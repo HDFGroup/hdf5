@@ -54,6 +54,7 @@
 #define ATTR_NAME_LEN   16
 #define ATTR_MAX_DIMS   7
 #define ATTR_TMP_NAME   "a really long temp_name"
+#define CORDER_ITER_STOP            3
 
 /* 3-D dataset with fixed dimensions */
 #define SPACE1_NAME  "Space1"
@@ -118,9 +119,21 @@ struct attr4_struct {
 #define ATTR5_RANK	0
 float attr_data5=(float)-5.123;        /* Test data for 5th attribute */
 
-herr_t attr_op1(hid_t loc_id, const char *name, void *op_data);
+/* Attribute iteration struct */
+typedef struct {
+    H5_iter_order_t order;      /* Direction of iteration */
+    unsigned ncalled;           /* # of times callback is entered */
+    unsigned nskipped;          /* # of attributes skipped */
+    int stop;                   /* # of iterations to stop after */
+    int64_t curr;               /* Current creation order value */
+    size_t max_visit;           /* Size of "visited attribute" flag array */
+    hbool_t *visited;           /* Pointer to array of "visited attribute" flags */
+} attr_iter_info_t;
+
+static herr_t attr_op1(hid_t loc_id, const char *name, void *op_data);
 
 
+
 /****************************************************************
 **
 **  test_attr_basic_write(): Test basic H5A (attribute) code.
@@ -353,6 +366,7 @@ test_attr_basic_write(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_basic_write() */
 
+
 /****************************************************************
 **
 **  test_attr_basic_read(): Test basic H5A (attribute) code.
@@ -440,6 +454,7 @@ test_attr_basic_read(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_basic_read() */
 
+
 /****************************************************************
 **
 **  test_attr_flush(): Test H5A (attribute) code for performing
@@ -506,6 +521,7 @@ test_attr_flush(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_flush() */
 
+
 /****************************************************************
 **
 **  test_attr_plist(): Test Attribute Creation Property Lists
@@ -618,6 +634,7 @@ test_attr_plist(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }  /* test_attr_plist() */
 
+
 /****************************************************************
 **
 **  test_attr_compound_write(): Test H5A (attribute) code.
@@ -706,6 +723,7 @@ test_attr_compound_write(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_compound_write() */
 
+
 /****************************************************************
 **
 **  test_attr_compound_read(): Test basic H5A (attribute) code.
@@ -853,6 +871,7 @@ test_attr_compound_read(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_compound_read() */
 
+
 /****************************************************************
 **
 **  test_attr_scalar_write(): Test scalar H5A (attribute) writing code.
@@ -917,6 +936,7 @@ test_attr_scalar_write(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_scalar_write() */
 
+
 /****************************************************************
 **
 **  test_attr_scalar_read(): Test scalar H5A (attribute) reading code.
@@ -981,6 +1001,7 @@ test_attr_scalar_read(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_scalar_read() */
 
+
 /****************************************************************
 **
 **  test_attr_mult_write(): Test basic H5A (attribute) code.
@@ -1100,6 +1121,7 @@ test_attr_mult_write(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_mult_write() */
 
+
 /****************************************************************
 **
 **  test_attr_mult_read(): Test basic H5A (attribute) code.
@@ -1319,6 +1341,7 @@ test_attr_mult_read(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_mult_read() */
 
+
 /****************************************************************
 **
 **  attr_op1(): Attribute operator
@@ -1356,6 +1379,7 @@ herr_t attr_op1(hid_t UNUSED loc_id, const char *name, void *op_data)
     return(ret);
 } /* end attr_op1() */
 
+
 /****************************************************************
 **
 **  test_attr_iterate(): Test H5A (attribute) iterator code.
@@ -1427,6 +1451,7 @@ test_attr_iterate(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_iterate() */
 
+
 /****************************************************************
 **
 **  test_attr_delete(): Test H5A (attribute) code for deleting objects.
@@ -1540,6 +1565,7 @@ test_attr_delete(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_delete() */
 
+
 /****************************************************************
 **
 **  test_attr_dtype_shared(): Test H5A (attribute) code for using
@@ -1715,6 +1741,7 @@ test_attr_dtype_shared(hid_t fapl)
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
 }   /* test_attr_dtype_shared() */
 
+
 /****************************************************************
 **
 **  test_attr_dense_verify(): Test basic H5A (attribute) code.
@@ -1774,6 +1801,7 @@ test_attr_dense_verify(hid_t loc_id, unsigned max_attr)
     } /* end for */
 }   /* test_attr_dense_verify() */
 
+
 /****************************************************************
 **
 **  test_attr_dense_create(): Test basic H5A (attribute) code.
@@ -1904,6 +1932,7 @@ test_attr_dense_create(hid_t fcpl, hid_t fapl)
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
 }   /* test_attr_dense_create() */
 
+
 /****************************************************************
 **
 **  test_attr_dense_open(): Test basic H5A (attribute) code.
@@ -2036,6 +2065,7 @@ test_attr_dense_open(hid_t fcpl, hid_t fapl)
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
 }   /* test_attr_dense_open() */
 
+
 /****************************************************************
 **
 **  test_attr_dense_delete(): Test basic H5A (attribute) code.
@@ -2206,6 +2236,7 @@ test_attr_dense_delete(hid_t fcpl, hid_t fapl)
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
 }   /* test_attr_dense_delete() */
 
+
 /****************************************************************
 **
 **  test_attr_dense_rename(): Test basic H5A (attribute) code.
@@ -2294,8 +2325,8 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
         sprintf(new_attrname, "new attr %02u", u);
 
         /* Rename attribute */
-        ret = H5Arename(dataset, attrname, new_attrname);
-        CHECK(ret, FAIL, "H5Arename");
+        ret = H5Arename2(fid, DSET1_NAME, attrname, new_attrname, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Arename2");
 
         /* Check # of attributes */
         attr_count = H5Aget_num_attrs(dataset);
@@ -2364,6 +2395,7 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
 }   /* test_attr_dense_rename() */
 
+
 /****************************************************************
 **
 **  test_attr_dense_unlink(): Test basic H5A (attribute) code.
@@ -2493,6 +2525,7 @@ test_attr_dense_unlink(hid_t fcpl, hid_t fapl)
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
 }   /* test_attr_dense_unlink() */
 
+
 /****************************************************************
 **
 **  test_attr_dense_limits(): Test basic H5A (attribute) code.
@@ -2657,6 +2690,7 @@ test_attr_dense_limits(hid_t fcpl, hid_t fapl)
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
 }   /* test_attr_dense_limits() */
 
+
 /****************************************************************
 **
 **  test_attr_corder_create_empty(): Test basic H5A (attribute) code.
@@ -2772,6 +2806,7 @@ test_attr_corder_create_basic(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_corder_create_basic() */
 
+
 /****************************************************************
 **
 **  test_attr_corder_create_compact(): Test basic H5A (attribute) code.
@@ -2969,6 +3004,7 @@ test_attr_corder_create_compact(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_corder_create_compact() */
 
+
 /****************************************************************
 **
 **  test_attr_corder_create_dense(): Test basic H5A (attribute) code.
@@ -3195,6 +3231,7 @@ test_attr_corder_create_dense(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_corder_create_dense() */
 
+
 /****************************************************************
 **
 **  test_attr_corder_transition(): Test basic H5A (attribute) code.
@@ -3600,6 +3637,7 @@ test_attr_corder_transition(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 }   /* test_attr_corder_transition() */
 
+
 /****************************************************************
 **
 **  test_attr_corder_delete(): Test basic H5A (attribute) code.
@@ -3947,6 +3985,7 @@ attr_info_by_idx_check(hid_t obj_id, const char *attrname, hsize_t n,
         return(-1);
 } /* end attr_info_by_idx_check() */
 
+
 /****************************************************************
 **
 **  test_attr_info_by_idx(): Test basic H5A (attribute) code.
@@ -4154,6 +4193,7 @@ test_attr_info_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Sclose");
 }   /* test_attr_info_by_idx() */
 
+
 /****************************************************************
 **
 **  test_attr_delete_by_idx(): Test basic H5A (attribute) code.
@@ -4683,54 +4723,282 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Sclose");
 }   /* test_attr_delete_by_idx() */
 
+
 /****************************************************************
 **
-**  attr_op2(): Revised attribute operator
+**  attr_iterate2_cb(): Revised attribute operator
 **
 ****************************************************************/
-herr_t
-attr_op2(hid_t UNUSED loc_id, const char *name, const H5A_info_t *ainfo, void *op_data)
+static herr_t
+attr_iterate2_cb(hid_t loc_id, const char *attr_name, const H5A_info_t *info,
+    void *_op_data)
 {
-    int *count = (int *)op_data;
-    herr_t ret = 0;
+    attr_iter_info_t *op_data = (attr_iter_info_t *)_op_data;   /* User data */
+    char attrname[NAME_BUF_SIZE]; /* Object name */
+    H5A_info_t my_info;         /* Local attribute info */
 
 #ifdef QAK
-    switch(*count) {
-        case 0:
-            if(HDstrcmp(name,ATTR1_NAME))
-                TestErrPrintf("attribute name different: name=%s, should be %s\n",name,ATTR1_NAME);
-             (*count)++;
-             break;
-
-        case 1:
-            if(HDstrcmp(name,ATTR2_NAME))
-                TestErrPrintf("attribute name different: name=%s, should be %s\n",name,ATTR2_NAME);
-             (*count)++;
-             break;
-
-        case 2:
-            if(HDstrcmp(name,ATTR3_NAME))
-                TestErrPrintf("attribute name different: name=%s, should be %s\n",name,ATTR3_NAME);
-             (*count)++;
-             break;
-
-        default:
-            ret=-1;
-            break;
-    }  /* end switch() */
+HDfprintf(stderr, "attr_name = '%s'\n", attr_name);
+if(info)
+    HDfprintf(stderr, "info->corder = %u\n", (unsigned)info->corder);
+HDfprintf(stderr, "op_data->curr = %Hd\n", op_data->curr);
 #endif /* QAK */
 
-    return(ret);
-} /* end attr_op2() */
+    /* Increment # of times the callback was called */
+    op_data->ncalled++;
+
+    /* Get the attribute information directly to compare */
+    if(H5Aget_info(loc_id, ".", attr_name, &my_info, H5P_DEFAULT) < 0)
+        return(H5_ITER_ERROR);
+
+    /* Check more things for revised attribute iteration (vs. older attribute iteration) */
+    if(info) {
+        /* Check for correct order of iteration */
+        /* (if we are operating in increasing or decreasing order) */
+        if(op_data->order != H5_ITER_NATIVE)
+            if(info->corder != op_data->curr)
+                return(H5_ITER_ERROR);
+
+        /* Compare attribute info structs */
+        if(info->corder_valid != my_info.corder_valid)
+            return(H5_ITER_ERROR);
+        if(info->corder != my_info.corder)
+            return(H5_ITER_ERROR);
+        if(info->cset != my_info.cset)
+            return(H5_ITER_ERROR);
+        if(info->data_size != my_info.data_size)
+            return(H5_ITER_ERROR);
+    } /* end if */
+
+    /* Verify name of link */
+    sprintf(attrname, "attr %02u", (unsigned)my_info.corder);
+    if(HDstrcmp(attr_name, attrname))
+        return(H5_ITER_ERROR);
+
+    /* Check if we've visited this link before */
+    if((size_t)op_data->curr >= op_data->max_visit)
+        return(H5_ITER_ERROR);
+    if(op_data->visited[op_data->curr])
+        return(H5_ITER_ERROR);
+    op_data->visited[op_data->curr] = TRUE;
+
+    /* Advance to next value, in correct direction */
+    if(op_data->order != H5_ITER_DEC)
+        op_data->curr++;
+    else
+        op_data->curr--;
+
+    /* Check for stopping in the middle of iterating */
+    if(op_data->stop > 0)
+        if(--op_data->stop == 0)
+            return(CORDER_ITER_STOP);
+
+    return(H5_ITER_CONT);
+} /* end attr_iterate2_cb() */
+
+
+/****************************************************************
+**
+**  attr_iterate_cb(): Attribute operator
+**
+****************************************************************/
+static herr_t
+attr_iterate_cb(hid_t loc_id, const char *attr_name, void *_op_data)
+{
+    return(attr_iterate2_cb(loc_id, attr_name, NULL, _op_data));
+} /* end attr_iterate_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    attr_iterate2_fail_cb
+ *
+ * Purpose:     Callback routine for iterating over attributes on object that
+ *              always returns failure
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Tuesday, February 20, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+attr_iterate2_fail_cb(hid_t UNUSED group_id, const char UNUSED *attr_name,
+    const H5A_info_t UNUSED *info, void UNUSED *_op_data)
+{
+    return(H5_ITER_ERROR);
+} /* end attr_iterate2_fail_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    attr_iterate_check
+ *
+ * Purpose:     Check iteration over attributes on an object
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Tuesday, February 20, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+attr_iterate_check(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
+    unsigned max_attrs, attr_iter_info_t *iter_info)
+{
+    unsigned    v;              /* Local index variable */
+    hsize_t     skip;           /* # of attributes to skip on object */
+    unsigned    oskip;          /* # of attributes to skip on object, with H5Aiterate */
+    int         old_nerrs;      /* Number of errors when entering this check */
+    herr_t      ret;            /* Generic return value */
+
+    /* Retrieve the current # of reported errors */
+    old_nerrs = GetTestNumErrs();
+
+    /* Iterate over attributes on object */
+    iter_info->nskipped = (unsigned)(skip = 0);
+    iter_info->order = order;
+    iter_info->stop = -1;
+    iter_info->ncalled = 0;
+    iter_info->curr = order != H5_ITER_DEC ? 0 : (max_attrs - 1);
+    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    ret = H5Aiterate2(obj_id, ".", idx_type, order, &skip, attr_iterate2_cb, iter_info, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Aiterate2");
+
+    /* Verify that we visited all the attributes */
+    VERIFY(skip, max_attrs, "H5Aiterate2");
+    for(v = 0; v < max_attrs; v++)
+        VERIFY(iter_info->visited[v], TRUE, "H5Aiterate2");
+
+
+    /* Iterate over attributes on object, with H5Aiterate */
+    iter_info->nskipped = oskip = 0;
+    iter_info->order = order;
+    iter_info->stop = -1;
+    iter_info->ncalled = 0;
+    iter_info->curr = order != H5_ITER_DEC ? 0 : (max_attrs - 1);
+    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    ret = H5Aiterate(obj_id, &oskip, attr_iterate_cb, iter_info);
+    CHECK(ret, FAIL, "H5Aiterate");
+
+    /* Verify that we visited all the attributes */
+    VERIFY(skip, max_attrs, "H5Aiterate");
+    for(v = 0; v < max_attrs; v++)
+        VERIFY(iter_info->visited[v], TRUE, "H5Aiterate");
+
+
+    /* Skip over some attributes on object */
+    iter_info->nskipped = (unsigned)(skip = max_attrs / 2);
+    iter_info->order = order;
+    iter_info->stop = -1;
+    iter_info->ncalled = 0;
+    iter_info->curr = order != H5_ITER_DEC ? skip : ((max_attrs - 1) - skip);
+    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    ret = H5Aiterate2(obj_id, ".", idx_type, order, &skip, attr_iterate2_cb, iter_info, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Aiterate2");
+
+    /* Verify that we visited all the attributes */
+    VERIFY(skip, max_attrs, "H5Aiterate2");
+    if(order == H5_ITER_INC) {
+        for(v = 0; v < (max_attrs / 2); v++)
+            VERIFY(iter_info->visited[v + (max_attrs / 2)], TRUE, "H5Aiterate2");
+    } /* end if */
+    else if(order == H5_ITER_DEC) {
+        for(v = 0; v < (max_attrs / 2); v++)
+            VERIFY(iter_info->visited[v], TRUE, "H5Aiterate2");
+    } /* end if */
+    else {
+        unsigned nvisit = 0;        /* # of links visited */
+
+        HDassert(order == H5_ITER_NATIVE);
+        for(v = 0; v < max_attrs; v++)
+            if(iter_info->visited[v] == TRUE)
+                nvisit++;
+
+        VERIFY(skip, (max_attrs / 2), "H5Aiterate2");
+    } /* end else */
+
+
+    /* Skip over some attributes on object, with H5Aiterate */
+    iter_info->nskipped = oskip = max_attrs / 2;
+    iter_info->order = order;
+    iter_info->stop = -1;
+    iter_info->ncalled = 0;
+    iter_info->curr = order != H5_ITER_DEC ? (unsigned)oskip : ((max_attrs - 1) - oskip);
+    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    ret = H5Aiterate(obj_id, &oskip, attr_iterate_cb, iter_info);
+    CHECK(ret, FAIL, "H5Aiterate");
+
+    /* Verify that we visited all the links */
+    VERIFY(oskip, max_attrs, "H5Aiterate");
+    if(order == H5_ITER_INC) {
+        for(v = 0; v < (max_attrs / 2); v++)
+            VERIFY(iter_info->visited[v + (max_attrs / 2)], TRUE, "H5Aiterate");
+    } /* end if */
+    else if(order == H5_ITER_DEC) {
+        for(v = 0; v < (max_attrs / 2); v++)
+            VERIFY(iter_info->visited[v], TRUE, "H5Aiterate");
+    } /* end if */
+    else {
+        unsigned nvisit = 0;        /* # of links visited */
+
+        HDassert(order == H5_ITER_NATIVE);
+        for(v = 0; v < max_attrs; v++)
+            if(iter_info->visited[v] == TRUE)
+                nvisit++;
+
+        VERIFY(skip, (max_attrs / 2), "H5Aiterate");
+    } /* end else */
+
+
+    /* Iterate over attributes on object, stopping in the middle */
+    iter_info->nskipped = (unsigned)(skip = 0);
+    iter_info->order = order;
+    iter_info->stop = 3;
+    iter_info->ncalled = 0;
+    iter_info->curr = order != H5_ITER_DEC ? 0 : (max_attrs - 1);
+    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    ret = H5Aiterate2(obj_id, ".", idx_type, order, &skip, attr_iterate2_cb, iter_info, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Aiterate2");
+    VERIFY(ret, CORDER_ITER_STOP, "H5Aiterate2");
+    VERIFY(iter_info->ncalled, 3, "H5Aiterate2");
+
+
+    /* Iterate over attributes on object, stopping in the middle, with H5Aiterate() */
+    iter_info->nskipped = oskip = 0;
+    iter_info->order = order;
+    iter_info->stop = 3;
+    iter_info->ncalled = 0;
+    iter_info->curr = order != H5_ITER_DEC ? 0 : (max_attrs - 1);
+    HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
+    ret = H5Aiterate(obj_id, &oskip, attr_iterate_cb, iter_info);
+    CHECK(ret, FAIL, "H5Aiterate");
+    VERIFY(ret, CORDER_ITER_STOP, "H5Aiterate2");
+    VERIFY(iter_info->ncalled, 3, "H5Aiterate2");
+
+
+    /* Check for iteration routine indicating failure */
+    skip = 0;
+    ret = H5Aiterate2(obj_id, ".", idx_type, order, &skip, attr_iterate2_fail_cb, NULL, H5P_DEFAULT);
+    VERIFY(ret, FAIL, "H5Aiterate2");
+
+    /* Retrieve current # of errors */
+    if(old_nerrs == GetTestNumErrs())
+        return(0);
+    else
+        return(-1);
+} /* end attr_iterate_check() */
 
 /****************************************************************
 **
-**  test_attr_iterate_by_idx(): Test basic H5A (attribute) code.
+**  test_attr_iterate2(): Test basic H5A (attribute) code.
 **      Tests iterating over attributes by index
 **
 ****************************************************************/
 static void
-test_attr_iterate_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
+test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
 {
     hid_t	fid;		/* HDF5 File ID			*/
     hid_t	dset1, dset2, dset3;	/* Dataset IDs			*/
@@ -4738,7 +5006,6 @@ test_attr_iterate_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
     hid_t	sid;	        /* Dataspace ID			*/
     hid_t	attr;	        /* Attribute ID			*/
     hid_t	dcpl;	        /* Dataset creation property list ID */
-    H5A_info_t  ainfo;          /* Attribute information */
     unsigned    max_compact;    /* Maximum # of links to store in group compactly */
     unsigned    min_dense;      /* Minimum # of links to store in group "densely" */
     htri_t	is_empty;	/* Are there any attributes? */
@@ -4748,9 +5015,11 @@ test_attr_iterate_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
     hsize_t     corder_count;   /* # of records in creation order index */
     H5_index_t idx_type;        /* Type of index to operate on */
     H5_iter_order_t order;      /* Order within in the index */
+    attr_iter_info_t iter_info; /* Iterator info */
+    hbool_t     *visited = NULL;        /* Array of flags for visiting links */
+    hsize_t     idx;            /* Start index for iteration */
     hbool_t     use_index;      /* Use index on creation order values */
     char	attrname[NAME_BUF_SIZE];    /* Name of attribute */
-    char        tmpname[NAME_BUF_SIZE];     /* Temporary attribute name */
     unsigned    curr_dset;      /* Current dataset to work on */
     unsigned    u;              /* Local index variable */
     herr_t	ret;		/* Generic return value		*/
@@ -4766,6 +5035,12 @@ test_attr_iterate_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
     /* Query the attribute creation properties */
     ret = H5Pget_attr_phase_change(dcpl, &max_compact, &min_dense);
     CHECK(ret, FAIL, "H5Pget_attr_phase_change");
+
+    /* Allocate the "visited link" array */
+    iter_info.max_visit = max_compact * 2;
+    visited = HDmalloc(sizeof(hbool_t) * iter_info.max_visit);
+    CHECK(visited, NULL, "HDmalloc");
+    iter_info.visited = visited;
 
     /* Loop over operating on different indices on link fields */
     for(idx_type = H5_INDEX_NAME; idx_type <=H5_INDEX_CRT_ORDER; idx_type++) {
@@ -4845,10 +5120,9 @@ test_attr_iterate_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
 
                     /* Check for iterating over object with no attributes (should be OK) */
-                    ret = H5Aiterate2(my_dataset, ".", idx_type, order, NULL, attr_op2, NULL, H5P_DEFAULT);
+                    ret = H5Aiterate2(my_dataset, ".", idx_type, order, NULL, attr_iterate2_cb, NULL, H5P_DEFAULT);
                     CHECK(ret, FAIL, "H5Aiterate2");
 
-#ifdef NOT_YET
                     /* Create attributes, up to limit of compact form */
                     for(u = 0; u < max_compact; u++) {
                         /* Create attribute */
@@ -4878,49 +5152,38 @@ test_attr_iterate_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     is_dense = H5O_is_attr_dense_test(my_dataset);
                     VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
 
-                    /* Check for out of bound deletions */
-                    ret = H5Adelete_by_idx(my_dataset, ".", idx_type, order, (hsize_t)u, H5P_DEFAULT);
-                    VERIFY(ret, FAIL, "H5Adelete_by_idx");
+                    /* Check for out of bound iteration */
+                    idx = u;
+                    ret = H5Aiterate2(my_dataset, ".", idx_type, order, &idx, attr_iterate2_cb, NULL, H5P_DEFAULT);
+                    VERIFY(ret, FAIL, "H5Aiterate2");
 
-                    /* Delete attributes from compact storage */
-                    for(u = 0; u < (max_compact - 1); u++) {
-                        /* Delete first attribute in appropriate order */
-                        ret = H5Adelete_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT);
-                        CHECK(ret, FAIL, "H5Adelete_by_idx");
+                    /* Test iteration over attributes stored compactly */
+                    ret = attr_iterate_check(my_dataset, idx_type, order, u, &iter_info);
+                    CHECK(ret, FAIL, "attr_iterate_check");
+                } /* end for */
 
-                        /* Verify the attribute information for first attribute in appropriate order */
-                        HDmemset(&ainfo, 0, sizeof(ainfo));
-                        ret = H5Aget_info_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, &ainfo, H5P_DEFAULT);
-                        if(new_format) {
-                            if(order == H5_ITER_INC) {
-                                VERIFY(ainfo.corder, (u + 1), "H5Aget_info_by_idx");
-                            } /* end if */
-                            else {
-                                VERIFY(ainfo.corder, (max_compact - (u + 2)), "H5Aget_info_by_idx");
-                            } /* end else */
-                        } /* end if */
 
-                        /* Verify the name for first attribute in appropriate order */
-                        HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-                        ret = H5Aget_name_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
-                        if(order == H5_ITER_INC)
-                            sprintf(attrname, "attr %02u", (u + 1));
-                        else
-                            sprintf(attrname, "attr %02u", (max_compact - (u + 2)));
-                        ret = HDstrcmp(attrname, tmpname);
-                        VERIFY(ret, 0, "H5Aget_name_by_idx");
-                    } /* end for */
+                /* Work on all the datasets */
+                for(curr_dset = 0; curr_dset < NUM_DSETS; curr_dset++) {
+                    switch(curr_dset) {
+                        case 0:
+                            my_dataset = dset1;
+                            break;
 
-                    /* Delete last attribute */
-                    ret = H5Adelete_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT);
-                    CHECK(ret, FAIL, "H5Adelete_by_idx");
+                        case 1:
+                            my_dataset = dset2;
+                            break;
 
-                    /* Verify state of attribute storage (empty) */
-                    is_empty = H5O_is_attr_empty_test(my_dataset);
-                    VERIFY(is_empty, TRUE, "H5O_is_attr_empty_test");
+                        case 2:
+                            my_dataset = dset3;
+                            break;
+
+                        default:
+                            HDassert(0 && "Too many datasets!");
+                    } /* end switch */
 
                     /* Create more attributes, to push into dense form */
-                    for(u = 0; u < (max_compact * 2); u++) {
+                    for(u = max_compact; u < (max_compact * 2); u++) {
                         /* Create attribute */
                         sprintf(attrname, "attr %02u", u);
                         attr = H5Acreate(my_dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT);
@@ -4963,151 +5226,14 @@ test_attr_iterate_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                         VERIFY(name_count, (max_compact * 2), "H5O_attr_dense_info_test");
                     } /* end if */
 
-                    /* Check for out of bound deletion */
-                    ret = H5Adelete_by_idx(my_dataset, ".", idx_type, order, (hsize_t)u, H5P_DEFAULT);
-                    VERIFY(ret, FAIL, "H5Adelete_by_idx");
+                    /* Check for out of bound iteration */
+                    idx = u;
+                    ret = H5Aiterate2(my_dataset, ".", idx_type, order, &idx, attr_iterate2_cb, NULL, H5P_DEFAULT);
+                    VERIFY(ret, FAIL, "H5Aiterate2");
 
-                    /* Delete attributes from dense storage */
-                    for(u = 0; u < ((max_compact * 2) - 1); u++) {
-                        /* Delete first attribute in appropriate order */
-                        ret = H5Adelete_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT);
-                        CHECK(ret, FAIL, "H5Adelete_by_idx");
-
-                        /* Verify the attribute information for first attribute in appropriate order */
-                        HDmemset(&ainfo, 0, sizeof(ainfo));
-                        ret = H5Aget_info_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, &ainfo, H5P_DEFAULT);
-                        if(new_format) {
-                            if(order == H5_ITER_INC) {
-                                VERIFY(ainfo.corder, (u + 1), "H5Aget_info_by_idx");
-                            } /* end if */
-                            else {
-                                VERIFY(ainfo.corder, ((max_compact * 2) - (u + 2)), "H5Aget_info_by_idx");
-                            } /* end else */
-                        } /* end if */
-
-                        /* Verify the name for first attribute in appropriate order */
-                        HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-                        ret = H5Aget_name_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
-                        if(order == H5_ITER_INC)
-                            sprintf(attrname, "attr %02u", (u + 1));
-                        else
-                            sprintf(attrname, "attr %02u", ((max_compact * 2) - (u + 2)));
-                        ret = HDstrcmp(attrname, tmpname);
-                        VERIFY(ret, 0, "H5Aget_name_by_idx");
-                    } /* end for */
-
-                    /* Delete last attribute */
-                    ret = H5Adelete_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT);
-                    CHECK(ret, FAIL, "H5Adelete_by_idx");
-
-                    /* Verify state of attribute storage (empty) */
-                    is_empty = H5O_is_attr_empty_test(my_dataset);
-                    VERIFY(is_empty, TRUE, "H5O_is_attr_empty_test");
-
-                    /* Check for deletion on empty attribute storage again */
-                    ret = H5Adelete_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT);
-                    VERIFY(ret, FAIL, "H5Adelete_by_idx");
-
-
-                    /* Delete attributes in middle */
-
-
-                    /* Create attributes, to push into dense form */
-                    for(u = 0; u < (max_compact * 2); u++) {
-                        /* Create attribute */
-                        sprintf(attrname, "attr %02u", u);
-                        attr = H5Acreate(my_dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT);
-                        CHECK(attr, FAIL, "H5Acreate");
-
-                        /* Write data into the attribute */
-                        ret = H5Awrite(attr, H5T_NATIVE_UINT, &u);
-                        CHECK(ret, FAIL, "H5Awrite");
-
-                        /* Close attribute */
-                        ret = H5Aclose(attr);
-                        CHECK(ret, FAIL, "H5Aclose");
-
-                        /* Verify state of object */
-                        if(u >= max_compact) {
-                            is_dense = H5O_is_attr_dense_test(my_dataset);
-                            VERIFY(is_dense, (new_format ? TRUE : FALSE), "H5O_is_attr_dense_test");
-                        } /* end if */
-
-                        /* Verify information for new attribute */
-                        ret = attr_info_by_idx_check(my_dataset, attrname, (hsize_t)u, use_index);
-                        CHECK(ret, FAIL, "attr_info_by_idx_check");
-                    } /* end for */
-
-                    /* Delete every other attribute from dense storage, in appropriate order */
-                    for(u = 0; u < max_compact; u++) {
-                        /* Delete attribute */
-                        ret = H5Adelete_by_idx(my_dataset, ".", idx_type, order, (hsize_t)u, H5P_DEFAULT);
-                        CHECK(ret, FAIL, "H5Adelete_by_idx");
-
-                        /* Verify the attribute information for first attribute in appropriate order */
-                        HDmemset(&ainfo, 0, sizeof(ainfo));
-                        ret = H5Aget_info_by_idx(my_dataset, ".", idx_type, order, (hsize_t)u, &ainfo, H5P_DEFAULT);
-                        if(new_format) {
-                            if(order == H5_ITER_INC) {
-                                VERIFY(ainfo.corder, ((u * 2) + 1), "H5Aget_info_by_idx");
-                            } /* end if */
-                            else {
-                                VERIFY(ainfo.corder, ((max_compact * 2) - ((u * 2) + 2)), "H5Aget_info_by_idx");
-                            } /* end else */
-                        } /* end if */
-
-                        /* Verify the name for first attribute in appropriate order */
-                        HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-                        ret = H5Aget_name_by_idx(my_dataset, ".", idx_type, order, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
-                        if(order == H5_ITER_INC)
-                            sprintf(attrname, "attr %02u", ((u * 2) + 1));
-                        else
-                            sprintf(attrname, "attr %02u", ((max_compact * 2) - ((u * 2) + 2)));
-                        ret = HDstrcmp(attrname, tmpname);
-                        VERIFY(ret, 0, "H5Aget_name_by_idx");
-                    } /* end for */
-
-                    /* Delete remaining attributes from dense storage, in appropriate order */
-                    for(u = 0; u < (max_compact - 1); u++) {
-                        /* Delete attribute */
-                        ret = H5Adelete_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT);
-                        CHECK(ret, FAIL, "H5Adelete_by_idx");
-
-                        /* Verify the attribute information for first attribute in appropriate order */
-                        HDmemset(&ainfo, 0, sizeof(ainfo));
-                        ret = H5Aget_info_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, &ainfo, H5P_DEFAULT);
-                        if(new_format) {
-                            if(order == H5_ITER_INC) {
-                                VERIFY(ainfo.corder, ((u * 2) + 3), "H5Aget_info_by_idx");
-                            } /* end if */
-                            else {
-                                VERIFY(ainfo.corder, ((max_compact * 2) - ((u * 2) + 4)), "H5Aget_info_by_idx");
-                            } /* end else */
-                        } /* end if */
-
-                        /* Verify the name for first attribute in appropriate order */
-                        HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-                        ret = H5Aget_name_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
-                        if(order == H5_ITER_INC)
-                            sprintf(attrname, "attr %02u", ((u * 2) + 3));
-                        else
-                            sprintf(attrname, "attr %02u", ((max_compact * 2) - ((u * 2) + 4)));
-                        ret = HDstrcmp(attrname, tmpname);
-                        VERIFY(ret, 0, "H5Aget_name_by_idx");
-                    } /* end for */
-
-                    /* Delete last attribute */
-                    ret = H5Adelete_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT);
-                    CHECK(ret, FAIL, "H5Adelete_by_idx");
-
-                    /* Verify state of attribute storage (empty) */
-                    is_empty = H5O_is_attr_empty_test(my_dataset);
-                    VERIFY(is_empty, TRUE, "H5O_is_attr_empty_test");
-
-                    /* Check for deletion on empty attribute storage again */
-                    ret = H5Adelete_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT);
-                    VERIFY(ret, FAIL, "H5Adelete_by_idx");
-#endif /* NOT_YET */
+                    /* Test iteration over attributes stored densely */
+                    ret = attr_iterate_check(my_dataset, idx_type, order, u, &iter_info);
+                    CHECK(ret, FAIL, "attr_iterate_check");
                 } /* end for */
 
                 /* Close Datasets */
@@ -5132,7 +5258,276 @@ test_attr_iterate_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
     /* Close dataspace */
     ret = H5Sclose(sid);
     CHECK(ret, FAIL, "H5Sclose");
-}   /* test_attr_iterate_by_idx() */
+}   /* test_attr_iterate2() */
+
+/****************************************************************
+**
+**  test_attr_open_by_idx(): Test basic H5A (attribute) code.
+**      Tests opening attributes by index
+**
+****************************************************************/
+static void
+test_attr_open_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
+{
+    hid_t	fid;		/* HDF5 File ID			*/
+    hid_t	dset1, dset2, dset3;	/* Dataset IDs			*/
+    hid_t	my_dataset;	/* Current dataset ID		*/
+    hid_t	sid;	        /* Dataspace ID			*/
+    hid_t	attr;	        /* Attribute ID			*/
+    hid_t	dcpl;	        /* Dataset creation property list ID */
+    unsigned    max_compact;    /* Maximum # of links to store in group compactly */
+    unsigned    min_dense;      /* Minimum # of links to store in group "densely" */
+    htri_t	is_empty;	/* Are there any attributes? */
+    htri_t	is_dense;	/* Are attributes stored densely? */
+    hsize_t     nattrs;         /* Number of attributes on object */
+    hsize_t     name_count;     /* # of records in name index */
+    hsize_t     corder_count;   /* # of records in creation order index */
+    H5_index_t idx_type;        /* Type of index to operate on */
+    H5_iter_order_t order;      /* Order within in the index */
+    attr_iter_info_t iter_info; /* Iterator info */
+    hbool_t     *visited = NULL;        /* Array of flags for visiting links */
+    hsize_t     idx;            /* Start index for iteration */
+    hbool_t     use_index;      /* Use index on creation order values */
+    char	attrname[NAME_BUF_SIZE];    /* Name of attribute */
+    unsigned    curr_dset;      /* Current dataset to work on */
+    unsigned    u;              /* Local index variable */
+    herr_t	ret;		/* Generic return value		*/
+
+    /* Create dataspace for dataset & attributes */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Create dataset creation property list */
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(dcpl, FAIL, "H5Pcreate");
+
+    /* Query the attribute creation properties */
+    ret = H5Pget_attr_phase_change(dcpl, &max_compact, &min_dense);
+    CHECK(ret, FAIL, "H5Pget_attr_phase_change");
+
+    /* Allocate the "visited link" array */
+    iter_info.max_visit = max_compact * 2;
+    visited = HDmalloc(sizeof(hbool_t) * iter_info.max_visit);
+    CHECK(visited, NULL, "HDmalloc");
+    iter_info.visited = visited;
+
+    /* Loop over operating on different indices on link fields */
+    for(idx_type = H5_INDEX_NAME; idx_type <=H5_INDEX_CRT_ORDER; idx_type++) {
+        /* Loop over operating in different orders */
+        for(order = H5_ITER_INC; order <=H5_ITER_DEC; order++) {
+            /* Loop over using index for creation order value */
+            for(use_index = FALSE; use_index <= TRUE; use_index++) {
+                /* Print appropriate test message */
+                if(idx_type == H5_INDEX_CRT_ORDER) {
+                    if(order == H5_ITER_INC) {
+                        if(use_index)
+                            MESSAGE(5, ("Testing Iterating over Attributes By Creation Order Index in Increasing Order w/Creation Order Index\n"))
+                        else
+                            MESSAGE(5, ("Testing Iterating over Attributes By Creation Order Index in Increasing Order w/o Creation Order Index\n"))
+                    } /* end if */
+                    else {
+                        if(use_index)
+                            MESSAGE(5, ("Testing Iterating over Attributes By Creation Order Index in Decreasing Order w/Creation Order Index\n"))
+                        else
+                            MESSAGE(5, ("Testing Iterating over Attributes By Creation Order Index in Decreasing Order w/o Creation Order Index\n"))
+                    } /* end else */
+                } /* end if */
+                else {
+                    if(order == H5_ITER_INC) {
+                        if(use_index)
+                            MESSAGE(5, ("Testing Iterating over Attributes By Name Index in Increasing Order w/Creation Order Index\n"))
+                        else
+                            MESSAGE(5, ("Testing Iterating over Attributes By Name Index in Increasing Order w/o Creation Order Index\n"))
+                    } /* end if */
+                    else {
+                        if(use_index)
+                            MESSAGE(5, ("Testing Iterating over Attributes By Name Index in Decreasing Order w/Creation Order Index\n"))
+                        else
+                            MESSAGE(5, ("Testing Iterating over Attributes By Name Index in Decreasing Order w/o Creation Order Index\n"))
+                    } /* end else */
+                } /* end else */
+
+                /* Create file */
+                fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
+                CHECK(fid, FAIL, "H5Fcreate");
+
+                /* Set attribute creation order tracking & indexing for object */
+                ret = H5Pset_attr_creation_order(dcpl, (H5P_CRT_ORDER_TRACKED | (use_index ? H5P_CRT_ORDER_INDEXED : (unsigned)0)));
+                CHECK(ret, FAIL, "H5Pset_attr_creation_order");
+
+                /* Create datasets */
+                dset1 = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
+                CHECK(dset1, FAIL, "H5Dcreate");
+                dset2 = H5Dcreate(fid, DSET2_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
+                CHECK(dset2, FAIL, "H5Dcreate");
+                dset3 = H5Dcreate(fid, DSET3_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
+                CHECK(dset3, FAIL, "H5Dcreate");
+
+                /* Work on all the datasets */
+                for(curr_dset = 0; curr_dset < NUM_DSETS; curr_dset++) {
+                    switch(curr_dset) {
+                        case 0:
+                            my_dataset = dset1;
+                            break;
+
+                        case 1:
+                            my_dataset = dset2;
+                            break;
+
+                        case 2:
+                            my_dataset = dset3;
+                            break;
+
+                        default:
+                            HDassert(0 && "Too many datasets!");
+                    } /* end switch */
+
+                    /* Check on dataset's attribute storage status */
+                    is_empty = H5O_is_attr_empty_test(my_dataset);
+                    VERIFY(is_empty, TRUE, "H5O_is_attr_empty_test");
+                    is_dense = H5O_is_attr_dense_test(my_dataset);
+                    VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
+
+                    /* Check for iterating over object with no attributes (should be OK) */
+                    ret = H5Aiterate2(my_dataset, ".", idx_type, order, NULL, attr_iterate2_cb, NULL, H5P_DEFAULT);
+                    CHECK(ret, FAIL, "H5Aiterate2");
+
+                    /* Create attributes, up to limit of compact form */
+                    for(u = 0; u < max_compact; u++) {
+                        /* Create attribute */
+                        sprintf(attrname, "attr %02u", u);
+                        attr = H5Acreate(my_dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT);
+                        CHECK(attr, FAIL, "H5Acreate");
+
+                        /* Write data into the attribute */
+                        ret = H5Awrite(attr, H5T_NATIVE_UINT, &u);
+                        CHECK(ret, FAIL, "H5Awrite");
+
+                        /* Close attribute */
+                        ret = H5Aclose(attr);
+                        CHECK(ret, FAIL, "H5Aclose");
+
+                        /* Verify information for new attribute */
+                        ret = attr_info_by_idx_check(my_dataset, attrname, (hsize_t)u, use_index);
+                        CHECK(ret, FAIL, "attr_info_by_idx_check");
+                    } /* end for */
+
+                    /* Verify state of object */
+                    ret = H5O_num_attrs_test(my_dataset, &nattrs);
+                    CHECK(ret, FAIL, "H5O_num_attrs_test");
+                    VERIFY(nattrs, max_compact, "H5O_num_attrs_test");
+                    is_empty = H5O_is_attr_empty_test(my_dataset);
+                    VERIFY(is_empty, FALSE, "H5O_is_attr_empty_test");
+                    is_dense = H5O_is_attr_dense_test(my_dataset);
+                    VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
+
+                    /* Check for out of bound iteration */
+                    idx = u;
+                    ret = H5Aiterate2(my_dataset, ".", idx_type, order, &idx, attr_iterate2_cb, NULL, H5P_DEFAULT);
+                    VERIFY(ret, FAIL, "H5Aiterate2");
+
+                    /* Test iteration over attributes stored compactly */
+                    ret = attr_iterate_check(my_dataset, idx_type, order, u, &iter_info);
+                    CHECK(ret, FAIL, "attr_iterate_check");
+                } /* end for */
+
+
+                /* Work on all the datasets */
+                for(curr_dset = 0; curr_dset < NUM_DSETS; curr_dset++) {
+                    switch(curr_dset) {
+                        case 0:
+                            my_dataset = dset1;
+                            break;
+
+                        case 1:
+                            my_dataset = dset2;
+                            break;
+
+                        case 2:
+                            my_dataset = dset3;
+                            break;
+
+                        default:
+                            HDassert(0 && "Too many datasets!");
+                    } /* end switch */
+
+                    /* Create more attributes, to push into dense form */
+                    for(u = max_compact; u < (max_compact * 2); u++) {
+                        /* Create attribute */
+                        sprintf(attrname, "attr %02u", u);
+                        attr = H5Acreate(my_dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT);
+                        CHECK(attr, FAIL, "H5Acreate");
+
+                        /* Write data into the attribute */
+                        ret = H5Awrite(attr, H5T_NATIVE_UINT, &u);
+                        CHECK(ret, FAIL, "H5Awrite");
+
+                        /* Close attribute */
+                        ret = H5Aclose(attr);
+                        CHECK(ret, FAIL, "H5Aclose");
+
+                        /* Verify state of object */
+                        if(u >= max_compact) {
+                            is_dense = H5O_is_attr_dense_test(my_dataset);
+                            VERIFY(is_dense, (new_format ? TRUE : FALSE), "H5O_is_attr_dense_test");
+                        } /* end if */
+
+                        /* Verify information for new attribute */
+                        ret = attr_info_by_idx_check(my_dataset, attrname, (hsize_t)u, use_index);
+                        CHECK(ret, FAIL, "attr_info_by_idx_check");
+                    } /* end for */
+
+                    /* Verify state of object */
+                    ret = H5O_num_attrs_test(my_dataset, &nattrs);
+                    CHECK(ret, FAIL, "H5O_num_attrs_test");
+                    VERIFY(nattrs, (max_compact * 2), "H5O_num_attrs_test");
+                    is_empty = H5O_is_attr_empty_test(my_dataset);
+                    VERIFY(is_empty, FALSE, "H5O_is_attr_empty_test");
+                    is_dense = H5O_is_attr_dense_test(my_dataset);
+                    VERIFY(is_dense, (new_format ? TRUE : FALSE), "H5O_is_attr_dense_test");
+
+                    if(new_format) {
+                        /* Retrieve & verify # of records in the name & creation order indices */
+                        ret = H5O_attr_dense_info_test(my_dataset, &name_count, &corder_count);
+                        CHECK(ret, FAIL, "H5O_attr_dense_info_test");
+                        if(use_index)
+                            VERIFY(name_count, corder_count, "H5O_attr_dense_info_test");
+                        VERIFY(name_count, (max_compact * 2), "H5O_attr_dense_info_test");
+                    } /* end if */
+
+                    /* Check for out of bound iteration */
+                    idx = u;
+                    ret = H5Aiterate2(my_dataset, ".", idx_type, order, &idx, attr_iterate2_cb, NULL, H5P_DEFAULT);
+                    VERIFY(ret, FAIL, "H5Aiterate2");
+
+                    /* Test iteration over attributes stored densely */
+                    ret = attr_iterate_check(my_dataset, idx_type, order, u, &iter_info);
+                    CHECK(ret, FAIL, "attr_iterate_check");
+                } /* end for */
+
+                /* Close Datasets */
+                ret = H5Dclose(dset1);
+                CHECK(ret, FAIL, "H5Dclose");
+                ret = H5Dclose(dset2);
+                CHECK(ret, FAIL, "H5Dclose");
+                ret = H5Dclose(dset3);
+                CHECK(ret, FAIL, "H5Dclose");
+
+                /* Close file */
+                ret = H5Fclose(fid);
+                CHECK(ret, FAIL, "H5Fclose");
+            } /* end for */
+        } /* end for */
+    } /* end for */
+
+    /* Close property list */
+    ret = H5Pclose(dcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Close dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+}   /* test_attr_open_by_idx() */
 
 /****************************************************************
 **
@@ -5731,8 +6126,8 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
             sprintf(attrname2, "new attr %02u", u);
 
             /* Change second dataset's attribute's name */
-            ret = H5Arename(dataset2, attrname, attrname2);
-            CHECK(ret, FAIL, "H5Arename");
+            ret = H5Arename2(fid, DSET2_NAME, attrname, attrname2, H5P_DEFAULT);
+            CHECK(ret, FAIL, "H5Arename2");
 
 
             /* Check refcount on attributes now */
@@ -5787,8 +6182,8 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
 
 
             /* Change second dataset's attribute's name back to original */
-            ret = H5Arename(dataset2, attrname2, attrname);
-            CHECK(ret, FAIL, "H5Arename");
+            ret = H5Arename2(fid, DSET2_NAME, attrname2, attrname, H5P_DEFAULT);
+            CHECK(ret, FAIL, "H5Arename2");
 
 
             /* Check refcount on attributes now */
@@ -6747,7 +7142,12 @@ test_attr(void)
                 /* New attribute API routine tests */
                 test_attr_info_by_idx(new_format, my_fcpl, my_fapl);    /* Test querying attribute info by index */
                 test_attr_delete_by_idx(new_format, my_fcpl, my_fapl);  /* Test deleting attribute by index */
-                test_attr_iterate_by_idx(new_format, my_fcpl, my_fapl); /* Test iterating over attributes by index */
+                test_attr_iterate2(new_format, my_fcpl, my_fapl);       /* Test iterating over attributes by index */
+#ifdef NOT_YET
+                test_attr_open_by_idx(new_format, my_fcpl, my_fapl);    /* Test opening attributes by index */
+#else /* NOT_YET */
+HDfprintf(stderr, "Finish H5Aopen_by_idx() test!\n");
+#endif /* NOT_YET */
 
                 /* More complex tests with both "new format" and "shared" attributes */
                 if(use_shared == TRUE) {
@@ -6762,7 +7162,10 @@ test_attr(void)
             /* New attribute API routine tests, on old-format storage */
             test_attr_info_by_idx(new_format, fcpl, my_fapl);   /* Test querying attribute info by index */
             test_attr_delete_by_idx(new_format, fcpl, my_fapl); /* Test deleting attribute by index */
-            test_attr_iterate_by_idx(new_format, fcpl, my_fapl); /* Test iterating over attributes by index */
+            test_attr_iterate2(new_format, fcpl, my_fapl);      /* Test iterating over attributes by index */
+#ifdef NOT_YET
+            test_attr_open_by_idx(new_format, fcpl, my_fapl);   /* Test opening attributes by index */
+#endif /* NOT_YET */
         } /* end else */
     } /* end for */
 

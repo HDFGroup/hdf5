@@ -91,7 +91,6 @@ typedef struct {
     hbool_t *visited;           /* Pointer to array of "visited link" flags */
 } link_iter_info_t;
 
-#ifndef QAK
 
 /*-------------------------------------------------------------------------
  * Function:	mklinks
@@ -8791,7 +8790,6 @@ error:
 
     return -1;
 } /* end object_info_old() */
-#endif /* QAK */
 
 
 /*-------------------------------------------------------------------------
@@ -9347,7 +9345,6 @@ main(void)
         /* Set the "use the latest version of the format" flag for creating objects in the file */
         if(H5Pset_latest_format(fapl2, TRUE) < 0) TEST_ERROR
 
-#ifndef QAK
         /* Loop over using new group format */
         for(new_format = FALSE; new_format <= TRUE; new_format++) {
             /* General tests... (on both old & new format groups */
@@ -9431,9 +9428,6 @@ main(void)
                 nerrors += group_info_old(fapl) < 0 ? 1 : 0;
             }
         } /* end for */
-#else /* QAK */
-HDfprintf(stderr, "Uncomment tests!\n");
-#endif /* QAK */
 
         /* Close 2nd FAPL */
 	H5Pclose(fapl2);

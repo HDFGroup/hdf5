@@ -69,8 +69,6 @@ typedef struct H5A_iter_cb1 {
 static hid_t H5A_create(const H5G_loc_t *loc, const char *name,
     const H5T_t *type, const H5S_t *space, hid_t acpl_id, hid_t dxpl_id);
 static herr_t H5A_open_common(const H5G_loc_t *loc, H5A_t *attr);
-static H5A_t *H5A_open_by_idx(const H5G_loc_t *loc, const char *obj_name,
-    H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id, hid_t dxpl_id);
 static H5A_t *H5A_open_by_name(const H5G_loc_t *loc, const char *obj_name,
     const char *attr_name, hid_t lapl_id, hid_t dxpl_id);
 static herr_t H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id);
@@ -474,13 +472,19 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5Aopen_idx
+    H5Aopen_by_idx
  PURPOSE
-    Opens the n'th attribute for an object
+    Opens the n'th attribute for an object, according to the order within
+    an index
  USAGE
-    hid_t H5Aopen_idx (loc_id, idx)
-        hid_t loc_id;       IN: Object that attribute is attached to
-        unsigned idx;       IN: Index (0-based) attribute to open
+    hid_t H5Aopen_by_idx(loc_id, obj_ame, idx_type, order, n, aapl_id, lapl_id)
+        hid_t loc_id;           IN: Object that attribute is attached to
+        const char *obj_name;   IN: Name of object relative to location
+        H5_index_t idx_type;    IN: Type of index to use
+        H5_iter_order_t order;  IN: Order to iterate over index
+        hsize_t n;              IN: Index (0-based) attribute to open
+        hid_t aapl_id;          IN: Attribute access property list
+        hid_t lapl_id;          IN: Link access property list
  RETURNS
     ID of attribute on success, negative on failure
 
@@ -489,27 +493,36 @@ done:
     index specified is used to look up the corresponding attribute for the
     object.  The attribute ID returned from this function must be released with
     H5Aclose or resource leaks will develop.
-        The location object may be either a group or a dataset, both of
-    which may have any sort of attribute.
 --------------------------------------------------------------------------*/
 hid_t
-H5Aopen_idx(hid_t loc_id, unsigned idx)
+H5Aopen_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
+    H5_iter_order_t order, hsize_t n, hid_t UNUSED aapl_id, hid_t lapl_id)
 {
-    H5G_loc_t	loc;	        /* Object location */
     H5A_t       *attr = NULL;   /* Attribute opened */
-    hid_t	ret_value;
+    H5G_loc_t	loc;	        /* Object location */
+    hid_t	ret_value;      /* Return value */
 
-    FUNC_ENTER_API(H5Aopen_idx, FAIL)
-    H5TRACE2("i", "iIu", loc_id, idx);
+    FUNC_ENTER_API(H5Aopen_by_idx, FAIL)
 
     /* check arguments */
     if(H5I_ATTR == H5I_get_type(loc_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
     if(H5G_loc(loc_id, &loc) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(!obj_name || !*obj_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name")
+    if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+    if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+    if(H5P_DEFAULT == lapl_id)
+        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
     /* Open the attribute in the object header */
-    if(NULL == (attr = H5A_open_by_idx(&loc, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)idx, H5P_LINK_ACCESS_DEFAULT, H5AC_ind_dxpl_id)))
+    if(NULL == (attr = H5A_open_by_idx(&loc, obj_name, idx_type, order, n, lapl_id, H5AC_ind_dxpl_id)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open attribute")
 
     /* Register the attribute and get an ID for it */
@@ -523,7 +536,7 @@ done:
             HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute")
 
     FUNC_LEAVE_API(ret_value)
-} /* H5Aopen_idx() */
+} /* H5Aopen_by_idx() */
 
 
 /*-------------------------------------------------------------------------
@@ -595,7 +608,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static H5A_t *
+H5A_t *
 H5A_open_by_idx(const H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, hid_t lapl_id, hid_t dxpl_id)
 {
@@ -1533,44 +1546,72 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Arename
+ * Function:	H5Arename2
  *
  * Purpose:     Rename an attribute
  *
  * Return:	Success:             Non-negative
  *		Failure:             Negative
  *
- * Programmer:	Raymond Lu
- *              October 23, 2002
+ * Programmer:	Quincey Koziol
+ *              February 20, 2007
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
+H5Arename2(hid_t loc_id, const char *obj_name, const char *old_attr_name,
+    const char *new_attr_name, hid_t lapl_id)
 {
     H5G_loc_t	loc;	                /* Object location */
+    H5G_loc_t   obj_loc;                /* Location used to open group */
+    H5G_name_t  obj_path;            	/* Opened object group hier. path */
+    H5O_loc_t   obj_oloc;            	/* Opened object object location */
+    hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Arename, FAIL)
-    H5TRACE3("e", "iss", loc_id, old_name, new_name);
+    FUNC_ENTER_API(H5Arename2, FAIL)
 
     /* check arguments */
-    if(!old_name || !new_name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "name is nil")
     if(H5I_ATTR == H5I_get_type(loc_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
-    if(H5G_loc(loc_id, & loc) < 0)
+    if(H5G_loc(loc_id, &loc) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(!obj_name || !*obj_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name")
+    if(!old_attr_name || !*old_attr_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no old attribute name")
+    if(!new_attr_name || !*new_attr_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no new attribute name")
+    if(H5P_DEFAULT == lapl_id)
+        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
     /* Avoid thrashing things if the names are the same */
-    if(HDstrcmp(old_name, new_name))
+    if(HDstrcmp(old_attr_name, new_attr_name)) {
+        /* Set up opened group location to fill in */
+        obj_loc.oloc = &obj_oloc;
+        obj_loc.path = &obj_path;
+        H5G_loc_reset(&obj_loc);
+
+        /* Find the object's location */
+        if(H5G_loc_find(&loc, obj_name, &obj_loc/*out*/, lapl_id, H5AC_ind_dxpl_id) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "object not found")
+        loc_found = TRUE;
+
         /* Call attribute rename routine */
-        if(H5O_attr_rename(loc.oloc, H5AC_dxpl_id, old_name, new_name) < 0)
+        if(H5O_attr_rename(obj_loc.oloc, H5AC_dxpl_id, old_attr_name, new_attr_name) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute")
+    } /* end if */
 
 done:
+    /* Release resources */
+    if(loc_found && H5G_loc_free(&obj_loc) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location")
+
     FUNC_LEAVE_API(ret_value)
-} /* H5Arename() */
+} /* H5Arename2() */
 
 
 /*--------------------------------------------------------------------------

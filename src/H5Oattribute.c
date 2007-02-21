@@ -337,8 +337,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_attr_open_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned UNUSED sequence, unsigned UNUSED *oh_flags_ptr, void *_udata/*in,out*/)
+H5O_attr_open_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, unsigned sequence,
+    unsigned UNUSED *oh_flags_ptr, void *_udata/*in,out*/)
 {
     H5O_iter_opn_t *udata = (H5O_iter_opn_t *)_udata;   /* Operator user data */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
@@ -355,6 +355,10 @@ H5O_attr_open_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
         /* Make a copy of the attribute to return */
         if(NULL == (udata->attr = H5A_copy(NULL, (H5A_t *)mesg->native)))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "unable to copy attribute")
+
+        /* Assign [somewhat arbitrary] creation order value, for older versions of the format */
+        if(oh->version == H5O_VERSION_1)
+            udata->attr->crt_idx = sequence;
 
         /* Stop iterating */
         ret_value = H5_ITER_STOP;

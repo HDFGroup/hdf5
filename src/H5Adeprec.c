@@ -108,6 +108,60 @@ H5A_init_deprec_interface(void)
 
 /*--------------------------------------------------------------------------
  NAME
+    H5Aopen_idx
+ PURPOSE
+    Opens the n'th attribute for an object
+ USAGE
+    hid_t H5Aopen_idx (loc_id, idx)
+        hid_t loc_id;       IN: Object that attribute is attached to
+        unsigned idx;       IN: Index (0-based) attribute to open
+ RETURNS
+    ID of attribute on success, negative on failure
+
+ DESCRIPTION
+        This function opens an existing attribute for access.  The attribute
+    index specified is used to look up the corresponding attribute for the
+    object.  The attribute ID returned from this function must be released with
+    H5Aclose or resource leaks will develop.
+        The location object may be either a group or a dataset, both of
+    which may have any sort of attribute.
+--------------------------------------------------------------------------*/
+hid_t
+H5Aopen_idx(hid_t loc_id, unsigned idx)
+{
+    H5G_loc_t	loc;	        /* Object location */
+    H5A_t       *attr = NULL;   /* Attribute opened */
+    hid_t	ret_value;
+
+    FUNC_ENTER_API(H5Aopen_idx, FAIL)
+    H5TRACE2("i", "iIu", loc_id, idx);
+
+    /* check arguments */
+    if(H5I_ATTR == H5I_get_type(loc_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+    if(H5G_loc(loc_id, &loc) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+
+    /* Open the attribute in the object header */
+    if(NULL == (attr = H5A_open_by_idx(&loc, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)idx, H5P_LINK_ACCESS_DEFAULT, H5AC_ind_dxpl_id)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open attribute")
+
+    /* Register the attribute and get an ID for it */
+    if((ret_value = H5I_register(H5I_ATTR, attr)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register attribute for ID")
+
+done:
+    /* Cleanup on failure */
+    if(ret_value < 0)
+        if(attr && H5A_close(attr) < 0)
+            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute")
+
+    FUNC_LEAVE_API(ret_value)
+} /* H5Aopen_idx() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5Aget_num_attrs
  PURPOSE
     Determines the number of attributes attached to an object
@@ -164,6 +218,47 @@ H5Aget_num_attrs(hid_t loc_id)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Aget_num_attrs() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Arename
+ *
+ * Purpose:     Rename an attribute
+ *
+ * Return:	Success:             Non-negative
+ *		Failure:             Negative
+ *
+ * Programmer:	Raymond Lu
+ *              October 23, 2002
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
+{
+    H5G_loc_t	loc;	                /* Object location */
+    herr_t	ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(H5Arename, FAIL)
+    H5TRACE3("e", "iss", loc_id, old_name, new_name);
+
+    /* check arguments */
+    if(!old_name || !new_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "name is nil")
+    if(H5I_ATTR == H5I_get_type(loc_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+    if(H5G_loc(loc_id, & loc) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+
+    /* Avoid thrashing things if the names are the same */
+    if(HDstrcmp(old_name, new_name))
+        /* Call attribute rename routine */
+        if(H5O_attr_rename(loc.oloc, H5AC_dxpl_id, old_name, new_name) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Arename() */
 
 
 /*--------------------------------------------------------------------------
