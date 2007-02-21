@@ -108,6 +108,121 @@ H5A_init_deprec_interface(void)
 
 /*--------------------------------------------------------------------------
  NAME
+    H5Acreate
+ PURPOSE
+    Creates an attribute on an object
+ USAGE
+    hid_t H5Acreate (loc_id, name, type_id, space_id, plist_id)
+        hid_t loc_id;       IN: Object (dataset or group) to be attached to
+        const char *name;   IN: Name of attribute to create
+        hid_t type_id;      IN: ID of datatype for attribute
+        hid_t space_id;     IN: ID of dataspace for attribute
+        hid_t plist_id;     IN: ID of creation property list (currently not used)
+ RETURNS
+    Non-negative on success/Negative on failure
+
+ DESCRIPTION
+        This function creates an attribute which is attached to the object
+    specified with 'location_id'.  The name specified with 'name' for each
+    attribute for an object must be unique for that object.  The 'type_id'
+    and 'space_id' are created with the H5T and H5S interfaces respectively.
+    The attribute ID returned from this function must be released with H5Aclose
+    or resource leaks will develop.
+
+--------------------------------------------------------------------------*/
+hid_t
+H5Acreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
+	  hid_t plist_id)
+{
+    H5G_loc_t           loc;                    /* Object location */
+    H5T_t		*type;                  /* Datatype to use for attribute */
+    H5S_t		*space;                 /* Dataspace to use for attribute */
+    hid_t		ret_value;              /* Return value */
+
+    FUNC_ENTER_API(H5Acreate, FAIL)
+    H5TRACE5("i", "isiii", loc_id, name, type_id, space_id, plist_id);
+
+    /* check arguments */
+    if(H5I_ATTR == H5I_get_type(loc_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+    if(H5G_loc(loc_id, &loc) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(0 == (H5F_INTENT(loc.oloc->file) & H5F_ACC_RDWR))
+	HGOTO_ERROR(H5E_ARGS, H5E_WRITEERROR, FAIL, "no write intent on file")
+    if(!name || !*name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a type")
+    if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+
+    /* Go do the real work for attaching the attribute to the dataset */
+    if((ret_value = H5A_create(&loc, name, type, space, plist_id, H5AC_dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to create attribute")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Acreate() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Aopen_name
+ PURPOSE
+    Opens an attribute for an object by looking up the attribute name
+ USAGE
+    hid_t H5Aopen_name (loc_id, name)
+        hid_t loc_id;       IN: Object (dataset or group) to be attached to
+        const char *name;   IN: Name of attribute to locate and open
+ RETURNS
+    ID of attribute on success, negative on failure
+
+ DESCRIPTION
+        This function opens an existing attribute for access.  The attribute
+    name specified is used to look up the corresponding attribute for the
+    object.  The attribute ID returned from this function must be released with
+    H5Aclose or resource leaks will develop.
+        The location object may be either a group or a dataset, both of
+    which may have any sort of attribute.
+--------------------------------------------------------------------------*/
+hid_t
+H5Aopen_name(hid_t loc_id, const char *name)
+{
+    H5G_loc_t    	loc;            /* Object location */
+    H5A_t               *attr = NULL;   /* Attribute opened */
+    hid_t		ret_value;
+
+    FUNC_ENTER_API(H5Aopen_name, FAIL)
+    H5TRACE2("i", "is", loc_id, name);
+
+    /* check arguments */
+    if(H5I_ATTR == H5I_get_type(loc_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+    if(H5G_loc(loc_id, &loc) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(!name || !*name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+
+    /* Open the attribute on the object header */
+    if(NULL == (attr = H5A_open_by_name(&loc, ".", name, H5P_LINK_ACCESS_DEFAULT, H5AC_ind_dxpl_id)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "can't open attribute")
+
+    /* Register the attribute and get an ID for it */
+    if((ret_value = H5I_register(H5I_ATTR, attr)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register attribute for ID")
+
+done:
+    /* Cleanup on failure */
+    if(ret_value < 0)
+        if(attr && H5A_close(attr) < 0)
+            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute")
+
+    FUNC_LEAVE_API(ret_value)
+} /* H5Aopen_name() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5Aopen_idx
  PURPOSE
     Opens the n'th attribute for an object
