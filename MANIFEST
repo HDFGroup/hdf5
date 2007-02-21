@@ -1502,7 +1502,6 @@
 ./tools/h5diff/Makefile.in
 ./tools/h5diff/h5diff_main.c
 ./tools/h5diff/h5diffgentest.c
-./tools/h5diff/testh5diff.h
 ./tools/h5diff/testh5diff.sh
 
 
