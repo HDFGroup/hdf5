@@ -90,26 +90,29 @@ void parallel_print(const char* format, ...)
  va_end(ap);
 }
 
-
 /*-------------------------------------------------------------------------
- * Function: print_dims
+ * Function: print_dimensions
  *
- * Purpose: print dimensions
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: May 9, 2003
+ * Purpose: print dimensions 
  *
  *-------------------------------------------------------------------------
  */
-void print_dims( int r, hsize_t *d )
+void
+print_dimensions (int rank, hsize_t *dims)
 {
- int i;
- parallel_print("[ " );
- for ( i=0; i<r; i++ )
-  parallel_print("%"H5_PRINTF_LL_WIDTH"u ",(unsigned long_long)d[i]  );
- parallel_print("] " );
+    int i;
+
+    parallel_print("[" );
+    for ( i = 0; i < rank-1; i++)
+    {
+        parallel_print("%"H5_PRINTF_LL_WIDTH"u", (unsigned long_long)dims[i]);
+        parallel_print("x");
+    }
+    parallel_print("%"H5_PRINTF_LL_WIDTH"u", (unsigned long_long)dims[rank-1]);
+    parallel_print("]" );
+    
 }
+
 
 /*-------------------------------------------------------------------------
  * Function: print_type

@@ -61,8 +61,7 @@ hsize_t diff_dataset( hid_t file1_id,
                       hid_t file2_id,
                       const char *obj1_name,
                       const char *obj2_name,
-                      diff_opt_t *options,
-                      int print_dims)
+                      diff_opt_t *options)
 {
  hid_t   did1=-1;
  hid_t   did2=-1;
@@ -110,8 +109,7 @@ hsize_t diff_dataset( hid_t file1_id,
                         did2,
                         obj1_name,
                         obj2_name,
-                        options,
-                        print_dims);
+                        options);
  }
 /*-------------------------------------------------------------------------
  * close
@@ -160,8 +158,7 @@ hsize_t diff_datasetid( hid_t did1,
                         hid_t did2,
                         const char *obj1_name,
                         const char *obj2_name,
-                        diff_opt_t *options,
-                        int print_dims)
+                        diff_opt_t *options)
 {
  hid_t      sid1=-1;
  hid_t      sid2=-1;
@@ -230,14 +227,6 @@ hsize_t diff_datasetid( hid_t did1,
  /* Get the data type */
  if ( (f_tid2 = H5Dget_type(did2)) < 0 )
   goto error;
-
- 
- /*-------------------------------------------------------------------------
-  * print dimensions
-  *-------------------------------------------------------------------------
-  */
- if (print_dims)
-     print_size (rank1, dims1);
 
 /*-------------------------------------------------------------------------
  * check for empty datasets
@@ -726,14 +715,14 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
  {
   if (options->m_verbose && obj1_name) {
    printf("Comparison not supported: <%s> has rank %d, dimensions ", obj1_name, rank1);
-   print_dims(rank1,dims1);
+   print_dimensions(rank1,dims1);
    printf(", max dimensions ");
-   print_dims(rank1,maxdim1);
+   print_dimensions(rank1,maxdim1);
    printf("\n" );
    printf("<%s> has rank %d, dimensions ", obj2_name, rank2);
-   print_dims(rank2,dims2);
+   print_dimensions(rank2,dims2);
    printf(", max dimensions ");
-   print_dims(rank2,maxdim2);
+   print_dimensions(rank2,maxdim2);
   }
   return 0;
  }
@@ -764,15 +753,15 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
  {
   if (options->m_verbose && obj1_name) {
    printf("Comparison not supported: <%s> has rank %d, dimensions ", obj1_name, rank1);
-   print_dims(rank1,dims1);
+   print_dimensions(rank1,dims1);
    if (maxdim1 && maxdim2) {
     printf(", max dimensions ");
-    print_dims(rank1,maxdim1);
+    print_dimensions(rank1,maxdim1);
     printf("\n" );
     printf("<%s> has rank %d, dimensions ", obj2_name, rank2);
-    print_dims(rank2,dims2);
+    print_dimensions(rank2,dims2);
     printf(", max dimensions ");
-    print_dims(rank2,maxdim2);
+    print_dimensions(rank2,maxdim2);
    }
   }
   return 0;
@@ -787,10 +776,10 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
   if (options->m_verbose) {
    printf( "Warning: different maximum dimensions\n");
    printf("<%s> has max dimensions ", obj1_name);
-   print_dims(rank1,maxdim1);
+   print_dimensions(rank1,maxdim1);
    printf("\n");
    printf("<%s> has max dimensions ", obj2_name);
-   print_dims(rank2,maxdim2);
+   print_dimensions(rank2,maxdim2);
    printf("\n");
   }
  }

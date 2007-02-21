@@ -152,6 +152,7 @@ int print_data(diff_opt_t *options)
  *
  *-------------------------------------------------------------------------
  */
+
 static
 void print_pos( int        *ph,       /* print header */
                 int        pp,        /* print percentage */
@@ -163,47 +164,53 @@ void print_pos( int        *ph,       /* print header */
                 const char *obj1,
                 const char *obj2 )
 {
- int i;
+    int i;
+    
+    /* print header */
+    if ( *ph==1 )
+    {
+        *ph=0;
 
- /* print header */
- if ( *ph==1 )
- {
-  *ph=0;
-
-  if (pp)
-  {
-   parallel_print("%-15s %-15s %-15s %-15s %-15s\n",
-    "position",
-    (obj1!=NULL) ? obj1 : " ",
-    (obj2!=NULL) ? obj2 : " ",
-    "difference",
-    "relative");
-   parallel_print("------------------------------------------------------------------------\n");
-  }
-  else
-  {
-   parallel_print("%-15s %-15s %-15s %-20s\n",
-    "position",
-    (obj1!=NULL) ? obj1 : " ",
-    (obj2!=NULL) ? obj2 : " ",
-    "difference");
-   parallel_print("------------------------------------------------------------\n");
-  }
- }
-
- for ( i = 0; i < rank; i++)
- {
-  pos[i] = curr_pos/acc[i];
-  curr_pos -= acc[i]*pos[i];
- }
- assert( curr_pos == 0 );
-
- parallel_print("[ " );
- for ( i = 0; i < rank; i++)
- {
-  parallel_print("%"H5_PRINTF_LL_WIDTH"u ", (unsigned long_long)pos[i]);
- }
- parallel_print("]" );
+        parallel_print("%-16s","size:");
+        print_dimensions (rank,dims);
+        parallel_print("%-11s","");
+        print_dimensions (rank,dims);
+        parallel_print("\n");
+        
+        if (pp)
+        {
+            parallel_print("%-15s %-15s %-15s %-15s %-15s\n",
+                "position",
+                (obj1!=NULL) ? obj1 : " ",
+                (obj2!=NULL) ? obj2 : " ",
+                "difference",
+                "relative");
+            parallel_print("------------------------------------------------------------------------\n");
+        }
+        else
+        {
+            parallel_print("%-15s %-15s %-15s %-20s\n",
+                "position",
+                (obj1!=NULL) ? obj1 : " ",
+                (obj2!=NULL) ? obj2 : " ",
+                "difference");
+            parallel_print("------------------------------------------------------------\n");
+        }
+    } /* end print header */
+    
+    for ( i = 0; i < rank; i++)
+    {
+        pos[i] = curr_pos/acc[i];
+        curr_pos -= acc[i]*pos[i];
+    }
+    assert( curr_pos == 0 );
+    
+    parallel_print("[ " );
+    for ( i = 0; i < rank; i++)
+    {
+        parallel_print("%"H5_PRINTF_LL_WIDTH"u ", (unsigned long_long)pos[i]);
+    }
+    parallel_print("]" );
 }
 
 
@@ -789,8 +796,7 @@ hsize_t diff_datum(void       *_mem1,
       obj2_id,
       NULL,
       NULL,
-      options,
-      0);
+      options);
      break;
     default:
      parallel_print("Warning: Comparison not possible of object types referenced: <%s> and <%s>",

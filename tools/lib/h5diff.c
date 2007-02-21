@@ -60,9 +60,8 @@ print_objname (diff_opt_t * options, hsize_t nfound)
 void
 do_print_objname (const char *OBJ, const char *path1, const char *path2)
 {
- parallel_print("%s:\n<%s> and <%s> ", OBJ, path1, path2);
+    parallel_print("%-7s: <%s> and <%s>\n", OBJ, path1, path2);
 }
-
 
 
 
@@ -930,7 +929,7 @@ hsize_t diff (hid_t file1_id,
   {
    if (print_objname (options, (hsize_t)1))
     do_print_objname ("dataset", path1, path2);
-   nfound = diff_dataset (file1_id, file2_id, path1, path2, options, 1);
+   nfound = diff_dataset (file1_id, file2_id, path1, path2, options);
    /* always print the number of differences found */
    print_found(nfound);
   }
@@ -944,14 +943,14 @@ hsize_t diff (hid_t file1_id,
    {
     /* shut up temporarily */
     options->m_quiet = 1;
-    nfound = diff_dataset (file1_id, file2_id, path1, path2, options, 0);
+    nfound = diff_dataset (file1_id, file2_id, path1, path2, options);
     /* print again */
     options->m_quiet = 0;
     if (nfound)
     {
      if (print_objname (options, nfound))
       do_print_objname ("dataset", path1, path2);
-     nfound = diff_dataset (file1_id, file2_id, path1, path2, options, 1);
+     nfound = diff_dataset (file1_id, file2_id, path1, path2, options);
      /* print the number of differences found only when found
      this is valid for the default mode and report mode */
      print_found(nfound);
@@ -964,7 +963,7 @@ hsize_t diff (hid_t file1_id,
   */
    else
    {
-    nfound = diff_dataset (file1_id, file2_id, path1, path2, options, 0);
+    nfound = diff_dataset (file1_id, file2_id, path1, path2, options);
    }
   }   /*else verbose */
 

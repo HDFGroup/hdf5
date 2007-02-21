@@ -76,15 +76,13 @@ hsize_t diff_dataset( hid_t file1_id,
                       hid_t file2_id,
                       const char *obj1_name,
                       const char *obj2_name,
-                      diff_opt_t *options,
-                      int print_dims);
+                      diff_opt_t *options);
 
 hsize_t diff_datasetid( hid_t dset1_id,
                         hid_t dset2_id,
                         const char *obj1_name,
                         const char *obj2_name,
-                        diff_opt_t *options,
-                        int print_dims);
+                        diff_opt_t *options);
 
 hsize_t diff( hid_t      file1_id,
               const char *path1,
@@ -160,7 +158,7 @@ const char* diff_basename(const char *name);
 const char* get_type(int type);
 const char* get_class(H5T_class_t tclass);
 const char* get_sign(H5T_sign_t sign);
-void        print_dims( int r, hsize_t *d );
+void        print_dimensions (int rank, hsize_t *dims);
 int         print_objname(diff_opt_t *options, hsize_t nfound);
 void        do_print_objname (const char *OBJ, const char *path1, const char *path2);
 
