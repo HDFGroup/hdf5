@@ -238,11 +238,11 @@
      write(*, fmt = e_format) error_string
      total_error = total_error + external_total_error 
 
-!     error_string = failure
-     error_string = skip
+     error_string = failure
+!     error_string = skip
      cleanup = .FALSE.
-!     CALL multi_file_test(cleanup, multi_file_total_error)
-!     IF (multi_file_total_error == 0) error_string = success
+     CALL multi_file_test(cleanup, multi_file_total_error)
+     IF (multi_file_total_error == 0) error_string = success
      write(*, fmt = '(23a)', advance = 'no') ' Multi file driver test'     
      write(*, fmt = '(47x,a)', advance = 'no')  ' '
      write(*, fmt = e_format) error_string
