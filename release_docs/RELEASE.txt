@@ -174,6 +174,8 @@ New Features
 
     Library:
     --------
+       - Removed size restrictions on attributes, when using the "latest"
+            version of the file format. - QAK - 2007/02/21
        - Relaxed restrictions on attribute operations to allow a file ID to
             be used as the "location ID".  If a file ID is used, the attribute
             operation will occur on the root group of the file.
