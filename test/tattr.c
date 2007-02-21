@@ -119,6 +119,11 @@ struct attr4_struct {
 #define ATTR5_RANK	0
 float attr_data5=(float)-5.123;        /* Test data for 5th attribute */
 
+#define ATTR6_RANK	3
+#define ATTR6_DIM1	100
+#define ATTR6_DIM2	100
+#define ATTR6_DIM3	100
+
 /* Attribute iteration struct */
 typedef struct {
     H5_iter_order_t order;      /* Direction of iteration */
@@ -2671,6 +2676,276 @@ test_attr_dense_limits(hid_t fcpl, hid_t fapl)
 
     /* Close dataspace */
     ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Unlink dataset */
+    ret = H5Gunlink(fid, DSET1_NAME);
+    CHECK(ret, FAIL, "H5Gunlink");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Check size of file */
+    filesize = h5_get_file_size(FILENAME);
+    VERIFY(filesize, empty_filesize, "h5_get_file_size");
+}   /* test_attr_dense_limits() */
+
+
+/****************************************************************
+**
+**  test_attr_big(): Test basic H5A (attribute) code.
+**      Tests storing "big" attribute in dense storage immediately, if available
+**
+****************************************************************/
+static void
+test_attr_big(hid_t fcpl, hid_t fapl)
+{
+    hid_t	fid;		/* HDF5 File ID			*/
+    hid_t	dataset;	/* Dataset ID			*/
+    hid_t	sid;	        /* Dataspace ID			*/
+    hid_t	big_sid;	/* "Big" dataspace ID		*/
+    hsize_t     dims[ATTR6_RANK] = {ATTR6_DIM1, ATTR6_DIM2, ATTR6_DIM3};           /* Attribute dimensions */
+    hid_t	attr;	        /* Attribute ID			*/
+    hid_t	dcpl;	        /* Dataset creation property list ID */
+    char	attrname[NAME_BUF_SIZE];        /* Name of attribute */
+    unsigned    max_compact;    /* Maximum # of attributes to store compactly */
+    unsigned    min_dense;      /* Minimum # of attributes to store "densely" */
+    unsigned    nshared_indices;        /* # of shared message indices */
+    hbool_t     latest_format;  /* Whether we're using the latest version of the format or not */
+    htri_t	is_empty;	/* Are there any attributes? */
+    htri_t	is_dense;	/* Are attributes stored densely? */
+    unsigned    u;              /* Local index variable */
+    h5_stat_size_t empty_filesize;       /* Size of empty file */
+    h5_stat_size_t filesize;             /* Size of file after modifications */
+    herr_t	ret;		/* Generic return value		*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Storing 'Big' Attributes in Dense Storage\n"));
+
+    /* Create file */
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Get size of file */
+    empty_filesize = h5_get_file_size(FILENAME);
+    if(empty_filesize < 0)
+        TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
+
+    /* Re-open file */
+    fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Create dataspace for dataset & "small" attributes */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Create "big" dataspace for "big" attributes */
+    big_sid = H5Screate_simple(ATTR6_RANK, dims, NULL);
+    CHECK(big_sid, FAIL, "H5Screate_simple");
+
+    /* Query the group creation properties */
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(dcpl, FAIL, "H5Pcreate");
+
+    /* Retrieve limits for compact/dense attribute storage */
+    ret = H5Pget_attr_phase_change(dcpl, &max_compact, &min_dense);
+    CHECK(ret, FAIL, "H5Pget_attr_phase_change");
+
+    /* Retrieve # of shared message indices (ie. whether attributes are shared or not) */
+    ret = H5Pget_shared_mesg_nindexes(fcpl, &nshared_indices);
+    CHECK(ret, FAIL, "H5Pget_shared_mesg_nindexes");
+
+    /* Retrieve the "use the latest version of the format" flag for creating objects in the file */
+    ret = H5Pget_latest_format(fapl, &latest_format);
+    CHECK(ret, FAIL, "H5Pget_latest_format");
+
+    /* Create a dataset */
+    dataset = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
+    CHECK(dataset, FAIL, "H5Dcreate");
+
+    /* Close property list */
+    ret = H5Pclose(dcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+
+    /* Check on dataset's attribute storage status */
+    is_empty = H5O_is_attr_empty_test(dataset);
+    VERIFY(is_empty, TRUE, "H5O_is_attr_empty_test");
+    is_dense = H5O_is_attr_dense_test(dataset);
+    VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
+
+
+    /* Add first "small" attribute, which should be in compact storage */
+
+    /* Create attribute */
+    u = 0;
+    sprintf(attrname, "attr %02u", u);
+    attr = H5Acreate(dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Acreate");
+
+    /* Close attribute */
+    ret = H5Aclose(attr);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Check on dataset's attribute storage status */
+    is_empty = H5O_is_attr_empty_test(dataset);
+    VERIFY(is_empty, FALSE, "H5O_is_attr_empty_test");
+    is_dense = H5O_is_attr_dense_test(dataset);
+    VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
+
+
+    /* Add second "small" attribute, which should stay in compact storage */
+
+    /* Create attribute */
+    u = 1;
+    sprintf(attrname, "attr %02u", u);
+    attr = H5Acreate(dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Acreate");
+
+    /* Close attribute */
+    ret = H5Aclose(attr);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Check on dataset's attribute storage status */
+    is_empty = H5O_is_attr_empty_test(dataset);
+    VERIFY(is_empty, FALSE, "H5O_is_attr_empty_test");
+    is_dense = H5O_is_attr_dense_test(dataset);
+    VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
+
+
+    /* Add first "big" attribute, which should push storage into dense form */
+
+    /* Create attribute */
+    u = 2;
+    sprintf(attrname, "attr %02u", u);
+    attr = H5Acreate(dataset, attrname, H5T_NATIVE_UINT, big_sid, H5P_DEFAULT);
+    if(latest_format) {
+        CHECK(attr, FAIL, "H5Acreate");
+
+        /* Close attribute */
+        ret = H5Aclose(attr);
+        CHECK(ret, FAIL, "H5Aclose");
+
+        /* Check on dataset's attribute storage status */
+        /* (when attributes are shared, the "big" attribute goes into the shared
+         *  message heap instead of forcing the attribute storage into the dense
+         *  form - QAK)
+         */
+        is_empty = H5O_is_attr_empty_test(dataset);
+        VERIFY(is_empty, FALSE, "H5O_is_attr_empty_test");
+        is_dense = H5O_is_attr_dense_test(dataset);
+        VERIFY(is_dense, (nshared_indices ? FALSE : TRUE), "H5O_is_attr_dense_test");
+
+
+        /* Add second "big" attribute, which should leave storage in dense form */
+
+        /* Create attribute */
+        u = 3;
+        sprintf(attrname, "attr %02u", u);
+        attr = H5Acreate(dataset, attrname, H5T_NATIVE_UINT, big_sid, H5P_DEFAULT);
+        CHECK(attr, FAIL, "H5Acreate");
+
+        /* Close attribute */
+        ret = H5Aclose(attr);
+        CHECK(ret, FAIL, "H5Aclose");
+
+        /* Check on dataset's attribute storage status */
+        /* (when attributes are shared, the "big" attribute goes into the shared
+         *  message heap instead of forcing the attribute storage into the dense
+         *  form - QAK)
+         */
+        is_empty = H5O_is_attr_empty_test(dataset);
+        VERIFY(is_empty, FALSE, "H5O_is_attr_empty_test");
+        is_dense = H5O_is_attr_dense_test(dataset);
+        VERIFY(is_dense, (nshared_indices ? FALSE : TRUE), "H5O_is_attr_dense_test");
+
+
+        /* Delete second "small" attribute, attributes should still be stored densely */
+
+        /* Delete attribute */
+        u = 1;
+        sprintf(attrname, "attr %02u", u);
+        ret = H5Adelete(dataset, attrname);
+        CHECK(ret, FAIL, "H5Adelete");
+
+        /* Check on dataset's attribute storage status */
+        is_empty = H5O_is_attr_empty_test(dataset);
+        VERIFY(is_empty, FALSE, "H5O_is_attr_empty_test");
+        is_dense = H5O_is_attr_dense_test(dataset);
+        VERIFY(is_dense, (nshared_indices ? FALSE : TRUE), "H5O_is_attr_dense_test");
+
+
+        /* Delete second "big" attribute, attributes should still be stored densely */
+
+        /* Delete attribute */
+        u = 3;
+        sprintf(attrname, "attr %02u", u);
+        ret = H5Adelete(dataset, attrname);
+        CHECK(ret, FAIL, "H5Adelete");
+
+        /* Check on dataset's attribute storage status */
+        is_empty = H5O_is_attr_empty_test(dataset);
+        VERIFY(is_empty, FALSE, "H5O_is_attr_empty_test");
+        is_dense = H5O_is_attr_dense_test(dataset);
+        VERIFY(is_dense, (nshared_indices ? FALSE : TRUE), "H5O_is_attr_dense_test");
+
+
+        /* Delete first "big" attribute, attributes should _not_ be stored densely */
+
+        /* Delete attribute */
+        u = 2;
+        sprintf(attrname, "attr %02u", u);
+        ret = H5Adelete(dataset, attrname);
+        CHECK(ret, FAIL, "H5Adelete");
+
+        /* Check on dataset's attribute storage status */
+        is_empty = H5O_is_attr_empty_test(dataset);
+        VERIFY(is_empty, FALSE, "H5O_is_attr_empty_test");
+        is_dense = H5O_is_attr_dense_test(dataset);
+        VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
+
+
+        /* Delete first "small" attribute, should be no attributes now */
+
+        /* Delete attribute */
+        u = 0;
+        sprintf(attrname, "attr %02u", u);
+        ret = H5Adelete(dataset, attrname);
+        CHECK(ret, FAIL, "H5Adelete");
+
+        /* Check on dataset's attribute storage status */
+        is_empty = H5O_is_attr_empty_test(dataset);
+        VERIFY(is_empty, TRUE, "H5O_is_attr_empty_test");
+    } /* end if */
+    else {
+        /* Shouldn't be able to create "big" attributes with older version of format */
+        VERIFY(attr, FAIL, "H5Acreate");
+
+        /* Check on dataset's attribute storage status */
+        /* (when attributes are shared, the "big" attribute goes into the shared
+         *  message heap instead of forcing the attribute storage into the dense
+         *  form - QAK)
+         */
+        is_empty = H5O_is_attr_empty_test(dataset);
+        VERIFY(is_empty, FALSE, "H5O_is_attr_empty_test");
+        is_dense = H5O_is_attr_dense_test(dataset);
+        VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
+    } /* end else */
+
+
+    /* Close dataspaces */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose(big_sid);
     CHECK(ret, FAIL, "H5Sclose");
 
     /* Close Dataset */
@@ -7461,13 +7736,10 @@ test_attr(void)
                 test_attr_dense_rename(my_fcpl, my_fapl);       /* Test renaming attributes in dense storage */
                 test_attr_dense_unlink(my_fcpl, my_fapl);       /* Test unlinking object with attributes in dense storage */
                 test_attr_dense_limits(my_fcpl, my_fapl);       /* Test dense attribute storage limits */
+                test_attr_big(my_fcpl, my_fapl);                /* Test storing big attribute */
 
                 /* Attribute creation order tests */
                 test_attr_corder_create_basic(my_fcpl, my_fapl);/* Test creating an object w/attribute creation order info */
-/* XXX: when creation order indexing is fully working, go back and add checks
- *      to these tests to make certain that the creation order values are
- *      correct.
- */
                 test_attr_corder_create_compact(my_fcpl, my_fapl);  /* Test compact attribute storage on an object w/attribute creation order info */
                 test_attr_corder_create_dense(my_fcpl, my_fapl);/* Test dense attribute storage on an object w/attribute creation order info */
                 test_attr_corder_transition(my_fcpl, my_fapl);  /* Test attribute storage transitions on an object w/attribute creation order info */
@@ -7496,6 +7768,7 @@ test_attr(void)
             test_attr_iterate2(new_format, fcpl, my_fapl);      /* Test iterating over attributes by index */
             test_attr_open_by_idx(new_format, fcpl, my_fapl);   /* Test opening attributes by index */
             test_attr_open(new_format, fcpl, my_fapl);          /* Test opening attributes by name */
+            test_attr_big(fcpl, my_fapl);                       /* Test storing big attribute */
         } /* end else */
     } /* end for */
 

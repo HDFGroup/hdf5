@@ -221,24 +221,38 @@ H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
     if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
-    /* Check for switching to "dense" attribute storage */
-    if(oh->version > H5O_VERSION_1 && oh->nattrs == oh->max_compact &&
-            !H5F_addr_defined(oh->attr_fheap_addr)) {
-        H5O_iter_cvt_t udata;           /* User data for callback */
-        H5O_mesg_operator_t op;         /* Wrapper for operator */
+    /* Check if switching to "dense" attribute storage is possible */
+    if(oh->version > H5O_VERSION_1 && !H5F_addr_defined(oh->attr_fheap_addr)) {
+        htri_t sharable;        /* Whether the attribute will be shared */
+        size_t raw_size = 0;    /* Raw size of message */
 
-        /* Create dense storage for attributes */
-        if(H5A_dense_create(loc->file, dxpl_id, oh) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to create dense storage for attributes")
+        /* Check for attribute being sharable */
+        if((sharable = H5SM_can_share(loc->file, dxpl_id, NULL, NULL, H5O_ATTR_ID, attr)) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_BADMESG, FAIL, "can't determine attribute sharing status")
+        else if(sharable == FALSE) {
+            /* Compute the size needed to encode the attribute */
+            raw_size = (H5O_MSG_ATTR->raw_size)(loc->file, FALSE, attr);
+        } /* end if */
 
-        /* Set up user data for callback */
-        udata.f = loc->file;
-        udata.dxpl_id = dxpl_id;
+        /* Check for condititions for switching to "dense" attribute storage are met */
+        if(oh->nattrs == oh->max_compact ||
+                (!sharable && raw_size >= H5O_MESG_MAX_SIZE)) {
+            H5O_iter_cvt_t udata;           /* User data for callback */
+            H5O_mesg_operator_t op;         /* Wrapper for operator */
 
-        /* Iterate over existing attributes, moving them to dense storage */
-        op.lib_op = H5O_attr_to_dense_cb;
-        if(H5O_msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, TRUE, op, &udata, dxpl_id, &oh_flags) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTCONVERT, FAIL, "error converting attributes to dense storage")
+            /* Create dense storage for attributes */
+            if(H5A_dense_create(loc->file, dxpl_id, oh) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to create dense storage for attributes")
+
+            /* Set up user data for callback */
+            udata.f = loc->file;
+            udata.dxpl_id = dxpl_id;
+
+            /* Iterate over existing attributes, moving them to dense storage */
+            op.lib_op = H5O_attr_to_dense_cb;
+            if(H5O_msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, TRUE, op, &udata, dxpl_id, &oh_flags) < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTCONVERT, FAIL, "error converting attributes to dense storage")
+        } /* end if */
     } /* end if */
 
     /* Increment attribute count */

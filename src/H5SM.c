@@ -761,6 +761,122 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5SM_can_share_common
+ *
+ * Purpose:     "trivial" checks for determining if a message can be shared.
+ *
+ * Note:	These checks are common to the "can share" and "try share"
+ *		routines and are the "fast" checks before we need to protect
+ *		the SOHM master table.
+ *
+ * Return:      TRUE if message could be a SOHM
+ *              FALSE if this message couldn't be a SOHM
+ *              Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Wednesday, February 21, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+H5SM_can_share_common(const H5F_t *f, unsigned type_id, const void *mesg)
+{
+    htri_t ret_value;           /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5SM_can_share_common)
+
+    /* Check whether this message ought to be shared or not */
+    /* If sharing is disabled in this file, don't share the message */
+    if(!H5F_addr_defined(f->shared->sohm_addr))
+        HGOTO_DONE(FALSE)
+
+    /* Type-specific check */
+    if((ret_value = H5O_msg_can_share(type_id, mesg)) < 0)
+        HGOTO_ERROR(H5E_SOHM, H5E_BADTYPE, FAIL, "can_share callback returned error")
+    if(ret_value == FALSE)
+        HGOTO_DONE(FALSE)
+
+    /* At this point, the message passes the "trivial" checks and is worth
+     *  further checks.
+     */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5SM_can_share_common() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5SM_can_share
+ *
+ * Purpose:     Checks if an object header message would be shared or is
+ *		already shared.
+ *
+ *              If not, returns FALSE and does nothing.
+ *
+ * Return:      TRUE if message will be a SOHM
+ *              FALSE if this message won't be a SOHM
+ *              Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Wednesday, February 21, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5SM_can_share(H5F_t *f, hid_t dxpl_id, H5SM_master_table_t *table,
+    ssize_t *sohm_index_num, unsigned type_id, const void *mesg)
+{
+    size_t              mesg_size;
+    H5SM_master_table_t *my_table = NULL;
+    ssize_t             index_num;
+    htri_t              tri_ret;
+    htri_t              ret_value = TRUE;
+
+    FUNC_ENTER_NOAPI(H5SM_can_share, FAIL)
+
+    /* "trivial" sharing checks */
+    if((tri_ret = H5SM_can_share_common(f, type_id, mesg)) < 0)
+        HGOTO_ERROR(H5E_SOHM, H5E_BADTYPE, FAIL, "'trivial' sharing checks returned error")
+    if(tri_ret == FALSE)
+        HGOTO_DONE(FALSE)
+
+    /* Look up the master SOHM table */
+    /* (use incoming master SOHM table if possible) */
+    if(table)
+        my_table = table;
+    else {
+        if(NULL == (my_table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, NULL, NULL, H5AC_READ)))
+            HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
+    } /* end if */
+
+    /* Find the right index for this message type.  If there is no such index
+     * then this type of message isn't shareable
+     */
+    if((index_num = H5SM_get_index(my_table, type_id)) < 0) {
+        H5E_clear_stack(NULL); /*ignore error*/
+        HGOTO_DONE(FALSE)
+    } /* end if */
+
+    /* If the message isn't big enough, don't bother sharing it */
+    if(0 == (mesg_size = H5O_msg_raw_size(f, type_id, TRUE, mesg)))
+        HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "unable to get OH message size")
+    if(mesg_size < my_table->indexes[index_num].min_mesg_size)
+        HGOTO_DONE(FALSE)
+
+    /* At this point, the message will be shared, set the index number if requested. */
+    if(sohm_index_num)
+        *sohm_index_num = index_num;
+
+done:
+    /* Release the master SOHM table, if we protected it */
+    if(my_table && my_table != table && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, my_table, H5AC__NO_FLAGS_SET) < 0)
+	HDONE_ERROR(H5E_SOHM, H5E_CANTRELEASE, FAIL, "unable to close SOHM master table")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5SM_can_share() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5SM_try_share
  *
  * Purpose:     Attempts to share an object header message.  If the message
@@ -784,46 +900,29 @@ done:
 htri_t
 H5SM_try_share(H5F_t *f, hid_t dxpl_id, unsigned type_id, void *mesg)
 {
-    size_t              mesg_size;
     H5SM_master_table_t *table = NULL;
     unsigned            cache_flags = H5AC__NO_FLAGS_SET;
     ssize_t             index_num;
     htri_t              tri_ret;
-    herr_t              ret_value = TRUE;
+    htri_t              ret_value = TRUE;
 
     FUNC_ENTER_NOAPI(H5SM_try_share, FAIL)
 
-    /* Check whether this message ought to be shared or not */
-    /* If sharing is disabled in this file, don't share the message */
-    if(f->shared->sohm_addr == HADDR_UNDEF)
-        HGOTO_DONE(FALSE);
-
-    /* Type-specific check */
-    if((tri_ret = H5O_msg_can_share(type_id, mesg)) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "can_share callback returned error")
+    /* "trivial" sharing checks */
+    if((tri_ret = H5SM_can_share_common(f, type_id, mesg)) < 0)
+        HGOTO_ERROR(H5E_SOHM, H5E_BADTYPE, FAIL, "'trivial' sharing checks returned error")
     if(tri_ret == FALSE)
-        HGOTO_DONE(FALSE);
+        HGOTO_DONE(FALSE)
 
     /* Look up the master SOHM table */
     if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, NULL, NULL, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
 
-    /* Find the right index for this message type.  If there is no such index
-     * then this type of message isn't shareable
-     */
-    if((index_num = H5SM_get_index(table, type_id)) < 0)
-    {
-        H5E_clear_stack(NULL); /*ignore error*/
-        HGOTO_DONE(FALSE);
-    } /* end if */
-
-    /* If the message isn't big enough, don't bother sharing it */
-    if(0 == (mesg_size = H5O_msg_raw_size(f, type_id, TRUE, mesg)))
-        HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "unable to get OH message size")
-    if(mesg_size < table->indexes[index_num].min_mesg_size)
-        HGOTO_DONE(FALSE);
-
-    /* At this point, the message will be shared. */
+    /* "complex" sharing checks */
+    if((tri_ret = H5SM_can_share(f, dxpl_id, table, &index_num, type_id, mesg)) < 0)
+        HGOTO_ERROR(H5E_SOHM, H5E_BADTYPE, FAIL, "'complex' sharing checks returned error")
+    if(tri_ret == FALSE)
+        HGOTO_DONE(FALSE)
 
     /* If the index hasn't been allocated yet, create it */
     if(table->indexes[index_num].index_addr == HADDR_UNDEF)
@@ -1551,7 +1650,6 @@ H5SM_get_refcount(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     H5SM_list_t *list = NULL;           /* SOHM index list for message type (if in list form) */
     H5SM_index_header_t *header=NULL;   /* Index header for message type */
     H5SM_mesg_key_t key;                /* Key for looking up message */
-    H5SM_fh_ud_gh_t udata;              /* User data for fractal heap 'op' callback */
     H5SM_sohm_t message;                /* Shared message returned from callback */
     size_t buf_size;                    /* Size of the encoded message */
     void *encoding_buf = NULL;          /* Buffer for encoded message */

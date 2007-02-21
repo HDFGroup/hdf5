@@ -602,12 +602,12 @@ H5HF_write(H5HF_t *fh, hid_t dxpl_id, void *_id, hbool_t UNUSED *id_changed,
         /* Operate on object from managed heap blocks */
         /* (ID can't change and modifying object is "easy" to manage) */
         if(H5HF_man_write(fh->hdr, dxpl_id, id, obj) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "can't operate on object from fractal heap")
+            HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "can't write to 'managed' heap object")
     } /* end if */
     else if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_HUGE) {
-        /* Check for writing a 'huge' object */
-        /* (which isn't supported yet - ID could change and lots of work to re-compress changed object) */
-        HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "modifying 'huge' object not supported yet")
+        /* Operate on "huge" object */
+        if(H5HF_huge_write(fh->hdr, dxpl_id, id, obj) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "can't write to 'huge' heap object")
     } /* end if */
     else if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_TINY) {
         /* Check for writing a 'tiny' object */

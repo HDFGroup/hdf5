@@ -638,6 +638,8 @@ H5_DLL herr_t H5HF_huge_get_obj_len(H5HF_hdr_t *hdr, hid_t dxpl_id,
     const uint8_t *id, size_t *obj_len_p);
 H5_DLL herr_t H5HF_huge_read(H5HF_hdr_t *fh, hid_t dxpl_id, const uint8_t *id,
     void *obj);
+H5_DLL herr_t H5HF_huge_write(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
+    const void *obj);
 H5_DLL herr_t H5HF_huge_op(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
     H5HF_operator_t op, void *op_data);
 H5_DLL herr_t H5HF_huge_remove(H5HF_hdr_t *fh, hid_t dxpl_id, const uint8_t *id);

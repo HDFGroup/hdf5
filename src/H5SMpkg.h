@@ -21,10 +21,17 @@
  *              the H5SM shared object header messages package.  Source files
  *              outside the H5SM package should	include H5SMprivate.h instead.
  */
+#ifndef H5SM_PACKAGE
+#error "Do not include this file outside the H5SM package!"
+#endif
+
 #ifndef _H5SMpkg_H
 #define _H5SMpkg_H
 
-#include "H5SMprivate.h"
+/* Get package's private header */
+#include "H5SMprivate.h"	/* Shared Object Header Messages	*/
+
+/* Other private headers needed by this file */
 #include "H5B2private.h"        /* B-trees                              */
 #include "H5HFprivate.h"        /* Fractal heaps		  	*/
 
@@ -141,13 +148,13 @@ typedef struct {
 
 
 /* Typedef for shared object header message master table */
-typedef struct {
+struct H5SM_master_table_t {
     /* Information for H5AC cache functions, _must_ be first field in structure */
     H5AC_info_t cache_info;
 
     uint8_t num_indexes;            /* Number of indexes */
     H5SM_index_header_t *indexes;   /* Array of num_indexes indexes */
-} H5SM_master_table_t;
+};
 
 /*
  * Data exchange structure to pass through the fractal heap layer for the

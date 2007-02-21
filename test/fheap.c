@@ -15221,16 +15221,23 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     if(H5HF_insert(fh, dxpl, obj_size, shared_wobj_g, huge_heap_id) < 0)
         FAIL_STACK_ERROR
 
-    /* Verify that writing to 'tiny' and 'huge' objects return failure (for now) */
-    H5E_BEGIN_TRY {
-        ret = H5HF_write(fh, dxpl, tiny_heap_id, &id_changed, shared_wobj_g);
-    } H5E_END_TRY;
-    HDassert(!id_changed);
-    if(ret >= 0)
-        TEST_ERROR
-
+    /* Verify that writing to 'huge' objects works for un-filtered heaps */
     H5E_BEGIN_TRY {
         ret = H5HF_write(fh, dxpl, huge_heap_id, &id_changed, shared_wobj_g);
+    } H5E_END_TRY;
+    HDassert(!id_changed);
+    if(tparam->comp == FHEAP_TEST_COMPRESS) {
+        if(ret >= 0)
+            TEST_ERROR
+    } /* end if */
+    else {
+        if(ret < 0)
+            FAIL_STACK_ERROR
+    } /* end else */
+
+    /* Verify that writing to 'tiny' objects return failure (for now) */
+    H5E_BEGIN_TRY {
+        ret = H5HF_write(fh, dxpl, tiny_heap_id, &id_changed, shared_wobj_g);
     } H5E_END_TRY;
     HDassert(!id_changed);
     if(ret >= 0)

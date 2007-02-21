@@ -708,6 +708,81 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5HF_huge_write
+ *
+ * Purpose:	Write a 'huge' object to the heap
+ *
+ * Note:	This implementation somewhat limited: it doesn't handle
+ *		heaps with filters, which would require re-compressing the
+ *		huge object and probably changing the address of the object
+ *		on disk (and possibly the heap ID for "direct" huge IDs).
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Feb 21 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_huge_write(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
+    const void *obj)
+{
+    haddr_t obj_addr;                   /* Object's address in the file */
+    size_t obj_size;                    /* Object's size in the file */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_huge_write)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
+    HDassert(id);
+    HDassert(obj);
+
+    /* Check for filters on the heap */
+    if(hdr->filter_len > 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "modifying 'huge' object with filters not supported yet")
+
+    /* Skip over the flag byte */
+    id++;
+
+    /* Check for 'huge' object ID that encodes address & length directly */
+    if(hdr->huge_ids_direct) {
+        /* Retrieve the object's address and length (common) */
+        H5F_addr_decode(hdr->f, &id, &obj_addr);
+        H5F_DECODE_LENGTH(hdr->f, id, obj_size);
+    } /* end if */
+    else {
+        H5HF_huge_bt2_indir_rec_t found_rec;  /* Record found from tracking object */
+        H5HF_huge_bt2_indir_rec_t search_rec; /* Record for searching for object */
+
+        /* Get ID for looking up 'huge' object in v2 B-tree */
+        UINT64DECODE_VAR(id, search_rec.id, hdr->huge_id_size)
+
+        /* Look up object in v2 B-tree */
+        if(H5B2_find(hdr->f, dxpl_id, H5HF_BT2_INDIR, hdr->huge_bt2_addr,
+                    &search_rec, H5HF_huge_bt2_indir_found, &found_rec) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "can't find object in B-tree")
+
+        /* Retrieve the object's address & length */
+        obj_addr = found_rec.addr;
+        H5_ASSIGN_OVERFLOW(/* To: */ obj_size, /* From: */ found_rec.len, /* From: */ hsize_t, /* To: */ size_t);
+    } /* end else */
+
+    /* Write the object's data to the file */
+    /* (writes directly from application's buffer) */
+    if(H5F_block_write(hdr->f, H5FD_MEM_FHEAP_HUGE_OBJ, obj_addr, obj_size, dxpl_id, obj) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "writing 'huge' object to file failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_huge_write() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5HF_huge_read
  *
  * Purpose:	Read a 'huge' object from the heap

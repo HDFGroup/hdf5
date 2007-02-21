@@ -23,22 +23,30 @@
 #ifndef _H5SMprivate_H
 #define _H5SMprivate_H
 
-#include "H5Oprivate.h"
-#include "H5Pprivate.h"
+#include "H5Oprivate.h"		/* Object headers			*/
+#include "H5Pprivate.h"		/* Property lists			*/
 
 /****************************/
 /* Library Private Typedefs */
 /****************************/
 
+/* Forward references of package typedefs */
+typedef struct H5SM_master_table_t H5SM_master_table_t;
+
+
 /******************************/
 /* Library Private Prototypes */
 /******************************/
+
+/* Generally useful shared message routines */
 H5_DLL herr_t H5SM_init(H5F_t *f, H5P_genplist_t *fc_plist, hid_t dxpl_id);
+H5_DLL htri_t H5SM_can_share(H5F_t *f, hid_t dxpl_id, H5SM_master_table_t *table,
+    ssize_t *sohm_index_num, unsigned type_id, const void *mesg);
 H5_DLL htri_t H5SM_try_share(H5F_t *f, hid_t dxpl_id, unsigned type_id,
-                  void *mesg);
+    void *mesg);
 H5_DLL herr_t H5SM_try_delete(H5F_t *f, hid_t dxpl_id, unsigned type_id, const H5O_shared_t *mesg);
 H5_DLL herr_t H5SM_get_info(H5F_t *f, unsigned *index_flags, unsigned *minsizes,
-                  unsigned *list_max, unsigned *btree_min, hid_t dxpl_id);
+    unsigned *list_max, unsigned *btree_min, hid_t dxpl_id);
 H5_DLL htri_t H5SM_type_shared(H5F_t *f, unsigned type_id, hid_t dxpl_id);
 H5_DLL herr_t H5SM_get_fheap_addr(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     haddr_t *fheap_addr);
@@ -46,11 +54,12 @@ H5_DLL herr_t H5SM_reconstitute(H5O_shared_t *sh_mesg, H5O_fheap_id_t heap_id);
 H5_DLL herr_t H5SM_get_refcount(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     const H5O_shared_t *sh_mesg, hsize_t *ref_count);
 
+/* Debugging routines */
 H5_DLL herr_t H5SM_table_debug(H5F_t *f, hid_t dxpl_id, haddr_t table_addr,
-                         FILE *stream, int indent, int fwidth,
-                         unsigned table_vers, unsigned num_indexes);
+    FILE *stream, int indent, int fwidth, unsigned table_vers,
+    unsigned num_indexes);
 H5_DLL herr_t H5SM_list_debug(H5F_t *f, hid_t dxpl_id, haddr_t list_addr,
-                         FILE *stream, int indent, int fwidth,
-                         unsigned list_vers, size_t num_messages);
+    FILE *stream, int indent, int fwidth, unsigned list_vers, size_t num_messages);
+
 #endif /*_H5SMprivate_H*/
 
