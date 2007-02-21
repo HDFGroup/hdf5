@@ -1724,13 +1724,22 @@ datatype_list2(hid_t type, const char UNUSED *name)
 static hid_t
 slink_open(hid_t location, const char *name)
 {
-    char buf[64];
+    H5G_stat_t  statbuf;
 
-    if(H5Lget_val(location, name, buf, sizeof(buf), H5P_DEFAULT) < 0)
+    if (H5Gget_objinfo(location, name, FALSE, &statbuf) < 0) 
         return -1;
-    if(NULL == HDmemchr(buf, 0, sizeof(buf)))
-         HDstrcpy(buf + sizeof(buf) - 4, "...");
-    HDfputs(buf, stdout);
+
+    if(statbuf.type == H5G_LINK) {    /* Soft link */
+        char *buf = HDmalloc(statbuf.linklen);
+
+        if(H5Lget_val(location, name, buf, statbuf.linklen, H5P_DEFAULT) < 0) {
+            HDfree(buf);
+            return -1;
+        }
+
+        HDfputs(buf, stdout);
+        HDfree(buf);
+    }
 
     return 0;
 }
