@@ -17,23 +17,26 @@
 #include "H5private.h"
 
 /*-------------------------------------------------------------------------
- * Function: print_dims
+ * Function: print_dimensions
  *
- * Purpose: print dimensions
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: May 9, 2003
+ * Purpose: print dimensions 
  *
  *-------------------------------------------------------------------------
  */
-void print_dims( int r, hsize_t *d )
+void
+print_dimensions (int rank, hsize_t *dims)
 {
- int i;
- printf("[ " );
- for ( i=0; i<r; i++ )
-  printf("%d ",(int)d[i]  );
- printf("] " );
+    int i;
+
+    printf("[" );
+    for ( i = 0; i < rank-1; i++)
+    {
+        printf("%"H5_PRINTF_LL_WIDTH"u", (unsigned long_long)dims[i]);
+        printf("x");
+    }
+    printf("%"H5_PRINTF_LL_WIDTH"u", (unsigned long_long)dims[rank-1]);
+    printf("]" );
+    
 }
 
 

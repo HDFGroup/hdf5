@@ -7,53 +7,59 @@ file1     file2
     x      x    /dset          
     x      x    /g1            
 
-dataset:
-</dset> and </dset> [2]
+dataset: </dset> and </dset>
 </dset> and </dset> are empty datasets
-group:
-</g1> and </g1> attribute:
-<string of </g1>> and <string of </g1>> position        string of </g1> string of </g1> difference          
+group  : </g1> and </g1>
+attribute: <string of </g1>> and <string of </g1>>
+size:           [2]           [2]
+position        string of </g1> string of </g1> difference          
 ------------------------------------------------------------
 [ 0 ]          a                z                
 [ 0 ]          b                z                
 [ 1 ]          d                z                
 [ 1 ]          e                z                
 4 differences found
-attribute:
-<bitfield of </g1>> and <bitfield of </g1>> position        bitfield of </g1> bitfield of </g1> difference          
+attribute: <bitfield of </g1>> and <bitfield of </g1>>
+size:           [2]           [2]
+position        bitfield of </g1> bitfield of </g1> difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 2 differences found
-attribute:
-<opaque of </g1>> and <opaque of </g1>> position        opaque of </g1> opaque of </g1> difference          
+attribute: <opaque of </g1>> and <opaque of </g1>>
+size:           [2]           [2]
+position        opaque of </g1> opaque of </g1> difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 2 differences found
-attribute:
-<compound of </g1>> and <compound of </g1>> position        compound of </g1> compound of </g1> difference          
+attribute: <compound of </g1>> and <compound of </g1>>
+size:           [2]           [2]
+position        compound of </g1> compound of </g1> difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 0 ]          2               0               2              
 [ 1 ]          3               0               3              
 [ 1 ]          4               0               4              
 4 differences found
-attribute:
-<enum of </g1>> and <enum of </g1>> position        enum of </g1>   enum of </g1>   difference          
+attribute: <enum of </g1>> and <enum of </g1>>
+size:           [2]           [2]
+position        enum of </g1>   enum of </g1>   difference          
 ------------------------------------------------------------
 [ 0 ]          RED              GREEN            
 [ 1 ]          RED              GREEN            
 2 differences found
-attribute:
-<vlen of </g1>> and <vlen of </g1>> position        vlen of </g1>   vlen of </g1>   difference          
+attribute: <vlen of </g1>> and <vlen of </g1>>
+size:           [2]           [2]
+position        vlen of </g1>   vlen of </g1>   difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 [ 1 ]          3               0               3              
 3 differences found
-attribute:
-<array of </g1>> and <array of </g1>> position        array of </g1>  array of </g1>  difference          
+attribute: <array of </g1>> and <array of </g1>>
+size:           [2]           [2]
+position        array of </g1>  array of </g1>  difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 0 ]          2               0               2              
@@ -62,20 +68,23 @@ attribute:
 [ 1 ]          5               0               5              
 [ 1 ]          6               0               6              
 6 differences found
-attribute:
-<integer of </g1>> and <integer of </g1>> position        integer of </g1> integer of </g1> difference          
+attribute: <integer of </g1>> and <integer of </g1>>
+size:           [2]           [2]
+position        integer of </g1> integer of </g1> difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 2 differences found
-attribute:
-<float of </g1>> and <float of </g1>> position        float of </g1>  float of </g1>  difference          
+attribute: <float of </g1>> and <float of </g1>>
+size:           [2]           [2]
+position        float of </g1>  float of </g1>  difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 2 differences found
-attribute:
-<string2D of </g1>> and <string2D of </g1>> position        string2D of </g1> string2D of </g1> difference          
+attribute: <string2D of </g1>> and <string2D of </g1>>
+size:           [3x2]           [3x2]
+position        string2D of </g1> string2D of </g1> difference          
 ------------------------------------------------------------
 [ 0 0 ]          a                z                
 [ 0 0 ]          b                z                
@@ -90,8 +99,9 @@ attribute:
 [ 2 1 ]          k                z                
 [ 2 1 ]          l                z                
 12 differences found
-attribute:
-<bitfield2D of </g1>> and <bitfield2D of </g1>> position        bitfield2D of </g1> bitfield2D of </g1> difference          
+attribute: <bitfield2D of </g1>> and <bitfield2D of </g1>>
+size:           [3x2]           [3x2]
+position        bitfield2D of </g1> bitfield2D of </g1> difference          
 ------------------------------------------------------------
 [ 0 0 ]          1               0               1              
 [ 0 1 ]          2               0               2              
@@ -100,8 +110,9 @@ attribute:
 [ 2 0 ]          5               0               5              
 [ 2 1 ]          6               0               6              
 6 differences found
-attribute:
-<opaque2D of </g1>> and <opaque2D of </g1>> position        opaque2D of </g1> opaque2D of </g1> difference          
+attribute: <opaque2D of </g1>> and <opaque2D of </g1>>
+size:           [3x2]           [3x2]
+position        opaque2D of </g1> opaque2D of </g1> difference          
 ------------------------------------------------------------
 [ 0 0 ]          1               0               1              
 [ 0 1 ]          2               0               2              
@@ -110,8 +121,9 @@ attribute:
 [ 2 0 ]          5               0               5              
 [ 2 1 ]          6               0               6              
 6 differences found
-attribute:
-<compound2D of </g1>> and <compound2D of </g1>> position        compound2D of </g1> compound2D of </g1> difference          
+attribute: <compound2D of </g1>> and <compound2D of </g1>>
+size:           [3x2]           [3x2]
+position        compound2D of </g1> compound2D of </g1> difference          
 ------------------------------------------------------------
 [ 0 0 ]          1               0               1              
 [ 0 0 ]          2               0               2              
@@ -126,8 +138,9 @@ attribute:
 [ 2 1 ]          11              0               11             
 [ 2 1 ]          12              0               12             
 12 differences found
-attribute:
-<enum2D of </g1>> and <enum2D of </g1>> position        enum2D of </g1> enum2D of </g1> difference          
+attribute: <enum2D of </g1>> and <enum2D of </g1>>
+size:           [3x2]           [3x2]
+position        enum2D of </g1> enum2D of </g1> difference          
 ------------------------------------------------------------
 [ 0 0 ]          RED              GREEN            
 [ 0 1 ]          RED              GREEN            
@@ -136,8 +149,9 @@ attribute:
 [ 2 0 ]          RED              GREEN            
 [ 2 1 ]          RED              GREEN            
 6 differences found
-attribute:
-<vlen2D of </g1>> and <vlen2D of </g1>> position        vlen2D of </g1> vlen2D of </g1> difference          
+attribute: <vlen2D of </g1>> and <vlen2D of </g1>>
+size:           [3x2]           [3x2]
+position        vlen2D of </g1> vlen2D of </g1> difference          
 ------------------------------------------------------------
 [ 0 1 ]          1               0               1              
 [ 1 0 ]          2               0               2              
@@ -151,8 +165,9 @@ attribute:
 [ 2 1 ]          10              0               10             
 [ 2 1 ]          11              0               11             
 11 differences found
-attribute:
-<array2D of </g1>> and <array2D of </g1>> position        array2D of </g1> array2D of </g1> difference          
+attribute: <array2D of </g1>> and <array2D of </g1>>
+size:           [3x2]           [3x2]
+position        array2D of </g1> array2D of </g1> difference          
 ------------------------------------------------------------
 [ 0 0 ]          1               0               1              
 [ 0 0 ]          2               0               2              
@@ -173,8 +188,9 @@ attribute:
 [ 2 1 ]          17              0               17             
 [ 2 1 ]          18              0               18             
 18 differences found
-attribute:
-<integer2D of </g1>> and <integer2D of </g1>> position        integer2D of </g1> integer2D of </g1> difference          
+attribute: <integer2D of </g1>> and <integer2D of </g1>>
+size:           [3x2]           [3x2]
+position        integer2D of </g1> integer2D of </g1> difference          
 ------------------------------------------------------------
 [ 0 0 ]          1               0               1              
 [ 0 1 ]          2               0               2              
@@ -183,8 +199,9 @@ attribute:
 [ 2 0 ]          5               0               5              
 [ 2 1 ]          6               0               6              
 6 differences found
-attribute:
-<float2D of </g1>> and <float2D of </g1>> position        float2D of </g1> float2D of </g1> difference          
+attribute: <float2D of </g1>> and <float2D of </g1>>
+size:           [3x2]           [3x2]
+position        float2D of </g1> float2D of </g1> difference          
 ------------------------------------------------------------
 [ 0 0 ]          1               0               1              
 [ 0 1 ]          2               0               2              
@@ -193,8 +210,9 @@ attribute:
 [ 2 0 ]          5               0               5              
 [ 2 1 ]          6               0               6              
 6 differences found
-attribute:
-<string3D of </g1>> and <string3D of </g1>> position        string3D of </g1> string3D of </g1> difference          
+attribute: <string3D of </g1>> and <string3D of </g1>>
+size:           [4x3x2]           [4x3x2]
+position        string3D of </g1> string3D of </g1> difference          
 ------------------------------------------------------------
 [ 0 0 0 ]          a                z                
 [ 0 0 0 ]          b                z                
@@ -244,8 +262,9 @@ attribute:
 [ 3 2 1 ]          X                z                
 [ 3 2 1 ]          Z                z                
 47 differences found
-attribute:
-<bitfield3D of </g1>> and <bitfield3D of </g1>> position        bitfield3D of </g1> bitfield3D of </g1> difference          
+attribute: <bitfield3D of </g1>> and <bitfield3D of </g1>>
+size:           [4x3x2]           [4x3x2]
+position        bitfield3D of </g1> bitfield3D of </g1> difference          
 ------------------------------------------------------------
 [ 0 0 0 ]          1               0               1              
 [ 0 0 1 ]          2               0               2              
@@ -272,8 +291,9 @@ attribute:
 [ 3 2 0 ]          23              0               23             
 [ 3 2 1 ]          24              0               24             
 24 differences found
-attribute:
-<opaque3D of </g1>> and <opaque3D of </g1>> position        opaque3D of </g1> opaque3D of </g1> difference          
+attribute: <opaque3D of </g1>> and <opaque3D of </g1>>
+size:           [4x3x2]           [4x3x2]
+position        opaque3D of </g1> opaque3D of </g1> difference          
 ------------------------------------------------------------
 [ 0 0 0 ]          1               0               1              
 [ 0 0 1 ]          2               0               2              
@@ -300,8 +320,9 @@ attribute:
 [ 3 2 0 ]          23              0               23             
 [ 3 2 1 ]          24              0               24             
 24 differences found
-attribute:
-<compound3D of </g1>> and <compound3D of </g1>> position        compound3D of </g1> compound3D of </g1> difference          
+attribute: <compound3D of </g1>> and <compound3D of </g1>>
+size:           [4x3x2]           [4x3x2]
+position        compound3D of </g1> compound3D of </g1> difference          
 ------------------------------------------------------------
 [ 0 0 0 ]          1               0               1              
 [ 0 0 0 ]          2               0               2              
@@ -352,8 +373,9 @@ attribute:
 [ 3 2 1 ]          47              0               47             
 [ 3 2 1 ]          48              0               48             
 48 differences found
-attribute:
-<enum3D of </g1>> and <enum3D of </g1>> position        enum3D of </g1> enum3D of </g1> difference          
+attribute: <enum3D of </g1>> and <enum3D of </g1>>
+size:           [4x3x2]           [4x3x2]
+position        enum3D of </g1> enum3D of </g1> difference          
 ------------------------------------------------------------
 [ 0 0 0 ]          GREEN            RED              
 [ 0 0 1 ]          GREEN            RED              
@@ -380,8 +402,9 @@ attribute:
 [ 3 2 0 ]          GREEN            RED              
 [ 3 2 1 ]          GREEN            RED              
 24 differences found
-attribute:
-<vlen3D of </g1>> and <vlen3D of </g1>> position        vlen3D of </g1> vlen3D of </g1> difference          
+attribute: <vlen3D of </g1>> and <vlen3D of </g1>>
+size:           [4x3x2]           [4x3x2]
+position        vlen3D of </g1> vlen3D of </g1> difference          
 ------------------------------------------------------------
 [ 0 0 1 ]          1               0               1              
 [ 0 1 0 ]          2               0               2              
@@ -443,8 +466,9 @@ attribute:
 [ 3 2 1 ]          58              0               58             
 [ 3 2 1 ]          59              0               59             
 59 differences found
-attribute:
-<array3D of </g1>> and <array3D of </g1>> position        array3D of </g1> array3D of </g1> difference          
+attribute: <array3D of </g1>> and <array3D of </g1>>
+size:           [4x3x2]           [4x3x2]
+position        array3D of </g1> array3D of </g1> difference          
 ------------------------------------------------------------
 [ 0 0 0 ]          1               0               1              
 [ 0 0 0 ]          2               0               2              
@@ -519,8 +543,9 @@ attribute:
 [ 3 2 1 ]          71              0               71             
 [ 3 2 1 ]          72              0               72             
 72 differences found
-attribute:
-<integer3D of </g1>> and <integer3D of </g1>> position        integer3D of </g1> integer3D of </g1> difference          
+attribute: <integer3D of </g1>> and <integer3D of </g1>>
+size:           [4x3x2]           [4x3x2]
+position        integer3D of </g1> integer3D of </g1> difference          
 ------------------------------------------------------------
 [ 0 0 0 ]          1               0               1              
 [ 0 0 1 ]          2               0               2              
@@ -547,8 +572,9 @@ attribute:
 [ 3 2 0 ]          23              0               23             
 [ 3 2 1 ]          24              0               24             
 24 differences found
-attribute:
-<float3D of </g1>> and <float3D of </g1>> position        float3D of </g1> float3D of </g1> difference          
+attribute: <float3D of </g1>> and <float3D of </g1>>
+size:           [4x3x2]           [4x3x2]
+position        float3D of </g1> float3D of </g1> difference          
 ------------------------------------------------------------
 [ 0 0 0 ]          1               0               1              
 [ 0 0 1 ]          2               0               2              
@@ -575,50 +601,57 @@ attribute:
 [ 3 2 0 ]          23              0               23             
 [ 3 2 1 ]          24              0               24             
 24 differences found
-group:
-</> and </> attribute:
-<string of </>> and <string of </>> position        string of </>   string of </>   difference          
+group  : </> and </>
+attribute: <string of </>> and <string of </>>
+size:           [2]           [2]
+position        string of </>   string of </>   difference          
 ------------------------------------------------------------
 [ 0 ]          a                z                
 [ 0 ]          b                z                
 [ 1 ]          d                z                
 [ 1 ]          e                z                
 4 differences found
-attribute:
-<bitfield of </>> and <bitfield of </>> position        bitfield of </> bitfield of </> difference          
+attribute: <bitfield of </>> and <bitfield of </>>
+size:           [2]           [2]
+position        bitfield of </> bitfield of </> difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 2 differences found
-attribute:
-<opaque of </>> and <opaque of </>> position        opaque of </>   opaque of </>   difference          
+attribute: <opaque of </>> and <opaque of </>>
+size:           [2]           [2]
+position        opaque of </>   opaque of </>   difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 2 differences found
-attribute:
-<compound of </>> and <compound of </>> position        compound of </> compound of </> difference          
+attribute: <compound of </>> and <compound of </>>
+size:           [2]           [2]
+position        compound of </> compound of </> difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 0 ]          2               0               2              
 [ 1 ]          3               0               3              
 [ 1 ]          4               0               4              
 4 differences found
-attribute:
-<enum of </>> and <enum of </>> position        enum of </>     enum of </>     difference          
+attribute: <enum of </>> and <enum of </>>
+size:           [2]           [2]
+position        enum of </>     enum of </>     difference          
 ------------------------------------------------------------
 [ 0 ]          RED              GREEN            
 [ 1 ]          RED              GREEN            
 2 differences found
-attribute:
-<vlen of </>> and <vlen of </>> position        vlen of </>     vlen of </>     difference          
+attribute: <vlen of </>> and <vlen of </>>
+size:           [2]           [2]
+position        vlen of </>     vlen of </>     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 [ 1 ]          3               0               3              
 3 differences found
-attribute:
-<array of </>> and <array of </>> position        array of </>    array of </>    difference          
+attribute: <array of </>> and <array of </>>
+size:           [2]           [2]
+position        array of </>    array of </>    difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 0 ]          2               0               2              
@@ -627,20 +660,23 @@ attribute:
 [ 1 ]          5               0               5              
 [ 1 ]          6               0               6              
 6 differences found
-attribute:
-<integer of </>> and <integer of </>> position        integer of </>  integer of </>  difference          
+attribute: <integer of </>> and <integer of </>>
+size:           [2]           [2]
+position        integer of </>  integer of </>  difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 2 differences found
-attribute:
-<float of </>> and <float of </>> position        float of </>    float of </>    difference          
+attribute: <float of </>> and <float of </>>
+size:           [2]           [2]
+position        float of </>    float of </>    difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 2 differences found
-attribute:
-<string2D of </>> and <string2D of </>> position        string2D of </> string2D of </> difference          
+attribute: <string2D of </>> and <string2D of </>>
+size:           [3x2]           [3x2]
+position        string2D of </> string2D of </> difference          
 ------------------------------------------------------------
 [ 0 0 ]          a                z                
 [ 0 0 ]          b                z                
@@ -655,8 +691,9 @@ attribute:
 [ 2 1 ]          k                z                
 [ 2 1 ]          l                z                
 12 differences found
-attribute:
-<bitfield2D of </>> and <bitfield2D of </>> position        bitfield2D of </> bitfield2D of </> difference          
+attribute: <bitfield2D of </>> and <bitfield2D of </>>
+size:           [3x2]           [3x2]
+position        bitfield2D of </> bitfield2D of </> difference          
 ------------------------------------------------------------
 [ 0 0 ]          1               0               1              
 [ 0 1 ]          2               0               2              
@@ -665,8 +702,9 @@ attribute:
 [ 2 0 ]          5               0               5              
 [ 2 1 ]          6               0               6              
 6 differences found
-attribute:
-<opaque2D of </>> and <opaque2D of </>> position        opaque2D of </> opaque2D of </> difference          
+attribute: <opaque2D of </>> and <opaque2D of </>>
+size:           [3x2]           [3x2]
+position        opaque2D of </> opaque2D of </> difference          
 ------------------------------------------------------------
 [ 0 0 ]          1               0               1              
 [ 0 1 ]          2               0               2              
@@ -675,8 +713,9 @@ attribute:
 [ 2 0 ]          5               0               5              
 [ 2 1 ]          6               0               6              
 6 differences found
-attribute:
-<compound2D of </>> and <compound2D of </>> position        compound2D of </> compound2D of </> difference          
+attribute: <compound2D of </>> and <compound2D of </>>
+size:           [3x2]           [3x2]
+position        compound2D of </> compound2D of </> difference          
 ------------------------------------------------------------
 [ 0 0 ]          1               0               1              
 [ 0 0 ]          2               0               2              
@@ -691,8 +730,9 @@ attribute:
 [ 2 1 ]          11              0               11             
 [ 2 1 ]          12              0               12             
 12 differences found
-attribute:
-<enum2D of </>> and <enum2D of </>> position        enum2D of </>   enum2D of </>   difference          
+attribute: <enum2D of </>> and <enum2D of </>>
+size:           [3x2]           [3x2]
+position        enum2D of </>   enum2D of </>   difference          
 ------------------------------------------------------------
 [ 0 0 ]          RED              GREEN            
 [ 0 1 ]          RED              GREEN            
@@ -701,8 +741,9 @@ attribute:
 [ 2 0 ]          RED              GREEN            
 [ 2 1 ]          RED              GREEN            
 6 differences found
-attribute:
-<vlen2D of </>> and <vlen2D of </>> position        vlen2D of </>   vlen2D of </>   difference          
+attribute: <vlen2D of </>> and <vlen2D of </>>
+size:           [3x2]           [3x2]
+position        vlen2D of </>   vlen2D of </>   difference          
 ------------------------------------------------------------
 [ 0 1 ]          1               0               1              
 [ 1 0 ]          2               0               2              
@@ -716,8 +757,9 @@ attribute:
 [ 2 1 ]          10              0               10             
 [ 2 1 ]          11              0               11             
 11 differences found
-attribute:
-<array2D of </>> and <array2D of </>> position        array2D of </>  array2D of </>  difference          
+attribute: <array2D of </>> and <array2D of </>>
+size:           [3x2]           [3x2]
+position        array2D of </>  array2D of </>  difference          
 ------------------------------------------------------------
 [ 0 0 ]          1               0               1              
 [ 0 0 ]          2               0               2              
@@ -738,8 +780,9 @@ attribute:
 [ 2 1 ]          17              0               17             
 [ 2 1 ]          18              0               18             
 18 differences found
-attribute:
-<integer2D of </>> and <integer2D of </>> position        integer2D of </> integer2D of </> difference          
+attribute: <integer2D of </>> and <integer2D of </>>
+size:           [3x2]           [3x2]
+position        integer2D of </> integer2D of </> difference          
 ------------------------------------------------------------
 [ 0 0 ]          1               0               1              
 [ 0 1 ]          2               0               2              
@@ -748,8 +791,9 @@ attribute:
 [ 2 0 ]          5               0               5              
 [ 2 1 ]          6               0               6              
 6 differences found
-attribute:
-<float2D of </>> and <float2D of </>> position        float2D of </>  float2D of </>  difference          
+attribute: <float2D of </>> and <float2D of </>>
+size:           [3x2]           [3x2]
+position        float2D of </>  float2D of </>  difference          
 ------------------------------------------------------------
 [ 0 0 ]          1               0               1              
 [ 0 1 ]          2               0               2              
@@ -758,8 +802,9 @@ attribute:
 [ 2 0 ]          5               0               5              
 [ 2 1 ]          6               0               6              
 6 differences found
-attribute:
-<string3D of </>> and <string3D of </>> position        string3D of </> string3D of </> difference          
+attribute: <string3D of </>> and <string3D of </>>
+size:           [4x3x2]           [4x3x2]
+position        string3D of </> string3D of </> difference          
 ------------------------------------------------------------
 [ 0 0 0 ]          a                z                
 [ 0 0 0 ]          b                z                
@@ -809,8 +854,9 @@ attribute:
 [ 3 2 1 ]          X                z                
 [ 3 2 1 ]          Z                z                
 47 differences found
-attribute:
-<bitfield3D of </>> and <bitfield3D of </>> position        bitfield3D of </> bitfield3D of </> difference          
+attribute: <bitfield3D of </>> and <bitfield3D of </>>
+size:           [4x3x2]           [4x3x2]
+position        bitfield3D of </> bitfield3D of </> difference          
 ------------------------------------------------------------
 [ 0 0 0 ]          1               0               1              
 [ 0 0 1 ]          2               0               2              
@@ -837,8 +883,9 @@ attribute:
 [ 3 2 0 ]          23              0               23             
 [ 3 2 1 ]          24              0               24             
 24 differences found
-attribute:
-<opaque3D of </>> and <opaque3D of </>> position        opaque3D of </> opaque3D of </> difference          
+attribute: <opaque3D of </>> and <opaque3D of </>>
+size:           [4x3x2]           [4x3x2]
+position        opaque3D of </> opaque3D of </> difference          
 ------------------------------------------------------------
 [ 0 0 0 ]          1               0               1              
 [ 0 0 1 ]          2               0               2              
@@ -865,8 +912,9 @@ attribute:
 [ 3 2 0 ]          23              0               23             
 [ 3 2 1 ]          24              0               24             
 24 differences found
-attribute:
-<compound3D of </>> and <compound3D of </>> position        compound3D of </> compound3D of </> difference          
+attribute: <compound3D of </>> and <compound3D of </>>
+size:           [4x3x2]           [4x3x2]
+position        compound3D of </> compound3D of </> difference          
 ------------------------------------------------------------
 [ 0 0 0 ]          1               0               1              
 [ 0 0 0 ]          2               0               2              
@@ -917,8 +965,9 @@ attribute:
 [ 3 2 1 ]          47              0               47             
 [ 3 2 1 ]          48              0               48             
 48 differences found
-attribute:
-<enum3D of </>> and <enum3D of </>> position        enum3D of </>   enum3D of </>   difference          
+attribute: <enum3D of </>> and <enum3D of </>>
+size:           [4x3x2]           [4x3x2]
+position        enum3D of </>   enum3D of </>   difference          
 ------------------------------------------------------------
 [ 0 0 0 ]          GREEN            RED              
 [ 0 0 1 ]          GREEN            RED              
@@ -945,8 +994,9 @@ attribute:
 [ 3 2 0 ]          GREEN            RED              
 [ 3 2 1 ]          GREEN            RED              
 24 differences found
-attribute:
-<vlen3D of </>> and <vlen3D of </>> position        vlen3D of </>   vlen3D of </>   difference          
+attribute: <vlen3D of </>> and <vlen3D of </>>
+size:           [4x3x2]           [4x3x2]
+position        vlen3D of </>   vlen3D of </>   difference          
 ------------------------------------------------------------
 [ 0 0 1 ]          1               0               1              
 [ 0 1 0 ]          2               0               2              
@@ -1008,8 +1058,9 @@ attribute:
 [ 3 2 1 ]          58              0               58             
 [ 3 2 1 ]          59              0               59             
 59 differences found
-attribute:
-<array3D of </>> and <array3D of </>> position        array3D of </>  array3D of </>  difference          
+attribute: <array3D of </>> and <array3D of </>>
+size:           [4x3x2]           [4x3x2]
+position        array3D of </>  array3D of </>  difference          
 ------------------------------------------------------------
 [ 0 0 0 ]          1               0               1              
 [ 0 0 0 ]          2               0               2              
@@ -1084,8 +1135,9 @@ attribute:
 [ 3 2 1 ]          71              0               71             
 [ 3 2 1 ]          72              0               72             
 72 differences found
-attribute:
-<integer3D of </>> and <integer3D of </>> position        integer3D of </> integer3D of </> difference          
+attribute: <integer3D of </>> and <integer3D of </>>
+size:           [4x3x2]           [4x3x2]
+position        integer3D of </> integer3D of </> difference          
 ------------------------------------------------------------
 [ 0 0 0 ]          1               0               1              
 [ 0 0 1 ]          2               0               2              
@@ -1112,8 +1164,9 @@ attribute:
 [ 3 2 0 ]          23              0               23             
 [ 3 2 1 ]          24              0               24             
 24 differences found
-attribute:
-<float3D of </>> and <float3D of </>> position        float3D of </>  float3D of </>  difference          
+attribute: <float3D of </>> and <float3D of </>>
+size:           [4x3x2]           [4x3x2]
+position        float3D of </>  float3D of </>  difference          
 ------------------------------------------------------------
 [ 0 0 0 ]          1               0               1              
 [ 0 0 1 ]          2               0               2              

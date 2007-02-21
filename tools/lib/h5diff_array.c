@@ -144,6 +144,7 @@ int print_data(diff_opt_t *options)
  return ( (options->m_report || options->m_verbose) && !options->m_quiet)?1:0;
 }
 
+
 /*-------------------------------------------------------------------------
  * Function: print_pos
  *
@@ -162,47 +163,53 @@ void print_pos( int        *ph,       /* print header */
                 const char *obj1,
                 const char *obj2 )
 {
- int i;
+    int i;
+    
+    /* print header */
+    if ( *ph==1 )
+    {
+        *ph=0;
 
- /* print header */
- if ( *ph==1 )
- {
-  *ph=0;
-
-  if (pp)
-  {
-   printf("%-15s %-15s %-15s %-15s %-15s\n",
-    "position",
-    (obj1!=NULL) ? obj1 : " ",
-    (obj2!=NULL) ? obj2 : " ",
-    "difference",
-    "relative");
-   printf("------------------------------------------------------------------------\n");
-  }
-  else
-  {
-   printf("%-15s %-15s %-15s %-20s\n",
-    "position",
-    (obj1!=NULL) ? obj1 : " ",
-    (obj2!=NULL) ? obj2 : " ",
-    "difference");
-   printf("------------------------------------------------------------\n");
-  }
- }
-
- for ( i = 0; i < rank; i++)
- {
-  pos[i] = curr_pos/acc[i];
-  curr_pos -= acc[i]*pos[i];
- }
- assert( curr_pos == 0 );
-
- printf("[ " );
- for ( i = 0; i < rank; i++)
- {
-  printf("%"H5_PRINTF_LL_WIDTH"u ", (unsigned long_long)pos[i]);
- }
- printf("]" );
+        printf("%-16s","size:");
+        print_dimensions (rank,dims);
+        printf("%-11s","");
+        print_dimensions (rank,dims);
+        printf("\n");
+        
+        if (pp)
+        {
+            printf("%-15s %-15s %-15s %-15s %-15s\n",
+                "position",
+                (obj1!=NULL) ? obj1 : " ",
+                (obj2!=NULL) ? obj2 : " ",
+                "difference",
+                "relative");
+            printf("------------------------------------------------------------------------\n");
+        }
+        else
+        {
+            printf("%-15s %-15s %-15s %-20s\n",
+                "position",
+                (obj1!=NULL) ? obj1 : " ",
+                (obj2!=NULL) ? obj2 : " ",
+                "difference");
+            printf("------------------------------------------------------------\n");
+        }
+    } /* end print header */
+    
+    for ( i = 0; i < rank; i++)
+    {
+        pos[i] = curr_pos/acc[i];
+        curr_pos -= acc[i]*pos[i];
+    }
+    assert( curr_pos == 0 );
+    
+    printf("[ " );
+    for ( i = 0; i < rank; i++)
+    {
+        printf("%"H5_PRINTF_LL_WIDTH"u ", (unsigned long_long)pos[i]);
+    }
+    printf("]" );
 }
 
 
@@ -428,10 +435,6 @@ hsize_t diff_datum(void       *_mem1,
  size_t        size=0;
  int           iszero1;
  int           iszero2;
- H5G_obj_t     obj1_type;
- H5G_obj_t     obj2_type;
- hid_t         obj1_id;
- hid_t         obj2_id;
  hsize_t       nfound=0;   /* differences found */
  int           ret=0;      /* check return error */
  float         f1, f2;
@@ -722,6 +725,8 @@ hsize_t diff_datum(void       *_mem1,
    {
     hid_t  region1_id;
     hid_t  region2_id;
+    hid_t  obj1_id;
+    hid_t  obj2_id;
 
     if ((obj1_id = H5Rdereference(container1_id, H5R_DATASET_REGION, _mem1))<0)
      ret= -1;
@@ -754,6 +759,10 @@ hsize_t diff_datum(void       *_mem1,
   */
    else if (H5Tequal(m_type, H5T_STD_REF_OBJ))
    {
+    H5G_obj_t  obj1_type;
+    H5G_obj_t  obj2_type;
+    hid_t      obj1_id;
+    hid_t      obj2_id;
 
     if ((obj1_type = H5Rget_obj_type(container1_id, H5R_OBJECT, _mem1))<0)
      ret= -1;
@@ -788,11 +797,10 @@ hsize_t diff_datum(void       *_mem1,
       obj2_id,
       NULL,
       NULL,
-      options,
-      0);
+      options);
      break;
     default:
-     printf("Warning: Comparison not possible of object types referenced: <%s> and <%s>",
+     printf("Warning: Comparison not possible of object types referenced: <%s> and <%s>\n",
       obj1, obj2);
      options->not_cmp=1;
      break;

@@ -1,8 +1,7 @@
 #############################
 Expected output for 'h5diff h5diff_dset1.h5 h5diff_dset2.h5 -v refreg'
 #############################
-dataset:
-</refreg> and </refreg> [2]
+dataset: </refreg> and </refreg>
 Referenced dataset      6056            6056
 ------------------------------------------------------------
 Region blocks

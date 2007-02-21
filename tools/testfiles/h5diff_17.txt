@@ -21,9 +21,9 @@ file1     file2
     x           /g1/fp2        
            x    /g2            
 
-group:
-</g1> and </g1> dataset:
-</g1/dset1> and </g1/dset1> [3x2]
+group  : </g1> and </g1>
+dataset: </g1/dset1> and </g1/dset1>
+size:           [3x2]           [3x2]
 position        dset1           dset1           difference          
 ------------------------------------------------------------
 [ 0 0 ]          1               0               1              
@@ -31,5 +31,5 @@ position        dset1           dset1           difference
 [ 1 0 ]          1               1.01            0.01           
 [ 1 1 ]          1               1.001           0.001          
 [ 2 1 ]          0               1               1              
-group:
-</> and </> 5 differences found
+group  : </> and </>
+5 differences found
