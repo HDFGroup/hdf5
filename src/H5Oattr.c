@@ -89,22 +89,22 @@ const H5O_msg_class_t H5O_MSG_ATTR[1] = {{
 /* This is the initial version, which does not have support for shared datatypes */
 #define H5O_ATTR_VERSION_1	1
 
-/* This version allows support for shared datatypes */
+/* This version allows support for shared datatypes & dataspaces by adding a
+ *      'flag' byte indicating when those components are shared.  This version
+ *      also dropped the alignment on all the components */
 #define H5O_ATTR_VERSION_2	2
 
 /* Add support for different character encodings of attribute names */
 #define H5O_ATTR_VERSION_3      3
 
-/* Add support for shared dataspaces */
-#define H5O_ATTR_VERSION_4      4
-
 /* The latest version of the format.  Look through the 'encode' 
  *      and 'size' callback for places to change when updating this. */
-#define H5O_ATTR_VERSION_LATEST H5O_ATTR_VERSION_4
+#define H5O_ATTR_VERSION_LATEST H5O_ATTR_VERSION_3
 
 /* Flags for attribute flag encoding */
 #define H5O_ATTR_FLAG_TYPE_SHARED       0x01
 #define H5O_ATTR_FLAG_SPACE_SHARED      0x02
+#define H5O_ATTR_FLAG_ALL               0x03
 
 /* Declare external the free list for H5S_t's */
 H5FL_EXTERN(H5S_t);
@@ -154,12 +154,17 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, unsigned UNUSED mesg_flags,
 
     /* Version number */
     version = *p++;
-    if(version < H5O_ATTR_VERSION_1 || version > H5O_ATTR_VERSION_4)
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for attribute message")
+    if(version < H5O_ATTR_VERSION_1 || version > H5O_ATTR_VERSION_LATEST)
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, NULL, "bad version number for attribute message")
 
     /* Get the flags byte if we have a later version of the attribute */
-    if(version > H5O_ATTR_VERSION_1)
+    if(version >= H5O_ATTR_VERSION_2) {
         flags = *p++;
+
+        /* Check for unknown flag */
+        if(flags & (unsigned)~H5O_ATTR_FLAG_ALL)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, NULL, "unknown flag for attribute message")
+    } /* end if */
     else
         p++;    /* Byte is unused when version<2 */
 
@@ -312,12 +317,10 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
     /* Check which version to write out */
     if(use_latest_format)
         version = H5O_ATTR_VERSION_LATEST;      /* Write out latest version of format */
-    else if(space_shared)
-      version = H5O_ATTR_VERSION_4;   /* Write version with shared dataspaces */
     else if(attr->encoding != H5T_CSET_ASCII)
         version = H5O_ATTR_VERSION_3;   /* Write version which includes the character encoding */
-    else if(type_shared)
-        version = H5O_ATTR_VERSION_2;   /* Write out version with shared datatype */
+    else if(type_shared || space_shared)
+        version = H5O_ATTR_VERSION_2;   /* Write out version with flag for shared datatype & dataspaces */
     else
         version = H5O_ATTR_VERSION_1;   /* Write out basic version */
 
@@ -325,12 +328,11 @@ H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg)
     *p++ = version;
 
     /* Set attribute flags if version >1 */
-    if(version > H5O_ATTR_VERSION_1)
-    {
+    if(version >= H5O_ATTR_VERSION_2) {
         flags = (type_shared ? H5O_ATTR_FLAG_TYPE_SHARED : 0 );
         flags |= (space_shared ? H5O_ATTR_FLAG_SPACE_SHARED : 0);
         *p++ = flags;    /* Set flags for attribute */
-    }
+    } /* end if */
     else
         *p++ = 0; /* Reserved, for version <2 */
 
@@ -478,18 +480,16 @@ H5O_attr_size(const H5F_t *f, const void *_mesg)
     /* Check which version to write out */
     if(use_latest_format)
         version = H5O_ATTR_VERSION_LATEST;      /* Write out latest version of format */
-    else if(space_shared)
-      version = H5O_ATTR_VERSION_4;   /* Write version with shared dataspaces */
     else if(attr->encoding != H5T_CSET_ASCII)
         version = H5O_ATTR_VERSION_3;   /* Write version which includes the character encoding */
-    else if(type_shared)
-        version = H5O_ATTR_VERSION_2;   /* Write out version with shared datatype */
+    else if(type_shared || space_shared)
+        version = H5O_ATTR_VERSION_2;   /* Write out version with flag for indicating shared datatype or dataspace */
     else
         version = H5O_ATTR_VERSION_1;   /* Write out basic version */
 
     /* Common size information */
     ret_value = 1 +				/*version               */
-                1 +				/*reserved		*/
+                1 +				/*reserved/flags	*/
                 2 +				/*name size inc. null	*/
                 2 +				/*type size		*/
                 2; 				/*space size		*/
@@ -505,7 +505,7 @@ H5O_attr_size(const H5F_t *f, const void *_mesg)
                     attr->dt_size +		/*datatype		*/
                     attr->ds_size +		/*dataspace		*/
                     attr->data_size;		/*the data itself	*/
-    else if(version == H5O_ATTR_VERSION_3 || version == H5O_ATTR_VERSION_4)
+    else if(version == H5O_ATTR_VERSION_3)
         ret_value += 1 +                        /*character encoding    */
                     name_len	+		/*attribute name	*/
                     attr->dt_size +		/*datatype		*/
@@ -1053,7 +1053,9 @@ H5O_attr_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream, int in
 	       int fwidth)
 {
     const H5A_t *mesg = (const H5A_t *)_mesg;
-    herr_t ret_value = SUCCEED;   /* Return value */
+    const char		*s;             /* Temporary string pointer */
+    char		buf[256];       /* Temporary string buffer */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_debug)
 
@@ -1066,6 +1068,21 @@ H5O_attr_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream, int in
     fprintf(stream, "%*s%-*s \"%s\"\n", indent, "", fwidth,
 	    "Name:",
 	    mesg->name);
+    switch(mesg->encoding) {
+        case H5T_CSET_ASCII:
+            s = "ASCII";
+            break;
+        case H5T_CSET_UTF8:
+            s = "UTF-8";
+            break;
+        default:
+            sprintf(buf, "H5T_CSET_RESERVED_%d", (int)(mesg->encoding));
+            s = buf;
+            break;
+    } /* end switch */
+    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+            "Character Set of Name:",
+            s);
     HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
 	    "Initialized:",
 	    mesg->initialized);
@@ -1075,6 +1092,12 @@ H5O_attr_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream, int in
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
 	    "Object:",
 	    mesg->oloc.addr);
+
+    /* Check for attribute creation order index on the attribute */
+    if(mesg->crt_idx != H5O_MAX_CRT_ORDER_IDX)
+        HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+                "Creation Index:",
+                (unsigned)mesg->crt_idx);
 
     fprintf(stream, "%*sDatatype...\n", indent, "");
     fprintf(stream, "%*s%-*s %lu\n", indent+3, "", MAX(0,fwidth-3),

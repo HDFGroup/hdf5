@@ -1531,7 +1531,7 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
             sprintf(buf, "H5T_CLASS_%d", (int)(dt->shared->type));
             s = buf;
             break;
-    }
+    } /* end switch */
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	    "Type class:",
 	    s);
@@ -1580,6 +1580,41 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
     } else if(H5T_REFERENCE == dt->shared->type) {
 	fprintf(stream, "%*s%-*s\n", indent, "", fwidth,
 		"Fix dumping reference types!");
+    } else if(H5T_STRING == dt->shared->type) {
+        switch(dt->shared->u.atomic.u.s.cset) {
+            case H5T_CSET_ASCII:
+                s = "ASCII";
+                break;
+            case H5T_CSET_UTF8:
+                s = "UTF-8";
+                break;
+            default:
+                sprintf(buf, "H5T_CSET_RESERVED_%d", (int)(dt->shared->u.atomic.u.s.cset));
+                s = buf;
+                break;
+        } /* end switch */
+        fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                "Character Set:",
+                s);
+
+        switch(dt->shared->u.atomic.u.s.pad) {
+            case H5T_STR_NULLTERM:
+                s = "NULL Terminated";
+                break;
+            case H5T_STR_NULLPAD:
+                s = "NULL Padded";
+                break;
+            case H5T_STR_SPACEPAD:
+                s = "Space Padded";
+                break;
+            default:
+                sprintf(buf, "H5T_STR_RESERVED_%d", (int)(dt->shared->u.atomic.u.s.pad));
+                s = buf;
+                break;
+        } /* end switch */
+        fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                "String Padding:",
+                s);
     } else if(H5T_VLEN == dt->shared->type) {
         switch(dt->shared->u.vlen.type) {
             case H5T_VLEN_SEQUENCE:
@@ -1610,6 +1645,44 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
         } /* end switch */
         fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                 "Location:", s);
+
+        /* Extra information for VL-strings */
+        if(dt->shared->u.vlen.type == H5T_VLEN_STRING) {
+            switch(dt->shared->u.vlen.cset) {
+                case H5T_CSET_ASCII:
+                    s = "ASCII";
+                    break;
+                case H5T_CSET_UTF8:
+                    s = "UTF-8";
+                    break;
+                default:
+                    sprintf(buf, "H5T_CSET_RESERVED_%d", (int)(dt->shared->u.vlen.cset));
+                    s = buf;
+                    break;
+            } /* end switch */
+            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                    "Character Set:",
+                    s);
+
+            switch(dt->shared->u.vlen.pad) {
+                case H5T_STR_NULLTERM:
+                    s = "NULL Terminated";
+                    break;
+                case H5T_STR_NULLPAD:
+                    s = "NULL Padded";
+                    break;
+                case H5T_STR_SPACEPAD:
+                    s = "Space Padded";
+                    break;
+                default:
+                    sprintf(buf, "H5T_STR_RESERVED_%d", (int)(dt->shared->u.vlen.pad));
+                    s = buf;
+                    break;
+            } /* end switch */
+            fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                    "String Padding:",
+                    s);
+        } /* end if */
     } else if(H5T_ARRAY == dt->shared->type) {
 	fprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
 		"Rank:",
