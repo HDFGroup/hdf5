@@ -42,6 +42,7 @@ static hbool_t  hexdump_g = FALSE;        /* show data as raw hexadecimal */
 static hbool_t  show_errors_g = FALSE;    /* print HDF5 error messages */
 static hbool_t  simple_output_g = FALSE;  /* make output more machine-readable */
 static hbool_t  show_file_name_g = FALSE; /* show file name for full names */
+static hbool_t  no_line_wrap_g = FALSE;   /* show data content without line wrap */
 
 /* Info to pass to the iteration functions */
 typedef struct iter_t {
@@ -1257,7 +1258,12 @@ dump_dataset_values(hid_t dset)
 
     } else {
         info.idx_fmt = "(%s)";
-        info.line_ncols = width_g;
+        if (no_line_wrap_g) {
+            info.line_ncols = 65535;
+            info.line_per_line = 1;
+        }
+        else
+            info.line_ncols = width_g;
         info.line_multi_new = 1;
         if (label_g) info.cmpd_name = "%s=";
         info.line_pre  = "        %s ";
@@ -2161,7 +2167,10 @@ main (int argc, const char *argv[])
             preferred_driver = argv[argno]+6;
         } else if (!strncmp(argv[argno], "--width=", 8)) {
             width_g = (int)strtol(argv[argno]+8, &rest, 0);
-            if (width_g<=0 || *rest) {
+
+            if (0 == width_g)
+                no_line_wrap_g = TRUE;
+            else if (width_g<0 || *rest) {
                 usage();
                 leave(1);
             }
@@ -2194,7 +2203,10 @@ main (int argc, const char *argv[])
                 s = argv[++argno];
             }
             width_g = (int)strtol(s, &rest, 0);
-            if (width_g<=0 || *rest) {
+
+            if (0 == width_g)
+                no_line_wrap_g = TRUE;
+            else if (width_g<0 || *rest) {
                 usage();
                 leave(1);
             }
