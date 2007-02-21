@@ -314,7 +314,7 @@ sub gen_configure {
 
   for (my $i = 0; $i < $#contents; ++$i) {
     if ($contents[$i] =~ /^AC_INIT/) {
-      $contents[$i] = sprintf("AC_INIT([$name], [%d.%d.%d%s], [hdfhelp\@ncsa.uiuc.edu])\n",
+      $contents[$i] = sprintf("AC_INIT([$name], [%d.%d.%d%s], [help\@hdfgroup.org])\n",
                               @newver[0,1,2],
                               $newver[3] eq "" ? "" : "-".$newver[3]);
       last;
