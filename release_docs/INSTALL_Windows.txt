@@ -50,14 +50,14 @@ Preconditions
       4.1 HDF5 uses Zlib version 1.2.2 for compression and Zlib is NOT
           distributed with HDF5 library in 1.6.x release. To use Zlib
           library, you have to install your own Zlib DLL library or go
-          to ftp://hdf.ncsa.uiuc.edu/lib-external/zlib/1.2/bin 
+          to ftp://ftp.hdfgroup.org/lib-external/zlib/1.2/bin 
           to download the Zlib library.
       
       4.2 HDF5 uses Szip version 2.0 for compression and Szip
           compression software is provided with HDF5 products starting
           from 1.6.0 release.  To use Szip 2.0 library, you can
           download Szip source codes and binaries from
-          ftp://hdf.ncsa.uiuc.edu/lib-external/szip/2.0/bin/windows
+          ftp://ftp.hdfgroup.org/lib-external/szip/2.0/bin/windows
 
           Please note that Szip is not a totally open-source free
           software.  For licensing issue of Szip, please check 
@@ -142,7 +142,7 @@ Notes
    4. HDF4-related tools are not built and released with HDF5 library
       packages any more. To obtain HDF4-related tools, please check
       http://hdf.ncsa.uiuc.edu/h4toh5/ and 
-      ftp://hdf.ncsa.uiuc.edu/HDF5/h4toh5/
+      ftp://ftp.hdfgroup.org/HDF5/h4toh5
 
    5. For DLL users, please do read and follow "DLL hints"
       at Section IV.
@@ -276,7 +276,7 @@ Section II: How to build and test HDF5 libraries and tools
           Note: Szip library is different when using Intel 7.x compiler.
                 You should build Szip source codes with Intel
                 compiler or download binaries for Intel compiler
-                from ftp://ftp.ncsa.uiuc.edu/HDF/szip/bin/windows.
+                from ftp://ftp.hdfgroup.org/lib-external/szip/2.0/bin/windows.
                 The Szip library and header path should also be 
                 set up accordingly (refer to precondition 6).
                
@@ -1250,7 +1250,7 @@ Section V: How to disable Gzip(Zlib)/Szip compression
 
           Szip library is different if you want to disable Szip 
           encoder. Download szip_noencoder binaries from
-          ftp://ftp.ncsa.uiuc.edu/HDF/szip/bin/windows.
+          ftp://ftp.hdfgroup.org/lib-external/szip/2.0/bin/windows.
           The Szip library and header path should also be set up
           accordingly (refer to precondition 6).
    
