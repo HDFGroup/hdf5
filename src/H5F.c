@@ -946,9 +946,8 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
          * and set the version # of the superblock to 1 if it is a non-default
          * value.
          */
-        if(f->shared->btree_k[H5B_ISTORE_ID]!=HDF5_BTREE_ISTORE_IK_DEF) {
-            super_vers= HDF5_SUPERBLOCK_VERSION_1 ; /* Super block version 1 */
-        }
+        if(f->shared->btree_k[H5B_ISTORE_ID] != HDF5_BTREE_ISTORE_IK_DEF)
+            super_vers = HDF5_SUPERBLOCK_VERSION_1; /* Super block version 1 */
 
         /* The shared object header message table gets created later, but if
          * it is present we should use version 2 of the superblock.
@@ -958,9 +957,9 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
         HDassert(sohm_indexes < 255);
         f->shared->sohm_nindexes = sohm_indexes;
 
-        if(sohm_indexes > 0) {
-            super_vers= HDF5_SUPERBLOCK_VERSION_2; /* Super block version 2 */
-        }
+        /* Bump superblock version to hold SOHM info */
+        if(sohm_indexes > 0)
+            super_vers = HDF5_SUPERBLOCK_VERSION_2; /* Super block version 2 */
 
         if(NULL == (plist = H5I_object(fapl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
@@ -1377,24 +1376,42 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
      * empty or not.
      */
     if(0 == H5FD_get_eof(lf) && (flags & H5F_ACC_RDWR)) {
+        H5O_loc_t ext_loc;      /* Superblock extension location */
+
         /*
          * We've just opened a fresh new file (or truncated one). We need
          * to create & write the superblock.
          */
+
         /* Initialize information about the superblock and allocate space for it */
-        if(H5F_init_superblock(file, dxpl_id) == 0)
+        if(H5F_init_superblock(file, &ext_loc, dxpl_id) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to allocate file superblock")
 
-        /* Create the Shared Object Header Message table and register it with the
-         * metadata cache, if this file supports shared messages */
+        /* Create the Shared Object Header Message table and register it with
+         *      the metadata cache, if this file supports shared messages.
+         */
         if(file->shared->sohm_nindexes > 0) {
             H5P_genplist_t     *c_plist;            /*file creation property list     */
-            if(NULL == (c_plist = H5P_object_verify(fcpl_id,H5P_FILE_CREATE)))
+
+            /* Get the file's creation property list */
+            if(NULL == (c_plist = H5P_object_verify(fcpl_id, H5P_FILE_CREATE)))
                 HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
 
-            if(H5SM_init(file, c_plist, dxpl_id) <0)
+            /* Initialize the shared message code */
+            if(H5SM_init(file, c_plist, &ext_loc, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create SOHM table")
-        }
+        } /* end if */
+
+        /* Close the superblock extension, if it was opened */
+        if(H5F_addr_defined(file->shared->extension_addr)) {
+            /* Twiddle the number of open objects to avoid closing the file
+             * (since this will be the only open object currently).
+             */
+            file->nopen_objs++;
+            if(H5O_close(&ext_loc) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "unable to close superblock extension")
+            file->nopen_objs--;
+        } /* end if */
 
         /* Create and open the root group */
         /* (This must be after the space for the superblock is allocated in
@@ -1403,54 +1420,12 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
         if(H5G_mkroot(file, dxpl_id, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create/open root group")
 
-        /* Create the superblock extension and write "extra" superblock data.
-         * Currently, the extension is only needed if Shared Object Header
-         * Messages are enabled.
-         */
-        if(file->shared->sohm_nindexes > 0) {
-            H5O_loc_t ext_loc;                      /* Superblock extension location */
-            H5O_shmesg_table_t sohm_table;
-
-            /* The superblock extension isn't actually a group, but the
-             * default group creation list should work fine.
-             * If we don't supply a size for the object header, HDF5 will
-             * allocate H5O_MIN_SIZE by default.  This is currently
-             * big enough to hold the biggest possible extension, but should
-             * be tuned if more information is added to the superblock
-             * extension.
-             */
-            H5O_loc_reset(&ext_loc);
-            if(H5O_create(file, dxpl_id, 0, H5P_GROUP_CREATE_DEFAULT, &ext_loc) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, NULL, "unable to create superblock extension")
-
-            /* Record this address */
-            file->shared->extension_addr = ext_loc.addr;
-
-            /* Write shared message information to the extension */
-            sohm_table.addr = file->shared->sohm_addr;
-            sohm_table.version = file->shared->sohm_vers;
-            sohm_table.nindexes = file->shared->sohm_nindexes;
-
-            if(H5O_msg_create(&ext_loc, H5O_SHMESG_ID, H5O_MSG_FLAG_CONSTANT | H5O_MSG_FLAG_DONTSHARE, H5O_UPDATE_TIME, &sohm_table, dxpl_id) < 0)
-	        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to update type header message")
-
-            /* Close the extension.  Bump the version number to avoid closing the
-            * file (since this will be the only open object).
-            */
-            file->nopen_objs++;
-            if(H5O_close(&ext_loc) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "unable to close superblock extension")
-            file->nopen_objs--;
-        }
-
-
-         /* Write the superblock to the file */
+        /* Write the superblock to the file */
         /* (This must be after the root group is created, since the root
          *      group's symbol table entry is part of the superblock)
          */
         if(H5F_write_superblock(file, dxpl_id) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to write file superblock")
-
     } else if (1 == shared->nrefs) {
         H5G_loc_t           root_loc;           /*root location                 */
         H5O_loc_t           root_oloc;          /*root object location          */
@@ -1462,7 +1437,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
         H5G_loc_reset(&root_loc);
 
 	/* Read the superblock if it hasn't been read before. */
-        if(H5F_read_superblock(file, dxpl_id, &root_loc, HADDR_UNDEF, NULL, (size_t)0) < 0)
+        if(H5F_read_superblock(file, dxpl_id, &root_loc) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock")
 
 	/* Open the root group */

@@ -987,6 +987,8 @@ H5G_mkroot(H5F_t *f, hid_t dxpl_id, H5G_loc_t *loc)
 
     /* check args */
     HDassert(f);
+
+    /* Check if the root group is already initialized */
     if(f->shared->root_grp)
         HGOTO_DONE(SUCCEED)
 
@@ -996,9 +998,9 @@ H5G_mkroot(H5F_t *f, hid_t dxpl_id, H5G_loc_t *loc)
 
     /*
      * If there is no root object then create one. The root group always starts
-     * with a hard link count of one since it's pointed to by the boot block.
+     * with a hard link count of one since it's pointed to by the superblock.
      */
-    if (loc == NULL) {
+    if(loc == NULL) {
         H5P_genplist_t *fc_plist;       /* File creation property list */
         H5O_ginfo_t     ginfo;          /* Group info parameters */
         H5O_linfo_t     linfo;          /* Link info parameters */
@@ -1022,11 +1024,13 @@ H5G_mkroot(H5F_t *f, hid_t dxpl_id, H5G_loc_t *loc)
         H5G_loc_reset(&new_root_loc);
         loc = &new_root_loc;
 
+        /* Create root group */
 	if(H5G_obj_create(f, dxpl_id, &ginfo, &linfo, f->shared->fcpl_id, loc->oloc/*out*/) < 0)
 	    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group entry")
 	if(1 != H5O_link(loc->oloc, 1, dxpl_id))
 	    HGOTO_ERROR(H5E_SYM, H5E_LINKCOUNT, FAIL, "internal error (wrong link count)")
-    } else {
+    } /* end if */
+    else {
 	/*
 	 * Open the root object as a group.
 	 */

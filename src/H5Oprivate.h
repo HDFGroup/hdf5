@@ -417,12 +417,12 @@ H5_DLL herr_t H5O_obj_type(const H5O_loc_t *loc, H5O_type_t *obj_type, hid_t dxp
 H5_DLL herr_t H5O_get_create_plist(const H5O_loc_t *loc, hid_t dxpl_id, struct H5P_genplist_t *oc_plist);
 
 /* Object header message routines */
-H5_DLL herr_t H5O_msg_create(H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags,
+H5_DLL herr_t H5O_msg_create(const H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags,
     unsigned update_flags, void *mesg, hid_t dxpl_id);
 H5_DLL herr_t H5O_msg_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, unsigned type_id,
     unsigned mesg_flags, unsigned update_flags, void *mesg,
     unsigned *oh_flags_ptr);
-H5_DLL herr_t H5O_msg_write(H5O_loc_t *loc, unsigned type_id, unsigned flags,
+H5_DLL herr_t H5O_msg_write(const H5O_loc_t *loc, unsigned type_id, unsigned flags,
     unsigned update_flags, void *mesg, hid_t dxpl_id);
 H5_DLL void *H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, void *mesg,
     hid_t dxpl_id);

@@ -99,18 +99,19 @@ H5FL_ARR_DEFINE(H5SM_sohm_t, H5O_SHMESG_MAX_LIST_SIZE);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, hid_t dxpl_id)
+H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, const H5O_loc_t *ext_loc, hid_t dxpl_id)
 {
-    H5SM_master_table_t *table = NULL;
-    haddr_t table_addr = HADDR_UNDEF;
-    unsigned num_indexes;
-    unsigned list_max, btree_min;
-    unsigned index_type_flags[H5O_SHMESG_MAX_NINDEXES];
-    unsigned minsizes[H5O_SHMESG_MAX_NINDEXES];
-    unsigned type_flags_used;
-    unsigned x;
-    hsize_t table_size;
-    herr_t ret_value=SUCCEED;
+    H5O_shmesg_table_t sohm_table;      /* SOHM message for superblock extension */
+    H5SM_master_table_t *table = NULL;  /* SOHM master table for file */
+    haddr_t table_addr = HADDR_UNDEF;   /* Address of SOHM master table in file */
+    unsigned num_indexes;               /* Number of SOHM indices */
+    unsigned list_max, btree_min;       /* Phase change limits for SOHM indices */
+    unsigned index_type_flags[H5O_SHMESG_MAX_NINDEXES]; /* Messages types stored in each index */
+    unsigned minsizes[H5O_SHMESG_MAX_NINDEXES]; /* Message size sharing threshhold for each index */
+    unsigned type_flags_used;           /* Message type flags used, for sanity checking */
+    hsize_t table_size;                 /* Size of SOHM master table in file */
+    unsigned x;                         /* Local index variable */
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5SM_init, NULL)
 
@@ -144,7 +145,7 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, hid_t dxpl_id)
         if(index_type_flags[x] & type_flags_used)
             HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "the same shared message type flag is assigned to more than one index")
         type_flags_used |= index_type_flags[x];
-    }
+    } /* end for */
 
     /* Set version and number of indexes in table and in superblock.
      * Right now we just use one byte to hold the number of indexes.
@@ -167,7 +168,7 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, hid_t dxpl_id)
     /* Initialize all of the indexes, but don't allocate space for them to
      * hold messages until we actually need to write to them.
      */
-    for(x=0; x<table->num_indexes; x++)
+    for(x = 0; x < table->num_indexes; x++)
     {
         table->indexes[x].btree_min = btree_min;
         table->indexes[x].list_max = list_max;
@@ -176,12 +177,12 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, hid_t dxpl_id)
         table->indexes[x].index_addr = HADDR_UNDEF;
         table->indexes[x].heap_addr = HADDR_UNDEF;
         table->indexes[x].num_messages = 0;
+
         /* Indexes start as lists unless the list-to-btree threshold is zero */
-        if(table->indexes[x].list_max > 0) {
+        if(table->indexes[x].list_max > 0)
             table->indexes[x].index_type = H5SM_LIST;
-        } else {
+        else
             table->indexes[x].index_type = H5SM_BTREE;
-        }
     } /* end for */
 
     /* Allocate space for the table on disk */
@@ -191,19 +192,25 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, hid_t dxpl_id)
 
     /* Cache the new table */
     if(H5AC_set(f, dxpl_id, H5AC_SOHM_TABLE, table_addr, table, H5AC__NO_FLAGS_SET) < 0)
-	HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, FAIL, "can't add SOHM table to cache")
+	HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, "can't add SOHM table to cache")
 
     /* Record the address of the master table in the file */
     f->shared->sohm_addr = table_addr;
 
+    /* Write shared message information to the superblock extension */
+    sohm_table.addr = f->shared->sohm_addr;
+    sohm_table.version = f->shared->sohm_vers;
+    sohm_table.nindexes = f->shared->sohm_nindexes;
+    if(H5O_msg_create(ext_loc, H5O_SHMESG_ID, H5O_MSG_FLAG_CONSTANT | H5O_MSG_FLAG_DONTSHARE, H5O_UPDATE_TIME, &sohm_table, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTINIT, FAIL, "unable to update SOHM header message")
+
 done:
-    if(ret_value < 0)
-    {
+    if(ret_value < 0) {
         if(table_addr != HADDR_UNDEF)
             H5MF_xfree(f, H5FD_MEM_SOHM_TABLE, dxpl_id, table_addr, (hsize_t)H5SM_TABLE_SIZE(f));
         if(table != NULL)
             H5FL_FREE(H5SM_master_table_t, table);
-    }
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_init() */

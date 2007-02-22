@@ -43,75 +43,12 @@
 #include "H5RCprivate.h"	/* Reference counted object functions	*/
 
 /*
- * Feature: Define this constant to be non-zero if you want to enable code
- *	    that minimizes the number of calls to lseek().  This has a huge
- *	    performance benefit on some systems.  Set this constant to zero
- *	    on the compiler command line to disable that optimization.
- */
-#ifndef H5F_OPT_SEEK
-#  define H5F_OPT_SEEK 1
-#endif
-
-/*
  * Feature: Define this constant on the compiler command-line if you want to
  *	    see some debugging messages on the debug stream.
  */
 #ifdef NDEBUG
 #  undef H5F_DEBUG
 #endif
-
-/* Superblock sizes for various versions */
-/* Checksum size in the file */
-#define H5F_SIZEOF_CHKSUM 4
-
-/* Fixed-size portion at the beginning of all superblocks */
-#define H5F_SUPERBLOCK_FIXED_SIZE ( H5F_SIGNATURE_LEN                   \
-        + 3 /* superblock, freespace, and root group versions */        \
-        + 1 /* reserved */                                              \
-        + 3 /* shared header vers, size of address, size of lengths */  \
-        + 1 /* reserved */                                              \
-        + 4 /* group leaf k, group internal k */                        \
-        + 4) /* consistency flags */
-
-#define H5F_SUPERBLOCK_VARLEN_SIZE_V0(f)                                \
-        ( H5F_SIZEOF_ADDR(f) /* base address */                         \
-        + H5F_SIZEOF_ADDR(f) /* free space address */                   \
-        + H5F_SIZEOF_ADDR(f) /* EOF address */                          \
-        + H5F_SIZEOF_ADDR(f) /* driver block address */                 \
-        + H5G_SIZEOF_ENTRY(f)) /* root group ptr */
-
-#define H5F_SUPERBLOCK_VARLEN_SIZE_V1(f)                                \
-        ( 2 /* indexed B-tree internal k */                             \
-        + 2 /* reserved */                                              \
-        + H5F_SIZEOF_ADDR(f) /* base address */                         \
-        + H5F_SIZEOF_ADDR(f) /* free space address */                   \
-        + H5F_SIZEOF_ADDR(f) /* EOF address */                          \
-        + H5F_SIZEOF_ADDR(f) /* driver block address */                 \
-        + H5G_SIZEOF_ENTRY(f)) /* root group ptr */
-
-#define H5F_SUPERBLOCK_VARLEN_SIZE_V2(f)                                \
-        ( 2 /* indexed B-tree internal k */                             \
-        + H5F_SIZEOF_ADDR(f) /* base address */                         \
-        + H5F_SIZEOF_ADDR(f) /* free space address */                   \
-/*        + H5F_SIZEOF_ADDR(f) */ /* shared message table address */         \
-/* JAMES        + 2 */ /* shared message version and number of indexes */          \
-        + H5F_SIZEOF_ADDR(f) /* EOF address */                          \
-        + H5F_SIZEOF_ADDR(f) /* driver block address */                 \
-        + H5G_SIZEOF_ENTRY(f) /* root group ptr */                      \
-        + H5F_SIZEOF_CHKSUM)
-
-#define H5F_SUPERBLOCK_SIZE(v, f) ( H5F_SUPERBLOCK_FIXED_SIZE           \
-        + (v == 0 ? H5F_SUPERBLOCK_VARLEN_SIZE_V0(f) : 0)               \
-        + (v == 1 ? H5F_SUPERBLOCK_VARLEN_SIZE_V1(f) : 0)               \
-        + (v == 2 ? H5F_SUPERBLOCK_VARLEN_SIZE_V2(f) : 0))
-
-
-#define H5F_DRVINFOBLOCK_HDR_SIZE 16
-#define H5F_DRVINFO_CHKSUM(v) (v == 0 ? 0 : H5F_SIZEOF_CHKSUM)
-
-/* Maximum size of super-block buffers */
-#define H5F_MAX_SUPERBLOCK_SIZE  134
-#define H5F_MAX_DRVINFOBLOCK_SIZE  1024
 
 /* Define the HDF5 file signature */
 #define H5F_SIGNATURE	  "\211HDF\r\n\032\n"
@@ -224,7 +161,6 @@ H5FL_EXTERN(H5F_file_t);
 /* Package Private Prototypes */
 /******************************/
 
-
 /* General routines */
 H5_DLL herr_t H5F_init(void);
 H5_DLL herr_t H5F_try_close(H5F_t *f);
@@ -236,9 +172,9 @@ H5_DLL int H5F_term_unmount_cb(void *obj_ptr, hid_t obj_id, void *key);
 H5_DLL herr_t H5F_mount_count_ids(H5F_t *f, unsigned *nopen_files, unsigned *nopen_objs);
 
 /* Superblock related routines */
-H5_DLL hsize_t H5F_init_superblock(const H5F_t *f, hid_t dxpl_id);
+H5_DLL herr_t H5F_init_superblock(H5F_t *f, H5O_loc_t *ext_loc, hid_t dxpl_id);
 H5_DLL herr_t H5F_write_superblock(H5F_t *f, hid_t dxpl_id);
-H5_DLL herr_t H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc, haddr_t addr, uint8_t *buf, size_t buf_size);
+H5_DLL herr_t H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc);
 
 /* Shared file list related routines */
 H5_DLL herr_t H5F_sfile_add(H5F_file_t *shared);

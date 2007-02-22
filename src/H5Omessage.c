@@ -117,7 +117,7 @@ static herr_t H5O_copy_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_msg_create(H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags,
+H5O_msg_create(const H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags,
     unsigned update_flags, void *mesg, hid_t dxpl_id)
 {
     H5O_t *oh = NULL;                   /* Object header */
@@ -268,7 +268,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_msg_write(H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags,
+H5O_msg_write(const H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags,
     unsigned update_flags, void *mesg, hid_t dxpl_id)
 {
     H5O_t *oh = NULL;                   /* Object header to use */

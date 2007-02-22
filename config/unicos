@@ -104,7 +104,7 @@ case $CC_BASENAME in
   gcc)
     CFLAGS="$CFLAGS -Wsign-compare" #Only works for some versions
     DEBUG_CFLAGS="-g -fverbose-asm"
-    DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
+    DEBUG_CPPFLAGS=
     PROD_CFLAGS="-O3 -fomit-frame-pointer"
     PROD_CPPFLAGS=
     PROFILE_CFLAGS="-pg"
@@ -114,7 +114,7 @@ case $CC_BASENAME in
   cc)
     CFLAGS="$CFLAGS"
     DEBUG_CFLAGS="-g -h zero -h scalar0"
-    DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
+    DEBUG_CPPFLAGS=
     PROD_CFLAGS="-O2 -h scalar0"
     PROD_CPPFLAGS=
     PROFILE_CFLAGS="-pg"
@@ -124,7 +124,7 @@ case $CC_BASENAME in
   *)
     CFLAGS="$CFLAGS -ansi"
     DEBUG_CFLAGS="-g"
-    DEBUG_CPPFLAGS="-DH5F_OPT_SEEK=0 -DH5F_LOW_DFLT=H5F_LOW_SEC2"
+    DEBUG_CPPFLAGS=
     PROD_CFLAGS="-O"
     PROD_CPPFLAGS=
     PROFILE_CFLAGS="-pg"
