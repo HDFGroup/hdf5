@@ -51,6 +51,7 @@
 ./bin/iostats
 ./bin/locate_sw
 ./bin/ltmain.sh
+./bin/makehelp
 ./bin/mkdirs
 ./bin/reconfigure			_DO_NOT_DISTRIBUTE_
 ./bin/release
