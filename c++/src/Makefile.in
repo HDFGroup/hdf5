@@ -743,7 +743,10 @@ uninstall-am: uninstall-binSCRIPTS uninstall-includeHEADERS \
 # exists.
 .PHONY: build-check-clean build-check-p build-check-s build-lib build-progs \
         build-tests check-clean check-install check-p check-s check-vfd \
-        install-doc lib progs tests uninstall-doc _exec_check-s _test
+        install-doc lib progs tests uninstall-doc _exec_check-s _test help
+
+help:
+	@$(top_srcdir)/bin/makehelp
 
 # Some C++ compilers/linkers (PGI?) create a directory named "ii_files" that
 # holds *.ii files, which are template entity instantiations.

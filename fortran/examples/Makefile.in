@@ -533,7 +533,10 @@ uninstall-am: uninstall-info-am uninstall-local
 # exists.
 .PHONY: build-check-clean build-check-p build-check-s build-lib build-progs \
         build-tests check-clean check-install check-p check-s check-vfd \
-        install-doc lib progs tests uninstall-doc _exec_check-s _test
+        install-doc lib progs tests uninstall-doc _exec_check-s _test help
+
+help:
+	@$(top_srcdir)/bin/makehelp
 
 # Some examples depend on files created by other examples.
 grpdsetexample.chkexe_: grpsexample.chkexe_

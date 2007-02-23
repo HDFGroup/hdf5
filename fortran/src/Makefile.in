@@ -807,7 +807,10 @@ uninstall-am: uninstall-info-am uninstall-libLTLIBRARIES \
 # exists.
 .PHONY: build-check-clean build-check-p build-check-s build-lib build-progs \
         build-tests check-clean check-install check-p check-s check-vfd \
-        install-doc lib progs tests uninstall-doc _exec_check-s _test
+        install-doc lib progs tests uninstall-doc _exec_check-s _test help
+
+help:
+	@$(top_srcdir)/bin/makehelp
 
 # Fortran module files can have different extensions and different names
 # (e.g., different capitalizations) on different platforms.  Write rules

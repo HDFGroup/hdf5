@@ -57,6 +57,7 @@
 ./bin/locate_sw
 ./bin/ltmain.sh
 ./bin/make_err
+./bin/makehelp
 ./bin/missing
 ./bin/mkdirs
 ./bin/mkinstalldirs

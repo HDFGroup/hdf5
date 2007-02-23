@@ -231,6 +231,8 @@ H5Acreate2(hid_t loc_id, const char *obj_name, const char *attr_name,
     hid_t		ret_value;              /* Return value */
 
     FUNC_ENTER_API(H5Acreate2, FAIL)
+    H5TRACE8("i", "issiiiii", loc_id, obj_name, attr_name, type_id, space_id,
+             acpl_id, aapl_id, lapl_id);
 
     /* check arguments */
     if(H5I_ATTR == H5I_get_type(loc_id))
@@ -449,6 +451,7 @@ H5Aopen(hid_t loc_id, const char *obj_name, const char *attr_name,
     hid_t		ret_value;
 
     FUNC_ENTER_API(H5Aopen, FAIL)
+    H5TRACE5("i", "issii", loc_id, obj_name, attr_name, aapl_id, lapl_id);
 
     /* check arguments */
     if(H5I_ATTR == H5I_get_type(loc_id))
@@ -516,6 +519,8 @@ H5Aopen_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     hid_t	ret_value;      /* Return value */
 
     FUNC_ENTER_API(H5Aopen_by_idx, FAIL)
+    H5TRACE7("i", "isIiIohii", loc_id, obj_name, idx_type, order, n, aapl_id,
+             lapl_id);
 
     /* check arguments */
     if(H5I_ATTR == H5I_get_type(loc_id))
@@ -1617,6 +1622,7 @@ H5Arename2(hid_t loc_id, const char *obj_name, const char *old_attr_name,
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(H5Arename2, FAIL)
+    H5TRACE5("e", "isssi", loc_id, obj_name, old_attr_name, new_attr_name, lapl_id);
 
     /* check arguments */
     if(H5I_ATTR == H5I_get_type(loc_id))

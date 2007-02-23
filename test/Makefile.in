@@ -1206,7 +1206,10 @@ uninstall-am: uninstall-info-am
 # exists.
 .PHONY: build-check-clean build-check-p build-check-s build-lib build-progs \
         build-tests check-clean check-install check-p check-s check-vfd \
-        install-doc lib progs tests uninstall-doc _exec_check-s _test
+        install-doc lib progs tests uninstall-doc _exec_check-s _test help
+
+help:
+	@$(top_srcdir)/bin/makehelp
 
 # Additional target for running timing test
 timings _timings: testmeta
