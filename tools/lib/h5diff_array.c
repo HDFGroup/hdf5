@@ -123,6 +123,7 @@ static hbool_t all_zero(const void *_mem, size_t size);
 static int     ull2float(unsigned long_long ull_value, float *f_value);
 static hsize_t character_compare(unsigned char *mem1,unsigned char *mem2,hsize_t i,int rank,hsize_t *dims,hsize_t *acc,hsize_t *pos,diff_opt_t *options,const char *obj1,const char *obj2,int *ph);
 static hsize_t character_compare_opt(unsigned char *mem1,unsigned char *mem2,hsize_t i,int rank,hsize_t *dims,hsize_t *acc,hsize_t *pos,diff_opt_t *options,const char *obj1,const char *obj2,int *ph);
+static void    NOT_SUPPORTED();
 
 
 /*-------------------------------------------------------------------------
@@ -437,7 +438,6 @@ hsize_t diff_datum(void       *_mem1,
  int           iszero2;
  hsize_t       nfound=0;   /* differences found */
  int           ret=0;      /* check return error */
- float         f1, f2;
  double        per;
  int           both_zero;
 
@@ -1700,69 +1700,16 @@ hsize_t diff_datum(void       *_mem1,
       /* !-d and -p */
       else if (!options->d && options->p)
       {
-          if (ull2float(temp1_ullong,&f1)<0)
-              goto error;
-          if (ull2float(temp2_ullong,&f2)<0)
-              goto error;
-          PER(f1,f2);
-          
-          if (not_comparable && !both_zero) /* not comparable */
-          {
-              print_pos(ph,1,i,acc,pos,rank,dims,obj1,obj2);
-              printf(SPACES);
-              printf(ULLI_FORMAT_P_NOTCOMP,temp1_ullong,temp2_ullong,PDIFF(temp1_ullong,temp2_ullong));
-              options->not_cmp=1;
-              nfound++;
-          }
-          
-          else
-              
-              if ( per > options->percent )
-              {
-                  
-                  if ( print_data(options) )
-                  {
-                      print_pos(ph,1,i,acc,pos,rank,dims,obj1,obj2);
-                      printf(SPACES);
-                      printf(ULLI_FORMAT_P,temp1_ullong,temp2_ullong,PDIFF(temp1_ullong,temp2_ullong),per);
-                  }
-                  nfound++;
-              }
+          NOT_SUPPORTED();
+          options->not_cmp=1;
+          return nfound;
       }
       /* -d and -p */
       else if ( options->d && options->p)
       {
-          
-          if (ull2float(temp1_ullong,&f1)<0)
-              goto error;
-          if (ull2float(temp2_ullong,&f2)<0)
-              goto error;
-
-          PER(f1,f2);
-          
-          if (not_comparable && !both_zero) /* not comparable */
-          {
-              print_pos(ph,1,i,acc,pos,rank,dims,obj1,obj2);
-              printf(SPACES);
-              printf(ULLI_FORMAT_P_NOTCOMP,temp1_ullong,temp2_ullong,PDIFF(temp1_ullong,temp2_ullong));
-              options->not_cmp=1;
-              nfound++;
-          }
-          
-          else
-              
-              if ( per > options->percent && PDIFF(temp1_ullong,temp2_ullong) > (unsigned long_long)options->delta )
-              {
-                  
-                  if ( print_data(options) )
-                  {
-                      print_pos(ph,1,i,acc,pos,rank,dims,obj1,obj2);
-                      
-                      printf(SPACES);
-                      printf(ULLI_FORMAT_P,temp1_ullong,temp2_ullong,PDIFF(temp1_ullong,temp2_ullong),per);
-                  }
-                  nfound++;
-              }
+          NOT_SUPPORTED();
+          options->not_cmp=1;
+          return nfound;
       }
       else if (temp1_ullong != temp2_ullong)
       {
@@ -1998,9 +1945,6 @@ hsize_t diff_datum(void       *_mem1,
 
  return nfound;
 
-error:
- options->err_stat=1;
- return nfound;
 }
 
 
@@ -4378,10 +4322,7 @@ hsize_t diff_ullong(unsigned char *mem1,
  unsigned long_long  temp1_ullong;
  unsigned long_long  temp2_ullong;
  hsize_t             i;
- float               f1, f2;
- double              per;
- int                 both_zero;
-    
+     
  /* -d and !-p */
  if (options->d && !options->p)
  {
@@ -4413,44 +4354,9 @@ hsize_t diff_ullong(unsigned char *mem1,
  else if (!options->d && options->p)
  {
      
-     for ( i = 0; i < nelmts; i++)
-     {
-         memcpy(&temp1_ullong, mem1, sizeof(unsigned long_long));
-         memcpy(&temp2_ullong, mem2, sizeof(unsigned long_long));
-         
-         if (ull2float(temp1_ullong,&f1)<0)
-              goto error;
-          if (ull2float(temp2_ullong,&f2)<0)
-              goto error;
-
-         PER(f1,f2);
-         
-         if (not_comparable && !both_zero) /* not comparable */
-         {
-             print_pos(ph,1,hyper_start+i,acc,pos,rank,dims,obj1,obj2);
-             printf(SPACES);
-             printf(ULLI_FORMAT_P_NOTCOMP,temp1_ullong,temp2_ullong,PDIFF(temp1_ullong,temp2_ullong));
-             options->not_cmp=1;
-             nfound++;
-         }
-         
-         else
-             
-             if ( per > options->percent )
-             {
-                 if ( print_data(options) )
-                 {
-                     print_pos(ph,1,hyper_start+i,acc,pos,rank,dims,obj1,obj2);
-                     printf(SPACES);
-                     printf(ULLI_FORMAT_P,temp1_ullong,temp2_ullong,PDIFF(temp1_ullong,temp2_ullong),per);
-                 }
-                 nfound++;
-             }
-             mem1+=sizeof(unsigned long_long);
-             mem2+=sizeof(unsigned long_long);
-             if (options->n && nfound>=options->count)
-                 return nfound;
-     }
+     NOT_SUPPORTED();
+     options->not_cmp=1;
+     return nfound;
      
      
  }
@@ -4459,44 +4365,9 @@ hsize_t diff_ullong(unsigned char *mem1,
  else if ( options->d && options->p)
  {
      
-     for ( i = 0; i < nelmts; i++)
-     {
-         memcpy(&temp1_ullong, mem1, sizeof(unsigned long_long));
-         memcpy(&temp2_ullong, mem2, sizeof(unsigned long_long));
-         
-         if (ull2float(temp1_ullong,&f1)<0)
-              goto error;
-          if (ull2float(temp2_ullong,&f2)<0)
-              goto error;
-
-         PER(f1,f2);
-         
-         if (not_comparable && !both_zero) /* not comparable */
-         {
-             print_pos(ph,1,hyper_start+i,acc,pos,rank,dims,obj1,obj2);
-             printf(SPACES);
-             printf(ULLI_FORMAT_P_NOTCOMP,temp1_ullong,temp2_ullong,PDIFF(temp1_ullong,temp2_ullong));
-             options->not_cmp=1;
-             nfound++;
-         }
-         
-         else
-             
-             if ( per > options->percent && PDIFF(temp1_ullong,temp2_ullong) > (unsigned long_long)options->delta )
-             {
-                 if ( print_data(options) )
-                 {
-                     print_pos(ph,1,hyper_start+i,acc,pos,rank,dims,obj1,obj2);
-                     printf(SPACES);
-                     printf(ULLI_FORMAT_P,temp1_ullong,temp2_ullong,PDIFF(temp1_ullong,temp2_ullong),per);
-                 }
-                 nfound++;
-             }
-             mem1+=sizeof(unsigned long_long);
-             mem2+=sizeof(unsigned long_long);
-             if (options->n && nfound>=options->count)
-                 return nfound;
-     }
+     NOT_SUPPORTED();
+     options->not_cmp=1;
+     return nfound;
      
  }
  else
@@ -4526,10 +4397,6 @@ hsize_t diff_ullong(unsigned char *mem1,
      
  }
  
- return nfound;
-
-error:
- options->err_stat=1;
  return nfound;
 }
 
@@ -4599,9 +4466,6 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-
-
-
 static 
 hbool_t equal_double(double value, double expected)                               
 {
@@ -4646,3 +4510,15 @@ hbool_t equal_float(float value, float expected)
 }
 
 
+/*-------------------------------------------------------------------------
+ * Function:    NOT_SUPPORTED
+ *
+ * Purpose:     print a warning
+ *
+ *-------------------------------------------------------------------------
+ */
+static void NOT_SUPPORTED()
+{
+    printf("Warning: feature not supported\n");
+ 
+}
