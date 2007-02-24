@@ -236,4 +236,4 @@ Install HDF5 on Cygwin
 
 -----------------------------------------------------------------------
 
-Need Further assistance, email hdfhelp@ncsa.uiuc.edu
+Need Further assistance, email help@hdfgroup.org

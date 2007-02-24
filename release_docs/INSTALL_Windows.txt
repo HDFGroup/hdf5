@@ -1360,5 +1360,5 @@ Section VIII: Misc.
     variable value to "sec2".
 
 *******************************************************************
-Please send email to hdfhelp@ncsa.uiuc.edu for further assistance.
+Please send email to help@hdfgroup.org for further assistance.
 
