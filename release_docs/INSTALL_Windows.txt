@@ -3,7 +3,7 @@ HDF5 Build and Install Instructions for Windows 2000/XP (Full Version)
 ----------------------------------------------------------------------
 
 The following instructions assume that the HDF5 source code package 
-from HDF website (http://hdf.ncsa.uiuc.edu) is used.
+from HDF website (http://hdfgroup.org) is used.
 
 
 ***************************WARNINGS***********************************
@@ -62,7 +62,7 @@ Preconditions
           Please note that Szip is not a totally open-source free
           software.  For licensing issue of Szip, please check 
           "Licensing terms" at
-          http://hdf.ncsa.uiuc.edu/doc_resource/SZIP/index.html.
+          http://hdfgroup.org/doc_resource/SZIP/index.html.
 
       Compression feature inside HDF5 is optional. 
       
@@ -141,7 +141,7 @@ Notes
    
    4. HDF4-related tools are not built and released with HDF5 library
       packages any more. To obtain HDF4-related tools, please check
-      http://hdf.ncsa.uiuc.edu/h4toh5/ and 
+      http://hdfgroup.org/h4toh5/ and 
       ftp://ftp.hdfgroup.org/HDF5/h4toh5
 
    5. For DLL users, please do read and follow "DLL hints"
