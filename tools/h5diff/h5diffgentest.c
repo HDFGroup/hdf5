@@ -114,27 +114,33 @@ int test_basic(const char *fname1,
  hsize_t dims[2] = { 3,2 };
 
  /* Test */
- double  data1[3][2] = {{1,1},  {1,1},       {0,0}};
- double  data2[3][2] = {{0,1.1},{1.01,1.001},{0,1}};
- int     data5[3][2] = {{100,100},{100,100},{100,100}};
- int     data6[3][2] = {{101,102},{103,104},{150,200}};
- unsigned long_long data7[3][2] = {{100,100},{100,100},{100,100}};
- unsigned long_long data8[3][2] = {{101,102},{103,104},{150,200}};
- double  data3[3][2] = {{100,100},{100,100},{100,100}}; 
- double  data4[3][2] = {{105,120},{160,95},{80,40}};
- double  data9[3][2] = {{100,100},{100,0},{0,100}}; 
- /* compare divide by zero */
- /* compare both zero */
- double  data10[3][2] ={{120,80},{0,100},{0,50}};
- /*
-A   B   1-B/A   %
-100 120 0.2     20
-100 80  0.2     20
-100 0   1       100
-0   100 #DIV/0! #DIV/0!
-0   0   #DIV/0! #DIV/0!
-100 50  0.5     50
-*/
+ double             data1[3][2] = {{1,1},  {1,1},       {0,0}};
+ double             data2[3][2] = {{0,1.1},{1.01,1.001},{0,1}};
+ double             data3[3][2] = {{100,100},{100,100},{100,100}}; 
+ double             data4[3][2] = {{105,120},{160,95},{80,40}};
+
+/*-------------------------------------------------------------------------
+ * relative error, compare divide by zero, both zero
+ *-------------------------------------------------------------------------
+ */
+
+ int                data5[3][2] = {{100,100},{100,0},{0,100}}; 
+ int                data6[3][2] = {{120,80}, {0,100},{0,50}};
+ unsigned long_long data7[3][2] = {{100,100},{100,0},{0,100}}; 
+ unsigned long_long data8[3][2] = {{120,80}, {0,100},{0,50}};
+ double             data9[3][2] = {{100,100},{100,0},{0,100}}; 
+ double             data10[3][2] ={{120,80}, {0,100},{0,50}};
+ 
+/*-------------------------------------------------------------------------
+ A   B   1-B/A   %
+ 100 120 0.2     20
+ 100 80  0.2     20
+ 100 0   1       100
+ 0   100 #DIV/0! #DIV/0!
+ 0   0   #DIV/0! #DIV/0!
+ 100 50  0.5     50
+ *-------------------------------------------------------------------------
+ */
 
  /* floating point comparison , epsilon = 0.00001 */
  float  data11[3][2] ={{0.00000f,0.00001f},{0.00001f, 0.00000f},{0.00001f,0.00001f}};
@@ -167,8 +173,7 @@ A   B   1-B/A   %
  /* relative (unsigned long_long) */
  write_dset(gid1,2,dims,"dset7",H5T_NATIVE_ULLONG,data7);
  write_dset(gid1,2,dims,"dset8",H5T_NATIVE_ULLONG,data8);
-
- /* test divide by zero in percente case */
+ /* relative (double) */
  write_dset(gid1,2,dims,"dset9",H5T_NATIVE_DOUBLE,data9);
  write_dset(gid1,2,dims,"dset10",H5T_NATIVE_DOUBLE,data10);
 
