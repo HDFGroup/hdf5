@@ -120,7 +120,6 @@ static int   not_comparable;
 static void    close_obj(H5G_obj_t obj_type, hid_t obj_id);
 static hsize_t diff_region(hid_t obj1_id, hid_t obj2_id,hid_t region1_id, hid_t region2_id, diff_opt_t *options);
 static hbool_t all_zero(const void *_mem, size_t size);
-static int     ull2float(unsigned long_long ull_value, float *f_value);
 static hsize_t character_compare(unsigned char *mem1,unsigned char *mem2,hsize_t i,int rank,hsize_t *dims,hsize_t *acc,hsize_t *pos,diff_opt_t *options,const char *obj1,const char *obj2,int *ph);
 static hsize_t character_compare_opt(unsigned char *mem1,unsigned char *mem2,hsize_t i,int rank,hsize_t *dims,hsize_t *acc,hsize_t *pos,diff_opt_t *options,const char *obj1,const char *obj2,int *ph);
 static void    NOT_SUPPORTED();
@@ -4399,59 +4398,6 @@ hsize_t diff_ullong(unsigned char *mem1,
  
  return nfound;
 }
-
-
-
-/*-------------------------------------------------------------------------
- * Function:    ull2float
- *
- * Purpose:     convert unsigned long_long to float
- *
- * Programmer:  pvn
- *              Mar 22, 2006
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static
-int ull2float(unsigned long_long ull_value, float *f_value)
-{
- hid_t          dxpl_id;
- unsigned char  *buf;
- size_t         src_size;
- size_t         dst_size;
-
- if((dxpl_id = H5Pcreate(H5P_DATASET_XFER))<0)
-  return -1;
-
- src_size = H5Tget_size(H5T_NATIVE_ULLONG);
- dst_size = H5Tget_size(H5T_NATIVE_FLOAT);
- buf = (unsigned char*)calloc(1, MAX(src_size, dst_size));
-
- memcpy(buf, &ull_value, src_size);
-
- /* do conversion */
- if(H5Tconvert(H5T_NATIVE_ULLONG, H5T_NATIVE_FLOAT, 1, buf, NULL, dxpl_id)<0)
-  goto error;
-
- memcpy(f_value, buf, dst_size);
-
- if(buf)
-  free(buf);
-
- return 0;
-
-error:
- H5E_BEGIN_TRY {
-  H5Pclose(dxpl_id);
- } H5E_END_TRY;
- if(buf)
-  free(buf);
-
- return -1;
-}
-
 
 /*-------------------------------------------------------------------------
  * Function:    equal_float, equal_double

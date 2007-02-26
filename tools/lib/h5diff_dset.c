@@ -762,9 +762,6 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
  return 1;
 }
 
-
-
-
 /*-------------------------------------------------------------------------
  * Function: print_sizes
  *
