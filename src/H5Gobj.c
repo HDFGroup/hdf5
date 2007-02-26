@@ -908,7 +908,6 @@ H5G_obj_remove_update_linfo(H5O_loc_t *oloc, H5O_linfo_t *linfo, hid_t dxpl_id)
                 /* If ok, insert links as link messages */
                 if(can_convert) {
                     struct H5O_t *oh = NULL;      /* Pointer to group's object header */
-                    unsigned oh_flags = H5AC__DIRTIED_FLAG;
 
                     /* Get a pointer to the object header itself */
                     if((oh = H5O_protect(oloc, dxpl_id)) == NULL)
@@ -916,16 +915,16 @@ H5G_obj_remove_update_linfo(H5O_loc_t *oloc, H5O_linfo_t *linfo, hid_t dxpl_id)
 
                     /* Insert link messages into group */
                     for(u = 0; u < linfo->nlinks; u++)
-                        if(H5O_msg_append(oloc->file, dxpl_id, oh, H5O_LINK_ID, 0, H5O_UPDATE_TIME, &(ltable.lnks[u]), &oh_flags) < 0) {
+                        if(H5O_msg_append(oloc->file, dxpl_id, oh, H5O_LINK_ID, 0, H5O_UPDATE_TIME, &(ltable.lnks[u])) < 0) {
                             /* Release object header */
-                            if(H5O_unprotect(oloc, oh, dxpl_id, oh_flags) < 0)
+                            if(H5O_unprotect(oloc, oh) < 0)
                                 HDONE_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to unprotect dataset object header")
 
                             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
                         } /* end if */
 
                     /* Release object header */
-                    if(H5O_unprotect(oloc, oh, dxpl_id, oh_flags) < 0)
+                    if(H5O_unprotect(oloc, oh) < 0)
                         HDONE_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to unprotect dataset object header")
 
                     /* Remove the dense storage */

@@ -1089,8 +1089,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, const H5S_t *ds,
-           unsigned *oh_flags_ptr)
+H5S_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, const H5S_t *ds)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
@@ -1099,13 +1098,12 @@ H5S_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, const H5S_t *ds,
     HDassert(f);
     HDassert(oh);
     HDassert(ds);
-    HDassert(oh_flags_ptr);
 
     switch (H5S_GET_EXTENT_TYPE(ds)) {
         case H5S_NULL:
         case H5S_SCALAR:
         case H5S_SIMPLE:
-            if(H5O_msg_append(f, dxpl_id, oh, H5O_SDSPACE_ID, 0, 0, &(ds->extent), oh_flags_ptr) < 0)
+            if(H5O_msg_append(f, dxpl_id, oh, H5O_SDSPACE_ID, 0, 0, &(ds->extent)) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't update simple data space message")
             break;
 

@@ -162,7 +162,7 @@ static herr_t H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc,
  */
 static herr_t
 H5O_attr_to_dense_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned UNUSED sequence, unsigned *oh_flags_ptr, void *_udata/*in,out*/)
+    unsigned UNUSED sequence, hbool_t *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_cvt_t *udata = (H5O_iter_cvt_t *)_udata;   /* Operator user data */
     H5A_t *attr = (H5A_t *)mesg->native;        /* Pointer to attribute to insert */
@@ -184,7 +184,7 @@ H5O_attr_to_dense_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to convert into null message")
 
     /* Indicate that the object header was modified */
-    *oh_flags_ptr |= H5AC__DIRTIED_FLAG;
+    *oh_modified = TRUE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -235,8 +235,7 @@ H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
         } /* end if */
 
         /* Check for condititions for switching to "dense" attribute storage are met */
-        if(oh->nattrs == oh->max_compact ||
-                (!sharable && raw_size >= H5O_MESG_MAX_SIZE)) {
+        if(oh->nattrs == oh->max_compact || (!sharable && raw_size >= H5O_MESG_MAX_SIZE)) {
             H5O_iter_cvt_t udata;           /* User data for callback */
             H5O_mesg_operator_t op;         /* Wrapper for operator */
 
@@ -249,8 +248,9 @@ H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
             udata.dxpl_id = dxpl_id;
 
             /* Iterate over existing attributes, moving them to dense storage */
-            op.lib_op = H5O_attr_to_dense_cb;
-            if(H5O_msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, TRUE, op, &udata, dxpl_id, &oh_flags) < 0)
+            op.op_type = H5O_MESG_OP_LIB;
+            op.u.lib_op = H5O_attr_to_dense_cb;
+            if(H5O_msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, &op, &udata, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTCONVERT, FAIL, "error converting attributes to dense storage")
         } /* end if */
     } /* end if */
@@ -278,7 +278,7 @@ H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
     } /* end if */
     else {
         /* Append new message to object header */
-        if(H5O_msg_append_real(loc->file, dxpl_id, oh, H5O_MSG_ATTR, 0, 0, attr, &oh_flags) < 0)
+        if(H5O_msg_append_real(loc->file, dxpl_id, oh, H5O_MSG_ATTR, 0, 0, attr) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to create new attribute in header")
     } /* end else */
 
@@ -322,7 +322,7 @@ H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
 	HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "error determining if message should be shared")
 
     /* Update the modification time, if any */
-    if(H5O_touch_oh(loc->file, dxpl_id, oh, FALSE, &oh_flags) < 0)
+    if(H5O_touch_oh(loc->file, dxpl_id, oh, FALSE) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update time on object")
 
     /* Indicate that the object header was modified */
@@ -352,7 +352,7 @@ done:
  */
 static herr_t
 H5O_attr_open_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, unsigned sequence,
-    unsigned UNUSED *oh_flags_ptr, void *_udata/*in,out*/)
+    hbool_t UNUSED *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_opn_t *udata = (H5O_iter_opn_t *)_udata;   /* Operator user data */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
@@ -399,7 +399,6 @@ H5A_t *
 H5O_attr_open_by_name(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
 {
     H5O_t *oh = NULL;                   /* Pointer to actual object header */
-    unsigned oh_flags = H5AC__NO_FLAGS_SET;     /* Metadata cache flags for object header */
     H5A_t *ret_value;                   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_open_by_name)
@@ -429,8 +428,9 @@ H5O_attr_open_by_name(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
         udata.attr = NULL;
 
         /* Iterate over attributes, to locate correct one to open */
-        op.lib_op = H5O_attr_open_cb;
-        if(H5O_msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, TRUE, op, &udata, dxpl_id, &oh_flags) < 0)
+        op.op_type = H5O_MESG_OP_LIB;
+        op.u.lib_op = H5O_attr_open_cb;
+        if(H5O_msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, &op, &udata, dxpl_id) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "error updating attribute")
 
         /* Check that we found the attribute */
@@ -443,7 +443,7 @@ H5O_attr_open_by_name(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
     } /* end else */
 
 done:
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_PROTECT, NULL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -609,7 +609,7 @@ done:
  */
 static herr_t
 H5O_attr_write_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned UNUSED sequence, unsigned *oh_flags_ptr, void *_udata/*in,out*/)
+    unsigned UNUSED sequence, hbool_t *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_wrt_t *udata = (H5O_iter_wrt_t *)_udata;   /* Operator user data */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
@@ -641,7 +641,7 @@ H5O_attr_write_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
         mesg->dirty = TRUE;
 
         /* Indicate that the object header was modified */
-        *oh_flags_ptr |= H5AC__DIRTIED_FLAG;
+        *oh_modified = TRUE;
 
         /* Indicate that the attribute was found */
         udata->found = TRUE;
@@ -671,7 +671,6 @@ herr_t
 H5O_attr_write(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
 {
     H5O_t *oh = NULL;                   /* Pointer to actual object header */
-    unsigned oh_flags = H5AC__NO_FLAGS_SET;     /* Metadata cache flags for object header */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_write)
@@ -701,8 +700,9 @@ H5O_attr_write(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
         udata.found = FALSE;
 
         /* Iterate over attributes, to locate correct one to update */
-        op.lib_op = H5O_attr_write_cb;
-        if(H5O_msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, TRUE, op, &udata, dxpl_id, &oh_flags) < 0)
+        op.op_type = H5O_MESG_OP_LIB;
+        op.u.lib_op = H5O_attr_write_cb;
+        if(H5O_msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, &op, &udata, dxpl_id) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "error updating attribute")
 
         /* Check that we found the attribute */
@@ -711,11 +711,11 @@ H5O_attr_write(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
     } /* end else */
 
     /* Update the modification time, if any */
-    if(H5O_touch_oh(loc->file, dxpl_id, oh, FALSE, &oh_flags) < 0)
+    if(H5O_touch_oh(loc->file, dxpl_id, oh, FALSE) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update time on object")
 
 done:
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -738,7 +738,7 @@ done:
  */
 static herr_t
 H5O_attr_rename_chk_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned UNUSED sequence, unsigned UNUSED *oh_flags_ptr, void *_udata/*in,out*/)
+    unsigned UNUSED sequence, hbool_t UNUSED *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_ren_t *udata = (H5O_iter_ren_t *)_udata;   /* Operator user data */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
@@ -784,7 +784,7 @@ H5O_attr_rename_chk_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
  */
 static herr_t
 H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned UNUSED sequence, unsigned *oh_flags_ptr, void *_udata/*in,out*/)
+    unsigned UNUSED sequence, hbool_t *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_ren_t *udata = (H5O_iter_ren_t *)_udata;   /* Operator user data */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
@@ -855,7 +855,7 @@ H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
 
                 /* Append renamed attribute to object header */
                 /* (Don't let it become shared) */
-                if(H5O_msg_append_real(udata->f, udata->dxpl_id, oh, H5O_MSG_ATTR, (mesg->flags | H5O_MSG_FLAG_DONTSHARE), 0, attr, oh_flags_ptr) < 0)
+                if(H5O_msg_append_real(udata->f, udata->dxpl_id, oh, H5O_MSG_ATTR, (mesg->flags | H5O_MSG_FLAG_DONTSHARE), 0, attr) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, H5_ITER_ERROR, "unable to relocate renamed attribute in header")
 
                 /* Sanity check */
@@ -867,7 +867,7 @@ H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
         } /* end else */
 
         /* Indicate that the object header was modified */
-        *oh_flags_ptr |= H5AC__DIRTIED_FLAG;
+        *oh_modified = TRUE;
 
         /* Indicate that we found an existing attribute with the old name */
         udata->found = TRUE;
@@ -930,8 +930,9 @@ H5O_attr_rename(const H5O_loc_t *loc, hid_t dxpl_id, const char *old_name,
         udata.found = FALSE;
 
         /* Iterate over attributes, to check if "new name" exists already */
-        op.lib_op = H5O_attr_rename_chk_cb;
-        if(H5O_msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, TRUE, op, &udata, dxpl_id, &oh_flags) < 0)
+        op.op_type = H5O_MESG_OP_LIB;
+        op.u.lib_op = H5O_attr_rename_chk_cb;
+        if(H5O_msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, &op, &udata, dxpl_id) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "error updating attribute")
 
         /* If the new name was found, indicate an error */
@@ -939,17 +940,21 @@ H5O_attr_rename(const H5O_loc_t *loc, hid_t dxpl_id, const char *old_name,
             HGOTO_ERROR(H5E_ATTR, H5E_EXISTS, FAIL, "attribute with new name already exists")
 
         /* Iterate over attributes again, to actually rename attribute with old name */
-        op.lib_op = H5O_attr_rename_mod_cb;
-        if(H5O_msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, TRUE, op, &udata, dxpl_id, &oh_flags) < 0)
+        op.op_type = H5O_MESG_OP_LIB;
+        op.u.lib_op = H5O_attr_rename_mod_cb;
+        if(H5O_msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, &op, &udata, dxpl_id) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "error updating attribute")
 
         /* Check that we found the attribute to rename */
         if(!udata.found)
             HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "can't locate attribute with old name")
+
+        /* Indicate that the object header was modified */
+        oh_flags |= H5AC__DIRTIED_FLAG;
     } /* end else */
 
     /* Update the modification time, if any */
-    if(H5O_touch_oh(loc->file, dxpl_id, oh, FALSE, &oh_flags) < 0)
+    if(H5O_touch_oh(loc->file, dxpl_id, oh, FALSE) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update time on object")
 
 done:
@@ -978,7 +983,6 @@ H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
     hsize_t *last_attr, const H5A_attr_iter_op_t *attr_op, void *op_data)
 {
     H5O_t *oh = NULL;                   /* Pointer to actual object header */
-    unsigned oh_flags = H5AC__NO_FLAGS_SET;     /* Metadata cache flags for object header */
     H5A_attr_table_t atable = {0, NULL};        /* Table of attributes */
     herr_t ret_value;                   /* Return value */
 
@@ -1010,7 +1014,7 @@ H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
         corder_bt2_addr = oh->corder_bt2_addr;
 
         /* Release the object header */
-        if(H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
+        if(H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
         oh = NULL;
 
@@ -1022,11 +1026,11 @@ H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
     } /* end if */
     else {
         /* Build table of attributes for compact storage */
-        if(H5A_compact_build_table(loc->file, dxpl_id, oh, idx_type, order, &atable, &oh_flags) < 0)
+        if(H5A_compact_build_table(loc->file, dxpl_id, oh, idx_type, order, &atable) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "error building attribute table")
 
         /* Release the object header */
-        if(H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
+        if(H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
         oh = NULL;
 
@@ -1041,7 +1045,7 @@ H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
 
 done:
     /* Release resources */
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
     if(atable.attrs && H5A_attr_release_table(&atable) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to release attribute table")
@@ -1101,8 +1105,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_attr_remove_update(const H5O_loc_t *loc, H5O_t *oh, unsigned *oh_flags,
-    hid_t dxpl_id)
+H5O_attr_remove_update(const H5O_loc_t *loc, H5O_t *oh, hid_t dxpl_id)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -1111,7 +1114,6 @@ H5O_attr_remove_update(const H5O_loc_t *loc, H5O_t *oh, unsigned *oh_flags,
     /* Check arguments */
     HDassert(loc);
     HDassert(oh);
-    HDassert(oh_flags);
 
     /* Reset the creation order min/max if there's no more attributes on the object */
     if(oh->nattrs == 0)
@@ -1166,7 +1168,7 @@ H5O_attr_remove_update(const H5O_loc_t *loc, H5O_t *oh, unsigned *oh_flags,
 
                     /* Insert attribute message into object header */
                     /* (Will increment reference count on shared attributes) */
-                    if(H5O_msg_append_real(loc->file, dxpl_id, oh, H5O_MSG_ATTR, 0, 0, &(atable.attrs[u]), oh_flags) < 0)
+                    if(H5O_msg_append_real(loc->file, dxpl_id, oh, H5O_MSG_ATTR, 0, 0, &(atable.attrs[u])) < 0)
                         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't create message")
                 } /* end for */
 
@@ -1175,7 +1177,7 @@ H5O_attr_remove_update(const H5O_loc_t *loc, H5O_t *oh, unsigned *oh_flags,
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete dense attribute storage")
 
                 /* Update the modification time, if any */
-                if(H5O_touch_oh(loc->file, dxpl_id, oh, FALSE, oh_flags) < 0)
+                if(H5O_touch_oh(loc->file, dxpl_id, oh, FALSE) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update time on object")
             } /* end if */
 
@@ -1206,7 +1208,7 @@ done:
  */
 static herr_t
 H5O_attr_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned UNUSED sequence, unsigned *oh_flags_ptr, void *_udata/*in,out*/)
+    unsigned UNUSED sequence, hbool_t *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_rm_t *udata = (H5O_iter_rm_t *)_udata;   /* Operator user data */
     herr_t ret_value = H5_ITER_CONT;    /* Return value */
@@ -1232,7 +1234,7 @@ H5O_attr_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to convert into null message")
 
         /* Indicate that the object header was modified */
-        *oh_flags_ptr |= H5AC__DIRTIED_FLAG;
+        *oh_modified = TRUE;
 
         /* Indicate that this message is the attribute to be deleted */
         udata->found = TRUE;
@@ -1262,7 +1264,6 @@ herr_t
 H5O_attr_remove(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
 {
     H5O_t *oh = NULL;                   /* Pointer to actual object header */
-    unsigned oh_flags = H5AC__NO_FLAGS_SET;     /* Metadata cache flags for object header */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_remove)
@@ -1295,8 +1296,9 @@ H5O_attr_remove(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
         udata.found = FALSE;
 
         /* Iterate over attributes, to locate correct one to delete */
-        op.lib_op = H5O_attr_remove_cb;
-        if(H5O_msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, TRUE, op, &udata, dxpl_id, &oh_flags) < 0)
+        op.op_type = H5O_MESG_OP_LIB;
+        op.u.lib_op = H5O_attr_remove_cb;
+        if(H5O_msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, &op, &udata, dxpl_id) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "error deleting attribute")
 
         /* Check that we found the attribute */
@@ -1305,11 +1307,11 @@ H5O_attr_remove(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
     } /* end else */
 
     /* Update the object header information after removing an attribute */
-    if(H5O_attr_remove_update(loc, oh, &oh_flags, dxpl_id) < 0)
+    if(H5O_attr_remove_update(loc, oh, dxpl_id) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update attribute info")
 
 done:
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1335,7 +1337,6 @@ H5O_attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
 {
     H5O_t *oh = NULL;                   /* Pointer to actual object header */
     H5A_attr_table_t atable = {0, NULL};        /* Table of attributes */
-    unsigned oh_flags = H5AC__NO_FLAGS_SET;     /* Metadata cache flags for object header */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_remove_by_idx)
@@ -1361,7 +1362,7 @@ H5O_attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
         H5O_mesg_operator_t op;         /* Wrapper for operator */
 
         /* Build table of attributes for compact storage */
-        if(H5A_compact_build_table(loc->file, dxpl_id, oh, idx_type, order, &atable, &oh_flags) < 0)
+        if(H5A_compact_build_table(loc->file, dxpl_id, oh, idx_type, order, &atable) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "error building attribute table")
 
         /* Check for skipping too many attributes */
@@ -1375,8 +1376,9 @@ H5O_attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
         udata.found = FALSE;
 
         /* Iterate over attributes, to locate correct one to delete */
-        op.lib_op = H5O_attr_remove_cb;
-        if(H5O_msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, TRUE, op, &udata, dxpl_id, &oh_flags) < 0)
+        op.op_type = H5O_MESG_OP_LIB;
+        op.u.lib_op = H5O_attr_remove_cb;
+        if(H5O_msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, &op, &udata, dxpl_id) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "error deleting attribute")
 
         /* Check that we found the attribute */
@@ -1385,11 +1387,11 @@ H5O_attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
     } /* end else */
 
     /* Update the object header information after removing an attribute */
-    if(H5O_attr_remove_update(loc, oh, &oh_flags, dxpl_id) < 0)
+    if(H5O_attr_remove_update(loc, oh, dxpl_id) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update attribute info")
 
 done:
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
     if(atable.attrs && H5A_attr_release_table(&atable) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to release attribute table")
@@ -1461,7 +1463,7 @@ done:
  */
 static herr_t
 H5O_attr_exists_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned UNUSED sequence, unsigned UNUSED *oh_flags_ptr, void *_udata/*in,out*/)
+    unsigned UNUSED sequence, hbool_t UNUSED *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_rm_t *udata = (H5O_iter_rm_t *)_udata;   /* Operator user data */
     herr_t ret_value = H5_ITER_CONT;    /* Return value */
@@ -1501,7 +1503,6 @@ htri_t
 H5O_attr_exists(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
 {
     H5O_t *oh = NULL;           /* Pointer to actual object header */
-    unsigned oh_flags = H5AC__NO_FLAGS_SET;     /* Metadata cache flags for object header */
     htri_t ret_value;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_exists)
@@ -1531,8 +1532,9 @@ H5O_attr_exists(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
         udata.found = FALSE;
 
         /* Iterate over existing attributes, checking for attribute with same name */
-        op.lib_op = H5O_attr_exists_cb;
-        if(H5O_msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, TRUE, op, &udata, dxpl_id, &oh_flags) < 0)
+        op.op_type = H5O_MESG_OP_LIB;
+        op.u.lib_op = H5O_attr_exists_cb;
+        if(H5O_msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, &op, &udata, dxpl_id) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_BADITER, FAIL, "error checking for existence of attribute")
 
         /* Check that we found the attribute */

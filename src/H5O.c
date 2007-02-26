@@ -1028,6 +1028,17 @@ H5O_protect(H5O_loc_t *loc, hid_t dxpl_id)
     if(NULL == (ret_value = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "unable to load object header")
 
+    /* Mark object header as un-evictable */
+    if(H5AC_pin_protected_entry(loc->file, ret_value) < 0) {
+        if(H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, ret_value, H5AC__NO_FLAGS_SET) < 0)
+            HDONE_ERROR(H5E_OHDR, H5E_PROTECT, NULL, "unable to release object header")
+
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTPIN, NULL, "unable to pin object header")
+    } /* end if */
+
+    /* Release the object header from the cache */
+    if(H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, ret_value, H5AC__NO_FLAGS_SET) < 0)
+	HGOTO_ERROR(H5E_OHDR, H5E_PROTECT, NULL, "unable to release object header")
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_protect() */
@@ -1051,7 +1062,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_unprotect(H5O_loc_t *loc, H5O_t *oh, hid_t dxpl_id, unsigned oh_flags)
+H5O_unprotect(H5O_loc_t *loc, H5O_t *oh)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
 
@@ -1063,9 +1074,9 @@ H5O_unprotect(H5O_loc_t *loc, H5O_t *oh, hid_t dxpl_id, unsigned oh_flags)
     HDassert(H5F_addr_defined(loc->addr));
     HDassert(oh);
 
-    /* Release the object header from the cache */
-    if(H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+    /* Mark object header as evictable again */
+    if(H5AC_unpin_entry(loc->file, oh) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPIN, FAIL, "unable to unpin object header")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1087,16 +1098,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_touch_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hbool_t force,
-    unsigned * oh_flags_ptr)
+H5O_touch_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hbool_t force)
 {
     time_t	now;                    /* Current time */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_touch_oh)
 
+    HDassert(f);
     HDassert(oh);
-    HDassert(oh_flags_ptr);
 
     /* Get current time */
     now = H5_now();
@@ -1119,7 +1129,7 @@ H5O_touch_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hbool_t force,
                 HGOTO_DONE(SUCCEED);        /*nothing to do*/
 
             /* Allocate space for the modification time message */
-            if((idx = H5O_msg_alloc(f, dxpl_id, oh, H5O_MSG_MTIME_NEW, &mesg_flags, &now, oh_flags_ptr)) == UFAIL)
+            if((idx = H5O_msg_alloc(f, dxpl_id, oh, H5O_MSG_MTIME_NEW, &mesg_flags, &now)) == UFAIL)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to allocate space for modification time message")
 
             /* Set the message's flags if appropriate */
@@ -1144,8 +1154,9 @@ H5O_touch_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hbool_t force,
         oh->atime = oh->ctime = now;
     } /* end else */
 
-    /* Mark the object header as dirty */
-    *oh_flags_ptr |= H5AC__DIRTIED_FLAG;
+    /* Mark object header as dirty in cache */
+    if(H5AC_mark_pinned_or_protected_entry_dirty(f, oh) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTMARKDIRTY, FAIL, "unable to mark object header as dirty")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1188,8 +1199,11 @@ H5O_touch(H5O_loc_t *loc, hbool_t force, hid_t dxpl_id)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
     /* Create/Update the modification time message */
-    if(H5O_touch_oh(loc->file, dxpl_id, oh, force, &oh_flags) < 0)
+    if(H5O_touch_oh(loc->file, dxpl_id, oh, force) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to update object modificaton time")
+
+    /* Mark object header as changed */
+    oh_flags |= H5AC__DIRTIED_FLAG;
 
 done:
     if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
@@ -1214,7 +1228,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hbool_t * oh_flags_ptr)
+H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
 {
     int	idx;
     herr_t      ret_value = SUCCEED;       /* Return value */
@@ -1223,7 +1237,6 @@ H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hbool_t * oh_flags_ptr)
 
     HDassert(f);
     HDassert(oh);
-    HDassert(oh_flags_ptr);
 
     /* Look for existing message */
     for(idx = 0; idx < oh->nmesgs; idx++)
@@ -1243,14 +1256,13 @@ H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hbool_t * oh_flags_ptr)
         bogus->u = H5O_BOGUS_VALUE;
 
         /* Allocate space in the object header for bogus message */
-	if((idx = H5O_msg_alloc(f, dxpl_id, oh, H5O_MSG_BOGUS, &mesg_flags, bogus, oh_flags_ptr)) < 0)
+	if((idx = H5O_msg_alloc(f, dxpl_id, oh, H5O_MSG_BOGUS, &mesg_flags, bogus)) < 0)
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to allocate space for 'bogus' message")
 
         /* Point to "bogus" information (take it over) */
 	oh->mesg[idx].native = bogus;
 
         /* Mark the message and object header as dirty */
-	*oh_flags_ptr = TRUE;
         oh->mesg[idx].flags = mesg_flags;
         oh->mesg[idx].dirty = TRUE;
         oh->dirty = TRUE;
@@ -1297,8 +1309,11 @@ H5O_bogus(H5O_loc_t *loc, hid_t dxpl_id)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
     /* Create the "bogus" message */
-    if(H5O_bogus_oh(ent->file, dxpl_id, oh, &oh_flags) < 0)
+    if(H5O_bogus_oh(ent->file, dxpl_id, oh) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to update object 'bogus' message")
+
+    /* Mark object header as changed */
+    oh_flags |= H5AC__DIRTIED_FLAG;
 
 done:
     if(oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, oh_flags) < 0)

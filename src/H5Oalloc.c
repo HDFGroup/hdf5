@@ -840,7 +840,7 @@ done:
  */
 unsigned
 H5O_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *type,
-    const void *mesg, unsigned * oh_flags_ptr)
+    const void *mesg)
 {
     size_t      raw_size;       /* Raw size of message */
     size_t      aligned_size;   /* Size of message including alignment */
@@ -853,7 +853,6 @@ H5O_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *type,
     HDassert(oh);
     HDassert(type);
     HDassert(mesg);
-    HDassert(oh_flags_ptr);
 
     /* Compute the size needed to store the message in the object header */
     if((raw_size = (type->raw_size)(f, FALSE, mesg)) >= H5O_MESG_MAX_SIZE)
@@ -901,8 +900,9 @@ H5O_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *type,
     if(H5O_alloc_null(oh, idx, type, NULL, aligned_size) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, UFAIL, "can't split null message")
 
-    /* Mark the object header as modified */
-    *oh_flags_ptr |= H5AC__DIRTIED_FLAG;
+    /* Mark object header as dirty in cache */
+    if(H5AC_mark_pinned_or_protected_entry_dirty(f, oh) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTMARKDIRTY, UFAIL, "unable to mark object header as dirty")
 
     /* Set return value */
     ret_value = idx;

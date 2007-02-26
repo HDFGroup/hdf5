@@ -291,12 +291,18 @@ typedef struct H5O_addr_map_t {
 
 /* Typedef for "internal library" iteration operations */
 typedef herr_t (*H5O_lib_operator_t)(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned sequence, unsigned *oh_flags_ptr/*out*/, void *operator_data/*in,out*/);
+    unsigned sequence, hbool_t *oh_modified/*out*/, void *operator_data/*in,out*/);
 
 /* Some syntactic sugar to make the compiler happy with two different kinds of iterator callbacks */
-typedef union {
-    H5O_operator_t app_op;      /* Application callback for each message */
-    H5O_lib_operator_t lib_op;  /* Library internal callback for each message */
+typedef struct {
+    enum {
+        H5O_MESG_OP_APP,            /* Application callback */
+        H5O_MESG_OP_LIB             /* Library internal callback */
+    } op_type;
+    union {
+        H5O_operator_t app_op;      /* Application callback for each message */
+        H5O_lib_operator_t lib_op;  /* Library internal callback for each message */
+    } u;
 } H5O_mesg_operator_t;
 
 
@@ -433,11 +439,10 @@ H5_DLL const H5O_obj_class_t *H5O_obj_class_real(H5O_t *oh);
 
 /* Object header message routines */
 H5_DLL unsigned H5O_msg_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
-    const H5O_msg_class_t *type, unsigned *mesg_flags, void *mesg,
-    unsigned *oh_flags_ptr);
+    const H5O_msg_class_t *type, unsigned *mesg_flags, void *mesg);
 H5_DLL herr_t H5O_msg_append_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     const H5O_msg_class_t *type, unsigned mesg_flags, unsigned update_flags,
-    void *mesg, unsigned *oh_flags_ptr);
+    void *mesg);
 H5_DLL void *H5O_msg_read_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     unsigned type_id, void *mesg);
 H5_DLL void *H5O_msg_free_real(const H5O_msg_class_t *type, void *mesg);
@@ -448,12 +453,11 @@ H5_DLL void *H5O_msg_copy_file(const H5O_msg_class_t *type, H5F_t *file_src,
     void *mesg_src, H5F_t *file_dst, hid_t dxpl_id, hbool_t *shared,
     H5O_copy_t *cpy_info, void *udata);
 H5_DLL herr_t H5O_msg_iterate_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type,
-    hbool_t internal, H5O_mesg_operator_t op, void *op_data, hid_t dxpl_id,
-    unsigned *oh_flags_ptr);
+    const H5O_mesg_operator_t *op, void *op_data, hid_t dxpl_id);
 
 /* Object header allocation routines */
 H5_DLL unsigned H5O_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
-    const H5O_msg_class_t *type, const void *mesg, hbool_t *oh_dirtied_ptr);
+    const H5O_msg_class_t *type, const void *mesg);
 H5_DLL herr_t H5O_condense_header(H5F_t *f, H5O_t *oh, hid_t dxpl_id);
 H5_DLL herr_t H5O_release_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     H5O_mesg_t *mesg, hbool_t adj_link);

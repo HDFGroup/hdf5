@@ -115,7 +115,7 @@ static herr_t H5A_attr_sort_table(H5A_attr_table_t *atable, H5_index_t idx_type,
  */
 static herr_t
 H5A_compact_build_table_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned sequence, unsigned UNUSED *oh_flags_ptr, void *_udata/*in,out*/)
+    unsigned sequence, hbool_t UNUSED *oh_modified, void *_udata/*in,out*/)
 {
     H5A_compact_bt_ud_t *udata = (H5A_compact_bt_ud_t *)_udata;   /* Operator user data */
     herr_t ret_value = H5_ITER_CONT;    /* Return value */
@@ -172,7 +172,7 @@ done:
  */
 herr_t
 H5A_compact_build_table(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_index_t idx_type,
-    H5_iter_order_t order, H5A_attr_table_t *atable, unsigned *oh_flags)
+    H5_iter_order_t order, H5A_attr_table_t *atable)
 {
     H5A_compact_bt_ud_t udata;                  /* User data for iteration callback */
     H5O_mesg_operator_t op;             /* Wrapper for operator */
@@ -197,8 +197,9 @@ H5A_compact_build_table(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_index_t idx_type,
     udata.bogus_crt_idx = (oh->version == H5O_VERSION_1) ? TRUE : FALSE;
 
     /* Iterate over existing attributes, checking for attribute with same name */
-    op.lib_op = H5A_compact_build_table_cb;
-    if(H5O_msg_iterate_real(f, oh, H5O_MSG_ATTR, TRUE, op, &udata, dxpl_id, oh_flags) < 0)
+    op.op_type = H5O_MESG_OP_LIB;
+    op.u.lib_op = H5A_compact_build_table_cb;
+    if(H5O_msg_iterate_real(f, oh, H5O_MSG_ATTR, &op, &udata, dxpl_id) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_BADITER, FAIL, "error building attribute table")
 
     /* Correct # of attributes in table */

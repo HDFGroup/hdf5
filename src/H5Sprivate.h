@@ -202,19 +202,19 @@ H5_DLL hsize_t H5S_get_npoints_max(const H5S_t *ds);
 H5_DLL hbool_t H5S_has_extent(const H5S_t *ds);
 H5_DLL int H5S_get_simple_extent_ndims(const H5S_t *ds);
 H5_DLL int H5S_get_simple_extent_dims(const H5S_t *ds, hsize_t dims[]/*out*/,
-					hsize_t max_dims[]/*out*/);
+    hsize_t max_dims[]/*out*/);
 H5_DLL herr_t H5S_write(struct H5O_loc_t *loc, const H5S_t *space,
     hbool_t update_time, hid_t dxpl_id);
 H5_DLL herr_t H5S_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh,
-                         const H5S_t *ds, unsigned * oh_flags_ptr);
+    const H5S_t *ds);
 H5_DLL H5S_t *H5S_read(const struct H5O_loc_t *loc, hid_t dxpl_id);
 H5_DLL int H5S_extend(H5S_t *space, const hsize_t *size);
 H5_DLL int H5S_set_extent(H5S_t *space, const hsize_t *size);
 H5_DLL herr_t H5S_set_extent_real(H5S_t *space, const hsize_t *size);
 H5_DLL H5S_t *H5S_create_simple(unsigned rank, const hsize_t dims[/*rank*/],
-		  const hsize_t maxdims[/*rank*/]);
+    const hsize_t maxdims[/*rank*/]);
 H5_DLL herr_t H5S_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
-			 int indent, int fwidth);
+    int indent, int fwidth);
 
 H5_DLL hsize_t H5S_extent_nelem(const H5S_extent_t *ext);
 
@@ -222,9 +222,9 @@ H5_DLL hsize_t H5S_extent_nelem(const H5S_extent_t *ext);
 H5_DLL herr_t H5S_select_deserialize(H5S_t *space, const uint8_t *buf);
 H5_DLL H5S_sel_type H5S_get_select_type(const H5S_t *space);
 H5_DLL herr_t H5S_select_iterate(void *buf, hid_t type_id, const H5S_t *space,
-				H5D_operator_t op, void *operator_data);
-H5_DLL herr_t H5S_select_fill(void *fill, size_t fill_size,
-                                const H5S_t *space, void *buf);
+    H5D_operator_t op, void *operator_data);
+H5_DLL herr_t H5S_select_fill(void *fill, size_t fill_size, const H5S_t *space,
+    void *buf);
 H5_DLL htri_t H5S_select_valid(const H5S_t *space);
 H5_DLL hssize_t H5S_get_select_npoints(const H5S_t *space);
 H5_DLL herr_t H5S_get_select_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
