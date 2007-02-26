@@ -66,11 +66,11 @@ Preconditions:
        the extended-Rice lossless compression algorithm for chunked
        datatsets. For more information about Szip compression and 
        license terms see 
-       http://hdf.ncsa.uiuc.edu/HDF5/doc_resource/SZIP/index.html.
+       http://hdfgroup.org/HDF5/doc_resource/SZIP/index.html.
       
        The latest supported public release of SZIP is available from
-       ftp://hdf.ncsa.uiuc.edu/szip/2.0. Binary distribution can be 
-       found under ftp://hdf.ncsa.uiuc.edu/lib-external/szip/2.0/bin
+       ftp://ftp.hdfgroup.org/lib-external/szip/2.0. Binary distribution can be 
+       found under ftp://ftp.hdfgroup.org/lib-external/szip/2.0/bin/cygwin
 
 
 Install HDF5 on Cygwin
@@ -78,7 +78,7 @@ Install HDF5 on Cygwin
 
 1. Get HDF5 source code package
    Users can download HDF5 source code package from HDF website
-   (http://hdf.ncsa.uiuc.edu). 
+   (http://hdfgroup.org). 
      
 2. Unpacking the distribution
 
@@ -236,4 +236,4 @@ Install HDF5 on Cygwin
 
 -----------------------------------------------------------------------
 
-Need Further assistance, email hdfhelp@ncsa.uiuc.edu
+Need Further assistance, email help@hdfgroup.org

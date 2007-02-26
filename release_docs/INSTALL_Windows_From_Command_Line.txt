@@ -41,42 +41,13 @@ WARNINGS:
 Please read CAREFULLY about HDF5 build and install preconditions and 
 notes in INSTALL_Windows.txt before starting below procedures.
 
-========================================================================
-                             Preconditions
-========================================================================
-
-   1. Add WinZip command line support (Optional)
-      
-      To use WinZip command line utility, you have to install 
-      WinZip 9.0 or higher version.
-
-      If you want to extract zip files on the command line,
-      you should
-   
-      1.1 Install WinZip command line support add-on 1.1
-   
-          Download WinZip command line support add-on 1.1 from 
-          http://www.winzip.com and install it.
-   
-      1.2 Add WinZip into environment path
-   
-          Open "System" in Control Panel.
-          On the "Advanced" tab, click "Environment Variables", click
-          "Path" in the "System variables" box, then click "Edit" and 
-          add your WinZip path (For example C:\Program Files\WinZip)
-          into "Variable Value" and click "OK".
-
-      Notes: 
-         You can also extract zip files from interactive WinZip
-         interface without the above two steps.
-  
 
 ========================================================================
    Section I: Building and testing HDF5 on command line with Microsoft 
               Visual C++ 6.0 and Compaq Visual Fortran 6.0.
 ========================================================================
     
-1. Extra Preconditions: 
+1. Preconditions: 
 
    1.1 Set path for Visual C++ 6.0 and Compaq Visual Fortran 6.0
    
@@ -449,4 +420,4 @@ SECTION II: Building and testing HDF5 C and C++ Library on command line
 ***********************************************************************  
 For further information, please refer to INSTALL_WINDOWS.txt.
 
-Please send email to hdfhelp@ncsa.uiuc.edu for further assistance.
+Please send email to help@hdfgroup.org for further assistance.

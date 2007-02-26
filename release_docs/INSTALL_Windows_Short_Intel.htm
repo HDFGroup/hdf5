@@ -1,468 +1,639 @@
-<HTML>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
 
-<!--
-  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-  * Copyright by The HDF Group.                                               *
-  * Copyright by the Board of Trustees of the University of Illinois.         *
-  * All rights reserved.                                                      *
-  *                                                                           *
-  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
-  * terms governing use, modification, and redistribution, is contained in    *
-  * the files COPYING and Copyright.html.  COPYING can be found at the root   *
-  * of the source code distribution tree; Copyright.html can be found at the  *
-  * root level of an installed copy of the electronic HDF5 document set and   *
-  * is linked from the top-level documents page.  It can also be found at     *
-  * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
-  * access to either file, you may request a copy from help@hdfgroup.org.     *
-  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- -->
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * Copyright by The HDF Group. * * Copyright by the Board of Trustees of the University of Illinois. * * All rights reserved. * * * * This file is part of HDF5. The full HDF5 copyright notice, including * * terms governing use, modification, and redistribution, is contained in * * the files COPYING and Copyright.html. COPYING can be found at the root * * of the source code distribution tree; Copyright.html can be found at the * * root level of an installed copy of the electronic HDF5 document set and * * is linked from the top-level documents page. It can also be found at * * http://hdfgroup.org/HDF5/doc/Copyright.html. If you do not have * * access to either file, you may request a copy from help@hdfgroup.org. * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+  <meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+  <title>HDF5 Build and Install Instructions for Windows XP with
+INTEL Compiler</title>
 
-<HEAD>
-<META NAME="GENERATOR" Content="Microsoft FrontPage 5.0">
-<TITLE>HDF5 Build and Install Instructions for Windows XP with 
-INTEL Compiler </TITLE>
-<style type="text/css">
 
+  <style type="text/css">
 a {text-decoration:none}
 a:link {color:#0000FF;}
 a:visited {color:purple;}
 a:hover {background-color:#FAEBD7;}
-
 body {
-     margin-left:5%;
-     margin-right:5%
-     }
+margin-left:5%;
+margin-right:5%
+}
 h1 {
-   font-family:font-family:times, arial, 'lucida console', sans-serif;
-   font-size: 180%;
-   font-style:bold;
-   color:#0000FF;
-   text-align:center;
-   text-transform:capitalize;
-   margin-top:30
-   }
+font-family:font-family:times, arial, 'lucida console', sans-serif;
+font-size: 180%;
+font-style:bold;
+color:#0000FF;
+text-align:center;
+text-transform:capitalize;
+margin-top:30
+}
 h2 {
-   font-family:font-family:times, arial, 'lucida console', sans-serif;
-   font-size: 160%;
-   font-style:bold;
-   color:#0000FF;
-   text-align:center;
-   text-transform:capitalize;
-   margin-top:20
-   
-   }
+font-family:font-family:times, arial, 'lucida console', sans-serif;
+font-size: 160%;
+font-style:bold;
+color:#0000FF;
+text-align:center;
+text-transform:capitalize;
+margin-top:20
+}
 h3 {
-   font-family:font-family:times, arial, 'lucida console', sans-serif;
-   font-size: 140%;
-   font-style:bold;
-   color:#0000FF;
-   text-transform:capitalize;
-   margin-top:15
-   }
+font-family:font-family:times, arial, 'lucida console', sans-serif;
+font-size: 140%;
+font-style:bold;
+color:#0000FF;
+text-transform:capitalize;
+margin-top:15
+}
 h4 {
-   font-family:font-family:times, arial, 'lucida console', sans-serif;
-   font-size: 120%;
-   font-style:bold;
-   color:#0000FF;
-   margin-top:12
-   }
+font-family:font-family:times, arial, 'lucida console', sans-serif;
+font-size: 120%;
+font-style:bold;
+color:#0000FF;
+margin-top:12
+}
 h5 {
-   font-family:font-family:times, arial, 'lucida console', sans-serif;
-   font-size: 110%;
-   font-style:bold;
-   color:#0000FF;
-   margin-top:10
-   }
-
+font-family:font-family:times, arial, 'lucida console', sans-serif;
+font-size: 110%;
+font-style:bold;
+color:#0000FF;
+margin-top:10
+}
 hr.first {color:#0000FF; height:4px;width:100%;magin-top:10px;margin-bottom:10px;border:thick double blue;}
 hr.second{color:#0000FF;height:2px; width:100%;magin-top:5px;margin-bottom:5px;border:thin dotted;}
-
-li{ 
-   margin-top:12;
-   }
-    
+li{ margin-top:12;
+}
 p.right{text-align:right;color:#A52A2A;}
-
 p {
-   font-family:font-family:times, arial, 'lucida console', sans-serif;
-   font-size: 110%;
-   text-align:left;
-  }
-  
+font-family:font-family:times, arial, 'lucida console', sans-serif;
+font-size: 110%;
+text-align:left;
+}
 p.center {text-align:center}
-  
 p.note{
-   font-family:font-family:times, arial, 'lucida console', sans-serif;
-   font-size: 110%;
-   text-align:left;
-   color:#FF0000
-  }
-
+font-family:font-family:times, arial, 'lucida console', sans-serif;
+font-size: 110%;
+text-align:left;
+color:#FF0000
+}
 p.filename
 {
-   font-family:font-family:times, arial, 'lucida console', sans-serif;
-   font-size: 100%;
-   font-style:italic; color:#008000
-   text-align:center;
+font-family:font-family:times, arial, 'lucida console', sans-serif;
+font-size: 100%;
+font-style:italic; color:#008000
+text-align:center;
 }
-   
 span.filename
 {
-   font-family:font-family:times, arial, 'lucida console', sans-serif;
-   font-size: 95%;
-   font-style:italic; color:#800000
-
+font-family:font-family:times, arial, 'lucida console', sans-serif;
+font-size: 95%;
+font-style:italic; color:#800000
 }
-
 table {
-      font-family:font-family:times, arial, 'lucida console', sans-serif;
-      font-size: 100%;
-      text-align:left;
-      border:thin solid blue;
-      }
-      
+font-family:font-family:times, arial, 'lucida console', sans-serif;
+font-size: 100%;
+text-align:left;
+border:thin solid blue;
+}
 td {
-   font-family:font-family:times, arial, 'lucida console', sans-serif;
-   font-size: 95%;
-   text-align:left;
-   padding:10;
-   }
-
+font-family:font-family:times, arial, 'lucida console', sans-serif;
+font-size: 95%;
+text-align:left;
+padding:10;
+}
 ul.normal
 {
 margin-left:10%;
 list-style-type:none;
 margin-bottom:15px;
 }
-
 ul.intable
 {
 text-align: left;
 list-style-type:none;
 }
-</style>
-</HEAD>
-<BODY>
+  </style>
+</head>
 
-<h1>HDF5 Build and Install Instructions for Windows XP with INTEL Compiler</h1>
+
+
+
+<body>
+
+<h1>HDF5 Build and Install Instructions for Windows XP with INTEL
+Compiler</h1>
+
 <h1>(Short Version)</h1>
-<hr class="first" >
+
+<hr class="first">
 <p class="note">Notes:</p>
-<p> 1. This short instruction is written for users who want to quickly build HDF5 
-library and tools from the HDF5 source code package with Intel Compiler but do 
-not want to know HDF5 building and installation details on Windows XP. For 
-detailed HDF5 build and install information, or if you have trouble following 
-any steps in the instructions, please refer to INSTALL_Windows.txt for further 
-information. For users who would like to build and test HDF5 package from the 
-command line, please refer to INSATLL_Windows_From_Command_Line.txt. 
-</p>
+
+<p> 1. This short instruction is written for users who want to
+quickly build HDF5 library and tools from the HDF5 source code package
+with Intel Compiler but do not want to know HDF5 building and
+installation details on Windows XP. For detailed HDF5 build and install
+information, or if you have trouble following any steps in the
+instructions, please refer to INSTALL_Windows.txt for further
+information. For users who would like to build and test HDF5 package
+from the command line, please refer to
+INSATLL_Windows_From_Command_Line.txt. </p>
+
 <p>2. For Intel Compiler users, Intel 7.x works with MSVS 6.0 and
-     Intel 8.1 only works with MSVS .net 2003 when you build 
-     HDF5-1.8.x.</p>
-     
-<p>3. HDF5 Fortran DLL Libraries is not supported with Intel Fortran
-         8.1 integration with Visual C++ .Net 2003 Environment. But 
-         Release version of HDF5 Fortran DLL Libraries works with Intel
-         Fortran whilt Debug version doesn't.</p>
-         
-<p>4. Szip library is different when using Intel compiler.
-         You should build Szip source codes with Intel
-         compiler or download binaries for Intel compiler
-         from <a href="ftp://ftp.ncsa.uiuc.edu/HDF/szip/2.0/bin/windows" target="_blank">
-         ftp://ftp.ncsa.uiuc.edu/HDF/szip/2.0/bin/windows.</a> </p>
-         
-<p>5. Set up path for external libraries and headers 
-	<ul class="intable">
-		
-           
-			<li><p>Skip this part if you don't want to use ANY compression 
-			         features provided by HDF5.  Please do read <A href="http://hdf.ncsa.uiuc.edu/windows/INSTALL_Windows.html#section5" target="_blank">Section V in INSTALL_Windows.html.</a></p></li>
+Intel 8.1 only works with MSVS .net 2003 when you build HDF5-1.8.x.</p>
 
-			<li><p>You have to read this part even if you want to use only Zlib
-			         or Szip.  You also need to read <A href="http://hdf.ncsa.uiuc.edu/windows/INSTALL_Windows.html#section5" target="_blank">Section V in INSTALL_Windows.html</a></p></li>
+<p>3. HDF5 Fortran DLL Libraries is not supported with Intel
+Fortran 8.1 integration with Visual C++ .Net 2003 Environment. But
+Release version of HDF5 Fortran DLL Libraries works with Intel Fortran
+whilt Debug version doesn't.</p>
 
-			<li><p>For users using Intel compiler 7.1 integration with MSVS 6.0, 
-			         please refer to<a href="http://hdf.ncsa.uiuc.edu/windows/INSTALL_Windows.html#precondition6" target="_blank">
-			         "Preconditions 6"  on INSTALL_Windows.html </a>to 
-			         set up path for external libraries and headers.</p></li>
-			        
-			<li><p>For users using Intel compiler 8.1 integration with Visual C++
-			         .Net 2003, detailed information about setting up external 
-			         libraries and header will be given in Part II, 2.1.3 in this 
-			         document.</p></li>
-     </ul>
-</p>
-         
-<p>6. <a href="#part2_2.1" target="_blank">Part II, 2.1 </a>in this document will build ONLY HDF5 Static and DLL C and C++ 
-         Library using Intel C++ Compiler.  If you want to build HDF5 
-         Static and DLL C and C++ Library as well as HDF5 Static Fortran
-         Library, Please go to <a href="#part2_2.2" target="_blank">Part II, 2.2 </a>directly!</p>
-         
-<p>7. Only short information was given on test HDF5 Libraries. Users 
-	 want to know detailed information about testing HDF5 Libraries
-     and tools, please refer to document  
-     <A href="http://hdf.ncsa.uiuc.edu/windows/INSTALL_Windows.html#step2_section2" target=_blank>
-    INSTALL_Windows.html, Section II, STEP 2 Testing HDF5 libraries and tools.</a></p>
-  
-<p>8. If&nbsp; you are not building HDF5 with Thread-Safe Feature, ttsafedll.dsp 
-should be turned off always.</p>
-  
+<p>4. Szip library is different when using Intel compiler. You
+should build Szip source codes with Intel compiler or download binaries
+for Intel compiler from <a href="ftp://ftp.ncsa.uiuc.edu/HDF/szip/2.0/bin/windows" target="_blank">
+ftp://ftp.ncsa.uiuc.edu/HDF/szip/2.0/bin/windows.</a> </p>
+
+<p>5. Set up path for external libraries and headers </p>
+
+<ul class="intable">
+
+  <li>
+    <p>Skip this part if you don't want to use ANY compression
+features provided by HDF5. Please do read <a href="http://hdfgroup.org/windows/INSTALL_Windows.html#section5" target="_blank">Section V in INSTALL_Windows.html.</a></p>
+
+  </li>
+
+  <li>
+    <p>You have to read this part even if you want to use only
+Zlib or Szip. You also need to read <a href="http://hdfgroup.org/windows/INSTALL_Windows.html#section5" target="_blank">Section V in INSTALL_Windows.html</a></p>
+
+  </li>
+
+  <li>
+    <p>For users using Intel compiler 7.1 integration with MSVS
+6.0, please refer to<a href="http://hdfgroup.org/windows/INSTALL_Windows.html#precondition6" target="_blank"> "Preconditions 6" on INSTALL_Windows.html </a>to
+set up path for external libraries and headers.</p>
+
+  </li>
+
+  <li>
+    <p>For users using Intel compiler 8.1 integration with Visual
+C++ .Net 2003, detailed information about setting up external libraries
+and header will be given in Part II, 2.1.3 in this document.</p>
+
+  </li>
+
+</ul>
+
+<p></p>
+
+<p>6. <a href="#part2_2.1" target="_blank">Part
+II, 2.1 </a>in this document will build ONLY HDF5 Static and DLL
+C and C++ Library using Intel C++ Compiler. If you want to build HDF5
+Static and DLL C and C++ Library as well as HDF5 Static Fortran
+Library, Please go to <a href="#part2_2.2" target="_blank">Part
+II, 2.2 </a>directly!</p>
+
+<p>7. Only short information was given on test HDF5 Libraries.
+Users want to know detailed information about testing HDF5 Libraries
+and tools, please refer to document <a href="http://hdfgroup.org/windows/INSTALL_Windows.html#step2_section2" target="_blank"> INSTALL_Windows.html, Section II, STEP 2
+Testing HDF5 libraries and tools.</a></p>
+
+<p>8. If&nbsp; you are not building HDF5 with Thread-Safe
+Feature, ttsafedll.dsp should always be turned off.</p>
+
 <p class="note">Warnings:</p>
-<p class="note">Please read CAREFULLY about <a href="http://hdf.ncsa.uiuc.edu/windows/INSTALL_Windows.html#preconditions" target="_blank">
-HDF5 build and install preconditions and notes</a> in 
+
+<p class="note">Please read CAREFULLY about <a href="http://hdfgroup.org/windows/INSTALL_Windows.html#preconditions" target="_blank">
+HDF5 build and install preconditions and notes</a> in
 INSTALL_Windows.txt before starting below procedures. </p>
-<hr class="second" />
+
+<hr class="second">
 <h2>Part I. Building HDF5 with INTEL compiler 7.1 with MSVS 6.0</h2>
-<hr class="second" />
 
-	<ul class="intable">
-		<li><h3>1.1. Intel C Compiler</h3>
-			<p>Go to Tools-->Select Compiler</p>
-			<p>Check Intel box and click OK button.</p>
-		</li>
-		<li><h3>1.2. Intel Fortran Compiler</h3>
-			<p>Go to Tools-->Select Compiler</p>
-			<p>Check Intel box and click OK button.</p>
-			<p>Go to Tools-->Customize-->Add-ins and Macro Files and check Intel Fortran Compiler Build Tool</p>	
-		</li>
-	</ul>
-	
-<hr class="second" />
-<h2>Part II. Building HDF5 with INTEL compiler 8.1 with Visual C++ .Net  2003 Environment</h2>
-<hr class="second" />
+<hr class="second">
+<ul class="intable">
 
-	<ul class="intable">
-		<li><h3><a name="part2_2.1">2.1 Building HDF5 C and C++ Library with Intel C++ Compiler</a></h3>
-				<ul class="intable">
-					<li><h4>2.1.1 Open all.dsw</h4>
-						<p class="note">Notes:</p>
-						<p>all.sln is for command line use only. please open all.dsw not all.sln.</p>
-						<p>Invoke Microsoft Visual C++ .Net 2003.  From the main 
-							menu, go to "File" and select "Open Solution". In
-							the "Open Solution" window, Change "Files of type" to
-							"All Project Files". Choose "all.dsw" under the directory
-							c:\MyHDFstuff\hdf5\windows\proj\all. In the pop up window,
-							choose "Yes To All" to convert all project files to Visual
-							C++ .Net project format.</p>
-					</li>
-					<li><h4>2.1.2 Convert to Use Intel C++ Project System</h4>
-					
-					<p>Right click on the solution name "all.sln" in the 
-					"Solution Explorer". From the pop-up menu select 
-					"Convert to use Intel C++ Project System" to convert 
-					all .Net project files to Intel C++ project files. </p>
-					</li>
-					<li><h4>2.1.3 Set up path for external libraries and headers</h4>
-					<p> Go to Tools > Options > Intel C++. In the left pane, Click "General".</p>
-						<ul class="intable">
-							<li><p>a. In the right pane, under "Compiler selection",
-							choose Intel C++ 8.1.</p></li>
-							<li><p>b. Click on "Intel C++ 8.1" to set the directories
-							and default options. In "Include", Add Zlib and Szip 
-							header path(c:\zlib122\include c:\szip\include). 
-							In "Library", Add Zlib and Szip Library Path
-							(c:\zlib122\lib, c:\szip\dll).</p></li>
-							<li><p>c. Then click "OK".</p></li>
-						</ul>
-					</li>
-					<li><h4>2.1.4 Building C and C++ Static and DLL Libraries and Tools</h4>
-					<p>Select "Build", then Select "Set Active Configuration".</p>
-					<p>Select "all -- Win32 Debug" or "all -- Win32 Release"</p>
-					<p>Disable all Fortran project files listed below and 
-                    ttsafedll project file:</p>
-					
-						<ul class="normal">						
-									<li>flush1_fortran </li>
-			  						<li>flush1_fortrandll </li>
-			  						<li>flush2_fortran </li>
-			  						<li>flush2_fortrandll </li>
-			  						<li>hdf5_f90cstub </li>
-			  						<li>hdf5_f90cstubdll</li>
-			  						<li>hdf5_fortran </li>
-			  						<li>hdf5_fortrandll </li>
-			  						<li>hdf5_hl_fortran </li>
-			  						<li>hdf5_hl_fortrandll</li>
-			  						<li>hdf5_hl_f90cstubdll</li>
-			  						<li>hl_test_image_fortran</li>
-			  						<li>hl_test_image_fortrandll</li>
-			  						<li>hl_test_lite_fortran</li>
-			  						<li>hl_test_lite_fortrandll</li>
-			  						<li>hl_test_table_fortran </li>
-			  						<li>hl_test_table_fortrandll</li>
-			  						<li>libtest_cstubdll </li>
-			  						<li>libtest_fortran </li>
-			  						<li>libtest_fortrandll </li>
-			  						<li>testhdf5_fortran </li>
-			  						<li>testhdf5_fortrandll</li>
-			  						<li>ttsafedll</li>					
-			  				</ul>      
-			  		<p>Select "ok". Select "Build" -> "Build" or "Rebuild All" to
-					build debug version of project "all".</p>
-					</li>
-					<li><h4>2.1.5 Testing HDF5 C and C++ Libraries and Tools</h4>
-   					<p>Under directory "hdf5", a batch file hdf5check.bat was provided to 
-					 test HDF5 libraries and tools. 
-					</p>
-					<p>Invoke command prompt, go to directory "hdf5", type in the following command to test HDF5 C and C++ Libraries.</p>
-						<ul class="normal">
-							<li>hdf5check enablecpp</li>
-						</ul>
-					<p>Test results will be save into file check_results.txt under 
-						directory "hdf5". Check check_results.txt, there should be no 
-						"failures" at all.
-					</p>
-					</li>
-				</ul>
-			</li>
-			<li><h3><a name="part2_2.2">2.2 Building HDF5 C and C++ Library and Static Fortran Library with Intel Compiler 8.1</a></h3>
-				<p class="note">Notes:</p>
-				<p>This step will build HDF5 Static and DLL C and C++ Library 
-					using Intel C++ 8.1 Compiler as well as HDF5 Static Fortran
-					Library using Intel Fortran 8.1 Compiler. 
-				</p>
-				<p>Users who want to build ONLY HDF5 Static and DLL C and C++ 
-					Library please go to <a href="#part2_2.1" target="_blank">Part II, 2.1.</a>
-				<ul class="intable">
-					<li><h4>2.2.1 Open all.dsw</h4>
-					<p>Invoke Microsoft Visual C++ .Net 2003.  From the main 
-						menu, go to "File" and select "Open Solution". In
-						the "Open Solution" window, Change "Files of type" to
-						"All Project Files". Choose "all.dsw" under the directory
-						c:\MyHDFstuff\hdf5\windows\proj\all. In the pop up window,
-						choose "Yes To All" to convert all project files to Visual
-						C++ .Net project format.</p>
-					</li>
-					
-					<li><h4> 2.2.2 Extract Compaq Visual Fortran Projects</h4>
-						<ul class="intable">
-							<li><p> a. Select project "flush1_fortran" in the Solution 
-								Explorer window. In the Project menu, select 
-								"Extract Compaq Visual Fortran Project". </p>
-								<p>Do the same thing for the following project files:</p>
-								<ul class="normal">
-									<li>flush2_fortran </li>
-         							<li>hdf5_fortran </li>
-         							<li>testhdf5_fortran </li>
-         							<li>hl_test_image_fortran </li>
-	            					<li>hl_test_lite_fortran </li>
-	            					<li>hl_test_table_fortran</li>
-	            				</ul>
-	            			</li>
-	            			<li><p>b. Select project "libtest_fortran" in the Solution 
-								Explorer window. In the Project menu, select 
-								"Extract Compaq Visual Fortran Project".  Choose 
-								"The Intel Fortran project" as the the main project . 
-                            Do the same thing for &quot;hdf5_hl_fortran&quot;</p>
-							</li>
-						</ul>
-					</li>
-					<li><h4>2.2.3 Change project dependencies of "libtest_fortran" 
-                    and &quot;hdf5_hl_fortran&quot;</h4>
-						<p>Highlight project "libtest_fortran", choose "Project"->
-							"Project Dependencies", uncheck "libtest".
-						</p>
-						<p>Highlight project "hdf5_hl_fortran", choose "Project"->
-							"Project Dependencies", uncheck "hdf5_fortran&quot; and 
-                        &quot;hdf5_hl&quot;.</p>
-					</li>
-					<li><h4>2.2.4 Convert all.sln to Use Intel C++ Project System</h4>
-						<p>Right click on the solution name "all.sln" in the 
-							"Solution Explorer". From the pop-up menu select 
-							"Convert to use Intel C++ Project System" to convert 
-							all .Net C++ project files to Intel C++ project formats. 
-						</p>
-					</li>
-					<li><h4>2.2.5 Building C and C++ Static and DLL Libraries and  Static 
-						Fortran Libraries and Tools</h4>
-						<p>Select "Build", then Select "Set Active Configuration".</p>
-						<p>Select "all -- Win32 Debug" or "all -- Win32 Release"</p>
-						<p>Disable all Fortran DLL project files listed below 
-                        and ttsafedll project file:</p>
-							<ul class="normal">
-					 	 		<li>flush1_fortrandll </li>
-					 	 		<li>flush2_fortrandll </li>
-		           				<li>hdf5_fortrandll </li>
-		           				<li>hdf5_hl_fortrandll</li>
-		           				<li>hdf5_hl_f90cstubdll</li>
-			  					<li>hl_test_image_fortrandll</li>
-			  					<li>hl_test_lite_fortrandll</li>
-			  					<li>hl_test_table_fortrandll</li>
-								<li>libtest_fortrandll </li>
-	             				<li>testhdf5_fortrandll</li>
-	             				<li>ttsafedll</li>
-	             			</ul>
-						<p>Select "ok". Select "Build" -> "Build" or "Rebuild All" to
-							build Debug or Release version of HDF5 C, C++ Static and DLL 
-							Library using Intel C++ 8.1 Compiler and HDF5 Static and High
-							Level Fortran Library using Intel Fortran 8.1 compiler.
-						</p>
-					</li>
-				</ul>
-			</li>
-		</ul>
-		<hr class="second" />
-		<h2>Part III Build HDF5 C and C++ Library with Intel C++ Compiler</h2>
-		<hr class="second" />
-			<ul class="intable">
-				<li><h3>3.1 Test HDF5 C and C++ Libraries</h3>
-						<p>Invoke command prompt, go to directory "hdf5", type in the 
-						   following command to test HDF5 C and C++ Libraries.</p>
-						<p>hdf5check enablecpp</p>
-						<p>Test results will be save into file check_results.txt under 
-							directory "hdf5". Check check_results.txt, there should be no 
-							"failures" at all.
-						</p>
-				</li>
-				
-				<li><h3>3.2 Test HDF5 Static and High Level Fortran Library</h3>
-						<p>Go to directory c:\myHDFstuff\hdf5\fortran\test, Run batch file
-    					testhdf5_fortran.bat with the following two options to test
-    					fortran static library 
-    					</p>
-    						<ul class="normal">
-    							<li>testhdf5_fortran release &gt;&gt; "Your output file name" </li>
-    							<li>testhdf5_fortran debug &gt;&gt;    "Your output file name"</li>
-    						</ul>
-    					<p>Check your output files, there should be no "failures" at all.</p>
-    			</li>
-    			<li><h3>3.3 Test HDF5 High Level Fortran Library</h3>
-    					<p>Go to directory c:\myHDFstuff\hdf5\hl\fortran\test, Run batch file
-    						testhdf5_fortran.bat with the following two options to test
-    					fortran static library 
-    					</p>
-    						<ul class="normal">
-    								<li>test_hdf5_hl_fortran release &gt;&gt; "Your output file name" </li>
- 
-    								<li>test_hdf5_hl_fortran debug &gt;&gt;    "Your output file name"</li>
-    						</ul>
-						    <p>Check your output files, there should be no "failures" at all.</p>
-				</li>	    
-			 </ul>
+  <li>
+    <h3>1.1. Intel C Compiler</h3>
 
-<hr class="second" >		
+    <p>Go to Tools--&gt;Select Compiler</p>
+
+    <p>Check Intel box and click OK button.</p>
+
+  </li>
+
+  <li>
+    <h3>1.2. Intel Fortran Compiler</h3>
+
+    <p>Go to Tools--&gt;Select Compiler</p>
+
+    <p>Check Intel box and click OK button.</p>
+
+    <p>Go to Tools--&gt;Customize--&gt;Add-ins and Macro
+Files and check Intel Fortran Compiler Build Tool</p>
+
+  </li>
+
+</ul>
+
+<hr class="second">
+<h2>Part II. Building HDF5 with INTEL compiler 8.1 with Visual
+C++ .Net 2003 Environment</h2>
+
+<hr class="second">
+<ul class="intable">
+
+  <li>
+    <h3><a name="part2_2.1">2.1 Building HDF5 C and
+C++ Library with Intel C++ Compiler</a></h3>
+
+    <ul class="intable">
+
+      <li>
+        <h4>2.1.1 Open all.dsw</h4>
+
+        <p class="note">Notes:</p>
+
+        <p>all.sln is for command line use only. please open
+all.dsw not all.sln.</p>
+
+        <p>Invoke Microsoft Visual C++ .Net 2003. From the main
+menu, go to "File" and select "Open Solution". In the "Open Solution"
+window, Change "Files of type" to "All Project Files". Choose "all.dsw"
+under the directory c:\MyHDFstuff\hdf5\windows\proj\all. In the pop up
+window, choose "Yes To All" to convert all project files to Visual C++
+.Net project format.</p>
+
+      </li>
+
+      <li>
+        <h4>2.1.2 Convert to Use Intel C++ Project System</h4>
+
+        <p>Right click on the solution name "all.sln" in the
+"Solution Explorer". From the pop-up menu select "Convert to use Intel
+C++ Project System" to convert all .Net project files to Intel C++
+project files. </p>
+
+      </li>
+
+      <li>
+        <h4>2.1.3 Set up path for external libraries and headers</h4>
+
+        <p> Go to Tools &gt; Options &gt; Intel C++. In
+the left pane, Click "General".</p>
+
+        <ul class="intable">
+
+          <li>
+            <p>a. In the right pane, under "Compiler selection",
+choose Intel C++ 8.1.</p>
+
+          </li>
+
+          <li>
+            <p>b. Click on "Intel C++ 8.1" to set the directories
+and default options. In "Include", Add Zlib and Szip header
+path(c:\zlib122\include c:\szip\include). In "Library", Add Zlib and
+Szip Library Path (c:\zlib122\lib, c:\szip\dll).</p>
+
+          </li>
+
+          <li>
+            <p>c. Then click "OK".</p>
+
+          </li>
+
+        </ul>
+
+      </li>
+
+      <li>
+        <h4>2.1.4 Building C and C++ Static and DLL Libraries and
+Tools</h4>
+
+        <p>Select "Build", then Select "Set Active Configuration".</p>
+
+        <p>Select "all -- Win32 Debug" or "all -- Win32 Release"</p>
+
+        <p>Disable all Fortran project files listed below and
+ttsafedll project file:</p>
+
+        <ul class="normal">
+
+          <li>flush1_fortran </li>
+
+          <li>flush1_fortrandll </li>
+
+          <li>flush2_fortran </li>
+
+          <li>flush2_fortrandll </li>
+
+          <li>hdf5_f90cstub </li>
+
+          <li>hdf5_f90cstubdll</li>
+
+          <li>hdf5_fortran </li>
+
+          <li>hdf5_fortrandll </li>
+
+          <li>hdf5_hl_fortran </li>
+
+          <li>hdf5_hl_fortrandll</li>
+
+          <li>hdf5_hl_f90cstubdll</li>
+
+          <li>hl_test_image_fortran</li>
+
+          <li>hl_test_image_fortrandll</li>
+
+          <li>hl_test_lite_fortran</li>
+
+          <li>hl_test_lite_fortrandll</li>
+
+          <li>hl_test_table_fortran </li>
+
+          <li>hl_test_table_fortrandll</li>
+
+          <li>libtest_cstubdll </li>
+
+          <li>libtest_fortran </li>
+
+          <li>libtest_fortrandll </li>
+
+          <li>testhdf5_fortran </li>
+
+          <li>testhdf5_fortrandll</li>
+
+          <li>ttsafedll</li>
+
+        </ul>
+
+        <p>Select "ok". Select "Build" -&gt; "Build" or
+"Rebuild All" to build debug version of project "all".</p>
+
+      </li>
+
+      <li>
+        <h4>2.1.5 Testing HDF5 C and C++ Libraries and Tools</h4>
+
+        <p>Under directory "hdf5", a batch file hdf5check.bat was
+provided to test HDF5 libraries and tools. </p>
+
+        <p>Invoke command prompt, go to directory "hdf5", type in
+the following command to test HDF5 C and C++ Libraries.</p>
+
+        <ul class="normal">
+
+          <li>hdf5check enablecpp</li>
+
+        </ul>
+
+        <p>Test results will be save into file check_results.txt
+under directory "hdf5". Check check_results.txt, there should be no
+"failures" at all. </p>
+
+      </li>
+
+    </ul>
+
+  </li>
+
+  <li>
+    <h3><a name="part2_2.2">2.2 Building HDF5 C and
+C++ Library and Static Fortran Library with Intel Compiler 8.1</a></h3>
+
+    <p class="note">Notes:</p>
+
+    <p>This step will build HDF5 Static and DLL C and C++ Library
+using Intel C++ 8.1 Compiler as well as HDF5 Static Fortran Library
+using Intel Fortran 8.1 Compiler. </p>
+
+    <p>Users who want to build ONLY HDF5 Static and DLL C and C++
+Library please go to <a href="#part2_2.1" target="_blank">Part
+II, 2.1.</a> </p>
+
+    <ul class="intable">
+
+      <li>
+        <h4>2.2.1 Open all.dsw</h4>
+
+        <p>Invoke Microsoft Visual C++ .Net 2003. From the main
+menu, go to "File" and select "Open Solution". In the "Open Solution"
+window, Change "Files of type" to "All Project Files". Choose "all.dsw"
+under the directory c:\MyHDFstuff\hdf5\windows\proj\all. In the pop up
+window, choose "Yes To All" to convert all project files to Visual C++
+.Net project format.</p>
+
+      </li>
+
+      <li>
+        <h4> 2.2.2 Extract Compaq Visual Fortran Projects</h4>
+
+        <ul class="intable">
+
+          <li>
+            <p> a. Select project "flush1_fortran" in the
+Solution Explorer window. In the Project menu, select "Extract Compaq
+Visual Fortran Project". </p>
+
+            <p>Do the same thing for the following project files:</p>
+
+            <ul class="normal">
+
+              <li>flush2_fortran </li>
+
+              <li>hdf5_fortran </li>
+
+              <li>testhdf5_fortran </li>
+
+              <li>hl_test_image_fortran </li>
+
+              <li>hl_test_lite_fortran </li>
+
+              <li>hl_test_table_fortran</li>
+
+            </ul>
+
+          </li>
+
+          <li>
+            <p>b. Select project "libtest_fortran" in the
+Solution Explorer window. In the Project menu, select "Extract Compaq
+Visual Fortran Project". Choose "The Intel Fortran project" as the the
+main project . Do the same thing for "hdf5_hl_fortran"</p>
+
+          </li>
+
+        </ul>
+
+      </li>
+
+      <li>
+        <h4>2.2.3 Change project dependencies of
+"libtest_fortran" and "hdf5_hl_fortran"</h4>
+
+        <p>Highlight project "libtest_fortran", choose
+"Project"-&gt; "Project Dependencies", uncheck "libtest". </p>
+
+        <p>Highlight project "hdf5_hl_fortran", choose
+"Project"-&gt; "Project Dependencies", uncheck "hdf5_fortran" and
+"hdf5_hl".</p>
+
+      </li>
+
+      <li>
+        <h4>2.2.4 Convert all.sln to Use Intel C++ Project System</h4>
+
+        <p>Right click on the solution name "all.sln" in the
+"Solution Explorer". From the pop-up menu select "Convert to use Intel
+C++ Project System" to convert all .Net C++ project files to Intel C++
+project formats. </p>
+
+      </li>
+
+      <li>
+        <h4>2.2.5 Building C and C++ Static and DLL Libraries and
+Static Fortran Libraries and Tools</h4>
+
+        <p>Select "Build", then Select "Set Active Configuration".</p>
+
+        <p>Select "all -- Win32 Debug" or "all -- Win32 Release"</p>
+
+        <p>Disable all Fortran DLL project files listed below and
+ttsafedll project file:</p>
+
+        <ul class="normal">
+
+          <li>flush1_fortrandll </li>
+
+          <li>flush2_fortrandll </li>
+
+          <li>hdf5_fortrandll </li>
+
+          <li>hdf5_hl_fortrandll</li>
+
+          <li>hdf5_hl_f90cstubdll</li>
+
+          <li>hl_test_image_fortrandll</li>
+
+          <li>hl_test_lite_fortrandll</li>
+
+          <li>hl_test_table_fortrandll</li>
+
+          <li>libtest_fortrandll </li>
+
+          <li>testhdf5_fortrandll</li>
+
+          <li>ttsafedll</li>
+
+        </ul>
+
+        <p>Select "ok". Select "Build" -&gt; "Build" or
+"Rebuild All" to build Debug or Release version of HDF5 C, C++ Static
+and DLL Library using Intel C++ 8.1 Compiler and HDF5 Static and High
+Level Fortran Library using Intel Fortran 8.1 compiler. </p>
+
+      </li>
+
+    </ul>
+
+  </li>
+
+</ul>
+
+<hr class="second">
+<h2>Part III Build HDF5 C and C++ Library with Intel C++ Compiler</h2>
+
+<hr class="second">
+<ul class="intable">
+
+  <li>
+    <h3>3.1 Test HDF5 C and C++ Libraries</h3>
+
+    <p>Invoke command prompt, go to directory "hdf5", type in the
+following command to test HDF5 C and C++ Libraries.</p>
+
+    <p>hdf5check enablecpp</p>
+
+    <p>Test results will be save into file check_results.txt
+under directory "hdf5". Check check_results.txt, there should be no
+"failures" at all. </p>
+
+  </li>
+
+  <li>
+    <h3>3.2 Test HDF5 Static and High Level Fortran Library</h3>
+
+    <p>Go to directory c:\myHDFstuff\hdf5\fortran\test, Run batch
+file testhdf5_fortran.bat with the following two options to test
+fortran static library </p>
+
+    <ul class="normal">
+
+      <li>testhdf5_fortran release &gt;&gt; "Your output
+file name" </li>
+
+      <li>testhdf5_fortran debug &gt;&gt; "Your output
+file name"</li>
+
+    </ul>
+
+    <p>Check your output files, there should be no "failures" at
+all.</p>
+
+  </li>
+
+  <li>
+    <h3>3.3 Test HDF5 High Level Fortran Library</h3>
+
+    <p>Go to directory c:\myHDFstuff\hdf5\hl\fortran\test, Run
+batch file testhdf5_fortran.bat with the following two options to test
+fortran static library </p>
+
+    <ul class="normal">
+
+      <li>test_hdf5_hl_fortran release &gt;&gt; "Your
+output file name" </li>
+
+      <li>test_hdf5_hl_fortran debug &gt;&gt; "Your
+output file name"</li>
+
+    </ul>
+
+    <p>Check your output files, there should be no "failures" at
+all.</p>
+
+  </li>
+
+</ul>
+
+<hr class="second">
 <h2>Part IV: Installing HDF5 Libraries</h2>
-<hr class="second" >
 
-<p>Run the batch file c:\MyHDFstuff\hdf5\installhdf5lib.bat to install 
-all HDF5 libraries and tools into c:\MyHDFstuff\hdf5\hdf5lib directory.</p>
+<hr class="second">
+<p>Run the batch file c:\MyHDFstuff\hdf5\installhdf5lib.bat to
+install all HDF5 libraries and tools into c:\MyHDFstuff\hdf5\hdf5lib
+directory.</p>
 
-<hr class="second" >
+<hr class="second">
 <h2>Part V: Building HDF5 Examples (Optional)</h2>
-<hr class="second" >
-<p>Please read <A href="http://hdf.ncsa.uiuc.edu/windows/INSTALL_Windows.html#step4_section2" target=_blank>section II, step 4 in INSTALL_Windows.html.</A></p>
 
-<hr class="first" />
+<hr class="second">
+<p>Please read <a href="http://hdfgroup.org/windows/INSTALL_Windows.html#step4_section2" target="_blank">section II, step 4 in INSTALL_Windows.html.</a></p>
 
-			
-     													
-<h4>Need further assistance? email to <a href="mailto:hdfhelp@ncsa.uiuc.edu">hdfhelp@ncsa.uiuc.edu</a> or go to
-    <a href="http://hdf.ncsa.uiuc.edu/windows/">http://hdf.ncsa.uiuc.edu/windows/questions</a> to get help on windows</h4>
-    <h4 style="background-color:green;color:white;text-align:center;letter-spacing:5;">Thank&nbsp; you&nbsp; for&nbsp; using&nbsp; Hierarchical&nbsp; Data&nbsp; Format&nbsp; (HDF)</h4>
-    <p>&nbsp;</p>
-<p>&nbsp;</p>
-                    </ul>
-<p>&nbsp;</p>
+<hr class="first">
+<h4>Need further assistance? email to <a href="mailto:help@hdfgroup.org">help@hdfgroup.org</a>
+or go to <a href="http://hdfgroup.org/windows/questions.html">http://hdfgroup.org/windows/questions/questions.html</a>
+to get help on windows</h4>
+
+<h4 style="background-color: green; color: white; text-align: center; letter-spacing: 5px;">Thank&nbsp;
+you&nbsp; for&nbsp; using&nbsp; Hierarchical&nbsp;
+Data&nbsp; Format&nbsp; (HDF)</h4>
+
 <p>&nbsp;</p>
 
-</BODY>
-</HTML>
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+</body>
+</html>

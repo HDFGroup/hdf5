@@ -143,4 +143,4 @@ Please read section II, step 4 in INSTALL_Windows.txt.
 
 
 ************************************************************************
-Please send email to hdfhelp@ncsa.uiuc.edu for further assistance
+Please send email to help@hdfgroup.org for further assistance

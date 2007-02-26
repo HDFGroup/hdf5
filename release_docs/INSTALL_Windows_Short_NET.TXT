@@ -17,7 +17,7 @@ Notes: This short instruction is written for users who want to quickly
        INSATLL_Windows_From_Command_Line.txt.
 
        For .Net and Intel users, If  you are not building HDF5 with 
-       Thread-Safe Feature, ttsafedll.dsp should be turned off always.
+       Thread-Safe Feature, ttsafedll.dsp should always be turned off.
         
 WARNINGS:
 
@@ -74,6 +74,9 @@ notes in INSTALL_Windows.txt before starting below procedures.
    copy the nessary files to the directory where they will be used.
 
 2. Open all.dsw workspace
+
+   In the pop up window, choose "Yes To All" to convert all project 
+   files to Visual C++ .Net project format.
    
    Notes: all.sln is for command use only. Please open all.dsw 
           not all.sln.
@@ -251,5 +254,5 @@ the following part in INSTALL_Windows.txt for detailed information.
 
 ************************************************************************
 
-Need further assistance, send email to hdfhelp@ncsa.uiuc.edu
+Need further assistance, send email to help@hdfgroup.org
 

@@ -5,7 +5,7 @@
 ***********************************************************************
 
 The following instructions assume that the HDF5 source code package from
-HDF website (http://hdf.ncsa.uiuc.edu) is used.
+HDF website (http://hdfgroup.org) is used.
 
 Warnings:
 Please read CAREFULLY about the following preconditions and notes first.
@@ -71,7 +71,7 @@ Preconditions:
       4.1 HDF5 uses Zlib version 1.2.2 for compression and Zlib is NOT
           distributed with HDF5 library in 1.8.x release. To use Zlib
           library, you have to install your own Zlib DLL library or go
-          to ftp://hdf.ncsa.uiuc.edu/lib-external/zlib/1.2/bin 
+          to ftp://ftp.hdfgroup.org/lib-external/zlib/1.2/bin 
           to download the Zlib library.
 
       
@@ -79,12 +79,12 @@ Preconditions:
           compression software is provided with HDF5 products in
           1.8.0 release.  To use Szip 2.0 library, you can
           download Szip source codes and binaries from
-          ftp://hdf.ncsa.uiuc.edu/lib-external/szip/2.0/bin/windows
+          ftp://ftp.hdfgroup.org/lib-external/szip/2.0/bin/windows
 
           Please note that Szip is not a totally open-source free
           software.  For licensing issue of Szip, please check 
           "Licensing terms" at
-          http://hdf.ncsa.uiuc.edu/doc_resource/SZIP/index.html.
+          http://hdfgroup.org/doc_resource/SZIP/index.html.
 
       Szip compression feature inside HDF5 is optional. 
       
@@ -171,8 +171,8 @@ Notes:
    
    6. HDF4-related tools are not built and released with HDF5 library
       packages any more. To obtain HDF4 related tools, please check
-      http://hdf.ncsa.uiuc.edu/h4toh5/ and 
-      ftp://hdf.ncsa.uiuc.edu/HDF5/h4toh5/
+      http://hdfgroup.org/h4toh5/ and 
+      ftp://ftp.hdfgroup.org/HDF5/h4toh5
 
    7. For DLL users, please do read and follow "DLL hints"
       at Section IV.
@@ -188,8 +188,9 @@ Notes:
    
    11. For users who would like to build, test and use HDF5 snapshot
        release, please read Section IX.
-   12. For .Net and Intel users, if  you are not in Section X How to build HDF5 with 
-       Thread-Safe Feature, ttsafedll.dsp should be turned off always.
+   12. For .Net and Intel users, if you are not building HDF5 with 
+       Thread-Safe Feature (see Section X), ttsafedll.dsp should 
+       always be turned off.
 
 
 ========================================================================
@@ -239,7 +240,7 @@ STEP 1: Building HDF5 libraries and tools
    1. Run batch file copy_hdf.bat.
 
       Go to  c:\MyHDFstuff\hdf5\windows and run copy_hdf.bat. This
-      process will copy all the necessary batch files,windows specific 
+      process will copy all the necessary batch files, windows specific 
       source codes and text files saved under c:\MyHDFstuff\hdf5\windows 
       directory to the corresponding directories under hdf5.
 
@@ -347,9 +348,9 @@ STEP 1: Building HDF5 libraries and tools
    4. Select "Build", then Select "Set Active Configuration".
    
       4.1 To build debug versions of single-threaded static libraries, 
-    	  Debug multithreaded DLLs and tests
+      Debug multithreaded DLLs and tests
     	    
-          In "Project configurations", select "all -- Win32 Debug",
+      In "Project configurations", select "all -- Win32 Debug",
 	  select "ok". Select "Build" -> "Build" or "Rebuild All" to
    	  build debug version of project "all".
    	      
@@ -412,7 +413,7 @@ STEP 1: Building HDF5 libraries and tools
                toolslibD.lib- the internal DLL export library for tools 
 
             c:\MyHDFstuff\hdf5\tools\"tools directory"-
-            where tools are located		
+            where tools are located
 
        The directories listed below will contain the following files
        ONLY when you choose to build HDF5 C++ libraries:
@@ -679,8 +680,8 @@ We provide 2 options for users to test HDF5 libraries and tools.
 
              b) release dll version
              type:
-                hdf5test release dll > "Your output filename"
-				
+                hdf5test release dll >"Your output filename"
+
              c) debug static version
              type: 
                 hdf5test debug >"Your output filename"
@@ -730,7 +731,7 @@ We provide 2 options for users to test HDF5 libraries and tools.
          type:
             testhdf5tools release dll
          output file: toolstest_releasedll.txt 
-				
+
          c) debug static version
          type: 
             testhdf5tools debug
@@ -859,10 +860,10 @@ We provide 2 options for users to test HDF5 libraries and tools.
     following HDF5 high level fortran DLLs will be copied to the system
     directory.
     
-c:\MyHDFstuff\hdf5\proj\hdf5_hl_f90cstubdll\Release\hdf5_hl_f90cstubdll.dll
-c:\MyHDFstuff\hdf5\proj\hdf5_hl_f90cstubdll\Debug\hdf5_hl_f90cstubdlld.dll
-c:\MyHDFstuff\hdf5\proj\hdf5_hlfortrandll\Release\hdf5_hlfortrandll.dll
-c:\MyHDFstuff\hdf5\proj\hdf5_hlfortrandll\Debug\hdf5_hlfortrandlld.dll
+        c:\MyHDFstuff\hdf5\proj\hdf5_hl_f90cstubdll\Release\hdf5_hl_f90cstubdll.dll
+        c:\MyHDFstuff\hdf5\proj\hdf5_hl_f90cstubdll\Debug\hdf5_hl_f90cstubdlld.dll
+        c:\MyHDFstuff\hdf5\proj\hdf5_hlfortrandll\Release\hdf5_hlfortrandll.dll
+        c:\MyHDFstuff\hdf5\proj\hdf5_hlfortrandll\Debug\hdf5_hlfortrandlld.dll
     
     Run test_hdf5_hl_fortran.bat in the hdf5\hl\fortran\test directory at
     the command prompt as below:
@@ -927,13 +928,13 @@ To build and test HDF5 C examples:
 
        2.1 To build debug versions of C examples.
            In "Project configurations", select "allexamples -- Win32 Debug",
-   	   select "ok". Select "Build" -> "Build" or "Rebuild All" to
-   	   build debug version of project "allexamples".
+          select "ok". Select "Build" -> "Build" or "Rebuild All" to
+          build debug version of project "allexamples".
 
        2.2 To build release versions of C examples.
-   	   In "Project configurations", select "allexamples -- Win32 Release",
-   	   select "ok". Select "Build" -> "Build" or "Rebuild All" to
-   	   build release version of project "allexamples".
+          In "Project configurations", select "allexamples -- Win32 Release",
+          select "ok". Select "Build" -> "Build" or "Rebuild All" to
+          build release version of project "allexamples".
 
       When the debug build or release build is done, there should be the 
       following subdirectories in c:\MyHDFstuff\hdf5\examples\
@@ -1004,8 +1005,8 @@ To build and test HDF5 C++ examples:
        2.2 To build release versions of C++ examples.
 
            In "Project configurations", select "allcppexamples -- Win32 Release",
-   	   select "ok". Select "Build" -> "Build" or "Rebuild All" to
-   	   build release version of project "allcppexamples".
+          select "ok". Select "Build" -> "Build" or "Rebuild All" to
+          build release version of project "allcppexamples".
       
    When the debug build or release build is done, there should be the 
    following subdirectories in c:\MyHDFstuff\hdf5\c++\examples\
@@ -1131,13 +1132,13 @@ c:\MyHDFstuff\hdf5\windows\hl\examples\allhlcexamples\allhlcexamples.dsw
    2. Select "Build", then Select "Set Active Configuration". 
 
        2.1 To build debug versions of High Level C examples.
-   	   In "Project configurations", select 
+           In "Project configurations", select 
            "allhlcexamples -- Win32 Debug", select "ok". Select 
            "Build" -> "Build" or "Rebuild All" to build debug version 
            of project "allhlcexamples".
 
        2.2 To build release versions of C examples.
-   	   In "Project configurations", select 
+           In "Project configurations", select 
            "allhlcexamples -- Win32 Release", select "ok". Select 
            "Build" -> "Build" or "Rebuild All" to build release version
            of project "allhlcexamples".
@@ -1425,7 +1426,7 @@ Warning: When you modify the H5pubconf.h file as described below,
              #define H5_HAVE_FILTER_DEFLATE 1
 
           then save the file.
-	  
+
       1.2 Delete HDF5_EXT_ZLIB environment variable if you have
           set it in preconditions.
    
@@ -1450,9 +1451,9 @@ Warning: When you modify the H5pubconf.h file as described below,
 
              #define H5_HAVE_SZLIB_H 1
              #define H5_HAVE_FILTER_SZIP 1
-            		   
+
           then save the file.
-	
+
       2.2 Delete HDF5_EXT_SZIP environment variable if you have
           set it in preconditions.
 
@@ -1481,7 +1482,7 @@ Warning: When you modify the H5pubconf.h file as described below,
 
           Szip library is different if you want to disable Szip encoder.
           Download szip_noencoder binaries from
-          ftp://ftp.ncsa.uiuc.edu/HDF/szip/2.0/bin/windows.
+          ftp://ftp.hdfgroup.org/lib-external/szip/2.0/bin/windows.
           The Szip library and header path should also be set up
           accordingly (refer to precondition 6).
    
@@ -1680,7 +1681,7 @@ Notes:  1. For Intel Compiler users, Intel 7.x works with MSVS 6.0 and
            HDF5-1.8.x.
               
         2. HDF5 Fortran DLL Libraries is not supported with Intel 
-	   Fortran 8.1 integration with Visual C++ .Net 2003 
+           Fortran 8.1 integration with Visual C++ .Net 2003 
            Environment. But Release version of HDF5 Fortran DLL 
            libraries works with Intel Fortran Compiler while Debug 
            version doesn't. 
@@ -1688,7 +1689,7 @@ Notes:  1. For Intel Compiler users, Intel 7.x works with MSVS 6.0 and
         3. Szip library is different when using Intel compiler.
            You should build Szip source codes with Inter compiler or 
            download binaries for Intel compiler from 
-           ftp://ftp.ncsa.uiuc.edu/HDF/szip/2.0/bin/windows.
+           ftp://ftp.hdfgroup.org/lib-external/szip/2.0/bin/windows.
         
         4. Run hdf5/windows/copy_hdf.bat first before open all.dsw. 
 
@@ -1714,7 +1715,7 @@ Notes:  1. For Intel Compiler users, Intel 7.x works with MSVS 6.0 and
      Szip source codes or binaries for Intel compiler can be downloaded
      from the following address:
      
-     ftp://ftp.ncsa.uiuc.edu/HDF/szip/2.0/bin/windows. 
+     ftp://ftp.hdfgroup.org/lib-external/szip/2.0/bin/windows. 
          
      b. Set up path for external libraries and headers
     
@@ -1994,15 +1995,15 @@ H5Tinit.c can be sucesessfully created by other compilers.
  1. Previous step: Section II, step 1(1).
  
  2. Extra steps:
-	1) Open c:\myHDFstuff\hdf5\windows\misc\typegen\typegen.dsw.
+    1) Open c:\myHDFstuff\hdf5\windows\misc\typegen\typegen.dsw.
 		
-	2) Build the project file.
+    2) Build the project file.
 		
-	3) Invoke command prompt and go to c:\myHDFstuff\hdf5\src.
+    3) Invoke command prompt and go to c:\myHDFstuff\hdf5\src.
 		
-	4) type H5Tinit.exe >H5Tinit.c
+    4) type H5Tinit.exe >H5Tinit.c
 		
-	5) Go back to Section II, continue with step 1(2).
+    5) Go back to Section II, continue with step 1(2).
 
 Step II: Generate H5f90i_gen.h and H5fortran_types.f90 using Compaq 
          Visual Fortran 6.6c
@@ -2252,9 +2253,9 @@ Section XI: How to build HDF5 in Visual studio 2005 on windows 32-bit and 64-bit
  pay attention to the following reminders:
  1) To use zlib or szlib compression packages:
     Use zlib 1.2.2 DLL provided at
-    ftp://ftp.ncsa.uiuc.edu/HDF/lib-external/zlib/1.2/bin/zlib122-windows.tar.gz
+    ftp://ftp.hdfgroup.org/lib-external/zlib/1.2/bin/zlib122-windows.tar.gz
     Use szlib 2.0 DLL provided at
-    ftp://ftp.ncsa.uiuc.edu/HDF/lib-external/szip/2.0/bin/windows/xp-net/
+    ftp://ftp.hdfgroup.org/lib-external/szip/2.0/bin/windows/xp-net
  2) Make sure that WIN32 macro is set at visual studio 2005. 
  3) You may use _CRT_SECURE_NO_DEPRECATE to disable the warnings.
  Please refer to Section VI: How to build HDF5 in Visual Studio .Net 2003.
@@ -2265,7 +2266,7 @@ Section XI: How to build HDF5 in Visual studio 2005 on windows 32-bit and 64-bit
                             Section XII: Misc.
 ========================================================================
 
-1. drivers we support
+1. Drivers we support
  
  The default driver on windows we support is sec2 driver. However, stdio
  driver is also supported. If you want to use stdio driver in your 
@@ -2362,4 +2363,4 @@ using the Visual C++ Development Environment.
     Remember to undo 1 and 2 after you test if you are not going to use 1.6 backward compatibility option.
     
 ************************************************************************
- Please send email to hdfhelp@hdfgroup.org for further assistance.
+ Please send email to help@hdfgroup.org for further assistance.
