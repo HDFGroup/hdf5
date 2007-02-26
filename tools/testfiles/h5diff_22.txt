@@ -2,7 +2,6 @@
 Expected output for 'h5diff h5diff_types.h5 h5diff_types.h5 -v dset t1'
 #############################
 Comparison not possible: </dset> is of type H5G_DATASET and </t1> is of type H5G_TYPE
-0 differences found
 --------------------------------
 Some objects are not comparable
 --------------------------------

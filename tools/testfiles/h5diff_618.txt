@@ -1,4 +1,3 @@
 #############################
 Expected output for 'h5diff h5diff_basic1.h5 h5diff_basic2.h5 -p 2 g1/dset3 g1/dset4'
 #############################
-0 differences found

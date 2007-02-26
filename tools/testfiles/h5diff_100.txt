@@ -1034,5 +1034,6 @@ position        big             big             difference
 [ 268436477 ]          31              0               31             
 [ 268436478 ]          31              0               31             
 [ 268436479 ]          31              0               31             
-group  : </> and </>
 1024 differences found
+group  : </> and </>
+0 differences found

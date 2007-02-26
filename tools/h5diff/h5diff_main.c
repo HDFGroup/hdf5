@@ -18,35 +18,45 @@
 #include <assert.h>
 
 static void usage(void);
-static int check_n_input( const char* );
-static int check_f_input( const char* );
-
+static int  check_n_input( const char* );
+static int  check_f_input( const char* );
+static void print_info(diff_opt_t* options);
 
 /*-------------------------------------------------------------------------
  * Function: main
  *
  * Purpose: h5diff main program
  *
- * Return: An  exit status of 0 means no differences were found, 1 means some
+ * Return: An exit status of 0 means no differences were found, 1 means some
  *   differences were found.
  *
- * Programmer: Pedro Vicente Nunes, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente Nunes, pvn@hdfgroup.org
  *
  * Date: May 9, 2003
  *
  * Comments:
  *
- * Modifications: July 2004
+ * Modifications: 
+ *
+ * July 2004
  *  Introduced the four modes:
  *   Normal mode: print the number of differences found and where they occured
  *   Report mode: print the above plus the differences
  *   Verbose mode: print the above plus a list of objects and warnings
  *   Quiet mode: do not print output
  *
-    * Modifications: October 2005
-    *  Introduced a new field 'not_cmp' to 'diff_opt_t' that detects
-    *  if some objects are not comparable and prints the message
-    *  "Some objects are not comparable"
+ * October 2005
+ *  Introduced a new field 'not_cmp' to 'diff_opt_t' that detects
+ *  if some objects are not comparable and prints the message
+ *  "Some objects are not comparable"
+ *
+ * February 2007
+ *  Added comparison for dataset regions. 
+ *  Added support for reading and comparing by hyperslabs for large files.
+ *  Inclusion of a relative error formula to compare floating
+ *   point numbers in order to deal with floating point uncertainty. 
+ *  Printing of dataset dimensions along with dataset name.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -204,35 +214,7 @@ int main(int argc, const char *argv[])
 
  nfound = h5diff(fname1,fname2,objname1,objname2,&options);
 
-/*-------------------------------------------------------------------------
- * print how many differences were found
- *-------------------------------------------------------------------------
- */
- if (!options.m_quiet)
- {
-  if (options.cmn_objs==0)
-  {
-   printf("No common objects found. Files are not comparable.\n");
-   if (!options.m_verbose)
-    printf("Use -v for a list of objects.\n");
-  }
-  else
-  {
-   if (!options.err_stat)
-    print_found(nfound);
-  }
-
-  if (options.not_cmp==1)
-  {
-      printf("--------------------------------\n");
-      printf("Some objects are not comparable\n");
-      printf("--------------------------------\n");
-      if (!options.m_verbose)
-          printf("Use -v for a list of objects.\n");
-  }
-
-
- }
+ print_info(&options);
 
 /*-------------------------------------------------------------------------
  * exit code
@@ -328,6 +310,7 @@ int check_f_input( const char *str )
  *
  *-------------------------------------------------------------------------
  */
+static
 void usage(void)
 {
  printf("usage: h5diff file1 file2 [OPTIONS] [obj1[obj2]] \n");
@@ -384,4 +367,38 @@ void usage(void)
  printf("3) datatypes: the return value of H5Tequal 2) links: name string difference of the linked value\n");
 
  exit(0);
+}
+
+
+
+/*-------------------------------------------------------------------------
+ * Function: print_info
+ *
+ * Purpose: print several information messages
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static
+void  print_info(diff_opt_t* options)
+{
+ if (options->m_quiet || options->err_stat)
+  return;
+
+ if (options->cmn_objs==0)
+ {
+  printf("No common objects found. Files are not comparable.\n");
+  if (!options->m_verbose)
+   printf("Use -v for a list of objects.\n");
+ }
+
+ if (options->not_cmp==1)
+ {
+  printf("--------------------------------\n");
+  printf("Some objects are not comparable\n");
+  printf("--------------------------------\n");
+  if (!options->m_verbose)
+   printf("Use -v for a list of objects.\n");
+ }
+
 }

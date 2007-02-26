@@ -471,6 +471,7 @@ hsize_t diff (hid_t file1_id,
             if (print_objname(options,(hsize_t)1))
                 do_print_objname ("dataset", path1, path2);
             nfound=diff_dataset(file1_id,file2_id,path1,path2,options);
+            print_found(nfound);
             
         }
        /*-------------------------------------------------------------------------
@@ -493,6 +494,7 @@ hsize_t diff (hid_t file1_id,
                     if (print_objname(options,nfound))
                         do_print_objname ("dataset", path1, path2);
                     nfound=diff_dataset(file1_id,file2_id,path1,path2,options);
+                    print_found(nfound);
                 } 
             } 
             /* in quiet mode, just count differences */
@@ -523,6 +525,10 @@ hsize_t diff (hid_t file1_id,
         
         if (print_objname(options,nfound))
             do_print_objname ("datatype", path1, path2);
+
+        /* always print the number of differences found in verbose mode */
+        if (options->m_verbose)
+            print_found(nfound);
         
         /*-------------------------------------------------------------------------
          * compare attributes
@@ -552,6 +558,10 @@ hsize_t diff (hid_t file1_id,
         
         if (print_objname(options,nfound))
             do_print_objname ("group", path1, path2);
+
+        /* always print the number of differences found in verbose mode */
+        if (options->m_verbose)
+            print_found(nfound);
         
         if ((grp1_id = H5Gopen(file1_id, path1))<0)
             goto out;
@@ -602,6 +612,10 @@ hsize_t diff (hid_t file1_id,
             
             if (print_objname (options, nfound))
                 do_print_objname ("link", path1, path2);
+
+            /* always print the number of differences found in verbose mode */
+            if (options->m_verbose)
+                print_found(nfound);
             
             HDfree (buf1);
             HDfree (buf2);
