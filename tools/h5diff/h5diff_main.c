@@ -46,6 +46,19 @@
  *   h5diff and ph5diff split into two files, one that is used
  *   to build a serial h5diff and one used to build a parallel h5diff
  *   Common functions have been moved to h5diff_common.c
+ *
+ * October 2005
+ *  Introduced a new field 'not_cmp' to 'diff_opt_t' that detects
+ *  if some objects are not comparable and prints the message
+ *  "Some objects are not comparable"
+ *
+ * February 2007
+ *  Added comparison for dataset regions. 
+ *  Added support for reading and comparing by hyperslabs for large files.
+ *  Inclusion of a relative error formula to compare floating
+ *   point numbers in order to deal with floating point uncertainty. 
+ *  Printing of dataset dimensions along with dataset name
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -64,7 +77,7 @@ int main(int argc, const char *argv[])
 
  nfound = h5diff(fname1,fname2,objname1,objname2,&options);
 
- print_results(&options);
+ print_info(&options);
 
 /*-------------------------------------------------------------------------
  * exit code

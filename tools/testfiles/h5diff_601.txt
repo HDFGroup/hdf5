@@ -10,8 +10,8 @@ file2             File name of the second HDF5 file
 [obj2]            Name of an HDF5 object, in absolute path
 [OPTIONS] are:
 [-h]              Print out this information
-[-r]              Report mode. Print the differences
-[-v]              Verbose mode. Print the differences, list of objects, warnings
+[-r]              Report mode. Print differences
+[-v]              Verbose mode. Print differences, list of objects, warnings
 [-q]              Quiet mode. Do not do output
 [-n count]        Print difference up to count number
 [-d delta]        Print difference when it is greater than limit delta

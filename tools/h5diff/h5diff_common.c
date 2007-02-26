@@ -180,14 +180,14 @@ void parse_input(int argc,
 }
 
 /*-------------------------------------------------------------------------
- * Function: print_results
+ * Function: print_info
  *
  * Purpose: print several information messages
  *
  *-------------------------------------------------------------------------
  */
 
-void  print_results(diff_opt_t* options)
+void  print_info(diff_opt_t* options)
 {
  if (options->m_quiet || options->err_stat)
   return;
@@ -299,8 +299,8 @@ void usage(void)
  printf("[obj2]            Name of an HDF5 object, in absolute path\n");
  printf("[OPTIONS] are:\n");
  printf("[-h]              Print out this information\n");
- printf("[-r]              Report mode. Print the differences\n");
- printf("[-v]              Verbose mode. Print the differences, list of objects, warnings\n");
+ printf("[-r]              Report mode. Print differences\n");
+ printf("[-v]              Verbose mode. Print differences, list of objects, warnings\n");
  printf("[-q]              Quiet mode. Do not do output\n");
  printf("[-n count]        Print difference up to count number\n");
  printf("[-d delta]        Print difference when it is greater than limit delta\n");
