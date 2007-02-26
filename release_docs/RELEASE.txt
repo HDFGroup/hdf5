@@ -504,6 +504,8 @@ New Features
 
     Tools:
     ------
+        - h5diff: added support for -p option for unsigned long_long data. PVN
+          - 2007/02/26
         - h5diff: added support for comparing dataset regions. PVN - 2007/02/20
         - h5diff: added support for reading and comparing by hyperslabs for large files.
           PVN - 2007/02/20
