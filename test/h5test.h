@@ -123,15 +123,18 @@ extern MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
  *    1. XXX_ABS_EQUAL - check if the difference is smaller than the 
  *       Epsilon value.  The Epsilon values, FLT_EPSILON, DBL_EPSILON,
  *       and LDBL_EPSILON, are defined by compiler in float.h.
- *    2. To be defined later.
+ *    2. XXX_REL_EQUAL - check if the relative difference is smaller than a
+ *       predefined value M.  See if two values are relatively equal.
+ *       It's the test's responsibility not to pass in the value 0, which 
+ *       may cause the equation to fail.
  */
 #define FLT_ABS_EQUAL(X,Y)	(fabsf(X-Y)<FLT_EPSILON)
 #define DBL_ABS_EQUAL(X,Y)	(fabs(X-Y)<DBL_EPSILON)
 #define LDBL_ABS_EQUAL(X,Y)	(fabsl(X-Y)<LDBL_EPSILON)
 
-/*#define FP_ABS_UNEQUAL(X,Y,T)	((T==1 && fabsf(X-Y)>FLT_EPSILON) || \
-                                 (T==2 && fabs(X-Y)>DBL_EPSILON) || \
-                                 (T==3 && fabsl(X-Y)>LDBL_EPSILON))*/
+#define FLT_REL_EQUAL(X,Y,M)    (fabsf((Y-X)/X<M)
+#define DBL_REL_EQUAL(X,Y,M)    (fabs((Y-X)/X)<M)
+#define LDBL_REL_EQUAL(X,Y,M)    (fabsl((Y-X)/X)<M)
 
 #ifdef __cplusplus
 extern "C" {
@@ -173,7 +176,6 @@ H5TEST_DLL void  IncTestNumErrs(void);
 H5TEST_DLL const void *GetTestParameters(void);
 H5TEST_DLL int  TestErrPrintf(const char *format, ...);
 H5TEST_DLL void SetTest(const char *testname, int action);
-
 
 #ifdef H5_HAVE_FILTER_SZIP
 H5TEST_DLL int h5_szip_can_encode(void);

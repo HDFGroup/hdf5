@@ -5160,7 +5160,7 @@ test_set_local(hid_t fapl)
     h5_fixname(FILENAME[5], fapl, filename, sizeof filename);
 
     /* Initialize the integer & floating-point dataset */
-    n=0.0;
+    n=1.0;
     for (i = 0; i < DSET_DIM1; i++)
 	for (j = 0; j < DSET_DIM2; j++) {
 	    points[i][j] = (int)n++;
@@ -5356,7 +5356,9 @@ test_set_local(hid_t fapl)
     /* Check that the values read are the modified version of what was written */
     for (i=0; i<dims[0]; i++) {
 	for (j=0; j<dims[1]; j++) {
-	    if (points_dbl[i][j] != check_dbl[i][j]) {
+	    /* If the difference between two values is greater than 0.001%, they're 
+             * considered not equal. */
+            if(!DBL_REL_EQUAL(points_dbl[i][j],check_dbl[i][j],0.00001)) {
 		H5_FAILED();
 		printf("    Line %d: Read different values than written.\n",__LINE__);
 		printf("    At index %lu,%lu\n", (unsigned long)(i), (unsigned long)(j));
