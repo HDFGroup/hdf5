@@ -259,7 +259,7 @@ SKIP() {
 
 ##############################################################################
 ##############################################################################
-###			  T H E   T E S T S                                            ###
+###			  T H E   T E S T S                                ###
 ##############################################################################
 ##############################################################################
 
@@ -286,9 +286,6 @@ TOOLTEST h5diff_14.txt  $FILE1 $FILE2  -r g1/dset1 g1/dset2
 # 1.5 with -d
 TOOLTEST h5diff_15.txt $FILE1 $FILE2 -r -d 5 g1/dset3 g1/dset4
 
-# 1.6 with -p (double)
-#TOOLTEST h5diff_16.txt $FILE1 $FILE1 g1/dset9 g1/dset10 -p 0.01 -v
-
 # 1.6.1 with -p (int)
 TOOLTEST h5diff_161.txt $FILE1 $FILE1 -v -p 0.02 g1/dset5 g1/dset6
 
@@ -303,13 +300,6 @@ TOOLTEST h5diff_17.txt $FILE1 $FILE2 -v
 
 # 1.8 quiet mode 
 TOOLTEST h5diff_18.txt $FILE1 $FILE2 -q
-
-# 1.9.1 with -p (int)
-#TOOLTEST h5diff_191.txt $FILE1 $FILE1 -v -p 0.02 g1/dset5 g1/dset6
-
-# 1.9.2 with -p (unsigned long_long)
-#TOOLTEST h5diff_192.txt $FILE1 $FILE1 -v -p 0.02 g1/dset7 g1/dset8
-
 
 # ##############################################################################
 # # not comparable types
