@@ -57,7 +57,6 @@
 
 #define INDENT  3
 #define VCOL    50
-#define SIGLEN  H5F_SIGNATURE_LEN       /* Size of signature buffer */
 
 
 /*-------------------------------------------------------------------------
@@ -81,7 +80,7 @@ main(int argc, char *argv[])
     hid_t	fid, fapl, dxpl;
     H5F_t       *f;
     haddr_t     addr = 0, extra = 0, extra2 = 0, extra3 = 0;
-    uint8_t     sig[SIGLEN];
+    uint8_t     sig[H5F_SIGNATURE_LEN];
     size_t      u;
     herr_t      status = SUCCEED;
 

@@ -44,22 +44,26 @@
 
 /* Fixed-size portion at the beginning of all superblocks */
 #define H5F_SUPERBLOCK_FIXED_SIZE ( H5F_SIGNATURE_LEN                   \
-        + 3 /* superblock, freespace, and root group versions */        \
+        + 1) /* superblock version */
+
+/* Macros for computing variable-size superblock size */
+#define H5F_SUPERBLOCK_VARLEN_SIZE_COMMON                               \
+        (2  /* freespace, and root group versions */			\
         + 1 /* reserved */                                              \
         + 3 /* shared header vers, size of address, size of lengths */  \
         + 1 /* reserved */                                              \
         + 4 /* group leaf k, group internal k */                        \
         + 4) /* consistency flags */
-
-/* Macros for computing variable-size superblock size */
 #define H5F_SUPERBLOCK_VARLEN_SIZE_V0(f)                                \
-        ( H5F_SIZEOF_ADDR(f) /* base address */                         \
+        ( H5F_SUPERBLOCK_VARLEN_SIZE_COMMON /* Common variable-length info */ \
+        + H5F_SIZEOF_ADDR(f) /* base address */                         \
         + H5F_SIZEOF_ADDR(f) /* <unused> */				\
         + H5F_SIZEOF_ADDR(f) /* EOF address */                          \
         + H5F_SIZEOF_ADDR(f) /* driver block address */                 \
         + H5G_SIZEOF_ENTRY(f)) /* root group ptr */
 #define H5F_SUPERBLOCK_VARLEN_SIZE_V1(f)                                \
-        ( 2 /* indexed B-tree internal k */                             \
+        ( H5F_SUPERBLOCK_VARLEN_SIZE_COMMON /* Common variable-length info */ \
+        + 2 /* indexed B-tree internal k */                             \
         + 2 /* reserved */                                              \
         + H5F_SIZEOF_ADDR(f) /* base address */                         \
         + H5F_SIZEOF_ADDR(f) /* <unused> */				\
@@ -67,7 +71,8 @@
         + H5F_SIZEOF_ADDR(f) /* driver block address */                 \
         + H5G_SIZEOF_ENTRY(f)) /* root group ptr */
 #define H5F_SUPERBLOCK_VARLEN_SIZE_V2(f)                                \
-        ( 2 /* indexed B-tree internal k */                             \
+        ( H5F_SUPERBLOCK_VARLEN_SIZE_COMMON /* Common variable-length info */ \
+        + 2 /* indexed B-tree internal k */                             \
         + H5F_SIZEOF_ADDR(f) /* base address */                         \
         + H5F_SIZEOF_ADDR(f) /* superblock extension address */         \
         + H5F_SIZEOF_ADDR(f) /* EOF address */                          \
@@ -232,12 +237,12 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
     size_t              sizeof_addr;        /* Size of offsets in the file (in bytes) */
     size_t              sizeof_size;        /* Size of lengths in the file (in bytes) */
     const size_t        fixed_size = H5F_SUPERBLOCK_FIXED_SIZE; /*fixed sizeof superblock   */
-    unsigned            sym_leaf_k = 0;
+    unsigned            sym_leaf_k;         /* Symbol table leaf node's 'K' value */
     size_t              variable_size;      /*variable sizeof superblock    */
     unsigned            btree_k[H5B_NUM_BTREE_ID];  /* B-tree internal node 'K' values */
     H5F_file_t         *shared = NULL;      /* shared part of `file'        */
     H5FD_t             *lf = NULL;          /* file driver part of `shared' */
-    uint8_t            *p;                  /* Temporary pointer into encoding buffers */
+    uint8_t            *p;                  /* Temporary pointer into encoding buffer */
     unsigned            super_vers;         /* Superblock version          */
     unsigned            freespace_vers;     /* Freespace info version       */
     unsigned            obj_dir_vers;       /* Object header info version   */
@@ -267,7 +272,7 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
     if(H5FD_read(lf, H5FD_MEM_SUPER, dxpl_id, shared->super_addr, fixed_size, p) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL, "unable to read superblock")
 
-    /* Signature, already checked (when locating the superblock) */
+    /* Skip over signature (already checked when locating the superblock) */
     p += H5F_SIGNATURE_LEN;
 
     /* Superblock version */
@@ -276,6 +281,20 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "bad superblock version number")
     if(H5P_set(c_plist, H5F_CRT_SUPER_VERS_NAME, &super_vers) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set superblock version")
+
+    /* Sanity check */
+    HDassert(((size_t)(p - buf)) == fixed_size);
+
+    /* Determine the size of the variable-length part of the superblock */
+    variable_size = H5F_SUPERBLOCK_VARLEN_SIZE(super_vers, f);
+    HDassert(variable_size > 0);
+    HDassert(fixed_size + variable_size <= sizeof(buf));
+
+    /* Read in variable-sized portion of superblock */
+    if(H5FD_set_eoa(lf, H5FD_MEM_SUPER, shared->super_addr + fixed_size + variable_size) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "set end of space allocation request failed")
+    if(H5FD_read(lf, H5FD_MEM_SUPER, dxpl_id, shared->super_addr + fixed_size, variable_size, p) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to read superblock")
 
     /* Freespace version */
     freespace_vers = *p++;
@@ -343,18 +362,6 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
 
     /* File consistency flags. Not really used yet */
     UINT32DECODE(p, shared->consist_flags);
-    HDassert(((size_t)(p - buf)) == fixed_size);
-
-    /* Determine the size of the variable-length part of the superblock */
-    variable_size = H5F_SUPERBLOCK_VARLEN_SIZE(super_vers, f);
-    HDassert(variable_size > 0);
-    HDassert(fixed_size + variable_size <= sizeof(buf));
-
-    /* Read in variable-sized portion of superblock */
-    if(H5FD_set_eoa(lf, H5FD_MEM_SUPER, shared->super_addr + fixed_size + variable_size) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "set end of space allocation request failed")
-    if(H5FD_read(lf, H5FD_MEM_SUPER, dxpl_id, shared->super_addr + fixed_size, variable_size, p) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to read superblock")
 
     /*
      * If the superblock version # is greater than 0, read in the indexed
