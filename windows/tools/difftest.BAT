@@ -102,47 +102,47 @@ echo.****************************************************
 
 ::1.0
 set flag=-h
-call %tooltest% h5diff_10.txt 
+call %tooltest% h5diff_10.wri 
 
 ::1.1 normal mode
 set flag=%file1% %file2%
-call %tooltest% h5diff_11.txt 
+call %tooltest% h5diff_11.wri 
 
 ::1.2 normal mode with objects
 set flag=%file1% %file2% g1/dset1 g1/dset2
-call %tooltest% h5diff_12.txt   
+call %tooltest% h5diff_12.wri   
 
 ::1.3 report mode
 set flag=%file1% %file2% -r
-call %tooltest% h5diff_13.txt 
+call %tooltest% h5diff_13.wri 
  
 ::1.4 report  mode with objects
 set flag=%file1% %file2% -r g1/dset1 g1/dset2
-call %tooltest% h5diff_14.txt 
+call %tooltest% h5diff_14.wri 
  
 ::1.5 with -d
 set flag=%file1% %file2% -r -d 5 g1/dset3 g1/dset4
-call %tooltest% h5diff_15.txt 
- 
-::1.6 with -p
-set flag=%file1% %file1% g1/dset9 g1/dset10 -p 0.01 -v
-call %tooltest% h5diff_16.txt 
- 
+call %tooltest% h5diff_15.wri 
+
+::1.6.1 with -p (int)
+set flag=%file1% %file1% -v -p 0.02 g1/dset5 g1/dset6
+call %tooltest% h5diff_16_1.wri 
+
+::1.6.2 with -p (unsigned long_long)
+set flag=%file1% %file1% -v -p 0.02 g1/dset7 g1/dset8
+call %tooltest% h5diff_16_2.wri 
+
+::1.6.2 with -p (unsigned long_long)
+set flag=%file1% %file1% -v -p 0.02 g1/dset9 g1/dset10
+call %tooltest% h5diff_16_3.wri 
+
 ::1.7 verbose mode
 set flag=%file1% %file2% -v
-call %tooltest% h5diff_17.txt 
+call %tooltest% h5diff_17.wri 
  
 ::1.8 quiet mode 
 set flag=%file1% %file2% -q
-call %tooltest% h5diff_18.txt 
-
-::#1.9.1 with -p (int)
-set flag=%file1% %file1% -v -p 0.02 g1/dset5 g1/dset6
-call %tooltest% h5diff_191.txt 
-
-::#1.9.2 with -p (unsigned long_long)
-set flag=%file1% %file1% -v -p 0.02 g1/dset7 g1/dset8
-call %tooltest% h5diff_192.txt 
+call %tooltest% h5diff_18.wri 
 
 ::---------------------
 ::Not Comparable Types
@@ -150,41 +150,41 @@ call %tooltest% h5diff_192.txt
 
 ::2.0
 set flag=%file3% %file3% -v dset g1
-call %tooltest% h5diff_20.txt 
+call %tooltest% h5diff_20.wri 
 
 ::2.1
 set flag=%file3% %file3% -v dset l1
-call %tooltest% h5diff_21.txt 
+call %tooltest% h5diff_21.wri 
  
 
 ::2.2
 set flag=%file3% %file3% -v dset t1
-call %tooltest% h5diff_22.txt  
+call %tooltest% h5diff_22.wri  
  
 
 ::2.3
 set flag=%file3% %file3% -v g1 g1
-call %tooltest% h5diff_23.txt 
+call %tooltest% h5diff_23.wri 
 
 ::2.4
 set flag=%file3% %file3% -v t1 t1
-call %tooltest% h5diff_24.txt  
+call %tooltest% h5diff_24.wri  
  
 ::2.5
 set flag=%file3% %file3% -v l1 l1
-call %tooltest% h5diff_25.txt  
+call %tooltest% h5diff_25.wri  
 
 ::2.6
 set flag=%file3% %file3% -v g1 g2
-call %tooltest% h5diff_26.txt 
+call %tooltest% h5diff_26.wri 
 
 ::2.7
 set flag=%file3% %file3% -v t1 t2
-call %tooltest% h5diff_27.txt  
+call %tooltest% h5diff_27.wri  
  
 ::2.8
 set flag=%file3% %file3% -v l1 l2
-call %tooltest% h5diff_28.txt  
+call %tooltest% h5diff_28.wri  
 
 
 
@@ -194,47 +194,47 @@ call %tooltest% h5diff_28.txt
 
 ::5.0
 set flag=%file4% %file4% -v dset0a dset0b
-call %tooltest% h5diff_50.txt  
+call %tooltest% h5diff_50.wri  
  
 
 ::5.1
 set flag=%file4% %file4% -v dset1a dset1b
-call %tooltest% h5diff_51.txt  
+call %tooltest% h5diff_51.wri  
  
 
 ::5.2
 set flag=%file4% %file4% -v dset2a dset2b
-call %tooltest% h5diff_52.txt 
+call %tooltest% h5diff_52.wri 
  
 
 ::5.3
 set flag=%file4% %file4% -v dset3a dset4b
-call %tooltest% h5diff_53.txt 
+call %tooltest% h5diff_53.wri 
  
 
 ::5.4
 set flag=%file4% %file4% -v dset4a dset4b
-call %tooltest% h5diff_54.txt 
+call %tooltest% h5diff_54.wri 
  
 
 ::5.5
 set flag=%file4% %file4% -v dset5a dset5b
-call %tooltest% h5diff_55.txt  
+call %tooltest% h5diff_55.wri  
  
 
 ::5.6
 set flag=%file4% %file4% -v dset6a dset6b
-call %tooltest% h5diff_56.txt 
+call %tooltest% h5diff_56.wri 
  
 
 ::5.7
 set flag=%file4% %file4% -v dset7a dset7b
-call %tooltest% h5diff_57.txt  
+call %tooltest% h5diff_57.wri  
  
 
 ::5.8 long_long test; different format of long_long print  in Linux and IRIX
-set flag=%file4% %file4% dset8a dset8b
-call %tooltest% h5diff_58.txt  SKIP
+set flag=%file7% %file8% -v refreg
+call %tooltest% h5diff_58.wri
 
 :: --------------
 :: Error messages
@@ -242,11 +242,11 @@ call %tooltest% h5diff_58.txt  SKIP
 
 ::6.0: Check if the command line number of arguments is less than 3
 set flag=%file1%
-call %tooltest% h5diff_600.txt 
+call %tooltest% h5diff_600.wri 
  
 ::6.1: Check for invalid options
 set flag=%file1% %file2% -x
-call %tooltest% h5diff_601.txt   
+call %tooltest% h5diff_601.wri   
 
 :: ----
 :: -d 
@@ -254,47 +254,47 @@ call %tooltest% h5diff_601.txt
 
 ::6.2: no value
 set flag=%file1% %file2% -d g1/dset3 g1/dset4
-call %tooltest% h5diff_602.txt  
+call %tooltest% h5diff_602.wri  
  
 
 ::6.3: negative value
 set flag=%file1% %file2% -d -4 g1/dset3 g1/dset4
-call %tooltest% h5diff_603.txt  
+call %tooltest% h5diff_603.wri  
  
 
 ::6.4: zero
 set flag=%file1% %file2% -d 0 g1/dset3 g1/dset4
-call %tooltest% h5diff_604.txt  
+call %tooltest% h5diff_604.wri  
  
 
 ::6.5: non number
 set flag=%file1% %file2% -d u g1/dset3 g1/dset4
-call %tooltest% h5diff_605.txt  
+call %tooltest% h5diff_605.wri  
  
 
 ::6.6: hexadecimal
 set flag=%file1% %file2% -d 0x1 g1/dset3 g1/dset4
-call %tooltest% h5diff_606.txt 
+call %tooltest% h5diff_606.wri 
  
 
 ::6.7: string
 set flag=%file1% %file2% -d "1" g1/dset3 g1/dset4
-call %tooltest% h5diff_607.txt  
+call %tooltest% h5diff_607.wri  
  
 
 ::6.8: repeated option
 set flag=%file1% %file2% -d 1 -d 2 g1/dset3 g1/dset4
-call %tooltest% h5diff_608.txt  
+call %tooltest% h5diff_608.wri  
  
 
 ::6.9: number larger than biggest difference
 set flag=%file1% %file2% -d 200 g1/dset3 g1/dset4
-call %tooltest% h5diff_609.txt  
+call %tooltest% h5diff_609.wri  
  
 
 ::6.10: number smaller than smallest difference
 set flag=%file1% %file2% -d 1 g1/dset3 g1/dset4
-call %tooltest% h5diff_610.txt  
+call %tooltest% h5diff_610.wri  
  
 ::---
 ::-p
@@ -303,50 +303,50 @@ call %tooltest% h5diff_610.txt
 
 ::6.11: no value
 set flag=%file1% %file2% -r -p g1/dset3 g1/dset4
-call %tooltest% h5diff_611.txt  
+call %tooltest% h5diff_611.wri  
  
 
 
 ::6.12: negative value
 set flag=%file1% %file2% -p -4 g1/dset3 g1/dset4
-call %tooltest% h5diff_612.txt  
+call %tooltest% h5diff_612.wri  
  
 
 
 ::6.13: zero
 set flag=%file1% %file2% -p 0 g1/dset3 g1/dset4
-call %tooltest% h5diff_613.txt  
+call %tooltest% h5diff_613.wri  
  
 
 
 ::6.14: non number
 set flag=%file1% %file2% -p u g1/dset3 g1/dset4
-call %tooltest% h5diff_614.txt  
+call %tooltest% h5diff_614.wri  
  
 
 ::6.15: hexadecimal
 set flag=%file1% %file2% -p 0x1 g1/dset3 g1/dset4
-call %tooltest% h5diff_615.txt  
+call %tooltest% h5diff_615.wri  
  
 
 ::6.16: string
 set flag=%file1% %file2% -p "0.21" g1/dset3 g1/dset4
-call %tooltest% h5diff_616.txt  
+call %tooltest% h5diff_616.wri  
  
 
 ::6.17: repeated option
 set flag=%file1% %file2% -p 0.21 -p 0.22 g1/dset3 g1/dset4
-call %tooltest% h5diff_617.txt  
+call %tooltest% h5diff_617.wri  
  
 
 ::6.18: number larger than biggest difference
 set flag=%file1% %file2% -p 2 g1/dset3 g1/dset4
-call %tooltest% h5diff_618.txt  
+call %tooltest% h5diff_618.wri  
  
 
 ::6.19: number smaller than smallest difference
 set flag=%file1% %file2% -p 0.005 g1/dset3 g1/dset4
-call %tooltest% h5diff_619.txt  
+call %tooltest% h5diff_619.wri  
  
 
 ::---
@@ -355,61 +355,61 @@ call %tooltest% h5diff_619.txt
 
 ::6.20: no value
 set flag=%file1% %file2% -n g1/dset3 g1/dset4
-call %tooltest% h5diff_620.txt  
+call %tooltest% h5diff_620.wri  
  
 
 ::6.21: negative value
 set flag=%file1% %file2% -n -4 g1/dset3 g1/dset4
-call %tooltest% h5diff_621.txt  
+call %tooltest% h5diff_621.wri  
  
 
 ::6.22: zero
 set flag=%file1% %file2% -n 0 g1/dset3 g1/dset4
-call %tooltest% h5diff_622.txt  
+call %tooltest% h5diff_622.wri  
  
 
 ::6.23: non number
 set flag=%file1% %file2% -n u g1/dset3 g1/dset4
-call %tooltest% h5diff_623.txt  
+call %tooltest% h5diff_623.wri  
  
 
 ::6.24: hexadecimal
 set flag=%file1% %file2% -n 0x1 g1/dset3 g1/dset4
-call %tooltest% h5diff_624.txt  
+call %tooltest% h5diff_624.wri  
  
 
 ::6.25: string
 set flag=%file1% %file2% -n "2" g1/dset3 g1/dset4
-call %tooltest% h5diff_625.txt  
+call %tooltest% h5diff_625.wri  
  
 
 
 ::6.26: repeated option
 set flag=%file1% %file2% -n 2 -n 3 g1/dset3 g1/dset4
-call %tooltest% h5diff_626.txt  
+call %tooltest% h5diff_626.wri  
  
 
 ::6.27: number larger than biggest difference
 set flag=%file1% %file2% -n 200 g1/dset3 g1/dset4
-call %tooltest% h5diff_627.txt  
+call %tooltest% h5diff_627.wri  
  
 
 ::6.28: number smaller than smallest difference
 set flag=%file1% %file2% -n 1 g1/dset3 g1/dset4
-call %tooltest% h5diff_628.txt  
+call %tooltest% h5diff_628.wri  
  
 
 ::6.29:  non valid %files
 
 set flag=file1.h6      file2.h6
-call %tooltest% h5diff_629.txt  
+call %tooltest% h5diff_629.wri  
 
 ::--------------
 ::7.  attributes
 ::--------------
 
 set flag=%file5% %file6% -v
-call %tooltest% h5diff_70.txt  
+call %tooltest% h5diff_70.wri  
 
 
 ::-------------------------
@@ -417,7 +417,7 @@ call %tooltest% h5diff_70.txt
 ::-------------------------
 
 set flag=%file7% %file8% -v
-call %tooltest% h5diff_80.txt  
+call %tooltest% h5diff_80.wri  
  
 
 ::-----------------------------
@@ -425,14 +425,25 @@ call %tooltest% h5diff_80.txt
 ::-----------------------------
 
 set flag=%file1% %file1%
-call %tooltest% h5diff_90.txt  
+call %tooltest% h5diff_90.wri  
 
 ::-----------------------------
 ::10. read by hyperslab, print indexes
 ::-----------------------------
 
 set flag=%file9% %file10% -v
-call %tooltest% h5diff_100.txt  
+call %tooltest% h5diff_100.wri  
+
+::-----------------------------
+::11. floating point comparison
+::-----------------------------
+
+REM Not tested on Windows due to difference in formatting of scientific notation
+REM set flag=%file1% %file1% /g1/d1  g1/d2  -v
+REM call %tooltest% h5diff_101.wri  
+
+REM set flag=%file1% %file1% /g1/fp1 g1/fp2 -v
+REM call %tooltest% h5diff_102.wri  
 
 ::Change directory to hdf5\tools
 cd ..\..
