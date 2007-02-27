@@ -3375,7 +3375,12 @@ test_sohm(void)
     test_sohm_delete();         /* Test deleting shared messages */
     test_sohm_delete_revert();  /* Test that a file with SOHMs becomes an
                                  * empty file again when they are deleted. */
+#ifndef  H5_CANNOT_OPEN_TWICE   /* On VMS this test fails since it tries to
+                                   open target file the second time */
     test_sohm_extlink();        /* Test SOHMs when external links are used */
+
+#endif /* H5_CANNOT_OPEN_TWICE */
+
     test_sohm_extend_dset();    /* Test extending shared datasets */
 
 } /* test_sohm() */
