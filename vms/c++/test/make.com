@@ -21,17 +21,21 @@ $
 $ ccc := cxx 'cxxopt /include=([-.-.src], [-.-.test], [-.src])
 $! 
 $!
-$ cxxobj1= "testhdf5, tattr, tfile, th5s, h5cpputil"
-$ cxxobj2= "dsets, h5cpputil"
 $!                               
 $ ccc testhdf5 
 $ ccc tattr
 $ ccc tfile
+$ ccc tcompound
+$ ccc tfilter
+$ ccc trefer
+$ ccc ttypes
+$ ccc tvlstr
 $ ccc th5s
 $ ccc h5cpputil
 $ type sys$input
        Creating testhdf5
-$ cxxlink  testhdf5,tattr,tfile, th5s, h5cpputil, -
+$ cxxlink  testhdf5,tattr,tfile, th5s, -
+           tcompound, tfilter, trefer, tvlstr, ttypes, h5cpputil, -
            [-.src]hdf5_cplus.olb/lib, [-.-.test]libh5test.olb/lib, -
            [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $!
