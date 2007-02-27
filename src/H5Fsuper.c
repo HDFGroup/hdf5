@@ -397,7 +397,6 @@ H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
         shared->base_addr = shared->super_addr;
     } /* end if */
 
-
     /* This step is for h5repart tool only. If user wants to change file driver
      *  from family to sec2 while using h5repart, set the driver address to
      *  undefined to let the library ignore the family driver information saved
@@ -752,9 +751,6 @@ H5F_write_superblock(H5F_t *f, hid_t dxpl_id)
         char driver_name[9];    /* Name of driver, for driver info block */
         uint8_t *dbuf = p;      /* Pointer to beginning of driver info */
 
-        /* Add in the size of the header */
-        driver_size += H5F_DRVINFOBLOCK_HDR_SIZE;
-
         /* Encode the driver information block */
 	*p++ = HDF5_DRIVERINFO_VERSION_0; /* Version */
         *p++ = 0; /* reserved */
@@ -762,7 +758,7 @@ H5F_write_superblock(H5F_t *f, hid_t dxpl_id)
         *p++ = 0; /* reserved */
 
 	/* Driver info size, excluding header */
-	UINT32ENCODE(p, driver_size - H5F_DRVINFOBLOCK_HDR_SIZE);
+	UINT32ENCODE(p, driver_size);
 
 	/* Encode driver-specific data */
 	if(H5FD_sb_encode(f->shared->lf, driver_name, dbuf + H5F_DRVINFOBLOCK_HDR_SIZE) < 0)
@@ -771,10 +767,14 @@ H5F_write_superblock(H5F_t *f, hid_t dxpl_id)
 	/* Store driver name (set in 'H5FD_sb_encode' call above) */
 	HDmemcpy(dbuf + 8, driver_name, (size_t)8);
 
+        /* Advance buffer pointer past name & variable-sized portion of driver info */
+        /* (for later use in storing the checksum) */
+        p += 8 + driver_size;
+
         /* Update superblock checksum with driver info block checksum */
         /* (on superblock versions > 1) */
         if(super_vers >= HDF5_SUPERBLOCK_VERSION_2)
-            chksum = H5_checksum_metadata(dbuf, driver_size, chksum);
+            chksum = H5_checksum_metadata(dbuf, driver_size + H5F_DRVINFOBLOCK_HDR_SIZE, chksum);
     } /* end if */
 
     /* Encode the checksum on the superblock (for versions > 1) */

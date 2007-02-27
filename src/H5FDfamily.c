@@ -613,27 +613,21 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_family_sb_encode(H5FD_t *_file, char *name/*out*/,
-		     unsigned char *buf/*out*/)
+H5FD_family_sb_encode(H5FD_t *_file, char *name/*out*/, unsigned char *buf/*out*/)
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
-    unsigned char	*p = buf;
-    uint64_t            msize;
-    herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_family_sb_encode, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_family_sb_encode)
 
     /* Name and version number */
-    strncpy(name, "NCSAfami", (size_t)8);
+    HDstrncpy(name, "NCSAfami", (size_t)8);
     name[8] = '\0';
 
-    /* copy member file size */
-    msize = (uint64_t)file->memb_size;
-    UINT64ENCODE(p, msize);
+    /* Store member file size */
+    UINT64ENCODE(buf, (uint64_t)file->memb_size);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5FD_family_sb_encode() */
 
 
 /*-------------------------------------------------------------------------
@@ -660,9 +654,8 @@ static herr_t
 H5FD_family_sb_decode(H5FD_t *_file, const char UNUSED *name, const unsigned char *buf)
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
-    uint64_t            msize = 0;
-    char                err_msg[128];
-    herr_t ret_value=SUCCEED;   /* Return value */
+    uint64_t            msize;
+    herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_family_sb_decode, FAIL)
 
@@ -676,18 +669,19 @@ H5FD_family_sb_decode(H5FD_t *_file, const char UNUSED *name, const unsigned cha
     if(file->mem_newsize) {
         file->memb_size = file->mem_newsize;
         HGOTO_DONE(ret_value)
-    }
+    } /* end if */
 
     /* Default - use the saved member size */
-    if(file->pmem_size == H5F_FAMILY_DEFAULT) {
+    if(file->pmem_size == H5F_FAMILY_DEFAULT)
        file->pmem_size = msize;
-    }
 
     /* Check if member size from file access property is correct */
     if(msize != file->pmem_size) {
-        sprintf(err_msg, "family member size should be %lu", (unsigned long)msize);
+        char                err_msg[128];
+
+        sprintf(err_msg, "family member size should be %lu, is %lu", (unsigned long)msize, (unsigned long)file->pmem_size);
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, err_msg)
-    }
+    } /* end if */
 
     /* Update member file size to the size saved in the superblock.
      * That's the size intended to be. */
@@ -695,7 +689,7 @@ H5FD_family_sb_decode(H5FD_t *_file, const char UNUSED *name, const unsigned cha
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_family_sb_decode() */
 
 
 /*-------------------------------------------------------------------------

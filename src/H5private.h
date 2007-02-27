@@ -1299,6 +1299,7 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
                                                                               \
    BEGIN_MPE_LOG(func_name)
 
+/* Note: this macro only works when there's _no_ interface initialization routine for the module */
 #define FUNC_ENTER_NOAPI_INIT(func_name,err)			       	      \
    /* Initialize the interface, if appropriate */		              \
    H5_INTERFACE_INIT(err)						      \
