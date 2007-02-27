@@ -39,8 +39,8 @@ int main(int argc, char *argv[])
     const char *err8 = "Invalid size of data - %s.\n";
     const char *err9 = "Cannot specify more than 30 input files in one call to h5import.\n";
 
-  (void) setvbuf(stderr, (char *) NULL, _IOLBF, 0);
-  (void) setvbuf(stdout, (char *) NULL, _IOLBF, 0);
+  (void) HDsetvbuf(stderr, (char *) NULL, _IOLBF, 0);
+  (void) HDsetvbuf(stdout, (char *) NULL, _IOLBF, 0);
 
  /*
   * validate the number of command line arguments
