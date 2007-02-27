@@ -712,9 +712,9 @@ H5F_write_superblock(H5F_t *f, hid_t dxpl_id)
     *p++ = 0;   /* reserved*/
 
     *p++ = (uint8_t)share_head_vers;
-    assert (H5F_SIZEOF_ADDR(f) <= 255);
+    HDassert(H5F_SIZEOF_ADDR(f) <= 255);
     *p++ = (uint8_t)H5F_SIZEOF_ADDR(f);
-    assert (H5F_SIZEOF_SIZE(f) <= 255);
+    HDassert(H5F_SIZEOF_SIZE(f) <= 255);
     *p++ = (uint8_t)H5F_SIZEOF_SIZE(f);
     *p++ = 0;   /* reserved */
 
@@ -741,7 +741,7 @@ H5F_write_superblock(H5F_t *f, hid_t dxpl_id)
     if(H5G_obj_ent_encode(f, &p, H5G_oloc(f->shared->root_grp)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to encode root group information")
 
-    /* Compute superblock checksum */
+    /* Compute [possibly partial] superblock checksum */
     if(super_vers >= HDF5_SUPERBLOCK_VERSION_2)
         chksum = H5_checksum_metadata(buf, (H5F_SUPERBLOCK_SIZE(super_vers, f) - H5F_SIZEOF_CHKSUM), 0);
 
