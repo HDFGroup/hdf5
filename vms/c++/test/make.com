@@ -22,7 +22,6 @@ $ ccc := cxx 'cxxopt /include=([-.-.src], [-.-.test], [-.src])
 $! 
 $!
 $!                               
-$ ccc testhdf5 
 $ ccc tattr
 $ ccc tfile
 $ ccc tcompound
@@ -32,6 +31,7 @@ $ ccc ttypes
 $ ccc tvlstr
 $ ccc th5s
 $ ccc h5cpputil
+$ ccc testhdf5 
 $ type sys$input
        Creating testhdf5
 $ cxxlink  testhdf5,tattr,tfile, th5s, -
