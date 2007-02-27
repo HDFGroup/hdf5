@@ -46,8 +46,8 @@ H5_DLL htri_t H5SM_can_share(H5F_t *f, hid_t dxpl_id, H5SM_master_table_t *table
 H5_DLL htri_t H5SM_try_share(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     void *mesg);
 H5_DLL herr_t H5SM_try_delete(H5F_t *f, hid_t dxpl_id, unsigned type_id, const H5O_shared_t *mesg);
-H5_DLL herr_t H5SM_get_info(H5F_t *f, unsigned *index_flags, unsigned *minsizes,
-    unsigned *list_max, unsigned *btree_min, hid_t dxpl_id);
+H5_DLL herr_t H5SM_get_info(const H5O_loc_t *ext_loc, H5P_genplist_t *fc_plist,
+    hid_t dxpl_id);
 H5_DLL htri_t H5SM_type_shared(H5F_t *f, unsigned type_id, hid_t dxpl_id);
 H5_DLL herr_t H5SM_get_fheap_addr(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     haddr_t *fheap_addr);

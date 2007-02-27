@@ -705,7 +705,7 @@ H5SM_convert_list_to_btree(H5F_t * f, H5SM_index_header_t * header,
      */
     HDmemcpy(&temp_header, header, sizeof(H5SM_index_header_t));
     if(H5SM_delete_index(f, &temp_header, dxpl_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_SOHM, H5E_CANTDELETE, FAIL, "can't free list index");
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTDELETE, FAIL, "can't free list index")
 
     header->index_addr = tree_addr;
     header->index_type = H5SM_BTREE;
@@ -1465,8 +1465,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5SM_get_info
  *
- * Purpose:     Get the list-to-btree and btree-to-list cutoff numbers for
- *              an index within the master table.
+ * Purpose:     Get the shared message info for a file, if there is any.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -1476,40 +1475,84 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5SM_get_info(H5F_t *f, unsigned *index_flags, unsigned *minsizes,
-    unsigned *list_max, unsigned *btree_min, hid_t dxpl_id)
+H5SM_get_info(const H5O_loc_t *ext_loc, H5P_genplist_t *fc_plist, hid_t dxpl_id)
 {
-    H5SM_master_table_t *table = NULL;
-    haddr_t table_addr;
-    uint8_t i;
-    herr_t ret_value = SUCCEED;
+    H5F_t *f = ext_loc->file;           /* File pointer (convenience variable) */
+    H5F_file_t *shared = f->shared;     /* Shared file info (convenience variable) */
+    H5O_shmesg_table_t sohm_table;      /* SOHM message from superblock extension */
+    H5SM_master_table_t *table = NULL;  /* SOHM master table */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5SM_get_info, FAIL)
 
-    HDassert(f && f->shared);
-    HDassert(f->shared->sohm_addr != HADDR_UNDEF);
+    /* Sanity check */
+    HDassert(ext_loc);
+    HDassert(f && shared);
+    HDassert(fc_plist);
 
-    /* Convenience variables */
-    table_addr = f->shared->sohm_addr;
+    /* Read in shared message information, if it exists */
+    if(NULL == H5O_msg_read(ext_loc, H5O_SHMESG_ID, &sohm_table, dxpl_id)) {
+        /* Reset error from "failed" message read */
+        H5E_clear_stack(NULL);
 
+        /* No SOHM info in file */
+        shared->sohm_addr = HADDR_UNDEF;
+        shared->sohm_nindexes = 0;
+        shared->sohm_vers = 0;
 
-    /* Read the rest of the SOHM table information from the cache */
-    if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, table_addr, NULL, NULL, H5AC_READ)))
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
+        /* Shared object header messages are disabled */
+        if(H5P_set(fc_plist, H5F_CRT_SHMSG_NINDEXES_NAME, &shared->sohm_nindexes) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set number of SOHM indexes")
+    } /* end if */
+    else {
+        unsigned index_flags[H5O_SHMESG_MAX_NINDEXES];  /* Message flags for each index */
+        unsigned minsizes[H5O_SHMESG_MAX_NINDEXES];     /* Minimum message size for each index */
+        unsigned sohm_l2b;           /* SOHM list-to-btree cutoff */
+        unsigned sohm_b2l;           /* SOHM btree-to-list cutoff */
+        unsigned u;                  /* Local index variable */
 
-    /* Return info */
-    *list_max = table->indexes[0].list_max;
-    *btree_min = table->indexes[0].btree_min;
+        /* Set SOHM info from file */
+        shared->sohm_addr = sohm_table.addr;
+        shared->sohm_vers = sohm_table.version;
+        shared->sohm_nindexes = sohm_table.nindexes;
+        HDassert(H5F_addr_defined(shared->sohm_addr));
+        HDassert(shared->sohm_nindexes > 0 && shared->sohm_nindexes <= H5O_SHMESG_MAX_NINDEXES);
 
-    /* Get information about the individual SOHM indexes */
-    for(i=0; i<table->num_indexes; ++i) {
-        index_flags[i] = table->indexes[i].mesg_types;
-        minsizes[i] = table->indexes[i].min_mesg_size;
-    }
+        /* Read the rest of the SOHM table information from the cache */
+        if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, shared->sohm_addr, NULL, NULL, H5AC_READ)))
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
+
+        /* Get index conversion limits */
+        sohm_l2b = table->indexes[0].list_max;
+        sohm_b2l = table->indexes[0].btree_min;
+
+        /* Iterate through all indices */
+        for(u = 0; u < table->num_indexes; ++u) {
+            /* Pack information about the individual SOHM index */
+            index_flags[u] = table->indexes[u].mesg_types;
+            minsizes[u] = table->indexes[u].min_mesg_size;
+
+            /* Sanity check */
+            HDassert(sohm_l2b == table->indexes[u].list_max);
+            HDassert(sohm_b2l == table->indexes[u].btree_min);
+        } /* end for */
+
+        /* Set values in the property list */
+        if(H5P_set(fc_plist, H5F_CRT_SHMSG_NINDEXES_NAME, &shared->sohm_nindexes) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set number of SOHM indexes")
+        if(H5P_set(fc_plist, H5F_CRT_SHMSG_INDEX_TYPES_NAME, index_flags) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set type flags for indexes")
+        if(H5P_set(fc_plist, H5F_CRT_SHMSG_INDEX_MINSIZE_NAME, minsizes) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set type flags for indexes")
+        if(H5P_set(fc_plist, H5F_CRT_SHMSG_LIST_MAX_NAME, &sohm_l2b) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set SOHM cutoff in property list")
+        if(H5P_set(fc_plist, H5F_CRT_SHMSG_BTREE_MIN_NAME, &sohm_b2l) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set SOHM cutoff in property list")
+    } /* end else */
 
 done:
     /* Release the master SOHM table if we took it out of the cache */
-    if(table && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_TABLE, table_addr, table, H5AC__NO_FLAGS_SET) < 0)
+    if(table && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_TABLE, shared->sohm_addr, table, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_CACHE, H5E_CANTRELEASE, FAIL, "unable to close SOHM master table")
 
     FUNC_LEAVE_NOAPI(ret_value)

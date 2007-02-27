@@ -80,7 +80,6 @@ typedef struct H5F_file_t {
     haddr_t	super_addr;	/* Absolute address of super block	*/
     haddr_t	base_addr;	/* Absolute base address for rel.addrs. */
     haddr_t	extension_addr;	/* Relative address of superblock extension	*/
-    H5O_shmesg_table_t sohm_table; /* Shared message table information */
     haddr_t	sohm_addr;	/* Relative address of shared object header message table */
     unsigned	sohm_vers;	/* Version of shared message table on disk */
     unsigned	sohm_nindexes;	/* Number of shared messages indexes in the table */

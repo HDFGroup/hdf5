@@ -89,7 +89,7 @@ H5O_shmesg_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
     if(NULL == (mesg = H5MM_calloc(sizeof(H5O_shmesg_table_t))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for shared message table message")
 
-    /* Read version, table address, and number of indexes */
+    /* Retrieve version, table address, and number of indexes */
     mesg->version = *p++;
     H5F_addr_decode(f, &p, &(mesg->addr));
     mesg->nindexes = *p++;
@@ -126,7 +126,7 @@ H5O_shmesg_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const voi
     HDassert(p);
     HDassert(mesg);
 
-    /* Read version, table address, and number of indexes */
+    /* Store version, table address, and number of indexes */
     *p++ = mesg->version;
     H5F_addr_encode(f, &p, mesg->addr);
     *p++ = mesg->nindexes;

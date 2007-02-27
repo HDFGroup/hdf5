@@ -381,6 +381,26 @@ typedef struct H5F_t H5F_t;
 #define H5_PAR_META_WRITE 0
 #endif /* H5_HAVE_PARALLEL */
 
+/* Version #'s of the major components of the file format */
+#define HDF5_SUPERBLOCK_VERSION_DEF	0	/* The default super block format	  */
+#define HDF5_SUPERBLOCK_VERSION_1	1	/* Version with non-default B-tree 'K' value */
+#define HDF5_SUPERBLOCK_VERSION_2	2	/* Version with superblock extension and checksum */
+#define HDF5_SUPERBLOCK_VERSION_LATEST	HDF5_SUPERBLOCK_VERSION_2	/* The maximum super block format    */
+#define HDF5_FREESPACE_VERSION	0	/* of the Free-Space Info	  */
+#define HDF5_OBJECTDIR_VERSION	0	/* of the Object Directory format */
+#define HDF5_SHAREDHEADER_VERSION 0	/* of the Shared-Header Info	  */
+#define HDF5_DRIVERINFO_VERSION_0 0	/* of the Driver Information Block*/
+#define HDF5_DRIVERINFO_VERSION_LATEST	HDF5_DRIVERINFO_VERSION_0	/* Maximum driver info block format    */
+
+/* B-tree internal 'K' values */
+#define HDF5_BTREE_SNODE_IK_DEF         16
+#define HDF5_BTREE_ISTORE_IK_DEF        32      /* Note! this value is assumed
+                                                    to be 32 for version 0
+                                                    of the superblock and
+                                                    if it is changed, the code
+                                                    must compensate. -QAK
+                                                 */
+
 /* Forward declarations for prototype arguments */
 struct H5B_class_t;
 struct H5RC_t;

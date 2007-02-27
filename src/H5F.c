@@ -737,74 +737,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_locate_signature
- *
- * Purpose:	Finds the HDF5 super block signature in a file.	The signature
- *		can appear at address 0, or any power of two beginning with
- *		512.
- *
- * Return:	Success:	The absolute format address of the signature.
- *
- *		Failure:	HADDR_UNDEF
- *
- * Programmer:	Robb Matzke
- *		Friday, November  7, 1997
- *
- * Modifications:
- *		Robb Matzke, 1999-08-02
- *		Rewritten to use the virtual file layer.
- *-------------------------------------------------------------------------
- */
-haddr_t
-H5F_locate_signature(H5FD_t *file, hid_t dxpl_id)
-{
-    haddr_t	    addr, eoa;
-    uint8_t	    buf[H5F_SIGNATURE_LEN];
-    unsigned	    n, maxpow;
-    haddr_t         ret_value;       /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5F_locate_signature)
-
-    /* Find the least N such that 2^N is larger than the file size */
-    if (HADDR_UNDEF==(addr=H5FD_get_eof(file)) ||
-            HADDR_UNDEF==(eoa=H5FD_get_eoa(file, H5FD_MEM_SUPER)))
-	HGOTO_ERROR(H5E_IO, H5E_CANTINIT, HADDR_UNDEF, "unable to obtain EOF/EOA value")
-    for (maxpow=0; addr; maxpow++)
-        addr>>=1;
-    maxpow = MAX(maxpow, 9);
-
-    /*
-     * Search for the file signature at format address zero followed by
-     * powers of two larger than 9.
-     */
-    for (n=8; n<maxpow; n++) {
-	addr = (8==n) ? 0 : (haddr_t)1 << n;
-	if (H5FD_set_eoa(file, H5FD_MEM_SUPER, addr+H5F_SIGNATURE_LEN) < 0)
-	    HGOTO_ERROR(H5E_IO, H5E_CANTINIT, HADDR_UNDEF, "unable to set EOA value for file signature")
-	if (H5FD_read(file, H5FD_MEM_SUPER, dxpl_id, addr, (size_t)H5F_SIGNATURE_LEN, buf) < 0)
-	    HGOTO_ERROR(H5E_IO, H5E_CANTINIT, HADDR_UNDEF, "unable to read file signature")
-	if (!HDmemcmp(buf, H5F_SIGNATURE, (size_t)H5F_SIGNATURE_LEN))
-            break;
-    }
-
-    /*
-     * If the signature was not found then reset the EOA value and return
-     * failure.
-     */
-    if (n>=maxpow) {
-	(void)H5FD_set_eoa(file, H5FD_MEM_SUPER, eoa); /* Ignore return value */
-	HGOTO_ERROR(H5E_IO, H5E_CANTINIT, HADDR_UNDEF, "unable to find a valid file signature")
-    }
-
-    /* Set return value */
-    ret_value=addr;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5Fis_hdf5
  *
  * Purpose:	Check the file signature to detect an HDF5 file.
@@ -896,9 +828,6 @@ static H5F_t *
 H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 {
     H5F_t	*f = NULL, *ret_value;
-    unsigned    sohm_indexes;
-    unsigned    super_vers = HDF5_SUPERBLOCK_VERSION_DEF;
-    H5P_genplist_t *plist;              /* Property list */
 
     FUNC_ENTER_NOAPI_NOINIT(H5F_new)
 
@@ -911,6 +840,9 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 	f->shared = shared;
     } /* end if */
     else {
+        unsigned super_vers = HDF5_SUPERBLOCK_VERSION_DEF;      /* Superblock version for file */
+        H5P_genplist_t *plist;              /* Property list */
+
         HDassert(lf != NULL);
         if(NULL == (f->shared = H5FL_CALLOC(H5F_file_t)))
             HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate shared file structure")
@@ -941,38 +873,21 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get byte number for object size")
         if(H5P_get(plist, H5F_CRT_BTREE_RANK_NAME, &f->shared->btree_k[0]) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "unable to get rank for btree internal nodes")
-
-        /* Check for non-default indexed storage B-tree internal 'K' value
-         * and set the version # of the superblock to 1 if it is a non-default
-         * value.
-         */
-        if(f->shared->btree_k[H5B_ISTORE_ID] != HDF5_BTREE_ISTORE_IK_DEF)
-            super_vers = HDF5_SUPERBLOCK_VERSION_1; /* Super block version 1 */
-
-        /* The shared object header message table gets created later, but if
-         * it is present we should use version 2 of the superblock.
-         */
-        if(H5P_get(plist, H5F_CRT_SHMSG_NINDEXES_NAME, &sohm_indexes)<0)
+        if(H5P_get(plist, H5F_CRT_SHMSG_NINDEXES_NAME, &f->shared->sohm_nindexes)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get number of SOHM indexes")
-        HDassert(sohm_indexes < 255);
-        f->shared->sohm_nindexes = sohm_indexes;
+        HDassert(f->shared->sohm_nindexes < 255);
 
-        /* Bump superblock version to hold SOHM info */
-        if(sohm_indexes > 0)
-            super_vers = HDF5_SUPERBLOCK_VERSION_2; /* Super block version 2 */
-
+        /* Get the FAPL values to cache */
         if(NULL == (plist = H5I_object(fapl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
         if(H5P_get(plist, H5F_ACS_META_CACHE_INIT_CONFIG_NAME, &(f->shared->mdc_initCacheCfg)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get initial meta data cache resize config")
-
         if(H5P_get(plist, H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME, &(f->shared->rdcc_nelmts)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get data cache element size")
         if(H5P_get(plist, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, &(f->shared->rdcc_nbytes)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get data cache cache size")
         if(H5P_get(plist, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, &(f->shared->rdcc_w0)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get preempt read chunk")
-
         if(H5P_get(plist, H5F_ACS_ALIGN_THRHD_NAME, &(f->shared->threshold)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get alignment threshold")
         if(H5P_get(plist, H5F_ACS_ALIGN_NAME, &(f->shared->alignment)) < 0)
@@ -984,16 +899,28 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
         if(H5P_get(plist, H5F_ACS_LATEST_FORMAT_NAME, &(f->shared->latest_format)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get 'latest format' flag")
 
-        /* If a newer super block version is required, set it here */
-        if(super_vers != HDF5_SUPERBLOCK_VERSION_DEF)
-        {
+        /* Bump superblock version if we are to use the latest version of the format */
+        if(f->shared->latest_format)
+            super_vers = HDF5_SUPERBLOCK_VERSION_LATEST;
+        /* Bump superblock version to create superblock extension for SOHM info */
+        else if(f->shared->sohm_nindexes > 0)
+            super_vers = HDF5_SUPERBLOCK_VERSION_2;
+        /* Check for non-default indexed storage B-tree internal 'K' value
+         * and set the version # of the superblock to 1 if it is a non-default
+         * value.
+         */
+        else if(f->shared->btree_k[H5B_ISTORE_ID] != HDF5_BTREE_ISTORE_IK_DEF)
+            super_vers = HDF5_SUPERBLOCK_VERSION_1;
+
+        /* If a newer superblock version is required, set it here */
+        if(super_vers != HDF5_SUPERBLOCK_VERSION_DEF) {
             H5P_genplist_t *c_plist;              /* Property list */
 
             if(NULL == (c_plist = H5I_object(f->shared->fcpl_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not property list")
             if(H5P_set(c_plist, H5F_CRT_SUPER_VERS_NAME, &super_vers) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set superblock version")
-        }
+        } /* end if */
 
 	/*
 	 * Create a meta data cache with the specified number of elements.
@@ -1766,8 +1693,8 @@ done:
  * Function:	H5F_flush
  *
  * Purpose:	Flushes (and optionally invalidates) cached data plus the
- *		file super block.  If the logical file size field is zero
- *		then it is updated to be the length of the super block.
+ *		file superblock.  If the logical file size field is zero
+ *		then it is updated to be the length of the superblock.
  *
  * Return:	Non-negative on success/Negative on failure
  *
