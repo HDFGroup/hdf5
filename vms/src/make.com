@@ -33,7 +33,7 @@ $ cobj= "H5, H5checksum, H5dbg, H5system, H5timer, H5trace,"+-
         "H5Bcache, H5B2dbg, H5B2test, H5B2int, H5B2stat, H5C, H5CS,"+-  
         "H5D, H5Dcontig, H5Dcompact,"+-
         "H5Defl, H5Dio, H5Distore, H5Doh, H5Dmpio, H5Dselect, H5Dtest ,"+-
-        "H5E, H5F, H5Fdbg, H5Fmount, H5Fsfile, H5Fsuper, H5FD, H5FDcore,"+-
+        "H5E, H5F, H5Fdbg, H5Fmount, H5Fsfile, H5Fsuper, H5Ftest, H5FD, H5FDcore,"+-
         "H5FDfamily, H5FDlog, H5FDmpi, H5FDmpio,"+-
         "H5FDmpiposix, H5FDmulti, H5FDsec2, H5FDstdio,"+-
         "H5FDstream, H5FDdirect, H5FL, H5FO, H5Ffake,"+-
