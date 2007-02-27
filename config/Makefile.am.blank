@@ -40,11 +40,11 @@
 include $(top_srcdir)/config/commence.am
 
 # Add include directories to the C preprocessor flags
-#INCLUDES=-I$(top_srcdir)/src
+INCLUDES=-I$(top_srcdir)/src
 
 # Our main targets, the library foo.la and the programs bar and baz
-#lib_LTLIBRARIES=foo.la
-#bin_PROGRAMS=bar baz
+lib_LTLIBRARIES=foo.la
+bin_PROGRAMS=bar baz
 
 # Helper programs and test programs
 noinst_PROGRAMS=helper

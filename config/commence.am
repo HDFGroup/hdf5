@@ -80,10 +80,10 @@ F9XMODFLAG=@F9XMODFLAG@
 
 # Set the paths for AFS installs of autotools for Linux machines
 # Ideally, these tools should never be needed during the build.
-ACLOCAL=/afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/aclocal -I /afs/ncsa/projects/hdf/packages/libtool_1.5.14/Linux_2.4/share/aclocal
-AUTOHEADER=/afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoheader
-AUTOMAKE=/afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/automake
-AUTOCONF=/afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoconf
+AUTOCONF=/home1/packages/autoconf/autoconf-2.60/bin/autoconf
+AUTOMAKE=/home1/packages/automake/automake-1.9.6/bin/automake-1.9
+AUTOHEADER=/home1/packages/autoconf/autoconf-2.60/bin/autoheader
+ACLOCAL=/home1/packages/automake/automake-1.9.6/bin/aclocal-1.9 -I /afs/ncsa/projects/hdf/packages/libtool_1.5.14/Linux_2.4/share/aclocal
 
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.

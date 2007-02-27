@@ -88,19 +88,19 @@ DIST_SOURCES = $(parallel_test_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-
-# Set the paths for AFS installs of autotools for Linux machines
-# Ideally, these tools should never be needed during the build.
-ACLOCAL = /afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/aclocal -I /afs/ncsa/projects/hdf/packages/libtool_1.5.14/Linux_2.4/share/aclocal
+ACLOCAL = /home1/packages/automake/automake-1.9.6/bin/aclocal-1.9 -I /afs/ncsa/projects/hdf/packages/libtool_1.5.14/Linux_2.4/share/aclocal
 ADD_PARALLEL_FILES = @ADD_PARALLEL_FILES@
 AMDEP_FALSE = @AMDEP_FALSE@
 AMDEP_TRUE = @AMDEP_TRUE@
 AMTAR = @AMTAR@
 AM_MAKEFLAGS = @AM_MAKEFLAGS@
 AR = @AR@
-AUTOCONF = /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoconf
-AUTOHEADER = /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoheader
-AUTOMAKE = /afs/ncsa/projects/hdf/packages/automake_1.9.5/Linux_2.4/bin/automake
+
+# Set the paths for AFS installs of autotools for Linux machines
+# Ideally, these tools should never be needed during the build.
+AUTOCONF = /home1/packages/autoconf/autoconf-2.60/bin/autoconf
+AUTOHEADER = /home1/packages/autoconf/autoconf-2.60/bin/autoheader
+AUTOMAKE = /home1/packages/automake/automake-1.9.6/bin/automake-1.9
 AWK = @AWK@
 BUILD_ALL_CONDITIONAL_FALSE = @BUILD_ALL_CONDITIONAL_FALSE@
 BUILD_ALL_CONDITIONAL_TRUE = @BUILD_ALL_CONDITIONAL_TRUE@
