@@ -51,7 +51,6 @@
 #define H5F_CRT_USER_BLOCK_DEF       0
 /* Definitions for the 1/2 rank for symbol table leaf nodes */
 #define H5F_CRT_SYM_LEAF_SIZE        sizeof(unsigned)
-#define H5F_CRT_SYM_LEAF_DEF         4
 /* Definitions for the 1/2 rank for btree internal nodes    */
 #define H5F_CRT_BTREE_RANK_SIZE      sizeof(unsigned[H5B_NUM_BTREE_ID])
 #define H5F_CRT_BTREE_RANK_DEF       {HDF5_BTREE_SNODE_IK_DEF,HDF5_BTREE_ISTORE_IK_DEF}
@@ -64,15 +63,6 @@
 /* Definitions for version number of the superblock         */
 #define H5F_CRT_SUPER_VERS_SIZE       sizeof(unsigned)
 #define H5F_CRT_SUPER_VERS_DEF        HDF5_SUPERBLOCK_VERSION_DEF
-/* Definitions for free-space version number                */
-#define H5F_CRT_FREESPACE_VERS_SIZE   sizeof(unsigned)
-#define H5F_CRT_FREESPACE_VERS_DEF    HDF5_FREESPACE_VERSION
-/* Definitions for object directory version number          */
-#define H5F_CRT_OBJ_DIR_VERS_SIZE     sizeof(unsigned)
-#define H5F_CRT_OBJ_DIR_VERS_DEF      HDF5_OBJECTDIR_VERSION
-/* Definitions for shared-header format version             */
-#define H5F_CRT_SHARE_HEAD_VERS_SIZE  sizeof(unsigned)
-#define H5F_CRT_SHARE_HEAD_VERS_DEF   HDF5_SHAREDHEADER_VERSION
 /* Definitions for shared object header messages */
 #define H5F_CRT_SHMSG_NINDEXES_SIZE    sizeof(unsigned)
 #define H5F_CRT_SHMSG_NINDEXES_DEF     (0)
@@ -155,9 +145,6 @@ H5P_fcrt_reg_prop(H5P_genclass_t *pclass)
     size_t sizeof_addr = H5F_CRT_ADDR_BYTE_NUM_DEF;     /* Default size of addresses in the file */
     size_t sizeof_size = H5F_CRT_OBJ_BYTE_NUM_DEF;      /* Default size of sizes in the file */
     unsigned superblock_ver = H5F_CRT_SUPER_VERS_DEF;   /* Default superblock version # */
-    unsigned freespace_ver = H5F_CRT_FREESPACE_VERS_DEF;/* Default free space version # */
-    unsigned objectdir_ver = H5F_CRT_OBJ_DIR_VERS_DEF;  /* Default object directory version # */
-    unsigned sharedheader_ver = H5F_CRT_SHARE_HEAD_VERS_DEF;    /* Default shared header message version # */
     unsigned num_sohm_indexes    = H5F_CRT_SHMSG_NINDEXES_DEF;
     unsigned sohm_index_flags[H5O_SHMESG_MAX_NINDEXES]    = H5F_CRT_SHMSG_INDEX_TYPES_DEF;
     unsigned sohm_index_minsizes[H5O_SHMESG_MAX_NINDEXES] = H5F_CRT_SHMSG_INDEX_MINSIZE_DEF;
@@ -189,18 +176,6 @@ H5P_fcrt_reg_prop(H5P_genclass_t *pclass)
 
     /* Register the superblock version number */
     if(H5P_register(pclass, H5F_CRT_SUPER_VERS_NAME, H5F_CRT_SUPER_VERS_SIZE, &superblock_ver, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-    /* Register the free-space version number */
-    if(H5P_register(pclass, H5F_CRT_FREESPACE_VERS_NAME, H5F_CRT_FREESPACE_VERS_SIZE, &freespace_ver, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-    /* Register the object directory version number */
-    if(H5P_register(pclass, H5F_CRT_OBJ_DIR_VERS_NAME, H5F_CRT_OBJ_DIR_VERS_SIZE, &objectdir_ver, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-    /* Register the shared-header version number */
-    if(H5P_register(pclass, H5F_CRT_SHARE_HEAD_VERS_NAME, H5F_CRT_SHARE_HEAD_VERS_SIZE, &sharedheader_ver, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the shared OH message information */
@@ -264,14 +239,11 @@ H5Pget_version(hid_t plist_id, unsigned *super/*out*/, unsigned *freelist/*out*/
         if(H5P_get(plist, H5F_CRT_SUPER_VERS_NAME, super) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get superblock version")
     if(freelist)
-        if(H5P_get(plist, H5F_CRT_FREESPACE_VERS_NAME, freelist) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get free-space version")
+        *freelist = HDF5_FREESPACE_VERSION;     /* (hard-wired) */
     if(stab)
-        if(H5P_get(plist, H5F_CRT_OBJ_DIR_VERS_NAME, stab) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object directory version")
+        *stab = HDF5_OBJECTDIR_VERSION;         /* (hard-wired) */
     if(shhdr)
-        if(H5P_get(plist, H5F_CRT_SHARE_HEAD_VERS_NAME, shhdr) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get shared-header version")
+        *shhdr = HDF5_SHAREDHEADER_VERSION;     /* (hard-wired) */
 
 done:
     FUNC_LEAVE_API(ret_value)

@@ -337,18 +337,16 @@ typedef struct H5F_t H5F_t;
 /* ========= File Creation properties ============ */
 #define H5F_CRT_USER_BLOCK_NAME      "block_size"       /* Size of the file user block in bytes */
 #define H5F_CRT_SYM_LEAF_NAME        "symbol_leaf"      /* 1/2 rank for symbol table leaf nodes */
+#define H5F_CRT_SYM_LEAF_DEF         4
 #define H5F_CRT_BTREE_RANK_NAME      "btree_rank"       /* 1/2 rank for btree internal nodes    */
 #define H5F_CRT_ADDR_BYTE_NUM_NAME   "addr_byte_num"    /* Byte number in an address            */
-#define H5F_CRT_OBJ_BYTE_NUM_NAME     "obj_byte_num"    /* Byte number for object size          */
-#define H5F_CRT_SUPER_VERS_NAME       "super_version"   /* Version number of the superblock     */
-#define H5F_CRT_FREESPACE_VERS_NAME   "free_space_version" /* Free-space version number            */
-#define H5F_CRT_OBJ_DIR_VERS_NAME     "obj_dir_version" /* Object directory version number      */
-#define H5F_CRT_SHARE_HEAD_VERS_NAME  "share_head_version" /* Shared-header format version         */
-#define H5F_CRT_SHMSG_NINDEXES_NAME    "num_shmsg_indexes" /* Number of shared object header message indexes */
+#define H5F_CRT_OBJ_BYTE_NUM_NAME    "obj_byte_num"     /* Byte number for object size          */
+#define H5F_CRT_SUPER_VERS_NAME      "super_version"    /* Version number of the superblock     */
+#define H5F_CRT_SHMSG_NINDEXES_NAME  "num_shmsg_indexes" /* Number of shared object header message indexes */
 #define H5F_CRT_SHMSG_INDEX_TYPES_NAME "shmsg_message_types" /* Types of message in each index */
 #define H5F_CRT_SHMSG_INDEX_MINSIZE_NAME "shmsg_message_minsize" /* Minimum size of messages in each index */
-#define H5F_CRT_SHMSG_LIST_MAX_NAME    "shmsg_list_max"  /* Shared message list maximum size */
-#define H5F_CRT_SHMSG_BTREE_MIN_NAME   "shmsg_btree_min" /* Shared message B-tree minimum size */
+#define H5F_CRT_SHMSG_LIST_MAX_NAME  "shmsg_list_max"   /* Shared message list maximum size */
+#define H5F_CRT_SHMSG_BTREE_MIN_NAME "shmsg_btree_min"  /* Shared message B-tree minimum size */
 
 
 
@@ -384,13 +382,12 @@ typedef struct H5F_t H5F_t;
 /* Version #'s of the major components of the file format */
 #define HDF5_SUPERBLOCK_VERSION_DEF	0	/* The default super block format	  */
 #define HDF5_SUPERBLOCK_VERSION_1	1	/* Version with non-default B-tree 'K' value */
-#define HDF5_SUPERBLOCK_VERSION_2	2	/* Version with superblock extension and checksum */
+#define HDF5_SUPERBLOCK_VERSION_2	2	/* Revised version with superblock extension and checksum */
 #define HDF5_SUPERBLOCK_VERSION_LATEST	HDF5_SUPERBLOCK_VERSION_2	/* The maximum super block format    */
-#define HDF5_FREESPACE_VERSION	0	/* of the Free-Space Info	  */
-#define HDF5_OBJECTDIR_VERSION	0	/* of the Object Directory format */
-#define HDF5_SHAREDHEADER_VERSION 0	/* of the Shared-Header Info	  */
-#define HDF5_DRIVERINFO_VERSION_0 0	/* of the Driver Information Block*/
-#define HDF5_DRIVERINFO_VERSION_LATEST	HDF5_DRIVERINFO_VERSION_0	/* Maximum driver info block format    */
+#define HDF5_FREESPACE_VERSION	        0	/* of the Free-Space Info	  */
+#define HDF5_OBJECTDIR_VERSION	        0	/* of the Object Directory format */
+#define HDF5_SHAREDHEADER_VERSION       0	/* of the Shared-Header Info	  */
+#define HDF5_DRIVERINFO_VERSION_0       0	/* of the Driver Information Block*/
 
 /* B-tree internal 'K' values */
 #define HDF5_BTREE_SNODE_IK_DEF         16
