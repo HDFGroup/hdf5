@@ -36,30 +36,53 @@ Extra Preconditions
       C:\Program Files\Microsoft Visual Studio\Common\MSDev98\Bin\)
       into "Variable Value" and click "OK".
 
-   2. Add WinZip command line support (Optional)
-      
-      To use WinZip command line utility, you have to install 
-      WinZip 9.0 or higher version.
+   2. Add command line file-extraction support
+   
+      Option A. Winzip
+         
+          To use WinZip command line utility, you have to install 
+          WinZip 9.0 or higher version.  You will also need the Winzip command
+          line utility, which is free after the purchase of Winzip Pro
 
-      If you want to extract hdf5\windows\all.zip on the command line,
-      you should
+          If you want to extract hdf5\windows\all.zip on the command line,
+          you should
+       
+          Step 1) Install WinZip command line support add-on 1.1
+       
+              Download WinZip command line support add-on 1.1 from 
+              http://www.winzip.com and install it.
+       
+          Step 2) Add WinZip into environment path
+       
+              Open "System" in Control Panel.
+              On the "Advanced" tab, click "Environment Variables", click
+              "Path" in the "System variables" box, then click "Edit" and 
+              add your WinZip path (For example C:\Program Files\WinZip)
+              into "Variable Value" and click "OK".
+  
+      Option B. 7-Zip
+
+          7-Zip is a free, open-source file archiver which supports
+          unpacking zip file from the command line.  To use 7-Zip:
+
+          Step 1) Install 7-Zip
+          
+             7-Zip is available online at http://www.7-zip.org/
+             Please install the latest version available
+         
+          Step 2) Add 7-Zip to Path
+          
+             Open "System" in Control Panel.
    
-      2.1 Install WinZip command line support add-on 1.1
-   
-          Download WinZip command line support add-on 1.1 from 
-          http://www.winzip.com and install it.
-   
-      2.2 Add WinZip into environment path
-   
-          Open "System" in Control Panel.
-          On the "Advanced" tab, click "Environment Variables", click
-          "Path" in the "System variables" box, then click "Edit" and 
-          add your WinZip path (For example C:\Program Files\WinZip)
-          into "Variable Value" and click "OK".
+             On the "Advanced" tab, click "Environment Variables", click "Path"
+             in the "System variables" box, then click "Edit" and add your 7-Zip
+             path (For example, C:\Program Files\7-Zip) into "Variable Value" 
+             and click "OK".
+
 
       Note: 
-         You can also extract all.zip from interactive WinZip interface 
-         without the above two steps.
+         You can also extract all.zip from interactive WinZip or 7-Zip interface 
+         without the above steps.
   
 ***********************************************************************
 Step 1. Building and testing HDF5 libraries and tools
@@ -69,15 +92,25 @@ Step 1. Building and testing HDF5 libraries and tools
       Unpack all.zip in c:\MyHDFstuff\hdf5\windows into the 
       C:\myHDFstuff\hdf5\ directory.
       
-      This can be done with either of the following 2 options:
+      This can be done with either of the following 3 options:
 
-      Option A. Unpack from the interactive WinZip interface
+      Option A. Unpack from the interactive WinZip or 7-Zip interface
 
-      Option B. unpack on the command line
+      Option B. Unpack on the command line with WinZip
 
          cd into the c:\MyHDFstuff\hdf5\windows directory
    
          type: wzunzip -yO -d -o all.zip c:\MyHDFstuff\hdf5
+
+      Option C. Unpack on the command line with 7-Zip
+      
+         Open a command prompt and navigate the the directory
+         C:\MyHDFstuff\hdf5\windows  Then run the command:
+         
+            7z x all.zip -o..\ -y
+
+         This will extract all windows files into the c:\MyHDFstuff\hdf5
+         directory.
    
 
    2. Build and Test
