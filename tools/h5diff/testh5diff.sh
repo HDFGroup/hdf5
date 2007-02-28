@@ -290,7 +290,7 @@ TOOLTEST h5diff_15.txt $FILE1 $FILE2 -r -d 5 g1/dset3 g1/dset4
 TOOLTEST h5diff_16_1.txt $FILE1 $FILE1 -v -p 0.02 g1/dset5 g1/dset6
 
 # 1.6.2 with -p (unsigned long_long)
-#TOOLTEST h5diff_16_2.txt $FILE1 $FILE1 -v -p 0.02 g1/dset7 g1/dset8
+TOOLTEST h5diff_16_2.txt $FILE1 $FILE1 -v -p 0.02 g1/dset7 g1/dset8
 
 # 1.6.3 with -p (double)
 TOOLTEST h5diff_16_3.txt $FILE1 $FILE1 -v -p 0.02 g1/dset9 g1/dset10

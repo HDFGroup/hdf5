@@ -60,7 +60,6 @@
 static hbool_t equal_float(float value, float expected);
 static hbool_t equal_double(double value, double expected);
 
-
 /*-------------------------------------------------------------------------
  * -p relative error formula
  *
@@ -90,13 +89,13 @@ static int   not_comparable;
 }
 
 
-#define PER_UNSIGN(A,B) { per=-1;                    \
+#define PER_UNSIGN(TYPE,A,B) { per=-1;               \
     not_comparable=0;                                \
     both_zero=0;                                     \
     if (A==0 && B==0)                                \
     both_zero=1;                                     \
     if (A!=0)                                        \
-    per = (double) (B-A) / (double)A ;               \
+    per = ABS((double)((TYPE)(B-A)) / (double)A) ;   \
     else                                             \
     not_comparable=1;                                \
 }
@@ -946,7 +945,7 @@ hsize_t diff_datum(void       *_mem1,
       /* !-d and -p */
       else if (!options->d && options->p)
       {
-          PER_UNSIGN(temp1_uchar,temp2_uchar);
+          PER_UNSIGN(signed char,temp1_uchar,temp2_uchar);
           
           if (not_comparable && !both_zero) /* not comparable */
           {
@@ -976,7 +975,7 @@ hsize_t diff_datum(void       *_mem1,
       /* -d and -p */
       else if ( options->d && options->p)
       {
-          PER_UNSIGN(temp1_uchar,temp2_uchar);
+          PER_UNSIGN(signed char,temp1_uchar,temp2_uchar);
           
           if (not_comparable && !both_zero) /* not comparable */
           {
@@ -1149,7 +1148,7 @@ hsize_t diff_datum(void       *_mem1,
       /* !-d and -p */
       else if (!options->d && options->p)
       {
-          PER_UNSIGN(temp1_ushort,temp2_ushort);
+          PER_UNSIGN(signed short,temp1_ushort,temp2_ushort);
           
           if (not_comparable && !both_zero) /* not comparable */
           {
@@ -1180,7 +1179,7 @@ hsize_t diff_datum(void       *_mem1,
       /* -d and -p */
       else if ( options->d && options->p)
       {
-          PER_UNSIGN(temp1_ushort,temp2_ushort);
+          PER_UNSIGN(signed short,temp1_ushort,temp2_ushort);
           
           if (not_comparable && !both_zero) /* not comparable */
           {
@@ -1350,7 +1349,7 @@ hsize_t diff_datum(void       *_mem1,
       /* !-d and -p */
       else if (!options->d && options->p)
       {
-          PER_UNSIGN(temp1_uint,temp2_uint);
+          PER_UNSIGN(signed int,temp1_uint,temp2_uint);
           
           if (not_comparable && !both_zero) /* not comparable */
           {
@@ -1380,7 +1379,7 @@ hsize_t diff_datum(void       *_mem1,
       /* -d and -p */
       else if ( options->d && options->p)
       {
-          PER_UNSIGN(temp1_uint,temp2_uint);
+          PER_UNSIGN(signed int,temp1_uint,temp2_uint);
           
           if (not_comparable && !both_zero) /* not comparable */
           {
@@ -1552,7 +1551,7 @@ hsize_t diff_datum(void       *_mem1,
       /* !-d and -p */
       else if (!options->d && options->p)
       {
-          PER_UNSIGN(temp1_ulong,temp2_ulong);
+          PER_UNSIGN(signed long,temp1_ulong,temp2_ulong);
           
           if (not_comparable && !both_zero) /* not comparable */
           {
@@ -1582,7 +1581,7 @@ hsize_t diff_datum(void       *_mem1,
       /* -d and -p */
       else if ( options->d && options->p)
       {
-          PER_UNSIGN(temp1_ulong,temp2_ulong);
+          PER_UNSIGN(signed long,temp1_ulong,temp2_ulong);
           
           if (not_comparable && !both_zero) /* not comparable */
           {
@@ -2459,7 +2458,7 @@ hsize_t character_compare_opt(unsigned char *mem1,
  /* !-d and -p */
  else if (!options->d && options->p)
  {
-     PER_UNSIGN(temp1_uchar,temp2_uchar);
+     PER_UNSIGN(signed char,temp1_uchar,temp2_uchar);
      if ( per > options->percent )
      {
          if ( print_data(options) )
@@ -2474,7 +2473,7 @@ hsize_t character_compare_opt(unsigned char *mem1,
  /* -d and -p */
  else if ( options->d && options->p)
  {
-     PER_UNSIGN(temp1_uchar,temp2_uchar);
+     PER_UNSIGN(signed char,temp1_uchar,temp2_uchar);
      if ( per > options->percent && PDIFF(temp1_uchar,temp2_uchar) > options->delta )
      {
          if ( print_data(options) )
@@ -3100,7 +3099,7 @@ hsize_t diff_uchar(unsigned char *mem1,
          memcpy(&temp1_uchar, mem1, sizeof(unsigned char));
          memcpy(&temp2_uchar, mem2, sizeof(unsigned char));
          
-         PER_UNSIGN(temp1_uchar,temp2_uchar);
+         PER_UNSIGN(signed char,temp1_uchar,temp2_uchar);
          
          if (not_comparable && !both_zero) /* not comparable */
          {
@@ -3145,7 +3144,7 @@ hsize_t diff_uchar(unsigned char *mem1,
          memcpy(&temp1_uchar, mem1, sizeof(unsigned char));
          memcpy(&temp2_uchar, mem2, sizeof(unsigned char));
          
-         PER_UNSIGN(temp1_uchar,temp2_uchar);
+         PER_UNSIGN(signed char,temp1_uchar,temp2_uchar);
          
          if (not_comparable && !both_zero) /* not comparable */
          {
@@ -3457,7 +3456,7 @@ hsize_t diff_ushort(unsigned char *mem1,
          memcpy(&temp1_ushort, mem1, sizeof(unsigned short));
          memcpy(&temp2_ushort, mem2, sizeof(unsigned short));
          
-         PER_UNSIGN(temp1_ushort,temp2_ushort);
+         PER_UNSIGN(signed short,temp1_ushort,temp2_ushort);
          
          if (not_comparable && !both_zero) /* not comparable */
          {
@@ -3504,7 +3503,7 @@ hsize_t diff_ushort(unsigned char *mem1,
          memcpy(&temp1_ushort, mem1, sizeof(unsigned short));
          memcpy(&temp2_ushort, mem2, sizeof(unsigned short));
          
-         PER_UNSIGN(temp1_ushort,temp2_ushort);
+         PER_UNSIGN(signed short,temp1_ushort,temp2_ushort);
          
          if (not_comparable && !both_zero) /* not comparable */
          {
@@ -3819,7 +3818,7 @@ hsize_t diff_uint(unsigned char *mem1,
          memcpy(&temp1_uint, mem1, sizeof(unsigned int));
          memcpy(&temp2_uint, mem2, sizeof(unsigned int));
          
-         PER_UNSIGN(temp1_uint,temp2_uint);
+         PER_UNSIGN(signed int,temp1_uint,temp2_uint);
          
          if (not_comparable && !both_zero) /* not comparable */
          {
@@ -3865,7 +3864,7 @@ hsize_t diff_uint(unsigned char *mem1,
          memcpy(&temp1_uint, mem1, sizeof(unsigned int));
          memcpy(&temp2_uint, mem2, sizeof(unsigned int));
          
-         PER_UNSIGN(temp1_uint,temp2_uint);
+         PER_UNSIGN(signed int,temp1_uint,temp2_uint);
          
          if (not_comparable && !both_zero) /* not comparable */
          {
@@ -4189,7 +4188,7 @@ hsize_t diff_ulong(unsigned char *mem1,
          memcpy(&temp1_ulong, mem1, sizeof(unsigned long));
          memcpy(&temp2_ulong, mem2, sizeof(unsigned long));
          
-         PER_UNSIGN(temp1_ulong,temp2_ulong);
+         PER_UNSIGN(signed long,temp1_ulong,temp2_ulong);
          
          if (not_comparable && !both_zero) /* not comparable */
          {
@@ -4235,7 +4234,7 @@ hsize_t diff_ulong(unsigned char *mem1,
          memcpy(&temp1_ulong, mem1, sizeof(unsigned long));
          memcpy(&temp2_ulong, mem2, sizeof(unsigned long));
          
-         PER_UNSIGN(temp1_ulong,temp2_ulong);
+         PER_UNSIGN(signed long,temp1_ulong,temp2_ulong);
          
          if (not_comparable && !both_zero) /* not comparable */
          {
