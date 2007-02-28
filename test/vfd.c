@@ -215,7 +215,6 @@ test_direct(void)
     if(file_size<1*KB || file_size>4*KB)
         TEST_ERROR;
 
-#ifdef H5_HAVE_DIRECT_ALIGN
     /* Allocate aligned memory for data set 1. For data set 1, everything is aligned including
      * memory address, size of data, and file address. */
     if(posix_memalign(&points, (size_t)FBSIZE, (size_t)(DSET1_DIM1*DSET1_DIM2*sizeof(int)))!=0)
@@ -223,11 +222,6 @@ test_direct(void)
 
     if(posix_memalign(&check, (size_t)FBSIZE, (size_t)(DSET1_DIM1*DSET1_DIM2*sizeof(int)))!=0)
         TEST_ERROR;
-#else
-    /* Allocate aligned memory for data set 1. No need for alignment. */
-    points=(int*)malloc(DSET1_DIM1*DSET1_DIM2*sizeof(int));
-    check=(int*)malloc(DSET1_DIM1*DSET1_DIM2*sizeof(int));
-#endif
 
     /* Initialize the dset1 */
     p1 = points;

@@ -61,9 +61,6 @@
 /* Define if the direct I/O virtual file driver should be compiled */
 #undef HAVE_DIRECT
 
-/* Define if the direct I/O VFD requires alignment */
-#undef HAVE_DIRECT_ALIGN
-
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 

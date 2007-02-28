@@ -1965,7 +1965,7 @@ test_compound_11(void)
     for(u=0; u<NTESTELEM; u++) {
         ((big_t *)buf)[u].d1=(double)u*(double)1.5;
         ((big_t *)buf)[u].d2=(double)u*(double)2.5;
-        ((big_t *)buf)[u].d2=(double)u*(double)3.5;
+        ((big_t *)buf)[u].d3=(double)u*(double)3.5;
         ((big_t *)buf)[u].i1=u*3;
         ((big_t *)buf)[u].i2=u*5;
         ((big_t *)buf)[u].s1=HDmalloc(32);

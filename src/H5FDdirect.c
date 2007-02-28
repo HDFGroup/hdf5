@@ -54,6 +54,7 @@ typedef struct H5FD_direct_fapl_t {
     size_t	mboundary;	/* Memory boundary for alignment		*/
     size_t	fbsize;		/* File system block size			*/
     size_t	cbsize;		/* Maximal buffer size for copying user data	*/
+    hbool_t     must_align;     /* Decides if data alignment is required        */
 } H5FD_direct_fapl_t;
 
 /*
@@ -332,6 +333,9 @@ H5Pset_fapl_direct(hid_t fapl_id, size_t boundary, size_t block_size, size_t cbu
     else
 	fa.cbsize = CBSIZE_DEF;
 
+    /* Set the default to be true for data alignment */
+    fa.must_align = TRUE;
+
     /* Copy buffer size must be a multiple of file block size */
     if(fa.cbsize % fa.fbsize != 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "copy buffer size must be a multiple of block size")
@@ -493,6 +497,7 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
 #endif
     h5_stat_t		sb;
     H5P_genplist_t 	*plist;      /* Property list */
+    int                 *buf;
     H5FD_t		*ret_value;
 
     FUNC_ENTER_NOAPI(H5FD_direct_open, NULL)
@@ -555,6 +560,27 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
     file->fa.mboundary = fa->mboundary;
     file->fa.fbsize = fa->fbsize;
     file->fa.cbsize = fa->cbsize;
+
+    /* Try to decide if data alignment is required.  The reason to check it here
+     * is to handle correctly the case that the file is in a different file system
+     * than the one where the program is running.
+     */
+    buf = (int*)HDmalloc(sizeof(int));
+    if(o_flags &= O_CREAT) {
+        if(write(file->fd, (void*)buf, sizeof(int))<0)
+            file->fa.must_align = TRUE;
+        else {
+            file->fa.must_align = FALSE;
+            file_truncate(file->fd, (file_offset_t)0);
+        }
+    } else {
+        if(read(file->fd, (void*)buf, sizeof(int))<0)
+            file->fa.must_align = TRUE;
+        else
+            file->fa.must_align = FALSE;
+    }
+    if(buf)
+        HDfree(buf);
 
     /* Set return value */
     ret_value=(H5FD_t*)file;
@@ -868,7 +894,7 @@ H5FD_direct_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, ha
 {
     H5FD_direct_t	*file = (H5FD_direct_t*)_file;
     ssize_t		nbytes;
-    hbool_t		must_align = TRUE;
+    hbool_t		_must_align = TRUE;
     herr_t      	ret_value=SUCCEED;       /* Return value */
     size_t		alloc_size;
     void		*copy_buf, *p2, *p3;
@@ -891,12 +917,10 @@ H5FD_direct_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, ha
     if (addr+size>file->eoa)
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow")
 
-#ifndef H5_HAVE_DIRECT_ALIGN
     /* If the system doesn't require data to be aligned, read the data in 
      * the same way as sec2 driver.
      */
-    must_align = FALSE;
-#endif
+    _must_align = file->fa.must_align;
 
     /* Get the memory boundary for alignment, file system block size, and maximal 
      * copy buffer size.
@@ -909,7 +933,7 @@ H5FD_direct_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, ha
      * read it directly from the file.  If not, read a bigger 
      * and aligned data first, then copy the data into memory buffer.
      */
-    if(!must_align || ((addr%_fbsize==0) && (size%_fbsize==0) && ((size_t)buf%_boundary==0))) {
+    if(!_must_align || ((addr%_fbsize==0) && (size%_fbsize==0) && ((size_t)buf%_boundary==0))) {
 	    /* Seek to the correct location */
 	    if ((addr!=file->pos || OP_READ!=file->op) &&
 		    file_seek(file->fd, (file_offset_t)addr, SEEK_SET)<0)
@@ -1040,7 +1064,7 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
 {
     H5FD_direct_t	*file = (H5FD_direct_t*)_file;
     ssize_t		nbytes;
-    hbool_t		must_align = TRUE;
+    hbool_t		_must_align = TRUE;
     herr_t      	ret_value=SUCCEED;       /* Return value */
     size_t		alloc_size;
     void		*copy_buf, *p1, *p3;
@@ -1063,12 +1087,10 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
     if (addr+size>file->eoa)
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow")
 
-#ifndef H5_HAVE_DIRECT_ALIGN
     /* If the system doesn't require data to be aligned, read the data in 
      * the same way as sec2 driver.
      */
-    must_align = FALSE;
-#endif
+    _must_align = file->fa.must_align;
 
     /* Get the memory boundary for alignment, file system block size, and maximal 
      * copy buffer size.
@@ -1081,7 +1103,7 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
      * write it directly to the file.  If not, read a bigger and aligned data 
      * first, update buffer with user data, then write the data out.
      */
-    if(!must_align || ((addr%_fbsize==0) && (size%_fbsize==0) && ((size_t)buf%_boundary==0))) {
+    if(!_must_align || ((addr%_fbsize==0) && (size%_fbsize==0) && ((size_t)buf%_boundary==0))) {
 	    /* Seek to the correct location */
 	    if ((addr!=file->pos || OP_WRITE!=file->op) &&
 		    file_seek(file->fd, (file_offset_t)addr, SEEK_SET)<0)
@@ -1257,15 +1279,13 @@ H5FD_direct_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
         file->pos = HADDR_UNDEF;
         file->op = OP_UNKNOWN;
     } 
-#ifdef H5_HAVE_DIRECT_ALIGN
-    else { 
+    else if (file->fa.must_align){ 
 	/*Even though eof is equal to eoa, file is still truncated because Direct I/O
 	 *write introduces some extra data for alignment.
 	 */
         if (-1==file_truncate(file->fd, (file_offset_t)file->eof))
             HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
     }
-#endif /*H5_HAVE_DIRECT_ALIGN*/
     
 done:
     FUNC_LEAVE_NOAPI(ret_value)
