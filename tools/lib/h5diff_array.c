@@ -59,7 +59,6 @@
 static hbool_t equal_float(float value, float expected);
 static hbool_t equal_double(double value, double expected);
 
-
 /*-------------------------------------------------------------------------
  * -p relative error formula
  *
@@ -71,7 +70,6 @@ static hbool_t equal_double(double value, double expected);
  * --------
  *    A
  *
-
  *-------------------------------------------------------------------------
  */
 
@@ -89,16 +87,17 @@ static int   not_comparable;
 }
 
 
-#define PER_UNSIGN(A,B) { per=-1;                    \
+#define PER_UNSIGN(TYPE,A,B) { per=-1;               \
     not_comparable=0;                                \
     both_zero=0;                                     \
     if (A==0 && B==0)                                \
     both_zero=1;                                     \
     if (A!=0)                                        \
-    per = (double) (B-A) / (double)A ;               \
+    per = ABS((double)((TYPE)(B-A)) / (double)A) ;   \
     else                                             \
     not_comparable=1;                                \
 }
+
 
 
 #define BOTH_ZERO(A,B) { both_zero=0;                \
@@ -111,7 +110,10 @@ static int   not_comparable;
     is_zero=1;                                       \
 }
 
-#   define PDIFF(a,b)		( (b>a) ? (b-a) : (a-b))
+#define PDIFF(a,b)		( (b>a) ? (b-a) : (a-b))
+
+#define NOT_SUPPORTED() { printf("Warning: feature not supported\n"); }
+
 
 /*-------------------------------------------------------------------------
  * local prototypes
@@ -122,7 +124,6 @@ static hsize_t diff_region(hid_t obj1_id, hid_t obj2_id,hid_t region1_id, hid_t 
 static hbool_t all_zero(const void *_mem, size_t size);
 static hsize_t character_compare(unsigned char *mem1,unsigned char *mem2,hsize_t i,int rank,hsize_t *dims,hsize_t *acc,hsize_t *pos,diff_opt_t *options,const char *obj1,const char *obj2,int *ph);
 static hsize_t character_compare_opt(unsigned char *mem1,unsigned char *mem2,hsize_t i,int rank,hsize_t *dims,hsize_t *acc,hsize_t *pos,diff_opt_t *options,const char *obj1,const char *obj2,int *ph);
-static void    NOT_SUPPORTED();
 
 
 /*-------------------------------------------------------------------------
@@ -141,7 +142,7 @@ static void    NOT_SUPPORTED();
 static
 int print_data(diff_opt_t *options)
 {
- return ( (options->m_report || options->m_verbose) && !options->m_quiet)?1:0;
+    return ( (options->m_report || options->m_verbose) && !options->m_quiet)?1:0;
 }
 
 
@@ -240,134 +241,134 @@ hsize_t diff_array( void *_mem1,
                     hid_t container1_id,
                     hid_t container2_id) /* dataset where the reference came from*/
 {
- hsize_t       nfound=0;          /* number of differences found */
- size_t        size;              /* size of datum */
- unsigned char *mem1 = (unsigned char*)_mem1;
- unsigned char *mem2 = (unsigned char*)_mem2;
- unsigned char *tmp1;
- unsigned char *tmp2;
- hsize_t       acc[32];    /* accumulator position */
- hsize_t       pos[32];    /* matrix position */
- int           ph=1;       /* print header  */
- hsize_t       i;
- int           j;
-
- /* get the size. */
- size = H5Tget_size( m_type );
-
- acc[rank-1]=1;
- for(j=(rank-2); j>=0; j--)
- {
-  acc[j]=acc[j+1]*dims[j+1];
- }
- for ( j = 0; j < rank; j++)
-  pos[j]=0;
-
- if(H5Tis_variable_str(m_type))
- {
-  tmp1 = ((unsigned char**)mem1)[0];
-  tmp2 = ((unsigned char**)mem2)[0];
-  nfound+=diff_datum(
-   tmp1,
-   tmp2,
-   m_type,
-   (hsize_t)0,
-   rank,
-   dims,
-   acc,
-   pos,
-   options,
-   name1,
-   name2,
-   container1_id,
-   container2_id,
-   &ph);
- }
-
- else
- {
-  switch (H5Tget_class(m_type))
-  {
-  default:
-   assert(0);
-   break;
-
- /*-------------------------------------------------------------------------
-  * float and integer atomic types
-  *-------------------------------------------------------------------------
-  */
- 
-  case H5T_FLOAT:
-
-   if (H5Tequal(m_type, H5T_NATIVE_FLOAT))
-    nfound=diff_float(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
-   else if (H5Tequal(m_type, H5T_NATIVE_DOUBLE))
-    nfound=diff_double(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
-   break;
-
-  case H5T_INTEGER:
-
-   if (H5Tequal(m_type, H5T_NATIVE_SCHAR))
-    nfound=diff_schar(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
-   else if (H5Tequal(m_type, H5T_NATIVE_UCHAR))
-    nfound=diff_uchar(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
-   else if (H5Tequal(m_type, H5T_NATIVE_SHORT))
-    nfound=diff_short(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
-   else if (H5Tequal(m_type, H5T_NATIVE_USHORT))
-    nfound=diff_ushort(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
-   else if (H5Tequal(m_type, H5T_NATIVE_INT))
-    nfound=diff_int(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
-   else if (H5Tequal(m_type, H5T_NATIVE_UINT))
-    nfound=diff_uint(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
-   else if (H5Tequal(m_type, H5T_NATIVE_LONG))
-    nfound=diff_long(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
-   else if (H5Tequal(m_type, H5T_NATIVE_ULONG))
-    nfound=diff_ulong(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
-   else if (H5Tequal(m_type, H5T_NATIVE_LLONG))
-    nfound=diff_llong(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
-   else if (H5Tequal(m_type, H5T_NATIVE_ULLONG))
-    nfound=diff_ullong(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
-
-   break;
-
- /*-------------------------------------------------------------------------
-  * Other types than float and integer
-  *-------------------------------------------------------------------------
-  */
-
-  case H5T_COMPOUND:
-  case H5T_STRING:
-  case H5T_BITFIELD:
-  case H5T_OPAQUE:
-  case H5T_ENUM:
-  case H5T_ARRAY:
-  case H5T_VLEN:
-  case H5T_REFERENCE:
-
-   for ( i = 0; i < nelmts; i++)
-   {
-    nfound+=diff_datum(
-     mem1 + i * size,
-     mem2 + i * size, /* offset */
-     m_type,
-     i,
-     rank,
-     dims,
-     acc,
-     pos,
-     options,
-     name1,
-     name2,
-     container1_id,
-     container2_id,
-     &ph);
-    if (options->n && nfound>=options->count)
-     return nfound;
-   } /* i */
-  } /* switch */
- } /* else */
-
- return nfound;
+    unsigned char *mem1 = (unsigned char*)_mem1;
+    unsigned char *mem2 = (unsigned char*)_mem2;
+    unsigned char *tmp1;
+    unsigned char *tmp2;
+    hsize_t       nfound=0;   /* number of differences found */
+    size_t        size;       /* size of datum */
+    hsize_t       acc[32];    /* accumulator position */
+    hsize_t       pos[32];    /* matrix position */
+    int           ph=1;       /* print header  */
+    hsize_t       i;
+    int           j;
+    
+    /* get the size. */
+    size = H5Tget_size( m_type );
+    
+    acc[rank-1]=1;
+    for(j=(rank-2); j>=0; j--)
+    {
+        acc[j]=acc[j+1]*dims[j+1];
+    }
+    for ( j = 0; j < rank; j++)
+        pos[j]=0;
+    
+    if(H5Tis_variable_str(m_type))
+    {
+        tmp1 = ((unsigned char**)mem1)[0];
+        tmp2 = ((unsigned char**)mem2)[0];
+        nfound+=diff_datum(
+            tmp1,
+            tmp2,
+            m_type,
+            (hsize_t)0,
+            rank,
+            dims,
+            acc,
+            pos,
+            options,
+            name1,
+            name2,
+            container1_id,
+            container2_id,
+            &ph);
+    }
+    
+    else
+    {
+        switch (H5Tget_class(m_type))
+        {
+        default:
+            assert(0);
+            break;
+            
+       /*-------------------------------------------------------------------------
+        * float and integer atomic types
+        *-------------------------------------------------------------------------
+        */
+            
+        case H5T_FLOAT:
+            
+            if (H5Tequal(m_type, H5T_NATIVE_FLOAT))
+                nfound=diff_float(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
+            else if (H5Tequal(m_type, H5T_NATIVE_DOUBLE))
+                nfound=diff_double(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
+            break;
+            
+        case H5T_INTEGER:
+            
+            if (H5Tequal(m_type, H5T_NATIVE_SCHAR))
+                nfound=diff_schar(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
+            else if (H5Tequal(m_type, H5T_NATIVE_UCHAR))
+                nfound=diff_uchar(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
+            else if (H5Tequal(m_type, H5T_NATIVE_SHORT))
+                nfound=diff_short(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
+            else if (H5Tequal(m_type, H5T_NATIVE_USHORT))
+                nfound=diff_ushort(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
+            else if (H5Tequal(m_type, H5T_NATIVE_INT))
+                nfound=diff_int(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
+            else if (H5Tequal(m_type, H5T_NATIVE_UINT))
+                nfound=diff_uint(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
+            else if (H5Tequal(m_type, H5T_NATIVE_LONG))
+                nfound=diff_long(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
+            else if (H5Tequal(m_type, H5T_NATIVE_ULONG))
+                nfound=diff_ulong(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
+            else if (H5Tequal(m_type, H5T_NATIVE_LLONG))
+                nfound=diff_llong(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
+            else if (H5Tequal(m_type, H5T_NATIVE_ULLONG))
+                nfound=diff_ullong(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
+            
+            break;
+            
+        /*-------------------------------------------------------------------------
+         * Other types than float and integer
+         *-------------------------------------------------------------------------
+         */
+            
+        case H5T_COMPOUND:
+        case H5T_STRING:
+        case H5T_BITFIELD:
+        case H5T_OPAQUE:
+        case H5T_ENUM:
+        case H5T_ARRAY:
+        case H5T_VLEN:
+        case H5T_REFERENCE:
+            
+            for ( i = 0; i < nelmts; i++)
+            {
+                nfound+=diff_datum(
+                    mem1 + i * size,
+                    mem2 + i * size, /* offset */
+                    m_type,
+                    i,
+                    rank,
+                    dims,
+                    acc,
+                    pos,
+                    options,
+                    name1,
+                    name2,
+                    container1_id,
+                    container2_id,
+                    &ph);
+                if (options->n && nfound>=options->count)
+                    return nfound;
+            } /* i */
+        } /* switch */
+    } /* else */
+    
+    return nfound;
 }
 
 /*-------------------------------------------------------------------------
@@ -946,7 +947,7 @@ hsize_t diff_datum(void       *_mem1,
       /* !-d and -p */
       else if (!options->d && options->p)
       {
-          PER_UNSIGN(temp1_uchar,temp2_uchar);
+          PER_UNSIGN(signed char,temp1_uchar,temp2_uchar);
           
           if (not_comparable && !both_zero) /* not comparable */
           {
@@ -976,7 +977,7 @@ hsize_t diff_datum(void       *_mem1,
       /* -d and -p */
       else if ( options->d && options->p)
       {
-          PER_UNSIGN(temp1_uchar,temp2_uchar);
+          PER_UNSIGN(signed char,temp1_uchar,temp2_uchar);
           
           if (not_comparable && !both_zero) /* not comparable */
           {
@@ -1149,7 +1150,7 @@ hsize_t diff_datum(void       *_mem1,
       /* !-d and -p */
       else if (!options->d && options->p)
       {
-          PER_UNSIGN(temp1_ushort,temp2_ushort);
+          PER_UNSIGN(signed short,temp1_ushort,temp2_ushort);
           
           if (not_comparable && !both_zero) /* not comparable */
           {
@@ -1180,7 +1181,7 @@ hsize_t diff_datum(void       *_mem1,
       /* -d and -p */
       else if ( options->d && options->p)
       {
-          PER_UNSIGN(temp1_ushort,temp2_ushort);
+          PER_UNSIGN(signed short,temp1_ushort,temp2_ushort);
           
           if (not_comparable && !both_zero) /* not comparable */
           {
@@ -1350,7 +1351,7 @@ hsize_t diff_datum(void       *_mem1,
       /* !-d and -p */
       else if (!options->d && options->p)
       {
-          PER_UNSIGN(temp1_uint,temp2_uint);
+          PER_UNSIGN(signed int,temp1_uint,temp2_uint);
           
           if (not_comparable && !both_zero) /* not comparable */
           {
@@ -1380,7 +1381,7 @@ hsize_t diff_datum(void       *_mem1,
       /* -d and -p */
       else if ( options->d && options->p)
       {
-          PER_UNSIGN(temp1_uint,temp2_uint);
+          PER_UNSIGN(signed int,temp1_uint,temp2_uint);
           
           if (not_comparable && !both_zero) /* not comparable */
           {
@@ -1552,7 +1553,7 @@ hsize_t diff_datum(void       *_mem1,
       /* !-d and -p */
       else if (!options->d && options->p)
       {
-          PER_UNSIGN(temp1_ulong,temp2_ulong);
+          PER_UNSIGN(signed long,temp1_ulong,temp2_ulong);
           
           if (not_comparable && !both_zero) /* not comparable */
           {
@@ -1582,7 +1583,7 @@ hsize_t diff_datum(void       *_mem1,
       /* -d and -p */
       else if ( options->d && options->p)
       {
-          PER_UNSIGN(temp1_ulong,temp2_ulong);
+          PER_UNSIGN(signed long,temp1_ulong,temp2_ulong);
           
           if (not_comparable && !both_zero) /* not comparable */
           {
@@ -1753,14 +1754,20 @@ hsize_t diff_datum(void       *_mem1,
       /* !-d and -p */
       else if (!options->d && options->p)
       {
-          NOT_SUPPORTED();
+          if ( print_data(options) )
+          {
+              NOT_SUPPORTED();
+          }
           options->not_cmp=1;
           return nfound;
       }
       /* -d and -p */
       else if ( options->d && options->p)
       {
-          NOT_SUPPORTED();
+          if ( print_data(options) )
+          {
+              NOT_SUPPORTED();
+          }
           options->not_cmp=1;
           return nfound;
       }
@@ -2408,7 +2415,7 @@ hsize_t character_compare_opt(unsigned char *mem1,
  /* !-d and -p */
  else if (!options->d && options->p)
  {
-     PER_UNSIGN(temp1_uchar,temp2_uchar);
+     PER_UNSIGN(signed char,temp1_uchar,temp2_uchar);
      if ( per > options->percent )
      {
          if ( print_data(options) )
@@ -2423,7 +2430,7 @@ hsize_t character_compare_opt(unsigned char *mem1,
  /* -d and -p */
  else if ( options->d && options->p)
  {
-     PER_UNSIGN(temp1_uchar,temp2_uchar);
+     PER_UNSIGN(signed char,temp1_uchar,temp2_uchar);
      if ( per > options->percent && PDIFF(temp1_uchar,temp2_uchar) > options->delta )
      {
          if ( print_data(options) )
@@ -3049,7 +3056,7 @@ hsize_t diff_uchar(unsigned char *mem1,
          memcpy(&temp1_uchar, mem1, sizeof(unsigned char));
          memcpy(&temp2_uchar, mem2, sizeof(unsigned char));
          
-         PER_UNSIGN(temp1_uchar,temp2_uchar);
+         PER_UNSIGN(signed char,temp1_uchar,temp2_uchar);
          
          if (not_comparable && !both_zero) /* not comparable */
          {
@@ -3094,7 +3101,7 @@ hsize_t diff_uchar(unsigned char *mem1,
          memcpy(&temp1_uchar, mem1, sizeof(unsigned char));
          memcpy(&temp2_uchar, mem2, sizeof(unsigned char));
          
-         PER_UNSIGN(temp1_uchar,temp2_uchar);
+         PER_UNSIGN(signed char,temp1_uchar,temp2_uchar);
          
          if (not_comparable && !both_zero) /* not comparable */
          {
@@ -3406,7 +3413,7 @@ hsize_t diff_ushort(unsigned char *mem1,
          memcpy(&temp1_ushort, mem1, sizeof(unsigned short));
          memcpy(&temp2_ushort, mem2, sizeof(unsigned short));
          
-         PER_UNSIGN(temp1_ushort,temp2_ushort);
+         PER_UNSIGN(signed short,temp1_ushort,temp2_ushort);
          
          if (not_comparable && !both_zero) /* not comparable */
          {
@@ -3453,7 +3460,7 @@ hsize_t diff_ushort(unsigned char *mem1,
          memcpy(&temp1_ushort, mem1, sizeof(unsigned short));
          memcpy(&temp2_ushort, mem2, sizeof(unsigned short));
          
-         PER_UNSIGN(temp1_ushort,temp2_ushort);
+         PER_UNSIGN(signed short,temp1_ushort,temp2_ushort);
          
          if (not_comparable && !both_zero) /* not comparable */
          {
@@ -3768,7 +3775,7 @@ hsize_t diff_uint(unsigned char *mem1,
          memcpy(&temp1_uint, mem1, sizeof(unsigned int));
          memcpy(&temp2_uint, mem2, sizeof(unsigned int));
          
-         PER_UNSIGN(temp1_uint,temp2_uint);
+         PER_UNSIGN(signed int,temp1_uint,temp2_uint);
          
          if (not_comparable && !both_zero) /* not comparable */
          {
@@ -3814,7 +3821,7 @@ hsize_t diff_uint(unsigned char *mem1,
          memcpy(&temp1_uint, mem1, sizeof(unsigned int));
          memcpy(&temp2_uint, mem2, sizeof(unsigned int));
          
-         PER_UNSIGN(temp1_uint,temp2_uint);
+         PER_UNSIGN(signed int,temp1_uint,temp2_uint);
          
          if (not_comparable && !both_zero) /* not comparable */
          {
@@ -4138,7 +4145,7 @@ hsize_t diff_ulong(unsigned char *mem1,
          memcpy(&temp1_ulong, mem1, sizeof(unsigned long));
          memcpy(&temp2_ulong, mem2, sizeof(unsigned long));
          
-         PER_UNSIGN(temp1_ulong,temp2_ulong);
+         PER_UNSIGN(signed long,temp1_ulong,temp2_ulong);
          
          if (not_comparable && !both_zero) /* not comparable */
          {
@@ -4184,7 +4191,7 @@ hsize_t diff_ulong(unsigned char *mem1,
          memcpy(&temp1_ulong, mem1, sizeof(unsigned long));
          memcpy(&temp2_ulong, mem2, sizeof(unsigned long));
          
-         PER_UNSIGN(temp1_ulong,temp2_ulong);
+         PER_UNSIGN(signed long,temp1_ulong,temp2_ulong);
          
          if (not_comparable && !both_zero) /* not comparable */
          {
@@ -4485,7 +4492,10 @@ hsize_t diff_ullong(unsigned char *mem1,
  else if (!options->d && options->p)
  {
      
-     NOT_SUPPORTED();
+     if ( print_data(options) )
+     {
+         NOT_SUPPORTED();
+     }
      options->not_cmp=1;
      return nfound;
      
@@ -4496,7 +4506,10 @@ hsize_t diff_ullong(unsigned char *mem1,
  else if ( options->d && options->p)
  {
      
-     NOT_SUPPORTED();
+     if ( print_data(options) )
+     {
+         NOT_SUPPORTED();
+     }
      options->not_cmp=1;
      return nfound;
      
@@ -4587,16 +4600,3 @@ hbool_t equal_float(float value, float expected)
     
 }
 
-
-/*-------------------------------------------------------------------------
- * Function:    NOT_SUPPORTED
- *
- * Purpose:     print a warning
- *
- *-------------------------------------------------------------------------
- */
-static void NOT_SUPPORTED()
-{
-    printf("Warning: feature not supported\n");
- 
-}
