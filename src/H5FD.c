@@ -3763,7 +3763,7 @@ done:
  *--------------------------------------------------------------------------
  */
 herr_t
-H5FDget_vfd_handle(H5FD_t *file, hid_t fapl, void** file_handle)
+H5FDget_vfd_handle(H5FD_t *file, hid_t fapl, void **file_handle)
 {
     herr_t              ret_value;
 
@@ -3795,7 +3795,7 @@ done:
  *--------------------------------------------------------------------------
  */
 herr_t
-H5FD_get_vfd_handle(H5FD_t *file, hid_t fapl, void** file_handle)
+H5FD_get_vfd_handle(H5FD_t *file, hid_t fapl, void **file_handle)
 {
     herr_t ret_value = SUCCEED;
 
