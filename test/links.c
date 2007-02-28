@@ -9367,8 +9367,8 @@ main(void)
 #endif /* H5_CANNOT_OPEN_TWICE */
             nerrors += external_link_path((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
             nerrors += external_link_mult((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
-            nerrors += external_link_self((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
 #ifndef H5_CANNOT_OPEN_TWICE
+            nerrors += external_link_self((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
             nerrors += external_link_pingpong((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
             nerrors += external_link_toomany((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
 #endif /* H5_CANNOT_OPEN_TWICE */
