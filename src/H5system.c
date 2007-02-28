@@ -559,7 +559,7 @@ void HDsrand(unsigned int seed)
  */
 #ifdef H5_VMS
 int
-HDremove_all(char *fname)
+HDremove_all(const char *fname)
 {
     int ret_value = -1;
     char *_fname;
