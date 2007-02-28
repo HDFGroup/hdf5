@@ -243,7 +243,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_attr_creation_order
  *
- * Purpose:     Set the flags for creation order of attributes in a group
+ * Purpose:     Set the flags for creation order of attributes on an object
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -292,8 +292,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_attr_creation_order
  *
- * Purpose:     Returns the flag indicating that creation order is tracked
- *              for attributes in a group.
+ * Purpose:     Returns the flags indicating creation order is tracked/indexed
+ *              for attributes on an object.
  *
  * Return:      Non-negative on success/Negative on failure
  *
