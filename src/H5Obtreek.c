@@ -14,10 +14,10 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
-/* Programmer:  James Laird <jlaird@hdfgroup.org>
- *              Monday, January 29, 2007
+/* Programmer:  Quincey Koziol <koziol@hdfgroup.org>
+ *              Thursday, March  1, 2007
  *
- * Purpose:	A message holding "implicitly shared object header message"
+ * Purpose:	A message holding non-default v1 B-tree 'K' value
  *              information in the superblock extension.
  */
 
@@ -28,23 +28,23 @@
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5MMprivate.h"	/* Memory management			*/
 
-static void  *H5O_shmesg_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
-static herr_t H5O_shmesg_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
-static void  *H5O_shmesg_copy(const void *_mesg, void *_dest);
-static size_t H5O_shmesg_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
-static herr_t H5O_shmesg_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
+static void  *H5O_btreek_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
+static herr_t H5O_btreek_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
+static void  *H5O_btreek_copy(const void *_mesg, void *_dest);
+static size_t H5O_btreek_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static herr_t H5O_btreek_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
 			     int indent, int fwidth);
 
 /* This message derives from H5O message class */
-const H5O_msg_class_t H5O_MSG_SHMESG[1] = {{
-    H5O_SHMESG_ID,              /*message id number                     */
-    "shared message table",     /*message name for debugging            */
-    sizeof(H5O_shmesg_table_t),	/*native message size                   */
+const H5O_msg_class_t H5O_MSG_BTREEK[1] = {{
+    H5O_BTREEK_ID,              /*message id number                     */
+    "v1 B-tree 'K' values",     /*message name for debugging            */
+    sizeof(H5O_btreek_t),	/*native message size                   */
     FALSE,			/* messages are sharable?       */
-    H5O_shmesg_decode,		/*decode message                        */
-    H5O_shmesg_encode,		/*encode message                        */
-    H5O_shmesg_copy,            /*copy the native value                 */
-    H5O_shmesg_size,		/*raw message size			*/
+    H5O_btreek_decode,		/*decode message                        */
+    H5O_btreek_encode,		/*encode message                        */
+    H5O_btreek_copy,            /*copy the native value                 */
+    H5O_btreek_size,		/*raw message size			*/
     NULL,                       /*free internal memory			*/
     NULL,                       /* free method				*/
     NULL,			/* file delete method			*/
@@ -56,88 +56,97 @@ const H5O_msg_class_t H5O_MSG_SHMESG[1] = {{
     NULL,			/* post copy native value to file	*/
     NULL,			/* get creation index		        */
     NULL,			/* set creation index		        */
-    H5O_shmesg_debug              /*debug the message			*/
+    H5O_btreek_debug            /*debug the message			*/
 }};
+
+/* Current version of v1 B-tree 'K' value information */
+#define H5O_BTREEK_VERSION 	0
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_shmesg_decode
+ * Function:	H5O_btreek_decode
  *
  * Purpose:	Decode a shared message table message and return a pointer
- *              to a newly allocated H5O_shmesg_table_t struct.
+ *              to a newly allocated H5O_btreek_t struct.
  *
  * Return:	Success:	Ptr to new message in native struct.
  *		Failure:	NULL
  *
- * Programmer:  James Laird
- *              Jan 29, 2007
+ * Programmer:  Quincey Koziol
+ *              Mar  1, 2007
  *
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_shmesg_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
+H5O_btreek_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
     const uint8_t *p)
 {
-    H5O_shmesg_table_t	*mesg;          /* Native message */
+    H5O_btreek_t	*mesg;          /* Native message */
     void                *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_shmesg_decode)
+    FUNC_ENTER_NOAPI_NOINIT(H5O_btreek_decode)
 
     /* Sanity check */
     HDassert(f);
     HDassert(p);
 
-    if(NULL == (mesg = H5MM_calloc(sizeof(H5O_shmesg_table_t))))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for shared message table message")
+    /* Version of message */
+    if(*p++ != H5O_BTREEK_VERSION)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message")
 
-    /* Retrieve version, table address, and number of indexes */
-    mesg->version = *p++;
-    H5F_addr_decode(f, &p, &(mesg->addr));
-    mesg->nindexes = *p++;
+    /* Allocate space for message */
+    if(NULL == (mesg = H5MM_calloc(sizeof(H5O_btreek_t))))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for v1 B-tree 'K' message")
+
+    /* Retrieve non-default B-tree 'K' values */
+    UINT16DECODE(p, mesg->btree_k[H5B_ISTORE_ID]);
+    UINT16DECODE(p, mesg->btree_k[H5B_SNODE_ID]);
+    UINT16DECODE(p, mesg->sym_leaf_k);
 
     /* Set return value */
     ret_value = (void *)mesg;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_shmesg_decode() */
+} /* end H5O_btreek_decode() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_shmesg_encode
+ * Function:	H5O_btreek_encode
  *
- * Purpose:	Encode a shared message table message.
+ * Purpose:	Encode a v1 B-tree 'K' value message.
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:  James Laird
- *              Jan 29, 2007
+ * Programmer:  Quincey Koziol
+ *              Mar  1, 2007
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_shmesg_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O_btreek_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
-    const H5O_shmesg_table_t *mesg = (const H5O_shmesg_table_t *)_mesg;
+    const H5O_btreek_t *mesg = (const H5O_btreek_t *)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_shmesg_encode)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_btreek_encode)
 
     /* Sanity check */
     HDassert(f);
     HDassert(p);
     HDassert(mesg);
 
-    /* Store version, table address, and number of indexes */
-    *p++ = mesg->version;
-    H5F_addr_encode(f, &p, mesg->addr);
-    *p++ = mesg->nindexes;
+    /* Store version and non-default v1 B-tree 'K' values */
+    *p++ = H5O_BTREEK_VERSION;
+    UINT16ENCODE(p, mesg->btree_k[H5B_ISTORE_ID]);
+    UINT16ENCODE(p, mesg->btree_k[H5B_SNODE_ID]);
+    UINT16ENCODE(p, mesg->sym_leaf_k);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_shmesg_encode() */
+} /* end H5O_btreek_encode() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_shmesg_copy
+ * Function:	H5O_btreek_copy
  *
  * Purpose:	Copies a message from _MESG to _DEST, allocating _DEST if
  *		necessary.
@@ -145,24 +154,24 @@ H5O_shmesg_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const voi
  * Return:	Success:	Ptr to _DEST
  *		Failure:	NULL
  *
- * Programmer:  James Laird
- *              Jan 29, 2007
+ * Programmer:  Quincey Koziol
+ *              Mar  1, 2007
  *
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_shmesg_copy(const void *_mesg, void *_dest)
+H5O_btreek_copy(const void *_mesg, void *_dest)
 {
-    const H5O_shmesg_table_t	*mesg = (const H5O_shmesg_table_t *)_mesg;
-    H5O_shmesg_table_t		*dest = (H5O_shmesg_table_t *)_dest;
-    void			*ret_value;
+    const H5O_btreek_t	*mesg = (const H5O_btreek_t *)_mesg;
+    H5O_btreek_t	*dest = (H5O_btreek_t *)_dest;
+    void		*ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_shmesg_copy)
+    FUNC_ENTER_NOAPI_NOINIT(H5O_btreek_copy)
 
     /* Sanity check */
     HDassert(mesg);
 
-    if(!dest && NULL == (dest = H5MM_malloc(sizeof(H5O_shmesg_table_t))))
+    if(!dest && NULL == (dest = H5MM_malloc(sizeof(H5O_btreek_t))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for shared message table message")
 
     /* All this message requires is a shallow copy */
@@ -173,11 +182,11 @@ H5O_shmesg_copy(const void *_mesg, void *_dest)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_shmesg_copy() */
+} /* end H5O_btreek_copy() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_shmesg_size
+ * Function:	H5O_btreek_size
  *
  * Purpose:	Returns the size of the raw message in bytes not counting the
  *		message type or size fields, but only the data fields.
@@ -185,48 +194,49 @@ done:
  * Return:	Success:	Message data size in bytes w/o alignment.
  *		Failure:	0
  *
- * Programmer:  James Laird
- *              Jan 29, 2007
+ * Programmer:  Quincey Koziol
+ *              Mar  1, 2007
  *
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_shmesg_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void UNUSED *_mesg)
+H5O_btreek_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void UNUSED *_mesg)
 {
     size_t                   ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_shmesg_size)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_btreek_size)
 
     /* Sanity check */
     HDassert(f);
 
-    ret_value = 1 +                     /* Version number        */
-		H5F_SIZEOF_ADDR(f) +    /* Table address */
-		1;                      /* Number of indexes */
+    ret_value = 1 +             /* Version number */
+		2 +             /* Indexed storage internal B-tree 'K' value */
+		2 +             /* Symbol table node internal B-tree 'K' value */
+		2;              /* Symbol table node leaf 'K' value */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_shmesg_size() */
+} /* end H5O_btreek_size() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_shmesg_debug
+ * Function:	H5O_btreek_debug
  *
  * Purpose:	Prints debugging info for the message.
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:  James Laird
- *              Jan 29, 2007
+ * Programmer:  Quincey Koziol
+ *              Mar  1, 2007
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_shmesg_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *stream,
+H5O_btreek_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *stream,
     int indent, int fwidth)
 {
-    const H5O_shmesg_table_t *mesg = (const H5O_shmesg_table_t *)_mesg;
+    const H5O_btreek_t *mesg = (const H5O_btreek_t *)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_shmesg_debug)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_btreek_debug)
 
     /* Sanity check */
     HDassert(f);
@@ -236,12 +246,12 @@ H5O_shmesg_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE 
     HDassert(fwidth >= 0);
 
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "Version:", mesg->version);
-    HDfprintf(stream, "%*s%-*s %a (rel)\n", indent, "", fwidth,
-	      "Shared message table address:", mesg->addr);
+	      "Indexed storage internal B-tree 'K' value:", mesg->btree_k[H5B_ISTORE_ID]);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "Number of indexes:", mesg->nindexes);
+	      "Symbol table node internal B-tree 'K' value:", mesg->btree_k[H5B_SNODE_ID]);
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	      "Symbol table node leaf 'K' value:", mesg->sym_leaf_k);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_shmesg_debug() */
+} /* end H5O_btreek_debug() */
 

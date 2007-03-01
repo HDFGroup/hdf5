@@ -128,11 +128,12 @@ typedef struct H5O_copy_t {
 #define H5O_ATTR_ID	0x000c          /* Attribute Message.  */
 #define H5O_NAME_ID	0x000d          /* Object name message.  */
 #define H5O_MTIME_ID	0x000e          /* Modification time message. (Old)  */
-#define H5O_SHARED_ID	0x000f          /* Shared object message.  */
+#define H5O_SHMESG_ID   0x000f          /* Shared message "SOHM" table. */
 #define H5O_CONT_ID	0x0010          /* Object header continuation message.  */
 #define H5O_STAB_ID	0x0011          /* Symbol table message.  */
 #define H5O_MTIME_NEW_ID 0x0012         /* Modification time message. (New)  */
-#define H5O_SHMESG_ID   0x0013          /* Shared message "SOHM" table. */
+#define H5O_BTREEK_ID   0x0013          /* v1 B-tree 'K' values message.  */
+#define H5O_DRVINFO_ID  0x0014          /* Driver info message.  */
 
 
 /* Shared object message flags.
@@ -147,7 +148,7 @@ typedef struct H5O_copy_t {
 #define H5O_IS_SHARED(F)        (((F) & (H5O_SHARED_IN_HEAP_FLAG | H5O_COMMITTED_FLAG)) ? TRUE : FALSE)
 
 /*
- * Shared object message.
+ * Shared object header message info.
  * This needs to go first because other messages can be shared and
  * include a H5O_shared_t struct
  * The oloc shouldn't ever be holding open a file; if it ever is (if
@@ -383,6 +384,29 @@ typedef struct H5O_shmesg_table_t {
     unsigned		version;	/*SOHM table version number */
     unsigned		nindexes;	/*number of indexes in the table */
 } H5O_shmesg_table_t;
+
+/*
+ * v1 B-tree 'K' value message
+ * Information about file-wide non-default v1 B-tree 'K' values, stored in
+ * superblock extension
+ * (Data structure in memory)
+ */
+typedef struct H5O_btreek_t {
+    unsigned        btree_k[H5B_NUM_BTREE_ID];  /* B-tree internal node 'K' values */
+    unsigned        sym_leaf_k;                 /* Symbol table leaf node's 'K' value */
+} H5O_btreek_t;
+
+/*
+ * Driver info message
+ * Information about driver info, stored in superblock extension
+ * (Data structure in memory)
+ */
+typedef struct H5O_drvinfo_t {
+    char                name[9];                /* Driver name */
+    size_t		len;                    /* Length of encoded buffer */
+    uint8_t            *buf;                    /* Buffer for encoded info */
+} H5O_drvinfo_t;
+
 
 /* Typedef for iteration operations */
 typedef herr_t (*H5O_operator_t)(const void *mesg/*in*/, unsigned idx,

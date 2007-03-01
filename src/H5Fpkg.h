@@ -69,7 +69,7 @@
 typedef struct H5F_file_t {
     H5FD_t	*lf; 		/* Lower level file handle for I/O	*/
     unsigned	nrefs;		/* Ref count for times file is opened	*/
-    uint32_t	consist_flags;	/* File Consistency Flags		*/
+    uint8_t	consist_flags;	/* File Consistency Flags		*/
     unsigned	flags;		/* Access Permissions for file		*/
 
     /* Cached values from FCPL */
@@ -171,9 +171,9 @@ H5_DLL int H5F_term_unmount_cb(void *obj_ptr, hid_t obj_id, void *key);
 H5_DLL herr_t H5F_mount_count_ids(H5F_t *f, unsigned *nopen_files, unsigned *nopen_objs);
 
 /* Superblock related routines */
-H5_DLL herr_t H5F_init_superblock(H5F_t *f, H5O_loc_t *ext_loc, hid_t dxpl_id);
-H5_DLL herr_t H5F_write_superblock(H5F_t *f, hid_t dxpl_id);
-H5_DLL herr_t H5F_read_superblock(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc);
+H5_DLL herr_t H5F_super_init(H5F_t *f, hid_t dxpl_id);
+H5_DLL herr_t H5F_super_write(H5F_t *f, hid_t dxpl_id);
+H5_DLL herr_t H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc);
 
 /* Shared file list related routines */
 H5_DLL herr_t H5F_sfile_add(H5F_file_t *shared);

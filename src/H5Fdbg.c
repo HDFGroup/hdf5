@@ -104,15 +104,13 @@ H5F_debug(H5F_t *f, hid_t dxpl_id, FILE * stream, int indent, int fwidth)
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Symbol table leaf node 1/2 rank:", f->shared->sym_leaf_k);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "Symbol table internal node 1/2 rank:",
-              f->shared->btree_k[H5B_SNODE_ID]);
-    HDfprintf(stream, "%*s%-*s 0x%08lx\n", indent, "", fwidth,
-	      "File consistency flags:",
-	      (unsigned long) (f->shared->consist_flags));
+	      "Symbol table internal node 1/2 rank:", f->shared->btree_k[H5B_SNODE_ID]);
+    HDfprintf(stream, "%*s%-*s 0x%02x\n", indent, "", fwidth,
+	      "File consistency flags:", (unsigned)(f->shared->consist_flags));
     HDfprintf(stream, "%*s%-*s %a (abs)\n", indent, "", fwidth,
 	      "Base address:", f->shared->base_addr);
     HDfprintf(stream, "%*s%-*s %a (rel)\n", indent, "", fwidth,
-	      "Superblock extension address (formerly free space address):", f->shared->extension_addr);
+	      "Superblock extension address:", f->shared->extension_addr);
     HDfprintf(stream, "%*s%-*s %a (rel)\n", indent, "", fwidth,
 	      "Shared object header message table address:", f->shared->sohm_addr);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,

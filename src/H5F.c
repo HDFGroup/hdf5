@@ -32,7 +32,6 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5Tprivate.h"		/* Datatypes				*/
-#include "H5SMprivate.h"        /* Shared Object Header messages        */
 
 /* Predefined file drivers */
 #include "H5FDcore.h"		/*temporary in-memory files		*/
@@ -1303,46 +1302,19 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
      * empty or not.
      */
     if(0 == H5FD_get_eof(lf) && (flags & H5F_ACC_RDWR)) {
-        H5O_loc_t ext_loc;      /* Superblock extension location */
-
         /*
          * We've just opened a fresh new file (or truncated one). We need
          * to create & write the superblock.
          */
 
         /* Initialize information about the superblock and allocate space for it */
-        if(H5F_init_superblock(file, &ext_loc, dxpl_id) < 0)
+        /* (Writes superblock extension messages, if there are any) */
+        if(H5F_super_init(file, dxpl_id) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to allocate file superblock")
-
-        /* Create the Shared Object Header Message table and register it with
-         *      the metadata cache, if this file supports shared messages.
-         */
-        if(file->shared->sohm_nindexes > 0) {
-            H5P_genplist_t     *c_plist;            /*file creation property list     */
-
-            /* Get the file's creation property list */
-            if(NULL == (c_plist = H5P_object_verify(fcpl_id, H5P_FILE_CREATE)))
-                HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
-
-            /* Initialize the shared message code */
-            if(H5SM_init(file, c_plist, &ext_loc, dxpl_id) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create SOHM table")
-        } /* end if */
-
-        /* Close the superblock extension, if it was opened */
-        if(H5F_addr_defined(file->shared->extension_addr)) {
-            /* Twiddle the number of open objects to avoid closing the file
-             * (since this will be the only open object currently).
-             */
-            file->nopen_objs++;
-            if(H5O_close(&ext_loc) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "unable to close superblock extension")
-            file->nopen_objs--;
-        } /* end if */
 
         /* Create and open the root group */
         /* (This must be after the space for the superblock is allocated in
-         *      the file and after the SOHM table has been created)
+         *      the file, since the superblock must be at offset 0)
          */
         if(H5G_mkroot(file, dxpl_id, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create/open root group")
@@ -1351,7 +1323,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
         /* (This must be after the root group is created, since the root
          *      group's symbol table entry is part of the superblock)
          */
-        if(H5F_write_superblock(file, dxpl_id) < 0)
+        if(H5F_super_write(file, dxpl_id) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to write file superblock")
     } else if (1 == shared->nrefs) {
         H5G_loc_t           root_loc;           /*root location                 */
@@ -1364,7 +1336,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
         H5G_loc_reset(&root_loc);
 
 	/* Read the superblock if it hasn't been read before. */
-        if(H5F_read_superblock(file, dxpl_id, &root_loc) < 0)
+        if(H5F_super_read(file, dxpl_id, &root_loc) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock")
 
 	/* Open the root group */
@@ -1826,12 +1798,11 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
     } /* end if */
 
     /* Write the superblock to disk */
-    if(H5F_write_superblock(f, dxpl_id) != SUCCEED)
+    if(H5F_super_write(f, dxpl_id) != SUCCEED)
         HGOTO_ERROR(H5E_CACHE, H5E_WRITEERROR, FAIL, "unable to write superblock to file")
 
     /* Flush file buffers to disk. */
-    if(H5FD_flush(f->shared->lf, dxpl_id,
-                   (unsigned)((flags & H5F_FLUSH_CLOSING) > 0)) < 0)
+    if(H5FD_flush(f->shared->lf, dxpl_id, (unsigned)((flags & H5F_FLUSH_CLOSING) > 0)) < 0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed")
 
     /* Check flush errors for children - errors are already on the stack */

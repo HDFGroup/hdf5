@@ -31,7 +31,7 @@
 #define H5O_NMESGS	8 		/*initial number of messages	     */
 #define H5O_NCHUNKS	2		/*initial number of chunks	     */
 #define H5O_MIN_SIZE	32		/*min obj header data size	     */
-#define H5O_MSG_TYPES   20              /* # of types of messages            */
+#define H5O_MSG_TYPES   21              /* # of types of messages            */
 #define H5O_MAX_CRT_ORDER_IDX 65535     /* Max. creation order index value   */
 
 /* Versions of object header structure */
@@ -390,13 +390,11 @@ H5_DLLVAR const H5O_msg_class_t H5O_MSG_NAME[1];
  */
 H5_DLLVAR const H5O_msg_class_t H5O_MSG_MTIME[1];
 
-/* Shared Object Message. (0x000f) */
-/*
- * This message ID never really appears in an object
- * header.  Instead, bit 2 of the `Flags' field will be set and the ID field
- * will be the ID of the pointed-to message.
+/* Shared Message information message (0x000f) 
+ * A message for the superblock extension, holding information about
+ * the file-wide shared message "SOHM" table
  */
-H5_DLLVAR const H5O_msg_class_t H5O_MSG_SHARED[1];
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_SHMESG[1];
 
 /* Object Header Continuation Message. (0x0010) */
 H5_DLLVAR const H5O_msg_class_t H5O_MSG_CONT[1];
@@ -410,11 +408,17 @@ H5_DLLVAR const H5O_msg_class_t H5O_MSG_STAB[1];
  */
 H5_DLLVAR const H5O_msg_class_t H5O_MSG_MTIME_NEW[1];
 
-/* Shared Message information message (0x000a) 
+/* v1 B-tree 'K' value message (0x0013) 
  * A message for the superblock extension, holding information about
- * the file-wide shared message "SOHM" table
+ * the file-wide v1 B-tree 'K' values.
  */
-H5_DLLVAR const H5O_msg_class_t H5O_MSG_SHMESG[1];
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_BTREEK[1];
+
+/* Driver info message (0x0014) 
+ * A message for the superblock extension, holding information about
+ * the file driver settings
+ */
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_DRVINFO[1];
 
 
 /*

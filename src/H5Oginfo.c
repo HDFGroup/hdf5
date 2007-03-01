@@ -66,7 +66,7 @@ const H5O_msg_class_t H5O_MSG_GINFO[1] = {{
 }};
 
 /* Current version of group info information */
-#define H5O_GINFO_VERSION 	1
+#define H5O_GINFO_VERSION 	0
 
 /* Flags for group info flag encoding */
 #define H5O_GINFO_FLAG_TRACK_NAME          0x01

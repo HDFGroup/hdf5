@@ -74,7 +74,7 @@ const H5O_msg_class_t H5O_MSG_LINFO[1] = {{
 }};
 
 /* Current version of link info information */
-#define H5O_LINFO_VERSION 	1
+#define H5O_LINFO_VERSION 	0
 
 /* Flags for link info index flag encoding */
 #define H5O_LINFO_INDEX_NAME          0x01
