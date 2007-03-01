@@ -712,13 +712,13 @@ hsize_t diff_datum(void       *_mem1,
 
   iszero1=all_zero(_mem1, H5Tget_size(m_type));
   iszero2=all_zero(_mem2, H5Tget_size(m_type));
-  if (iszero1==1 || iszero2==1)
+  if (iszero1 != iszero2)
   {
-   return 0;
+   return 1;
   }
-  else
+  else if (!iszero1 && !iszero2)
   {
-
+ 
  /*-------------------------------------------------------------------------
   * H5T_STD_REF_DSETREG
   * Dataset region reference

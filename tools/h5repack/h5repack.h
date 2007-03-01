@@ -145,24 +145,15 @@ int copy_objects(const char* fnamein,
                  const char* fnameout,
                  pack_opt_t *options);
 
-void print_objlist(const char *filename,
-                   int nobjects,
-                   trav_info_t *travi );
-
-int do_copy_objects(hid_t fidin,
+int do_copy_refobjs(hid_t fidin,
                     hid_t fidout,
                     trav_table_t *travt,
-                    pack_opt_t *options);
+                    pack_opt_t *options); /* repack options */
 
-int copy_attr(hid_t loc_in,
-              hid_t loc_out,
-              pack_opt_t *options
-              );
 
 void read_info(const char *filename,pack_opt_t *options);
 void init_packobject(pack_info_t *obj);
 int print_filters(hid_t dcpl_id);
-
 
 
 /*-------------------------------------------------------------------------
