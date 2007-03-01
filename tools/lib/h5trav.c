@@ -17,22 +17,31 @@
 #include "h5trav.h"
 #include "H5private.h"
 
-/* functions for traversal */
+/*-------------------------------------------------------------------------
+ * local functions
+ *-------------------------------------------------------------------------
+ */
 static int traverse( hid_t loc_id,
-              const char *group_name,
-              trav_table_t *table,
-              trav_info_t *info,
-              int *idx,
-              int print);
+                     const char *group_name,
+                     trav_table_t *table,
+                     trav_info_t *info,
+                     int *idx,
+                     int print);
 
 static hssize_t get_nnames( hid_t loc_id,
-                   const char *group_name );
+                            const char *group_name );
 
-herr_t get_name_type( hid_t loc_id,
-                      const char *group_name,
-                      int idx,
-                      char **name,
-                      H5G_obj_t1 *type );
+static herr_t get_name_type( hid_t loc_id,
+                             const char *group_name,
+                             int idx,
+                             char **name,
+                             H5G_obj_t *type );
+
+
+/*-------------------------------------------------------------------------
+ * "h5trav info" public functions. used in h5diff
+ *-------------------------------------------------------------------------
+ */
 
 /*-------------------------------------------------------------------------
  * Function: h5trav_getinfo
@@ -68,36 +77,7 @@ int h5trav_getinfo(hid_t file_id,
  trav_table_free( table );
 
  return nnames;
-
 }
-
-
-/*-------------------------------------------------------------------------
- * Function: h5trav_gettable
- *
- * Purpose: get the trav_table_t struct
- *
- * Return: 0, -1 on error
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: December 17, 2003
- *
- *-------------------------------------------------------------------------
- */
-
-int h5trav_gettable(hid_t fid, trav_table_t *travt)
-{
- int nnames=0;
-
- /* iterate starting on the root group */
- if (( nnames = traverse(fid,"/",travt,NULL,&nnames,0))<0)
-  return -1;
-
- return 0;
-
-}
-
 
 /*-------------------------------------------------------------------------
  * Function: h5trav_getindex
@@ -134,8 +114,6 @@ int h5trav_getindex( const char *obj, int nobjs, trav_info_t *info )
  return -1;
 }
 
-
-
 /*-------------------------------------------------------------------------
  * Function: h5trav_freeinfo
  *
@@ -147,15 +125,189 @@ int h5trav_getindex( const char *obj, int nobjs, trav_info_t *info )
 void h5trav_freeinfo( trav_info_t *info, int nobjs )
 {
  int i;
-	if ( info )
-	{
-		for ( i = 0; i < nobjs; i++)
-		{
-			if (info[i].name)
-		 	HDfree( info[i].name );
-		}
-		HDfree(info);
-	}
+    if ( info )
+    {
+        for ( i = 0; i < nobjs; i++)
+        {
+            if (info[i].name)
+            HDfree( info[i].name );
+        }
+        HDfree(info);
+    }
+}
+
+/*-------------------------------------------------------------------------
+ * Function: h5trav_printinfo
+ *
+ * Purpose: print list of names in file
+ *
+ * Return: void
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: May 9, 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+void h5trav_printinfo(int nobjs, trav_info_t *travi)
+{
+ int i;
+ for ( i = 0; i < nobjs; i++)
+ {
+  switch ( travi[i].type )
+  {
+  case H5G_GROUP:
+   printf(" %-10s %s\n", "group", travi[i].name  );
+   break;
+  case H5G_DATASET:
+   printf(" %-10s %s\n", "dataset", travi[i].name );
+   break;
+  case H5G_TYPE:
+   printf(" %-10s %s\n", "datatype", travi[i].name );
+   break;
+  case H5G_LINK:
+   printf(" %-10s %s\n", "link", travi[i].name );
+   break;
+ 
+  default:
+   printf(" %-10s %s\n", "User defined object", travi[i].name );
+   break;
+  }
+ }
+}
+
+/*-------------------------------------------------------------------------
+ * "h5trav table" public functions. used in h5repack
+ *-------------------------------------------------------------------------
+ */
+
+/*-------------------------------------------------------------------------
+ * Function: h5trav_getindext
+ *
+ * Purpose: get index of NAME in list
+ *
+ * Return: index, -1 if not found
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: December 18, 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+
+int h5trav_getindext(const char *name, trav_table_t *table)
+{
+ char *pdest;
+ int  result;
+ unsigned int  i, j;
+
+ for ( i = 0; i < table->nobjs; i++)
+ {
+  if ( strcmp(name,table->objs[i].name)==0 )
+   return i;
+
+  pdest  = strstr( table->objs[i].name, name );
+  result = (int)(pdest - table->objs[i].name);
+
+  /* found at position 1, meaning without '/' */
+  if( pdest != NULL && result==1 && strlen(table->objs[i].name)-1==strlen(name))
+   return i;
+
+  /* search also in the list of links */
+  if (table->objs[i].nlinks)
+  {
+   for ( j=0; j<table->objs[i].nlinks; j++)
+   {
+    if ( strcmp(name,table->objs[i].links[j].new_name)==0 )
+     return i;
+
+    pdest  = strstr( table->objs[i].links[j].new_name, name );
+    result = (int)(pdest - table->objs[i].links[j].new_name);
+
+    /* found at position 1, meaning without '/' */
+    if( pdest != NULL && result==1 )
+     return i;
+
+   }
+  }
+
+ }
+ return -1;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: h5trav_gettable
+ *
+ * Purpose: get the trav_table_t struct
+ *
+ * Return: 0, -1 on error
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: December 17, 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+
+int h5trav_gettable(hid_t fid, trav_table_t *travt)
+{
+ int nnames=0;
+
+ /* iterate starting on the root group */
+ if (( nnames = traverse(fid,"/",travt,NULL,&nnames,0))<0)
+  return -1;
+
+ return 0;
+
+}
+
+/*-------------------------------------------------------------------------
+ * Function: h5trav_printtable
+ *
+ * Purpose: print list of objects in file
+ *
+ * Return: void
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: May 9, 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+void h5trav_printtable(trav_table_t *table)
+{
+ unsigned int i, j;
+
+ for ( i = 0; i < table->nobjs; i++)
+ {
+  switch ( table->objs[i].type )
+  {
+  case H5G_GROUP:
+   printf(" %-10s %s\n", "group", table->objs[i].name  );
+   break;
+  case H5G_DATASET:
+   printf(" %-10s %s\n", "dataset", table->objs[i].name );
+   break;
+  case H5G_TYPE:
+   printf(" %-10s %s\n", "datatype", table->objs[i].name );
+   break;
+  case H5G_LINK:
+   printf(" %-10s %s\n", "link", table->objs[i].name );
+   break;
+  default:
+   printf(" %-10s %s\n", "User defined object", table->objs[i].name );
+   break;
+  }
+
+  if (table->objs[i].nlinks)
+  {
+   for ( j=0; j<table->objs[i].nlinks; j++)
+   {
+    printf(" %-10s %s\n", "    hardlink", table->objs[i].links[j].new_name );
+   }
+  }
+
+ }
 }
 
 
@@ -254,11 +406,11 @@ static herr_t opget_info( hid_t loc_id, const char *name, void *op_data)
  *-------------------------------------------------------------------------
  */
 
-herr_t get_name_type( hid_t loc_id,
-                      const char *group_name,
-                      int idx,
-                      char **name,
-                      H5G_obj_t1 *type )
+static herr_t get_name_type( hid_t loc_id,
+                             const char *group_name,
+                             int idx,
+                             char **name,
+                             H5G_obj_t *type )
 {
 
  trav_info_t info;
@@ -287,15 +439,15 @@ herr_t get_name_type( hid_t loc_id,
  */
 
 static int traverse( hid_t loc_id,
-              const char *group_name,
-              trav_table_t *table,
-              trav_info_t *info,
-              int *idx,
-              int print)
+                     const char *group_name,
+                     trav_table_t *table,
+                     trav_info_t *info,
+                     int *idx,
+                     int print)
 {
-
+ haddr_t       objno;              /* Compact form of object's location */
  char          *name=NULL;
- H5G_obj_t1     type;
+ H5G_obj_t     type;
  int           n_names;
  char          *path=NULL;
  H5G_stat_t    statbuf;
@@ -326,6 +478,7 @@ static int traverse( hid_t loc_id,
   /* get info */
    H5Gget_objinfo( loc_id, path, FALSE, &statbuf);
   } H5E_END_TRY;
+  objno = (haddr_t)statbuf.objno[0] | ((haddr_t)statbuf.objno[1] << (8 * sizeof(long)));
 
   /* add to array */
   if ( info )
@@ -350,10 +503,10 @@ static int traverse( hid_t loc_id,
    inserted_objs++;
 
    /* nlink is number of hard links to object */
-   if (statbuf.nlink > 0  && trav_table_search(statbuf.objno, table ) == -1)
+   if (statbuf.nlink > 0  && trav_table_search(objno, table ) == -1)
    {
     /* add object to table */
-    trav_table_add(statbuf.objno, path, H5G_GROUP, table );
+    trav_table_add(objno, path, H5G_GROUP, table );
 
     /* print it */
     if (print)
@@ -367,7 +520,7 @@ static int traverse( hid_t loc_id,
        group with more than one link to it */
    if (statbuf.nlink > 1)
    {
-    if ((j = trav_table_search(statbuf.objno, table )) < 0 )
+    if ((j = trav_table_search(objno, table )) < 0 )
      return -1;
 
     trav_table_addlink(table,j,path);
@@ -398,10 +551,10 @@ static int traverse( hid_t loc_id,
    inserted_objs++;
 
    /* nlink is number of hard links to object */
-   if (statbuf.nlink > 0  && trav_table_search(statbuf.objno, table ) == -1)
+   if (statbuf.nlink > 0  && trav_table_search(objno, table ) == -1)
    {
     /* add object to table */
-    trav_table_add(statbuf.objno, path, H5G_DATASET, table );
+    trav_table_add(objno, path, H5G_DATASET, table );
 
     /* print it */
     if (print)
@@ -412,7 +565,7 @@ static int traverse( hid_t loc_id,
        dataset with more than one link to it */
    if (statbuf.nlink > 1)
    {
-    if ((j = trav_table_search(statbuf.objno, table )) < 0 )
+    if ((j = trav_table_search(objno, table )) < 0 )
      return -1;
 
     trav_table_addlink(table,j,path);
@@ -443,10 +596,10 @@ static int traverse( hid_t loc_id,
    inserted_objs++;
 
    /* nlink is number of hard links to object */
-   if (statbuf.nlink > 0  && trav_table_search(statbuf.objno, table ) == -1)
+   if (statbuf.nlink > 0  && trav_table_search(objno, table ) == -1)
    {
     /* add object to table */
-    trav_table_add(statbuf.objno, path, H5G_TYPE, table );
+    trav_table_add(objno, path, H5G_TYPE, table );
 
      /* print it */
     if (print)
@@ -462,16 +615,16 @@ static int traverse( hid_t loc_id,
    */
 
   case H5G_LINK:
-   {
+  {
     /* increment */
     inserted_objs++;
 
     /* add object to table */
-    trav_table_add(statbuf.objno, path, H5G_LINK, table );
+    trav_table_add(HADDR_UNDEF, path, H5G_LINK, table );
 
     if (statbuf.linklen>0)
     {
-    char *targbuf=NULL;
+     char *targbuf;
 
      targbuf = HDmalloc(statbuf.linklen);
      assert(targbuf);
@@ -489,9 +642,11 @@ static int traverse( hid_t loc_id,
 
    break;
 
+  
+
 
   default:
-    HDfprintf(stderr, "traverse: Unknown object!\n");
+    HDfprintf(stderr, "traverse: Unknown object %d!\n", type);
     return (-1);
    break;
 
@@ -516,148 +671,9 @@ static int traverse( hid_t loc_id,
 
 
 
-/*-------------------------------------------------------------------------
- * Function: h5trav_printinfo
- *
- * Purpose: print list of names in file
- *
- * Return: void
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: May 9, 2003
- *
- *-------------------------------------------------------------------------
- */
-void h5trav_printinfo(int nobjs, trav_info_t *travi)
-{
- int i;
- for ( i = 0; i < nobjs; i++)
- {
-  switch ( travi[i].type )
-  {
-  case H5G_GROUP:
-   printf(" %-10s %s\n", "group", travi[i].name  );
-   break;
-  case H5G_DATASET:
-   printf(" %-10s %s\n", "dataset", travi[i].name );
-   break;
-  case H5G_TYPE:
-   printf(" %-10s %s\n", "datatype", travi[i].name );
-   break;
-  case H5G_LINK:
-   printf(" %-10s %s\n", "link", travi[i].name );
-   break;
-  default:
-   printf(" %-10s %s\n", "User defined object", travi[i].name );
-   break;
-  }
- }
-}
 
 
 
-/*-------------------------------------------------------------------------
- * Function: h5trav_printtable
- *
- * Purpose: print list of objects in file
- *
- * Return: void
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: May 9, 2003
- *
- *-------------------------------------------------------------------------
- */
-void h5trav_printtable(trav_table_t *table)
-{
- int i, j;
-
- for ( i = 0; i < table->nobjs; i++)
- {
-  switch ( table->objs[i].type )
-  {
-  case H5G_GROUP:
-   printf(" %-10s %s\n", "group", table->objs[i].name  );
-   break;
-  case H5G_DATASET:
-   printf(" %-10s %s\n", "dataset", table->objs[i].name );
-   break;
-  case H5G_TYPE:
-   printf(" %-10s %s\n", "datatype", table->objs[i].name );
-   break;
-  case H5G_LINK:
-   printf(" %-10s %s\n", "link", table->objs[i].name );
-   break;
-  default:
-   printf(" %-10s %s\n", "User defined object", table->objs[i].name );
-   break;
-  }
-
-  if (table->objs[i].nlinks)
-  {
-   for ( j=0; j<table->objs[i].nlinks; j++)
-   {
-    printf(" %-10s %s\n", "    hardlink", table->objs[i].links[j].new_name );
-   }
-  }
-
- }
-}
 
 
-/*-------------------------------------------------------------------------
- * Function: h5trav_getindext
- *
- * Purpose: get index of NAME in list
- *
- * Return: index, -1 if not found
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: December 18, 2003
- *
- *-------------------------------------------------------------------------
- */
-
-int h5trav_getindext(const char *name, trav_table_t *table)
-{
- char *pdest;
- int  result;
- int  i, j;
-
- for ( i = 0; i < table->nobjs; i++)
- {
-  if ( strcmp(name,table->objs[i].name)==0 )
-   return i;
-
-  pdest  = strstr( table->objs[i].name, name );
-  result = (int)(pdest - table->objs[i].name);
-
-  /* found at position 1, meaning without '/' */
-  if( pdest != NULL && result==1 && strlen(table->objs[i].name)-1==strlen(name))
-   return i;
-
-  /* search also in the list of links */
-  if (table->objs[i].nlinks)
-  {
-   for ( j=0; j<table->objs[i].nlinks; j++)
-   {
-    if ( strcmp(name,table->objs[i].links[j].new_name)==0 )
-     return i;
-
-    pdest  = strstr( table->objs[i].links[j].new_name, name );
-    result = (int)(pdest - table->objs[i].links[j].new_name);
-
-    /* found at position 1, meaning without '/' */
-    if( pdest != NULL && result==1 )
-     return i;
-
-   }
-  }
-
- }
- return -1;
-}
 

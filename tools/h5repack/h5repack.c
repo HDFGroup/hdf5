@@ -14,7 +14,12 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <stdlib.h>
+#include <string.h>
+#include "h5tools_utils.h"
 #include "h5repack.h"
+
+extern char  *progname;
+
 
 /*-------------------------------------------------------------------------
  * File: h5repack.c
@@ -71,11 +76,11 @@ int h5repack(const char* infile,
   return -1;
 
  /* check for objects in input that are in the file */
- if (check_objects(infile,options)<0)
+ if (check_objects(infile,options) < 0)
   return -1;
 
  /* copy the objects  */
- if (copy_objects(infile,outfile,options)<0)
+ if (copy_objects(infile,outfile,options) < 0)
   return -1;
 
 
@@ -135,7 +140,7 @@ int h5repack_addfilter(const char* str,
  int             n_objs;         /*number of objects in the current -f or -c option entry */
 
  if (options->all_filter==1){
-  printf("Error: Invalid compression input: all option is present \
+  error_msg(progname, "invalid compression input: 'all' option is present \
    with other objects <%s>\n",str);
   return -1;
  }
@@ -185,7 +190,7 @@ int h5repack_addlayout(const char* str,
  init_packobject(&pack);
 
  if (options->all_layout==1){
-  printf("Error: Invalid layout input: all option \
+  error_msg(progname, "invalid layout input: 'all' option \
    is present with other objects <%s>\n",str);
   return -1;
  }
@@ -243,8 +248,9 @@ int h5repack_addlayout(const char* str,
  */
 static int check_options(pack_opt_t *options)
 {
- int   i, k, j, has_cp=0, has_ck=0;
- char  slayout[30];
+ unsigned int   i;
+ int            k, j, has_cp=0, has_ck=0;
+ char           slayout[30];
 
 /*-------------------------------------------------------------------------
  * objects to layout
@@ -302,7 +308,7 @@ static int check_options(pack_opt_t *options)
  }
 
  if (options->all_layout==1 && has_ck){
-  printf("Error: Invalid chunking input: all option\
+  error_msg(progname, "invalid chunking input: 'all' option\
    is present with other objects\n");
   return -1;
  }
@@ -357,7 +363,7 @@ static int check_options(pack_opt_t *options)
  } /* i */
 
  if (options->all_filter==1 && has_cp){
-  printf("Error: Invalid compression input: all option\
+  error_msg(progname, "invalid compression input: 'all' option\
    is present with other objects\n");
   return -1;
  }
@@ -401,7 +407,7 @@ void read_info(const char *filename,
 
 
  if ((fp = fopen(data_file, "r")) == (FILE *)NULL) {
-  printf( "Cannot open options file %s", filename);
+  error_msg(progname, "cannot open options file %s", filename);
   exit(1);
  }
 
@@ -438,7 +444,7 @@ void read_info(const char *filename,
    comp_info[i-1]='\0'; /*cut the last " */
 
    if (h5repack_addfilter(comp_info,options)==-1){
-    printf( "Could not add compression option. Exiting\n");
+    error_msg(progname, "could not add compression option\n");
     exit(1);
    }
   }
@@ -468,7 +474,7 @@ void read_info(const char *filename,
    comp_info[i-1]='\0'; /*cut the last " */
 
    if (h5repack_addlayout(comp_info,options)==-1){
-    printf( "Could not add chunck option. Exiting\n");
+    error_msg(progname, "could not add chunck option\n");
     exit(1);
    }
   }
@@ -477,7 +483,7 @@ void read_info(const char *filename,
   *-------------------------------------------------------------------------
   */
   else {
-   printf( "Bad file format for %s", filename);
+   error_msg(progname, "bad file format for %s", filename);
    exit(1);
   }
  }
@@ -485,5 +491,6 @@ void read_info(const char *filename,
  fclose(fp);
  return;
 }
+
 
 

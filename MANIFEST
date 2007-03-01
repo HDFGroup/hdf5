@@ -1523,12 +1523,7 @@
 ./tools/h5repack/h5repack_parse.c
 ./tools/h5repack/h5repack_refs.c
 ./tools/h5repack/h5repack_verify.c
-./tools/h5repack/testh5repack.h
-./tools/h5repack/testh5repack_attr.c
-./tools/h5repack/testh5repack_dset.c
-./tools/h5repack/testh5repack_main.c
-./tools/h5repack/testh5repack_make.c
-./tools/h5repack/testh5repack_util.c
+./tools/h5repack/h5repacktst.c
 ./tools/h5repack/testh5repack_detect_szip.c
 
 ./tools/h5ls/Dependencies
@@ -1899,12 +1894,21 @@
 
 
 # h5repack test files
-./tools/testfiles/test0.h5
-./tools/testfiles/test1.h5
-./tools/testfiles/test3.h5
-./tools/testfiles/test4.h5
-./tools/testfiles/test5.h5
-./tools/testfiles/h5repack_info.txt
+./tools/testfiles/h5repack_early.h5
+./tools/testfiles/h5repack_layout.h5
+./tools/testfiles/h5repack_filters.h5
+./tools/testfiles/h5repack_fill.h5
+./tools/testfiles/h5repack_fletcher.h5
+./tools/testfiles/h5repack_objs.h5
+./tools/testfiles/h5repack_early2.h5
+./tools/testfiles/h5repack_hlink.h5
+./tools/testfiles/info.h5repack
+./tools/testfiles/h5repack_big.h5
+./tools/testfiles/h5repack_shuffle.h5
+./tools/testfiles/h5repack_attr.h5
+./tools/testfiles/h5repack_deflate.h5
+
+
 
 # jam utility and tests
 ./tools/h5jam/Dependencies

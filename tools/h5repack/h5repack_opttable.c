@@ -1,4 +1,4 @@
- /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
  * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
@@ -13,10 +13,12 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
 #include <stdlib.h>
+#include <string.h>
+#include "h5tools_utils.h"
 #include "h5repack.h"
 
+extern char  *progname;
 
 /*-------------------------------------------------------------------------
  * Function: init_packobject
@@ -36,7 +38,6 @@ void init_packobject(pack_info_t *obj)
  for ( j=0; j<H5_REPACK_MAX_NFILTERS; j++)
  {
   obj->filter[j].filtn        = -1;
-  obj->filter[j].szip_coding  = -1;
   for ( k=0; k<CDVALUES; k++)
    obj->filter[j].cd_values[k] = -1;
  }
@@ -44,8 +45,6 @@ void init_packobject(pack_info_t *obj)
  obj->refobj_id = -1;
  obj->layout = H5D_LAYOUT_ERROR;
  obj->nfilters = 0;
-
-
 }
 
 /*-------------------------------------------------------------------------
@@ -59,7 +58,7 @@ void init_packobject(pack_info_t *obj)
  */
 
 static void aux_tblinsert_filter(pack_opttbl_t *table,
-                                 int I,
+                                 unsigned int I,
                                  filter_info_t filt)
 {
  if (table->objs[ I ].nfilters<H5_REPACK_MAX_NFILTERS)
@@ -68,7 +67,7 @@ static void aux_tblinsert_filter(pack_opttbl_t *table,
  }
  else
  {
-  printf("Cannot insert the filter in this object.\
+  error_msg(progname, "cannot insert the filter in this object.\
    Maximum capacity exceeded\n");
  }
 }
@@ -84,7 +83,7 @@ static void aux_tblinsert_filter(pack_opttbl_t *table,
  */
 
 static void aux_tblinsert_layout(pack_opttbl_t *table,
-                                 int I,
+                                 unsigned int I,
                                  pack_info_t *pack)
 {
  int k;
@@ -122,12 +121,12 @@ static void aux_tblinsert_layout(pack_opttbl_t *table,
 
 static int aux_inctable(pack_opttbl_t *table, int n_objs )
 {
- int i;
+ unsigned int i;
 
  table->size += n_objs;
  table->objs = (pack_info_t*)realloc(table->objs, table->size * sizeof(pack_info_t));
  if (table->objs==NULL) {
-  printf("Error: not enough memory for options table\n");
+  error_msg(progname, "not enough memory for options table\n");
   return -1;
  }
  for (i = table->nelems; i < table->size; i++)
@@ -149,10 +148,10 @@ static int aux_inctable(pack_opttbl_t *table, int n_objs )
 
 int options_table_init( pack_opttbl_t **tbl )
 {
- int i;
+ unsigned int i;
  pack_opttbl_t* table = (pack_opttbl_t*) malloc(sizeof(pack_opttbl_t));
  if (table==NULL) {
-  printf("Error: not enough memory for options table\n");
+  error_msg(progname, "not enough memory for options table\n");
   return -1;
  }
 
@@ -160,7 +159,7 @@ int options_table_init( pack_opttbl_t **tbl )
  table->nelems = 0;
  table->objs   = (pack_info_t*) malloc(table->size * sizeof(pack_info_t));
  if (table->objs==NULL) {
-  printf("Error: not enough memory for options table\n");
+  error_msg(progname, "not enough memory for options table\n");
   return -1;
  }
 
@@ -206,7 +205,8 @@ int options_add_layout( obj_list_t *obj_list,
                         pack_info_t *pack,
                         pack_opttbl_t *table )
 {
- int i, j, I, added=0, found=0;
+ unsigned int i, I;
+ int          j, added=0, found=0;
 
  /* increase the size of the collection by N_OBJS if necessary */
  if (table->nelems+n_objs >= table->size)
@@ -230,7 +230,7 @@ int options_add_layout( obj_list_t *obj_list,
      /* already chunk info inserted for this one; exit */
      if (table->objs[i].chunk.rank>0)
      {
-      printf("Input Error: chunk information already inserted for <%s>\n",obj_list[j].obj);
+      error_msg(progname, "chunk information already inserted for <%s>\n",obj_list[j].obj);
       exit(1);
      }
      /* insert the layout info */
@@ -304,7 +304,8 @@ int options_add_filter(obj_list_t *obj_list,
                        pack_opttbl_t *table )
 {
 
- int i, j, I, added=0, found=0;
+ unsigned int i, I;
+ int          j, added=0, found=0;
 
  /* increase the size of the collection by N_OBJS if necessary */
  if (table->nelems+n_objs >= table->size)
@@ -387,7 +388,7 @@ int options_add_filter(obj_list_t *obj_list,
 pack_info_t* options_get_object( const char *path,
                                  pack_opttbl_t *table )
 {
- int i;
+ unsigned int i;
 
  for ( i = 0; i < table->nelems; i++)
  {

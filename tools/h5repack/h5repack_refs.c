@@ -83,6 +83,28 @@ int do_copy_refobjs(hid_t fidin,
   *-------------------------------------------------------------------------
   */
   case H5G_GROUP:
+      
+  /*-------------------------------------------------------------------------
+   * copy referenced objects in attributes
+   *-------------------------------------------------------------------------
+   */
+
+      if ((grp_out=H5Gopen(fidout,travt->objs[i].name))<0)
+          goto error;
+      
+      if((grp_in = H5Gopen (fidin,travt->objs[i].name))<0)
+          goto error;
+      
+      if (copy_refs_attr(grp_in,grp_out,options,travt,fidout)<0)
+          goto error;
+      
+      if (H5Gclose(grp_out)<0)
+          goto error;
+      if (H5Gclose(grp_in)<0)
+          goto error;
+
+
+
 
    /*-------------------------------------------------------------------------
     * check for hard links

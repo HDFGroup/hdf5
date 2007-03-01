@@ -15,8 +15,10 @@
 
 #include "hdf5.h"
 #include "h5test.h"
+#include "h5tools_utils.h"
 #include "h5repack.h"
 
+extern char  *progname;
 
 
 /*-------------------------------------------------------------------------
@@ -61,6 +63,7 @@ int has_filter(hid_t dcpl_id,
  for (i=0; i<nfilters; i++)
  {
   cd_nelmts = NELMTS(cd_values);
+
   filtn = H5Pget_filter(dcpl_id,
    (unsigned)i,
    &filt_flags,
@@ -68,6 +71,7 @@ int has_filter(hid_t dcpl_id,
    cd_values,
    sizeof(f_name),
    f_name);
+
 
   if (filtnin==filtn)
    have=1;
@@ -161,7 +165,9 @@ int h5repack_verify(const char *fname,
  hid_t  dset_id=-1;  /* dataset ID */
  hid_t  dcpl_id=-1;  /* dataset creation property list ID */
  hid_t  space_id=-1; /* space ID */
- int    ret=1, i, j;
+ int    ret=1;
+ unsigned int i;
+ int j;
  trav_table_t  *travt=NULL;
 
  /* open the file */
@@ -343,7 +349,8 @@ int h5repack_cmpdcpl(const char *fname1,
  hid_t         dcpl2=-1;      /* dataset creation property list ID */
  trav_table_t  *travt1=NULL;
  trav_table_t  *travt2=NULL;
- int           ret=1, i;
+ int           ret=1;
+ unsigned int  i;
 
 /*-------------------------------------------------------------------------
  * open the files first; if they are not valid, no point in continuing
@@ -356,12 +363,12 @@ int h5repack_cmpdcpl(const char *fname1,
  /* Open the files */
  if ((fid1=H5Fopen(fname1,H5F_ACC_RDONLY,H5P_DEFAULT))<0 )
  {
-  printf("h5repack: <%s>: %s\n", fname1, H5FOPENERROR );
+  error_msg(progname, "<%s>: %s\n", fname1, H5FOPENERROR );
   return -1;
  }
  if ((fid2=H5Fopen(fname2,H5F_ACC_RDONLY,H5P_DEFAULT))<0 )
  {
-  printf("h5repack: <%s>: %s\n", fname2, H5FOPENERROR );
+  error_msg(progname, "<%s>: %s\n", fname2, H5FOPENERROR );
   H5Fclose(fid1);
   return -1;
  }
@@ -419,7 +426,7 @@ int h5repack_cmpdcpl(const char *fname1,
 
    if (ret==0)
    {
-    printf("Property lists for <%s> are different\n",travt1->objs[i].name);
+    error_msg(progname, "property lists for <%s> are different\n",travt1->objs[i].name);
     goto error;
    }
 
@@ -477,3 +484,4 @@ error:
  return -1;
 
 }
+

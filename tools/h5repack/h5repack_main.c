@@ -14,9 +14,93 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <stdlib.h>
+#include <string.h>
+#include "h5tools_utils.h"
 #include "h5repack.h"
 
-static void usage(void);
+/* module-scoped variables */
+const char *progname = "h5repack";
+int d_status = EXIT_SUCCESS;
+
+
+/*-------------------------------------------------------------------------
+ * Function: usage
+ *
+ * Purpose: print usage
+ *
+ * Return: void
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static
+void usage(void)
+{
+ printf("usage: h5repack -i input -o output [-h] [-v] [-f FILTER] [-l LAYOUT] [-n] [-m size] [-e file]\n");
+ printf("\n");
+ printf("-i input       Input HDF5 File\n");
+ printf("-o output      Output HDF5 File\n");
+ printf("[-h]           Print this message\n");
+ printf("[-v]           Verbose mode\n");
+ printf("[-n]           Use a native HDF5 type when repacking. Default is the file type\n");
+ printf("[-m size]      Do not apply the filter to objects smaller than size\n");
+ printf("[-e file]      Name of file with the -f and -l options\n");
+ printf("[-f FILTER]    Filter type\n");
+ printf("[-l LAYOUT]    Layout type\n");
+ printf("\n");
+ printf("FILTER is a string with the format:\n");
+ printf("\n");
+ printf("    <list of objects>:<name of filter>=<filter parameters>\n");
+ printf("\n");
+ printf("    <list of objects> is a comma separated list of object names, meaning apply\n");
+ printf("      compression only to those objects. If no names are specified, the filter\n");
+ printf("      is applied to all objects\n");
+ printf("    <name of filter> can be:\n");
+ printf("      GZIP, to apply the HDF5 GZIP filter (GZIP compression)\n");
+ printf("      SZIP, to apply the HDF5 SZIP filter (SZIP compression)\n");
+ printf("      SHUF, to apply the HDF5 shuffle filter\n");
+ printf("      FLET, to apply the HDF5 checksum filter\n");
+ printf("      NONE, to remove all filters\n");
+ printf("    <filter parameters> is optional filter parameter information\n");
+ printf("      GZIP=<deflation level> from 1-9\n");
+ printf("      SZIP=<pixels per block,coding> pixels per block is a even number in\n");
+ printf("            2-32 and coding method is either EC or NN\n");
+ printf("      SHUF (no parameter)\n");
+ printf("      FLET (no parameter)\n");
+ printf("      NONE (no parameter)\n");
+ printf("\n");
+ printf("LAYOUT is a string with the format:\n");
+ printf("\n");
+ printf("    <list of objects>:<layout type>=<layout parameters>\n");
+ printf("\n");
+ printf("    <list of objects> is a comma separated list of object names, meaning that\n");
+ printf("      layout information is supplied for those objects. If no names are\n");
+ printf("      specified, the layout type is applied to all objects\n");
+ printf("    <layout type> can be:\n");
+ printf("      CHUNK, to apply chunking layout\n");
+ printf("      COMPA, to apply compact layout\n");
+ printf("      CONTI, to apply continuous layout\n");
+ printf("    <layout parameters> is optional layout information\n");
+ printf("      CHUNK=DIM[xDIM...xDIM], the chunk size of each dimension\n");
+ printf("      COMPA (no parameter)\n");
+ printf("      CONTI (no parameter)\n");
+ printf("\n");
+ printf("Examples of use:\n");
+ printf("\n");
+ printf("1) h5repack -v -i file1 -o file2 -f GZIP=1\n");
+ printf("\n");
+ printf("   GZIP compression with level 1 to all objects\n");
+ printf("\n");
+ printf("2) h5repack -v -i file1 -o file2 -f A:SZIP=8,NN\n");
+ printf("\n");
+ printf("   SZIP compression with 8 pixels per block and NN coding method to object A\n");
+ printf("\n");
+ printf("3) h5repack -v -i file1 -o file2 -l A,B:CHUNK=20x10 -f C,D,F:NONE\n");
+ printf("\n");
+ printf("   Chunked layout, with a layout size of 20x10, to objects A and B\n");
+ printf("   and remove filters to objects C, D, F\n");
+ printf("\n");
+}
 
 /*-------------------------------------------------------------------------
  * Function: main
@@ -31,8 +115,10 @@ static void usage(void);
  *
  * Comments:
  *
- * Modifications: July 2004
- *  Introduced the extra EC or NN option for SZIP
+ * Modifications: 
+ *  July 2004: Introduced the extra EC or NN option for SZIP
+ *  October 2006: Added a new switch -n, that allows to write the dataset 
+ *                using a native type. The default to write is the file type.
  *
  *-------------------------------------------------------------------------
  */
@@ -47,6 +133,12 @@ int main(int argc, char **argv)
 
  /* initialize options  */
  h5repack_init (&options,0);
+
+ if (argc<2)
+ {
+  usage();
+  exit(1);
+ }
 
  for ( i = 1; i < argc; i++)
  {
@@ -67,7 +159,10 @@ int main(int argc, char **argv)
 
    /* add the -f filter option */
    if (h5repack_addfilter(argv[i+1],&options)<0)
+   {
+    error_msg(progname, "in parsing filter\n");
     exit(1);
+   }
 
    /* jump to next */
    ++i;
@@ -76,7 +171,10 @@ int main(int argc, char **argv)
 
    /* parse the -l layout option */
    if (h5repack_addlayout(argv[i+1],&options)<0)
+   {
+    error_msg(progname, "in parsing layout\n");
     exit(1);
+   }
 
    /* jump to next */
    ++i;
@@ -85,7 +183,7 @@ int main(int argc, char **argv)
   else if (strcmp(argv[i], "-m") == 0) {
    options.threshold = parse_number(argv[i+1]);
    if ((int)options.threshold==-1) {
-    printf("Error: Invalid treshold size <%s>\n",argv[i+1]);
+    error_msg(progname, "invalid treshold size <%s>\n",argv[i+1]);
     exit(1);
    }
    ++i;
@@ -94,8 +192,12 @@ int main(int argc, char **argv)
   else if (strcmp(argv[i], "-e") == 0) {
    read_info(argv[++i],&options);
   }
+  else if (strcmp(argv[i], "-n") == 0) {
+   options.use_native = 1;
+  }
 
   else if (argv[i][0] == '-') {
+   error_msg(progname, " - is not a valid argument\n");
    usage();
    exit(1);
   }
@@ -103,6 +205,7 @@ int main(int argc, char **argv)
 
  if (infile == NULL || outfile == NULL)
  {
+  error_msg(progname, "file names missing\n");
   usage();
   exit(1);
  }
@@ -117,81 +220,5 @@ int main(int argc, char **argv)
   return 1;
  else
   return 0;
-}
-
-/*-------------------------------------------------------------------------
- * Function: usage
- *
- * Purpose: print usage
- *
- * Return: void
- *
- *-------------------------------------------------------------------------
- */
-
-static
-void usage(void)
-{
- printf("h5repack -i input -o output [-h] [-v] [-f 'filter'] [-l 'layout'][-m number][-e file] \n");
- printf("\n");
- printf("-i input          Input HDF5 File\n");
- printf("-o output         Output HDF5 File\n");
- printf("[-h]              Print usage message\n");
- printf("[-v]              Verbose mode. Print more output (list of objects,\n");
- printf("                   filters, warnings)\n");
- printf("[-f 'filter']     Filter type: 'filter' is a string with the format\n");
- printf("\n");
- printf("     <list of objects> : <name of filter> = <filter parameters>\n");
- printf("\n");
- printf("     <list of objects> is a comma separated list of object names\n");
- printf("       meaning apply compression only to those objects.\n");
- printf("       if no object names are specified, the filter is applied to all objects\n");
- printf("     <name of filter> can be:\n");
- printf("       GZIP, to apply the HDF5 GZIP filter (GZIP compression)\n");
- printf("       SZIP, to apply the HDF5 SZIP filter (SZIP compression)\n");
- printf("       SHUF, to apply the HDF5 shuffle filter\n");
- printf("       FLET, to apply the HDF5 checksum filter\n");
- printf("       NONE, to remove the filter\n");
- printf("     <filter parameters> is optional compression info\n");
- printf("       SHUF (no parameter)\n");
- printf("       FLET (no parameter)\n");
- printf("       GZIP=<deflation level> from 1-9\n");
- printf("       SZIP=<pixels per block,coding>\n");
- printf("            (pixels per block is a even number in 2-32 and coding method\n");
- printf("            is 'EC' or 'NN')\n");
- printf("[-l 'layout']     Layout type. 'layout' is a string with the format\n");
- printf("\n");
- printf("     <list of objects> : <layout type>\n");
- printf("\n");
- printf("     <list of objects> is a comma separated list of object names,\n");
- printf("       meaning that layout information is supplied for those objects.\n");
- printf("       if no object names are specified, the layout is applied to all objects\n");
- printf("     <layout type> can be:\n");
- printf("       CHUNK, to apply chunking layout\n");
- printf("       COMPA, to apply compact layout\n");
- printf("       CONTI, to apply continuous layout\n");
- printf("     <layout parameters> is present for the chunk case only\n");
- printf("       it is the chunk size of each dimension:\n");
- printf("       <dim_1 x dim_2 x ... dim_n>\n");
- printf("\n");
- printf("-e file           File with the -f and -l options (only filter and layout flags)\n");
- printf("-m size           Do not apply the filter to objects which size in bytes\n");
- printf("                   is smaller than number. If no size is specified a minimum of\n");
- printf("                   1024 bytes is assumed.\n");
- printf("\n");
- printf("Examples of use:\n");
- printf("\n");
- printf("1) h5repack -i file1 -o file2 -f GZIP=1 -v\n");
- printf("\n");
- printf("   Applies GZIP compression to all objects in file1 and saves the output in file2\n");
- printf("\n");
- printf("2) h5repack -i file1 -o file2 -f dset1:SZIP=8,NN -v\n");
- printf("\n");
- printf("   Applies SZIP compression only to object 'dset1'\n");
- printf("\n");
- printf("3) h5repack -i file1 -o file2 -l dset1,dset2:CHUNK=20x10 -v\n");
- printf("\n");
- printf("   Applies chunked layout to objects 'dset1' and 'dset2'\n");
- printf("\n");
 }
 

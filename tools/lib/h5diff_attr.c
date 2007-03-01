@@ -38,7 +38,7 @@
  */
 
 int diff_attr(hid_t loc1_id,
-              hid_t  loc2_id,
+              hid_t loc2_id,
               const char *path1,
               const char *path2,
               diff_opt_t *options)
@@ -51,13 +51,13 @@ int diff_attr(hid_t loc1_id,
  hid_t      ftype2_id=-1;    /* file data type ID */
  hid_t      mtype1_id=-1;    /* memory data type ID */
  hid_t      mtype2_id=-1;    /* memory data type ID */
- size_t     msize1;       /* memory size of memory type */
- size_t     msize2;       /* memory size of memory type */
- void       *buf1=NULL;   /* data buffer */
- void       *buf2=NULL;   /* data buffer */
- hsize_t    nelmts1;      /* number of elements in dataset */
- int        rank1;        /* rank of dataset */
- int        rank2;        /* rank of dataset */
+ size_t     msize1;          /* memory size of memory type */
+ size_t     msize2;          /* memory size of memory type */
+ void       *buf1=NULL;      /* data buffer */
+ void       *buf2=NULL;      /* data buffer */
+ hsize_t    nelmts1;         /* number of elements in dataset */
+ int        rank1;           /* rank of dataset */
+ int        rank2;           /* rank of dataset */
  hsize_t    dims1[H5S_MAX_RANK];/* dimensions of dataset */
  hsize_t    dims2[H5S_MAX_RANK];/* dimensions of dataset */
  char       name1[512];
@@ -65,9 +65,9 @@ int diff_attr(hid_t loc1_id,
  char       np1[512];
  char       np2[512];
  int        n1, n2, i, j;
- int        ret=0;
  hsize_t    nfound;
  int        cmp=1;
+ int        ret=0;
 
  if ((n1 = H5Aget_num_attrs(loc1_id))<0)
   goto error;
@@ -83,33 +83,26 @@ int diff_attr(hid_t loc1_id,
   buf1=NULL;
   buf2=NULL;
 
-  /*-------------------------------------------------------------------------
-  * open
-  *-------------------------------------------------------------------------
-  */
   /* open attribute */
   if ((attr1_id = H5Aopen_idx(loc1_id, (unsigned)i))<0)
    goto error;
-  if ((attr2_id = H5Aopen_idx(loc2_id, (unsigned)i))<0)
-   goto error;
-
-  /* get name */
+   /* get name */
   if (H5Aget_name( attr1_id, 255, name1 )<0)
    goto error;
+
+  /* use the name on the first file to open the second file */
+  H5E_BEGIN_TRY 
+  {
+   if ((attr2_id = H5Aopen_name(loc2_id, name1))<0)
+   {
+    ret = 1;
+    goto error;
+   }
+  } H5E_END_TRY;
+
+  /* get name */
   if (H5Aget_name( attr2_id, 255, name2 )<0)
    goto error;
-
-  if (HDstrcmp(name1,name2)!=0)
-  {
-   if (options->m_verbose)
-   {
-    printf("Different name for attributes: <%s> and <%s>\n", name1, name2);
-   }
-   H5Aclose(attr1_id);
-   H5Aclose(attr2_id);
-   ret=1;
-   continue;
-  }
 
   /* get the file datatype  */
   if ((ftype1_id = H5Aget_type( attr1_id )) < 0 )
@@ -313,7 +306,7 @@ error:
  } H5E_END_TRY;
 
  options->err_stat=1;
- return 0;
+ return ret;
 }
 
 

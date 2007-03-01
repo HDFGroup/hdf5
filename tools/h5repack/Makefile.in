@@ -36,6 +36,7 @@ PRIV_PROGS=testh5repack_detect_szip
 ##
 LIBHDF5=$(top_builddir)/src/libhdf5.la
 LIBTOOLS=../lib/libh5tools.la
+LIBH5TEST=../../test/libh5test.la
 
 PUB_PROGS=h5repack
 PROGS=$(PUB_PROGS) $(TEST_PROGS) $(PRIV_PROGS)
@@ -53,9 +54,9 @@ DISTCLEAN=h5repack.sh
 
 ## Source and object files for programs...
 ##
-PROG_SRC=h5repack.c h5repack_copy.c h5repack_filters.c  h5repack_refs.c  h5repack_list.c h5repack_main.c h5repack_opttable.c h5repack_parse.c h5repack_verify.c testh5repack_attr.c testh5repack_dset.c   testh5repack_main.c testh5repack_make.c  testh5repack_util.c
-OBJS=h5repack.lo h5repack_filters.lo h5repack_copy.lo h5repack_refs.lo  h5repack_list.lo h5repack_main.lo h5repack_opttable.lo h5repack_parse.lo h5repack_verify.lo	
-TEST_OBJS=h5repack.lo h5repack_filters.lo  h5repack_copy.lo h5repack_refs.lo  h5repack_list.lo h5repack_opttable.lo h5repack_parse.lo h5repack_verify.lo testh5repack_attr.lo testh5repack_dset.lo  testh5repack_main.lo testh5repack_make.lo  testh5repack_util.lo
+PROG_SRC=h5repack.c h5repack_copy.c h5repack_refs.c h5repack_filters.c  h5repack_list.c h5repack_main.c h5repack_opttable.c h5repack_parse.c h5repack_verify.c h5repacktst.c
+OBJS=h5repack.lo h5repack_filters.lo h5repack_copy.lo h5repack_refs.lo h5repack_list.lo h5repack_main.lo h5repack_opttable.lo h5repack_parse.lo h5repack_verify.lo	
+TEST_OBJS=h5repack.lo h5repack_filters.lo  h5repack_copy.lo h5repack_refs.lo h5repack_list.lo h5repack_opttable.lo h5repack_parse.lo h5repack_verify.lo h5repacktst.lo
 DETECT_OBJS=testh5repack_detect_szip.lo
 PROG_OBJ=$(PROG_SRC:.c=.lo) $(DETECT_OBJS)
 
@@ -71,15 +72,15 @@ TEST_OBJ=$(TEST_SRC:.c=.lo)
 check test _test: $(PROGS)
 
 ## How to build the programs...They all depend on the hdf5 library and
-## the tools library compiled in this directory.
+## the tools library compiled in this directory 
 ##
-$(PROGS): $(LIBTOOLS) $(LIBHDF5)
+$(PROGS): $(LIBTOOLS)  $(LIBHDF5) 
 
 h5repack: $(OBJS)
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(OBJS)  $(LIBTOOLS)  $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 h5repacktst: $(TEST_OBJS)
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(TEST_OBJS)  $(LIBTOOLS)  $(LIBHDF5) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(TEST_OBJS)  $(LIBTOOLS) $(LIBH5TEST) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 testh5repack_detect_szip: $(DETECT_OBJS)
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(DETECT_OBJS)  $(LIBTOOLS)  $(LIBHDF5) $(LDFLAGS) $(LIBS)

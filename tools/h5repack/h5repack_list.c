@@ -13,13 +13,14 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include "H5private.h"
+#include "h5tools_utils.h"
 #include "h5repack.h"
 
+extern char  *progname;
 
 /*-------------------------------------------------------------------------
  * Function: check_objects
@@ -38,133 +39,128 @@
 int check_objects(const char* fname,
                   pack_opt_t *options)
 {
- hid_t         fid;
- int           i;
- trav_table_t  *travt=NULL;
-
-/*-------------------------------------------------------------------------
- * open the file
- *-------------------------------------------------------------------------
- */
-
- /* disable out reporting */
- H5E_BEGIN_TRY {
-
- /* Open the files */
- if ((fid=H5Fopen(fname,H5F_ACC_RDONLY,H5P_DEFAULT))<0 ){
-  printf("h5repack: <%s>: %s\n", fname, H5FOPENERROR );
-  exit(1);
- }
- /* enable out reporting */
- } H5E_END_TRY;
-
-
-/*-------------------------------------------------------------------------
- * get the list of objects in the file
- *-------------------------------------------------------------------------
- */
-
- /* init table */
- trav_table_init(&travt);
-
- /* get the list of objects in the file */
- if (h5trav_gettable(fid,travt)<0)
-  goto out;
-
-/*-------------------------------------------------------------------------
- * compare with user supplied list
- *-------------------------------------------------------------------------
- */
-
- if (options->verbose)
- {
-  printf("Opening file <%s>. Searching for objects to modify...\n",fname);
- }
-
- for ( i = 0; i < options->op_tbl->nelems; i++)
- {
-  char* name=options->op_tbl->objs[i].path;
-  if (options->verbose)
-   printf(" <%s>",name);
-
-  /* the input object names are present in the file and are valid */
-  if (h5trav_getindext(name,travt)<0)
-  {
-   printf("%sError: Could not find <%s> in file <%s>. Exiting...\n",
-    (options->verbose?"\n":""),name,fname);
-   goto out;
-  }
-  if (options->verbose)
-   printf("...Found\n");
-
-
-  /* check for extra filter conditions */
-  switch (options->op_tbl->objs[i].filter->filtn)
-  {
-
-   /* chunk size must be smaller than pixels per block */
-  case H5Z_FILTER_SZIP:
-   {
-    int     j;
-    int     csize=1;
-    int     ppb=options->op_tbl->objs[i].filter->cd_values[0];
-    hsize_t dims[H5S_MAX_RANK];
-    int     rank;
-    hid_t   did;
-    hid_t   sid;
-
-    if (options->op_tbl->objs[i].chunk.rank>0)
-    {
-     rank=options->op_tbl->objs[i].chunk.rank;
-     for (j=0; j<rank; j++)
-      csize*=(int)options->op_tbl->objs[i].chunk.chunk_lengths[j];
+    hid_t         fid;
+    unsigned int  i;
+    trav_table_t  *travt=NULL;
+    
+    /* nothing to do */
+    if (options->op_tbl->nelems==0)
+        return 0;
+    
+    /*-------------------------------------------------------------------------
+     * open the file
+     *-------------------------------------------------------------------------
+     */
+    if ((fid=h5tools_fopen(fname, NULL, NULL, 0))<0){
+        printf("<%s>: %s\n", fname, H5FOPENERROR );
+        return -1;
     }
-    else
+    
+    /*-------------------------------------------------------------------------
+     * get the list of objects in the file
+     *-------------------------------------------------------------------------
+     */
+    
+    /* init table */
+    trav_table_init(&travt);
+    
+    /* get the list of objects in the file */
+    if (h5trav_gettable(fid,travt)<0)
+        goto out;
+    
+    /*-------------------------------------------------------------------------
+     * compare with user supplied list
+     *-------------------------------------------------------------------------
+     */
+    
+    if (options->verbose)
     {
-     if ((did=H5Dopen(fid,travt->objs[i].name))<0)
-      goto out;
-     if ((sid=H5Dget_space(did))<0)
-      goto out;
-     if ( (rank=H5Sget_simple_extent_ndims(sid))<0)
-      goto out;
-     HDmemset(dims, 0, sizeof dims);
-     if ( H5Sget_simple_extent_dims(sid,dims,NULL)<0)
-      goto out;
-     for (j=0; j<rank; j++)
-      csize*=(int)dims[j];
-     if (H5Sclose(sid)<0)
-      goto out;
-     if (H5Dclose(did)<0)
-      goto out;
+        printf("Opening file <%s>. Searching for objects to modify...\n",fname);
     }
-
-    if (csize < ppb )
+    
+    for ( i = 0; i < options->op_tbl->nelems; i++)
     {
-     printf("Warning: SZIP settins, chunk size is smaller than pixels per block...Exiting\n");
-     goto out;
-    }
-
-
-   }
-   break;
-
-  }
-
-
-
- } /* i */
-/*-------------------------------------------------------------------------
- * close
- *-------------------------------------------------------------------------
- */
- H5Fclose(fid);
- trav_table_free(travt);
- return 0;
-
+        char* name=options->op_tbl->objs[i].path;
+        if (options->verbose)
+            printf(" <%s>",name);
+        
+        /* the input object names are present in the file and are valid */
+        if (h5trav_getindext(name,travt)<0)
+        {
+            error_msg(progname, "%s Could not find <%s> in file <%s>. Exiting...\n",
+                (options->verbose?"\n":""),name,fname);
+            goto out;
+        }
+        if (options->verbose)
+            printf("...Found\n");
+        
+        
+        /* check for extra filter conditions */
+        switch (options->op_tbl->objs[i].filter->filtn)
+        {
+            
+            /* chunk size must be smaller than pixels per block */
+        case H5Z_FILTER_SZIP:
+            {
+                int     j;
+                int     csize=1;
+                int     ppb=options->op_tbl->objs[i].filter->cd_values[0];
+                hsize_t dims[H5S_MAX_RANK];
+                int     rank;
+                hid_t   did;
+                hid_t   sid;
+                
+                if (options->op_tbl->objs[i].chunk.rank>0)
+                {
+                    rank=options->op_tbl->objs[i].chunk.rank;
+                    for (j=0; j<rank; j++)
+                        csize*=(int)options->op_tbl->objs[i].chunk.chunk_lengths[j];
+                }
+                else
+                {
+                    if ((did=H5Dopen(fid,travt->objs[i].name))<0)
+                        goto out;
+                    if ((sid=H5Dget_space(did))<0)
+                        goto out;
+                    if ( (rank=H5Sget_simple_extent_ndims(sid))<0)
+                        goto out;
+                    HDmemset(dims, 0, sizeof dims);
+                    if ( H5Sget_simple_extent_dims(sid,dims,NULL)<0)
+                        goto out;
+                    for (j=0; j<rank; j++)
+                        csize*=(int)dims[j];
+                    if (H5Sclose(sid)<0)
+                        goto out;
+                    if (H5Dclose(did)<0)
+                        goto out;
+                }
+                
+                if (csize < ppb )
+                {
+                    printf(" <warning: SZIP settins, chunk size is smaller than pixels per block>\n");
+                    goto out;
+                }
+                
+                
+            }
+            break;
+            
+        }
+        
+    } /* i */
+      
+   /*-------------------------------------------------------------------------
+    * close
+    *-------------------------------------------------------------------------
+    */
+    H5Fclose(fid);
+    trav_table_free(travt);
+    return 0;
+    
 out:
- H5Fclose(fid);
- trav_table_free(travt);
- return -1;
+    H5Fclose(fid);
+    trav_table_free(travt);
+    return -1;
 }
 
 
@@ -186,30 +182,30 @@ void print_objlist(const char *filename,
                    int nobjects,
                    trav_info_t *info )
 {
- int i;
-
- printf("File <%s>: # of entries = %d\n", filename, nobjects );
- for ( i = 0; i < nobjects; i++)
- {
-  switch ( info[i].type )
-  {
-  case H5G_GROUP:
-   printf(" %-10s %s\n", "group", info[i].name  );
-   break;
-  case H5G_DATASET:
-   printf(" %-10s %s\n", "dataset", info[i].name );
-   break;
-  case H5G_TYPE:
-   printf(" %-10s %s\n", "datatype", info[i].name );
-   break;
-  case H5G_LINK:
-   printf(" %-10s %s\n", "link", info[i].name );
-   break;
-  default:
-   printf(" %-10s %s\n", "User defined object", info[i].name );
-   break;
-  }
- }
+    int i;
+    
+    printf("File <%s>: # of entries = %d\n", filename, nobjects );
+    for ( i = 0; i < nobjects; i++)
+    {
+        switch ( info[i].type )
+        {
+        case H5G_GROUP:
+            printf(" %-10s %s\n", "group", info[i].name  );
+            break;
+        case H5G_DATASET:
+            printf(" %-10s %s\n", "dataset", info[i].name );
+            break;
+        case H5G_TYPE:
+            printf(" %-10s %s\n", "datatype", info[i].name );
+            break;
+        case H5G_LINK:
+            printf(" %-10s %s\n", "link", info[i].name );
+            break;
+        default:
+            printf(" %-10s %s\n", "User defined object", info[i].name );
+            break;
+        }
+    }
 
 }
 

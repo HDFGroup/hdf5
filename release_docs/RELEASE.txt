@@ -53,12 +53,14 @@ New Features
 
     Tools:
     ------
+       - h5repack: added support for reading and comparing by hyperslabs for
+         large files. PVN - 2007/03/01
+       - h5repack: a new option allows the copy using the file type (default)
+         instead of the previous conversion to native type. PVN - 2007/03/01
+       - h5repack: output the percentage of compression used. PVN - 2007/03/01
        - h5diff: added support for comparing dataset regions. PVN - 2007/02/20
        - h5diff: added support for reading and comparing by hyperslabs for large files.
           PVN - 2007/02/20
-       - h5diff: inclusion of a relative error compare formula to compare floating
-          point numbers in order to deal with floating point uncertainty. PVN - 
-          2007/02/20
        - h5diff: printing of dataset dimensions along with dataset name. PVN -
           2007/02/19
 

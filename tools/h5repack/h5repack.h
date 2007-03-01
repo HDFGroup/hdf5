@@ -43,11 +43,12 @@ typedef struct {
 /*
  the type of filter and additional parameter
  type can be one of the filters
- H5Z_FILTER_NONE       0,  uncompress if compressed
- H5Z_FILTER_DEFLATE    1 , deflation like gzip
- H5Z_FILTER_SHUFFLE    2 , shuffle the data
- H5Z_FILTER_FLETCHER32 3 , letcher32 checksum of EDC
- H5Z_FILTER_SZIP       4 , szip compression
+ H5Z_FILTER_NONE        0,  uncompress if compressed
+ H5Z_FILTER_DEFLATE     1 , deflation like gzip
+ H5Z_FILTER_SHUFFLE     2 , shuffle the data
+ H5Z_FILTER_FLETCHER32  3 , letcher32 checksum of EDC
+ H5Z_FILTER_SZIP        4 , szip compression
+
 */
 
 #define CDVALUES 2
@@ -55,11 +56,6 @@ typedef struct {
 typedef struct {
  H5Z_filter_t filtn;               /* filter identification number */
  int          cd_values[CDVALUES]; /* filter client data values */
- /* extra input for szip, selects the coding method
-    entropy coding method: EC=0
-    nearest neighbor coding method: NN=1
- */
- int          szip_coding;
 } filter_info_t;
 
 /* chunk lengths along each dimension and rank */
@@ -70,7 +66,7 @@ typedef struct {
 
 /* we currently define a maximum value for the filters array,
    that corresponds to the current library filters */
-#define H5_REPACK_MAX_NFILTERS 4
+#define H5_REPACK_MAX_NFILTERS 6
 
 /* information for one object, contains PATH, CHUNK info and FILTER info */
 typedef struct {
@@ -84,9 +80,9 @@ typedef struct {
 
 /* store a table of all objects */
 typedef struct {
- int         size;
- int         nelems;
- pack_info_t *objs;
+ unsigned int size;
+ unsigned int nelems;
+ pack_info_t  *objs;
 } pack_opttbl_t;
 
 
@@ -103,8 +99,9 @@ typedef struct {
  filter_info_t   filter_g;    /*global filter INFO for the ALL case */
  chunk_info_t    chunk_g;     /*global chunk INFO for the ALL case */
  H5D_layout_t    layout_g;    /*global layout information for the ALL case */
- int verbose;                 /*verbose mode */
- hsize_t threshold;               /*minimum size to compress, in bytes */
+ int             verbose;     /*verbose mode */
+ hsize_t         threshold;   /*minimum size to compress, in bytes */
+ int             use_native;  /*use a native type in write */  
 } pack_opt_t;
 
 
@@ -147,25 +144,10 @@ int copy_objects(const char* fnamein,
                  const char* fnameout,
                  pack_opt_t *options);
 
-void print_objlist(const char *filename,
-                   int nobjects,
-                   trav_info_t *travi );
-
-int do_copy_objects(hid_t fidin,
-                    hid_t fidout,
-                    trav_table_t *travt,
-                    pack_opt_t *options);
-
-int copy_attr(hid_t loc_in,
-              hid_t loc_out,
-              pack_opt_t *options
-              );
-
 int do_copy_refobjs(hid_t fidin,
                     hid_t fidout,
                     trav_table_t *travt,
                     pack_opt_t *options); /* repack options */
-
 
 
 void read_info(const char *filename,pack_opt_t *options);
@@ -183,7 +165,6 @@ int apply_filters(const char* name,    /* object name from traverse list */
                   int rank,            /* rank of dataset */
                   hsize_t *dims,       /* dimensions of dataset */
                   hid_t dcpl_id,       /* dataset creation property list */
-                  hid_t type_id,       /* datatype */
                   pack_opt_t *options); /* repack options */
 
 int has_filter(hid_t dcpl_id,

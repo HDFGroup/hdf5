@@ -17,11 +17,10 @@
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
+#include "h5tools_utils.h"
 #include "h5repack.h"
 
-#if 0
-#define PARSE_DEBUG
-#endif
+extern char  *progname;
 
 /*-------------------------------------------------------------------------
  * Function: parse_filter
@@ -95,7 +94,7 @@ obj_list_t* parse_filter(const char *str,
  obj_list=malloc(n*sizeof(obj_list_t));
  if (obj_list==NULL)
  {
-  printf("Could not alloc object list\n");
+  error_msg(progname, "could not allocate object list\n");
   return NULL;
  }
  *n_objs=n;
@@ -118,7 +117,7 @@ obj_list_t* parse_filter(const char *str,
  if (end_obj+1==(int)len)
  {
   if (obj_list) free(obj_list);
-  printf("Input Error: Invalid compression type in <%s>\n",str);
+  error_msg(progname, "input Error: Invalid compression type in <%s>\n",str);
   exit(1);
  }
 
@@ -155,7 +154,7 @@ obj_list_t* parse_filter(const char *str,
       c = str[u];
       if (!isdigit(c) && l==-1){
        if (obj_list) free(obj_list);
-       printf("Input Error: Compression parameter not digit in <%s>\n",str);
+       error_msg(progname, "compression parameter not digit in <%s>\n",str);
        exit(1);
       }
       if (l==-1)
@@ -170,12 +169,12 @@ obj_list_t* parse_filter(const char *str,
         i=len-1; /* end */
         (*n_objs)--; /* we counted an extra ',' */
         if (strcmp(smask,"NN")==0)
-         filt->szip_coding=0;
+         filt->cd_values[j++]=H5_SZIP_NN_OPTION_MASK;
         else if (strcmp(smask,"EC")==0)
-         filt->szip_coding=1;
+         filt->cd_values[j++]=H5_SZIP_EC_OPTION_MASK;
         else
         {
-         printf("Input Error: szip mask must be 'NN' or 'EC' \n");
+         error_msg(progname, "szip mask must be 'NN' or 'EC' \n");
          exit(1);
         }
 
@@ -184,6 +183,8 @@ obj_list_t* parse_filter(const char *str,
 
      }  /* u */
     } /*if */
+
+
 
 /*-------------------------------------------------------------------------
  * all other filters
@@ -198,7 +199,7 @@ obj_list_t* parse_filter(const char *str,
       c = str[u];
       if (!isdigit(c)){
        if (obj_list) free(obj_list);
-       printf("Input Error: Compression parameter not digit in <%s>\n",str);
+       error_msg(progname, "compression parameter is not a digit in <%s>\n",str);
        exit(1);
       }
       stype[m]=c;
@@ -233,7 +234,7 @@ obj_list_t* parse_filter(const char *str,
     filt->filtn=H5Z_FILTER_DEFLATE;
     if (no_param) { /*no more parameters, GZIP must have parameter */
      if (obj_list) free(obj_list);
-     printf("Input Error: Missing compression parameter in <%s>\n",str);
+     error_msg(progname, "missing compression parameter in <%s>\n",str);
      exit(1);
     }
    }
@@ -247,7 +248,7 @@ obj_list_t* parse_filter(const char *str,
     filt->filtn=H5Z_FILTER_SZIP;
     if (no_param) { /*no more parameters, SZIP must have parameter */
      if (obj_list) free(obj_list);
-     printf("Input Error: Missing compression parameter in <%s>\n",str);
+     error_msg(progname, "missing compression parameter in <%s>\n",str);
      exit(1);
     }
    }
@@ -261,7 +262,7 @@ obj_list_t* parse_filter(const char *str,
     filt->filtn=H5Z_FILTER_SHUFFLE;
     if (m>0){ /*shuffle does not have parameter */
      if (obj_list) free(obj_list);
-     printf("Input Error: Extra parameter in SHUF <%s>\n",str);
+     error_msg(progname, "extra parameter in SHUF <%s>\n",str);
      exit(1);
     }
    }
@@ -274,13 +275,14 @@ obj_list_t* parse_filter(const char *str,
     filt->filtn=H5Z_FILTER_FLETCHER32;
     if (m>0){ /*shuffle does not have parameter */
      if (obj_list) free(obj_list);
-     printf("Input Error: Extra parameter in FLET <%s>\n",str);
+     error_msg(progname, "extra parameter in FLET <%s>\n",str);
      exit(1);
     }
    }
+
    else {
     if (obj_list) free(obj_list);
-    printf("Input Error: Invalid filter type in <%s>\n",str);
+    error_msg(progname, "invalid filter type in <%s>\n",str);
     exit(1);
    }
   }
@@ -297,7 +299,7 @@ obj_list_t* parse_filter(const char *str,
  case H5Z_FILTER_DEFLATE:
   if (filt->cd_values[0]<0 || filt->cd_values[0]>9 ){
    if (obj_list) free(obj_list);
-   printf("Input Error: Invalid compression parameter in <%s>\n",str);
+   error_msg(progname, "invalid compression parameter in <%s>\n",str);
    exit(1);
   }
   break;
@@ -307,20 +309,21 @@ obj_list_t* parse_filter(const char *str,
   pixels_per_block=filt->cd_values[0];
   if ((pixels_per_block%2)==1) {
    if (obj_list) free(obj_list);
-   printf("Input Error: pixels_per_block is not even in <%s>\n",str);
+   error_msg(progname, "pixels_per_block is not even in <%s>\n",str);
    exit(1);
   }
   if (pixels_per_block>H5_SZIP_MAX_PIXELS_PER_BLOCK) {
    if (obj_list) free(obj_list);
-   printf("Input Error: pixels_per_block is too large in <%s>\n",str);
+   error_msg(progname, "pixels_per_block is too large in <%s>\n",str);
    exit(1);
   }
   if ( (strcmp(smask,"NN")!=0) && (strcmp(smask,"EC")!=0) ) {
    if (obj_list) free(obj_list);
-   printf("Input Error: szip mask must be 'NN' or 'EC' \n");
+   error_msg(progname, "szip mask must be 'NN' or 'EC' \n");
    exit(1);
   }
   break;
+
  };
 
  return obj_list;
@@ -350,7 +353,7 @@ const char* get_sfilter(H5Z_filter_t filtn)
  else if (filtn==H5Z_FILTER_FLETCHER32)
   return "FLETCHER32";
  else {
-  printf("Input error in filter type\n");
+  error_msg(progname, "input error in filter type\n");
   exit(1);
  }
  return NULL;
@@ -419,7 +422,7 @@ obj_list_t* parse_layout(const char *str,
  obj_list=malloc(n*sizeof(obj_list_t));
  if (obj_list==NULL)
  {
-  printf("Could not alloc object list\n");
+  error_msg(progname, "could not allocate object list\n");
   return NULL;
  }
  *n_objs=n;
@@ -443,7 +446,7 @@ obj_list_t* parse_layout(const char *str,
  if (end_obj+1==(int)len)
  {
   if (obj_list) free(obj_list);
-  printf("Parse layout error: No characters after : in <%s>\n",str);
+  error_msg(progname, "in parse layout, no characters after : in <%s>\n",str);
   exit(1);
  }
 
@@ -460,7 +463,7 @@ obj_list_t* parse_layout(const char *str,
    else if (strcmp(slayout,"CHUNK")==0)
     pack->layout=H5D_CHUNKED;
    else {
-    printf("Parse layout error: Not a valid layout in <%s>\n",str);
+    error_msg(progname, "in parse layout, not a valid layout in <%s>\n",str);
     exit(1);
    }
   }
@@ -484,7 +487,7 @@ obj_list_t* parse_layout(const char *str,
    if (j>(int)len)
    {
     if (obj_list) free(obj_list);
-    printf("Parse layout error: <%s> Chunk dimensions missing\n",str);
+    error_msg(progname, "in parse layout,  <%s> Chunk dimensions missing\n",str);
     exit(1);
    }
 
@@ -498,7 +501,7 @@ obj_list_t* parse_layout(const char *str,
      && c!='N' && c!='O' && c!='N' && c!='E'
      ){
      if (obj_list) free(obj_list);
-     printf("Parse layout error: <%s> Not a valid character in <%s>\n",
+     error_msg(progname, "in parse layout, <%s> Not a valid character in <%s>\n",
       sdim,str);
      exit(1);
     }
@@ -511,7 +514,7 @@ obj_list_t* parse_layout(const char *str,
       pack->chunk.chunk_lengths[c_index]=atoi(sdim);
       if (pack->chunk.chunk_lengths[c_index]==0) {
        if (obj_list) free(obj_list);
-       printf("Parse layout error: <%s> Conversion to number in <%s>\n",
+       error_msg(progname, "in parse layout, <%s> conversion to number in <%s>\n",
         sdim,str);
        exit(1);
       }
@@ -529,7 +532,7 @@ obj_list_t* parse_layout(const char *str,
        pack->chunk.chunk_lengths[c_index]=atoi(sdim);
        if (pack->chunk.chunk_lengths[c_index]==0){
         if (obj_list) free(obj_list);
-        printf("Parse layout error: <%s> Conversion to number in <%s>\n",
+        error_msg(progname, "in parse layout, <%s> conversion to number in <%s>\n",
          sdim,str);
         exit(1);
        }

@@ -31,12 +31,12 @@
  *-------------------------------------------------------------------------
  */
 
-int trav_table_search(unsigned long *objno, trav_table_t *table )
+int trav_table_search(haddr_t objno, trav_table_t *table )
 {
- int i;
+ unsigned int i;
 
  for (i = 0; i < table->nobjs; i++)
-   if (table->objs[i].objno[0] == *objno && table->objs[i].objno[1] == *(objno + 1))
+  if (table->objs[i].objno == objno)
    return i;
 
   return -1;
@@ -57,12 +57,12 @@ int trav_table_search(unsigned long *objno, trav_table_t *table )
  *-------------------------------------------------------------------------
  */
 
-void trav_table_add(unsigned long *objno,
+void trav_table_add(haddr_t objno,
                     char *name,
-                    H5G_obj_t1 type,
+                    H5G_obj_t type,
                     trav_table_t *table)
 {
- int i;
+ unsigned int i;
 
  if (table->nobjs == table->size) {
   table->size *= 2;
@@ -70,7 +70,7 @@ void trav_table_add(unsigned long *objno,
    (trav_obj_t*)HDrealloc(table->objs, table->size * sizeof(trav_obj_t));
 
   for (i = table->nobjs; i < table->size; i++) {
-   table->objs[i].objno[0] = table->objs[i].objno[1] = 0;
+   table->objs[i].objno = 0;
    table->objs[i].flags[0] = table->objs[i].flags[1] = 0;
    table->objs[i].displayed = 0;
    table->objs[i].type = H5G_UNKNOWN;
@@ -82,8 +82,7 @@ void trav_table_add(unsigned long *objno,
  }
 
  i = table->nobjs++;
- table->objs[i].objno[0] = objno[0];
- table->objs[i].objno[1] = objno[1];
+ table->objs[i].objno = objno;
  table->objs[i].flags[0] = table->objs[i].flags[1] = 0;
  HDfree(table->objs[i].name);
  table->objs[i].name = (char *)HDstrdup(name);
@@ -109,10 +108,10 @@ void trav_table_add(unsigned long *objno,
 
 void trav_table_addflags(unsigned *flags,
                          char *name,
-                         H5G_obj_t1 type,
+                         H5G_obj_t type,
                          trav_table_t *table)
 {
- int i;
+ unsigned int i;
 
  if (table->nobjs == table->size) {
   table->size *= 2;
@@ -120,7 +119,7 @@ void trav_table_addflags(unsigned *flags,
    (trav_obj_t*)HDrealloc(table->objs, table->size * sizeof(trav_obj_t));
 
   for (i = table->nobjs; i < table->size; i++) {
-   table->objs[i].objno[0] = table->objs[i].objno[1] = 0;
+   table->objs[i].objno = 0;
    table->objs[i].flags[0] = table->objs[i].flags[1] = 0;
    table->objs[i].displayed = 0;
    table->objs[i].type = H5G_UNKNOWN;
@@ -132,8 +131,7 @@ void trav_table_addflags(unsigned *flags,
  }
 
  i = table->nobjs++;
- table->objs[i].objno[0] = 0;
- table->objs[i].objno[1] = 0;
+ table->objs[i].objno = 0;
  table->objs[i].flags[0] = flags[0];
  table->objs[i].flags[1] = flags[1];
  HDfree(table->objs[i].name);
@@ -160,7 +158,7 @@ void trav_table_addflags(unsigned *flags,
 
 void trav_table_init( trav_table_t **tbl )
 {
- int i;
+ unsigned int i;
  trav_table_t* table = (trav_table_t*) HDmalloc(sizeof(trav_table_t));
 
  table->size = 20;
@@ -169,7 +167,7 @@ void trav_table_init( trav_table_t **tbl )
   (trav_obj_t*)HDmalloc(table->size * sizeof(trav_obj_t));
 
  for (i = 0; i < table->size; i++) {
-  table->objs[i].objno[0] = table->objs[i].objno[1] = 0;
+  table->objs[i].objno = 0;
   table->objs[i].flags[0] = table->objs[i].flags[1] = 0;
   table->objs[i].displayed = 0;
   table->objs[i].type = H5G_UNKNOWN;
@@ -200,7 +198,7 @@ void trav_table_init( trav_table_t **tbl )
 
 void trav_table_free( trav_table_t *table )
 {
- int i, j;
+ unsigned int i, j;
 
  for ( i = 0; i < table->nobjs; i++)
  {
@@ -237,14 +235,14 @@ void trav_table_addlink(trav_table_t *table,
                         int j /* the object index */,
                         char *path )
 {
- int k;
+ unsigned int k;
 
  /* already inserted */
  if (strcmp(table->objs[j].name,path)==0)
   return;
 
  /* allocate space if necessary */
- if (table->objs[j].nlinks == table->objs[j].sizelinks) {
+ if (table->objs[j].nlinks == (unsigned)table->objs[j].sizelinks) {
   table->objs[j].sizelinks += 2;
   table->objs[j].links =
    (trav_link_t*)HDrealloc(table->objs[j].links,
