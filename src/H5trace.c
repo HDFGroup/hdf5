@@ -323,6 +323,29 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 		}
 		break;
 
+ 	    case 'c':
+		if (ptr) {
+		    if (vp) {
+			fprintf (out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
+		} else {
+		    H5FD_mpio_collective_opt_t opt= va_arg(ap, H5FD_mpio_collective_opt_t); /*lint !e64 Type mismatch not really occuring */
+		    switch (opt) {
+			case H5FD_MPIO_COLLECTIVE_IO:
+			    fprintf (out, "H5FD_MPIO_COLLECTIVE_IO");
+			    break;
+			case H5FD_MPIO_INDIVIDUAL_IO:
+			    fprintf (out, "H5FD_MPIO_INDIVIDUAL_IO");
+			    break;
+			default:
+			    fprintf (out, "%ld", (long)opt);
+			    break;
+		    }
+		}
+		break;
+
             case 'f':
 		if (ptr) {
 		    if (vp) {
@@ -370,6 +393,32 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 			break;
 		    case H5D_FILL_VALUE_USER_DEFINED:
 			fprintf (out, "H5D_FILL_VALUE_USER_DEFINED");
+			break;
+		    }
+		}
+		break;
+
+	    case 'h':
+		if (ptr) {
+		    if (vp) {
+			fprintf (out, "0x%lx", (unsigned long)vp);
+		    } else {
+			fprintf(out, "NULL");
+		    }
+		} else {
+		    H5FD_mpio_chunk_opt_t opt = va_arg(ap, H5FD_mpio_chunk_opt_t); /*lint !e64 Type mismatch not really occuring */
+		    switch (opt) {
+		    case H5FD_MPIO_CHUNK_DEFAULT:
+			fprintf (out, "H5FD_MPIO_CHUNK_DEFAULT");
+			break;
+		    case H5FD_MPIO_CHUNK_ONE_IO:
+			fprintf (out, "H5FD_MPIO_CHUNK_ONE_IO");
+			break;
+		    case H5FD_MPIO_CHUNK_MULTI_IO:
+			fprintf (out, "H5FD_MPIO_CHUNK_MULTI_IO");
+			break;
+		    default:
+			fprintf (out, "%ld", (long)opt);
 			break;
 		    }
 		}
