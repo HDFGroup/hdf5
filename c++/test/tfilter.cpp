@@ -66,7 +66,7 @@ const H5Z_class_t H5Z_BOGUS[1] = {{
     "bogus",                    /* Filter name for debugging    */
     NULL,                       /* The "can apply" callback     */
     NULL,                       /* The "set local" callback     */
-    filter_bogus,               /* The actual filter function   */
+    (H5Z_func_t)filter_bogus,   /* The actual filter function   */
 }};
 
 /*-------------------------------------------------------------------------

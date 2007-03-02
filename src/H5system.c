@@ -34,6 +34,7 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Fprivate.h"		/* File access				*/
+#include "H5MMprivate.h"	/* Memory management			*/
 
 
 /****************/
@@ -564,7 +565,7 @@ HDremove_all(const char *fname)
     int ret_value = -1;
     char *_fname;
 
-    _fname = H5MM_malloc(HDstrlen(fname) + 3); /* to accomodate ;* and null */
+    _fname = (char *)H5MM_malloc(HDstrlen(fname) + 3); /* to accomodate ;* and null */
     if(_fname) {
         HDstrcpy(_fname, fname);
         HDstrcat(_fname,";*");
