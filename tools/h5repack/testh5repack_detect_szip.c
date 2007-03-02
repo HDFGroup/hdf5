@@ -17,7 +17,6 @@
 #include "hdf5.h"
 #include "h5test.h"
 #include "h5repack.h"
-#include "testh5repack.h"
 
 
 /*-------------------------------------------------------------------------
