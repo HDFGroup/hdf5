@@ -11,6 +11,7 @@
  * is linked from the top-level documents page.  It can also be found at     *
  * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
  * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * / 
 
 /***********************************************************
 *
@@ -194,7 +195,7 @@ test_vlstrings_basic(void)
 	    str_used+=HDstrlen(wdata[i])+1;
 
 	// Compare against the strings actually written.
-	verify_val(vlsize,(hsize_t)str_used,"DataSet::getVlenBufSize", __LINE__, __FILE__);
+	verify_val((int)vlsize,str_used,"DataSet::getVlenBufSize", __LINE__, __FILE__);
 
 	// Read dataset from disk.
 	char *rdata[SPACE1_DIM1];   // Information read in
