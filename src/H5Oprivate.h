@@ -414,8 +414,6 @@ typedef herr_t (*H5O_operator_t)(const void *mesg/*in*/, unsigned idx,
 
 /* Forward declarations for prototype arguments */
 struct H5P_genplist_t;
-struct H5SL_t;
-struct H5O_t;
 
 /* Object header routines */
 H5_DLL herr_t H5O_init(void);

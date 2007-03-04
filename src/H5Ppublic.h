@@ -224,6 +224,8 @@ H5_DLL herr_t H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, uns
 H5_DLL herr_t H5Pget_attr_phase_change(hid_t plist_id, unsigned *max_compact, unsigned *min_dense);
 H5_DLL herr_t H5Pset_attr_creation_order(hid_t plist_id, unsigned crt_order_flags);
 H5_DLL herr_t H5Pget_attr_creation_order(hid_t plist_id, unsigned *crt_order_flags);
+H5_DLL herr_t H5Pset_obj_track_times(hid_t plist_id, hbool_t track_times);
+H5_DLL herr_t H5Pget_obj_track_times(hid_t plist_id, hbool_t *track_times);
 
 /* File creation property list (FCPL) routines */
 H5_DLL herr_t H5Pget_version(hid_t plist_id, unsigned *boot/*out*/,

@@ -671,6 +671,7 @@ herr_t
 H5O_attr_write(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
 {
     H5O_t *oh = NULL;                   /* Pointer to actual object header */
+    unsigned oh_flags = H5AC__NO_FLAGS_SET;     /* Metadata cache flags for object header */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_write)
@@ -714,8 +715,11 @@ H5O_attr_write(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
     if(H5O_touch_oh(loc->file, dxpl_id, oh, FALSE) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update time on object")
 
+    /* Indicate that the object header was modified */
+    oh_flags |= H5AC__DIRTIED_FLAG;
+
 done:
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -948,14 +952,14 @@ H5O_attr_rename(const H5O_loc_t *loc, hid_t dxpl_id, const char *old_name,
         /* Check that we found the attribute to rename */
         if(!udata.found)
             HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "can't locate attribute with old name")
-
-        /* Indicate that the object header was modified */
-        oh_flags |= H5AC__DIRTIED_FLAG;
     } /* end else */
 
     /* Update the modification time, if any */
     if(H5O_touch_oh(loc->file, dxpl_id, oh, FALSE) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update time on object")
+
+    /* Indicate that the object header was modified */
+    oh_flags |= H5AC__DIRTIED_FLAG;
 
 done:
     if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
@@ -1175,10 +1179,6 @@ H5O_attr_remove_update(const H5O_loc_t *loc, H5O_t *oh, hid_t dxpl_id)
                 /* Remove the dense storage */
                 if(H5A_dense_delete(loc->file, dxpl_id, oh) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete dense attribute storage")
-
-                /* Update the modification time, if any */
-                if(H5O_touch_oh(loc->file, dxpl_id, oh, FALSE) < 0)
-                    HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update time on object")
             } /* end if */
 
             /* Free attribute table information */
@@ -1264,6 +1264,7 @@ herr_t
 H5O_attr_remove(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
 {
     H5O_t *oh = NULL;                   /* Pointer to actual object header */
+    unsigned oh_flags = H5AC__NO_FLAGS_SET;     /* Metadata cache flags for object header */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_remove)
@@ -1310,8 +1311,15 @@ H5O_attr_remove(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
     if(H5O_attr_remove_update(loc, oh, dxpl_id) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update attribute info")
 
+    /* Update the modification time, if any */
+    if(H5O_touch_oh(loc->file, dxpl_id, oh, FALSE) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update time on object")
+
+    /* Indicate that the object header was modified */
+    oh_flags |= H5AC__DIRTIED_FLAG;
+
 done:
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1336,6 +1344,7 @@ H5O_attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, hid_t dxpl_id)
 {
     H5O_t *oh = NULL;                   /* Pointer to actual object header */
+    unsigned oh_flags = H5AC__NO_FLAGS_SET;     /* Metadata cache flags for object header */
     H5A_attr_table_t atable = {0, NULL};        /* Table of attributes */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -1390,8 +1399,15 @@ H5O_attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
     if(H5O_attr_remove_update(loc, oh, dxpl_id) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update attribute info")
 
+    /* Update the modification time, if any */
+    if(H5O_touch_oh(loc->file, dxpl_id, oh, FALSE) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update time on object")
+
+    /* Indicate that the object header was modified */
+    oh_flags |= H5AC__DIRTIED_FLAG;
+
 done:
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
     if(atable.attrs && H5A_attr_release_table(&atable) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to release attribute table")

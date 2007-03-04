@@ -80,6 +80,10 @@ const char *FILENAME[] = {
 #define CORDER_ITER_STOP            3
 #define CORDER_EST_ENTRY_LEN        9
 
+/* Timestamp macros */
+#define TIMESTAMP_GROUP_1       "timestamp1"
+#define TIMESTAMP_GROUP_2       "timestamp2"
+
 /* Link iteration struct */
 typedef struct {
     H5_iter_order_t order;      /* Direction of iteration */
@@ -9310,6 +9314,171 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    timestamps
+ *
+ * Purpose:     Verify that disabling tracking timestamps for an object
+ *              works correctly
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Saturday, March 3, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+timestamps(hid_t fapl)
+{
+    hid_t	file_id = (-1); 	/* File ID */
+    hid_t	group_id = (-1);	/* Group ID */
+    hid_t	group_id2 = (-1);	/* Group ID */
+    hid_t       gcpl_id = (-1); 	/* Group creation property list ID */
+    hid_t       gcpl_id2 = (-1); 	/* Group creation property list ID */
+    H5O_info_t  oinfo, oinfo2;          /* Object info for groups created */
+    char        filename[NAME_BUF_SIZE];/* File name */
+    hbool_t     track_times;            /* The object timestamp setting */
+
+    /* Print test message */
+    TESTING("timestamps on objects")
+
+    /* Create group creation property list */
+    if((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0) TEST_ERROR
+
+    /* Query the object timestamp setting */
+    if(H5Pget_obj_track_times(gcpl_id, &track_times) < 0) TEST_ERROR
+
+    /* Check default timestamp information */
+    if(track_times != TRUE) TEST_ERROR
+
+    /* Set a non-default object timestamp setting */
+    if(H5Pset_obj_track_times(gcpl_id, FALSE) < 0) TEST_ERROR
+
+    /* Query the object timestamp setting */
+    if(H5Pget_obj_track_times(gcpl_id, &track_times) < 0) TEST_ERROR
+
+    /* Check default timestamp information */
+    if(track_times != FALSE) TEST_ERROR
+
+
+    /* Create file */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+    if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+
+    /* Create group with non-default object timestamp setting */
+    if((group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Llink(file_id, TIMESTAMP_GROUP_1, group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Close the group creation property list */
+    if(H5Pclose(gcpl_id) < 0) TEST_ERROR
+
+    /* Create group with default object timestamp setting */
+    if((group_id2 = H5Gcreate_expand(file_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Llink(file_id, TIMESTAMP_GROUP_2, group_id2, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Retrieve the new groups' creation properties */
+    if((gcpl_id = H5Gget_create_plist(group_id)) < 0) TEST_ERROR
+    if((gcpl_id2 = H5Gget_create_plist(group_id2)) < 0) TEST_ERROR
+
+    /* Query & verify the object timestamp settings */
+    if(H5Pget_obj_track_times(gcpl_id, &track_times) < 0) TEST_ERROR
+    if(track_times != FALSE) TEST_ERROR
+    if(H5Pget_obj_track_times(gcpl_id2, &track_times) < 0) TEST_ERROR
+    if(track_times != TRUE) TEST_ERROR
+
+    /* Query the object information for each group */
+    if(H5Oget_info(group_id, ".", &oinfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Oget_info(group_id2, ".", &oinfo2, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Sanity check object information for each group */
+    if(oinfo.atime != 0) TEST_ERROR
+    if(oinfo.mtime != 0) TEST_ERROR
+    if(oinfo.ctime != 0) TEST_ERROR
+    if(oinfo.btime != 0) TEST_ERROR
+    if(oinfo.atime == oinfo2.atime) TEST_ERROR
+    if(oinfo.mtime == oinfo2.mtime) TEST_ERROR
+    if(oinfo.ctime == oinfo2.ctime) TEST_ERROR
+    if(oinfo.btime == oinfo2.btime) TEST_ERROR
+    if((oinfo.hdr.flags & H5O_HDR_STORE_TIMES) != 0) TEST_ERROR
+    if((oinfo2.hdr.flags & H5O_HDR_STORE_TIMES) == 0) TEST_ERROR
+    if(oinfo.hdr.space.total >= oinfo2.hdr.space.total) TEST_ERROR
+    if(oinfo.hdr.space.meta >= oinfo2.hdr.space.meta) TEST_ERROR
+
+    /* Close the property lists */
+    if(H5Pclose(gcpl_id) < 0) TEST_ERROR
+    if(H5Pclose(gcpl_id2) < 0) TEST_ERROR
+
+    /* Close the groups */
+    if(H5Gclose(group_id) < 0) TEST_ERROR
+    if(H5Gclose(group_id2) < 0) TEST_ERROR
+
+    /* Close the file */
+    if(H5Fclose(file_id) < 0) TEST_ERROR
+
+
+    /* Re-open the file */
+    if((file_id = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Open groups */
+    if((group_id = H5Gopen(file_id, TIMESTAMP_GROUP_1)) < 0) TEST_ERROR
+    if((group_id2 = H5Gopen(file_id, TIMESTAMP_GROUP_2)) < 0) TEST_ERROR
+
+    /* Retrieve the groups' creation properties */
+    if((gcpl_id = H5Gget_create_plist(group_id)) < 0) TEST_ERROR
+    if((gcpl_id2 = H5Gget_create_plist(group_id2)) < 0) TEST_ERROR
+
+    /* Query & verify the object timestamp settings */
+    if(H5Pget_obj_track_times(gcpl_id, &track_times) < 0) TEST_ERROR
+    if(track_times != FALSE) TEST_ERROR
+    if(H5Pget_obj_track_times(gcpl_id2, &track_times) < 0) TEST_ERROR
+    if(track_times != TRUE) TEST_ERROR
+
+    /* Query the object information for each group */
+    if(H5Oget_info(group_id, ".", &oinfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Oget_info(group_id2, ".", &oinfo2, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Sanity check object information for each group */
+    if(oinfo.atime != 0) TEST_ERROR
+    if(oinfo.mtime != 0) TEST_ERROR
+    if(oinfo.ctime != 0) TEST_ERROR
+    if(oinfo.btime != 0) TEST_ERROR
+    if(oinfo.atime == oinfo2.atime) TEST_ERROR
+    if(oinfo.mtime == oinfo2.mtime) TEST_ERROR
+    if(oinfo.ctime == oinfo2.ctime) TEST_ERROR
+    if(oinfo.btime == oinfo2.btime) TEST_ERROR
+    if((oinfo.hdr.flags & H5O_HDR_STORE_TIMES) != 0) TEST_ERROR
+    if((oinfo2.hdr.flags & H5O_HDR_STORE_TIMES) == 0) TEST_ERROR
+    if(oinfo.hdr.space.total >= oinfo2.hdr.space.total) TEST_ERROR
+    if(oinfo.hdr.space.meta >= oinfo2.hdr.space.meta) TEST_ERROR
+
+    /* Close the property lists */
+    if(H5Pclose(gcpl_id) < 0) TEST_ERROR
+    if(H5Pclose(gcpl_id2) < 0) TEST_ERROR
+
+    /* Close the groups */
+    if(H5Gclose(group_id) < 0) TEST_ERROR
+    if(H5Gclose(group_id2) < 0) TEST_ERROR
+
+    /* Close the file */
+    if(H5Fclose(file_id) < 0) TEST_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    /* Free resources */
+    H5E_BEGIN_TRY {
+        H5Pclose(gcpl_id);
+        H5Gclose(group_id);
+        H5Fclose(file_id);
+    } H5E_END_TRY;
+
+    return -1;
+} /* end timestamps() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Test links
@@ -9399,35 +9568,33 @@ main(void)
             nerrors += linkinfo((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
 
             nerrors += check_all_closed((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
-
-            /* New group revision feature tests */
-            if(new_format == TRUE) {
-                nerrors += corder_create_empty(fapl2) < 0 ? 1 : 0;
-/* XXX: when creation order indexing is fully working, go back and add checks
- *      to these tests to make certain that the creation order values are
- *      correct.
- */
-                nerrors += corder_create_compact(fapl2) < 0 ? 1 : 0;
-                nerrors += corder_create_dense(fapl2) < 0 ? 1 : 0;
-                nerrors += corder_transition(fapl2) < 0 ? 1 : 0;
-                nerrors += corder_delete(fapl2) < 0 ? 1 : 0;
-                nerrors += link_info_by_idx(fapl2) < 0 ? 1 : 0;
-                nerrors += delete_by_idx(fapl2) < 0 ? 1 : 0;
-                nerrors += link_iterate(fapl2) < 0 ? 1 : 0;
-                nerrors += open_by_idx(fapl2) < 0 ? 1 : 0;
-                nerrors += object_info(fapl2) < 0 ? 1 : 0;
-                nerrors += group_info(fapl2) < 0 ? 1 : 0;
-            } /* end if */
-            else {
-                /* Test new API calls on old-style groups */
-                nerrors += link_info_by_idx_old(fapl) < 0 ? 1 : 0;
-                nerrors += delete_by_idx_old(fapl) < 0 ? 1 : 0;
-                nerrors += link_iterate_old(fapl) < 0 ? 1 : 0;
-                nerrors += open_by_idx_old(fapl) < 0 ? 1 : 0;
-                nerrors += object_info_old(fapl) < 0 ? 1 : 0;
-                nerrors += group_info_old(fapl) < 0 ? 1 : 0;
-            }
         } /* end for */
+
+        /* New group revision feature tests */
+        nerrors += corder_create_empty(fapl2) < 0 ? 1 : 0;
+/* XXX: when creation order indexing is fully working, go back and add checks
+*      to these tests to make certain that the creation order values are
+*      correct.
+*/
+        nerrors += corder_create_compact(fapl2) < 0 ? 1 : 0;
+        nerrors += corder_create_dense(fapl2) < 0 ? 1 : 0;
+        nerrors += corder_transition(fapl2) < 0 ? 1 : 0;
+        nerrors += corder_delete(fapl2) < 0 ? 1 : 0;
+        nerrors += link_info_by_idx(fapl2) < 0 ? 1 : 0;
+        nerrors += delete_by_idx(fapl2) < 0 ? 1 : 0;
+        nerrors += link_iterate(fapl2) < 0 ? 1 : 0;
+        nerrors += open_by_idx(fapl2) < 0 ? 1 : 0;
+        nerrors += object_info(fapl2) < 0 ? 1 : 0;
+        nerrors += group_info(fapl2) < 0 ? 1 : 0;
+        nerrors += timestamps(fapl2) < 0 ? 1 : 0;
+
+        /* Test new API calls on old-style groups */
+        nerrors += link_info_by_idx_old(fapl) < 0 ? 1 : 0;
+        nerrors += delete_by_idx_old(fapl) < 0 ? 1 : 0;
+        nerrors += link_iterate_old(fapl) < 0 ? 1 : 0;
+        nerrors += open_by_idx_old(fapl) < 0 ? 1 : 0;
+        nerrors += object_info_old(fapl) < 0 ? 1 : 0;
+        nerrors += group_info_old(fapl) < 0 ? 1 : 0;
 
         /* Close 2nd FAPL */
 	H5Pclose(fapl2);

@@ -48,7 +48,7 @@
 /* Flags for shared message indexes.
  * Pass these flags in using the mesg_type_flags parameter in
  * H5P_set_shared_mesg_index.
- * (Developers: These flags correspond to object header message type_ids,
+ * (Developers: These flags correspond to object header message type IDs,
  * but we need to assign each kind of message to a different bit so that
  * one index can hold multiple types.)
  */
@@ -59,6 +59,11 @@
 #define H5O_MESG_PLINE_FLAG    0x0008          /* Filter pipeline message.  */
 #define H5O_MESG_ATTR_FLAG     0x0010          /* Attribute Message.  */
 #define H5O_MESG_ALL_FLAG      (H5O_MESG_SDSPACE_FLAG | H5O_MESG_DTYPE_FLAG | H5O_MESG_FILL_FLAG | H5O_MESG_PLINE_FLAG | H5O_MESG_ATTR_FLAG)
+
+/* Object header status flag definitions */
+#define H5O_HDR_ATTR_CRT_ORDER_TRACKED  0x01    /* Attribute creation order is tracked */
+#define H5O_HDR_ATTR_CRT_ORDER_INDEXED  0x02    /* Attribute creation order has index */
+#define H5O_HDR_STORE_TIMES             0x04    /* Store access, modification, change & birth times for object */
 
 /* Maximum shared message values.  Number of indexes is 8 to allow room to add
  * new types of messages.
@@ -100,12 +105,17 @@ typedef struct H5O_info_t {
         unsigned version;		/* Version number of header format in file */
         unsigned nmesgs;		/* Number of object header messages */
         unsigned nchunks;		/* Number of object header chunks */
-        hsize_t hdr_size;		/* Total size of object header in file */
-        hsize_t meta_space;		/* Space within header for object header metadata information */
-        hsize_t mesg_space;		/* Space within header for actual message information */
-        hsize_t free_space;		/* Free space within object header */
-        uint64_t msg_present;		/* Flags to indicate presence of message type in header */
-        uint64_t msg_shared;		/* Flags to indicate message type is shared in header */
+        unsigned flags;                 /* Object header status flags */
+        struct {
+            hsize_t total;		/* Total space for storing object header in file */
+            hsize_t meta;		/* Space within header for object header metadata information */
+            hsize_t mesg;		/* Space within header for actual message information */
+            hsize_t free;		/* Free space within object header */
+        } space;
+        struct {
+            uint64_t present;		/* Flags to indicate presence of message type in header */
+            uint64_t shared;		/* Flags to indicate message type is shared in header */
+        } mesg;
     } hdr;
     hsize_t             meta_size;      /* Size of additional metadata for an object */
                                         /* (B-tree & heap for groups, B-tree for chunked dataset, etc.) */

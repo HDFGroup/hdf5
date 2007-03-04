@@ -43,7 +43,9 @@
 /****************/
 
 /* Set the object header size to speculatively read in */
-/* (needs to be more than the default dataset header size) */
+/* (needs to be more than the object header prefix size to work at all and
+ *      should be larger than the default dataset object header to save the
+ *      extra I/O operations) */
 #define H5O_SPEC_READ_SIZE 512
 
 
@@ -281,6 +283,9 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
         if(H5O_VERSION_1 != oh->version)
             HGOTO_ERROR(H5E_OHDR, H5E_VERSION, NULL, "bad object header version number")
 
+        /* Flags */
+        oh->flags = H5O_CRT_OHDR_FLAGS_DEF;
+
         /* Reserved */
         p++;
     } /* end else */
@@ -294,10 +299,14 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
     /* Version-specific fields */
     if(oh->version > H5O_VERSION_1) {
         /* Time fields */
-        UINT32DECODE(p, oh->atime);
-        UINT32DECODE(p, oh->mtime);
-        UINT32DECODE(p, oh->ctime);
-        UINT32DECODE(p, oh->btime);
+        if(oh->flags & H5O_HDR_STORE_TIMES) {
+            UINT32DECODE(p, oh->atime);
+            UINT32DECODE(p, oh->mtime);
+            UINT32DECODE(p, oh->ctime);
+            UINT32DECODE(p, oh->btime);
+        } /* end if */
+        else
+            oh->atime = oh->mtime = oh->ctime = oh->btime = 0;
 
         /* Attribute fields */
         UINT16DECODE(p, oh->max_compact);
@@ -331,6 +340,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 
     /* Determine object header prefix length */
     prefix_size = (size_t)(p - read_buf);
+    HDassert((size_t)prefix_size == (size_t)(H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
 
     /* Compute first chunk address */
     chunk_addr = addr + (hsize_t)prefix_size;
@@ -385,6 +395,10 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
                 HDmemcpy(oh->chunk[0].image, read_buf, prefix_size);
 
                 /* Read the chunk raw data */
+                /* (probably re-reads some data we already retrieved, but since
+                 *      we have to do the I/O operation anyway, we might as
+                 *      well avoid memcpy()ing the data in our buffer already)
+                 */
                 if(H5F_block_read(f, H5FD_MEM_OHDR, chunk_addr, (oh->chunk[0].size - prefix_size),
                         dxpl_id, (oh->chunk[0].image + prefix_size)) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to read object header data")
@@ -634,10 +648,12 @@ H5O_assert(oh);
             UINT32ENCODE(p, oh->nlink);
 
             /* Time fields */
-            UINT32ENCODE(p, oh->atime);
-            UINT32ENCODE(p, oh->mtime);
-            UINT32ENCODE(p, oh->ctime);
-            UINT32ENCODE(p, oh->btime);
+            if(oh->flags & H5O_HDR_STORE_TIMES) {
+                UINT32ENCODE(p, oh->atime);
+                UINT32ENCODE(p, oh->mtime);
+                UINT32ENCODE(p, oh->ctime);
+                UINT32ENCODE(p, oh->btime);
+            } /* end if */
 
             /* Attribute fields */
             UINT16ENCODE(p, oh->max_compact);

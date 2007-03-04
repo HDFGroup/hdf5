@@ -676,9 +676,6 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
     if(oh->version > H5O_VERSION_1) {
         H5P_genplist_t  *oc_plist;          /* Object creation property list */
 
-        /* Initialize all time fields with current time */
-        oh->atime = oh->mtime = oh->ctime = oh->btime = H5_now();
-
         /* Get the property list */
         if(NULL == (oc_plist = H5I_object(ocpl_id)))
             HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a property list")
@@ -695,12 +692,21 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
         if(H5P_get(oc_plist, H5O_CRT_OHDR_FLAGS_NAME, &oh->flags) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object header flags")
 
+        /* Initialize all time fields with current time */
+        if(oh->flags & H5O_HDR_STORE_TIMES)
+            oh->atime = oh->mtime = oh->ctime = oh->btime = H5_now();
+        else
+            oh->atime = oh->mtime = oh->ctime = oh->btime = 0;
+
         /* Set starting values for attribute info */
         oh->attr_fheap_addr = HADDR_UNDEF;
         oh->name_bt2_addr = HADDR_UNDEF;
         oh->corder_bt2_addr = HADDR_UNDEF;
     } /* end if */
     else {
+        /* Flags */
+        oh->flags = H5O_CRT_OHDR_FLAGS_DEF;
+
         /* Reset unused time fields */
         oh->atime = oh->mtime = oh->ctime = oh->btime = 0;
 
@@ -1109,55 +1115,58 @@ H5O_touch_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hbool_t force)
     HDassert(f);
     HDassert(oh);
 
-    /* Get current time */
-    now = H5_now();
+    /* Check if this object header is tracking times */
+    if(oh->flags & H5O_HDR_STORE_TIMES) {
+        /* Get current time */
+        now = H5_now();
 
-    /* Check version, to determine how to store time information */
-    if(oh->version == H5O_VERSION_1) {
-        unsigned	idx;                    /* Index of modification time message to update */
+        /* Check version, to determine how to store time information */
+        if(oh->version == H5O_VERSION_1) {
+            unsigned	idx;                    /* Index of modification time message to update */
 
-        /* Look for existing message */
-        for(idx = 0; idx < oh->nmesgs; idx++)
-            if(H5O_MSG_MTIME == oh->mesg[idx].type || H5O_MSG_MTIME_NEW == oh->mesg[idx].type)
-                break;
+            /* Look for existing message */
+            for(idx = 0; idx < oh->nmesgs; idx++)
+                if(H5O_MSG_MTIME == oh->mesg[idx].type || H5O_MSG_MTIME_NEW == oh->mesg[idx].type)
+                    break;
 
-        /* Create a new message, if necessary */
-        if(idx == oh->nmesgs) {
-            unsigned mesg_flags = 0;        /* Flags for message in object header */
+            /* Create a new message, if necessary */
+            if(idx == oh->nmesgs) {
+                unsigned mesg_flags = 0;        /* Flags for message in object header */
 
-            /* If we would have to create a new message, but we aren't 'forcing' it, get out now */
-            if(!force)
-                HGOTO_DONE(SUCCEED);        /*nothing to do*/
+                /* If we would have to create a new message, but we aren't 'forcing' it, get out now */
+                if(!force)
+                    HGOTO_DONE(SUCCEED);        /*nothing to do*/
 
-            /* Allocate space for the modification time message */
-            if((idx = H5O_msg_alloc(f, dxpl_id, oh, H5O_MSG_MTIME_NEW, &mesg_flags, &now)) == UFAIL)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to allocate space for modification time message")
+                /* Allocate space for the modification time message */
+                if((idx = H5O_msg_alloc(f, dxpl_id, oh, H5O_MSG_MTIME_NEW, &mesg_flags, &now)) == UFAIL)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to allocate space for modification time message")
 
-            /* Set the message's flags if appropriate */
-            oh->mesg[idx].flags = mesg_flags;
+                /* Set the message's flags if appropriate */
+                oh->mesg[idx].flags = mesg_flags;
+            } /* end if */
+
+            /* Allocate 'native' space, if necessary */
+            if(NULL == oh->mesg[idx].native) {
+                if(NULL == (oh->mesg[idx].native = H5FL_MALLOC(time_t)))
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "memory allocation failed for modification time message")
+            } /* end if */
+
+            /* Update the message */
+            *((time_t *)(oh->mesg[idx].native)) = now;
+
+            /* Mark the message as dirty */
+            oh->mesg[idx].dirty = TRUE;
         } /* end if */
+        else {
+            /* XXX: For now, update access time & change fields in the object header */
+            /* (will need to add some code to update modification time appropriately) */
+            oh->atime = oh->ctime = now;
+        } /* end else */
 
-        /* Allocate 'native' space, if necessary */
-        if(NULL == oh->mesg[idx].native) {
-            if(NULL == (oh->mesg[idx].native = H5FL_MALLOC(time_t)))
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "memory allocation failed for modification time message")
-        } /* end if */
-
-        /* Update the message */
-        *((time_t *)(oh->mesg[idx].native)) = now;
-
-        /* Mark the message as dirty */
-        oh->mesg[idx].dirty = TRUE;
+        /* Mark object header as dirty in cache */
+        if(H5AC_mark_pinned_or_protected_entry_dirty(f, oh) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTMARKDIRTY, FAIL, "unable to mark object header as dirty")
     } /* end if */
-    else {
-        /* XXX: For now, update access time & change fields in the object header */
-        /* (will need to add some code to update modification time appropriately) */
-        oh->atime = oh->ctime = now;
-    } /* end else */
-
-    /* Mark object header as dirty in cache */
-    if(H5AC_mark_pinned_or_protected_entry_dirty(f, oh) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTMARKDIRTY, FAIL, "unable to mark object header as dirty")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1857,13 +1866,16 @@ H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id)
     oinfo->hdr.nmesgs = oh->nmesgs;
     oinfo->hdr.nchunks = oh->nchunks;
 
+    /* Set the status flags */
+    oinfo->hdr.flags = oh->flags;
+
     /* Iterate over all the messages, accumulating message size & type information */
     oinfo->num_attrs = 0;
-    oinfo->hdr.meta_space = H5O_SIZEOF_HDR(oh) + (H5O_SIZEOF_CHKHDR_OH(oh) * (oh->nchunks - 1));
-    oinfo->hdr.mesg_space = 0;
-    oinfo->hdr.free_space = 0;
-    oinfo->hdr.msg_present = 0;
-    oinfo->hdr.msg_shared = 0;
+    oinfo->hdr.space.meta = H5O_SIZEOF_HDR(oh) + (H5O_SIZEOF_CHKHDR_OH(oh) * (oh->nchunks - 1));
+    oinfo->hdr.space.mesg = 0;
+    oinfo->hdr.space.free = 0;
+    oinfo->hdr.mesg.present = 0;
+    oinfo->hdr.mesg.shared = 0;
     for(u = 0, curr_msg = &oh->mesg[0]; u < oh->nmesgs; u++, curr_msg++) {
         uint64_t type_flag;             /* Flag for message type */
 
@@ -1873,21 +1885,21 @@ H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id)
 
         /* Accumulate information, based on the type of message */
 	if(H5O_NULL_ID == curr_msg->type->id)
-            oinfo->hdr.free_space += H5O_SIZEOF_MSGHDR_OH(oh) + curr_msg->raw_size;
+            oinfo->hdr.space.free += H5O_SIZEOF_MSGHDR_OH(oh) + curr_msg->raw_size;
         else if(H5O_CONT_ID == curr_msg->type->id)
-            oinfo->hdr.meta_space += H5O_SIZEOF_MSGHDR_OH(oh) + curr_msg->raw_size;
+            oinfo->hdr.space.meta += H5O_SIZEOF_MSGHDR_OH(oh) + curr_msg->raw_size;
         else {
-            oinfo->hdr.meta_space += H5O_SIZEOF_MSGHDR_OH(oh);
-            oinfo->hdr.mesg_space += curr_msg->raw_size;
+            oinfo->hdr.space.meta += H5O_SIZEOF_MSGHDR_OH(oh);
+            oinfo->hdr.space.mesg += curr_msg->raw_size;
         } /* end else */
 
-        /* Set flag to indicate present of message type */
+        /* Set flag to indicate presence of message type */
         type_flag = ((uint64_t)1) << curr_msg->type->id;
-        oinfo->hdr.msg_present |= type_flag;
+        oinfo->hdr.mesg.present |= type_flag;
 
         /* Set flag if the message is shared in some way */
         if(curr_msg->flags & H5O_MSG_FLAG_SHARED)                                   \
-            oinfo->hdr.msg_shared |= type_flag;
+            oinfo->hdr.mesg.shared |= type_flag;
     } /* end for */
 
     /* Sanity checking, etc. for # of attributes */
@@ -1901,17 +1913,17 @@ H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id)
     } /* end if */
 
     /* Iterate over all the chunks, adding any gaps to the free space */
-    oinfo->hdr.hdr_size = 0;
+    oinfo->hdr.space.total = 0;
     for(u = 0, curr_chunk = &oh->chunk[0]; u < oh->nchunks; u++, curr_chunk++) {
         /* Accumulate the size of the header on header */
-        oinfo->hdr.hdr_size += curr_chunk->size;
+        oinfo->hdr.space.total += curr_chunk->size;
 
         /* If the chunk has a gap, add it to the free space */
-        oinfo->hdr.free_space += curr_chunk->gap;
+        oinfo->hdr.space.free += curr_chunk->gap;
     } /* end for */
 
     /* Sanity check that all the bytes are accounted for */
-    HDassert(oinfo->hdr.hdr_size == (oinfo->hdr.free_space + oinfo->hdr.meta_space + oinfo->hdr.mesg_space + oh->skipped_mesg_size));
+    HDassert(oinfo->hdr.space.total == (oinfo->hdr.space.free + oinfo->hdr.space.meta + oinfo->hdr.space.mesg + oh->skipped_mesg_size));
 
 done:
     if(oh && H5AC_unprotect(oloc->file, dxpl_id, H5AC_OHDR, oloc->addr, oh, H5AC__NO_FLAGS_SET) < 0)

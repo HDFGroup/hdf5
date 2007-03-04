@@ -40,7 +40,7 @@
 #define H5O_VERSION_1		1
 
 /* Revised version - leaves out reserved bytes and alignment padding, and adds
- *      magic number as prefix and checksum
+ *      magic number as prefix and checksum as suffix for all chunks.
  */
 #define H5O_VERSION_2		2
 
@@ -78,6 +78,9 @@
 /* Size of checksum (on disk) */
 #define H5O_SIZEOF_CHKSUM               4
 
+/* Default value for object header status flags */
+#define H5O_CRT_OHDR_FLAGS_DEF          H5O_HDR_STORE_TIMES
+
 /*
  * Size of object header prefix.
  */
@@ -95,10 +98,12 @@
                 1 +		/*flags		 	*/		      \
                 2 +		/*number of messages	*/		      \
                 4 +		/*reference count	*/		      \
-                4 +		/*access time		*/		      \
-                4 +		/*modification time	*/		      \
-                4 +		/*change time		*/		      \
-                4 +		/*birth time		*/		      \
+                (((O)->flags & H5O_HDR_STORE_TIMES) ? (			      \
+                  4 +		/*access time		*/		      \
+                  4 +		/*modification time	*/		      \
+                  4 +		/*change time		*/		      \
+                  4		/*birth time		*/		      \
+                ) : 0) +						      \
                 2 +		/*max compact attributes */		      \
                 2 +		/*min dense attributes	*/		      \
                 (O)->sizeof_size + /*# of attributes	*/		      \
@@ -231,9 +236,9 @@ struct H5O_t {
     size_t      sizeof_addr;            /* Size of file addresses	     */
 
     /* Object information (stored) */
-    unsigned	version;		/*version number		     */
     unsigned	nlink;			/*link count			     */
-    unsigned	flags;			/*flags				     */
+    uint8_t	version;		/*version number		     */
+    uint8_t	flags;			/*flags				     */
 
     /* Time information (stored, for versions > 1) */
     time_t      atime;                  /*access time 			     */
