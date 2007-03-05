@@ -348,11 +348,8 @@ int do_copy_refobjs(hid_t fidin,
  * copy referenced objects in attributes
  *-------------------------------------------------------------------------
  */
-#if 1
    if (copy_refs_attr(dset_in,dset_out,options,travt,fidout)<0)
     goto error;
-#endif
-
 
 /*-------------------------------------------------------------------------
  * check for hard links
