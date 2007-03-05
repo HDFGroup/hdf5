@@ -160,6 +160,8 @@ int main (void)
  *-------------------------------------------------------------------------
  */
 
+#if 0
+
 /*-------------------------------------------------------------------------
  * file with fill values
  *-------------------------------------------------------------------------
@@ -198,11 +200,12 @@ int main (void)
   GOERROR;
  PASSED();
 
+#endif
+
 /*-------------------------------------------------------------------------
  * file with attributes
  *-------------------------------------------------------------------------
  */
-#if 0
  TESTING("    copy of datasets (attributes)");
  if (h5repack_init (&pack_options, 0)<0)
   GOERROR;
@@ -217,7 +220,6 @@ int main (void)
  if (h5repack_end (&pack_options)<0)
   GOERROR;
  PASSED();
-#endif
 
 /*-------------------------------------------------------------------------
  * file with hardlinks
@@ -3541,7 +3543,7 @@ void write_attr_in(hid_t loc_id,
  {
   status=H5Rcreate(&buf4[0],fid,dset_name,H5R_OBJECT,-1);
   status=H5Rcreate(&buf4[1],fid,dset_name,H5R_OBJECT,-1);
-  make_attr(loc_id,1,dims,"reference to object",H5T_STD_REF_OBJ,buf4);
+  make_attr(loc_id,1,dims,"reference",H5T_STD_REF_OBJ,buf4);
  }
 
 

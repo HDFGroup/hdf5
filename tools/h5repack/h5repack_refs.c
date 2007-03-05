@@ -1,3 +1,4 @@
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
  * Copyright by the Board of Trustees of the University of Illinois.         *
@@ -20,18 +21,14 @@
 #include "H5private.h"
 #include "h5repack.h"
 
-static const char* MapIdToName(hid_t refobj_id,
-                               trav_table_t *travt);
+/*-------------------------------------------------------------------------
+ * local functions
+ *-------------------------------------------------------------------------
+ */
 
-static void close_obj(H5G_obj_t obj_type, hid_t obj_id);
-
-
-static int copy_refs_attr(hid_t loc_in,
-                          hid_t loc_out,
-                          pack_opt_t *options,
-                          trav_table_t *travt,
-                          hid_t fidout         /* for saving references */
-                          );
+static const char* MapIdToName(hid_t refobj_id,trav_table_t *travt);
+static void close_obj(H5G_obj_t1 obj_type, hid_t obj_id);
+static int copy_refs_attr(hid_t loc_in,hid_t loc_out,pack_opt_t *options,trav_table_t *travt,hid_t fidout);
 
 /*-------------------------------------------------------------------------
  * Function: do_copy_refobjs
@@ -62,12 +59,13 @@ int do_copy_refobjs(hid_t fidin,
  hid_t     space_id=(-1);          /* space ID */
  hid_t     ftype_id=(-1);          /* file data type ID */
  hid_t     mtype_id=(-1);          /* memory data type ID */
- size_t    msize;             /* memory size of memory type */
- hsize_t   nelmts;            /* number of elements in dataset */
- int       rank;              /* rank of dataset */
- hsize_t   dims[H5S_MAX_RANK];/* dimensions of dataset */
- int       next;              /* external files */
- unsigned  i, j;
+ size_t    msize;                  /* memory size of memory type */
+ hsize_t   nelmts;                 /* number of elements in dataset */
+ int       rank;                   /* rank of dataset */
+ hsize_t   dims[H5S_MAX_RANK];     /* dimensions of dataset */
+ int       next;                   /* external files */
+ unsigned int i, j;
+ int       k;
 
 /*-------------------------------------------------------------------------
  * browse
@@ -143,8 +141,8 @@ int do_copy_refobjs(hid_t fidin,
    if ( H5Sget_simple_extent_dims(space_id,dims,NULL)<0)
     goto error;
    nelmts=1;
-   for (j=0; j<rank; j++)
-    nelmts*=dims[j];
+   for (k=0; k<rank; k++)
+    nelmts*=dims[k];
 
    if ((mtype_id=h5tools_get_native_type(ftype_id))<0)
     goto error;
@@ -180,7 +178,7 @@ int do_copy_refobjs(hid_t fidin,
  */
    if (H5Tequal(mtype_id, H5T_STD_REF_OBJ))
    {
-    H5G_obj_t       obj_type;
+    H5G_obj_t1       obj_type;
     hid_t            refobj_id;
     hobj_ref_t       *refbuf=NULL; /* buffer for object references */
     hobj_ref_t       *buf=NULL;
@@ -255,7 +253,7 @@ int do_copy_refobjs(hid_t fidin,
  */
    else if (H5Tequal(mtype_id, H5T_STD_REF_DSETREG))
    {
-    H5G_obj_t       obj_type;
+    H5G_obj_t1       obj_type;
     hid_t            refobj_id;
     hdset_reg_ref_t  *refbuf=NULL; /* input buffer for region references */
     hdset_reg_ref_t  *buf=NULL;    /* output buffer */
@@ -350,8 +348,10 @@ int do_copy_refobjs(hid_t fidin,
  * copy referenced objects in attributes
  *-------------------------------------------------------------------------
  */
+#if 1
    if (copy_refs_attr(dset_in,dset_out,options,travt,fidout)<0)
     goto error;
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -489,14 +489,14 @@ static int copy_refs_attr(hid_t loc_in,
                           hid_t fidout         /* for saving references */
                           )
 {
- hid_t      attr_id=-1;      /* attr ID */
- hid_t      attr_out=-1;     /* attr ID */
- hid_t      space_id=-1;     /* space ID */
- hid_t      ftype_id=-1;     /* file data type ID */
- hid_t      mtype_id=-1;     /* memory data type ID */
- size_t     msize;        /* memory size of type */
- hsize_t    nelmts;       /* number of elements in dataset */
- int        rank;         /* rank of dataset */
+ hid_t      attr_id=-1;        /* attr ID */
+ hid_t      attr_out=-1;       /* attr ID */
+ hid_t      space_id=-1;       /* space ID */
+ hid_t      ftype_id=-1;       /* file data type ID */
+ hid_t      mtype_id=-1;       /* memory data type ID */
+ size_t     msize;             /* memory size of type */
+ hsize_t    nelmts;            /* number of elements in dataset */
+ int        rank;              /* rank of dataset */
  hsize_t    dims[H5S_MAX_RANK];/* dimensions of dataset */
  char       name[255];
  int        n, j;
@@ -554,7 +554,7 @@ static int copy_refs_attr(hid_t loc_in,
  */
    if (H5Tequal(mtype_id, H5T_STD_REF_OBJ))
    {
-    H5G_obj_t  obj_type;
+    H5G_obj_t1  obj_type;
     hid_t       refobj_id;
     hobj_ref_t  *refbuf=NULL;
     unsigned    k;
@@ -631,7 +631,7 @@ static int copy_refs_attr(hid_t loc_in,
  */
    else if (H5Tequal(mtype_id, H5T_STD_REF_DSETREG))
    {
-    H5G_obj_t       obj_type;
+    H5G_obj_t1       obj_type;
     hid_t            refobj_id;
     hdset_reg_ref_t  *refbuf=NULL; /* input buffer for region references */
     hdset_reg_ref_t  *buf=NULL;    /* output buffer */
@@ -734,14 +734,14 @@ error:
 }
 
 /*-------------------------------------------------------------------------
- * Function: close_obj
+ * Function:	close_obj
  *
- * Purpose: Auxiliary function to close an object
+ * Purpose:	Auxiliary function to close an object
  *
  *-------------------------------------------------------------------------
  */
 
-static void close_obj(H5G_obj_t obj_type, hid_t obj_id)
+static void close_obj(H5G_obj_t1 obj_type, hid_t obj_id)
 {
  H5E_BEGIN_TRY
  {
@@ -761,6 +761,7 @@ static void close_obj(H5G_obj_t obj_type, hid_t obj_id)
   }
  } H5E_END_TRY;
 }
+
 /*-------------------------------------------------------------------------
  * Function:	MapIdToName
  *
@@ -772,11 +773,11 @@ static void close_obj(H5G_obj_t obj_type, hid_t obj_id)
 static const char* MapIdToName(hid_t refobj_id,
                                trav_table_t *travt)
 {
- hid_t id;
- hid_t fid;
- H5G_stat_t refstat;    /* Stat for the refobj id */
- H5G_stat_t objstat;    /* Stat for objects in the file */
- int   i;
+ hid_t        id;
+ hid_t        fid;
+ H5G_stat_t   refstat;    /* Stat for the refobj id */
+ H5G_stat_t   objstat;    /* Stat for objects in the file */
+ unsigned int i;
 
  /* obtain information to identify the referenced object uniquely */
  if(H5Gget_objinfo(refobj_id, ".", 0, &refstat) <0)
@@ -824,4 +825,6 @@ static const char* MapIdToName(hid_t refobj_id,
 
  return NULL;
 }
+
+
 

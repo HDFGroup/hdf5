@@ -29,6 +29,9 @@
  *-------------------------------------------------------------------------
  */
 
+typedef H5G_obj_t H5G_obj_t1;
+
+
 typedef struct trav_info_t {
     char      *name;
     H5G_obj_t type;
@@ -133,3 +136,5 @@ void trav_table_addlink(trav_table_t *table,
 
 
 #endif  /* H5TRAV_H__ */
+
+

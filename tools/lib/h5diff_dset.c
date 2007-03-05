@@ -515,7 +515,8 @@ hsize_t diff_datasetid( hid_t did1,
   }
   
  } /* hyperslab read */
-
+ }/*cmp*/
+ 
 /*-------------------------------------------------------------------------
  * compare attributes
  * the if condition refers to cases when the dataset is a referenced object
@@ -523,9 +524,7 @@ hsize_t diff_datasetid( hid_t did1,
  */
 
  if (obj1_name)
-  diff_attr(did1,did2,obj1_name,obj2_name,options);
-
- }/*cmp*/
+  nfound += diff_attr(did1,did2,obj1_name,obj2_name,options);
 
 /*-------------------------------------------------------------------------
  * close
