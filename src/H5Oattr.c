@@ -918,12 +918,13 @@ H5O_attr_copy_file(H5F_t *file_src, const H5O_msg_class_t UNUSED *mesg_type,
                 size_t ref_count;
 
                 /* Determine # of reference elements to copy */
-                ref_count = attr_dst->data_size / attr_dst->dt_size;
+                ref_count = attr_dst->data_size / H5T_get_size(attr_dst->dt);
 
                 /* Copy objects referenced in source buffer to destination file and set destination elements */
                 if(H5O_copy_expand_ref(file_src, attr_src->data, dxpl_id,
                         file_dst, attr_dst->data, ref_count, H5T_get_ref_type(attr_src->dt), cpy_info) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "unable to copy reference attribute")
+
             } /* end if */
             else
                 /* Reset value to zero */
