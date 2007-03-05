@@ -121,6 +121,10 @@ SOURCE=..\..\..\tools\h5repack\h5repack_parse.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\tools\h5repack\h5repack_refs.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\tools\h5repack\h5repack_verify.c
 # End Source File
 # End Group
