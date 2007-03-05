@@ -26,22 +26,23 @@
  * loc_id = H5Dopen( fid, name);
  * loc_id = H5Topen( fid, name);
  *
- * Return:
- *  0 : no differences found
- *  1 : differences found
+ * Return: number of differences found
  *
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  *
  * Date: November, 03, 2003
  *
+ * Modifications:
+ *  March, 02, 2007: return the number of differences found
+ *
  *-------------------------------------------------------------------------
  */
 
-int diff_attr(hid_t loc1_id,
-              hid_t loc2_id,
-              const char *path1,
-              const char *path2,
-              diff_opt_t *options)
+hsize_t diff_attr(hid_t loc1_id,
+                  hid_t loc2_id,
+                  const char *path1,
+                  const char *path2,
+                  diff_opt_t *options)
 {
  hid_t      attr1_id=-1;     /* attr ID */
  hid_t      attr2_id=-1;     /* attr ID */
@@ -65,9 +66,9 @@ int diff_attr(hid_t loc1_id,
  char       np1[512];
  char       np2[512];
  int        n1, n2, i, j;
- hsize_t    nfound;
+ hsize_t    nfound=0;
+ hsize_t    nfound_total=0;
  int        cmp=1;
- int        ret=0;
 
  if ((n1 = H5Aget_num_attrs(loc1_id))<0)
   goto error;
@@ -95,7 +96,6 @@ int diff_attr(hid_t loc1_id,
   {
    if ((attr2_id = H5Aopen_name(loc2_id, name1))<0)
    {
-    ret = 1;
     goto error;
    }
   } H5E_END_TRY;
@@ -285,9 +285,11 @@ int diff_attr(hid_t loc1_id,
    HDfree(buf1);
   if (buf2)
    HDfree(buf2);
+
+  nfound_total += nfound;
  } /* i */
 
- return ret;
+ return nfound_total;
 
 error:
  H5E_BEGIN_TRY {
@@ -306,7 +308,7 @@ error:
  } H5E_END_TRY;
 
  options->err_stat=1;
- return ret;
+ return nfound_total;
 }
 
 

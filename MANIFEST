@@ -1907,8 +1907,7 @@
 ./tools/testfiles/h5repack_shuffle.h5
 ./tools/testfiles/h5repack_attr.h5
 ./tools/testfiles/h5repack_deflate.h5
-
-
+./tools/testfiles/h5repack_szip.h5
 
 # jam utility and tests
 ./tools/h5jam/Dependencies
