@@ -504,6 +504,9 @@ New Features
 
     Tools:
     ------
+        - h5repack: now uses the API function H5Ocopy (of the tool h5copy) to
+           recreate objects if there is not a user input for changes. PVN -
+           2007/05/07
         - h5repack: added support for reading and repacking  by hyperslabs for
            large files. PVN - 2007/03/01
         - h5repack: a new option allows the copy using the file type (default)
