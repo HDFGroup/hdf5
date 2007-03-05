@@ -220,7 +220,7 @@ addr_reset(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:    create_ref_attr 
+ * Function:    attach_ref_attr 
  *
  * Purpose:     Create an attribute with object references
  *
@@ -245,7 +245,7 @@ attach_ref_attr(hid_t file_id, hid_t loc_id)
     int data1[2][9] = {{1,1,1,1,1,1,1,1,1},{1,1,1,1,1,1,1,1,18}};
     int data2[2][9] = {{2,2,2,2,2,2,2,2,2},{2,2,2,2,2,2,2,2,18}};
 
-
+    /* creates two simple datasets */
     if((sid = H5Screate_simple(2, dims, NULL)) < 0) TEST_ERROR
     if((sid_ref = H5Screate_simple(1, dims_ref, NULL)) < 0) TEST_ERROR
     if((did1 = H5Dcreate(file_id, dsetname1, H5T_NATIVE_INT, sid,  H5P_DEFAULT)) < 0) TEST_ERROR
@@ -253,6 +253,7 @@ attach_ref_attr(hid_t file_id, hid_t loc_id)
     if((did2 = H5Dcreate(file_id, dsetname2, H5T_NATIVE_INT, sid,  H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Dwrite(did2, H5T_NATIVE_INT, H5S_ALL , H5S_ALL, H5P_DEFAULT,data2) < 0) TEST_ERROR
 
+    /* create an attribute with two object references */
     if(H5Rcreate(&ref[0], file_id, dsetname1, H5R_OBJECT, -1) < 0) TEST_ERROR
     if(H5Rcreate(&ref[1], file_id, dsetname2, H5R_OBJECT, -1) < 0) TEST_ERROR
     if((aid = H5Acreate(loc_id, "obj_ref_attr", H5T_STD_REF_OBJ, sid_ref, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -273,6 +274,76 @@ error:
         H5Dclose(did1);
         H5Dclose(did2);
         H5Pclose(aid);
+    } H5E_END_TRY;
+
+    return(-1);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    attach_reg_ref_attr 
+ *
+ * Purpose:     Create an attribute with object references
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Peter Cao
+ *              Monday, March 5, 2006
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+attach_reg_ref_attr(hid_t file_id, hid_t loc_id)
+{
+    const char dsetnamev[] = "dataset_pointed_by_reg_ref_attr";
+    hid_t aid = (-1);
+    hid_t space_id = (-1);       /* dataspace identifiers */
+    hid_t spacer_id = (-1);       /* dataspace identifiers */
+    hid_t dsetv_id = (-1);       /*dataset identifiers*/
+    hsize_t dims[2] =  {2,9};
+    hsize_t dimsr[1] =  {2};
+    int rank = 2;
+    int rankr =1;
+    hdset_reg_ref_t ref[2];
+    int data[2][9] = {{1,1,2,3,3,4,5,5,6},{1,2,2,3,4,4,5,6,6}};
+    hsize_t start[2];
+    hsize_t count[2];
+    hsize_t coord[3][2] = {{0, 0}, {1, 6}, {0, 8}};
+    size_t num_points = 3;
+
+    if((space_id = H5Screate_simple(rank, dims, NULL)) < 0) TEST_ERROR
+    if((spacer_id = H5Screate_simple(rankr, dimsr, NULL)) < 0) TEST_ERROR
+    if((dsetv_id = H5Dcreate(file_id, dsetnamev, H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Dwrite(dsetv_id, H5T_NATIVE_INT, H5S_ALL , H5S_ALL, H5P_DEFAULT,data) < 0) TEST_ERROR
+
+    start[0] = 0;
+    start[1] = 3;
+    count[0] = 2;
+    count[1] = 3;
+    if(H5Sselect_hyperslab(space_id,H5S_SELECT_SET,start,NULL,count,NULL) < 0) TEST_ERROR
+    if(H5Rcreate(&ref[0], file_id, dsetnamev, H5R_DATASET_REGION, space_id) < 0) TEST_ERROR
+    if(H5Sselect_none(space_id) < 0) TEST_ERROR
+    if(H5Sselect_elements(space_id, H5S_SELECT_SET, num_points, (const hsize_t **)coord) < 0) TEST_ERROR
+    if(H5Rcreate(&ref[1], file_id, dsetnamev, H5R_DATASET_REGION, space_id) < 0) TEST_ERROR
+
+    if((aid = H5Acreate(loc_id, "reg_ref_attr", H5T_STD_REF_DSETREG, spacer_id, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Awrite(aid, H5T_STD_REF_DSETREG, ref) < 0) TEST_ERROR
+
+
+    if(H5Sclose(space_id) < 0) TEST_ERROR
+    if(H5Dclose(dsetv_id) < 0) TEST_ERROR
+    if(H5Aclose(aid) < 0) TEST_ERROR
+
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Sclose(space_id);
+        H5Dclose(dsetv_id);
+        H5Aclose(aid);
     } H5E_END_TRY;
 
     return(-1);
@@ -6914,6 +6985,9 @@ test_copy_option(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl, unsigned flag, hboo
 
         /* create an attribute of object references */
         if(attach_ref_attr(fid_src, gid_ref) < 0) TEST_ERROR
+
+        /* create an attribute of region references */
+        if(attach_reg_ref_attr(fid_src, gid_ref) < 0) TEST_ERROR
 
         /* create a dataset of region references */
         if(create_reg_ref_dataset(fid_src, gid_ref) < 0) TEST_ERROR
