@@ -147,6 +147,7 @@ Bug Fixes since HDF5-1.6.5 Release
    
     Tools
     -----
+       - Fixed a bug in the h5diff percentage option -p. PVN 2007/03/05
        - Fixed a bug in h5dump that caused array indices greater than 2 ^32-1
          not to be printed correctly - PVN 2007/2/19
 
