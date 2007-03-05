@@ -504,6 +504,8 @@ New Features
 
     Tools:
     ------
+        - h5repack: added support for the new nbit and scaleoffset filters.
+          PVN - 2007/05/07
         - h5repack: now uses the API function H5Ocopy (of the tool h5copy) to
            recreate objects if there is not a user input for changes. PVN -
            2007/05/07
