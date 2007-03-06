@@ -48,6 +48,9 @@
  *      extra I/O operations) */
 #define H5O_SPEC_READ_SIZE 512
 
+/* All the object header status flags that this version of the library knows about */
+#define H5O_HDR_ALL_FLAGS       (H5O_HDR_ATTR_CRT_ORDER_TRACKED | H5O_HDR_ATTR_CRT_ORDER_INDEXED | H5O_HDR_STORE_TIMES)
+
 
 /******************/
 /* Local Typedefs */
@@ -276,6 +279,8 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 
         /* Flags */
         oh->flags = *p++;
+        if(oh->flags & ~H5O_HDR_ALL_FLAGS)
+            HGOTO_ERROR(H5E_OHDR, H5E_VERSION, NULL, "unknown object header status flag(s)")
     } /* end if */
     else {
         /* Version */

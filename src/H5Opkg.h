@@ -240,7 +240,7 @@ struct H5O_t {
     uint8_t	version;		/*version number		     */
     uint8_t	flags;			/*flags				     */
 
-    /* Time information (stored, for versions > 1) */
+    /* Time information (stored, for versions > 1 & H5O_HDR_STORE_TIMES flag set) */
     time_t      atime;                  /*access time 			     */
     time_t      mtime;                  /*modification time 		     */
     time_t      ctime;                  /*change time 			     */
