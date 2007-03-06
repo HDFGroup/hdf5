@@ -37,8 +37,10 @@ static herr_t H5O_attr_free(void *mesg);
 static herr_t H5O_attr_pre_copy_file(H5F_t *file_src, const void *mesg_src,
     hbool_t *deleted, const H5O_copy_t *cpy_info, void *udata);
 static void *H5O_attr_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type,
-    void *native_src, H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info,
-    void *udata);
+    void *native_src, H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
+static herr_t H5O_attr_post_copy_file(const H5O_loc_t *src_oloc,
+    const void *mesg_src, H5O_loc_t *dst_oloc, void *mesg_dst, hid_t dxpl_id,
+    H5O_copy_t *cpy_info);
 static herr_t H5O_attr_get_crt_index(const void *_mesg, H5O_msg_crt_idx_t *crt_idx);
 static herr_t H5O_attr_set_crt_index(void *_mesg, H5O_msg_crt_idx_t crt_idx);
 static herr_t H5O_attr_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
@@ -80,7 +82,7 @@ const H5O_msg_class_t H5O_MSG_ATTR[1] = {{
     NULL,		    	/*can share method		*/
     H5O_attr_pre_copy_file,	/* pre copy native value to file */
     H5O_attr_shared_copy_file,	/* copy native value to file    */
-    NULL,			/* post copy native value to file    */
+    H5O_attr_post_copy_file,	/* post copy native value to file    */
     H5O_attr_get_crt_index,	/* get creation index		*/
     H5O_attr_set_crt_index,	/* set creation index		*/
     H5O_attr_shared_debug	/* debug the message            */
@@ -909,27 +911,6 @@ H5O_attr_copy_file(H5F_t *file_src, const H5O_msg_class_t UNUSED *mesg_type,
             if(H5D_vlen_reclaim(tid_mem, buf_space, H5P_DATASET_XFER_DEFAULT, reclaim_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_BADITER, NULL, "unable to reclaim variable-length data")
         }  /* end if */
-        else if((H5T_get_class(attr_src->dt, FALSE) == H5T_REFERENCE) && (file_src != file_dst)) {
-            /* copy object pointed by reference. The current implementation does not deal with
-               nested reference such as reference in a compound structure */
-
-            /* Check for expanding references */
-            if(cpy_info->expand_ref) {
-                size_t ref_count;
-
-                /* Determine # of reference elements to copy */
-                ref_count = attr_dst->data_size / H5T_get_size(attr_dst->dt);
-
-                /* Copy objects referenced in source buffer to destination file and set destination elements */
-                if(H5O_copy_expand_ref(file_src, attr_src->data, dxpl_id,
-                        file_dst, attr_dst->data, ref_count, H5T_get_ref_type(attr_src->dt), cpy_info) < 0)
-                    HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "unable to copy reference attribute")
-
-            } /* end if */
-            else
-                /* Reset value to zero */
-                HDmemset(attr_dst->data, 0, attr_dst->data_size);
-	} /* end if */
         else {
             HDassert(attr_dst->data_size == attr_src->data_size);
             HDmemcpy(attr_dst->data, attr_src->data, attr_src->data_size);
@@ -970,6 +951,71 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O_attr_copy_file() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_attr_post_copy_file
+ *
+ * Purpose:     Finish copying a message from between files.
+ *              We have to copy the values of a reference attribute in the
+ *              post copy because H5O_post_copy_file() fails at the case that
+ *              an object may have a reference attribute that points to the
+ *              object itself.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Peter Cao
+ *              March 6, 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_attr_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc,
+    void *mesg_dst, hid_t dxpl_id, H5O_copy_t *cpy_info)
+{
+    H5A_t  *attr_src = (H5A_t *)mesg_src;
+    H5A_t  *attr_dst = (H5A_t *)mesg_dst;
+    H5F_t  *file_src = src_oloc->file;
+    H5F_t  *file_dst = dst_oloc->file;
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_post_copy_file)
+
+    /* check args */
+    HDassert(attr_src);
+    HDassert(file_src);
+    HDassert(attr_dst);
+    HDassert(file_dst);
+
+    /* only need to fix reference attribute */
+    if ( (NULL == attr_src->data) ||
+         (H5T_get_class(attr_src->dt, FALSE) != H5T_REFERENCE) ||
+         (file_src == file_dst) )
+        HGOTO_DONE(SUCCEED)
+
+    /* copy object pointed by reference. The current implementation does not deal with
+       nested reference such as reference in a compound structure */
+
+    /* Check for expanding references */
+    if(cpy_info->expand_ref) {
+        size_t ref_count;
+
+        /* Determine # of reference elements to copy */
+        ref_count = attr_dst->data_size / H5T_get_size(attr_dst->dt);
+
+        /* Copy objects referenced in source buffer to destination file and set destination elements */
+        if(H5O_copy_expand_ref(file_src, attr_src->data, dxpl_id,
+                file_dst, attr_dst->data, ref_count, H5T_get_ref_type(attr_src->dt), cpy_info) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, FAIL, "unable to copy reference attribute")
+    } /* end if */
+    else
+        /* Reset value to zero */
+        HDmemset(attr_dst->data, 0, attr_dst->data_size);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5O_attr_post_copy_file() */
 
 
 /*-------------------------------------------------------------------------
