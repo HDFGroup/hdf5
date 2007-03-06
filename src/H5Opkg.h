@@ -31,7 +31,7 @@
 #define H5O_NMESGS	8 		/*initial number of messages	     */
 #define H5O_NCHUNKS	2		/*initial number of chunks	     */
 #define H5O_MIN_SIZE	32		/*min obj header data size	     */
-#define H5O_MSG_TYPES   21              /* # of types of messages            */
+#define H5O_MSG_TYPES   22              /* # of types of messages            */
 #define H5O_MAX_CRT_ORDER_IDX 65535     /* Max. creation order index value   */
 
 /* Versions of object header structure */
@@ -259,7 +259,7 @@ struct H5O_t {
     /* Attribute information (stored, for versions > 1) */
     unsigned	max_compact;		/* Maximum # of compact attributes   */
     unsigned	min_dense;		/* Minimum # of "dense" attributes   */
-    hsize_t     nattrs;                 /* Number of attributes in the group */
+    hsize_t     nattrs;                 /* Number of attributes on the object */
     haddr_t     attr_fheap_addr;        /* Address of fractal heap for storing "dense" attributes */
     haddr_t     name_bt2_addr;          /* Address of v2 B-tree for indexing names of attributes */
     haddr_t     corder_bt2_addr;        /* Address of v2 B-tree for indexing creation order of attributes */
@@ -434,6 +434,9 @@ H5_DLLVAR const H5O_msg_class_t H5O_MSG_BTREEK[1];
  * the file driver settings
  */
 H5_DLLVAR const H5O_msg_class_t H5O_MSG_DRVINFO[1];
+
+/* Attribute Information Message. (0x0015) */
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_AINFO[1];
 
 
 /*

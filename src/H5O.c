@@ -79,11 +79,11 @@ static herr_t H5O_obj_type_real(H5O_t *oh, H5O_type_t *obj_type);
 /* Header message ID to class mapping */
 const H5O_msg_class_t *const H5O_msg_class_g[] = {
     H5O_MSG_NULL,		/*0x0000 Null				*/
-    H5O_MSG_SDSPACE,		/*0x0001 Simple Dimensionality		*/
+    H5O_MSG_SDSPACE,		/*0x0001 Dataspace			*/
     H5O_MSG_LINFO,		/*0x0002 Link information		*/
-    H5O_MSG_DTYPE,		/*0x0003 Data Type			*/
+    H5O_MSG_DTYPE,		/*0x0003 Datatype			*/
     H5O_MSG_FILL,       	/*0x0004 Old data storage -- fill value */
-    H5O_MSG_FILL_NEW,		/*0x0005 New Data storage -- fill value */
+    H5O_MSG_FILL_NEW,		/*0x0005 New data storage -- fill value */
     H5O_MSG_LINK,		/*0x0006 Link 				*/
     H5O_MSG_EFL,		/*0x0007 Data storage -- external data files */
     H5O_MSG_LAYOUT,		/*0x0008 Data Layout			*/
@@ -92,7 +92,7 @@ const H5O_msg_class_t *const H5O_msg_class_g[] = {
 #else /* H5O_ENABLE_BOGUS */
     NULL,			/*0x0009 "Bogus" (for testing)		*/
 #endif /* H5O_ENABLE_BOGUS */
-    H5O_MSG_GINFO,		/*0x000A Group Information		*/
+    H5O_MSG_GINFO,		/*0x000A Group information		*/
     H5O_MSG_PLINE,		/*0x000B Data storage -- filter pipeline */
     H5O_MSG_ATTR,		/*0x000C Attribute list			*/
     H5O_MSG_NAME,		/*0x000D Object name			*/
@@ -103,6 +103,7 @@ const H5O_msg_class_t *const H5O_msg_class_g[] = {
     H5O_MSG_MTIME_NEW,		/*0x0012 New Object modification date and time */
     H5O_MSG_BTREEK,		/*0x0013 Non-default v1 B-tree 'K' values */
     H5O_MSG_DRVINFO,		/*0x0014 Driver info settings		*/
+    H5O_MSG_AINFO,		/*0x0015 Attribute information	*/
 };
 
 /* Header object ID to class mapping */

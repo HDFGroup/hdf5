@@ -1,4 +1,4 @@
-/* * * * * * * * * * * * * * * * * * * * * * *fs * * * * * * * * * * * * * * * *
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
  * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
@@ -114,8 +114,8 @@ typedef struct H5O_copy_t {
 
 /* Header message IDs */
 #define H5O_NULL_ID	0x0000          /* Null Message.  */
-#define H5O_SDSPACE_ID	0x0001          /* Simple Dataspace Message.  */
-#define H5O_LINFO_ID    0x0002          /* Link Info Message. */
+#define H5O_SDSPACE_ID	0x0001          /* Dataspace Message. */
+#define H5O_LINFO_ID    0x0002          /* Link info Message. */
 #define H5O_DTYPE_ID	0x0003          /* Datatype Message.  */
 #define H5O_FILL_ID     0x0004          /* Fill Value Message. (Old)  */
 #define H5O_FILL_NEW_ID 0x0005          /* Fill Value Message. (New)  */
@@ -123,7 +123,7 @@ typedef struct H5O_copy_t {
 #define H5O_EFL_ID	0x0007          /* External File List Message  */
 #define H5O_LAYOUT_ID	0x0008          /* Data Storage Layout Message.  */
 #define H5O_BOGUS_ID	0x0009          /* "Bogus" Message.  */
-#define H5O_GINFO_ID	0x000a          /* Group Info Message.  */
+#define H5O_GINFO_ID	0x000a          /* Group info Message.  */
 #define H5O_PLINE_ID	0x000b          /* Filter pipeline message.  */
 #define H5O_ATTR_ID	0x000c          /* Attribute Message.  */
 #define H5O_NAME_ID	0x000d          /* Object name message.  */
@@ -134,6 +134,7 @@ typedef struct H5O_copy_t {
 #define H5O_MTIME_NEW_ID 0x0012         /* Modification time message. (New)  */
 #define H5O_BTREEK_ID   0x0013          /* v1 B-tree 'K' values message.  */
 #define H5O_DRVINFO_ID  0x0014          /* Driver info message.  */
+#define H5O_AINFO_ID    0x0015          /* Attribute info message.  */
 
 
 /* Shared object message flags.
@@ -406,6 +407,23 @@ typedef struct H5O_drvinfo_t {
     size_t		len;                    /* Length of encoded buffer */
     uint8_t            *buf;                    /* Buffer for encoded info */
 } H5O_drvinfo_t;
+
+/*
+ * Attribute Info Message.
+ * (Contains dynamic information about attributes on an object)
+ * (Data structure in memory)
+ */
+typedef struct H5O_ainfo_t {
+    /* (creation order info) */
+    hbool_t     index_corder;           /* Are creation order values indexed on attributes? */
+    H5O_msg_crt_idx_t max_crt_idx;      /* Maximum attribute creation index used */
+    haddr_t     corder_bt2_addr;        /* Address of v2 B-tree for indexing creation order values of "dense" attributes */
+
+    /* (storage management info) */
+    hsize_t     nattrs;                 /* Number of attributes on the object */
+    haddr_t     fheap_addr;             /* Address of fractal heap for storing "dense" attributes */
+    haddr_t     name_bt2_addr;          /* Address of v2 B-tree for indexing names of "dense" attributes */
+} H5O_ainfo_t;
 
 
 /* Typedef for iteration operations */

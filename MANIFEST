@@ -582,6 +582,7 @@
 ./src/H5MPprivate.h
 ./src/H5MPtest.c
 ./src/H5O.c
+./src/H5Oainfo.c
 ./src/H5Oalloc.c
 ./src/H5Oattr.c
 ./src/H5Oattribute.c

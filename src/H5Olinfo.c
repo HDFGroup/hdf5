@@ -77,8 +77,9 @@ const H5O_msg_class_t H5O_MSG_LINFO[1] = {{
 #define H5O_LINFO_VERSION 	0
 
 /* Flags for link info index flag encoding */
-#define H5O_LINFO_INDEX_NAME          0x01
-#define H5O_LINFO_INDEX_CORDER        0x02
+#define H5O_LINFO_INDEX_NAME            0x01
+#define H5O_LINFO_INDEX_CORDER          0x02
+#define H5O_LINFO_ALL_FLAGS             (H5O_LINFO_INDEX_NAME | H5O_LINFO_INDEX_CORDER)
 
 /* Data exchange structure to use when copying links from src to dst */
 typedef struct {
@@ -89,18 +90,16 @@ typedef struct {
     H5O_copy_t  *cpy_info;              /* Information for copy operation */
 } H5O_linfo_postcopy_ud_t;
 
-/* Declare a free list to manage the hsize_t struct */
+/* Declare a free list to manage the H5O_linfo_t struct */
 H5FL_DEFINE_STATIC(H5O_linfo_t);
 
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_linfo_decode
  *
- * Purpose:     Decode a message and return a pointer to
- *              a newly allocated one.
+ * Purpose:     Decode a message and return a pointer to a newly allocated one.
  *
- * Return:      Success:        Ptr to new message in native order.
- *
+ * Return:      Success:        Ptr to new message in native form.
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
@@ -113,8 +112,8 @@ static void *
 H5O_linfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
     const uint8_t *p)
 {
-    unsigned char index_flags;  /* Flags for encoding link index info */
     H5O_linfo_t	*linfo = NULL;  /* Link info */
+    unsigned char index_flags;  /* Flags for encoding link index info */
     void        *ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_linfo_decode)
@@ -134,6 +133,8 @@ H5O_linfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
     /* Get the index flags for the group */
     index_flags = *p++;
     HDassert(index_flags & H5O_LINFO_INDEX_NAME);
+    if(index_flags & ~H5O_LINFO_ALL_FLAGS)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad flag value for message")
     linfo->index_corder = (index_flags & H5O_LINFO_INDEX_CORDER) ? TRUE : FALSE;
 
     /* Number of links in the group */
@@ -231,7 +232,6 @@ H5O_linfo_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void
  *              necessary.
  *
  * Return:      Success:        Ptr to _DEST
- *
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
@@ -273,7 +273,6 @@ done:
  *              This function doesn't take into account alignment.
  *
  * Return:      Success:        Message data size in bytes without alignment.
- *
  *              Failure:        zero
  *
  * Programmer:  Quincey Koziol
