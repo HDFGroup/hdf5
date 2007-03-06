@@ -255,7 +255,7 @@ H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
         } /* end if */
     } /* end if */
 
-    /* Increment attribute count */
+    /* Increment attribute count on object */
     oh->nattrs++;
 
     /* Later versions of the object header track the creation index on all messages */

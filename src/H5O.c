@@ -645,7 +645,7 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
     /* Make certain we allocate at least a reasonable size for the object header */
     size_hint = H5O_ALIGN_F(f, MAX(H5O_MIN_SIZE, size_hint));
 
-    /* Allocate the object header and fill in header fields */
+    /* Allocate the object header and zero out header fields */
     if(NULL == (oh = H5FL_CALLOC(H5O_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
@@ -662,28 +662,30 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
         if(NULL == (oc_plist = H5I_object(ocpl_id)))
             HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a property list")
 
-        /* Initialize attribute tracking fields */
-
-        /* Retrieve phase change values from property list */
-        if(H5P_get(oc_plist, H5O_CRT_ATTR_MAX_COMPACT_NAME, &oh->max_compact) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get max. # of compact attributes")
-        if(H5P_get(oc_plist, H5O_CRT_ATTR_MIN_DENSE_NAME, &oh->min_dense) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get min. # of dense attributes")
-
-        /* Get object header flags */
+        /* Get any object header status flags set by properties */
         if(H5P_get(oc_plist, H5O_CRT_OHDR_FLAGS_NAME, &oh->flags) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object header flags")
 
-        /* Initialize all time fields with current time */
+        /* Initialize all time fields with current time, if we are storing them */
         if(oh->flags & H5O_HDR_STORE_TIMES)
             oh->atime = oh->mtime = oh->ctime = oh->btime = H5_now();
         else
             oh->atime = oh->mtime = oh->ctime = oh->btime = 0;
 
-        /* Set starting values for attribute info */
+        /* Initialize attribute tracking fields */
+
+        /* Retrieve attribute storage phase change values from property list */
+        if(H5P_get(oc_plist, H5O_CRT_ATTR_MAX_COMPACT_NAME, &oh->max_compact) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get max. # of compact attributes")
+        if(H5P_get(oc_plist, H5O_CRT_ATTR_MIN_DENSE_NAME, &oh->min_dense) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get min. # of dense attributes")
+
+        /* Set starting values for dense attribute storage info */
         oh->attr_fheap_addr = HADDR_UNDEF;
         oh->name_bt2_addr = HADDR_UNDEF;
         oh->corder_bt2_addr = HADDR_UNDEF;
+
+        /* Check for non-default attribute storage phase change values */
     } /* end if */
     else {
         /* Flags */
@@ -732,7 +734,7 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
     if(NULL == (oh->mesg = H5FL_SEQ_CALLOC(H5O_mesg_t, oh->alloc_nmesgs)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
-    /* Initialize the first message */
+    /* Initialize the initial "null" message, covering the entire first chunk */
     oh->mesg[0].type = H5O_MSG_NULL;
     oh->mesg[0].dirty = TRUE;
     oh->mesg[0].native = NULL;
@@ -1916,7 +1918,7 @@ H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id)
 	if(H5O_ATTR_ID == curr_msg->type->id)
             oinfo->num_attrs++;
 
-        /* Accumulate information, based on the type of message */
+        /* Accumulate space usage information, based on the type of message */
 	if(H5O_NULL_ID == curr_msg->type->id)
             oinfo->hdr.space.free += H5O_SIZEOF_MSGHDR_OH(oh) + curr_msg->raw_size;
         else if(H5O_CONT_ID == curr_msg->type->id)
