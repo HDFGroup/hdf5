@@ -686,6 +686,8 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
         oh->corder_bt2_addr = HADDR_UNDEF;
 
         /* Check for non-default attribute storage phase change values */
+        if(oh->max_compact != H5O_CRT_ATTR_MAX_COMPACT_DEF || oh->min_dense != H5O_CRT_ATTR_MIN_DENSE_DEF)
+            oh->flags |= H5O_HDR_ATTR_STORE_PHASE_CHANGE;
     } /* end if */
     else {
         /* Flags */

@@ -49,7 +49,7 @@
 #define H5O_SPEC_READ_SIZE 512
 
 /* All the object header status flags that this version of the library knows about */
-#define H5O_HDR_ALL_FLAGS       (H5O_HDR_ATTR_CRT_ORDER_TRACKED | H5O_HDR_ATTR_CRT_ORDER_INDEXED | H5O_HDR_STORE_TIMES)
+#define H5O_HDR_ALL_FLAGS       (H5O_HDR_ATTR_CRT_ORDER_TRACKED | H5O_HDR_ATTR_CRT_ORDER_INDEXED | H5O_HDR_ATTR_STORE_PHASE_CHANGE | H5O_HDR_STORE_TIMES)
 
 
 /******************/
@@ -314,8 +314,14 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
             oh->atime = oh->mtime = oh->ctime = oh->btime = 0;
 
         /* Attribute fields */
-        UINT16DECODE(p, oh->max_compact);
-        UINT16DECODE(p, oh->min_dense);
+        if(oh->flags & H5O_HDR_ATTR_STORE_PHASE_CHANGE) {
+            UINT16DECODE(p, oh->max_compact);
+            UINT16DECODE(p, oh->min_dense);
+        } /* end if */
+        else {
+            oh->max_compact = H5O_CRT_ATTR_MAX_COMPACT_DEF;
+            oh->min_dense = H5O_CRT_ATTR_MIN_DENSE_DEF;
+        } /* end else */
         H5F_DECODE_LENGTH(f, p, oh->nattrs);
         H5F_addr_decode(f, &p, &(oh->attr_fheap_addr));
         H5F_addr_decode(f, &p, &(oh->name_bt2_addr));
@@ -661,8 +667,10 @@ H5O_assert(oh);
             } /* end if */
 
             /* Attribute fields */
-            UINT16ENCODE(p, oh->max_compact);
-            UINT16ENCODE(p, oh->min_dense);
+            if(oh->flags & H5O_HDR_ATTR_STORE_PHASE_CHANGE) {
+                UINT16ENCODE(p, oh->max_compact);
+                UINT16ENCODE(p, oh->min_dense);
+            } /* end if */
             H5F_ENCODE_LENGTH(f, p, oh->nattrs);
             H5F_addr_encode(f, &p, oh->attr_fheap_addr);
             H5F_addr_encode(f, &p, oh->name_bt2_addr);

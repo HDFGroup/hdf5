@@ -48,10 +48,8 @@
 /* ========= Object Creation properties ============ */
 /* Definitions for the max. # of attributes to store compactly */
 #define H5O_CRT_ATTR_MAX_COMPACT_SIZE   sizeof(unsigned)
-#define H5O_CRT_ATTR_MAX_COMPACT_DEF    8
 /* Definitions for the min. # of attributes to store densely */
 #define H5O_CRT_ATTR_MIN_DENSE_SIZE     sizeof(unsigned)
-#define H5O_CRT_ATTR_MIN_DENSE_DEF      6
 /* Definitions for object header flags */
 #define H5O_CRT_OHDR_FLAGS_SIZE         sizeof(uint8_t)
 

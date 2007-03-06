@@ -78,7 +78,15 @@
 /* Size of checksum (on disk) */
 #define H5O_SIZEOF_CHKSUM               4
 
-/* Default value for object header status flags */
+/* ========= Object Creation properties ============ */
+/* Default values for some of the object creation properties */
+/* NOTE: The H5O_CRT_ATTR_MAX_COMPACT_DEF & H5O_CRT_ATTR_MIN_DENSE_DEF values
+ *      are "built into" the file format, make certain existing files with
+ *      default attribute phase change storage are handled correctly if they
+ *      are changed.
+ */
+#define H5O_CRT_ATTR_MAX_COMPACT_DEF    8
+#define H5O_CRT_ATTR_MIN_DENSE_DEF      6
 #define H5O_CRT_OHDR_FLAGS_DEF          H5O_HDR_STORE_TIMES
 
 /*
@@ -104,8 +112,10 @@
                   4 +		/*change time		*/		      \
                   4		/*birth time		*/		      \
                 ) : 0) +						      \
-                2 +		/*max compact attributes */		      \
-                2 +		/*min dense attributes	*/		      \
+                (((O)->flags & H5O_HDR_ATTR_STORE_PHASE_CHANGE) ? (	      \
+                  2 +		/*max compact attributes */		      \
+                  2		/*min dense attributes	*/		      \
+                ) : 0) +						      \
                 (O)->sizeof_size + /*# of attributes	*/		      \
                 (O)->sizeof_addr + /*addr of attribute heap */		      \
                 (O)->sizeof_addr + /*addr of attribute name index */	      \

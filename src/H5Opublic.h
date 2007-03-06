@@ -63,7 +63,8 @@
 /* Object header status flag definitions */
 #define H5O_HDR_ATTR_CRT_ORDER_TRACKED  0x01    /* Attribute creation order is tracked */
 #define H5O_HDR_ATTR_CRT_ORDER_INDEXED  0x02    /* Attribute creation order has index */
-#define H5O_HDR_STORE_TIMES             0x04    /* Store access, modification, change & birth times for object */
+#define H5O_HDR_ATTR_STORE_PHASE_CHANGE 0x04    /* Non-default attribute storage phase change values stored */
+#define H5O_HDR_STORE_TIMES             0x08    /* Store access, modification, change & birth times for object */
 
 /* Maximum shared message values.  Number of indexes is 8 to allow room to add
  * new types of messages.
