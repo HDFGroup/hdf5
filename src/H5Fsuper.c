@@ -613,8 +613,8 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
             H5O_msg_reset(H5O_DRVINFO_ID, &drvinfo);
         } /* end else */
 
-        /* Close the extension.  Bump the version number to avoid closing the
-         * file (since this will be the only open object).
+        /* Close the extension.  Twiddle the number of open objects to avoid
+         * closing the file (since this will be the only open object).
          */
         f->nopen_objs++;
         if(H5O_close(&ext_loc) < 0)

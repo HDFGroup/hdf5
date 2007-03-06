@@ -972,27 +972,6 @@ done:
  *		matzke@llnl.gov
  *		Jul 18 1997
  *
- * Modifications:
- *
- * 	Robb Matzke, 1998-10-14
- *	Nothing happens unless the reference count for the H5F_t goes to
- *	zero.  The reference counts are decremented here.
- *
- * 	Robb Matzke, 1999-02-19
- *	More careful about decrementing reference counts so they don't go
- *	negative or wrap around to some huge value.  Nothing happens if a
- *	reference count is already zero.
- *
- *      Robb Matzke, 2000-10-31
- *      H5FL_FREE() aborts if called with a null pointer (unlike the
- *      original H5MM_free()).
- *
- *      Pedro Vicente, <pvn@ncsa.uiuc.edu> 18 Sep 2002
- *      Added `id to name' support.
- *
- *      James Laird, 2007-1-29
- *      H5F_dest now frees superblock extension oloc.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1004,6 +983,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
 
     /* Sanity check */
     HDassert(f);
+    HDassert(f->shared);
 
     if(1 == f->shared->nrefs) {
         /* Flush at this point since the file will be closed */
@@ -1085,6 +1065,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
     f->mtab.nalloc = 0;
     if(H5FO_top_dest(f) < 0)
         HDONE_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "problems closing file")
+    f->shared = NULL;
     H5FL_FREE(H5F_t, f);
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1566,9 +1547,8 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     new_file->file_id = ret_value;
 
 done:
-    if(ret_value < 0 && new_file)
-        if(H5F_close(new_file) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
+    if(ret_value < 0 && new_file && H5F_try_close(new_file) < 0)
+        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fopen() */
@@ -1673,50 +1653,6 @@ done:
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
  *		Aug 29 1997
- *
- * Modifications:
- *              rky 1998-08-28
- *		Only p0 writes metadata to disk.
- *
- * 		Robb Matzke, 1998-10-16
- *		Added the `scope' argument to indicate what should be
- *		flushed. If the value is H5F_SCOPE_GLOBAL then the entire
- *		virtual file is flushed; a value of H5F_SCOPE_LOCAL means
- *		that only the specified file is flushed.  A value of
- *		H5F_SCOPE_DOWN means flush the specified file and all
- *		children.
- *
- * 		Robb Matzke, 1999-08-02
- *		If ALLOC_ONLY is non-zero then all this function does is
- *		allocate space for the userblock and superblock. Also
- *		rewritten to use the virtual file layer.
- *
- * 		Robb Matzke, 1999-08-16
- *		The driver information block is encoded and either allocated
- *		or written to disk.
- *
- *		Raymond Lu, 2001-10-14
- *              Changed to new generic property list.
- *
- *		Quincey Koziol, 2002-05-20
- *              Added 'closing' parameter
- *
- *		Quincey Koziol, 2002-06-05
- *              Added boot block & driver info block checksumming, to avoid
- *              writing them out when they haven't changed.
- *
- *		Quincey Koziol, 2002-06-06
- *              Return the remainders of the metadata & "small data" blocks to
- *              the free list of blocks for the file.
- *
- *              Bill Wendling, 2003-03-18
- *              Modified the flags being passed in to be one flag instead
- *              of several.
- *
- *		John Mainzer, 2005-01-07
- *		H5AC (and H5C) now have their own system of flags.  Hence
- *		we must now translate between the H5F_FLUSH flags and the
- *		H5AC flags.  Added code to handle this detail.
  *
  *-------------------------------------------------------------------------
  */
@@ -1835,19 +1771,6 @@ done:
  * Programmer:	Robb Matzke
  *		Tuesday, September 23, 1997
  *
- * Modifications:
- * 		Robb Matzke, 1998-10-14
- *		Nothing happens unless the H5F_t reference count is one (the
- *		file is flushed anyway).  The reference count is decremented
- *		by H5F_dest().
- *
- * 		Robb Matzke, 1999-08-02
- *		Modified to use the virtual file layer.
- *
- *		Bill Wendling, 2003-03-18
- *		Modified H5F_flush call to take one flag instead of
- *		several Boolean flags.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1919,6 +1842,7 @@ H5F_try_close(H5F_t *f)
 
     /* Sanity check */
     HDassert(f);
+    HDassert(f->shared);
 
     /* Check if this file is already in the process of closing */
     if(f->closing)
@@ -2900,6 +2824,88 @@ H5F_use_latest_format(const H5F_t *f)
 
     FUNC_LEAVE_NOAPI(f->shared->latest_format)
 } /* end H5F_use_latest_format() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_fc_degree
+ *
+ * Purpose:	Retrieve the 'file close degree' for the file.
+ *
+ * Return:	Success:	Non-negative, the 'file close degree'
+ *
+ * 		Failure:	(can't happen)
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Mar  5 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+H5F_close_degree_t
+H5F_get_fc_degree(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_fc_degree)
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->fc_degree)
+} /* end H5F_get_fc_degree() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_incr_nopen_objs
+ *
+ * Purpose:	Increment the number of open objects for a file.
+ *
+ * Return:	Success:	The number of open objects, after the increment
+ *
+ * 		Failure:	(can't happen)
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Mar  6 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+unsigned
+H5F_incr_nopen_objs(H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_incr_nopen_objs)
+
+    HDassert(f);
+
+    FUNC_LEAVE_NOAPI(++f->nopen_objs)
+} /* end H5F_incr_nopen_objs() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_decr_nopen_objs
+ *
+ * Purpose:	Decrement the number of open objects for a file.
+ *
+ * Return:	Success:	The number of open objects, after the decrement
+ *
+ * 		Failure:	(can't happen)
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Mar  6 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+unsigned
+H5F_decr_nopen_objs(H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_decr_nopen_objs)
+
+    HDassert(f);
+
+    FUNC_LEAVE_NOAPI(--f->nopen_objs)
+} /* end H5F_decr_nopen_objs() */
 
 
 /*-------------------------------------------------------------------------

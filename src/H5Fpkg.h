@@ -162,7 +162,6 @@ H5FL_EXTERN(H5F_file_t);
 
 /* General routines */
 H5_DLL herr_t H5F_init(void);
-H5_DLL herr_t H5F_try_close(H5F_t *f);
 H5_DLL haddr_t H5F_locate_signature(H5FD_t *file, hid_t dxpl_id);
 
 /* File mount related routines */

@@ -533,6 +533,7 @@ H5_DLL H5RS_str_t *H5G_build_fullpath_refstr_str(H5RS_str_t *path_r, const char 
 /*
  * These functions operate on group "locations"
  */
+H5_DLL herr_t H5G_loc_root(H5F_t *f, H5G_loc_t *loc);
 H5_DLL herr_t H5G_loc_copy(H5G_loc_t *dst, const H5G_loc_t *src, H5_copy_depth_t depth);
 H5_DLL herr_t H5G_loc_insert(H5G_loc_t *grp_loc, const char *name,
     H5G_loc_t *obj_loc, hid_t dxpl_id);

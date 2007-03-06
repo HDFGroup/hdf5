@@ -255,7 +255,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_RDCC_NBYTES(F)      ((F)->shared->rdcc_nbytes)
 #define H5F_RDCC_W0(F)          ((F)->shared->rdcc_w0)
 /* Check for file driver feature enabled */
-#define H5F_HAS_FEATURE(F,FL)   ((F)->shared->lf->feature_flags&(FL))
+#define H5F_HAS_FEATURE(F,FL)   ((F)->shared->lf->feature_flags & (FL))
 /* B-tree node raw page */
 #define H5F_GRP_BTREE_SHARED(F) ((F)->shared->grp_btree_shared)
 /* Base address of file */
@@ -265,6 +265,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_GC_REF(F)           ((F)->shared->gc_ref)
 #define H5F_USE_LATEST_FORMAT(F) ((F)->shared->latest_format)
 #define H5F_INTENT(F)           ((F)->intent)
+#define H5F_GET_FC_DEGREE(F)    ((F)->shared->fc_degree)
 #else /* H5F_PACKAGE */
 #define H5F_FCPL(F)             (H5F_get_fcpl(F))
 #define H5F_SIZEOF_ADDR(F)      (H5F_sizeof_addr(F))
@@ -281,6 +282,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_GC_REF(F)           (H5F_gc_ref(F))
 #define H5F_USE_LATEST_FORMAT(F) (H5F_use_latest_format(F))
 #define H5F_INTENT(F)           (H5F_get_intent(F))
+#define H5F_GET_FC_DEGREE(F)    (H5F_get_fc_degree(F))
 #endif /* H5F_PACKAGE */
 
 
@@ -405,6 +407,7 @@ struct H5RC_t;
 /* Private functions */
 H5_DLL H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id,
     hid_t fapl_id, hid_t dxpl_id);
+H5_DLL herr_t H5F_try_close(H5F_t *f);
 
 /* Functions than retrieve values from the file struct */
 H5_DLL hid_t H5F_get_driver_id(const H5F_t *f);
@@ -421,6 +424,8 @@ H5_DLL int H5F_mpi_get_rank(const H5F_t *f);
 H5_DLL MPI_Comm H5F_mpi_get_comm(const H5F_t *f);
 H5_DLL int H5F_mpi_get_size(const H5F_t *f);
 #endif /* H5_HAVE_PARALLEL */
+H5_DLL unsigned H5F_incr_nopen_objs(H5F_t *f);
+H5_DLL unsigned H5F_decr_nopen_objs(H5F_t *f);
 
 /* Functions than check file mounting information */
 H5_DLL hbool_t H5F_is_mount(const H5F_t *file);
@@ -440,6 +445,7 @@ H5_DLL struct H5RC_t *H5F_grp_btree_shared(const H5F_t *f);
 H5_DLL size_t H5F_sieve_buf_size(const H5F_t *f);
 H5_DLL unsigned H5F_gc_ref(const H5F_t *f);
 H5_DLL hbool_t H5F_use_latest_format(const H5F_t *f);
+H5_DLL H5F_close_degree_t H5F_get_fc_degree(const H5F_t *f);
 
 /* Functions that operate on blocks of bytes wrt super block */
 H5_DLL herr_t H5F_block_read(const H5F_t *f, H5FD_mem_t type, haddr_t addr,

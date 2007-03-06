@@ -2077,15 +2077,11 @@ H5I_get_file_id(hid_t obj_id)
         if(H5I_inc_ref(ret_value) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
     }
-    else if(type == H5I_DATATYPE) {
+    else if(type == H5I_DATATYPE || type == H5I_GROUP || type == H5I_DATASET || type == H5I_ATTR) {
         if(H5G_loc(obj_id, &loc) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "not a named datatype")
-        ret_value = H5F_get_id(loc.oloc->file);
-    }
-    else if(type == H5I_GROUP || type == H5I_DATASET || type == H5I_ATTR) {
-        if(H5G_loc(obj_id, &loc) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get symbol table info")
-        ret_value = H5F_get_id(loc.oloc->file);
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get object location")
+        if((ret_value = H5F_get_id(loc.oloc->file)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get file ID")
     }
     else
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid object ID")

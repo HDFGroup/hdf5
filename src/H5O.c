@@ -195,10 +195,6 @@ hid_t
 H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
 {
     H5G_loc_t	loc;
-    H5G_loc_t   obj_loc;                /* Location used to open group */
-    H5G_name_t  obj_path;            	/* Opened object group hier. path */
-    H5O_loc_t   obj_oloc;            	/* Opened object object location */
-    hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
     hid_t       ret_value = FAIL;
 
     FUNC_ENTER_API(H5Oopen, FAIL)
@@ -210,25 +206,11 @@ H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
-    /* Set up opened group location to fill in */
-    obj_loc.oloc = &obj_oloc;
-    obj_loc.path = &obj_path;
-    H5G_loc_reset(&obj_loc);
-
-    /* Find the object's location */
-    if(H5G_loc_find(&loc, name, &obj_loc/*out*/, lapl_id, H5AC_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
-    loc_found = TRUE;
-
     /* Open the object */
-    if((ret_value = H5O_open_by_loc(&obj_loc, H5AC_dxpl_id)) < 0)
+    if((ret_value = H5O_open_name(&loc, name, lapl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
 done:
-    if(ret_value < 0 && loc_found)
-        if(H5G_loc_free(&obj_loc) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oopen() */
 
@@ -814,6 +796,57 @@ H5O_open(const H5O_loc_t *loc)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_open_name
+ *
+ * Purpose:	Opens an object within an HDF5 file.
+ *
+ * Return:	Success:	An open object identifier
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		March  5 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5O_open_name(H5G_loc_t *loc, const char *name, hid_t lapl_id)
+{
+    H5G_loc_t   obj_loc;                /* Location used to open group */
+    H5G_name_t  obj_path;            	/* Opened object group hier. path */
+    H5O_loc_t   obj_oloc;            	/* Opened object object location */
+    hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
+    hid_t       ret_value = FAIL;
+
+    FUNC_ENTER_NOAPI(H5O_open_name, FAIL)
+
+    /* Check args */
+    HDassert(loc);
+    HDassert(name && *name);
+
+    /* Set up opened group location to fill in */
+    obj_loc.oloc = &obj_oloc;
+    obj_loc.path = &obj_path;
+    H5G_loc_reset(&obj_loc);
+
+    /* Find the object's location */
+    if(H5G_loc_find(loc, name, &obj_loc/*out*/, lapl_id, H5AC_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+    loc_found = TRUE;
+
+    /* Open the object */
+    if((ret_value = H5O_open_by_loc(&obj_loc, H5AC_dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
+
+done:
+    if(ret_value < 0 && loc_found)
+        if(H5G_loc_free(&obj_loc) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_open_name() */
 
 
 /*-------------------------------------------------------------------------

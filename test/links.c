@@ -2367,7 +2367,7 @@ external_link_toomany(hid_t fapl, hbool_t new_format)
     } H5E_END_TRY;
     if (gid >= 0) {
 	H5_FAILED();
-	puts("    Should have failed for sequence of too many nested links.");
+	printf("%d:    Should have failed for sequence of too many nested links.", __LINE__);
 	goto error;
     }
 
@@ -3531,7 +3531,7 @@ error:
     return -1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    ext_link_endian
  *
@@ -3621,6 +3621,90 @@ error:
     } H5E_END_TRY;
     return -1;
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:    external_link_strong
+ *
+ * Purpose:     Check that external links work properly when they opened in
+ *              a file with "strong" file close degree.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Monday, March 5, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+external_link_strong(hid_t fapl, hbool_t new_format)
+{
+    hid_t       my_fapl;                        /* File access property list */
+    hid_t       fid1 = (-1), fid2 = (-1);       /* File ID */
+    hid_t       gid1 = (-1), gid2 = (-1);       /* Group IDs */
+    char        objname[NAME_BUF_SIZE];         /* Object name */
+    ssize_t     name_len;                       /* Length of object name */
+    char	filename1[NAME_BUF_SIZE],
+                filename2[NAME_BUF_SIZE];
+
+    if(new_format)
+        TESTING("that external files work with strong file close degree (w/new group format)")
+    else
+        TESTING("that external files work with strong file close degree")
+
+    /* Set up filenames */
+    h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
+    h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
+
+    /* Copy file access property list */
+    if((my_fapl = H5Pcopy(fapl)) < 0) TEST_ERROR
+
+    /* Set strong file close degree */
+    if(H5Pset_fclose_degree(my_fapl, H5F_CLOSE_STRONG) < 0) TEST_ERROR
+
+    /* Create a group at /A/B/C in first file */
+    if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0) TEST_ERROR
+    if((gid1 = H5Gcreate(fid1, "A", (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(gid1) < 0) TEST_ERROR
+    if((gid1 = H5Gcreate(fid1, "A/B", (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(gid1) < 0) TEST_ERROR
+    if((gid1 = H5Gcreate(fid1, "A/B/C", (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(gid1) < 0) TEST_ERROR
+    if(H5Fclose(fid1) < 0) TEST_ERROR
+
+    /* Create an external link /W/X/DLINK in second file to <filename1>:/A/B/C */
+    if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((gid2 = H5Gcreate(fid2, "/W", (size_t)0)) < 0) TEST_ERROR
+    if(H5Gclose(gid2) < 0) TEST_ERROR
+    if((gid2 = H5Gcreate(fid2, "/W/X", (size_t)0)) < 0) TEST_ERROR
+    if(H5Lcreate_external(filename1, "/A/B/C", gid2, "DLINK", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gclose(gid2) < 0) TEST_ERROR
+    if(H5Fclose(fid2) < 0) TEST_ERROR
+
+    /* Access external link from file #1 */
+    if((fid2 = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((gid2 = H5Gopen(fid2, "/W/X/DLINK")) < 0) TEST_ERROR
+    if((name_len = H5Iget_name(gid2, objname, (size_t)NAME_BUF_SIZE )) < 0) TEST_ERROR
+    if(HDstrcmp(objname, "/A/B/C")) TEST_ERROR
+    if(H5Gclose(gid2) < 0) TEST_ERROR
+    if(H5Fclose(fid2) < 0) TEST_ERROR
+
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Gclose(fapl);
+        H5Gclose(gid2);
+        H5Gclose(gid1);
+        H5Fclose(fid2);
+        H5Fclose(fid1);
+    } H5E_END_TRY;
+    return -1;
+} /* end external_link_strong() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    ud_hard_links
@@ -9552,6 +9636,7 @@ main(void)
             nerrors += external_link_closing((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
 #endif /* H5_CANNOT_OPEN_TWICE */
             nerrors += external_link_endian((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
+            nerrors += external_link_strong((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
 
             /* These tests assume that external links are a form of UD links,
              * so assume that everything that passed for external links

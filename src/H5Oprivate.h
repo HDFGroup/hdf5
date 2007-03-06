@@ -435,6 +435,7 @@ H5_DLL herr_t H5O_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 H5_DLL herr_t H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id);
 H5_DLL herr_t H5O_obj_type(const H5O_loc_t *loc, H5O_type_t *obj_type, hid_t dxpl_id);
 H5_DLL herr_t H5O_get_create_plist(const H5O_loc_t *loc, hid_t dxpl_id, struct H5P_genplist_t *oc_plist);
+H5_DLL hid_t H5O_open_name(H5G_loc_t *loc, const char *name, hid_t lapl_id);
 
 /* Object header message routines */
 H5_DLL herr_t H5O_msg_create(const H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags,

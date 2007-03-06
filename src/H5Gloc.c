@@ -133,23 +133,13 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
             {
                 H5F_t	*f;
 
+                /* Get the file struct */
                 if(NULL == (f = H5I_object(loc_id)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file ID")
-                if(NULL == (loc->oloc = H5G_oloc(H5G_rootof(f))))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location for root group")
-                if(NULL == (loc->path = H5G_nameof(H5G_rootof(f))))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path for root group")
 
-                /* Patch up root group's object location to reflect this file */
-                /* (Since the root group info is only stored once for files which
-                 *  share an underlying low-level file)
-                 */
-                /* (but only for non-mounted files) */
-                if(!H5F_is_mount(f))
-                {
-                    loc->oloc->file = f;
-                    loc->oloc->holding_file = FALSE;
-                }
+                /* Construct a group location for root group of the file */
+                if(H5G_loc_root(f, loc) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unable to create location for file")
             } /* end case */
             break;
 
@@ -227,6 +217,56 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_loc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_loc_root
+ *
+ * Purpose:	Construct a "group location" for the root group of a file
+ *
+ * Return:	Success:	Non-negative
+ * 		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Mar  5 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_loc_root(H5F_t *f, H5G_loc_t *loc)
+{
+    H5G_t *root_grp;                    /* Pointer to root group's info */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_loc_root, FAIL)
+
+    HDassert(f);
+    HDassert(loc);
+
+    /* Retrieve the root group for the file */
+    root_grp = H5G_rootof(f);
+    HDassert(root_grp);
+
+    /* Build the group location for the root group */
+    if(NULL == (loc->oloc = H5G_oloc(root_grp)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location for root group")
+    if(NULL == (loc->path = H5G_nameof(root_grp)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path for root group")
+
+    /* Patch up root group's object location to reflect this file */
+    /* (Since the root group info is only stored once for files which
+     *  share an underlying low-level file)
+     */
+    /* (but only for non-mounted files) */
+    if(!H5F_is_mount(f)) {
+        loc->oloc->file = f;
+        loc->oloc->holding_file = FALSE;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_loc_root() */
 
 
 /*-------------------------------------------------------------------------
