@@ -246,9 +246,9 @@ done:
 herr_t
 H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int fwidth)
 {
-    unsigned	i, chunkno;
     size_t	mesg_total = 0, chunk_total = 0;
     unsigned	*sequence;
+    unsigned	i;              /* Local index variable */
     herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5O_debug_real, FAIL)
@@ -337,7 +337,6 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
     for(i = 0, chunk_total = 0; i < oh->nchunks; i++) {
         size_t chunk_size;
 
-	chunk_total += oh->chunk[i].size;
 	HDfprintf(stream, "%*sChunk %d...\n", indent, "", i);
 
 	HDfprintf(stream, "%*s%-*s %t\n", indent + 3, "", MAX(0, fwidth - 3),
@@ -348,13 +347,18 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
 		  "Address:",
                   oh->chunk[i].addr);
 
+        /* Decrement chunk 0's size by the object header prefix size */
 	if(0 == i) {
             if(H5F_addr_ne(oh->chunk[i].addr, addr))
-                HDfprintf(stream, "*** WRONG ADDRESS!\n");
+                HDfprintf(stream, "*** WRONG ADDRESS FOR CHUNK #0!\n");
             chunk_size = oh->chunk[i].size - H5O_SIZEOF_HDR(oh);
         } /* end if */
         else
             chunk_size = oh->chunk[i].size;
+
+        /* Accumulate chunk's size to total */
+	chunk_total += chunk_size;
+
 	HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", MAX(0, fwidth - 3),
 		  "Size in bytes:",
 		  chunk_size);
@@ -369,8 +373,11 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     for(i = 0, mesg_total = 0; i < oh->nmesgs; i++) {
         const H5O_msg_class_t  *debug_type;              /* Type of message to use for callbacks */
+        unsigned chunkno;                       /* Chunk for message */
 
+        /* Accumulate message's size to total */
 	mesg_total += H5O_SIZEOF_MSGHDR_OH(oh) + oh->mesg[i].raw_size;
+
 	HDfprintf(stream, "%*sMessage %d...\n", indent, "", i);
 
 	/* check for bad message id */
@@ -433,12 +440,6 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
 	    HDfprintf(stream, "%*s<No info for this message>\n", indent + 6, "");
     } /* end for */
     sequence = H5MM_xfree(sequence);
-
-    /* Chunk 0 has header information.  Count this in the size of the chunk
-     * when we check its size below.
-     */
-    if(chunkno == 0)
-        mesg_total += H5O_SIZEOF_HDR(oh);
 
     if(mesg_total != chunk_total)
 	HDfprintf(stream, "*** TOTAL SIZE DOES NOT MATCH ALLOCATED SIZE!\n");
