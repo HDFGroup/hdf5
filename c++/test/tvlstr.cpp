@@ -11,6 +11,7 @@
  * is linked from the top-level documents page.  It can also be found at     *
  * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
  * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /***********************************************************
 *
