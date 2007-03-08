@@ -31,6 +31,14 @@ EXIT_BANNER()
 TIMESTAMP "Exit $PROGNAME with status=$?"
 }
 
+# Show current total disk usage.
+DISKUSAGE()
+{
+    du -ks | \
+    ( read x y; echo "Disk Usage=$x KB" )
+}
+
+
 # MAIN
 # SGI /bin/sh replaces $0 as function name if used in a function.
 # Set the name here to avoid that ambiguity and better style too.
@@ -391,15 +399,15 @@ if [ "$cmd" = "all" -o -n "$cmdtest" -o -n "$cmddiff" ]; then
 	    TIMESTAMP "configure" && \
 	    ${srcdir:+${CURRENT}/}${CONFIGURE} && \
 	    TIMESTAMP "make" && \
-	    ${MAKE} && \
+	    ${MAKE} && DISKUSAGE \
 	    TIMESTAMP ${CHECKVAL} && \
-	    ${MAKE} ${CHECKVAL} && \
+	    ${MAKE} ${CHECKVAL} && DISKUSAGE \
 	    TIMESTAMP "install" && \
-	    ${MAKE} install-all && \
+	    ${MAKE} install-all && DISKUSAGE \
 	    TIMESTAMP "check-install" && \
-	    ${MAKE} check-install && \
+	    ${MAKE} check-install && DISKUSAGE \
 	    TIMESTAMP "uninstall" && \
-	    ${MAKE} uninstall-all); then
+	    ${MAKE} uninstall-all) && DISKUSAGE ; then
 	    :
 	else
 	    errcode=$?
