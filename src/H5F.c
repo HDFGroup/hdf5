@@ -850,7 +850,6 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 	f->shared->extension_addr = HADDR_UNDEF;
 	f->shared->sohm_addr = HADDR_UNDEF;
 	f->shared->sohm_vers = HDF5_SHAREDHEADER_VERSION;
-	f->shared->sohm_nindexes = 0;
 	f->shared->driver_addr = HADDR_UNDEF;
         f->shared->lf = lf;
 
@@ -2906,6 +2905,34 @@ H5F_decr_nopen_objs(H5F_t *f)
 
     FUNC_LEAVE_NOAPI(--f->nopen_objs)
 } /* end H5F_decr_nopen_objs() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_store_msg_crt_idx
+ *
+ * Purpose:	Retrieve the 'store message creation index' flag for the file.
+ *
+ * Return:	Success:	Non-negative, the 'store message creation index' flag
+ *
+ * 		Failure:	(can't happen)
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Mar  6 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5F_store_msg_crt_idx(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_store_msg_crt_idx)
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->store_msg_crt_idx)
+} /* end H5F_store_msg_crt_idx() */
 
 
 /*-------------------------------------------------------------------------

@@ -634,9 +634,10 @@ herr_t
 H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
     H5O_loc_t *loc/*out*/)
 {
-    H5O_t      *oh = NULL;
+    H5O_t      *oh = NULL;              /* Object header created */
     haddr_t     oh_addr;                /* Address of initial object header */
     size_t      oh_size;                /* Size of initial object header */
+    hbool_t     store_msg_crt_idx;      /* Whether to always store message creation indices for this file */
     herr_t      ret_value = SUCCEED;    /* return value */
 
     FUNC_ENTER_NOAPI(H5O_create, FAIL)
@@ -653,8 +654,12 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
     if(NULL == (oh = H5FL_CALLOC(H5O_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
-    /* Initialize rudimentary information object object header */
-    oh->version = H5F_USE_LATEST_FORMAT(f) ? H5O_VERSION_LATEST : H5O_VERSION_1;
+    /* Initialize file-specific information for object header */
+    store_msg_crt_idx = H5F_STORE_MSG_CRT_IDX(f);
+    if(H5F_USE_LATEST_FORMAT(f) || store_msg_crt_idx)
+        oh->version = H5O_VERSION_LATEST;
+    else
+        oh->version = H5O_VERSION_1;
     oh->sizeof_size = H5F_SIZEOF_SIZE(f);
     oh->sizeof_addr = H5F_SIZEOF_ADDR(f);
 
@@ -676,7 +681,11 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
         else
             oh->atime = oh->mtime = oh->ctime = oh->btime = 0;
 
-        /* Initialize attribute tracking fields */
+        /* Make certain attribute creation order tracking is enabled if
+         *      attributes can be shared in this file.
+         */
+        if(store_msg_crt_idx)
+            oh->flags |= H5O_HDR_ATTR_CRT_ORDER_TRACKED;
 
         /* Retrieve attribute storage phase change values from property list */
         if(H5P_get(oc_plist, H5O_CRT_ATTR_MAX_COMPACT_NAME, &oh->max_compact) < 0)

@@ -95,6 +95,9 @@ typedef struct H5A_dense_bt2_corder_rec_t {
     H5O_msg_crt_idx_t corder;           /* 'creation order' field value */
 } H5A_dense_bt2_corder_rec_t;
 
+/* Define the 'found' callback function pointer for matching an attribute record in a v2 B-tree */
+typedef herr_t (*H5A_bt2_found_t)(const H5A_t *attr, hbool_t *took_ownership, void *op_data);
+
 /*
  * Common data exchange structure for dense attribute storage.  This structure
  * is passed through the v2 B-tree layer to the methods for the objects
@@ -110,7 +113,7 @@ typedef struct H5A_bt2_ud_common_t {
     uint32_t    name_hash;              /* Hash of name of attribute to compare */
     uint8_t     flags;                  /* Flags for attribute storage location */
     H5O_msg_crt_idx_t corder;           /* Creation order value of attribute to compare */
-    H5B2_found_t found_op;              /* Callback when correct attribute is found */
+    H5A_bt2_found_t found_op;           /* Callback when correct attribute is found */
     void        *found_op_data;         /* Callback data when correct attribute is found */
 } H5A_bt2_ud_common_t;
 

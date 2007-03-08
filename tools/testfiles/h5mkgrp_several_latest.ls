@@ -3,10 +3,10 @@ Expected output for 'h5ls ../testfiles/h5mkgrp_several_latest.h5'
 #############################
 Opened "../testfiles/h5mkgrp_several_latest.h5" with sec2 driver.
 /one                     Group
-    Location:  1:302
+    Location:  1:288
     Links:     1
     Modified:  XXXX-XX-XX XX:XX:XX XXX
 /two                     Group
-    Location:  1:556
+    Location:  1:528
     Links:     1
     Modified:  XXXX-XX-XX XX:XX:XX XXX

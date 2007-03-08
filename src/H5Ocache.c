@@ -150,7 +150,9 @@ H5O_flush_msgs(H5F_t *f, H5O_t *oh)
             } /* end for */
             /* Only encode creation index for version 2+ of format */
             else {
-                UINT16ENCODE(p, curr_msg->crt_idx);
+                /* Only encode creation index if they are being tracked */
+                if(oh->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED)
+                    UINT16ENCODE(p, curr_msg->crt_idx);
             } /* end else */
             HDassert(p == curr_msg->raw);
 
@@ -262,7 +264,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
     if(NULL == (oh = H5FL_CALLOC(H5O_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    /* Generic, non-stored information */
+    /* File-specific, non-stored information */
     oh->sizeof_size = H5F_SIZEOF_SIZE(f);
     oh->sizeof_addr = H5F_SIZEOF_ADDR(f);
 
@@ -326,7 +328,12 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
         H5F_addr_decode(f, &p, &(oh->attr_fheap_addr));
         H5F_addr_decode(f, &p, &(oh->name_bt2_addr));
         H5F_addr_decode(f, &p, &(oh->corder_bt2_addr));
-        UINT16DECODE(p, oh->max_attr_crt_idx);
+
+        /* Only encode max. creation index if they are being tracked */
+        if(oh->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED)
+            UINT16DECODE(p, oh->max_attr_crt_idx)
+        else
+            oh->max_attr_crt_idx = 0;
     } /* end if */
     else {
         /* Reset unused time fields */
@@ -449,17 +456,28 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
             H5O_msg_crt_idx_t crt_idx = H5O_MAX_CRT_ORDER_IDX;  /* Creation index for current message */
 
             /* Decode message prefix info */
+
+            /* Version # */
             if(oh->version == H5O_VERSION_1)
                 UINT16DECODE(p, id)
             else
                 id = *p++;
+
+            /* Message size */
 	    UINT16DECODE(p, mesg_size);
 	    HDassert(mesg_size == H5O_ALIGN_OH(oh, mesg_size));
+
+            /* Message flags */
 	    flags = *p++;
+
+            /* Reserved bytes/creation index */
             if(oh->version == H5O_VERSION_1)
                 p += 3; /*reserved*/
-            else
-                UINT16DECODE(p, crt_idx);
+            else {
+                /* Only encode creation index if they are being tracked */
+                if(oh->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED)
+                    UINT16DECODE(p, crt_idx);
+            } /* end else */
 
             /* Try to detect invalidly formatted object header message that
              *  extends past end of chunk.
@@ -675,7 +693,10 @@ H5O_assert(oh);
             H5F_addr_encode(f, &p, oh->attr_fheap_addr);
             H5F_addr_encode(f, &p, oh->name_bt2_addr);
             H5F_addr_encode(f, &p, oh->corder_bt2_addr);
-            UINT16ENCODE(p, oh->max_attr_crt_idx);
+
+            /* Only encode max. creation index if they are being tracked */
+            if(oh->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED)
+                UINT16ENCODE(p, oh->max_attr_crt_idx);
 
             /* Chunk size */
             UINT32ENCODE(p, (oh->chunk[0].size - H5O_SIZEOF_HDR(oh)));

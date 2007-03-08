@@ -289,13 +289,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5A_dense_fnd_cb(const void *_attr, void *_user_attr)
+H5A_dense_fnd_cb(const H5A_t *attr, hbool_t *took_ownership, void *_user_attr)
 {
-    const H5A_t *attr = (const H5A_t *)_attr; /* Record from B-tree */
-    H5A_t **user_attr = (H5A_t **)_user_attr; /* User data from v2 B-tree attribute lookup */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    H5A_t const **user_attr = (H5A_t const **)_user_attr; /* User data from v2 B-tree attribute lookup */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5A_dense_fnd_cb)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_dense_fnd_cb)
 
     /*
      * Check arguments.
@@ -303,12 +301,11 @@ H5A_dense_fnd_cb(const void *_attr, void *_user_attr)
     HDassert(attr);
     HDassert(user_attr);
 
-    /* Copy attribute information */
-    if(NULL == (*user_attr = H5A_copy(NULL, attr)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy attribute")
+    /* Take over attribute ownership */
+    *user_attr = attr;
+    *took_ownership = TRUE;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5A_dense_fnd_cb() */
 
 

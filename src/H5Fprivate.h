@@ -266,6 +266,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_USE_LATEST_FORMAT(F) ((F)->shared->latest_format)
 #define H5F_INTENT(F)           ((F)->intent)
 #define H5F_GET_FC_DEGREE(F)    ((F)->shared->fc_degree)
+#define H5F_STORE_MSG_CRT_IDX(F)    ((F)->shared->store_msg_crt_idx)
 #else /* H5F_PACKAGE */
 #define H5F_FCPL(F)             (H5F_get_fcpl(F))
 #define H5F_SIZEOF_ADDR(F)      (H5F_sizeof_addr(F))
@@ -283,6 +284,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_USE_LATEST_FORMAT(F) (H5F_use_latest_format(F))
 #define H5F_INTENT(F)           (H5F_get_intent(F))
 #define H5F_GET_FC_DEGREE(F)    (H5F_get_fc_degree(F))
+#define H5F_STORE_MSG_CRT_IDX(F)    (H5F_store_msg_crt_idx(F))
 #endif /* H5F_PACKAGE */
 
 
@@ -446,6 +448,7 @@ H5_DLL size_t H5F_sieve_buf_size(const H5F_t *f);
 H5_DLL unsigned H5F_gc_ref(const H5F_t *f);
 H5_DLL hbool_t H5F_use_latest_format(const H5F_t *f);
 H5_DLL H5F_close_degree_t H5F_get_fc_degree(const H5F_t *f);
+H5_DLL hbool_t H5F_store_msg_crt_idx(const H5F_t *f);
 
 /* Functions that operate on blocks of bytes wrt super block */
 H5_DLL herr_t H5F_block_read(const H5F_t *f, H5FD_mem_t type, haddr_t addr,

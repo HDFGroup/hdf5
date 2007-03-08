@@ -37,6 +37,7 @@
 #include "H5Aprivate.h"		/* Attributes	  			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* File access				*/
+#include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5SMprivate.h"        /* Shared object header messages        */
@@ -1327,7 +1328,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_msg_mesg_size
+ * Function:	H5O_msg_size_f
  *
  * Purpose:	Calculate the final size of an encoded message in an object
  *              header.
@@ -1344,12 +1345,77 @@ done:
  *-------------------------------------------------------------------------
  */
 size_t
-H5O_msg_mesg_size(const H5F_t *f, unsigned type_id, const void *mesg, size_t extra_raw)
+H5O_msg_size_f(const H5F_t *f, hid_t ocpl_id, unsigned type_id,
+    const void *mesg, size_t extra_raw)
 {
-    const H5O_msg_class_t *type;            /* Actual H5O class type for the ID */
-    size_t      ret_value;       /* Return value */
+    const H5O_msg_class_t *type; /* Actual H5O class type for the ID */
+    H5P_genplist_t *ocpl;       /* Object Creation Property list */
+    uint8_t oh_flags;           /* Object header status flags */
+    size_t ret_value;           /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_msg_mesg_size, 0)
+    FUNC_ENTER_NOAPI(H5O_msg_size_f, 0)
+
+    /* Check args */
+    HDassert(type_id < NELMTS(H5O_msg_class_g));
+    type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
+    HDassert(type);
+    HDassert(type->raw_size);
+    HDassert(f);
+    HDassert(mesg);
+
+    /* Get the property list */
+    if(NULL == (ocpl = H5I_object(ocpl_id)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, 0, "not a property list")
+
+    /* Get any object header status flags set by properties */
+    if(H5P_get(ocpl, H5O_CRT_OHDR_FLAGS_NAME, &oh_flags) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, 0, "can't get object header flags")
+
+
+    /* Compute the raw data size for the mesg */
+    if((ret_value = (type->raw_size)(f, FALSE, mesg)) == 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOUNT, 0, "unable to determine size of message")
+
+    /* Add in "extra" raw space */
+    ret_value += extra_raw;
+
+    /* Adjust size for alignment, if necessary */
+    ret_value = H5O_ALIGN_F(f, ret_value);
+
+    /* Add space for message header */
+    ret_value += H5O_SIZEOF_MSGHDR_F(f,
+            (H5F_STORE_MSG_CRT_IDX(f) || oh_flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED));
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_msg_size_f() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_msg_size_oh
+ *
+ * Purpose:	Calculate the final size of an encoded message in an object
+ *              header.
+ *
+ * Note:	This routine assumes that the message is already used in
+ *              an object header.
+ *
+ * Return:	Size of message on success, 0 on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Mar  7 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+size_t
+H5O_msg_size_oh(const H5F_t *f, const H5O_t *oh, unsigned type_id,
+    const void *mesg, size_t extra_raw)
+{
+    const H5O_msg_class_t *type; /* Actual H5O class type for the ID */
+    size_t ret_value;           /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_msg_size_oh, 0)
 
     /* Check args */
     HDassert(type_id < NELMTS(H5O_msg_class_g));
@@ -1367,14 +1433,14 @@ H5O_msg_mesg_size(const H5F_t *f, unsigned type_id, const void *mesg, size_t ext
     ret_value += extra_raw;
 
     /* Adjust size for alignment, if necessary */
-    ret_value = H5O_ALIGN_F(f, ret_value);
+    ret_value = H5O_ALIGN_OH(oh, ret_value);
 
     /* Add space for message header */
-    ret_value += H5O_SIZEOF_MSGHDR_F(f);
+    ret_value += H5O_SIZEOF_MSGHDR_OH(oh);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_msg_mesg_size() */
+} /* end H5O_msg_size_oh() */
 
 
 /*-------------------------------------------------------------------------

@@ -163,17 +163,17 @@ H5G_obj_create(H5F_t *f, hid_t dxpl_id, const H5O_ginfo_t *ginfo,
         size_t link_size;                   /* Size of a link message */
 
         /* Calculate message size infomation, for creating group's object header */
-        linfo_size = H5O_msg_mesg_size(f, H5O_LINFO_ID, linfo, (size_t)0);
+        linfo_size = H5O_msg_size_f(f, gcpl_id, H5O_LINFO_ID, linfo, (size_t)0);
         HDassert(linfo_size);
 
-        ginfo_size = H5O_msg_mesg_size(f, H5O_GINFO_ID, ginfo, (size_t)0);
+        ginfo_size = H5O_msg_size_f(f, gcpl_id, H5O_GINFO_ID, ginfo, (size_t)0);
         HDassert(ginfo_size);
 
         lnk.type = H5L_TYPE_HARD;
         lnk.corder = 0;
         lnk.corder_valid = ginfo->track_corder;
         lnk.name = &null_char;
-        link_size = H5O_msg_mesg_size(f, H5O_LINK_ID, &lnk, (size_t)ginfo->est_name_len);
+        link_size = H5O_msg_size_f(f, gcpl_id, H5O_LINK_ID, &lnk, (size_t)ginfo->est_name_len);
         HDassert(link_size);
 
         /* Compute size of header to use for creation */
@@ -887,6 +887,7 @@ H5G_obj_remove_update_linfo(H5O_loc_t *oloc, H5O_linfo_t *linfo, hid_t dxpl_id)
 
             /* Check if we should switch from dense storage back to link messages */
             if(linfo->nlinks < ginfo.min_dense) {
+                struct H5O_t *oh = NULL;      /* Pointer to group's object header */
                 H5G_link_table_t ltable;        /* Table of links */
                 hbool_t can_convert = TRUE;     /* Whether converting to link messages is possible */
                 size_t u;                       /* Local index */
@@ -895,24 +896,22 @@ H5G_obj_remove_update_linfo(H5O_loc_t *oloc, H5O_linfo_t *linfo, hid_t dxpl_id)
                 if(H5G_dense_build_table(oloc->file, dxpl_id, linfo, H5_INDEX_NAME, H5_ITER_NATIVE, &ltable) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over links")
 
+                /* Get a pointer to the object header itself */
+                if((oh = H5O_protect(oloc, dxpl_id)) == NULL)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to protect dataset object header")
+
                 /* Inspect links in table for ones that can't be converted back
                  * into link message form (currently only links which can't fit
                  * into an object header message)
                  */
                 for(u = 0; u < linfo->nlinks; u++)
-                    if(H5O_msg_mesg_size(oloc->file, H5O_LINK_ID, &(ltable.lnks[u]), (size_t)0) >= H5O_MESG_MAX_SIZE) {
+                    if(H5O_msg_size_oh(oloc->file, oh, H5O_LINK_ID, &(ltable.lnks[u]), (size_t)0) >= H5O_MESG_MAX_SIZE) {
                         can_convert = FALSE;
                         break;
                     } /* end if */
 
                 /* If ok, insert links as link messages */
                 if(can_convert) {
-                    struct H5O_t *oh = NULL;      /* Pointer to group's object header */
-
-                    /* Get a pointer to the object header itself */
-                    if((oh = H5O_protect(oloc, dxpl_id)) == NULL)
-                        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to protect dataset object header")
-
                     /* Insert link messages into group */
                     for(u = 0; u < linfo->nlinks; u++)
                         if(H5O_msg_append(oloc->file, dxpl_id, oh, H5O_LINK_ID, 0, H5O_UPDATE_TIME, &(ltable.lnks[u])) < 0) {
@@ -923,14 +922,14 @@ H5G_obj_remove_update_linfo(H5O_loc_t *oloc, H5O_linfo_t *linfo, hid_t dxpl_id)
                             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
                         } /* end if */
 
-                    /* Release object header */
-                    if(H5O_unprotect(oloc, oh) < 0)
-                        HDONE_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to unprotect dataset object header")
-
                     /* Remove the dense storage */
                     if(H5G_dense_delete(oloc->file, dxpl_id, linfo, FALSE) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete dense link storage")
                 } /* end if */
+
+                /* Release object header */
+                if(H5O_unprotect(oloc, oh) < 0)
+                    HDONE_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to unprotect dataset object header")
 
                 /* Free link table information */
                 if(H5G_link_release_table(&ltable) < 0)

@@ -2444,6 +2444,54 @@ HDfprintf(stderr, "%s: type = %u, addr = %a, size = %Hu\n", FUNC, (unsigned)type
         /* Check if we increased the size of the largest block on the list */
         file->maxsize = MAX(file->maxsize, last->size);
 
+        /* Check if this free block adjoins the "metadata aggregator" */
+        if(file->feature_flags & H5FD_FEAT_AGGREGATE_METADATA && file->eoma != 0) {
+            hbool_t adjoins = FALSE;    /* Whether the block adjoined the metadata aggregator */
+
+            /* Does the new block adjoin the end of the metadata aggregator */
+            if((file->eoma + file->cur_meta_block_size) == last->addr) {
+                last->addr = file->eoma;
+                adjoins = TRUE;
+            } /* end if */
+            /* Does the new block adjoin the beginning of the metadata aggregator */
+            else if((last->addr + last->size) == file->eoma)
+                adjoins = TRUE;
+
+            /* Reset metadata aggregator information, if adjoined */
+            if(adjoins) {
+#ifdef H5FD_ALLOC_DEBUG
+HDfprintf(stderr, "%s: Adjoined metadata aggregator\n", FUNC);
+#endif /* H5FD_ALLOC_DEBUG */
+                last->size += file->cur_meta_block_size;
+                file->eoma = 0;
+                file->cur_meta_block_size = 0;
+            } /* end if */
+        } /* end if */
+
+        /* Check if this free block adjoins the "small data aggregator" */
+        if(file->feature_flags & H5FD_FEAT_AGGREGATE_SMALLDATA && file->eosda != 0) {
+            hbool_t adjoins = FALSE;    /* Whether the block adjoined the small-data aggregator */
+
+            /* Does the new block adjoin the end of the small-data aggregator */
+            if((file->eosda + file->cur_sdata_block_size) == last->addr) {
+                last->addr = file->eosda;
+                adjoins = TRUE;
+            } /* end if */
+            /* Does the new block adjoin the beginning of the small-data aggregator */
+            else if((last->addr + last->size) == file->eosda)
+                adjoins = TRUE;
+
+            /* Reset small-data aggregator information, if adjoined */
+            if(adjoins) {
+#ifdef H5FD_ALLOC_DEBUG
+HDfprintf(stderr, "%s: Adjoined small data aggregator\n", FUNC);
+#endif /* H5FD_ALLOC_DEBUG */
+                last->size += file->cur_sdata_block_size;
+                file->eosda = 0;
+                file->cur_sdata_block_size = 0;
+            } /* end if */
+        } /* end if */
+
         /* Check if this free block is at the end of file allocated space.
          * Truncate it if this is true. */
         if(file->cls->get_eoa) {
@@ -2451,6 +2499,9 @@ HDfprintf(stderr, "%s: type = %u, addr = %a, size = %Hu\n", FUNC, (unsigned)type
 
             eoa = file->cls->get_eoa(file, type);
             if(eoa == (last->addr + last->size)) {
+#ifdef H5FD_ALLOC_DEBUG
+HDfprintf(stderr, "%s: Reducing file size to = %a\n", FUNC, last->addr);
+#endif /* H5FD_ALLOC_DEBUG */
                 if(file->cls->set_eoa(file, type, last->addr) < 0)
                     HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "set end of space allocation request failed")
 

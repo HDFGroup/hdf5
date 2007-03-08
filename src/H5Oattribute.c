@@ -258,8 +258,8 @@ H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
     /* Increment attribute count on object */
     oh->nattrs++;
 
-    /* Later versions of the object header track the creation index on all messages */
-    if(oh->version > H5O_VERSION_1) {
+    /* Later versions of the object header track the creation index on attributes */
+    if(oh->version > H5O_VERSION_1 && (oh->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED)) {
         /* Check for attribute creation order index on the object wrapping around */
         if(oh->max_attr_crt_idx == H5O_MAX_CRT_ORDER_IDX)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINC, FAIL, "attribute creation index can't be incremented")
@@ -1145,7 +1145,7 @@ H5O_attr_remove_update(const H5O_loc_t *loc, H5O_t *oh, hid_t dxpl_id)
              * can't fit into an object header message)
              */
             for(u = 0; u < oh->nattrs; u++)
-                if(H5O_msg_mesg_size(loc->file, H5O_ATTR_ID, &(atable.attrs[u]), (size_t)0) >= H5O_MESG_MAX_SIZE) {
+                if(H5O_msg_size_oh(loc->file, oh, H5O_ATTR_ID, &(atable.attrs[u]), (size_t)0) >= H5O_MESG_MAX_SIZE) {
                     can_convert = FALSE;
                     break;
                 } /* end if */

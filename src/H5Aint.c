@@ -194,7 +194,8 @@ H5A_compact_build_table(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_index_t idx_type,
     udata.dxpl_id = dxpl_id;
     udata.atable = atable;
     udata.curr_attr = 0;
-    udata.bogus_crt_idx = (oh->version == H5O_VERSION_1) ? TRUE : FALSE;
+    udata.bogus_crt_idx = (oh->version == H5O_VERSION_1 ||
+            !(oh->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED)) ? TRUE : FALSE;
 
     /* Iterate over existing attributes, checking for attribute with same name */
     op.op_type = H5O_MESG_OP_LIB;

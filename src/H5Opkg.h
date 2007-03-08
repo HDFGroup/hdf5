@@ -120,7 +120,9 @@
                 (O)->sizeof_addr + /*addr of attribute heap */		      \
                 (O)->sizeof_addr + /*addr of attribute name index */	      \
                 (O)->sizeof_addr + /*addr of attribute creation order index */ \
-                2 +		/*max attr. creation index */		      \
+                (((O)->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED) ? (	      \
+                  2		/*max attr. creation index */		      \
+                ) : 0) +						      \
                 4 +		/*chunk data size	*/		      \
                 H5O_SIZEOF_CHKSUM) /*checksum size	*/		      \
     )
@@ -128,7 +130,7 @@
 /*
  * Size of object header message prefix
  */
-#define H5O_SIZEOF_MSGHDR_VERS(V)					      \
+#define H5O_SIZEOF_MSGHDR_VERS(V,C)					      \
     (((V) == H5O_VERSION_1)  						      \
         ?								      \
             H5O_ALIGN_OLD(2 +	/*message type		*/		      \
@@ -139,12 +141,14 @@
             (1 +		/*message type		*/		      \
                 2 + 		/*sizeof message data	*/		      \
                 1 +		/*flags              	*/		      \
-                2)		/*creation index     	*/		      \
+                ((C) ? (						      \
+                  2		/*creation index     	*/		      \
+                ) : 0))							      \
     )
 #define H5O_SIZEOF_MSGHDR_OH(O)						      \
-    H5O_SIZEOF_MSGHDR_VERS((O)->version)
-#define H5O_SIZEOF_MSGHDR_F(F)						      \
-    H5O_SIZEOF_MSGHDR_VERS(H5F_USE_LATEST_FORMAT(F) ? H5O_VERSION_LATEST : H5O_VERSION_1)
+    H5O_SIZEOF_MSGHDR_VERS((O)->version, (O)->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED)
+#define H5O_SIZEOF_MSGHDR_F(F, C)						      \
+    H5O_SIZEOF_MSGHDR_VERS((H5F_USE_LATEST_FORMAT(F) || H5F_STORE_MSG_CRT_IDX(F)) ? H5O_VERSION_LATEST : H5O_VERSION_1, (C))
 
 /*
  * Size of chunk "header" for each chunk
@@ -241,7 +245,7 @@ struct H5O_t {
     H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
                             /* first field in structure */
 
-    /* General information (not stored) */
+    /* File-specific information (not stored) */
     size_t      sizeof_size;            /* Size of file sizes 		     */
     size_t      sizeof_addr;            /* Size of file addresses	     */
 

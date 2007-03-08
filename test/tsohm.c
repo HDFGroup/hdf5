@@ -2200,8 +2200,8 @@ static void test_sohm_size2(int close_reopen)
      */
     if(list_index_med.dsets2 >= btree_index.dsets2)
         VERIFY(list_index_med.dsets2, 1, "h5_get_file_size");
-    if(btree_index.dsets2 > list_index_small.dsets2)
-        VERIFY(btree_index.dsets2, 1, "h5_get_file_size");
+    if(btree_index.dsets2 > list_index_small.dsets2 * OVERHEAD_ALLOWED)
+        VERIFY(btree_index.dsets2, list_index_small.dsets2, "h5_get_file_size");
     if(list_index_small.dsets2 >= norm_sizes.dsets2)
         VERIFY(btree_index.dsets2, 1, "h5_get_file_size");
     /* If the small list (now a B-tree) is bigger than the existing B-tree,
@@ -2233,8 +2233,8 @@ static void test_sohm_size2(int close_reopen)
      */
     if(list_index_med.interleaved >= btree_index.interleaved)
         VERIFY(0, 1, "h5_get_file_size");
-    if(btree_index.interleaved > list_index_small.interleaved)
-        VERIFY(0, 1, "h5_get_file_size");
+    if(btree_index.interleaved > list_index_small.interleaved * OVERHEAD_ALLOWED)
+        VERIFY(btree_index.interleaved, list_index_small.interleaved, "h5_get_file_size");
     if(list_index_small.interleaved >= norm_sizes.interleaved)
         VERIFY(0, 1, "h5_get_file_size");
     /* The lists should still have grown the same amount.  The converted
@@ -2262,8 +2262,8 @@ static void test_sohm_size2(int close_reopen)
      * of file space can be hard to predict.
 
      */
-    if(btree_index.attrs1 > list_index_small.attrs1)
-        VERIFY(0, 1, "h5_get_file_size");
+    if(btree_index.attrs1 > list_index_small.attrs1 * OVERHEAD_ALLOWED)
+        VERIFY(btree_index.attrs1, list_index_small.attrs1, "h5_get_file_size");
     if(btree_index.attrs1 > list_index_med.attrs1 * OVERHEAD_ALLOWED)
         VERIFY(0, 1, "h5_get_file_size");
     if(list_index_med.attrs1 > btree_index.attrs1 * OVERHEAD_ALLOWED)
@@ -2297,8 +2297,8 @@ static void test_sohm_size2(int close_reopen)
      * of sizes.  The big list index is still too big to be smaller than a
      * normal file.  The B-tree indexes should all be about the same size.
      */
-    if(btree_index.attrs2 > list_index_small.attrs2)
-        VERIFY(0, 1, "h5_get_file_size");
+    if(btree_index.attrs2 > list_index_small.attrs2 * OVERHEAD_ALLOWED)
+        VERIFY(btree_index.attrs2, list_index_small.attrs2, "h5_get_file_size");
     if(list_index_small.attrs2 > btree_index.attrs2 * OVERHEAD_ALLOWED)
         VERIFY(0, 1, "h5_get_file_size");
     if(btree_index.attrs2 > list_index_med.attrs2 * OVERHEAD_ALLOWED)
@@ -2680,14 +2680,12 @@ static void delete_helper(hid_t fcpl_id, hid_t *dspace_id, hid_t *dcpl_id)
 
     /* The two filesizes should be almost the same */
     if(norm_filesize > deleted_filesize * OVERHEAD_ALLOWED)
-        VERIFY(0, 1, "h5_get_file_size");
+        VERIFY(norm_filesize, deleted_filesize, "h5_get_file_size");
     if(deleted_filesize > norm_filesize * OVERHEAD_ALLOWED)
-        VERIFY(0, 1, "h5_get_file_size");
-
+        VERIFY(deleted_filesize, norm_filesize, "h5_get_file_size");
 }
 
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_sohm_delete
  *

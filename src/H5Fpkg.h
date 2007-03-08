@@ -72,7 +72,7 @@ typedef struct H5F_file_t {
     uint8_t	consist_flags;	/* File Consistency Flags		*/
     unsigned	flags;		/* Access Permissions for file		*/
 
-    /* Cached values from FCPL */
+    /* Cached values from FCPL/superblock */
     unsigned	sym_leaf_k;	/* Size of leaves in symbol tables      */
     unsigned    btree_k[H5B_NUM_BTREE_ID];  /* B-tree key values for each type  */
     size_t	sizeof_addr;	/* Size of addresses in file            */
@@ -102,6 +102,7 @@ typedef struct H5F_file_t {
     hsize_t	alignment;	/* Alignment				*/
     unsigned	gc_ref;		/* Garbage-collect references?		*/
     hbool_t	latest_format;	/* Always use the latest format?	*/
+    hbool_t	store_msg_crt_idx;	/* Store creation index for object header messages?	*/
     int	ncwfs;			/* Num entries on cwfs list		*/
     struct H5HG_heap_t **cwfs;	/* Global heap cache			*/
     struct H5G_t *root_grp;	/* Open root group			*/

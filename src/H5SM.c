@@ -197,6 +197,12 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, const H5O_loc_t *ext_loc, hid_t d
     /* Record the address of the master table in the file */
     f->shared->sohm_addr = table_addr;
 
+    /* Check for sharing attributes in this file, which means that creation
+     *  indices must be tracked on object header message in the file.
+     */
+    if(type_flags_used & H5O_MESG_ATTR_FLAG)
+        f->shared->store_msg_crt_idx = TRUE;
+
     /* Write shared message information to the superblock extension */
     sohm_table.addr = f->shared->sohm_addr;
     sohm_table.version = f->shared->sohm_vers;
@@ -1535,6 +1541,12 @@ H5SM_get_info(const H5O_loc_t *ext_loc, H5P_genplist_t *fc_plist, hid_t dxpl_id)
             /* Sanity check */
             HDassert(sohm_l2b == table->indexes[u].list_max);
             HDassert(sohm_b2l == table->indexes[u].btree_min);
+
+            /* Check for sharing attributes in this file, which means that creation
+             *  indices must be tracked on object header message in the file.
+             */
+            if(index_flags[u] & H5O_MESG_ATTR_FLAG)
+                shared->store_msg_crt_idx = TRUE;
         } /* end for */
 
         /* Set values in the property list */

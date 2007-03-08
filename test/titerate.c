@@ -473,9 +473,12 @@ static void test_iter_attr(hid_t fapl, hbool_t new_format)
         /* Verify that the index is the correct value */
         VERIFY(idx, (unsigned)i, "H5Aiterate");
 
-        /* Verify that the correct name is retrieved */
-        if(HDstrcmp(info.name, anames[idx - 1]) != 0)
-            TestErrPrintf("%u: Attribute iteration function didn't return 'two' correctly!\n", __LINE__);
+        /* Don't check name when new format is used */
+        if(!new_format) {
+            /* Verify that the correct name is retrieved */
+            if(HDstrcmp(info.name, anames[idx - 1]) != 0)
+                TestErrPrintf("%u: Attribute iteration function didn't set names correctly, info.name = '%s', anames[idx - 1] = '%s'!\n", __LINE__, info.name, anames[idx - 1]);
+        } /* end if */
     } /* end while */
     VERIFY(ret, -1, "H5Aiterate");
     if(i != 50 || idx != 50)
@@ -496,9 +499,12 @@ static void test_iter_attr(hid_t fapl, hbool_t new_format)
         /* Verify that the index is the correct value */
         VERIFY(idx, (unsigned)i + 10, "H5Aiterate");
 
-        /* Verify that the correct name is retrieved */
-        if(HDstrcmp(info.name, anames[idx - 1]) != 0)
-            TestErrPrintf("Attribute iteration function didn't return changing correctly!\n");
+        /* Don't check name when new format is used */
+        if(!new_format) {
+            /* Verify that the correct name is retrieved */
+            if(HDstrcmp(info.name, anames[idx - 1]) != 0)
+                TestErrPrintf("%u: Attribute iteration function didn't set names correctly, info.name = '%s', anames[idx - 1] = '%s'!\n", __LINE__, info.name, anames[idx - 1]);
+        } /* end if */
     } /* end while */
     VERIFY(ret, -1, "H5Aiterate");
     if(i != 40 || idx != 50)

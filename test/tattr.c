@@ -1753,14 +1753,18 @@ test_attr_dtype_shared(hid_t fapl)
 **      Verify attributes on object
 **
 ****************************************************************/
-static void
+static int
 test_attr_dense_verify(hid_t loc_id, unsigned max_attr)
 {
     char	attrname[NAME_BUF_SIZE];        /* Name of attribute */
     hid_t	attr;	        /* Attribute ID	*/
     unsigned    value;          /* Attribute value */
     unsigned    u;              /* Local index variable */
+    int         old_nerrs;      /* Number of errors when entering this check */
     herr_t	ret;		/* Generic return value	*/
+
+    /* Retrieve the current # of reported errors */
+    old_nerrs = GetTestNumErrs();
 
     /* Re-open all the attributes by name and verify the data */
     for(u = 0; u < max_attr; u++) {
@@ -1804,6 +1808,12 @@ test_attr_dense_verify(hid_t loc_id, unsigned max_attr)
         ret = H5Aclose(attr);
         CHECK(ret, FAIL, "H5Aclose");
     } /* end for */
+
+    /* Retrieve current # of errors */
+    if(old_nerrs == GetTestNumErrs())
+        return(0);
+    else
+        return(-1);
 }   /* test_attr_dense_verify() */
 
 
@@ -1989,6 +1999,10 @@ test_attr_dense_open(hid_t fcpl, hid_t fapl)
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
     CHECK(dcpl, FAIL, "H5Pcreate");
 
+    /* Enable creation order tracking on attributes, so creation order tests work */
+    ret = H5Pset_attr_creation_order(dcpl, H5P_CRT_ORDER_TRACKED);
+    CHECK(ret, FAIL, "H5Pset_attr_creation_order");
+
     /* Create a dataset */
     dataset = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
     CHECK(dataset, FAIL, "H5Dcreate");
@@ -2021,7 +2035,8 @@ test_attr_dense_open(hid_t fcpl, hid_t fapl)
         CHECK(ret, FAIL, "H5Aclose");
 
         /* Verify attributes written so far */
-        test_attr_dense_verify(dataset, u);
+        ret = test_attr_dense_verify(dataset, u);
+        CHECK(ret, FAIL, "test_attr_dense_verify");
     } /* end for */
 
     /* Check on dataset's attribute storage status */
@@ -2051,7 +2066,8 @@ test_attr_dense_open(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Sclose");
 
     /* Verify all the attributes written */
-    test_attr_dense_verify(dataset, (u + 1));
+    ret = test_attr_dense_verify(dataset, (u + 1));
+    CHECK(ret, FAIL, "test_attr_dense_verify");
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -2123,6 +2139,10 @@ test_attr_dense_delete(hid_t fcpl, hid_t fapl)
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
     CHECK(dcpl, FAIL, "H5Pcreate");
 
+    /* Enable creation order tracking on attributes, so creation order tests work */
+    ret = H5Pset_attr_creation_order(dcpl, H5P_CRT_ORDER_TRACKED);
+    CHECK(ret, FAIL, "H5Pset_attr_creation_order");
+
     /* Create a dataset */
     dataset = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
     CHECK(dataset, FAIL, "H5Dcreate");
@@ -2193,7 +2213,8 @@ test_attr_dense_delete(hid_t fcpl, hid_t fapl)
         CHECK(ret, FAIL, "H5Adelete");
 
         /* Verify attributes still left */
-        test_attr_dense_verify(dataset, u);
+        ret = test_attr_dense_verify(dataset, u);
+        CHECK(ret, FAIL, "test_attr_dense_verify");
     } /* end for */
 
     /* Check on dataset's attribute storage status */
@@ -2210,7 +2231,8 @@ test_attr_dense_delete(hid_t fcpl, hid_t fapl)
     VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
 
     /* Verify attributes still left */
-    test_attr_dense_verify(dataset, (u - 1));
+    ret = test_attr_dense_verify(dataset, (u - 1));
+    CHECK(ret, FAIL, "test_attr_dense_verify");
 
     /* Delete another attribute, to verify deletion in compact storage */
     sprintf(attrname, "attr %02u", (u - 1));
@@ -2222,7 +2244,8 @@ test_attr_dense_delete(hid_t fcpl, hid_t fapl)
     VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
 
     /* Verify attributes still left */
-    test_attr_dense_verify(dataset, (u - 2));
+    ret = test_attr_dense_verify(dataset, (u - 2));
+    CHECK(ret, FAIL, "test_attr_dense_verify");
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
