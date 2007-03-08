@@ -492,8 +492,10 @@ test_file_name()
  *
  *-------------------------------------------------------------------------
  */
-void
-test_file(void)
+#ifdef __cplusplus
+extern "C"
+#endif
+void test_file(void)
 {
     // Output message about test being performed
     MESSAGE(5, ("Testing File I/O operations\n"));

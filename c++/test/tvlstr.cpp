@@ -758,6 +758,9 @@ static void test_vl_rewrite(void)
 **  test_vlstrings(): Main VL string testing routine.
 **
 ****************************************************************/
+#ifdef __cplusplus
+extern "C"
+#endif
 void test_vlstrings(void)
 {
     // Output message about test being performed

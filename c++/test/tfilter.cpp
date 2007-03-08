@@ -248,6 +248,9 @@ void test_szip_filter(H5File& file1)
 **
 ****************************************************************/
 const H5std_string      FILE1("tfilters.h5");
+#ifdef __cplusplus
+extern "C"
+#endif
 void test_filters(void)
 {
     // Output message about test being performed

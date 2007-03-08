@@ -774,6 +774,9 @@ cerr << "all the way here?" << endl;
 **  test_types(): Main data types testing routine.
 **
 ****************************************************************/
+#ifdef __cplusplus
+extern "C"
+#endif
 void test_types(void)
 {
     // Output message about test being performed

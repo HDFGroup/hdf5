@@ -1200,8 +1200,10 @@ test_string_attr(void)
 **  test_attr(): Main attribute testing routine.
 **
 ****************************************************************/
-void
-test_attr(void)
+#ifdef __cplusplus
+extern "C"
+#endif
+void test_attr(void)
 {
     // Output message about test being performed
     MESSAGE(5, ("Testing Attributes\n"));

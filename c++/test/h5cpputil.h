@@ -95,6 +95,9 @@ class InvalidActionException : public Exception {
 };
 
 /* Prototypes for the test routines */
+#ifdef __cplusplus
+extern "C" {
+#endif
 void test_attr(void);
 void test_compound(void);
 void test_file(void);
@@ -113,6 +116,11 @@ void cleanup_h5s(void);
 void cleanup_reference(void);
 void cleanup_types(void);
 void cleanup_vlstrings(void);
+
+#ifdef __cplusplus
+}
+#endif
+
 /* not yet
 void cleanup_select(void);
 void cleanup_time(void);

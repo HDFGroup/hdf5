@@ -591,8 +591,10 @@ test_h5s_compound_scalar_read(void)
  * Modifications:
  *-------------------------------------------------------------------------
  */
-void
-test_h5s(void)
+#ifdef __cplusplus
+extern "C"
+#endif
+void test_h5s(void)
 {
     // Output message about test being performed
     MESSAGE(5, ("Testing Dataspaces\n"));

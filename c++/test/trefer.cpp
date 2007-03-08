@@ -277,8 +277,10 @@ test_reference_obj(void)
 **  test_reference(): Main reference testing routine.
 **
 ****************************************************************/
-void
-test_reference(void)
+#ifdef __cplusplus
+extern "C"
+#endif
+void test_reference(void)
 {
     // Output message about test being performed
     MESSAGE(5, ("Testing References\n"));
