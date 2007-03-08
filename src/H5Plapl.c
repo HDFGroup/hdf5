@@ -331,7 +331,7 @@ H5Pset_elink_prefix(hid_t plist_id, const char *prefix)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(H5Pset_elink_prefix, FAIL)
-    H5TRACE2("e", "is", plist_id, prefix);
+    H5TRACE2("e", "i*s", plist_id, prefix);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_LINK_ACCESS)))
@@ -382,7 +382,7 @@ H5Pget_elink_prefix(hid_t plist_id, char *prefix, size_t size)
     ssize_t 	ret_value;              /* Return value */
 
     FUNC_ENTER_API(H5Pget_elink_prefix, FAIL)
-    H5TRACE3("Zs", "isz", plist_id, prefix, size);
+    H5TRACE3("Zs", "i*sz", plist_id, prefix, size);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_LINK_ACCESS)))

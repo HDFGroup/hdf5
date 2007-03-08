@@ -562,6 +562,7 @@ H5Pset_dxpl_mpio_collective_opt(hid_t dxpl_id, H5FD_mpio_collective_opt_t opt_mo
     herr_t ret_value;
 
     FUNC_ENTER_API(H5Pset_dxpl_mpio_collective_opt, FAIL)
+    H5TRACE2("e", "iDc", dxpl_id, opt_mode);
 /*    H5TRACE2("e","iDt",dxpl_id,xfer_mode);*/
 
     if(dxpl_id==H5P_DEFAULT)
@@ -614,6 +615,7 @@ H5Pset_dxpl_mpio_chunk_opt(hid_t dxpl_id, H5FD_mpio_chunk_opt_t opt_mode)
     herr_t ret_value;
 
     FUNC_ENTER_API(H5Pset_dxpl_mpio_chunk_opt, FAIL)
+    H5TRACE2("e", "iDh", dxpl_id, opt_mode);
 /*    H5TRACE2("e","iDt",dxpl_id,xfer_mode);*/
 
     if(dxpl_id==H5P_DEFAULT)

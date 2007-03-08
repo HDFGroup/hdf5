@@ -139,7 +139,7 @@ H5Glink(hid_t cur_loc_id, H5L_type_t type, const char *cur_name, const char *new
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(H5Glink, FAIL)
-    H5TRACE4("e", "iLlss", cur_loc_id, type, cur_name, new_name);
+    H5TRACE4("e", "iLl*s*s", cur_loc_id, type, cur_name, new_name);
 
     /* Check arguments */
     if(!cur_name || !*cur_name)
@@ -185,7 +185,7 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5L_type_t type,
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(H5Glink2, FAIL)
-    H5TRACE5("e", "isLlis", cur_loc_id, cur_name, type, new_loc_id, new_name);
+    H5TRACE5("e", "i*sLli*s", cur_loc_id, cur_name, type, new_loc_id, new_name);
 
     /* Check arguments */
     if(!cur_name || !*cur_name)
@@ -288,7 +288,7 @@ H5Gmove(hid_t src_loc_id, const char *src_name, const char *dst_name)
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Gmove, FAIL)
-    H5TRACE3("e", "iss", src_loc_id, src_name, dst_name);
+    H5TRACE3("e", "i*s*s", src_loc_id, src_name, dst_name);
 
     /* Call common routine to move the link */
     if(H5G_move(src_loc_id, src_name, H5L_SAME_LOC, dst_name) < 0)
@@ -313,7 +313,7 @@ H5Gmove2(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Gmove2, FAIL)
-    H5TRACE4("e", "isis", src_loc_id, src_name, dst_loc_id, dst_name);
+    H5TRACE4("e", "i*si*s", src_loc_id, src_name, dst_loc_id, dst_name);
 
     /* Call common routine to move the link */
     if(H5G_move(src_loc_id, src_name, dst_loc_id, dst_name) < 0)
@@ -395,7 +395,7 @@ H5Gunlink(hid_t loc_id, const char *name)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(H5Gunlink, FAIL)
-    H5TRACE2("e", "is", loc_id, name);
+    H5TRACE2("e", "i*s", loc_id, name);
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -427,7 +427,7 @@ H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *buf/*out*/)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(H5Gget_linkval, FAIL)
-    H5TRACE4("e", "iszx", loc_id, name, size, buf);
+    H5TRACE4("e", "i*szx", loc_id, name, size, buf);
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc))
@@ -475,7 +475,7 @@ H5Gget_objname_by_idx(hid_t loc_id, hsize_t idx, char *name, size_t size)
     ssize_t		ret_value;
 
     FUNC_ENTER_API(H5Gget_objname_by_idx, FAIL)
-    H5TRACE4("Zs", "ihsz", loc_id, idx, name, size);
+    H5TRACE4("Zs", "ih*sz", loc_id, idx, name, size);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -518,7 +518,7 @@ H5Gset_comment(hid_t loc_id, const char *name, const char *comment)
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Gset_comment, FAIL)
-    H5TRACE3("e", "iss", loc_id, name, comment);
+    H5TRACE3("e", "i*s*s", loc_id, name, comment);
 
     if(H5G_loc(loc_id, &loc) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
@@ -563,7 +563,7 @@ H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf)
     int	ret_value;
 
     FUNC_ENTER_API(H5Gget_comment, FAIL)
-    H5TRACE4("Is", "iszs", loc_id, name, bufsize, buf);
+    H5TRACE4("Is", "i*sz*s", loc_id, name, bufsize, buf);
 
     if(H5G_loc(loc_id, &loc) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
@@ -728,7 +728,7 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op,
     herr_t	ret_value;
 
     FUNC_ENTER_API(H5Giterate, FAIL)
-    H5TRACE5("e", "is*Isxx", loc_id, name, idx_p, op, op_data);
+    H5TRACE5("e", "i*s*Isx*x", loc_id, name, idx_p, op, op_data);
 
     /* Check args */
     if(!name || !*name)
@@ -826,7 +826,7 @@ H5Gget_objinfo(hid_t loc_id, const char *name, hbool_t follow_link,
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Gget_objinfo, FAIL)
-    H5TRACE4("e", "isbx", loc_id, name, follow_link, statbuf);
+    H5TRACE4("e", "i*sbx", loc_id, name, follow_link, statbuf);
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc) < 0)

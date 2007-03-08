@@ -2408,7 +2408,7 @@ H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
     herr_t	ret_value=SUCCEED;	/*return value			*/
 
     FUNC_ENTER_API(H5Tregister, FAIL);
-    H5TRACE5("e", "Tesiix", pers, name, src_id, dst_id, func);
+    H5TRACE5("e", "Te*siix", pers, name, src_id, dst_id, func);
 
     /* Check args */
     if (H5T_PERS_HARD!=pers && H5T_PERS_SOFT!=pers)
@@ -2557,7 +2557,7 @@ H5Tunregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id,
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tunregister, FAIL);
-    H5TRACE5("e", "Tesiix", pers, name, src_id, dst_id, func);
+    H5TRACE5("e", "Te*siix", pers, name, src_id, dst_id, func);
 
     /* Check arguments */
     if (src_id>0 && (NULL==(src=H5I_object_verify(src_id,H5I_DATATYPE))))
@@ -2601,7 +2601,7 @@ H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata)
     H5T_path_t	*path = NULL;
 
     FUNC_ENTER_API(H5Tfind, NULL);
-    H5TRACE3("x", "iix", src_id, dst_id, pcdata);
+    H5TRACE3("x", "ii**x", src_id, dst_id, pcdata);
 
     /* Check args */
     if (NULL == (src = H5I_object_verify(src_id,H5I_DATATYPE)) ||
@@ -2703,7 +2703,7 @@ H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts, void *buf,
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tconvert, FAIL);
-    H5TRACE6("e", "iizxxi", src_id, dst_id, nelmts, buf, background, dxpl_id);
+    H5TRACE6("e", "iiz*x*xi", src_id, dst_id, nelmts, buf, background, dxpl_id);
 
     /* Check args */
     if (NULL==(src=H5I_object_verify(src_id,H5I_DATATYPE)) ||
@@ -2752,7 +2752,7 @@ H5Tencode(hid_t obj_id, void *buf, size_t *nalloc)
     herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_API (H5Tencode, FAIL)
-    H5TRACE3("e", "ix*z", obj_id, buf, nalloc);
+    H5TRACE3("e", "i*x*z", obj_id, buf, nalloc);
 
     /* Check argument and retrieve object */
     if(NULL == (dtype = H5I_object_verify(obj_id, H5I_DATATYPE)))
@@ -2792,7 +2792,7 @@ H5Tdecode(const void *buf)
     hid_t       ret_value;
 
     FUNC_ENTER_API(H5Tdecode, FAIL)
-    H5TRACE1("i", "x", buf);
+    H5TRACE1("i", "*x", buf);
 
     /* Check args */
     if(buf == NULL)

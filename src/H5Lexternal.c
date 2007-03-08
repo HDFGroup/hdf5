@@ -273,8 +273,8 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Lcreate_external, FAIL)
-    H5TRACE6("e", "ssisii", file_name, obj_name, link_loc_id, link_name, lcpl_id,
-             lapl_id);
+    H5TRACE6("e", "*s*si*sii", file_name, obj_name, link_loc_id, link_name,
+             lcpl_id, lapl_id);
 
     /* Check arguments */
     if(!file_name || !*file_name)
@@ -364,7 +364,7 @@ H5Lunpack_elink_val(char *ext_linkval, size_t link_size, char **filename,
     herr_t      ret_value=SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(H5Lunpack_elink_val, FAIL)
-    H5TRACE4("e", "sz*s*s", ext_linkval, link_size, filename, obj_path);
+    H5TRACE4("e", "*sz**s**s", ext_linkval, link_size, filename, obj_path);
 
     if(ext_linkval == NULL )
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not an external link linkval buffer")

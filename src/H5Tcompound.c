@@ -337,7 +337,7 @@ H5Tinsert(hid_t parent_id, const char *name, size_t offset, hid_t member_id)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tinsert, FAIL)
-    H5TRACE4("e", "iszi", parent_id, name, offset, member_id);
+    H5TRACE4("e", "i*szi", parent_id, name, offset, member_id);
 
     /* Check args */
     if (parent_id==member_id)

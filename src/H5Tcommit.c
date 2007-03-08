@@ -91,7 +91,7 @@ H5Tcommit(hid_t loc_id, const char *name, hid_t type_id)
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tcommit, FAIL)
-    H5TRACE3("e", "isi", loc_id, name, type_id);
+    H5TRACE3("e", "i*si", loc_id, name, type_id);
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -446,7 +446,7 @@ H5Topen(hid_t loc_id, const char *name)
     hid_t        ret_value = FAIL;
 
     FUNC_ENTER_API(H5Topen, FAIL)
-    H5TRACE2("i", "is", loc_id, name);
+    H5TRACE2("i", "i*s", loc_id, name);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -523,7 +523,7 @@ H5Topen_expand(hid_t loc_id, const char *name, hid_t tapl_id)
     hid_t        ret_value = FAIL;
 
     FUNC_ENTER_API(H5Topen_expand, FAIL)
-    H5TRACE3("i", "isi", loc_id, name, tapl_id);
+    H5TRACE3("i", "i*si", loc_id, name, tapl_id);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)

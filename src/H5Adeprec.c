@@ -140,7 +140,7 @@ H5Acreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     hid_t		ret_value;              /* Return value */
 
     FUNC_ENTER_API(H5Acreate, FAIL)
-    H5TRACE5("i", "isiii", loc_id, name, type_id, space_id, plist_id);
+    H5TRACE5("i", "i*siii", loc_id, name, type_id, space_id, plist_id);
 
     /* check arguments */
     if(H5I_ATTR == H5I_get_type(loc_id))
@@ -193,7 +193,7 @@ H5Aopen_name(hid_t loc_id, const char *name)
     hid_t		ret_value;
 
     FUNC_ENTER_API(H5Aopen_name, FAIL)
-    H5TRACE2("i", "is", loc_id, name);
+    H5TRACE2("i", "i*s", loc_id, name);
 
     /* check arguments */
     if(H5I_ATTR == H5I_get_type(loc_id))
@@ -355,7 +355,7 @@ H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(H5Arename, FAIL)
-    H5TRACE3("e", "iss", loc_id, old_name, new_name);
+    H5TRACE3("e", "i*s*s", loc_id, old_name, new_name);
 
     /* check arguments */
     if(!old_name || !new_name)
@@ -420,7 +420,7 @@ H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
     herr_t	        ret_value;      /* Return value */
 
     FUNC_ENTER_API(H5Aiterate, FAIL)
-    H5TRACE4("e", "i*Iuxx", loc_id, attr_num, op, op_data);
+    H5TRACE4("e", "i*Iux*x", loc_id, attr_num, op, op_data);
 
     /* check arguments */
     if(H5I_ATTR == H5I_get_type(loc_id))
@@ -465,7 +465,7 @@ H5Adelete(hid_t loc_id, const char *name)
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(H5Adelete, FAIL)
-    H5TRACE2("e", "is", loc_id, name);
+    H5TRACE2("e", "i*s", loc_id, name);
 
     /* check arguments */
     if(H5I_ATTR == H5I_get_type(loc_id))

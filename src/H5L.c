@@ -309,7 +309,7 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     herr_t      ret_value=SUCCEED;              /* Return value */
 
     FUNC_ENTER_API(H5Lmove, FAIL)
-    H5TRACE6("e", "isisii", src_loc_id, src_name, dst_loc_id, dst_name, lcpl_id,
+    H5TRACE6("e", "i*si*sii", src_loc_id, src_name, dst_loc_id, dst_name, lcpl_id,
              lapl_id);
 
     /* Check arguments */
@@ -367,7 +367,7 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     herr_t      ret_value=SUCCEED;              /* Return value */
 
     FUNC_ENTER_API(H5Lcopy, FAIL)
-    H5TRACE6("e", "isisii", src_loc_id, src_name, dst_loc_id, dst_name, lcpl_id,
+    H5TRACE6("e", "i*si*sii", src_loc_id, src_name, dst_loc_id, dst_name, lcpl_id,
              lapl_id);
 
     /* Check arguments */
@@ -432,7 +432,7 @@ H5Llink(hid_t new_loc_id, const char *new_name, hid_t obj_id, hid_t lcpl_id,
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Llink, FAIL)
-    H5TRACE5("e", "isiii", new_loc_id, new_name, obj_id, lcpl_id, lapl_id);
+    H5TRACE5("e", "i*siii", new_loc_id, new_name, obj_id, lcpl_id, lapl_id);
 
     /* Check arguments */
     if(new_loc_id == H5L_SAME_LOC)
@@ -483,7 +483,7 @@ H5Lcreate_soft(const char *target_path,
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(H5Lcreate_soft, FAIL)
-    H5TRACE5("e", "sisii", target_path, cur_loc_id, new_name, lcpl_id, lapl_id);
+    H5TRACE5("e", "*si*sii", target_path, cur_loc_id, new_name, lcpl_id, lapl_id);
 
     /* Check arguments */
     if(H5G_loc(cur_loc_id, &cur_loc) < 0)
@@ -529,7 +529,7 @@ H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
     herr_t      ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_API(H5Lcreate_hard, FAIL)
-    H5TRACE6("e", "isisii", cur_loc_id, cur_name, new_loc_id, new_name, lcpl_id,
+    H5TRACE6("e", "i*si*sii", cur_loc_id, cur_name, new_loc_id, new_name, lcpl_id,
              lapl_id);
 
     /* Check arguments */
@@ -598,8 +598,8 @@ H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type,
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Lcreate_ud, FAIL)
-    H5TRACE7("e", "isLlxzii", link_loc_id, link_name, link_type, udata, udata_size,
-             lcpl_id, lapl_id);
+    H5TRACE7("e", "i*sLl*xzii", link_loc_id, link_name, link_type, udata,
+             udata_size, lcpl_id, lapl_id);
 
     /* Check arguments */
     if(H5G_loc(link_loc_id, &link_loc) < 0)
@@ -641,7 +641,7 @@ H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(H5Ldelete, FAIL)
-    H5TRACE3("e", "isi", loc_id, name, lapl_id);
+    H5TRACE3("e", "i*si", loc_id, name, lapl_id);
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -686,7 +686,7 @@ H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(H5Ldelete_by_idx, FAIL)
-    H5TRACE6("e", "isIiIohi", loc_id, group_name, idx_type, order, n, lapl_id);
+    H5TRACE6("e", "i*sIiIohi", loc_id, group_name, idx_type, order, n, lapl_id);
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -745,7 +745,7 @@ H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/, size_t size,
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(H5Lget_val, FAIL)
-    H5TRACE5("e", "isxzi", loc_id, name, buf, size, lapl_id);
+    H5TRACE5("e", "i*sxzi", loc_id, name, buf, size, lapl_id);
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc))
@@ -795,7 +795,7 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(H5Lget_val_by_idx, FAIL)
-    H5TRACE8("e", "isIiIohxzi", loc_id, group_name, idx_type, order, n, buf, size,
+    H5TRACE8("e", "i*sIiIohxzi", loc_id, group_name, idx_type, order, n, buf, size,
              lapl_id);
 
     /* Check arguments */
@@ -853,7 +853,7 @@ H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linfo /*out*/,
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(H5Lget_info, FAIL)
-    H5TRACE4("e", "isxi", loc_id, name, linfo, lapl_id);
+    H5TRACE4("e", "i*sxi", loc_id, name, linfo, lapl_id);
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc))
@@ -899,7 +899,7 @@ H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(H5Lget_info_by_idx, FAIL)
-    H5TRACE7("e", "isIiIohxi", loc_id, group_name, idx_type, order, n, linfo,
+    H5TRACE7("e", "i*sIiIohxi", loc_id, group_name, idx_type, order, n, linfo,
              lapl_id);
 
     /* Check arguments */
@@ -1088,7 +1088,7 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
     ssize_t ret_value;          /* Return value */
 
     FUNC_ENTER_API(H5Lget_name_by_idx, FAIL)
-    H5TRACE8("Zs", "isIiIohxzi", loc_id, group_name, idx_type, order, n, name, size,
+    H5TRACE8("Zs", "i*sIiIohxzi", loc_id, group_name, idx_type, order, n, name, size,
              lapl_id);
 
     /* Check arguments */
@@ -1160,7 +1160,7 @@ H5Literate(hid_t loc_id, const char *group_name,
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_API(H5Literate, FAIL)
-    H5TRACE8("e", "isIiIo*hxxi", loc_id, group_name, idx_type, order, idx_p, op,
+    H5TRACE8("e", "i*sIiIo*hx*xi", loc_id, group_name, idx_type, order, idx_p, op,
              op_data, lapl_id);
 
     /* Check arguments */

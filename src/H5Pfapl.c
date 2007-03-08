@@ -649,7 +649,7 @@ H5Pset_driver(hid_t plist_id, hid_t new_driver_id, const void *new_driver_info)
     herr_t ret_value=SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(H5Pset_driver, FAIL);
-    H5TRACE3("e", "iix", plist_id, new_driver_id, new_driver_info);
+    H5TRACE3("e", "ii*x", plist_id, new_driver_id, new_driver_info);
 
     /* Check arguments */
     if(NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
@@ -1328,7 +1328,7 @@ H5Pset_mdc_config(hid_t                 plist_id,
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pset_mdc_config, FAIL);
-    H5TRACE2("e", "ix", plist_id, config_ptr);
+    H5TRACE2("e", "i*x", plist_id, config_ptr);
 
     /* Get the plist structure */
     if( NULL == ( plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS) ) ) {
@@ -1392,7 +1392,7 @@ H5Pget_mdc_config(hid_t                 plist_id,
     herr_t ret_value = SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pget_mdc_config, FAIL);
-    H5TRACE2("e", "ix", plist_id, config_ptr);
+    H5TRACE2("e", "i*x", plist_id, config_ptr);
 
     /* Get the plist structure */
     if ( NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)) ) {

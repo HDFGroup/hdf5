@@ -199,7 +199,7 @@ H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
     hid_t       ret_value = FAIL;
 
     FUNC_ENTER_API(H5Oopen, FAIL)
-    H5TRACE3("i", "isi", loc_id, name, lapl_id);
+    H5TRACE3("i", "i*si", loc_id, name, lapl_id);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -251,7 +251,7 @@ H5Oopen_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     hid_t       ret_value = FAIL;
 
     FUNC_ENTER_API(H5Oopen_by_idx, FAIL)
-    H5TRACE6("i", "isIiIohi", loc_id, group_name, idx_type, order, n, lapl_id);
+    H5TRACE6("i", "i*sIiIohi", loc_id, group_name, idx_type, order, n, lapl_id);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -469,6 +469,7 @@ H5Oget_info(hid_t loc_id, const char *name, H5O_info_t *oinfo, hid_t lapl_id)
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(H5Oget_info, FAIL)
+    H5TRACE4("e", "i*s*xi", loc_id, name, oinfo, lapl_id);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -518,6 +519,8 @@ H5Oget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(H5Oget_info_by_idx, FAIL)
+    H5TRACE7("e", "i*sIiIoh*xi", loc_id, group_name, idx_type, order, n, oinfo,
+             lapl_id);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)

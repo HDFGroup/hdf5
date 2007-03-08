@@ -170,7 +170,7 @@ H5Tenum_insert(hid_t type, const char *name, const void *value)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tenum_insert, FAIL)
-    H5TRACE3("e", "isx", type, name, value);
+    H5TRACE3("e", "i*s*x", type, name, value);
 
     /* Check args */
     if (NULL==(dt=H5I_object_verify(type,H5I_DATATYPE)))
@@ -363,7 +363,7 @@ H5Tenum_nameof(hid_t type, const void *value, char *name/*out*/, size_t size)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tenum_nameof, FAIL)
-    H5TRACE4("e", "ixxz", type, value, name, size);
+    H5TRACE4("e", "i*xxz", type, value, name, size);
 
     /* Check args */
     if (NULL==(dt=H5I_object_verify(type,H5I_DATATYPE)))
@@ -503,7 +503,7 @@ H5Tenum_valueof(hid_t type, const char *name, void *value/*out*/)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tenum_valueof, FAIL)
-    H5TRACE3("e", "isx", type, name, value);
+    H5TRACE3("e", "i*sx", type, name, value);
 
     /* Check args */
     if (NULL==(dt=H5I_object_verify(type,H5I_DATATYPE)))

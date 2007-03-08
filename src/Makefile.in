@@ -99,17 +99,18 @@ am_libhdf5_la_OBJECTS = H5.lo H5checksum.lo H5dbg.lo H5system.lo \
 	H5HFdbg.lo H5HFdblock.lo H5HFdtable.lo H5HFhdr.lo H5HFhuge.lo \
 	H5HFiblock.lo H5HFiter.lo H5HFman.lo H5HFsection.lo \
 	H5HFspace.lo H5HFstat.lo H5HFtest.lo H5HFtiny.lo H5HG.lo \
-	H5HGdbg.lo H5HL.lo H5HLdbg.lo H5HP.lo H5I.lo H5MF.lo H5MM.lo \
-	H5MP.lo H5MPtest.lo H5L.lo H5Lexternal.lo H5O.lo H5Oainfo.lo H5Oalloc.lo \
-	H5Oattr.lo H5Oattribute.lo H5Obogus.lo H5Obtreek.lo H5Ocache.lo H5Ocont.lo \
-	H5Ocopy.lo H5Odbg.lo H5Odrvinfo.lo H5Odtype.lo H5Oefl.lo H5Ofill.lo \
-	H5Oginfo.lo H5Olayout.lo H5Olinfo.lo H5Olink.lo H5Omessage.lo \
-	H5Omtime.lo H5Oname.lo H5Onull.lo H5Opline.lo H5Osdspace.lo \
-	H5Oshared.lo H5Ostab.lo H5Oshmesg.lo H5Otest.lo H5P.lo \
-	H5Pacpl.lo H5Pdcpl.lo H5Pdxpl.lo H5Pfapl.lo H5Pfcpl.lo \
-	H5Pfmpl.lo H5Pgcpl.lo H5Plapl.lo H5Plcpl.lo H5Pocpl.lo \
-	H5Pocpypl.lo H5Pstrcpl.lo H5Ptest.lo H5R.lo H5RC.lo H5RS.lo \
-	H5S.lo H5Sall.lo H5Shyper.lo H5Smpio.lo H5Snone.lo H5Spoint.lo \
+	H5HGdbg.lo H5HL.lo H5HLdbg.lo H5HP.lo H5I.lo H5L.lo \
+	H5Lexternal.lo H5MF.lo H5MM.lo H5MP.lo H5MPtest.lo H5O.lo \
+	H5Oainfo.lo H5Oalloc.lo H5Oattr.lo H5Oattribute.lo H5Obogus.lo \
+	H5Obtreek.lo H5Ocache.lo H5Ocont.lo H5Ocopy.lo H5Odbg.lo \
+	H5Odrvinfo.lo H5Odtype.lo H5Oefl.lo H5Ofill.lo H5Oginfo.lo \
+	H5Olayout.lo H5Olinfo.lo H5Olink.lo H5Omessage.lo H5Omtime.lo \
+	H5Oname.lo H5Onull.lo H5Opline.lo H5Osdspace.lo H5Oshared.lo \
+	H5Ostab.lo H5Oshmesg.lo H5Otest.lo H5P.lo H5Pacpl.lo \
+	H5Pdcpl.lo H5Pdxpl.lo H5Pfapl.lo H5Pfcpl.lo H5Pfmpl.lo \
+	H5Pgcpl.lo H5Plapl.lo H5Plcpl.lo H5Pocpl.lo H5Pocpypl.lo \
+	H5Pstrcpl.lo H5Ptest.lo H5R.lo H5RC.lo H5RS.lo H5S.lo \
+	H5Sall.lo H5Shyper.lo H5Smpio.lo H5Snone.lo H5Spoint.lo \
 	H5Sselect.lo H5Stest.lo H5SL.lo H5SM.lo H5SMbtree2.lo \
 	H5SMcache.lo H5SMtest.lo H5ST.lo H5T.lo H5Tarray.lo H5Tbit.lo \
 	H5Tcommit.lo H5Tcompound.lo H5Tconv.lo H5Tcset.lo H5Tenum.lo \
@@ -417,10 +418,12 @@ libhdf5_la_SOURCES = H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5HF.c H5HFbtree2.c H5HFcache.c H5HFdbg.c H5HFdblock.c H5HFdtable.c \
         H5HFhdr.c H5HFhuge.c H5HFiblock.c H5HFiter.c H5HFman.c H5HFsection.c \
         H5HFspace.c H5HFstat.c H5HFtest.c H5HFtiny.c \
-        H5HG.c H5HGdbg.c H5HL.c H5HLdbg.c H5HP.c H5I.c H5MF.c H5MM.c \
-        H5MP.c H5MPtest.c H5L.c H5Lexternal.c H5O.c H5Oainfo.c H5Oalloc.c H5Oattr.c \
+        H5HG.c H5HGdbg.c H5HL.c H5HLdbg.c H5HP.c H5I.c H5L.c H5Lexternal.c \
+        H5MF.c H5MM.c H5MP.c H5MPtest.c \
+        H5O.c H5Oainfo.c H5Oalloc.c H5Oattr.c \
         H5Oattribute.c H5Obogus.c H5Obtreek.c H5Ocache.c \
-        H5Ocont.c H5Ocopy.c H5Odbg.c H5Odrvinfo.c H5Odtype.c H5Oefl.c H5Ofill.c H5Oginfo.c \
+        H5Ocont.c H5Ocopy.c H5Odbg.c H5Odrvinfo.c H5Odtype.c H5Oefl.c \
+        H5Ofill.c H5Oginfo.c \
         H5Olayout.c \
         H5Olinfo.c H5Olink.c H5Omessage.c H5Omtime.c \
         H5Oname.c H5Onull.c H5Opline.c H5Osdspace.c H5Oshared.c H5Ostab.c \

@@ -864,7 +864,7 @@ H5Pset_external(hid_t plist_id, const char *name, off_t offset, hsize_t size)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Pset_external, FAIL)
-    H5TRACE4("e", "isoh", plist_id, name, offset, size);
+    H5TRACE4("e", "i*soh", plist_id, name, offset, size);
 
     /* Check arguments */
     if (!name || !*name)
@@ -1990,7 +1990,7 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(H5Pset_fill_value, FAIL)
-    H5TRACE3("e", "iix", plist_id, type_id, value);
+    H5TRACE3("e", "ii*x", plist_id, type_id, value);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))

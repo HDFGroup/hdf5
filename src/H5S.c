@@ -1692,7 +1692,7 @@ H5Sencode(hid_t obj_id, void *buf, size_t *nalloc)
     herr_t      ret_value=SUCCEED;
 
     FUNC_ENTER_API (H5Sencode, FAIL);
-    H5TRACE3("e", "ix*z", obj_id, buf, nalloc);
+    H5TRACE3("e", "i*x*z", obj_id, buf, nalloc);
 
     /* Check argument and retrieve object */
     if (NULL==(dspace=(H5S_t *)H5I_object_verify(obj_id, H5I_DATASPACE)))
@@ -1805,7 +1805,7 @@ H5Sdecode(const void *buf)
     hid_t       ret_value;
 
     FUNC_ENTER_API (H5Sdecode, FAIL)
-    H5TRACE1("i", "x", buf);
+    H5TRACE1("i", "*x", buf);
 
     if(buf == NULL)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "empty buffer")

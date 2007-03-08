@@ -298,7 +298,7 @@ H5Dcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     hid_t           ret_value;          /* Return value */
 
     FUNC_ENTER_API(H5Dcreate, FAIL)
-    H5TRACE5("i", "isiii", loc_id, name, type_id, space_id, dcpl_id);
+    H5TRACE5("i", "i*siii", loc_id, name, type_id, space_id, dcpl_id);
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -481,7 +481,7 @@ H5Dopen(hid_t loc_id, const char *name)
     hid_t        ret_value;
 
     FUNC_ENTER_API(H5Dopen, FAIL)
-    H5TRACE2("i", "is", loc_id, name);
+    H5TRACE2("i", "i*s", loc_id, name);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -562,7 +562,7 @@ H5Dopen_expand(hid_t loc_id, const char *name, hid_t dapl_id)
     hid_t        ret_value;
 
     FUNC_ENTER_API(H5Dopen_expand, FAIL)
-    H5TRACE3("i", "isi", loc_id, name, dapl_id);
+    H5TRACE3("i", "i*si", loc_id, name, dapl_id);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -2736,7 +2736,7 @@ H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t op,
     herr_t ret_value;
 
     FUNC_ENTER_API(H5Diterate, FAIL)
-    H5TRACE5("e", "xiixx", buf, type_id, space_id, op, operator_data);
+    H5TRACE5("e", "*xiix*x", buf, type_id, space_id, op, operator_data);
 
     /* Check args */
     if(NULL==op)
@@ -2814,7 +2814,7 @@ H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf)
     herr_t ret_value;
 
     FUNC_ENTER_API(H5Dvlen_reclaim, FAIL)
-    H5TRACE4("e", "iiix", type_id, space_id, plist_id, buf);
+    H5TRACE4("e", "iii*x", type_id, space_id, plist_id, buf);
 
     /* Check args */
     if(H5I_DATATYPE != H5I_get_type(type_id) || buf == NULL)

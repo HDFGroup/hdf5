@@ -688,7 +688,7 @@ H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void **file_handle)
     herr_t              ret_value;
 
     FUNC_ENTER_API(H5Fget_vfd_handle, FAIL)
-    H5TRACE3("e", "iix", file_id, fapl, file_handle);
+    H5TRACE3("e", "ii**x", file_id, fapl, file_handle);
 
     /* Check args */
     assert(file_handle);
@@ -762,7 +762,7 @@ H5Fis_hdf5(const char *name)
     htri_t	ret_value;
 
     FUNC_ENTER_API(H5Fis_hdf5, FAIL)
-    H5TRACE1("t", "s", name);
+    H5TRACE1("t", "*s", name);
 
     /* Check args and all the boring stuff. */
     if (!name || !*name)
@@ -1419,7 +1419,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     hid_t	ret_value;	        /*return value			*/
 
     FUNC_ENTER_API(H5Fcreate, FAIL)
-    H5TRACE4("i", "sIuii", filename, flags, fcpl_id, fapl_id);
+    H5TRACE4("i", "*sIuii", filename, flags, fcpl_id, fapl_id);
 
     /* Check/fix arguments */
     if (!filename || !*filename)
@@ -1521,7 +1521,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     hid_t	ret_value;	        /*return value			*/
 
     FUNC_ENTER_API(H5Fopen, FAIL)
-    H5TRACE3("i", "sIui", filename, flags, fapl_id);
+    H5TRACE3("i", "*sIui", filename, flags, fapl_id);
 
     /* Check/fix arguments. */
     if(!filename || !*filename)
@@ -3224,7 +3224,7 @@ H5Fget_mdc_config(hid_t file_id,
     herr_t     result;
 
     FUNC_ENTER_API(H5Fget_mdc_config, FAIL)
-    H5TRACE2("e", "ix", file_id, config_ptr);
+    H5TRACE2("e", "i*x", file_id, config_ptr);
 
     /* Check args */
     if ( NULL == (file = H5I_object_verify(file_id, H5I_FILE)) ) {
@@ -3283,7 +3283,7 @@ H5Fset_mdc_config(hid_t file_id,
     herr_t     result;
 
     FUNC_ENTER_API(H5Fset_mdc_config, FAIL)
-    H5TRACE2("e", "ix", file_id, config_ptr);
+    H5TRACE2("e", "i*x", file_id, config_ptr);
 
     /* Check args */
     if ( NULL == (file = H5I_object_verify(file_id, H5I_FILE)) ) {

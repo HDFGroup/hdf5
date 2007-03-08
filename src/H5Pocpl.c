@@ -371,6 +371,7 @@ H5Pset_obj_track_times(hid_t plist_id, hbool_t track_times)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(H5Pset_obj_track_times, FAIL)
+    H5TRACE2("e", "ib", plist_id, track_times);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_CREATE)))
@@ -413,6 +414,7 @@ H5Pget_obj_track_times(hid_t plist_id, hbool_t *track_times)
     herr_t ret_value = SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pget_obj_track_times, FAIL)
+    H5TRACE2("e", "i*b", plist_id, track_times);
 
     /* Get values */
     if(track_times) {

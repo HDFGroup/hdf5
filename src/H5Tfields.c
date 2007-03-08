@@ -252,7 +252,7 @@ H5Tget_member_index(hid_t type_id, const char *name)
     unsigned    i;
 
     FUNC_ENTER_API(H5Tget_member_index, FAIL)
-    H5TRACE2("Is", "is", type_id, name);
+    H5TRACE2("Is", "i*s", type_id, name);
 
     /* Check arguments */
     assert(name);

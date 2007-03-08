@@ -74,7 +74,7 @@ H5Tset_tag(hid_t type_id, const char *tag)
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Tset_tag, FAIL)
-    H5TRACE2("e", "is", type_id, tag);
+    H5TRACE2("e", "i*s", type_id, tag);
 
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
