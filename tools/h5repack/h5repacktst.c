@@ -2579,8 +2579,8 @@ int make_big(hid_t loc_id, int set_chunk)
  hsize_t hs_start[1];
  size_t  size;
  size_t  nelmts=(size_t)GBLL/1024;
- char    fillvalue=-1;
- char    *buf=NULL;
+ signed  char fillvalue=-1;
+ signed  char *buf=NULL;
  int     i, j, s;
  char    c;
  char    name[20];
@@ -2590,7 +2590,7 @@ int make_big(hid_t loc_id, int set_chunk)
  /* create */ 
  if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
   goto out;
- if (H5Pset_fill_value(dcpl, H5T_NATIVE_CHAR, &fillvalue)<0)
+ if (H5Pset_fill_value(dcpl, H5T_NATIVE_SCHAR, &fillvalue)<0)
   goto out;
 
  if (set_chunk)
@@ -2601,7 +2601,7 @@ int make_big(hid_t loc_id, int set_chunk)
  }
  if ((f_sid = H5Screate_simple(1,dims,NULL))<0)
   goto out;
- if ((did = H5Dcreate(loc_id,name,H5T_NATIVE_CHAR,f_sid,dcpl))<0)
+ if ((did = H5Dcreate(loc_id,name,H5T_NATIVE_SCHAR,f_sid,dcpl))<0)
   goto out;
  if ((m_sid = H5Screate_simple(1, hs_size, hs_size))<0) 
   goto out;
@@ -2626,7 +2626,7 @@ int make_big(hid_t loc_id, int set_chunk)
   hs_start[0] = i * GBLL/1024;
   if (H5Sselect_hyperslab (f_sid,H5S_SELECT_SET,hs_start,NULL,hs_size, NULL)<0) 
    goto out;
-  if (H5Dwrite (did,H5T_NATIVE_CHAR,m_sid,f_sid,H5P_DEFAULT,buf)<0) 
+  if (H5Dwrite (did,H5T_NATIVE_SCHAR,m_sid,f_sid,H5P_DEFAULT,buf)<0) 
    goto out;
 
   /* write only one hyperslab */
@@ -2659,7 +2659,6 @@ out:
  return -1;
 
 }
-
 
 /*-------------------------------------------------------------------------
  * Function: write_dset_in
