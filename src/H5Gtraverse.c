@@ -722,10 +722,11 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
                     linfo = &def_linfo;
                 } /* end if */
                 else {
-                    /* Only keep the index_corder information from the parent 
+                    /* Only keep the creation order information from the parent 
                      *  group's link info
                      */
                     HDmemcpy(&tmp_linfo, &def_linfo, sizeof(H5O_linfo_t));
+                    tmp_linfo.track_corder = par_linfo.track_corder;
                     tmp_linfo.index_corder = par_linfo.index_corder;
                     linfo = &tmp_linfo;
                 } /* end else */

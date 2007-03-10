@@ -76,10 +76,9 @@ const H5O_msg_class_t H5O_MSG_AINFO[1] = {{
 #define H5O_AINFO_VERSION 	0
 
 /* Flags for attribute info flag encoding */
-#define H5O_AINFO_INDEX_NAME            0x01
-#define H5O_AINFO_TRACK_CORDER          0x02
-#define H5O_AINFO_INDEX_CORDER          0x04
-#define H5O_AINFO_ALL_FLAGS             (H5O_AINFO_INDEX_NAME | H5O_AINFO_TRACK_CORDER | H5O_AINFO_INDEX_CORDER)
+#define H5O_AINFO_TRACK_CORDER          0x01
+#define H5O_AINFO_INDEX_CORDER          0x02
+#define H5O_AINFO_ALL_FLAGS             (H5O_AINFO_TRACK_CORDER | H5O_AINFO_INDEX_CORDER)
 
 /* Declare a free list to manage the H5O_ainfo_t struct */
 H5FL_DEFINE_STATIC(H5O_ainfo_t);
@@ -123,7 +122,6 @@ H5O_ainfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
 
     /* Get the flags for the message */
     flags = *p++;
-    HDassert(flags & H5O_AINFO_INDEX_NAME);
     if(flags & ~H5O_AINFO_ALL_FLAGS)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad flag value for message")
     ainfo->track_corder = (flags & H5O_AINFO_TRACK_CORDER) ? TRUE : FALSE;
@@ -191,8 +189,7 @@ H5O_ainfo_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void
     *p++ = H5O_AINFO_VERSION;
 
     /* The flags for the attribute indices */
-    flags = H5O_AINFO_INDEX_NAME;       /* Names are always indexed */
-    flags |= ainfo->track_corder ? H5O_AINFO_TRACK_CORDER : 0;
+    flags = ainfo->track_corder ? H5O_AINFO_TRACK_CORDER : 0;
     flags |= ainfo->index_corder ? H5O_AINFO_INDEX_CORDER : 0;
     *p++ = flags;
 

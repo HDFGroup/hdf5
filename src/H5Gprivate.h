@@ -60,6 +60,7 @@
 /* ========= Group Creation properties ============ */
 
 /* Defaults for link info values */
+#define H5G_CRT_LINFO_TRACK_CORDER              FALSE
 #define H5G_CRT_LINFO_INDEX_CORDER              FALSE
 #define H5G_CRT_LINFO_NLINKS                    0
 #define H5G_CRT_LINFO_MAX_CORDER                0
@@ -70,7 +71,8 @@
 /* Definitions for link info settings */
 #define H5G_CRT_LINK_INFO_NAME                  "link info"
 #define H5G_CRT_LINK_INFO_SIZE                  sizeof(H5O_linfo_t)
-#define H5G_CRT_LINK_INFO_DEF                   {H5G_CRT_LINFO_INDEX_CORDER, \
+#define H5G_CRT_LINK_INFO_DEF                   {H5G_CRT_LINFO_TRACK_CORDER, \
+                                                    H5G_CRT_LINFO_INDEX_CORDER, \
                                                     H5G_CRT_LINFO_MAX_CORDER, \
                                                     H5G_CRT_LINFO_CORDER_BT2_ADDR, \
                                                     H5G_CRT_LINFO_NLINKS, \
@@ -80,7 +82,6 @@
 
 /* Defaults for group info values */
 #define H5G_CRT_GINFO_LHEAP_SIZE_HINT           0
-#define H5G_CRT_GINFO_TRACK_CORDER              FALSE
 #define H5G_CRT_GINFO_MAX_COMPACT               8
 #define H5G_CRT_GINFO_MIN_DENSE                 6
 #define H5G_CRT_GINFO_EST_NUM_ENTRIES           4
@@ -90,7 +91,6 @@
 #define H5G_CRT_GROUP_INFO_NAME                 "group info"
 #define H5G_CRT_GROUP_INFO_SIZE                 sizeof(H5O_ginfo_t)
 #define H5G_CRT_GROUP_INFO_DEF                  {H5G_CRT_GINFO_LHEAP_SIZE_HINT, \
-                                                    H5G_CRT_GINFO_TRACK_CORDER, \
                                                     H5G_CRT_GINFO_MAX_COMPACT, \
                                                     H5G_CRT_GINFO_MIN_DENSE, \
                                                     H5G_CRT_GINFO_EST_NUM_ENTRIES, \

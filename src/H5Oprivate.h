@@ -179,6 +179,7 @@ typedef struct H5O_shared_t {
  */
 typedef struct H5O_linfo_t {
     /* (creation order info) */
+    hbool_t     track_corder;           /* Are creation order values tracked on links? */
     hbool_t     index_corder;           /* Are creation order values indexed on links? */
     int64_t     max_corder;             /* Current max. creation order value for group */
     haddr_t     corder_bt2_addr;        /* Address of v2 B-tree for indexing creation order values of links */
@@ -321,8 +322,6 @@ typedef struct H5O_ginfo_t {
     uint32_t    lheap_size_hint;        /* Local heap size hint              */
 
     /* "New" format group info (stored) */
-    /* (creation order info) */
-    hbool_t     track_corder;           /* Are creation order values tracked on links? */
 
     /* (storage management info) */
     uint16_t	max_compact;		/* Maximum # of compact links        */

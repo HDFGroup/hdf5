@@ -68,10 +68,6 @@ const H5O_msg_class_t H5O_MSG_GINFO[1] = {{
 /* Current version of group info information */
 #define H5O_GINFO_VERSION 	0
 
-/* Flags for group info flag encoding */
-#define H5O_GINFO_FLAG_TRACK_NAME          0x01
-#define H5O_GINFO_FLAG_TRACK_CORDER        0x02
-
 /* Declare a free list to manage the H5O_ginfo_t struct */
 H5FL_DEFINE_STATIC(H5O_ginfo_t);
 
@@ -115,8 +111,6 @@ H5O_ginfo_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_fla
 
     /* Get the flags for the group */
     flags = *p++;
-    HDassert(flags & H5O_GINFO_FLAG_TRACK_NAME);
-    ginfo->track_corder = (flags & H5O_GINFO_FLAG_TRACK_CORDER) ? TRUE : FALSE;
 
     /* Get the max. # of links to store compactly & the min. # of links to store densely */
     UINT16DECODE(p, ginfo->max_compact)
@@ -155,7 +149,7 @@ static herr_t
 H5O_ginfo_encode(H5F_t UNUSED *f, hbool_t UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_ginfo_t  *ginfo = (const H5O_ginfo_t *) _mesg;
-    unsigned char       flags;          /* Flags for encoding group info */
+    unsigned char       flags = 0;          /* Flags for encoding group info */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_ginfo_encode)
 
@@ -167,8 +161,6 @@ H5O_ginfo_encode(H5F_t UNUSED *f, hbool_t UNUSED disable_shared, uint8_t *p, con
     *p++ = H5O_GINFO_VERSION;
 
     /* The flags for the group info */
-    flags = H5O_GINFO_FLAG_TRACK_NAME;          /* Names are always tracked */
-    flags |= ginfo->track_corder ? H5O_GINFO_FLAG_TRACK_CORDER : 0;
     *p++ = flags;
 
     /* Store the max. # of links to store compactly & the min. # of links to store densely */
@@ -319,8 +311,6 @@ H5O_ginfo_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
-	      "Track creation order of links:", ginfo->track_corder);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Max. compact links:", ginfo->max_compact);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,

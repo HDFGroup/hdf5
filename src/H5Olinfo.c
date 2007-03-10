@@ -77,9 +77,9 @@ const H5O_msg_class_t H5O_MSG_LINFO[1] = {{
 #define H5O_LINFO_VERSION 	0
 
 /* Flags for link info index flag encoding */
-#define H5O_LINFO_INDEX_NAME            0x01
+#define H5O_LINFO_TRACK_CORDER          0x01
 #define H5O_LINFO_INDEX_CORDER          0x02
-#define H5O_LINFO_ALL_FLAGS             (H5O_LINFO_INDEX_NAME | H5O_LINFO_INDEX_CORDER)
+#define H5O_LINFO_ALL_FLAGS             (H5O_LINFO_TRACK_CORDER | H5O_LINFO_INDEX_CORDER)
 
 /* Data exchange structure to use when copying links from src to dst */
 typedef struct {
@@ -132,16 +132,19 @@ H5O_linfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
 
     /* Get the index flags for the group */
     index_flags = *p++;
-    HDassert(index_flags & H5O_LINFO_INDEX_NAME);
     if(index_flags & ~H5O_LINFO_ALL_FLAGS)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad flag value for message")
+    linfo->track_corder = (index_flags & H5O_LINFO_TRACK_CORDER) ? TRUE : FALSE;
     linfo->index_corder = (index_flags & H5O_LINFO_INDEX_CORDER) ? TRUE : FALSE;
 
     /* Number of links in the group */
     H5F_DECODE_LENGTH(f, p, linfo->nlinks)
 
-    /* Min. & max creation order value for the group */
-    INT64DECODE(p, linfo->max_corder)
+    /* Max. link creation order value for the group, if tracked */
+    if(linfo->track_corder)
+        INT64DECODE(p, linfo->max_corder)
+    else
+        linfo->max_corder = 0;
 
     /* Address of fractal heap to store "dense" links */
     H5F_addr_decode(f, &p, &(linfo->link_fheap_addr));
@@ -197,15 +200,16 @@ H5O_linfo_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void
     *p++ = H5O_LINFO_VERSION;
 
     /* The flags for the link indices */
-    index_flags = H5O_LINFO_INDEX_NAME;       /* Names are always indexed */
+    index_flags = linfo->track_corder ? H5O_LINFO_TRACK_CORDER : 0;
     index_flags |= linfo->index_corder ? H5O_LINFO_INDEX_CORDER : 0;
     *p++ = index_flags;
 
     /* Number of links in the group */
     H5F_ENCODE_LENGTH(f, p, linfo->nlinks)
 
-    /* Min. & max creation order value for the group */
-    INT64ENCODE(p, linfo->max_corder)
+    /* Max. link creation order value for the group, if tracked */
+    if(linfo->track_corder)
+        INT64ENCODE(p, linfo->max_corder)
 
     /* Address of fractal heap to store "dense" links */
     H5F_addr_encode(f, &p, linfo->link_fheap_addr);
@@ -291,7 +295,7 @@ H5O_linfo_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg)
     ret_value = 1                       /* Version */
                 + 1                     /* Index flags */
                 + H5F_SIZEOF_SIZE(f)    /* Number of links */
-                + 8                     /* Curr. max. creation order value */
+                + (linfo->track_corder ? 8 : 0) /* Curr. max. creation order value */
                 + H5F_SIZEOF_ADDR(f)    /* Address of fractal heap to store "dense" links */
                 + H5F_SIZEOF_ADDR(f)    /* Address of v2 B-tree for indexing names of links */
                 + (linfo->index_corder ? H5F_SIZEOF_ADDR(f) : 0);   /* Address of v2 B-tree for indexing creation order values of links */
@@ -562,6 +566,8 @@ H5O_linfo_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
+    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
+	      "Track creation order of links:", linfo->track_corder);
     HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
 	      "Index creation order of links:", linfo->index_corder);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,

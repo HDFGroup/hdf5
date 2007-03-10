@@ -424,7 +424,6 @@ herr_t
 H5Pset_link_creation_order(hid_t plist_id, unsigned crt_order_flags)
 {
     H5P_genplist_t *plist;              /* Property list pointer */
-    H5O_ginfo_t ginfo;                  /* Group information structure */
     H5O_linfo_t linfo;                  /* Link information structure */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -439,22 +438,12 @@ H5Pset_link_creation_order(hid_t plist_id, unsigned crt_order_flags)
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
-    /* Get group info */
-    if(H5P_get(plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group info")
-
-    /* Update field */
-    ginfo.track_corder = (crt_order_flags & H5P_CRT_ORDER_TRACKED) ? TRUE : FALSE;
-
-    /* Set group info */
-    if(H5P_set(plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set group info")
-
     /* Get link info */
     if(H5P_get(plist, H5G_CRT_LINK_INFO_NAME, &linfo) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get link info")
 
-    /* Update field */
+    /* Update fields */
+    linfo.track_corder = (crt_order_flags & H5P_CRT_ORDER_TRACKED) ? TRUE : FALSE;
     linfo.index_corder = (crt_order_flags & H5P_CRT_ORDER_INDEXED) ? TRUE : FALSE;
 
     /* Set link info */
@@ -489,7 +478,6 @@ H5Pget_link_creation_order(hid_t plist_id, unsigned *crt_order_flags /*out*/)
     /* Get values */
     if(crt_order_flags) {
         H5P_genplist_t *plist;      /* Property list pointer */
-        H5O_ginfo_t ginfo;          /* Group information structure */
         H5O_linfo_t linfo;          /* Link information structure */
 
         /* Reset the value to return */
@@ -499,16 +487,11 @@ H5Pget_link_creation_order(hid_t plist_id, unsigned *crt_order_flags /*out*/)
         if(NULL == (plist = H5P_object_verify(plist_id, H5P_GROUP_CREATE)))
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
-        /* Get group info */
-        if(H5P_get(plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group info")
-
-        *crt_order_flags |= ginfo.track_corder ? H5P_CRT_ORDER_TRACKED : 0;
-
         /* Get link info */
         if(H5P_get(plist, H5G_CRT_LINK_INFO_NAME, &linfo) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get link info")
 
+        *crt_order_flags |= linfo.track_corder ? H5P_CRT_ORDER_TRACKED : 0;
         *crt_order_flags |= linfo.index_corder ? H5P_CRT_ORDER_INDEXED : 0;
     } /* end if */
 
