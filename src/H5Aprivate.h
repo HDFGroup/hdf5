@@ -48,14 +48,10 @@ typedef struct H5A_attr_iter_op_t H5A_attr_iter_op_t;
 /***************************************/
 /* Library-private Function Prototypes */
 /***************************************/
-struct H5O_t; /*forward decl*/
 
 /* General attribute routines */
 H5_DLL struct H5O_loc_t *H5A_oloc(H5A_t *attr);
 H5_DLL H5G_name_t *H5A_nameof(H5A_t *attr);
-
-/* Attribute "dense" storage routines */
-H5_DLL herr_t H5A_dense_delete(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh);
 
 #endif /* _H5Aprivate_H */
 

@@ -1055,7 +1055,6 @@ static void sohm_attr_helper(hid_t fcpl_id)
 }
 
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_sohm_attrs
  *

@@ -415,6 +415,7 @@ typedef struct H5O_drvinfo_t {
  */
 typedef struct H5O_ainfo_t {
     /* (creation order info) */
+    hbool_t     track_corder;           /* Are creation order values tracked on attributes? */
     hbool_t     index_corder;           /* Are creation order values indexed on attributes? */
     H5O_msg_crt_idx_t max_crt_idx;      /* Maximum attribute creation index used */
     haddr_t     corder_bt2_addr;        /* Address of v2 B-tree for indexing creation order values of "dense" attributes */
@@ -524,6 +525,9 @@ H5_DLL herr_t H5O_link_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg);
 
 /* Shared message operators */
 H5_DLL herr_t H5O_shared_copy(void *dst, const H5O_shared_t *src);
+
+/* Attribute operators */
+H5_DLL hsize_t H5O_attr_count_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh);
 
 #endif /* _H5Oprivate_H */
 

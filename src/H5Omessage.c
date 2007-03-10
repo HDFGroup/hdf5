@@ -73,12 +73,7 @@ typedef struct {
 /* Local Prototypes */
 /********************/
 
-static herr_t H5O_msg_write_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
-    const H5O_msg_class_t *type, unsigned mesg_flags, unsigned update_flags,
-    void *mesg);
 static herr_t H5O_msg_reset_real(const H5O_msg_class_t *type, void *native);
-static herr_t H5O_msg_remove_real(const H5O_loc_t *loc, const H5O_msg_class_t *type,
-    int sequence, H5O_operator_t op, void *op_data, hbool_t adj_link, hid_t dxpl_id);
 static herr_t H5O_msg_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, 
     unsigned sequence, hbool_t *oh_modified, void *_udata/*in,out*/);
 static herr_t H5O_copy_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx,
@@ -325,7 +320,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5O_msg_write_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *type,
     unsigned mesg_flags, unsigned update_flags, void *mesg)
 {
@@ -339,10 +334,11 @@ H5O_msg_write_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *ty
     HDassert(f);
     HDassert(oh);
     HDassert(type);
+    HDassert(type != H5O_MSG_ATTR);
     HDassert(mesg);
     HDassert(0 == (mesg_flags & ~H5O_MSG_FLAG_BITS));
 
-    /* Count similar messages */
+    /* Locate message of correct type */
     for(idx = 0, idx_msg = &oh->mesg[0]; idx < oh->nmesgs; idx++, idx_msg++)
 	if(type->id == idx_msg->type->id)
             break;
@@ -433,7 +429,7 @@ H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, void *mesg,
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "unable to load object header")
 
     /* Call the "real" read routine */
-    if((ret_value = H5O_msg_read_real(loc->file, dxpl_id, oh, type_id, mesg)) == NULL)
+    if(NULL == (ret_value = H5O_msg_read_real(loc->file, dxpl_id, oh, type_id, mesg)))
 	HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to load object header")
 
 done:
@@ -915,6 +911,7 @@ herr_t
 H5O_msg_remove(H5O_loc_t *loc, unsigned type_id, int sequence, hbool_t adj_link,
     hid_t dxpl_id)
 {
+    H5O_t *oh = NULL;                   /* Pointer to actual object header */
     const H5O_msg_class_t *type;            /* Actual H5O class type for the ID */
     herr_t      ret_value;              /* Return value */
 
@@ -929,11 +926,18 @@ H5O_msg_remove(H5O_loc_t *loc, unsigned type_id, int sequence, hbool_t adj_link,
     type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
     HDassert(type);
 
+    /* Protect the object header to iterate over */
+    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+
     /* Call the "real" remove routine */
-    if((ret_value = H5O_msg_remove_real(loc, type, sequence, NULL, NULL, adj_link, dxpl_id)) < 0)
+    if((ret_value = H5O_msg_remove_real(loc->file, oh, type, sequence, NULL, NULL, adj_link, dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to remove object header message")
 
 done:
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_msg_remove() */
 
@@ -959,6 +963,7 @@ herr_t
 H5O_msg_remove_op(const H5O_loc_t *loc, unsigned type_id, int sequence,
     H5O_operator_t op, void *op_data, hbool_t adj_link, hid_t dxpl_id)
 {
+    H5O_t *oh = NULL;                   /* Pointer to actual object header */
     const H5O_msg_class_t *type;            /* Actual H5O class type for the ID */
     herr_t      ret_value;              /* Return value */
 
@@ -973,11 +978,18 @@ H5O_msg_remove_op(const H5O_loc_t *loc, unsigned type_id, int sequence,
     type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
     HDassert(type);
 
+    /* Protect the object header to iterate over */
+    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+
     /* Call the "real" remove routine */
-    if((ret_value = H5O_msg_remove_real(loc, type, sequence, op, op_data, adj_link, dxpl_id)) < 0)
+    if((ret_value = H5O_msg_remove_real(loc->file, oh, type, sequence, op, op_data, adj_link, dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to remove object header message")
 
 done:
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_msg_remove_op() */
 
@@ -1058,9 +1070,6 @@ done:
  *		the sequence numbers to change for subsequent messages of
  *		the same type.
  *
- *		No attempt is made to join adjacent free areas of the
- *		object header into a single larger free area.
- *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
@@ -1069,28 +1078,28 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5O_msg_remove_real(const H5O_loc_t *loc, const H5O_msg_class_t *type, int sequence,
-    H5O_operator_t app_op, void *op_data, hbool_t adj_link, hid_t dxpl_id)
+herr_t
+H5O_msg_remove_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type,
+    int sequence, H5O_operator_t app_op, void *op_data, hbool_t adj_link,
+    hid_t dxpl_id)
 {
-    H5O_t *oh = NULL;                   /* Pointer to actual object header */
     H5O_iter_rm_t udata;                /* User data for iterator */
     H5O_mesg_operator_t op;             /* Wrapper for operator */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_msg_remove_real)
+    FUNC_ENTER_NOAPI(H5O_msg_remove_real, FAIL)
 
     /* check args */
-    HDassert(loc);
-    HDassert(loc->file);
+    HDassert(f);
+    HDassert(oh);
     HDassert(type);
 
     /* Make certain we are allowed to modify the file */
-    if(0 == (H5F_INTENT(loc->file) & H5F_ACC_RDWR))
-	HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "no write intent on file")
+    if(0 == (H5F_INTENT(f) & H5F_ACC_RDWR))
+	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "no write intent on file")
 
     /* Set up iterator operator data */
-    udata.f = loc->file;
+    udata.f = f;
     udata.dxpl_id = dxpl_id;
     udata.sequence = sequence;
     udata.nfailed = 0;
@@ -1098,14 +1107,10 @@ H5O_msg_remove_real(const H5O_loc_t *loc, const H5O_msg_class_t *type, int seque
     udata.op_data = op_data;
     udata.adj_link = adj_link;
 
-    /* Protect the object header to iterate over */
-    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
-
     /* Iterate over the messages, deleting appropriate one(s) */
     op.op_type = H5O_MESG_OP_LIB;
     op.u.lib_op = H5O_msg_remove_cb;
-    if(H5O_msg_iterate_real(loc->file, oh, type, &op, &udata, dxpl_id) < 0)
+    if(H5O_msg_iterate_real(f, oh, type, &op, &udata, dxpl_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "error iterating over messages")
 
     /* Fail if we tried to remove any constant messages */
@@ -1113,9 +1118,6 @@ H5O_msg_remove_real(const H5O_loc_t *loc, const H5O_msg_class_t *type, int seque
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to remove constant message(s)")
 
 done:
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_msg_remove_real() */
 

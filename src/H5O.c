@@ -38,7 +38,6 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5Aprivate.h"		/* Attributes			  	*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"		/* File access				*/
 #include "H5FLprivate.h"	/* Free lists                           */
@@ -693,11 +692,6 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
         if(H5P_get(oc_plist, H5O_CRT_ATTR_MIN_DENSE_NAME, &oh->min_dense) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get min. # of dense attributes")
 
-        /* Set starting values for dense attribute storage info */
-        oh->attr_fheap_addr = HADDR_UNDEF;
-        oh->name_bt2_addr = HADDR_UNDEF;
-        oh->corder_bt2_addr = HADDR_UNDEF;
-
         /* Check for non-default attribute storage phase change values */
         if(oh->max_compact != H5O_CRT_ATTR_MAX_COMPACT_DEF || oh->min_dense != H5O_CRT_ATTR_MIN_DENSE_DEF)
             oh->flags |= H5O_HDR_ATTR_STORE_PHASE_CHANGE;
@@ -708,11 +702,6 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
 
         /* Reset unused time fields */
         oh->atime = oh->mtime = oh->ctime = oh->btime = 0;
-
-        /* Reset unused attribute fields */
-        oh->attr_fheap_addr = HADDR_UNDEF;
-        oh->name_bt2_addr = HADDR_UNDEF;
-        oh->corder_bt2_addr = HADDR_UNDEF;
     } /* end else */
 
     /* Compute total size of initial object header */
@@ -1467,12 +1456,6 @@ H5O_delete_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete file space for object header message")
     } /* end for */
 
-    /* Check for dense attribute storage & delete it if necessary */
-    if(oh->version > H5O_VERSION_1 && H5F_addr_defined(oh->attr_fheap_addr)) {
-        if(H5A_dense_delete(f, dxpl_id, oh) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete dense attribute storage")
-    } /* end if */
-
     /* Free main (first) object header "chunk" */
     if(H5MF_xfree(f, H5FD_MEM_OHDR, dxpl_id, oh->chunk[0].addr, (hsize_t)oh->chunk[0].size) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free object header")
@@ -1920,7 +1903,6 @@ H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id)
     oinfo->hdr.flags = oh->flags;
 
     /* Iterate over all the messages, accumulating message size & type information */
-    oinfo->num_attrs = 0;
     oinfo->hdr.space.meta = H5O_SIZEOF_HDR(oh) + (H5O_SIZEOF_CHKHDR_OH(oh) * (oh->nchunks - 1));
     oinfo->hdr.space.mesg = 0;
     oinfo->hdr.space.free = 0;
@@ -1928,10 +1910,6 @@ H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id)
     oinfo->hdr.mesg.shared = 0;
     for(u = 0, curr_msg = &oh->mesg[0]; u < oh->nmesgs; u++, curr_msg++) {
         uint64_t type_flag;             /* Flag for message type */
-
-        /* Check for attribute message */
-	if(H5O_ATTR_ID == curr_msg->type->id)
-            oinfo->num_attrs++;
 
         /* Accumulate space usage information, based on the type of message */
 	if(H5O_NULL_ID == curr_msg->type->id)
@@ -1952,15 +1930,8 @@ H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id)
             oinfo->hdr.mesg.shared |= type_flag;
     } /* end for */
 
-    /* Sanity checking, etc. for # of attributes */
-    if(oh->version > H5O_VERSION_1) {
-        if(H5F_addr_defined(oh->attr_fheap_addr)) {
-            HDassert(oinfo->num_attrs == 0);
-            oinfo->num_attrs = oh->nattrs;
-        } /* end if */
-        else
-            HDassert(oh->nattrs == oinfo->num_attrs);
-    } /* end if */
+    /* Retrieve # of attributes */
+    oinfo->num_attrs = H5O_attr_count_real(oloc->file, dxpl_id, oh);
 
     /* Iterate over all the chunks, adding any gaps to the free space */
     oinfo->hdr.space.total = 0;

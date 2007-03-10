@@ -96,6 +96,7 @@ htri_t
 H5O_is_attr_dense_test(hid_t oid)
 {
     H5O_t *oh = NULL;           /* Object header */
+    H5O_ainfo_t ainfo;          /* Attribute information for object */
     H5O_loc_t *oloc;            /* Pointer to object's location */
     htri_t ret_value;           /* Return value */
 
@@ -109,8 +110,14 @@ H5O_is_attr_dense_test(hid_t oid)
     if(NULL == (oh = H5AC_protect(oloc->file, H5AC_ind_dxpl_id, H5AC_OHDR, oloc->addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
+    /* Check for attribute info stored */
+    ainfo.fheap_addr = HADDR_UNDEF;
+    if(oh->version > H5O_VERSION_1 && NULL == H5O_msg_read_real(oloc->file, H5AC_ind_dxpl_id, oh, H5O_AINFO_ID, &ainfo))
+        /* Clear error stack from not finding attribute info */
+        H5E_clear_stack(NULL);
+
     /* Check if dense storage is being used */
-    if(H5F_addr_defined(oh->attr_fheap_addr)) {
+    if(H5F_addr_defined(ainfo.fheap_addr)) {
         /* Check for any messages in object header */
         HDassert(H5O_msg_count_real(oh, H5O_MSG_ATTR) == 0);
 
@@ -149,6 +156,8 @@ htri_t
 H5O_is_attr_empty_test(hid_t oid)
 {
     H5O_t *oh = NULL;           /* Object header */
+    H5O_ainfo_t ainfo;          /* Attribute information for object */
+    H5O_ainfo_t *ainfo_ptr = NULL;      /* Pointer to attribute information for object */
     H5O_loc_t *oloc;            /* Pointer to object's location */
     hsize_t nattrs;             /* Number of attributes */
     htri_t ret_value;           /* Return value */
@@ -163,23 +172,33 @@ H5O_is_attr_empty_test(hid_t oid)
     if(NULL == (oh = H5AC_protect(oloc->file, H5AC_ind_dxpl_id, H5AC_OHDR, oloc->addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
+    /* Check for attribute info stored */
+    ainfo.fheap_addr = HADDR_UNDEF;
+    if(oh->version > H5O_VERSION_1 && NULL == (ainfo_ptr = H5O_msg_read_real(oloc->file, H5AC_ind_dxpl_id, oh, H5O_AINFO_ID, &ainfo)))
+        /* Clear error stack from not finding attribute info */
+        H5E_clear_stack(NULL);
+
     /* Retrieve the number of attribute messages in header */
     nattrs = H5O_msg_count_real(oh, H5O_MSG_ATTR);
 
-    /* Check for later version of object header format */
+    /* Check for later version of object header format & attribute info available */
     if(oh->version > H5O_VERSION_1) {
-        /* Check for using dense storage */
-        if(H5F_addr_defined(oh->attr_fheap_addr)) {
-            /* Check for any messages in object header */
-            HDassert(nattrs == 0);
+        if(ainfo_ptr) {
+            /* Check for using dense storage */
+            if(H5F_addr_defined(ainfo.fheap_addr)) {
+                /* Check for any messages in object header */
+                HDassert(nattrs == 0);
 
-            /* Retrieve # of records in name index */
-            if(H5B2_get_nrec(oloc->file, H5AC_ind_dxpl_id, H5A_BT2_NAME, oh->name_bt2_addr, &nattrs) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTCOUNT, FAIL, "unable to retrieve # of records from name index")
+                /* Retrieve # of records in name index */
+                if(H5B2_get_nrec(oloc->file, H5AC_ind_dxpl_id, H5A_BT2_NAME, ainfo.name_bt2_addr, &nattrs) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTCOUNT, FAIL, "unable to retrieve # of records from name index")
+            } /* end if */
+
+            /* Verify that attribute count in object header is correct */
+            HDassert(nattrs == ainfo.nattrs);
         } /* end if */
-
-        /* Verify that attribute count in object header is correct */
-        HDassert(nattrs == oh->nattrs);
+        else
+            HDassert(nattrs == 0);
     } /* end if */
 
     /* Set the return value */
@@ -216,6 +235,7 @@ herr_t
 H5O_num_attrs_test(hid_t oid, hsize_t *nattrs)
 {
     H5O_t *oh = NULL;           /* Object header */
+    H5O_ainfo_t ainfo;          /* Attribute information for object */
     H5O_loc_t *oloc;            /* Pointer to object's location */
     hsize_t obj_nattrs;         /* Number of attributes */
     herr_t ret_value = SUCCEED; /* Return value */
@@ -230,23 +250,29 @@ H5O_num_attrs_test(hid_t oid, hsize_t *nattrs)
     if(NULL == (oh = H5AC_protect(oloc->file, H5AC_ind_dxpl_id, H5AC_OHDR, oloc->addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
+    /* Check for attribute info stored */
+    ainfo.fheap_addr = HADDR_UNDEF;
+    if(oh->version > H5O_VERSION_1 && NULL == H5O_msg_read_real(oloc->file, H5AC_ind_dxpl_id, oh, H5O_AINFO_ID, &ainfo))
+        /* Clear error stack from not finding attribute info */
+        H5E_clear_stack(NULL);
+
     /* Retrieve the number of attribute messages in header */
     obj_nattrs = H5O_msg_count_real(oh, H5O_MSG_ATTR);
 
     /* Check for later version of object header format */
     if(oh->version > H5O_VERSION_1) {
         /* Check for using dense storage */
-        if(H5F_addr_defined(oh->attr_fheap_addr)) {
+        if(H5F_addr_defined(ainfo.fheap_addr)) {
             /* Check for any messages in object header */
             HDassert(obj_nattrs == 0);
 
             /* Retrieve # of records in name index */
-            if(H5B2_get_nrec(oloc->file, H5AC_ind_dxpl_id, H5A_BT2_NAME, oh->name_bt2_addr, &obj_nattrs) < 0)
+            if(H5B2_get_nrec(oloc->file, H5AC_ind_dxpl_id, H5A_BT2_NAME, ainfo.name_bt2_addr, &obj_nattrs) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTCOUNT, FAIL, "unable to retrieve # of records from name index")
         } /* end if */
 
         /* Verify that attribute count in object header is correct */
-        HDassert(obj_nattrs == oh->nattrs);
+        HDassert(obj_nattrs == ainfo.nattrs);
     } /* end if */
 
     /* Set the number of attributes */
@@ -285,6 +311,7 @@ herr_t
 H5O_attr_dense_info_test(hid_t oid, hsize_t *name_count, hsize_t *corder_count)
 {
     H5O_t *oh = NULL;           /* Object header */
+    H5O_ainfo_t ainfo;          /* Attribute information for object */
     H5O_loc_t *oloc;            /* Pointer to object's location */
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -298,20 +325,26 @@ H5O_attr_dense_info_test(hid_t oid, hsize_t *name_count, hsize_t *corder_count)
     if(NULL == (oh = H5AC_protect(oloc->file, H5AC_ind_dxpl_id, H5AC_OHDR, oloc->addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
+    /* Check for attribute info stored */
+    ainfo.fheap_addr = HADDR_UNDEF;
+    if(oh->version > H5O_VERSION_1 && NULL == H5O_msg_read_real(oloc->file, H5AC_ind_dxpl_id, oh, H5O_AINFO_ID, &ainfo))
+        /* Clear error stack from not finding attribute info */
+        H5E_clear_stack(NULL);
+
     /* Check for 'dense' attribute storage file addresses being defined */
-    if(!H5F_addr_defined(oh->attr_fheap_addr))
+    if(!H5F_addr_defined(ainfo.fheap_addr))
         HGOTO_DONE(FAIL)
-    if(!H5F_addr_defined(oh->name_bt2_addr))
+    if(!H5F_addr_defined(ainfo.name_bt2_addr))
         HGOTO_DONE(FAIL)
 
     /* Retrieve # of records in name index */
-    if(H5B2_get_nrec(oloc->file, H5AC_ind_dxpl_id, H5A_BT2_NAME, oh->name_bt2_addr, name_count) < 0)
+    if(H5B2_get_nrec(oloc->file, H5AC_ind_dxpl_id, H5A_BT2_NAME, ainfo.name_bt2_addr, name_count) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOUNT, FAIL, "unable to retrieve # of records from name index")
 
     /* Check if there is a creation order index */
-    if(H5F_addr_defined(oh->corder_bt2_addr)) {
+    if(H5F_addr_defined(ainfo.corder_bt2_addr)) {
         /* Retrieve # of records in creation order index */
-        if(H5B2_get_nrec(oloc->file, H5AC_ind_dxpl_id, H5A_BT2_CORDER, oh->corder_bt2_addr, corder_count) < 0)
+        if(H5B2_get_nrec(oloc->file, H5AC_ind_dxpl_id, H5A_BT2_CORDER, ainfo.corder_bt2_addr, corder_count) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTCOUNT, FAIL, "unable to retrieve # of records from creation order index")
     } /* end if */
     else

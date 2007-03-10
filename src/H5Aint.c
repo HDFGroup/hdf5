@@ -274,9 +274,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5A_dense_build_table(H5F_t *f, hid_t dxpl_id, haddr_t attr_fheap_addr,
-    haddr_t name_bt2_addr, H5_index_t idx_type, H5_iter_order_t order,
-    H5A_attr_table_t *atable)
+H5A_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
+    H5_index_t idx_type, H5_iter_order_t order, H5A_attr_table_t *atable)
 {
     hsize_t nrec;                       /* # of records in v2 B-tree */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -285,13 +284,14 @@ H5A_dense_build_table(H5F_t *f, hid_t dxpl_id, haddr_t attr_fheap_addr,
 
     /* Sanity check */
     HDassert(f);
-    HDassert(H5F_addr_defined(attr_fheap_addr));
-    HDassert(H5F_addr_defined(name_bt2_addr));
+    HDassert(ainfo);
+    HDassert(H5F_addr_defined(ainfo->fheap_addr));
+    HDassert(H5F_addr_defined(ainfo->name_bt2_addr));
     HDassert(atable);
 
     /* Retrieve # of records in "name" B-tree */
     /* (should be same # of records in all indices) */
-    if(H5B2_get_nrec(f, dxpl_id, H5A_BT2_NAME, name_bt2_addr, &nrec) < 0)
+    if(H5B2_get_nrec(f, dxpl_id, H5A_BT2_NAME, ainfo->name_bt2_addr, &nrec) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve # of records in index")
 
     /* Set size of table */
@@ -316,9 +316,8 @@ H5A_dense_build_table(H5F_t *f, hid_t dxpl_id, haddr_t attr_fheap_addr,
         attr_op.u.lib_op = H5A_dense_build_table_cb;
 
         /* Iterate over the links in the group, building a table of the link messages */
-        if(H5A_dense_iterate(f, dxpl_id, (hid_t)0, attr_fheap_addr, name_bt2_addr,
-                HADDR_UNDEF, H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)0, NULL,
-                &attr_op, &udata) < 0)
+        if(H5A_dense_iterate(f, dxpl_id, (hid_t)0, ainfo, H5_INDEX_NAME,
+                H5_ITER_NATIVE, (hsize_t)0, NULL, &attr_op, &udata) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "error building attribute table")
 
         /* Sort attribute table in correct iteration order */

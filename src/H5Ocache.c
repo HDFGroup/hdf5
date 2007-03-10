@@ -48,9 +48,6 @@
  *      extra I/O operations) */
 #define H5O_SPEC_READ_SIZE 512
 
-/* All the object header status flags that this version of the library knows about */
-#define H5O_HDR_ALL_FLAGS       (H5O_HDR_ATTR_CRT_ORDER_TRACKED | H5O_HDR_ATTR_CRT_ORDER_INDEXED | H5O_HDR_ATTR_STORE_PHASE_CHANGE | H5O_HDR_STORE_TIMES)
-
 
 /******************/
 /* Local Typedefs */
@@ -324,16 +321,6 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
             oh->max_compact = H5O_CRT_ATTR_MAX_COMPACT_DEF;
             oh->min_dense = H5O_CRT_ATTR_MIN_DENSE_DEF;
         } /* end else */
-        H5F_DECODE_LENGTH(f, p, oh->nattrs);
-        H5F_addr_decode(f, &p, &(oh->attr_fheap_addr));
-        H5F_addr_decode(f, &p, &(oh->name_bt2_addr));
-        H5F_addr_decode(f, &p, &(oh->corder_bt2_addr));
-
-        /* Only encode max. creation index if they are being tracked */
-        if(oh->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED)
-            UINT16DECODE(p, oh->max_attr_crt_idx)
-        else
-            oh->max_attr_crt_idx = 0;
     } /* end if */
     else {
         /* Reset unused time fields */
@@ -342,11 +329,6 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
         /* Reset unused attribute fields */
         oh->max_compact = 0;
         oh->min_dense = 0;
-        oh->nattrs = 0;
-        oh->attr_fheap_addr = HADDR_UNDEF;
-        oh->name_bt2_addr = HADDR_UNDEF;
-        oh->corder_bt2_addr = HADDR_UNDEF;
-        oh->max_attr_crt_idx = 0;
     } /* end else */
 
     /* First chunk size */
@@ -689,14 +671,6 @@ H5O_assert(oh);
                 UINT16ENCODE(p, oh->max_compact);
                 UINT16ENCODE(p, oh->min_dense);
             } /* end if */
-            H5F_ENCODE_LENGTH(f, p, oh->nattrs);
-            H5F_addr_encode(f, &p, oh->attr_fheap_addr);
-            H5F_addr_encode(f, &p, oh->name_bt2_addr);
-            H5F_addr_encode(f, &p, oh->corder_bt2_addr);
-
-            /* Only encode max. creation index if they are being tracked */
-            if(oh->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED)
-                UINT16ENCODE(p, oh->max_attr_crt_idx);
 
             /* Chunk size */
             UINT32ENCODE(p, (oh->chunk[0].size - H5O_SIZEOF_HDR(oh)));

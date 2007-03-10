@@ -186,32 +186,34 @@ H5_DLL herr_t H5A_free(H5A_t *attr);
 H5_DLL herr_t H5A_close(H5A_t *attr);
 
 /* Attribute "dense" storage routines */
-H5_DLL herr_t H5A_dense_create(H5F_t *f, hid_t dxpl_id, H5O_t *oh);
-H5_DLL H5A_t *H5A_dense_open(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
+H5_DLL herr_t H5A_dense_create(H5F_t *f, hid_t dxpl_id, H5O_ainfo_t *ainfo);
+H5_DLL H5A_t *H5A_dense_open(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
     const char *name);
-H5_DLL herr_t H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
+H5_DLL herr_t H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
     H5A_t *attr);
-H5_DLL herr_t H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
+H5_DLL herr_t H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
     H5A_t *attr);
-H5_DLL herr_t H5A_dense_rename(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
+H5_DLL herr_t H5A_dense_rename(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
     const char *old_name, const char *new_name);
 H5_DLL herr_t H5A_dense_iterate(H5F_t *f, hid_t dxpl_id, hid_t loc_id,
-    haddr_t attr_fheap_addr, haddr_t name_bt2_addr, haddr_t corder_bt2_addr,
-    H5_index_t idx_type, H5_iter_order_t order, hsize_t skip,
-    hsize_t *last_attr, const H5A_attr_iter_op_t *attr_op, void *op_data);
-H5_DLL herr_t H5A_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
+    const H5O_ainfo_t *ainfo, H5_index_t idx_type, H5_iter_order_t order,
+    hsize_t skip, hsize_t *last_attr, const H5A_attr_iter_op_t *attr_op,
+    void *op_data);
+H5_DLL herr_t H5A_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
     const char *name);
-H5_DLL herr_t H5A_dense_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
+H5_DLL herr_t H5A_dense_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n);
-H5_DLL htri_t H5A_dense_exists(H5F_t *f, hid_t dxpl_id, const H5O_t *oh,
+H5_DLL htri_t H5A_dense_exists(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
     const char *name);
+H5_DLL herr_t H5A_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_ainfo_t *ainfo);
+
 
 /* Attribute table operations */
 H5_DLL herr_t H5A_compact_build_table(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     H5_index_t idx_type, H5_iter_order_t order, H5A_attr_table_t *atable);
 H5_DLL herr_t H5A_dense_build_table(H5F_t *f, hid_t dxpl_id,
-    haddr_t attr_fheap_addr, haddr_t name_bt2_addr, H5_index_t idx_type,
-    H5_iter_order_t order, H5A_attr_table_t *atable);
+    const H5O_ainfo_t *ainfo, H5_index_t idx_type, H5_iter_order_t order,
+    H5A_attr_table_t *atable);
 H5_DLL herr_t H5A_attr_iterate_table(const H5A_attr_table_t *atable,
     hsize_t skip, hsize_t *last_attr, hid_t loc_id,
     const H5A_attr_iter_op_t *attr_op, void *op_data);

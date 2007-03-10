@@ -24,9 +24,11 @@
  *-------------------------------------------------------------------------
  */
 
+#define H5A_PACKAGE		/*suppress error about including H5Apkg	  */
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5Apkg.h"             /* Attributes				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Opkg.h"             /* Object headers			*/
@@ -39,6 +41,10 @@ static void *H5O_ainfo_copy(const void *_mesg, void *_dest);
 static size_t H5O_ainfo_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O_ainfo_free(void *_mesg);
 static herr_t H5O_ainfo_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg);
+static herr_t H5O_ainfo_pre_copy_file(H5F_t *file_src, const void *mesg_src,
+    hbool_t *deleted, const H5O_copy_t *cpy_info, void *udata);
+static void *H5O_ainfo_copy_file(H5F_t *file_src, void *mesg_src,
+    H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O_ainfo_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 			     FILE * stream, int indent, int fwidth);
 
@@ -58,8 +64,8 @@ const H5O_msg_class_t H5O_MSG_AINFO[1] = {{
     NULL,			/* link method			*/
     NULL, 			/*set share method		*/
     NULL,		    	/*can share method		*/
-    NULL,			/* pre copy native value to file */
-    NULL,			/* copy native value to file    */
+    H5O_ainfo_pre_copy_file,	/* pre copy native value to file */
+    H5O_ainfo_copy_file,	/* copy native value to file    */
     NULL,			/* post copy native value to file */
     NULL,			/* get creation index		*/
     NULL,			/* set creation index		*/
@@ -69,10 +75,11 @@ const H5O_msg_class_t H5O_MSG_AINFO[1] = {{
 /* Current version of attribute info information */
 #define H5O_AINFO_VERSION 	0
 
-/* Flags for attribute info index flag encoding */
+/* Flags for attribute info flag encoding */
 #define H5O_AINFO_INDEX_NAME            0x01
-#define H5O_AINFO_INDEX_CORDER          0x02
-#define H5O_AINFO_ALL_FLAGS             (H5O_AINFO_INDEX_NAME | H5O_AINFO_INDEX_CORDER)
+#define H5O_AINFO_TRACK_CORDER          0x02
+#define H5O_AINFO_INDEX_CORDER          0x04
+#define H5O_AINFO_ALL_FLAGS             (H5O_AINFO_INDEX_NAME | H5O_AINFO_TRACK_CORDER | H5O_AINFO_INDEX_CORDER)
 
 /* Declare a free list to manage the H5O_ainfo_t struct */
 H5FL_DEFINE_STATIC(H5O_ainfo_t);
@@ -97,7 +104,7 @@ H5O_ainfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
     const uint8_t *p)
 {
     H5O_ainfo_t	*ainfo = NULL;  /* Attribute info */
-    unsigned char index_flags;  /* Flags for encoding link index info */
+    unsigned char flags;        /* Flags for encoding attribute info */
     void        *ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_ainfo_decode)
@@ -114,18 +121,22 @@ H5O_ainfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
     if(NULL == (ainfo = H5FL_MALLOC(H5O_ainfo_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    /* Get the index flags for the object */
-    index_flags = *p++;
-    HDassert(index_flags & H5O_AINFO_INDEX_NAME);
-    if(index_flags & ~H5O_AINFO_ALL_FLAGS)
+    /* Get the flags for the message */
+    flags = *p++;
+    HDassert(flags & H5O_AINFO_INDEX_NAME);
+    if(flags & ~H5O_AINFO_ALL_FLAGS)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad flag value for message")
-    ainfo->index_corder = (index_flags & H5O_AINFO_INDEX_CORDER) ? TRUE : FALSE;
+    ainfo->track_corder = (flags & H5O_AINFO_TRACK_CORDER) ? TRUE : FALSE;
+    ainfo->index_corder = (flags & H5O_AINFO_INDEX_CORDER) ? TRUE : FALSE;
 
     /* Number of attributes on the object */
     H5F_DECODE_LENGTH(f, p, ainfo->nattrs)
 
     /* Max. creation order value for the object */
-    UINT16DECODE(p, ainfo->max_crt_idx);
+    if(ainfo->track_corder)
+        UINT16DECODE(p, ainfo->max_crt_idx)
+    else
+        ainfo->max_crt_idx = H5O_MAX_CRT_ORDER_IDX;
 
     /* Address of fractal heap to store "dense" attributes */
     H5F_addr_decode(f, &p, &(ainfo->fheap_addr));
@@ -143,9 +154,8 @@ H5O_ainfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
     ret_value = ainfo;
 
 done:
-    if(ret_value == NULL)
-        if(ainfo != NULL)
-            H5FL_FREE(H5O_ainfo_t, ainfo);
+    if(ret_value == NULL && ainfo != NULL)
+        H5FL_FREE(H5O_ainfo_t, ainfo);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_ainfo_decode() */
@@ -168,7 +178,7 @@ static herr_t
 H5O_ainfo_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_ainfo_t   *ainfo = (const H5O_ainfo_t *)_mesg;
-    unsigned char       index_flags;          /* Flags for encoding attribute index info */
+    unsigned char       flags;          /* Flags for encoding attribute info */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_ainfo_encode)
 
@@ -181,15 +191,17 @@ H5O_ainfo_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void
     *p++ = H5O_AINFO_VERSION;
 
     /* The flags for the attribute indices */
-    index_flags = H5O_AINFO_INDEX_NAME;       /* Names are always indexed */
-    index_flags |= ainfo->index_corder ? H5O_AINFO_INDEX_CORDER : 0;
-    *p++ = index_flags;
+    flags = H5O_AINFO_INDEX_NAME;       /* Names are always indexed */
+    flags |= ainfo->track_corder ? H5O_AINFO_TRACK_CORDER : 0;
+    flags |= ainfo->index_corder ? H5O_AINFO_INDEX_CORDER : 0;
+    *p++ = flags;
 
     /* Number of attributes on the object */
     H5F_ENCODE_LENGTH(f, p, ainfo->nattrs)
 
     /* Max. creation order value for the object */
-    UINT16ENCODE(p, ainfo->max_crt_idx);
+    if(ainfo->track_corder)
+        UINT16ENCODE(p, ainfo->max_crt_idx);
 
     /* Address of fractal heap to store "dense" attributes */
     H5F_addr_encode(f, &p, ainfo->fheap_addr);
@@ -275,7 +287,7 @@ H5O_ainfo_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg)
     ret_value = 1                       /* Version */
                 + 1                     /* Index flags */
                 + H5F_SIZEOF_SIZE(f)    /* Number of attributes */
-                + 2                     /* Curr. max. creation order value */
+                + (ainfo->track_corder ? 2 : 0) /* Curr. max. creation order value */
                 + H5F_SIZEOF_ADDR(f)    /* Address of fractal heap to store "dense" attributes */
                 + H5F_SIZEOF_ADDR(f)    /* Address of v2 B-tree for indexing names of attributes */
                 + (ainfo->index_corder ? H5F_SIZEOF_ADDR(f) : 0);   /* Address of v2 B-tree for indexing creation order values of attributes */
@@ -334,15 +346,101 @@ H5O_ainfo_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg)
     HDassert(ainfo);
 
     /* If the object is using "dense" attribute storage, delete it */
-#ifdef NOT_YET
     if(H5F_addr_defined(ainfo->fheap_addr))
-        if(H5G_dense_delete(f, dxpl_id, (H5O_linfo_t *)linfo, TRUE) < 0)   /* Casting away const OK - QAK */
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free dense link storage")
-#endif /* NOT_YET */
+        if(H5A_dense_delete(f, dxpl_id, (H5O_ainfo_t *)ainfo) < 0)   /* Casting away const OK - QAK */
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free dense attribute storage")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_ainfo_delete() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_ainfo_pre_copy_file
+ *
+ * Purpose:     Perform any necessary actions before copying message between
+ *              files.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Friday, March  9, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_ainfo_pre_copy_file(H5F_t UNUSED *file_src, const void UNUSED *native_src,
+    hbool_t *deleted, const H5O_copy_t *cpy_info, void UNUSED *udata)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_ainfo_pre_copy_file)
+
+    /* check args */
+    HDassert(deleted);
+    HDassert(cpy_info);
+
+    /* If we are not copying attributes into the destination file, indicate
+     *  that this message should be deleted.
+     */
+    if(cpy_info->copy_without_attr)
+        *deleted = TRUE;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_ainfo_pre_copy_file() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_ainfo_copy_file
+ *
+ * Purpose:     Copies a message from _MESG to _DEST in file
+ *
+ * Return:      Success:        Ptr to _DEST
+ *              Failure:        NULL
+ *
+ * Programmer:  Quincey Koziol
+ *              March 9, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5O_ainfo_copy_file(H5F_t UNUSED *file_src, void *mesg_src,
+    H5F_t UNUSED *file_dst, hid_t UNUSED dxpl_id, H5O_copy_t UNUSED *cpy_info,
+    void UNUSED *udata)
+{
+    H5O_ainfo_t *ainfo_src = (H5O_ainfo_t *)mesg_src;
+    H5O_ainfo_t *ainfo_dst = NULL;
+    void        *ret_value;             /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_ainfo_copy_file)
+
+    /* check args */
+    HDassert(file_src);
+    HDassert(ainfo_src);
+    HDassert(file_dst);
+    HDassert(cpy_info);
+    HDassert(!cpy_info->copy_without_attr);
+
+/* XXX: Bail out for now, if the source object has densely stored attributes */
+    if(H5F_addr_defined(ainfo_src->fheap_addr))
+        HGOTO_ERROR(H5E_OHDR, H5E_UNSUPPORTED, NULL, "densely stored attributes not supported yet")
+
+    /* Allocate space for the destination message */
+    if(NULL == (ainfo_dst = H5FL_MALLOC(H5O_ainfo_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    /* Copy the top level of the information */
+    *ainfo_dst = *ainfo_src;
+
+    /* Set return value */
+    ret_value = ainfo_dst;
+
+done:
+    /* Release destination attribute information on failure */
+    if(ret_value == NULL && ainfo_dst != NULL)
+        H5FL_FREE(H5O_ainfo_t, ainfo_dst);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5O_ainfo_copy_file() */
 
 
 /*-------------------------------------------------------------------------
@@ -373,10 +471,12 @@ H5O_ainfo_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
-	      "Index creation order of links:", ainfo->index_corder);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Number of attributes:", ainfo->nattrs);
+    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
+	      "Track creation order of attributes:", ainfo->track_corder);
+    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
+	      "Index creation order of attributes:", ainfo->index_corder);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Max. creation index value:", (unsigned)ainfo->max_crt_idx);
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,

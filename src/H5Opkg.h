@@ -24,7 +24,6 @@
 #include "H5Oprivate.h"		/* Object headers		  	*/
 
 /* Other private headers needed by this file */
-#include "H5Aprivate.h"		/* Attributes				*/
 #include "H5ACprivate.h"	/* Metadata cache			*/
 
 /* Object header macros */
@@ -116,13 +115,6 @@
                   2 +		/*max compact attributes */		      \
                   2		/*min dense attributes	*/		      \
                 ) : 0) +						      \
-                (O)->sizeof_size + /*# of attributes	*/		      \
-                (O)->sizeof_addr + /*addr of attribute heap */		      \
-                (O)->sizeof_addr + /*addr of attribute name index */	      \
-                (O)->sizeof_addr + /*addr of attribute creation order index */ \
-                (((O)->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED) ? (	      \
-                  2		/*max attr. creation index */		      \
-                ) : 0) +						      \
                 4 +		/*chunk data size	*/		      \
                 H5O_SIZEOF_CHKSUM) /*checksum size	*/		      \
     )
@@ -197,6 +189,9 @@
         } /* end if */							      \
     } /* end if */
 
+/* All the object header status flags that this version of the library knows about */
+#define H5O_HDR_ALL_FLAGS       (H5O_HDR_ATTR_CRT_ORDER_TRACKED | H5O_HDR_ATTR_CRT_ORDER_INDEXED | H5O_HDR_ATTR_STORE_PHASE_CHANGE | H5O_HDR_STORE_TIMES)
+
 
 /* The "message class" type */
 struct H5O_msg_class_t {
@@ -263,11 +258,6 @@ struct H5O_t {
     /* Attribute information (stored, for versions > 1) */
     unsigned	max_compact;		/* Maximum # of compact attributes   */
     unsigned	min_dense;		/* Minimum # of "dense" attributes   */
-    hsize_t     nattrs;                 /* Number of attributes on the object */
-    haddr_t     attr_fheap_addr;        /* Address of fractal heap for storing "dense" attributes */
-    haddr_t     name_bt2_addr;          /* Address of v2 B-tree for indexing names of attributes */
-    haddr_t     corder_bt2_addr;        /* Address of v2 B-tree for indexing creation order of attributes */
-    H5O_msg_crt_idx_t max_attr_crt_idx; /* Maximum attribute creation index used */
 
     /* Message management (stored, encoded in chunks) */
     size_t	nmesgs;			/*number of messages		     */
@@ -469,12 +459,17 @@ H5_DLL unsigned H5O_msg_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
 H5_DLL herr_t H5O_msg_append_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     const H5O_msg_class_t *type, unsigned mesg_flags, unsigned update_flags,
     void *mesg);
+H5_DLL herr_t H5O_msg_write_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
+    const H5O_msg_class_t *type, unsigned mesg_flags, unsigned update_flags,
+    void *mesg);
 H5_DLL void *H5O_msg_read_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     unsigned type_id, void *mesg);
 H5_DLL void *H5O_msg_free_real(const H5O_msg_class_t *type, void *mesg);
 H5_DLL herr_t H5O_msg_free_mesg(H5O_mesg_t *mesg);
 H5_DLL unsigned H5O_msg_count_real(const H5O_t *oh, const H5O_msg_class_t *type);
 H5_DLL htri_t H5O_msg_exists_oh(const H5O_t *oh, unsigned type_id);
+H5_DLL herr_t H5O_msg_remove_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type,
+    int sequence, H5O_operator_t op, void *op_data, hbool_t adj_link, hid_t dxpl_id);
 H5_DLL void *H5O_msg_copy_file(const H5O_msg_class_t *type, H5F_t *file_src,
     void *mesg_src, H5F_t *file_dst, hid_t dxpl_id, hbool_t *shared,
     H5O_copy_t *cpy_info, void *udata);
@@ -502,7 +497,7 @@ H5_DLL herr_t H5O_shared_copy_file(H5F_t *file_src, H5F_t *file_dst, hid_t dxpl_
 H5_DLL herr_t H5O_shared_debug(const H5O_shared_t *mesg, FILE *stream,
     int indent, int fwidth);
 
-/* Attribute operators */
+/* Attribute message operators */
 H5_DLL herr_t H5O_attr_reset(void *_mesg);
 H5_DLL herr_t H5O_attr_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg);
 H5_DLL herr_t H5O_attr_link(H5F_t *f, hid_t dxpl_id, const void *_mesg);

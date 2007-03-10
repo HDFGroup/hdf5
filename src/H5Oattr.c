@@ -711,7 +711,7 @@ H5O_attr_pre_copy_file(H5F_t UNUSED *file_src, const void UNUSED *native_src,
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_attr_copy_file(H5F_t *file_src, const H5O_msg_class_t UNUSED *mesg_type,
+H5O_attr_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t UNUSED *mesg_type,
     void *native_src, H5F_t *file_dst, hid_t dxpl_id,
     H5O_copy_t *cpy_info, void UNUSED *udata)
 {
@@ -970,10 +970,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_attr_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc,
-    void *mesg_dst, hid_t dxpl_id, H5O_copy_t *cpy_info)
+H5O_attr_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src,
+    H5O_loc_t *dst_oloc, void *mesg_dst, hid_t dxpl_id, H5O_copy_t *cpy_info)
 {
-    H5A_t  *attr_src = (H5A_t *)mesg_src;
+    const H5A_t  *attr_src = (const H5A_t *)mesg_src;
     H5A_t  *attr_dst = (H5A_t *)mesg_dst;
     H5F_t  *file_src = src_oloc->file;
     H5F_t  *file_dst = dst_oloc->file;
@@ -988,30 +988,33 @@ H5O_attr_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_loc
     HDassert(attr_dst);
     HDassert(file_dst);
 
-    /* only need to fix reference attribute */
-    if ( (NULL == attr_src->data) ||
-         (H5T_get_class(attr_src->dt, FALSE) != H5T_REFERENCE) ||
-         (file_src == file_dst) )
-        HGOTO_DONE(SUCCEED)
+    /* Only need to fix reference attribute with real data being copied to
+     *  another file.
+     */
+    if((NULL != attr_src->data) &&
+            (H5T_get_class(attr_src->dt, FALSE) == H5T_REFERENCE) &&
+            (file_src != file_dst)) {
 
-    /* copy object pointed by reference. The current implementation does not deal with
-       nested reference such as reference in a compound structure */
+        /* copy object pointed by reference. The current implementation does not
+         *  deal with nested reference such as reference in a compound structure
+         */
 
-    /* Check for expanding references */
-    if(cpy_info->expand_ref) {
-        size_t ref_count;
+        /* Check for expanding references */
+        if(cpy_info->expand_ref) {
+            size_t ref_count;
 
-        /* Determine # of reference elements to copy */
-        ref_count = attr_dst->data_size / H5T_get_size(attr_dst->dt);
+            /* Determine # of reference elements to copy */
+            ref_count = attr_dst->data_size / H5T_get_size(attr_dst->dt);
 
-        /* Copy objects referenced in source buffer to destination file and set destination elements */
-        if(H5O_copy_expand_ref(file_src, attr_src->data, dxpl_id,
-                file_dst, attr_dst->data, ref_count, H5T_get_ref_type(attr_src->dt), cpy_info) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, FAIL, "unable to copy reference attribute")
+            /* Copy objects referenced in source buffer to destination file and set destination elements */
+            if(H5O_copy_expand_ref(file_src, attr_src->data, dxpl_id,
+                    file_dst, attr_dst->data, ref_count, H5T_get_ref_type(attr_src->dt), cpy_info) < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, FAIL, "unable to copy reference attribute")
+        } /* end if */
+        else
+            /* Reset value to zero */
+            HDmemset(attr_dst->data, 0, attr_dst->data_size);
     } /* end if */
-    else
-        /* Reset value to zero */
-        HDmemset(attr_dst->data, 0, attr_dst->data_size);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

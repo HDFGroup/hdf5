@@ -348,28 +348,9 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     oh_dst->ctime = oh_src->ctime;
     oh_dst->btime = oh_src->btime;
 
-    /* Copy attribute information */
+    /* Copy attribute storage information */
     oh_dst->max_compact = oh_src->max_compact;
     oh_dst->min_dense = oh_src->min_dense;
-    if(cpy_info->copy_without_attr) {
-        oh_dst->nattrs = 0;
-        oh_dst->attr_fheap_addr = HADDR_UNDEF;
-        oh_dst->name_bt2_addr = HADDR_UNDEF;
-        oh_dst->corder_bt2_addr = HADDR_UNDEF;
-    } /* end if */
-    else {
-        oh_dst->nattrs = oh_src->nattrs;
-/* XXX: Bail out for now, if the source object has densely stored attributes */
-        if(H5F_addr_defined(oh_src->attr_fheap_addr))
-            HGOTO_ERROR(H5E_OHDR, H5E_UNSUPPORTED, FAIL, "densely stored attributes not supported yet")
-        else {
-            HDassert(!H5F_addr_defined(oh_src->name_bt2_addr));
-            oh_dst->attr_fheap_addr = HADDR_UNDEF;
-            oh_dst->name_bt2_addr = HADDR_UNDEF;
-            oh_dst->corder_bt2_addr = HADDR_UNDEF;
-        } /* end else */
-    } /* end else */
-    
 
     /* Initialize size of chunk array.  The destination always has only one
      * chunk.

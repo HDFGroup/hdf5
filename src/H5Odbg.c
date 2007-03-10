@@ -94,7 +94,6 @@ H5O_assert(const H5O_t *oh)
 {
     H5O_mesg_t *curr_msg;               /* Pointer to current message to examine */
     H5O_mesg_t *tmp_msg;                /* Pointer to temporary message to examine */
-    hsize_t num_attrs;                  /* Number of attributes on object */
     size_t meta_space;                  /* Size of header metadata */
     size_t mesg_space;                  /* Size of message raw data */
     size_t free_space;                  /* Size of free space in header */
@@ -108,7 +107,6 @@ H5O_assert(const H5O_t *oh)
     meta_space = H5O_SIZEOF_HDR(oh) + (H5O_SIZEOF_CHKHDR_OH(oh) * (oh->nchunks - 1));
     mesg_space = 0;
     free_space = 0;
-    num_attrs = 0;
 
     /* Loop over all chunks in object header */
     for(u = 0; u < oh->nchunks; u++) {
@@ -140,10 +138,6 @@ H5O_assert(const H5O_t *oh)
 
     /* Loop over all messages in object header */
     for(u = 0, curr_msg = &oh->mesg[0]; u < oh->nmesgs; u++, curr_msg++) {
-        /* Check for attribute message */
-	if(H5O_ATTR_ID == curr_msg->type->id)
-            num_attrs++;
-
         /* Accumulate information, based on the type of message */
 	if(H5O_NULL_ID == curr_msg->type->id)
             free_space += H5O_SIZEOF_MSGHDR_OH(oh) + curr_msg->raw_size;
@@ -175,8 +169,6 @@ H5O_assert(const H5O_t *oh)
                 HDassert(!(tmp_msg->raw >= curr_msg->raw && tmp_msg->raw < (curr_msg->raw + curr_msg->raw_size)));
         } /* end for */
     } /* end for */
-    if(oh->version > H5O_VERSION_1 && !H5F_addr_defined(oh->attr_fheap_addr))
-        HDassert(oh->nattrs == num_attrs);
 
     /* Sanity check that all the bytes are accounted for */
     HDassert(hdr_size == (free_space + meta_space + mesg_space + oh->skipped_mesg_size));
@@ -276,54 +268,59 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Number of links:",
 	      oh->nlink);
+
     /* Extra information for later versions */
     if(oh->version > H5O_VERSION_1) {
-        struct tm *tm;          /* Time structure */
-        char buf[128];          /* Buffer for formatting time info */
-
-        /* Time fields */
-        tm = HDlocaltime(&oh->atime);
-        HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
-        HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-                "Access Time:", buf);
-        tm = HDlocaltime(&oh->mtime);
-        HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
-        HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-                "Modification Time:", buf);
-        tm = HDlocaltime(&oh->ctime);
-        HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
-        HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-                "Change Time:", buf);
-        tm = HDlocaltime(&oh->btime);
-        HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
-        HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
-                "Birth Time:", buf);
-
-        /* Attribute tracking fields */
+        /* Display object's status flags */
 	HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 		   "Attribute creation order tracked:",
 		   (oh->flags & H5P_CRT_ORDER_TRACKED) ? "Yes" : "No");
 	HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 		   "Attribute creation order indexed:",
 		   (oh->flags & H5P_CRT_ORDER_INDEXED) ? "Yes" : "No");
-        HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-                  "Max. compact attributes:",
-                  (unsigned)oh->max_compact);
-        HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-                  "Min. dense attributes:",
-                  (unsigned)oh->min_dense);
-        HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
-                  "Number of attributes:",
-                  oh->nattrs);
-        HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
-                  "Attribute heap address:",
-                  oh->attr_fheap_addr);
-        HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
-                  "Attribute name index address:",
-                  oh->name_bt2_addr);
-        HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
-                  "Attribute creation order index address:",
-                  oh->corder_bt2_addr);
+	HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+		   "Attribute storage phase change values:",
+		   (oh->flags & H5O_HDR_ATTR_STORE_PHASE_CHANGE) ? "Non-default" : "Default");
+	HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+		   "Timestamps:",
+		   (oh->flags & H5O_HDR_STORE_TIMES) ? "Enabled" : "Disabled");
+        if(oh->flags & ~H5O_HDR_ALL_FLAGS)
+            HDfprintf(stream, "*** UNKNOWN OBJECT HEADER STATUS FLAG: %02x!\n",
+                (unsigned)oh->flags);
+
+        /* Only dump times, if they are tracked */
+        if(oh->flags & H5O_HDR_STORE_TIMES) {
+            struct tm *tm;          /* Time structure */
+            char buf[128];          /* Buffer for formatting time info */
+
+            /* Time fields */
+            tm = HDlocaltime(&oh->atime);
+            HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
+            HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                    "Access Time:", buf);
+            tm = HDlocaltime(&oh->mtime);
+            HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
+            HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                    "Modification Time:", buf);
+            tm = HDlocaltime(&oh->ctime);
+            HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
+            HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                    "Change Time:", buf);
+            tm = HDlocaltime(&oh->btime);
+            HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
+            HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                    "Birth Time:", buf);
+        } /* end if */
+
+        /* Attribute tracking fields */
+        if(oh->flags & H5O_HDR_ATTR_STORE_PHASE_CHANGE) {
+            HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+                      "Max. compact attributes:",
+                      (unsigned)oh->max_compact);
+            HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+                      "Min. dense attributes:",
+                      (unsigned)oh->min_dense);
+        } /* end if */
     } /* end if */
 
     HDfprintf(stream, "%*s%-*s %Zu (%Zu)\n", indent, "", fwidth,
