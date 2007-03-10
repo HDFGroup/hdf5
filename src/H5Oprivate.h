@@ -173,11 +173,13 @@ typedef struct H5O_shared_t {
  *      link info structure in src/H5Gprivate.h - QAK)
  * (if the fields in this struct are changed, also look at the code that
  *      creates intermediate groups in src/H5Gtraverse.c - QAK)
+ * (The "max. creation order" field is signed so that we might have an easy
+ *      way to add links to the front of the creation ordering (with negative
+ *      values) as well as the end of the creation ordering - QAK)
  */
 typedef struct H5O_linfo_t {
     /* (creation order info) */
     hbool_t     index_corder;           /* Are creation order values indexed on links? */
-    int64_t     min_corder;             /* Current min. creation order value for group */
     int64_t     max_corder;             /* Current max. creation order value for group */
     haddr_t     corder_bt2_addr;        /* Address of v2 B-tree for indexing creation order values of links */
 

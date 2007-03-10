@@ -62,7 +62,6 @@
 /* Defaults for link info values */
 #define H5G_CRT_LINFO_INDEX_CORDER              FALSE
 #define H5G_CRT_LINFO_NLINKS                    0
-#define H5G_CRT_LINFO_MIN_CORDER                0
 #define H5G_CRT_LINFO_MAX_CORDER                0
 #define H5G_CRT_LINFO_LINK_FHEAP_ADDR           HADDR_UNDEF
 #define H5G_CRT_LINFO_NAME_BT2_ADDR             HADDR_UNDEF
@@ -72,7 +71,6 @@
 #define H5G_CRT_LINK_INFO_NAME                  "link info"
 #define H5G_CRT_LINK_INFO_SIZE                  sizeof(H5O_linfo_t)
 #define H5G_CRT_LINK_INFO_DEF                   {H5G_CRT_LINFO_INDEX_CORDER, \
-                                                    H5G_CRT_LINFO_MIN_CORDER, \
                                                     H5G_CRT_LINFO_MAX_CORDER, \
                                                     H5G_CRT_LINFO_CORDER_BT2_ADDR, \
                                                     H5G_CRT_LINFO_NLINKS, \

@@ -147,7 +147,7 @@ Expected output for 'h5dump --xml tall.h5'
       </hdf5:Group>
    </hdf5:Group>
    <hdf5:Group Name="g2" OBJ-XID="xid_1848" H5Path="/g2" Parents="xid_96" H5ParentPaths="/" >
-      <hdf5:Dataset Name="dset2.1" OBJ-XID="xid_9032" H5Path= "/g2/dset2.1" Parents="xid_1848" H5ParentPaths="/g2">
+      <hdf5:Dataset Name="dset2.1" OBJ-XID="xid_9024" H5Path= "/g2/dset2.1" Parents="xid_1848" H5ParentPaths="/g2">
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>
@@ -172,7 +172,7 @@ Expected output for 'h5dump --xml tall.h5'
             </hdf5:DataFromFile>
          </hdf5:Data>
       </hdf5:Dataset>
-      <hdf5:Dataset Name="dset2.2" OBJ-XID="xid_9632" H5Path= "/g2/dset2.2" Parents="xid_1848" H5ParentPaths="/g2">
+      <hdf5:Dataset Name="dset2.2" OBJ-XID="xid_9624" H5Path= "/g2/dset2.2" Parents="xid_1848" H5ParentPaths="/g2">
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
          </hdf5:StorageLayout>

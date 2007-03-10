@@ -141,7 +141,6 @@ H5O_linfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
     H5F_DECODE_LENGTH(f, p, linfo->nlinks)
 
     /* Min. & max creation order value for the group */
-    INT64DECODE(p, linfo->min_corder)
     INT64DECODE(p, linfo->max_corder)
 
     /* Address of fractal heap to store "dense" links */
@@ -206,7 +205,6 @@ H5O_linfo_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void
     H5F_ENCODE_LENGTH(f, p, linfo->nlinks)
 
     /* Min. & max creation order value for the group */
-    INT64ENCODE(p, linfo->min_corder)
     INT64ENCODE(p, linfo->max_corder)
 
     /* Address of fractal heap to store "dense" links */
@@ -293,7 +291,6 @@ H5O_linfo_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg)
     ret_value = 1                       /* Version */
                 + 1                     /* Index flags */
                 + H5F_SIZEOF_SIZE(f)    /* Number of links */
-                + 8                     /* Curr. min. creation order value */
                 + 8                     /* Curr. max. creation order value */
                 + H5F_SIZEOF_ADDR(f)    /* Address of fractal heap to store "dense" links */
                 + H5F_SIZEOF_ADDR(f)    /* Address of v2 B-tree for indexing names of links */
@@ -400,7 +397,7 @@ H5O_linfo_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst,
      */
     if(cpy_info->max_depth >= 0 && cpy_info->curr_depth >= cpy_info->max_depth) {
         linfo_dst->nlinks = 0;
-        linfo_dst->min_corder = linfo_dst->max_corder = 0;
+        linfo_dst->max_corder = 0;
         linfo_dst->link_fheap_addr = HADDR_UNDEF;
         linfo_dst->name_bt2_addr = HADDR_UNDEF;
         linfo_dst->corder_bt2_addr = HADDR_UNDEF;
@@ -569,8 +566,6 @@ H5O_linfo_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *
 	      "Index creation order of links:", linfo->index_corder);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Number of links:", linfo->nlinks);
-    HDfprintf(stream, "%*s%-*s %Hd\n", indent, "", fwidth,
-	      "Min. creation order value:", linfo->min_corder);
     HDfprintf(stream, "%*s%-*s %Hd\n", indent, "", fwidth,
 	      "Max. creation order value:", linfo->max_corder);
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,

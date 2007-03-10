@@ -9008,7 +9008,6 @@ group_info(hid_t fapl)
 
                     /* Check (new/empty) group's information */
                     if(grp_info.storage_type != H5G_STORAGE_TYPE_COMPACT) TEST_ERROR
-                    if(grp_info.min_corder != 0) TEST_ERROR
                     if(grp_info.max_corder != 0) TEST_ERROR
                     if(grp_info.nlinks != 0) TEST_ERROR
 
@@ -9029,7 +9028,6 @@ group_info(hid_t fapl)
 
                     /* Check (new) group's information */
                     if(grp_info.storage_type != H5G_STORAGE_TYPE_COMPACT) TEST_ERROR
-                    if(grp_info.min_corder != 0) TEST_ERROR
                     if(grp_info.max_corder != (int64_t)(u + 1)) TEST_ERROR
                     if(grp_info.nlinks != (hsize_t)(u + 1)) TEST_ERROR
 
@@ -9044,7 +9042,6 @@ group_info(hid_t fapl)
 
                         /* Check (new) group's information */
                         if(grp_info.storage_type != H5G_STORAGE_TYPE_COMPACT) TEST_ERROR
-                        if(grp_info.min_corder != 0) TEST_ERROR
                         if(grp_info.max_corder != (int64_t)(u + 1)) TEST_ERROR
                         if(grp_info.nlinks != (hsize_t)(u + 1)) TEST_ERROR
                     } /* end if */
@@ -9058,7 +9055,6 @@ group_info(hid_t fapl)
 
                     /* Check main group's information */
                     if(grp_info.storage_type != H5G_STORAGE_TYPE_COMPACT) TEST_ERROR
-                    if(grp_info.min_corder != 0) TEST_ERROR
                     if(grp_info.max_corder != (int64_t)(u + 1)) TEST_ERROR
                     if(grp_info.nlinks != (hsize_t)(u + 1)) TEST_ERROR
 
@@ -9072,7 +9068,6 @@ group_info(hid_t fapl)
 
                     /* Check soft link group's information */
                     if(grp_info.storage_type != H5G_STORAGE_TYPE_COMPACT) TEST_ERROR
-                    if(grp_info.min_corder != 0) TEST_ERROR
                     if(grp_info.max_corder != (int64_t)(u + 1)) TEST_ERROR
                     if(grp_info.nlinks != (hsize_t)(u + 1)) TEST_ERROR
                 } /* end for */
@@ -9103,7 +9098,6 @@ group_info(hid_t fapl)
 
                     /* Check (new/empty) group's information */
                     if(grp_info.storage_type != H5G_STORAGE_TYPE_COMPACT) TEST_ERROR
-                    if(grp_info.min_corder != 0) TEST_ERROR
                     if(grp_info.max_corder != 0) TEST_ERROR
                     if(grp_info.nlinks != 0) TEST_ERROR
 
@@ -9124,7 +9118,6 @@ group_info(hid_t fapl)
 
                     /* Check (new) group's information */
                     if(grp_info.storage_type != H5G_STORAGE_TYPE_DENSE) TEST_ERROR
-                    if(grp_info.min_corder != 0) TEST_ERROR
                     if(grp_info.max_corder != (int64_t)(u + 1)) TEST_ERROR
                     if(grp_info.nlinks != (hsize_t)(u + 1)) TEST_ERROR
 
@@ -9139,7 +9132,6 @@ group_info(hid_t fapl)
 
                         /* Check (new) group's information */
                         if(grp_info.storage_type != H5G_STORAGE_TYPE_DENSE) TEST_ERROR
-                        if(grp_info.min_corder != 0) TEST_ERROR
                         if(grp_info.max_corder != (int64_t)(u + 1)) TEST_ERROR
                         if(grp_info.nlinks != (hsize_t)(u + 1)) TEST_ERROR
                     } /* end if */
@@ -9153,7 +9145,6 @@ group_info(hid_t fapl)
 
                     /* Check main group's information */
                     if(grp_info.storage_type != H5G_STORAGE_TYPE_DENSE) TEST_ERROR
-                    if(grp_info.min_corder != 0) TEST_ERROR
                     if(grp_info.max_corder != (int64_t)(u + 1)) TEST_ERROR
                     if(grp_info.nlinks != (hsize_t)(u + 1)) TEST_ERROR
 
@@ -9167,7 +9158,6 @@ group_info(hid_t fapl)
 
                     /* Check soft link group's information */
                     if(grp_info.storage_type != H5G_STORAGE_TYPE_DENSE) TEST_ERROR
-                    if(grp_info.min_corder != 0) TEST_ERROR
                     if(grp_info.max_corder != (int64_t)(u + 1)) TEST_ERROR
                     if(grp_info.nlinks != (hsize_t)(u + 1)) TEST_ERROR
                 } /* end for */
@@ -9288,7 +9278,6 @@ group_info_old(hid_t fapl)
 
             /* Check (new/empty) group's information */
             if(grp_info.storage_type != H5G_STORAGE_TYPE_SYMBOL_TABLE) TEST_ERROR
-            if(grp_info.min_corder != 0) TEST_ERROR
             if(grp_info.max_corder != 0) TEST_ERROR
             if(grp_info.nlinks != 0) TEST_ERROR
 
@@ -9309,7 +9298,6 @@ group_info_old(hid_t fapl)
 
             /* Check (new) group's information */
             if(grp_info.storage_type != H5G_STORAGE_TYPE_SYMBOL_TABLE) TEST_ERROR
-            if(grp_info.min_corder != 0) TEST_ERROR
             if(grp_info.max_corder != 0) TEST_ERROR
             if(grp_info.nlinks != (hsize_t)(u + 1)) TEST_ERROR
 
@@ -9324,7 +9312,6 @@ group_info_old(hid_t fapl)
 
                 /* Check (new) group's information */
                 if(grp_info.storage_type != H5G_STORAGE_TYPE_SYMBOL_TABLE) TEST_ERROR
-                if(grp_info.min_corder != 0) TEST_ERROR
                 if(grp_info.max_corder != 0) TEST_ERROR
                 if(grp_info.nlinks != (hsize_t)(u + 1)) TEST_ERROR
             } /* end if */
@@ -9338,7 +9325,6 @@ group_info_old(hid_t fapl)
 
             /* Check main group's information */
             if(grp_info.storage_type != H5G_STORAGE_TYPE_SYMBOL_TABLE) TEST_ERROR
-            if(grp_info.min_corder != 0) TEST_ERROR
             if(grp_info.max_corder != 0) TEST_ERROR
             if(grp_info.nlinks != (hsize_t)(u + 1)) TEST_ERROR
 
@@ -9352,7 +9338,6 @@ group_info_old(hid_t fapl)
 
             /* Check soft link group's information */
             if(grp_info.storage_type != H5G_STORAGE_TYPE_SYMBOL_TABLE) TEST_ERROR
-            if(grp_info.min_corder != 0) TEST_ERROR
             if(grp_info.max_corder != 0) TEST_ERROR
             if(grp_info.nlinks != (hsize_t)(u + 1)) TEST_ERROR
         } /* end for */

@@ -686,7 +686,6 @@ H5G_obj_info(H5O_loc_t *oloc, H5G_info_t *grp_info, hid_t dxpl_id)
     if(H5O_msg_read(oloc, H5O_LINFO_ID, &linfo, dxpl_id)) {
         /* Retrieve the information about the links */
         grp_info->nlinks = linfo.nlinks;
-        grp_info->min_corder = linfo.min_corder;
         grp_info->max_corder = linfo.max_corder;
 
         /* Check if the group is using compact or dense storage for its links */
@@ -705,7 +704,6 @@ H5G_obj_info(H5O_loc_t *oloc, H5G_info_t *grp_info, hid_t dxpl_id)
 
         /* Set the other information about the group */
         grp_info->storage_type = H5G_STORAGE_TYPE_SYMBOL_TABLE;
-        grp_info->min_corder = 0;
         grp_info->max_corder = 0;
     } /* end else */
 
@@ -867,7 +865,7 @@ H5G_obj_remove_update_linfo(H5O_loc_t *oloc, H5O_linfo_t *linfo, hid_t dxpl_id)
 
     /* Reset the creation order min/max if there's no more links in group */
     if(linfo->nlinks == 0)
-        linfo->min_corder = linfo->max_corder = 0;
+        linfo->max_corder = 0;
 
     /* Check for transitioning out of dense storage, if we are using it */
     if(H5F_addr_defined(linfo->link_fheap_addr)) {

@@ -74,7 +74,6 @@ typedef enum H5G_storage_type_t {
 typedef struct H5G_info_t {
     H5G_storage_type_t 	storage_type;	/* Type of storage for links in group */
     hsize_t 	nlinks;		        /* Number of links in group */
-    int64_t     min_corder;             /* Current min. creation order value for group */
     int64_t     max_corder;             /* Current max. creation order value for group */
 } H5G_info_t;
 
