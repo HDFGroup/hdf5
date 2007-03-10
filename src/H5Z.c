@@ -797,25 +797,25 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags,
          * filter struct is reallocated.  Set these pointers to ~NULL
          * so that we can reset them after reallocating the filters array.
          */
-        for(n=0; n<pline->nalloc; ++n) {
+        for(n = 0; n < pline->nalloc; ++n)
             if(pline->filter[n].cd_values == pline->filter[n]._cd_values)
                 pline->filter[n].cd_values = (void *) ~((size_t)NULL);
-        }
 
 	x.nalloc = MAX(H5Z_MAX_NFILTERS, 2 * pline->nalloc);
-	x.filter = H5MM_realloc(pline->filter, x.nalloc*sizeof(x.filter[0]));
+	x.filter = H5MM_realloc(pline->filter, x.nalloc * sizeof(x.filter[0]));
 	if(NULL == x.filter)
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for filter pipeline")
+
+        /* Fix pointers in previous filters that need to point to their own
+         *      internal data.
+         */
+        for(n = 0; n < pline->nalloc; ++n)
+            if(x.filter[n].cd_values == (void *) ~((size_t) NULL))
+                x.filter[n].cd_values = x.filter[n]._cd_values;
+
+        /* Point to newly allocated buffer */
 	pline->nalloc = x.nalloc;
 	pline->filter = x.filter;
-
-        /* Fix pointers in filters that need to point to their own internal
-         * data.
-         */
-        for(n=0; n<pline->nalloc; ++n) {
-            if(pline->filter[n].cd_values == (void *) ~((size_t) NULL))
-                pline->filter[n].cd_values = pline->filter[n]._cd_values;
-        }
     } /* end if */
 
     /* Add the new filter to the pipeline */
