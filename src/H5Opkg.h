@@ -103,7 +103,6 @@
             (H5O_SIZEOF_MAGIC +	/*magic number  	*/		      \
                 1 +		/*version number 	*/		      \
                 1 +		/*flags		 	*/		      \
-                2 +		/*number of messages	*/		      \
                 4 +		/*reference count	*/		      \
                 (((O)->flags & H5O_HDR_STORE_TIMES) ? (			      \
                   4 +		/*access time		*/		      \
@@ -477,6 +476,7 @@ H5_DLL herr_t H5O_msg_iterate_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *t
     const H5O_mesg_operator_t *op, void *op_data, hid_t dxpl_id);
 
 /* Object header allocation routines */
+H5_DLL herr_t H5O_alloc_msgs(H5O_t *oh, size_t min_alloc);
 H5_DLL unsigned H5O_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     const H5O_msg_class_t *type, const void *mesg);
 H5_DLL herr_t H5O_condense_header(H5F_t *f, H5O_t *oh, hid_t dxpl_id);

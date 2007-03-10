@@ -64,7 +64,6 @@ static herr_t H5O_eliminate_gap(H5O_t *oh, H5O_mesg_t *mesg,
     uint8_t *new_gap_loc, size_t new_gap_size);
 static herr_t H5O_alloc_null(H5O_t *oh, unsigned null_idx,
     const H5O_msg_class_t *new_type, void *new_native, size_t new_size);
-static herr_t H5O_alloc_msgs(H5O_t *oh, size_t min_alloc);
 static htri_t H5O_alloc_extend_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno,
     size_t size, unsigned * msg_idx);
 static unsigned H5O_alloc_new_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
@@ -395,7 +394,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5O_alloc_msgs(H5O_t *oh, size_t min_alloc)
 {
     size_t old_alloc;                   /* Old number of messages allocated */
@@ -410,7 +409,7 @@ H5O_alloc_msgs(H5O_t *oh, size_t min_alloc)
 
     /* Initialize number of messages information */
     old_alloc = oh->alloc_nmesgs;
-    na = oh->alloc_nmesgs + MAX(oh->alloc_nmesgs, min_alloc);
+    na = oh->alloc_nmesgs + MAX(oh->alloc_nmesgs, min_alloc);   /* At least double */
 
     /* Attempt to allocate more memory */
     if(NULL == (new_mesg = H5FL_SEQ_REALLOC(H5O_mesg_t, oh->mesg, na)))

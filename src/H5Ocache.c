@@ -280,6 +280,9 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
         oh->flags = *p++;
         if(oh->flags & ~H5O_HDR_ALL_FLAGS)
             HGOTO_ERROR(H5E_OHDR, H5E_VERSION, NULL, "unknown object header status flag(s)")
+
+        /* Number of messages (to allocate initially) */
+        nmesgs = 1;
     } /* end if */
     else {
         /* Version */
@@ -292,10 +295,10 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 
         /* Reserved */
         p++;
-    } /* end else */
 
-    /* Number of messages */
-    UINT16DECODE(p, nmesgs);
+        /* Number of messages */
+        UINT16DECODE(p, nmesgs);
+    } /* end else */
 
     /* Link count */
     UINT32DECODE(p, oh->nlink);
@@ -496,9 +499,12 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
                     merged_null_msgs++;
                 } /* end if */
                 else {
-                    /* New message */
-                    if(oh->nmesgs >= nmesgs)
-                        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "corrupt object header - too many messages")
+                    /* Check if we need to extend message table to hold the new message */
+                    if(oh->nmesgs >= oh->alloc_nmesgs)
+                        if(H5O_alloc_msgs(oh, (size_t)1) < 0)
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate more space for messages")
+
+                    /* Record information about message */
                     mesgno = oh->nmesgs++;
                     oh->mesg[mesgno].type = H5O_msg_class_g[id];
                     oh->mesg[mesgno].dirty = FALSE;
@@ -574,8 +580,9 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 	oh->cache_info.is_dirty = TRUE;
 
     /* Sanity check for the correct # of messages in object header */
-    if((oh->nmesgs + skipped_msgs + merged_null_msgs) != nmesgs)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "corrupt object header - too few messages")
+    if(oh->version == H5O_VERSION_1)
+        if((oh->nmesgs + skipped_msgs + merged_null_msgs) != nmesgs)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "corrupt object header - too few messages")
 
 #ifdef H5O_DEBUG
 H5O_assert(oh);
@@ -651,9 +658,6 @@ H5O_assert(oh);
 
             /* Flags */
             *p++ = oh->flags;
-
-            /* Number of messages */
-            UINT16ENCODE(p, oh->nmesgs);
 
             /* Link count */
             UINT32ENCODE(p, oh->nlink);
