@@ -4339,8 +4339,10 @@ test_attr_info_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
         CHECK(fid, FAIL, "H5Fcreate");
 
         /* Set attribute creation order tracking & indexing for object */
-        ret = H5Pset_attr_creation_order(dcpl, (H5P_CRT_ORDER_TRACKED | (use_index ? H5P_CRT_ORDER_INDEXED : (unsigned)0)));
-        CHECK(ret, FAIL, "H5Pset_attr_creation_order");
+        if(new_format == TRUE) {
+            ret = H5Pset_attr_creation_order(dcpl, (H5P_CRT_ORDER_TRACKED | (use_index ? H5P_CRT_ORDER_INDEXED : (unsigned)0)));
+            CHECK(ret, FAIL, "H5Pset_attr_creation_order");
+        } /* end if */
 
         /* Create datasets */
         dset1 = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
@@ -4577,8 +4579,10 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                 CHECK(fid, FAIL, "H5Fcreate");
 
                 /* Set attribute creation order tracking & indexing for object */
-                ret = H5Pset_attr_creation_order(dcpl, (H5P_CRT_ORDER_TRACKED | (use_index ? H5P_CRT_ORDER_INDEXED : (unsigned)0)));
-                CHECK(ret, FAIL, "H5Pset_attr_creation_order");
+                if(new_format == TRUE) {
+                    ret = H5Pset_attr_creation_order(dcpl, (H5P_CRT_ORDER_TRACKED | (use_index ? H5P_CRT_ORDER_INDEXED : (unsigned)0)));
+                    CHECK(ret, FAIL, "H5Pset_attr_creation_order");
+                } /* end if */
 
                 /* Create datasets */
                 dset1 = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
@@ -5382,8 +5386,10 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
                 CHECK(fid, FAIL, "H5Fcreate");
 
                 /* Set attribute creation order tracking & indexing for object */
-                ret = H5Pset_attr_creation_order(dcpl, (H5P_CRT_ORDER_TRACKED | (use_index ? H5P_CRT_ORDER_INDEXED : (unsigned)0)));
-                CHECK(ret, FAIL, "H5Pset_attr_creation_order");
+                if(new_format == TRUE) {
+                    ret = H5Pset_attr_creation_order(dcpl, (H5P_CRT_ORDER_TRACKED | (use_index ? H5P_CRT_ORDER_INDEXED : (unsigned)0)));
+                    CHECK(ret, FAIL, "H5Pset_attr_creation_order");
+                } /* end if */
 
                 /* Create datasets */
                 dset1 = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
@@ -5706,8 +5712,10 @@ test_attr_open_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                 CHECK(fid, FAIL, "H5Fcreate");
 
                 /* Set attribute creation order tracking & indexing for object */
-                ret = H5Pset_attr_creation_order(dcpl, (H5P_CRT_ORDER_TRACKED | (use_index ? H5P_CRT_ORDER_INDEXED : (unsigned)0)));
-                CHECK(ret, FAIL, "H5Pset_attr_creation_order");
+                if(new_format == TRUE) {
+                    ret = H5Pset_attr_creation_order(dcpl, (H5P_CRT_ORDER_TRACKED | (use_index ? H5P_CRT_ORDER_INDEXED : (unsigned)0)));
+                    CHECK(ret, FAIL, "H5Pset_attr_creation_order");
+                } /* end if */
 
                 /* Create datasets */
                 dset1 = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
@@ -5988,8 +5996,10 @@ test_attr_open(hbool_t new_format, hid_t fcpl, hid_t fapl)
         CHECK(fid, FAIL, "H5Fcreate");
 
         /* Set attribute creation order tracking & indexing for object */
-        ret = H5Pset_attr_creation_order(dcpl, (H5P_CRT_ORDER_TRACKED | (use_index ? H5P_CRT_ORDER_INDEXED : (unsigned)0)));
-        CHECK(ret, FAIL, "H5Pset_attr_creation_order");
+        if(new_format == TRUE) {
+            ret = H5Pset_attr_creation_order(dcpl, (H5P_CRT_ORDER_TRACKED | (use_index ? H5P_CRT_ORDER_INDEXED : (unsigned)0)));
+            CHECK(ret, FAIL, "H5Pset_attr_creation_order");
+        } /* end if */
 
         /* Create datasets */
         dset1 = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);

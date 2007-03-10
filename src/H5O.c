@@ -633,9 +633,11 @@ herr_t
 H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
     H5O_loc_t *loc/*out*/)
 {
+    H5P_genplist_t  *oc_plist;          /* Object creation property list */
     H5O_t      *oh = NULL;              /* Object header created */
     haddr_t     oh_addr;                /* Address of initial object header */
     size_t      oh_size;                /* Size of initial object header */
+    uint8_t	oh_flags;		/* Object header's initial status flags */
     hbool_t     store_msg_crt_idx;      /* Whether to always store message creation indices for this file */
     herr_t      ret_value = SUCCEED;    /* return value */
 
@@ -649,31 +651,32 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
     /* Make certain we allocate at least a reasonable size for the object header */
     size_hint = H5O_ALIGN_F(f, MAX(H5O_MIN_SIZE, size_hint));
 
+    /* Get the property list */
+    if(NULL == (oc_plist = H5I_object(ocpl_id)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a property list")
+
+    /* Get any object header status flags set by properties */
+    if(H5P_get(oc_plist, H5O_CRT_OHDR_FLAGS_NAME, &oh_flags) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object header flags")
+
     /* Allocate the object header and zero out header fields */
     if(NULL == (oh = H5FL_CALLOC(H5O_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Initialize file-specific information for object header */
     store_msg_crt_idx = H5F_STORE_MSG_CRT_IDX(f);
-    if(H5F_USE_LATEST_FORMAT(f) || store_msg_crt_idx)
+    if(H5F_USE_LATEST_FORMAT(f) || store_msg_crt_idx || (oh_flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED))
         oh->version = H5O_VERSION_LATEST;
     else
         oh->version = H5O_VERSION_1;
     oh->sizeof_size = H5F_SIZEOF_SIZE(f);
     oh->sizeof_addr = H5F_SIZEOF_ADDR(f);
 
+    /* Set initial status flags */
+    oh->flags = oh_flags;
+
     /* Initialize version-specific fields */
     if(oh->version > H5O_VERSION_1) {
-        H5P_genplist_t  *oc_plist;          /* Object creation property list */
-
-        /* Get the property list */
-        if(NULL == (oc_plist = H5I_object(ocpl_id)))
-            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a property list")
-
-        /* Get any object header status flags set by properties */
-        if(H5P_get(oc_plist, H5O_CRT_OHDR_FLAGS_NAME, &oh->flags) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object header flags")
-
         /* Initialize all time fields with current time, if we are storing them */
         if(oh->flags & H5O_HDR_STORE_TIMES)
             oh->atime = oh->mtime = oh->ctime = oh->btime = H5_now();
@@ -697,9 +700,6 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
             oh->flags |= H5O_HDR_ATTR_STORE_PHASE_CHANGE;
     } /* end if */
     else {
-        /* Flags */
-        oh->flags = H5O_CRT_OHDR_FLAGS_DEF;
-
         /* Reset unused time fields */
         oh->atime = oh->mtime = oh->ctime = oh->btime = 0;
     } /* end else */
