@@ -279,7 +279,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
         /* Flags */
         oh->flags = *p++;
         if(oh->flags & ~H5O_HDR_ALL_FLAGS)
-            HGOTO_ERROR(H5E_OHDR, H5E_VERSION, NULL, "unknown object header status flag(s)")
+            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "unknown object header status flag(s)")
 
         /* Number of messages (to allocate initially) */
         nmesgs = 1;
@@ -324,6 +324,28 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
             oh->max_compact = H5O_CRT_ATTR_MAX_COMPACT_DEF;
             oh->min_dense = H5O_CRT_ATTR_MIN_DENSE_DEF;
         } /* end else */
+
+        /* First chunk size */
+        switch(oh->flags & H5O_HDR_CHUNK0_SIZE) {
+            case 0:     /* 1 byte size */
+                chunk_size = *p++;
+                break;
+
+            case 1:     /* 2 byte size */
+                UINT16DECODE(p, chunk_size);
+                break;
+
+            case 2:     /* 4 byte size */
+                UINT32DECODE(p, chunk_size);
+                break;
+
+            case 3:     /* 8 byte size */
+                UINT64DECODE(p, chunk_size);
+                break;
+
+            default:
+                HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "bad size for chunk 0")
+        } /* end switch */
     } /* end if */
     else {
         /* Reset unused time fields */
@@ -332,10 +354,10 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
         /* Reset unused attribute fields */
         oh->max_compact = 0;
         oh->min_dense = 0;
-    } /* end else */
 
-    /* First chunk size */
-    UINT32DECODE(p, chunk_size);
+        /* First chunk size */
+        UINT32DECODE(p, chunk_size);
+    } /* end else */
 
     /* Reserved, in version 1 */
     if(H5O_VERSION_1 == oh->version)
@@ -412,8 +434,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
         } /* end if */
         else {
             /* Read the chunk raw data */
-            if(H5F_block_read(f, H5FD_MEM_OHDR, chunk_addr, chunk_size,
-                    dxpl_id, oh->chunk[chunkno].image) < 0)
+            if(H5F_block_read(f, H5FD_MEM_OHDR, chunk_addr, chunk_size, dxpl_id, oh->chunk[chunkno].image) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to read object header data")
 
             /* Point into chunk image to decode */
@@ -649,6 +670,8 @@ H5O_assert(oh);
          * on the entire block of memory needs to be updated if anything is
          * modified */
         if(oh->version > H5O_VERSION_1) {
+            uint64_t chunk0_size = oh->chunk[0].size - H5O_SIZEOF_HDR(oh);  /* Size of chunk 0's data */
+
             /* Verify magic number */
             HDassert(!HDmemcmp(p, H5O_HDR_MAGIC, H5O_SIZEOF_MAGIC));
             p += H5O_SIZEOF_MAGIC;
@@ -676,8 +699,27 @@ H5O_assert(oh);
                 UINT16ENCODE(p, oh->min_dense);
             } /* end if */
 
-            /* Chunk size */
-            UINT32ENCODE(p, (oh->chunk[0].size - H5O_SIZEOF_HDR(oh)));
+            /* First chunk size */
+            switch(oh->flags & H5O_HDR_CHUNK0_SIZE) {
+                case 0:     /* 1 byte size */
+                    *p++ = chunk0_size;
+                    break;
+
+                case 1:     /* 2 byte size */
+                    UINT16ENCODE(p, chunk0_size);
+                    break;
+
+                case 2:     /* 4 byte size */
+                    UINT32ENCODE(p, chunk0_size);
+                    break;
+
+                case 3:     /* 8 byte size */
+                    UINT64ENCODE(p, chunk0_size);
+                    break;
+
+                default:
+                    HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "bad size for chunk 0")
+            } /* end switch */
         } /* end if */
         else {
             /* Version */

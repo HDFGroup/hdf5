@@ -677,6 +677,8 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
 
     /* Initialize version-specific fields */
     if(oh->version > H5O_VERSION_1) {
+        size_t tent_oh_size;            /* Tentative size of object header */
+
         /* Initialize all time fields with current time, if we are storing them */
         if(oh->flags & H5O_HDR_STORE_TIMES)
             oh->atime = oh->mtime = oh->ctime = oh->btime = H5_now();
@@ -698,6 +700,30 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
         /* Check for non-default attribute storage phase change values */
         if(oh->max_compact != H5O_CRT_ATTR_MAX_COMPACT_DEF || oh->min_dense != H5O_CRT_ATTR_MIN_DENSE_DEF)
             oh->flags |= H5O_HDR_ATTR_STORE_PHASE_CHANGE;
+
+        /* Determine correct value for chunk #0 size bits */
+
+        /* See if only 1 byte is enough */
+        tent_oh_size = H5O_SIZEOF_HDR(oh) + size_hint;
+        if(tent_oh_size > 255) {
+            uint8_t old_oh_flags = oh->flags;   /* Temporary object header flags */
+
+            /* Need more than 1 byte, see if 2 bytes is enough */
+            oh->flags |= H5O_HDR_CHUNK0_2;
+            tent_oh_size = H5O_SIZEOF_HDR(oh) + size_hint;
+            if(tent_oh_size > 65535) {
+                /* Need more than 2 bytes, see if 4 bytes is enough */
+                oh->flags = old_oh_flags;
+                oh->flags |= H5O_HDR_CHUNK0_4;
+                tent_oh_size = H5O_SIZEOF_HDR(oh) + size_hint;
+                if(tent_oh_size > 4294967295) {
+                    /* Use 8 bytes */
+                    /* (Should probably have check for using more than 8 bytes... :-) */
+                    oh->flags = old_oh_flags;
+                    oh->flags |= H5O_HDR_CHUNK0_8;
+                } /* end if */
+            } /* end if */
+        } /* end if */
     } /* end if */
     else {
         /* Reset unused time fields */

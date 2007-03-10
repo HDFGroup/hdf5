@@ -61,10 +61,12 @@
 #define H5O_MESG_ALL_FLAG      (H5O_MESG_SDSPACE_FLAG | H5O_MESG_DTYPE_FLAG | H5O_MESG_FILL_FLAG | H5O_MESG_PLINE_FLAG | H5O_MESG_ATTR_FLAG)
 
 /* Object header status flag definitions */
-#define H5O_HDR_ATTR_CRT_ORDER_TRACKED  0x01    /* Attribute creation order is tracked */
-#define H5O_HDR_ATTR_CRT_ORDER_INDEXED  0x02    /* Attribute creation order has index */
-#define H5O_HDR_ATTR_STORE_PHASE_CHANGE 0x04    /* Non-default attribute storage phase change values stored */
-#define H5O_HDR_STORE_TIMES             0x08    /* Store access, modification, change & birth times for object */
+#define H5O_HDR_CHUNK0_SIZE             0x03    /* 2-bit field indicating # of bytes to store the size of chunk 0's data */
+#define H5O_HDR_ATTR_CRT_ORDER_TRACKED  0x04    /* Attribute creation order is tracked */
+#define H5O_HDR_ATTR_CRT_ORDER_INDEXED  0x08    /* Attribute creation order has index */
+#define H5O_HDR_ATTR_STORE_PHASE_CHANGE 0x10    /* Non-default attribute storage phase change values stored */
+#define H5O_HDR_STORE_TIMES             0x20    /* Store access, modification, change & birth times for object */
+#define H5O_HDR_ALL_FLAGS       (H5O_HDR_CHUNK0_SIZE | H5O_HDR_ATTR_CRT_ORDER_TRACKED | H5O_HDR_ATTR_CRT_ORDER_INDEXED | H5O_HDR_ATTR_STORE_PHASE_CHANGE | H5O_HDR_STORE_TIMES)
 
 /* Maximum shared message values.  Number of indexes is 8 to allow room to add
  * new types of messages.

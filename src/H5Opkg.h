@@ -88,6 +88,12 @@
 #define H5O_CRT_ATTR_MIN_DENSE_DEF      6
 #define H5O_CRT_OHDR_FLAGS_DEF          H5O_HDR_STORE_TIMES
 
+/* Object header status flag definitions */
+#define H5O_HDR_CHUNK0_1                0x00
+#define H5O_HDR_CHUNK0_2                0x01
+#define H5O_HDR_CHUNK0_4                0x02
+#define H5O_HDR_CHUNK0_8                0x03
+
 /*
  * Size of object header prefix.
  */
@@ -114,7 +120,7 @@
                   2 +		/*max compact attributes */		      \
                   2		/*min dense attributes	*/		      \
                 ) : 0) +						      \
-                4 +		/*chunk data size	*/		      \
+                (1 << ((O)->flags & H5O_HDR_CHUNK0_SIZE)) + /*chunk 0 data size */ \
                 H5O_SIZEOF_CHKSUM) /*checksum size	*/		      \
     )
 
@@ -187,9 +193,6 @@
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, ERR, "unable to set creation index") \
         } /* end if */							      \
     } /* end if */
-
-/* All the object header status flags that this version of the library knows about */
-#define H5O_HDR_ALL_FLAGS       (H5O_HDR_ATTR_CRT_ORDER_TRACKED | H5O_HDR_ATTR_CRT_ORDER_INDEXED | H5O_HDR_ATTR_STORE_PHASE_CHANGE | H5O_HDR_STORE_TIMES)
 
 
 /* The "message class" type */
