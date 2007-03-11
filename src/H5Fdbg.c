@@ -106,7 +106,7 @@ H5F_debug(H5F_t *f, hid_t dxpl_id, FILE * stream, int indent, int fwidth)
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Symbol table internal node 1/2 rank:", f->shared->btree_k[H5B_SNODE_ID]);
     HDfprintf(stream, "%*s%-*s 0x%02x\n", indent, "", fwidth,
-	      "File consistency flags:", (unsigned)(f->shared->consist_flags));
+	      "File status flags:", (unsigned)(f->shared->status_flags));
     HDfprintf(stream, "%*s%-*s %a (abs)\n", indent, "", fwidth,
 	      "Base address:", f->shared->base_addr);
     HDfprintf(stream, "%*s%-*s %a (rel)\n", indent, "", fwidth,

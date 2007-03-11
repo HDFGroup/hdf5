@@ -54,9 +54,12 @@
 #define H5F_SIGNATURE	  "\211HDF\r\n\032\n"
 #define H5F_SIGNATURE_LEN 8
 
-/*
- * Private file open flags.
- */
+/* Superblock status flags */
+#define H5F_SUPER_WRITE_ACCESS          0x01
+#define H5F_SUPER_FILE_OK               0x02
+#define H5F_SUPER_ALL_FLAGS             (H5F_SUPER_WRITE_ACCESS | H5F_SUPER_FILE_OK)
+
+/* Mask for removing private file access flags */
 #define H5F_ACC_PUBLIC_FLAGS 	0x00ffu
 
 /*
@@ -69,7 +72,7 @@
 typedef struct H5F_file_t {
     H5FD_t	*lf; 		/* Lower level file handle for I/O	*/
     unsigned	nrefs;		/* Ref count for times file is opened	*/
-    uint8_t	consist_flags;	/* File Consistency Flags		*/
+    uint8_t	status_flags;	/* File status flags			*/
     unsigned	flags;		/* Access Permissions for file		*/
 
     /* Cached values from FCPL/superblock */

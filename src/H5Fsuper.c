@@ -292,7 +292,7 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
 
     /* Check for older version of superblock format */
     if(super_vers < HDF5_SUPERBLOCK_VERSION_2) {
-        uint32_t	consist_flags;	    /* File Consistency Flags	   */
+        uint32_t	status_flags;	    /* File status flags	   */
         unsigned        btree_k[H5B_NUM_BTREE_ID];  /* B-tree internal node 'K' values */
         unsigned        sym_leaf_k;         /* Symbol table leaf node's 'K' value */
 
@@ -351,10 +351,12 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
          * for the indexed storage B-tree internal 'K' value later.
          */
 
-        /* File consistency flags. (Not really used yet) */
-        UINT32DECODE(p, consist_flags);
-        HDassert(consist_flags <= 255);
-        shared->consist_flags = consist_flags;
+        /* File status flags (not really used yet) */
+        UINT32DECODE(p, status_flags);
+        HDassert(status_flags <= 255);
+        shared->status_flags = status_flags;
+        if(shared->status_flags & ~H5F_SUPER_ALL_FLAGS)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "bad flag value for superblock")
 
         /*
          * If the superblock version # is greater than 0, read in the indexed
@@ -480,8 +482,10 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set byte number for object size")
         shared->sizeof_size = sizeof_size;  /* Keep a local copy also */
 
-        /* File consistency flags. (Not really used yet) */
-        shared->consist_flags = *p++;
+        /* File status flags (not really used yet) */
+        shared->status_flags = *p++;
+        if(shared->status_flags & ~H5F_SUPER_ALL_FLAGS)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "bad flag value for superblock")
 
         /* Base, superblock extension, end of file & root group object header addresses */
         H5F_addr_decode(f, (const uint8_t **)&p, &shared->base_addr/*out*/);
@@ -672,7 +676,7 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get userblock size")
     f->shared->super_addr = userblock_size;
     f->shared->base_addr = f->shared->super_addr;
-    f->shared->consist_flags = 0x03;
+    f->shared->status_flags = 0;
 
     /* Grab superblock version from property list */
     if(H5P_get(plist, H5F_CRT_SUPER_VERS_NAME, &super_vers) < 0)
@@ -855,8 +859,6 @@ H5F_super_write(H5F_t *f, hid_t dxpl_id)
 
     /* Check for older version of superblock format */
     if(super_vers < HDF5_SUPERBLOCK_VERSION_2) {
-        uint32_t consist_flags;	        /* File Consistency Flags */
-
         *p++ = (uint8_t)HDF5_FREESPACE_VERSION;     /* (hard-wired) */
         *p++ = (uint8_t)HDF5_OBJECTDIR_VERSION;     /* (hard-wired) */
         *p++ = 0;   /* reserved*/
@@ -870,8 +872,7 @@ H5F_super_write(H5F_t *f, hid_t dxpl_id)
 
         UINT16ENCODE(p, f->shared->sym_leaf_k);
         UINT16ENCODE(p, f->shared->btree_k[H5B_SNODE_ID]);
-        consist_flags = f->shared->consist_flags;
-        UINT32ENCODE(p, consist_flags);
+        UINT32ENCODE(p, (uint32_t)f->shared->status_flags);
 
         /*
          * Versions of the superblock >0 have the indexed storage B-tree
@@ -921,12 +922,12 @@ H5F_super_write(H5F_t *f, hid_t dxpl_id)
         uint32_t        chksum;                 /* Checksum temporary variable      */
         H5O_loc_t       *root_oloc;             /* Pointer to root group's object location */
 
-        /* Size of file addresses & offsets, and consistency flags */
+        /* Size of file addresses & offsets, and status flags */
         HDassert(H5F_SIZEOF_ADDR(f) <= 255);
         *p++ = (uint8_t)H5F_SIZEOF_ADDR(f);
         HDassert(H5F_SIZEOF_SIZE(f) <= 255);
         *p++ = (uint8_t)H5F_SIZEOF_SIZE(f);
-        *p++ = f->shared->consist_flags;
+        *p++ = f->shared->status_flags;
 
         /* Base, superblock extension & end of file addresses */
         H5F_addr_encode(f, &p, f->shared->base_addr);
