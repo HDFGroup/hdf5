@@ -135,6 +135,7 @@ typedef struct H5O_copy_t {
 #define H5O_BTREEK_ID   0x0013          /* v1 B-tree 'K' values message.  */
 #define H5O_DRVINFO_ID  0x0014          /* Driver info message.  */
 #define H5O_AINFO_ID    0x0015          /* Attribute info message.  */
+#define H5O_REFCOUNT_ID 0x0016          /* Reference count message.  */
 
 
 /* Shared object message flags.
@@ -428,6 +429,13 @@ typedef struct H5O_ainfo_t {
     haddr_t     fheap_addr;             /* Address of fractal heap for storing "dense" attributes */
     haddr_t     name_bt2_addr;          /* Address of v2 B-tree for indexing names of "dense" attributes */
 } H5O_ainfo_t;
+
+/*
+ * Reference Count Message.
+ * (Contains # of links to object, if >1)
+ * (Data structure in memory)
+ */
+typedef uint32_t H5O_refcount_t;
 
 
 /* Typedef for iteration operations */

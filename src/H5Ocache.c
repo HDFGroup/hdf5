@@ -44,8 +44,8 @@
 
 /* Set the object header size to speculatively read in */
 /* (needs to be more than the object header prefix size to work at all and
- *      should be larger than the default dataset object header to save the
- *      extra I/O operations) */
+ *      should be larger than the largest object type's default object header
+ *      size to save the extra I/O operations) */
 #define H5O_SPEC_READ_SIZE 512
 
 
@@ -283,28 +283,10 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 
         /* Number of messages (to allocate initially) */
         nmesgs = 1;
-    } /* end if */
-    else {
-        /* Version */
-        oh->version = *p++;
-        if(H5O_VERSION_1 != oh->version)
-            HGOTO_ERROR(H5E_OHDR, H5E_VERSION, NULL, "bad object header version number")
 
-        /* Flags */
-        oh->flags = H5O_CRT_OHDR_FLAGS_DEF;
+        /* Number of links to object (unless overridden by refcount message) */
+        oh->nlink = 1;
 
-        /* Reserved */
-        p++;
-
-        /* Number of messages */
-        UINT16DECODE(p, nmesgs);
-    } /* end else */
-
-    /* Link count */
-    UINT32DECODE(p, oh->nlink);
-
-    /* Version-specific fields */
-    if(oh->version > H5O_VERSION_1) {
         /* Time fields */
         if(oh->flags & H5O_HDR_STORE_TIMES) {
             UINT32DECODE(p, oh->atime);
@@ -348,6 +330,23 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
         } /* end switch */
     } /* end if */
     else {
+        /* Version */
+        oh->version = *p++;
+        if(H5O_VERSION_1 != oh->version)
+            HGOTO_ERROR(H5E_OHDR, H5E_VERSION, NULL, "bad object header version number")
+
+        /* Flags */
+        oh->flags = H5O_CRT_OHDR_FLAGS_DEF;
+
+        /* Reserved */
+        p++;
+
+        /* Number of messages */
+        UINT16DECODE(p, nmesgs);
+
+        /* Link count */
+        UINT32DECODE(p, oh->nlink);
+
         /* Reset unused time fields */
         oh->atime = oh->mtime = oh->ctime = oh->btime = 0;
 
@@ -592,6 +591,21 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
                 chunk_addr = cont->addr;
                 chunk_size = cont->size;
             } /* end if */
+            /* Check if next message to examine is a ref. count message */
+            else if(H5O_REFCOUNT_ID == oh->mesg[curmesg].type->id) {
+                H5O_refcount_t *refcount;
+
+                /* Decode ref. count message */
+                HDassert(oh->version > H5O_VERSION_1);
+                refcount = (H5O_refcount_t *)(H5O_MSG_REFCOUNT->decode)(f, dxpl_id, 0, oh->mesg[curmesg].raw);
+
+                /* Save 'native' form of ref. count message */
+                oh->mesg[curmesg].native = refcount;
+
+                /* Set object header values */
+                oh->has_refcount_msg = TRUE;
+                oh->nlink = *refcount;
+            } /* end if */
         } /* end for */
     } /* end while */
 
@@ -680,9 +694,6 @@ H5O_assert(oh);
 
             /* Flags */
             *p++ = oh->flags;
-
-            /* Link count */
-            UINT32ENCODE(p, oh->nlink);
 
             /* Time fields */
             if(oh->flags & H5O_HDR_STORE_TIMES) {

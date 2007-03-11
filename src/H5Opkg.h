@@ -29,8 +29,8 @@
 /* Object header macros */
 #define H5O_NMESGS	8 		/*initial number of messages	     */
 #define H5O_NCHUNKS	2		/*initial number of chunks	     */
-#define H5O_MIN_SIZE	32		/*min obj header data size	     */
-#define H5O_MSG_TYPES   22              /* # of types of messages            */
+#define H5O_MIN_SIZE	22		/* Min. obj header data size (must be big enough for a message prefix and a continuation message) */
+#define H5O_MSG_TYPES   23              /* # of types of messages            */
 #define H5O_MAX_CRT_ORDER_IDX 65535     /* Max. creation order index value   */
 
 /* Versions of object header structure */
@@ -109,7 +109,6 @@
             (H5O_SIZEOF_MAGIC +	/*magic number  	*/		      \
                 1 +		/*version number 	*/		      \
                 1 +		/*flags		 	*/		      \
-                4 +		/*reference count	*/		      \
                 (((O)->flags & H5O_HDR_STORE_TIMES) ? (			      \
                   4 +		/*access time		*/		      \
                   4 +		/*modification time	*/		      \
@@ -247,6 +246,7 @@ struct H5O_t {
     size_t      sizeof_addr;            /* Size of file addresses	     */
 
     /* Object information (stored) */
+    hbool_t     has_refcount_msg;       /* Whether the object has a ref. count message */
     unsigned	nlink;			/*link count			     */
     uint8_t	version;		/*version number		     */
     uint8_t	flags;			/*flags				     */
@@ -433,6 +433,9 @@ H5_DLLVAR const H5O_msg_class_t H5O_MSG_DRVINFO[1];
 
 /* Attribute Information Message. (0x0015) */
 H5_DLLVAR const H5O_msg_class_t H5O_MSG_AINFO[1];
+
+/* Reference Count Message. (0x0016) */
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_REFCOUNT[1];
 
 
 /*

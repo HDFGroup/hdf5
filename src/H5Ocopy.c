@@ -295,12 +295,15 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     haddr_t                addr_new = HADDR_UNDEF;
     hbool_t                *deleted = NULL;      /* Array of flags indicating whether messages should be copied */
     size_t                 null_msgs;               /* Number of NULL messages found in each loop */
+    size_t                 orig_dst_msgs;           /* Original # of messages in dest. object */
     H5O_mesg_t             *mesg_src;               /* Message in source object header */
     H5O_mesg_t             *mesg_dst;               /* Message in source object header */
     const H5O_msg_class_t  *copy_type;              /* Type of message to use for copying */
     const H5O_obj_class_t  *obj_class = NULL;       /* Type of object we are copying */
     void                   *udata = NULL;           /* User data for passing to message callbacks */
     size_t                 dst_oh_size;             /* Total size of the destination OH */
+    size_t                 dst_oh_null;             /* Size of the null message to add to destination OH */
+    unsigned               dst_oh_gap;              /* Size of the gap in chunk #0 of destination OH */
     uint8_t                *current_pos;            /* Current position in destination image */
     size_t                 msghdr_size;
     hbool_t                shared;                  /* Whether copy_file callback created a shared message */
@@ -535,6 +538,27 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
             oh_dst->flags |= H5O_HDR_CHUNK0_2;
     } /* end if */
 
+    /* Check if the chunk's data portion is too small */
+    dst_oh_gap = dst_oh_null = 0;
+    if(dst_oh_size < H5O_MIN_SIZE) {
+        size_t delta = (H5O_MIN_SIZE - dst_oh_size);    /* Delta in chunk size needed */
+
+        /* Sanity check */
+        HDassert((oh_dst->flags & H5O_HDR_CHUNK0_SIZE) == H5O_HDR_CHUNK0_1);
+
+        /* Determine whether to create gap or NULL message */
+        if(delta < H5O_SIZEOF_MSGHDR_OH(oh_dst))
+            dst_oh_gap = delta;
+        else
+            dst_oh_null = delta;
+
+        /* Increase destination object header size */
+        dst_oh_size += delta;
+
+        /* Sanity check */
+        HDassert(dst_oh_size <= 255);
+    } /* end if */
+
     /* Add in destination's object header size now */
     dst_oh_size += H5O_SIZEOF_HDR(oh_dst);
 
@@ -550,7 +574,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     /* Set dest. chunk information */
     oh_dst->chunk[0].dirty = TRUE;
     oh_dst->chunk[0].size = dst_oh_size;
-    oh_dst->chunk[0].gap = 0;
+    oh_dst->chunk[0].gap = dst_oh_gap;
 
     /* Set up raw pointers and copy messages that didn't need special
      * treatment.  This has to happen after the destination header has been
@@ -568,7 +592,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         HDmemcpy(current_pos, H5O_HDR_MAGIC, (size_t)H5O_SIZEOF_MAGIC); 
     current_pos += H5O_SIZEOF_HDR(oh_dst) - H5O_SIZEOF_CHKSUM_OH(oh_dst);
 
-    /* Copy each message that wasn't dirtied above */
+    /* Loop through destination messages, updating their "raw" info */
     null_msgs = 0;
     for(mesgno = 0; mesgno < oh_dst->nmesgs; mesgno++) {
         /* Skip any deleted or NULL messages in the source unless the
@@ -585,17 +609,43 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         mesg_src = &(oh_src->mesg[mesgno + null_msgs]);
         mesg_dst = &(oh_dst->mesg[mesgno]);
 
-        if(!mesg_dst->dirty) {
+        /* Copy each message that wasn't dirtied above */
+        if(!mesg_dst->dirty)
             /* Copy the message header plus the message's raw data. */
-            HDmemcpy(current_pos, mesg_src->raw - msghdr_size,
-                    msghdr_size + mesg_src->raw_size);
-        } /* end if */
+            HDmemcpy(current_pos, mesg_src->raw - msghdr_size, msghdr_size + mesg_src->raw_size);
+
+        /* Set message's raw pointer to destination chunk's new "image" */
         mesg_dst->raw = current_pos + msghdr_size;
+
+        /* Move to location where next message should go */
         current_pos += mesg_dst->raw_size + msghdr_size;
     } /* end for */
 
+    /* Save this in case more messages are added during NULL message checking */
+    orig_dst_msgs = oh_dst->nmesgs;
+
+    /* Check if we need to add a NULL message to this header */
+    if(dst_oh_null > 0) {
+        unsigned null_idx;              /* Index of new NULL message */
+
+        /* Make sure we have enough space for new NULL message */
+        if(oh_dst->nmesgs + 1 > oh_dst->alloc_nmesgs)
+            if(H5O_alloc_msgs(oh_dst, (size_t)1) < 0)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate more space for messages")
+
+        /* Create null message for [rest of] space in new chunk */
+        /* (account for chunk's magic # & checksum) */
+        null_idx = oh_dst->nmesgs++;
+        oh_dst->mesg[null_idx].type = H5O_MSG_NULL;
+        oh_dst->mesg[null_idx].dirty = TRUE;
+        oh_dst->mesg[null_idx].native = NULL;
+        oh_dst->mesg[null_idx].raw = current_pos + msghdr_size;
+        oh_dst->mesg[null_idx].raw_size = dst_oh_null -  msghdr_size;
+        oh_dst->mesg[null_idx].chunkno = 0;
+    } /* end if */
+
     /* Make sure we filled the chunk, except for room at the end for a checksum */
-    HDassert(current_pos + H5O_SIZEOF_CHKSUM_OH(oh_dst) == dst_oh_size + oh_dst->chunk[0].image);
+    HDassert(current_pos + dst_oh_gap + dst_oh_null + H5O_SIZEOF_CHKSUM_OH(oh_dst) == dst_oh_size + oh_dst->chunk[0].image);
 
     /* Set the dest. object location to the first chunk address */
     HDassert(H5F_addr_defined(addr_new));
@@ -620,7 +670,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
      * object header for destination object
      */
     null_msgs = 0;
-    for(mesgno = 0; mesgno < oh_dst->nmesgs; mesgno++) {
+    for(mesgno = 0; mesgno < orig_dst_msgs; mesgno++) {
         /* Skip any deleted or NULL messages in the source unless the
          * preserve_null flag is set
          */
@@ -657,7 +707,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     /* Indicate that the destination address will no longer be locked */
     addr_map->is_locked = FALSE;
 
-    /* Increment object header's reference count, if any descendents have created links to link to this object */
+    /* Increment object header's reference count, if any descendents have created links to this object */
     if(addr_map->inc_ref_count) {
         H5_CHECK_OVERFLOW(addr_map->inc_ref_count, hsize_t, unsigned);
         oh_dst->nlink += (unsigned)addr_map->inc_ref_count;

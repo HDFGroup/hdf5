@@ -1255,11 +1255,11 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
                  * of messages hasn't increased.
                  */
                  if(H5O_COPY_PRESERVE_NULL_FLAG & copy_flags) {
-                        if(objstat.ohdr.nmesgs != objstat2.ohdr.nmesgs);
+                    if(objstat.ohdr.nmesgs != objstat2.ohdr.nmesgs)
+                        ;
                     else
                         if(objstat.ohdr.nmesgs < objstat2.ohdr.nmesgs) TEST_ERROR
                  }
-                if(1 != objstat2.ohdr.nchunks) TEST_ERROR
             } /* end if */
 
             /* Get link info */

@@ -6259,16 +6259,6 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
         ret = H5Pclose(my_fcpl);
         CHECK(ret, FAIL, "H5Pclose");
 
-        /* Commit datatype to file */
-        if(test_shared == 2) {
-            ret = H5Tcommit(fid, TYPE1_NAME, attr_tid);
-            CHECK(ret, FAIL, "H5Tcommit");
-
-            /* Close attribute's datatype */
-            ret = H5Tclose(attr_tid);
-            CHECK(ret, FAIL, "H5Tclose");
-        } /* end switch */
-
         /* Close file */
         ret = H5Fclose(fid);
         CHECK(ret, FAIL, "H5Fclose");
@@ -6283,10 +6273,10 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
         fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
         CHECK(fid, FAIL, "H5Fopen");
 
-        /* Re-open attribute datatype as necessary */
+        /* Commit datatype to file */
         if(test_shared == 2) {
-            attr_tid = H5Topen(fid, TYPE1_NAME);
-            CHECK(attr_tid, FAIL, "H5Topen");
+            ret = H5Tcommit(fid, TYPE1_NAME, attr_tid);
+            CHECK(ret, FAIL, "H5Tcommit");
         } /* end if */
 
         /* Set up to query the object creation properties */
@@ -6466,6 +6456,12 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
         ret = H5Gunlink(fid, DSET2_NAME);
         CHECK(ret, FAIL, "H5Gunlink");
 
+        /* Unlink committed datatype */
+        if(test_shared == 2) {
+            ret = H5Gunlink(fid, TYPE1_NAME);
+            CHECK(ret, FAIL, "H5Gunlink");
+        } /* end if */
+
         /* Check on attribute storage status */
         ret = H5F_get_sohm_mesg_count_test(fid, H5O_ATTR_ID, &mesg_count);
         CHECK(ret, FAIL, "H5F_get_sohm_mesg_count_test");
@@ -6588,16 +6584,6 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
         ret = H5Pclose(my_fcpl);
         CHECK(ret, FAIL, "H5Pclose");
 
-        /* Commit datatype to file */
-        if(test_shared == 2) {
-            ret = H5Tcommit(fid, TYPE1_NAME, attr_tid);
-            CHECK(ret, FAIL, "H5Tcommit");
-
-            /* Close attribute's datatype */
-            ret = H5Tclose(attr_tid);
-            CHECK(ret, FAIL, "H5Tclose");
-        } /* end switch */
-
         /* Close file */
         ret = H5Fclose(fid);
         CHECK(ret, FAIL, "H5Fclose");
@@ -6612,10 +6598,10 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
         fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
         CHECK(fid, FAIL, "H5Fopen");
 
-        /* Re-open attribute datatype as necessary */
+        /* Commit datatype to file */
         if(test_shared == 2) {
-            attr_tid = H5Topen(fid, TYPE1_NAME);
-            CHECK(attr_tid, FAIL, "H5Topen");
+            ret = H5Tcommit(fid, TYPE1_NAME, attr_tid);
+            CHECK(ret, FAIL, "H5Tcommit");
         } /* end if */
 
         /* Set up to query the object creation properties */
@@ -6911,6 +6897,12 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
         ret = H5Gunlink(fid, DSET2_NAME);
         CHECK(ret, FAIL, "H5Gunlink");
 
+        /* Unlink committed datatype */
+        if(test_shared == 2) {
+            ret = H5Gunlink(fid, TYPE1_NAME);
+            CHECK(ret, FAIL, "H5Gunlink");
+        } /* end if */
+
         /* Check on attribute storage status */
         ret = H5F_get_sohm_mesg_count_test(fid, H5O_ATTR_ID, &mesg_count);
         CHECK(ret, FAIL, "H5F_get_sohm_mesg_count_test");
@@ -7032,16 +7024,6 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
         ret = H5Pclose(my_fcpl);
         CHECK(ret, FAIL, "H5Pclose");
 
-        /* Commit datatype to file */
-        if(test_shared == 2) {
-            ret = H5Tcommit(fid, TYPE1_NAME, attr_tid);
-            CHECK(ret, FAIL, "H5Tcommit");
-
-            /* Close attribute's datatype */
-            ret = H5Tclose(attr_tid);
-            CHECK(ret, FAIL, "H5Tclose");
-        } /* end switch */
-
         /* Close file */
         ret = H5Fclose(fid);
         CHECK(ret, FAIL, "H5Fclose");
@@ -7056,10 +7038,10 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
         fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
         CHECK(fid, FAIL, "H5Fopen");
 
-        /* Re-open attribute datatype as necessary */
+        /* Commit datatype to file */
         if(test_shared == 2) {
-            attr_tid = H5Topen(fid, TYPE1_NAME);
-            CHECK(attr_tid, FAIL, "H5Topen");
+            ret = H5Tcommit(fid, TYPE1_NAME, attr_tid);
+            CHECK(ret, FAIL, "H5Tcommit");
         } /* end if */
 
         /* Set up to query the object creation properties */
@@ -7278,6 +7260,12 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
         ret = H5Gunlink(fid, DSET2_NAME);
         CHECK(ret, FAIL, "H5Gunlink");
 
+        /* Unlink committed datatype */
+        if(test_shared == 2) {
+            ret = H5Gunlink(fid, TYPE1_NAME);
+            CHECK(ret, FAIL, "H5Gunlink");
+        } /* end if */
+
         /* Check on attribute storage status */
         ret = H5F_get_sohm_mesg_count_test(fid, H5O_ATTR_ID, &mesg_count);
         CHECK(ret, FAIL, "H5F_get_sohm_mesg_count_test");
@@ -7399,16 +7387,6 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
         ret = H5Pclose(my_fcpl);
         CHECK(ret, FAIL, "H5Pclose");
 
-        /* Commit datatype to file */
-        if(test_shared == 2) {
-            ret = H5Tcommit(fid, TYPE1_NAME, attr_tid);
-            CHECK(ret, FAIL, "H5Tcommit");
-
-            /* Close attribute's datatype */
-            ret = H5Tclose(attr_tid);
-            CHECK(ret, FAIL, "H5Tclose");
-        } /* end switch */
-
         /* Close file */
         ret = H5Fclose(fid);
         CHECK(ret, FAIL, "H5Fclose");
@@ -7423,10 +7401,10 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
         fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
         CHECK(fid, FAIL, "H5Fopen");
 
-        /* Re-open attribute datatype as necessary */
+        /* Commit datatype to file */
         if(test_shared == 2) {
-            attr_tid = H5Topen(fid, TYPE1_NAME);
-            CHECK(attr_tid, FAIL, "H5Topen");
+            ret = H5Tcommit(fid, TYPE1_NAME, attr_tid);
+            CHECK(ret, FAIL, "H5Tcommit");
         } /* end if */
 
         /* Set up to query the object creation properties */
@@ -7630,6 +7608,12 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
         /* Unlink first dataset */
         ret = H5Gunlink(fid, DSET1_NAME);
         CHECK(ret, FAIL, "H5Gunlink");
+
+        /* Unlink committed datatype */
+        if(test_shared == 2) {
+            ret = H5Gunlink(fid, TYPE1_NAME);
+            CHECK(ret, FAIL, "H5Gunlink");
+        } /* end if */
 
         /* Check on attribute storage status */
         ret = H5F_get_sohm_mesg_count_test(fid, H5O_ATTR_ID, &mesg_count);

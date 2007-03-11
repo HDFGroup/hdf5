@@ -632,6 +632,15 @@ done:
  *
  *              SIZE need not be aligned.
  *
+ * Note:	The algorithm for finding a message to replace with a
+ *		continuation message is still fairly limited.  It's possible
+ *		that two (or more) messages smaller than a continuation message
+ *		might occupy a chunk and need to be moved in order to make
+ *		room for the continuation message.
+ *
+ *		Also, we aren't checking for NULL messages in front of another
+ *		message right now...
+ *
  * Return:      Success:        Index number of the null message for the
  *                              new chunk.  The null message will be at
  *                              least SIZE bytes not counting the message
@@ -651,11 +660,20 @@ H5O_alloc_new_chunk(H5F_t *f,
                     H5O_t *oh,
                     size_t size)
 {
+    /* Struct for storing information about "best" messages to allocate from */
+    typedef struct {
+        int msgno;                      /* Index in message array */
+        size_t gap_size;                /* Size of any "gap" in the chunk immediately after message */
+        size_t null_size;               /* Size of any null message in the chunk immediately after message */
+        size_t total_size;              /* Total size of "available" space around message */
+        unsigned null_msgno;            /* Message index of null message immediately after message */
+    } alloc_info;
+
+    H5O_mesg_t *curr_msg;               /* Pointer to current message to operate on */
     size_t      cont_size;              /*continuation message size     */
-    int         found_null = (-1);      /*best fit null message         */
-    int         found_attr = (-1);      /*best fit attribute message    */
-    int         found_link = (-1);      /*best fit link message         */
-    int         found_other = (-1);     /*best fit other message        */
+    int         found_null = (-1);      /* Best fit null message         */
+    alloc_info  found_attr = {-1, 0, 0, 0, 0};      /* Best fit attribute message    */
+    alloc_info  found_other = {-1, 0, 0, 0, 0};     /* Best fit other message        */
     unsigned    idx;                    /*message number */
     uint8_t     *p = NULL;              /*ptr into new chunk            */
     H5O_cont_t  *cont = NULL;           /*native continuation message   */
@@ -677,65 +695,106 @@ H5O_alloc_new_chunk(H5F_t *f,
      * that could be moved to make room for the continuation message.
      *
      * Don't ever move continuation message from one chunk to another.
-     * Prioritize link messages moving to later chunks, instead of
-     * more "important" messages.
+     *
      * Avoid moving attributes when possible to preserve their
      * ordering (although ordering is *not* guaranteed!).
      *
      */
     cont_size = H5O_ALIGN_OH(oh, H5F_SIZEOF_ADDR(f) + H5F_SIZEOF_SIZE(f));
-    for(u = 0; u < oh->nmesgs; u++) {
-        int msg_id = oh->mesg[u].type->id;      /* Temp. copy of message type ID */
+    for(u = 0, curr_msg = &oh->mesg[0]; u < oh->nmesgs; u++, curr_msg++) {
+        if(curr_msg->type->id == H5O_NULL_ID) {
+            if(cont_size == curr_msg->raw_size) {
+                found_null = u;
+                break;
+            }  /* end if */
+            else if(curr_msg->raw_size > cont_size &&
+                    (found_null < 0 || curr_msg->raw_size < oh->mesg[found_null].raw_size))
+                found_null = u;
+        } /* end if */
+        else if(curr_msg->type->id == H5O_CONT_ID) {
+            /* Don't consider continuation messages (for now) */
+        } /* end if */
+        else {
+            unsigned msg_chunkno = curr_msg->chunkno;         /* Chunk that the message is in */
+            uint8_t *end_chunk_data = (oh->chunk[msg_chunkno].image + oh->chunk[msg_chunkno].size) - (H5O_SIZEOF_CHKSUM_OH(oh) + oh->chunk[msg_chunkno].gap);     /* End of message data in chunk */
+            uint8_t *end_msg = curr_msg->raw + curr_msg->raw_size;  /* End of current message */
+            size_t gap_size = 0;            /* Size of gap after current message */
+            size_t null_size = 0;           /* Size of NULL message after current message */
+            unsigned null_msgno;            /* Index of NULL message after current message */
+            size_t total_size;              /* Total size of available space "around" current message */
 
-	if(H5O_NULL_ID == msg_id) {
-	    if(cont_size == oh->mesg[u].raw_size) {
-		found_null = u;
-		break;
-	    } else if(oh->mesg[u].raw_size >= cont_size &&
-                   (found_null < 0 ||
-                    oh->mesg[u].raw_size < oh->mesg[found_null].raw_size)) {
-		found_null = u;
-	    }
-	} else if(H5O_CONT_ID == msg_id) {
-	    /*don't consider continuation messages */
-	} else if(H5O_ATTR_ID == msg_id) {
-            if(oh->mesg[u].raw_size >= cont_size &&
-                   (found_attr < 0 ||
-                    oh->mesg[u].raw_size < oh->mesg[found_attr].raw_size))
-                found_attr = u;
-	} else if(H5O_LINK_ID == msg_id) {
-            if(oh->mesg[u].raw_size >= cont_size &&
-                   (found_link < 0 ||
-                    oh->mesg[u].raw_size < oh->mesg[found_link].raw_size))
-                found_link = u;
-	} else {
-            if(oh->mesg[u].raw_size >= cont_size &&
-                   (found_other < 0 ||
-                    oh->mesg[u].raw_size < oh->mesg[found_other].raw_size))
-                found_other = u;
-	} /* end else */
+            /* Check if the message is the last one in the chunk */
+            if(end_msg == end_chunk_data)
+                gap_size = oh->chunk[msg_chunkno].gap;
+            else {
+                H5O_mesg_t *tmp_msg;    /* Temp. pointer to message to operate on */
+                unsigned v;             /* Local index variable */
+
+                /* Check for null message after this message, in same chunk */
+                for(v = 0, tmp_msg = &oh->mesg[0]; v < oh->nmesgs; v++, tmp_msg++) {
+                    if(tmp_msg->type->id == H5O_NULL_ID && (tmp_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh)) == end_msg) {
+                        null_msgno = v;
+                        null_size = H5O_SIZEOF_MSGHDR_OH(oh) + tmp_msg->raw_size;
+                        break;
+                    } /* end if */
+
+                    /* XXX: Should also check for NULL message in front of current message... */
+
+                } /* end for */
+            } /* end else */
+
+            /* Add up current message's total available space */
+            total_size = curr_msg->raw_size + gap_size + null_size;
+
+            /* Check if message is large enough to hold continuation info */
+            if(total_size >= cont_size) {
+                if(curr_msg->type->id == H5O_ATTR_ID) {
+                    if(found_attr.msgno < 0 || total_size < found_attr.total_size) {
+                        found_attr.msgno = u;
+                        found_attr.gap_size = gap_size;
+                        found_attr.null_size = null_size;
+                        found_attr.total_size = total_size;
+                        found_attr.null_msgno = null_msgno;
+                    } /* end if */
+                } /* end if */
+                else {
+                    if(found_other.msgno < 0 || total_size < found_other.total_size) {
+                        found_other.msgno = u;
+                        found_other.gap_size = gap_size;
+                        found_other.null_size = null_size;
+                        found_other.total_size = total_size;
+                        found_other.null_msgno = null_msgno;
+                    } /* end if */
+                } /* end else */
+            } /* end if */
+        } /* end else */
     } /* end for */
-    HDassert(found_null >= 0 || found_attr >= 0 || found_link >= 0 || found_other >= 0);
+    if(found_null < 0 && found_attr.msgno < 0 && found_other.msgno < 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, UFAIL, "unable to locate message to move")
 
     /*
      * If we must move some other message to make room for the null
      * message, then make sure the new chunk has enough room for that
      * other message.
      *
-     * Move link messages first, then other messages, and attributes
-     * only as a last resort.
+     * Move other messages first, and attributes only as a last resort.
      *
      */
     if(found_null < 0) {
-        if(found_link >= 0)
-            found_other = found_link;
-
-        if(found_other < 0)
+        if(found_other.msgno < 0)
             found_other = found_attr;
 
-        HDassert(found_other >= 0);
-        size += H5O_SIZEOF_MSGHDR_OH(oh) + oh->mesg[found_other].raw_size;
+        HDassert(found_other.msgno >= 0);
+        size += H5O_SIZEOF_MSGHDR_OH(oh) + oh->mesg[found_other.msgno].raw_size;
     } /* end if */
+
+    /*
+     * The total chunk size must include the requested space plus enough
+     * for the message header.  This must be at least some minimum and
+     * aligned propertly.
+     */
+    size = MAX(H5O_MIN_SIZE, size + H5O_SIZEOF_MSGHDR_OH(oh));
+    HDassert(size == H5O_ALIGN_OH(oh, size));
 
     /*
      * The total chunk size must include enough space for the checksum
@@ -743,14 +802,6 @@ H5O_alloc_new_chunk(H5F_t *f,
      * in later versions of the object header)
      */
     size +=  H5O_SIZEOF_CHKHDR_OH(oh);
-
-    /*
-     * The total chunk size must include the requested space plus enough
-     * for the message header.  This must be at least some minimum and a
-     * multiple of the alignment size.
-     */
-    size = MAX(H5O_MIN_SIZE, size + H5O_SIZEOF_MSGHDR_OH(oh));
-    HDassert(size == H5O_ALIGN_OH(oh, size));
 
     /* allocate space in file to hold the new chunk */
     new_chunk_addr = H5MF_alloc(f, H5FD_MEM_OHDR, dxpl_id, (hsize_t)size);
@@ -806,22 +857,51 @@ H5O_alloc_new_chunk(H5F_t *f,
         null_msg->type = H5O_MSG_NULL;
         null_msg->dirty = TRUE;
         null_msg->native = NULL;
-        null_msg->raw = oh->mesg[found_other].raw;
-        null_msg->raw_size = oh->mesg[found_other].raw_size;
-        null_msg->chunkno = oh->mesg[found_other].chunkno;
+        null_msg->raw = oh->mesg[found_other.msgno].raw;
+        null_msg->raw_size = oh->mesg[found_other.msgno].raw_size;
+        null_msg->chunkno = oh->mesg[found_other.msgno].chunkno;
 
-        /* Copy the message to move to its new location */
+        /* Copy the message to move (& its prefix) to its new location */
         /* (Chunk is already dirty, no need to mark it) */
-        HDmemcpy(p, oh->mesg[found_other].raw - H5O_SIZEOF_MSGHDR_OH(oh),
-                 oh->mesg[found_other].raw_size + H5O_SIZEOF_MSGHDR_OH(oh));
+        HDmemcpy(p, oh->mesg[found_other.msgno].raw - H5O_SIZEOF_MSGHDR_OH(oh),
+                 oh->mesg[found_other.msgno].raw_size + H5O_SIZEOF_MSGHDR_OH(oh));
 
-        /* Switch message to point to new location */
-        oh->mesg[found_other].raw = p + H5O_SIZEOF_MSGHDR_OH(oh);
-        oh->mesg[found_other].chunkno = chunkno;
+        /* Switch moved message to point to new location */
+        oh->mesg[found_other.msgno].raw = p + H5O_SIZEOF_MSGHDR_OH(oh);
+        oh->mesg[found_other.msgno].chunkno = chunkno;
 
         /* Account for copied message in new chunk */
-        p += H5O_SIZEOF_MSGHDR_OH(oh) + oh->mesg[found_other].raw_size;
-        size -= H5O_SIZEOF_MSGHDR_OH(oh) + oh->mesg[found_other].raw_size;
+        p += H5O_SIZEOF_MSGHDR_OH(oh) + oh->mesg[found_other.msgno].raw_size;
+        size -= H5O_SIZEOF_MSGHDR_OH(oh) + oh->mesg[found_other.msgno].raw_size;
+
+        /* Add any available space after the message to move to the new null message */
+        if(found_other.gap_size > 0) {
+            /* Absorb a gap after the moved message */
+            HDassert(oh->chunk[null_msg->chunkno].gap == found_other.gap_size);
+            null_msg->raw_size += found_other.gap_size;
+            oh->chunk[null_msg->chunkno].gap = 0;
+        } /* end if */
+        else if(found_other.null_size > 0) {
+            H5O_mesg_t *old_null_msg = &oh->mesg[found_other.null_msgno]; /* Pointer to NULL message to eliminate */
+
+            /* Absorb a null message after the moved message */
+            HDassert((null_msg->raw + null_msg->raw_size) == (old_null_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh)));
+            null_msg->raw_size += found_other.null_size;
+
+            /* Release any information/memory for message */
+            H5O_msg_free_mesg(old_null_msg);
+
+            /* Remove null message from list of messages */
+            if(found_other.null_msgno < (oh->nmesgs - 1))
+                HDmemmove(old_null_msg, old_null_msg + 1, ((oh->nmesgs - 1) - found_other.null_msgno) * sizeof(H5O_mesg_t));
+
+            /* Decrement # of messages */
+            /* (Don't bother reducing size of message array for now -QAK) */
+            oh->nmesgs--;
+
+            /* Adjust message index for new NULL message */
+            found_null--;
+        } /* end if */
     } /* end if */
     HDassert(found_null >= 0);
 
@@ -832,8 +912,7 @@ H5O_alloc_new_chunk(H5F_t *f,
     oh->mesg[idx].dirty = TRUE;
     oh->mesg[idx].native = NULL;
     oh->mesg[idx].raw = p + H5O_SIZEOF_MSGHDR_OH(oh);
-    oh->mesg[idx].raw_size = size -
-                (H5O_SIZEOF_CHKHDR_OH(oh) + H5O_SIZEOF_MSGHDR_OH(oh));
+    oh->mesg[idx].raw_size = size - (H5O_SIZEOF_CHKHDR_OH(oh) + H5O_SIZEOF_MSGHDR_OH(oh));
     oh->mesg[idx].chunkno = chunkno;
 
     /* Initialize the continuation information */

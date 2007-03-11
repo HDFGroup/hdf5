@@ -608,6 +608,7 @@
 ./src/H5Opline.c
 ./src/H5Oprivate.h
 ./src/H5Opublic.h
+./src/H5Orefcount.c
 ./src/H5Osdspace.c
 ./src/H5Oshared.c
 ./src/H5Oshared.h

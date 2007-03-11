@@ -1247,7 +1247,7 @@ test_file_freespace(void)
     free_space = H5Fget_freespace(file);
     CHECK(free_space, FAIL, "H5Fget_freespace");
 #ifdef H5_HAVE_LARGE_HSIZET
-    VERIFY(free_space, 2368, "H5Fget_freespace");
+    VERIFY(free_space, 2376, "H5Fget_freespace");
 #else /* H5_HAVE_LARGE_HSIZET */
     VERIFY(free_space, 588, "H5Fget_freespace");        /* XXX: fix me */
 #endif /* H5_HAVE_LARGE_HSIZET */

@@ -103,6 +103,7 @@ const H5O_msg_class_t *const H5O_msg_class_g[] = {
     H5O_MSG_BTREEK,		/*0x0013 Non-default v1 B-tree 'K' values */
     H5O_MSG_DRVINFO,		/*0x0014 Driver info settings		*/
     H5O_MSG_AINFO,		/*0x0015 Attribute information		*/
+    H5O_MSG_REFCOUNT,		/*0x0016 Object's ref. count		*/
 };
 
 /* Header object ID to class mapping */
@@ -989,8 +990,7 @@ H5O_link(const H5O_loc_t *loc, int adjust, hid_t dxpl_id)
 	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "no write intent on file")
 
     /* get header */
-    if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr,
-				   NULL, NULL, H5AC_WRITE)))
+    if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
     /* adjust link count */
@@ -1031,6 +1031,36 @@ H5O_link(const H5O_loc_t *loc, int adjust, hid_t dxpl_id)
 
 	oh->nlink += adjust;
         oh_flags |= H5AC__DIRTIED_FLAG;
+    } /* end if */
+
+    /* Check for operations on refcount message */
+    if(oh->version > H5O_VERSION_1) {
+        /* Check if the object has a refcount message already */
+        if(oh->has_refcount_msg) {
+            /* Check for removing refcount message */
+            if(oh->nlink <= 1) {
+                if(H5O_msg_remove_real(loc->file, oh, H5O_MSG_REFCOUNT, H5O_ALL, NULL, NULL, TRUE, dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete refcount message")
+                oh->has_refcount_msg = FALSE;
+            } /* end if */
+            /* Update refcount message with new link count */
+            else {
+                H5O_refcount_t refcount = oh->nlink;
+
+                if(H5O_msg_write_real(loc->file, dxpl_id, oh, H5O_MSG_REFCOUNT, H5O_MSG_FLAG_DONTSHARE, 0, &refcount) < 0)
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update refcount message")
+            } /* end else */
+        } /* end if */
+        else {
+            /* Check for adding refcount message to object */
+            if(oh->nlink > 1) {
+                H5O_refcount_t refcount = oh->nlink;
+
+                if(H5O_msg_append_real(loc->file, dxpl_id, oh, H5O_MSG_REFCOUNT, H5O_MSG_FLAG_DONTSHARE, 0, &refcount) < 0)
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to create new refcount message")
+                oh->has_refcount_msg = TRUE;
+            } /* end if */
+        } /* end else */
     } /* end if */
 
     /* Set return value */
