@@ -253,6 +253,10 @@ H5Pset_link_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dens
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group info")
 
     /* Update fields */
+    if(max_compact != H5G_CRT_GINFO_MAX_COMPACT || min_dense != H5G_CRT_GINFO_MIN_DENSE)
+        ginfo.store_link_phase_change = TRUE;
+    else
+        ginfo.store_link_phase_change = FALSE;
     ginfo.max_compact = max_compact;
     ginfo.min_dense = min_dense;
 
@@ -353,6 +357,10 @@ H5Pset_est_link_info(hid_t plist_id, unsigned est_num_entries, unsigned est_name
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group info")
 
     /* Update fields */
+    if(est_num_entries != H5G_CRT_GINFO_EST_NUM_ENTRIES || est_name_len != H5G_CRT_GINFO_EST_NAME_LEN)
+        ginfo.store_est_entry_info = TRUE;
+    else
+        ginfo.store_est_entry_info = FALSE;
     ginfo.est_num_entries = est_num_entries;
     ginfo.est_name_len = est_name_len;
 

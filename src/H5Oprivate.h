@@ -324,10 +324,12 @@ typedef struct H5O_ginfo_t {
     /* "New" format group info (stored) */
 
     /* (storage management info) */
+    hbool_t     store_link_phase_change;/* Whether to store the link phase change values */
     uint16_t	max_compact;		/* Maximum # of compact links        */
     uint16_t	min_dense;		/* Minimum # of "dense" links        */
 
     /* (initial object header size info) */
+    hbool_t     store_est_entry_info;   /* Whether to store the est. entry values */
     uint16_t	est_num_entries;	/* Estimated # of entries in group   */
     uint16_t	est_name_len;		/* Estimated length of entry name    */
 } H5O_ginfo_t;

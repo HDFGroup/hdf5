@@ -82,8 +82,10 @@
 
 /* Defaults for group info values */
 #define H5G_CRT_GINFO_LHEAP_SIZE_HINT           0
+#define H5G_CRT_GINFO_STORE_LINK_PHASE_CHANGE   FALSE
 #define H5G_CRT_GINFO_MAX_COMPACT               8
 #define H5G_CRT_GINFO_MIN_DENSE                 6
+#define H5G_CRT_GINFO_STORE_EST_ENTRY_INFO      FALSE
 #define H5G_CRT_GINFO_EST_NUM_ENTRIES           4
 #define H5G_CRT_GINFO_EST_NAME_LEN              8
 
@@ -91,8 +93,10 @@
 #define H5G_CRT_GROUP_INFO_NAME                 "group info"
 #define H5G_CRT_GROUP_INFO_SIZE                 sizeof(H5O_ginfo_t)
 #define H5G_CRT_GROUP_INFO_DEF                  {H5G_CRT_GINFO_LHEAP_SIZE_HINT, \
+                                                    H5G_CRT_GINFO_STORE_LINK_PHASE_CHANGE, \
                                                     H5G_CRT_GINFO_MAX_COMPACT, \
                                                     H5G_CRT_GINFO_MIN_DENSE, \
+                                                    H5G_CRT_GINFO_STORE_EST_ENTRY_INFO, \
                                                     H5G_CRT_GINFO_EST_NUM_ENTRIES, \
                                                     H5G_CRT_GINFO_EST_NAME_LEN \
                                                 }

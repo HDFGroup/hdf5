@@ -68,6 +68,11 @@ const H5O_msg_class_t H5O_MSG_GINFO[1] = {{
 /* Current version of group info information */
 #define H5O_GINFO_VERSION 	0
 
+/* Flags for group info flag encoding */
+#define H5O_GINFO_STORE_PHASE_CHANGE    0x01
+#define H5O_GINFO_STORE_EST_ENTRY_INFO  0x02
+#define H5O_GINFO_ALL_FLAGS             (H5O_GINFO_STORE_PHASE_CHANGE | H5O_GINFO_STORE_EST_ENTRY_INFO)
+
 /* Declare a free list to manage the H5O_ginfo_t struct */
 H5FL_DEFINE_STATIC(H5O_ginfo_t);
 
@@ -111,14 +116,30 @@ H5O_ginfo_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_fla
 
     /* Get the flags for the group */
     flags = *p++;
+    if(flags & ~H5O_GINFO_ALL_FLAGS)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad flag value for message")
+    ginfo->store_link_phase_change = (flags & H5O_GINFO_STORE_PHASE_CHANGE) ? TRUE : FALSE;
+    ginfo->store_est_entry_info = (flags & H5O_GINFO_STORE_EST_ENTRY_INFO) ? TRUE : FALSE;
 
     /* Get the max. # of links to store compactly & the min. # of links to store densely */
-    UINT16DECODE(p, ginfo->max_compact)
-    UINT16DECODE(p, ginfo->min_dense)
+    if(ginfo->store_link_phase_change) {
+        UINT16DECODE(p, ginfo->max_compact)
+        UINT16DECODE(p, ginfo->min_dense)
+    } /* end if */
+    else {
+        ginfo->max_compact = H5G_CRT_GINFO_MAX_COMPACT;
+        ginfo->min_dense = H5G_CRT_GINFO_MIN_DENSE;
+    } /* end else */
 
     /* Get the estimated # of entries & name lengths */
-    UINT16DECODE(p, ginfo->est_num_entries)
-    UINT16DECODE(p, ginfo->est_name_len)
+    if(ginfo->store_est_entry_info) {
+        UINT16DECODE(p, ginfo->est_num_entries)
+        UINT16DECODE(p, ginfo->est_name_len)
+    } /* end if */
+    else {
+        ginfo->est_num_entries = H5G_CRT_GINFO_EST_NUM_ENTRIES;
+        ginfo->est_name_len = H5G_CRT_GINFO_EST_NAME_LEN;
+    } /* end if */
 
     /* Set return value */
     ret_value = ginfo;
@@ -149,7 +170,7 @@ static herr_t
 H5O_ginfo_encode(H5F_t UNUSED *f, hbool_t UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_ginfo_t  *ginfo = (const H5O_ginfo_t *) _mesg;
-    unsigned char       flags = 0;          /* Flags for encoding group info */
+    unsigned char       flags;          /* Flags for encoding group info */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_ginfo_encode)
 
@@ -161,15 +182,21 @@ H5O_ginfo_encode(H5F_t UNUSED *f, hbool_t UNUSED disable_shared, uint8_t *p, con
     *p++ = H5O_GINFO_VERSION;
 
     /* The flags for the group info */
+    flags = ginfo->store_link_phase_change ?  H5O_GINFO_STORE_PHASE_CHANGE : 0;
+    flags |= ginfo->store_est_entry_info ?  H5O_GINFO_STORE_EST_ENTRY_INFO : 0;
     *p++ = flags;
 
     /* Store the max. # of links to store compactly & the min. # of links to store densely */
-    UINT16ENCODE(p, ginfo->max_compact)
-    UINT16ENCODE(p, ginfo->min_dense)
+    if(ginfo->store_link_phase_change) {
+        UINT16ENCODE(p, ginfo->max_compact)
+        UINT16ENCODE(p, ginfo->min_dense)
+    } /* end if */
 
     /* Estimated # of entries & name lengths */
-    UINT16ENCODE(p, ginfo->est_num_entries)
-    UINT16ENCODE(p, ginfo->est_name_len)
+    if(ginfo->store_est_entry_info) {
+        UINT16ENCODE(p, ginfo->est_num_entries)
+        UINT16ENCODE(p, ginfo->est_name_len)
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_ginfo_encode() */
@@ -231,13 +258,12 @@ done:
  *              koziol@ncsa.uiuc.edu
  *              Aug 30 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_ginfo_size(const H5F_t UNUSED *f, hbool_t UNUSED disable_shared, const void UNUSED *_mesg)
+H5O_ginfo_size(const H5F_t UNUSED *f, hbool_t UNUSED disable_shared, const void *_mesg)
 {
+    const H5O_ginfo_t   *ginfo = (const H5O_ginfo_t *)_mesg;
     size_t ret_value;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_ginfo_size)
@@ -245,10 +271,14 @@ H5O_ginfo_size(const H5F_t UNUSED *f, hbool_t UNUSED disable_shared, const void 
     /* Set return value */
     ret_value = 1 +                     /* Version */
                 1 +                     /* Flags */
-                2 +                     /* "Max compact" links */
-                2 +                     /* "Min dense" links */
-                2 +                     /* Estimated # of entries in group */
-                2;                      /* Estimated length of name of entry in group */
+                (ginfo->store_link_phase_change ? (
+                    2 +                 /* "Max compact" links */
+                    2                   /* "Min dense" links */
+                ) : 0) +                /* "Min dense" links */
+                (ginfo->store_est_entry_info ? (
+                    2 +                 /* Estimated # of entries in group */
+                    2                   /* Estimated length of name of entry in group */
+                ) : 0);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_ginfo_size() */
@@ -263,8 +293,6 @@ H5O_ginfo_size(const H5F_t UNUSED *f, hbool_t UNUSED disable_shared, const void 
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, August 30, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -291,8 +319,6 @@ H5O_ginfo_free(void *mesg)
  * Programmer:  Quincey Koziol
  *              koziol@ncsa.uiuc.edu
  *              Aug 30 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

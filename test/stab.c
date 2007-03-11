@@ -427,9 +427,9 @@ lifecycle(hid_t fapl)
     /* Check that the object header is only one chunk and the space has been allocated correctly */
     if(H5Gget_objinfo(gid, ".", FALSE, &obj_stat) < 0) TEST_ERROR
 #ifdef H5_HAVE_LARGE_HSIZET
-    if(obj_stat.ohdr.size != 187) TEST_ERROR
+    if(obj_stat.ohdr.size != 183) TEST_ERROR
 #else /* H5_HAVE_LARGE_HSIZET */
-    if(obj_stat.ohdr.size != 167) TEST_ERROR
+    if(obj_stat.ohdr.size != 163) TEST_ERROR
 #endif /* H5_HAVE_LARGE_HSIZET */
     if(obj_stat.ohdr.free != 0) TEST_ERROR
     if(obj_stat.ohdr.nmesgs != 6) TEST_ERROR
@@ -453,9 +453,9 @@ lifecycle(hid_t fapl)
     /* Check that the object header is still one chunk and the space has been allocated correctly */
     if(H5Gget_objinfo(gid, ".", FALSE, &obj_stat) < 0) TEST_ERROR
 #ifdef H5_HAVE_LARGE_HSIZET
-    if(obj_stat.ohdr.size != 187) TEST_ERROR
+    if(obj_stat.ohdr.size != 183) TEST_ERROR
 #else /* H5_HAVE_LARGE_HSIZET */
-    if(obj_stat.ohdr.size != 167) TEST_ERROR
+    if(obj_stat.ohdr.size != 163) TEST_ERROR
 #endif /* H5_HAVE_LARGE_HSIZET */
     if(obj_stat.ohdr.free != 112) TEST_ERROR
     if(obj_stat.ohdr.nmesgs != 3) TEST_ERROR
