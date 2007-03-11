@@ -178,13 +178,13 @@ typedef struct H5O_shared_t {
  *      values) as well as the end of the creation ordering - QAK)
  */
 typedef struct H5O_linfo_t {
-    /* (creation order info) */
+    /* Creation order info */
     hbool_t     track_corder;           /* Are creation order values tracked on links? */
     hbool_t     index_corder;           /* Are creation order values indexed on links? */
     int64_t     max_corder;             /* Current max. creation order value for group */
     haddr_t     corder_bt2_addr;        /* Address of v2 B-tree for indexing creation order values of links */
 
-    /* (storage management info) */
+    /* Storage management info */
     hsize_t     nlinks;                 /* Number of links in the group      */
     haddr_t     link_fheap_addr;        /* Address of fractal heap for storing "dense" links */
     haddr_t     name_bt2_addr;          /* Address of v2 B-tree for indexing names of links */
@@ -356,6 +356,18 @@ typedef struct H5O_name_t {
 } H5O_name_t;
 
 /*
+ * Shared message table message
+ * Information about file-wide shared message table, stored in superblock
+ * extension
+ * (Data structure in memory)
+ */
+typedef struct H5O_shmesg_table_t {
+    haddr_t		addr;	        /*file address of SOHM table */
+    unsigned		version;	/*SOHM table version number */
+    unsigned		nindexes;	/*number of indexes in the table */
+} H5O_shmesg_table_t;
+
+/*
  * Object header continuation message.
  * (Data structure in memory)
  */
@@ -376,18 +388,6 @@ typedef struct H5O_stab_t {
     haddr_t	btree_addr;		/*address of B-tree		     */
     haddr_t	heap_addr;		/*address of name heap		     */
 } H5O_stab_t;
-
-/*
- * Shared message table message
- * Information about file-wide shared message table, stored in superblock
- * extension
- * (Data structure in memory)
- */
-typedef struct H5O_shmesg_table_t {
-    haddr_t		addr;	        /*file address of SOHM table */
-    unsigned		version;	/*SOHM table version number */
-    unsigned		nindexes;	/*number of indexes in the table */
-} H5O_shmesg_table_t;
 
 /*
  * v1 B-tree 'K' value message
@@ -417,13 +417,13 @@ typedef struct H5O_drvinfo_t {
  * (Data structure in memory)
  */
 typedef struct H5O_ainfo_t {
-    /* (creation order info) */
+    /* Creation order info */
     hbool_t     track_corder;           /* Are creation order values tracked on attributes? */
     hbool_t     index_corder;           /* Are creation order values indexed on attributes? */
     H5O_msg_crt_idx_t max_crt_idx;      /* Maximum attribute creation index used */
     haddr_t     corder_bt2_addr;        /* Address of v2 B-tree for indexing creation order values of "dense" attributes */
 
-    /* (storage management info) */
+    /* Storage management info */
     hsize_t     nattrs;                 /* Number of attributes on the object */
     haddr_t     fheap_addr;             /* Address of fractal heap for storing "dense" attributes */
     haddr_t     name_bt2_addr;          /* Address of v2 B-tree for indexing names of "dense" attributes */

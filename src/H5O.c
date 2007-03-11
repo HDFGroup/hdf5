@@ -93,7 +93,7 @@ const H5O_msg_class_t *const H5O_msg_class_g[] = {
 #endif /* H5O_ENABLE_BOGUS */
     H5O_MSG_GINFO,		/*0x000A Group information		*/
     H5O_MSG_PLINE,		/*0x000B Data storage -- filter pipeline */
-    H5O_MSG_ATTR,		/*0x000C Attribute list			*/
+    H5O_MSG_ATTR,		/*0x000C Attribute			*/
     H5O_MSG_NAME,		/*0x000D Object name			*/
     H5O_MSG_MTIME,		/*0x000E Object modification date and time */
     H5O_MSG_SHMESG,		/*0x000F File-wide shared message table */
@@ -102,7 +102,7 @@ const H5O_msg_class_t *const H5O_msg_class_g[] = {
     H5O_MSG_MTIME_NEW,		/*0x0012 New Object modification date and time */
     H5O_MSG_BTREEK,		/*0x0013 Non-default v1 B-tree 'K' values */
     H5O_MSG_DRVINFO,		/*0x0014 Driver info settings		*/
-    H5O_MSG_AINFO,		/*0x0015 Attribute information	*/
+    H5O_MSG_AINFO,		/*0x0015 Attribute information		*/
 };
 
 /* Header object ID to class mapping */
