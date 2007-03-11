@@ -513,13 +513,30 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     /* Calculate how big the destination object header will be on disk.
      * This isn't necessarily the same size as the original.
      */
-    dst_oh_size = H5O_SIZEOF_HDR(oh_dst);
 
-    /* Add space for messages. */
+    /* Compute space for messages. */
+    dst_oh_size = 0;
     for(mesgno = 0; mesgno < oh_dst->nmesgs; mesgno++) {
         dst_oh_size += H5O_SIZEOF_MSGHDR_OH(oh_dst);
         dst_oh_size += oh_dst->mesg[mesgno].raw_size;
     } /* end for */
+
+    /* Check if we need to determine correct value for chunk #0 size bits */
+    if(oh_dst->version > H5O_VERSION_1) {
+        /* Reset destination object header's "chunk 0 size" flags */
+        oh_dst->flags &= ~H5O_HDR_CHUNK0_SIZE;
+
+        /* Determine correct value for chunk #0 size bits */
+        if(dst_oh_size > 4294967295)
+            oh_dst->flags |= H5O_HDR_CHUNK0_8;
+        else if(dst_oh_size > 65535)
+            oh_dst->flags |= H5O_HDR_CHUNK0_4;
+        else if(dst_oh_size > 255)
+            oh_dst->flags |= H5O_HDR_CHUNK0_2;
+    } /* end if */
+
+    /* Add in destination's object header size now */
+    dst_oh_size += H5O_SIZEOF_HDR(oh_dst);
 
     /* Allocate space for chunk in destination file */
     if(HADDR_UNDEF == (oh_dst->chunk[0].addr = H5MF_alloc(oloc_dst->file, H5FD_MEM_OHDR, dxpl_id, (hsize_t)dst_oh_size)))
@@ -539,7 +556,6 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
      * treatment.  This has to happen after the destination header has been
      * allocated.
      */
-    HDassert(H5O_SIZEOF_HDR(oh_src) == H5O_SIZEOF_HDR(oh_dst));
     HDassert(H5O_SIZEOF_MSGHDR_OH(oh_src) == H5O_SIZEOF_MSGHDR_OH(oh_dst));
     msghdr_size = H5O_SIZEOF_MSGHDR_OH(oh_src);
 
@@ -584,6 +600,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     /* Set the dest. object location to the first chunk address */
     HDassert(H5F_addr_defined(addr_new));
     oloc_dst->addr = addr_new;
+
 
     /* Allocate space for the address mapping of the object copied */
     if(NULL == (addr_map = H5FL_MALLOC(H5O_addr_map_t)))

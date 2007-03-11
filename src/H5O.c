@@ -677,7 +677,7 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
 
     /* Initialize version-specific fields */
     if(oh->version > H5O_VERSION_1) {
-        size_t tent_oh_size;            /* Tentative size of object header */
+        uint64_t tent_oh_size;            /* Tentative size of object header */
 
         /* Initialize all time fields with current time, if we are storing them */
         if(oh->flags & H5O_HDR_STORE_TIMES)
@@ -702,28 +702,12 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
             oh->flags |= H5O_HDR_ATTR_STORE_PHASE_CHANGE;
 
         /* Determine correct value for chunk #0 size bits */
-
-        /* See if only 1 byte is enough */
-        tent_oh_size = H5O_SIZEOF_HDR(oh) + size_hint;
-        if(tent_oh_size > 255) {
-            uint8_t old_oh_flags = oh->flags;   /* Temporary object header flags */
-
-            /* Need more than 1 byte, see if 2 bytes is enough */
+        if(size_hint > 4294967295)
+            oh->flags |= H5O_HDR_CHUNK0_8;
+        else if(size_hint > 65535)
+            oh->flags |= H5O_HDR_CHUNK0_4;
+        else if(size_hint > 255)
             oh->flags |= H5O_HDR_CHUNK0_2;
-            tent_oh_size = H5O_SIZEOF_HDR(oh) + size_hint;
-            if(tent_oh_size > 65535) {
-                /* Need more than 2 bytes, see if 4 bytes is enough */
-                oh->flags = old_oh_flags;
-                oh->flags |= H5O_HDR_CHUNK0_4;
-                tent_oh_size = H5O_SIZEOF_HDR(oh) + size_hint;
-                if(tent_oh_size > 4294967295) {
-                    /* Use 8 bytes */
-                    /* (Should probably have check for using more than 8 bytes... :-) */
-                    oh->flags = old_oh_flags;
-                    oh->flags |= H5O_HDR_CHUNK0_8;
-                } /* end if */
-            } /* end if */
-        } /* end if */
     } /* end if */
     else {
         /* Reset unused time fields */
@@ -2011,14 +1995,19 @@ H5O_get_create_plist(const H5O_loc_t *oloc, hid_t dxpl_id, H5P_genplist_t *oc_pl
 
     /* Set property values, if they were used for the object */
     if(oh->version > H5O_VERSION_1) {
+        uint8_t ohdr_flags;             /* "User-visible" object header status flags */
+
         /* Set attribute storage values */
         if(H5P_set(oc_plist, H5O_CRT_ATTR_MAX_COMPACT_NAME, &oh->max_compact) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set max. # of compact attributes in property list")
         if(H5P_set(oc_plist, H5O_CRT_ATTR_MIN_DENSE_NAME, &oh->min_dense) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set min. # of dense attributes in property list")
 
+        /* Mask off non-"user visible" flags */
+        ohdr_flags = oh->flags & (H5O_HDR_ATTR_CRT_ORDER_TRACKED | H5O_HDR_ATTR_CRT_ORDER_INDEXED | H5O_HDR_STORE_TIMES);
+
         /* Set object header flags */
-        if(H5P_set(oc_plist, H5O_CRT_OHDR_FLAGS_NAME, &oh->flags) < 0)
+        if(H5P_set(oc_plist, H5O_CRT_OHDR_FLAGS_NAME, &ohdr_flags) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set object header flags")
     } /* end if */
 

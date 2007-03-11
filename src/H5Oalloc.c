@@ -468,6 +468,9 @@ H5O_alloc_extend_chunk(H5F_t *f,
     size_t      old_size;       /* Old size of chunk */
     htri_t      tri_result;     /* Result from checking if chunk can be extended */
     int         extend_msg = -1;/* Index of null message to extend */
+    uint8_t     new_size_flags = 0;     /* New chunk #0 size flags */
+    hbool_t     adjust_size_flags = FALSE;      /* Whether to adjust the chunk #0 size flags */
+    size_t      extra_prfx_size = 0; /* Extra bytes added to object header prefix */
     unsigned    u;              /* Local index variable */
     htri_t      ret_value = TRUE; 	/* return value */
 
@@ -506,17 +509,47 @@ H5O_alloc_extend_chunk(H5F_t *f,
         delta = (aligned_size + H5O_SIZEOF_MSGHDR_OH(oh)) - oh->chunk[chunkno].gap;
     delta = H5O_ALIGN_OH(oh, delta);
 
+    /* Check for changing the chunk #0 data size enough to need adjusting the flags */
+    if(oh->version > H5O_VERSION_1 && chunkno == 0) {
+        uint64_t chunk0_size = oh->chunk[0].size - H5O_SIZEOF_HDR(oh);  /* Size of chunk 0's data */
+
+        /* Check for moving from a 1-byte to a 2-byte size encoding */
+        if(chunk0_size <= 255 && (chunk0_size + delta) > 255) {
+            extra_prfx_size = 1;
+            new_size_flags = H5O_HDR_CHUNK0_2;
+            adjust_size_flags = TRUE;
+        } /* end if */
+        /* Check for moving from a 2-byte to a 4-byte size encoding */
+        else if(chunk0_size <= 65535 && (chunk0_size + delta) > 65535) {
+            extra_prfx_size = 2;
+            new_size_flags = H5O_HDR_CHUNK0_4;
+            adjust_size_flags = TRUE;
+        } /* end if */
+        /* Check for moving from a 4-byte to a 8-byte size encoding */
+        else if(chunk0_size <= 4294967295 && (chunk0_size + delta) > 4294967295) {
+            extra_prfx_size = 4;
+            new_size_flags = H5O_HDR_CHUNK0_8;
+            adjust_size_flags = TRUE;
+        } /* end if */
+    } /* end if */
+
     /* Determine whether the chunk can be extended */
     tri_result = H5MF_can_extend(f, H5FD_MEM_OHDR, oh->chunk[chunkno].addr,
-                                 (hsize_t)(oh->chunk[chunkno].size), (hsize_t)delta);
+                                 (hsize_t)(oh->chunk[chunkno].size), (hsize_t)(delta + extra_prfx_size));
     if(tri_result == FALSE)     /* can't extend -- we are done */
         HGOTO_DONE(FALSE)
     else if(tri_result < 0) /* error */
         HGOTO_ERROR(H5E_RESOURCE, H5E_SYSTEM, FAIL, "can't tell if we can extend chunk")
 
     /* If we get this far, we should be able to extend the chunk */
-    if(H5MF_extend(f, H5FD_MEM_OHDR, oh->chunk[chunkno].addr, (hsize_t)(oh->chunk[chunkno].size), (hsize_t)delta) < 0 )
+    if(H5MF_extend(f, H5FD_MEM_OHDR, oh->chunk[chunkno].addr, (hsize_t)(oh->chunk[chunkno].size), (hsize_t)(delta + extra_prfx_size)) < 0 )
         HGOTO_ERROR(H5E_RESOURCE, H5E_SYSTEM, FAIL, "can't extend chunk")
+
+    /* Adjust object header prefix flags */
+    if(adjust_size_flags) {
+        oh->flags &= ~H5O_HDR_CHUNK0_SIZE;
+        oh->flags |= new_size_flags;
+    } /* end if */
 
     /* If we can extend an existing null message, take care of that */
     if(extend_msg >= 0) {
@@ -548,7 +581,7 @@ H5O_alloc_extend_chunk(H5F_t *f,
     /* Allocate more memory space for chunk's image */
     old_image = oh->chunk[chunkno].image;
     old_size = oh->chunk[chunkno].size;
-    oh->chunk[chunkno].size += delta;
+    oh->chunk[chunkno].size += delta + extra_prfx_size;
     oh->chunk[chunkno].image = H5FL_BLK_REALLOC(chunk_image, old_image, oh->chunk[chunkno].size);
     oh->chunk[chunkno].gap = 0;
     oh->chunk[chunkno].dirty = TRUE;
@@ -562,7 +595,7 @@ H5O_alloc_extend_chunk(H5F_t *f,
     for(u = 0; u < oh->nmesgs; u++) {
         /* Adjust raw addresses for messages in this chunk to reflect new 'image' address */
         if(oh->mesg[u].chunkno == chunkno)
-            oh->mesg[u].raw = oh->chunk[chunkno].image + (oh->mesg[u].raw - old_image);
+            oh->mesg[u].raw = oh->chunk[chunkno].image + extra_prfx_size + (oh->mesg[u].raw - old_image);
 
         /* Find continuation message which points to this chunk and adjust chunk's size */
         /* (Chunk 0 doesn't have a continuation message that points to it and

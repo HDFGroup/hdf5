@@ -357,11 +357,10 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 
         /* First chunk size */
         UINT32DECODE(p, chunk_size);
-    } /* end else */
 
-    /* Reserved, in version 1 */
-    if(H5O_VERSION_1 == oh->version)
+        /* Reserved, in version 1 */
         p += 4;
+    } /* end else */
 
     /* Determine object header prefix length */
     prefix_size = (size_t)(p - read_buf);
@@ -702,14 +701,17 @@ H5O_assert(oh);
             /* First chunk size */
             switch(oh->flags & H5O_HDR_CHUNK0_SIZE) {
                 case 0:     /* 1 byte size */
+                    HDassert(chunk0_size < 256);
                     *p++ = chunk0_size;
                     break;
 
                 case 1:     /* 2 byte size */
+                    HDassert(chunk0_size < 65536);
                     UINT16ENCODE(p, chunk0_size);
                     break;
 
                 case 2:     /* 4 byte size */
+                    HDassert(chunk0_size < 4294967296);
                     UINT32ENCODE(p, chunk0_size);
                     break;
 

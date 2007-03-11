@@ -136,6 +136,20 @@ H5O_assert(const H5O_t *oh)
             HDassert(oh->chunk[u].gap == 0);
     } /* end for */
 
+    /* Check for correct chunk #0 size flags */
+    if(oh->version > H5O_VERSION_1) {
+        uint64_t chunk0_size = oh->chunk[0].size - H5O_SIZEOF_HDR(oh);
+
+        if(chunk0_size <= 255)
+            HDassert((oh->flags & H5O_HDR_CHUNK0_SIZE) == H5O_HDR_CHUNK0_1);
+        else if(chunk0_size <= 65535)
+            HDassert((oh->flags & H5O_HDR_CHUNK0_SIZE) == H5O_HDR_CHUNK0_2);
+        else if(chunk0_size <= 4294967295)
+            HDassert((oh->flags & H5O_HDR_CHUNK0_SIZE) == H5O_HDR_CHUNK0_4);
+        else
+            HDassert((oh->flags & H5O_HDR_CHUNK0_SIZE) == H5O_HDR_CHUNK0_8);
+    } /* end if */
+
     /* Loop over all messages in object header */
     for(u = 0, curr_msg = &oh->mesg[0]; u < oh->nmesgs; u++, curr_msg++) {
         /* Accumulate information, based on the type of message */
