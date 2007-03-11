@@ -172,6 +172,7 @@ H5G_obj_create(H5F_t *f, hid_t dxpl_id, const H5O_ginfo_t *ginfo,
         lnk.type = H5L_TYPE_HARD;
         lnk.corder = 0;
         lnk.corder_valid = linfo->track_corder;
+        lnk.cset = H5T_CSET_ASCII;
         lnk.name = &null_char;
         link_size = H5O_msg_size_f(f, gcpl_id, H5O_LINK_ID, &lnk, (size_t)ginfo->est_name_len);
         HDassert(link_size);

@@ -81,7 +81,17 @@ const H5O_msg_class_t H5O_MSG_LINK[1] = {{
 #define H5O_LINK_VERSION 	1
 
 /* Flags for link flag encoding */
-#define H5O_LINK_FLAG_HAS_CORDER        0x01
+#define H5O_LINK_NAME_SIZE              0x03    /* 2-bit field for size of name length */
+#define H5O_LINK_STORE_CORDER           0x04    /* Whether to store creation index */
+#define H5O_LINK_STORE_LINK_TYPE        0x08    /* Whether to store non-default link type */
+#define H5O_LINK_STORE_NAME_CSET        0x10    /* Whether to store non-default name character set */
+#define H5O_LINK_ALL_FLAGS              (H5O_LINK_NAME_SIZE | H5O_LINK_STORE_CORDER | H5O_LINK_STORE_LINK_TYPE | H5O_LINK_STORE_NAME_CSET)
+
+/* Individual definitions of name size values */
+#define H5O_LINK_NAME_1                 0x00    /* Use 1-byte value for name length */
+#define H5O_LINK_NAME_2                 0x01    /* Use 2-byte value for name length */
+#define H5O_LINK_NAME_4                 0x02    /* Use 4-byte value for name length */
+#define H5O_LINK_NAME_8                 0x03    /* Use 8-byte value for name length */
 
 /* Declare a free list to manage the H5O_link_t struct */
 H5FL_DEFINE_STATIC(H5O_link_t);
@@ -128,14 +138,21 @@ H5O_link_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
 
     /* Get the encoding flags for the link */
     link_flags = *p++;
+    if(link_flags & ~H5O_LINK_ALL_FLAGS)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad flag value for message")
 
-    /* Get the type of the link */
-    lnk->type = *p++;
-    if(lnk->type < H5L_TYPE_HARD || lnk->type > H5L_TYPE_MAX)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad link type")
+    /* Check for non-default link type */
+    if(link_flags & H5O_LINK_STORE_LINK_TYPE) {
+        /* Get the type of the link */
+        lnk->type = *p++;
+        if(lnk->type < H5L_TYPE_HARD || lnk->type > H5L_TYPE_MAX)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad link type")
+    } /* end if */
+    else
+        lnk->type = H5L_TYPE_HARD;
 
     /* Get the link creation time from the file */
-    if(link_flags & H5O_LINK_FLAG_HAS_CORDER) {
+    if(link_flags & H5O_LINK_STORE_CORDER) {
         INT64DECODE(p, lnk->corder)
         lnk->corder_valid = TRUE;
     } /* end if */
@@ -144,15 +161,41 @@ H5O_link_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
         lnk->corder_valid = FALSE;
     } /* end else */
 
-    /* Get the link name's character set */
-    lnk->cset = (H5T_cset_t)*p++;
-    if(lnk->cset < H5T_CSET_ASCII || lnk->cset > H5T_CSET_UTF8)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad cset type")
+    /* Check for non-default name character set */
+    if(link_flags & H5O_LINK_STORE_NAME_CSET) {
+        /* Get the link name's character set */
+        lnk->cset = (H5T_cset_t)*p++;
+        if(lnk->cset < H5T_CSET_ASCII || lnk->cset > H5T_CSET_UTF8)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad cset type")
+    } /* end if */
+    else
+        lnk->cset = H5T_CSET_ASCII;
 
-    /* Get the link's name */
-    UINT32DECODE(p, len)
+    /* Get the length of the link's name */
+    switch(link_flags & H5O_LINK_NAME_SIZE) {
+        case 0:     /* 1 byte size */
+            len = *p++;
+            break;
+
+        case 1:     /* 2 byte size */
+            UINT16DECODE(p, len);
+            break;
+
+        case 2:     /* 4 byte size */
+            UINT32DECODE(p, len);
+            break;
+
+        case 3:     /* 8 byte size */
+            UINT64DECODE(p, len);
+            break;
+
+        default:
+            HDassert(0 && "bad size for name");
+    } /* end switch */
     if(len == 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "invalid name length")
+
+    /* Get the link's name */
     if(NULL == (lnk->name = H5MM_malloc(len + 1)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     HDmemcpy(lnk->name, p, len);
@@ -232,9 +275,9 @@ done:
 static herr_t
 H5O_link_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
-    const H5O_link_t       *lnk = (const H5O_link_t *) _mesg;
-    size_t                  len;            /* Length of a string in the message */
-    unsigned char           link_flags;     /* Flags for encoding link info */
+    const H5O_link_t    *lnk = (const H5O_link_t *) _mesg;
+    uint64_t            len;            /* Length of a string in the message */
+    unsigned char       link_flags;     /* Flags for encoding link info */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_link_encode)
 
@@ -243,28 +286,63 @@ H5O_link_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void 
     HDassert(p);
     HDassert(lnk);
 
+    /* Get length of link's name */
+    len = (uint64_t)HDstrlen(lnk->name);
+    HDassert(len > 0);
+
     /* encode */
     *p++ = H5O_LINK_VERSION;
 
     /* The encoding flags for the link */
-    link_flags = lnk->corder_valid ? H5O_LINK_FLAG_HAS_CORDER : 0;
+    if(len > 4294967295)
+        link_flags = H5O_LINK_NAME_8;
+    else if(len > 65535)
+        link_flags = H5O_LINK_NAME_4;
+    else if(len > 255)
+        link_flags = H5O_LINK_NAME_2;
+    else
+        link_flags = H5O_LINK_NAME_1;
+    link_flags |= lnk->corder_valid ? H5O_LINK_STORE_CORDER : 0;
+    link_flags |= (lnk->type != H5L_TYPE_HARD) ? H5O_LINK_STORE_LINK_TYPE : 0;
+    link_flags |= (lnk->cset != H5T_CSET_ASCII) ? H5O_LINK_STORE_NAME_CSET : 0;
     *p++ = link_flags;
 
-    /* Store the type of the link */
-    *p++ = lnk->type;
+    /* Store the type of a non-default link */
+    if(link_flags & H5O_LINK_STORE_LINK_TYPE)
+        *p++ = lnk->type;
 
     /* Store the link creation order in the file, if its valid */
     if(lnk->corder_valid)
         INT64ENCODE(p, lnk->corder)
 
-    /* Store the link name's character set */
-    *p++ = (uint8_t)lnk->cset;
+    /* Store a non-default link name character set */
+    if(link_flags & H5O_LINK_STORE_NAME_CSET)
+        *p++ = (uint8_t)lnk->cset;
+
+    /* Store the link name's length */
+    switch(link_flags & H5O_LINK_NAME_SIZE) {
+        case 0:     /* 1 byte size */
+            *p++ = len;
+            break;
+
+        case 1:     /* 2 byte size */
+            UINT16ENCODE(p, len);
+            break;
+
+        case 2:     /* 4 byte size */
+            UINT32ENCODE(p, len);
+            break;
+
+        case 3:     /* 8 byte size */
+            UINT64ENCODE(p, len);
+            break;
+
+        default:
+            HDassert(0 && "bad size for name");
+    } /* end switch */
 
     /* Store the link's name */
-    len = HDstrlen(lnk->name);
-    HDassert(len > 0);
-    UINT32ENCODE(p, (uint32_t)len)
-    HDmemcpy(p, lnk->name, len);
+    HDmemcpy(p, lnk->name, (size_t)len);
     p += len;
 
     /* Store the appropriate information for each type of link */
@@ -279,7 +357,7 @@ H5O_link_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void 
             len = (uint16_t)HDstrlen(lnk->u.soft.name);
             HDassert(len > 0);
             UINT16ENCODE(p, len)
-            HDmemcpy(p, lnk->u.soft.name, len);
+            HDmemcpy(p, lnk->u.soft.name, (size_t)len);
             p += len;
             break;
 
@@ -292,7 +370,7 @@ H5O_link_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void 
             UINT16ENCODE(p, len)
             if(len > 0)
             {
-                HDmemcpy(p, lnk->u.ud.udata, len);
+                HDmemcpy(p, lnk->u.ud.udata, (size_t)len);
                 p+=len;
             }
             break;
@@ -382,18 +460,33 @@ static size_t
 H5O_link_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg)
 {
     const H5O_link_t *lnk = (const H5O_link_t *)_mesg;
+    uint64_t name_len;    /* Length of name */
+    size_t name_size;   /* Size of encoded name length */
     size_t ret_value;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_link_size)
 
+    /* Get name's length */
+    name_len = (uint64_t)HDstrlen(lnk->name);
+
+    /* Determine correct value for name size bits */
+    if(name_len > 4294967295)
+        name_size = 8;
+    else if(name_len > 65535)
+        name_size = 4;
+    else if(name_len > 255)
+        name_size = 2;
+    else
+        name_size = 1;
+
     /* Set return value */
     ret_value = 1 +                     /* Version */
                 1 +                     /* Link encoding flags */
-                1 +                     /* Link type */
+                (lnk->type != H5L_TYPE_HARD ? 1 : 0) + /* Link type */
                 (lnk->corder_valid ? 8 : 0) + /* Creation order */
-                1 +                     /* Character set */
-                4 +                     /* Name length */
-                HDstrlen(lnk->name);    /* Name */
+                (lnk->cset != H5T_CSET_ASCII ? 1 : 0) + /* Character set */
+                name_size +             /* Name length */
+                name_len;               /* Name */
 
     /* Add the appropriate length for each type of link */
     switch(lnk->type) {

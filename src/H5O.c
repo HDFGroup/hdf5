@@ -677,8 +677,6 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
 
     /* Initialize version-specific fields */
     if(oh->version > H5O_VERSION_1) {
-        uint64_t tent_oh_size;            /* Tentative size of object header */
-
         /* Initialize all time fields with current time, if we are storing them */
         if(oh->flags & H5O_HDR_STORE_TIMES)
             oh->atime = oh->mtime = oh->ctime = oh->btime = H5_now();

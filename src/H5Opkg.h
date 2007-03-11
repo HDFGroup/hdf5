@@ -89,10 +89,10 @@
 #define H5O_CRT_OHDR_FLAGS_DEF          H5O_HDR_STORE_TIMES
 
 /* Object header status flag definitions */
-#define H5O_HDR_CHUNK0_1                0x00
-#define H5O_HDR_CHUNK0_2                0x01
-#define H5O_HDR_CHUNK0_4                0x02
-#define H5O_HDR_CHUNK0_8                0x03
+#define H5O_HDR_CHUNK0_1                0x00    /* Use 1-byte value for chunk #0 size */
+#define H5O_HDR_CHUNK0_2                0x01    /* Use 2-byte value for chunk #0 size */
+#define H5O_HDR_CHUNK0_4                0x02    /* Use 4-byte value for chunk #0 size */
+#define H5O_HDR_CHUNK0_8                0x03    /* Use 8-byte value for chunk #0 size */
 
 /*
  * Size of object header prefix.
