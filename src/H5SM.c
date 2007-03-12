@@ -1592,6 +1592,7 @@ H5SM_message_encode(const H5F_t UNUSED *f, uint8_t *raw, const void *_nrecord)
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_message_encode)
 
     /* Encode the SOHM's fields */
+    *raw++ = 0;                 /* The "location" of the message (will be replaced in following checkin) */
     UINT32ENCODE(raw, message->hash);
     UINT32ENCODE(raw, message->ref_count);
     UINT64ENCODE(raw, message->fheap_id);
@@ -1621,6 +1622,7 @@ H5SM_message_decode(const H5F_t UNUSED *f, const uint8_t *raw, void *_nrecord)
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_message_decode)
 
     /* Encode the SOHM's fields */
+    raw++;                      /* skip unused "location" field right now */
     UINT32DECODE(raw, message->hash);
     UINT32DECODE(raw, message->ref_count);
     UINT64DECODE(raw, message->fheap_id);

@@ -45,7 +45,8 @@
 #define H5SM_TABLE_SIZEOF_MAGIC 4
 #define H5SM_SIZEOF_CHECKSUM 4
 
-#define H5SM_SOHM_ENTRY_SIZE(f) (4  /* Hash value */                         \
+#define H5SM_SOHM_ENTRY_SIZE(f) (1  /* "location" (unused right now) */      \
+         + 4                        /* Hash value */                         \
          + 4                        /* reference count*/                     \
          + sizeof(H5O_fheap_id_t))  /* size of heap ID on disk */
 
