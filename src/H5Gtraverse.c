@@ -714,7 +714,7 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
 
                 /* Get the link info for parent group */
                 /* (OK if not found) */
-                if(NULL == H5O_msg_read(grp_loc.oloc, H5O_LINFO_ID, &par_linfo, dxpl_id)) {
+                if(NULL == H5G_obj_get_linfo(grp_loc.oloc, &par_linfo, dxpl_id)) {
                     /* Clear error stack from not finding the link info message */
                     H5E_clear_stack(NULL);
 

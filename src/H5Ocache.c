@@ -606,6 +606,11 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
                 oh->has_refcount_msg = TRUE;
                 oh->nlink = *refcount;
             } /* end if */
+            /* Check if next message to examine is a link message */
+            else if(H5O_LINK_ID == oh->mesg[curmesg].type->id) {
+                /* Increment the count of link messages */
+                oh->link_msgs_seen++;
+            } /* end if */
         } /* end for */
     } /* end while */
 

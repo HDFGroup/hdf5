@@ -137,8 +137,8 @@ H5O_linfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
     linfo->track_corder = (index_flags & H5O_LINFO_TRACK_CORDER) ? TRUE : FALSE;
     linfo->index_corder = (index_flags & H5O_LINFO_INDEX_CORDER) ? TRUE : FALSE;
 
-    /* Number of links in the group */
-    H5F_DECODE_LENGTH(f, p, linfo->nlinks)
+    /* Set the number of links in the group to an invalid value, so we query it later */
+    linfo->nlinks = HSIZET_MAX;
 
     /* Max. link creation order value for the group, if tracked */
     if(linfo->track_corder)
@@ -147,7 +147,7 @@ H5O_linfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
         linfo->max_corder = 0;
 
     /* Address of fractal heap to store "dense" links */
-    H5F_addr_decode(f, &p, &(linfo->link_fheap_addr));
+    H5F_addr_decode(f, &p, &(linfo->fheap_addr));
 
     /* Address of v2 B-tree to index names of links (names are always indexed) */
     H5F_addr_decode(f, &p, &(linfo->name_bt2_addr));
@@ -204,15 +204,12 @@ H5O_linfo_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void
     index_flags |= linfo->index_corder ? H5O_LINFO_INDEX_CORDER : 0;
     *p++ = index_flags;
 
-    /* Number of links in the group */
-    H5F_ENCODE_LENGTH(f, p, linfo->nlinks)
-
     /* Max. link creation order value for the group, if tracked */
     if(linfo->track_corder)
         INT64ENCODE(p, linfo->max_corder)
 
     /* Address of fractal heap to store "dense" links */
-    H5F_addr_encode(f, &p, linfo->link_fheap_addr);
+    H5F_addr_encode(f, &p, linfo->fheap_addr);
 
     /* Address of v2 B-tree to index names of links */
     H5F_addr_encode(f, &p, linfo->name_bt2_addr);
@@ -294,7 +291,6 @@ H5O_linfo_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg)
     /* Set return value */
     ret_value = 1                       /* Version */
                 + 1                     /* Index flags */
-                + H5F_SIZEOF_SIZE(f)    /* Number of links */
                 + (linfo->track_corder ? 8 : 0) /* Curr. max. creation order value */
                 + H5F_SIZEOF_ADDR(f)    /* Address of fractal heap to store "dense" links */
                 + H5F_SIZEOF_ADDR(f)    /* Address of v2 B-tree for indexing names of links */
@@ -354,7 +350,7 @@ H5O_linfo_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg)
     HDassert(linfo);
 
     /* If the group is using "dense" link storage, delete it */
-    if(H5F_addr_defined(linfo->link_fheap_addr))
+    if(H5F_addr_defined(linfo->fheap_addr))
         if(H5G_dense_delete(f, dxpl_id, (H5O_linfo_t *)linfo, TRUE) < 0)   /* Casting away const OK - QAK */
             HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free dense link storage")
 
@@ -402,7 +398,7 @@ H5O_linfo_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst,
     if(cpy_info->max_depth >= 0 && cpy_info->curr_depth >= cpy_info->max_depth) {
         linfo_dst->nlinks = 0;
         linfo_dst->max_corder = 0;
-        linfo_dst->link_fheap_addr = HADDR_UNDEF;
+        linfo_dst->fheap_addr = HADDR_UNDEF;
         linfo_dst->name_bt2_addr = HADDR_UNDEF;
         linfo_dst->corder_bt2_addr = HADDR_UNDEF;
     } /* end if */
@@ -411,7 +407,7 @@ H5O_linfo_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst,
         /* (XXX: should probably get the "creation" parameters for the source group's
          *      dense link storage components and use those - QAK)
          */
-        if(H5F_addr_defined(linfo_src->link_fheap_addr)) {
+        if(H5F_addr_defined(linfo_src->fheap_addr)) {
             if(H5G_dense_create(file_dst, dxpl_id, linfo_dst) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to create 'dense' form of new format group")
         } /* end if */
@@ -513,7 +509,7 @@ H5O_linfo_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src,
         HGOTO_DONE(SUCCEED)
 
     /* Check for copying dense link storage */
-    if(H5F_addr_defined(linfo_src->link_fheap_addr)) {
+    if(H5F_addr_defined(linfo_src->fheap_addr)) {
         H5O_linfo_postcopy_ud_t udata;          /* User data for iteration callback */
         H5G_link_iterate_t lnk_op;              /* Link operator */
 
@@ -575,7 +571,7 @@ H5O_linfo_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *
     HDfprintf(stream, "%*s%-*s %Hd\n", indent, "", fwidth,
 	      "Max. creation order value:", linfo->max_corder);
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
-	      "'Dense' link storage fractal heap address:", linfo->link_fheap_addr);
+	      "'Dense' link storage fractal heap address:", linfo->fheap_addr);
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
 	      "'Dense' link storage name index v2 B-tree address:", linfo->name_bt2_addr);
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,

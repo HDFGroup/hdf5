@@ -215,9 +215,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_refcount_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg)
+H5O_refcount_size(const H5F_t UNUSED *f, hbool_t UNUSED disable_shared,
+    const void UNUSED *_mesg)
 {
-    const H5O_refcount_t   *refcount = (const H5O_refcount_t *)_mesg;
     size_t ret_value;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_refcount_size)

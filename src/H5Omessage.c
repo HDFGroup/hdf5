@@ -908,7 +908,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_msg_remove(H5O_loc_t *loc, unsigned type_id, int sequence, hbool_t adj_link,
+H5O_msg_remove(const H5O_loc_t *loc, unsigned type_id, int sequence, hbool_t adj_link,
     hid_t dxpl_id)
 {
     H5O_t *oh = NULL;                   /* Pointer to actual object header */

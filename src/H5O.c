@@ -2046,3 +2046,43 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_get_create_plist() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_get_nlinks
+ *
+ * Purpose:	Retrieve the number of link messages read in from the file
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		March 11 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_get_nlinks(const H5O_loc_t *oloc, hid_t dxpl_id, hsize_t *nlinks)
+{
+    H5O_t *oh = NULL;                   /* Object header */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_get_nlinks, FAIL)
+
+    /* Check args */
+    HDassert(oloc);
+    HDassert(nlinks);
+
+    /* Get the object header */
+    if(NULL == (oh = H5AC_protect(oloc->file, dxpl_id, H5AC_OHDR, oloc->addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+
+    /* Retrieve the # of link messages seen when the object header was loaded */
+    *nlinks = oh->link_msgs_seen;
+
+done:
+    if(oh && H5AC_unprotect(oloc->file, dxpl_id, H5AC_OHDR, oloc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
+	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_get_nlinks() */
+

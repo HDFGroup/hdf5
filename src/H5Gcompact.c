@@ -183,7 +183,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_compact_insert(H5O_loc_t *grp_oloc, H5O_link_t *obj_lnk,
+H5G_compact_insert(const H5O_loc_t *grp_oloc, H5O_link_t *obj_lnk,
     hid_t dxpl_id)
 {
     herr_t     ret_value = SUCCEED;       /* Return value */

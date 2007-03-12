@@ -255,7 +255,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_stab_insert(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
+H5G_stab_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
     hid_t dxpl_id)
 {
     H5O_stab_t		stab;		/* Symbol table message		*/
@@ -433,7 +433,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_stab_iterate(H5O_loc_t *oloc, hid_t dxpl_id, H5_iter_order_t order,
+H5G_stab_iterate(const H5O_loc_t *oloc, hid_t dxpl_id, H5_iter_order_t order,
     hsize_t skip, hsize_t *last_lnk, hid_t gid,
     H5G_link_iterate_t *lnk_op, void *op_data)
 {

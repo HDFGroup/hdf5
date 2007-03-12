@@ -561,7 +561,7 @@ H5Gget_create_plist(hid_t group_id)
         H5O_linfo_t linfo;		/* Link info message            */
 
         /* Read the link info */
-        if(NULL == H5O_msg_read(&(grp->oloc), H5O_LINFO_ID, &linfo, H5AC_ind_dxpl_id))
+        if(NULL == H5G_obj_get_linfo(&(grp->oloc), &linfo, H5AC_ind_dxpl_id))
             HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get link info")
 
         /* Set the link info for the property list */

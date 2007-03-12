@@ -303,10 +303,10 @@ H5G_dense_create(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create fractal heap")
 
     /* Retrieve the heap's address in the file */
-    if(H5HF_get_heap_addr(fheap, &(linfo->link_fheap_addr)) < 0)
+    if(H5HF_get_heap_addr(fheap, &(linfo->fheap_addr)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGETSIZE, FAIL, "can't get fractal heap address")
 #ifdef QAK
-HDfprintf(stderr, "%s: linfo->link_fheap_addr = %a\n", FUNC, linfo->link_fheap_addr);
+HDfprintf(stderr, "%s: linfo->fheap_addr = %a\n", FUNC, linfo->fheap_addr);
 #endif /* QAK */
 
     /* Retrieve the heap's ID length in the file */
@@ -386,7 +386,7 @@ H5G_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     HDassert(linfo);
     HDassert(lnk);
 #ifdef QAK
-HDfprintf(stderr, "%s: linfo->link_fheap_addr = %a\n", FUNC, linfo->link_fheap_addr);
+HDfprintf(stderr, "%s: linfo->fheap_addr = %a\n", FUNC, linfo->fheap_addr);
 HDfprintf(stderr, "%s: linfo->name_bt2_addr = %a\n", FUNC, linfo->name_bt2_addr);
 #endif /* QAK */
 
@@ -410,7 +410,7 @@ HDfprintf(stderr, "%s: HDstrlen(lnk->name) = %Zu, link_size = %Zu\n", FUNC, HDst
 	HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "can't encode link")
 
     /* Open the fractal heap */
-    if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo->link_fheap_addr)))
+    if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo->fheap_addr)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
 
     /* Insert the serialized link into the fractal heap */
@@ -520,7 +520,7 @@ H5G_dense_lookup(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     HDassert(lnk);
 
     /* Open the fractal heap */
-    if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo->link_fheap_addr)))
+    if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo->fheap_addr)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
 
     /* Construct the user data for v2 B-tree callback */
@@ -687,7 +687,7 @@ H5G_dense_lookup_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
         H5G_bt2_ud_lbi_t udata;        /* User data for v2 B-tree link lookup */
 
         /* Open the fractal heap */
-        if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo->link_fheap_addr)))
+        if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo->fheap_addr)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
 
         /* Construct the user data for v2 B-tree callback */
@@ -1011,7 +1011,7 @@ H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
         H5G_bt2_ud_it_t udata;              /* User data for iterator callback */
 
         /* Open the fractal heap */
-        if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo->link_fheap_addr)))
+        if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo->fheap_addr)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
 
         /* Construct the user data for v2 B-tree iterator callback */
@@ -1205,7 +1205,7 @@ H5G_dense_get_name_by_idx(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo,
         H5G_bt2_ud_gnbi_t udata;       /* User data for v2 B-tree callback */
 
         /* Open the fractal heap */
-        if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo->link_fheap_addr)))
+        if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo->fheap_addr)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
 
         /* Set up the user data for the v2 B-tree 'record remove' callback */
@@ -1464,7 +1464,7 @@ H5G_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     HDassert(name && *name);
 
     /* Open the fractal heap */
-    if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo->link_fheap_addr)))
+    if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo->fheap_addr)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
 
     /* Set up the user data for the v2 B-tree 'record remove' callback */
@@ -1696,7 +1696,7 @@ H5G_dense_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
         H5G_bt2_ud_rmbi_t udata;            /* User data for v2 B-tree record removal */
 
         /* Open the fractal heap */
-        if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo->link_fheap_addr)))
+        if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo->fheap_addr)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
 
         /* Set up the user data for the v2 B-tree 'remove by index' callback */
@@ -1772,7 +1772,7 @@ H5G_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo, hbool_t adj_link)
         H5G_bt2_ud_rm_t udata;          /* User data for v2 B-tree record removal */
 
         /* Open the fractal heap */
-        if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo->link_fheap_addr)))
+        if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo->fheap_addr)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
 
         /* Set up the user data for the v2 B-tree 'record remove' callback */
@@ -1815,9 +1815,9 @@ H5G_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo, hbool_t adj_link)
         HDassert(!H5F_addr_defined(linfo->corder_bt2_addr));
 
     /* Delete the fractal heap */
-    if(H5HF_delete(f, dxpl_id, linfo->link_fheap_addr) < 0)
+    if(H5HF_delete(f, dxpl_id, linfo->fheap_addr) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete fractal heap")
-    linfo->link_fheap_addr = HADDR_UNDEF;
+    linfo->fheap_addr = HADDR_UNDEF;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -266,6 +266,7 @@ struct H5O_t {
     size_t	alloc_nmesgs;		/*number of message slots	     */
     H5O_mesg_t	*mesg;			/*array of messages		     */
     size_t      skipped_mesg_size;      /*size of skipped messages (for sanity checking) */
+    size_t      link_msgs_seen;         /* # of link messages seen when loading header */
 
     /* Chunk management (not stored) */
     size_t	nchunks;		/*number of chunks		     */
