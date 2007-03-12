@@ -231,7 +231,7 @@ H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
     if(oh->version > H5O_VERSION_1) {
         hbool_t new_ainfo = FALSE;          /* Flag to indicate that the attribute information is new */
 
-        if(NULL == H5O_msg_read_real(loc->file, dxpl_id, oh, H5O_AINFO_ID, &ainfo)) {
+        if(NULL == H5A_get_ainfo(loc->file, dxpl_id, oh, &ainfo)) {
             /* Clear error stack from not finding attribute info */
             H5E_clear_stack(NULL);
 
@@ -468,7 +468,7 @@ H5O_attr_open_by_name(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
-    if(oh->version > H5O_VERSION_1 && NULL == H5O_msg_read_real(loc->file, dxpl_id, oh, H5O_AINFO_ID, &ainfo))
+    if(oh->version > H5O_VERSION_1 && NULL == H5A_get_ainfo(loc->file, dxpl_id, oh, &ainfo))
         /* Clear error stack from not finding attribute info */
         H5E_clear_stack(NULL);
 
@@ -748,7 +748,7 @@ H5O_attr_write(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
-    if(oh->version > H5O_VERSION_1 && NULL == H5O_msg_read_real(loc->file, dxpl_id, oh, H5O_AINFO_ID, &ainfo))
+    if(oh->version > H5O_VERSION_1 && NULL == H5A_get_ainfo(loc->file, dxpl_id, oh, &ainfo))
         /* Clear error stack from not finding attribute info */
         H5E_clear_stack(NULL);
 
@@ -973,7 +973,7 @@ H5O_attr_rename(const H5O_loc_t *loc, hid_t dxpl_id, const char *old_name,
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
-    if(oh->version > H5O_VERSION_1 && NULL == H5O_msg_read_real(loc->file, dxpl_id, oh, H5O_AINFO_ID, &ainfo))
+    if(oh->version > H5O_VERSION_1 && NULL == H5A_get_ainfo(loc->file, dxpl_id, oh, &ainfo))
         /* Clear error stack from not finding attribute info */
         H5E_clear_stack(NULL);
 
@@ -1066,7 +1066,7 @@ H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
-    if(oh->version > H5O_VERSION_1 && NULL == H5O_msg_read_real(loc->file, dxpl_id, oh, H5O_AINFO_ID, &ainfo))
+    if(oh->version > H5O_VERSION_1 && NULL == H5A_get_ainfo(loc->file, dxpl_id, oh, &ainfo))
         /* Clear error stack from not finding attribute info */
         H5E_clear_stack(NULL);
 
@@ -1337,7 +1337,7 @@ H5O_attr_remove(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
-    if(oh->version > H5O_VERSION_1 && NULL == (ainfo_ptr = H5O_msg_read_real(loc->file, dxpl_id, oh, H5O_AINFO_ID, &ainfo)))
+    if(oh->version > H5O_VERSION_1 && NULL == (ainfo_ptr = H5A_get_ainfo(loc->file, dxpl_id, oh, &ainfo)))
         /* Clear error stack from not finding attribute info */
         H5E_clear_stack(NULL);
 
@@ -1423,7 +1423,7 @@ H5O_attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
-    if(oh->version > H5O_VERSION_1 && NULL == (ainfo_ptr = H5O_msg_read_real(loc->file, dxpl_id, oh, H5O_AINFO_ID, &ainfo)))
+    if(oh->version > H5O_VERSION_1 && NULL == (ainfo_ptr = H5A_get_ainfo(loc->file, dxpl_id, oh, &ainfo)))
         /* Clear error stack from not finding attribute info */
         H5E_clear_stack(NULL);
 
@@ -1512,7 +1512,7 @@ H5O_attr_count_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
         H5O_ainfo_t ainfo;                  /* Attribute information for object */
 
         /* Attempt to get the attribute information from the object header */
-        if(H5O_msg_read_real(f, dxpl_id, oh, H5O_AINFO_ID, &ainfo))
+        if(H5A_get_ainfo(f, dxpl_id, oh, &ainfo))
             ret_value = ainfo.nattrs;
         else {
             /* Clear error stack from not finding attribute info */
@@ -1643,7 +1643,7 @@ H5O_attr_exists(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
-    if(oh->version > H5O_VERSION_1 && NULL == H5O_msg_read_real(loc->file, dxpl_id, oh, H5O_AINFO_ID, &ainfo))
+    if(oh->version > H5O_VERSION_1 && NULL == H5A_get_ainfo(loc->file, dxpl_id, oh, &ainfo))
         /* Clear error stack from not finding attribute info */
         H5E_clear_stack(NULL);
 

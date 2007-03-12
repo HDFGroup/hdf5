@@ -112,7 +112,7 @@ H5O_is_attr_dense_test(hid_t oid)
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
-    if(oh->version > H5O_VERSION_1 && NULL == H5O_msg_read_real(oloc->file, H5AC_ind_dxpl_id, oh, H5O_AINFO_ID, &ainfo))
+    if(oh->version > H5O_VERSION_1 && NULL == H5A_get_ainfo(oloc->file, H5AC_ind_dxpl_id, oh, &ainfo))
         /* Clear error stack from not finding attribute info */
         H5E_clear_stack(NULL);
 
@@ -174,7 +174,7 @@ H5O_is_attr_empty_test(hid_t oid)
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
-    if(oh->version > H5O_VERSION_1 && NULL == (ainfo_ptr = H5O_msg_read_real(oloc->file, H5AC_ind_dxpl_id, oh, H5O_AINFO_ID, &ainfo)))
+    if(oh->version > H5O_VERSION_1 && NULL == (ainfo_ptr = H5A_get_ainfo(oloc->file, H5AC_ind_dxpl_id, oh, &ainfo)))
         /* Clear error stack from not finding attribute info */
         H5E_clear_stack(NULL);
 
@@ -252,7 +252,7 @@ H5O_num_attrs_test(hid_t oid, hsize_t *nattrs)
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
-    if(oh->version > H5O_VERSION_1 && NULL == H5O_msg_read_real(oloc->file, H5AC_ind_dxpl_id, oh, H5O_AINFO_ID, &ainfo))
+    if(oh->version > H5O_VERSION_1 && NULL == H5A_get_ainfo(oloc->file, H5AC_ind_dxpl_id, oh, &ainfo))
         /* Clear error stack from not finding attribute info */
         H5E_clear_stack(NULL);
 
@@ -327,7 +327,7 @@ H5O_attr_dense_info_test(hid_t oid, hsize_t *name_count, hsize_t *corder_count)
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
-    if(oh->version > H5O_VERSION_1 && NULL == H5O_msg_read_real(oloc->file, H5AC_ind_dxpl_id, oh, H5O_AINFO_ID, &ainfo))
+    if(oh->version > H5O_VERSION_1 && NULL == H5A_get_ainfo(oloc->file, H5AC_ind_dxpl_id, oh, &ainfo))
         /* Clear error stack from not finding attribute info */
         H5E_clear_stack(NULL);
 

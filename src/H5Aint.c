@@ -616,3 +616,53 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_attr_release_table() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5A_get_ainfo
+ *
+ * Purpose:     Retrieves the "attribute info" message for an object.  Also
+ *              sets the number of attributes correctly, if it isn't set up yet.
+ *
+ * Return:	Success:	Ptr to message in native format.
+ *              Failure:        NULL
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              Mar 11 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+H5O_ainfo_t *
+H5A_get_ainfo(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_ainfo_t *ainfo)
+{
+    H5O_ainfo_t *ret_value;     /* Return value */
+    
+    FUNC_ENTER_NOAPI(H5A_get_ainfo, NULL)
+
+    /* check arguments */
+    HDassert(f);
+    HDassert(oh);
+
+    /* Retrieve the "attribute info" structure */
+    if(ret_value = H5O_msg_read_real(f, dxpl_id, oh, H5O_AINFO_ID, ainfo)) {
+        /* Check if we don't know how many attributes there are */
+        if(ret_value->nattrs == HSIZET_MAX) {
+            /* Check if we are using "dense" attribute storage */
+            if(H5F_addr_defined(ret_value->fheap_addr)) {
+                /* Retrieve # of records in "name" B-tree */
+                /* (should be same # of records in all indices) */
+                if(H5B2_get_nrec(f, dxpl_id, H5A_BT2_NAME, ret_value->name_bt2_addr, &ret_value->nattrs) < 0)
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "can't retrieve # of records in index")
+            } /* end if */
+            else
+                /* Retrieve # of attributes from object header */
+                ret_value->nattrs = oh->attr_msgs_seen;
+        } /* end if */
+    } /* end if */
+    else
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "attribute info message not present")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5A_get_ainfo() */
+

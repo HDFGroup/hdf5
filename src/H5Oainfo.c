@@ -127,8 +127,8 @@ H5O_ainfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
     ainfo->track_corder = (flags & H5O_AINFO_TRACK_CORDER) ? TRUE : FALSE;
     ainfo->index_corder = (flags & H5O_AINFO_INDEX_CORDER) ? TRUE : FALSE;
 
-    /* Number of attributes on the object */
-    H5F_DECODE_LENGTH(f, p, ainfo->nattrs)
+    /* Set the number of attributes on the object to an invalid value, so we query it later */
+    ainfo->nattrs = HSIZET_MAX;
 
     /* Max. creation order value for the object */
     if(ainfo->track_corder)
@@ -192,9 +192,6 @@ H5O_ainfo_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void
     flags = ainfo->track_corder ? H5O_AINFO_TRACK_CORDER : 0;
     flags |= ainfo->index_corder ? H5O_AINFO_INDEX_CORDER : 0;
     *p++ = flags;
-
-    /* Number of attributes on the object */
-    H5F_ENCODE_LENGTH(f, p, ainfo->nattrs)
 
     /* Max. creation order value for the object */
     if(ainfo->track_corder)
@@ -283,7 +280,6 @@ H5O_ainfo_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void *_mesg)
     /* Set return value */
     ret_value = 1                       /* Version */
                 + 1                     /* Index flags */
-                + H5F_SIZEOF_SIZE(f)    /* Number of attributes */
                 + (ainfo->track_corder ? 2 : 0) /* Curr. max. creation order value */
                 + H5F_SIZEOF_ADDR(f)    /* Address of fractal heap to store "dense" attributes */
                 + H5F_SIZEOF_ADDR(f)    /* Address of v2 B-tree for indexing names of attributes */

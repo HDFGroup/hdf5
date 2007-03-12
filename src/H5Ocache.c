@@ -611,6 +611,11 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
                 /* Increment the count of link messages */
                 oh->link_msgs_seen++;
             } /* end if */
+            /* Check if next message to examine is an attribute message */
+            else if(H5O_ATTR_ID == oh->mesg[curmesg].type->id) {
+                /* Increment the count of attribute messages */
+                oh->attr_msgs_seen++;
+            } /* end if */
         } /* end for */
     } /* end while */
 
