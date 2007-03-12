@@ -566,7 +566,7 @@ h5tools_print_char(h5tools_str_t *str, const h5tool_format_t *info, char ch)
  *  If TYPE is a variable length string then the pointer to
  *  the value to pring (VP) is a pointer to a `char*'.
  *
- *  pvn, 28 March 2006
+ *  PVN, 28 March 2006
  *  added H5T_NATIVE_LDOUBLE case
  *-------------------------------------------------------------------------
  */
