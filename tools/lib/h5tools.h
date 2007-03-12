@@ -27,8 +27,8 @@
 #define ESCAPE_HTML             1
 #define OPT(X,S)                ((X) ? (X) : (S))
 #define OPTIONAL_LINE_BREAK     "\001"  /* Special strings embedded in the output */
-#define START_OF_DATA		0x0001
-#define END_OF_DATA		0x0002
+#define START_OF_DATA       0x0001
+#define END_OF_DATA     0x0002
 
 /*
  * The output functions need a temporary buffer to hold a piece of the
@@ -402,5 +402,5 @@ extern int      h5tools_can_encode(H5Z_filter_t filtn);
 
 void            init_acc_pos(h5tools_context_t *ctx, hsize_t *dims);
 
-#endif	/* H5TOOLS_H__ */
+#endif  /* H5TOOLS_H__ */
 

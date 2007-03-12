@@ -93,7 +93,7 @@ int h5tools_canreadf(const char* name, /* object name, serves also as boolean pr
     return 0;
 
 /*-------------------------------------------------------------------------
- * H5Z_FILTER_DEFLATE	   1 , deflation like gzip
+ * H5Z_FILTER_DEFLATE      1 , deflation like gzip
  *-------------------------------------------------------------------------
  */
   case H5Z_FILTER_DEFLATE:
@@ -186,7 +186,7 @@ int h5tools_can_encode( H5Z_filter_t filtn)
 
   switch (filtn)
   {
-    /* user defined filter	   */
+    /* user defined filter     */
   default:
     return 0;
 

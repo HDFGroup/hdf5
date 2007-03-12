@@ -75,15 +75,15 @@ init_ref_path_table(hid_t fid)
 
     /* Create skip list to store reference path information */
     if((ref_path_table = H5SL_create(H5SL_TYPE_HADDR, 0.5, (size_t)16))==NULL)
-	return (-1);
+    return (-1);
 
     if((root_path = HDstrdup("/")) == NULL)
-	return (-1);
+    return (-1);
 
     if(H5Gget_objinfo(fid, "/", TRUE, &sb)<0) {
-	/* fatal error? */
-	HDfree(root_path);
-	return (-1);
+    /* fatal error? */
+    HDfree(root_path);
+    return (-1);
     }
 
     /* Insert into table (takes ownership of path) */
@@ -164,8 +164,8 @@ ref_path_table_lookup(const char *thepath)
 
     /* Get object ID for object at path */
     if(H5Gget_objinfo(thefile, thepath, TRUE, &sb)<0)
-	/*  fatal error ? */
-	return HADDR_UNDEF;
+    /*  fatal error ? */
+    return HADDR_UNDEF;
 
     /* Return OID or HADDR_UNDEF */
     objno = ((haddr_t)sb.objno[1] << (8*sizeof(long))) | (haddr_t)sb.objno[0];
@@ -300,10 +300,10 @@ lookup_ref_path(haddr_t ref)
 {
     uint8_t                *p;          /* Pointer to reference to translate */
     haddr_t                 addr;       /* Resulting address */
-    unsigned		    i;          /* Local index variable */
-    haddr_t		    tmp;        /* Temporary portion of address */
-    uint8_t		    c;          /* Byte from address */
-    hbool_t		    all_zero = TRUE;    /* If the address is all zeros, make into HADDR_UNDEF */
+    unsigned            i;          /* Local index variable */
+    haddr_t         tmp;        /* Temporary portion of address */
+    uint8_t         c;          /* Byte from address */
+    hbool_t         all_zero = TRUE;    /* If the address is all zeros, make into HADDR_UNDEF */
     ref_path_node_t        *node;       /* Ref path node found for address */
 
     /* Be safer for h5ls */
@@ -315,17 +315,17 @@ lookup_ref_path(haddr_t ref)
     addr = 0;
 
     for (i=0; i<sizeof(haddr_t); i++) {
-	c = *p++;
-	if (c != 0xff)
+    c = *p++;
+    if (c != 0xff)
             all_zero = FALSE;
 
-	if (i<sizeof(haddr_t)) {
-	    tmp = c;
-	    tmp <<= (i * 8);	/*use tmp to get casting right */
-	    addr |= tmp;
-	} else if (!all_zero) {
-	    assert(0 == *p);	/*overflow */
-	}
+    if (i<sizeof(haddr_t)) {
+        tmp = c;
+        tmp <<= (i * 8);    /*use tmp to get casting right */
+        addr |= tmp;
+    } else if (!all_zero) {
+        assert(0 == *p);    /*overflow */
+    }
     }
     if (all_zero)
         addr = HADDR_UNDEF;

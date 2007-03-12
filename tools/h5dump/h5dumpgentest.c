@@ -5071,8 +5071,8 @@ static void gent_string(void)
  c_t      buf3 = {24, "Four score and seven\n years ago our forefathers brought forth on this continent a new nation"};
  char     buf4[] = {"Four score and seven\n years ago our forefathers brought forth on this continent a new nation"};
  hsize_t  dims1[]  = {1};
- hsize_t		dims2[]  = {SPACE1_DIM1};
- hsize_t		dims4[1];
+ hsize_t        dims2[]  = {SPACE1_DIM1};
+ hsize_t        dims4[1];
  int      ret;
 
  dims4[0] = sizeof(buf4);
@@ -5243,9 +5243,9 @@ static void gent_aindices(void)
  */
 static void gent_longlinks(void)
 {
-    hid_t		fid = (-1);     /* File ID */
-    hid_t		gid = (-1);     /* Group ID */
-    hid_t		gid2 = (-1);    /* Datatype ID */
+    hid_t       fid = (-1);     /* File ID */
+    hid_t       gid = (-1);     /* Group ID */
+    hid_t       gid2 = (-1);    /* Datatype ID */
     char               *objname = NULL; /* Name of object [Long] */
     size_t              u;              /* Local index variable */
 
