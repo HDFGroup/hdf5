@@ -96,7 +96,7 @@ int attr_data2[ATTR2_DIM1][ATTR2_DIM2]={{7614,-416},{197814,-3}}; /* Test data f
 #define ATTR3_DIM1	2
 #define ATTR3_DIM2	2
 #define ATTR3_DIM3	2
-double attr_data3[ATTR3_DIM1][ATTR3_DIM2][ATTR3_DIM3]={{{2.3,-26.1},{0.123,-10.0}},{{981724.2,-0.91827},{2.0,23.0}}}; /* Test data for 3rd attribute */
+double attr_data3[ATTR3_DIM1][ATTR3_DIM2][ATTR3_DIM3]={{{2.3,-26.1},{0.123,-10.0}},{{973.23,-0.91827},{2.0,23.0}}}; /* Test data for 3rd attribute */
 
 #define ATTR4_NAME  "Attr4"
 #define ATTR4_RANK	2
@@ -495,7 +495,7 @@ test_attr_flush(hid_t fapl)
     ret=H5Aread(att, H5T_NATIVE_DOUBLE, &rdata);
     CHECK(ret, FAIL, "H5Awrite");
 
-    if(rdata!=0.0)
+    if(!DBL_ABS_EQUAL(rdata,0.0))
         TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n",rdata,0.0);
 
     ret=H5Fflush(fil, H5F_SCOPE_GLOBAL);
@@ -504,7 +504,7 @@ test_attr_flush(hid_t fapl)
     ret=H5Aread(att, H5T_NATIVE_DOUBLE, &rdata);
     CHECK(ret, FAIL, "H5Awrite");
 
-    if(rdata!=0.0)
+    if(!DBL_ABS_EQUAL(rdata,0.0))
         TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n",rdata,0.0);
 
     ret=H5Awrite(att, H5T_NATIVE_DOUBLE, &wdata);
@@ -513,7 +513,7 @@ test_attr_flush(hid_t fapl)
     ret=H5Aread(att, H5T_NATIVE_DOUBLE, &rdata);
     CHECK(ret, FAIL, "H5Awrite");
 
-    if(rdata!=wdata)
+    if(!DBL_ABS_EQUAL(rdata,wdata))
         TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n",rdata,wdata);
 
     ret=H5Sclose(spc);
@@ -980,8 +980,11 @@ test_attr_scalar_read(hid_t fapl)
     /* Read attribute information */
     ret=H5Aread(attr,H5T_NATIVE_FLOAT,&rdata);
     CHECK(ret, FAIL, "H5Aread");
-    VERIFY(rdata, attr_data5, "H5Aread");
-
+    /* Verify the floating-poing value in this way to avoid compiler warning. */
+    if(!FLT_ABS_EQUAL(rdata,attr_data5))
+	printf("*** UNEXPECTED VALUE from %s should be %f, but is %f at line %4d in %s\n",
+	    "H5Aread", attr_data5, rdata, (int)__LINE__, __FILE__);
+ 
     /* Get the attribute's dataspace */
     sid = H5Aget_space(attr);
     CHECK(sid, FAIL, "H5Aget_space");
@@ -1316,7 +1319,7 @@ test_attr_mult_read(hid_t fapl)
     for(i=0; i<ATTR3_DIM1; i++)
         for(j=0; j<ATTR3_DIM2; j++)
             for(k=0; k<ATTR3_DIM3; k++)
-                if(attr_data3[i][j][k]!=read_data3[i][j][k])
+                if(!DBL_ABS_EQUAL(attr_data3[i][j][k],read_data3[i][j][k]))
                     TestErrPrintf("%d: attribute data different: attr_data3[%d][%d][%d]=%f, read_data3[%d][%d][%d]=%f\n",__LINE__,i,j,k,attr_data3[i][j][k],i,j,k,read_data3[i][j][k]);
 
     /* Verify Name */

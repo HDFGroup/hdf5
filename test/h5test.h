@@ -128,7 +128,7 @@ extern MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
  *       It's the test's responsibility not to pass in the value 0, which 
  *       may cause the equation to fail.
  */
-#define FLT_ABS_EQUAL(X,Y)	(fabsf(X-Y)<FLT_EPSILON)
+#define FLT_ABS_EQUAL(X,Y)	((float)fabs(X-Y)<FLT_EPSILON)
 #define DBL_ABS_EQUAL(X,Y)	(fabs(X-Y)<DBL_EPSILON)
 #define LDBL_ABS_EQUAL(X,Y)	(fabsl(X-Y)<LDBL_EPSILON)
 
