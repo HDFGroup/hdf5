@@ -2862,9 +2862,10 @@ set_output_file(const char *fname, int is_bin)
 /*-------------------------------------------------------------------------
  * Function:    set_binary_form
  *
- * Purpose: 
+ * Purpose: set the binary form of output by translating from a string input
+ *          parameter to a integer return value
  *
- * Return:  
+ * Return: integer form of binary output or -1 if none found
  *
  * Programmer:  Pedro Vicente Nunes
  *             June 28, 2006
