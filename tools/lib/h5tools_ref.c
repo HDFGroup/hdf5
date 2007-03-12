@@ -75,15 +75,15 @@ init_ref_path_table(hid_t fid)
 
     /* Create skip list to store reference path information */
     if((ref_path_table = H5SL_create(H5SL_TYPE_HADDR, 0.5, (size_t)16))==NULL)
-	return (-1);
+    return (-1);
 
     if((root_path = HDstrdup("/")) == NULL)
-	return (-1);
+    return (-1);
 
     if(H5Gget_objinfo(fid, "/", TRUE, &sb)<0) {
-	/* fatal error? */
-	HDfree(root_path);
-	return (-1);
+    /* fatal error? */
+    HDfree(root_path);
+    return (-1);
     }
     objno = (haddr_t)sb.objno[0] | ((haddr_t)sb.objno[1] << (8 * sizeof(long)));
 
@@ -163,7 +163,7 @@ ref_path_table_lookup(const char *thepath)
 
     /* Check for external link first, so we don't return the OID of an object in another file */
     if(H5Gget_objinfo(thefile, thepath, FALSE, &sb)<0)
-	return HADDR_UNDEF;
+    return HADDR_UNDEF;
     if(sb.type == H5G_LINK) {
         /* Get object ID for object at path */
         /* (If the object is not a soft link, we've already retrieved the

@@ -17,7 +17,7 @@
 
 #include "hdf5.h"
 
-#define H5DUMP_MAX_RANK		H5S_MAX_RANK
+#define H5DUMP_MAX_RANK     H5S_MAX_RANK
 
 #define ATTRIBUTE_DATA  0
 #define DATASET_DATA    1

@@ -114,9 +114,9 @@ set_local_myfilter(hid_t dcpl_id, hid_t tid, hid_t UNUSED sid);
 /* This message derives from H5Z */
 const H5Z_class_t H5Z_MYFILTER[1] = {{
     H5Z_CLASS_T_VERS,
-    MYFILTER_ID,		       /* Filter id number		*/
+    MYFILTER_ID,               /* Filter id number      */
     1, 1,
-    "myfilter",			       /* Filter name for debugging	*/
+    "myfilter",                /* Filter name for debugging */
     NULL,                /* The "can apply" callback     */
     set_local_myfilter,  /* The "set local" callback     */
     myfilter,            /* The actual filter function */
@@ -5279,8 +5279,8 @@ static void gent_string(void)
  c_t      buf3 = {24, "Four score and seven\n years ago our forefathers brought forth on this continent a new nation"};
  char     buf4[] = {"Four score and seven\n years ago our forefathers brought forth on this continent a new nation"};
  hsize_t  dims1[]  = {1};
- hsize_t		dims2[]  = {SPACE1_DIM1};
- hsize_t		dims4[1];
+ hsize_t        dims2[]  = {SPACE1_DIM1};
+ hsize_t        dims4[1];
  int      ret;
 
  dims4[0] = sizeof(buf4);
@@ -5453,9 +5453,9 @@ static void gent_aindices(void)
  */
 static void gent_longlinks(void)
 {
-    hid_t		fid = (-1);     /* File ID */
-    hid_t		gid = (-1);     /* Group ID */
-    hid_t		gid2 = (-1);    /* Datatype ID */
+    hid_t       fid = (-1);     /* File ID */
+    hid_t       gid = (-1);     /* Group ID */
+    hid_t       gid2 = (-1);    /* Datatype ID */
     char               *objname = NULL; /* Name of object [Long] */
     size_t              u;              /* Local index variable */
 

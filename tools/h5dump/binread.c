@@ -40,7 +40,7 @@
  *
  * Return: void
  *
- * Programmer:	Pedro Vicente Nunes
+ * Programmer:  Pedro Vicente Nunes
  *
  * Modifications:
  *

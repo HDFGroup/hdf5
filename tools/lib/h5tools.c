@@ -101,10 +101,10 @@ void
 h5tools_init(void)
 {
     if (!h5tools_init_g) {
-	if (!rawdatastream)
-	    rawdatastream = stdout;
+    if (!rawdatastream)
+        rawdatastream = stdout;
 
-	h5tools_init_g++;
+    h5tools_init_g++;
     }
 }
 
@@ -128,12 +128,12 @@ void
 h5tools_close(void)
 {
     if (h5tools_init_g) {
-	if (rawdatastream && rawdatastream != stdout) {
-	    if (fclose(rawdatastream))
-		perror("closing rawdatastream");
-	    else
-		rawdatastream = NULL;
-	}
+    if (rawdatastream && rawdatastream != stdout) {
+        if (fclose(rawdatastream))
+        perror("closing rawdatastream");
+        else
+        rawdatastream = NULL;
+    }
 
         /* Clean up the reference path table, if it's been used */
         term_ref_path_table();
@@ -141,7 +141,7 @@ h5tools_close(void)
         /* Shut down the library */
         H5close();
 
-	h5tools_init_g = 0;
+    h5tools_init_g = 0;
     }
 }
 
@@ -217,24 +217,24 @@ h5tools_get_fapl(hid_t fapl, const char *driver, unsigned *drivernum)
 #ifdef H5_HAVE_PARALLEL
     } else if(!strcmp(driver, drivernames[MPIO_IDX])) {
         /* MPI-I/O Driver */
-	/* check if MPI has been initialized. */
-	if(!h5tools_mpi_init_g)
-	    MPI_Initialized(&h5tools_mpi_init_g);
+    /* check if MPI has been initialized. */
+    if(!h5tools_mpi_init_g)
+        MPI_Initialized(&h5tools_mpi_init_g);
         if(h5tools_mpi_init_g) {
             if(H5Pset_fapl_mpio(new_fapl, MPI_COMM_WORLD, MPI_INFO_NULL) < 0)
-		goto error;
+        goto error;
 
             if(drivernum)
                 *drivernum = MPIO_IDX;
         } /* end if */
     } else if (!strcmp(driver, drivernames[MPIPOSIX_IDX])) {
         /* MPI-I/O Driver */
-	/* check if MPI has been initialized. */
-	if(!h5tools_mpi_init_g)
-	    MPI_Initialized(&h5tools_mpi_init_g);
+    /* check if MPI has been initialized. */
+    if(!h5tools_mpi_init_g)
+        MPI_Initialized(&h5tools_mpi_init_g);
         if(h5tools_mpi_init_g) {
             if(H5Pset_fapl_mpiposix(new_fapl, MPI_COMM_WORLD, TRUE) < 0)
-		goto error;
+        goto error;
 
             if(drivernum)
                 *drivernum = MPIPOSIX_IDX;

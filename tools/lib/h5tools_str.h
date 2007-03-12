@@ -21,9 +21,9 @@
 #define H5TOOLS_STR_H__
 
 typedef struct h5tools_str_t {
-    char	*s;		/*allocate string		*/
-    size_t	len;		/*length of actual value	*/
-    size_t	nalloc;		/*allocated size of string	*/
+    char    *s;     /*allocate string       */
+    size_t  len;        /*length of actual value    */
+    size_t  nalloc;     /*allocated size of string  */
 } h5tools_str_t;
 
 extern void     h5tools_str_close(h5tools_str_t *str);

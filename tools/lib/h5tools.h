@@ -27,8 +27,8 @@
 #define ESCAPE_HTML             1
 #define OPT(X,S)                ((X) ? (X) : (S))
 #define OPTIONAL_LINE_BREAK     "\001"  /* Special strings embedded in the output */
-#define START_OF_DATA		0x0001
-#define END_OF_DATA		0x0002
+#define START_OF_DATA       0x0001
+#define END_OF_DATA     0x0002
 
 /*
  * The output functions need a temporary buffer to hold a piece of the
