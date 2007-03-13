@@ -504,8 +504,11 @@ New Features
 
     Tools:
     ------
+        - h5dump: added support for double long type H5T_NATIVE_LDOUBLE. PVN
+           2007/03/13
+        - h5dump: new options for binary output, see usage. PVN 2007/03/13
         - h5repack: added support for the new nbit and scaleoffset filters.
-          PVN - 2007/05/07
+           PVN - 2007/05/07
         - h5repack: now uses the API function H5Ocopy (of the tool h5copy) to
            recreate objects if there is not a user input for changes. PVN -
            2007/05/07
@@ -902,6 +905,12 @@ Bug Fixes since HDF5-1.6.0 release
 
     Tools
     -----
+        - Fixed a bug on h5dump regarding the display of named datatypes
+           attributes. PVN 2007/03/13
+        - Fixed a bug on h5dump regarding the display of group comments. PVN
+           2007/03/13
+        - Fixed a bug on h5dump regarding the display of hardlinks pointing 
+           to the root group. PVN 2007/03/13
         - Fixed a bug in the h5diff percentage option -p. PVN 2007/03/05
         - Fixed a bug in h5dump that caused array indices greater than 2 ^32-1
            not to be printed correctly - PVN 2007/2/19
