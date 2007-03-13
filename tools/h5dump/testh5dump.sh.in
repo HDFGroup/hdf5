@@ -301,6 +301,22 @@ TOOLTEST tbigdims.ddl -d dset4gb -s 4294967284 -c 22 tbigdims.h5
 # hyperslab read
 TOOLTEST thyperslab.ddl thyperslab.h5
 
+#
+
+# test for long double (some systems do not have long double)
+#TOOLTEST tldouble.ddl tldouble.h5
+
+# test for binary output
+TOOLTEST tbin1.ddl -d integer -o out1.bin -b LE     tbinary.h5
+TOOLTEST tbin2.ddl -d float   -o out2.bin -b BE     tbinary.h5
+TOOLTEST tbin3.ddl -d array   -o out3.bin -b MEMORY tbinary.h5
+TOOLTEST tbin4.ddl -d double  -o out4.bin -b FILE   tbinary.h5
+   # Clean up binary output files
+   if test -z "$HDF5_NOCLEANUP"; then
+      rm -f $srcdir/../testfiles/out[1-4].bin
+   fi
+
+
 
 if test $nerrors -eq 0 ; then
    echo "All $DUMPER tests passed."

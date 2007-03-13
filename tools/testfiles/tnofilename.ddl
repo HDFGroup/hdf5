@@ -7,19 +7,24 @@ usage: h5dump [OPTIONS] file
      -n, --contents       Print a list of the file contents and exit
      -B, --bootblock      Print the content of the boot block
      -H, --header         Print the header only; no data is displayed
-     -A                   Print the header and value of attributes; data of datasets is not displayed
+     -A, --onlyattr       Print the header and value of attributes; data 
+                          of datasets is not displayed
      -i, --object-ids     Print the object ids
      -r, --string         Print 1-byte integer datasets as ASCII
-     -e,                  Escape non printing characters
+     -e, --escape         Escape non printing characters
      -V, --version        Print version number and exit
      -a P, --attribute=P  Print the specified attribute
      -d P, --dataset=P    Print the specified dataset
-     -y                   Do not print array indices with the data
+     -y, --noindex        Do not print array indices with the data
      -p,   --properties   Print dataset filters, storage layout and fill value
      -f D, --filedriver=D Specify which driver to open the file with
      -g P, --group=P      Print the specified group and all members
      -l P, --soft-link=P  Print the value(s) of the specified soft link
      -o F, --output=F     Output raw data into file F
+     -b B, --binary=B     Binary file output, of form B. Recommended usage is
+                          with -o (output file) and -d (dataset). B can be:
+                          MEMORY for a memory type, FILE for the file type,
+                          LE or BE for pre-existing little or big endian types
      -t P, --datatype=P   Print the specified named data type
      -w N, --width=N      Set the number of columns of output
      -x, --xml            Output in XML using Schema
@@ -63,5 +68,9 @@ usage: h5dump [OPTIONS] file
   2) Selecting a subset from dataset /foo in file quux.h5
 
       h5dump -d /foo -s "0,1" -S "1,1" -c "2,3" -k "2,2" quux.h5
+
+  3) Saving dataset 'dset' in file quux.h5 to binary file 'out.bin' using a little-endian type 
+
+      h5dump -d /dset -b LE -o out.bin quux.h5
 
 h5dump error: missing file name

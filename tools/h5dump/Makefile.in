@@ -53,7 +53,7 @@ DISTCLEAN=testh5dump.sh
 
 ## Source and object files for programs...
 ##
-PROG_SRC=h5dump.c h5dumpgentest.c
+PROG_SRC=h5dump.c h5dumpgentest.c binread.c
 PROG_OBJ=$(PROG_SRC:.c=.lo)
 
 PRIVATE_HDR=h5dump.h
@@ -76,12 +76,15 @@ check-xml:
 ## How to build the programs...They all depend on the hdf5 library and
 ## the tools library compiled in this directory.
 ##
-$(PROGS): $(LIBTOOLS) $(LIBHDF5)
+$(PROGS): $(LIBTOOLS) $(LIBHDF5) binread
 
 h5dump: h5dump.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5dump.lo $(LIBTOOLS) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 h5dumpgentest: h5dumpgentest.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5dumpgentest.lo $(LIBTOOLS) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+
+binread: binread.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ binread.lo $(LDFLAGS) $(LIBS)
 
 @CONCLUDE@

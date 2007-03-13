@@ -1462,6 +1462,8 @@
 ./tools/h5dump/h5dumpgentest.c
 ./tools/h5dump/testh5dump.sh.in
 ./tools/h5dump/testh5dumpxml.sh
+./tools/h5dump/binread.c
+
 
 ./tools/h5import/Dependencies
 ./tools/h5import/Makefile.in
@@ -1719,6 +1721,12 @@
 ./tools/testfiles/tbigdims.ddl
 ./tools/testfiles/tbigdims.h5
 ./tools/testfiles/thyperslab.h5
+./tools/testfiles/tbinary.h5
+./tools/testfiles/tbin2.ddl
+./tools/testfiles/tbin3.ddl
+./tools/testfiles/tldouble.h5
+./tools/testfiles/tbin4.ddl
+./tools/testfiles/tbin1.ddl
 
 
 

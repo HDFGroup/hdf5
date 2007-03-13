@@ -375,6 +375,8 @@ struct subset_t {
 };
 
 extern FILE   *rawdatastream;       /*output stream for raw data            */
+extern int     bin_output;          /* binary output */
+extern int     bin_form;            /* binary form */
 
 /* Strings for output */
 #define GROUP           "GROUP"
@@ -391,6 +393,8 @@ extern int      h5tools_dump_dset(FILE *stream, const h5tool_format_t *info, hid
 extern int      h5tools_dump_mem(FILE *stream, const h5tool_format_t *info, hid_t obj_id,
                                  hid_t type, hid_t space, void *mem, int indentlevel);
 extern hid_t    h5tools_get_native_type(hid_t type);
+extern hid_t    h5tools_get_little_endian_type(hid_t type);
+extern hid_t    h5tools_get_big_endian_type(hid_t type);
 
 extern void     h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t container,
                          h5tools_context_t *ctx/*in,out*/, unsigned flags,

@@ -352,7 +352,7 @@ struct handler_t {
  * parameters. The long-named ones can be partially spelled. When
  * adding more, make sure that they don't clash with each other.
  */
-static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:s:S:A";
+static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b:F:s:S:A";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
@@ -457,6 +457,11 @@ static struct long_options l_opts[] = {
     { "xml-n", require_arg, 'X' },
     { "xml", no_arg, 'x' },
     { "xm", no_arg, 'x' },
+    { "onlyattr", no_arg, 'A' },
+    { "escape", no_arg, 'e' },
+    { "noindex", no_arg, 'y' },
+    { "binary", require_arg, 'b' },
+    { "form", require_arg, 'F' },
     { NULL, 0, '\0' }
 };
 
@@ -588,19 +593,24 @@ usage(const char *prog)
     fprintf(stdout, "     -n, --contents       Print a list of the file contents and exit\n");
     fprintf(stdout, "     -B, --bootblock      Print the content of the boot block\n");
     fprintf(stdout, "     -H, --header         Print the header only; no data is displayed\n");
-    fprintf(stdout, "     -A                   Print the header and value of attributes; data of datasets is not displayed\n");
+    fprintf(stdout, "     -A, --onlyattr       Print the header and value of attributes; data \n");
+    fprintf(stdout, "                          of datasets is not displayed\n");
     fprintf(stdout, "     -i, --object-ids     Print the object ids\n");
     fprintf(stdout, "     -r, --string         Print 1-byte integer datasets as ASCII\n");
-    fprintf(stdout, "     -e,                  Escape non printing characters\n");
+    fprintf(stdout, "     -e, --escape         Escape non printing characters\n");
     fprintf(stdout, "     -V, --version        Print version number and exit\n");
     fprintf(stdout, "     -a P, --attribute=P  Print the specified attribute\n");
     fprintf(stdout, "     -d P, --dataset=P    Print the specified dataset\n");
-    fprintf(stdout, "     -y                   Do not print array indices with the data\n");
+    fprintf(stdout, "     -y, --noindex        Do not print array indices with the data\n");
     fprintf(stdout, "     -p,   --properties   Print dataset filters, storage layout and fill value\n");
     fprintf(stdout, "     -f D, --filedriver=D Specify which driver to open the file with\n");
     fprintf(stdout, "     -g P, --group=P      Print the specified group and all members\n");
     fprintf(stdout, "     -l P, --soft-link=P  Print the value(s) of the specified soft link\n");
     fprintf(stdout, "     -o F, --output=F     Output raw data into file F\n");
+    fprintf(stdout, "     -b B, --binary=B     Binary file output, of form B. Recommended usage is\n");
+    fprintf(stdout, "                          with -o (output file) and -d (dataset). B can be:\n");
+    fprintf(stdout, "                          MEMORY for a memory type, FILE for the file type,\n");
+    fprintf(stdout, "                          LE or BE for pre-existing little or big endian types\n");
     fprintf(stdout, "     -t P, --datatype=P   Print the specified named data type\n");
     fprintf(stdout, "     -w N, --width=N      Set the number of columns of output\n");
     fprintf(stdout, "     -x, --xml            Output in XML using Schema\n");
@@ -645,6 +655,10 @@ usage(const char *prog)
     fprintf(stdout, "\n");
     fprintf(stdout, "      h5dump -d /foo -s \"0,1\" -S \"1,1\" -c \"2,3\" -k \"2,2\" quux.h5\n");
     fprintf(stdout, "\n");
+    fprintf(stdout, "  3) Saving dataset 'dset' in file quux.h5 to binary file 'out.bin' using a little-endian type \n");
+    fprintf(stdout, "\n");
+    fprintf(stdout, "      h5dump -d /dset -b LE -o out.bin quux.h5\n");
+    fprintf(stdout, "\n");
 }
 
 /*-------------------------------------------------------------------------
@@ -656,31 +670,36 @@ usage(const char *prog)
  *
  * Programmer:  Ruey-Hsia Li
  *
- * Modifications:
+ * Modifications: pvn, March 28, 2006
+ *  print information about type when a native match is not possible
  *
  *-------------------------------------------------------------------------
  */
+
 static void
 print_datatype(hid_t type,unsigned in_group)
 {
-    char       *fname;
+    char       *mname;
     hid_t       mtype, str_type;
     unsigned    nmembers;
-    int         perm[H5DUMP_MAX_RANK];
     unsigned    ndims;
     unsigned    i;
     size_t      size=0;
     hsize_t     dims[H5DUMP_MAX_RANK];
     H5T_str_t   str_pad;
     H5T_cset_t  cset;
-    H5G_stat_t  statbuf;
     H5T_order_t order;
     hid_t       super;
     hid_t       tmp_type;
     htri_t      is_vlstr=FALSE;
+    const char  *order_s=NULL;  /* byte order string */
+    H5T_sign_t  sign;           /* sign scheme value */
+    const char  *sign_s=NULL;   /* sign scheme string */
+
 
     if (!in_group && H5Tcommitted(type) > 0) {
         obj_t  *obj;    /* Found object */
+        H5G_stat_t  statbuf;
 
         H5Gget_objinfo(type, ".", TRUE, &statbuf);
         obj = search_obj(type_table, statbuf.objno);
@@ -706,82 +725,137 @@ print_datatype(hid_t type,unsigned in_group)
     } else {
         switch (H5Tget_class(type)) {
         case H5T_INTEGER:
-            if (H5Tequal(type, H5T_STD_I8BE)) {
+            if (H5Tequal(type, H5T_STD_I8BE)==TRUE) {
                 printf("H5T_STD_I8BE");
-            } else if (H5Tequal(type, H5T_STD_I8LE)) {
+            } else if (H5Tequal(type, H5T_STD_I8LE)==TRUE) {
                 printf("H5T_STD_I8LE");
-            } else if (H5Tequal(type, H5T_STD_I16BE)) {
+            } else if (H5Tequal(type, H5T_STD_I16BE)==TRUE) {
                 printf("H5T_STD_I16BE");
-            } else if (H5Tequal(type, H5T_STD_I16LE)) {
+            } else if (H5Tequal(type, H5T_STD_I16LE)==TRUE) {
                 printf("H5T_STD_I16LE");
-            } else if (H5Tequal(type, H5T_STD_I32BE)) {
+            } else if (H5Tequal(type, H5T_STD_I32BE)==TRUE) {
                 printf("H5T_STD_I32BE");
-            } else if (H5Tequal(type, H5T_STD_I32LE)) {
+            } else if (H5Tequal(type, H5T_STD_I32LE)==TRUE) {
                 printf("H5T_STD_I32LE");
-            } else if (H5Tequal(type, H5T_STD_I64BE)) {
+            } else if (H5Tequal(type, H5T_STD_I64BE)==TRUE) {
                 printf("H5T_STD_I64BE");
-            } else if (H5Tequal(type, H5T_STD_I64LE)) {
+            } else if (H5Tequal(type, H5T_STD_I64LE)==TRUE) {
                 printf("H5T_STD_I64LE");
-            } else if (H5Tequal(type, H5T_STD_U8BE)) {
+            } else if (H5Tequal(type, H5T_STD_U8BE)==TRUE) {
                 printf("H5T_STD_U8BE");
-            } else if (H5Tequal(type, H5T_STD_U8LE)) {
+            } else if (H5Tequal(type, H5T_STD_U8LE)==TRUE) {
                 printf("H5T_STD_U8LE");
-            } else if (H5Tequal(type, H5T_STD_U16BE)) {
+            } else if (H5Tequal(type, H5T_STD_U16BE)==TRUE) {
                 printf("H5T_STD_U16BE");
-            } else if (H5Tequal(type, H5T_STD_U16LE)) {
+            } else if (H5Tequal(type, H5T_STD_U16LE)==TRUE) {
                 printf("H5T_STD_U16LE");
-            } else if (H5Tequal(type, H5T_STD_U32BE)) {
+            } else if (H5Tequal(type, H5T_STD_U32BE)==TRUE) {
                 printf("H5T_STD_U32BE");
-            } else if (H5Tequal(type, H5T_STD_U32LE)) {
+            } else if (H5Tequal(type, H5T_STD_U32LE)==TRUE) {
                 printf("H5T_STD_U32LE");
-            } else if (H5Tequal(type, H5T_STD_U64BE)) {
+            } else if (H5Tequal(type, H5T_STD_U64BE)==TRUE) {
                 printf("H5T_STD_U64BE");
-            } else if (H5Tequal(type, H5T_STD_U64LE)) {
+            } else if (H5Tequal(type, H5T_STD_U64LE)==TRUE) {
                 printf("H5T_STD_U64LE");
-            } else if (H5Tequal(type, H5T_NATIVE_SCHAR)) {
+            } else if (H5Tequal(type, H5T_NATIVE_SCHAR)==TRUE) {
                 printf("H5T_NATIVE_SCHAR");
-            } else if (H5Tequal(type, H5T_NATIVE_UCHAR)) {
+            } else if (H5Tequal(type, H5T_NATIVE_UCHAR)==TRUE) {
                 printf("H5T_NATIVE_UCHAR");
-            } else if (H5Tequal(type, H5T_NATIVE_SHORT)) {
+            } else if (H5Tequal(type, H5T_NATIVE_SHORT)==TRUE) {
                 printf("H5T_NATIVE_SHORT");
-            } else if (H5Tequal(type, H5T_NATIVE_USHORT)) {
+            } else if (H5Tequal(type, H5T_NATIVE_USHORT)==TRUE) {
                 printf("H5T_NATIVE_USHORT");
-            } else if (H5Tequal(type, H5T_NATIVE_INT)) {
+            } else if (H5Tequal(type, H5T_NATIVE_INT)==TRUE) {
                 printf("H5T_NATIVE_INT");
-            } else if (H5Tequal(type, H5T_NATIVE_UINT)) {
+            } else if (H5Tequal(type, H5T_NATIVE_UINT)==TRUE) {
                 printf("H5T_NATIVE_UINT");
-            } else if (H5Tequal(type, H5T_NATIVE_LONG)) {
+            } else if (H5Tequal(type, H5T_NATIVE_LONG)==TRUE) {
                 printf("H5T_NATIVE_LONG");
-            } else if (H5Tequal(type, H5T_NATIVE_ULONG)) {
+            } else if (H5Tequal(type, H5T_NATIVE_ULONG)==TRUE) {
                 printf("H5T_NATIVE_ULONG");
-            } else if (H5Tequal(type, H5T_NATIVE_LLONG)) {
+            } else if (H5Tequal(type, H5T_NATIVE_LLONG)==TRUE) {
                 printf("H5T_NATIVE_LLONG");
-            } else if (H5Tequal(type, H5T_NATIVE_ULLONG)) {
+            } else if (H5Tequal(type, H5T_NATIVE_ULLONG)==TRUE) {
                 printf("H5T_NATIVE_ULLONG");
             } else {
-                printf("undefined integer");
-                d_status = EXIT_FAILURE;
+
+             /* byte order */
+             if (H5Tget_size(type)>1)
+             {
+              order = H5Tget_order(type);
+              if (H5T_ORDER_LE==order) {
+               order_s = " little-endian";
+              } else if (H5T_ORDER_BE==order) {
+               order_s = " big-endian";
+              } else if (H5T_ORDER_VAX==order) {
+               order_s = " mixed-endian";
+              } else {
+               order_s = " unknown-byte-order";
+              }
+             } else {
+              order_s = "";
+             }
+
+             /* sign */
+             if ((sign=H5Tget_sign(type))>=0)
+             {
+              if (H5T_SGN_NONE==sign) {
+               sign_s = " unsigned";
+              } else if (H5T_SGN_2==sign) {
+               sign_s = "";
+              } else {
+               sign_s = " unknown-sign";
+              }
+             } else {
+              sign_s = " unknown-sign";
+             }
+
+             /* print size, order, and sign  */
+             printf("%lu-bit%s%s integer",
+              (unsigned long)(8*H5Tget_size(type)), order_s, sign_s);
             }
             break;
 
         case H5T_FLOAT:
-            if (H5Tequal(type, H5T_IEEE_F32BE)) {
+            if (H5Tequal(type, H5T_IEEE_F32BE)==TRUE) {
                 printf("H5T_IEEE_F32BE");
-            } else if (H5Tequal(type, H5T_IEEE_F32LE)) {
+            } else if (H5Tequal(type, H5T_IEEE_F32LE)==TRUE) {
                 printf("H5T_IEEE_F32LE");
-            } else if (H5Tequal(type, H5T_IEEE_F64BE)) {
+            } else if (H5Tequal(type, H5T_IEEE_F64BE)==TRUE) {
                 printf("H5T_IEEE_F64BE");
-            } else if (H5Tequal(type, H5T_IEEE_F64LE)) {
+            } else if (H5Tequal(type, H5T_IEEE_F64LE)==TRUE) {
                 printf("H5T_IEEE_F64LE");
-            } else if (H5Tequal(type, H5T_NATIVE_FLOAT)) {
+            } else if (H5Tequal(type, H5T_NATIVE_FLOAT)==TRUE) {
                 printf("H5T_NATIVE_FLOAT");
-            } else if (H5Tequal(type, H5T_NATIVE_DOUBLE)) {
+            } else if (H5Tequal(type, H5T_NATIVE_DOUBLE)==TRUE) {
                 printf("H5T_NATIVE_DOUBLE");
-            } else if (H5Tequal(type, H5T_NATIVE_LDOUBLE)) {
+#if H5_SIZEOF_LONG_DOUBLE !=0
+            } else if (H5Tequal(type, H5T_NATIVE_LDOUBLE)==TRUE) {
                 printf("H5T_NATIVE_LDOUBLE");
+#endif
             } else {
-                printf("undefined float");
-                d_status = EXIT_FAILURE;
+
+             /* byte order */
+             if (H5Tget_size(type)>1)
+             {
+              order = H5Tget_order(type);
+              if (H5T_ORDER_LE==order) {
+               order_s = " little-endian";
+              } else if (H5T_ORDER_BE==order) {
+               order_s = " big-endian";
+              } else if (H5T_ORDER_VAX==order) {
+               order_s = " mixed-endian";
+              } else {
+               order_s = " unknown-byte-order";
+              }
+             } else {
+              order_s = "";
+             }
+
+             /* print size and byte order */
+             printf("%lu-bit%s floating-point",
+              (unsigned long)(8*H5Tget_size(type)), order_s);
+
             }
             break;
 
@@ -895,21 +969,21 @@ done:
             break;
 
         case H5T_BITFIELD:
-            if (H5Tequal(type, H5T_STD_B8BE)) {
+            if (H5Tequal(type, H5T_STD_B8BE)==TRUE) {
                 printf("H5T_STD_B8BE");
-            } else if (H5Tequal(type, H5T_STD_B8LE)) {
+            } else if (H5Tequal(type, H5T_STD_B8LE)==TRUE) {
                 printf("H5T_STD_B8LE");
-            } else if (H5Tequal(type, H5T_STD_B16BE)) {
+            } else if (H5Tequal(type, H5T_STD_B16BE)==TRUE) {
                 printf("H5T_STD_B16BE");
-            } else if (H5Tequal(type, H5T_STD_B16LE)) {
+            } else if (H5Tequal(type, H5T_STD_B16LE)==TRUE) {
                 printf("H5T_STD_B16LE");
-            } else if (H5Tequal(type, H5T_STD_B32BE)) {
+            } else if (H5Tequal(type, H5T_STD_B32BE)==TRUE) {
                 printf("H5T_STD_B32BE");
-            } else if (H5Tequal(type, H5T_STD_B32LE)) {
+            } else if (H5Tequal(type, H5T_STD_B32LE)==TRUE) {
                 printf("H5T_STD_B32LE");
-            } else if (H5Tequal(type, H5T_STD_B64BE)) {
+            } else if (H5Tequal(type, H5T_STD_B64BE)==TRUE) {
                 printf("H5T_STD_B64BE");
-            } else if (H5Tequal(type, H5T_STD_B64LE)) {
+            } else if (H5Tequal(type, H5T_STD_B64LE)==TRUE) {
                 printf("H5T_STD_B64LE");
             } else {
                 printf("undefined bitfield");
@@ -931,7 +1005,7 @@ done:
             printf("H5T_COMPOUND %s\n", dump_header_format->structblockbegin);
 
             for (i = 0; i < nmembers; i++) {
-                fname = H5Tget_member_name(type, i);
+                mname = H5Tget_member_name(type, i);
                 mtype = H5Tget_member_type(type, i);
                 indentation(indent + COL);
 
@@ -943,8 +1017,8 @@ done:
                 if (H5Tget_class(mtype) == H5T_COMPOUND)
                     indent -= COL;
 
-                printf(" \"%s\";\n", fname);
-                free(fname);
+                printf(" \"%s\";\n", mname);
+                free(mname);
             }
 
             indentation(indent);
@@ -987,7 +1061,7 @@ done:
 
             /* Get array information */
             ndims = H5Tget_array_ndims(type);
-            H5Tget_array_dims(type, dims, perm);
+            H5Tget_array_dims(type, dims, NULL);
 
             /* Print array dimensions */
             for (i = 0; i < ndims; i++)
@@ -1606,26 +1680,33 @@ done:
  *
  * Programmer:  Ruey-Hsia Li
  *
- * Modifications: Comments: not yet implemented.
+ * Modifications: pvn March 27, 2006
+ *  add printing of attributes
  *
  *-------------------------------------------------------------------------
  */
 static void
 dump_named_datatype(hid_t type, const char *name)
 {
-    indentation(indent);
-    printf("%s \"%s\" %s", dump_header_format->datatypebegin, name,
-       dump_header_format->datatypeblockbegin);
+ indentation(indent);
+ printf("%s \"%s\" %s", dump_header_format->datatypebegin, name,
+  dump_header_format->datatypeblockbegin);
 
-    if (H5Tget_class(type) == H5T_COMPOUND) {
-    print_datatype(type,1);
-    } else {
-    indentation(indent + COL);
-    print_datatype(type,1);
-    printf(";\n");
-    }
-    end_obj(dump_header_format->datatypeend,
-        dump_header_format->datatypeblockend);
+ if (H5Tget_class(type) == H5T_COMPOUND) {
+  print_datatype(type,1);
+ } else {
+  indentation(indent + COL);
+  print_datatype(type,1);
+  printf(";\n");
+ }
+
+ /* print attributes */
+ indent += COL;
+ H5Aiterate(type, NULL, dump_attr, NULL);
+ indent -= COL;
+
+ end_obj(dump_header_format->datatypeend,
+  dump_header_format->datatypeblockend);
 }
 
 /*-------------------------------------------------------------------------
@@ -1894,7 +1975,7 @@ dump_subsetting_header(struct subset_t *sset, int dims)
  *-------------------------------------------------------------------------
  */
 static void
-dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int pindex)
+dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
 {
     h5tool_format_t   *outputformat = &dataformat;
     int         status = -1;
@@ -1909,7 +1990,7 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int pindex)
     outputformat->line_ncols = nCols;
     outputformat->do_escape=display_escape;
     /* print the matrix indices */
-    outputformat->pindex=pindex;
+    outputformat->pindex=display_index;
     if (outputformat->pindex) {
         outputformat->idx_fmt   = "(%s): ";
         outputformat->idx_n_fmt = HSIZE_T_FORMAT;
@@ -2610,21 +2691,72 @@ static void dump_fcontents(hid_t fid)
  * Programmer:  Albert Cheng, 2000/09/30
  *
  * Modifications:
+ *  pvn June, 1, 2006. Add a switch for binary output
  *
  *-------------------------------------------------------------------------
  */
 static int
-set_output_file(const char *fname)
+set_output_file(const char *fname, int is_bin)
 {
-    FILE    *f; /* temporary holding place for the stream pointer
-                 * so that rawdatastream is changed only when succeeded */
+ FILE    *f;    /* temporary holding place for the stream pointer
+* so that rawdatastream is changed only when succeeded */
 
-    if ((f = fopen(fname, "w")) != NULL) {
-    rawdatastream = f;
-    return 0;
-    }
+ if (rawdatastream && rawdatastream != stdout) {
+  if (fclose(rawdatastream))
+   perror("closing rawdatastream");
+  else
+   rawdatastream = NULL;
+ }
 
-    return -1;
+ /* binary output */
+ if (is_bin)
+ {
+  if ((f = fopen(fname, "wb")) != NULL) {
+   rawdatastream = f;
+   return 0;
+  }
+ }
+ else
+ {
+  if ((f = fopen(fname, "w")) != NULL) {
+   rawdatastream = f;
+   return 0;
+  }
+ }
+
+ return -1;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    set_binary_form
+ *
+ * Purpose: set the binary form of output by translating from a string input
+ *          parameter to a integer return value
+ *
+ * Return: integer form of binary output or -1 if none found
+ *
+ * Programmer:  Pedro Vicente Nunes
+ *             June 28, 2006
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+set_binary_form(const char *form)
+{
+ int bform=-1;
+
+ if (strcmp(form,"MEMORY")==0) /* native form */
+  bform = 0;
+ else if (strcmp(form,"FILE")==0) /* file type form */
+  bform = 1;
+ else if (strcmp(form,"LE")==0) /* convert to little endian */
+  bform = 2;
+ else if (strcmp(form,"BE")==0) /* convert to big endian */
+  bform = 3;
+
+ return bform;
 }
 
 /*-------------------------------------------------------------------------
@@ -3062,6 +3194,7 @@ handle_datatypes(hid_t fid, char *type, void UNUSED * data)
  *              Tuesday, 20. February 2001
  *
  * Modifications:
+ *  pvn June, 1, 2006. Add a switch for binary output
  *
  *-------------------------------------------------------------------------
  */
@@ -3070,6 +3203,10 @@ parse_command_line(int argc, const char *argv[])
 {
     struct handler_t   *hand, *last_dset = NULL;
     int                 i, opt, last_was_dset = FALSE;
+
+    /* some logic to handle both -o and -b order */
+    const char          *outfname=NULL;
+    bin_form = -1;
 
     /* this will be plenty big enough to hold the info */
     hand = calloc((size_t)argc, sizeof(struct handler_t));
@@ -3185,16 +3322,48 @@ parse_start:
 
             last_was_dset = FALSE;
             break;
-        case 'o':
-            if (set_output_file(opt_arg) < 0){
-                /* failed to set output file */
-                usage(progname);
-                leave(EXIT_FAILURE);
-            }
 
-            usingdasho = TRUE;
-            last_was_dset = FALSE;
-            break;
+        case 'o':
+         
+         if (bin_form > 0 )
+         {
+          if (set_output_file(opt_arg, 1) < 0){
+           usage(progname);
+           leave(EXIT_FAILURE);
+          }
+         }
+         else
+         {
+          if (set_output_file(opt_arg, 0) < 0){
+           usage(progname);
+           leave(EXIT_FAILURE);
+          }
+         }
+      
+         usingdasho = TRUE;
+         last_was_dset = FALSE;
+         outfname = opt_arg;
+         break;
+
+       case 'b':
+            
+        if ( ( bin_form = set_binary_form(opt_arg)) < 0){
+         /* failed to set binary form */
+         usage(progname);
+         leave(EXIT_FAILURE);
+        }
+        if (outfname!=NULL) {
+         if (set_output_file(outfname, 1) < 0){
+          /* failed to set output file */
+          usage(progname);
+          leave(EXIT_FAILURE);
+         }
+         
+         bin_output = TRUE;
+         last_was_dset = FALSE;
+        }
+        
+        break;
 
         /** begin XML parameters **/
         case 'x':

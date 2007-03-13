@@ -47,6 +47,8 @@
 
 static char    *h5tools_escape(char *s, size_t size);
 static hbool_t  h5tools_is_zero(const void *_mem, size_t size);
+static void     h5tools_print_char(h5tools_str_t *str, const h5tool_format_t *info, char ch);
+
 
 /*-------------------------------------------------------------------------
  * Function:    h5tools_str_close
@@ -340,7 +342,7 @@ h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info,
                 h5tools_str_append(str, "%s", OPT(info->idx_sep, ","));
 
             h5tools_str_append(str, OPT(info->idx_n_fmt, HSIZE_T_FORMAT),
-                               ctx->pos[i]);
+                               (hsize_t)ctx->pos[i]);
         }
     } else {
         /* Scalar */
@@ -465,69 +467,70 @@ h5tools_str_dump_region(h5tools_str_t *str, hid_t region, const h5tool_format_t 
  *
  *-------------------------------------------------------------------------
  */
-void
-h5tools_print_char(h5tools_str_t *str, const h5tool_format_t *info, unsigned char ch)
+
+static void
+h5tools_print_char(h5tools_str_t *str, const h5tool_format_t *info, char ch)
 {
     if (info->str_locale == ESCAPE_HTML) {
         if (ch <= ' ' || ch > '~')
             h5tools_str_append(str, "%%%02x", ch);
         else
-            h5tools_str_append(str, "%c", (char)ch);
+            h5tools_str_append(str, "%c", ch);
     } else {
         switch (ch) {
-        case '"':
-           if (!info->do_escape)
-            h5tools_str_append(str, "\"");
-           else
-            h5tools_str_append(str, "\\\"");
-            break;
-        case '\\':
-          if (!info->do_escape)
-            h5tools_str_append(str, "\\");
-          else
-            h5tools_str_append(str, "\\\\");
-            break;
-        case '\b':
-           if (!info->do_escape)
-            h5tools_str_append(str, "\b");
-           else
-            h5tools_str_append(str, "\\b");
-            break;
-        case '\f':
-           if (!info->do_escape)
-             h5tools_str_append(str, "\f");
-           else
-             h5tools_str_append(str, "\\f");
-            break;
-        case '\n':
-           if (!info->do_escape) {
-             h5tools_str_append(str, "\n");
-             h5tools_str_append(str, "           ");
-           }
-           else
-            h5tools_str_append(str, "\\n");
-         break;
-        case '\r':
-         if (!info->do_escape) {
-           h5tools_str_append(str, "\r");
-           h5tools_str_append(str, "           ");
-         }
-          else
-            h5tools_str_append(str, "\\r");
-            break;
-        case '\t':
-          if (!info->do_escape)
-           h5tools_str_append(str, "\t");
-          else
-           h5tools_str_append(str, "\\t");
-            break;
-        default:
-            if (isprint(ch))
-                h5tools_str_append(str, "%c", (char)ch);
-            else
-                h5tools_str_append(str, "\\%03o", ch);
+            case '"':
+               if (!info->do_escape)
+                h5tools_str_append(str, "\"");
+               else
+                h5tools_str_append(str, "\\\"");
+                break;
+            case '\\':
+              if (!info->do_escape)
+                h5tools_str_append(str, "\\");
+              else
+                h5tools_str_append(str, "\\\\");
+                break;
+            case '\b':
+               if (!info->do_escape)
+                h5tools_str_append(str, "\b");
+               else
+                h5tools_str_append(str, "\\b");
+                break;
+            case '\f':
+               if (!info->do_escape)
+                 h5tools_str_append(str, "\f");
+               else
+                 h5tools_str_append(str, "\\f");
+                break;
+            case '\n':
+               if (!info->do_escape) {
+                 h5tools_str_append(str, "\n");
+                 h5tools_str_append(str, "           ");
+               }
+               else
+                h5tools_str_append(str, "\\n");
+             break;
+            case '\r':
+             if (!info->do_escape) {
+               h5tools_str_append(str, "\r");
+               h5tools_str_append(str, "           ");
+             }
+              else
+                h5tools_str_append(str, "\\r");
+                break;
+            case '\t':
+              if (!info->do_escape)
+               h5tools_str_append(str, "\t");
+              else
+               h5tools_str_append(str, "\\t");
+                break;
+            default:
+                if (isprint(ch))
+                    h5tools_str_append(str, "%c", ch);
+                else
+                    h5tools_str_append(str, "\\%03o", ch);
 
-            break;
+                break;
         }
     }
 }
@@ -557,15 +560,18 @@ h5tools_print_char(h5tools_str_t *str, const h5tool_format_t *info, unsigned cha
  *      Added support for printing raw data. If info->raw is non-zero
  *      then data is printed in hexadecimal format.
  *
- *              Robb Matzke, 2003-01-10
- *              Binary output format is dd:dd:... instead of 0xdddd... so it
- *              doesn't look like a hexadecimal integer, and thus users will
- *              be less likely to complain that HDF5 didn't properly byte
- *              swap their data during type conversion.
+ *  Robb Matzke, 2003-01-10
+ *  Binary output format is dd:dd:... instead of 0xdddd... so it
+ *  doesn't look like a hexadecimal integer, and thus users will
+ *  be less likely to complain that HDF5 didn't properly byte
+ *  swap their data during type conversion.
  *
- *              Robb Matzke, LLNL, 2003-06-05
- *              If TYPE is a variable length string then the pointer to
- *              the value to pring (VP) is a pointer to a `char*'.
+ *  Robb Matzke, LLNL, 2003-06-05
+ *  If TYPE is a variable length string then the pointer to
+ *  the value to pring (VP) is a pointer to a `char*'.
+ *
+ *  PVN, 28 March 2006
+ *  added H5T_NATIVE_LDOUBLE case
  *-------------------------------------------------------------------------
  */
 char *
@@ -597,6 +603,9 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
     int                tempint;
     unsigned short     tempushort;
     short              tempshort;
+#if H5_SIZEOF_LONG_DOUBLE !=0
+    long double        templdouble;
+#endif
 
     /* Build default formats for long long types */
     if (!fmt_llong[0]) {
@@ -624,9 +633,14 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
     } else if (H5Tequal(type, H5T_NATIVE_DOUBLE)) {
         memcpy(&tempdouble, vp, sizeof(double));
         h5tools_str_append(str, OPT(info->fmt_double, "%g"), tempdouble);
+#if H5_SIZEOF_LONG_DOUBLE !=0
+    } else if (H5Tequal(type, H5T_NATIVE_LDOUBLE)) {
+      memcpy(&templdouble, vp, sizeof(long double));
+      h5tools_str_append(str, "%Lf", templdouble);
+#endif
     } else if (info->ascii && (H5Tequal(type, H5T_NATIVE_SCHAR) ||
                                H5Tequal(type, H5T_NATIVE_UCHAR))) {
-        h5tools_print_char(str, info, (unsigned char)(*ucp_vp));
+        h5tools_print_char(str, info, (char)(*ucp_vp));
     } else if (H5T_STRING == H5Tget_class(type)) {
         unsigned int i;
         char quote = '\0';
@@ -680,7 +694,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                 }
 
                 /* Print the character */
-                h5tools_print_char(str, info, (unsigned char)(s[i]));
+                h5tools_print_char(str, info, s[i]);
 
                 /* Print the repeat count */
                 if (info->str_repeat && j > info->str_repeat) {

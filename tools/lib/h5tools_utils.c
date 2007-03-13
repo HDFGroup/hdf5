@@ -598,6 +598,30 @@ init_objs(hid_t fid, find_objs_t *info, table_t **group_table,
     info->type_table = *type_table;
     info->dset_table = *dset_table;
 
+    {
+     /* add the root group as an object, it may have hard links to it */
+     
+     H5G_stat_t statbuf;
+     unsigned long   objno[2];   /*object number         */
+     char*      tmp;
+     
+     if(H5Gget_objinfo(fid, "/", FALSE, &statbuf) < 0)
+         return FAIL;
+     else 
+     {
+         objno[0] = (unsigned long)(statbuf.objno[0]);
+#if H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG
+         objno[1] = (unsigned long)(statbuf.objno[1] >> 8*sizeof(long));
+#else /* H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG */
+         objno[1] = 0;
+#endif /* H5_SIZEOF_UINT64_T>H5_SIZEOF_LONG */
+
+         /* call with an empty string, it appends group separator */
+         tmp = build_obj_path_name(info->prefix, "");
+         add_obj(info->group_table, objno, tmp, TRUE);
+     }
+    }
+
     /* Find all shared objects */
     return(H5Giterate(fid, "/", NULL, find_objs_cb, (void *)info));
 }

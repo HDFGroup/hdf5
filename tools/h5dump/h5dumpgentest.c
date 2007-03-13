@@ -451,7 +451,11 @@ static void gent_hardlink(void)
     group = H5Gopen(fid, "/g1");
     H5Glink (group, H5G_LINK_HARD, "/g2", "g1.1");
     H5Gclose(group);
+    
+     /* create a link to the root group */
+    H5Glink (fid, H5G_LINK_HARD, "/", "g3");
     H5Fclose(fid);
+
 }
 
 /*
@@ -5284,6 +5288,136 @@ static void gent_longlinks(void)
     HDfree(objname);
 }
 
+/*-------------------------------------------------------------------------
+ * Function: gent_ldouble
+ *
+ * Purpose: make file with a long double dataset
+ *
+ *-------------------------------------------------------------------------
+ */
+static int gent_ldouble(void)
+{
+ hid_t       fid;
+ hid_t       did;
+ hid_t       tid;
+ hid_t       sid;
+ size_t      size;
+ hsize_t     dims[1] = {3};
+ long double buf[3] = {1,2,3};
+
+ if ((fid = H5Fcreate(FILE52, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0)
+  goto error;
+
+ if ((sid = H5Screate_simple(1, dims, NULL))<0)
+  goto error;
+
+ if ((tid = H5Tcopy(H5T_NATIVE_LDOUBLE))<0)
+  goto error;
+
+ if ((size = H5Tget_size(tid))==0)
+  goto error;
+
+ if ((did = H5Dcreate(fid, "dset", tid, sid, H5P_DEFAULT))<0)
+  goto error;
+
+ if (H5Dwrite(did,tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+  goto error;
+
+ if (H5Sclose(sid)<0)
+  goto error;
+ if (H5Tclose(tid)<0)
+  goto error;
+ if (H5Dclose(did)<0)
+  goto error;
+ if (H5Fclose(fid)<0)
+  goto error;
+
+ return 0;
+
+error:
+ printf("error !\n");
+ return -1;
+
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:    gent_binary
+ *
+ * Purpose:     Generate a file to be used in the binary output test 
+ *              Contains:
+ *              1) an integer dataset
+ *              2) a float dataset
+ *              3) an array dataset
+ *              4) a large double dataset
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+gent_binary(void)
+{
+ hid_t    fid, sid, did, tid;
+ hsize_t  dims[1] = {6};
+ hsize_t  dimarray[1] = {2};
+ hsize_t  dimsl[1] = {100000};
+ int      ibuf[6]  = {1,2,3,4,5,6};
+ float    fbuf[6]  = {1,2,3,4,5,6};
+ int      abuf[2][6] = {{1,2,3,4,5,6},{7,8,9,10,11,12}};  /* array */
+ double   *dbuf=NULL;
+
+ fid = H5Fcreate(FILE55, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+
+/*-------------------------------------------------------------------------
+ * integer
+ *-------------------------------------------------------------------------
+ */
+ sid = H5Screate_simple(1, dims, NULL);
+ did = H5Dcreate(fid, "integer", H5T_NATIVE_INT, sid, H5P_DEFAULT);
+ H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, ibuf);
+ H5Dclose(did);
+ H5Sclose(sid);
+
+/*-------------------------------------------------------------------------
+ * float
+ *-------------------------------------------------------------------------
+ */
+ sid = H5Screate_simple(1, dims, NULL);
+ did = H5Dcreate(fid, "float", H5T_NATIVE_FLOAT, sid, H5P_DEFAULT);
+ H5Dwrite(did, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, fbuf);
+ H5Dclose(did);
+ H5Sclose(sid);
+
+/*-------------------------------------------------------------------------
+ * array
+ *-------------------------------------------------------------------------
+ */
+ tid = H5Tarray_create(H5T_NATIVE_INT, 1, dims, NULL);
+ sid = H5Screate_simple(1, dimarray, NULL);
+ did = H5Dcreate(fid, "array", tid, sid, H5P_DEFAULT);
+ H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, abuf);
+ H5Dclose(did);
+ H5Tclose(tid);
+ H5Sclose(sid);
+
+/*-------------------------------------------------------------------------
+ * double
+ *-------------------------------------------------------------------------
+ */
+ sid = H5Screate_simple(1, dimsl, NULL);
+ did = H5Dcreate(fid, "double", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT);
+ dbuf=calloc(100000,sizeof(double));
+ if (dbuf!=NULL)
+ {
+  H5Dwrite(did, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dbuf);
+  free(dbuf);
+ }
+ H5Dclose(did);
+ H5Sclose(sid);
+
+ /* close */
+ H5Fclose(fid);
+}
 
 /*-------------------------------------------------------------------------
  * Function: gen_bigdims
@@ -5480,6 +5614,8 @@ int main(void)
     gent_string();
     gent_aindices();
     gent_longlinks();
+    gent_ldouble();
+    gent_binary();
     gent_bigdims();
     gent_hyperslab();
 

@@ -30,23 +30,20 @@
 #include "h5tools_utils.h"
 #include "H5private.h"
 
-/*
- * The output functions need a temporary buffer to hold a piece of the
- * dataset while it's being printed. This constant sets the limit on the
- * size of that temporary buffer in bytes. For efficiency's sake, choose the
- * largest value suitable for your machine (for testing use a small value).
- */
-#if 1
-#define H5TOOLS_BUFSIZE         (1024 * 1024)
-#else
-#define H5TOOLS_BUFSIZE         (1024)
-#endif  /* 1 */
+
 
 #define ALIGN(A,Z)      ((((A) + (Z) - 1) / (Z)) * (Z))
 
 /* global variables */
 int         compound_data;
 FILE       *rawdatastream;  /* should initialize to stdout but gcc moans about it */
+int         bin_output;    /* binary output */
+int         bin_form;      /* binary form */
+
+
+/* local prototypes */
+static int do_bin_output(FILE *stream, hsize_t nelmts, hid_t tid, void *_mem);
+static int render_bin_output(FILE *stream, hid_t tid, void *_mem);
 
 /* module-scoped variables */
 static int  h5tools_init_g;     /* if h5tools lib has been initialized */
@@ -508,22 +505,22 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
  *      Robb Matzke, Monday, April 26, 1999
  * Modifications:
  *  Robb Matzke, 1999-06-04
- *  The `container' argument is the optional dataset for reference types.
+ * The `container' argument is the optional dataset for reference types.
  *
  *  Robb Matzke, 1999-09-29
- *  Understands the `per_line' property which indicates that every Nth
- *  element should begin a new line.
+ * Understands the `per_line' property which indicates that every Nth
+ * element should begin a new line.
  *
  *      Robb Matzke, LLNL, 2003-06-05
  *      Do not dereference the memory for a variable-length string here.
  *      Deref in h5tools_str_sprint() instead so recursive types are
  *      handled correctly.
-    *
-    *      Pedro Vicente Nunes, THG, 2005-10-19
+ *
+ *      Pedro Vicente Nunes, THG, 2005-10-19
  *        pass to the prefix in h5tools_simple_prefix the total position
-    *                               instead of the current stripmine position i; this is necessary 
-    *                               to print the array indices 
-    *        new field sm_pos in h5tools_context_t, the current stripmine element position 
+ *        instead of the current stripmine position i; this is necessary
+ *        to print the array indices
+ *        new field sm_pos in h5tools_context_t, the current stripmine element position
  *-------------------------------------------------------------------------
  */
 void
@@ -531,15 +528,15 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
                          h5tools_context_t *ctx/*in,out*/, unsigned flags,
                          hsize_t nelmts, hid_t type, void *_mem)
 {
-    unsigned char   *mem = (unsigned char*)_mem;
-    hsize_t     i;      /*element counter       */
-    char        *s, *section;   /*a section of output       */
-    int         secnum;     /*section sequence number   */
-    size_t      size;       /*size of each datum        */
-    size_t      ncols = 80; /*available output width    */
-    h5tools_str_t   buffer;     /*string into which to render   */
-    int         multiline;  /*datum was multiline       */
-    hsize_t     curr_pos;       /* total data element position      */
+    unsigned char *mem = (unsigned char*)_mem;
+    hsize_t  i;  /*element counter  */
+    char  *s, *section; /*a section of output  */
+    int   secnum;  /*section sequence number */
+    size_t  size;  /*size of each datum  */
+    size_t  ncols = 80; /*available output width */
+    h5tools_str_t buffer;  /*string into which to render */
+    int   multiline; /*datum was multiline  */
+    hsize_t  curr_pos;  /* total data element position   */
     int                 elmt_counter = 0;/*counts the # elements printed.
                                           *I (ptl?) needed something that
                                           *isn't going to get reset when a new
@@ -548,21 +545,30 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
                                           *break after we see a number equal
                                           *to the ctx->size_last_dim.   */
 
-    /* Setup */
-    memset(&buffer, 0, sizeof(h5tools_str_t));
-    size = H5Tget_size(type);
+     /* binary dump */
+    if (bin_output)
+    {
+     do_bin_output(stream,nelmts,type,_mem);
+     bin_output=0;
+    }
+    else
+    {
+     /* Setup */
+     memset(&buffer, 0, sizeof(h5tools_str_t));
+     size = H5Tget_size(type);
 
-    if (info->line_ncols > 0)
-    ncols = info->line_ncols;
+     if (info->line_ncols > 0)
+      ncols = info->line_ncols;
+
 
     /* pass to the prefix in h5tools_simple_prefix the total position
-    instead of the current stripmine position i; this is necessary
-    to print the array indices */
-    curr_pos = ctx->sm_pos;
-    
-    h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
+      instead of the current stripmine position i; this is necessary
+      to print the array indices */
+     curr_pos = ctx->sm_pos;
 
-    for (i = 0; i < nelmts; i++, ctx->cur_elmt++, elmt_counter++) {
+     h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
+
+     for (i = 0; i < nelmts; i++, ctx->cur_elmt++, elmt_counter++) {
         /* Render the element */
         h5tools_str_reset(&buffer);
         h5tools_str_sprint(&buffer, info, container, type, mem + i * size, ctx);
@@ -664,8 +670,8 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
                     multiline++;
 
                   /* pass to the prefix in h5tools_simple_prefix the total position
-             instead of the current stripmine position i; this is necessary 
-             to print the array indices */
+       instead of the current stripmine position i; this is necessary
+       to print the array indices */
                 curr_pos = ctx->sm_pos + i;
 
                 h5tools_simple_prefix(stream, info, ctx, curr_pos, secnum);
@@ -683,6 +689,9 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
     }
 
     h5tools_str_close(&buffer);
+
+ }/* else bin */
+
 }
 
 /*-------------------------------------------------------------------------
@@ -890,33 +899,33 @@ static int
 h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, hid_t dset,
                          hid_t p_type, int indentlevel)
 {
-    hid_t       f_space;        /*file data space   */
-    hsize_t     elmtno;         /*counter       */
-    int         i;          /*counter       */
-    int         carry;          /*counter carry value   */
-    hsize_t     zero[8];        /*vector of zeros   */
-    unsigned int    flags;          /*buffer extent flags   */
-    hsize_t     total_size[H5S_MAX_RANK];/*total size of dataset*/
+    hid_t               f_space;                  /* file data space */
+    hsize_t             elmtno;                   /* counter  */
+    hsize_t             i;                        /* counter  */
+    int                 carry;                    /* counter carry value */
+    hsize_t             zero[8];                  /* vector of zeros */
+    unsigned int        flags;                    /* buffer extent flags */
+    hsize_t             total_size[H5S_MAX_RANK]; /* total size of dataset*/
 
     /* Print info */
-    h5tools_context_t   ctx;            /*print context     */
-    size_t      p_type_nbytes;      /*size of memory type   */
-    hsize_t     p_nelmts;       /*total selected elmts  */
+    h5tools_context_t   ctx;                      /* print context  */
+    size_t              p_type_nbytes;            /* size of memory type */
+    hsize_t             p_nelmts;                 /* total selected elmts */
 
     /* Stripmine info */
-    hsize_t     sm_size[H5S_MAX_RANK];  /*stripmine size    */
-    hsize_t     sm_nbytes;      /*bytes per stripmine   */
-    hsize_t     sm_nelmts;      /*elements per stripmine*/
-    unsigned char      *sm_buf = NULL;      /*buffer for raw data   */
-    hid_t       sm_space;       /*stripmine data space  */
+    hsize_t             sm_size[H5S_MAX_RANK];    /* stripmine size */
+    hsize_t             sm_nbytes;                /* bytes per stripmine */
+    hsize_t             sm_nelmts;                /* elements per stripmine*/
+    unsigned char       *sm_buf = NULL;           /* buffer for raw data */
+    hid_t               sm_space;                 /* stripmine data space */
 
     /* Hyperslab info */
-    hsize_t     hs_offset[H5S_MAX_RANK];/*starting offset   */
-    hsize_t     hs_size[H5S_MAX_RANK];  /*size this pass    */
-    hsize_t     hs_nelmts;      /*elements in request   */
+    hsize_t            hs_offset[H5S_MAX_RANK];   /* starting offset */
+    hsize_t            hs_size[H5S_MAX_RANK];     /* size this pass */
+    hsize_t            hs_nelmts;                 /* elements in request */
 
     /* VL data special information */
-    unsigned int        vl_data = 0;            /*contains VL datatypes */
+    unsigned int       vl_data = 0;               /* contains VL datatypes */
 
     f_space = H5Dget_space(dset);
 
@@ -932,7 +941,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, hid_t dset,
     ctx.indent_level = indentlevel;
     ctx.need_prefix = 1;
     ctx.ndims = H5Sget_simple_extent_ndims(f_space);
-
+    
     if ((size_t)ctx.ndims > NELMTS(sm_size)) {
         H5Sclose(f_space);
         return FAIL;
@@ -1193,8 +1202,12 @@ h5tools_dump_dset(FILE *stream, const h5tool_format_t *info, hid_t dset, hid_t _
     if (p_type < 0) {
         f_type = H5Dget_type(dset);
 
-        if (info->raw)
+        if (info->raw || bin_form == 1 )
             p_type = H5Tcopy(f_type);
+        else if (bin_form == 2 )
+            p_type = h5tools_get_little_endian_type(f_type);
+        else if (bin_form == 3 )
+            p_type = h5tools_get_big_endian_type(f_type);
         else
             p_type = h5tools_get_native_type(f_type);
 
@@ -1217,7 +1230,7 @@ h5tools_dump_dset(FILE *stream, const h5tool_format_t *info, hid_t dset, hid_t _
         else
             status = h5tools_dump_simple_subset(rawdatastream, info, dset, p_type,
                                                 sset, indentlevel);
-    } else /* space is H5S_NULL */
+    } else 
         status = SUCCEED;
 
     /* Close the dataspace */
@@ -1297,5 +1310,444 @@ void init_acc_pos(h5tools_context_t *ctx, hsize_t *dims)
  }
  for ( i = 0; i < ctx->ndims; i++)
   ctx->pos[i]=0;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: do_bin_output
+ *
+ * Purpose: Dump memory buffer to a binary file stream
+ *
+ * Return: Success:    SUCCEED
+ *         Failure:    FAIL
+ *
+ * Programmer: Pedro Vicente Nunes
+ *             Friday, June 2, 2006
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static
+int do_bin_output(FILE *stream, hsize_t nelmts, hid_t tid, void *_mem)
+{
+ unsigned char *mem  = (unsigned char*)_mem;
+ size_t         size; /* datum size */
+ hsize_t        i;    /* element counter  */
+
+ size = H5Tget_size(tid);
+
+ for (i = 0; i < nelmts; i++)
+ {
+  if (render_bin_output(stream,tid,mem + i * size)<0)
+  {
+   printf("\nError in writing binary stream\n");
+   return FAIL;
+  }
+ }
+
+ return SUCCEED;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: render_bin_output
+ *
+ * Purpose: Write one element of memory buffer to a binary file stream
+ *
+ * Return: Success:    SUCCEED
+ *         Failure:    FAIL
+ *
+ * Programmer: Pedro Vicente Nunes
+ *             Friday, June 2, 2006
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static
+int render_bin_output(FILE *stream, hid_t tid, void *_mem)
+{
+#if 0
+ #define DEBUG_H5DUMP_BIN 1
+#endif
+ unsigned char     *mem  = (unsigned char*)_mem;
+ size_t             size;   /* datum size */
+ float              tempfloat;
+ double             tempdouble;
+ unsigned long_long tempullong;
+ long_long          templlong;
+ unsigned long      tempulong;
+ long               templong;
+ unsigned int       tempuint;
+ int                tempint;
+ unsigned short     tempushort;
+ short              tempshort;
+ unsigned char      tempuchar;
+ char               tempschar;
+#if H5_SIZEOF_LONG_DOUBLE !=0
+ long double        templdouble;
+#endif
+#ifdef DEBUG_H5DUMP_BIN
+ static char        fmt_llong[8], fmt_ullong[8];
+ if (!fmt_llong[0]) {
+  sprintf(fmt_llong, "%%%sd", H5_PRINTF_LL_WIDTH);
+  sprintf(fmt_ullong, "%%%su", H5_PRINTF_LL_WIDTH);
+ }
+#endif
+
+ size = H5Tget_size(tid);
+
+ if (H5Tequal(tid, H5T_NATIVE_FLOAT))
+ {
+  memcpy(&tempfloat, mem, sizeof(float));
+#ifdef DEBUG_H5DUMP_BIN
+  fprintf(stream, "%g ", tempfloat);
+#else
+  if (1 != fwrite(&tempfloat, size, 1, stream))
+   return FAIL;
+#endif
+ }
+ else if (H5Tequal(tid, H5T_NATIVE_DOUBLE))
+ {
+  memcpy(&tempdouble, mem, sizeof(double));
+#ifdef DEBUG_H5DUMP_BIN
+  fprintf(stream, "%g ", tempdouble);
+#else
+  if (1 != fwrite(&tempdouble, size, 1, stream))
+   return FAIL;
+#endif
+ }
+#if H5_SIZEOF_LONG_DOUBLE !=0
+ else if (H5Tequal(tid, H5T_NATIVE_LDOUBLE))
+ {
+  memcpy(&templdouble, mem, sizeof(long double));
+#ifdef DEBUG_H5DUMP_BIN
+  fprintf(stream, "%Lf ", templdouble);
+#else
+  if (1 != fwrite(&templdouble, size, 1, stream))
+   return FAIL;
+#endif
+ }
+#endif
+ else if (H5T_STRING == H5Tget_class(tid))
+ {
+  unsigned int i;
+  H5T_str_t    pad;
+  char        *s;
+
+  pad = H5Tget_strpad(tid);
+
+  if(H5Tis_variable_str(tid))
+  {
+   s = *(char**)mem;
+   if(s!=NULL)
+    size = HDstrlen(s);
+  }
+  else
+  {
+   s = (char *)mem;
+   size = H5Tget_size(tid);
+  }
+  for (i=0; i<size && (s[i] || pad!=H5T_STR_NULLTERM); i++)
+  {
+   memcpy(&tempuchar, &s[i], sizeof(unsigned char));
+#ifdef DEBUG_H5DUMP_BIN
+   fprintf(stream, "%d", tempuchar);
+#else
+   if (1 != fwrite(&tempuchar, size, 1, stream))
+    return FAIL;
+#endif
+  } /* i */
+ }
+ else if (H5Tequal(tid, H5T_NATIVE_INT))
+ {
+  memcpy(&tempint, mem, sizeof(int));
+#ifdef DEBUG_H5DUMP_BIN
+  fprintf(stream, "%d ", tempint);
+#else
+  if (1 != fwrite(&tempint, size, 1, stream))
+   return FAIL;
+#endif
+ }
+ else if (H5Tequal(tid, H5T_NATIVE_UINT))
+ {
+  memcpy(&tempuint, mem, sizeof(unsigned int));
+#ifdef DEBUG_H5DUMP_BIN
+  fprintf(stream, "%u ", tempuint);
+#else
+  if (1 != fwrite(&tempuint, size, 1, stream))
+   return FAIL;
+#endif
+ }
+ else if (H5Tequal(tid, H5T_NATIVE_SCHAR))
+ {
+  memcpy(&tempschar, mem, sizeof(char));
+#ifdef DEBUG_H5DUMP_BIN
+  fprintf(stream, "%d ", tempschar);
+#else
+  if (1 != fwrite(&tempschar, size, 1, stream))
+   return FAIL;
+#endif
+ }
+ else if (H5Tequal(tid, H5T_NATIVE_UCHAR))
+ {
+  memcpy(&tempuchar, mem, sizeof(unsigned char));
+#ifdef DEBUG_H5DUMP_BIN
+  fprintf(stream, "%u ", tempuchar);
+#else
+  if (1 != fwrite(&tempuchar, size, 1, stream))
+   return FAIL;
+#endif
+ }
+ else if (H5Tequal(tid, H5T_NATIVE_SHORT))
+ {
+  memcpy(&tempshort, mem, sizeof(short));
+#ifdef DEBUG_H5DUMP_BIN
+  fprintf(stream, "%d ", tempshort);
+#else
+  if (1 != fwrite(&tempshort, size, 1, stream))
+   return FAIL;
+#endif
+ }
+ else if (H5Tequal(tid, H5T_NATIVE_USHORT))
+ {
+  memcpy(&tempushort, mem, sizeof(unsigned short));
+#ifdef DEBUG_H5DUMP_BIN
+  fprintf(stream, "%u ", tempushort);
+#else
+  if (1 != fwrite(&tempushort, size, 1, stream))
+   return FAIL;
+#endif
+ }
+ else if (H5Tequal(tid, H5T_NATIVE_LONG))
+ {
+  memcpy(&templong, mem, sizeof(long));
+#ifdef DEBUG_H5DUMP_BIN
+  fprintf(stream, "%ld ", templong);
+#else
+  if (1 != fwrite(&templong, size, 1, stream))
+   return FAIL;
+#endif
+ }
+ else if (H5Tequal(tid, H5T_NATIVE_ULONG))
+ {
+  memcpy(&tempulong, mem, sizeof(unsigned long));
+#ifdef DEBUG_H5DUMP_BIN
+  fprintf(stream, "%lu ", tempulong);
+#else
+  if (1 != fwrite(&tempulong, size, 1, stream))
+   return FAIL;
+#endif
+ }
+ else if (H5Tequal(tid, H5T_NATIVE_LLONG))
+ {
+  memcpy(&templlong, mem, sizeof(long_long));
+#ifdef DEBUG_H5DUMP_BIN
+  fprintf(stream, fmt_llong, templlong);
+#else
+  if (1 != fwrite(&templlong, size, 1, stream))
+   return FAIL;
+#endif
+ }
+ else if (H5Tequal(tid, H5T_NATIVE_ULLONG))
+ {
+  memcpy(&tempullong, mem, sizeof(unsigned long_long));
+#ifdef DEBUG_H5DUMP_BIN
+  fprintf(stream, fmt_ullong, tempullong);
+#else
+  if (1 != fwrite(&tempullong, size, 1, stream))
+   return FAIL;
+#endif
+ }
+ else if (H5Tequal(tid, H5T_NATIVE_HSSIZE))
+ {
+  if (sizeof(hssize_t) == sizeof(int))
+  {
+   memcpy(&tempint, mem, sizeof(int));
+#ifdef DEBUG_H5DUMP_BIN
+   fprintf(stream, "%d ", tempint);
+#else
+   if (1 != fwrite(&tempint, size, 1, stream))
+    return FAIL;
+#endif
+  }
+  else if (sizeof(hssize_t) == sizeof(long))
+  {
+   memcpy(&templong, mem, sizeof(long));
+#ifdef DEBUG_H5DUMP_BIN
+   fprintf(stream, "%ld ", templong);
+#else
+   if (1 != fwrite(&templong, size, 1, stream))
+    return FAIL;
+#endif
+  }
+  else
+  {
+   memcpy(&templlong, mem, sizeof(long_long));
+#ifdef DEBUG_H5DUMP_BIN
+   fprintf(stream, fmt_llong, templlong);
+#else
+   if (1 != fwrite(&templlong, size, 1, stream))
+    return FAIL;
+#endif
+  }
+ }
+ else if (H5Tequal(tid, H5T_NATIVE_HSIZE))
+ {
+  if (sizeof(hsize_t) == sizeof(int))
+  {
+   memcpy(&tempuint, mem, sizeof(unsigned int));
+#ifdef DEBUG_H5DUMP_BIN
+   fprintf(stream, "%u ", tempuint);
+#else
+   if (1 != fwrite(&tempuint, size, 1, stream))
+    return FAIL;
+#endif
+  }
+  else if (sizeof(hsize_t) == sizeof(long))
+  {
+   memcpy(&tempulong, mem, sizeof(unsigned long));
+#ifdef DEBUG_H5DUMP_BIN
+   fprintf(stream, "%lu ", tempulong);
+#else
+   if (1 != fwrite(&tempulong, size, 1, stream))
+    return FAIL;
+#endif
+  }
+  else
+  {
+   memcpy(&tempullong, mem, sizeof(unsigned long_long));
+#ifdef DEBUG_H5DUMP_BIN
+   fprintf(stream, fmt_ullong, tempullong);
+#else
+   if (1 != fwrite(&tempullong, size, 1, stream))
+    return FAIL;
+#endif
+  }
+ }
+ else if (H5Tget_class(tid) == H5T_COMPOUND)
+ {
+  unsigned j;
+  hid_t    memb;
+  unsigned nmembs;
+  size_t   offset;
+
+  nmembs = H5Tget_nmembers(tid);
+
+  for (j = 0; j < nmembs; j++)
+  {
+   offset = H5Tget_member_offset(tid, j);
+   memb   = H5Tget_member_type(tid, j);
+
+   if (render_bin_output(stream,memb,mem + offset)<0)
+    return FAIL;
+
+   H5Tclose(memb);
+  }
+ }
+ else if (H5Tget_class(tid) == H5T_ENUM)
+ {
+  unsigned int i;
+  if (1==size)
+  {
+#ifdef DEBUG_H5DUMP_BIN
+   fprintf(stream, "0x%02x", mem[0]);
+#else
+   if (1 != fwrite(&mem[0], size, 1, stream))
+    return FAIL;
+#endif
+  }
+  else
+  {
+   for (i = 0; i < size; i++)
+   {
+#ifdef DEBUG_H5DUMP_BIN
+    fprintf(stream, "%s%02x", i?":":"", mem[i]);
+#else
+    if (1 != fwrite(&mem[i], sizeof(char), 1, stream))
+     return FAIL;
+#endif
+   } /*i*/
+  }/*else 1 */
+ }
+ else if (H5Tget_class(tid) == H5T_ARRAY)
+ {
+  int     k, ndims;
+  hsize_t i, dims[H5S_MAX_RANK], temp_nelmts, nelmts;
+  hid_t   memb;
+
+  /* get the array's base datatype for each element */
+  memb = H5Tget_super(tid);
+  size = H5Tget_size(memb);
+  ndims = H5Tget_array_ndims(tid);
+  H5Tget_array_dims(tid, dims, NULL);
+  assert(ndims >= 1 && ndims <= H5S_MAX_RANK);
+
+  /* calculate the number of array elements */
+  for (k = 0, nelmts = 1; k < ndims; k++)
+  {
+   temp_nelmts = nelmts;
+   temp_nelmts *= dims[k];
+   nelmts = (size_t)temp_nelmts;
+  }
+
+  /* dump the array element */
+  for (i = 0; i < nelmts; i++)
+  {
+   if (render_bin_output(stream,memb,mem + i * size)<0)
+    return FAIL;
+  }
+
+  H5Tclose(memb);
+ }
+ else if (H5Tget_class(tid) == H5T_VLEN)
+ {
+  unsigned int i;
+  hsize_t nelmts;
+  hid_t   memb;
+
+  /* get the VL sequences's base datatype for each element */
+  memb = H5Tget_super(tid);
+  size = H5Tget_size(memb);
+
+  /* Get the number of sequence elements */
+  nelmts = ((hvl_t *)mem)->len;
+
+  for (i = 0; i < nelmts; i++)
+  {
+   /* dump the array element */
+   if (render_bin_output(stream,memb,((char *)(((hvl_t *)mem)->p)) + i * size)<0)
+    return FAIL;
+  }
+  H5Tclose(memb);
+ }
+ else
+ {
+  size_t i;
+  if (1==size)
+  {
+#ifdef DEBUG_H5DUMP_BIN
+   fprintf(stream, "0x%02x", mem[0]);
+#else
+   if (1 != fwrite(&mem[0], size, 1, stream))
+    return FAIL;
+#endif
+  }
+  else
+  {
+   for (i = 0; i < size; i++)
+   {
+#ifdef DEBUG_H5DUMP_BIN
+    fprintf(stream, "%s%02x", i?":":"", mem[i]);
+#else
+    if (1 != fwrite(&mem[i], sizeof(char), 1, stream))
+     return FAIL;
+#endif
+   } /*i*/
+  }/*else 1 */
+ }
+
+
+ return SUCCEED;
 }
 
