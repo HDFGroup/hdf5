@@ -1,0 +1,164 @@
+#! /bin/sh
+#
+# Copyright by The HDF Group.
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the files COPYING and Copyright.html.  COPYING can be found at the root
+# of the source code distribution tree; Copyright.html can be found at the
+# root level of an installed copy of the electronic HDF5 document set and
+# is linked from the top-level documents page.  It can also be found at
+# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+# access to either file, you may request a copy from help@hdfgroup.org.
+#
+# Tests for the h5cc compiler tool
+# Created: Albert Cheng, 2007/3/13
+#
+# Modification:
+#
+
+# Where the tool is installed.
+prefix="@prefix@"
+H5TOOL="h5cc"           	# The tool name
+H5TOOL_BIN="${prefix}/bin/h5cc -show"   # The path of the tool binary
+
+CMP='cmp -s'
+DIFF='diff -c'
+
+nerrors=0
+verbose=yes
+
+# The build (current) directory might be different than the source directory.
+if test -z "$srcdir"; then
+   srcdir=.
+fi
+
+# Parse option
+#   None
+
+# Print a line-line message left justified in a field of 70 characters
+# beginning with the word "Testing".
+#
+TESTING() {
+   SPACES="                                                               "
+   echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
+}
+
+
+# Debug printing
+# Change : to echo to print the debug statement
+DPRINT() {
+    : $*
+}
+
+# Run a test and print PASS or *FAIL*.  If a test fails then increment
+# the `nerrors' global variable and (if $verbose is set) display the
+# difference between the actual output and the expected output. The
+# expected output is given as the first argument to this function and
+# the actual output file is calculated by replacing the `.ddl' with
+# `.out'.  The actual output is not removed if $HDF5_NOCLEANUP has a
+# non-zero value.
+#
+# This test shows what commands will be run and verify they are as expected.
+# It does not actually execute the compiler script to compile source code.
+# The actual execution ability is tested somewhere else.
+#
+# Algorithm:
+# First figure out the parameters (e.g., compiler name and option, linker name and
+# options, libraries used, ....) that the h5cc command uses.  Then use the -show to
+# display what commands the tool will use for different parameter and verify if they
+# are as expected.
+# The paramters have two part, prefix and suffix. The prefix part is the real compiler
+# or linker command name, options (-I, -D, ...).  The suffix part is the link options,
+# libraries, ....
+#
+
+#
+# $1: -C compile only; -L link only; -CL compile and link.
+# $2-$: remainign arguments
+#
+TOOLTEST() {
+    dummy_c=zzdummy.c
+    dummy_o=`echo $dummy_c | sed -e s/.c$/.o/`
+    expect=test_$H5TOOL_$$.expected
+    actual=test_$H5TOOL_$$.result
+
+    cmdtype=$1
+    shift
+
+    # figure out compiling prefix and suffix
+    xcommand="`$H5TOOL_BIN -c $dummy_c`"
+    DPRINT xcommand=$xcommand
+    compile_prefix="`echo $xcommand | sed -e s/-c\ ${dummy_c}.*//`"
+    compile_suffix="`echo $xcommand | sed -e s/.*\ -c\ ${dummy_c}//`"
+    DPRINT compile_prefix=$compile_prefix
+    DPRINT compile_suffix=$compile_suffix
+
+    # figure out linking prefix and suffix
+    xcommand="`$H5TOOL_BIN $dummy_o`"
+    link_prefix="`echo $xcommand | sed -e s/${dummy_o}.*//`"
+    link_suffix="`echo $xcommand | sed -e s/.*${dummy_o}//`"
+    DPRINT link_prefix=$link_prefix
+    DPRINT link_suffix=$link_suffix
+
+    # create the expected result
+    cp /dev/null $expect	# empty it
+    if [ $cmdtype = -C -o $cmdtype = -CL ]; then
+	echo $compile_prefix $* > $expect
+    fi
+    if [ $cmdtype = -L -o $cmdtype = -CL ]; then
+	echo $link_prefix $* $link_suffix > $expect
+    fi
+
+    # Run test.
+    # Tflops interprets "$@" as "" when no parameter is given (e.g., the
+    # case of missing file name).  Changed it to use $@ till Tflops fixes it.
+    TESTING $H5TOOL $@
+    $H5TOOL_BIN $* > $actual 2>&1
+
+    if $CMP $expect $actual; then
+	echo " PASSED"
+    else
+	echo "*FAILED*"
+	nerrors="`expr $nerrors + 1`"
+	test yes = "$verbose" && \
+	    ( echo "========== Expected results ($expect) ==========="; cat $expect;
+	      echo "========== Actual results ($actual) ==========="; cat $actual;
+	      echo "===============================================") |sed 's/^/    /'
+    fi
+
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+	rm -f $actual $expect
+    fi
+}
+
+
+# Print a "SKIP" message
+SKIP() {
+	 TESTING $H5TOOL $@
+	  echo  " -SKIP-"
+}
+
+
+##############################################################################
+###			  T H E   T E S T S                                ###
+##############################################################################
+TOOLTEST -C -c A.c
+TOOLTEST -C -c A.c B.c
+TOOLTEST -L  A.o
+TOOLTEST -L  A.o B.o
+TOOLTEST -L  A.o B.o L.a
+SKIP -CL A.c B.c L.a
+
+# ##############################################################################
+# # END
+# ##############################################################################
+
+if test $nerrors -eq 0 ; then
+   echo "All $H5TOOL tests passed."
+fi
+
+exit $nerrors

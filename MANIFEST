@@ -794,19 +794,20 @@
 
 ./examples/Attributes.txt
 ./examples/Dependencies
-./examples/Makefile.in
+./examples/h5_attribute.c
 ./examples/h5_chunk_read.c
 ./examples/h5_compound.c
 ./examples/h5_drivers.c
 ./examples/h5_extend_write.c
 ./examples/h5_group.c
-./examples/h5_read.c
-./examples/h5_write.c
-./examples/h5_select.c
-./examples/h5_attribute.c
 ./examples/h5_mount.c
+./examples/h5_read.c
 ./examples/h5_reference.c
+./examples/h5_select.c
+./examples/h5_write.c
+./examples/Makefile.in
 ./examples/ph5example.c
+./examples/testh5cc.sh.in
 
 
 #------------------------------------------------------------------------------
@@ -869,10 +870,9 @@
 ./fortran/config/unicosmk2.0.5.X
 ./fortran/config/unicosmk2.0.6.X
 
-./fortran/examples/Dependencies
-./fortran/examples/Makefile.in
 ./fortran/examples/attrexample.f90
 ./fortran/examples/compound.f90
+./fortran/examples/Dependencies
 ./fortran/examples/dsetexample.f90
 ./fortran/examples/fileexample.f90
 ./fortran/examples/groupexample.f90
@@ -880,12 +880,14 @@
 ./fortran/examples/grpit.f90
 ./fortran/examples/grpsexample.f90
 ./fortran/examples/hyperslab.f90
+./fortran/examples/Makefile.in
 ./fortran/examples/mountexample.f90
 ./fortran/examples/ph5example.f90
 ./fortran/examples/refobjexample.f90
 ./fortran/examples/refregexample.f90
 ./fortran/examples/rwdsetexample.f90
 ./fortran/examples/selectele.f90
+./fortran/examples/testh5fc.sh.in
 
 ./fortran/src/Dependencies
 ./fortran/src/H5_f.c
@@ -1000,17 +1002,18 @@
 ./c++/config/unicos10.0.X
 ./c++/config/unicosmk2.0.6.X
 
-./c++/examples/Dependencies
 ./c++/examples/chunks.cpp
 ./c++/examples/compound.cpp
 ./c++/examples/create.cpp
+./c++/examples/Dependencies
 ./c++/examples/expected.out
 ./c++/examples/extend_ds.cpp
 ./c++/examples/h5group.cpp
+./c++/examples/Makefile.in
 ./c++/examples/readdata.cpp
 ./c++/examples/testexamples.sh
+./c++/examples/testh5c++.sh.in
 ./c++/examples/writedata.cpp
-./c++/examples/Makefile.in
 
 ./c++/src/Dependencies
 ./c++/src/H5AbstractDs.cpp
