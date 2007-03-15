@@ -273,13 +273,11 @@ test_reference_obj(void)
 
     /* Attempting to retrieve type of object using non-valid refs */
     for (j=0; j<3; j++){
-#ifdef H5_WANT_H5_V1_4_COMPAT
-        ret = H5Rget_object_type(dataset,&nvrbuf[j]);
-        VERIFY(ret, H5G_UNKNOWN, "H5Rget_object_type");
-#else /* H5_WANT_H5_V1_4_COMPAT */
+if (nvrbuf[j] != 100){
         ret = H5Rget_obj_type(dataset,H5R_OBJECT,&nvrbuf[j]);
         VERIFY(ret, H5G_UNKNOWN, "H5Rget_obj_type");
-#endif /* H5_WANT_H5_V1_4_COMPAT */
+}else
+    printf("H5Rget_obj_type[100] test skipped\n");
     }
 
     /* Close datatype */
@@ -549,13 +547,8 @@ test_reference_region(void)
 
     /* Attempting to retrieve type of object using non-valid refs */
     for (j=0; j<3; j++){
-#ifdef H5_WANT_H5_V1_4_COMPAT
-        ret = H5Rget_object_type(dset1,&nvrbuf[j]);
-        VERIFY(ret, H5G_UNKNOWN, "H5Rget_object_type");
-#else /* H5_WANT_H5_V1_4_COMPAT */
         ret = H5Rget_obj_type(dset1,H5R_DATASET_REGION,&nvrbuf[j]);
         VERIFY(ret, H5G_UNKNOWN, "H5Rget_obj_type");
-#endif /* H5_WANT_H5_V1_4_COMPAT */
     }
 
     /* Close Dataset */
