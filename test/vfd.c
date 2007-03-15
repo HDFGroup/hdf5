@@ -188,8 +188,15 @@ test_direct(void)
     if(H5Pset_alignment(fapl, (hsize_t)THRESHOLD, (hsize_t)FBSIZE)<0)
 	TEST_ERROR;
 	
-    if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
-        TEST_ERROR;
+    H5E_BEGIN_TRY {
+        file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    } H5E_END_TRY;
+    if(file<0) {
+        H5Pclose (fapl);
+        SKIPPED();
+        printf("	Probably the file system doesn't support Direct I/O\n");
+        return 0;
+    }
 
     /* Retrieve the access property list... */
     if ((access_fapl = H5Fget_access_plist(file)) < 0)

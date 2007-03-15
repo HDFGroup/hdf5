@@ -497,7 +497,7 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
 #endif
     h5_stat_t		sb;
     H5P_genplist_t 	*plist;      /* Property list */
-    int                 *buf;
+    int                 *buf1, *buf2;
     H5FD_t		*ret_value;
 
     FUNC_ENTER_NOAPI(H5FD_direct_open, NULL)
@@ -565,22 +565,34 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
      * is to handle correctly the case that the file is in a different file system
      * than the one where the program is running.
      */
-    buf = (int*)HDmalloc(sizeof(int));
+    buf1 = (int*)HDmalloc(sizeof(int));
+    if (HDposix_memalign(&buf2, file->fa.mboundary, file->fa.fbsize) != 0)
+	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "HDposix_memalign failed")
+
     if(o_flags &= O_CREAT) {
-        if(write(file->fd, (void*)buf, sizeof(int))<0)
-            file->fa.must_align = TRUE;
-        else {
+        if(write(file->fd, (void*)buf1, sizeof(int))<0) {
+            if(write(file->fd, (void*)buf2, file->fa.fbsize)<0)
+                HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, NULL, "file system may not support Direct I/O")
+            else 
+                file->fa.must_align = TRUE;
+        } else {
             file->fa.must_align = FALSE;
             file_truncate(file->fd, (file_offset_t)0);
         }
     } else {
-        if(read(file->fd, (void*)buf, sizeof(int))<0)
-            file->fa.must_align = TRUE;
-        else
+        if(read(file->fd, (void*)buf1, sizeof(int))<0) {
+            if(read(file->fd, (void*)buf2, file->fa.fbsize)<0)
+                HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "file system may not support Direct I/O")
+            else 
+                file->fa.must_align = TRUE;
+        } else
             file->fa.must_align = FALSE;
     }
-    if(buf)
-        HDfree(buf);
+
+    if(buf1)
+        HDfree(buf1);
+    if(buf2)
+        HDfree(buf2);
 
     /* Set return value */
     ret_value=(H5FD_t*)file;
