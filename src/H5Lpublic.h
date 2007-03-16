@@ -152,6 +152,7 @@ H5_DLL herr_t H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/,
 H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     void *buf/*out*/, size_t size, hid_t lapl_id);
+H5_DLL htri_t H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id);
 H5_DLL herr_t H5Lget_info(hid_t loc_id, const char *name,
     H5L_info_t *linfo /*out*/, hid_t lapl_id);
 H5_DLL herr_t H5Lget_info_by_idx(hid_t loc_id, const char *group_name,

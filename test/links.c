@@ -310,6 +310,8 @@ cklinks(hid_t fapl, hbool_t new_format)
 	puts("    expected file location.");
 	TEST_ERROR
     }
+    if(H5Lexists(file, "d1", H5P_DEFAULT) != TRUE) TEST_ERROR
+    if(H5Lexists(file, "grp1/hard", H5P_DEFAULT) != TRUE) TEST_ERROR
 
     /* Symbolic link */
     if (H5Gget_objinfo(file, "grp1/soft", TRUE, &sb2) < 0) TEST_ERROR
@@ -330,6 +332,7 @@ cklinks(hid_t fapl, hbool_t new_format)
 	puts("    Soft link test failed. Wrong link value");
 	TEST_ERROR
     }
+    if(H5Lexists(file, "grp1/soft", H5P_DEFAULT) != TRUE) TEST_ERROR
 
     /* Dangling link */
     H5E_BEGIN_TRY {
@@ -356,6 +359,7 @@ cklinks(hid_t fapl, hbool_t new_format)
 	puts("    Dangling link test failed. Wrong link value");
 	TEST_ERROR
     }
+    if(H5Lexists(file, "grp1/dangle", H5P_DEFAULT) != TRUE) TEST_ERROR
 
     /* Recursive link */
     H5E_BEGIN_TRY {
@@ -382,6 +386,9 @@ cklinks(hid_t fapl, hbool_t new_format)
 	puts("   Recursive link test failed. Wrong link value");
 	TEST_ERROR
     }
+
+    /* Non-existant link */
+    if(H5Lexists(file, "foobar", H5P_DEFAULT) == TRUE) TEST_ERROR
 
     /* Cleanup */
     if (H5Fclose(file) < 0) TEST_ERROR

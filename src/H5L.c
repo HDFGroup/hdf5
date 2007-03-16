@@ -168,9 +168,14 @@ static herr_t H5L_delete_by_idx_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
 static herr_t H5L_move_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
-static herr_t H5L_move_dest_cb(H5G_loc_t *grp_loc/*in*/,
-    const char *name, const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
+static herr_t H5L_move_dest_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
+    const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
+static herr_t H5L_exists_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
+    const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
+    H5G_own_loc_t *own_loc/*out*/);
+static htri_t H5L_exists(const H5G_loc_t *loc, const char *name, hid_t lapl_id,
+    hid_t dxpl_id);
 static herr_t H5L_get_info_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
@@ -829,6 +834,47 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Lget_val_by_idx() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Lexists
+ *
+ * Purpose:	Checks if a link of a given name exists in a group
+ *
+ * Return:	Success:	TRUE/FALSE
+ * 		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, March 16, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id)
+{
+    H5G_loc_t	loc;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_API(H5Lexists, FAIL)
+
+    /* Check arguments */
+    if(H5G_loc(loc_id, &loc))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(!name || !*name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+    if(H5P_DEFAULT == lapl_id)
+        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Check for the existence of the link */
+    if((ret_value = H5L_exists(&loc, name, lapl_id, H5AC_ind_dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link info")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Lexists() */
 
 
 /*-------------------------------------------------------------------------
@@ -2461,6 +2507,70 @@ H5L_move(H5G_loc_t *src_loc, const char *src_name, H5G_loc_t *dst_loc,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L_move() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5L_exists_cb
+ *
+ * Purpose:	Callback for checking whether a link exists
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, March 16 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5L_exists_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
+    const H5O_link_t *lnk, H5G_loc_t UNUSED *obj_loc, void *_udata/*in,out*/,
+    H5G_own_loc_t *own_loc/*out*/)
+{
+    hbool_t *udata = (hbool_t *)_udata;   /* User data passed in */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5L_exists_cb)
+
+    /* Check if the name in this group resolved to a valid link */
+    *udata = (lnk != NULL);
+
+    /* Indicate that this callback didn't take ownership of the group *
+     * location for the object */
+    *own_loc = H5G_OWN_NONE;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5L_exists_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5L_exists
+ *
+ * Purpose:	Returns whether a link exists in a group
+ *
+ * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, March 16 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+H5L_exists(const H5G_loc_t *loc, const char *name, hid_t lapl_id, hid_t dxpl_id)
+{
+    hbool_t exists = FALSE;             /* Whether the link exists in the group */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5L_exists)
+
+    /* Traverse the group hierarchy to locate the object to get info about */
+    if(H5G_traverse(loc, name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK, H5L_exists_cb, &exists, lapl_id, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "path doesn't exist")
+
+    /* Set return value */
+    ret_value = exists;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5L_exists() */
 
 
 /*-------------------------------------------------------------------------
