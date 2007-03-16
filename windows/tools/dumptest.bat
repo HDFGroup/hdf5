@@ -134,11 +134,16 @@ call %tooltest% tnamed_dtype_attr.ddl
 set flag=%tslink%
 call %tooltest% tslink-1.ddl
 
+set flag=%tudlink%
+call %tooltest% tudlink-1.ddl
 ::-------------------------------------
 ::test for displaying the selected link
 ::-------------------------------------
 set flag=-l slink2 %tslink%
 call %tooltest% tslink-2.ddl
+
+set flag=-l udlink2 %tudlink%
+call %tooltest% tudlink-2.ddl
 
 ::--------------------
 ::tests for hard links
@@ -296,11 +301,11 @@ call %tooltest% tall-2B.ddl
 set flag=--dataset=/g1/g1.1/dset1.1.1 --start=1,1 --stride=2,3 --count=3,2 --block=1,1 %tall%
 call %tooltest% tall-4s.ddl
 
-::set flag=-d "/g1/g1.1/dset1.1.2[0;2;10;]" %tall%
-::call %tooltest% tall-5s.ddl
+set flag=-d "/g1/g1.1/dset1.1.2[0;2;10;]" %tall%
+call %tooltest% tall-5s.ddl
 
-::set flag=-d "/dset1[1,1;;;]" %tdset%
-::call %tooltest% tdset-3s.ddl
+set flag=-d "/dset1[1,1;;;]" %tdset%
+call %tooltest% tdset-3s.ddl
 
 ::set flag=-d "/dset1[;3,2;4,4;1,4]" %tdset2%
 ::call %tooltest% tdset2-1s.ddl
@@ -391,6 +396,23 @@ call %tooltest% tindicesyes.ddl
 set flag=-y %taindices%
 call %tooltest% tindicesno.ddl
 
+
+::-----------------------------
+::array indices with subsetting
+::-----------------------------
+
+set flag=-d 1d -s 3 -c 40 %taindices%
+call %tooltest% tindicessub1.ddl
+
+set flag=-d 2d -s 1,3 -c 6,4 %taindices%
+call %tooltest% tindicessub2.ddl
+
+set flag=-d 3d -s 0,1,3 -c 2,6,4 %taindices%
+call %tooltest% tindicessub3.ddl
+
+set flag=-d 4d -s 0,0,1,3 -c 2,2,6,4 %taindices%
+call %tooltest% tindicessub4.ddl
+
 ::-----------------
 ::tests for filters
 ::-----------------
@@ -426,14 +448,23 @@ call %tooltest% tallfilters.ddl zlib szip
 ::user defined
 set flag=-H  -p -d myfilter  %tfilters%
 call %tooltest% tuserfilter.ddl
-  
-::test for displaying dataset and attribute of null space
-set flag=%tnullspace%
-call %tooltest% tnullspace.ddl
 
 ::test for displaying objects with very long names
 set flag=%tlonglinks%
 call %tooltest% tlonglinks.ddl
+
+::dimensions over 4GB, print boundary 
+set flag=-d dset4gb -s 4294967284 -c 22 %tbigdims%
+call %tooltest% tbigdims.ddl
+
+::hyperslab read
+set flag=%thyperslab%
+call %tooltest% thyperslab.ddl
+
+::test for displaying dataset and attribute of null space
+set flag=%tnullspace%
+call %tooltest% tnullspace.ddl
+
 
 ::test for long double (Some systems do not have long double)
 set flag=%tldouble%
@@ -442,6 +473,24 @@ call %tooltest% tldouble.ddl SKIP
 ::Test for vms
 set flag=%tvms%
 call %tooltest% tvms.ddl
+
+
+::test for binary output
+set flag=-d integer -o out1.bin -b LE %tbinary%
+call %tooltest% tbin1.ddl
+
+set flag=-d float   -o out2.bin -b BE %tbinary%
+call %tooltest% tbin2.ddl
+
+set flag=-d array   -o out3.bin -b MEMORY %tbinary%
+call %tooltest% tbin3.ddl
+
+set flag=-d double  -o out4.bin -b FILE %tbinary%
+call %tooltest% tbin4.ddl
+
+::test for dataset region references 
+set flag=%tdatareg%
+call %tooltest% tregref.ddl
 
 echo. 
 echo.****************************************************
