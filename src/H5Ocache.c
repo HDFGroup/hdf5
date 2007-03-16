@@ -301,6 +301,8 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
         if(oh->flags & H5O_HDR_ATTR_STORE_PHASE_CHANGE) {
             UINT16DECODE(p, oh->max_compact);
             UINT16DECODE(p, oh->min_dense);
+            if(oh->max_compact < oh->min_dense)
+                HGOTO_ERROR(H5E_OHDR, H5E_VERSION, NULL, "bad object header attribute phase change values")
         } /* end if */
         else {
             oh->max_compact = H5O_CRT_ATTR_MAX_COMPACT_DEF;
@@ -328,6 +330,8 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
             default:
                 HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "bad size for chunk 0")
         } /* end switch */
+        if(chunk_size > 0 && chunk_size < H5O_SIZEOF_MSGHDR_OH(oh))
+            HGOTO_ERROR(H5E_OHDR, H5E_VERSION, NULL, "bad object header chunk size")
     } /* end if */
     else {
         /* Version */
@@ -356,6 +360,9 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 
         /* First chunk size */
         UINT32DECODE(p, chunk_size);
+        if((nmesgs > 0 && chunk_size < H5O_SIZEOF_MSGHDR_OH(oh)) ||
+                (nmesgs == 0 && chunk_size > 0))
+            HGOTO_ERROR(H5E_OHDR, H5E_VERSION, NULL, "bad object header chunk size")
 
         /* Reserved, in version 1 */
         p += 4;
@@ -369,7 +376,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
     chunk_addr = addr + (hsize_t)prefix_size;
 
     /* Allocate the message array */
-    oh->alloc_nmesgs = nmesgs;
+    oh->alloc_nmesgs = (nmesgs > 0) ? nmesgs : 1;
     if(NULL == (oh->mesg = H5FL_SEQ_MALLOC(H5O_mesg_t, oh->alloc_nmesgs)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
