@@ -61,7 +61,6 @@ const int H5Z_FILTER_BOGUS = 305;
 // Local prototypes
 static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
     const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
-void cleanup_dsets(void);
 
 
 /*-------------------------------------------------------------------------
@@ -173,7 +172,7 @@ test_create( H5File& file)
     // catch all other exceptions
     catch (Exception E)
     {
-	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__);
+	issue_fail_msg("test_create", __LINE__, __FILE__);
 
 	// clean up and return with failure
 	if (dataset != NULL)
@@ -972,7 +971,7 @@ test_types(H5File& file)
  *-------------------------------------------------------------------------
  */
 int
-main(void)
+main()
 {
     hid_t	fapl_id;
     fapl_id = h5_fileaccess(); // in h5test.c, returns a file access template
@@ -1028,9 +1027,11 @@ main(void)
  *
  *-------------------------------------------------------------------------
  */
-void
-cleanup_dsets(void)
+#ifdef __cplusplus
+extern "C"
+#endif
+void cleanup_dsets()
 {
-    remove(FILE1.c_str());
+    HDremove(FILE1.c_str());
 } // cleanup_dsets
 

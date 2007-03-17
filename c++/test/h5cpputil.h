@@ -42,20 +42,37 @@ int test_report (int, const H5std_string&);
 void issue_fail_msg(const char* where, int line, const char* file_name,
 		    const char* message="");
 
+class InvalidActionException : public Exception {
+   public:
+	InvalidActionException(const H5std_string func_name, const H5std_string message = DEFAULT_MSG);
+	InvalidActionException();
+	virtual ~InvalidActionException();
+};
+
+class TestFailedException : public Exception {
+   public:
+	TestFailedException(const H5std_string func_name, const H5std_string message = DEFAULT_MSG);
+	TestFailedException();
+	virtual ~TestFailedException();
+};
+
 template <class Type1, class Type2>
     void verify_val(Type1 x, Type2 value, const char* where, int line, const char* file_name)
 {
     if (GetTestVerbosity()>=VERBO_HI)
     {
+	cerr << endl;
         cerr << "   Call to routine: " << where << " at line " << line
 	     << " in " << file_name <<  " had value " << x << endl;
     }
     if (x != value)
     {
+	cerr << endl;
         cerr << "*** UNEXPECTED VALUE from " << where << " should be "
 	     << value << ", but is " << x << " at line " << line
 	     << " in " << file_name << endl;
 	IncTestNumErrs();
+	throw TestFailedException(where, "");
     }
 }
 
@@ -64,10 +81,12 @@ template <class Type1, class Type2>
 {
     if (x != value)
     {
+	cerr << endl;
         cerr << "*** UNEXPECTED VALUE: " << file_name << ":line " << line
 	     << ":" << msg << " different: " << x << ", should be " << value
 	     << endl;
 	IncTestNumErrs();
+	throw TestFailedException(file_name, msg);
     }
 }
 
@@ -76,23 +95,19 @@ template <class Type1, class Type2>
 {
     if (GetTestVerbosity()>=VERBO_HI)
     {
+	cerr << endl;
         cerr << "   Call to routine: " << where << " at line " << line
 	     << " in " << file_name <<  " had value " << x << endl;
     }
     if (x == value)
     {
+	cerr << endl;
         cerr << "*** UNEXPECTED VALUE from " << where << " should not be "
 	     << value << " at line " << line << " in " << file_name << endl;
 	IncTestNumErrs();
+	throw TestFailedException(where, "");
     }
 }
-
-class InvalidActionException : public Exception {
-   public:
-	InvalidActionException(const H5std_string func_name, const H5std_string message = DEFAULT_MSG);
-	InvalidActionException();
-	virtual ~InvalidActionException();
-};
 
 /* Prototypes for the test routines */
 #ifdef __cplusplus
@@ -110,6 +125,7 @@ void test_vlstrings(void);
 /* Prototypes for the cleanup routines */
 void cleanup_attr(void);
 void cleanup_compound(void);
+void cleanup_dsets(void);
 void cleanup_file(void);
 void cleanup_filters(void);
 void cleanup_h5s(void);

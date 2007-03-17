@@ -100,7 +100,7 @@ void issue_fail_msg(const char* where, int line, const char* file_name,
 {
     //if (GetTestVerbosity()>=VERBO_HI)
     {
-        cerr << "ERROR>>> From " << where << " at line " << line
+        cerr << ">>> FAILED in " << where << " at line " << line
              << " in " << file_name << " - " << message << endl << endl;
     }
 }
@@ -159,4 +159,26 @@ InvalidActionException::InvalidActionException(const H5std_string func_name, con
 // Function:    InvalidActionException destructor
 //--------------------------------------------------------------------------
 InvalidActionException::~InvalidActionException() {}
+
+//--------------------------------------------------------------------------
+// Function:    TestFailedException default constructor
+//--------------------------------------------------------------------------
+TestFailedException::TestFailedException():Exception(){}
+
+//--------------------------------------------------------------------------
+// Function:    TestFailedException overloaded constructor
+//
+// Purpose:	Creates an TestFailedException with the name of the function,
+//              which the failure should have occurred but didn't, and a
+//		message explaining why it should fail.
+// Parameters
+//		func_name - IN: Name of the function where failure should occur
+//		message   - IN: Message
+//--------------------------------------------------------------------------
+TestFailedException::TestFailedException(const H5std_string func_name, const H5std_string message) : Exception(func_name, message) {}
+
+//--------------------------------------------------------------------------
+// Function:    TestFailedException destructor
+//--------------------------------------------------------------------------
+TestFailedException::~TestFailedException() {}
 

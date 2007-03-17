@@ -113,13 +113,11 @@ filter_bogus(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
 // Chunk dimensions
 const hsize_t chunk_size[2] = {FILTER_CHUNK_DIM1, FILTER_CHUNK_DIM2};
 
-static void test_null_filter(void)
+static void test_null_filter()
 {
     // Output message about test being performed
     SUBTEST("'Null' filter");
-
-    try
-    {
+    try {
 	hsize_t  null_size;          // Size of dataset with null filter
 
 	// Prepare dataset create property list
@@ -144,7 +142,7 @@ static void test_null_filter(void)
     // catch all other exceptions
     catch (Exception E)
     {
-        issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_null_filter()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }  // test_null_filter
 
@@ -176,10 +174,10 @@ void test_szip_filter(H5File& file1)
 
     // Output message about test being performed
     SUBTEST("szip filter (with encoder)");
+
     if ( h5_szip_can_encode() == 1) {
     char* tconv_buf = new char [1000];
-    try
-    {
+    try {
         const hsize_t   size[2] = {DSET_DIM1, DSET_DIM2};
 
         // Create the data space
@@ -222,14 +220,15 @@ void test_szip_filter(H5File& file1)
                     throw Exception("test_szip_filter", "Failed in testing szip method");
             }
 	dsplist.close();
+	PASSED();
     } // end of try
 
     // catch all other exceptions
     catch (Exception E)
     {
-        issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_szip_filter()", __LINE__, __FILE__, E.getCDetailMsg());
     }
-    } 
+    } // if szip presents 
     else {
 	SKIPPED();
     }
@@ -251,7 +250,7 @@ const H5std_string      FILE1("tfilters.h5");
 #ifdef __cplusplus
 extern "C"
 #endif
-void test_filters(void)
+void test_filters()
 {
     // Output message about test being performed
     MESSAGE(5, ("Testing Various Filters\n"));
@@ -273,7 +272,7 @@ void test_filters(void)
     }
     catch (Exception E)
     {
-        issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_filters()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_filters()
 
@@ -291,8 +290,10 @@ void test_filters(void)
  *
  *-------------------------------------------------------------------------
  */
-void
-cleanup_filters(void)
+#ifdef __cplusplus
+extern "C"
+#endif
+void cleanup_filters()
 {
     HDremove(FILE1.c_str());
 }

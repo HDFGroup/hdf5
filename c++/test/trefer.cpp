@@ -84,14 +84,13 @@ typedef struct s1_t {
 **      Tests references to various kinds of objects
 **
 ****************************************************************/
-static void
-test_reference_obj(void)
+static void test_reference_obj()
 {
     int    i;          // counting variables
     const  H5std_string write_comment="Foo!"; // Comments for group
 
     // Output message about test being performed
-    MESSAGE(5, ("Testing Object Reference Functions\n"));
+    SUBTEST("Testing Object Reference Functions");
 
     H5File* file1 = NULL;
     try {
@@ -266,9 +265,11 @@ test_reference_obj(void)
 	free(wbuf);
 	free(rbuf);
 	free(tbuf);
+
+	PASSED();
     } // end try
     catch (Exception E) {
-	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_reference_obj()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_reference_obj()
 
@@ -280,7 +281,7 @@ test_reference_obj(void)
 #ifdef __cplusplus
 extern "C"
 #endif
-void test_reference(void)
+void test_reference()
 {
     // Output message about test being performed
     MESSAGE(5, ("Testing References\n"));
@@ -295,9 +296,11 @@ void test_reference(void)
 ** Purpose:	Cleanup temporary test files
 ** Return:	none
 ****************************************************************/
-void
-cleanup_reference(void)
+#ifdef __cplusplus
+extern "C"
+#endif
+void cleanup_reference()
 {
-    remove(FILE1.c_str());
+    HDremove(FILE1.c_str());
 }
 
