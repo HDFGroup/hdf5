@@ -110,7 +110,7 @@ static int   not_comparable;
     is_zero=1;                                       \
 }
 
-#define PDIFF(a,b)		( (b>a) ? (b-a) : (a-b))
+#define PDIFF(a,b)      ( (b>a) ? (b-a) : (a-b))
 
 #define NOT_SUPPORTED() { printf("Warning: feature not supported\n"); }
 
@@ -119,7 +119,7 @@ static int   not_comparable;
  * local prototypes
  *-------------------------------------------------------------------------
  */
-static void    close_obj(H5G_obj_t obj_type, hid_t obj_id);
+static void    close_obj(H5G_obj_t1 obj_type, hid_t obj_id);
 static hsize_t diff_region(hid_t obj1_id, hid_t obj2_id,hid_t region1_id, hid_t region2_id, diff_opt_t *options);
 static hbool_t all_zero(const void *_mem, size_t size);
 static hsize_t character_compare(unsigned char *mem1,unsigned char *mem2,hsize_t i,int rank,hsize_t *dims,hsize_t *acc,hsize_t *pos,diff_opt_t *options,const char *obj1,const char *obj2,int *ph);
@@ -759,8 +759,8 @@ hsize_t diff_datum(void       *_mem1,
   */
    else if (H5Tequal(m_type, H5T_STD_REF_OBJ))
    {
-    H5G_obj_t  obj1_type;
-    H5G_obj_t  obj2_type;
+    H5G_obj_t1  obj1_type;
+    H5G_obj_t1  obj2_type;
     hid_t      obj1_id;
     hid_t      obj2_id;
 
@@ -2049,7 +2049,7 @@ static hbool_t all_zero(const void *_mem, size_t size)
  *-------------------------------------------------------------------------
  */
 
-static void close_obj(H5G_obj_t obj_type, hid_t obj_id)
+static void close_obj(H5G_obj_t1 obj_type, hid_t obj_id)
 {
  switch (obj_type) {
  case H5G_GROUP:

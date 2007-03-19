@@ -35,7 +35,7 @@ static herr_t get_name_type( hid_t loc_id,
                              const char *group_name,
                              int idx,
                              char **name,
-                             H5G_obj_t *type );
+                             H5G_obj_t1 *type );
 
 
 /*-------------------------------------------------------------------------
@@ -410,7 +410,7 @@ static herr_t get_name_type( hid_t loc_id,
                              const char *group_name,
                              int idx,
                              char **name,
-                             H5G_obj_t *type )
+                             H5G_obj_t1 *type )
 {
 
  trav_info_t info;
@@ -447,7 +447,7 @@ static int traverse( hid_t loc_id,
 {
  haddr_t       objno;              /* Compact form of object's location */
  char          *name=NULL;
- H5G_obj_t     type;
+ H5G_obj_t1    type;
  int           n_names;
  char          *path=NULL;
  H5G_stat_t    statbuf;
