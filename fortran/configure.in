@@ -70,6 +70,12 @@ AC_SUBST(HID_T)
 AC_SUBST(SIZE_T)
 AC_SUBST(OBJECT_NAMELEN_DEFAULT_F)
 
+dnl Support FC variable to define Fortran compiler if F9X variable is
+dnl not used.  This should be depreciated in the future.
+if test "x" = "x$F9X"; then
+  F9X=${FC}
+fi
+
 dnl ----------------------------------------------------------------------
 dnl Dump all shell variables values.
 dnl
