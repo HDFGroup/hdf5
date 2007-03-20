@@ -36,7 +36,7 @@ fi
 
 
 # Use default Fortran 90 compiler according to what C compiler is used.
-if test "X-" = "X-$FC"; then
+if test "X-" = "X-$F9X"; then
     case $CC_BASENAME in
         gcc*)
             F9X=g95
