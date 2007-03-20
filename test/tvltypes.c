@@ -29,7 +29,7 @@
 
 /* 1-D dataset with fixed dimensions */
 #define SPACE1_RANK	1
-#define SPACE1_DIM1     4
+#define SPACE1_DIM1     4 
 
 /* 2-D dataset with fixed dimensions */
 #define SPACE2_RANK	2
@@ -2388,6 +2388,194 @@ rewrite_shorter_vltypes_vlen_vlen_atomic(void)
 
 /****************************************************************
 **
+**  test_vltypes_fill_value(): Test fill value for VL data.  
+**  One tests data space isn't allocated; another tests data
+**  space is allocated.
+**
+****************************************************************/
+static void
+test_vltypes_fill_value(void)
+{
+    typedef struct dtype1_struct {
+        int    i1;
+        char   *str;
+        int    i2;
+        int    i3;
+        int    i4;
+        int    i5;
+        int    i6;
+        int    i7;
+        int    i8;
+        float  f1;
+    } dtype1_struct;
+
+    herr_t ret;
+    hid_t file_id;
+    hid_t dtype1_id = -1;
+    hid_t str_id = -1;
+    hid_t dspace_id;
+    hid_t dcpl_id, xfer_pid;
+    hid_t dset_id; 
+    hsize_t dim1[] = {SPACE1_DIM1};
+    const dtype1_struct fill1 = {1, "foobar", 2, 3, 4, 5, 6, 7, 8, 9.0};
+    dtype1_struct buf[SPACE1_DIM1];
+    size_t mem_used=0;  /* Memory used during allocation */
+    int i;
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Check fill value for VL data\n"));
+
+    /* Create a compound data type */
+    dtype1_id = H5Tcreate(H5T_COMPOUND, sizeof(struct dtype1_struct));
+    CHECK(dtype1_id, FAIL, "H5Tcreate");
+
+    ret = H5Tinsert(dtype1_id,"i1",HOFFSET(struct dtype1_struct,i1),H5T_NATIVE_INT);
+    CHECK(ret, FAIL, "H5Tinsert");
+
+    str_id = H5Tcopy(H5T_C_S1);
+    CHECK(str_id, FAIL, "H5Tcopy");
+    ret = H5Tset_size(str_id,H5T_VARIABLE);
+    CHECK(ret, FAIL, "H5Tset_size");
+
+    ret = H5Tinsert(dtype1_id,"vl_string",HOFFSET(dtype1_struct,str),str_id);
+    CHECK(ret, FAIL, "H5Tinsert");
+
+    ret = H5Tinsert(dtype1_id,"i2",HOFFSET(struct dtype1_struct,i2),H5T_NATIVE_INT);
+    CHECK(ret, FAIL, "H5Tinsert");
+
+    ret = H5Tinsert(dtype1_id,"i3",HOFFSET(struct dtype1_struct,i3),H5T_NATIVE_INT);
+    CHECK(ret, FAIL, "H5Tinsert");
+
+    ret = H5Tinsert(dtype1_id,"i4",HOFFSET(struct dtype1_struct,i4),H5T_NATIVE_INT);
+    CHECK(ret, FAIL, "H5Tinsert");
+
+    ret = H5Tinsert(dtype1_id,"i5",HOFFSET(struct dtype1_struct,i5),H5T_NATIVE_INT);
+    CHECK(ret, FAIL, "H5Tinsert");
+
+    ret = H5Tinsert(dtype1_id,"i6",HOFFSET(struct dtype1_struct,i6),H5T_NATIVE_INT);
+    CHECK(ret, FAIL, "H5Tinsert");
+
+    ret = H5Tinsert(dtype1_id,"i7",HOFFSET(struct dtype1_struct,i7),H5T_NATIVE_INT);
+    CHECK(ret, FAIL, "H5Tinsert");
+
+    ret = H5Tinsert(dtype1_id,"i8",HOFFSET(struct dtype1_struct,i8),H5T_NATIVE_INT);
+    CHECK(ret, FAIL, "H5Tinsert");
+
+    ret = H5Tinsert(dtype1_id,"f1",HOFFSET(struct dtype1_struct,f1),H5T_NATIVE_FLOAT);
+    CHECK(ret, FAIL, "H5Tinsert");
+
+    ret = H5Tclose(str_id);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Create dataset create property list and set the fill value */
+    dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(dcpl_id, FAIL, "H5Pcreate");
+
+    ret = H5Pset_fill_value(dcpl_id, dtype1_id, &fill1);
+    CHECK(ret, FAIL, "H5Pset_fill_value");
+
+    /* Create the file */
+    file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file_id, FAIL, "H5Fcreate");
+
+    dspace_id=H5Screate_simple(SPACE1_RANK,dim1,NULL);
+    CHECK(dspace_id, FAIL, "H5Screate_simple");
+
+    /* Create first data set with default setting - no space is allocated */
+    dset_id = H5Dcreate(file_id, "dataset1", dtype1_id, dspace_id, dcpl_id);
+    CHECK(dset_id, FAIL, "H5Dcreate");
+
+    ret = H5Dclose(dset_id);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Create a second data set with space allocated and fill value written */
+    ret = H5Pset_fill_time(dcpl_id, H5D_FILL_TIME_IFSET);
+    CHECK(ret, FAIL, "H5Pset_fill_time");
+
+    ret = H5Pset_alloc_time(dcpl_id, H5D_ALLOC_TIME_EARLY);
+    CHECK(ret, FAIL, "H5Pset_alloc_time");
+
+    dset_id = H5Dcreate(file_id, "dataset2", dtype1_id, dspace_id, dcpl_id);
+    CHECK(dset_id, FAIL, "H5Dcreate");
+
+    ret = H5Dclose(dset_id);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    ret = H5Fclose(file_id);
+    CHECK(ret, FAIL, "H5Fclose");
+
+
+    /* Open the file to check data set value */
+    file_id = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(file_id, FAIL, "H5Fopen");
+
+    /* Open first data set */
+    dset_id = H5Dopen(file_id, "dataset1");
+    CHECK(dset_id, FAIL, "H5Dopen");
+
+    /* Change to the custom memory allocation routines for reading VL data */
+    xfer_pid=H5Pcreate(H5P_DATASET_XFER);
+    CHECK(xfer_pid, FAIL, "H5Pcreate");
+
+    ret=H5Pset_vlen_mem_manager(xfer_pid,test_vltypes_alloc_custom,&mem_used,test_vltypes_free_custom,&mem_used);
+    CHECK(ret, FAIL, "H5Pset_vlen_mem_manager");
+
+    /* Read in the data of fill value */
+    ret = H5Dread(dset_id, dtype1_id, dspace_id, dspace_id,xfer_pid, buf);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Compare data read in */
+    for(i=0; i<SPACE1_DIM1; i++) {
+        if(strcmp(buf[i].str, "foobar")) {
+            TestErrPrintf("%d: VL data doesn't match!, buf[%d].str=%s\n",__LINE__,(int)i,buf[i].str);
+            /*continue;*/
+        } /* end if */
+    } /* end for */
+
+    ret = H5Dclose(dset_id);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Release the space */
+    ret = H5Dvlen_reclaim(dtype1_id,dspace_id,xfer_pid,buf);
+    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+
+    /* Open the second data set to check the value of data */
+    dset_id = H5Dopen(file_id, "dataset2");
+    CHECK(dset_id, FAIL, "H5Dopen");
+
+    ret = H5Dread(dset_id, dtype1_id, dspace_id, dspace_id,xfer_pid, buf);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Compare data read in */
+    for(i=0; i<SPACE1_DIM1; i++) {
+        if(strcmp(buf[i].str, "foobar")) {
+            TestErrPrintf("%d: VL data doesn't match!, buf[%d].str=%s\n",__LINE__,(int)i,buf[i].str);
+            /*continue;*/
+        } /* end if */
+    } /* end for */
+
+    ret = H5Dclose(dset_id);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Release the space */
+    ret = H5Dvlen_reclaim(dtype1_id,dspace_id,xfer_pid,buf);
+    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+
+    ret = H5Sclose(dspace_id);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    ret = H5Pclose(dcpl_id);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    ret = H5Tclose(dtype1_id);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    ret = H5Fclose(file_id);
+    CHECK(ret, FAIL, "H5Fclose");
+} /* end test_vltypes_fill_value() */
+
+/****************************************************************
+**
 **  test_vltypes(): Main VL datatype testing routine.
 **
 ****************************************************************/
@@ -2412,6 +2600,7 @@ test_vltypes(void)
     rewrite_shorter_vltypes_vlen_vlen_atomic();  /*overwrite with VL data of shorted sequence*/
     test_vltypes_compound_vlen_vlen();/* Test compound datatypes with VL atomic components */
     test_vltypes_compound_vlstr();    /* Test data rewritten of nested VL data */
+    test_vltypes_fill_value();        /* Test fill value for VL data */
 }   /* test_vltypes() */
 
 
