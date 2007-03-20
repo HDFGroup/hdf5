@@ -700,7 +700,7 @@ sleep 10
 #################################
 if [ "$TESTHOST" = -all ]; then
     if [ -f $ALLHOSTSFILE ]; then
-	TESTHOST=`sed -e s/#.*// $ALLHOSTSFILE`
+	TESTHOST=`sed -e '/^#/d;/^ *$/d' $ALLHOSTSFILE`
     else
 	PRINT "could not access the all-hosts-file ($ALLHOSTSFILE)"
 	USAGE
