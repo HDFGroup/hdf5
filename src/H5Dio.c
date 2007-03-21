@@ -48,42 +48,7 @@
 /* Local Typedefs */
 /******************/
 
-/* Information for mapping between file space and memory space */
 
-#if 0
-/* Structure holding information about a chunk's selection for mapping */
-typedef struct H5D_chunk_info_t {
-    hsize_t index;              /* "Index" of chunk in dataset */
-    size_t chunk_points;        /* Number of elements selected in chunk */
-    H5S_t *fspace;              /* Dataspace describing chunk & selection in it */
-    hsize_t coords[H5O_LAYOUT_NDIMS];   /* Coordinates of chunk in file dataset's dataspace */
-    H5S_t *mspace;              /* Dataspace describing selection in memory corresponding to this chunk */
-    unsigned mspace_shared;     /* Indicate that the memory space for a chunk is shared and shouldn't be freed */
-} H5D_chunk_info_t;
-
-/* Main structure holding the mapping between file chunks and memory */
-typedef struct fm_map {
-    H5SL_t *fsel;               /* Skip list containing file dataspaces for all chunks */
-    hsize_t last_index;         /* Index of last chunk operated on */
-    H5D_chunk_info_t *last_chunk_info;  /* Pointer to last chunk's info */
-    const H5S_t *file_space;    /* Pointer to the file dataspace */
-    const H5S_t *mem_space;     /* Pointer to the memory dataspace */
-    unsigned mem_space_copy;    /* Flag to indicate that the memory dataspace must be copied */
-    hsize_t f_dims[H5O_LAYOUT_NDIMS];   /* File dataspace dimensions */
-    H5S_t *mchunk_tmpl;         /* Dataspace template for new memory chunks */
-    unsigned f_ndims;           /* Number of dimensions for file dataspace */
-    H5S_sel_iter_t mem_iter;    /* Iterator for elements in memory selection */
-    unsigned m_ndims;           /* Number of dimensions for memory dataspace */
-    hsize_t chunks[H5O_LAYOUT_NDIMS];   /* Number of chunks in each dimension */
-    hsize_t chunk_dim[H5O_LAYOUT_NDIMS];    /* Size of chunk in each dimension */
-    hsize_t down_chunks[H5O_LAYOUT_NDIMS];   /* "down" size of number of chunks in each dimension */
-    H5O_layout_t *layout;       /* Dataset layout information*/
-    H5S_sel_type msel_type;     /* Selection type in memory */
-    hsize_t total_chunks;       /* Number of total chunks */
-    hbool_t *select_chunk;         /* store the information about whether this chunk is selected or not */
-} fm_map;
-
-#endif
 /********************/
 /* Local Prototypes */
 /********************/
@@ -257,7 +222,7 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_t
     assert(space);
 
     /* Make sure the dataspace has an extent set (or is NULL) */
-    if( !(H5S_has_extent(space)) )
+    if(!(H5S_has_extent(space)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dataspace extent has not been set")
 
     /* Get the memory and file datatype sizes */
@@ -265,94 +230,94 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_t
     dst_type_size = H5T_get_size(buf_type);
 
     /* Get the maximum buffer size needed and allocate it */
-    buf_size=MAX(src_type_size,dst_type_size);
+    buf_size = MAX(src_type_size,dst_type_size);
 
     /* Allocate space for conversion buffer */
-    if(NULL == (tconv_buf = H5FL_BLK_MALLOC(type_elem,buf_size)))
+    if(NULL == (tconv_buf = H5FL_BLK_MALLOC(type_elem, buf_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* If there's no fill value, just use zeros */
-    if(fill==NULL) {
-        HDmemset(tconv_buf,0,dst_type_size);
+    if(fill == NULL) {
+        HDmemset(tconv_buf, 0, dst_type_size);
 
         /* Fill the selection in the memory buffer */
         if(H5S_select_fill(tconv_buf, dst_type_size, space, buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, FAIL, "filling selection failed")
+    } /* end if */
+    else {
+        /* Set up type conversion function */
+        if(NULL == (tpath = H5T_path_find(fill_type, buf_type, NULL, NULL, dxpl_id, FALSE)))
+            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types")
 
-        HGOTO_DONE(ret_value);
-    }
- 
-    /* Set up type conversion function */
-    if(NULL == (tpath = H5T_path_find(fill_type, buf_type, NULL, NULL, dxpl_id, FALSE)))
-        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types")
-
-    if(!H5T_path_noop(tpath)) {
-        if((src_id = H5I_register(H5I_DATATYPE, H5T_copy(fill_type, H5T_COPY_ALL))) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion")
-
-        if((dst_id = H5I_register(H5I_DATATYPE, H5T_copy(buf_type, H5T_COPY_ALL))) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion")
-    }
-
-    /* Copy the user's data into the buffer for conversion */
-    HDmemcpy(tconv_buf,fill,src_type_size);
-
-    if(TRUE == H5T_detect_class(fill_type, H5T_VLEN)) {
-        /* If there's VL type of data, make multiple copies of fill value first, 
-         * then do conversion on each element so that each of them has a copy 
-         * of the VL data. 
-         */
-
-        /* Get the number of elements */
-        nelmts = H5S_get_simple_extent_npoints(space);
-
-        /* Allocate a temporary buffer and background buffer */
-        if(NULL == (tmp_buf = H5FL_BLK_MALLOC(type_conv,(size_t)nelmts*buf_size)) || NULL==(bkg_buf = H5FL_BLK_CALLOC(type_conv,(size_t)nelmts*buf_size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-
-        /* Fill the selection in the temporary buffer */
-        if(H5S_select_fill(tconv_buf, src_type_size, space, tmp_buf) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, FAIL, "filling selection failed")
-    
-        /* Convert disk buffer into memory buffer */
         if(!H5T_path_noop(tpath)) {
-            if(H5T_convert(tpath, src_id, dst_id, (size_t)nelmts, (size_t)0, (size_t)0, tmp_buf, bkg_buf, dxpl_id) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "data type conversion failed")
+            if((src_id = H5I_register(H5I_DATATYPE, H5T_copy(fill_type, H5T_COPY_ALL))) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion")
+
+            if((dst_id = H5I_register(H5I_DATATYPE, H5T_copy(buf_type, H5T_COPY_ALL))) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion")
         } /* end if */
 
-        /* Copy the final data into the memory buffer */
-        HDmemcpy(buf, tmp_buf, (size_t)nelmts*dst_type_size);
-    } else {
-        /* If there's no VL type of data, do conversion first then fill the data into
-         * the memory buffer. */
-        if(NULL==(bkg_buf = H5FL_BLK_CALLOC(type_elem,buf_size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        /* Copy the user's data into the buffer for conversion */
+        HDmemcpy(tconv_buf, fill, src_type_size);
 
-        /* Convert disk buffer into memory buffer */
-        if(!H5T_path_noop(tpath)) {
-            /* Perform data type conversion */
-            if(H5T_convert(tpath, src_id, dst_id, (size_t)1, (size_t)0, (size_t)0, tconv_buf, bkg_buf, dxpl_id) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "data type conversion failed")
-        } /* end if */
+        if(TRUE == H5T_detect_class(fill_type, H5T_VLEN)) {
+            /* If there's VL type of data, make multiple copies of fill value first, 
+             * then do conversion on each element so that each of them has a copy 
+             * of the VL data. 
+             */
 
-        /* Fill the selection in the memory buffer */
-        if(H5S_select_fill(tconv_buf, dst_type_size, space, buf) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, FAIL, "filling selection failed")
-    }
+            /* Get the number of elements */
+            nelmts = H5S_get_simple_extent_npoints(space);
+
+            /* Allocate a temporary buffer and background buffer */
+            if(NULL == (tmp_buf = H5FL_BLK_MALLOC(type_conv, (size_t)nelmts * buf_size)) || NULL == (bkg_buf = H5FL_BLK_CALLOC(type_conv, (size_t)nelmts * buf_size)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+            /* Fill the selection in the temporary buffer */
+            if(H5S_select_fill(tconv_buf, src_type_size, space, tmp_buf) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, FAIL, "filling selection failed")
+        
+            /* Convert disk buffer into memory buffer */
+            if(!H5T_path_noop(tpath)) {
+                if(H5T_convert(tpath, src_id, dst_id, (size_t)nelmts, (size_t)0, (size_t)0, tmp_buf, bkg_buf, dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "data type conversion failed")
+            } /* end if */
+
+            /* Copy the final data into the memory buffer */
+            HDmemcpy(buf, tmp_buf, (size_t)nelmts * dst_type_size);
+        } else {
+            /* If there's no VL type of data, do conversion first then fill the data into
+             * the memory buffer. */
+            if(NULL == (bkg_buf = H5FL_BLK_CALLOC(type_elem, buf_size)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+            /* Convert disk buffer into memory buffer */
+            if(!H5T_path_noop(tpath)) {
+                /* Perform data type conversion */
+                if(H5T_convert(tpath, src_id, dst_id, (size_t)1, (size_t)0, (size_t)0, tconv_buf, bkg_buf, dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "data type conversion failed")
+            } /* end if */
+
+            /* Fill the selection in the memory buffer */
+            if(H5S_select_fill(tconv_buf, dst_type_size, space, buf) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, FAIL, "filling selection failed")
+        } /* end else */
+    } /* end else */
 
 done:
-    if (tmp_buf)
+    if(tmp_buf)
         H5FL_BLK_FREE(type_conv,tmp_buf);
-    if (tconv_buf)
+    if(tconv_buf)
         H5FL_BLK_FREE(type_elem,tconv_buf);
-    if (bkg_buf) {
+    if(bkg_buf) {
         if(TRUE == H5T_detect_class(fill_type, H5T_VLEN))
-            H5FL_BLK_FREE(type_conv,bkg_buf);
+            H5FL_BLK_FREE(type_conv, bkg_buf);
         else
-            H5FL_BLK_FREE(type_elem,bkg_buf);
-    }
+            H5FL_BLK_FREE(type_elem, bkg_buf);
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
-}   /* H5D_fill() */
+} /* H5D_fill() */
 
 
 /*--------------------------------------------------------------------------
