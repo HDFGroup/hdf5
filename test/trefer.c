@@ -273,11 +273,8 @@ test_reference_obj(void)
 
     /* Attempting to retrieve type of object using non-valid refs */
     for (j=0; j<3; j++){
-if (nvrbuf[j] != 100){
         ret = H5Rget_obj_type(dataset,H5R_OBJECT,&nvrbuf[j]);
         VERIFY(ret, H5G_UNKNOWN, "H5Rget_obj_type");
-}else
-    printf("H5Rget_obj_type[100] test skipped\n");
     }
 
     /* Close datatype */
