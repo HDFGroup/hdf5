@@ -26,7 +26,6 @@ CFG=testhdf5_cpp - Win32 Debug
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
 CPP=cl.exe
-F90=df.exe
 RSC=rc.exe
 
 !IF  "$(CFG)" == "testhdf5_cpp - Win32 Release"
@@ -42,6 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "../../../../c++/test/testhdf5_cpp/Release"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
+F90=df.exe
 # ADD BASE F90 /include:"Release/"
 # ADD F90 /include:"Release/"
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
@@ -68,6 +68,7 @@ LINK32=link.exe
 # PROP Intermediate_Dir "../../../../c++/test/testhdf5_cpp/Debug"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
+F90=df.exe
 # ADD BASE F90 /include:"Debug/"
 # ADD F90 /include:"Debug/"
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
@@ -100,6 +101,10 @@ SOURCE="..\..\..\..\c++\test\tattr.cpp"
 # End Source File
 # Begin Source File
 
+SOURCE="..\..\..\..\c++\test\tcompound.cpp"
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\..\test\testframe.c
 # End Source File
 # Begin Source File
@@ -112,11 +117,23 @@ SOURCE="..\..\..\..\c++\test\tfile.cpp"
 # End Source File
 # Begin Source File
 
+SOURCE="..\..\..\..\c++\test\tfilter.cpp"
+# End Source File
+# Begin Source File
+
 SOURCE="..\..\..\..\c++\test\th5s.cpp"
 # End Source File
 # Begin Source File
 
 SOURCE="..\..\..\..\c++\test\trefer.cpp"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\..\..\c++\test\ttypes.cpp"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\..\..\c++\test\tvlstr.cpp"
 # End Source File
 # End Group
 # Begin Group "Header Files"

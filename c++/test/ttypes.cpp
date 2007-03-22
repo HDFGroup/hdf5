@@ -307,7 +307,7 @@ static void test_query()
  *
  *-------------------------------------------------------------------------
  */
-const char* filename1("dtypes1.h5");
+const char* filename1 = "dtypes1.h5";
 static void test_transient ()
 {
     static hsize_t	ds_size[2] = {10, 20};
