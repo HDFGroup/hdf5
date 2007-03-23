@@ -40,9 +40,8 @@ PUB_DOCS=ADGuide.html Attributes.html Big.html Caching.html Chunk_f1.gif  \
          RM_H5R.html RM_H5S.html RM_H5T.html RM_H5Z.html References.html  \
          TechNotes.html Tools.html Version.html chunk1.gif compat.html    \
          dataset_p1.gif ddl.html extern1.gif extern2.gif group_p1.gif     \
-         group_p2.gif group_p3.gif h5s.examples hdf2.jpg ph5design.html   \
-         ph5example.c ph5implement.txt pipe1.gif pipe2.gif pipe3.gif      \
-         pipe4.gif pipe5.gif index.html version.gif
+         group_p2.gif group_p3.gif h5s.examples hdf2.jpg pipe1.gif        \
+	 pipe2.gif pipe3.gif pipe4.gif pipe5.gif index.html version.gif
 
 # Other doc files (not to be installed)...
 PRIVATE_DOCS=Chunk_f1.obj Chunk_f2.obj Chunk_f6.obj CodeReview.html      \
