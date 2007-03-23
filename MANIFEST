@@ -748,9 +748,6 @@
 ./doc/html/group_p3.obj			_DO_NOT_DISTRIBUTE_
 ./doc/html/h5s.examples
 ./doc/html/hdf2.jpg
-./doc/html/ph5design.html
-./doc/html/ph5example.c
-./doc/html/ph5implement.txt
 ./doc/html/pipe1.gif
 ./doc/html/pipe1.obj			_DO_NOT_DISTRIBUTE_
 ./doc/html/pipe2.gif
