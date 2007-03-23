@@ -53,7 +53,7 @@ MOSTLYCLEAN=*.h5
 PROG_SRC= h5diff_main.c  h5diffgentest.c
 PROG_OBJ=$(PROG_SRC:.c=.lo)
 OBJS= h5diff_main.lo
-TEST_OBJS=h5diffgentest.o
+TEST_OBJS=h5diffgentest.lo
 
 PRIVATE_HDR=testh5diff.h
 
