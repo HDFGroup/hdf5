@@ -1699,6 +1699,7 @@ test_vltypes_compound_vlstr(void)
 	e1   color;
     } s2;
     typedef struct {                    /* Struct that the compound type are composed of */
+        double d;
         hvl_t v;
     } s1;
     s1 wdata[SPACE1_DIM1];              /* data to write */
@@ -1709,7 +1710,7 @@ test_vltypes_compound_vlstr(void)
     hid_t	fid1;		        /* HDF5 File IDs		*/
     hid_t	dataset, dset2;	        /* Dataset ID			*/
     hid_t	sid1, sid2, filespace, filespace2;  /* Dataspace ID	*/
-    hid_t	tid1, tid2, tid3, tid4, tid5;       /* Datatype IDs     */
+    hid_t	tid1, tid2, tid3, tid4, tid5, tid6;       /* Datatype IDs     */
     hid_t	cparms;
     hsize_t	dims1[] = {SPACE1_DIM1};
     hsize_t	chunk_dims[] = {SPACE1_DIM1/2};
@@ -1726,6 +1727,7 @@ test_vltypes_compound_vlstr(void)
 
     /* Allocate and initialize VL data to write */
     for(i=0; i<SPACE1_DIM1; i++) {
+        wdata[i].d = 1234.5;
         wdata[i].v.p=(s2*)HDmalloc((i+L3_INCM)*sizeof(s2));
         wdata[i].v.len=i+L3_INCM;
         for(t1=(wdata[i].v).p, j=0; j<(i+L3_INCM); j++, t1++) {
@@ -1762,6 +1764,7 @@ test_vltypes_compound_vlstr(void)
     ret = H5Tenum_insert(tid3, "GREEN", &val);
     CHECK(ret, FAIL, "H5Tenum_insert");
 
+    
     /* Create the first layer compound type */
     tid5 = H5Tcreate(H5T_COMPOUND, sizeof(s2));
     CHECK(tid5, FAIL, "H5Tcreate");
@@ -1784,6 +1787,15 @@ test_vltypes_compound_vlstr(void)
     /* Insert fields */
     ret=H5Tinsert(tid2, "v", HOFFSET(s1, v), tid1);
     CHECK(ret, FAIL, "H5Tinsert");
+
+    tid6 = H5Tcopy(H5T_IEEE_F64LE);
+    CHECK(ret, FAIL, "H5Tinsert");
+
+    /* Insert fields */
+    ret=H5Tinsert(tid2, "d", HOFFSET(s1, d), tid6);
+    CHECK(ret, FAIL, "H5Tinsert");
+
+
 
     /* Modify dataset creation properties, i.e. enable chunking  */
     cparms = H5Pcreate (H5P_DATASET_CREATE);
@@ -1820,11 +1832,15 @@ test_vltypes_compound_vlstr(void)
     CHECK(ret, FAIL, "H5Sclose");
 
     /* Close datatype */
-    ret = H5Tclose(tid4);
+    ret = H5Tclose(tid6);
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Close datatype */
     ret = H5Tclose(tid5);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close datatype */
+    ret = H5Tclose(tid4);
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Close datatype */
@@ -1894,6 +1910,7 @@ test_vltypes_compound_vlstr(void)
     /* Use this part for new data */
     strcpy(str, "bbbbbbbb\0");
     for(i=0; i<SPACE1_DIM1; i++) {
+        wdata2[i].d = 2017.3;
         wdata2[i].v.p=(s2*)HDmalloc((i+1)*sizeof(s2));
         wdata2[i].v.len=i+1;
         for(t1=(s2*)(wdata2[i].v).p, j=0; j<i+1; j++, t1++) {
@@ -1941,10 +1958,6 @@ test_vltypes_compound_vlstr(void)
         } /* end for */
     } /* end for */
 
-    /* Reclaim the write VL data */
-    ret=H5Dvlen_reclaim(tid2,sid1,H5P_DEFAULT,wdata2);
-    CHECK(ret, FAIL, "H5Dvlen_reclaim");
-
     /* Reclaim the VL data */
     ret=H5Dvlen_reclaim(tid2,sid1,H5P_DEFAULT,rdata2);
     CHECK(ret, FAIL, "H5Dvlen_reclaim");
@@ -1959,6 +1972,71 @@ test_vltypes_compound_vlstr(void)
     /* Close disk dataspace */
     ret = H5Sclose(sid2);
     CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close disk dataspace */
+    ret = H5Sclose(filespace2);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close datatype */
+    ret = H5Tclose(tid2);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close file */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+
+    /* Open file */
+    fid1 = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fopen");
+
+    /* Open the dataset */
+    dset2=H5Dopen(fid1,"Dataset1");
+    CHECK(dset2, FAIL, "H5Dopen");
+
+    /* Get the data type */
+    tid2 = H5Dget_type(dset2);
+    CHECK(tid2, FAIL, "H5Dget_type");
+
+    /* Select a hyperslab  */
+    filespace2 = H5Dget_space (dset2);
+    ret = H5Sselect_hyperslab (filespace2, H5S_SELECT_SET, offset, NULL,
+                                  dims1, NULL);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Read dataset from disk */
+    ret=H5Dread(dset2,tid2,H5S_ALL,H5S_ALL,H5P_DEFAULT,rdata2);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Compare data read in */
+    for(i=0; i<SPACE1_DIM1; i++) {
+        if(wdata2[i].v.len!=rdata2[i].v.len) {
+            TestErrPrintf("%d: VL data length don't match!, wdata2[%d].v.len=%d, rdata2[%d].v.len=%d\n",__LINE__,(int)i,(int)wdata2[i].v.len,(int)i,(int)rdata2[i].v.len);
+            continue;
+        } /* end if */
+
+        for(t1=wdata2[i].v.p, t2=rdata2[i].v.p, j=0; j<rdata2[i].v.len; j++, t1++, t2++) {
+                if( strcmp(t1->string, t2->string) ) {
+                    TestErrPrintf("VL data values don't match!, t1->string=%s, t2->string=%s\n",t1->string, t2->string);
+                    continue;
+                } /* end if */
+                if(t1->color != t2->color) {
+                    TestErrPrintf("VL data values don't match!, t1->color=%d, t2->color=%d\n",t1->color, t2->color);
+                    continue;
+                } /* end if */
+        } /* end for */
+    } /* end for */
+
+    /* Reclaim the write VL data */
+    ret=H5Dvlen_reclaim(tid2,filespace2,H5P_DEFAULT,wdata2);
+    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+
+    /* Reclaim the VL data */
+    ret=H5Dvlen_reclaim(tid2,filespace2,H5P_DEFAULT,rdata2);
+    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+
+    ret = H5Dclose(dset2);
+    CHECK(ret, FAIL, "H5Dclose");
 
     /* Close disk dataspace */
     ret = H5Sclose(filespace2);
@@ -2336,16 +2414,19 @@ static void
 test_vltypes_fill_value(void)
 {
     typedef struct dtype1_struct {
-        int    i1;
-        char   *str;
-        int    i2;
-        int    i3;
-        int    i4;
-        int    i5;
-        int    i6;
-        int    i7;
-        int    i8;
-        float  f1;
+        unsigned int    gui;
+        unsigned int    pgui;
+        char   *str_id;
+        char   *str_name;
+        char   *str_desc;
+        char   *str_orig;
+        char   *str_stat;
+        unsigned int    ver;
+        double val;
+        double ma;
+        double mi;
+        char   *str_form;
+        char   *str_unit;
     } dtype1_struct;
 
     herr_t ret;
@@ -2356,7 +2437,7 @@ test_vltypes_fill_value(void)
     hid_t dcpl_id, xfer_pid;
     hid_t dset_id; 
     hsize_t dim1[] = {SPACE1_DIM1};
-    const dtype1_struct fill1 = {1, "foobar", 2, 3, 4, 5, 6, 7, 8, 9.0};
+    const dtype1_struct fill1 = {1, 2, "foobar", "", NULL, "\0", "dead", 3, 4.0, 100.0, 1.0, "liquid", "meter"};
     dtype1_struct buf[SPACE1_DIM1];
     size_t mem_used=0;  /* Memory used during allocation */
     int i;
@@ -2368,40 +2449,53 @@ test_vltypes_fill_value(void)
     dtype1_id = H5Tcreate(H5T_COMPOUND, sizeof(struct dtype1_struct));
     CHECK(dtype1_id, FAIL, "H5Tcreate");
 
-    ret = H5Tinsert(dtype1_id,"i1",HOFFSET(struct dtype1_struct,i1),H5T_NATIVE_INT);
+    ret = H5Tinsert(dtype1_id,"guid",HOFFSET(struct dtype1_struct,gui),H5T_NATIVE_UINT);
     CHECK(ret, FAIL, "H5Tinsert");
+
+    ret = H5Tinsert(dtype1_id,"pguid",HOFFSET(struct dtype1_struct,pgui),H5T_NATIVE_UINT);
+    CHECK(ret, FAIL, "H5Tinsert");
+
 
     str_id = H5Tcopy(H5T_C_S1);
     CHECK(str_id, FAIL, "H5Tcopy");
     ret = H5Tset_size(str_id,H5T_VARIABLE);
     CHECK(ret, FAIL, "H5Tset_size");
 
-    ret = H5Tinsert(dtype1_id,"vl_string",HOFFSET(dtype1_struct,str),str_id);
+    ret = H5Tinsert(dtype1_id,"str_id",HOFFSET(dtype1_struct,str_id),str_id);
     CHECK(ret, FAIL, "H5Tinsert");
 
-    ret = H5Tinsert(dtype1_id,"i2",HOFFSET(struct dtype1_struct,i2),H5T_NATIVE_INT);
+    ret = H5Tinsert(dtype1_id,"str_name",HOFFSET(dtype1_struct,str_name),str_id);
     CHECK(ret, FAIL, "H5Tinsert");
 
-    ret = H5Tinsert(dtype1_id,"i3",HOFFSET(struct dtype1_struct,i3),H5T_NATIVE_INT);
+    ret = H5Tinsert(dtype1_id,"str_desc",HOFFSET(dtype1_struct,str_desc),str_id);
     CHECK(ret, FAIL, "H5Tinsert");
 
-    ret = H5Tinsert(dtype1_id,"i4",HOFFSET(struct dtype1_struct,i4),H5T_NATIVE_INT);
+    ret = H5Tinsert(dtype1_id,"str_orig",HOFFSET(dtype1_struct,str_orig),str_id);
     CHECK(ret, FAIL, "H5Tinsert");
 
-    ret = H5Tinsert(dtype1_id,"i5",HOFFSET(struct dtype1_struct,i5),H5T_NATIVE_INT);
+    ret = H5Tinsert(dtype1_id,"str_stat",HOFFSET(dtype1_struct,str_stat),str_id);
     CHECK(ret, FAIL, "H5Tinsert");
 
-    ret = H5Tinsert(dtype1_id,"i6",HOFFSET(struct dtype1_struct,i6),H5T_NATIVE_INT);
+
+    ret = H5Tinsert(dtype1_id,"ver",HOFFSET(struct dtype1_struct,ver),H5T_NATIVE_UINT);
     CHECK(ret, FAIL, "H5Tinsert");
 
-    ret = H5Tinsert(dtype1_id,"i7",HOFFSET(struct dtype1_struct,i7),H5T_NATIVE_INT);
+    ret = H5Tinsert(dtype1_id,"val",HOFFSET(struct dtype1_struct,val),H5T_NATIVE_DOUBLE);
     CHECK(ret, FAIL, "H5Tinsert");
 
-    ret = H5Tinsert(dtype1_id,"i8",HOFFSET(struct dtype1_struct,i8),H5T_NATIVE_INT);
+    ret = H5Tinsert(dtype1_id,"ma",HOFFSET(struct dtype1_struct,ma),H5T_NATIVE_DOUBLE);
     CHECK(ret, FAIL, "H5Tinsert");
 
-    ret = H5Tinsert(dtype1_id,"f1",HOFFSET(struct dtype1_struct,f1),H5T_NATIVE_FLOAT);
+    ret = H5Tinsert(dtype1_id,"mi",HOFFSET(struct dtype1_struct,mi),H5T_NATIVE_DOUBLE);
     CHECK(ret, FAIL, "H5Tinsert");
+
+
+    ret = H5Tinsert(dtype1_id,"str_form",HOFFSET(dtype1_struct,str_form),str_id);
+    CHECK(ret, FAIL, "H5Tinsert");
+
+    ret = H5Tinsert(dtype1_id,"str_unit",HOFFSET(dtype1_struct,str_unit),str_id);
+    CHECK(ret, FAIL, "H5Tinsert");
+
 
     ret = H5Tclose(str_id);
     CHECK(ret, FAIL, "H5Tclose");
@@ -2465,9 +2559,9 @@ test_vltypes_fill_value(void)
 
     /* Compare data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
-        if(strcmp(buf[i].str, "foobar")) {
-            TestErrPrintf("%d: VL data doesn't match!, buf[%d].str=%s\n",__LINE__,(int)i,buf[i].str);
-            /*continue;*/
+        if(strcmp(buf[i].str_id, "foobar") || strcmp(buf[i].str_name, "") || buf[i].str_desc || strcmp(buf[i].str_orig,"\0") || strcmp(buf[i].str_stat, "dead") || strcmp(buf[i].str_form, "liquid") || strcmp(buf[i].str_unit, "meter")) {
+            TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n",__LINE__,(int)i);
+            continue;
         } /* end if */
     } /* end for */
 
@@ -2487,9 +2581,9 @@ test_vltypes_fill_value(void)
 
     /* Compare data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
-        if(strcmp(buf[i].str, "foobar")) {
-            TestErrPrintf("%d: VL data doesn't match!, buf[%d].str=%s\n",__LINE__,(int)i,buf[i].str);
-            /*continue;*/
+        if(strcmp(buf[i].str_id, "foobar") || strcmp(buf[i].str_name, "") || buf[i].str_desc || strcmp(buf[i].str_orig,"\0") || strcmp(buf[i].str_stat, "dead") || strcmp(buf[i].str_form, "liquid") || strcmp(buf[i].str_unit, "meter")) {
+            TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n",__LINE__,(int)i);
+            continue;
         } /* end if */
     } /* end for */
 
@@ -2512,6 +2606,7 @@ test_vltypes_fill_value(void)
     ret = H5Fclose(file_id);
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_vltypes_fill_value() */
+
 
 /****************************************************************
 **

@@ -2496,7 +2496,13 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                             dst_size=seq_len*dst_base_size;
 
                             /* Check if conversion buffer is large enough, resize if
-                             * necessary */
+                             * necessary.  If the SEQ_LEN is 0, allocate a minimal size buffer. */
+			    if(src_size==0 && dst_size==0) {
+                                conv_buf_size=((1/H5T_VLEN_MIN_CONF_BUF_SIZE)+1)*H5T_VLEN_MIN_CONF_BUF_SIZE;
+                                if((conv_buf=H5FL_BLK_REALLOC(vlen_seq,conv_buf, conv_buf_size))==NULL)
+                                    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion");
+			    }
+
                             if(conv_buf_size<MAX(src_size,dst_size)) {
                                 /* Only allocate conversion buffer in H5T_VLEN_MIN_CONF_BUF_SIZE increments */
                                 conv_buf_size=((MAX(src_size,dst_size)/H5T_VLEN_MIN_CONF_BUF_SIZE)+1)*H5T_VLEN_MIN_CONF_BUF_SIZE;

@@ -256,7 +256,7 @@ test_vlstrings_basic(void)
 static void
 test_vlstrings_special(void)
 {
-    const char *wdata[SPACE1_DIM1] = {"one", "two", "", "four"};
+    const char *wdata[SPACE1_DIM1] = {"one", "two", "", "\0"};
     const char *wdata2[SPACE1_DIM1] = {NULL, NULL, NULL, NULL};
     char *rdata[SPACE1_DIM1];   /* Information read in */
     char *fill;                 /* Fill value */
@@ -314,6 +314,11 @@ test_vlstrings_special(void)
             TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)strlen(rdata[i]));
             continue;
         } /* end if */
+        if((wdata[i]==NULL && rdata[i]!=NULL) || (rdata[i]==NULL && wdata[i]!=NULL)) {
+            TestErrPrintf("VL data values don't match!\n");
+            continue;
+        } /* end if */
+
         if( HDstrcmp(wdata[i],rdata[i]) != 0 ) {
             TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",(int)i,wdata[i],(int)i,rdata[i]);
             continue;
