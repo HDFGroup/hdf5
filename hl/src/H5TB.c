@@ -3457,18 +3457,22 @@ out:
 static
 int H5TB_find_field( const char *field, const char *field_list )
 {
- const char *start = field_list;
- const char *end;
-
- while ( (end = strstr( start, "," )) != 0 ) {
-    if ( strncmp(start,field,(size_t)(end-start)) == 0 ) return 1;
-    start = end + 1;
- }
-
- if ( strcmp( start, field ) == 0 ) return 1;
-
- return -1;
-
+    const char *start = field_list;
+    const char *end;
+    
+    while ( (end = strstr( start, "," )) != 0 ) 
+    {
+        size_t count = end - start;
+        if ( strncmp(start, field, count) == 0 && count == strlen(field) )
+            return 1;
+        start = end + 1;
+    }
+    
+    if ( strcmp( start, field ) == 0 )
+        return 1;
+    
+    return -1;
+    
 }
 
 
