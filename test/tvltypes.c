@@ -2397,16 +2397,19 @@ static void
 test_vltypes_fill_value(void)
 {
     typedef struct dtype1_struct {
-        int    i1;
-        char   *str;
-        int    i2;
-        int    i3;
-        int    i4;
-        int    i5;
-        int    i6;
-        int    i7;
-        int    i8;
-        float  f1;
+        unsigned int    gui;
+        unsigned int    pgui;
+        char   *str_id;
+        char   *str_name;
+        char   *str_desc;
+        char   *str_orig;
+        char   *str_stat;
+        unsigned int    ver;
+        double val;
+        double ma;
+        double mi;
+        char   *str_form;
+        char   *str_unit;
     } dtype1_struct;
 
     herr_t ret;
@@ -2417,7 +2420,7 @@ test_vltypes_fill_value(void)
     hid_t dcpl_id, xfer_pid;
     hid_t dset_id; 
     hsize_t dim1[] = {SPACE1_DIM1};
-    const dtype1_struct fill1 = {1, "foobar", 2, 3, 4, 5, 6, 7, 8, 9.0};
+    const dtype1_struct fill1 = {1, 2, "foobar", "", NULL, "\0", "dead", 3, 4.0, 100.0, 1.0, "liquid", "meter"};
     dtype1_struct buf[SPACE1_DIM1];
     size_t mem_used=0;  /* Memory used during allocation */
     int i;
@@ -2429,40 +2432,53 @@ test_vltypes_fill_value(void)
     dtype1_id = H5Tcreate(H5T_COMPOUND, sizeof(struct dtype1_struct));
     CHECK(dtype1_id, FAIL, "H5Tcreate");
 
-    ret = H5Tinsert(dtype1_id,"i1",HOFFSET(struct dtype1_struct,i1),H5T_NATIVE_INT);
+    ret = H5Tinsert(dtype1_id,"guid",HOFFSET(struct dtype1_struct,gui),H5T_NATIVE_UINT);
     CHECK(ret, FAIL, "H5Tinsert");
+
+    ret = H5Tinsert(dtype1_id,"pguid",HOFFSET(struct dtype1_struct,pgui),H5T_NATIVE_UINT);
+    CHECK(ret, FAIL, "H5Tinsert");
+
 
     str_id = H5Tcopy(H5T_C_S1);
     CHECK(str_id, FAIL, "H5Tcopy");
     ret = H5Tset_size(str_id,H5T_VARIABLE);
     CHECK(ret, FAIL, "H5Tset_size");
 
-    ret = H5Tinsert(dtype1_id,"vl_string",HOFFSET(dtype1_struct,str),str_id);
+    ret = H5Tinsert(dtype1_id,"str_id",HOFFSET(dtype1_struct,str_id),str_id);
     CHECK(ret, FAIL, "H5Tinsert");
 
-    ret = H5Tinsert(dtype1_id,"i2",HOFFSET(struct dtype1_struct,i2),H5T_NATIVE_INT);
+    ret = H5Tinsert(dtype1_id,"str_name",HOFFSET(dtype1_struct,str_name),str_id);
     CHECK(ret, FAIL, "H5Tinsert");
 
-    ret = H5Tinsert(dtype1_id,"i3",HOFFSET(struct dtype1_struct,i3),H5T_NATIVE_INT);
+    ret = H5Tinsert(dtype1_id,"str_desc",HOFFSET(dtype1_struct,str_desc),str_id);
     CHECK(ret, FAIL, "H5Tinsert");
 
-    ret = H5Tinsert(dtype1_id,"i4",HOFFSET(struct dtype1_struct,i4),H5T_NATIVE_INT);
+    ret = H5Tinsert(dtype1_id,"str_orig",HOFFSET(dtype1_struct,str_orig),str_id);
     CHECK(ret, FAIL, "H5Tinsert");
 
-    ret = H5Tinsert(dtype1_id,"i5",HOFFSET(struct dtype1_struct,i5),H5T_NATIVE_INT);
+    ret = H5Tinsert(dtype1_id,"str_stat",HOFFSET(dtype1_struct,str_stat),str_id);
     CHECK(ret, FAIL, "H5Tinsert");
 
-    ret = H5Tinsert(dtype1_id,"i6",HOFFSET(struct dtype1_struct,i6),H5T_NATIVE_INT);
+
+    ret = H5Tinsert(dtype1_id,"ver",HOFFSET(struct dtype1_struct,ver),H5T_NATIVE_UINT);
     CHECK(ret, FAIL, "H5Tinsert");
 
-    ret = H5Tinsert(dtype1_id,"i7",HOFFSET(struct dtype1_struct,i7),H5T_NATIVE_INT);
+    ret = H5Tinsert(dtype1_id,"val",HOFFSET(struct dtype1_struct,val),H5T_NATIVE_DOUBLE);
     CHECK(ret, FAIL, "H5Tinsert");
 
-    ret = H5Tinsert(dtype1_id,"i8",HOFFSET(struct dtype1_struct,i8),H5T_NATIVE_INT);
+    ret = H5Tinsert(dtype1_id,"ma",HOFFSET(struct dtype1_struct,ma),H5T_NATIVE_DOUBLE);
     CHECK(ret, FAIL, "H5Tinsert");
 
-    ret = H5Tinsert(dtype1_id,"f1",HOFFSET(struct dtype1_struct,f1),H5T_NATIVE_FLOAT);
+    ret = H5Tinsert(dtype1_id,"mi",HOFFSET(struct dtype1_struct,mi),H5T_NATIVE_DOUBLE);
     CHECK(ret, FAIL, "H5Tinsert");
+
+
+    ret = H5Tinsert(dtype1_id,"str_form",HOFFSET(dtype1_struct,str_form),str_id);
+    CHECK(ret, FAIL, "H5Tinsert");
+
+    ret = H5Tinsert(dtype1_id,"str_unit",HOFFSET(dtype1_struct,str_unit),str_id);
+    CHECK(ret, FAIL, "H5Tinsert");
+
 
     ret = H5Tclose(str_id);
     CHECK(ret, FAIL, "H5Tclose");
@@ -2526,9 +2542,9 @@ test_vltypes_fill_value(void)
 
     /* Compare data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
-        if(strcmp(buf[i].str, "foobar")) {
-            TestErrPrintf("%d: VL data doesn't match!, buf[%d].str=%s\n",__LINE__,(int)i,buf[i].str);
-            /*continue;*/
+        if(strcmp(buf[i].str_id, "foobar") || strcmp(buf[i].str_name, "") || buf[i].str_desc || strcmp(buf[i].str_orig,"\0") || strcmp(buf[i].str_stat, "dead") || strcmp(buf[i].str_form, "liquid") || strcmp(buf[i].str_unit, "meter")) {
+            TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n",__LINE__,(int)i);
+            continue;
         } /* end if */
     } /* end for */
 
@@ -2548,9 +2564,9 @@ test_vltypes_fill_value(void)
 
     /* Compare data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
-        if(strcmp(buf[i].str, "foobar")) {
-            TestErrPrintf("%d: VL data doesn't match!, buf[%d].str=%s\n",__LINE__,(int)i,buf[i].str);
-            /*continue;*/
+        if(strcmp(buf[i].str_id, "foobar") || strcmp(buf[i].str_name, "") || buf[i].str_desc || strcmp(buf[i].str_orig,"\0") || strcmp(buf[i].str_stat, "dead") || strcmp(buf[i].str_form, "liquid") || strcmp(buf[i].str_unit, "meter")) {
+            TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n",__LINE__,(int)i);
+            continue;
         } /* end if */
     } /* end for */
 
