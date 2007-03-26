@@ -256,7 +256,7 @@ test_vlstrings_basic(void)
 static void
 test_vlstrings_special(void)
 {
-    const char *wdata[SPACE1_DIM1] = {"one", "two", "", "\0"};
+    const char *wdata[SPACE1_DIM1] = {"", "two", "three", "\0"};
     const char *wdata2[SPACE1_DIM1] = {NULL, NULL, NULL, NULL};
     char *rdata[SPACE1_DIM1];   /* Information read in */
     char *fill;                 /* Fill value */
