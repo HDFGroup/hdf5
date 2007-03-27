@@ -365,7 +365,8 @@ H5V_log2_gen(uint64_t n)
             if((tt = (unsigned)(n >> 16)))
                 r = (t = (unsigned)(n >> 24)) ? 24 + LogTable256[t] : 16 + LogTable256[tt & 0xFF];
             else
-                r = (t = (unsigned)(n >> 8)) ? 8 + LogTable256[t] : LogTable256[n];
+                /* Added 'uint8_t' cast to pacify PGCC compiler */
+                r = (t = (unsigned)(n >> 8)) ? 8 + LogTable256[t] : LogTable256[(uint8_t)n];
 #ifdef H5_BAD_LOG2_CODE_GENERATED
     } /* end else */
 #endif /* H5_BAD_LOG2_CODE_GENERATED  */

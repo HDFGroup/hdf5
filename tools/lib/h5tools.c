@@ -735,7 +735,9 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
 {
     herr_t            ret;                     /* the value to return */
     hid_t             f_space;                 /* file data space */
-    hsize_t           i, j, n;                 /* counters  */
+    size_t            i;                       /* counters  */
+    size_t            j;                       /* counters  */
+    hsize_t           n;                       /* counters  */
     hsize_t           zero = 0;                /* vector of zeros */
     unsigned int      flags;                   /* buffer extent flags */
     hsize_t           total_size[H5S_MAX_RANK];/* total size of dataset*/
@@ -780,7 +782,7 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
 
     /* assume entire data space to be printed */
     if (ctx.ndims > 0)
-        for (i = 0; i < ctx.ndims; i++)
+        for (i = 0; i < (size_t)ctx.ndims; i++)
             ctx.p_min_idx[i] = 0;
 
     H5Sget_simple_extent_dims(f_space, total_size, NULL);
@@ -794,7 +796,7 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
     /* get the offset count */
     outer_count = 1;
     if (ctx.ndims > 2)
-        for (i = 0; i < ctx.ndims - 2; i++)
+        for (i = 0; i < (size_t)ctx.ndims - 2; i++)
             outer_count *= sset->count[ i ];
 
     if(ctx.ndims>0)
@@ -802,7 +804,7 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
 
 
     /* initialize temporary start, count and maximum start */
-    for (i = 0; i < ctx.ndims; i++)
+    for (i = 0; i < (size_t)ctx.ndims; i++)
     {
         temp_start[ i ] = sset->start[ i ];
         temp_count[ i ] = sset->count[ i ];
@@ -811,7 +813,7 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
     }
     if (ctx.ndims > 2)
     {
-        for (i = 0; i < ctx.ndims - 2; i++)
+        for (i = 0; i < (size_t)ctx.ndims - 2; i++)
         {
             max_start[ i ] = temp_start[ i ] + sset->count[ i ];
             temp_count[ i ] = 1;
@@ -896,10 +898,10 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
                 the element position at the start of hyperslab */
                 H5Sget_select_bounds(f_space,low,high);
                 elmtno=0;
-                for (i = 0; i < ctx.ndims-1; i++) 
+                for (i = 0; i < (size_t)ctx.ndims-1; i++) 
                 {
                     hsize_t offset = 1; /* accumulation of the previous dimensions */
-                    for (j = i+1; j < ctx.ndims; j++) 
+                    for (j = i+1; j < (size_t)ctx.ndims; j++) 
                         offset *= total_size[j];
                     elmtno+= low[i] * offset;
                 }
@@ -989,7 +991,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, hid_t dset,
 {
     hid_t               f_space;                  /* file data space */
     hsize_t             elmtno;                   /* counter  */
-    hsize_t             i;                        /* counter  */
+    size_t             i;                        /* counter  */
     int                 carry;                    /* counter carry value */
     hsize_t             zero[8];                  /* vector of zeros */
     unsigned int        flags;                    /* buffer extent flags */
@@ -1037,7 +1039,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, hid_t dset,
 
     /* Assume entire data space to be printed */
     if (ctx.ndims > 0)
-        for (i = 0; i < ctx.ndims; i++)
+        for (i = 0; i < (size_t)ctx.ndims; i++)
             ctx.p_min_idx[i] = 0;
 
     H5Sget_simple_extent_dims(f_space, total_size, NULL);

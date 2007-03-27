@@ -157,6 +157,7 @@ test_table(hid_t fid, int do_write)
  hsize_t nfields;
  hsize_t rfields;
  hsize_t i, j;
+ size_t u;
  hsize_t start1;      /* record to start reading from 1st table */
  hsize_t start2;      /* record to start writing in 2nd table */
 
@@ -580,8 +581,8 @@ test_table(hid_t fid, int do_write)
  * data= 0 1 2 3 4 5 6 7
  *-------------------------------------------------------------------------
  */
- for( i=0; i<NRECORDS; i++)
-  wbufd[i] = wbuf[i];
+ for( u=0; u<(size_t)NRECORDS; u++)
+  wbufd[u] = wbuf[u];
 
  if (H5TBmake_table(TITLE,fid,"table3",NFIELDS,NRECORDS,type_size_mem,
                     field_names,field_offset,field_type,
@@ -617,8 +618,8 @@ test_table(hid_t fid, int do_write)
  *-------------------------------------------------------------------------
  */
  nrecords=rrecords;
- for( i=0; i<nrecords; i++)
-  wbufd[i] = rbuf[i];
+ for( u=0; u<(size_t)nrecords; u++)
+  wbufd[u] = rbuf[u];
 
 /*-------------------------------------------------------------------------
  * Delete records, start at 0, delete 2
@@ -648,8 +649,8 @@ test_table(hid_t fid, int do_write)
  *-------------------------------------------------------------------------
  */
  nrecords=rrecords;
- for( i=0; i<nrecords; i++)
-  wbufd[i] = rbuf[i];
+ for( u=0; u<(size_t)nrecords; u++)
+  wbufd[u] = rbuf[u];
 
 /*-------------------------------------------------------------------------
  * Delete records, start at 1, delete 1
@@ -679,8 +680,8 @@ test_table(hid_t fid, int do_write)
  *-------------------------------------------------------------------------
  */
  nrecords=rrecords;
- for( i=0; i<nrecords; i++)
-  wbufd[i] = rbuf[i];
+ for( u=0; u<(size_t)nrecords; u++)
+  wbufd[u] = rbuf[u];
 
 /*-------------------------------------------------------------------------
  * Delete records, start at 0, delete 1
@@ -710,8 +711,8 @@ test_table(hid_t fid, int do_write)
  *-------------------------------------------------------------------------
  */
  nrecords=rrecords;
- for( i=0; i<nrecords; i++)
-  wbufd[i] = rbuf[i];
+ for( u=0; u<(size_t)nrecords; u++)
+  wbufd[u] = rbuf[u];
 
  /* Read complete table */
  if (H5TBread_table(fid,"table3",type_size_mem,field_offset,field_size,rbuf)<0)
@@ -923,18 +924,18 @@ test_table(hid_t fid, int do_write)
   goto out;
 
  /* compare the read values with the initial values */
- for( i = 0; i < NRECORDS; i++ )
+ for( u = 0; u < (size_t)NRECORDS; u++ )
  {
-  if ( i >= 2 && i <= 4 )
+  if ( u >= 2 && u <= 4 )
   {
-    if ( rbuf[i].lati        != position_in[i-NRECORDS_ADD+1].lati ||
-         rbuf[i].longi       != position_in[i-NRECORDS_ADD+1].longi ||
-         rbuf[i].pressure    != pressure_in[i-NRECORDS_ADD+1] )
+    if ( rbuf[u].lati        != position_in[u-(size_t)NRECORDS_ADD+1].lati ||
+         rbuf[u].longi       != position_in[u-(size_t)NRECORDS_ADD+1].longi ||
+         rbuf[u].pressure    != pressure_in[u-(size_t)NRECORDS_ADD+1] )
     {
      fprintf(stderr,"%ld %f %d\n",
-      rbuf[i].longi,rbuf[i].pressure,rbuf[i].lati);
+      rbuf[u].longi,rbuf[u].pressure,rbuf[u].lati);
      fprintf(stderr,"%ld %f %d\n",
-      position_in[i].longi,pressure_in[i],position_in[i].lati);
+      position_in[u].longi,pressure_in[u],position_in[u].lati);
       goto out;
     }
   }
@@ -980,9 +981,9 @@ test_table(hid_t fid, int do_write)
   goto out;
 
  /* Compare the extracted table with the initial values */
- for( i = 0; i < NRECORDS_ADD; i++ )
+ for( u = 0; u < (size_t)NRECORDS_ADD; u++ )
  {
-  if ( pressure_out[i] != pressure_in[i] ) {
+  if ( pressure_out[u] != pressure_in[u] ) {
    goto out;
   }
  }
@@ -1009,10 +1010,10 @@ test_table(hid_t fid, int do_write)
   goto out;
 
  /* Compare the extracted table with the initial values */
- for( i = 0; i < NRECORDS_ADD; i++ )
+ for( u = 0; u < (size_t)NRECORDS_ADD; u++ )
  {
-  if ( position_out[i].lati  != position_in[i].lati ||
-   position_out[i].longi != position_in[i].longi )
+  if ( position_out[u].lati  != position_in[u].lati ||
+   position_out[u].longi != position_in[u].longi )
    goto out;
  }
 
@@ -1040,18 +1041,18 @@ test_table(hid_t fid, int do_write)
   goto out;
 
  /* Compare the extracted table with the initial values */
- for( i = 0; i < NRECORDS; i++ )
+ for( u = 0; u < (size_t)NRECORDS; u++ )
  {
-  if ( ( strcmp( namepre_out[i].name,  namepre_in[i].name ) != 0 ) ||
-         namepre_out[i].pressure != namepre_in[i].pressure ) {
+  if ( ( strcmp( namepre_out[u].name,  namepre_in[u].name ) != 0 ) ||
+         namepre_out[u].pressure != namepre_in[u].pressure ) {
    goto out;
   }
  }
  /* reset buffer */
- for( i = 0; i < NRECORDS; i++ )
+ for( u = 0; u < (size_t)NRECORDS; u++ )
  {
-  strcpy( namepre_out[i].name,  "\0" );
-  namepre_out[i].pressure = -1;
+  strcpy( namepre_out[u].name,  "\0" );
+  namepre_out[u].pressure = -1;
  }
 
 /*-------------------------------------------------------------------------
@@ -1066,10 +1067,10 @@ test_table(hid_t fid, int do_write)
   goto out;
 
  /* Compare the extracted table with the initial values */
- for( i = 0; i < 3; i++ )
+ for( u = 0; u < 3; u++ )
  {
-  if ( ( strcmp( namepre_out[i].name,  namepre_in[start+i].name ) != 0 ) ||
-         namepre_out[i].pressure != namepre_in[start+i].pressure ) {
+  if ( ( strcmp( namepre_out[u].name,  namepre_in[(size_t)start+u].name ) != 0 ) ||
+         namepre_out[u].pressure != namepre_in[(size_t)start+u].pressure ) {
    goto out;
   }
  }
@@ -1119,13 +1120,13 @@ test_table(hid_t fid, int do_write)
   goto out;
 
  /* Compare the extracted table with the initial values */
- for( i = 0; i < NRECORDS; i++ )
+ for( u = 0; u < (size_t)NRECORDS; u++ )
  {
-  if ( i >= 2 && i <= 4 )
+  if ( u >= 2 && u <= 4 )
   {
-    if ( rbuf[i].lati        != position_in[i-NRECORDS_ADD+1].lati ||
-         rbuf[i].longi       != position_in[i-NRECORDS_ADD+1].longi ||
-         rbuf[i].pressure    != pressure_in[i-NRECORDS_ADD+1] )
+    if ( rbuf[u].lati        != position_in[u-(size_t)NRECORDS_ADD+1].lati ||
+         rbuf[u].longi       != position_in[u-(size_t)NRECORDS_ADD+1].longi ||
+         rbuf[u].pressure    != pressure_in[u-(size_t)NRECORDS_ADD+1] )
    goto out;
   }
  }
@@ -1176,9 +1177,9 @@ test_table(hid_t fid, int do_write)
   goto out;
 
  /* compare the extracted table with the initial values */
- for( i = 0; i < NRECORDS; i++ )
+ for( u = 0; u < (size_t)NRECORDS; u++ )
  {
-  if ( pressure_out[i] != pressure_in[i] ) {
+  if ( pressure_out[u] != pressure_in[u] ) {
    goto out;
   }
  }
@@ -1207,10 +1208,10 @@ test_table(hid_t fid, int do_write)
   goto out;
 
  /* compare the extracted table with the initial values */
- for( i = 0; i < NRECORDS_ADD; i++ )
+ for( u = 0; u < (size_t)NRECORDS_ADD; u++ )
  {
-  if ( position_out[i].lati  != position_in[i].lati ||
-       position_out[i].longi != position_in[i].longi ) {
+  if ( position_out[u].lati  != position_in[u].lati ||
+       position_out[u].longi != position_in[u].longi ) {
    goto out;
   }
  }
@@ -1241,19 +1242,19 @@ test_table(hid_t fid, int do_write)
   goto out;
 
  /* compare the extracted table with the initial values */
- for( i = 0; i < NRECORDS; i++ )
+ for( u = 0; u < (size_t)NRECORDS; u++ )
  {
-  if ( ( strcmp( namepre_out[i].name,  namepre_in[i].name ) != 0 ) ||
-         namepre_out[i].pressure != namepre_in[i].pressure ) {
+  if ( ( strcmp( namepre_out[u].name,  namepre_in[u].name ) != 0 ) ||
+         namepre_out[u].pressure != namepre_in[u].pressure ) {
    goto out;
   }
  }
 
  /* reset buffer */
- for( i = 0; i < NRECORDS; i++ )
+ for( u = 0; u < (size_t)NRECORDS; u++ )
  {
-  strcpy( namepre_out[i].name,  "\0" );
-  namepre_out[i].pressure = -1;
+  strcpy( namepre_out[u].name,  "\0" );
+  namepre_out[u].pressure = -1;
  }
 
 /*-------------------------------------------------------------------------
@@ -1271,10 +1272,10 @@ test_table(hid_t fid, int do_write)
   goto out;
 
  /* compare the extracted table with the initial values */
- for( i = 0; i < 3; i++ )
+ for( u = 0; u < 3; u++ )
  {
-  if ( ( strcmp( namepre_out[i].name,  wbuf[start+i].name ) != 0 ) ||
-   namepre_out[i].pressure != wbuf[start+i].pressure ) {
+  if ( ( strcmp( namepre_out[u].name,  wbuf[(size_t)start+u].name ) != 0 ) ||
+   namepre_out[u].pressure != wbuf[(size_t)start+u].pressure ) {
    goto out;
   }
  }
@@ -1312,14 +1313,14 @@ test_table(hid_t fid, int do_write)
   goto out;
 
  /* compare the extracted table with the original array */
- for( i = 0; i < NRECORDS; i++ )
+ for( u = 0; u < (size_t)NRECORDS; u++ )
  {
-  if ( ( strcmp( rbuf2[i].name,  wbuf[i].name ) != 0 ) ||
-   rbuf2[i].lati          != wbuf[i].lati ||
-   rbuf2[i].longi         != wbuf[i].longi ||
-   rbuf2[i].pressure      != wbuf[i].pressure ||
-   rbuf2[i].temperature   != wbuf[i].temperature ||
-   rbuf2[i].new_field     != buf_new[i] ) {
+  if ( ( strcmp( rbuf2[u].name,  wbuf[u].name ) != 0 ) ||
+   rbuf2[u].lati          != wbuf[u].lati ||
+   rbuf2[u].longi         != wbuf[u].longi ||
+   rbuf2[u].pressure      != wbuf[u].pressure ||
+   rbuf2[u].temperature   != wbuf[u].temperature ||
+   rbuf2[u].new_field     != buf_new[u] ) {
    goto out;
   }
  }
@@ -1355,12 +1356,12 @@ test_table(hid_t fid, int do_write)
   goto out;
 
  /* compare the extracted table with the original array */
- for( i = 0; i < NRECORDS; i++ )
+ for( u = 0; u < (size_t)NRECORDS; u++ )
  {
-  if ( ( strcmp( rbuf3[i].name, wbuf[i].name ) != 0 ) ||
-         rbuf3[i].lati != wbuf[i].lati ||
-         rbuf3[i].longi != wbuf[i].longi ||
-         rbuf3[i].temperature != wbuf[i].temperature ) {
+  if ( ( strcmp( rbuf3[u].name, wbuf[u].name ) != 0 ) ||
+         rbuf3[u].lati != wbuf[u].lati ||
+         rbuf3[u].longi != wbuf[u].longi ||
+         rbuf3[u].temperature != wbuf[u].temperature ) {
    goto out;
   }
  }
@@ -1403,26 +1404,26 @@ test_table(hid_t fid, int do_write)
 
  /* alocate */
  names_out = malloc( sizeof(char*) * (size_t)NFIELDS );
- for ( i = 0; i < NFIELDS; i++)
+ for ( u = 0; u < (size_t)NFIELDS; u++)
  {
-  names_out[i] = malloc( sizeof(char) * 255 );
+  names_out[u] = malloc( sizeof(char) * 255 );
  }
 
  /* Get field info */
  if ( H5TBget_field_info(fid, "table1", names_out, sizes_out, offset_out, &size_out ) < 0 )
   goto out;
 
- for ( i = 0; i < NFIELDS; i++)
+ for ( u = 0; u < (size_t)NFIELDS; u++)
  {
-  if ( (strcmp( field_names[i], names_out[i] ) != 0)) {
+  if ( (strcmp( field_names[u], names_out[u] ) != 0)) {
    goto out;
   }
  }
 
  /* release */
- for ( i = 0; i < NFIELDS; i++)
+ for ( u = 0; u < (size_t)NFIELDS; u++)
  {
-  free ( names_out[i] );
+  free ( names_out[u] );
  }
  free ( names_out );
 
@@ -1549,8 +1550,9 @@ static hid_t h5file_open(const char *fname, unsigned flags)
  * function that compares one particle
  *-------------------------------------------------------------------------
  */
-static int cmp_par(hsize_t i, hsize_t j, particle_t *rbuf, particle_t *wbuf )
+static int cmp_par(hsize_t _i, hsize_t _j, particle_t *rbuf, particle_t *wbuf )
 {
+    size_t i = (size_t)_i, j = (size_t)_j;
  if ( ( strcmp( rbuf[i].name, wbuf[j].name ) != 0 ) ||
   rbuf[i].lati != wbuf[j].lati ||
   rbuf[i].longi != wbuf[j].longi ||

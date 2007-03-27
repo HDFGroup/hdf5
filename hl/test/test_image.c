@@ -96,7 +96,7 @@ static int test_simple(void)
  hsize_t       pal_dims_out[2];
  char          interlace[20];
  hssize_t      npals;
- hsize_t       i, j;
+ size_t       i, j;
  herr_t        is_image;
  herr_t        is_pal;
  unsigned char image_in1 [ WIDTH*HEIGHT ];
@@ -120,10 +120,10 @@ static int test_simple(void)
 
  /* create an image of 9 values divided evenly by the array */
  space = WIDTH*HEIGHT / PAL_ENTRIES;
- for (i=0, j=0, n=0; i < WIDTH*HEIGHT; i++, j++ )
+ for (i=0, j=0, n=0; i < (size_t)(WIDTH*HEIGHT); i++, j++ )
  {
   image_in1[i] = n;
-  if ( j > space )
+  if ( j > (size_t)space )
   {
    n++;
    j=0;
@@ -131,7 +131,7 @@ static int test_simple(void)
   if (n>PAL_ENTRIES-1) n=0;
  }
  /* create an image 3 byte RGB image */
- for (i=0, j=0, n=0; i < WIDTH*HEIGHT*3; i++, j++)
+ for (i=0, j=0, n=0; i < (size_t)(WIDTH*HEIGHT*3); i++, j++)
  {
   image_in2[i] = n;
   if (j==3)
@@ -185,7 +185,7 @@ static int test_simple(void)
   goto out;
 
  /* check */
- for (i = 0; i < height*width*planes; i++)
+ for (i = 0; i < (size_t)(height*width*planes); i++)
  {
   if ( image_in1[i] != image_out1[i] )
   {
@@ -223,7 +223,7 @@ static int test_simple(void)
   goto out;
 
  /* check */
- for (i = 0; i < height*width*planes; i++)
+ for (i = 0; i < (size_t)(height*width*planes); i++)
  {
   if ( image_in2[i] != image_out2[i] )
   {

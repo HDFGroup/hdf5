@@ -56,7 +56,7 @@ create_file(char* name, hid_t fapl)
     hid_t	file, dcpl, space, dset, groups, grp;
     hsize_t	ds_size[2] = {100, 100};
     hsize_t	ch_size[2] = {5, 5};
-    hsize_t	i, j;
+    size_t	i, j;
 
     if ((file=H5Fcreate(name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) goto error;
 
@@ -74,7 +74,7 @@ create_file(char* name, hid_t fapl)
 	 * for the Win32 version 5.0 compiler.
 	 * 1998-11-06 ptl
 	 */
-	for (j=0; j<ds_size[1]; j++) {
+	for (j=0; j<(size_t)ds_size[1]; j++) {
 	    the_data[i][j] = (double)(hssize_t)i/(hssize_t)(j+1);
 	}
     }
@@ -119,7 +119,7 @@ extend_file(hid_t file)
     hid_t	dcpl, space, dset;
     hsize_t	ds_size[2] = {100, 100};
     hsize_t	ch_size[2] = {5, 5};
-    hsize_t	i, j;
+    size_t	i, j;
 
     /* Create a chunked dataset */
     if ((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
@@ -135,7 +135,7 @@ extend_file(hid_t file)
 	 * for the Win32 version 5.0 compiler.
 	 * 1998-11-06 ptl
 	 */
-	for (j=0; j<ds_size[1]; j++) {
+	for (j=0; j<(size_t)ds_size[1]; j++) {
 	    the_data[i][j] = (double)(hssize_t)i/(hssize_t)(j+1);
 	}
     }

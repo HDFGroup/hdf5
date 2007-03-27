@@ -133,7 +133,8 @@ test_noconv(hid_t file)
 			 E1_RED,   E1_BLUE,  E1_GREEN, E1_BLACK, E1_WHITE,
 			 E1_RED,   E1_WHITE, E1_GREEN, E1_GREEN, E1_BLUE};
     c_e1	data2[NELMTS(data1)];
-    hsize_t	i, ds_size[1]={NELMTS(data1)};
+    hsize_t	ds_size[1]={NELMTS(data1)};
+    size_t	i;
 
     TESTING("no-conversion datasets");
     if ((cwg=H5Gcreate(file, "test_noconv", 0))<0) goto error;
@@ -151,7 +152,7 @@ test_noconv(hid_t file)
     if (H5Dwrite(dset, type, space, space, H5P_DEFAULT, data1)<0) goto error;
     if (H5Dread(dset, type, space, space, H5P_DEFAULT, data2)<0) goto error;
 
-    for (i=0; i<ds_size[0]; i++) {
+    for (i=0; i<(size_t)ds_size[0]; i++) {
 	if (data1[i]!=data2[i]) {
 	    H5_FAILED();
 	    printf("    data1[%lu]=%d, data2[%lu]=%d (should be same)\n",
@@ -202,7 +203,8 @@ static int
 test_tr1(hid_t file)
 {
     hid_t	cwg=-1, m_type=-1, f_type=-1, space=-1, dset=-1;
-    hsize_t	i, ds_size[1]={10};
+    hsize_t	ds_size[1]={10};
+    size_t	i;
     c_e1	eval;
     int		ival;
     static c_e1	data1[10]={E1_RED,   E1_GREEN, E1_BLUE,  E1_GREEN, E1_WHITE,
@@ -238,7 +240,7 @@ test_tr1(hid_t file)
 	if (H5Dwrite(dset, m_type, space, space, H5P_DEFAULT, data1)<0) goto error;
 	if (H5Dread(dset, m_type, space, space, H5P_DEFAULT, data2)<0) goto error;
 
-	for (i=0; i<ds_size[0]; i++) {
+	for (i=0; i<(size_t)ds_size[0]; i++) {
 	    if (data1[i]!=data2[i]) {
 		H5_FAILED();
 		printf("    data1[%lu]=%d, data2[%lu]=%d (should be same)\n",
@@ -293,7 +295,8 @@ static int
 test_tr2(hid_t file)
 {
     hid_t	cwg=-1, m_type=-1, f_type=-1, space=-1, dset=-1;
-    hsize_t	i, ds_size[1]={10};
+    hsize_t	ds_size[1]={10};
+    size_t	i;
     c_e1	val1;
     int		val2;
     static c_e1	data1[10]={E1_RED,   E1_GREEN, E1_BLUE,  E1_GREEN, E1_WHITE,
@@ -328,7 +331,7 @@ test_tr2(hid_t file)
 	if (H5Dwrite(dset, m_type, space, space, H5P_DEFAULT, data1)<0) goto error;
 	if (H5Dread(dset, m_type, space, space, H5P_DEFAULT, data2)<0) goto error;
 
-	for (i=0; i<ds_size[0]; i++) {
+	for (i=0; i<(size_t)ds_size[0]; i++) {
 	    if (data1[i]!=data2[i]) {
 		H5_FAILED();
 		printf("    data1[%lu]=%d, data2[%lu]=%d (should be same)\n",

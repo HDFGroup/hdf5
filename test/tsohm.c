@@ -971,7 +971,7 @@ static void sohm_attr_helper(hid_t fcpl_id)
     int wdata[2] = {7, 42};
     int rdata[2];
     herr_t ret;
-    hsize_t x;
+    size_t x;
 
     /* Create a file using the fcpl */
     file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
@@ -1005,7 +1005,7 @@ static void sohm_attr_helper(hid_t fcpl_id)
     memset(rdata, 0, sizeof(rdata));
     ret = H5Aread(attr_id, H5T_NATIVE_INT, rdata);
     CHECK_I(ret, "H5Aread");
-    for(x=0; x<dims; ++x) {
+    for(x=0; x<(size_t)dims; ++x) {
         VERIFY(rdata[x], wdata[x], "H5Aread");
     }
 
@@ -1041,7 +1041,7 @@ static void sohm_attr_helper(hid_t fcpl_id)
     memset(rdata, 0, sizeof(rdata));
     ret = H5Aread(attr_id, H5T_NATIVE_INT, rdata);
     CHECK_I(ret, "H5Aread");
-    for(x=0; x<dims; ++x) {
+    for(x=0; x<(size_t)dims; ++x) {
         VERIFY(rdata[x], wdata[x], "H5Aread");
     }
 

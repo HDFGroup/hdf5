@@ -54,7 +54,7 @@ check_dset(hid_t file, const char* name)
     hid_t	space, dset;
     hsize_t	ds_size[2] = {100, 100};
     double	error;
-    hsize_t	i, j;
+    size_t	i, j;
 
     /* Open the dataset */
     if ((dset=H5Dopen(file, name))<0) goto error;
@@ -65,8 +65,8 @@ check_dset(hid_t file, const char* name)
     /* Read some data */
     if (H5Dread(dset, H5T_NATIVE_DOUBLE, space, space, H5P_DEFAULT,
 		the_data)<0) goto error;
-    for (i=0; i<ds_size[0]; i++) {
-	for (j=0; j<ds_size[1]; j++) {
+    for (i=0; i<(size_t)ds_size[0]; i++) {
+	for (j=0; j<(size_t)ds_size[1]; j++) {
 	    /*
 	     * The extra cast in the following statement is a bug workaround
 	     * for the Win32 version 5.0 compiler.

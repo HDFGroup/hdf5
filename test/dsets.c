@@ -1312,7 +1312,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     const hsize_t	hs_offset[2] = {FILTER_HS_OFFSET1, FILTER_HS_OFFSET2}; /* Hyperslab offset */
     const hsize_t	hs_size[2] = {FILTER_HS_SIZE1, FILTER_HS_SIZE2};   /* Hyperslab size */
     void		*tconv_buf = NULL;      /* Temporary conversion buffer */
-    hsize_t		i, j, n;        /* Local index variables */
+    size_t		i, j, n;        /* Local index variables */
     herr_t              status;         /* Error status */
 
     /* Create the data space */
@@ -1357,8 +1357,8 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     if (H5Dread (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check)<0)
 	goto error;
 
-    for (i=0; i<size[0]; i++) {
-	for (j=0; j<size[1]; j++) {
+    for (i=0; i<(size_t)size[0]; i++) {
+	for (j=0; j<(size_t)size[1]; j++) {
 	    if (0!=check[i][j]) {
 		H5_FAILED();
 		printf("    Read a non-zero value.\n");
@@ -1557,9 +1557,9 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
      */
     TESTING("    filters (partial I/O)");
 
-    for (i=0; i<hs_size[0]; i++) {
-	for (j=0; j<hs_size[1]; j++) {
-	    points[hs_offset[0]+i][hs_offset[1]+j] = (int)HDrandom();
+    for (i=0; i<(size_t)hs_size[0]; i++) {
+	for (j=0; j<(size_t)hs_size[1]; j++) {
+	    points[(size_t)hs_offset[0]+i][(size_t)hs_offset[1]+j] = (int)HDrandom();
 	}
     }
     if (H5Sselect_hyperslab(sid, H5S_SELECT_SET, hs_offset, NULL, hs_size,
@@ -1593,19 +1593,19 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
 	   TEST_ERROR;
 
         /* Check that the values read are the same as the values written */
-        for (i=0; i<hs_size[0]; i++) {
-	   for (j=0; j<hs_size[1]; j++) {
-	       if (points[hs_offset[0]+i][hs_offset[1]+j] !=
-                      check[hs_offset[0]+i][hs_offset[1]+j]) {
+        for (i=0; i<(size_t)hs_size[0]; i++) {
+	   for (j=0; j<(size_t)hs_size[1]; j++) {
+	       if (points[(size_t)hs_offset[0]+i][(size_t)hs_offset[1]+j] !=
+                      check[(size_t)hs_offset[0]+i][(size_t)hs_offset[1]+j]) {
 		  H5_FAILED();
 		  fprintf(stderr,"    Read different values than written.\n");
 		  fprintf(stderr,"    At index %lu,%lu\n",
-		         (unsigned long)(hs_offset[0]+i),
-		         (unsigned long)(hs_offset[1]+j));
+		         (unsigned long)((size_t)hs_offset[0]+i),
+		         (unsigned long)((size_t)hs_offset[1]+j));
 		  fprintf(stderr,"    At original: %d\n",
-		         (int)points[hs_offset[0]+i][hs_offset[1]+j]);
+		         (int)points[(size_t)hs_offset[0]+i][(size_t)hs_offset[1]+j]);
 		  fprintf(stderr,"    At returned: %d\n",
-		         (int)check[hs_offset[0]+i][hs_offset[1]+j]);
+		         (int)check[(size_t)hs_offset[0]+i][(size_t)hs_offset[1]+j]);
 		  goto error;
 	       }
 	   }
@@ -2166,7 +2166,7 @@ test_missing_filter(hid_t file)
     const hsize_t dims[2] = {DSET_DIM1, DSET_DIM2};         /* Dataspace dimensions */
     const hsize_t chunk_dims[2] = {2, 25};      /* Chunk dimensions */
     hsize_t     dset_size;      /* Dataset size */
-    hsize_t     i,j;            /* Local index variables */
+    size_t      i,j;            /* Local index variables */
     herr_t      ret;            /* Generic return value */
     char testfile[512]="";      /* Buffer to hold name of existing test file */
     char *srcdir = HDgetenv("srcdir");    /* The source directory, if we are using the --srcdir configure option */
@@ -2278,8 +2278,8 @@ test_missing_filter(hid_t file)
 
     /* Compare data */
     /* Check that the values read are the same as the values written */
-    for (i=0; i<dims[0]; i++) {
-	for (j=0; j<dims[1]; j++) {
+    for (i=0; i<(size_t)dims[0]; i++) {
+	for (j=0; j<(size_t)dims[1]; j++) {
 	    if (points[i][j] != check[i][j]) {
 		H5_FAILED();
 		printf("    Line %d: Read different values than written.\n",__LINE__);
@@ -2418,7 +2418,7 @@ test_onebyte_shuffle(hid_t file)
     const hsize_t       chunk_size[2] = {10, 20};
     unsigned char       orig_data[10][20];
     unsigned char       new_data[10][20];
-    hsize_t		i, j;
+    size_t		i, j;
 #else /* H5_HAVE_FILTER_SHUFFLE */
     const char		*not_supported= "    Data shuffling is not enabled.";
 #endif /* H5_HAVE_FILTER_SHUFFLE */
@@ -2479,8 +2479,8 @@ test_onebyte_shuffle(hid_t file)
 	goto error;
 
     /* Check that the values read are the same as the values written */
-    for (i=0; i<size[0]; i++) {
-	for (j=0; j<size[1]; j++) {
+    for (i=0; i<(size_t)size[0]; i++) {
+	for (j=0; j<(size_t)size[1]; j++) {
 	    if (new_data[i][j] != orig_data[i][j]) {
 		H5_FAILED();
 		printf("    Read different values than written.\n");
@@ -2538,7 +2538,7 @@ test_nbit_int(hid_t file)
     int                 new_data[2][5];
     unsigned int        mask;
     size_t              precision, offset;
-    hsize_t             i, j;
+    size_t             i, j;
 #else /* H5_HAVE_FILTER_NBIT */
     const char          *not_supported= "    Nbit is not enabled.";
 #endif /* H5_HAVE_FILTER_NBIT */
@@ -2572,8 +2572,8 @@ test_nbit_int(hid_t file)
                              space,dc))<0) goto error;
 
     /* Initialize data, assuming size of long_long >= size of int */
-    for (i= 0;i< size[0]; i++)
-      for (j = 0; j < size[1]; j++) {
+    for (i= 0;i< (size_t)size[0]; i++)
+      for (j = 0; j < (size_t)size[1]; j++) {
         orig_data[i][j] = (int)(((long_long)HDrandom() %
                            (long_long)HDpow(2.0, (double)(precision - 1))) << offset);
 
@@ -2621,8 +2621,8 @@ test_nbit_int(hid_t file)
      * Use mask for checking the significant bits, ignoring the padding bits
      */
     mask = ~(~0 << (precision + offset)) & (~0 << offset);
-    for (i=0; i<size[0]; i++) {
-        for (j=0; j<size[1]; j++) {
+    for (i=0; i<(size_t)size[0]; i++) {
+        for (j=0; j<(size_t)size[1]; j++) {
             if ((new_data[i][j] & mask) != (orig_data[i][j] & mask)) {
                 H5_FAILED();
                 printf("    Read different values than written.\n");
@@ -2683,7 +2683,7 @@ test_nbit_float(hid_t file)
     (float)5.2045898}, {(float)-49140.000, (float)2350.2500, (float)-3.2110596e-1, (float)6.4998865e-5, (float)-0.0000000}};
     float               new_data[2][5];
     size_t              precision, offset;
-    hsize_t             i, j;
+    size_t             i, j;
 #else /* H5_HAVE_FILTER_NBIT */
     const char          *not_supported= "    Nbit is not enabled.";
 #endif /* H5_HAVE_FILTER_NBIT */
@@ -2750,8 +2750,8 @@ test_nbit_float(hid_t file)
     /* Check that the values read are the same as the values written
      * Assume size of int = size of float
      */
-    for (i=0; i<size[0]; i++) {
-        for (j=0; j<size[1]; j++) {
+    for (i=0; i<(size_t)size[0]; i++) {
+        for (j=0; j<(size_t)size[1]; j++) {
             if (!(orig_data[i][j]==orig_data[i][j])) continue;  /* skip if value is NaN */
             if (new_data[i][j] != orig_data[i][j]) {
                 H5_FAILED();
@@ -2816,7 +2816,7 @@ test_nbit_double(hid_t file)
     6.6562295504670740e-3, -1.5747263393432150, 1.0711093225222612, -9.8971679387636870e-1}};
     double              new_data[2][5];
     size_t              precision, offset;
-    hsize_t             i, j;
+    size_t             i, j;
 #else /* H5_HAVE_FILTER_NBIT */
     const char          *not_supported= "    Nbit is not enabled.";
 #endif /* H5_HAVE_FILTER_NBIT */
@@ -2883,8 +2883,8 @@ test_nbit_double(hid_t file)
     /* Check that the values read are the same as the values written
      * Assume size of long_long = size of double
      */
-    for (i=0; i<size[0]; i++) {
-        for (j=0; j<size[1]; j++) {
+    for (i=0; i<(size_t)size[0]; i++) {
+        for (j=0; j<(size_t)size[1]; j++) {
             if (!(orig_data[i][j]==orig_data[i][j])) continue;  /* skip if value is NaN */
             if (new_data[i][j] != orig_data[i][j]) {
                 H5_FAILED();
@@ -2945,7 +2945,7 @@ test_nbit_array(hid_t file)
     unsigned int        orig_data[2][5][3][2];
     unsigned int        new_data[2][5][3][2];
     size_t              precision, offset;
-    hsize_t             i, j, m, n;
+    size_t             i, j, m, n;
 #else /* H5_HAVE_FILTER_NBIT */
     const char          *not_supported= "    Nbit is not enabled.";
 #endif /* H5_HAVE_FILTER_NBIT */
@@ -2984,10 +2984,10 @@ test_nbit_array(hid_t file)
                              space,dc))<0) goto error;
 
     /* Initialize data, assuming size of long_long >= size of unsigned int */
-    for (i= 0;i< size[0]; i++)
-      for (j = 0; j < size[1]; j++)
-        for (m = 0; m < adims[0]; m++)
-          for (n = 0; n < adims[1]; n++)
+    for (i= 0;i< (size_t)size[0]; i++)
+      for (j = 0; j < (size_t)size[1]; j++)
+        for (m = 0; m < (size_t)adims[0]; m++)
+          for (n = 0; n < (size_t)adims[1]; n++)
             orig_data[i][j][m][n] = (unsigned int)(((long_long)HDrandom() %
                                      (long_long)HDpow(2.0, (double)precision)) << offset);
     PASSED();
@@ -3028,10 +3028,10 @@ test_nbit_array(hid_t file)
 
     /* Check that the values read are the same as the values written
      */
-    for (i=0; i<size[0]; i++)
-      for (j=0; j<size[1]; j++)
-        for (m = 0; m < adims[0]; m++)
-          for (n = 0; n < adims[1]; n++) {
+    for (i=0; i<(size_t)size[0]; i++)
+      for (j=0; j<(size_t)size[1]; j++)
+        for (m = 0; m < (size_t)adims[0]; m++)
+          for (n = 0; n < (size_t)adims[1]; n++) {
             if (new_data[i][j][m][n]!= orig_data[i][j][m][n]) {
                 H5_FAILED();
                 printf("    Read different values than written.\n");
@@ -3104,7 +3104,7 @@ test_nbit_compound(hid_t file)
     atomic              orig_data[2][5];
     atomic              new_data[2][5];
     unsigned int        i_mask, s_mask, c_mask;
-    hsize_t             i, j;
+    size_t             i, j;
 
 #else /* H5_HAVE_FILTER_NBIT */
     const char          *not_supported= "    Nbit is not enabled.";
@@ -3166,8 +3166,8 @@ test_nbit_compound(hid_t file)
                              space,dc))<0) goto error;
 
     /* Initialize data, assuming size of long_long >= size of member datatypes */
-    for (i= 0;i< size[0]; i++)
-      for (j = 0; j < size[1]; j++) {
+    for (i= 0;i< (size_t)size[0]; i++)
+      for (j = 0; j < (size_t)size[1]; j++) {
         orig_data[i][j].i = (int)(((long_long)HDrandom() %
                              (long_long)HDpow(2.0, (double)(precision[0]-1))) << offset[0]);
         orig_data[i][j].c = (char)(((long_long)HDrandom() %
@@ -3319,7 +3319,7 @@ test_nbit_compound_2(hid_t file)
     complex             orig_data[2][5];
     complex             new_data[2][5];
     unsigned int        i_mask, s_mask, c_mask, b_mask;
-    hsize_t             i, j, m, n, b_failed, d_failed;
+    size_t             i, j, m, n, b_failed, d_failed;
 
 #else /* H5_HAVE_FILTER_NBIT */
     const char          *not_supported= "    Nbit is not enabled.";
@@ -3413,8 +3413,8 @@ test_nbit_compound_2(hid_t file)
                              space,dc))<0) goto error;
 
     /* Initialize data, assuming size of long_long >= size of member datatypes */
-    for (i= 0;i< size[0]; i++)
-      for (j = 0; j < size[1]; j++) {
+    for (i= 0;i< (size_t)size[0]; i++)
+      for (j = 0; j < (size_t)size[1]; j++) {
         orig_data[i][j].a.i = (int)(((long_long)HDrandom() %
                                (long_long)HDpow(2.0, (double)(precision[0]-1))) << offset[0]);
         orig_data[i][j].a.c = (char)(((long_long)HDrandom() %
@@ -3426,13 +3426,13 @@ test_nbit_compound_2(hid_t file)
         orig_data[i][j].v = (unsigned int)(((long_long)HDrandom() %
                              (long_long)HDpow(2.0, (double)precision[3])) << offset[3]);
 
-        for(m = 0; m < array_dims[0]; m++)
-          for(n = 0; n < array_dims[1]; n++)
+        for(m = 0; m < (size_t)array_dims[0]; m++)
+          for(n = 0; n < (size_t)array_dims[1]; n++)
             orig_data[i][j].b[m][n] = (char)(((long_long)HDrandom() %
                                        (long_long)HDpow(2.0, (double)(precision[4]-1))) << offset[4]);
 
-        for(m = 0; m < array_dims[0]; m++)
-          for(n = 0; n < array_dims[1]; n++) {
+        for(m = 0; m < (size_t)array_dims[0]; m++)
+          for(n = 0; n < (size_t)array_dims[1]; n++) {
             orig_data[i][j].d[m][n].i = (int)(-((long_long)HDrandom() %
                                          (long_long)HDpow(2.0, (double)(precision[0]-1))) << offset[0]);
             orig_data[i][j].d[m][n].c = (char)(((long_long)HDrandom() %
@@ -3485,20 +3485,20 @@ test_nbit_compound_2(hid_t file)
     c_mask = ~(~0 << (precision[1] + offset[1])) & (~0 << offset[1]);
     s_mask = ~(~0 << (precision[2] + offset[2])) & (~0 << offset[2]);
     b_mask = ~(~0 << (precision[4] + offset[4])) & (~0 << offset[4]);
-    for (i=0; i<size[0]; i++) {
-      for (j=0; j<size[1]; j++) {
+    for (i=0; i<(size_t)size[0]; i++) {
+      for (j=0; j<(size_t)size[1]; j++) {
         b_failed = 0;
         d_failed = 0;
 
-        for(m = 0; m < array_dims[0]; m++)
-          for(n = 0; n < array_dims[1]; n++)
+        for(m = 0; m < (size_t)array_dims[0]; m++)
+          for(n = 0; n < (size_t)array_dims[1]; n++)
              if((new_data[i][j].b[m][n]&b_mask)!=(orig_data[i][j].b[m][n]&b_mask)) {
                 b_failed = 1;
                 goto out;
              }
 
-        for(m = 0; m < array_dims[0]; m++)
-          for(n = 0; n < array_dims[1]; n++)
+        for(m = 0; m < (size_t)array_dims[0]; m++)
+          for(n = 0; n < (size_t)array_dims[1]; n++)
              if((new_data[i][j].d[m][n].i & i_mask)!=(orig_data[i][j].d[m][n].i & i_mask)||
                 (new_data[i][j].d[m][n].c & c_mask)!=(orig_data[i][j].d[m][n].c & c_mask)||
                 (new_data[i][j].d[m][n].s & s_mask)!=(orig_data[i][j].d[m][n].s & s_mask)||
@@ -3591,7 +3591,7 @@ test_nbit_compound_3(hid_t file)
     const hsize_t       chunk_size[1] = {5};
     atomic              orig_data[5];
     atomic              new_data[5];
-    hsize_t             i, k, j;
+    size_t             i, k, j;
 
 #else /* H5_HAVE_FILTER_NBIT */
     const char          *not_supported= "    Nbit is not enabled.";
@@ -3641,7 +3641,7 @@ test_nbit_compound_3(hid_t file)
                                      space, H5P_DEFAULT))<0) goto error;
 
     /* Initialize data */
-    for(i = 0; i < size[0]; i++) {
+    for(i = 0; i < (size_t)size[0]; i++) {
         orig_data[i].i = HDrandom() % (long)HDpow(2.0, 17.0 - 1.0);
         HDstrcpy(orig_data[i].str, "fixed-length C string");
         orig_data[i].vl_str = HDstrdup("variable-length C string");
@@ -3692,7 +3692,7 @@ test_nbit_compound_3(hid_t file)
         goto error;
 
     /* Check that the values read are the same as the values written */
-    for (i = 0; i < size[0]; i++) {
+    for (i = 0; i < (size_t)size[0]; i++) {
         if(new_data[i].i != orig_data[i].i ||
            strcmp(new_data[i].str, orig_data[i].str) !=0 ||
            strcmp(new_data[i].vl_str, orig_data[i].vl_str) !=0 ||
@@ -3779,7 +3779,7 @@ test_scaleoffset_int(hid_t file)
     const hsize_t       chunk_size[2] = {2,5};
     int                 orig_data[2][5];
     int                 new_data[2][5];
-    hsize_t             i, j;
+    size_t             i, j;
 #else /* H5_HAVE_FILTER_SCALEOFFSET */
     const char          *not_supported= "    Scaleoffset is not enabled.";
 #endif /* H5_HAVE_FILTER_SCALEOFFSET */
@@ -3810,8 +3810,8 @@ test_scaleoffset_int(hid_t file)
                              space,dc))<0) goto error;
 
     /* Initialize data */
-    for (i= 0;i< size[0]; i++)
-      for (j = 0; j < size[1]; j++) {
+    for (i= 0;i< (size_t)size[0]; i++)
+      for (j = 0; j < (size_t)size[1]; j++) {
         orig_data[i][j] = HDrandom() % 10000;
 
         /* even-numbered values are negtive */
@@ -3853,8 +3853,8 @@ test_scaleoffset_int(hid_t file)
                 new_data)<0) goto error;
 
     /* Check that the values read are the same as the values written */
-    for (i=0; i<size[0]; i++) {
-        for (j=0; j<size[1]; j++) {
+    for (i=0; i<(size_t)size[0]; i++) {
+        for (j=0; j<(size_t)size[1]; j++) {
             if (new_data[i][j] != orig_data[i][j]) {
                 H5_FAILED();
                 printf("    Read different values than written.\n");
@@ -3915,7 +3915,7 @@ test_scaleoffset_int_2(hid_t file)
     hsize_t             count[2];  /* Block count */
     hsize_t             block[2];  /* Block sizes */
     int                 fillval;
-    hsize_t             j;
+    size_t              j;
 #else /* H5_HAVE_FILTER_SCALEOFFSET */
     const char          *not_supported= "    Scaleoffset is not enabled.";
 #endif /* H5_HAVE_FILTER_SCALEOFFSET */
@@ -3959,7 +3959,7 @@ test_scaleoffset_int_2(hid_t file)
                            stride, count, block)<0) goto error;
 
     /* Initialize data of hyperslab */
-    for (j = 0; j < size[1]; j++) {
+    for (j = 0; j < (size_t)size[1]; j++) {
         orig_data[0][j] = (int)HDrandom() % 10000;
 
         /* even-numbered values are negtive */
@@ -4002,7 +4002,7 @@ test_scaleoffset_int_2(hid_t file)
                 new_data)<0) goto error;
 
     /* Check that the values read are the same as the values written */
-    for (j=0; j<size[1]; j++) {
+    for (j=0; j<(size_t)size[1]; j++) {
         if (new_data[0][j] != orig_data[0][j]) {
             H5_FAILED();
             printf("    Read different values than written.\n");
@@ -4057,7 +4057,7 @@ test_scaleoffset_float(hid_t file)
     const hsize_t       chunk_size[2] = {2,5};
     float               orig_data[2][5];
     float               new_data[2][5];
-    hsize_t             i, j;
+    size_t              i, j;
 #else /* H5_HAVE_FILTER_SCALEOFFSET */
     const char          *not_supported= "    Scaleoffset is not enabled.";
 #endif /* H5_HAVE_FILTER_SCALEOFFSET */
@@ -4089,8 +4089,8 @@ test_scaleoffset_float(hid_t file)
                              space,dc))<0) goto error;
 
     /* Initialize data */
-    for (i= 0;i< size[0]; i++)
-      for (j = 0; j < size[1]; j++) {
+    for (i= 0;i< (size_t)size[0]; i++)
+      for (j = 0; j < (size_t)size[1]; j++) {
         orig_data[i][j] = (float)((HDrandom() % 100000) / (float)1000.0);
 
         /* even-numbered values are negtive */
@@ -4132,8 +4132,8 @@ test_scaleoffset_float(hid_t file)
                 new_data)<0) goto error;
 
     /* Check that the values read are the same as the values written */
-    for (i=0; i<size[0]; i++) {
-        for (j=0; j<size[1]; j++) {
+    for (i=0; i<(size_t)size[0]; i++) {
+        for (j=0; j<(size_t)size[1]; j++) {
             if (HDfabs(new_data[i][j]-orig_data[i][j]) > HDpow(10.0, -3.0)) {
                 H5_FAILED();
                 printf("    Read different values than written.\n");
@@ -4194,7 +4194,7 @@ test_scaleoffset_float_2(hid_t file)
     hsize_t             stride[2]; /* Stride of hyperslab */
     hsize_t             count[2];  /* Block count */
     hsize_t             block[2];  /* Block sizes */
-    hsize_t             j;
+    size_t              j;
 #else /* H5_HAVE_FILTER_SCALEOFFSET */
     const char          *not_supported= "    Scaleoffset is not enabled.";
 #endif /* H5_HAVE_FILTER_SCALEOFFSET */
@@ -4240,7 +4240,7 @@ test_scaleoffset_float_2(hid_t file)
                            stride, count, block)<0) goto error;
 
     /* Initialize data of hyperslab */
-    for (j = 0; j < size[1]; j++) {
+    for (j = 0; j < (size_t)size[1]; j++) {
         orig_data[0][j] = (float)((HDrandom() % 100000) / (float)1000.0);
 
         /* even-numbered values are negtive */
@@ -4283,7 +4283,7 @@ test_scaleoffset_float_2(hid_t file)
                 new_data)<0) goto error;
 
     /* Check that the values read are the same as the values written */
-    for (j=0; j<size[1]; j++) {
+    for (j=0; j<(size_t)size[1]; j++) {
         if (HDfabs(new_data[0][j]-orig_data[0][j]) > HDpow(10.0, -3.0)) {
             H5_FAILED();
             printf("    Read different values than written.\n");
@@ -4337,7 +4337,7 @@ test_scaleoffset_double(hid_t file)
     const hsize_t       chunk_size[2] = {2,5};
     double              orig_data[2][5];
     double              new_data[2][5];
-    hsize_t             i, j;
+    size_t              i, j;
 #else /* H5_HAVE_FILTER_SCALEOFFSET */
     const char          *not_supported= "    Scaleoffset is not enabled.";
 #endif /* H5_HAVE_FILTER_SCALEOFFSET */
@@ -4369,8 +4369,8 @@ test_scaleoffset_double(hid_t file)
                              space,dc))<0) goto error;
 
     /* Initialize data */
-    for (i= 0;i< size[0]; i++)
-      for (j = 0; j < size[1]; j++) {
+    for (i= 0;i< (size_t)size[0]; i++)
+      for (j = 0; j < (size_t)size[1]; j++) {
         orig_data[i][j] = (HDrandom() % 10000000) / 10000000.0;
 
         /* even-numbered values are negtive */
@@ -4412,8 +4412,8 @@ test_scaleoffset_double(hid_t file)
                 new_data)<0) goto error;
 
     /* Check that the values read are the same as the values written */
-    for (i=0; i<size[0]; i++) {
-        for (j=0; j<size[1]; j++) {
+    for (i=0; i<(size_t)size[0]; i++) {
+        for (j=0; j<(size_t)size[1]; j++) {
             if (HDfabs(new_data[i][j]-orig_data[i][j]) > HDpow(10.0, -7.0)) {
                 H5_FAILED();
                 printf("    Read different values than written.\n");
@@ -4474,7 +4474,7 @@ test_scaleoffset_double_2(hid_t file)
     hsize_t             stride[2]; /* Stride of hyperslab */
     hsize_t             count[2];  /* Block count */
     hsize_t             block[2];  /* Block sizes */
-    hsize_t             j;
+    size_t              j;
 #else /* H5_HAVE_FILTER_SCALEOFFSET */
     const char          *not_supported= "    Scaleoffset is not enabled.";
 #endif /* H5_HAVE_FILTER_SCALEOFFSET */
@@ -4520,7 +4520,7 @@ test_scaleoffset_double_2(hid_t file)
                            stride, count, block)<0) goto error;
 
     /* Initialize data of hyperslab */
-    for (j = 0; j < size[1]; j++) {
+    for (j = 0; j < (size_t)size[1]; j++) {
         orig_data[0][j] = (HDrandom() % 10000000) / 10000000.0;
 
         /* even-numbered values are negtive */
@@ -4563,7 +4563,7 @@ test_scaleoffset_double_2(hid_t file)
                 new_data)<0) goto error;
 
     /* Check that the values read are the same as the values written */
-    for (j=0; j<size[1]; j++) {
+    for (j=0; j<(size_t)size[1]; j++) {
         if (HDfabs(new_data[0][j]-orig_data[0][j]) > HDpow(10.0, -7.0)) {
             H5_FAILED();
             printf("    Read different values than written.\n");
@@ -4794,7 +4794,7 @@ test_can_apply(hid_t file)
     const hsize_t dims[2] = {DSET_DIM1, DSET_DIM2};         /* Dataspace dimensions */
     const hsize_t chunk_dims[2] = {2, 25};      /* Chunk dimensions */
     hsize_t     dset_size;      /* Dataset size */
-    hsize_t     i,j;            /* Local index variables */
+    size_t      i,j;            /* Local index variables */
 
     TESTING("dataset filter 'can apply' callback");
 
@@ -4883,8 +4883,8 @@ test_can_apply(hid_t file)
 
     /* Compare data */
     /* Check that the values read are the same as the values written */
-    for (i=0; i<dims[0]; i++) {
-	for (j=0; j<dims[1]; j++) {
+    for (i=0; i<(size_t)dims[0]; i++) {
+	for (j=0; j<(size_t)dims[1]; j++) {
 	    if (points[i][j] != check[i][j]) {
 		H5_FAILED();
 		printf("    Line %d: Read different values than written.\n",__LINE__);
@@ -5156,7 +5156,7 @@ test_set_local(hid_t fapl)
     const hsize_t chunk_dims[2] = {2, 25};      /* Chunk dimensions */
     hsize_t     dset_size;      /* Dataset size */
     unsigned    cd_values[2]={BOGUS2_PARAM_1, BOGUS2_PARAM_2};   /* Parameters for Bogus2 filter */
-    hsize_t     i,j;          /* Local index variables */
+    size_t      i,j;          /* Local index variables */
     double      n;          /* Local index variables */
 
     TESTING("dataset filter 'set local' callback");

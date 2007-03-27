@@ -312,7 +312,7 @@ h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info,
                    hsize_t max_idx[], h5tools_context_t *ctx)
 {
     hsize_t p_prod[H5S_MAX_RANK];
-    hsize_t i = 0;
+    size_t i = 0;
     hsize_t curr_pos=elmtno;
 
     h5tools_str_reset(str);
@@ -325,7 +325,7 @@ h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info,
         for (i = ndims - 1, p_prod[ndims - 1] = 1; i > 0; --i)
             p_prod[i - 1] = (max_idx[i] - min_idx[i]) * p_prod[i];
 
-        for ( i = 0; i < (hsize_t)ndims; i++)
+        for ( i = 0; i < (size_t)ndims; i++)
         {
          ctx->pos[i] = curr_pos/ctx->acc[i];
          curr_pos -= ctx->acc[i]*ctx->pos[i];
@@ -333,7 +333,7 @@ h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info,
         assert( curr_pos == 0 );
 
         /* Print the index values */
-        for (i = 0; i < (hsize_t)ndims; i++) {
+        for (i = 0; i < (size_t)ndims; i++) {
             if (i)
                 h5tools_str_append(str, "%s", OPT(info->idx_sep, ","));
 

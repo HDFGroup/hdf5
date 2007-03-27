@@ -16,8 +16,8 @@
 #include "hdf5.h"
 #include "hdf5_hl.h"
 
-#define WIDTH         (hsize_t)400
-#define HEIGHT        (hsize_t)200
+#define WIDTH         400
+#define HEIGHT        200
 #define PAL_ENTRIES   9
 unsigned char buf [ WIDTH*HEIGHT ];
 
@@ -26,7 +26,7 @@ int main( void )
  hid_t         file_id;
  herr_t        status;
  hsize_t       pal_dims[] = {PAL_ENTRIES,3};
- hsize_t       i, j;
+ size_t        i, j;
  int           n, space;
  unsigned char pal[PAL_ENTRIES*3] = {  /* create a palette with 9 colors */
  0,0,168,      /* dark blue */
@@ -56,7 +56,7 @@ int main( void )
  file_id = H5Fcreate( "ex_image1.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
 
  /* make the image */
- status = H5IMmake_image_8bit( file_id, "image1", WIDTH, HEIGHT, buf );
+ status = H5IMmake_image_8bit( file_id, "image1", (hsize_t)WIDTH, (hsize_t)HEIGHT, buf );
 
  /* make a palette */
  status = H5IMmake_palette( file_id, "pallete", pal_dims, pal );
