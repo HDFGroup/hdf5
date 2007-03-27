@@ -28,8 +28,8 @@ CPPFLAGS=-I. -I$(srcdir) -I$(top_builddir)/src -I$(top_srcdir)/src  \
 
 ## Test programs and scripts.
 ##
-TEST_PROGS=
-TEST_SCRIPTS=
+TEST_PROGS=h52gifgentst
+TEST_SCRIPTS=$(srcdir)/h52giftest.sh
 
 ## These are our main targets: library and tools.
 ##
@@ -72,5 +72,8 @@ gif2h5: gif2hdf.lo gif2mem.lo decompress.lo gifread.lo writehdf.lo
 
 h52gif: hdf2gif.lo hdfgifwr.lo readhdf.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ hdf2gif.lo hdfgifwr.lo readhdf.lo $(LIBHDF5_HL) $(LIBTOOLS) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+
+h52gifgentst: h52gifgentst.lo
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h52gifgentst.lo $(LIBTOOLS) $(LIBHDF5) $(LIBHDF5_HL) $(LDFLAGS) $(LIBS)
 
 @CONCLUDE@
