@@ -1,3 +1,4 @@
+#!/bin/sh
 #
 # Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
@@ -11,30 +12,35 @@
 # is linked from the top-level documents page.  It can also be found at
 # http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
 # access to either file, you may request a copy from help@hdfgroup.org.
-##
-## Makefile.am
-## Run automake to generate a Makefile.in from this file.
 #
-# HDF5 Library Makefile(.in)
-#
+# HDF Utilities Test script
 
-include $(top_srcdir)/config/commence.am
+# initialize errors variable
+errors=0
 
-# Include src and tools/lib directories
-INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib -I$(top_srcdir)/hl/src
+TESTING() {
+   SPACES="                                                               "
+   echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
+}
 
-# These are our main targets, the tools
+TOOLTEST()
+{
+err=0
+$RUNSERIAL ./h52gif $*
 
-bin_PROGRAMS=gif2h5 h52gif h52gifgentst
 
-gif2h5_SOURCES=gif2hdf.c gif2mem.c decompress.c gifread.c writehdf.c 
+if [ $err -eq 1 ]; then
+errors="` expr $errors + 1 `";
+  echo "*FAILED*"
+else
+  echo " PASSED"
+fi
+}
 
-h52gif_SOURCES=hdf2gif.c hdfgifwr.c readhdf.c
 
-h52gifgentst_SOURCES=h52gifgentst.c 
 
-# Programs all depend on the hdf5 library, the tools library, and the HL
-# library.
-LDADD=$(LIBH5_HL) $(LIBH5TOOLS) $(LIBHDF5)
+TESTING "h52giftst.h5 image1.gif -i 1234567 -p palette" ;
+TOOLTEST h52giftst.h5 image1.gif -i 1234567 -p palette
 
-include $(top_srcdir)/config/conclude.am
+
+exit $errors
