@@ -165,7 +165,7 @@ The following sections discuss installation procedures in detail:
    Section VI  : How to build in HDF5 in VS 7.0(.NET) and Intel 8.x 
                  with .NET environment
    Section VII : How to build and test HDF5 snapshot release
-   Section VIII:  How to build HDF5 with Thread-Safe Feature
+   Section VIII:  How to build HDF5 Multithreaded Static Library
    Section IX  : Misc. 
 
 ---------------------------------------------------------------------
