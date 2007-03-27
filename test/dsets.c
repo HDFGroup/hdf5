@@ -137,6 +137,10 @@ const char *FILENAME[] = {
 #define MISSING_CHUNK_DATASET   "missing_chunk"
 #define MISSING_CHUNK_DIM       100
 
+/* Names for random chunks test */
+#define NPOINTS         50
+#define RC_FILENAME "random_chunks.h5"
+
 /* Shared global arrays */
 #define DSET_DIM1       100
 #define DSET_DIM2       200
@@ -5957,6 +5961,236 @@ error:
     return -1;
 } /* end test_zero_dims() */
 
+
+/*-------------------------------------------------------------------------
+ * Function: test_random_chunks
+ *
+ * Purpose: Tests that write/read on randomly selected chunks in 2 datasets.
+ *              One dataset has fixed dimensions, and the other has unlimited
+ *              dimensions which are extended before write/read operations.
+ *
+ *
+ * Return: Success: 0
+ *  Failure: -1
+ *
+ * Programmer: Christian Chilan
+ *             Monday, March 26, 2007
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_random_chunks(void)
+{
+    hid_t       s=-1, m=-1, d=-1, dcpl=-1, file=-1;
+    int         wbuf[NPOINTS],
+                rbuf[NPOINTS],
+                check[20][20];
+    hsize_t     coord[NPOINTS][2];
+    hsize_t     dsize[2]={100,100}, dmax[2]={H5S_UNLIMITED, H5S_UNLIMITED}, csize[2]={10,10}, nsize[2]={200,200};
+    hsize_t     msize[1]={NPOINTS};
+    const char  dname[]="dataset";
+    int         chunk_row, chunk_col;
+    size_t      i, j;
+
+
+    TESTING("Write/read on randomly selected chunks");
+
+    assert(NPOINTS < 100);
+
+    /* Create file for first test */
+    if ((file = H5Fcreate(RC_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0) TEST_ERROR;
+
+    /* Create dataspace */
+    if((s = H5Screate_simple(2, dsize, NULL))<0) TEST_ERROR;
+
+    /* Create dataset creation property list */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0) TEST_ERROR;
+
+    /* Set chunked layout */
+    if(H5Pset_chunk(dcpl, 2, csize)<0) TEST_ERROR;
+
+    /* Set early allocation time */
+    if (H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY)<0) TEST_ERROR;
+
+    /* Create dataset */
+    if((d = H5Dcreate(file, dname, H5T_NATIVE_INT, s, dcpl))<0) TEST_ERROR;
+
+    /* Initialization of check array for repeated coordinates */
+    for (i=0; i<dsize[0]/csize[0]; i++)
+        for (j=0; j<dsize[1]/csize[1]; j++)
+            check[i][j] = 0;
+
+    /* Generate random point coordinates. Only one point is selected per chunk */
+    for (i=0; i<NPOINTS; i++){
+        do {
+            chunk_row = (int)HDrandom () % (dsize[0]/csize[0]);
+            chunk_col = (int)HDrandom () % (dsize[1]/csize[1]);
+        } while (check[chunk_row][chunk_col]);
+
+        wbuf[i] = check[chunk_row][chunk_col] = chunk_row+chunk_col+1;
+        coord[i][0] = chunk_row * csize[0];
+        coord[i][1] = chunk_col * csize[1];
+    }
+
+    /* Create dataspace for write buffer */
+    if ((m = H5Screate_simple(1, msize, NULL))<0) TEST_ERROR;
+
+    /* Select the random points for writing */
+    if (H5Sselect_elements (s, H5S_SELECT_SET, NPOINTS, (const hsize_t **)coord)<0) TEST_ERROR;
+
+    /* Write into dataset */
+    if (H5Dwrite(d, H5T_NATIVE_INT, m, s, H5P_DEFAULT, wbuf)<0) TEST_ERROR;
+
+    /* Close resources*/
+    if (H5Sclose(s)<0) TEST_ERROR;
+    if (H5Sclose(m)<0) TEST_ERROR;
+    if (H5Pclose(dcpl)<0) TEST_ERROR;
+    if (H5Dclose(d)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR;
+
+    /* Open file again */
+    if ((file = H5Fopen(RC_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT))<0) TEST_ERROR;
+
+    /* Open dataset */
+    if ((d = H5Dopen(file, dname))<0) TEST_ERROR;
+
+    /* Get dataset dataspace */
+    if ((s = H5Dget_space(d))<0) TEST_ERROR;
+
+    /* Create dataspace for read buffer */
+    if ((m = H5Screate_simple(1, msize, NULL))<0) TEST_ERROR;
+
+    /* Select the random points for reading */
+    if (H5Sselect_elements (s, H5S_SELECT_SET, NPOINTS, (const hsize_t **)coord)<0) TEST_ERROR;
+
+    /* Read from dataset */
+    if (H5Dread(d, H5T_NATIVE_INT, m, s, H5P_DEFAULT, rbuf)<0) TEST_ERROR;
+
+    /* Verify that written and read data are the same */
+    for (i=0; i<NPOINTS; i++)
+        if (rbuf[i]!=wbuf[i]){
+            printf("    Line %d: Incorrect value, wbuf[%u]=%d, rbuf[%u]=%d\n",__LINE__,(unsigned)i,wbuf[i],(unsigned)i,rbuf[i]);
+                TEST_ERROR;
+        } /* end if */
+
+    /* Close resources */
+    if (H5Sclose(s)<0) TEST_ERROR;
+    if (H5Sclose(m)<0) TEST_ERROR;
+    if (H5Dclose(d)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR;
+
+    /* Remove file */
+    HDremove(RC_FILENAME);
+
+
+    /* Create file for second test */
+    if ((file = H5Fcreate(RC_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0) TEST_ERROR;
+
+    /* Create dataspace with unlimited maximum dimensions */
+    if((s = H5Screate_simple(2, dsize, dmax))<0) TEST_ERROR;
+
+    /* Create dataset creation property list */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0) TEST_ERROR;
+
+    /* Set chunked layout */
+    if(H5Pset_chunk(dcpl, 2, csize)<0) TEST_ERROR;
+
+    /* Set allocation time to early */
+    if (H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY)<0) TEST_ERROR;
+
+    /* Create dataset */
+    if((d = H5Dcreate(file, dname, H5T_NATIVE_INT, s, dcpl))<0) TEST_ERROR;
+
+    /* Extend both dimensions of the dataset */
+    if (H5Dextend(d, nsize)<0) TEST_ERROR;
+
+    /* Reset the dataset dataspace to new dimensions */
+    if (H5Sset_extent_simple(s, 2, nsize, dmax)<0) TEST_ERROR;
+
+    /* Initialize check buffer for repeated coordinates */
+    for (i=0; i<nsize[0]/csize[0]; i++)
+        for (j=0; j<nsize[1]/csize[1]; j++)
+            check[i][j] = 0;
+
+    /* Generate random point coordinates. Only one point is selected per chunk */
+    for (i=0; i<NPOINTS; i++){
+        do {
+            chunk_row = (int)HDrandom () % (nsize[0]/csize[0]);
+            chunk_col = (int)HDrandom () % (nsize[1]/csize[1]);
+        } while (check[chunk_row][chunk_col]);
+
+        wbuf[i] = check[chunk_row][chunk_col] = chunk_row+chunk_col+1;
+        coord[i][0] = chunk_row * csize[0];
+        coord[i][1] = chunk_col * csize[1];
+    }
+
+    /* Create dataspace for write buffer */
+    if ((m = H5Screate_simple(1, msize, NULL))<0) TEST_ERROR;
+
+    /* Select the random points for writing */
+    if (H5Sselect_elements (s, H5S_SELECT_SET, NPOINTS, (const hsize_t **)coord)<0) TEST_ERROR;
+
+    /* Write into dataset */
+    if (H5Dwrite(d, H5T_NATIVE_INT, m, s, H5P_DEFAULT, wbuf)<0) TEST_ERROR;
+
+    /* Close resources */
+    if (H5Sclose(s)<0) TEST_ERROR;
+    if (H5Sclose(m)<0) TEST_ERROR;
+    if (H5Pclose(dcpl)<0) TEST_ERROR;
+    if (H5Dclose(d)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR;
+
+    /* Open file again */
+    if ((file = H5Fopen(RC_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT))<0) TEST_ERROR;
+
+    /* Open dataset */
+    if ((d = H5Dopen(file, dname))<0) TEST_ERROR;
+
+    /* Get dataset dataspace */
+    if ((s = H5Dget_space(d))<0) TEST_ERROR;
+
+    /* Create dataspace for read buffer */
+    if ((m = H5Screate_simple(1, msize, NULL))<0) TEST_ERROR;
+
+    /* Select the random points for reading */
+    if (H5Sselect_elements (s, H5S_SELECT_SET, NPOINTS, (const hsize_t **)coord)<0) TEST_ERROR;
+
+    /* Read from dataset */
+    if (H5Dread(d, H5T_NATIVE_INT, m, s, H5P_DEFAULT, rbuf)<0) TEST_ERROR;
+
+    /* Verify that written and read data are the same */
+    for (i=0; i<NPOINTS; i++)
+        if (rbuf[i]!=wbuf[i]){
+            printf("    Line %d: Incorrect value, wbuf[%u]=%d, rbuf[%u]=%d\n",__LINE__,(unsigned)i,wbuf[i],(unsigned)i,rbuf[i]);
+                TEST_ERROR;
+        } /* end if */
+
+    /* Close resources */
+    if (H5Sclose(s)<0) TEST_ERROR;
+    if (H5Sclose(m)<0) TEST_ERROR;
+    if (H5Dclose(d)<0) TEST_ERROR;
+    if (H5Fclose(file)<0) TEST_ERROR;
+
+    /* Remove file */
+    HDremove(RC_FILENAME);
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(dcpl);
+        H5Sclose(s);
+        H5Sclose(m);
+        H5Dclose(d);
+        H5Fclose(file);
+    } H5E_END_TRY;
+    return -1;
+} /* end test_random_chunks() */
+
+
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -6074,7 +6308,8 @@ main(void)
             nerrors += (test_filters_endianess(my_fapl) < 0	? 1: 0);
             nerrors += (test_zero_dims(file) < 0		? 1: 0);
             nerrors += (test_missing_chunk(file) < 0		? 1: 0);
-
+            nerrors += (test_random_chunks() < 0		? 1: 0);
+            
             if(H5Fclose(file) < 0)
                 goto error;
         } /* end for */
