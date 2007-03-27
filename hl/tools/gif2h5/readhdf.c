@@ -53,13 +53,13 @@ int ReadHDF(BYTE** data, BYTE palette[256][3], hsize_t *image_size,
     hid_t    fHfile;       /* H5 file to open                              */
     hid_t    dspace;       /* dataspace identifier for the the dataset     */
     hid_t    dtype;        /* datatype identifier for the the dataset      */
-				hid_t    mtype_id;     /* memory data type ID                          */
-				size_t   msize;        /* memory size of memory type                   */
-    hid_t    dset;	        /* dataset identifier                           */
+    hid_t    mtype_id;     /* memory data type ID                          */
+    size_t   msize;        /* memory size of memory type                   */
+    hid_t    dset;         /* dataset identifier                           */
     hid_t    pal_set;      /* dataset for palette                          */
     hid_t    pal_space;    /* dataspace for palette                        */
     hid_t    pal_dtype;    /* datatype for palette                         */
-    hsize_t  datasize;	    /* size of the image                            */
+    hsize_t  datasize;     /* size of the image                            */
     int      pal_exist=0;  /* do we have a palette?                        */
 
     /* check stuff */
@@ -112,17 +112,17 @@ int ReadHDF(BYTE** data, BYTE palette[256][3], hsize_t *image_size,
         return -1;
     }
 
-				/* get memory type */						
-				if ((mtype_id=h5tools_get_native_type(dtype))<0){
-					fprintf(stderr , "Unable to get memory type\n");
-					return -1;
-				}
-				
-				/* get memory datatype size */	
-				if ((msize=H5Tget_size(mtype_id))==0){
-					fprintf(stderr , "Unable to get memory size\n");
-					return -1;
-				}
+    /* get memory type */      
+    if ((mtype_id=h5tools_get_native_type(dtype))<0){
+     fprintf(stderr , "Unable to get memory type\n");
+     return -1;
+    }
+    
+    /* get memory datatype size */ 
+    if ((msize=H5Tget_size(mtype_id))==0){
+     fprintf(stderr , "Unable to get memory size\n");
+     return -1;
+    }
 
     /* size needed to store the image */
     datasize = image_size[0] * image_size[1];
@@ -143,7 +143,7 @@ int ReadHDF(BYTE** data, BYTE palette[256][3], hsize_t *image_size,
     if (pal_exist) {
         hsize_t loc_pal_size[2];
         hsize_t pal_datasize;
-								hid_t   pal_mtype_id;    
+        hid_t   pal_mtype_id;    
         void    *temp_buf;
 
         /* get the palette dataset */
@@ -181,27 +181,27 @@ int ReadHDF(BYTE** data, BYTE palette[256][3], hsize_t *image_size,
             return -1;
         }
 
-								/* get memory type */						
-								if ((pal_mtype_id=h5tools_get_native_type(pal_dtype))<0){
+        /* get memory type */      
+        if ((pal_mtype_id=h5tools_get_native_type(pal_dtype))<0){
             fprintf(stderr , "Unable to get memory type\n");
             return -1;
         }
-								
-								/* get memory datatype size */	
-								if ((msize=H5Tget_size(pal_mtype_id))==0){
+        
+        /* get memory datatype size */ 
+        if ((msize=H5Tget_size(pal_mtype_id))==0){
             fprintf(stderr , "Unable to get memory size\n");
             return -1;
         }
-						
+      
         /* size needed to store the image */
         pal_datasize = loc_pal_size[0] * loc_pal_size[1];
 
         /* copy stuff into a temp buffer and then copy 256*3 elements to palette */
-								temp_buf=(void *) malloc((unsigned)(pal_datasize*msize));
-											if ( temp_buf==NULL){
-												printf( "cannot read into memory\n" );
-												return -1;
-											}
+        temp_buf=(void *) malloc((unsigned)(pal_datasize*msize));
+           if ( temp_buf==NULL){
+            printf( "cannot read into memory\n" );
+            return -1;
+           }
         /*
          * make sure that the palette is actually 256 X 3 so that we don't
          * create overflows
@@ -225,12 +225,12 @@ int ReadHDF(BYTE** data, BYTE palette[256][3], hsize_t *image_size,
 
         /* get rid of the temp memory */
         cleanup(temp_buf);
-								
-								/* close pal ids */
-								H5Dclose(pal_set);
-								H5Sclose(pal_space);
-								H5Tclose(pal_dtype);
-								H5Tclose(pal_mtype_id);
+        
+        /* close pal ids */
+        H5Dclose(pal_set);
+        H5Sclose(pal_space);
+        H5Tclose(pal_dtype);
+        H5Tclose(pal_mtype_id);
         /* end of if (pal_exist) */
     } else {
         int i;
@@ -248,8 +248,8 @@ int ReadHDF(BYTE** data, BYTE palette[256][3], hsize_t *image_size,
     /* close everything */
     H5Dclose(dset);
     H5Sclose(dspace);
-				H5Tclose(dtype);
-				H5Tclose(mtype_id);
+    H5Tclose(dtype);
+    H5Tclose(mtype_id);
     H5Fclose(fHfile);
     return 0;
 }

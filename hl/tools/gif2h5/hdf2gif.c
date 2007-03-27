@@ -89,13 +89,13 @@ int main(int argc , char **argv)
     int   LeftOfs, TopOfs;
     int   CountDown;
     int   curx , cury;
-    int	  w,h;
+    int   w,h;
 #endif /* UNUSED */
     int   ColorMapSize, InitCodeSize, Background, BitsPerPixel;
     int   j,nc;
-    int	  i;
+    int   i;
     int   numcols = 256;
-    int   time_out = 0;		/* time between two images in the animation */
+    int   time_out = 0;  /* time between two images in the animation */
     int   n_images , idx;
 
     BYTE pc2nc[256] , r1[256] , g1[256] , b1[256];
@@ -216,8 +216,8 @@ int main(int argc , char **argv)
             return -1;
         }
 
-		assert(dim_sizes[0]==(hsize_t)((int)dim_sizes[0]));
-		assert(dim_sizes[1]==(hsize_t)((int)dim_sizes[1]));
+  assert(dim_sizes[0]==(hsize_t)((int)dim_sizes[0]));
+  assert(dim_sizes[1]==(hsize_t)((int)dim_sizes[1]));
         RWidth  = (int)dim_sizes[1];
         RHeight = (int)dim_sizes[0];
 #ifdef UNUSED

@@ -38,12 +38,12 @@
  *
  * Based on: compress.c - File compression ala IEEE Computer, June 1984.
  *
- *	Spencer W. Thomas       (decvax!harpo!utah-cs!utah-gr!thomas)
- *	Jim McKie               (decvax!mcvax!jim)
- *	Steve Davies            (decvax!vax135!petsd!peora!srd)
- *	Ken Turkowski           (decvax!decwrl!turtlevax!ken)
- *	James A. Woods          (decvax!ihnp4!ames!jaw)
- *	Joe Orost               (decvax!vax135!petsd!joe)
+ * Spencer W. Thomas       (decvax!harpo!utah-cs!utah-gr!thomas)
+ * Jim McKie               (decvax!mcvax!jim)
+ * Steve Davies            (decvax!vax135!petsd!peora!srd)
+ * Ken Turkowski           (decvax!decwrl!turtlevax!ken)
+ * James A. Woods          (decvax!ihnp4!ames!jaw)
+ * Joe Orost               (decvax!vax135!petsd!joe)
  *****************************************************************/
 
 
@@ -53,8 +53,8 @@
 
 #include "gif.h"
 
-typedef BYTE		byte;
-typedef long int	count_int;
+typedef BYTE  byte;
+typedef long int count_int;
 
 /* indicies into conv24MB */
 #define CONV24_8BIT  0
@@ -175,8 +175,8 @@ static int           cur_bits = 0;
 #ifndef WIN32
 #define min(a,b)        ((a>b) ? b : a)
 #endif
-#define XV_BITS	12    /* BITS was already defined on some systems */
-#define MSDOS	1
+#define XV_BITS 12    /* BITS was already defined on some systems */
+#define MSDOS 1
 #define HSIZE  5003            /* 80% occupancy */
 
 typedef unsigned char   char_type;
