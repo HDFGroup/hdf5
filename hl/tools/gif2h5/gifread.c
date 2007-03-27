@@ -129,52 +129,52 @@ ReadGifImageDesc(
 {
     WORD i;        /* Loop counter                               */
     WORD tableSize;         /* Number of entries in the Local Color Table */
-	/* BYTE Interlace; */         /* PackedField & 0x20 gives information on interlacing */
-	BYTE *TempPtr;
-	int	 ch , ch1;
+ /* BYTE Interlace; */         /* PackedField & 0x20 gives information on interlacing */
+ BYTE *TempPtr;
+ int  ch , ch1;
 
-	GifImageDesc->TableSize = 0;
-	for (i = 0 ; i < 9 ; i++) {
-		GifImageDesc->GIDDump[i] = *(*MemGif2)++;
-	}
+ GifImageDesc->TableSize = 0;
+ for (i = 0 ; i < 9 ; i++) {
+  GifImageDesc->GIDDump[i] = *(*MemGif2)++;
+ }
 
-	/*
-	** Get the relevant fields. I need ImageWidth and Height actively hence I have
-	** taken information from those fields. I intend to keep the GifImageDesc data
-	** structure as it is so that anyone needing the rest of the fields can do so
-	** quickly.
-	*/
+ /*
+ ** Get the relevant fields. I need ImageWidth and Height actively hence I have
+ ** taken information from those fields. I intend to keep the GifImageDesc data
+ ** structure as it is so that anyone needing the rest of the fields can do so
+ ** quickly.
+ */
 
-	if (EndianOrder == 1) /* LittleEndian */
-	{
-		GifImageDesc->ImageWidth  = (WORD) (GifImageDesc->GIDDump[4] & 0xFF);
-		GifImageDesc->ImageWidth |= (WORD) ((GifImageDesc->GIDDump[5] & 0xFF) << 0x08);
+ if (EndianOrder == 1) /* LittleEndian */
+ {
+  GifImageDesc->ImageWidth  = (WORD) (GifImageDesc->GIDDump[4] & 0xFF);
+  GifImageDesc->ImageWidth |= (WORD) ((GifImageDesc->GIDDump[5] & 0xFF) << 0x08);
 
-		GifImageDesc->ImageHeight  = (WORD) (GifImageDesc->GIDDump[6] & 0xFF);
-		GifImageDesc->ImageHeight |= (WORD) ((GifImageDesc->GIDDump[7] & 0xFF) << 0x08);
+  GifImageDesc->ImageHeight  = (WORD) (GifImageDesc->GIDDump[6] & 0xFF);
+  GifImageDesc->ImageHeight |= (WORD) ((GifImageDesc->GIDDump[7] & 0xFF) << 0x08);
 
-	}
-	else
-	{
-		GifImageDesc->ImageWidth = (WORD) (GifImageDesc->GIDDump[4] & 0xFF);
-		GifImageDesc->ImageWidth = ((WORD) (GifImageDesc->GIDDump[5] & 0xFF)) | (GifImageDesc->ImageWidth << 0x08);
+ }
+ else
+ {
+  GifImageDesc->ImageWidth = (WORD) (GifImageDesc->GIDDump[4] & 0xFF);
+  GifImageDesc->ImageWidth = ((WORD) (GifImageDesc->GIDDump[5] & 0xFF)) | (GifImageDesc->ImageWidth << 0x08);
 
-		GifImageDesc->ImageHeight = (WORD) (GifImageDesc->GIDDump[6] & 0xFF);
-		GifImageDesc->ImageHeight = ((WORD) (GifImageDesc->GIDDump[7] & 0xFF)) | (GifImageDesc->ImageWidth << 0x08);
+  GifImageDesc->ImageHeight = (WORD) (GifImageDesc->GIDDump[6] & 0xFF);
+  GifImageDesc->ImageHeight = ((WORD) (GifImageDesc->GIDDump[7] & 0xFF)) | (GifImageDesc->ImageWidth << 0x08);
 
 
-	}
+ }
 
-	GifImageDesc->PackedField = GifImageDesc->GIDDump[8];
+ GifImageDesc->PackedField = GifImageDesc->GIDDump[8];
 
-	/* Interlace = GifImageDesc->PackedField & 0x20; */
+ /* Interlace = GifImageDesc->PackedField & 0x20; */
 
     /* Check if a Local Color Table is present */
     if (GifImageDesc->PackedField & 0x80)
     {
         /* Read number of color table entries */
         tableSize = (WORD) (1L << ((GifImageDesc->PackedField & 0x07) + 1));
-		GifImageDesc->TableSize = tableSize;
+  GifImageDesc->TableSize = tableSize;
         /* Read the Local Color Table */
         for (i = 0; i < tableSize; i++)
         {
@@ -184,25 +184,25 @@ ReadGifImageDesc(
         }
     }
 
-	/*
-	** Get LZW minimum Code Size
-	*/
-	GifImageDesc->CodeSize = (WORD)*(*MemGif2)++;
+ /*
+ ** Get LZW minimum Code Size
+ */
+ GifImageDesc->CodeSize = (WORD)*(*MemGif2)++;
 
-	/*GifImageDesc->GIFImage = ReadDataSubBlocks(FpGif);*/
-	if (!(GifImageDesc->GIFImage = (BYTE *)malloc((GifImageDesc->ImageWidth) * (GifImageDesc->ImageHeight)))) {
-		printf("Out of memory");
-		exit(-1);
-	}
+ /*GifImageDesc->GIFImage = ReadDataSubBlocks(FpGif);*/
+ if (!(GifImageDesc->GIFImage = (BYTE *)malloc((GifImageDesc->ImageWidth) * (GifImageDesc->ImageHeight)))) {
+  printf("Out of memory");
+  exit(-1);
+ }
 
 
-	TempPtr = GifImageDesc->GIFImage;
-	do
-	{
-		ch = ch1 = (int)*(*MemGif2)++;
-		while (ch--) *TempPtr++ = *(*MemGif2)++;
-	}
-	while (ch1);
+ TempPtr = GifImageDesc->GIFImage;
+ do
+ {
+  ch = ch1 = (int)*(*MemGif2)++;
+  while (ch--) *TempPtr++ = *(*MemGif2)++;
+ }
+ while (ch1);
 
 
     return(0);          /* No FILE stream error occured */
@@ -251,23 +251,23 @@ ReadGifPlainText(
 {
     int i;
 
-	for (i = 0 ; i < 13 ; i++) {
-		GifPlainText->PTEDump[i] = *(*MemGif2)++;
-	}
+ for (i = 0 ; i < 13 ; i++) {
+  GifPlainText->PTEDump[i] = *(*MemGif2)++;
+ }
 
     /* Read in the Plain Text data sub-blocks */
     if (!(GifPlainText->PlainTextData = ReadDataSubBlocks(MemGif2 , &(GifPlainText->DataSize))))
         return(1);
 
     /*
-	GifPlainText->Terminator       = 0;
-	*/
+ GifPlainText->Terminator       = 0;
+ */
 
     /* Check for a FILE stream error */
-	/*
+ /*
     if (ferror(FpGif))
         return(-1);
-	*/
+ */
 
     return(0);          /* No FILE stream error occured */
 }
@@ -290,22 +290,22 @@ ReadGifApplication(
 {
     int i;
 
-	for (i = 0 ; i < 12 ; i++) {
-		GifApplication->AEDump[i] = *(*MemGif2)++;
-	}
+ for (i = 0 ; i < 12 ; i++) {
+  GifApplication->AEDump[i] = *(*MemGif2)++;
+ }
 
     /* Read in the Plain Text data sub-blocks */
     if (!(GifApplication->ApplicationData = ReadDataSubBlocks(MemGif2 , &(GifApplication->DataSize))))
         return(1);
-	/*
+ /*
     GifApplication->Terminator     = 0;
-	*/
+ */
 
-	/* Check for a FILE stream error */
-	/*
+ /* Check for a FILE stream error */
+ /*
     if (ferror(FpGif))
         return(-1);
-	*/
+ */
 
     return(0);          /* No FILE stream error occured */
 }
@@ -355,27 +355,27 @@ ReadDataSubBlocks(BYTE **MemGif2, /* GIF image file input FILE stream           
     BYTE *ptr2;     /* Pointer used to mark the top of the heap      */
     BYTE dataSize;  /* Size of the current data sub-block being read */
     WORD bufSize;   /* Total size of the Plain Text data buffer      */
-	int tempcount = 0;
+ int tempcount = 0;
 
-	bufSize = 0;				/* The output buffer is empty          */
+ bufSize = 0;    /* The output buffer is empty          */
 
-    dataSize = *(*MemGif2)++;		/* Get the size of the first sub-block */
+    dataSize = *(*MemGif2)++;  /* Get the size of the first sub-block */
 
     /* Allocate initial data buffer */
     if (!(ptr1 = ptr2 = (BYTE *) malloc((size_t)dataSize + 1))) {
-		printf("Out of memory. Allocation of memory for data sub-blocks for\neither Comment, Plain Text or Application Extensions failed");
+  printf("Out of memory. Allocation of memory for data sub-blocks for\neither Comment, Plain Text or Application Extensions failed");
         return((BYTE *) NULL);
-	}
+ }
     for (;;)
     {
-		tempcount++;
+  tempcount++;
         bufSize += (dataSize);  /* Running total of the buffer size */
-		*DSize = bufSize;
+  *DSize = bufSize;
 
 #ifdef COMMENTED_OUT
-        *ptr1++ = dataSize;			/* Write the data count */
+        *ptr1++ = dataSize;   /* Write the data count */
 #endif /* COMMENTED_OUT */
-        while (dataSize--)			/* Read/write the Plain Text data */
+        while (dataSize--)   /* Read/write the Plain Text data */
              *ptr1++ = *(*MemGif2)++;
 
         /* Check if there is another data sub-block */
@@ -387,14 +387,14 @@ ReadDataSubBlocks(BYTE **MemGif2, /* GIF image file input FILE stream           
             return((BYTE *) NULL);
 
 
-		ptr1 += bufSize;			/* Move pointer to the end of the data */
+  ptr1 += bufSize;   /* Move pointer to the end of the data */
 
 
     }
 
-   	*ptr1++ = '\0';
+    *ptr1++ = '\0';
 
-    return(ptr2);					/* Return a pointer to the sub-block data */
+    return(ptr2);     /* Return a pointer to the sub-block data */
 }
 
 

@@ -75,7 +75,7 @@ WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName , char *GIFFileName)
 
     /* first create the global palette if there is one */
     if (gifHead.PackedField & 0x80) { /* global palette exists */
-        hsize_t dims[2];	/* specify the dimensions of the palette */
+        hsize_t dims[2]; /* specify the dimensions of the palette */
 
         /* size of the palette is tablesize (rows) X 3 (columns) */
         dims[0] = gifHead.TableSize;
