@@ -149,7 +149,8 @@ int main(int argc , char **argv)
         if (bool_is_image) {
             /* this is an image */
             /* allocate space to store the image name */
-            image_name_arr[number_of_images] = (CHAR*) malloc(strlen(argv[arg_index] + 1));
+            size_t len = strlen(argv[arg_index]);
+            image_name_arr[number_of_images] = (CHAR*) malloc( len + 1);
             strcpy(image_name_arr[number_of_images] , argv[arg_index]);
 
             /* make the palette array for this NULL */
@@ -163,7 +164,8 @@ int main(int argc , char **argv)
             /* this is a palette */
             /* allocate space to store the pal name */
             /* the palette was probably allocated for a previous image */
-            pal_name_arr[number_of_images-1] = (CHAR*) malloc(strlen(argv[arg_index] + 1));
+            size_t len = strlen(argv[arg_index]);
+            pal_name_arr[number_of_images-1] = (CHAR*) malloc( len + 1);
             strcpy(pal_name_arr[number_of_images - 1], argv[arg_index]);
             bool_is_palette = 0;
             continue;
@@ -172,12 +174,10 @@ int main(int argc , char **argv)
         /* oops. This was not meant to happen */
         usage();
 
-#if 0
         while (number_of_images--) {
             cleanup(image_name_arr[number_of_images]);
             cleanup(pal_name_arr[number_of_images]);
         }
-#endif  /* 0 */
 
         return -1;
     }
@@ -216,8 +216,8 @@ int main(int argc , char **argv)
             return -1;
         }
 
-  assert(dim_sizes[0]==(hsize_t)((int)dim_sizes[0]));
-  assert(dim_sizes[1]==(hsize_t)((int)dim_sizes[1]));
+        assert(dim_sizes[0]==(hsize_t)((int)dim_sizes[0]));
+        assert(dim_sizes[1]==(hsize_t)((int)dim_sizes[1]));
         RWidth  = (int)dim_sizes[1];
         RHeight = (int)dim_sizes[0];
 #ifdef UNUSED
@@ -392,14 +392,17 @@ int main(int argc , char **argv)
 
     fclose(fpGif);
 
-#if 0
+    if (HDFName != NULL)
+     free(HDFName);
+    if (GIFName != NULL)
+     free(GIFName);
+
     while(number_of_images--) {
         if (image_name_arr[number_of_images])
             free(image_name_arr[number_of_images]);
         if (pal_name_arr[number_of_images])
             free(pal_name_arr[number_of_images]);
     }
-#endif  /* 0 */
 
     return 0;
 }

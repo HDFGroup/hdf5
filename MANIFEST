@@ -1993,9 +1993,7 @@
 ./hl/tools/gif2h5/writehdf.c
 ./hl/tools/gif2h5/h52gifgentst.c
 ./hl/tools/gif2h5/h52giftest.sh
-#
-./tools/testfiles/h52giftst.h5
-
+./hl/tools/testfiles/h52giftst.h5
 
 
 # windows

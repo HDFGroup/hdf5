@@ -15,6 +15,8 @@
 #
 # HDF Utilities Test script
 
+TESTFILE="$srcdir/../testfiles/h52giftst.h5"
+
 # initialize errors variable
 errors=0
 
@@ -28,7 +30,6 @@ TOOLTEST()
 err=0
 $RUNSERIAL ./h52gif $*
 
-
 if [ $err -eq 1 ]; then
 errors="` expr $errors + 1 `";
   echo "*FAILED*"
@@ -39,8 +40,8 @@ fi
 
 
 
-TESTING "h52giftst.h5 image1.gif -i 1234567 -p palette" ;
-TOOLTEST h52giftst.h5 image1.gif -i 1234567 -p palette
+TESTING "h52giftst.h5 image1.gif -i 12345678 -p palette" ;
+TOOLTEST $TESTFILE image1.gif -i 12345678 -p palette
 
 
 exit $errors
