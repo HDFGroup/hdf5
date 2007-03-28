@@ -114,8 +114,8 @@ int main(int argc , char **argv)
         return 0;
     }
 
-    memset(image_name_arr , 0 , (size_t)MAX_NUMBER_IMAGES);
-    memset(pal_name_arr , 0 , (size_t)MAX_NUMBER_IMAGES);
+    memset(image_name_arr , 0 , MAX_NUMBER_IMAGES);
+    memset(pal_name_arr , 0 , MAX_NUMBER_IMAGES);
 
     HDFName = (CHAR *)malloc (strlen(argv[1]) + 1);
     GIFName = (CHAR *)malloc (strlen(argv[2]) + 1);
@@ -149,7 +149,8 @@ int main(int argc , char **argv)
         if (bool_is_image) {
             /* this is an image */
             /* allocate space to store the image name */
-            image_name_arr[number_of_images] = (CHAR*) malloc(strlen(argv[arg_index] + 1));
+            size_t len = strlen(argv[arg_index]);
+            image_name_arr[number_of_images] = (CHAR*) malloc( len + 1);
             strcpy(image_name_arr[number_of_images] , argv[arg_index]);
 
             /* make the palette array for this NULL */
@@ -163,7 +164,8 @@ int main(int argc , char **argv)
             /* this is a palette */
             /* allocate space to store the pal name */
             /* the palette was probably allocated for a previous image */
-            pal_name_arr[number_of_images-1] = (CHAR*) malloc(strlen(argv[arg_index] + 1));
+            size_t len = strlen(argv[arg_index]);
+            pal_name_arr[number_of_images-1] = (CHAR*) malloc( len + 1);
             strcpy(pal_name_arr[number_of_images - 1], argv[arg_index]);
             bool_is_palette = 0;
             continue;
@@ -172,12 +174,10 @@ int main(int argc , char **argv)
         /* oops. This was not meant to happen */
         usage();
 
-#if 0
         while (number_of_images--) {
             cleanup(image_name_arr[number_of_images]);
             cleanup(pal_name_arr[number_of_images]);
         }
-#endif  /* 0 */
 
         return -1;
     }
@@ -216,8 +216,8 @@ int main(int argc , char **argv)
             return -1;
         }
 
-  assert(dim_sizes[0]==(hsize_t)((int)dim_sizes[0]));
-  assert(dim_sizes[1]==(hsize_t)((int)dim_sizes[1]));
+        assert(dim_sizes[0]==(hsize_t)((int)dim_sizes[0]));
+        assert(dim_sizes[1]==(hsize_t)((int)dim_sizes[1]));
         RWidth  = (int)dim_sizes[1];
         RHeight = (int)dim_sizes[0];
 #ifdef UNUSED
@@ -311,9 +311,9 @@ int main(int argc , char **argv)
         if (idx == 0) {
             /* Write out the GIF header and logical screen descriptor */
             if (n_images > 1) {
-                fwrite("GIF89a", sizeof( char ), (size_t)6, fpGif);  /* the GIF magic number */
+                fwrite("GIF89a", sizeof( char ), 6, fpGif);  /* the GIF magic number */
             } else {
-                fwrite("GIF87a", sizeof( char ), (size_t)6, fpGif);  /* the GIF magic number */
+                fwrite("GIF87a", sizeof( char ), 6, fpGif);  /* the GIF magic number */
             }
 
             putword(RWidth, fpGif);             /* screen descriptor */
@@ -335,7 +335,7 @@ int main(int argc , char **argv)
                 fputc(0x21 , fpGif);
                 fputc(0xFF , fpGif);
                 fputc(11 , fpGif);
-                fwrite("NETSCAPE2.0" , (size_t)1 , (size_t)11 , fpGif);
+                fwrite("NETSCAPE2.0" , 1 , 11 , fpGif);
                 fputc(3 , fpGif);
                 fputc(1 , fpGif);
                 fputc(0 , fpGif);
@@ -392,14 +392,17 @@ int main(int argc , char **argv)
 
     fclose(fpGif);
 
-#if 0
+    if (HDFName != NULL)
+     free(HDFName);
+    if (GIFName != NULL)
+     free(GIFName);
+
     while(number_of_images--) {
         if (image_name_arr[number_of_images])
             free(image_name_arr[number_of_images]);
         if (pal_name_arr[number_of_images])
             free(pal_name_arr[number_of_images]);
     }
-#endif  /* 0 */
 
     return 0;
 }

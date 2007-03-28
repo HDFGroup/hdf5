@@ -16,7 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "hdf5.h"
-#include "H5IM.h"
+#include "H5IMpublic.h"
 
 
 
@@ -36,7 +36,7 @@
 #define WIDTH       (hsize_t)400
 #define HEIGHT      (hsize_t)200
 #define PAL_ENTRIES  256
-#define IMAGE1_NAME  "1234567"
+#define IMAGE1_NAME  "12345678"
 #define PAL_NAME     "palette"
 
 /*-------------------------------------------------------------------------
