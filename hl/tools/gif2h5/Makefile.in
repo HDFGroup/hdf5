@@ -53,10 +53,17 @@ PROG_OBJ=$(PROG_SRC:.c=.lo)
 
 PRIVATE_HDR=gif.h
 
-## Source and object files for the tests
+OTHER_SRC=h52gifgentst.c
+OTHER_OBJ=$(OTHER_SRC:.c=.lo)
+
+## Source and object files for the tests (to be cleaned up)
 ##
 TEST_SRC=
-TEST_OBJ=$(TEST_SRC:.c=.lo)
+TEST_OBJ=$(TEST_SRC:.c=.lo) $(OTHER_OBJ)
+
+## Temporary files generated  *.h5 and *.gif
+MOSTLYCLEAN=*.h5 *.gif
+CLEAN=
 
 ## Programs have to be built before they can be tested!
 ##
