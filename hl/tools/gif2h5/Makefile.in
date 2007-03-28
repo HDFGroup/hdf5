@@ -81,6 +81,6 @@ h52gif: hdf2gif.lo hdfgifwr.lo readhdf.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ hdf2gif.lo hdfgifwr.lo readhdf.lo $(LIBHDF5_HL) $(LIBTOOLS) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 h52gifgentst: h52gifgentst.lo
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h52gifgentst.lo $(LIBTOOLS) $(LIBHDF5) $(LIBHDF5_HL) $(LDFLAGS) $(LIBS)
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h52gifgentst.lo $(LIBHDF5_HL) $(LIBTOOLS) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 @CONCLUDE@
