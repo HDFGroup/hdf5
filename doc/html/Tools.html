@@ -7,6 +7,7 @@ HDF5/Tools API Specification
 
 <!--
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+  * Copyright by The HDF Group.                                               *
   * Copyright by the Board of Trustees of the University of Illinois.         *
   * All rights reserved.                                                      *
   *                                                                           *
@@ -16,8 +17,8 @@ HDF5/Tools API Specification
   * of the source code distribution tree; Copyright.html can be found at the  *
   * root level of an installed copy of the electronic HDF5 document set and   *
   * is linked from the top-level documents page.  It can also be found at     *
-  * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
-  * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+  * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
+  * access to either file, you may request a copy from help@hdfgroup.org.     *
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  -->
 
@@ -27,13 +28,14 @@ HDF5/Tools API Specification
 <body bgcolor="#FFFFFF">
 <!-- HEADER RIGHT " " -->
 
-<!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" --><hr>
+<!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" -->
+<hr>
 <center>
 <table border=0 width=98%>
 <tr><td valign=top align=left>
 <a href="index.html">HDF5 documents and links</a>&nbsp;<br>
 <a href="H5.intro.html">Introduction to HDF5</a>&nbsp;<br>
-<a href="http://hdf.ncsa.uiuc.edu/HDF5/doc/UG/index.html">HDF5 User Guide</a>&nbsp;<br>
+<a href="http://www.hdfgroup.org/HDF5/doc/UG/UG_frame.html">HDF5 User Guide</a>&nbsp;<br>
 <!--
 <a href="Glossary.html">Glossary</a><br>
 -->
@@ -57,7 +59,7 @@ And in this document, the
 <a href="PredefDTypes.html">Datatypes</a>&nbsp;&nbsp;
 </td></tr>
 <tr><td colspan="2" align="right">
-<i><small>(<a href="http://hdf.ncsa.uiuc.edu/HDF5/doc/PSandPDF/">PDF</a>
+<i><small>(<a href="http://www.hdfgroup.org/HDF5/doc/PSandPDF/">PDF</a>
 of complete manual formatted as print volume)&nbsp;&nbsp;&nbsp;</small></i>
 </td></tr>
 </table>
@@ -128,12 +130,12 @@ installed with HDF5.
     <br><br>
     </ul>
  
-    <li><a href="http://hdf.ncsa.uiuc.edu/hdf-java-html/" 
+    <li><a href="http://www.hdfgroup.org/hdf-java-html/" 
         target="ToolsExt">Java-based tools for HDF5</a>
         for viewing, manipulating, and generating HDF4 and HDF5 files:
         <br>
         <em>(Distributed separately; external link is 
-        <code>http://hdf.ncsa.uiuc.edu/hdf-java-html/</code>)</em>
+        <code>http://www.hdfgroup.org/hdf-java-html/</code>)</em>
     <ul>
 	<li><code>HDFview</code> -- a browser that 
 	    works with both HDF4 and HDF5 files and 
@@ -154,13 +156,13 @@ installed with HDF5.
     <br><br>
     </ul>
 
-    <li><a href="http://hdf.ncsa.uiuc.edu/h4toh5/" target="ToolsExt">
+    <li><a href="http://www.hdfgroup.org/h4toh5/" target="ToolsExt">
         HDF5/HDF4 conversion tools</a>:
         <br>
         <em>(Distributed separately; external link is 
-	<code>http://hdf.ncsa.uiuc.edu/h4toh5/</code>)</em>
+	<code>http://www.hdfgroup.org/h4toh5/</code>)</em>
     <ul>
-        <li><a href="http://hdf.ncsa.uiuc.edu/h4toh5/" 
+        <li><a href="http://www.hdfgroup.org/h4toh5/" 
 	    target="ToolsExt">H4toH5 Conversion Library</a> -- 
             Provides APIs for use in tools that perform customized 
 	    conversions of HDF4 files to HDF5 files
@@ -171,12 +173,12 @@ installed with HDF5.
     <br><br>
     </ul>
 
-    <li><a href="http://hdf.ncsa.uiuc.edu/tools5.html" 
+    <li><a href="http://www.hdfgroup.org/tools5.html" 
         target="ToolsExt">Other tools</a>, 
 	including third-party and commercial utilities and applications
         <br>
         <em>(Distributed separately; external link is 
-	<code>http://hdf.ncsa.uiuc.edu/tools5.html</code>)</em>
+	<code>http://www.hdfgroup.org/tools5.html</code>)</em>
 
 </ul>
 <!--
@@ -294,11 +296,12 @@ installed with HDF5.
         XML output.  This output contains a complete description of the file, 
         marked up in XML.  The XML conforms to the HDF5 Document Type 
         Definition (DTD) available at
-        <a href="http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd">
-        <code>http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.dtd</code></a>.
+        <a href="http://www.hdfgroup.org/DTDs/HDF5-File.dtd">
+        <code>http://www.hdfgroup.org/DTDs/HDF5-File.dtd</code></a>.
         <p>
         The XML output is suitable for use with other tools, including the 
-        <a href="http://hdf.ncsa.uiuc.edu/java-hdf5-html">HDF5 Java Tools</a>.
+        <a href="http://www.hdfgroup.org/hdf-java-html" 
+        target="ToolsExt">HDF5 Java Tools</a>.
 
 <dt><strong>Options and Parameters:</strong>
     <dl>
@@ -543,10 +546,10 @@ installed with HDF5.
         <a href="ddl.html"><cite>DDL for HDF5</cite></a>
 
     <li>HDF5 XML Schema at
-        <a href="http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.xsd">http://hdf.ncsa.uiuc.edu/DTDs/HDF5-File.xsd</a>
+        <a href="http://www.hdfgroup.org/DTDs/HDF5-File.xsd">http://www.hdfgroup.org/DTDs/HDF5-File.xsd</a>
 
     <li>HDF5 XML information at
-        <a href="http://hdf.ncsa.uiuc.edu/HDF5/XML">http://hdf.ncsa.uiuc.edu/HDF5/XML/</a>
+        <a href="http://www.hdfgroup.org/HDF5/XML">http://www.hdfgroup.org/HDF5/XML/</a>
     </ul>
 
 </dl>
@@ -672,7 +675,7 @@ installed with HDF5.
 	<p>
 	Additional information, with several sample cases, 
 	can be found in the document 
-	<a href="http://hdf.ncsa.uiuc.edu/HDF5/h5diff/h5diff_design.html">
+	<a href="http://www.hdfgroup.org/HDF5/h5diff/h5diff_design.html">
 	<cite>H5diff Examples</cite></a>.
 <dt><strong>Options and Parameters:</strong>
     <dl>
@@ -1789,13 +1792,12 @@ installed with HDF5.
         Floating point datatypes are converted to IEEE format.
         
 <dt><strong>Note:</strong>
-    <dl>The <code>h5toh4</code> and <code>h4toh5</code> utilities 
+    <dd>The <code>h5toh4</code> and <code>h4toh5</code> utilities 
         are no longer part of the HDF5 product;  
 	they are distributed separately through the page
-	<a href="http://hdf.ncsa.uiuc.edu/h4toh5/">
+	<a href="http://www.hdfgroup.org/h4toh5/">
 	Converting between HDF (4.x) and HDF5</a>.
 	</p>
-
 <dt><strong>Options and Parameters:</strong>
     <dl>
         <dt><code>-h</code>
@@ -1865,12 +1867,6 @@ installed with HDF5.
         HDF5 object, according to the mapping described in
         <a href="ADGuide/H4toH5Mapping.pdf" target=ExternalWinA>
         <cite>Mapping HDF4 Objects to HDF5 Objects</cite></a>.
-    <!-- [FOLLOWING FILE HAS BEEN REMOVED FROM SERVER:
-        (If this mapping changes between HDF5 Library releases, a more up-to-date
-        version may be available at
-        <a href="http://hdf.ncsa.uiuc.edu/HDF5/papers/h4toh5/H4-to-H5MappingGuidelines.pdf" target=ExternalWinB>
-        <cite>Mapping HDF4 Objects to HDF5 Objects</cite> on the HDF FTP server</a>.)
-    -->
         <p>
         In this initial version, <code>h4toh5</code> converts the following 
         HDF4 objects:
@@ -1917,9 +1913,10 @@ installed with HDF5.
     <dl>The <code>h4toh5</code> and <code>h5toh4</code> utilities 
         are no longer part of the HDF5 product;  
 	they are distributed separately through the page
-	<a href="http://hdf.ncsa.uiuc.edu/h4toh5/">
+	<a href="http://www.hdfgroup.org/h4toh5/">
 	Converting between HDF (4.x) and HDF5</a>.
 	</p>
+    </dl>
 <dt><strong>Options and Parameters:</strong>
     <dl>
         <dt><code>-h</code>
@@ -2662,13 +2659,14 @@ This tool moves the HDF5 file through byte copies, i.e., it does not read or int
 -->
 
 
-<!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" --><hr>
+<!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" -->
+<hr>
 <center>
 <table border=0 width=98%>
 <tr><td valign=top align=left>
 <a href="index.html">HDF5 documents and links</a>&nbsp;<br>
 <a href="H5.intro.html">Introduction to HDF5</a>&nbsp;<br>
-<a href="http://hdf.ncsa.uiuc.edu/HDF5/doc/UG/index.html">HDF5 User Guide</a>&nbsp;<br>
+<a href="http://www.hdfgroup.org/HDF5/doc/UG/UG_frame.html">HDF5 User Guide</a>&nbsp;<br>
 <!--
 <a href="Glossary.html">Glossary</a><br>
 -->
@@ -2692,18 +2690,21 @@ And in this document, the
 <a href="PredefDTypes.html">Datatypes</a>&nbsp;&nbsp;
 </td></tr>
 <tr><td colspan="2" align="right">
-<i><small>(<a href="http://hdf.ncsa.uiuc.edu/HDF5/doc/PSandPDF/">PDF</a>
+<i><small>(<a href="http://www.hdfgroup.org/HDF5/doc/PSandPDF/">PDF</a>
 of complete manual formatted as print volume)&nbsp;&nbsp;&nbsp;</small></i>
 </td></tr>
 </table>
 </center>
 <hr>
-<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" --><address>
-<a href="mailto:hdfhelp@ncsa.uiuc.edu">HDF Help Desk</a> 
+<!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" -->
+<address>
+THG Help Desk: <img src="Graphics/help.png" align=top height=16>
 <br>
-Describes HDF5 Release 1.6.5, November 2005
+Describes HDF5 Release 1.6.6, April 2007
 </address>
-<!-- #EndLibraryItem --><dt><dt>&nbsp;<dt><dt>&nbsp;<dt><dt>&nbsp;<dt><dt><SCRIPT LANGUAGE="JAVASCRIPT">
+<!-- #EndLibraryItem -->
+&nbsp;<br>
+<SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
 document.writeln("Last modified: 6 September 2006");
 -->

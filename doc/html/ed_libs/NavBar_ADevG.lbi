@@ -10,7 +10,7 @@
     -->
 </td>
 <td valign=top align=right>
-    <a href="http://hdf.ncsa.uiuc.edu/HDF5/doc/UG/index.html">HDF5 User's Guide</a>&nbsp;<br>
+    <a href="http://www.hdfgroup.org/HDF5/doc/UG/UG_frame.html">HDF5 User's Guide</a>&nbsp;<br>
     <a href="../RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;<br>
     <a href="../ADGuide.html">HDF5 Application Developer's Guide</a>&nbsp;<br>
 </td></tr>

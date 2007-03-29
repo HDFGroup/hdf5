@@ -1,3 +1,4 @@
+
 <hr>
 <center>
 <table border=0 width=98%>
@@ -5,7 +6,7 @@
     <a href="../index.html">HDF5 documents and links</a>&nbsp;<br>
     <a href="../H5.intro.html">Introduction to HDF5</a>&nbsp;<br>
     <a href="../RM_H5Front.html">HDF5 Reference Manual</a>&nbsp;<br>   
-    <a href="http://hdf.ncsa.uiuc.edu/HDF5/doc/UG/index.html">HDF5 User's Guide for Release 1.6</a>&nbsp;<br>
+    <a href="http://www.hdfgroup.org/HDF5/doc/UG/UG_frame.html">HDF5 User's Guide for Release 1.6</a>&nbsp;<br>
     <!--
     <a href="Glossary.html">Glossary</a><br>
     -->
