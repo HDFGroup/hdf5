@@ -1,5 +1,6 @@
 # HDF5 Library Makefile(.in)
 #
+# Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
@@ -9,8 +10,9 @@
 # of the source code distribution tree; Copyright.html can be found at the
 # root level of an installed copy of the electronic HDF5 document set and
 # is linked from the top-level documents page.  It can also be found at
-# http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have
-# access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu.
+# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+# access to either file, you may request a copy from help@hdfgroup.org.
+#
 #
 top_srcdir=@top_srcdir@
 top_builddir=../../..
@@ -26,7 +28,7 @@ DOCDIR=$(docdir)/hdf5/ed_libs
 PUB_DOCS=Footer.lbi NavBar_ADevG.lbi NavBar_Common.lbi NavBar_Intro.lbi \
          NavBar_RM.lbi NavBar_TechN.lbi NavBar_UG.lbi styles_Format.lbi \
          styles_Gen.lbi styles_Index.lbi styles_Intro.lbi styles_RM.lbi \
-         styles_UG.lbi
+         styles_UG.lbi copyright-html.lbi
 
 # Other doc files (not to be installed)...
 PRIVATE_DOCS=
