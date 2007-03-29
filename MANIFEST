@@ -217,6 +217,13 @@
 ./doc/html/Graphics/Java.gif
 ./doc/html/Graphics/Makefile.in
 ./doc/html/Graphics/OtherAPIs.gif
+./doc/html/Graphics/THGnoTextSm.jpg
+./doc/html/Graphics/THGwTextSm.jpg
+./doc/html/Graphics/XRD100.gif
+./doc/html/Graphics/hdf2.gif
+./doc/html/Graphics/help.jpg
+./doc/html/Graphics/help.png
+./doc/html/Graphics/help.gif
 
 ./doc/html/Intro/Dependencies
 ./doc/html/Intro/IntroExamples.html
@@ -713,6 +720,7 @@
 ./doc/html/ed_libs/NavBar_RM.lbi
 ./doc/html/ed_libs/NavBar_TechN.lbi
 ./doc/html/ed_libs/NavBar_UG.lbi
+./doc/html/ed_libs/copyright-html.lbi
 ./doc/html/ed_libs/styles_Format.lbi
 ./doc/html/ed_libs/styles_Gen.lbi
 ./doc/html/ed_libs/styles_Index.lbi
