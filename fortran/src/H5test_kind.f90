@@ -53,7 +53,7 @@
               j = 0
              write(*, "("" subroutine i"" i2.2,""()"")") j
              write(*,*)"   implicit none"
-             write(*,*)"   integer :: a"
+             write(*,*)"   integer :: a = 0"
              write(*,*)"   integer :: a_size"
              write(*,*)"   a_size = bit_size(a)"
              write(*,*)"   if (a_size .eq. 8) then"
@@ -76,8 +76,8 @@
               jr = 0
              write(*, "("" subroutine r"" i2.2,""()"")") j
              write(*,*)"   implicit none"
-             write(*,*)"   real :: b(1)"
-             write(*,*)"   integer :: a(1)"
+             write(*,*)"   real :: b(1) = 0"
+             write(*,*)"   integer :: a(1) = 0"
              write(*,*)"   integer :: a_size"
              write(*,*)"   integer :: real_size"
              write(*,*)"   integer :: ab_size ! How many integers needed to hold a real"
@@ -102,8 +102,8 @@
               jd = 0
              write(*, "("" subroutine d"" i2.2,""()"")") jd
              write(*,*)"   implicit none"
-             write(*,*)"   double precision :: b"
-             write(*,*)"   integer :: a(8)"
+             write(*,*)"   double precision :: b = 0"
+             write(*,*)"   integer :: a(8) = 0"
              write(*,*)"   integer :: a_size"
              write(*,*)"   integer :: b_size"
              write(*,*)"   a_size = bit_size(a(1))"
@@ -120,7 +120,7 @@
               j = kind_numbers(i)
              write(*, "("" subroutine i"" i2.2,""()"")") j
              write(*,*)"   implicit none"
-             write(*,*)"   integer(",j,") :: a"
+             write(*,*)"   integer(",j,") :: a = 0"
              write(*,*)"   integer :: a_size"
              write(*,*)"   a_size = bit_size(a)"
              write(*,*)"   if (a_size .eq. 8) then"
