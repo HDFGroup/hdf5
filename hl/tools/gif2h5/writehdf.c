@@ -19,6 +19,8 @@
 #include "gif.h"
 #include "H5IM.h"
 
+#define PAL_NAME "global"
+
 /*-------------------------------------------------------------------------
  * Function: WriteHDF
  *
@@ -39,6 +41,7 @@ WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName , char *GIFFileName)
 {
     GIFHEAD          gifHead;           /* GIF Header structure            */
     GIFIMAGEDESC    *gifImageDesc;      /* Logical Image Descriptor struct */
+    int              has_pal=0;
 
     long ImageCount;                    /* number of images */
 #ifdef UNUSED
@@ -82,8 +85,10 @@ WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName , char *GIFFileName)
         dims[1] = 3;
         
         /* make a palette */
-        if (H5IMmake_palette(file_id,"Global Palette",dims,(unsigned char *)gifHead.HDFPalette)<0)
+        if (H5IMmake_palette(file_id,PAL_NAME,dims,(unsigned char *)gifHead.HDFPalette)<0)
          return -1;
+
+        has_pal=1;
     }
 
     for(i = 0; i < ImageCount; i++) {
@@ -103,8 +108,11 @@ WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName , char *GIFFileName)
          return -1;
       
         /* attach the palette to the image dataset */
-        if (H5IMlink_palette(file_id,ImageName,"Global Palette")<0)
-         return -1;
+        if (has_pal)
+        {
+            if (H5IMlink_palette(file_id,ImageName,PAL_NAME)<0)
+                return -1;
+        }
     }
 
     /* close the H5 file */

@@ -1994,7 +1994,7 @@
 ./hl/tools/gif2h5/h52gifgentst.c
 ./hl/tools/gif2h5/h52giftest.sh
 ./hl/tools/testfiles/h52giftst.h5
-
+./hl/tools/testfiles/image1.gif
 
 # windows
 ./windows/COPYING
