@@ -94,6 +94,7 @@ H5O_assert(const H5O_t *oh)
 {
     H5O_mesg_t *curr_msg;               /* Pointer to current message to examine */
     H5O_mesg_t *tmp_msg;                /* Pointer to temporary message to examine */
+    unsigned cont_msgs_found = 0;       /* # of continuation messages for object */
     size_t meta_space;                  /* Size of header metadata */
     size_t mesg_space;                  /* Size of message raw data */
     size_t free_space;                  /* Size of free space in header */
@@ -155,8 +156,26 @@ H5O_assert(const H5O_t *oh)
         /* Accumulate information, based on the type of message */
 	if(H5O_NULL_ID == curr_msg->type->id)
             free_space += H5O_SIZEOF_MSGHDR_OH(oh) + curr_msg->raw_size;
-        else if(H5O_CONT_ID == curr_msg->type->id)
+        else if(H5O_CONT_ID == curr_msg->type->id) {
+            H5O_cont_t *cont = (H5O_cont_t *)curr_msg->native;
+            hbool_t found_chunk = FALSE;        /* Found a chunk that matches */
+
+            /* Increment # of continuation messages found */
+            cont_msgs_found++;
+
+            /* Sanity check that every continuation message has a matching chunk */
+            /* (and only one) */
+            for(v = 0; v < oh->nchunks; v++) {
+                if(H5F_addr_eq(cont->addr, oh->chunk[v].addr) && cont->size == oh->chunk[v].size) {
+                    HDassert(cont->chunkno == v);
+                    HDassert(!found_chunk);
+                    found_chunk = TRUE;
+                } /* end if */
+            } /* end for */
+            HDassert(found_chunk);
+
             meta_space += H5O_SIZEOF_MSGHDR_OH(oh) + curr_msg->raw_size;
+        } /* end if */
         else {
             meta_space += H5O_SIZEOF_MSGHDR_OH(oh);
             mesg_space += curr_msg->raw_size;
@@ -183,6 +202,9 @@ H5O_assert(const H5O_t *oh)
                 HDassert(!(tmp_msg->raw >= curr_msg->raw && tmp_msg->raw < (curr_msg->raw + curr_msg->raw_size)));
         } /* end for */
     } /* end for */
+
+    /* Sanity check that the # of cont. messages is correct for the # of chunks */
+    HDassert(oh->nchunks == (cont_msgs_found + 1));
 
     /* Sanity check that all the bytes are accounted for */
     HDassert(hdr_size == (free_space + meta_space + mesg_space + oh->skipped_mesg_size));

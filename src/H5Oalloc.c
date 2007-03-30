@@ -1525,6 +1525,21 @@ H5O_remove_empty_chunks(H5F_t *f, H5O_t *oh, hid_t dxpl_id)
                     HDassert(curr_msg->chunkno != deleted_chunkno);
                     if(curr_msg->chunkno > deleted_chunkno)
                         curr_msg->chunkno--;
+
+                    /* Check for continuation message */
+                    if(H5O_CONT_ID == curr_msg->type->id) {
+                        /* Decode current continuation message if necessary */
+                        if(NULL == curr_msg->native) {
+                            HDassert(H5O_MSG_CONT->decode);
+                            curr_msg->native = (H5O_MSG_CONT->decode)(f, dxpl_id, 0, curr_msg->raw);
+                            if(NULL == curr_msg->native)
+                                HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode message")
+                        } /* end if */
+
+                        /* Check for pointer to chunk after deleted chunk */
+                        if(((H5O_cont_t *)(curr_msg->native))->chunkno > deleted_chunkno)
+                            ((H5O_cont_t *)(curr_msg->native))->chunkno--;
+                    } /* end if */
                 } /* end for */
 
                 /* Found chunk to delete */
