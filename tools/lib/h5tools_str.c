@@ -316,7 +316,7 @@ h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info,
                    hsize_t max_idx[], h5tools_context_t *ctx)
 {
     hsize_t p_prod[H5S_MAX_RANK];
-    hsize_t i = 0;
+    size_t i = 0;
     hsize_t curr_pos=elmtno;
 
     h5tools_str_reset(str);

@@ -55,7 +55,7 @@ main(void)
     hid_t	fapl, file, dcpl, space, dset, groups, grp;
     hsize_t	ds_size[2] = {100, 100};
     hsize_t	ch_size[2] = {5, 5};
-    hsize_t	i, j;
+    size_t	i, j;
     char	name[1024];
 
     h5_reset();

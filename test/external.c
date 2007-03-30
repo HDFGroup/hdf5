@@ -590,7 +590,7 @@ test_2 (hid_t fapl)
     hid_t	dset=-1;		/*dataset			*/
     hid_t	grp=-1;			/*group to emit diagnostics	*/
     int		fd;			/*external file descriptors	*/
-    hsize_t	i, j;			/*miscellaneous counters	*/
+    size_t	i, j;			/*miscellaneous counters	*/
     hssize_t	n;			/*bytes of I/O			*/
     char	filename[1024];		/*file names			*/
     int		part[25], whole[100];	/*raw data buffers		*/

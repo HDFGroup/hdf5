@@ -54,7 +54,7 @@ main(void)
     hid_t	fapl, file, space, dset, groups, grp;
     hsize_t	ds_size[2];
     double	error;
-    hsize_t	i, j;
+    size_t	i, j;
     char	name[1024];
 
     h5_reset();

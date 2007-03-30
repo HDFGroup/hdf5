@@ -225,7 +225,7 @@ test_extend(hid_t f, const char *prefix,
     hid_t               dataset;        /* Dataset ID */
     hid_t               fspace;         /* Dataset's file dataspace */
     hid_t               mspace;         /* Dataset's memory dataspace */
-    hsize_t		i, j, k, ctr;
+    size_t		i, j, k, ctr;
     int			ndims;
     uint8_t		*buf = NULL, *check = NULL, *whole = NULL;
     char		dims[64], s[256], name[256];

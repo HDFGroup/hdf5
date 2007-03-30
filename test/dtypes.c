@@ -3305,7 +3305,7 @@ test_named (hid_t fapl)
     hid_t		file=-1, type=-1, space=-1, dset=-1, t2=-1, t3=-1, attr1=-1;
     herr_t		status;
     static hsize_t	ds_size[2] = {10, 20};
-    hsize_t		i,j;
+    size_t		i,j;
     unsigned 		attr_data[10][20];
     char		filename[1024];
 

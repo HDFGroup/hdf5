@@ -1311,7 +1311,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     const hsize_t	hs_offset[2] = {FILTER_HS_OFFSET1, FILTER_HS_OFFSET2}; /* Hyperslab offset */
     const hsize_t	hs_size[2] = {FILTER_HS_SIZE1, FILTER_HS_SIZE2};   /* Hyperslab size */
     void		*tconv_buf = NULL;      /* Temporary conversion buffer */
-    hsize_t		i, j, n;        /* Local index variables */
+    size_t		i, j, n;        /* Local index variables */
     herr_t              status;         /* Error status */
 
     /* Create the data space */
@@ -1562,7 +1562,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
 
     for (i=0; i<hs_size[0]; i++) {
 	for (j=0; j<hs_size[1]; j++) {
-	    points[hs_offset[0]+i][hs_offset[1]+j] = (int)HDrandom();
+	    points[(size_t)hs_offset[0]+i][(size_t)hs_offset[1]+j] = (int)HDrandom();
 	}
     }
     if (H5Sselect_hyperslab(sid, H5S_SELECT_SET, hs_offset, NULL, hs_size,
@@ -1598,8 +1598,8 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         /* Check that the values read are the same as the values written */
         for (i=0; i<hs_size[0]; i++) {
 	   for (j=0; j<hs_size[1]; j++) {
-	       if (points[hs_offset[0]+i][hs_offset[1]+j] !=
-                      check[hs_offset[0]+i][hs_offset[1]+j]) {
+	       if (points[(size_t)hs_offset[0]+i][(size_t)hs_offset[1]+j] !=
+                      check[(size_t)hs_offset[0]+i][(size_t)hs_offset[1]+j]) {
 		  H5_FAILED();
 		  fprintf(stderr,"    Read different values than written.\n");
 		  fprintf(stderr,"    At index %lu,%lu\n",
@@ -2166,7 +2166,7 @@ test_missing_filter(hid_t file)
     const hsize_t dims[2] = {DSET_DIM1, DSET_DIM2};         /* Dataspace dimensions */
     const hsize_t chunk_dims[2] = {2, 25};      /* Chunk dimensions */
     hsize_t     dset_size;      /* Dataset size */
-    hsize_t     i,j;            /* Local index variables */
+    size_t      i,j;            /* Local index variables */
     herr_t      ret;            /* Generic return value */
     char testfile[512]="";      /* Buffer to hold name of existing test file */
     char *srcdir = HDgetenv("srcdir");    /* The source directory, if we are using the --srcdir configure option */
@@ -2418,7 +2418,7 @@ test_onebyte_shuffle(hid_t file)
     const hsize_t       chunk_size[2] = {10, 20};
     unsigned char       orig_data[10][20];
     unsigned char       new_data[10][20];
-    hsize_t		i, j;
+    size_t		i, j;
 #else /* H5_HAVE_FILTER_SHUFFLE */
     const char		*not_supported= "    Data shuffling is not enabled.";
 #endif /* H5_HAVE_FILTER_SHUFFLE */
@@ -2712,7 +2712,7 @@ test_can_apply(hid_t file)
     const hsize_t dims[2] = {DSET_DIM1, DSET_DIM2};         /* Dataspace dimensions */
     const hsize_t chunk_dims[2] = {2, 25};      /* Chunk dimensions */
     hsize_t     dset_size;      /* Dataset size */
-    hsize_t     i,j;            /* Local index variables */
+    size_t      i,j;            /* Local index variables */
 
     TESTING("dataset filter 'can apply' callback");
 
@@ -3073,7 +3073,7 @@ test_set_local(hid_t fapl)
     const hsize_t chunk_dims[2] = {2, 25};      /* Chunk dimensions */
     hsize_t     dset_size;      /* Dataset size */
     unsigned    cd_values[2]={BOGUS2_PARAM_1, BOGUS2_PARAM_2};   /* Parameters for Bogus2 filter */
-    hsize_t     i,j;          /* Local index variables */
+    size_t      i,j;          /* Local index variables */
     double      n;          /* Local index variables */
 
     TESTING("dataset filter 'set local' callback");

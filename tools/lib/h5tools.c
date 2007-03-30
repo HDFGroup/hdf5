@@ -901,7 +901,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, hid_t dset,
 {
     hid_t               f_space;                  /* file data space */
     hsize_t             elmtno;                   /* counter  */
-    hsize_t             i;                        /* counter  */
+    size_t             i;                        /* counter  */
     int                 carry;                    /* counter carry value */
     hsize_t             zero[8];                  /* vector of zeros */
     unsigned int        flags;                    /* buffer extent flags */
