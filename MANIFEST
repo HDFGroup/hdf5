@@ -1376,7 +1376,8 @@
 ./tools/testfiles/h5repack_nbit.h5
 ./tools/testfiles/h5repack_soffset.h5
 ./tools/testfiles/info.h5repack
-
+./tools/testfiles/h5repack_ext.bin
+./tools/testfiles/h5repack_ext.h5
 
 
 

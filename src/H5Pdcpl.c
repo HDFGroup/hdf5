@@ -199,6 +199,9 @@ done:
  * Programmer:     Raymond Lu
  *                 Tuesday, October 2, 2001
  *
+ * Modifications:  pvn, April 02, 2007
+ *  Reset external file list slots name_offset to a state when created
+ *
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
@@ -235,6 +238,21 @@ H5P_dcrt_copy(hid_t dst_plist_id, hid_t src_plist_id, void UNUSED *copy_data)
     HDmemset(&dst_efl, 0, sizeof(H5O_efl_t));
     if(NULL == H5O_msg_copy(H5O_EFL_ID, &src_efl, &dst_efl))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't copy external file list")
+
+    /* reset efl name_offset and heap_addr, these are the values when the dataset is created */
+    if (dst_efl.slot)
+    {
+        unsigned int i;
+
+        dst_efl.heap_addr = HADDR_UNDEF;
+        for ( i = 0; i < dst_efl.nused; i++)
+        {
+            dst_efl.slot[i].name_offset = 0;
+        }
+        
+    }
+
+
     if(NULL == H5O_msg_copy(H5O_PLINE_ID, &src_pline, &dst_pline))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't copy data pipeline")
 

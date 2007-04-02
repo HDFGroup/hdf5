@@ -65,6 +65,9 @@
 /* Big file to test read by hyperslabs  */
 #define FNAME14    "h5repack_big.h5"
 #define FNAME14OUT "h5repack_big_out.h5"
+/* external file  */
+#define FNAME15    "h5repack_ext.h5"
+#define FNAME15OUT "h5repack_ext_out.h5"
 
 
 const char *H5REPACK_FILENAMES[] = {
@@ -110,6 +113,8 @@ int write_dset(hid_t loc_id,int rank,hsize_t *dims,const char *dset_name,hid_t t
 int make_dset(hid_t loc_id,const char *name,hid_t sid,hid_t dcpl,void *buf);
 int make_attr(hid_t loc_id,int rank,hsize_t *dims,const char *attr_name,hid_t type_id,void *buf);
 void make_dset_reg_ref(hid_t loc_id);
+int make_external(hid_t loc_id);
+
 
 /*-------------------------------------------------------------------------
  * Function: main
@@ -155,8 +160,7 @@ int main (void)
  * Format of the tests:
  *
  * 1) make a copy of the file with h5repack
- * 2) use the h5diff utility to compare the input and output file;
- *     it returns RET==0 if the objects have the same data
+ * 2) use the h5diff function to compare the input and output file
  *-------------------------------------------------------------------------
  */
 
@@ -1281,6 +1285,23 @@ if (szip_can_encode) {
   GOERROR;
  PASSED();
 
+/*-------------------------------------------------------------------------
+ * test external dataset
+ *-------------------------------------------------------------------------
+ */
+ TESTING("    external datasets");
+ if (h5repack_init (&pack_options, 0)<0)
+  GOERROR;
+ if (h5repack(FNAME15,FNAME15OUT,&pack_options) < 0)
+  GOERROR;
+ if (h5diff(FNAME15,FNAME15OUT,NULL,NULL,&diff_options) > 0)
+  GOERROR;
+ if (h5repack_verify(FNAME15OUT,&pack_options)<=0)
+  GOERROR;
+ if (h5repack_end (&pack_options)<0)
+  GOERROR;
+ PASSED();
+
 
 /*-------------------------------------------------------------------------
  * end
@@ -1459,6 +1480,17 @@ int make_testfiles(void)
  if((loc_id = H5Fcreate(FNAME14,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
   return -1;
  if (make_big(loc_id, 1)<0)
+  goto out;
+ if(H5Fclose(loc_id)<0)
+  return -1;
+
+/*-------------------------------------------------------------------------
+ * create a file with external dataset
+ *-------------------------------------------------------------------------
+ */
+ if((loc_id = H5Fcreate(FNAME15,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+  return -1;
+ if (make_external(loc_id)<0)
   goto out;
  if(H5Fclose(loc_id)<0)
   return -1;
@@ -2659,6 +2691,60 @@ out:
  return -1;
 
 }
+
+/*-------------------------------------------------------------------------
+ * Function: make_external 
+ *
+ * Purpose: create a external dataset
+ *
+ *-------------------------------------------------------------------------
+ */
+
+int make_external(hid_t loc_id)
+{
+ hid_t   did=-1;
+ hid_t   sid=-1;
+ hid_t   dcpl;
+ int     buf[2]={1,2};
+ hsize_t cur_size[1];		/* data space current size	*/
+ hsize_t max_size[1];		/* data space maximum size	*/
+ hsize_t size;
+
+ cur_size[0] = max_size[0] = 2;
+ size = max_size[0] * sizeof(int);
+ 
+ /* create */ 
+ if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+  goto out;
+ if (H5Pset_external(dcpl, "h5repack_ext.bin", (off_t)0, size)<0) 
+  goto out;
+ if ((sid = H5Screate_simple(1,cur_size, max_size))<0)
+  goto out;
+ if ((did = H5Dcreate(loc_id,"external",H5T_NATIVE_INT,sid,dcpl))<0)
+  goto out;
+ if (H5Dwrite(did,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+  goto out;
+
+ /* close */
+ if(H5Sclose(sid)<0)
+  goto out;
+ if(H5Pclose(dcpl)<0)
+  goto out;
+ if(H5Dclose(did)<0)
+  goto out;
+
+ return 0;
+
+out:
+ H5E_BEGIN_TRY {
+  H5Pclose(dcpl);
+  H5Sclose(sid);
+  H5Dclose(did);
+ } H5E_END_TRY;
+ return -1;
+
+}
+
 
 /*-------------------------------------------------------------------------
  * Function: write_dset_in
