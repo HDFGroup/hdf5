@@ -102,7 +102,7 @@ main(int argv , char *argc[])
      * Call WriteHDF from here. Go ahead and change WriteHDF to write whatever
      * format you want
      */
-    if (WriteHDF(GifMemoryStruct , argc[2]))
+    if (WriteHDF(GifMemoryStruct , argc[2] , argc[1]))
         printf("HDF Write Error\n\n");
 
     /* Free all buffers */

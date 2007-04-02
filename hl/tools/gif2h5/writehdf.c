@@ -19,6 +19,8 @@
 #include "gif.h"
 #include "H5IMpublic.h"
 
+#define PAL_NAME "global"
+
 /*-------------------------------------------------------------------------
  * Function: WriteHDF
  *
@@ -35,12 +37,18 @@
  */
 
 int
-WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName)
+WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName , char *GIFFileName)
 {
     GIFHEAD          gifHead;           /* GIF Header structure            */
     GIFIMAGEDESC    *gifImageDesc;      /* Logical Image Descriptor struct */
+    int              has_pal=0;
 
     long ImageCount;                    /* number of images */
+#ifdef UNUSED
+    long CommentCount,                  /* number of comments */
+         ApplicationCount,              /* number of application extensions */
+         PlainTextCount;                /* number of plain text extensions */
+#endif /* UNUSED */
 
     char ImageName[256];                /* Image name for the Image */
 
@@ -55,6 +63,11 @@ WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName)
 
     /* get some data from gifHead */
     ImageCount = gifHead.ImageCount;
+#ifdef UNUSED
+    CommentCount = (WORD)gifHead.CommentCount;
+    ApplicationCount = (WORD)gifHead.ApplicationCount;
+    PlainTextCount = (WORD)gifHead.PlainTextCount;
+#endif /* UNUSED */
 
     if ((file_id = H5Fcreate(HDFName , H5F_ACC_TRUNC , H5P_DEFAULT , H5P_DEFAULT)) < 0) {
         /* error occured opening the HDF File for write */
@@ -72,8 +85,10 @@ WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName)
         dims[1] = 3;
         
         /* make a palette */
-        if (H5IMmake_palette(file_id,"Global Palette",dims,(unsigned char *)gifHead.HDFPalette)<0)
+        if (H5IMmake_palette(file_id,PAL_NAME,dims,(unsigned char *)gifHead.HDFPalette)<0)
          return -1;
+
+        has_pal=1;
     }
 
     for(i = 0; i < ImageCount; i++) {
@@ -93,8 +108,11 @@ WriteHDF(GIFTOMEM GifMemoryStruct, char *HDFName)
          return -1;
       
         /* attach the palette to the image dataset */
-        if (H5IMlink_palette(file_id,ImageName,"Global Palette")<0)
-         return -1;
+        if (has_pal)
+        {
+            if (H5IMlink_palette(file_id,ImageName,PAL_NAME)<0)
+                return -1;
+        }
     }
 
     /* close the H5 file */
