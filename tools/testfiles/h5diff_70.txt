@@ -8,7 +8,7 @@ file1     file2
     x      x    /g1            
 
 dataset: </dset> and </dset>
-</dset> and </dset> are empty datasets
+</dset> or </dset> are empty datasets
 attribute: <string of </dset>> and <string of </dset>>
 size:           [2]           [2]
 position        string of </dset> string of </dset> difference          

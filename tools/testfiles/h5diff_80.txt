@@ -294,10 +294,10 @@ position        enum            enum            difference
 [ 0 ]          RED              GREEN            
 1 differences found
 dataset: </g1/enum2D> and </g1/enum2D>
-</g1/enum2D> and </g1/enum2D> are empty datasets
+</g1/enum2D> or </g1/enum2D> are empty datasets
 0 differences found
 dataset: </g1/enum3D> and </g1/enum3D>
-</g1/enum3D> and </g1/enum3D> are empty datasets
+</g1/enum3D> or </g1/enum3D> are empty datasets
 0 differences found
 dataset: </g1/float> and </g1/float>
 size:           [2]           [2]

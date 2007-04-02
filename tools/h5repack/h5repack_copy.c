@@ -180,7 +180,6 @@ int do_copy_objects(hid_t fidin,
  hsize_t  dims[H5S_MAX_RANK];/* dimensions of dataset */
  hsize_t  dsize_in;          /* input dataset size before filter */
  hsize_t  dsize_out;         /* output dataset size after filter */
- int      next;              /* external files */
  int      apply_s;           /* flag for apply filter to small dataset sizes */
  int      apply_f;           /* flag for apply filter to return error on H5Dcreate */
  double   per;               /* percent utilization of storage */
@@ -269,18 +268,7 @@ int do_copy_objects(hid_t fidin,
     
     if ((msize=H5Tget_size(wtype_id))==0)
      goto error;
-    
-    /*-------------------------------------------------------------------------
-     * check for external files
-     *-------------------------------------------------------------------------
-     */
-    if ((next=H5Pget_external_count (dcpl_id))<0)
-     goto error;
-    
-    if (next)
-     fprintf(stderr," <warning: %s has external files, ignoring read...>\n",
-     travt->objs[i].name );
-    
+       
     /*-------------------------------------------------------------------------
      * check if the dataset creation property list has filters that
      * are not registered in the current configuration
@@ -288,7 +276,7 @@ int do_copy_objects(hid_t fidin,
      * 2) the internal filters might be turned off
      *-------------------------------------------------------------------------
     */
-    if (next==0 && h5tools_canreadf((travt->objs[i].name),dcpl_id)==1)
+    if (h5tools_canreadf((travt->objs[i].name),dcpl_id)==1)
     {
      apply_s=1;
      apply_f=1;
