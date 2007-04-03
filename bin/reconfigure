@@ -17,28 +17,76 @@
 # A simple script to reconfigure autotools for HDF5.
 # The autotools include a reconfigure script, but this script
 # has the paths of autoconf and automake hardcoded to work on HDF
-# machines.  Thus is enforces that HDF5 always uses the
+# machines.  Thus it enforces that HDF5 always uses the
 # same versions of autotools.
-# Uses autoconf version 2.59
+# Uses autoconf version 2.60
 
-# The autotools live in AFS, so as long as their paths don't change
-# and this machine has the right version of m4, this script should
-# be able to run the autotools.
+# HDF5 currently uses the following versions of the autotools:
+AUTOCONF_VERSION="autoconf (GNU Autoconf) 2.60"
+AUTOHEADER_VERSION="autoheader (GNU Autoconf) 2.60"
+ACLOCAL_VERSION="aclocal (GNU automake) 1.9.6"
+LIBTOOL_VERSION="(GNU libtool) 1.5.14"
 
 
-  # Run commands in order
-  echo /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoheader
-  /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoheader
+# If the user has defined environment variables pointing to the autotools,
+# use those (but check their versions first!). Otherwise, assume that
+# we're running on a machine with access to the autotools in home1/packages.
+if test -z ${AUTOCONF}; then
+  AUTOCONF=/home1/packages/autoconf/autoconf-2.60/bin/autoconf
+fi
+if test -z ${AUTOHEADER}; then
+  AUTOHEADER=/home1/packages/autoconf/autoconf-2.60/bin/autoheader
+fi
+if test -z ${ACLOCAL}; then
+  ACLOCAL=/home1/packages/automake/automake-1.9.6/bin/aclocal-1.9
+fi
+if test -z ${LIBTOOL}; then
+  LIBTOOL=/home1/packages/libtool/libtool-1.5.14/bin/libtool
+fi
 
-  echo /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoconf
-  /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoconf
+# Check version numbers of autotools
+AC_VERS=`${AUTOCONF} --version 2>&1 | grep "^${AUTOCONF_VERSION}"`
+if test -z "${AC_VERS}"; then
+  echo "${AUTOCONF} version is not ${AUTOCONF_VERSION}"
+  exit 1
+fi
+AH_VERS=`${AUTOHEADER} --version 2>&1 | grep "^${AUTOHEADER_VERSION}"`
+if test -z "${AH_VERS}"; then
+  echo "${AUTOHEADER} version is not ${AUTOHEADER_VERSION}"
+  exit 1
+fi
+AL_VERS=`${ACLOCAL} --version 2>&1 | grep "^${ACLOCAL_VERSION}"`
+if test -z "${AL_VERS}"; then
+  echo "${ACLOCAL} version is not ${ACLOCAL_VERSION}"
+  exit 1
+fi
+LT_VERS=`${LIBTOOL} --version 2>&1 | grep "${LIBTOOL_VERSION}"`
+if test -z "${LT_VERS}"; then
+   echo "${LIBTOOL} version is not ${LIBTOOL_VERSION}"
+   exit 1
+fi
+
+# Make sure tools are in the path
+PATH=/home1/packages/autoconf/autoconf-2.60/bin:$PATH
+LIBTOOL_DIR=`dirname ${LIBTOOL}`
+
+# Run commands in order
+
+  echo ${ACLOCAL} -I ${LIBTOOL_DIR}/../share/aclocal
+  ${ACLOCAL} -I ${LIBTOOL_DIR}/../share/aclocal || exit 1
+
+  echo ${AUTOHEADER}
+  ${AUTOHEADER} || exit 1
+
+  echo ${AUTOCONF}
+  ${AUTOCONF} || exit 1
 
   # Run autoconf on c++ and fortran configure.in files, too
-  echo /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoconf -o c++/configure c++/configure.in
-  /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoconf -o c++/configure c++/configure.in
+  echo ${AUTOCONF} -o c++/configure c++/configure.in
+  ${AUTOCONF} -o c++/configure c++/configure.in || exit 1
 
-  echo /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoconf -o fortran/configure -Ifortran fortran/configure.in
-  /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoconf -o fortran/configure -Ifortran fortran/configure.in
+  echo ${AUTOCONF} -o fortran/configure -Ifortran fortran/configure.in
+  ${AUTOCONF} -o fortran/configure -Ifortran fortran/configure.in || exit 1
 
 
 exit 0
