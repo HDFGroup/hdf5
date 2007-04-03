@@ -241,7 +241,7 @@ hsize_t diff_datasetid( hid_t did1,
  if (storage_size1==0 || storage_size2==0)
  {
   if (options->m_verbose && obj1_name && obj2_name)
-   printf("<%s> or <%s> are empty datasets\n", obj1_name, obj2_name);
+   parallel_print("<%s> or <%s> are empty datasets\n", obj1_name, obj2_name);
   cmp=0;
   options->not_cmp=1;
  }
