@@ -2272,7 +2272,7 @@ int make_big(hid_t loc_id, int set_chunk)
   goto out;
  
  /* create a evenly divided buffer from 0 to 127  */
- buf=(char *) HDmalloc((unsigned)(nelmts*size));
+ buf=(signed  char *) HDmalloc((unsigned)(nelmts*size));
  s = 1024 / 127;
  for (i=0, j=0, c=0; i<1024; j++, i++) 
  {
