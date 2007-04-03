@@ -63,7 +63,6 @@ int do_copy_refobjs(hid_t fidin,
  hsize_t   nelmts;                 /* number of elements in dataset */
  int       rank;                   /* rank of dataset */
  hsize_t   dims[H5S_MAX_RANK];     /* dimensions of dataset */
- int       next;                   /* external files */
  unsigned int i, j;
  int       k;
 
@@ -149,13 +148,6 @@ int do_copy_refobjs(hid_t fidin,
 
    if ((msize=H5Tget_size(mtype_id))==0)
     goto error;
-
-/*-------------------------------------------------------------------------
- * check for external files
- *-------------------------------------------------------------------------
- */
-   if ((next=H5Pget_external_count (dcpl_id))<0)
-    goto error;
 /*-------------------------------------------------------------------------
  * check if the dataset creation property list has filters that
  * are not registered in the current configuration
@@ -163,7 +155,7 @@ int do_copy_refobjs(hid_t fidin,
  * 2) the internal filters might be turned off
  *-------------------------------------------------------------------------
  */
-   if (next==0 && h5tools_canreadf((NULL),dcpl_id)==1)
+   if (h5tools_canreadf((NULL),dcpl_id)==1)
    {
 /*-------------------------------------------------------------------------
  * test for a valid output dataset
@@ -202,7 +194,7 @@ int do_copy_refobjs(hid_t fidin,
 
      if ((obj_type = H5Rget_obj_type(dset_in,H5R_OBJECT,buf))<0)
       goto error;
-     refbuf=HDmalloc((unsigned)nelmts*msize);
+     refbuf=HDcalloc((unsigned)nelmts,msize);
      if ( refbuf==NULL){
       printf( "cannot allocate memory\n" );
       goto error;
@@ -544,6 +536,7 @@ static int copy_refs_attr(hid_t loc_in,
   if ((msize=H5Tget_size(mtype_id))==0)
    goto error;
 
+  
 /*-------------------------------------------------------------------------
  * object references are a special case
  * we cannot just copy the buffers, but instead we recreate the reference
@@ -575,7 +568,7 @@ static int copy_refs_attr(hid_t loc_in,
 
      if ((obj_type = H5Rget_obj_type(attr_id,H5R_OBJECT,buf))<0)
       goto error;
-     refbuf=HDmalloc((unsigned)nelmts*msize);
+     refbuf=HDcalloc((unsigned)nelmts,msize);
      if ( refbuf==NULL){
       printf( "cannot allocate memory\n" );
       goto error;
@@ -607,13 +600,14 @@ static int copy_refs_attr(hid_t loc_in,
 
     if ((attr_out=H5Acreate(loc_out,name,ftype_id,space_id,H5P_DEFAULT))<0)
      goto error;
-    if (nelmts) {
+    if (nelmts) 
+    {
      if(H5Awrite(attr_out,mtype_id,refbuf)<0)
       goto error;
     }
-
     if (H5Aclose(attr_out)<0)
      goto error;
+
 
     if (refbuf)
      free(refbuf);
@@ -822,6 +816,5 @@ static const char* MapIdToName(hid_t refobj_id,
 
  return NULL;
 }
-
 
 

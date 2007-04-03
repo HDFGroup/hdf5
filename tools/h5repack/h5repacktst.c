@@ -168,6 +168,7 @@ int main (void)
  * file with fill values
  *-------------------------------------------------------------------------
  */
+
  TESTING("    copy of datasets (fill values)");
  if (h5repack_init (&pack_options, 0)<0)
   GOERROR;
@@ -182,6 +183,7 @@ int main (void)
  if (h5repack_end (&pack_options)<0)
   GOERROR;
  PASSED();
+
 
 /*-------------------------------------------------------------------------
  * file with all kinds of dataset datatypes
@@ -2787,11 +2789,11 @@ void write_dset_in(hid_t loc_id,
 
  /* create 1D attributes with dimension [2], 2 elements */
  hsize_t    dims[1]={2};
- hsize_t    dims1r[1]={1};
+ hsize_t    dims1r[1]={2};
  char       buf1[2][2]= {"ab","de"};        /* string */
  char       buf2[2]= {1,2};                 /* bitfield, opaque */
  s_t        buf3[2]= {{1,2},{3,4}};         /* compound */
- hobj_ref_t buf4[1];                        /* reference */
+ hobj_ref_t buf4[2];                        /* reference */
  e_t        buf45[2]= {RED,GREEN};          /* enum */
  hvl_t      buf5[2];                        /* vlen */
  hsize_t    dimarray[1]={3};                /* array dimension */
@@ -2914,6 +2916,8 @@ void write_dset_in(hid_t loc_id,
  *-------------------------------------------------------------------------
  */
  /* object references ( H5R_OBJECT ) */
+ buf4[0]=0;
+ buf4[1]=0;
  if (dset_name)
  {
   status=H5Rcreate(&buf4[0],file_id,dset_name,H5R_OBJECT,-1);
