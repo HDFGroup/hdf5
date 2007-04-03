@@ -90,23 +90,29 @@ typedef struct {
  */
 /* Callback prototypes for user-defined links */
 /* Link creation callback */
-typedef herr_t (*H5L_create_func_t)(const char * link_name, hid_t loc_group, void * udata, size_t udata_size, hid_t lcpl_id);
+typedef herr_t (*H5L_create_func_t)(const char *link_name, hid_t loc_group,
+    const void *lnkdata, size_t lnkdata_size, hid_t lcpl_id);
 
 /* Callback for when the link is moved */
-typedef herr_t (*H5L_move_func_t)(const char * new_name, hid_t new_loc, void * udata, size_t udata_size);
+typedef herr_t (*H5L_move_func_t)(const char *new_name, hid_t new_loc,
+    const void *lnkdata, size_t lnkdata_size);
 
 /* Callback for when the link is copied */
-typedef herr_t (*H5L_copy_func_t)(const char * new_name, hid_t new_loc, void * udata, size_t udata_size);
+typedef herr_t (*H5L_copy_func_t)(const char *new_name, hid_t new_loc,
+    const void *lnkdata, size_t lnkdata_size);
 
 /* Callback during link traversal */
-typedef herr_t (*H5L_traverse_func_t)(const char * link_name, hid_t cur_group, void * udata, size_t udata_size, hid_t lapl_id);
+typedef herr_t (*H5L_traverse_func_t)(const char *link_name, hid_t cur_group,
+    const void *lnkdata, size_t lnkdata_size, hid_t lapl_id);
 
 /* Callback for when the link is deleted */
-typedef herr_t (*H5L_delete_func_t)(const char * link_name, hid_t file, void * udata, size_t udata_size);
+typedef herr_t (*H5L_delete_func_t)(const char *link_name, hid_t file,
+    const void *lnkdata, size_t lnkdata_size);
 
 /* Callback for querying the link */
 /* Returns the size of the buffer needed */
-typedef ssize_t (*H5L_query_func_t)(const char * link_name, void * udata, size_t udata_size, void * buf /*out*/, size_t buf_size);
+typedef ssize_t (*H5L_query_func_t)(const char *link_name, const void *lnkdata,
+    size_t lnkdata_size, void *buf /*out*/, size_t buf_size);
 
 /* User-defined link types */
 typedef struct {
@@ -167,15 +173,15 @@ H5_DLL herr_t H5Literate(hid_t loc_id, const char *group_name,
 
 /* UD link functions */
 H5_DLL herr_t H5Lcreate_ud(hid_t link_loc_id, const char *link_name,
-    H5L_type_t link_type, const void * udata, size_t udata_size, hid_t lcpl_id,
+    H5L_type_t link_type, const void *udata, size_t udata_size, hid_t lcpl_id,
     hid_t lapl_id);
 H5_DLL herr_t H5Lregister(const H5L_class_t *cls);
 H5_DLL herr_t H5Lunregister(H5L_type_t id);
 H5_DLL htri_t H5Lis_registered(H5L_type_t id);
 
 /* External link functions */
-H5_DLL herr_t H5Lunpack_elink_val(char * ext_linkval/*in*/, size_t link_size,
-    char ** filename/*out*/, char** obj_path /*out*/);
+H5_DLL herr_t H5Lunpack_elink_val(const void *ext_linkval/*in*/, size_t link_size,
+   unsigned *flags, const char **filename/*out*/, const char **obj_path /*out*/);
 H5_DLL herr_t H5Lcreate_external(const char *file_name, const char *obj_name,
     hid_t link_loc_id, const char *link_name, hid_t lcpl_id, hid_t lapl_id);
 

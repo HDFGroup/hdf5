@@ -29,15 +29,15 @@
 #include "H5Pprivate.h"         /* Property lists                       */
 
 static hid_t H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
-    void * udata, size_t UNUSED udata_size, hid_t lapl_id);
-static ssize_t H5L_extern_query(const char UNUSED * link_name, void * udata,
+    const void *udata, size_t UNUSED udata_size, hid_t lapl_id);
+static ssize_t H5L_extern_query(const char UNUSED * link_name, const void *udata,
     size_t udata_size, void * buf /*out*/, size_t buf_size);
 
 /* Default External Link link class */
 const H5L_class_t H5L_EXTERN_LINK_CLASS[1] = {{
     H5L_LINK_CLASS_T_VERS,      /* H5L_class_t version            */
     H5L_TYPE_EXTERNAL,		/* Link type id number            */
-    "external_link",            /* Link name for debugging        */
+    "external",                 /* Link name for debugging        */
     NULL,                       /* Creation callback              */
     NULL,                       /* Move callback                  */
     NULL,                       /* Copy callback                  */
@@ -45,6 +45,12 @@ const H5L_class_t H5L_EXTERN_LINK_CLASS[1] = {{
     NULL,                       /* Deletion callback              */
     H5L_extern_query            /* Query callback                 */
 }};
+
+/* Version of external link format */
+#define H5L_EXT_VERSION         0
+
+/* Valid flags for external links */
+#define H5L_EXT_FLAGS_ALL       0
 
 
 /*--------------------------------------------------------------------------
@@ -91,29 +97,39 @@ H5L_init_extern_interface(void)
  */
 static hid_t
 H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
-    void * udata, size_t UNUSED udata_size, hid_t lapl_id)
+    const void *_udata, size_t UNUSED udata_size, hid_t lapl_id)
 {
     H5P_genplist_t *plist;              /* Property list pointer */
     char       *my_prefix;              /* Library's copy of the prefix */
     H5G_loc_t   root_loc;               /* Location of root group in external file */
     H5G_loc_t   loc;                    /* Location of object */
     H5F_t	*ext_file = NULL;	/* File struct for external file */
-    char       *file_name = (char *)udata;
-    char       *obj_name;
-    size_t      fname_len;
-    hbool_t     fname_alloc = FALSE;
-    unsigned    intent;
-    hid_t       fapl_id = -1;
-    hid_t       ret_value = -1;
+    const uint8_t *p = (const uint8_t *)_udata;  /* Pointer into external link buffer */
+    const char *file_name;              /* Name of file containing external link's object */
+    char *full_name = NULL;             /* File name with prefix */
+    const char  *obj_name;              /* Name external link's object */
+    size_t      fname_len;              /* Length of external link file name */
+    unsigned    intent;                 /* File access permissions */
+    hid_t       fapl_id = -1;           /* File access property list for external link's file */
+    hid_t       ext_obj = -1;           /* ID for external link's object */
+    hid_t       ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI(H5L_extern_traverse, FAIL)
 
     /* Sanity checks */
-    HDassert(file_name);
+    HDassert(p);
+
+    /* Check external link version & flags */
+    if(((*p >> 4) & 0x0F) > H5L_EXT_VERSION)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTDECODE, FAIL, "bad version number for external link")
+    if((*p & 0x0F) & ~H5L_EXT_FLAGS_ALL)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTDECODE, FAIL, "bad flags for external link")
+    p++;
 
     /* Gather some information from the external link's user data */
+    file_name = (const char *)p;
     fname_len = HDstrlen(file_name);
-    obj_name = ((char *)udata) + fname_len + 1;
+    obj_name = (const char *)p + fname_len + 1;
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))
@@ -128,15 +144,17 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
         size_t prefix_len = HDstrlen(my_prefix);
 
         /* Allocate a buffer to hold the filename plus prefix */
-        if(NULL == (file_name = H5MM_malloc(prefix_len + fname_len + 1)))
+        if(NULL == (full_name = H5MM_malloc(prefix_len + fname_len + 1)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate filename buffer")
-        fname_alloc = TRUE;
 
         /* Copy the prefix into the buffer */
-        HDstrcpy(file_name, my_prefix);
+        HDstrcpy(full_name, my_prefix);
 
         /* Add the external link's filename to the prefix supplied */
-        HDstrcat(file_name, udata);
+        HDstrcat(full_name, (const char *)p);
+
+        /* Point to name w/prefix */
+        file_name = full_name;
     } /* end if */
 
     /* Get the location for the group holding the external link */
@@ -178,7 +196,7 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
         HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unable to create location for file")
 
     /* Open the object referenced in the external file */
-    if((ret_value = H5O_open_name(&root_loc, obj_name, lapl_id)) < 0) {
+    if((ext_obj = H5O_open_name(&root_loc, obj_name, lapl_id)) < 0) {
         H5F_decr_nopen_objs(ext_file);
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
     } /* end if */
@@ -191,6 +209,9 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
         HGOTO_ERROR(H5E_LINK, H5E_CANTCLOSEFILE, FAIL, "problem closing external file")
     ext_file = NULL;
 
+    /* Set return value */
+    ret_value = ext_obj;
+
 done:
     /* Release resources */
     if(fapl_id > 0 && H5I_dec_ref(fapl_id) < 0)
@@ -198,9 +219,13 @@ done:
     if(ext_file && H5F_try_close(ext_file) < 0)
         HDONE_ERROR(H5E_LINK, H5E_CANTCLOSEFILE, FAIL, "problem closing external file")
 
-    /* Free file_name if it's been allocated */
-    if(fname_alloc)
-        H5MM_xfree(file_name);
+    /* Free full_name if it's been allocated */
+    if(full_name)
+        H5MM_xfree(full_name);
+
+    /* Close object if it's open and something failed */
+    if(ret_value < 0 && ext_obj >= 0 && H5I_dec_ref(ext_obj) < 0)
+        HDONE_ERROR(H5E_ATOM, H5E_CANTRELEASE, FAIL, "unable to close atom for external object")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L_extern_traverse() */
@@ -224,10 +249,19 @@ done:
  *-------------------------------------------------------------------------
  */
 static ssize_t
-H5L_extern_query(const char UNUSED * link_name, void * udata,
-    size_t udata_size, void * buf /*out*/, size_t buf_size)
+H5L_extern_query(const char UNUSED * link_name, const void *_udata, size_t udata_size,
+    void *buf /*out*/, size_t buf_size)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5L_extern_query)
+    const uint8_t *udata = (const uint8_t *)_udata;      /* Pointer to external link buffer */
+    ssize_t     ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5L_extern_query)
+
+    /* Check external link version & flags */
+    if(((*udata >> 4) & 0x0F) != H5L_EXT_VERSION)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTDECODE, FAIL, "bad version number for external link")
+    if((*udata & 0x0F) & ~H5L_EXT_FLAGS_ALL)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTDECODE, FAIL, "bad flags for external link")
 
     /* If the buffer is NULL, skip writing anything in it and just return
      * the size needed */
@@ -239,7 +273,11 @@ H5L_extern_query(const char UNUSED * link_name, void * udata,
         HDmemcpy(buf, udata, buf_size);
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(udata_size)
+    /* Set return value */
+    ret_value = udata_size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L_extern_query() */
 
 
@@ -265,12 +303,13 @@ H5L_extern_query(const char UNUSED * link_name, void * udata,
  */
 herr_t
 H5Lcreate_external(const char *file_name, const char *obj_name,
-        hid_t link_loc_id, const char *link_name, hid_t lcpl_id, hid_t lapl_id)
+    hid_t link_loc_id, const char *link_name, hid_t lcpl_id, hid_t lapl_id)
 {
-    H5G_loc_t	link_loc;
-    char       *temp_name = NULL;
-    size_t      buf_size;
-    herr_t      ret_value = SUCCEED;       /* Return value */
+    H5G_loc_t	link_loc;               /* Group location to create link */
+    void       *ext_link_buf = NULL;    /* Buffer to contain external link */
+    size_t      buf_size;               /* Size of buffer to hold external link */
+    uint8_t    *p;                      /* Pointer into external link buffer */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(H5Lcreate_external, FAIL)
     H5TRACE6("e", "*s*si*sii", file_name, obj_name, link_loc_id, link_name,
@@ -287,19 +326,25 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no link name specified")
 
     /* Combine the filename and link name into a single buffer to give to the UD link */
-    buf_size = HDstrlen(file_name) + HDstrlen(obj_name) + 2;
-    if(NULL == (temp_name = H5MM_malloc(buf_size)))
+    buf_size = 1 + (HDstrlen(file_name) + 1) + (HDstrlen(obj_name) + 1);
+    if(NULL == (ext_link_buf = H5MM_malloc(buf_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate udata buffer")
-    HDstrcpy(temp_name, file_name);
-    HDstrcpy(temp_name + (HDstrlen(file_name) + 1), obj_name);
+
+    /* Encode the external link information */
+    p = ext_link_buf;
+    *p++ = (H5L_EXT_VERSION << 4) | H5L_EXT_FLAGS_ALL;  /* External link version & flags */
+    HDstrcpy((char *)p, file_name);     /* Name of file containing external link's object */
+    p += HDstrlen(file_name) + 1;
+    HDstrcpy((char *)p, obj_name);       /* External link's object */
 
     /* Create an external link */
-    if(H5L_create_ud(&link_loc, link_name, temp_name, buf_size, H5L_TYPE_EXTERNAL, lcpl_id, lapl_id, H5AC_dxpl_id) < 0)
+    if(H5L_create_ud(&link_loc, link_name, ext_link_buf, buf_size, H5L_TYPE_EXTERNAL, lcpl_id, lapl_id, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
-    if(temp_name != NULL)
-        H5MM_free(temp_name);
+    if(ext_link_buf != NULL)
+        H5MM_free(ext_link_buf);
+
     FUNC_LEAVE_API(ret_value)
 } /* end H5Lcreate_external() */
 
@@ -330,21 +375,21 @@ H5L_register_external(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5L_register_external() */
 
 
 /*-------------------------------------------------------------------------
  * Function: H5Lunpack_elink_val
  *
  * Purpose: Given a buffer holding the "link value" from an external link,
- *              gets pointers to the filename and object path within the
- *              link value buffer.
+ *              gets pointers to the information within the link value buffer.
  *
- *              External link linkvalues are two NULL-terminated strings
- *              one after the other.
+ *              External link link values contain some flags and
+ *              two NULL-terminated strings, one after the other.
  *
- *              FILENAME and OBJ_PATH will be set to pointers within
- *              ext_linkval unless they are NULL.
+ *              The FLAGS value will be filled in and FILENAME and
+ *              OBJ_PATH will be set to pointers within ext_linkval (unless
+ *              any of these values is NULL).
  *
  *              Using this function on strings that aren't external link
  *              udata buffers can result in segmentation faults.
@@ -357,48 +402,60 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Lunpack_elink_val(char *ext_linkval, size_t link_size, char **filename,
-                    char **obj_path)
+H5Lunpack_elink_val(const void *_ext_linkval, size_t link_size,
+    unsigned *flags, const char **filename, const char **obj_path)
 {
-    size_t      len;                /* Length of the filename in the linkval*/
-    herr_t      ret_value=SUCCEED;  /* Return value */
+    const uint8_t *ext_linkval = (const uint8_t *)_ext_linkval; /* Pointer to the link value */
+    unsigned    lnk_version;            /* External link format version */
+    unsigned    lnk_flags;              /* External link flags */
+    size_t      len;                    /* Length of the filename in the linkval*/
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(H5Lunpack_elink_val, FAIL)
-    H5TRACE4("e", "*sz**s**s", ext_linkval, link_size, filename, obj_path);
 
+    /* Sanity check external link buffer */
     if(ext_linkval == NULL )
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not an external link linkval buffer")
-    if(link_size <= 1)
+    lnk_version = (*ext_linkval >> 4) & 0x0F;
+    lnk_flags = *ext_linkval & 0x0F;
+    if(lnk_version > H5L_EXT_VERSION)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTDECODE, FAIL, "bad version number for external link")
+    if(lnk_flags & ~H5L_EXT_FLAGS_ALL)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTDECODE, FAIL, "bad flags for external link")
+    if(link_size <= 2)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid external link buffer")
 
     /* Try to do some error checking.  If the last character in the linkval
      * (the last character of obj_path) isn't NULL, then something's wrong.
      */
-    if(ext_linkval[link_size-1] != '\0')
+    if(ext_linkval[link_size - 1] != '\0')
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "linkval buffer is not NULL-terminated")
 
     /* We're now guaranteed that HDstrlen won't segfault, since the buffer has
      * at least one NULL in it.
      */
-    len = HDstrlen(ext_linkval);
+    len = HDstrlen(ext_linkval + 1);
 
     /* If the first NULL we found was at the very end of the buffer, then
      * this external link value has no object name and is invalid.
      */
-    if(len + 1>= link_size)
+    if((len + 1) >= (link_size - 1))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "linkval buffer doesn't contain an object path")
 
     /* If we got here then the buffer contains (at least) two strings packed
      * in the correct way.  Assume it's correct and return pointers to the
      * filename and object path.
      */
-    if(filename != NULL)
-        *filename = ext_linkval;
+    if(filename)
+        *filename = ext_linkval + 1;
+    if(obj_path)
+        *obj_path = (ext_linkval + 1) + len + 1;  /* Add one for NULL terminator */
 
-    if(obj_path != NULL)
-        *obj_path = ext_linkval + len + 1;  /* Add one for NULL terminator */
+    /* Set the flags to return */
+    if(flags)
+        *flags = lnk_flags;
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Lunpack_elink_val() */
 

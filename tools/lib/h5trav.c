@@ -665,32 +665,29 @@ static int traverse( hid_t loc_id,
         H5Lget_info( loc_id, path, &linkbuf, H5P_DEFAULT);
     } H5E_END_TRY;
 
-    if(linkbuf.type == H5L_TYPE_EXTERNAL)
-    {
-      if (statbuf.linklen>0)
-      {
-      char *targbuf;
-      char *objname;
+    if(linkbuf.type == H5L_TYPE_EXTERNAL) {
+        if(statbuf.linklen > 0) {
+            char *targbuf;
+            const char *filename;
+            const char *objname;
 
-      targbuf = HDmalloc(statbuf.linklen);
-      assert(targbuf);
-      H5Gget_linkval(loc_id,path,statbuf.linklen,targbuf);
-      H5Lunpack_elink_val(targbuf, statbuf.linklen, NULL, &objname);
-      if (print)
-        printf(" %-10s %s -> %s %s\n", "ext link", path, targbuf, objname);
-      free(targbuf);
-      }
-      else
-      {
-      if (print)
-        printf(" %-10s %s ->\n", "udlink", path);
-      }
-    }
-    else  /* Unknown user-defined type */
-    {
-      if (print)
-        printf(" %-10s %s ->\n", "UD link type", path);
-    }
+            targbuf = HDmalloc(statbuf.linklen);
+            assert(targbuf);
+            H5Gget_linkval(loc_id, path, statbuf.linklen, targbuf);
+            H5Lunpack_elink_val(targbuf, statbuf.linklen, NULL, &filename, &objname);
+            if(print)
+                printf(" %-10s %s -> %s %s\n", "ext link", path, filename, objname);
+            free(targbuf);
+        } /* end if */
+        else {
+            if(print)
+                printf(" %-10s %s ->\n", "udlink", path);
+        } /* end else */
+    } /* end if */
+    else {  /* Unknown user-defined type */
+        if(print)
+            printf(" %-10s %s ->\n", "UD link type", path);
+    } /* end else */
   }
   break;
 
@@ -717,13 +714,4 @@ static int traverse( hid_t loc_id,
 
  return inserted_objs;
 }
-
-
-
-
-
-
-
-
-
 

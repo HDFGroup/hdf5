@@ -70,8 +70,6 @@ int main( void )
                                sizeof( dst_buf[0].temperature)};
  size_t field_offset_pos[2] = { HOFFSET( Position, lati ),
                                 HOFFSET( Position, longi )};
- size_t field_offset_namepre[2] = { HOFFSET( NamePressure, name ),
-                                    HOFFSET( NamePressure, pressure )};
  const char *field_names[NFIELDS]  =     /* Define field information */
  { "Name","Latitude", "Longitude", "Pressure", "Temperature" };
  hid_t      field_type[NFIELDS];
@@ -101,11 +99,6 @@ int main( void )
  {
   sizeof(position_in[0].longi),
   sizeof(position_in[0].lati)
- };
- size_t field_sizes_namepre[2]=
- {
-  sizeof(namepre_in[0].name),
-  sizeof(namepre_in[0].pressure)
  };
  size_t field_sizes_pre[1]=
  {

@@ -51,7 +51,7 @@
  * Creates two files and uses an external link to access an object in the
  * second file from the first file.
  */
-void extlink_example(void)
+static void extlink_example(void)
 {
     hid_t source_file_id, targ_file_id;
     hid_t group_id, group2_id;
@@ -111,7 +111,7 @@ void extlink_example(void)
  * where it is run (so to run this example on Unix, first mkdir red and mkdir
  * blue).
  */
-void extlink_prefix_example(void)
+static void extlink_prefix_example(void)
 {
     hid_t source_file_id, red_file_id, blue_file_id;
     hid_t group_id, group2_id;
@@ -209,9 +209,10 @@ void extlink_prefix_example(void)
  * We might also have wanted to supply a creation callback that checks
  * that a path was supplied in the udata.
  */
-static hid_t UD_soft_traverse(const char *link_name, hid_t cur_group, void *udata, size_t udata_size, hid_t lapl_id);
+static hid_t UD_soft_traverse(const char *link_name, hid_t cur_group,
+    const void *udata, size_t udata_size, hid_t lapl_id);
 
-void soft_link_example(void)
+static void soft_link_example(void)
 {
     hid_t file_id;
     hid_t group_id;
@@ -276,9 +277,11 @@ void soft_link_example(void)
  * The actual traversal function simply needs to open the correct object by
  * name and return its ID.
  */
-static hid_t UD_soft_traverse(const char *link_name, hid_t cur_group, void *udata, size_t udata_size, hid_t lapl_id)
+
+static hid_t UD_soft_traverse(const char *link_name, hid_t cur_group,
+    const void *udata, size_t udata_size, hid_t lapl_id)
 {
-    const char *target = (char *) udata;
+    const char *target = (const char *) udata;
     hid_t ret_value;
 
     /* Pass the udata straight through to HDF5. If it's invalid, let HDF5
@@ -288,7 +291,6 @@ static hid_t UD_soft_traverse(const char *link_name, hid_t cur_group, void *udat
     return ret_value;
 }
 
-
 
 /* Hard Link example
  *
@@ -305,11 +307,14 @@ static hid_t UD_soft_traverse(const char *link_name, hid_t cur_group, void *udat
  * To keep the example simple, these links don't have a query callback.
  * Generally, real link classes should always be query-able.
  */
-static herr_t UD_hard_create(const char *link_name, hid_t loc_group, void *udata, size_t udata_size, hid_t lcpl_id);
-static herr_t UD_hard_delete(const char *link_name, hid_t loc_group, void *udata, size_t udata_size);
-static hid_t UD_hard_traverse(const char *link_name, hid_t cur_group, void *udata, size_t udata_size, hid_t lapl_id);
+static herr_t UD_hard_create(const char *link_name, hid_t loc_group,
+    const void *udata, size_t udata_size, hid_t lcpl_id);
+static herr_t UD_hard_delete(const char *link_name, hid_t loc_group,
+    const void *udata, size_t udata_size);
+static hid_t UD_hard_traverse(const char *link_name, hid_t cur_group,
+    const void *udata, size_t udata_size, hid_t lapl_id);
 
-void hard_link_example(void)
+static void hard_link_example(void)
 {
     hid_t file_id;
     hid_t group_id;
@@ -398,7 +403,8 @@ void hard_link_example(void)
  * If this function returns a negative value, the call to H5Lcreate_ud()
  * will also return failure and the link will not be created.
  */
-static herr_t UD_hard_create(const char *link_name, hid_t loc_group, void *udata, size_t udata_size, hid_t lcpl_id)
+static herr_t UD_hard_create(const char *link_name, hid_t loc_group,
+    const void *udata, size_t udata_size, hid_t lcpl_id)
 {
     haddr_t addr;
     hid_t target_obj = -1;
@@ -411,7 +417,7 @@ static herr_t UD_hard_create(const char *link_name, hid_t loc_group, void *udata
       goto done;
     }
 
-    addr = *((haddr_t *) udata);
+    addr = *((const haddr_t *) udata);
 
     /* Open the object this link points to so that we can increment
      * its reference count. This also ensures that the address passed
@@ -441,7 +447,8 @@ done:
  * Since the creation function increments the object's reference count, it's
  * important to decrement it again when the link is deleted.
  */
-static herr_t UD_hard_delete(const char *link_name, hid_t loc_group, void *udata, size_t udata_size)
+static herr_t UD_hard_delete(const char *link_name, hid_t loc_group,
+    const void *udata, size_t udata_size)
 {
     haddr_t addr;
     hid_t target_obj = -1;
@@ -456,7 +463,7 @@ static herr_t UD_hard_delete(const char *link_name, hid_t loc_group, void *udata
       goto done;
     }
 
-    addr = *((haddr_t *) udata);
+    addr = *((const haddr_t *) udata);
 
     /* Open the object this link points to */
     target_obj= H5Oopen_by_addr(loc_group, addr);
@@ -484,7 +491,8 @@ done:
  * The actual traversal function simply needs to open the correct object and
  * return its ID.
  */
-static hid_t UD_hard_traverse(const char *link_name, hid_t cur_group, void * udata, size_t udata_size, hid_t lapl_id)
+static hid_t UD_hard_traverse(const char *link_name, hid_t cur_group,
+    const void *udata, size_t udata_size, hid_t lapl_id)
 {
     haddr_t       addr;
     hid_t         ret_value = -1;
@@ -495,7 +503,7 @@ static hid_t UD_hard_traverse(const char *link_name, hid_t cur_group, void * uda
     if(udata_size != sizeof(haddr_t))
       return -1;
 
-    addr = *((haddr_t *) udata);
+    addr = *((const haddr_t *) udata);
 
     /* Open the object by address. If H5Oopen_by_addr fails, ret_value will
      * be negative to indicate that the traversal function failed.
@@ -520,9 +528,10 @@ static hid_t UD_hard_traverse(const char *link_name, hid_t cur_group, void * uda
  * These are defined after the example below.
  * These links have no udata, so they don't need a query function.
  */
-static hid_t UD_plist_traverse(const char *link_name, hid_t cur_group, void *udata, size_t udata_size, hid_t lapl_id);
+static hid_t UD_plist_traverse(const char *link_name, hid_t cur_group,
+    const void *udata, size_t udata_size, hid_t lapl_id);
 
-void plist_link_example(void)
+static void plist_link_example(void)
 {
     hid_t file_id;
     hid_t group_id, group2_id;
@@ -610,7 +619,8 @@ void plist_link_example(void)
 /* UD_plist_traverse
  * Open a path passed in through the property list.
  */
-static hid_t UD_plist_traverse(const char *link_name, hid_t cur_group, void * udata, size_t udata_size, hid_t lapl_id)
+static hid_t UD_plist_traverse(const char *link_name, hid_t cur_group,
+    const void *udata, size_t udata_size, hid_t lapl_id)
 {
     char *        path;
     hid_t         ret_value = -1;

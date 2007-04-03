@@ -1544,25 +1544,26 @@ dump_all(hid_t group, const char *name, void * op_data)
         case H5G_UDLINK:
         {
             indentation(indent);
-            switch(linfo.type)
-            {
+            switch(linfo.type) {
               case H5L_TYPE_EXTERNAL:
               {
                 char *targbuf;
-                char *filename;
-                char *targname;
+
                 targbuf = HDmalloc(statbuf.linklen);
                 HDassert(targbuf);
-                if (!doxml) {
-                    begin_obj(dump_header_format->extlinkbegin, name,
-                            dump_header_format->extlinkblockbegin);
-                }
-                if (H5Lget_val(group, name, targbuf, statbuf.linklen, H5P_DEFAULT) < 0) {
+                if(!doxml) {
+                    begin_obj(dump_header_format->extlinkbegin, name, dump_header_format->extlinkblockbegin);
+                } /* end if */
+
+                if(H5Lget_val(group, name, targbuf, statbuf.linklen, H5P_DEFAULT) < 0) {
                     error_msg(progname, "unable to get external link value\n");
                     d_status = EXIT_FAILURE;
                     ret = FAIL;
                 } else {
-                    if(H5Lunpack_elink_val(targbuf, statbuf.linklen, &filename, &targname) < 0) {
+                    const char *filename;
+                    const char *targname;
+
+                    if(H5Lunpack_elink_val(targbuf, statbuf.linklen, NULL, &filename, &targname) < 0) {
                       error_msg(progname, "unable to unpack external link value\n");
                       d_status = EXIT_FAILURE;
                       ret = FAIL;
@@ -2963,7 +2964,7 @@ parse_hsize_list(const char *h_list)
     p_list = calloc(size_count, sizeof(hsize_t));
 
     for (ptr = h_list; i < size_count && ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
-        if (isdigit(*ptr)) {
+        if(isdigit(*ptr)) {
             /* we should have an integer now */
             p_list[i++] = (hsize_t)atof(ptr);
 
@@ -3214,8 +3215,6 @@ handle_links(hid_t fid, char *links, void UNUSED * data)
 {
     H5G_stat_t  statbuf;
     H5L_info_t linfo;
-    char * elink_file;
-    char * elink_path;
 
     if(H5Gget_objinfo(fid, links, FALSE, &statbuf) < 0) {
         error_msg(progname, "unable to get obj info from \"%s\"\n", links);
@@ -3247,25 +3246,26 @@ handle_links(hid_t fid, char *links, void UNUSED * data)
                   dump_header_format->udlinkblockbegin);
         indentation(COL);
         switch(linfo.type) {
-          case H5L_TYPE_EXTERNAL:
-              begin_obj(dump_header_format->extlinkbegin, links,
+            case H5L_TYPE_EXTERNAL:
+                begin_obj(dump_header_format->extlinkbegin, links,
                         dump_header_format->extlinkblockbegin);
-              if(H5Lget_val(fid, links, buf, statbuf.linklen, H5P_DEFAULT) >= 0) {
-                  if(H5Lunpack_elink_val(buf, statbuf.linklen, &elink_file, &elink_path)>=0) {
-                      indentation(COL);
-                      printf("LINKCLASS %d\n", linfo.type);
-                      indentation(COL);
-                      printf("TARGETFILE \"%s\"\n", elink_file);
-                      indentation(COL);
-                      printf("TARGETPATH \"%s\"\n", elink_path);
-                  } else {
-                      error_msg(progname, "h5dump error: unable to unpack external link value for \"%s\"\n",
-                                links);
-                      d_status = EXIT_FAILURE;
-                  }
+                if(H5Lget_val(fid, links, buf, statbuf.linklen, H5P_DEFAULT) >= 0) {
+                    const char *elink_file;
+                    const char *elink_path;
+
+                    if(H5Lunpack_elink_val(buf, statbuf.linklen, NULL, &elink_file, &elink_path)>=0) {
+                        indentation(COL);
+                        printf("LINKCLASS %d\n", linfo.type);
+                        indentation(COL);
+                        printf("TARGETFILE \"%s\"\n", elink_file);
+                        indentation(COL);
+                        printf("TARGETPATH \"%s\"\n", elink_path);
+                    } else {
+                        error_msg(progname, "h5dump error: unable to unpack external link value for \"%s\"\n", links);
+                        d_status = EXIT_FAILURE;
+                    }
               } else {
-                  error_msg(progname, "h5dump error: unable to get external link value for \"%s\"\n",
-                            links);
+                  error_msg(progname, "h5dump error: unable to get external link value for \"%s\"\n", links);
                   d_status = EXIT_FAILURE;
               }
               end_obj(dump_header_format->extlinkend,

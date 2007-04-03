@@ -1775,14 +1775,13 @@ udlink_open(hid_t location, const char *name)
 {
     H5L_info_t linfo;
     char * buf = NULL;
-    char * filename = NULL;
-    char * path = NULL;
+    const char * filename;
+    const char * path;
 
     if(H5Lget_info(location, name, &linfo, H5P_DEFAULT) < 0)
         return -1;
 
-    switch(linfo.type)
-    {
+    switch(linfo.type) {
         /* For external links, try to display info for the object it points to */
         case H5L_TYPE_EXTERNAL:
             if((buf = HDmalloc(linfo.u.val_size)) == NULL)
@@ -1790,7 +1789,7 @@ udlink_open(hid_t location, const char *name)
             if(H5Lget_val(location, name, buf, linfo.u.val_size, H5P_DEFAULT) < 0)
                 goto error;
 
-            if(H5Lunpack_elink_val(buf, linfo.u.val_size,  &filename, &path) < 0) goto error;
+            if(H5Lunpack_elink_val(buf, linfo.u.val_size, NULL, &filename, &path) < 0) goto error;
             HDfputs("file: ", stdout);
             HDfputs(filename, stdout);
             HDfputs("    path: ", stdout);
@@ -1800,6 +1799,7 @@ udlink_open(hid_t location, const char *name)
         default:
             HDfputs("cannot follow UD links", stdout);
     }
+
     return 0;
 
 error:

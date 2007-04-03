@@ -337,8 +337,8 @@ static herr_t
 test_long_desc(void)
 {
     const char          *format="Testing very long description string, %s";
-    char                *long_desc;
-    char                *full_desc;
+    char                *long_desc = NULL;
+    char                *full_desc = NULL;
     size_t              u;
     const char          *test_FUNC="test_long_desc";
 

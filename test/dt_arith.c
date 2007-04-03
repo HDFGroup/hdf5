@@ -725,8 +725,8 @@ static int test_particular_fp_integer(void)
     hbool_t     flag;
     double      src_d = (double)SCHAR_MAX;
     signed char dst_c;
-    unsigned char *buf1, *buf2;
-    unsigned char *saved_buf1, *saved_buf2;
+    unsigned char *buf1 = NULL, *buf2 = NULL;
+    unsigned char *saved_buf1 = NULL, *saved_buf2 = NULL;
     size_t      src_size1, src_size2;
     size_t      dst_size1, dst_size2;
     float       src_f = (float)INT_MAX;

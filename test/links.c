@@ -1592,8 +1592,8 @@ external_link_root(hid_t fapl, hbool_t new_format)
     ssize_t     name_len;                       /* Length of object name */
     char	filename1[NAME_BUF_SIZE];
     char	filename2[NAME_BUF_SIZE];
-    char       *file;				/* File from external link */
-    char       *path;				/* Path from external link */
+    const char  *file;				/* File from external link */
+    const char  *path;				/* Path from external link */
 
     if(new_format)
         TESTING("external link to root (w/new group format)")
@@ -1627,15 +1627,13 @@ external_link_root(hid_t fapl, hbool_t new_format)
 	goto error;
     }
     if(H5Lget_val(fid, "ext_link", objname, sizeof(objname), H5P_DEFAULT) < 0) TEST_ERROR
-    if(H5Lunpack_elink_val(objname, sb.linklen, &file, &path) < 0) TEST_ERROR
-    if(HDstrcmp(file, filename1))
-    {
+    if(H5Lunpack_elink_val(objname, sb.linklen, NULL, &file, &path) < 0) TEST_ERROR
+    if(HDstrcmp(file, filename1)) {
 	H5_FAILED();
 	puts("    External link file name incorrect");
 	goto error;
     }
-    if(HDstrcmp(path, "/"))
-    {
+    if(HDstrcmp(path, "/")) {
 	H5_FAILED();
 	puts("    External link path incorrect");
 	goto error;
@@ -2591,8 +2589,8 @@ external_link_query(hid_t fapl, hbool_t new_format)
 {
     hid_t	fid = (-1);     		/* File ID */
     hid_t	gid = (-1);	                /* Group IDs */
-    char       *file_name;                      /* Name of the file the external link points to */
-    char       *object_name;                    /* Name of the object the external link points to */
+    const char *file_name;                      /* Name of the file the external link points to */
+    const char *object_name;                    /* Name of the object the external link points to */
     H5G_stat_t	sb;                             /* Object information */
     H5L_info_t li;                          /* Link information */
     char	filename1[NAME_BUF_SIZE],
@@ -2616,7 +2614,7 @@ external_link_query(hid_t fapl, hbool_t new_format)
 
     /* Get size of buffer for external link */
     if(H5Lget_info(fid, "src", &li, H5P_DEFAULT) < 0) TEST_ERROR
-    if(li.u.val_size != (HDstrlen(filename2) + HDstrlen("/dst") + 2)) TEST_ERROR
+    if(li.u.val_size != (1 + (HDstrlen(filename2) + 1) + (HDstrlen("/dst") + 1))) TEST_ERROR
     if (H5L_TYPE_EXTERNAL != li.type) {
 	H5_FAILED();
 	puts("    Unexpected link class - should have been an external link");
@@ -2642,7 +2640,7 @@ external_link_query(hid_t fapl, hbool_t new_format)
 
     /* Get size of buffer for external link */
     if(H5Lget_info(fid, "src", &li, H5P_DEFAULT) < 0) TEST_ERROR
-    if(li.u.val_size != (HDstrlen(filename2) + HDstrlen("/dst") + 2)) TEST_ERROR
+    if(li.u.val_size != (1 + (HDstrlen(filename2) + 1) + (HDstrlen("/dst") + 1))) TEST_ERROR
     if (H5L_TYPE_EXTERNAL != li.type) {
 	H5_FAILED();
 	puts("    Unexpected link class - should have been an external link");
@@ -2653,7 +2651,7 @@ external_link_query(hid_t fapl, hbool_t new_format)
     if(H5Lget_val(fid, "src", query_buf, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Extract the file and object names from the buffer */
-    if(H5Lunpack_elink_val(query_buf, li.u.val_size, &file_name, &object_name) < 0) TEST_ERROR
+    if(H5Lunpack_elink_val(query_buf, li.u.val_size, NULL, &file_name, &object_name) < 0) TEST_ERROR
 
     /* Compare the file and object names */
     if(strcmp(file_name, filename2)) TEST_ERROR
@@ -2671,20 +2669,20 @@ external_link_query(hid_t fapl, hbool_t new_format)
     if(H5Fclose(fid) < 0) TEST_ERROR
 
     /* Make sure that passing in NULLs to H5Lunpack_elink_val works */
-    if(H5Lunpack_elink_val(query_buf, li.u.val_size, NULL, NULL) < 0) TEST_ERROR
+    if(H5Lunpack_elink_val(query_buf, li.u.val_size, NULL, NULL, NULL) < 0) TEST_ERROR
 
     /* Make sure that bogus cases trigger errors in H5Lunpack_elink_val */
     H5E_BEGIN_TRY {
-      if(H5Lunpack_elink_val(query_buf, li.u.val_size - 1, NULL, NULL) >= 0) TEST_ERROR
+      if(H5Lunpack_elink_val(query_buf, li.u.val_size - 1, NULL, NULL, NULL) >= 0) TEST_ERROR
     } H5E_END_TRY
     H5E_BEGIN_TRY {
-      if(H5Lunpack_elink_val(query_buf, (size_t)0, NULL, NULL) >= 0) TEST_ERROR
+      if(H5Lunpack_elink_val(query_buf, (size_t)0, NULL, NULL, NULL) >= 0) TEST_ERROR
     } H5E_END_TRY
     H5E_BEGIN_TRY {
-      if(H5Lunpack_elink_val(NULL, (size_t)0, NULL, NULL) >= 0) TEST_ERROR
+      if(H5Lunpack_elink_val(NULL, (size_t)0, NULL, NULL, NULL) >= 0) TEST_ERROR
     } H5E_END_TRY
     H5E_BEGIN_TRY {
-      if(H5Lunpack_elink_val(NULL, (size_t)1000, NULL, NULL) >= 0) TEST_ERROR
+      if(H5Lunpack_elink_val(NULL, (size_t)1000, NULL, NULL, NULL) >= 0) TEST_ERROR
     } H5E_END_TRY
 
     PASSED();
@@ -3730,133 +3728,127 @@ error:
 /* Callback functions for UD hard links. */
 /* UD_hard_create increments the object's reference count */
 static herr_t
-UD_hard_create(const char UNUSED * link_name, hid_t loc_group, void * udata, size_t udata_size, hid_t UNUSED lcpl_id)
+UD_hard_create(const char UNUSED * link_name, hid_t loc_group, const void *udata,
+    size_t udata_size, hid_t UNUSED lcpl_id)
 {
     haddr_t addr;
     hid_t target_obj = -1;
     herr_t ret_value = 0;
 
-    if(udata_size != sizeof(haddr_t))
-    {
-      ret_value = -1;
-      goto done;
-    }
+    if(udata_size != sizeof(haddr_t)) {
+        ret_value = -1;
+        goto done;
+    } /* end if */
 
-    addr = *((haddr_t *) udata);
+    addr = *((const haddr_t *)udata);
 
     /* Open the object this link points to */
     target_obj= H5Oopen_by_addr(loc_group, addr);
-    if(target_obj < 0)
-    {
-      ret_value = -1;
-      goto done;
-    }
+    if(target_obj < 0) {
+        ret_value = -1;
+        goto done;
+    } /* end if */
 
     /* Increment the reference count of the target object */
-    if(H5Oincr_refcount(target_obj) < 0)
-    {
-      ret_value = -1;
-      goto done;
-    }
+    if(H5Oincr_refcount(target_obj) < 0) {
+        ret_value = -1;
+        goto done;
+    } /* end if */
 
 done:
     /* Close the target object if we opened it */
-    if(target_obj >= 0)
-    {
-        switch(H5Iget_type(target_obj))
-        {
+    if(target_obj >= 0) {
+        switch(H5Iget_type(target_obj)) {
             case H5I_GROUP:
                 if(H5Gclose(target_obj) < 0)
-                  ret_value = -1;
+                    ret_value = -1;
                 break;
             case H5I_DATASET:
                 if(H5Dclose(target_obj) < 0)
-                  ret_value = -1;
+                    ret_value = -1;
                 break;
             case H5I_DATATYPE:
                 if(H5Tclose(target_obj) < 0)
-                  ret_value = -1;
+                    ret_value = -1;
                 break;
             default:
               return -1;
-        }
-    }
+        } /* end switch */
+    } /* end if */
 
     return ret_value;
-}
+} /* end UD_hard_create() */
 
-/* UD_hard_delete decrements the object's reference count */
-static herr_t
-UD_hard_delete(const char UNUSED * link_name, hid_t file, void * udata, size_t udata_size)
-{
-    haddr_t addr;
-    hid_t target_obj = -1;
-    herr_t ret_value = 0;
-
-    if(udata_size != sizeof(haddr_t))
-    {
-      ret_value = -1;
-      goto done;
-    }
-
-    addr = *((haddr_t *) udata);
-
-    /* Open the object this link points to */
-    target_obj= H5Oopen_by_addr(file, addr);
-    if(target_obj < 0)
-    {
-      ret_value = -1;
-      goto done;
-    }
-
-    /* Decrement the reference count of the target object */
-    if(H5Odecr_refcount(target_obj) < 0)
-    {
-      ret_value = -1;
-      goto done;
-    }
-
-done:
-    /* Close the target object if we opened it */
-    if(target_obj >= 0)
-    {
-        switch(H5Iget_type(target_obj))
-        {
-            case H5I_GROUP:
-                if(H5Gclose(target_obj) < 0)
-                  ret_value = -1;
-                break;
-            case H5I_DATASET:
-                if(H5Dclose(target_obj) < 0)
-                  ret_value = -1;
-                break;
-            case H5I_DATATYPE:
-                if(H5Tclose(target_obj) < 0)
-                  ret_value = -1;
-                break;
-            default:
-              return -1;
-        }
-    }
-
-    return ret_value;
-}
-
+/* Traverse a hard link by opening the object */
 static hid_t
-UD_hard_traverse(const char UNUSED *link_name, hid_t cur_group, void * udata, size_t udata_size, hid_t UNUSED lapl_id)
+UD_hard_traverse(const char UNUSED *link_name, hid_t cur_group,
+    const void *udata, size_t udata_size, hid_t UNUSED lapl_id)
 {
     haddr_t addr;
-    hid_t         ret_value = -1;
+    hid_t ret_value = -1;
 
     if(udata_size != sizeof(haddr_t))
-      return -1;
+        return -1;
 
-    addr = *((haddr_t *) udata);
+    addr = *((const haddr_t *) udata);
 
     ret_value = H5Oopen_by_addr(cur_group, addr); /* If this fails, our return value will be negative. */
 
     return ret_value;
-}
+} /* end UD_hard_traverse() */
+
+/* UD_hard_delete decrements the object's reference count */
+static herr_t
+UD_hard_delete(const char UNUSED * link_name, hid_t file, const void *udata,
+    size_t udata_size)
+{
+    haddr_t addr;
+    hid_t target_obj = -1;
+    herr_t ret_value = 0;
+
+    if(udata_size != sizeof(haddr_t)) {
+        ret_value = -1;
+        goto done;
+    } /* end if */
+
+    addr = *((const haddr_t *) udata);
+
+    /* Open the object this link points to */
+    target_obj= H5Oopen_by_addr(file, addr);
+    if(target_obj < 0) {
+        ret_value = -1;
+        goto done;
+    } /* end if */
+
+    /* Decrement the reference count of the target object */
+    if(H5Odecr_refcount(target_obj) < 0) {
+        ret_value = -1;
+        goto done;
+    } /* end if */
+
+done:
+    /* Close the target object if we opened it */
+    if(target_obj >= 0) {
+        switch(H5Iget_type(target_obj)) {
+            case H5I_GROUP:
+                if(H5Gclose(target_obj) < 0)
+                    ret_value = -1;
+                break;
+            case H5I_DATASET:
+                if(H5Dclose(target_obj) < 0)
+                    ret_value = -1;
+                break;
+            case H5I_DATATYPE:
+                if(H5Tclose(target_obj) < 0)
+                    ret_value = -1;
+                break;
+            default:
+                return -1;
+        } /* end switch */
+    } /* end if */
+
+    return ret_value;
+} /* end UD_hard_delete() */
 
 const H5L_class_t UD_hard_class[1] = {{
     H5L_LINK_CLASS_T_VERS,           /* H5L_class_t version       */
@@ -4010,7 +4002,8 @@ ud_hard_links(hid_t fapl)
  * in the current group named REREG_TARGET_NAME
  */
 static hid_t
-UD_rereg_traverse(const char UNUSED * link_name, hid_t cur_group, void UNUSED * udata, size_t UNUSED udata_size, hid_t lapl_id)
+UD_rereg_traverse(const char UNUSED * link_name, hid_t cur_group,
+    const void UNUSED *udata, size_t UNUSED udata_size, hid_t lapl_id)
 {
     hid_t ret_value;
 
@@ -4020,7 +4013,7 @@ UD_rereg_traverse(const char UNUSED * link_name, hid_t cur_group, void UNUSED * 
 
 error:
     return -1;
-}
+} /* end UD_rereg_traverse() */
 
 /* This link class has the same ID number as the UD hard links but
  * has a very different traversal function */
@@ -4194,7 +4187,8 @@ ud_link_reregister(hid_t fapl)
 /* Callback functions for UD "callback" links. */
 /* Creation callback.  Called during move as well. */
 static herr_t
-UD_cb_create(const char * link_name, hid_t loc_group, void * udata, size_t udata_size, hid_t lcpl_id)
+UD_cb_create(const char * link_name, hid_t loc_group, const void *udata,
+    size_t udata_size, hid_t lcpl_id)
 {
     if(!link_name) TEST_ERROR
     if(loc_group < 0) TEST_ERROR
@@ -4209,12 +4203,13 @@ UD_cb_create(const char * link_name, hid_t loc_group, void * udata, size_t udata
 
 error:
     return -1;
-}
+} /* end UD_cb_create() */
 
 static hid_t
-UD_cb_traverse(const char * link_name, hid_t cur_group, void * udata, size_t udata_size, hid_t lapl_id)
+UD_cb_traverse(const char * link_name, hid_t cur_group, const void *udata,
+    size_t udata_size, hid_t lapl_id)
 {
-    const char *target = (char *) udata;
+    const char *target = (const char *)udata;
     hid_t ret_value;
 
     if(!link_name) TEST_ERROR
@@ -4232,11 +4227,12 @@ UD_cb_traverse(const char * link_name, hid_t cur_group, void * udata, size_t uda
 
 error:
     return -1;
-}
+} /* end UD_cb_traverse() */
 
 /* Callback for when the link is moved or renamed */
 static herr_t
-UD_cb_move(const char * new_name, hid_t new_loc, void * udata, size_t udata_size)
+UD_cb_move(const char *new_name, hid_t new_loc, const void *udata,
+    size_t udata_size)
 {
     if(!new_name) TEST_ERROR
     if(new_loc < 0) TEST_ERROR
@@ -4250,11 +4246,12 @@ UD_cb_move(const char * new_name, hid_t new_loc, void * udata, size_t udata_size
 
 error:
     return -1;
-}
+} /* end UD_cb_move() */
 
 /* Callback for when the link is deleted.  Also called during move */
 static herr_t
-UD_cb_delete(const char * link_name, hid_t file, void * udata, size_t udata_size)
+UD_cb_delete(const char *link_name, hid_t file, const void *udata,
+    size_t udata_size)
 {
     if(!link_name) TEST_ERROR
     if(file < 0) TEST_ERROR
@@ -4268,11 +4265,12 @@ UD_cb_delete(const char * link_name, hid_t file, void * udata, size_t udata_size
 
 error:
     return -1;
-}
+} /* end UD_cb_delete() */
 
 /* Callback for when the link is queried */
 static ssize_t
-UD_cb_query(const char * link_name, void * udata, size_t udata_size, void* buf, size_t buf_size)
+UD_cb_query(const char * link_name, const void *udata, size_t udata_size,
+    void *buf, size_t buf_size)
 {
     if(!link_name) TEST_ERROR
     if(udata_size > 0 && !udata) TEST_ERROR
@@ -4281,18 +4279,17 @@ UD_cb_query(const char * link_name, void * udata, size_t udata_size, void* buf, 
     if(strcmp(udata, UD_CB_TARGET)) TEST_ERROR
     if(udata_size != UD_CB_TARGET_LEN) TEST_ERROR
 
-    if(buf)
-    {
+    if(buf) {
       if(buf_size < 16) TEST_ERROR
       strcpy(buf, "query succeeded");
-    }
+    } /* end if */
 
     /* There are 15 characters and a NULL in "query succeeded" */
     return 16;
 
 error:
     return -1;
-}
+} /* end UD_cb_query() */
 
 const H5L_class_t UD_cb_class[1] = {{
     H5L_LINK_CLASS_T_VERS,    /* H5L_class_t version       */
@@ -4448,7 +4445,8 @@ ud_callbacks(hid_t fapl, hbool_t new_format)
  *-------------------------------------------------------------------------
  */
 static hid_t
-UD_plist_traverse(const char UNUSED * link_name, hid_t cur_group, void UNUSED * udata, size_t udata_size, hid_t lapl_id)
+UD_plist_traverse(const char UNUSED * link_name, hid_t cur_group,
+    const void UNUSED *udata, size_t udata_size, hid_t lapl_id)
 {
     char target[NAME_BUF_SIZE];
     hid_t ret_value;
@@ -4465,7 +4463,8 @@ UD_plist_traverse(const char UNUSED * link_name, hid_t cur_group, void UNUSED * 
 
 error:
     return -1;
-}
+} /* end UD_plist_traverse() */
+
 const H5L_class_t UD_plist_class[1] = {{
     H5L_LINK_CLASS_T_VERS,    /* H5L_class_t version       */
     UD_PLIST_TYPE,            /* Link type id number            */
@@ -4590,20 +4589,20 @@ lapl_udata(hid_t fapl, hbool_t new_format)
  */
 static herr_t
 UD_cbsucc_create(const char UNUSED * link_name, hid_t UNUSED loc_group,
-    void * udata, size_t udata_size, hid_t UNUSED lcpl_id)
+    const void *udata, size_t udata_size, hid_t UNUSED lcpl_id)
 {
     /* Check to make sure that this "soft link" has a target */
     if(udata_size < 1 || !udata)
        return -1;
 
     return 0;
-}
+} /* end UD_cbsucc_create() */
 
 static hid_t
-UD_cbsucc_traverse(const char UNUSED * link_name, hid_t cur_group,
-    void * udata, size_t UNUSED udata_size, hid_t lapl_id)
+UD_cbsucc_traverse(const char UNUSED *link_name, hid_t cur_group,
+    const void *udata, size_t UNUSED udata_size, hid_t lapl_id)
 {
-    const char *target = (char *) udata;
+    const char *target = (const char *)udata;
     hid_t ret_value;
 
     if(!target) goto error;
@@ -4614,57 +4613,57 @@ UD_cbsucc_traverse(const char UNUSED * link_name, hid_t cur_group,
 
 error:
     return -1;
-}
+} /* end UD_cbsucc_traverse() */
 
 /* Failure callback for when the link is moved or renamed */
 static herr_t
-UD_cbfail_move(const char UNUSED * new_name, hid_t UNUSED new_loc,
-    void UNUSED * udata, size_t UNUSED udata_size)
+UD_cbfail_move(const char UNUSED *new_name, hid_t UNUSED new_loc,
+    const void UNUSED *udata, size_t UNUSED udata_size)
 {
     /* This traversal function will always fail. */
     return -1;
-}
+} /* end UD_cbfail_move() */
 
 /* SuccessCallback for when the link is moved or renamed */
 static herr_t
-UD_cbsucc_move(const char UNUSED * new_name, hid_t UNUSED new_loc,
-    void UNUSED * udata, size_t UNUSED udata_size)
+UD_cbsucc_move(const char UNUSED *new_name, hid_t UNUSED new_loc,
+    const void UNUSED *udata, size_t UNUSED udata_size)
 {
     /* This traversal function will always succeed. */
     return 0;
-}
+} /* end UD_cbsucc_move() */
 
 /* Callback for when the link is deleted.  Also called during move */
 static herr_t
-UD_cbsucc_delete(const char UNUSED * link_name, hid_t UNUSED file,
-    void UNUSED * udata, size_t UNUSED udata_size)
+UD_cbsucc_delete(const char UNUSED *link_name, hid_t UNUSED file,
+    const void UNUSED *udata, size_t UNUSED udata_size)
 {
     /* This callback will always succeed */
     return 0;
-}
+} /* end UD_cbsucc_delete() */
 
 /* Callback for when the link is deleted.  Also called during move */
 static herr_t
-UD_cbfail_delete(const char UNUSED * link_name, hid_t UNUSED file,
-    void UNUSED * udata, size_t UNUSED udata_size)
+UD_cbfail_delete(const char UNUSED *link_name, hid_t UNUSED file,
+    const void UNUSED *udata, size_t UNUSED udata_size)
 {
     /* This traversal function will always fail. */
     /* Note: un-deletable links are in general a very bad idea! */
     return -1;
-}
+} /* end UD_cbfail_delete() */
 
 /* Callback for when the link is queried */
 static ssize_t
-UD_cbfail_query(const char UNUSED * link_name, void UNUSED * udata,
+UD_cbfail_query(const char UNUSED *link_name, const void UNUSED *udata,
     size_t UNUSED udata_size, void UNUSED *buf, size_t UNUSED buf_size)
 {
     /* This traversal function will always fail. */
     return -1;
-}
+} /* end UD_cbfail_query() */
 
 /* Callback for when the link is queried */
 static ssize_t
-UD_cbfail_on_write_query(const char UNUSED * link_name, void UNUSED * udata,
+UD_cbfail_on_write_query(const char UNUSED *link_name, const void UNUSED *udata,
     size_t UNUSED udata_size, void *buf, size_t UNUSED buf_size)
 {
     /* This traversal function will return a buffer size,
@@ -4676,11 +4675,12 @@ UD_cbfail_on_write_query(const char UNUSED * link_name, void UNUSED * udata,
         return -1;
 
     return 0;
-}
+} /* end UD_cbfail_on_write_query() */
 
 /* Callback for when the link is queried */
 static ssize_t
-UD_cbsucc_query(const char UNUSED * link_name, void UNUSED * udata, size_t UNUSED udata_size, void *buf, size_t buf_size)
+UD_cbsucc_query(const char UNUSED *link_name, const void UNUSED *udata,
+    size_t UNUSED udata_size, void *buf, size_t buf_size)
 {
     /* This traversal function will return a buffer size,
      * but will fail when a buffer is passed in ("writing to the buffer"
@@ -4691,7 +4691,7 @@ UD_cbsucc_query(const char UNUSED * link_name, void UNUSED * udata, size_t UNUSE
         strcpy(buf, "succeed");
 
     return 8;
-}
+} /* end UD_cbsucc_query() */
 
 /* This class is full of failing callbacks */
 const H5L_class_t UD_cbfail_class1[1] = {{

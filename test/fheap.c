@@ -15168,7 +15168,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     unsigned char tiny_heap_id[HEAP_ID_LEN]; /* Heap ID for 'tiny' object */
     unsigned char huge_heap_id[HEAP_ID_LEN]; /* Heap ID for 'huge' object */
     hbool_t     id_changed = FALSE;     /* Whether the heap ID changed */
-    unsigned char *rewrite_obj;         /* Pointer to re-write buffer for objects */
+    unsigned char *rewrite_obj = NULL;  /* Pointer to re-write buffer for objects */
     fheap_heap_ids_t keep_ids;          /* Structure to retain heap IDs */
     h5_stat_size_t       empty_size;             /* Size of a file with an empty heap */
     size_t      obj_size;               /* Size of object */

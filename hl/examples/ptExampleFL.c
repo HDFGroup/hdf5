@@ -72,7 +72,7 @@ int main(void)
  if(err < 0)
      goto out;
 
- printf("Number of packets in packet table after five appends: %d\n", count);
+ printf("Number of packets in packet table after five appends: %d\n", (int)count);
 
     /* Initialize packet table's "current record" */
  err = H5PTcreate_index(ptable);

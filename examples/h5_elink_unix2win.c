@@ -39,12 +39,12 @@
  * Note that this may not be necessary on your system; many Windows systems can
  * understand Unix paths.
  */
-static hid_t elink_unix2win_trav(const char *link_name, hid_t cur_group, void * udata, size_t udata_size, hid_t lapl_id)
+static hid_t elink_unix2win_trav(const char *link_name, hid_t cur_group, 
+    const void *udata, size_t udata_size, hid_t lapl_id)
 {
     hid_t         fid;
-    char         *file_name = NULL;
-    char         *obj_name;
-    char         *elink_prefix;         /* External link prefix */
+    const char   *file_name;
+    const char   *obj_name;
     char         *new_fname = NULL;     /* Buffer allocated to hold Unix file path */
     ssize_t       prefix_len;           /* External link prefix length */
     size_t        fname_len;
@@ -54,7 +54,7 @@ static hid_t elink_unix2win_trav(const char *link_name, hid_t cur_group, void * 
 
     printf("Converting Unix path to Windows path.\n");
 
-    if(H5Lunpack_elink_val(udata, udata_size, &file_name, &obj_name) < 0)
+    if(H5Lunpack_elink_val(udata, udata_size, NULL, &file_name, &obj_name) < 0)
         goto error;
     fname_len = strlen(file_name);
 
@@ -71,7 +71,7 @@ static hid_t elink_unix2win_trav(const char *link_name, hid_t cur_group, void * 
         new_fname = malloc(prefix_len + fname_len + 1);
 
         /* Copy the prefix into the buffer */
-        if(H5Pget_elink_prefix(lapl_id, new_fname, prefix_len + 1) < 0)
+        if(H5Pget_elink_prefix(lapl_id, new_fname, (size_t)(prefix_len + 1)) < 0)
             goto error;
 
         start_pos = prefix_len;
@@ -102,16 +102,14 @@ static hid_t elink_unix2win_trav(const char *link_name, hid_t cur_group, void * 
     if(H5Fclose(fid) < 0)
         goto error;
 
-    /* Free file names if they've been allocated */
+    /* Free file name if it's been allocated */
     if(new_fname)
         free(new_fname);
-    if(file_name)
-        free(file_name);
 
     return ret_value;
 
 error:
-    /* Free file_name if it's been allocated */
+    /* Free file name if it's been allocated */
     if(new_fname)
         free(new_fname);
     return -1;
@@ -138,7 +136,7 @@ const H5L_class_t elink_unix2win_class[1] = {{
  * follows the external link to open the target file.
  */
 static int
-unix2win_example()
+unix2win_example(void)
 {
     hid_t	fid = (-1);     		/* File ID */
     hid_t	gid = (-1);     		/* Group ID */

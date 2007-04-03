@@ -613,8 +613,7 @@ H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no link name specified")
 
     /* Create external link */
-    if(H5L_create_ud(&link_loc, link_name, udata, udata_size, link_type,
-                lcpl_id, lapl_id, H5AC_dxpl_id) < 0)
+    if(H5L_create_ud(&link_loc, link_name, udata, udata_size, link_type, lcpl_id, lapl_id, H5AC_dxpl_id) < 0)
 	HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -1512,17 +1511,15 @@ H5L_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSED 
         if(H5G_name_set(grp_loc->path, udata->path, name) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "cannot set name")
 
-    /* If link is a user-defined link, trigger its creation callback if it has one*/
-    if(udata->lnk->type >= H5L_TYPE_UD_MIN)
-    {
+    /* If link is a user-defined link, trigger its creation callback if it has one */
+    if(udata->lnk->type >= H5L_TYPE_UD_MIN) {
         const H5L_class_t   *link_class;         /* User-defined link class */
 
         /* Get the link class for this type of link. */
         if(NULL == (link_class = H5L_find_class(udata->lnk->type)))
             HGOTO_ERROR(H5E_LINK, H5E_NOTREGISTERED, FAIL, "unable to get class of UD link")
 
-        if(link_class->create_func != NULL)
-        {
+        if(link_class->create_func != NULL) {
             H5O_loc_t           temp_oloc;
             H5G_name_t          temp_path;
 
@@ -1551,16 +1548,14 @@ H5L_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSED 
 
 done:
     /* Close the location given to the user callback if it was created */
-    if(grp_id >= 0)
-    {
+    if(grp_id >= 0) {
         if(H5I_dec_ref(grp_id) < 0)
             HDONE_ERROR(H5E_ATOM, H5E_CANTRELEASE, FAIL, "unable to close atom from UD callback")
-    }
-    else if(grp != NULL)
-    {
+    } /* end if */
+    else if(grp != NULL) {
         if(H5G_close(grp) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to close group given to UD callback")
-    }
+    } /* end if */
     else if(temp_loc_init)
         H5G_loc_free(&temp_loc);
 
@@ -1615,8 +1610,7 @@ H5L_create_real(H5G_loc_t *link_loc, const char *link_name, H5G_name_t *obj_path
         HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "can't normalize name")
 
     /* Check for flags present in creation property list */
-    if(lcpl_id != H5P_DEFAULT)
-    {
+    if(lcpl_id != H5P_DEFAULT) {
         unsigned crt_intmd_group;
 
         if(NULL == (lc_plist = H5I_object(lcpl_id)))
@@ -1807,7 +1801,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5L_create_ud(H5G_loc_t *link_loc, const char *link_name, const void * ud_data,
+H5L_create_ud(H5G_loc_t *link_loc, const char *link_name, const void *ud_data,
     size_t ud_data_size, H5L_type_t type, hid_t lcpl_id, hid_t lapl_id,
     hid_t dxpl_id)
 {
@@ -1830,11 +1824,10 @@ H5L_create_ud(H5G_loc_t *link_loc, const char *link_name, const void * ud_data,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "link class has not been registered with library")
 
     /* Fill in UD link-specific information in the link struct*/
-    if(ud_data_size > 0)
-    {
-        lnk.u.ud.udata = H5MM_malloc((size_t) ud_data_size);
+    if(ud_data_size > 0) {
+        lnk.u.ud.udata = H5MM_malloc((size_t)ud_data_size);
         HDmemcpy(lnk.u.ud.udata, ud_data, (size_t) ud_data_size);
-    }
+    } /* end if */
     else
         lnk.u.ud.udata = NULL;
 
@@ -2223,16 +2216,14 @@ H5L_move_dest_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create new link to object")
 
     /* If the link was a user-defined link, call its move callback if it has one */
-    if(udata->lnk->type >= H5L_TYPE_UD_MIN)
-    {
+    if(udata->lnk->type >= H5L_TYPE_UD_MIN) {
         const H5L_class_t   *link_class;         /* User-defined link class */
 
         /* Get the link class for this type of link. */
         if(NULL == (link_class = H5L_find_class(udata->lnk->type)))
             HGOTO_ERROR(H5E_LINK, H5E_NOTREGISTERED, FAIL, "link class is not registered")
 
-        if((!udata->copy && link_class->move_func != NULL) || (udata->copy && link_class->move_func))
-        {
+        if((!udata->copy && link_class->move_func) || (udata->copy && link_class->copy_func)) {
             H5O_loc_t           temp_oloc;
             H5G_name_t          temp_path;
 
@@ -2253,13 +2244,11 @@ H5L_move_dest_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
             if((grp_id = H5I_register(H5I_GROUP, grp)) < 0)
                 HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group ID")
 
-            if(udata->copy)
-            {
+            if(udata->copy) {
                 if((link_class->copy_func)(udata->lnk->name, grp_id, udata->lnk->u.ud.udata, udata->lnk->u.ud.size) < 0)
                     HGOTO_ERROR(H5E_LINK, H5E_CALLBACK, FAIL, "UD copy callback returned error")
             } /* end if */
-            else
-            {
+            else {
                 if((link_class->move_func)(udata->lnk->name, grp_id, udata->lnk->u.ud.udata, udata->lnk->u.ud.size) < 0)
                     HGOTO_ERROR(H5E_LINK, H5E_CALLBACK, FAIL, "UD move callback returned error")
             } /* end else */
@@ -2268,16 +2257,14 @@ H5L_move_dest_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
 
 done:
     /* Close the location given to the user callback if it was created */
-    if(grp_id >= 0)
-    {
+    if(grp_id >= 0) {
         if(H5I_dec_ref(grp_id) < 0)
             HDONE_ERROR(H5E_ATOM, H5E_CANTRELEASE, FAIL, "unable to close atom from UD callback")
-    }
-    else if(grp != NULL)
-    {
+    } /* end if */
+    else if(grp != NULL) {
         if(H5G_close(grp) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to close group given to UD callback")
-    }
+    } /* end if */
     else if(temp_loc_init)
         H5G_loc_free(&temp_loc);
 
@@ -2370,8 +2357,7 @@ H5L_move_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to follow symbolic link")
 
     /* If this is a move and not a copy operation, change the object's name and remove the old link */
-    if(!udata->copy)
-    {
+    if(!udata->copy) {
         H5RS_str_t *dst_name_r;      /* Ref-counted version of dest name */
 
         /* Fix names up */
@@ -2402,8 +2388,7 @@ done:
      * In this special case, the H5L_move_dest_cb callback frees the name
      * if it succeeds
      */
-    if(link_copied)
-    {
+    if(link_copied) {
         if(udata_out.lnk->type == H5L_TYPE_SOFT)
             udata_out.lnk->u.soft.name = H5MM_xfree(udata_out.lnk->u.soft.name);
         else if(udata_out.lnk->type >= H5L_TYPE_UD_MIN && udata_out.lnk->u.ud.size > 0)
@@ -2461,8 +2446,7 @@ H5L_move(H5G_loc_t *src_loc, const char *src_name, H5G_loc_t *dst_loc,
     HDassert(dst_name && *dst_name);
 
     /* Check for flags present in creation property list */
-    if(lcpl_id != H5P_DEFAULT)
-    {
+    if(lcpl_id != H5P_DEFAULT) {
         unsigned crt_intmd_group;
 
         if(NULL == (lc_plist = H5I_object(lcpl_id)))
