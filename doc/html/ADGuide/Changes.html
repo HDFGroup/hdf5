@@ -55,7 +55,178 @@ This document is intended to assist application developers who must keep
 an application synchronized with the HDF5 library or related software.
 
 
-<h2>Release 1.6.5 (current release) versus Release 1.6.4</h2> 
+
+
+
+<h2>Release 1.6.6 (current release) versus Release 1.6.5</h2> 
+
+<dir>
+
+This section lists the API-level changes that have been made in the 
+transition from the HDF5 Release 1.6.5 to Release 1.6.6.
+<p>
+
+Release 1.6.6 is primarily a bug-fix release and includes
+no changes in the syntax or [proper] behavior of 
+the library's public interfaces.
+
+There are, however, two changes in tool interfaces.
+
+<!--
+    <h3>New Functions and Tools</h3>
+        <dl>
+	  <dt>C functions:
+          <dd>None.
+          <dd>The following C functions are new for Release 1.6.6 and 
+              are documented in the
+              <a href="../RM_H5Front.html"><cite>HDF5 Reference Manual</cite></a>.
+	
+              <table border="0">
+              <tr>
+                <td align="left" valign="top"><code>FUNCTION NAME</code>
+                    &nbsp;&nbsp;&nbsp;&nbsp;</td>
+                <td align="left" valign="top"><em>FUNCTION</em> <code>SYNTAX</code>
+                    <br>
+                    See <a href="../RM_H5[FUNCTION ENTRY URL]">entry</a>.</td>
+              </tr>
+              </table>    
+
+	      
+          <dd>&nbsp;
+	  <dt>Fortran subroutines:
+          <dd>None.
+
+          <dd>The following Fortran90 subroutines are new for Release 1.6.6 
+	      and are documented in the 
+              <a href="../RM_H5Front.html"><cite>HDF5 Reference Manual</cite></a>.
+              <table border="0">
+              <tr>
+                <td align="left" valign="top">Corresponding to the 
+                    new C functions listed above:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;<code>FORTRAN_SUBROUTINE_NAME_f</code><br>
+                    </td>
+                <td align="left" valign="top"> 
+                    &nbsp;&nbsp;&nbsp;&nbsp;</td>
+              </tr>
+              </table>    
+
+	  
+          <dd>&nbsp;
+	  <dt>Tools:
+          <dd>None.
+
+          <dd>The following tools are new for Release 1.6.6 and are 
+              documented on the <a href="../Tools.html">Tools page</a> of the
+              <a href="../RM_H5Front.html"><cite>HDF5 Reference Manual</cite></a>.
+              <dd><code>h5repack</code> description...
+
+              <dd><code>h5repack</code> description...
+
+        </dl>
+
+
+    <h3>Deleted Functions</h3>
+
+        None.
+
+	The following functions are deprecated in HDF5 Release X.X.x.
+        A backward compatibility mode is provided in this release,
+        enabling these functions and other Release 1.4.x compatibility
+        features, but is available only when the HDF5 library is 
+        configured with the flag <code>H5_WANT_H5_V1_4_COMPAT</code>.
+        The backward compatibility mode is not enabled in the 
+        binaries distributed by NCSA.
+
+        <dir>
+        <table border=0>
+        <tr valign="top" align="left"><td>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </td><td>
+<pre>
+<code>function</code>
+</pre>
+        </td><td>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </td><td>
+<pre>
+<code>function</code>
+</pre>
+        </td><td>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </td><td>
+<pre>&nbsp;
+
+</pre>
+        </td></tr>
+        </table>
+        </dir>
+        <p>
+	The above functions will eventually be removed from the HDF5 
+        distribution and from the <cite>HDF5 Reference Manual</cite>.
+
+
+    <h3>Functions with Changed Syntax</h3>
+
+        None.
+
+
+        The following functions have changed as noted.
+	
+        <dl>
+        <dt>C functions:
+        <dt><code>H5function?</code>
+          <dd>Change....
+	
+        <dd>&nbsp;
+        <dt>Fortran90 subroutines:
+        <dt><code>h5subroutine_f?</code>
+          <dd>Change...
+        </dl>
+
+
+    <h3>Constants with Changed Values</h3>
+    
+        None.
+-->
+        
+
+    <h3>Tools with Changed Options and/or Behavior</h3>
+
+	
+        <dl>
+          <dt>The following tools have changed in this release and are 
+              documented on the <a href="../Tools.html">Tools page</a> of the
+              <a href="../RM_H5Front.html"><cite>HDF5 Reference Manual</cite></a>.
+                  <br>&nbsp;
+              <dd><code>h5repack</code>:
+                  <br>
+                  A new option allows the new copy to use 
+                  the file datatype instead of the previous conversion 
+                  to native datatype.
+                  This is now the default behavior.
+
+                  <br>&nbsp;
+              <dd><code>h5dump</code>: 
+                  <br>
+                  This tool includes new options for binary output.
+
+                  <br>&nbsp;
+              <dd><i><b>(Both of the above need refinement.)</b></i>
+
+        </dl>
+        </dl>
+    </dir>
+<p>&nbsp;
+
+
+
+
+
+
+
+
+
+<h2>Release 1.6.5 versus Release 1.6.4</h2> 
 
 <dir>
 
@@ -364,6 +535,7 @@ transition from the HDF5 Release 1.6.4 to Release 1.6.5.
 
 
     </dir>
+<p>&nbsp;
 
 
 
