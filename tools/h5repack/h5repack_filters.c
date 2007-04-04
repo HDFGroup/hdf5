@@ -15,6 +15,7 @@
 
 #include "hdf5.h"
 #include "h5test.h"
+#include "h5trav.h"
 #include "h5repack.h"
 
 
@@ -267,9 +268,9 @@ int apply_filters(const char* name,    /* object name from traverse list */
     {
         
     /*-------------------------------------------------------------------------
-    * filters require CHUNK layout; if we do not have one define a default
-    *-------------------------------------------------------------------------
-        */
+     * filters require CHUNK layout; if we do not have one define a default
+     *-------------------------------------------------------------------------
+     */
         if (obj.layout==-1)
         {
             obj.chunk.rank=rank;
@@ -350,7 +351,7 @@ int apply_filters(const char* name,    /* object name from traverse list */
     }
     /*obj.nfilters*/
     
-    /*-------------------------------------------------------------------------
+   /*-------------------------------------------------------------------------
     * layout
     *-------------------------------------------------------------------------
     */

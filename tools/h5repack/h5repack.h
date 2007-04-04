@@ -17,10 +17,6 @@
 #ifndef H5REPACK_H__
 #define H5REPACK_H__
 
-#include "hdf5.h"
-#include "h5trav.h"
-#include "h5diff.h"
-#include "h5tools.h"
 
 #define H5FOPENERROR "unable to open file"
 
@@ -150,7 +146,6 @@ int do_copy_refobjs(hid_t fidin,
                     pack_opt_t *options); /* repack options */
 
 
-void read_info(const char *filename,pack_opt_t *options);
 void init_packobject(pack_info_t *obj);
 int print_filters(hid_t dcpl_id);
 

@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "h5tools_utils.h"
+#include "h5trav.h"
 #include "h5repack.h"
 
 extern char  *progname;
@@ -548,8 +549,6 @@ obj_list_t* parse_layout(const char *str,
 
  return obj_list;
 }
-
-
 
 /*-------------------------------------------------------------------------
  * Function: parse_number

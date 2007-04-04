@@ -15,7 +15,9 @@
 
 #include "hdf5.h"
 #include "h5test.h"
+#include "h5tools.h"
 #include "h5tools_utils.h"
+#include "h5trav.h"
 #include "h5repack.h"
 
 extern char  *progname;

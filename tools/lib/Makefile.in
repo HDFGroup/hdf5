@@ -42,7 +42,7 @@ PROGS=$(PUB_PROGS) $(TEST_PROGS)
 
 ## Source and object files for the library; do not install
 ##
-LIB_SRC=h5tools.c h5tools_str.c h5tools_utils.c h5diff.c h5diff_array.c h5diff_attr.c h5diff_dset.c h5diff_util.c h5trav.c h5trav_table.c h5tools_filters.c h5tools_ref.c h5tools_type.c
+LIB_SRC=h5tools.c h5tools_str.c h5tools_utils.c h5diff.c h5diff_array.c h5diff_attr.c h5diff_dset.c h5diff_util.c h5trav.c h5tools_filters.c h5tools_ref.c h5tools_type.c
 LIB_OBJ=$(LIB_SRC:.c=.lo)
 PUB_LIB=
 AUX_LIB=$(LIB)

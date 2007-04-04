@@ -17,7 +17,9 @@
 #include <string.h>
 #include <stdio.h>
 #include "H5private.h"
+#include "h5tools.h"
 #include "h5tools_utils.h"
+#include "h5trav.h"
 #include "h5repack.h"
 
 extern char  *progname;
@@ -51,7 +53,8 @@ int check_objects(const char* fname,
      * open the file
      *-------------------------------------------------------------------------
      */
-    if ((fid=h5tools_fopen(fname, NULL, NULL, 0))<0){
+    if ((fid=h5tools_fopen(fname, NULL, NULL, 0))<0)
+    {
         printf("<%s>: %s\n", fname, H5FOPENERROR );
         return -1;
     }

@@ -1551,7 +1551,6 @@
 ./tools/lib/h5diff_util.c
 ./tools/lib/h5trav.c
 ./tools/lib/h5trav.h
-./tools/lib/h5trav_table.c
 ./tools/lib/h5tools.c
 ./tools/lib/h5tools.h
 ./tools/lib/h5tools_filters.c

@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include "hdf5.h"
 #include "h5test.h"
+#include "h5trav.h"
 #include "h5repack.h"
 
 
