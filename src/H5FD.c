@@ -1535,11 +1535,11 @@ HDfprintf(stderr, "%s: type = %u, size = %Hu\n", FUNC, (unsigned)type, size);
     if(type != H5FD_MEM_DRAW) {
         /* Handle metadata differently from "raw" data */
         if((ret_value = H5FD_alloc_metadata(file, type, dxpl_id, size)) == HADDR_UNDEF)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, HADDR_UNDEF, "can't allocate for metadata")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, HADDR_UNDEF, "can't allocate for metadata")
     } else {
         /* Allocate "raw" data */
         if((ret_value = H5FD_alloc_raw(file, type, dxpl_id, size)) == HADDR_UNDEF)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, HADDR_UNDEF, "can't allocate for raw data")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, HADDR_UNDEF, "can't allocate for raw data")
     }
 
 done:
@@ -1857,7 +1857,8 @@ HDfprintf(stderr, "%s: type = %u, size = %Hu\n", FUNC, (unsigned)type, size);
              */
             if(size >= file->def_meta_block_size) {
                 /* Allocate more room for this new block the regular way */
-                new_meta = H5FD_real_alloc(file, type, dxpl_id, size);
+                if(HADDR_UNDEF==(new_meta = H5FD_real_alloc(file, type, dxpl_id, size)))
+                    HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, HADDR_UNDEF, "can't allocate metadata block")
 
                 /*
                  * Check if the new metadata is at the end of the current
@@ -1879,8 +1880,9 @@ HDfprintf(stderr, "%s: type = %u, size = %Hu\n", FUNC, (unsigned)type, size);
                 }
             } else {
                 /* Allocate another metadata block */
-                new_meta = H5FD_real_alloc(file, H5FD_MEM_DEFAULT, dxpl_id,
-                                           file->def_meta_block_size);
+                if(HADDR_UNDEF==(new_meta = H5FD_real_alloc(file, H5FD_MEM_DEFAULT, dxpl_id,
+                                           file->def_meta_block_size)))
+                    HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, HADDR_UNDEF, "can't allocate metadata block")
 
                 /*
                  * Check if the new metadata is at the end of the current
@@ -1916,7 +1918,8 @@ HDfprintf(stderr, "%s: type = %u, size = %Hu\n", FUNC, (unsigned)type, size);
         }
     } else {
         /* Allocate data the regular way */
-        ret_value = H5FD_real_alloc(file, type, dxpl_id, size);
+        if(HADDR_UNDEF==(ret_value = H5FD_real_alloc(file, type, dxpl_id, size)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, HADDR_UNDEF, "can't allocate metadata block")
     }
 
 done:
@@ -1970,7 +1973,8 @@ HDfprintf(stderr, "%s: type = %u, size = %Hu\n", FUNC, (unsigned)type, size);
             /* Check if the block asked for is too large for the "small data" block */
             if(size >= file->def_sdata_block_size) {
                 /* Allocate more room for this new block the regular way */
-                new_data = H5FD_real_alloc(file, type, dxpl_id, size);
+                if(HADDR_UNDEF==(new_data = H5FD_real_alloc(file, type, dxpl_id, size)))
+                    HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, HADDR_UNDEF, "can't allocate raw data block")
 
                 /*
                  * Check if the new raw data is at the end of the current
@@ -1992,8 +1996,9 @@ HDfprintf(stderr, "%s: type = %u, size = %Hu\n", FUNC, (unsigned)type, size);
                 }
             } else {
                 /* Allocate another "small data" block */
-                new_data = H5FD_real_alloc(file, type, dxpl_id,
-                                           file->def_sdata_block_size);
+                if(HADDR_UNDEF==(new_data = H5FD_real_alloc(file, type, dxpl_id,
+                                           file->def_sdata_block_size)))
+                    HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, HADDR_UNDEF, "can't allocate raw data block")
 
                 /*
                  * Check if the new raw data is at the end of the current
@@ -2032,7 +2037,8 @@ HDfprintf(stderr, "%s: type = %u, size = %Hu\n", FUNC, (unsigned)type, size);
         }
     } else {
         /* Allocate data the regular way */
-        ret_value = H5FD_real_alloc(file, type, dxpl_id, size);
+        if(HADDR_UNDEF==(ret_value = H5FD_real_alloc(file, type, dxpl_id, size)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, HADDR_UNDEF, "can't allocate raw data block")
     }
 
 done:

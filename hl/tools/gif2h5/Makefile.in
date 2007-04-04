@@ -56,7 +56,7 @@ host_triplet = @host@
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am
-bin_PROGRAMS = gif2h5$(EXEEXT) h52gif$(EXEEXT)
+bin_PROGRAMS = gif2h5$(EXEEXT) h52gif$(EXEEXT) h52gifgentst$(EXEEXT)
 subdir = hl/tools/gif2h5
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
@@ -83,6 +83,11 @@ h52gif_OBJECTS = $(am_h52gif_OBJECTS)
 h52gif_LDADD = $(LDADD)
 h52gif_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_3)
+am_h52gifgentst_OBJECTS = h52gifgentst.$(OBJEXT)
+h52gifgentst_OBJECTS = $(am_h52gifgentst_OBJECTS)
+h52gifgentst_LDADD = $(LDADD)
+h52gifgentst_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
 am__depfiles_maybe = depfiles
@@ -94,8 +99,9 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(gif2h5_SOURCES) $(h52gif_SOURCES)
-DIST_SOURCES = $(gif2h5_SOURCES) $(h52gif_SOURCES)
+SOURCES = $(gif2h5_SOURCES) $(h52gif_SOURCES) $(h52gifgentst_SOURCES)
+DIST_SOURCES = $(gif2h5_SOURCES) $(h52gif_SOURCES) \
+	$(h52gifgentst_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -338,8 +344,9 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog
 
 # Include src and tools/lib directories
 INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/tools/lib -I$(top_srcdir)/hl/src
-gif2h5_SOURCES = gif2hdf.c gif2mem.c decompress.c gifread.c writehdf.c
+gif2h5_SOURCES = gif2hdf.c gif2mem.c decompress.c gifread.c writehdf.c 
 h52gif_SOURCES = hdf2gif.c hdfgifwr.c readhdf.c
+h52gifgentst_SOURCES = h52gifgentst.c 
 
 # Programs all depend on the hdf5 library, the tools library, and the HL
 # library.
@@ -428,6 +435,9 @@ gif2h5$(EXEEXT): $(gif2h5_OBJECTS) $(gif2h5_DEPENDENCIES)
 h52gif$(EXEEXT): $(h52gif_OBJECTS) $(h52gif_DEPENDENCIES) 
 	@rm -f h52gif$(EXEEXT)
 	$(LINK) $(h52gif_LDFLAGS) $(h52gif_OBJECTS) $(h52gif_LDADD) $(LIBS)
+h52gifgentst$(EXEEXT): $(h52gifgentst_OBJECTS) $(h52gifgentst_DEPENDENCIES) 
+	@rm -f h52gifgentst$(EXEEXT)
+	$(LINK) $(h52gifgentst_LDFLAGS) $(h52gifgentst_OBJECTS) $(h52gifgentst_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -439,6 +449,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gif2hdf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gif2mem.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gifread.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h52gifgentst.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hdf2gif.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hdfgifwr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/readhdf.Po@am__quote@

@@ -22,7 +22,7 @@
 
 #include "h5test.h"
 
-#define KB              1024
+#define KB              1024U
 #define FAMILY_NUMBER   4
 #define FAMILY_SIZE     (1*KB)
 #define FAMILY_SIZE2    (5*KB)
@@ -379,7 +379,7 @@ test_core(void)
 
     /* Set property list and file name for CORE driver */
     fapl = h5_fileaccess();
-    if(H5Pset_fapl_core(fapl, CORE_INCREMENT, TRUE)<0)
+    if(H5Pset_fapl_core(fapl, (size_t)CORE_INCREMENT, TRUE)<0)
         TEST_ERROR;
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
 
@@ -418,7 +418,7 @@ test_core(void)
 
     /* Open the file with backing store off for read and write.  
      * Changes won't be saved in file. */
-    if(H5Pset_fapl_core(fapl, CORE_INCREMENT, FALSE)<0)
+    if(H5Pset_fapl_core(fapl, (size_t)CORE_INCREMENT, FALSE)<0)
         TEST_ERROR;
 
     if((file=H5Fopen(filename, H5F_ACC_RDWR, fapl))<0)
@@ -480,7 +480,7 @@ test_core(void)
 
     /* Open the file with backing store on for read and write.  
      * Changes will be saved in file. */
-    if(H5Pset_fapl_core(fapl, CORE_INCREMENT, TRUE)<0)
+    if(H5Pset_fapl_core(fapl, (size_t)CORE_INCREMENT, TRUE)<0)
         TEST_ERROR;
 
     if((file=H5Fopen(filename, H5F_ACC_RDWR, fapl))<0)
@@ -660,7 +660,7 @@ test_family(void)
     hid_t       access_fapl = -1;
     char        filename[1024];
     char        dname[]="dataset";
-    int         i, j;
+    unsigned int i, j;
     int         *fhandle=NULL, *fhandle2=NULL;
     int         buf[FAMILY_NUMBER][FAMILY_SIZE];
     hsize_t     dims[2]={FAMILY_NUMBER, FAMILY_SIZE};
@@ -719,6 +719,7 @@ test_family(void)
     for(i=0; i<FAMILY_NUMBER; i++)
         for(j=0; j<FAMILY_SIZE; j++)
             buf[i][j] = i*10000+j;
+
     if(H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)<0)
         TEST_ERROR;
 
