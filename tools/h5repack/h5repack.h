@@ -17,6 +17,10 @@
 #ifndef H5REPACK_H__
 #define H5REPACK_H__
 
+#include "hdf5.h"
+#include "h5trav.h"
+
+
 
 #define H5FOPENERROR "unable to open file"
 

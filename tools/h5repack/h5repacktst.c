@@ -13,12 +13,9 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
-#include "hdf5.h"
+#include "h5repack.h"
 #include "h5test.h"
 #include "h5tools.h"
-#include "h5trav.h"
-#include "h5repack.h"
 #include "h5diff.h"
 
 #define GOERROR  {H5_FAILED(); goto error;}

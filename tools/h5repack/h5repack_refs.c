@@ -17,10 +17,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include "h5repack.h"
 #include "H5private.h"
 #include "h5tools.h"
-#include "h5trav.h"
-#include "h5repack.h"
 
 /*-------------------------------------------------------------------------
  * local functions

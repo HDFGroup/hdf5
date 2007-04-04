@@ -15,9 +15,8 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "h5tools_utils.h"
-#include "h5trav.h"
 #include "h5repack.h"
+#include "h5tools_utils.h"
 
 extern char  *progname;
 
