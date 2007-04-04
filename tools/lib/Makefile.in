@@ -69,8 +69,8 @@ LTLIBRARIES = $(noinst_LTLIBRARIES)
 libh5tools_la_LIBADD =
 am_libh5tools_la_OBJECTS = h5tools.lo h5tools_str.lo h5tools_utils.lo \
 	h5diff.lo h5diff_array.lo h5diff_attr.lo h5diff_dset.lo \
-	h5diff_util.lo h5trav.lo h5trav_table.lo h5tools_filters.lo \
-	h5tools_ref.lo h5tools_type.lo
+	h5diff_util.lo h5trav.lo h5tools_filters.lo h5tools_ref.lo \
+	h5tools_type.lo
 libh5tools_la_OBJECTS = $(am_libh5tools_la_OBJECTS)
 am__EXEEXT_1 = talign$(EXEEXT)
 talign_SOURCES = talign.c
@@ -338,7 +338,7 @@ INCLUDES = -I$(top_srcdir)/src
 noinst_LTLIBRARIES = libh5tools.la
 libh5tools_la_SOURCES = h5tools.c h5tools_str.c h5tools_utils.c h5diff.c \
     h5diff_array.c h5diff_attr.c h5diff_dset.c h5diff_util.c h5trav.c  \
-    h5trav_table.c h5tools_filters.c h5tools_ref.c h5tools_type.c
+    h5tools_filters.c h5tools_ref.c h5tools_type.c
 
 
 # Test program.  Link using libhdf5 and libh5tools
@@ -437,7 +437,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5tools_type.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5tools_utils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5trav.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5trav_table.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/talign.Po@am__quote@
 
 .c.o:

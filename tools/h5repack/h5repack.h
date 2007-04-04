@@ -19,8 +19,7 @@
 
 #include "hdf5.h"
 #include "h5trav.h"
-#include "h5diff.h"
-#include "h5tools.h"
+
 
 #define H5FOPENERROR "unable to open file"
 

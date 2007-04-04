@@ -412,6 +412,8 @@ H5Lunpack_elink_val(const void *_ext_linkval, size_t link_size,
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(H5Lunpack_elink_val, FAIL)
+    H5TRACE5("e", "*xz*Iu**s**s", _ext_linkval, link_size, flags, filename,
+             obj_path);
 
     /* Sanity check external link buffer */
     if(ext_linkval == NULL )

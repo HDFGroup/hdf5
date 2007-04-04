@@ -28,7 +28,7 @@ noinst_LTLIBRARIES=libh5tools.la
 
 libh5tools_la_SOURCES=h5tools.c h5tools_str.c h5tools_utils.c h5diff.c \
     h5diff_array.c h5diff_attr.c h5diff_dset.c h5diff_util.c h5trav.c  \
-    h5trav_table.c h5tools_filters.c h5tools_ref.c h5tools_type.c
+    h5tools_filters.c h5tools_ref.c h5tools_type.c
 
 # Test program.  Link using libhdf5 and libh5tools
 TEST_PROG=talign

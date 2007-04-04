@@ -18,8 +18,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "H5private.h"
 #include "h5repack.h"
+#include "H5private.h"
+#include "h5diff.h"
+#include "h5tools.h"
+
 
 /*-------------------------------------------------------------------------
  * local functions
