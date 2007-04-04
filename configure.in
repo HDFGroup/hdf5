@@ -332,18 +332,6 @@ AC_PROG_INSTALL
 AC_LIBTOOL_DLOPEN
 AC_PROG_LIBTOOL
 
-
-dnl ----------------------------------------------------------------------
-dnl Check that the tr utility is working properly.
-
-AC_PATH_PROG(TR, tr)
-
-TR_TEST=`echo Test | ${TR} ${as_cr_letters}"," ${as_cr_LETTERS}" "`
-if test "X${TR_TEST}" != "XTEST"; then
-  AC_MSG_ERROR([tr program doesn't work])
-fi
-
-
 dnl Post processing to patch up some deficiencies in libtool
 case $host_os in
   linux*)
@@ -562,7 +550,6 @@ AC_CHECK_LIB([m], [ceil])
 
 if test "`uname`" = "SunOS" -o "`uname -sr`" = "HP-UX B.11.00"; then
   dnl ...for Solaris
-  AC_CHECK_LIB([socket], [socket])
   AC_CHECK_LIB([nsl], [xdr_int])
 fi
 
@@ -1637,7 +1624,7 @@ case "X-$DEBUG_PKG" in
 esac
 
 if test -n "$DEBUG_PKG"; then
-  for pkg in `echo $DEBUG_PKG | ${TR} ${as_cr_letters}',' ${as_cr_LETTERS}' '`; do
+  for pkg in `echo $DEBUG_PKG | tr ${as_cr_letters}',' ${as_cr_LETTERS}' '`; do
     CPPFLAGS="$CPPFLAGS -DH5${pkg}_DEBUG"
   done
 fi
@@ -1806,7 +1793,7 @@ case "$CC_BASENAME" in
     if (echo $cmd | grep / >/dev/null); then
       path="`echo $cmd | sed 's/\(.*\)\/.*$/\1/'`"
     else
-      for path in `echo $PATH | ${TR} ":" " "`; do
+      for path in `echo $PATH | tr : ' '`; do
         if test -x $path/$cmd; then
           break
         fi
@@ -1837,7 +1824,7 @@ case "$CC_BASENAME" in
     if (echo $cmd | grep / >/dev/null); then
       path="`echo $cmd | sed 's/\(.*\)\/.*$/\1/'`"
     else
-      for path in `echo $PATH | ${TR} ":" " "`; do
+      for path in `echo $PATH | tr : ' '`; do
         if test -x $path/$cmd; then
           break
         fi
@@ -2175,7 +2162,7 @@ case "X-$FILTERS" in
 esac
 
 if test -n "$FILTERS"; then
-  for filter in `echo $FILTERS | ${TR} ${as_cr_letters}',' ${as_cr_LETTERS}' '`; do
+  for filter in `echo $FILTERS | tr ${as_cr_letters}',' ${as_cr_LETTERS}' '`; do
     dnl ------------------------------------------------------------------
     dnl Have to use separate 'if' construct for each filter, so that
     dnl autoheader can detect the AC_DEFINE for each one...

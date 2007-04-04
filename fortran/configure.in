@@ -374,16 +374,6 @@ fi
 AC_SUBST(LT_STATIC_EXEC)
 
 dnl ----------------------------------------------------------------------
-dnl Check that the tr utility is working properly.
-
-AC_PATH_PROG(TR, tr)
-
-TR_TEST=`echo Test | ${TR} ${as_cr_letters}"," ${as_cr_LETTERS}" "`
-if test "X${TR_TEST}" != "XTEST"; then
-  AC_MSG_ERROR([tr program doesn't work])
-fi
-
-dnl ----------------------------------------------------------------------
 dnl Test for 64bit stuff before the data types and their sizes. The
 dnl result could effect the outcome of the sizeof macros below.
 dnl
@@ -699,7 +689,7 @@ case "$F9X" in
     if (echo $cmd |grep / >/dev/null); then
       path="`echo $cmd |sed 's/\(.*\)\/.*$/\1/'`"
     else
-      for path in `echo $PATH | ${TR} ":" " "`; do
+      for path in `echo $PATH |tr : ' '`; do
         if test -x $path/$cmd; then
           break;
         fi
@@ -770,7 +760,7 @@ dnl as_cr_letters='abcdefghijklmnopqrstuvwxyz'
 dnl as_cr_LETTERS='ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
 if test -n "$FILTERS"; then
-  for filter in `echo $FILTERS | ${TR} ${as_cr_letters}',' ${as_cr_LETTERS}' '`; do
+  for filter in `echo $FILTERS | tr ${as_cr_letters}',' ${as_cr_LETTERS}' '`; do
 dnl ----------------------------------------------------------------------
 dnl Have to use separate 'if' construct for each filter, so that autoheader
 dnl can detect the AC_DEFINE for each one...
