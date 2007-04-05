@@ -578,7 +578,7 @@ H5FD_stdio_alloc(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxp
 #ifndef H5_HAVE_FSEEKO
     /* If fseeko isn't available, big files (>2GB) won't be supported. */
     if(addr+size>BIG_FILE)
-        H5Epush_ret (func, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR, "can't write file bigger than 2GB because fseek isn't available", -1)
+        H5Epush_ret (func, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR, "can't write file bigger than 2GB because fseeko isn't available", -1)
 #endif 
 
     file->eoa = addr+size;
