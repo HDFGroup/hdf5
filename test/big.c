@@ -556,7 +556,9 @@ main (int ac, char **av)
     puts("Test passed with the Family Driver.");
 
 #ifdef H5_HAVE_FSEEKO
-    /* Test big file with the STDIO driver */
+    /* Test big file with the STDIO driver only if fseeko is supported,
+     * because the OFFSET parameter of fseek has the type LONG, not big
+     * enough to support big files. */
     puts("\nTesting big file with the STDIO Driver ");
 
     fapl = h5_fileaccess();

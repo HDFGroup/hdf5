@@ -598,6 +598,10 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - STDIO driver didn't support files bigger than 2GB because the OFFSET
+            parameter of fseek is of type LONG INT, not big enough for big files.
+            Use fseeko instead for big files if it's available on the system.
+            SLU - 2007/4/5
         - Fixed a bug in H5Sselect_valid() that caused an incorrect value to
             be returned (0) instead of FAIL on error conditions such as the
             selection or extent not being defined. CMC - 2007/01/17
