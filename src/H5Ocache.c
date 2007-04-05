@@ -739,7 +739,8 @@ H5O_assert(oh);
                     break;
 
                 case 2:     /* 4 byte size */
-                    HDassert(chunk0_size < 4294967296LL);
+		    /* use <= 2**32 -1 to stay within 4 bytes integer range */
+                    HDassert(chunk0_size <= 4294967295UL);
                     UINT32ENCODE(p, chunk0_size);
                     break;
 
