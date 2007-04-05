@@ -649,8 +649,8 @@ esac
 
 AC_TRY_COMPILE([#include <sys/types.h>],
                [off64_t n = 0;],
-               [AC_CHECK_FUNCS([lseek64 fseek64])],
-               [AC_MSG_RESULT([skipping test for lseek64() and fseek64()])])
+               [AC_CHECK_FUNCS([lseek64 fseek64 fseeko ftello])],
+               [AC_MSG_RESULT([skipping test for lseek64(), fseek64(), fseeko(), and ftello])])
 
 dnl ----------------------------------------------------------------------
 dnl Data types and their sizes.

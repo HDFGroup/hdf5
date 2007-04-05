@@ -55,6 +55,12 @@
 /* Define to 1 if you have the `fseek64' function. */
 #undef HAVE_FSEEK64
 
+/* Define to 1 if you have the `fseeko' function. */
+#undef HAVE_FSEEKO
+
+/* Define to 1 if you have the `ftello' function. */
+#undef HAVE_FTELLO
+
 /* Define if the function stack tracing code is to be compiled in */
 #undef HAVE_FUNCSTACK
 

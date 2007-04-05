@@ -112,6 +112,18 @@ typedef struct H5FD_stdio_t {
 #endif
 } H5FD_stdio_t;
 
+#ifdef H5_HAVE_LSEEK64
+#   define file_offset_t	off64_t
+#   define file_truncate	ftruncate64
+#elif defined (WIN32) && !defined(__MWERKS__)
+# /*MSVC*/
+#   define file_offset_t __int64
+#   define file_truncate	_chsize
+#else
+#   define file_offset_t	off_t
+#   define file_truncate	ftruncate
+#endif
+
 /*
  * These macros check for overflow of various quantities.  These macros
  * assume that file_offset_t is signed and haddr_t and size_t are unsigned.
@@ -134,24 +146,16 @@ typedef struct H5FD_stdio_t {
 #define REGION_OVERFLOW(A,Z)	(ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) || \
     HADDR_UNDEF==(A)+(Z) || (file_offset_t)((A)+(Z))<(file_offset_t)(A))
 
-#ifdef H5_HAVE_LSEEK64
-#   define file_offset_t	off64_t
-#   define file_truncate	ftruncate64
-#elif defined (WIN32) && !defined(__MWERKS__)
-# /*MSVC*/
-#   define file_offset_t __int64
-#   define file_truncate	_chsize
-#else
-#   define file_offset_t	off_t
-#   define file_truncate	ftruncate
-#endif
-
+/* Define big file as 2GB */
+#define BIG_FILE 0x80000000UL
+ 
 /* Prototypes */
 static H5FD_t *H5FD_stdio_open(const char *name, unsigned flags,
                  hid_t fapl_id, haddr_t maxaddr);
 static herr_t H5FD_stdio_close(H5FD_t *lf);
 static int H5FD_stdio_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
 static herr_t H5FD_stdio_query(const H5FD_t *_f1, unsigned long *flags);
+static haddr_t H5FD_stdio_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size);
 static haddr_t H5FD_stdio_get_eoa(H5FD_t *_file);
 static herr_t H5FD_stdio_set_eoa(H5FD_t *_file, haddr_t addr);
 static haddr_t H5FD_stdio_get_eof(H5FD_t *_file);
@@ -180,7 +184,7 @@ static const H5FD_class_t H5FD_stdio_g = {
     H5FD_stdio_close,		                /*close			*/
     H5FD_stdio_cmp,			        /*cmp			*/
     H5FD_stdio_query,		                /*query			*/
-    NULL,					/*alloc			*/
+    H5FD_stdio_alloc,				/*alloc			*/
     NULL,					/*free			*/
     H5FD_stdio_get_eoa,		                /*get_eoa		*/
     H5FD_stdio_set_eoa, 	                /*set_eoa		*/
@@ -371,10 +375,18 @@ H5FD_stdio_open( const char *name, unsigned flags, hid_t fapl_id,
     file->op = H5FD_STDIO_OP_SEEK;
     file->pos = HADDR_UNDEF;
     file->write_access=write_access;    /* Note the write_access for later */
-    if (fseek(file->fp, 0, SEEK_END) < 0) {
+#ifdef H5_HAVE_FSEEKO
+    if(fseeko(file->fp, (off_t)0, SEEK_END) < 0) {
+#else
+    if(fseek(file->fp, (long)0L, SEEK_END) < 0) {
+#endif
         file->op = H5FD_STDIO_OP_UNKNOWN;
     } else {
+#ifdef H5_HAVE_FTELLO
+        off_t x = ftello (file->fp);
+#else
         long x = ftell (file->fp);
+#endif
         assert (x>=0);
         file->eof = (haddr_t)x;
     }
@@ -521,6 +533,61 @@ H5FD_stdio_query(const H5FD_t *_f, unsigned long *flags /* out */)
 
     return(0);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_stdio_alloc
+ *
+ * Purpose:	Allocates file memory. If fseeko isn't available, makes 
+ *              sure the file size isn't bigger than 2GB because the 
+ *              parameter OFFSET of fseek is of the type LONG INT, limiting
+ *              the file size to 2GB.
+ *
+ * Return:	Success:	Address of new memory
+ *
+ *		Failure:	HADDR_UNDEF
+ *
+ * Programmer:	Raymond Lu
+ *              30 March 2007
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static haddr_t
+H5FD_stdio_alloc(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxpl_id, hsize_t size)
+{
+    H5FD_stdio_t	*file = (H5FD_stdio_t*)_file;
+    haddr_t		addr;
+    static const char   *func="H5FD_stdio_alloc";  /* Function Name for error reporting */
+    haddr_t ret_value;          /* Return value */
+
+    /* Clear the error stack */
+    H5Eclear();
+
+    /* Compute the address for the block to allocate */
+    addr = file->eoa;
+
+    /* Check if we need to align this block */
+    if(size>=file->pub.threshold) {
+        /* Check for an already aligned block */
+        if(addr%file->pub.alignment!=0)
+            addr=((addr/file->pub.alignment)+1)*file->pub.alignment;
+    } /* end if */
+
+#ifndef H5_HAVE_FSEEKO
+    /* If fseeko isn't available, big files (>2GB) won't be supported. */
+    if(addr+size>BIG_FILE)
+        H5Epush_ret (func, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR, "can't write file bigger than 2GB because fseek isn't available", -1)
+#endif 
+
+    file->eoa = addr+size;
+
+    /* Set return value */
+    ret_value=addr;
+
+    return(ret_value);
+}   /* H5FD_stdio_alloc() */
 
 
 /*-------------------------------------------------------------------------
@@ -713,7 +780,11 @@ H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, siz
      */
     if (!(file->op == H5FD_STDIO_OP_READ || file->op==H5FD_STDIO_OP_SEEK) ||
             file->pos != addr) {
+#ifdef H5_HAVE_FSEEKO
+        if (fseeko(file->fp, (off_t)addr, SEEK_SET) < 0) {
+#else
         if (fseek(file->fp, (long)addr, SEEK_SET) < 0) {
+#endif
             file->op = H5FD_STDIO_OP_UNKNOWN;
             file->pos = HADDR_UNDEF;
             H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "fseek failed", -1)
@@ -803,7 +874,11 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
      */
     if ((file->op != H5FD_STDIO_OP_WRITE && file->op != H5FD_STDIO_OP_SEEK) ||
                 file->pos != addr) {
+#ifdef H5_HAVE_FSEEKO
+        if (fseeko(file->fp, (off_t)addr, SEEK_SET) < 0) {
+#else
         if (fseek(file->fp, (long)addr, SEEK_SET) < 0) {
+#endif
             file->op = H5FD_STDIO_OP_UNKNOWN;
             file->pos = HADDR_UNDEF;
             H5Epush_ret(func, H5E_IO, H5E_SEEKERROR, "fseek failed", -1)
