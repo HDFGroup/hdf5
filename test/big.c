@@ -555,7 +555,7 @@ main (int ac, char **av)
     if (h5_cleanup(FILENAME, fapl)) remove(DNAME);
     puts("Test passed with the Family Driver.");
 
-
+#ifdef H5_HAVE_FSEEKO
     /* Test big file with the STDIO driver */
     puts("\nTesting big file with the STDIO Driver ");
 
@@ -568,6 +568,7 @@ main (int ac, char **av)
     if (writer(filename, fapl, WRT_N)) goto error;
     if (reader(filename, fapl)) goto error;
     puts("Test passed with the STDIO Driver.");
+#endif
 
 quit:
     /* End with normal exit code */
