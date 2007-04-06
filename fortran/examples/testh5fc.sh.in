@@ -21,8 +21,13 @@
 
 # Where the tool is installed.
 prefix="@prefix@"
-H5TOOL="h5fc"           	# The tool name
-H5TOOL_BIN="${prefix}/bin/h5fc -show"   # The path of the tool binary
+PARALLEL=@PARALLEL@		# Am I in parallel mode?
+if [ "$PARALLEL" = no ]; then
+    H5TOOL="h5cc"           	# The tool name
+else
+    H5TOOL="h5pcc"               # The tool name
+fi
+H5TOOL_BIN="${prefix}/bin/${H5TOOL} -show"   # The path of the tool binary
 
 CMP='cmp -s'
 DIFF='diff -c'
