@@ -14,6 +14,8 @@
 # access to either file, you may request a copy from help@hdfgroup.org.
 ##
 
+# This tool is adapted from the mpicc command of the MPICH Software.
+
 ############################################################################
 ##                                                                        ##
 ## Things You May Have to Modify:                                         ##
@@ -234,6 +236,11 @@ for arg in $@ ; do
       ;;
   esac
 done
+
+if test "$dash_c" = "yes" -a "$do_compile" = no -a "$do_link" = no ; then
+    # -c was specified.  Force do_compile on.
+    do_compile=yes
+fi
 
 if test "x$do_compile" = "xyes"; then
   if test "x$dash_c" != "xyes"; then
