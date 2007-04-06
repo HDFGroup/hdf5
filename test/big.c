@@ -555,7 +555,26 @@ main (int ac, char **av)
     if (h5_cleanup(FILENAME, fapl)) remove(DNAME);
     puts("Test passed with the Family Driver.");
 
+
+    /* Test big file with the SEC2 driver */
+    puts("\nTesting big file with the SEC2 Driver ");
+
+    fapl = h5_fileaccess();
+    if(H5Pset_fapl_sec2(fapl)<0)
+
+    HDmemset(filename, 0, sizeof(filename));
+    h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
+
+    if (writer(filename, fapl, WRT_N)) goto error;
+    if (reader(filename, fapl)) goto error;
+
+    puts("Test passed with the SEC2 Driver.");
+
+
 #ifdef H5_HAVE_FSEEKO
+    /* Clean up the test file */
+    if (h5_cleanup(FILENAME, fapl)) remove(DNAME);
+
     /* Test big file with the STDIO driver only if fseeko is supported,
      * because the OFFSET parameter of fseek has the type LONG, not big
      * enough to support big files. */
