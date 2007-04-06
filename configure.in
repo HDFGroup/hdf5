@@ -992,12 +992,19 @@ case $withval in
 esac
 
 if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
-    AC_DEFINE(HAVE_FILTER_SZIP, 1,
-            [Define if support for szip filter is enabled])
-    USE_FILTER_SZIP="yes"
-
     dnl SZLIB library is available.  Check if it can encode
     AC_MSG_CHECKING([for szlib encoder])
+
+    AC_CACHE_VAL([hdf5_cv_szlib_functional],
+        [AC_TRY_RUN([
+        #include <szlib.h>
+
+        int main(void)
+        {
+            SZ_encoder_enabled();
+            exit(0);
+        }
+        ], [hdf5_cv_szlib_functional=yes], [hdf5_cv_szlib_functional=no],)])
 
     AC_CACHE_VAL([hdf5_cv_szlib_can_encode],
         [AC_TRY_RUN([
@@ -1013,24 +1020,39 @@ if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
         }
         ], [hdf5_cv_szlib_can_encode=yes], [hdf5_cv_szlib_can_encode=no],)])
 
+    if test ${hdf5_cv_szlib_functional} = "no"; then
+        hdf5_cv_szlib_can_encode=broken
+    else
+        AC_DEFINE(HAVE_FILTER_SZIP, 1,
+                [Define if support for szip filter is enabled])
+        USE_FILTER_SZIP="yes"
+    fi
+
     if test ${hdf5_cv_szlib_can_encode} = "yes"; then
         AC_MSG_RESULT([yes])
-    else
+    fi
+    if test ${hdf5_cv_szlib_can_encode} = "no"; then
         AC_MSG_RESULT([no])
+    fi
+    if test ${hdf5_cv_szlib_can_encode} = "broken"; then
+        AC_MSG_RESULT([shared szlib doesn't work. disabling szip.])
     fi
 
     dnl Add "szip" to external filter list
-    if test "X$EXTERNAL_FILTERS" != "X"; then
-        EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
-    fi
-    EXTERNAL_FILTERS="${EXTERNAL_FILTERS}szip"
     if test ${hdf5_cv_szlib_can_encode} = "yes"; then
-        EXTERNAL_FILTERS="${EXTERNAL_FILTERS}(encoder)"
-    else
-        EXTERNAL_FILTERS="${EXTERNAL_FILTERS}(no encoder)"
+        if test "X$EXTERNAL_FILTERS" != "X"; then
+            EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
+        fi
+        EXTERNAL_FILTERS="${EXTERNAL_FILTERS}szip(encoder)"
     fi
-fi
+    if test ${hdf5_cv_szlib_can_encode} = "no"; then
+        if test "X$EXTERNAL_FILTERS" != "X"; then
+            EXTERNAL_FILTERS="${EXTERNAL_FILTERS},"
+        fi
+        EXTERNAL_FILTERS="${EXTERNAL_FILTERS}szip(no encoder)"
+    fi
 
+fi
 
 dnl ----------------------------------------------------------------------
 dnl Is SSL library present? It is needed by GLOBUS-GASS and Grid Storage

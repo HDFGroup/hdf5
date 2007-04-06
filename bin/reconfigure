@@ -27,18 +27,18 @@
 
 
   # Run commands in order
-  echo /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoheader
-  /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoheader
+  echo /home1/packages/autoconf/autoconf-2.60/bin/autoheader
+  /home1/packages/autoconf/autoconf-2.60/bin/autoheader
 
-  echo /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoconf
-  /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoconf
+  echo /home1/packages/autoconf/autoconf-2.60/bin/autoconf
+  /home1/packages/autoconf/autoconf-2.60/bin/autoconf
 
   # Run autoconf on c++ and fortran configure.in files, too
-  echo /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoconf -o c++/configure c++/configure.in
-  /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoconf -o c++/configure c++/configure.in
+  echo /home1/packages/autoconf/autoconf-2.60/bin/autoconf -o c++/configure c++/configure.in
+  /home1/packages/autoconf/autoconf-2.60/bin/autoconf -o c++/configure c++/configure.in
 
-  echo /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoconf -o fortran/configure -Ifortran fortran/configure.in
-  /afs/ncsa/projects/hdf/packages/autoconf_2.59/Linux_2.4/bin/autoconf -o fortran/configure -Ifortran fortran/configure.in
+  echo /home1/packages/autoconf/autoconf-2.60/bin/autoconf -o fortran/configure -Ifortran fortran/configure.in
+  /home1/packages/autoconf/autoconf-2.60/bin/autoconf -o fortran/configure -Ifortran fortran/configure.in
 
 
 exit 0
