@@ -14,6 +14,8 @@
 # access to either file, you may request a copy from help@hdfgroup.org.
 ##
 
+# This tool is adapted from the mpicc command of the MPICH Software.
+
 ############################################################################
 ##                                                                        ##
 ## Things You May Have to Modify:                                         ##
