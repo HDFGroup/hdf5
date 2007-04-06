@@ -1284,6 +1284,7 @@ AC_CONFIG_FILES([config/depend1
                  src/Makefile
                  test/Makefile
                  $PARALLEL_MAKE
+                 examples/testh5fc.sh
                  examples/Makefile])
 AC_OUTPUT
 no_create=$saved_no_create

@@ -31,6 +31,7 @@ FC_PP=$(bindir)/h5pfc
 TEST_PROGS=dsetexample fileexample rwdsetexample attrexample groupexample	\
 	   grpsexample grpdsetexample hyperslab selectele grpit refobjexample	\
 	   refregexample mountexample compound
+TEST_SCRIPTS=testh5fc.sh
 
 ## These are the files that `make clean' (and derivatives) will remove from
 ## this directory.

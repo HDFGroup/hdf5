@@ -827,6 +827,7 @@ AC_CONFIG_FILES([config/depend1
                  src/Makefile
                  src/h5c++
                  test/Makefile
+                 examples/testh5c++.sh
                  examples/Makefile])
 AC_OUTPUT
 no_create=$saved_no_create

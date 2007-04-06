@@ -2478,6 +2478,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/misc/Makefile
                  tools/misc/h5cc
                  examples/Makefile
+                 examples/testh5cc.sh
                  doc/Makefile
                  doc/html/Makefile
                  doc/html/ed_libs/Makefile

@@ -13213,7 +13213,7 @@ fi
 
 saved_no_create=$no_create
 no_create=yes
-ac_config_files="$ac_config_files config/depend1 config/depend2 config/depend3 config/depend4 config/dependN config/commence config/conclude Makefile src/h5fc src/H5fortran_types.f90 src/libhdf5_fortran.settings src/Makefile test/Makefile $PARALLEL_MAKE examples/Makefile"
+ac_config_files="$ac_config_files config/depend1 config/depend2 config/depend3 config/depend4 config/dependN config/commence config/conclude Makefile src/h5fc src/H5fortran_types.f90 src/libhdf5_fortran.settings src/Makefile test/Makefile $PARALLEL_MAKE examples/testh5fc.sh examples/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -13780,6 +13780,7 @@ do
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "test/Makefile") CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;
     "$PARALLEL_MAKE") CONFIG_FILES="$CONFIG_FILES $PARALLEL_MAKE" ;;
+    "examples/testh5fc.sh") CONFIG_FILES="$CONFIG_FILES examples/testh5fc.sh" ;;
     "examples/Makefile") CONFIG_FILES="$CONFIG_FILES examples/Makefile" ;;
 
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5

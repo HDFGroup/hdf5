@@ -42,8 +42,7 @@ EXAMPLE_PROGS=$(TEST_SRC)
 ## These are the programs that `make all' or `make tests' will build and which
 ## `make check' will run. List them in the order they should be run.
 TEST_PROGS=$(TEST_SRC:.cpp=)
-
-##TEST_SCRIPTS=$(srcdir)/testexamples.sh
+TEST_SCRIPTS=testh5c++.sh
 
 ## These are the files that `make clean' (and derivatives) will remove from
 ## this directory.

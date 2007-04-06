@@ -30,6 +30,7 @@ CFLAGS=
 TEST_PROGS_PARA=ph5example
 TEST_PROGS=h5_write h5_read h5_extend_write h5_chunk_read h5_compound   \
            h5_group h5_select h5_attribute h5_mount h5_reference h5_drivers
+TEST_SCRIPTS=testh5cc.sh
 
 ## These are the files that `make clean' (and derivatives) will remove from
 ## this directory.
