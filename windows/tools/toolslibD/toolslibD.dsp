@@ -326,21 +326,6 @@ SOURCE=..\..\..\tools\lib\h5trav.c
 !ENDIF 
 
 # End Source File
-# Begin Source File
-
-SOURCE=..\..\..\tools\lib\h5trav_table.c
-
-!IF  "$(CFG)" == "toolslibD - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "toolslibD - Win32 Debug"
-
-!ELSEIF  "$(CFG)" == "toolslibD - Win32 AlphaDbg"
-
-!ELSEIF  "$(CFG)" == "toolslibD - Win32 AlphaRel"
-
-!ENDIF 
-
-# End Source File
 # End Group
 # Begin Group "headers"
 
