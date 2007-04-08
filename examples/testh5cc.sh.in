@@ -128,7 +128,6 @@ main (void)
 EOF
 
 
-
 # Parse option
 #   None
 
@@ -149,29 +148,8 @@ DPRINT() {
 
 # Run a test and print PASS or *FAIL*.  If a test fails then increment
 # the `nerrors' global variable and (if $verbose is set) display the
-# difference between the actual output and the expected output. The
-# expected output is given as the first argument to this function and
-# the actual output file is calculated by replacing the `.ddl' with
-# `.out'.  The actual output is not removed if $HDF5_NOCLEANUP has a
-# non-zero value.
-#
-# This test shows what commands will be run and verify they are as expected.
-# It does not actually execute the compiler script to compile source code.
-# The actual execution ability is tested somewhere else.
-#
-# Algorithm:
-# First figure out the parameters (e.g., compiler name and option, linker name and
-# options, libraries used, ....) that the h5cc command uses.  Then use the -show to
-# display what commands the tool will use for different parameter and verify if they
-# are as expected.
-# The paramters have two part, prefix and suffix. The prefix part is the real compiler
-# or linker command name, options (-I, -D, ...).  The suffix part is the link options,
-# libraries, ....
-#
-
-#
-# $1: -C compile only; -L link only; -CL compile and link.
-# $2-$: remainign arguments
+# failed output.  The actual output is not removed if $HDF5_NOCLEANUP is
+# defined.
 #
 TOOLTEST() {
     out=test_$H5TOOL_$$.out
