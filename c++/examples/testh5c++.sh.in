@@ -19,10 +19,13 @@
 # Modification:
 #
 
+# Initializations
 # Where the tool is installed.
 prefix="@prefix@"
+AR=@AR@
+RANLIB=@RANLIB@
 H5TOOL="h5c++"           	# The tool name
-H5TOOL_BIN="${prefix}/bin/h5c++ -show"   # The path of the tool binary
+H5TOOL_BIN="${prefix}/bin/${H5TOOL}"   # The path of the tool binary
 
 CMP='cmp -s'
 DIFF='diff -c'
@@ -34,6 +37,122 @@ verbose=yes
 if test -z "$srcdir"; then
    srcdir=.
 fi
+
+# Generate some source files and library for tests.
+hdf5main=${H5TOOL}_hdf5main.cpp
+hdf5main_o=${H5TOOL}_hdf5main.o
+appmain=${H5TOOL}_appmain.cpp
+appmain_o=${H5TOOL}_appmain.o
+prog1=${H5TOOL}_prog1.cpp
+prog1_o=${H5TOOL}_prog1.o
+prog2=${H5TOOL}_prog2.cpp
+prog2_o=${H5TOOL}_prog2.o
+applib=libapp${H5TOOL}.a
+
+# short hands
+temp_SRC="$hdf5main $appmain $prog1 $prog2"
+temp_OBJ=`echo $temp_SRC | sed -e 's/\.cpp/.o/g'`
+temp_FILES="a.out *.h5 $applib"
+
+# Generate appmain:
+# An application Main that calls hdf5 and application's own functions.
+cat > $appmain <<EOF
+#include <string>
+
+#ifdef OLD_HEADER_FILENAME
+#include <iostream.h>
+#else
+#include <iostream>
+#endif
+
+#include "H5Cpp.h"
+
+#ifndef H5_NO_NAMESPACE
+using namespace H5;
+#endif
+
+const H5std_string	FILE_NAME( "tmpapp.h5" );
+extern "C" int sub1(void);
+extern "C" int sub2(void);
+
+int main (void)
+{
+    //sub1();
+    //sub2();
+    H5File file( FILE_NAME, H5F_ACC_TRUNC );
+    return 0;
+}
+
+EOF
+
+# generate prog1
+cat > $prog1 <<EOF
+#ifdef OLD_HEADER_FILENAME
+    #include <iostream.h>
+#else
+    #include <iostream>
+#endif
+#include <string>
+
+#ifndef H5_NO_NAMESPACE
+#ifndef H5_NO_STD
+    using std::cout;
+    using std::endl;
+#endif  // H5_NO_STD
+#endif
+int sub1(void)
+{
+    cout << "in sub1" << endl;
+}
+EOF
+
+# generate prog2
+cat > $prog2 <<EOF
+#ifdef OLD_HEADER_FILENAME
+    #include <iostream.h>
+#else
+    #include <iostream>
+#endif
+#include <string>
+
+#ifndef H5_NO_NAMESPACE
+#ifndef H5_NO_STD
+    using std::cout;
+    using std::endl;
+#endif  // H5_NO_STD
+#endif
+int sub2(void)
+{
+    cout << "in sub2" << endl;
+}
+EOF
+
+# Generate HDF5 Main Program:
+# An HDF5 sample program that calls hdf5 functions.
+cat > $hdf5main <<EOF
+#include <string>
+
+#ifdef OLD_HEADER_FILENAME
+#include <iostream.h>
+#else
+#include <iostream>
+#endif
+
+#include "H5Cpp.h"
+
+#ifndef H5_NO_NAMESPACE
+using namespace H5;
+#endif
+
+const H5std_string	FILE_NAME( "tmphdf5.h5" );
+
+int main (void)
+{
+    H5File file( FILE_NAME, H5F_ACC_TRUNC );
+    return 0;
+}
+EOF
+
 
 # Parse option
 #   None
@@ -55,86 +174,32 @@ DPRINT() {
 
 # Run a test and print PASS or *FAIL*.  If a test fails then increment
 # the `nerrors' global variable and (if $verbose is set) display the
-# difference between the actual output and the expected output. The
-# expected output is given as the first argument to this function and
-# the actual output file is calculated by replacing the `.ddl' with
-# `.out'.  The actual output is not removed if $HDF5_NOCLEANUP has a
-# non-zero value.
-#
-# This test shows what commands will be run and verify they are as expected.
-# It does not actually execute the compiler script to compile source code.
-# The actual execution ability is tested somewhere else.
-#
-# Algorithm:
-# First figure out the parameters (e.g., compiler name and option, linker name and
-# options, libraries used, ....) that the h5c++ command uses.  Then use the -show to
-# display what commands the tool will use for different parameter and verify if they
-# are as expected.
-# The paramters have two part, prefix and suffix. The prefix part is the real compiler
-# or linker command name, options (-I, -D, ...).  The suffix part is the link options,
-# libraries, ....
-#
-
-#
-# $1: -C compile only; -L link only; -CL compile and link.
-# $2-$: remainign arguments
+# failed output.  The actual output is not removed if $HDF5_NOCLEANUP is
+# defined.
 #
 TOOLTEST() {
-    dummy_cpp=zzdummy.cpp
-    dummy_o=`echo $dummy_cpp | sed -e s/.cpp$/.o/`
-    expect=test_$H5TOOL_$$.expected
-    actual=test_$H5TOOL_$$.result
-
-    cmdtype=$1
-    shift
-
-    # figure out compiling prefix and suffix
-    xcommand="`$H5TOOL_BIN -c $dummy_cpp`"
-    DPRINT xcommand=$xcommand
-    compile_prefix="`echo $xcommand | sed -e s/-c\ ${dummy_cpp}.*//`"
-    compile_suffix="`echo $xcommand | sed -e s/.*\ -c\ ${dummy_cpp}//`"
-    DPRINT compile_prefix=$compile_prefix
-    DPRINT compile_suffix=$compile_suffix
-
-    # figure out linking prefix and suffix
-    xcommand="`$H5TOOL_BIN $dummy_o`"
-    link_prefix="`echo $xcommand | sed -e s/${dummy_o}.*//`"
-    link_suffix="`echo $xcommand | sed -e s/.*${dummy_o}//`"
-    DPRINT link_prefix=$link_prefix
-    DPRINT link_suffix=$link_suffix
-
-    # create the expected result
-    cp /dev/null $expect	# empty it
-    if [ $cmdtype = -C -o $cmdtype = -CL ]; then
-	echo $compile_prefix $* > $expect
-    fi
-    if [ $cmdtype = -L -o $cmdtype = -CL ]; then
-	echo $link_prefix $* $link_suffix > $expect
-    fi
+    out=test_$H5TOOL_$$.out
+    err=test_$H5TOOL_$$.err
 
     # Run test.
-    # Tflops interprets "$@" as "" when no parameter is given (e.g., the
-    # case of missing file name).  Changed it to use $@ till Tflops fixes it.
     TESTING $H5TOOL $@
-    $H5TOOL_BIN $* > $actual 2>&1
-
-    if $CMP $expect $actual; then
+    $H5TOOL_BIN $@ > $out 2>&1
+    result=$?
+    if [ $result = 0 ]; then
 	echo " PASSED"
     else
 	echo "*FAILED*"
 	nerrors="`expr $nerrors + 1`"
 	test yes = "$verbose" && \
-	    ( echo "========== Expected results ($expect) ==========="; cat $expect;
-	      echo "========== Actual results ($actual) ==========="; cat $actual;
+	    ( echo "========== results ==========="; cat $out;
 	      echo "===============================================") |sed 's/^/    /'
     fi
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-	rm -f $actual $expect
+	rm -f $out
     fi
 }
-
 
 # Print a "SKIP" message
 SKIP() {
@@ -146,16 +211,48 @@ SKIP() {
 ##############################################################################
 ###			  T H E   T E S T S                                ###
 ##############################################################################
-TOOLTEST -C -c A.cpp
-TOOLTEST -C -c A.cpp B.cpp
-TOOLTEST -L  A.o
-TOOLTEST -L  A.o B.o
-TOOLTEST -L  A.o B.o L.a
-SKIP -CL A.cpp B.cpp L.a
+#
+# HDF5 program that calls HDF5 APIs.
+echo "***"Simple Compile and Link in one step.
+TOOLTEST $hdf5main
+# Application program that calls HDF5 and its own functions.
+TOOLTEST $appmain $prog1 $prog2
 
-# ##############################################################################
-# # END
-# ##############################################################################
+# Compile, then link.
+echo "***"Compile and Link in two steps.
+TOOLTEST -c $hdf5main
+TOOLTEST $hdf5main_o
+TOOLTEST -c $appmain $prog1 $prog2
+TOOLTEST $appmain_o $prog1_o $prog2_o
+
+# Build external library, then link with it.
+echo "***"Build external library and link with it.
+TOOLTEST -c $prog1 $prog2
+rm $applib
+$AR cru $applib $prog1_o $prog2_o
+$RANLIB $applib
+TOOLTEST $appmain $applib
+TOOLTEST $appmain_o $applib
+# This is peculiar but should work. (See bug ID 729)
+TOOLTEST -c $hdf5main
+rm $applib
+$AR cru $applib $hdf5main_o
+$RANLIB $applib
+TOOLTEST -o a.out $applib
+
+# Just cpp, no compile, no link.
+echo "***"Just cpp, no compile, no link.
+TOOLTEST -E $hdf5main
+TOOLTEST -E $appmain $prog1 $prog2
+
+##############################################################################
+# END
+##############################################################################
+
+# Clean up  file
+if test -z "$HDF5_NOCLEANUP"; then
+    rm -f $temp_SRC $temp_OBJ $temp_FILES
+fi
 
 if test $nerrors -eq 0 ; then
    echo "All $H5TOOL tests passed."
