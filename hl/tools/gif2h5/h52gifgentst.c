@@ -36,7 +36,7 @@
 #define WIDTH       (hsize_t)400
 #define HEIGHT      (hsize_t)200
 #define PAL_ENTRIES  256
-#define IMAGE1_NAME  "12345678"
+#define IMAGE1_NAME  "image"
 #define PAL_NAME     "palette"
 
 /*-------------------------------------------------------------------------
@@ -101,4 +101,5 @@ int main(void)
     
     return 0;
 }
+
 

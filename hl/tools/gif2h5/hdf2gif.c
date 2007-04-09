@@ -28,6 +28,8 @@
 #include <stdio.h>
 #include <assert.h>
 #include "gif.h"
+#include "H5IMpublic.h"
+
 
 #define MAX_FILE_LEN            256
 #define MAX_NUMBER_IMAGES       50
@@ -56,26 +58,20 @@ putword(int w, FILE *fp)
 static void
 usage(void)
 {
-    printf("Usage: h52gif <h5_file> <gif_file> -i <h5_image> [-p <h5_palette>]\n");
+    printf("Usage: h52gif <h5_file> <gif_file> -i <h5_image>\n");
     printf("h52gif expects *at least* one h5_image.\n");
-    printf("You may repeat -i <h5_image> [-p <h5_palette>] at most 50 times\n");
+    printf("You may repeat -i <h5_image> at most 50 times\n");
     printf("(maximum of 50 images).\n");
 }
 
 FILE *fpGif = NULL;
 int main(int argc , char **argv)
 {
-
-
-    hsize_t dim_sizes[2];
     BYTE *Image;
 
     /* compression structs */
     CHAR *HDFName = NULL;
     CHAR *GIFName = NULL;
-
-    /* reference variables */
-    int has_local_palette;  /* treated as a flag */
 
     BYTE* b;
 
@@ -85,16 +81,10 @@ int main(int argc , char **argv)
     BYTE  Blue[256];
 
     int   RWidth, RHeight;
-#ifdef UNUSED
-    int   LeftOfs, TopOfs;
-    int   CountDown;
-    int   curx , cury;
-    int   w,h;
-#endif /* UNUSED */
     int   ColorMapSize, InitCodeSize, Background, BitsPerPixel;
     int   j,nc;
     int   i;
-    int   numcols = 256;
+    int   numcols;
     int   time_out = 0;  /* time between two images in the animation */
     int   n_images , idx;
 
@@ -104,40 +94,32 @@ int main(int argc , char **argv)
     int number_of_images = 0;
     int arg_index = 2;
     int bool_is_image = 0; /* 0 = false , 1 = true */
-    int bool_is_palette = 0;
     CHAR* image_name_arr[MAX_NUMBER_IMAGES];
-    CHAR* pal_name_arr[MAX_NUMBER_IMAGES];
 
-    if (argc < 5) {
+    if (argc < 4) 
+    {
         /* they didn't supply at least one image -- bail */
         usage();
-        return 0;
+        return 1;
     }
 
     memset(image_name_arr , 0 , MAX_NUMBER_IMAGES);
-    memset(pal_name_arr , 0 , MAX_NUMBER_IMAGES);
 
-    HDFName = (CHAR *)malloc (strlen(argv[1]) + 1);
-    GIFName = (CHAR *)malloc (strlen(argv[2]) + 1);
-
-    if (strlen(argv[1] + 1) > MAX_FILE_LEN || strlen(argv[2] + 1) > MAX_FILE_LEN) {
+    if (strlen(argv[1] + 1) > MAX_FILE_LEN || strlen(argv[2] + 1) > MAX_FILE_LEN) 
+    {
         /* supplied file names are too long. bail. */
         usage();
         printf("Supplied filenames exceed maximum length of 256 bytes\n");
     }
 
-    strcpy(HDFName , argv[1]);
-    strcpy(GIFName , argv[2]);
+    HDFName = argv[1];
+    GIFName = argv[2];
 
     /* get the options */
-    while (arg_index++ < argc - 1 && number_of_images < MAX_NUMBER_IMAGES) {
+    while (arg_index++ < argc - 1 && number_of_images < MAX_NUMBER_IMAGES) 
+    {
         if (!strcmp(argv[arg_index] , "-i")) {
             bool_is_image = 1;
-            continue;
-        }
-
-        if (!strcmp(argv[arg_index] , "-p")) {
-            bool_is_palette = 1;
             continue;
         }
 
@@ -146,86 +128,91 @@ int main(int argc , char **argv)
             continue;
         }
 
-        if (bool_is_image) {
+        if (bool_is_image) 
+        {
             /* this is an image */
             /* allocate space to store the image name */
             size_t len = strlen(argv[arg_index]);
             image_name_arr[number_of_images] = (CHAR*) malloc( len + 1);
             strcpy(image_name_arr[number_of_images] , argv[arg_index]);
 
-            /* make the palette array for this NULL */
-            pal_name_arr[number_of_images] = NULL;
             number_of_images++;
             bool_is_image = 0;
-            continue;
-        }
-
-        if (bool_is_palette) {
-            /* this is a palette */
-            /* allocate space to store the pal name */
-            /* the palette was probably allocated for a previous image */
-            size_t len = strlen(argv[arg_index]);
-            pal_name_arr[number_of_images-1] = (CHAR*) malloc( len + 1);
-            strcpy(pal_name_arr[number_of_images - 1], argv[arg_index]);
-            bool_is_palette = 0;
             continue;
         }
 
         /* oops. This was not meant to happen */
         usage();
 
-        while (number_of_images--) {
-            cleanup(image_name_arr[number_of_images]);
-            cleanup(pal_name_arr[number_of_images]);
-        }
-
-        return -1;
+        goto out;
     }
 
-    /* we shall always have a palette - read hdf will see to that */
-    has_local_palette = true;
-
-    /* Do Endian Order testing and set Endian Order */
+   /* Do Endian Order testing and set Endian Order */
     idx = 0x0001;
     b = (BYTE *) &idx;
     EndianOrder = (b[0] ? 1:0);
 
-    if (!(fpGif = fopen(GIFName , "wb"))) {
+    if (!(fpGif = fopen(GIFName , "wb"))) 
+    {
         printf("Error opening gif file for output. Aborting.\n");
-        return -1;
+        goto out;
     }
 
     /* hardwire n_images to 1 for now. */
     n_images = number_of_images;
 
     Background = 0;
-    for (idx = 0 ; idx < n_images ; idx++) {
-        /* try to read the image and the palette */
+    for (idx = 0 ; idx < n_images ; idx++) 
+    {
 
-        /*
-         * Lots of funky stuff to support multiple images has been taken off.
-         * Just in case you're extending code, here's what you need to do in
-         * short: figure out if there is a global palette or not, if there is
-         * one store that one only.  If they are all local or a combination of
-         * local and global palettes, you will have to write the global
-         * palette out and then independantly write the smaller local palettes
-         */
-        if (ReadHDF(&Image, GlobalPalette, dim_sizes, HDFName,
-                    image_name_arr[idx], pal_name_arr[idx]) < 0) {
-            fprintf(stderr , "Unable to read image %s from HDF file %s\n",image_name_arr[idx],HDFName);
-            return -1;
+        hsize_t       width, height, planes;
+        hid_t         fid;
+        char          interlace[20];
+        hssize_t      npals;
+        hsize_t       pal_dims[2];
+        unsigned char *pal;
+        char          *image_name = image_name_arr[idx];
+       
+        if ((fid = H5Fopen(HDFName , H5F_ACC_RDONLY , H5P_DEFAULT)) < 0) {
+            fprintf(stderr , "Unable to open HDF file for input. Aborting.\n");
+            goto out;
         }
+        
+        /* read image */
+        if ( H5IMget_image_info( fid, image_name, &width, &height, &planes, interlace, &npals ) < 0 )
+            goto out;
 
-        assert(dim_sizes[0]==(hsize_t)((int)dim_sizes[0]));
-        assert(dim_sizes[1]==(hsize_t)((int)dim_sizes[1]));
-        RWidth  = (int)dim_sizes[1];
-        RHeight = (int)dim_sizes[0];
-#ifdef UNUSED
-        w = dim_sizes[1];
-        h = dim_sizes[0];
+        Image = (BYTE*) malloc( (size_t) width * (size_t) height );
+        
+        if ( H5IMread_image( fid, image_name, Image ) < 0 )
+            goto out;
 
-        LeftOfs = TopOfs = 0;
-#endif /* UNUSED */
+        if (npals)
+        {
+            if ( H5IMget_palette_info( fid, image_name, 0, pal_dims ) < 0 )
+                goto out;
+
+            pal = (BYTE*) malloc( (size_t) pal_dims[0] * (size_t) pal_dims[1] );
+            
+            if ( H5IMget_palette( fid, image_name, 0, pal ) < 0 )
+                goto out;
+
+            numcols = (int) pal_dims[0];
+
+            for (i = 0, j = 0 ; i < numcols ; j+=3, i++)
+            {
+                GlobalPalette[i][0] = pal[j];
+                GlobalPalette[i][1] = pal[j+1];
+                GlobalPalette[i][2] = pal[j+2];
+            }
+
+            free(pal);
+        }
+        
+        H5Fclose(fid);
+        
+        RWidth  = (int)width;
+        RHeight = (int)height;
 
 
         /*
@@ -237,48 +224,61 @@ int main(int argc , char **argv)
          *      palette
          *   2. Check for palettes in any of the other images.
          */
-        if (!has_local_palette) {
-            for (i = 0 ; i < 256 ; i++) {
+        if (!npals) 
+        {
+            numcols = 256;
+            for (i = 0 ; i < numcols ; i++) 
+            {
                 Red[i] = 255 - i;
                 Green[i] = 255 - i;
                 Blue[i] = 255 - i;
             }
-        } else {
-            for (i = 0 ; i < 256 ; i++){
+        } 
+        else 
+        {
+            for (i = 0 ; i < numcols ; i++)
+            {
                 Red[i] = GlobalPalette[i][0];
                 Green[i] = GlobalPalette[i][1];
                 Blue[i] = GlobalPalette[i][2];
             }
         }
 
-        for (i = 0; i < 256; i++) {
+        for (i = 0; i < numcols; i++) 
+        {
             pc2nc[i] = r1[i] = g1[i] = b1[i] = 0;
         }
 
         /* compute number of unique colors */
         nc = 0;
 
-        for (i = 0; i < numcols; i++) {
+        for (i = 0; i < numcols; i++) 
+        {
             /* see if color #i is already used */
-            for (j = 0; j < i; j++) {
+            for (j = 0; j < i; j++) 
+            {
                 if (Red[i] == Red[j] && Green[i] == Green[j] && Blue[i] == Blue[j])
                     break;
             }
-
-            if (j==i) {
+            
+            if (j==i) 
+            {
                 /* wasn't found */
                 pc2nc[i] = nc;
                 r1[nc] = Red[i];
                 g1[nc] = Green[i];
                 b1[nc] = Blue[i];
                 nc++;
-            } else {
+            } 
+            else 
+            {
                 pc2nc[i] = pc2nc[j];
             }
         }
 
         /* figure out 'BitsPerPixel' */
-        for (i = 1; i < 8; i++) {
+        for (i = 1; i < 8; i++) 
+        {
             if ((1<<i) >= nc)
                 break;
         }
@@ -286,33 +286,30 @@ int main(int argc , char **argv)
         BitsPerPixel = i;
         ColorMapSize = 1 << BitsPerPixel;
 
-#ifdef UNUSED
-        CountDown = w * h;  /* # of pixels we'll be doing */
-#endif /* UNUSED */
-
         if (BitsPerPixel <= 1)
             InitCodeSize = 2;
         else
             InitCodeSize = BitsPerPixel;
 
-#ifdef UNUSED
-        curx = cury = 0;
-#endif /* UNUSED */
-
-        if (!fpGif) {
+        if (!fpGif) 
+        {
             fprintf(stderr,  "WriteGIF: file not open for writing\n" );
-            return (1);
+            goto out;
         }
 
         /*
          * If it is the first image we do all the header stuff that isn't
          * required for the rest of the images.
          */
-        if (idx == 0) {
+        if (idx == 0) 
+        {
             /* Write out the GIF header and logical screen descriptor */
-            if (n_images > 1) {
+            if (n_images > 1) 
+            {
                 fwrite("GIF89a", sizeof( char ), 6, fpGif);  /* the GIF magic number */
-            } else {
+            } 
+            else 
+            {
                 fwrite("GIF87a", sizeof( char ), 6, fpGif);  /* the GIF magic number */
             }
 
@@ -331,7 +328,8 @@ int main(int argc , char **argv)
              * If loop_times is 0 , put in the application extension to make
              * the gif anime loop indefinitely
              */
-            if (time_out > 0) {
+            if (time_out > 0) 
+            {
                 fputc(0x21 , fpGif);
                 fputc(0xFF , fpGif);
                 fputc(11 , fpGif);
@@ -344,7 +342,8 @@ int main(int argc , char **argv)
             }
         }
 
-        if (n_images > 1) {
+        if (n_images > 1) 
+        {
             /* write a graphic control block */
             fputc(0x21 , fpGif);
             fputc(0xF9 , fpGif);
@@ -368,7 +367,8 @@ int main(int argc , char **argv)
         /* since we always have a local color palette ... */
         fputc((0x80 | (BitsPerPixel - 1)) , fpGif);
 
-        for (i = 0; i < ColorMapSize; i++) {
+        for (i = 0; i < ColorMapSize; i++) 
+        {
             /* write out Global colormap */
             fputc(r1[i], fpGif);
             fputc(g1[i], fpGif);
@@ -377,32 +377,42 @@ int main(int argc , char **argv)
 
         fputc(InitCodeSize , fpGif);
 
-        i = hdfWriteGIF(fpGif , Image , 0 , (int)dim_sizes[0] ,
-                        (int)dim_sizes[1] , r1, g1 , b1 , pc2nc , 256 , 8 ,
-                        BitsPerPixel);
+        i = hdfWriteGIF(fpGif , Image , 0 , RHeight , RWidth , r1, g1 , b1 , pc2nc , 256 , 8 , BitsPerPixel);
         fputc(0x00, fpGif);
         free(Image);
     }
 
-    if (fputc(';',fpGif) == EOF) {
+    if (fputc(';',fpGif) == EOF) 
+    {
         /* Write GIF file terminator */
         fprintf(stderr , "Error!");
-        return -1;
+        goto out;
     }
 
-    fclose(fpGif);
+    if (fpGif != NULL)
+        fclose(fpGif);
 
-    if (HDFName != NULL)
-     free(HDFName);
-    if (GIFName != NULL)
-     free(GIFName);
 
-    while(number_of_images--) {
+    while(number_of_images--) 
+    {
         if (image_name_arr[number_of_images])
             free(image_name_arr[number_of_images]);
-        if (pal_name_arr[number_of_images])
-            free(pal_name_arr[number_of_images]);
     }
+    
 
     return 0;
+
+
+out:
+
+    while(number_of_images--) 
+    {
+        if (image_name_arr[number_of_images])
+            free(image_name_arr[number_of_images]);
+    }
+    if (fpGif != NULL)
+        fclose(fpGif);
+       
+
+    return 1;
 }
