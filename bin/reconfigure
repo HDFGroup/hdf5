@@ -19,26 +19,51 @@
 # has the paths of autoconf and automake hardcoded to work on HDF
 # machines.  Thus is enforces that HDF5 always uses the
 # same versions of autotools.
-# Uses autoconf version 2.59
 
-# The autotools live in AFS, so as long as their paths don't change
-# and this machine has the right version of m4, this script should
-# be able to run the autotools.
+# HDF5 currently uses the following versions of the autotools:
+AUTOCONF_VERSION="autoconf (GNU Autoconf) 2.61"
+AUTOHEADER_VERSION="autoheader (GNU Autoconf) 2.61"
 
 
-  # Run commands in order
-  echo /home1/packages/autoconf/autoconf-2.60/bin/autoheader
-  /home1/packages/autoconf/autoconf-2.60/bin/autoheader
+# If the user has defined environment variables pointing to the autotools,
+# use those (but check their versions first!). Otherwise, assume that
+# we're running on a machine with access to the autotools in home1/packages.
+if test -z ${AUTOCONF}; then
+  AUTOCONF=/home1/packages/autoconf/autoconf-2.61/bin/autoconf
+fi
+if test -z ${AUTOHEADER}; then
+  AUTOHEADER=/home1/packages/autoconf/autoconf-2.61/bin/autoheader
+fi
 
-  echo /home1/packages/autoconf/autoconf-2.60/bin/autoconf
-  /home1/packages/autoconf/autoconf-2.60/bin/autoconf
 
-  # Run autoconf on c++ and fortran configure.in files, too
-  echo /home1/packages/autoconf/autoconf-2.60/bin/autoconf -o c++/configure c++/configure.in
-  /home1/packages/autoconf/autoconf-2.60/bin/autoconf -o c++/configure c++/configure.in
+# Check version numbers of autotools
+AC_VERS=`${AUTOCONF} --version 2>&1 | grep "^${AUTOCONF_VERSION}"`
+if test -z "${AC_VERS}"; then
+  echo "${AUTOCONF} version is not ${AUTOCONF_VERSION}"
+  exit 1
+fi
+AH_VERS=`${AUTOHEADER} --version 2>&1 | grep "^${AUTOHEADER_VERSION}"`
+if test -z "${AH_VERS}"; then
+  echo "${AUTOHEADER} version is not ${AUTOHEADER_VERSION}"
+  exit 1
+fi
 
-  echo /home1/packages/autoconf/autoconf-2.60/bin/autoconf -o fortran/configure -Ifortran fortran/configure.in
-  /home1/packages/autoconf/autoconf-2.60/bin/autoconf -o fortran/configure -Ifortran fortran/configure.in
 
+# Make sure tools are in path
+PATH=/home1/packages/autoconf/autoconf-2.61/bin:$PATH
+
+
+# Run commands in order
+  echo ${AUTOHEADER}
+  ${AUTOHEADER} || exit 1
+
+  echo ${AUTOCONF}
+  ${AUTOCONF} || exit 1
+
+  echo ${AUTOCONF} -o c++/configure c++/configure.in
+  ${AUTOCONF} -o c++/configure c++/configure.in || exit 1
+
+  echo ${AUTOCONF} -o fortran/configure -Ifortran fortran/configure.in
+  ${AUTOCONF} -o fortran/configure -Ifortran fortran/configure.in || exit 1
 
 exit 0

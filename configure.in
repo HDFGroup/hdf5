@@ -1035,7 +1035,7 @@ if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
         AC_MSG_RESULT([no])
     fi
     if test ${hdf5_cv_szlib_can_encode} = "broken"; then
-        AC_MSG_RESULT([shared szlib doesn't work. disabling szip.])
+        AC_MSG_RESULT([shared szlib library cannot be linked. disabling szip. use static szip library instead.])
     fi
 
     dnl Add "szip" to external filter list
