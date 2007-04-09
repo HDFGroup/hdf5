@@ -33,6 +33,10 @@ DIFF='diff -c'
 nerrors=0
 verbose=yes
 
+# setup my machine information.
+myos=`uname -s`
+myhostnama=`uname -n`
+
 # The build (current) directory might be different than the source directory.
 if test -z "$srcdir"; then
    srcdir=.
@@ -103,6 +107,7 @@ cat > $prog1 <<EOF
 int sub1(void)
 {
     cout << "in sub1" << endl;
+    return 0;
 }
 EOF
 
@@ -124,6 +129,7 @@ cat > $prog2 <<EOF
 int sub2(void)
 {
     cout << "in sub2" << endl;
+    return 0;
 }
 EOF
 
@@ -228,17 +234,22 @@ TOOLTEST $appmain_o $prog1_o $prog2_o
 # Build external library, then link with it.
 echo "***"Build external library and link with it.
 TOOLTEST -c $prog1 $prog2
-rm $applib
+rm -f $applib
 $AR cru $applib $prog1_o $prog2_o
 $RANLIB $applib
 TOOLTEST $appmain $applib
 TOOLTEST $appmain_o $applib
 # This is peculiar but should work. (See bug ID 729)
 TOOLTEST -c $hdf5main
-rm $applib
+rm -f $applib
 $AR cru $applib $hdf5main_o
 $RANLIB $applib
-TOOLTEST -o a.out $applib
+# SunOS does not support this. Skip it.
+if [ $myos = SunOS ]; then
+    SKIP -o a.out $applib
+else
+    TOOLTEST -o a.out $applib
+fi
 
 # Just cpp, no compile, no link.
 echo "***"Just cpp, no compile, no link.
