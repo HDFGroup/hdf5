@@ -265,6 +265,38 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t * cache_ptr,
  *		Note that protected entries are removed from the LRU lists
  *		and inserted on the protected list.
  *
+ * is_read_only: Boolean flag that is only meaningful if is_protected is 
+ * 		TRUE.  In this circumstance, it indicates whether the 
+ * 		entry has been protected read only, or read/write.
+ *
+ * 		If the entry has been protected read only (i.e. is_protected
+ * 		and is_read_only are both TRUE), we allow the entry to be 
+ * 		protected more than once.
+ *
+ *		In this case, the number of readers is maintained in the 
+ *		ro_ref_count field (see below), and unprotect calls simply
+ *		decrement that field until it drops to zero, at which point
+ *		the entry is actually unprotected.
+ *
+ * ro_ref_count: Integer field used to maintain a count of the number of 
+ * 		outstanding read only protects on this entry.  This field
+ * 		must be zero whenever either is_protected or is_read_only
+ * 		are TRUE.
+ *
+ * max_ro_ref_count:  Integer field used to track the maximum value of 
+ * 		ro_ref_count in the current protection of this entry.
+ * 		The field must be reset to zero when the entry is 
+ * 		unprotected.  
+ *
+ * 		This field exist to allow us to refrain from flagging 
+ * 		an error if an entry is protected read only, and then
+ * 		unprotected dirtied if the ro_ref_count has not exceeded
+ * 		1.  
+ *
+ * 		It is a temporary fix which should be removed once we
+ * 		have corrected all the instances of this behaviour in the
+ *		code that calls the metadata cache.
+ *
  * is_pinned:	Boolean flag indicating whether the entry has been pinned
  * 		in the cache.
  *
@@ -432,6 +464,9 @@ typedef struct H5C_cache_entry_t
     hbool_t		is_dirty;
     hbool_t		dirtied;
     hbool_t		is_protected;
+    hbool_t		is_read_only;
+    int			ro_ref_count;
+    int			max_ro_ref_count; /* delete this when possible */
     hbool_t		is_pinned;
     hbool_t		in_slist;
     hbool_t		flush_marker;
@@ -775,6 +810,10 @@ typedef struct H5C_auto_size_ctl_t
  * 	H5C__SET_FLUSH_MARKER_FLAG
  * 	H5C__PIN_ENTRY_FLAG
  *
+ * These flags apply to H5C_protect()
+ *
+ * 	H5C__READ_ONLY_FLAG
+ *
  * These flags apply to H5C_unprotect():
  *
  * 	H5C__SET_FLUSH_MARKER_FLAG
@@ -811,6 +850,7 @@ typedef struct H5C_auto_size_ctl_t
 #define H5C__FLUSH_CLEAR_ONLY_FLAG		0x0080
 #define H5C__FLUSH_MARKED_ENTRIES_FLAG		0x0100
 #define H5C__FLUSH_IGNORE_PROTECTED_FLAG	0x0200
+#define H5C__READ_ONLY_FLAG			0x0400
 
 
 H5_DLL H5C_t * H5C_create(size_t                     max_cache_size,
@@ -918,7 +958,8 @@ H5_DLL void * H5C_protect(H5F_t *             f,
                           const H5C_class_t * type,
                           haddr_t             addr,
                           const void *        udata1,
-                          void *              udata2);
+                          void *              udata2,
+			  unsigned            flags);
 
 H5_DLL herr_t H5C_reset_cache_hit_rate_stats(H5C_t * cache_ptr);
 

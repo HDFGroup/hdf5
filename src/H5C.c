@@ -537,6 +537,10 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
  * 	JRM -- 8/9/06
  * 	More pinned entry stats related updates.
  *
+ * 	JRM -- 3/31/07
+ * 	Updated H5C__UPDATE_STATS_FOR_PROTECT() to keep stats on 
+ * 	read and write protects.
+ *
  ***********************************************************************/
 
 #define H5C__UPDATE_CACHE_HIT_RATE_STATS(cache_ptr, hit) \
@@ -686,24 +690,34 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
                  = (entry_ptr)->size;                                    \
         }
 
-#define H5C__UPDATE_STATS_FOR_PROTECT(cache_ptr, entry_ptr, hit)     \
-	if ( hit )                                                   \
-            ((cache_ptr)->hits)[(entry_ptr)->type->id]++;            \
-	else                                                         \
-            ((cache_ptr)->misses)[(entry_ptr)->type->id]++;          \
-        if ( (cache_ptr)->index_len > (cache_ptr)->max_index_len )   \
-            (cache_ptr)->max_index_len = (cache_ptr)->index_len;     \
-        if ( (cache_ptr)->index_size > (cache_ptr)->max_index_size ) \
-            (cache_ptr)->max_index_size = (cache_ptr)->index_size;   \
-        if ( (cache_ptr)->pl_len > (cache_ptr)->max_pl_len )         \
-            (cache_ptr)->max_pl_len = (cache_ptr)->pl_len;           \
-        if ( (cache_ptr)->pl_size > (cache_ptr)->max_pl_size )       \
-            (cache_ptr)->max_pl_size = (cache_ptr)->pl_size;         \
-        if ( (entry_ptr)->size >                                     \
-             ((cache_ptr)->max_size)[(entry_ptr)->type->id] ) {      \
-            ((cache_ptr)->max_size)[(entry_ptr)->type->id]           \
-                 = (entry_ptr)->size;                                \
-        }                                                            \
+#define H5C__UPDATE_STATS_FOR_PROTECT(cache_ptr, entry_ptr, hit)             \
+	if ( hit )                                                           \
+            ((cache_ptr)->hits)[(entry_ptr)->type->id]++;                    \
+	else                                                                 \
+            ((cache_ptr)->misses)[(entry_ptr)->type->id]++;                  \
+        if ( ! ((entry_ptr)->is_read_only) ) {                               \
+	    ((cache_ptr)->write_protects)[(entry_ptr)->type->id]++;          \
+	} else {                                                             \
+	    ((cache_ptr)->read_protects)[(entry_ptr)->type->id]++;           \
+	    if ( ((entry_ptr)->ro_ref_count) >                               \
+		 ((cache_ptr)->max_read_protects)[(entry_ptr)->type->id] ) { \
+	        ((cache_ptr)->max_read_protects)[(entry_ptr)->type->id] =    \
+			((entry_ptr)->ro_ref_count);                         \
+	    }                                                                \
+	}                                                                    \
+        if ( (cache_ptr)->index_len > (cache_ptr)->max_index_len )           \
+            (cache_ptr)->max_index_len = (cache_ptr)->index_len;             \
+        if ( (cache_ptr)->index_size > (cache_ptr)->max_index_size )         \
+            (cache_ptr)->max_index_size = (cache_ptr)->index_size;           \
+        if ( (cache_ptr)->pl_len > (cache_ptr)->max_pl_len )                 \
+            (cache_ptr)->max_pl_len = (cache_ptr)->pl_len;                   \
+        if ( (cache_ptr)->pl_size > (cache_ptr)->max_pl_size )               \
+            (cache_ptr)->max_pl_size = (cache_ptr)->pl_size;                 \
+        if ( (entry_ptr)->size >                                             \
+             ((cache_ptr)->max_size)[(entry_ptr)->type->id] ) {              \
+            ((cache_ptr)->max_size)[(entry_ptr)->type->id]                   \
+                 = (entry_ptr)->size;                                        \
+        }                                                                    \
         ((entry_ptr)->accesses)++;
 
 #define H5C__UPDATE_STATS_FOR_PIN(cache_ptr, entry_ptr)          \
@@ -752,18 +766,28 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
         if ( (cache_ptr)->slist_size > (cache_ptr)->max_slist_size )     \
 	    (cache_ptr)->max_slist_size = (cache_ptr)->slist_size;
 
-#define H5C__UPDATE_STATS_FOR_PROTECT(cache_ptr, entry_ptr, hit)     \
-	if ( hit )                                                   \
-            ((cache_ptr)->hits)[(entry_ptr)->type->id]++;            \
-	else                                                         \
-            ((cache_ptr)->misses)[(entry_ptr)->type->id]++;          \
-        if ( (cache_ptr)->index_len > (cache_ptr)->max_index_len )   \
-            (cache_ptr)->max_index_len = (cache_ptr)->index_len;     \
-        if ( (cache_ptr)->index_size > (cache_ptr)->max_index_size ) \
-            (cache_ptr)->max_index_size = (cache_ptr)->index_size;   \
-        if ( (cache_ptr)->pl_len > (cache_ptr)->max_pl_len )         \
-            (cache_ptr)->max_pl_len = (cache_ptr)->pl_len;           \
-        if ( (cache_ptr)->pl_size > (cache_ptr)->max_pl_size )       \
+#define H5C__UPDATE_STATS_FOR_PROTECT(cache_ptr, entry_ptr, hit)             \
+	if ( hit )                                                           \
+            ((cache_ptr)->hits)[(entry_ptr)->type->id]++;                    \
+	else                                                                 \
+            ((cache_ptr)->misses)[(entry_ptr)->type->id]++;                  \
+        if ( ! ((entry_ptr)->is_read_only) ) {                               \
+	    ((cache_ptr)->write_protects)[(entry_ptr)->type->id]++;          \
+	} else {                                                             \
+	    ((cache_ptr)->read_protects)[(entry_ptr)->type->id]++;           \
+	    if ( ((entry_ptr)->ro_ref_count) >                               \
+		 ((cache_ptr)->max_read_protects)[(entry_ptr)->type->id] ) { \
+	        ((cache_ptr)->max_read_protects)[(entry_ptr)->type->id] =    \
+			((entry_ptr)->ro_ref_count);                         \
+	    }                                                                \
+	}                                                                    \
+        if ( (cache_ptr)->index_len > (cache_ptr)->max_index_len )           \
+            (cache_ptr)->max_index_len = (cache_ptr)->index_len;             \
+        if ( (cache_ptr)->index_size > (cache_ptr)->max_index_size )         \
+            (cache_ptr)->max_index_size = (cache_ptr)->index_size;           \
+        if ( (cache_ptr)->pl_len > (cache_ptr)->max_pl_len )                 \
+            (cache_ptr)->max_pl_len = (cache_ptr)->pl_len;                   \
+        if ( (cache_ptr)->pl_size > (cache_ptr)->max_pl_size )               \
             (cache_ptr)->max_pl_size = (cache_ptr)->pl_size;
 
 #define H5C__UPDATE_STATS_FOR_PIN(cache_ptr, entry_ptr)          \
@@ -1184,6 +1208,10 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
  *		QAK -- 11/27/04
  *		Switched over to using skip list routines.
  *
+ *		JRM -- 3/28/07
+ *		Updated sanity checks for the new is_read_only and 
+ *		ro_ref_count fields in H5C_cache_entry_t.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -1193,6 +1221,8 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );             \
     HDassert( (entry_ptr) );                                        \
     HDassert( !((entry_ptr)->is_protected) );                       \
+    HDassert( !((entry_ptr)->is_read_only) );                       \
+    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                   \
     HDassert( (entry_ptr)->size > 0 );                              \
     HDassert( (entry_ptr)->in_slist );                              \
     HDassert( (cache_ptr)->slist_ptr );                             \
@@ -1321,6 +1351,10 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
  *		replacement policy code, and thus this macro has nothing
  *		to do if called for such an entry.
  *
+ *		JRM -- 3/28/07
+ *		Added sanity checks using the new is_read_only and 
+ *		ro_ref_count fields of struct H5C_cache_entry_t.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -1332,6 +1366,8 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                     \
     HDassert( (entry_ptr) );                                                \
     HDassert( !((entry_ptr)->is_protected) );                               \
+    HDassert( !((entry_ptr)->is_read_only) );                               \
+    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                           \
     HDassert( (entry_ptr)->size > 0 );                                      \
                                                                             \
     if ( ! ((entry_ptr)->is_pinned) ) {                                     \
@@ -1393,6 +1429,8 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                     \
     HDassert( (entry_ptr) );                                                \
     HDassert( !((entry_ptr)->is_protected) );                               \
+    HDassert( !((entry_ptr)->is_read_only) );                               \
+    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                           \
     HDassert( (entry_ptr)->size > 0 );                                      \
                                                                             \
     if ( ! ((entry_ptr)->is_pinned) ) {                                     \
@@ -1455,6 +1493,10 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
  *		Pinned entries can't be evicted, so this entry should never
  *		be called on a pinned entry.  Added assert to verify this.
  *
+ *		JRM -- 3/28/07
+ *		Added sanity checks for the new is_read_only and 
+ *		ro_ref_count fields of struct H5C_cache_entry_t.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -1466,6 +1508,8 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                      \
     HDassert( (entry_ptr) );                                                 \
     HDassert( !((entry_ptr)->is_protected) );                                \
+    HDassert( !((entry_ptr)->is_read_only) );                                \
+    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                            \
     HDassert( !((entry_ptr)->is_pinned) );                                   \
     HDassert( (entry_ptr)->size > 0 );                                       \
                                                                              \
@@ -1506,6 +1550,8 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                      \
     HDassert( (entry_ptr) );                                                 \
     HDassert( !((entry_ptr)->is_protected) );                                \
+    HDassert( !((entry_ptr)->is_read_only) );                                \
+    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                            \
     HDassert( !((entry_ptr)->is_pinned) );                                   \
     HDassert( (entry_ptr)->size > 0 );                                       \
                                                                              \
@@ -1560,6 +1606,10 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
  *		Thus I modified this macro to do nothing if the entry is
  *		pinned.
  *
+ *		JRM - 3/28/07
+ *		Added sanity checks based on the new is_read_only and
+ *		ro_ref_count fields of struct H5C_cache_entry_t.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -1571,6 +1621,8 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                     \
     HDassert( (entry_ptr) );                                                \
     HDassert( !((entry_ptr)->is_protected) );                               \
+    HDassert( !((entry_ptr)->is_read_only) );                               \
+    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                           \
     HDassert( (entry_ptr)->size > 0 );                                      \
                                                                             \
     if ( ! ((entry_ptr)->is_pinned) ) {                                     \
@@ -1631,6 +1683,8 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                     \
     HDassert( (entry_ptr) );                                                \
     HDassert( !((entry_ptr)->is_protected) );                               \
+    HDassert( !((entry_ptr)->is_read_only) );                               \
+    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                           \
     HDassert( (entry_ptr)->size > 0 );                                      \
                                                                             \
     if ( ! ((entry_ptr)->is_pinned) ) {                                     \
@@ -1698,6 +1752,10 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
  *		Not any more.  We must now allow insertion of pinned 
  *		entries.  Updated macro to support this.
  *
+ *		JRM - 3/28/07
+ *		Added sanity checks using the new is_read_only and
+ *		ro_ref_count fields of struct H5C_cache_entry_t.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -1709,6 +1767,8 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                    \
     HDassert( (entry_ptr) );                                               \
     HDassert( !((entry_ptr)->is_protected) );                              \
+    HDassert( !((entry_ptr)->is_read_only) );                              \
+    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                          \
     HDassert( (entry_ptr)->size > 0 );                                     \
                                                                            \
     if ( (entry_ptr)->is_pinned ) {                                        \
@@ -1757,6 +1817,8 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                    \
     HDassert( (entry_ptr) );                                               \
     HDassert( !((entry_ptr)->is_protected) );                              \
+    HDassert( !((entry_ptr)->is_read_only) );                              \
+    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                          \
     HDassert( (entry_ptr)->size > 0 );                                     \
                                                                            \
     if ( (entry_ptr)->is_pinned ) {                                        \
@@ -1825,6 +1887,10 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
  *		the pinned entry list instead of from the data structures
  *		maintained by the replacement policy.
  *
+ *		JRM - 3/28/07
+ *		Added sanity checks based on the new is_read_only and 
+ *		ro_ref_count fields of struct H5C_cache_entry_t.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -1836,6 +1902,8 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                   \
     HDassert( (entry_ptr) );                                              \
     HDassert( !((entry_ptr)->is_protected) );                             \
+    HDassert( !((entry_ptr)->is_read_only) );                             \
+    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                         \
     HDassert( (entry_ptr)->size > 0 );                                    \
 									  \
     if ( (entry_ptr)->is_pinned ) {                                       \
@@ -1896,6 +1964,8 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                   \
     HDassert( (entry_ptr) );                                              \
     HDassert( !((entry_ptr)->is_protected) );                             \
+    HDassert( !((entry_ptr)->is_read_only) );                             \
+    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                         \
     HDassert( (entry_ptr)->size > 0 );                                    \
 									  \
     if ( (entry_ptr)->is_pinned ) {                                       \
@@ -1981,6 +2051,10 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
  *		in the replacement policy data structures, so there is
  *		nothing to be done.
  *
+ *		JRM - 3/28/07
+ *		Added sanity checks using the new is_read_only and 
+ *		ro_ref_count fields of struct H5C_cache_entry_t.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -1992,6 +2066,8 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                      \
     HDassert( (entry_ptr) );                                                 \
     HDassert( !((entry_ptr)->is_protected) );                                \
+    HDassert( !((entry_ptr)->is_read_only) );                                \
+    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                            \
     HDassert( (entry_ptr)->size > 0 );                                       \
                                                                              \
     if ( ! ((entry_ptr)->is_pinned) ) {                                      \
@@ -2060,6 +2136,8 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                      \
     HDassert( (entry_ptr) );                                                 \
     HDassert( !((entry_ptr)->is_protected) );                                \
+    HDassert( !((entry_ptr)->is_read_only) );                                \
+    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                            \
     HDassert( (entry_ptr)->size > 0 );                                       \
                                                                              \
     if ( ! ((entry_ptr)->is_pinned) ) {                                      \
@@ -2111,7 +2189,9 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
  *
  * Modifications:
  *
- *		None.
+ * 		JRM -- 3/28/07
+ *		Added sanity checks based on the new is_read_only and 
+ *		ro_ref_count fields of struct H5C_cache_entry_t.
  *
  *-------------------------------------------------------------------------
  */
@@ -2124,6 +2204,8 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                   \
     HDassert( (entry_ptr) );                                              \
     HDassert( !((entry_ptr)->is_protected) );                             \
+    HDassert( !((entry_ptr)->is_read_only) );                             \
+    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                         \
     HDassert( (entry_ptr)->size > 0 );                                    \
     HDassert( new_size > 0 );                                             \
 				  					  \
@@ -2178,6 +2260,8 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                   \
     HDassert( (entry_ptr) );                                              \
     HDassert( !((entry_ptr)->is_protected) );                             \
+    HDassert( !((entry_ptr)->is_read_only) );                             \
+    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                         \
     HDassert( (entry_ptr)->size > 0 );                                    \
     HDassert( new_size > 0 );                                             \
 				  					  \
@@ -2229,7 +2313,9 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
  *
  * Modifications:
  *
- *		None.
+ *		JRM -- 3/28/07
+ *		Added sanity checks based on the new is_read_only and 
+ *		ro_ref_count fields of struct H5C_cache_entry_t.
  *
  *-------------------------------------------------------------------------
  */
@@ -2241,7 +2327,9 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
     HDassert( (cache_ptr) );                                           \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                \
     HDassert( (entry_ptr) );                                           \
-    HDassert( ! ((entry_ptr)->is_protected) );                         \
+    HDassert( !((entry_ptr)->is_protected) );                          \
+    HDassert( !((entry_ptr)->is_read_only) );                          \
+    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                      \
     HDassert( (entry_ptr)->is_pinned);                                 \
     HDassert( (entry_ptr)->size > 0 );                                 \
                                                                        \
@@ -2291,7 +2379,9 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
     HDassert( (cache_ptr) );                                           \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                \
     HDassert( (entry_ptr) );                                           \
-    HDassert( ! ((entry_ptr)->is_protected) );                         \
+    HDassert( !((entry_ptr)->is_protected) );                          \
+    HDassert( !((entry_ptr)->is_read_only) );                          \
+    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                      \
     HDassert( (entry_ptr)->is_pinned);                                 \
     HDassert( (entry_ptr)->size > 0 );                                 \
                                                                        \
@@ -2741,6 +2831,10 @@ done:
  *		for sanity checking in the flush process, and are not
  *		compiled in unless H5C_DO_SANITY_CHECKS is TRUE.
  *
+ *		JRM -- 3/28/07
+ *		Added initialization for the new is_read_only and 
+ *		ro_ref_count fields.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -2892,27 +2986,30 @@ H5C_create(size_t		      max_cache_size,
 
     for ( i = 0; i < H5C__MAX_EPOCH_MARKERS; i++ )
     {
-        (cache_ptr->epoch_marker_active)[i]		= FALSE;
+        (cache_ptr->epoch_marker_active)[i]		 = FALSE;
 
-        ((cache_ptr->epoch_markers)[i]).addr		= (haddr_t)i;
-        ((cache_ptr->epoch_markers)[i]).size		= (size_t)0;
-        ((cache_ptr->epoch_markers)[i]).type		= &epoch_marker_class;
-        ((cache_ptr->epoch_markers)[i]).is_dirty	= FALSE;
-        ((cache_ptr->epoch_markers)[i]).dirtied		= FALSE;
-        ((cache_ptr->epoch_markers)[i]).is_protected	= FALSE;
-        ((cache_ptr->epoch_markers)[i]).is_pinned	= FALSE;
-        ((cache_ptr->epoch_markers)[i]).in_slist	= FALSE;
-        ((cache_ptr->epoch_markers)[i]).ht_next		= NULL;
-        ((cache_ptr->epoch_markers)[i]).ht_prev		= NULL;
-        ((cache_ptr->epoch_markers)[i]).next		= NULL;
-        ((cache_ptr->epoch_markers)[i]).prev		= NULL;
-        ((cache_ptr->epoch_markers)[i]).aux_next	= NULL;
-        ((cache_ptr->epoch_markers)[i]).aux_prev	= NULL;
+        ((cache_ptr->epoch_markers)[i]).addr		 = (haddr_t)i;
+        ((cache_ptr->epoch_markers)[i]).size		 = (size_t)0;
+        ((cache_ptr->epoch_markers)[i]).type		 = &epoch_marker_class;
+        ((cache_ptr->epoch_markers)[i]).is_dirty	 = FALSE;
+        ((cache_ptr->epoch_markers)[i]).dirtied		 = FALSE;
+        ((cache_ptr->epoch_markers)[i]).is_protected	 = FALSE;
+	((cache_ptr->epoch_markers)[i]).is_read_only	 = FALSE;
+	((cache_ptr->epoch_markers)[i]).ro_ref_count	 = 0;
+	((cache_ptr->epoch_markers)[i]).max_ro_ref_count = 0;
+        ((cache_ptr->epoch_markers)[i]).is_pinned	 = FALSE;
+        ((cache_ptr->epoch_markers)[i]).in_slist	 = FALSE;
+        ((cache_ptr->epoch_markers)[i]).ht_next		 = NULL;
+        ((cache_ptr->epoch_markers)[i]).ht_prev		 = NULL;
+        ((cache_ptr->epoch_markers)[i]).next		 = NULL;
+        ((cache_ptr->epoch_markers)[i]).prev		 = NULL;
+        ((cache_ptr->epoch_markers)[i]).aux_next	 = NULL;
+        ((cache_ptr->epoch_markers)[i]).aux_prev	 = NULL;
 #if H5C_COLLECT_CACHE_ENTRY_STATS
-        ((cache_ptr->epoch_markers)[i]).accesses	= 0;
-        ((cache_ptr->epoch_markers)[i]).clears		= 0;
-        ((cache_ptr->epoch_markers)[i]).flushes		= 0;
-        ((cache_ptr->epoch_markers)[i]).pins		= 0;
+        ((cache_ptr->epoch_markers)[i]).accesses	 = 0;
+        ((cache_ptr->epoch_markers)[i]).clears		 = 0;
+        ((cache_ptr->epoch_markers)[i]).flushes		 = 0;
+        ((cache_ptr->epoch_markers)[i]).pins		 = 0;
 #endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
     }
 
@@ -3707,6 +3804,12 @@ done:
  *		leave it in (albeit commented out for now).  If we can't
  *		find a case where it helps, lets get rid of it.
  *
+ *
+ *		Added some sanity checks to the change which verify the 
+ *		expected values of the new is_read_only and ro_ref_count
+ *		fields.
+ *						JRM - 3/29/07
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3824,6 +3927,8 @@ H5C_flush_to_min_clean(H5F_t * f,
                 ( entry_ptr != NULL ) )
         {
             HDassert( ! (entry_ptr->is_protected) );
+            HDassert( ! (entry_ptr->is_read_only) );
+            HDassert( entry_ptr->ro_ref_count == 0 );
             HDassert( entry_ptr->is_dirty );
             HDassert( entry_ptr->in_slist );
 
@@ -4270,6 +4375,10 @@ done:
  *		Added initialization for the new flush_in_progress and
  *		destroy_in_progress fields.
  *
+ *		JRM -- 3/29/07
+ *		Added initialization for the new is_read_only and 
+ *		ro_ref_count fields.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -4458,6 +4567,9 @@ H5C_insert_entry(H5F_t * 	     f,
      */
 
     entry_ptr->is_protected = FALSE;
+    entry_ptr->is_read_only = FALSE;
+    entry_ptr->ro_ref_count = 0;
+    entry_ptr->max_ro_ref_count = 0; /* JRM - delete this when possible */
 
     entry_ptr->is_pinned = insert_pinned;
 
@@ -4932,7 +5044,13 @@ done:
  *
  * Modifications:
  *
- * 		None
+ * 		JRM -- 3/29/07
+ * 		Added sanity check to verify that the pinned entry
+ * 		is not protected read only.
+ *
+ * 		This sanity check is commented out for now -- uncomment
+ * 		it once we deal with the problem of entries being protected
+ * 		read only, and then dirtied.
  *
  *-------------------------------------------------------------------------
  */
@@ -4952,7 +5070,9 @@ H5C_mark_pinned_or_protected_entry_dirty(H5C_t * cache_ptr,
     entry_ptr = (H5C_cache_entry_t *)thing;
 
     if ( entry_ptr->is_protected ) {
-
+#if 0 /* JRM - uncomment this when possible */
+	HDassert( ! ((entry_ptr)->is_read_only) );
+#endif
         /* set the dirtied flag */
         entry_ptr->dirtied = TRUE;
 
@@ -5300,6 +5420,11 @@ done:
  *		Added conditional compile to avoid unused parameter 
  *		warning in production compile.
  *
+ *		JRM -- 4/4/07
+ *		Fixed typo -- canged macro call to 
+ *		H5C__UPDATE_STATS_FOR_UNPIN to call to 
+ *		H5C__UPDATE_STATS_FOR_PIN.
+ *
  *-------------------------------------------------------------------------
  */
 #ifndef NDEBUG
@@ -5337,7 +5462,7 @@ H5C_pin_protected_entry(H5C_t UNUSED *	cache_ptr,
 
     entry_ptr->is_pinned = TRUE;
 
-    H5C__UPDATE_STATS_FOR_UNPIN(cache_ptr, entry_ptr)
+    H5C__UPDATE_STATS_FOR_PIN(cache_ptr, entry_ptr)
 
 done:
 
@@ -5414,6 +5539,14 @@ done:
  *		disk.  This is necessary as a bug fix in the object 
  *		header code requires us to modify a header as it is read.
  *
+ *		JRM -- 3/28/07
+ *		Added the flags parameter and supporting code.  At least
+ *		for now, this parameter is used to allow the entry to 
+ *		be protected read only, thus allowing multiple protects.
+ *
+ * 		Also added code to allow multiple read only protects
+ * 		of cache entries.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -5425,11 +5558,13 @@ H5C_protect(H5F_t *	        f,
             const H5C_class_t * type,
             haddr_t 	        addr,
             const void *        udata1,
-            void *	        udata2)
+            void *	        udata2,
+	    unsigned		flags)
 {
     hbool_t		hit;
     hbool_t		first_flush;
     hbool_t		have_write_permitted = FALSE;
+    hbool_t		read_only = FALSE;
     hbool_t		write_permitted;
     herr_t		result;
     void *		thing;
@@ -5448,13 +5583,18 @@ H5C_protect(H5F_t *	        f,
     HDassert( H5F_addr_defined(addr) );
 
 #if H5C_DO_EXTREME_SANITY_CHECKS
-        if ( H5C_validate_lru_list(cache_ptr) < 0 ) {
+    if ( H5C_validate_lru_list(cache_ptr) < 0 ) {
 
-		HDassert(0);
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, NULL, \
-                            "LRU sanity check failed.\n");
-        }
+	HDassert(0);
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, NULL, \
+                    "LRU sanity check failed.\n");
+    }
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
+
+    if ( (flags & H5C__READ_ONLY_FLAG) != 0 )
+    {
+	read_only = TRUE;
+    }
 
     /* first check to see if the target is in cache */
     H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, NULL)
@@ -5584,22 +5724,43 @@ H5C_protect(H5F_t *	        f,
 
     if ( entry_ptr->is_protected ) {
 
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, \
-                    "Target already protected?!?.")
+	if ( ( read_only ) && ( entry_ptr->is_read_only ) ) {
+	
+	    HDassert( entry_ptr->ro_ref_count > 0 );
+
+	    (entry_ptr->ro_ref_count)++;
+
+	    /* JRM - delete this when possible */
+	    if ( entry_ptr->ro_ref_count > entry_ptr->max_ro_ref_count ) {
+
+		entry_ptr->max_ro_ref_count = entry_ptr->ro_ref_count;
+	    }
+	} else {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, \
+                        "Target already protected & not read only?!?.")
+	}
+    } else {
+
+    	H5C__UPDATE_RP_FOR_PROTECT(cache_ptr, entry_ptr, NULL)
+
+    	entry_ptr->is_protected = TRUE;
+
+	if ( read_only ) {
+
+	    entry_ptr->is_read_only = TRUE;
+	    entry_ptr->ro_ref_count = 1;
+	    entry_ptr->max_ro_ref_count = 1;
+	}
+
+    	entry_ptr->dirtied = FALSE;
     }
-
-    H5C__UPDATE_RP_FOR_PROTECT(cache_ptr, entry_ptr, NULL)
-
-    entry_ptr->is_protected = TRUE;
-
-    entry_ptr->dirtied = FALSE;
-
-    ret_value = thing;
 
     H5C__UPDATE_CACHE_HIT_RATE_STATS(cache_ptr, hit)
 
     H5C__UPDATE_STATS_FOR_PROTECT(cache_ptr, entry_ptr, hit)
 
+    ret_value = thing;
 
     if ( ( cache_ptr->size_decreased ) ||
          ( ( cache_ptr->resize_enabled ) &&
@@ -6149,6 +6310,10 @@ done:
  *		JRM -- 8/23/06
  *		Added code supporting new flush related statistics.
  *
+ *		JRM -- 3/31/07 
+ *		Added code supporting the new write_protects, 
+ *		read_protects, and max_read_protects fields.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -6167,6 +6332,9 @@ H5C_stats(H5C_t * cache_ptr,
     int		i;
     int64_t     total_hits = 0;
     int64_t     total_misses = 0;
+    int64_t	total_write_protects = 0;
+    int64_t	total_read_protects = 0;
+    int64_t	max_read_protects = 0;
     int64_t     total_insertions = 0;
     int64_t     total_pinned_insertions = 0;
     int64_t     total_clears = 0;
@@ -6213,6 +6381,11 @@ H5C_stats(H5C_t * cache_ptr,
 
         total_hits              += cache_ptr->hits[i];
         total_misses            += cache_ptr->misses[i];
+	total_write_protects	+= cache_ptr->write_protects[i];
+	total_read_protects	+= cache_ptr->read_protects[i];
+	if ( max_read_protects < cache_ptr->max_read_protects[i] ) {
+	    max_read_protects = cache_ptr->max_read_protects[i];
+	}
         total_insertions        += cache_ptr->insertions[i];
         total_pinned_insertions += cache_ptr->pinned_insertions[i];
         total_clears            += cache_ptr->clears[i];
@@ -6356,6 +6529,13 @@ H5C_stats(H5C_t * cache_ptr,
               hit_rate);
 
     HDfprintf(stdout,
+              "%s  Total write / read (max) protects  = %ld / %ld (%d)\n",
+              cache_ptr->prefix,
+              (long)total_write_protects,
+              (long)total_read_protects,
+              max_read_protects);
+
+    HDfprintf(stdout,
               "%s  Total clears / flushes / evictions = %ld / %ld / %ld\n",
               cache_ptr->prefix,
               (long)total_clears,
@@ -6441,6 +6621,13 @@ H5C_stats(H5C_t * cache_ptr,
                       (long)(cache_ptr->hits[i]),
                       (long)(cache_ptr->misses[i]),
                       hit_rate);
+
+            HDfprintf(stdout,
+                      "%s    write / read (max) protects    = %ld / %ld (%d)\n",
+                      cache_ptr->prefix,
+                      (long)(cache_ptr->write_protects[i]),
+                      (long)(cache_ptr->read_protects[i]),
+                      (int)(cache_ptr->max_read_protects[i]));
 
             HDfprintf(stdout,
                      "%s    clears / flushes / evictions   = %ld / %ld / %ld\n",
@@ -6554,6 +6741,10 @@ done:
  *		Added conditional compile code to avoid unused parameter
  *		warning in the production build.
  *
+ *		JRM 3/31/07
+ *		Added initialization for the new write_protects, 
+ *		read_protects, and max_read_protects fields.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -6580,6 +6771,9 @@ H5C_stats__reset(H5C_t UNUSED * cache_ptr)
     {
         cache_ptr->hits[i]			= 0;
         cache_ptr->misses[i]			= 0;
+        cache_ptr->write_protects[i]		= 0;
+        cache_ptr->read_protects[i]		= 0;
+        cache_ptr->max_read_protects[i]		= 0;
         cache_ptr->insertions[i]		= 0;
         cache_ptr->pinned_insertions[i]		= 0;
         cache_ptr->clears[i]			= 0;
@@ -6778,6 +6972,13 @@ done:
  *		H5C_cache_entry_t.  If this field is TRUE, it is the
  *		equivalent of setting the H5C__DIRTIED_FLAG.
  *
+ *		JRM -- 3/29/07
+ *		Modified function to allow a entry to be protected 
+ *		more than once if the entry is protected read only.
+ *
+ *		Also added sanity checks using the new is_read_only and
+ *		ro_ref_count parameters.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6850,203 +7051,266 @@ H5C_unprotect(H5F_t *		  f,
         }
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
-#ifdef H5_HAVE_PARALLEL
-    /* When the H5C code is used to implement the metadata cache in the
-     * PHDF5 case, only the cache on process 0 is allowed to write to file.
-     * All the other metadata caches must hold dirty entries until they
-     * are told that the entries are clean.
-     *
-     * The clear_on_unprotect flag in the H5C_cache_entry_t structure
-     * exists to deal with the case in which an entry is protected when
-     * its cache receives word that the entry is now clean.  In this case,
-     * the clear_on_unprotect flag is set, and the entry is flushed with
-     * the H5C__FLUSH_CLEAR_ONLY_FLAG.
-     *
-     * All this is a bit awkward, but until the metadata cache entries
-     * are contiguous, with only one dirty flag, we have to let the supplied
-     * functions deal with the reseting the is_dirty flag.
+
+    /* if the entry has multiple read only protects, just decrement
+     * the ro_ref_counter.  Don't actually unprotect until the ref count
+     * drops to zero.
      */
-    if ( entry_ptr->clear_on_unprotect ) {
+    if ( entry_ptr->ro_ref_count > 1 ) {
 
-        HDassert( entry_ptr->is_dirty );
+	HDassert( entry_ptr->is_protected );
+        HDassert( entry_ptr->is_read_only );
 
-        entry_ptr->clear_on_unprotect = FALSE;
-
-        if ( ! dirtied ) {
-
-            clear_entry = TRUE;
-        }
-    }
-#endif /* H5_HAVE_PARALLEL */
-
-    if ( ! (entry_ptr->is_protected) ) {
+	if ( dirtied ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
-                        "Entry already unprotected??")
-    }
+                        "Read only entry modified(1)??")
+	}
 
-    /* mark the entry as dirty if appropriate */
-    entry_ptr->is_dirty = ( (entry_ptr->is_dirty) || dirtied );
+	(entry_ptr->ro_ref_count)--;
 
-    /* update for change in entry size if necessary */
-    if ( ( size_changed ) && ( entry_ptr->size != new_size ) ) {
+        /* Pin or unpin the entry as requested. */
+        if ( pin_entry ) {
 
-        /* update the protected list */
-        H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr->pl_len), \
-                                        (cache_ptr->pl_size), \
-                                        (entry_ptr->size), (new_size));
+            if ( entry_ptr->is_pinned ) {
 
-        /* update the hash table */
-	H5C__UPDATE_INDEX_FOR_SIZE_CHANGE((cache_ptr), (entry_ptr->size),\
-                                          (new_size));
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTPIN, FAIL, \
+                            "Entry already pinned???")
+            }
+	    entry_ptr->is_pinned = TRUE;
+	    H5C__UPDATE_STATS_FOR_PIN(cache_ptr, entry_ptr)
 
-        /* if the entry is in the skip list, update that too */
-        if ( entry_ptr->in_slist ) {
+        } else if ( unpin_entry ) {
 
-	    H5C__UPDATE_SLIST_FOR_SIZE_CHANGE((cache_ptr), (entry_ptr->size),\
+            if ( ! ( entry_ptr->is_pinned ) ) {
+
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, \
+			    "Entry already unpinned???")
+            }
+	    entry_ptr->is_pinned = FALSE;
+	    H5C__UPDATE_STATS_FOR_UNPIN(cache_ptr, entry_ptr)
+
+        }
+
+    } else {
+
+	if ( entry_ptr->is_read_only ) {
+
+	    HDassert( entry_ptr->ro_ref_count == 1 );
+
+	    if ( ( dirtied ) &&
+	     /* JRM - delete the following line when possible */ 
+	     ( entry_ptr->max_ro_ref_count > 1 ) ) {
+
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
+                            "Read only entry modified(2)??")
+	    }
+
+	    entry_ptr->is_read_only = FALSE;
+	    entry_ptr->ro_ref_count = 0;
+	    entry_ptr->max_ro_ref_count = 0;
+	}
+
+#ifdef H5_HAVE_PARALLEL
+        /* When the H5C code is used to implement the metadata cache in the
+         * PHDF5 case, only the cache on process 0 is allowed to write to file.
+         * All the other metadata caches must hold dirty entries until they
+         * are told that the entries are clean.
+         *
+         * The clear_on_unprotect flag in the H5C_cache_entry_t structure
+         * exists to deal with the case in which an entry is protected when
+         * its cache receives word that the entry is now clean.  In this case,
+         * the clear_on_unprotect flag is set, and the entry is flushed with
+         * the H5C__FLUSH_CLEAR_ONLY_FLAG.
+         *
+         * All this is a bit awkward, but until the metadata cache entries
+         * are contiguous, with only one dirty flag, we have to let the supplied
+         * functions deal with the reseting the is_dirty flag.
+         */
+        if ( entry_ptr->clear_on_unprotect ) {
+
+            HDassert( entry_ptr->is_dirty );
+
+            entry_ptr->clear_on_unprotect = FALSE;
+
+            if ( ! dirtied ) {
+
+                clear_entry = TRUE;
+            }
+        }
+#endif /* H5_HAVE_PARALLEL */
+
+        if ( ! (entry_ptr->is_protected) ) {
+
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
+                            "Entry already unprotected??")
+        }
+
+        /* mark the entry as dirty if appropriate */
+        entry_ptr->is_dirty = ( (entry_ptr->is_dirty) || dirtied );
+
+        /* update for change in entry size if necessary */
+        if ( ( size_changed ) && ( entry_ptr->size != new_size ) ) {
+
+            /* update the protected list */
+            H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr->pl_len), \
+                                            (cache_ptr->pl_size), \
+                                            (entry_ptr->size), (new_size));
+
+            /* update the hash table */
+	    H5C__UPDATE_INDEX_FOR_SIZE_CHANGE((cache_ptr), (entry_ptr->size),\
                                               (new_size));
+
+            /* if the entry is in the skip list, update that too */
+            if ( entry_ptr->in_slist ) {
+
+	        H5C__UPDATE_SLIST_FOR_SIZE_CHANGE((cache_ptr), \
+				                  (entry_ptr->size),\
+                                                  (new_size));
+            }
+
+            /* update statistics just before changing the entry size */
+	    H5C__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE((cache_ptr), (entry_ptr), \
+                                                    (new_size));
+
+	    /* finally, update the entry size proper */
+	    entry_ptr->size = new_size;
         }
 
-        /* update statistics just before changing the entry size */
-	H5C__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE((cache_ptr), (entry_ptr), \
-                                                (new_size));
+        /* Pin or unpin the entry as requested. */
+        if ( pin_entry ) {
 
-	/* finally, update the entry size proper */
-	entry_ptr->size = new_size;
-    }
+            if ( entry_ptr->is_pinned ) {
 
-    /* Pin or unpin the entry as requested. */
-    if ( pin_entry ) {
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTPIN, FAIL, \
+                            "Entry already pinned???")
+            }
+	    entry_ptr->is_pinned = TRUE;
+	    H5C__UPDATE_STATS_FOR_PIN(cache_ptr, entry_ptr)
 
-        if ( entry_ptr->is_pinned ) {
+        } else if ( unpin_entry ) {
 
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTPIN, FAIL, \
-			"Entry already pinned???")
+            if ( ! ( entry_ptr->is_pinned ) ) {
+
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, \
+			    "Entry already unpinned???")
+            }
+	    entry_ptr->is_pinned = FALSE;
+	    H5C__UPDATE_STATS_FOR_UNPIN(cache_ptr, entry_ptr)
+
         }
-	entry_ptr->is_pinned = TRUE;
-	H5C__UPDATE_STATS_FOR_PIN(cache_ptr, entry_ptr)
 
-    } else if ( unpin_entry ) {
-
-	if ( ! ( entry_ptr->is_pinned ) ) {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, \
-			"Entry already unpinned???")
-        }
-	entry_ptr->is_pinned = FALSE;
-	H5C__UPDATE_STATS_FOR_UNPIN(cache_ptr, entry_ptr)
-
-    }
-
-    /* H5C__UPDATE_RP_FOR_UNPROTECT will places the unprotected entry on
-     * the pinned entry list if entry_ptr->is_pined is TRUE.
-     */
-    H5C__UPDATE_RP_FOR_UNPROTECT(cache_ptr, entry_ptr, FAIL)
-
-    entry_ptr->is_protected = FALSE;
-
-    /* if the entry is dirty, 'or' its flush_marker with the set flush flag,
-     * and then add it to the skip list if it isn't there already.
-     */
-
-    if ( entry_ptr->is_dirty ) {
-
-        entry_ptr->flush_marker |= set_flush_marker;
-
-        if ( ! (entry_ptr->in_slist) ) {
-
-            H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
-        }
-    }
-
-    /* this implementation of the "deleted" option is a bit inefficient, as
-     * we re-insert the entry to be deleted into the replacement policy
-     * data structures, only to remove them again.  Depending on how often
-     * we do this, we may want to optimize a bit.
-     *
-     * On the other hand, this implementation is reasonably clean, and
-     * makes good use of existing code.
-     *                                             JRM - 5/19/04
-     */
-    if ( deleted ) {
-
-        /* the following first flush flag will never be used as we are
-         * calling H5C_flush_single_entry with both the
-         * H5C__FLUSH_CLEAR_ONLY_FLAG and H5C__FLUSH_INVALIDATE_FLAG flags.
-	 * However, it is needed for the function call.
+        /* H5C__UPDATE_RP_FOR_UNPROTECT will places the unprotected entry on
+         * the pinned entry list if entry_ptr->is_pined is TRUE.
          */
-        hbool_t		dummy_first_flush = TRUE;
+        H5C__UPDATE_RP_FOR_UNPROTECT(cache_ptr, entry_ptr, FAIL)
 
-	/* we can't delete a pinned entry */
-	HDassert ( ! (entry_ptr->is_pinned ) );
+        entry_ptr->is_protected = FALSE;
 
-        /* verify that the target entry is in the cache. */
+        /* if the entry is dirty, 'or' its flush_marker with the set flush flag,
+         * and then add it to the skip list if it isn't there already.
+         */
 
-        H5C__SEARCH_INDEX(cache_ptr, addr, test_entry_ptr, FAIL)
+        if ( entry_ptr->is_dirty ) {
 
-        if ( test_entry_ptr == NULL ) {
+            entry_ptr->flush_marker |= set_flush_marker;
 
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
-                        "entry not in hash table?!?.")
-        }
-        else if ( test_entry_ptr != entry_ptr ) {
+            if ( ! (entry_ptr->in_slist) ) {
 
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
-                        "hash table contains multiple entries for addr?!?.")
+                H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
+            }
         }
 
-        if ( H5C_flush_single_entry(f,
-                                    primary_dxpl_id,
-                                    secondary_dxpl_id,
-                                    cache_ptr,
-                                    type,
-                                    addr,
-                                    (H5C__FLUSH_CLEAR_ONLY_FLAG |
-                                     H5C__FLUSH_INVALIDATE_FLAG),
-                                    &dummy_first_flush,
-                                    TRUE) < 0 ) {
+        /* this implementation of the "deleted" option is a bit inefficient, as
+         * we re-insert the entry to be deleted into the replacement policy
+         * data structures, only to remove them again.  Depending on how often
+         * we do this, we may want to optimize a bit.
+         *
+         * On the other hand, this implementation is reasonably clean, and
+         * makes good use of existing code.
+         *                                             JRM - 5/19/04
+         */
+        if ( deleted ) {
 
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "Can't flush.")
+            /* the following first flush flag will never be used as we are
+             * calling H5C_flush_single_entry with both the
+             * H5C__FLUSH_CLEAR_ONLY_FLAG and H5C__FLUSH_INVALIDATE_FLAG flags.
+	     * However, it is needed for the function call.
+             */
+            hbool_t		dummy_first_flush = TRUE;
+
+	    /* we can't delete a pinned entry */
+	    HDassert ( ! (entry_ptr->is_pinned ) );
+
+            /* verify that the target entry is in the cache. */
+
+            H5C__SEARCH_INDEX(cache_ptr, addr, test_entry_ptr, FAIL)
+
+            if ( test_entry_ptr == NULL ) {
+
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
+                            "entry not in hash table?!?.")
+            }
+            else if ( test_entry_ptr != entry_ptr ) {
+
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
+                            "hash table contains multiple entries for addr?!?.")
+            }
+
+            if ( H5C_flush_single_entry(f,
+                                        primary_dxpl_id,
+                                        secondary_dxpl_id,
+                                        cache_ptr,
+                                        type,
+                                        addr,
+                                        (H5C__FLUSH_CLEAR_ONLY_FLAG |
+                                         H5C__FLUSH_INVALIDATE_FLAG),
+                                        &dummy_first_flush,
+                                        TRUE) < 0 ) {
+
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "Can't flush.")
+            }
         }
-    }
 #ifdef H5_HAVE_PARALLEL
-    else if ( clear_entry ) {
+        else if ( clear_entry ) {
 
-        /* the following first flush flag will never be used as we are
-         * calling H5C_flush_single_entry with the H5C__FLUSH_CLEAR_ONLY_FLAG
-         * flag.  However, it is needed for the function call.
-         */
-        hbool_t		dummy_first_flush = TRUE;
+            /* the following first flush flag will never be used as we are
+             * calling H5C_flush_single_entry with the 
+	     * H5C__FLUSH_CLEAR_ONLY_FLAG flag.  However, it is needed for 
+	     * the function call.
+             */
+            hbool_t		dummy_first_flush = TRUE;
 
-        /* verify that the target entry is in the cache. */
+            /* verify that the target entry is in the cache. */
 
-        H5C__SEARCH_INDEX(cache_ptr, addr, test_entry_ptr, FAIL)
+            H5C__SEARCH_INDEX(cache_ptr, addr, test_entry_ptr, FAIL)
 
-        if ( test_entry_ptr == NULL ) {
+            if ( test_entry_ptr == NULL ) {
 
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
-                        "entry not in hash table?!?.")
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
+                            "entry not in hash table?!?.")
+            }
+            else if ( test_entry_ptr != entry_ptr ) {
+
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
+                            "hash table contains multiple entries for addr?!?.")
+            }
+
+            if ( H5C_flush_single_entry(f,
+                                        primary_dxpl_id,
+                                        secondary_dxpl_id,
+                                        cache_ptr,
+                                        type,
+                                        addr,
+                                        H5C__FLUSH_CLEAR_ONLY_FLAG,
+                                        &dummy_first_flush,
+                                        TRUE) < 0 ) {
+
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "Can't clear.")
+            }
         }
-        else if ( test_entry_ptr != entry_ptr ) {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
-                        "hash table contains multiple entries for addr?!?.")
-        }
-
-        if ( H5C_flush_single_entry(f,
-                                    primary_dxpl_id,
-                                    secondary_dxpl_id,
-                                    cache_ptr,
-                                    type,
-                                    addr,
-                                    H5C__FLUSH_CLEAR_ONLY_FLAG,
-                                    &dummy_first_flush,
-                                    TRUE) < 0 ) {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "Can't clear.")
-        }
-    }
 #endif /* H5_HAVE_PARALLEL */
+    }
 
     H5C__UPDATE_STATS_FOR_UNPROTECT(cache_ptr)
 
@@ -8872,6 +9136,11 @@ done:
  *		in which the target entry is resized during flush, and 
  *		update the caches data structures accordingly.
  *
+ *
+ *		JRM -- 3/29/07
+ *		Added sanity checks on the new is_read_only and 
+ *		ro_ref_count fields.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -9248,6 +9517,8 @@ H5C_flush_single_entry(H5F_t *		   f,
             HDassert( !(entry_ptr->flush_marker) );
             HDassert( !(entry_ptr->in_slist) );
             HDassert( !(entry_ptr->is_protected) );
+            HDassert( !(entry_ptr->is_read_only) );
+            HDassert( (entry_ptr->ro_ref_count) == 0 );
 
 	    if ( (flush_flags & H5C_CALLBACK__SIZE_CHANGED_FLAG) != 0 ) {
 
@@ -9368,6 +9639,10 @@ done:
  *		Added initialization for the new flush_in_progress and
  *		destroy in progress fields.
  *
+ *		JRM - 3/29/07
+ *		Added initialization for the new is_read_only and 
+ *		ro_ref_count fields.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -9432,6 +9707,9 @@ H5C_load_entry(H5F_t *             f,
     entry_ptr->addr = addr;
     entry_ptr->type = type;
     entry_ptr->is_protected = FALSE;
+    entry_ptr->is_read_only = FALSE;
+    entry_ptr->ro_ref_count = 0;
+    entry_ptr->max_ro_ref_count = 0; /* JRM - delete this when possible */
     entry_ptr->in_slist = FALSE;
     entry_ptr->flush_marker = FALSE;
 #ifdef H5_HAVE_PARALLEL
@@ -9520,6 +9798,10 @@ done:
  *		is not full.  This case occurs when we need to flush to
  *		min clean size before the cache has filled.
  *
+ *		JRM -- 3/29/07
+ *		Added sanity checks using the new is_read_only and 
+ *		ro_ref_count fields.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -9565,6 +9847,8 @@ H5C_make_space_in_cache(H5F_t *	f,
               )
         {
             HDassert( ! (entry_ptr->is_protected) );
+            HDassert( ! (entry_ptr->is_read_only) );
+            HDassert( (entry_ptr->ro_ref_count) == 0 );
 
             prev_ptr = entry_ptr->prev;
 
@@ -9631,6 +9915,8 @@ H5C_make_space_in_cache(H5F_t *	f,
               )
         {
             HDassert( ! (entry_ptr->is_protected) );
+            HDassert( ! (entry_ptr->is_read_only) );
+            HDassert( (entry_ptr->ro_ref_count) == 0 );
             HDassert( entry_ptr->is_dirty );
             HDassert( entry_ptr->in_slist );
 
@@ -9675,6 +9961,8 @@ H5C_make_space_in_cache(H5F_t *	f,
               )
         {
             HDassert( ! (entry_ptr->is_protected) );
+            HDassert( ! (entry_ptr->is_read_only) );
+            HDassert( (entry_ptr->ro_ref_count) == 0 );
             HDassert( ! (entry_ptr->is_dirty) );
 
             prev_ptr = entry_ptr->aux_prev;

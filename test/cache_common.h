@@ -224,6 +224,12 @@ typedef struct test_entry_t
     hbool_t		  is_protected;	/* entry should currently be on
 					 * the cache's protected list.
                                          */
+    hbool_t		  is_read_only; /* TRUE iff the entry should be 
+					 * protected read only.
+					 */
+    int			  ro_ref_count; /* Number of outstanding read only
+					 * protects on the entry.
+					 */
     hbool_t		  is_pinned;	/* entry is currently pinned in
 					 * the cache.
                                          */
@@ -622,6 +628,10 @@ void protect_entry(H5C_t * cache_ptr,
                    int32_t type,
                    int32_t idx);
 
+void protect_entry_ro(H5C_t * cache_ptr,
+                      int32_t type,
+                      int32_t idx);
+
 hbool_t entry_in_cache(H5C_t * cache_ptr,
                        int32_t type,
                        int32_t idx);
@@ -658,6 +668,7 @@ void row_major_scan_forward(H5C_t * cache_ptr,
                             hbool_t do_renames,
                             hbool_t rename_to_main_addr,
                             hbool_t do_destroys,
+                            hbool_t do_mult_ro_protects,
                             int dirty_destroys,
                             int dirty_unprotects);
 
@@ -681,6 +692,7 @@ void row_major_scan_backward(H5C_t * cache_ptr,
                              hbool_t do_renames,
                              hbool_t rename_to_main_addr,
                              hbool_t do_destroys,
+                             hbool_t do_mult_ro_protects,
                              int dirty_destroys,
                              int dirty_unprotects);
 

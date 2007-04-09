@@ -1872,6 +1872,14 @@ done:
  *		JRM - 6/6/06
  *		Added trace file support.
  *
+ *		JRM - 3/18/07
+ *		Modified code to support the new flags parameter for 
+ *		H5C_protect().  For now, that means passing in the 
+ *		H5C_READ_ONLY_FLAG if rw == H5AC_READ.
+ *
+ *		Also updated the trace file output to save the 
+ *		rw parameter, since we are now doing something with it.
+ *
  *-------------------------------------------------------------------------
  */
 void *
@@ -1881,9 +1889,10 @@ H5AC_protect(H5F_t *f,
              haddr_t addr,
 	     const void *udata1,
              void *udata2,
-             H5AC_protect_t UNUSED rw)
+             H5AC_protect_t rw)
 {
     /* char *		fcn_name = "H5AC_protect"; */
+    unsigned		protect_flags = H5C__NO_FLAGS_SET;
     void *		thing = (void *)NULL;
     void *		ret_value;      /* Return value */
 #if H5AC__TRACE_FILE_ENABLED
@@ -1915,11 +1924,32 @@ H5AC_protect(H5F_t *f,
          ( H5C_get_trace_file_ptr(f->shared->cache, &trace_file_ptr) >= 0 ) &&
          ( trace_file_ptr != NULL ) ) {
 
-        sprintf(trace, "H5AC_protect %lx %d",
+	char * rw_string;
+
+        if ( rw == H5AC_WRITE ) {
+
+	    rw_string = "H5AC_WRITE";
+
+	} else if ( rw == H5AC_READ ) {
+
+	    rw_string = "H5AC_READ";
+
+	} else {
+
+	    rw_string = "???";
+	}
+
+        sprintf(trace, "H5AC_protect %lx %d %s",
 	        (unsigned long)addr,
-		(int)(type->id));
+		(int)(type->id),
+		rw_string);
     }
 #endif /* H5AC__TRACE_FILE_ENABLED */
+
+    if ( rw == H5AC_READ ) {
+
+	protect_flags |= H5C__READ_ONLY_FLAG;
+    }
 
     thing = H5C_protect(f,
                         dxpl_id,
@@ -1928,7 +1958,8 @@ H5AC_protect(H5F_t *f,
                         type,
                         addr,
                         udata1,
-                        udata2);
+                        udata2,
+			protect_flags);
 
     if ( thing == NULL ) {
 
@@ -2276,7 +2307,7 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
          ( H5C_get_trace_file_ptr(f->shared->cache, &trace_file_ptr) >= 0 ) &&
          ( trace_file_ptr != NULL ) ) {
 
-        sprintf(trace, "H5AC_protect %lx %d",
+        sprintf(trace, "H5AC_unprotect %lx %d",
 	        (unsigned long)addr,
 		(int)(type->id));
 

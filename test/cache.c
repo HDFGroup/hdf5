@@ -92,6 +92,7 @@ static void check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr);
 static void check_flush_protected_err(void);
 static void check_get_entry_status(void);
 static void check_expunge_entry(void);
+static void check_multiple_read_protect(void);
 static void check_rename_entry(void);
 static void check_rename_entry__run_test(H5C_t * cache_ptr, int test_num,
                                       struct rename_entry_test_spec * spec_ptr);
@@ -109,6 +110,8 @@ static void check_double_unprotect_err(void);
 static void check_mark_entry_dirty_errs(void);
 static void check_expunge_entry_errs(void);
 static void check_resize_entry_errs(void);
+static void check_unprotect_ro_dirty_err(void);
+static void check_protect_ro_rw_err(void);
 static void check_auto_cache_resize(void);
 static void check_auto_cache_resize_disable(void);
 static void check_auto_cache_resize_epoch_markers(void);
@@ -197,6 +200,7 @@ smoke_check_1(void)
                            /* do_renames             */ TRUE,
                            /* rename_to_main_addr    */ FALSE,
                            /* do_destroys            */ TRUE,
+			   /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
                            /* dirty_unprotects       */ dirty_unprotects);
 
@@ -215,6 +219,7 @@ smoke_check_1(void)
                             /* do_renames             */ TRUE,
                             /* rename_to_main_addr    */ TRUE,
                             /* do_destroys            */ FALSE,
+			    /* do_mult_ro_protects    */ TRUE,
                             /* dirty_destroys         */ dirty_destroys,
                             /* dirty_unprotects       */ dirty_unprotects);
 
@@ -233,6 +238,7 @@ smoke_check_1(void)
                            /* do_renames             */ TRUE,
                            /* rename_to_main_addr    */ FALSE,
                            /* do_destroys            */ FALSE,
+			   /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
                            /* dirty_unprotects       */ dirty_unprotects);
 
@@ -388,6 +394,7 @@ smoke_check_2(void)
                            /* do_renames             */ TRUE,
                            /* rename_to_main_addr    */ FALSE,
                            /* do_destroys            */ TRUE,
+			   /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
                            /* dirty_unprotects       */ dirty_unprotects);
 
@@ -406,6 +413,7 @@ smoke_check_2(void)
                             /* do_renames             */ TRUE,
                             /* rename_to_main_addr    */ TRUE,
                             /* do_destroys            */ FALSE,
+			    /* do_mult_ro_protects    */ TRUE,
                             /* dirty_destroys         */ dirty_destroys,
                             /* dirty_unprotects       */ dirty_unprotects);
 
@@ -424,6 +432,7 @@ smoke_check_2(void)
                            /* do_renames             */ TRUE,
                            /* rename_to_main_addr    */ FALSE,
                            /* do_destroys            */ FALSE,
+			   /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
                            /* dirty_unprotects       */ dirty_unprotects);
 
@@ -578,6 +587,7 @@ smoke_check_3(void)
                            /* do_renames             */ TRUE,
                            /* rename_to_main_addr    */ FALSE,
                            /* do_destroys            */ TRUE,
+			   /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
                            /* dirty_unprotects       */ dirty_unprotects);
 
@@ -596,6 +606,7 @@ smoke_check_3(void)
                             /* do_renames             */ TRUE,
                             /* rename_to_main_addr    */ TRUE,
                             /* do_destroys            */ FALSE,
+			    /* do_mult_ro_protects    */ TRUE,
                             /* dirty_destroys         */ dirty_destroys,
                             /* dirty_unprotects       */ dirty_unprotects);
 
@@ -614,6 +625,7 @@ smoke_check_3(void)
                            /* do_renames             */ TRUE,
                            /* rename_to_main_addr    */ FALSE,
                            /* do_destroys            */ FALSE,
+			   /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
                            /* dirty_unprotects       */ dirty_unprotects);
 
@@ -769,6 +781,7 @@ smoke_check_4(void)
                            /* do_renames             */ TRUE,
                            /* rename_to_main_addr    */ FALSE,
                            /* do_destroys            */ TRUE,
+			   /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
                            /* dirty_unprotects       */ dirty_unprotects);
 
@@ -787,6 +800,7 @@ smoke_check_4(void)
                             /* do_renames             */ TRUE,
                             /* rename_to_main_addr    */ TRUE,
                             /* do_destroys            */ FALSE,
+			    /* do_mult_ro_protects    */ TRUE,
                             /* dirty_destroys         */ dirty_destroys,
                             /* dirty_unprotects       */ dirty_unprotects);
 
@@ -805,6 +819,7 @@ smoke_check_4(void)
                            /* do_renames             */ TRUE,
                            /* rename_to_main_addr    */ FALSE,
                            /* do_destroys            */ FALSE,
+			   /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ dirty_destroys,
                            /* dirty_unprotects       */ dirty_unprotects);
 
@@ -1894,6 +1909,7 @@ write_permitted_check(void)
                            /* do_renames             */ TRUE,
                            /* rename_to_main_addr    */ FALSE,
                            /* do_destroys            */ TRUE,
+			   /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ TRUE,
                            /* dirty_unprotects       */ TRUE);
 
@@ -1914,6 +1930,7 @@ write_permitted_check(void)
                             /* do_renames             */ TRUE,
                             /* rename_to_main_addr    */ TRUE,
                             /* do_destroys            */ FALSE,
+			    /* do_mult_ro_protects    */ TRUE,
                             /* dirty_destroys         */ FALSE,
                             /* dirty_unprotects       */ NO_CHANGE);
 
@@ -1934,6 +1951,7 @@ write_permitted_check(void)
                            /* do_renames             */ TRUE,
                            /* rename_to_main_addr    */ FALSE,
                            /* do_destroys            */ FALSE,
+			   /* do_mult_ro_protects    */ TRUE,
                            /* dirty_destroys         */ TRUE,
                            /* dirty_unprotects       */ TRUE);
 
@@ -12680,6 +12698,427 @@ check_expunge_entry(void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	check_multiple_read_protect()
+ *
+ * Purpose:	Verify that multiple, simultaneous read protects of a 
+ * 		single entry perform as expectd.
+ *
+ * Return:	void
+ *
+ * Programmer:	John Mainzer
+ *              4/1/07
+ *
+ * Modifications:
+ *
+ * 		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+
+static void
+check_multiple_read_protect(void)
+{
+    const char * fcn_name = "check_multiple_read_protect()";
+    H5C_t * cache_ptr = NULL;
+    test_entry_t * entry_ptr;
+
+    TESTING("multiple read only protects on a single entry");
+
+    pass = TRUE;
+
+    /* allocate a cache.  Should succeed.
+     *
+     * Then to start with, proceed as follows:
+     *
+     * Read protect an entry.
+     *
+     * Then read protect the entry again.  Should succeed.
+     *
+     * Read protect yet again.  Should succeed.
+     *
+     * Unprotect with no changes, and then read protect twice again.
+     * Should succeed.
+     *
+     * Now unprotect three times.  Should succeed.
+     *
+     * If stats are enabled, verify that correct stats are collected at
+     * every step.
+     *
+     * Also, verify internal state of read protects at every step.
+     */
+
+    if ( pass ) {
+
+        reset_entries();
+
+        cache_ptr = setup_cache((size_t)(2 * 1024),
+                                (size_t)(1 * 1024));
+
+        entry_ptr = &((entries[0])[0]);
+
+        if ( ( entry_ptr->header.is_protected ) || 
+ 	     ( entry_ptr->header.is_read_only ) ||
+	     ( entry_ptr->header.ro_ref_count != 0 ) ) {
+
+            pass = FALSE;
+            failure_mssg = "Unexpected ro protected status 1.\n";
+        }
+    }
+
+#if H5C_COLLECT_CACHE_STATS
+    if ( ( cache_ptr->write_protects[0] != 0 ) ||
+	 ( cache_ptr->read_protects[0] != 0 ) ||
+	 ( cache_ptr->max_read_protects[0] != 0 ) ) {
+
+	pass = FALSE;
+	failure_mssg = "Unexpected protect stats 1.\n";
+    }
+#endif /* H5C_COLLECT_CACHE_STATS */
+
+    if ( pass )
+    {
+        protect_entry_ro(cache_ptr, 0, 0);
+
+        if ( ( ! ( entry_ptr->header.is_protected ) ) || 
+ 	     ( ! ( entry_ptr->header.is_read_only ) ) ||
+	     ( entry_ptr->header.ro_ref_count != 1 ) ) {
+
+            pass = FALSE;
+            failure_mssg = "Unexpected ro protected status 2.\n";
+        }
+    }
+
+#if H5C_COLLECT_CACHE_STATS
+    if ( ( cache_ptr->write_protects[0] != 0 ) ||
+	 ( cache_ptr->read_protects[0] != 1 ) ||
+	 ( cache_ptr->max_read_protects[0] != 1 ) ) {
+
+	pass = FALSE;
+	failure_mssg = "Unexpected protect stats 2.\n";
+    }
+#endif /* H5C_COLLECT_CACHE_STATS */
+
+    if ( pass )
+    {
+        protect_entry_ro(cache_ptr, 0, 0);
+
+        if ( ( ! ( entry_ptr->header.is_protected ) ) || 
+ 	     ( ! ( entry_ptr->header.is_read_only ) ) ||
+	     ( entry_ptr->header.ro_ref_count != 2 ) ) {
+
+            pass = FALSE;
+            failure_mssg = "Unexpected ro protected status 3.\n";
+        }
+    }
+
+#if H5C_COLLECT_CACHE_STATS
+    if ( ( cache_ptr->write_protects[0] != 0 ) ||
+	 ( cache_ptr->read_protects[0] != 2 ) ||
+	 ( cache_ptr->max_read_protects[0] != 2 ) ) {
+
+	pass = FALSE;
+	failure_mssg = "Unexpected protect stats 3.\n";
+    }
+#endif /* H5C_COLLECT_CACHE_STATS */
+
+    if ( pass )
+    {
+        unprotect_entry(cache_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
+
+        if ( ( ! ( entry_ptr->header.is_protected ) ) || 
+ 	     ( ! ( entry_ptr->header.is_read_only ) ) ||
+	     ( entry_ptr->header.ro_ref_count != 1 ) ) {
+
+            pass = FALSE;
+            failure_mssg = "Unexpected ro protected status 4.\n";
+        }
+    }
+
+#if H5C_COLLECT_CACHE_STATS
+    if ( ( cache_ptr->write_protects[0] != 0 ) ||
+	 ( cache_ptr->read_protects[0] != 2 ) ||
+	 ( cache_ptr->max_read_protects[0] != 2 ) ) {
+
+	pass = FALSE;
+	failure_mssg = "Unexpected protect stats 4.\n";
+    }
+#endif /* H5C_COLLECT_CACHE_STATS */
+
+    if ( pass )
+    {
+        protect_entry_ro(cache_ptr, 0, 0);
+
+        if ( ( ! ( entry_ptr->header.is_protected ) ) || 
+ 	     ( ! ( entry_ptr->header.is_read_only ) ) ||
+	     ( entry_ptr->header.ro_ref_count != 2 ) ) {
+
+            pass = FALSE;
+            failure_mssg = "Unexpected ro protected status 5.\n";
+        }
+    }
+
+#if H5C_COLLECT_CACHE_STATS
+    if ( ( cache_ptr->write_protects[0] != 0 ) ||
+	 ( cache_ptr->read_protects[0] != 3 ) ||
+	 ( cache_ptr->max_read_protects[0] != 2 ) ) {
+
+	pass = FALSE;
+	failure_mssg = "Unexpected protect stats 5.\n";
+    }
+#endif /* H5C_COLLECT_CACHE_STATS */
+
+    if ( pass )
+    {
+        protect_entry_ro(cache_ptr, 0, 0);
+
+        if ( ( ! ( entry_ptr->header.is_protected ) ) || 
+ 	     ( ! ( entry_ptr->header.is_read_only ) ) ||
+	     ( entry_ptr->header.ro_ref_count != 3 ) ) {
+
+            pass = FALSE;
+            failure_mssg = "Unexpected ro protected status 6.\n";
+        }
+    }
+
+#if H5C_COLLECT_CACHE_STATS
+    if ( ( cache_ptr->write_protects[0] != 0 ) ||
+	 ( cache_ptr->read_protects[0] != 4 ) ||
+	 ( cache_ptr->max_read_protects[0] != 3 ) ) {
+
+	pass = FALSE;
+	failure_mssg = "Unexpected protect stats 6.\n";
+    }
+#endif /* H5C_COLLECT_CACHE_STATS */
+
+    if ( pass )
+    {
+        unprotect_entry(cache_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
+
+        if ( ( ! ( entry_ptr->header.is_protected ) ) || 
+ 	     ( ! ( entry_ptr->header.is_read_only ) ) ||
+	     ( entry_ptr->header.ro_ref_count != 2 ) ) {
+
+            pass = FALSE;
+            failure_mssg = "Unexpected ro protected status 7.\n";
+        }
+    }
+
+#if H5C_COLLECT_CACHE_STATS
+    if ( ( cache_ptr->write_protects[0] != 0 ) ||
+	 ( cache_ptr->read_protects[0] != 4 ) ||
+	 ( cache_ptr->max_read_protects[0] != 3 ) ) {
+
+	pass = FALSE;
+	failure_mssg = "Unexpected protect stats 7.\n";
+    }
+#endif /* H5C_COLLECT_CACHE_STATS */
+
+    if ( pass )
+    {
+        unprotect_entry(cache_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
+
+        if ( ( ! ( entry_ptr->header.is_protected ) ) || 
+ 	     ( ! ( entry_ptr->header.is_read_only ) ) ||
+	     ( entry_ptr->header.ro_ref_count != 1 ) ) {
+
+            pass = FALSE;
+            failure_mssg = "Unexpected ro protected status 8.\n";
+        }
+    }
+
+#if H5C_COLLECT_CACHE_STATS
+    if ( ( cache_ptr->write_protects[0] != 0 ) ||
+	 ( cache_ptr->read_protects[0] != 4 ) ||
+	 ( cache_ptr->max_read_protects[0] != 3 ) ) {
+
+	pass = FALSE;
+	failure_mssg = "Unexpected protect stats 8.\n";
+    }
+#endif /* H5C_COLLECT_CACHE_STATS */
+
+    if ( pass )
+    {
+        unprotect_entry(cache_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
+
+        if ( ( entry_ptr->header.is_protected ) || 
+ 	     ( entry_ptr->header.is_read_only ) ||
+	     ( entry_ptr->header.ro_ref_count != 0 ) ) {
+
+            pass = FALSE;
+            failure_mssg = "Unexpected ro protected status 9.\n";
+        }
+    }
+
+#if H5C_COLLECT_CACHE_STATS
+    if ( ( cache_ptr->write_protects[0] != 0 ) ||
+	 ( cache_ptr->read_protects[0] != 4 ) ||
+	 ( cache_ptr->max_read_protects[0] != 3 ) ) {
+
+	pass = FALSE;
+	failure_mssg = "Unexpected protect stats 9.\n";
+    }
+#endif /* H5C_COLLECT_CACHE_STATS */
+
+
+    /* If we get this far, do a write protect and unprotect to verify 
+     * that the stats are getting collected properly here as well.
+     */
+
+    if ( pass )
+    {
+        protect_entry(cache_ptr, 0, 0);
+
+        if ( ( ! ( entry_ptr->header.is_protected ) ) || 
+ 	     ( entry_ptr->header.is_read_only ) ||
+	     ( entry_ptr->header.ro_ref_count != 0 ) ) {
+
+            pass = FALSE;
+            failure_mssg = "Unexpected ro protected status 10.\n";
+        }
+    }
+
+#if H5C_COLLECT_CACHE_STATS
+    if ( ( cache_ptr->write_protects[0] != 1 ) ||
+	 ( cache_ptr->read_protects[0] != 4 ) ||
+	 ( cache_ptr->max_read_protects[0] != 3 ) ) {
+
+	pass = FALSE;
+	failure_mssg = "Unexpected protect stats 10.\n";
+    }
+#endif /* H5C_COLLECT_CACHE_STATS */
+
+    if ( pass )
+    {
+        unprotect_entry(cache_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
+
+        if ( ( entry_ptr->header.is_protected ) || 
+ 	     ( entry_ptr->header.is_read_only ) ||
+	     ( entry_ptr->header.ro_ref_count != 0 ) ) {
+
+            pass = FALSE;
+            failure_mssg = "Unexpected ro protected status 11.\n";
+        }
+    }
+
+#if H5C_COLLECT_CACHE_STATS
+    if ( ( cache_ptr->write_protects[0] != 1 ) ||
+	 ( cache_ptr->read_protects[0] != 4 ) ||
+	 ( cache_ptr->max_read_protects[0] != 3 ) ) {
+
+	pass = FALSE;
+	failure_mssg = "Unexpected protect stats 11.\n";
+    }
+#endif /* H5C_COLLECT_CACHE_STATS */
+
+
+    /* Finally, mix things up a little, using a mix of reads and 
+     * and writes on different entries.  Also include a pin to verify
+     * that it works as well.
+     *
+     * Stats are looking OK, so we will only test them one more time
+     * at the end to ensure that all is at it should be.
+     */
+
+    if ( pass ) {
+
+        protect_entry(cache_ptr, 0, 2);		/* (0,2) write */
+        protect_entry_ro(cache_ptr, 0, 4);      /* (0,4) read only (1) */
+	protect_entry(cache_ptr, 0, 6);		/* (0,6) write */
+
+        unprotect_entry(cache_ptr, 0, 2, FALSE, /* (0,2) unprotect */
+			H5C__NO_FLAGS_SET);
+
+        protect_entry_ro(cache_ptr, 0, 2);	/* (0,2) read only (1) */
+	protect_entry(cache_ptr, 0, 1);         /* (0,1) write */
+        protect_entry_ro(cache_ptr, 0, 4);	/* (0,4) read only (2) */
+	protect_entry(cache_ptr, 0, 0);		/* (0,0) write */
+        protect_entry_ro(cache_ptr, 0, 2);	/* (0,2) read only (2) */
+
+        unprotect_entry(cache_ptr, 0, 2, FALSE, /* (0,2) read only (1) pin */
+			H5C__PIN_ENTRY_FLAG);
+        unprotect_entry(cache_ptr, 0, 6, FALSE, /* (0,6) unprotect */
+			H5C__NO_FLAGS_SET);
+
+        protect_entry_ro(cache_ptr, 0, 4);	/* (0,4) read only (3) */
+
+        unprotect_entry(cache_ptr, 0, 2, FALSE, /* (0,2) unprotect */
+			H5C__NO_FLAGS_SET);
+        unprotect_entry(cache_ptr, 0, 1, FALSE, /* (0,1) unprotect */
+			H5C__NO_FLAGS_SET);
+
+	if ( pass ) {
+
+	    entry_ptr = &((entries[0])[4]);
+
+	    if ( H5C_pin_protected_entry(cache_ptr, (void *)entry_ptr) < 0 ) {
+
+	        pass = FALSE;
+	        failure_mssg = "H5C_pin_protected_entry() failed.\n";
+
+	    } else if ( ! (entry_ptr->header.is_pinned) ) {
+
+	        pass = FALSE;
+	        failure_mssg = "entry (0,4) not pinned.\n";
+
+	    } else {
+
+		/* keep test bed sanity checks happy */
+		entry_ptr->is_pinned = TRUE;
+
+	    }
+	}
+
+        unprotect_entry(cache_ptr, 0, 4, FALSE, /* (0,4) read only (2) */
+			H5C__NO_FLAGS_SET);
+        unprotect_entry(cache_ptr, 0, 4, FALSE, /* (0,4) read only (1) */
+			H5C__UNPIN_ENTRY_FLAG);
+
+        if ( ( pass ) && ( entry_ptr->header.is_pinned ) ) {
+
+            pass = FALSE;
+            failure_mssg = "enty (0,4) still pinned.\n";
+
+	}
+
+        unprotect_entry(cache_ptr, 0, 4, FALSE, /* (0,4) unprotect */
+			H5C__NO_FLAGS_SET);
+        unprotect_entry(cache_ptr, 0, 0, FALSE, /* (0,0) unprotect */
+			H5C__NO_FLAGS_SET);
+
+	unpin_entry(cache_ptr, 0, 2);
+    }
+
+#if H5C_COLLECT_CACHE_STATS
+    if ( ( cache_ptr->write_protects[0] != 5 ) ||
+	 ( cache_ptr->read_protects[0] != 9 ) ||
+	 ( cache_ptr->max_read_protects[0] != 3 ) ) {
+
+	pass = FALSE;
+	failure_mssg = "Unexpected protect stats 11.\n";
+    }
+#endif /* H5C_COLLECT_CACHE_STATS */
+
+
+    if ( pass ) {
+
+        takedown_cache(cache_ptr, FALSE, FALSE);
+    }
+
+    if ( pass ) { PASSED(); } else { H5_FAILED(); }
+
+    if ( ! pass ) {
+
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
+                  fcn_name, failure_mssg);
+    }
+
+    return;
+
+} /* check_multiple_read_protect() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	check_rename_entry()
  *
  * Purpose:	Verify that H5C_rename_entry behaves as expected.  In
@@ -14656,6 +15095,11 @@ check_pin_entry_errs(void)
  *
  * Modifications:
  *
+ *    - Modified call to H5C_protect() to pass H5C__NO_FLAGS_SET in the
+ *      the new flags parameter.
+ *
+ *      					JRM -- 3/28/07
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -14691,7 +15135,8 @@ check_double_protect_err(void)
     if ( pass ) {
 
         cache_entry_ptr = H5C_protect(NULL, -1, -1, cache_ptr, &(types[0]),
-                                      entry_ptr->addr, NULL, NULL);
+                                      entry_ptr->addr, NULL, NULL,
+				      H5C__NO_FLAGS_SET);
 
         if ( cache_entry_ptr != NULL ) {
 
@@ -15168,6 +15613,222 @@ check_resize_entry_errs(void)
     return;
 
 } /* check_resize_entry_errs() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	check_unprotect_ro_dirty_err()
+ *
+ * Purpose:	If an entry is protected read only, verify that unprotecting
+ * 		it dirty will generate an error.
+ *
+ * Return:	void
+ *
+ * Programmer:	John Mainzer
+ *              4/3/07
+ *
+ * Modifications:
+ *
+ *		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static void
+check_unprotect_ro_dirty_err(void)
+{
+    const char * fcn_name = "check_unprotect_ro_dirty_err()";
+    //herr_t result;
+    int result;
+    H5C_t * cache_ptr = NULL;
+    test_entry_t * entry_ptr;
+
+    TESTING("unprotect a read only entry dirty error");
+
+    pass = TRUE;
+
+    /* allocate a cache, protect an entry read only, and then unprotect it 
+     * with the dirtied flag set.  This should fail.  Destroy the cache
+     * -- should succeed.
+     */
+
+    /* at present this test will fail due to code allowing current code
+     * to function with errors that are not dangerous.   Thus this test
+     * is commented out for now.  Put in back into use as soon as possible.
+     */
+#if 0 /* JRM */
+    if ( pass ) {
+
+        reset_entries();
+
+        cache_ptr = setup_cache((size_t)(2 * 1024),
+                                (size_t)(1 * 1024));
+
+        protect_entry_ro(cache_ptr, 0, 0);
+
+        entry_ptr = &((entries[0])[0]);
+    }
+
+    if ( pass ) {
+
+        result = H5C_unprotect(NULL, -1, -1, cache_ptr, &(types[0]),
+                               entry_ptr->addr, (void *)entry_ptr,
+                               H5C__DIRTIED_FLAG, (size_t)0);
+
+	entry_ptr->is_dirty = TRUE;
+
+        if ( result >= 0 ) {
+
+            pass = FALSE;
+            failure_mssg =
+                "attempt to unprotect a ro entry dirty succeeded 1.\n";
+        }
+    }
+
+    if ( pass ) {
+
+        takedown_cache(cache_ptr, FALSE, FALSE);
+    }
+#endif
+
+    /* allocate a another cache, protect an entry read only twice, and 
+     * then unprotect it with the dirtied flag set.  This should fail.  
+     * Unprotect it with no flags set twice and then destroy the cache.
+     * This should succeed.
+     */
+
+    if ( pass ) {
+
+        reset_entries();
+
+        cache_ptr = setup_cache((size_t)(2 * 1024),
+                                (size_t)(1 * 1024));
+
+        protect_entry_ro(cache_ptr, 0, 0);
+        protect_entry_ro(cache_ptr, 0, 0);
+
+        entry_ptr = &((entries[0])[0]);
+    }
+
+    if ( pass ) {
+
+        result = H5C_unprotect(NULL, -1, -1, cache_ptr, &(types[0]),
+                               entry_ptr->addr, (void *)entry_ptr,
+                               H5C__DIRTIED_FLAG, (size_t)0);
+
+        if ( result > 0 ) {
+
+            pass = FALSE;
+            failure_mssg =
+                "attempt to unprotect a ro entry dirty succeeded 2.\n";
+        }
+    }
+
+    if ( pass ) {
+
+	unprotect_entry(cache_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
+	unprotect_entry(cache_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
+
+    }
+
+    if ( pass ) {
+
+        takedown_cache(cache_ptr, FALSE, FALSE);
+    }
+
+    if ( pass ) { PASSED(); } else { H5_FAILED(); }
+
+    if ( ! pass ) {
+
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
+                  fcn_name, failure_mssg);
+    }
+
+    return;
+
+} /* check_unprotect_ro_dirty_err() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	check_protect_ro_rw_err()
+ *
+ * Purpose:	If an entry is protected read only, verify that protecting
+ * 		it rw will generate an error.
+ *
+ * Return:	void
+ *
+ * Programmer:	John Mainzer
+ *              4/9/07
+ *
+ * Modifications:
+ *
+ *		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static void
+check_protect_ro_rw_err(void)
+{
+    const char * fcn_name = "check_protect_ro_rw_err()";
+    H5C_t * cache_ptr = NULL;
+    test_entry_t * entry_ptr;
+    void * thing_ptr = NULL;
+
+    TESTING("protect a read only entry rw error");
+
+    pass = TRUE;
+
+    /* allocate a cache, protect an entry read only, and then try to protect 
+     * it again rw.  This should fail.
+     * 
+     * Unprotect the entry and destroy the cache -- should succeed.
+     */
+
+    if ( pass ) {
+
+        reset_entries();
+
+        cache_ptr = setup_cache((size_t)(2 * 1024),
+                                (size_t)(1 * 1024));
+
+        protect_entry_ro(cache_ptr, 0, 0);
+
+        entry_ptr = &((entries[0])[0]);
+    }
+
+    if ( pass ) {
+
+        thing_ptr = H5C_protect(NULL, -1, -1, cache_ptr, &(types[0]),
+                                entry_ptr->addr, NULL, NULL, H5C__NO_FLAGS_SET);
+
+        if ( thing_ptr != NULL ) {
+
+            pass = FALSE;
+            failure_mssg = "attempt to protect a ro entry rw succeeded.\n";
+        }
+    }
+
+    if ( pass ) {
+
+	unprotect_entry(cache_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
+    }
+
+    if ( pass ) {
+
+        takedown_cache(cache_ptr, FALSE, FALSE);
+    }
+
+    if ( pass ) { PASSED(); } else { H5_FAILED(); }
+
+    if ( ! pass ) {
+
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
+                  fcn_name, failure_mssg);
+    }
+
+    return;
+
+} /* check_protect_ro_rw_err() */
 
 
 /*-------------------------------------------------------------------------
@@ -24181,6 +24842,7 @@ main(void)
     check_flush_cache();
     check_get_entry_status();
     check_expunge_entry();
+    check_multiple_read_protect();
     check_rename_entry();
     check_pin_protected_entry();
     check_resize_entry();
@@ -24197,6 +24859,8 @@ main(void)
     check_mark_entry_dirty_errs();
     check_expunge_entry_errs();
     check_resize_entry_errs();
+    check_unprotect_ro_dirty_err();
+    check_protect_ro_rw_err();
     check_auto_cache_resize();
     check_auto_cache_resize_disable();
     check_auto_cache_resize_epoch_markers();

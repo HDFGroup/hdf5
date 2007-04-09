@@ -568,6 +568,25 @@
  *		equal to the array index has not been in cache when
  *		requested in the current epoch.
  *
+ * write_protects:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells
+ * 		are used to record the number of times an entry with type id
+ * 		equal to the array index has been write protected in the 
+ * 		current epoch.
+ *
+ * 		Observe that (hits + misses) = (write_protects + read_protects).
+ *
+ * read_protects: Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells
+ *              are used to record the number of times an entry with type id
+ *              equal to the array index has been read protected in the
+ *              current epoch.
+ *
+ *              Observe that (hits + misses) = (write_protects + read_protects).
+ *
+ * max_read_protects:  Array of int32 of length H5C__MAX_NUM_TYPE_IDS + 1. 
+ * 		The cells are used to maximum number of simultaneous read 
+ * 		protects on any entry with type id equal to the array index 
+ * 		in the current epoch.
+ *
  * insertions:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells
  *		are used to record the number of times an entry with type
  *		id equal to the array index has been inserted into the
@@ -844,6 +863,9 @@ struct H5C_t
     /* stats fields */
     int64_t                     hits[H5C__MAX_NUM_TYPE_IDS + 1];
     int64_t                     misses[H5C__MAX_NUM_TYPE_IDS + 1];
+    int64_t                     write_protects[H5C__MAX_NUM_TYPE_IDS + 1];
+    int64_t                     read_protects[H5C__MAX_NUM_TYPE_IDS + 1];
+    int32_t                     max_read_protects[H5C__MAX_NUM_TYPE_IDS + 1];
     int64_t                     insertions[H5C__MAX_NUM_TYPE_IDS + 1];
     int64_t                     pinned_insertions[H5C__MAX_NUM_TYPE_IDS + 1];
     int64_t                     clears[H5C__MAX_NUM_TYPE_IDS + 1];

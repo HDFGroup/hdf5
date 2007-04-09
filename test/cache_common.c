@@ -1537,6 +1537,10 @@ entry_in_cache(H5C_t * cache_ptr,
  * 		Added initialization for new pinned entry test related
  * 		fields.
  *
+ * 		JRM -- 4/1/07
+ * 		Added initialization for the new is_read_only, and 
+ * 		ro_ref_count fields.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -1574,6 +1578,9 @@ reset_entries(void)
             base_addr[j].header.type = NULL;
             base_addr[j].header.is_dirty = FALSE;
             base_addr[j].header.is_protected = FALSE;
+            base_addr[j].header.is_read_only = FALSE;
+            base_addr[j].header.ro_ref_count = FALSE;
+            base_addr[j].header.max_ro_ref_count = 0;
             base_addr[j].header.next = NULL;
             base_addr[j].header.prev = NULL;
             base_addr[j].header.aux_next = NULL;
@@ -1592,6 +1599,8 @@ reset_entries(void)
             base_addr[j].writes = 0;
             base_addr[j].is_dirty = FALSE;
             base_addr[j].is_protected = FALSE;
+            base_addr[j].is_read_only = FALSE;
+            base_addr[j].ro_ref_count = FALSE;
 
             base_addr[j].is_pinned = FALSE;
 	    base_addr[j].pinning_ref_count = 0;
@@ -2683,6 +2692,10 @@ rename_entry(H5C_t * cache_ptr,
  *              6/11/04
  *
  * Modifications:
+ *	
+ *    - Modified call to H5C_protect to pass H5C__NO_FLAGS_SET in the 
+ *      new flags parameter.
+ *    						JRM -- 3/28/07
  *
  *-------------------------------------------------------------------------
  */
@@ -2712,7 +2725,8 @@ protect_entry(H5C_t * cache_ptr,
         HDassert( !(entry_ptr->is_protected) );
 
         cache_entry_ptr = H5C_protect(NULL, -1, -1, cache_ptr, &(types[type]),
-                                      entry_ptr->addr, NULL, NULL);
+                                      entry_ptr->addr, NULL, NULL,
+				      H5C__NO_FLAGS_SET);
 
         if ( ( cache_entry_ptr != (void *)entry_ptr ) ||
              ( !(entry_ptr->header.is_protected) ) ||
@@ -2761,6 +2775,86 @@ protect_entry(H5C_t * cache_ptr,
     return;
 
 } /* protect_entry() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	protect_entry_ro()
+ *
+ * Purpose:	Do a read only protect the entry indicated by the type 
+ * 		and index.
+ *
+ *		Do nothing if pass is FALSE on entry.
+ *
+ * Return:	void
+ *
+ * Programmer:	John Mainzer
+ *              4/1/07
+ *
+ * Modifications:
+ *	
+ *    - None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+void
+protect_entry_ro(H5C_t * cache_ptr,
+                int32_t type,
+                int32_t idx)
+{
+    /* const char * fcn_name = "protect_entry_ro()"; */
+    test_entry_t * base_addr;
+    test_entry_t * entry_ptr;
+    H5C_cache_entry_t * cache_entry_ptr;
+
+    if ( pass ) {
+
+        HDassert( cache_ptr );
+        HDassert( ( 0 <= type ) && ( type < NUMBER_OF_ENTRY_TYPES ) );
+        HDassert( ( 0 <= idx ) && ( idx <= max_indices[type] ) );
+
+        base_addr = entries[type];
+        entry_ptr = &(base_addr[idx]);
+
+        HDassert( entry_ptr->index == idx );
+        HDassert( entry_ptr->type == type );
+        HDassert( entry_ptr == entry_ptr->self );
+        HDassert( ( ! ( entry_ptr->is_protected ) ) || 
+		  ( ( entry_ptr->is_read_only ) && 
+		    ( entry_ptr->ro_ref_count > 0 ) ) );
+
+        cache_entry_ptr = H5C_protect(NULL, -1, -1, cache_ptr, &(types[type]),
+                                      entry_ptr->addr, NULL, NULL,
+				      H5C__READ_ONLY_FLAG);
+
+        if ( ( cache_entry_ptr != (void *)entry_ptr ) ||
+             ( !(entry_ptr->header.is_protected) ) ||
+             ( !(entry_ptr->header.is_read_only) ) ||
+             ( entry_ptr->header.ro_ref_count <= 0 ) ||
+             ( entry_ptr->header.type != &(types[type]) ) ||
+             ( entry_ptr->size != entry_ptr->header.size ) ||
+             ( entry_ptr->addr != entry_ptr->header.addr ) ) {
+
+            pass = FALSE;
+            failure_mssg = "error in read only H5C_protect().";
+
+        } else {
+
+	    HDassert( ( entry_ptr->cache_ptr == NULL ) ||
+		      ( entry_ptr->cache_ptr == cache_ptr ) );
+
+	    entry_ptr->cache_ptr = cache_ptr;
+            entry_ptr->is_protected = TRUE;
+	    entry_ptr->is_read_only = TRUE;
+	    entry_ptr->ro_ref_count++;
+        }
+
+        HDassert( ((entry_ptr->header).type)->id == type );
+    }
+
+    return;
+
+} /* protect_entry_ro() */
 
 
 /*-------------------------------------------------------------------------
@@ -2862,6 +2956,9 @@ unpin_entry(H5C_t * cache_ptr,
  *		JRM -- 3/31/06
  *		Update for pinned entries.
  *
+ *		JRM -- 4/1/07 
+ *		Updated for new multiple read protects.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -2913,10 +3010,32 @@ unprotect_entry(H5C_t * cache_ptr,
                                flags, (size_t)0);
 
         if ( ( result < 0 ) ||
-             ( entry_ptr->header.is_protected ) ||
+             ( ( entry_ptr->header.is_protected ) &&
+	       ( ( ! ( entry_ptr->is_read_only ) ) ||
+		 ( entry_ptr->ro_ref_count <= 0 ) ) ) ||
              ( entry_ptr->header.type != &(types[type]) ) ||
              ( entry_ptr->size != entry_ptr->header.size ) ||
              ( entry_ptr->addr != entry_ptr->header.addr ) ) {
+
+#if 1 /* JRM */
+	    if ( result < 0 ) {
+		HDfprintf(stdout, "result is negative.\n");
+	    }
+	    if ( ( entry_ptr->header.is_protected ) &&
+                 ( ( ! ( entry_ptr->is_read_only ) ) ||
+                   ( entry_ptr->ro_ref_count <= 0 ) ) ) {
+		HDfprintf(stdout, "protected and not RO or refcnt <= 0.\n");
+	    }
+            if ( entry_ptr->header.type != &(types[type]) ) {
+		HDfprintf(stdout, "type disagreement.\n");
+	    }
+	    if ( entry_ptr->size != entry_ptr->header.size ) {
+		HDfprintf(stdout, "size disagreement.\n");
+	    }
+	    if ( entry_ptr->addr != entry_ptr->header.addr ) {
+		HDfprintf(stdout, "addr disagreement.\n");
+	    }
+#endif /* JRM */
 
             pass = FALSE;
             failure_mssg = "error in H5C_unprotect().";
@@ -2924,7 +3043,21 @@ unprotect_entry(H5C_t * cache_ptr,
         }
         else
         {
-            entry_ptr->is_protected = FALSE;
+	    if ( entry_ptr->ro_ref_count > 1 ) {
+
+		entry_ptr->ro_ref_count--;
+
+	    } else if ( entry_ptr->ro_ref_count == 1 ) {
+
+		entry_ptr->is_protected = FALSE;
+		entry_ptr->is_read_only = FALSE;
+		entry_ptr->ro_ref_count = 0;
+
+	    } else {
+            
+		entry_ptr->is_protected = FALSE;
+
+	    }
 
 	    if ( pin_flag_set ) {
 
@@ -2947,6 +3080,10 @@ unprotect_entry(H5C_t * cache_ptr,
             HDassert( entry_ptr->header.is_dirty );
             HDassert( entry_ptr->is_dirty );
         }
+
+	HDassert( entry_ptr->header.is_protected == entry_ptr->is_protected );
+	HDassert( entry_ptr->header.is_read_only == entry_ptr->is_read_only );
+	HDassert( entry_ptr->header.ro_ref_count == entry_ptr->ro_ref_count );
     }
 
     return;
@@ -3092,6 +3229,10 @@ unprotect_entry_with_size_change(H5C_t * cache_ptr,
  *
  * Modifications:
  *
+ * 		JRM -- 4/4/07
+ * 		Added code supporting multiple read only protects.
+ * 		Note that this increased the minimum lag to 10.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -3107,6 +3248,7 @@ row_major_scan_forward(H5C_t * cache_ptr,
                        hbool_t do_renames,
                        hbool_t rename_to_main_addr,
                        hbool_t do_destroys,
+		       hbool_t do_mult_ro_protects,
                        int dirty_destroys,
                        int dirty_unprotects)
 {
@@ -3117,7 +3259,7 @@ row_major_scan_forward(H5C_t * cache_ptr,
     if ( verbose )
         HDfprintf(stdout, "%s(): entering.\n", fcn_name);
 
-    HDassert( lag > 5 );
+    HDassert( lag >= 10 );
 
     type = 0;
 
@@ -3132,6 +3274,11 @@ row_major_scan_forward(H5C_t * cache_ptr,
 
         while ( ( pass ) && ( idx <= (max_indices[type] + lag) ) )
         {
+	    if ( verbose ) {
+
+                HDfprintf(stdout, "%d:%d: ", type, idx);
+	    }
+
             if ( ( pass ) && ( do_inserts ) && ( (idx + lag) >= 0 ) &&
                  ( (idx + lag) <= max_indices[type] ) &&
                  ( ((idx + lag) % 2) == 0 ) &&
@@ -3197,6 +3344,78 @@ row_major_scan_forward(H5C_t * cache_ptr,
                                 H5C__NO_FLAGS_SET);
             }
 
+	    if ( do_mult_ro_protects )
+	    {
+		if ( ( pass ) && ( (idx + lag - 5) >= 0 ) &&
+		     ( (idx + lag - 5) < max_indices[type] ) &&
+		     ( (idx + lag - 5) % 9 == 0 ) ) {
+
+                    if ( verbose )
+                        HDfprintf(stdout, "(p-ro, %d, %d) ", type, 
+				  (idx + lag - 5));
+
+		    protect_entry_ro(cache_ptr, type, (idx + lag - 5));
+		}
+
+		if ( ( pass ) && ( (idx + lag - 6) >= 0 ) &&
+		     ( (idx + lag - 6) < max_indices[type] ) &&
+		     ( (idx + lag - 6) % 11 == 0 ) ) {
+
+                    if ( verbose )
+                        HDfprintf(stdout, "(p-ro, %d, %d) ", type, 
+				  (idx + lag - 6));
+
+		    protect_entry_ro(cache_ptr, type, (idx + lag - 6));
+		}
+
+		if ( ( pass ) && ( (idx + lag - 7) >= 0 ) &&
+		     ( (idx + lag - 7) < max_indices[type] ) &&
+		     ( (idx + lag - 7) % 13 == 0 ) ) {
+
+                    if ( verbose )
+                        HDfprintf(stdout, "(p-ro, %d, %d) ", type, 
+				  (idx + lag - 7));
+
+		    protect_entry_ro(cache_ptr, type, (idx + lag - 7));
+		}
+
+		if ( ( pass ) && ( (idx + lag - 7) >= 0 ) &&
+		     ( (idx + lag - 7) < max_indices[type] ) &&
+		     ( (idx + lag - 7) % 9 == 0 ) ) {
+
+                    if ( verbose )
+                        HDfprintf(stdout, "(u-ro, %d, %d) ", type, 
+				  (idx + lag - 7));
+
+		    unprotect_entry(cache_ptr, type, (idx + lag - 7),
+				    FALSE, H5C__NO_FLAGS_SET);
+		}
+
+		if ( ( pass ) && ( (idx + lag - 8) >= 0 ) &&
+		     ( (idx + lag - 8) < max_indices[type] ) &&
+		     ( (idx + lag - 8) % 11 == 0 ) ) {
+
+                    if ( verbose )
+                        HDfprintf(stdout, "(u-ro, %d, %d) ", type, 
+				  (idx + lag - 8));
+
+		    unprotect_entry(cache_ptr, type, (idx + lag - 8),
+				    FALSE, H5C__NO_FLAGS_SET);
+		}
+
+		if ( ( pass ) && ( (idx + lag - 9) >= 0 ) &&
+		     ( (idx + lag - 9) < max_indices[type] ) &&
+		     ( (idx + lag - 9) % 13 == 0 ) ) {
+
+                    if ( verbose )
+                        HDfprintf(stdout, "(u-ro, %d, %d) ", type, 
+				  (idx + lag - 9));
+
+		    unprotect_entry(cache_ptr, type, (idx + lag - 9),
+				    FALSE, H5C__NO_FLAGS_SET);
+		}
+	    } /* if ( do_mult_ro_protects ) */
+
             if ( ( pass ) && ( idx >= 0 ) && ( idx <= max_indices[type] ) ) {
 
                 if ( verbose )
@@ -3204,7 +3423,6 @@ row_major_scan_forward(H5C_t * cache_ptr,
 
                 protect_entry(cache_ptr, type, idx);
             }
-
 
             if ( ( pass ) && ( (idx - lag + 2) >= 0 ) &&
                  ( (idx - lag + 2) <= max_indices[type] ) &&
@@ -3433,6 +3651,10 @@ hl_row_major_scan_forward(H5C_t * cache_ptr,
  *
  * Modifications:
  *
+ * 		JRM -- 4/4/07
+ * 		Added code supporting multiple read only protects.
+ * 		Note that this increased the minimum lag to 10.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -3448,6 +3670,7 @@ row_major_scan_backward(H5C_t * cache_ptr,
                         hbool_t do_renames,
                         hbool_t rename_to_main_addr,
                         hbool_t do_destroys,
+			hbool_t do_mult_ro_protects,
                         int dirty_destroys,
                         int dirty_unprotects)
 {
@@ -3458,7 +3681,7 @@ row_major_scan_backward(H5C_t * cache_ptr,
     if ( verbose )
         HDfprintf(stdout, "%s(): Entering.\n", fcn_name);
 
-    HDassert( lag > 5 );
+    HDassert( lag >= 10 );
 
     type = NUMBER_OF_ENTRY_TYPES - 1;
 
@@ -3537,6 +3760,78 @@ row_major_scan_backward(H5C_t * cache_ptr,
                 unprotect_entry(cache_ptr, type, idx-lag+5, NO_CHANGE,
                                 H5C__NO_FLAGS_SET);
             }
+
+	    if ( do_mult_ro_protects )
+	    {
+		if ( ( pass ) && ( (idx - lag + 5) >= 0 ) &&
+		     ( (idx - lag + 5) < max_indices[type] ) &&
+		     ( (idx - lag + 5) % 9 == 0 ) ) {
+
+                    if ( verbose )
+                        HDfprintf(stdout, "(p-ro, %d, %d) ", type, 
+				  (idx - lag + 5));
+
+		    protect_entry_ro(cache_ptr, type, (idx - lag + 5));
+		}
+
+		if ( ( pass ) && ( (idx - lag + 6) >= 0 ) &&
+		     ( (idx - lag + 6) < max_indices[type] ) &&
+		     ( (idx - lag + 6) % 11 == 0 ) ) {
+
+                    if ( verbose )
+                        HDfprintf(stdout, "(p-ro, %d, %d) ", type, 
+				  (idx - lag + 6));
+
+		    protect_entry_ro(cache_ptr, type, (idx - lag + 6));
+		}
+
+		if ( ( pass ) && ( (idx - lag + 7) >= 0 ) &&
+		     ( (idx - lag + 7) < max_indices[type] ) &&
+		     ( (idx - lag + 7) % 13 == 0 ) ) {
+
+                    if ( verbose )
+                        HDfprintf(stdout, "(p-ro, %d, %d) ", type, 
+				  (idx - lag + 7));
+
+		    protect_entry_ro(cache_ptr, type, (idx - lag + 7));
+		}
+
+		if ( ( pass ) && ( (idx - lag + 7) >= 0 ) &&
+		     ( (idx - lag + 7) < max_indices[type] ) &&
+		     ( (idx - lag + 7) % 9 == 0 ) ) {
+
+                    if ( verbose )
+                        HDfprintf(stdout, "(u-ro, %d, %d) ", type, 
+				  (idx - lag + 7));
+
+		    unprotect_entry(cache_ptr, type, (idx - lag + 7),
+				    FALSE, H5C__NO_FLAGS_SET);
+		}
+
+		if ( ( pass ) && ( (idx - lag + 8) >= 0 ) &&
+		     ( (idx - lag + 8) < max_indices[type] ) &&
+		     ( (idx - lag + 8) % 11 == 0 ) ) {
+
+                    if ( verbose )
+                        HDfprintf(stdout, "(u-ro, %d, %d) ", type, 
+				  (idx - lag + 8));
+
+		    unprotect_entry(cache_ptr, type, (idx - lag + 8),
+				    FALSE, H5C__NO_FLAGS_SET);
+		}
+
+		if ( ( pass ) && ( (idx - lag + 9) >= 0 ) &&
+		     ( (idx - lag + 9) < max_indices[type] ) &&
+		     ( (idx - lag + 9) % 13 == 0 ) ) {
+
+                    if ( verbose )
+                        HDfprintf(stdout, "(u-ro, %d, %d) ", type, 
+				  (idx - lag + 9));
+
+		    unprotect_entry(cache_ptr, type, (idx - lag + 9),
+				    FALSE, H5C__NO_FLAGS_SET);
+		}
+	    } /* if ( do_mult_ro_protects ) */
 
             if ( ( pass ) && ( idx >= 0 ) && ( idx <= max_indices[type] ) ) {
 
