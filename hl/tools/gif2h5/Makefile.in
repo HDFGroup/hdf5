@@ -48,7 +48,7 @@ PUB_LIB=
 
 ## Source and object files for programs...
 ##
-PROG_SRC=decompress.c gif2hdf.c gif2mem.c gifread.c hdf2gif.c hdfgifwr.c readhdf.c writehdf.c
+PROG_SRC=decompress.c gif2hdf.c gif2mem.c gifread.c hdf2gif.c hdfgifwr.c writehdf.c
 PROG_OBJ=$(PROG_SRC:.c=.lo)
 
 PRIVATE_HDR=gif.h
@@ -77,8 +77,8 @@ $(PROGS): $(LIBHDF5_HL) $(LIBTOOLS) $(LIBHDF5)
 gif2h5: gif2hdf.lo gif2mem.lo decompress.lo gifread.lo writehdf.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ gif2hdf.lo gif2mem.lo decompress.lo gifread.lo writehdf.lo  $(LIBHDF5_HL) $(LIBTOOLS) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
-h52gif: hdf2gif.lo hdfgifwr.lo readhdf.lo
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ hdf2gif.lo hdfgifwr.lo readhdf.lo $(LIBHDF5_HL) $(LIBTOOLS) $(LIBHDF5) $(LDFLAGS) $(LIBS)
+h52gif: hdf2gif.lo hdfgifwr.lo 
+	@$(LT_LINK_EXE) $(CFLAGS) -o $@ hdf2gif.lo hdfgifwr.lo $(LIBHDF5_HL) $(LIBTOOLS) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 h52gifgentst: h52gifgentst.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h52gifgentst.lo $(LIBHDF5_HL) $(LIBTOOLS) $(LIBHDF5) $(LDFLAGS) $(LIBS)

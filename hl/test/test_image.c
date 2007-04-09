@@ -18,8 +18,8 @@
 
 #define FILE_NAME "test_image.h5"
 
-#define WIDTH       (hsize_t)400
-#define HEIGHT      (hsize_t)200
+#define WIDTH        400
+#define HEIGHT       200
 #define PAL_ENTRIES  256
 #define IMAGE1_NAME  "image1"
 #define IMAGE2_NAME  "image2"
@@ -32,11 +32,11 @@
  */
 int main( void )
 {
-    hsize_t       width, height, planes;
+    hsize_t       width    = WIDTH;
+    hsize_t       height   = HEIGHT;
+    hsize_t       planes;
     hid_t         fid;
     int           i, j, n, space;
-    int iWIDTH    = (int) WIDTH;
-    int iHEIGHT   = (int) HEIGHT;
     char          interlace[20];
     hssize_t      npals;
     
@@ -55,8 +55,8 @@ int main( void )
     hsize_t       pal_dims_out[2];               /* palette dimensions */
     
     /* create an image */
-    space = iWIDTH*iHEIGHT / PAL_ENTRIES;
-    for (i=0, j=0, n=0; i < iWIDTH*iHEIGHT; i++, j++ )
+    space = WIDTH*HEIGHT / PAL_ENTRIES;
+    for (i=0, j=0, n=0; i < WIDTH*HEIGHT; i++, j++ )
     {
         buf1[i] = n;
         if ( j > space )
@@ -64,21 +64,25 @@ int main( void )
             n++;
             j=0;
         }
-        if (n>PAL_ENTRIES-1) n=0;
+        
     }
     
     
     /* create an image */
-    space = iWIDTH*iHEIGHT / PAL_ENTRIES;
-    for (i=0, j=0, n=0; i < iWIDTH*iHEIGHT*3; i++, j++ )
+    space = WIDTH*HEIGHT / 256;
+    for (i=0, j=0, n=0; i < WIDTH*HEIGHT*3; i+=3, j++ )
     {
-        buf2[i] = n;
+        unsigned char r, g, b;
+
+        r = n; g = 0; b = 255-n;
+        buf2[i]   = r;
+        buf2[i+1] = g;
+        buf2[i+2] = b;
         if ( j > space )
         {
             n++;
             j=0;
         }
-        if (n>PAL_ENTRIES-1) n=0;
     }
     
    /*-------------------------------------------------------------------------
@@ -103,7 +107,7 @@ int main( void )
     TESTING("indexed image");
     
     /* Write image */
-    if ( H5IMmake_image_8bit( fid, IMAGE1_NAME, WIDTH, HEIGHT, buf1 ) < 0 )
+    if ( H5IMmake_image_8bit( fid, IMAGE1_NAME, width, height, buf1 ) < 0 )
         goto out;
     
     /* Make a palette */
@@ -139,7 +143,7 @@ int main( void )
     TESTING("true color image");
     
     /* Write image */
-    if ( H5IMmake_image_24bit( fid, IMAGE2_NAME, WIDTH, HEIGHT, "INTERLACE_PIXEL", buf2 ) )
+    if ( H5IMmake_image_24bit( fid, IMAGE2_NAME, width, height, "INTERLACE_PIXEL", buf2 ) )
         goto out;
     
     /* Read image */
@@ -158,7 +162,7 @@ int main( void )
     
     PASSED();
     
-    /*-------------------------------------------------------------------------
+   /*-------------------------------------------------------------------------
     * H5IMget_npalettes test
     *-------------------------------------------------------------------------
     */

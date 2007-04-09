@@ -15,6 +15,7 @@
 #
 # HDF Utilities Test script
 
+
 TESTFILE1="$srcdir/../testfiles/h52giftst.h5"
 TESTFILE2="$srcdir/../testfiles/image1.gif"
 
@@ -26,36 +27,39 @@ TESTING() {
    echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
 }
 
+
+
 TOOLTEST1()
 {
-err=0
-$RUNSERIAL ./h52gif $*
-
-if [ $err -eq 1 ]; then
-errors="` expr $errors + 1 `";
+ $RUNSERIAL ./h52gif $*
+ 
+ RET=$?
+ if [ $RET != 0 ] ; then
   echo "*FAILED*"
-else
+  errors="` expr $errors + 1 `";
+ else
   echo " PASSED"
-fi
+ fi
+
 }
 
 TOOLTEST2()
 {
-err=0
-$RUNSERIAL ./gif2h5 $*
-
-if [ $err -eq 1 ]; then
-errors="` expr $errors + 1 `";
+ $RUNSERIAL ./gif2h5 $*
+ 
+ RET=$?
+ if [ $RET != 0 ] ; then
   echo "*FAILED*"
-else
+  errors="` expr $errors + 1 `";
+ else
   echo " PASSED"
-fi
+ fi
 }
 
 
 
-TESTING "./h52gif h52giftst.h5 image1.gif -i 12345678 -p palette" 
-TOOLTEST1 $TESTFILE1 image1.gif -i 12345678 -p palette
+TESTING "./h52gif h52giftst.h5 image1.gif -i image" 
+TOOLTEST1 $TESTFILE1 image1.gif -i image
 TESTING "./gif2h5 image1.gif image1.h5"
 TOOLTEST2 $TESTFILE2 image1.h5
 

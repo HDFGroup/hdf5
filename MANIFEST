@@ -1998,7 +1998,6 @@
 ./hl/tools/gif2h5/gifread.c
 ./hl/tools/gif2h5/hdf2gif.c
 ./hl/tools/gif2h5/hdfgifwr.c
-./hl/tools/gif2h5/readhdf.c
 ./hl/tools/gif2h5/writehdf.c
 ./hl/tools/gif2h5/h52gifgentst.c
 ./hl/tools/gif2h5/h52giftest.sh
