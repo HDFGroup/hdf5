@@ -76,13 +76,13 @@ using namespace H5;
 #endif
 
 const H5std_string	FILE_NAME( "tmpapp.h5" );
-extern "C" int sub1(void);
-extern "C" int sub2(void);
+int sub1(void);
+int sub2(void);
 
 int main (void)
 {
-    //sub1();
-    //sub2();
+    sub1();
+    sub2();
     H5File file( FILE_NAME, H5F_ACC_TRUNC );
     return 0;
 }
