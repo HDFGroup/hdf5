@@ -19,15 +19,18 @@
 # Modification:
 #
 
+# Initializations
 # Where the tool is installed.
 prefix="@prefix@"
 PARALLEL=@PARALLEL@		# Am I in parallel mode?
+AR=@AR@
+RANLIB=@RANLIB@
 if [ "$PARALLEL" = no ]; then
-    H5TOOL="h5cc"           	# The tool name
+    H5TOOL="h5fc"           	# The tool name
 else
-    H5TOOL="h5pcc"               # The tool name
+    H5TOOL="h5pfc"               # The tool name
 fi
-H5TOOL_BIN="${prefix}/bin/${H5TOOL} -show"   # The path of the tool binary
+H5TOOL_BIN="${prefix}/bin/${H5TOOL}"   # The path of the tool binary
 
 CMP='cmp -s'
 DIFF='diff -c'
@@ -39,6 +42,81 @@ verbose=yes
 if test -z "$srcdir"; then
    srcdir=.
 fi
+
+# Generate some source files and library for tests.
+suffix=f90		# source file suffix
+hdf5main=${H5TOOL}_hdf5main.$suffix
+hdf5main_o=${H5TOOL}_hdf5main.o
+appmain=${H5TOOL}_appmain.$suffix
+appmain_o=${H5TOOL}_appmain.o
+prog1=${H5TOOL}_prog1.$suffix
+prog1_o=${H5TOOL}_prog1.o
+prog2=${H5TOOL}_prog2.$suffix
+prog2_o=${H5TOOL}_prog2.o
+applib=libapp${H5TOOL}.a
+
+# short hands
+temp_SRC="$hdf5main $appmain $prog1 $prog2"
+temp_OBJ=`echo $temp_SRC | sed -e 's/${suffix}/.o/g'`
+temp_FILES="a.out *.h5 $applib"
+
+# Generate appmain:
+# An application Main that calls hdf5 and application's own functions.
+cat > $appmain <<EOF
+     PROGRAM FILEEXAMPLE
+     USE HDF5 ! This module contains all necessary modules 
+        
+     IMPLICIT NONE
+
+     CHARACTER(LEN=8), PARAMETER :: filename = "apptmp.h5" ! File name
+     INTEGER(HID_T) :: file_id                            ! File identifier
+ 
+     INTEGER     ::   error  ! Error flag
+
+     CALL sub1
+     CALL h5open_f (error)
+     CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error)
+     CALL h5fclose_f(file_id, error)
+     CALL h5close_f(error)
+     CALL sub2
+     END PROGRAM FILEEXAMPLE 
+EOF
+
+# generate prog1
+cat > $prog1 <<EOF
+	subroutine sub1
+	print *, "in sub1"
+	end
+EOF
+
+# generate prog2
+cat > $prog2 <<EOF
+	subroutine sub2
+	print *, "in sub2"
+	end
+EOF
+
+# Generate HDF5 Main Program:
+# An HDF5 sample program that calls hdf5 functions.
+cat > $hdf5main <<EOF
+     PROGRAM FILEEXAMPLE
+     USE HDF5 ! This module contains all necessary modules 
+        
+     IMPLICIT NONE
+
+     CHARACTER(LEN=8), PARAMETER :: filename = "apptmp.h5" ! File name
+     INTEGER(HID_T) :: file_id                            ! File identifier
+ 
+     INTEGER     ::   error  ! Error flag
+
+     CALL h5open_f (error)
+     CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error)
+     CALL h5fclose_f(file_id, error)
+     CALL h5close_f(error)
+     END PROGRAM FILEEXAMPLE 
+EOF
+
+
 
 # Parse option
 #   None
@@ -72,7 +150,7 @@ DPRINT() {
 #
 # Algorithm:
 # First figure out the parameters (e.g., compiler name and option, linker name and
-# options, libraries used, ....) that the h5fc command uses.  Then use the -show to
+# options, libraries used, ....) that the h5cc command uses.  Then use the -show to
 # display what commands the tool will use for different parameter and verify if they
 # are as expected.
 # The paramters have two part, prefix and suffix. The prefix part is the real compiler
@@ -85,61 +163,28 @@ DPRINT() {
 # $2-$: remainign arguments
 #
 TOOLTEST() {
-    dummy_f=zzdummy.f90
-    dummy_o=`echo $dummy_f | sed -e s/.f90$/.o/`
-    expect=test_$H5TOOL_$$.expected
-    actual=test_$H5TOOL_$$.result
-
-    cmdtype=$1
-    shift
-
-    # figure out compiling prefix and suffix
-    xcommand="`$H5TOOL_BIN -c $dummy_f`"
-    DPRINT xcommand=$xcommand
-    compile_prefix="`echo $xcommand | sed -e s/-c\ ${dummy_f}.*//`"
-    compile_suffix="`echo $xcommand | sed -e s/.*\ -c\ ${dummy_f}//`"
-    DPRINT compile_prefix=$compile_prefix
-    DPRINT compile_suffix=$compile_suffix
-
-    # figure out linking prefix and suffix
-    xcommand="`$H5TOOL_BIN $dummy_o`"
-    link_prefix="`echo $xcommand | sed -e s/${dummy_o}.*//`"
-    link_suffix="`echo $xcommand | sed -e s/.*${dummy_o}//`"
-    DPRINT link_prefix=$link_prefix
-    DPRINT link_suffix=$link_suffix
-
-    # create the expected result
-    cp /dev/null $expect	# empty it
-    if [ $cmdtype = -C -o $cmdtype = -CL ]; then
-	echo $compile_prefix $* > $expect
-    fi
-    if [ $cmdtype = -L -o $cmdtype = -CL ]; then
-	echo $link_prefix $* $link_suffix > $expect
-    fi
+    out=test_$H5TOOL_$$.out
+    err=test_$H5TOOL_$$.err
 
     # Run test.
-    # Tflops interprets "$@" as "" when no parameter is given (e.g., the
-    # case of missing file name).  Changed it to use $@ till Tflops fixes it.
     TESTING $H5TOOL $@
-    $H5TOOL_BIN $* > $actual 2>&1
-
-    if $CMP $expect $actual; then
+    $H5TOOL_BIN $@ > $out 2>&1
+    result=$?
+    if [ $result = 0 ]; then
 	echo " PASSED"
     else
 	echo "*FAILED*"
 	nerrors="`expr $nerrors + 1`"
 	test yes = "$verbose" && \
-	    ( echo "========== Expected results ($expect) ==========="; cat $expect;
-	      echo "========== Actual results ($actual) ==========="; cat $actual;
+	    ( echo "========== results ==========="; cat $out;
 	      echo "===============================================") |sed 's/^/    /'
     fi
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-	rm -f $actual $expect
+	rm -f $out
     fi
 }
-
 
 # Print a "SKIP" message
 SKIP() {
@@ -151,16 +196,41 @@ SKIP() {
 ##############################################################################
 ###			  T H E   T E S T S                                ###
 ##############################################################################
-TOOLTEST -C -c A.f90
-TOOLTEST -C -c A.f90 B.f90
-TOOLTEST -L  A.o
-TOOLTEST -L  A.o B.o
-TOOLTEST -L  A.o B.o L.a
-SKIP -CL A.f90 B.f90 L.a
+#
+# HDF5 program that calls HDF5 APIs.
+echo "***"Simple Compile and Link in one step.
+TOOLTEST $hdf5main
+# Application program that calls HDF5 and its own functions.
+TOOLTEST $appmain $prog1 $prog2
 
-# ##############################################################################
-# # END
-# ##############################################################################
+# Compile, then link.
+echo "***"Compile and Link in two steps.
+TOOLTEST -c $hdf5main
+TOOLTEST $hdf5main_o
+TOOLTEST -c $appmain $prog1 $prog2
+TOOLTEST $appmain_o $prog1_o $prog2_o
+
+# Build external library, then link with it.
+echo "***"Build external library and link with it.
+TOOLTEST -c $prog1 $prog2
+$AR cru $applib $prog1_o $prog2_o
+$RANLIB $applib
+SKIP $appmain $applib
+SKIP $appmain_o $applib
+
+# Just cpp, no compile, no link.
+echo "***"Just cpp, no compile, no link.
+TOOLTEST -E $hdf5main
+TOOLTEST -E $appmain $prog1 $prog2
+
+##############################################################################
+# END
+##############################################################################
+
+# Clean up  file
+if test -z "$HDF5_NOCLEANUP"; then
+    rm -f $temp_SRC $temp_OBJ $temp_FILES
+fi
 
 if test $nerrors -eq 0 ; then
    echo "All $H5TOOL tests passed."
