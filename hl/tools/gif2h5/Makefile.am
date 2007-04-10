@@ -40,4 +40,7 @@ h52gifgentst_SOURCES=h52gifgentst.c
 # library.
 LDADD=$(LIBH5_HL) $(LIBH5TOOLS) $(LIBHDF5)
 
+CHECK_CLEANFILES+=*.h5
+CHECK_CLEANFILES+=*.gif
+
 include $(top_srcdir)/config/conclude.am
