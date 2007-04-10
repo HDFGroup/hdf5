@@ -65,7 +65,7 @@ int main(int argc , char **argv)
 
     int arg_index = 2;
     int bool_is_image = 0; /* 0 = false , 1 = true */
-    char *image_name;
+    char *image_name = NULL;
     int idx;
 
     if (argc < 4) 
@@ -307,9 +307,8 @@ int main(int argc , char **argv)
 
     if (fpGif != NULL)
         fclose(fpGif);
-
-    free(image_name);
-    
+    if (image_name != NULL)
+        free(image_name);
 
     return 0;
 
@@ -318,9 +317,8 @@ out:
 
     if (fpGif != NULL)
         fclose(fpGif);
-
-    free(image_name);
-       
+    if (image_name != NULL)
+        free(image_name);
 
     return 1;
 }
