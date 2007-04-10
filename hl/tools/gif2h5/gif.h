@@ -28,8 +28,6 @@
 
 #define MAX_PAL 768
 
-/* set the name length restriction to 64 charachters */
-#define VSNAMELENMAX 64 /* this is a carryover from HDF4 */
 
 /* typedef H5T_NATIVE_UINT8  BYTE; */
 typedef unsigned char BYTE;

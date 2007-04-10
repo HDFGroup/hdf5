@@ -33,9 +33,8 @@ main(int argv , char *argc[])
     BYTE *MemGif;
     BYTE *StartPos;
 
-    /* VSNAMELENMAX is a carryover from HDF4 and is #defined to 256 in gif.h */
-    char GIFFileName[VSNAMELENMAX];
-    char HDFFileName[VSNAMELENMAX];
+    char *GIFFileName;
+    char *HDFFileName;
 
     /*
      * Initialize all GifMemoryStruct pointers to null to prevent hassles
@@ -53,15 +52,11 @@ main(int argv , char *argc[])
         return(-1);
     }
 
-    strncpy(GIFFileName , argc[1] , VSNAMELENMAX - 1);
-    strncpy(HDFFileName , argc[2] , VSNAMELENMAX - 1);
-    GIFFileName[VSNAMELENMAX - 1] = '\0';
-    HDFFileName[VSNAMELENMAX - 1] = '\0';
+    GIFFileName = argc[1];
+    HDFFileName = argc[2];
 
     if (!(fpGif = fopen(GIFFileName,"rb"))) {
         printf("Unable to open GIF file for reading.\n");
-        printf("Filename (including path) must be less than %d charachters in length\n",
-               VSNAMELENMAX);
         exit(-1);
     }
 
@@ -102,7 +97,7 @@ main(int argv , char *argc[])
      * Call WriteHDF from here. Go ahead and change WriteHDF to write whatever
      * format you want
      */
-    if (WriteHDF(GifMemoryStruct , argc[2] , argc[1]))
+    if (WriteHDF(GifMemoryStruct , HDFFileName , GIFFileName))
         printf("HDF Write Error\n\n");
 
     /* Free all buffers */
