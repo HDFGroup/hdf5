@@ -13,18 +13,6 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * NOTES:
- * 04/01 - 04/10: been working on it a lot. I think it does gif89 images just
- *                fine with palettes. So that's cool. Putting in multiple
- *                images and animation support right now
- * 03/29: For some reason I can write .GIF files which IE will open and see
- *        but kodak imaging does not like. I'm sure its a problem with the GIF
- *        file, I can't figure out what.
- * 03/17: Explicitely deallocate the GIFTOMEM* struct in the main loop.
- *        Check for both success and failure conditions
- */
-
 #include <stdio.h>
 #include <assert.h>
 #include "gif.h"
@@ -32,20 +20,8 @@
 
 
 #define MAX_FILE_LEN            256
-#define MAX_NUMBER_IMAGES       50
 
 int EndianOrder;
-
-#ifdef NOT_USED
-static void
-PutByte(BYTE b , FILE *fpGif)
-{
-    if (fputc(b , fpGif) == EOF) {
-        printf("File Writing Error, cannot continue");
-        exit(-1);
-    }
-}
-#endif /* NOT_USED */
 
 static void
 putword(int w, FILE *fp)
@@ -60,8 +36,7 @@ usage(void)
 {
     printf("Usage: h52gif <h5_file> <gif_file> -i <h5_image>\n");
     printf("h52gif expects *at least* one h5_image.\n");
-    printf("You may repeat -i <h5_image> at most 50 times\n");
-    printf("(maximum of 50 images).\n");
+   
 }
 
 FILE *fpGif = NULL;
@@ -85,16 +60,13 @@ int main(int argc , char **argv)
     int   j,nc;
     int   i;
     int   numcols;
-    int   time_out = 0;  /* time between two images in the animation */
-    int   n_images , idx;
 
     BYTE pc2nc[256] , r1[256] , g1[256] , b1[256];
 
-    /* initial stuff */
-    int number_of_images = 0;
     int arg_index = 2;
     int bool_is_image = 0; /* 0 = false , 1 = true */
-    CHAR* image_name_arr[MAX_NUMBER_IMAGES];
+    char *image_name;
+    int idx;
 
     if (argc < 4) 
     {
@@ -102,8 +74,6 @@ int main(int argc , char **argv)
         usage();
         return 1;
     }
-
-    memset(image_name_arr , 0 , MAX_NUMBER_IMAGES);
 
     if (strlen(argv[1] + 1) > MAX_FILE_LEN || strlen(argv[2] + 1) > MAX_FILE_LEN) 
     {
@@ -116,27 +86,20 @@ int main(int argc , char **argv)
     GIFName = argv[2];
 
     /* get the options */
-    while (arg_index++ < argc - 1 && number_of_images < MAX_NUMBER_IMAGES) 
+    while (arg_index++ < argc - 1) 
     {
         if (!strcmp(argv[arg_index] , "-i")) {
             bool_is_image = 1;
             continue;
         }
 
-        if (!strcmp(argv[arg_index] , "-a")) {
-            time_out = 10;
-            continue;
-        }
-
         if (bool_is_image) 
         {
-            /* this is an image */
             /* allocate space to store the image name */
             size_t len = strlen(argv[arg_index]);
-            image_name_arr[number_of_images] = (CHAR*) malloc( len + 1);
-            strcpy(image_name_arr[number_of_images] , argv[arg_index]);
+            image_name = (CHAR*) malloc( len + 1);
+            strcpy(image_name , argv[arg_index]);
 
-            number_of_images++;
             bool_is_image = 0;
             continue;
         }
@@ -158,22 +121,17 @@ int main(int argc , char **argv)
         goto out;
     }
 
-    /* hardwire n_images to 1 for now. */
-    n_images = number_of_images;
-
     Background = 0;
-    for (idx = 0 ; idx < n_images ; idx++) 
     {
-
         hsize_t       width, height, planes;
         hid_t         fid;
         char          interlace[20];
         hssize_t      npals;
         hsize_t       pal_dims[2];
         unsigned char *pal;
-        char          *image_name = image_name_arr[idx];
        
-        if ((fid = H5Fopen(HDFName , H5F_ACC_RDONLY , H5P_DEFAULT)) < 0) {
+        if ((fid = H5Fopen(HDFName , H5F_ACC_RDONLY , H5P_DEFAULT)) < 0) 
+        {
             fprintf(stderr , "Unable to open HDF file for input. Aborting.\n");
             goto out;
         }
@@ -297,62 +255,20 @@ int main(int argc , char **argv)
             goto out;
         }
 
-        /*
-         * If it is the first image we do all the header stuff that isn't
-         * required for the rest of the images.
-         */
-        if (idx == 0) 
-        {
-            /* Write out the GIF header and logical screen descriptor */
-            if (n_images > 1) 
-            {
-                fwrite("GIF89a", sizeof( char ), 6, fpGif);  /* the GIF magic number */
-            } 
-            else 
-            {
-                fwrite("GIF87a", sizeof( char ), 6, fpGif);  /* the GIF magic number */
-            }
+      
+        fwrite("GIF87a", sizeof( char ), 6, fpGif);  /* the GIF magic number */
+        
+        putword(RWidth, fpGif);             /* screen descriptor */
+        putword(RHeight, fpGif);
+        
+        i = 0x00;                   /* No, there is no color map */
+        i |= (8-1)<<4;              /* OR in the color resolution (hardwired 8) */
+        i |= (BitsPerPixel - 1);    /* OR in the # of bits per pixel */
+        fputc(i,fpGif);
+        
+        fputc(Background,fpGif);    /* background color */
+        fputc(0, fpGif);            /* future expansion byte */
 
-            putword(RWidth, fpGif);             /* screen descriptor */
-            putword(RHeight, fpGif);
-
-            i = 0x00;                   /* No, there is no color map */
-            i |= (8-1)<<4;              /* OR in the color resolution (hardwired 8) */
-            i |= (BitsPerPixel - 1);    /* OR in the # of bits per pixel */
-            fputc(i,fpGif);
-
-            fputc(Background,fpGif);    /* background color */
-            fputc(0, fpGif);            /* future expansion byte */
-
-            /*
-             * If loop_times is 0 , put in the application extension to make
-             * the gif anime loop indefinitely
-             */
-            if (time_out > 0) 
-            {
-                fputc(0x21 , fpGif);
-                fputc(0xFF , fpGif);
-                fputc(11 , fpGif);
-                fwrite("NETSCAPE2.0" , 1 , 11 , fpGif);
-                fputc(3 , fpGif);
-                fputc(1 , fpGif);
-                fputc(0 , fpGif);
-                fputc(0 , fpGif);
-                fputc(0 , fpGif);
-            }
-        }
-
-        if (n_images > 1) 
-        {
-            /* write a graphic control block */
-            fputc(0x21 , fpGif);
-            fputc(0xF9 , fpGif);
-            fputc(4 , fpGif);
-            fputc(4 , fpGif);
-            putword(time_out , fpGif);
-            fputc(255, fpGif);
-            fputc(0 , fpGif);
-        }
 
         /*
          * Put Image Descriptor
@@ -392,12 +308,7 @@ int main(int argc , char **argv)
     if (fpGif != NULL)
         fclose(fpGif);
 
-
-    while(number_of_images--) 
-    {
-        if (image_name_arr[number_of_images])
-            free(image_name_arr[number_of_images]);
-    }
+    free(image_name);
     
 
     return 0;
@@ -405,13 +316,10 @@ int main(int argc , char **argv)
 
 out:
 
-    while(number_of_images--) 
-    {
-        if (image_name_arr[number_of_images])
-            free(image_name_arr[number_of_images]);
-    }
     if (fpGif != NULL)
         fclose(fpGif);
+
+    free(image_name);
        
 
     return 1;
