@@ -85,20 +85,23 @@ void tts_error(void)
     expected[0].maj_num = H5E_DATASET;
     expected[0].min_num = H5E_CANTINIT;
 
-    expected[1].maj_num = H5E_SYM;
-    expected[1].min_num = H5E_EXISTS;
+    expected[1].maj_num = H5E_DATASET;
+    expected[1].min_num = H5E_CANTINIT;
 
-    expected[2].maj_num = H5E_SYM;
-    expected[2].min_num = H5E_NOTFOUND;
+    expected[2].maj_num = H5E_LINK;
+    expected[2].min_num = H5E_CANTINIT;
 
     expected[3].maj_num = H5E_SYM;
-    expected[3].min_num = H5E_CALLBACK;
+    expected[3].min_num = H5E_CANTINSERT;
 
     expected[4].maj_num = H5E_SYM;
-    expected[4].min_num = H5E_EXISTS;
+    expected[4].min_num = H5E_NOTFOUND;
 
     expected[5].maj_num = H5E_SYM;
-    expected[5].min_num = H5E_EXISTS;
+    expected[5].min_num = H5E_CALLBACK;
+
+    expected[6].maj_num = H5E_SYM;
+    expected[6].min_num = H5E_EXISTS;
 
     /* set up mutex for global count of errors */
     ret=pthread_mutex_init(&error_mutex, NULL);
