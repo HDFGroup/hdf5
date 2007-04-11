@@ -15637,8 +15637,7 @@ static void
 check_unprotect_ro_dirty_err(void)
 {
     const char * fcn_name = "check_unprotect_ro_dirty_err()";
-    //herr_t result;
-    int result;
+    herr_t result;
     H5C_t * cache_ptr = NULL;
     test_entry_t * entry_ptr;
 
@@ -15852,16 +15851,7 @@ check_protect_ro_rw_err(void)
 hbool_t rpt_fcn_called = FALSE;
 enum H5C_resize_status rpt_status;
 
-void test_rpt_fcn(UNUSED H5C_t * cache_ptr,
-                  UNUSED int32_t version,
-                  UNUSED double hit_rate,
-                  UNUSED enum H5C_resize_status status,
-                  UNUSED size_t old_max_cache_size,
-                  UNUSED size_t new_max_cache_size,
-                  UNUSED size_t old_min_clean_size,
-                  UNUSED size_t new_min_clean_size);
-
-void test_rpt_fcn(UNUSED H5C_t * cache_ptr,
+static void test_rpt_fcn(UNUSED H5C_t * cache_ptr,
                   UNUSED int32_t version,
                   UNUSED double hit_rate,
                   UNUSED enum H5C_resize_status status,
