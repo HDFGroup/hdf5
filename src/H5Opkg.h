@@ -290,6 +290,7 @@ typedef struct H5O_obj_class_t {
     void	(*free_copy_file_udata)(void *); /*free user data for 'copy file' operation */
     htri_t	(*isa)(H5O_t *);		/*if a header matches an object class */
     hid_t	(*open)(const H5G_loc_t *, hid_t );	/*open an object of this class */
+    void	*(*create)(H5F_t *, void *, H5G_loc_t *, hid_t );	/*create an object of this class */
     H5O_loc_t	*(*get_oloc)(hid_t );		/*get the object header location for an object */
 } H5O_obj_class_t;
 

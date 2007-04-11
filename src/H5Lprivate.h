@@ -27,6 +27,7 @@
 #include "H5Gprivate.h"		/* Groups				*/
 #include "H5Oprivate.h"		/* Object headers			*/
 
+
 /**************************/
 /* Library Private Macros */
 /**************************/
@@ -40,6 +41,7 @@
 /* ========  Link access property names ======== */
 #define H5L_ACS_NLINKS_NAME        "max soft links"         /* Number of soft links to traverse */
 #define H5L_ACS_ELINK_PREFIX_NAME  "external link prefix"   /* External link prefix */
+
 
 /****************************/
 /* Library Private Typedefs */
@@ -57,12 +59,14 @@
 
 /* General operations on links */
 H5_DLL herr_t H5L_init(void);
-H5_DLL herr_t H5L_link(H5G_loc_t *new_loc, const char *new_name,
+H5_DLL herr_t H5L_link(const H5G_loc_t *new_loc, const char *new_name,
     H5G_loc_t *obj_loc, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id);
+H5_DLL herr_t H5L_link_object(const H5G_loc_t *new_loc, const char *new_name,
+    H5O_obj_create_t *ocrt_info, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id);
 H5_DLL herr_t H5L_create_hard(H5G_loc_t *cur_loc, const char *cur_name,
-    H5G_loc_t *link_loc, const char *link_name, hid_t lcpl_id,
+    const H5G_loc_t *link_loc, const char *link_name, hid_t lcpl_id,
     hid_t lapl_id, hid_t dxpl_id);
-H5_DLL herr_t H5L_create_soft(const char *target_path, H5G_loc_t *cur_loc,
+H5_DLL herr_t H5L_create_soft(const char *target_path, const H5G_loc_t *cur_loc,
     const char *cur_name, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id);
 H5_DLL hid_t H5L_get_default_lcpl(void);
 H5_DLL herr_t H5L_move(H5G_loc_t *src_loc, const char *src_name,

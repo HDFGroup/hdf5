@@ -2292,8 +2292,7 @@ test_full_group_dense(hid_t fapl)
      *  another object header message chunk - in order to make the file size
      *  computation below easier/correct - QAK)
      */
-    if((gid = H5Gcreate_expand(file_id, gcpl, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Llink(file_id, "/delete", gid, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if((gid = H5Gcreate2(file_id, "/delete", H5P_DEFAULT, gcpl, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Close GCPL */
     if(H5Pclose(gcpl) < 0) TEST_ERROR

@@ -727,16 +727,17 @@ test_h5l_create(hid_t fapl, hbool_t new_format)
     if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create and commit a datatype with no name */
-    if((type_id =H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
-    if(H5Tcommit_expand(file_id, type_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
-    if(! H5Tcommitted(type_id)) TEST_ERROR
+    if((type_id = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if(H5Tcommit_anon(file_id, type_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(!H5Tcommitted(type_id)) TEST_ERROR
 
     /* Create the dataspace */
     dims[0] = H5L_DIM1;
     dims[1] = H5L_DIM2;
-    if((space_id=H5Screate_simple(2 ,dims, NULL)) < 0) TEST_ERROR
+    if((space_id = H5Screate_simple(2 ,dims, NULL)) < 0) TEST_ERROR
+
     /* Create a dataset with no name using the committed datatype*/
-    if ((dset_id = H5Dcreate_expand(file_id, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if ((dset_id = H5Dcreate_anon(file_id, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Verify that we can write to and read from the dataset */
     /* Initialize the dataset */
@@ -757,7 +758,7 @@ test_h5l_create(hid_t fapl, hbool_t new_format)
                 TEST_ERROR
 
     /* Create a group with no name*/
-    if((group_id = H5Gcreate_expand(file_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((group_id = H5Gcreate_anon(file_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Link nameless datatype into nameless group */
     if(H5Llink(group_id, "datatype", type_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
@@ -855,8 +856,7 @@ test_lcpl(hid_t fapl, hbool_t new_format)
     if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create and link a group with the default LCPL */
-    if((group_id = H5Gcreate_expand(file_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Llink(file_id, "/group", group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if((group_id = H5Gcreate2(file_id, "/group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Gclose(group_id) < 0) TEST_ERROR
 
     /* Check that its character encoding is the default */
@@ -864,10 +864,9 @@ test_lcpl(hid_t fapl, hbool_t new_format)
     if(linfo.cset != H5F_DEFAULT_CSET) TEST_ERROR
 
     /* Create and commit a datatype with the default LCPL */
-    if((type_id =H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
-    if(H5Tcommit_expand(file_id, type_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
-    if(H5Llink(file_id, "/type", type_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
-    if(H5Tclose(type_id) < 0) TEST_ERROR;    
+    if((type_id = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if(H5Tcommit2(file_id, "/type", type_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Tclose(type_id) < 0) TEST_ERROR
 
     /* Check that its character encoding is the default */
     if(H5Lget_info(file_id, "type", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
@@ -879,8 +878,7 @@ test_lcpl(hid_t fapl, hbool_t new_format)
     if((space_id=H5Screate_simple(2 ,dims, NULL)) < 0) TEST_ERROR
 
     /* Create a dataset using the default LCPL */
-    if ((dset_id = H5Dcreate_expand(file_id, H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Llink(file_id, "/dataset", dset_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if((dset_id = H5Dcreate2(file_id, "/dataset", H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Dclose(dset_id) < 0) TEST_ERROR
 
     /* Check that its character encoding is the default */
@@ -892,8 +890,7 @@ test_lcpl(hid_t fapl, hbool_t new_format)
     if(H5Pset_char_encoding(lcpl_id, H5T_CSET_UTF8) < 0) TEST_ERROR
 
     /* Create and link a group with the new LCPL */
-    if((group_id = H5Gcreate_expand(file_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Llink(file_id, "/group2", group_id, lcpl_id, H5P_DEFAULT) < 0) TEST_ERROR
+    if((group_id = H5Gcreate2(file_id, "/group2", lcpl_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Gclose(group_id) < 0) TEST_ERROR
 
     /* Check that its character encoding is UTF-8 */
@@ -901,18 +898,16 @@ test_lcpl(hid_t fapl, hbool_t new_format)
     if(linfo.cset != H5T_CSET_UTF8) TEST_ERROR
 
     /* Create and commit a datatype with the new LCPL */
-    if((type_id =H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
-    if(H5Tcommit_expand(file_id, type_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
-    if(H5Llink(file_id, "/type2", type_id, lcpl_id, H5P_DEFAULT) < 0) TEST_ERROR;    
-    if(H5Tclose(type_id) < 0) TEST_ERROR;    
+    if((type_id = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if(H5Tcommit2(file_id, "/type2", type_id, lcpl_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Tclose(type_id) < 0) TEST_ERROR
 
     /* Check that its character encoding is UTF-8 */
     if(H5Lget_info(file_id, "type2", &linfo, H5P_DEFAULT) < 0) TEST_ERROR
     if(linfo.cset != H5T_CSET_UTF8) TEST_ERROR
 
     /* Create a dataset using the new LCPL */
-    if ((dset_id = H5Dcreate_expand(file_id, H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Llink(file_id, "/dataset2", dset_id, lcpl_id, H5P_DEFAULT) < 0) TEST_ERROR
+    if((dset_id = H5Dcreate2(file_id, "/dataset2", H5T_NATIVE_INT, space_id, lcpl_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Dclose(dset_id) < 0) TEST_ERROR
 
     /* Check that its character encoding is UTF-8 */
@@ -1336,8 +1331,7 @@ test_move_preserves(hid_t fapl_id, hbool_t new_format)
     if(H5Pset_char_encoding(lcpl_id, H5T_CSET_UTF8) < 0) TEST_ERROR
 
     /* Create a group with that lcpl */
-    if((group_id = H5Gcreate_expand(file_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Llink(file_id, "group", group_id, lcpl_id, H5P_DEFAULT) < 0) TEST_ERROR
+    if((group_id = H5Gcreate2(file_id, "group", lcpl_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Gclose(group_id) < 0) TEST_ERROR
 
     /* Get the group's link's information */
@@ -2028,18 +2022,16 @@ external_link_self(hid_t fapl, hbool_t new_format)
     h5_fixname(FILENAME[3], fapl, filename3, sizeof filename1);
 
     /* Create file */
-    if((fid=H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create an lcpl with intermediate group creation set */
-    if((lcpl_id=H5Pcreate(H5P_LINK_CREATE)) < 0) TEST_ERROR
+    if((lcpl_id = H5Pcreate(H5P_LINK_CREATE)) < 0) TEST_ERROR
     if(H5Pset_create_intermediate_group(lcpl_id, TRUE) < 0) TEST_ERROR
 
     /* Create a series of groups within the file: /A/B and /X/Y/Z */
-    if((gid=H5Gcreate_expand(fid, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Llink(fid, "A/B", gid, lcpl_id, H5P_DEFAULT) < 0) TEST_ERROR
+    if((gid = H5Gcreate2(fid, "A/B", lcpl_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Gclose(gid) < 0) TEST_ERROR
-    if((gid=H5Gcreate_expand(fid, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Llink(fid, "X/Y", gid, lcpl_id, H5P_DEFAULT) < 0) TEST_ERROR
+    if((gid = H5Gcreate2(fid, "X/Y", lcpl_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Gclose(gid) < 0) TEST_ERROR
 
     if(H5Pclose (lcpl_id) < 0) TEST_ERROR
@@ -3427,10 +3419,10 @@ external_link_closing(hid_t fapl, hbool_t new_format)
     if(H5Tclose(tid) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
-    /* Test H5*open_expand */
-    if((gid = H5Gopen_expand(fid1, "elink/elink/elink/group1_moved", H5P_DEFAULT)) < 0) TEST_ERROR
-    if((tid = H5Topen_expand(fid1, "elink/elink/elink/type1_moved", H5P_DEFAULT)) < 0) TEST_ERROR
-    if((did = H5Dopen_expand(fid1, "elink/elink/elink/dataset1_moved", H5P_DEFAULT)) < 0) TEST_ERROR
+    /* Test H5*open2 */
+    if((gid = H5Gopen2(fid1, "elink/elink/elink/group1_moved", H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Topen2(fid1, "elink/elink/elink/type1_moved", H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dopen2(fid1, "elink/elink/elink/dataset1_moved", H5P_DEFAULT)) < 0) TEST_ERROR
     /* Close objects */
     if(H5Gclose(gid) < 0) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
@@ -5064,20 +5056,20 @@ lapl_nlinks(hid_t fapl, hbool_t new_format)
 
     /* Try to open the objects using too many symlinks with default *APLs */
     H5E_BEGIN_TRY {
-        if((gid = H5Gopen_expand(fid, "soft17", H5P_DEFAULT)) >=0) {
-          H5_FAILED();
-          puts("    Should have failed for too many nested links.");
-          TEST_ERROR
+        if((gid = H5Gopen2(fid, "soft17", H5P_DEFAULT)) >=0) {
+            H5_FAILED();
+            puts("    Should have failed for too many nested links.");
+            TEST_ERROR
         }
-        if((tid = H5Topen_expand(fid, "soft17/datatype", H5P_DEFAULT)) >=0) {
-          H5_FAILED();
-          puts("    Should have failed for too many nested links.");
-          TEST_ERROR
+        if((tid = H5Topen2(fid, "soft17/datatype", H5P_DEFAULT)) >=0) {
+            H5_FAILED();
+            puts("    Should have failed for too many nested links.");
+            TEST_ERROR
         }
-        if((did = H5Dopen_expand(fid, "soft17/dataset", H5P_DEFAULT)) >=0) {
-          H5_FAILED();
-          puts("    Should have failed for too many nested links.");
-          TEST_ERROR
+        if((did = H5Dopen2(fid, "soft17/dataset", H5P_DEFAULT)) >=0) {
+            H5_FAILED();
+            puts("    Should have failed for too many nested links.");
+            TEST_ERROR
         }
     } H5E_END_TRY
 
@@ -5094,9 +5086,9 @@ lapl_nlinks(hid_t fapl, hbool_t new_format)
     /* We should now be able to use these property lists to open each kind
      * of object.
      */
-    if((gid = H5Gopen_expand(fid, "soft17", gapl)) < 0) TEST_ERROR
-    if((tid = H5Topen_expand(fid, "soft17/datatype", tapl)) < 0) TEST_ERROR
-    if((did = H5Dopen_expand(fid, "soft17/dataset", dapl)) < 0) TEST_ERROR
+    if((gid = H5Gopen2(fid, "soft17", gapl)) < 0) TEST_ERROR
+    if((tid = H5Topen2(fid, "soft17/datatype", tapl)) < 0) TEST_ERROR
+    if((did = H5Dopen2(fid, "soft17/dataset", dapl)) < 0) TEST_ERROR
 
     /* Close objects */
     if(H5Gclose(gid) < 0) TEST_ERROR
@@ -5329,8 +5321,7 @@ corder_create_empty(hid_t fapl)
     if(crt_order_flags != (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED)) TEST_ERROR
 
     /* Create group with creation order indexing & tracking on */
-    if((group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Llink(file_id, CORDER_GROUP_NAME, group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if((group_id = H5Gcreate2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check on group's status */
     if(H5G_is_empty_test(group_id) != TRUE) TEST_ERROR
@@ -5423,8 +5414,7 @@ corder_create_compact(hid_t fapl)
     if(H5Pset_link_creation_order(gcpl_id, (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED)) < 0) TEST_ERROR
 
     /* Create group with creation order indexing & tracking on */
-    if((group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Llink(file_id, CORDER_GROUP_NAME, group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if((group_id = H5Gcreate2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check on group's initial status */
     if(H5G_is_empty_test(group_id) != TRUE) TEST_ERROR
@@ -5544,8 +5534,7 @@ corder_create_dense(hid_t fapl)
     if(H5Pset_link_creation_order(gcpl_id, (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED)) < 0) TEST_ERROR
 
     /* Create group with creation order indexing & tracking on */
-    if((group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Llink(file_id, CORDER_GROUP_NAME, group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if((group_id = H5Gcreate2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check on group's initial status */
     if(H5G_is_empty_test(group_id) != TRUE) TEST_ERROR
@@ -5688,8 +5677,7 @@ corder_transition(hid_t fapl)
     if(H5Pset_est_link_info(gcpl_id, max_compact, CORDER_EST_ENTRY_LEN) < 0) TEST_ERROR
 
     /* Create group with creation order indexing & tracking on */
-    if((group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-    if(H5Llink(file_id, CORDER_GROUP_NAME, group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if((group_id = H5Gcreate2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Close the group creation property list */
     if(H5Pclose(gcpl_id) < 0) FAIL_STACK_ERROR
@@ -5931,8 +5919,7 @@ corder_delete(hid_t fapl)
         if(H5Pset_est_link_info(gcpl_id, max_compact, CORDER_EST_ENTRY_LEN) < 0) TEST_ERROR
 
         /* Create group with creation order indexing & tracking on */
-        if((group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-        if(H5Llink(file_id, CORDER_GROUP_NAME, group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+        if((group_id = H5Gcreate2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
         /* Close the group creation property list */
         if(H5Pclose(gcpl_id) < 0) FAIL_STACK_ERROR
@@ -6213,8 +6200,7 @@ link_info_by_idx(hid_t fapl)
             if(H5Pset_link_creation_order(gcpl_id, (H5P_CRT_ORDER_TRACKED | (use_index ? H5P_CRT_ORDER_INDEXED : (unsigned)0))) < 0) TEST_ERROR
 
             /* Create group with creation order indexing & tracking on */
-            if((group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
-            if(H5Llink(file_id, CORDER_GROUP_NAME, group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+            if((group_id = H5Gcreate2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
 
             /* Query the group creation properties */
             if(H5Pget_link_phase_change(gcpl_id, &max_compact, &min_dense) < 0) TEST_ERROR
@@ -6587,8 +6573,7 @@ delete_by_idx(hid_t fapl)
                 if(H5Pset_link_creation_order(gcpl_id, (H5P_CRT_ORDER_TRACKED | (use_index ? H5P_CRT_ORDER_INDEXED : (unsigned)0))) < 0) TEST_ERROR
 
                 /* Create group with creation order tracking on */
-                if((group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
-                if(H5Llink(file_id, CORDER_GROUP_NAME, group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+                if((group_id = H5Gcreate2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
 
                 /* Query the group creation properties */
                 if(H5Pget_link_phase_change(gcpl_id, &max_compact, &min_dense) < 0) TEST_ERROR
@@ -7443,8 +7428,7 @@ link_iterate(hid_t fapl)
                 if(H5Pset_link_creation_order(gcpl_id, (H5P_CRT_ORDER_TRACKED | (use_index ? H5P_CRT_ORDER_INDEXED : (unsigned)0))) < 0) TEST_ERROR
 
                 /* Create group with creation order tracking on */
-                if((group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
-                if(H5Llink(file_id, CORDER_GROUP_NAME, group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+                if((group_id = H5Gcreate2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
 
 
                 /* Check for iteration on empty group */
@@ -8135,12 +8119,10 @@ open_by_idx(hid_t fapl)
                 if(H5Pset_link_creation_order(gcpl_id, (H5P_CRT_ORDER_TRACKED | (use_index ? H5P_CRT_ORDER_INDEXED : (unsigned)0))) < 0) TEST_ERROR
 
                 /* Create group with creation order tracking on */
-                if((group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
-                if(H5Llink(file_id, CORDER_GROUP_NAME, group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+                if((group_id = H5Gcreate2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
 
                 /* Create group with creation order tracking on for soft links */
-                if((soft_group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
-                if(H5Llink(file_id, CORDER_SOFT_GROUP_NAME, soft_group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+                if((soft_group_id = H5Gcreate2(file_id, CORDER_SOFT_GROUP_NAME, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
 
 
                 /* Try to open on object in an empty group */
@@ -8322,12 +8304,10 @@ open_by_idx_old(hid_t fapl)
         if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
         /* Create old-style group */
-        if((group_id = H5Gcreate_expand(file_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-        if(H5Llink(file_id, CORDER_GROUP_NAME, group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+        if((group_id = H5Gcreate2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
         /* Create old-style group for soft links */
-        if((soft_group_id = H5Gcreate_expand(file_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-        if(H5Llink(file_id, CORDER_SOFT_GROUP_NAME, soft_group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+        if((soft_group_id = H5Gcreate2(file_id, CORDER_SOFT_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
 
         /* Try to open on object in an empty group */
@@ -8592,12 +8572,10 @@ object_info(hid_t fapl)
                 if(H5Pset_link_creation_order(gcpl_id, (H5P_CRT_ORDER_TRACKED | (use_index ? H5P_CRT_ORDER_INDEXED : (unsigned)0))) < 0) TEST_ERROR
 
                 /* Create group with creation order tracking on */
-                if((group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
-                if(H5Llink(file_id, CORDER_GROUP_NAME, group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+                if((group_id = H5Gcreate2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
 
                 /* Create group with creation order tracking on for soft links */
-                if((soft_group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
-                if(H5Llink(file_id, CORDER_SOFT_GROUP_NAME, soft_group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+                if((soft_group_id = H5Gcreate2(file_id, CORDER_SOFT_GROUP_NAME, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
 
 
                 /* Check for out of bound query by index on empty group */
@@ -8791,12 +8769,10 @@ object_info_old(hid_t fapl)
         if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
         /* Create old-style group */
-        if((group_id = H5Gcreate_expand(file_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-        if(H5Llink(file_id, CORDER_GROUP_NAME, group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+        if((group_id = H5Gcreate2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
         /* Create old-style group for soft links */
-        if((soft_group_id = H5Gcreate_expand(file_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-        if(H5Llink(file_id, CORDER_SOFT_GROUP_NAME, soft_group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+        if((soft_group_id = H5Gcreate2(file_id, CORDER_SOFT_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
 
         /* Check for out of bound query by index on empty group */
@@ -8985,12 +8961,10 @@ group_info(hid_t fapl)
                 if(H5Pset_link_creation_order(gcpl_id, (H5P_CRT_ORDER_TRACKED | (use_index ? H5P_CRT_ORDER_INDEXED : (unsigned)0))) < 0) TEST_ERROR
 
                 /* Create group with creation order tracking on */
-                if((group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
-                if(H5Llink(file_id, CORDER_GROUP_NAME, group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+                if((group_id = H5Gcreate2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
 
                 /* Create group with creation order tracking on for soft links */
-                if((soft_group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
-                if(H5Llink(file_id, CORDER_SOFT_GROUP_NAME, soft_group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+                if((soft_group_id = H5Gcreate2(file_id, CORDER_SOFT_GROUP_NAME, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
 
 
                 /* Check for out of bound query by index on empty group */
@@ -9007,8 +8981,7 @@ group_info(hid_t fapl)
                     sprintf(objname, "filler %02u", u);
 
                     /* Create hard link, with group object */
-                    if((group_id2 = H5Gcreate_expand(group_id, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
-                    if(H5Llink(group_id, objname, group_id2, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+                    if((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
 
                     /* Retrieve group's information */
                     if(H5Gget_info(group_id2, ".", &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
@@ -9097,8 +9070,7 @@ group_info(hid_t fapl)
                     sprintf(objname, "filler %02u", u);
 
                     /* Create hard link, with group object */
-                    if((group_id2 = H5Gcreate_expand(group_id, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
-                    if(H5Llink(group_id, objname, group_id2, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+                    if((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
 
                     /* Retrieve group's information */
                     if(H5Gget_info(group_id2, ".", &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
@@ -9256,12 +9228,10 @@ group_info_old(hid_t fapl)
         if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
         /* Create old-style group */
-        if((group_id = H5Gcreate_expand(file_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-        if(H5Llink(file_id, CORDER_GROUP_NAME, group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+        if((group_id = H5Gcreate2(file_id, CORDER_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
         /* Create old-style group for soft links */
-        if((soft_group_id = H5Gcreate_expand(file_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-        if(H5Llink(file_id, CORDER_SOFT_GROUP_NAME, soft_group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+        if((soft_group_id = H5Gcreate2(file_id, CORDER_SOFT_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
 
         /* Check for out of bound query by index on empty group */
@@ -9442,15 +9412,13 @@ timestamps(hid_t fapl)
     if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create group with non-default object timestamp setting */
-    if((group_id = H5Gcreate_expand(file_id, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Llink(file_id, TIMESTAMP_GROUP_1, group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if((group_id = H5Gcreate2(file_id, TIMESTAMP_GROUP_1, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Close the group creation property list */
     if(H5Pclose(gcpl_id) < 0) TEST_ERROR
 
     /* Create group with default object timestamp setting */
-    if((group_id2 = H5Gcreate_expand(file_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Llink(file_id, TIMESTAMP_GROUP_2, group_id2, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if((group_id2 = H5Gcreate2(file_id, TIMESTAMP_GROUP_2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Retrieve the new groups' creation properties */
     if((gcpl_id = H5Gget_create_plist(group_id)) < 0) TEST_ERROR

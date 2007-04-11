@@ -120,10 +120,10 @@ typedef herr_t (*H5G_iterate_t)(hid_t group, const char *name, void *op_data);
 /*********************/
 /* Public Prototypes */
 /*********************/
-H5_DLL hid_t H5Gcreate(hid_t loc_id, const char *name, size_t size_hint);
-H5_DLL hid_t H5Gcreate_expand(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id);
-H5_DLL hid_t H5Gopen(hid_t loc_id, const char *name);
-H5_DLL hid_t H5Gopen_expand(hid_t loc_id, const char *name, hid_t gapl_id);
+H5_DLL hid_t H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id,
+    hid_t gcpl_id, hid_t gapl_id);
+H5_DLL hid_t H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id);
+H5_DLL hid_t H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id);
 H5_DLL hid_t H5Gget_create_plist(hid_t group_id);
 H5_DLL herr_t H5Gget_info(hid_t loc_id, const char *name, H5G_info_t *ginfo,
     hid_t lapl_id);
@@ -137,6 +137,8 @@ H5_DLL herr_t H5Gclose(hid_t group_id);
  * 
  * Use of these functions and variables is deprecated.
  */
+H5_DLL hid_t H5Gcreate(hid_t loc_id, const char *name, size_t size_hint);
+H5_DLL hid_t H5Gopen(hid_t loc_id, const char *name);
 H5_DLL herr_t H5Glink(hid_t cur_loc_id, H5L_type_t type, const char *cur_name,
     const char *new_name);
 H5_DLL herr_t H5Gmove(hid_t src_loc_id, const char *src_name,

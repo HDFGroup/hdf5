@@ -455,6 +455,7 @@
 ./src/H5D.c
 ./src/H5Dcompact.c
 ./src/H5Dcontig.c
+./src/H5Ddeprec.c
 ./src/H5Defl.c
 ./src/H5Dio.c
 ./src/H5Distore.c
@@ -524,6 +525,7 @@
 ./src/H5Gdense.c
 ./src/H5Gdeprec.c
 ./src/H5Gent.c
+./src/H5Gint.c
 ./src/H5Glink.c
 ./src/H5Gloc.c
 ./src/H5Gname.c
@@ -671,6 +673,7 @@
 ./src/H5Tcompound.c
 ./src/H5Tconv.c
 ./src/H5Tcset.c
+./src/H5Tdeprec.c
 ./src/H5Tenum.c
 ./src/H5Tfields.c
 ./src/H5Tfixed.c

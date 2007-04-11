@@ -629,17 +629,17 @@ test_h5o_plist(void)
      *  using the respective type of creation property lists.
      */
 
-    /* Create the group */
-    grp = H5Gcreate_expand(fid, gcpl, H5P_DEFAULT);
-    CHECK(grp, FAIL, "H5Gcreate_expand");
+    /* Create the group anonymously and link it in */
+    grp = H5Gcreate_anon(fid, gcpl, H5P_DEFAULT);
+    CHECK(grp, FAIL, "H5Gcreate_anon");
     ret = H5Llink(fid, "group", grp, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Llink");
 
-    /* Commit the type inside the group */
+    /* Commit the type inside the group anonymously and link it in */
     dtype = H5Tcopy(H5T_NATIVE_INT);
     CHECK(dtype, FAIL, "H5Tcopy");
-    ret = H5Tcommit_expand(fid, dtype, tcpl, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Tcommit_expand");
+    ret = H5Tcommit_anon(fid, dtype, tcpl, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tcommit_anon");
     ret = H5Llink(fid, "datatype", dtype, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Llink");
 
@@ -647,9 +647,9 @@ test_h5o_plist(void)
     dspace = H5Screate(H5S_SCALAR);
     CHECK(dspace, FAIL, "H5Screate");
 
-    /* Create the dataset. */
-    dset = H5Dcreate_expand(fid, H5T_NATIVE_INT, dspace, dcpl, H5P_DEFAULT);
-    CHECK(dset, FAIL, "H5Dcreate_expand");
+    /* Create the dataset anonymously and link it in */
+    dset = H5Dcreate_anon(fid, H5T_NATIVE_INT, dspace, dcpl, H5P_DEFAULT);
+    CHECK(dset, FAIL, "H5Dcreate_anon");
     ret = H5Llink(fid, "dataset", dset, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Llink");
     ret = H5Sclose(dspace);

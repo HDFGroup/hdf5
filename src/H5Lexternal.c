@@ -436,7 +436,7 @@ H5Lunpack_elink_val(const void *_ext_linkval, size_t link_size,
     /* We're now guaranteed that HDstrlen won't segfault, since the buffer has
      * at least one NULL in it.
      */
-    len = HDstrlen(ext_linkval + 1);
+    len = HDstrlen((const char *)ext_linkval + 1);
 
     /* If the first NULL we found was at the very end of the buffer, then
      * this external link value has no object name and is invalid.
@@ -449,9 +449,9 @@ H5Lunpack_elink_val(const void *_ext_linkval, size_t link_size,
      * filename and object path.
      */
     if(filename)
-        *filename = ext_linkval + 1;
+        *filename = (const char *)ext_linkval + 1;
     if(obj_path)
-        *obj_path = (ext_linkval + 1) + len + 1;  /* Add one for NULL terminator */
+        *obj_path = ((const char *)ext_linkval + 1) + len + 1;  /* Add one for NULL terminator */
 
     /* Set the flags to return */
     if(flags)

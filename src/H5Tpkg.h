@@ -355,6 +355,12 @@ typedef enum H5T_sdir_t {
     H5T_BIT_MSB				/*search msb toward lsb		     */
 } H5T_sdir_t;
 
+/* Typedef for named datatype creation operation */
+typedef struct {
+    H5T_t *dt;                  /* Datatype to commit */
+    hid_t tcpl_id;              /* Named datatype creation property list */
+} H5T_obj_create_t;
+
 /*
  * Alignment information for native types. A value of N indicates that the
  * data must be aligned on an address ADDR such that 0 == ADDR mod N. When
@@ -446,6 +452,9 @@ H5FL_EXTERN(H5T_shared_t);
 
 /* Common functions */
 H5_DLL H5T_t *H5T_create(H5T_class_t type, size_t size);
+H5_DLL herr_t H5T_commit(H5F_t *file, H5T_t *type, hid_t tcpl_id, hid_t dxpl_id);
+H5_DLL herr_t H5T_commit_named(const H5G_loc_t *loc, const char *name,
+    H5T_t *dt, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id);
 H5_DLL H5T_t *H5T_alloc(void);
 H5_DLL herr_t H5T_free(H5T_t *dt);
 H5_DLL H5T_sign_t H5T_get_sign(H5T_t const *dt);
@@ -1330,4 +1339,5 @@ H5_DLL size_t H5T_get_member_offset(const H5T_t *dt, unsigned membno);
 H5_DLL size_t H5T_get_member_size(const H5T_t *dt, unsigned membno);
 H5_DLL htri_t H5T_is_packed(const H5T_t *dt);
 
-#endif
+#endif /* _H5Tpkg_H */
+

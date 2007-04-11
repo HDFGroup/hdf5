@@ -85,12 +85,9 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"		/* File access				*/
-#include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Gpkg.h"		/* Groups		  		*/
-#include "H5HLprivate.h"	/* Local Heaps				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
-#include "H5Lprivate.h"         /* Links			  	*/
-#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Lprivate.h"         /* Links                                */
 #include "H5Pprivate.h"         /* Property lists                       */
 
 /* Local macros */
@@ -112,28 +109,23 @@ H5FL_DEFINE(H5G_t);
 H5FL_DEFINE(H5G_shared_t);
 
 /* Private prototypes */
-static H5G_t *H5G_create(H5F_t *file, hid_t dxpl_id, hid_t gcpl_id, hid_t gapl_id);
 static herr_t H5G_open_oid(H5G_t *grp, hid_t dxpl_id);
-static herr_t H5G_insertion_loc_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
-    const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
-    H5G_own_loc_t *own_loc/*out*/);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Gcreate
+ * Function:	H5Gcreate2
  *
- * Purpose:	Creates a new group relative to LOC_ID and gives it the
- *		specified NAME.  The group is opened for write access
- *		and it's object ID is returned.
+ * Purpose:	Creates a new group relative to LOC_ID, giving it the
+ *              specified creation property list GCPL_ID and access
+ *              property list GAPL_ID.  The link to the new group is
+ *              created with the LCPL_ID.
  *
- *		The optional SIZE_HINT specifies how much file space to
- *		reserve to store the names that will appear in this
- *		group. If a non-positive value is supplied for the SIZE_HINT
- *		then a default size is chosen.
- *
- * See also:	H5Gset(), H5Gpush(), H5Gpop()
- *
- * Errors:
+ * Usage:       H5Gcreate2(loc_id, char *name, lcpl_id, gcpl_id, gapl_id)
+ *                  hid_t loc_id;	  IN: File or group identifier
+ *                  const char *name; IN: Absolute or relative name of the new group
+ *                  hid_t lcpl_id;	  IN: Property list for link creation
+ *                  hid_t gcpl_id;	  IN: Property list for group creation
+ *                  hid_t gapl_id;	  IN: Property list for group access
  *
  * Return:	Success:	The object ID of a new, empty group open for
  *				writing.  Call H5Gclose() when finished with
@@ -141,115 +133,118 @@ static herr_t H5G_insertion_loc_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
  *
  *		Failure:	FAIL
  *
- * Programmer:	Robb Matzke
- *		Wednesday, September 24, 1997
+ * Programmer:  Quincey Koziol
+ *	        April 5, 2007
  *
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Gcreate(hid_t loc_id, const char *name, size_t size_hint)
+H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id,
+    hid_t gapl_id)
 {
-    H5G_loc_t	    loc;
-    H5G_loc_t	    grp_loc;
-    H5G_t	   *grp = NULL;
-    H5G_loc_t       insertion_loc;      /* Loc of group in which to create object */
-    H5G_name_t      insert_path;        /* Path of group in which to create object */
-    H5O_loc_t       insert_oloc;        /* oloc of group in which to create object */
-    hbool_t         insert_loc_valid = FALSE;  /* Is insertion_loc valid? */
-    H5F_t          *file;               /* File the group will be inserted into */
-    hid_t           tmp_gcpl = (-1);    /* Temporary group creation property list */
-    hid_t	    grp_id = (-1);      /* ID of group being created */
-    hid_t	    ret_value;
+    H5G_loc_t	    loc;                /* Location to create group */
+    H5G_t	   *grp = NULL;         /* New group created */
+    hid_t	    ret_value;          /* Return value */
 
-    FUNC_ENTER_API(H5Gcreate, FAIL)
-    H5TRACE3("i", "i*sz", loc_id, name, size_hint);
+    FUNC_ENTER_API(H5Gcreate2, FAIL)
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name given")
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
-    /* Check if we need to create a non-standard GCPL */
-    if(size_hint > 0) {
-        H5P_genplist_t  *gc_plist;  /* Property list created */
-        H5O_ginfo_t     ginfo;          /* Group info property */
-
-        /* Get the default property list */
-        if(NULL == (gc_plist = H5I_object(H5P_GROUP_CREATE_DEFAULT)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
-
-        /* Make a copy of the default property list */
-        if((tmp_gcpl = H5P_copy_plist(gc_plist)) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to copy the creation property list")
-
-        /* Get the copy of the property list */
-        if(NULL == (gc_plist = H5I_object(H5P_GROUP_CREATE_DEFAULT)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
-
-        /* Get the group info property */
-        if(H5P_get(gc_plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group info")
-
-        /* Set the non-default local heap size hint */
-        ginfo.lheap_size_hint = size_hint;
-        if(H5P_set(gc_plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set group info")
-    } /* end if */
+    /* Get correct property list */
+    if(H5P_DEFAULT == lcpl_id)
+        lcpl_id = H5P_LINK_CREATE_DEFAULT;
     else
-        tmp_gcpl = H5P_GROUP_CREATE_DEFAULT;
+        if(TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link creation property list")
 
-    /* What file is the group being added to?  This may not be the same file
-     * that loc_id is in if mounting is being used. */
-    insertion_loc.path = &insert_path;
-    insertion_loc.oloc = &insert_oloc;
-    H5G_loc_reset(&insertion_loc);
-    if(H5G_insertion_loc(&loc, name, &insertion_loc, H5AC_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to locate insertion point")
-    insert_loc_valid=TRUE;
-    file = insertion_loc.oloc->file;
+    /* Check group creation property list */
+    if(H5P_DEFAULT == gcpl_id)
+        gcpl_id = H5P_GROUP_CREATE_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(gcpl_id, H5P_GROUP_CREATE))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group create property list")
 
-    /* Create the group */
-    if(NULL == (grp = H5G_create(file, H5AC_dxpl_id, tmp_gcpl, H5P_DEFAULT)))
+    /* Check the group access property list */
+    if(H5P_DEFAULT == gapl_id)
+        gapl_id = H5P_GROUP_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(gapl_id, H5P_GROUP_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group access property list")
+
+    /* Create the new group & get its ID */
+    if(NULL == (grp = H5G_create_named(&loc, name, lcpl_id, gcpl_id, gapl_id, H5AC_dxpl_id)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
-
-    /* Get an ID for the newly created group */
-    if((grp_id = H5I_register(H5I_GROUP, grp)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
-
-    /* Get the new group's location */
-    if(H5G_loc(grp_id, &grp_loc) <0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get location for new group")
-
-    /* Link the new group to its parent group */
-    if(H5L_link(&loc, name, &grp_loc, H5P_DEFAULT, H5P_DEFAULT, H5AC_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link to group")
-
-    /* Set the return value */
-    ret_value = grp_id;
+    if((ret_value = H5I_register(H5I_GROUP, grp)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
 
 done:
-    if(tmp_gcpl > 0 && tmp_gcpl != H5P_GROUP_CREATE_DEFAULT)
-        if(H5I_dec_ref(tmp_gcpl) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release property list")
-
-    if(insert_loc_valid) {
-        if(H5G_loc_free(&insertion_loc) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to free location")
-    }
-    if(ret_value < 0) {
-        if(grp_id >= 0)
-            H5I_dec_ref(grp_id);
-        else if(grp!=NULL)
-            H5G_close(grp);
-    } /* end if */
+    if(ret_value < 0)
+        if(grp && H5G_close(grp) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
 
     FUNC_LEAVE_API(ret_value)
-} /* end H5Gcreate() */
+} /* end H5Gcreate2() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Gcreate_expand
+ * Function:	H5G_create_named
+ *
+ * Purpose:	Internal routine to create a new "named" group.
+ *
+ * Return:	Success:	Non-NULL, pointer to new group object.
+ *
+ *		Failure:	NULL
+ *
+ * Programmer:  Quincey Koziol
+ *	        April 5, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+H5G_t *
+H5G_create_named(const H5G_loc_t *loc, const char *name, hid_t lcpl_id,
+    hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id)
+{
+    H5O_obj_create_t ocrt_info;         /* Information for object creation */
+    H5G_obj_create_t gcrt_info;         /* Information for group creation */
+    H5G_t	   *ret_value;          /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_create_named, NULL)
+
+    /* Check arguments */
+    HDassert(loc);
+    HDassert(name && *name);
+    HDassert(lcpl_id != H5P_DEFAULT);
+    HDassert(gcpl_id != H5P_DEFAULT);
+    HDassert(gapl_id != H5P_DEFAULT);
+    HDassert(dxpl_id != H5P_DEFAULT);
+
+    /* Set up group creation info */
+    gcrt_info.gcpl_id = gcpl_id;
+
+    /* Set up object creation information */
+    ocrt_info.obj_type = H5O_TYPE_GROUP;
+    ocrt_info.crt_info = &gcrt_info;
+    ocrt_info.new_obj = NULL;
+
+    /* Create the new group and link it to its parent group */
+    if(H5L_link_object(loc, name, &ocrt_info, lcpl_id, gapl_id, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to create and link to group")
+    HDassert(ocrt_info.new_obj);
+
+    /* Set the return value */
+    ret_value = ocrt_info.new_obj;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_create_named() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Gcreate_anon
  *
  * Purpose:	Creates a new group relative to LOC_ID, giving it the
  *              specified creation property list GCPL_ID and access
@@ -258,23 +253,19 @@ done:
  *              The resulting ID should be linked into the file with
  *              H5Llink or it will be deleted when closed.
  *
- *              Given the default setting, H5Gcreate_expand() followed by
+ *              Given the default setting, H5Gcreate_anon() followed by
  *              H5Llink() will have the same function as H5Gcreate().
  *
- * Usage:       H5Gcreate_expand(loc_id, char *name, gcpl_id, gapl_id)
- *              hid_t loc_id;	  IN: File or group identifier
- *              const char *name; IN: Absolute or relative name of the new group
- *              hid_t gcpl_id;	  IN: Property list for group creation
- *              hid_t gapl_id;	  IN: Property list for group access
+ * Usage:       H5Gcreate_anon(loc_id, char *name, gcpl_id, gapl_id)
+ *                  hid_t loc_id;	  IN: File or group identifier
+ *                  const char *name; IN: Absolute or relative name of the new group
+ *                  hid_t gcpl_id;	  IN: Property list for group creation
+ *                  hid_t gapl_id;	  IN: Property list for group access
  *
  * Example:	To create missing groups "A" and "B01" along the given path "/A/B01/grp"
  *              hid_t create_id = H5Pcreate(H5P_GROUP_CREATE);
  *              int   status = H5Pset_create_intermediate_group(create_id, TRUE);
- *              hid_t gid = H5Gcreate_expand(file_id, "/A/B01/grp", create_id, H5P_DEFAULT);
- *
- * See also:	H5Gcreate(), H5Dcreate_expand(), H5Pset_create_intermediate_group()
- *
- * Errors:
+ *              hid_t gid = H5Gcreate_anon(file_id, "/A/B01/grp", create_id, H5P_DEFAULT);
  *
  * Return:	Success:	The object ID of a new, empty group open for
  *				writing.  Call H5Gclose() when finished with
@@ -284,16 +275,17 @@ done:
  *
  * Programmer:  Peter Cao
  *	        May 08, 2005
+ *
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Gcreate_expand(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
+H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
 {
     H5G_loc_t	    loc;
     H5G_t	   *grp = NULL;
     hid_t	    ret_value;
 
-    FUNC_ENTER_API(H5Gcreate_expand, FAIL)
+    FUNC_ENTER_API(H5Gcreate_anon, FAIL)
     H5TRACE3("i", "iii", loc_id, gcpl_id, gapl_id);
 
     /* Check arguments */
@@ -315,101 +307,22 @@ H5Gcreate_expand(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group access property list")
 
     /* Create the new group & get its ID */
-    if(NULL == (grp = H5G_create(loc.oloc->file, H5AC_dxpl_id, gcpl_id, gapl_id)))
+    if(NULL == (grp = H5G_create(loc.oloc->file, gcpl_id, H5AC_dxpl_id)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
     if((ret_value = H5I_register(H5I_GROUP, grp)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
 
 done:
-    if(ret_value < 0) {
-        if(grp!=NULL)
-            H5G_close(grp);
-    } /* end if */
+    if(ret_value < 0)
+        if(grp && H5G_close(grp) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
 
     FUNC_LEAVE_API(ret_value)
-} /* end H5Gcreate_expand() */
+} /* end H5Gcreate_anon() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Gopen
- *
- * Purpose:	Opens an existing group for modification.  When finished,
- *		call H5Gclose() to close it and release resources.
- *
- * Errors:
- *
- * Return:	Success:	Object ID of the group.
- *
- *		Failure:	FAIL
- *
- * Programmer:	Robb Matzke
- *		Wednesday, December 31, 1997
- *
- *-------------------------------------------------------------------------
- */
-hid_t
-H5Gopen(hid_t loc_id, const char *name)
-{
-    H5G_t       *grp = NULL;
-    H5G_loc_t	loc;
-    H5G_loc_t   grp_loc;                /* Location used to open group */
-    H5G_name_t  grp_path;            	/* Opened object group hier. path */
-    H5O_loc_t   grp_oloc;            	/* Opened object object location */
-    H5O_type_t  obj_type;               /* Type of object at location */
-    hbool_t     loc_found = FALSE;      /* Location at 'name' found */
-    hid_t       ret_value;              /* Return value */
-
-    FUNC_ENTER_API(H5Gopen, FAIL)
-    H5TRACE2("i", "i*s", loc_id, name);
-
-    /* Check args */
-    if(H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(!name || !*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
-
-    /* Set up opened group location to fill in */
-    grp_loc.oloc = &grp_oloc;
-    grp_loc.path = &grp_path;
-    H5G_loc_reset(&grp_loc);
-
-    /* Find the group object */
-    if(H5G_loc_find(&loc, name, &grp_loc/*out*/, H5P_DEFAULT, H5AC_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
-    loc_found = TRUE;
-
-    /* Check that the object found is the correct type */
-    if(H5O_obj_type(&grp_oloc, &obj_type, H5AC_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object type")
-    if(obj_type != H5O_TYPE_GROUP)
-        HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "not a group")
-
-    /* Open the group */
-    if((grp = H5G_open(&grp_loc, H5AC_dxpl_id)) == NULL)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
-
-    /* Register an atom for the group */
-    if((ret_value = H5I_register(H5I_GROUP, grp)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
-
-done:
-    if(ret_value < 0) {
-        if(grp != NULL)
-            H5G_close(grp);
-        else {
-            if(loc_found) {
-                if(H5G_loc_free(&grp_loc) < 0)
-                    HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
-            }
-        } /* end else */
-    } /* end if */
-
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Gopen() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Gopen_expand
+ * Function:	H5Gopen2
  *
  * Purpose:	Opens an existing group for modification.  When finished,
  *		call H5Gclose() to close it and release resources.
@@ -426,7 +339,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Gopen_expand(hid_t loc_id, const char *name, hid_t gapl_id)
+H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id)
 {
     H5G_t       *grp = NULL;
     H5G_loc_t	loc;
@@ -437,7 +350,7 @@ H5Gopen_expand(hid_t loc_id, const char *name, hid_t gapl_id)
     hbool_t     loc_found = FALSE;      /* Location at 'name' found */
     hid_t       ret_value;              /* Return value */
 
-    FUNC_ENTER_API(H5Gopen_expand, FAIL);
+    FUNC_ENTER_API(H5Gopen2, FAIL)
     H5TRACE3("i", "i*si", loc_id, name, gapl_id);
 
     /* Check args */
@@ -479,18 +392,18 @@ H5Gopen_expand(hid_t loc_id, const char *name, hid_t gapl_id)
 
 done:
     if(ret_value < 0) {
-        if(grp != NULL)
-            H5G_close(grp);
+        if(grp) {
+            if(H5G_close(grp) < 0)
+                HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
+        } /* end if */
         else {
-            if(loc_found) {
-                if(H5G_loc_free(&grp_loc) < 0)
-                    HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
-            }
+            if(loc_found && H5G_loc_free(&grp_loc) < 0)
+                HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
         } /* end else */
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)
-} /* end H5Gopen_expand() */
+} /* end H5Gopen2() */
 
 
 /*-------------------------------------------------------------------------
@@ -730,7 +643,7 @@ H5Gclose(hid_t group_id)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API(H5Gclose, FAIL);
+    FUNC_ENTER_API(H5Gclose, FAIL)
     H5TRACE1("e", "i", group_id);
 
     /* Check args */
@@ -840,10 +753,10 @@ H5G_term_interface(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_term_interface)
 
-    if (H5_interface_initialize_g) {
-	if ((n = H5I_nmembers(H5I_GROUP))) {
+    if(H5_interface_initialize_g) {
+	if((n = H5I_nmembers(H5I_GROUP)))
 	    H5I_clear_type(H5I_GROUP, FALSE);
-	} else {
+	else {
 	    /* Destroy the group object id group */
 	    H5I_dec_type_ref(H5I_GROUP);
 
@@ -858,105 +771,6 @@ H5G_term_interface(void)
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5G_term_interface() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_component
- *
- * Purpose:	Returns the pointer to the first component of the
- *		specified name by skipping leading slashes.  Returns
- *		the size in characters of the component through SIZE_P not
- *		counting leading slashes or the null terminator.
- *
- * Return:	Success:	Ptr into NAME.
- *
- *		Failure:	Ptr to the null terminator of NAME.
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Aug 11 1997
- *
- *-------------------------------------------------------------------------
- */
-const char *
-H5G_component(const char *name, size_t *size_p)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_component)
-
-    assert(name);
-
-    while ('/' == *name)
-        name++;
-    if (size_p)
-        *size_p = HDstrcspn(name, "/");
-
-    FUNC_LEAVE_NOAPI(name)
-} /* end H5G_component() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_normalize
- *
- * Purpose:	Returns a pointer to a new string which has duplicate and
- *              trailing slashes removed from it.
- *
- * Return:	Success:	Ptr to normalized name.
- *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              Saturday, August 16, 2003
- *
- *-------------------------------------------------------------------------
- */
-char *
-H5G_normalize(const char *name)
-{
-    char *norm;         /* Pointer to the normalized string */
-    size_t	s,d;    /* Positions within the strings */
-    unsigned    last_slash;     /* Flag to indicate last character was a slash */
-    char *ret_value;    /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5G_normalize);
-
-    /* Sanity check */
-    assert(name);
-
-    /* Duplicate the name, to return */
-    if (NULL==(norm=H5MM_strdup(name)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for normalized string");
-
-    /* Walk through the characters, omitting duplicated '/'s */
-    s=d=0;
-    last_slash=0;
-    while(name[s]!='\0') {
-        if(name[s]=='/')
-            if(last_slash)
-                ;
-            else {
-                norm[d++]=name[s];
-                last_slash=1;
-            } /* end else */
-        else {
-            norm[d++]=name[s];
-            last_slash=0;
-        } /* end else */
-        s++;
-    } /* end while */
-
-    /* Terminate normalized string */
-    norm[d]='\0';
-
-    /* Check for final '/' on normalized name & eliminate it */
-    if(d>1 && last_slash)
-        norm[d-1]='\0';
-
-    /* Set return value */
-    ret_value=norm;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5G_normalize() */
 
 
 /*-------------------------------------------------------------------------
@@ -1094,8 +908,8 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static H5G_t *
-H5G_create(H5F_t *file, hid_t dxpl_id, hid_t gcpl_id, hid_t UNUSED gapl_id)
+H5G_t *
+H5G_create(H5F_t *file, hid_t gcpl_id, hid_t dxpl_id)
 {
     H5G_t	*grp = NULL;	/*new group			*/
     H5P_genplist_t  *gc_plist;  /* Property list created */
@@ -1109,9 +923,7 @@ H5G_create(H5F_t *file, hid_t dxpl_id, hid_t gcpl_id, hid_t UNUSED gapl_id)
     /* check args */
     HDassert(file);
     HDassert(gcpl_id != H5P_DEFAULT);
-#ifdef LATER
-    HDassert(gapl_id != H5P_DEFAULT);
-#endif /* LATER */
+    HDassert(dxpl_id != H5P_DEFAULT);
 
     /* create an open group */
     if(NULL == (grp = H5FL_CALLOC(H5G_t)))
@@ -1559,86 +1371,6 @@ H5G_map_obj_type(H5O_type_t obj_type)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_insertion_loc_cb
- *
- * Purpose:	Callback for finding insertion location.  This routine sets the
- *              correct information in the location passed in through the udata.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	James Laird
- *              Wednesday, August 16, 2006
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5G_insertion_loc_cb(H5G_loc_t *grp_loc/*in*/, const char UNUSED *name, const H5O_link_t UNUSED *lnk,
-    H5G_loc_t *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
-{
-    H5G_trav_ins_t *udata = (H5G_trav_ins_t *)_udata;   /* User data passed in */
-    herr_t ret_value = SUCCEED;              /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5G_insertion_loc_cb)
-
-    /* Check if the name in this group resolves to a valid location */
-    /* (which is not what we want) */
-    if(obj_loc != NULL)
-        HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "name already exists")
-
-    /* Take ownership of the grp_loc */
-    if(H5G_loc_copy(udata->loc, grp_loc, H5_COPY_SHALLOW) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, FAIL, "couldn't take ownership of group location")
-    *own_loc = H5G_OWN_GRP_LOC;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_insertion_loc_cb() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_insertion_loc
- *
- * Purpose:	Given a location and name that specifies a not-yet-existing
- *		object return the location of the group into which the object
- *              is about to be inserted.
- *
- * Return:	Success:	H5G_loc_t pointer
- *                              (should be released with H5G_loc_free)
- *
- *		Failure:	NULL
- *
- * Programmer:	James Laird
- *              Wednesday, August 16, 2006
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5G_insertion_loc(H5G_loc_t *src_loc, const char *name,
-    H5G_loc_t *insertion_loc/*out*/, hid_t dxpl_id)
-{
-    H5G_trav_ins_t udata;           /* User data for traversal */
-    herr_t         ret_value = SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5G_insertion_loc, FAIL)
-
-    HDassert(src_loc);
-    HDassert(insertion_loc);
-    HDassert(name && *name);
-
-    /*
-     * Look up the name to get the containing group's location and to make
-     * sure the name doesn't already exist.
-     */
-    udata.loc = insertion_loc;
-    if(H5G_traverse(src_loc, name, H5G_TARGET_NORMAL, H5G_insertion_loc_cb, &udata, H5P_DEFAULT, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "name already exists")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_insertion_loc() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5G_free_grp_name
  *
  * Purpose:	Free the 'ID to name' buffers.
@@ -1687,12 +1419,12 @@ done:
 herr_t
 H5G_get_shared_count(H5G_t *grp)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_get_shared_count);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_get_shared_count)
 
     /* Check args */
     HDassert(grp && grp->shared);
 
-    FUNC_LEAVE_NOAPI(grp->shared->fo_count);
+    FUNC_LEAVE_NOAPI(grp->shared->fo_count)
 } /* end H5G_get_shared_count() */
 
 
@@ -1711,7 +1443,7 @@ H5G_get_shared_count(H5G_t *grp)
 herr_t
 H5G_mount(H5G_t *grp)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_mount);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_mount)
 
     /* Check args */
     HDassert(grp && grp->shared);
@@ -1720,7 +1452,7 @@ H5G_mount(H5G_t *grp)
     /* Set the 'mounted' flag */
     grp->shared->mounted = TRUE;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G_mount() */
 
 
@@ -1739,7 +1471,7 @@ H5G_mount(H5G_t *grp)
 herr_t
 H5G_unmount(H5G_t *grp)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_unmount);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_unmount)
 
     /* Check args */
     HDassert(grp && grp->shared);
@@ -1748,6 +1480,6 @@ H5G_unmount(H5G_t *grp)
     /* Reset the 'mounted' flag */
     grp->shared->mounted = FALSE;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G_unmount() */
 

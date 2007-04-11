@@ -45,7 +45,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5A.c H5Abtree2.c H5Adense.c H5Adeprec.c H5Aint.c H5Atest.c \
         H5AC.c H5B.c H5Bcache.c \
         H5B2.c H5B2cache.c H5B2dbg.c H5B2int.c H5B2stat.c H5B2test.c \
-        H5C.c H5CS.c H5D.c H5Dcompact.c H5Dcontig.c \
+        H5C.c H5CS.c H5D.c H5Dcompact.c H5Dcontig.c H5Ddeprec.c \
         H5Defl.c H5Dio.c H5Distore.c H5Dmpio.c H5Doh.c H5Dselect.c H5Dtest.c \
         H5E.c \
         H5F.c H5Fdbg.c H5Ffake.c H5Fmount.c H5Fsfile.c H5Fsuper.c H5Ftest.c \
@@ -53,7 +53,8 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5FDdirect.c H5FDfamily.c H5FDlog.c H5FDmpi.c H5FDmpio.c   \
         H5FDmpiposix.c H5FDmulti.c H5FDsec2.c H5FDstdio.c           \
         H5FDstream.c H5FL.c H5FO.c H5FS.c H5FScache.c H5FSdbg.c H5FSsection.c \
-        H5G.c H5Gbtree2.c H5Gcompact.c H5Gdense.c H5Gdeprec.c H5Gent.c H5Glink.c \
+        H5G.c H5Gbtree2.c H5Gcompact.c H5Gdense.c H5Gdeprec.c H5Gent.c \
+        H5Gint.c H5Glink.c \
         H5Gloc.c H5Gname.c H5Gnode.c H5Gobj.c H5Goh.c H5Gstab.c H5Gtest.c \
         H5Gtraverse.c \
         H5HF.c H5HFbtree2.c H5HFcache.c H5HFdbg.c H5HFdblock.c H5HFdtable.c \
@@ -77,7 +78,8 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5RS.c H5S.c H5Sall.c H5Shyper.c H5Smpio.c H5Snone.c H5Spoint.c       \
         H5Sselect.c H5Stest.c H5SL.c H5SM.c H5SMbtree2.c \
         H5SMcache.c H5SMtest.c H5ST.c H5T.c H5Tarray.c H5Tbit.c H5Tcommit.c \
-        H5Tcompound.c H5Tconv.c H5Tcset.c H5Tenum.c H5Tfields.c H5Tfixed.c    \
+        H5Tcompound.c H5Tconv.c H5Tcset.c H5Tdeprec.c H5Tenum.c H5Tfields.c \
+        H5Tfixed.c \
         H5Tfloat.c H5Tinit.c H5Tnative.c H5Toffset.c H5Toh.c H5Topaque.c \
         H5Torder.c \
         H5Tpad.c H5Tprecis.c H5Tstrpad.c H5Tvlen.c H5TS.c H5V.c H5Z.c  \

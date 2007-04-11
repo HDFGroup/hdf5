@@ -497,15 +497,15 @@ H5_DLLVAR hid_t H5T_NATIVE_INT_FAST64_g;
 H5_DLLVAR hid_t H5T_NATIVE_UINT_FAST64_g;
 
 /* Operations defined on all datatypes */
-H5_DLL hid_t H5Topen(hid_t loc_id, const char *name);
-H5_DLL hid_t H5Topen_expand(hid_t loc_id, const char *name, hid_t tapl_id);
 H5_DLL hid_t H5Tcreate(H5T_class_t type, size_t size);
 H5_DLL hid_t H5Tcopy(hid_t type_id);
 H5_DLL herr_t H5Tclose(hid_t type_id);
 H5_DLL htri_t H5Tequal(hid_t type1_id, hid_t type2_id);
 H5_DLL herr_t H5Tlock(hid_t type_id);
-H5_DLL herr_t H5Tcommit(hid_t loc_id, const char *name, hid_t type_id);
-H5_DLL herr_t H5Tcommit_expand(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id);
+H5_DLL herr_t H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id,
+    hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id);
+H5_DLL hid_t H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id);
+H5_DLL herr_t H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id);
 H5_DLL hid_t H5Tget_create_plist(hid_t type_id);
 H5_DLL htri_t H5Tcommitted(hid_t type_id);
 H5_DLL herr_t H5Tencode(hid_t obj_id, void *buf, size_t *nalloc);
@@ -592,7 +592,16 @@ H5_DLL htri_t H5Tcompiler_conv(hid_t src_id, hid_t dst_id);
 H5_DLL herr_t H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts,
 			  void *buf, void *background, hid_t plist_id);
 
+/* Functions and variables defined for compatibility with previous versions
+ * of the HDF5 API.
+ * 
+ * Use of these functions and variables is deprecated.
+ */
+H5_DLL hid_t H5Topen(hid_t loc_id, const char *name);
+H5_DLL herr_t H5Tcommit(hid_t loc_id, const char *name, hid_t type_id);
+
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif /* _H5Tpublic_H */
+

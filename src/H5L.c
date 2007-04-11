@@ -70,9 +70,10 @@ typedef struct {
 /* User data for path traversal callback to creating a link */
 typedef struct {
     H5F_t *file;                        /* Pointer to the file */
+    H5P_genplist_t *lc_plist;           /* Link creation property list */
     hid_t dxpl_id;                      /* Dataset transfer property list */
-    hid_t lcpl_id;                      /* Link creation property list */
     H5G_name_t *path;                   /* Path to object being linked */
+    H5O_obj_create_t *ocrt_info;        /* Pointer to object creation info */
     H5O_link_t *lnk;                    /* Pointer to link information to insert */
 } H5L_trav_cr_t;
 
@@ -149,9 +150,9 @@ static int H5L_find_class_idx(H5L_type_t id);
 static herr_t H5L_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
-static herr_t H5L_create_real(H5G_loc_t *link_loc, const char *link_name,
-    H5G_name_t *obj_path, H5F_t *obj_file, H5O_link_t *lnk, hid_t lcpl_id,
-    hid_t lapl_id, hid_t dxpl_id);
+static herr_t H5L_create_real(const H5G_loc_t *link_loc, const char *link_name,
+    H5G_name_t *obj_path, H5F_t *obj_file, H5O_link_t *lnk, H5O_obj_create_t *ocrt_info, 
+    hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id);
 static herr_t H5L_get_val_real(const H5O_link_t *lnk, void *buf, size_t size);
 static herr_t H5L_get_val_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
@@ -1431,8 +1432,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5L_link(H5G_loc_t *new_loc, const char *new_name, H5G_loc_t *obj_loc,
-           hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id)
+H5L_link(const H5G_loc_t *new_loc, const char *new_name, H5G_loc_t *obj_loc,
+    hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id)
 {
     H5O_link_t lnk;                     /* Link to insert */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -1454,12 +1455,55 @@ H5L_link(H5G_loc_t *new_loc, const char *new_name, H5G_loc_t *obj_loc,
     lnk.u.hard.addr = obj_loc->oloc->addr;
 
     /* Create the link */
-    if(H5L_create_real(new_loc, new_name, obj_loc->path, obj_loc->oloc->file, &lnk, lcpl_id, lapl_id, dxpl_id) < 0) 
+    if(H5L_create_real(new_loc, new_name, obj_loc->path, obj_loc->oloc->file, &lnk, NULL, lcpl_id, lapl_id, dxpl_id) < 0) 
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create new link to object")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L_link() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5L_link_object
+ *
+ * Purpose:	Creates a new object and a link to it.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, April 9, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5L_link_object(const H5G_loc_t *new_loc, const char *new_name,
+    H5O_obj_create_t *ocrt_info, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id)
+{
+    H5O_link_t lnk;                     /* Link to insert */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5L_link_object)
+
+    /* Check args */
+    HDassert(new_loc);
+    HDassert(new_name && *new_name);
+    HDassert(ocrt_info);
+
+    /* The link callback will check that the object isn't being hard linked
+     * into a different file, so we don't need to do it here (there could be
+     * external links along the path).
+     */
+
+    /* Construct link information for eventual insertion */
+    lnk.type = H5L_TYPE_HARD;
+
+    /* Create the link */
+    if(H5L_create_real(new_loc, new_name, NULL, NULL, &lnk, ocrt_info, lcpl_id, lapl_id, dxpl_id) < 0) 
+        HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create new link to object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5L_link_object() */
 
 
 /*-------------------------------------------------------------------------
@@ -1494,10 +1538,40 @@ H5L_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSED 
 
     /* Check for crossing file boundaries with a new hard link */
     if(udata->lnk->type == H5L_TYPE_HARD) {
-        /* Check that both objects are in same file */
-        if(grp_loc->oloc->file->shared != udata->file->shared)
-            HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "interfile hard links are not allowed")
+        /* Check for creating an object */
+        /* (only for hard links) */
+        if(udata->ocrt_info) {
+            H5G_loc_t new_loc;          /* Group location for new object */
+
+            /* Create new object at this location */
+            if(NULL == (udata->ocrt_info->new_obj = H5O_obj_create(grp_loc->oloc->file, udata->ocrt_info->obj_type, udata->ocrt_info->crt_info, &new_loc, udata->dxpl_id)))
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to create object")
+
+            /* Set address for hard link */
+            udata->lnk->u.hard.addr = new_loc.oloc->addr;
+
+            /* Set object path to use for setting object name (below) */
+            udata->path = new_loc.path;
+        } /* end if */
+        else {
+            /* Check that both objects are in same file */
+            if(grp_loc->oloc->file->shared != udata->file->shared)
+                HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "interfile hard links are not allowed")
+        } /* end else */
     } /* end if */
+
+    /* Set 'standard' aspects of link */
+    udata->lnk->corder = 0;            /* Will be re-written during group insertion, if the group is tracking creation order */
+    udata->lnk->corder_valid = FALSE;   /* Creation order not valid (yet) */
+
+    /* Check for non-default link creation properties */
+    if(udata->lc_plist) {
+        /* Get character encoding property */
+        if(H5P_get(udata->lc_plist, H5P_STRCRT_CHAR_ENCODING_NAME, &udata->lnk->cset) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for character encoding")
+    } /* end if */
+    else
+        udata->lnk->cset = H5F_DEFAULT_CSET;   /* Default character encoding for link */
 
     /* Set the link's name correctly */
     /* Casting away const OK -QAK */
@@ -1588,22 +1662,22 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5L_create_real(H5G_loc_t *link_loc, const char *link_name, H5G_name_t *obj_path,
-    H5F_t *obj_file, H5O_link_t *lnk, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id)
+H5L_create_real(const H5G_loc_t *link_loc, const char *link_name,
+    H5G_name_t *obj_path, H5F_t *obj_file, H5O_link_t *lnk,
+    H5O_obj_create_t *ocrt_info, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id)
 {
     char *norm_link_name = NULL;        /* Pointer to normalized link name */
     unsigned target_flags = H5G_TARGET_NORMAL; /* Flags to pass to group traversal function */
-    H5T_cset_t char_encoding = H5F_DEFAULT_CSET; /* Character encoding for link */
-    H5P_genplist_t* lc_plist;           /* Link creation property list */
+    H5P_genplist_t *lc_plist = NULL;   /* Link creation property list */
     H5L_trav_cr_t udata;               /* User data for callback */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5L_create_real)
 
     /* Check args */
-    HDassert(lnk);
     HDassert(link_loc);
     HDassert(link_name && *link_name);
+    HDassert(lnk);
     HDassert(lnk->type >= H5L_TYPE_HARD && lnk->type <= H5L_TYPE_MAX);
 
     /* Get normalized link name */
@@ -1614,6 +1688,7 @@ H5L_create_real(H5G_loc_t *link_loc, const char *link_name, H5G_name_t *obj_path
     if(lcpl_id != H5P_DEFAULT) {
         unsigned crt_intmd_group;
 
+        /* Get link creation property list */
         if(NULL == (lc_plist = H5I_object(lcpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
@@ -1623,35 +1698,27 @@ H5L_create_real(H5G_loc_t *link_loc, const char *link_name, H5G_name_t *obj_path
 
         if(crt_intmd_group > 0)
             target_flags |= H5G_CRT_INTMD_GROUP;
-
-        /* Get character encoding property */
-        if(H5P_get(lc_plist, H5P_STRCRT_CHAR_ENCODING_NAME, &char_encoding) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for character encoding")
     } /* end if */
 
-    /* Pass the lcpl to the link creation callback */
-    udata.lcpl_id = lcpl_id;
-
-    /* Fill in common data for the link struct */
-    lnk->cset = char_encoding;
-    lnk->corder = 0;            /* Will be re-written during group insertion, if the group is tracking creation order */
-    lnk->corder_valid = FALSE;   /* Creation order not valid (yet) */
-
     /* Set up user data
-     * file is used to make sure that hard links don't cross files, and
+     * FILE is used to make sure that hard links don't cross files, and
      * should be NULL for other link types.
-     * lnk is the link struct passed into this function.  At this point all
-     * of its fields should be populated except for name, which is set when
-     * inserting it in the callback.
-     * dxpl_id is the dxpl ID that needs to be used during writes and reads.
-     * path is a pointer to the path of the object being inserted if this is
+     * LC_PLIST is a pointer to the link creation property list.
+     * DXPL_ID is the dxpl ID that needs to be used during writes and reads.
+     * PATH is a pointer to the path of the object being inserted if this is
      * a hard link; this is used to set the paths to objects when they are
      * created.  For other link types, this is NULL.
+     * OCRT_INFO is a pointer to the structure for object creation.
+     * LNK is the link struct passed into this function.  At this point all
+     * of its fields should be populated except for name, which is set when
+     * inserting it in the callback.
      */
     udata.file = obj_file;
-    udata.lnk = lnk;
+    udata.lc_plist = lc_plist;
     udata.dxpl_id = dxpl_id;
     udata.path = obj_path;
+    udata.ocrt_info = ocrt_info;
+    udata.lnk = lnk;
 
     /* Traverse the destination path & create new link */
     if(H5G_traverse(link_loc, link_name, target_flags, H5L_link_cb, &udata, lapl_id, dxpl_id) < 0)
@@ -1680,8 +1747,8 @@ done:
  */
 herr_t
 H5L_create_hard(H5G_loc_t *cur_loc, const char *cur_name,
-    H5G_loc_t *link_loc, const char *link_name, hid_t lcpl_id, hid_t lapl_id,
-    hid_t dxpl_id)
+    const H5G_loc_t *link_loc, const char *link_name, hid_t lcpl_id,
+    hid_t lapl_id, hid_t dxpl_id)
 {
     char *norm_cur_name = NULL;	        /* Pointer to normalized current name */
     H5F_t *link_file = NULL;            /* Pointer to file to link to */
@@ -1696,8 +1763,8 @@ H5L_create_hard(H5G_loc_t *cur_loc, const char *cur_name,
 
     /* Check args */
     HDassert(cur_loc);
-    HDassert(link_loc);
     HDassert(cur_name && *cur_name);
+    HDassert(link_loc);
     HDassert(link_name && *link_name);
 
     /* Get normalized copy of the current name */
@@ -1723,7 +1790,7 @@ H5L_create_hard(H5G_loc_t *cur_loc, const char *cur_name,
 
     /* Create actual link to the object.  Pass in NULL for the path, since this
      * function shouldn't change an object's user path. */
-    if(H5L_create_real(link_loc, link_name, NULL, link_file, &lnk, lcpl_id, lapl_id, dxpl_id) < 0)
+    if(H5L_create_real(link_loc, link_name, NULL, link_file, &lnk, NULL, lcpl_id, lapl_id, dxpl_id) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create new link to object")
 
 done:
@@ -1753,7 +1820,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5L_create_soft(const char *target_path, H5G_loc_t *link_loc,
+H5L_create_soft(const char *target_path, const H5G_loc_t *link_loc,
     const char *link_name, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id)
 {
     char *norm_target = NULL;	        /* Pointer to normalized current name */
@@ -1776,7 +1843,7 @@ H5L_create_soft(const char *target_path, H5G_loc_t *link_loc,
     lnk.u.soft.name = norm_target;
 
     /* Create actual link to the object */
-    if(H5L_create_real(link_loc, link_name, NULL, NULL, &lnk, lcpl_id, lapl_id, dxpl_id) < 0)
+    if(H5L_create_real(link_loc, link_name, NULL, NULL, &lnk, NULL, lcpl_id, lapl_id, dxpl_id) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create new link to object")
 
 done:
@@ -1802,9 +1869,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5L_create_ud(H5G_loc_t *link_loc, const char *link_name, const void *ud_data,
-    size_t ud_data_size, H5L_type_t type, hid_t lcpl_id, hid_t lapl_id,
-    hid_t dxpl_id)
+H5L_create_ud(const H5G_loc_t *link_loc, const char *link_name,
+    const void *ud_data, size_t ud_data_size, H5L_type_t type, hid_t lcpl_id,
+    hid_t lapl_id, hid_t dxpl_id)
 {
     H5O_link_t lnk;                     /* Link to insert */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -1836,7 +1903,7 @@ H5L_create_ud(H5G_loc_t *link_loc, const char *link_name, const void *ud_data,
     lnk.type = type;
 
     /* Create actual link to the object */
-    if(H5L_create_real(link_loc, link_name, NULL, NULL, &lnk, lcpl_id, lapl_id, dxpl_id) < 0)
+    if(H5L_create_real(link_loc, link_name, NULL, NULL, &lnk, NULL, lcpl_id, lapl_id, dxpl_id) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to register new name for object")
 
 done:

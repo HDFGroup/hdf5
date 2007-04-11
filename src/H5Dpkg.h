@@ -218,17 +218,31 @@ typedef struct fm_map {
     hbool_t *select_chunk;         /* store the information about whether this chunk is selected or not */
 } fm_map;
 
+/* Typedef for dataset creation operation */
+typedef struct {
+    hid_t type_id;              /* Datatype for dataset */
+    const H5S_t *space;         /* Dataspace for dataset */
+    hid_t dcpl_id;              /* Dataset creation property list */
+} H5D_obj_create_t;
+
+
 /*****************************/
 /* Package Private Variables */
 /*****************************/
 extern H5D_dxpl_cache_t H5D_def_dxpl_cache;
 
+
 /******************************/
 /* Package Private Prototypes */
 /******************************/
 
+H5_DLL H5D_t *H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space,
+    hid_t dcpl_id, hid_t dxpl_id);
+H5_DLL H5D_t *H5D_create_named(const H5G_loc_t *loc, const char *name,
+    hid_t type_id, const H5S_t *space, hid_t lcpl_id, hid_t dcpl_id,
+    hid_t dapl_id, hid_t dxpl_id);
 H5_DLL herr_t H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset, H5D_time_alloc_t time_alloc,
-                        hbool_t update_time, hbool_t full_overwrite);
+    hbool_t update_time, hbool_t full_overwrite);
 
 /* Functions that perform serial I/O operations */
 H5_DLL herr_t H5D_select_fscat (H5D_io_info_t *io_info,

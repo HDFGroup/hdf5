@@ -2086,3 +2086,51 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_get_nlinks() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_obj_create
+ *
+ * Purpose:	Creates an object, in an abstract manner.
+ *
+ * Return:	Success:	Pointer to object opened
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *		April 9 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5O_obj_create(H5F_t *f, H5O_type_t obj_type, void *crt_info, H5G_loc_t *obj_loc,
+    hid_t dxpl_id)
+{
+    size_t u;                           /* Local index variable */
+    void *ret_value = NULL;             /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_obj_create, NULL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(obj_type >= H5O_TYPE_GROUP && obj_type <= H5O_TYPE_NAMED_DATATYPE);
+    HDassert(crt_info);
+    HDassert(obj_loc);
+
+    /* Iterate through the object classes */
+    for(u = 0; u < NELMTS(H5O_obj_class_g); u++) {
+        /* Check for correct type of object to create */
+	if(H5O_obj_class_g[u]->type == obj_type) {
+            /* Call the object class's 'create' routine */
+            HDassert(H5O_obj_class_g[u]->create);
+            if(NULL == (ret_value = H5O_obj_class_g[u]->create(f, crt_info, obj_loc, dxpl_id)))
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, NULL, "unable to open object")
+
+            /* Break out of loop */
+            break;
+        } /* end if */
+    } /* end for */
+    HDassert(ret_value);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_obj_create() */
+

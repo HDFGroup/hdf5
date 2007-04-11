@@ -332,6 +332,12 @@ typedef herr_t (*H5G_traverse_t)(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk/*in*/, H5G_loc_t *obj_loc/*out*/, void *operator_data/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
 
+/* Typedef for group creation operation */
+typedef struct {
+    hid_t gcpl_id;              /* Group creation property list */
+} H5G_obj_create_t;
+
+
 /*****************************/
 /* Package Private Variables */
 /*****************************/
@@ -350,12 +356,20 @@ H5_DLLVAR const H5B2_class_t H5G_BT2_NAME[1];
 /* The v2 B-tree class for indexing 'creation order' field on links */
 H5_DLLVAR const H5B2_class_t H5G_BT2_CORDER[1];
 
+/******************************/
+/* Package Private Prototypes */
+/******************************/
+
 /*
- * Utility functions
+ * General group routines
  */
-H5_DLL herr_t H5G_init(void);
-H5_DLL char * H5G_normalize(const char *name);
-H5_DLL const char * H5G_component(const char *name, size_t *size_p);
+H5_DLL H5G_t *H5G_create(H5F_t *file, hid_t gcpl_id, hid_t dxpl_id);
+H5_DLL H5G_t *H5G_create_named(const H5G_loc_t *loc, const char *name,
+    hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id);
+
+/*
+ * Group hierarchy traversal routines
+ */
 H5_DLL herr_t H5G_traverse_term_interface(void);
 H5_DLL herr_t H5G_traverse_special(const H5G_loc_t *grp_loc,
     const H5O_link_t *lnk, unsigned target, size_t *nlinks, hbool_t last_comp,
@@ -364,9 +378,12 @@ H5_DLL herr_t H5G_traverse(const H5G_loc_t *loc, const char *name,
     unsigned target, H5G_traverse_t op, void *op_data, hid_t lapl_id,
     hid_t dxpl_id);
 
-/******************************/
-/* Package Private Prototypes */
-/******************************/
+/*
+ * Utility functions
+ */
+H5_DLL herr_t H5G_init(void);
+H5_DLL char *H5G_normalize(const char *name);
+H5_DLL const char *H5G_component(const char *name, size_t *size_p);
 
 /*
  * Functions that understand symbol tables but not names.  The

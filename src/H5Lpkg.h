@@ -53,7 +53,7 @@
 /* Package Private Prototypes */
 /******************************/
 
-H5_DLL herr_t H5L_create_ud(H5G_loc_t *link_loc, const char *link_name,
+H5_DLL herr_t H5L_create_ud(const H5G_loc_t *link_loc, const char *link_name,
     const void * ud_data, size_t ud_data_size, H5L_type_t type,
     hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id);
 

@@ -148,9 +148,9 @@ static void extlink_prefix_example(void)
 
     /* Now if we traverse the external link, HDF5 will look for an external
      * file named red/prefix_target.h5, which exists.
-     * To pass the group access property list, we need to use H5Gopen_expand.
+     * To pass the group access property list, we need to use H5Gopen2.
      */
-    group_id = H5Gopen_expand(source_file_id, "ext_link", gapl_id);
+    group_id = H5Gopen2(source_file_id, "ext_link", gapl_id);
 
     /* Now we can use the open group ID to create a new group inside the
      * "red" file.
@@ -165,7 +165,7 @@ static void extlink_prefix_example(void)
      * directory.
      */
     H5Pset_elink_prefix(gapl_id, "blue/");
-    group_id = H5Gopen_expand(source_file_id, "ext_link", gapl_id);
+    group_id = H5Gopen2(source_file_id, "ext_link", gapl_id);
     group2_id = H5Gcreate(group_id, "sky blue", (size_t) 0);
 
     /* Close both groups. */
@@ -591,14 +591,14 @@ static void plist_link_example(void)
 
     /* Open the first group through the plist link using the GAPL we just
      * created */
-    group_id = H5Gopen_expand(file_id, "plist_link", gapl_id);
+    group_id = H5Gopen2(file_id, "plist_link", gapl_id);
 
     /* If we change the value set on the property list, it will change where
      * the plist link points.
      */
     path = "group_1/group_2";
     H5Pset(gapl_id, PLIST_LINK_PROP, &path);
-    group2_id = H5Gopen_expand(file_id, "plist_link", gapl_id);
+    group2_id = H5Gopen2(file_id, "plist_link", gapl_id);
 
     /* group_id points to group_1 and group2_id points to group_2, both opened
      * through the same link.

@@ -282,14 +282,8 @@ main(int argc, const char *argv[])
         hid_t gid;              /* Group ID */
 
         /* Attempt to create a group */
-        if((gid = H5Gcreate_expand(fid, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-            error_msg(progname, "Could not create group\n");
-            leave(EXIT_FAILURE);
-        } /* end if */
-
-        /* Link new group into group hierarchy */
-        if(H5Llink(fid, params.groups[curr_group], gid, lcpl_id, H5P_DEFAULT) < 0) {
-            error_msg(progname, "Could not create link to group '%s'\n", params.groups[curr_group]);
+        if((gid = H5Gcreate2(fid, params.groups[curr_group], lcpl_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+            error_msg(progname, "Could not create group '%s'\n", params.groups[curr_group]);
             leave(EXIT_FAILURE);
         } /* end if */
 

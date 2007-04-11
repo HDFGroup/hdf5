@@ -17,25 +17,30 @@
 /* Module Setup */
 /****************/
 
+#define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+
 
 /***********/
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5Dprivate.h"		/* Datasets				*/
+#include "H5Dpkg.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Opkg.h"             /* Object headers			*/
 
+
 /****************/
 /* Local Macros */
 /****************/
 
+
 /******************/
 /* Local Typedefs */
 /******************/
+
 
 /********************/
 /* Local Prototypes */
@@ -44,15 +49,20 @@ static void *H5O_dset_get_copy_file_udata(void);
 static void H5O_dset_free_copy_file_udata(void *);
 static htri_t H5O_dset_isa(H5O_t *loc);
 static hid_t H5O_dset_open(const H5G_loc_t *obj_loc, hid_t dxpl_id);
+static void *H5O_dset_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc,
+    hid_t dxpl_id);
 static H5O_loc_t *H5O_dset_get_oloc(hid_t obj_id);
+
 
 /*********************/
 /* Package Variables */
 /*********************/
 
+
 /*****************************/
 /* Library Private Variables */
 /*****************************/
+
 
 /*******************/
 /* Local Variables */
@@ -66,6 +76,7 @@ const H5O_obj_class_t H5O_OBJ_DATASET[1] = {{
     H5O_dset_free_copy_file_udata, /* free 'copy file' user data	*/
     H5O_dset_isa, 		/* "isa" message		*/
     H5O_dset_open, 		/* open an object of this class */
+    H5O_dset_create, 		/* create an object of this class */
     H5O_dset_get_oloc 		/* get an object header location for an object */
 }};
 
@@ -218,8 +229,8 @@ H5O_dset_open(const H5G_loc_t *obj_loc, hid_t dxpl_id)
     HDassert(obj_loc);
 
     /* Open the dataset */
-    if((dset = H5D_open(obj_loc, dxpl_id)) == NULL)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open dataset")
+    if(NULL == (dset = H5D_open(obj_loc, dxpl_id)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open dataset")
 
     /* Register an ID for the dataset */
     if((ret_value = H5I_register(H5I_DATASET, dset)) < 0)
@@ -227,11 +238,60 @@ H5O_dset_open(const H5G_loc_t *obj_loc, hid_t dxpl_id)
 
 done:
     if(ret_value < 0)
-        if(dset != NULL)
-            H5D_close(dset);
+        if(dset && H5D_close(dset) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_dset_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_dset_create
+ *
+ * Purpose:	Create a dataset in a file
+ *
+ * Return:	Success:	Pointer to the dataset data structure
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, April 11, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5O_dset_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc, hid_t dxpl_id)
+{
+    H5D_obj_create_t *crt_info = (H5D_obj_create_t *)_crt_info; /* Dataset creation parameters */
+    H5D_t *dset = NULL;         /* New dataset created */
+    void *ret_value;            /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_dset_create)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(crt_info);
+    HDassert(obj_loc);
+
+    /* Create the the dqtaset */
+    if(NULL == (dset = H5D_create(f, crt_info->type_id, crt_info->space, crt_info->dcpl_id, dxpl_id)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to create dataset")
+
+    /* Set up the new dataset's location */
+    if(NULL == (obj_loc->oloc = H5D_oloc(dset)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get object location of dataset")
+    if(NULL == (obj_loc->path = H5D_nameof(dset)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to get path of dataset")
+
+    /* Set the return value */
+    ret_value = dset;
+
+done:
+    if(ret_value == NULL)
+        if(dset && H5D_close(dset) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release dataset")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_dset_create() */
 
 
 /*-------------------------------------------------------------------------
@@ -256,11 +316,11 @@ H5O_dset_get_oloc(hid_t obj_id)
     FUNC_ENTER_NOAPI_NOINIT(H5O_dset_get_oloc)
 
     /* Get the dataset */
-    if((dset = H5I_object(obj_id)) == NULL)
+    if(NULL == (dset = H5I_object(obj_id)))
         HGOTO_ERROR(H5E_OHDR, H5E_BADATOM, NULL, "couldn't get object from ID")
 
     /* Get the dataset's object header location */
-    if((ret_value = H5D_oloc(dset)) == NULL)
+    if(NULL == (ret_value = H5D_oloc(dset)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "unable to get object location from object")
 
 done:

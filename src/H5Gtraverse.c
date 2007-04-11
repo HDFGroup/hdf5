@@ -157,8 +157,8 @@ H5G_traverse_ud(const H5G_loc_t *grp_loc/*in,out*/, const H5O_link_t *lnk,
     H5G_loc_t           grp_loc_copy;
     H5G_name_t          grp_path_copy;
     H5O_loc_t           grp_oloc_copy;
-    H5O_loc_t          *new_oloc=NULL;
-    H5F_t              *temp_file=NULL;
+    H5O_loc_t          *new_oloc = NULL;
+    H5F_t              *temp_file = NULL;
     H5G_t              *grp;
     hid_t               lapl_id = (-1);         /* LAPL local to this routine */
     H5P_genplist_t     *lapl;                   /* LAPL with nlinks set */
@@ -197,24 +197,27 @@ H5G_traverse_ud(const H5G_loc_t *grp_loc/*in,out*/, const H5O_link_t *lnk,
     if((cur_grp = H5I_register(H5I_GROUP, grp)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
 
-    /* Record number of soft links left to traverse in the property list.
-     * If no property list exists yet, create one. */
-    if(_lapl_id == H5P_DEFAULT || _lapl_id == H5P_LINK_ACCESS_DEFAULT) {
+    /* Check for generic default property list and use link access default if so */
+    if(_lapl_id == H5P_DEFAULT) {
         HDassert(H5P_LINK_ACCESS_DEFAULT != -1);
         if(NULL == (lapl = H5I_object(H5P_LINK_ACCESS_DEFAULT)))
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "unable to get default property list")
-
-        if((lapl_id = H5P_copy_plist(lapl)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unable to copy property list")
     } /* end if */
     else {
-        /* Use the property list passed in */
-        lapl_id = _lapl_id;
-
-        if(NULL == (lapl = H5I_object(lapl_id)))
+        /* Get the underlying property list passed in */
+        if(NULL == (lapl = H5I_object(_lapl_id)))
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "unable to get property list from ID")
     } /* end else */
 
+    /* Copy the property list passed in */
+    if((lapl_id = H5P_copy_plist(lapl)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unable to copy property list")
+
+    /* Get the underlying property list copy */
+    if(NULL == (lapl = H5I_object(lapl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "unable to get property list from ID")
+
+    /* Record number of soft links left to traverse in the property list. */
     if(H5P_set(lapl, H5L_ACS_NLINKS_NAME, nlinks) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set nlink info")
 
@@ -223,8 +226,7 @@ H5G_traverse_ud(const H5G_loc_t *grp_loc/*in,out*/, const H5O_link_t *lnk,
         HGOTO_ERROR(H5E_ARGS, H5E_BADATOM, FAIL, "traversal callback returned invalid ID")
 
     /* Get the oloc from the ID the user callback returned */
-    switch(H5I_get_type(cb_return))
-    {
+    switch(H5I_get_type(cb_return)) {
         case H5I_GROUP:
             if((new_oloc = H5G_oloc(H5I_object(cb_return))) == NULL)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location from group ID")
@@ -249,7 +251,7 @@ H5G_traverse_ud(const H5G_loc_t *grp_loc/*in,out*/, const H5O_link_t *lnk,
 
         default:
             HGOTO_ERROR(H5E_ATOM, H5E_BADTYPE, FAIL, "not a valid location or object ID")
-    }
+    } /* end switch */
 
     /* Copy the location the user returned to us */
     if(H5O_loc_copy(obj_loc->oloc, new_oloc, H5_COPY_DEEP) < 0)
@@ -277,9 +279,8 @@ done:
               HDONE_ERROR(H5E_ATOM, H5E_CANTRELEASE, FAIL, "unable to close atom from UD callback")
 
     /* Close the LAPL, if we copied the default one */
-    if(lapl_id > 0 && lapl_id != _lapl_id)
-        if(H5I_dec_ref(lapl_id) < 0)
-              HDONE_ERROR(H5E_ATOM, H5E_CANTRELEASE, FAIL, "unable to close copied link access property list")
+    if(lapl_id > 0 && H5I_dec_ref(lapl_id) < 0)
+          HDONE_ERROR(H5E_ATOM, H5E_CANTRELEASE, FAIL, "unable to close copied link access property list")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_traverse_ud() */
@@ -853,7 +854,7 @@ H5G_traverse(const H5G_loc_t *loc, const char *name, unsigned target, H5G_traver
 
     /* Go perform "real" traversal */
     if(H5G_traverse_real(loc, name, target, &nlinks, op, op_data, lapl_id, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "path traversal failed")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "internal path traversal failed")
 
 done:
    FUNC_LEAVE_NOAPI(ret_value)

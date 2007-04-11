@@ -91,10 +91,11 @@ extern "C" {
 typedef herr_t (*H5D_operator_t)(void *elem, hid_t type_id, unsigned ndim,
 				 const hsize_t *point, void *operator_data);
 
-H5_DLL hid_t H5Dcreate(hid_t file_id, const char *name, hid_t type_id,
-			 hid_t space_id, hid_t plist_id);
-H5_DLL hid_t H5Dopen(hid_t file_id, const char *name);
-H5_DLL hid_t H5Dopen_expand(hid_t file_id, const char *name, hid_t dapl_id);
+H5_DLL hid_t H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id,
+    hid_t space_id, hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id);
+H5_DLL hid_t H5Dcreate_anon(hid_t file_id, hid_t type_id, hid_t space_id,
+    hid_t plist_id, hid_t dapl_id);
+H5_DLL hid_t H5Dopen2(hid_t file_id, const char *name, hid_t dapl_id);
 H5_DLL herr_t H5Dclose(hid_t dset_id);
 H5_DLL hid_t H5Dget_space(hid_t dset_id);
 H5_DLL herr_t H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation);
@@ -115,11 +116,18 @@ H5_DLL herr_t H5Dfill(const void *fill, hid_t fill_type, void *buf,
         hid_t buf_type, hid_t space);
 H5_DLL herr_t H5Dset_extent(hid_t dset_id, const hsize_t *size);
 H5_DLL herr_t H5Ddebug(hid_t dset_id);
-H5_DLL hid_t H5Dcreate_expand(hid_t file_id, hid_t type_id,
-			 hid_t space_id, hid_t plist_id, hid_t dapl_id);
 
+/* Functions and variables defined for compatibility with previous versions
+ * of the HDF5 API.
+ * 
+ * Use of these functions and variables is deprecated.
+ */
+H5_DLL hid_t H5Dcreate(hid_t file_id, const char *name, hid_t type_id,
+    hid_t space_id, hid_t plist_id);
+H5_DLL hid_t H5Dopen(hid_t file_id, const char *name);
 
 #ifdef __cplusplus
 }
 #endif
 #endif /* _H5Dpublic_H */
+

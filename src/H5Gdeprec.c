@@ -43,7 +43,9 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Gpkg.h"		/* Groups		  		*/
+#include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Lprivate.h"         /* Links                                */
+#include "H5Pprivate.h"         /* Property lists                       */
 
 
 /****************/
@@ -123,6 +125,171 @@ H5G_init_deprec_interface(void)
 
     FUNC_LEAVE_NOAPI(H5G_init())
 } /* H5G_init_deprec_interface() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Gcreate
+ *
+ * Purpose:	Creates a new group relative to LOC_ID and gives it the
+ *		specified NAME.  The group is opened for write access
+ *		and it's object ID is returned.
+ *
+ *		The optional SIZE_HINT specifies how much file space to
+ *		reserve to store the names that will appear in this
+ *		group. If a non-positive value is supplied for the SIZE_HINT
+ *		then a default size is chosen.
+ *
+ * Return:	Success:	The object ID of a new, empty group open for
+ *				writing.  Call H5Gclose() when finished with
+ *				the group.
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *		Wednesday, September 24, 1997
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Gcreate(hid_t loc_id, const char *name, size_t size_hint)
+{
+    H5G_loc_t	    loc;                /* Location to create group */
+    H5G_t	   *grp = NULL;         /* New group created */
+    hid_t           tmp_gcpl = (-1);    /* Temporary group creation property list */
+    hid_t	    ret_value;          /* Return value */
+
+    FUNC_ENTER_API(H5Gcreate, FAIL)
+    H5TRACE3("i", "i*sz", loc_id, name, size_hint);
+
+    /* Check arguments */
+    if(H5G_loc(loc_id, &loc) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(!name || !*name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name given")
+
+    /* Check if we need to create a non-standard GCPL */
+    if(size_hint > 0) {
+        H5P_genplist_t  *gc_plist;  /* Property list created */
+        H5O_ginfo_t     ginfo;          /* Group info property */
+
+        /* Get the default property list */
+        if(NULL == (gc_plist = H5I_object(H5P_GROUP_CREATE_DEFAULT)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+
+        /* Make a copy of the default property list */
+        if((tmp_gcpl = H5P_copy_plist(gc_plist)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to copy the creation property list")
+
+        /* Get the copy of the property list */
+        if(NULL == (gc_plist = H5I_object(H5P_GROUP_CREATE_DEFAULT)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+
+        /* Get the group info property */
+        if(H5P_get(gc_plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get group info")
+
+        /* Set the non-default local heap size hint */
+        ginfo.lheap_size_hint = size_hint;
+        if(H5P_set(gc_plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set group info")
+    } /* end if */
+    else
+        tmp_gcpl = H5P_GROUP_CREATE_DEFAULT;
+
+    /* Create the new group & get its ID */
+    if(NULL == (grp = H5G_create_named(&loc, name, H5P_LINK_CREATE_DEFAULT,
+            tmp_gcpl, H5P_GROUP_ACCESS_DEFAULT, H5AC_dxpl_id)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
+    if((ret_value = H5I_register(H5I_GROUP, grp)) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
+
+done:
+    if(tmp_gcpl > 0 && tmp_gcpl != H5P_GROUP_CREATE_DEFAULT)
+        if(H5I_dec_ref(tmp_gcpl) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release property list")
+
+    if(ret_value < 0)
+        if(grp && H5G_close(grp) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
+
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Gcreate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Gopen
+ *
+ * Purpose:	Opens an existing group for modification.  When finished,
+ *		call H5Gclose() to close it and release resources.
+ *
+ * Return:	Success:	Object ID of the group.
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Robb Matzke
+ *		Wednesday, December 31, 1997
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Gopen(hid_t loc_id, const char *name)
+{
+    H5G_t       *grp = NULL;
+    H5G_loc_t	loc;
+    H5G_loc_t   grp_loc;                /* Location used to open group */
+    H5G_name_t  grp_path;            	/* Opened object group hier. path */
+    H5O_loc_t   grp_oloc;            	/* Opened object object location */
+    H5O_type_t  obj_type;               /* Type of object at location */
+    hbool_t     loc_found = FALSE;      /* Location at 'name' found */
+    hid_t       ret_value;              /* Return value */
+
+    FUNC_ENTER_API(H5Gopen, FAIL)
+    H5TRACE2("i", "i*s", loc_id, name);
+
+    /* Check args */
+    if(H5G_loc(loc_id, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(!name || !*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+
+    /* Set up opened group location to fill in */
+    grp_loc.oloc = &grp_oloc;
+    grp_loc.path = &grp_path;
+    H5G_loc_reset(&grp_loc);
+
+    /* Find the group object */
+    if(H5G_loc_find(&loc, name, &grp_loc/*out*/, H5P_DEFAULT, H5AC_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
+    loc_found = TRUE;
+
+    /* Check that the object found is the correct type */
+    if(H5O_obj_type(&grp_oloc, &obj_type, H5AC_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object type")
+    if(obj_type != H5O_TYPE_GROUP)
+        HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "not a group")
+
+    /* Open the group */
+    if((grp = H5G_open(&grp_loc, H5AC_dxpl_id)) == NULL)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
+
+    /* Register an atom for the group */
+    if((ret_value = H5I_register(H5I_GROUP, grp)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
+
+done:
+    if(ret_value < 0) {
+        if(grp) {
+            if(H5G_close(grp) < 0)
+                HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
+        } /* end if */
+        else {
+            if(loc_found && H5G_loc_free(&grp_loc) < 0)
+                HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+        } /* end else */
+    } /* end if */
+
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Gopen() */
 
 
 /*-------------------------------------------------------------------------

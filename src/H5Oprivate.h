@@ -442,6 +442,13 @@ typedef uint32_t H5O_refcount_t;
 typedef herr_t (*H5O_operator_t)(const void *mesg/*in*/, unsigned idx,
     void *operator_data/*in,out*/);
 
+/* Typedef for abstract object creation */
+typedef struct {
+    H5O_type_t obj_type;        /* Type of object to create */
+    void *crt_info;             /* Information for object creation callback */
+    void *new_obj;              /* Pointer to new object created */
+} H5O_obj_create_t;
+
 /* Forward declarations for prototype arguments */
 struct H5P_genplist_t;
 
@@ -467,6 +474,7 @@ H5_DLL herr_t H5O_obj_type(const H5O_loc_t *loc, H5O_type_t *obj_type, hid_t dxp
 H5_DLL herr_t H5O_get_create_plist(const H5O_loc_t *loc, hid_t dxpl_id, struct H5P_genplist_t *oc_plist);
 H5_DLL hid_t H5O_open_name(H5G_loc_t *loc, const char *name, hid_t lapl_id);
 H5_DLL herr_t H5O_get_nlinks(const H5O_loc_t *loc, hid_t dxpl_id, hsize_t *nlinks);
+H5_DLL void *H5O_obj_create(H5F_t *f, H5O_type_t obj_type, void *crt_info, H5G_loc_t *obj_loc, hid_t dxpl_id);
 
 /* Object header message routines */
 H5_DLL herr_t H5O_msg_create(const H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags,
