@@ -43,19 +43,20 @@ if test -z "$srcdir"; then
 fi
 
 # Generate some source files and library for tests.
-hdf5main=${H5TOOL}_hdf5main.cpp
+suffix=cpp		# source file suffix
+hdf5main=${H5TOOL}_hdf5main.$suffix
 hdf5main_o=${H5TOOL}_hdf5main.o
-appmain=${H5TOOL}_appmain.cpp
+appmain=${H5TOOL}_appmain.$suffix
 appmain_o=${H5TOOL}_appmain.o
-prog1=${H5TOOL}_prog1.cpp
+prog1=${H5TOOL}_prog1.$suffix
 prog1_o=${H5TOOL}_prog1.o
-prog2=${H5TOOL}_prog2.cpp
+prog2=${H5TOOL}_prog2.$suffix
 prog2_o=${H5TOOL}_prog2.o
 applib=libapp${H5TOOL}.a
 
 # short hands
 temp_SRC="$hdf5main $appmain $prog1 $prog2"
-temp_OBJ=`echo $temp_SRC | sed -e 's/\.cpp/.o/g'`
+temp_OBJ=`echo $temp_SRC | sed -e "s/\.${suffix}/.o/g"`
 temp_FILES="a.out *.h5 $applib"
 
 # Generate appmain:
@@ -251,8 +252,8 @@ else
     TOOLTEST -o a.out $applib
 fi
 
-# Just cpp, no compile, no link.
-echo "***"Just cpp, no compile, no link.
+# Just preprocess, no compile, no link.
+echo "***"Just preprocess, no compile, no link.
 TOOLTEST -E $hdf5main
 TOOLTEST -E $appmain $prog1 $prog2
 

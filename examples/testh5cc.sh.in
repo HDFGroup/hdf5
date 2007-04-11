@@ -38,25 +38,30 @@ DIFF='diff -c'
 nerrors=0
 verbose=yes
 
+# setup my machine information.
+myos=`uname -s`
+myhostnama=`uname -n`
+
 # The build (current) directory might be different than the source directory.
 if test -z "$srcdir"; then
    srcdir=.
 fi
 
 # Generate some source files and library for tests.
-hdf5main=${H5TOOL}_hdf5main.c
+suffix=c		# source file suffix
+hdf5main=${H5TOOL}_hdf5main.$suffix
 hdf5main_o=${H5TOOL}_hdf5main.o
-appmain=${H5TOOL}_appmain.c
+appmain=${H5TOOL}_appmain.$suffix
 appmain_o=${H5TOOL}_appmain.o
-prog1=${H5TOOL}_prog1.c
+prog1=${H5TOOL}_prog1.$suffix
 prog1_o=${H5TOOL}_prog1.o
-prog2=${H5TOOL}_prog2.c
+prog2=${H5TOOL}_prog2.$suffix
 prog2_o=${H5TOOL}_prog2.o
 applib=libapp${H5TOOL}.a
 
 # short hands
 temp_SRC="$hdf5main $appmain $prog1 $prog2"
-temp_OBJ=`echo $temp_SRC | sed -e 's/\.c/.o/g'`
+temp_OBJ=`echo $temp_SRC | sed -e "s/\.${suffix}/.o/g"`
 temp_FILES="a.out *.h5 $applib"
 
 # Generate appmain:
@@ -207,8 +212,8 @@ $RANLIB $applib
 TOOLTEST $appmain $applib
 TOOLTEST $appmain_o $applib
 
-# Just cpp, no compile, no link.
-echo "***"Just cpp, no compile, no link.
+# Just preprocess, no compile, no link.
+echo "***"Just preprocess, no compile, no link.
 TOOLTEST -E $hdf5main
 TOOLTEST -E $appmain $prog1 $prog2
 
