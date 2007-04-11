@@ -237,7 +237,6 @@ hbool_t
 H5MF_alloc_overflow(H5F_t *f, hsize_t size)
 {
     hsize_t space_needed = 0;    /* Accumulator variable */
-    H5FD_mem_t type;             /* Type of memory */
     size_t c;                    /* Local index variable */
     hbool_t ret_value;           /* Return value */
 

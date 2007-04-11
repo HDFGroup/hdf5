@@ -4639,7 +4639,7 @@ done:
 H5O_loc_t *
 H5T_oloc(H5T_t *dt)
 {
-    H5O_loc_t		*ret_value = NULL;
+    H5O_loc_t *ret_value;
 
     FUNC_ENTER_NOAPI(H5T_oloc, NULL)
 
@@ -4678,7 +4678,7 @@ done:
 H5G_name_t *
 H5T_nameof(H5T_t *dt)
 {
-    H5G_name_t		*ret_value = NULL;
+    H5G_name_t *ret_value;
 
     FUNC_ENTER_NOAPI(H5T_nameof, NULL)
 

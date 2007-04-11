@@ -560,8 +560,12 @@ H5FD_stdio_alloc(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxp
 {
     H5FD_stdio_t	*file = (H5FD_stdio_t*)_file;
     haddr_t		addr;
-    static const char   *func="H5FD_stdio_alloc";  /* Function Name for error reporting */
+    static const char   *func = "H5FD_stdio_alloc";  /* Function Name for error reporting */
     haddr_t ret_value;          /* Return value */
+
+    /* Shut compiler up */
+    type = type;
+    dxpl_id = dxpl_id;
 
     /* Clear the error stack */
     H5Eclear_stack(H5E_DEFAULT);
@@ -570,22 +574,22 @@ H5FD_stdio_alloc(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxp
     addr = file->eoa;
 
     /* Check if we need to align this block */
-    if(size>=file->pub.threshold) {
+    if(size >= file->pub.threshold) {
         /* Check for an already aligned block */
-        if(addr%file->pub.alignment!=0)
-            addr=((addr/file->pub.alignment)+1)*file->pub.alignment;
+        if((addr % file->pub.alignment) != 0)
+            addr = ((addr / file->pub.alignment) + 1) * file->pub.alignment;
     } /* end if */
 
 #ifndef H5_HAVE_FSEEKO
     /* If fseeko isn't available, big files (>2GB) won't be supported. */
-    if(addr+size>BIG_FILE)
-        H5Epush_ret (func, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR, "can't write file bigger than 2GB because fseeko isn't available", -1)
+    if((addr + size) > BIG_FILE)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR, "can't write file bigger than 2GB because fseeko isn't available", HADDR_UNDEF)
 #endif 
 
-    file->eoa = addr+size;
+    file->eoa = addr + size;
 
     /* Set return value */
-    ret_value=addr;
+    ret_value = addr;
 
     return(ret_value);
 }   /* H5FD_stdio_alloc() */

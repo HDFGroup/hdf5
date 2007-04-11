@@ -333,7 +333,7 @@ H5G_obj_get_linfo(const H5O_loc_t *grp_oloc, H5O_linfo_t *linfo, hid_t dxpl_id)
     HDassert(grp_oloc);
 
     /* Retrieve the "link info" structure */
-    if(ret_value = H5O_msg_read(grp_oloc, H5O_LINFO_ID, linfo, dxpl_id)) {
+    if((ret_value = H5O_msg_read(grp_oloc, H5O_LINFO_ID, linfo, dxpl_id))) {
         /* Check if we don't know how many links there are */
         if(ret_value->nlinks == HSIZET_MAX) {
             /* Check if we are using "dense" link storage */

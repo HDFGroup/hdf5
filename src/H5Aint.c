@@ -644,7 +644,7 @@ H5A_get_ainfo(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_ainfo_t *ainfo)
     HDassert(oh);
 
     /* Retrieve the "attribute info" structure */
-    if(ret_value = H5O_msg_read_real(f, dxpl_id, oh, H5O_AINFO_ID, ainfo)) {
+    if((ret_value = H5O_msg_read_real(f, dxpl_id, oh, H5O_AINFO_ID, ainfo))) {
         /* Check if we don't know how many attributes there are */
         if(ret_value->nattrs == HSIZET_MAX) {
             /* Check if we are using "dense" attribute storage */
