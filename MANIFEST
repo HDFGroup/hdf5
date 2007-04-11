@@ -141,6 +141,8 @@
 ./examples/h5_ref2reg.c
 ./examples/h5_shared_mesg.c
 ./examples/ph5example.c
+./examples/testh5cc.sh.in
+
 
 
 #------------------------------------------------------------------------------
@@ -170,6 +172,7 @@
 ./fortran/examples/refregexample.f90
 ./fortran/examples/rwdsetexample.f90
 ./fortran/examples/selectele.f90
+./fortran/examples/testh5fc.sh.in
 
 ./fortran/src/H5_f.c
 ./fortran/src/H5_ff.f90
@@ -265,6 +268,7 @@
 ./c++/examples/h5group.cpp
 ./c++/examples/readdata.cpp
 ./c++/examples/testexamples.sh
+./c++/examples/testh5c++.sh.in
 ./c++/examples/writedata.cpp
 ./c++/examples/Makefile.am
 ./c++/examples/Makefile.in

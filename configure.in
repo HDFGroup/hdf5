@@ -3607,11 +3607,13 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/misc/testh5repart.sh
                  tools/misc/testh5stat.sh
                  examples/Makefile
+                 examples/testh5cc.sh
                  c++/Makefile
                  c++/src/Makefile
                  c++/src/h5c++
                  c++/test/Makefile
                  c++/examples/Makefile
+                 c++/examples/testh5c++.sh
                  fortran/Makefile
                  fortran/src/h5fc
                  fortran/src/libhdf5_fortran.settings
@@ -3619,6 +3621,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  fortran/test/Makefile
                  fortran/testpar/Makefile
                  fortran/examples/Makefile
+                 fortran/examples/testh5fc.sh
                  hl/Makefile
                  hl/src/Makefile
                  hl/test/Makefile

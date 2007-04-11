@@ -24,6 +24,7 @@ include $(top_srcdir)/config/commence.am
 # These are the programs that 'make all' or 'make prog' will build and
 # which 'make check' will run.  List them in the order they should be run.
 TEST_PROG=create readdata writedata compound extend_ds chunks h5group
+TEST_SCRIPT=testh5c++.sh
 
 # These are the example files to be installed
 INSTALL_FILES=create.cpp readdata.cpp writedata.cpp compound.cpp         \

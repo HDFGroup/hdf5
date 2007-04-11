@@ -1,0 +1,239 @@
+#! /bin/sh
+#
+# Copyright by The HDF Group.
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the files COPYING and Copyright.html.  COPYING can be found at the root
+# of the source code distribution tree; Copyright.html can be found at the
+# root level of an installed copy of the electronic HDF5 document set and
+# is linked from the top-level documents page.  It can also be found at
+# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+# access to either file, you may request a copy from help@hdfgroup.org.
+#
+# Tests for the h5fc compiler tool
+# Created: Albert Cheng, 2007/3/14
+#
+# Modification:
+#
+
+# Initializations
+# Where the tool is installed.
+prefix="@prefix@"
+PARALLEL=@PARALLEL@		# Am I in parallel mode?
+AR=@AR@
+RANLIB=@RANLIB@
+if [ "$PARALLEL" = no ]; then
+    H5TOOL="h5fc"           	# The tool name
+else
+    H5TOOL="h5pfc"               # The tool name
+fi
+H5TOOL_BIN="${prefix}/bin/${H5TOOL}"   # The path of the tool binary
+
+CMP='cmp -s'
+DIFF='diff -c'
+
+nerrors=0
+verbose=yes
+
+# The build (current) directory might be different than the source directory.
+if test -z "$srcdir"; then
+   srcdir=.
+fi
+
+# Generate some source files and library for tests.
+suffix=f90		# source file suffix
+hdf5main=${H5TOOL}_hdf5main.$suffix
+hdf5main_o=${H5TOOL}_hdf5main.o
+appmain=${H5TOOL}_appmain.$suffix
+appmain_o=${H5TOOL}_appmain.o
+prog1=${H5TOOL}_prog1.$suffix
+prog1_o=${H5TOOL}_prog1.o
+prog2=${H5TOOL}_prog2.$suffix
+prog2_o=${H5TOOL}_prog2.o
+applib=libapp${H5TOOL}.a
+
+# short hands
+temp_SRC="$hdf5main $appmain $prog1 $prog2"
+temp_OBJ=`echo $temp_SRC | sed -e 's/${suffix}/.o/g'`
+temp_FILES="a.out *.h5 $applib"
+
+# Generate appmain:
+# An application Main that calls hdf5 and application's own functions.
+cat > $appmain <<EOF
+     PROGRAM FILEEXAMPLE
+     USE HDF5 ! This module contains all necessary modules 
+        
+     IMPLICIT NONE
+
+     CHARACTER(LEN=8), PARAMETER :: filename = "apptmp.h5" ! File name
+     INTEGER(HID_T) :: file_id                            ! File identifier
+ 
+     INTEGER     ::   error  ! Error flag
+
+     CALL sub1
+     CALL h5open_f (error)
+     CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error)
+     CALL h5fclose_f(file_id, error)
+     CALL h5close_f(error)
+     CALL sub2
+     END PROGRAM FILEEXAMPLE 
+EOF
+
+# generate prog1
+cat > $prog1 <<EOF
+	subroutine sub1
+	print *, "in sub1"
+	end
+EOF
+
+# generate prog2
+cat > $prog2 <<EOF
+	subroutine sub2
+	print *, "in sub2"
+	end
+EOF
+
+# Generate HDF5 Main Program:
+# An HDF5 sample program that calls hdf5 functions.
+cat > $hdf5main <<EOF
+     PROGRAM FILEEXAMPLE
+     USE HDF5 ! This module contains all necessary modules 
+        
+     IMPLICIT NONE
+
+     CHARACTER(LEN=8), PARAMETER :: filename = "apptmp.h5" ! File name
+     INTEGER(HID_T) :: file_id                            ! File identifier
+ 
+     INTEGER     ::   error  ! Error flag
+
+     CALL h5open_f (error)
+     CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error)
+     CALL h5fclose_f(file_id, error)
+     CALL h5close_f(error)
+     END PROGRAM FILEEXAMPLE 
+EOF
+
+
+
+# Parse option
+#   None
+
+# Print a line-line message left justified in a field of 70 characters
+# beginning with the word "Testing".
+#
+TESTING() {
+   SPACES="                                                               "
+   echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
+}
+
+
+# Debug printing
+# Change : to echo to print the debug statement
+DPRINT() {
+    : $*
+}
+
+# Run a test and print PASS or *FAIL*.  If a test fails then increment
+# the `nerrors' global variable and (if $verbose is set) display the
+# difference between the actual output and the expected output. The
+# expected output is given as the first argument to this function and
+# the actual output file is calculated by replacing the `.ddl' with
+# `.out'.  The actual output is not removed if $HDF5_NOCLEANUP has a
+# non-zero value.
+#
+# This test shows what commands will be run and verify they are as expected.
+# It does not actually execute the compiler script to compile source code.
+# The actual execution ability is tested somewhere else.
+#
+# Algorithm:
+# First figure out the parameters (e.g., compiler name and option, linker name and
+# options, libraries used, ....) that the h5cc command uses.  Then use the -show to
+# display what commands the tool will use for different parameter and verify if they
+# are as expected.
+# The paramters have two part, prefix and suffix. The prefix part is the real compiler
+# or linker command name, options (-I, -D, ...).  The suffix part is the link options,
+# libraries, ....
+#
+
+#
+# $1: -C compile only; -L link only; -CL compile and link.
+# $2-$: remainign arguments
+#
+TOOLTEST() {
+    out=test_$H5TOOL_$$.out
+    err=test_$H5TOOL_$$.err
+
+    # Run test.
+    TESTING $H5TOOL $@
+    $H5TOOL_BIN $@ > $out 2>&1
+    result=$?
+    if [ $result = 0 ]; then
+	echo " PASSED"
+    else
+	echo "*FAILED*"
+	nerrors="`expr $nerrors + 1`"
+	test yes = "$verbose" && \
+	    ( echo "========== results ==========="; cat $out;
+	      echo "===============================================") |sed 's/^/    /'
+    fi
+
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+	rm -f $out
+    fi
+}
+
+# Print a "SKIP" message
+SKIP() {
+	 TESTING $H5TOOL $@
+	  echo  " -SKIP-"
+}
+
+
+##############################################################################
+###			  T H E   T E S T S                                ###
+##############################################################################
+#
+# HDF5 program that calls HDF5 APIs.
+echo "***"Simple Compile and Link in one step.
+TOOLTEST $hdf5main
+# Application program that calls HDF5 and its own functions.
+TOOLTEST $appmain $prog1 $prog2
+
+# Compile, then link.
+echo "***"Compile and Link in two steps.
+TOOLTEST -c $hdf5main
+TOOLTEST $hdf5main_o
+TOOLTEST -c $appmain $prog1 $prog2
+TOOLTEST $appmain_o $prog1_o $prog2_o
+
+# Build external library, then link with it.
+echo "***"Build external library and link with it.
+TOOLTEST -c $prog1 $prog2
+$AR cru $applib $prog1_o $prog2_o
+$RANLIB $applib
+SKIP $appmain $applib
+SKIP $appmain_o $applib
+
+# Just cpp, no compile, no link.
+echo "***"Just cpp, no compile, no link.
+TOOLTEST -E $hdf5main
+TOOLTEST -E $appmain $prog1 $prog2
+
+##############################################################################
+# END
+##############################################################################
+
+# Clean up  file
+if test -z "$HDF5_NOCLEANUP"; then
+    rm -f $temp_SRC $temp_OBJ $temp_FILES
+fi
+
+if test $nerrors -eq 0 ; then
+   echo "All $H5TOOL tests passed."
+fi
+
+exit $nerrors

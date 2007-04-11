@@ -32,6 +32,7 @@ endif
 TEST_PROG = h5_write h5_read h5_extend_write h5_chunk_read h5_compound   \
            h5_group h5_select h5_attribute h5_mount h5_reference h5_drivers \
            h5_ref2reg h5_extlink h5_elink_unix2win h5_shared_mesg
+TEST_SCRIPT=testh5cc.sh
 
 # Install files
 # List all file that should be installed in examples directory

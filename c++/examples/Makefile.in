@@ -53,7 +53,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(top_srcdir)/config/commence.am \
+	$(srcdir)/testh5c++.sh.in $(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am \
 	$(top_srcdir)/config/examples.am
 TESTS =
@@ -64,7 +64,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = testh5c++.sh
 SOURCES =
 DIST_SOURCES =
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -294,6 +294,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5
 # These are the programs that 'make all' or 'make prog' will build and
 # which 'make check' will run.  List them in the order they should be run.
 TEST_PROG = create readdata writedata compound extend_ds chunks h5group
+TEST_SCRIPT = testh5c++.sh
 
 # These are the example files to be installed
 INSTALL_FILES = create.cpp readdata.cpp writedata.cpp compound.cpp         \
@@ -362,6 +363,8 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+testh5c++.sh: $(top_builddir)/config.status $(srcdir)/testh5c++.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 mostlyclean-libtool:
 	-rm -f *.lo

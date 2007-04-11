@@ -34,6 +34,7 @@ endif
 TEST_PROG=dsetexample fileexample rwdsetexample attrexample groupexample    \
        grpsexample grpdsetexample hyperslab selectele grpit refobjexample   \
        refregexample mountexample compound
+TEST_SCRIPT=testh5fc.sh
 
 # List files to be installed here
 INSTALL_FILES=dsetexample.f90 fileexample.f90 rwdsetexample.f90             \

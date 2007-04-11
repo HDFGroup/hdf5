@@ -53,7 +53,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(top_srcdir)/config/commence.am \
+	$(srcdir)/testh5cc.sh.in $(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am \
 	$(top_srcdir)/config/examples.am
 TESTS =
@@ -64,7 +64,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = testh5cc.sh
 SOURCES =
 DIST_SOURCES =
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -300,6 +300,7 @@ TEST_PROG = h5_write h5_read h5_extend_write h5_chunk_read h5_compound   \
            h5_group h5_select h5_attribute h5_mount h5_reference h5_drivers \
            h5_ref2reg h5_extlink h5_elink_unix2win h5_shared_mesg
 
+TEST_SCRIPT = testh5cc.sh
 
 # Install files
 # List all file that should be installed in examples directory
@@ -372,6 +373,8 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+testh5cc.sh: $(top_builddir)/config.status $(srcdir)/testh5cc.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 mostlyclean-libtool:
 	-rm -f *.lo
