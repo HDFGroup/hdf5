@@ -109,13 +109,42 @@ main(int argv , char *argc[])
 
         if (gifImageDesc.Image != NULL)
             free(gifImageDesc.Image);
+        
+        if (GifMemoryStruct.GifImageDesc[i] != NULL)
+        {
+            free(GifMemoryStruct.GifImageDesc[i]);
+            GifMemoryStruct.GifImageDesc[i] = NULL;
+        }
 
         if (GifMemoryStruct.GifGraphicControlExtension[i] != NULL)
+        {
             free(GifMemoryStruct.GifGraphicControlExtension[i]);
+            GifMemoryStruct.GifGraphicControlExtension[i] = NULL;
+        }
     }
 
     free(StartPos);
-    free(GifMemoryStruct.GifHeader);
-    free(GifMemoryStruct.GifApplicationExtension);
+    if (GifMemoryStruct.GifHeader != NULL)
+    {
+        free(GifMemoryStruct.GifHeader);
+        GifMemoryStruct.GifHeader = NULL;
+    }
+    if (GifMemoryStruct.GifApplicationExtension != NULL)
+    {
+        free(GifMemoryStruct.GifApplicationExtension);
+        GifMemoryStruct.GifApplicationExtension = NULL;
+    }
+    if (GifMemoryStruct.GifImageDesc != NULL)
+    {
+        free(GifMemoryStruct.GifImageDesc);
+        GifMemoryStruct.GifImageDesc = NULL;
+    }
+    if (GifMemoryStruct.GifGraphicControlExtension != NULL)
+    {
+        free(GifMemoryStruct.GifGraphicControlExtension);
+        GifMemoryStruct.GifGraphicControlExtension = NULL;
+    }
+
+
     return 0;
 }
