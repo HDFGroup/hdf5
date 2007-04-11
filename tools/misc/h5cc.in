@@ -1,5 +1,5 @@
 #! /bin/sh
-#
+##
 # Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
@@ -12,7 +12,9 @@
 # is linked from the top-level documents page.  It can also be found at
 # http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
 # access to either file, you may request a copy from help@hdfgroup.org.
-#
+##
+
+# This tool is adapted from the mpicc command of the MPICH Software.
 
 ############################################################################
 ##                                                                        ##
@@ -234,6 +236,11 @@ for arg in $@ ; do
       ;;
   esac
 done
+
+if test "$dash_c" = "yes" -a "$do_compile" = no -a "$do_link" = no ; then
+    # -c was specified.  Force do_compile on.
+    do_compile=yes
+fi
 
 if test "x$do_compile" = "xyes"; then
   if test "x$dash_c" != "xyes"; then
