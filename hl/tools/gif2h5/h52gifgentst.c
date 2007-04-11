@@ -18,10 +18,8 @@
 #include "hdf5.h"
 #include "H5IMpublic.h"
 
-
-
 /*-------------------------------------------------------------------------
- * Program: h52giftst
+ * Program: h52gifgentst
  *
  * Purpose: generate files for h52gif testing
  *
@@ -33,8 +31,8 @@
  */
 
 #define FILENAME    "h52giftst.h5"
-#define WIDTH       (hsize_t)400
-#define HEIGHT      (hsize_t)200
+#define WIDTH        400
+#define HEIGHT       200
 #define PAL_ENTRIES  256
 #define IMAGE1_NAME  "image"
 #define PAL_NAME     "palette"
@@ -54,6 +52,8 @@ int main(void)
     unsigned char buf [ WIDTH*HEIGHT ];
     unsigned char pal[ PAL_ENTRIES * 3 ];        /* palette array */
     hsize_t       pal_dims[2] = {PAL_ENTRIES,3}; /* palette dimensions */
+    hsize_t       width  = WIDTH;
+    hsize_t       height = HEIGHT;
 
     
     /* create a file  */
@@ -70,11 +70,11 @@ int main(void)
             n++;
             j=0;
         }
-        if (n>PAL_ENTRIES-1) n=0;
+        
     }
 
     /* make the image */
-    if (H5IMmake_image_8bit( fid, IMAGE1_NAME, WIDTH, HEIGHT, buf )<0)
+    if (H5IMmake_image_8bit( fid, IMAGE1_NAME, width, height, buf )<0)
         return 1;
 
    /*-------------------------------------------------------------------------
@@ -101,5 +101,4 @@ int main(void)
     
     return 0;
 }
-
 
