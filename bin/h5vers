@@ -72,7 +72,7 @@ use strict;
 # one directory above the H5public.h file is also modified so it looks
 # something like: This is hdf5-1.2.3-pre1 currently under development.
 # The AC_INIT macro in configure.in will also change in this case to be
-# something like: AC_INIT([HDF5], [hdf5-1.2.3-pre1], [hdfhelp@ncsa.uiuc.edu])
+# something like: AC_INIT([HDF5], [hdf5-1.2.3-pre1], [help@hdfgroup.org])
 #
 # Whenever the version changes, this script will increment the revision
 # field in HDF5's libtool shared library version in config/lt_vers.am,
@@ -126,7 +126,7 @@ EOF
 }
 
 # Parse arguments
-my ($verbose, $set, $inc, $file);
+my ($verbose, $set, $inc, $file, $rc);
 my (@files) = ("H5public.h", "src/H5public.h", "../src/H5public.h");
 while ($_ = shift) {
   $_ eq "-s" && do {
@@ -328,9 +328,13 @@ sub gen_configure {
   $conf =~ /^(.*?)\/?configure.in$/;
 
   if ($1) {
-    system("cd $1 && bin/reconfigure >/dev/null 2>/dev/null && rm -rf autom4te.cache");
+    $rc = system("cd $1 && bin/reconfigure >/dev/null 2>/dev/null && rm -rf autom4te.cache");
   } else {
-    system("bin/reconfigure >/dev/null 2>/dev/null && rm -rf autom4te.cache");
+    $rc = system("bin/reconfigure >/dev/null 2>/dev/null && rm -rf autom4te.cache");
+  }
+  if ($rc) {
+    printf("bin/reconfigure failed with exit code %d. Aborted.\n", $rc);
+    exit 1;
   }
 }
 
