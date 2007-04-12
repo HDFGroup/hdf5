@@ -304,7 +304,7 @@ H5E_term_interface(void)
  *
  *-------------------------------------------------------------------------
  */
-static H5E_t *
+H5E_t *
 H5E_get_stack(void)
 {
     H5E_t *estack;
@@ -321,7 +321,7 @@ H5E_get_stack(void)
         /* Set the thread-specific info */
         estack->nused = 0;
         estack->new_api = TRUE;
-        estack->u.func_stack = (H5E_auto2_t)H5Eprint2;
+        estack->u.func2 = (H5E_auto2_t)H5Eprint2;
         estack->auto_data = NULL;
 
         /* (It's not necessary to release this in this API, it is

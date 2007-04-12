@@ -132,7 +132,7 @@ int
 main(int argc, char* argv[])
 {
     hid_t fapl1, fapl2;
-    H5E_auto_stack_t func;
+    H5E_auto2_t func;
 
     char	name[1024];
     const char *envval = NULL;
@@ -176,8 +176,8 @@ main(int argc, char* argv[])
 	 * so we turn off the error stack temporarily */
 	if(mpi_rank == 0) 
 	    TESTING("H5Fflush (part2 without flush)");
-	H5Eget_auto_stack(H5E_DEFAULT,&func,NULL);
-	H5Eset_auto_stack(H5E_DEFAULT, NULL, NULL);
+	H5Eget_auto2(H5E_DEFAULT,&func,NULL);
+	H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
 	h5_fixname(FILENAME[1], fapl2, name, sizeof name);
 	if(check_file(name, fapl2))
@@ -192,7 +192,7 @@ main(int argc, char* argv[])
 	    H5_FAILED()
 	    goto error;
 	}
-	H5Eset_auto_stack(H5E_DEFAULT, func, NULL);
+	H5Eset_auto2(H5E_DEFAULT, func, NULL);
 
 
 	h5_cleanup(&FILENAME[0], fapl1);

@@ -56,7 +56,7 @@
 #define WRITE_NUMBER		37
 
 static herr_t error_callback(hid_t , void *);
-static herr_t walk_error_callback(unsigned, const H5E_error_stack_t *, void *);
+static herr_t walk_error_callback(unsigned, const H5E_error2_t *, void *);
 static void *tts_error_thread(void *);
 
 /* Global variables */
@@ -163,16 +163,16 @@ void *tts_error_thread(void UNUSED *arg)
 {
     hid_t dataspace, datatype, dataset;
     hsize_t dimsf[1]; /* dataset dimensions */
-    H5E_auto_stack_t old_error_cb;
+    H5E_auto2_t old_error_cb;
     void *old_error_client_data;
     int value;
     int ret;
 
     /* preserve previous error stack handler */
-    H5Eget_auto_stack(H5E_DEFAULT, &old_error_cb, &old_error_client_data); 
+    H5Eget_auto2(H5E_DEFAULT, &old_error_cb, &old_error_client_data); 
 
     /* set each thread's error stack handler */
-    H5Eset_auto_stack(H5E_DEFAULT, error_callback, NULL); 
+    H5Eset_auto2(H5E_DEFAULT, error_callback, NULL); 
 
     /* define dataspace for dataset */
     dimsf[0] = 1;
@@ -198,7 +198,7 @@ void *tts_error_thread(void UNUSED *arg)
     assert(ret>=0);
 
     /* turn our error stack handler off */
-    H5Eset_auto_stack(H5E_DEFAULT, old_error_cb, old_error_client_data); 
+    H5Eset_auto2(H5E_DEFAULT, old_error_cb, old_error_client_data); 
 
     return NULL;
 }
@@ -213,11 +213,11 @@ herr_t error_callback(hid_t estack_id, void *client_data)
     error_count++;
     ret=pthread_mutex_unlock(&error_mutex);
     assert(ret==0);
-    return H5Ewalk_stack(H5E_DEFAULT, H5E_WALK_DOWNWARD, walk_error_callback, client_data);
+    return H5Ewalk2(H5E_DEFAULT, H5E_WALK_DOWNWARD, walk_error_callback, client_data);
 }
 
 static
-herr_t walk_error_callback(unsigned n, const H5E_error_stack_t *err_desc, void UNUSED *client_data)
+herr_t walk_error_callback(unsigned n, const H5E_error2_t *err_desc, void UNUSED *client_data)
 {
     hid_t maj_num, min_num;
 

@@ -44,10 +44,6 @@
 #include "H5Cpkg.h"             /* Cache                                */
 #include "H5SLprivate.h"        /* Skip lists */
 
-#ifdef H5_HAVE_PARALLEL
-#include <mpi.h>
-#endif /* H5_HAVE_PARALLEL */
-
 
 #define H5AC_DEBUG_DIRTY_BYTES_CREATION	0
 
