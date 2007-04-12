@@ -188,9 +188,6 @@ for arg in $@ ; do
 	            do_link="yes"
 	            link_objs="$link_objs $arg"
                 fi
-            elif test "x$ext" = "x.a"; then
-              # This is an archive that we're linking in
-              libraries=" $libraries $arg "
             else
               compile_args="$compile_args $arg"
               link_args="$link_args $arg"
