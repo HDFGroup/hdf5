@@ -76,7 +76,7 @@ main(void)
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
 	goto error;
     if (NULL==(f=H5I_object(file))) {
-	H5Eprint_stack(H5E_DEFAULT, stdout);
+	H5Eprint2(H5E_DEFAULT, stdout);
 	goto error;
     }
 
@@ -88,7 +88,7 @@ main(void)
     HDmemset(&oh_loc, 0, sizeof(oh_loc));
     if(H5O_create(f, H5P_DATASET_XFER_DEFAULT, (size_t)64, H5P_GROUP_CREATE_DEFAULT, &oh_loc/*out*/)<0) {
 	H5_FAILED();
-	H5Eprint_stack(H5E_DEFAULT, stdout);
+	H5Eprint2(H5E_DEFAULT, stdout);
 	goto error;
     }
     PASSED();
@@ -98,17 +98,17 @@ main(void)
     time_new = 11111111;
     if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT) < 0) {
 	H5_FAILED();
-	H5Eprint_stack(H5E_DEFAULT, stdout);
+	H5Eprint2(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE)<0) {
 	H5_FAILED();
-	H5Eprint_stack(H5E_DEFAULT, stdout);
+	H5Eprint2(H5E_DEFAULT, stdout);
 	goto error;
     }
     if(NULL == H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
-	H5Eprint_stack(H5E_DEFAULT, stdout);
+	H5Eprint2(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (ro!=time_new) {
@@ -126,17 +126,17 @@ main(void)
     time_new = 33333333;
     if (H5O_msg_write(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
-	H5Eprint_stack(H5E_DEFAULT, stdout);
+	H5Eprint2(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE)<0) {
 	H5_FAILED();
-	H5Eprint_stack(H5E_DEFAULT, stdout);
+	H5Eprint2(H5E_DEFAULT, stdout);
 	goto error;
     }
     if(NULL == H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
-	H5Eprint_stack(H5E_DEFAULT, stdout);
+	H5Eprint2(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (ro!=time_new) {
@@ -161,13 +161,13 @@ main(void)
         time_new = (i+1)*1000+1;
         if(H5O_msg_create(&oh_loc, H5O_MTIME_ID, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT) < 0) {
 	    H5_FAILED();
-            H5Eprint_stack(H5E_DEFAULT, stdout);
+            H5Eprint2(H5E_DEFAULT, stdout);
 	    goto error;
 	}
     }
     if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE)<0) {
 	H5_FAILED();
-	H5Eprint_stack(H5E_DEFAULT, stdout);
+	H5Eprint2(H5E_DEFAULT, stdout);
 	goto error;
     }
     PASSED();
@@ -181,12 +181,12 @@ main(void)
         time_new = (i + 1) * 1000 + 10;
         if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT) < 0) {
 	    H5_FAILED();
-            H5Eprint_stack(H5E_DEFAULT, stdout);
+            H5Eprint2(H5E_DEFAULT, stdout);
 	    goto error;
 	}
         if (H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE)<0) {
 	    H5_FAILED();
-            H5Eprint_stack(H5E_DEFAULT, stdout);
+            H5Eprint2(H5E_DEFAULT, stdout);
 	    goto error;
 	}
     }
@@ -198,24 +198,24 @@ main(void)
     TESTING("message deletion");
     if (H5O_msg_remove(&oh_loc, H5O_MTIME_NEW_ID, H5O_ALL, TRUE, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
-	H5Eprint_stack(H5E_DEFAULT, stdout);
+	H5Eprint2(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (H5O_msg_remove(&oh_loc, H5O_MTIME_ID, H5O_ALL, TRUE, H5P_DATASET_XFER_DEFAULT)<0) {
 	H5_FAILED();
-	H5Eprint_stack(H5E_DEFAULT, stdout);
+	H5Eprint2(H5E_DEFAULT, stdout);
 	goto error;
     }
     if(H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	puts("    H5O_msg_read() should have failed but didn't");
-	H5Eclear_stack(H5E_DEFAULT);
+	H5Eclear2(H5E_DEFAULT);
 	goto error;
     }
     if(H5O_msg_read(&oh_loc, H5O_MTIME_ID, &ro, H5P_DATASET_XFER_DEFAULT)) {
 	H5_FAILED();
 	puts("    H5O_msg_read() should have failed but didn't");
-	H5Eclear_stack(H5E_DEFAULT);
+	H5Eclear2(H5E_DEFAULT);
 	goto error;
     }
     PASSED();
@@ -225,7 +225,7 @@ main(void)
     TESTING("object header closing");
     if (H5O_close(&oh_loc)<0) {
 	H5_FAILED();
-	H5Eprint_stack(H5E_DEFAULT, stdout);
+	H5Eprint2(H5E_DEFAULT, stdout);
 	goto error;
     }
     if (H5Fclose(file)<0) goto error;

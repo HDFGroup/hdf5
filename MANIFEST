@@ -468,7 +468,10 @@
 ./src/H5Dtest.c
 ./src/H5E.c
 ./src/H5Edefin.h
+./src/H5Edeprec.c
 ./src/H5Einit.h
+./src/H5Eint.c
+./src/H5Epkg.h
 ./src/H5Eprivate.h
 ./src/H5Epubgen.h
 ./src/H5Epublic.h

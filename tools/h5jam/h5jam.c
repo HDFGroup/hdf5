@@ -159,7 +159,7 @@ main (int argc, const char *argv[])
   int h5fid;
   int ofid;
   void *edata;
-  H5E_auto_stack_t func;
+  H5E_auto2_t func;
   hid_t ifile;
   hid_t plist;
   herr_t status;
@@ -175,8 +175,8 @@ main (int argc, const char *argv[])
   int res;
 
   /* Disable error reporting */
-  H5Eget_auto_stack (H5E_DEFAULT, &func, &edata);
-  H5Eset_auto_stack (H5E_DEFAULT, NULL, NULL);
+  H5Eget_auto2(H5E_DEFAULT, &func, &edata);
+  H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
   parse_command_line (argc, argv);
 
@@ -517,22 +517,22 @@ compute_user_block_size (hsize_t ublock_size)
  *  Returns the size of the padded file.
  */
 hsize_t
-write_pad (int ofile, hsize_t where)
+write_pad(int ofile, hsize_t where)
 {
-  unsigned int i;
-  char buf[1];
-  hsize_t psize;
+    unsigned int i;
+    char buf[1];
+    hsize_t psize;
 
-  buf[0] = '\0';
+    buf[0] = '\0';
 
-  HDlseek (ofile, (off_t) where, SEEK_SET);
+    HDlseek(ofile, (off_t) where, SEEK_SET);
 
-  psize = compute_user_block_size (where);
-  psize -= where;
+    psize = compute_user_block_size (where);
+    psize -= where;
 
-  for (i = 0; i < psize; i++)
-    {
-      HDwrite (ofile, buf, 1);
-    }
-  return (where + psize);	/* the new size of the file. */
+    for(i = 0; i < psize; i++)
+        HDwrite (ofile, buf, 1);
+
+    return(where + psize);	/* the new size of the file. */
 }
+

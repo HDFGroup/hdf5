@@ -401,7 +401,7 @@ test_value_dsnt_exist(void)
     TESTING("for non-existing name and value");
     /* Turn off error reporting since we expect failure in this test */
 
-    if (H5Eset_auto_stack(H5E_DEFAULT, NULL, NULL) < 0) goto error;
+    if (H5Eset_auto2(H5E_DEFAULT, NULL, NULL) < 0) goto error;
 
     if ((datatype_id = H5Tenum_create(H5T_NATIVE_INT))< 0) goto error;
 

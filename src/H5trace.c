@@ -554,16 +554,16 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 		break;
 
 	    case 'e':
-		if (ptr) {
-		    if (vp) {
-			fprintf (out, "0x%lx", (unsigned long)vp);
-		    } else {
+		if(ptr) {
+		    if(vp)
+			fprintf(out, "0x%lx", (unsigned long)vp);
+		    else
 			fprintf(out, "NULL");
-		    }
-		} else {
-		    H5E_error_stack_t *error = va_arg (ap, H5E_error_stack_t*); /*lint !e64 Type mismatch not really occuring */
-		    fprintf (out, "0x%lx", (unsigned long)error);
-		}
+		} /* end if */
+                else {
+		    H5E_error2_t *error = va_arg(ap, H5E_error2_t *); /*lint !e64 Type mismatch not really occuring */
+		    fprintf(out, "0x%lx", (unsigned long)error);
+		} /* end else */
 		break;
 
 	    case 't':

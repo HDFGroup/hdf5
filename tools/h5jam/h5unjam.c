@@ -162,7 +162,7 @@ main(int argc, const char *argv[])
     int   ufid;
     int   h5fid;
     void               *edata;
-    H5E_auto_stack_t          func;
+    H5E_auto2_t          func;
     hid_t               ifile;
     off_t fsize;
     hsize_t usize;
@@ -173,8 +173,8 @@ main(int argc, const char *argv[])
     struct stat sbuf;
 
     /* Disable error reporting */
-    H5Eget_auto_stack(H5E_DEFAULT, &func, &edata);
-    H5Eset_auto_stack(H5E_DEFAULT, NULL, NULL);
+    H5Eget_auto2(H5E_DEFAULT, &func, &edata);
+    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
     parse_command_line(argc, argv);
 
@@ -286,33 +286,33 @@ main(int argc, const char *argv[])
  *  Returns the size of the output file.
  */
 hsize_t
-copy_to_file( int infid, int ofid, ssize_t where, ssize_t how_much ) {
-	char buf[1024];
-	off_t to;
-	off_t from;
-	ssize_t nchars = -1;
+copy_to_file( int infid, int ofid, ssize_t where, ssize_t how_much )
+{
+    char buf[1024];
+    off_t to;
+    off_t from;
+    ssize_t nchars = -1;
 
+    /* nothing to copy */
+    if(how_much <= 0)
+        return(where);
 
-	if (how_much <= 0) {
-		/* nothing to copy */
-		return(where);
-	}
-	from = where;
-	to = 0;
+    from = where;
+    to = 0;
 
-	while( how_much > 0) {
-		HDlseek(infid,from,SEEK_SET);
-		if (how_much > 512) {
-			nchars = HDread(infid,buf,(unsigned)512);
-		} else {
-			nchars = HDread(infid,buf,(unsigned)how_much);
-		}
-		HDlseek(ofid,to,SEEK_SET);
-		HDwrite(ofid,buf,(unsigned)nchars);
-		how_much -= nchars;
-		from += nchars;
-		to += nchars;
-	}
+    while( how_much > 0) {
+        HDlseek(infid,from,SEEK_SET);
+        if (how_much > 512)
+            nchars = HDread(infid,buf,(unsigned)512);
+        else
+            nchars = HDread(infid,buf,(unsigned)how_much);
+        HDlseek(ofid,to,SEEK_SET);
+        HDwrite(ofid,buf,(unsigned)nchars);
+        how_much -= nchars;
+        from += nchars;
+        to += nchars;
+    }
 
-	return (where+how_much);
+    return (where + how_much);
 }
+

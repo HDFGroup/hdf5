@@ -569,16 +569,16 @@ error:
 int test_set(void)
 {
     hid_t	dxpl_id;
-    H5E_auto_stack_t func;
+    H5E_auto2_t func;
     const char* str = "(9/5.0)*x + 32";
     char* ptrgetTest = malloc(strlen(str)+1);
 
     if((dxpl_id = H5Pcreate(H5P_DATASET_XFER))<0) TEST_ERROR;
 
     /* Test get before set */
-    H5Eget_auto_stack(H5E_DEFAULT,&func,NULL);
+    H5Eget_auto2(H5E_DEFAULT,&func,NULL);
 
-    H5Eset_auto_stack(H5E_DEFAULT, NULL, NULL);
+    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
     TESTING("H5Pget_data_transform (get before set)")
     if(H5Pget_data_transform(dxpl_id, ptrgetTest, strlen(str)+1) < 0)
     {
@@ -620,7 +620,7 @@ int test_set(void)
     TESTING("H5Pset_data_transform (set with invalid transform 8)")
     INVALID_SET_TEST("(9/5)*x + x^2");
 
-    H5Eset_auto_stack(H5E_DEFAULT, func, NULL);
+    H5Eset_auto2(H5E_DEFAULT, func, NULL);
 
     return 0;
 

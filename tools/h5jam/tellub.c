@@ -128,7 +128,7 @@ main (int argc, const char *argv[])
 {
   char *ifname;
   void *edata;
-  H5E_auto_stack_t func;
+  H5E_auto2_t func;
   hid_t ifile;
   hsize_t usize;
   htri_t testval;
@@ -136,8 +136,8 @@ main (int argc, const char *argv[])
   hid_t plist;
 
   /* Disable error reporting */
-  H5Eget_auto_stack(H5E_DEFAULT, &func, &edata);
-  H5Eset_auto_stack(H5E_DEFAULT, NULL, NULL);
+  H5Eget_auto2(H5E_DEFAULT, &func, &edata);
+  H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
   parse_command_line (argc, argv);
 
@@ -188,3 +188,4 @@ main (int argc, const char *argv[])
 
   return (EXIT_SUCCESS);
 }
+

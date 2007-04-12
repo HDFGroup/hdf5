@@ -2814,7 +2814,7 @@ test_man_insert_weird(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
     } H5E_END_TRY;
     if(ret >= 0)
         TEST_ERROR
-    H5Eclear_stack(H5E_DEFAULT);
+    H5Eclear2(H5E_DEFAULT);
 
     /* Insert a 1-sized object into heap (should be a 'tiny' object) */
     if(add_obj(fh, dxpl, (size_t)10, (size_t)1, &state, NULL))
@@ -5952,7 +5952,7 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
     } H5E_END_TRY;
     if(ret >= 0)
         TEST_ERROR
-    H5Eclear_stack(H5E_DEFAULT);
+    H5Eclear2(H5E_DEFAULT);
 
     /* Try reading bogus heap ID from heap w/objects */
     H5E_BEGIN_TRY {
@@ -5960,7 +5960,7 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
     } H5E_END_TRY;
     if(ret >= 0)
         TEST_ERROR
-    H5Eclear_stack(H5E_DEFAULT);
+    H5Eclear2(H5E_DEFAULT);
 
     /* Close the fractal heap */
     if(H5HF_close(fh, dxpl) < 0)

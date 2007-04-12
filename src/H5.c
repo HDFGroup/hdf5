@@ -205,10 +205,10 @@ done:
 void
 H5_term_library(void)
 {
-    int	pending, ntries=0, n;
-    unsigned	at=0;
+    int	pending, ntries = 0, n;
+    unsigned	at = 0;
     char	loop[1024];
-    H5E_auto_stack_t func;
+    H5E_auto2_t func;
 
 #ifdef H5_HAVE_THREADSAFE
     /* explicit locking of the API */
@@ -217,11 +217,11 @@ H5_term_library(void)
 #endif
 
     /* Don't do anything if the library is already closed */
-    if (!(H5_INIT_GLOBAL))
+    if(!(H5_INIT_GLOBAL))
 	goto done;
 
     /* Check if we should display error output */
-    (void)H5Eget_auto_stack(H5E_DEFAULT,&func,NULL);
+    (void)H5Eget_auto2(H5E_DEFAULT, &func, NULL);
 
     /*
      * Terminate each interface. The termination functions return a positive
@@ -229,14 +229,14 @@ H5_term_library(void)
      * way that would necessitate some cleanup work in the other interface.
      */
 #define DOWN(F)								      \
-    (((n=H5##F##_term_interface()) && at+8<sizeof loop)?		      \
-     (sprintf(loop+at, "%s%s", at?",":"", #F),				      \
-      at += HDstrlen(loop+at),						      \
+    (((n = H5##F##_term_interface()) && (at + 8) < sizeof loop)?	      \
+     (sprintf(loop + at, "%s%s", (at ? "," : ""), #F),			      \
+      at += HDstrlen(loop + at),					      \
       n):                                                                     \
-     ((n>0 && at+5<sizeof loop)?					      \
-     (sprintf(loop+at, "..."),						      \
-      at += HDstrlen(loop+at),						      \
-     n):n))
+     ((n > 0 && (at + 5) < sizeof loop) ?				      \
+     (sprintf(loop + at, "..."),					      \
+      at += HDstrlen(loop + at),					      \
+     n) : n))
 
     do {
 	pending = 0;
@@ -251,7 +251,7 @@ H5_term_library(void)
 	pending += DOWN(S);
 	pending += DOWN(T);
         /* Don't shut down the file code until objects in files are shut down */
-        if(pending==0)
+        if(pending == 0)
             pending += DOWN(F);
 
         /* Don't shut down "low-level" components until "high-level" components
@@ -259,49 +259,49 @@ H5_term_library(void)
          * from being closed "out from underneath" of the high-level objects
          * that depend on them. -QAK
          */
-        if(pending==0) {
+        if(pending == 0) {
             pending += DOWN(AC);
             pending += DOWN(Z);
             pending += DOWN(FD);
             pending += DOWN(P);
             /* Don't shut down the error code until other APIs which use it are shut down */
-            if(pending==0)
+            if(pending == 0)
                 pending += DOWN(E);
             /* Don't shut down the ID code until other APIs which use them are shut down */
-            if(pending==0)
+            if(pending == 0)
                 pending += DOWN(I);
             /* Don't shut down the free list code until _everything_ else is down */
-            if(pending==0)
+            if(pending == 0)
                 pending += DOWN(FL);
         }
-    } while (pending && ntries++ < 100);
+    } while(pending && ntries++ < 100);
 
-    if (pending) {
+    if(pending) {
         /* Only display the error message if the user is interested in them. */
-        if (func) {
+        if(func) {
             fprintf(stderr, "HDF5: infinite loop closing library\n");
             fprintf(stderr, "      %s\n", loop);
 #ifndef NDEBUG
             HDabort();
 #endif /* NDEBUG */
-        }
-    }
+        } /* end if */
+    } /* end if */
 
 #ifdef H5_HAVE_MPE
     /* Close MPE instrumentation library.  May need to move this
      * down if any of the below code involves using the instrumentation code.
      */
-    if (H5_MPEinit_g)
-    {
+    if(H5_MPEinit_g) {
 	int mpe_code;
 	int mpi_initialized;
+
 	MPI_Initialized(&mpi_initialized);
-	if (mpi_initialized){
+	if(mpi_initialized) {
 	    mpe_code = MPE_Finish_log("cpilog");
 	    assert(mpe_code >=0);
-	}
+	} /* end if */
 	H5_MPEinit_g = FALSE;	/* turn it off no matter what */
-    }
+    } /* end if */
 #endif
 
     /* Mark library as closed */

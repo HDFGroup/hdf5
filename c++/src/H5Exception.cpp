@@ -141,11 +141,11 @@ H5std_string Exception::getMinorString( hid_t err_minor ) const
 ///		handlers
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void Exception::setAutoPrint( H5E_auto_stack_t& func, void* client_data )
+void Exception::setAutoPrint( H5E_auto2_t& func, void* client_data )
 {
    // calls the C API routine H5Eset_auto to set the auto printing to
    // the specified function.
-   herr_t ret_value = H5Eset_auto_stack( H5E_DEFAULT, func, client_data );
+   herr_t ret_value = H5Eset_auto2( H5E_DEFAULT, func, client_data );
    if( ret_value < 0 )
       throw Exception( "Exception::setAutoPrint", "H5Eset_auto failed" );
 }
@@ -159,7 +159,7 @@ void Exception::dontPrint()
 {
    // calls the C API routine H5Eset_auto with NULL parameters to turn
    // off the automatic error printing.
-   herr_t ret_value = H5Eset_auto_stack( H5E_DEFAULT, NULL, NULL );
+   herr_t ret_value = H5Eset_auto2( H5E_DEFAULT, NULL, NULL );
    if( ret_value < 0 )
       throw Exception( "Exception::dontPrint", "H5Eset_auto failed" );
 }
@@ -174,11 +174,11 @@ void Exception::dontPrint()
 ///					the error function
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void Exception::getAutoPrint( H5E_auto_stack_t& func, void** client_data )
+void Exception::getAutoPrint( H5E_auto2_t& func, void** client_data )
 {
    // calls the C API routine H5Eget_auto to get the current setting of
    // the automatic error printing
-   herr_t ret_value = H5Eget_auto_stack( H5E_DEFAULT, &func, client_data );
+   herr_t ret_value = H5Eget_auto2( H5E_DEFAULT, &func, client_data );
    if( ret_value < 0 )
       throw Exception( "Exception::getAutoPrint", "H5Eget_auto failed" );
 }
@@ -194,7 +194,7 @@ void Exception::getAutoPrint( H5E_auto_stack_t& func, void** client_data )
 void Exception::clearErrorStack()
 {
    // calls the C API routine H5Eclear to clear the error stack
-   herr_t ret_value = H5Eclear_stack(H5E_DEFAULT);
+   herr_t ret_value = H5Eclear2(H5E_DEFAULT);
    if( ret_value < 0 )
       throw Exception( "Exception::clearErrorStack", "H5Eclear failed" );
 }
@@ -228,7 +228,7 @@ void Exception::clearErrorStack()
 ///\par
 ///     Data structure to describe the error:
 ///\code
-/// typedef struct H5E_error_stack_t {
+/// typedef struct H5E_error2_t {
 ///     hid_t       cls_id;         //class ID
 ///     hid_t       maj_num;        //major error ID
 ///     hid_t       min_num;        //minor error number
@@ -236,14 +236,14 @@ void Exception::clearErrorStack()
 ///     const char  *file_name;     //file in which error occurred
 ///     unsigned    line;           //line in file where error occurs
 ///     const char  *desc;          //optional supplied description
-/// } H5E_error_stack_t;
+/// } H5E_error2_t;
 ///\endcode
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void Exception::walkErrorStack( H5E_direction_t direction, H5E_walk_stack_t func, void* client_data )
+void Exception::walkErrorStack( H5E_direction_t direction, H5E_walk2_t func, void* client_data )
 {
    // calls the C API routine H5Ewalk to walk the error stack
-   herr_t ret_value = H5Ewalk_stack( H5E_DEFAULT, direction, func, client_data );
+   herr_t ret_value = H5Ewalk2( H5E_DEFAULT, direction, func, client_data );
    if( ret_value < 0 )
       throw Exception( "Exception::walkErrorStack", "H5Ewalk failed" );
 }
@@ -302,7 +302,7 @@ const char* Exception::getCFuncName() const
 //--------------------------------------------------------------------------
 void Exception::printError( FILE* stream ) const
 {
-   herr_t ret_value = H5Eprint_stack( H5E_DEFAULT, stream ); // print to stderr
+   herr_t ret_value = H5Eprint2( H5E_DEFAULT, stream ); // print to stderr
    if( ret_value < 0 )
       throw Exception( "Exception::printError", "H5Eprint failed" );
 }

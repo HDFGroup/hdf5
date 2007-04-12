@@ -213,7 +213,7 @@ main(int argc, const char *argv[])
     size_t curr_group;          /* Current group to create */
 
     /* Disable the HDF5 library's error reporting */
-    H5Eset_auto_stack(H5E_DEFAULT, NULL, NULL);
+    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
     /* Initialize h5tools lib */
     h5tools_init();

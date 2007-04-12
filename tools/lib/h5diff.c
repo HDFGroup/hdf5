@@ -1143,7 +1143,8 @@ hsize_t diff (hid_t file1_id,
             /* If one or both of these links isn't an external link, we can only
              * compare information from H5Lget_info since we don't have a query
              * function registered for them. 
-            /* If the link classes or the buffer length are not the
+             *
+             * If the link classes or the buffer length are not the
              * same, the links are "different"
              */
                 if((li1.type != li2.type) || (li1.u.val_size != li2.u.val_size))

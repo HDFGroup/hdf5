@@ -40,7 +40,7 @@
     if ((ret) == (val)) {						      \
 	TestErrPrintf("*** UNEXPECTED RETURN from %s is %ld at line %4d "     \
 		   "in %s\n", where, (long)(ret), (int)__LINE__, __FILE__);   \
-	H5Eprint_stack(H5E_DEFAULT, stdout);				      \
+	H5Eprint2(H5E_DEFAULT, stdout);				      \
     }									      \
 } while(0)
 
@@ -52,7 +52,7 @@
    if ((ret)<0) {							      \
       TestErrPrintf ("*** UNEXPECTED RETURN from %s is %ld line %4d in %s\n", \
                   (where), (long)(ret), (int)__LINE__, __FILE__);	      \
-      H5Eprint_stack(H5E_DEFAULT, stdout);				      \
+      H5Eprint2(H5E_DEFAULT, stdout);				      \
    }									      \
 }
 
@@ -64,7 +64,7 @@
    if (!(ret)) {							      \
       TestErrPrintf ("*** UNEXPECTED RETURN from %s is NULL line %4d in %s\n", \
                   (where), (int)__LINE__, __FILE__);			      \
-      H5Eprint_stack(H5E_DEFAULT, stdout);				      \
+      H5Eprint2(H5E_DEFAULT, stdout);				      \
    }									      \
 }
 
@@ -77,7 +77,7 @@
     if ((x) != (val)) {							      \
 	TestErrPrintf("*** UNEXPECTED VALUE from %s should be %ld, but is %ld at line %4d " \
 		   "in %s\n", (where), (long)(val), (long)(x), (int)__LINE__, __FILE__); \
-	H5Eprint_stack(H5E_DEFAULT, stdout);				      \
+	H5Eprint2(H5E_DEFAULT, stdout);				      \
     }									      \
 } while(0)
 
@@ -90,7 +90,7 @@
     if (HDstrcmp(x, val)) {					              \
 	TestErrPrintf("*** UNEXPECTED VALUE from %s should be %s, but is %s at line %4d " \
 		   "in %s\n", where, val, x, (int)__LINE__, __FILE__);        \
-	H5Eprint_stack(H5E_DEFAULT, stdout);				      \
+	H5Eprint2(H5E_DEFAULT, stdout);				      \
     }									      \
 } while(0)
 
@@ -101,11 +101,11 @@
 		   "%ld\n", func, (int)__LINE__, __FILE__, (long)(ret));      \
     }									      \
     if (GetTestVerbosity()>=VERBO_HI)					      \
-        H5Eprint_stack(H5E_DEFAULT, stdout);				      \
+        H5Eprint2(H5E_DEFAULT, stdout);				      \
     if ((ret) == FAIL) {						      \
 	TestErrPrintf("*** UNEXPECTED RETURN from %s is %ld at line %4d "     \
 		   "in %s\n", func, (long)(ret), (int)__LINE__, __FILE__);    \
-	H5Eprint_stack(H5E_DEFAULT, stdout);				      \
+	H5Eprint2(H5E_DEFAULT, stdout);				      \
     }									      \
 } while(0)
 

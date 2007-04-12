@@ -38,7 +38,7 @@ nh5eclear_c( )
   /*
    * Call H5Eclear function.
    */
-  status = H5Eclear_stack(H5E_DEFAULT);
+  status = H5Eclear2(H5E_DEFAULT);
   if(status < 0) return ret_val;
   ret_val = 0;
   return ret_val;
@@ -72,7 +72,7 @@ nh5eprint_c1(_fcd name, int_f* namelen)
   /*
    * Call H5Eprint function.
    */
-  status = H5Eprint_stack(H5E_DEFAULT, file);
+  status = H5Eprint2(H5E_DEFAULT, file);
   if (status >=0 ) ret_val = 0;
   fclose(file);
 
@@ -102,7 +102,7 @@ nh5eprint_c2()
   /*
    * Call H5Eprint function.
    */
-  status = H5Eprint_stack(H5E_DEFAULT, NULL);
+  status = H5Eprint2(H5E_DEFAULT, NULL);
   if(status >= 0) ret_val = 0;
   return ret_val;
 }
@@ -192,9 +192,9 @@ nh5eset_auto_c(int_f* printflag)
   herr_t status = -1;
 
   if (*printflag == 1)
-    status = H5Eset_auto_stack(H5E_DEFAULT, (H5E_auto_stack_t)H5Eprint, stderr);
+    status = H5Eset_auto2(H5E_DEFAULT, (H5E_auto2_t)H5Eprint, stderr);
   if (*printflag == 0)
-    status = H5Eset_auto_stack(H5E_DEFAULT, NULL,NULL);
+    status = H5Eset_auto2(H5E_DEFAULT, NULL,NULL);
   if (status >= 0) ret_val = 0;
   return ret_val;
 }
