@@ -97,12 +97,12 @@ LIB32=link.exe -lib
 # PROP Output_Dir "Debug"
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
-F90=df.exe
-# ADD BASE F90 /browser /compile_only /debug:full /include:"hdf5___W/" /nologo /warn:nofileopt
-# ADD F90 /browser /compile_only /debug:full /include:"Debug/" /nologo /warn:nofileopt
 CPP=cl.exe
 # ADD BASE CPP /nologo /Gt0 /W3 /GX /Z7 /Od /I "..\..\src" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FR /YX /FD /c
 # ADD CPP /nologo /Gt0 /W3 /GX /Z7 /Od /I "..\..\src" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FR /YX /FD /c
+F90=df.exe
+# ADD BASE F90 /browser /compile_only /debug:full /include:"hdf5___W/" /nologo /warn:nofileopt
+# ADD F90 /browser /compile_only /debug:full /include:"Debug/" /nologo /warn:nofileopt
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
@@ -122,12 +122,12 @@ LIB32=link.exe -lib
 # PROP Output_Dir "Release"
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
-F90=df.exe
-# ADD BASE F90 /compile_only /include:"hdf5___0/" /nologo /warn:nofileopt
-# ADD F90 /compile_only /include:"Release/" /nologo /warn:nofileopt
 CPP=cl.exe
 # ADD BASE CPP /nologo /Gt0 /W3 /GX /O2 /I "..\..\src" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
 # ADD CPP /nologo /Gt0 /W3 /GX /O2 /I "..\..\src" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
+F90=df.exe
+# ADD BASE F90 /compile_only /include:"hdf5___0/" /nologo /warn:nofileopt
+# ADD F90 /compile_only /include:"Release/" /nologo /warn:nofileopt
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
@@ -484,6 +484,21 @@ SOURCE=..\..\..\src\H5Dcontig.c
 !ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
 
 # PROP Intermediate_Dir "..\..\..\proj\hdf5\Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5Ddeprec.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
 
 !ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
 
@@ -1098,6 +1113,21 @@ SOURCE=..\..\..\src\H5Gent.c
 !ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
 
 # PROP Intermediate_Dir "..\..\..\proj\hdf5\Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5Gint.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
 
 !ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
 
@@ -2755,6 +2785,21 @@ SOURCE=..\..\..\src\H5Tcset.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\src\H5Tdeprec.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\H5Tenum.c
 
 !IF  "$(CFG)" == "hdf5 - Win32 Release"
@@ -3387,6 +3432,40 @@ SOURCE=..\..\..\src\H5Zpublic.h
 SOURCE=..\..\..\src\hdf5.h
 # End Source File
 # End Group
+# Begin Source File
+
+SOURCE=..\..\..\src\H5Edeprec.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5Eint.c
+
+!IF  "$(CFG)" == "hdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "hdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\H5Epkg.h
+# End Source File
 # Begin Source File
 
 SOURCE=..\..\..\src\H5Oainfo.c
