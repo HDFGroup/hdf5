@@ -25,7 +25,7 @@ int main( void )
  hid_t         file_id;
  herr_t        status;
  hsize_t       pal_dims[] = {PAL_ENTRIES,3};
- hsize_t       i, j;
+ size_t       i, j;
  int           n, space;
  unsigned char pal[PAL_ENTRIES*3] = {  /* create a palette with 9 colors */
  0,0,168,      /* dark blue */

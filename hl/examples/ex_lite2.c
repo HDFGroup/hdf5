@@ -21,7 +21,8 @@ int main( void )
  int         data[6];
  hsize_t     dims[2];
  herr_t      status;
- hsize_t     i, j, nrow, n_values;
+ size_t      i, j;
+ size_t      nrow, n_values;
  
  /* open file from ex_lite1.c */
  file_id = H5Fopen ("ex_lite1.h5", H5F_ACC_RDONLY, H5P_DEFAULT); 
@@ -38,7 +39,7 @@ int main( void )
  for (i=0; i<n_values/nrow; i++ )
  {
   for (j=0; j<nrow; j++)
-   printf ("  %d", data[i*nrow + j]);
+   printf ("  %d", data[(size_t)i*nrow + j]);
   printf ("\n");
  }
    
