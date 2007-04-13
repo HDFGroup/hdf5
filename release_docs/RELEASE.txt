@@ -1334,3 +1334,8 @@ ftp://hdf.ncsa.uiuc.edu/pub/outgoing/hdf5/hdf5-1.6.2/F90_source_for_Crays
 
   In such cases, you will have to include the regular prefix in your
   filter script.
+
+* H5Ocopy() does not copy reg_ref attributes correctly when shared-message
+  is turn on. The value of the reference in the destination attriubte is
+  wrong. This H5Ocopy problem will affect h5copy tool
+
