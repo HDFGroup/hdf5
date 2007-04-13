@@ -18,9 +18,6 @@
 #include "gif.h"
 #include "H5IM.h"
 
-
-#define MAX_FILE_LEN            256
-
 int EndianOrder;
 
 static void
@@ -73,13 +70,6 @@ int main(int argc , char **argv)
         /* they didn't supply at least one image -- bail */
         usage();
         return 1;
-    }
-
-    if (strlen(argv[1] + 1) > MAX_FILE_LEN || strlen(argv[2] + 1) > MAX_FILE_LEN) 
-    {
-        /* supplied file names are too long. bail. */
-        usage();
-        printf("Supplied filenames exceed maximum length of 256 bytes\n");
     }
 
     HDFName = argv[1];
