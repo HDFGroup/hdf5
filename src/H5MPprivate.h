@@ -368,7 +368,6 @@
 #define color_H5Sget_simple_extent_ndims "red"
 #define color_H5Sget_simple_extent_dims "red"
 #define color_H5Sis_simple "red"
-#define color_H5Sset_space "red"
 #define color_H5Sget_select_npoints "red"
 #define color_H5Sselect_hyperslab "red"
 #define color_H5Scombine_hyperslab "red"
