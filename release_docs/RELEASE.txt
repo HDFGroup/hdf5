@@ -504,9 +504,12 @@ New Features
 
     Tools:
     ------
+        - h52gif and gif2h5: Both these tools were revised to include the High
+          Level Image API support, and tests were added to /hl/tools/gif2h5.
+           PVN - 2007/04/13
         - h5dump: added support for double long type H5T_NATIVE_LDOUBLE. PVN
            2007/03/13
-        - h5dump: new options for binary output, see usage. PVN 2007/03/13
+        - h5dump: added support for binary output, see usage. PVN 2007/03/13
         - h5repack: added support for the new nbit and scaleoffset filters.
            PVN - 2007/05/07
         - h5repack: now uses the API function H5Ocopy (of the tool h5copy) to
