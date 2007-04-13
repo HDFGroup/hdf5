@@ -20,6 +20,9 @@
 #ifndef _H5Zpublic_H
 #define _H5Zpublic_H
 
+/* Public headers needed by this file */
+#include "H5public.h"
+
 /*
  * Filter identifiers.  Values 0 through 255 are for filters defined by the
  * HDF5 library.  Values 256 through 511 are available for testing new

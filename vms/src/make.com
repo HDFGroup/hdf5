@@ -31,14 +31,14 @@ $!
 $ cobj= "H5, H5checksum, H5dbg, H5system, H5timer, H5trace,"+-
         "H5A, H5Abtree2, H5Adense, H5Adeprec, H5Aint, H5Atest, H5AC, H5B, H5B2, H5B2cache,"+-
         "H5Bcache, H5B2dbg, H5B2test, H5B2int, H5B2stat, H5C, H5CS,"+-  
-        "H5D, H5Dcontig, H5Dcompact,"+-
+        "H5D, H5Dcontig, H5Dcompact, H5Ddeprec,"+-
         "H5Defl, H5Dio, H5Distore, H5Doh, H5Dmpio, H5Dselect, H5Dtest ,"+-
-        "H5E, H5F, H5Fdbg, H5Fmount, H5Fsfile, H5Fsuper, H5Ftest, H5FD, H5FDcore,"+-
+        "H5E, H5Edeprec, H5Eint, H5F, H5Fdbg, H5Fmount, H5Fsfile, H5Fsuper, H5Ftest, H5FD, H5FDcore,"+-
         "H5FDfamily, H5FDlog, H5FDmpi, H5FDmpio,"+-
         "H5FDmpiposix, H5FDmulti, H5FDsec2, H5FDstdio,"+-
         "H5FDstream, H5FDdirect, H5FL, H5FO, H5Ffake,"+-
         "H5FS, H5FScache, H5FSdbg, H5FSsection,"+-
-        "H5G, H5Gcompact, H5Gdeprec, H5Gent, H5Glink, H5Gloc, H5Gname, H5Gnode, H5Gstab,"+-
+        "H5G, H5Gcompact, H5Gdeprec, H5Gent, H5Gint, H5Glink, H5Gloc, H5Gname, H5Gnode, H5Gstab,"+-
         "H5Gdense, H5Gbtree2,"+-
         "H5Gobj, H5Goh, H5Gtest, H5Gtraverse,"+-
         "H5HF, H5HFbtree2, H5HFcache, H5HFdbg, H5HFman, H5HFtest, H5HFstat,"+-
@@ -57,7 +57,7 @@ $ cobj1= "H5Oname, H5Onull, H5Opline, H5Osdspace, H5Oshared, H5Ostab, H5Otest,"+
         "H5Sselect, H5Stest,"+-
         "H5SL, H5SM, H5SMbtree2, H5SMcache, H5SMtest," +-
         "H5ST, H5T, H5Tarray, H5Tbit, H5Tcommit,"+-
-        "H5Tcompound, H5Tconv, H5Tcset, H5Tenum, H5Tfields, H5Tfixed,"+-
+        "H5Tcompound, H5Tconv, H5Tcset, H5Tdeprec, H5Tenum, H5Tfields, H5Tfixed,"+-
         "H5Tfloat, H5Tinit, H5Tnative, H5Toffset, H5Toh, H5Topaque, H5Torder,"+-
         "H5Tpad, H5Tprecis, H5Tstrpad, H5Tvlen, H5TS, H5V, H5Z,"+-
         "H5Zdeflate, H5Zfletcher32, H5Znbit, H5Zshuffle, H5Zszip,"+-

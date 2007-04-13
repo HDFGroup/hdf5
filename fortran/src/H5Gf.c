@@ -642,7 +642,7 @@ nh5gget_comment_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *bufsize,
    *  Allocate buffer to hold the comment
    */
   c_bufsize = (size_t)*bufsize;
-  if(c_bufsize) c_comment = (char *)malloc(c_bufsize);
+  if(c_bufsize) c_comment = (char *)malloc(c_bufsize + 1);
   if(c_comment == NULL) {
                         HDfree(c_name);
                         return ret_value;
