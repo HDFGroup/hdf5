@@ -19,7 +19,7 @@ Contents:
    Section IV    :  How to build an application using the HDF5 library  or DLL
    Section V     :  How to disable Gzip(Zlib)/Szip compression
    Section VI    :  How to build HDF5 in .NET 2003
-   Section VII   :  How to build HDF5 with INTEL Compiler
+   Section VII   :  How to build HDF5 with Fortran Support
    Section VIII  :  How to build Multi-threaded version of HDF5 library
    Section IX    :  How to build and test HDF5 snapshot release
    Section X     :  How to build HDF5 with Thread-Safe Feature
@@ -33,16 +33,15 @@ Contents:
 
 Preconditions:
 
-   1. Installed Microsoft Visual C++ 6.0 or Intel C compiler and WinZip.
-       
-      1.1 Installed Compaq Visual Fortran compiler(6.0 or higher version), 
-          or Intel Fortran compiler if you want to build HDF5 Fortran
-          libraries.    
+   1. Installed Microsoft Visual C++ 6.0 or Intel Compiler and WinZip.
+
+      1.1 Installed Intel Compiler 9.1 if you want to build
+          HDF5 Fortran libraries.
 
       Note: By default, WinZip will convert the Unix end of line format
             when extracting .tar file.  This conversion will cause
             "false" failure in some HDF5 tools testings.
- 
+
             Please uncheck the "TAR file smart CR/LF conversion" option
             in your WinZip to prevent the conversion when extracting
             .tar file.
@@ -56,13 +55,13 @@ Preconditions:
 
    2. Set up a directory structure to unpack the library.  For example:
 
-	        c:\                                          (any drive)
-	        MyHDFstuff\                      (any folder name)
+            c:\                                          (any drive)
+            MyHDFstuff\                      (any folder name)
 
-   3. Download the hdf5-1.8.x source code package and use WinZip to 
-      extract the HDF5 package into c:\MyHDFstuff.  This creates a 
-      directory called 'hdf5-1.8.x' under MyHDFstuff which contains 
-      several files and directories.  Rename "hdf5-1.8.x" to "hdf5".  
+   3. Download the hdf5-1.8.x source code package and use WinZip to
+      extract the HDF5 package into c:\MyHDFstuff.  This creates a
+      directory called 'hdf5-1.8.x' under MyHDFstuff which contains
+      several files and directories.  Rename "hdf5-1.8.x" to "hdf5".
 
    4. HDF5 provide options to do in-memory compress within HDF5
       library.  Currently, two external compression libraries Zlib and
@@ -71,10 +70,10 @@ Preconditions:
       4.1 HDF5 uses Zlib version 1.2.2 for compression and Zlib is NOT
           distributed with HDF5 library in 1.8.x release. To use Zlib
           library, you have to install your own Zlib DLL library or go
-          to ftp://ftp.hdfgroup.org/lib-external/zlib/1.2/bin 
+          to ftp://ftp.hdfgroup.org/lib-external/zlib/1.2/bin
           to download the Zlib library.
 
-      
+
       4.2 HDF5 uses Szip version 2.0 for compression and Szip
           compression software is provided with HDF5 products in
           1.8.0 release.  To use Szip 2.0 library, you can
@@ -82,34 +81,34 @@ Preconditions:
           ftp://ftp.hdfgroup.org/lib-external/szip/2.0/bin/windows
 
           Please note that Szip is not a totally open-source free
-          software.  For licensing issue of Szip, please check 
+          software.  For licensing issue of Szip, please check
           "Licensing terms" at
           http://hdfgroup.org/doc_resource/SZIP/index.html.
 
-      Szip compression feature inside HDF5 is optional. 
-      
-   5. Define the following environment variables: 
+      Szip compression feature inside HDF5 is optional.
+
+   5. Define the following environment variables:
 
         HDF5_EXT_ZLIB
         HDF5_EXT_SZIP
-      
+
       In this section, Zlib and Szip compression packages are assumed
       to be used.  Please read Section V as well as this section if you
       do not want to use compression feature inside HDF5.
-      
+
       To define these environment variables:
-      
+
       Click "Start", click "Control Panel", and then double-click
       "System".  On the "Advanced" tab, click "Environment Variables".
-      
+
       If you are logged on as administrator to the local computer AND
       want to let all other users use these two environment variables,
       click "New" under "System Variables" box; otherwise, click "New"
       under "User Variables" box.
-      
+
       In the New Variable window, set "Variable name" as HDF5_EXT_ZLIB
       and "Variable value" as zdll.lib, then click OK.
-      
+
       Similarly, you can set:
 
       HDF5_EXT_SZIP environment variable as szlibdll.lib
@@ -117,14 +116,14 @@ Preconditions:
       Notes:
 
          a. You might have to close and reopen running programs for
-            the new environment variable settings to take effect. 
+            the new environment variable settings to take effect.
 
          b. c:\zlib122\zlib1.dll and c:\szip\dll\szlibdll.dll should
             be copied into the location that the application can find,
             one suggestion is to use the c:\WINDOWS\system.
-      
+
    6. Set up path for external libraries and headers
-    
+
       Skip this part if you don't want to use ANY compression features
       provided by HDF5.  Please do read Section V.
 
@@ -133,96 +132,98 @@ Preconditions:
 
       Invoke Microsoft Visual C++ and go to "Tools" and select
       "Options", find "Directories";
-      
-      6.1 Find the box "Show directories for", choose 
-          "Include files", if you can not find your Zlib and Szip 
-          header path 
+
+      6.1 Find the box "Show directories for", choose
+          "Include files", if you can not find your Zlib and Szip
+          header path
           (for example, c:\zlib122\include, c:\szip\include)
           from the directory list, add the header path
-          (c:\zlib122\include, c:\szip\include) to the 
+          (c:\zlib122\include, c:\szip\include) to the
           included directories.
-      
+
       6.2 Find the box "Show directories for", choose "Library files",
           If you cannot find your Zlib and Szip library path
           (for example, c:\zlib122\lib, c:\szip\dll)
           from the directory list, add the library path
           (c:\zlib122\lib, c:\szip\dll) to the library directories.
-      
+
 Notes:
 
-   1. In release 1.8.0, all.zip is deprecated. Users should go to 
-      hdf5/windows directory, run copy_hdf.bat first and then open 
+   1. In release 1.8.0, all.zip is deprecated. Users should go to
+      hdf5/windows directory, run copy_hdf.bat first and then open
       all.dsw under hdf5/windows/proj/all to start building process.
-   
-   2. In release 1.8.0, all.sln was provided for command line use ONLY. 
+
+   2. In release 1.8.0, all.sln was provided for command line use ONLY.
       all.sln should never be opened to start building HDF5 using IDE.
- 
-   3. To build HDF5 C++ and FORTRAN libraries, please read through
+
+   3. To build HDF5 C++ libraries, please read through
       this document.
-   
-   4. For users who want to quickly build HDF5 library or do not 
-      want to know HDF5 building and installation details, please 
+
+   4. For users who want to quickly build HDF5 library or do not
+      want to know HDF5 building and installation details, please
       read INSATLL_Windows_Short_MSVS6.0.txt,
       INSTALL_Windows_Short_Net.txt or INSTALL_Windows_Short_Intel.txt
       based on the compiler to be used.
 
-   5. For users who would like to build and test HDF5 package from the 
+   5. For users who would like to build and test HDF5 package from the
       command line, please read INSATLL_Windows_From_Command_Line.txt.
-   
+
    6. HDF4-related tools are not built and released with HDF5 library
       packages any more. To obtain HDF4 related tools, please check
-      http://hdfgroup.org/h4toh5/ and 
+      http://hdfgroup.org/h4toh5/ and
       ftp://ftp.hdfgroup.org/HDF5/h4toh5
 
    7. For DLL users, please do read and follow "DLL hints"
       at Section IV.
 
-   8. For .NET users, please read Section VI. 
-   
-   9. For Intel Compiler users, Intel 7.x works with MSVS 6.0 and
-      Intel 8.1 only works with MSVS .net 2003 when you build 
-      HDF5-1.8.x, please read Section VII.
-   
+   8. For .NET users, please read Section VI.
+
+   9. For fortran users, Intel fortran Compiler 9.1 is currently supported-- please
+      see Section VII.  Intel Compiler verion 7.x and 8.x are no longer supported,
+      but documentation can still be found on the web at 
+      http://hdfgroup.org/windows/docs/hdf518/dep/Install_Windows_Dep_Intel.txt
+
    10. For users who would like to build Muti-threaded version of HDF5
        library, please read Section VIII.
-   
+
    11. For users who would like to build, test and use HDF5 snapshot
        release, please read Section IX.
-   12. For .Net and Intel users, if you are not building HDF5 with 
-       Thread-Safe Feature (see Section X), ttsafedll.dsp should 
+   12. For .Net and Intel users, if you are not building HDF5 with
+       Thread-Safe Feature (see Section X), ttsafedll.dsp should
        always be turned off.
 
+   13. The Compaq Fortran Compiler is no longer supported in HDF5-1.8.
 
 ========================================================================
-                 Section I: What do we build and install? 
+                 Section I: What do we build and install?
 ========================================================================
 
    1. Build and Install
 
-      HDF5 static library: 
+      HDF5 static library:
            debug and release versionu
 
-      HDF5 Dynamic Link Library(DLL): 
+      HDF5 Dynamic Link Library(DLL):
            debug and release version as well as export libraries for DLL
-           
-      HDF5 High-Level Library (Optional):
-      	   HDF5 C++ Library
-      	   HDF5 HL-Fortran Library
-      		 
-      HDF5 tools:
-           HDF5 tools 
 
-   2. Build Only (Not included in the binary distribution)        
+      HDF5 High-Level Library (Optional):
+           HDF5 C++ Library
+           HDF5 HL-Fortran Library
+
+      HDF5 tools:
+           HDF5 tools
+
+   2. Build Only (Not included in the binary distribution)
 
       HDF5 tool library:
            debug and release version
 
       HDF5 tool export library for DLL:
-           debug and release version 
+           debug and release version
 
       HDF5 library testing programs:
            HDF5 library comprehensive tests
-		
+
       HDF5 related tools testing programs:
            HDF5 tools comprehensive tests
 
@@ -232,72 +233,41 @@ Notes:
            simple HDF5 C/C++/Fortran and High level C/Fortran examples
 
 ========================================================================
-      Section II: How to build and test HDF5 libraries and tools 
+      Section II: How to build and test HDF5 libraries and tools
 ========================================================================
 
 STEP 1: Building HDF5 libraries and tools
-    
+
+Note:
+      1) To build HDF5 with Fortran support, please read over Section VII.
+
+
+      
    1. Run batch file copy_hdf.bat.
 
       Go to  c:\MyHDFstuff\hdf5\windows and run copy_hdf.bat. This
-      process will copy all the necessary batch files, windows specific 
-      source codes and text files saved under c:\MyHDFstuff\hdf5\windows 
+      process will copy all the necessary batch files, windows specific
+      source codes and text files saved under c:\MyHDFstuff\hdf5\windows
       directory to the corresponding directories under hdf5.
 
    2. Invoke Microsoft Visual C++ compiler
-    
+
       Invoke Microsoft Visual C++.  From the main menu, go to "File"
       and select the "Open Workspace" option. Then open the
-      c:\MyHDFstuff\hdf5\windows\proj\all\all.dsw workspace. 
+      c:\MyHDFstuff\hdf5\windows\proj\all\all.dsw workspace.
 
-      You should find windows project files listed as "all files, 
-      big files etc." on the left.        
+      You should find windows project files listed as "all files,
+      big files etc." on the left.
 
-   3. (Optional)HDF5 C++, Fortran libraries, High level C++, 
-      High level Fortran and Intel compiler
-    
-      3.1 Skip this step if you do not want to build HDF5 C++ libraries
-        
+   3. (Optional)HDF5 C++ and High level C++
+
+      3.1 Skip this step if you do not want to build HDF5 High-Level
+          libraries
+
           Go to "Project" and select "dependencies";
           Select "all" in the "Select project to modify:" box,
           then enable the desired projects:
-      
-             dsets_cpp
-             dsets_cppdll
-             hdf5_cpp
-             hdf5_cppdll
-             testhdf5_cpp
-             testhdf5_cppdll
-             
-             
-      3.2 Skip this step if you do not want to build HDF5 Fortran
-          libraries
-        
-          Go to "Project" and select "dependencies";
-          Select "all" in the "Select project to modify:" box,
-          then enable the desired projects:
-              
-             flush1_fortran
-             flush1_fortrandll
-             flush2_fortran
-             flush2_fortrandll
-             hdf5_f90cstub
-             hdf5_f90cstubdll
-             hdf5_fortran
-             hdf5_fortrandll
-             libtest_cstubdll
-             libtest_fortran
-             libtest_fortrandll
-             testhdf5_fortran
-             testhdf5_fortrandll
-      
-      3.3 Skip this step if you do not want to build HDF5 High-Level
-          libraries
-        
-          Go to "Project" and select "dependencies";
-          Select "all" in the "Select project to modify:" box,
-          then enable the desired projects: 
-      
+
              hdf5_hl
              hdf5_hldll
              hl_test_image
@@ -310,85 +280,64 @@ STEP 1: Building HDF5 libraries and tools
              hl_test_dsdll
              hl_test_packet
              hl_test_packetdll
-             
-      3.4 Skip this step if you do not want to build HDF5 High-Level
-          C++ libraries  
-          
-          Go to "Project" and select "dependencies";
-          Select "all" in the "Select project to modify:" box,
-          then enable all of the project files listed in Section II
-          Step 1(3.1) and the following desired projects: 
-          	 
-          	 hdf5_hl_cpp
-          	 hdf5_hl_cppdll
-          	 hl_test_table_cpp
-          	 hl_test_table_cppdll
-          
-              
-      3.5 Skip this step if you do not want to build HDF5 High-Level
-          Fortran libraries
-        
-          Go to "Project" and select "dependencies";
-          Select "all" in the "Select project to modify:" box,
-          then enable all of the project files listed in Section II
-          Step 1(3.2) and the following desired projects: 
-          
-             hdf5_hl_f90cstubdll
-             hdf5_hl_fortran
-             hdf5_hl_fortrandll
-             hl_test_image_fortran
-             hl_test_image_fortrandll
-             hl_test_lite_fortran
-             hl_test_lite_fortrandll
-             hl_test_table_fortran
-             hl_test_table_fortrandll
-             
-      3.6 If you are using Intel compilers, please read Section VII.
-                 
-   4. Select "Build", then Select "Set Active Configuration".
-   
-      4.1 To build debug versions of single-threaded static libraries, 
-      Debug multithreaded DLLs and tests
-    	    
-      In "Project configurations", select "all -- Win32 Debug",
-	  select "ok". Select "Build" -> "Build" or "Rebuild All" to
-   	  build debug version of project "all".
-   	      
-      4.2 To build release versions of single-threaded static libraries, 
-   	  multithreaded DLLs and tests
-   	      
-   	  In "Project configurations", select "all -- Win32 Release",
-   	  select "ok". Select "Build" -> "Build" or "Rebuild All" to
-   	  build release version of project "all".
-                
-      Both debug and release versions must be built.
-       
-      Warning messages can be ignored. 
 
-      When the debug or release build is done the directories 
+      3.2 Skip this step if you do not want to build HDF5 High-Level
+          C++ libraries
+
+          Go to "Project" and select "dependencies";
+          Select "all" in the "Select project to modify:" box,
+          then enable all of the project files listed in Section II
+          Step 1(3.1) and the following desired projects:
+
+            hdf5_hl_cpp
+            hdf5_hl_cppdll
+            hl_test_table_cpp
+            hl_test_table_cppdll
+
+   4. Select "Build", then Select "Set Active Configuration".
+
+      4.1 To build debug versions of single-threaded static libraries,
+      Debug multithreaded DLLs and tests
+
+      In "Project configurations", select "all -- Win32 Debug",
+      select "ok". Select "Build" -> "Build" or "Rebuild All" to
+      build debug version of project "all".
+
+      4.2 To build release versions of single-threaded static libraries,
+      multithreaded DLLs and tests
+
+      In "Project configurations", select "all -- Win32 Release",
+      select "ok". Select "Build" -> "Build" or "Rebuild All" to
+      build release version of project "all".
+
+      Both debug and release versions must be built.
+
+      Warning messages can be ignored.
+
+      When the debug or release build is done the directories
       listed below will contain the following files:
 
-            c:\MyHDFstuff\hdf5\proj\hdf5\debug - 
+            c:\MyHDFstuff\hdf5\proj\hdf5\debug -
 
                hdf5d.lib- the hdf5 static library
 
-            c:\MyHDFstuff\hdf5\proj\hdf5\release - 
+            c:\MyHDFstuff\hdf5\proj\hdf5\release -
 
                hdf5.lib- the hdf5 static library
 
-            c:\MyHDFstuff\hdf5\proj\hdf5dll\debug - 
+            c:\MyHDFstuff\hdf5\proj\hdf5dll\debug -
 
                hdf5ddll.dll- DLL
-               hdf5ddll.lib- the DLL export library                  
+               hdf5ddll.lib- the DLL export library
 
-            c:\MyHDFstuff\hdf5\proj\hdf5dll\release - 
+            c:\MyHDFstuff\hdf5\proj\hdf5dll\release -
 
                hdf5dll.dll- DLL
                hdf5dll.lib- the DLL export library
 
-            c:\MyHDFstuff\hdf5\test\libtest\debug - 
+            c:\MyHDFstuff\hdf5\test\libtest\debug -
         and c:\MyHDFstuff\hdf5\test\libtest\release -
-            
+
                libtest.lib - the internal library for test
 
             c:\MyHDFstuff\hdf5\test\libtestD\debug -
@@ -410,192 +359,82 @@ STEP 1: Building HDF5 libraries and tools
         and c:\MyHDFstuff\hdf5\tools\toolslibD\release -
 
                toolslibD.dll- DLL
-               toolslibD.lib- the internal DLL export library for tools 
+               toolslibD.lib- the internal DLL export library for tools
 
             c:\MyHDFstuff\hdf5\tools\"tools directory"-
             where tools are located
 
        The directories listed below will contain the following files
        ONLY when you choose to build HDF5 C++ libraries:
-       
-            c:\MyHDFstuff\hdf5\proj\hdf5_cpp\debug - 
-               
+
+            c:\MyHDFstuff\hdf5\proj\hdf5_cpp\debug -
+
                hdf5_cppd.lib- the HDF5 C++ API static library
 
-            c:\MyHDFstuff\hdf5\proj\hdf5_cpp\release - 
-               
+            c:\MyHDFstuff\hdf5\proj\hdf5_cpp\release -
+
                hdf5_cpp.lib- the HDF5 C++ API static library
 
-            c:\MyHDFstuff\hdf5\proj\hdf5_cppdll\debug - 
-               
+            c:\MyHDFstuff\hdf5\proj\hdf5_cppdll\debug -
+
                hdf5_cppddll.dll- the HDF5 C++ API DLL
                hdf5_cppddll.lib- the C++ API DLL export library
-               
-            c:\MyHDFstuff\hdf5\proj\hdf5_cppdll\release - 
-               
+
+            c:\MyHDFstuff\hdf5\proj\hdf5_cppdll\release -
+
                hdf5_cppdll.dll- the HDF5 C++ API DLL
                hdf5_cppdll.lib- the C++ API DLL export library
-            
-       The directories listed below will contain the following files
-       ONLY when you choose to build HDF5 Fortran libraries:
 
-            c:\MyHDFstuff\hdf5\proj\hdf5_fortran\debug - 
-       
-               hdf5_fortrand.lib- the HDF5 Fortran API static library
-               
-            c:\MyHDFstuff\hdf5\proj\hdf5_fortran\release - 
-       
-               hdf5_fortran.lib- the HDF5 Fortran API static library
 
-            c:\MyHDFstuff\hdf5\proj\hdf5_fortrandll\debug - 
-       
-               hdf5_fortranddll.dll- the HDF5 Fortran API DLL
-               hdf5_fortranddll.lib- the HDF5 Fortran API DLL export
-                                     library
-               
-            c:\MyHDFstuff\hdf5\proj\hdf5_fortrandll\release - 
-       
-               hdf5_fortrandll.dll- the HDF5 Fortran API DLL
-               hdf5_fortrandll.lib- the HDF5 Fortran API DLL export
-                                    library
-               
-            c:\MyHDFstuff\hdf5\proj\hdf5_f90sctub\debug - 
-
-               hdf5_f90cstubd.lib- the HDF5 C and Fortran stub static
-                                   library
-
-            c:\MyHDFstuff\hdf5\proj\hdf5_f90cstub\release - 
-
-               hdf5_f90cstub.lib- the HDF5 C and Fortran stub static
-                                  library
-
-            c:\MyHDFstuff\hdf5\proj\hdf5_f90sctubdll\debug - 
-
-               hdf5_f90cstubddll.dll- the HDF5 C and Fortran stub DLL
-               hdf5_f90cstubddll.lib- the HDF5 C and Fortran stub DLL
-                                      export library
-
-            c:\MyHDFstuff\hdf5\proj\hdf5_f90cstubdll\release - 
-
-               hdf5_f90cstubdll.dll- the HDF5 C and Fortran stub DLL
-               hdf5_f90cstubdll.lib- the HDF5 C and Fortran stub DLL
-                                     export library
-
-            c:\MyHDFstuff\hdf5\fortran\test\libtest_cstubdll\debug - 
-          
-               libtest_cstubddll.dll- the HDF5 Fortran test C and
-                                      Fortran stub DLL
-               libtest_cstubddll.lib- the HDF5 Fortran test C and
-                                      Fortran stub DLL export library
-
-            c:\MyHDFstuff\hdf5\fortran\test\libtest_cstubdll\release - 
-          
-               libtest_cstubdll.dll- the HDF5 Fortran test C and
-                                     Fortran stub DLL
-               libtest_cstubdll.lib- the HDF5 Fortran test C and
-                                     Fortran stub DLL export library
-
-            c:\MyHDFstuff\hdf5\fortran\test\libtest_fortran\debug - 
-          
-               libtest_fortrand.lib- the HDF5 Fortran test static
-                                     library
-
-            c:\MyHDFstuff\hdf5\fortran\test\libtest_fortran\release - 
-          
-               libtest_fortranr.lib- the HDF5 Fortran test static
-                                    library
-
-            c:\MyHDFstuff\hdf5\fortran\test\libtest_fortrandll\debug - 
-          
-               libtest_fortranddll.dll- the HDF5 Fortran test DLL
-               libtest_fortranddll.lib- the HDF5 Fortran test DLL
-                                        export library
-
-            c:\MyHDFstuff\hdf5\fortran\test\libtest_fortran\release - 
-          
-               libtest_fortrandll.dll- the HDF5 Fortran test DLL
-               libtest_fortrandll.lib- the HDF5 Fortran test DLL
-                                       export library
-                                       
        The directories listed below will contain the following files
        ONLY when you choose to build HDF5 High Level libraries:
-       			
-       	    c:\MyHDFstuff\hdf5\proj\hdf5_hl\Release -
-       			
-       	       hdf5_hl.lib - HDF5 High Level Static Library
-       			  
-       	    c:\MyHDFstuff\hdf5\proj\hdf5_hl\Debug - 
-       			
-       	       hdf5_hld.lib - HDF5 High Level Static Library
-       	       
-       	   c:\MyHDFstuff\hdf5\proj\hdf5_hldll\Release -
-       			
-       	       hdf5_hldll.dll - HDF5 High Level DLL
-       	       hdf5_hldll.lib - HDF5 High Level export Library
-       			  
-       	    c:\MyHDFstuff\hdf5\proj\hdf5_hldll\Debug - 
-       			
-       	       hdf5_hldlld.dll - HDF5 High Level DLL
-       	       hdf5_hldlld.lib - HDF5 High Level export Library
-       
+
+            c:\MyHDFstuff\hdf5\proj\hdf5_hl\Release -
+
+               hdf5_hl.lib - HDF5 High Level Static Library
+
+            c:\MyHDFstuff\hdf5\proj\hdf5_hl\Debug -
+
+               hdf5_hld.lib - HDF5 High Level Static Library
+
+           c:\MyHDFstuff\hdf5\proj\hdf5_hldll\Release -
+
+               hdf5_hldll.dll - HDF5 High Level DLL
+               hdf5_hldll.lib - HDF5 High Level export Library
+
+            c:\MyHDFstuff\hdf5\proj\hdf5_hldll\Debug -
+
+               hdf5_hldlld.dll - HDF5 High Level DLL
+               hdf5_hldlld.lib - HDF5 High Level export Library
+
        The directories listed below will contain the following files
        ONLY when you choose to build HDF5 High Level C++ libraries:
-       			
-       	    c:\MyHDFstuff\hdf5\proj\hdf5_hl_cpp\Release -
-       			
-       	       hdf5_hl_cpp.lib - HDF5 High Level  C++ Static Library
-       	    
-       	    c:\MyHDFstuff\hdf5\proj\hdf5_hl_cpp\Debug -
-       			
-       	       hdf5_hl_cpp.lib - HDF5 High Level C++ Static Library
-       	    
-       	    c:\MyHDFstuff\hdf5\proj\hdf5_hl_cppdll\Release -
-       			
-       	       hdf5_hl_cppdll.dll - HDF5 High Level C++ DLL
-       	       hdf5_hl_cppdll.lib - HDF5 High Level C++ export Library
-       	    
-       	    c:\MyHDFstuff\hdf5\proj\hdf5_hl_cppdll\Debug -
-       			
-       	        hdf5_hl_cppdlld.dll - HDF5 High Level C++ DLL
-       	       hdf5_hl_cppdlld.lib - HDF5 High Level C++ export Library
-       			  
-       The directories listed below will contain the following files
-       ONLY when you choose to build HDF5 High Level Fortran libraries:
-       
-            c:\MyHDFstuff\hdf5\proj\hdf5_hl_f90cstubdll\Release -
-            
-            hdf5_hl_f90cstubdll.dll - HDF5 High Level C and Fortran stub DLL
-            hdf5_hl_f90cstubdll.lib - HDF5 High Level C and Fortran stub export library
-            
-            c:\MyHDFstuff\hdf5\proj\hdf5_hl_f90cstubdll\Debug -
-            
-            hdf5_hl_f90cstubdlld.dll - HDF5 High Level C and Fortran stub DLL
-            hdf5_hl_f90cstubdlld.lib - HDF5 High Level C and Fortran stub export library
-       
-            c:\MyHDFstuff\hdf5\proj\hdf5_hl_fortran\Release - 
-            
-            hdf5_hl_fortranr.lib - HDF5 High Level Fortran Static Library
-            
-            c:\MyHDFstuff\hdf5\proj\hdf5_hl_fortran\Debug - 
-            
-            hdf5_hl_fortrand.lib - HDF5 High-Level Fortran Static Library    
-           
-           c:\MyHDFstuff\hdf5\proj\hdf5_hl_fortrandll\Release - 
-            
-            hdf5_hl_fortrandll.dll - HDF5 High Level Fortran DLL
-            hdf5_hl_fortrandll.lib - HDF5 High Level Fortran export Library
-            
-            c:\MyHDFstuff\hdf5\proj\hdf5_hl_fortrandll\Debug - 
-            
-            hdf5_hl_fortrandlld.dll - HDF5 High Level Fortran DLL
-            hdf5_hl_fortrandlld.lib - HDF5 High Level Fortran export Library
+
+            c:\MyHDFstuff\hdf5\proj\hdf5_hl_cpp\Release -
+
+               hdf5_hl_cpp.lib - HDF5 High Level  C++ Static Library
+
+            c:\MyHDFstuff\hdf5\proj\hdf5_hl_cpp\Debug -
+
+               hdf5_hl_cpp.lib - HDF5 High Level C++ Static Library
+
+            c:\MyHDFstuff\hdf5\proj\hdf5_hl_cppdll\Release -
+
+               hdf5_hl_cppdll.dll - HDF5 High Level C++ DLL
+               hdf5_hl_cppdll.lib - HDF5 High Level C++ export Library
+
+            c:\MyHDFstuff\hdf5\proj\hdf5_hl_cppdll\Debug -
+
+                hdf5_hl_cppdlld.dll - HDF5 High Level C++ DLL
+               hdf5_hl_cppdlld.lib - HDF5 High Level C++ export Library
+
 
 STEP 2: Testing HDF5 libraries and tools
 
 HDF5 libraries and tools should be tested to make sure that they were
 built correctly.
 
-We provide 2 options for users to test HDF5 libraries and tools.  
+We provide 2 options for users to test HDF5 libraries and tools.
 
    Option 1: Automatic testings
 
@@ -604,44 +443,44 @@ We provide 2 options for users to test HDF5 libraries and tools.
 
    hdf5check batch file can be run with one of the following four
    options:
-   
+
       hdf5check                  test HDF5 C library and tools only
-      
+
       hdf5check enablecpp        test HDF5 C/C++ libraries and tools
-                                 To use this option, HDF5 C++ 
-                                 libraries must have been built 
+                                 To use this option, HDF5 C++
+                                 libraries must have been built
                                  in step I.
-      
+
       hdf5check enablefortran    test HDF5 C/FORTRAN libraries and
                                  tools
                                  To use this option, HDF5 Fortran
-                                 libraries must have been built 
-                                 in step I.      
-      
+                                 libraries must have been built
+                                 in Section VII.
+
       hdf5check enableall        test HDF5 C/C++/FORTRAN libraries
                                  and tools
-                                 To use this option, HDF5 C++ and 
+                                 To use this option, HDF5 C++ and
                                  Fortran libraries must have been
-                                 built in step I.      
+                                 built in Section VII.
 
    Invoke a command prompt window and run hdf5check with appropriate
    option.
 
    Test results are saved in two files:
 
-      c:\MyHDFstuff\hdf5\check_results.txt   
+      c:\MyHDFstuff\hdf5\check_results.txt
 
       c:\MyHDFstuff\hdf5\tests_results.txt.
 
    In general, you only need to check tests_results.txt.  If all the
-   tests passed, then you do not have to check check_results.txt.  
+   tests passed, then you do not have to check check_results.txt.
    If some tests failed, check check_results.txt can help you
    figure out what was wrong.
 
    Option 2: Step-by-step HDF5 libraries and tools testings
 
    You can also test HDF5 libraries and tools one by one.  There are
-   possibly four versions of HDF5 libraries and tools testings. 
+   possibly four versions of HDF5 libraries and tools testings.
 
    They are:
 
@@ -653,12 +492,12 @@ We provide 2 options for users to test HDF5 libraries and tools.
    We strongly suggest you to redirect your testing results into an
    output file so that you can easily check the testing results. You
    may use either Notepad or WordPad or whatever other windows word
-   processor to check the results.  For the purpose of printing,  
+   processor to check the results.  For the purpose of printing,
    please choose font less than 14 for better alignment of the text.
 
    DLLs listed below should be placed into the Windows system
-   directory.  A batch file named install_dll.bat is included in 
-   c:\MyHDFstuff\hdf5 directory.  Run this batch file and the 
+   directory.  A batch file named install_dll.bat is included in
+   c:\MyHDFstuff\hdf5 directory.  Run this batch file and the
    following HDF5 DLLs will be copied to the system directory.
 
       hdf5\proj\hdf5dll\release\hdf5dll.dll
@@ -666,56 +505,56 @@ We provide 2 options for users to test HDF5 libraries and tools.
       hdf5\test\libtestD\release\libtestD.dll
       hdf5\test\libtestD\debug\libtestDd.dll
 
-   1. HDF5 library testing 
+   1. HDF5 library testing
 
-      cd into the hdf5\test directory. 
+      cd into the hdf5\test directory.
 
          (1) basic tests
-            
+
              Go to a) b) c) or d) to test your chosen version
 
              a) release static version
-             type:             
-                hdf5test release >"Your output filename" 
+             type:
+                hdf5test release >"Your output filename"
 
              b) release dll version
              type:
                 hdf5test release dll >"Your output filename"
 
              c) debug static version
-             type: 
+             type:
                 hdf5test debug >"Your output filename"
 
              d) debug dll version
              type:
                 hdf5test debug dll >"Your output filename"
-            
+
          (2) timing tests
 
              Go to a) b) c) or d) to test your chosen version
- 
+
              a) release static version
-             type:             
-                hdf5timingtest release >"Your output filename" 
+             type:
+                hdf5timingtest release >"Your output filename"
 
              b) release dll version
              type:
                 hdf5timingtest release dll >"Your output filename"
-				
+
              c) debug static version
-             type: 
+             type:
                 hdf5timingtest debug >"Your output filename"
 
              d) debug dll version
              type:
                 hdf5timingtest debug dll >"Your output filename"
 
-      Use Notepad or WordPad to check results. You should 
+      Use Notepad or WordPad to check results. You should
       not find any FAILED marks in your output files.
 
    2. HDF5 tools testing
- 
-      To test HDF5 tools, cd back into hdf5 directory and then cd into 
+
+      To test HDF5 tools, cd back into hdf5 directory and then cd into
       tools directory(c:\MyHDFstuff\hdf5\tools).  The HDF5 tools testing
       results are saved into output files in tools directory by the
       testhdf5tools.bat as described below.
@@ -723,63 +562,63 @@ We provide 2 options for users to test HDF5 libraries and tools.
       Go to a) b) c) or d) to test your chosen version
 
          a) release static version
-         type:             
+         type:
             testhdf5tools release
-         output file: toolstest_release.txt 
+         output file: toolstest_release.txt
 
          b) release dll version
          type:
             testhdf5tools release dll
-         output file: toolstest_releasedll.txt 
+         output file: toolstest_releasedll.txt
 
          c) debug static version
-         type: 
+         type:
             testhdf5tools debug
-         output file: toolstest_debug.txt 
+         output file: toolstest_debug.txt
 
          d) debug dll version
          type:
             testhdf5tools debug dll
-         output file: toolstest_debugdll.txt 
-               
-      Use Notepad or WordPad to check results. You should 
+         output file: toolstest_debugdll.txt
+
+      Use Notepad or WordPad to check results. You should
       not find any FAILED marks in your output files.
-    
+
    3. HDF5 C++ library test
-  
+
       Skip this step UNLESS you have built HDF5 C++ libraries
       and want to test them.
-     
+
       DLLs listed below should be placed into the Windows system
-      directory.  A batch file named install_cppdll.bat is included in 
-      c:\MyHDFstuff\hdf5 directory.  Run this batch file and the 
+      directory.  A batch file named install_cppdll.bat is included in
+      c:\MyHDFstuff\hdf5 directory.  Run this batch file and the
       following HDF5 C++ DLLs will be copied to the system directory.
-       
+
          hdf5\proj\hdf5_cppdll\release\hdf5_cppdll.dll
          hdf5\proj\hdf5_cppdll\debug\hdf5_cppddll.dll
 
-      Run hdf5cpptest.bat in the hdf5\c++\test directory at the 
+      Run hdf5cpptest.bat in the hdf5\c++\test directory at the
       command prompt as below:
-     
+
          hdf5cpptest release >"Your output filename"
          hdf5cpptest release dll >"Your output filename"
          hdf5cpptest debug >"Your output filename"
          hdf5cpptest debug dll >"Your output filename"
 
-      Use Notepad or WordPad to check results. You should 
+      Use Notepad or WordPad to check results. You should
       not find any FAILED marks in your output files.
-     
+
    4. HDF5 Fortran library test
-  
-      Skip this step UNLESS you have built HDF5 Fortran libraries     
+
+      Skip this step UNLESS you have built HDF5 Fortran libraries
       and want to test them.
-     
+
       DLLs listed below should be placed into the Windows system
-      directory.  A batch file named install_f90dll.bat is included in 
-      c:\MyHDFstuff\hdf5 directory.  Run this batch file and the 
+      directory.  A batch file named install_f90dll.bat is included in
+      c:\MyHDFstuff\hdf5 directory.  Run this batch file and the
       following HDF5 Fortran DLLs will be copied to the system
       directory.
-       
+
          hdf5\proj\hdf5_f90cstubdll\release\hdf5_f90cstubdll.dll
          hdf5\proj\hdf5_f90cstubdll\debug\hdf5_f90cstubddll.dll
          hdf5\proj\hdf5_fortrandll\release\hdf5_fortrandll.dll
@@ -796,135 +635,137 @@ We provide 2 options for users to test HDF5 libraries and tools.
          testhdf5_fortran debug >"Your output filename"
          testhdf5_fortran debug dll >"Your output filename"
 
-      Use Notepad or WordPad to check results. You should 
+      Use Notepad or WordPad to check results. You should
       not find any FAILED marks in your output files.
-    
+
     5. HDF5 High-Level library test
-    
-    Skip this step UNLESS you have built HDF5 High-Level libraries     
+
+    Skip this step UNLESS you have built HDF5 High-Level libraries
     and want to test them.
-    
+
     DLLs listed below should be placed into the Windows system
-    directory.  A batch file named install_hldll.bat is included in 
-    c:\MyHDFstuff\hdf5 directory.  Run this batch file and the 
+    directory.  A batch file named install_hldll.bat is included in
+    c:\MyHDFstuff\hdf5 directory.  Run this batch file and the
     following HDF5 high level DLLs will be copied to the system
     directory.
-    
+
     c:\MyHDFstuff\hdf5\proj\hdf5_hldll\Release\hdf5_hldll.dll
     c:\MyHDFstuff\hdf5\proj\hdf5_hldll\Debug\hdf5_hldlld.dll
-    
-    Run test_hdf5_hl.bat in the hdf5\hl\test directory at the 
+
+    Run test_hdf5_hl.bat in the hdf5\hl\test directory at the
       command prompt as below:
-     
+
          test_hdf5_hl release >"Your output filename"
          test_hdf5_hl release dll >"Your output filename"
          test_hdf5_hl debug >"Your output filename"
          test_hdf5_hl debug dll >"Your output filename"
 
-      Use Notepad or WordPad to check results. You should 
+      Use Notepad or WordPad to check results. You should
       not find any FAILED marks in your output files.
-      
+
     6  HDF5 High-Level C++ library test
-    
+
     Skip this step UNLESS you have built HDF5 High-Level C++
     libraries and want to test them.
-    
+
     DLLs listed below should be placed into the Windows system
-    directory.  A batch file named install_hlcppdll.bat is included in 
-    c:\MyHDFstuff\hdf5 directory.  Run this batch file and the 
+    directory.  A batch file named install_hlcppdll.bat is included in
+    c:\MyHDFstuff\hdf5 directory.  Run this batch file and the
     following HDF5 high level c++ DLLs will be copied to the system
     directory.
-    
+
     c:\MyHDFstuff\hdf5\proj\hdf5_hlcppdll\Release\hdf5_hlcppdll.dll
     c:\MyHDFstuff\hdf5\proj\hdf5_hlcppdll\Debug\hdf5_hlcppdlld.dll
-    
+
     Run test_hdf5_hl_cpp.bat in the hdf5\hl\c++\test directory at
     the command prompt as below:
-     
+
          test_hdf5_hl_cpp release >"Your output filename"
          test_hdf5_hl_cpp release dll >"Your output filename"
          test_hdf5_hl_cpp debug >"Your output filename"
          test_hdf5_hl_cpp debug dll >"Your output filename"
 
-     Use Notepad or WordPad to check results. You should 
+     Use Notepad or WordPad to check results. You should
      not find any FAILED marks in your output files.
-    
+
     7. HDF5 High-Level Fortran library test
-    
+
     Skip this step UNLESS you have built HDF5 High-Level Fortran
     libraries and want to test them.
-    
+
     DLLs listed below should be placed into the Windows system
-    directory.  A batch file named install_hlf90dll.bat is included in 
-    c:\MyHDFstuff\hdf5 directory.  Run this batch file and the 
+    directory.  A batch file named install_hlf90dll.bat is included in
+    c:\MyHDFstuff\hdf5 directory.  Run this batch file and the
     following HDF5 high level fortran DLLs will be copied to the system
     directory.
-    
+
         c:\MyHDFstuff\hdf5\proj\hdf5_hl_f90cstubdll\Release\hdf5_hl_f90cstubdll.dll
         c:\MyHDFstuff\hdf5\proj\hdf5_hl_f90cstubdll\Debug\hdf5_hl_f90cstubdlld.dll
         c:\MyHDFstuff\hdf5\proj\hdf5_hlfortrandll\Release\hdf5_hlfortrandll.dll
         c:\MyHDFstuff\hdf5\proj\hdf5_hlfortrandll\Debug\hdf5_hlfortrandlld.dll
-    
+
     Run test_hdf5_hl_fortran.bat in the hdf5\hl\fortran\test directory at
     the command prompt as below:
-     
+
          test_hdf5_hl_fortran release     >>"Your output filename"
          test_hdf5_hl_fortran release dll >>"Your output filename"
          test_hdf5_hl_fortran debug       >>"Your output filename"
          test_hdf5_hl_fortran debug dll   >>"Your output filename"
 
-    Use Notepad or WordPad to check results. You should 
+    Use Notepad or WordPad to check results. You should
     not find any FAILED marks in your output files.
 
  STEP 3: Installing HDF5 Libraries
 
 We provide a batch file for users to relocate all HDF5 libraries in one
 folder (C++ and Fortran libraries will also be copied into this folder
-if they have been built in step I).  The file is called
-installhdf5lib.bat under c:\MyHDFstuff\hdf5 directory.  Run the batch 
-file, you may see a folder called hdf5lib under c:\MyHDFstuff\hdf5.  
-    
+if they have been built in step I or Section VII, respectively).  The file
+is called installhdf5lib.bat under c:\MyHDFstuff\hdf5 directory.  Run
+the batch file, you may see a folder called hdf5lib under c:\MyHDFstuff\hdf5.
+
 The <release> layout of <hdf5lib> should be:
-    
+
    release\include   --  HDF5 header files
    release\bin       --  HDF5 static tool executables
    release\bindll    --  HDF5 DLL tool executables
    release\lib       --  HDF5 static libraries
    release\dll       --  HDF5 DLLs
-       
+
 You may also find the similar layout for the <debug>.
 
-Section III: How to build examples (optional)
+========================================================================
+                 Section I: How To Build Examples (Optional)
+========================================================================
 
 Simple examples have been provided for users to test HDF5
 C/C++/Fortran and high level C/Fortran library and tools.
 
-Note: 
+Note:
       1) To build HDF5 C++ examples, HDF5 C++ library must have been
          built in step I.
 
-      2) To build HDF5 Fortran examples, HDF5 Fortran library must
-         have been built in step I.
-         
-      3) To build HDF5 High Level C examples, HDF5 High level library 
+      2) To build HDF5 Fortran or HL Fortran examples, please see 
+         Section VII, Step 3.
+
+      3) To build HDF5 High Level C examples, HDF5 High level library
          must have been built in step I.
 
-      4) By default, the debug versions of HDF5 C/C++/Fortran/HL examples
-         are linked with the debug versions of HDF5 C/C++/Fortran/HL 
-         libraries and DLLs.  The debug versions of HDF5 C/C++/Fortran/HL
+      4) By default, the debug versions of HDF5 C/C++/HL examples
+         are linked with the debug versions of HDF5 C/C++/HL
+         libraries and DLLs.  The debug versions of HDF5 C/C++/HL
          examples will fail if they are linked with HDF5 binary
          distribution, which only includes the release versions of
-         HDF5 C/C++/Fortran libraries and DLLs.
+         HDF5 C/C++ libraries and DLLs.
 
 To build and test HDF5 C examples:
 ----------------------------------
    1. Invoke Microsoft Visual C++, go to "File" and select
-      the "Open Workspace" option. 
-      
+      the "Open Workspace" option.
+
       Then open the workspace
       c:\MyHDFstuff\hdf5\windows\examples\allexamples\allexamples.dsw.
 
-   2. Select "Build", then Select "Set Active Configuration". 
+   2. Select "Build", then Select "Set Active Configuration".
 
        2.1 To build debug versions of C examples.
            In "Project configurations", select "allexamples -- Win32 Debug",
@@ -936,29 +777,29 @@ To build and test HDF5 C examples:
           select "ok". Select "Build" -> "Build" or "Rebuild All" to
           build release version of project "allexamples".
 
-      When the debug build or release build is done, there should be the 
+      When the debug build or release build is done, there should be the
       following subdirectories in c:\MyHDFstuff\hdf5\examples\
 
           attributetest
           attributetestdll
           chunkread
           chunkreaddll
-          compoundtest 
+          compoundtest
           compoundtestdll
-          extendwritetest 
+          extendwritetest
           extendwritetestdll
-          grouptest 
+          grouptest
           grouptestdll
-          readtest 
+          readtest
           readtestdll
-          selectest 
+          selectest
           selectestdll
-          writetest 
+          writetest
           writetestdll
 
-   3. Invoke a command prompt window and run the batch file 
+   3. Invoke a command prompt window and run the batch file
       InstallExamples.bat which resides in the top level directory
-      (c:\MyHDFstuff\hdf5).  This file creates 4 new directories, 
+      (c:\MyHDFstuff\hdf5).  This file creates 4 new directories,
       examplesREL, examplesRELDLL, examplesDBG, and examplesDBGDLL,
       in the c:\MyHDFstuff\hdf5\examples directory and places all the
       executables in it.  Both the release and debug versions of the
@@ -968,7 +809,7 @@ To build and test HDF5 C examples:
       examples tests output file named testExamples_exp_output.txt
       in c:\MyHDFstuff\hdf5\examples directory for you to test HDF5
       C examples.
-      
+
       testExamples.bat batch file has 4 options:
 
          testExamples release     -- for release version
@@ -989,7 +830,7 @@ To build and test HDF5 C++ examples:
 ------------------------------------
 
    1. Invoke Microsoft Visual C++ 6.0, choose "File" and select
-      the "Open Workspace" option. 
+      the "Open Workspace" option.
 
       Then open the workspace
       c:\myHDFstuff\hdf5\windows\c++\examples\allcppexamples\allcppexamples.dsw.
@@ -1007,47 +848,47 @@ To build and test HDF5 C++ examples:
            In "Project configurations", select "allcppexamples -- Win32 Release",
           select "ok". Select "Build" -> "Build" or "Rebuild All" to
           build release version of project "allcppexamples".
-      
-   When the debug build or release build is done, there should be the 
+
+   When the debug build or release build is done, there should be the
    following subdirectories in c:\MyHDFstuff\hdf5\c++\examples\
 
           chunkstest
           chunkstestdll
-          compoundtest 
-          compoundtestdll 
-          createtest 
-          createtestdll 
-          extend_dstest 
-          extend_dstestdll 
-          h5grouptest 
-          h5grouptestdll 
-          readdatatest 
-          readdatatestdll 
-          writedatatest 
-          writedatatestdll 
+          compoundtest
+          compoundtestdll
+          createtest
+          createtestdll
+          extend_dstest
+          extend_dstestdll
+          h5grouptest
+          h5grouptestdll
+          readdatatest
+          readdatatestdll
+          writedatatest
+          writedatatestdll
 
-   3. Invoke a command prompt window and run the batch file 
+   3. Invoke a command prompt window and run the batch file
       InstallcppExamples.bat which resides in the top level directory
-      (c:\MyHDFstuff\hdf5).  This file creates 4 new directories, 
+      (c:\MyHDFstuff\hdf5).  This file creates 4 new directories,
       cppexamplesREL, cppexamplesRELDLL, cppexamplesDBG,
       and cppexamplesDBGDLL, in the c:\MyHDFstuff\c++\examples
       directory and places all the executables in it.  Both the release
-      and debug versions of the examples should be built before this 
+      and debug versions of the examples should be built before this
       step is done.
 
    4. We provide a batch file named testcppExamples.bat in
       c:\MyHDFstuff\hdf5\c++\examples directory for you to test HDF5
       C++ examples.
-      
+
       testcppExamples.bat batch file has 4 options:
 
          testcppExamples release     -- for release version
 
          testcppExamples release dll -- for release DLL version
 
-         testcppExamples debug       -- for debug version 
+         testcppExamples debug       -- for debug version
 
-         testcppExamples debug dll   -- for debug DLL version 
+         testcppExamples debug dll   -- for debug DLL version
 
       Invoke a command prompt window and run testcppExamples with
       appropriate options.  You should get "All HDF5 C++ examples tests
@@ -1055,95 +896,32 @@ To build and test HDF5 C++ examples:
       the difference between the expected outputs and actual outputs
       will be given.
 
-To build and test HDF5 Fortran example:
----------------------------------------
 
-   1. Invoke Compaq Visual Fortran or intel Fortran under Microsoft 
-      Visual studio development environment, go to "File" and select
-      the "Open Workspace" option.
-
-      Then open the workspace
-      c:\MyHDFstuff\hdf5\windows\fortran\examples\allf90examples\allf90examples.dsw.
-
-   2. Select "Build", then Select "Set Active Configuration".
-   
-    2.1 To build debug versions of Fortran examples.
-
-        In "Project configurations", select "allf90examples -- Win32 Debug",
-        select "ok". Select "Build" -> "Build" or "Rebuild All" to
-        build debug version of project "allf90examples".
-
-    2.2 To build release versions of Fortran examples.
-
-        In "Project configurations", select "allf90examples -- Win32 Release",
-        select "ok". Select "Build" -> "Build" or "Rebuild All" to
-        build release version of project "allf90examples".
-      
-   When the debug build or release build is done, there should be the 
-   following subdirectories in c:\MyHDFstuff\hdf5\fortran\examples\
-
-          attreexampletest
-          attreexampletestdll 
-          compoundtest 
-          compoundtestdll
-          dsetexampletest
-          dsetexampletestdll
-          fileexampletest
-          fileexampletestdll
-          groupexampletest
-          groupexampletestdll
-          grpdsetexampletest
-          grpdsetexampletestdll
-          grpittest
-          grpittestdll
-          grpsexampletest
-          grpsexampletestdll
-          hyperslabtest
-          hyperslabtestdll
-          mountexampletest
-          mountexampletest
-          refobjexampletest
-          refobjexampletestdll
-          refregexampletest
-          refregexampletestdll
-          rwdsetexampletest
-          rwdsetexampletestdll
-          selecteletest
-          selecteletestdll
-
-   3. Invoke a command prompt window and run the batch file 
-      Installf90Examples.bat which resides in the top level directory
-      (c:\MyHDFstuff\hdf5).  This file creates 4 new directories, 
-      f90examplesREL, f90examplesRELDLL, f90examplesDBG, and
-      f90examplesDBGDLL, in the c:\MyHDFstuff\fortran\examples directory
-      and places all the executables in it.  Both the release and debug
-      versions of the examples should be built before this step is done.
-      
 To build and test HDF5 High Level C examples:
 ---------------------------------------------
 
    1. Invoke Microsoft Visual C++, go to "File" and select
-      the "Open Workspace" option. 
-      
-      Then open the workspace 
+      the "Open Workspace" option.
+
+      Then open the workspace
 
 c:\MyHDFstuff\hdf5\windows\hl\examples\allhlcexamples\allhlcexamples.dsw
 
-   2. Select "Build", then Select "Set Active Configuration". 
+   2. Select "Build", then Select "Set Active Configuration".
 
        2.1 To build debug versions of High Level C examples.
-           In "Project configurations", select 
-           "allhlcexamples -- Win32 Debug", select "ok". Select 
-           "Build" -> "Build" or "Rebuild All" to build debug version 
+           In "Project configurations", select
+           "allhlcexamples -- Win32 Debug", select "ok". Select
+           "Build" -> "Build" or "Rebuild All" to build debug version
            of project "allhlcexamples".
 
        2.2 To build release versions of C examples.
-           In "Project configurations", select 
-           "allhlcexamples -- Win32 Release", select "ok". Select 
+           In "Project configurations", select
+           "allhlcexamples -- Win32 Release", select "ok". Select
            "Build" -> "Build" or "Rebuild All" to build release version
            of project "allhlcexamples".
 
-      When the debug build or release build is done, there should be the 
+      When the debug build or release build is done, there should be the
       following subdirectories in c:\MyHDFstuff\hdf5\hl\examples
 
           allhlcexamples
@@ -1158,22 +936,22 @@ c:\MyHDFstuff\hdf5\windows\hl\examples\allhlcexamples\allhlcexamples.dsw
           ex_packet
           ex_packetdll
 
-   3. Invoke a command prompt window and run the batch file 
+   3. Invoke a command prompt window and run the batch file
       Install_hlcexamples.bat which resides in the top level directory
-      (c:\MyHDFstuff\hdf5).  This file creates 4 new directories, 
-      HLCexamplesRELEASE, HLCexamplesRELEASEDLL, HLCexamplesDEBUG, and 
-      HLCexamplesDEBUGDLL, in the c:\MyHDFstuff\hdf5\hl\examples 
-      directory and places all the executables in it. Both the release 
-      and debug versions of the examples should be built before this 
+      (c:\MyHDFstuff\hdf5).  This file creates 4 new directories,
+      HLCexamplesRELEASE, HLCexamplesRELEASEDLL, HLCexamplesDEBUG, and
+      HLCexamplesDEBUGDLL, in the c:\MyHDFstuff\hdf5\hl\examples
+      directory and places all the executables in it. Both the release
+      and debug versions of the examples should be built before this
       step is done.
 
-   4. We provide a batch file named test_hl_cexamples.bat in 
-      c:\MyHDFstuff\hdf5\hl\examples directory for you to test 
+   4. We provide a batch file named test_hl_cexamples.bat in
+      c:\MyHDFstuff\hdf5\hl\examples directory for you to test
       HDF5 high level C examples.
-      
+
       test_hl_cexamples.bat batch file has 4 options:
-      
-         Options                        purpose                                   
+
+         Options                        purpose
 
          test_hl_cexamples release      -- for release version
 
@@ -1186,79 +964,13 @@ c:\MyHDFstuff\hdf5\windows\hl\examples\allhlcexamples\allhlcexamples.dsw
       Invoke a command prompt window and run test_hl_cexamples with
       appropriate options.
 
-     When you run "test_hl_cexamples.bat" with each option,  if you see the 
+     When you run "test_hl_cexamples.bat" with each option,  if you see the
      following messages at the end:
-      
+
           All of the HL C Examples Passed!
 
       You have built HL C examples successfully. Otherwise, HL C examples
       Failed to build.
-
-
-To build and test HDF5 High Level Fortran examples:
----------------------------------------------------
-
-   1. Invoke Compaq Visual Fortran 6.6c, open the workspace
-
-    c:\MyHDFstuff\hdf5\windows\hl\fortran\examples\ (continue next line)
-      allhlf90examples\allhlf90examples.dsw
-
-   2. Select "Build", then Select "Set Active Configuration".
-
-       2.1 To build debug versions of High Level Fortran examples.
-           In "Project configurations", select
-           "allhlf90examples -- Win32 Debug", select "ok". Select
-           "Build" -> "Build" or "Rebuild All" to build debug version
-           of project "allhlf90examples".
-
-       2.2 To build release versions of Fortran examples.
-           In "Project configurations", select
-           "allhlf90examples -- Win32 Release", select "ok". Select
-           "Build" -> "Build" or "Rebuild All" to build release version
-           of project "allhlf90examples".
-
-      When the debug build or release build is done, there should be the
-      following subdirectories in c:\MyHDFstuff\hdf5\hl\fortran\examples
-
-          ex_lite
-          ex_litedll
-
-3. Invoke a command prompt window and run the batch file
-      Install_hlf90examples.bat which resides in the top level directory
-      (c:\MyHDFstuff\hdf5).  This file creates 4 new directories,
-      HLf90examplesRELEASE, HLf90examplesRELEASEDLL, HLf90examplesDEBUG, 
-      and HLf90examplesDEBUGDLL, in the 
-      c:\MyHDFstuff\hdf5\hl\fortran\examples directory and places all 
-      the executables in it. Both the release
-      and debug versions of the examples should be built before this
-      step is done.
-
-   4. We provide a batch file named test_hl_f90examples.bat in
-      c:\MyHDFstuff\hdf5\hl\fortran\examples directory for you to test
-      HDF5 high level fortran examples.
-
-      test_hl_f90examples.bat batch file has 4 options:
-
-         Options                          purpose
-
-         test_hl_f90examples release      -- for release version
-
-         test_hl_f90examples release dll  -- for release DLL version
-
-         test_hl_f90examples debug        -- for debug version
-
-         test_hl_f90examples debug dll    -- for debug DLL version
-
-      Invoke a command prompt window and run test_hl_f90examples with
-      appropriate options.
-
-      When you run "test_hl_f90examples release", the output will look
-      like:
-      
-          release  version of High Level Fortran examples     PASSED
-
-      Similar messages should be generated with another three options
-      If the high level Fortran examples are built successfully.
 
 
 ========================================================================
@@ -1307,17 +1019,17 @@ To use HDF5 static library
 
     6. In a text-area labeled with "Additional include directories:",
        add HDF5, Zlib, and Szip header files directories.  For example:
-       
+
           c:\MyHDFstuff\hdf5\hdf5lib\release\include
           c:\zlib122\include
           c:\szip\include
 
        Then click OK.
 
-    7. (optional) to use HDF5 Fortran static library, the location of 
+    7. (Optional) To use HDF5 Fortran static library, the location of
        Fortran module files should be specified by following
-       Project->Settings->Fortran->Preprocessor, and in a test-area 
-       labeled with "INCLUDE and USE Paths:", add HDF5 Fortran module 
+       Project->Settings->Fortran->Preprocessor, and in a test-area
+       labeled with "INCLUDE and USE Paths:", add HDF5 Fortran module
        files directories.  For example:
 
           c:\MyHDFstuff\hdf5\hdf5lib\release\include
@@ -1332,8 +1044,8 @@ To use HDF5 static library
 
     3. Change the "Files of type:" to "Library Files (.lib)"
 
-    4. Navigate through the directories until you find the location of 
-       the hdf5.lib. 
+    4. Navigate through the directories until you find the location of
+       the hdf5.lib.
 
     5. Select hdf5.lib and click OK.
 
@@ -1350,8 +1062,8 @@ To use HDF5 static library
     1. Go to Tools->Options->Directories,
 
     2. Insert the correct HDF5, Zlib, Szip paths for both headers(include)
-       and libraries.  For example, 
-       
+       and libraries.  For example,
+
           c:\MyHDFstuff\hdf5\hdf5lib\release\include
           c:\MyHDFstuff\hdf5\hdf5lib\release\lib
           c:\zlib122\include
@@ -1361,22 +1073,22 @@ To use HDF5 static library
 
     3. Go to the Project menu and choose the "Settings" option.
 
-    4. Find the "link" option and "Input" category, insert 
+    4. Find the "link" option and "Input" category, insert
        "zdll.lib, szlibdll.lib, hdf5.lib".
 
-    5. (Optional) repeat 3-4, to insert "hdf5_cpp.lib" if you want to 
+    5. (Optional) repeat 3-4, to insert "hdf5_cpp.lib" if you want to
        use HDF5 C++ static library.
 
-    6. (Optional) repeat 3-4, to insert "hdf5_fortran.lib" if you want to 
+    6. (Optional) repeat 3-4, to insert "hdf5_fortran.lib" if you want to
        use HDF5 Fortran static library.
-       
+
     7. (Optional)repeast 3-4, to insert "hdf5_hl.lib" if you want to use
         HDF5 high leve static library.
-       
-    7. (Optional) repeat 3-4, to insert "hdf5_hl_cpp.lib" if you want to 
+
+    7. (Optional) repeat 3-4, to insert "hdf5_hl_cpp.lib" if you want to
        use HDF5 high level C++ static library.
 
-    8. (Optional) repeat 3-4, to insert "hdf5_hl_fortran.lib" if you want to 
+    8. (Optional) repeat 3-4, to insert "hdf5_hl_fortran.lib" if you want to
        use HDF5 high level Fortran static library.
 
 
@@ -1391,19 +1103,19 @@ To use the DLL:
        hdf5_cppdll.lib for HDF5 C++ library, and hdf5_fortrandll.lib
        for HDF5 Fortran library.
 
-    3. Place the DLL in a location that Windows will be able to locate 
+    3. Place the DLL in a location that Windows will be able to locate
        it. The searched path and order for DLL's is
 
        a) The directory where the executable module for the current
           process is located.
-       b) The current directory. 
-       c} The Windows system directory. The GetSystemDirectory function 
-          retrieves the path of this directory. 
+       b) The current directory.
+       c} The Windows system directory. The GetSystemDirectory function
+          retrieves the path of this directory.
        d) The Windows directory. The GetWindowsDirectory function
           retrieves the path of this directory.
        e) The directories listed in the PATH environment variable.
- 
-    4. To modify your own application settings, please DO FOLLOW the 
+
+    4. To modify your own application settings, please DO FOLLOW the
        "DLL Hints" at Section XI "HELPFUL POINTERS".
 
 ========================================================================
@@ -1413,8 +1125,8 @@ To use the DLL:
 Warning: When you modify the H5pubconf.h file as described below,
          DO NOT just change the values of these macros from 1 to 0.
          Please DO remove(or comment out) appropriate lines.
-         
-   1. Disable Gzip compression 
+
+   1. Disable Gzip compression
 
       If you would like to remove Gzip compression from the HDF5
       library, follow the steps below.
@@ -1429,7 +1141,7 @@ Warning: When you modify the H5pubconf.h file as described below,
 
       1.2 Delete HDF5_EXT_ZLIB environment variable if you have
           set it in preconditions.
-   
+
       1.3 Run-compile HDF5 library according to Section II.
 
       When you disable Gzip, you may get the following message
@@ -1447,7 +1159,7 @@ Warning: When you modify the H5pubconf.h file as described below,
 
       2.1 Open the H5pubconf.h file from the c:\MyHDFstuff\hdf5\src
           directory and remove(or comment out) the following two
-          lines: 
+          lines:
 
              #define H5_HAVE_SZLIB_H 1
              #define H5_HAVE_FILTER_SZIP 1
@@ -1459,7 +1171,7 @@ Warning: When you modify the H5pubconf.h file as described below,
 
       2.3 Run-compile HDF5 library according to Section II.
 
-      When you disable Szip, you may get the following message 
+      When you disable Szip, you may get the following message
       when building HDF5 libraries:
 
       The following environment variables were not found
@@ -1467,7 +1179,7 @@ Warning: When you modify the H5pubconf.h file as described below,
 
       This message can be ignored.
 
-   Notes:   
+   Notes:
 
    To disable Gzip and Szip at the same time, just follow 1.1~1.2
    and 2.1~2.2 and run-compile HDF5 library according to Section II.
@@ -1485,585 +1197,745 @@ Warning: When you modify the H5pubconf.h file as described below,
           ftp://ftp.hdfgroup.org/lib-external/szip/2.0/bin/windows.
           The Szip library and header path should also be set up
           accordingly (refer to precondition 6).
-   
+
       3.2 Run-compile HDF5 library according to Section II.
 
 ========================================================================
-   Section VI: How to build HDF5 in Microsoft Visual Studio .Net 2003    
+   Section VI: How to build HDF5 in Microsoft Visual Studio .Net 2003
 ========================================================================
 
-Preconditions: 
-                                                          
+Preconditions:
+
    a. Set up path for Microsoft Visual Studio .Net 2003 compiler
-      
+
       Open "System" in Control Panel.
-   
-      On the "Advanced" tab, click "Environment Variables", click 
-      "Path" in the "System variables" box, then click "Edit" and 
-      add your Visual C++ .Net path (For example, 
+
+      On the "Advanced" tab, click "Environment Variables", click
+      "Path" in the "System variables" box, then click "Edit" and
+      add your Visual C++ .Net path (For example,
       C:\Program Files\Microsoft Visual Studio .NET 2003\Common7\IDE)
-      into "Variable Value" and click "OK". 
-                                                                        
-   b. Set up path for external libraries and headers                     
-                                                                         
-    Skip this part if you don't want to use ANY compression features     
-    provided by HDF5.  Please do read Section V.                         
-                                                                         
-    You have to read this part even if you want to only use Zlib         
-    or Szip.  You also need to read Section V.                           
-                                                                         
-    Invoke Microsoft Visual C++ .Net and go to "Tools" and select             
+      into "Variable Value" and click "OK".
+
+   b. Set up path for external libraries and headers
+
+    Skip this part if you don't want to use ANY compression features
+    provided by HDF5.  Please do read Section V.
+
+    You have to read this part even if you want to only use Zlib
+    or Szip.  You also need to read Section V.
+
+    Invoke Microsoft Visual C++ .Net and go to "Tools" and select
     "Options". In the left pane of  "Option" window poped up,
     choose and extend "Projects", Click on "VC++ Directories".
-    In the right pane, Find the box "Show directories for", choose                          
-    "Include files", if you can not find your Zlib and Szip              
-    header path                                                          
-    (for example, c:\zlib122\include, c:\szip\include)                   
-    from the directory list, add the header path                         
-    (c:\zlib122\include, c:\szip\include) to the                         
-    included directories.                                                
-                                                                         
-    Find the box "Show directories for", choose "Library files",         
-    If you cannot find your Zlib and Szip library path                   
-    (for example, c:\zlib122\lib, c:\szip\dll)                           
-    from the directory list, add the library path                        
-    (c:\zlib122\lib, c:\szip\dll) to the library directories.            
+    In the right pane, Find the box "Show directories for", choose
+    "Include files", if you can not find your Zlib and Szip
+    header path
+    (for example, c:\zlib122\include, c:\szip\include)
+    from the directory list, add the header path
+    (c:\zlib122\include, c:\szip\include) to the
+    included directories.
+
+    Find the box "Show directories for", choose "Library files",
+    If you cannot find your Zlib and Szip library path
+    (for example, c:\zlib122\lib, c:\szip\dll)
+    from the directory list, add the library path
+    (c:\zlib122\lib, c:\szip\dll) to the library directories.
 
 1. Open all.dsw workspace
-   
-   Invoke Microsoft Visual C++ .Net 2003.  From the main        
-   menu, go to "File" and select "Open Solution". In            
-   the "Open Solution" window, Change "Files of type" to        
-   "All Project Files". Choose "all.dsw" under the directory    
-   c:\MyHDFstuff\hdf5\windows\proj\all. In the pop up window,   
-   choose "Yes To All" to convert all project files to Visual  
-   C++ .Net project format.                                     
-   
-2. Building HDF5 C and C++ Libraries 
 
-   Users can choose the desirable libraries to be built according
-   to the following description.
-   
-   2.1 If you don't want to build HDF5 C++ Libraries,                          
-   Go to "Build" and select "Configuration Manager". Choose "Release"      
-   or "Debug" under "Active Solution Configuration"                        
-                                                                           
-   Disable the following projects:                                         
-                                                                           
-        dsets_cpp                                                          
-        dsets_cppdll                                                       
-        hdf5_cpp                                                           
-        hdf5_cppdll                                                        
-        testhdf5_cpp                                                       
-        testhdf5_cppdll                                                    
-        hdf5_hl_cpp          
-        hdf5_hl_cppdll                                              
-        hl_test_table_cpp
-        hl_test_table_cppdll
-        ttsafedll
-   
-   Click on "OK", From the main menu, choose "Build"-> "Build" or  
-   "Rebuild ALL" to build both release and debug version of HDF5   
-   Libraries.                                                      
-                                                                           
-   2.2 If you don't want to build HDF5 Fortran Libraries,                      
-   Go to "Build" and select "Configuration Manager". Choose "Release"      
-   or "Debug" under "Active Solution Configuration"                        
-                                                                           
-   Disable the following projects:                                         
-                                                                           
-        flush1_fortran                                                     
-        flush1_fortrandll                                                  
-        flush2_fortran                                                     
-        flush2_fortrandll                                                  
-        hdf5_f90cstub                                                      
-        hdf5_f90cstubdll                                                   
-        hdf5_fortran                                                       
-        hdf5_fortrandll                                                    
-        libtest_cstubdll                                                   
-        libtest_fortran                                                    
-        libtest_fortrandll                                                 
-        testhdf5_fortran                                                   
-        testhdf5_fortrandll                                                
+   Invoke Microsoft Visual C++ .Net 2003.  From the main
+   menu, go to "File" and select "Open Solution". In
+   the "Open Solution" window, Change "Files of type" to
+   "All Project Files". Choose "all.dsw" under the directory
+   c:\MyHDFstuff\hdf5\windows\proj\all. In the pop up window,
+   choose "Yes To All" to convert all project files to Visual
+   C++ .Net project format.
+
+2. Building HDF5 C and C++ Libraries
+
+   2.1 Disable project files not relevant to C and C++.
+
+   Go to "Build" and select "Configuration Manager". Choose "Release"
+   or "Debug" under "Active Solution Configuration"
+
+   Disable the following projects:
+
+        flush1_fortran
+        flush1_fortrandll
+        flush2_fortran
+        flush2_fortrandll
+        hdf5_f90cstub
+        hdf5_f90cstubdll
+        hdf5_fortran
+        hdf5_fortrandll
+        libtest_cstubdll
+        libtest_fortran
+        libtest_fortrandll
+        testhdf5_fortran
+        testhdf5_fortrandll
         hdf5_hl_fortran
         hdf5_hl_f90cstubdll
-        hdf5_hl_fortrandll                                                            
+        hdf5_hl_fortrandll
         hl_test_image_fortran
-        hl_test_image_fortrandll                                                     
-        hl_test_lite_fortran                                               
+        hl_test_image_fortrandll
+        hl_test_lite_fortran
         hl_test_lite_fortrandll
-        hl_test_table_fortran	                                           
+        hl_test_table_fortran
         hl_test_table_fortrandll
         ttsafedll
-                                                                           
-   Click on "OK", From the main menu, choose "Build"-> "Build" or  
-   "Rebuild ALL" to build both release and debug version of HDF5   
-   Libraries.                                                      
-   
-   2.3 If you don't want to build HDF5 High-Level Libraries,                   
-   Go to "Build" and select "Configuration Manager". Choose "Release"      
-   or "Debug" under "Active Solution Configuration"                        
-                                                                           
-   Disable the following projects:                                         
-                                                                           
-        hdf5_hl 
-        hdf5_hldll                                                           
-        hl_test_image                                                      
-        hl_test_imagedll
-        hl_test_lite                                                       
-        hl_test_litedll
-        hl_test_table                                                      
-        hl_test_tabledll
-        hl_test_ds                                                         
-        hl_test_dsdll
-        hl_test_packet                                                     
-        hl_test_packetdll
-        ttsafedll
-                                                                           
-   Click on "OK", From the main menu, choose "Build"-> "Build" or  
-   "Rebuild ALL" to build both release and debug version of HDF5   
-   Libraries.                                                      
-   
-   2.4 If you want to build HDF5 C++ libarty without High-Level                
-   C++ Libraries, Go to "Build" and select "Configuration Manager".        
-   Choose "Release" or "Debug" under "Active Solution Configuration"       
-                                                                           
-   Disable the following projects:                                         
-                                                                           
-        hdf5_hl_cpp
-        hdf5_hl_cppdll                                                        
-        hl_test_table_cpp             
-        hl_test_table_cppdll
-        ttsafedll
-   
-   Click on "OK", From the main menu, choose "Build"-> "Build" or  
-   "Rebuild ALL" to build both release and debug version of HDF5   
-   Libraries.                                                                                           
-                                                                           
-   2.5 If you want to build HDF5 Fortran Libraries without High-Level          
-   Fortran Libraries, Go to "Build" and select "Configuration Manager".    
-   Choose "Release" or "Debug" under "Active Solution Configuration".      
-                                                                           
-   Disable the following projects:                                         
-                                                                           
-        hdf5_hl_fortran
-        hdf5_hl_f90cstubdll
-        hdf5_hl_fortrandll                                                            
-        hl_test_image_fortran
-        hl_test_image_fortrandll                                                     
-        hl_test_lite_fortran                                               
-        hl_test_lite_fortrandll
-        hl_test_table_fortran	                                           
-        hl_test_table_fortrandll    
-        ttsafedll                                          
-   
-   Click on "OK", From the main menu, choose "Build"-> "Build" or 
+
+   Click on "OK",
+
+   2.2.1 Building HDF5 C and C++ Libraries
+
+   From the main menu, choose "Build"-> "Build" or
    "Rebuild ALL" to build both release and debug version of HDF5
    Libraries.
 
-3. Testing HDF5 Libraries and Tools. 
 
-Go back to Section II, continue with STEP 2 (Testing HDF5 
+   2.2.2 If you don't want to build HDF5 C++ Libraries,
+   Go to "Build" and select "Configuration Manager". Choose "Release"
+   or "Debug" under "Active Solution Configuration"
+
+   Disable the following projects:
+
+        dsets_cpp
+        dsets_cppdll
+        hdf5_cpp
+        hdf5_cppdll
+        testhdf5_cpp
+        testhdf5_cppdll
+        hdf5_hl_cpp
+        hdf5_hl_cppdll
+        hl_test_table_cpp
+        hl_test_table_cppdll
+
+
+   Click on "OK", From the main menu, choose "Build"-> "Build" or
+   "Rebuild ALL" to build both release and debug version of HDF5
+   Libraries.
+
+
+
+   2.2.3 If you don't want to build HDF5 High-Level Libraries,
+   Go to "Build" and select "Configuration Manager". Choose "Release"
+   or "Debug" under "Active Solution Configuration"
+
+   Disable the following projects:
+
+        hdf5_hl
+        hdf5_hldll
+        hl_test_image
+        hl_test_imagedll
+        hl_test_lite
+        hl_test_litedll
+        hl_test_table
+        hl_test_tabledll
+        hl_test_ds
+        hl_test_dsdll
+        hl_test_packet
+        hl_test_packetdll
+
+
+   Click on "OK", From the main menu, choose "Build"-> "Build" or
+   "Rebuild ALL" to build both release and debug version of HDF5
+   Libraries.
+
+   2.2.4 If you want to build HDF5 C++ libarty without High-Level
+   C++ Libraries, Go to "Build" and select "Configuration Manager".
+   Choose "Release" or "Debug" under "Active Solution Configuration"
+
+   Disable the following projects:
+
+        hdf5_hl_cpp
+        hdf5_hl_cppdll
+        hl_test_table_cpp
+        hl_test_table_cppdll
+
+
+   Click on "OK", From the main menu, choose "Build"-> "Build" or
+   "Rebuild ALL" to build both release and debug version of HDF5
+   Libraries.
+
+   2.5 If you want to build HDF5 Fortran Libraries without High-Level
+   Fortran Libraries, Go to "Build" and select "Configuration Manager".
+   Choose "Release" or "Debug" under "Active Solution Configuration".
+
+   Disable the following projects:
+
+        hdf5_hl_fortran
+        hdf5_hl_f90cstubdll
+        hdf5_hl_fortrandll
+        hl_test_image_fortran
+        hl_test_image_fortrandll
+        hl_test_lite_fortran
+        hl_test_lite_fortrandll
+        hl_test_table_fortran
+        hl_test_table_fortrandll
+        ttsafedll
+
+   Click on "OK", From the main menu, choose "Build"-> "Build" or
+   "Rebuild ALL" to build both release and debug version of HDF5
+   Libraries.
+
+3. Testing HDF5 Libraries and Tools.
+
+Go back to Section II, continue with STEP 2 (Testing HDF5
 libraries and tools) to test HDF5 C and C++ Libraries.
-  
+
 4. If you want to change some project setting, select the project and
    right click the button to choose Properties; find the similar menu
    there as in Microsoft Visual Studio 6.0.
-   
+
 NOTE:  Please read Section V if you do not want to use compression
        feature inside HDF5.
-             
-======================================================================== 
-          Section VII: How to build HDF5 with INTEL Compiler    
-======================================================================== 
-Notes:  1. For Intel Compiler users, Intel 7.x works with MSVS 6.0 and
-           Intel 8.1 only works with MSVS .net 2003 when you build 
-           HDF5-1.8.x.
-              
-        2. HDF5 Fortran DLL Libraries is not supported with Intel 
-           Fortran 8.1 integration with Visual C++ .Net 2003 
-           Environment. But Release version of HDF5 Fortran DLL 
-           libraries works with Intel Fortran Compiler while Debug 
-           version doesn't. 
-              
-        3. Szip library is different when using Intel compiler.
-           You should build Szip source codes with Inter compiler or 
-           download binaries for Intel compiler from 
-           ftp://ftp.hdfgroup.org/lib-external/szip/2.0/bin/windows.
+
+========================================================================
+          Section VII: How to build HDF5 with Intel Fortran 9.1
+========================================================================
+Notes:  1. For Intel Compiler users, Intel fortran Compiler 9.1 is currently
+        supported-- please see below.  Intel Compiler verion
+        7.x and 8.x are no longer supported, but documentation can
+        still be found on the web at 
+        http://hdfgroup.org/windows/docs/hdf518/dep/Install_Windows_Dep_Intel.txt
+
+        2. The Compaq Fortran Compiler is no longer supported for HDF5 1.8.
+
+        3. Intel Fortran 9.1 works only under .Net 2003 or Visual Studio 2005
+        environments
         
-        4. Run hdf5/windows/copy_hdf.bat first before open all.dsw. 
+        4. For Visual Studio 2005 users, parallel builds should be disabled.  To
+        do so: Go to  Tools > Options > Projects and Solutions > Build and Run. 
+        Set "maximum number of parallel project builds" to 1.
+        
 
-1. INTEL compiler 7.1
-
-     1.1. Intel C Compiler
-          Go to Tools-->Select Compiler
-          Check Intel box and click OK button.
-          
-     1.2. Intel Fortran Compiler
-          Go to Tools-->Select Compiler
-          Check Intel box and click OK button.
-          Go to Tools-->Customize-->Add-ins and Macro Files
-          and check Intel Fortran Compiler Build Tool
-           
-2. INTEL compiler 8.1   
 
   Preconditions:
-     
-     a. Setup Szip Library for Intel Compiler. 
-     
+
+     a. Setup Szip Library for Intel Compiler.
+
      Intel compilers use different Szip library from other compilers.
      Szip source codes or binaries for Intel compiler can be downloaded
      from the following address:
-     
-     ftp://ftp.hdfgroup.org/lib-external/szip/2.0/bin/windows. 
-         
+
+     ftp://ftp.hdfgroup.org/lib-external/szip/2.0/bin/windows.
+
      b. Set up path for external libraries and headers
-    
+
       Skip this part if you don't want to use ANY compression features
-      provided by HDF5.  Please do read Section V.
+      provided by HDF5.  Instead, read Section V.
 
-      You have to read this part even if you want to only use Zlib
+      You have to read this part even if you want to use only Zlib
       or Szip.  You also need to read Section V.
-      
-      Invoke Microsoft Visual C++ .Net 2003.  From the main 
-      menu, Go to Tools > Options > Intel C++. In the left pane,
-      Click on "Intel C++ 8.1" to set the directories and default 
-      options. In "Include", Add Zlib and Szip header path
-      (c:\zlib122\include c:\szip\include). In "Library", Add Zlib and
-      Szip Library Path (c:\zlib122\lib, c:\szip\dll). Then click "OK".
 
-   2.1 Intel C++ Compiler 8.1 under MSVS C++ .Net 2003 Environment
-			
-      Notes: This step will build ONLY HDF5 Static and DLL C and C++ 
-            Library using Intel C++ Compiler.
-          
-      If you want to build HDF5 Static and DLL C and C++ Library 
-      using Intel C++ 8.1 Compiler as well as HDF5 Static Fortran 
-      Library using Intel Fortran 8.1 Compiler, Please go to 2.2 
-      directly!
-          
-      2.1.1 Open all.dsw and Convert Project Files to Visual
-            C++ .Net Format
- 
-      Invoke Microsoft Visual C++ .Net 2003.  From the main 
-      menu, go to "File" and select "Open Solution". In
-      the "Open Solution" window, Change "Files of type" to
-      "All Project Files". Choose "all.dsw" under the directory
-      c:\MyHDFstuff\hdf5\windows\proj\all. In the pop up window,
-      choose "Yes To All" to convert all project files to Visual
-      C++ .Net project format.
-          	
-      2.1.2 Convert to Use Intel C++ Project System
-      
-      Right click on the solution name "all.sln" in the 
-      "Solution Explorer". From the pop-up menu select 
-      "Convert to use Intel C++ Project System" to convert 
-      all .Net project files to Intel C++ project files. 
-	                        
-      2.1.3 Choose Intel Compiler 
-     
-      Go to Tools > Options,  In the left pane, choose
-      "Intel C++", click "General". In the right pane, under 
-      "Compiler selection", choose "Intel C++ 8.1", then click "OK".
-         
-      2.1.4 Building HDF5 C and C++ Libraries and Tools
+      Invoke Microsoft Visual C++ .Net 2003 or 2005.  From the main
+      menu, Go to Tools > Options > Intel(R) Fortran.
+      In the right panel, make sure your "Selected Compiler" is Intel Fortran 9.1.
+      Click the right-most box for "Libraries",
+      Add Zlib and Szip Library Path (c:\zlib122\lib, c:\szip\dll for example)
+      Click rightmost box for "Includes",
+      Add Zlib and Szip header path (c:\zlib122\include c:\szip\include, for example).
+      Then click "OK".
 
-      Select "Build", then Select "Set Active Configuration".
-	       			
-      Select "all -- Win32 Debug" or "all -- Win32 Release"
-    	        
-      Disable all Fortran project files listed below and ttsafedll 
-      project files:
-               
-        flush1_fortran                                                     
-        flush1_fortrandll                                                  
-        flush2_fortran                                                     
-        flush2_fortrandll                                                  
-        hdf5_f90cstub                                                      
-        hdf5_f90cstubdll                                                   
-        hdf5_fortran                                                       
-        hdf5_fortrandll                                                    
-        libtest_cstubdll                                                   
-        libtest_fortran                                                    
-        libtest_fortrandll                                                 
-        testhdf5_fortran                                                   
-        testhdf5_fortrandll                                                
-        hdf5_hl_fortran
-        hdf5_hl_f90cstubdll
-        hdf5_hl_fortrandll                                                            
+      
+  1. Build with Intel Fortran Compiler 9.1 under MSVS C++ .Net 2003 / 2005 Environment
+
+      Note: This step will build HDF5 Static and DLL C and C++
+            Library using .Net 2003 or Visual Studio 2005 Compiler as well as
+            HDF5 Static and High Level Fortran Library using Intel
+            Fortran 9.1 Compiler.
+
+
+      1.1 Open all.dsw and Convert Project Files (.dsp) to Visual
+            C++ .Net Format (.vcproj)
+
+              Invoke Microsoft Visual C++ .Net 2003.  From the main menu, go to
+              "File" and select "Open Solution". In the "Open Solution" window,
+              Change "Files of type" to "All Project Files". Choose "all.dsw"
+              under the directory c:\MyHDFstuff\hdf5\windows\proj\all. In the
+              pop up window, choose "Yes To All" to convert all project files
+              to Visual C++ .Net project format.
+
+      1.2 Extract Compaq Fortran Project Files
+
+       a. Select project "flush1_fortran" in the Solution Explorer
+       window. In the Project menu, select
+       "Extract Compaq Visual Fortran Project".
+
+       Do the same thing for the following project files, but for now, skip
+       the projects labelled "**SKIP**":
+
+        flush1_fortrandll
+        flush2_fortran
+        flush2_fortrandll
+        hdf5_fortran
+        hdf5_fortrandll
+        **SKIP** libtest_fortran
+        libtest_fortrandll
+        testhdf5_fortran
+        testhdf5_fortrandll
+        **SKIP** hdf5_hl_fortran
+        hdf5_hl_fortrandll
         hl_test_image_fortran
-        hl_test_image_fortrandll                                                     
-        hl_test_lite_fortran                                               
-        hl_test_lite_fortrandll
-        hl_test_table_fortran	                                           
-        hl_test_table_fortrandll
-        ttsafedll
-    	        
-      Select "ok". Select "Build" -> "Build" or "Rebuild All" to
-      build debug version of project "all".   			
-   	     
-      2.1.5 Testing HDF5 C and C++ Libraries and Tools
-      Go back to Section II, continue with STEP 2(Testing HDF5 
-      libraries and tools) to test HDF5 C and C++ Libraries.
-       
-  2.2 Intel Fortran Compiler 8.1 under MSVS C++ .Net 2003 Environment
-       
-      Note: This step will build HDF5 Static and DLL C and C++ 
-            Library using Intel C++ 8.1 Compiler as well as HDF5 
-            Static and High Level Fortran Library using Intel 
-            Fortran 8.1 Compiler. 
-             
-            Users who want to build ONLY HDF5 Static and DLL C and C++ 
-            LibraryPlease go to 2.1.
-          
-      2.2.1 Open all.dsw and Convert Project Files (.dsp) to Visual 
-            C++ .Net Format (.vcproj) 
- 
-      Invoke Microsoft Visual C++ .Net 2003.  From the main menu, go to
-      "File" and select "Open Solution". In the "Open Solution" window,
-      Change "Files of type" to "All Project Files". Choose "all.dsw" 
-      under the directory c:\MyHDFstuff\hdf5\windows\proj\all. In the 
-      pop up window, choose "Yes To All" to convert all project files 
-      to Visual C++ .Net project format.
-         
-      2.2.2 Extract Compaq Fortran Project Files
-      
-       a. Select project "flush1_fortran" in the Solution Explorer 
-       window. In the Project menu, select 
-       "Extract Compaq Visual Fortran Project". 
-         		
-       Do the same thing for the following project files:
-         		
-       	flush2_fortran
-       	hdf5_fortran
-       	testhdf5_fortran
-       	hl_test_image_fortran
+        hl_test_image_fortrandll
         hl_test_lite_fortran
+        hl_test_lite_fortrandll
         hl_test_table_fortran
-         				       
-       b. Select project "libtest_fortran" in the Solution 
-       Explorer window. In the Project menu, select 
-       "Extract Compaq Visual Fortran Project". Since Project 
-       file "libtest_fortran" contain both C and Fortran code, 
-       you will be asked to specify which project, either 
-       Fortran or C/C++, will serve as the main project for 
-       this mixed language projects. Choose 
-       "The Intel Fortran project" as the the main project and 
-       click "OK". 
+        hl_test_table_fortrandll
+
+
+       b. Select project "libtest_fortran" in the Solution
+       Explorer window. In the Project menu, select
+       "Extract Compaq Visual Fortran Project". Since Project
+       file "libtest_fortran" contain both C and Fortran code,
+       you will be asked to specify which project, either
+       Fortran or C/C++, will serve as the main project for
+       this mixed language projects. Choose
+       "The Intel Fortran project" as the the main project and
+       click "OK".
 
        Do the same thing for hdf5_hl_fortran.
+
+      1.3 Change project dependencies
+
+
+      To check the project dependencies:
       
-      2.2.3 Change project dependencies of "libtest_fortran" and
-      "hdf5_hl_fortran"
-               
-      Highlight project "libtest_fortran", choose tab "Project"->
-      "Project Dependencies", uncheck "libtest".
+      Right click the selected project, you should see "Project Dependencies" on the menu,
+      click "Project Dependencies", You should see a "Project Dependencies" panel, with
+      the selected project and the projects it depends on checked under "Depends on" list.
 
-      Highlight project "hdf5_hl_fortran", choose tab "Project"->
-      "Project Dependencies", uncheck "hdf5_fortran" and "hdf5_hl".
+      Make sure all intel fortran projects have their corrsponding dependencies as follows:
 
-               
-      2.2.4 Convert to Use Intel C++ Project System
+      hdf5_fortran:             hdf5,                 hdf5_f90cstub
 
-      Right click on the solution name "all.sln" in the 
-      "Solution Explorer". From the pop-up menu select 
-      "Convert to use Intel C++ Project System" to convert 
-      all .Net C++ project files to Intel C++ project formats. 
-	      
-      2.2.5 Building HDF5 C/C++/Static Fortran Libraries and Tools
-	
-      Select "Build", then Select "Set Active Configuration".
-	             
-      Select "all -- Win32 Debug" or "all -- Win32 Release"
-    	        
-      Disable all Fortran DLL project files listed below and ttsafedll
-      project file:
-			            
-       flush1_fortrandll
-       flush2_fortrandll
-       hdf5_fortrandll
-       hdf5_hl_fortrandll
-       hl_test_image_fortrandll
-       hl_test_lite_fortrandll
-       hl_test_table_fortrandll
-       libtest_fortrandll
-       testhdf5_fortrandll
-       ttsafedll
-			                	        
+      hdf5_fortrandll:          hdf5dll,              hdf5_f90cstubdll
+
+      libtest_fortran:          libtest,              libtest_fotran_lib
+
+      libtest_fortrandll:       libtest_cstubdll,     libtestD
+
+      hdf5_hl_fortran:          hdf5,                 hdf5_f90cstub,
+                                hdf5_fortran,         hdf5_hl,
+                                hdf5_hl_fortran_lib
+
+      hdf5_hl_fortrandll:       hdf5dll,              hdf5_hldll,
+                                hdf5_hl_f90cstubdll,  hdf5_fortrandll,
+                                hdf5_f90cstubdll
+
+
+      flush1_fortran:           hdf5,                 hdf5_f90cstub,
+                                hdf5_fortran,         libtest,
+                                libtest_fortran,      libtest_fortran_lib
+                                
+      flush1_fortrandll:        hdf5_f90cstubdll,     hdf5_fortrandll,
+                                hdf5dll,              libtest_fortrandll
+                                libtest_cstubdll,     libtestD
+
+      flush2_fortran:           hdf5,                 hdf5_f90cstub,
+                                hdf5_fortran,         libtest,
+                                libtest_fortran,      libtest_fortran_lib
+
+      flush2_fortrandll:        hdf5_f90cstubdll,     hdf5_fortrandll,
+                                hdf5dll,              libtest_fortrandll
+                                libtest_cstubdll,     libtestD
+                                
+      testhdf5_fortran:         hdf5,                 hdf5_f90cstub,
+                                hdf5_fortran,         libtest,
+                                libtest_fortran,      libtest_fortran_lib
+
+      testhdf5_fortrandll:      hdf5_f90cstubdll,     hdf5_fortrandll,
+                                hdf5dll,              libtest_fortrandll
+                                libtest_cstubdll,     libtestD
+
+
+
+      hl_test_image_fortran:    hdf5,                 hdf5_f90cstub,
+                                hdf5_fortran,         hdf5_hl,
+                                hdf5_hl_fortran,      hdf5_hl_fortran_lib
+
+      hl_test_image_fortrandll: hdf5dll,              hdf5_hldll,
+                                hdf5_f90cstubdll,     hdf5_fortrandll,
+                                hdf5_hl_f90cstubdll,  hdf5_hl_fortrandll
+      
+      hl_test_lite_fortran:     hdf5,                 hdf5_f90cstub,
+                                hdf5_fortran,         hdf5_hl,
+                                hdf5_hl_fortran,      hdf5_hl_fortran_lib
+
+      hl_test_lite_fortrandll:  hdf5dll,              hdf5_hldll,
+                                hdf5_f90cstubdll,     hdf5_fortrandll,
+                                hdf5_hl_f90cstubdll,  hdf5_hl_fortrandll
+
+      hl_test_table_fortran:    hdf5,                 hdf5_f90cstub,
+                                hdf5_fortran,         hdf5_hl,
+                                hdf5_hl_fortran,      hdf5_hl_fortran_lib
+      
+      hl_test_table_fortrandll:hdf5dll,               hdf5_hldll,
+                               hdf5_f90cstubdll,      hdf5_fortrandll,
+                               hdf5_hl_f90cstubdll,   hdf5_hl_fortrandll
+
+
+
+      1.4 Building HDF5 C/C++/Fortran Libraries and Tools
+
+      Select "Build", then Select "Configuration Manager".
+
+      Select "Debug" or "Release"
+
+      Disable ttsafedll
+
+
       Select "ok". Select "Build" -> "Build" or "Rebuild All" to
-      build Debug or Release version of HDF5 C, C++ Static and DLL 
-      Library using Intel C++ 8.1 Compiler and HDF5 Static and High
-      Level static Fortran Library using Intel Fortran 8.1 compiler.
-    	         
-      2.2.6 Test HDF5 Static and High Level Fortran Library
-    	
-      a. Test HDF5 Static Fortran Library
-    	
-      Go to directory c:\myHDFstuff\hdf5\fortran\test, Run batch file
-      testhdf5_fortran.bat with the following two options to test
-      fortran static library 
-    	   
-    	   testhdf5_fortran release >> "Your output file name"
-    	   testhdf5_fortran debug   >> "Your output file name"
-    	   
-      Check your output files, there should be no "failures" at all.
-    	           	            	   
-      b. Test HDF5 High Level Fortran Library
-      
-      Go to directory c:\myHDFstuff\hdf5\hl\fortran\test, Run batch file
-      testhdf5_fortran.bat with the following two options to test
-      fortran static library 
-    	   
-    	   test_hdf5_hl_fortran release >> "Your output file name"
-    	   test_hdf5_hl_fortran debug   >> "Your output file name"
-    	   
-      Check your output files, there should be no "failures" at all.
- 
- 
+      build Debug or Release version of HDF5 C, C++, fortran
+      Library using Intel fortran 9.1 Compiler with .Net 2003 or .Net 2005.
+
+
+  2. Test HDF5 Static and High Level Fortran Library
+
+    We provide 2 options for users to test HDF5 libraries and tools.
+
+       Option 1: Automatic testings
+
+       HDF5 comes with various test suites, all of which can be tested
+       with hdf5check.bat batch file in c:\MyHDFstuff\hdf5 directory.
+
+       hdf5check batch file can used to test HDF libraries with Fortran with
+       the following options:
+
+          hdf5check enablefortran    test HDF5 C/FORTRAN libraries and
+                                     tools
+
+
+          hdf5check enableall        test HDF5 C/C++/FORTRAN libraries
+                                     and tools
+                                     To use this option, HDF5 C++ and
+                                     Fortran libraries must have been
+                                     built.
+
+       Invoke a command prompt window and run hdf5check with appropriate
+       option.
+
+       Test results are saved in two files:
+
+          c:\MyHDFstuff\hdf5\check_results.txt
+
+          c:\MyHDFstuff\hdf5\tests_results.txt.
+
+       In general, you only need to check tests_results.txt.  If all the
+       tests passed, then you do not have to check check_results.txt.
+       If some tests failed, check check_results.txt can help you
+       figure out what was wrong.
+
+       
+       Option 2: Step-by-step HDF5 libraries and tools testings
+
+       Note: This section provides step-by-step instructions for testing the
+       Fortran librariy and tools only.  To test the rest of the HDF5 library
+       and tools, please see Section II, Step 2.
+       
+       
+       a. Test HDF5 Static Fortran Library
+
+       Go to directory c:\myHDFstuff\hdf5\fortran\test, Run batch file
+       testhdf5_fortran.bat with the following two options to test
+       fortran static library
+
+         testhdf5_fortran release >> "Your output file name"
+         testhdf5_fortran debug   >> "Your output file name"
+
+       Check your output files, there should be no "failures" at all.
+
+       b. Test HDF5 High Level Fortran Library
+
+       Go to directory c:\myHDFstuff\hdf5\hl\fortran\test, Run batch file
+       testhdf5_fortran.bat with the following two options to test
+       fortran static library
+
+            test_hdf5_hl_fortran release >> "Your output file name"
+            test_hdf5_hl_fortran debug   >> "Your output file name"
+
+       Check your output files, there should be no "failures" at all.
+
+
+  3. (Optional) Build HDF5 Fortan and HL Fortran Examples
+  
+        Note: This section only covers building Fortran and HL Fortran examples.
+        For other examples, please see Section III.
+        
+        To build and test HDF5 Fortran example:
+        ---------------------------------------
+
+           1. Invoke the Intel Fortran Compiler 9.1 or above under Microsoft
+              Visual Studio development environment, go to "File" and select
+              the "Open Workspace" option.
+
+              Then open the workspace
+              c:\MyHDFstuff\hdf5\windows\fortran\examples\allf90examples\allf90examples.dsw.
+
+           2. Select "Build", then Select "Set Active Configuration".
+
+            2.1 To build debug versions of Fortran examples.
+
+                In "Project configurations", select "allf90examples -- Win32 Debug",
+                select "ok". Select "Build" -> "Build" or "Rebuild All" to
+                build debug version of project "allf90examples".
+
+            2.2 To build release versions of Fortran examples.
+
+                In "Project configurations", select "allf90examples -- Win32 Release",
+                select "ok". Select "Build" -> "Build" or "Rebuild All" to
+                build release version of project "allf90examples".
+
+           When the debug build or release build is done, there should be the
+           following subdirectories in c:\MyHDFstuff\hdf5\fortran\examples\
+
+                  attreexampletest
+                  attreexampletestdll
+                  compoundtest
+                  compoundtestdll
+                  dsetexampletest
+                  dsetexampletestdll
+                  fileexampletest
+                  fileexampletestdll
+                  groupexampletest
+                  groupexampletestdll
+                  grpdsetexampletest
+                  grpdsetexampletestdll
+                  grpittest
+                  grpittestdll
+                  grpsexampletest
+                  grpsexampletestdll
+                  hyperslabtest
+                  hyperslabtestdll
+                  mountexampletest
+                  mountexampletest
+                  refobjexampletest
+                  refobjexampletestdll
+                  refregexampletest
+                  refregexampletestdll
+                  rwdsetexampletest
+                  rwdsetexampletestdll
+                  selecteletest
+                  selecteletestdll
+
+           3. Invoke a command prompt window and run the batch file
+              Installf90Examples.bat which resides in the top level directory
+              (c:\MyHDFstuff\hdf5).  This file creates 4 new directories,
+              f90examplesREL, f90examplesRELDLL, f90examplesDBG, and
+              f90examplesDBGDLL, in the c:\MyHDFstuff\fortran\examples directory
+              and places all the executables in it.  Both the release and debug
+              versions of the examples should be built before this step is done.
+              
+              
+        To build and test HDF5 High Level Fortran examples:
+        ---------------------------------------------------
+
+           1. Invoke Compaq Visual Fortran 6.6c, open the workspace
+
+            c:\MyHDFstuff\hdf5\windows\hl\fortran\examples\ (continue next line)
+              allhlf90examples\allhlf90examples.dsw
+
+           2. Select "Build", then Select "Set Active Configuration".
+
+               2.1 To build debug versions of High Level Fortran examples.
+                   In "Project configurations", select
+                   "allhlf90examples -- Win32 Debug", select "ok". Select
+                   "Build" -> "Build" or "Rebuild All" to build debug version
+                   of project "allhlf90examples".
+
+               2.2 To build release versions of Fortran examples.
+                   In "Project configurations", select
+                   "allhlf90examples -- Win32 Release", select "ok". Select
+                   "Build" -> "Build" or "Rebuild All" to build release version
+                   of project "allhlf90examples".
+
+              When the debug build or release build is done, there should be the
+              following subdirectories in c:\MyHDFstuff\hdf5\hl\fortran\examples
+
+                  ex_lite
+                  ex_litedll
+
+        3. Invoke a command prompt window and run the batch file
+              Install_hlf90examples.bat which resides in the top level directory
+              (c:\MyHDFstuff\hdf5).  This file creates 4 new directories,
+              HLf90examplesRELEASE, HLf90examplesRELEASEDLL, HLf90examplesDEBUG,
+              and HLf90examplesDEBUGDLL, in the
+              c:\MyHDFstuff\hdf5\hl\fortran\examples directory and places all
+              the executables in it. Both the release
+              and debug versions of the examples should be built before this
+              step is done.
+
+           4. We provide a batch file named test_hl_f90examples.bat in
+              c:\MyHDFstuff\hdf5\hl\fortran\examples directory for you to test
+              HDF5 high level fortran examples.
+
+              test_hl_f90examples.bat batch file has 4 options:
+
+                 Options                          purpose
+
+                 test_hl_f90examples release      -- for release version
+
+                 test_hl_f90examples release dll  -- for release DLL version
+
+                 test_hl_f90examples debug        -- for debug version
+
+                 test_hl_f90examples debug dll    -- for debug DLL version
+
+              Invoke a command prompt window and run test_hl_f90examples with
+              appropriate options.
+
+              When you run "test_hl_f90examples release", the output will look
+              like:
+
+                  release  version of High Level Fortran examples     PASSED
+
+              Similar messages should be generated with another three options
+              If the high level Fortran examples are built successfully.
+
 ========================================================================
-   Section VIII : How to build Multi-threaded version of HDF5 library  
+   Section VIII : How to build Multi-threaded version of HDF5 library
 ========================================================================
 
-Notes: Preconditions and Section I also apply to this section. Users who 
-       want to build Multi-threaded version of HDF5 library, please read 
+Notes: Preconditions and Section I also apply to this section. Users who
+       want to build Multi-threaded version of HDF5 library, please read
        those two sections carefully before go to the following part.
-              
+
 1. Run batch file copy_hdf.bat.
 
    Go to  c:\MyHDFstuff\hdf5\windows and run copy_hdf.bat. This
-   process will copy all the necessary batch files,windows specific 
-   source codes and text files saved under c:\MyHDFstuff\hdf5\windows 
+   process will copy all the necessary batch files,windows specific
+   source codes and text files saved under c:\MyHDFstuff\hdf5\windows
    directory to the corresponding directories under hdf5.
-  
+
 2. Invoke Microsoft Visual C++ compiler
-    
+
    Invoke Microsoft Visual C++.  From the main menu, go to "File"
    and select the "Open Workspace" option. Then open the
-   c:\MyHDFstuff\hdf5\windows\proj\all\all.dsw workspace. 
+   c:\MyHDFstuff\hdf5\windows\proj\all\all.dsw workspace.
 
-   You should find windows project files listed as "all files, 
-   big files etc." on the left.        
+   You should find windows project files listed as "all files,
+   big files etc." on the left.
 
-3. Please refer to Section II, Step 3(3) to set the dependencies of 
+3. Please refer to Section II, Step 3(3) to set the dependencies of
    project "all.dsp".
 
 4. Change Project settings
 
-   Choose "Project"->"Settings", 
-   In the left pane of the window "Project Settings",  from the drop 
-   down box to the right of "Setting For:", choose "Win32 Release"; 
-   Highlight all of the static project file in the left lower pane 
+   Choose "Project"->"Settings",
+   In the left pane of the window "Project Settings",  from the drop
+   down box to the right of "Setting For:", choose "Win32 Release";
+   Highlight all of the static project file in the left lower pane
    by pressing "ctrl" key while clicking the project file name.
-     
+
    In the right pane of the "Project Settings" window, choose "C/C++".
-   From the drop down box to the right of "Category",  choose 
-   "Code Generation", under "Use run-time library:", 
+   From the drop down box to the right of "Category",  choose
+   "Code Generation", under "Use run-time library:",
    "Single-Threaded" should appear. If it is blank inside this
-   box, check if you highlight some dll project files. Change 
+   box, check if you highlight some dll project files. Change
    "Single-Threaded" to "Multithreaded".
-    
-   In the left pane of the window "Project Settings",  from the drop 
-   down box to the right of "Setting For:", choose "Win32 Debug"; 
-   Highlight all of the static project file in the left lower pane 
+
+   In the left pane of the window "Project Settings",  from the drop
+   down box to the right of "Setting For:", choose "Win32 Debug";
+   Highlight all of the static project file in the left lower pane
    by pressing "ctrl" key while clicking the project file name.
-     
+
    In the right pane of the "Project Settings" window, choose "C/C++".
-   From the drop down box to the right of "Category",  choose 
-   "Code Generation", under "Use run-time library:", 
-   "Debug Single-Threaded" should appear. If it is blank inside this 
+   From the drop down box to the right of "Category",  choose
+   "Code Generation", under "Use run-time library:",
+   "Debug Single-Threaded" should appear. If it is blank inside this
    box, check if you highlight some dll project files. Change
    "Debug Single-Threaded" to "Debug Multithreaded"
-     
+
 5. Go back to Section II, Step 1 (4), continue to build and test HDF5 library.
-      	
+      
 
 ========================================================================
         Section IX: Building and testing HDF5 snapshot release
 ========================================================================
 
-Note: This section is only for users who would like to build and test 
+Note: This section is only for users who would like to build and test
       HDF5 snapshot release.
-      
+
 Step I: Generate H5Tinit.c using Microsoft Visual C++ 6.0
 
-For users who would like to build and test HDF5 C and C++ library ONLY, 
-it is necessary to manually generate H5Tinit.c before going to 
-Section II step 1(2). Follow the steps below to generate H5Tinit.c 
-manually using Microsoft Visual C++ 6.0. We don't guarantee that 
+For users who would like to build and test HDF5 C and C++ library ONLY,
+it is necessary to manually generate H5Tinit.c before going to
+Section II step 1(2). Follow the steps below to generate H5Tinit.c
+manually using Microsoft Visual C++ 6.0. We don't guarantee that
 H5Tinit.c can be sucesessfully created by other compilers.
- 
+
  1. Previous step: Section II, step 1(1).
- 
+
  2. Extra steps:
     1) Open c:\myHDFstuff\hdf5\windows\misc\typegen\typegen.dsw.
-		
+
     2) Build the project file.
-		
+
     3) Invoke command prompt and go to c:\myHDFstuff\hdf5\src.
-		
+
     4) type H5Tinit.exe >H5Tinit.c
-		
+
     5) Go back to Section II, continue with step 1(2).
 
-Step II: Generate H5f90i_gen.h and H5fortran_types.f90 using Compaq 
+Step II: Generate H5f90i_gen.h and H5fortran_types.f90 using Compaq
          Visual Fortran 6.6c
-         
-Note: The users who don't want to build fortran library can skip 
+
+Note: The users who don't want to build fortran library can skip
       this step.
 
 For users who would like to build and test HDF5 with Fortran library.
-It is necessary to manually generate the following three files with 
+It is necessary to manually generate the following three files with
 the given compiler before go to Section II:
 
-       Files to be Generated    Compiler to be Used 
+       Files to be Generated    Compiler to be Used
 
        H5f90i_gen.h             Compaq Visual Fortran 6.6
        H5fortran_types.f90      Compaq Visual Fortran 6.6
        H5Tinit.c                Visual C++ 6.0
 
-We don't guarantee that these three files can be created successfully 
+We don't guarantee that these three files can be created successfully
 by other compilers.
- 
+
  1) Previous step: Section II, step 1(1)
 
  2) Follow the steps in Section X, Step I to generate H5Tinit.c.
 
- 3) Open and build H5fortran_detect_gen.dsw with Compaq Visual Fortran 
-    
-     Go to the following directory 
+ 3) Open and build H5fortran_detect_gen.dsw with Compaq Visual Fortran
+
+     Go to the following directory
      c:\myHDFstuff\hdf5\windows\misc\H5fortran_detect_gen
-     Open H5fortran_detect_gen.dsw with Compaq Visual Fortran and 
+     Open H5fortran_detect_gen.dsw with Compaq Visual Fortran and
      build the project file.
 
- 4) Invoke command prompt and go to c:\myHDFstuff\hdf5\fortran\src.                         
-    Type 
+ 4) Invoke command prompt and go to c:\myHDFstuff\hdf5\fortran\src.
+    Type
          H5fortran_detect_gen.exe > H5fortran_detect.f90
 
  5) Open and build fortrantypegen.dsw with Compaq Visual Fortran
 
-     Go to the following directory 
+     Go to the following directory
      c:\myHDFstuff\hdf5\windows\misc\fortrantypegen
-     Open fortrantypegen.dsw with Compaq Visual Fortran and 
+     Open fortrantypegen.dsw with Compaq Visual Fortran and
      build the project file.
-    
+
  6) Invoke command prompt and go to c:\myHDFstuff\hdf5\fortran\src.
-    Type 
-    		
+    Type
+
           H5fortran_detect.exe > H5fort_type_defines.h
-    
+
  7) Open and build matchtypegen.dsw with Compaq Visual Fortran
     Go to the following directory
-    c:\myHDFstuff\hdf5\windows\misc\matchtypegen 
+    c:\myHDFstuff\hdf5\windows\misc\matchtypegen
     Open matchtypegen.dsw and build the project file.
-    
+
  8) Invoke command prompt and go to c:\myHDFstuff\hdf5\fortran\src.
-    Type 
+    Type
           H5match_types.exe
-   
-    This step will generate H5f90i_gen.h and H5fortran_types.f90 
+
+    This step will generate H5f90i_gen.h and H5fortran_types.f90
     automatically.
-    
- 9) Go back to Section II, step 1(2) to build and test HDF5 Libraries 
+
+ 9) Go back to Section II, step 1(2) to build and test HDF5 Libraries
     and Tools
 
 
@@ -2071,205 +1943,205 @@ by other compilers.
     Section X: How To Build And Test HDF5 With Thread-Safe Feature
 ========================================================================
 
-   All of the preconditions in "Preconditions" Section at the 
+   All of the preconditions in "Preconditions" Section at the
    beginning of this document also apply to this section. There
    are some extra preconditions for this section only as following.
 
    pre1. Pthread-Win32 Installed
 
-   Posix Threads for Windows is a open source free software. Users can 
+   Posix Threads for Windows is a open source free software. Users can
    download it from http://sources.redhat.com/pthreads-win32/.
 
-   HDF5 release 1.8.0 supports Pthread-Win32 2.7.0 (2005-06-04) or 
+   HDF5 release 1.8.0 supports Pthread-Win32 2.7.0 (2005-06-04) or
    later. Since pthreadVC2.dll used by HDF5 1.8.0 is the release version
-   dll of pthread-win32, ONLY HDF5 1.8.0 release dll are supported and 
-   tested on Windows XP. 
- 
+   dll of pthread-win32, ONLY HDF5 1.8.0 release dll are supported and
+   tested on Windows XP.
+
    pre2. Set Path for Pthread-Win32 header and library
-   
-   Invoke Microsoft Visual C++ 6.0, go to Tools->Options->Directories. 
+
+   Invoke Microsoft Visual C++ 6.0, go to Tools->Options->Directories.
 
    From the drop-down box under "Show directories for:",
 
-       Choose "Include files", add in the path to Pthread-Win32 header 
+       Choose "Include files", add in the path to Pthread-Win32 header
        file(For example: C:\PTHREADS_WIN32\INCLUDE).
-       
+
        Choose "Library files", add in the path to Pthread-Winew library
        (For example: C:\PTHREADS_WIN32\LIB).
 
    pre3. Enable HDF5 Thread-safe Feature on Windows
 
-   Go to directory c:\MYHDFstuff\hdf5\windows\src, open H5pubconf.h and 
+   Go to directory c:\MYHDFstuff\hdf5\windows\src, open H5pubconf.h and
    find the following messages and remove those comment signs referred to by those
    two arrows and save H5pubconf.h
-   
+
 
    /*Users want to build and test hdf5 library with thread safe enabled,
      Make the following block active
    */
 
    /*                                            <----
-     #if defined _DLL                                
+     #if defined _DLL
      #define H5_HAVE_THREADSAFE
-     #define H5_HAVE_SYSTEM_SCOPE_THREADS 1          
-     #if defined TTSAFE_H                             
-     #define sleep Sleep                              
-     #endif                                           
-     #endif                                           
+     #define H5_HAVE_SYSTEM_SCOPE_THREADS 1
+     #if defined TTSAFE_H
+     #define sleep Sleep
+     #endif
+     #endif
    */                                            <----
 
 
-   pre4. Define Environment Variable(HDF5_EXT_PTHREAD) for PthreadVC2.lib 
-      
+   pre4. Define Environment Variable(HDF5_EXT_PTHREAD) for PthreadVC2.lib
+
       To define this environment variable:
-      
+
       Click "Start" -> "Control Panel" ->  "System" -> "Advanced" -> "Environment Variables".
-      
+
       If you are logged on as administrator to the local computer AND
       want to let all other users use these two environment variables,
       click "New" under "System Variables" box; otherwise, click "New"
       under "User Variables" box.
-      
-      In the New Variable window, set 
-      "Variable name" as HDF5_EXT_PTHREAD 
+
+      In the New Variable window, set
+      "Variable name" as HDF5_EXT_PTHREAD
       "Variable value" as pthreadVC2.lib
 
       click OK.
-  
+
    pre5. Copy pthreadVC2.dll to System Directory
-      
-      pthreadVC2.dll should be copied into the location that applications can find. 
+
+      pthreadVC2.dll should be copied into the location that applications can find.
      One suggestion is to use the c:\WINDOWS\system.
-      
- 
+
+
 1. Build HDF5 Release DLL with Thread-safe Feature
 
    1.1 Run batch file copy_hdf.bat.
 
    Go to  c:\MyHDFstuff\hdf5\windows and run copy_hdf.bat. This
-   process will copy all the necessary batch files,windows specific 
-   source codes and text files saved under c:\MyHDFstuff\hdf5\windows 
+   process will copy all the necessary batch files,windows specific
+   source codes and text files saved under c:\MyHDFstuff\hdf5\windows
    directory to the corresponding directories under hdf5.
 
 
    1.2 Invoke Microsoft Visual C++ compiler
-    
+
    Invoke Microsoft Visual C++.  From the main menu, go to "File"
    and select the "Open Workspace" option. Then open the
-   c:\MyHDFstuff\hdf5\windows\proj\all\all.dsw workspace. 
+   c:\MyHDFstuff\hdf5\windows\proj\all\all.dsw workspace.
 
    1.3 Add in Thread-safe Source Code for HDF5 Library
 
    Expand project "hdf5dll", right click on "source" and choose
-   "Add Files to Folder...", browse to add in file "H5TS.c" under 
+   "Add Files to Folder...", browse to add in file "H5TS.c" under
    directory c:\MYHDFSTUFF\hdf5\src.
 
    1.4 Link to  pthreadVC2.lib
 
    Right click on project "hdf5dll", choose "Set as Active Project".
-   
+
    Go to Project->Setting
 
-      On the left pane, choose "Win32 Release" to the right of 
-      "Settings For:" 
+      On the left pane, choose "Win32 Release" to the right of
+      "Settings For:"
 
-      On the right pane, choose "Link", choose "Input" from the 
+      On the right pane, choose "Link", choose "Input" from the
       drop-down box to the right of "Category:"
-   
+
       Under "Object/library modules:", add in "$(HDF5_EXT_PTHREAD)"
       (No quotation marks).
 
    Click on "OK".
 
    1.5 Set Project Active Configurations
-   
+
    Go to Build->Set Active Configuration, choose "hdf5dll-Win32 Release"
    under "Project configurations:", Click "OK".
 
    1.6 Build HDF5 Release DLL with Thread-safe Feature
-   
-   Go to Build->Build hdf5dll.dll to build HDF5 Release DLL with 
+
+   Go to Build->Build hdf5dll.dll to build HDF5 Release DLL with
    thread-safe feature.
 
-   Warning messages can be ignored. But there should be no failures at 
+   Warning messages can be ignored. But there should be no failures at
    all.
 
 2. Test Thread-safe Feature of HDF5 Release DLL
-   
+
    2.1 Build Release Version of Project libtestD
-   
-   Go to Build->Set Active Configuration, choose 
+
+   Go to Build->Set Active Configuration, choose
    "libtestD-Win32 Release" under "Project configurations:", Click "OK".
 
    Go to Build->Build libtestD.dll to build release version of Project
    libtestD.
 
    2.2 Build Release Version of Project ttsafedll
-    
-   Go to Build->Set Active Configuration, choose 
+
+   Go to Build->Set Active Configuration, choose
    "ttsafedll-Win32 Release" under "Project configurations:", Click "OK".
 
    Go to Build->Build ttsafedll.exe to build release version of Project
    ttsafedll.exe.
 
-   2.3 Install hdf5dll.dll 
-   
-   Invoke a comand prompt, change directory to c:\MYHDFSTUFF\hdf5, run 
+   2.3 Install hdf5dll.dll
+
+   Invoke a comand prompt, change directory to c:\MYHDFSTUFF\hdf5, run
    batch file install_dll.bat to copy
-   c:\MYHDFSTUFF\hdf5\proj\hdf5dll\release\hdf5dll.dll into system 
+   c:\MYHDFSTUFF\hdf5\proj\hdf5dll\release\hdf5dll.dll into system
    directory.
 
    2.4 Test Thread-safe Feature of HDF5 Release DLL
-   
-   Set project file ttsafedll.dsp as the active project file if it is 
-   not. Go to Build->Execute ttsafedll.exe, the following is the 
+
+   Set project file ttsafedll.dsp as the active project file if it is
+   not. Go to Build->Execute ttsafedll.exe, the following is the
    test messages users should get:
 
        For help use: ttsafedll.exe -help
        Linked with hdf5 version 1.7 release 51
-       Testing  -- multi-dataset creation (dcreate) 
-       Testing  -- per-thread error stacks (error) 
-       Testing  -- thread cancellation safety test (cancel) 
-       Testing  -- multi-attribute creation (acreate) 
-   
+       Testing  -- multi-dataset creation (dcreate)
+       Testing  -- per-thread error stacks (error)
+       Testing  -- thread cancellation safety test (cancel)
+       Testing  -- multi-attribute creation (acreate)
 
-       All tests were successful. 
+
+       All tests were successful.
 
 
        Cleaning Up temp files...
-   
+
    Users who got the same messages as above have successfully built the
    release version of hdf5dll.dll.
 
 3. Build, Test and Install HDF5 Library and Tools
- 
-   Go back to Section II, Step I(2) to Build, test and install HDF5 
+
+   Go back to Section II, Step I(2) to Build, test and install HDF5
    libary and tools.
 ========================================================================
 Section XI: How to build HDF5 in Visual studio 2005 on windows 32-bit and 64-bit platform
 ========================================================================
  The building procedure is almost the same as building HDF5 on .Net 2003.
- For 64-bit, currently we only support HDF5 as an 32-bit application and you may need to 
+ For 64-bit, currently we only support HDF5 as an 32-bit application and you may need to
  pay attention to the following reminders:
  1) To use zlib or szlib compression packages:
     Use zlib 1.2.2 DLL provided at
     ftp://ftp.hdfgroup.org/lib-external/zlib/1.2/bin/zlib122-windows.tar.gz
     Use szlib 2.0 DLL provided at
     ftp://ftp.hdfgroup.org/lib-external/szip/2.0/bin/windows/xp-net
- 2) Make sure that WIN32 macro is set at visual studio 2005. 
+ 2) Make sure that WIN32 macro is set at visual studio 2005.
  3) You may use _CRT_SECURE_NO_DEPRECATE to disable the warnings.
  Please refer to Section VI: How to build HDF5 in Visual Studio .Net 2003.
- Please also note that the example workspace may not work properly. You may need to reset hdf5 
+ Please also note that the example workspace may not work properly. You may need to reset hdf5
  library path.
- 
+
 ========================================================================
                             Section XII: Misc.
 ========================================================================
 
 1. Drivers we support
- 
+
  The default driver on windows we support is sec2 driver. However, stdio
- driver is also supported. If you want to use stdio driver in your 
+ driver is also supported. If you want to use stdio driver in your
  application, you may set environment variable HDF5_DRIVER to "stdio".
 
  On windows XP, the following steps should be followed to set the
@@ -2281,8 +2153,8 @@ Section XI: How to build HDF5 in Visual studio 2005 on windows 32-bit and 64-bit
  d) Add new variable "HDF5_DRIVER"
  e) set the "HDF5_DRIVER" to "stdio"
 
- Reminder: if you don't want to use stdio driver, please remember to 
- delete the environment variable "HDF5_DRIVER" or change the variable 
+ Reminder: if you don't want to use stdio driver, please remember to
+ delete the environment variable "HDF5_DRIVER" or change the variable
  value to "sec2".
 
 2. Helpful Pointers
@@ -2290,10 +2162,10 @@ Section XI: How to build HDF5 in Visual studio 2005 on windows 32-bit and 64-bit
 Here are some helpful notes if you are not familiar with
 using the Visual C++ Development Environment.
 
-    2.1 Project name and location issues: 
-       
+    2.1 Project name and location issues:
+
     If you must install all.dsw and all.dsp in another directory,
-    relative to hdf5 directory, you will be asked to locate the 
+    relative to hdf5 directory, you will be asked to locate the
     sub-project files, when you open the project all.dsw.
 
     If you want to rename all (the entire project), you will need to
@@ -2303,7 +2175,7 @@ using the Visual C++ Development Environment.
     You can also modify all.dsw and all.dsp as text, to allow these 2
     files to be installed in another directory.
 
-  
+
     2.2 Settings... details:
 
     If you create your own project, the necessary settings can be read
@@ -2319,17 +2191,17 @@ using the Visual C++ Development Environment.
                       These are all set to use Single-Threaded
 
     2.3 DLL... hints:
-  
-    If you want to use DLL versions of HDF5 library in your application, 
-    you should  
+
+    If you want to use DLL versions of HDF5 library in your application,
+    you should
       1) put HDF5 DLL into windows system directory
-      
+
       2) add HDF5 DLL export library into your project
-      
+
       3) Follow "Settings... details" into the last line:
-         change Single-Threaded into Multithreaded DLL or 
+         change Single-Threaded into Multithreaded DLL or
          Debug Multithreaded DLL
-         
+
       4) Follow "Settings.. details" into PreProcessor:
          Project
             Settings
@@ -2339,20 +2211,20 @@ using the Visual C++ Development Environment.
 
         Find PreProcessor definations and Add _HDF5USEDLL_ at the
         end of the PreProcessor definitions to use HDF5 C DLL.
-      
+
       5)(optional) repeat 4), add HDF5CPP_USEDLL at the
         end of the PreProcessor definitions to use HDF5 C++ DLL.
-      
+
       6) (optional) repeat 4), add _HDF5USEHLDLL_ at the
-         end of the PreProcessor definitions to use HDF5 high level 
+         end of the PreProcessor definitions to use HDF5 high level
          DLL.
-            
+
       7) (optional) repeat 4), add HDF5USE_HLCPPDLL at the
          end of the PreProcessor definitions to use HDF5 high level C++
          DLL.
-         
+
       8) (optional) Follow Project->Settings->Fortran->Category->
-         General->Predefined Preprocess or Symbols, and add 
+         General->Predefined Preprocess or Symbols, and add
          "HDF5F90_WINDOWS" to use HDF5 Fortran DLL.
 
 3. Backward compatibility with 1.6
@@ -2361,6 +2233,6 @@ using the Visual C++ Development Environment.
     3.2 Set up an environment variable H5_WANT_H5_V1_6_COMPAT to 1, this will be used to test compatibility
         of error APIs.
     Remember to undo 1 and 2 after you test if you are not going to use 1.6 backward compatibility option.
-    
+
 ************************************************************************
  Please send email to help@hdfgroup.org for further assistance.
