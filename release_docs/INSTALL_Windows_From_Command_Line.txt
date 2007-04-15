@@ -313,7 +313,7 @@ SECTION II: Building and testing HDF5 C and C++ Library on command line
        
        Users who have not install this utility, can open 
        IntelC++Compiler81 package, go to directory "IA32", 
-       open Data1.zip with winzip, find ICProjConvert80.exe and 
+       open Data1.zip with 7zip or WinZip, find ICProjConvert80.exe and 
        extract it to a corresponding directory. For example,
        C:\Program Files\Intel\CPP\Compiler80\Ia32\Bin
 
