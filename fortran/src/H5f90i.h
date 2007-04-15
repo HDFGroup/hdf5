@@ -213,7 +213,7 @@ typedef float          real_f;
 #if defined _WINDOWS || defined WIN32
 
 typedef char              *_fcd;
-typedef int               haddr_t_f;
+typedef long double       haddr_t_f;
 typedef int               hsize_t_f;
 typedef int               hssize_t_f;
 typedef int               size_t_f;
