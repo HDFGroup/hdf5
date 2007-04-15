@@ -12,12 +12,17 @@ Please read CAREFULLY about the following preconditions and notes first.
 Preconditions
 ~~~~~~~~~~~~~
 
-   1. Installed Microsoft Visual C++ 6.0 and WinZip.
+   1. Installed Microsoft Visual C++ 6.0 and 7zip or WinZip.
        
       1.1 Installed Intel Fortran Compiler (9.1 or higher version), 
           if you want to build HDF5 Fortran libraries.    
 
-      Note: By default, WinZip will convert the Unix end of line format
+      Note: 1. 7zip is an open-source alternative to WinZip.  Some of the
+            advanced functionality is disabled in WinZip unless you buy the
+            software.  With 7zip, most of this functionality is included for
+            free.
+      
+            2. By default, WinZip will convert the Unix end of line format
             when extracting .tar file.  This conversion will cause
             "false" failure in some HDF5 tools testings.
  
@@ -37,7 +42,7 @@ Preconditions
 	        c:\                              (any drive)
 	        MyHDFstuff\                      (any folder name)
 
-   3. Download the hdf5-1.6.x source code package and use WinZip to 
+   3. Download the hdf5-1.6.x source code package and use 7zip or WinZip to 
       extract the HDF5 package into c:\MyHDFstuff.  This creates a 
       directory called 'hdf5-1.6.x' under MyHDFstuff which contains 
       several files and directories.  Rename "hdf5-1.6.x" to "hdf5".  
