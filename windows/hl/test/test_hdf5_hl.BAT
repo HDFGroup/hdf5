@@ -46,3 +46,11 @@ echo ===============================================
 echo Testing hl_test_packet%2 -- %1
 echo ===============================================
 hl_test_packet%2\%1\hl_test_packet%2
+
+echo.
+echo ===============================================
+echo Testing h52gif and gif2h5 -- %1 %2
+echo ===============================================
+cd ..\tools\gif2h5
+call h52giftest %1 %2
+cd ..\..\test
