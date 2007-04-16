@@ -72,7 +72,7 @@ Preconditions:
       library.  Currently, two external compression libraries Zlib and
       Szip can be used with HDF5.
 
-      4.1 HDF5 uses Zlib version 1.2.2 for compression and Zlib is NOT
+      4.1 HDF5 uses Zlib version 1.2.3 for compression and Zlib is NOT
           distributed with HDF5 library in 1.8.x release. To use Zlib
           library, you have to install your own Zlib DLL library or go
           to ftp://ftp.hdfgroup.org/lib-external/zlib/1.2/bin
@@ -123,7 +123,7 @@ Preconditions:
          a. You might have to close and reopen running programs for
             the new environment variable settings to take effect.
 
-         b. c:\zlib122\zlib1.dll and c:\szip\dll\szlibdll.dll should
+         b. c:\zlib123\zlib1.dll and c:\szip\dll\szlibdll.dll should
             be copied into the location that the application can find,
             one suggestion is to use the c:\WINDOWS\system.
 
@@ -141,16 +141,16 @@ Preconditions:
       6.1 Find the box "Show directories for", choose
           "Include files", if you can not find your Zlib and Szip
           header path
-          (for example, c:\zlib122\include, c:\szip\include)
+          (for example, c:\zlib123\include, c:\szip\include)
           from the directory list, add the header path
-          (c:\zlib122\include, c:\szip\include) to the
+          (c:\zlib123\include, c:\szip\include) to the
           included directories.
 
       6.2 Find the box "Show directories for", choose "Library files",
           If you cannot find your Zlib and Szip library path
-          (for example, c:\zlib122\lib, c:\szip\dll)
+          (for example, c:\zlib123\lib, c:\szip\dll)
           from the directory list, add the library path
-          (c:\zlib122\lib, c:\szip\dll) to the library directories.
+          (c:\zlib123\lib, c:\szip\dll) to the library directories.
 
 Notes:
 
@@ -1026,7 +1026,7 @@ To use HDF5 static library
        add HDF5, Zlib, and Szip header files directories.  For example:
 
           c:\MyHDFstuff\hdf5\hdf5lib\release\include
-          c:\zlib122\include
+          c:\zlib123\include
           c:\szip\include
 
        Then click OK.
@@ -1071,8 +1071,8 @@ To use HDF5 static library
 
           c:\MyHDFstuff\hdf5\hdf5lib\release\include
           c:\MyHDFstuff\hdf5\hdf5lib\release\lib
-          c:\zlib122\include
-          c:\zlib122\lib
+          c:\zlib123\include
+          c:\zlib123\lib
           c:\szip\include
           c:\szip\dll
 
@@ -1235,16 +1235,16 @@ Preconditions:
     In the right pane, Find the box "Show directories for", choose
     "Include files", if you can not find your Zlib and Szip
     header path
-    (for example, c:\zlib122\include, c:\szip\include)
+    (for example, c:\zlib123\include, c:\szip\include)
     from the directory list, add the header path
-    (c:\zlib122\include, c:\szip\include) to the
+    (c:\zlib123\include, c:\szip\include) to the
     included directories.
 
     Find the box "Show directories for", choose "Library files",
     If you cannot find your Zlib and Szip library path
-    (for example, c:\zlib122\lib, c:\szip\dll)
+    (for example, c:\zlib123\lib, c:\szip\dll)
     from the directory list, add the library path
-    (c:\zlib122\lib, c:\szip\dll) to the library directories.
+    (c:\zlib123\lib, c:\szip\dll) to the library directories.
 
 1. Open all.dsw workspace
 
@@ -1437,9 +1437,9 @@ Notes:  1. For Intel Compiler users, Intel fortran Compiler 9.1 is currently
       menu, Go to Tools > Options > Intel(R) Fortran.
       In the right panel, make sure your "Selected Compiler" is Intel Fortran 9.1.
       Click the right-most box for "Libraries",
-      Add Zlib and Szip Library Path (c:\zlib122\lib, c:\szip\dll for example)
+      Add Zlib and Szip Library Path (c:\zlib123\lib, c:\szip\dll for example)
       Click rightmost box for "Includes",
-      Add Zlib and Szip header path (c:\zlib122\include c:\szip\include, for example).
+      Add Zlib and Szip header path (c:\zlib123\include c:\szip\include, for example).
       Then click "OK".
 
       
@@ -2130,7 +2130,7 @@ Section XI: How to build HDF5 in Visual studio 2005 on windows 32-bit and 64-bit
  pay attention to the following reminders:
  1) To use zlib or szlib compression packages:
     Use zlib 1.2.2 DLL provided at
-    ftp://ftp.hdfgroup.org/lib-external/zlib/1.2/bin/zlib122-windows.tar.gz
+    ftp://ftp.hdfgroup.org/lib-external/zlib/1.2/bin/zlib123-windows.tar.gz
     Use szlib 2.0 DLL provided at
     ftp://ftp.hdfgroup.org/lib-external/szip/2.0/bin/windows/xp-net
  2) Make sure that WIN32 macro is set at visual studio 2005.

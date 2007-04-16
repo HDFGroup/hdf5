@@ -53,16 +53,16 @@ notes in INSTALL_Windows.txt before starting below procedures.
       In the right pane, Find the box "Show directories for", choose                          
       "Include files", if you can not find your Zlib and Szip              
       header path                                                          
-      (for example, c:\zlib122\include, c:\szip\include)                   
+      (for example, c:\zlib123\include, c:\szip\include)                   
       from the directory list, add the header path                         
-      (c:\zlib122\include, c:\szip\include) to the                         
+      (c:\zlib123\include, c:\szip\include) to the                         
       included directories.                                                
                                                                          
       Find the box "Show directories for", choose "Library files",         
       If you cannot find your Zlib and Szip library path                   
-      (for example, c:\zlib122\lib, c:\szip\dll)                           
+      (for example, c:\zlib123\lib, c:\szip\dll)                           
       from the directory list, add the library path                        
-      (c:\zlib122\lib, c:\szip\dll) to the library directories.            
+      (c:\zlib123\lib, c:\szip\dll) to the library directories.            
 
 ========================================================================
                 Building HDF5 C/C++ Libraries with VS .NET

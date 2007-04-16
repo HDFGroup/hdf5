@@ -51,9 +51,9 @@ WARNINGS:
       menu, Go to Tools > Options > Intel(R) Fortran.
       In the right panel, make sure your "Selected Compiler" is Intel Fortran 9.1.
       Click the right-most box for "Libraries",
-      Add Zlib and Szip Library Path (c:\zlib122\lib, c:\szip\dll for example)
+      Add Zlib and Szip Library Path (c:\zlib123\lib, c:\szip\dll for example)
       Click rightmost box for "Includes",
-      Add Zlib and Szip header path (c:\zlib122\include c:\szip\include, for example).
+      Add Zlib and Szip header path (c:\zlib123\include c:\szip\include, for example).
       Then click "OK".
 
 ========================================================================
