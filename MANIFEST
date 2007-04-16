@@ -1967,7 +1967,7 @@
 ./windows/hl/fortran/examples/ex_litedll/ex_litedll.dsp
 
 #Window High Level Tools
-./windows/hl/gif2h5/h52giftest.bat
+./windows/hl/tools/gif2h5/h52giftest.bat
 ./windows/hl/tools/gifconv/gif2h5.dsp
 ./windows/hl/tools/gifconv/h52gif.dsp
 ./windows/hl/tools/gifconvdll/gif2h5dll.dsp
