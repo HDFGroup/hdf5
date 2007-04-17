@@ -1256,6 +1256,13 @@ Known Problems
   from the site:
 ftp://hdf.ncsa.uiuc.edu/pub/outgoing/hdf5/hdf5-1.6.2/F90_source_for_Crays
 
+* Not all platforms behave correctly with szip's shared libraries. Szip is
+  disabled in these cases, and a message is relayed at configure time. Static
+  libraries should be working on all systems that support szip, and should be
+  used when shared libraries are unavailable. There is also a configure error
+  on Altix machines that incorrectly reports when a version of szip without
+  an encoder is being used.
+
 * On some platforms that use Intel and Absoft compilers to build HDF5 fortran library,
   compilation may fail for fortranlib_test.f90, fflush1.f90 and fflush2.f90
   complaining about exit subroutine. Comment out the line 
