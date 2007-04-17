@@ -2103,7 +2103,7 @@ by other compilers.
    test messages users should get:
 
        For help use: ttsafedll.exe -help
-       Linked with hdf5 version 1.7 release 51
+       Linked with hdf5 version 1.8 release 0
        Testing  -- multi-dataset creation (dcreate)
        Testing  -- per-thread error stacks (error)
        Testing  -- thread cancellation safety test (cancel)
@@ -2130,7 +2130,7 @@ Section XI: How to build HDF5 in Visual studio 2005 on windows 32-bit and 64-bit
  pay attention to the following reminders:
  1) To use zlib or szlib compression packages:
     Use zlib 1.2.2 DLL provided at
-    ftp://ftp.hdfgroup.org/lib-external/zlib/1.2/bin/zlib123-windows.tar.gz
+    ftp://ftp.hdfgroup.org/lib-external/zlib/1.2/bin/zlib123-windows.zip
     Use szlib 2.0 DLL provided at
     ftp://ftp.hdfgroup.org/lib-external/szip/2.0/bin/windows/xp-net
  2) Make sure that WIN32 macro is set at visual studio 2005.
