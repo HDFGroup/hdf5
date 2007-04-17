@@ -1,12 +1,12 @@
 ************************************************************************
-* Build and Install HDF5 C/C++ Library with VS .NET 2003 on Windows XP *
-*                          (Short Version)                             *
+* Build and Install HDF5 C/C++ Library with VS .NET 2003 or 2005       *
+*                     with Windows XP (Short Version)                  *
 ************************************************************************
 
 Notes: This short instruction is written for users who want to quickly
        build HDF5 library and tools from the HDF5 source code package
-       with Microsoft Visual Studio .NET 2003 but do not want to know HDF5 
-       building and installation details on Windows XP.
+       with Microsoft Visual Studio .NET 2003 or 2005 but do not want 
+       to know HDF5 building and installation details on Windows XP.
          
        For detailed HDF5 build and install information, or if you have
        trouble following any steps in the instructions, please refer to
@@ -64,6 +64,29 @@ notes in INSTALL_Windows.txt before starting below procedures.
       from the directory list, add the library path                        
       (c:\zlib123\lib, c:\szip\dll) to the library directories.            
 
+========================================================================
+                Building HDF5 C/C++ Libraries with VS 2005
+========================================================================
+ 
+    Note: These extra steps on apply to Visual Studio 2005.  If you will be
+          building with .Net 2003, please skip to the section below.
+ 
+     The building procedure is almost the same as building HDF5 on .Net 2003.
+
+     1) To use zlib or szlib compression packages:
+        Use zlib 1.2.2 DLL provided at
+        ftp://ftp.hdfgroup.org/lib-external/zlib/1.2/bin/zlib123-windows.zip
+        Use szlib 2.0 DLL provided at
+        ftp://ftp.hdfgroup.org/lib-external/szip/2.0/bin/windows/xp-net
+     2) Make sure that WIN32 macro is set at Visual Studio 2005.
+     3) You may use _CRT_SECURE_NO_DEPRECATE to disable the warnings.
+     Please refer to the next section, "Building HDF5 C/C++ Libraries 
+     with VS .NET"
+     
+     Please also note that the example workspace may not work properly. 
+     You may need to reset hdf5 library path.
+ 
+ 
 ========================================================================
                 Building HDF5 C/C++ Libraries with VS .NET
 ========================================================================
