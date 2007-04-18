@@ -53,10 +53,10 @@ uname -a
 # setup exit banner message
 trap EXIT_BANNER 0
 
-# Dump environment variables
-echo ===Dumping environment variables===
+# Dump environment variables before option parsing
+echo ===Dumping environment variables before option parsing ===
 printenv | sort
-echo ===Done Dumping environment variables===
+echo ===Done Dumping environment variables before option parsing ===
 
 # snapshots release directory.  Default relative to $BASEDIR.
 ReleaseDir_default=release_dir
@@ -221,6 +221,11 @@ while [ $# -gt 0 ] ; do
     esac
     shift
 done
+
+# Dump environment variables after option parsing
+echo ===Dumping environment variables after option parsing ===
+printenv | sort
+echo ===Done Dumping environment variables after option parsing ===
 
 if [ "$cmd" = help ]; then
     set -
