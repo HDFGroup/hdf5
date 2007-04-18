@@ -1,23 +1,12 @@
 HDF5 version 1.8.0-alpha6snap3 currently under development
 ================================================================================
 
-===========================================================================
-WARNING!!  WARNING!!  WARNING!!  WARNING!!  WARNING!!  WARNING!!  WARNING!!
-
-This code is currently using interim file format changes that will
-certainly change before the final 1.8.0 release.  Please feel free to
-test everything out (in fact, we'd welcome that!), but do _NOT_ keep any
-of the files produced as they will not be readable by later versions of
-the HDF5 software.
-
-WARNING!!  WARNING!!  WARNING!!  WARNING!!  WARNING!!  WARNING!!  WARNING!!
-===========================================================================
 
 INTRODUCTION
 
 This document describes the differences between HDF5-1.6.* and
-HDF5-1.8.0-alpha3, and contains information on the platforms tested and
-known problems in HDF5-1.8.0-alpha3. For more details check the HISTORY.txt
+HDF5-1.8.0-beta1, and contains information on the platforms tested and
+known problems in HDF5-1.8.0-beta1. For more details check the HISTORY.txt
 file in the HDF5 source.
 
 The HDF5 documentation can be found on the NCSA ftp server
@@ -25,11 +14,11 @@ The HDF5 documentation can be found on the NCSA ftp server
 
      /HDF/HDF5/docs/
 
-The HDF5 1.8.0-alpha* documentation can be found on the NCSA web 
-server http://hdf.ncsa.uiuc.edu/HDF5/release/alpha/obtain518.html
+The HDF5 1.8.0-beta* documentation can be found on the NCSA web 
+server http://hdf.ncsa.uiuc.edu/HDF5/release/beta/obtain518.html
 
 New features of upcoming 1.8.0 release are described in
-the "What is new in 1.8.0-alpha?" document at the following URL:
+the "What is new in 1.8.0?" document at the following URL:
 http://hdf.ncsa.uiuc.edu/HDF5/doc_1.8pre/WhatsNew180.html
 
 New and modified APIs are listed in
@@ -945,25 +934,25 @@ Bug Fixes since HDF5-1.6.0 release
 
 Platforms Tested
 ================
-Platforms marked with * were not tested for hdf5-1.8.0-alpha2 release
+Platforms marked with * were not tested for hdf5-1.8.0-beta  release
 
-    AIX 5.2 (32/64 bit)           xlc 6.0.0.8
-                                  xlC 6.0.0.9
-                                  xlf 8.1.1.7
+    AIX 5.2 (32/64 bit)           xlc 8.0.0.11
+                                  xlC 8.0.0.11
+                                  xlf 10.01.0000.0 
                                   mpcc_r 6.0.0.8
                                   mpxlf_r 8.1.1.7
-    AIX 5.2 (32/64 bit, LLNL frost)    xlc 6.0.0.8
+*    AIX 5.2 (32/64 bit, LLNL frost)    xlc 6.0.0.8
                                   xlC 6.0.0.8
                                   xlf 8.1.1.7
                                   mpcc_r 6.0.0.8
                                   mpxlf_r 8.1.1.7
-    AIX 5.3 (32/64 bit)           xlc 7.0.0.0
-                                  xlC 7.0.
-                                  xlf 9.1.0.3
+    AIX 5.3 (32/64 bit)           xlc 7.0.0.8
+                                  xlC 7.0.0.8
+                                  xlf  09.01.0000.0007
 *   Cray X1 water 3.0.35          Cray Standard C Version 5.4.0.7.4
                                   Cray Fortran 5.4.0.7.3
                                   Cray C++ 5.4.0.7.4
-    FreeBSD 4.11                  gcc 2.95.4
+*    FreeBSD 4.11                  gcc 2.95.4
                                   g++ 2.95.4
                                   gcc 3.2.3, 3.3.6, 3.4.4, 4.0.0
     HP-UX B.11.00                 HP C  HP92453-01 A.11.01.20 
@@ -972,25 +961,22 @@ Platforms marked with * were not tested for hdf5-1.8.0-alpha2 release
 *   HP-UX B.11.23                 HP aC++/ANSI C B3910B A.06.00
                                   HP F90 v2.9.2
                                   HP aC++/ANSI C B3910B A.06.00
-    IRIX64 6.5 (tesla -64)        MIPSpro cc 7.4.2m
+*    IRIX64 6.5 (tesla -64)        MIPSpro cc 7.4.2m
                                   F90 MIPSpro 7.4.2m
                                   C++ MIPSpro cc 7.4.2m
-    IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1.3m
-                                  F90 MIPSpro 7.3.1.3m (64 only)
-                                  C++ MIPSpro cc 7.3.1.3m
+    IRIX64 6.5 (64 & n32)         MIPSpro cc 7.4.4m
+                                  F90 MIPSpro 7.4.4m 
+                                  C++ MIPSpro cc 7.4.4m
 				  mpt 1.6
     Linux 2.4.21-40               gcc 3.2.3
-                                  PGI compilers (pgcc, pgf90, pgCC) 
-                                  version 6-0.5
-                                  Absoft Fortran compiler v9.0
-                         	  Intel(R) C++ 32-bit Version 8.1
-    				  Intel(R) Fortran 32-bit Version 8.1
-                                  MPIch 1.2.6
-    Linux 2.4.21-268-smp x86_64   gcc 3.3.1 (SuSE Linux, AMD)
-    (mir)                         PGI 6.0-5 C and F90 (with k3-32) 
-                         	  Intel(R) C++ 32-bit Version 8.1
-    				  Intel(R) Fortran 32-bit Version 8.1
-    Linux 2.4.21-sgi306rp21 Altix 
+    (osage)
+    Linux 2.6.9                   gcc 3.4.6
+    (kagiso)                      PGI 6.2-5 (pgcc, pgf90, pgCC)
+                                  Intel 9.1 (icc, ifort, icpc)
+    Linux 2.6.16.27 x86_64 AMD    gcc 4.1.0 (SuSE Linux), g++ 4.1.0, g95 (GCC 4.0.3)
+    (smirom)                      PGI 6.2-5 (pgcc, pgf90, pgCC)
+                         	  Intel 9.1 (icc, iort, icpc)
+    Linux 2.6.5-7.252.1-rtgfx #1 
           SMP ia64                Intel(R) C++ Version 9.0
     (cobalt)                      Intel(R) Fortran Itanium(R) Version 9.0 
                                   SGI MPI
@@ -998,19 +984,15 @@ Platforms marked with * were not tested for hdf5-1.8.0-alpha2 release
                                   HP Fortran V5.5A-3548
 				  Compaq C++ V6.5-036  
 				  MPIX200_64_r13.4
-*   OSF1 V5.1 (PSC)               Compaq C V6.5-303 
-                                  HP Fortran V5.5A-3548
-				  Compaq C++ V6.5-040  
     SunOS 5.8 32,46               Sun WorkShop 6 update 2 C 5.3
      (Solaris 2.8)                Sun WorkShop 6 update 2 Fortran 90
                                   Sun WorkShop 6 update 2 C++ 5.3
-    SunOS 5.9 32,64               Sun C 5.6 2004/07/15
-     (Solaris 2.9)                Sun Fortran 95 8.0 2004/07/15
-                                  Sun C++ 5.6 2004/07/15
-*   SunOS 5.10                    Sun WorkShop 6 update 2 C 5.3
-                                  Sun WorkShop 6 update 2 Fortran 95 6.2
-                                  Sun WorkShop 6 update 2 C++ 5.3
-                                  Patch 111685-13 
+    SunOS 5.10 i86pc              Sun C 5.7
+                                  Sun Fortran 95 8.1
+                                  Sun C++ 5.7
+    SunOS 5.10                    cc: Sun C 5.8 
+    (linew)                       f90: Sun Fortran 95 8.2 
+                                  CC: Sun C++ 5.8 
     Xeon Linux 2.4.21-32.0.1.ELsmp-perfctr-lustre
     (tungsten)	                  Intel(R) C++ Version 9.0
                                   Intel(R) Fortran Compiler Version 9.0
@@ -1019,14 +1001,12 @@ Platforms marked with * were not tested for hdf5-1.8.0-alpha2 release
                                   Intel(R) Fortran Compiler Version 8.0
 				  mpich-gm-1.2.5..10-intel-r2
     Windows XP                    MSVC++.NET
-                                  MSVC++ 6.0
-                                  Intel 8.1 C++
-    Windows 64                    Windows 2005 
-    MAC OS X                      Darwin 7.5
-                                  gcc and g++ Apple Computer, Inc. GCC 
-                                  version 1175, based on gcc version 3.3.2
-                                  IBM XL Fortran version 8.1 
-                                  Absoft Fortran compiler v8.2
+                                  Intel 9.1 C, C++, Fortran
+    Windows 64                    Windows 2005 (32-bit only) 
+                                  Intel 9.1 C, C++, Fortran
+
+    MAC OS  10.4 (Intel)          gcc i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1            
+                                  G95 (GCC 4.0.3 (g95 0.91!) Nov 21 2006)
     Alpha Open VMS 7.3
 
 
@@ -1045,8 +1025,6 @@ Platform                 C        F90    F90      C++   zlib  SZIP
                          parallel        parallel
 Solaris2.8 64-bit        y        y      y(1)     y     y     y
 Solaris2.8 32-bit        y        y      y(1)     y     y     y
-Solaris2.9 64-bit        y(1)     y      y(1)     y     y     y
-Solaris2.9 32-bit        y(1)     y      y(1)     y     y     y
 Solaris2.10 64-bit       y(1)     y      n        y     y     y
 Solaris2.10 32-bit       y(1)     y      n        y     y     y
 IRIX64_6.5 64-bit        y(2)     y      y        y     y     y
@@ -1060,12 +1038,10 @@ Cray XT3           (16)  n        y      n        y     y     n
 IBM BG/L           (15)  n        n      n        n     y     y
 AIX-5.2 & 5.3 32-bit     y        y      y        y     y     y
 AIX-5.2 & 5.3 64-bit     y        y      y        y     y     y
-WinXP Visual Studio 6.0  n        y(9)   n        y     y     y
 WinXP .Net 2003          n        y(16)  n        y(8)  y     y               
 WinXP 64bit 
     Visual Studio 2005   n        n      n        y     n     n
 Cygwin                   n        y      n        y     y     y
-Mac OS X 10.3            n        y(4)   n        y     y     y
 Mac OS X 10.4 PowerPC    n               n
 FreeBSD 4.11             n        n      n        y     y     y
 RedHat EL3  W       (3)  y(1)     y(10)  n        y     y     y
@@ -1075,9 +1051,9 @@ SuSe x86_64 gcc  (3,12)  n        y(11)  n        y     y     y
 SuSe x86_64 icc  (3,12)  n        y(13)  n        y     y     y
 Linux 2.4 Xeon C 
     Lustre Intel  (3,6)  n        y      n        y     y     y
-Linux 2.4 SuSE ia64 C 
+Linux 2.6 SuSE ia64 C 
     Intel         (3,7)  y        y      y        y     y     y
-Linux 2.4 SGI Altix 
+Linux 2.6 SGI Altix 
     ia64 Intel      (3)  y        y      y        y     y     y
 Alpha OpenVMS 7.3.2      n        y      n        y     n     n
 
@@ -1087,8 +1063,6 @@ Platform                 Shared  Shared    Shared    static-  Thread-  STREAM-
                          C libs  F90 libs  C++ libs  exec     safe     VFD
 Solaris2.8 64-bit        y       y         n         x        y        y
 Solaris2.8 32-bit        y       y         y         x        y        y
-Solaris2.9 64-bit        y       y         n         x        y        y
-Solaris2.9 32-bit        y       y         y         x        y        y
 Solaris2.10 64-bit       y                           x        y        y
 Solaris2.10 32-bit       y                           x        y        y
 IRIX64_6.5 64-bit        y       y         n         y        y        y
@@ -1102,7 +1076,6 @@ Cray XT3           (16)  n                           y        n        y
 IBM BG/L           (15)  n                           y        n        n
 AIX-5.2 & 5.3 32-bit     n       n         n         y        n        y
 AIX-5.2 & 5.3 64-bit     n       n         n         y        n        y
-WinXP Visual Studio 6.0  y       y         y         dna      y        n
 WinXP .Net 2003          y       dna       y         dna      y        n
 WinXP 64bit 
     Visual Studio 2005   y       dna       y         dna      n        n
@@ -1148,6 +1121,7 @@ Alpha OpenVMS 7.3.2      n       n         n         y        n        n
 
 Known Problems
 ==============
+* on SUN 5.10 C++ test fails in the "Testing Shared Datatypes with Attributes" test 
 * configuring with --enable-debug=all produces compiler errors on most
   platforms.  Users who want to run HDF5 in debug mode should use
   --enable-debug rather than --enable-debug=all to enable debugging
