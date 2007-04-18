@@ -1140,6 +1140,13 @@ Alpha OpenVMS 7.3.2      n       n         n         y        n        n
 
 Known Problems
 ==============
+* For SNL, Red Storm: only paralle HDF5 is supported.  The serial tests pass
+  and the parallel tests also pass with lots of non-fatal error messages.
+* For LLNL, uP: both serial and parallel pass.  Zeus: serial passes but
+  parallel fails with a known proglem in MPI.  ubgl: serial passes but
+  parallel fails. 
+* For LANL, QSC: serial works but parallel HDF5 failed parallel tests
+  that are suspected to be an MPI problem that is triggered by v1.8.
 * on SUN 5.10 C++ test fails in the "Testing Shared Datatypes with Attributes" test 
 * configuring with --enable-debug=all produces compiler errors on most
   platforms.  Users who want to run HDF5 in debug mode should use
