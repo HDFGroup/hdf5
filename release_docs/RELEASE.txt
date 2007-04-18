@@ -953,7 +953,9 @@ Bug Fixes since HDF5-1.6.0 release
 
 Platforms Tested
 ================
-Platforms marked with * were not tested for hdf5-1.8.0-beta  release
+Platforms marked with * were not tested for hdf5-1.8.0-beta1 release
+(This information is somewhat out of date and may be inaccurate.  It will be
+    updated for a later release)
 
     AIX 5.2 (32/64 bit)           xlc 8.0.0.11
                                   xlC 8.0
