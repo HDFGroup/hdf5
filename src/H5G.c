@@ -147,6 +147,7 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id,
     hid_t	    ret_value;          /* Return value */
 
     FUNC_ENTER_API(H5Gcreate2, FAIL)
+    H5TRACE5("i", "i*siii", loc_id, name, lcpl_id, gcpl_id, gapl_id);
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc) < 0)

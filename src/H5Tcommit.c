@@ -80,6 +80,7 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(H5Tcommit2, FAIL)
+    H5TRACE6("e", "i*siiii", loc_id, name, type_id, lcpl_id, tcpl_id, tapl_id);
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc) < 0)

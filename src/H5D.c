@@ -294,7 +294,8 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     hid_t           ret_value;          /* Return value */
 
     FUNC_ENTER_API(H5Dcreate2, FAIL)
-    H5TRACE5("i", "iiiii", loc_id, type_id, space_id, dcpl_id, dapl_id);
+    H5TRACE7("i", "i*siiiii", loc_id, name, type_id, space_id, lcpl_id, dcpl_id,
+             dapl_id);
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc) < 0)
