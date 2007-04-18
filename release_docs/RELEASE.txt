@@ -937,7 +937,7 @@ Platforms Tested
 Platforms marked with * were not tested for hdf5-1.8.0-beta  release
 
     AIX 5.2 (32/64 bit)           xlc 8.0.0.11
-                                  xlC 8.0.0.11
+                                  xlC 8.0
                                   xlf 10.01.0000.0 
                                   mpcc_r 6.0.0.8
                                   mpxlf_r 8.1.1.7
