@@ -9,28 +9,33 @@ HDF5-1.8.0-beta1, and contains information on the platforms tested and
 known problems in HDF5-1.8.0-beta1. For more details check the HISTORY.txt
 file in the HDF5 source.
 
-The HDF5 documentation can be found on the NCSA ftp server
-(ftp.ncsa.uiuc.edu) in the directory:
 
-     /HDF/HDF5/docs/
+Links to HDF5 1.8.0-beta* source code, documentation, and additional materials
+can be found on THG's development server (www.hdfgroup.uiuc.edu) at the
+following location:
+     http://www.hdfgroup.uiuc.edu/HDF5/release/beta/obtain518.html
+User documentation for the beta can be accessed directly at this location: 
+     http://www.hdfgroup.uiuc.edu/HDF5/doc_1.8pre/doc/
 
-The HDF5 1.8.0-beta* documentation can be found on the NCSA web 
-server http://hdf.ncsa.uiuc.edu/HDF5/release/beta/obtain518.html
+New features of the upcoming 1.8.0 release are described in
+the "What's New in 1.8.0?" document:
+     http://www.hdfgroup.uiuc.edu/HDF5/doc_1.8pre/WhatsNew180.html
 
-New features of upcoming 1.8.0 release are described in
-the "What is new in 1.8.0?" document at the following URL:
-http://hdf.ncsa.uiuc.edu/HDF5/doc_1.8pre/WhatsNew180.html
+New and modified APIs are described briefly in
+     http://www.hdfgroup.uiuc.edu/HDF5/doc_1.8pre/WhatsNew180.html
+and will be listed in the "HDF5 Software Changes" document:
+     http://www.hdfgroup.uiuc.edu/HDF5/doc_1.8pre/doc/ADGuide/Changes.html
 
-New and modified APIs are listed in
-http://hdf.ncsa.uiuc.edu/HDF5/doc_1.8pre/doc/ADGuide/Changes.html
 
-For more information look at the HDF5 home page at:
+
+For more information, see the HDF5 home page:
    
-    http://hdf.ncsa.uiuc.edu/HDF5/
+    http://www.hdfgroup.org/HDF5/
 
-If you have any questions or comments, please send them to:
+If you have any questions or comments, please send them to the HDF Help Desk:
 
-    hdfhelp@ncsa.uiuc.edu
+    help@hdfgroup.org
+
 
 CONTENTS
 
@@ -283,7 +288,7 @@ New Features
 
              If MPI-IO packages at your Linux and Altix support this case,
              please comment out the last line and report to us at
-             hdfhelp@ncsa.uiuc.edu. We can tune in our configuration to
+             help@hdfgroup.org. We can tune in our configuration to
              support this.                                                     
  
              KY - 2006/02/16
@@ -555,6 +560,19 @@ New Features
         - Added Packet Table API for creating tables with less overhead than
             H5TB API.  Added C++ wrapper for Packet Tables.  See documentation.
             JML - 2004/03/28
+    
+    Documentation 
+    ------------- 
+        - The documentation for this release is largely complete, but 
+            trails the source code.  A few of the newer functions are 
+            not yet documented.                       FMB - 2007/04/18
+        - The user documents for this beta can be accessed directly at
+            this location:
+               http://www.hdfgroup.uiuc.edu/HDF5/doc_1.8pre/doc/
+            The most recent document versions (updated daily) in the 
+            1.8 development branch can be accessed at this location:
+               http://www.hdfgroup.uiuc.edu/HDF5/doc_dev_snapshot/H5_dev/
+                                                      FMB - 2007/04/18
 
 
 Support for new platforms, languages and compilers.
@@ -632,7 +650,7 @@ Bug Fixes since HDF5-1.6.0 release
 
             If your files have been affected by this bug, or you are concerned
             that your files might have been, please contact the HDF Helpdesk
-            at hdfhelp@ncsa.uiuc.edu for a tool to detect and repair files
+            at help@hdfgroup.org for a tool to detect and repair files
             affected by this problem.  QAK - 2006/6/16
         - Fixed various problems with retrieving names of objects, especially
             with mounted files.  QAK - 2005/12/25
@@ -926,6 +944,7 @@ Bug Fixes since HDF5-1.6.0 release
     Documentation 
     ------------- 
 
+
     F90 APIs
     --------
         - h5pget_driver_f was returning information that could not be
@@ -1005,7 +1024,7 @@ Platforms marked with * were not tested for hdf5-1.8.0-beta  release
     Windows 64                    Windows 2005 (32-bit only) 
                                   Intel 9.1 C, C++, Fortran
 
-    MAC OS  10.4 (Intel)          gcc i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1            
+    MAC OS  10.4 (Intel)          gcc i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1 
                                   G95 (GCC 4.0.3 (g95 0.91!) Nov 21 2006)
     Alpha Open VMS 7.3
 
@@ -1227,8 +1246,8 @@ Known Problems
 * Before building HDF5 F90 Library from source on Crays 
   replace H5Aff.f90, H5Dff.f90 and H5Pff.f90 files in the fortran/src
   subdirectory in the top level directory with the Cray-specific files
-  from the site:
-ftp://hdf.ncsa.uiuc.edu/pub/outgoing/hdf5/hdf5-1.6.2/F90_source_for_Crays
+  from this site:
+       ftp://www.hdfgroup.uiuc.edu/pub/outgoing/hdf5/hdf5-1.8.0-pre/PATCH/
 
 * Not all platforms behave correctly with szip's shared libraries. Szip is
   disabled in these cases, and a message is relayed at configure time. Static
