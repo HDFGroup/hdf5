@@ -149,7 +149,7 @@ case "$cc_vendor-$cc_version" in
       gcc-2.95.[34])
         PROD_CFLAGS="-O3"
         ;;
-      gcc-3.[0-4]*|gcc-4.[01]*)
+      gcc-3.[0-4]*|gcc-4.[012]*)
         # The optimization level is reduced for gcc 3.* and 4.* due to problems
         # with code generation for src/H5Tconv.c with the -O2 & -O3 
         # optimization levels (which shows up as failures for various integer
