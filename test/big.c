@@ -31,6 +31,9 @@ const char *FILENAME[] = {
 #define WRT_SIZE	4*1024
 #define FAMILY_SIZE	1024*1024*1024
 
+/* Define big file as 2GB */
+#define BIG_FILE 0x80000000UL
+ 
 #define MAX_TRIES       100
 
 #if H5_SIZEOF_LONG_LONG >= 8
@@ -130,6 +133,46 @@ is_sparse(void)
     return (0);
 #endif
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	supports_big
+ *
+ * Purpose:	Determines if the file system of the current working
+ *		directory supports big files.
+ *
+ * Return:	Success:	Non-zero if big files are supported; zero
+ *				otherwise.
+ *
+ *		Failure:	zero
+ *
+ * Programmer:	Raymond Lu
+ *              Wednesday, April 18, 2007
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+supports_big(void)
+{
+    int		fd;
+
+    if ((fd=HDopen("y.h5", O_RDWR|O_TRUNC|O_CREAT, 0666))<0) return 0;
+
+    /* Write a few bytes at 2GB */
+    if (HDlseek(fd, BIG_FILE, SEEK_SET)!=BIG_FILE) return 0;
+    if (5!=HDwrite(fd, "hello", (size_t)5)) return 0;
+
+    /* Write a few bytes at 4GB */
+    if (HDlseek(fd, 2*BIG_FILE, SEEK_SET) != 2*BIG_FILE) return 0;
+    if (5!=HDwrite(fd, "hello", (size_t)5)) return 0;
+
+    if (HDclose(fd)<0) return 0;
+
+    return (1);
+}
+
 
 
 /*-------------------------------------------------------------------------
@@ -548,13 +591,24 @@ main (int ac, char **av)
     if (writer(filename, fapl, WRT_N)) goto error;
     if (reader(filename, fapl)) goto error;
 
-    /* Clean up the test file */
-    if (h5_cleanup(FILENAME, fapl)) remove(DNAME);
     puts("Test passed with the Family Driver.");
 
+    /*
+     * We shouldn't run this test if the file system doesn't support big files 
+     * because we would generate multi-gigabyte files.
+     */
+    puts("\nChecking if file system supports big files...");
+    if (!supports_big()) {
+        puts("Tests for sec2 and stdio are skipped because file system does not support big files.");
+        usage();
+        goto quit;
+    }
+
+    /* Clean up the test file */
+    if (h5_cleanup(FILENAME, fapl)) remove(DNAME);
 
     /* Test big file with the SEC2 driver */
-    puts("\nTesting big file with the SEC2 Driver ");
+    puts("Testing big file with the SEC2 Driver ");
 
     fapl = h5_fileaccess();
     if(H5Pset_fapl_sec2(fapl)<0)
@@ -566,7 +620,6 @@ main (int ac, char **av)
     if (reader(filename, fapl)) goto error;
 
     puts("Test passed with the SEC2 Driver.");
-
 
 #ifdef H5_HAVE_FSEEKO
     /* Clean up the test file */
