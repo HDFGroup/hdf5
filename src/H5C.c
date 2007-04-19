@@ -2996,7 +2996,6 @@ H5C_create(size_t		      max_cache_size,
         ((cache_ptr->epoch_markers)[i]).is_protected	 = FALSE;
 	((cache_ptr->epoch_markers)[i]).is_read_only	 = FALSE;
 	((cache_ptr->epoch_markers)[i]).ro_ref_count	 = 0;
-	((cache_ptr->epoch_markers)[i]).max_ro_ref_count = 0;
         ((cache_ptr->epoch_markers)[i]).is_pinned	 = FALSE;
         ((cache_ptr->epoch_markers)[i]).in_slist	 = FALSE;
         ((cache_ptr->epoch_markers)[i]).ht_next		 = NULL;
@@ -4569,7 +4568,6 @@ H5C_insert_entry(H5F_t * 	     f,
     entry_ptr->is_protected = FALSE;
     entry_ptr->is_read_only = FALSE;
     entry_ptr->ro_ref_count = 0;
-    entry_ptr->max_ro_ref_count = 0; /* JRM - delete this when possible */
 
     entry_ptr->is_pinned = insert_pinned;
 
@@ -5730,11 +5728,6 @@ H5C_protect(H5F_t *	        f,
 
 	    (entry_ptr->ro_ref_count)++;
 
-	    /* JRM - delete this when possible */
-	    if ( entry_ptr->ro_ref_count > entry_ptr->max_ro_ref_count ) {
-
-		entry_ptr->max_ro_ref_count = entry_ptr->ro_ref_count;
-	    }
 	} else {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, \
@@ -5750,7 +5743,6 @@ H5C_protect(H5F_t *	        f,
 
 	    entry_ptr->is_read_only = TRUE;
 	    entry_ptr->ro_ref_count = 1;
-	    entry_ptr->max_ro_ref_count = 1;
 	}
 
     	entry_ptr->dirtied = FALSE;
@@ -7098,9 +7090,7 @@ H5C_unprotect(H5F_t *		  f,
 
 	    HDassert( entry_ptr->ro_ref_count == 1 );
 
-	    if ( ( dirtied ) &&
-	     /* JRM - delete the following line when possible */ 
-	     ( entry_ptr->max_ro_ref_count > 1 ) ) {
+	    if ( dirtied ) {
 
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
                             "Read only entry modified(2)??")
@@ -7108,7 +7098,6 @@ H5C_unprotect(H5F_t *		  f,
 
 	    entry_ptr->is_read_only = FALSE;
 	    entry_ptr->ro_ref_count = 0;
-	    entry_ptr->max_ro_ref_count = 0;
 	}
 
 #ifdef H5_HAVE_PARALLEL
@@ -9709,7 +9698,6 @@ H5C_load_entry(H5F_t *             f,
     entry_ptr->is_protected = FALSE;
     entry_ptr->is_read_only = FALSE;
     entry_ptr->ro_ref_count = 0;
-    entry_ptr->max_ro_ref_count = 0; /* JRM - delete this when possible */
     entry_ptr->in_slist = FALSE;
     entry_ptr->flush_marker = FALSE;
 #ifdef H5_HAVE_PARALLEL

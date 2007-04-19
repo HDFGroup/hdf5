@@ -813,7 +813,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5HL_t *
-H5HL_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr)
+H5HL_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5AC_protect_t rw)
 {
     H5HL_t *ret_value;
 
@@ -823,7 +823,7 @@ H5HL_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr)
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
 
-    if(NULL == (ret_value = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (ret_value = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, rw)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "unable to load heap")
 
 done:

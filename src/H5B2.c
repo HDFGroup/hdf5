@@ -1137,7 +1137,7 @@ H5B2_modify(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
         hbool_t changed;        /* Whether the 'modify' callback changed the record */
 
         /* Lock B-tree leaf node */
-        if (NULL == (leaf = H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, &(curr_node_ptr.node_nrec), bt2_shared, H5AC_READ)))
+        if (NULL == (leaf = H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, &(curr_node_ptr.node_nrec), bt2_shared, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
         /* Locate record */
@@ -1173,7 +1173,7 @@ H5B2_modify(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
         } /* end else */
 
         /* Mark the node as dirty if it changed */
-        leaf_flags |= changed ? H5AC__DIRTIED_FLAG : 0;
+        leaf_flags |= (changed ? H5AC__DIRTIED_FLAG : 0);
 
         /* Unlock current node */
         if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, leaf_flags) < 0)

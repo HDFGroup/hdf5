@@ -284,7 +284,7 @@ H5G_node_debug_key(FILE *stream, H5F_t *f, hid_t dxpl_id, int indent, int fwidth
 
         HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Name:");
 
-        if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->heap_addr)))
+        if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->heap_addr, H5AC_READ)))
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to protect symbol name")
 
         s = H5HL_offset_into(f, heap, key->offset);
@@ -794,7 +794,7 @@ H5G_node_cmp2(H5F_t *f, hid_t dxpl_id, void *_lt_key, void *_udata, void *_rt_ke
     HDassert(rt_key);
 
     /* Get base address of heap */
-    if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->heap_addr)))
+    if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->heap_addr, H5AC_READ)))
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to protect symbol name")
 
     base = H5HL_offset_into(f, heap, (size_t)0);
@@ -855,7 +855,7 @@ H5G_node_cmp3(H5F_t *f, hid_t dxpl_id, void *_lt_key, void *_udata, void *_rt_ke
     FUNC_ENTER_NOAPI_NOINIT(H5G_node_cmp3)
 
     /* Get base address of heap */
-    if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->heap_addr)))
+    if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->heap_addr, H5AC_READ)))
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to protect symbol name")
 
     base = H5HL_offset_into(f, heap, (size_t)0);
@@ -933,7 +933,7 @@ H5G_node_found(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *_lt_key
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL, "unable to protect symbol table node")
 
     /* Get base address of heap */
-    if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->common.heap_addr)))
+    if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->common.heap_addr, H5AC_READ)))
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to protect symbol name")
 
     base = H5HL_offset_into(f, heap, (size_t)0);
@@ -1046,7 +1046,7 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr,
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_INS_ERROR, "unable to protect symbol table node")
 
     /* Get base address of heap */
-    if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->common.heap_addr)))
+    if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->common.heap_addr, H5AC_READ)))
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR, "unable to protect symbol name")
 
     base = H5HL_offset_into(f, heap, (size_t)0);
@@ -1228,7 +1228,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
         const char *s;          /* Pointer to string in local heap */
 
         /* Lock the heap down */
-        if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->common.heap_addr)))
+        if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->common.heap_addr, H5AC_WRITE)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTPROTECT, H5B_INS_ERROR, "unable to protect local heap")
 
         /* Get base address of heap */
@@ -1461,7 +1461,7 @@ H5G_node_iterate(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t ad
             size_t		n;      /* Length of link name */
             const char		*name;  /* Pointer to link name in heap */
 
-            if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->heap_addr)))
+            if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->heap_addr, H5AC_READ)))
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5_ITER_ERROR, "unable to protect symbol name")
 
             name = H5HL_offset_into(f, heap, ents[u].name_off);
@@ -1816,7 +1816,7 @@ H5G_node_copy(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5_ITER_ERROR, "unable to load symbol table node")
 
     /* get the base address of the heap */
-    if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->src_heap_addr)))
+    if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->src_heap_addr, H5AC_READ)))
        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5_ITER_ERROR, "unable to protect symbol name")
 
     /* copy object in this node one by one */
@@ -1952,7 +1952,7 @@ H5G_node_build_table(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5_ITER_ERROR, "unable to load symbol table node")
 
     /* Lock down the heap for this group */
-    if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->heap_addr)))
+    if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->heap_addr, H5AC_READ)))
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5_ITER_ERROR, "unable to protect symbol name")
 
     /* Check if the link table needs to be extended */
@@ -2058,7 +2058,7 @@ H5G_node_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
 	fprintf(stream, "%*sSymbol %u:\n", indent - 3, "", u);
 
 	if(heap_addr > 0 && H5F_addr_defined(heap_addr)) {
-            if(NULL == (heap = H5HL_protect(f, dxpl_id, heap_addr)))
+            if(NULL == (heap = H5HL_protect(f, dxpl_id, heap_addr, H5AC_READ)))
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to protect symbol name");
 
             s = H5HL_offset_into(f, heap, sn->entry[u].name_off);
@@ -2066,7 +2066,7 @@ H5G_node_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
             if(s)
                 fprintf(stream, "%*s%-*s `%s'\n", indent, "", fwidth, "Name:", s);
 
-            if(H5HL_unprotect(f, dxpl_id, heap, heap_addr, FALSE) < 0)
+            if(H5HL_unprotect(f, dxpl_id, heap, heap_addr, H5AC__NO_FLAGS_SET) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol name")
             heap = NULL; s = NULL;
 	}

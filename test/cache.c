@@ -15650,11 +15650,6 @@ check_unprotect_ro_dirty_err(void)
      * -- should succeed.
      */
 
-    /* at present this test will fail due to code allowing current code
-     * to function with errors that are not dangerous.   Thus this test
-     * is commented out for now.  Put in back into use as soon as possible.
-     */
-#if 0 /* JRM */
     if ( pass ) {
 
         reset_entries();
@@ -15687,7 +15682,6 @@ check_unprotect_ro_dirty_err(void)
 
         takedown_cache(cache_ptr, FALSE, FALSE);
     }
-#endif
 
     /* allocate a another cache, protect an entry read only twice, and 
      * then unprotect it with the dirtied flag set.  This should fail.  

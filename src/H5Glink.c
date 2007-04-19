@@ -247,7 +247,7 @@ H5G_ent_to_link(H5F_t *f, hid_t dxpl_id, H5O_link_t *lnk, haddr_t lheap_addr,
         /* Check if the heap pointer was passed in */
         if(!heap) {
             /* Lock the local heap */
-            if(NULL == (heap = H5HL_protect(f, dxpl_id, lheap_addr)))
+            if(NULL == (heap = H5HL_protect(f, dxpl_id, lheap_addr, H5AC_READ)))
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to protect local heap")
         } /* end if */
 
@@ -314,7 +314,7 @@ H5G_ent_to_info(H5F_t *f, hid_t dxpl_id, H5L_info_t *info, haddr_t lheap_addr,
         H5HL_t *heap;           /* Pointer to local heap for group */
 
         /* Lock the local heap */
-        if(NULL == (heap = H5HL_protect(f, dxpl_id, lheap_addr)))
+        if(NULL == (heap = H5HL_protect(f, dxpl_id, lheap_addr, H5AC_READ)))
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to protect local heap")
 
         s = H5HL_offset_into(f, heap, ent->cache.slink.lval_offset);

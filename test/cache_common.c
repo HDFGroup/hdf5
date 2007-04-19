@@ -1580,7 +1580,6 @@ reset_entries(void)
             base_addr[j].header.is_protected = FALSE;
             base_addr[j].header.is_read_only = FALSE;
             base_addr[j].header.ro_ref_count = FALSE;
-            base_addr[j].header.max_ro_ref_count = 0;
             base_addr[j].header.next = NULL;
             base_addr[j].header.prev = NULL;
             base_addr[j].header.aux_next = NULL;

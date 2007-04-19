@@ -283,20 +283,6 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t * cache_ptr,
  * 		must be zero whenever either is_protected or is_read_only
  * 		are TRUE.
  *
- * max_ro_ref_count:  Integer field used to track the maximum value of 
- * 		ro_ref_count in the current protection of this entry.
- * 		The field must be reset to zero when the entry is 
- * 		unprotected.  
- *
- * 		This field exist to allow us to refrain from flagging 
- * 		an error if an entry is protected read only, and then
- * 		unprotected dirtied if the ro_ref_count has not exceeded
- * 		1.  
- *
- * 		It is a temporary fix which should be removed once we
- * 		have corrected all the instances of this behaviour in the
- *		code that calls the metadata cache.
- *
  * is_pinned:	Boolean flag indicating whether the entry has been pinned
  * 		in the cache.
  *
@@ -466,7 +452,6 @@ typedef struct H5C_cache_entry_t
     hbool_t		is_protected;
     hbool_t		is_read_only;
     int			ro_ref_count;
-    int			max_ro_ref_count; /* delete this when possible */
     hbool_t		is_pinned;
     hbool_t		in_slist;
     hbool_t		flush_marker;

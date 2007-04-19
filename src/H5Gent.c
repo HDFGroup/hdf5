@@ -496,7 +496,7 @@ H5G_ent_debug(H5F_t UNUSED *f, hid_t dxpl_id, const H5G_entry_t *ent, FILE * str
             if(heap_addr > 0 && H5F_addr_defined(heap_addr)) {
                 H5HL_t *heap;
 
-                heap = H5HL_protect(ent->file, dxpl_id, heap_addr);
+                heap = H5HL_protect(ent->file, dxpl_id, heap_addr, H5AC_READ);
                 lval = H5HL_offset_into(ent->file, heap, ent->cache.slink.lval_offset);
                 HDfprintf(stream, "%*s%-*s %s\n", nested_indent, "", nested_fwidth,
                            "Link value:",

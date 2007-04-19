@@ -125,7 +125,7 @@ main(void)
 	    for (j=4; j<i; j++) buf[j] = '0' + j%10;
 	    if (j>4) buf[j] = '\0';
 
-	    if (NULL == (heap = H5HL_protect(f, H5P_DATASET_XFER_DEFAULT, heap_addr))) {
+	    if (NULL == (heap = H5HL_protect(f, H5P_DATASET_XFER_DEFAULT, heap_addr, H5AC_READ))) {
 		H5_FAILED();
 		H5Eprint2(H5E_DEFAULT, stdout);
 		goto error;

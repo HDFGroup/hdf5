@@ -582,7 +582,7 @@ H5G_stab_get_name_by_idx_cb(const H5G_entry_t *ent, void *_udata)
     name_off = ent->name_off;
 
     /* Pin the heap down in memory */
-    if(NULL == (heap = H5HL_protect(udata->common.f, udata->common.dxpl_id, udata->heap_addr)))
+    if(NULL == (heap = H5HL_protect(udata->common.f, udata->common.dxpl_id, udata->heap_addr, H5AC_READ)))
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to protect symbol name")
 
     name = H5HL_offset_into(udata->common.f, heap, name_off);
@@ -905,7 +905,7 @@ H5G_stab_lookup_by_idx_cb(const H5G_entry_t *ent, void *_udata)
     HDassert(udata);
 
     /* Pin the heap down in memory */
-    if(NULL == (heap = H5HL_protect(udata->common.f, udata->common.dxpl_id, udata->heap_addr)))
+    if(NULL == (heap = H5HL_protect(udata->common.f, udata->common.dxpl_id, udata->heap_addr, H5AC_READ)))
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to protect symbol name")
 
     /* Duplicate the link name */
