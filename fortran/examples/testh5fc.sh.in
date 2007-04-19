@@ -170,7 +170,7 @@ TOOLTEST() {
 }
 
 # Print a "SKIP" message
-SKIP() {
+SKIPTEST() {
 	 TESTING $H5TOOL $@
 	  echo  " -SKIP-"
 }
@@ -198,8 +198,8 @@ echo "***"Build external library and link with it.
 TOOLTEST -c $prog1 $prog2
 $AR cru $applib $prog1_o $prog2_o
 $RANLIB $applib
-SKIP $appmain $applib
-SKIP $appmain_o $applib
+TOOLTEST $appmain $applib
+TOOLTEST $appmain_o $applib
 
 # No preprocess test since -E is not a common option for Fortran compilers.
 
