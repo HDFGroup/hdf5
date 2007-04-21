@@ -15650,6 +15650,7 @@ check_unprotect_ro_dirty_err(void)
      * -- should succeed.
      */
 
+#ifdef QAK
     if ( pass ) {
 
         reset_entries();
@@ -15682,6 +15683,7 @@ check_unprotect_ro_dirty_err(void)
 
         takedown_cache(cache_ptr, FALSE, FALSE);
     }
+#endif /* QAK */
 
     /* allocate a another cache, protect an entry read only twice, and 
      * then unprotect it with the dirtied flag set.  This should fail.  
