@@ -593,7 +593,11 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDfrexpl(X,N)		frexp(X,N)
 #endif /* H5_HAVE_FREXPL */
 /* fscanf() variable arguments */
-#define HDfseek(F,O,W)		fseek(F,O,W)
+#ifdef H5_HAVE_FSEEKO
+     #define HDfseek(F,O,W)	fseeko(F,O,W)
+#else
+     #define HDfseek(F,O,W)	fseek(F,O,W)
+#endif
 #define HDfsetpos(F,P)		fsetpos(F,P)
 /* definitions related to the file stat utilities.
  * Windows have its own function names.
@@ -677,7 +681,11 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
         #define HDlseek(F,O,W)  _lseeki64(F,O,W)
      #endif
 #else
-#define HDlseek(F,O,W)		lseek(F,O,W)
+     #ifdef H5_HAVE_FSEEK64
+        #define HDlseek(F,O,W)	lseek64(F,O,W)
+     #else
+        #define HDlseek(F,O,W)	lseek(F,O,W)
+     #endif
 #endif
 #define HDmalloc(Z)		malloc(Z)
 #define HDposix_memalign(P,A,Z) posix_memalign(P,A,Z)
