@@ -75,7 +75,7 @@ Preconditions:
       4.1 HDF5 uses Zlib version 1.2.3 for compression and Zlib is NOT
           distributed with HDF5 library in 1.8.x release. To use Zlib
           library, you have to install your own Zlib DLL library or go
-          to ftp://ftp.hdfgroup.org/lib-external/zlib/1.2/bin
+          to ftp://ftp.hdfgroup.org/lib-external/zlib/1.2/bin/zlib123-windows.zip
           to download the Zlib library.
 
 
@@ -193,7 +193,7 @@ Notes:
 
    11. For users who would like to build, test and use HDF5 snapshot
        release, please read Section IX.
-   12. For .Net and Intel users, if you are not building HDF5 with
+   12. For .Net and 2005 users, if you are not building HDF5 with
        Thread-Safe Feature (see Section X), ttsafedll.dsp should
        always be turned off.
 
@@ -206,7 +206,7 @@ Notes:
    1. Build and Install
 
       HDF5 static library:
-           debug and release versionu
+           debug and release version
 
       HDF5 Dynamic Link Library(DLL):
            debug and release version as well as export libraries for DLL
@@ -241,14 +241,15 @@ Notes:
       Section II: How to build and test HDF5 libraries and tools
 ========================================================================
 
-STEP 1: Building HDF5 libraries and tools
-
 Note:
-      1) To build HDF5 with Fortran support, please read over Section VII.
-
+      To build and testHDF5 with Fortran support, please read 
+      over Section VII.
 
       
-   1. Run batch file copy_hdf.bat.
+STEP 1: Building HDF5 libraries and tools
+
+      
+   1. Run batch file copy_hdf.bat
 
       Go to  c:\MyHDFstuff\hdf5\windows and run copy_hdf.bat. This
       process will copy all the necessary batch files, windows specific
@@ -302,7 +303,7 @@ Note:
    4. Select "Build", then Select "Set Active Configuration".
 
       4.1 To build debug versions of single-threaded static libraries,
-      Debug multithreaded DLLs and tests
+      debug multithreaded DLLs and tests
 
       In "Project configurations", select "all -- Win32 Debug",
       select "ok". Select "Build" -> "Build" or "Rebuild All" to
@@ -466,7 +467,7 @@ We provide 2 options for users to test HDF5 libraries and tools.
                                  and tools
                                  To use this option, HDF5 C++ and
                                  Fortran libraries must have been
-                                 built in Section VII.
+                                 built.
 
    Invoke a command prompt window and run hdf5check with appropriate
    option.
@@ -615,8 +616,8 @@ We provide 2 options for users to test HDF5 libraries and tools.
 
    4. HDF5 Fortran library test
 
-      Skip this step UNLESS you have built HDF5 Fortran libraries
-      and want to test them.
+      Skip this step UNLESS you have built HDF5 Fortran libraries in 
+      Section VII, and want to test them.
 
       DLLs listed below should be placed into the Windows system
       directory.  A batch file named install_f90dll.bat is included in
@@ -1209,6 +1210,11 @@ Warning: When you modify the H5pubconf.h file as described below,
    Section VI: How to build HDF5 in Microsoft Visual Studio .Net 2003
 ========================================================================
 
+Note:
+        To build Fortran libraries with Intel Fortran 9.1, please see
+        Section VII.
+        
+        
 Preconditions:
 
    a. Set up path for Microsoft Visual Studio .Net 2003 compiler
@@ -1362,22 +1368,8 @@ Preconditions:
    "Rebuild ALL" to build both release and debug version of HDF5
    Libraries.
 
-   2.5 If you want to build HDF5 Fortran Libraries without High-Level
-   Fortran Libraries, Go to "Build" and select "Configuration Manager".
+   2.5 Go to "Build" and select "Configuration Manager".
    Choose "Release" or "Debug" under "Active Solution Configuration".
-
-   Disable the following projects:
-
-        hdf5_hl_fortran
-        hdf5_hl_f90cstubdll
-        hdf5_hl_fortrandll
-        hl_test_image_fortran
-        hl_test_image_fortrandll
-        hl_test_lite_fortran
-        hl_test_lite_fortrandll
-        hl_test_table_fortran
-        hl_test_table_fortrandll
-        ttsafedll
 
    Click on "OK", From the main menu, choose "Build"-> "Build" or
    "Rebuild ALL" to build both release and debug version of HDF5
@@ -1454,12 +1446,12 @@ Notes:  1. For Intel Compiler users, Intel fortran Compiler 9.1 is currently
       1.1 Open all.dsw and Convert Project Files (.dsp) to Visual
             C++ .Net Format (.vcproj)
 
-              Invoke Microsoft Visual C++ .Net 2003.  From the main menu, go to
-              "File" and select "Open Solution". In the "Open Solution" window,
-              Change "Files of type" to "All Project Files". Choose "all.dsw"
-              under the directory c:\MyHDFstuff\hdf5\windows\proj\all. In the
-              pop up window, choose "Yes To All" to convert all project files
-              to Visual C++ .Net project format.
+              Invoke Microsoft Visual C++ .Net or 2005.  From the main menu, 
+              go to "File" and select "Open Solution". In the "Open Solution" 
+              window, Change "Files of type" to "All Project Files". Choose 
+              "all.dsw" under the directory c:\MyHDFstuff\hdf5\windows\proj\all.
+              In the pop up window, choose "Yes To All" to convert all project 
+              files to Visual C++ .Net project format.
 
       1.2 Extract Compaq Fortran Project Files
 
@@ -1735,7 +1727,7 @@ Notes:  1. For Intel Compiler users, Intel fortran Compiler 9.1 is currently
         To build and test HDF5 High Level Fortran examples:
         ---------------------------------------------------
 
-           1. Invoke Compaq Visual Fortran 6.6c, open the workspace
+           1. Invoke Compaq Visual Fortran 9.1, open the workspace
 
             c:\MyHDFstuff\hdf5\windows\hl\fortran\examples\ (continue next line)
               allhlf90examples\allhlf90examples.dsw

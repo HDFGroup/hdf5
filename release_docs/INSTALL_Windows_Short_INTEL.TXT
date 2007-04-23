@@ -70,7 +70,7 @@ WARNINGS:
       1.1 Open all.dsw and Convert Project Files (.dsp) to Visual
             C++ .Net Format (.vcproj)
 
-              Invoke Microsoft Visual C++ .Net 2003.  From the main menu, go to
+              Invoke Microsoft Visual C++ .Net or 2005.  From the main menu, go to
               "File" and select "Open Solution". In the "Open Solution" window,
               Change "Files of type" to "All Project Files". Choose "all.dsw"
               under the directory c:\MyHDFstuff\hdf5\windows\proj\all. In the
@@ -208,7 +208,7 @@ WARNINGS:
 
       Select "ok". Select "Build" -> "Build" or "Rebuild All" to
       build Debug or Release version of HDF5 C, C++, fortran
-      Library using Intel fortran 9.1 Compiler with .Net 2003 or .Net 2005.
+      Library using Intel Fortran 9.1 Compiler with .Net 2003 or 2005.
 
 ========================================================================
        Part II. Test HDF5 Static and High Level Fortran Library
@@ -353,7 +353,7 @@ WARNINGS:
         To build and test HDF5 High Level Fortran examples:
         ---------------------------------------------------
 
-           1. Invoke Compaq Visual Fortran 6.6c, open the workspace
+           1. Invoke Compaq Visual Fortran 9.1, open the workspace
 
             c:\MyHDFstuff\hdf5\windows\hl\fortran\examples\ (continue next line)
               allhlf90examples\allhlf90examples.dsw

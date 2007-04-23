@@ -29,13 +29,13 @@ notes in INSTALL_Windows.txt before starting below procedures.
                             Preconditions                                                           
 ========================================================================                          
 
-   1. Setup path Visual Studio .Net 2003 Compiler.  
+   1. Setup path Visual Studio .Net or 2005 Compiler.  
    
       Open "System" in Control Panel.
    
       On the "Advanced" tab, click "Environment Variables", click 
       "Path" in the "System variables" box, then click "Edit" and 
-      add your Visual C++ .Net path (For example, 
+      add your Visual C++ .Net or 2005 path (For example, 
       C:\Program Files\Microsoft Visual Studio .NET 2003\Common7\IDE)
       into "Variable Value" and click "OK".                          
                                                                          
