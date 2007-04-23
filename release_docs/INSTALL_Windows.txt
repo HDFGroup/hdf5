@@ -1098,9 +1098,7 @@ Section VII: Building with Intel Fortran 9.1
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     Notes:  1. For Intel Compiler users, Intel fortran Compiler 9.1 is currently
             supported-- please see below.  Intel Compiler verion
-            7.x and 8.x are no longer supported, but documentation can
-            still be found on the web at 
-            http://hdfgroup.org/windows/docs/hdf516/dep/Install_Windows_Dep_Intel.txt
+            7.x and 8.x are no longer supported.
 
             2. Intel Fortran 9.1 works only under .Net 2003 or Visual Studio 2005 
             environments
