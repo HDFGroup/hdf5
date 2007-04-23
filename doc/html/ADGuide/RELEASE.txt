@@ -1,4 +1,4 @@
-HDF5 version 1.6.6-snap19 released on Sun Feb 18 18:23:21 CST 2007
+HDF5 version 1.6.6-snap20 released on Mon Apr 23 10:53:42 CDT 2007
 ================================================================================
 
 INTRODUCTION
@@ -53,6 +53,22 @@ New Features
 
     Tools:
     ------
+       - h52gif and gif2h5: Both these tools were revised to include the High
+         Level Image API support, and tests were added to /hl/tools/gif2h5.
+          PVN - 2007/04/13
+       - h5dump: added support for double long type H5T_NATIVE_LDOUBLE. PVN
+          2007/03/13
+       - h5dump: added support for binary output, see usage. PVN 2007/03/13
+       - h5repack: added support for reading and comparing by hyperslabs for
+         large files. PVN - 2007/03/01
+       - h5repack: a new option allows the copy using the file type (default)
+         instead of the previous conversion to native type. PVN - 2007/03/01
+       - h5repack: output the percentage of compression used. PVN - 2007/03/01
+       - h5diff: added support for comparing dataset regions. PVN - 2007/02/20
+       - h5diff: added support for reading and comparing by hyperslabs for large files.
+          PVN - 2007/02/20
+       - h5diff: printing of dataset dimensions along with dataset name. PVN -
+          2007/02/19
 
     F90 API:
     --------
@@ -74,7 +90,11 @@ Bug Fixes since HDF5-1.6.5 Release
 
     Library
     -------
-       - Relaxed restrictions on attribute operations to allow a file ID to
+        - STDIO driver didn't support files bigger than 2GB because the OFFSET
+            parameter of fseek is of type LONG INT, not big enough for big files.
+            Use fseeko instead for big files if it's available on the system.
+            SLU - 2007/4/5
+        - Relaxed restrictions on attribute operations to allow a file ID to
             be used as the "location ID".  If a file ID is used, the attribute
             operation will occur on the root group of the file.
             - QAK - 2007/02/09
@@ -137,6 +157,15 @@ Bug Fixes since HDF5-1.6.5 Release
    
     Tools
     -----
+       - Fixed a bug on h5dump regarding the display of named datatypes
+          attributes. PVN 2007/03/13
+       - Fixed a bug on h5dump regarding the display of group comments. PVN
+          2007/03/13
+       - Fixed a bug on h5dump regarding the display of hardlinks pointing 
+           to the root group. PVN 2007/03/13
+       - Fixed a bug in the h5diff percentage option -p. PVN 2007/03/05
+       - Fixed a bug in h5dump that caused array indices greater than 2 ^32-1
+         not to be printed correctly - PVN 2007/2/19
 
     Documentation 
     ------------- 
