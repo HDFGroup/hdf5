@@ -388,15 +388,10 @@
 ./release_docs/INSTALL
 ./release_docs/INSTALL_Cygwin.txt
 ./release_docs/INSTALL_VMS.txt
-./release_docs/INSTALL_Windows.html
 ./release_docs/INSTALL_Windows.txt
-./release_docs/INSTALL_Windows_From_Command_Line.html
 ./release_docs/INSTALL_Windows_From_Command_Line.txt
-./release_docs/INSTALL_Windows_Short_Intel.htm
 ./release_docs/INSTALL_Windows_Short_INTEL.TXT
-./release_docs/INSTALL_Windows_Short_MSVS6.0.htm
 ./release_docs/INSTALL_Windows_Short_MSVS6.0.TXT
-./release_docs/INSTALL_Windows_Short_Net.htm
 ./release_docs/INSTALL_Windows_Short_NET.TXT
 ./release_docs/INSTALL_codewarrior.txt
 ./release_docs/INSTALL_parallel
