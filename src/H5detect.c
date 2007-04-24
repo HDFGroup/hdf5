@@ -16,6 +16,7 @@
 /*keep this declaration near the top of this file -RPM*/
 static const char *FileHeader = "\n\
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n\
+ * Copyright by The HDF Group.                                               *\n\
  * Copyright by the Board of Trustees of the University of Illinois.         *\n\
  * All rights reserved.                                                      *\n\
  *                                                                           *\n\
@@ -25,8 +26,8 @@ static const char *FileHeader = "\n\
  * of the source code distribution tree; Copyright.html can be found at the  *\n\
  * root level of an installed copy of the electronic HDF5 document set and   *\n\
  * is linked from the top-level documents page.  It can also be found at     *\n\
- * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *\n\
- * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *\n\
+ * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *\n\
+ * access to either file, you may request a copy from help@hdfgroup.org.     *\n\
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *";
 /*
  *
