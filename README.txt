@@ -2,18 +2,6 @@ HDF5 version 1.8.0-beta1post1 currently under development
 Please refer to the release_docs/INSTALL file for installation instructions.
 ------------------------------------------------------------------------------
 
-===========================================================================
-WARNING!!  WARNING!!  WARNING!!  WARNING!!  WARNING!!  WARNING!!  WARNING!!
-
-This code is currently using interim file format changes that will
-certainly change before the final 1.8.0 release.  Please feel free to
-test everything out (in fact, we'd welcome that!), but do _NOT_ keep any
-of the files produced as they will not be readable by later versions of
-the HDF5 software.
-
-WARNING!!  WARNING!!  WARNING!!  WARNING!!  WARNING!!  WARNING!!  WARNING!!
-===========================================================================
-
 This release is almost fully functional for the entire API defined in the
 documentation, see the RELEASE.txt file in the release_docs directory for information
 specific to this release of the library.  The INSTALL file contains
