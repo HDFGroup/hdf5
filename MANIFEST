@@ -132,6 +132,7 @@
 ./examples/h5_extend_write.c
 ./examples/h5_extlink.c
 ./examples/h5_group.c
+./examples/h5_interm_group.c
 ./examples/h5_read.c
 ./examples/h5_write.c
 ./examples/h5_select.c
