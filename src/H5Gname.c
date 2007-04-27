@@ -1236,7 +1236,7 @@ H5G_get_refobj_name(hid_t file, hid_t dxpl_id, const H5O_loc_t *loc,
         HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "group iteration failed while looking for object name")
     else if(status > 0) {
         /* Set the length of the full path */
-        ret_value = HDstrlen(udata.container) + 1;
+        ret_value = HDstrlen(udata.container);
 
         /* If there's a buffer provided, copy into it, up to the limit of its size */
         if(name) {
