@@ -2520,9 +2520,9 @@ test_obj_ref(hid_t fapl)
     if((dataset2 = H5Rdereference(dataset, H5R_OBJECT, &wbuf[0])) < 0) TEST_ERROR
     i = H5Iget_name(dataset2, (char*)buf, sizeof(buf));
     if(H5Dclose(dataset2) < 0) TEST_ERROR
-    if(!((HDstrcmp(buf, "/Dataset3") == 0) && (i == 10))) TEST_ERROR
+    if(!((HDstrcmp(buf, "/Dataset3") == 0) && (i == 9))) TEST_ERROR
     i = H5Rget_name(dataset, H5R_OBJECT, &wbuf[0], (char*)buf, sizeof(buf));
-    if(!((HDstrcmp(buf, "/Dataset3") == 0) && (i == 10))) TEST_ERROR
+    if(!((HDstrcmp(buf, "/Dataset3") == 0) && (i == 9))) TEST_ERROR
     PASSED()
 
     HDmemset(buf, 0, sizeof(buf));
@@ -2530,9 +2530,9 @@ test_obj_ref(hid_t fapl)
     if((dataset2 = H5Rdereference(dataset, H5R_OBJECT, &wbuf[1])) < 0) TEST_ERROR
     i = H5Iget_name(dataset2, (char*)buf, sizeof(buf));
     if(H5Dclose(dataset2) < 0) TEST_ERROR
-    if(!((HDstrcmp(buf, "/Group1/Dataset2") == 0) && (i == 17))) TEST_ERROR
+    if(!((HDstrcmp(buf, "/Group1/Dataset2") == 0) && (i == 16))) TEST_ERROR
     i = H5Rget_name(dataset, H5R_OBJECT, &wbuf[1], (char*)buf, sizeof(buf));
-    if(!((HDstrcmp(buf, "/Group1/Dataset2") == 0) && (i == 17))) TEST_ERROR
+    if(!((HDstrcmp(buf, "/Group1/Dataset2") == 0) && (i == 16))) TEST_ERROR
     PASSED()
 
     HDmemset(buf, 0, sizeof(buf));
@@ -2540,9 +2540,9 @@ test_obj_ref(hid_t fapl)
     if((group = H5Rdereference(dataset, H5R_OBJECT, &wbuf[2])) < 0) TEST_ERROR
     i = H5Iget_name(group, (char*)buf, sizeof(buf));
     if(H5Gclose(group) < 0) TEST_ERROR
-    if(!((HDstrcmp(buf, "/Group1") == 0) && (i == 8))) TEST_ERROR
+    if(!((HDstrcmp(buf, "/Group1") == 0) && (i == 7))) TEST_ERROR
     i = H5Rget_name(dataset, H5R_OBJECT, &wbuf[2], (char*)buf, sizeof(buf));
-    if(!((HDstrcmp(buf, "/Group1") == 0) && (i == 8))) TEST_ERROR
+    if(!((HDstrcmp(buf, "/Group1") == 0) && (i == 7))) TEST_ERROR
     PASSED()
 
     HDmemset(buf, 0, sizeof(buf));
@@ -2550,9 +2550,9 @@ test_obj_ref(hid_t fapl)
     if((tid1 = H5Rdereference(dataset, H5R_OBJECT, &wbuf[3])) < 0) TEST_ERROR
     i = H5Iget_name(tid1, (char*)buf, sizeof(buf));
     if(H5Tclose(tid1) < 0) TEST_ERROR
-    if(!((HDstrcmp(buf, "/Group1/Datatype1") == 0) && (i == 18))) TEST_ERROR
+    if(!((HDstrcmp(buf, "/Group1/Datatype1") == 0) && (i == 17))) TEST_ERROR
     i = H5Rget_name(dataset, H5R_OBJECT, &wbuf[3], (char*)buf, sizeof(buf));
-    if(!((HDstrcmp(buf, "/Group1/Datatype1") == 0) && (i == 18))) TEST_ERROR
+    if(!((HDstrcmp(buf, "/Group1/Datatype1") == 0) && (i == 17))) TEST_ERROR
     PASSED()
 
     HDmemset(buf, 0, sizeof(buf));
@@ -2560,9 +2560,9 @@ test_obj_ref(hid_t fapl)
     if((dataset2 = H5Rdereference(dataset, H5R_OBJECT, &wbuf[4])) < 0) TEST_ERROR
     i = H5Iget_name(dataset2, (char*)buf, sizeof(buf));
     if(H5Dclose(dataset2) < 0) TEST_ERROR
-    if(!((HDstrcmp(buf, "/Group1/Group2/Dataset4") == 0) && (i == 24))) TEST_ERROR
+    if(!((HDstrcmp(buf, "/Group1/Group2/Dataset4") == 0) && (i == 23))) TEST_ERROR
     i = H5Rget_name(dataset, H5R_OBJECT, &wbuf[4], (char*)buf, sizeof(buf));
-    if(!((HDstrcmp(buf, "/Group1/Group2/Dataset4") == 0) && (i == 24))) TEST_ERROR
+    if(!((HDstrcmp(buf, "/Group1/Group2/Dataset4") == 0) && (i == 23))) TEST_ERROR
     PASSED()
 
     HDmemset(buf, 0, sizeof(buf));
@@ -2570,9 +2570,9 @@ test_obj_ref(hid_t fapl)
     if((group = H5Rdereference(dataset, H5R_OBJECT, &wbuf[5])) < 0) TEST_ERROR
     i = H5Iget_name(group, (char*)buf, sizeof(buf));
     if(H5Gclose(group) < 0) TEST_ERROR
-    if(!((HDstrcmp(buf, "/Group1/Group2") == 0) && (i == 15))) TEST_ERROR
+    if(!((HDstrcmp(buf, "/Group1/Group2") == 0) && (i == 14))) TEST_ERROR
     i = H5Rget_name(dataset, H5R_OBJECT, &wbuf[5], (char*)buf, sizeof(buf));
-    if(!((HDstrcmp(buf, "/Group1/Group2") == 0) && (i == 15))) TEST_ERROR
+    if(!((HDstrcmp(buf, "/Group1/Group2") == 0) && (i == 14))) TEST_ERROR
     PASSED()
 
     HDmemset(buf, 0, sizeof(buf));
@@ -2580,9 +2580,9 @@ test_obj_ref(hid_t fapl)
     if((dataset2 = H5Rdereference(dataset, H5R_OBJECT, &wbuf[6])) < 0) TEST_ERROR
     i = H5Iget_name(dataset2, (char*)buf, sizeof(buf));
     if(H5Dclose(dataset2) < 0) TEST_ERROR
-    if(!((HDstrcmp(buf, "/Group1/Dataset5") == 0) && (i == 17))) TEST_ERROR
+    if(!((HDstrcmp(buf, "/Group1/Dataset5") == 0) && (i == 16))) TEST_ERROR
     i = H5Rget_name(dataset, H5R_OBJECT, &wbuf[6], (char*)buf, sizeof(buf));
-    if(!((HDstrcmp(buf, "/Group1/Dataset5") == 0) && (i == 17))) TEST_ERROR
+    if(!((HDstrcmp(buf, "/Group1/Dataset5") == 0) && (i == 16))) TEST_ERROR
     PASSED()
 
     HDmemset(buf, 0, sizeof(buf));
@@ -2590,9 +2590,9 @@ test_obj_ref(hid_t fapl)
     if((group = H5Rdereference(dataset, H5R_OBJECT, &wbuf[7])) < 0) TEST_ERROR
     i = H5Iget_name(group, (char*)buf, sizeof(buf));
     if(H5Gclose(group) < 0) TEST_ERROR
-    if(!((HDstrcmp(buf, "/") == 0) && (i == 2))) TEST_ERROR
+    if(!((HDstrcmp(buf, "/") == 0) && (i == 1))) TEST_ERROR
     i = H5Rget_name(dataset, H5R_OBJECT, &wbuf[7], (char*)buf, sizeof(buf));
-    if(!((HDstrcmp(buf, "/") == 0) && (i == 2))) TEST_ERROR
+    if(!((HDstrcmp(buf, "/") == 0) && (i == 1))) TEST_ERROR
     PASSED()
 
     /* Now we mount fid2 at /Group2 and look for dataset4.  It shouldn't be found */
@@ -2741,7 +2741,7 @@ test_reg_ref(hid_t fapl)
     /* Get name of the dataset the first region reference points to using H5Rget_name */
     TESTING("H5Rget_name to get name from region reference (hyperslab)");
     name_size1 = H5Rget_name(dsetr_id, H5R_DATASET_REGION, &ref_out[0], (char*)buf1, NAME_BUF_SIZE);
-    if(!((HDstrcmp(buf1, "/MATRIX") == 0) && (name_size1 == 8))) TEST_ERROR 
+    if(!((HDstrcmp(buf1, "/MATRIX") == 0) && (name_size1 == 7))) TEST_ERROR 
     PASSED()
 
     TESTING("H5Iget_name to get name from region reference (hyperslab)");
@@ -2751,7 +2751,7 @@ test_reg_ref(hid_t fapl)
 
     /* Get name of the dataset the first region reference points using H5Iget_name */
     name_size2 = H5Iget_name(dsetv_id, (char*)buf2, NAME_BUF_SIZE); 
-    if(!((HDstrcmp(buf2, "/MATRIX") == 0) && (name_size2 == 8))) TEST_ERROR
+    if(!((HDstrcmp(buf2, "/MATRIX") == 0) && (name_size2 == 7))) TEST_ERROR
 
     if((status = H5Dclose(dsetv_id)) < 0) TEST_ERROR
 
@@ -2760,7 +2760,7 @@ test_reg_ref(hid_t fapl)
     /* Get name of the dataset the second region reference points to using H5Rget_name */
     TESTING("H5Rget_name to get name from region reference (pnt selec)");
     name_size1 = H5Rget_name(dsetr_id, H5R_DATASET_REGION, &ref_out[1], (char*)buf1, NAME_BUF_SIZE);      
-    if(!((HDstrcmp(buf1, "/MATRIX") == 0) && (name_size1 == 8))) TEST_ERROR
+    if(!((HDstrcmp(buf1, "/MATRIX") == 0) && (name_size1 == 7))) TEST_ERROR
     PASSED()
 
     TESTING("H5Iget_name to get name from region reference (pnt selec)");
@@ -2770,7 +2770,7 @@ test_reg_ref(hid_t fapl)
 
     /* Get name of the dataset the first region reference points using H5Iget_name */
     name_size2 = H5Iget_name(dsetv_id, (char*)buf2, NAME_BUF_SIZE); 
-    if(!((HDstrcmp(buf2, "/MATRIX") == 0) && (name_size2 == 8))) TEST_ERROR
+    if(!((HDstrcmp(buf2, "/MATRIX") == 0) && (name_size2 == 7))) TEST_ERROR
 
     if((status = H5Dclose(dsetv_id)) < 0) TEST_ERROR
 
