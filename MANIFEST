@@ -1955,7 +1955,6 @@
 ./windows/hl/examples/ex_packetdll/ex_packetdll.dsp
 
 #Windows High Level Fortran Examples
-./windows/hl/fortran/examples/exlite.f90
 ./windows/hl/fortran/examples/test_hl_f90examples.BAT
 ./windows/hl/fortran/examples/allhlf90examples/allhlf90examples.dsp
 ./windows/hl/fortran/examples/allhlf90examples/allhlf90examples.dsw
