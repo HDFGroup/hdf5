@@ -1493,83 +1493,31 @@ Notes:  1. For Intel Compiler users, Intel fortran Compiler 9.1 is currently
 
        Do the same thing for hdf5_hl_fortran.
 
-      1.3 Change project dependencies
+      1.3 Add project dependencies
 
 
       To check the project dependencies:
       
-      Right click the selected project, you should see "Project Dependencies" on the menu,
-      click "Project Dependencies", You should see a "Project Dependencies" panel, with
-      the selected project and the projects it depends on checked under "Depends on" list.
+      Right click the selected project, you should see "Project Dependencies" 
+      on the menu, click "Project Dependencies", You should see a "Project 
+      Dependencies" panel, with the selected project and the projects it 
+      depends on checked under "Depends on" list.
 
-      Make sure all intel fortran projects have their corrsponding dependencies as follows:
-
-      hdf5_fortran:             hdf5,                 hdf5_f90cstub
-
-      hdf5_fortrandll:          hdf5dll,              hdf5_f90cstubdll
-
-      libtest_fortran:          libtest,              libtest_fotran_lib
-
-      libtest_fortrandll:       libtest_cstubdll,     libtestD
-
-      hdf5_hl_fortran:          hdf5,                 hdf5_f90cstub,
-                                hdf5_fortran,         hdf5_hl,
-                                hdf5_hl_fortran_lib
-
-      hdf5_hl_fortrandll:       hdf5dll,              hdf5_hldll,
-                                hdf5_hl_f90cstubdll,  hdf5_fortrandll,
-                                hdf5_f90cstubdll
-
-
-      flush1_fortran:           hdf5,                 hdf5_f90cstub,
-                                hdf5_fortran,         libtest,
-                                libtest_fortran,      libtest_fortran_lib
-                                
-      flush1_fortrandll:        hdf5_f90cstubdll,     hdf5_fortrandll,
-                                hdf5dll,              libtest_fortrandll
-                                libtest_cstubdll,     libtestD
-
-      flush2_fortran:           hdf5,                 hdf5_f90cstub,
-                                hdf5_fortran,         libtest,
-                                libtest_fortran,      libtest_fortran_lib
-
-      flush2_fortrandll:        hdf5_f90cstubdll,     hdf5_fortrandll,
-                                hdf5dll,              libtest_fortrandll
-                                libtest_cstubdll,     libtestD
-                                
-      testhdf5_fortran:         hdf5,                 hdf5_f90cstub,
-                                hdf5_fortran,         libtest,
-                                libtest_fortran,      libtest_fortran_lib
-
-      testhdf5_fortrandll:      hdf5_f90cstubdll,     hdf5_fortrandll,
-                                hdf5dll,              libtest_fortrandll
-                                libtest_cstubdll,     libtestD
-
-
-
-      hl_test_image_fortran:    hdf5,                 hdf5_f90cstub,
-                                hdf5_fortran,         hdf5_hl,
-                                hdf5_hl_fortran,      hdf5_hl_fortran_lib
-
-      hl_test_image_fortrandll: hdf5dll,              hdf5_hldll,
-                                hdf5_f90cstubdll,     hdf5_fortrandll,
-                                hdf5_hl_f90cstubdll,  hdf5_hl_fortrandll
+      Each of the following projects will need libtest_fortran_lib added
+      to its list of dependencies:
       
-      hl_test_lite_fortran:     hdf5,                 hdf5_f90cstub,
-                                hdf5_fortran,         hdf5_hl,
-                                hdf5_hl_fortran,      hdf5_hl_fortran_lib
-
-      hl_test_lite_fortrandll:  hdf5dll,              hdf5_hldll,
-                                hdf5_f90cstubdll,     hdf5_fortrandll,
-                                hdf5_hl_f90cstubdll,  hdf5_hl_fortrandll
-
-      hl_test_table_fortran:    hdf5,                 hdf5_f90cstub,
-                                hdf5_fortran,         hdf5_hl,
-                                hdf5_hl_fortran,      hdf5_hl_fortran_lib
+            libtest_fortran
+            flush1_fortran
+            flush2_fortran
+            testhdf5_fortran
+            
+      Each of the following projects will need hdf5_hl_fortran_lib added
+      to its list of dependencies:
       
-      hl_test_table_fortrandll:hdf5dll,               hdf5_hldll,
-                               hdf5_f90cstubdll,      hdf5_fortrandll,
-                               hdf5_hl_f90cstubdll,   hdf5_hl_fortrandll
+            hdf5_hl_fortran
+            hl_test_image_fortran
+            hl_test_lite_fortran
+            hl_test_table_fortran
 
 
 

@@ -1256,6 +1256,15 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name libtest_fortran
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_f90cstub
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtest
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -1276,6 +1285,15 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name libtest_fortrandll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtest_cstubdll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtestD
     End Project Dependency
 }}}
 
@@ -1331,6 +1349,15 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name hdf5_fortran
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_f90cstub
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtest
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -1351,6 +1378,15 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name libtest_fortrandll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtest_cstubdll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtestD
     End Project Dependency
 }}}
 
@@ -2087,6 +2123,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name hdf5_f90cstub
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -2101,6 +2140,9 @@ Package=<4>
 {{{
     Begin Project Dependency
     Project_Dep_Name hdf5_f90cstubdll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
     End Project Dependency
 }}}
 
@@ -2186,6 +2228,12 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name hdf5_fortran
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_f90cstub
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -2206,6 +2254,12 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name hdf5_fortrandll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_f90cstubdll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hldll
     End Project Dependency
 }}}
 
@@ -2315,6 +2369,15 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name hdf5_hl_fortran
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_f90cstub
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hl
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -2332,6 +2395,18 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name hdf5_hl_fortrandll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_f90cstubdll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hl_f90cstubdll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hldll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
     End Project Dependency
 }}}
 
@@ -2393,6 +2468,15 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name hdf5_fortran
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_f90cstub
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hl
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -2410,6 +2494,18 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name hdf5_hl_fortrandll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_f90cstubdll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hl_f90cstubdll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hldll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
     End Project Dependency
 }}}
 
@@ -2552,6 +2648,15 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name hdf5_hl_fortran
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_f90cstub
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hl
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -2569,6 +2674,18 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name hdf5_hl_fortrandll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_f90cstubdll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hl_f90cstubdll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_hldll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
     End Project Dependency
 }}}
 
@@ -2797,6 +2914,9 @@ Package=<4>
 {{{
     Begin Project Dependency
     Project_Dep_Name libtest_cstubdll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtestD
     End Project Dependency
 }}}
 
@@ -3350,6 +3470,15 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name libtest_fortran
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5_f90cstub
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtest
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -3370,6 +3499,15 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name libtest_fortrandll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtest_cstubdll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtestD
     End Project Dependency
 }}}
 
