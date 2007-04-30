@@ -99,7 +99,7 @@ const H5O_msg_class_t H5O_MSG_ATTR[1] = {{
 /* Add support for different character encodings of attribute names */
 #define H5O_ATTR_VERSION_3      3
 
-/* The latest version of the format.  Look through the 'encode' 
+/* The latest version of the format.  Look through the 'encode', 'decode'
  *      and 'size' callback for places to change when updating this. */
 #define H5O_ATTR_VERSION_LATEST H5O_ATTR_VERSION_3
 

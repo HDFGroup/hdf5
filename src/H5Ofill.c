@@ -31,28 +31,26 @@
 #include "H5Pprivate.h"		/* Property lists			*/
 
 
-static void  *H5O_fill_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
-static herr_t H5O_fill_encode(H5F_t *f, uint8_t *p, const void *_mesg);
-static size_t H5O_fill_size(const H5F_t *f, const void *_mesg);
-static herr_t H5O_fill_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
-			     int indent, int fwidth);
+static void  *H5O_fill_old_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
+static herr_t H5O_fill_old_encode(H5F_t *f, uint8_t *p, const void *_mesg);
+static size_t H5O_fill_old_size(const H5F_t *f, const void *_mesg);
 static void  *H5O_fill_new_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
 static herr_t H5O_fill_new_encode(H5F_t *f, uint8_t *p, const void *_mesg);
-static void  *H5O_fill_new_copy(const void *_mesg, void *_dest);
 static size_t H5O_fill_new_size(const H5F_t *f, const void *_mesg);
-static herr_t H5O_fill_new_reset(void *_mesg);
-static herr_t H5O_fill_new_free(void *_mesg);
-static herr_t H5O_fill_new_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
+static void  *H5O_fill_copy(const void *_mesg, void *_dest);
+static herr_t H5O_fill_reset(void *_mesg);
+static herr_t H5O_fill_free(void *_mesg);
+static herr_t H5O_fill_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
 			     int indent, int fwidth);
 
 /* Set up & include shared message "interface" info */
 #define H5O_SHARED_TYPE			H5O_MSG_FILL
 #define H5O_SHARED_DECODE		H5O_fill_shared_decode
-#define H5O_SHARED_DECODE_REAL		H5O_fill_decode
+#define H5O_SHARED_DECODE_REAL		H5O_fill_old_decode
 #define H5O_SHARED_ENCODE		H5O_fill_shared_encode
-#define H5O_SHARED_ENCODE_REAL		H5O_fill_encode
+#define H5O_SHARED_ENCODE_REAL		H5O_fill_old_encode
 #define H5O_SHARED_SIZE			H5O_fill_shared_size
-#define H5O_SHARED_SIZE_REAL		H5O_fill_size
+#define H5O_SHARED_SIZE_REAL		H5O_fill_old_size
 #define H5O_SHARED_DELETE		H5O_fill_shared_delete
 #undef H5O_SHARED_DELETE_REAL
 #define H5O_SHARED_LINK			H5O_fill_shared_link
@@ -91,7 +89,7 @@ static herr_t H5O_fill_new_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FIL
 #undef H5O_SHARED_DEBUG
 #define H5O_SHARED_DEBUG		H5O_fill_new_shared_debug
 #undef H5O_SHARED_DEBUG_REAL
-#define H5O_SHARED_DEBUG_REAL		H5O_fill_new_debug
+#define H5O_SHARED_DEBUG_REAL		H5O_fill_debug
 #undef H5Oshared_H
 #include "H5Oshared.h"			/* Shared Object Header Message Callbacks */
 
@@ -103,10 +101,10 @@ const H5O_msg_class_t H5O_MSG_FILL[1] = {{
     TRUE,			/* messages are sharable?       */
     H5O_fill_shared_decode,	/*decode message                        */
     H5O_fill_shared_encode,	/*encode message                        */
-    H5O_fill_new_copy,          /*copy the native value                 */
+    H5O_fill_copy,		/*copy the native value                 */
     H5O_fill_shared_size,	/*raw message size			*/
-    H5O_fill_new_reset,         /*free internal memory			*/
-    H5O_fill_new_free,		/* free method				*/
+    H5O_fill_reset,		/*free internal memory			*/
+    H5O_fill_free,		/* free method				*/
     H5O_fill_shared_delete,	/* file delete method			*/
     H5O_fill_shared_link,	/* link method				*/
     H5O_shared_copy,		/* set share method			*/
@@ -127,10 +125,10 @@ const H5O_msg_class_t H5O_MSG_FILL_NEW[1] = {{
     TRUE,			/* messages are sharable?       */
     H5O_fill_new_shared_decode,	/*decode message			*/
     H5O_fill_new_shared_encode,	/*encode message			*/
-    H5O_fill_new_copy,		/*copy the native value			*/
+    H5O_fill_copy,		/*copy the native value			*/
     H5O_fill_new_shared_size,	/*raw message size			*/
-    H5O_fill_new_reset,		/*free internal memory			*/
-    H5O_fill_new_free,		/* free method				*/
+    H5O_fill_reset,		/*free internal memory			*/
+    H5O_fill_free,		/* free method				*/
     H5O_fill_new_shared_delete,	/* file delete method			*/
     H5O_fill_new_shared_link,	/* link method				*/
     H5O_shared_copy,		/* set share method			*/
@@ -144,9 +142,25 @@ const H5O_msg_class_t H5O_MSG_FILL_NEW[1] = {{
 }};
 
 /* Initial version of the "old" fill value information */
-#define H5O_FILL_VERSION 	1
+/* (It doesn't look like this value was ever used in the file -QAK) */
+#define H5O_FILL_VERSION_1 	1
 /* Revised version of the "new" fill value information */
 #define H5O_FILL_VERSION_2 	2
+/* Version of the "new" fill value information with smaller default format */
+#define H5O_FILL_VERSION_3 	3
+
+/* The latest version of the format.  Look through the 'encode', 'decode'
+ *      and 'size' callback for places to change when updating this. */
+#define H5O_FILL_VERSION_LATEST H5O_FILL_VERSION_3
+
+/* Masks, shift values & flags for fill value message */
+#define H5O_FILL_MASK_ALLOC_TIME        0x03
+#define H5O_FILL_SHIFT_ALLOC_TIME       0
+#define H5O_FILL_MASK_FILL_TIME         0x03
+#define H5O_FILL_SHIFT_FILL_TIME        2
+#define H5O_FILL_FLAG_UNDEFINED_VALUE   0x10
+#define H5O_FILL_FLAG_HAVE_VALUE        0x20
+#define H5O_FILL_FLAGS_ALL              (H5O_FILL_MASK_ALLOC_TIME | (H5O_FILL_MASK_FILL_TIME << H5O_FILL_SHIFT_FILL_TIME) | H5O_FILL_FLAG_UNDEFINED_VALUE | H5O_FILL_FLAG_HAVE_VALUE)
 
 /* Declare a free list to manage the H5O_fill_t struct */
 H5FL_DEFINE(H5O_fill_t);
@@ -160,7 +174,6 @@ H5FL_DEFINE(H5O_fill_t);
  * 		fill value writing time and whether fill value is defined.
  *
  * Return:	Success:	Ptr to new message in native struct.
- *
  *		Failure:	NULL
  *
  * Programmer:  Raymond Lu
@@ -173,7 +186,7 @@ H5O_fill_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_
     const uint8_t *p)
 {
     H5O_fill_t	*mesg = NULL;
-    int		version;
+    unsigned	version;                /* Version of format */
     void	*ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_fill_new_decode)
@@ -186,33 +199,78 @@ H5O_fill_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_
 
     /* Version */
     version = *p++;
-    if(version != H5O_FILL_VERSION && version !=H5O_FILL_VERSION_2)
+    if(version < H5O_FILL_VERSION_1 || version > H5O_FILL_VERSION_LATEST)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for fill value message")
 
-    /* Space allocation time */
-    mesg->alloc_time = (H5D_alloc_time_t)*p++;
+    /* Decode each version */
+    if(version < H5O_FILL_VERSION_3) {
+        /* Space allocation time */
+        mesg->alloc_time = (H5D_alloc_time_t)*p++;
 
-    /* Fill value write time */
-    mesg->fill_time = (H5D_fill_time_t)*p++;
+        /* Fill value write time */
+        mesg->fill_time = (H5D_fill_time_t)*p++;
 
-    /* Whether fill value is defined */
-    mesg->fill_defined = *p++;
+        /* Whether fill value is defined */
+        mesg->fill_defined = *p++;
 
-    /* Only decode fill value information if one is defined */
-    if(mesg->fill_defined) {
-        INT32DECODE(p, mesg->size);
-        if(mesg->size > 0) {
-            H5_CHECK_OVERFLOW(mesg->size,ssize_t,size_t);
+        /* Only decode fill value information if one is defined */
+        if(mesg->fill_defined) {
+            INT32DECODE(p, mesg->size);
+            if(mesg->size > 0) {
+                H5_CHECK_OVERFLOW(mesg->size, ssize_t, size_t);
+                if(NULL == (mesg->buf = H5MM_malloc((size_t)mesg->size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value")
+                HDmemcpy(mesg->buf, p, (size_t)mesg->size);
+            } /* end if */
+        } /* end if */
+        else
+            mesg->size = (-1);
+    } /* end if */
+    else {
+        unsigned flags;          /* Status flags */
+
+        /* Flags */
+        flags = *p++;
+
+        /* Check for unknown flags */
+        if(flags & (unsigned)~H5O_FILL_FLAGS_ALL)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "unknown flag for fill value message")
+
+        /* Space allocation time */
+        mesg->alloc_time = (flags >> H5O_FILL_SHIFT_ALLOC_TIME) & H5O_FILL_MASK_ALLOC_TIME;
+
+        /* Fill value write time */
+        mesg->fill_time = (flags >> H5O_FILL_SHIFT_FILL_TIME) & H5O_FILL_MASK_FILL_TIME;
+
+        /* Check for undefined fill value */
+        if(flags & H5O_FILL_FLAG_UNDEFINED_VALUE) {
+            /* Sanity check */
+            HDassert(!(flags & H5O_FILL_FLAG_HAVE_VALUE));
+
+            /* Set value for "undefined" fill value */
+            mesg->size = (-1);
+        } /* end if */
+        else if(flags & H5O_FILL_FLAG_HAVE_VALUE) {
+            /* Fill value size */
+            UINT32DECODE(p, mesg->size);
+
+            /* Fill value */
+            H5_CHECK_OVERFLOW(mesg->size, ssize_t, size_t);
             if(NULL == (mesg->buf = H5MM_malloc((size_t)mesg->size)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value")
             HDmemcpy(mesg->buf, p, (size_t)mesg->size);
-        } /* end if */
-    } /* end if */
-    else
-        mesg->size = (-1);
+
+            /* Set the "defined" flag */
+            mesg->fill_defined = TRUE;
+        } /* end else */
+        else {
+            /* Set the "defined" flag */
+            mesg->fill_defined = TRUE;
+        } /* end else */
+    } /* end else */
 
     /* Set return value */
-    ret_value = (void*)mesg;
+    ret_value = (void *)mesg;
 
 done:
     if(!ret_value && mesg) {
@@ -226,12 +284,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_fill_decode
+ * Function:    H5O_fill_old_decode
  *
- * Purpose:     Decode a fill value message.
+ * Purpose:     Decode an old fill value message.
  *
  * Return:      Success:        Ptr to new message in native struct.
- *
  *              Failure:        NULL
  *
  * Programmer:  Robb Matzke
@@ -240,13 +297,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_fill_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
+H5O_fill_old_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
     const uint8_t *p)
 {
     H5O_fill_t *mesg = NULL;		/* Decoded fill value message */
     void *ret_value;                    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_fill_decode)
+    FUNC_ENTER_NOAPI_NOINIT(H5O_fill_old_decode)
 
     HDassert(f);
     HDassert(p);
@@ -282,7 +339,7 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_fill_decode() */
+} /* end H5O_fill_old_decode() */
 
 
 /*-------------------------------------------------------------------------
@@ -297,13 +354,13 @@ done:
  * Programmer:  Raymond Lu
  *              Feb 26, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_fill_new_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
+H5O_fill_new_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 {
+    unsigned	version;                /* Version of format */
+    hbool_t     use_latest_format;      /* Flag indicating the newest file format should be used */
     const H5O_fill_t	*mesg = (const H5O_fill_t *)_mesg;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_new_encode)
@@ -312,52 +369,106 @@ H5O_fill_new_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
     HDassert(p);
     HDassert(mesg && NULL == mesg->type);
 
+    /* Get the file's 'use the latest version of the format' flag */
+    use_latest_format = H5F_USE_LATEST_FORMAT(f);
+
+    /* Check which version to write out */
+    if(use_latest_format)
+        version = H5O_FILL_VERSION_LATEST;      /* Write out latest version of format */
+    else
+        version = H5O_FILL_VERSION_2;
+
     /* Version */
-    *p++ = H5O_FILL_VERSION_2;
+    *p++ = (uint8_t)version;
 
-    /* Space allocation time */
-    *p++ = mesg->alloc_time;
+    if(version < H5O_FILL_VERSION_3) {
+        /* Space allocation time */
+        *p++ = mesg->alloc_time;
 
-    /* Fill value writing time */
-    *p++ = mesg->fill_time;
+        /* Fill value writing time */
+        *p++ = mesg->fill_time;
 
-    /* Whether fill value is defined */
-    *p++ = mesg->fill_defined;
+        /* Whether fill value is defined */
+        *p++ = mesg->fill_defined;
 
-    /* Only write out the size and fill value if it is defined */
-    if(mesg->fill_defined) {
-        INT32ENCODE(p, mesg->size);
-        if(mesg->size > 0)
-            if(mesg->buf) {
-                H5_CHECK_OVERFLOW(mesg->size, ssize_t, size_t);
-                HDmemcpy(p, mesg->buf, (size_t)mesg->size);
-            } /* end if */
+        /* Only write out the size and fill value if it is defined */
+        if(mesg->fill_defined) {
+            UINT32ENCODE(p, mesg->size);
+            if(mesg->size > 0)
+                if(mesg->buf) {
+                    H5_CHECK_OVERFLOW(mesg->size, ssize_t, size_t);
+                    HDmemcpy(p, mesg->buf, (size_t)mesg->size);
+                } /* end if */
+        } /* end if */
     } /* end if */
+    else {
+        uint8_t flags = 0;      /* Fill value setting flags */
+
+        /* Encode space allocation time */
+        HDassert(mesg->alloc_time == (H5O_FILL_MASK_ALLOC_TIME & mesg->alloc_time));
+        flags |= (H5O_FILL_MASK_ALLOC_TIME & mesg->alloc_time) << H5O_FILL_SHIFT_ALLOC_TIME;
+
+        /* Encode fill value writing time */
+        HDassert(mesg->fill_time == (H5O_FILL_MASK_FILL_TIME & mesg->fill_time));
+        flags |= (H5O_FILL_MASK_FILL_TIME & mesg->fill_time) << H5O_FILL_SHIFT_FILL_TIME;
+
+        /* Check if we need to encode a fill value size */
+        if(mesg->size < 0) {
+            /* Indicate that the fill value has been "undefined" by the user */
+            flags |= H5O_FILL_FLAG_UNDEFINED_VALUE;
+
+            /* Flags */
+            *p++ = (uint8_t)flags;
+
+            /* Sanity check */
+            HDassert(!mesg->buf);
+        } /* end if */
+        else if(mesg->size > 0) {
+            /* Indicate that a fill value size is present */
+            flags |= H5O_FILL_FLAG_HAVE_VALUE;
+
+            /* Flags */
+            *p++ = (uint8_t)flags;
+
+            /* Encode the size of fill value */
+            INT32ENCODE(p, mesg->size);
+
+            /* Encode the fill value */
+            HDassert(mesg->buf);
+            H5_CHECK_OVERFLOW(mesg->size, ssize_t, size_t);
+            HDmemcpy(p, mesg->buf, (size_t)mesg->size);
+        } /* end if */
+        else {
+            /* Flags */
+            *p++ = (uint8_t)flags;
+
+            /* Sanity check */
+            HDassert(!mesg->buf);
+        } /* end else */
+    } /* end else */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_fill_new_encode() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_fill_encode
+ * Function:    H5O_fill_old_encode
  *
- * Purpose:     Encode a fill value message.
+ * Purpose:     Encode an old fill value message.
  *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              Thursday, October  1, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_fill_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
+H5O_fill_old_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
 {
     const H5O_fill_t *mesg = (const H5O_fill_t *)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_encode)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_old_encode)
 
     HDassert(f);
     HDassert(p);
@@ -368,11 +479,11 @@ H5O_fill_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
         HDmemcpy(p, mesg->buf, (size_t)mesg->size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_fill_encode() */
+} /* end H5O_fill_old_encode() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_fill_new_copy
+ * Function:	H5O_fill_copy
  *
  * Purpose:	Copies a message from _MESG to _DEST, allocating _DEST if
  *		necessary.  The new fill value message is fill value plus
@@ -380,7 +491,6 @@ H5O_fill_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
  *		whether fill value is defined.
  *
  * Return:	Success:	Ptr to _DEST
- *
  *		Failure:	NULL
  *
  * Programmer:  Raymond Lu
@@ -389,13 +499,13 @@ H5O_fill_encode(H5F_t UNUSED *f, uint8_t *p, const void *_mesg)
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_fill_new_copy(const void *_mesg, void *_dest)
+H5O_fill_copy(const void *_mesg, void *_dest)
 {
     const H5O_fill_t	*mesg = (const H5O_fill_t *)_mesg;
     H5O_fill_t		*dest = (H5O_fill_t *)_dest;
     void		*ret_value;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_fill_new_copy)
+    FUNC_ENTER_NOAPI_NOINIT(H5O_fill_copy)
 
     HDassert(mesg);
 
@@ -437,7 +547,7 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_fill_new_copy() */
+} /* end H5O_fill_copy() */
 
 
 /*-------------------------------------------------------------------------
@@ -450,46 +560,65 @@ done:
  *              fill value writing time and whether fill value is defined.
  *
  * Return:	Success:	Message data size in bytes w/o alignment.
- *
  *		Failure:	0
  *
- * Programmer:	Robb Matzke
- *              Thursday, October  1, 1998
+ * Programmer:  Raymond Lu
+ *              Feb 26, 2002
  *
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_fill_new_size(const H5F_t UNUSED *f, const void *_mesg)
+H5O_fill_new_size(const H5F_t *f, const void *_mesg)
 {
     const H5O_fill_t	*mesg = (const H5O_fill_t *)_mesg;
-    size_t			ret_value;
+    unsigned	        version;                /* Version of format */
+    hbool_t             use_latest_format;      /* Flag indicating the newest file format should be used */
+    size_t		ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_new_size)
 
     HDassert(f);
     HDassert(mesg);
 
-    ret_value = 1 + 		/* Version number        */
-		1 + 		/* Space allocation time */
-		1 + 		/* Fill value write time */
-		1; 		/* Fill value defined    */
-    if(mesg->fill_defined)
-        ret_value += 4 +	/* Fill value size	 */
-		(mesg->size > 0 ? mesg->size : 0);	/* Size of fill value	 */
+    /* Get the file's 'use the latest version of the format' flag */
+    use_latest_format = H5F_USE_LATEST_FORMAT(f);
+
+    /* Check which version to write out */
+    if(use_latest_format)
+        version = H5O_FILL_VERSION_LATEST;      /* Write out latest version of format */
+    else
+        version = H5O_FILL_VERSION_2;
+
+    /* Determine size for different versions */
+    if(version < H5O_FILL_VERSION_3) {
+        ret_value = 1 +	 		/* Version number        */
+                    1 + 		/* Space allocation time */
+                    1 + 		/* Fill value write time */
+                    1; 			/* Fill value defined    */
+        if(mesg->fill_defined)
+            ret_value += 4 +	/* Fill value size	 */
+                    (mesg->size > 0 ? mesg->size : 0);	/* Size of fill value	 */
+    } /* end if */
+    else {
+        ret_value = 1 +	 		/* Version number        */
+                    1;			/* Status flags          */
+        if(mesg->size > 0)
+            ret_value += 4 +		/* Fill value size	 */
+                    mesg->size;		/* Size of fill value	 */
+    } /* end else */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_fill_new_size() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_fill_size
+ * Function:    H5O_fill_old_size
  *
  * Purpose:     Returns the size of the raw message in bytes not counting the
  *              message type or size fields, but only the data fields.  This
  *              function doesn't take into account alignment.
  *
  * Return:      Success:        Message data size in bytes w/o alignment.
- *
  *              Failure:        0
  *
  * Programmer:  Robb Matzke
@@ -498,16 +627,16 @@ H5O_fill_new_size(const H5F_t UNUSED *f, const void *_mesg)
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_fill_size(const H5F_t UNUSED *f, const void *_mesg)
+H5O_fill_old_size(const H5F_t UNUSED *f, const void *_mesg)
 {
     const H5O_fill_t *mesg = (const H5O_fill_t *)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_size)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_old_size)
 
     HDassert(mesg);
 
     FUNC_LEAVE_NOAPI(4 + mesg->size)
-} /* end H5O_fill_size() */
+} /* end H5O_fill_old_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -542,11 +671,9 @@ H5O_fill_reset_dyn(H5O_fill_t *fill)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_fill_new_reset
+ * Function:	H5O_fill_reset
  *
- * Purpose:	Resets a new message to an initial state.  The new fill value
- *              message is fill value plus space allocation time and
- *              fill value writing time and whether fill value is defined.
+ * Purpose:	Resets a message to an initial state.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -556,11 +683,11 @@ H5O_fill_reset_dyn(H5O_fill_t *fill)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_fill_new_reset(void *_mesg)
+H5O_fill_reset(void *_mesg)
 {
     H5O_fill_t	*mesg = (H5O_fill_t *)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_new_reset)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_reset)
 
     HDassert(mesg);
 
@@ -573,11 +700,11 @@ H5O_fill_new_reset(void *_mesg)
     mesg->fill_defined = FALSE;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_fill_new_reset() */
+} /* end H5O_fill_reset() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_fill_new_free
+ * Function:	H5O_fill_free
  *
  * Purpose:	Frees the message
  *
@@ -589,20 +716,20 @@ H5O_fill_new_reset(void *_mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_fill_new_free(void *mesg)
+H5O_fill_free(void *mesg)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_new_free)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_free)
 
     HDassert(mesg);
 
     H5FL_FREE(H5O_fill_t, mesg);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_fill_new_free() */
+} /* end H5O_fill_free() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_fill_new_debug
+ * Function:	H5O_fill_debug
  *
  * Purpose:	Prints debugging info for the message.
  *
@@ -611,18 +738,16 @@ H5O_fill_new_free(void *mesg)
  * Programmer:	Robb Matzke
  *              Thursday, October  1, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_fill_new_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *stream,
+H5O_fill_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *stream,
 	       int indent, int fwidth)
 {
     const H5O_fill_t *mesg = (const H5O_fill_t *)_mesg;
     H5D_fill_value_t fill_status;       /* Whether the fill value is defined */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_new_debug)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_debug)
 
     HDassert(f);
     HDassert(mesg);
@@ -630,9 +755,7 @@ H5O_fill_new_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FIL
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-	      "Version:", (unsigned)H5O_FILL_VERSION);
-    fprintf(stream, "%*s%-*s ", indent, "", fwidth, "Space Allocation Time:");
+    HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Space Allocation Time:");
     switch(mesg->alloc_time) {
         case H5D_ALLOC_TIME_EARLY:
             fprintf(stream,"Early\n");
@@ -651,7 +774,7 @@ H5O_fill_new_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FIL
             break;
 
     } /* end switch */
-    fprintf(stream, "%*s%-*s ", indent, "", fwidth, "Fill Time:");
+    HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Fill Time:");
     switch(mesg->fill_time) {
         case H5D_FILL_TIME_ALLOC:
             fprintf(stream,"On Allocation\n");
@@ -670,7 +793,7 @@ H5O_fill_new_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FIL
             break;
 
     } /* end switch */
-    fprintf(stream, "%*s%-*s ", indent, "", fwidth, "Fill Value Defined:");
+    HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Fill Value Defined:");
     H5P_is_fill_value_defined((const H5O_fill_t *)mesg, &fill_status);
     switch(fill_status) {
         case H5D_FILL_VALUE_UNDEFINED:
@@ -692,7 +815,7 @@ H5O_fill_new_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FIL
     } /* end switch */
     HDfprintf(stream, "%*s%-*s %Zd\n", indent, "", fwidth,
 	      "Size:", mesg->size);
-    fprintf(stream, "%*s%-*s ", indent, "", fwidth, "Data type:");
+    HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Data type:");
     if(mesg->type) {
 	H5T_debug(mesg->type, stream);
 	fprintf(stream, "\n");
@@ -701,48 +824,6 @@ H5O_fill_new_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FIL
 	fprintf(stream, "<dataset type>\n");
 
     FUNC_LEAVE_NOAPI(SUCCEED);
-} /* end H5O_fill_new_debug() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5O_fill_debug
- *
- * Purpose:	Prints debugging info for the message.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Thursday, October  1, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5O_fill_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *stream,
-    int indent, int fwidth)
-{
-    const H5O_fill_t *mesg = (const H5O_fill_t *)_mesg;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_debug)
-
-    HDassert(f);
-    HDassert(mesg);
-    HDassert(stream);
-    HDassert(indent >= 0);
-    HDassert(fwidth >= 0);
-
-    HDfprintf(stream, "%*s%-*s %Zd\n", indent, "", fwidth,
-	      "Bytes:", mesg->size);
-    fprintf(stream, "%*s%-*s ", indent, "", fwidth, "Data type:");
-    if(mesg->type) {
-	H5T_debug(mesg->type, stream);
-	fprintf(stream, "\n");
-    } /* end if */
-    else
-	fprintf(stream, "<dataset type>\n");
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_fill_debug() */
 
 
