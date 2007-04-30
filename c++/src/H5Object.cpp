@@ -120,7 +120,7 @@ Attribute H5Object::createAttribute( const char* name, const DataType& data_type
 // Function:	H5Object::createAttribute
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes
-///		a reference to an \c std::string for \a name.
+///		a reference to an \c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 Attribute H5Object::createAttribute( const H5std_string& name, const DataType& data_type, const DataSpace& data_space, const PropList& create_plist ) const
@@ -154,7 +154,7 @@ Attribute H5Object::openAttribute( const char* name ) const
 // Function:	H5Object::openAttribute
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes
-///		a reference to an \c std::string for \a name.
+///		a reference to an \c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 Attribute H5Object::openAttribute( const H5std_string& name ) const
@@ -197,7 +197,7 @@ Attribute H5Object::openAttribute( const unsigned int idx ) const
 ///\par Description
 ///		For information, please refer to the C layer Reference Manual
 ///		at:
-/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5A.html#Annot-Iterate
+/// http://hdfgroup.org/HDF5/doc/RM_H5A.html#Annot-Iterate
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 int H5Object::iterateAttrs( attr_operator_t user_op, unsigned * idx, void *op_data )
@@ -261,7 +261,7 @@ void H5Object::removeAttr( const char* name ) const
 // Function:	H5Object::removeAttr
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes
-///		a reference to an \c std::string for \a name.
+///		a reference to an \c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void H5Object::removeAttr( const H5std_string& name ) const
@@ -290,7 +290,7 @@ void H5Object::renameAttr(const char* oldname, const char* newname) const
 // Function:	H5Object::renameAttr
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes
-///		a reference to an \c std::string for the names.
+///		a reference to an \c H5std_string for the names.
 // Programmer	Binh-Minh Ribler - Mar, 2005
 //--------------------------------------------------------------------------
 void H5Object::renameAttr(const H5std_string& oldname, const H5std_string& newname) const

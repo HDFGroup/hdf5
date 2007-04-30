@@ -87,7 +87,7 @@ StrType::StrType( const PredType& pred_type, const size_t& size ) : AtomType()
 // Function:	StrType overloaded constructor
 ///\brief	Creates a string datatype with a specified length
 ///\param	dummy - IN: To simplify calling the previous constructor
-//			and avoid prototype clash with another constructor
+///			and avoid prototype clash with another constructor
 ///\param	size  - IN: Length of the new string type
 ///\exception	H5::DataTypeIException
 ///\par Description
@@ -209,7 +209,7 @@ H5T_str_t StrType::getStrpad() const
 ///\exception	H5::DataTypeIException
 ///\par Description
 ///		For detail, please refer to the C layer Reference Manual at:
-/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5T.html#Datatype-SetStrpad
+/// http://hdfgroup.org/HDF5/doc/RM_H5T.html#Datatype-SetStrpad
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void StrType::setStrpad( H5T_str_t strpad ) const

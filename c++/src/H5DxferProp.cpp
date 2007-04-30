@@ -370,7 +370,7 @@ void DSetMemXferPropList::getMulti(hid_t *memb_dxpl)
 ///\exception	H5::PropListIException
 ///\par Description
 ///		For detail, please refer to the C layer Reference Manual at:
-/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetSmallData
+/// http://hdfgroup.org/HDF5/doc/RM_H5P.html#Property-SetSmallData
 // Programmer:	Binh-Minh Ribler - July, 2004
 //--------------------------------------------------------------------------
 void DSetMemXferPropList::setSmallDataBlockSize(hsize_t size)
@@ -410,7 +410,7 @@ hsize_t DSetMemXferPropList::getSmallDataBlockSize()
 ///\par Description
 ///		For information, please refer to the C layer Reference
 ///		Manual at:
-/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetHyperVectorSize
+/// http://hdfgroup.org/HDF5/doc/RM_H5P.html#Property-SetHyperVectorSize
 // Programmer:	Binh-Minh Ribler - July, 2004
 //--------------------------------------------------------------------------
 void DSetMemXferPropList::setHyperVectorSize(size_t vector_size)

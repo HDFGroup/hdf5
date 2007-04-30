@@ -372,9 +372,9 @@ void IdComponent::reference(void* ref, const char* name) const
 // Function:    IdComponent::reference
 ///\brief       This is an overloaded function, provided for your convenience.
 ///             It differs from the above function in that it takes an
-///             \c std::string for the object's name.
+///             \c H5std_string for the object's name.
 ///\param       ref - IN: Reference pointer
-///\param       name - IN: Name of the object to be referenced - \c std::string
+///\param       name - IN: Name of the object to be referenced - \c H5std_string
 // Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void IdComponent::reference(void* ref, const H5std_string& name) const

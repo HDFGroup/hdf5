@@ -107,7 +107,7 @@ int DSetCreatPropList::getChunk( int max_ndims, hsize_t* dim ) const
 ///\exception	H5::PropListIException
 ///\par Description
 ///		For information on setting layout type, please refer to
-/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetLayout
+/// http://hdfgroup.org/HDF5/doc/RM_H5P.html#Property-SetLayout
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DSetCreatPropList::setLayout(H5D_layout_t layout) const
@@ -211,7 +211,7 @@ void DSetCreatPropList::setSzip(unsigned int options_mask, unsigned int pixels_p
 ///\par
 ///		For information on setting fill value, please refer to the
 ///		C layer Reference Manual at:
-/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetFillValue
+/// http://hdfgroup.org/HDF5/doc/RM_H5P.html#Property-SetFillValue
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DSetCreatPropList::setFillValue( const DataType& fvalue_type, const void* value ) const
@@ -461,7 +461,7 @@ bool DSetCreatPropList::allFiltersAvail() const
 ///\par Description
 ///		Please refer to the Reference Manual of \c H5Pset_shuffle for
 ///		details.
-/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5P.html#Property-SetShuffle
+/// http://hdfgroup.org/HDF5/doc/RM_H5P.html#Property-SetShuffle
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DSetCreatPropList::setShuffle() const

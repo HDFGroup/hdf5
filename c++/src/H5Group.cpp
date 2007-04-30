@@ -82,9 +82,9 @@ Group::Group( const hid_t group_id ) : H5Object( group_id ) {}
 //--------------------------------------------------------------------------
 // Function:	Group overload constructor - dereference
 ///\brief	Given a reference to some object, returns that group
-///             obj - IN: Location reference object is in
+///\param	obj - IN: Location reference object is in
 ///\param	ref - IN: Reference pointer
-///\parDescription
+///\par Description
 ///		\c obj can be DataSet, Group, H5File, or named DataType, that 
 ///		is a datatype that has been named by DataType::commit.
 // Programmer	Binh-Minh Ribler - Oct, 2006
@@ -145,8 +145,8 @@ void* Group::Reference(const H5std_string& name) const
 ///\brief	Retrieves the type of object that an object reference points to.
 ///\param	ref      - IN: Reference to query
 ///\param	ref_type - IN: Type of reference to query, valid values are:
-///		\li \c H5R_OBJECT \tReference is an object reference.
-///		\li \c H5R_DATASET_REGION \tReference is a dataset region reference.
+///		\li \c H5R_OBJECT - Reference is an object reference.
+///		\li \c H5R_DATASET_REGION - Reference is a dataset region reference.
 ///\return	An object type, which can be one of the following:
 ///			H5G_LINK Object is a symbolic link.
 ///			H5G_GROUP Object is a group.

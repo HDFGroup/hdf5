@@ -86,7 +86,7 @@ void Attribute::write( const DataType& mem_type, const void *buf ) const
 //--------------------------------------------------------------------------
 // Function:	Attribute::write
 ///\brief	This is an overloaded member function, provided for convenience.
-///		It writes a \a std::string to this attribute.
+///		It writes a \a H5std_string to this attribute.
 ///\param	mem_type  - IN: Attribute datatype (in memory)
 ///\param	strg      - IN: Data to be written
 ///\exception	H5::AttributeIException
@@ -125,7 +125,7 @@ void Attribute::read( const DataType& mem_type, void *buf ) const
 //--------------------------------------------------------------------------
 // Function:	Attribute::read
 ///\brief	This is an overloaded member function, provided for convenience.
-///		It reads a \a std::string from this attribute.
+///		It reads a \a H5std_string from this attribute.
 ///\param	mem_type  - IN: Attribute datatype (in memory)
 ///\param	strg      - IN: Buffer for read string
 ///\exception	H5::AttributeIException

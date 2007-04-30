@@ -98,7 +98,7 @@ H5T_order_t AtomType::getOrder() const
 //--------------------------------------------------------------------------
 // Function:	AtomType::getOrder
 ///\brief	This is an overloaded member function, provided for convenience.
-///		It takes a reference to a \c std::string for the buffer that
+///		It takes a reference to a \c H5std_string for the buffer that
 ///		provide the text description of the returned byte order.
 ///		The text description can be either of the following:
 ///		"Little endian byte ordering (0)";
@@ -178,7 +178,7 @@ size_t AtomType::getPrecision() const
 ///\exception	H5::DataTypeIException
 ///\par Description
 ///		For information, please see C layer Reference Manuat at:
-/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5T.html#Datatype-SetPrecision
+/// http://hdfgroup.org/HDF5/doc/RM_H5T.html#Datatype-SetPrecision
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void AtomType::setPrecision( size_t precision ) const
@@ -198,7 +198,7 @@ void AtomType::setPrecision( size_t precision ) const
 ///\exception	H5::DataTypeIException
 ///\par Description
 ///		For information, please see C layer Reference Manuat at:
-/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5T.html#Datatype-GetOffset
+/// http://hdfgroup.org/HDF5/doc/RM_H5T.html#Datatype-GetOffset
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
 //		12/05/00: due to C API change
@@ -225,7 +225,7 @@ int AtomType::getOffset() const
 ///\exception	H5::DataTypeIException
 ///\par Description
 ///		For information, please see C layer Reference Manuat at:
-/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5T.html#Datatype-SetOffset
+/// http://hdfgroup.org/HDF5/doc/RM_H5T.html#Datatype-SetOffset
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void AtomType::setOffset( size_t offset ) const

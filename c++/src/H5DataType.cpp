@@ -51,8 +51,6 @@ namespace H5 {
 // Function:	DataType overloaded constructor
 ///\brief	Creates a datatype using an existing datatype's id
 ///\param	existing_id - IN: Id of the existing datatype
-///\param	predefined  - IN: Indicates whether or not this datatype is
-///		a predefined datatype; default to \c false
 // Description
 //		Constructor creates a copy of an existing DataType using
 //		its id.  The argument "predefined" is default to false;
@@ -87,7 +85,7 @@ DataType::DataType( const H5T_class_t type_class, size_t size ) : H5Object()
 ///\brief	Given a reference to some object, returns that datatype
 ///\param       obj - IN: Location reference object is in
 ///\param	ref - IN: Reference pointer
-///\parDescription
+///\par Description
 ///		\c obj can be DataSet, Group, H5File, or named DataType, that 
 ///		is a datatype that has been named by DataType::commit.
 // Programmer	Binh-Minh Ribler - Oct, 2006
@@ -145,7 +143,7 @@ void DataType::copy( const DataType& like_type )
 ///\param	dset - IN: Dataset 
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - Jan, 2007
-///\parDescription
+///\par Description
 ///		The resulted dataset will be transient and modifiable.
 //--------------------------------------------------------------------------
 void DataType::copy(const DataSet& dset)
@@ -369,7 +367,7 @@ and tested throughly.  BMR - Oct 29, 2005
 ///		The function specified by \a func will be called for all 
 ///		data type conversions that result in an overflow.
 ///		For more information, please see:
-/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5T.html#Datatype-SetOverflow
+/// http://hdfgroup.org/HDF5/doc/RM_H5T.html#Datatype-SetOverflow
 // Programmer	Binh-Minh Ribler - 2004
 //--------------------------------------------------------------------------
 void DataType::setOverflow( H5T_overflow_t func ) const
@@ -497,7 +495,7 @@ DataType DataType::getSuper() const
 ///\exception	H5::DataTypeIException
 ///\par Description
 ///		For more information, please see:
-/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5T.html#Datatype-Register
+/// http://hdfgroup.org/HDF5/doc/RM_H5T.html#Datatype-Register
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DataType::registerFunc( H5T_pers_t pers, const char* name, const DataType& dest, H5T_conv_t func ) const

@@ -76,7 +76,7 @@ H5File::H5File() : IdComponent(0) {}
 ///		For info on file creation in the case of an already-open file,
 ///		please refer to the \b Special \b case section in the C layer
 ///		Reference Manual at:
-/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5F.html#File-Create
+/// http://hdfgroup.org/HDF5/doc/RM_H5F.html#File-Create
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5File::H5File( const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : IdComponent(0)
@@ -88,7 +88,7 @@ H5File::H5File( const char* name, unsigned int flags, const FileCreatPropList& c
 // Function:	H5File overloaded constructor
 ///\brief	This is another overloaded constructor.  It differs from the
 ///		above constructor only in the type of the \a name argument.
-///\param	name - IN: Name of the file - \c std::string
+///\param	name - IN: Name of the file - \c H5std_string
 ///\param	flags - IN: File access flags
 ///\param	create_plist - IN: File creation property list, used when
 ///		modifying default file meta-data.  Default to
@@ -187,8 +187,8 @@ bool H5File::isHdf5(const char* name)
 //--------------------------------------------------------------------------
 // Function:	H5File::isHdf5
 ///\brief	This is an overloaded member function, provided for convenience.
-///		It takes an \c std::string for \a name.
-///\param	name - IN: Name of the file - \c std::string
+///		It takes an \c H5std_string for \a name.
+///\param	name - IN: Name of the file - \c H5std_string
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 bool H5File::isHdf5(const H5std_string& name )
@@ -227,8 +227,8 @@ void H5File::openFile(const char* name, unsigned int flags, const FileAccPropLis
 //--------------------------------------------------------------------------
 // Function:	H5File::openFile
 ///\brief	This is an overloaded member function, provided for convenience.
-///		It takes an \c std::string for \a name.
-///\param	name         - IN: Name of the file - \c std::string
+///		It takes an \c H5std_string for \a name.
+///\param	name         - IN: Name of the file - \c H5std_string
 ///\param	flags        - IN: File access flags
 ///\param	access_plist - IN: File access property list.  Default to
 ///		FileAccPropList::DEFAULT
@@ -553,8 +553,8 @@ void* H5File::Reference(const H5std_string& name) const
 ///\brief	Retrieves the type of object that an object reference points to.
 ///\param	ref      - IN: Reference to query
 ///\param	ref_type - IN: Type of reference, valid values are:
-///		\li \c H5R_OBJECT \tReference is an object reference.
-///		\li \c H5R_DATASET_REGION \tReference is a dataset region reference.
+///		\li \c H5R_OBJECT - Reference is an object reference.
+///		\li \c H5R_DATASET_REGION - Reference is a dataset region reference.
 ///\return	Object type, which can be one of the following:
 ///		\li \c H5G_LINK    - Object is a symbolic link.
 ///		\li \c H5G_GROUP   - Object is a group.

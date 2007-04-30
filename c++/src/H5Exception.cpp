@@ -218,7 +218,7 @@ void Exception::walkErrorStack( H5E_direction_t direction, H5E_walk_t func, void
 // Function:	Exception::getDetailMsg
 ///\brief	Returns the detailed message set at the time the exception
 ///		is thrown.
-///\return	Text message - \c std::string
+///\return	Text message - \c H5std_string
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5std_string Exception::getDetailMsg() const
@@ -241,7 +241,7 @@ const char* Exception::getCDetailMsg() const
 //--------------------------------------------------------------------------
 // Function:	Exception::getFuncName
 ///\brief	Returns the name of the function, where the exception is thrown.
-///\return	Text message - \c std::string
+///\return	Text message - \c H5std_string
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5std_string Exception::getFuncName() const
