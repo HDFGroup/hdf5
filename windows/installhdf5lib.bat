@@ -103,6 +103,7 @@ copy proj\hdf5_hl_fortrandll\debug\*.mod  hdf5lib\debug\include
 copy proj\hdf5_hl\debug\hdf5_hld.lib hdf5lib\debug\lib
 copy proj\hdf5_hl_cpp\debug\hdf5_hl_cppd.lib hdf5lib\debug\lib
 copy proj\hdf5_hl_fortran\debug\hdf5_hl_fortrand.lib hdf5lib\debug\lib
+copy proj\hdf5_hl_fortran\debug\hdf5_hl_fortran.lib hdf5lib\debug\lib
 
 copy proj\hdf5_hldll\debug\hdf5_hldlld.lib hdf5lib\debug\dll
 copy proj\hdf5_hldll\debug\hdf5_hldlld.dll hdf5lib\debug\dll
@@ -124,6 +125,7 @@ copy proj\hdf5_hl_fortrandll\release\*.mod  hdf5lib\release\include
 copy proj\hdf5_hl\release\hdf5_hl.lib hdf5lib\release\lib
 copy proj\hdf5_hl_cpp\release\hdf5_hl_cpp.lib hdf5lib\release\lib
 copy proj\hdf5_hl_fortran\release\hdf5_hl_fortranr.lib hdf5lib\release\lib
+copy proj\hdf5_hl_fortran\release\hdf5_hl_fortran.lib hdf5lib\release\lib
 
 copy proj\hdf5_hldll\release\hdf5_hldll.lib hdf5lib\release\dll
 copy proj\hdf5_hldll\release\hdf5_hldll.dll hdf5lib\release\dll

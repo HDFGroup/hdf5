@@ -740,7 +740,7 @@ The <release> layout of <hdf5lib> should be:
 You may also find the similar layout for the <debug>.
 
 ========================================================================
-                 Section I: How To Build Examples (Optional)
+                 Section III: How To Build Examples (Optional)
 ========================================================================
 
 Simple examples have been provided for users to test HDF5
@@ -1490,6 +1490,11 @@ Notes:  1. For Intel Compiler users, Intel fortran Compiler 9.1 is currently
        this mixed language projects. Choose
        "The Intel Fortran project" as the the main project and
        click "OK".
+       
+       Note: In Visual Studio 2005, you may receive a message that 
+       says "The attempt to convert the Fortran project file failed.
+       The project file (.dsp) has not been converted."  This message
+       can safely be ignored.
 
        Do the same thing for hdf5_hl_fortran.
 
@@ -1610,12 +1615,25 @@ Notes:  1. For Intel Compiler users, Intel fortran Compiler 9.1 is currently
         To build and test HDF5 Fortran example:
         ---------------------------------------
 
-           1. Invoke the Intel Fortran Compiler 9.1 or above under Microsoft
-              Visual Studio development environment, go to "File" and select
-              the "Open Workspace" option.
+            1.1 Open allf90examples.dsw and Convert Project Files (.dsp) to Visual
+                    C++ .Net Format (.vcproj)
 
-              Then open the workspace
-              c:\MyHDFstuff\hdf5\windows\fortran\examples\allf90examples\allf90examples.dsw.
+                Invoke Microsoft Visual C++ .Net or 2005.  From the main menu, 
+                go to "File" and select "Open Solution". In the "Open Solution" 
+                window, Change "Files of type" to "All Project Files". Choose 
+                "allf90examples.dsw" under the directory 
+                c:\MyHDFstuff\hdf5\windows\fortran\examples\allf90examples.
+                In the pop up window, choose "Yes To All" to convert all project 
+                files to Visual C++ .Net project format.
+
+            1.2 Extract Compaq Fortran Project Files
+
+                a. Select project "attreexampletest" in the Solution Explorer
+                window. In the Project menu, select "Extract Compaq Visual 
+                Fortran Project".
+
+                Do the same thing for the each of the other project files, excluding
+                "allf90examples"
 
            2. Select "Build", then Select "Set Active Configuration".
 
@@ -1675,10 +1693,24 @@ Notes:  1. For Intel Compiler users, Intel fortran Compiler 9.1 is currently
         To build and test HDF5 High Level Fortran examples:
         ---------------------------------------------------
 
-           1. Invoke Compaq Visual Fortran 9.1, open the workspace
+            1.1 Open allhlf90examples.dsw and Convert Project Files (.dsp) to Visual
+                    C++ .Net Format (.vcproj)
 
-            c:\MyHDFstuff\hdf5\windows\hl\fortran\examples\ (continue next line)
-              allhlf90examples\allhlf90examples.dsw
+                Invoke Microsoft Visual C++ .Net or 2005.  From the main menu, 
+                go to "File" and select "Open Solution". In the "Open Solution" 
+                window, Change "Files of type" to "All Project Files". Choose 
+                "allhlf90examples.dsw" under the directory 
+                c:\MyHDFstuff\hdf5\windows\hl\fortran\examples\allhlf90examples.
+                In the pop up window, choose "Yes To All" to convert all project 
+                files to Visual C++ .Net project format.
+
+            1.2 Extract Compaq Fortran Project Files
+
+                a. Select project "ex_lite" in the Solution Explorer
+                window. In the Project menu, select "Extract Compaq Visual 
+                Fortran Project".
+
+                Do the same thing for the "ex_litedll".
 
            2. Select "Build", then Select "Set Active Configuration".
 
@@ -1940,7 +1972,8 @@ by other compilers.
 
       To define this environment variable:
 
-      Click "Start" -> "Control Panel" ->  "System" -> "Advanced" -> "Environment Variables".
+      Click "Start" -> "Control Panel" ->  "System" -> "Advanced" -> 
+      "Environment Variables".
 
       If you are logged on as administrator to the local computer AND
       want to let all other users use these two environment variables,
@@ -1955,8 +1988,8 @@ by other compilers.
 
    pre5. Copy pthreadVC2.dll to System Directory
 
-      pthreadVC2.dll should be copied into the location that applications can find.
-     One suggestion is to use the c:\WINDOWS\system.
+      pthreadVC2.dll should be copied into the location that applications 
+      can find.  One suggestion is to use the c:\WINDOWS\system.
 
 
 1. Build HDF5 Release DLL with Thread-safe Feature
@@ -2063,11 +2096,12 @@ by other compilers.
    Go back to Section II, Step I(2) to Build, test and install HDF5
    libary and tools.
 ========================================================================
-Section XI: How to build HDF5 in Visual studio 2005 on windows 32-bit and 64-bit platform
+Section XI: How to build HDF5 in Visual studio 2005 on windows 32-bit and 
+            64-bit platform
 ========================================================================
  The building procedure is almost the same as building HDF5 on .Net 2003.
- For 64-bit, currently we only support HDF5 as an 32-bit application and you may need to
- pay attention to the following reminders:
+ For 64-bit, currently we only support HDF5 as an 32-bit application and 
+ you may need to pay attention to the following reminders:
  1) To use zlib or szlib compression packages:
     Use zlib 1.2.2 DLL provided at
     ftp://ftp.hdfgroup.org/lib-external/zlib/1.2/bin/zlib123-windows.zip
@@ -2076,8 +2110,8 @@ Section XI: How to build HDF5 in Visual studio 2005 on windows 32-bit and 64-bit
  2) Make sure that WIN32 macro is set at visual studio 2005.
  3) You may use _CRT_SECURE_NO_DEPRECATE to disable the warnings.
  Please refer to Section VI: How to build HDF5 in Visual Studio .Net 2003.
- Please also note that the example workspace may not work properly. You may need to reset hdf5
- library path.
+ Please also note that the example workspace may not work properly. You may 
+ need to reset hdf5 library path.
 
 ========================================================================
                             Section XII: Misc.
@@ -2173,11 +2207,14 @@ using the Visual C++ Development Environment.
          "HDF5F90_WINDOWS" to use HDF5 Fortran DLL.
 
 3. Backward compatibility with 1.6
-    If you are going to use 1.6 APIs with 1.8 branch, you may do the following two things:
-    3.1 Uncomment out /*#define H5_WANT_H5_V1_6_COMPAT 1*/ inside h5pubconf.h under windows\src.
-    3.2 Set up an environment variable H5_WANT_H5_V1_6_COMPAT to 1, this will be used to test compatibility
-        of error APIs.
-    Remember to undo 1 and 2 after you test if you are not going to use 1.6 backward compatibility option.
+    If you are going to use 1.6 APIs with 1.8 branch, you may do the 
+    following two things:
+        3.1 Uncomment out /*#define H5_WANT_H5_V1_6_COMPAT 1*/ inside 
+        h5pubconf.h under windows\src.
+        3.2 Set up an environment variable H5_WANT_H5_V1_6_COMPAT to 1, 
+        this will be used to test compatibility of error APIs.
+    Remember to undo 1 and 2 after you test if you are not going to use 1.6 
+    backward compatibility option.
 
 ************************************************************************
  Please send email to help@hdfgroup.org for further assistance.
