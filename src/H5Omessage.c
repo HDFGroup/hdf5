@@ -340,7 +340,7 @@ H5O_msg_write_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *ty
 
     /* Locate message of correct type */
     for(idx = 0, idx_msg = &oh->mesg[0]; idx < oh->nmesgs; idx++, idx_msg++)
-	if(type->id == idx_msg->type->id)
+	if(type == idx_msg->type)
             break;
     if(idx == oh->nmesgs)
         HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "message type not found")
@@ -482,7 +482,7 @@ H5O_msg_read_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
 
     /* Scan through the messages looking for the right one */
     for(idx = 0; idx < oh->nmesgs; idx++)
-	if(type_id == oh->mesg[idx].type->id)
+	if(type == oh->mesg[idx].type)
             break;
     if(idx == oh->nmesgs)
         HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, NULL, "message type not found")
@@ -879,7 +879,7 @@ H5O_msg_exists_oh(const H5O_t *oh, unsigned type_id)
 
     /* Scan through the messages looking for the right one */
     for(u = 0; u < oh->nmesgs; u++)
-	if(type->id == oh->mesg[u].type->id)
+	if(type == oh->mesg[u].type)
             HGOTO_DONE(TRUE)
 
 done:
@@ -1242,7 +1242,7 @@ H5O_msg_iterate_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type,
 
     /* Iterate over messages */
     for(sequence = 0, idx = 0, idx_msg = &oh->mesg[0]; idx < oh->nmesgs && !ret_value; idx++, idx_msg++) {
-	if(type->id == idx_msg->type->id) {
+	if(type == idx_msg->type) {
             /* Decode the message if necessary.  */
             H5O_LOAD_NATIVE(f, dxpl_id, idx_msg, FAIL)
 

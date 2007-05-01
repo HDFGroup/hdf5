@@ -1228,11 +1228,26 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
          HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout")
 
 #ifdef H5O_ENABLE_BOGUS
-    /*
-     * Add a "bogus" message (for error testing).
-     */
-    if(H5O_bogus_oh(file, dxpl_id, oh)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to update 'bogus' message")
+{
+    H5P_genplist_t     *dc_plist;               /* Dataset's creation property list */
+
+    /* Get dataset's property list object */
+    if(NULL == (dc_plist = H5I_object(dset->shared->dcpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get dataset creation property list")
+
+    /* Check whether to add a "bogus" message */
+    if(H5P_exist_plist(dc_plist, H5O_BOGUS_MSG_FLAGS_NAME) > 0) {
+        uint8_t bogus_flags = 0;        /* Flags for creating "bogus" message */
+
+        /* Retrieve "bogus" message flags */
+        if(H5P_get(dc_plist, H5O_BOGUS_MSG_FLAGS_NAME, &bogus_flags) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get bogus message options")
+
+        /* Add a "bogus" message (for error testing). */
+        if(H5O_bogus_oh(file, dxpl_id, oh, (unsigned)bogus_flags) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create 'bogus' message")
+    } /* end if */
+}
 #endif /* H5O_ENABLE_BOGUS */
 
     /* Add a modification time message. */

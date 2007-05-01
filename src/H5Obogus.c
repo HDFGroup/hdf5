@@ -86,37 +86,37 @@ const H5O_msg_class_t H5O_MSG_BOGUS[1] = {{
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_bogus_decode(H5F_t UNUSED *f, hid_t dxpl_id, unsigned UNUSED mesg_flags,
+H5O_bogus_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
     const uint8_t *p)
 {
     H5O_bogus_t *mesg = NULL;
     void *ret_value;            /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_bogus_decode);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_bogus_decode)
 
     /* check args */
-    assert(f);
-    assert(p);
+    HDassert(f);
+    HDassert(p);
 
     /* Allocate the bogus message */
-    if (NULL==(mesg = H5MM_calloc(sizeof(H5O_bogus_t))))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    if(NULL == (mesg = H5MM_calloc(sizeof(H5O_bogus_t))))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* decode */
     UINT32DECODE(p, mesg->u);
 
     /* Validate the bogus info */
-    if(mesg->u!=H5O_BOGUS_VALUE)
-	HGOTO_ERROR (H5E_OHDR, H5E_BADVALUE, NULL, "invalid bogus value :-)");
+    if(mesg->u != H5O_BOGUS_VALUE)
+	HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "invalid bogus value :-)")
 
     /* Set return value */
-    ret_value=mesg;
+    ret_value = mesg;
 
 done:
-    if(ret_value==NULL && mesg!=NULL)
+    if(ret_value == NULL && mesg != NULL)
         H5MM_xfree(mesg);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_bogus_decode() */
 
 
@@ -136,17 +136,17 @@ done:
 static herr_t
 H5O_bogus_encode(H5F_t UNUSED *f, hbool_t UNUSED disable_shared, uint8_t *p, const void UNUSED *mesg)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_bogus_encode);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_bogus_encode)
 
     /* check args */
-    assert(f);
-    assert(p);
-    assert(mesg);
+    HDassert(f);
+    HDassert(p);
+    HDassert(mesg);
 
     /* encode */
     UINT32ENCODE(p, H5O_BOGUS_VALUE);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_bogus_encode() */
 
 
@@ -171,12 +171,9 @@ H5O_bogus_encode(H5F_t UNUSED *f, hbool_t UNUSED disable_shared, uint8_t *p, con
 static size_t
 H5O_bogus_size(const H5F_t UNUSED *f, hbool_t UNUSED disable_shared, const void UNUSED *mesg)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_bogus_size);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_bogus_size)
 
-    /* check args */
-    assert(f);
-
-    FUNC_LEAVE_NOAPI(4);
+    FUNC_LEAVE_NOAPI(4)
 } /* end H5O_bogus_size() */
 
 
@@ -201,20 +198,19 @@ H5O_bogus_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE *
 {
     const H5O_bogus_t	*mesg = (const H5O_bogus_t *)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_name_debug);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_bogus_debug)
 
     /* check args */
-    assert(f);
-    assert(mesg);
-    assert(stream);
-    assert(indent >= 0);
-    assert(fwidth >= 0);
+    HDassert(f);
+    HDassert(mesg);
+    HDassert(stream);
+    HDassert(indent >= 0);
+    HDassert(fwidth >= 0);
 
-    fprintf(stream, "%*s%-*s `%u'\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s `%u'\n", indent, "", fwidth,
             "Bogus Value:", mesg->u);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_bogus_debug() */
 #endif /* H5O_ENABLE_BOGUS */
-
 

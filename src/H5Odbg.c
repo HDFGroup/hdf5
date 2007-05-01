@@ -207,7 +207,7 @@ H5O_assert(const H5O_t *oh)
     HDassert(oh->nchunks == (cont_msgs_found + 1));
 
     /* Sanity check that all the bytes are accounted for */
-    HDassert(hdr_size == (free_space + meta_space + mesg_space + oh->skipped_mesg_size));
+    HDassert(hdr_size == (free_space + meta_space + mesg_space));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_assert() */
@@ -427,31 +427,57 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
 		  (unsigned) (oh->mesg[i].type->id),
 		  oh->mesg[i].type->name,
 		  sequence[oh->mesg[i].type->id]++);
-	HDfprintf(stream, "%*s%-*s %t\n", indent+3, "", MAX (0, fwidth-3),
+	HDfprintf(stream, "%*s%-*s %t\n", indent + 3, "", MAX (0, fwidth - 3),
 		   "Dirty:",
 		   oh->mesg[i].dirty);
-	HDfprintf(stream, "%*s%-*s %s\n", indent+3, "", MAX (0, fwidth-3),
-		   "Shared:",
-		   (oh->mesg[i].flags & H5O_MSG_FLAG_SHARED) ? "Yes" : "No");
-	HDfprintf(stream, "%*s%-*s %s\n", indent + 3, "", MAX(0, fwidth - 3),
-		  "Constant:",
-		  (oh->mesg[i].flags & H5O_MSG_FLAG_CONSTANT) ? "Yes" : "No");
-	if(oh->mesg[i].flags & ~H5O_MSG_FLAG_BITS)
-	    HDfprintf(stream, "%*s%-*s 0x%02x\n", indent+3,"",MAX(0,fwidth-3),
-		       "*** ADDITIONAL UNKNOWN FLAGS --->",
-		       oh->mesg[i].flags & ~H5O_MSG_FLAG_BITS);
-	HDfprintf(stream, "%*s%-*s %Zu bytes\n", indent+3, "", MAX(0,fwidth-3),
-		  "Raw size in obj header:",
-		  oh->mesg[i].raw_size);
+        HDfprintf(stream, "%*s%-*s ", indent + 3, "", MAX (0, fwidth - 3),
+                   "Message flags:");
+	if(oh->mesg[i].flags) {
+            hbool_t flag_printed = FALSE;
+
+            if(oh->mesg[i].flags & H5O_MSG_FLAG_SHARED) {
+                HDfprintf(stream, "%s%s", (flag_printed ? ", " : "<"), "S");
+                flag_printed = TRUE;
+            } /* end if */
+            if(oh->mesg[i].flags & H5O_MSG_FLAG_CONSTANT) {
+                HDfprintf(stream, "%s%s", (flag_printed ? ", " : "<"), "C");
+                flag_printed = TRUE;
+            } /* end if */
+            if(oh->mesg[i].flags & H5O_MSG_FLAG_DONTSHARE) {
+                HDfprintf(stream, "%s%s", (flag_printed ? ", " : "<"), "DS");
+                flag_printed = TRUE;
+            } /* end if */
+            if(oh->mesg[i].flags & H5O_MSG_FLAG_FAIL_IF_UNKNOWN) {
+                HDfprintf(stream, "%s%s", (flag_printed ? ", " : "<"), "FIU");
+                flag_printed = TRUE;
+            } /* end if */
+            if(oh->mesg[i].flags & H5O_MSG_FLAG_MARK_IF_UNKNOWN) {
+                HDfprintf(stream, "%s%s", (flag_printed ? ", " : "<"), "MIU");
+                flag_printed = TRUE;
+            } /* end if */
+            if(oh->mesg[i].flags & H5O_MSG_FLAG_WAS_UNKNOWN) {
+                HDassert(oh->mesg[i].flags & H5O_MSG_FLAG_MARK_IF_UNKNOWN);
+                HDfprintf(stream, "%s%s", (flag_printed ? ", " : "<"), "WU");
+                flag_printed = TRUE;
+            } /* end if */
+            HDfprintf(stream, ">\n");
+            if(oh->mesg[i].flags & ~H5O_MSG_FLAG_BITS)
+                HDfprintf(stream, "%*s%-*s 0x%02x\n", indent + 3,"", MAX(0, fwidth - 3),
+                           "*** ADDITIONAL UNKNOWN FLAGS --->",
+                           oh->mesg[i].flags & ~H5O_MSG_FLAG_BITS);
+        } /* end if */
+        else
+            HDfprintf(stream, "<none>\n");
 	HDfprintf(stream, "%*s%-*s %u\n", indent + 3, "", MAX(0, fwidth - 3),
 		  "Chunk number:",
 		  oh->mesg[i].chunkno);
 	chunkno = oh->mesg[i].chunkno;
 	if(chunkno >= oh->nchunks)
 	    HDfprintf(stream, "*** BAD CHUNK NUMBER\n");
-	HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", MAX(0, fwidth - 3),
-		  "Raw data offset in chunk:",
-		  (size_t)(oh->mesg[i].raw - oh->chunk[chunkno].image));
+	HDfprintf(stream, "%*s%-*s (%Zu, %Zu) bytes\n", indent + 3, "", MAX(0, fwidth - 3),
+		  "Raw message data (offset, size) in chunk:",
+		  (size_t)(oh->mesg[i].raw - oh->chunk[chunkno].image),
+		  oh->mesg[i].raw_size);
 
 	/* check the size */
 	if((oh->mesg[i].raw + oh->mesg[i].raw_size >

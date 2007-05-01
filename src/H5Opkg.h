@@ -30,7 +30,7 @@
 #define H5O_NMESGS	8 		/*initial number of messages	     */
 #define H5O_NCHUNKS	2		/*initial number of chunks	     */
 #define H5O_MIN_SIZE	22		/* Min. obj header data size (must be big enough for a message prefix and a continuation message) */
-#define H5O_MSG_TYPES   23              /* # of types of messages            */
+#define H5O_MSG_TYPES   24              /* # of types of messages            */
 #define H5O_MAX_CRT_ORDER_IDX 65535     /* Max. creation order index value   */
 
 /* Versions of object header structure */
@@ -265,7 +265,6 @@ struct H5O_t {
     size_t	nmesgs;			/*number of messages		     */
     size_t	alloc_nmesgs;		/*number of message slots	     */
     H5O_mesg_t	*mesg;			/*array of messages		     */
-    size_t      skipped_mesg_size;      /*size of skipped messages (for sanity checking) */
     size_t      link_msgs_seen;         /* # of link messages seen when loading header */
     size_t      attr_msgs_seen;         /* # of attribute messages seen when loading header */
 
@@ -440,6 +439,9 @@ H5_DLLVAR const H5O_msg_class_t H5O_MSG_AINFO[1];
 /* Reference Count Message. (0x0016) */
 H5_DLLVAR const H5O_msg_class_t H5O_MSG_REFCOUNT[1];
 
+/* Placeholder for unknown message. (0x0017) */
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_UNKNOWN[1];
+
 
 /*
  * Object header "object" types
@@ -523,6 +525,7 @@ H5_DLL htri_t H5O_is_attr_empty_test(hid_t oid);
 H5_DLL htri_t H5O_is_attr_dense_test(hid_t oid);
 H5_DLL herr_t H5O_num_attrs_test(hid_t oid, hsize_t *nattrs);
 H5_DLL herr_t H5O_attr_dense_info_test(hid_t oid, hsize_t *name_count, hsize_t *corder_count);
+H5_DLL herr_t H5O_check_msg_marked_test(hid_t oid, hbool_t flag_val);
 #endif /* H5O_TESTING */
 
 /* Object header debugging routines */

@@ -71,8 +71,9 @@ typedef struct H5O_t H5O_t;
 #define H5O_MSG_FLAG_SHARED	0x02u
 #define H5O_MSG_FLAG_DONTSHARE	0x04u
 #define H5O_MSG_FLAG_FAIL_IF_UNKNOWN 0x08u
-#define H5O_MSG_FLAG_CURRENT 0x10u
-#define H5O_MSG_FLAG_BITS	(H5O_MSG_FLAG_CONSTANT|H5O_MSG_FLAG_SHARED|H5O_MSG_FLAG_DONTSHARE)
+#define H5O_MSG_FLAG_MARK_IF_UNKNOWN 0x10u
+#define H5O_MSG_FLAG_WAS_UNKNOWN 0x20u
+#define H5O_MSG_FLAG_BITS	(H5O_MSG_FLAG_CONSTANT|H5O_MSG_FLAG_SHARED|H5O_MSG_FLAG_DONTSHARE|H5O_MSG_FLAG_FAIL_IF_UNKNOWN|H5O_MSG_FLAG_MARK_IF_UNKNOWN|H5O_MSG_FLAG_WAS_UNKNOWN)
 
 /* Flags for updating messages */
 #define H5O_UPDATE_TIME         0x01u
@@ -84,6 +85,10 @@ typedef struct H5O_t H5O_t;
 #define H5O_CRT_ATTR_MAX_COMPACT_NAME	"max compact attr"      /* Max. # of attributes to store compactly */
 #define H5O_CRT_ATTR_MIN_DENSE_NAME	"min dense attr"	/* Min. # of attributes to store densely */
 #define H5O_CRT_OHDR_FLAGS_NAME		"object header flags"	/* Object header flags */
+#ifdef H5O_ENABLE_BOGUS
+#define H5O_BOGUS_MSG_FLAGS_NAME        "bogus msg flags"       /* Flags for 'bogus' message */
+#define H5O_BOGUS_MSG_FLAGS_SIZE        sizeof(uint8_t)
+#endif /* H5O_ENABLE_BOGUS */
 
 /* ========= Object Copy properties ============ */
 #define H5O_CPY_OPTION_NAME 		"copy object"           /* Copy options */
@@ -136,6 +141,8 @@ typedef struct H5O_copy_t {
 #define H5O_DRVINFO_ID  0x0014          /* Driver info message.  */
 #define H5O_AINFO_ID    0x0015          /* Attribute info message.  */
 #define H5O_REFCOUNT_ID 0x0016          /* Reference count message.  */
+#define H5O_UNKNOWN_ID  0x0017          /* Placeholder message ID for unknown message.  */
+                                        /* (this should never exist in a file) */
 
 
 /* Shared object message flags.
@@ -432,10 +439,15 @@ typedef struct H5O_ainfo_t {
 
 /*
  * Reference Count Message.
- * (Contains # of links to object, if >1)
  * (Data structure in memory)
  */
-typedef uint32_t H5O_refcount_t;
+typedef uint32_t H5O_refcount_t;        /* Contains # of links to object, if >1 */
+
+/*
+ * "Unknown" Message.
+ * (Data structure in memory)
+ */
+typedef unsigned H5O_unknown_t;         /* Original message type ID */
 
 
 /* Typedef for iteration operations */
@@ -465,8 +477,7 @@ H5_DLL herr_t H5O_touch(H5O_loc_t *loc, hbool_t force, hid_t dxpl_id);
 H5_DLL herr_t H5O_touch_oh(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh,
     hbool_t force);
 #ifdef H5O_ENABLE_BOGUS
-H5_DLL herr_t H5O_bogus(H5O_loc_t *loc, hid_t dxpl_id);
-H5_DLL herr_t H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh);
+H5_DLL herr_t H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, unsigned mesg_flags);
 #endif /* H5O_ENABLE_BOGUS */
 H5_DLL herr_t H5O_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 H5_DLL herr_t H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id);

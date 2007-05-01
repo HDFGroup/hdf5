@@ -620,6 +620,7 @@
 ./src/H5Oshmesg.c
 ./src/H5Ostab.c
 ./src/H5Otest.c
+./src/H5Ounknown.c
 ./src/H5P.c
 ./src/H5Pacpl.c
 ./src/H5Pdcpl.c
@@ -744,7 +745,8 @@
 ./test/fillval.c
 ./test/flush1.c
 ./test/flush2.c
-./test/gen_cross.c
+./test/gen_bogus.c                      _DO_NOT_DISTRIBUTE_
+./test/gen_cross.c                      _DO_NOT_DISTRIBUTE_
 ./test/gen_deflate.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_mergemsg.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_new_array.c			_DO_NOT_DISTRIBUTE_

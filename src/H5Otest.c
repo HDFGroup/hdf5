@@ -16,7 +16,7 @@
 /* Programmer:  Quincey Koziol <koziol@hdfgroup.org>
  *              Monday, December 4, 2006
  *
- * Purpose:	Attribute testing functions.
+ * Purpose:	Object header testing functions.
  */
 
 /****************/
@@ -356,4 +356,67 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5O_attr_dense_info_test() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5O_check_msg_marked_test
+ PURPOSE
+    Check if an unknown message with the "mark if unknown" flag actually gets
+    marked.
+ USAGE
+    herr_t H5O_check_msg_marked_test(oid, flag_val)
+        hid_t oid;              IN: Object to check
+        hbool_t flag_val;       IN: Desired flag value
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Locates the "unknown" message and checks that the "was unknown" flag is set
+    correctly.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    DO NOT USE THIS FUNCTION FOR ANYTHING EXCEPT TESTING
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5O_check_msg_marked_test(hid_t oid, hbool_t flag_val)
+{
+    H5O_t *oh = NULL;           /* Object header */
+    H5O_loc_t *oloc;            /* Pointer to object's location */
+    H5O_mesg_t *idx_msg;        /* Pointer to message */
+    unsigned idx;               /* Index of message */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_check_msg_marked_test, FAIL)
+
+    /* Get object location for object */
+    if(NULL == (oloc = H5O_get_loc(oid)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+
+    /* Get the object header */
+    if(NULL == (oh = H5AC_protect(oloc->file, H5AC_ind_dxpl_id, H5AC_OHDR, oloc->addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+
+    /* Locate "unknown" message  */
+    for(idx = 0, idx_msg = &oh->mesg[0]; idx < oh->nmesgs; idx++, idx_msg++)
+	if(idx_msg->type->id == H5O_UNKNOWN_ID) {
+            /* Check for "unknown" message having the correct flags */
+            if(((idx_msg->flags & H5O_MSG_FLAG_WAS_UNKNOWN) > 0) != flag_val)
+                HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "'unknown' message has incorrect 'was unknown' flag value")
+
+            /* Break out of loop, to indicate that the "unknown" message was found */
+            break;
+        } /* end if */
+
+    /* Check for not finding an "unknown" message */
+    if(idx == oh->nmesgs)
+        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "'unknown' message type not found")
+
+done:
+    if(oh && H5AC_unprotect(oloc->file, H5AC_ind_dxpl_id, H5AC_OHDR, oloc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
+	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* H5O_check_msg_marked_test() */
 

@@ -341,7 +341,6 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     /* Initialize header information */
     oh_dst->version = oh_src->version;
     oh_dst->flags = oh_src->flags;
-    oh_dst->skipped_mesg_size = oh_src->skipped_mesg_size;
     oh_dst->link_msgs_seen = oh_src->link_msgs_seen;
     oh_dst->attr_msgs_seen = oh_src->attr_msgs_seen;
     oh_dst->sizeof_size = H5F_SIZEOF_SIZE(oloc_dst->file);

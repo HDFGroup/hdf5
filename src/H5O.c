@@ -104,6 +104,7 @@ const H5O_msg_class_t *const H5O_msg_class_g[] = {
     H5O_MSG_DRVINFO,		/*0x0014 Driver info settings		*/
     H5O_MSG_AINFO,		/*0x0015 Attribute information		*/
     H5O_MSG_REFCOUNT,		/*0x0016 Object's ref. count		*/
+    H5O_MSG_UNKNOWN,		/*0x0017 Placeholder for unknown message */
 };
 
 /* Header object ID to class mapping */
@@ -1315,12 +1316,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
+H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned mesg_flags)
 {
-    int	idx;
-    herr_t      ret_value = SUCCEED;       /* Return value */
+    unsigned	idx;                    /* Local index variable */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER(H5O_bogus_oh, FAIL)
+    FUNC_ENTER_NOAPI(H5O_bogus_oh, FAIL)
 
     HDassert(f);
     HDassert(oh);
@@ -1333,7 +1334,6 @@ H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
     /* Create a new message */
     if(idx == oh->nmesgs) {
         H5O_bogus_t *bogus;             /* Pointer to the bogus information */
-        unsigned mesg_flags = 0;        /* Flags for message in object header */
 
         /* Allocate the native message in memory */
 	if(NULL == (bogus = H5MM_malloc(sizeof(H5O_bogus_t))))
@@ -1349,65 +1349,17 @@ H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
         /* Point to "bogus" information (take it over) */
 	oh->mesg[idx].native = bogus;
 
-        /* Mark the message and object header as dirty */
+        /* Set the appropriate flags for the message */
         oh->mesg[idx].flags = mesg_flags;
+
+        /* Mark the message and object header as dirty */
         oh->mesg[idx].dirty = TRUE;
-        oh->dirty = TRUE;
+        oh->cache_info.is_dirty = TRUE;
     } /* end if */
 
 done:
-    FUNC_LEAVE(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_bogus_oh() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5O_bogus
- *
- * Purpose:	Create a "bogus" message in an object.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              <koziol@ncsa.uiuc.edu>
- *              Tuesday, January 21, 2003
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5O_bogus(H5O_loc_t *loc, hid_t dxpl_id)
-{
-    H5O_t	*oh = NULL;
-    unsigned	oh_flags = H5AC__NO_FLAGS_SET;
-    herr_t	ret_value = SUCCEED;
-
-    FUNC_ENTER(H5O_bogus, FAIL)
-
-    /* check args */
-    HDassert(loc);
-    HDassert(loc->file);
-    HDassert(H5F_addr_defined(loc->addr));
-
-    /* Verify write access to the file */
-    if(0 == (H5F_INTENT(loc->file) & H5F_ACC_RDWR))
-	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "no write intent on file")
-
-    /* Get the object header */
-    if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
-
-    /* Create the "bogus" message */
-    if(H5O_bogus_oh(ent->file, dxpl_id, oh) < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to update object 'bogus' message")
-
-    /* Mark object header as changed */
-    oh_flags |= H5AC__DIRTIED_FLAG;
-
-done:
-    if(oh && H5AC_unprotect(ent->file, dxpl_id, H5AC_OHDR, ent->header, oh, oh_flags) < 0)
-	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
-
-    FUNC_LEAVE(ret_value)
-} /* end H5O_bogus() */
 #endif /* H5O_ENABLE_BOGUS */
 
 
@@ -1982,7 +1934,7 @@ H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id)
     } /* end for */
 
     /* Sanity check that all the bytes are accounted for */
-    HDassert(oinfo->hdr.space.total == (oinfo->hdr.space.free + oinfo->hdr.space.meta + oinfo->hdr.space.mesg + oh->skipped_mesg_size));
+    HDassert(oinfo->hdr.space.total == (oinfo->hdr.space.free + oinfo->hdr.space.meta + oinfo->hdr.space.mesg));
 
 done:
     if(oh && H5AC_unprotect(oloc->file, dxpl_id, H5AC_OHDR, oloc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
