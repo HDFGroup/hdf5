@@ -552,6 +552,9 @@ New Features
 
     High-Level APIs:
     ------
+        - Fortran interfaces for the Image, Table and Lite APIs. PVN - 2007/5/1
+        - New HDF5 Dimension Scale API (H5DS) allows dimension scales to be
+          created in an HDF5 file and associated with specific datasets. PVN - 2007/5/1
         - There are two new functions in the Lite library, H5LTtext_to_dtype
             and H5LTdtype_to_text.  H5LTtext_to_dtype creates a HDF5 data type
             given a text description; H5LTdtype_to_text converts a data type
