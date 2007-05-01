@@ -3352,6 +3352,7 @@ parse_start:
          usage(progname);
          leave(EXIT_FAILURE);
         }
+        bin_output = TRUE;
         if (outfname!=NULL) {
          if (set_output_file(outfname, 1) < 0){
           /* failed to set output file */
@@ -3359,7 +3360,7 @@ parse_start:
           leave(EXIT_FAILURE);
          }
          
-         bin_output = TRUE;
+         
          last_was_dset = FALSE;
         }
         
