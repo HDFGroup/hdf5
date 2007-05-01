@@ -382,17 +382,18 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_loc_find_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const H5O_link_t UNUSED *lnk,
-    H5G_loc_t *obj_loc, void *_udata/*in,out*/, H5G_own_loc_t *own_loc/*out*/)
+H5G_loc_find_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
+    const H5O_link_t UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
+    H5G_own_loc_t *own_loc/*out*/)
 {
     H5G_loc_fnd_t *udata = (H5G_loc_fnd_t *)_udata;   /* User data passed in */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_loc_find_cb)
 
-    /* Check if the name in this group resolved to a valid link */
+    /* Check if the name in this group resolved to a valid object */
     if(obj_loc == NULL)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist")
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object doesn't exist")
 
     /* Take ownership of the object's group location */
     /* (Group traversal callbacks are responsible for either taking ownership
