@@ -2035,8 +2035,9 @@ AC_ARG_ENABLE([debug],
                               [Turn on debugging in all packages. One may
                                also specify a comma-separated list of
                                package names without the leading H5 or
-                               the word no. The default is most
-                               packages.])],
+                               the word no. The default is most packages
+			       if production is disabled; no if it is enabled.
+                               ])],
               [DEBUG_PKG=$enableval])
 
 dnl Default to no if producton is enabled
