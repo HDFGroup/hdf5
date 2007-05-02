@@ -60,7 +60,7 @@ const H5O_msg_class_t H5O_MSG_UNKNOWN[1] = {{
 }};
 
 /* Declare a free list to manage the H5O_unknown_t struct */
-H5FL_DEFINE_STATIC(H5O_unknown_t);
+H5FL_DEFINE(H5O_unknown_t);
 
 
 /*-------------------------------------------------------------------------
