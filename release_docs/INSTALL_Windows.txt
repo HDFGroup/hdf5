@@ -1189,8 +1189,8 @@ Section VII: Building with Intel Fortran 9.1
        can safely be ignored.
 
 
-      1.3: Other fixes
-
+      1.3: Fix Project Output
+      
       1) Change libtest_fortran_lib Release Output
       
         For .Net 2003:
@@ -1205,6 +1205,22 @@ Section VII: Building with Intel Fortran 9.1
             and select "Properties".  From the left pane, choose Librarian >
             General.  In the right pane, under Output File, change
             ".\Release\libtest_fortran.lib" to ".\Release\libtest_fortranr.lib" 
+            Then click "OK".
+            
+      2) Change hdf5_fortran Debug Output
+      
+        For .Net 2003:
+            Choose configuration to be "Debug". Right click project 
+            hdf5_fortran. Click "librarian" on the left panel. Change 
+            "$(OutDir)/$(ProjectName).lib" to "$(OutDir)/hdf5_fortrand.lib" 
+            on the panel of Output File; then click "OK".
+
+        For Visual Studio 2005:
+            In Build > Configuration Manager, set the configuration to "Debug"
+            and click OK.  Then, right click on the project hdf5_fortran
+            and select "Properties".  From the left pane, choose Librarian >
+            General.  In the right pane, under Output File, change
+            "$(OutDir)/$(ProjectName).lib" to "$(OutDir)/hdf5_fortrand.lib" 
             Then click "OK".
             
 
