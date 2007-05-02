@@ -1171,8 +1171,8 @@ Section VII: Building with Intel Fortran 9.1
         libtest_fortrandll
         testhdf5_fortran
         testhdf5_fortrandll
-
-         
+        
+             
        b. Select project "libtest_fortran" in the Solution
        Explorer window. In the Project menu, select
        "Extract Compaq Visual Fortran Project". Since Project
@@ -1183,13 +1183,13 @@ Section VII: Building with Intel Fortran 9.1
        "The Intel Fortran project" as the the main project and
        click "OK".
 
-      1.3: Remove redundant header files at hdf5_fortran and hdf5_fortrandll
+       Note: In Visual Studio 2005, you may receive a message that 
+       says "The attempt to convert the Fortran project file failed.
+       The project file (.dsp) has not been converted."  This message
+       can safely be ignored.
 
-      Clicking project files hdf5_fortran and hdf5_fortrandll,
-      either under "Source Files" or "Header Files"
-      Select H5f90.h,H5f90i.h,H5f90proto.h and remove them for the project files.
 
-      1.4: Other fixes
+      1.3: Other fixes
 
       1) Change libtest_fortran_lib Release Output
       
@@ -1207,69 +1207,26 @@ Section VII: Building with Intel Fortran 9.1
             ".\Release\libtest_fortran.lib" to ".\Release\libtest_fortranr.lib" 
             Then click "OK".
             
-      2) Change hdf5_fortrandll Preprocessor
-      
-        For .Net 2003:
-            Right click project hdf5_fortrandll, click "Fortran" on the left panel,
-            On the right panel, under "Preprocessor Definitions",
-            change "HDF5F90_WINDOWS BUILD_HDF5_DLL" to 
-            "HDF5F90_WINDOWS,BUILD_HDF5_DLL",then click "OK".
 
-        For Visual Studio 2005:
-            Right click project hdf5_fortrandll and select "Properties".  In the
-            left pane, select Fortran > Preprocessor.  In the right panel, under
-            "Preprocessor Definitions", change "HDF5F90_WINDOWS BUILD_HDF5_DLL"
-            to "HDF5F90_WINDOWS,BUILD_HDF5_DLL",then click "OK".
-
-
-      1.5: Change project dependencies
+      1.4: Change project dependencies
 
 
       To check the project dependencies,
-      right click the selected project, you should see "Project Dependencies" on the menu,
-      click "Project Dependencies", You should see a "Project Dependencies" panel, with
-      the selected project and the projects it depends on checked under "Depends on" list.
+      right click the selected project, you should see "Project Dependencies" 
+      on the menu, click "Project Dependencies", You should see a "Project 
+      Dependencies" panel, with the selected project and the projects it 
+      depends on checked under "Depends on" list.  
+      
+      The project "libtest_fortran_lib" will need to be added as a
+      dependnecy to the following projects:
 
-      Make sure all intel fortran projects have their corrsponding dependencies as follows:
-
-      flush1_fortran:       hdf5,                   hdf5_f90cstub,
-                            hdf5_fortran,           libtest,
-                            libtest_fortran,        libtest_fortran_lib
-
-      flush1_fortrandll:    hdf5_f90cstubdll,       hdf5_fortrandll,
-                            hdf5dll,                libtest_fortrandll
-                            libtest_cstubdll,       libtestD
-
-      flush2_fortran:       hdf5,                   hdf5_f90cstub,
-                            hdf5_fortran,           libtest,
-                            libtest_fortran,        libtest_fortran_lib
-                            
-      flush2_fortrandll:    hdf5_f90cstubdll,       hdf5_fortrandll,
-                            hdf5dll,                libtest_fortrandll
-                            libtest_cstubdll,       libtestD
-                            
-      hdf5_fortran:         hdf5,                   hdf5_f90cstub
-
-      hdf5_fortrandll:      hdf5dll,                hdf5_f90cstubdll
-
-      libtest_fortran:      libtest,                libtest_fotran_lib
-
-      libtest_fortrandll:   libtest_cstubdll,       libtestD
-                            
-      testhdf5_fortran:     hdf5,                   hdf5_f90cstub,
-                            hdf5_fortran,           libtest,
-                            libtest_fortran,        libtest_fortran_lib
-
-                            
-                            
-      testhdf5_fortrandll:  hdf5_f90cstubdll,       hdf5_fortrandll,
-                            hdf5dll,                libtest_fortrandll
-                            libtest_cstubdll,       libtestD
+            flush1_fortran
+            flush2_fortran
+            libtest_fortran
+            testhdf5_fortran
 
 
-
-
-      1.6 Building HDF5 C/C++/Fortran Libraries and Tools
+      1.5 Building HDF5 C/C++/Fortran Libraries and Tools
 
       Select "Build", then Select "Configuration Manager".
 
