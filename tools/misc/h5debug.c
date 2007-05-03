@@ -204,6 +204,7 @@ main(int argc, char *argv[])
 
     if (status < 0) {
         fprintf(stderr, "An error occurred\n");
+        H5Eprint(stderr);
         HDexit(5);
     }
     H5Pclose(dxpl);
