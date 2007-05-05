@@ -1813,6 +1813,7 @@
 ./windows/test/objcopy/objcopy.dsp
 ./windows/test/ohdrdll/ohdrdll.dsp
 ./windows/test/ohdr/ohdr.dsp
+./windows/test/ohdr_gentst/ohdr_gentst.dsp
 ./windows/test/overheaddll/overheaddll.dsp
 ./windows/test/overhead/overhead.dsp
 ./windows/test/pooldll/pooldll.dsp
