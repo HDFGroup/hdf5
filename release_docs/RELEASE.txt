@@ -75,6 +75,10 @@ New Features
 
     C++ API:
     --------
+	- Added support for szip: DSetCreatPropList::setSzip - BMR 2007/01/24
+
+
+
 
 
 Support for New Platforms, Languages and Compilers
@@ -175,7 +179,27 @@ Bug Fixes since HDF5-1.6.5 Release
                                 
     C++ API
     -------
-
+	- Changed
+	        StrType::StrType(const size_t& size);
+	  to
+	        StrType::StrType(const int dummy, const size_t& size);
+	  because the first one clashed with
+	        StrType::StrType(const hid_t existing_id); - BMR 2007/05/03
+	- Wrappers of H5Rcreate had incorrect prototypes.  Added these
+	  overloaded functions:
+	        IdComponent::reference(void* ref, const char* name, DataSpace&
+	                dataspace, H5R_type_t ref_type = H5R_DATASET_REGION)
+	        IdComponent::void reference(void* ref, const char* name)
+	        IdComponent::reference(void* ref, const H5std_string& name)
+	  and will remove these incorrect member functions:
+	        DataSet::Reference
+	        DataType::Reference
+	        Group::Reference
+	        H5File::Reference
+	- Added wrappers for H5Rdereference as constructors
+	        DataSet(IdComponent& obj, void* ref);
+	        Group(IdComponent& obj, void* ref);
+	        DataType(IdComponent& obj, void* ref);
 
 
    
