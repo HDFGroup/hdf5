@@ -12292,19 +12292,19 @@ if test -z "$ECHO_N" -o -z "$ECHO_C"; then
   fi
 fi
 
+config_summary="../#c++_configure_summary"
+rm -f $config_summary
+
 PRINT_PLAIN() {
-  echo $ECHO_N "$1$ECHO_C"
-  echo $ECHO_N "$1$ECHO_C" 1>>src/libhdf5_cpp.settings
+  echo $ECHO_N "$1$ECHO_C" 1>>$config_summary
 }
 
 PRINT_N() {
-  echo $ECHO_N "$1:  $ECHO_C"
-  echo $ECHO_N "$1:  $ECHO_C" 1>>src/libhdf5_cpp.settings
+  echo $ECHO_N "$1:  $ECHO_C" 1>>$config_summary
 }
 
 PRINT() {
-  echo "$1"
-  echo "$1" 1>>src/libhdf5_cpp.settings
+  echo "$1" 1>>$config_summary
 }
 
 IF_YES_NO() {
@@ -12331,13 +12331,8 @@ IF_ENABLED_DISABLED() {
   fi
 }
 
-PRINT "C++ Configure Summary"
-PRINT "Compiling Options:"
-
 PRINT_N "                   C++ Compiler"
 PRINT "$CXX"
 
 PRINT_N "                       CXXFLAGS"
 PRINT "$CXXFLAGS"
-
-PRINT "Features:"

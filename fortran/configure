@@ -13646,19 +13646,19 @@ if test -z "$ECHO_N" -o -z "$ECHO_C"; then
   fi
 fi
 
+config_summary="../#fortran_configure_summary"
+rm -f $config_summary
+
 PRINT_PLAIN() {
-  echo $ECHO_N "$1$ECHO_C"
-  echo $ECHO_N "$1$ECHO_C" 1>>src/libhdf5_fortran.settings
+  echo $ECHO_N "$1$ECHO_C" 1>>$config_summary
 }
 
 PRINT_N() {
-  echo $ECHO_N "$1:  $ECHO_C"
-  echo $ECHO_N "$1:  $ECHO_C" 1>>src/libhdf5_fortran.settings
+  echo $ECHO_N "$1:  $ECHO_C" 1>>$config_summary
 }
 
 PRINT() {
-  echo "$1"
-  echo "$1" 1>>src/libhdf5_fortran.settings
+  echo "$1" 1>>$config_summary
 }
 
 IF_YES_NO() {
@@ -13685,9 +13685,6 @@ IF_ENABLED_DISABLED() {
   fi
 }
 
-PRINT "Fortran Configure Summary"
-PRINT "Compiling Options:"
-
 PRINT_N "               Fortran Compiler"
 PRINT "$F9X"
 
@@ -13705,5 +13702,3 @@ PRINT "$CPPFLAGS"
 
 PRINT_N "                        LDFLAGS"
 PRINT "$LDFLAGS"
-
-PRINT "Features:"

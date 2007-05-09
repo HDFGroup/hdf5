@@ -2558,6 +2558,11 @@ PRINT_N() {
   echo $ECHO_N "$1:  $ECHO_C" 1>>src/libhdf5.settings
 }
 
+PRINT_F() {
+  cat "$1"
+  cat "$1" 1>>src/libhdf5.settings
+}
+
 PRINT() {
   echo "$1"
   echo "$1" 1>>src/libhdf5.settings
@@ -2590,6 +2595,7 @@ IF_ENABLED_DISABLED() {
   fi
 }
 
+PRINT ""
 PRINT "Configure Summary"
 PRINT "Compiling Options:"
 
@@ -2638,15 +2644,32 @@ IF_YES_NO "$TRACE_API"
 PRINT_N "   Optimization Instrumentation"
 IF_YES_NO "$INSTRUMENT"
 
+PRINT ""
 PRINT "Languages:"
+PRINT "----------"
 
 PRINT_N "                            C++"
 IF_YES_NO "$HDF_CXX"
+summary_file="#c++_configure_summary"
+if test X$HDF_CXX = Xyes -a -f $summary_file ; then
+
+    PRINT_F $summary_file
+    rm -f $summary_file
+    PRINT ""
+fi
 
 PRINT_N "                        Fortran"
 IF_YES_NO "$HDF_FORTRAN"
+summary_file="#fortran_configure_summary"
+if test X$HDF_FORTRAN = Xyes -a -f $summary_file ; then
+    PRINT_F $summary_file
+    rm -f $summary_file
+    PRINT ""
+fi
 
+PRINT ""
 PRINT "Features:"
+PRINT "---------"
 
 PRINT_N "                        dmalloc"
 IF_YES_NO "$HAVE_DMALLOC"
