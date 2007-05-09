@@ -34,7 +34,7 @@ hdf5_builddir=$(top_builddir)/src
 ## created by replacing the `.cpp' with a `.lo'. This list is necessary
 ## for building automatic dependencies.
 TEST_SRC=create.cpp readdata.cpp writedata.cpp compound.cpp extend_ds.cpp \
-	 chunks.cpp h5group.cpp
+	 chunks.cpp h5group.cpp strtype.cpp
 TEST_OBJ=$(TEST_SRC:.cpp=.lo)
 
 EXAMPLE_PROGS=$(TEST_SRC)
@@ -69,6 +69,9 @@ chunks: $(srcdir)/chunks.cpp
 
 extend_ds: $(srcdir)/extend_ds.cpp
 	$(CXX) $(CPPFLAGS) -o $@ $(srcdir)/extend_ds.cpp
+
+strtype: $(srcdir)/strtype.cpp
+	$(CXX) $(CPPFLAGS) -o $@ $(srcdir)/strtype.cpp
 
 writedata: $(srcdir)/writedata.cpp
 	$(CXX) $(CPPFLAGS) -o $@ $(srcdir)/writedata.cpp

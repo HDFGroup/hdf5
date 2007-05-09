@@ -45,6 +45,7 @@ TESTING C++ Examples
    ./extend_ds
    ./chunks
    ./h5group
+   ./strtype
 ) > $actual
 
 if $CMP $expect $actual; then
