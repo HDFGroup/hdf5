@@ -806,11 +806,11 @@ case "X-$enable_parallel" in
     dnl Try link a simple MPI program.  If fail, try again with -lmpi.
     AC_TRY_FLINK(mpif.h, [
         integer:: ierr
-        call mpi_file_open( ierr )],,
+        call mpi_init( ierr )],,
         AC_CHECK_FLIB(mpi, [
           include 'mpif.h'
           integer:: ierr
-          call mpi_file_open( ierr )],, PARALLEL=no))
+          call mpi_init( ierr )],, PARALLEL=no))
 
     dnl Then try link a simple MPI-IO program.  If fail, try again with
     dnl -lmpio.
