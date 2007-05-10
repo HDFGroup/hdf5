@@ -978,6 +978,7 @@ int
 H5O_link(const H5O_loc_t *loc, int adjust, hid_t dxpl_id)
 {
     H5O_t	*oh = NULL;
+    H5AC_protect_t oh_acc;              /* Access mode for protecting object header */
     unsigned oh_flags = H5AC__NO_FLAGS_SET; /* Whether the object was deleted  */
     int	ret_value;                          /* Return value */
 
@@ -987,81 +988,82 @@ H5O_link(const H5O_loc_t *loc, int adjust, hid_t dxpl_id)
     HDassert(loc);
     HDassert(loc->file);
     HDassert(H5F_addr_defined(loc->addr));
-    if(adjust != 0 && 0 == (H5F_INTENT(loc->file) & H5F_ACC_RDWR))
-	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "no write intent on file")
 
     /* get header */
-    if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
+    oh_acc = adjust ? H5AC_WRITE : H5AC_READ;
+    if(NULL == (oh = H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, oh_acc)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
-    /* adjust link count */
-    if(adjust < 0) {
-        /* Check for too large of an adjustment */
-        if((unsigned)(-adjust) > oh->nlink)
-	    HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "link count would be negative")
-	oh->nlink += adjust;
-        oh_flags |= H5AC__DIRTIED_FLAG;
+    /* Check for adjusting link count */
+    if(adjust) {
+        if(adjust < 0) {
+            /* Check for too large of an adjustment */
+            if((unsigned)(-adjust) > oh->nlink)
+                HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "link count would be negative")
+            oh->nlink += adjust;
+            oh_flags |= H5AC__DIRTIED_FLAG;
 
-        /* Check if the object should be deleted */
-        if(oh->nlink == 0) {
-            /* Check if the object is still open by the user */
-            if(H5FO_opened(loc->file, loc->addr) != NULL) {
-                /* Flag the object to be deleted when it's closed */
-                if(H5FO_mark(loc->file, loc->addr, TRUE) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "can't mark object for deletion")
+            /* Check if the object should be deleted */
+            if(oh->nlink == 0) {
+                /* Check if the object is still open by the user */
+                if(H5FO_opened(loc->file, loc->addr) != NULL) {
+                    /* Flag the object to be deleted when it's closed */
+                    if(H5FO_mark(loc->file, loc->addr, TRUE) < 0)
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "can't mark object for deletion")
+                } /* end if */
+                else {
+                    /* Delete object right now */
+                    if(H5O_delete_oh(loc->file, dxpl_id, oh) < 0)
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "can't delete object from file")
+
+                    /* Mark the object header as deleted */
+                    oh_flags = H5C__DELETED_FLAG;
+                } /* end else */
+            } /* end if */
+        } else {
+            /* A new object, or one that will be deleted */
+            if(oh->nlink == 0) {
+                /* Check if the object is current open, but marked for deletion */
+                if(H5FO_marked(loc->file, loc->addr) > 0) {
+                    /* Remove "delete me" flag on the object */
+                    if(H5FO_mark(loc->file, loc->addr, FALSE) < 0)
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "can't mark object for deletion")
+                } /* end if */
+            } /* end if */
+
+            oh->nlink += adjust;
+            oh_flags |= H5AC__DIRTIED_FLAG;
+        } /* end if */
+
+        /* Check for operations on refcount message */
+        if(oh->version > H5O_VERSION_1) {
+            /* Check if the object has a refcount message already */
+            if(oh->has_refcount_msg) {
+                /* Check for removing refcount message */
+                if(oh->nlink <= 1) {
+                    if(H5O_msg_remove_real(loc->file, oh, H5O_MSG_REFCOUNT, H5O_ALL, NULL, NULL, TRUE, dxpl_id) < 0)
+                        HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete refcount message")
+                    oh->has_refcount_msg = FALSE;
+                } /* end if */
+                /* Update refcount message with new link count */
+                else {
+                    H5O_refcount_t refcount = oh->nlink;
+
+                    if(H5O_msg_write_real(loc->file, dxpl_id, oh, H5O_MSG_REFCOUNT, H5O_MSG_FLAG_DONTSHARE, 0, &refcount) < 0)
+                        HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update refcount message")
+                } /* end else */
             } /* end if */
             else {
-                /* Delete object right now */
-                if(H5O_delete_oh(loc->file, dxpl_id, oh) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "can't delete object from file")
+                /* Check for adding refcount message to object */
+                if(oh->nlink > 1) {
+                    H5O_refcount_t refcount = oh->nlink;
 
-                /* Mark the object header as deleted */
-                oh_flags = H5C__DELETED_FLAG;
+                    if(H5O_msg_append_real(loc->file, dxpl_id, oh, H5O_MSG_REFCOUNT, H5O_MSG_FLAG_DONTSHARE, 0, &refcount) < 0)
+                        HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to create new refcount message")
+                    oh->has_refcount_msg = TRUE;
+                } /* end if */
             } /* end else */
         } /* end if */
-    } else if (adjust > 0) {
-        /* A new object, or one that will be deleted */
-        if(oh->nlink == 0) {
-            /* Check if the object is current open, but marked for deletion */
-            if(H5FO_marked(loc->file, loc->addr) > 0) {
-                /* Remove "delete me" flag on the object */
-                if(H5FO_mark(loc->file, loc->addr, FALSE) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "can't mark object for deletion")
-            } /* end if */
-        } /* end if */
-
-	oh->nlink += adjust;
-        oh_flags |= H5AC__DIRTIED_FLAG;
-    } /* end if */
-
-    /* Check for operations on refcount message */
-    if(oh->version > H5O_VERSION_1) {
-        /* Check if the object has a refcount message already */
-        if(oh->has_refcount_msg) {
-            /* Check for removing refcount message */
-            if(oh->nlink <= 1) {
-                if(H5O_msg_remove_real(loc->file, oh, H5O_MSG_REFCOUNT, H5O_ALL, NULL, NULL, TRUE, dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete refcount message")
-                oh->has_refcount_msg = FALSE;
-            } /* end if */
-            /* Update refcount message with new link count */
-            else {
-                H5O_refcount_t refcount = oh->nlink;
-
-                if(H5O_msg_write_real(loc->file, dxpl_id, oh, H5O_MSG_REFCOUNT, H5O_MSG_FLAG_DONTSHARE, 0, &refcount) < 0)
-                    HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update refcount message")
-            } /* end else */
-        } /* end if */
-        else {
-            /* Check for adding refcount message to object */
-            if(oh->nlink > 1) {
-                H5O_refcount_t refcount = oh->nlink;
-
-                if(H5O_msg_append_real(loc->file, dxpl_id, oh, H5O_MSG_REFCOUNT, H5O_MSG_FLAG_DONTSHARE, 0, &refcount) < 0)
-                    HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to create new refcount message")
-                oh->has_refcount_msg = TRUE;
-            } /* end if */
-        } /* end else */
     } /* end if */
 
     /* Set return value */
