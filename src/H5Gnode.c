@@ -1418,12 +1418,9 @@ H5G_node_iterate(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t ad
     H5G_bt_it_it_t	*udata = (H5G_bt_it_it_t *)_udata;
     H5G_node_t		*sn = NULL;
     H5HL_t              *heap = NULL;
-    char		buf[1024], *s = buf;    /* Buffer for link name & pointer to link name */
-    size_t              buf_size = sizeof(buf); /* Size of link name buffer */
-    unsigned		nsyms;                  /* # of symbols in node */
-    H5G_entry_t		*ents = NULL;           /* Copy of entries in this node */
+    H5G_entry_t		*ents;                  /* Pointer to entries in this node */
     unsigned		u;                      /* Local index variable */
-    int	                ret_value;
+    int	                ret_value = H5_ITER_CONT;
 
     FUNC_ENTER_NOAPI(H5G_node_iterate, H5_ITER_ERROR)
 
@@ -1434,63 +1431,30 @@ H5G_node_iterate(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t ad
     HDassert(H5F_addr_defined(addr));
     HDassert(udata);
 
-    /*
-     * Save information about the symbol table node since we can't lock it
-     * because we're about to call an application function.
-     */
+    /* Protect the symbol table node & local heap while we iterate over entries */
     if(NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5_ITER_ERROR, "unable to load symbol table node")
-    nsyms = sn->nsyms;
-    if(NULL == (ents = H5FL_SEQ_MALLOC(H5G_entry_t, (size_t)nsyms)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR, "memory allocation failed")
-    HDmemcpy(ents, sn->entry, sizeof(H5G_entry_t) * nsyms);
-
-    if(H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) != SUCCEED) {
-        sn = NULL;
-        HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5_ITER_ERROR, "unable to release object header")
-    } /* end if */
-    sn = NULL;    /* Make certain future references will be caught */
+    if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->heap_addr, H5AC_READ)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5_ITER_ERROR, "unable to protect symbol name")
 
     /*
      * Iterate over the symbol table node entries.
      */
-    for(u = 0, ret_value = H5_ITER_CONT; u < nsyms && !ret_value; u++) {
+    for(u = 0, ents = sn->entry; u < sn->nsyms && ret_value == H5_ITER_CONT; u++) {
         if(udata->skip > 0)
             --udata->skip;
         else {
-            size_t		n;      /* Length of link name */
             const char		*name;  /* Pointer to link name in heap */
 
-            if(NULL == (heap = H5HL_protect(f, dxpl_id, udata->heap_addr, H5AC_READ)))
-                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5_ITER_ERROR, "unable to protect symbol name")
-
+            /* Get the pointer to the name of the link in the heap */
             name = H5HL_offset_into(f, heap, ents[u].name_off);
             HDassert(name);
-            n = HDstrlen(name);
-
-            /* Allocate space or point to existing buffer */
-            if((n + 1) > sizeof(buf)) {
-                if(s != buf)
-                    H5MM_xfree(s);
-                if(NULL == (s = H5MM_malloc(n + 1)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR, "memory allocation failed")
-                buf_size = n + 1;
-            } /* end if */
-            else
-                s = buf;
-
-            /* Make a copy of the name */
-            HDstrcpy(s, name);
-
-            if(H5HL_unprotect(f, dxpl_id, heap, udata->heap_addr, H5AC__NO_FLAGS_SET) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5_ITER_ERROR, "unable to unprotect symbol name")
-            heap = NULL; name = NULL;
 
             /* Check which type of callback to make */
             switch(udata->lnk_op->op_type) {
                 case H5G_LINK_OP_OLD:
                     /* Make the old-type application callback */
-                    ret_value = (udata->lnk_op->u.old_op)(udata->group_id, s, udata->op_data);
+                    ret_value = (udata->lnk_op->u.old_op)(udata->group_id, name, udata->op_data);
                     break;
 
                 case H5G_LINK_OP_APP:
@@ -1502,7 +1466,7 @@ H5G_node_iterate(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t ad
                             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5_ITER_ERROR, "unable to get info for symbol table entry")
 
                         /* Make the application callback */
-                        ret_value = (udata->lnk_op->u.app_op)(udata->group_id, s, &info, udata->op_data);
+                        ret_value = (udata->lnk_op->u.app_op)(udata->group_id, name, &info, udata->op_data);
                     }
                     break;
 
@@ -1512,7 +1476,7 @@ H5G_node_iterate(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t ad
                         H5O_link_t lnk;         /* Link for entry */
 
                         /* Convert the entry to a link */
-                        if(H5G_ent_to_link(f, dxpl_id, &lnk, udata->heap_addr, NULL, &ents[u], s) < 0)
+                        if(H5G_ent_to_link(f, dxpl_id, &lnk, udata->heap_addr, NULL, &ents[u], name) < 0)
                             HGOTO_ERROR(H5E_SYM, H5E_CANTCONVERT, H5_ITER_ERROR, "unable to convert symbol table entry to link")
 
                         /* Call the library's callback */
@@ -1534,18 +1498,11 @@ H5G_node_iterate(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t ad
         HERROR(H5E_SYM, H5E_CANTNEXT, "iteration operator failed");
 
 done:
-    /* Free the memory for the name, if we used a dynamically allocated buffer */
-    if(s != buf)
-        H5MM_xfree(s);
-
+    /* Release resources */
     if(heap && H5HL_unprotect(f, dxpl_id, heap, udata->heap_addr, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5_ITER_ERROR, "unable to unprotect symbol name")
-
     if(sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) != SUCCEED)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5_ITER_ERROR, "unable to release object header")
-
-    if(ents)
-        H5FL_SEQ_FREE(H5G_entry_t, ents);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_node_iterate() */
