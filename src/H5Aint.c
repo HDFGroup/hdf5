@@ -80,6 +80,9 @@ static herr_t H5A_compact_build_table_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
     unsigned sequence, unsigned *oh_flags_ptr, void *_udata/*in,out*/);
 static herr_t H5A_dense_build_table_cb(const H5A_t *attr, void *_udata);
 static int H5A_attr_cmp_name_inc(const void *attr1, const void *attr2);
+static int H5A_attr_cmp_name_dec(const void *attr1, const void *attr2);
+static int H5A_attr_cmp_corder_inc(const void *attr1, const void *attr2);
+static int H5A_attr_cmp_corder_dec(const void *attr1, const void *attr2);
 static herr_t H5A_attr_sort_table(H5A_attr_table_t *atable, H5_index_t idx_type,
     H5_iter_order_t order);
 

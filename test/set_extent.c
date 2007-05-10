@@ -123,27 +123,28 @@ int main( void )
     for( i = 0; i < (int)dims_out[0]; i++ )
         for( j = 0; j < (int)dims_out[1]; j++ )
             if (  buf1[i][j] != data[i][j] ) {
-                printf("buf1[%d][%d]=%d\n",i,j,buf1[i][j]);
-                printf("data[%d][%d]=%d\n",i,j,data[i][j]);
+                printf("buf1[%d][%d] = %d\n", i, j, buf1[i][j]);
+                printf("data[%d][%d] = %d\n", i, j, data[i][j]);
                 TEST_ERROR;
             } /* end if */
 
 
     /*-------------------------------------------------------------------------
-    * Set new dimensions for the array; expand it again
+    * Set new dimensions for the array; expand it back to original size
     *-------------------------------------------------------------------------
     */
 
     /* Set new dimensions for the array. */
-    if (H5Dset_extent( dataset_id , dims )<0) TEST_ERROR;
+    if(H5Dset_extent(dataset_id, dims) < 0) TEST_ERROR;
 
     /* Get the space. */
-    if ((space_id = H5Dget_space( dataset_id ))<0) TEST_ERROR;
+    if((space_id = H5Dget_space(dataset_id)) < 0) TEST_ERROR;
 
     /* Get dimensions. */
-    if (H5Sget_simple_extent_dims( space_id, dims_out, NULL )<0) TEST_ERROR;
+    if(H5Sget_simple_extent_dims(space_id, dims_out, NULL) < 0) TEST_ERROR;
 
-    if ( dims_out[0] != dims[0] ) TEST_ERROR;
+    if(dims_out[0] != dims[0]) TEST_ERROR;
+    if(dims_out[1] != dims[1]) TEST_ERROR;
 
 
     /*-------------------------------------------------------------------------
@@ -152,19 +153,21 @@ int main( void )
     */
 
     /* Read the new dataset. */
-    if (H5Dread( dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf2 )<0) TEST_ERROR;
+    if(H5Dread(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf2) < 0) TEST_ERROR;
 
     /* Compare the read array with the original array */
-    for( i = 0; i < (int)dims_out[0]; i++ ) {
-        for( j = 0; j < (int)dims_out[1]; j++ ) {
-            if ( i >= 70 || j >= 70 ) {
-                if (  buf2[i][j] != fillvalue ) TEST_ERROR;
-            }
+    for(i = 0; i < (int)dims_out[0]; i++ )
+        for(j = 0; j < (int)dims_out[1]; j++ )
+            if(i >= 70 || j >= 70) {
+                if(buf2[i][j] != fillvalue) {
+                    printf("buf1[%d][%d] = %d\n", i, j, buf1[i][j]);
+                    printf("fillvalue = %d\n", fillvalue);
+                    TEST_ERROR;
+                } /* end if */
+            } /* end if */
             else {
-                if (  buf2[i][j] != data[i][j] ) TEST_ERROR;
+                if(buf2[i][j] != data[i][j]) TEST_ERROR;
             }
-        }
-    }
 
 
     /*-------------------------------------------------------------------------
