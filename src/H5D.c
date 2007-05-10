@@ -3192,7 +3192,7 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
             H5D_BUILD_IO_INFO(&io_info, dset, dxpl_cache, dxpl_id, NULL);
 
             /* Remove excess chunks */
-            if(H5D_istore_prune_by_extent(&io_info) < 0)
+            if(H5D_istore_prune_by_extent(&io_info, curr_dims) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to remove chunks ")
 
             /* Reset the elements outsize the new dimensions, but in existing chunks */

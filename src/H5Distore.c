@@ -65,6 +65,7 @@
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5Sprivate.h"         /* Dataspaces                           */
+#include "H5SLprivate.h"	/* Skip lists				*/
 #include "H5Vprivate.h"		/* Vector and array functions		*/
 
 /****************/
@@ -104,6 +105,8 @@
 #define H5D_ISTORE_NDIMS(X)	(((X)->sizeof_rkey-8)/8)
 
 #define H5D_HASH(D,ADDR) H5F_addr_hash(ADDR,(D)->cache.chunk.nslots)
+
+#define H5D_ISTORE_DEFAULT_SKIPLIST_HEIGHT     8
 
 /******************/
 /* Local Typedefs */
@@ -166,6 +169,7 @@ typedef struct H5D_istore_bt_ud_common_t {
  */
 typedef H5D_istore_bt_ud_common_t H5D_istore_ud0_t;
 
+/* B-tree callback info for various operations */
 typedef struct H5D_istore_ud1_t {
     H5D_istore_bt_ud_common_t common;           /* Common info for B-tree user data (must be first) */
     haddr_t		addr;			/*file address of chunk */
@@ -187,7 +191,9 @@ typedef struct H5D_istore_it_ud2_t {
 /* B-tree callback info for iteration to prune chunks */
 typedef struct H5D_istore_it_ud3_t {
     H5D_istore_bt_ud_common_t common;           /* Common info for B-tree user data (must be first) */
-    hsize_t		*dims;		        /*dataset dimensions	*/
+    const hsize_t	*dims;		        /* New dataset dimensions	*/
+    const hsize_t       *down_chunks;           /* "down" size of number of chunks in each dimension */
+    H5SL_t              *outside;               /* Skip list to hold chunks outside the new dimensions */
 } H5D_istore_it_ud3_t;
 
 /* B-tree callback info for iteration to copy data */
@@ -223,9 +229,22 @@ typedef struct H5D_istore_it_ud4_t {
 /* B-tree callback info for iteration to obtain chunk address and the index of the chunk for all chunks in the B-tree. */
 typedef struct H5D_istore_it_ud5_t {
     H5D_istore_bt_ud_common_t common;           /* Common info for B-tree user data (must be first) */
-    hsize_t*              down_chunks;
+    hsize_t             *down_chunks;
     haddr_t             *chunk_addr;
 } H5D_istore_it_ud5_t;
+
+/* Skip list node for storing chunks to remove during an iteration */
+typedef struct H5D_istore_sl_ck_t {
+    hsize_t             index;                  /* Index of chunk to remove (must be first) */
+    H5D_istore_key_t	key;	                /* Chunk key */
+} H5D_istore_sl_ck_t;
+
+/* Skip list callback info when destroying list & removing chunks */
+typedef struct H5D_istore_sl_rm_t {
+    H5F_t               *f;                     /* Pointer to file for B-tree */
+    hid_t               dxpl_id;                /* DXPL to use */
+    const H5O_layout_t	*mesg;		        /* Layout message	*/
+} H5D_istore_sl_rm_t;
 
 /********************/
 /* Local Prototypes */
@@ -243,7 +262,7 @@ static int H5D_istore_iter_allocated(H5F_t *f, hid_t dxpl_id, const void *left_k
 				 const void *right_key, void *_udata);
 static int H5D_istore_iter_dump(H5F_t *f, hid_t dxpl_id, const void *left_key, haddr_t addr,
 				 const void *right_key, void *_udata);
-static int H5D_istore_prune_extent(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
+static int H5D_istore_prune_check(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
         const void *_rt_key, void *_udata);
 static int H5D_istore_iter_copy(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
                                  const void *_rt_key, void *_udata);
@@ -322,6 +341,9 @@ H5FL_BLK_DEFINE_STATIC(chunk_page);
 
 /* Declare extern the free list to manage blocks of type conversion data */
 H5FL_BLK_EXTERN(type_conv);
+
+/* Declare a free list to manage H5D_istore_sl_ck_t objects */
+H5FL_DEFINE_STATIC(H5D_istore_sl_ck_t);
 
 
 /*-------------------------------------------------------------------------
@@ -2904,6 +2926,113 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5D_istore_prune_check
+ *
+ * Purpose:	Search for chunks that are no longer necessary in the B-tree.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Pedro Vicente, pvn@ncsa.uiuc.edu
+ * 		March 26, 2002
+ *
+ *-------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+static int
+H5D_istore_prune_check(H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
+    const void *_lt_key, haddr_t UNUSED addr, const void UNUSED *_rt_key,
+    void *_udata)
+{
+    H5D_istore_it_ud3_t       *udata = (H5D_istore_it_ud3_t *)_udata;
+    const H5D_istore_key_t       *lt_key = (const H5D_istore_key_t *)_lt_key;
+    unsigned                rank;	/*current # of dimensions */
+    unsigned                u;
+    int                     ret_value = H5_ITER_CONT;       /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_istore_prune_check)
+
+    /* Figure out what chunks are no longer in use for the specified extent and release them */
+    rank = udata->common.mesg->u.chunk.ndims - 1;
+    for(u = 0; u < rank; u++)
+        /* The LT_KEY is the left key (the one that describes the chunk). It points to a chunk of
+         * storage that contains the beginning of the logical address space represented by UDATA.
+         */
+	if((hsize_t)lt_key->offset[u] > udata->dims[u]) {
+            H5D_istore_sl_ck_t *sl_node;        /* Skip list node for chunk to remove */
+
+            /* Allocate space for the shared structure */
+            if(NULL == (sl_node = H5FL_MALLOC(H5D_istore_sl_ck_t)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR, "memory allocation failed for shared B-tree info")
+
+            /* Calculate the index of this chunk */
+            if(H5V_chunk_index(rank, lt_key->offset, udata->common.mesg->u.chunk.dim, udata->down_chunks, &sl_node->index) < 0) {
+                H5FL_FREE(H5D_istore_sl_ck_t, sl_node);
+                HGOTO_ERROR(H5E_IO, H5E_BADRANGE, H5_ITER_ERROR, "can't get chunk index")
+            } /* end if */
+
+            /* Store the key for the chunk */
+            sl_node->key = *lt_key;
+
+            /* Insert the chunk description in the skip list */
+            if(H5SL_insert(udata->outside, sl_node, &sl_node->index) < 0) {
+                H5FL_FREE(H5D_istore_sl_ck_t, sl_node);
+                HGOTO_ERROR(H5E_IO, H5E_CANTINSERT, H5_ITER_ERROR, "can't insert chunk into skip list")
+            } /* end if */
+
+            /* Break out of loop, we know the chunk is outside the current dimensions */
+	    break;
+	} /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_istore_prune_check() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_istore_prune_remove
+ *
+ * Purpose:	Destroy a skip list node for "pruning" chunks, also removes
+ *              the chunk from the B-tree.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol, koziol@hdfgroup.org
+ * 		May 3, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_istore_prune_remove(void *item, void UNUSED *key, void *op_data)
+{
+    H5D_istore_sl_ck_t *sl_node = (H5D_istore_sl_ck_t *)item;           /* Temporary pointer to chunk to remove */
+    H5D_istore_sl_rm_t *rm_info = (H5D_istore_sl_rm_t *)op_data;       /* Information needed for removing chunk from B-tree */
+    H5D_istore_ud0_t bt_udata;                  /* User data for B-tree removal routine */
+    herr_t ret_value = H5_ITER_CONT;            /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_istore_prune_remove)
+
+    /* Sanity checks */
+    HDassert(sl_node);
+    HDassert(rm_info);
+
+    /* Initialize the user data for the B-tree callback */
+    HDmemset(&bt_udata, 0, sizeof bt_udata);
+    bt_udata.key = sl_node->key;
+    bt_udata.mesg = rm_info->mesg;
+
+    /* Remove */
+    if(H5B_remove(rm_info->f, rm_info->dxpl_id, H5B_ISTORE, rm_info->mesg->u.chunk.addr, &bt_udata) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_CANTINIT, H5_ITER_ERROR, "unable to remove entry")
+
+    /* Free the chunk checking node */
+    H5FL_FREE(H5D_istore_sl_ck_t, sl_node);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* H5D_istore_prune_remove() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D_istore_prune_by_extent
  *
  * Purpose:	This function searches for chunks that are no longer necessary both in the
@@ -3003,124 +3132,103 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_istore_prune_by_extent(const H5D_io_info_t *io_info)
+H5D_istore_prune_by_extent(const H5D_io_info_t *io_info, const hsize_t *old_dims)
 {
     H5D_t *dset = io_info->dset;          /* Local pointer to the dataset info */
     const H5D_rdcc_t       *rdcc = &(dset->shared->cache.chunk);	/*raw data chunk cache */
     H5D_rdcc_ent_t         *ent = NULL, *next = NULL;	/*cache entry  */
-    unsigned                u;	/*counters  */
-    int                     found;	/*remove this entry  */
     H5D_istore_it_ud3_t     udata;	/*B-tree pass-through */
+    H5D_istore_sl_rm_t      rm_info;    /* User data for skip list destroy callback */
     hsize_t                 curr_dims[H5O_LAYOUT_NDIMS];	/*current dataspace dimensions */
-    herr_t      ret_value = SUCCEED;       /* Return value */
+    hsize_t                 chunks[H5O_LAYOUT_NDIMS];	        /*current number of chunks in each dimension */
+    hsize_t                 down_chunks[H5O_LAYOUT_NDIMS];      /* "down" size of number of elements in each dimension */
+    unsigned                rank;	/* Current # of dimensions */
+    unsigned                u;	        /* Local index variable */
+    herr_t                  ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5D_istore_prune_by_extent, FAIL)
 
     /* Check args */
-    assert(io_info);
-    assert(dset && H5D_CHUNKED == dset->shared->layout.type);
-    assert(dset->shared->layout.u.chunk.ndims > 0 && dset->shared->layout.u.chunk.ndims <= H5O_LAYOUT_NDIMS);
-    assert(H5F_addr_defined(dset->shared->layout.u.chunk.addr));
+    HDassert(io_info);
+    HDassert(dset && H5D_CHUNKED == dset->shared->layout.type);
+    HDassert(dset->shared->layout.u.chunk.ndims > 0 && dset->shared->layout.u.chunk.ndims <= H5O_LAYOUT_NDIMS);
+    HDassert(H5F_addr_defined(dset->shared->layout.u.chunk.addr));
 
     /* Go get the rank & dimensions */
+    rank = dset->shared->layout.u.chunk.ndims - 1;
     if(H5S_get_simple_extent_dims(dset->shared->space, curr_dims, NULL) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions")
 
- /*-------------------------------------------------------------------------
-  * Figure out what chunks are no longer in use for the specified extent
-  * and release them from the linked list raw data cache
-  *-------------------------------------------------------------------------
-  */
-    found = 0;
+    /*-------------------------------------------------------------------------
+     * Figure out what chunks are no longer in use for the specified extent
+     * and release them from the linked list raw data cache
+     *-------------------------------------------------------------------------
+     */
     for(ent = rdcc->head; ent; ent = next) {
+        /* Get pointer to next extry in cache, in case this one is evicted */
 	next = ent->next;
 
-        for(u = 0; u < dset->shared->layout.u.chunk.ndims - 1; u++) {
+        /* Check for chunk offset outside of new dimensions */
+        for(u = 0; u < rank; u++)
             if((hsize_t)ent->offset[u] > curr_dims[u]) {
-                found = 1;
-                break;
-            } /* end if */
-        } /* end for */
-
-	if(found) {
 #ifdef H5D_ISTORE_DEBUG
-	    HDfputs("cache:remove:[", stderr);
-	    for(u = 0; u < dset->shared->layout.u.chunk.ndims - 1; u++)
-		HDfprintf(stderr, "%s%Hd", u ? ", " : "", ent->offset[u]);
-	    HDfputs("]\n", stderr);
+                HDfputs("cache:remove:[", stderr);
+                for(u = 0; u < rank; u++)
+                    HDfprintf(stderr, "%s%Hd", (u ? ", " : ""), ent->offset[u]);
+                HDfputs("]\n", stderr);
 #endif
 
-	    /* Preempt the entry from the cache, but do not flush it to disk */
-	    if(H5D_istore_preempt(io_info, ent, FALSE) < 0)
-		HGOTO_ERROR(H5E_IO, H5E_CANTINIT, 0, "unable to preempt chunk")
+                /* Preempt the entry from the cache, but do not flush it to disk */
+                if(H5D_istore_preempt(io_info, ent, FALSE) < 0)
+                    HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to preempt chunk")
 
-            found=0;
-	}
-    }
+                /* Break out of loop, chunk is evicted */
+                break;
+            } /* end if */
+    } /* end for */
 
-/*-------------------------------------------------------------------------
- * Check if there are any chunks on the B-tree
- *-------------------------------------------------------------------------
- */
+    /* Round up to the next integer # of chunks, to accomodate partial chunks */
+    for(u = 0; u < rank; u++)
+        chunks[u] = ((old_dims[u] + dset->shared->layout.u.chunk.dim[u]) - 1) / dset->shared->layout.u.chunk.dim[u];
 
+    /* Get the "down" sizes for each dimension */
+    if(H5V_array_down(rank, chunks, down_chunks) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_BADVALUE, FAIL, "can't compute 'down' sizes")
+
+    /* Initialize the user data for the iteration */
     HDmemset(&udata, 0, sizeof udata);
     udata.common.mesg = &dset->shared->layout;
     udata.dims = curr_dims;
+    udata.down_chunks = down_chunks;
 
-    if(H5B_iterate(dset->oloc.file, io_info->dxpl_id, H5B_ISTORE, H5D_istore_prune_extent, dset->shared->layout.u.chunk.addr, &udata) < 0)
-	HGOTO_ERROR(H5E_IO, H5E_CANTINIT, 0, "unable to iterate over B-tree")
+    /* Initialize the skip list that will hold the chunks outside the dimensions */
+    if(NULL == (udata.outside = H5SL_create(H5SL_TYPE_HSIZE, 0.5, (size_t)H5D_ISTORE_DEFAULT_SKIPLIST_HEIGHT)))
+        HGOTO_ERROR(H5E_IO, H5E_CANTCREATE, FAIL, "can't create skip list for chunks outside new dimensions")
+
+    /* Iterate over chunks in dataset, creating a list of chunks which are
+     *  now completely outside the dataset's dimensions.
+     *
+     * Note: It would be more efficient to create a new B-tree routine that
+     *          performed a "remove if" operation on the B-tree and remove all
+     *          the chunks that were outside the dataset's dimensions through
+     *          that routine.  However, that's a fair amount of work and it's
+     *          unlikely that shrinking a dataset is a performance critical
+     *          operation. - QAK
+     */
+    if(H5B_iterate(dset->oloc.file, io_info->dxpl_id, H5B_ISTORE, H5D_istore_prune_check, dset->shared->layout.u.chunk.addr, &udata) < 0)
+	HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to iterate over B-tree")
+
+    /* Set up user data for skip list callback */
+    rm_info.f = dset->oloc.file;
+    rm_info.dxpl_id = io_info->dxpl_id;
+    rm_info.mesg = &dset->shared->layout;
+
+    /* Destroy the skip list, deleting the chunks in the callback */
+    H5SL_destroy(udata.outside, H5D_istore_prune_remove, &rm_info);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_istore_prune_by_extent() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5D_istore_prune_extent
- *
- * Purpose:	Search for chunks that are no longer necessary in the B-tree.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Pedro Vicente, pvn@ncsa.uiuc.edu
- * 		March 26, 2002
- *
- *-------------------------------------------------------------------------
- */
-/* ARGSUSED */
-static int
-H5D_istore_prune_extent(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t UNUSED addr,
-        const void UNUSED *_rt_key, void *_udata)
-{
-    H5D_istore_it_ud3_t       *udata = (H5D_istore_it_ud3_t *)_udata;
-    const H5D_istore_key_t       *lt_key = (const H5D_istore_key_t *)_lt_key;
-    unsigned                u;
-    int                     ret_value = H5_ITER_CONT;       /* Return value */
-
-    /* The LT_KEY is the left key (the one that describes the chunk). It points to a chunk of
-     * storage that contains the beginning of the logical address space represented by UDATA.
-     */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5D_istore_prune_extent)
-
-    /* Figure out what chunks are no longer in use for the specified extent and release them */
-    for(u = 0; u < udata->common.mesg->u.chunk.ndims - 1; u++)
-	if((hsize_t)lt_key->offset[u] > udata->dims[u]) {
-            H5D_istore_ud0_t        bt_udata;
-
-            HDmemset(&bt_udata, 0, sizeof bt_udata);
-            bt_udata.key = *lt_key;
-            bt_udata.mesg = udata->common.mesg;
-
-            /* Remove */
-            if(H5B_remove(f, dxpl_id, H5B_ISTORE, udata->common.mesg->u.chunk.addr, &bt_udata) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5_ITER_ERROR, "unable to remove entry")
-	    break;
-	} /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_istore_prune_extent() */
 
 
 /*-------------------------------------------------------------------------
@@ -3421,8 +3529,6 @@ H5D_istore_update_cache(H5D_t *dset, hid_t dxpl_id)
     hsize_t             curr_dims[H5O_LAYOUT_NDIMS];	/*current dataspace dimensions */
     hsize_t             chunks[H5O_LAYOUT_NDIMS];	        /*current number of chunks in each dimension */
     hsize_t             down_chunks[H5O_LAYOUT_NDIMS];   /* "down" size of number of elements in each dimension */
-    hsize_t             idx;    /* Chunk index */
-    unsigned	        old_idx;	/* Previous index number	*/
     unsigned            u;	/*counters  */
     herr_t      ret_value=SUCCEED;      /* Return value */
 
@@ -3454,7 +3560,11 @@ H5D_istore_update_cache(H5D_t *dset, hid_t dxpl_id)
 
     /* Recompute the index for each cached chunk that is in a dataset */
     for(ent = rdcc->head; ent; ent = next) {
-        next=ent->next;
+        hsize_t             idx;        /* Chunk index */
+        unsigned	    old_idx;	/* Previous index number	*/
+
+        /* Get the pointer to the next cache entry */
+        next = ent->next;
 
         /* Calculate the index of this chunk */
         if(H5V_chunk_index(rank,ent->offset,dset->shared->layout.u.chunk.dim,down_chunks,&idx)<0)
