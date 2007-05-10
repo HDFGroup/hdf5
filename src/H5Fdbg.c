@@ -47,7 +47,7 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_debug(H5F_t *f, hid_t dxpl_id, FILE * stream, int indent, int fwidth)
+H5F_debug(H5F_t *f, FILE *stream, int indent, int fwidth)
 {
     H5P_genplist_t *plist;              /* File creation property list */
     hsize_t userblock_size;             /* Userblock size */
@@ -139,7 +139,7 @@ H5F_debug(H5F_t *f, hid_t dxpl_id, FILE * stream, int indent, int fwidth)
         root_ent.file = f;
 
         /* Display root group symbol table entry info */
-	H5G_ent_debug(f, dxpl_id, &root_ent, stream, indent + 3, MAX(0, fwidth - 3), HADDR_UNDEF);
+	H5G_ent_debug(f, &root_ent, stream, indent + 3, MAX(0, fwidth - 3), NULL);
     } /* end if */
 
 done:

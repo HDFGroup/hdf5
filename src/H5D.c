@@ -562,7 +562,7 @@ done:
         } /* end if */
         else {
             if(loc_found && H5G_loc_free(&dset_loc) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+                HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't free location")
         } /* end else */
     } /* end if */
 
@@ -861,7 +861,7 @@ H5Dget_create_plist(hid_t dset_id)
 
     /* Retrieve any object creation properties */
     if(H5O_get_create_plist(&dset->oloc, H5AC_ind_dxpl_id, new_plist) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object creation info")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get object creation info")
 
     /* Get the fill value property */
     if(H5P_get(new_plist, H5D_CRT_FILL_VALUE_NAME, &copied_fill) < 0)
@@ -1194,6 +1194,7 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
     /* Update external storage message, if it's used */
     if(dset->shared->dcpl_cache.efl.nused > 0) {
         H5O_efl_t *efl = &dset->shared->dcpl_cache.efl; /* Dataset's external file list */
+        H5HL_t *heap;                           /* Pointer to local heap for EFL file names */
         size_t heap_size = H5HL_ALIGN(1);
         size_t u;
 
@@ -1201,22 +1202,41 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
         for(u = 0; u < efl->nused; ++u)
             heap_size += H5HL_ALIGN(HDstrlen(efl->slot[u].name) + 1);
 
-        if(H5HL_create(file, dxpl_id, heap_size, &efl->heap_addr/*out*/) < 0 ||
-                H5HL_insert(file, dxpl_id, efl->heap_addr, (size_t)1, "") == (size_t)(-1))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create external file list name heap")
+        /* Create the heap for the EFL file names */
+        if(H5HL_create(file, dxpl_id, heap_size, &efl->heap_addr/*out*/) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create EFL file name heap")
+
+        /* Pin the heap down in memory */
+        if(NULL == (heap = H5HL_protect(file, dxpl_id, efl->heap_addr, H5AC_WRITE)))
+            HGOTO_ERROR(H5E_DATASET, H5E_PROTECT, FAIL, "unable to protect EFL file name heap")
+
+        /* Insert "empty" name first */
+        if((size_t)(-1) == H5HL_insert(file, dxpl_id, heap, (size_t)1, "")) {
+            H5HL_unprotect(file, dxpl_id, heap, efl->heap_addr);
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert file name into heap")
+        } /* end if */
 
         for(u = 0; u < efl->nused; ++u) {
-            size_t offset = H5HL_insert(file, dxpl_id, efl->heap_addr,
-                        HDstrlen(efl->slot[u].name) + 1, efl->slot[u].name);
+            size_t offset;      /* Offset of file name in heap */
 
+            /* Insert file name into heap */
+            if((size_t)(-1) == (offset = H5HL_insert(file, dxpl_id, heap,
+                        HDstrlen(efl->slot[u].name) + 1, efl->slot[u].name))) {
+                H5HL_unprotect(file, dxpl_id, heap, efl->heap_addr);
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert file name into heap")
+            } /* end if */
+
+            /* Store EFL file name offset */
             HDassert(0 == efl->slot[u].name_offset);
-
-            if(offset == (size_t)(-1))
-                HGOTO_ERROR(H5E_EFL, H5E_CANTINIT, FAIL, "unable to insert URL into name heap")
-
             efl->slot[u].name_offset = offset;
         } /* end for */
 
+        /* Release the heap */
+        if(H5HL_unprotect(file, dxpl_id, heap, efl->heap_addr) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_PROTECT, FAIL, "unable to unprotect EFL file name heap")
+        heap = NULL;
+
+        /* Insert EFL message into dataset object header */
         if(H5O_msg_append(file, dxpl_id, oh, H5O_EFL_ID, H5O_MSG_FLAG_CONSTANT, 0, efl) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update external file list message")
     } /* end if */

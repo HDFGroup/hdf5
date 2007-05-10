@@ -35,6 +35,7 @@
 #include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5B2private.h"	/* v2 B-trees				*/
 #include "H5HFprivate.h"	/* Fractal heaps			*/
+#include "H5HLprivate.h"	/* Local Heaps				*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5SLprivate.h"	/* Skip lists				*/
 
@@ -160,7 +161,7 @@ typedef struct {
 typedef struct H5G_bt_common_t {
     /* downward */
     const char  *name;                  /*points to temporary memory         */
-    haddr_t     heap_addr;              /*symbol table heap address          */
+    H5HL_t *heap;                       /*symbol table heap		     */
 } H5G_bt_common_t;
 
 /*
@@ -206,7 +207,7 @@ typedef struct H5G_bt_lkp_t {
 typedef struct H5G_bt_it_it_t {
     /* downward */
     hid_t	group_id;	/*group id to pass to iteration operator     */
-    haddr_t     heap_addr;      /*symbol table heap address                  */
+    H5HL_t      *heap;          /*symbol table heap 			     */
     hsize_t	skip;		/*initial entries to skip		     */
     H5G_link_iterate_t *lnk_op;	/*iteration operator			     */
     void	*op_data;	/*user-defined operator data		     */
@@ -228,47 +229,16 @@ typedef struct H5G_bt_it_cpy_t {
 typedef struct H5G_bt_it_idx_common_t {
     /* downward */
     H5F_t       *f;             /* Pointer to file that symbol table is in */
-    hid_t       dxpl_id;        /* DXPL for operation */
     hsize_t     idx;            /* Index of group member to be queried */
     hsize_t     num_objs;       /* The number of objects having been traversed */
     H5G_bt_find_op_t op;        /* Operator to call when correct entry is found */
 } H5G_bt_it_idx_common_t;
 
-/* Data passed through B-tree iteration for looking up a name by index */
-typedef struct H5G_bt_it_gnbi_t {
-    /* downward */
-    H5G_bt_it_idx_common_t common; /* Common information for "by index" lookup  */
-    haddr_t     heap_addr;      /*symbol table heap address                  */
-
-    /* upward */
-    char         *name;         /*member name to be returned                 */
-} H5G_bt_it_gnbi_t;
-
-/* Data passed through B-tree iteration for looking up a type by index */
-typedef struct H5G_bt_it_gtbi_t {
-    /* downward */
-    H5G_bt_it_idx_common_t common; /* Common information for "by index" lookup  */
-
-    /* upward */
-    H5G_obj_t    type;          /*member type to be returned                 */
-} H5G_bt_it_gtbi_t;
-
-/* Data passed through B-tree iteration for looking up a link by index */
-typedef struct H5G_bt_it_lbi_t {
-    /* downward */
-    H5G_bt_it_idx_common_t common; /* Common information for "by index" lookup  */
-    haddr_t     heap_addr;      /*symbol table heap address                  */
-
-    /* upward */
-    H5O_link_t *lnk;            /*link to be returned                        */
-    hbool_t     found;      	/*whether we found the link                  */
-} H5G_bt_it_lbi_t;
-
 /* Data passed through B-tree iteration for building a table of the links */
 typedef struct H5G_bt_it_bt_t {
     /* downward */
     size_t alloc_nlinks;        /* Number of links allocated in table */
-    haddr_t heap_addr;          /* Symbol table heap address */
+    H5HL_t      *heap;          /*symbol table heap 			     */
 
     /* upward */
     H5G_link_table_t *ltable;   /* Link table to add information to */
@@ -425,10 +395,10 @@ H5_DLL herr_t H5G_ent_decode_vec(H5F_t *f, const uint8_t **pp,
 				  H5G_entry_t *ent, unsigned n);
 H5_DLL herr_t H5G_ent_encode_vec(H5F_t *f, uint8_t **pp,
 				  const H5G_entry_t *ent, unsigned n);
-H5_DLL herr_t H5G_ent_convert(H5F_t *f, haddr_t heap_addr, const char *name,
-    const H5O_link_t *lnk, H5G_entry_t *ent, hid_t dxpl_id);
-H5_DLL herr_t H5G_ent_debug(H5F_t *f, hid_t dxpl_id, const H5G_entry_t *ent, FILE * stream,
-			     int indent, int fwidth, haddr_t heap);
+H5_DLL herr_t H5G_ent_convert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap,
+    const char *name, const H5O_link_t *lnk, H5G_entry_t *ent);
+H5_DLL herr_t H5G_ent_debug(H5F_t *f, const H5G_entry_t *ent,
+    FILE * stream, int indent, int fwidth, H5HL_t *heap);
 
 /* Functions that understand symbol table nodes */
 H5_DLL herr_t H5G_node_init(H5F_t *f);
@@ -444,15 +414,14 @@ H5_DLL int H5G_node_build_table(H5F_t *f, hid_t dxpl_id, const void *_lt_key, ha
 		     const void *_rt_key, void *_udata);
 
 /* Functions that understand links in groups */
-struct H5HL_t;
 H5_DLL int H5G_link_cmp_name_inc(const void *lnk1, const void *lnk2);
 H5_DLL int H5G_link_cmp_name_dec(const void *lnk1, const void *lnk2);
 H5_DLL int H5G_link_cmp_corder_inc(const void *lnk1, const void *lnk2);
 H5_DLL int H5G_link_cmp_corder_dec(const void *lnk1, const void *lnk2);
-H5_DLL herr_t H5G_ent_to_link(H5F_t *f, hid_t dxpl_id, H5O_link_t *lnk,
-    haddr_t lheap_addr, struct H5HL_t *heap, const H5G_entry_t *ent, const char *name);
-H5_DLL herr_t H5G_ent_to_info(H5F_t *f, hid_t dxpl_id, H5L_info_t *info,
-    haddr_t lheap_addr, const H5G_entry_t *ent);
+H5_DLL herr_t H5G_ent_to_link(H5F_t *f, H5O_link_t *lnk, const H5HL_t *heap,
+    const H5G_entry_t *ent, const char *name);
+H5_DLL herr_t H5G_ent_to_info(H5F_t *f, H5L_info_t *info, const H5HL_t *heap,
+    const H5G_entry_t *ent);
 H5_DLL herr_t H5G_link_to_info(const H5O_link_t *lnk, H5L_info_t *linfo);
 H5_DLL herr_t H5G_link_to_loc(const H5G_loc_t *grp_loc, const H5O_link_t *lnk,
     H5G_loc_t *obj_loc);

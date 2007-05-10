@@ -1912,6 +1912,10 @@ H5AC_protect(H5F_t *f,
     HDassert(type->load);
     HDassert(H5F_addr_defined(addr));
 
+    /* Check for invalid access request */
+    if(0 == (f->intent & H5F_ACC_RDWR) && rw == H5AC_WRITE)
+	HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "no write intent on file")
+
 #if H5AC__TRACE_FILE_ENABLED
     /* For the protect call, only the addr and type id is really necessary 
      * in the trace file.  Include the size of the entry protected as a 

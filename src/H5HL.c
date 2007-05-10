@@ -53,13 +53,6 @@
 /* Private typedefs */
 
 /* PRIVATE PROTOTYPES */
-#ifdef NOT_YET
-static void *H5HL_read(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size,
-			void *buf);
-static herr_t H5HL_write(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size,
-			  const void *buf);
-#endif /* NOT_YET */
-
 static herr_t H5HL_serialize(H5F_t *f, H5HL_t *heap, uint8_t *buf);
 static H5HL_free_t *H5HL_remove_free(H5HL_t *heap, H5HL_free_t *fl);
 static herr_t H5HL_minimize_heap_space(H5F_t *f, hid_t dxpl_id, H5HL_t *heap);
@@ -720,68 +713,6 @@ H5HL_compute_size(const H5F_t *f, const H5HL_t *heap, size_t *size_ptr)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HL_read
- *
- * Purpose:	Reads some object (or part of an object) from the heap
- *		whose address is ADDR in file F.  OFFSET is the byte offset
- *		from the beginning of the heap at which to begin reading
- *		and SIZE is the number of bytes to read.
- *
- *		If BUF is the null pointer then a buffer is allocated by
- *		this function.
- *
- *		Attempting to read past the end of an object may cause this
- *		function to fail.
- *
- * Return:	Success:	BUF (or the allocated buffer)
- *
- *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 16 1997
- *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- *-------------------------------------------------------------------------
- */
-#ifdef NOT_YET
-static void *
-H5HL_read(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size, void *buf)
-{
-    H5HL_t	*heap = NULL;
-    void      *ret_value;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5HL_read, NULL);
-
-    /* check arguments */
-    assert(f);
-    assert (H5F_addr_defined(addr));
-
-    if (NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "unable to load heap");
-
-    assert(offset < heap->heap_alloc);
-    assert(offset + size <= heap->heap_alloc);
-
-    if (!buf && NULL==(buf = H5MM_malloc(size)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    HDmemcpy(buf, heap->chunk + H5HL_SIZEOF_HDR(f) + offset, size);
-
-    /* Set return value */
-    ret_value=buf;
-
-done:
-    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, H5AC__NO_FLAGS_SET) != SUCCEED)
-        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, NULL, "unable to release object header");
-
-    FUNC_LEAVE_NOAPI(ret_value);
-}
-#endif /* NOT_YET */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5HL_protect
  *
  * Purpose:     This function is a wrapper for the H5AC_protect call. The
@@ -878,7 +809,7 @@ H5HL_offset_into(H5F_t *f, const H5HL_t *heap, size_t offset)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HL_unprotect(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, haddr_t addr, unsigned heap_flags)
+H5HL_unprotect(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, haddr_t addr)
 {
     herr_t  ret_value = SUCCEED;
 
@@ -889,7 +820,7 @@ H5HL_unprotect(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, haddr_t addr, unsigned hea
     HDassert(heap);
     HDassert(H5F_addr_defined(addr));
 
-    if(H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, (void *)heap, heap_flags) != SUCCEED)
+    if(H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, (void *)heap, H5AC__NO_FLAGS_SET) != SUCCEED)
         HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header")
 
 done:
@@ -940,26 +871,11 @@ H5HL_remove_free(H5HL_t *heap, H5HL_free_t *fl)
  *		matzke@llnl.gov
  *		Jul 17 1997
  *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- *
- *		John Mainzer, 6/7/05
- *		Modified code to use the dirtied parameter of
- *		H5AC_unprotect() instead of manipulating the is_dirty
- *		field of the cache info directly.
- *
- *		John Mainzer, 8/10/05
- *		Modified code to allocate file space as needed, instead
- *		of allocating it on eviction.
- *
  *-------------------------------------------------------------------------
  */
 size_t
-H5HL_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t buf_size, const void *buf)
+H5HL_insert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t buf_size, const void *buf)
 {
-    H5HL_t	*heap = NULL;
-    unsigned	heap_flags = H5AC__NO_FLAGS_SET;
     H5HL_free_t	*fl = NULL, *last_fl = NULL;
     size_t	offset = 0;
     size_t	need_size;
@@ -967,21 +883,22 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t buf_size, const void *
     size_t      sizeof_hdr;     /* Cache H5HL header size for file */
     size_t	ret_value;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5HL_insert, (size_t)(-1));
+    FUNC_ENTER_NOAPI(H5HL_insert, (size_t)(-1))
 
     /* check arguments */
     HDassert(f);
-    HDassert(H5F_addr_defined(addr));
+    HDassert(heap);
     HDassert(buf_size > 0);
     HDassert(buf);
 
-    if(0 == (f->intent & H5F_ACC_RDWR))
-	HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, (size_t)(-1), "no write intent on file")
-
-    if(NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, (size_t)(-1), "unable to load heap")
-
-    heap_flags |= H5AC__DIRTIED_FLAG;
+    /* Mark heap as dirty in cache */
+    /* (A bit early in the process, but it's difficult to determine in the
+     *  code below where to mark the heap as dirty, especially in error cases,
+     *  so we just accept that an extra flush of the heap info could occur
+     *  if an error occurs -QAK)
+     */
+    if(H5AC_mark_pinned_or_protected_entry_dirty(f, heap) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTMARKDIRTY, (size_t)(-1), "unable to mark heap as dirty")
 
     /* Cache this for later */
     sizeof_hdr = H5HL_SIZEOF_HDR(f);
@@ -1153,77 +1070,8 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t buf_size, const void *
     ret_value = offset;
 
 done:
-    if(heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, heap_flags) != SUCCEED)
-        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, (size_t)(-1), "unable to release object header")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5HL_insert() */
-
-#ifdef NOT_YET
-
-/*-------------------------------------------------------------------------
- * Function:	H5HL_write
- *
- * Purpose:	Writes (overwrites) the object (or part of object) stored
- *		in BUF to the heap at file address ADDR in file F.  The
- *		writing begins at byte offset OFFSET from the beginning of
- *		the heap and continues for SIZE bytes.
- *
- *		Do not partially write an object to create it;	the first
- *		write for an object must be for the entire object.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 16 1997
- *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- *
- *		John Mainzer, 6/7/05
- *		Modified code to use the dirtied parameter of
- *		H5AC_unprotect() instead of manipulating the is_dirty
- *		field of the cache info directly.
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5HL_write(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t offset, size_t size, const void *buf)
-{
-    H5HL_t 	*heap = NULL;
-    unsigned	heap_flags = H5AC__NO_FLAGS_SET;
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5HL_write, FAIL);
-
-    /* check arguments */
-    assert(f);
-    assert(H5F_addr_defined(addr));
-    assert(buf);
-    assert (offset==H5HL_ALIGN (offset));
-
-    if (0==(f->intent & H5F_ACC_RDWR))
-	HGOTO_ERROR (H5E_HEAP, H5E_WRITEERROR, FAIL, "no write intent on file");
-
-    if (NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to load heap");
-
-    assert(offset < heap->heap_alloc);
-    assert(offset + size <= heap->heap_alloc);
-
-    heap_flags |= H5AC__DIRTIED_FLAG;
-    HDmemcpy(heap->chunk + H5HL_SIZEOF_HDR(f) + offset, buf, size);
-
-done:
-    if (heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, heap_flags) != SUCCEED &&
-            ret_value != FAIL)
-        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release object header");
-
-    FUNC_LEAVE_NOAPI(ret_value);
-}
-#endif /* NOT_YET */
 
 
 /*-------------------------------------------------------------------------
@@ -1248,25 +1096,10 @@ done:
  *		matzke@llnl.gov
  *		Jul 16 1997
  *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- *
- *		John Mainzer, 6/7/05
- *		Modified code to use the dirtied parameter of
- *		H5AC_unprotect() instead of manipulating the is_dirty
- *		field of the cache info directly.
- *
- *		John Mainzer, 8/10/05
- *		Modified code to attempt to decrease heap size if the
- *		entry removal results in a free list entry at the end
- *		of the heap that is at least half the size of the heap.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HL_remove(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t offset, size_t size,
-    unsigned *heap_flags)
+H5HL_remove(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t offset, size_t size)
 {
     H5HL_free_t		*fl = NULL;
     herr_t      	ret_value = SUCCEED;       /* Return value */
@@ -1279,22 +1112,26 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t offset, size_t size,
     HDassert(size > 0);
     HDassert(offset == H5HL_ALIGN(offset));
 
-    if(0 == (f->intent & H5F_ACC_RDWR))
-	HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "no write intent on file")
-
     size = H5HL_ALIGN(size);
 
     HDassert(offset < heap->heap_alloc);
     HDassert(offset + size <= heap->heap_alloc);
 
-    fl = heap->freelist;
-    *heap_flags |= H5AC__DIRTIED_FLAG;
+    /* Mark heap as dirty in cache */
+    /* (A bit early in the process, but it's difficult to determine in the
+     *  code below where to mark the heap as dirty, especially in error cases,
+     *  so we just accept that an extra flush of the heap info could occur
+     *  if an error occurs -QAK)
+     */
+    if(H5AC_mark_pinned_or_protected_entry_dirty(f, heap) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTMARKDIRTY, (size_t)(-1), "unable to mark heap as dirty")
 
     /*
      * Check if this chunk can be prepended or appended to an already
      * free chunk.  It might also fall between two chunks in such a way
      * that all three chunks can be combined into one.
      */
+    fl = heap->freelist;
     while(fl) {
         H5HL_free_t *fl2 = NULL;
 
@@ -1427,10 +1264,6 @@ H5HL_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
     /* check arguments */
     assert(f);
     assert(H5F_addr_defined(addr));
-
-    /* Check for write access */
-    if (0==(f->intent & H5F_ACC_RDWR))
-	HGOTO_ERROR (H5E_HEAP, H5E_WRITEERROR, FAIL, "no write intent on file");
 
     /* Cache this for later */
     sizeof_hdr= H5HL_SIZEOF_HDR(f);

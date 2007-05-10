@@ -217,18 +217,15 @@ H5G_link_cmp_corder_dec(const void *lnk1, const void *lnk2)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_to_link(H5F_t *f, hid_t dxpl_id, H5O_link_t *lnk, haddr_t lheap_addr,
-    H5HL_t *_heap, const H5G_entry_t *ent, const char *name)
+H5G_ent_to_link(H5F_t *f, H5O_link_t *lnk, const H5HL_t *heap,
+    const H5G_entry_t *ent, const char *name)
 {
-    herr_t     ret_value = SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5G_ent_to_link, FAIL)
+    FUNC_ENTER_NOAPI_NOFUNC(H5G_ent_to_link)
 
     /* check arguments */
     HDassert(f);
     HDassert(lnk);
-    HDassert(H5F_addr_defined(lheap_addr) || _heap);
-    HDassert(!(H5F_addr_defined(lheap_addr) && _heap));
+    HDassert(heap);
     HDassert(ent);
     HDassert(name);
 
@@ -242,24 +239,12 @@ H5G_ent_to_link(H5F_t *f, hid_t dxpl_id, H5O_link_t *lnk, haddr_t lheap_addr,
     /* Object is a symbolic or hard link */
     if(ent->type == H5G_CACHED_SLINK) {
         const char *s;          /* Pointer to link value */
-        H5HL_t *heap = _heap;   /* Pointer to local heap for group */
-
-        /* Check if the heap pointer was passed in */
-        if(!heap) {
-            /* Lock the local heap */
-            if(NULL == (heap = H5HL_protect(f, dxpl_id, lheap_addr, H5AC_READ)))
-                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to protect local heap")
-        } /* end if */
 
         s = H5HL_offset_into(f, heap, ent->cache.slink.lval_offset);
+        HDassert(s);
 
         /* Copy the link value */
         lnk->u.soft.name = H5MM_xstrdup(s);
-
-        /* Release the local heap, if we locked it */
-        if(heap != _heap)
-            if(H5HL_unprotect(f, dxpl_id, heap, lheap_addr, H5AC__NO_FLAGS_SET) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read unprotect link value")
 
         /* Set link type */
         lnk->type = H5L_TYPE_SOFT;
@@ -272,8 +257,7 @@ H5G_ent_to_link(H5F_t *f, hid_t dxpl_id, H5O_link_t *lnk, haddr_t lheap_addr,
         lnk->type = H5L_TYPE_HARD;
     } /* end else */
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G_ent_to_link() */
 
 
@@ -291,16 +275,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_to_info(H5F_t *f, hid_t dxpl_id, H5L_info_t *info, haddr_t lheap_addr,
+H5G_ent_to_info(H5F_t *f, H5L_info_t *info, const H5HL_t *heap,
     const H5G_entry_t *ent)
 {
-    herr_t     ret_value = SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5G_ent_to_info, FAIL)
+    FUNC_ENTER_NOAPI_NOFUNC(H5G_ent_to_info)
 
     /* check arguments */
     HDassert(f);
     HDassert(info);
+    HDassert(heap);
     HDassert(ent);
 
     /* Set (default) common info for info */
@@ -311,20 +294,12 @@ H5G_ent_to_info(H5F_t *f, hid_t dxpl_id, H5L_info_t *info, haddr_t lheap_addr,
     /* Object is a symbolic or hard link */
     if(ent->type == H5G_CACHED_SLINK) {
         const char *s;          /* Pointer to link value */
-        H5HL_t *heap;           /* Pointer to local heap for group */
-
-        /* Lock the local heap */
-        if(NULL == (heap = H5HL_protect(f, dxpl_id, lheap_addr, H5AC_READ)))
-            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to protect local heap")
 
         s = H5HL_offset_into(f, heap, ent->cache.slink.lval_offset);
+        HDassert(s);
 
         /* Get the link value size */
         info->u.val_size = HDstrlen(s) + 1;
-
-        /* Release the local heap */
-        if(H5HL_unprotect(f, dxpl_id, heap, lheap_addr, H5AC__NO_FLAGS_SET) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to unprotect local heap")
 
         /* Set link type */
         info->type = H5L_TYPE_SOFT;
@@ -337,8 +312,7 @@ H5G_ent_to_info(H5F_t *f, hid_t dxpl_id, H5L_info_t *info, haddr_t lheap_addr,
         info->type = H5L_TYPE_HARD;
     } /* end else */
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G_ent_to_info() */
 
 

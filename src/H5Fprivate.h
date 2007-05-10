@@ -472,7 +472,7 @@ H5_DLL H5F_t *H5F_fake_alloc(size_t sizeof_size);
 H5_DLL herr_t H5F_fake_free(H5F_t *f);
 
 /* Debugging functions */
-H5_DLL herr_t H5F_debug(H5F_t *f, hid_t dxpl_id, FILE * stream, int indent, int fwidth);
+H5_DLL herr_t H5F_debug(H5F_t *f, FILE * stream, int indent, int fwidth);
 
 #endif /* _H5Fprivate_H */
 

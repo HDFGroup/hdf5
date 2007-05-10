@@ -373,8 +373,8 @@ H5G_ent_reset(H5G_entry_t *ent)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_convert(H5F_t *f, haddr_t heap_addr, const char *name, const H5O_link_t *lnk,
-    H5G_entry_t *ent, hid_t dxpl_id)
+H5G_ent_convert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, const char *name,
+    const H5O_link_t *lnk, H5G_entry_t *ent)
 {
     size_t	name_offset;            /* Offset of name in heap */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -383,7 +383,7 @@ H5G_ent_convert(H5F_t *f, haddr_t heap_addr, const char *name, const H5O_link_t 
 
     /* check arguments */
     HDassert(f);
-    HDassert(H5F_addr_defined(heap_addr));
+    HDassert(heap);
     HDassert(name);
     HDassert(lnk);
 
@@ -393,7 +393,7 @@ H5G_ent_convert(H5F_t *f, haddr_t heap_addr, const char *name, const H5O_link_t 
     /*
      * Add the new name to the heap.
      */
-    name_offset = H5HL_insert(f, dxpl_id, heap_addr, HDstrlen(name) + 1, name);
+    name_offset = H5HL_insert(f, dxpl_id, heap, HDstrlen(name) + 1, name);
     if(0 == name_offset || (size_t)(-1) == name_offset)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, H5B_INS_ERROR, "unable to insert symbol name into heap")
     ent->name_off = name_offset;
@@ -410,7 +410,7 @@ H5G_ent_convert(H5F_t *f, haddr_t heap_addr, const char *name, const H5O_link_t 
                 size_t	lnk_offset;		/* Offset to sym-link value	*/
 
                 /* Insert link value into local heap */
-                if((size_t)(-1) == (lnk_offset = H5HL_insert(f, dxpl_id, heap_addr,
+                if((size_t)(-1) == (lnk_offset = H5HL_insert(f, dxpl_id, heap,
                         HDstrlen(lnk->u.soft.name) + 1, lnk->u.soft.name)))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write link value to local heap")
 
@@ -445,17 +445,17 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_debug(H5F_t UNUSED *f, hid_t dxpl_id, const H5G_entry_t *ent, FILE * stream,
-	      int indent, int fwidth, haddr_t heap_addr)
+H5G_ent_debug(H5F_t UNUSED *f, const H5G_entry_t *ent, FILE *stream,
+    int indent, int fwidth, H5HL_t *heap)
 {
     const char		*lval = NULL;
     int nested_indent, nested_fwidth;
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5G_ent_debug);
+    FUNC_ENTER_NOAPI_NOFUNC(H5G_ent_debug)
 
     /* Calculate the indent & field width values for nested information */
-    nested_indent=indent+3;
-    nested_fwidth=MAX(0,fwidth-3);
+    nested_indent = indent + 3;
+    nested_fwidth = MAX(0, fwidth - 3);
 
     HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
 	      "Name offset into private heap:",
@@ -493,15 +493,11 @@ H5G_ent_debug(H5F_t UNUSED *f, hid_t dxpl_id, const H5G_entry_t *ent, FILE * str
             HDfprintf(stream, "%*s%-*s %lu\n", nested_indent, "", nested_fwidth,
                        "Link value offset:",
                        (unsigned long)(ent->cache.slink.lval_offset));
-            if(heap_addr > 0 && H5F_addr_defined(heap_addr)) {
-                H5HL_t *heap;
-
-                heap = H5HL_protect(ent->file, dxpl_id, heap_addr, H5AC_READ);
+            if(heap) {
                 lval = H5HL_offset_into(ent->file, heap, ent->cache.slink.lval_offset);
                 HDfprintf(stream, "%*s%-*s %s\n", nested_indent, "", nested_fwidth,
                            "Link value:",
                            lval);
-                H5HL_unprotect(ent->file, dxpl_id, heap, heap_addr, H5AC__NO_FLAGS_SET);
             } /* end if */
             else
                 HDfprintf(stream, "%*s%-*s\n", nested_indent, "", nested_fwidth, "Warning: Invalid heap address given, name not displayed!");
@@ -512,6 +508,6 @@ H5G_ent_debug(H5F_t UNUSED *f, hid_t dxpl_id, const H5G_entry_t *ent, FILE * str
             break;
     } /* end switch */
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5G_ent_debug() */
 

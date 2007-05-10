@@ -58,6 +58,7 @@ main(void)
     H5F_t	*f=NULL;		/*hdf5 file pointer		*/
     char	filename[1024];		/*file name			*/
     haddr_t	heap_addr;		/*local heap address		*/
+    H5HL_t      *heap = NULL;           /*local heap			*/
     size_t	obj[NOBJS];		/*offsets within the heap	*/
     int		i, j;			/*miscellaneous counters	*/
     char	buf[1024];		/*the value to store		*/
@@ -86,17 +87,26 @@ main(void)
 	H5Eprint2(H5E_DEFAULT, stdout);
 	goto error;
     }
+    if (NULL == (heap = H5HL_protect(f, H5P_DATASET_XFER_DEFAULT, heap_addr, H5AC_WRITE))) {
+        H5_FAILED();
+        H5Eprint2(H5E_DEFAULT, stdout);
+        goto error;
+    }
     for(i = 0; i < NOBJS; i++) {
         sprintf(buf, "%03d-", i);
         for (j=4; j<i; j++) buf[j] = '0' + j%10;
         if (j>4) buf[j] = '\0';
 
-        if ((size_t)(-1)==(obj[i]=H5HL_insert(f, H5P_DATASET_XFER_DEFAULT, heap_addr, strlen(buf)+1,
-					      buf))) {
+        if ((size_t)(-1)==(obj[i]=H5HL_insert(f, H5P_DATASET_XFER_DEFAULT, heap, strlen(buf)+1, buf))) {
 	    H5_FAILED();
 	    H5Eprint2(H5E_DEFAULT, stdout);
 	    goto error;
 	}
+    }
+    if (H5HL_unprotect(f, H5P_DATASET_XFER_DEFAULT, heap, heap_addr) < 0) {
+        H5_FAILED();
+        H5Eprint2(H5E_DEFAULT, stdout);
+        goto error;
     }
     if (H5Fclose(file)<0) goto error;
     PASSED();
@@ -119,8 +129,6 @@ main(void)
 	    goto error;
 	}
 	for (i=0; i<NOBJS; i++) {
-	    H5HL_t *heap = NULL;
-
 	    sprintf(buf, "%03d-", i);
 	    for (j=4; j<i; j++) buf[j] = '0' + j%10;
 	    if (j>4) buf[j] = '\0';
@@ -145,7 +153,7 @@ main(void)
 		goto error;
 	    }
 
-	    if (H5HL_unprotect(f, H5P_DATASET_XFER_DEFAULT, heap, heap_addr, H5AC__NO_FLAGS_SET) < 0) {
+	    if (H5HL_unprotect(f, H5P_DATASET_XFER_DEFAULT, heap, heap_addr) < 0) {
 		H5_FAILED();
 		H5Eprint2(H5E_DEFAULT, stdout);
 		goto error;

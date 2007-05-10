@@ -422,7 +422,7 @@ H5Lunpack_elink_val(const void *_ext_linkval, size_t link_size,
     lnk_flags = *ext_linkval & 0x0F;
     if(lnk_version > H5L_EXT_VERSION)
         HGOTO_ERROR(H5E_LINK, H5E_CANTDECODE, FAIL, "bad version number for external link")
-    if(lnk_flags & ~H5L_EXT_FLAGS_ALL)
+    if(lnk_flags & (unsigned)~H5L_EXT_FLAGS_ALL)
         HGOTO_ERROR(H5E_LINK, H5E_CANTDECODE, FAIL, "bad flags for external link")
     if(link_size <= 2)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid external link buffer")
