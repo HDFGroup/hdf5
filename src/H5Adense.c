@@ -1340,6 +1340,8 @@ H5A_dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
     const H5A_dense_bt2_name_rec_t *record = (const H5A_dense_bt2_name_rec_t *)_record; /* v2 B-tree record */
     H5A_bt2_ud_rmbi_t *bt2_udata = (H5A_bt2_ud_rmbi_t *)_bt2_udata;         /* User data for callback */
     H5A_fh_ud_cp_t fh_udata;            /* User data for fractal heap 'op' callback */
+    H5O_shared_t sh_loc;                /* Shared message info for attribute */
+    hbool_t use_sh_loc;                 /* Whether to use the attribute's shared location or the separate one */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5A_dense_remove_by_idx_bt2_cb)
@@ -1356,10 +1358,23 @@ H5A_dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
     else
         fheap = bt2_udata->fheap;
 
-    /* Call fractal heap 'op' routine, to make copy of attribute to remove */
-    if(H5HF_op(fheap, bt2_udata->dxpl_id, &record->id, H5A_dense_copy_fh_cb, &fh_udata) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPERATE, FAIL, "attribute removal callback failed")
-    HDassert(fh_udata.attr);
+    /* Check whether to make a copy of the attribute or just need the shared location info */
+    if(H5F_addr_defined(bt2_udata->other_bt2_addr) || !(record->flags & H5O_MSG_FLAG_SHARED)) {
+        /* Call fractal heap 'op' routine, to make copy of attribute to remove */
+        if(H5HF_op(fheap, bt2_udata->dxpl_id, &record->id, H5A_dense_copy_fh_cb, &fh_udata) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTOPERATE, FAIL, "attribute removal callback failed")
+        HDassert(fh_udata.attr);
+
+        /* Use the attribute's shared location */
+        use_sh_loc = FALSE;
+    } /* end if */
+    else {
+        /* Create a shared message location from the heap ID for this record */
+        H5SM_reconstitute(&sh_loc, record->id);
+
+        /* Use the separate shared location */
+        use_sh_loc = TRUE;
+    } /* end else */
 
     /* Check for removing the link from the "other" index (creation order, when name used and vice versa) */
     if(H5F_addr_defined(bt2_udata->other_bt2_addr)) {
@@ -1400,8 +1415,16 @@ H5A_dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
 
     /* Check for removing shared attribute */
     if(record->flags & H5O_MSG_FLAG_SHARED) {
+        H5O_shared_t *sh_loc_ptr;       /* Pointer to shared message info for attribute */
+
+        /* Set up pointer to correct shared location */
+        if(use_sh_loc)
+            sh_loc_ptr = &sh_loc;
+        else
+            sh_loc_ptr = &(fh_udata.attr->sh_loc);
+
         /* Decrement the reference count on the shared attribute message */
-        if(H5SM_try_delete(bt2_udata->f, bt2_udata->dxpl_id, H5O_ATTR_ID, &(fh_udata.attr->sh_loc)) < 0)
+        if(H5SM_try_delete(bt2_udata->f, bt2_udata->dxpl_id, H5O_ATTR_ID, sh_loc_ptr) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to delete shared attribute")
     } /* end if */
     else {
