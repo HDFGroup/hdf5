@@ -85,5 +85,8 @@ h5repacktst: $(TEST_OBJS)
 testh5repack_detect_szip: $(DETECT_OBJS)
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ $(DETECT_OBJS)  $(LIBTOOLS)  $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
+## The following empty rule is necessary to override a bug present when compiling with icc. It demands
+##  a rule to make h5trav.h, so a blank one has been provided.
+h5trav.h:
 
 @CONCLUDE@
