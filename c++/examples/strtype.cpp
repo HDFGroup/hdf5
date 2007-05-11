@@ -107,13 +107,14 @@ int main()
       dataset.read((void*)rdata, dtype);
 
       /* Print data read in */
+      unsigned i;
       cout << "data read:" << endl;
-      for(unsigned i=0; i<SPACE1_DIM1; i++)
+      for(i=0; i<SPACE1_DIM1; i++)
 	  cout << wdata[i] << endl;
       cout << endl;
 
       /* Free memory for rdata */
-      for(unsigned i=0; i<SPACE1_DIM1; i++) {
+      for(i=0; i<SPACE1_DIM1; i++) {
           free(rdata[i]);
       }
    } // end of try block
