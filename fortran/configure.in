@@ -190,6 +190,118 @@ AC_PROG_CPP	dnl this is checked for when AC_HEADER_STDC is done
 CC_BASENAME="`echo $CC |cut -f1 -d' ' |xargs basename 2>/dev/null`"
 AC_PROG_MAKE_SET
 AC_PROG_INSTALL
+
+dnl ----------------------------------------------------------------------
+dnl The following variables are used to distinguish between building a
+dnl serial and parallel library.
+dnl
+dnl    HAVE_PARALLEL	-- defined in H5config.h if we are building
+dnl			   a parallel library even if configure wasn't
+dnl			   able to find some header file or library that
+dnl			   might be required. This is defined if the
+dnl			   compiler looks like a parallel compiler (e.g.,
+dnl			   mpif90 or mpf90) or if the user explicitly states
+dnl			   that a parallel library is being built by supplying
+dnl			   the `--enable-parallel' configure switch.
+dnl
+dnl    PARALLEL		-- This variable is set to a non-null value if
+dnl			   configure thinks we're compiling a parallel
+dnl			   version of the library.
+dnl
+dnl    RUNSERIAL	-- This is a command which will be prepended to
+dnl			   the executable name to run the executable using
+dnl			   a single process. For serial versions of the
+dnl			   library this will normally be empty. For parallel
+dnl			   versions it might be something like `mpirun -np 1'.
+dnl			   The value of this variable is substituted in *.in
+dnl			   files.
+dnl
+dnl    RUNPARALLEL	-- This is a command which will be prepended to
+dnl			   the executable name to run the executable on
+dnl			   multiple processors. For the serial library the
+dnl			   value will normally be the empty string. For
+dnl			   parallel library it should be something like
+dnl			   `mpi -np $$NPROCS' where NPROCS will eventually
+dnl			   contain the number of processors on which to run
+dnl			   the executable (the double dollarsigns are to
+dnl			   protect the expansion until make executes the
+dnl			   command).  The value of this variable is
+dnl			   substituted in *.in files.
+dnl
+AC_SUBST(PARALLEL)
+AC_SUBST(RUNSERIAL)
+AC_SUBST(RUNPARALLEL)
+AC_SUBST(TESTPARALLEL)
+AC_SUBST(BUILD_PARALLEL_CONDITIONAL_TRUE)
+AC_SUBST(BUILD_PARALLEL_CONDITIONAL_FALSE)
+
+dnl variables related to conditions of parallel build.
+
+dnl ----------------------------------------------------------------------
+dnl If the compiler is obviously a parallel compiler then we're building
+dnl a parallel version of hdf5 and should define HAVE_PARALLEL. Furthermore,
+dnl the name of the compiler might tell us how to run the resulting
+dnl executable. For `mpif90' the executable should be run with `mpirun'
+dnl from the same directory as mpif90 if it exists.
+dnl
+case "$F9X" in
+  *mpif90*)
+    dnl The mpich compiler. Use mpirun from the same directory if it
+    dnl exists.
+    PARALLEL=mpif90
+    AC_MSG_CHECKING(for mpirun)
+
+    dnl Find the path where mpif90 is located.
+    cmd=`echo $F9X |cut -f1 -d' '`
+    if (echo $cmd |grep / >/dev/null); then
+      path="`echo $cmd |sed 's/\(.*\)\/.*$/\1/'`"
+    else
+      for path in `echo $PATH |tr : ' '`; do
+        if test -x $path/$cmd; then
+          break;
+        fi
+      done
+    fi
+
+    dnl Is there an mpirun at that path?
+    if test -x $path/mpirun; then
+      AC_MSG_RESULT($path/mpirun)
+      RUNSERIAL="${RUNSERIAL:-none}"
+
+      if test -z "$RUNPARALLEL"; then
+        RUNPARALLEL="$path/mpirun -np \$\${NPROCS:=2}"
+      fi
+    else
+      AC_MSG_RESULT(none)
+    fi
+    ;;
+
+  *mpxlf* | *mpxlf_r* | *mpxlf90* | *mpxlf90_r* | *mpxlf95* | *mpxlf95_r*)
+    dnl The IBM compiler
+    PARALLEL="$F9X"
+    ;;
+
+  *)
+    dnl Probably not a parallel compiler, but if `--enable-parallel'
+    dnl is defined below then we're still building a parallel hdf5.
+    ;;
+esac
+
+dnl ----------------------------------------------------------------------------
+dnl If shared libraries are being used with parallel, disable them, unless the 
+dnl user explicity enables them via the '--enable-shared' option.
+if test "X${enable_shared}" = "X" -a "X${enable_parallel}" = "Xyes"; then
+    echo '    shared libraries disabled in parallel'
+    enable_shared="no"
+elif test "X${enable_shared}" = "Xyes" -a "X${enable_parallel}" = "Xyes"; then
+    echo '    shared libraries explicitly enabled by user'
+elif test "X${enable_shared}" = "X" -a "X${PARALLEL}" != "X"; then
+    echo '    shared libraries disabled when a parallel compiler is being used'
+    enable_shared="no"
+elif test "X${enable_shared}" = "Xyes" -a "X${PARALLEL}" != "X"; then
+    echo '    shared libraries explicitly enabled by user'
+fi
+
 AM_PROG_LIBTOOL
 
 dnl ----------------------------------------------------------------------
@@ -623,102 +735,6 @@ AC_TRY_FCOMPILE([
 ], AC_MSG_RESULT(yes),
    AC_MSG_RESULT(no)
    FFLAGS="$FFLAGS_saved")
-
-dnl ----------------------------------------------------------------------
-dnl The following variables are used to distinguish between building a
-dnl serial and parallel library.
-dnl
-dnl    HAVE_PARALLEL	-- defined in H5config.h if we are building
-dnl			   a parallel library even if configure wasn't
-dnl			   able to find some header file or library that
-dnl			   might be required. This is defined if the
-dnl			   compiler looks like a parallel compiler (e.g.,
-dnl			   mpif90 or mpf90) or if the user explicitly states
-dnl			   that a parallel library is being built by supplying
-dnl			   the `--enable-parallel' configure switch.
-dnl
-dnl    PARALLEL		-- This variable is set to a non-null value if
-dnl			   configure thinks we're compiling a parallel
-dnl			   version of the library.
-dnl
-dnl    RUNSERIAL	-- This is a command which will be prepended to
-dnl			   the executable name to run the executable using
-dnl			   a single process. For serial versions of the
-dnl			   library this will normally be empty. For parallel
-dnl			   versions it might be something like `mpirun -np 1'.
-dnl			   The value of this variable is substituted in *.in
-dnl			   files.
-dnl
-dnl    RUNPARALLEL	-- This is a command which will be prepended to
-dnl			   the executable name to run the executable on
-dnl			   multiple processors. For the serial library the
-dnl			   value will normally be the empty string. For
-dnl			   parallel library it should be something like
-dnl			   `mpi -np $$NPROCS' where NPROCS will eventually
-dnl			   contain the number of processors on which to run
-dnl			   the executable (the double dollarsigns are to
-dnl			   protect the expansion until make executes the
-dnl			   command).  The value of this variable is
-dnl			   substituted in *.in files.
-dnl
-AC_SUBST(PARALLEL)
-AC_SUBST(RUNSERIAL)
-AC_SUBST(RUNPARALLEL)
-AC_SUBST(TESTPARALLEL)
-AC_SUBST(BUILD_PARALLEL_CONDITIONAL_TRUE)
-AC_SUBST(BUILD_PARALLEL_CONDITIONAL_FALSE)
-
-dnl variables related to conditions of parallel build.
-
-dnl ----------------------------------------------------------------------
-dnl If the compiler is obviously a parallel compiler then we're building
-dnl a parallel version of hdf5 and should define HAVE_PARALLEL. Furthermore,
-dnl the name of the compiler might tell us how to run the resulting
-dnl executable. For `mpif90' the executable should be run with `mpirun'
-dnl from the same directory as mpif90 if it exists.
-dnl
-case "$F9X" in
-  *mpif90*)
-    dnl The mpich compiler. Use mpirun from the same directory if it
-    dnl exists.
-    PARALLEL=mpif90
-    AC_MSG_CHECKING(for mpirun)
-
-    dnl Find the path where mpif90 is located.
-    cmd=`echo $F9X |cut -f1 -d' '`
-    if (echo $cmd |grep / >/dev/null); then
-      path="`echo $cmd |sed 's/\(.*\)\/.*$/\1/'`"
-    else
-      for path in `echo $PATH |tr : ' '`; do
-        if test -x $path/$cmd; then
-          break;
-        fi
-      done
-    fi
-
-    dnl Is there an mpirun at that path?
-    if test -x $path/mpirun; then
-      AC_MSG_RESULT($path/mpirun)
-      RUNSERIAL="${RUNSERIAL:-none}"
-
-      if test -z "$RUNPARALLEL"; then
-        RUNPARALLEL="$path/mpirun -np \$\${NPROCS:=2}"
-      fi
-    else
-      AC_MSG_RESULT(none)
-    fi
-    ;;
-
-  *mpxlf* | *mpxlf_r* | *mpxlf90* | *mpxlf90_r* | *mpxlf95* | *mpxlf95_r*)
-    dnl The IBM compiler
-    PARALLEL="$F9X"
-    ;;
-
-  *)
-    dnl Probably not a parallel compiler, but if `--enable-parallel'
-    dnl is defined below then we're still building a parallel hdf5.
-    ;;
-esac
 
 dnl ----------------------------------------------------------------------
 dnl Turn on internal I/O filters by setting macros in header files

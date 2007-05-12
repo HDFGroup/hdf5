@@ -151,6 +151,11 @@ Bug Fixes since HDF5-1.6.5 Release
 
     Configuration
     -------------
+	- Changed to default to --disable-shared if parallel is enabled. - AKC
+	  2007/5/12
+	- Correct an coding error in configure when it tries to locate the
+	  needed MPI and MPI-IO library for the fortran interface. - AKC
+	  2007/5/9.
 	- Changed default fortran compiler to g95 when gcc is used. - AKC
           2007/2/17.
 	- Configure can now use any tr command.  No more need for

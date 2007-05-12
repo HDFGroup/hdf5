@@ -841,6 +841,12 @@ SET_MAKE
 INSTALL_PROGRAM
 INSTALL_SCRIPT
 INSTALL_DATA
+PARALLEL
+RUNSERIAL
+RUNPARALLEL
+TESTPARALLEL
+BUILD_PARALLEL_CONDITIONAL_TRUE
+BUILD_PARALLEL_CONDITIONAL_FALSE
 LN_S
 ECHO
 RANLIB
@@ -860,12 +866,6 @@ PTHREAD
 DEBUG_PKG
 TRACE_API
 INSTRUMENT_LIBRARY
-PARALLEL
-RUNSERIAL
-RUNPARALLEL
-TESTPARALLEL
-BUILD_PARALLEL_CONDITIONAL_TRUE
-BUILD_PARALLEL_CONDITIONAL_FALSE
 MPE
 FILTERS
 USE_FILTER_SHUFFLE
@@ -3453,6 +3453,98 @@ test -z "$INSTALL_SCRIPT" && INSTALL_SCRIPT='${INSTALL}'
 test -z "$INSTALL_DATA" && INSTALL_DATA='${INSTALL} -m 644'
 
 
+
+
+
+
+
+
+case "$CC_BASENAME" in
+  mpicc)
+            PARALLEL=mpicc
+    { echo "$as_me:$LINENO: checking for mpirun" >&5
+echo $ECHO_N "checking for mpirun... $ECHO_C" >&6; }
+
+        cmd="`echo $CC | cut -f1 -d' '`"
+    if (echo $cmd | grep / >/dev/null); then
+      path="`echo $cmd | sed 's/\(.*\)\/.*$/\1/'`"
+    else
+      for path in `echo $PATH | tr : ' '`; do
+        if test -x $path/$cmd; then
+          break
+        fi
+      done
+    fi
+
+        if test -x $path/mpirun; then
+      { echo "$as_me:$LINENO: result: $path/mpirun" >&5
+echo "${ECHO_T}$path/mpirun" >&6; }
+      RUNSERIAL="${RUNSERIAL:-none}"
+
+      if test -z "$RUNPARALLEL"; then
+        RUNPARALLEL="$path/mpirun -np \$\${NPROCS:=3}"
+      fi
+    else
+      { echo "$as_me:$LINENO: result: none" >&5
+echo "${ECHO_T}none" >&6; }
+    fi
+    ;;
+
+  hcc)
+            PARALLEL=hcc
+    { echo "$as_me:$LINENO: checking for mpirun_lam or mpirun" >&5
+echo $ECHO_N "checking for mpirun_lam or mpirun... $ECHO_C" >&6; }
+
+        cmd="`echo $CC | cut -f1 -d' '`"
+    if (echo $cmd | grep / >/dev/null); then
+      path="`echo $cmd | sed 's/\(.*\)\/.*$/\1/'`"
+    else
+      for path in `echo $PATH | tr : ' '`; do
+        if test -x $path/$cmd; then
+          break
+        fi
+      done
+    fi
+
+        if test -x $path/mpirun_lam -o -x $path/mpirun; then
+      if test -x $path/mpirun_lam; then
+        cmd=mpirun_lam
+      else
+        cmd=mpirun
+      fi
+      { echo "$as_me:$LINENO: result: $path/$cmd" >&5
+echo "${ECHO_T}$path/$cmd" >&6; }
+      RUNSERIAL="${RUNSERIAL:-none}"
+      if test -z "$RUNPARALLEL"; then
+        RUNPARALLEL="$path/$cmd -np \$\${NPROCS:=3}"
+      fi
+    else
+      { echo "$as_me:$LINENO: result: none" >&5
+echo "${ECHO_T}none" >&6; }
+    fi
+    ;;
+
+  mpcc|mpcc_r)
+        PARALLEL="$CC_BASENAME"
+    ;;
+
+  *)
+            ;;
+esac
+
+if test "X${enable_shared}" = "X" -a "X${enable_parallel}" = "Xyes"; then
+    echo '    shared libraries disabled in parallel'
+    enable_shared="no"
+elif test "X${enable_shared}" = "Xyes" -a "X${enable_parallel}" = "Xyes"; then
+    echo '    shared libraries explicitly enabled by user'
+elif test "X${enable_shared}" = "X" -a "X${PARALLEL}" != "X"; then
+    echo '    shared libraries disabled when a parallel compiler is being used'
+    enable_shared="no"
+elif test "X${enable_shared}" = "Xyes" -a "X${PARALLEL}" != "X"; then
+    echo '    shared libraries explicitly enabled by user'
+fi
+
+
 # Check whether --enable-shared was given.
 if test "${enable_shared+set}" = set; then
   enableval=$enable_shared; p=${PACKAGE-default}
@@ -5209,7 +5301,7 @@ test "x$enable_libtool_lock" != xno && enable_libtool_lock=yes
 case $host in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 5212 "configure"' > conftest.$ac_ext
+  echo '#line 5304 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -5766,7 +5858,7 @@ chmod -w .
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -o out/conftest2.$ac_objext"
 compiler_c_o=no
-if { (eval echo configure:5769: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
+if { (eval echo configure:5861: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
   # The compiler can only warn and ignore the option if not recognized
   # So say no if there are warnings
   if test -s out/conftest.err; then
@@ -7641,7 +7733,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 7644 "configure"
+#line 7736 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -7739,7 +7831,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 7742 "configure"
+#line 7834 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -34561,86 +34653,6 @@ echo "$as_me: not updating unwritable cache $cache_file" >&6;}
 fi
 rm -f confcache
 
-
-
-
-
-
-
-
-case "$CC_BASENAME" in
-  mpicc)
-            PARALLEL=mpicc
-    { echo "$as_me:$LINENO: checking for mpirun" >&5
-echo $ECHO_N "checking for mpirun... $ECHO_C" >&6; }
-
-        cmd="`echo $CC | cut -f1 -d' '`"
-    if (echo $cmd | grep / >/dev/null); then
-      path="`echo $cmd | sed 's/\(.*\)\/.*$/\1/'`"
-    else
-      for path in `echo $PATH | tr : ' '`; do
-        if test -x $path/$cmd; then
-          break
-        fi
-      done
-    fi
-
-        if test -x $path/mpirun; then
-      { echo "$as_me:$LINENO: result: $path/mpirun" >&5
-echo "${ECHO_T}$path/mpirun" >&6; }
-      RUNSERIAL="${RUNSERIAL:-none}"
-
-      if test -z "$RUNPARALLEL"; then
-        RUNPARALLEL="$path/mpirun -np \$\${NPROCS:=3}"
-      fi
-    else
-      { echo "$as_me:$LINENO: result: none" >&5
-echo "${ECHO_T}none" >&6; }
-    fi
-    ;;
-
-  hcc)
-            PARALLEL=hcc
-    { echo "$as_me:$LINENO: checking for mpirun_lam or mpirun" >&5
-echo $ECHO_N "checking for mpirun_lam or mpirun... $ECHO_C" >&6; }
-
-        cmd="`echo $CC | cut -f1 -d' '`"
-    if (echo $cmd | grep / >/dev/null); then
-      path="`echo $cmd | sed 's/\(.*\)\/.*$/\1/'`"
-    else
-      for path in `echo $PATH | tr : ' '`; do
-        if test -x $path/$cmd; then
-          break
-        fi
-      done
-    fi
-
-        if test -x $path/mpirun_lam -o -x $path/mpirun; then
-      if test -x $path/mpirun_lam; then
-        cmd=mpirun_lam
-      else
-        cmd=mpirun
-      fi
-      { echo "$as_me:$LINENO: result: $path/$cmd" >&5
-echo "${ECHO_T}$path/$cmd" >&6; }
-      RUNSERIAL="${RUNSERIAL:-none}"
-      if test -z "$RUNPARALLEL"; then
-        RUNPARALLEL="$path/$cmd -np \$\${NPROCS:=3}"
-      fi
-    else
-      { echo "$as_me:$LINENO: result: none" >&5
-echo "${ECHO_T}none" >&6; }
-    fi
-    ;;
-
-  mpcc|mpcc_r)
-        PARALLEL="$CC_BASENAME"
-    ;;
-
-  *)
-            ;;
-esac
-
 # Check whether --enable-parallel was given.
 if test "${enable_parallel+set}" = set; then
   enableval=$enable_parallel;
@@ -37504,6 +37516,12 @@ SET_MAKE!$SET_MAKE$ac_delim
 INSTALL_PROGRAM!$INSTALL_PROGRAM$ac_delim
 INSTALL_SCRIPT!$INSTALL_SCRIPT$ac_delim
 INSTALL_DATA!$INSTALL_DATA$ac_delim
+PARALLEL!$PARALLEL$ac_delim
+RUNSERIAL!$RUNSERIAL$ac_delim
+RUNPARALLEL!$RUNPARALLEL$ac_delim
+TESTPARALLEL!$TESTPARALLEL$ac_delim
+BUILD_PARALLEL_CONDITIONAL_TRUE!$BUILD_PARALLEL_CONDITIONAL_TRUE$ac_delim
+BUILD_PARALLEL_CONDITIONAL_FALSE!$BUILD_PARALLEL_CONDITIONAL_FALSE$ac_delim
 LN_S!$LN_S$ac_delim
 ECHO!$ECHO$ac_delim
 RANLIB!$RANLIB$ac_delim
@@ -37521,12 +37539,6 @@ SRB!$SRB$ac_delim
 TESTSRB!$TESTSRB$ac_delim
 PTHREAD!$PTHREAD$ac_delim
 DEBUG_PKG!$DEBUG_PKG$ac_delim
-TRACE_API!$TRACE_API$ac_delim
-INSTRUMENT_LIBRARY!$INSTRUMENT_LIBRARY$ac_delim
-PARALLEL!$PARALLEL$ac_delim
-RUNSERIAL!$RUNSERIAL$ac_delim
-RUNPARALLEL!$RUNPARALLEL$ac_delim
-TESTPARALLEL!$TESTPARALLEL$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 88; then
@@ -37580,8 +37592,8 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
-BUILD_PARALLEL_CONDITIONAL_TRUE!$BUILD_PARALLEL_CONDITIONAL_TRUE$ac_delim
-BUILD_PARALLEL_CONDITIONAL_FALSE!$BUILD_PARALLEL_CONDITIONAL_FALSE$ac_delim
+TRACE_API!$TRACE_API$ac_delim
+INSTRUMENT_LIBRARY!$INSTRUMENT_LIBRARY$ac_delim
 MPE!$MPE$ac_delim
 FILTERS!$FILTERS$ac_delim
 USE_FILTER_SHUFFLE!$USE_FILTER_SHUFFLE$ac_delim
