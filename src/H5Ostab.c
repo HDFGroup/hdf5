@@ -41,9 +41,10 @@ static herr_t H5O_stab_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, cons
 static void *H5O_stab_copy(const void *_mesg, void *_dest);
 static size_t H5O_stab_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O_stab_free(void *_mesg);
-static herr_t H5O_stab_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg);
+static herr_t H5O_stab_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg);
 static void *H5O_stab_copy_file(H5F_t *file_src, void *native_src,
-    H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
+    H5F_t *file_dst, hbool_t *recompute_size, H5O_copy_t *cpy_info, void *udata,
+    hid_t dxpl_id);
 static herr_t H5O_stab_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc,
     void *mesg_dst, hid_t dxpl_id, H5O_copy_t *cpy_info);
 static herr_t H5O_stab_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
@@ -54,7 +55,7 @@ const H5O_msg_class_t H5O_MSG_STAB[1] = {{
     H5O_STAB_ID,            	/*message id number             */
     "stab",                 	/*message name for debugging    */
     sizeof(H5O_stab_t),     	/*native message size           */
-    FALSE,			/* messages are sharable?       */
+    0,				/* messages are sharable?       */
     H5O_stab_decode,        	/*decode message                */
     H5O_stab_encode,        	/*encode message                */
     H5O_stab_copy,          	/*copy the native value         */
@@ -270,7 +271,7 @@ H5O_stab_free (void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_stab_delete(H5F_t *f, hid_t dxpl_id, const void *mesg)
+H5O_stab_delete(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh, void *mesg)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
@@ -305,7 +306,8 @@ done:
  */
 static void *
 H5O_stab_copy_file(H5F_t *file_src, void *native_src, H5F_t *file_dst,
-    hid_t dxpl_id, H5O_copy_t UNUSED *cpy_info, void UNUSED *udata)
+    hbool_t UNUSED *recompute_size, H5O_copy_t UNUSED *cpy_info, void UNUSED *udata,
+    hid_t dxpl_id)
 {
     H5O_stab_t          *stab_src = (H5O_stab_t *) native_src;
     H5O_stab_t          *stab_dst = NULL;

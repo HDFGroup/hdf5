@@ -41,7 +41,7 @@ static void *H5O_cont_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const
 static herr_t H5O_cont_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static size_t H5O_cont_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O_cont_free(void *mesg);
-static herr_t H5O_cont_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg);
+static herr_t H5O_cont_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg);
 static herr_t H5O_cont_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			     int indent, int fwidth);
 
@@ -50,7 +50,7 @@ const H5O_msg_class_t H5O_MSG_CONT[1] = {{
     H5O_CONT_ID,            	/*message id number             */
     "hdr continuation",     	/*message name for debugging    */
     sizeof(H5O_cont_t),     	/*native message size           */
-    FALSE,			/* messages are sharable?       */
+    0,				/* messages are sharable?       */
     H5O_cont_decode,        	/*decode message                */
     H5O_cont_encode,        	/*encode message                */
     NULL,                   	/*no copy method                */
@@ -59,7 +59,7 @@ const H5O_msg_class_t H5O_MSG_CONT[1] = {{
     H5O_cont_free,	        /* free method			*/
     H5O_cont_delete,		/* file delete method		*/
     NULL,			/* link method			*/
-    NULL,		    	/*set share method		*/
+    NULL,			/*set share method		*/
     NULL,		    	/*can share method		*/
     NULL,			/* pre copy native value to file */
     NULL,			/* copy native value to file    */
@@ -223,9 +223,9 @@ H5O_cont_free(void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_cont_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg)
+H5O_cont_delete(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh, void *_mesg)
 {
-    const H5O_cont_t     *mesg = (const H5O_cont_t *) _mesg;
+    H5O_cont_t *mesg = (H5O_cont_t *) _mesg;
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_cont_delete)

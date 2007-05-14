@@ -106,5 +106,7 @@ H5_DLL H5R_type_t H5T_get_ref_type(const H5T_t *dt);
 H5_DLL H5T_t *H5T_open(const H5G_loc_t *loc, hid_t dxpl_id);
 H5_DLL htri_t H5T_committed(const H5T_t *type);
 H5_DLL int H5T_link(const H5T_t *type, int adjust, hid_t dxpl_id);
+H5_DLL herr_t H5T_update_shared(H5T_t *type);
 
-#endif
+#endif /* _H5Tprivate_H */
+

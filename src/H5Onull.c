@@ -35,7 +35,7 @@ const H5O_msg_class_t H5O_MSG_NULL[1] = {{
     H5O_NULL_ID,            	/*message id number             */
     "null",                 	/*message name for debugging    */
     0,                      	/*native message size           */
-    FALSE,			/*messages are sharable?        */
+    0,				/* messages are sharable?       */
     NULL,                   	/*no decode method              */
     NULL,                   	/*no encode method              */
     NULL,                   	/*no copy method                */

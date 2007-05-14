@@ -193,7 +193,7 @@ H5A_dense_fh_name_cmp(const void *obj, size_t UNUSED obj_len, void *_udata)
     if(udata->cmp == 0 && udata->found_op) {
         /* Check whether we should "reconstitute" the shared message info */
         if(udata->record->flags & H5O_MSG_FLAG_SHARED)
-            H5SM_reconstitute(&(attr->sh_loc), udata->record->id);
+            H5SM_reconstitute(&(attr->sh_loc), udata->f, H5O_ATTR_ID, udata->record->id);
 
         /* Set the creation order index for the attribute */
         attr->crt_idx = udata->record->corder;
@@ -325,7 +325,7 @@ H5A_dense_btree2_name_compare(const void *_bt2_udata, const void *_bt2_rec)
 #endif /* QAK */
 
         /* Check for attribute in shared storage */
-        if(bt2_rec->flags)
+        if(bt2_rec->flags & H5O_MSG_FLAG_SHARED)
             fheap = bt2_udata->shared_fheap;
         else
             fheap = bt2_udata->fheap;
@@ -382,7 +382,7 @@ H5A_dense_btree2_name_compare(const void *_bt2_udata, const void *_bt2_rec)
             if(ret_value == 0 && bt2_udata->found_op) {
                 /* Check whether we should "reconstitute" the shared message info */
                 if(bt2_rec->flags & H5O_MSG_FLAG_SHARED)
-                    H5SM_reconstitute(&(attr->sh_loc), bt2_rec->id);
+                    H5SM_reconstitute(&(attr->sh_loc), bt2_udata->f, H5O_ATTR_ID, bt2_rec->id);
 
                 /* Set the creation order index for the attribute */
                 attr->crt_idx = bt2_rec->corder;

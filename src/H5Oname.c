@@ -46,7 +46,7 @@ const H5O_msg_class_t H5O_MSG_NAME[1] = {{
     H5O_NAME_ID,            	/*message id number             */
     "name",                 	/*message name for debugging    */
     sizeof(H5O_name_t),     	/*native message size           */
-    FALSE,			/* messages are sharable?       */
+    0,				/* messages are sharable?       */
     H5O_name_decode,        	/*decode message                */
     H5O_name_encode,        	/*encode message                */
     H5O_name_copy,          	/*copy the native value         */

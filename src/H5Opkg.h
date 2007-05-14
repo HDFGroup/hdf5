@@ -176,7 +176,7 @@
 
 /* Load native information for a message, if it's not already present */
 /* (Only works for messages with decode callback) */
-#define H5O_LOAD_NATIVE(F, DXPL, MSG, ERR)                                        \
+#define H5O_LOAD_NATIVE(F, DXPL, OH, MSG, ERR)                                \
     if(NULL == (MSG)->native) {                                               \
         const H5O_msg_class_t	*msg_type = (MSG)->type;                      \
                                                                               \
@@ -184,6 +184,11 @@
         HDassert(msg_type->decode);                                           \
         if(NULL == ((MSG)->native = (msg_type->decode)((F), (DXPL), (MSG)->flags, (MSG)->raw))) \
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, ERR, "unable to decode message") \
+                                                                              \
+        /* Set the message's "shared info", if it's shareable */	      \
+        if((MSG)->flags & H5O_MSG_FLAG_SHAREABLE) {                           \
+            H5O_UPDATE_SHARED((H5O_shared_t *)(MSG)->native, H5O_SHARE_TYPE_HERE, (F), msg_type->id, (MSG)->crt_idx, (OH)->chunk[0].addr) \
+        } /* end if */                                                        \
                                                                               \
         /* Set the message's "creation index", if it has one */		      \
         if(msg_type->set_crt_index) {				      	      \
@@ -193,25 +198,29 @@
         } /* end if */							      \
     } /* end if */
 
+/* Flags for a message class's "sharability" */
+#define H5O_SHARE_IS_SHARABLE   0x01
+#define H5O_SHARE_IN_OHDR       0x02
+
 
 /* The "message class" type */
 struct H5O_msg_class_t {
     unsigned	id;				/*message type ID on disk   */
     const char	*name;				/*for debugging             */
     size_t	native_size;			/*size of native message    */
-    hbool_t     is_sharable;			/*are messages of this class sharable? */
+    unsigned    share_flags;			/* Message sharing settings */
     void	*(*decode)(H5F_t*, hid_t, unsigned, const uint8_t *);
     herr_t	(*encode)(H5F_t*, hbool_t, uint8_t*, const void *);
     void	*(*copy)(const void *, void *);	/*copy native value         */
     size_t	(*raw_size)(const H5F_t *, hbool_t, const void *);/*sizeof encoded message	*/
     herr_t	(*reset)(void *);		/*free nested data structs  */
     herr_t	(*free)(void *);		/*free main data struct  */
-    herr_t	(*del)(H5F_t *, hid_t, const void *);   /* Delete space in file referenced by this message */
-    herr_t	(*link)(H5F_t *, hid_t, const void *);  /* Increment any links in file reference by this message */
-    herr_t	(*set_share)(void*, const H5O_shared_t*);    /* Set shared information */
+    herr_t	(*del)(H5F_t *, hid_t, H5O_t *, void *);    /* Delete space in file referenced by this message */
+    herr_t	(*link)(H5F_t *, hid_t, H5O_t *, void *);   /* Increment any links in file reference by this message */
+    herr_t	(*set_share)(void*, const H5O_shared_t*);   /* Set shared information */
     htri_t	(*can_share)(const void *);	/* Is message allowed to be shared? */
     herr_t	(*pre_copy_file)(H5F_t *, const void *, hbool_t *, const H5O_copy_t *, void *); /*"pre copy" action when copying native value to file */
-    void	*(*copy_file)(H5F_t *, void *, H5F_t *, hid_t, H5O_copy_t *, void *); /*copy native value to file */
+    void	*(*copy_file)(H5F_t *, void *, H5F_t *, hbool_t *, H5O_copy_t *, void *, hid_t); /*copy native value to file */
     herr_t	(*post_copy_file)(const H5O_loc_t *, const void *, H5O_loc_t *, void *, hid_t, H5O_copy_t *); /*"post copy" action when copying native value to file */
     herr_t      (*get_crt_index)(const void *, H5O_msg_crt_idx_t *);	/* Get message's creation index */
     herr_t      (*set_crt_index)(void *, H5O_msg_crt_idx_t);	/* Set message's creation index */
@@ -460,7 +469,7 @@ H5_DLLVAR const H5O_obj_class_t H5O_OBJ_DATATYPE[1];
 /* Package-local function prototypes */
 H5_DLL herr_t H5O_flush_msgs(H5F_t *f, H5O_t *oh);
 H5_DLL hid_t H5O_open_by_loc(const H5G_loc_t *obj_loc, hid_t dxpl_id);
-H5_DLL herr_t H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_mesg_t *mesg);
+H5_DLL herr_t H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, H5O_mesg_t *mesg);
 H5_DLL const H5O_obj_class_t *H5O_obj_class_real(H5O_t *oh);
 
 /* Object header message routines */
@@ -481,8 +490,8 @@ H5_DLL htri_t H5O_msg_exists_oh(const H5O_t *oh, unsigned type_id);
 H5_DLL herr_t H5O_msg_remove_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type,
     int sequence, H5O_operator_t op, void *op_data, hbool_t adj_link, hid_t dxpl_id);
 H5_DLL void *H5O_msg_copy_file(const H5O_msg_class_t *type, H5F_t *file_src,
-    void *mesg_src, H5F_t *file_dst, hid_t dxpl_id, hbool_t *shared,
-    H5O_copy_t *cpy_info, void *udata);
+    void *mesg_src, H5F_t *file_dst, hbool_t *recompute_size,
+    H5O_copy_t *cpy_info, void *udata, hid_t dxpl_id);
 H5_DLL herr_t H5O_msg_iterate_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type,
     const H5O_mesg_operator_t *op, void *op_data, hid_t dxpl_id);
 
@@ -498,20 +507,20 @@ H5_DLL herr_t H5O_release_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
 H5_DLL void * H5O_shared_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *buf, const H5O_msg_class_t *type);
 H5_DLL herr_t H5O_shared_encode(const H5F_t *f, uint8_t *buf/*out*/, const H5O_shared_t *sh_mesg);
 H5_DLL size_t H5O_shared_size(const H5F_t *f, const H5O_shared_t *sh_mesg);
-H5_DLL herr_t H5O_shared_delete(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *sh_mesg,
-    const H5O_msg_class_t *mesg_type);
-H5_DLL herr_t H5O_shared_link(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *sh_mesg,
-    const H5O_msg_class_t *mesg_type);
-H5_DLL herr_t H5O_shared_copy_file(H5F_t *file_src, H5F_t *file_dst, hid_t dxpl_id,
+H5_DLL herr_t H5O_shared_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
+    const H5O_msg_class_t *mesg_type, H5O_shared_t *sh_mesg);
+H5_DLL herr_t H5O_shared_link(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
+    const H5O_msg_class_t *mesg_type, H5O_shared_t *sh_mesg);
+H5_DLL herr_t H5O_shared_copy_file(H5F_t *file_src, H5F_t *file_dst, 
     const H5O_msg_class_t *mesg_type, const void *_native_src, void *_native_dst,
-    H5O_copy_t *cpy_info, void *udata);
+    hbool_t *recompute_size, H5O_copy_t *cpy_info, void *udata, hid_t dxpl_id);
 H5_DLL herr_t H5O_shared_debug(const H5O_shared_t *mesg, FILE *stream,
     int indent, int fwidth);
 
 /* Attribute message operators */
 H5_DLL herr_t H5O_attr_reset(void *_mesg);
-H5_DLL herr_t H5O_attr_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg);
-H5_DLL herr_t H5O_attr_link(H5F_t *f, hid_t dxpl_id, const void *_mesg);
+H5_DLL herr_t H5O_attr_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg);
+H5_DLL herr_t H5O_attr_link(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg);
 
 /* These functions operate on object locations */
 H5_DLL H5O_loc_t *H5O_get_loc(hid_t id);

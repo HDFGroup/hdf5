@@ -1376,7 +1376,7 @@ H5G_dense_remove_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
 
     /* Perform the deletion action on the link, if requested */
     /* (call message "delete" callback directly: *ick* - QAK) */
-    if(H5O_link_delete(udata->f, udata->dxpl_id, lnk) < 0)
+    if(H5O_link_delete(udata->f, udata->dxpl_id, NULL, lnk) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete link")
 
 done:
@@ -1618,7 +1618,7 @@ H5G_dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
 
     /* Perform the deletion action on the link */
     /* (call link message "delete" callback directly: *ick* - QAK) */
-    if(H5O_link_delete(bt2_udata->f, bt2_udata->dxpl_id, fh_udata.lnk) < 0)
+    if(H5O_link_delete(bt2_udata->f, bt2_udata->dxpl_id, NULL, fh_udata.lnk) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete link")
 
     /* Release the space allocated for the link */

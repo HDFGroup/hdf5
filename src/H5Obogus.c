@@ -49,7 +49,7 @@ const H5O_msg_class_t H5O_MSG_BOGUS[1] = {{
     H5O_BOGUS_ID,            	/*message id number             */
     "bogus",                 	/*message name for debugging    */
     0,     	                /*native message size           */
-    FALSE,			/* messages are sharable?       */
+    0,				/* messages are sharable?       */
     H5O_bogus_decode,        	/*decode message                */
     H5O_bogus_encode,        	/*encode message                */
     NULL,          	        /*copy the native value         */

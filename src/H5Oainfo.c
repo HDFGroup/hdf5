@@ -40,11 +40,13 @@ static herr_t H5O_ainfo_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, con
 static void *H5O_ainfo_copy(const void *_mesg, void *_dest);
 static size_t H5O_ainfo_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O_ainfo_free(void *_mesg);
-static herr_t H5O_ainfo_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg);
+static herr_t H5O_ainfo_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
+    void *_mesg);
 static herr_t H5O_ainfo_pre_copy_file(H5F_t *file_src, const void *mesg_src,
     hbool_t *deleted, const H5O_copy_t *cpy_info, void *udata);
 static void *H5O_ainfo_copy_file(H5F_t *file_src, void *mesg_src,
-    H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
+    H5F_t *file_dst, hbool_t *recompute_size, H5O_copy_t *cpy_info, void *udata,
+    hid_t dxpl_id);
 static herr_t H5O_ainfo_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 			     FILE * stream, int indent, int fwidth);
 
@@ -53,7 +55,7 @@ const H5O_msg_class_t H5O_MSG_AINFO[1] = {{
     H5O_AINFO_ID,            	/*message id number             */
     "ainfo",                 	/*message name for debugging    */
     sizeof(H5O_ainfo_t),     	/*native message size           */
-    FALSE,			/* messages are sharable?       */
+    0,				/* messages are sharable?       */
     H5O_ainfo_decode,        	/*decode message                */
     H5O_ainfo_encode,        	/*encode message                */
     H5O_ainfo_copy,          	/*copy the native value         */
@@ -62,7 +64,7 @@ const H5O_msg_class_t H5O_MSG_AINFO[1] = {{
     H5O_ainfo_free,	        /* free method			*/
     H5O_ainfo_delete,	        /* file delete method		*/
     NULL,			/* link method			*/
-    NULL, 			/*set share method		*/
+    NULL,			/*set share method		*/
     NULL,		    	/*can share method		*/
     H5O_ainfo_pre_copy_file,	/* pre copy native value to file */
     H5O_ainfo_copy_file,	/* copy native value to file    */
@@ -327,9 +329,9 @@ H5O_ainfo_free(void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_ainfo_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg)
+H5O_ainfo_delete(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh, void *_mesg)
 {
-    const H5O_ainfo_t *ainfo = (const H5O_ainfo_t *)_mesg;
+    H5O_ainfo_t *ainfo = (H5O_ainfo_t *)_mesg;
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_ainfo_delete)
@@ -340,7 +342,7 @@ H5O_ainfo_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg)
 
     /* If the object is using "dense" attribute storage, delete it */
     if(H5F_addr_defined(ainfo->fheap_addr))
-        if(H5A_dense_delete(f, dxpl_id, (H5O_ainfo_t *)ainfo) < 0)   /* Casting away const OK - QAK */
+        if(H5A_dense_delete(f, dxpl_id, ainfo) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free dense attribute storage")
 
 done:
@@ -397,8 +399,8 @@ H5O_ainfo_pre_copy_file(H5F_t UNUSED *file_src, const void UNUSED *native_src,
  */
 static void *
 H5O_ainfo_copy_file(H5F_t UNUSED *file_src, void *mesg_src,
-    H5F_t UNUSED *file_dst, hid_t UNUSED dxpl_id, H5O_copy_t UNUSED *cpy_info,
-    void UNUSED *udata)
+    H5F_t UNUSED *file_dst, hbool_t UNUSED *recompute_size,
+    H5O_copy_t UNUSED *cpy_info, void UNUSED *udata, hid_t UNUSED dxpl_id)
 {
     H5O_ainfo_t *ainfo_src = (H5O_ainfo_t *)mesg_src;
     H5O_ainfo_t *ainfo_dst = NULL;

@@ -47,7 +47,8 @@ static herr_t H5O_link_free(void *_mesg);
 static herr_t H5O_link_pre_copy_file(H5F_t *file_src, const void *mesg_src,
     hbool_t *deleted, const H5O_copy_t *cpy_info, void *udata);
 static void *H5O_link_copy_file(H5F_t *file_src, void *native_src,
-    H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
+    H5F_t *file_dst, hbool_t *recompute_size, H5O_copy_t *cpy_info, void *udata,
+    hid_t dxpl_id);
 static herr_t H5O_link_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc,
     void *mesg_dst, hid_t dxpl_id, H5O_copy_t *cpy_info);
 static herr_t H5O_link_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
@@ -58,7 +59,7 @@ const H5O_msg_class_t H5O_MSG_LINK[1] = {{
     H5O_LINK_ID,            	/*message id number             */
     "link",                 	/*message name for debugging    */
     sizeof(H5O_link_t),     	/*native message size           */
-    FALSE,			/* messages are sharable?       */
+    0,				/* messages are sharable?       */
     H5O_link_decode,        	/*decode message                */
     H5O_link_encode,        	/*encode message                */
     H5O_link_copy,          	/*copy the native value         */
@@ -587,9 +588,9 @@ H5O_link_free(void *_mesg)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_link_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg)
+H5O_link_delete(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh, void *_mesg)
 {
-    const H5O_link_t *lnk = (const H5O_link_t *)_mesg;
+    H5O_link_t *lnk = (H5O_link_t *)_mesg;
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_link_delete, FAIL)
@@ -699,7 +700,8 @@ H5O_link_pre_copy_file(H5F_t UNUSED *file_src, const void UNUSED *native_src,
  */
 static void *
 H5O_link_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t UNUSED *file_dst,
-    hid_t UNUSED dxpl_id, H5O_copy_t UNUSED *cpy_info, void UNUSED *udata)
+    hbool_t UNUSED *recompute_size, H5O_copy_t UNUSED *cpy_info, void UNUSED *udata,
+    hid_t UNUSED dxpl_id)
 {
     H5O_link_t  *link_src = (H5O_link_t *)native_src;
     H5O_link_t  *link_dst = NULL;

@@ -36,16 +36,20 @@
 /* Local Typedefs */
 /******************/
 
-/* Udata struct for call to H5SM_btree_compare_cb */
+/* Udata struct for calls to H5SM_btree_compare_cb and H5SM_compare_iter_op*/
 typedef struct H5SM_compare_udata_t {
-    H5SM_mesg_key_t *key;   /* Key; compare this against record in heap */
-    herr_t ret;            /* Return value; set this to result of memcmp */
+    const H5SM_mesg_key_t *key; /* Key; compare this against stored message */
+    H5O_msg_crt_idx_t idx;      /* Index of the message in the OH, if applicable */
+    unsigned type_id;           /* Type ID of the type being compared */
+    herr_t ret;                 /* Return value; set this to result of memcmp */
 } H5SM_compare_udata_t;
+
 
 /********************/
 /* Local Prototypes */
 /********************/
 
+/* v2 B-tree callbacks */
 static herr_t H5SM_btree_compare_cb(const void *obj, size_t obj_len, void *_udata);
 static herr_t H5SM_btree_store(void *native, const void *udata);
 static herr_t H5SM_btree_retrieve(void *udata, const void *native);
@@ -98,18 +102,82 @@ H5SM_btree_compare_cb(const void *obj, size_t obj_len, void *_udata)
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_btree_compare_cb)
 
     /* If the encoding sizes are different, it's not the same object */
-    if(udata->key->encoding_size != obj_len) {
-        if(udata->key->encoding_size > obj_len)
-            udata->ret = 1;
-        else
-            udata->ret = -1;
-    } else {
+    if(udata->key->encoding_size > obj_len)
+        udata->ret = 1;
+    else if(udata->key->encoding_size < obj_len)
+        udata->ret = -1;
+    else
         /* Sizes are the same.  Return result of memcmp */
         udata->ret = HDmemcmp(udata->key->encoding, obj, obj_len);
-    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_btree_compare_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5SM_compare_iter_op
+ *
+ * Purpose:	OH iteration callback to compare a key against a message in
+ *              an OH
+ *
+ * Return:	0 if this is not the message we're searching for
+ *              1 if this is the message we're searching for (with memcmp
+ *                      result returned in udata)
+ *              negative on error
+ *
+ * Programmer:	James Laird
+ *              Wednesday, February 7, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5SM_compare_iter_op(const void *_mesg, unsigned idx, void *_udata)
+{
+    H5SM_compare_udata_t *udata = (H5SM_compare_udata_t *) _udata;
+    unsigned char *buf = NULL;
+    herr_t ret_value = H5_ITER_CONT;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5SM_compare_iter_op)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(_mesg);
+    HDassert(udata && udata->key);
+
+    /* Check the creation index for this message */
+    if(idx == udata->idx) {
+        size_t raw_size;
+
+        /* Retrieve the length of the unshared version of the message */
+        raw_size = H5O_msg_raw_size(udata->key->file, udata->type_id, TRUE, _mesg);
+        HDassert(raw_size > 0);
+
+        if(udata->key->encoding_size > raw_size)
+            udata->ret = 1;
+        else if(udata->key->encoding_size < raw_size)
+            udata->ret = -1;
+        else {
+            if(NULL == (buf = HDmalloc(raw_size)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR, "memory allocation failed")
+
+            /* JAMES: is there a faster way to get the encoded value here?  Do we already have a raw value? */
+            if(H5O_msg_encode(udata->key->file, udata->type_id, TRUE, buf, _mesg) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, H5_ITER_ERROR, "unable to encode message from object header")
+
+            udata->ret = HDmemcmp(udata->key->encoding, buf, raw_size);
+        } /* end else */
+
+        /* Indicate that we found the message we were looking for */
+        ret_value = H5_ITER_STOP;
+    } /* end if */
+
+done:
+    if(buf)
+        HDfree(buf);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5SM_compare_iter_op() */
 
 
 /*-------------------------------------------------------------------------
@@ -133,52 +201,80 @@ H5SM_message_compare(const void *rec1, const void *rec2)
 {
     const H5SM_mesg_key_t *key = (const H5SM_mesg_key_t *) rec1;
     const H5SM_sohm_t *mesg = (const H5SM_sohm_t *) rec2;
-    int64_t hash_diff;  /* Has to be able to hold two 32-bit values */
     herr_t ret_value = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_message_compare)
 
-    /* JAMES: might be able to spare a sentinel byte instead of worrying about
-     * refcounts.  Here, we need to find a deleted message in a B-tree to
-     * actually delete it.
-     */
-    /* JAMES HDassert(mesg->ref_count > 0); */
-
     /* If the key has an fheap ID, we're looking for a message that's
      * already in the index; if the fheap ID matches, we've found the message
      * and can stop immediately.
+     * Likewise, if the message has an OH location that is matched by the
+     * message in the index, we've found the message.
      */
-    if(key->message.fheap_id == mesg->fheap_id)
-        HGOTO_DONE(0);
+    if(mesg->location == H5SM_IN_HEAP && key->message.location == H5SM_IN_HEAP) {
+        if(key->message.u.heap_loc.fheap_id == mesg->u.heap_loc.fheap_id)
+            HGOTO_DONE(0);
+    } /* end if */
+    else if(mesg->location == H5SM_IN_OH && key->message.location == H5SM_IN_OH) {
+        if(key->message.u.mesg_loc.oh_addr == mesg->u.mesg_loc.oh_addr &&
+                key->message.u.mesg_loc.index == mesg->u.mesg_loc.index &&
+                key->message.msg_type_id == mesg->msg_type_id)
+            HGOTO_DONE(0);
+    } /* end if */
 
-    hash_diff = key->message.hash;
-    hash_diff -= mesg->hash;
-
+    /* Compare hash values */
+    if(key->message.hash > mesg->hash)
+        ret_value = 1;
+    else if(key->message.hash < mesg->hash)
+        ret_value = -1;
     /* If the hash values match, make sure the messages are really the same */
-    if(0 == hash_diff) {
-       /* Hash values match; compare the encoded message with the one in
-        * the heap.
-        */
-       H5SM_compare_udata_t udata;
-       herr_t ret;
+    else {
+        /* Hash values match; compare the encoded message with the one in
+         * the index.
+         */
+        H5SM_compare_udata_t udata;
+        herr_t status;
 
+        HDassert(key->message.hash == mesg->hash);
         HDassert(key->encoding_size > 0 && key->encoding);
-        /* Casting away const OK.  -JML */
+
+        /* Set up user data for callback */
         udata.key = key;
 
-        /* Call heap op routine with comparison callback */
-        ret = H5HF_op(key->fheap, H5AC_dxpl_id, &(mesg->fheap_id), H5SM_btree_compare_cb, &udata);
-        HDassert(ret >= 0);
+        /* Compare the encoded message with either the message in the heap or
+         * the message in an object header.
+         */
+        if(mesg->location == H5SM_IN_HEAP) {
+            /* Call heap op routine with comparison callback */
+            status = H5HF_op(key->fheap, H5AC_dxpl_id, &(mesg->u.heap_loc.fheap_id), H5SM_btree_compare_cb, &udata);
+            HDassert(status >= 0);
+        } /* end if */
+        else {
+            H5O_loc_t oloc;             /* Object owning the message */
+
+            /* Sanity checks */
+            HDassert(key->file);
+            HDassert(mesg->location == H5SM_IN_OH);
+
+            /* Reset the object location */
+            status = H5O_loc_reset(&oloc);
+            HDassert(status >= 0);
+
+            /* Set up object location */
+            oloc.file = key->file;
+            oloc.addr = mesg->u.mesg_loc.oh_addr;
+
+            /* Finish setting up user data for iterator */
+            udata.idx = mesg->u.mesg_loc.index;
+            udata.type_id = mesg->msg_type_id;
+
+            /* JAMES: is this okay? */
+            status = H5O_msg_iterate(&oloc, mesg->msg_type_id, H5SM_compare_iter_op, &udata, key->dxpl_id);
+            HDassert(status >= 0);
+        } /* end else */
 
         ret_value = udata.ret;
     } /* end if */
-    else {
-        /* Compress 64-bit hash_diff to fit in an herr_t */
-        if(hash_diff > 0)
-            ret_value = 1;
-        else
-            ret_value = -1;
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -263,89 +359,19 @@ H5SM_btree_debug(FILE *stream, const H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_btree_debug)
 
-    HDfprintf(stream, "%*s%-*s {%a, %lo, %Hx}\n", indent, "", fwidth, "Shared Message:",
-        sohm->fheap_id, sohm->hash, sohm->ref_count);
+    if(sohm->location == H5SM_IN_HEAP)
+        HDfprintf(stream, "%*s%-*s {%a, %lo, %Hx}\n", indent, "", fwidth,
+            "Shared Message in heap:",
+            sohm->u.heap_loc.fheap_id, sohm->hash, sohm->u.heap_loc.ref_count);
+    else {
+        HDassert(sohm->location == H5SM_IN_OH);
+        HDfprintf(stream, "%*s%-*s {%a, %lo, %Hx, %Hx}\n", indent, "", fwidth,
+            "Shared Message in OH:",
+            sohm->u.mesg_loc.oh_addr, sohm->hash, sohm->msg_type_id, sohm->u.mesg_loc.index);
+    } /* end else */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SM_btree_debug */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5SM_incr_ref
- *
- * Purpose:	Increment the reference count for a SOHM message and return
- *              the message's heap ID.
- *
- *              The message pointer is actually returned via op_data, which
- *              should be a pointer to a H5SM_fheap_id_t.
- *
- * Return:	Non-negative on success
- *              Negative on failure
- *
- * Programmer:	James Laird
- *              Monday, November 6, 2006
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5SM_incr_ref(void *record, void *op_data, hbool_t *changed)
-{
-    H5SM_sohm_t *message = (H5SM_sohm_t *) record;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_incr_ref)
-
-    HDassert(record);
-    HDassert(op_data);
-    HDassert(changed);
-
-    ++message->ref_count;
-    *changed = TRUE;
-
-    if(op_data)
-       *(H5O_fheap_id_t *)op_data = message->fheap_id;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5SM_incr_ref() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5SM_decr_ref
- *
- * Purpose:	Decrement the reference count for a SOHM message.  Doesn't
- *              remove the record from the B-tree even if the refcount
- *              reaches zero.
- *
- *              The new message is returned through op_data.  If its
- *              reference count is zero, the calling function should
- *              remove this record from the B-tree.
- *
- * Return:	Non-negative on success
- *              Negative on failure
- *
- * Programmer:	James Laird
- *              Monday, November 6, 2006
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5SM_decr_ref(void *record, void *op_data, hbool_t *changed)
-{
-    H5SM_sohm_t *message = (H5SM_sohm_t *) record;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_decr_ref)
-
-    HDassert(record);
-    HDassert(op_data);
-    HDassert(changed);
-
-    --message->ref_count;
-    *changed = TRUE;
-
-    if(op_data)
-       *(H5SM_sohm_t *)op_data = *message;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5SM_decr_ref() */
 
 
 /*-------------------------------------------------------------------------
@@ -367,29 +393,25 @@ H5SM_decr_ref(void *record, void *op_data, hbool_t *changed)
 herr_t
 H5SM_btree_convert_to_list_op(const void * record, void *op_data)
 {
-    const H5SM_sohm_t *message = (const H5SM_sohm_t *) record;
-    const H5SM_list_t *list = (const H5SM_list_t *) op_data;
-    hsize_t      x;
+    const H5SM_sohm_t *message = (const H5SM_sohm_t *)record;
+    const H5SM_list_t *list = (const H5SM_list_t *)op_data;
+    size_t mesg_idx;            /* Index of message to modify */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_btree_convert_to_list_op)
 
+    /* Sanity checks */
     HDassert(record);
     HDassert(op_data);
 
-    /* Insert this message into the list */
-    for(x=0; x<list->header->list_max; x++)
-    {
-        if(list->messages[x].ref_count == 0)
-        {
-            HDmemcpy(&(list->messages[x]), message, sizeof(H5SM_sohm_t));
-            HDassert(list->messages[x].ref_count > 0);
-            break;
-        }
-    }
+    /* Get the message index, and increment the # of messages in list */
+    mesg_idx = list->header->num_messages++;
+    HDassert(list->header->num_messages <= list->header->list_max);
 
-    /* Increment the number of messages in the list */
-    ++list->header->num_messages;
+    /* Insert this message at the end of the list */
+    HDassert(list->messages[mesg_idx].location == H5SM_NO_LOC);
+    HDassert(message->location != H5SM_NO_LOC);
+    HDmemcpy(&(list->messages[mesg_idx]), message, sizeof(H5SM_sohm_t));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-}
+} /* end H5SM_btree_convert_to_list_op() */
 

@@ -40,7 +40,7 @@ const H5O_msg_class_t H5O_MSG_BTREEK[1] = {{
     H5O_BTREEK_ID,              /*message id number                     */
     "v1 B-tree 'K' values",     /*message name for debugging            */
     sizeof(H5O_btreek_t),	/*native message size                   */
-    FALSE,			/* messages are sharable?       */
+    0,				/* messages are sharable?       */
     H5O_btreek_decode,		/*decode message                        */
     H5O_btreek_encode,		/*encode message                        */
     H5O_btreek_copy,            /*copy the native value                 */
@@ -49,7 +49,7 @@ const H5O_msg_class_t H5O_MSG_BTREEK[1] = {{
     NULL,                       /* free method				*/
     NULL,			/* file delete method			*/
     NULL,			/* link method				*/
-    NULL,	                /* set share method			*/
+    NULL,			/*set share method		        */
     NULL,		    	/*can share method		        */
     NULL,			/* pre copy native value to file	*/
     NULL,			/* copy native value to file		*/

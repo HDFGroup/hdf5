@@ -1444,7 +1444,7 @@ H5O_delete_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
      */
     for(u = 0, curr_msg = &oh->mesg[0]; u < oh->nmesgs; u++, curr_msg++) {
         /* Free any space referred to in the file from this message */
-        if(H5O_delete_mesg(f, dxpl_id, curr_msg) < 0)
+        if(H5O_delete_mesg(f, dxpl_id, oh, curr_msg) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete file space for object header message")
     } /* end for */
 
@@ -1761,11 +1761,10 @@ H5O_loc_hold_file(H5O_loc_t *loc)
     HDassert(loc->file);
 
     /* If this location is not already holding its file open, do so. */
-    if(!loc->holding_file)
-    {
+    if(!loc->holding_file) {
         loc->file->nopen_objs++;
         loc->holding_file = TRUE;
-    }
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_loc_hold_file() */
@@ -2087,4 +2086,34 @@ H5O_obj_create(H5F_t *f, H5O_type_t obj_type, void *crt_info, H5G_loc_t *obj_loc
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_obj_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_get_oh_addr
+ *
+ * Purpose:	Retrieve the address of the object header
+ *
+ * Note:	This routine participates in the "Inlining C struct access"
+ *		pattern, don't call it directly, use the appropriate macro
+ *		defined in H5Oprivate.h.
+ *
+ * Return:	Success:	Valid haddr_t
+ *		Failure:	HADDR_UNDEF
+ *
+ * Programmer:	Quincey Koziol
+ *		March 15 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+haddr_t
+H5O_get_oh_addr(const H5O_t *oh)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_get_oh_addr)
+
+    HDassert(oh);
+    HDassert(oh->chunk);
+
+    FUNC_LEAVE_NOAPI(oh->chunk[0].addr)
+} /* end H5O_get_oh_addr() */
 

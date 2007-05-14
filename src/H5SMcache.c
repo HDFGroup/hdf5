@@ -433,7 +433,7 @@ H5SM_flush_list(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_lis
         /* Write messages from the messages array to disk */
         mesgs_written = 0;
         for(x=0; x<list->header->list_max && mesgs_written < list->header->num_messages; x++) {
-            if(list->messages[x].ref_count > 0) {
+            if(list->messages[x].location != H5SM_NO_LOC) {
                 if(H5SM_message_encode(f, p, &(list->messages[x]))< 0)
                     HGOTO_ERROR(H5E_SOHM, H5E_CANTFLUSH, FAIL, "unable to write shared message to disk")
 
@@ -552,7 +552,7 @@ H5SM_load_list(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1,
 
     /* Initialize the rest of the array */
     for(x = header->num_messages; x < header->list_max; x++)
-        list->messages[x].ref_count = 0;
+        list->messages[x].location = H5SM_NO_LOC;
 
     ret_value = list;
 

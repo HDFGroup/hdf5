@@ -40,7 +40,7 @@ const H5O_msg_class_t H5O_MSG_SHMESG[1] = {{
     H5O_SHMESG_ID,              /*message id number                     */
     "shared message table",     /*message name for debugging            */
     sizeof(H5O_shmesg_table_t),	/*native message size                   */
-    FALSE,			/* messages are sharable?       */
+    0,				/* messages are sharable?       */
     H5O_shmesg_decode,		/*decode message                        */
     H5O_shmesg_encode,		/*encode message                        */
     H5O_shmesg_copy,            /*copy the native value                 */

@@ -368,11 +368,10 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     /* Check if any of the pieces should be (or are already) shared in the
      * SOHM table
      */
-    if(H5SM_try_share(attr->oloc.file, dxpl_id, H5O_DTYPE_ID, attr->dt) < 0)
+    if(H5SM_try_share(attr->oloc.file, dxpl_id, NULL, H5O_DTYPE_ID, attr->dt, NULL) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "trying to share datatype failed")
-    if(H5SM_try_share(attr->oloc.file, dxpl_id, H5O_SDSPACE_ID, attr->ds) < 0)
+    if(H5SM_try_share(attr->oloc.file, dxpl_id, NULL, H5O_SDSPACE_ID, attr->ds, NULL) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "trying to share dataspace failed")
-
 
     /* Check whether datatype is committed & increment ref count
      * (to maintain ref. count incr/decr similarity with "shared message"
@@ -2022,7 +2021,22 @@ H5A_copy(H5A_t *_new_attr, const H5A_t *old_attr)
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "unable to copy attribute datatype")
     if(NULL == (new_attr->ds = H5S_copy(old_attr->ds, FALSE)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "unable to copy attribute dataspace")
-/* XXX: Copy the object location and group path? -QAK */
+
+#if defined(H5_USING_PURIFY) || !defined(NDEBUG)
+    /* Clear object location */
+    if(H5O_loc_reset(&(new_attr->oloc)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to reset location")
+
+    /* Clear path name */
+    if(H5G_name_reset(&(new_attr->path)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to reset path")
+#endif /* H5_USING_PURIFY */
+
+    /* Copy the object location and group path */
+    if(H5O_loc_copy(&(new_attr->oloc), &(old_attr->oloc), H5_COPY_DEEP) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "can't copy object location")
+    if(H5G_name_copy(&(new_attr->path), &(old_attr->path), H5_COPY_DEEP) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "can't copy path")
 
     /* Copy the attribute data, if there is any */
     if(old_attr->data) {

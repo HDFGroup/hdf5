@@ -45,10 +45,17 @@
 #define H5SM_TABLE_SIZEOF_MAGIC 4
 #define H5SM_SIZEOF_CHECKSUM 4
 
-#define H5SM_SOHM_ENTRY_SIZE(f) (1  /* "location" (unused right now) */      \
-         + 4                        /* Hash value */                         \
-         + 4                        /* reference count*/                     \
+#define H5SM_HEAP_LOC_SIZE (4  /* Reference count */                        \
          + sizeof(H5O_fheap_id_t))  /* size of heap ID on disk */
+
+#define H5SM_OH_LOC_SIZE(f) (1  /* reserved (possible flags?) */            \
+         + 1                    /* message type ID */			    \
+         + 2                    /* creation index of message in OH */       \
+         + H5F_SIZEOF_ADDR(f))  /* address of OH */
+
+#define H5SM_SOHM_ENTRY_SIZE(f) (1  /* Message location */                  \
+         + 4  /* Hash value */                                              \
+         + MAX(H5SM_HEAP_LOC_SIZE, H5SM_OH_LOC_SIZE(f)))
 
 #define H5SM_TABLE_SIZE(f) ( H5SM_TABLE_SIZEOF_MAGIC                         \
          + H5SM_SIZEOF_CHECKSUM)               /* Checksum */
@@ -103,28 +110,36 @@
  * disk.
  */
 
+/* Where a message is stored */
+typedef enum {
+    H5SM_NO_LOC = -1,
+    H5SM_IN_HEAP = 0,    	/* Message is stored in the heap */
+    H5SM_IN_OH    		/* Message is stored in an object header */
+} H5SM_storage_loc_t;
+
+/* Typedef for a record's location if it's stored in the heap */
+typedef struct {
+    hsize_t ref_count;		/* Number of times this message is used in the file */
+    H5O_fheap_id_t fheap_id;    /* ID of the OHM in the fractal heap */
+} H5SM_heap_loc_t;
+
 /* Typedef for a SOHM index node */
 typedef struct {
-    uint32_t hash;		/* Hash value for OHM */
-    H5O_fheap_id_t fheap_id;	/* ID of the OHM in the fractal heap */
-    hsize_t ref_count;		/* Number of times this message is used */
+    H5SM_storage_loc_t location;        /* Type of message location */
+    uint32_t hash;		        /* Hash value for encoded OHM */
+    unsigned msg_type_id;               /* Message's type ID */
+    union {
+        H5O_mesg_loc_t mesg_loc;        /* Location of message in object header */
+        H5SM_heap_loc_t heap_loc;       /* Heap ID for message in SOHM heap */
+    } u;
 } H5SM_sohm_t;
 
+/* Types of message indices */
 typedef enum {
     H5SM_BADTYPE = -1,
     H5SM_LIST,    		/* Index is an unsorted list */
     H5SM_BTREE    		/* Index is a sorted B-tree */
 } H5SM_index_type_t;
-
-/* Typedef for searching an index (list or B-tree) */
-typedef struct {
-    H5SM_sohm_t message;                /* The message to find/insert.
-                                         * If the message doesn't yet have a
-                                         * heap ID, the heap ID will be 0. */
-    void *encoding; 		        /* The message encoded, or NULL */
-    size_t encoding_size; 		/* Size of the encoding, or 0 */
-    H5HF_t *fheap;    			/* The heap for this message type, open. */
-} H5SM_mesg_key_t;
 
 /* Typedef for a SOHM index header */
 typedef struct {
@@ -157,6 +172,18 @@ struct H5SM_master_table_t {
     H5SM_index_header_t *indexes;   /* Array of num_indexes indexes */
 };
 
+/* Typedef for searching an index (list or B-tree) */
+typedef struct {
+    H5F_t *file;                        /* File in which sharing is happening */
+    hid_t dxpl_id;                      /* DXPL for sharing messages in heap */
+    H5HF_t *fheap;    			/* The heap for this message type, open. */
+    void *encoding; 		        /* The message encoded, or NULL */
+    size_t encoding_size; 		/* Size of the encoding, or 0 */
+    H5SM_sohm_t message;                /* The message to find/insert.
+                                         * If the message doesn't yet have a
+                                         * heap ID, the heap ID will be 0. */
+} H5SM_mesg_key_t;
+
 /*
  * Data exchange structure to pass through the fractal heap layer for the
  * H5HF_op function when computing a hash value for a message.
@@ -168,6 +195,13 @@ typedef struct {
     /* upward */
     uint32_t    hash;                   /* Hash value */
 } H5SM_fh_ud_gh_t;
+
+/* Typedef to increment a reference count in the B-tree */
+typedef struct {
+    H5SM_mesg_key_t *key;       /* IN: key for message being incremented */
+    H5O_fheap_id_t fheap_id;    /* OUT: fheap ID of record */
+    hid_t dxpl_id;
+} H5SM_incr_ref_opdata;
 
 
 /****************************/
@@ -201,10 +235,6 @@ H5_DLL herr_t H5SM_message_decode(const H5F_t *f, const uint8_t *raw,
  */
 H5_DLL herr_t H5SM_message_compare(const void *rec1,
                                    const void *rec2);
-
-/* H5B2_modify_t callbacks to adjust record's refcount. */
-H5_DLL herr_t H5SM_incr_ref(void *record, void *op_data, hbool_t *changed);
-H5_DLL herr_t H5SM_decr_ref(void *record, void *op_data, hbool_t *changed);
 
 /* H5B2_remove_t callback to add messages to a list index */
 H5_DLL herr_t H5SM_btree_convert_to_list_op(const void * record, void *op_data);

@@ -39,9 +39,11 @@ static void *H5O_layout_copy(const void *_mesg, void *_dest);
 static size_t H5O_layout_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O_layout_reset(void *_mesg);
 static herr_t H5O_layout_free(void *_mesg);
-static herr_t H5O_layout_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg);
+static herr_t H5O_layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
+    void *_mesg);
 static void *H5O_layout_copy_file(H5F_t *file_src, void *mesg_src,
-    H5F_t *file_dst, hid_t dxpl_id, H5O_copy_t *cpy_info, void *udata);
+    H5F_t *file_dst, hbool_t *recompute_size, H5O_copy_t *cpy_info,
+    void *udata, hid_t dxpl_id);
 static herr_t H5O_layout_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			       int indent, int fwidth);
 
@@ -50,7 +52,7 @@ const H5O_msg_class_t H5O_MSG_LAYOUT[1] = {{
     H5O_LAYOUT_ID,          	/*message id number             */
     "layout",               	/*message name for debugging    */
     sizeof(H5O_layout_t),   	/*native message size           */
-    FALSE,			/* messages are sharable?       */
+    0,				/* messages are sharable?       */
     H5O_layout_decode,      	/*decode message                */
     H5O_layout_encode,      	/*encode message                */
     H5O_layout_copy,        	/*copy the native value         */
@@ -554,9 +556,9 @@ H5O_layout_free (void *_mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_layout_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg)
+H5O_layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh, void *_mesg)
 {
-    const H5O_layout_t *mesg = (const H5O_layout_t *) _mesg;
+    H5O_layout_t *mesg = (H5O_layout_t *) _mesg;
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_layout_delete)
@@ -608,7 +610,8 @@ done:
  */
 static void *
 H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
-    hid_t dxpl_id, H5O_copy_t *cpy_info, void *_udata)
+    hbool_t UNUSED *recompute_size, H5O_copy_t *cpy_info, void *_udata,
+    hid_t dxpl_id)
 {
     H5D_copy_file_ud_t *udata = (H5D_copy_file_ud_t *)_udata;   /* Dataset copying user data */
     H5O_layout_t       *layout_src = (H5O_layout_t *) mesg_src;

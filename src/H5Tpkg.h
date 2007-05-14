@@ -312,7 +312,6 @@ typedef struct H5T_shared_t {
     hsize_t		fo_count; /* number of references to this file object */
     H5T_state_t		state;	/*current state of the type		     */
     H5T_class_t		type;	/*which class of type is this?		     */
-    H5F_t		*sh_file;/*file pointer if this is a shared type     */
     size_t		size;	/*total size of an instance of this type     */
     hbool_t		force_conv;/* Set if this type always needs to be converted and H5T_conv_noop cannot be called */
     struct H5T_t	*parent;/*parent type for derived datatypes	     */
@@ -330,6 +329,7 @@ struct H5T_t {
     H5O_shared_t    sh_loc;     /* Shared message info (must be first) */
 
     H5T_shared_t   *shared;     /* all other information */
+    H5O_loc_t       oloc;       /* Object location, if the type is a named type */
     H5G_name_t      path;       /* group hier. path if the type is a named type */
 };
 

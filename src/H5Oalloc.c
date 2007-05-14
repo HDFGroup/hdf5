@@ -1053,7 +1053,7 @@ H5O_release_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_mesg_t *mesg,
     /* Check if we should operate on the message */
     if(adj_link) {
         /* Free any space referred to in the file from this message */
-        if(H5O_delete_mesg(f, dxpl_id, mesg) < 0)
+        if(H5O_delete_mesg(f, dxpl_id, oh, mesg) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete file space for object header message")
     } /* end if */
 

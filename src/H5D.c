@@ -65,6 +65,9 @@ typedef struct {
 /* General stuff */
 static herr_t H5D_init_storage(H5D_t *dataset, hbool_t full_overwrite, hid_t dxpl_id);
 static H5D_shared_t *H5D_new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type);
+static herr_t H5D_init_type(H5F_t *file, const H5D_t *dset, hid_t type_id,
+    const H5T_t *type);
+static herr_t H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset);
 static herr_t H5D_open_oid(H5D_t *dataset, hid_t dxpl_id);
 static herr_t H5D_get_space_status(H5D_t *dset, H5D_space_status_t *allocation, hid_t dxpl_id);
 static hsize_t H5D_get_storage_size(H5D_t *dset, hid_t dxpl_id);
@@ -73,7 +76,6 @@ static herr_t H5D_iterate(void *buf, hid_t type_id, H5S_t *space,
     H5D_operator_t op, void *operator_data);
 static herr_t H5D_extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
 static herr_t H5D_set_extent(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
-static herr_t H5D_init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type);
 
 
 /*********************/
@@ -1008,7 +1010,7 @@ H5D_init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type)
     htri_t immutable;                   /* Flag whether the type is immutable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_init_type, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5D_init_type)
 
     /* Sanity checking */
     HDassert(file);
@@ -1079,7 +1081,7 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
     hbool_t             fill_changed = FALSE;      /* Flag indicating the fill value was changed */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_update_oh_info, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5D_update_oh_info)
 
     /* Sanity checking */
     HDassert(file);
@@ -1160,11 +1162,20 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
     if(H5O_msg_append(file, dxpl_id, oh, H5O_FILL_NEW_ID, H5O_MSG_FLAG_CONSTANT, 0, fill_prop) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update new fill value header message")
 
-    /* If there is valid information for the old fill value struct, update it */
+    /* If there is valid information for the old fill value struct, add it */
     /* (only if we aren't trying to write the latest version of the file format) */
     if(fill_prop->buf && !use_latest_format) {
+        H5O_fill_t old_fill_prop;       /* Copy of fill value property, for writing as "old" fill value */
+
+        /* Shallow copy the fill value property */
+        /* (we only want to make certain that the shared component isnt' modified) */
+        HDmemcpy(&old_fill_prop, fill_prop, sizeof(old_fill_prop));
+
+        /* Reset shared component info */
+        H5O_msg_reset_share(H5O_FILL_ID, &old_fill_prop);
+
         /* Write old fill value */
-        if(H5O_msg_append(file, dxpl_id, oh, H5O_FILL_ID, H5O_MSG_FLAG_CONSTANT, 0, fill_prop) < 0)
+        if(H5O_msg_append(file, dxpl_id, oh, H5O_FILL_ID, H5O_MSG_FLAG_CONSTANT, 0, &old_fill_prop) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update old fill value header message")
     } /* end if */
 

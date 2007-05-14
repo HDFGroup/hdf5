@@ -406,7 +406,7 @@ static H5T_t *H5T_decode(const unsigned char *buf);
 
 /* Define a macro for common code for all newly allocate datatypes */
 #define H5T_INIT_TYPE_ALLOC_COMMON(TYPE) {				      \
-    dt->sh_loc.flags = H5O_NOT_SHARED;					      \
+    dt->sh_loc.type = H5O_SHARE_TYPE_UNSHARED;				      \
     dt->shared->type = TYPE;							      \
 }
 
@@ -3005,7 +3005,7 @@ H5T_create(H5T_class_t type, size_t size)
     dt->shared->size = size;
 
     /* Set return value */
-    ret_value=dt;
+    ret_value = dt;
 
 done:
     if(ret_value==NULL) {
@@ -3107,22 +3107,22 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
              * Return a transient type (locked or unlocked) or an opened named
              * type.  Immutable transient types are degraded to read-only.
              */
-            if(old_dt->sh_loc.flags & H5O_COMMITTED_FLAG) {
+            if(old_dt->sh_loc.type == H5O_SHARE_TYPE_COMMITTED) {
                 /* Check if the object is already open */
-                if((reopened_fo = H5FO_opened(old_dt->sh_loc.u.oloc.file, old_dt->sh_loc.u.oloc.addr)) == NULL) {
+                if((reopened_fo = H5FO_opened(old_dt->sh_loc.file, old_dt->sh_loc.u.loc.oh_addr)) == NULL) {
                     /* Clear any errors from H5FO_opened() */
                     H5E_clear_stack(NULL);
 
                     /* Open named datatype again */
-                    if(H5O_open(&(old_dt->sh_loc.u.oloc)) < 0)
+                    if(H5O_open(&old_dt->oloc) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to reopen named data type");
 
                     /* Insert opened named datatype into opened object list for the file */
-                    if(H5FO_insert(old_dt->sh_loc.u.oloc.file, old_dt->sh_loc.u.oloc.addr, new_dt->shared, FALSE)<0)
+                    if(H5FO_insert(old_dt->sh_loc.file, old_dt->sh_loc.u.loc.oh_addr, new_dt->shared, FALSE)<0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, NULL, "can't insert datatype into list of open objects")
 
                     /* Increment object count for the object in the top file */
-                    if(H5FO_top_incr(old_dt->sh_loc.u.oloc.file, old_dt->sh_loc.u.oloc.addr) < 0)
+                    if(H5FO_top_incr(old_dt->sh_loc.file, old_dt->sh_loc.u.loc.oh_addr) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINC, NULL, "can't increment object count")
 
                     new_dt->shared->fo_count = 1;
@@ -3136,14 +3136,14 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
                     reopened_fo->fo_count++;
 
                     /* Check if the object has been opened through the top file yet */
-                    if(H5FO_top_count(old_dt->sh_loc.u.oloc.file, old_dt->sh_loc.u.oloc.addr) == 0) {
+                    if(H5FO_top_count(old_dt->sh_loc.file, old_dt->sh_loc.u.loc.oh_addr) == 0) {
                         /* Open the object through this top file */
-                        if(H5O_open(&(old_dt->sh_loc.u.oloc)) < 0)
+                        if(H5O_open(&old_dt->oloc) < 0)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to open object header")
                     } /* end if */
 
                     /* Increment object count for the object in the top file */
-                    if(H5FO_top_incr(old_dt->sh_loc.u.oloc.file, old_dt->sh_loc.u.oloc.addr) < 0)
+                    if(H5FO_top_incr(old_dt->sh_loc.file, old_dt->sh_loc.u.loc.oh_addr) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINC, NULL, "can't increment object count")
                 } /* end else */
                 new_dt->shared->state = H5T_STATE_OPEN;
@@ -3259,28 +3259,32 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
             break;
     } /* end switch */
 
-    /* Set the path name if the original type was a named type and the new
-     * type is also named.
+    /* Set the cached location & name path if the original type was a named
+     * type and the new type is also named.
      */
-    if(H5G_name_reset(&(new_dt->path)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to reset path")
+    if(H5O_loc_reset(&new_dt->oloc) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRESET, NULL, "unable to initialize location")
+    if(H5G_name_reset(&new_dt->path) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to reset path")
 
     if(new_dt->shared->state == H5T_STATE_NAMED || new_dt->shared->state == H5T_STATE_OPEN) {
+        if(H5O_loc_copy(&(new_dt->oloc), &(old_dt->oloc), H5_COPY_DEEP) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy object location")
         if(H5G_name_copy(&(new_dt->path), &(old_dt->path), H5_COPY_DEEP) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to copy path")
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to copy path")
     } /* end if */
 
     /* Copy shared location information if the new type is named or if it is
      * shared in the heap.
      */
-    if(old_dt->sh_loc.flags & H5O_SHARED_IN_HEAP_FLAG ||
-            new_dt->shared->state == H5T_STATE_NAMED || new_dt->shared->state == H5T_STATE_OPEN)
-    {
-        if(H5O_shared_copy(&(new_dt->sh_loc), &(old_dt->sh_loc)) < 0)
+    if(old_dt->sh_loc.type == H5O_SHARE_TYPE_SOHM ||
+            new_dt->shared->state == H5T_STATE_NAMED || new_dt->shared->state == H5T_STATE_OPEN) {
+        if(H5O_set_shared(&(new_dt->sh_loc), &(old_dt->sh_loc)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy shared information")
     } /* end if */
     else
-        new_dt->sh_loc.flags = H5O_NOT_SHARED;
+        /* Reset shared component info */
+        H5O_msg_reset_share(H5O_DTYPE_ID, new_dt);
 
     /* Set return value */
     ret_value = new_dt;
@@ -3368,8 +3372,9 @@ H5T_alloc(void)
     /* Allocate & initialize new datatype info */
     if(NULL == (dt = H5FL_CALLOC(H5T_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    H5O_loc_reset(&(dt->oloc));
     H5G_name_reset(&(dt->path));
-    dt->sh_loc.flags = H5O_NOT_SHARED;
+    H5O_msg_reset_share(H5O_DTYPE_ID, dt);
 
     if(NULL == (dt->shared = H5FL_CALLOC(H5T_shared_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
@@ -3378,13 +3383,12 @@ H5T_alloc(void)
     ret_value = dt;
 
 done:
-    if(ret_value == NULL) {
+    if(ret_value == NULL)
         if(dt != NULL) {
             if(dt->shared != NULL)
                 H5FL_FREE(H5T_shared_t, dt->shared);
             H5FL_FREE(H5T_t, dt);
         } /* end if */
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_alloc() */
@@ -3419,15 +3423,16 @@ H5T_free(H5T_t *dt)
      * remove from the list of open objects in the file.
      */
     if(H5T_STATE_OPEN == dt->shared->state) {
-        HDassert(dt->sh_loc.flags & H5O_COMMITTED_FLAG);
-        HDassert(H5F_addr_defined(dt->sh_loc.u.oloc.addr));
+        HDassert(dt->sh_loc.type == H5O_SHARE_TYPE_COMMITTED);
+        HDassert(H5F_addr_defined(dt->sh_loc.u.loc.oh_addr));
+        HDassert(H5F_addr_defined(dt->oloc.addr));
 
         /* Remove the datatype from the list of opened objects in the file */
-        if(H5FO_top_decr(dt->sh_loc.u.oloc.file, dt->sh_loc.u.oloc.addr) < 0)
+        if(H5FO_top_decr(dt->sh_loc.file, dt->sh_loc.u.loc.oh_addr) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't decrement count for object")
-        if(H5FO_delete(dt->sh_loc.u.oloc.file, H5AC_dxpl_id, dt->sh_loc.u.oloc.addr) < 0)
+        if(H5FO_delete(dt->sh_loc.file, H5AC_dxpl_id, dt->sh_loc.u.loc.oh_addr) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't remove datatype from list of open objects")
-        if(H5O_close(&(dt->sh_loc.u.oloc)) < 0)
+        if(H5O_close(&dt->oloc) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to close data type object header")
         dt->shared->state = H5T_STATE_NAMED;
     } /* end if */
@@ -3524,16 +3529,18 @@ H5T_close(H5T_t *dt)
          * remove from the list of open objects in the file.
          */
         if(H5T_STATE_OPEN == dt->shared->state) {
-            HDassert(dt->sh_loc.flags & H5O_COMMITTED_FLAG);
+            HDassert(dt->sh_loc.type == H5O_SHARE_TYPE_COMMITTED);
 
             /* Decrement the ref. count for this object in the top file */
-            if(H5FO_top_decr(dt->sh_loc.u.oloc.file, dt->sh_loc.u.oloc.addr) < 0)
+            if(H5FO_top_decr(dt->sh_loc.file, dt->sh_loc.u.loc.oh_addr) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't decrement count for object")
 
             /* Check reference count for this object in the top file */
-            if(H5FO_top_count(dt->sh_loc.u.oloc.file, dt->sh_loc.u.oloc.addr) == 0)
-                if(H5O_close(&(dt->sh_loc.u.oloc)) < 0)
+            if(H5FO_top_count(dt->sh_loc.file, dt->sh_loc.u.loc.oh_addr) == 0) {
+                /* Close object location for named datatype */
+                if(H5O_close(&dt->oloc) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to close")
+            } /* end if */
         } /* end if */
 
         /* Free the group hier. path since we're not calling H5T_free*/
@@ -4652,8 +4659,8 @@ H5T_oloc(H5T_t *dt)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "not a named datatype")
         case H5T_STATE_NAMED:
         case H5T_STATE_OPEN:
-            HDassert(dt->sh_loc.flags & H5O_COMMITTED_FLAG);
-            ret_value = &(dt->sh_loc.u.oloc);
+            HDassert(dt->sh_loc.type == H5O_SHARE_TYPE_COMMITTED);
+            ret_value = &dt->oloc;
             break;
     } /* end switch */
 

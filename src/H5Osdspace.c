@@ -60,7 +60,7 @@ const H5O_msg_class_t H5O_MSG_SDSPACE[1] = {{
     H5O_SDSPACE_ID,	    	/* message id number		    	*/
     "dataspace",	    	/* message name for debugging	   	*/
     sizeof(H5S_extent_t),   	/* native message size		    	*/
-    TRUE,			/* messages are sharable?       */
+    H5O_SHARE_IS_SHARABLE|H5O_SHARE_IN_OHDR,	/* messages are sharable?       */
     H5O_sdspace_shared_decode,	/* decode message			*/
     H5O_sdspace_shared_encode,	/* encode message			*/
     H5O_sdspace_copy,	    	/* copy the native value		*/
@@ -69,7 +69,7 @@ const H5O_msg_class_t H5O_MSG_SDSPACE[1] = {{
     H5O_sdspace_free,		/* free method				*/
     H5O_sdspace_shared_delete,	/* file delete method		*/
     H5O_sdspace_shared_link,	/* link method			*/
-    H5O_shared_copy,		/* set share method			*/
+    NULL,			/* set share method		*/
     NULL,		    	/*can share method		*/
     H5O_sdspace_pre_copy_file,	/* pre copy native value to file */
     H5O_sdspace_shared_copy_file,/* copy native value to file    */
@@ -316,11 +316,6 @@ H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *_mesg)
  DESCRIPTION
 	This function copies a native (memory) simple dimensionality message,
     allocating the destination structure if necessary.
- MODIFICATIONS
-    Raymond Lu
-    April 8, 2004
-    Changed operation on H5S_simple_t to H5S_extent_t.
-
 --------------------------------------------------------------------------*/
 static void *
 H5O_sdspace_copy(const void *mesg, void *dest)
@@ -332,20 +327,20 @@ H5O_sdspace_copy(const void *mesg, void *dest)
     FUNC_ENTER_NOAPI_NOINIT(H5O_sdspace_copy)
 
     /* check args */
-    assert(src);
-    if (!dst && NULL==(dst = H5FL_MALLOC(H5S_extent_t)))
+    HDassert(src);
+    if(!dst && NULL == (dst = H5FL_MALLOC(H5S_extent_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Copy extent information */
-    if(H5S_extent_copy(dst,src)<0)
+    if(H5S_extent_copy(dst, src) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy extent")
 
     /* Set return value */
-    ret_value=dst;
+    ret_value = dst;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5O_sdspace_copy() */
 
 
 /*--------------------------------------------------------------------------

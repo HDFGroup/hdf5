@@ -73,7 +73,8 @@ typedef struct H5O_t H5O_t;
 #define H5O_MSG_FLAG_FAIL_IF_UNKNOWN 0x08u
 #define H5O_MSG_FLAG_MARK_IF_UNKNOWN 0x10u
 #define H5O_MSG_FLAG_WAS_UNKNOWN 0x20u
-#define H5O_MSG_FLAG_BITS	(H5O_MSG_FLAG_CONSTANT|H5O_MSG_FLAG_SHARED|H5O_MSG_FLAG_DONTSHARE|H5O_MSG_FLAG_FAIL_IF_UNKNOWN|H5O_MSG_FLAG_MARK_IF_UNKNOWN|H5O_MSG_FLAG_WAS_UNKNOWN)
+#define H5O_MSG_FLAG_SHAREABLE  0x40u
+#define H5O_MSG_FLAG_BITS	(H5O_MSG_FLAG_CONSTANT|H5O_MSG_FLAG_SHARED|H5O_MSG_FLAG_DONTSHARE|H5O_MSG_FLAG_FAIL_IF_UNKNOWN|H5O_MSG_FLAG_MARK_IF_UNKNOWN|H5O_MSG_FLAG_WAS_UNKNOWN|H5O_MSG_FLAG_SHAREABLE)
 
 /* Flags for updating messages */
 #define H5O_UPDATE_TIME         0x01u
@@ -92,6 +93,22 @@ typedef struct H5O_t H5O_t;
 
 /* ========= Object Copy properties ============ */
 #define H5O_CPY_OPTION_NAME 		"copy object"           /* Copy options */
+
+/* If the module using this macro is allowed access to the private variables, access them directly */
+#ifdef H5O_PACKAGE
+#define H5O_OH_GET_ADDR(O)    ((O)->chunk[0].addr)
+#else /* H5O_PACKAGE */
+#define H5O_OH_GET_ADDR(O)    (H5O_get_oh_addr(O))
+#endif /* H5O_PACKAGE */
+
+/* Set the fields in a shared message structure */
+#define H5O_UPDATE_SHARED(SH_MESG, SH_TYPE, F, MSG_TYPE, CRT_IDX, OH_ADDR)    \
+    (SH_MESG)->type = (SH_TYPE);                                              \
+    (SH_MESG)->file = (F);                                                    \
+    (SH_MESG)->msg_type_id = (MSG_TYPE);                                      \
+    (SH_MESG)->u.loc.index = (CRT_IDX);                                       \
+    (SH_MESG)->u.loc.oh_addr = (OH_ADDR);
+
 
 /* Fractal heap ID type for shared message & attribute heap IDs. */
 typedef uint64_t H5O_fheap_id_t;
@@ -145,29 +162,44 @@ typedef struct H5O_copy_t {
                                         /* (this should never exist in a file) */
 
 
-/* Shared object message flags.
+/* Shared object message types.
  * Shared objects can be committed, in which case the shared message contains
  * the location of the object header that holds the message, or shared in the
  * heap, in which case the shared message holds their heap ID.
  */
-#define H5O_NOT_SHARED 0
-#define H5O_SHARED_IN_HEAP_FLAG 0x01
-#define H5O_COMMITTED_FLAG 0x02
+#define H5O_SHARE_TYPE_UNSHARED     0           /* Message is not shared */
+#define H5O_SHARE_TYPE_SOHM         1           /* Message is stored in SOHM heap */
+#define H5O_SHARE_TYPE_COMMITTED    2           /* Message is stored in another object header */
+#define H5O_SHARE_TYPE_HERE         3           /* Message is stored in this object header, but is sharable */
 
-#define H5O_IS_SHARED(F)        (((F) & (H5O_SHARED_IN_HEAP_FLAG | H5O_COMMITTED_FLAG)) ? TRUE : FALSE)
+/* Detect messages that aren't stored in message's object header */
+#define H5O_IS_STORED_SHARED(T) ((((T) == H5O_SHARE_TYPE_SOHM) || ((T) == H5O_SHARE_TYPE_COMMITTED)) ? TRUE : FALSE)
+
+/* Detect shared messages that are "tracked" in some other location */
+#define H5O_IS_TRACKED_SHARED(T) ((T) > 0)
+
+
+/* Specify the object header address and index needed
+ *      to locate a message in another object header.
+ */
+typedef struct H5O_mesg_loc_t {
+    H5O_msg_crt_idx_t index;            /* index within object header   */
+    haddr_t oh_addr;                    /* address of object header    */
+} H5O_mesg_loc_t;
+
 
 /*
  * Shared object header message info.
- * This needs to go first because other messages can be shared and
- * include a H5O_shared_t struct
- * The oloc shouldn't ever be holding open a file; if it ever is (if
- * H5O_loc_hold_file was ever called on it) it won't be closed properly,
- * since shared messages don't close their olocs.
+ *
+ * (This structure is used in other messages that can be shared and will
+ * include a H5O_shared_t struct as the first field in their "native" type)
  */
 typedef struct H5O_shared_t {
-    unsigned flags;             /* flags describing how message is shared */
+    unsigned type;                      /* Type describing how message is shared */
+    H5F_t *file;                        /* File that message is located within */
+    unsigned msg_type_id;               /* Message's type ID */
     union {
-        H5O_loc_t	oloc;		/* object location info		     */
+        H5O_mesg_loc_t	loc;		/* Object location info		     */
         H5O_fheap_id_t  heap_id;        /* ID within the SOHM heap           */
     } u;
 } H5O_shared_t;
@@ -486,6 +518,7 @@ H5_DLL herr_t H5O_get_create_plist(const H5O_loc_t *loc, hid_t dxpl_id, struct H
 H5_DLL hid_t H5O_open_name(H5G_loc_t *loc, const char *name, hid_t lapl_id);
 H5_DLL herr_t H5O_get_nlinks(const H5O_loc_t *loc, hid_t dxpl_id, hsize_t *nlinks);
 H5_DLL void *H5O_obj_create(H5F_t *f, H5O_type_t obj_type, void *crt_info, H5G_loc_t *obj_loc, hid_t dxpl_id);
+H5_DLL haddr_t H5O_get_oh_addr(const H5O_t *oh);
 
 /* Object header message routines */
 H5_DLL herr_t H5O_msg_create(const H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags,
@@ -515,13 +548,18 @@ H5_DLL size_t H5O_msg_size_oh(const H5F_t *f, const H5O_t *oh, unsigned type_id,
     const void *mesg, size_t extra_raw);
 H5_DLL htri_t H5O_msg_is_shared(unsigned type_id, const void *mesg);
 H5_DLL htri_t H5O_msg_can_share(unsigned type_id, const void *mesg);
-H5_DLL herr_t H5O_msg_set_share(unsigned type_id, H5O_shared_t *share, void *mesg);
+H5_DLL htri_t H5O_msg_can_share_in_ohdr(unsigned type_id);
+H5_DLL herr_t H5O_msg_set_share(unsigned type_id, const H5O_shared_t *share,
+    void *mesg);
 H5_DLL herr_t H5O_msg_reset_share(unsigned type_id, void *mesg);
+H5_DLL herr_t H5O_msg_get_crt_index(unsigned type_id, const void *mesg,
+    H5O_msg_crt_idx_t *crt_idx);
 H5_DLL herr_t H5O_msg_encode(H5F_t *f, unsigned type_id, hbool_t disable_shared,
     unsigned char *buf, const void *obj);
 H5_DLL void* H5O_msg_decode(H5F_t *f, hid_t dxpl_id, unsigned type_id, 
     const unsigned char *buf);
-H5_DLL herr_t H5O_msg_delete(H5F_t *f, hid_t dxpl_id, unsigned type_id, const void *mesg);
+H5_DLL herr_t H5O_msg_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
+    unsigned type_id, void *mesg);
 
 /* Object copying routines */
 H5_DLL herr_t H5O_copy_header_map(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
@@ -552,10 +590,11 @@ H5_DLL herr_t H5O_fill_reset_dyn(H5O_fill_t *fill);
 H5_DLL herr_t H5O_fill_convert(H5O_fill_t *fill, H5T_t *type, hbool_t *fill_changed, hid_t dxpl_id);
 
 /* Link operators */
-H5_DLL herr_t H5O_link_delete(H5F_t *f, hid_t dxpl_id, const void *_mesg);
+H5_DLL herr_t H5O_link_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
+    void *_mesg);
 
 /* Shared message operators */
-H5_DLL herr_t H5O_shared_copy(void *dst, const H5O_shared_t *src);
+H5_DLL herr_t H5O_set_shared(H5O_shared_t *dst, const H5O_shared_t *src);
 
 /* Attribute operators */
 H5_DLL hsize_t H5O_attr_count_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh);
