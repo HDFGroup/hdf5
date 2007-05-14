@@ -464,6 +464,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name testhdf5_cppdll
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name ohdr_gentst
+    End Project Dependency
 }}}
 
 ###############################################################################
