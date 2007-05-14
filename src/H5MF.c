@@ -216,6 +216,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5MF_alloc_overflow
  *
@@ -227,10 +228,9 @@ done:
  *          1 if overflow would result (the allocation should not be allowed)
  *
  * Programmer:	James Laird
- *				Nat Furrer
+ *		Nat Furrer
  *              Tuesday, June 1, 2004
  *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 hbool_t
@@ -267,9 +267,9 @@ H5MF_alloc_overflow(H5F_t *f, hsize_t size)
         space_needed = space_needed >> 16;
 
     if(space_needed != 0)
-        ret_value=TRUE;
+        ret_value = TRUE;
     else
-        ret_value=FALSE;
+        ret_value = FALSE;
 
     FUNC_LEAVE_NOAPI(ret_value)
 }

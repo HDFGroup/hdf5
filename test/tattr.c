@@ -6988,7 +6988,7 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
 
     /* Create "big" dataspace for "large" attributes */
     big_sid = H5Screate_simple(SPACE1_RANK, big_dims, NULL);
-    CHECK(sid, FAIL, "H5Screate_simple");
+    CHECK(big_sid, FAIL, "H5Screate_simple");
 
     /* Loop over type of shared components */
     for(test_shared = 0; test_shared < 3; test_shared++) {

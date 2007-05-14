@@ -160,7 +160,7 @@ typedef struct {
 
 /* Main dataspace structure (typedef'd in H5Sprivate.h) */
 struct H5S_t {
-    H5S_extent_t extent;                /* Dataspace extent */
+    H5S_extent_t extent;                /* Dataspace extent (must stay first) */
     H5S_select_t select;		/* Dataspace selection */
 };
 

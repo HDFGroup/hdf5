@@ -282,7 +282,7 @@ H5HF_man_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
     /* Skip over the flag byte */
     id++;
 
-    /* Decode the object offset within the heap & it's length */
+    /* Decode the object offset within the heap & its length */
 #ifdef QAK
 HDfprintf(stderr, "%s: hdr->heap_off_size = %u, hdr->heap_len_size = %u\n", FUNC, (unsigned)hdr->heap_off_size, (unsigned)hdr->heap_len_size);
 #endif /* QAK */

@@ -32,6 +32,8 @@
 #include "H5Spkg.h"		/* Dataspaces 				*/
 
 #include "H5Dprivate.h"         /* Datasets (for EFL property name)     */
+#include "H5Fprivate.h"		/* File access				*/
+#include "H5Iprivate.h"		/* IDs			  		*/
 
 
 const char *FILENAME[] = {
@@ -1148,7 +1150,9 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
 
     /* Release raw data buffers */
     HDfree(rbuf);
+    rbuf = NULL;
     HDfree(rbuf2);
+    rbuf2 = NULL;
 
     /* close the source dataspace */
     if(H5Sclose(sid) < 0) TEST_ERROR
@@ -3406,6 +3410,11 @@ test_copy_dataset_attr_named_dtype(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 
     /* close the SRC file */
     if(H5Fclose(fid_src) < 0) TEST_ERROR
+
+
+    /* Check that all file IDs have been closed */
+    if(H5I_nmembers(H5I_FILE) != 0) TEST_ERROR
+    if(H5F_sfile_assert_num(0) != 0) TEST_ERROR
 
 
     /* open the source file with read-only */

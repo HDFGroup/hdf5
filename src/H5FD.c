@@ -1880,6 +1880,9 @@ HDfprintf(stderr, "%s: type = %u, size = %Hu\n", FUNC, (unsigned)type, size);
                 }
             } else {
                 /* Allocate another metadata block */
+#ifdef H5FD_ALLOC_DEBUG
+HDfprintf(stderr, "%s: Allocating 'metadata' block\n", FUNC);
+#endif /* H5FD_ALLOC_DEBUG */
                 if(HADDR_UNDEF==(new_meta = H5FD_real_alloc(file, H5FD_MEM_DEFAULT, dxpl_id,
                                            file->def_meta_block_size)))
                     HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, HADDR_UNDEF, "can't allocate metadata block")
@@ -1996,6 +1999,9 @@ HDfprintf(stderr, "%s: type = %u, size = %Hu\n", FUNC, (unsigned)type, size);
                 }
             } else {
                 /* Allocate another "small data" block */
+#ifdef H5FD_ALLOC_DEBUG
+HDfprintf(stderr, "%s: Allocating 'small data' block\n", FUNC);
+#endif /* H5FD_ALLOC_DEBUG */
                 if(HADDR_UNDEF==(new_data = H5FD_real_alloc(file, type, dxpl_id,
                                            file->def_sdata_block_size)))
                     HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, HADDR_UNDEF, "can't allocate raw data block")

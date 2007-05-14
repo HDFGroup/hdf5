@@ -156,6 +156,9 @@ H5HF_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
     H5HF_t *ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI(H5HF_create, NULL)
+#ifdef QAK
+HDfprintf(stderr, "%s: Called\n", FUNC);
+#endif /* QAK */
 
     /*
      * Check arguments.
@@ -579,6 +582,9 @@ H5HF_write(H5HF_t *fh, hid_t dxpl_id, void *_id, hbool_t UNUSED *id_changed,
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5HF_write, FAIL)
+#ifdef QAK
+HDfprintf(stderr, "%s: Called\n", FUNC);
+#endif /* QAK */
 
     /*
      * Check arguments.
@@ -716,6 +722,9 @@ H5HF_remove(H5HF_t *fh, hid_t dxpl_id, const void *_id)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5HF_remove, FAIL)
+#ifdef QAK
+HDfprintf(stderr, "%s: Called\n", FUNC);
+#endif /* QAK */
 
     /*
      * Check arguments.

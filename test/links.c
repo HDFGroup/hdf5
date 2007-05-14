@@ -3390,13 +3390,15 @@ external_link_closing(hid_t fapl, hbool_t new_format)
 
     /* Test move */
     if(H5Lmove(fid1, "elink/elink/elink/group1", fid1,
-      "elink/elink/elink/group1_moved", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+        "elink/elink/elink/group1_moved", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
     /* Open file 4 so we can do some fancy things */
     if((fid4 = H5Fopen(filename4, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
     if(H5Lmove(fid1, "elink/elink/elink/type1", fid4,
-      "type1_moved", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+        "type1_moved", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
     if(H5Lmove(fid4, "dataset1", fid1,
-      "elink/elink/elink/dataset1_moved", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+        "elink/elink/elink/dataset1_moved", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
     /* Close file 4 again */
     if(H5Fclose(fid4) < 0) TEST_ERROR
 
@@ -3526,7 +3528,7 @@ error:
         H5Fclose(fid1);
     } H5E_END_TRY;
     return -1;
-}
+} /* external_link_closing() */
 
 
 /*-------------------------------------------------------------------------
