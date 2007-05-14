@@ -136,10 +136,10 @@ typedef struct H5FL_reg_head_t {
 #else /* H5_NO_REG_FREE_LISTS */
 #include "H5MMprivate.h"
 /* Common macro for H5FL_DEFINE & H5FL_DEFINE_STATIC */
-#define H5FL_DEFINE_COMMON(t) int H5FL_REG_NAME(t)
+#define H5FL_DEFINE_COMMON(t) int UNUSED H5FL_REG_NAME(t)
 
 #define H5FL_DEFINE(t)  H5_DLL H5FL_DEFINE_COMMON(t)
-#define H5FL_EXTERN(t)  extern H5_DLL int H5FL_REG_NAME(t)
+#define H5FL_EXTERN(t)  extern H5_DLL H5FL_DEFINE_COMMON(t)
 #define H5FL_DEFINE_STATIC(t)  static H5FL_DEFINE_COMMON(t)
 #define H5FL_MALLOC(t) (t *)H5MM_malloc(sizeof(t))
 #define H5FL_CALLOC(t) (t *)H5MM_calloc(sizeof(t))
