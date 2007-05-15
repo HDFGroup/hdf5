@@ -24,7 +24,7 @@ $ type sys$input
 $!
 $ cobj="h5tools, h5tools_str, h5tools_utils, h5diff, h5diff_array, "+-
         "h5diff_attr, h5diff_dset, h5diff_util, h5trav,"+- 
-        " h5trav_table, h5tools_filters, h5tools_ref, h5tools_type"
+        "h5tools_filters, h5tools_ref, h5tools_type"
 $!
 $ ccc 'cobj 
 $ library/create []libh5tools  'cobj

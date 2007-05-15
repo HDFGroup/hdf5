@@ -49,7 +49,7 @@ $ cobj= "H5, H5checksum, H5dbg, H5system, H5timer, H5trace,"+-
         "H5Obogus, H5Obtreek, H5Odrvinfo, H5Ocache,"+-
         "H5Ocont, H5Ocopy, H5Odbg, H5Odtype, H5Oefl, H5Ofill, H5Oginfo, H5Olayout,"+-
         "H5Olinfo, H5Olink, H5Omessage, H5Oshmesg, H5Omtime"
-$ cobj1= "H5Oname, H5Onull, H5Opline, H5Osdspace, H5Oshared, H5Ostab, H5Otest,"+-
+$ cobj1= "H5Oname, H5Onull, H5Opline, H5Orefcount, H5Osdspace, H5Oshared, H5Ostab, H5Otest, H5Ounknown,"+-
         "H5P, H5Pacpl, H5Pdcpl, H5Pdxpl, H5Pfapl, H5Pfcpl, H5Pfmpl, H5Pgcpl, H5Plapl,"+-
         "H5Pocpl, H5Pocpypl, H5Ptest, H5Pstrcpl, H5Plcpl,"+-
         "H5R, H5RC,"+-
