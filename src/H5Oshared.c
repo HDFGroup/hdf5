@@ -620,7 +620,7 @@ H5O_shared_debug(const H5O_shared_t *mesg, FILE *stream, int indent, int fwidth)
                     "SOHM");
             HDfprintf(stream, "%*s%-*s %016llx\n", indent, "", fwidth,
                     "Heap ID:",
-                    (unsigned long long)mesg->u.heap_id);
+                    (unsigned long_long)mesg->u.heap_id);
             break;
 
         case H5O_SHARE_TYPE_HERE:
