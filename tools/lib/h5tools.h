@@ -45,7 +45,7 @@
 /*
  * Maximum size used in a call to malloc
  */
-#define H5TOOLS_MALLOCSIZE      ((size_t)1024 * 1024 * 1024)
+#define H5TOOLS_MALLOCSIZE      (128 * 1024 * 1024)
 
 /* format for hsize_t */
 #define HSIZE_T_FORMAT   "%"H5_PRINTF_LL_WIDTH"u"
