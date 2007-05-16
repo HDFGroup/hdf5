@@ -59,10 +59,10 @@ New Features
        - h5dump: added support for double long type H5T_NATIVE_LDOUBLE. PVN
           2007/03/13
        - h5dump: added support for binary output, see usage. PVN 2007/03/13
-       - h5repack: added support for reading and comparing by hyperslabs for
+       - h5repack: added support for reading and writing  by hyperslabs for
          large files. PVN - 2007/03/01
        - h5repack: a new option allows the copy using the file type (default)
-         instead of the previous conversion to native type. PVN - 2007/03/01
+          instead of the previous conversion to native type. PVN - 2007/03/01
        - h5repack: output the percentage of compression used. PVN - 2007/03/01
        - h5diff: added support for comparing dataset regions. PVN - 2007/02/20
        - h5diff: added support for reading and comparing by hyperslabs for large files.
