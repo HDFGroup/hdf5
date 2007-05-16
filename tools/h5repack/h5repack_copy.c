@@ -159,6 +159,45 @@ out:
  *  October 2006:  Read/write using the file type by default.
  *                 Read/write by hyperslabs for big datasets.
  *
+ *  A threshold of H5TOOLS_MALLOCSIZE (128 MB) is the limit upon which I/O hyperslab is done
+ *  i.e., if the memory needed to read a dataset is greater than this limit, 
+ *  then hyperslab I/O is done instead of one operation I/O 
+ *  For each dataset, the memory needed is calculated according to
+ *
+ *  memory needed = number of elements * size of each element
+ *
+ *  if the memory needed is lower than H5TOOLS_MALLOCSIZE, then the following operations 
+ *  are done
+ *
+ *  H5Dread( input_dataset )
+ *  H5Dwrite( output_dataset )
+ *
+ *  with all elements in the datasets selected. If the memory needed is greater than 
+ *  H5TOOLS_MALLOCSIZE, then the following operations are done instead:
+ *
+ *  a strip mine is defined for each dimension k (a strip mine is defined as a 
+ *  hyperslab whose size is memory manageable) according to the formula
+ *
+ *  (1) strip_mine_size[k ] = MIN(dimension[k ], H5TOOLS_BUFSIZE / size of memory type)
+ *
+ *  where H5TOOLS_BUFSIZE is a constant currently defined as 1MB. This formula assures 
+ *  that for small datasets (small relative to the H5TOOLS_BUFSIZE constant), the strip 
+ *  mine size k is simply defined as its dimension k, but for larger datasets the 
+ *  hyperslab size is still memory manageable.
+ *  a cycle is done until the number of elements in the dataset is reached. In each 
+ *  iteration, two parameters are defined for the function H5Sselect_hyperslab, 
+ *  the start and size of each hyperslab, according to
+ *
+ *  (2) hyperslab_size [k] = MIN(dimension[k] - hyperslab_offset[k], strip_mine_size [k])
+ *
+ *  where hyperslab_offset [k] is initially set to zero, and later incremented in 
+ *  hyperslab_size[k] offsets. The reason for the operation 
+ *
+ *  dimension[k] - hyperslab_offset[k]
+ *
+ *  in (2) is that, when using the strip mine size, it assures that the "remaining" part 
+ *  of the dataset that does not fill an entire strip mine is processed.
+ *
  *-------------------------------------------------------------------------
  */
 

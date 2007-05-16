@@ -79,7 +79,6 @@ int d_status = EXIT_SUCCESS;
 #define CDIM1   DIM1/2
 #define CDIM2   DIM2/2
 #define RANK    2
-#define GBLL    ((unsigned long_long) 1024*1024*1024)
 
 /*-------------------------------------------------------------------------
  * prototypes
@@ -99,7 +98,7 @@ int make_fletcher32(hid_t loc_id);
 
 int make_all(hid_t loc_id);
 int make_fill(hid_t loc_id);
-int make_big(hid_t loc_id, int set_chunk);
+int make_big(hid_t loc_id);
 int make_testfiles(void);
 void write_dset_in(hid_t loc_id,const char* dset_name,hid_t file_id,int make_diffs );
 void write_attr_in(hid_t loc_id,const char* dset_name,hid_t fid,int make_diffs );
@@ -1333,7 +1332,7 @@ int make_testfiles(void)
  */
  if((loc_id = H5Fcreate(FNAME14,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
   return -1;
- if (make_big(loc_id, 1)<0)
+ if (make_big(loc_id)<0)
   goto out;
  if(H5Fclose(loc_id)<0)
   return -1;
@@ -2219,49 +2218,42 @@ out:
 /*-------------------------------------------------------------------------
  * Function: make_big 
  *
- * Purpose: used in test read by hyperslabs. Can create 1GB datasets, either with 
- *  chunk layout or with contiguous layout, by iterating trough 1MB hyperslabs.
- *  Only 1 hyperslab is written. Only the chunk case is called.
+ * Purpose: used in test read by hyperslabs. Creates a 128MB dataset.
+ *  Only 1 1024Kb hyperslab is written.
  *
  *-------------------------------------------------------------------------
  */
 
-int make_big(hid_t loc_id, int set_chunk)
+int make_big(hid_t loc_id)
 {
  hid_t   did=-1;
  hid_t   f_sid=-1;
  hid_t   m_sid=-1;
  hid_t   tid;
  hid_t   dcpl;
- hsize_t dims[1]={GBLL};               /* dataset dimensions */
- hsize_t hs_size[1]={GBLL/1024};       /* hyperslab dimensions */
- hsize_t chunk_dims[1]={GBLL/1024};    /* chunk dimensions */
- hsize_t hs_start[1];
+ hsize_t dims[1]={ H5TOOLS_MALLOCSIZE + 1}; /* dataset dimensions */
+ hsize_t hs_size[1];                     /* hyperslab dimensions */
+ hsize_t hs_start[1];                    /* hyperslab start */
+ hsize_t chunk_dims[1]={1024};           /* chunk dimensions */
  size_t  size;
- size_t  nelmts=(size_t)GBLL/1024;
+ size_t  nelmts=(size_t)1024;
  signed  char fillvalue=-1;
  signed  char *buf=NULL;
- int     i, j, s;
- char    c;
- char    name[20];
 
- strcpy(name,"conti");
+ /* write one 1024 byte hyperslab */
+ hs_start[0] = 0;
+ hs_size[0]  = 1024;
 
  /* create */ 
  if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
   goto out;
  if (H5Pset_fill_value(dcpl, H5T_NATIVE_SCHAR, &fillvalue)<0)
   goto out;
-
- if (set_chunk)
- {
-  strcpy(name,"chunk");
-  if(H5Pset_chunk(dcpl, 1, chunk_dims)<0)
-   goto out;
- }
+ if(H5Pset_chunk(dcpl, 1, chunk_dims)<0)
+  goto out;
  if ((f_sid = H5Screate_simple(1,dims,NULL))<0)
   goto out;
- if ((did = H5Dcreate(loc_id,name,H5T_NATIVE_SCHAR,f_sid,dcpl))<0)
+ if ((did = H5Dcreate(loc_id,"dset",H5T_NATIVE_SCHAR,f_sid,dcpl))<0)
   goto out;
  if ((m_sid = H5Screate_simple(1, hs_size, hs_size))<0) 
   goto out;
@@ -2270,30 +2262,14 @@ int make_big(hid_t loc_id, int set_chunk)
  if ((size = H5Tget_size(tid))<=0)
   goto out;
  
- /* create a evenly divided buffer from 0 to 127  */
- buf=(signed  char *) HDmalloc((unsigned)(nelmts*size));
- s = 1024 / 127;
- for (i=0, j=0, c=0; i<1024; j++, i++) 
- {
-  if ( j==s)
-  {
-   c++;
-   j=0;
-  };
+ /* initialize buffer to 0  */
+ buf=(signed  char *) calloc( nelmts, size);
+ 
+ if (H5Sselect_hyperslab (f_sid,H5S_SELECT_SET,hs_start,NULL,hs_size, NULL)<0) 
+  goto out;
+ if (H5Dwrite (did,H5T_NATIVE_SCHAR,m_sid,f_sid,H5P_DEFAULT,buf)<0) 
+  goto out;
 
-  HDmemset(buf, c, nelmts);
-  
-  hs_start[0] = i * GBLL/1024;
-  if (H5Sselect_hyperslab (f_sid,H5S_SELECT_SET,hs_start,NULL,hs_size, NULL)<0) 
-   goto out;
-  if (H5Dwrite (did,H5T_NATIVE_SCHAR,m_sid,f_sid,H5P_DEFAULT,buf)<0) 
-   goto out;
-
-  /* write only one hyperslab */
-  if (i==0) 
-   break;
-  
- }
  free(buf);
  buf=NULL;
 
