@@ -64,7 +64,7 @@ hid_t H5TB_create_type(hid_t loc_id,
  *
  * Date: January 17, 2001
  *
- * Comments: The data is packed
+ * Comments: 
  *
  * Modifications:
  *
