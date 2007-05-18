@@ -1573,6 +1573,7 @@
 ./tools/misc/h5redeploy.in
 ./tools/misc/h5repart.c
 
+# test files for h5dump
 ./tools/testfiles/tall-1.ddl
 ./tools/testfiles/tall-2.ddl
 ./tools/testfiles/tall-3.ddl
@@ -1737,8 +1738,8 @@
 ./tools/testfiles/tldouble.h5
 ./tools/testfiles/tbin4.ddl
 ./tools/testfiles/tbin1.ddl
-
-
+# h5dump binary test, h5import configuration
+./tools/testfiles/out3.h5import
 
 # Expected output from h5ls tests
 ./tools/testfiles/nosuchfile.ls
