@@ -47,9 +47,9 @@
  * And now for a couple non-Posix functions...  Watch out for systems that
  * define these in terms of macros.
  */
-#ifdef WIN32
+#ifdef _WIN32
 #define HDstrdup(S)				   _strdup(S)
-#else /* WIN32 */
+#else /* _WIN32 */
 
 #if !defined strdup && !defined H5_HAVE_STRDUP
 extern char *strdup(const char *s);
@@ -57,7 +57,7 @@ extern char *strdup(const char *s);
 
 #define HDstrdup(S)				  strdup(S)
 
-#endif /* WIN32 */
+#endif /* _WIN32 */
 
 #define HDstrcmp(S,T)			  strcmp(S,T)
 #define HDstrlen(S)				  strlen(S)
@@ -74,7 +74,7 @@ extern char *strdup(const char *s);
 #endif
 #define HDclose(F)				  close(F)
 
-#ifdef WIN32
+#ifdef _WIN32
      #ifdef __MWERKS__
         #define HDlseek(F,O,W)  lseek(F,O,W)
      #else /*MSVS */
@@ -95,7 +95,7 @@ extern char *strdup(const char *s);
 
 #define HDread(F,M,Z)		read(F,M,Z)
 
-#ifdef WIN32
+#ifdef _WIN32
      #ifdef __MWERKS__
      #define HDstat(S,B)   stat(S,B)
      #else /*MSVC*/
@@ -105,7 +105,7 @@ extern char *strdup(const char *s);
 #define HDstat(S,B)  stat(S,B)
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
      #ifdef __MWERKS__
      #define HDfstat(F,B)       fstat(F,B)
      typedef struct stat		h5_stat_t;

@@ -45,7 +45,7 @@
 #   include <sys/stat.h>
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 #   include <io.h>
 #	include <fcntl.h>
 #endif
@@ -216,7 +216,7 @@ main (int argc, char *argv[])
     int		dst_is_family;		/*is dst name a family name?	*/
     int		dst_membno=0;		/*destination member number	*/
 
-#if defined(WIN32) && ! defined (__MWERKS__)
+#if defined(_WIN32) && ! defined (__MWERKS__)
     __int64	left_overs=0;		/*amount of zeros left over	*/
     __int64	src_offset=0;		/*offset in source member	*/
     __int64	dst_offset=0;		/*offset in destination member	*/

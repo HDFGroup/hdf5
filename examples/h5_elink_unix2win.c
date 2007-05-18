@@ -142,7 +142,7 @@ unix2win_example(void)
     hid_t	gid = (-1);     		/* Group ID */
 
     /* Create the target file. */
-#ifdef WIN32
+#ifdef _WIN32
     if((fid=H5Fcreate("u2w\\u2w_target.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0) goto error;
 #else
     if((fid=H5Fcreate("u2w/u2w_target.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0) goto error;
@@ -161,7 +161,7 @@ unix2win_example(void)
      * that external links can be traversed.
      */
 
-#ifdef WIN32
+#ifdef _WIN32
     /* Register the elink_unix2win class defined above to replace default
      * external links
      */

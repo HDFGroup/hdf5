@@ -21,7 +21,7 @@
 #ifndef H5API_ADPT_H
 #define H5API_ADPT_H
 
-#if defined(WIN32) || defined(_WIN32)
+#if defined(_WIN32)
 
 #if defined(_HDF5DLL_)
 #pragma warning(disable: 4273)	/* Disable the dll linkage warnings */
@@ -108,7 +108,7 @@
 #define H5_DLLCPP
 #endif /* HDF5_CPPDLL_EXPORTS */
 
-#else /*WIN32*/
+#else /*_WIN32*/
 #define H5_DLL
 #define H5_HLDLL
 #define H5_HLCPPDLL

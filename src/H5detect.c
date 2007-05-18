@@ -1088,7 +1088,7 @@ bit.\n";
      * The FQDM of this host or the empty string.
      */
 #ifdef H5_HAVE_GETHOSTNAME
-#ifdef WIN32
+#ifdef _WIN32
 /* windows DLL cannot recognize gethostname, so turn off on windows for the time being!
     KY, 2003-1-14 */
     host_name[0] = '\0';

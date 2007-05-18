@@ -43,13 +43,13 @@
 
 #include <zlib.h>
 
-#if defined(MSDOS) || defined(OS2) || defined(WIN32)
+#if defined(MSDOS) || defined(OS2) || defined(_WIN32)
 #  include <fcntl.h>
 #  include <io.h>
 #  define SET_BINARY_MODE(file)     setmode(fileno(file), O_BINARY)
 #else
 #  define SET_BINARY_MODE(file)     /* nothing */
-#endif  /* MSDOS || OS2 || WIN32 */
+#endif  /* MSDOS || OS2 || _WIN32 */
 
 #ifdef VMS
 #  define unlink        delete

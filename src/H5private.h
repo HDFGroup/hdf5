@@ -140,12 +140,12 @@
 #endif
 
 
-#ifdef WIN32
+#ifdef _WIN32
 
 #define VC_EXTRALEAN		/*Exclude rarely-used stuff from Windows headers */
 #include <windows.h>
 
-#endif /*WIN32*/
+#endif /*_WIN32*/
 
 /* H5_inline */
 #ifndef H5_inline
@@ -564,11 +564,11 @@ typedef enum {
 #define HDfgetc(F)		fgetc(F)
 #define HDfgetpos(F,P)		fgetpos(F,P)
 #define HDfgets(S,N,F)		fgets(S,N,F)
-#ifdef WIN32
+#ifdef _WIN32
 #define HDfileno(F)		_fileno(F)
-#else /* WIN32 */
+#else /* _WIN32 */
 #define HDfileno(F)		fileno(F)
-#endif /* WIN32 */
+#endif /* _WIN32 */
 #define HDfloor(X)		floor(X)
 #define HDfmod(X,Y)		fmod(X,Y)
 #define HDfopen(S,M)		fopen(S,M)
@@ -604,7 +604,7 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
  * For Unix, if off_t is not 64bit big, try use the pseudo-standard
  * xxx64 versions if available.
  */
-#ifdef WIN32
+#ifdef _WIN32
     #ifdef __MWERKS__
     #define HDfstat(F,B)        fstat(F,B)
     #define HDstat(S,B)   	stat(S,B)
@@ -674,7 +674,7 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDlog(X)		log(X)
 #define HDlog10(X)		log10(X)
 #define HDlongjmp(J,N)		longjmp(J,N)
-#ifdef WIN32
+#ifdef _WIN32
      #ifdef __MWERKS__
         #define HDlseek(F,O,W)  lseek(F,O,W)
      #else /*MSVS */
@@ -701,18 +701,18 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDmemcpy(X,Y,Z)		memcpy((char*)(X),(const char*)(Y),Z)
 #define HDmemmove(X,Y,Z)	memmove((char*)(X),(const char*)(Y),Z)
 /*
- * The (void*) cast just avoids a compiler warning in WIN32
+ * The (void*) cast just avoids a compiler warning in _WIN32
  */
-#ifdef WIN32
+#ifdef _WIN32
 #define HDmemset(X,C,Z)		memset((void*)(X),C,Z)
-#else /* WIN32 */
+#else /* _WIN32 */
 #define HDmemset(X,C,Z)		memset(X,C,Z)
-#endif /* WIN32 */
-#ifdef WIN32
+#endif /* _WIN32 */
+#ifdef _WIN32
 #define HDmkdir(S,M)		_mkdir(S)
-#else /* WIN32 */
+#else /* _WIN32 */
 #define HDmkdir(S,M)		mkdir(S,M)
-#endif /* WIN32 */
+#endif /* _WIN32 */
 #define HDmkfifo(S,M)		mkfifo(S,M)
 #define HDmktime(T)		mktime(T)
 #define HDmodf(X,Y)		modf(X,Y)
@@ -772,7 +772,7 @@ int HDremove_all(const char * fname);
 #define HDsetpgid(P,PG)		setpgid(P,PG)
 #define HDsetsid()		setsid()
 #define HDsetuid(U)		setuid(U)
-#ifndef WIN32
+#ifndef _WIN32
 #define HDsetvbuf(F,S,M,Z)	setvbuf(F,S,M,Z)
 #endif
 #define HDsigaction(N,A)	sigaction(N,A)
@@ -790,7 +790,7 @@ int HDremove_all(const char * fname);
 #define HDsin(X)		sin(X)
 #define HDsinh(X)		sinh(X)
 #define HDsleep(N)		sleep(N)
-#ifdef WIN32
+#ifdef _WIN32
 #define HDsnprintf              _snprintf /*varargs*/
 #else
 #define HDsnprintf		snprintf /*varargs*/
@@ -854,7 +854,7 @@ H5_DLL int64_t HDstrtoll (const char *s, const char **rest, int base);
 #define HDumask(N)		umask(N)
 #define HDuname(S)		uname(S)
 #define HDungetc(C,F)		ungetc(C,F)
-#ifdef WIN32
+#ifdef _WIN32
 #define HDunlink(S)             _unlink(S)
 #else
 #define HDunlink(S)		unlink(S)
@@ -867,7 +867,7 @@ H5_DLL int64_t HDstrtoll (const char *s, const char **rest, int base);
 #define HDvfprintf(F,FMT,A)	vfprintf(F,FMT,A)
 #define HDvprintf(FMT,A)	vprintf(FMT,A)
 #define HDvsprintf(S,FMT,A)	vsprintf(S,FMT,A)
-#ifdef WIN32
+#ifdef _WIN32
 #   define HDvsnprintf(S,N,FMT,A) _vsnprintf(S,N,FMT,A)
 #else
 #   define HDvsnprintf(S,N,FMT,A) vsnprintf(S,N,FMT,A)
@@ -890,9 +890,9 @@ H5_DLL int64_t HDstrtoll (const char *s, const char **rest, int base);
  * And now for a couple non-Posix functions...  Watch out for systems that
  * define these in terms of macros.
  */
-#ifdef WIN32
+#ifdef _WIN32
 #define HDstrdup(S)    _strdup(S)
-#else /* WIN32 */
+#else /* _WIN32 */
 
 #if !defined strdup && !defined H5_HAVE_STRDUP
 extern char *strdup(const char *s);
@@ -900,7 +900,7 @@ extern char *strdup(const char *s);
 
 #define HDstrdup(S)     strdup(S)
 
-#endif /* WIN32 */
+#endif /* _WIN32 */
 
 
 /*

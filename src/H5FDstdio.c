@@ -43,7 +43,7 @@
 #include <unistd.h>
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
 #include <io.h>
 
@@ -91,7 +91,7 @@ typedef struct H5FD_stdio_t {
     haddr_t	pos;			/*current file I/O position	*/
     H5FD_stdio_file_op op;	/*last operation		*/
     unsigned write_access;  /* Flag to indicate the file was opened with write access */
-#ifndef WIN32
+#ifndef _WIN32
     /*
      * On most systems the combination of device and i-node number uniquely
      * identify a file.
@@ -100,7 +100,7 @@ typedef struct H5FD_stdio_t {
     ino_t	inode;			/*file i-node number		*/
 #else
     /*
-     * On WIN32 the low-order word of a unique identifier associated with the
+     * On _WIN32 the low-order word of a unique identifier associated with the
      * file and the volume serial number uniquely identify a file. This number
      * (which, both? -rpm) may change when the system is restarted or when the
      * file is opened. After a process opens a file, the identifier is
@@ -116,7 +116,7 @@ typedef struct H5FD_stdio_t {
 #ifdef H5_HAVE_LSEEK64
 #   define file_offset_t	off64_t
 #   define file_truncate	ftruncate64
-#elif defined (WIN32) && !defined(__MWERKS__)
+#elif defined (_WIN32) && !defined(__MWERKS__)
 # /*MSVC*/
 #   define file_offset_t __int64
 #   define file_truncate	_chsize
@@ -323,13 +323,13 @@ H5FD_stdio_open( const char *name, unsigned flags, hid_t fapl_id,
     unsigned    write_access=0;     /* File opened with write access? */
     H5FD_stdio_t	*file=NULL;
     static const char *func="H5FD_stdio_open";  /* Function Name for error reporting */
-#ifdef WIN32
+#ifdef _WIN32
 	HFILE filehandle;
 	struct _BY_HANDLE_FILE_INFORMATION fileinfo;
         int fd;
-#else /* WIN32 */
+#else /* _WIN32 */
     struct stat		    sb;
-#endif  /* WIN32 */
+#endif  /* _WIN32 */
 
     /* Sanity check on file offsets */
     assert(sizeof(file_offset_t)>=sizeof(size_t));
@@ -393,7 +393,7 @@ H5FD_stdio_open( const char *name, unsigned flags, hid_t fapl_id,
     }
 
     /* The unique key */
-#ifdef WIN32
+#ifdef _WIN32
 /*#error "Needs correct fileindexhi & fileindexlo, code below is from sec2 driver"*/
     fd = _fileno(f);
     filehandle = _get_osfhandle(fd);
@@ -473,7 +473,7 @@ H5FD_stdio_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
-#ifdef WIN32
+#ifdef _WIN32
     if (f1->fileindexhi < f2->fileindexhi) return -1;
     if (f1->fileindexhi > f2->fileindexhi) return 1;
 
@@ -964,7 +964,7 @@ H5FD_stdio_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
     if(file->write_access) {
         /* Makes sure that the true file size is the same as the end-of-address. */
         if (file->eoa!=file->eof) {
-#ifdef WIN32
+#ifdef _WIN32
             int fd=_fileno(file->fp);     /* File descriptor for HDF5 file */
             HFILE filehandle;   /* Windows file handle */
             LARGE_INTEGER li;   /* 64-bit integer for SetFilePointer() call */
@@ -978,12 +978,12 @@ H5FD_stdio_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
             (void)SetFilePointer((HANDLE)filehandle,li.LowPart,&li.HighPart,FILE_BEGIN);
             if(SetEndOfFile((HANDLE)filehandle)==0)
                 H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR, "unable to extend file properly", -1)
-#else /* WIN32 */
+#else /* _WIN32 */
             int fd=fileno(file->fp);     /* File descriptor for HDF5 file */
 
             if (-1==file_truncate(fd, (file_offset_t)file->eoa))
                 H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR, "unable to extend file properly", -1)
-#endif /* WIN32 */
+#endif /* _WIN32 */
 
             /* Update the eof value */
             file->eof = file->eoa;

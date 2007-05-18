@@ -26,11 +26,11 @@
 #include <sys/stat.h>
 #include "h5test.h"
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <process.h>
 #include <direct.h>
 #include <winsock.h>
-#endif  /* WIN32 */
+#endif  /* _WIN32 */
 
 /*
  * Define these environment variables or constants to influence functions in
@@ -632,7 +632,7 @@ void
 h5_show_hostname(void)
 {
     char	hostname[80];
-#ifdef WIN32
+#ifdef _WIN32
      WSADATA wsaData;
      int err;
 #endif
@@ -650,7 +650,7 @@ h5_show_hostname(void)
 	    printf("thread 0.");
     }
 #elif defined(H5_HAVE_THREADSAFE)
-#ifdef WIN32
+#ifdef _WIN32
     printf("some thread: no way to know the thread number from pthread on windows.");
 #else
     printf("thread %d.", (int)pthread_self());
@@ -659,7 +659,7 @@ h5_show_hostname(void)
 #else
     printf("thread 0.");
 #endif
-#ifdef WIN32
+#ifdef _WIN32
 
    err = WSAStartup( MAKEWORD(2,2), &wsaData );
    if ( err != 0 ) {
@@ -689,7 +689,7 @@ h5_show_hostname(void)
 #else
     printf(" gethostname not supported\n");
 #endif
-#ifdef WIN32
+#ifdef _WIN32
     WSACleanup();
 #endif
 }

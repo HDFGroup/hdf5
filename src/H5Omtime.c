@@ -27,7 +27,7 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 
-#if defined (WIN32) && !defined (__MWERKS__)
+#if defined (_WIN32) && !defined (__MWERKS__)
 #include <sys/types.h>
 #include <sys/timeb.h>
 #endif
@@ -247,7 +247,7 @@ H5O_mtime_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_fla
 
 	the_time -= tz.tz_minuteswest * 60 - (tm.tm_isdst ? 3600 : 0);
     }
-#elif defined (WIN32)
+#elif defined (_WIN32)
   #if !defined (__MWERKS__) /* MSVC */
     {
      struct timeb timebuffer;
@@ -264,7 +264,7 @@ H5O_mtime_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_fla
     ;
 
   #endif /*__MWERKS__*/
-#else /* WIN32 */
+#else /* _WIN32 */
     /*
      * The catch-all.  If we can't convert a character string universal
      * coordinated time to a time_t value reliably then we can't decode the

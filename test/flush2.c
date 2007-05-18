@@ -197,7 +197,7 @@ main(void)
 	    PASSED()
 	else
 	{
-#if defined WIN32 && defined _HDF5USEDLL_
+#if defined _WIN32 && defined _HDF5USEDLL_
 	SKIPPED();
 	puts("   DLL will flush the file even when calling _exit, skip this test temporarily");
 
@@ -219,7 +219,7 @@ main(void)
 	    PASSED()
 	else
 	{
-#if defined WIN32 && defined _HDF5USEDLL_
+#if defined _WIN32 && defined _HDF5USEDLL_
 	SKIPPED();
 	puts("   DLL will flush the file even when calling _exit, skip this test temporarily");
 

@@ -95,7 +95,7 @@ typedef struct H5FD_log_t {
     size_t  iosize;         /* Size of I/O information buffers */
     FILE   *logfp;          /* Log file pointer */
     H5FD_log_fapl_t fa;	/*driver-specific file access properties*/
-#ifndef WIN32
+#ifndef _WIN32
     /*
      * On most systems the combination of device and i-node number uniquely
      * identify a file.
@@ -104,7 +104,7 @@ typedef struct H5FD_log_t {
     ino_t	inode;			/*file i-node number		*/
 #else
     /*
-     * On WIN32 the low-order word of a unique identifier associated with the
+     * On _WIN32 the low-order word of a unique identifier associated with the
      * file and the volume serial number uniquely identify a file. This number
      * (which, both? -rpm) may change when the system is restarted or when the
      * file is opened. After a process opens a file, the identifier is
@@ -134,7 +134,7 @@ typedef struct H5FD_log_t {
 #ifdef H5_HAVE_LSEEK64
 #   define file_offset_t	off64_t
 #   define file_seek		lseek64
-#elif defined (WIN32)
+#elif defined (_WIN32)
 #   ifdef __MWERKS__
 #       define file_offset_t off_t
 #       define file_seek lseek
@@ -502,7 +502,7 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id,
     int		fd=(-1);
     H5FD_log_t	*file=NULL;
     H5FD_log_fapl_t	*fa;     /* File access property list information */
-#ifdef WIN32
+#ifdef _WIN32
     HFILE filehandle;
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
 #endif
@@ -545,7 +545,7 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id,
     H5_ASSIGN_OVERFLOW(file->eof,sb.st_size,h5_stat_size_t,haddr_t);
     file->pos = HADDR_UNDEF;
     file->op = OP_UNKNOWN;
-#ifdef WIN32
+#ifdef _WIN32
     filehandle = _get_osfhandle(fd);
     (void)GetFileInformationByHandle((HANDLE)filehandle, &fileinfo);
     file->fileindexhi = fileinfo.nFileIndexHigh;
@@ -746,7 +746,7 @@ H5FD_log_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
     FUNC_ENTER_NOAPI(H5FD_log_cmp, H5FD_VFD_DEFAULT)
 
-#ifdef WIN32
+#ifdef _WIN32
     if (f1->fileindexhi < f2->fileindexhi) HGOTO_DONE(-1)
     if (f1->fileindexhi > f2->fileindexhi) HGOTO_DONE(1)
 

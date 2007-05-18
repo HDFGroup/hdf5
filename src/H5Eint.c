@@ -266,7 +266,7 @@ H5E_walk_cb(unsigned n, const H5E_error_t *err_desc, void *client_data)
 	        fprintf(stream, "thread 0");
         } /* end block */
 #elif defined(H5_HAVE_THREADSAFE)
-#ifdef WIN32
+#ifdef _WIN32
         fprintf(stream, "some thread: no way to know the thread number from pthread on windows");
 #else
         fprintf(stream, "thread %lu", (unsigned long)pthread_self());
@@ -385,7 +385,7 @@ H5E_walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
 	        fprintf(stream, "thread 0");
         } /* end block */
 #elif defined(H5_HAVE_THREADSAFE)
-#ifdef WIN32
+#ifdef _WIN32
         fprintf(stream, "some thread: no way to know the thread number from pthread on windows");
 #else
         fprintf(stream, "thread %lu", (unsigned long)pthread_self());

@@ -624,7 +624,7 @@ H5FD_stream_open (const char *filename,
   H5FD_stream_t             *stream=NULL;
   const H5FD_stream_fapl_t *fapl;
   int                       o_flags;
-#ifdef WIN32
+#ifdef _WIN32
   WSADATA wsadata;
 #endif
   H5P_genplist_t *plist=NULL;        /* Property list pointer */
@@ -649,7 +649,7 @@ H5FD_stream_open (const char *filename,
   if ((O_RDWR & o_flags) && ! (O_CREAT & o_flags))
     HGOTO_ERROR (H5E_ARGS, H5E_UNSUPPORTED, NULL, "open stream for read/write not supported")
 
-#ifdef WIN32
+#ifdef _WIN32
   if (WSAStartup (MAKEWORD (2, 0), &wsadata))
     HGOTO_ERROR (H5E_IO, H5E_CANTINIT, NULL, "Couldn't start Win32 socket layer")
 #endif

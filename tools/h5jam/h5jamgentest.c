@@ -330,11 +330,11 @@ create_textfile(const char *name, size_t size)
     size_t i;
     char *bp;
 
-	#ifdef WIN32
+	#ifdef _WIN32
 	fd = _creat(name, _S_IREAD | _S_IWRITE);
-	#else /* WIN32 */
+	#else /* _WIN32 */
 	fd = creat(name,(mode_t)0777);
-	#endif /* WIN32 */
+	#endif /* _WIN32 */
 	if (fd < 0) {
 		/* panic */
 	}
