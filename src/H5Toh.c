@@ -219,7 +219,7 @@ H5O_dtype_get_oloc(hid_t obj_id)
     FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_get_oloc)
 
     /* Get the datatype */
-    if(NULL == (type = H5I_object(obj_id)))
+    if(NULL == (type = (H5T_t *)H5I_object(obj_id)))
         HGOTO_ERROR(H5E_OHDR, H5E_BADATOM, NULL, "couldn't get object from ID")
 
     /* Get the datatype's object header location */

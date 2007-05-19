@@ -230,7 +230,7 @@ H5RS_decr(H5RS_str_t *rs)
     /* Decrement reference count for string */
     if((--rs->n)==0) {
         if(!rs->wrapped)
-            H5FL_BLK_FREE(str_buf,rs->s);
+            (void)H5FL_BLK_FREE(str_buf,rs->s);
         H5FL_FREE(H5RS_str_t,rs);
     } /* end if */
 
