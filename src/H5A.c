@@ -2095,6 +2095,8 @@ H5A_free(H5A_t *attr)
 	    HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release dataspace info")
     if(attr->data)
         attr->data = H5FL_BLK_FREE(attr_buf, attr->data);
+    if(H5G_name_free(&(attr->path)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release group hier. path")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2146,10 +2148,6 @@ H5A_close(H5A_t *attr)
     if(attr->obj_opened)
         if(H5O_close(&(attr->oloc)) < 0)
 	    HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release object header info")
-
-   /* Release the group hier. path for the object the attribute is on */
-   if(H5G_name_free(&(attr->path)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release group hier. path")
 
     H5FL_FREE(H5A_t, attr);
 

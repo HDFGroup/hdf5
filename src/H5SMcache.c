@@ -210,7 +210,7 @@ H5SM_load_table(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
     HDassert(f->shared->sohm_vers == HDF5_SHAREDHEADER_VERSION);
 
     /* Allocate space for the master table in memory */
-    if(NULL == (table = (H5SM_master_table_t *)H5MM_calloc(sizeof(H5SM_master_table_t))))
+    if(NULL == (table = H5FL_CALLOC(H5SM_master_table_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Read number of indexes and version from file superblock */
@@ -348,7 +348,7 @@ H5SM_dest_table(H5F_t UNUSED *f, H5SM_master_table_t* table)
 
     H5FL_ARR_FREE(H5SM_index_header_t, table->indexes);
 
-    H5MM_free(table);
+    H5FL_FREE(H5SM_master_table_t, table);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SM_dest_table */

@@ -63,9 +63,12 @@
 /* Macro for inclusion in the free list allocation parameters */
 #define H5FL_TRACK_PARAMS       ,const char *call_file, const char *call_func, int call_line
 
+/* Forward declarations for structure fields */
+struct H5CS_t;
+
 /* Tracking information for each block */
 typedef struct H5FL_track_t {
-    H5CS_t *stack;      /* Function stack */
+    struct H5CS_t *stack;      /* Function stack */
     char *file;         /* Name of file containing calling function */
     char *func;         /* Name of calling function */
     int line;           /* Line # within calling function */

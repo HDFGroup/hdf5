@@ -99,6 +99,10 @@ typedef struct H5FL_blk_gc_list_t {
 static H5FL_blk_gc_list_t H5FL_blk_gc_head={0,NULL};
 
 #ifdef H5FL_TRACK
+
+/* Extra headers needed */
+#include "H5CSprivate.h"	/* Function stack			*/
+
 /* Head of "outstanding allocations" list */
 static H5FL_track_t *H5FL_out_head_g = NULL;
 #endif /* H5FL_TRACK */
@@ -377,7 +381,7 @@ H5FL_reg_malloc(H5FL_reg_head_t *head H5FL_TRACK_PARAMS)
 
 #ifdef H5FL_TRACK
     /* Copy allocation location information */
-    ((H5FL_track_t *)ret_value)->stack = H5MM_malloc(sizeof(H5CS_t));
+    ((H5FL_track_t *)ret_value)->stack = H5MM_calloc(sizeof(H5CS_t));
     H5CS_copy_stack(((H5FL_track_t *)ret_value)->stack);
     ((H5FL_track_t *)ret_value)->file = H5MM_strdup(call_file);
     ((H5FL_track_t *)ret_value)->func = H5MM_strdup(call_func);
@@ -875,7 +879,7 @@ H5FL_blk_malloc(H5FL_blk_head_t *head, size_t size H5FL_TRACK_PARAMS)
 
 #ifdef H5FL_TRACK
     /* Copy allocation location information */
-    ((H5FL_track_t *)ret_value)->stack = H5MM_malloc(sizeof(H5CS_t));
+    ((H5FL_track_t *)ret_value)->stack = H5MM_calloc(sizeof(H5CS_t));
     H5CS_copy_stack(((H5FL_track_t *)ret_value)->stack);
     ((H5FL_track_t *)ret_value)->file = H5MM_strdup(call_file);
     ((H5FL_track_t *)ret_value)->func = H5MM_strdup(call_func);

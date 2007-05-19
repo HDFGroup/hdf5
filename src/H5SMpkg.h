@@ -207,7 +207,9 @@ typedef struct {
 /****************************/
 /* Package Variables        */
 /****************************/
+
 /* Declare free lists to manage H5SM structs */
+H5FL_EXTERN(H5SM_master_table_t);
 H5FL_ARR_EXTERN(H5SM_index_header_t);
 H5FL_EXTERN(H5SM_list_t);
 H5FL_ARR_EXTERN(H5SM_sohm_t);

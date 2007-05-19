@@ -26,7 +26,7 @@
 /* Private headers needed by this file */
 #include "H5private.h"
 
-#define H5CS_NSLOTS	32	/*number of slots in an function stack	     */
+#define H5CS_NSLOTS	48	/*number of slots in an function stack	     */
 
 /* A function stack */
 typedef struct H5CS_t {

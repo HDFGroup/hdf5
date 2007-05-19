@@ -2232,17 +2232,18 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5SM_read_mesg(H5F_t *f, const H5SM_sohm_t *mesg, H5HF_t *fheap,
     H5O_t *open_oh, hid_t dxpl_id, size_t *encoding_size /*out*/,
     void ** encoded_mesg /*out*/)
 {
     size_t buf_size;
     void * encoding_buf=NULL;
-    herr_t ret_value = SUCCEED;
     H5O_loc_t oloc;
     H5O_t *oh = NULL;
-    FUNC_ENTER_NOAPI(H5SM_read_mesg, FAIL)
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5SM_read_mesg)
 
     HDassert(f);
     HDassert(mesg);
@@ -2282,6 +2283,7 @@ H5SM_read_mesg(H5F_t *f, const H5SM_sohm_t *mesg, H5HF_t *fheap,
         udata.file = f;
         udata.type_id = mesg->msg_type_id;
         udata.encoding_buf = NULL;
+        udata.idx = 0;
 
         /* Use the "real" iterate routine so it doesn't try to protect the OH */
         op.op_type = H5O_MESG_OP_APP;
