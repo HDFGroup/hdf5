@@ -1134,7 +1134,7 @@ H5B2_modify(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     {
         unsigned leaf_flags = H5AC__NO_FLAGS_SET;
         H5B2_leaf_t *leaf;      /* Pointer to leaf node in B-tree */
-        hbool_t changed;        /* Whether the 'modify' callback changed the record */
+        hbool_t changed = FALSE;/* Whether the 'modify' callback changed the record */
 
         /* Lock B-tree leaf node */
         if (NULL == (leaf = H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, &(curr_node_ptr.node_nrec), bt2_shared, H5AC_WRITE)))

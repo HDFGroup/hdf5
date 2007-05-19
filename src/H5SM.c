@@ -1851,6 +1851,10 @@ H5SM_get_info(const H5O_loc_t *ext_loc, H5P_genplist_t *fc_plist, hid_t dxpl_id)
         unsigned sohm_b2l;           /* SOHM btree-to-list cutoff */
         unsigned u;                  /* Local index variable */
 
+        /* Portably initialize the arrays */
+        HDmemset(index_flags, 0, sizeof(index_flags));
+        HDmemset(minsizes, 0, sizeof(minsizes));
+
         /* Set SOHM info from file */
         shared->sohm_addr = sohm_table.addr;
         shared->sohm_vers = sohm_table.version;
