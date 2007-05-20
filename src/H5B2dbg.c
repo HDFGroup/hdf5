@@ -111,11 +111,11 @@ H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     /*
      * Load the B-tree header.
      */
-    if(NULL == (bt2 = H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
+    if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree header")
 
     /* Get the pointer to the shared B-tree info */
-    shared = H5RC_GET_OBJ(bt2->shared);
+    shared = (H5B2_shared_t *)H5RC_GET_OBJ(bt2->shared);
     HDassert(shared);
 
     /* Print opening message */
@@ -223,11 +223,11 @@ H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, 
     /*
      * Load the B-tree header.
      */
-    if(NULL == (bt2 = H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, type, NULL, H5AC_READ)))
+    if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, type, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree header")
 
     /* Get the pointer to the shared B-tree info */
-    shared = H5RC_GET_OBJ(bt2->shared);
+    shared = (H5B2_shared_t *)H5RC_GET_OBJ(bt2->shared);
     HDassert(shared);
 
     /*
@@ -352,17 +352,17 @@ H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     /*
      * Load the B-tree header.
      */
-    if(NULL == (bt2 = H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, type, NULL, H5AC_READ)))
+    if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, type, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree header")
 
     /* Get the pointer to the shared B-tree info */
-    shared = H5RC_GET_OBJ(bt2->shared);
+    shared = (H5B2_shared_t *)H5RC_GET_OBJ(bt2->shared);
     HDassert(shared);
 
     /*
      * Load the B-tree leaf node
      */
-    if(NULL == (leaf = H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, addr, &nrec, bt2->shared, H5AC_READ)))
+    if(NULL == (leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, addr, &nrec, bt2->shared, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree leaf node")
 
     /* Release the B-tree header */

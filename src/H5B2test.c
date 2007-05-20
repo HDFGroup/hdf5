@@ -269,7 +269,7 @@ H5B2_get_root_addr_test(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     HDassert(root_addr);
 
     /* Look up the B-tree header */
-    if(NULL == (bt2 = H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
+    if(NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
 
     /* Get B-tree root addr */
@@ -319,7 +319,7 @@ H5B2_get_node_info_test(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr
     HDassert(H5F_addr_defined(addr));
 
     /* Look up the B-tree header */
-    if (NULL == (bt2 = H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
+    if (NULL == (bt2 = (H5B2_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
 
     /* Safely grab pointer to reference counted shared B-tree info, so we can release the B-tree header if necessary */
@@ -328,7 +328,7 @@ H5B2_get_node_info_test(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr
     incr_rc=TRUE;
 
     /* Get the pointer to the shared B-tree info */
-    shared = H5RC_GET_OBJ(bt2_shared);
+    shared = (H5B2_shared_t *)H5RC_GET_OBJ(bt2_shared);
     HDassert(shared);
 
     /* Make copy of the root node pointer to start search with */
@@ -393,7 +393,7 @@ H5B2_get_node_info_test(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr
         H5B2_leaf_t *leaf;          /* Pointer to leaf node in B-tree */
 
         /* Lock B-tree leaf node */
-        if(NULL == (leaf = H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, &(curr_node_ptr.node_nrec), bt2_shared, H5AC_READ)))
+        if(NULL == (leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, &(curr_node_ptr.node_nrec), bt2_shared, H5AC_READ)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
         /* Locate record */

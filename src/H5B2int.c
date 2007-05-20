@@ -265,7 +265,7 @@ H5B2_shared_free(void *_shared)
 
     /* Free the B-tree node buffer */
     if(shared->page)
-        H5FL_BLK_FREE(node_page, shared->page);
+        (void)H5FL_BLK_FREE(node_page, shared->page);
 
     /* Free the array of offsets into the native key block */
     if(shared->nat_off)
@@ -381,7 +381,7 @@ H5B2_split1(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
     HDassert(internal_flags_ptr);
 
     /* Get the pointer to the shared B-tree info */
-    shared = H5RC_GET_OBJ(internal->shared);
+    shared = (H5B2_shared_t *)H5RC_GET_OBJ(internal->shared);
     HDassert(shared);
 
     /* Slide records in parent node up one space, to make room for promoted record */
@@ -434,9 +434,9 @@ H5B2_split1(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *curr_node_
         right_addr = internal->node_ptrs[idx + 1].addr;
 
         /* Protect both leafs */
-        if(NULL == (left_leaf = H5AC_protect(f, dxpl_id, child_class, left_addr, &(internal->node_ptrs[idx].node_nrec), internal->shared, H5AC_WRITE)))
+        if(NULL == (left_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, left_addr, &(internal->node_ptrs[idx].node_nrec), internal->shared, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
-        if(NULL == (right_leaf = H5AC_protect(f, dxpl_id, child_class, right_addr, &(internal->node_ptrs[idx + 1].node_nrec), internal->shared, H5AC_WRITE)))
+        if(NULL == (right_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, right_addr, &(internal->node_ptrs[idx + 1].node_nrec), internal->shared, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         /* More setup for child nodes */
@@ -560,7 +560,7 @@ H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2, unsigned *bt2_flags_ptr)
     HDassert(bt2_flags_ptr);
 
     /* Get the pointer to the shared B-tree info */
-    shared = H5RC_GET_OBJ(bt2->shared);
+    shared = (H5B2_shared_t *)H5RC_GET_OBJ(bt2->shared);
     HDassert(shared);
 
     /* Update depth of B-tree */
@@ -644,7 +644,7 @@ H5B2_redistribute2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
     HDassert(internal);
 
     /* Get the pointer to the shared B-tree info */
-    shared=H5RC_GET_OBJ(internal->shared);
+    shared=(H5B2_shared_t *)H5RC_GET_OBJ(internal->shared);
     HDassert(shared);
 
     /* Check for the kind of B-tree node to redistribute */
@@ -683,9 +683,9 @@ H5B2_redistribute2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
         right_addr = internal->node_ptrs[idx+1].addr;
 
         /* Lock left & right B-tree child nodes */
-        if (NULL == (left_leaf = H5AC_protect(f, dxpl_id, child_class, left_addr, &(internal->node_ptrs[idx].node_nrec), internal->shared, H5AC_WRITE)))
+        if (NULL == (left_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, left_addr, &(internal->node_ptrs[idx].node_nrec), internal->shared, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
-        if (NULL == (right_leaf = H5AC_protect(f, dxpl_id, child_class, right_addr, &(internal->node_ptrs[idx+1].node_nrec), internal->shared, H5AC_WRITE)))
+        if (NULL == (right_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, right_addr, &(internal->node_ptrs[idx+1].node_nrec), internal->shared, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         /* More setup for child nodes */
@@ -874,7 +874,7 @@ H5B2_redistribute3(H5F_t *f, hid_t dxpl_id, unsigned depth,
     HDassert(internal_flags_ptr);
 
     /* Get the pointer to the shared B-tree info */
-    shared=H5RC_GET_OBJ(internal->shared);
+    shared=(H5B2_shared_t *)H5RC_GET_OBJ(internal->shared);
     HDassert(shared);
 
     /* Check for the kind of B-tree node to redistribute */
@@ -923,11 +923,11 @@ H5B2_redistribute3(H5F_t *f, hid_t dxpl_id, unsigned depth,
         right_addr = internal->node_ptrs[idx+1].addr;
 
         /* Lock B-tree child nodes */
-        if (NULL == (left_leaf = H5AC_protect(f, dxpl_id, child_class, left_addr, &(internal->node_ptrs[idx-1].node_nrec), internal->shared, H5AC_WRITE)))
+        if (NULL == (left_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, left_addr, &(internal->node_ptrs[idx-1].node_nrec), internal->shared, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
-        if (NULL == (middle_leaf = H5AC_protect(f, dxpl_id, child_class, middle_addr, &(internal->node_ptrs[idx].node_nrec), internal->shared, H5AC_WRITE)))
+        if (NULL == (middle_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, middle_addr, &(internal->node_ptrs[idx].node_nrec), internal->shared, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
-        if (NULL == (right_leaf = H5AC_protect(f, dxpl_id, child_class, right_addr, &(internal->node_ptrs[idx+1].node_nrec), internal->shared, H5AC_WRITE)))
+        if (NULL == (right_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, right_addr, &(internal->node_ptrs[idx+1].node_nrec), internal->shared, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         /* More setup for child nodes */
@@ -1244,7 +1244,7 @@ H5B2_merge2(H5F_t *f, hid_t dxpl_id, unsigned depth,
     HDassert(internal_flags_ptr);
 
     /* Get the pointer to the shared B-tree info */
-    shared=H5RC_GET_OBJ(internal->shared);
+    shared=(H5B2_shared_t *)H5RC_GET_OBJ(internal->shared);
     HDassert(shared);
 
     /* Check for the kind of B-tree node to split */
@@ -1283,9 +1283,9 @@ H5B2_merge2(H5F_t *f, hid_t dxpl_id, unsigned depth,
         right_addr = internal->node_ptrs[idx+1].addr;
 
         /* Lock left & right B-tree child nodes */
-        if(NULL == (left_leaf = H5AC_protect(f, dxpl_id, child_class, left_addr, &(internal->node_ptrs[idx].node_nrec), internal->shared, H5AC_WRITE)))
+        if(NULL == (left_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, left_addr, &(internal->node_ptrs[idx].node_nrec), internal->shared, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
-        if(NULL == (right_leaf = H5AC_protect(f, dxpl_id, child_class, right_addr, &(internal->node_ptrs[idx+1].node_nrec), internal->shared, H5AC_WRITE)))
+        if(NULL == (right_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, right_addr, &(internal->node_ptrs[idx+1].node_nrec), internal->shared, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         /* More setup for accessing child node information */
@@ -1404,7 +1404,7 @@ H5B2_merge3(H5F_t *f, hid_t dxpl_id, unsigned depth,
     HDassert(internal_flags_ptr);
 
     /* Get the pointer to the shared B-tree info */
-    shared=H5RC_GET_OBJ(internal->shared);
+    shared=(H5B2_shared_t *)H5RC_GET_OBJ(internal->shared);
     HDassert(shared);
 
     /* Check for the kind of B-tree node to split */
@@ -1453,11 +1453,11 @@ H5B2_merge3(H5F_t *f, hid_t dxpl_id, unsigned depth,
         right_addr = internal->node_ptrs[idx+1].addr;
 
         /* Lock B-tree child nodes */
-        if (NULL == (left_leaf = H5AC_protect(f, dxpl_id, child_class, left_addr, &(internal->node_ptrs[idx-1].node_nrec), internal->shared, H5AC_WRITE)))
+        if (NULL == (left_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, left_addr, &(internal->node_ptrs[idx-1].node_nrec), internal->shared, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
-        if (NULL == (middle_leaf = H5AC_protect(f, dxpl_id, child_class, middle_addr, &(internal->node_ptrs[idx].node_nrec), internal->shared, H5AC_WRITE)))
+        if (NULL == (middle_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, middle_addr, &(internal->node_ptrs[idx].node_nrec), internal->shared, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
-        if (NULL == (right_leaf = H5AC_protect(f, dxpl_id, child_class, right_addr, &(internal->node_ptrs[idx+1].node_nrec), internal->shared, H5AC_WRITE)))
+        if (NULL == (right_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, right_addr, &(internal->node_ptrs[idx+1].node_nrec), internal->shared, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         /* More setup for accessing child node information */
@@ -1619,7 +1619,7 @@ H5B2_swap_leaf(H5F_t *f, hid_t dxpl_id, unsigned depth,
     HDassert(idx <= internal->nrec);
 
     /* Get the pointer to the shared B-tree info */
-    shared=H5RC_GET_OBJ(internal->shared);
+    shared=(H5B2_shared_t *)H5RC_GET_OBJ(internal->shared);
     HDassert(shared);
 
     /* Check for the kind of B-tree node to swap */
@@ -1646,7 +1646,7 @@ H5B2_swap_leaf(H5F_t *f, hid_t dxpl_id, unsigned depth,
         child_addr = internal->node_ptrs[idx].addr;
 
         /* Lock B-tree child node */
-        if (NULL == (child_leaf = H5AC_protect(f, dxpl_id, child_class, child_addr, &(internal->node_ptrs[idx].node_nrec), internal->shared, H5AC_WRITE)))
+        if (NULL == (child_leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, child_class, child_addr, &(internal->node_ptrs[idx].node_nrec), internal->shared, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         /* More setup for accessing child node information */
@@ -1711,11 +1711,11 @@ H5B2_insert_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     HDassert(H5F_addr_defined(curr_node_ptr->addr));
 
     /* Lock current B-tree node */
-    if (NULL == (leaf = H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr->addr, &(curr_node_ptr->node_nrec), bt2_shared, H5AC_WRITE)))
+    if (NULL == (leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr->addr, &(curr_node_ptr->node_nrec), bt2_shared, H5AC_WRITE)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
     /* Get the pointer to the shared B-tree info */
-    shared=H5RC_GET_OBJ(bt2_shared);
+    shared=(H5B2_shared_t *)H5RC_GET_OBJ(bt2_shared);
     HDassert(shared);
 
     /* Must have a leaf node with enough space to insert a record now */
@@ -1799,7 +1799,7 @@ H5B2_insert_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
     /* Get the pointer to the shared B-tree info */
-    shared=H5RC_GET_OBJ(bt2_shared);
+    shared=(H5B2_shared_t *)H5RC_GET_OBJ(bt2_shared);
     HDassert(shared);
 
 /* Split or redistribute child node pointers, if necessary */
@@ -1940,11 +1940,11 @@ H5B2_create_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, H5B2_node_ptr_t *n
     H5RC_INC(leaf->shared);
 
     /* Get the pointer to the shared B-tree info */
-    shared = H5RC_GET_OBJ(leaf->shared);
+    shared = (H5B2_shared_t *)H5RC_GET_OBJ(leaf->shared);
     HDassert(shared);
 
     /* Allocate space for the native keys in memory */
-    if((leaf->leaf_native = H5FL_FAC_MALLOC(shared->node_info[0].nat_rec_fac)) == NULL)
+    if((leaf->leaf_native = (uint8_t *)H5FL_FAC_MALLOC(shared->node_info[0].nat_rec_fac)) == NULL)
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree leaf native keys")
 #ifdef H5_USING_PURIFY
 HDmemset(leaf->leaf_native, 0, shared->type->nrec_size * shared->node_info[0].max_nrec);
@@ -2013,18 +2013,18 @@ H5B2_create_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     H5RC_INC(internal->shared);
 
     /* Get the pointer to the shared B-tree info */
-    shared = H5RC_GET_OBJ(internal->shared);
+    shared = (H5B2_shared_t *)H5RC_GET_OBJ(internal->shared);
     HDassert(shared);
 
     /* Allocate space for the native keys in memory */
-    if((internal->int_native = H5FL_FAC_MALLOC(shared->node_info[depth].nat_rec_fac)) == NULL)
+    if((internal->int_native = (uint8_t *)H5FL_FAC_MALLOC(shared->node_info[depth].nat_rec_fac)) == NULL)
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree internal native keys")
 #ifdef H5_USING_PURIFY
 HDmemset(internal->int_native, 0, shared->type->nrec_size * shared->node_info[depth].max_nrec);
 #endif /* H5_USING_PURIFY */
 
     /* Allocate space for the node pointers in memory */
-    if((internal->node_ptrs = H5FL_FAC_MALLOC(shared->node_info[depth].node_ptr_fac)) == NULL)
+    if((internal->node_ptrs = (H5B2_node_ptr_t *)H5FL_FAC_MALLOC(shared->node_info[depth].node_ptr_fac)) == NULL)
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree internal node pointers")
 #ifdef H5_USING_PURIFY
 HDmemset(internal->node_ptrs, 0, sizeof(H5B2_node_ptr_t) * (shared->node_info[depth].max_nrec + 1));
@@ -2086,7 +2086,7 @@ H5B2_protect_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, haddr_t addr,
     udata.depth = depth;
 
     /* Protect the internal node */
-    if(NULL == (ret_value = H5AC_protect(f, dxpl_id, H5AC_BT2_INT, addr, &udata, NULL, rw)))
+    if(NULL == (ret_value = (H5B2_internal_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_INT, addr, &udata, NULL, rw)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to load B-tree internal node")
 
 done:
@@ -2133,7 +2133,7 @@ H5B2_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
     HDassert(op);
 
     /* Get the pointer to the shared B-tree info */
-    shared = H5RC_GET_OBJ(bt2_shared);
+    shared = (H5B2_shared_t *)H5RC_GET_OBJ(bt2_shared);
     HDassert(shared);
 
     /* Protect current node & set up variables */
@@ -2150,7 +2150,7 @@ H5B2_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
         node_native = internal->int_native;
 
         /* Allocate space for the node pointers in memory */
-        if((node_ptrs = H5FL_FAC_MALLOC(shared->node_info[depth].node_ptr_fac)) == NULL)
+        if((node_ptrs = (H5B2_node_ptr_t *)H5FL_FAC_MALLOC(shared->node_info[depth].node_ptr_fac)) == NULL)
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree internal node pointers")
 
         /* Copy the node pointers */
@@ -2160,7 +2160,7 @@ H5B2_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
         H5B2_leaf_t *leaf;             /* Pointer to leaf node */
 
         /* Lock the current B-tree node */
-        if (NULL == (leaf = H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, curr_node->addr, &(curr_node->node_nrec), bt2_shared, H5AC_READ)))
+        if (NULL == (leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, curr_node->addr, &(curr_node->node_nrec), bt2_shared, H5AC_READ)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         /* Set up information about current node */
@@ -2170,7 +2170,7 @@ H5B2_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
     } /* end else */
 
     /* Allocate space for the native keys in memory */
-    if((native = H5FL_FAC_MALLOC(shared->node_info[depth].nat_rec_fac)) == NULL)
+    if((native = (uint8_t *)H5FL_FAC_MALLOC(shared->node_info[depth].nat_rec_fac)) == NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree internal native keys")
 
     /* Copy the native keys */
@@ -2248,11 +2248,11 @@ H5B2_remove_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
     /* Lock current B-tree node */
     leaf_addr = curr_node_ptr->addr;
-    if(NULL == (leaf = H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, leaf_addr, &(curr_node_ptr->node_nrec), bt2_shared, H5AC_WRITE)))
+    if(NULL == (leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, leaf_addr, &(curr_node_ptr->node_nrec), bt2_shared, H5AC_WRITE)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
     /* Get the pointer to the shared B-tree info */
-    shared = H5RC_GET_OBJ(bt2_shared);
+    shared = (H5B2_shared_t *)H5RC_GET_OBJ(bt2_shared);
     HDassert(shared);
 
     /* Sanity check number of records */
@@ -2351,7 +2351,7 @@ H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
     /* Get the pointer to the shared B-tree info */
-    shared = H5RC_GET_OBJ(bt2_shared);
+    shared = (H5B2_shared_t *)H5RC_GET_OBJ(bt2_shared);
     HDassert(shared);
 
     /* Determine the correct number of records to merge at */
@@ -2551,11 +2551,11 @@ H5B2_remove_leaf_by_idx(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
     /* Lock B-tree leaf node */
     leaf_addr = curr_node_ptr->addr;
-    if(NULL == (leaf = H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, leaf_addr, &(curr_node_ptr->node_nrec), bt2_shared, H5AC_WRITE)))
+    if(NULL == (leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, leaf_addr, &(curr_node_ptr->node_nrec), bt2_shared, H5AC_WRITE)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
     /* Get the pointer to the shared B-tree info */
-    shared = H5RC_GET_OBJ(bt2_shared);
+    shared = (H5B2_shared_t *)H5RC_GET_OBJ(bt2_shared);
     HDassert(shared);
 
     /* Sanity check number of records */
@@ -2653,7 +2653,7 @@ H5B2_remove_internal_by_idx(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     HDassert(internal->nrec == curr_node_ptr->node_nrec);
 
     /* Get the pointer to the shared B-tree info */
-    shared = H5RC_GET_OBJ(bt2_shared);
+    shared = (H5B2_shared_t *)H5RC_GET_OBJ(bt2_shared);
     HDassert(shared);
     HDassert(depth == shared->depth || internal->nrec > 1);
 
@@ -2919,11 +2919,11 @@ H5B2_neighbor_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     HDassert(op);
 
     /* Lock current B-tree node */
-    if (NULL == (leaf = H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr->addr, &(curr_node_ptr->node_nrec), bt2_shared, H5AC_READ)))
+    if (NULL == (leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr->addr, &(curr_node_ptr->node_nrec), bt2_shared, H5AC_READ)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
     /* Get the pointer to the shared B-tree info */
-    shared=H5RC_GET_OBJ(bt2_shared);
+    shared=(H5B2_shared_t *)H5RC_GET_OBJ(bt2_shared);
     HDassert(shared);
 
 
@@ -3017,7 +3017,7 @@ H5B2_neighbor_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
     /* Get the pointer to the shared B-tree info */
-    shared = H5RC_GET_OBJ(bt2_shared);
+    shared = (H5B2_shared_t *)H5RC_GET_OBJ(bt2_shared);
     HDassert(shared);
 
     /* Locate node pointer for child */
@@ -3088,7 +3088,7 @@ H5B2_delete_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
     HDassert(curr_node);
 
     /* Get the pointer to the shared B-tree info */
-    shared=H5RC_GET_OBJ(bt2_shared);
+    shared=(H5B2_shared_t *)H5RC_GET_OBJ(bt2_shared);
     HDassert(shared);
 
     if(depth>0) {
@@ -3113,7 +3113,7 @@ H5B2_delete_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
         H5B2_leaf_t *leaf;             /* Pointer to leaf node */
 
         /* Lock the current B-tree node */
-        if (NULL == (leaf = H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, curr_node->addr, &(curr_node->node_nrec), bt2_shared, H5AC_WRITE)))
+        if (NULL == (leaf = (H5B2_leaf_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_LEAF, curr_node->addr, &(curr_node->node_nrec), bt2_shared, H5AC_WRITE)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree leaf node")
 
         /* Set up information about current node */

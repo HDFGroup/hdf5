@@ -282,7 +282,7 @@ H5L_term_interface(void)
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5L_term_interface)
 
     /* Free the table of link types */
-    H5L_table_g = H5MM_xfree(H5L_table_g);
+    H5L_table_g = (H5L_class_t *)H5MM_xfree(H5L_table_g);
     H5L_table_used_g = H5L_table_alloc_g = 0;
 
     FUNC_LEAVE_NOAPI(n)
@@ -1355,8 +1355,7 @@ H5L_register(const H5L_class_t *cls)
     if(i >= H5L_table_used_g) {
 	if(H5L_table_used_g >= H5L_table_alloc_g) {
 	    size_t n = MAX(H5L_MIN_TABLE_SIZE, 2 * H5L_table_alloc_g);
-	    H5L_class_t *table = H5MM_realloc(H5L_table_g,
-					      n * sizeof(H5L_class_t));
+	    H5L_class_t *table = (H5L_class_t *)H5MM_realloc(H5L_table_g, (n * sizeof(H5L_class_t)));
             if(!table)
 		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to extend link type table")
 	    H5L_table_g = table;
@@ -1689,7 +1688,7 @@ H5L_create_real(const H5G_loc_t *link_loc, const char *link_name,
         unsigned crt_intmd_group;
 
         /* Get link creation property list */
-        if(NULL == (lc_plist = H5I_object(lcpl_id)))
+        if(NULL == (lc_plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
         /* Get intermediate group creation property */
@@ -2403,13 +2402,13 @@ H5L_move_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
     } /* end switch */
 
     /* Set up user data for move_dest_cb */
-    if((udata_out.lnk = H5O_msg_copy(H5O_LINK_ID, lnk, NULL)) == NULL)
+    if((udata_out.lnk = (H5O_link_t *)H5O_msg_copy(H5O_LINK_ID, lnk, NULL)) == NULL)
         HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to copy link to be moved")
 
     /* In this special case, the link's name is going to be replaced at its
      * destination, so we should free it here.
      */
-    udata_out.lnk->name = H5MM_xfree(udata_out.lnk->name);
+    udata_out.lnk->name = (char *)H5MM_xfree(udata_out.lnk->name);
     link_copied = TRUE;
 
     udata_out.lnk->cset = udata->cset;
@@ -2458,7 +2457,7 @@ done:
      */
     if(link_copied) {
         if(udata_out.lnk->type == H5L_TYPE_SOFT)
-            udata_out.lnk->u.soft.name = H5MM_xfree(udata_out.lnk->u.soft.name);
+            udata_out.lnk->u.soft.name = (char *)H5MM_xfree(udata_out.lnk->u.soft.name);
         else if(udata_out.lnk->type >= H5L_TYPE_UD_MIN && udata_out.lnk->u.ud.size > 0)
             udata_out.lnk->u.ud.udata = H5MM_xfree(udata_out.lnk->u.ud.udata);
         H5MM_xfree(udata_out.lnk);
@@ -2517,7 +2516,7 @@ H5L_move(H5G_loc_t *src_loc, const char *src_name, H5G_loc_t *dst_loc,
     if(lcpl_id != H5P_DEFAULT) {
         unsigned crt_intmd_group;
 
-        if(NULL == (lc_plist = H5I_object(lcpl_id)))
+        if(NULL == (lc_plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
         /* Get intermediate group creation property */
@@ -2538,7 +2537,7 @@ H5L_move(H5G_loc_t *src_loc, const char *src_name, H5G_loc_t *dst_loc,
     if(lapl_id == H5P_DEFAULT)
         lapl_copy = lapl_id;
     else {
-        if(NULL == (la_plist = H5I_object(lapl_id)))
+        if(NULL == (la_plist = (H5P_genplist_t *)H5I_object(lapl_id)))
             HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a valid access PL")
         if((lapl_copy = H5P_copy_plist(la_plist)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to copy access properties")
