@@ -589,11 +589,11 @@ H5A_open_common(const H5G_loc_t *loc, H5A_t *attr)
     /* Clear object location */
     if(H5O_loc_reset(&(attr->oloc)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to reset location")
-
-    /* Clear path name */
-    if(H5G_name_reset(&(attr->path)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to reset path")
 #endif /* H5_USING_PURIFY */
+
+    /* Free any previous group hier. path */
+    if(H5G_name_free(&(attr->path)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release group hier. path")
 
     /* Deep copy of the symbol table entry */
     if(H5O_loc_copy(&(attr->oloc), loc->oloc, H5_COPY_DEEP) < 0)
@@ -701,7 +701,7 @@ H5A_open_by_name(const H5G_loc_t *loc, const char *obj_name, const char *attr_na
     H5A_t       *attr = NULL;           /* Attribute from object header */
     H5A_t       *ret_value;             /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5A_open_by_name)
+    FUNC_ENTER_NOAPI(H5A_open_by_name, NULL)
 
     /* check args */
     HDassert(loc);
@@ -894,9 +894,9 @@ done:
     if(dst_id >= 0)
         (void)H5I_dec_ref(dst_id);
     if(tconv_buf && !tconv_owned)
-        tconv_buf = H5FL_BLK_FREE(attr_buf, tconv_buf);
+        H5FL_BLK_FREE(attr_buf, tconv_buf);
     if(bkg_buf)
-        bkg_buf = H5FL_BLK_FREE(attr_buf, bkg_buf);
+        H5FL_BLK_FREE(attr_buf, bkg_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A_write() */
@@ -1038,9 +1038,9 @@ done:
     if(dst_id >= 0)
         (void)H5I_dec_ref(dst_id);
     if(tconv_buf)
-        tconv_buf = H5FL_BLK_FREE(attr_buf, tconv_buf);
+        H5FL_BLK_FREE(attr_buf, tconv_buf);
     if(bkg_buf)
-	bkg_buf = H5FL_BLK_FREE(attr_buf, bkg_buf);
+	H5FL_BLK_FREE(attr_buf, bkg_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A_read() */
@@ -2137,7 +2137,7 @@ H5A_close(H5A_t *attr)
             HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "unable to write attribute")
 
         /* Free temporary buffer */
-        tmp_buf = H5FL_BLK_FREE(attr_buf, tmp_buf);
+        H5FL_BLK_FREE(attr_buf, tmp_buf);
     } /* end if */
 
     /* Free dynamicly allocated items */
