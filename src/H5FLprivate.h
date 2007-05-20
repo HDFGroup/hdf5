@@ -209,14 +209,14 @@ typedef struct H5FL_blk_head_t {
 
 #else /* H5_NO_BLK_FREE_LISTS */
 /* Common macro for H5FL_BLK_DEFINE & H5FL_BLK_DEFINE_STATIC */
-#define H5FL_BLK_DEFINE_COMMON(t) int H5FL_BLK_NAME(t)
+#define H5FL_BLK_DEFINE_COMMON(t) int UNUSED H5FL_BLK_NAME(t)
 
 #define H5FL_BLK_DEFINE(t)      H5_DLL H5FL_BLK_DEFINE_COMMON(t)
-#define H5FL_BLK_EXTERN(t)      extern H5_DLL int H5FL_BLK_NAME(t)
+#define H5FL_BLK_EXTERN(t)      extern H5_DLL H5FL_BLK_DEFINE_COMMON(t)
 #define H5FL_BLK_DEFINE_STATIC(t)  static H5FL_BLK_DEFINE_COMMON(t)
 #define H5FL_BLK_MALLOC(t,size) (uint8_t *)H5MM_malloc(size)
 #define H5FL_BLK_CALLOC(t,size) (uint8_t *)H5MM_calloc(size)
-#define H5FL_BLK_FREE(t,blk) (uint8_t *)H5MM_xfree(blk)
+#define H5FL_BLK_FREE(t,blk) H5MM_xfree(blk)
 #define H5FL_BLK_REALLOC(t,blk,new_size) (uint8_t *)H5MM_realloc(blk,new_size)
 #define H5FL_BLK_AVAIL(t,size)  (FALSE)
 #endif /* H5_NO_BLK_FREE_LISTS */
@@ -338,10 +338,10 @@ typedef struct H5FL_seq_head_t {
 
 #else /* H5_NO_SEQ_FREE_LISTS */
 /* Common macro for H5FL_SEQ_DEFINE & H5FL_SEQ_DEFINE_STATIC */
-#define H5FL_SEQ_DEFINE_COMMON(t) int H5FL_SEQ_NAME(t)
+#define H5FL_SEQ_DEFINE_COMMON(t) int UNUSED H5FL_SEQ_NAME(t)
 
 #define H5FL_SEQ_DEFINE(t)      H5_DLL H5FL_SEQ_DEFINE_COMMON(t)
-#define H5FL_SEQ_EXTERN(t)      extern H5_DLL int H5FL_SEQ_NAME(t)
+#define H5FL_SEQ_EXTERN(t)      extern H5_DLL H5FL_SEQ_DEFINE_COMMON(t)
 #define H5FL_SEQ_DEFINE_STATIC(t)  static H5FL_SEQ_DEFINE_COMMON(t)
 #define H5FL_SEQ_MALLOC(t,elem) (t *)H5MM_malloc((elem)*sizeof(t))
 #define H5FL_SEQ_CALLOC(t,elem) (t *)H5MM_calloc((elem)*sizeof(t))
