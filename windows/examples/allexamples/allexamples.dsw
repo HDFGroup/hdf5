@@ -3,7 +3,7 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
-Project: "allexamples"=.\allexamples.dsp - Package Owner=<4>
+Project: "allexamples"=".\allexamples.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -59,11 +59,17 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name writetestdll
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name intermgrouptest
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name intermgrouptestdll
+    End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "attributetest"=..\attributetest\attributetest.dsp - Package Owner=<4>
+Project: "attributetest"="..\attributetest\attributetest.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -75,7 +81,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "attributetestdll"=..\attributetestdll\attributetestdll.dsp - Package Owner=<4>
+Project: "attributetestdll"="..\attributetestdll\attributetestdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -87,7 +93,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "chunkread"=..\chunkread\chunkread.dsp - Package Owner=<4>
+Project: "chunkread"="..\chunkread\chunkread.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -99,7 +105,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "chunkreaddll"=..\chunkreaddll\chunkreaddll.dsp - Package Owner=<4>
+Project: "chunkreaddll"="..\chunkreaddll\chunkreaddll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -111,7 +117,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "compoundtest"=..\compoundtest\compoundtest.dsp - Package Owner=<4>
+Project: "compoundtest"="..\compoundtest\compoundtest.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -123,7 +129,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "compoundtestdll"=..\compoundtestdll\compoundtestdll.dsp - Package Owner=<4>
+Project: "compoundtestdll"="..\compoundtestdll\compoundtestdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -135,7 +141,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "extendwritetest"=..\extendwritetest\extendwritetest.dsp - Package Owner=<4>
+Project: "extendwritetest"="..\extendwritetest\extendwritetest.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -147,7 +153,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "extendwritetestdll"=..\extendwritetestdll\extendwritetestdll.dsp - Package Owner=<4>
+Project: "extendwritetestdll"="..\extendwritetestdll\extendwritetestdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -159,7 +165,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "grouptest"=..\grouptest\grouptest.dsp - Package Owner=<4>
+Project: "grouptest"="..\grouptest\grouptest.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -171,7 +177,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "grouptestdll"=..\grouptestdll\grouptestdll.dsp - Package Owner=<4>
+Project: "grouptestdll"="..\grouptestdll\grouptestdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -183,7 +189,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "readtest"=..\readtest\readtest.dsp - Package Owner=<4>
+Project: "intermgrouptest"="..\intermgrouptest\intermgrouptest.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -195,7 +201,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "readtestdll"=..\readtestdll\readtestdll.dsp - Package Owner=<4>
+Project: "intermgrouptestdll"="..\intermgrouptestdll\intermgrouptestdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -207,7 +213,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "selectest"=..\selectest\selectest.dsp - Package Owner=<4>
+Project: "readtest"="..\readtest\readtest.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -219,7 +225,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "selectestdll"=..\selectestdll\selectestdll.dsp - Package Owner=<4>
+Project: "readtestdll"="..\readtestdll\readtestdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -231,7 +237,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "writetest"=..\writetest\writetest.dsp - Package Owner=<4>
+Project: "selectest"="..\selectest\selectest.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -243,7 +249,31 @@ Package=<4>
 
 ###############################################################################
 
-Project: "writetestdll"=..\writetestdll\writetestdll.dsp - Package Owner=<4>
+Project: "selectestdll"="..\selectestdll\selectestdll.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "writetest"="..\writetest\writetest.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "writetestdll"="..\writetestdll\writetestdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{

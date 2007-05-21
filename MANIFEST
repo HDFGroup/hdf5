@@ -1650,6 +1650,8 @@
 ./windows/examples/extendwritetestdll/extendwritetestdll.dsp
 ./windows/examples/grouptest/grouptest.dsp
 ./windows/examples/grouptestdll/grouptestdll.dsp
+./windows/examples/intermgrouptest/intermgrouptest.dsp
+./windows/examples/intermgrouptestdll/intermgrouptestdll.dsp
 ./windows/examples/readtest/readtest.dsp
 ./windows/examples/readtestdll/readtestdll.dsp
 ./windows/examples/selectest/selectest.dsp

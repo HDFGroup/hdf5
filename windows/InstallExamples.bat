@@ -76,6 +76,16 @@ copy debug\grouptestdll.exe ..\examplesDBGDLL\
 copy release\grouptestdll.exe ..\examplesRELDLL\
 cd ..
 
+cd intermgrouptest
+copy debug\intermgrouptest.exe ..\examplesDBG\
+copy release\intermgrouptest.exe ..\examplesREL\
+cd ..
+
+cd intermgrouptestdll
+copy debug\intermgrouptestdll.exe ..\examplesDBGDLL\
+copy release\intermgrouptestdll.exe ..\examplesRELDLL\
+cd ..
+
 cd readtest
 copy debug\readtest.exe ..\examplesDBG\
 copy release\readtest.exe ..\examplesREL\
