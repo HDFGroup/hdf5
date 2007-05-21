@@ -23,8 +23,15 @@ USE_FILTER_FLETCHER32="@USE_FILTER_FLETCHER32@"
 USE_FILTER_NBIT="@USE_FILTER_NBIT@"
 USE_FILTER_SCALEOFFSET="@USE_FILTER_SCALEOFFSET@"
 
-DUMPER=h5dump               # The tool name
-DUMPER_BIN=`pwd`/$DUMPER    # The path of the tool binary
+DUMPER=h5dump                     # The tool name
+DUMPER_BIN=`pwd`/$DUMPER          # The path of the tool binary
+
+H5DIFF=../h5diff/h5diff           # The h5diff tool name 
+H5DIFF_BIN=`pwd`/$H5DIFF          # The path of the h5diff  tool binary
+
+H5IMPORT=../h5import/h5import     # The h5import tool name 
+H5IMPORT_BIN=`pwd`/$H5IMPORT      # The path of the h5import  tool binary
+
 
 CMP='cmp -s'
 DIFF='diff -c'
@@ -99,6 +106,73 @@ SKIP() {
 	  echo  " -SKIP-"
 }
   
+# Print a line-line message left justified in a field of 70 characters
+#
+PRINT_H5DIFF() {
+ SPACES="                                                               "
+ echo " Running h5diff $* $SPACES" | cut -c1-70 | tr -d '\012'
+}
+
+
+# Call the h5diff tool
+#
+DIFFTEST() 
+{
+    PRINT_H5DIFF  $@
+    (
+     cd $srcdir/../testfiles
+     if [ "`uname -s`" = "TFLOPS O/S" ]; then
+      $RUNSERIAL $H5DIFF_BIN $@ -q
+     else
+      $RUNSERIAL $H5DIFF_BIN "$@" -q
+     fi
+    )
+    RET=$?
+    if [ $RET != 0 ] ; then
+         echo "*FAILED*"
+         nerrors="`expr $nerrors + 1`"
+    else
+         echo " PASSED"
+    fi
+        
+}
+
+# Print a line-line message left justified in a field of 70 characters
+# beginning with the word "Verifying".
+#
+PRINT_H5IMPORT() {
+ SPACES="                                                               "
+ echo " Running h5import $* $SPACES" | cut -c1-70 | tr -d '\012'
+}
+
+# Call the h5import tool
+#
+IMPORTTEST() 
+{
+    # remove the output hdf5 file if it exists
+    hdf5_file="$srcdir/../testfiles/$5"
+    if [ -f $hdf5_file ]; then
+     rm -f $hdf5_file
+    fi
+
+    PRINT_H5IMPORT  $@
+    (
+     cd $srcdir/../testfiles
+     if [ "`uname -s`" = "TFLOPS O/S" ]; then
+      $RUNSERIAL $H5IMPORT_BIN $@
+     else
+      $RUNSERIAL $H5IMPORT_BIN "$@" 
+     fi
+    )
+    RET=$?
+    if [ $RET != 0 ] ; then
+         echo "*FAILED*"
+         nerrors="`expr $nerrors + 1`"
+    else
+         echo " PASSED"
+    fi
+        
+}
 
 
 ##############################################################################
@@ -340,14 +414,22 @@ TOOLTEST tnullspace.ddl tnullspace.h5
 TOOLTEST tvms.ddl tvms.h5
 
 # test for binary output
-TOOLTEST tbin1.ddl -d integer -o out1.bin -b LE     tbinary.h5
-TOOLTEST tbin2.ddl -d float   -o out2.bin -b BE     tbinary.h5
-TOOLTEST tbin3.ddl -d array   -o out3.bin -b MEMORY tbinary.h5
-TOOLTEST tbin4.ddl -d double  -o out4.bin -b FILE   tbinary.h5
-   # Clean up binary output files
-   if test -z "$HDF5_NOCLEANUP"; then
-      rm -f $srcdir/../testfiles/out[1-4].bin
-   fi
+TOOLTEST   tbin1.ddl -d array  -o out1.bin -b LE     tbinary.h5
+TOOLTEST   tbin2.ddl -d float  -o out2.bin -b BE     tbinary.h5
+
+# the MEMORY test can be validated with h5import/h5diff
+TOOLTEST   tbin3.ddl -d integer -o out3.bin -b MEMORY tbinary.h5
+IMPORTTEST out3.bin -c out3.h5import -o out3.h5
+DIFFTEST   tbinary.h5 out3.h5 /integer /integer
+
+TOOLTEST   tbin4.ddl -d double  -o out4.bin -b FILE   tbinary.h5
+   
+# Clean up binary output files
+if test -z "$HDF5_NOCLEANUP"; then
+ rm -f $srcdir/../testfiles/out[1-4].bin
+ rm -f $srcdir/../testfiles/out3.h5
+fi
+
 
 # test for dataset region references 
 TOOLTEST tregref.ddl tdatareg.h5

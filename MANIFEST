@@ -995,6 +995,7 @@
 ./tools/misc/testfiles/h5stat_help1.ddl
 ./tools/misc/testfiles/h5stat_help2.ddl
 
+# h5dump
 ./tools/testfiles/family_file00000.h5
 ./tools/testfiles/family_file00001.h5
 ./tools/testfiles/family_file00002.h5
@@ -1191,7 +1192,8 @@
 ./tools/testfiles/tbigdims.ddl
 ./tools/testfiles/tbigdims.h5
 ./tools/testfiles/thyperslab.h5
-
+# h5dump h5import validation
+./tools/testfiles/out3.h5import
 
 
 # Expected output from h5ls tests
