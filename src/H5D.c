@@ -1939,8 +1939,14 @@ done:
                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
         } /* end if */
         if(dataset->shared->type) {
-            if(H5I_dec_ref(dataset->shared->type_id) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
+            if(dataset->shared->type_id > 0) {
+                if(H5I_dec_ref(dataset->shared->type_id) < 0)
+                    HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
+            } /* end if */
+            else {
+                if(H5T_close(dataset->shared->type) < 0)
+                    HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
+            } /* end else */
         } /* end if */
     } /* end if */
 
