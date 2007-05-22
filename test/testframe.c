@@ -26,7 +26,7 @@
 /*
  * Definitions for the testing structure.
  */
-#define MAXNUMOFTESTS   40
+#define MAXNUMOFTESTS   45
 #define MAXTESTNAME     16
 #define MAXTESTDESC     64
 
