@@ -70,7 +70,7 @@ H5_DLL htri_t H5P_exist_plist(H5P_genplist_t *plist, const char *name);
 H5_DLL char *H5P_get_class_name(H5P_genclass_t *pclass);
 H5_DLL herr_t H5P_get_nprops_pclass(H5P_genclass_t *pclass, size_t *nprops, hbool_t recurse);
 H5_DLL herr_t H5P_register(H5P_genclass_t *pclass, const char *name, size_t size,
-            void *def_value, H5P_prp_create_func_t prp_create, H5P_prp_set_func_t prp_set,
+            const void *def_value, H5P_prp_create_func_t prp_create, H5P_prp_set_func_t prp_set,
             H5P_prp_get_func_t prp_get, H5P_prp_delete_func_t prp_delete,
             H5P_prp_copy_func_t prp_copy, H5P_prp_compare_func_t prp_cmp,
             H5P_prp_close_func_t prp_close);
