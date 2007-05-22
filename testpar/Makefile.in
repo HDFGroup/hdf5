@@ -44,7 +44,7 @@ MOSTLYCLEAN=MPItest.h5 Para*.h5 *.clog
 DISTCLEAN=go Makefile testph5.sh
 
 ## Test source files
-TEST_PHDF5_SRC=testphdf5.c t_dset.c t_file.c t_mdset.c t_ph5basic.c t_coll_chunk.c t_span_tree.c t_chunk_alloc.c
+TEST_PHDF5_SRC=testphdf5.c t_dset.c t_file.c t_mdset.c t_ph5basic.c t_coll_chunk.c t_span_tree.c t_chunk_alloc.c t_filter_read.c
 TEST_PHDF5_OBJ=$(TEST_PHDF5_SRC:.c=.lo)
 TEST_SRC=t_mpi.c $(TEST_PHDF5_SRC)
 TEST_OBJ=$(TEST_SRC:.c=.lo)
