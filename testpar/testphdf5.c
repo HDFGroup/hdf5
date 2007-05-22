@@ -367,6 +367,8 @@ int main(int argc, char **argv)
 	    "extendible dataset independent write #2", PARATESTFILE);
     AddTest("calloc", test_chunk_alloc, NULL,
 	    "parallel extend Chunked allocation on serial file", PARATESTFILE);
+    AddTest("fltread", test_filter_read, NULL,
+	    "parallel read of dataset written serially with filters", PARATESTFILE);
 
 #ifdef H5_HAVE_FILTER_DEFLATE
     AddTest("cmpdsetr", compress_readAll, NULL,
