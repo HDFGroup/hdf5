@@ -476,14 +476,15 @@ call %tooltest% tvms.ddl
 
 
 ::test for binary output
-set flag=-d integer -o out1.bin -b LE %tbinary%
+set flag=-d array -o out1.bin -b LE %tbinary%
 call %tooltest% tbin1.ddl
 
 set flag=-d float   -o out2.bin -b BE %tbinary%
 call %tooltest% tbin2.ddl
 
-set flag=-d array   -o out3.bin -b MEMORY %tbinary%
+set flag=-d integer   -o out3.bin -b MEMORY %tbinary%
 call %tooltest% tbin3.ddl
+
 
 set flag=-d double  -o out4.bin -b FILE %tbinary%
 call %tooltest% tbin4.ddl
