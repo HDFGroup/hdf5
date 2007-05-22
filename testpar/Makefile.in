@@ -87,7 +87,7 @@ t_posix_compliant_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
 am_testphdf5_OBJECTS = testphdf5.$(OBJEXT) t_dset.$(OBJEXT) \
 	t_file.$(OBJEXT) t_mdset.$(OBJEXT) t_ph5basic.$(OBJEXT) \
 	t_coll_chunk.$(OBJEXT) t_span_tree.$(OBJEXT) \
-	t_chunk_alloc.$(OBJEXT)
+	t_chunk_alloc.$(OBJEXT) t_filter_read.$(OBJEXT)
 testphdf5_OBJECTS = $(am_testphdf5_OBJECTS)
 testphdf5_LDADD = $(LDADD)
 testphdf5_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
@@ -345,7 +345,7 @@ TEST_PROG_PARA = t_mpi t_posix_compliant testphdf5 t_cache t_pflush1 t_pflush2
 TEST_SCRIPT_PARA = testph5.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 testphdf5_SOURCES = testphdf5.c t_dset.c t_file.c t_mdset.c t_ph5basic.c \
-        t_coll_chunk.c t_span_tree.c t_chunk_alloc.c
+        t_coll_chunk.c t_span_tree.c t_chunk_alloc.c t_filter_read.c 
 
 
 # The tests all depend on the hdf5 library and the test library
@@ -439,6 +439,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_coll_chunk.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_dset.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_file.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_filter_read.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_mdset.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_mpi.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_pflush1.Po@am__quote@
