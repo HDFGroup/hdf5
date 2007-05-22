@@ -5685,9 +5685,16 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 #endif
 
 	    /* The hardware conversion */
-	    /* Check for underflow when src is a "larger" float than dst.*/
+	    /* Check for underflow when src is a "larger" float than dst.
+             * Also check if the source value is in the valid range.
+             */
 	    if (FLT_FLOAT==src_type) {
 		HDmemcpy(aligned, saved+j*sizeof(float), sizeof(float));
+
+                /* Make sure the source value is in the valid range for the compiler. */
+		if(HDfabs(*((double*)aligned)) < FLT_MIN)
+                    continue;
+ 
 		if (FLT_FLOAT==dst_type) {
 		    hw_f = *((float*)aligned);
 		    hw = (unsigned char*)&hw_f;
@@ -5702,6 +5709,10 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 		}
 	    } else if (FLT_DOUBLE==src_type) {
 		HDmemcpy(aligned, saved+j*sizeof(double), sizeof(double));
+
+		if(HDfabs(*((double*)aligned)) < DBL_MIN)
+                    continue;
+
 		if (FLT_FLOAT==dst_type) {
 		    hw_f = (float)(*((double*)aligned));
 		    hw = (unsigned char*)&hw_f;
@@ -5718,6 +5729,10 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 #if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE
 	    } else {
 		HDmemcpy(aligned, saved+j*sizeof(long double), sizeof(long double));
+
+		if(HDfabs(*((double*)aligned)) < LDBL_MIN)
+                    continue;
+
 		if (FLT_FLOAT==dst_type) {
 		    hw_f = *((long double*)aligned);
 		    hw = (unsigned char*)&hw_f;
