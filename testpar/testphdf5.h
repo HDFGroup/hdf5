@@ -212,6 +212,7 @@ void dataset_readAll(void);
 void extend_readInd(void);
 void extend_readAll(void);
 void test_chunk_alloc(void);
+void test_filter_read(void);
 void compact_dataset(void);
 void null_dataset(void);
 void big_dataset(void);
