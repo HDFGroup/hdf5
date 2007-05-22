@@ -851,6 +851,7 @@
 ./testpar/t_pflush2.c
 ./testpar/t_chunk_alloc.c
 ./testpar/t_coll_chunk.c
+./testpar/t_filter_read.c
 ./testpar/t_span_tree.c
 ./testpar/t_posix_compliant.c
 ./testpar/testpar.h
