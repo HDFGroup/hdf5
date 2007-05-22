@@ -32,7 +32,7 @@ check_PROGRAMS = $(TEST_PROG_PARA)
 check_SCRIPTS= $(TEST_SCRIPT)
 
 testphdf5_SOURCES=testphdf5.c t_dset.c t_file.c t_mdset.c t_ph5basic.c \
-        t_coll_chunk.c t_span_tree.c t_chunk_alloc.c
+        t_coll_chunk.c t_span_tree.c t_chunk_alloc.c t_filter_read.c 
 
 # The tests all depend on the hdf5 library and the test library
 LDADD = $(LIBH5TEST) $(LIBHDF5)
