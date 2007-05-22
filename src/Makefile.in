@@ -104,8 +104,8 @@ am_libhdf5_la_OBJECTS = H5.lo H5checksum.lo H5dbg.lo H5system.lo \
 	H5Odrvinfo.lo H5Odtype.lo H5Oefl.lo H5Ofill.lo H5Oginfo.lo \
 	H5Olayout.lo H5Olinfo.lo H5Olink.lo H5Omessage.lo H5Omtime.lo \
 	H5Oname.lo H5Onull.lo H5Opline.lo H5Orefcount.lo H5Osdspace.lo \
-	H5Oshared.lo H5Ostab.lo H5Oshmesg.lo H5Otest.lo H5Ounknown.lo H5P.lo \
-	H5Pacpl.lo H5Pdcpl.lo H5Pdxpl.lo H5Pfapl.lo H5Pfcpl.lo \
+	H5Oshared.lo H5Ostab.lo H5Oshmesg.lo H5Otest.lo H5Ounknown.lo \
+	H5P.lo H5Pacpl.lo H5Pdcpl.lo H5Pdxpl.lo H5Pfapl.lo H5Pfcpl.lo \
 	H5Pfmpl.lo H5Pgcpl.lo H5Plapl.lo H5Plcpl.lo H5Pocpl.lo \
 	H5Pocpypl.lo H5Pstrcpl.lo H5Ptest.lo H5R.lo H5RC.lo H5RS.lo \
 	H5S.lo H5Sall.lo H5Shyper.lo H5Smpio.lo H5Snone.lo H5Spoint.lo \

@@ -81,12 +81,13 @@ am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 	getname$(EXEEXT) vfd$(EXEEXT) ntypes$(EXEEXT) dangle$(EXEEXT) \
 	dtransform$(EXEEXT) reserved$(EXEEXT) cross_read$(EXEEXT) \
 	btree2$(EXEEXT) fheap$(EXEEXT)
-am__EXEEXT_2 = gen_bogus$(EXEEXT) gen_deflate$(EXEEXT) gen_filters$(EXEEXT) \
-	gen_new_array$(EXEEXT) gen_new_fill$(EXEEXT) \
-	gen_new_group$(EXEEXT) gen_new_mtime$(EXEEXT) \
-	gen_new_super$(EXEEXT) gen_noencoder$(EXEEXT) \
-	gen_nullspace$(EXEEXT) space_overflow$(EXEEXT) \
-	gen_cross$(EXEEXT) gen_udlinks$(EXEEXT)
+am__EXEEXT_2 = gen_bogus$(EXEEXT) gen_deflate$(EXEEXT) \
+	gen_filters$(EXEEXT) gen_new_array$(EXEEXT) \
+	gen_new_fill$(EXEEXT) gen_new_group$(EXEEXT) \
+	gen_new_mtime$(EXEEXT) gen_new_super$(EXEEXT) \
+	gen_noencoder$(EXEEXT) gen_nullspace$(EXEEXT) \
+	space_overflow$(EXEEXT) gen_cross$(EXEEXT) \
+	gen_udlinks$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 big_SOURCES = big.c
 big_OBJECTS = big.$(OBJEXT)

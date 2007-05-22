@@ -74,6 +74,9 @@ const char *H5REPACK_FILENAMES[] = {
     NULL
 };
 
+#define H5REPACK_EXTFILE "h5repack_ext.bin"
+
+
 const char *progname = "h5repacktst";
 int d_status = EXIT_SUCCESS;
 
@@ -136,7 +139,6 @@ int main (void)
 #if defined (H5_HAVE_FILTER_SZIP)
  int szip_can_encode = 0;
 #endif
- hid_t       fapl;
 
  /* initialize */
  memset(&diff_options, 0, sizeof (diff_opt_t));
@@ -144,10 +146,6 @@ int main (void)
 
  /* run tests  */
  puts("Testing h5repack:");
-
- /* setup */
- h5_reset();
- fapl = h5_fileaccess();
 
  /* make the test files */
  TESTING("    generating datasets");
@@ -1305,13 +1303,20 @@ if (szip_can_encode) {
 
 
 /*-------------------------------------------------------------------------
- * end
+ * clean temporary test files
  *-------------------------------------------------------------------------
  */
+ {
+     hid_t       fapl;
+     
+     /* setup */
+     h5_reset();
+     fapl = h5_fileaccess();
+     h5_cleanup(H5REPACK_FILENAMES, fapl); 
+     
+ }
 
  puts("All h5repack tests passed.");
-
- h5_cleanup(H5REPACK_FILENAMES, fapl); 
 
  return 0;
 
@@ -2695,7 +2700,7 @@ int make_external(hid_t loc_id)
  /* create */ 
  if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
   goto out;
- if (H5Pset_external(dcpl, "h5repack_ext.bin", (off_t)0, size)<0) 
+ if (H5Pset_external(dcpl, H5REPACK_EXTFILE, (off_t)0, size)<0) 
   goto out;
  if ((sid = H5Screate_simple(1,cur_size, max_size))<0)
   goto out;
