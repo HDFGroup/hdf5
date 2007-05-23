@@ -44,17 +44,11 @@
 /* Local Macros */
 /****************/
 
-#ifndef QAK
-/* Size of stack buffer for serialized attributes */
-#define H5A_ATTR_BUF_SIZE               128
-#endif /* QAK */
-
 
 /******************/
 /* Local Typedefs */
 /******************/
 
-#ifdef QAK
 /*
  * Data exchange structure for dense attribute storage.  This structure is
  * passed through the fractal heap layer to compare attributes.
@@ -71,7 +65,6 @@ typedef struct H5A_fh_ud_cmp_t {
     /* upward */
     int         cmp;                    /* Comparison of two attribute names */
 } H5A_fh_ud_cmp_t;
-#endif /* QAK */
 
 
 /********************/
@@ -108,9 +101,7 @@ static herr_t H5A_dense_btree2_name_debug(FILE *stream, const H5F_t *f, hid_t dx
     int indent, int fwidth, const void *record, const void *_udata);
 
 /* Fractal heap function callbacks */
-#ifdef QAK
 static herr_t H5A_dense_fh_name_cmp(const void *obj, size_t obj_len, void *op_data);
-#endif /* QAK */
 
 
 /*********************/
@@ -145,11 +136,6 @@ const H5B2_class_t H5A_BT2_CORDER[1]={{  /* B-tree class information */
 /* Library Private Variables */
 /*****************************/
 
-#ifndef QAK
-/* Declare extern a free list to manage blocks of type conversion data */
-H5FL_BLK_EXTERN(ser_attr);
-#endif /* QAK */
-
 
 /*******************/
 /* Local Variables */
@@ -171,7 +157,6 @@ H5FL_BLK_EXTERN(ser_attr);
  *
  *-------------------------------------------------------------------------
  */
-#ifdef QAK
 static herr_t
 H5A_dense_fh_name_cmp(const void *obj, size_t UNUSED obj_len, void *_udata)
 {
@@ -210,7 +195,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_dense_fh_name_cmp() */
-#endif /* QAK */
 
 
 /*-------------------------------------------------------------------------
@@ -301,16 +285,13 @@ H5A_dense_btree2_name_compare(const void *_bt2_udata, const void *_bt2_rec)
     else if(bt2_udata->name_hash > bt2_rec->hash)
         ret_value = 1;
     else {
-#ifdef QAK
         H5A_fh_ud_cmp_t fh_udata;       /* User data for fractal heap 'op' callback */
-#endif /* QAK */
         H5HF_t *fheap;                  /* Fractal heap handle to use for finding object */
         herr_t status;                  /* Status from fractal heap 'op' routine */
 
         /* Sanity check */
         HDassert(bt2_udata->name_hash == bt2_rec->hash);
 
-#ifdef QAK
         /* Prepare user data for callback */
         /* down */
         fh_udata.f = bt2_udata->f;
@@ -322,7 +303,6 @@ H5A_dense_btree2_name_compare(const void *_bt2_udata, const void *_bt2_rec)
 
         /* up */
         fh_udata.cmp = 0;
-#endif /* QAK */
 
         /* Check for attribute in shared storage */
         if(bt2_rec->flags & H5O_MSG_FLAG_SHARED)
@@ -331,72 +311,12 @@ H5A_dense_btree2_name_compare(const void *_bt2_udata, const void *_bt2_rec)
             fheap = bt2_udata->fheap;
         HDassert(fheap);
 
-#ifdef QAK
         /* Check if the user's attribute and the B-tree's attribute have the same name */
         status = H5HF_op(fheap, bt2_udata->dxpl_id, &bt2_rec->id, H5A_dense_fh_name_cmp, &fh_udata);
         HDassert(status >= 0);
 
         /* Callback will set comparison value */
         ret_value = fh_udata.cmp;
-#else /* QAK */
-/* XXX: This hack is due to a shared attribute and one of its components
- *      ending up in the same fractal heap direct block.  Once John's change
- *      to the metadata cache that allows re-entrant read "protects" is in
- *      place, the previous code can be uncommented. -QAK
- */
-        {
-            H5A_t *attr;                /* Pointer to attribute created from heap object */
-            uint8_t attr_buf[H5A_ATTR_BUF_SIZE]; /* Buffer for serializing message */
-            void *attr_ptr;             /* Pointer to serialized message */
-            hbool_t took_ownership = FALSE;     /* Whether the "found" operator took ownership of the attribute */
-            size_t attr_size;           /* Length of existing encoded attribute */
-
-            /* Get length of encoded attribute */
-            status = H5HF_get_obj_len(fheap, bt2_udata->dxpl_id, &bt2_rec->id, &attr_size);
-            HDassert(status >= 0);
-
-            /* Allocate space for serialized message, if necessary */
-            if(attr_size > sizeof(attr_buf)) {
-                attr_ptr = H5FL_BLK_MALLOC(ser_attr, attr_size);
-                HDassert(attr_ptr);
-            } /* end if */
-            else
-                attr_ptr = attr_buf;
-
-            /* Read the encoded attribute */
-            status = H5HF_read(fheap, bt2_udata->dxpl_id, &bt2_rec->id, attr_ptr);
-            HDassert(status >= 0);
-
-            /* Decode attribute information */
-            attr = (H5A_t *)H5O_msg_decode(bt2_udata->f, bt2_udata->dxpl_id, H5O_ATTR_ID, (const unsigned char *)attr_ptr);
-            HDassert(attr);
-
-            /* Release space, if we allocated it */
-            if(attr_ptr != attr_buf)
-                (void)H5FL_BLK_FREE(ser_attr, attr_ptr);
-
-            /* Compare the string values */
-            ret_value = HDstrcmp(bt2_udata->name, attr->name);
-
-            /* Check for correct attribute & callback to make */
-            if(ret_value == 0 && bt2_udata->found_op) {
-                /* Check whether we should "reconstitute" the shared message info */
-                if(bt2_rec->flags & H5O_MSG_FLAG_SHARED)
-                    H5SM_reconstitute(&(attr->sh_loc), bt2_udata->f, H5O_ATTR_ID, bt2_rec->id);
-
-                /* Set the creation order index for the attribute */
-                attr->crt_idx = bt2_rec->corder;
-
-                /* Make callback */
-                status = (bt2_udata->found_op)(attr, &took_ownership, bt2_udata->found_op_data);
-                HDassert(status >= 0);
-            } /* end if */
-
-            /* Release the space allocated for the attrbute */
-            if(!took_ownership)
-                H5O_msg_free(H5O_ATTR_ID, attr);
-        }
-#endif /* QAK */
     } /* end else */
 
     FUNC_LEAVE_NOAPI(ret_value)
