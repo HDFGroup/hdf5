@@ -5692,7 +5692,7 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 		HDmemcpy(aligned, saved+j*sizeof(float), sizeof(float));
 
                 /* Make sure the source value is in the valid range for the compiler. */
-		if(HDfabs(*((double*)aligned)) < FLT_MIN)
+		if(HDfabsf(*((float*)aligned)) < FLT_MIN)
                     continue;
  
 		if (FLT_FLOAT==dst_type) {
@@ -5730,7 +5730,7 @@ test_conv_flt_1 (const char *name, hid_t src, hid_t dst)
 	    } else {
 		HDmemcpy(aligned, saved+j*sizeof(long double), sizeof(long double));
 
-		if(HDfabs(*((double*)aligned)) < LDBL_MIN)
+		if(HDfabsl(*((long double*)aligned)) < LDBL_MIN)
                     continue;
 
 		if (FLT_FLOAT==dst_type) {
