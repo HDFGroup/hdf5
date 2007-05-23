@@ -500,6 +500,7 @@ H5G_obj_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
             use_new_dense = FALSE;
         else {
             H5G_obj_oh_it_ud1_t	udata;          /* User data for iteration */
+            H5O_mesg_operator_t op;             /* Message operator */
 
             /* The group doesn't currently have "dense" storage for links */
             if(H5G_dense_create(grp_oloc->file, dxpl_id, &linfo) < 0)
@@ -511,7 +512,9 @@ H5G_obj_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
             udata.linfo = &linfo;
 
             /* Iterate over the 'link' messages, inserting them into the dense link storage  */
-            if(H5O_msg_iterate(grp_oloc, H5O_LINK_ID, H5G_obj_compact_to_dense_cb, &udata, dxpl_id) < 0)
+            op.op_type = H5O_MESG_OP_APP;
+            op.u.app_op = H5G_obj_compact_to_dense_cb;
+            if(H5O_msg_iterate(grp_oloc, H5O_LINK_ID, &op, &udata, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "error iterating over links")
 
             /* Remove all the 'link' messages */

@@ -142,6 +142,7 @@ H5G_compact_build_table(const H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t 
     /* Allocate space for the table entries */
     if(ltable->nlinks > 0) {
         H5G_iter_bt_t udata;               /* User data for iteration callback */
+        H5O_mesg_operator_t op;             /* Message operator */
 
         /* Allocate the link table */
         if((ltable->lnks = H5MM_malloc(sizeof(H5O_link_t) * ltable->nlinks)) == NULL)
@@ -152,7 +153,9 @@ H5G_compact_build_table(const H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t 
         udata.curr_lnk = 0;
 
         /* Iterate through the link messages, adding them to the table */
-        if(H5O_msg_iterate(oloc, H5O_LINK_ID, H5G_compact_build_table_cb, &udata, dxpl_id) < 0)
+        op.op_type = H5O_MESG_OP_APP;
+        op.u.app_op = H5G_compact_build_table_cb;
+        if(H5O_msg_iterate(oloc, H5O_LINK_ID, &op, &udata, dxpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "error iterating over link messages")
 
         /* Sort link table in correct iteration order */
@@ -565,6 +568,7 @@ H5G_compact_lookup(H5O_loc_t *oloc, const char *name, H5O_link_t *lnk,
     hid_t dxpl_id)
 {
     H5G_iter_lkp_t udata;               /* User data for iteration callback */
+    H5O_mesg_operator_t op;             /* Message operator */
     herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_compact_lookup, FAIL)
@@ -579,7 +583,9 @@ H5G_compact_lookup(H5O_loc_t *oloc, const char *name, H5O_link_t *lnk,
     udata.found = FALSE;
 
     /* Iterate through the link messages, adding them to the table */
-    if(H5O_msg_iterate(oloc, H5O_LINK_ID, H5G_compact_lookup_cb, &udata, dxpl_id) < 0)
+    op.op_type = H5O_MESG_OP_APP;
+    op.u.app_op = H5G_compact_lookup_cb;
+    if(H5O_msg_iterate(oloc, H5O_LINK_ID, &op, &udata, dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "error iterating over link messages")
 
     /* Check if we found the link we were looking for */

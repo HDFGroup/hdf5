@@ -227,7 +227,7 @@ struct H5O_msg_class_t {
     herr_t	(*debug)(H5F_t*, hid_t, const void*, FILE*, int, int);
 };
 
-typedef struct H5O_mesg_t {
+struct H5O_mesg_t {
     const H5O_msg_class_t	*type;	/*type of message		     */
     hbool_t		dirty;		/*raw out of date wrt native	     */
     uint8_t		flags;		/*message flags			     */
@@ -236,7 +236,7 @@ typedef struct H5O_mesg_t {
     void		*native;	/*native format message		     */
     uint8_t		*raw;		/*ptr to raw data		     */
     size_t		raw_size;	/*size with alignment		     */
-} H5O_mesg_t;
+};
 
 typedef struct H5O_chunk_t {
     hbool_t	dirty;			/*dirty flag			     */
@@ -309,23 +309,6 @@ typedef struct H5O_addr_map_t {
     hbool_t     is_locked;              /* Indicate that the destination object is locked currently */
     hsize_t     inc_ref_count;          /* Number of deferred increments to reference count */
 } H5O_addr_map_t;
-
-
-/* Typedef for "internal library" iteration operations */
-typedef herr_t (*H5O_lib_operator_t)(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
-    unsigned sequence, hbool_t *oh_modified/*out*/, void *operator_data/*in,out*/);
-
-/* Some syntactic sugar to make the compiler happy with two different kinds of iterator callbacks */
-typedef struct {
-    enum {
-        H5O_MESG_OP_APP,            /* Application callback */
-        H5O_MESG_OP_LIB             /* Library internal callback */
-    } op_type;
-    union {
-        H5O_operator_t app_op;      /* Application callback for each message */
-        H5O_lib_operator_t lib_op;  /* Library internal callback for each message */
-    } u;
-} H5O_mesg_operator_t;
 
 
 /* H5O inherits cache-like properties from H5AC */
@@ -467,6 +450,7 @@ H5_DLLVAR const H5O_obj_class_t H5O_OBJ_DATATYPE[1];
 
 
 /* Package-local function prototypes */
+H5_DLL herr_t H5O_msg_flush(H5F_t *f, H5O_t *oh, H5O_mesg_t *mesg);
 H5_DLL herr_t H5O_flush_msgs(H5F_t *f, H5O_t *oh);
 H5_DLL hid_t H5O_open_by_loc(const H5G_loc_t *obj_loc, hid_t dxpl_id);
 H5_DLL herr_t H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, H5O_mesg_t *mesg);

@@ -46,10 +46,9 @@
 /* Udata struct for calls to H5SM_read_iter_op */
 typedef struct H5SM_read_udata_t {
     H5F_t *file;                    /* File in which sharing is happening (in) */
-    unsigned type_id;               /* Type of the message (in) */
-    size_t buf_size;               /* Size of the encoded message (out) */
-    void * encoding_buf;            /* The encoded message (out) */
-    H5O_msg_crt_idx_t idx;          /* Creation index of this message */
+    H5O_msg_crt_idx_t idx;          /* Creation index of this message (in) */
+    size_t buf_size;                /* Size of the encoded message (out) */
+    void *encoding_buf;             /* The encoded message (out) */
 } H5SM_read_udata_t;
 
 
@@ -74,7 +73,8 @@ static herr_t H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     H5SM_index_header_t *header, const H5O_shared_t * mesg, 
     unsigned *cache_flags, void ** /*out*/ encoded_mesg);
 static herr_t H5SM_type_to_flag(unsigned type_id, unsigned *type_flag);
-static herr_t H5SM_read_iter_op(const void *_mesg, unsigned idx, void *_udata);
+static herr_t H5SM_read_iter_op(H5O_t *oh, H5O_mesg_t *mesg, unsigned sequence,
+    hbool_t *oh_modified, void *_udata);
 static herr_t H5SM_read_mesg(H5F_t *f, const H5SM_sohm_t *mesg, H5HF_t *fheap,
                H5O_t * open_oh, hid_t dxpl_id, size_t *encoding_size /*out*/,
                void ** encoded_mesg /*out*/);
@@ -1403,7 +1403,7 @@ H5SM_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, H5O_shared_t *sh_mesg)
     } /* end if */
 
 done:
-    /* Release the master SOHM table on error */
+    /* Release the master SOHM table (should only happen on error) */
     if(table && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, table, cache_flags) < 0)
 	HDONE_ERROR(H5E_CACHE, H5E_CANTRELEASE, FAIL, "unable to close SOHM master table")
 
@@ -1643,13 +1643,12 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
 
         /* Set up user data for message iteration */
         udata.file = f;
-        udata.type_id = type_id;
         udata.idx = mesg->u.loc.index;
         udata.encoding_buf = NULL;
 
         /* Use the "real" iterate routine so it doesn't try to protect the OH */
-        op.op_type = H5O_MESG_OP_APP;
-        op.u.app_op = H5SM_read_iter_op;
+        op.op_type = H5O_MESG_OP_LIB;
+        op.u.lib_op = H5SM_read_iter_op;
         if((ret_value = H5O_msg_iterate_real(f, oh, type, &op, &udata, dxpl_id)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "unable to iterate over object header messages")
 
@@ -2180,10 +2179,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM_read_iter_op(const void *_mesg, unsigned idx, void *_udata)
+H5SM_read_iter_op(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, unsigned sequence,
+    hbool_t UNUSED *oh_modified, void *_udata/*in,out*/)
 {
     H5SM_read_udata_t *udata = (H5SM_read_udata_t *) _udata;
-    unsigned char *buf = NULL;
     herr_t ret_value = H5_ITER_CONT;
 
     FUNC_ENTER_NOAPI_NOINIT(H5SM_read_iter_op)
@@ -2191,34 +2190,34 @@ H5SM_read_iter_op(const void *_mesg, unsigned idx, void *_udata)
     /*
      * Check arguments.
      */
-    HDassert(_mesg);
+    HDassert(oh);
+    HDassert(mesg);
     HDassert(udata);
     HDassert(NULL == udata->encoding_buf);
 
     /* Check the creation index for this message */
-    if(idx == udata->idx) {
-        size_t raw_size;
+    if(sequence == udata->idx) {
+        /* Check if the message is dirty & flush it to the object header if so */
+        if(mesg->dirty)
+            if(H5O_msg_flush(udata->file, oh, mesg) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, H5_ITER_ERROR, "unable to encode object header message")
 
-        raw_size = H5O_msg_raw_size(udata->file, udata->type_id, TRUE, _mesg);
-        HDassert(raw_size);
+        /* Get the message's encoded size */
+        udata->buf_size = mesg->raw_size;
+        HDassert(udata->buf_size);
 
-        if(NULL == (buf = HDmalloc(raw_size)))
+        /* Allocate buffer to return the message in */
+        if(NULL == (udata->encoding_buf = H5MM_malloc(udata->buf_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR, "memory allocation failed")
 
-        /* JAMES: is there a faster way to get the encoded value here?  Do we already have a raw value? */
-        if(H5O_msg_encode(udata->file, udata->type_id, TRUE, buf, _mesg) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, H5_ITER_ERROR, "can't encode message from object header")
+        /* Copy the encoded message into the buffer to return */
+        HDmemcpy(udata->encoding_buf, mesg->raw, udata->buf_size);
 
-        udata->encoding_buf = buf;
-        udata->buf_size = raw_size;
-
+        /* Found the message we were looking for */
         ret_value = H5_ITER_STOP;
     } /* end if */
 
 done:
-    if(ret_value < 0 && buf)
-        HDfree(buf);
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_read_iter_op() */
 
@@ -2285,13 +2284,13 @@ H5SM_read_mesg(H5F_t *f, const H5SM_sohm_t *mesg, H5HF_t *fheap,
 
         /* Set up user data for message iteration */
         udata.file = f;
-        udata.type_id = mesg->msg_type_id;
+        udata.idx = mesg->u.mesg_loc.index;
         udata.encoding_buf = NULL;
         udata.idx = 0;
 
         /* Use the "real" iterate routine so it doesn't try to protect the OH */
-        op.op_type = H5O_MESG_OP_APP;
-        op.u.app_op = H5SM_read_iter_op;
+        op.op_type = H5O_MESG_OP_LIB;
+        op.u.lib_op = H5SM_read_iter_op;
         if((ret_value = H5O_msg_iterate_real(f, oh, type, &op, &udata, dxpl_id)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "unable to iterate over object header messages")
 
@@ -2474,8 +2473,8 @@ H5SM_list_debug(H5F_t *f, hid_t dxpl_id, haddr_t list_addr,
     HDfprintf(stream, "%*sShared Message List Index...\n", indent, "");
     for(x = 0; x < num_messages; ++x) {
         HDfprintf(stream, "%*sShared Object Header Message %d...\n", indent, "", x);
-        HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", fwidth, /* JAMES: better flag for this? */
-                "Hash value:", list->messages[x].hash);
+        HDfprintf(stream, "%*s%-*s %08lu\n", indent + 3, "", fwidth,
+                "Hash value:", (unsigned long)list->messages[x].hash);
         if(list->messages[x].location == H5SM_IN_HEAP) {
             HDfprintf(stream, "%*s%-*s %s\n", indent + 3, "", fwidth,
                     "Location:", "in heap");

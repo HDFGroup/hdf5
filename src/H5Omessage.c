@@ -1167,12 +1167,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_msg_iterate(const H5O_loc_t *loc, unsigned type_id, H5O_operator_t app_op,
-    void *op_data, hid_t dxpl_id)
+H5O_msg_iterate(const H5O_loc_t *loc, unsigned type_id,
+    const H5O_mesg_operator_t *op, void *op_data, hid_t dxpl_id)
 {
     H5O_t *oh = NULL;               /* Pointer to actual object header */
     const H5O_msg_class_t *type;    /* Actual H5O class type for the ID */
-    H5O_mesg_operator_t op;         /* Wrapper for operator */
     herr_t ret_value;               /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_msg_iterate, FAIL)
@@ -1184,15 +1183,14 @@ H5O_msg_iterate(const H5O_loc_t *loc, unsigned type_id, H5O_operator_t app_op,
     HDassert(type_id < NELMTS(H5O_msg_class_g));
     type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
     HDassert(type);
+    HDassert(op);
 
     /* Protect the object header to iterate over */
     if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
     /* Call the "real" iterate routine */
-    op.op_type = H5O_MESG_OP_APP;
-    op.u.app_op = app_op;
-    if((ret_value = H5O_msg_iterate_real(loc->file, oh, type, &op, op_data, dxpl_id)) < 0)
+    if((ret_value = H5O_msg_iterate_real(loc->file, oh, type, op, op_data, dxpl_id)) < 0)
         HERROR(H5E_OHDR, H5E_BADITER, "unable to iterate over object header messages");
 
 done:
@@ -2043,4 +2041,148 @@ H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_mesg_t *mesg)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_delete_mesg() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_msg_flush
+ *
+ * Purpose:	Flushes a message for an object header.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		May 14 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_msg_flush(H5F_t *f, H5O_t *oh, H5O_mesg_t *mesg)
+{
+    uint8_t	*p;             /* Temporary pointer to encode with */
+    unsigned    msg_id;         /* ID for message */
+    herr_t      ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_msg_flush, FAIL)
+
+    /* check args */
+    HDassert(f);
+    HDassert(oh);
+
+    /* Point into message's chunk's image */
+    p = mesg->raw - H5O_SIZEOF_MSGHDR_OH(oh);
+
+    /* Retrieve actual message ID, for unknown messages */
+    if(mesg->type == H5O_MSG_UNKNOWN)
+        msg_id = *(H5O_unknown_t *)(mesg->native);
+    else
+        msg_id = (uint8_t)mesg->type->id;
+
+    /* Encode the message prefix */
+    if(oh->version == H5O_VERSION_1)
+        UINT16ENCODE(p, msg_id)
+    else
+        *p++ = (uint8_t)msg_id;
+    HDassert(mesg->raw_size < H5O_MESG_MAX_SIZE);
+    UINT16ENCODE(p, mesg->raw_size);
+    *p++ = mesg->flags;
+
+    /* Only encode reserved bytes for version 1 of format */
+    if(oh->version == H5O_VERSION_1) {
+        *p++ = 0; /*reserved*/
+        *p++ = 0; /*reserved*/
+        *p++ = 0; /*reserved*/
+    } /* end for */
+    /* Only encode creation index for version 2+ of format */
+    else {
+        /* Only encode creation index if they are being tracked */
+        if(oh->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED)
+            UINT16ENCODE(p, mesg->crt_idx);
+    } /* end else */
+    HDassert(p == mesg->raw);
+
+#ifndef NDEBUG
+    /* Make certain that null messages aren't in chunks w/gaps */
+    if(H5O_NULL_ID == msg_id)
+        HDassert(oh->chunk[mesg->chunkno].gap == 0);
+
+    /* Unknown messages should always have a native pointer */
+    if(mesg->type == H5O_MSG_UNKNOWN)
+        HDassert(mesg->native);
+#endif /* NDEBUG */
+
+    /* Encode the message itself, if it's not an "unknown" message */
+    if(mesg->native && mesg->type != H5O_MSG_UNKNOWN) {
+        /*
+         * Encode the message.  If the message is shared then we
+         * encode a Shared Object message instead of the object
+         * which is being shared.
+         */
+        HDassert(mesg->raw >= oh->chunk[mesg->chunkno].image);
+        HDassert(mesg->raw_size == H5O_ALIGN_OH(oh, mesg->raw_size));
+        HDassert(mesg->raw + mesg->raw_size <=
+               oh->chunk[mesg->chunkno].image + (oh->chunk[mesg->chunkno].size - H5O_SIZEOF_CHKSUM_OH(oh)));
+#ifndef NDEBUG
+/* Sanity check that the message won't overwrite past it's allocated space */
+{
+    size_t msg_size;
+
+    msg_size = mesg->type->raw_size(f, FALSE, mesg->native);
+    msg_size = H5O_ALIGN_OH(oh, msg_size);
+    HDassert(msg_size <= mesg->raw_size);
+}
+#endif /* NDEBUG */
+        HDassert(mesg->type->encode);
+        if((mesg->type->encode)(f, FALSE, mesg->raw, mesg->native) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode object header message")
+    } /* end if */
+
+    /* Pass "modifiedness" from message to chunk */
+    mesg->dirty = FALSE;
+    oh->chunk[mesg->chunkno].dirty = TRUE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_msg_flush() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_flush_msgs
+ *
+ * Purpose:	Flushes messages for object header.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Nov 21 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_flush_msgs(H5F_t *f, H5O_t *oh)
+{
+    H5O_mesg_t *curr_msg;       /* Pointer to current message being operated on */
+    unsigned	u;              /* Local index variable */
+    herr_t      ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_flush_msgs, FAIL)
+
+    /* check args */
+    HDassert(f);
+    HDassert(oh);
+
+    /* Encode any dirty messages */
+    for(u = 0, curr_msg = &oh->mesg[0]; u < oh->nmesgs; u++, curr_msg++)
+        if(curr_msg->dirty)
+            if(H5O_msg_flush(f, oh, curr_msg) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode object header message")
+
+    /* Sanity check for the correct # of messages in object header */
+    if(oh->nmesgs != u)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "corrupt object header - too few messages")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_flush_msgs() */
 

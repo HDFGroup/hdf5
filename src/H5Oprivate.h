@@ -44,6 +44,7 @@
 
 /* Forward references of package typedefs */
 typedef struct H5O_msg_class_t H5O_msg_class_t;
+typedef struct H5O_mesg_t H5O_mesg_t;
 typedef struct H5O_t H5O_t;
 
 /* Values used to create the shared message & attribute heaps */
@@ -482,9 +483,26 @@ typedef uint32_t H5O_refcount_t;        /* Contains # of links to object, if >1 
 typedef unsigned H5O_unknown_t;         /* Original message type ID */
 
 
-/* Typedef for iteration operations */
+/* Typedef for "application" iteration operations */
 typedef herr_t (*H5O_operator_t)(const void *mesg/*in*/, unsigned idx,
     void *operator_data/*in,out*/);
+
+/* Typedef for "internal library" iteration operations */
+typedef herr_t (*H5O_lib_operator_t)(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
+    unsigned sequence, hbool_t *oh_modified/*out*/, void *operator_data/*in,out*/);
+
+/* Some syntactic sugar to make the compiler happy with two different kinds of iterator callbacks */
+typedef struct {
+    enum {
+        H5O_MESG_OP_APP,            /* Application callback */
+        H5O_MESG_OP_LIB             /* Library internal callback */
+    } op_type;
+    union {
+        H5O_operator_t app_op;      /* Application callback for each message */
+        H5O_lib_operator_t lib_op;  /* Library internal callback for each message */
+    } u;
+} H5O_mesg_operator_t;
+
 
 /* Typedef for abstract object creation */
 typedef struct {
@@ -538,8 +556,8 @@ H5_DLL herr_t H5O_msg_remove(const H5O_loc_t *loc, unsigned type_id, int sequenc
     hbool_t adj_link, hid_t dxpl_id);
 H5_DLL herr_t H5O_msg_remove_op(const H5O_loc_t *loc, unsigned type_id, int sequence,
     H5O_operator_t op, void *op_data, hbool_t adj_link, hid_t dxpl_id);
-H5_DLL herr_t H5O_msg_iterate(const H5O_loc_t *loc, unsigned type_id, H5O_operator_t op,
-    void *op_data, hid_t dxpl_id);
+H5_DLL herr_t H5O_msg_iterate(const H5O_loc_t *loc, unsigned type_id,
+    const H5O_mesg_operator_t *op, void *op_data, hid_t dxpl_id);
 H5_DLL size_t H5O_msg_raw_size(const H5F_t *f, unsigned type_id,
     hbool_t disable_shared, const void *mesg);
 H5_DLL size_t H5O_msg_size_f(const H5F_t *f, hid_t ocpl_id, unsigned type_id,

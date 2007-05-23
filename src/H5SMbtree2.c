@@ -17,6 +17,7 @@
 /* Module Setup */
 /****************/
 
+#define H5O_PACKAGE		/*suppress error about including H5Opkg 	  */
 #define H5SM_PACKAGE		/*suppress error about including H5SMpkg	  */
 
 /***********/
@@ -24,6 +25,7 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Opkg.h"             /* Object Headers                       */
 #include "H5SMpkg.h"            /* Shared object header messages        */
 
 
@@ -40,7 +42,6 @@
 typedef struct H5SM_compare_udata_t {
     const H5SM_mesg_key_t *key; /* Key; compare this against stored message */
     H5O_msg_crt_idx_t idx;      /* Index of the message in the OH, if applicable */
-    unsigned type_id;           /* Type ID of the type being compared */
     herr_t ret;                 /* Return value; set this to result of memcmp */
 } H5SM_compare_udata_t;
 
@@ -131,10 +132,10 @@ H5SM_btree_compare_cb(const void *obj, size_t obj_len, void *_udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM_compare_iter_op(const void *_mesg, unsigned idx, void *_udata)
+H5SM_compare_iter_op(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, unsigned sequence,
+    hbool_t UNUSED *oh_modified, void *_udata/*in,out*/)
 {
     H5SM_compare_udata_t *udata = (H5SM_compare_udata_t *) _udata;
-    unsigned char *buf = NULL;
     herr_t ret_value = H5_ITER_CONT;
 
     FUNC_ENTER_NOAPI_NOINIT(H5SM_compare_iter_op)
@@ -142,30 +143,29 @@ H5SM_compare_iter_op(const void *_mesg, unsigned idx, void *_udata)
     /*
      * Check arguments.
      */
-    HDassert(_mesg);
+    HDassert(oh);
+    HDassert(mesg);
     HDassert(udata && udata->key);
 
     /* Check the creation index for this message */
-    if(idx == udata->idx) {
-        size_t raw_size;
+    if(sequence == udata->idx) {
+        size_t aligned_encoded_size = H5O_ALIGN_OH(oh, udata->key->encoding_size);
 
-        /* Retrieve the length of the unshared version of the message */
-        raw_size = H5O_msg_raw_size(udata->key->file, udata->type_id, TRUE, _mesg);
-        HDassert(raw_size > 0);
+        /* Sanity check the message's length */
+        HDassert(mesg->raw_size > 0);
 
-        if(udata->key->encoding_size > raw_size)
+        if(aligned_encoded_size > mesg->raw_size)
             udata->ret = 1;
-        else if(udata->key->encoding_size < raw_size)
+        else if(aligned_encoded_size < mesg->raw_size)
             udata->ret = -1;
         else {
-            if(NULL == (buf = HDmalloc(raw_size)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR, "memory allocation failed")
+            /* Check if the message is dirty & flush it to the object header if so */
+            if(mesg->dirty)
+                if(H5O_msg_flush(udata->key->file, oh, mesg) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, H5_ITER_ERROR, "unable to encode object header message")
 
-            /* JAMES: is there a faster way to get the encoded value here?  Do we already have a raw value? */
-            if(H5O_msg_encode(udata->key->file, udata->type_id, TRUE, buf, _mesg) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, H5_ITER_ERROR, "unable to encode message from object header")
-
-            udata->ret = HDmemcmp(udata->key->encoding, buf, raw_size);
+            HDassert(udata->key->encoding_size <= mesg->raw_size);
+            udata->ret = HDmemcmp(udata->key->encoding, mesg->raw, udata->key->encoding_size);
         } /* end else */
 
         /* Indicate that we found the message we were looking for */
@@ -173,9 +173,6 @@ H5SM_compare_iter_op(const void *_mesg, unsigned idx, void *_udata)
     } /* end if */
 
 done:
-    if(buf)
-        HDfree(buf);
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_compare_iter_op() */
 
@@ -251,6 +248,7 @@ H5SM_message_compare(const void *rec1, const void *rec2)
         } /* end if */
         else {
             H5O_loc_t oloc;             /* Object owning the message */
+            H5O_mesg_operator_t op;             /* Message operator */
 
             /* Sanity checks */
             HDassert(key->file);
@@ -266,10 +264,11 @@ H5SM_message_compare(const void *rec1, const void *rec2)
 
             /* Finish setting up user data for iterator */
             udata.idx = mesg->u.mesg_loc.index;
-            udata.type_id = mesg->msg_type_id;
 
-            /* JAMES: is this okay? */
-            status = H5O_msg_iterate(&oloc, mesg->msg_type_id, H5SM_compare_iter_op, &udata, key->dxpl_id);
+            /* Locate the right message and compare with it */
+            op.op_type = H5O_MESG_OP_LIB;
+            op.u.lib_op = H5SM_compare_iter_op;
+            status = H5O_msg_iterate(&oloc, mesg->msg_type_id, &op, &udata, key->dxpl_id);
             HDassert(status >= 0);
         } /* end else */
 

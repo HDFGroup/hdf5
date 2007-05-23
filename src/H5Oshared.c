@@ -565,7 +565,9 @@ H5O_shared_copy_file(H5F_t *file_src, H5F_t *file_dst,
     } /* end if */
     else {
         /* Try to share new message in the destination file. */
-        /* JAMES: message is always shared in heap in dest. file */
+        /* Message is always shared in heap in dest. file because the dest.
+         *      object header doesn't quite exist yet - JML
+         */
         if(H5SM_try_share(file_dst, dxpl_id, NULL, mesg_type->id, _native_dst, NULL) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to determine if message should be shared")
     } /* end else */

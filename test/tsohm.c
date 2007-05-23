@@ -566,8 +566,6 @@ size1_helper(hid_t file, const char* filename, hid_t fapl_id, int test_file_clos
     dtype1_struct wdata = {11, "string", 22, 33, 44, 55, 66, 77, 88, 0.0};
     dtype1_struct rdata;
     hid_t       dtype1_id = -1;
-    hid_t       dup_tid = -1;
-    hid_t       type_id = -1;
     hid_t       space_id = -1;
     hid_t       dset_id = -1;
     hsize_t     dim1[1];
@@ -642,13 +640,11 @@ size1_helper(hid_t file, const char* filename, hid_t fapl_id, int test_file_clos
 
     if((dtype1_id = H5Dget_type(dset_id))<0) TEST_ERROR
 
-    if((dup_tid = H5Tcopy(dtype1_id))<0) TEST_ERROR
-
     rdata.i1 = rdata.i2 = 0;
     strcpy(rdata.str, "\0");
 
     /* Read data back again */
-    if(H5Dread(dset_id,dup_tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,&rdata)<0) {
+    if(H5Dread(dset_id,dtype1_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,&rdata)<0) {
         H5_FAILED(); AT();
         printf("Can't read data\n");
         goto error;
@@ -661,15 +657,12 @@ size1_helper(hid_t file, const char* filename, hid_t fapl_id, int test_file_clos
     } /* end if */
 
     if(H5Dclose(dset_id)<0) TEST_ERROR
-    if(H5Tclose(dup_tid)<0) TEST_ERROR
 
     /* Create several copies of the dataset (this increases the amount of space saved by sharing the datatype message) */
     for(x=0; x<SOHM_HELPER_NUM_EX_DSETS; x++) {
-        if((type_id = H5Tcopy(dtype1_id)) < 0) TEST_ERROR
-        if((dset_id = H5Dcreate(file,EXTRA_DSETNAME[x],type_id,space_id,H5P_DEFAULT)) < 0) TEST_ERROR
-
-        if(H5Tclose(type_id)<0) TEST_ERROR
+        if((dset_id = H5Dcreate(file,EXTRA_DSETNAME[x],dtype1_id,space_id,H5P_DEFAULT)) < 0) TEST_ERROR
         if(H5Dclose(dset_id)<0) TEST_ERROR
+
         /* Close and re-open the file if requested*/
         if(test_file_closing) {
             if((file = close_reopen_file(file, filename, fapl_id)) < 0) TEST_ERROR
@@ -684,12 +677,10 @@ size1_helper(hid_t file, const char* filename, hid_t fapl_id, int test_file_clos
 
     if((dtype1_id = H5Dget_type(dset_id))<0) TEST_ERROR
 
-    if((dup_tid = H5Tcopy(dtype1_id))<0) TEST_ERROR
-
     rdata.i1 = rdata.i2 = 0;
 
     /* Read data back again */
-    if(H5Dread(dset_id,dup_tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,&rdata)<0) {
+    if(H5Dread(dset_id,dtype1_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,&rdata)<0) {
         H5_FAILED(); AT();
         printf("Can't read data\n");
         goto error;
@@ -703,14 +694,12 @@ size1_helper(hid_t file, const char* filename, hid_t fapl_id, int test_file_clos
 
     if(H5Dclose(dset_id)<0) TEST_ERROR
     if(H5Tclose(dtype1_id)<0) TEST_ERROR
-    if(H5Tclose(dup_tid)<0) TEST_ERROR
     return file;
 
  error:
     H5E_BEGIN_TRY {
+        H5Sclose(space_id);
         H5Tclose(dtype1_id);
-        H5Tclose(type_id);
-        H5Tclose(dup_tid);
         H5Dclose(dset_id);
         H5Fclose(file);
     } H5E_END_TRY
