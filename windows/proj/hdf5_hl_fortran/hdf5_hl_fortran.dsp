@@ -52,7 +52,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"..\..\..\proj\hdf5_hl_fortran\Release\hdf5_hl_fortranr.lib"
++# ADD LIB32 /nologo /out:"..\..\..\proj\hdf5_hl_fortran\Release\hdf5_hl_fortran.lib"
 
 !ELSEIF  "$(CFG)" == "hdf5_hl_fortran - Win32 Debug"
 

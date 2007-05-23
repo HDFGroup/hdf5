@@ -2231,12 +2231,6 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name hdf5_fortran
     End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name hdf5
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name hdf5_f90cstub
-    End Project Dependency
 }}}
 
 ###############################################################################

@@ -24,6 +24,7 @@ mkdir bindll
 mkdir dll
 mkdir lib
 mkdir include
+mkdir modsdll
 cd ..
 mkdir release
 cd release
@@ -31,7 +32,8 @@ mkdir bin
 mkdir bindll
 mkdir dll
 mkdir lib
-mkdir include 
+mkdir include
+mkdir modsdll
 cd ..
 cd ..
 
@@ -97,13 +99,14 @@ copy tools\h5repartdll\release\h5repartdll.exe hdf5lib\release\bindll
 copy hl\src\*.h hdf5lib\debug\include
 copy "hl\c++\src\*.h" hdf5lib\debug\include
 copy proj\hdf5_hl_fortran\debug\*.mod  hdf5lib\debug\include
-copy proj\hdf5_hl_fortrandll\debug\*.mod  hdf5lib\debug\include
+copy proj\hdf5_hl_fortrandll\debug\*.mod  hdf5lib\debug\modsdll
 
 
 copy proj\hdf5_hl\debug\hdf5_hld.lib hdf5lib\debug\lib
 copy proj\hdf5_hl_cpp\debug\hdf5_hl_cppd.lib hdf5lib\debug\lib
 copy proj\hdf5_hl_fortran\debug\hdf5_hl_fortrand.lib hdf5lib\debug\lib
-copy proj\hdf5_hl_fortran\debug\hdf5_hl_fortran.lib hdf5lib\debug\lib
+copy proj\hdf5_hl_fortran\debug\hdf5_hl_fortran_libd.lib hdf5lib\debug\lib
+
 
 copy proj\hdf5_hldll\debug\hdf5_hldlld.lib hdf5lib\debug\dll
 copy proj\hdf5_hldll\debug\hdf5_hldlld.dll hdf5lib\debug\dll
@@ -120,12 +123,12 @@ copy proj\hdf5_hl_f90cstubdll\debug\hdf5_hl_f90cstubdlld.dll hdf5lib\debug\dll
 copy hl\src\*.h hdf5lib\release\include
 copy "hl\c++\src\*.h" hdf5lib\release\include
 copy proj\hdf5_hl_fortran\release\*.mod  hdf5lib\release\include
-copy proj\hdf5_hl_fortrandll\release\*.mod  hdf5lib\release\include
+copy proj\hdf5_hl_fortrandll\release\*.mod  hdf5lib\release\modsdll
 
 copy proj\hdf5_hl\release\hdf5_hl.lib hdf5lib\release\lib
 copy proj\hdf5_hl_cpp\release\hdf5_hl_cpp.lib hdf5lib\release\lib
-copy proj\hdf5_hl_fortran\release\hdf5_hl_fortranr.lib hdf5lib\release\lib
 copy proj\hdf5_hl_fortran\release\hdf5_hl_fortran.lib hdf5lib\release\lib
+copy proj\hdf5_hl_fortran\release\hdf5_hl_fortran_lib.lib hdf5lib\release\lib
 
 copy proj\hdf5_hldll\release\hdf5_hldll.lib hdf5lib\release\dll
 copy proj\hdf5_hldll\release\hdf5_hldll.dll hdf5lib\release\dll
@@ -158,7 +161,8 @@ rename cpp c++
 @REM Install Fortran libraries and tools
 copy proj\hdf5_fortran\debug\*.mod hdf5lib\debug\include
 copy proj\hdf5_fortran\debug\hdf5_fortrand.lib hdf5lib\debug\lib
-copy proj\hdf5_fortrandll\debug\*.mod hdf5lib\debug\include
+copy proj\hdf5_f90cstub\debug\hdf5_f90cstubd.lib hdf5lib\debug\lib
+copy proj\hdf5_fortrandll\debug\*.mod hdf5lib\debug\modsdll
 copy proj\hdf5_fortrandll\debug\hdf5_fortranddll.lib hdf5lib\debug\dll
 copy proj\hdf5_fortrandll\debug\hdf5_fortranddll.dll hdf5lib\debug\dll
 copy proj\hdf5_f90cstubdll\debug\hdf5_f90cstubddll.lib hdf5lib\debug\dll
@@ -166,7 +170,8 @@ copy proj\hdf5_f90cstubdll\debug\hdf5_f90cstubddll.dll hdf5lib\debug\dll
 
 copy proj\hdf5_fortran\release\*.mod hdf5lib\release\include
 copy proj\hdf5_fortran\release\hdf5_fortran.lib hdf5lib\release\lib
-copy proj\hdf5_fortrandll\release\*.mod hdf5lib\release\include
+copy proj\hdf5_f90cstub\release\hdf5_f90cstub.lib hdf5lib\release\lib
+copy proj\hdf5_fortrandll\release\*.mod hdf5lib\release\modsdll
 copy proj\hdf5_fortrandll\release\hdf5_fortrandll.lib hdf5lib\release\dll
 copy proj\hdf5_fortrandll\release\hdf5_fortrandll.dll hdf5lib\release\dll
 copy proj\hdf5_f90cstubdll\release\hdf5_f90cstubdll.lib hdf5lib\release\dll

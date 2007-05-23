@@ -3629,7 +3629,7 @@
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_fill_time_f
+!DEC$attributes dllexport :: h5pget_fill_time_f
 !DEC$endif
 !
             IMPLICIT NONE
@@ -3825,7 +3825,7 @@
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_sieve_buf_size_f
+!DEC$attributes dllexport :: h5pget_sieve_buf_size_f
 !DEC$endif
 !
             IMPLICIT NONE

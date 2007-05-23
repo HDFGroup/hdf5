@@ -5559,7 +5559,7 @@
           SUBROUTINE h5dfill_char(fill_value, space_id, buf,  hdferr)
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dfill_integer
+!DEC$attributes dllexport :: h5dfill_char
 !DEC$endif
 
             IMPLICIT NONE
