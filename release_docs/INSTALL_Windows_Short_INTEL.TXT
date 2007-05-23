@@ -144,8 +144,30 @@ WARNINGS:
             hl_test_table_fortran
 
 
+      1.4 Change Project Output
 
-      1.4 Building HDF5 C/C++/Fortran Libraries and Tools
+      Right click on the project "hdf5_hl_fortran" and select
+      "Properties".  At the top left of the Property Pages, select
+      "Debug" for the Configuration.  Then, in the left pane, go to
+      Librarian > General.  Change the Output File from
+      "$(OutDir)/$(ProjectName).lib" to "$(OutDir)/$(ProjectName)d.lib".
+      Then click Ok.
+      
+      Similarly, right-click on "hdf5_hl_fortran_lib", and select
+      "Properties".  At the top left of the Property Pages, select
+      "Debug" for the Configuration.  Then, in the left pane, go to
+      Librarian > General.  Change the Output File from
+      "..\..\..\proj\hdf5_hl_fortran\Debug\hdf5_hl_fortrand.lib"
+      to ..\..\..\proj\hdf5_hl_fortran\Debug\hdf5_hl_fortrand_lib.lib".
+      
+      Then, in the top left corner again, change the Configuration to
+      "Release".  Inside of Librarian > General, change the Output File
+      from ".\..\..\..\proj\hdf5_hl_fortran\Release\hdf5_hl_fortran.lib"
+      to ".\..\..\..\proj\hdf5_hl_fortran\Release\hdf5_hl_fortran_lib.lib".
+
+      
+      
+      1.5 Building HDF5 C/C++/Fortran Libraries and Tools
 
       Select "Build", then Select "Configuration Manager".
 

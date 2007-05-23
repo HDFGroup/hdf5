@@ -1524,9 +1524,31 @@ Notes:  1. For Intel Compiler users, Intel fortran Compiler 9.1 is currently
             hl_test_lite_fortran
             hl_test_table_fortran
 
+            
+      1.4 Change Project Output
 
+      Right click on the project "hdf5_hl_fortran" and select
+      "Properties".  At the top left of the Property Pages, select
+      "Debug" for the Configuration.  Then, in the left pane, go to
+      Librarian > General.  Change the Output File from
+      "$(OutDir)/$(ProjectName).lib" to "$(OutDir)/$(ProjectName)d.lib".
+      Then click Ok.
+      
+      Similarly, right-click on "hdf5_hl_fortran_lib", and select
+      "Properties".  At the top left of the Property Pages, select
+      "Debug" for the Configuration.  Then, in the left pane, go to
+      Librarian > General.  Change the Output File from
+      "..\..\..\proj\hdf5_hl_fortran\Debug\hdf5_hl_fortrand.lib"
+      to ..\..\..\proj\hdf5_hl_fortran\Debug\hdf5_hl_fortrand_lib.lib".
+      
+      Then, in the top left corner again, change the Configuration to
+      "Release".  Inside of Librarian > General, change the Output File
+      from ".\..\..\..\proj\hdf5_hl_fortran\Release\hdf5_hl_fortran.lib"
+      to ".\..\..\..\proj\hdf5_hl_fortran\Release\hdf5_hl_fortran_lib.lib".
+      
+      
 
-      1.4 Building HDF5 C/C++/Fortran Libraries and Tools
+      1.5 Building HDF5 C/C++/Fortran Libraries and Tools
 
       Select "Build", then Select "Configuration Manager".
 
@@ -2117,31 +2139,12 @@ Section XI: How to build HDF5 in Visual studio 2005 on windows 32-bit and
                             Section XII: Misc.
 ========================================================================
 
-1. Drivers we support
-
- The default driver on windows we support is sec2 driver. However, stdio
- driver is also supported. If you want to use stdio driver in your
- application, you may set environment variable HDF5_DRIVER to "stdio".
-
- On windows XP, the following steps should be followed to set the
- environment variable,
-
- a) Go to Control panel and find "system",
- b) Click "system" and choose "advanced",
- c) Choose Environment Variables
- d) Add new variable "HDF5_DRIVER"
- e) set the "HDF5_DRIVER" to "stdio"
-
- Reminder: if you don't want to use stdio driver, please remember to
- delete the environment variable "HDF5_DRIVER" or change the variable
- value to "sec2".
-
-2. Helpful Pointers
+1. Helpful Pointers
 
 Here are some helpful notes if you are not familiar with
 using the Visual C++ Development Environment.
 
-    2.1 Project name and location issues:
+    1.1 Project name and location issues:
 
     If you must install all.dsw and all.dsp in another directory,
     relative to hdf5 directory, you will be asked to locate the
@@ -2155,7 +2158,7 @@ using the Visual C++ Development Environment.
     files to be installed in another directory.
 
 
-    2.2 Settings... details:
+    1.2 Settings... details:
 
     If you create your own project, the necessary settings can be read
     from the all.dsp file(as text), or from the Project Settings in the
@@ -2169,7 +2172,7 @@ using the Visual C++ Development Environment.
                    Use run-time Library
                       These are all set to use Single-Threaded
 
-    2.3 DLL... hints:
+    1.3 DLL... hints:
 
     If you want to use DLL versions of HDF5 library in your application,
     you should
@@ -2206,7 +2209,7 @@ using the Visual C++ Development Environment.
          General->Predefined Preprocess or Symbols, and add
          "HDF5F90_WINDOWS" to use HDF5 Fortran DLL.
 
-3. Backward compatibility with 1.6
+2. Backward compatibility with 1.6
     If you are going to use 1.6 APIs with 1.8 branch, you may do the 
     following two things:
         3.1 Uncomment out /*#define H5_WANT_H5_V1_6_COMPAT 1*/ inside 
