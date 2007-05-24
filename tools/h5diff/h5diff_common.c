@@ -50,7 +50,6 @@ void parse_input(int argc,
 
  if ( argc<3 )
  {
-  printf("Number of arguments is only %d\n", argc );
   usage();
  }
 

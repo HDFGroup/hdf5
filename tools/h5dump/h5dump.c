@@ -3377,6 +3377,12 @@ parse_command_line(int argc, const char *argv[])
     const char          *outfname=NULL;
     bin_form = -1;
 
+     /* no arguments */
+    if (argc == 1) {
+        usage(progname);
+        leave(EXIT_FAILURE);
+    }
+
     /* this will be plenty big enough to hold the info */
     hand = calloc((size_t)argc, sizeof(struct handler_t));
 
