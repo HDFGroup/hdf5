@@ -28,7 +28,7 @@
 static
 int aux_find_obj(const char* name,          /* object name from traverse list */
                  pack_opt_t *options,       /* repack options */
-                                                                    pack_info_t *obj /*OUT*/)  /* info about object to filter */
+                 pack_info_t *obj /*OUT*/)  /* info about object to filter */
 {
  char *pdest;
  int  result;
@@ -190,14 +190,17 @@ int aux_assign_obj(const char* name,            /* object name from traverse lis
 int apply_filters(const char* name,    /* object name from traverse list */
                   int rank,            /* rank of dataset */
                   hsize_t *dims,       /* dimensions of dataset */
-                  hid_t dcpl_id,       /* dataset creation property list */
-                  pack_opt_t *options) /* repack options */
+                  hid_t dcpl_id,       /* (IN,OUT) dataset creation property list */
+                  pack_opt_t *options, /* repack options */
+                  int *has_filter)     /* (OUT) object NAME has a filter */
 {
     int          nfilters;       /* number of filters in DCPL */
     hsize_t      chsize[64];     /* chunk size in elements */
     H5D_layout_t layout;
     int          i;
     pack_info_t  obj;
+
+    *has_filter = 0;
     
     if (rank==0) /* scalar dataset, do not apply */
         return 0;
@@ -225,7 +228,9 @@ int apply_filters(const char* name,    /* object name from traverse list */
     * only remove if we are inserting new ones
     *-------------------------------------------------------------------------
     */
-    if (nfilters && obj.nfilters ) {
+    if (nfilters && obj.nfilters ) 
+    {
+        *has_filter = 1;
         if (H5Premove_filter(dcpl_id,H5Z_FILTER_ALL)<0)
             return -1;
     }

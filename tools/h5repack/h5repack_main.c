@@ -184,7 +184,7 @@ void read_info(const char *filename,
     
     
     if ((fp = fopen(data_file, "r")) == (FILE *)NULL) {
-        error_msg(progname, "cannot open options file %s", filename);
+        error_msg(progname, "cannot open options file %s\n", filename);
         exit(1);
     }
     
