@@ -84,7 +84,6 @@ int main(int argc, const char *argv[])
 
  if ( argc<3 )
  {
-  printf("Number of arguments is only %d\n", argc );
   usage();
  }
 

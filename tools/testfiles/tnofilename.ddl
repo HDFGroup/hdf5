@@ -73,4 +73,3 @@ usage: h5dump [OPTIONS] file
 
       h5dump -d /dset -b LE -o out.bin quux.h5
 
-h5dump error: missing file name
