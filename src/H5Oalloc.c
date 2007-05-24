@@ -594,8 +594,12 @@ H5O_alloc_extend_chunk(H5F_t *f,
     /* Spin through existing messages, adjusting them */
     for(u = 0; u < oh->nmesgs; u++) {
         /* Adjust raw addresses for messages in this chunk to reflect new 'image' address */
-        if(oh->mesg[u].chunkno == chunkno)
+        if(oh->mesg[u].chunkno == chunkno) {
             oh->mesg[u].raw = oh->chunk[chunkno].image + extra_prfx_size + (oh->mesg[u].raw - old_image);
+
+            /* Flag message as dirty */
+            oh->mesg[u].dirty = TRUE;
+        } /* endif */
 
         /* Find continuation message which points to this chunk and adjust chunk's size */
         /* (Chunk 0 doesn't have a continuation message that points to it and

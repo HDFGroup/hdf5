@@ -720,7 +720,7 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
 
     /* Allocate disk space for header and first chunk */
     if(HADDR_UNDEF == (oh_addr = H5MF_alloc(f, H5FD_MEM_OHDR, dxpl_id, (hsize_t)oh_size)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for object header header")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for object header")
 
     /* Create the chunk list */
     oh->nchunks = oh->alloc_nchunks = 1;
@@ -1511,23 +1511,27 @@ static herr_t
 H5O_obj_type_real(H5O_t *oh, H5O_type_t *obj_type)
 {
     const H5O_obj_class_t *obj_class;           /* Class of object for header */
-    herr_t ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_obj_type_real)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_obj_type_real)
 
     /* Sanity check */
     HDassert(oh);
     HDassert(obj_type);
 
     /* Look up class for object header */
-    if(NULL == (obj_class = H5O_obj_class_real(oh)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine object type")
+    if(NULL == (obj_class = H5O_obj_class_real(oh))) {
+        /* Clear error stack from "failed" class lookup */
+        H5E_clear_stack(NULL);
 
-    /* Set object type */
-    *obj_type = obj_class->type;
+        /* Set type to "unknown" */
+        *obj_type = H5O_TYPE_UNKNOWN;
+    } /* end if */
+    else {
+        /* Set object type */
+        *obj_type = obj_class->type;
+    } /* end else */
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_obj_type_real() */
 
 
@@ -1927,7 +1931,7 @@ H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id)
     /* Iterate over all the chunks, adding any gaps to the free space */
     oinfo->hdr.space.total = 0;
     for(u = 0, curr_chunk = &oh->chunk[0]; u < oh->nchunks; u++, curr_chunk++) {
-        /* Accumulate the size of the header on header */
+        /* Accumulate the size of the header on disk */
         oinfo->hdr.space.total += curr_chunk->size;
 
         /* If the chunk has a gap, add it to the free space */
