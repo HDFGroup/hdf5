@@ -2399,7 +2399,7 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
     for(u = 0; u < (max_compact * 2); u++) {
         unsigned    value;          /* Attribute value */
 
-        /* Create attribute */
+        /* Open attribute */
         sprintf(attrname, "new attr %02u", u);
         attr = H5Aopen_name(dataset, attrname);
         CHECK(attr, FAIL, "H5Aopen_name");
@@ -2994,7 +2994,225 @@ test_attr_big(hid_t fcpl, hid_t fapl)
     /* Check size of file */
     filesize = h5_get_file_size(FILENAME);
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
-}   /* test_attr_dense_limits() */
+}   /* test_attr_big() */
+
+
+/****************************************************************
+**
+**  test_attr_null_space(): Test basic H5A (attribute) code.
+**      Tests storing attribute with "null" dataspace
+**
+****************************************************************/
+static void
+test_attr_null_space(hid_t fcpl, hid_t fapl)
+{
+    hid_t	fid;		/* HDF5 File ID			*/
+    hid_t	dataset;	/* Dataset ID			*/
+    hid_t	sid;	        /* Dataspace ID			*/
+    hid_t	null_sid;	/* "null" dataspace ID		*/
+    hid_t	attr_sid;	/* Attribute's dataspace ID	*/
+    hid_t	attr;	        /* Attribute ID			*/
+    char	attrname[NAME_BUF_SIZE];        /* Name of attribute */
+    unsigned    value;          /* Attribute value */
+    htri_t      cmp;            /* Results of comparison */
+    hsize_t     storage_size;   /* Size of storage for attribute */
+    H5A_info_t  ainfo;          /* Attribute info */
+    h5_stat_size_t empty_filesize;       /* Size of empty file */
+    h5_stat_size_t filesize;             /* Size of file after modifications */
+    herr_t	ret;		/* Generic return value		*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Storing Attributes with 'null' dataspace\n"));
+
+    /* Create file */
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Get size of file */
+    empty_filesize = h5_get_file_size(FILENAME);
+    if(empty_filesize < 0)
+        TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
+
+    /* Re-open file */
+    fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Create dataspace for dataset attributes */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Create "null" dataspace for attribute */
+    null_sid = H5Screate(H5S_NULL);
+    CHECK(null_sid, FAIL, "H5Screate");
+
+    /* Create a dataset */
+    dataset = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate");
+
+
+    /* Add attribute with 'null' dataspace */
+
+    /* Create attribute */
+    HDstrcpy(attrname, "null attr");
+    attr = H5Acreate(dataset, attrname, H5T_NATIVE_UINT, null_sid, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Acreate");
+
+    /* Try to read data from the attribute */
+    /* (shouldn't fail, but should leave buffer alone) */
+    value = 23;
+    ret = H5Aread(attr, H5T_NATIVE_UINT, &value);
+    CHECK(ret, FAIL, "H5Aread");
+    VERIFY(value, 23, "H5Aread");
+
+    /* Get the dataspace for the attribute and make certain it's 'null' */
+    attr_sid = H5Aget_space(attr);
+    CHECK(attr_sid, FAIL, "H5Aget_space");
+
+    /* Compare the dataspaces */
+    cmp = H5Sextent_equal(attr_sid, null_sid);
+    CHECK(cmp, FAIL, "H5Sextent_equal");
+    VERIFY(cmp, TRUE, "H5Sextent_equal");
+
+    /* Close dataspace */
+    ret = H5Sclose(attr_sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Check the storage size for the attribute */
+    storage_size = H5Aget_storage_size(attr);
+    VERIFY(storage_size, 0, "H5Aget_storage_size");
+
+    /* Get the attribute info */
+    ret = H5Aget_info(attr, &ainfo);
+    CHECK(ret, FAIL, "H5Aget_info");
+    VERIFY(ainfo.data_size, storage_size, "H5Aget_info");
+
+    /* Close attribute */
+    ret = H5Aclose(attr);
+    CHECK(ret, FAIL, "H5Aclose");
+
+
+    /* Add another attribute with 'null' dataspace */
+
+    /* Create attribute */
+    HDstrcpy(attrname, "null attr #2");
+    attr = H5Acreate(dataset, attrname, H5T_NATIVE_UINT, null_sid, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Acreate");
+
+    /* Try to write data to the attribute */
+    /* (shouldn't fail, but should leave buffer alone) */
+    value = 23;
+    ret = H5Awrite(attr, H5T_NATIVE_UINT, &value);
+    CHECK(ret, FAIL, "H5Awrite");
+    VERIFY(value, 23, "H5Awrite");
+
+    /* Close attribute */
+    ret = H5Aclose(attr);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+
+    /* Re-open the file and check on the attributes */
+
+    /* Re-open file */
+    fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Open dataset */
+    dataset = H5Dopen(fid, DSET1_NAME);
+    CHECK(dataset, FAIL, "H5Dopen");
+
+
+    /* Open first attribute */
+    HDstrcpy(attrname, "null attr #2");
+    attr = H5Aopen_name(dataset, attrname);
+    CHECK(attr, FAIL, "H5Aopen_name");
+
+    /* Try to read data from the attribute */
+    /* (shouldn't fail, but should leave buffer alone) */
+    value = 23;
+    ret = H5Aread(attr, H5T_NATIVE_UINT, &value);
+    CHECK(ret, FAIL, "H5Aread");
+    VERIFY(value, 23, "H5Aread");
+
+    /* Get the dataspace for the attribute and make certain it's 'null' */
+    attr_sid = H5Aget_space(attr);
+    CHECK(attr_sid, FAIL, "H5Aget_space");
+
+    /* Compare the dataspaces */
+    cmp = H5Sextent_equal(attr_sid, null_sid);
+    CHECK(cmp, FAIL, "H5Sextent_equal");
+    VERIFY(cmp, TRUE, "H5Sextent_equal");
+
+    /* Close dataspace */
+    ret = H5Sclose(attr_sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Check the storage size for the attribute */
+    storage_size = H5Aget_storage_size(attr);
+    VERIFY(storage_size, 0, "H5Aget_storage_size");
+
+    /* Get the attribute info */
+    ret = H5Aget_info(attr, &ainfo);
+    CHECK(ret, FAIL, "H5Aget_info");
+    VERIFY(ainfo.data_size, storage_size, "H5Aget_info");
+
+    /* Close attribute */
+    ret = H5Aclose(attr);
+    CHECK(ret, FAIL, "H5Aclose");
+
+
+    /* Open second attribute */
+    HDstrcpy(attrname, "null attr");
+    attr = H5Aopen_name(dataset, attrname);
+    CHECK(attr, FAIL, "H5Aopen_name");
+
+    /* Try to write data to the attribute */
+    /* (shouldn't fail, but should leave buffer alone) */
+    value = 23;
+    ret = H5Awrite(attr, H5T_NATIVE_UINT, &value);
+    CHECK(ret, FAIL, "H5Awrite");
+    VERIFY(value, 23, "H5Awrite");
+
+    /* Close attribute */
+    ret = H5Aclose(attr);
+    CHECK(ret, FAIL, "H5Aclose");
+
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Unlink dataset */
+    ret = H5Gunlink(fid, DSET1_NAME);
+    CHECK(ret, FAIL, "H5Gunlink");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+
+    /* Close dataspaces */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose(null_sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+
+    /* Check size of file */
+    filesize = h5_get_file_size(FILENAME);
+    VERIFY(filesize, empty_filesize, "h5_get_file_size");
+}   /* test_attr_null_space() */
 
 
 /****************************************************************
@@ -7907,6 +8125,7 @@ test_attr(void)
                 test_attr_dense_unlink(my_fcpl, my_fapl);       /* Test unlinking object with attributes in dense storage */
                 test_attr_dense_limits(my_fcpl, my_fapl);       /* Test dense attribute storage limits */
                 test_attr_big(my_fcpl, my_fapl);                /* Test storing big attribute */
+                test_attr_null_space(my_fcpl, my_fapl);         /* Test storing attribute with NULL dataspace */
 
                 /* Attribute creation order tests */
                 test_attr_corder_create_basic(my_fcpl, my_fapl);/* Test creating an object w/attribute creation order info */
@@ -7942,6 +8161,7 @@ test_attr(void)
             test_attr_open_by_idx(new_format, fcpl, my_fapl);   /* Test opening attributes by index */
             test_attr_open(new_format, fcpl, my_fapl);          /* Test opening attributes by name */
             test_attr_big(fcpl, my_fapl);                       /* Test storing big attribute */
+            test_attr_null_space(fcpl, my_fapl);                /* Test storing attribute with NULL dataspace */
 
             /* Tests that address specific bugs */
             test_attr_bug1(fcpl, my_fapl);                      /* Test odd allocation operations */

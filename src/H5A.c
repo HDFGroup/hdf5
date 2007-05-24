@@ -69,7 +69,6 @@ typedef struct H5A_iter_cb1 {
 static herr_t H5A_open_common(const H5G_loc_t *loc, H5A_t *attr);
 static herr_t H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id);
 static herr_t H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id);
-static hsize_t H5A_get_storage_size(const H5A_t *attr);
 
 
 /*********************/
@@ -1365,43 +1364,11 @@ H5Aget_storage_size(hid_t attr_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not an attribute")
 
     /* Set return value */
-    ret_value = H5A_get_storage_size(attr);
+    ret_value = attr->data_size;
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Aget_storage_size() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5A_get_storage_size
- *
- * Purpose:	Private function for H5Aget_storage_size.  Returns the
- *              amount of storage size that is required for this
- *		attribute.
- *
- * Return:	Success:	The amount of storage size allocated for the
- *				attribute.  The return value may be zero
- *                              if no data has been stored.
- *
- *		Failure:	Zero
- *
- * Programmer:	Raymond Lu
- *              October 23, 2002
- *
- *-------------------------------------------------------------------------
- */
-static hsize_t
-H5A_get_storage_size(const H5A_t *attr)
-{
-    hsize_t	ret_value;      /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_get_storage_size)
-
-    /* Set return value */
-    ret_value = attr->data_size;
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5A_get_storage_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -2127,7 +2094,7 @@ H5A_close(H5A_t *attr)
     HDassert(attr);
 
     /* Check if the attribute has any data yet, if not, fill with zeroes */
-    if(attr->obj_opened && !attr->initialized) {
+    if(attr->obj_opened && !attr->initialized && attr->data_size) {
         uint8_t *tmp_buf = H5FL_BLK_CALLOC(attr_buf, attr->data_size);
         if(NULL == tmp_buf)
             HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "memory allocation failed for attribute fill-value")
