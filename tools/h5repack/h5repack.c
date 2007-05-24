@@ -256,7 +256,7 @@ static int check_options(pack_opt_t *options)
  * objects to layout
  *-------------------------------------------------------------------------
  */
- if (options->verbose)
+ if (options->verbose && have_request(options) /* only print if requested */)
  {
   printf("Objects to modify layout are...\n");
   if (options->all_layout==1)  {
@@ -318,7 +318,7 @@ static int check_options(pack_opt_t *options)
  *-------------------------------------------------------------------------
  */
 
- if (options->verbose)
+ if (options->verbose && have_request(options) /* only print if requested */)
  {
   printf("Objects to apply filter are...\n");
   if (options->all_filter==1)
@@ -407,7 +407,7 @@ void read_info(const char *filename,
 
 
  if ((fp = fopen(data_file, "r")) == (FILE *)NULL) {
-  error_msg(progname, "cannot open options file %s", filename);
+  error_msg(progname, "cannot open options file %s\n", filename);
   exit(1);
  }
 
@@ -493,3 +493,23 @@ void read_info(const char *filename,
 }
 
 
+/*-------------------------------------------------------------------------
+ * Function: have_request
+ *
+ * Purpose: check if a filter or layout was requested
+ *
+ * Return: 1 yes, 0 no
+ *
+ * Date: May, 24, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+int have_request(pack_opt_t *options)
+{
+
+    if (options->all_filter || options->all_layout || options->op_tbl->nelems)
+        return 1;
+
+    return 0;
+
+}

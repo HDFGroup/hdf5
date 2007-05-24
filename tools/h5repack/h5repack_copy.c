@@ -231,6 +231,7 @@ int do_copy_objects(hid_t fidin,
  double   per;               /* percent utilization of storage */
  void     *buf=NULL;         /* buffer for raw data */
  void     *sm_buf=NULL;      /* buffer for raw data */
+ int      has_filter;        /* current object has a filter */
  unsigned i;
  int      is_ref=0;
 
@@ -286,6 +287,8 @@ int do_copy_objects(hid_t fidin,
  *-------------------------------------------------------------------------
  */
   case H5G_DATASET:
+
+   has_filter = 0;
 
    /* early detection of references */
    if ((dset_in=H5Dopen(fidin,travt->objs[i].name))<0)
@@ -376,7 +379,7 @@ int do_copy_objects(hid_t fidin,
       
       /* apply the filter */
       if (apply_s){
-       if (apply_filters(travt->objs[i].name,rank,dims,dcpl_out,options)<0)
+       if (apply_filters(travt->objs[i].name,rank,dims,dcpl_out,options,&has_filter)<0)
         goto error;
       }
       
@@ -529,16 +532,20 @@ int do_copy_objects(hid_t fidin,
       }
       else
        print_dataset_info(dcpl_id,travt->objs[i].name,0.0);
-     }
      
-     if (apply_s==0 && options->verbose)
-      printf(" <warning: filter not applied to %s. dataset smaller than %d bytes>\n",
-      travt->objs[i].name,
-      (int)options->threshold);
+      /* print a message that the filter was not applied 
+       (in case there was a filter)
+       */
+      if ( has_filter && apply_s == 0 )
+       printf(" <warning: filter not applied to %s. dataset smaller than %d bytes>\n",
+       travt->objs[i].name,
+       (int)options->threshold);
      
-     if (apply_f==0 && options->verbose)
-      printf(" <warning: could not apply the filter to %s>\n",
-      travt->objs[i].name);
+      if ( has_filter && apply_f == 0 )
+       printf(" <warning: could not apply the filter to %s>\n",
+       travt->objs[i].name);
+
+      } /* verbose */
      
      /*-------------------------------------------------------------------------
       * copy attrs
