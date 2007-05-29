@@ -247,7 +247,7 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_t
     else {
         /* Set up type conversion function */
         if(NULL == (tpath = H5T_path_find(fill_type, buf_type, NULL, NULL, dxpl_id, FALSE)))
-            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types")
+            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest datatype")
 
         if(!H5T_path_noop(tpath)) {
             if((src_id = H5I_register(H5I_DATATYPE, H5T_copy(fill_type, H5T_COPY_ALL))) < 0)
@@ -280,7 +280,7 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_t
             /* Convert disk buffer into memory buffer */
             if(!H5T_path_noop(tpath)) {
                 if(H5T_convert(tpath, src_id, dst_id, (size_t)nelmts, (size_t)0, (size_t)0, tmp_buf, bkg_buf, dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "data type conversion failed")
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
             } /* end if */
 
             /* Copy the final data into the memory buffer */
@@ -293,9 +293,9 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_t
 
             /* Convert disk buffer into memory buffer */
             if(!H5T_path_noop(tpath)) {
-                /* Perform data type conversion */
+                /* Perform datatype conversion */
                 if(H5T_convert(tpath, src_id, dst_id, (size_t)1, (size_t)0, (size_t)0, tconv_buf, bkg_buf, dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "data type conversion failed")
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
             } /* end if */
 
             /* Fill the selection in the memory buffer */
@@ -305,6 +305,10 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_t
     } /* end else */
 
 done:
+    if(src_id != (-1) && H5I_dec_ref(src_id) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
+    if(dst_id != (-1) && H5I_dec_ref(dst_id) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
     if(tmp_buf)
         H5FL_BLK_FREE(type_conv,tmp_buf);
     if(tconv_buf)
@@ -537,7 +541,7 @@ done:
  *		file.  The part of the dataset to write is defined with the
  *		MEM_SPACE_ID and FILE_SPACE_ID arguments. The data points
  *		are converted from their current type (MEM_TYPE_ID) to their
- *		file data type.	 Additional miscellaneous data transfer
+ *		file datatype.	 Additional miscellaneous data transfer
  *		properties can be passed to this function with the
  *		PLIST_ID argument.
  *
@@ -650,7 +654,7 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 
     /* Get memory datatype */
     if(NULL == (mem_type = H5I_object_verify(mem_type_id, H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
     if(!file_space)
         file_space = dataset->shared->space;
@@ -717,13 +721,13 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     /*
      * Locate the type conversion function and data space conversion
      * functions, and set up the element numbering information. If a data
-     * type conversion is necessary then register data type atoms. Data type
+     * type conversion is necessary then register datatype atoms. Data type
      * conversion is necessary if the user has set the `need_bkg' to a high
-     * enough value in xfer_parms since turning off data type conversion also
+     * enough value in xfer_parms since turning off datatype conversion also
      * turns off background preservation.
      */
     if (NULL==(tpath=H5T_path_find(dataset->shared->type, mem_type, NULL, NULL, dxpl_id, FALSE)))
-        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types")
+        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest datatype")
 
     /* Set up I/O operation */
     if(H5D_ioinfo_init(dataset,dxpl_cache,dxpl_id,mem_space,file_space,tpath,&io_info) < 0)
@@ -792,7 +796,7 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 
     /* Get the memory datatype */
     if(NULL == (mem_type = H5I_object_verify(mem_type_id, H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
     /* All filters in the DCPL must have encoding enabled. */
     if(!dataset->shared->checked_filters) {
@@ -882,13 +886,13 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     /*
      * Locate the type conversion function and data space conversion
      * functions, and set up the element numbering information. If a data
-     * type conversion is necessary then register data type atoms. Data type
+     * type conversion is necessary then register datatype atoms. Data type
      * conversion is necessary if the user has set the `need_bkg' to a high
-     * enough value in xfer_parms since turning off data type conversion also
+     * enough value in xfer_parms since turning off datatype conversion also
      * turns off background preservation.
      */
     if (NULL==(tpath=H5T_path_find(mem_type, dataset->shared->type, NULL, NULL, dxpl_id, FALSE)))
-	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types")
+	HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest datatype")
 
     /* Set up I/O operation */
     if(H5D_ioinfo_init(dataset,dxpl_cache,dxpl_id,mem_space,file_space,tpath,&io_info) < 0)
@@ -972,7 +976,7 @@ H5D_contig_read(H5D_io_info_t *io_info, hsize_t nelmts,
     H5S_sel_iter_t file_iter;           /*file selection iteration info*/
     hbool_t	file_iter_init=0;	/*file selection iteration info has been initialized */
     H5T_bkg_t	need_bkg;		/*type of background buf*/
-    uint8_t	*tconv_buf = NULL;	/*data type conv buffer	*/
+    uint8_t	*tconv_buf = NULL;	/*datatype conv buffer	*/
     uint8_t	*bkg_buf = NULL;	/*background buffer	*/
     hsize_t	smine_start;		/*strip mine start loc	*/
     size_t	n, smine_nelmts;	/*elements per strip	*/
@@ -1109,7 +1113,7 @@ H5D_contig_read(H5D_io_info_t *io_info, hsize_t nelmts,
         smine_nelmts = (size_t)MIN(request_nelmts, (nelmts-smine_start));
 
         /*
-         * Gather the data from disk into the data type conversion
+         * Gather the data from disk into the datatype conversion
          * buffer. Also gather data from application to background buffer
          * if necessary.
          */
@@ -1147,10 +1151,10 @@ H5D_contig_read(H5D_io_info_t *io_info, hsize_t nelmts,
         } /* end if */
 
 	/*
-         * Perform data type conversion.
+         * Perform datatype conversion.
          */
         if (H5T_convert(tpath, src_id, dst_id, smine_nelmts, (size_t)0, (size_t)0, tconv_buf, bkg_buf, io_info->dxpl_id) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "data type conversion failed")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
 
 	/* Do the data transform after the conversion (since we're using type mem_type) */
         if(!H5Z_xform_noop(dxpl_cache->data_xform_prop))
@@ -1234,7 +1238,7 @@ H5D_contig_write(H5D_io_info_t *io_info, hsize_t nelmts,
     H5S_sel_iter_t file_iter;           /*file selection iteration info*/
     hbool_t	file_iter_init=0;	/*file selection iteration info has been initialized */
     H5T_bkg_t	need_bkg;		/*type of background buf*/
-    uint8_t	*tconv_buf = NULL;	/*data type conv buffer	*/
+    uint8_t	*tconv_buf = NULL;	/*datatype conv buffer	*/
     uint8_t	*bkg_buf = NULL;	/*background buffer	*/
     hsize_t	smine_start;		/*strip mine start loc	*/
     size_t	n, smine_nelmts;	/*elements per strip	*/
@@ -1368,7 +1372,7 @@ H5D_contig_write(H5D_io_info_t *io_info, hsize_t nelmts,
         smine_nelmts = (size_t)MIN(request_nelmts, (nelmts-smine_start));
 
         /*
-         * Gather data from application buffer into the data type conversion
+         * Gather data from application buffer into the datatype conversion
          * buffer. Also gather data from the file into the background buffer
          * if necessary.
          */
@@ -1403,10 +1407,10 @@ H5D_contig_write(H5D_io_info_t *io_info, hsize_t nelmts,
         } /* end if */
 
 	/*
-         * Perform data type conversion.
+         * Perform datatype conversion.
          */
         if(H5T_convert(tpath, src_id, dst_id, smine_nelmts, (size_t)0, (size_t)0, tconv_buf, bkg_buf, io_info->dxpl_id) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "data type conversion failed")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
 
 	/* Do the data transform after the type conversion (since we're using dataset->shared->type). */
 	if(!H5Z_xform_noop(dxpl_cache->data_xform_prop))
@@ -1495,7 +1499,7 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
     H5S_sel_iter_t file_iter;           /*file selection iteration info*/
     hbool_t	file_iter_init = FALSE;	/*file selection iteration info has been initialized */
     H5T_bkg_t	need_bkg;		/*type of background buf*/
-    uint8_t	*tconv_buf = NULL;	/*data type conv buffer	*/
+    uint8_t	*tconv_buf = NULL;	/*datatype conv buffer	*/
     uint8_t	*bkg_buf = NULL;	/*background buffer	*/
     H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
     herr_t	ret_value = SUCCEED;	/*return value		*/
@@ -1666,7 +1670,7 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
             smine_nelmts = (size_t)MIN(request_nelmts, (chunk_info->chunk_points-smine_start));
 
             /*
-             * Gather the data from disk into the data type conversion
+             * Gather the data from disk into the datatype conversion
              * buffer. Also gather data from application to background buffer
              * if necessary.
              */
@@ -1702,10 +1706,10 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
             } /* end if */
 
             /*
-             * Perform data type conversion.
+             * Perform datatype conversion.
              */
             if(H5T_convert(tpath, src_id, dst_id, smine_nelmts, (size_t)0, (size_t)0, tconv_buf, bkg_buf, io_info->dxpl_id) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "data type conversion failed")
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
 
            /* Do the data transform after the conversion (since we're using type mem_type) */
             if(!H5Z_xform_noop(dxpl_cache->data_xform_prop))
@@ -1817,7 +1821,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
     H5S_sel_iter_t file_iter;           /*file selection iteration info*/
     hbool_t	file_iter_init=0;	/*file selection iteration info has been initialized */
     H5T_bkg_t	need_bkg;		/*type of background buf*/
-    uint8_t	*tconv_buf = NULL;	/*data type conv buffer	*/
+    uint8_t	*tconv_buf = NULL;	/*datatype conv buffer	*/
     uint8_t	*bkg_buf = NULL;	/*background buffer	*/
     H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
 
@@ -1987,7 +1991,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
             smine_nelmts = (size_t)MIN(request_nelmts, (chunk_info->chunk_points-smine_start));
 
             /*
-             * Gather the data from disk into the data type conversion
+             * Gather the data from disk into the datatype conversion
              * buffer. Also gather data from application to background buffer
              * if necessary.
              */
@@ -2023,10 +2027,10 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
             } /* end if */
 
 	    /*
-             * Perform data type conversion.
+             * Perform datatype conversion.
              */
             if(H5T_convert(tpath, src_id, dst_id, smine_nelmts, (size_t)0, (size_t)0, tconv_buf, bkg_buf, io_info->dxpl_id) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "data type conversion failed")
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
 
  	    /* Do the data transform after the type conversion (since we're using dataset->shared->type) */
             if(!H5Z_xform_noop(dxpl_cache->data_xform_prop))
