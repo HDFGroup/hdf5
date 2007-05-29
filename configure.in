@@ -2190,6 +2190,65 @@ case "X-$INSTRUMENT" in
     ;;
 esac
 
+dnl ----------------------------------------------------------------------
+dnl Check if they would like to securely clear file buffers before they are
+dnl     written.
+dnl
+AC_SUBST([CLEARFILEBUF])
+AC_MSG_CHECKING([whether to clear file buffers])
+AC_ARG_ENABLE([clear-file-buffers],
+              [AC_HELP_STRING([--enable-clear-file-buffers],
+                              [Securely clear file buffers before writing
+                              to file.  Default=yes.])],
+              [CLEARFILEBUF=$enableval])
+
+case "X-$CLEARFILEBUF" in
+  *)
+      CLEARFILEBUF=yes
+      AC_MSG_RESULT([yes])
+      AC_DEFINE([CLEAR_MEMORY], [1],
+                [Define if the memory buffers being written to disk should be
+                cleared before writing.])
+    ;;
+  X-no)
+      CLEARFILEBUF=no
+      AC_MSG_RESULT([no])
+    ;;
+esac
+
+dnl ----------------------------------------------------------------------
+dnl Check if they would like to use a memory checking tool (like valgrind's
+dnl     'memcheck' tool, or Rational Purify, etc) and the library should be
+dnl     more scrupulous with it's memory operations.  Enabling this also
+dnl     disables the library's free space manager code.
+dnl
+AC_SUBST([USINGMEMCHECKER])
+AC_MSG_CHECKING([whether a memory checking tool will be used])
+AC_ARG_ENABLE([using-memchecker],
+              [AC_HELP_STRING([--enable-using-memchecker],
+                              [Enable this option if a memory allocation and/or
+                              bounds checking tool will be used on the HDF5
+                              library.  Enabling this causes the library to be
+                              more picky about it's memory operations and also
+                              disables the library's free space manager code.
+                              Default=no.])],
+              [USINGMEMCHECKER=$enableval])
+
+case "X-$USINGMEMCHECKER" in
+  X-yes)
+      USINGMEMCHECKER=yes
+      AC_MSG_RESULT([yes])
+      AC_DEFINE([USING_MEMCHECKER], [1],
+                [Define if a memory checking tool will be used on the library,
+                to cause library to be very picky about memory operations and
+                also disable the internal free list manager code.])
+    ;;
+  *)
+      USINGMEMCHECKER=no
+      AC_MSG_RESULT([no])
+    ;;
+esac
+
 dnl Checkpoint the cache
 AC_CACHE_SAVE
 
@@ -3788,6 +3847,12 @@ IF_YES_NO "$STATIC_EXEC"
 
 PRINT_N "                        Tracing"
 IF_YES_NO "$TRACE_API"
+
+PRINT_N "Clear file buffers before write"
+IF_YES_NO "$CLEARFILEBUF"
+
+PRINT_N "           Using memory checker"
+IF_YES_NO "$USINGMEMCHECKER"
 
 PRINT_N "   Optimization Instrumentation"
 IF_YES_NO "$INSTRUMENT"

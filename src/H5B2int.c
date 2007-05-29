@@ -173,9 +173,9 @@ H5B2_shared_init (H5F_t *f, H5B2_t *bt2, const H5B2_class_t *type,
     /* Allocate "page" for node I/O */
     if((shared->page = H5FL_BLK_MALLOC(node_page, shared->node_size)) == NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-#ifdef H5_USING_PURIFY
-HDmemset(shared->page,0,shared->node_size);
-#endif /* H5_USING_PURIFY */
+#ifdef H5_CLEAR_MEMORY
+HDmemset(shared->page, 0, shared->node_size);
+#endif /* H5_CLEAR_MEMORY */
 
     /* Allocate array of node info structs */
     if((shared->node_info = H5FL_SEQ_MALLOC(H5B2_node_info_t, (size_t)(shared->depth + 1))) == NULL)
@@ -1946,9 +1946,9 @@ H5B2_create_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, H5B2_node_ptr_t *n
     /* Allocate space for the native keys in memory */
     if((leaf->leaf_native = (uint8_t *)H5FL_FAC_MALLOC(shared->node_info[0].nat_rec_fac)) == NULL)
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree leaf native keys")
-#ifdef H5_USING_PURIFY
+#ifdef H5_CLEAR_MEMORY
 HDmemset(leaf->leaf_native, 0, shared->type->nrec_size * shared->node_info[0].max_nrec);
-#endif /* H5_USING_PURIFY */
+#endif /* H5_CLEAR_MEMORY */
 
     /* Set number of records */
     leaf->nrec = 0;
@@ -2019,16 +2019,16 @@ H5B2_create_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     /* Allocate space for the native keys in memory */
     if((internal->int_native = (uint8_t *)H5FL_FAC_MALLOC(shared->node_info[depth].nat_rec_fac)) == NULL)
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree internal native keys")
-#ifdef H5_USING_PURIFY
+#ifdef H5_CLEAR_MEMORY
 HDmemset(internal->int_native, 0, shared->type->nrec_size * shared->node_info[depth].max_nrec);
-#endif /* H5_USING_PURIFY */
+#endif /* H5_CLEAR_MEMORY */
 
     /* Allocate space for the node pointers in memory */
     if((internal->node_ptrs = (H5B2_node_ptr_t *)H5FL_FAC_MALLOC(shared->node_info[depth].node_ptr_fac)) == NULL)
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree internal node pointers")
-#ifdef H5_USING_PURIFY
+#ifdef H5_CLEAR_MEMORY
 HDmemset(internal->node_ptrs, 0, sizeof(H5B2_node_ptr_t) * (shared->node_info[depth].max_nrec + 1));
-#endif /* H5_USING_PURIFY */
+#endif /* H5_CLEAR_MEMORY */
 
     /* Set number of records & depth of the node */
     internal->nrec = 0;

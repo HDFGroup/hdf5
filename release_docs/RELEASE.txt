@@ -155,11 +155,11 @@ New Features
 	- Long double is assumed to be a supported C data type.  It is a
 	  stanadard C89 type. AKC - 2004/10/22
 	- The IA64 will use ecc as the C++ compiler by default.
-        - Added some initial support for making purify (or similar memory
-            checking products) happier by initializing buffers to zero and
-            disabling the internal free list code.  To take advantage of this,
-            define 'H5_USING_PURIFY' in your CFLAGS when building the library.
-            QAK - 2004/07/23
+        - Added some initial support for making valgrind/Purify (or similar
+            memory checking products) happier by initializing buffers to zero
+            and disabling the internal free list code.  To take advantage of
+            this, use the "--enable-using-memchecker" configure option when
+            building the library.  QAK - 2004/07/23
         - Fixed the long compile time of H5detect.c when v7.x Intel Compiler
 	    is used with optimization NOT off.  AKC - 2004/05/20
 	- Fixed configure setting of C++ for OSF1 platform. AKC - 2004/01/06

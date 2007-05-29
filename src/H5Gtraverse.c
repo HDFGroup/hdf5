@@ -591,11 +591,11 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
     obj_loc.oloc = &obj_oloc;
     obj_loc.path = &obj_path;
 
-#if defined(H5_USING_PURIFY) || !defined(NDEBUG)
+#if defined(H5_USING_MEMCHECKER) || !defined(NDEBUG)
     /* Clear group location */
     if(H5G_loc_reset(&grp_loc) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to reset location")
-#endif /* H5_USING_PURIFY */
+#endif /* H5_USING_MEMCHECKER */
 
     /* Deep copy of the starting location to group location */
     if(H5G_loc_copy(&grp_loc, &loc, H5_COPY_DEEP) < 0)

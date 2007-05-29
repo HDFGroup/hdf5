@@ -826,9 +826,9 @@ H5FD_core_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
             x = H5MM_malloc(new_eof);
         else
             x = H5MM_realloc(file->mem, new_eof);
-#ifdef H5_USING_PURIFY
+#ifdef H5_CLEAR_MEMORY
 HDmemset(x + file->eof, 0, (size_t)(new_eof - file->eof));
-#endif /* H5_USING_PURIFY */
+#endif /* H5_CLEAR_MEMORY */
         if (!x)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory block")
         file->mem = x;

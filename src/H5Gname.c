@@ -392,10 +392,10 @@ H5G_name_copy(H5G_name_t *dst, const H5G_name_t *src, H5_copy_depth_t depth)
     /* Check arguments */
     HDassert(src);
     HDassert(dst);
-#if defined(H5_USING_PURIFY) || !defined(NDEBUG)
+#if defined(H5_USING_MEMCHECKER) || !defined(NDEBUG)
     HDassert(dst->full_path_r == NULL);
     HDassert(dst->user_path_r == NULL);
-#endif /* H5_USING_PURIFY */
+#endif /* H5_USING_MEMCHECKER */
     HDassert(depth == H5_COPY_SHALLOW || depth == H5_COPY_DEEP);
 
     /* Copy the top level information */

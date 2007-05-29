@@ -584,11 +584,11 @@ H5A_open_common(const H5G_loc_t *loc, H5A_t *attr)
     HDassert(loc);
     HDassert(attr);
 
-#if defined(H5_USING_PURIFY) || !defined(NDEBUG)
+#if defined(H5_USING_MEMCHECKER) || !defined(NDEBUG)
     /* Clear object location */
     if(H5O_loc_reset(&(attr->oloc)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to reset location")
-#endif /* H5_USING_PURIFY */
+#endif /* H5_USING_MEMCHECKER */
 
     /* Free any previous group hier. path */
     if(H5G_name_free(&(attr->path)) < 0)
@@ -1989,7 +1989,7 @@ H5A_copy(H5A_t *_new_attr, const H5A_t *old_attr)
     if(NULL == (new_attr->ds = H5S_copy(old_attr->ds, FALSE)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "unable to copy attribute dataspace")
 
-#if defined(H5_USING_PURIFY) || !defined(NDEBUG)
+#if defined(H5_USING_MEMCHECKER) || !defined(NDEBUG)
     /* Clear object location */
     if(H5O_loc_reset(&(new_attr->oloc)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to reset location")
@@ -1997,7 +1997,7 @@ H5A_copy(H5A_t *_new_attr, const H5A_t *old_attr)
     /* Clear path name */
     if(H5G_name_reset(&(new_attr->path)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to reset path")
-#endif /* H5_USING_PURIFY */
+#endif /* H5_USING_MEMCHECKER */
 
     /* Copy the object location and group path */
     if(H5O_loc_copy(&(new_attr->oloc), &(old_attr->oloc), H5_COPY_DEEP) < 0)

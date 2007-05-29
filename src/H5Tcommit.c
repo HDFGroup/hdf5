@@ -665,7 +665,7 @@ H5T_open(const H5G_loc_t *loc, hid_t dxpl_id)
         if(NULL == (dt = H5FL_MALLOC(H5T_t)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate space for datatype")
 
-#if defined(H5_USING_PURIFY) || !defined(NDEBUG)
+#if defined(H5_USING_MEMCHECKER) || !defined(NDEBUG)
         /* Clear object location */
         if(H5O_loc_reset(&(dt->oloc)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to reset location")
@@ -673,7 +673,7 @@ H5T_open(const H5G_loc_t *loc, hid_t dxpl_id)
         /* Clear path name */
         if(H5G_name_reset(&(dt->path)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to reset path")
-#endif /* H5_USING_PURIFY */
+#endif /* H5_USING_MEMCHECKER */
 
         /* Shallow copy (take ownership) of the object location object */
         if(H5O_loc_copy(&dt->oloc, loc->oloc, H5_COPY_SHALLOW) < 0)

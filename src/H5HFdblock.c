@@ -144,9 +144,9 @@ H5HF_man_dblock_create(hid_t dxpl_id, H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblo
 /* XXX: Change to using free-list factories */
     if((dblock->blk = H5FL_BLK_MALLOC(direct_block, dblock->size)) == NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-#ifdef H5_USING_PURIFY
+#ifdef H5_CLEAR_MEMORY
 HDmemset(dblock->blk, 0, dblock->size);
-#endif /* H5_USING_PURIFY */
+#endif /* H5_CLEAR_MEMORY */
 
     /* Allocate space for the direct block on disk */
     if(HADDR_UNDEF == (dblock_addr = H5MF_alloc(hdr->f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, (hsize_t)dblock->size)))
