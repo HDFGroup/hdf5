@@ -2530,7 +2530,7 @@ HDfprintf(stderr, "%s: Reducing file size to = %a\n", FUNC, last->addr);
     } else {
         /* leak memory */
 #ifdef H5F_DEBUG
-HDfprintf(stderr, "%s: LEAKED MEMORY!!!!!!\n", FUNC);
+HDfprintf(stderr, "%s: LEAKED MEMORY!!! type = %u, addr = %a, size = %Hu\n", FUNC, (unsigned)type, addr, size);
 #endif /* H5F_DEBUG */
     } /* end else */
 
