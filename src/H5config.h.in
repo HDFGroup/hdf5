@@ -3,6 +3,10 @@
 /* Define if your system generates wrong code for log2 routine. */
 #undef BAD_LOG2_CODE_GENERATED
 
+/* Define if the memory buffers being written to disk should be cleared before
+   writing. */
+#undef CLEAR_MEMORY
+
 /* Define if your system can handle converting denormalized floating-point
    values. */
 #undef CONVERT_DENORMAL_FLOAT
@@ -587,6 +591,11 @@
 /* Define if your system can accurately convert unsigned (long) long values to
    floating-point values. */
 #undef ULONG_TO_FP_BOTTOM_BIT_ACCURATE
+
+/* Define if a memory checking tool will be used on the library, to cause
+   library to be very picky about memory operations and also disable the
+   internal free list manager code. */
+#undef USING_MEMCHECKER
 
 /* Version number of package */
 #undef VERSION

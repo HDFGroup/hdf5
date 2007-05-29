@@ -131,6 +131,7 @@ CC_VERSION = @CC_VERSION@
 # H5_CFLAGS holds flags that should be used as CFLAGS when building hdf5,
 # but which shouldn't be exported to h5cc for building other programs.
 CFLAGS = @CFLAGS@ @H5_CFLAGS@
+CLEARFILEBUF = @CLEARFILEBUF@
 CONFIG_DATE = @CONFIG_DATE@
 CONFIG_MODE = @CONFIG_MODE@
 CONFIG_USER = @CONFIG_USER@
@@ -236,6 +237,7 @@ USE_FILTER_NBIT = @USE_FILTER_NBIT@
 USE_FILTER_SCALEOFFSET = @USE_FILTER_SCALEOFFSET@
 USE_FILTER_SHUFFLE = @USE_FILTER_SHUFFLE@
 USE_FILTER_SZIP = @USE_FILTER_SZIP@
+USINGMEMCHECKER = @USINGMEMCHECKER@
 VERSION = @VERSION@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
