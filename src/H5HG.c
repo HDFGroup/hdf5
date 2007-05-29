@@ -216,9 +216,9 @@ H5HG_create (H5F_t *f, hid_t dxpl_id, size_t size)
     if (NULL==(heap->chunk = H5FL_BLK_MALLOC (heap_chunk,size)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, \
                      "memory allocation failed");
-#ifdef H5_USING_PURIFY
-HDmemset(heap->chunk,0,size);
-#endif /* H5_USING_PURIFY */
+#ifdef H5_CLEAR_MEMORY
+HDmemset(heap->chunk, 0, size);
+#endif /* H5_CLEAR_MEMORY */
     heap->nalloc = H5HG_NOBJS (f, size);
     heap->nused = 1; /* account for index 0, which is used for the free object */
     if (NULL==(heap->obj = H5FL_SEQ_MALLOC (H5HG_obj_t,heap->nalloc)))
@@ -813,9 +813,9 @@ H5HG_extend (H5F_t *f, H5HG_heap_t *heap, size_t size)
     /* Re-allocate the heap information in memory */
     if (NULL==(new_chunk = H5FL_BLK_REALLOC (heap_chunk, heap->chunk, heap->size+need)))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "new heap allocation failed");
-#ifdef H5_USING_PURIFY
-HDmemset(new_chunk+heap->size,0,need);
-#endif /* H5_USING_PURIFY */
+#ifdef H5_CLEAR_MEMORY
+HDmemset(new_chunk + heap->size, 0, need);
+#endif /* H5_CLEAR_MEMORY */
 
     /* Adjust the size of the heap */
     old_size=heap->size;

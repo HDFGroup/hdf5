@@ -1904,6 +1904,32 @@ case "X-$INSTRUMENT" in
     ;;
 esac
 
+dnl ----------------------------------------------------------------------
+dnl Check if they would like to securely clear file buffers before they are
+dnl     written.
+dnl
+AC_SUBST([CLEARFILEBUF])
+AC_MSG_CHECKING([whether to clear file buffers])
+AC_ARG_ENABLE([clear-file-buffers],
+              [AC_HELP_STRING([--enable-clear-file-buffers],
+                              [Securely clear file buffers before writing
+                              to file.  Default=yes.])],
+              [CLEARFILEBUF=$enableval])
+
+case "X-$CLEARFILEBUF" in
+  *)
+      CLEARFILEBUF=yes
+      AC_MSG_RESULT([yes])
+      AC_DEFINE([CLEAR_MEMORY], [1],
+                [Define if the memory buffers being written to disk should be
+                cleared before writing.])
+    ;;
+  X-no)
+      CLEARFILEBUF=no
+      AC_MSG_RESULT([no])
+    ;;
+esac
+
 dnl Checkpoint the cache
 AC_CACHE_SAVE
 

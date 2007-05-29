@@ -3304,9 +3304,9 @@ H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t si
                         /* Reallocate the metadata accumulator buffer */
                         if ((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,file->accum_buf_size))==NULL)
                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer")
-#ifdef H5_USING_PURIFY
-HDmemset(file->meta_accum+file->accum_size,0,(file->accum_buf_size-file->accum_size));
-#endif /* H5_USING_PURIFY */
+#ifdef H5_CLEAR_MEMORY
+HDmemset(file->meta_accum + file->accum_size, 0, (file->accum_buf_size - (file->accum_size + size)));
+#endif /* H5_CLEAR_MEMORY */
                     } /* end if */
 
                     /* Move the existing metadata to the proper location */
@@ -3332,9 +3332,9 @@ HDmemset(file->meta_accum+file->accum_size,0,(file->accum_buf_size-file->accum_s
                         /* Reallocate the metadata accumulator buffer */
                         if ((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,file->accum_buf_size))==NULL)
                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer")
-#ifdef H5_USING_PURIFY
-HDmemset(file->meta_accum+file->accum_size,0,(file->accum_buf_size-file->accum_size));
-#endif /* H5_USING_PURIFY */
+#ifdef H5_CLEAR_MEMORY
+HDmemset(file->meta_accum + file->accum_size + size, 0, (file->accum_buf_size - (file->accum_size + size)));
+#endif /* H5_CLEAR_MEMORY */
                     } /* end if */
 
                     /* Copy the new metadata to the end */
@@ -3367,9 +3367,9 @@ HDmemset(file->meta_accum+file->accum_size,0,(file->accum_buf_size-file->accum_s
                         /* Reallocate the metadata accumulator buffer */
                         if ((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,file->accum_buf_size))==NULL)
                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer")
-#ifdef H5_USING_PURIFY
-HDmemset(file->meta_accum+file->accum_size,0,(file->accum_buf_size-file->accum_size));
-#endif /* H5_USING_PURIFY */
+#ifdef H5_CLEAR_MEMORY
+HDmemset(file->meta_accum + file->accum_size, 0, (file->accum_buf_size - file->accum_size));
+#endif /* H5_CLEAR_MEMORY */
                     } /* end if */
 
                     /* Calculate the proper offset of the existing metadata */
@@ -3401,9 +3401,9 @@ HDmemset(file->meta_accum+file->accum_size,0,(file->accum_buf_size-file->accum_s
                         /* Reallocate the metadata accumulator buffer */
                         if ((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,file->accum_buf_size))==NULL)
                             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer")
-#ifdef H5_USING_PURIFY
-HDmemset(file->meta_accum+file->accum_size,0,(file->accum_buf_size-file->accum_size));
-#endif /* H5_USING_PURIFY */
+#ifdef H5_CLEAR_MEMORY
+HDmemset(file->meta_accum + file->accum_size, 0, (file->accum_buf_size - file->accum_size));
+#endif /* H5_CLEAR_MEMORY */
                     } /* end if */
 
                     /* Copy the new metadata to the end */
@@ -3438,9 +3438,12 @@ HDmemset(file->meta_accum+file->accum_size,0,(file->accum_buf_size-file->accum_s
 
                     /* Note the new buffer size */
                     file->accum_buf_size=size;
-#ifdef H5_USING_PURIFY
-HDmemset(file->meta_accum+file->accum_size,0,(file->accum_buf_size-file->accum_size));
-#endif /* H5_USING_PURIFY */
+#ifdef H5_CLEAR_MEMORY
+{
+size_t clear_size = MAX(file->accum_size, size);
+HDmemset(file->meta_accum + clear_size, 0, (file->accum_buf_size - clear_size));
+}
+#endif /* H5_CLEAR_MEMORY */
                 } /* end if */
                 else {
                     /* Check if we should shrink the accumulator buffer */

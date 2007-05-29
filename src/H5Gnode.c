@@ -1721,9 +1721,9 @@ H5G_node_init(H5F_t *f)
     assert(shared->sizeof_rnode);
     if(NULL==(shared->page=H5FL_BLK_MALLOC(grp_page,shared->sizeof_rnode)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")
-#ifdef H5_USING_PURIFY
-HDmemset(shared->page,0,shared->sizeof_rnode);
-#endif /* H5_USING_PURIFY */
+#ifdef H5_CLEAR_MEMORY
+HDmemset(shared->page, 0, shared->sizeof_rnode);
+#endif /* H5_CLEAR_MEMORY */
     if(NULL==(shared->nkey=H5FL_SEQ_MALLOC(size_t,(size_t)(2*H5F_KVALUE(f,H5B_SNODE)+1))))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")
 
