@@ -1,5 +1,9 @@
 /* src/H5config.h.in.  Generated from configure.in by autoheader.  */
 
+/* Define if the memory buffers being written to disk should be cleared before
+   writing. */
+#undef CLEAR_MEMORY
+
 /* Define if your system can handle converting denormalized floating-point
    values. */
 #undef CONVERT_DENORMAL_FLOAT
