@@ -32,8 +32,6 @@
 #include "H5Spkg.h"		/* Dataspaces 				*/
 
 #include "H5Dprivate.h"         /* Datasets (for EFL property name)     */
-#include "H5Fprivate.h"		/* File access				*/
-#include "H5Iprivate.h"		/* IDs			  		*/
 
 
 const char *FILENAME[] = {
@@ -99,7 +97,7 @@ const char *FILENAME[] = {
 
 #define NAME_BUF_SIZE   1024
 #define NUM_ATTRIBUTES 4
-#define ATTR_NAME_LEN 40
+#define ATTR_NAME_LEN 80
 #define DIM_SIZE_1 12
 #define DIM_SIZE_2  6
 #define CHUNK_SIZE_1 5          /* Not an even fraction of dimension sizes, so we test copying partial chunks */
@@ -120,7 +118,8 @@ static struct {
 
 /* Local function prototypes */
 static int
-compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts, const void *buf1, const void *buf2);
+compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts, 
+            const void *buf1, const void *buf2, hid_t obj_owner);
 static int
 compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf);
 static int
@@ -309,31 +308,37 @@ attach_reg_ref_attr(hid_t file_id, hid_t loc_id)
     int rank = 2;
     int rankr =1;
     hdset_reg_ref_t ref[2];
-    int data[2][9] = {{1,1,2,3,3,4,5,5,6},{1,2,2,3,4,4,5,6,6}};
-    hsize_t start[2];
-    hsize_t count[2];
+    int data[2][9] = {{1,1,2,3,3,4,5,5,999},{1,2,2,3,4,4,5,6,999}};
+    hsize_t start[2] = {0, 3};
+    hsize_t count[2] = {2, 3};
     hsize_t coord[3][2] = {{0, 0}, {1, 6}, {0, 8}};
     size_t num_points = 3;
 
+    /* create a 2D dataset */
     if((space_id = H5Screate_simple(rank, dims, NULL)) < 0) TEST_ERROR
     if((spacer_id = H5Screate_simple(rankr, dimsr, NULL)) < 0) TEST_ERROR
     if((dsetv_id = H5Dcreate(file_id, dsetnamev, H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Dwrite(dsetv_id, H5T_NATIVE_INT, H5S_ALL , H5S_ALL, H5P_DEFAULT,data) < 0) TEST_ERROR
 
-    start[0] = 0;
-    start[1] = 3;
-    count[0] = 2;
-    count[1] = 3;
+    /* create reg_ref of block selection */
     if(H5Sselect_hyperslab(space_id,H5S_SELECT_SET,start,NULL,count,NULL) < 0) TEST_ERROR
     if(H5Rcreate(&ref[0], file_id, dsetnamev, H5R_DATASET_REGION, space_id) < 0) TEST_ERROR
+
+    /* create reg_ref of point selection */
     if(H5Sselect_none(space_id) < 0) TEST_ERROR
     if(H5Sselect_elements(space_id, H5S_SELECT_SET, num_points, (const hsize_t **)coord) < 0) TEST_ERROR
     if(H5Rcreate(&ref[1], file_id, dsetnamev, H5R_DATASET_REGION, space_id) < 0) TEST_ERROR
 
+    /* create reg_ref attribute */
     if((aid = H5Acreate(loc_id, "reg_ref_attr", H5T_STD_REF_DSETREG, spacer_id, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Awrite(aid, H5T_STD_REF_DSETREG, ref) < 0) TEST_ERROR
 
+    /* attach the reg_ref attribute to the dataset itself */
+    if(H5Aclose(aid) < 0) TEST_ERROR
+    if((aid = H5Acreate(dsetv_id, "reg_ref_attr", H5T_STD_REF_DSETREG, spacer_id, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Awrite(aid, H5T_STD_REF_DSETREG, ref) < 0) TEST_ERROR
 
+    if(H5Sclose(spacer_id) < 0) TEST_ERROR
     if(H5Sclose(space_id) < 0) TEST_ERROR
     if(H5Dclose(dsetv_id) < 0) TEST_ERROR
     if(H5Aclose(aid) < 0) TEST_ERROR
@@ -343,6 +348,7 @@ attach_reg_ref_attr(hid_t file_id, hid_t loc_id)
 
 error:
     H5E_BEGIN_TRY {
+        H5Sclose(spacer_id);
         H5Sclose(space_id);
         H5Dclose(dsetv_id);
         H5Aclose(aid);
@@ -628,7 +634,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-compare_attribute(hid_t aid, hid_t aid2, hid_t pid, const void *wbuf)
+compare_attribute(hid_t aid, hid_t aid2, hid_t pid, const void *wbuf, hid_t obj_owner)
 {
     hid_t sid = -1, sid2 = -1;                  /* Dataspace IDs */
     hid_t tid = -1, tid2 = -1;                  /* Datatype IDs */
@@ -686,12 +692,12 @@ compare_attribute(hid_t aid, hid_t aid2, hid_t pid, const void *wbuf)
 
     /* Check raw data read in against data written out */
     if(wbuf) {
-        if(!compare_data(aid, 0, pid, tid, (size_t)nelmts, wbuf, rbuf)) TEST_ERROR
-        if(!compare_data(aid2, 0, pid, tid2, (size_t)nelmts, wbuf, rbuf2)) TEST_ERROR
+        if(!compare_data(aid, 0, pid, tid, (size_t)nelmts, wbuf, rbuf, obj_owner)) TEST_ERROR
+        if(!compare_data(aid2, 0, pid, tid2, (size_t)nelmts, wbuf, rbuf2, obj_owner)) TEST_ERROR
     } /* end if */
     /* Don't have written data, just compare data between the two attributes */
     else
-        if(!compare_data(aid, aid2, pid, tid, (size_t)nelmts, rbuf, rbuf2)) TEST_ERROR
+        if(!compare_data(aid, aid2, pid, tid, (size_t)nelmts, rbuf, rbuf2, obj_owner)) TEST_ERROR
 
     /* Reclaim vlen data, if necessary */
     if(H5Tdetect_class(tid, H5T_VLEN) == TRUE)
@@ -745,6 +751,10 @@ error:
  * Note:	This isn't very general, the attributes are assumed to be
  *              those written in test_copy_attach_attributes().
  *
+ * Modifier:    Peter Cao
+ *              Wednesday, March 21, 2007
+ *              Change to compare any attributes of two objects
+ *
  *-------------------------------------------------------------------------
  */
 static int
@@ -754,7 +764,6 @@ compare_std_attributes(hid_t oid, hid_t oid2, hid_t pid)
     int num_attrs;                              /* Number of attributes */
     int num_attrs2;                             /* Number of attributes */
     char attr_name[ATTR_NAME_LEN];              /* Attribute name */
-    int wattr_data[2];                          /* Attribute buffer for writing */
     unsigned cpy_flags;                         /* Object copy flags */
     unsigned i;                                 /* Local index variable */
 
@@ -781,18 +790,13 @@ compare_std_attributes(hid_t oid, hid_t oid2, hid_t pid)
 
         /* Check the attributes are equal */
         for(i = 0; i < (unsigned)num_attrs; i++) {
-            sprintf(attr_name, "%d attr", i);
+            if ( (aid = H5Aopen_idx(oid, i) ) < 0 ) TEST_ERROR
+            if ( H5Aget_name(aid, ATTR_NAME_LEN, attr_name ) < 0) TEST_ERROR
 
-            /* Set up attribute data buffers */
-            wattr_data[0] = 100 * i;
-            wattr_data[1] = 200 * i;
-
-            /* Open the attributes */
-            if((aid = H5Aopen_name(oid, attr_name)) < 0) TEST_ERROR
             if((aid2 = H5Aopen_name(oid2, attr_name)) < 0) TEST_ERROR
 
             /* Check the attributes are equal */
-            if(!compare_attribute(aid, aid2, pid, wattr_data)) TEST_ERROR
+            if(!compare_attribute(aid, aid2, pid, NULL, oid)) TEST_ERROR
 
             /* Close the attributes */
             if(H5Aclose(aid) < 0) TEST_ERROR
@@ -825,7 +829,8 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts, const void *buf1, const void *buf2)
+compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts, 
+        const void *buf1, const void *buf2, hid_t obj_owner)
 {
     size_t elmt_size;           /* Size of an element */
 
@@ -852,7 +857,7 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts, 
             if(vl_buf1->len != vl_buf2->len) TEST_ERROR
 
             /* Check vlen data */
-            if(!compare_data(parent1, parent2, pid, base_tid, vl_buf1->len, vl_buf1->p, vl_buf2->p)) TEST_ERROR
+            if(!compare_data(parent1, parent2, pid, base_tid, vl_buf1->len, vl_buf1->p, vl_buf2->p, obj_owner)) TEST_ERROR
         } /* end for */
 
         if(H5Tclose(base_tid) < 0) TEST_ERROR
@@ -882,6 +887,18 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts, 
                 /* Open referenced objects */
                 if((obj1_id = H5Rdereference(parent1, H5R_OBJECT, ref_buf1)) < 0) TEST_ERROR
                 if((obj2_id = H5Rdereference(parent2, H5R_OBJECT, ref_buf2)) < 0) TEST_ERROR
+
+                /* break the infinite loop when the ref_object points to itself */
+                if (obj_owner > 0) {
+                    H5G_stat_t stat1, stat2;
+                    if (H5Gget_objinfo(obj_owner, ".", 0, &stat1) < 0) TEST_ERROR
+                    if (H5Gget_objinfo(obj1_id, ".", 0, &stat2) < 0) TEST_ERROR
+                    if ( (stat1.objno[0] == stat2.objno[0]) && (stat1.objno[1] == stat2.objno[1]) ) {
+                        if(H5Oclose(obj1_id) < 0) TEST_ERROR
+                        if(H5Oclose(obj2_id) < 0) TEST_ERROR
+                        return TRUE;
+                    }
+                }
 
                 /* Check for types of objects handled */
                 switch(obj1_type)
@@ -926,6 +943,19 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts, 
                 /* Open referenced objects */
                 if((obj1_id = H5Rdereference(parent1, H5R_DATASET_REGION, ref_buf1)) < 0) TEST_ERROR
                 if((obj2_id = H5Rdereference(parent2, H5R_DATASET_REGION, ref_buf2)) < 0) TEST_ERROR
+
+                /* break the infinite loop when the ref_object points to itself */
+                if (obj_owner > 0) {
+                    H5G_stat_t stat1, stat2;
+                    if (H5Gget_objinfo(obj_owner, ".", 0, &stat1) < 0) TEST_ERROR
+                    if (H5Gget_objinfo(obj1_id, ".", 0, &stat2) < 0) TEST_ERROR
+
+                    if ( (stat1.objno[0] == stat2.objno[0]) && (stat1.objno[1] == stat2.objno[1]) ) {
+                        if(H5Oclose(obj1_id) < 0) TEST_ERROR
+                        if(H5Oclose(obj2_id) < 0) TEST_ERROR
+                        return TRUE;
+                    }
+                }
 
                 /* Check for types of objects handled */
                 switch(obj1_type)
@@ -1080,14 +1110,8 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
         }
 
         /* Remove external file information from the dcpls */
-        /* Remove default property causes memory leak
         if(H5Premove(dcpl, H5D_CRT_EXT_FILE_LIST_NAME) < 0) TEST_ERROR
         if(H5Premove(dcpl2, H5D_CRT_EXT_FILE_LIST_NAME) < 0) TEST_ERROR
-        */
-
-        /* reset external file information from the dcpls */
-        if (H5P_reset_external_file_test(dcpl) < 0) TEST_ERROR
-        if (H5P_reset_external_file_test(dcpl2) < 0) TEST_ERROR
     }
 
     /* Compare the rest of the dataset creation property lists */
@@ -1135,12 +1159,12 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
 
     /* Check raw data read in against data written out */
     if(wbuf) {
-        if(!compare_data(did, 0, pid, tid, (size_t)nelmts, wbuf, rbuf)) TEST_ERROR
-        if(!compare_data(did2, 0, pid, tid2, (size_t)nelmts, wbuf, rbuf2)) TEST_ERROR
+        if(!compare_data(did, 0, pid, tid, (size_t)nelmts, wbuf, rbuf, did) ) TEST_ERROR
+        if(!compare_data(did2, 0, pid, tid2, (size_t)nelmts, wbuf, rbuf2, did2) ) TEST_ERROR
     } /* end if */
     /* Don't have written data, just compare data between the two datasets */
     else
-        if(!compare_data(did, did2, pid, tid, (size_t)nelmts, rbuf, rbuf2)) TEST_ERROR
+        if(!compare_data(did, did2, pid, tid, (size_t)nelmts, rbuf, rbuf2, did)) TEST_ERROR
 
     /* Reclaim vlen data, if necessary */
     if(H5Tdetect_class(tid, H5T_VLEN) == TRUE)
@@ -1150,9 +1174,7 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
 
     /* Release raw data buffers */
     HDfree(rbuf);
-    rbuf = NULL;
     HDfree(rbuf2);
-    rbuf2 = NULL;
 
     /* close the source dataspace */
     if(H5Sclose(sid) < 0) TEST_ERROR
@@ -1361,9 +1383,7 @@ HDassert(0 && "Unknown type of object");
     } /* end if */
 
     /* Check if the attributes are equal */
-    /* (don't check standard attributes when testing expanding references) */
-    if(!(cpy_flags & H5O_COPY_EXPAND_REFERENCE_FLAG))
-        if(compare_std_attributes(gid, gid2, pid) != TRUE) TEST_ERROR
+    if(compare_std_attributes(gid, gid2, pid) != TRUE) TEST_ERROR 
 
     /* Groups should be the same. :-) */
     return TRUE;
@@ -3412,11 +3432,6 @@ test_copy_dataset_attr_named_dtype(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Fclose(fid_src) < 0) TEST_ERROR
 
 
-    /* Check that all file IDs have been closed */
-    if(H5I_nmembers(H5I_FILE) != 0) TEST_ERROR
-    if(H5F_sfile_assert_num(0) != 0) TEST_ERROR
-
-
     /* open the source file with read-only */
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
@@ -3954,7 +3969,7 @@ test_copy_attribute_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 
     if((aid = H5Aopen_idx(did, 0)) < 0) TEST_ERROR
     if((aid2 = H5Aopen_idx(did2, 0)) < 0) TEST_ERROR
-    if(compare_attribute(aid, aid2, H5P_DEFAULT, NULL) != TRUE) TEST_ERROR
+    if(compare_attribute(aid, aid2, H5P_DEFAULT, NULL, did) != TRUE) TEST_ERROR
     if(H5Aclose(aid) < 0) TEST_ERROR
     if(H5Aclose(aid2) < 0) TEST_ERROR
 
@@ -7005,7 +7020,9 @@ test_copy_option(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl, unsigned flag, hboo
         if(attach_reg_ref_attr(fid_src, gid_ref) < 0) TEST_ERROR
 
         /* create a dataset of region references */
+/*
         if(create_reg_ref_dataset(fid_src, gid_ref) < 0) TEST_ERROR
+*/
 
         /* Close group holding reference objects */
         if(H5Gclose(gid_ref) < 0) TEST_ERROR
@@ -7277,13 +7294,20 @@ main(void)
             nerrors += test_copy_path(fcpl_src, fcpl_dst, my_fapl);
             nerrors += test_copy_same_file_named_datatype(fcpl_src, my_fapl);
             nerrors += test_copy_old_layout(fcpl_dst, my_fapl);
-            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_WITHOUT_ATTR_FLAG, FALSE, "H5Ocopy(): without attributes");
-            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, 0, TRUE, "H5Ocopy(): with missing groups");
-            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_EXPAND_SOFT_LINK_FLAG, FALSE, "H5Ocopy(): expand soft link");
-            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_SHALLOW_HIERARCHY_FLAG, FALSE, "H5Ocopy(): shallow group copy");
-            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_EXPAND_REFERENCE_FLAG, FALSE, "H5Ocopy(): expand object reference");
-            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_PRESERVE_NULL_FLAG, FALSE, "H5Ocopy(): preserve NULL messages");
-            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_WITHOUT_ATTR_FLAG | H5O_COPY_PRESERVE_NULL_FLAG, TRUE, "H5Ocopy(): preserve NULL messages");
+            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_WITHOUT_ATTR_FLAG, 
+                       FALSE, "H5Ocopy(): without attributes");
+            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, 0, TRUE, 
+                       "H5Ocopy(): with missing groups");
+            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_EXPAND_SOFT_LINK_FLAG, 
+                       FALSE, "H5Ocopy(): expand soft link");
+            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_SHALLOW_HIERARCHY_FLAG, 
+                       FALSE, "H5Ocopy(): shallow group copy");
+            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_EXPAND_REFERENCE_FLAG, 
+                       FALSE, "H5Ocopy(): expand object reference");
+            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_PRESERVE_NULL_FLAG, 
+                       FALSE, "H5Ocopy(): preserve NULL messages");
+            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_WITHOUT_ATTR_FLAG | 
+                       H5O_COPY_PRESERVE_NULL_FLAG, TRUE, "H5Ocopy(): preserve NULL messages");
 
 /* TODO: not implemented
             nerrors += test_copy_option(my_fapl, H5O_COPY_EXPAND_EXT_LINK_FLAG, FALSE, "H5Ocopy: expand external link");
@@ -7313,4 +7337,3 @@ main(void)
 error:
     return 1;
 } /* main */
-
