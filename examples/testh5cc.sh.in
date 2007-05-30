@@ -23,7 +23,7 @@
 
 # Initializations
 # Where the tool is installed.
-prefix="@prefix@"
+prefix="${prefix:-@prefix@}"
 PARALLEL=@PARALLEL@		# Am I in parallel mode?
 AR=@AR@
 RANLIB=@RANLIB@
