@@ -356,6 +356,61 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5O_SHARED_POST_COPY_FILE
+ *
+ * Purpose:     Copies a message from _SRC to _DEST in file
+ *
+ * Note:        The actual name of this routine can be different in each source
+ *              file that this header file is included in, and must be defined
+ *              prior to including this header file.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Peter Cao
+ *              May 25, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5_inline herr_t
+H5O_SHARED_POST_COPY_FILE(H5O_loc_t *oloc_src, void *mesg_src, H5O_loc_t *oloc_dst,
+    void *mesg_dst, hid_t dxpl_id, H5O_copy_t *cpy_info)
+{
+    const H5O_shared_t  *shared_dst = (const H5O_shared_t *)mesg_dst; /* Alias to shared info in native source */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_SHARED_POST_COPY_FILE)
+
+    HDassert(oloc_src->file);
+    HDassert(oloc_dst->file);
+    HDassert(mesg_src);
+    HDassert(mesg_dst);
+
+#ifndef H5O_SHARED_TYPE
+#error "Need to define H5O_SHARED_TYPE macro!"
+#endif /* H5O_SHARED_TYPE */
+#ifndef H5O_SHARED_POST_COPY_FILE
+#error "Need to define H5O_SHARED_POST_COPY_FILE macro!"
+#endif /* H5O_SHARED_POST_COPY_FILE */
+
+#ifdef H5O_SHARED_POST_COPY_FILE_REAL
+    /* Call native message's copy file callback to copy the message */
+    if(H5O_SHARED_POST_COPY_FILE_REAL(oloc_src, mesg_src, oloc_dst, mesg_dst, dxpl_id, cpy_info) <0 ) 
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy native message to another file")
+#endif /* H5O_SHARED_POST_COPY_FILE_REAL */
+
+    /* update only shared message after the post copy */
+    if(H5O_msg_is_shared(shared_dst->msg_type_id, mesg_dst)) {
+        if(H5O_shared_post_copy_file(oloc_dst->file, dxpl_id, cpy_info->oh_dst, mesg_dst) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to fix shared message in post copy")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_SHARED_POST_COPY_FILE() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5O_SHARED_DEBUG
  *
  * Purpose:     Prints debugging info for a potentially shared message.

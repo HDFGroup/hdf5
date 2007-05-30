@@ -699,6 +699,9 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
             HDassert(mesg_dst->type == mesg_src->type);
             HDassert(mesg_dst->native);
 
+            /* the object header is needed in the post copy for shared message */
+            cpy_info->oh_dst = &oh_dst;
+
             /* Perform "post copy" operation on message */
             if((copy_type->post_copy_file)(oloc_src, mesg_src->native, oloc_dst,
                     mesg_dst->native, dxpl_id, cpy_info) < 0)

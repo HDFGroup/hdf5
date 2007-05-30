@@ -130,9 +130,10 @@ typedef struct H5O_copy_t {
     hbool_t expand_ref;                 /* Flag to expand object references */
     hbool_t copy_without_attr;          /* Flag to not copy attributes */
     hbool_t preserve_null;              /* Flag to not delete NULL messages */
-    int curr_depth;                     /* Current depth in hierarchy copied */
-    int max_depth;                      /* Maximum depth in hierarchy to copy */
-    H5SL_t *map_list;                   /* Skip list to hold address mappings */
+    int     curr_depth;                 /* Current depth in hierarchy copied */
+    int     max_depth;                  /* Maximum depth in hierarchy to copy */
+    H5SL_t  *map_list;                  /* Skip list to hold address mappings */
+    H5O_t   *oh_dst;                    /* The destination object header */
 } H5O_copy_t;
 
 /* Header message IDs */

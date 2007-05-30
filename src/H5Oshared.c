@@ -578,6 +578,60 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5O_shared_post_copy_file
+ *
+ * Purpose:     Delate a shared message and replace with a new one.
+ *              The function is needed at cases such as coping a shared reg_ref attribute.
+ *              When a shared reg_ref attribute is copied from one file to
+ *              another, the values in file need to be replaced. The only way 
+ *              to complish that is to delete the old message and write the
+ *              new message with the correct values.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Peter Cao
+ *              xcao@hdfgroup.org
+ *              May 24 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_shared_post_copy_file(H5F_t *f, hid_t dxpl_id, H5O_t *oh, void *mesg)
+{
+    H5O_shared_t *old_sh_mesg;
+    htri_t shared_mesg;                 /* Whether the message should be shared */
+    unsigned msg_type_id;               /* Message's type ID */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_shared_post_copy_file)
+
+    /* check args */
+    HDassert(f);
+    HDassert(mesg);
+
+    /* the old shared message */
+    old_sh_mesg = (H5O_shared_t *) mesg;
+
+    /* save the type id for later use */
+    msg_type_id = old_sh_mesg->msg_type_id;
+
+    /* Remove the old message from the SOHM storage */
+    if(H5SM_delete(f, dxpl_id, oh, old_sh_mesg) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to find attribute information for object")
+
+    /* Add the new message */
+    if((shared_mesg = H5SM_try_share(f, dxpl_id, oh, msg_type_id, mesg, NULL)) == 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "message changed sharing status")
+    else if(shared_mesg < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "can't share message")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_shared_post_copy_file() */
+
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5O_shared_debug
  *
  * Purpose:	Prints debugging info for the message

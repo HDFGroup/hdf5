@@ -61,6 +61,8 @@ static herr_t H5O_attr_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 #define H5O_SHARED_LINK_REAL		H5O_attr_link
 #define H5O_SHARED_COPY_FILE		H5O_attr_shared_copy_file
 #define H5O_SHARED_COPY_FILE_REAL	H5O_attr_copy_file
+#define H5O_SHARED_POST_COPY_FILE	H5O_attr_shared_post_copy_file
+#define H5O_SHARED_POST_COPY_FILE_REAL	H5O_attr_post_copy_file
 #define H5O_SHARED_DEBUG		H5O_attr_shared_debug
 #define H5O_SHARED_DEBUG_REAL		H5O_attr_debug
 #include "H5Oshared.h"			/* Shared Object Header Message Callbacks */
@@ -83,7 +85,7 @@ const H5O_msg_class_t H5O_MSG_ATTR[1] = {{
     NULL,		    	/*can share method		*/
     H5O_attr_pre_copy_file,	/* pre copy native value to file */
     H5O_attr_shared_copy_file,	/* copy native value to file    */
-    H5O_attr_post_copy_file,	/* post copy native value to file    */
+    H5O_attr_shared_post_copy_file,	/* post copy native value to file    */
     H5O_attr_get_crt_index,	/* get creation index		*/
     H5O_attr_set_crt_index,	/* set creation index		*/
     H5O_attr_shared_debug	/* debug the message            */
@@ -957,6 +959,7 @@ H5O_attr_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src,
     HDassert(file_src);
     HDassert(attr_dst);
     HDassert(file_dst);
+
 
     /* Only need to fix reference attribute with real data being copied to
      *  another file.

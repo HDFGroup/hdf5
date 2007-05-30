@@ -51,6 +51,8 @@ static herr_t H5O_sdspace_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 #undef H5O_SHARED_LINK_REAL
 #define H5O_SHARED_COPY_FILE		H5O_sdspace_shared_copy_file
 #undef H5O_SHARED_COPY_FILE_REAL
+#define H5O_SHARED_POST_COPY_FILE	H5O_sdspace_shared_post_copy_file
+#undef H5O_SHARED_POST_COPY_FILE_REAL
 #define H5O_SHARED_DEBUG		H5O_sdspace_shared_debug
 #define H5O_SHARED_DEBUG_REAL		H5O_sdspace_debug
 #include "H5Oshared.h"			/* Shared Object Header Message Callbacks */
