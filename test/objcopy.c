@@ -1110,8 +1110,14 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
         }
 
         /* Remove external file information from the dcpls */
+        /* Remove default property causes memory leak
         if(H5Premove(dcpl, H5D_CRT_EXT_FILE_LIST_NAME) < 0) TEST_ERROR
         if(H5Premove(dcpl2, H5D_CRT_EXT_FILE_LIST_NAME) < 0) TEST_ERROR
+        */
+
+        /* reset external file information from the dcpls */
+        if (H5P_reset_external_file_test(dcpl) < 0) TEST_ERROR
+        if (H5P_reset_external_file_test(dcpl2) < 0) TEST_ERROR
     }
 
     /* Compare the rest of the dataset creation property lists */
