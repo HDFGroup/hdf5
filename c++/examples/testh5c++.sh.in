@@ -21,7 +21,7 @@
 
 # Initializations
 # Where the tool is installed.
-prefix="@prefix@"
+prefix="${prefix:-@prefix@}"
 AR=@AR@
 RANLIB=@RANLIB@
 H5TOOL="h5c++"           	# The tool name
