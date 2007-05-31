@@ -88,6 +88,7 @@ static herr_t H5O_fill_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *s
 #undef H5O_SHARED_COPY_FILE
 #define H5O_SHARED_COPY_FILE		H5O_fill_new_shared_copy_file
 #undef H5O_SHARED_COPY_FILE_REAL
+#undef H5O_SHARED_POST_COPY_FILE
 #define H5O_SHARED_POST_COPY_FILE	H5O_fill_new_shared_post_copy_file
 #undef H5O_SHARED_POST_COPY_FILE_REAL
 #undef H5O_SHARED_DEBUG
