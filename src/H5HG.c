@@ -200,7 +200,7 @@ H5HG_create (H5F_t *f, hid_t dxpl_id, size_t size)
     haddr_t	addr;
     size_t	n;
 
-    FUNC_ENTER_NOAPI(H5HG_create, HADDR_UNDEF);
+    FUNC_ENTER_NOAPI_NOINIT(H5HG_create)
 
     /* Check args */
     assert (f);
