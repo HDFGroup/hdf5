@@ -269,16 +269,24 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_t
             /* Get the number of elements */
             nelmts = H5S_get_simple_extent_npoints(space);
 
-            /* Allocate a temporary buffer and background buffer */
-            if(NULL == (tmp_buf = H5FL_BLK_MALLOC(type_conv, (size_t)nelmts * buf_size)) || NULL == (bkg_buf = H5FL_BLK_CALLOC(type_conv, (size_t)nelmts * buf_size)))
+            /* Allocate a temporary buffer */
+            if(NULL == (tmp_buf = H5FL_BLK_MALLOC(type_conv, (size_t)nelmts * buf_size)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
+/* XXX: Should replicate the fill value into the temp. buffer elements, then
+ *      type convert the temp. buffer, then scatter the temp. buffer elements
+ *      to the user's buffer. - QAK, 2007/05/31
+ */
             /* Fill the selection in the temporary buffer */
             if(H5S_select_fill(tconv_buf, src_type_size, space, tmp_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, FAIL, "filling selection failed")
         
             /* Convert disk buffer into memory buffer */
             if(!H5T_path_noop(tpath)) {
+                /* Allocate a background buffer */
+                if(NULL == (bkg_buf = H5FL_BLK_CALLOC(type_conv, (size_t)nelmts * buf_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
                 if(H5T_convert(tpath, src_id, dst_id, (size_t)nelmts, (size_t)0, (size_t)0, tmp_buf, bkg_buf, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
             } /* end if */
@@ -286,13 +294,13 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_t
             /* Copy the final data into the memory buffer */
             HDmemcpy(buf, tmp_buf, (size_t)nelmts * dst_type_size);
         } else {
-            /* If there's no VL type of data, do conversion first then fill the data into
-             * the memory buffer. */
-            if(NULL == (bkg_buf = H5FL_BLK_CALLOC(type_elem, buf_size)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-
             /* Convert disk buffer into memory buffer */
             if(!H5T_path_noop(tpath)) {
+                /* If there's no VL type of data, do conversion first then fill the data into
+                 * the memory buffer. */
+                if(NULL == (bkg_buf = H5FL_BLK_CALLOC(type_elem, buf_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
                 /* Perform datatype conversion */
                 if(H5T_convert(tpath, src_id, dst_id, (size_t)1, (size_t)0, (size_t)0, tconv_buf, bkg_buf, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")

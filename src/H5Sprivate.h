@@ -211,6 +211,7 @@ H5_DLL H5S_t *H5S_read(const struct H5O_loc_t *loc, hid_t dxpl_id);
 H5_DLL int H5S_extend(H5S_t *space, const hsize_t *size);
 H5_DLL int H5S_set_extent(H5S_t *space, const hsize_t *size);
 H5_DLL herr_t H5S_set_extent_real(H5S_t *space, const hsize_t *size);
+H5_DLL H5S_t *H5S_create(H5S_class_t type);
 H5_DLL H5S_t *H5S_create_simple(unsigned rank, const hsize_t dims[/*rank*/],
     const hsize_t maxdims[/*rank*/]);
 H5_DLL herr_t H5S_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,
@@ -242,7 +243,7 @@ H5_DLL htri_t H5S_select_is_single(const H5S_t *space);
 H5_DLL htri_t H5S_select_is_regular(const H5S_t *space);
 
 /* Operations on all selections */
-H5_DLL herr_t H5S_select_all(H5S_t *space, unsigned rel_prev);
+H5_DLL herr_t H5S_select_all(H5S_t *space, hbool_t rel_prev);
 
 /* Operations on none selections */
 H5_DLL herr_t H5S_select_none(H5S_t *space);

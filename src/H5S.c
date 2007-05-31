@@ -38,7 +38,6 @@
 #define H5S_ENCODE_VERSION      0
 
 /* Local static function prototypes */
-static H5S_t * H5S_create(H5S_class_t type);
 static herr_t H5S_set_extent_simple (H5S_t *space, unsigned rank,
     const hsize_t *dims, const hsize_t *max);
 static htri_t H5S_is_simple(const H5S_t *sdim);
@@ -300,13 +299,13 @@ H5S_term_interface(void)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static H5S_t *
+H5S_t *
 H5S_create(H5S_class_t type)
 {
     H5S_t *new_ds = NULL;    /* New dataspace created */
     H5S_t *ret_value;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5S_create)
+    FUNC_ENTER_NOAPI(H5S_create, NULL)
 
     /* Create a new data space */
     if(NULL == (new_ds = H5FL_MALLOC(H5S_t)))
@@ -333,7 +332,7 @@ H5S_create(H5S_class_t type)
     } /* end switch */
 
     /* Start with "all" selection */
-    if(H5S_select_all(new_ds, 0) < 0)
+    if(H5S_select_all(new_ds, FALSE) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection")
 
     /* Reset common selection info pointer */
@@ -1159,7 +1158,7 @@ H5S_read(const H5O_loc_t *loc, hid_t dxpl_id)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, NULL, "unable to load dataspace info from dataset header")
 
     /* Default to entire dataspace being selected */
-    if(H5S_select_all(ds, 0) < 0)
+    if(H5S_select_all(ds, FALSE) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection")
 
     /* Set the value for successful return */
@@ -1895,7 +1894,7 @@ H5S_decode(const unsigned char *buf)
     H5FL_FREE(H5S_extent_t, extent);
 
     /* Initialize to "all" selection. Deserialization relies on valid existing selection. */
-    if(H5S_select_all(ds, 0) < 0)
+    if(H5S_select_all(ds, FALSE) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection")
 
     /* Decode the select part of dataspace.  I believe this part always exists. */

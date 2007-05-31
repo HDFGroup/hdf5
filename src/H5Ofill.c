@@ -23,12 +23,14 @@
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5Pprivate.h"		/* Property lists			*/
+#include "H5Sprivate.h"		/* Dataspaces				*/
 
 
 static void  *H5O_fill_old_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
@@ -659,19 +661,53 @@ H5O_fill_old_size(const H5F_t UNUSED *f, const void *_mesg)
 herr_t
 H5O_fill_reset_dyn(H5O_fill_t *fill)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_fill_reset_dyn)
+    hid_t fill_type_id = -1;            /* Datatype ID for fill value datatype when reclaiming VL fill values */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_fill_reset_dyn, FAIL)
 
     HDassert(fill);
 
-    if(fill->buf)
+    if(fill->buf) {
+        if(fill->type && H5T_detect_class(fill->type, H5T_VLEN) > 0) {
+            H5T_t *fill_type;           /* Copy of fill value datatype */
+            H5S_t *fill_space;          /* Scalar dataspace for fill value element */
+
+            /* Copy the fill value datatype and get an ID for it */
+            if(NULL == (fill_type = H5T_copy(fill->type, H5T_COPY_TRANSIENT)))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy fill value datatype")
+            if((fill_type_id = H5I_register(H5I_DATATYPE, fill_type)) < 0) {
+                H5T_close(fill_type);
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register fill value datatype")
+            } /* end if */
+
+            /* Create a scalar dataspace for the fill value element */
+            if(NULL == (fill_space = H5S_create(H5S_SCALAR)))
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create scalar dataspace")
+
+            /* Reclaim any variable length components of the fill value */
+            if(H5D_vlen_reclaim(fill_type_id, fill_space, H5P_DATASET_XFER_DEFAULT, fill->buf) < 0) {
+                H5S_close(fill_space);
+                HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to reclaim variable-length fill value data")
+            } /* end if */
+
+            /* Release the scalar fill value dataspace */
+            H5S_close(fill_space);
+        } /* end if */
+
+        /* Release the fill value buffer now */
         fill->buf = H5MM_xfree(fill->buf);
+    } /* end if */
     fill->size = 0;
     if(fill->type) {
 	H5T_close(fill->type);
 	fill->type = NULL;
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    if(fill_type_id > 0)
+        H5I_dec_ref(fill_type_id);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_fill_reset_dyn() */
 
 

@@ -217,6 +217,100 @@ test_getset(void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_getset_vl
+ *
+ * Purpose:	Tests the H5Pget_fill_value() and H5Pset_fill_value()
+ *		functions, using variable-length datatype.
+ *
+ * Return:	Success:	0
+ *		Failure:	number of errors
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, May 31, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_getset_vl(hid_t fapl)
+{
+    hsize_t dims[1] = {2};
+    hid_t fileid = (-1), spaceid = (-1), typeid = (-1), datasetid = (-1), plistid = (-1);
+    char fill_value[] = "aaaa";
+    char orig_fill_value[] = "aaaa";
+    char *f1 = fill_value;
+    char *f2;
+    char filename[1024];
+
+    TESTING("property lists, with variable-length datatype");
+
+    /* Create string type. */
+    if((typeid =  H5Tcopy(H5T_C_S1)) < 0) TEST_ERROR
+    if(H5Tset_size(typeid, H5T_VARIABLE) < 0) TEST_ERROR
+
+    /* Set up dataset creation property list, with fill value */
+    if((plistid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
+    if(H5Pset_fill_value(plistid, typeid, &f1) < 0) TEST_ERROR
+
+    /* Modify original fill value string */
+    fill_value[0] = 'b';
+
+    /* Retrieve fill value from property */
+    if(H5Pget_fill_value(plistid, typeid, &f2) < 0) TEST_ERROR
+
+    /* Verify that the fill value is the original value */
+    if(HDstrcmp(f2, orig_fill_value)) TEST_ERROR
+
+    /* Release the fill value retrieved */
+    HDfree(f2);
+
+    /* Open file. */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+    if((fileid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Write an dataset of this type. */
+    if((spaceid = H5Screate_simple(1, dims, NULL)) < 0) TEST_ERROR
+    if((datasetid = H5Dcreate(fileid, "Dataset", typeid, spaceid, plistid)) < 0) TEST_ERROR
+
+    /* Close IDs (except datatype) */
+    if(H5Dclose(datasetid) < 0) TEST_ERROR
+    if(H5Pclose(plistid) < 0) TEST_ERROR
+    if(H5Sclose(spaceid) < 0) TEST_ERROR
+    if(H5Fclose(fileid) < 0) TEST_ERROR
+
+
+    /* Re-open file, group & dataset */
+    if((fileid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((datasetid = H5Dopen(fileid, "Dataset")) < 0) TEST_ERROR
+
+    /* Get dataset's creation property list */
+    if((plistid = H5Dget_create_plist(datasetid)) < 0) TEST_ERROR
+
+    /* Query fill value */
+    if(H5Pget_fill_value(plistid, typeid, &f2) < 0) TEST_ERROR
+
+    /* Verify that the fill value is the original value */
+    if(HDstrcmp(f2, orig_fill_value)) TEST_ERROR
+
+    /* Release the fill value retrieved */
+    HDfree(f2);
+
+    /* Close IDs */
+    if(H5Dclose(datasetid) < 0) TEST_ERROR
+    if(H5Fclose(fileid) < 0) TEST_ERROR
+    if(H5Pclose(plistid) < 0) TEST_ERROR
+    if(H5Tclose(typeid) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+ error:
+    H5E_BEGIN_TRY {
+    } H5E_END_TRY;
+    return 1;
+} /* end test_getset_vl() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	test_create
  *
  * Purpose:	Tests creating datasets that have fill values.
@@ -1448,6 +1542,7 @@ main(int argc, char *argv[])
 
 	/* Property list tests */
 	nerrors += test_getset();
+	nerrors += test_getset_vl(fapl);
 
         /* Copy the file access property list */
         if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR

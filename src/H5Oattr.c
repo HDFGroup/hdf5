@@ -221,7 +221,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, unsigned UNUSED mesg_flags,
     H5FL_FREE(H5S_extent_t, extent);
 
     /* Default to entire dataspace being selected */
-    if(H5S_select_all(attr->ds, 0) < 0)
+    if(H5S_select_all(attr->ds, FALSE) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection")
 
     if(version < H5O_ATTR_VERSION_2)

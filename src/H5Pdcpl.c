@@ -126,6 +126,9 @@ const H5P_libclass_t H5P_CLS_DCRT[1] = {{
 /* Library Private Variables */
 /*****************************/
 
+/* Declare extern the free list to manage blocks of type conversion data */
+H5FL_BLK_EXTERN(type_conv);
+
 
 
 /*-------------------------------------------------------------------------
@@ -2022,7 +2025,8 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
     H5O_fill_reset_dyn(&fill);
 
     if(value) {
-        H5T_t		*type;          /* Datatype for fill value */
+        H5T_t *type;            /* Datatype for fill value */
+        H5T_path_t *tpath;      /* Conversion information */
 
         /* Retrieve pointer to datatype */
 	if(NULL == (type = H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -2035,6 +2039,30 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
         if(NULL == (fill.buf = H5MM_malloc((size_t)fill.size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "memory allocation failed for fill value")
         HDmemcpy(fill.buf, value, (size_t)fill.size);
+
+        /* Set up type conversion function */
+        if(NULL == (tpath = H5T_path_find(type, type, NULL, NULL, H5AC_ind_dxpl_id, FALSE)))
+            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types")
+
+        /* If necessary, convert fill value datatypes (which copies VL components, etc.) */
+        if(!H5T_path_noop(tpath)) {
+            uint8_t *bkg_buf = NULL;    /* Background conversion buffer */
+
+            /* Allocate a background buffer */
+            if(H5T_path_bkg(tpath) && NULL == (bkg_buf = H5FL_BLK_CALLOC(type_conv, (size_t)fill.size)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+            /* Convert the fill value */
+            if(H5T_convert(tpath, type_id, type_id, (size_t)1, (size_t)0, (size_t)0, fill.buf, bkg_buf, H5AC_ind_dxpl_id) < 0) {
+                if(bkg_buf)
+                    H5FL_BLK_FREE(type_conv, bkg_buf);
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
+            } /* end if */
+
+            /* Release the background buffer */
+            if(bkg_buf)
+                H5FL_BLK_FREE(type_conv, bkg_buf);
+        } /* end if */
     }  /* end if */
     else
         fill.size = (-1);

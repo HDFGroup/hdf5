@@ -3403,7 +3403,7 @@ H5D_istore_initialize_by_extent(H5D_io_info_t *io_info)
 	    if(NULL == (chunk = H5D_istore_lock(io_info, NULL, FALSE, &idx_hint)))
 		HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to read raw data chunk")
 
-	    if(H5S_select_all(space_chunk, 1) < 0)
+	    if(H5S_select_all(space_chunk, TRUE) < 0)
 		HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to select space")
 
 	    for(u = 0; u < rank; u++)

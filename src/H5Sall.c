@@ -547,8 +547,8 @@ H5S_all_deserialize (H5S_t *space, const uint8_t UNUSED *buf)
     assert(space);
 
     /* Change to "all" selection */
-    if((ret_value=H5S_select_all(space,1))<0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection");
+    if((ret_value = H5S_select_all(space, TRUE)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -702,7 +702,7 @@ H5S_all_is_regular(const H5S_t UNUSED *space)
  USAGE
     herr_t H5S_select_all(dsid)
         hid_t dsid;             IN: Dataspace ID of selection to modify
-        unsigned rel_prev;      IN: Flag whether to release previous selection or not
+        hbool_t rel_prev;      IN: Flag whether to release previous selection or not
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -713,28 +713,28 @@ H5S_all_is_regular(const H5S_t UNUSED *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_all (H5S_t *space, unsigned rel_prev)
+H5S_select_all(H5S_t *space, hbool_t rel_prev)
 {
-    herr_t ret_value=SUCCEED;  /* return value */
+    herr_t ret_value = SUCCEED;  /* return value */
 
-    FUNC_ENTER_NOAPI(H5S_select_all, FAIL);
+    FUNC_ENTER_NOAPI(H5S_select_all, FAIL)
 
     /* Check args */
-    assert(space);
+    HDassert(space);
 
     /* Remove current selection first */
     if(rel_prev)
-        if(H5S_SELECT_RELEASE(space)<0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't release selection");
+        if(H5S_SELECT_RELEASE(space) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't release selection")
 
     /* Set number of elements in selection */
-    space->select.num_elem=(hsize_t)H5S_GET_EXTENT_NPOINTS(space);
+    space->select.num_elem = (hsize_t)H5S_GET_EXTENT_NPOINTS(space);
 
     /* Set selection type */
-    space->select.type=H5S_sel_all;
+    space->select.type = H5S_sel_all;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_select_all() */
 
 
@@ -767,8 +767,8 @@ herr_t H5Sselect_all (hid_t spaceid)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
     /* Call internal routine to do the work */
-    if((ret_value=H5S_select_all(space,1))<0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection");
+    if((ret_value = H5S_select_all(space, TRUE)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
 
 done:
     FUNC_LEAVE_API(ret_value);
