@@ -1743,6 +1743,8 @@
 #windows src
 ./windows/src/H5pubconf.h
 ./windows/src/H5Tinit.c
+./windows/src/H5FDwindows.c
+./windows/src/H5FDwindows.h
 
 #windows test
 ./windows/test/big/big.dsp
