@@ -199,7 +199,11 @@ case "$cc_vendor-$cc_version" in
     CFLAGS="$CFLAGS -Wno-long-long"
 
     # Append warning flags from gcc-3* case
-    DEBUG_CFLAGS="$DEBUG_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
+    # (don't use -Wpadded flag for normal builds, many of the warnings its
+    #   issuing can't be fixed and they are making it hard to detect other,
+    #   more important warnings)
+    #DEBUG_CFLAGS="$DEBUG_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
+    DEBUG_CFLAGS="$DEBUG_CFLAGS -Wfloat-equal -Wmissing-format-attribute"
 
     # Append warning flags from gcc-3.2* case
     DEBUG_CFLAGS="$DEBUG_CFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization -Wmultichar"
