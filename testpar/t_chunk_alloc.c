@@ -36,7 +36,11 @@ get_filesize(const char *filename)
     int		mpierr;
     MPI_File	fd;
     MPI_Offset	filesize;
+#ifndef H5_HAVE_MPI_GET_SIZE
+    struct stat stat_buf;
+#endif
 
+#ifdef H5_HAVE_MPI_GET_SIZE
     mpierr = MPI_File_open(MPI_COMM_SELF, (char*)filename, MPI_MODE_RDONLY,
 	MPI_INFO_NULL, &fd);
     VRFY((mpierr == MPI_SUCCESS), "");
@@ -46,6 +50,16 @@ get_filesize(const char *filename)
 
     mpierr = MPI_File_close(&fd);
     VRFY((mpierr == MPI_SUCCESS), "");
+#else
+    /* Some systems (only SGI Altix Propack 4 so far) doesn't return correct
+     * file size for MPI_File_get_size.  Use stat instead.
+     */
+    if((mpierr=stat(filename, &stat_buf))<0)
+    VRFY((mpierr == MPI_SUCCESS), "");
+
+    /* Hopefully this casting is safe */
+    filesize = (MPI_Offset)(stat_buf.st_size);
+#endif
 
     return(filesize);
 }

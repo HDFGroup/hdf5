@@ -219,6 +219,9 @@
 /* Define to 1 if you have the <mpe.h> header file. */
 #undef HAVE_MPE_H
 
+/* Define if MPI_File_get_size works correctly */
+#undef HAVE_MPI_GET_SIZE
+
 /* Define to 1 if you have the <netinet/in.h> header file. */
 #undef HAVE_NETINET_IN_H
 

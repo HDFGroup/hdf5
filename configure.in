@@ -2117,7 +2117,37 @@ if test -n "$PARALLEL"; then
   else
     AC_MSG_RESULT([no])
   fi
-  
+
+dnl ----------------------------------------------------------------------
+dnl Set the flag to indicate that the MPI_File_get_size() function
+dnl works.  The default is enabled unless the user knows the function
+dnl doesn't work on the system and disables it.  (This flag should be set
+dnl for all machines except for SGI Altix Propack 4 where the function 
+dnl doesn't return correct file size.)
+dnl
+AC_ARG_ENABLE([mpi-size],
+              [AC_HELP_STRING([--enable-mpi-size],
+                              [Some systems (only SGI Altix Propack 4 so far) return wrong value
+                               from MPI_File_get_size.  By disabling this function, the library
+                               will replace it with stat to get the correct file size.
+                               [default=yes]])],
+              [MPI_GET_SIZE=$enableval])
+
+AC_MSG_CHECKING([if MPI_File_get_size is enabled])
+
+AC_SUBST(MPI_GET_SIZE)
+case "X-$MPI_GET_SIZE" in
+  X-no)
+    AC_MSG_RESULT([no])
+    MPI_GET_SIZE=no
+    ;;
+  X-yes|*)
+    AC_MSG_RESULT([yes])
+    MPI_GET_SIZE=yes
+    AC_DEFINE([HAVE_MPI_GET_SIZE], [1],
+              [Define if MPI_File_get_size works correctly])
+    ;;
+esac
 
 dnl ----------------------------------------------------------------------
 dnl Check to see whether the complicate MPI derived datatype works. 

@@ -868,6 +868,7 @@ TRACE_API
 INSTRUMENT_LIBRARY
 CLEARFILEBUF
 MPE
+MPI_GET_SIZE
 FILTERS
 USE_FILTER_SHUFFLE
 USE_FILTER_FLETCHER32
@@ -1507,6 +1508,11 @@ Optional Features:
                           Securely clear file buffers before writing to file.
                           Default=yes.
   --enable-parallel       Search for MPI-IO and MPI support files
+  --enable-mpi-size       Some systems (only SGI Altix Propack 4 so far)
+                          return wrong value from MPI_File_get_size. By
+                          disabling this function, the library will replace it
+                          with stat to get the correct file size.
+                          [default=yes]
   --enable-stream-vfd     Build the Stream Virtual File Driver [default=yes]
   --enable-filters=all    Turn on all internal I/O filters. One may also
                           specify a comma-separated list of filters or the
@@ -5305,7 +5311,7 @@ test "x$enable_libtool_lock" != xno && enable_libtool_lock=yes
 case $host in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 5308 "configure"' > conftest.$ac_ext
+  echo '#line 5314 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -5862,7 +5868,7 @@ chmod -w .
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -o out/conftest2.$ac_objext"
 compiler_c_o=no
-if { (eval echo configure:5865: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
+if { (eval echo configure:5871: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
   # The compiler can only warn and ignore the option if not recognized
   # So say no if there are warnings
   if test -s out/conftest.err; then
@@ -7737,7 +7743,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 7740 "configure"
+#line 7746 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -7835,7 +7841,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 7838 "configure"
+#line 7844 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -36077,6 +36083,33 @@ echo "${ECHO_T}yes" >&6; }
 echo "${ECHO_T}no" >&6; }
   fi
 
+# Check whether --enable-mpi-size was given.
+if test "${enable_mpi_size+set}" = set; then
+  enableval=$enable_mpi_size; MPI_GET_SIZE=$enableval
+fi
+
+
+{ echo "$as_me:$LINENO: checking if MPI_File_get_size is enabled" >&5
+echo $ECHO_N "checking if MPI_File_get_size is enabled... $ECHO_C" >&6; }
+
+
+case "X-$MPI_GET_SIZE" in
+  X-no)
+    { echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+    MPI_GET_SIZE=no
+    ;;
+  X-yes|*)
+    { echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; }
+    MPI_GET_SIZE=yes
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_MPI_GET_SIZE 1
+_ACEOF
+
+    ;;
+esac
 
 { echo "$as_me:$LINENO: checking if irregular hyperslab optimization code works inside MPI-IO" >&5
 echo $ECHO_N "checking if irregular hyperslab optimization code works inside MPI-IO... $ECHO_C" >&6; }
@@ -37627,6 +37660,7 @@ TRACE_API!$TRACE_API$ac_delim
 INSTRUMENT_LIBRARY!$INSTRUMENT_LIBRARY$ac_delim
 CLEARFILEBUF!$CLEARFILEBUF$ac_delim
 MPE!$MPE$ac_delim
+MPI_GET_SIZE!$MPI_GET_SIZE$ac_delim
 FILTERS!$FILTERS$ac_delim
 USE_FILTER_SHUFFLE!$USE_FILTER_SHUFFLE$ac_delim
 USE_FILTER_FLETCHER32!$USE_FILTER_FLETCHER32$ac_delim
@@ -37646,7 +37680,7 @@ LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 21; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 22; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5
