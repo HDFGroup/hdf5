@@ -902,8 +902,11 @@ H5Dget_create_plist(hid_t dset_id)
 
             /* Allocate a background buffer */
             bkg_size = MAX(H5T_get_size(copied_fill.type), H5T_get_size(dset->shared->type));
-            if(H5T_path_bkg(tpath) && NULL == (bkg_buf = H5FL_BLK_CALLOC(type_conv, bkg_size)))
+            if(H5T_path_bkg(tpath) && NULL == (bkg_buf = H5FL_BLK_CALLOC(type_conv, bkg_size))) {
+                H5I_dec_ref(src_id);
+                H5I_dec_ref(dst_id);
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+            } /* end if */
 
             /* Convert fill value */
             if(H5T_convert(tpath, src_id, dst_id, (size_t)1, (size_t)0, (size_t)0, copied_fill.buf, bkg_buf, H5AC_ind_dxpl_id) < 0) {

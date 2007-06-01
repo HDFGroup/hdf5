@@ -172,6 +172,9 @@ const H5O_msg_class_t H5O_MSG_FILL_NEW[1] = {{
 /* Declare a free list to manage the H5O_fill_t struct */
 H5FL_DEFINE(H5O_fill_t);
 
+/* Declare extern the free list to manage blocks of type conversion data */
+H5FL_BLK_EXTERN(type_conv);
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5O_fill_new_decode
@@ -536,6 +539,55 @@ H5O_fill_copy(const void *_mesg, void *_dest)
 	if(NULL == (dest->buf = H5MM_malloc((size_t)mesg->size)))
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value")
 	HDmemcpy(dest->buf, mesg->buf, (size_t)mesg->size);
+
+        /* Check for needing to convert/copy fill value */
+        if(mesg->type) {
+            H5T_path_t *tpath;      /* Conversion information */
+
+            /* Set up type conversion function */
+            if(NULL == (tpath = H5T_path_find(mesg->type, dest->type, NULL, NULL, H5AC_ind_dxpl_id, FALSE)))
+                HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, NULL, "unable to convert between src and dest data types")
+
+            /* If necessary, convert fill value datatypes (which copies VL components, etc.) */
+            if(!H5T_path_noop(tpath)) {
+                hid_t dst_id, src_id;       /* Source & destination datatypes for type conversion */
+                uint8_t *bkg_buf = NULL;    /* Background conversion buffer */
+                size_t bkg_size;            /* Size of background buffer */
+
+                /* Wrap copies of types to convert */
+                dst_id = H5I_register(H5I_DATATYPE, H5T_copy(dest->type, H5T_COPY_TRANSIENT));
+                if(dst_id < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy/register datatype")
+                src_id = H5I_register(H5I_DATATYPE, H5T_copy(mesg->type, H5T_COPY_ALL));
+                if(src_id < 0) {
+                    H5I_dec_ref(dst_id);
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy/register datatype")
+                } /* end if */
+
+                /* Allocate a background buffer */
+                bkg_size = MAX(H5T_get_size(dest->type), H5T_get_size(mesg->type));
+                if(H5T_path_bkg(tpath) && NULL == (bkg_buf = H5FL_BLK_CALLOC(type_conv, bkg_size))) {
+                    H5I_dec_ref(src_id);
+                    H5I_dec_ref(dst_id);
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+                } /* end if */
+
+                /* Convert fill value */
+                if(H5T_convert(tpath, src_id, dst_id, (size_t)1, (size_t)0, (size_t)0, dest->buf, bkg_buf, H5AC_ind_dxpl_id) < 0) {
+                    H5I_dec_ref(src_id);
+                    H5I_dec_ref(dst_id);
+                    if(bkg_buf)
+                        H5FL_BLK_FREE(type_conv, bkg_buf);
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, NULL, "datatype conversion failed")
+                } /* end if */
+
+                /* Release the background buffer */
+                H5I_dec_ref(src_id);
+                H5I_dec_ref(dst_id);
+                if(bkg_buf)
+                    H5FL_BLK_FREE(type_conv, bkg_buf);
+            } /* end if */
+        } /* end if */
     } /* end if */
     else
         dest->buf = NULL;
