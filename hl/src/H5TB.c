@@ -113,7 +113,7 @@ herr_t H5TBmake_table( const char *table_title,
  }
 
  /* Create a simple data space with unlimited size */
- if ( (sid = H5Screate_simple( 1, dims, maxdims )) < 0 )
+ if ( (sid = H5Screate_simple( 1, dims, maxdims )) < 0 ) 
   return -1;
 
  /* Modify dataset creation properties, i.e. enable chunking  */
@@ -248,7 +248,6 @@ herr_t H5TBmake_table( const char *table_title,
  /* Release the datatype. */
  if ( H5Tclose( mem_type_id ) < 0 )
   return -1;
-
 
 return 0;
 
@@ -3281,7 +3280,8 @@ herr_t H5TBget_table_info ( hid_t loc_id,
    if ( H5LTget_attribute(loc_id,dset_name,"NROWS",H5T_NATIVE_LLONG,n)<0)
     return -1;
 
-   *nrecords = *n;
+   /**nrecords = *n;*/
+   *nrecords = n[0];
   }
   else
   {

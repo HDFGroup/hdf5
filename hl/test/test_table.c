@@ -354,7 +354,6 @@ int test_table(hid_t fid, int write)
  PASSED();
  }
 
-
  TESTING2("reading table");
 
 /*-------------------------------------------------------------------------
@@ -1355,7 +1354,6 @@ int test_table(hid_t fid, int write)
  PASSED();
  }
 
-
 /*-------------------------------------------------------------------------
  *
  * Functions tested:
@@ -1373,7 +1371,6 @@ int test_table(hid_t fid, int write)
                     field_names,field_offset,field_type,
                     chunk_size,fill,compress,wbuf)<0)
                     goto out;
-
 
  /* delete the field */
  if ( H5TBdelete_field(fid, "table14", "Pressure" ) < 0 )
