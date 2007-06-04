@@ -71,6 +71,20 @@ typedef struct s5_t {
     unsigned int post;
 } s5_t;
 
+/* The sixth dataset (a superset of s1).  This is for
+ * testing the optimization for the Chicago company. */
+typedef struct s6_t {
+    unsigned int a;
+    unsigned int b;
+    unsigned int c[4];
+    unsigned int d;
+    unsigned int e;
+    unsigned int pre;
+    unsigned int mid1;
+    unsigned int mid2;
+    unsigned int post;
+} s6_t;
+
 
 #if 1
 #  define NX	100u
@@ -123,6 +137,10 @@ main (int argc, char *argv[])
     /* Fifth dataset */
     static s5_t		s5[NX*NY];
     hid_t		s5_tid;
+
+    static s6_t		s6[NX*NY];
+    hid_t		s6_tid;
+
 
     /* Sixth dataset */
 
@@ -392,7 +410,84 @@ main (int argc, char *argv[])
 
     /*
      *######################################################################
-     * STEP 6: Update fields `b' and `d' on the file leaving the other
+     * STEP 6: Read all the members into a struct which has other members
+     * 	       which have already been initialized.  This is to test the
+     *         optimization for the Chicago company.  The optimization is
+     *         for the special case when the source members are a subset of
+     *         destination, and the order is the same, and no conversion
+     *         is needed.  For example:
+     *              struct source {            struct destination {
+     *                  TYPE1 A;      -->          TYPE1 A;
+     *                  TYPE2 B;      -->          TYPE2 B;
+     *                  TYPE3 C;      -->          TYPE3 C;
+     *              };                             TYPE4 D;
+     *                                             TYPE5 E;
+     *                                         };
+     */
+    TESTING("partially initialized superset optimized read");
+
+    /* Initialize some members */
+    for (i=0; i<NX*NY; i++) {
+	s6[i].pre =  1000+4*i;
+	s6[i].mid1 = 1001+4*i;
+	s6[i].mid2 = 1002+4*i;
+	s6[i].post = 1003+4*i;
+    }
+
+    /* Create a data type for s6 */
+    if ((s6_tid = H5Tcreate (H5T_COMPOUND, sizeof(s6_t)))<0)
+        goto error;
+    array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, memb_size, NULL);
+    if (H5Tinsert (s6_tid, "a", HOFFSET(s6_t,a), H5T_NATIVE_INT)<0 ||
+            H5Tinsert (s6_tid, "b", HOFFSET(s6_t,b), H5T_NATIVE_INT)<0 ||
+            H5Tinsert (s6_tid, "c", HOFFSET(s6_t,c), array_dt)<0 ||
+            H5Tinsert (s6_tid, "d", HOFFSET(s6_t,d), H5T_NATIVE_INT)<0 ||
+            H5Tinsert (s6_tid, "e", HOFFSET(s6_t,e), H5T_NATIVE_INT)<0 ||
+            H5Tinsert (s6_tid, "pre", HOFFSET(s6_t,pre), H5T_NATIVE_INT)<0 ||
+            H5Tinsert (s6_tid, "mid1", HOFFSET(s6_t,mid1), H5T_NATIVE_INT)<0 ||
+            H5Tinsert (s6_tid, "mid2", HOFFSET(s6_t,mid2), H5T_NATIVE_INT)<0 ||
+            H5Tinsert (s6_tid, "post", HOFFSET(s6_t,post), H5T_NATIVE_INT)<0)
+        goto error;
+    H5Tclose(array_dt);
+
+    /* Read the data */
+    if (H5Dread (dataset, s6_tid, H5S_ALL, H5S_ALL, PRESERVE, s6)<0) {
+	goto error;
+    }
+
+    /* Check that the data was read properly */
+    for (i=0; i<NX*NY; i++) {
+	if (s1[i].a!=s6[i].a ||
+	    s1[i].b!=s6[i].b ||
+	    s1[i].c[0]!=s6[i].c[0] ||
+	    s1[i].c[1]!=s6[i].c[1] ||
+	    s1[i].c[2]!=s6[i].c[2] ||
+	    s1[i].c[3]!=s6[i].c[3] ||
+	    s1[i].d!=s6[i].d ||
+	    s1[i].e!=s6[i].e) {
+	    H5_FAILED();
+	    puts("    Incorrect values read from the file");
+	    goto error;
+	}
+    }
+
+    /* Check that no previous values were clobbered */
+    for (i=0; i<NX*NY; i++) {
+	if (s6[i].pre  != 1000+4*i ||
+	    s6[i].mid1 != 1001+4*i ||
+	    s6[i].mid2 != 1002+4*i ||
+	    s6[i].post != 1003+4*i) {
+	    H5_FAILED();
+	    puts("    Memory values were clobbered");
+	    goto error;
+	}
+    }
+    PASSED();
+
+
+    /*
+     *######################################################################
+     * STEP 7: Update fields `b' and `d' on the file leaving the other
      *         fields unchanged.  This tests member alignment and background
      *	       buffers.
      */
@@ -438,7 +533,7 @@ main (int argc, char *argv[])
 
     /*
      *######################################################################
-     * STEP 7. Read the original dataset with an explicit data space.  Even
+     * STEP 8. Read the original dataset with an explicit data space.  Even
      * though these data spaces are equal it tests a different part of the
      * library.
      */
@@ -472,7 +567,7 @@ main (int argc, char *argv[])
 
     /*
      *######################################################################
-     * STEP 8. Read a hyperslab of the file into a complete array in memory.
+     * STEP 9. Read a hyperslab of the file into a complete array in memory.
      * The hyperslab is the middle third of the array.
      */
     TESTING("hyperslab partial read to array");
@@ -524,7 +619,7 @@ main (int argc, char *argv[])
 
     /*
      *######################################################################
-     * STEP 9.  Read a hyperslab of the file into a hyperslab of memory.  The
+     * STEP 10.  Read a hyperslab of the file into a hyperslab of memory.  The
      * part of memory not read is already initialized and must not change.
      */
     TESTING("hyperslab partial read to another hyperslab");
@@ -581,7 +676,7 @@ main (int argc, char *argv[])
 
     /*
      *######################################################################
-     * STEP 10. Same as step 9 except the memory array contains some members
+     * STEP 11. Same as step 9 except the memory array contains some members
      * which are already initialized, like step 5.
      */
     TESTING("hyperslab to hyperslab part initialized read");
@@ -647,7 +742,7 @@ main (int argc, char *argv[])
 
     /*
      *######################################################################
-     * Step 11: Write an array into the middle third of the dataset
+     * Step 12: Write an array into the middle third of the dataset
      * initializeing only members `b' and `d' to -1.
      */
     TESTING("hyperslab part initialized write");
