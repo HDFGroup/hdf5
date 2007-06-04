@@ -21,6 +21,7 @@
 
 const char *FILENAME[] = {
     "big",
+    "sec2",
     "stdio",
     NULL
 };
@@ -172,6 +173,7 @@ supports_big(void)
     if (5!=HDwrite(fd, "hello", (size_t)5)) return 0;
 
     if (HDclose(fd)<0) return 0;
+    if (HDunlink("y.h5")<0) return 0;
 
     return (1);
 }
@@ -492,6 +494,9 @@ usage(void)
  *		Albert Cheng, 2002/04/19
  *		Added command option -c.
  *
+ *              Raymond Lu, 2007/05/25
+ *              Added similar tests for SEC2 and STDIO drivers.
+ *
  *-------------------------------------------------------------------------
  */
 int
@@ -616,7 +621,7 @@ main (int ac, char **av)
     if(H5Pset_fapl_sec2(fapl)<0)
 
     HDmemset(filename, 0, sizeof(filename));
-    h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
+    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
 
     if (writer(filename, fapl, WRT_N)) goto error;
     if (reader(filename, fapl)) goto error;
@@ -636,7 +641,7 @@ main (int ac, char **av)
     if(H5Pset_fapl_stdio(fapl)<0)
 
     HDmemset(filename, 0, sizeof(filename));
-    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
+    h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
 
     if (writer(filename, fapl, WRT_N)) goto error;
     if (reader(filename, fapl)) goto error;
