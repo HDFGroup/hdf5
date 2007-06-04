@@ -29,7 +29,6 @@
 /*#if defined __INTEL_COMPILER
 #define H5_SIZEOF_LONG_DOUBLE 12
 #else*/
-
 /*#endif*/
 
 /*#define H5_HAVE_TM_ZONE 1 windows do not use this constant.*/  
@@ -82,6 +81,10 @@ in the file file_io.win32.c and including it on the projects
 #define H5_HAVE_SYS_TIMEB 1
 #define H5_HAVE_SYS_TYPES_H 1
 #define H5_HAVE_WINSOCK_H 1
+
+/* comment the following line out if the memory buffers being written to 
+   disk should not be cleared before writing. */
+#define H5_CLEAR_MEMORY 1
 
 /* comment the following line out if you are not using check sum filter*/
 #define H5_HAVE_FILTER_FLETCHER32 1
@@ -167,3 +170,8 @@ visual studio 2005 to fix this problem.
 
 /* uncomment the following line if we want parallel HDF5 support */
 /* #define H5_HAVE_PARALLEL  */
+
+/* uncomment the following line if you need the library to perform "strict" 
+   memory operations, which is useful when debugging with a memory checking 
+   tool like Purify, etc. */
+/* #define H5_USING_MEMCHECKER  1  */
