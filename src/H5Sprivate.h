@@ -21,9 +21,11 @@
 
 #include "H5Spublic.h"
 
+/* Public headers needed by this file */
+#include "H5Dpublic.h"		/* Datasets				*/
+
 /* Private headers needed by this file */
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5Dprivate.h"		/* Dataset functions			*/
 #include "H5Fprivate.h"		/* Files				*/
 #include "H5Gprivate.h"		/* Groups				*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
@@ -207,6 +209,7 @@ H5_DLL H5S_t *H5S_read(const struct H5G_entry_t *ent, hid_t dxpl_id);
 H5_DLL int H5S_extend(H5S_t *space, const hsize_t *size);
 H5_DLL int H5S_set_extent(H5S_t *space, const hsize_t *size);
 H5_DLL herr_t H5S_set_extent_real(H5S_t *space, const hsize_t *size);
+H5_DLL H5S_t *H5S_create(H5S_class_t type);
 H5_DLL H5S_t *H5S_create_simple(unsigned rank, const hsize_t dims[/*rank*/],
 		  const hsize_t maxdims[/*rank*/]);
 H5_DLL herr_t H5S_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream,

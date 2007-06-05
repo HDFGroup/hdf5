@@ -91,6 +91,10 @@ H5D_dxpl_cache_t H5D_def_dxpl_cache;
 /* Library Private Variables */
 /*****************************/
 
+/* Declare extern the free list to manage blocks of type conversion data */
+H5FL_BLK_EXTERN(type_conv);
+
+
 /*******************/
 /* Local Variables */
 /*******************/
@@ -1485,10 +1489,55 @@ H5Dget_create_plist(hid_t dset_id)
     if(H5P_get(new_plist, H5D_CRT_FILL_VALUE_NAME, &copied_fill) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value")
 
-    /* Copy the dataset type into the fill value message */
-    if(copied_fill.type==NULL)
+    /* Check if there is a fill value, but no type yet */
+    if(copied_fill.buf != NULL && copied_fill.type == NULL) {
+        H5T_path_t *tpath;      /* Conversion information*/
+
+        /* Copy the dataset type into the fill value message */
         if(NULL==(copied_fill.type=H5T_copy(dset->shared->type, H5T_COPY_TRANSIENT)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to copy dataset datatype for fill value")
+
+        /* Set up type conversion function */
+        if(NULL == (tpath = H5T_path_find(dset->shared->type, copied_fill.type, NULL, NULL, H5AC_ind_dxpl_id)))
+            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types")
+
+        /* Convert disk form of fill value into memory form */
+        if(!H5T_path_noop(tpath)) {
+            hid_t dst_id, src_id;       /* Source & destination datatypes for type conversion */
+            uint8_t *bkg_buf = NULL;    /* Background conversion buffer */
+            size_t bkg_size;            /* Size of background buffer */
+
+            /* Wrap copies of types to convert */
+            dst_id = H5I_register(H5I_DATATYPE, H5T_copy(copied_fill.type, H5T_COPY_TRANSIENT));
+            if(dst_id < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy/register datatype")
+            src_id = H5I_register(H5I_DATATYPE, H5T_copy(dset->shared->type, H5T_COPY_ALL));
+            if(src_id < 0) {
+                H5I_dec_ref(dst_id);
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy/register datatype")
+            } /* end if */
+
+            /* Allocate a background buffer */
+            bkg_size = MAX(H5T_get_size(copied_fill.type), H5T_get_size(dset->shared->type));
+            if(H5T_path_bkg(tpath) && NULL == (bkg_buf = H5FL_BLK_CALLOC(type_conv, bkg_size)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+            /* Convert fill value */
+            if(H5T_convert(tpath, src_id, dst_id, (size_t)1, (size_t)0, (size_t)0, copied_fill.buf, bkg_buf, H5AC_ind_dxpl_id) < 0) {
+                H5I_dec_ref(src_id);
+                H5I_dec_ref(dst_id);
+                if(bkg_buf)
+                    H5FL_BLK_FREE(type_conv, bkg_buf);
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
+            } /* end if */
+
+            /* Release local resources */
+            H5I_dec_ref(src_id);
+            H5I_dec_ref(dst_id);
+            if(bkg_buf)
+                H5FL_BLK_FREE(type_conv, bkg_buf);
+        } /* end if */
+    } /* end if */
 
     /* Set back the fill value property to property list */
     if(H5P_set(new_plist, H5D_CRT_FILL_VALUE_NAME, &copied_fill) < 0)

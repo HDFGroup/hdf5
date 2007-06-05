@@ -25,6 +25,7 @@
 /* Private headers needed by this file */
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
+#include "H5Sprivate.h"		/* Dataspaces 				*/
 
 /**************************/
 /* Library Private Macros */
@@ -238,6 +239,10 @@ H5_DLL herr_t H5D_xfer_close(hid_t dxpl_id, void *close_data);
 H5_DLL herr_t H5D_flush(const H5F_t *f, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5D_get_dxpl_cache(hid_t dxpl_id, H5D_dxpl_cache_t **cache);
 H5_DLL herr_t H5D_get_dxpl_cache_real(hid_t dxpl_id, H5D_dxpl_cache_t *cache);
+
+/* Functions that operate on vlen data */
+H5_DLL herr_t H5D_vlen_reclaim(hid_t type_id, H5S_t *space, hid_t plist_id,
+    void *buf);
 
 /* Functions that operate on contiguous storage */
 H5_DLL herr_t H5D_contig_delete(H5F_t *f, hid_t dxpl_id,

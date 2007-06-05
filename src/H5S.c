@@ -29,7 +29,6 @@
 #include "H5Spkg.h"		/* Dataspaces 				*/
 
 /* Local static function prototypes */
-static H5S_t * H5S_create(H5S_class_t type);
 static herr_t H5S_set_extent_simple (H5S_t *space, unsigned rank,
     const hsize_t *dims, const hsize_t *max);
 static htri_t H5S_is_simple(const H5S_t *sdim);
@@ -289,7 +288,7 @@ H5S_term_interface(void)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static H5S_t *
+H5S_t *
 H5S_create(H5S_class_t type)
 {
     H5S_t *ret_value;
