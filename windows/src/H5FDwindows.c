@@ -86,23 +86,44 @@ typedef struct H5FD_windows_t {
 
 
 /*
- * This driver supports systems that have the lseeki64() function by defining
- * some macros here so we don't have to have conditional compilations later
- * throughout the code.
- *
- * file_offset_t:	The datatype for file offsets, the second argument of
- *					the lseek() or lseeki64() call.
- *
- * file_seek:		The function which adjusts the current file position,
- *					either lseek() or lseek64().
+ *  Below we make several definitions based on whether 64-bit safe system
+ *  calls are available.  If they are not, the normal 32-bit routines will be
+ *  used, and files over 2GB are not supported.
  */
-
-#   define file_offset_t	__int64
+#ifdef H5_HAVE_FSEEKI64
 #   define file_seek		_fseeki64
+#   define fseek_offset_t	__int64
+#else
+#   define file_seek		fseek
+#   define fseek_offset_t	long
+#endif
 
+#ifdef H5_HAVE_CHSIZE_S
+#   define change_size		_chsize_s
+#   define chsize_offset_t	__int64
+#else
+#   define change_size      _chsize
+#   define chsize_offset_t	long
+#endif
+
+#ifdef H5_HAVE_STATI64
+#   define file_stat		_stati64
+#   define stat_struct_t	struct _stati64
+#else
+#   define file_stat        _stat
+#   define stat_struct_t	struct _stat
+#endif
+
+#ifdef H5_HAVE_FTELLI64
+#   define file_tell		_ftelli64
+#   define ftell_ret_t  	__int64
+#else
+#   define file_tell        ftell
+#   define ftell_ret_t	    long
+#endif
 /*
  * These macros check for overflow of various quantities.  These macros
- * assume that file_offset_t is signed and haddr_t and size_t are unsigned.
+ * assume that fseek_offset_t is signed and haddr_t and size_t are unsigned.
  *
  * ADDR_OVERFLOW:	Checks whether a file address of type `haddr_t'
  *			is too large to be represented by the second argument
@@ -115,13 +136,13 @@ typedef struct H5FD_windows_t {
  *			which can be addressed entirely by the second
  *			argument of the file seek function.
  */
-#define MAXADDR (((haddr_t)1<<(8*sizeof(file_offset_t)-1))-1)
+#define MAXADDR (((haddr_t)1<<(8*sizeof(fseek_offset_t)-1))-1)
 #define ADDR_OVERFLOW(A)	(HADDR_UNDEF==(A) ||			      \
 				 ((A) & ~(haddr_t)MAXADDR))
 #define SIZE_OVERFLOW(Z)	((Z) & ~(hsize_t)MAXADDR)
 #define REGION_OVERFLOW(A,Z)	(ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) ||      \
                                  HADDR_UNDEF==(A)+(Z) ||		      \
-				 (file_offset_t)((A)+(Z))<(file_offset_t)(A))
+				 (fseek_offset_t)((A)+(Z))<(fseek_offset_t)(A))
 
 /* Prototypes */
 static H5FD_t *H5FD_windows_open(const char *name, unsigned flags, hid_t fapl_id,
@@ -323,12 +344,12 @@ H5FD_windows_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
     int             fd            ;
     h5_stat_t		sb            ;
     H5FD_t			*ret_value	  ;
-	__int64			x			  ;
+	ftell_ret_t		x			  ;
 
     FUNC_ENTER_NOAPI(H5FD_windows_open, NULL)
 
     /* Sanity check on file offsets */
-    assert(sizeof(file_offset_t)>=sizeof(size_t));
+    assert(sizeof(fseek_offset_t)>=sizeof(size_t));
 
     /* Check arguments */
     if (!name || !*name)
@@ -361,99 +382,10 @@ H5FD_windows_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
     if (!f)
 		HSYS_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "fopen failed")
 
-	///* Translate our flags into a mode, and open the file */
-	//if(!access(name, F_OK)) {
-	//	/* This means that the file already exists */
-	//	switch(flags) {
-	//	case H5F_ACC_RDONLY  | H5F_ACC_TRUNC:
-	//	case H5F_ACC_RDONLY  | H5F_ACC_EXCL:
-	//	case H5F_ACC_RDWR    | H5F_ACC_EXCL:
-	//	case H5F_ACC_RDONLY  | H5F_ACC_TRUNC | H5F_ACC_EXCL:
-	//	case H5F_ACC_RDONLY  | H5F_ACC_CREAT | H5F_ACC_EXCL:
-	//	case H5F_ACC_RDWR    | H5F_ACC_CREAT | H5F_ACC_EXCL:
-	//	case H5F_ACC_RDONLY  | H5F_ACC_CREAT | H5F_ACC_TRUNC | H5F_ACC_EXCL:
-	//	case H5F_ACC_RDWR    | H5F_ACC_CREAT | H5F_ACC_TRUNC | H5F_ACC_EXCL:
-	//		/* Error cases */
-	//		HSYS_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "fopen failed")
-	//		break;
-
-	//	case H5F_ACC_RDWR:
-	//	case H5F_ACC_RDWR    | H5F_ACC_TRUNC:
-	//	case H5F_ACC_RDWR    | H5F_ACC_CREAT:
-	//	case H5F_ACC_RDWR    | H5F_ACC_CREAT | H5F_ACC_TRUNC:
-	//	case H5F_ACC_RDWR    | H5F_ACC_TRUNC | H5F_ACC_EXCL:
-	//		/* This will open an existing file with r/w access,
-	//		   and destroy any existing contents */
-	//		f = fopen(name, "wb+");
-	//		write_access = 1;
-	//		break;
-
-	//	case H5F_ACC_RDONLY | H5F_ACC_TRUNC | H5F_ACC_CREAT:
-	//		/* This will open an existing file with r/w access,
-	//		   and destroy any existing contents.  However,
-	//		   the user should not be allowed to write. */
-	//		f = fopen(name, "wb+");
-	//		/* No write access */
-	//		break;
-
-	//	case H5F_ACC_RDONLY:
-	//	case H5F_ACC_RDONLY | H5F_ACC_CREAT:
-	//		/* This will open an existing file with r/w access,
-	//		   keeping existing contents in tact.  However,
-	//		   the users should not be allowed to write. */
-	//		f = fopen(name, "rb");
-	//		/* no write access */
-	//		break;
-
-	//	default:
-	//		/* Should never get here */
-	//		HSYS_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "fopen failed")
-	//		break;
-	//	} /* end switch */
-	//} else {
-	//	/* This means that the file does not exist */
-	//	switch(flags) {
-	//	case H5F_ACC_RDONLY:
-	//	case H5F_ACC_RDWR:
-	//	case H5F_ACC_RDONLY  | H5F_ACC_TRUNC:
-	//	case H5F_ACC_RDWR    | H5F_ACC_TRUNC:
-	//	case H5F_ACC_RDONLY  | H5F_ACC_EXCL:
-	//	case H5F_ACC_RDWR    | H5F_ACC_EXCL:
-	//	case H5F_ACC_RDONLY  | H5F_ACC_TRUNC | H5F_ACC_EXCL:
-	//	case H5F_ACC_RDWR    | H5F_ACC_TRUNC | H5F_ACC_EXCL:
-	//		/* Error cases */
-	//		HSYS_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "fopen failed")
-	//		break;
-
-	//	case H5F_ACC_RDONLY | H5F_ACC_CREAT:
-	//	case H5F_ACC_RDONLY | H5F_ACC_CREAT | H5F_ACC_TRUNC:
-	//	case H5F_ACC_RDONLY | H5F_ACC_CREAT | H5F_ACC_EXCL:
-	//	case H5F_ACC_RDONLY | H5F_ACC_CREAT | H5F_ACC_TRUNC | H5F_ACC_EXCL:
-	//		/* This will create a new file with r/w access,
-	//		   but the user shouldn't be allowed to write anyway */
-	//		f = fopen(name, "wb+");
-	//		/* No write access */
-	//		break;
-
-	//	case H5F_ACC_RDWR | H5F_ACC_CREAT:
-	//	case H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC:
-	//	case H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_EXCL:
-	//	case H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC | H5F_ACC_EXCL:
-	//		/* This will create a new file with r/w access */
-	//		f = fopen(name, "wb+");
-	//		write_access = 1;
-	//		break;
-
-	//	default: 
-	//		/* Should never get here */
-	//		HSYS_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "fopen failed")
-	//		break;
-	//	} /* end switch */
-	//} /* end if */
 	if (!f) 
 		HSYS_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "fopen failed")
 
-    if (_stati64(name, &sb) == -1)
+    if (file_stat(name, (stat_struct_t*)&sb) == -1)
         HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file")
 
 	/* Create the new file struct */
@@ -463,10 +395,10 @@ H5FD_windows_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
     file->fp = f;
     H5_ASSIGN_OVERFLOW(file->eof,sb.st_size,h5_stat_size_t,haddr_t);
 
-    if(_fseeki64(file->fp, (__int64)0, SEEK_END) == -1)	{
+    if(file_seek(file->fp, (fseek_offset_t)0, SEEK_END) == -1)	{
 		HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, NULL, "unable to seek in file")
 	}
-    x = _ftelli64(file->fp);
+    x = file_tell(file->fp);
     assert(x>=0);
 	file->pos = file->eof = (haddr_t)x;
 
@@ -841,7 +773,7 @@ H5FD_windows_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
 
     /* Seek to the correct location */
     if ((addr!=file->pos || OP_READ!=file->op))
-		if (file_seek(file->fp, (file_offset_t)addr, SEEK_SET) == -1) {
+		if (file_seek(file->fp, (fseek_offset_t)addr, SEEK_SET) == -1) {
             file->op = OP_UNKNOWN;
             file->pos = HADDR_UNDEF;
 			HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
@@ -931,7 +863,7 @@ H5FD_windows_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, 
 
     /* Seek to the correct location */
     if ((addr!=file->pos || OP_WRITE!=file->op))
-		if (file_seek(file->fp, (file_offset_t)addr, SEEK_SET) == -1) {
+		if (file_seek(file->fp, (fseek_offset_t)addr, SEEK_SET) == -1) {
             file->op = OP_UNKNOWN;
             file->pos = HADDR_UNDEF;
 	        HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
@@ -1010,7 +942,7 @@ H5FD_windows_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned closing)
 	if((fd = _fileno((FILE*)file->fp)) == -1)
 		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to get file descriptor for file")
 
-	if(_chsize_s(fd, file->eoa))
+	if(change_size(fd, (chsize_offset_t)file->eoa))
 		HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
 
 	/* Update the eof value */

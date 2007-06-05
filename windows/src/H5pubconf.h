@@ -24,7 +24,11 @@
 #define H5_SIZEOF_LONG_DOUBLE 8
 #define H5_SIZEOF_OFF_T 4
 #define H5_SIZEOF_SHORT 2
+#ifndef _WIN64
 #define H5_SIZEOF_SIZE_T 4
+#else
+#define H5_SIZEOF_SIZE_T 8
+#endif
 
 /*#if defined __INTEL_COMPILER
 #define H5_SIZEOF_LONG_DOUBLE 12
@@ -74,13 +78,21 @@ in the file file_io.win32.c and including it on the projects
 #define H5_HAVE_STRDUP 1
 #define H5_HAVE_SYSTEM 1
 #define H5_HAVE_VSNPRINTF 1
-#define  H5_HAVE_IO_H 1
+#define H5_HAVE_IO_H 1
 #define H5_HAVE_SETJMP_H 1
 #define H5_HAVE_STDDEF_H 1
 #define H5_HAVE_SYS_STAT_H 1
 #define H5_HAVE_SYS_TIMEB 1
 #define H5_HAVE_SYS_TYPES_H 1
 #define H5_HAVE_WINSOCK_H 1
+#define H5_HAVE_STATI64 1
+
+ /* These 64-bit functions are only supported in  .NET Framework 2.0 or later */
+ #if _MSC_VER >= 1400
+ #define H5_HAVE_FSEEKI64 1
+ #define H5_HAVE_CHSIZE_S 1
+ #define H5_HAVE_FTELLI64 1
+ #endif /* _MSC_VER >= 1400 */
 
 /* comment the following line out if the memory buffers being written to 
    disk should not be cleared before writing. */
