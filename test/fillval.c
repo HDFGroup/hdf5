@@ -73,15 +73,15 @@ static hid_t create_compound_type(void)
 {
     hid_t ret_value=-1;
 
-    if((ret_value = H5Tcreate(H5T_COMPOUND, sizeof(comp_datatype)))<0)
+    if((ret_value = H5Tcreate(H5T_COMPOUND, sizeof(comp_datatype))) < 0)
         goto error;
-    if(H5Tinsert(ret_value, "a", HOFFSET(comp_datatype,a), H5T_NATIVE_FLOAT)<0)
+    if(H5Tinsert(ret_value, "a", HOFFSET(comp_datatype, a), H5T_NATIVE_FLOAT) < 0)
         goto error;
-    if(H5Tinsert(ret_value, "x", HOFFSET(comp_datatype,x), H5T_NATIVE_INT)<0)
+    if(H5Tinsert(ret_value, "x", HOFFSET(comp_datatype, x), H5T_NATIVE_INT) < 0)
         goto error;
-    if(H5Tinsert(ret_value, "y", HOFFSET(comp_datatype,y),
-        H5T_NATIVE_DOUBLE)<0) goto error;
-    if(H5Tinsert(ret_value, "z", HOFFSET(comp_datatype,z), H5T_NATIVE_CHAR)<0)
+    if(H5Tinsert(ret_value, "y", HOFFSET(comp_datatype, y), H5T_NATIVE_DOUBLE) < 0)
+        goto error;
+    if(H5Tinsert(ret_value, "z", HOFFSET(comp_datatype, z), H5T_NATIVE_CHAR) < 0)
 	goto error;
 
     return ret_value;

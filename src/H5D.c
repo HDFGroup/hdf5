@@ -3166,25 +3166,24 @@ H5D_init_storage(H5D_t *dset, hbool_t full_overwrite, hid_t dxpl_id)
 
     switch (dset->shared->layout.type) {
         case H5D_COMPACT:
-            {
-                hssize_t            snpoints;       /* Number of points in space (for error checking) */
-                size_t              npoints;        /* Number of points in space */
+            /* If we will be immediately overwriting the values, don't bother to clear them */
+            if(!full_overwrite) {
+                /* If the fill value is defined, initialize the data buffer with it */
+                if(dset->shared->fill.buf) {
+                    hssize_t            snpoints;       /* Number of points in space (for error checking) */
+                    size_t              npoints;        /* Number of points in space */
 
-                /* Get the number of elements in the dataset's dataspace */
-                snpoints = H5S_GET_EXTENT_NPOINTS(dset->shared->space);
-                assert(snpoints>=0);
-                H5_ASSIGN_OVERFLOW(npoints,snpoints,hssize_t,size_t);
+                    /* Get the number of elements in the dataset's dataspace */
+                    snpoints = H5S_GET_EXTENT_NPOINTS(dset->shared->space);
+                    assert(snpoints>=0);
+                    H5_ASSIGN_OVERFLOW(npoints,snpoints,hssize_t,size_t);
 
-                /* If we will be immediately overwriting the values, don't bother to clear them */
-                if(!full_overwrite) {
-                    /* If the fill value is defined, initialize the data buffer with it */
-                    if(dset->shared->fill.buf)
-                        /* Initialize the cached data buffer with the fill value */
-                        H5V_array_fill(dset->shared->layout.u.compact.buf, dset->shared->fill.buf, dset->shared->fill.size, npoints);
-                    else /* If the fill value is default, zero set data buf. */
-                        HDmemset(dset->shared->layout.u.compact.buf, 0, dset->shared->layout.u.compact.size);
+                    /* Initialize the cached data buffer with the fill value */
+                    H5V_array_fill(dset->shared->layout.u.compact.buf, dset->shared->fill.buf, dset->shared->fill.size, npoints);
                 } /* end if */
-            }
+                else /* If the fill value is default, zero set data buf. */
+                    HDmemset(dset->shared->layout.u.compact.buf, 0, dset->shared->layout.u.compact.size);
+            } /* end if */
             break;
 
         case H5D_CONTIGUOUS:
