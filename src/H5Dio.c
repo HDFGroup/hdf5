@@ -2398,8 +2398,8 @@ H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type, const H5S_t *f
     if((fm->msel_type=H5S_GET_SELECT_TYPE(equiv_mspace))<H5S_SEL_NONE)
         HGOTO_ERROR (H5E_DATASET, H5E_BADSELECT, FAIL, "unable to convert from file to memory data space")
 
-    /* Check if file selection is a point selection */
-    if(fsel_type==H5S_SEL_POINTS) {
+    /* Check if file selection is a point or none selection */
+    if(fsel_type==H5S_SEL_POINTS || fsel_type == H5S_SEL_NONE) {
         /* Create temporary datatypes for selection iteration */
         if((f_tid = H5I_register(H5I_DATATYPE, H5T_copy(dataset->shared->type, H5T_COPY_ALL)))<0)
             HGOTO_ERROR (H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register file datatype")
@@ -2436,7 +2436,7 @@ H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type, const H5S_t *f
     } /* end else */
 
     /* Build the memory selection for each chunk */
-    if(fsel_type!=H5S_SEL_POINTS && H5S_select_shape_same(file_space,equiv_mspace)==TRUE) {
+    if(fsel_type!=H5S_SEL_POINTS && fsel_type!=H5S_SEL_NONE && H5S_select_shape_same(file_space,equiv_mspace)==TRUE) {
         /* Reset chunk template information */
         fm->mchunk_tmpl=NULL;
 
