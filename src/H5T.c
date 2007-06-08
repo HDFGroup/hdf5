@@ -5176,6 +5176,12 @@ H5T_debug(const H5T_t *dt, FILE *stream)
         case H5T_ENUM:
             s1 = "enum";
             break;
+        case H5T_VLEN:
+            if(H5T_IS_VL_STRING(dt->shared))
+                s1 = "str";
+            else
+                s1 = "vlen";
+            break;
         default:
             s1 = "";
             break;
@@ -5297,11 +5303,31 @@ H5T_debug(const H5T_t *dt, FILE *stream)
 	fprintf(stream, "\n");
 
     } else if (H5T_VLEN==dt->shared->type) {
-	/* Variable data type */
-	fprintf(stream, " VLEN ");
-        H5T_debug(dt->shared->parent, stream);
-	fprintf(stream, "\n");
+        switch(dt->shared->u.vlen.loc) {
+            case H5T_LOC_MEMORY:
+                fprintf(stream, ", loc=memory");
+                break;
 
+            case H5T_LOC_DISK:
+                fprintf(stream, ", loc=disk");
+                break;
+
+            default:
+                fprintf(stream, ", loc=UNKNOWN");
+                break;
+        } /* end switch */
+
+        if(H5T_IS_VL_STRING(dt->shared)) {
+            /* Variable length string datatype */
+            fprintf(stream, ", variable-length");
+        } /* end if */
+        else {
+            /* Variable length sequence datatype */
+            fprintf(stream, " VLEN ");
+            H5T_debug(dt->shared->parent, stream);
+            fprintf(stream, "\n");
+        } /* end else */
+ 
     } else if (H5T_ENUM==dt->shared->type) {
 	/* Enumeration data type */
 	fprintf(stream, " ");
