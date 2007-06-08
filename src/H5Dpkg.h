@@ -235,6 +235,7 @@ H5_DLL ssize_t H5D_contig_writevv(const H5D_io_info_t *io_info,
     const void *buf);
 
 /* Functions that operate on compact dataset storage */
+H5_DLL herr_t H5D_compact_fill(H5D_t *dset, hid_t dxpl_id);
 H5_DLL ssize_t H5D_compact_readvv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[],
