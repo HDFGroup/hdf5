@@ -2497,21 +2497,9 @@ H5D_init_storage(H5D_t *dset, hbool_t full_overwrite, hid_t dxpl_id)
         case H5D_COMPACT:
             /* If we will be immediately overwriting the values, don't bother to clear them */
             if(!full_overwrite) {
-                /* If the fill value is defined, initialize the data buffer with it */
-                if(dset->shared->dcpl_cache.fill.buf) {
-                    hssize_t snpoints;      /* Number of points in space (for error checking) */
-                    size_t npoints;         /* Number of points in space */
-
-                    /* Get the number of elements in the dataset's dataspace */
-                    snpoints = H5S_GET_EXTENT_NPOINTS(dset->shared->space);
-                    HDassert(snpoints >= 0);
-                    H5_ASSIGN_OVERFLOW(npoints, snpoints, hssize_t, size_t);
-
-                    /* Initialize the cached data buffer with the fill value */
-                    H5V_array_fill(dset->shared->layout.u.compact.buf, dset->shared->dcpl_cache.fill.buf, (size_t)dset->shared->dcpl_cache.fill.size, npoints);
-                } /* end if */
-                else /* If the fill value is default, zero set data buf. */
-                    HDmemset(dset->shared->layout.u.compact.buf, 0, dset->shared->layout.u.compact.size);
+                /* Fill the compact dataset storage */
+                if(H5D_compact_fill(dset, dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize compact dataset storage")
             } /* end if */
             break;
 
