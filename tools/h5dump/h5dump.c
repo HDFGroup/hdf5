@@ -2182,7 +2182,8 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
         }
 
 
-    status = h5tools_dump_dset(stdout, outputformat, obj_id, -1, sset, depth);
+        status = h5tools_dump_dset(stdout, outputformat, obj_id, -1, sset, depth);
+
         H5Tclose(f_type);
     } else {
         /* need to call h5tools_dump_mem for the attribute data */
@@ -2191,8 +2192,8 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
         if(space_type == H5S_NULL || space_type == H5S_NO_CLASS) {
             status = SUCCEED;
         } else {
-        char        string_prefix[64];
-        h5tool_format_t    string_dataformat;
+            char        string_prefix[64];
+            h5tool_format_t    string_dataformat;
 
             type = H5Aget_type(obj_id);
             p_type = h5tools_get_native_type(type);
@@ -2209,35 +2210,35 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
             assert(buf);
 
             if (H5Aread(obj_id, p_type, buf) >= 0)
-        if (display_char && H5Tget_size(type) == 1 && H5Tget_class(type) == H5T_INTEGER) {
-            /*
-             * Print 1-byte integer data as an ASCII character string
-             * instead of integers if the `-r' or `--string' command-line
-             * option was given.
-             *
-             * We don't want to modify the global dataformat, so make a
-             * copy of it instead.
-             */
-            string_dataformat = *outputformat;
-            string_dataformat.idx_fmt = " ";
-            string_dataformat.line_multi_new = 1;
-            string_dataformat.line_1st = "        %s\"";
-            string_dataformat.line_pre = "        %s";
-            string_dataformat.line_cont = "        %s";
-            string_dataformat.str_repeat = 8;
-            string_dataformat.ascii = TRUE;
-            string_dataformat.elmt_suf1 = "";
-            string_dataformat.elmt_suf2 = "";
-            string_dataformat.line_indent = "";
-            strcpy(string_prefix, string_dataformat.line_pre);
-            strcat(string_prefix, "\"");
-            string_dataformat.line_pre = string_prefix;
-            string_dataformat.line_suf = "\"";
-            outputformat = &string_dataformat;
-        }
+                if (display_char && H5Tget_size(type) == 1 && H5Tget_class(type) == H5T_INTEGER) {
+                    /*
+                     * Print 1-byte integer data as an ASCII character string
+                     * instead of integers if the `-r' or `--string' command-line
+                     * option was given.
+                     *
+                     * We don't want to modify the global dataformat, so make a
+                     * copy of it instead.
+                     */
+                    string_dataformat = *outputformat;
+                    string_dataformat.idx_fmt = " ";
+                    string_dataformat.line_multi_new = 1;
+                    string_dataformat.line_1st = "        %s\"";
+                    string_dataformat.line_pre = "        %s";
+                    string_dataformat.line_cont = "        %s";
+                    string_dataformat.str_repeat = 8;
+                    string_dataformat.ascii = TRUE;
+                    string_dataformat.elmt_suf1 = "";
+                    string_dataformat.elmt_suf2 = "";
+                    string_dataformat.line_indent = "";
+                    strcpy(string_prefix, string_dataformat.line_pre);
+                    strcat(string_prefix, "\"");
+                    string_dataformat.line_pre = string_prefix;
+                    string_dataformat.line_suf = "\"";
+                    outputformat = &string_dataformat;
+                }
 
-                status = h5tools_dump_mem(stdout, outputformat, obj_id, p_type,
-                                        space, buf, depth);
+            status = h5tools_dump_mem(stdout, outputformat, obj_id, p_type,
+                                    space, buf, depth);
 
             free(buf);
             H5Tclose(p_type);
