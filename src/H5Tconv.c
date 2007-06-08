@@ -2430,11 +2430,11 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
             /* Set flags to indicate we are writing to or reading from the file */
             if(dst->shared->u.vlen.f!=NULL)
-                write_to_file=TRUE;
+                write_to_file = TRUE;
 
             /* Set the flag for nested VL case */
             if(write_to_file && parent_is_vlen && bkg!=NULL)
-                nested=1;
+                nested = TRUE;
 
             /* The outer loop of the type conversion macro, controlling which */
             /* direction the buffer is walked */
