@@ -84,8 +84,6 @@ else
   VFD_LIST = sec2 stdio core split multi family
 endif
 
-DEFAULT_VFD = @DEFAULT_VFD_NAME@
-
 # Additional target for running timing test
 timings _timings: testmeta
 	@for timing in $(TIMINGS) dummy; do                                   \

@@ -2658,26 +2658,6 @@ if test 1 = 2; then
             [Define if shared writing must be disabled (CodeWarrior only)])
 fi
 
-dnl ----------------------------------------------------------------------
-dnl Check if user has provided a custom Virtual File Driver list
-dnl
-
-AC_MSG_CHECKING([for Default Virtual File Driver])
-
-AC_ARG_WITH([default-vfd],
-            [AC_HELP_STRING([--with-default-vfd=drivername],
-                            [Define a default virtual file driver
-                             [default=]])],,
-            withval=)
-
-AC_SUBST(DEFAULT_VFD_NAME) DEFAULT_VFD_NAME=${withval}
-
-if test -z ${withval}; then
-   AC_MSG_RESULT([no])
-else
-   AC_MSG_RESULT([yes])
-fi
-
 dnl -----------------------------------------------------------------------------
 dnl Should the Stream Virtual File Driver be compiled in ?
 dnl
