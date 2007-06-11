@@ -178,6 +178,10 @@ h5tools_get_fapl(hid_t fapl, const char *driver, unsigned *drivernum)
     /* Determine which driver the user wants to open the file with. Try
      * that driver. If it can't open it, then fail. */
     if(!strcmp(driver, drivernames[SEC2_IDX])) {
+        /* SEC2 driver */
+        if(H5Pset_fapl_sec2(new_fapl) < 0)
+            goto error;
+
         if(drivernum)
             *drivernum = SEC2_IDX;
     } else if(!strcmp(driver, drivernames[FAMILY_IDX])) {

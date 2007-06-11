@@ -2666,8 +2666,8 @@ AC_MSG_CHECKING([for Default Virtual File Driver definition])
 AC_ARG_WITH([default-vfd],
             [AC_HELP_STRING([--with-default-vfd=driver],
                             [Specify default file driver
-                             [default=]])],,
-            withval=)
+                             [default=sec2]])],,
+            withval=sec2)
 
 if test "X$withval" = "Xsec2"; then
     AC_MSG_RESULT([yes])

@@ -85,7 +85,7 @@
 #define H5F_ACS_GARBG_COLCT_REF_DEF             0
 /* Definition for file driver ID */
 #define H5F_ACS_FILE_DRV_ID_SIZE                sizeof(hid_t)
-#define H5F_ACS_FILE_DRV_ID_DEF                 H5FD_SEC2
+#define H5F_ACS_FILE_DRV_ID_DEF                 H5_DEFAULT_VFD
 /* Definition for file driver info */
 #define H5F_ACS_FILE_DRV_INFO_SIZE              sizeof(void*)
 #define H5F_ACS_FILE_DRV_INFO_DEF               NULL
@@ -718,7 +718,7 @@ H5P_get_driver(H5P_genplist_t *plist)
     }
 
     if (H5FD_VFD_DEFAULT==ret_value)
-        ret_value = H5FD_SEC2;
+        ret_value = H5_DEFAULT_VFD;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

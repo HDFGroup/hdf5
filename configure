@@ -50460,7 +50460,7 @@ echo $ECHO_N "checking for Default Virtual File Driver definition... $ECHO_C" >&
 if test "${with_default_vfd+set}" = set; then
   withval=$with_default_vfd;
 else
-  withval=
+  withval=sec2
 fi
 
 
