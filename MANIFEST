@@ -507,6 +507,8 @@
 ./src/H5FDstdio.h
 ./src/H5FDstream.c
 ./src/H5FDstream.h
+./src/H5FDwindows.c
+./src/H5FDwindows.h
 ./src/H5FL.c
 ./src/H5FLprivate.h
 ./src/H5FO.c
@@ -1743,8 +1745,6 @@
 #windows src
 ./windows/src/H5pubconf.h
 ./windows/src/H5Tinit.c
-./windows/src/H5FDwindows.c
-./windows/src/H5FDwindows.h
 
 #windows test
 ./windows/test/big/big.dsp
