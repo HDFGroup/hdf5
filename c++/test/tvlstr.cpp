@@ -51,11 +51,6 @@ const H5std_string      DATAFILE2("tvlstr2.h5");
 const int SPACE1_RANK = 1;
 const hsize_t SPACE1_DIM1 = 4;
 
-// 2-D dataset with fixed dimensions
-const int SPACE2_RANK = 2;
-const hsize_t SPACE2_DIM1 = 10;
-const hsize_t SPACE2_DIM2 = 10;
-
 const H5std_string      VLSTR_TYPE("vl_string_type");
 
 // Definitions for the VL re-writing test
@@ -505,7 +500,6 @@ test_compact_vlstring(void)
 **
 ****************************************************************/
 // String for testing attributes
-static const char *string_att = "This is the string for the attribute";
 static char *string_att_write=NULL;
 
 // Info for a string attribute

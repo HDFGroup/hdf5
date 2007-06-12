@@ -51,12 +51,13 @@
 #define FILTER_CHUNK_DIM2 25
 
 // will do this function later or use it as guideline - BMR - 2007/01/26
-static herr_t test_filter_internal(hid_t fid, const char *name, hid_t dcpl, 
+/*static herr_t test_filter_internal(hid_t fid, const char *name, hid_t dcpl, 
 		int if_fletcher32, int corrupted, hsize_t *dset_size)
 {
     cerr << "do nothing right now" << endl;
     return(0);
 }
+*/
 
 /* Temporary filter IDs used for testing */
 #define H5Z_FILTER_BOGUS        305
@@ -73,15 +74,6 @@ const H5Z_class_t H5Z_BOGUS[1] = {{
 
 #ifndef H5_WANT_H5_V1_4_COMPAT
 static herr_t can_apply_bogus(hid_t dcpl_id, hid_t type_id, hid_t space_id);
-
-/* This message derives from H5Z */
-const H5Z_class_t H5Z_CAN_APPLY_TEST[1] = {{
-    H5Z_FILTER_BOGUS,           /* Filter id number             */
-    "bogus",                    /* Filter name for debugging    */
-    can_apply_bogus,            /* The "can apply" callback     */
-    NULL,                       /* The "set local" callback     */
-    filter_bogus,               /* The actual filter function   */
-}};
 
 /*-------------------------------------------------------------------------
  * Function:    can_apply_bogus
@@ -302,7 +294,6 @@ void test_filters(void)
     hid_t       fapl_id;
     fapl_id = h5_fileaccess(); // in h5test.c, returns a file access template
 
-    int         nerrors=0;      // keep track of number of failures occurr
     try
     {
         // Use the file access template id to create a file access prop. list

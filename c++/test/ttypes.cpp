@@ -106,13 +106,10 @@ static int noverflows_g = 0;
 #endif
 
 // Skip overflow tests if non-zero
-static int skip_overflow_tests_g = 0;
 
 // Don't use hardware conversions if set
-static int without_hardware_g = 0;
 
 // Count opaque conversions
-static int num_opaque_conversions_g = 0;
 
 /*
  * Although we check whether a floating point overflow generates a SIGFPE and
@@ -129,33 +126,6 @@ static int num_opaque_conversions_g = 0;
 // Allocates memory aligned on a certain boundary.
 #define aligned_malloc(Z)	((void*)((char*)malloc(ALIGNMENT+Z)+ALIGNMENT))
 #define aligned_free(M)		free((char*)(M)-ALIGNMENT)
-
-
-/*-------------------------------------------------------------------------
- * Function:	fpe_handler
- *
- * Purpose:	Exit with 255
- *
- * Return:	void
- *
- * Programmer:	Robb Matzke
- *              Monday, July  6, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static void
-fpe_handler(int UNUSED signo)
-{
-    SKIPPED();
-    puts("    Test skipped due to SIGFPE.");
-#ifndef HANDLE_SIGFPE
-    puts("    Remaining tests could not be run.");
-    puts("    Please turn off SIGFPE on overflows and try again.");
-#endif
-    exit(255);
-}
 
 
 /*-------------------------------------------------------------------------

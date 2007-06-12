@@ -59,17 +59,9 @@ const int SPACE1_DIM1 = 4;
 
 // 2-D dataset with fixed dimensions
 const H5std_string      SPACE2_NAME("Space2");
-const int SPACE2_RANK = 2;
-const int SPACE2_DIM1 = 10;
-const int SPACE2_DIM2 = 10;
 
 // Larger 1-D dataset with fixed dimensions
 const H5std_string      SPACE3_NAME("Space3");
-const int SPACE3_RANK = 1;
-const int SPACE3_DIM1 = 100;
-
-// Element selection information
-const int POINT1_NPOINTS = 10;
 
 // Compound datatype
 typedef struct s1_t {
