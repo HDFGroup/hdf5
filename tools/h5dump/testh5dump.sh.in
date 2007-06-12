@@ -267,9 +267,9 @@ TOOLTEST tempty.ddl tempty.h5
 TOOLTEST tgrp_comments.ddl tgrp_comments.h5
 
 # test the --filedriver flag
-#TOOLTEST tsplit_file.ddl --filedriver=split tsplit_file
+TOOLTEST tsplit_file.ddl --filedriver=split tsplit_file
 TOOLTEST tfamily.ddl --filedriver=family tfamily%05d.h5
-#TOOLTEST tmulti.ddl --filedriver=multi tmulti
+TOOLTEST tmulti.ddl --filedriver=multi tmulti
 
 # test for files with group names which reach > 1024 bytes in size
 TOOLTEST tlarge_objname.ddl -w157 tlarge_objname.h5
