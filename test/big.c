@@ -21,6 +21,7 @@
 
 const char *FILENAME[] = {
     "big",
+    "sec2",
     "stdio",
     NULL
 };
@@ -169,6 +170,7 @@ supports_big(void)
     if (5!=HDwrite(fd, "hello", (size_t)5)) return 0;
 
     if (HDclose(fd)<0) return 0;
+    if (HDunlink("y.h5")<0) return 0;
 
     return (1);
 }
