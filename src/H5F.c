@@ -41,7 +41,9 @@
 #include "H5FDmulti.h"		/*multiple files partitioned by mem usage */
 #include "H5FDsec2.h"		/*Posix unbuffered I/O			*/
 #include "H5FDstdio.h"		/* Standard C buffered I/O		*/
+#ifdef H5_HAVE_WINDOWS 
 #include "H5FDwindows.h"        /* Windows buffered I/O     */
+#endif
 #include "H5FDstream.h"         /*in-memory files streamed via sockets  */
 #include "H5FDdirect.h"         /*Linux direct I/O			*/
 
