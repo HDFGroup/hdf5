@@ -23,6 +23,16 @@
 #include "H5public.h"
 #include "H5Ipublic.h"
 
+/* Added definition for offsetof to fix undefined error on PGI compiler.
+   Although, after adding offsetof, a warning of incompatible redefinition 
+   was issued; worked around by "#undef offsetof" - BMR - 06/01/2007 */
+#if __PGI
+#ifdef offsetof
+    #undef offsetof
+#endif
+#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
+#endif
+
 #define HOFFSET(S,M)    (offsetof(S,M))
 
 /* These are the various classes of datatypes */
