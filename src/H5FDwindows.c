@@ -42,6 +42,8 @@
 #include "H5MMprivate.h"	/* Memory management		*/
 #include "H5Pprivate.h"		/* Property lists			*/
 
+#ifdef H5_HAVE_WINDOWS
+
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_WINDOWS_g = 0;
 
@@ -50,6 +52,11 @@ static hid_t H5FD_WINDOWS_g = 0;
 #define OP_READ		1
 #define OP_WRITE	2
 
+/*
+ * This is the max number of bytes that will be read or written by the file driver.
+ * Values above 2^31-1 may cause trouble with Windows.  Default is 2^30. 
+ */
+#define IO_BUF_SIZE 1073741824
 /*
  * The description of a file belonging to this driver. The `eoa' and `eof'
  * determine the amount of hdf5 address space in use and the high-water mark
@@ -68,7 +75,7 @@ typedef struct H5FD_windows_t {
 	 * .NET doesn't support our 64-bit safe stdio functions,
 	 * so we will use io.h functions instead.
      */
-#if _MSC_VER < 1400
+#ifndef WINDOWS_USE_STDIO
 	int		fd;				/*the file descriptor			*/
 #else
     FILE 	*fp;			/*the file handle				*/
@@ -318,12 +325,11 @@ H5FD_windows_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
     H5FD_t			*ret_value;
     struct _stati64 sb;
-#if _MSC_VER < 1400
+#ifndef WINDOWS_USE_STDIO
     int o_flags;
 #else
 	unsigned		write_access = 0;
-	__int64			x;
-#endif /* _MSC_VER */
+#endif /* WINDOWS_USE_STDIO */
 
     FUNC_ENTER_NOAPI(H5FD_windows_open, NULL)
 
@@ -338,7 +344,7 @@ H5FD_windows_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
     if (ADDR_OVERFLOW(maxaddr))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, NULL, "bogus maxaddr")
 
-#if _MSC_VER < 1400
+#ifndef WINDOWS_USE_STDIO
     /* Build the open flags */
     o_flags = (H5F_ACC_RDWR & flags) ? O_RDWR : O_RDONLY;
     if (H5F_ACC_TRUNC & flags) o_flags |= O_TRUNC;
@@ -346,14 +352,14 @@ H5FD_windows_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
     if (H5F_ACC_EXCL & flags) o_flags |= O_EXCL;
 
     /* Open the file */
-    if ((fd=HDopen(name, o_flags, 0666))<0)
+    if ((fd=_open(name, o_flags, 0666))<0)
         HSYS_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
     if (_fstati64(fd, &sb) == -1)
         HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file")
 
-#else /* _MSC_VER < 1400 */
+#else /* WINDOWS_USE_STDIO */
 	/* Translate our flags into a mode, and open the file */
-    if (access(name, F_OK) < 0) {
+    if (_access_s(name, F_OK)) {
         if ((flags & H5F_ACC_CREAT) && (flags & H5F_ACC_RDWR)) {
             f = fopen(name, "wb+");
             write_access=1;     /* Note the write access */
@@ -363,20 +369,20 @@ H5FD_windows_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
     } else if ((flags & H5F_ACC_CREAT) && (flags & H5F_ACC_EXCL)) {
 		HSYS_GOTO_ERROR(H5E_FILE, H5E_FILEEXISTS, NULL, "file exists but CREAT and EXCL were specified")
     } else if (flags & H5F_ACC_RDWR) {
-        if (flags & H5F_ACC_TRUNC)
+		if (flags & H5F_ACC_TRUNC)
             f = fopen(name, "wb+");
-        else
+		else
             f = fopen(name, "rb+");
         write_access=1;     /* Note the write access */
-    } else {
+    } else
         f = fopen(name, "rb");
-    }
+
     if (!f)
-		HSYS_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "fopen failed")
+		HSYS_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "fsopen failed")
 
     if (_stati64(name, &sb) == -1)
         HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to stat file")
-#endif /* _MSC_VER < 1400 */
+#endif /* WINDOWS_USE_STDIO */
 
 	/* Create the new file struct */
     if (NULL==(file=H5FL_CALLOC(H5FD_windows_t)))
@@ -386,14 +392,14 @@ H5FD_windows_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
     file->pos = HADDR_UNDEF;
     file->op = OP_UNKNOWN;
     
-#if _MSC_VER < 1400
+#ifndef WINDOWS_USE_STDIO
     file->fd = fd;
 #else
     file->fp = f;
 	if((fd = _fileno(f)) == -1)
 		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to get file descriptor for file")
     file->write_access=write_access;    /* Note the write_access for later */
-#endif /* _MSC_VER < 1400 */
+#endif /* WINDOWS_USE_STDIO */
 
 	if( (filehandle = (HANDLE)_get_osfhandle(fd)) == INVALID_HANDLE_VALUE)
 		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to get file handle for file")
@@ -408,13 +414,13 @@ H5FD_windows_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
 
 done:
     if(ret_value==NULL) {
-#if _MSC_VER < 1400
+#ifndef WINDOWS_USE_STDIO
         if(fd>=0)
             _close(fd);
 #else
         if(f)
 			fclose(file->fp);
-#endif /* _MSC_VER */
+#endif /* WINDOWS_USE_STDIO */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -445,11 +451,11 @@ H5FD_windows_close(H5FD_t *_file)
 
     FUNC_ENTER_NOAPI(H5FD_windows_close, FAIL)
 
-#if _MSC_VER < 1400
+#ifndef WINDOWS_USE_STDIO
     if (_close(file->fd)<0)
 #else
     if (fclose(file->fp)<0)
-#endif /* _MSC_VER */
+#endif /* WINDOWS_USE_STDIO */
         HSYS_GOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
     H5FL_FREE(H5FD_windows_t,file);
@@ -670,11 +676,11 @@ H5FD_windows_get_handle(H5FD_t *_file, hid_t UNUSED fapl, void** file_handle)
 
     if(!file_handle)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid")
-#if _MSC_VER < 1400
+#ifndef WINDOWS_USE_STDIO
     *file_handle = &(file->fd);
 #else
     *file_handle = &(file->fp);
-#endif /* _MSC_VER */
+#endif /* WINDOWS_USE_STDIO */
 	if(*file_handle==NULL)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "get handle failed")
 
@@ -757,7 +763,7 @@ H5FD_windows_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
 	       size_t size, void *buf/*out*/)
 {
     H5FD_windows_t		*file = (H5FD_windows_t*)_file;
-    ssize_t				nbytes;
+    int					nbytes;
     herr_t				ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_windows_read, FAIL)
@@ -775,11 +781,11 @@ H5FD_windows_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
 
     /* Seek to the correct location */
     if ((addr!=file->pos || OP_READ!=file->op))
-#if _MSC_VER < 1400
+#ifndef WINDOWS_USE_STDIO
 		if (_lseeki64(file->fd, addr, SEEK_SET) == -1) {
 #else
-        if (fseeki64(file->fp, addr, SEEK_SET) == -1) {
-#endif /* _MSC_VER */
+        if (_fseeki64(file->fp, addr, SEEK_SET) == -1) {
+#endif /* WINDOWS_USE_STDIO */
             file->op = OP_UNKNOWN;
             file->pos = HADDR_UNDEF;
 			HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
@@ -790,9 +796,9 @@ H5FD_windows_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
      * and the end of the file.
      */
     while (size>0) {
-#if _MSC_VER < 1400
+#ifndef WINDOWS_USE_STDIO
         do {
-            nbytes = _read(file->fd, buf, size);
+			nbytes = _read(file->fd, buf, (unsigned)(size <= IO_BUF_SIZE ? size: IO_BUF_SIZE));
         } while (-1==nbytes && EINTR==errno);
         if (-1==nbytes) /* error */
             HSYS_GOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed")
@@ -803,7 +809,7 @@ H5FD_windows_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
         }
 #else
         do {
-            nbytes = fread(buf,(size_t)1,size,file->fp);
+            nbytes = fread(buf,(size_t)1,(size <= IO_BUF_SIZE ? size: IO_BUF_SIZE),file->fp);
         } while (!nbytes && EINTR==errno);
 		if(!nbytes) {
             if (ferror(file->fp)) /* error */
@@ -814,7 +820,7 @@ H5FD_windows_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
 				break;
 			}	
 		}
-#endif /* _MSC_VER */
+#endif /* WINDOWS_USE_STDIO */
         assert(nbytes>=0);
         assert((size_t)nbytes<=size);
         H5_CHECK_OVERFLOW(nbytes,ssize_t,size_t);
@@ -883,11 +889,11 @@ H5FD_windows_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, 
     /* Seek to the correct location */
     if ((addr!=file->pos || OP_WRITE!=file->op))
 	{
-#if _MSC_VER < 1400
+#ifndef WINDOWS_USE_STDIO
 		if (_lseeki64(file->fd, addr, SEEK_SET) == -1) {
 #else
         if (_fseeki64(file->fp, addr, SEEK_SET) == -1) {
-#endif /* _MSC_VER */
+#endif /* WINDOWS_USE_STDIO */
             file->op = OP_UNKNOWN;
             file->pos = HADDR_UNDEF;
 	        HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
@@ -898,17 +904,20 @@ H5FD_windows_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, 
      * Write the data, being careful of interrupted system calls and partial
      * results
      */
-    while (size>0) {
+	while (size>0) {
         do {
-#if _MSC_VER < 1400
-            nbytes = _write(file->fd, buf, size);
+#ifndef WINDOWS_USE_STDIO
+            nbytes = _write(file->fd, buf, (unsigned)(size <= IO_BUF_SIZE ? size: IO_BUF_SIZE));
         } while (-1==nbytes && EINTR==errno);
         if (-1==nbytes) /* error */
 #else
-            nbytes = fwrite(buf, 1, size,file->fp);
-        } while (!nbytes && EINTR==errno);
+
+
+		/* Write 1GB or less at a time */
+			nbytes = fwrite(buf, 1, (size <= IO_BUF_SIZE ? size: IO_BUF_SIZE),file->fp);
+		} while (!nbytes && EINTR==errno);
         if (!nbytes) /* error */
-#endif /* _MSC_VER */
+#endif /* WINDOWS_USE_STDIO */
             HSYS_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
         assert(nbytes>0);
         assert((size_t)nbytes<=size);
@@ -917,7 +926,7 @@ H5FD_windows_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, 
         H5_CHECK_OVERFLOW(nbytes,ssize_t,haddr_t);
         addr += (haddr_t)nbytes;
         buf = (const char*)buf + nbytes;
-    }
+	}
 
     /* Update current position and eof */
     file->pos = addr;
@@ -959,37 +968,43 @@ H5FD_windows_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned closing)
 {
     H5FD_windows_t	*file = (H5FD_windows_t*)_file;
     herr_t			ret_value=SUCCEED;       /* Return value */
-#if _MSC_VER <= 1400
+#ifndef WINDOWS_USE_STDIO
 	LARGE_INTEGER	li;
 	HANDLE			filehandle;
-#endif /* _MSC_VER */
+#else
+	int				fd;
+#endif /* WINDOWS_USE_STDIO */
 
     FUNC_ENTER_NOAPI(H5FD_windows_flush, FAIL)
 
     assert(file);
 
-#if _MSC_VER < 1400
+#ifndef WINDOWS_USE_STDIO
 
 	/* Extend the file to make sure it's large enough */
     if( (filehandle = (HANDLE)_get_osfhandle(file->fd)) == INVALID_HANDLE_VALUE)
 		HGOTO_ERROR(H5E_FILE, H5E_FILEOPEN, FAIL, "unable to get file handle for file")
 	
 	li.QuadPart = file->eoa;
-	if(SetFilePointerEx(filehandle, li, NULL, FILE_BEGIN) == 0)
-		HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
+    (void)SetFilePointer((HANDLE)filehandle,li.LowPart,&li.HighPart,FILE_BEGIN);
 	if(SetEndOfFile(filehandle) == 0)
 		HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
 
-#else /* _MSC_VER
+#else /* WINDOWS_USE_STDIO */
 	/* Only try to flush if we have write access */
 	if(!file->write_access)
 		HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot flush without write access")
 
+	if((fd = _fileno(file->fp)) == -1)
+		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to get file descriptor for file")
+	if(_chsize_s(fd, file->eoa))
+		HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
+
 	/* Flush */
-	if(!closing) {
+	if(!closing)
 		if (fflush(file->fp) == EOF)
 			HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "fflush failed")
-#endif /* _MSC_VER */
+#endif /* WINDOWS_USE_STDIO */
 
 	/* Update the eof value */
 	file->eof = file->eoa;
@@ -1002,3 +1017,5 @@ H5FD_windows_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned closing)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
+
+#endif /* H5_HAVE_WINDOWS */
