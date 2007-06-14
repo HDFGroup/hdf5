@@ -17,8 +17,8 @@ $!
 $! Run HDF5 C tests
 $!
 $ type sys$input
-       Running tests. Output will be saved in the check_vms.out file
-$ define sys$output check_vms.out
+       Running tests
+$! define sys$output check_vms.out
 $ 
 $ type sys$input
 -------			Running testhdf5 	-------

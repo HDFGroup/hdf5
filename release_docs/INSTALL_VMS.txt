@@ -79,7 +79,6 @@
 	   - dsets test fails for test_scleoffset_double and
 	     test_scleoffset_double_2 tests when G_FLOAT double is used
                                                           06/01/2006 EIP 
-           - There is no support for files bigger than 2GB
            - There is no support for szip compression filter.
 	   - There are few C and Fortran tests that fail (C mtime,  Fortran file_close and
               multifile driver tests, probably more; all major tests succeed).
