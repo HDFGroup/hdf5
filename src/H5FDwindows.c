@@ -350,6 +350,8 @@ H5FD_windows_open(const char *name, unsigned flags, hid_t UNUSED fapl_id,
     if (H5F_ACC_TRUNC & flags) o_flags |= O_TRUNC;
     if (H5F_ACC_CREAT & flags) o_flags |= O_CREAT;
     if (H5F_ACC_EXCL & flags) o_flags |= O_EXCL;
+	/* Windows needs O_BINARY to correctly handle eol characters */
+	o_flags |= O_BINARY; 
 
     /* Open the file */
     if ((fd=_open(name, o_flags, 0666))<0)
@@ -979,40 +981,42 @@ H5FD_windows_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned closing)
 
     assert(file);
 
+	if (file->eoa != file->eof) {
 #ifndef WINDOWS_USE_STDIO
 
-	/* Extend the file to make sure it's large enough */
-    if( (filehandle = (HANDLE)_get_osfhandle(file->fd)) == INVALID_HANDLE_VALUE)
-		HGOTO_ERROR(H5E_FILE, H5E_FILEOPEN, FAIL, "unable to get file handle for file")
-	
-	li.QuadPart = file->eoa;
-    (void)SetFilePointer((HANDLE)filehandle,li.LowPart,&li.HighPart,FILE_BEGIN);
-	if(SetEndOfFile(filehandle) == 0)
-		HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
+		/* Extend the file to make sure it's large enough */
+		if( (filehandle = (HANDLE)_get_osfhandle(file->fd)) == INVALID_HANDLE_VALUE)
+			HGOTO_ERROR(H5E_FILE, H5E_FILEOPEN, FAIL, "unable to get file handle for file")
+		
+		li.QuadPart = (__int64)file->eoa;
+		(void)SetFilePointer((HANDLE)filehandle,li.LowPart,&li.HighPart,FILE_BEGIN);
+		if(SetEndOfFile(filehandle) == 0)
+			HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
 
 #else /* WINDOWS_USE_STDIO */
-	/* Only try to flush if we have write access */
-	if(!file->write_access)
-		HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot flush without write access")
+		/* Only try to flush if we have write access */
+		if(!file->write_access)
+			HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot flush without write access")
 
-	if((fd = _fileno(file->fp)) == -1)
-		HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to get file descriptor for file")
-	if(_chsize_s(fd, file->eoa))
-		HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
+		if((fd = _fileno(file->fp)) == -1)
+			HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to get file descriptor for file")
+		if(_chsize_s(fd, file->eoa))
+			HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
 
-	/* Flush */
-	if(!closing)
-		if (fflush(file->fp) == EOF)
-			HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "fflush failed")
+		/* Flush */
+		if(!closing)
+			if (fflush(file->fp) == EOF)
+				HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "fflush failed")
 #endif /* WINDOWS_USE_STDIO */
 
-	/* Update the eof value */
-	file->eof = file->eoa;
+		/* Update the eof value */
+		file->eof = file->eoa;
 
-	/* Reset last file I/O information */
-	file->pos = HADDR_UNDEF;
-	file->op = OP_UNKNOWN;
-    
+		/* Reset last file I/O information */
+		file->pos = HADDR_UNDEF;
+		file->op = OP_UNKNOWN;
+	
+	}
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
