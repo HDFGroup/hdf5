@@ -228,6 +228,9 @@
 /* Define to 1 if you have the <netinet/tcp.h> header file. */
 #undef HAVE_NETINET_TCP_H
 
+/* Define if the __offsetof__ extension is present */
+#undef HAVE_OFFSETOF
+
 /* Define if we have parallel support */
 #undef HAVE_PARALLEL
 
