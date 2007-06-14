@@ -1660,6 +1660,13 @@ AC_TRY_COMPILE(,[(void)__FUNCTION__],
                AC_MSG_RESULT([yes]),
                AC_MSG_RESULT([no]))
 
+AC_MSG_CHECKING([for __offsetof__ extension])
+AC_TRY_COMPILE(,[size_t __offsetof__(unused)],
+               AC_DEFINE([HAVE_OFFSETOF], [1],
+                         [Define if the __offsetof__ extension is present])
+               AC_MSG_RESULT([yes]),
+               AC_MSG_RESULT([no]))
+
 dnl ----------------------------------------------------------------------
 dnl Try to figure out how to print `long long'.  Some machines use `%lld'
 dnl and others use `%qd'.  There may be more!  The final `l' is a
