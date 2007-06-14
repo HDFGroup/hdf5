@@ -118,12 +118,18 @@ in the file file_io.win32.c and including it on the projects
 #define H5_HAVE_SZLIB_H 1
 #define H5_HAVE_FILTER_SZIP 1
 
-/* comment the following line out if you don't want to build the windows file
-   driver */
-#define H5_HAVE_WINDOWS
-
 /* change the following line if you would like to change the default file driver */
 #define H5_DEFAULT_VFD H5FD_SEC2
+
+/* comment the following line out if you don't want to build the windows file
+   driver */
+#define H5_HAVE_WINDOWS 1
+
+#ifdef H5_HAVE_WINDOWS
+/* uncomment the following line if you would like to use the buffered stdio
+   functions in the Windows file driver. */
+// #define WINDOWS_USE_STDIO 1
+#endif /* H5_HAVE_WINDOWS */
 
 /* comment the following line out if you are not using N-bit filter*/
 /* #define H5_HAVE_FILTER_NBIT 1*/
