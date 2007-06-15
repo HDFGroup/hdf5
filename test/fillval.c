@@ -1516,7 +1516,7 @@ main(int argc, char *argv[])
     envval = HDgetenv("HDF5_DRIVER");
     if(envval == NULL) 
         envval = "nomatch";
-    if(HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
+    if(HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
         int	nerrors=0, argno, test_contig=1, test_chunk=1, test_compact=1;
         hid_t	fapl = (-1), fapl2 = (-1);    /* File access property lists */
         hbool_t new_format;     /* Whether to use the new format or not */

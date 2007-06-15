@@ -172,17 +172,27 @@ main(void)
          *  between 1-byte chunk #0 size encoding and 2-byte chunk #0 size encoding
          *  works correctly - QAK)
          */
-        if(H5O_close(&oh_loc) < 0)
-            FAIL_STACK_ERROR
-        if(H5Fclose(file) < 0)
-            FAIL_STACK_ERROR
-        if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-            FAIL_STACK_ERROR
-        if(NULL == (f = H5I_object(file)))
-            FAIL_STACK_ERROR
-        oh_loc.file = f;
-        if(H5O_open(&oh_loc) < 0)
-            FAIL_STACK_ERROR
+        TESTING("close & re-open object header");
+        envval = HDgetenv("HDF5_DRIVER");
+        if(envval == NULL) 
+            envval = "nomatch";
+        if(HDstrcmp(envval, "multi") && HDstrcmp(envval, "split") && HDstrcmp(envval, "family")) {
+            if(H5O_close(&oh_loc) < 0)
+                FAIL_STACK_ERROR
+            if(H5Fclose(file) < 0)
+                FAIL_STACK_ERROR
+            if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+                FAIL_STACK_ERROR
+            if(NULL == (f = H5I_object(file)))
+                FAIL_STACK_ERROR
+            oh_loc.file = f;
+            if(H5O_open(&oh_loc) < 0)
+                FAIL_STACK_ERROR
+        } /* end if */
+        else {
+            SKIPPED();
+            puts("   Test not compatible with current Virtual File Driver");
+        } /* end else */
 
         /*
          * Test creation of a bunch of messages one after another to see
@@ -221,11 +231,11 @@ main(void)
 
 
         /* Test reading datasets with undefined object header messages */
-        puts("Reading objects with unknown header messages");
+        TESTING("reading objects with unknown header messages");
         envval = HDgetenv("HDF5_DRIVER");
         if(envval == NULL) 
             envval = "nomatch";
-        if(HDstrcmp(envval, "core") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "split") && HDstrcmp(envval, "family")) {
+        if(HDstrcmp(envval, "multi") && HDstrcmp(envval, "split") && HDstrcmp(envval, "family")) {
             hid_t file2;                    /* File ID for 'bogus' object file */
             char testpath[512] = "";
             char testfile[512] = "";

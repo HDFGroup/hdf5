@@ -437,6 +437,7 @@ main(void)
     envval = HDgetenv("HDF5_DRIVER");
     if (envval == NULL) 
         envval = "nomatch";
+/* QAK: should be able to use the core driver? */
     if (HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
 	num_errs+=rsrv_ohdr();
 	num_errs+=rsrv_heap();

@@ -2791,44 +2791,33 @@ int
 main(void)
 {
     hid_t   file_id = (-1);
-    const char *envval;
+    int nerrors = 0;
+    hid_t fapl;
+    char filename0[1024];
 
-    envval = HDgetenv("HDF5_DRIVER");
-    if(envval == NULL) 
-        envval = "nomatch";
-    /* Does work with core driver. */
-    if(HDstrcmp(envval, "core")==0) {
-        printf("All getname tests skipped - "
-	    "Incompatible with current Virtual File Driver(%s)\n", envval);
-    }else{
-        int nerrors = 0;
-        hid_t fapl;
-        char filename0[1024];
+    /* Reset the library and get the file access property list */
+    h5_reset();
+    fapl = h5_fileaccess();
+    h5_fixname(FILENAME[0], fapl, filename0, sizeof filename0);
 
-        /* Reset the library and get the file access property list */
-        h5_reset();
-        fapl = h5_fileaccess();
-        h5_fixname(FILENAME[0], fapl, filename0, sizeof filename0);
+    /* Create a new file_id using default create property but vfd access
+     * property.
+     */
+    if((file_id = H5Fcreate(filename0,H5F_ACC_TRUNC, H5P_DEFAULT, fapl )) < 0) TEST_ERROR
 
-        /* Create a new file_id using default create property but vfd access
-	 * property.
-	 */
-        if((file_id = H5Fcreate(filename0,H5F_ACC_TRUNC, H5P_DEFAULT, fapl )) < 0) TEST_ERROR
+    /* Call "main" test routine */
+    nerrors += test_main(file_id, fapl);
+    nerrors += test_obj_ref(fapl);
+    nerrors += test_reg_ref(fapl);
 
-        /* Call "main" test routine */
-	nerrors += test_main(file_id, fapl);
-	nerrors += test_obj_ref(fapl);
-	nerrors += test_reg_ref(fapl);
+    /* Close file */
+    H5Fclose(file_id);
 
-        /* Close file */
-        H5Fclose(file_id);
+    if(nerrors)
+        goto error;
+    puts("All getname tests passed.");
 
-	if(nerrors)
-            goto error;
-        puts("All getname tests passed.");
-
-        h5_cleanup(FILENAME, fapl);
-    } /* end if */
+    h5_cleanup(FILENAME, fapl);
 
     return 0;
 

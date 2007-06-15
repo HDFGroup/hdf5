@@ -7185,7 +7185,7 @@ main(void)
     if(envval == NULL)
         envval = "nomatch";
 
-    if(HDstrcmp(envval, "stdio") && HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
+    if(HDstrcmp(envval, "stdio") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
         int     nerrors = 0;
         hid_t	fapl, fapl2;
         hid_t   fcpl_shared;

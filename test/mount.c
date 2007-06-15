@@ -3829,7 +3829,7 @@ main(void)
     envval = HDgetenv("HDF5_DRIVER");
     if (envval == NULL) 
         envval = "nomatch";
-    if (HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi")) {
+    if (HDstrcmp(envval, "split") && HDstrcmp(envval, "multi")) {
 	h5_reset();
 	fapl = h5_fileaccess();
 	if (setup(fapl)<0) goto error;

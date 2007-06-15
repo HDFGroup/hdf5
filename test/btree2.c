@@ -7454,7 +7454,7 @@ main(void)
     envval = HDgetenv("HDF5_DRIVER");
     if(envval == NULL) 
         envval = "nomatch";
-    if(HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "family")) {
+    if(HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
 	/* Reset library */
 	h5_reset();
 	fapl = h5_fileaccess();
