@@ -1434,12 +1434,12 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_fill(void *_fill, size_t fill_size, const H5S_t *space, void *_buf)
+H5S_select_fill(const void *_fill, size_t fill_size, const H5S_t *space, void *_buf)
 {
     H5S_sel_iter_t iter;        /* Selection iteration info */
     hbool_t iter_init=0;        /* Selection iteration info has been initialized */
     uint8_t *buf;               /* Current location in buffer */
-    void *fill=_fill;           /* Alias for fill-value buffer */
+    const void *fill = _fill;   /* Alias for fill-value buffer */
     hssize_t nelmts;            /* Number of elements in selection */
     hsize_t off[H5D_XFER_HYPER_VECTOR_SIZE_DEF];          /* Array to store sequence offsets */
     size_t len[H5D_XFER_HYPER_VECTOR_SIZE_DEF];           /* Array to store sequence lengths */
@@ -1503,7 +1503,7 @@ done:
 
     /* Release fill value, if allocated */
     if(_fill==NULL && fill)
-        H5FL_BLK_FREE(type_elem,fill);
+        H5FL_BLK_FREE(type_elem, (void *)fill); /* casting away const OK - QAK */
 
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_select_fill() */

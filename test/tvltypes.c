@@ -24,6 +24,7 @@
 #include "testhdf5.h"
 
 #include "hdf5.h"
+#include "H5Dprivate.h"
 
 #define FILENAME   "tvltypes.h5"
 
@@ -43,6 +44,11 @@
 #define L2_INCM         8
 #define L3_INCM         3 
 
+/* 1-D dataset with fixed dimensions */
+#define SPACE4_RANK	1
+#define SPACE4_DIM_SMALL     128
+#define SPACE4_DIM_LARGE     (H5D_XFER_MAX_TEMP_BUF_DEF / 64)
+
 void *test_vltypes_alloc_custom(size_t size, void *info);
 void test_vltypes_free_custom(void *mem, void *info);
 
@@ -54,23 +60,21 @@ void test_vltypes_free_custom(void *mem, void *info);
 **      allocated.
 **
 ****************************************************************/
-void *test_vltypes_alloc_custom(size_t size, void *info)
+void *test_vltypes_alloc_custom(size_t size, void *mem_used)
 {
-    void *ret_value=NULL;       /* Pointer to return */
-    size_t *mem_used=(size_t *)info;  /* Get the pointer to the memory used */
-    size_t extra;               /* Extra space needed */
+    void *ret_value;            /* Pointer to return */
+    const size_t extra = MAX(sizeof(void *), sizeof(size_t)); /* Extra space needed */
+                                /* (This weird contortion is required on the
+                                 *      DEC Alpha to keep the alignment correct - QAK)
+                                 */
 
-    /*
-     *  This weird contortion is required on the DEC Alpha to keep the
-     *  alignment correct - QAK
-     */
-    extra=MAX(sizeof(void *),sizeof(size_t));
-
-    if((ret_value=HDmalloc(extra+size))!=NULL) {
-        *(size_t *)ret_value=size;
-        *mem_used+=size;
+    if((ret_value = HDmalloc(extra + size)) != NULL) {
+        *(size_t *)ret_value = size;
+        *(size_t *)mem_used += size;
     } /* end if */
-    ret_value=((unsigned char *)ret_value)+extra;
+
+    ret_value = ((unsigned char *)ret_value) + extra;
+
     return(ret_value);
 }
 
@@ -82,21 +86,17 @@ void *test_vltypes_alloc_custom(size_t size, void *info)
 **      allocated.
 **
 ****************************************************************/
-void test_vltypes_free_custom(void *_mem, void *info)
+void test_vltypes_free_custom(void *_mem, void *mem_used)
 {
-    unsigned char *mem;
-    size_t *mem_used=(size_t *)info;  /* Get the pointer to the memory used */
-    size_t extra;               /* Extra space needed */
+    if(_mem) {
+        const size_t extra = MAX(sizeof(void *), sizeof(size_t));     /* Extra space needed */
+                                                                /* (This weird contortion is required
+                                                                 *      on the DEC Alpha to keep the
+                                                                 *      alignment correct - QAK)
+                                                                 */
+        unsigned char *mem = ((unsigned char *)_mem) - extra;   /* Pointer to actual block allocated */
 
-    /*
-     *  This weird contortion is required on the DEC Alpha to keep the
-     *  alignment correct - QAK
-     */
-    extra=MAX(sizeof(void *),sizeof(size_t));
-
-    if(_mem!=NULL) {
-        mem=((unsigned char *)_mem)-extra;
-        *mem_used-=*(size_t *)mem;
+        *(size_t *)mem_used -= *(size_t *)mem;
         HDfree(mem);
     } /* end if */
 }
@@ -2433,19 +2433,23 @@ test_vltypes_fill_value(void)
     hid_t file_id;
     hid_t dtype1_id = -1;
     hid_t str_id = -1;
-    hid_t dspace_id;
+    hid_t small_dspace_id;              /* Dataspace ID for small datasets */
+    hid_t large_dspace_id;              /* Dataspace ID for large datasets */
+    hid_t dset_dspace_id;               /* Dataspace ID for a particular dataset */
     hid_t scalar_dspace_id;             /* Dataspace ID for scalar dataspace */
     hid_t single_dspace_id;             /* Dataspace ID for single element selection */
     hsize_t single_offset[] = {2};      /* Offset of single element selection */
     hsize_t single_block[] = {1};       /* Block size of single element selection */
     hid_t dcpl_id, xfer_pid;
     hid_t dset_id; 
-    hsize_t dim1[] = {SPACE3_DIM1};
+    hsize_t small_dims[] = {SPACE4_DIM_SMALL};
+    hsize_t large_dims[] = {SPACE4_DIM_LARGE};
+    hsize_t dset_elmts;                 /* Number of elements in a particular dataset */
     const dtype1_struct fill1 = {1, 2, "foobar", "", NULL, "\0", "dead", 3, 4.0, 100.0, 1.0, "liquid", "meter"};
     const dtype1_struct wdata = {3, 4, "", NULL, "\0", "foo", "two", 6, 8.0, 200.0, 2.0, "solid", "yard"};
-    dtype1_struct buf[SPACE3_DIM1];
-    size_t mem_used=0;  /* Memory used during allocation */
-    H5D_layout_t layout;        /* Dataset storage layout */
+    dtype1_struct *rbuf = NULL;         /* Buffer for reading data */
+    size_t mem_used = 0;                /* Memory used during allocation */
+    H5D_layout_t layout;                /* Dataset storage layout */
     char dset_name1[64], dset_name2[64];       /* Dataset names */
     unsigned i;
 
@@ -2506,9 +2510,17 @@ test_vltypes_fill_value(void)
     CHECK(ret, FAIL, "H5Tclose");
 
 
-    /* Create the main dataspace to use */
-    dspace_id = H5Screate_simple(SPACE3_RANK, dim1, NULL);
-    CHECK(dspace_id, FAIL, "H5Screate_simple");
+    /* Allocate space for the buffer to read data */
+    rbuf = HDmalloc(SPACE4_DIM_LARGE * sizeof(dtype1_struct));
+    CHECK(rbuf, NULL, "HDmalloc");
+
+
+    /* Create the small & large dataspaces to use */
+    small_dspace_id = H5Screate_simple(SPACE4_RANK, small_dims, NULL);
+    CHECK(small_dspace_id, FAIL, "H5Screate_simple");
+
+    large_dspace_id = H5Screate_simple(SPACE4_RANK, large_dims, NULL);
+    CHECK(large_dspace_id, FAIL, "H5Screate_simple");
 
     /* Create a scalar dataspace */
     scalar_dspace_id = H5Screate(H5S_SCALAR);
@@ -2529,7 +2541,9 @@ test_vltypes_fill_value(void)
 #ifdef QAK
 HDfprintf(stderr, "Before creating datasets\n");
 #endif /* QAK */
-    for(layout = H5D_COMPACT; layout <= H5D_CHUNKED; layout++) {
+HDfprintf(stderr, "Uncomment loop!\n");
+/*     for(layout = H5D_COMPACT; layout <= H5D_CHUNKED; layout++) { */
+    for(layout = H5D_COMPACT; layout <= H5D_CONTIGUOUS; layout++) {
         hid_t tmp_dcpl_id;      /* Temporary copy of the dataset creation property list */
 
         /* Make a copy of the dataset creation property list */
@@ -2541,6 +2555,7 @@ HDfprintf(stderr, "Before creating datasets\n");
             case H5D_COMPACT:
                 HDstrcpy(dset_name1, "dataset1-compact");
                 HDstrcpy(dset_name2, "dataset2-compact");
+                dset_dspace_id = small_dspace_id;
                 ret = H5Pset_layout(tmp_dcpl_id, H5D_COMPACT);
                 CHECK(ret, FAIL, "H5Pset_layout");
                 break;
@@ -2548,14 +2563,16 @@ HDfprintf(stderr, "Before creating datasets\n");
             case H5D_CONTIGUOUS:
                 HDstrcpy(dset_name1, "dataset1-contig");
                 HDstrcpy(dset_name2, "dataset2-contig");
+                dset_dspace_id = large_dspace_id;
                 break;
 
             case H5D_CHUNKED:
                 {
-                    hsize_t chunk_dims[1] = {SPACE3_DIM1 / 4};
+                    hsize_t chunk_dims[1] = {SPACE4_DIM_LARGE / 4};
 
                     HDstrcpy(dset_name1, "dataset1-chunked");
                     HDstrcpy(dset_name2, "dataset2-chunked");
+                    dset_dspace_id = large_dspace_id;
                     ret = H5Pset_chunk(tmp_dcpl_id, 1, chunk_dims);
                     CHECK(ret, FAIL, "H5Pset_chunk");
                 }
@@ -2566,7 +2583,7 @@ HDfprintf(stderr, "Before creating datasets\n");
 #ifdef QAK
 HDfprintf(stderr, "Before creating first dataset: '%s'\n", dset_name1);
 #endif /* QAK */
-        dset_id = H5Dcreate(file_id, dset_name1, dtype1_id, dspace_id, tmp_dcpl_id);
+        dset_id = H5Dcreate(file_id, dset_name1, dtype1_id, dset_dspace_id, tmp_dcpl_id);
 #ifdef QAK
 HDfprintf(stderr, "After creating first dataset\n");
 #endif /* QAK */
@@ -2582,6 +2599,7 @@ HDfprintf(stderr, "After closing first dataset\n");
         CHECK(ret, FAIL, "H5Dclose");
 
 
+#ifndef QAK2
         /* Create a second data set with space allocated and fill value written */
         ret = H5Pset_fill_time(tmp_dcpl_id, H5D_FILL_TIME_IFSET);
         CHECK(ret, FAIL, "H5Pset_fill_time");
@@ -2592,7 +2610,7 @@ HDfprintf(stderr, "After closing first dataset\n");
 #ifdef QAK
 HDfprintf(stderr, "Before creating second dataset: '%s'\n", dset_name2);
 #endif /* QAK */
-        dset_id = H5Dcreate(file_id, dset_name2, dtype1_id, dspace_id, tmp_dcpl_id);
+        dset_id = H5Dcreate(file_id, dset_name2, dtype1_id, dset_dspace_id, tmp_dcpl_id);
 #ifdef QAK
 HDfprintf(stderr, "After creating second dataset\n");
 #endif /* QAK */
@@ -2606,6 +2624,9 @@ HDfprintf(stderr, "Before closing second dataset\n");
 HDfprintf(stderr, "After closing second dataset\n");
 #endif /* QAK */
         CHECK(ret, FAIL, "H5Dclose");
+#else /* QAK2 */
+HDfprintf(stderr, "Uncomment test for second dataset!\n");
+#endif /* QAK2 */
 
         /* Close temporary DCPL */
         ret = H5Pclose(tmp_dcpl_id);
@@ -2634,23 +2655,31 @@ HDfprintf(stderr, "After closing second dataset\n");
 #ifdef QAK
 HDfprintf(stderr, "Before testing empty reads\n");
 #endif /* QAK */
-    for(layout = H5D_COMPACT; layout <= H5D_CHUNKED; layout++) {
+HDfprintf(stderr, "Uncomment loop!\n");
+/*     for(layout = H5D_COMPACT; layout <= H5D_CHUNKED; layout++) { */
+    for(layout = H5D_COMPACT; layout <= H5D_CONTIGUOUS; layout++) {
 
         /* Layout specific actions */
         switch(layout) {
             case H5D_COMPACT:
                 HDstrcpy(dset_name1, "dataset1-compact");
                 HDstrcpy(dset_name2, "dataset2-compact");
+                dset_dspace_id = small_dspace_id;
+                dset_elmts = SPACE4_DIM_SMALL;
                 break;
 
             case H5D_CONTIGUOUS:
                 HDstrcpy(dset_name1, "dataset1-contig");
                 HDstrcpy(dset_name2, "dataset2-contig");
+                dset_dspace_id = large_dspace_id;
+                dset_elmts = SPACE4_DIM_LARGE;
                 break;
 
             case H5D_CHUNKED:
                 HDstrcpy(dset_name1, "dataset1-chunked");
                 HDstrcpy(dset_name2, "dataset2-chunked");
+                dset_dspace_id = large_dspace_id;
+                dset_elmts = SPACE4_DIM_LARGE;
                 break;
         } /* end switch */
 
@@ -2668,16 +2697,22 @@ HDfprintf(stderr, "After opening first dataset\n");
 #ifdef QAK
 HDfprintf(stderr, "Before reading from first dataset\n");
 #endif /* QAK */
-        ret = H5Dread(dset_id, dtype1_id, dspace_id, dspace_id, xfer_pid, buf);
+        ret = H5Dread(dset_id, dtype1_id, dset_dspace_id, dset_dspace_id, xfer_pid, rbuf);
 #ifdef QAK
 HDfprintf(stderr, "After reading from first dataset\n");
 #endif /* QAK */
         CHECK(ret, FAIL, "H5Dread");
 
         /* Compare data read in */
-        for(i=0; i<SPACE3_DIM1; i++) {
-            if(strcmp(buf[i].str_id, "foobar") || strcmp(buf[i].str_name, "") || buf[i].str_desc || strcmp(buf[i].str_orig,"\0") || strcmp(buf[i].str_stat, "dead") || strcmp(buf[i].str_form, "liquid") || strcmp(buf[i].str_unit, "meter")) {
-                TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n",__LINE__,(int)i);
+        for(i = 0; i < dset_elmts; i++) {
+            if(HDstrcmp(rbuf[i].str_id, "foobar")
+                    || HDstrcmp(rbuf[i].str_name, "")
+                    || rbuf[i].str_desc
+                    || HDstrcmp(rbuf[i].str_orig, "\0")
+                    || HDstrcmp(rbuf[i].str_stat, "dead")
+                    || HDstrcmp(rbuf[i].str_form, "liquid")
+                    || HDstrcmp(rbuf[i].str_unit, "meter")) {
+                TestErrPrintf("%d: VL data doesn't match!, index(i) = %d\n", __LINE__, (int)i);
                 continue;
             } /* end if */
         } /* end for */
@@ -2692,10 +2727,17 @@ HDfprintf(stderr, "After closing first dataset\n");
         CHECK(ret, FAIL, "H5Dclose");
 
         /* Release the space */
-        ret = H5Dvlen_reclaim(dtype1_id, dspace_id, xfer_pid, buf);
+#ifdef QAK
+HDfprintf(stderr, "Before reclaiming space\n");
+#endif /* QAK */
+        ret = H5Dvlen_reclaim(dtype1_id, dset_dspace_id, xfer_pid, rbuf);
+#ifdef QAK
+HDfprintf(stderr, "After reclaiming space\n");
+#endif /* QAK */
         CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
 
+#ifndef QAK2
         /* Open the second data set to check the value of data */
 #ifdef QAK
 HDfprintf(stderr, "Before opening second dataset: '%s'\n", dset_name2);
@@ -2709,15 +2751,21 @@ HDfprintf(stderr, "After opening second dataset\n");
 #ifdef QAK
 HDfprintf(stderr, "Before reading from second dataset\n");
 #endif /* QAK */
-        ret = H5Dread(dset_id, dtype1_id, dspace_id, dspace_id, xfer_pid, buf);
+        ret = H5Dread(dset_id, dtype1_id, dset_dspace_id, dset_dspace_id, xfer_pid, rbuf);
 #ifdef QAK
 HDfprintf(stderr, "After reading from second dataset\n");
 #endif /* QAK */
         CHECK(ret, FAIL, "H5Dread");
 
         /* Compare data read in */
-        for(i=0; i<SPACE3_DIM1; i++) {
-            if(strcmp(buf[i].str_id, "foobar") || strcmp(buf[i].str_name, "") || buf[i].str_desc || strcmp(buf[i].str_orig,"\0") || strcmp(buf[i].str_stat, "dead") || strcmp(buf[i].str_form, "liquid") || strcmp(buf[i].str_unit, "meter")) {
+        for(i = 0; i < dset_elmts; i++) {
+            if(HDstrcmp(rbuf[i].str_id, "foobar")
+                    || HDstrcmp(rbuf[i].str_name, "")
+                    || rbuf[i].str_desc
+                    || HDstrcmp(rbuf[i].str_orig, "\0")
+                    || HDstrcmp(rbuf[i].str_stat, "dead")
+                    || HDstrcmp(rbuf[i].str_form, "liquid")
+                    || HDstrcmp(rbuf[i].str_unit, "meter")) {
                 TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n",__LINE__,(int)i);
                 continue;
             } /* end if */
@@ -2733,8 +2781,17 @@ HDfprintf(stderr, "After closing second dataset\n");
         CHECK(ret, FAIL, "H5Dclose");
 
         /* Release the space */
-        ret = H5Dvlen_reclaim(dtype1_id, dspace_id, xfer_pid, buf);
+#ifdef QAK
+HDfprintf(stderr, "Before reclaiming space\n");
+#endif /* QAK */
+        ret = H5Dvlen_reclaim(dtype1_id, dset_dspace_id, xfer_pid, rbuf);
+#ifdef QAK
+HDfprintf(stderr, "After reclaiming space\n");
+#endif /* QAK */
         CHECK(ret, FAIL, "H5Dvlen_reclaim");
+#else /* QAK2 */
+HDfprintf(stderr, "Uncomment test for second dataset!\n");
+#endif /* QAK2 */
     } /* end for */
 
     ret = H5Fclose(file_id);
@@ -2745,40 +2802,46 @@ HDfprintf(stderr, "After closing second dataset\n");
     file_id = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(file_id, FAIL, "H5Fopen");
 
-    /* Copy the dataset's dataspace */
-    single_dspace_id = H5Scopy(dspace_id);
-    CHECK(single_dspace_id, FAIL, "H5Scopy");
-
-    /* Set a single element in the dataspace */
-    ret = H5Sselect_hyperslab(single_dspace_id, H5S_SELECT_SET, single_offset,
-            NULL, single_block, NULL);
-    CHECK(ret, FAIL, "H5Sselect_hyperslab");
-
     /* Write one element & fill values to  datasets with different storage layouts */
 #ifdef QAK
 HDfprintf(stderr, "Before testing single element writes\n");
 #endif /* QAK */
 HDfprintf(stderr, "Uncomment loop!\n");
 /*     for(layout = H5D_COMPACT; layout <= H5D_CHUNKED; layout++) { */
-    for(layout = H5D_COMPACT; layout <= H5D_COMPACT; layout++) {
+    for(layout = H5D_COMPACT; layout <= H5D_CONTIGUOUS; layout++) {
 
         /* Layout specific actions */
         switch(layout) {
             case H5D_COMPACT:
                 HDstrcpy(dset_name1, "dataset1-compact");
                 HDstrcpy(dset_name2, "dataset2-compact");
+                dset_dspace_id = small_dspace_id;
+                dset_elmts = SPACE4_DIM_SMALL;
                 break;
 
             case H5D_CONTIGUOUS:
                 HDstrcpy(dset_name1, "dataset1-contig");
                 HDstrcpy(dset_name2, "dataset2-contig");
+                dset_dspace_id = large_dspace_id;
+                dset_elmts = SPACE4_DIM_LARGE;
                 break;
 
             case H5D_CHUNKED:
                 HDstrcpy(dset_name1, "dataset1-chunked");
                 HDstrcpy(dset_name2, "dataset2-chunked");
+                dset_dspace_id = large_dspace_id;
+                dset_elmts = SPACE4_DIM_LARGE;
                 break;
         } /* end switch */
+
+        /* Copy the dataset's dataspace */
+        single_dspace_id = H5Scopy(dset_dspace_id);
+        CHECK(single_dspace_id, FAIL, "H5Scopy");
+
+        /* Set a single element in the dataspace */
+        ret = H5Sselect_hyperslab(single_dspace_id, H5S_SELECT_SET, single_offset,
+                NULL, single_block, NULL);
+        CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
         /* Open first data set */
 #ifdef QAK
@@ -2803,34 +2866,34 @@ HDfprintf(stderr, "After writing to first dataset\n");
 #ifdef QAK
 HDfprintf(stderr, "Before reading from first dataset\n");
 #endif /* QAK */
-        ret = H5Dread(dset_id, dtype1_id, dspace_id, dspace_id, xfer_pid, buf);
+        ret = H5Dread(dset_id, dtype1_id, dset_dspace_id, dset_dspace_id, xfer_pid, rbuf);
 #ifdef QAK
 HDfprintf(stderr, "After reading from first dataset\n");
 #endif /* QAK */
         CHECK(ret, FAIL, "H5Dread");
 
         /* Compare data read in */
-        for(i = 0; i < SPACE3_DIM1; i++) {
+        for(i = 0; i < dset_elmts; i++) {
             if(i == single_offset[0]) {
-                if(HDstrcmp(buf[i].str_id, wdata.str_id)
-                        || buf[i].str_name
-                        || HDstrcmp(buf[i].str_desc, wdata.str_desc)
-                        || HDstrcmp(buf[i].str_orig, wdata.str_orig)
-                        || HDstrcmp(buf[i].str_stat, wdata.str_stat)
-                        || HDstrcmp(buf[i].str_form, wdata.str_form)
-                        || HDstrcmp(buf[i].str_unit, wdata.str_unit)) {
+                if(HDstrcmp(rbuf[i].str_id, wdata.str_id)
+                        || rbuf[i].str_name
+                        || HDstrcmp(rbuf[i].str_desc, wdata.str_desc)
+                        || HDstrcmp(rbuf[i].str_orig, wdata.str_orig)
+                        || HDstrcmp(rbuf[i].str_stat, wdata.str_stat)
+                        || HDstrcmp(rbuf[i].str_form, wdata.str_form)
+                        || HDstrcmp(rbuf[i].str_unit, wdata.str_unit)) {
                     TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n",__LINE__,(int)i);
                     continue;
                 } /* end if */
             } /* end if */
             else {
-                if(HDstrcmp(buf[i].str_id, "foobar")
-                        || HDstrcmp(buf[i].str_name, "")
-                        || buf[i].str_desc
-                        || HDstrcmp(buf[i].str_orig,"\0")
-                        || HDstrcmp(buf[i].str_stat, "dead")
-                        || HDstrcmp(buf[i].str_form, "liquid")
-                        || HDstrcmp(buf[i].str_unit, "meter")) {
+                if(HDstrcmp(rbuf[i].str_id, "foobar")
+                        || HDstrcmp(rbuf[i].str_name, "")
+                        || rbuf[i].str_desc
+                        || HDstrcmp(rbuf[i].str_orig,"\0")
+                        || HDstrcmp(rbuf[i].str_stat, "dead")
+                        || HDstrcmp(rbuf[i].str_form, "liquid")
+                        || HDstrcmp(rbuf[i].str_unit, "meter")) {
                     TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n",__LINE__,(int)i);
                     continue;
                 } /* end if */
@@ -2848,10 +2911,17 @@ HDfprintf(stderr, "After closing first dataset\n");
         CHECK(ret, FAIL, "H5Dclose");
 
         /* Release the space */
-        ret = H5Dvlen_reclaim(dtype1_id, dspace_id, xfer_pid, buf);
+#ifdef QAK
+HDfprintf(stderr, "Before reclaiming space\n");
+#endif /* QAK */
+        ret = H5Dvlen_reclaim(dtype1_id, dset_dspace_id, xfer_pid, rbuf);
+#ifdef QAK
+HDfprintf(stderr, "After reclaiming space\n");
+#endif /* QAK */
         CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
 
+#ifndef QAK2
         /* Open the second data set to check the value of data */
 #ifdef QAK
 HDfprintf(stderr, "Before opening second dataset: '%s'\n", dset_name2);
@@ -2875,34 +2945,34 @@ HDfprintf(stderr, "After writing to second dataset\n");
 #ifdef QAK
 HDfprintf(stderr, "Before reading from second dataset\n");
 #endif /* QAK */
-        ret = H5Dread(dset_id, dtype1_id, dspace_id, dspace_id, xfer_pid, buf);
+        ret = H5Dread(dset_id, dtype1_id, dset_dspace_id, dset_dspace_id, xfer_pid, rbuf);
 #ifdef QAK
 HDfprintf(stderr, "After reading from second dataset\n");
 #endif /* QAK */
         CHECK(ret, FAIL, "H5Dread");
 
         /* Compare data read in */
-        for(i = 0; i < SPACE3_DIM1; i++) {
+        for(i = 0; i < dset_elmts; i++) {
             if(i == single_offset[0]) {
-                if(HDstrcmp(buf[i].str_id, wdata.str_id)
-                        || buf[i].str_name
-                        || HDstrcmp(buf[i].str_desc, wdata.str_desc)
-                        || HDstrcmp(buf[i].str_orig, wdata.str_orig)
-                        || HDstrcmp(buf[i].str_stat, wdata.str_stat)
-                        || HDstrcmp(buf[i].str_form, wdata.str_form)
-                        || HDstrcmp(buf[i].str_unit, wdata.str_unit)) {
+                if(HDstrcmp(rbuf[i].str_id, wdata.str_id)
+                        || rbuf[i].str_name
+                        || HDstrcmp(rbuf[i].str_desc, wdata.str_desc)
+                        || HDstrcmp(rbuf[i].str_orig, wdata.str_orig)
+                        || HDstrcmp(rbuf[i].str_stat, wdata.str_stat)
+                        || HDstrcmp(rbuf[i].str_form, wdata.str_form)
+                        || HDstrcmp(rbuf[i].str_unit, wdata.str_unit)) {
                     TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n",__LINE__,(int)i);
                     continue;
                 } /* end if */
             } /* end if */
             else {
-                if(HDstrcmp(buf[i].str_id, "foobar")
-                        || HDstrcmp(buf[i].str_name, "")
-                        || buf[i].str_desc
-                        || HDstrcmp(buf[i].str_orig,"\0")
-                        || HDstrcmp(buf[i].str_stat, "dead")
-                        || HDstrcmp(buf[i].str_form, "liquid")
-                        || HDstrcmp(buf[i].str_unit, "meter")) {
+                if(HDstrcmp(rbuf[i].str_id, "foobar")
+                        || HDstrcmp(rbuf[i].str_name, "")
+                        || rbuf[i].str_desc
+                        || HDstrcmp(rbuf[i].str_orig,"\0")
+                        || HDstrcmp(rbuf[i].str_stat, "dead")
+                        || HDstrcmp(rbuf[i].str_form, "liquid")
+                        || HDstrcmp(rbuf[i].str_unit, "meter")) {
                     TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n",__LINE__,(int)i);
                     continue;
                 } /* end if */
@@ -2919,8 +2989,21 @@ HDfprintf(stderr, "After closing second dataset\n");
         CHECK(ret, FAIL, "H5Dclose");
 
         /* Release the space */
-        ret = H5Dvlen_reclaim(dtype1_id, dspace_id, xfer_pid, buf);
+#ifdef QAK
+HDfprintf(stderr, "Before reclaiming space\n");
+#endif /* QAK */
+        ret = H5Dvlen_reclaim(dtype1_id, dset_dspace_id, xfer_pid, rbuf);
+#ifdef QAK
+HDfprintf(stderr, "After reclaiming space\n");
+#endif /* QAK */
         CHECK(ret, FAIL, "H5Dvlen_reclaim");
+#else /* QAK2 */
+HDfprintf(stderr, "Uncomment test for second dataset!\n");
+#endif /* QAK2 */
+
+        /* Close the dataspace for the writes */
+        ret = H5Sclose(single_dspace_id);
+        CHECK(ret, FAIL, "H5Sclose");
     } /* end for */
 
     ret = H5Fclose(file_id);
@@ -2931,17 +3014,20 @@ HDfprintf(stderr, "After closing second dataset\n");
     ret = H5Pclose(xfer_pid);
     CHECK(ret, FAIL, "H5Pclose");
 
-    ret = H5Sclose(dspace_id);
+    ret = H5Sclose(small_dspace_id);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    ret = H5Sclose(large_dspace_id);
     CHECK(ret, FAIL, "H5Sclose");
 
     ret = H5Sclose(scalar_dspace_id);
     CHECK(ret, FAIL, "H5Sclose");
 
-    ret = H5Sclose(single_dspace_id);
-    CHECK(ret, FAIL, "H5Sclose");
-
     ret = H5Tclose(dtype1_id);
     CHECK(ret, FAIL, "H5Tclose");
+
+    /* Release buffer */
+    HDfree(rbuf);
 } /* end test_vltypes_fill_value() */
 
 
