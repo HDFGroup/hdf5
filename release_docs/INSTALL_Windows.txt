@@ -23,8 +23,9 @@ Contents:
    Section VIII  :  How to build Multi-threaded version of HDF5 library
    Section IX    :  How to build and test HDF5 snapshot release
    Section X     :  How to build HDF5 with Thread-Safe Feature
-   Section XI    :  How to build HDF5 in Visual studio 2005
-   Section XII   :  Misc.
+   Section XI    :  How to build HDF5 in Visual Studio 2005
+   Section XII   :  How to build HDF5 for 64-bit Windows
+   Section XIII  :  Misc.
 
 
 ========================================================================
@@ -2118,25 +2119,230 @@ by other compilers.
    Go back to Section II, Step I(2) to Build, test and install HDF5
    libary and tools.
 ========================================================================
-Section XI: How to build HDF5 in Visual studio 2005 on windows 32-bit and 
-            64-bit platform
+            Section XI: How to build HDF5 in Visual Studio 2005
 ========================================================================
+ 
  The building procedure is almost the same as building HDF5 on .Net 2003.
- For 64-bit, currently we only support HDF5 as an 32-bit application and 
- you may need to pay attention to the following reminders:
- 1) To use zlib or szlib compression packages:
-    Use zlib 1.2.2 DLL provided at
-    ftp://ftp.hdfgroup.org/lib-external/zlib/1.2/bin/zlib123-windows.zip
-    Use szlib 2.0 DLL provided at
-    ftp://ftp.hdfgroup.org/lib-external/szip/2.0/bin/windows/xp-net
- 2) Make sure that WIN32 macro is set at visual studio 2005.
- 3) You may use _CRT_SECURE_NO_DEPRECATE to disable the warnings.
  Please refer to Section VI: How to build HDF5 in Visual Studio .Net 2003.
- Please also note that the example workspace may not work properly. You may 
- need to reset hdf5 library path.
 
+ 
+ 
 ========================================================================
-                            Section XII: Misc.
+            Section XII: How to build HDF5 for 64-bit Windows
+========================================================================
+
+HDF5 can be built for 64-bit Windows in Visual Studio .NET 2003 or Visual
+Studio 2005.  Visual Studio 2005 offers much greater support, and the build
+process is much more straight-forward, so we recommend all users switch to 
+Visual Studio 2005 for 64-bit builds.  However, we still provide instruction
+for .NET.
+
+Notes:
+  
+    1. 32-bit binaries cannot be linked with 64-bit binaries, and therefore
+       external libraries (szip and zlib. and currently not supported.  In the
+       future we plan to build these libraries natively and offer support.
+       
+    2. Fortran libraries are currently untested and unsupported.
+    
+    3. Building 64-bit HDF5 from a 32-bit machine is also unsupported.  Because 
+       we generate H5tinit.c from a generated 64-bit executable, this must be
+       done on a 64-bit machine.
+    
+    
+Prerequisites:
+
+    1. A 64-bit Windows machine.  Either AMD64 and Itanium is supported.
+    
+    2. Either Visual Studio .NET or 2005.  Visual Studio 2005 is recommended.
+    
+    3. If building with .NET, the lastest version of the Windows Platform SDK
+       must be installed.  The latest version can be found at:
+          http://www.microsoft.com/msdownload/platformsdk/sdkupdate/
+       If building with 2005, Visual Studio must have been installed with the
+       x64 compiler tools.
+       
+
+Building:
+
+    1. Copy Windows-related files
+    
+        From the directory .\windows, run copy_hdf.bat.  This will copy
+        Windows-related files to their neccessarily locations within the source
+        directory.
+        
+    2. Open the IDE
+
+        For Visual Studio 2005, this simply involves opening as normal.
+        
+        In .NET, you must first open a 64-bit build environment command prompt.
+        To do this, go to the start menu and open Microsoft Platform SDK,
+        Open Build Environment Window, Windows XP 64-bit Build Environment,
+        and Set Windows XP x64 Build Env (Retail).  This sets up the neccessary
+        path for Visual Studio.  .NET must then be launched from that command
+        prompt.  This can be done by issuing the command:
+          start "" "C:\Program Files (x86)\Microsoft Visual Studio .NET 2003\
+			Common7\IDE\devenv.exe" /useenv
+            
+    
+    3. Generate H5tinit.c
+        
+        3.1 Open the workspace typegen.dsw from the folder .\windows\misc\typgen.
+            Visual Studio will convert this to .sln and .vcproj files.  
+
+        3.2 Set the Target Machine.  
+        
+            In .NET, this is done by right clicking on  the "h5tinit" project, 
+            and selecting "Properties".  Make sure your configuration is set 
+            to Release, and go to Linker, Advanced.  For the "Target Machine",
+            select "Not Set".  Then, under Linker, Command Line, add 
+            "/machine:AMD64" for AMD, or /machine:IA64 for Itanium.
+            
+            In Visual Studio 2005, go to Build, Configuration Manager.  For the
+            "Active solution platform", select "<New...>".  In the dialog, 
+            select x64 for the platform, and copy settings from "Win32".  Make
+            sure "Create new project platforms" is checked.
+
+        3.3 Modify H5detect.c
+        
+            In H5detect.c, find the function sigbus_handler.  Windows does have
+            siglongjmp, but it can be safely removed.  Comment out the following
+            line:
+                siglongjmp(jbuf_g, 1);
+                
+            Then, right click on the project h5tinit, and select Properties.
+            Make sure your configuration is set to Release, and select Linker,
+            Input.  From "Force Symbol References", remove "gethostname@8".
+            
+            Also, in .NET, in "Additional Dependencies", add
+            "bufferoverflowU.lib".
+            
+        3.4 Build H5tinit.exe
+        
+            Make sure your configuration is set to Release, and build the
+            project.  This will generate H5tinit.exe in the .\src folder.
+            
+        3.5 Create H5tinit.c
+        
+            From a command prompt, go to the .\src directory and issue the
+            command:
+                .\H5tinit.exe > H5tinit.c
+            This will generate our H5tinit.c file.
+            
+    4. Build the library
+        
+        4.1 Open the workspace all.dsw from the folder .\windows\proj\all.  If
+            using Visual Studio .NET, this should be launched from the same 
+            window, or open another window the same way you did in Step 2.
+            
+        4.2 Select the Target Machine
+        
+            In the same way you did in Step 3.2, set the Target Machine for
+            64-bit.  If using .NET, this needs to be done for all projects
+            that produce an executable or dll.  You can recognize these because
+            in the Property dialog, they have a "Linker" section, rather than
+            a "Librarian" section.
+          
+        4.3 Modify Project Settings
+        
+            Similar to Step 3.3, we must remove "gethostname@8" from the list of
+            "Force Symbol References" for each project that has it.  Although
+            tedious, this must be done, or Visual Studio will issue a linker
+            error.  For Visual Studio 2005, this must be done for both debug
+            and release versions.  In .NET, we only build release.
+            
+            In .NET, we also need to add "bufferoverflowU.lib" as a dependency
+            for several projects.  You can simply add it to all projects that
+            produce an executable or dll, or identify specific projects that
+            need it at build-time because they will fail with a link error
+            such as:
+                error LNK2001: unresolved external symbol __security_cookie
+                this library must be explicitly added for that project.
+                
+        4.4 Modify H5pubconf.h
+        
+            Open H5pubconf.h from the .\src directory.  Because we are not using
+            zlib or szip libraries, we must comment out the following lines:
+            
+                #define H5_HAVE_FILTER_DEFLATE 1
+                #define H5_HAVE_ZLIB_H 1
+                
+                #define H5_HAVE_SZLIB_H 1
+                #define H5_HAVE_FILTER_SZIP 1
+
+        4.5 Disable projects
+        
+            In Visual Studio, open the configuration manager and disable all
+            Fortran projects, as well as ttsafedll.  Disable the following
+            projects:
+            
+                flush1_fortran
+                flush1_fortrandll
+                flush2_fortran
+                flush2_fortrandll
+                hdf5_f90cstub
+                hdf5_f90cstubdll
+                hdf5_fortran
+                hdf5_fortrandll
+                hdf5_hl_fortran
+                hdf5_hl_fortrandll
+                hl_test_image_fortran
+                hl_test_image_fortrandll
+                hl_test_lite_fortran
+                hl_test_lite_fortrandll
+                hl_test_table_fortran
+                hl_test_table_fortrandll
+                libtest_cstubdll
+                libtest_fortran
+                libtest_fortrandll
+                testhdf5_fortran
+                testhdf5_fortrandll
+                ttsafedll
+                
+            If you aren't using the C++ library, you may disable those projects
+            as well.  For Visual Studio 2005, this must be done for both Release
+            and Debug versions.
+            
+        4.6 Build
+        
+            In Visual Studio, select Build, Build Solution.  In Visual Studio
+            2005, you may build Debug and Release versions, but in .NET, only
+            release builds are supported.
+        
+        
+Testing:
+    
+    We provide a test suite to verify all libraries and tools were built
+    successfully.  This test suite should work identically on 32- and 64- bit
+    builds.
+    
+    Note that because 64-bit binaries were built, these tests must run on a
+    64-bit machine.
+    
+    If built with Visual Studio 2005, simply open a command prompt, and from
+    the root hdf5 directory, issue the command "hdf5check".  If C++ libraries
+    were built, you may test them at the same time with the command
+    "hdf5check enablecpp".
+    
+    If built with Visual Studio .NET, debug versions of the library will not
+    be present, and the test scripts must be altered by hand to reflect this.
+    In a text editor, open hdf5check.bat from the root hdf5 folder, and comment
+    or remove test sections for "Debug" or "Debug DLL".  The layout is fairly
+    straight-forward, but as an alternative, you may manually run each of the
+    other various sub- test scripts with the "release" and "release dll"
+    parameters.
+    
+    
+Installing:
+
+    We provide a script that will install all headers, libraries, and tools
+    into one folder, hdf5lib.  From the root hdf5 directory, run the script
+    "installhdf5lib.bat".  This will create the hdf5lib folder, and create
+    subdirectories containing all relevent files.  This should work identically
+    on 32- an 64-bit Windows.
+ 
+========================================================================
+                            Section XIII: Misc.
 ========================================================================
 
 1. Helpful Pointers

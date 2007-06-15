@@ -119,7 +119,7 @@ in the file file_io.win32.c and including it on the projects
 #define H5_HAVE_FILTER_SZIP 1
 
 /* change the following line if you would like to change the default file driver */
-#define H5_DEFAULT_VFD H5FD_SEC2
+#define H5_DEFAULT_VFD H5FD_WINDOWS
 
 /* comment the following line out if you don't want to build the windows file
    driver */
