@@ -66,6 +66,16 @@
 #endif
 #endif
 
+/* 
+ * WinXP x64 does not define EWOULDBLOCK, but instead uses
+ * their own Windows-specific macro, so define it here.
+ */
+ #ifdef _WIN32
+ #ifndef EWOULDBLOCK
+ #define EWOULDBLOCK WSAEWOULDBLOCK
+ #endif /* EWOULDBLOCK */
+ #endif /* _WIN32 */
+ 
 #ifndef H5_HAVE_SOCKLEN_T
 typedef int socklen_t;
 #endif
