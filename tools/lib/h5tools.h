@@ -380,9 +380,9 @@ extern int     bin_form;            /* binary form */
 
 
 /* Strings for output */
-#define GROUP           "GROUP"
-#define DATASET         "DATASET"
-#define DATATYPE        "DATATYPE"
+#define H5_TOOLS_GROUP           "GROUP"
+#define H5_TOOLS_DATASET         "DATASET"
+#define H5_TOOLS_DATATYPE        "DATATYPE"
 
 /* Definitions of useful routines */
 extern void     h5tools_init(void);

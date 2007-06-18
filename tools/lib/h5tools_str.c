@@ -877,15 +877,15 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
             /* Print object type and close object */
             switch (otype) {
                 case H5G_GROUP:
-                    h5tools_str_append(str, GROUP);
+                    h5tools_str_append(str, H5_TOOLS_GROUP);
                     H5Gclose(obj);
                     break;
                 case H5G_DATASET:
-                    h5tools_str_append(str, DATASET);
+                    h5tools_str_append(str, H5_TOOLS_DATASET);
                     H5Dclose(obj);
                     break;
                 case H5G_TYPE:
-                    h5tools_str_append(str, DATATYPE);
+                    h5tools_str_append(str, H5_TOOLS_DATATYPE);
                     H5Tclose(obj);
                     break;
                 default:

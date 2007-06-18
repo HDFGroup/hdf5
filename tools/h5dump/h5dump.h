@@ -48,7 +48,6 @@
 #define SOFTLINK        "SOFTLINK"
 #define EXTLINK         "EXTERNAL_LINK"
 #define UDLINK          "USERDEFINED_LINK"
-#define STORAGELAYOUT   "STORAGELAYOUT"
 #define START           "START"
 #define STRIDE          "STRIDE"
 #define STRSIZE         "STRSIZE"
