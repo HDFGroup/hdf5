@@ -53,11 +53,6 @@ static hid_t H5FD_WINDOWS_g = 0;
 #define OP_WRITE	2
 
 /*
- * This is the max number of bytes that will be read or written by the file driver.
- * Values above 2^31-1 may cause trouble with Windows.  Default is 2^30. 
- */
-#define IO_BUF_SIZE 1073741824
-/*
  * The description of a file belonging to this driver. The `eoa' and `eof'
  * determine the amount of hdf5 address space in use and the high-water mark
  * of the file (the current size of the underlying file). The `pos'
@@ -800,7 +795,7 @@ H5FD_windows_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
     while (size>0) {
 #ifndef WINDOWS_USE_STDIO
         do {
-			nbytes = _read(file->fd, buf, (unsigned)(size <= IO_BUF_SIZE ? size: IO_BUF_SIZE));
+			nbytes = _read(file->fd, buf, (unsigned)(size <= WINDOWS_MAX_BUF ? size: WINDOWS_MAX_BUF));
         } while (-1==nbytes && EINTR==errno);
         if (-1==nbytes) /* error */
             HSYS_GOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed")
@@ -811,7 +806,7 @@ H5FD_windows_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
         }
 #else
         do {
-            nbytes = fread(buf,(size_t)1,(size <= IO_BUF_SIZE ? size: IO_BUF_SIZE),file->fp);
+            nbytes = fread(buf,(size_t)1,(size <= WINDOWS_MAX_BUF ? size: WINDOWS_MAX_BUF),file->fp);
         } while (!nbytes && EINTR==errno);
 		if(!nbytes) {
             if (ferror(file->fp)) /* error */
@@ -909,14 +904,14 @@ H5FD_windows_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, 
 	while (size>0) {
         do {
 #ifndef WINDOWS_USE_STDIO
-            nbytes = _write(file->fd, buf, (unsigned)(size <= IO_BUF_SIZE ? size: IO_BUF_SIZE));
+            nbytes = _write(file->fd, buf, (unsigned)(size <= WINDOWS_MAX_BUF ? size: WINDOWS_MAX_BUF));
         } while (-1==nbytes && EINTR==errno);
         if (-1==nbytes) /* error */
 #else
 
 
 		/* Write 1GB or less at a time */
-			nbytes = fwrite(buf, 1, (size <= IO_BUF_SIZE ? size: IO_BUF_SIZE),file->fp);
+			nbytes = fwrite(buf, 1, (size <= WINDOWS_MAX_BUF ? size: WINDOWS_MAX_BUF),file->fp);
 		} while (!nbytes && EINTR==errno);
         if (!nbytes) /* error */
 #endif /* WINDOWS_USE_STDIO */

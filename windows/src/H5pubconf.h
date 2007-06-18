@@ -126,9 +126,16 @@ in the file file_io.win32.c and including it on the projects
 #define H5_HAVE_WINDOWS 1
 
 #ifdef H5_HAVE_WINDOWS
+
 /* uncomment the following line if you would like to use the buffered stdio
    functions in the Windows file driver. */
 // #define WINDOWS_USE_STDIO 1
+
+/* this value controls the maximum data written in one write call in the
+ * Windows file driver.  Safe values are between 1 <= IO_BUF_SIZE <= 2GB-1.
+ * The default is 1GB. */
+#define WINDOWS_MAX_BUF 1073741824
+
 #endif /* H5_HAVE_WINDOWS */
 
 /* comment the following line out if you are not using N-bit filter*/
