@@ -261,13 +261,13 @@ static const h5dump_header_t standardformat = {
     "",             /*fileend */
     SUPER_BLOCK,            /*bootblockbegin */
     "",             /*bootblockend */
-    GROUP,          /*groupbegin */
+    H5_TOOLS_GROUP,          /*groupbegin */
     "",             /*groupend */
-    DATASET,            /*datasetbegin */
+    H5_TOOLS_DATASET,            /*datasetbegin */
     "",             /*datasetend */
     ATTRIBUTE,          /*attributebegin */
     "",             /*attributeend */
-    DATATYPE,           /*datatypebegin */
+    H5_TOOLS_DATATYPE,           /*datatypebegin */
     "",             /*datatypeend */
     DATASPACE,          /*dataspacebegin */
     "",             /*dataspaceend */

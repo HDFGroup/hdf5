@@ -46,7 +46,6 @@
 #define S_SIMPLE        "SIMPLE"
 #define S_NULL          "NULL"
 #define SOFTLINK        "SOFTLINK"
-#define STORAGELAYOUT   "STORAGELAYOUT"
 #define START           "START"
 #define STRIDE          "STRIDE"
 #define STRSIZE         "STRSIZE"
