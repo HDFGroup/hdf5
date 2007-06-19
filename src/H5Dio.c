@@ -2221,9 +2221,9 @@ done:
  *                                             };
  *              or
  *                  struct destination {       struct source {
- *                      TYPE1 A;      -->          TYPE1 A;
- *                      TYPE2 B;      -->          TYPE2 B;
- *                      TYPE3 C;      -->          TYPE3 C;
+ *                      TYPE1 A;      <--          TYPE1 A;
+ *                      TYPE2 B;      <--          TYPE2 B;
+ *                      TYPE3 C;      <--          TYPE3 C;
  *                  };                             TYPE4 D;
  *                                                 TYPE5 E;
  *                                             };
@@ -2359,9 +2359,9 @@ done:
  *                                             };
  *              or
  *                  struct destination {       struct source {
- *                      TYPE1 A;      -->          TYPE1 A;
- *                      TYPE2 B;      -->          TYPE2 B;
- *                      TYPE3 C;      -->          TYPE3 C;
+ *                      TYPE1 A;      <--          TYPE1 A;
+ *                      TYPE2 B;      <--          TYPE2 B;
+ *                      TYPE3 C;      <--          TYPE3 C;
  *                  };                             TYPE4 D;
  *                                                 TYPE5 E;
  *                                             };
