@@ -2418,16 +2418,24 @@ test_vltypes_fill_value(void)
     hid_t str_id = -1;
     hid_t small_dspace_id;              /* Dataspace ID for small datasets */
     hid_t large_dspace_id;              /* Dataspace ID for large datasets */
+    hid_t small_select_dspace_id;       /* Dataspace ID for selection in small datasets */
+    hid_t large_select_dspace_id;       /* Dataspace ID for selection in large datasets */
     hid_t dset_dspace_id;               /* Dataspace ID for a particular dataset */
+    hid_t dset_select_dspace_id;        /* Dataspace ID for selection in a particular dataset */
     hid_t scalar_dspace_id;             /* Dataspace ID for scalar dataspace */
     hid_t single_dspace_id;             /* Dataspace ID for single element selection */
     hsize_t single_offset[] = {2};      /* Offset of single element selection */
     hsize_t single_block[] = {1};       /* Block size of single element selection */
+    hsize_t select_offset[] = {0};      /* Offset of non-contiguous element selection */
+    hsize_t select_stride[] = {2};      /* Stride size of non-contiguous element selection */
+    hsize_t small_select_count[] = {SPACE4_DIM_SMALL / 2};       /* Count of small non-contiguous element selection */
+    hsize_t large_select_count[] = {SPACE4_DIM_LARGE / 2};       /* Count of large non-contiguous element selection */
+    hsize_t select_block[] = {1};       /* Block size of non-contiguous element selection */
     hid_t dcpl_id, xfer_pid;
     hid_t dset_id; 
     hsize_t small_dims[] = {SPACE4_DIM_SMALL};
     hsize_t large_dims[] = {SPACE4_DIM_LARGE};
-    hsize_t dset_elmts;                 /* Number of elements in a particular dataset */
+    size_t dset_elmts;                  /* Number of elements in a particular dataset */
     const dtype1_struct fill1 = {1, 2, "foobar", "", NULL, "\0", "dead", 3, 4.0, 100.0, 1.0, "liquid", "meter"};
     const dtype1_struct wdata = {3, 4, "", NULL, "\0", "foo", "two", 6, 8.0, 200.0, 2.0, "solid", "yard"};
     dtype1_struct *rbuf = NULL;         /* Buffer for reading data */
@@ -2504,6 +2512,21 @@ test_vltypes_fill_value(void)
 
     large_dspace_id = H5Screate_simple(SPACE4_RANK, large_dims, NULL);
     CHECK(large_dspace_id, FAIL, "H5Screate_simple");
+
+    /* Create small & large dataspaces w/non-contiguous selections */
+    small_select_dspace_id = H5Scopy(small_dspace_id);
+    CHECK(small_select_dspace_id, FAIL, "H5Scopy");
+
+    ret = H5Sselect_hyperslab(small_select_dspace_id, H5S_SELECT_SET,
+            select_offset, select_stride, small_select_count, select_block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    large_select_dspace_id = H5Scopy(large_dspace_id);
+    CHECK(large_select_dspace_id, FAIL, "H5Scopy");
+
+    ret = H5Sselect_hyperslab(large_select_dspace_id, H5S_SELECT_SET,
+            select_offset, select_stride, large_select_count, select_block);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* Create a scalar dataspace */
     scalar_dspace_id = H5Screate(H5S_SCALAR);
@@ -2626,7 +2649,7 @@ test_vltypes_fill_value(void)
     file_id = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(file_id, FAIL, "H5Fopen");
 
-    /* Read datasets with different storage layouts */
+    /* Read empty datasets with different storage layouts */
     for(layout = H5D_COMPACT; layout <= H5D_CHUNKED; layout++) {
         unsigned compress_loop;         /* # of times to run loop, for testing compressed chunked dataset */
         unsigned test_loop;             /* Loop over datasets */
@@ -2647,6 +2670,7 @@ test_vltypes_fill_value(void)
                     HDstrcpy(dset_name1, "dataset1-compact");
                     HDstrcpy(dset_name2, "dataset2-compact");
                     dset_dspace_id = small_dspace_id;
+                    dset_select_dspace_id = small_select_dspace_id;
                     dset_elmts = SPACE4_DIM_SMALL;
                     break;
 
@@ -2654,6 +2678,7 @@ test_vltypes_fill_value(void)
                     HDstrcpy(dset_name1, "dataset1-contig");
                     HDstrcpy(dset_name2, "dataset2-contig");
                     dset_dspace_id = large_dspace_id;
+                    dset_select_dspace_id = large_select_dspace_id;
                     dset_elmts = SPACE4_DIM_LARGE;
                     break;
 
@@ -2671,6 +2696,7 @@ test_vltypes_fill_value(void)
                     } /* end else */
 #endif /* H5_HAVE_FILTER_DEFLATE */
                     dset_dspace_id = large_dspace_id;
+                    dset_select_dspace_id = large_select_dspace_id;
                     dset_elmts = SPACE4_DIM_LARGE;
                     break;
             } /* end switch */
@@ -2679,7 +2705,7 @@ test_vltypes_fill_value(void)
             dset_id = H5Dopen(file_id, dset_name1);
             CHECK(dset_id, FAIL, "H5Dopen");
 
-            /* Read in the data of fill value */
+            /* Read in the entire 'empty' dataset of fill value */
             ret = H5Dread(dset_id, dtype1_id, dset_dspace_id, dset_dspace_id, xfer_pid, rbuf);
             CHECK(ret, FAIL, "H5Dread");
 
@@ -2697,18 +2723,54 @@ test_vltypes_fill_value(void)
                 } /* end if */
             } /* end for */
 
-            ret = H5Dclose(dset_id);
-            CHECK(ret, FAIL, "H5Dclose");
+            /* Release the space */
+            ret = H5Dvlen_reclaim(dtype1_id, dset_dspace_id, xfer_pid, rbuf);
+            CHECK(ret, FAIL, "H5Dvlen_reclaim");
+
+            /* Clear the read buffer */
+            HDmemset(rbuf, 0, dset_elmts * sizeof(dtype1_struct));
+
+            /* Read in non-contiguous selection from 'empty' dataset of fill value */
+            ret = H5Dread(dset_id, dtype1_id, dset_select_dspace_id, dset_select_dspace_id, xfer_pid, rbuf);
+            CHECK(ret, FAIL, "H5Dread");
+
+            /* Compare data read in */
+            for(i = 0; i < dset_elmts; i++) {
+                if((i % 2) == select_offset[0]) {
+                    if(HDstrcmp(rbuf[i].str_id, "foobar")
+                            || HDstrcmp(rbuf[i].str_name, "")
+                            || rbuf[i].str_desc
+                            || HDstrcmp(rbuf[i].str_orig, "\0")
+                            || HDstrcmp(rbuf[i].str_stat, "dead")
+                            || HDstrcmp(rbuf[i].str_form, "liquid")
+                            || HDstrcmp(rbuf[i].str_unit, "meter")) {
+                        TestErrPrintf("%d: VL data doesn't match!, index(i) = %d\n", __LINE__, (int)i);
+                        continue;
+                    } /* end if */
+                } /* end if */
+                else {
+                    if(rbuf[i].str_id || rbuf[i].str_name || rbuf[i].str_desc
+                            || rbuf[i].str_orig || rbuf[i].str_stat
+                            || rbuf[i].str_form || rbuf[i].str_unit) {
+                        TestErrPrintf("%d: VL data doesn't match!, index(i) = %d\n", __LINE__, (int)i);
+                        continue;
+                    } /* end if */
+                } /* end else */
+            } /* end for */
 
             /* Release the space */
             ret = H5Dvlen_reclaim(dtype1_id, dset_dspace_id, xfer_pid, rbuf);
             CHECK(ret, FAIL, "H5Dvlen_reclaim");
+
+            ret = H5Dclose(dset_id);
+            CHECK(ret, FAIL, "H5Dclose");
 
 
             /* Open the second data set to check the value of data */
             dset_id = H5Dopen(file_id, dset_name2);
             CHECK(dset_id, FAIL, "H5Dopen");
 
+            /* Read in the entire 'empty' dataset of fill value */
             ret = H5Dread(dset_id, dtype1_id, dset_dspace_id, dset_dspace_id, xfer_pid, rbuf);
             CHECK(ret, FAIL, "H5Dread");
 
@@ -2726,12 +2788,47 @@ test_vltypes_fill_value(void)
                 } /* end if */
             } /* end for */
 
-            ret = H5Dclose(dset_id);
-            CHECK(ret, FAIL, "H5Dclose");
+            /* Release the space */
+            ret = H5Dvlen_reclaim(dtype1_id, dset_dspace_id, xfer_pid, rbuf);
+            CHECK(ret, FAIL, "H5Dvlen_reclaim");
+
+            /* Clear the read buffer */
+            HDmemset(rbuf, 0, dset_elmts * sizeof(dtype1_struct));
+
+            /* Read in non-contiguous selection from 'empty' dataset of fill value */
+            ret = H5Dread(dset_id, dtype1_id, dset_select_dspace_id, dset_select_dspace_id, xfer_pid, rbuf);
+            CHECK(ret, FAIL, "H5Dread");
+
+            /* Compare data read in */
+            for(i = 0; i < dset_elmts; i++) {
+                if((i % 2) == select_offset[0]) {
+                    if(HDstrcmp(rbuf[i].str_id, "foobar")
+                            || HDstrcmp(rbuf[i].str_name, "")
+                            || rbuf[i].str_desc
+                            || HDstrcmp(rbuf[i].str_orig, "\0")
+                            || HDstrcmp(rbuf[i].str_stat, "dead")
+                            || HDstrcmp(rbuf[i].str_form, "liquid")
+                            || HDstrcmp(rbuf[i].str_unit, "meter")) {
+                        TestErrPrintf("%d: VL data doesn't match!, index(i) = %d\n", __LINE__, (int)i);
+                        continue;
+                    } /* end if */
+                } /* end if */
+                else {
+                    if(rbuf[i].str_id || rbuf[i].str_name || rbuf[i].str_desc
+                            || rbuf[i].str_orig || rbuf[i].str_stat
+                            || rbuf[i].str_form || rbuf[i].str_unit) {
+                        TestErrPrintf("%d: VL data doesn't match!, index(i) = %d\n", __LINE__, (int)i);
+                        continue;
+                    } /* end if */
+                } /* end else */
+            } /* end for */
 
             /* Release the space */
             ret = H5Dvlen_reclaim(dtype1_id, dset_dspace_id, xfer_pid, rbuf);
             CHECK(ret, FAIL, "H5Dvlen_reclaim");
+
+            ret = H5Dclose(dset_id);
+            CHECK(ret, FAIL, "H5Dclose");
         } /* end for */
     } /* end for */
 
@@ -2764,6 +2861,7 @@ test_vltypes_fill_value(void)
                     HDstrcpy(dset_name1, "dataset1-compact");
                     HDstrcpy(dset_name2, "dataset2-compact");
                     dset_dspace_id = small_dspace_id;
+                    dset_select_dspace_id = small_select_dspace_id;
                     dset_elmts = SPACE4_DIM_SMALL;
                     break;
 
@@ -2771,6 +2869,7 @@ test_vltypes_fill_value(void)
                     HDstrcpy(dset_name1, "dataset1-contig");
                     HDstrcpy(dset_name2, "dataset2-contig");
                     dset_dspace_id = large_dspace_id;
+                    dset_select_dspace_id = large_select_dspace_id;
                     dset_elmts = SPACE4_DIM_LARGE;
                     break;
 
@@ -2788,6 +2887,7 @@ test_vltypes_fill_value(void)
                     } /* end else */
 #endif /* H5_HAVE_FILTER_DEFLATE */
                     dset_dspace_id = large_dspace_id;
+                    dset_select_dspace_id = large_select_dspace_id;
                     dset_elmts = SPACE4_DIM_LARGE;
                     break;
             } /* end switch */
@@ -2840,12 +2940,61 @@ test_vltypes_fill_value(void)
                 } /* end if */
             } /* end for */
 
-            ret = H5Dclose(dset_id);
-            CHECK(ret, FAIL, "H5Dclose");
+            /* Release the space */
+            ret = H5Dvlen_reclaim(dtype1_id, dset_dspace_id, xfer_pid, rbuf);
+            CHECK(ret, FAIL, "H5Dvlen_reclaim");
+
+            /* Clear the read buffer */
+            HDmemset(rbuf, 0, dset_elmts * sizeof(dtype1_struct));
+
+            /* Read in non-contiguous selection from dataset */
+            ret = H5Dread(dset_id, dtype1_id, dset_select_dspace_id, dset_select_dspace_id, xfer_pid, rbuf);
+            CHECK(ret, FAIL, "H5Dread");
+
+            /* Compare data read in */
+            for(i = 0; i < dset_elmts; i++) {
+                if(i == single_offset[0]) {
+                    if(HDstrcmp(rbuf[i].str_id, wdata.str_id)
+                            || rbuf[i].str_name
+                            || HDstrcmp(rbuf[i].str_desc, wdata.str_desc)
+                            || HDstrcmp(rbuf[i].str_orig, wdata.str_orig)
+                            || HDstrcmp(rbuf[i].str_stat, wdata.str_stat)
+                            || HDstrcmp(rbuf[i].str_form, wdata.str_form)
+                            || HDstrcmp(rbuf[i].str_unit, wdata.str_unit)) {
+                        TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n",__LINE__,(int)i);
+                        continue;
+                    } /* end if */
+                } /* end if */
+                else {
+                    if((i % 2) == select_offset[0]) {
+                        if(HDstrcmp(rbuf[i].str_id, "foobar")
+                                || HDstrcmp(rbuf[i].str_name, "")
+                                || rbuf[i].str_desc
+                                || HDstrcmp(rbuf[i].str_orig, "\0")
+                                || HDstrcmp(rbuf[i].str_stat, "dead")
+                                || HDstrcmp(rbuf[i].str_form, "liquid")
+                                || HDstrcmp(rbuf[i].str_unit, "meter")) {
+                            TestErrPrintf("%d: VL data doesn't match!, index(i) = %d\n", __LINE__, (int)i);
+                            continue;
+                        } /* end if */
+                    } /* end if */
+                    else {
+                        if(rbuf[i].str_id || rbuf[i].str_name || rbuf[i].str_desc
+                                || rbuf[i].str_orig || rbuf[i].str_stat
+                                || rbuf[i].str_form || rbuf[i].str_unit) {
+                            TestErrPrintf("%d: VL data doesn't match!, index(i) = %d\n", __LINE__, (int)i);
+                            continue;
+                        } /* end if */
+                    } /* end else */
+                } /* end else */
+            } /* end for */
 
             /* Release the space */
             ret = H5Dvlen_reclaim(dtype1_id, dset_dspace_id, xfer_pid, rbuf);
             CHECK(ret, FAIL, "H5Dvlen_reclaim");
+
+            ret = H5Dclose(dset_id);
+            CHECK(ret, FAIL, "H5Dclose");
 
 
             /* Open the second data set to check the value of data */
@@ -2887,12 +3036,61 @@ test_vltypes_fill_value(void)
                 } /* end if */
             } /* end for */
 
-            ret = H5Dclose(dset_id);
-            CHECK(ret, FAIL, "H5Dclose");
+            /* Release the space */
+            ret = H5Dvlen_reclaim(dtype1_id, dset_dspace_id, xfer_pid, rbuf);
+            CHECK(ret, FAIL, "H5Dvlen_reclaim");
+
+            /* Clear the read buffer */
+            HDmemset(rbuf, 0, dset_elmts * sizeof(dtype1_struct));
+
+            /* Read in non-contiguous selection from dataset */
+            ret = H5Dread(dset_id, dtype1_id, dset_select_dspace_id, dset_select_dspace_id, xfer_pid, rbuf);
+            CHECK(ret, FAIL, "H5Dread");
+
+            /* Compare data read in */
+            for(i = 0; i < dset_elmts; i++) {
+                if(i == single_offset[0]) {
+                    if(HDstrcmp(rbuf[i].str_id, wdata.str_id)
+                            || rbuf[i].str_name
+                            || HDstrcmp(rbuf[i].str_desc, wdata.str_desc)
+                            || HDstrcmp(rbuf[i].str_orig, wdata.str_orig)
+                            || HDstrcmp(rbuf[i].str_stat, wdata.str_stat)
+                            || HDstrcmp(rbuf[i].str_form, wdata.str_form)
+                            || HDstrcmp(rbuf[i].str_unit, wdata.str_unit)) {
+                        TestErrPrintf("%d: VL data doesn't match!, index(i)=%d\n",__LINE__,(int)i);
+                        continue;
+                    } /* end if */
+                } /* end if */
+                else {
+                    if((i % 2) == select_offset[0]) {
+                        if(HDstrcmp(rbuf[i].str_id, "foobar")
+                                || HDstrcmp(rbuf[i].str_name, "")
+                                || rbuf[i].str_desc
+                                || HDstrcmp(rbuf[i].str_orig, "\0")
+                                || HDstrcmp(rbuf[i].str_stat, "dead")
+                                || HDstrcmp(rbuf[i].str_form, "liquid")
+                                || HDstrcmp(rbuf[i].str_unit, "meter")) {
+                            TestErrPrintf("%d: VL data doesn't match!, index(i) = %d\n", __LINE__, (int)i);
+                            continue;
+                        } /* end if */
+                    } /* end if */
+                    else {
+                        if(rbuf[i].str_id || rbuf[i].str_name || rbuf[i].str_desc
+                                || rbuf[i].str_orig || rbuf[i].str_stat
+                                || rbuf[i].str_form || rbuf[i].str_unit) {
+                            TestErrPrintf("%d: VL data doesn't match!, index(i) = %d\n", __LINE__, (int)i);
+                            continue;
+                        } /* end if */
+                    } /* end else */
+                } /* end else */
+            } /* end for */
 
             /* Release the space */
             ret = H5Dvlen_reclaim(dtype1_id, dset_dspace_id, xfer_pid, rbuf);
             CHECK(ret, FAIL, "H5Dvlen_reclaim");
+
+            ret = H5Dclose(dset_id);
+            CHECK(ret, FAIL, "H5Dclose");
 
             /* Close the dataspace for the writes */
             ret = H5Sclose(single_dspace_id);
@@ -2912,6 +3110,12 @@ test_vltypes_fill_value(void)
     CHECK(ret, FAIL, "H5Sclose");
 
     ret = H5Sclose(large_dspace_id);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    ret = H5Sclose(small_select_dspace_id);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    ret = H5Sclose(large_select_dspace_id);
     CHECK(ret, FAIL, "H5Sclose");
 
     ret = H5Sclose(scalar_dspace_id);

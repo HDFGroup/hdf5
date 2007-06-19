@@ -732,11 +732,11 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
     if((mspace = H5Screate_simple(5, one, NULL)) < 0)
         goto error;
     for (i=0; i<1000; i++) {
-	for (j=0; j<5; j++) {
+	for (j=0; j<5; j++)
 	    hs_offset[j] = rand() % cur_size[j];
-	}
 	if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL,
 				one, NULL)<0) goto error;
+
    	/* case for atomic datatype */
 	if (datatype==H5T_INTEGER) {
             if(H5Dread(dset1, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT,
@@ -772,7 +772,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
     }
     if (H5Sclose(mspace)<0) goto error;
 
-    /* Write to all odd data locations */
+    /* Select all odd data locations in the file dataset */
     for (i=0, nelmts=1; i<5; i++) {
 	hs_size[i] = cur_size[i]/2;
 	hs_offset[i] = 0;
@@ -783,28 +783,83 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
     if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, hs_stride,
                             hs_size, NULL)<0) goto error;
 
+    /* Read non-contiguous selection from empty dataset */
+
     /* case for atomic datatype */
     if(datatype==H5T_INTEGER) {
         /*check for overflow*/
-        HDassert((nelmts*sizeof(int))==(hsize_t)((size_t)(nelmts*sizeof(int))));
+        HDassert((nelmts * sizeof(int)) == (hsize_t)((size_t)(nelmts * sizeof(int))));
         buf = HDmalloc((size_t)(nelmts * sizeof(int)));
-        for(u = 0; u < nelmts; u++)
-            buf[u] = 9999;
-        if (H5Dwrite(dset1, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT,
-	    buf)<0) goto error;
+
+        if(H5Dread(dset1, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT, buf) < 0)
+            goto error;
+
+        /* Verify values, except if no fill value written */
+        if(fill_time != H5D_FILL_TIME_NEVER) {
+            for(u = 0; u < nelmts; u++) {
+                if(buf[u] != fillval) {
+                    H5_FAILED();
+                    puts("    Value read was not a fill value.");
+                    HDfprintf(stdout,"    Elmt={%Hu, %Hu, %Hu, %Hu, %Hu}, read: %u, "
+                           "Fill value: %u\n",
+                           hs_offset[0], hs_offset[1],
+                           hs_offset[2], hs_offset[3],
+                           hs_offset[4], buf[u], fillval);
+                    goto error;
+                } /* end if */
+            } /* end for */
+        } /* end if */
     }
     /* case for compound datatype */
-    else if(datatype==H5T_COMPOUND) {
-        HDassert((nelmts*sizeof(comp_datatype))==
-                (hsize_t)((size_t)(nelmts*sizeof(comp_datatype))));
-	buf_c = (comp_datatype*)HDcalloc((size_t)nelmts,sizeof(comp_datatype));
-        for (u=0; u<nelmts; u++) {
+    else if(datatype == H5T_COMPOUND) {
+        /*check for overflow*/
+        HDassert((nelmts * sizeof(comp_datatype)) ==
+	    (hsize_t)((size_t)(nelmts * sizeof(comp_datatype))));
+	buf_c = (comp_datatype *)HDmalloc((size_t)nelmts * sizeof(comp_datatype));
+
+        if(H5Dread(dset2, ctype_id, mspace, fspace, H5P_DEFAULT, buf_c) < 0)
+            goto error;
+
+        /* Verify values, except if no fill value written */
+        if(fill_time != H5D_FILL_TIME_NEVER) {
+            for(u = 0; u < nelmts; u++) {
+                if(buf_c[u].a != fill_c.a || buf_c[u].x != fill_c.x ||
+                        buf_c[u].y != fill_c.y || buf_c[u].z != fill_c.z) {
+                    H5_FAILED();
+                    puts("    Value read was not a fill value.");
+                    HDfprintf(stdout,"    Elmt={%Hu, %Hu, %Hu, %Hu, %Hu}, read: %f, %d, %f, %c"
+                            "Fill value: %f, %d, %f, %c\n",
+                            hs_offset[0], hs_offset[1],
+                            hs_offset[2], hs_offset[3],
+                            hs_offset[4],
+                            buf_c[u].a, buf_c[u].x, buf_c[u].y, buf_c[u].z,
+                            fill_c.a, fill_c.x, fill_c.y, fill_c.z);
+                    goto error;
+                } /* end if */
+            } /* end for */
+        } /* end if */
+    }
+
+    /* Write to all odd data locations */
+
+    /* case for atomic datatype */
+    if(datatype == H5T_INTEGER) {
+        for(u = 0; u < nelmts; u++)
+            buf[u] = 9999;
+        if(H5Dwrite(dset1, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT, buf) < 0)
+            goto error;
+    }
+    /* case for compound datatype */
+    else if(datatype == H5T_COMPOUND) {
+        HDmemset(buf_c, 0, ((size_t)nelmts * sizeof(comp_datatype)));
+        for(u = 0; u < nelmts; u++) {
 	    buf_c[u].a = (float)1111.11;
  	    buf_c[u].x = 2222;
 	    buf_c[u].y = 3333.3333;
 	    buf_c[u].z = 'd';
 	}
-        if (H5Dwrite(dset2, ctype_id, mspace, fspace, H5P_DEFAULT, buf_c)<0) goto error;
+        if(H5Dwrite(dset2, ctype_id, mspace, fspace, H5P_DEFAULT, buf_c) < 0)
+            goto error;
     }
 
     /* Check if space is allocated */
