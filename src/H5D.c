@@ -1889,6 +1889,10 @@ H5D_update_entry_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, H5P_genplist_t *p
             HGOTO_ERROR (H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update filter header message")
     } /* end if */
 
+    /* Get the dataset's DCPL cache info */
+    if(H5D_get_dcpl_cache(dset->shared->dcpl_id, &dset->shared->dcpl_cache) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill DCPL cache")
+
     /*
      * Allocate storage if space allocate time is early; otherwise delay
      * allocation until later.
@@ -2251,10 +2255,6 @@ H5D_create(H5G_entry_t *loc, const char *name, hid_t type_id, const H5S_t *space
     /* Update the dataset's entry info. */
     if (H5D_update_entry_info(file, dxpl_id, new_dset, dc_plist) != SUCCEED)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't update the metadata cache")
-
-    /* Get the dataset's DCPL cache info */
-    if (H5D_get_dcpl_cache(new_dset->shared->dcpl_id,&new_dset->shared->dcpl_cache)<0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't fill DCPL cache")
 
     /*
      * Give the dataset a name.  That is, create and add a new object to the
@@ -2658,6 +2658,10 @@ H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
         } /* end if */
     } /* end if */
 
+    /* Get the dataset's DCPL cache info */
+    if(H5D_get_dcpl_cache(dataset->shared->dcpl_id, &dataset->shared->dcpl_cache) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill DCPL cache")
+
     /*
      * Make sure all storage is properly initialized.
      * This is important only for parallel I/O where the space must
@@ -2670,10 +2674,6 @@ H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
         if (H5D_alloc_storage(dataset->ent.file, dxpl_id, dataset,H5D_ALLOC_OPEN, TRUE, FALSE)<0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file storage")
     } /* end if */
-
-    /* Get the dataset's DCPL cache info */
-    if(H5D_get_dcpl_cache(dataset->shared->dcpl_id,&dataset->shared->dcpl_cache)<0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill DCPL cache")
 
 done:
     /* Release fill value information */
