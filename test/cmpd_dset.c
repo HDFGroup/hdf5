@@ -28,6 +28,16 @@
 
 const char *FILENAME[] = {
     "cmpd_dset",
+    "src_subset",
+    "dst_subset",
+    NULL
+};
+
+const char *DSET_NAME[] = {
+    "contig_src_subset",
+    "chunk_src_subset",
+    "contig_dst_subset",
+    "chunk_dst_subset",
     NULL
 };
 
@@ -85,6 +95,28 @@ typedef struct s6_t {
     unsigned int post;
 } s6_t;
 
+/* Structures for testing the optimization for the Chicago company. */
+typedef struct {
+    int a, b, c[8], d, e;
+    float f, g, h[16], i, j;
+    double k, l, m, n;
+} stype1;
+typedef struct {
+    int a, b, c[8], d, e;
+    float f, g, h[16], i, j;
+    double k, l, m, n;
+    long o, p, q;
+} stype2;
+typedef struct {
+    int a, b, c[8], d, e;
+} stype3;
+typedef struct {
+    int a, b, c[8], d, e;
+    float f, g, h[16], i, j;
+    double k, l, m, n;
+    long o, p, q;
+    long_long r, s, t;
+} stype4;
 
 #if 1
 #  define NX	100u
@@ -96,7 +128,7 @@ typedef struct s6_t {
 
 
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:	test_compound
  *
  * Purpose:	Creates a simple dataset of a compound type and then reads
  *		it back.  The dataset is read back in various ways to
@@ -113,10 +145,13 @@ typedef struct s6_t {
  *		Robb Matzke, 1999-06-23
  *		If the command line switch `--noopt' is present then the fast
  *		compound datatype conversion is turned off.
+ *
+ *              Raymond Lu, 15 June 2007
+ *              Moved this part of code from MAIN to TEST_COMPOUND function.
  *-------------------------------------------------------------------------
  */
-int
-main (int argc, char *argv[])
+static int
+test_compound (char *filename, hid_t fapl)
 {
     /* First dataset */
     static s1_t		s1[NX*NY];
@@ -161,28 +196,14 @@ main (int argc, char *argv[])
 
     /* Other variables */
     unsigned int	i, j;
-    hid_t		file, dataset, space, PRESERVE, fapl;
+    hid_t		file, dataset, space, PRESERVE;
     hid_t       array_dt;
     static hsize_t	dim[] = {NX, NY};
     hsize_t 		f_offset[2];	/*offset of hyperslab in file	*/
     hsize_t 		h_size[2];	/*size of hyperslab		*/
     hsize_t		memb_size[1] = {4};
-    char		filename[256];
-
-    h5_reset();
-
-    /* Turn off optimized compound converter? */
-    if (argc>1) {
-	if (argc>2 || strcmp("--noopt", argv[1])) {
-	    fprintf(stderr, "usage: %s [--noopt]\n", argv[0]);
-	    exit(1);
-	}
-	H5Tunregister(H5T_PERS_DONTCARE, NULL, -1, -1, H5T_conv_struct_opt);
-    }
 
     /* Create the file */
-    fapl = h5_fileaccess();
-    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
     if ((file = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
 	goto error;
     }
@@ -808,8 +829,6 @@ main (int argc, char *argv[])
 	    }
 	}
     }
-    PASSED();
-
 
     /*
      * Release resources.
@@ -818,12 +837,950 @@ main (int argc, char *argv[])
     H5Dclose (dataset);
     H5Fclose (file);
 
-    h5_cleanup(FILENAME, fapl);
-    puts("All compound dataset tests passed.");
+    PASSED();
     return 0;
 
 error:
-    puts("Remaining tests have been skipped.");
     puts("*** DATASET TESTS FAILED ***");
     return 1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	initialize_stype1
+ *
+ * Purpose:	Initialize data buffer.
+ *
+ * Return:	void
+ *
+ * Programmer:  Raymond Lu
+ *              Friday, 15 June 2007
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static void
+initialize_stype1(unsigned char *buf, const size_t num)
+{
+    int	  i, j;
+    stype1 *s_ptr;
+
+    for (i=0; i<(int)num; i++) {
+	s_ptr = (stype1*)buf + i;
+	s_ptr->a    = i*8+0;
+	s_ptr->b    = i*8+1;
+        for(j=0; j<8; j++)
+	    s_ptr->c[j] = i*8+j;
+	s_ptr->d    = i*8+6;
+	s_ptr->e    = i*8+7;
+
+        s_ptr->f    = i*2/3;
+        s_ptr->g    = i*2/3+1;
+        for(j=0; j<16; j++)
+	    s_ptr->h[j] = i*j/5+j;
+        s_ptr->i    = i*2/3+2;
+        s_ptr->j    = i*2/3+3;
+
+        s_ptr->k    = i/7+1;
+        s_ptr->l    = i/7+2;
+        s_ptr->m    = i/7+3;
+        s_ptr->n    = i/7+4;
+    }
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	initialize_stype2
+ *
+ * Purpose:	Initialize data buffer.
+ *
+ * Return:	void
+ *
+ * Programmer:  Raymond Lu
+ *              Friday, 15 June 2007
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static void
+initialize_stype2(unsigned char *buf, const size_t num)
+{
+    size_t i, j;
+    stype2 *s_ptr;
+
+    for (i=0; i<num; i++) {
+	s_ptr = (stype2*)buf + i;
+	s_ptr->a    = i*8+0;
+	s_ptr->b    = i*8+1;
+        for(j=0; j<8; j++)
+	    s_ptr->c[j] = i*8+j;
+	s_ptr->d    = i*8+6;
+	s_ptr->e    = i*8+7;
+
+        s_ptr->f    = i*2/3;
+        s_ptr->g    = i*2/3+1;
+        for(j=0; j<16; j++)
+	    s_ptr->h[j] = i*j/5+j;
+        s_ptr->i    = i*2/3+2;
+        s_ptr->j    = i*2/3+3;
+
+        s_ptr->k    = i/7+1;
+        s_ptr->l    = i/7+2;
+        s_ptr->m    = i/7+3;
+        s_ptr->n    = i/7+4;
+
+        s_ptr->o    = i*3+0;
+        s_ptr->p    = i*3+1;
+        s_ptr->q    = i*3+2;
+    }
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	initialize_stype3
+ *
+ * Purpose:	Initialize data buffer.
+ *
+ * Return:	Success:	
+ *
+ * Programmer:  Raymond Lu
+ *              Friday, 15 June 2007
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static void
+initialize_stype3(unsigned char *buf, const size_t num)
+{
+    int	  i, j;
+    stype3 *s_ptr;
+
+    for (i=0; i<(int)num; i++) {
+	s_ptr = (stype3*)buf + i;
+	s_ptr->a    = i*8+0;
+	s_ptr->b    = i*8+1;
+        for(j=0; j<8; j++)
+	    s_ptr->c[j] = i*8+j;
+	s_ptr->d    = i*8+6;
+	s_ptr->e    = i*8+7;
+    }
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	initialize_stype4
+ *
+ * Purpose:	Initialize data buffer.
+ *
+ * Return:	void
+ *
+ * Programmer:  Raymond Lu
+ *              Friday, 15 June 2007
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static void
+initialize_stype4(unsigned char *buf, const size_t num)
+{
+    size_t i, j;
+    stype4 *s_ptr;
+
+    for (i=0; i<num; i++) {
+	s_ptr = (stype4*)buf + i;
+	s_ptr->a    = i*8+0;
+	s_ptr->b    = i*8+1;
+        for(j=0; j<8; j++)
+	    s_ptr->c[j] = i*8+j;
+	s_ptr->d    = i*8+6;
+	s_ptr->e    = i*8+7;
+
+        s_ptr->f    = i*2/3;
+        s_ptr->g    = i*2/3+1;
+        for(j=0; j<16; j++)
+	    s_ptr->h[j] = i*j/5+j;
+        s_ptr->i    = i*2/3+2;
+        s_ptr->j    = i*2/3+3;
+
+        s_ptr->k    = i/7+1;
+        s_ptr->l    = i/7+2;
+        s_ptr->m    = i/7+3;
+        s_ptr->n    = i/7+4;
+
+        s_ptr->o    = i*3+0;
+        s_ptr->p    = i*3+1;
+        s_ptr->q    = i*3+2;
+
+        s_ptr->r    = i*5+1;
+        s_ptr->s    = i*5+2;
+        s_ptr->t    = i*5+3;
+    }
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	create_stype1
+ *
+ * Purpose:	Create HDF5 compound datatype for stype1.
+ *
+ * Return:	Success:        datatype ID
+ *
+ *              Failure:        negative	
+ *
+ * Programmer:  Raymond Lu
+ *              Friday, 15 June 2007
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static hid_t
+create_stype1(void)
+{
+    hid_t   array_dt1, array_dt2, tid;
+    const hsize_t	eight = 8, sixteen = 16;
+
+    /* Build hdf5 datatypes */
+    if((array_dt1 = H5Tarray_create(H5T_NATIVE_INT,1, &eight, NULL))<0)
+        goto error;
+    if((array_dt2 = H5Tarray_create(H5T_NATIVE_FLOAT,1, &sixteen, NULL))<0)
+        goto error;
+
+    if ((tid=H5Tcreate(H5T_COMPOUND, sizeof(stype1)))<0 ||
+            H5Tinsert(tid, "a", HOFFSET(stype1, a), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(tid, "b", HOFFSET(stype1, b), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(tid, "c", HOFFSET(stype1, c), array_dt1)<0 ||
+            H5Tinsert(tid, "d", HOFFSET(stype1, d), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(tid, "e", HOFFSET(stype1, e), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(tid, "f", HOFFSET(stype1, f), H5T_NATIVE_FLOAT)<0 ||
+            H5Tinsert(tid, "g", HOFFSET(stype1, g), H5T_NATIVE_FLOAT)<0 ||
+            H5Tinsert(tid, "h", HOFFSET(stype1, h), array_dt2)<0 ||
+            H5Tinsert(tid, "i", HOFFSET(stype1, i), H5T_NATIVE_FLOAT)<0 ||
+            H5Tinsert(tid, "j", HOFFSET(stype1, j), H5T_NATIVE_FLOAT)<0 ||
+            H5Tinsert(tid, "k", HOFFSET(stype1, k), H5T_NATIVE_DOUBLE)<0 ||
+            H5Tinsert(tid, "l", HOFFSET(stype1, l), H5T_NATIVE_DOUBLE)<0 ||
+            H5Tinsert(tid, "m", HOFFSET(stype1, m), H5T_NATIVE_DOUBLE)<0 ||
+            H5Tinsert(tid, "n", HOFFSET(stype1, n), H5T_NATIVE_DOUBLE)<0) 
+        goto error;
+
+    if(H5Tclose(array_dt1)<0)
+        goto error;
+    if(H5Tclose(array_dt2)<0)
+        goto error;
+
+    return tid;
+
+error:
+    return FAIL;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	create_stype2
+ *
+ * Purpose:	Create HDF5 compound datatype for stype2.
+ *
+ * Return:	Success:        datatype ID
+ *
+ *              Failure:        negative	
+ *
+ * Programmer:  Raymond Lu
+ *              Friday, 15 June 2007
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static hid_t
+create_stype2(void)
+{
+    hid_t   array_dt1, array_dt2, tid;
+    const hsize_t	eight = 8, sixteen = 16;
+
+    /* Build hdf5 datatypes */
+    if((array_dt1 = H5Tarray_create(H5T_NATIVE_INT,1, &eight, NULL))<0)
+        goto error;
+    if((array_dt2 = H5Tarray_create(H5T_NATIVE_FLOAT,1, &sixteen, NULL))<0)
+        goto error;
+
+    if ((tid=H5Tcreate(H5T_COMPOUND, sizeof(stype2)))<0 ||
+            H5Tinsert(tid, "a", HOFFSET(stype2, a), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(tid, "b", HOFFSET(stype2, b), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(tid, "c", HOFFSET(stype2, c), array_dt1)<0 ||
+            H5Tinsert(tid, "d", HOFFSET(stype2, d), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(tid, "e", HOFFSET(stype2, e), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(tid, "f", HOFFSET(stype2, f), H5T_NATIVE_FLOAT)<0 ||
+            H5Tinsert(tid, "g", HOFFSET(stype2, g), H5T_NATIVE_FLOAT)<0 ||
+            H5Tinsert(tid, "h", HOFFSET(stype2, h), array_dt2)<0 ||
+            H5Tinsert(tid, "i", HOFFSET(stype2, i), H5T_NATIVE_FLOAT)<0 ||
+            H5Tinsert(tid, "j", HOFFSET(stype2, j), H5T_NATIVE_FLOAT)<0 ||
+            H5Tinsert(tid, "k", HOFFSET(stype2, k), H5T_NATIVE_DOUBLE)<0 ||
+            H5Tinsert(tid, "l", HOFFSET(stype2, l), H5T_NATIVE_DOUBLE)<0 ||
+            H5Tinsert(tid, "m", HOFFSET(stype2, m), H5T_NATIVE_DOUBLE)<0 ||
+            H5Tinsert(tid, "n", HOFFSET(stype2, n), H5T_NATIVE_DOUBLE)<0 ||
+            H5Tinsert(tid, "o", HOFFSET(stype2, o), H5T_NATIVE_LONG)<0 ||
+            H5Tinsert(tid, "p", HOFFSET(stype2, p), H5T_NATIVE_LONG)<0 ||
+            H5Tinsert(tid, "q", HOFFSET(stype2, q), H5T_NATIVE_LONG)<0)
+        goto error;
+
+    if(H5Tclose(array_dt1)<0)
+        goto error;
+    if(H5Tclose(array_dt2)<0)
+        goto error;
+
+    return tid;
+
+error:
+    return FAIL;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	create_stype3
+ *
+ * Purpose:	Create HDF5 compound datatype for stype3.
+ *
+ * Return:	Success:        datatype ID
+ *
+ *              Failure:        negative	
+ *
+ * Programmer:  Raymond Lu
+ *              Friday, 15 June 2007
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static hid_t
+create_stype3(void)
+{
+    hid_t   array_dt1, tid;
+    const hsize_t	eight = 8;
+
+    /* Build hdf5 datatypes */
+    if((array_dt1 = H5Tarray_create(H5T_NATIVE_INT,1, &eight, NULL))<0)
+        goto error;
+
+    if ((tid=H5Tcreate(H5T_COMPOUND, sizeof(stype3)))<0 ||
+            H5Tinsert(tid, "a", HOFFSET(stype3, a), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(tid, "b", HOFFSET(stype3, b), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(tid, "c", HOFFSET(stype3, c), array_dt1)<0 ||
+            H5Tinsert(tid, "d", HOFFSET(stype3, d), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(tid, "e", HOFFSET(stype3, e), H5T_NATIVE_INT)<0)
+        goto error;
+
+    if(H5Tclose(array_dt1)<0)
+        goto error;
+
+    return tid;
+
+error:
+    return FAIL;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	create_stype4
+ *
+ * Purpose:	Create HDF5 compound datatype for stype4.
+ *
+ * Return:	Success:        datatype ID
+ *
+ *              Failure:        negative	
+ *
+ * Programmer:  Raymond Lu
+ *              Friday, 15 June 2007
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static hid_t
+create_stype4(void)
+{
+    hid_t   array_dt1, array_dt2, tid;
+    const hsize_t	eight = 8, sixteen = 16;
+
+    /* Build hdf5 datatypes */
+    if((array_dt1 = H5Tarray_create(H5T_NATIVE_INT,1, &eight, NULL))<0)
+        goto error;
+    if((array_dt2 = H5Tarray_create(H5T_NATIVE_FLOAT,1, &sixteen, NULL))<0)
+        goto error;
+
+    if ((tid=H5Tcreate(H5T_COMPOUND, sizeof(stype4)))<0 ||
+            H5Tinsert(tid, "a", HOFFSET(stype4, a), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(tid, "b", HOFFSET(stype4, b), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(tid, "c", HOFFSET(stype4, c), array_dt1)<0 ||
+            H5Tinsert(tid, "d", HOFFSET(stype4, d), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(tid, "e", HOFFSET(stype4, e), H5T_NATIVE_INT)<0 ||
+            H5Tinsert(tid, "f", HOFFSET(stype4, f), H5T_NATIVE_FLOAT)<0 ||
+            H5Tinsert(tid, "g", HOFFSET(stype4, g), H5T_NATIVE_FLOAT)<0 ||
+            H5Tinsert(tid, "h", HOFFSET(stype4, h), array_dt2)<0 ||
+            H5Tinsert(tid, "i", HOFFSET(stype4, i), H5T_NATIVE_FLOAT)<0 ||
+            H5Tinsert(tid, "j", HOFFSET(stype4, j), H5T_NATIVE_FLOAT)<0 ||
+            H5Tinsert(tid, "k", HOFFSET(stype4, k), H5T_NATIVE_DOUBLE)<0 ||
+            H5Tinsert(tid, "l", HOFFSET(stype4, l), H5T_NATIVE_DOUBLE)<0 ||
+            H5Tinsert(tid, "m", HOFFSET(stype4, m), H5T_NATIVE_DOUBLE)<0 ||
+            H5Tinsert(tid, "n", HOFFSET(stype4, n), H5T_NATIVE_DOUBLE)<0 ||
+            H5Tinsert(tid, "o", HOFFSET(stype4, o), H5T_NATIVE_LONG)<0 ||
+            H5Tinsert(tid, "p", HOFFSET(stype4, p), H5T_NATIVE_LONG)<0 ||
+            H5Tinsert(tid, "q", HOFFSET(stype4, q), H5T_NATIVE_LONG)<0 ||
+            H5Tinsert(tid, "r", HOFFSET(stype4, r), H5T_NATIVE_LLONG)<0 ||
+            H5Tinsert(tid, "s", HOFFSET(stype4, s), H5T_NATIVE_LLONG)<0 ||
+            H5Tinsert(tid, "t", HOFFSET(stype4, t), H5T_NATIVE_LLONG)<0)
+        goto error;
+
+    if(H5Tclose(array_dt1)<0)
+        goto error;
+    if(H5Tclose(array_dt2)<0)
+        goto error;
+
+    return tid;
+
+error:
+    return FAIL;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	compare_data
+ *
+ * Purpose:	Compare data of stype1 and stype2.
+ *
+ * Return:	Success:        0
+ *
+ *              Failure:        negative	
+ *
+ * Programmer:  Raymond Lu
+ *              Friday, 15 June 2007
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static int
+compare_data(unsigned char *src_data, unsigned char *dst_data, hbool_t src_subset)
+{
+    stype1  *s_ptr;
+    stype2  *d_ptr;
+    int     i;
+
+    for (i=0; i<(int)NX*NY; i++) {
+        if(src_subset) {
+	   s_ptr = ((stype1*)src_data) + i;
+	   d_ptr = ((stype2*)dst_data)  + i;
+        } else {
+	   s_ptr = ((stype2*)src_data) + i;
+	   d_ptr = ((stype1*)dst_data)  + i;
+        }
+
+	if (s_ptr->a    != d_ptr->a    ||
+	    s_ptr->b    != d_ptr->b    ||
+	    s_ptr->c[0] != d_ptr->c[0] ||
+	    s_ptr->c[1] != d_ptr->c[1] ||
+	    s_ptr->c[2] != d_ptr->c[2] ||
+	    s_ptr->c[3] != d_ptr->c[3] ||
+	    s_ptr->d    != d_ptr->d    ||
+	    s_ptr->e    != d_ptr->e    ||
+            !FLT_ABS_EQUAL(s_ptr->f, d_ptr->f) ||
+            !FLT_ABS_EQUAL(s_ptr->g, d_ptr->g) ||
+            !FLT_ABS_EQUAL(s_ptr->h[0], d_ptr->h[0]) ||
+            !FLT_ABS_EQUAL(s_ptr->h[1], d_ptr->h[1]) ||
+            !FLT_ABS_EQUAL(s_ptr->i, d_ptr->i) ||
+            !FLT_ABS_EQUAL(s_ptr->j, d_ptr->j) ||
+            !DBL_ABS_EQUAL(s_ptr->k, d_ptr->k) ||
+            !DBL_ABS_EQUAL(s_ptr->l, d_ptr->l) ||
+            !DBL_ABS_EQUAL(s_ptr->m, d_ptr->m) ||
+            !DBL_ABS_EQUAL(s_ptr->n, d_ptr->n) ) {
+
+	    H5_FAILED();
+	    printf("    i=%d\n", i);
+	    printf("    src={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f}\n",
+		   s_ptr->a, s_ptr->b, s_ptr->c[0], s_ptr->c[1], s_ptr->c[2],
+		   s_ptr->c[3], s_ptr->c[4], s_ptr->c[5], s_ptr->c[6], s_ptr->c[7], 
+                   s_ptr->d, s_ptr->e, s_ptr->f, s_ptr->g,s_ptr->h[0],s_ptr->h[1],s_ptr->h[2],
+                   s_ptr->h[3],s_ptr->h[4],s_ptr->h[5],s_ptr->h[6],s_ptr->h[7],s_ptr->h[8],
+                   s_ptr->h[9],s_ptr->h[10],s_ptr->h[11],s_ptr->h[12],s_ptr->h[13],s_ptr->h[14],
+                   s_ptr->h[15], s_ptr->i,s_ptr->j,s_ptr->k,s_ptr->l,s_ptr->m,s_ptr->n);
+	    printf("    dst={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f}\n",
+		   d_ptr->a, d_ptr->b, d_ptr->c[0], d_ptr->c[1], d_ptr->c[2],
+		   d_ptr->c[3], d_ptr->c[4], d_ptr->c[5], d_ptr->c[6], d_ptr->c[7], 
+                   d_ptr->d, d_ptr->e, d_ptr->f, d_ptr->g,d_ptr->h[0],d_ptr->h[1],d_ptr->h[2],
+                   d_ptr->h[3],d_ptr->h[4],d_ptr->h[5],d_ptr->h[6],d_ptr->h[7],d_ptr->h[8],
+                   d_ptr->h[9],d_ptr->h[10],d_ptr->h[11],d_ptr->h[12],d_ptr->h[13],
+                   d_ptr->h[14], d_ptr->h[15], d_ptr->i,d_ptr->j,d_ptr->k,d_ptr->l,
+                   d_ptr->m,d_ptr->n);
+	    goto error;
+	}
+    }
+
+    return SUCCEED;
+
+error:
+    return FAIL;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_hdf5_src_subset
+ *
+ * Purpose:	Test the optimization of compound data writing, rewriting,
+ *              and reading when the source type is a subset of destination
+ *              type.  For example:
+ *                  struct source {            struct destination {
+ *                      TYPE1 A;      -->          TYPE1 A;
+ *                      TYPE2 B;      -->          TYPE2 B;
+ *                      TYPE3 C;      -->          TYPE3 C;
+ *                  };                             TYPE4 D;
+ *                                                 TYPE5 E;
+ *                                             };
+ *              This optimization is for the Chicago company.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Raymond Lu
+ *              Friday, 15 June 2007 
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static int
+test_hdf5_src_subset(char *filename, hid_t fapl)
+{
+    hid_t   file;     
+    hid_t   rew_tid, src_tid, dst_tid;
+    hid_t   dataset;
+    hid_t   space;
+    hid_t   dcpl, dxpl;
+    hsize_t dims[2] = {NX, NY};
+    hsize_t chunk_dims[2] = {NX/10, NY/10};
+    unsigned char *orig=NULL, *rew_buf=NULL, *rbuf=NULL;
+
+    /* Create the file for this test */
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+	goto error;
+
+    /* Build hdf5 datatypes */
+    if ((src_tid=create_stype1())<0)
+        goto error;
+
+    if ((dst_tid=create_stype2())<0)
+        goto error;
+
+    if ((rew_tid=create_stype3())<0)
+        goto error;
+
+    /* Create the data space */
+    if((space = H5Screate_simple(2, dims, NULL))<0)
+	goto error;
+
+    /* Allocate space and initialize data */
+    orig = (unsigned char*)malloc(NX * NY * sizeof(stype1));
+    initialize_stype1(orig, (size_t)NX*NY);
+
+    rbuf = (unsigned char*)malloc(NX * NY * sizeof(stype2));
+
+    rew_buf = (unsigned char*)malloc(NX * NY * sizeof(stype3));
+    initialize_stype3(rew_buf, (size_t)NX*NY);
+
+
+    /* Create dataset creation property list */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+        goto error;
+
+    /*
+     *######################################################################
+     * STEP 1. Write data to contiguous and chunked datasets.
+     */
+    TESTING("writing data to contiguous and chunked datasets");
+
+    /* Create contiguous data set */
+    if((dataset = H5Dcreate(file, DSET_NAME[0], src_tid, space, dcpl))<0)
+        goto error;
+
+    /* Write the data to the dataset */
+    if(H5Dwrite(dataset, src_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig)<0)
+	goto error;
+
+    if(H5Dclose(dataset) < 0)
+        goto error;
+
+    /* Set chunking */
+    if(H5Pset_chunk(dcpl, 2, chunk_dims)<0)
+        goto error;
+
+    /* Create chunked data set */
+    if((dataset = H5Dcreate(file, DSET_NAME[1], src_tid, space, dcpl))<0)
+        goto error;
+
+    /* Write the data to the dataset */
+    if(H5Dwrite(dataset, src_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig)<0)
+	goto error;
+
+    if(H5Dclose(dataset) < 0)
+        goto error;
+
+    PASSED();
+
+    /*
+     *######################################################################
+     * STEP 2. Rewrite the data with a subset of original data type. 
+     */
+    TESTING("rewriting data with a subset of original data type");
+
+    /* Create xfer properties to preserve initialized data */
+    if ((dxpl = H5Pcreate (H5P_DATASET_XFER))<0)
+       goto error;
+
+    if (H5Pset_preserve (dxpl, TRUE)<0)
+       goto error;
+
+    /* Rewrite contiguous data set */
+    if((dataset = H5Dopen(file, DSET_NAME[0]))<0)
+        goto error;
+
+    /* Write the data to the dataset */
+    if(H5Dwrite(dataset, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf)<0)
+	goto error;
+
+    if(H5Dclose(dataset) < 0)
+        goto error;
+
+    /* Rewrite chunked data set */
+    if((dataset = H5Dopen(file, DSET_NAME[1]))<0)
+        goto error;
+
+    /* Write the data to the dataset */
+    if(H5Dwrite(dataset, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf)<0)
+	goto error;
+
+    if(H5Dclose(dataset) < 0)
+        goto error;
+
+    PASSED();
+
+    /*
+     *######################################################################
+     * STEP 3. Read the data into a subset of the original compound type.
+     */
+    TESTING("reading data with a subset of original data type");
+
+    /* Check contiguous data set */
+    if((dataset = H5Dopen(file, DSET_NAME[0]))<0)
+        goto error;
+
+    if(H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf)<0)
+        goto error;
+
+    if(compare_data(orig, rbuf, TRUE)<0) 
+        goto error;
+
+    if(H5Dclose(dataset) < 0)
+        goto error;
+
+    /* Check chunked data set */
+    if((dataset = H5Dopen(file, DSET_NAME[1]))<0)
+        goto error;
+
+    if(H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf)<0)
+        goto error;
+
+    if(compare_data(orig, rbuf, TRUE)<0) 
+        goto error;
+
+    if(H5Dclose(dataset) < 0)
+        goto error;
+
+    /* Finishing test and release resources */
+    if(H5Sclose(space) < 0)
+        goto error;
+
+    if(H5Pclose(dcpl) < 0)
+        goto error;
+
+    if(H5Pclose(dxpl) < 0)
+        goto error;
+
+    if(H5Tclose(src_tid)<0)
+        goto error;
+    if(H5Tclose(dst_tid)<0)
+        goto error;
+    if(H5Tclose(rew_tid)<0)
+        goto error;
+    if(H5Fclose(file) < 0)
+        goto error;
+
+    free(orig);
+    free(rbuf);
+    free(rew_buf);
+
+    PASSED();
+    return 0;
+
+error:
+    puts("*** DATASET TESTS FAILED ***");
+    return 1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_hdf5_dst_subset
+ *
+ * Purpose:	Test the optimization of compound data writing, rewriting,
+ *              and reading when the destination type is a subset of the
+ *              source type.  For example:
+ *                  struct source {            struct destination {
+ *                      TYPE1 A;      -->          TYPE1 A;
+ *                      TYPE2 B;      -->          TYPE2 B;
+ *                      TYPE3 C;      -->          TYPE3 C;
+ *                      TYPE4 D;               }
+ *                      TYPE5 E;
+ *                  };
+ *              This optimization is for the Chicago company.  This test 
+ *              is in opposite of test_hdf5_src_subset. 
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Raymond Lu
+ *              Friday, 15 June 2007 
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static int
+test_hdf5_dst_subset(char *filename, hid_t fapl)
+{
+    hid_t   file;     
+    hid_t   rew_tid, src_tid, dst_tid;
+    hid_t   dataset;
+    hid_t   space;
+    hid_t   dcpl, dxpl;
+    hsize_t dims[2] = {NX, NY};
+    hsize_t chunk_dims[2] = {NX/10, NY/10};
+    unsigned char *orig=NULL, *rew_buf=NULL, *rbuf=NULL;
+
+    /* Create the file for this test */
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+	goto error;
+
+    /* Build hdf5 datatypes */
+    if ((src_tid=create_stype2())<0)
+        goto error;
+
+    if ((dst_tid=create_stype1())<0)
+        goto error;
+
+    if ((rew_tid=create_stype4())<0)
+        goto error;
+
+    /* Create the data space */
+    if((space = H5Screate_simple(2, dims, NULL))<0)
+	goto error;
+
+    /* Allocate space and initialize data */
+    orig = (unsigned char*)malloc(NX * NY * sizeof(stype2));
+    initialize_stype2(orig, (size_t)NX*NY);
+
+    rbuf = (unsigned char*)malloc(NX * NY * sizeof(stype1));
+
+    rew_buf = (unsigned char*)malloc(NX * NY * sizeof(stype4));
+    initialize_stype4(rew_buf, (size_t)NX*NY);
+
+    /* Create dataset creation property list */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+        goto error;
+
+    /*
+     *######################################################################
+     * STEP 1. Write data to contiguous and chunked datasets.
+     */
+    TESTING("writing data to contiguous and chunked datasets");
+
+    /* Create contiguous data set */
+    if((dataset = H5Dcreate(file, DSET_NAME[2], src_tid, space, dcpl))<0)
+        goto error;
+
+    /* Write the data to the dataset */
+    if(H5Dwrite(dataset, src_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig)<0)
+	goto error;
+
+    if(H5Dclose(dataset) < 0)
+        goto error;
+
+    /* Set chunking */
+    if(H5Pset_chunk(dcpl, 2, chunk_dims)<0)
+        goto error;
+
+    /* Create chunked data set */
+    if((dataset = H5Dcreate(file, DSET_NAME[3], src_tid, space, dcpl))<0)
+        goto error;
+
+    /* Write the data to the dataset */
+    if(H5Dwrite(dataset, src_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig)<0)
+	goto error;
+
+    if(H5Dclose(dataset) < 0)
+        goto error;
+
+    PASSED();
+
+    /*
+     *######################################################################
+     * STEP 2. Rewrite the data with a subset of original data type. 
+     */
+    TESTING("rewriting data with a subset of original data type");
+
+    /* Create xfer properties to preserve initialized data */
+    if ((dxpl = H5Pcreate (H5P_DATASET_XFER))<0)
+       goto error;
+
+    if (H5Pset_preserve (dxpl, TRUE)<0)
+       goto error;
+
+    /* Rewrite contiguous data set */
+    if((dataset = H5Dopen(file, DSET_NAME[2]))<0)
+        goto error;
+
+    /* Write the data to the dataset */
+    if(H5Dwrite(dataset, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf)<0)
+	goto error;
+
+    if(H5Dclose(dataset) < 0)
+        goto error;
+
+    /* Rewrite chunked data set */
+    if((dataset = H5Dopen(file, DSET_NAME[3]))<0)
+        goto error;
+
+    /* Write the data to the dataset */
+    if(H5Dwrite(dataset, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf)<0)
+	goto error;
+
+    if(H5Dclose(dataset) < 0)
+        goto error;
+
+    PASSED();
+
+    /*
+     *######################################################################
+     * STEP 3. Read the data into a subset of the original compound type.
+     */
+    TESTING("reading data with a subset of original data type");
+
+    /* Check contiguous data set */
+    if((dataset = H5Dopen(file, DSET_NAME[2]))<0)
+        goto error;
+
+    if(H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf)<0)
+        goto error;
+
+    if(compare_data(orig, rbuf, FALSE)<0) 
+        goto error;
+
+    if(H5Dclose(dataset) < 0)
+        goto error;
+
+    /* Check chunked data set */
+    if((dataset = H5Dopen(file, DSET_NAME[3]))<0)
+        goto error;
+
+    if(H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf)<0)
+        goto error;
+
+    if(compare_data(orig, rbuf, FALSE)<0) 
+        goto error;
+
+    if(H5Dclose(dataset) < 0)
+        goto error;
+
+    /* Finishing test and release resources */
+    if(H5Sclose(space) < 0)
+        goto error;
+
+    if(H5Pclose(dcpl) < 0)
+        goto error;
+
+    if(H5Pclose(dxpl) < 0)
+        goto error;
+
+    if(H5Tclose(src_tid)<0)
+        goto error;
+    if(H5Tclose(dst_tid)<0)
+        goto error;
+    if(H5Tclose(rew_tid)<0)
+        goto error;
+    if(H5Fclose(file) < 0)
+        goto error;
+
+    free(orig);
+    free(rbuf);
+    free(rew_buf);
+
+    PASSED();
+    return 0;
+
+error:
+    puts("*** DATASET TESTS FAILED ***");
+    return 1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	main
+ *
+ * Purpose:	Test different cases of I/O for compound data and the 
+ *              compound optimization for the Chicago company.
+ *
+ * Return:	Success:         0
+ *
+ *              Failure:         1	
+ *
+ * Programmer:  Raymond Lu
+ *              Friday, 15 June 2007
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+int
+main (int argc, char *argv[])
+{
+    hid_t	fapl_id;
+    char	fname[256];
+    unsigned 	nerrors = 0;
+
+    h5_reset();
+
+    /* Turn off optimized compound converter? */
+    if (argc>1) {
+	if (argc>2 || strcmp("--noopt", argv[1])) {
+	    fprintf(stderr, "usage: %s [--noopt]\n", argv[0]);
+	    exit(1);
+	}
+	H5Tunregister(H5T_PERS_DONTCARE, NULL, -1, -1, H5T_conv_struct_opt);
+    }
+
+    /* Create the file */
+    fapl_id = h5_fileaccess();
+
+    h5_fixname(FILENAME[0], fapl_id, fname, sizeof(fname));
+
+    puts("Testing compound dataset:");
+    nerrors += test_compound(fname, fapl_id);
+
+    puts("Testing the optimization of when the source type is a subset of the dest:");
+    h5_fixname(FILENAME[1], fapl_id, fname, sizeof(fname));
+    nerrors += test_hdf5_src_subset(fname, fapl_id);
+
+    puts("Testing the optimization of when the dest type is a subset of the source:");
+    h5_fixname(FILENAME[2], fapl_id, fname, sizeof(fname));
+    nerrors += test_hdf5_dst_subset(fname, fapl_id);
+
+    if (nerrors) {
+        printf("***** %u FAILURE%s! *****\n",
+               nerrors, 1==nerrors?"":"S");
+        HDexit(1);
+    }
+
+    h5_cleanup(FILENAME, fapl_id);
+    puts("All compound dataset tests passed.");
+    return 0;
 }

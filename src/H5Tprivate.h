@@ -64,6 +64,18 @@ typedef struct H5T_conv_cb_t {
     void*                       user_data;
 } H5T_conv_cb_t;
 
+/* Values for the optimization of compound data reading and writing.  They indicate
+ * whether the fields of the source and destination are subset of each other and
+ * there is no conversion needed.  It's for the Chicago company.
+ */
+typedef enum {
+    H5T_SUBSET_BADVALUE = -1,   /* Invalid value */
+    H5T_SUBSET_FALSE = 0,       /* Source and destination aren't subset of each other */ 
+    H5T_SUBSET_SRC,             /* Source is the subset of dest and no conversion is needed */
+    H5T_SUBSET_DST,             /* Dest is the subset of source and no conversion is needed */
+    H5T_SUBSET_CAP              /* Must be the last value */
+} H5T_subset_t;
+
 /* Forward declarations for prototype arguments */
 struct H5O_t;
 

@@ -77,6 +77,12 @@ static herr_t H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
             const H5T_t *mem_type, const H5S_t *mem_space,
 	    const H5S_t *file_space, H5T_path_t *tpath,
             hid_t src_id, hid_t dst_id, const void *buf);
+static herr_t H5D_compound_opt_read(hsize_t nelmts, const H5S_t *mem_space,
+            H5S_sel_iter_t *iter, const H5D_dxpl_cache_t *dxpl_cache, 
+            hid_t src_id, hid_t dst_id, H5T_subset_t subset, void *data_buf, 
+            void *user_buf/*out*/);
+static herr_t H5D_compound_opt_write(hsize_t nelmts, hid_t src_id, hid_t dst_id, 
+            void *data_buf);
 
 #ifdef H5_HAVE_PARALLEL
 static herr_t H5D_ioinfo_term(H5D_io_info_t *io_info);
@@ -115,6 +121,13 @@ H5FL_BLK_DEFINE(type_conv);
 
 /* Declare a free list to manage the H5D_chunk_info_t struct */
 H5FL_DEFINE_STATIC(H5D_chunk_info_t);
+
+/* Declare a free list to manage sequences of size_t */
+H5FL_SEQ_DEFINE_STATIC(size_t);
+
+/* Declare a free list to manage sequences of hsize_t */
+H5FL_SEQ_DEFINE_STATIC(hsize_t);
+
 
 
 /*--------------------------------------------------------------------------
@@ -1167,6 +1180,23 @@ H5D_contig_read(H5D_io_info_t *io_info, hsize_t nelmts,
 	if (n!=smine_nelmts)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed")
 
+        /* If the source and destination are compound types and subset of each other
+         * and no conversion is needed, copy the data directly into user's buffer and 
+         * bypass the rest of steps.  This optimization is for Chicago company */
+        if(H5T_SUBSET_SRC==H5T_path_compound_subset(tpath)) {
+            if(H5D_compound_opt_read(smine_nelmts, mem_space, &mem_iter, dxpl_cache,
+                src_id, dst_id, H5T_SUBSET_SRC, tconv_buf, buf /*out*/)<0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
+
+            continue;
+        } else if(H5T_SUBSET_DST==H5T_path_compound_subset(tpath)) {
+            if(H5D_compound_opt_read(smine_nelmts, mem_space, &mem_iter, dxpl_cache,
+                src_id, dst_id, H5T_SUBSET_DST, tconv_buf, buf /*out*/)<0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
+
+            continue;
+        }
+
         if (H5T_BKG_YES==need_bkg) {
 #ifdef H5S_DEBUG
             H5_timer_begin(&timer);
@@ -1421,33 +1451,44 @@ H5D_contig_write(H5D_io_info_t *io_info, hsize_t nelmts,
         if (n!=smine_nelmts)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "mem gather failed")
 
-        if (H5T_BKG_YES==need_bkg) {
+        /* If the source and destination are compound types and the destination is
+         * is a subset of the source and no conversion is needed, copy the data 
+         * directly into user's buffer and bypass the rest of steps.  If the source
+         * is a subset of the destination, the optimization is done in conversion
+         * function H5T_conv_struct_opt to protect the background data.  This
+         * optimization is for Chicago company */
+        if(H5T_SUBSET_DST==H5T_path_compound_subset(tpath)) {
+            if(H5D_compound_opt_write(smine_nelmts, src_id, dst_id, tconv_buf)<0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
+        } else {
+            if (H5T_BKG_YES==need_bkg) {
 #ifdef H5S_DEBUG
-            H5_timer_begin(&timer);
+                H5_timer_begin(&timer);
 #endif
-            n = H5D_select_fgath(io_info,
-                file_space, &bkg_iter, smine_nelmts,
-                bkg_buf/*out*/);
+                n = H5D_select_fgath(io_info,
+                    file_space, &bkg_iter, smine_nelmts,
+                    bkg_buf/*out*/);
 
 #ifdef H5S_DEBUG
-            H5_timer_end(&(io_info->stats->stats[0].bkg_timer), &timer);
-            io_info->stats->stats[0].bkg_nbytes += n * dst_type_size;
-            io_info->stats->stats[0].bkg_ncalls++;
+                H5_timer_end(&(io_info->stats->stats[0].bkg_timer), &timer);
+                io_info->stats->stats[0].bkg_nbytes += n * dst_type_size;
+                io_info->stats->stats[0].bkg_ncalls++;
 #endif
-            if (n!=smine_nelmts)
-                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file gather failed")
-        } /* end if */
+                if (n!=smine_nelmts)
+                    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file gather failed")
+            } /* end if */
 
-	/*
-         * Perform datatype conversion.
-         */
-        if(H5T_convert(tpath, src_id, dst_id, smine_nelmts, (size_t)0, (size_t)0, tconv_buf, bkg_buf, io_info->dxpl_id) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
+	    /*
+             * Perform datatype conversion.
+             */
+            if(H5T_convert(tpath, src_id, dst_id, smine_nelmts, (size_t)0, (size_t)0, tconv_buf, bkg_buf, io_info->dxpl_id) < 0)
+                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
 
-	/* Do the data transform after the type conversion (since we're using dataset->shared->type). */
-	if(!H5Z_xform_noop(dxpl_cache->data_xform_prop))
-	    if( H5Z_xform_eval(dxpl_cache->data_xform_prop, tconv_buf, smine_nelmts, dataset->shared->type) < 0)
+	    /* Do the data transform after the type conversion (since we're using dataset->shared->type). */
+	    if(!H5Z_xform_noop(dxpl_cache->data_xform_prop))
+	        if( H5Z_xform_eval(dxpl_cache->data_xform_prop, tconv_buf, smine_nelmts, dataset->shared->type) < 0)
 		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Error performing data transform")
+        }
 
         /*
          * Scatter the data out to the file.
@@ -1455,9 +1496,8 @@ H5D_contig_write(H5D_io_info_t *io_info, hsize_t nelmts,
 #ifdef H5S_DEBUG
         H5_timer_begin(&timer);
 #endif
-	status = H5D_select_fscat(io_info,
-            file_space, &file_iter, smine_nelmts,
-            tconv_buf);
+	status = H5D_select_fscat(io_info, file_space, &file_iter, smine_nelmts,
+                    tconv_buf);
 #ifdef H5S_DEBUG
         H5_timer_end(&(io_info->stats->stats[0].scat_timer), &timer);
         io_info->stats->stats[0].scat_nbytes += smine_nelmts * dst_type_size;
@@ -1722,6 +1762,23 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
 #endif
             if(n != smine_nelmts)
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed")
+
+            /* If the source and destination are compound types and subset of each other
+             * and no conversion is needed, copy the data directly into user's buffer and 
+             * bypass the rest of steps.  This optimization is for Chicago company */
+            if(H5T_SUBSET_SRC==H5T_path_compound_subset(tpath)) {
+                if(H5D_compound_opt_read(smine_nelmts, chunk_info->mspace, &mem_iter, dxpl_cache,
+                    src_id, dst_id, H5T_SUBSET_SRC, tconv_buf, buf /*out*/)<0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
+
+                continue;
+            } else if(H5T_SUBSET_DST==H5T_path_compound_subset(tpath)) {
+                if(H5D_compound_opt_read(smine_nelmts, chunk_info->mspace, &mem_iter, dxpl_cache,
+                    src_id, dst_id, H5T_SUBSET_DST, tconv_buf, buf /*out*/)<0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
+
+                continue;
+            }
 
             if(H5T_BKG_YES == need_bkg) {
 #ifdef H5S_DEBUG
@@ -2041,33 +2098,43 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
             if (n!=smine_nelmts)
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed")
 
-            if (H5T_BKG_YES==need_bkg) {
+            /* If the source and destination are compound types and the destination is
+             * is a subset of the source and no conversion is needed, copy the data 
+             * directly into user's buffer and bypass the rest of steps.  If the source
+             * is a subset of the destination, the optimization is done in conversion
+             * function H5T_conv_struct_opt to protect the background data.  This
+             * optimization is for Chicago company */
+            if(H5T_SUBSET_DST==H5T_path_compound_subset(tpath)) {
+                if(H5D_compound_opt_write(smine_nelmts, src_id, dst_id, tconv_buf)<0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
+            } else {
+                if (H5T_BKG_YES==need_bkg) {
 #ifdef H5S_DEBUG
-                H5_timer_begin(&timer);
+                    H5_timer_begin(&timer);
 #endif
-                n = H5D_select_fgath(io_info,
-                    chunk_info->fspace, &bkg_iter, smine_nelmts,
-                    bkg_buf/*out*/);
+                    n = H5D_select_fgath(io_info, chunk_info->fspace, &bkg_iter, smine_nelmts,
+                            bkg_buf/*out*/);
 
 #ifdef H5S_DEBUG
-                H5_timer_end(&(io_info->stats->stats[0].bkg_timer), &timer);
-                io_info->stats->stats[0].bkg_nbytes += n * dst_type_size;
-                io_info->stats->stats[0].bkg_ncalls++;
+                    H5_timer_end(&(io_info->stats->stats[0].bkg_timer), &timer);
+                    io_info->stats->stats[0].bkg_nbytes += n * dst_type_size;
+                    io_info->stats->stats[0].bkg_ncalls++;
 #endif
-                if (n!=smine_nelmts)
-                    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file gather failed")
-            } /* end if */
+                    if (n!=smine_nelmts)
+                        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file gather failed")
+                } /* end if */
 
-	    /*
-             * Perform datatype conversion.
-             */
-            if(H5T_convert(tpath, src_id, dst_id, smine_nelmts, (size_t)0, (size_t)0, tconv_buf, bkg_buf, io_info->dxpl_id) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
+	        /*
+                 * Perform datatype conversion.
+                 */
+                if(H5T_convert(tpath, src_id, dst_id, smine_nelmts, (size_t)0, (size_t)0, tconv_buf, bkg_buf, io_info->dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
 
- 	    /* Do the data transform after the type conversion (since we're using dataset->shared->type) */
-            if(!H5Z_xform_noop(dxpl_cache->data_xform_prop))
-	      if( H5Z_xform_eval(dxpl_cache->data_xform_prop, tconv_buf, smine_nelmts, dataset->shared->type) < 0)
-		     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Error performing data transform")
+ 	        /* Do the data transform after the type conversion (since we're using dataset->shared->type) */
+                if(!H5Z_xform_noop(dxpl_cache->data_xform_prop))
+	            if( H5Z_xform_eval(dxpl_cache->data_xform_prop, tconv_buf, smine_nelmts, dataset->shared->type) < 0)
+		        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Error performing data transform")
+            }
 
             /*
              * Scatter the data out to the file.
@@ -2135,6 +2202,218 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_chunk_write() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_compound_opt_read
+ *
+ * Purpose:	A shortcut optimization for the Chicago company for 
+ *              a special optimization case when the source and 
+ *              destination members are a subset of each other, and 
+ *              the order is the same, and no conversion is needed.  
+ *              For example:
+ *                  struct source {            struct destination {
+ *                      TYPE1 A;      -->          TYPE1 A;
+ *                      TYPE2 B;      -->          TYPE2 B;
+ *                      TYPE3 C;      -->          TYPE3 C;
+ *                  };                             TYPE4 D;
+ *                                                 TYPE5 E;
+ *                                             };
+ *              or
+ *                  struct destination {       struct source {
+ *                      TYPE1 A;      -->          TYPE1 A;
+ *                      TYPE2 B;      -->          TYPE2 B;
+ *                      TYPE3 C;      -->          TYPE3 C;
+ *                  };                             TYPE4 D;
+ *                                                 TYPE5 E;
+ *                                             };
+ *              The optimization is simply moving data to the appropriate 
+ *              places in the buffer.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *		11 June 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_compound_opt_read(hsize_t nelmts, const H5S_t *space,
+    H5S_sel_iter_t *iter, const H5D_dxpl_cache_t *dxpl_cache,
+    hid_t src_id, hid_t dst_id, H5T_subset_t subset, 
+    void *data_buf, void *user_buf/*out*/)
+{
+    uint8_t    *dbuf = (uint8_t *)data_buf;    /*cast for pointer arithmetic	*/
+    uint8_t    *ubuf = (uint8_t *)user_buf;    /*cast for pointer arithmetic	*/
+    uint8_t    *xdbuf;
+    uint8_t    *xubuf;
+
+    hsize_t    _off[H5D_IO_VECTOR_SIZE];       /* Array to store sequence offsets */
+    hsize_t    *off=NULL;                      /* Pointer to sequence offsets */
+    size_t     _len[H5D_IO_VECTOR_SIZE];       /* Array to store sequence lengths */
+    size_t     *len=NULL;                      /* Pointer to sequence lengths */
+    size_t     nseq;                           /* Number of sequences generated */
+    size_t     curr_off;                       /* offset of bytes left to process in sequence */
+    size_t     curr_seq;                       /* Current sequence being processed */
+    size_t     curr_len;                       /* Length of bytes left to process in sequence */
+    size_t     curr_nelmts;		       /* number of elements to process in sequence   */
+    size_t     i;
+
+    H5T_t      *src, *dst;
+    size_t     src_stride, dst_stride, type_size;
+    size_t     elmtno;			/*element counter		*/
+
+    herr_t     ret_value = SUCCEED;	       /*return value		*/
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_compound_opt_read)
+
+    /* Check args */
+    assert (data_buf);
+    assert (user_buf);
+    assert (space);
+    assert (iter);
+    assert (nelmts>0);
+
+    /* Allocate the vector I/O arrays */
+    if(dxpl_cache->vec_size != H5D_IO_VECTOR_SIZE) {
+        if((len = H5FL_SEQ_MALLOC(size_t,dxpl_cache->vec_size))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O length vector array");
+        if((off = H5FL_SEQ_MALLOC(hsize_t,dxpl_cache->vec_size))==NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate I/O offset vector array");
+    } /* end if */
+    else {
+        len=_len;
+        off=_off;
+    } /* end else */
+
+    if (NULL == (src = H5I_object(src_id)) || NULL == (dst = H5I_object(dst_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+
+    src_stride = H5T_get_size(src);
+    dst_stride = H5T_get_size(dst);
+
+    if(H5T_SUBSET_SRC == subset)
+        type_size = src_stride;
+    else if(H5T_SUBSET_DST == subset)
+        type_size = dst_stride;
+
+    xdbuf = dbuf;
+
+    /* Loop until all elements are written */
+    while(nelmts>0) {
+        /* Get list of sequences for selection to write */
+        if(H5S_SELECT_GET_SEQ_LIST(space,0,iter,dxpl_cache->vec_size,nelmts,&nseq,&elmtno,off,len)<0)
+            HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, 0, "sequence length generation failed");
+
+        /* Loop, while sequences left to process */
+        for(curr_seq=0; curr_seq<nseq; curr_seq++) {
+            /* Get the number of bytes and offset in sequence */
+            curr_len=len[curr_seq];
+            curr_off=off[curr_seq];
+
+            /* Decide the number of elements and position in the buffer. */
+            curr_nelmts = curr_len/dst_stride;
+            xubuf = ubuf + curr_off;
+
+            /* Copy the data into the right place. */
+            for(i=0; i<curr_nelmts; i++) {
+                HDmemmove(xubuf, xdbuf, type_size); 
+
+                /* Update pointers */
+                xdbuf += src_stride;
+                xubuf += dst_stride;
+            }
+
+        } /* end for */
+
+        /* Decrement number of elements left to process */
+        nelmts -= elmtno;
+    } /* end while */
+
+done:
+    if(dxpl_cache->vec_size != H5D_IO_VECTOR_SIZE) {
+        if(len!=NULL)
+            H5FL_SEQ_FREE(size_t,len);
+        if(off!=NULL)
+            H5FL_SEQ_FREE(hsize_t,off);
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_compound_opt_read() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_compound_opt_write
+ *
+ * Purpose:	A shortcut optimization for the Chicago company for 
+ *              a special optimization case when the source and 
+ *              destination members are a subset of each other, and 
+ *              the order is the same, and no conversion is needed.  
+ *              For example:
+ *                  struct source {            struct destination {
+ *                      TYPE1 A;      -->          TYPE1 A;
+ *                      TYPE2 B;      -->          TYPE2 B;
+ *                      TYPE3 C;      -->          TYPE3 C;
+ *                  };                             TYPE4 D;
+ *                                                 TYPE5 E;
+ *                                             };
+ *              or
+ *                  struct destination {       struct source {
+ *                      TYPE1 A;      -->          TYPE1 A;
+ *                      TYPE2 B;      -->          TYPE2 B;
+ *                      TYPE3 C;      -->          TYPE3 C;
+ *                  };                             TYPE4 D;
+ *                                                 TYPE5 E;
+ *                                             };
+ *              The optimization is simply moving data to the appropriate 
+ *              places in the buffer.
+ *
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *		11 June 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_compound_opt_write(hsize_t nelmts, hid_t src_id, hid_t dst_id, void *data_buf)
+{
+    uint8_t    *dbuf = (uint8_t *)data_buf;    /*cast for pointer arithmetic	*/
+    uint8_t    *xsbuf, *xdbuf;
+    size_t     i;
+    H5T_t      *src, *dst;
+    size_t     src_stride, dst_stride;
+    herr_t     ret_value = SUCCEED;	       /*return value		*/
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_compound_opt_write)
+
+    /* Check args */
+    assert (data_buf);
+    assert (nelmts>0);
+
+    if (NULL == (src = H5I_object(src_id)) || NULL == (dst = H5I_object(dst_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
+
+    src_stride = H5T_get_size(src);
+    dst_stride = H5T_get_size(dst);
+
+    xsbuf = dbuf;
+    xdbuf = dbuf;
+
+    /* Loop until all elements are written */
+    for(i=0; i<nelmts; i++) {
+        HDmemmove(xdbuf, xsbuf, dst_stride); 
+
+        /* Update pointers */
+        xsbuf += src_stride;
+        xdbuf += dst_stride;
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_compound_opt_write() */
 
 
 /*-------------------------------------------------------------------------

@@ -192,6 +192,7 @@ struct H5T_path_t {
     H5T_conv_t	func;			/*data conversion function	     */
     hbool_t	is_hard;		/*is it a hard function?	     */
     hbool_t	is_noop;		/*is it the noop conversion?	     */
+    hbool_t	are_compounds;		/*are source and dest both compounds?*/
     H5T_stats_t	stats;			/*statistics for the conversion	     */
     H5T_cdata_t	cdata;			/*data for this function	     */
 };
@@ -1338,6 +1339,8 @@ H5_DLL H5T_t *H5T_get_member_type(const H5T_t *dt, unsigned membno);
 H5_DLL size_t H5T_get_member_offset(const H5T_t *dt, unsigned membno);
 H5_DLL size_t H5T_get_member_size(const H5T_t *dt, unsigned membno);
 H5_DLL htri_t H5T_is_packed(const H5T_t *dt);
+H5_DLL H5T_subset_t H5T_conv_struct_subset(const H5T_cdata_t *cdata);
+H5_DLL H5T_subset_t H5T_path_compound_subset(const H5T_path_t *p);
 
 #endif /* _H5Tpkg_H */
 

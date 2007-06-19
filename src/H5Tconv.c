@@ -35,7 +35,7 @@ typedef struct H5T_conv_struct_t {
     hid_t	*src_memb_id;		/*source member type ID's	     */
     hid_t	*dst_memb_id;		/*destination member type ID's	     */
     H5T_path_t	**memb_path;		/*conversion path for each member    */
-    hbool_t     smembs_subset;          /*are source members a subset and in the top of dest? */ 
+    H5T_subset_t     smembs_subset;     /*are source and dest members a subset of each other? */ 
 } H5T_conv_struct_t;
 
 /* Conversion data for H5T_conv_enum() */
@@ -1704,9 +1704,17 @@ done:
  * Modifications:
  *              Raymond Lu, 3 May 2007
  *              Added the detection for a special optimization case when the 
- *              source members are a subset of destination, and the order is 
- *              the same, and no conversion is needed.  For example:
+ *              source and destination members are a subset of each other, and 
+ *              the order is the same, and no conversion is needed.  For example:
  *                  struct source {            struct destination {
+ *                      TYPE1 A;      -->          TYPE1 A;
+ *                      TYPE2 B;      -->          TYPE2 B;
+ *                      TYPE3 C;      -->          TYPE3 C;
+ *                  };                             TYPE4 D;
+ *                                                 TYPE5 E;
+ *                                             };
+ *              or
+ *                  struct destination {       struct source {
  *                      TYPE1 A;      -->          TYPE1 A;
  *                      TYPE2 B;      -->          TYPE2 B;
  *                      TYPE3 C;      -->          TYPE3 C;
@@ -1722,7 +1730,8 @@ static herr_t
 H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, hid_t dxpl_id)
 {
     H5T_conv_struct_t	*priv = (H5T_conv_struct_t*)(cdata->priv);
-    int		*src2dst = NULL;
+    int		        *src2dst = NULL;
+    unsigned            src_nmembs, dst_nmembs;
     unsigned		i, j;
     H5T_t		*type = NULL;
     hid_t		tid;
@@ -1730,23 +1739,23 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, hid_t dxpl_id)
 
     FUNC_ENTER_NOAPI_NOINIT(H5T_conv_struct_init);
 
+    src_nmembs = src->shared->u.compnd.nmembs;
+    dst_nmembs = dst->shared->u.compnd.nmembs;
+
     if (!priv) {
         /*
          * Allocate private data structure and arrays.
          */
         if (NULL==(priv=cdata->priv=H5MM_calloc(sizeof(H5T_conv_struct_t))) ||
-                NULL==(priv->src2dst=H5MM_malloc(src->shared->u.compnd.nmembs *
-                                 sizeof(int))) ||
-                NULL==(priv->src_memb_id=H5MM_malloc(src->shared->u.compnd.nmembs *
-                                    sizeof(hid_t))) ||
-                NULL==(priv->dst_memb_id=H5MM_malloc(dst->shared->u.compnd.nmembs *
-                                    sizeof(hid_t))))
+                NULL==(priv->src2dst=H5MM_malloc(src_nmembs * sizeof(int))) ||
+                NULL==(priv->src_memb_id=H5MM_malloc(src_nmembs * sizeof(hid_t))) ||
+                NULL==(priv->dst_memb_id=H5MM_malloc(dst_nmembs * sizeof(hid_t))))
             HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
         src2dst = priv->src2dst;
 
-        /* The flag of special optimization to indicate if source members are a subset
-         * and in the top of the destination. Initialize it to TRUE */
-        priv->smembs_subset = TRUE;
+        /* The flag of special optimization to indicate if source members and destination
+         * members are a subset of each other.  Initialize it to FALSE */
+        priv->smembs_subset = H5T_SUBSET_FALSE;
 
         /*
          * Insure that members are sorted.
@@ -1761,9 +1770,9 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, hid_t dxpl_id)
          * source and destination member data type so we can look up the
          * member data type conversion functions later.
          */
-        for (i=0; i<src->shared->u.compnd.nmembs; i++) {
+        for (i=0; i<src_nmembs; i++) {
             src2dst[i] = -1;
-            for (j=0; j<dst->shared->u.compnd.nmembs; j++) {
+            for (j=0; j<dst_nmembs; j++) {
                 if (!HDstrcmp (src->shared->u.compnd.memb[i].name,
                        dst->shared->u.compnd.memb[j].name)) {
                     src2dst[i] = j;
@@ -1782,11 +1791,6 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, hid_t dxpl_id)
                 assert (tid>=0);
                 priv->dst_memb_id[src2dst[i]] = tid;
             }
-
-            /* If any of source member doesn't have counterpart in the same order,
-             * don't do the special optimization. */
-            if(src2dst[i] != i || (src->shared->u.compnd.memb[i].offset != dst->shared->u.compnd.memb[i].offset))
-                priv->smembs_subset = FALSE;
         }
     }
     else {
@@ -1806,7 +1810,7 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, hid_t dxpl_id)
 					   sizeof(H5T_path_t*))))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
 
-    for (i=0; i<src->shared->u.compnd.nmembs; i++) {
+    for (i=0; i<src_nmembs; i++) {
         if (src2dst[i]>=0) {
             H5T_path_t *tpath = H5T_path_find(src->shared->u.compnd.memb[i].type,
                       dst->shared->u.compnd.memb[src2dst[i]].type, NULL, NULL, dxpl_id, FALSE);
@@ -1819,19 +1823,83 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, hid_t dxpl_id)
                 cdata->priv = priv = H5MM_xfree (priv);
                 HGOTO_ERROR (H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unable to convert member data type");
             }
-
-            /* If any of source member needs conversion, don't do the special optimization. */
-            if(priv->smembs_subset && ((priv->memb_path[i])->is_noop == FALSE))
-                priv->smembs_subset = FALSE;
-                
         }
     }
 
     /* Check if we need a background buffer */
-    if (H5T_detect_class(src,H5T_COMPOUND)==TRUE || H5T_detect_class(dst,H5T_COMPOUND)==TRUE)
+    if (H5T_detect_class(src,H5T_COMPOUND)==TRUE || H5T_detect_class(dst,H5T_COMPOUND)==TRUE) {
         cdata->need_bkg = H5T_BKG_YES;
 
+        if(src_nmembs < dst_nmembs) {
+            priv->smembs_subset = H5T_SUBSET_SRC;
+            for (i=0; i<src_nmembs; i++) {
+                /* If any of source members doesn't have counterpart in the same order or
+                 * there's conversion between members, don't do the optimization. */ 
+                if(src2dst[i] != i || (src->shared->u.compnd.memb[i].offset !=
+                    dst->shared->u.compnd.memb[i].offset) || (priv->memb_path[i])->is_noop == 
+                    FALSE)
+                    priv->smembs_subset = H5T_SUBSET_FALSE;
+            }
+        } else if(dst_nmembs < src_nmembs) {
+            priv->smembs_subset = H5T_SUBSET_DST;
+            for (i=0; i<dst_nmembs; i++) {
+                /* If any of source members doesn't have counterpart in the same order or
+                 * there's conversion between members, don't do the optimization. */ 
+                if(src2dst[i] != i || (src->shared->u.compnd.memb[i].offset !=
+                    dst->shared->u.compnd.memb[i].offset) || (priv->memb_path[i])->is_noop == 
+                    FALSE)
+                    priv->smembs_subset = H5T_SUBSET_FALSE;
+            }
+        } else /* If the numbers of source and dest members are equal and no conversion is needed,
+                * the case should have been handled as noop earlier in H5Dio.c. */
+          ;
+     
+    }
+
     cdata->recalc = FALSE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_conv_struct_subset
+ *
+ * Purpose:     A quick way to return a field in a struct private in this
+ *              file.  The flag SMEMBS_SUBSET indicates whether the source
+ *              members are a subset of destination or the destination 
+ *              members are a subset of the source, and the order is the
+ *              same, and no conversion is needed.  For example:
+ *                  struct source {            struct destination {
+ *                      TYPE1 A;      -->          TYPE1 A;
+ *                      TYPE2 B;      -->          TYPE2 B;
+ *                      TYPE3 C;      -->          TYPE3 C;
+ *                  };                             TYPE4 D;
+ *                                                 TYPE5 E;
+ *                                             };
+ *
+ * Return:      One of the value from H5T_subset_t.	
+ *
+ * Programmer:	Raymond Lu
+ *		8 June 2007
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+H5T_subset_t
+H5T_conv_struct_subset(const H5T_cdata_t *cdata)
+{
+    H5T_conv_struct_t	*priv;
+    H5T_subset_t        ret_value=FALSE;       /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5T_conv_struct_subset);
+
+    assert(cdata);
+    assert(cdata->priv);
+
+    priv = (H5T_conv_struct_t*)(cdata->priv);
+    ret_value = priv->smembs_subset;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -2109,9 +2177,9 @@ done:
  *              datatype.
  *
  *              Raymond Lu, 3 May 2007
- *              Optimize a special case when the source members are a subset of 
- *              destination, and the order is the same, and no conversion is needed.  
- *              For example:
+ *              Optimize a special case when the source and destination members 
+ *              are a subset of each other, and the order is the same, and no 
+ *              conversion is needed.  For example:
  *                  struct source {            struct destination {
  *                      TYPE1 A;      -->          TYPE1 A;
  *                      TYPE2 B;      -->          TYPE2 B;
@@ -2257,7 +2325,7 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                 buf_stride = src->shared->size;
             }
 
-            if(priv->smembs_subset == TRUE) {
+            if(priv->smembs_subset == H5T_SUBSET_SRC) {
                 /* If the optimization flag is set to indicate source members are a subset and 
                  * in the top of the destination, simply copy the source members to background buffer. */
                 xbuf = buf;
@@ -2285,6 +2353,34 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                         xbuf += buf_stride;
                         xbkg += bkg_stride;
                     }
+                }
+            } else if(priv->smembs_subset == H5T_SUBSET_DST) {
+                /* If the optimization flag is set to indicate destination members are a subset 
+                 * and in the top of the source, simply copy the source members to background 
+                 * buffer. */
+                xbuf = buf;
+                xbkg = bkg;
+
+                if(src->shared->size <= dst->shared->size) {
+                    /* This is to deal with a very special situation when the fields and their
+                     * offset for both source and destination are identical but the datatype 
+                     * sizes of source and destination are different.
+                     */
+                    for (elmtno=0; elmtno<nelmts; elmtno++) {
+                        HDmemmove(xbkg, xbuf, src->shared->size); 
+
+                        /* Update pointers */
+                        xbuf += buf_stride;
+                        xbkg += bkg_stride;
+                    }
+                } else {
+                     for (elmtno=0; elmtno<nelmts; elmtno++) {
+                        HDmemmove(xbkg, xbuf, dst->shared->size); 
+
+                        /* Update pointers */
+                        xbuf += buf_stride;
+                        xbkg += bkg_stride;
+                     }
                 }
             } else {
                 /*

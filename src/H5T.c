@@ -4451,6 +4451,11 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	table = path;
     }
 
+    /* Set the flag to indicate both source and destination types are compound types
+     * for the optimization of data reading (in H5Dio.c). */ 
+    if(H5T_COMPOUND==H5T_get_class(src, TRUE) && H5T_COMPOUND==H5T_get_class(dst, TRUE))
+        path->are_compounds = TRUE;
+
     /* Set return value */
     ret_value = path;
 
@@ -4493,6 +4498,46 @@ H5T_path_noop(const H5T_path_t *p)
 
     FUNC_LEAVE_NOAPI(p->is_noop || (p->is_hard && 0==H5T_cmp(p->src, p->dst, FALSE)));
 } /* end H5T_path_noop() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_path_compound_subset
+ *
+ * Purpose:	Checks if the source and destination types are both compound.
+ *              Tells whether whether the source members are a subset of 
+ *              destination, and the order is the same, and no conversion 
+ *              is needed.  For example:
+ *                  struct source {            struct destination {
+ *                      TYPE1 A;      -->          TYPE1 A;
+ *                      TYPE2 B;      -->          TYPE2 B;
+ *                      TYPE3 C;      -->          TYPE3 C;
+ *                  };                             TYPE4 D;
+ *                                                 TYPE5 E;
+ *                                             };
+ *
+ * Return:	One of the values of H5T_subset_t (can't fail).
+ *
+ * Programmer:	Raymond Lu
+ *		8 June 2007
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+H5T_subset_t
+H5T_path_compound_subset(const H5T_path_t *p)
+{
+    H5T_subset_t ret_value = FALSE;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_path_compound_subset);
+
+    assert(p);
+
+    if(p->are_compounds)
+        ret_value = H5T_conv_struct_subset(&(p->cdata));
+
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5T_path_compound_subset */
 
 
 /*-------------------------------------------------------------------------
