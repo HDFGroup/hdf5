@@ -238,18 +238,23 @@ H5D_contig_fill(H5D_t *dset, hid_t dxpl_id)
             if(NULL == (fill_to_mem_tpath = H5T_path_find(dset->shared->type, mem_type, NULL, NULL, dxpl_id, FALSE)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between src and dst datatypes")
 
-            /* Allocate a background buffer, if necessary */
-            bkg_buf_size = ptsperbuf * elmt_size;
-            if(H5T_path_bkg(fill_to_mem_tpath) && NULL == (bkg_buf = H5FL_BLK_MALLOC(type_conv, bkg_buf_size)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-
             /* Get the inverse datatype conversion path for this operation */
             if(NULL == (mem_to_dset_tpath = H5T_path_find(mem_type, dset->shared->type, NULL, NULL, dxpl_id, FALSE)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between src and dst datatypes")
 
-            /* Allocate the background buffer, if necessary */
-            if(H5T_path_bkg(mem_to_dset_tpath) && NULL == (bkg_buf = H5FL_BLK_MALLOC(type_conv, bkg_buf_size)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+            /* Check if we need to allocate a background buffer */
+            if(H5T_path_bkg(fill_to_mem_tpath) || H5T_path_bkg(mem_to_dset_tpath)) {
+                /* Check for inverse datatype conversion needing a background buffer */
+                /* (do this first, since it needs a larger buffer) */
+                if(H5T_path_bkg(mem_to_dset_tpath))
+                    bkg_buf_size = ptsperbuf * elmt_size;
+                else
+                    bkg_buf_size = elmt_size;
+
+                /* Allocate the background buffer */
+                if(NULL == (bkg_buf = H5FL_BLK_MALLOC(type_conv, bkg_buf_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+            } /* end if */
         } /* end if */
         else {
             /* If fill value is not library default, use it to set the element size */
@@ -313,9 +318,9 @@ H5D_contig_fill(H5D_t *dset, hid_t dxpl_id)
             /* Make a copy of the (disk-based) fill value into the buffer */
             HDmemcpy(buf, dset->shared->dcpl_cache.fill.buf, file_type_size);
 
-            /* Reset the background buffer, if necessary */
+            /* Reset first element of background buffer, if necessary */
             if(H5T_path_bkg(fill_to_mem_tpath))
-                HDmemset(bkg_buf, 0, bkg_buf_size);
+                HDmemset(bkg_buf, 0, elmt_size);
 
             /* Type convert the dataset buffer, to copy any VL components */
             if(H5T_convert(fill_to_mem_tpath, dset->shared->type_id, mem_tid, (size_t)1, (size_t)0, (size_t)0, buf, bkg_buf, dxpl_id) < 0)
@@ -324,7 +329,7 @@ H5D_contig_fill(H5D_t *dset, hid_t dxpl_id)
             /* Replicate the fill value into the cached buffer */
             H5V_array_fill(buf, buf, mem_type_size, curr_points);
 
-            /* Reset the background buffer, if necessary */
+            /* Reset the entire background buffer, if necessary */
             if(H5T_path_bkg(mem_to_dset_tpath))
                 HDmemset(bkg_buf, 0, bkg_buf_size);
 
