@@ -94,6 +94,8 @@ Bug Fixes since HDF5-1.6.5 Release
 
     Library
     -------
+        - Fixed several bugs with writing fill values for datasets that have
+            a variable-length datatype or component datatype.  QAK - 2007/06/19
         - STDIO driver didn't support files bigger than 2GB because the OFFSET
             parameter of fseek is of type LONG INT, not big enough for big files.
             Use fseeko instead for big files if it's available on the system.
