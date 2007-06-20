@@ -1040,6 +1040,7 @@
 ./c++/src/H5CompType.h
 ./c++/src/H5Cpp.h
 ./c++/src/H5CppDoc.h
+./c++/src/H5cxx_config.h.in
 ./c++/src/H5DataSet.cpp
 ./c++/src/H5DataSet.h
 ./c++/src/H5DataSpace.cpp
