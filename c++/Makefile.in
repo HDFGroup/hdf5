@@ -126,7 +126,7 @@ distclean:
 	-$(RM) config/commence config/conclude
 	-$(RM) config/stamp1 config/stamp2 config/depend?
 	-$(RM) config.cache config.log config.status configure.lineno
-	-$(RM) src/H5config.h src/H5pubconf.h
+	-$(RM) src/H5cxx_config.h src/H5cxx_pubconf.h
 	-$(RM) libtool Makefile so_locations
 
 maintainer-clean:
@@ -135,6 +135,6 @@ maintainer-clean:
 	@@SETX@; for d in $(SUBDIRS) examples; do			      \
 	   (cd $$d && $(MAKE) $@);					      \
 	done
-	-$(RM) config.cache config.log config.status src/H5config.h
+	-$(RM) config.cache config.log config.status src/H5cxx_config.h
 	-$(RM) configure src/H5config.h.in
 

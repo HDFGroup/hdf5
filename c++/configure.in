@@ -30,7 +30,23 @@ dnl release!!!
 dnl
 AC_INIT([HDF5 C++], [1.6.6-snap21], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5Library.cpp])
+AC_CONFIG_HEADER([src/H5cxx_config.h])
+
 AC_CONFIG_AUX_DIR([../bin])
+
+AC_OUTPUT_COMMANDS([
+  echo "creating c++/src/H5cxx_pubconf.h"
+  sed 's/#define /#define H5_CXX_/' <src/H5cxx_config.h |\
+    sed 's/#undef /#undef H5_CXX_/' >pubconf
+  if test ! -f src/H5cxx_pubconf.h; then
+    /bin/mv -f pubconf src/H5cxx_pubconf.h
+  elif (diff pubconf src/H5cxx_pubconf.h >/dev/null); then
+    /bin/rm -f pubconf
+    echo "src/H5cxx_pubconf.h is unchanged"
+  else
+    /bin/mv -f pubconf src/H5cxx_pubconf.h
+  fi
+])
 
 AC_CANONICAL_HOST
 AC_SUBST(CPPFLAGS)
@@ -394,6 +410,24 @@ dnl ----------------------------------------------------------------------
 dnl Checks for compiler characteristics.
 dnl
 AC_LANG_CPLUSPLUS
+
+AC_MSG_CHECKING([for offsetof extension])
+AC_TRY_COMPILE([#include <stdio.h>
+                #include <stddef.h>],
+                [struct index_st
+                {
+                  unsigned char type;
+                  unsigned char num;
+                  unsigned int len;
+                };
+                typedef struct index_st index_t;
+                int x,y;
+                x = offsetof(struct index_st, len);
+                y = offsetof(index_t, num)],
+               AC_DEFINE([HAVE_OFFSETOF], [1],
+                         [Define if the offsetof extension is present])
+               AC_MSG_RESULT([yes]),
+               AC_MSG_RESULT([no]))
 
 AC_MSG_CHECKING(if $CXX needs old style header files in includes)
 AC_TRY_RUN([
