@@ -1,4 +1,4 @@
-HDF5 version 1.8.0-beta2pre1 currently under development
+HDF5 version 1.8.0-beta2pre2 currently under development
 ================================================================================
 
 
