@@ -1,12 +1,12 @@
-HDF5 version 1.8.0-beta1post1 currently under development
+HDF5 version 1.8.0-beta2pre1 currently under development
 ================================================================================
 
 
 INTRODUCTION
 
 This document describes the differences between HDF5-1.6.* and
-HDF5-1.8.0-beta1, and contains information on the platforms tested and
-known problems in HDF5-1.8.0-beta1. For more details check the HISTORY.txt
+HDF5-1.8.0-beta2, and contains information on the platforms tested and
+known problems in HDF5-1.8.0-beta2. For more details check the HISTORY.txt
 file in the HDF5 source.
 
 
@@ -958,7 +958,7 @@ Bug Fixes since HDF5-1.6.0 release
 
 Platforms Tested
 ================
-Platforms marked with * were not tested for hdf5-1.8.0-beta1 release
+Platforms marked with * were not tested for hdf5-1.8.0-beta2 release
 (This information is somewhat out of date and may be inaccurate.  It will be
     updated for a later release)
 
