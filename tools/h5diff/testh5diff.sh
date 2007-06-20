@@ -498,8 +498,8 @@ TOOLTEST h5diff_90.txt $FILE1 $FILE1
 TOOLTEST h5diff_100.txt $FILE9 $FILE10 -v
 
 # 11. floating point comparison
-TOOLTEST h5diff_101.txt $FILE1 $FILE1 /g1/d1  g1/d2  -v
-TOOLTEST h5diff_102.txt $FILE1 $FILE1 /g1/fp1 g1/fp2 -v
+TOOLTEST h5diff_101.txt $FILE1 $FILE1 g1/d1  g1/d2  -v
+TOOLTEST h5diff_102.txt $FILE1 $FILE1 g1/fp1 g1/fp2 -v
 
 # ##############################################################################
 # # END
