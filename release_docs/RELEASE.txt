@@ -967,11 +967,6 @@ Platforms marked with * were not tested for hdf5-1.8.0-beta2 release
                                   xlf 10.01.0000.0 
                                   mpcc_r 6.0.0.8
                                   mpxlf_r 8.1.1.7
-*    AIX 5.2 (32/64 bit, LLNL frost)    xlc 6.0.0.8
-                                  xlC 6.0.0.8
-                                  xlf 8.1.1.7
-                                  mpcc_r 6.0.0.8
-                                  mpxlf_r 8.1.1.7
     AIX 5.3 (32/64 bit)           xlc 7.0.0.8
                                   xlC 7.0.0.8
                                   xlf  09.01.0000.0007
@@ -981,10 +976,7 @@ Platforms marked with * were not tested for hdf5-1.8.0-beta2 release
 *    FreeBSD 4.11                  gcc 2.95.4
                                   g++ 2.95.4
                                   gcc 3.2.3, 3.3.6, 3.4.4, 4.0.0
-    HP-UX B.11.00                 HP C  HP92453-01 A.11.01.20 
-                                  HP F90 v2.4
-                                  HP ANSI C++ B3910B A.03.13
-*   HP-UX B.11.23                 HP aC++/ANSI C B3910B A.06.00
+    HP-UX B.11.23                 HP aC++/ANSI C B3910B A.06.00
                                   HP F90 v2.9.2
                                   HP aC++/ANSI C B3910B A.06.00
 *    IRIX64 6.5 (tesla -64)        MIPSpro cc 7.4.2m
@@ -1013,7 +1005,7 @@ Platforms marked with * were not tested for hdf5-1.8.0-beta2 release
     SunOS 5.8 32,46               Sun WorkShop 6 update 2 C 5.3
      (Solaris 2.8)                Sun WorkShop 6 update 2 Fortran 90
                                   Sun WorkShop 6 update 2 C++ 5.3
-    SunOS 5.10 i86pc              Sun C 5.7
+*    SunOS 5.10 i86pc              Sun C 5.7
                                   Sun Fortran 95 8.1
                                   Sun C++ 5.7
     SunOS 5.10                    cc: Sun C 5.8 
@@ -1147,6 +1139,8 @@ Alpha OpenVMS 7.3.2      n       n         n         y        n        n
 
 Known Problems
 ==============
+* For HPUX 11.23 many tools tests failed for 64-bit version when linked to the
+  shared libraries (tested for 1.8.0-beta2)
 * For SNL, Red Storm: only paralle HDF5 is supported.  The serial tests pass
   and the parallel tests also pass with lots of non-fatal error messages.
 * For LLNL, uP: both serial and parallel pass.  Zeus: serial passes but
