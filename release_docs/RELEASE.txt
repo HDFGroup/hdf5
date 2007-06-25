@@ -583,8 +583,11 @@ Support for new platforms, languages and compilers.
         - Added support for Free-BSD on amd64 with GNU C and Fortran compilers
           4.2.1
                                                      EIP - 2007/06/25
-        - Added support for sequential libraries for Intel 64 Linux cluster
-          (abe.ncsa.uiuc.edu) (see Known Problems section for more info)
+        - Added support for sequential and parallel libraries for Intel 64 Linux
+          cluster (abe.ncsa.uiuc.edu).  Among three MPICH packages available on
+          this machine, only Open MPI works.  The VMI has seg fault in hyperslab.c
+          and bittests.c tests.  The MVAPICH2 complained about mpd not running 
+          the parallel test.  (see Known Problems section for more info)
                                                      EIP - 2007/06/25
         - Added support for HPUX11.23 for both 32 and 64-bit; HDF5 C++
         - Added support for 64-bit Windows with Visual Studio .NET and 2005.
@@ -1161,8 +1164,8 @@ Alpha OpenVMS 7.3.2      n       n         n         y        n        n
 Known Problems
 ==============
 * On Intel 64 Linux cluster (RH 4, Linux 2.6.9) with Intel 10.0 compilers use
-  -mp -O1 compilation flags to build the libraries. Higher level of optimization causes failures
-  in several HDF5 library tests. 
+  -mp -O1 compilation flags to build the libraries. Higher level of optimization 
+  causes failures in several HDF5 library tests. 
 * For HPUX 11.23 many tools tests failed for 64-bit version when linked to the
   shared libraries (tested for 1.8.0-beta2)
 * For SNL, Red Storm: only paralle HDF5 is supported.  The serial tests pass
