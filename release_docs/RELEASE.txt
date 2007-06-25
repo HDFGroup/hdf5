@@ -580,6 +580,8 @@ New Features
 
 Support for new platforms, languages and compilers.
 =======================================
+        - Added support for 64-bit Windows with Visual Studio .NET and 2005.
+            SJW - 2007/06/25
         - Added suport for HPUX11.23 for both 32 and 64-bit; HDF5 C++
           shared library is not supported with +DD64 flag.
                                                      EIP - 2006/06/22
@@ -1018,10 +1020,12 @@ Platforms marked with * were not tested for hdf5-1.8.0-beta2 release
     (NCSA tg-login)               Intel(R) C++ Version 8.0
                                   Intel(R) Fortran Compiler Version 8.0
 				  mpich-gm-1.2.5..10-intel-r2
-    Windows XP                    MSVC++.NET
-                                  Intel 9.1 C, C++, Fortran
-    Windows 64                    Windows 2005 (32-bit only) 
-                                  Intel 9.1 C, C++, Fortran
+    Windows XP                    Visual Studio 6.0
+                                  Visual Studio .NET w/ Intel Fortran 9.0
+                                  Visual Studio 2005 w/ Intel Fortran 9.0
+                                  cygwin
+    Windows 64                    Visual Studio .NET w/ Intel Fortran 9.0
+                                  Visual Studio 2005 w/ Intel Fortran 9.0
 
     MAC OS  10.4 (Intel)          gcc i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1 
                                   G95 (GCC 4.0.3 (g95 0.91!) Nov 21 2006)
@@ -1056,7 +1060,7 @@ Cray XT3           (16)  n        y      n        y     y     n
 IBM BG/L           (15)  n        n      n        n     y     y
 AIX-5.2 & 5.3 32-bit     y        y      y        y     y     y
 AIX-5.2 & 5.3 64-bit     y        y      y        y     y     y
-WinXP .Net 2003          n        y(16)  n        y(8)  y     y               
+WinXP .Net 2003          y        y(16)  n        y(8)  y     y               
 WinXP 64bit 
     Visual Studio 2005   n        n      n        y     n     n
 Cygwin                   n        y      n        y     y     y
@@ -1094,10 +1098,10 @@ Cray XT3           (16)  n                           y        n        y
 IBM BG/L           (15)  n                           y        n        n
 AIX-5.2 & 5.3 32-bit     n       n         n         y        n        y
 AIX-5.2 & 5.3 64-bit     n       n         n         y        n        y
-WinXP .Net 2003          y       dna       y         dna      y        n
+WinXP .Net 2003          y       y         y         y        y        n
 WinXP 64bit 
-    Visual Studio 2005   y       dna       y         dna      n        n
-Cygwin                   n       dna       n                  n        n
+    Visual Studio 2005   y       y         y         y        n        n
+Cygwin                   n       dna       n         n        n        n
 Mac OS X 10.3            y                           y        n        y
 Mac OS X 10.4 PowerPC
 FreeBSD 4.11             y       n         y         y        y        y
@@ -1131,7 +1135,6 @@ Alpha OpenVMS 7.3.2      n       n         n         y        n        n
            (13) ifort
            (14) Yes with C and Fortran, but not with C++
            (15) Only serial is ported.  PFS does not work for PHDF5 yet.
-           (16) With Intel Fortran 8.1 compiler.  Static only; DLL build fails.
     Compiler versions for each platform are listed in the preceding
     "Platforms Tested" table.
 
@@ -1185,7 +1188,6 @@ Known Problems
   processor, there's a bug in the compiler for optimization(-O2).  The library
   failed in several tests but all related to multi driver.  The problem has 
   been reported to the vendor.  
-* On windows XP, Fortran DLLs are not working with and Intel fortran 8.1.
 * On IBM AIX systems, parallel HDF5 mode will fail some tests with error
   messages like "INFO: 0031-XXX ...".  This is from the command poe.
   Set the environment variable MP_INFOLEVEL to 0 to minimize the messages
