@@ -19,7 +19,8 @@
 # MANIFEST.
 
 verbose=yes
-MANIFEST=/tmp/H5_MANIFEST.$$
+MANIFEST=/tmp/HD_MANIFEST.$$
+SVNENTRY=/tmp/HD_SVNENTRY.$$
 
 # function definitions
 
@@ -35,7 +36,6 @@ GETSVNENTRIES_13 ()
 # 5. remove everything except the file name.
 # 6. remove all blank lines, including the inserted one.
 {
-SVNENTRY=/tmp/H5_SVNENTRY.$$
 cp $1/entries $SVNENTRY
 chmod u+w $SVNENTRY	# entries file is not writable.
 ed - $SVNENTRY <<EOF
@@ -67,7 +67,6 @@ GETSVNENTRIES_14 ()
 #    entry and ed does not like to do g on an empty file.
 # 5. remove the marks.
 {
-SVNENTRY=/tmp/H5_SVNENTRY.$$
 cp $1/entries $SVNENTRY
 chmod u+w $SVNENTRY	# entries file is not writable.
 ed - $SVNENTRY <<EOF
