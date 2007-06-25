@@ -23,6 +23,7 @@ USE_FILTER_FLETCHER32="@USE_FILTER_FLETCHER32@"
 
 DUMPER=h5dump                     # The tool name
 DUMPER_BIN=`pwd`/$DUMPER          # The path of the tool binary
+TESTDIR=`pwd`/../testfiles
 
 H5DIFF=../h5diff/h5diff           # The h5diff tool name 
 H5DIFF_BIN=`pwd`/$H5DIFF          # The path of the h5diff  tool binary
@@ -41,7 +42,7 @@ if test -z "$srcdir"; then
    srcdir=.
 fi
 
-test -d ../testfiles || mkdir ../testfiles
+test -d $TESTDIR || mkdir $TESTDIR
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
@@ -61,40 +62,39 @@ TESTING() {
 #
 TOOLTEST() {
 
-   expect="$srcdir/../testfiles/$1"
-   actual="../testfiles/`basename $1 .ddl`.out"
-   actual_err="../testfiles/`basename $1 .ddl`.err"
-   shift
+    expect="$srcdir/../testfiles/$1"
+    actual="../testfiles/`basename $1 .ddl`.out"
+    actual_err="../testfiles/`basename $1 .ddl`.err"
+    shift
 
-   # Run test.
-   TESTING $DUMPER $@
-   (
-      echo "#############################"
-      echo "Expected output for '$DUMPER $@'" 
-      echo "#############################"
-      cd $srcdir/../testfiles
-      $RUNSERIAL $DUMPER_BIN $@
-   ) >$actual 2>$actual_err
-   cat $actual_err >> $actual
+    # Run test.
+    TESTING $DUMPER $@
+    (
+	cd $srcdir/../testfiles
+	$RUNSERIAL $DUMPER_BIN $@
+    ) >$actual 2>$actual_err
+    cat $actual_err >> $actual
 
+    if [ ! -f $expect ]; then
+        echo "*FAILED*"
+	echo "    $expect missing"
+        nerrors="`expr $nerrors + 1`"
+    else
+	# Skip the first three lines, which are label lines, before cmp.
+        if tail +4l $expect | $CMP - $actual; then
+	    echo " PASSED"
+        else
+	    echo "*FAILED*"
+	    echo "    Expected result (*.ddl) differs from actual result (*.out)"
+	    nerrors="`expr $nerrors + 1`"
+	    test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+        fi
+    fi
 
-   if [ ! -f $expect ]; then
-    # Create the expect file if it doesn't yet exist.
-    echo " CREATED"
-    cp $actual $expect
-   elif $CMP $expect $actual; then
-      echo " PASSED"
-   else
-      echo "*FAILED*"
-      echo "    Expected result (*.ddl) differs from actual result (*.out)"
-      nerrors="`expr $nerrors + 1`"
-      test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
-   fi
-
-   # Clean up output file
-   if test -z "$HDF5_NOCLEANUP"; then
-      rm -f $actual $actual_err
-   fi
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+	rm -f $actual $actual_err
+    fi
 
 }
 
@@ -385,20 +385,20 @@ TOOLTEST thyperslab.ddl thyperslab.h5
 #TOOLTEST tldouble.ddl tldouble.h5
 
 # test for binary output
-TOOLTEST   tbin1.ddl -d array  -o out1.bin -b LE     tbinary.h5
-TOOLTEST   tbin2.ddl -d float  -o out2.bin -b BE     tbinary.h5
+TOOLTEST   tbin1.ddl -d array  -o $TESTDIR/out1.bin -b LE     tbinary.h5
+TOOLTEST   tbin2.ddl -d float  -o $TESTDIR/out2.bin -b BE     tbinary.h5
 
 # the MEMORY test can be validated with h5import/h5diff
-TOOLTEST   tbin3.ddl -d integer -o out3.bin -b MEMORY tbinary.h5
-IMPORTTEST out3.bin -c out3.h5import -o out3.h5
-DIFFTEST   tbinary.h5 out3.h5 /integer /integer
+TOOLTEST   tbin3.ddl -d integer -o $TESTDIR/out3.bin -b MEMORY tbinary.h5
+IMPORTTEST $TESTDIR/out3.bin -c out3.h5import -o $TESTDIR/out3.h5
+DIFFTEST   tbinary.h5 $TESTDIR/out3.h5 /integer /integer
 
-TOOLTEST   tbin4.ddl -d double  -o out4.bin -b FILE   tbinary.h5
+TOOLTEST   tbin4.ddl -d double  -o $TESTDIR/out4.bin -b FILE   tbinary.h5
    
 # Clean up binary output files
 if test -z "$HDF5_NOCLEANUP"; then
- rm -f $srcdir/../testfiles/out[1-4].bin
- rm -f $srcdir/../testfiles/out3.h5
+ rm -f $TESTDIR/out[1-4].bin
+ rm -f $TESTDIR/out3.h5
 fi
 
 
