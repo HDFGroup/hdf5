@@ -580,6 +580,13 @@ New Features
 
 Support for new platforms, languages and compilers.
 =======================================
+        - Added support for Free-BSD on amd64 with GNU C and Fortran compilers
+          4.2.1
+                                                     EIP - 2007/06/25
+        - Added support for sequential libraries for Intel 64 Linux cluster
+          (abe.ncsa.uiuc.edu) (see Known Problems section for more info)
+                                                     EIP - 2007/06/25
+        - Added support for HPUX11.23 for both 32 and 64-bit; HDF5 C++
         - Added support for 64-bit Windows with Visual Studio .NET and 2005.
             SJW - 2007/06/25
         - Added suport for HPUX11.23 for both 32 and 64-bit; HDF5 C++
@@ -975,19 +982,29 @@ Platforms marked with * were not tested for hdf5-1.8.0-beta2 release
 *   Cray X1 water 3.0.35          Cray Standard C Version 5.4.0.7.4
                                   Cray Fortran 5.4.0.7.3
                                   Cray C++ 5.4.0.7.4
-*    FreeBSD 4.11                  gcc 2.95.4
-                                  g++ 2.95.4
-                                  gcc 3.2.3, 3.3.6, 3.4.4, 4.0.0
+    FreeBSD 6.2-STABLE            gcc 3.4.6 [FreeBSD] 20060305
+                                  g++ 3.4.6 [FreeBSD] 20060305
+                                  gcc 4.2.1 20070620
+                                  g++ 4.2.1 20070620
+                                  gfortran 4.2.1 20070620
+    FreeBSD 6.2-STABLE amd64      gcc 3.4.6 [FreeBSD] 20060305
+                                  g++ 3.4.6 [FreeBSD] 20060305
+                                  gcc 4.2.1 20070620
+                                  g++ 4.2.1 20070620
+                                  gfortran 4.2.1 20070620
+
     HP-UX B.11.23                 HP aC++/ANSI C B3910B A.06.00
                                   HP F90 v2.9.2
                                   HP aC++/ANSI C B3910B A.06.00
 *    IRIX64 6.5 (tesla -64)        MIPSpro cc 7.4.2m
                                   F90 MIPSpro 7.4.2m
                                   C++ MIPSpro cc 7.4.2m
-    IRIX64 6.5 (64 & n32)         MIPSpro cc 7.4.4m
+*    IRIX64 6.5 (64 & n32)         MIPSpro cc 7.4.4m
                                   F90 MIPSpro 7.4.4m 
                                   C++ MIPSpro cc 7.4.4m
 				  mpt 1.6
+    Linux 2.6.9 (RHEL4)           Intel 10.0 compilers
+    (abe.ncsa.uiuc.edu)
     Linux 2.4.21-40               gcc 3.2.3
     (osage)
     Linux 2.6.9                   gcc 3.4.6
@@ -1033,6 +1050,7 @@ Platforms marked with * were not tested for hdf5-1.8.0-beta2 release
 
 
 Supported Configuration Features Summary
+(This table was not modified for 1.8.0-beta2 release; for information contact help@hdfgroup.org)
 ========================================
 
     In the tables below
@@ -1142,6 +1160,9 @@ Alpha OpenVMS 7.3.2      n       n         n         y        n        n
 
 Known Problems
 ==============
+* On Intel 64 Linux cluster (RH 4, Linux 2.6.9) with Intel 10.0 compilers use
+  -mp -O1 compilation flags to build the libraries. Higher level of optimization causes failures
+  in several HDF5 library tests. 
 * For HPUX 11.23 many tools tests failed for 64-bit version when linked to the
   shared libraries (tested for 1.8.0-beta2)
 * For SNL, Red Storm: only paralle HDF5 is supported.  The serial tests pass
