@@ -69,9 +69,9 @@ extern "C" {
 #define H5_VERS_MAJOR	1	/* For major interface/format changes  	     */
 #define H5_VERS_MINOR	8	/* For minor interface/format changes  	     */
 #define H5_VERS_RELEASE	0	/* For tweaks, bug-fixes, or development     */
-#define H5_VERS_SUBRELEASE "beta2pre2"	/* For pre-releases like snap0       */
+#define H5_VERS_SUBRELEASE "beta2"	/* For pre-releases like snap0       */
 				/* Empty string for real releases.           */
-#define H5_VERS_INFO    "HDF5 library version: 1.8.0-beta2pre2"      /* Full version string */
+#define H5_VERS_INFO    "HDF5 library version: 1.8.0-beta2"      /* Full version string */
 
 #define H5check()	H5check_version(H5_VERS_MAJOR,H5_VERS_MINOR,	      \
 				        H5_VERS_RELEASE)
