@@ -451,6 +451,7 @@
 ./src/H5Dcontig.c
 ./src/H5Ddeprec.c
 ./src/H5Defl.c
+./src/H5Dfill.c
 ./src/H5Dio.c
 ./src/H5Distore.c
 ./src/H5Dmpio.c

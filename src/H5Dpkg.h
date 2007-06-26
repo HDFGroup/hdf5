@@ -225,6 +225,31 @@ typedef struct {
     hid_t dcpl_id;              /* Dataset creation property list */
 } H5D_obj_create_t;
 
+/* Typedef for filling a buffer with a fill value */
+typedef struct {
+    hbool_t     alloc_vl_during_refill; /* Whether to allocate VL-datatype fill buffer during refill */
+    H5MM_allocate_t fill_alloc_func;    /* Routine to call for allocating fill buffer */
+    void        *fill_alloc_info;       /* Extra info for allocation routine */
+    H5MM_free_t fill_free_func;         /* Routine to call for freeing fill buffer */
+    void        *fill_free_info;        /* Extra info for free routine */
+    H5T_path_t *fill_to_mem_tpath;      /* Datatype conversion path for converting the fill value to the memory buffer */
+    H5T_path_t *mem_to_dset_tpath;      /* Datatype conversion path for converting the memory buffer to the dataset elements */
+    const H5O_fill_t *fill;             /* Pointer to fill value */
+    void       *fill_buf;               /* Fill buffer */
+    size_t      fill_buf_size;          /* Size of fill buffer */
+    hbool_t     use_caller_fill_buf;    /* Whether the caller provided the fill buffer */
+    void       *bkg_buf;                /* Background conversion buffer */
+    size_t      bkg_buf_size;           /* Size of background buffer */
+    H5T_t      *mem_type;               /* Pointer to memory datatype */
+    const H5T_t *file_type;             /* Pointer to file datatype */
+    hid_t       mem_tid;                /* ID for memory version of disk datatype */
+    hid_t       file_tid;               /* ID for disk datatype */
+    size_t      mem_elmt_size, file_elmt_size;       /* Size of element in memory and on disk */
+    size_t      max_elmt_size;          /* Max. size of memory or file datatype */
+    size_t      elmts_per_buf;          /* # of elements that fit into a buffer */
+    hbool_t     has_vlen_fill_type;     /* Whether the datatype for the fill value has a variable-length component */
+} H5D_fill_buf_info_t;
+
 
 /*****************************/
 /* Package Private Variables */
@@ -241,7 +266,7 @@ H5_DLL H5D_t *H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space,
 H5_DLL H5D_t *H5D_create_named(const H5G_loc_t *loc, const char *name,
     hid_t type_id, const H5S_t *space, hid_t lcpl_id, hid_t dcpl_id,
     hid_t dapl_id, hid_t dxpl_id);
-H5_DLL herr_t H5D_alloc_storage (H5F_t *f, hid_t dxpl_id, H5D_t *dset, H5D_time_alloc_t time_alloc,
+H5_DLL herr_t H5D_alloc_storage(H5F_t *f, hid_t dxpl_id, H5D_t *dset, H5D_time_alloc_t time_alloc,
     hbool_t update_time, hbool_t full_overwrite);
 
 /* Functions that perform serial I/O operations */
@@ -337,6 +362,20 @@ H5_DLL ssize_t H5D_efl_writevv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
     const void *buf);
+
+/* Functions that perform fill value operations on datasets */
+H5_DLL herr_t H5D_fill(const void *fill, const H5T_t *fill_type, void *buf,
+    const H5T_t *buf_type, const H5S_t *space, hid_t dxpl_id);
+H5_DLL herr_t H5D_fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf,
+    hbool_t alloc_vl_during_refill,
+    H5MM_allocate_t alloc_func, void *alloc_info,
+    H5MM_free_t free_func, void *free_info,
+    const H5O_fill_t *fill, const H5T_t *dset_type, hid_t dset_type_id,
+    size_t nelmts, size_t min_buf_size, hid_t dxpl_id);
+H5_DLL herr_t H5D_fill_refill_vl(H5D_fill_buf_info_t *fb_info, size_t nelmts,
+    hid_t dxpl_id);
+H5_DLL herr_t H5D_fill_release(H5D_fill_buf_info_t *fb_info);
+H5_DLL herr_t H5D_fill_term(H5D_fill_buf_info_t *fb_info);
 
 #ifdef H5_HAVE_PARALLEL
 
