@@ -188,16 +188,6 @@ in the file file_io.win32.c and including it on the projects
 
 /* Check exception handling functions during data conversions */
 #define H5_WANT_DCONV_EXCEPTION 1
-#if _MSC_VER >=1400
-/* visual studio 2005 doesn't support size of setvbuf to be less thn 1,This is a hacking, we would like to wait
-visual studio 2005 to fix this problem.
-*/
-
-#define HDsetvbuf(F,S,M,Z) (((Z)>1)?setvbuf(F,S,M,Z):setvbuf(F,S,M,2))
-
-#else
-#define HDsetvbuf(F,S,M,Z) setvbuf(F,S,M,Z)
-#endif
 
 
 /* uncomment the following line if we want parallel HDF5 support */

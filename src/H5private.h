@@ -772,8 +772,12 @@ int HDremove_all(const char * fname);
 #define HDsetpgid(P,PG)		setpgid(P,PG)
 #define HDsetsid()		setsid()
 #define HDsetuid(U)		setuid(U)
+/* Windows does not permit setting the buffer size to values
+   less than 2.  */
 #ifndef _WIN32
 #define HDsetvbuf(F,S,M,Z)	setvbuf(F,S,M,Z)
+#else
+#define HDsetvbuf(F,S,M,Z)  setvbuf(F,S,M,(Z>1?Z:2))
 #endif
 #define HDsigaction(N,A)	sigaction(N,A)
 #define HDsigaddset(S,N)	sigaddset(S,N)
