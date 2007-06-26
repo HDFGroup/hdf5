@@ -1582,9 +1582,10 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     H5SM_sohm_t     message;            /* Deleted message returned from index */
     H5SM_sohm_t    *message_ptr;        /* Pointer to deleted message returned from index */
     H5HF_t         *fheap = NULL;       /* Fractal heap that contains the message */
-    H5SM_read_udata_t udata;            /* User data for callbacks */
-    H5O_loc_t       oloc;             /* Object location for message in object header */
-    H5O_t           *oh = NULL;           /* Object header for message in object header */
+    size_t          buf_size;           /* Size of the encoded message (out) */
+    void            *encoding_buf = NULL; /* The encoded message (out) */
+    H5O_loc_t       oloc;               /* Object location for message in object header */
+    H5O_t           *oh = NULL;         /* Object header for message in object header */
     unsigned        type_id;            /* Message type to operate on */
     herr_t          ret_value = SUCCEED;
 
@@ -1604,76 +1605,32 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     if(NULL == (fheap = H5HF_open(f, dxpl_id, header->heap_addr)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
 
-    /* Set up user data for callback */
-    udata.file = f;
-    udata.idx = mesg->u.loc.index;
-    udata.encoding_buf = NULL;
-    udata.buf_size = 0;
-
     /* Get the message size and encoded message for the message to be deleted,
      * either from its OH or from the heap.
      */
-     /* JAMES: could H5SM_read_mesg do this?  We need to set up key->message
-      * anyway.
-      */
     if(mesg->type == H5O_SHARE_TYPE_HERE) {
-        /* Read message from object header */
-        const H5O_msg_class_t *type = NULL;    /* Actual H5O class type for the ID */
-        H5O_mesg_operator_t op;         /* Wrapper for operator */
-
-        HDassert(open_oh);
-        type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
-        HDassert(type);
-
-        /* If the message we are deleting is not in the object header passed in,
-         *      we need to open & protect its object header
-         */
-        if(mesg->u.loc.oh_addr != H5O_OH_GET_ADDR(open_oh)) {
-            /* Reset object location for operation */
-            if(H5O_loc_reset(&oloc) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "unable to initialize location")
-
-            /* Open the object in the file */
-            oloc.file = f;
-            oloc.addr = mesg->u.loc.oh_addr;
-            if(H5O_open(&oloc) < 0)
-	        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to open object header")
-
-            /* Load the object header from the cache */
-            if(NULL == (oh = H5AC_protect(oloc.file, dxpl_id, H5AC_OHDR, oloc.addr, NULL, NULL, H5AC_WRITE)))
-	        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
-        } /* end if */
-        else
-            oh = open_oh;
-
-        /* Use the "real" iterate routine so it doesn't try to protect the OH */
-        op.op_type = H5O_MESG_OP_LIB;
-        op.u.lib_op = H5SM_read_iter_op;
-        if((ret_value = H5O_msg_iterate_real(f, oh, type, &op, &udata, dxpl_id)) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "unable to iterate over object header messages")
-
         key.message.location = H5SM_IN_OH;
         key.message.msg_type_id = type_id;
         key.message.u.mesg_loc = mesg->u.loc;
     } /* end if */
     else {
-        /* Copy the message from the heap */
-        if(H5HF_op(fheap, dxpl_id, &(mesg->u.heap_id), H5SM_read_mesg_fh_cb, &udata) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "can't read message from fractal heap.")
-
         key.message.location = H5SM_IN_HEAP;
         key.message.msg_type_id = type_id;
         key.message.u.heap_loc.ref_count = 0; /* Refcount isn't relevant here */
         key.message.u.heap_loc.fheap_id = mesg->u.heap_id;
     } /* end else */
 
+    /* Get the encoded message */
+    if(H5SM_read_mesg(f, &key.message, fheap, open_oh, dxpl_id, &buf_size, &encoding_buf) < 0)
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
+
     /* Set up key for message to be deleted. */
     key.file = f;
     key.dxpl_id = dxpl_id;
     key.fheap = fheap;
-    key.encoding = udata.encoding_buf;
-    key.encoding_size = udata.buf_size;
-    key.message.hash = H5_checksum_lookup3(udata.encoding_buf, udata.buf_size, type_id);
+    key.encoding = encoding_buf;
+    key.encoding_size = buf_size;
+    key.message.hash = H5_checksum_lookup3(encoding_buf, buf_size, type_id);
 
     /* Try to find the message in the index */
     if(header->index_type == H5SM_LIST) {
@@ -1732,7 +1689,7 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
 
 
         /* Return the message's encoding so anything it references can be freed */
-        *encoded_mesg = udata.encoding_buf;
+        *encoded_mesg = encoding_buf;
 
         /* If there are no messages left in the index, delete it */
         if(header->num_messages == 0) {
@@ -1781,8 +1738,8 @@ done:
     /* Free the message encoding, if we're not returning it in encoded_mesg
      * or if there's been an error.
      */
-    if(udata.encoding_buf && (NULL == *encoded_mesg || ret_value < 0))
-        udata.encoding_buf = H5MM_xfree(udata.encoding_buf);
+    if(encoding_buf && (NULL == *encoded_mesg || ret_value < 0))
+        encoding_buf = H5MM_xfree(encoding_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_delete_from_index() */
