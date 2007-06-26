@@ -2159,8 +2159,8 @@ static void test_sohm_size2(int close_reopen)
         VERIFY(norm_sizes.first_dset, 1, "h5_get_file_size");
     if(list_index_small.first_dset >= btree_index.first_dset)
         VERIFY(list_index_small.first_dset, 1, "h5_get_file_size");
-/* JAMES: can't guarantee    if(list_index_med.first_dset >= btree_index.first_dset)
-        VERIFY(btree_index.first_dset, 1, "h5_get_file_size"); */
+    if(list_index_med.first_dset >= btree_index.first_dset)
+        VERIFY(btree_index.first_dset, 1, "h5_get_file_size");
     if(btree_index.first_dset >= list_index_big.first_dset)
         VERIFY(list_index_med.first_dset, 1, "h5_get_file_size");
 
@@ -2173,8 +2173,8 @@ static void test_sohm_size2(int close_reopen)
      */
     if(list_index_small.dsets1 >= list_index_med.dsets1)
         VERIFY(btree_index.dsets1, 1, "h5_get_file_size");
-/* JAMES    if(list_index_med.dsets1 >= btree_index.dsets1)
-        VERIFY(list_index_med.dsets1, 1, "h5_get_file_size"); */
+    if(list_index_med.dsets1 >= btree_index.dsets1)
+        VERIFY(list_index_med.dsets1, 1, "h5_get_file_size");
     if(btree_index.dsets1 >= norm_sizes.dsets1)
         VERIFY(btree_index.dsets1, 1, "h5_get_file_size");
     if(norm_sizes.dsets1 >= list_index_big.dsets1)
@@ -2204,8 +2204,8 @@ static void test_sohm_size2(int close_reopen)
      * then the normal file.  The largest list may or may not be bigger than
      * the normal file.
      */
-/*JAMES    if(list_index_med.dsets2 >= btree_index.dsets2)
-        VERIFY(list_index_med.dsets2, 1, "h5_get_file_size"); */
+    if(list_index_med.dsets2 >= btree_index.dsets2)
+        VERIFY(list_index_med.dsets2, 1, "h5_get_file_size");
     if(btree_index.dsets2 > list_index_small.dsets2 * OVERHEAD_ALLOWED)
         VERIFY(btree_index.dsets2, list_index_small.dsets2, "h5_get_file_size");
     if(list_index_small.dsets2 >= norm_sizes.dsets2)
@@ -2237,8 +2237,8 @@ static void test_sohm_size2(int close_reopen)
      * shared.  No new messages should be written to the indexes, so the
      * sohm files will only get a little bit bigger.
      */
-/* JAMES    if(list_index_med.interleaved >= btree_index.interleaved)
-        VERIFY(0, 1, "h5_get_file_size"); */
+    if(list_index_med.interleaved >= btree_index.interleaved)
+        VERIFY(0, 1, "h5_get_file_size");
     if(btree_index.interleaved > list_index_small.interleaved * OVERHEAD_ALLOWED)
         VERIFY(btree_index.interleaved, list_index_small.interleaved, "h5_get_file_size");
     if(list_index_small.interleaved >= norm_sizes.interleaved)
