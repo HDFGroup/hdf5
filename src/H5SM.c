@@ -69,6 +69,7 @@ static herr_t H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     H5SM_index_header_t *header, unsigned type_id, void *mesg,
     unsigned *cache_flags_ptr);
 static herr_t H5SM_decr_ref(void *record, void *op_data, hbool_t *changed);
+static herr_t H5SM_read_mesg_fh_cb(const void *obj, size_t obj_len, void *_udata);
 static herr_t H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     H5SM_index_header_t *header, const H5O_shared_t * mesg, 
     unsigned *cache_flags, void ** /*out*/ encoded_mesg);
@@ -1578,13 +1579,12 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
 {
     H5SM_list_t     *list = NULL;
     H5SM_mesg_key_t key;
-    H5SM_sohm_t     message;             /* Deleted message returned from index */
-    H5SM_sohm_t    *message_ptr;         /* Pointer to deleted message returned from index */
-    H5HF_t         *fheap = NULL;        /* Fractal heap that contains the message */
-    size_t          buf_size;            /* Size of the encoded message */
-    void *          encoding_buf = NULL; /* Buffer for encoded message */
-    H5O_loc_t       oloc;
-    H5O_t           *oh = NULL;
+    H5SM_sohm_t     message;            /* Deleted message returned from index */
+    H5SM_sohm_t    *message_ptr;        /* Pointer to deleted message returned from index */
+    H5HF_t         *fheap = NULL;       /* Fractal heap that contains the message */
+    H5SM_read_udata_t udata;            /* User data for callbacks */
+    H5O_loc_t       oloc;             /* Object location for message in object header */
+    H5O_t           *oh = NULL;           /* Object header for message in object header */
     unsigned        type_id;            /* Message type to operate on */
     herr_t          ret_value = SUCCEED;
 
@@ -1604,6 +1604,12 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     if(NULL == (fheap = H5HF_open(f, dxpl_id, header->heap_addr)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
 
+    /* Set up user data for callback */
+    udata.file = f;
+    udata.idx = mesg->u.loc.index;
+    udata.encoding_buf = NULL;
+    udata.buf_size = 0;
+
     /* Get the message size and encoded message for the message to be deleted,
      * either from its OH or from the heap.
      */
@@ -1612,7 +1618,6 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
       */
     if(mesg->type == H5O_SHARE_TYPE_HERE) {
         /* Read message from object header */
-        H5SM_read_udata_t udata;
         const H5O_msg_class_t *type = NULL;    /* Actual H5O class type for the ID */
         H5O_mesg_operator_t op;         /* Wrapper for operator */
 
@@ -1641,37 +1646,19 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
         else
             oh = open_oh;
 
-        /* Set up user data for message iteration */
-        udata.file = f;
-        udata.idx = mesg->u.loc.index;
-        udata.encoding_buf = NULL;
-
         /* Use the "real" iterate routine so it doesn't try to protect the OH */
         op.op_type = H5O_MESG_OP_LIB;
         op.u.lib_op = H5SM_read_iter_op;
         if((ret_value = H5O_msg_iterate_real(f, oh, type, &op, &udata, dxpl_id)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "unable to iterate over object header messages")
 
-        /* Record the returned values */
-        buf_size = udata.buf_size;
-        encoding_buf = udata.encoding_buf;
-        HDassert(buf_size > 0 && encoding_buf);
-
         key.message.location = H5SM_IN_OH;
         key.message.msg_type_id = type_id;
         key.message.u.mesg_loc = mesg->u.loc;
     } /* end if */
     else {
-        /* Get the size of the message in the heap */
-        if(H5HF_get_obj_len(fheap, dxpl_id, &(mesg->u.heap_id), &buf_size) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get message size from fractal heap.")
-
-        /* Allocate a buffer to hold the message */
-        if(NULL == (encoding_buf = H5MM_malloc(buf_size)))
-            HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, FAIL, "memory allocation failed")
-
-        /* Read the message from the heap */
-        if(H5HF_read(fheap, dxpl_id, &(mesg->u.heap_id), encoding_buf) < 0)
+        /* Copy the message from the heap */
+        if(H5HF_op(fheap, dxpl_id, &(mesg->u.heap_id), H5SM_read_mesg_fh_cb, &udata) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "can't read message from fractal heap.")
 
         key.message.location = H5SM_IN_HEAP;
@@ -1684,9 +1671,9 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     key.file = f;
     key.dxpl_id = dxpl_id;
     key.fheap = fheap;
-    key.encoding = encoding_buf;
-    key.encoding_size = buf_size;
-    key.message.hash = H5_checksum_lookup3(encoding_buf, buf_size, type_id);
+    key.encoding = udata.encoding_buf;
+    key.encoding_size = udata.buf_size;
+    key.message.hash = H5_checksum_lookup3(udata.encoding_buf, udata.buf_size, type_id);
 
     /* Try to find the message in the index */
     if(header->index_type == H5SM_LIST) {
@@ -1745,7 +1732,7 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
 
 
         /* Return the message's encoding so anything it references can be freed */
-        *encoded_mesg = encoding_buf;
+        *encoded_mesg = udata.encoding_buf;
 
         /* If there are no messages left in the index, delete it */
         if(header->num_messages == 0) {
@@ -1794,8 +1781,8 @@ done:
     /* Free the message encoding, if we're not returning it in encoded_mesg
      * or if there's been an error.
      */
-    if(encoding_buf && (NULL == *encoded_mesg || ret_value < 0))
-        encoding_buf = H5MM_xfree(encoding_buf);
+    if(udata.encoding_buf && (NULL == *encoded_mesg || ret_value < 0))
+        udata.encoding_buf = H5MM_xfree(udata.encoding_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_delete_from_index() */
@@ -2223,6 +2210,41 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5SM_read_mesg_fh_cb
+ *
+ * Purpose:	Callback for H5HF_op, used in H5SM_read_mesg below.
+ *              Makes a copy of the message in the heap data, returned in the
+ *              UDATA struct.
+ *
+ * Return:	Negative on error, non-negative on success
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, June 26, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5SM_read_mesg_fh_cb(const void *obj, size_t obj_len, void *_udata)
+{
+    H5SM_read_udata_t *udata = (H5SM_read_udata_t *)_udata;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5SM_read_mesg_fh_cb)
+
+    /* Allocate a buffer to hold the message */
+    if(NULL == (udata->encoding_buf = H5MM_malloc(obj_len)))
+        HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+    /* Copy the message from the heap */
+    HDmemcpy(udata->encoding_buf, obj, obj_len);
+    udata->buf_size = obj_len;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5SM_read_mesg_fh_cb() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5SM_read_mesg
  *
  * Purpose:	Given an H5SM_sohm_t sohm, encodes the message into a buffer.
@@ -2240,10 +2262,9 @@ H5SM_read_mesg(H5F_t *f, const H5SM_sohm_t *mesg, H5HF_t *fheap,
     H5O_t *open_oh, hid_t dxpl_id, size_t *encoding_size /*out*/,
     void ** encoded_mesg /*out*/)
 {
-    size_t buf_size;
-    void * encoding_buf=NULL;
-    H5O_loc_t oloc;
-    H5O_t *oh = NULL;
+    H5SM_read_udata_t udata;    /* User data for callbacks */
+    H5O_loc_t oloc;             /* Object location for message in object header */
+    H5O_t *oh = NULL;           /* Object header for message in object header */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT(H5SM_read_mesg)
@@ -2252,12 +2273,17 @@ H5SM_read_mesg(H5F_t *f, const H5SM_sohm_t *mesg, H5HF_t *fheap,
     HDassert(mesg);
     HDassert(fheap);
 
+    /* Set up user data for message iteration */
+    udata.file = f;
+    udata.idx = mesg->u.mesg_loc.index;
+    udata.encoding_buf = NULL;
+    udata.idx = 0;
+
     /* Get the message size and encoded message for the message to be deleted,
      * either from its OH or from the heap.
      */
     if(mesg->location == H5SM_IN_OH) {
         /* Read message from object header */
-        H5SM_read_udata_t udata;
         const H5O_msg_class_t *type = NULL;    /* Actual H5O class type for the ID */
         H5O_mesg_operator_t op;         /* Wrapper for operator */
 
@@ -2282,41 +2308,25 @@ H5SM_read_mesg(H5F_t *f, const H5SM_sohm_t *mesg, H5HF_t *fheap,
         else
             oh = open_oh;
 
-        /* Set up user data for message iteration */
-        udata.file = f;
-        udata.idx = mesg->u.mesg_loc.index;
-        udata.encoding_buf = NULL;
-        udata.idx = 0;
-
         /* Use the "real" iterate routine so it doesn't try to protect the OH */
         op.op_type = H5O_MESG_OP_LIB;
         op.u.lib_op = H5SM_read_iter_op;
         if((ret_value = H5O_msg_iterate_real(f, oh, type, &op, &udata, dxpl_id)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "unable to iterate over object header messages")
-
-        /* Record the returned values */
-        buf_size = udata.buf_size;
-        encoding_buf = udata.encoding_buf;
     } /* end if */
     else {
         HDassert(mesg->location == H5SM_IN_HEAP);
 
-        /* Get the size of the message in the heap */
-        if(H5HF_get_obj_len(fheap, dxpl_id, &(mesg->u.heap_loc.fheap_id), &buf_size) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get message size from fractal heap.")
-
-        /* Allocate a buffer to hold the message */
-        if(NULL == (encoding_buf = H5MM_malloc(buf_size)))
-            HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, FAIL, "memory allocation failed")
-
-        /* Read the message from the heap */
-        /* JAMES: do one op here, as above? */
-        if(H5HF_read(fheap, dxpl_id, &(mesg->u.heap_loc.fheap_id), encoding_buf) < 0)
+        /* Copy the message from the heap */
+        if(H5HF_op(fheap, dxpl_id, &(mesg->u.heap_loc.fheap_id), H5SM_read_mesg_fh_cb, &udata) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "can't read message from fractal heap.")
     } /* end else */
+    HDassert(udata.encoding_buf);
+    HDassert(udata.buf_size);
 
-    *encoded_mesg = encoding_buf;
-    *encoding_size = buf_size;
+    /* Record the returned values */
+    *encoded_mesg = udata.encoding_buf;
+    *encoding_size = udata.buf_size;
 
 done:
     /* Close the object header if we opened one and had an error */
@@ -2328,8 +2338,9 @@ done:
             HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to close object header")
     } /* end if */
 
-    if(ret_value < 0 && encoding_buf)
-        encoding_buf = H5MM_xfree(encoding_buf);
+    /* Release the encoding buffer on error */
+    if(ret_value < 0 && udata.encoding_buf)
+        udata.encoding_buf = H5MM_xfree(udata.encoding_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_read_mesg */

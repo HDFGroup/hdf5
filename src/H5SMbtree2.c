@@ -81,7 +81,7 @@ const H5B2_class_t H5SM_INDEX[1]={{   /* B-tree class information */
 /*-------------------------------------------------------------------------
  * Function:	H5SM_btree_compare_cb
  *
- * Purpose:	Callback for H5HF_op, used in H5SM_btree_compare_cb below.
+ * Purpose:	Callback for H5HF_op, used in H5SM_message_compare below.
  *              Determines whether the search key passed in in _UDATA is
  *              equal to OBJ or not.
  *
@@ -98,7 +98,6 @@ static herr_t
 H5SM_btree_compare_cb(const void *obj, size_t obj_len, void *_udata)
 {
     H5SM_compare_udata_t *udata = (H5SM_compare_udata_t *)_udata;
-    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_btree_compare_cb)
 
@@ -111,7 +110,7 @@ H5SM_btree_compare_cb(const void *obj, size_t obj_len, void *_udata)
         /* Sizes are the same.  Return result of memcmp */
         udata->ret = HDmemcmp(udata->key->encoding, obj, obj_len);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SM_btree_compare_cb() */
 
 
@@ -243,7 +242,7 @@ H5SM_message_compare(const void *rec1, const void *rec2)
          */
         if(mesg->location == H5SM_IN_HEAP) {
             /* Call heap op routine with comparison callback */
-            status = H5HF_op(key->fheap, H5AC_dxpl_id, &(mesg->u.heap_loc.fheap_id), H5SM_btree_compare_cb, &udata);
+            status = H5HF_op(key->fheap, key->dxpl_id, &(mesg->u.heap_loc.fheap_id), H5SM_btree_compare_cb, &udata);
             HDassert(status >= 0);
         } /* end if */
         else {
