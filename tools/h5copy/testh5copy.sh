@@ -107,6 +107,11 @@ TOOLTEST()
         nerrors="`expr $nerrors + 1`"
     else
         echo " PASSED"
+
+        # Clean up output file
+        if test -z "$HDF5_NOCLEANUP"; then
+           rm -f output.out
+        fi
     fi
     
     if [ $runh5diff != no ]; then
@@ -165,6 +170,11 @@ H5LSTEST()
       echo "    Expected result (*.ls) differs from actual result (*.out)"
       nerrors="`expr $nerrors + 1`"
       test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+   fi
+
+   # Clean up output file
+   if test -z "$HDF5_NOCLEANUP"; then
+      rm -f $actual $actual_err
    fi
 }
 
