@@ -1340,7 +1340,6 @@ H5_DLL size_t H5T_get_member_offset(const H5T_t *dt, unsigned membno);
 H5_DLL size_t H5T_get_member_size(const H5T_t *dt, unsigned membno);
 H5_DLL htri_t H5T_is_packed(const H5T_t *dt);
 H5_DLL H5T_subset_t H5T_conv_struct_subset(const H5T_cdata_t *cdata);
-H5_DLL H5T_subset_t H5T_path_compound_subset(const H5T_path_t *p);
 
 #endif /* _H5Tpkg_H */
 

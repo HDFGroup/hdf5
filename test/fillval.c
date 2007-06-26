@@ -743,7 +743,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
 		&val_rd)<0) goto error;
 	    if (fill_time!=H5D_FILL_TIME_NEVER && val_rd!=fillval) {
 	        H5_FAILED();
-	        puts("    Value read was not a fill value.");
+                HDfprintf(stdout, "%u: Value read was not a fill value.\n", (unsigned)__LINE__);
 	        HDfprintf(stdout,"    Elmt={%Hu,%Hu,%Hu,%Hu,%Hu}, read: %u, "
 		       "Fill value: %u\n",
 		       hs_offset[0], hs_offset[1],
@@ -759,7 +759,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
 		rd_c.x!=fill_c.x || rd_c.y!=fill_c.y ||
 		rd_c.z!=fill_c.z)) {
                 H5_FAILED();
-                puts("    Value read was not a fill value.");
+                HDfprintf(stdout, "%u: Value read was not a fill value.\n", (unsigned)__LINE__);
                 HDfprintf(stdout,"    Elmt={%Hu,%Hu,%Hu,%Hu,%Hu}, read: %f, %d, %f, %c"
                        "Fill value: %f, %d, %f, %c\n",
                        hs_offset[0], hs_offset[1],
@@ -799,7 +799,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
             for(u = 0; u < nelmts; u++) {
                 if(buf[u] != fillval) {
                     H5_FAILED();
-                    puts("    Value read was not a fill value.");
+                    HDfprintf(stdout, "%u: Value read was not a fill value.\n", (unsigned)__LINE__);
                     HDfprintf(stdout,"    Elmt={%Hu, %Hu, %Hu, %Hu, %Hu}, read: %u, "
                            "Fill value: %u\n",
                            hs_offset[0], hs_offset[1],
@@ -826,7 +826,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
                 if(buf_c[u].a != fill_c.a || buf_c[u].x != fill_c.x ||
                         buf_c[u].y != fill_c.y || buf_c[u].z != fill_c.z) {
                     H5_FAILED();
-                    puts("    Value read was not a fill value.");
+                    HDfprintf(stdout, "%u: Value read was not a fill value.\n", (unsigned)__LINE__);
                     HDfprintf(stdout,"    Elmt={%Hu, %Hu, %Hu, %Hu, %Hu}, read: %f, %d, %f, %c"
                             "Fill value: %f, %d, %f, %c\n",
                             hs_offset[0], hs_offset[1],
@@ -896,7 +896,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
                 should_be = odd ? fillval : 9999;
                 if (val_rd!=should_be) {
                     H5_FAILED();
-                    puts("    Value read was not correct.");
+                    HDfprintf(stdout, "%u: Value read was not correct.\n", (unsigned)__LINE__);
                     printf("    Elmt={%ld,%ld,%ld,%ld,%ld}, read: %u, "
                            "should be: %u\n",
                            (long)hs_offset[0], (long)hs_offset[1],
@@ -909,7 +909,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
 	        should_be = 9999;
 	        if (val_rd!=should_be) {
 	            H5_FAILED();
-	            puts("    Value read was not correct.");
+                    HDfprintf(stdout, "%u: Value read was not correct.\n", (unsigned)__LINE__);
 	            printf("    Elmt={%ld,%ld,%ld,%ld,%ld}, read: %u, "
 		           "should be: %u\n",
 		           (long)hs_offset[0], (long)hs_offset[1],
@@ -940,7 +940,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
 		if( rd_c.a!=should_be_c.a || rd_c.x!=should_be_c.x ||
 		    rd_c.y!=should_be_c.y || rd_c.z!=should_be_c.z)  {
                     H5_FAILED();
-                    puts("    Value read was not correct.");
+                    HDfprintf(stdout, "%u: Value read was not correct.\n", (unsigned)__LINE__);
                     printf("    Elmt={%ld,%ld,%ld,%ld,%ld}, read: %f,%d,%f,%c "
                            "should be: %f,%d,%f,%c\n",
                            (long)hs_offset[0], (long)hs_offset[1],
@@ -959,7 +959,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
                 if( rd_c.a!=should_be_c.a || rd_c.x!=should_be_c.x ||
                     rd_c.y!=should_be_c.y || rd_c.z!=should_be_c.z)  {
                     H5_FAILED();
-                    puts("    Value read was not correct.");
+                    HDfprintf(stdout, "%u: Value read was not correct.\n", (unsigned)__LINE__);
                     printf("    Elmt={%ld,%ld,%ld,%ld,%ld}, read: %f,%d,%f,%c "
                            "should be: %f,%d,%f,%c\n",
                            (long)hs_offset[0], (long)hs_offset[1],
@@ -1285,7 +1285,7 @@ test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
 		    &val_rd)<0) goto error;
 	if (val_rd!=fillval) {
 	    H5_FAILED();
-	    puts("    Value read was not a fill value.");
+            HDfprintf(stdout, "%u: Value read was not a fill value.\n", (unsigned)__LINE__);
 	    HDfprintf(stdout,"    Elmt={%Hu,%Hu,%Hu,%Hu,%Hu}, read: %u, "
 		   "Fill value: %u\n",
 		   hs_offset[0], hs_offset[1],
@@ -1330,7 +1330,7 @@ test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
 
 	if (val_rd!=should_be) {
 	    H5_FAILED();
-	    puts("    Value read was not correct.");
+            HDfprintf(stdout, "%u: Value read was not correct.\n", (unsigned)__LINE__);
 	    HDfprintf(stdout,"    Elmt={%Hu,%Hu,%Hu,%Hu,%Hu}, read: %u, "
 		   "should be: %u\n",
 		   hs_offset[0], hs_offset[1],
@@ -1366,7 +1366,7 @@ test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
 
 	if (val_rd!=should_be) {
 	    H5_FAILED();
-	    puts("    Value read was not correct.");
+	    HDfprintf(stdout, "%u: Value read was not correct.\n", (unsigned)__LINE__);
 	    HDfprintf(stdout,"    Elmt={%Hu,%Hu,%Hu,%Hu,%Hu}, read: %u, "
 		   "should be: %u\n",
 		   hs_offset[0], hs_offset[1],
