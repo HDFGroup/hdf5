@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioProject ProjectType="typeDynamicLibrary" ProjectCreator="Intel Fortran" Keyword="Dll - Converted from CVF" Version="9.10" ProjectIdGuid="{71C6994C-3102-4A2A-B0AE-88A590CB36CE}">
+	<Platforms>
+		<Platform Name="Win32"/></Platforms>
+	<Configurations>
+		<Configuration Name="Release|Win32" OutputDirectory="../../../../fortran/test/libtest_fortrandll/Release" IntermediateDirectory="../../../../fortran/test/libtest_fortrandll/Release" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)" ConfigurationType="typeDynamicLibrary" MustRebuild="true" Command="$(TargetPath)">
+				<Tool Name="VFMidlTool" SwitchesHaveChanged="true" PreprocessorDefinitions="NDEBUG" MkTypLibCompatible="true" SuppressStartupBanner="true" TargetEnvironment="midlTargetWin32" TypeLibraryName="$(OUTDIR)/libtest_fortrandll.tlb"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFFortranCompilerTool" SwitchesHaveChanged="true" AdditionalOptions="/dll" SuppressStartupBanner="true" AdditionalIncludeDirectories="Release/;..\..\..\..\proj\hdf5_fortrandll\Release/" PreprocessorDefinitions="HDF5F90_WINDOWS,BUILD_HDF5_DLL" CallingConvention="callConventionCVF" ModulePath="Release/;..\..\..\..\proj\hdf5_fortrandll\Release/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/" RuntimeLibrary="rtMultiThreadedDLL" CompileOnly="true"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFLinkerTool" SwitchesHaveChanged="true" MustRebuild="true" AdditionalOptions="/MACHINE:I386" OutputFile="$(OUTDIR)/libtest_fortrandll.dll" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" ProgramDatabaseFile="$(OUTDIR)/libtest_fortrandll.pdb" ImportLibrary="$(OUTDIR)/libtest_fortrandll.lib" LinkDLL="true" AdditionalDependencies="kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"/>
+				<Tool Name="VFResourceCompilerTool" SwitchesHaveChanged="true" PreprocessorDefinitions="NDEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/>
+				<Tool Name="VFPreLinkEventTool"/></Configuration>
+		<Configuration Name="Debug|Win32" OutputDirectory="../../../../fortran/test/libtest_fortrandll/Debug" IntermediateDirectory="../../../../fortran/test/libtest_fortrandll/Debug" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)" ConfigurationType="typeDynamicLibrary" MustRebuild="true" Command="$(TargetPath)">
+				<Tool Name="VFMidlTool" SwitchesHaveChanged="true" PreprocessorDefinitions="_DEBUG" MkTypLibCompatible="true" SuppressStartupBanner="true" TargetEnvironment="midlTargetWin32" TypeLibraryName="$(OUTDIR)/libtest_fortrandll.tlb"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFFortranCompilerTool" SwitchesHaveChanged="true" AdditionalOptions="/dll" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="Debug/;..\..\..\..\proj\hdf5_fortrandll\Debug/" PreprocessorDefinitions="HDF5F90_WINDOWS,BUILD_HDF5_DLL" WarnArgMismatch="true" CallingConvention="callConventionCVF" ModulePath="Debug/;..\..\..\..\proj\hdf5_fortrandll\Debug/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL" CompileOnly="true"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFLinkerTool" SwitchesHaveChanged="true" MustRebuild="true" AdditionalOptions="/MACHINE:I386" OutputFile="../../../../fortran/test/libtest_fortrandll/Debug/libtest_fortranddll.dll" LinkIncremental="linkIncrementalYes" SuppressStartupBanner="true" GenerateDebugInformation="true" ProgramDatabaseFile="$(OUTDIR)/libtest_fortranddll.pdb" ImportLibrary="$(OUTDIR)/libtest_fortranddll.lib" LinkDLL="true" AdditionalDependencies="kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib"/>
+				<Tool Name="VFResourceCompilerTool" SwitchesHaveChanged="true" PreprocessorDefinitions="_DEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/>
+				<Tool Name="VFPreLinkEventTool"/></Configuration></Configurations>
+	<Files>
+		<File RelativePath="..\..\..\..\fortran\test\tf.f90"/></Files>
+	<Globals/></VisualStudioProject>

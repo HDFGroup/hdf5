@@ -1,5 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 8.00
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "h5tinit", "h5tinit\h5tinit.vcproj", "{E98DF2EF-7A5A-4BFD-84B3-DB72AC0E4915}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "h5tinit", "h5tinit\h5tinit.vcproj", "{B123D196-2F43-4FEB-80B5-990F06DED319}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
@@ -8,11 +8,13 @@ Global
 		Debug = Debug
 		Release = Release
 	EndGlobalSection
+	GlobalSection(ProjectDependencies) = postSolution
+	EndGlobalSection
 	GlobalSection(ProjectConfiguration) = postSolution
-		{E98DF2EF-7A5A-4BFD-84B3-DB72AC0E4915}.Debug.ActiveCfg = Debug|Win32
-		{E98DF2EF-7A5A-4BFD-84B3-DB72AC0E4915}.Debug.Build.0 = Debug|Win32
-		{E98DF2EF-7A5A-4BFD-84B3-DB72AC0E4915}.Release.ActiveCfg = Release|Win32
-		{E98DF2EF-7A5A-4BFD-84B3-DB72AC0E4915}.Release.Build.0 = Release|Win32
+		{B123D196-2F43-4FEB-80B5-990F06DED319}.Debug.ActiveCfg = Debug|Win32
+		{B123D196-2F43-4FEB-80B5-990F06DED319}.Debug.Build.0 = Debug|Win32
+		{B123D196-2F43-4FEB-80B5-990F06DED319}.Release.ActiveCfg = Release|Win32
+		{B123D196-2F43-4FEB-80B5-990F06DED319}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection

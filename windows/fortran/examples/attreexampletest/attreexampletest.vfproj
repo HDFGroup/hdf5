@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioProject ProjectCreator="Intel Fortran" Keyword="Console Application - Converted from CVF" Version="9.10" ProjectIdGuid="{8E77A110-6979-4EC2-8F51-0C5A39D1E252}">
+	<Platforms>
+		<Platform Name="Win32"/></Platforms>
+	<Configurations>
+		<Configuration Name="Release|Win32" OutputDirectory="../../../../fortran/examples/attreexampletest/Release" IntermediateDirectory="../../../../fortran/examples/attreexampletest/Release" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)" MustRebuild="true" Command="c:\hdf\hdf5-18\vnet\dep_vs6\windows\fortran\examples\attreexampletest\$(OUTDIR)\attreexampletest.exe">
+				<Tool Name="VFMidlTool" SwitchesHaveChanged="true" SuppressStartupBanner="true" TypeLibraryName="$(OUTDIR)/attreexampletest.tlb"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFFortranCompilerTool" SwitchesHaveChanged="true" SuppressStartupBanner="true" AdditionalIncludeDirectories="Release/;..\..\..\..\proj\hdf5_fortran\Release/" PreprocessorDefinitions="HDF5F90_WINDOWS" CallingConvention="callConventionCVF" ModulePath="..\..\..\..\proj\hdf5_fortran\Release/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/" CompileOnly="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFLinkerTool" SwitchesHaveChanged="true" MustRebuild="true" AdditionalOptions="/MACHINE:I386" OutputFile="$(OUTDIR)/attreexampletest.exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\proj\hdf5_fortran\release,..\..\..\..\hdf5lib\release\lib" IgnoreDefaultLibraryNames="libcd.lib" ProgramDatabaseFile="$(OUTDIR)/attreexampletest.pdb" SubSystem="subSystemConsole" AdditionalDependencies="kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib hdf5_fortran.lib $(HDF5_EXT_ZLIB) $(HDF5_EXT_SZIP)"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFResourceCompilerTool" SwitchesHaveChanged="true" PreprocessorDefinitions="NDEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/></Configuration>
+		<Configuration Name="Debug|Win32" OutputDirectory="../../../../fortran/examples/attreexampletest/Debug" IntermediateDirectory="../../../../fortran/examples/attreexampletest/Debug" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)" MustRebuild="true" Command="c:\hdf\hdf5-18\vnet\dep_vs6\windows\fortran\examples\attreexampletest\$(OUTDIR)\attreexampletest.exe">
+				<Tool Name="VFMidlTool" SwitchesHaveChanged="true" SuppressStartupBanner="true" TypeLibraryName="$(OUTDIR)/attreexampletest.tlb"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFFortranCompilerTool" SwitchesHaveChanged="true" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="Debug/Debug/;..\..\..\..\proj\hdf5_fortran\Debug/;Debug/" PreprocessorDefinitions="HDF5F90_WINDOWS" WarnArgMismatch="true" CallingConvention="callConventionCVF" ModulePath="..\..\..\..\proj\hdf5_fortran\Debug/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/" BoundsCheck="true" CompileOnly="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFLinkerTool" SwitchesHaveChanged="true" MustRebuild="true" AdditionalOptions="/MACHINE:I386" OutputFile="$(OUTDIR)/attreexampletest.exe" LinkIncremental="linkIncrementalYes" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\proj\hdf5_fortran\debug,..\..\..\..\hdf5lib\debug\lib" IgnoreDefaultLibraryNames="libcd.lib" GenerateDebugInformation="true" ProgramDatabaseFile="$(OUTDIR)/attreexampletest.pdb" SubSystem="subSystemConsole" AdditionalDependencies="kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib hdf5_fortrand.lib $(HDF5_EXT_ZLIB) $(HDF5_EXT_SZIP)"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFResourceCompilerTool" SwitchesHaveChanged="true" PreprocessorDefinitions="_DEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/></Configuration></Configurations>
+	<Files>
+		<File RelativePath="..\..\..\..\fortran\examples\attrexample.f90"/></Files>
+	<Globals/></VisualStudioProject>

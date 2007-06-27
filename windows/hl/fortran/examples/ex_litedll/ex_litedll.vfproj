@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioProject ProjectCreator="Intel Fortran" Keyword="Console Application - Converted from CVF" Version="9.10" ProjectIdGuid="{3EB0EFA7-69F8-4541-8565-EC7AD3603DBB}">
+	<Platforms>
+		<Platform Name="Win32"/></Platforms>
+	<Configurations>
+		<Configuration Name="Debug|Win32" OutputDirectory="..\..\..\..\hl\fortran\examples\ex_litedll\Debug" IntermediateDirectory="..\..\..\..\hl\fortran\examples\ex_litedll\Debug" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)" MustRebuild="true" Command="c:\hdf\hdf5-18\vnet\dep_vs6\hl\fortran\examples\ex_litedll\Debug\ex_litedll.exe">
+				<Tool Name="VFMidlTool" SwitchesHaveChanged="true" SuppressStartupBanner="true" TypeLibraryName="$(OUTDIR)/ex_litedll.tlb"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFFortranCompilerTool" SwitchesHaveChanged="true" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\..\..\..\..\proj\hdf5_fortrandll\debug/;..\..\..\..\..\proj\hdf5_hl_fortrandll\debug/" WarnArgMismatch="true" CallingConvention="callConventionCVF" ModulePath="Debug/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtSingleThreadedDebug" CompileOnly="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFLinkerTool" SwitchesHaveChanged="true" MustRebuild="true" AdditionalOptions="/MACHINE:I386" OutputFile="..\..\..\..\..\hl\fortran\examples\ex_litedll\Debug\ex_litedll.exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\..\proj\hdf5_fortrandll\debug,..\..\..\..\..\proj\hdf5_hl_fortrandll\debug" IgnoreDefaultLibraryNames="libc.lib" GenerateDebugInformation="true" ProgramDatabaseFile="$(OUTDIR)/ex_litedll.pdb" SubSystem="subSystemConsole" AdditionalDependencies="kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib hdf5_fortranddll.lib hdf5_hl_fortrandlld.lib"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFResourceCompilerTool" SwitchesHaveChanged="true" PreprocessorDefinitions="_DEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/></Configuration>
+		<Configuration Name="Release|Win32" OutputDirectory="..\..\..\..\..\hl\fortran\examples\ex_litedll\Release" IntermediateDirectory="..\..\..\..\..\hl\fortran\examples\ex_litedll\Release" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)" MustRebuild="true" Command="c:\hdf\hdf5-18\vnet\dep_vs6\windows\hl\fortran\examples\ex_litedll\$(OUTDIR)\ex_litedll.exe">
+				<Tool Name="VFMidlTool" SwitchesHaveChanged="true" SuppressStartupBanner="true" TypeLibraryName="$(OUTDIR)/ex_litedll.tlb"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFFortranCompilerTool" SwitchesHaveChanged="true" SuppressStartupBanner="true" AdditionalIncludeDirectories="..\..\..\..\..\proj\hdf5_fortrandll\release/;..\..\..\..\..\proj\hdf5_hl_fortrandll\release/" CallingConvention="callConventionCVF" ModulePath="Release/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/" CompileOnly="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFLinkerTool" SwitchesHaveChanged="true" MustRebuild="true" AdditionalOptions="/MACHINE:I386" OutputFile="$(OUTDIR)/ex_litedll.exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\..\proj\hdf5_fortrandll\release,..\..\..\..\..\proj\hdf5_hl_fortrandll\release" ProgramDatabaseFile="$(OUTDIR)/ex_litedll.pdb" SubSystem="subSystemConsole" AdditionalDependencies="kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib hdf5_fortrandll.lib hdf5_hl_fortrandll.lib"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFResourceCompilerTool" SwitchesHaveChanged="true" PreprocessorDefinitions="NDEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/></Configuration></Configurations>
+	<Files>
+		<Filter Name="Source Files" Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat;f90;for;f;fpp">
+		<File RelativePath="..\..\..\..\..\hl\fortran\examples\exlite.f90"/></Filter>
+		<Filter Name="Header Files" Filter="h;hpp;hxx;hm;inl;fi;fd"/>
+		<Filter Name="Resource Files" Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/></Files>
+	<Globals/></VisualStudioProject>
