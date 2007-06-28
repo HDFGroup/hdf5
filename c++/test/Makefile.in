@@ -59,7 +59,8 @@ am__aclocal_m4_deps = $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
-CONFIG_HEADER = $(top_builddir)/src/H5config.h
+CONFIG_HEADER = $(top_builddir)/src/H5config.h \
+	$(top_builddir)/c++/src/H5cxx_config.h
 CONFIG_CLEAN_FILES =
 am__EXEEXT_1 = dsets$(EXEEXT) testhdf5$(EXEEXT)
 am_dsets_OBJECTS = dsets.$(OBJEXT) h5cpputil.$(OBJEXT)
@@ -73,7 +74,7 @@ am_testhdf5_OBJECTS = testhdf5.$(OBJEXT) tattr.$(OBJEXT) \
 testhdf5_OBJECTS = $(am_testhdf5_OBJECTS)
 testhdf5_LDADD = $(LDADD)
 testhdf5_DEPENDENCIES = $(LIBH5CPP) $(LIBH5TEST) $(LIBHDF5)
-DEFAULT_INCLUDES = -I. -I$(top_builddir)/src@am__isrc@
+DEFAULT_INCLUDES = -I. -I$(top_builddir)/src -I$(top_builddir)/c++/src@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
 am__depfiles_maybe = depfiles
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \

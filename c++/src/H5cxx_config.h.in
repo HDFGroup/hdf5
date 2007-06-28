@@ -1,0 +1,5 @@
+/* c++/src/H5cxx_config.h.in Created manually. */
+
+/* Define if offsetof extension is present in CXX compiler*/
+#undef HAVE_OFFSETOF
+

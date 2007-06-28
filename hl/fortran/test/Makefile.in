@@ -59,7 +59,8 @@ am__aclocal_m4_deps = $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
-CONFIG_HEADER = $(top_builddir)/src/H5config.h
+CONFIG_HEADER = $(top_builddir)/src/H5config.h \
+	$(top_builddir)/c++/src/H5cxx_config.h
 CONFIG_CLEAN_FILES =
 am__EXEEXT_1 = tstlite$(EXEEXT) tstimage$(EXEEXT) tsttable$(EXEEXT)
 am_tstimage_OBJECTS = tstimage.$(OBJEXT)
@@ -74,7 +75,7 @@ am_tsttable_OBJECTS = tsttable.$(OBJEXT)
 tsttable_OBJECTS = $(am_tsttable_OBJECTS)
 tsttable_LDADD = $(LDADD)
 tsttable_DEPENDENCIES = $(LIBH5F_HL) $(LIBH5F) $(LIBH5_HL) $(LIBHDF5)
-DEFAULT_INCLUDES = -I. -I$(top_builddir)/src@am__isrc@
+DEFAULT_INCLUDES = -I. -I$(top_builddir)/src -I$(top_builddir)/c++/src@am__isrc@
 FCCOMPILE = $(FC) $(AM_FCFLAGS) $(FCFLAGS)
 LTFCCOMPILE = $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=compile $(FC) $(AM_FCFLAGS) $(FCFLAGS)

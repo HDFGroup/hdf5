@@ -444,6 +444,43 @@ int main(void) {
      CXXFLAGS="${CXXFLAGS} -DBOOL_NOTDEFINED"
   ])
 
+  AC_CONFIG_HEADER([c++/src/H5cxx_config.h])
+  
+  AC_OUTPUT_COMMANDS([
+    echo "creating c++/src/H5cxx_pubconf.h"
+    sed 's/#define /#define H5_CXX_/' <c++/src/H5cxx_config.h |\
+      sed 's/#undef /#undef H5_CXX_/' >pubconf
+    if test ! -f c++/src/H5cxx_pubconf.h; then
+      /bin/mv -f pubconf c++/src/H5cxx_pubconf.h
+    elif (diff pubconf c++/src/H5cxx_pubconf.h >/dev/null); then
+      rm -f pubconf
+      echo "c++/src/H5cxx_pubconf.h is unchanged"
+    else
+      /bin/mv -f pubconf c++/src/H5cxx_pubconf.h
+    fi
+  ])
+
+  AC_MSG_CHECKING([if $CXX has offsetof extension])
+    AC_TRY_COMPILE([
+  #include <stdio.h>
+  #include <stddef.h>
+    ],[
+    struct index_st
+    {
+      unsigned char type;
+      unsigned char num;
+      unsigned int len;
+    };
+    typedef struct index_st index_t;
+    int x,y;
+    x = offsetof(struct index_st, len);
+    y = offsetof(index_t, num)
+    ],
+    AC_DEFINE([HAVE_OFFSETOF], [1],
+    [Define if C++ compiler recognizes offsetof])
+    AC_MSG_RESULT([yes]),
+    AC_MSG_RESULT([no]))
+
   AC_MSG_CHECKING([if $CXX can handle static cast])
   AC_TRY_RUN([
 int main(void) {
@@ -1929,13 +1966,6 @@ AC_MSG_CHECKING([for __FUNCTION__ extension])
 AC_TRY_COMPILE(,[(void)__FUNCTION__],
                AC_DEFINE([HAVE_FUNCTION], [1],
                          [Define if the compiler understand the __FUNCTION__ keyword])
-               AC_MSG_RESULT([yes]),
-               AC_MSG_RESULT([no]))
-
-AC_MSG_CHECKING([for __offsetof__ extension])
-AC_TRY_COMPILE(,[size_t __offsetof__(unused)],
-               AC_DEFINE([HAVE_OFFSETOF], [1],
-                         [Define if the __offsetof__ extension is present])
                AC_MSG_RESULT([yes]),
                AC_MSG_RESULT([no]))
 
