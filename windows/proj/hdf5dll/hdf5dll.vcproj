@@ -7112,6 +7112,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5WB.c">
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5Z.c">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -7417,6 +7420,9 @@
 			Filter="*.h">
 			<File
 				RelativePath="..\..\..\src\H5ACprivate.h">
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5WBprivate.h">
 			</File>
 		</Filter>
 		<File

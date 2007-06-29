@@ -7053,6 +7053,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5WB.c">
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5Z.c">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -7502,6 +7505,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\src\H5Vprivate.h">
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5WBprivate.h">
 			</File>
 			<File
 				RelativePath="..\..\..\src\H5Zprivate.h">
