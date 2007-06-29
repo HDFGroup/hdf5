@@ -3346,30 +3346,21 @@ done:
 herr_t
 H5D_istore_initialize_by_extent(H5D_io_info_t *io_info)
 {
-    const H5O_layout_t *layout = &(io_info->dset->shared->layout); /* Dataset layout */
-    uint8_t                *chunk = NULL;	/*the file chunk  */
-    unsigned                idx_hint = 0;	/*input value for H5D_istore_lock */
-    hsize_t                 chunk_offset[H5O_LAYOUT_NDIMS];	/*logical location of the chunks */
-    hsize_t                 idx_cur[H5O_LAYOUT_NDIMS];	/*multi-dimensional counters */
-    hsize_t                 idx_max[H5O_LAYOUT_NDIMS];
-    hsize_t                 sub_size[H5O_LAYOUT_NDIMS];
-    hsize_t                 naccessed;	/*bytes accessed in chunk */
-    hsize_t                 end_chunk;	/*chunk position counter */
-    hsize_t                 start[H5O_LAYOUT_NDIMS];	/*starting location of hyperslab */
-    hsize_t                 count[H5O_LAYOUT_NDIMS];	/*element count of hyperslab */
-    hsize_t                 size[H5O_LAYOUT_NDIMS];	/*current size of dimensions */
-    H5S_t                  *space_chunk = NULL;	/*dataspace for a chunk */
-    hsize_t                 chunk_dims[H5O_LAYOUT_NDIMS];	/*current chunk dimensions */
-    hsize_t                 curr_dims[H5O_LAYOUT_NDIMS];	/*current dataspace dimensions */
-    hsize_t                 chunks[H5O_LAYOUT_NDIMS];	        /*current number of chunks in each dimension */
-    hsize_t                 down_chunks[H5O_LAYOUT_NDIMS];   /* "down" size of number of elements in each dimension */
-    int                     srank;	/*current # of dimensions (signed) */
-    unsigned                rank;	/*current # of dimensions */
-    int                     i, carry;	/*counters  */
-    int                     found = 0;	/*initialize this entry  */
-    H5D_storage_t           store;      /* Dataset storage information */
-    unsigned                u;          /* Local index variable */
-    herr_t	            ret_value = SUCCEED;	/* Return value */
+    H5S_t           *space_chunk = NULL;	/* Dataspace for a chunk */
+    const H5O_layout_t *layout = &(io_info->dset->shared->layout); /* Dataset's layout */
+    H5D_storage_t    store;                     /* Dataset storage information */
+    hsize_t          idx_cur[H5O_LAYOUT_NDIMS];	/* Multi-dimensional counters */
+    hsize_t          idx_max[H5O_LAYOUT_NDIMS];
+    hsize_t          start[H5O_LAYOUT_NDIMS];	/* Starting location of hyperslab */
+    hsize_t          chunk_dims[H5O_LAYOUT_NDIMS];  /* Current chunk dimensions */
+    hsize_t          curr_dims[H5O_LAYOUT_NDIMS];   /* Current dataspace dimensions */
+    hsize_t          chunks[H5O_LAYOUT_NDIMS];      /* Current number of chunks in each dimension */
+    hsize_t          down_chunks[H5O_LAYOUT_NDIMS]; /* "down" size of number of elements in each dimension */
+    int              srank;	        /* # of chunk dimensions (signed) */
+    unsigned         rank;	        /* # of chunk dimensions */
+    hbool_t	     carry;             /* Flag to indicate that chunk increment carrys to higher dimension (sorta) */
+    unsigned         u;                 /* Local index variable */
+    herr_t	     ret_value = SUCCEED;	/* Return value */
 
     FUNC_ENTER_NOAPI(H5D_istore_initialize_by_extent, FAIL)
 
@@ -3379,41 +3370,35 @@ H5D_istore_initialize_by_extent(H5D_io_info_t *io_info)
     HDassert(layout->u.chunk.ndims > 0 && layout->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
     HDassert(H5F_addr_defined(layout->u.chunk.addr));
 
-    /* Reset start & count arrays */
-    HDmemset(start, 0, sizeof(start));
-    HDmemset(count, 0, sizeof(count));
-
     /* Go get the rank & dimensions */
     if((srank = H5S_get_simple_extent_dims(io_info->dset->shared->space, curr_dims, NULL)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions")
     H5_ASSIGN_OVERFLOW(rank, srank, int, unsigned);
 
-    /* Copy current dimensions */
-    for(u = 0; u < rank; u++) {
-	size[u] = curr_dims[u];
+    /* Round up to the next integer # of chunks, to accomodate partial chunks */
+    for(u = 0; u < rank; u++)
+        chunks[u] = ((curr_dims[u] + layout->u.chunk.dim[u]) - 1) / layout->u.chunk.dim[u];
 
-        /* Round up to the next integer # of chunks, to accomodate partial chunks */
-        chunks[u] = ((curr_dims[u]+layout->u.chunk.dim[u])-1) / layout->u.chunk.dim[u];
-    } /* end for */
-    size[u] = layout->u.chunk.dim[u];
+    /* Set size of lowest chunk dimension (the dataset element size) */
+    curr_dims[rank] = layout->u.chunk.dim[rank];
 
     /* Get the "down" sizes for each dimension */
-    if(H5V_array_down(rank,chunks,down_chunks)<0)
+    if(H5V_array_down(rank, chunks, down_chunks) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "can't compute 'down' sizes")
 
     /* Create a data space for a chunk & set the extent */
     for(u = 0; u < rank; u++)
 	chunk_dims[u] = layout->u.chunk.dim[u];
-    if(NULL == (space_chunk = H5S_create_simple(rank,chunk_dims,NULL)))
+    if(NULL == (space_chunk = H5S_create_simple(rank, chunk_dims, NULL)))
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace")
 
-/*
- * Set up multi-dimensional counters (idx_max, and idx_cur) and
- * loop through the chunks copying each chunk from the application to the
- * chunk cache.
- */
+    /*
+     * Set up multi-dimensional counters (idx_max, and idx_cur) and
+     * loop through the chunks copying each chunk from the application to the
+     * chunk cache.
+     */
     for(u = 0; u < layout->u.chunk.ndims; u++) {
-	idx_max[u] = (size[u] - 1) / layout->u.chunk.dim[u] + 1;
+	idx_max[u] = (curr_dims[u] - 1) / layout->u.chunk.dim[u] + 1;
 	idx_cur[u] = 0;
     } /* end for */
 
@@ -3421,31 +3406,44 @@ H5D_istore_initialize_by_extent(H5D_io_info_t *io_info)
     HDassert(io_info->store == NULL);       /* Make certain we aren't blowing anything away */
     io_info->store = &store;
 
+    /* Reset start array */
+    HDmemset(start, 0, sizeof(start));
+
     /* Loop over all chunks */
-    carry = 0;
-    while(carry == 0) {
+    carry = FALSE;
+    while(!carry) {
+        hsize_t chunk_offset[H5O_LAYOUT_NDIMS]; /* Logical location of the chunks */
+        hsize_t naccessed;	/* Bytes accessed in chunk */
+        hbool_t found;	        /* Initialize this entry */
+        int i;	                /* Local index variable */
+
+        /* The location and size of the chunk being accessed */
 	for(u = 0, naccessed = 1; u < layout->u.chunk.ndims; u++) {
-	    /* The location and size of the chunk being accessed */
+            hsize_t sub_size;   /* Size of chunk accessed in a given dimension */
+
 	    chunk_offset[u] = idx_cur[u] * layout->u.chunk.dim[u];
-	    sub_size[u] = MIN((idx_cur[u] + 1) * layout->u.chunk.dim[u], size[u])
+	    sub_size = MIN((idx_cur[u] + 1) * layout->u.chunk.dim[u], curr_dims[u])
                     - chunk_offset[u];
-	    naccessed *= sub_size[u];
+	    naccessed *= sub_size;
 	} /* end for */
 
 	/*
 	 * Figure out what chunks have to be initialized. These are the chunks where the dataspace
 	 * extent boundary is within the chunk
 	 */
-	for(u = 0, found = 0; u < rank; u++) {
-	    end_chunk = chunk_offset[u] + layout->u.chunk.dim[u];
-	    if(end_chunk > size[u]) {
-		found = 1;
+        found = FALSE;
+	for(u = 0; u < rank; u++) {
+	    if((chunk_offset[u] + layout->u.chunk.dim[u]) > curr_dims[u]) {
+		found = TRUE;
 		break;
-	    }
+	    } /* end if */
         } /* end for */
 
 	if(found) {
             const H5O_fill_t *fill = &io_info->dset->shared->dcpl_cache.fill; /* Fill value information */
+            hsize_t count[H5O_LAYOUT_NDIMS];	/* Element count of hyperslab */
+            uint8_t *chunk;	        /* The file chunk  */
+            unsigned idx_hint;	        /* Which chunk we're dealing with */
 
             /* Calculate the index of this chunk */
             if(H5V_chunk_index(rank, chunk_offset, layout->u.chunk.dim, down_chunks, &store.chunk.index) < 0)
@@ -3459,7 +3457,7 @@ H5D_istore_initialize_by_extent(H5D_io_info_t *io_info)
 		HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to select space")
 
 	    for(u = 0; u < rank; u++)
-		count[u] = MIN((idx_cur[u] + 1) * layout->u.chunk.dim[u], size[u] - chunk_offset[u]);
+		count[u] = MIN((idx_cur[u] + 1) * layout->u.chunk.dim[u], curr_dims[u] - chunk_offset[u]);
 
 #ifdef H5D_ISTORE_DEBUG
 	    HDfputs("cache:initialize:offset:[", stdout);
@@ -3479,27 +3477,30 @@ H5D_istore_initialize_by_extent(H5D_io_info_t *io_info)
             /* Use the size of the elements in the chunk directly instead of */
             /* relying on the fill.size, which might be set to 0 if there is */
             /* no fill-value defined for the dataset -QAK */
-            H5_CHECK_OVERFLOW(size[rank],hsize_t,size_t);
-	    if(H5S_select_fill(fill->buf, (size_t)size[rank], space_chunk, chunk) < 0)
+            H5_CHECK_OVERFLOW(curr_dims[rank],hsize_t,size_t);
+	    if(H5S_select_fill(fill->buf, (size_t)curr_dims[rank], space_chunk, chunk) < 0)
 		HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, FAIL, "filling selection failed")
 
 	    if(H5D_istore_unlock(io_info, TRUE, idx_hint, chunk, (size_t)naccessed) < 0)
 		HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to unlock raw data chunk")
-	} /*found */
+	} /* end if */
 
 	/* Increment indices */
-	for(i = (int)rank, carry = 1; i >= 0 && carry; --i) {
+        carry = TRUE;
+	for(i = (int)rank; i >= 0; --i) {
 	    if(++idx_cur[i] >= idx_max[i])
 		idx_cur[i] = 0;
-	    else
-		carry = 0;
+	    else {
+                carry = FALSE;
+                break;
+            } /* end else */
 	} /* end for */
     } /* end while */
 
 done:
-    if(space_chunk)
-        if(H5S_close(space_chunk)<0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
+    /* Release resources */
+    if(space_chunk && H5S_close(space_chunk) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_istore_initialize_by_extent() */
