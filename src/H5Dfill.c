@@ -39,6 +39,7 @@
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Vprivate.h"		/* Vector and array functions		*/
+#include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
 
 /****************/
@@ -64,9 +65,6 @@
 /*********************/
 /* Package Variables */
 /*********************/
-
-/* Declare a free list to manage blocks of single datatype element data */
-H5FL_BLK_DEFINE(type_elem);
 
 /* Declare extern the free list to manage blocks of type conversion data */
 H5FL_BLK_EXTERN(type_conv);
@@ -174,7 +172,10 @@ herr_t
 H5D_fill(const void *fill, const H5T_t *fill_type, void *buf,
     const H5T_t *buf_type, const H5S_t *space, hid_t dxpl_id)
 {
-    uint8_t *tconv_buf = NULL;  /* Data type conv buffer */
+    H5WB_t  *elem_wb = NULL;    /* Wrapped buffer for element data */
+    uint8_t elem_buf[H5T_ELEM_BUF_SIZE]; /* Buffer for element data */
+    H5WB_t  *bkg_elem_wb = NULL;     /* Wrapped buffer for background data */
+    uint8_t bkg_elem_buf[H5T_ELEM_BUF_SIZE]; /* Buffer for background data */
     uint8_t *bkg_buf = NULL;    /* Background conversion buffer */
     uint8_t *tmp_buf = NULL;    /* Temp conversion buffer */
     hid_t src_id = -1, dst_id = -1;     /* Temporary type IDs */
@@ -198,12 +199,18 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf,
 
     /* If there's no fill value, just use zeros */
     if(fill == NULL) {
-        /* Allocate space & initialize conversion buffer to zeros */
-        if(NULL == (tconv_buf = H5FL_BLK_CALLOC(type_elem, dst_type_size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        void *elem_ptr;         /* Pointer to element to use for fill value */
+
+        /* Wrap the local buffer for elements */
+        if(NULL == (elem_wb = H5WB_wrap(elem_buf, sizeof(elem_buf))))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't wrap buffer")
+
+        /* Get a pointer to a buffer that's large enough for element */
+        if(NULL == (elem_ptr = H5WB_actual_clear(elem_wb, dst_type_size)))
+            HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't get actual buffer")
 
         /* Fill the selection in the memory buffer */
-        if(H5S_select_fill(tconv_buf, dst_type_size, space, buf) < 0)
+        if(H5S_select_fill(elem_ptr, dst_type_size, space, buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, FAIL, "filling selection failed")
     } /* end if */
     else {
@@ -283,24 +290,38 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf,
 
             /* Convert disk buffer into memory buffer */
             if(!H5T_path_noop(tpath)) {
-                /* Allocate space for conversion buffer */
-                if(NULL == (tconv_buf = H5FL_BLK_MALLOC(type_elem, buf_size)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+                void *elem_ptr;         /* Pointer to element to use for fill value */
+                void *bkg_ptr;          /* Pointer to background element to use for fill value */
+
+                /* Wrap the local buffer for elements */
+                if(NULL == (elem_wb = H5WB_wrap(elem_buf, sizeof(elem_buf))))
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't wrap buffer")
+
+                /* Get a pointer to a buffer that's large enough for element */
+                if(NULL == (elem_ptr = H5WB_actual(elem_wb, buf_size)))
+                    HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't get actual buffer")
 
                 /* Copy the user's data into the buffer for conversion */
-                HDmemcpy(tconv_buf, fill, src_type_size);
+                HDmemcpy(elem_ptr, fill, src_type_size);
 
                 /* If there's no VL type of data, do conversion first then fill the data into
                  * the memory buffer. */
-                if(H5T_path_bkg(tpath) && NULL == (bkg_buf = H5FL_BLK_CALLOC(type_elem, buf_size)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+                if(H5T_path_bkg(tpath)) {
+                    /* Wrap the local buffer for background elements */
+                    if(NULL == (bkg_elem_wb = H5WB_wrap(bkg_elem_buf, sizeof(bkg_elem_buf))))
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't wrap buffer")
+
+                    /* Get a pointer to a buffer that's large enough for element */
+                    if(NULL == (bkg_ptr = H5WB_actual_clear(bkg_elem_wb, buf_size)))
+                        HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't get actual buffer")
+                } /* end if */
 
                 /* Perform datatype conversion */
-                if(H5T_convert(tpath, src_id, dst_id, (size_t)1, (size_t)0, (size_t)0, tconv_buf, bkg_buf, dxpl_id) < 0)
+                if(H5T_convert(tpath, src_id, dst_id, (size_t)1, (size_t)0, (size_t)0, elem_ptr, bkg_ptr, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "data type conversion failed")
 
-                /* Point at temporary buffer */
-                fill_buf = tconv_buf;
+                /* Point at element buffer */
+                fill_buf = elem_ptr;
             } /* end if */
             else
                 fill_buf = fill;
@@ -318,14 +339,12 @@ done:
         HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
     if(tmp_buf)
         H5FL_BLK_FREE(type_conv, tmp_buf);
-    if(tconv_buf)
-        H5FL_BLK_FREE(type_elem, tconv_buf);
-    if(bkg_buf) {
-        if(TRUE == H5T_detect_class(fill_type, H5T_VLEN))
-            H5FL_BLK_FREE(type_conv, bkg_buf);
-        else
-            H5FL_BLK_FREE(type_elem, bkg_buf);
-    } /* end if */
+    if(elem_wb && H5WB_unwrap(elem_wb) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close wrapped buffer")
+    if(bkg_elem_wb && H5WB_unwrap(bkg_elem_wb) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close wrapped buffer")
+    if(bkg_buf)
+        H5FL_BLK_FREE(type_conv, bkg_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_fill() */

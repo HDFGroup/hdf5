@@ -39,6 +39,7 @@
 #include "H5HLprivate.h"	/* Local Heaps				*/
 #include "H5MFprivate.h"	/* File memory management		*/
 #include "H5MMprivate.h"	/* Memory management			*/
+#include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
 /* Private typedefs */
 
@@ -66,6 +67,9 @@ typedef struct H5G_node_t {
 /* Private macros */
 #define H5G_NODE_VERS   1               /*symbol table node version number   */
 #define H5G_NODE_SIZEOF_HDR(F) (H5G_NODE_SIZEOF_MAGIC + 4)
+
+/* Size of stack buffer for serialized nodes */
+#define H5G_NODE_BUF_SIZE       512
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5G_node_serialize(H5F_t *f, H5G_node_t *sym, size_t size, uint8_t *buf);
@@ -141,9 +145,6 @@ H5FL_DEFINE_STATIC(H5G_node_t);
 
 /* Declare a free list to manage sequences of H5G_entry_t's */
 H5FL_SEQ_DEFINE_STATIC(H5G_entry_t);
-
-/* Declare a free list to manage blocks of symbol node data */
-H5FL_BLK_DEFINE_STATIC(symbol_node);
 
 /* Declare a free list to manage the native key offset sequence information */
 H5FL_SEQ_DEFINE_STATIC(size_t);
@@ -346,65 +347,83 @@ H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED  *_udata1
 	      void UNUSED * _udata2)
 {
     H5G_node_t		   *sym = NULL;
-    size_t		    size = 0;
-    uint8_t		   *buf = NULL;
-    const uint8_t	   *p = NULL;
+    size_t		    size;
+    H5WB_t                 *wb = NULL;     /* Wrapped buffer for node data */
+    uint8_t                 node_buf[H5G_NODE_BUF_SIZE]; /* Buffer for node */
+    uint8_t		   *node;           /* Pointer to node buffer */
+    const uint8_t	   *p;
     H5G_node_t		   *ret_value;	/*for error handling */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_node_load);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_node_load)
 
     /*
      * Check arguments.
      */
-    assert(f);
-    assert(H5F_addr_defined(addr));
-    assert(!_udata1);
-    assert(NULL == _udata2);
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(!_udata1);
+    HDassert(NULL == _udata2);
 
     /*
      * Initialize variables.
      */
+
+    /* Wrap the local buffer for serialized node info */
+    if(NULL == (wb = H5WB_wrap(node_buf, sizeof(node_buf))))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't wrap buffer")
+
+    /* Compute the size of the serialized symbol table node on disk */
     size = H5G_node_size(f);
-    if ((buf=H5FL_BLK_MALLOC(symbol_node,size))==NULL)
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for symbol table node");
-    p=buf;
-    if(NULL == (sym = H5FL_CALLOC(H5G_node_t)) ||
-            NULL == (sym->entry = H5FL_SEQ_CALLOC(H5G_entry_t, (size_t)(2 * H5F_SYM_LEAF_K(f)))))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    if(H5F_block_read(f, H5FD_MEM_BTREE, addr, size, dxpl_id, buf) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_READERROR, NULL, "unable to read symbol table node");
+
+    /* Get a pointer to a buffer that's large enough for node */
+    if(NULL == (node = H5WB_actual(wb, size)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, NULL, "can't get actual buffer")
+
+    /* Read the serialized symbol table node. */
+    if(H5F_block_read(f, H5FD_MEM_BTREE, addr, size, dxpl_id, node) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_READERROR, NULL, "unable to read symbol table node")
+
+    /* Get temporary pointer to serialized node */
+    p = node;
+
     /* magic */
     if(HDmemcmp(p, H5G_NODE_MAGIC, (size_t)H5G_NODE_SIZEOF_MAGIC))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, NULL, "bad symbol table node signature");
+	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, NULL, "bad symbol table node signature")
     p += 4;
 
     /* version */
     if(H5G_NODE_VERS != *p++)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, NULL, "bad symbol table node version");
+	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, NULL, "bad symbol table node version")
+
     /* reserved */
     p++;
+
+    /* Allocate symbol table data structures */
+    if(NULL == (sym = H5FL_CALLOC(H5G_node_t)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    if(NULL == (sym->entry = H5FL_SEQ_CALLOC(H5G_entry_t, (size_t)(2 * H5F_SYM_LEAF_K(f)))))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* number of symbols */
     UINT16DECODE(p, sym->nsyms);
 
     /* entries */
     if(H5G_ent_decode_vec(f, &p, sym->entry, sym->nsyms) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, NULL, "unable to decode symbol table entries");
+	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, NULL, "unable to decode symbol table entries")
 
     /* Set return value */
     ret_value = sym;
 
 done:
-    if(buf)
-        H5FL_BLK_FREE(symbol_node,buf);
-    if(!ret_value) {
-        if (sym)
-            if(H5G_node_dest(f, sym)<0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, NULL, "unable to destroy symbol table node");
-    }
+    /* Release resources */
+    if(wb && H5WB_unwrap(wb) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, NULL, "can't close wrapped buffer")
+    if(!ret_value)
+        if(sym && H5G_node_dest(f, sym) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTFREE, NULL, "unable to destroy symbol table node")
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_node_load() */
 
 
 /*-------------------------------------------------------------------------
@@ -443,65 +462,77 @@ done:
 static herr_t
 H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5G_node_t *sym, unsigned UNUSED * flags_ptr)
 {
-    uint8_t	*buf = NULL;
-    size_t	size;
+    H5WB_t     *wb = NULL;     /* Wrapped buffer for node data */
+    uint8_t     node_buf[H5G_NODE_BUF_SIZE]; /* Buffer for node */
     unsigned	u;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_node_flush);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_node_flush)
 
     /*
      * Check arguments.
      */
-    assert(f);
-    assert(H5F_addr_defined(addr));
-    assert(sym);
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(sym);
 
     /*
      * Look for dirty entries and set the node dirty flag.
      */
-    for (u = 0; u < sym->nsyms; u++)
-	if (sym->entry[u].dirty) {
+    for(u = 0; u < sym->nsyms; u++)
+	if(sym->entry[u].dirty) {
             /* Set the node's dirty flag */
             sym->cache_info.is_dirty = TRUE;
 
             /* Reset the entry's dirty flag */
-            sym->entry[u].dirty=FALSE;
+            sym->entry[u].dirty = FALSE;
         } /* end if */
 
     /*
      * Write the symbol node to disk.
      */
-    if (sym->cache_info.is_dirty) {
+    if(sym->cache_info.is_dirty) {
+        uint8_t	   *node;           /* Pointer to node buffer */
+        size_t	size;
+
+        /* Wrap the local buffer for serialized node info */
+        if(NULL == (wb = H5WB_wrap(node_buf, sizeof(node_buf))))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wrap buffer")
+
+        /* Compute the size of the serialized symbol table node on disk */
         size = H5G_node_size(f);
 
-        /* Allocate temporary buffer */
-        if ((buf=H5FL_BLK_MALLOC(symbol_node,size))==NULL)
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+        /* Get a pointer to a buffer that's large enough for node */
+        if(NULL == (node = H5WB_actual(wb, size)))
+            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't get actual buffer")
 
-        if (H5G_node_serialize(f, sym, size, buf) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTSERIALIZE, FAIL, "node serialization failed");
+        /* Serialize symbol table node into buffer */
+        if(H5G_node_serialize(f, sym, size, node) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTSERIALIZE, FAIL, "node serialization failed")
 
-        if (H5F_block_write(f, H5FD_MEM_BTREE, addr, size, dxpl_id, buf) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "unable to write symbol table node to the file");
-        H5FL_BLK_FREE(symbol_node,buf);
+	/* Write the serialized symbol table node. */
+        if(H5F_block_write(f, H5FD_MEM_BTREE, addr, size, dxpl_id, node) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "unable to write symbol table node to the file")
 
         /* Reset the node's dirty flag */
         sym->cache_info.is_dirty = FALSE;
-    }
+    } /* end if */
 
     /*
      * Destroy the symbol node?	 This might happen if the node is being
      * preempted from the cache.
      */
-    if (destroy) {
-        if(H5G_node_dest(f, sym)<0)
-	    HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to destroy symbol table node");
-    }
+    if(destroy)
+        if(H5G_node_dest(f, sym) < 0)
+	    HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to destroy symbol table node")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    /* Release resources */
+    if(wb && H5WB_unwrap(wb) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close wrapped buffer")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_node_flush() */
 
 
 /*-------------------------------------------------------------------------

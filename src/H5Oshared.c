@@ -26,19 +26,29 @@
  *		the global heap.
  */
 
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
 
 
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
-#include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Gprivate.h"		/* Groups				*/
 #include "H5HFprivate.h"        /* Fractal heap				*/
-#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5SMprivate.h"        /* Shared object header messages        */
+#include "H5WBprivate.h"        /* Wrapped Buffers                      */
+
+/****************/
+/* Local Macros */
+/****************/
 
 /* First version, with full symbol table entry as link for object header sharing */
 #define H5O_SHARED_VERSION_1	1
@@ -53,8 +63,31 @@
 /* Size of stack buffer for serialized messages */
 #define H5O_MESG_BUF_SIZE               128
 
-/* Declare a free list to manage the serialized message information */
-H5FL_BLK_DEFINE(ser_mesg);
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+
+/********************/
+/* Local Prototypes */
+/********************/
+
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
+
 
 
 /*-------------------------------------------------------------------------
@@ -63,10 +96,7 @@ H5FL_BLK_DEFINE(ser_mesg);
  * Purpose:	Reads a message referred to by a shared message.
  *
  * Return:	Success:	Ptr to message in native format.  The message
- *				should be freed by calling H5O_msg_reset().  If
- *				MESG is a null pointer then the caller should
- *				also call H5MM_xfree() on the return value
- *				after calling H5O_msg_reset().
+ *				should be freed by calling H5O_msg_reset().
  *
  *		Failure:	NULL
  *
@@ -81,8 +111,8 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
     const H5O_msg_class_t *type)
 {
     H5HF_t *fheap = NULL;
+    H5WB_t *wb = NULL;          /* Wrapped buffer for attribute data */
     uint8_t mesg_buf[H5O_MESG_BUF_SIZE]; /* Buffer for deserializing messages */
-    uint8_t *buf = NULL;        /* Pointer to raw message in heap */
     void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_shared_read)
@@ -100,8 +130,9 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
 
     /* Check for implicit shared object header message */
     if(shared->type == H5O_SHARE_TYPE_SOHM) {
-        haddr_t fheap_addr;
-        size_t buf_size;
+        haddr_t fheap_addr;             /* Address of SOHM heap */
+        uint8_t *mesg_ptr;              /* Pointer to raw message in heap */
+        size_t mesg_size;               /* Size of message */
 
         /* Retrieve the fractal heap address for shared messages */
         if(H5SM_get_fheap_addr(f, dxpl_id, type->id, &fheap_addr) < 0)
@@ -112,23 +143,23 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
             HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, NULL, "unable to open fractal heap")
 
         /* Get the size of the message in the heap */
-        if(H5HF_get_obj_len(fheap, dxpl_id, &(shared->u.heap_id), &buf_size) < 0)
+        if(H5HF_get_obj_len(fheap, dxpl_id, &(shared->u.heap_id), &mesg_size) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "can't get message size from fractal heap.")
 
-        /* Allocate space for serialized message, if necessary */
-        if(buf_size > sizeof(mesg_buf)) {
-            if(NULL == (buf = H5FL_BLK_MALLOC(ser_mesg, buf_size)))
-                HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "memory allocation failed")
-        } /* end if */
-        else
-            buf = mesg_buf;
+        /* Wrap the local buffer for serialized message */
+        if(NULL == (wb = H5WB_wrap(mesg_buf, sizeof(mesg_buf))))
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't wrap buffer")
+
+        /* Get a pointer to a buffer that's large enough for message */
+        if(NULL == (mesg_ptr = H5WB_actual(wb, mesg_size)))
+            HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "can't get actual buffer")
 
         /* Retrieve the message from the heap */
-        if(H5HF_read(fheap, dxpl_id, &(shared->u.heap_id), buf) < 0)
+        if(H5HF_read(fheap, dxpl_id, &(shared->u.heap_id), mesg_ptr) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "can't read message from fractal heap.")
 
         /* Decode the message */
-        if(NULL == (ret_value = (type->decode)(f, dxpl_id, 0, buf)))
+        if(NULL == (ret_value = (type->decode)(f, dxpl_id, 0, mesg_ptr)))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "can't decode shared message.")
     } /* end if */
     else {
@@ -150,10 +181,10 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
 
 done:
     /* Release resources */
-    if(buf && buf != mesg_buf)
-        buf = H5FL_BLK_FREE(ser_mesg, buf);
     if(fheap && H5HF_close(fheap, dxpl_id) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "can't close fractal heap")
+    if(wb && H5WB_unwrap(wb) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CLOSEERROR, NULL, "can't close wrapped buffer")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_shared_read() */

@@ -36,9 +36,9 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
+#include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
 
 /****************/
@@ -252,9 +252,6 @@ typedef struct {
 /* Local Variables */
 /*******************/
 
-/* Declare a free list to manage the serialized link information */
-H5FL_BLK_DEFINE(ser_link);
-
 
 
 /*-------------------------------------------------------------------------
@@ -373,6 +370,7 @@ H5G_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     H5G_bt2_ud_ins_t udata;             /* User data for v2 B-tree insertion */
     H5HF_t *fheap = NULL;               /* Fractal heap handle */
     size_t link_size;                   /* Size of serialized link in the heap */
+    H5WB_t *wb = NULL;                  /* Wrapped buffer for link data */
     uint8_t link_buf[H5G_LINK_BUF_SIZE];        /* Buffer for serializing link */
     void *link_ptr = NULL;              /* Pointer to serialized link */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -397,13 +395,13 @@ HDfprintf(stderr, "%s: linfo->name_bt2_addr = %a\n", FUNC, linfo->name_bt2_addr)
 HDfprintf(stderr, "%s: HDstrlen(lnk->name) = %Zu, link_size = %Zu\n", FUNC, HDstrlen(lnk->name), link_size);
 #endif /* QAK */
 
-    /* Allocate space for serialized link, if necessary */
-    if(link_size > sizeof(link_buf)) {
-        if(NULL == (link_ptr = H5FL_BLK_MALLOC(ser_link, link_size)))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "memory allocation failed")
-    } /* end if */
-    else
-        link_ptr = link_buf;
+    /* Wrap the local buffer for serialized link */
+    if(NULL == (wb = H5WB_wrap(link_buf, sizeof(link_buf))))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wrap buffer")
+
+    /* Get a pointer to a buffer that's large enough for link */
+    if(NULL == (link_ptr = H5WB_actual(wb, link_size)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't get actual buffer")
 
     /* Create serialized form of link */
     if(H5O_msg_encode(f, H5O_LINK_ID, FALSE, link_ptr, lnk) < 0)
@@ -444,8 +442,8 @@ done:
     /* Release resources */
     if(fheap && H5HF_close(fheap, dxpl_id) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
-    if(link_ptr && link_ptr != link_buf)
-        H5FL_BLK_FREE(ser_link, link_ptr);
+    if(wb && H5WB_unwrap(wb) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close wrapped buffer")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_dense_insert() */

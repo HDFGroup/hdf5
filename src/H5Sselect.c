@@ -29,6 +29,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Spkg.h"		/* Dataspaces 				*/
 #include "H5Vprivate.h"		/* Vector and array functions		*/
+#include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
 /* Local functions */
 #ifdef LATER
@@ -37,8 +38,6 @@ static htri_t H5S_select_iter_has_next_block (const H5S_sel_iter_t *iter);
 static herr_t H5S_select_iter_next_block(H5S_sel_iter_t *iter);
 #endif /* LATER */
 
-/* Declare a free list to manage blocks of single datatype element data */
-H5FL_BLK_EXTERN(type_elem);
 
 
 /*--------------------------------------------------------------------------
@@ -1437,9 +1436,11 @@ herr_t
 H5S_select_fill(const void *_fill, size_t fill_size, const H5S_t *space, void *_buf)
 {
     H5S_sel_iter_t iter;        /* Selection iteration info */
-    hbool_t iter_init=0;        /* Selection iteration info has been initialized */
+    hbool_t iter_init = 0;      /* Selection iteration info has been initialized */
+    H5WB_t  *elem_wb = NULL;    /* Wrapped buffer for element data */
+    uint8_t elem_buf[H5T_ELEM_BUF_SIZE]; /* Buffer for element data */
     uint8_t *buf;               /* Current location in buffer */
-    const void *fill=_fill;     /* Alias for fill-value buffer */
+    const void *fill;           /* Alias for fill-value buffer */
     hssize_t nelmts;            /* Number of elements in selection */
     hsize_t off[H5D_IO_VECTOR_SIZE];          /* Array to store sequence offsets */
     size_t len[H5D_IO_VECTOR_SIZE];           /* Array to store sequence lengths */
@@ -1457,10 +1458,17 @@ H5S_select_fill(const void *_fill, size_t fill_size, const H5S_t *space, void *_
     assert(_buf);
 
     /* Check if we need a temporary fill value buffer */
-    if(fill==NULL) {
-        if (NULL==(fill = H5FL_BLK_CALLOC(type_elem,fill_size)))
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "fill value buffer allocation failed");
+    if(_fill == NULL) {
+        /* Wrap the local buffer for elements */
+        if(NULL == (elem_wb = H5WB_wrap(elem_buf, sizeof(elem_buf))))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't wrap buffer")
+
+        /* Get a pointer to a buffer that's large enough for element */
+        if(NULL == (fill = H5WB_actual_clear(elem_wb, fill_size)))
+            HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't get actual buffer")
     } /* end if */
+    else
+        fill = _fill;
 
     /* Initialize iterator */
     if (H5S_select_iter_init(&iter, space, fill_size)<0)
@@ -1495,15 +1503,11 @@ H5S_select_fill(const void *_fill, size_t fill_size, const H5S_t *space, void *_
     } /* end while */
 
 done:
-    /* Release selection iterator */
-    if(iter_init) {
-        if (H5S_SELECT_ITER_RELEASE(&iter)<0)
-            HDONE_ERROR (H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator");
-    } /* end if */
-
-    /* Release fill value, if allocated */
-    if(_fill==NULL && fill)
-        H5FL_BLK_FREE(type_elem, (void *)fill); /* casting away const OK - QAK */
+    /* Release resouces */
+    if(iter_init && H5S_SELECT_ITER_RELEASE(&iter) < 0)
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator");
+    if(elem_wb && H5WB_unwrap(elem_wb) < 0)
+        HDONE_ERROR(H5E_DATASPACE, H5E_CLOSEERROR, FAIL, "can't close wrapped buffer")
 
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_select_fill() */

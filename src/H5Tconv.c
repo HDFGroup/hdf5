@@ -3163,8 +3163,7 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     int	        direction;		/*direction of traversal	     */
     size_t	elmtno;			/*element number counter	     */
     unsigned    u;                      /* local index variable */
-    void	*bkg_buf=NULL;     	/*temporary background buffer 	     */
-    size_t	bkg_buf_size=0;	        /*size of background buffer in bytes */
+    void	*bkg_buf = NULL;     	/*temporary background buffer 	     */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5T_conv_array, FAIL)
@@ -3239,10 +3238,12 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
             /* Check if we need a background buffer for this conversion */
             if(tpath->cdata.need_bkg) {
+                size_t	bkg_buf_size;	        /*size of background buffer in bytes */
+
                 /* Allocate background buffer */
                 bkg_buf_size = src->shared->u.array.nelem * MAX(src->shared->size, dst->shared->size);
-                if((bkg_buf = H5FL_BLK_CALLOC(array_seq, bkg_buf_size)) == NULL)
-                    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
+                if(NULL == (bkg_buf = H5FL_BLK_CALLOC(array_seq, bkg_buf_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
             } /* end if */
 
             /* Perform the actual conversion */
@@ -3259,10 +3260,6 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                 dp += dst_delta;
             } /* end for */
 
-            /* Release the background buffer, if we have one */
-            if(bkg_buf != NULL)
-                H5FL_BLK_FREE(array_seq, bkg_buf);
-
             /* Release the temporary datatype IDs used */
             if(tsrc_id >= 0)
                 H5I_dec_ref(tsrc_id);
@@ -3275,6 +3272,10 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     }   /* end switch */
 
 done:
+    /* Release the background buffer, if we have one */
+    if(bkg_buf)
+        H5FL_BLK_FREE(array_seq, bkg_buf);
+
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5T_conv_array() */
 

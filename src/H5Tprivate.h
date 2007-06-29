@@ -30,6 +30,9 @@
 #include "H5Gprivate.h"		/* Groups 			  	*/
 #include "H5Rprivate.h"		/* References				*/
 
+/* Macro for size of temporary buffers to contain a single element */
+#define H5T_ELEM_BUF_SIZE       256
+
 /* Forward references of package typedefs */
 typedef struct H5T_t H5T_t;
 typedef struct H5T_stats_t H5T_stats_t;
