@@ -11,6 +11,9 @@
    values. */
 #undef CONVERT_DENORMAL_FLOAT
 
+/* Define if C++ compiler recognizes offsetof */
+#undef CXX_HAVE_OFFSETOF
+
 /* Define the default virtual file driver to compile */
 #undef DEFAULT_VFD
 
@@ -227,9 +230,6 @@
 
 /* Define to 1 if you have the <netinet/tcp.h> header file. */
 #undef HAVE_NETINET_TCP_H
-
-/* Define if C++ compiler recognizes offsetof */
-#undef HAVE_OFFSETOF
 
 /* Define if we have parallel support */
 #undef HAVE_PARALLEL

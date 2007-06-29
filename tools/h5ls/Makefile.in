@@ -60,8 +60,7 @@ am__aclocal_m4_deps = $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
-CONFIG_HEADER = $(top_builddir)/src/H5config.h \
-	$(top_builddir)/c++/src/H5cxx_config.h
+CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
@@ -70,7 +69,7 @@ h5ls_SOURCES = h5ls.c
 h5ls_OBJECTS = h5ls.$(OBJEXT)
 h5ls_LDADD = $(LDADD)
 h5ls_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
-DEFAULT_INCLUDES = -I. -I$(top_builddir)/src -I$(top_builddir)/c++/src@am__isrc@
+DEFAULT_INCLUDES = -I. -I$(top_builddir)/src@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
 am__depfiles_maybe = depfiles
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \

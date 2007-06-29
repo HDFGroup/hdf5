@@ -59,8 +59,7 @@ am__aclocal_m4_deps = $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
-CONFIG_HEADER = $(top_builddir)/src/H5config.h \
-	$(top_builddir)/c++/src/H5cxx_config.h
+CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES =
 @BUILD_PARALLEL_CONDITIONAL_TRUE@am__EXEEXT_1 = h5perf$(EXEEXT) \
 @BUILD_PARALLEL_CONDITIONAL_TRUE@	perf$(EXEEXT)
@@ -101,7 +100,7 @@ perf_meta_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
 zip_perf_SOURCES = zip_perf.c
 zip_perf_OBJECTS = zip_perf.$(OBJEXT)
 zip_perf_DEPENDENCIES = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
-DEFAULT_INCLUDES = -I. -I$(top_builddir)/src -I$(top_builddir)/c++/src@am__isrc@
+DEFAULT_INCLUDES = -I. -I$(top_builddir)/src@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
 am__depfiles_maybe = depfiles
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \

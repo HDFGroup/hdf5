@@ -59,8 +59,7 @@ am__aclocal_m4_deps = $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
-CONFIG_HEADER = $(top_builddir)/src/H5config.h \
-	$(top_builddir)/c++/src/H5cxx_config.h
+CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES =
 am__EXEEXT_1 = ptableTest$(EXEEXT)
 am_ptableTest_OBJECTS = ptableTest.$(OBJEXT)
@@ -68,7 +67,7 @@ ptableTest_OBJECTS = $(am_ptableTest_OBJECTS)
 ptableTest_LDADD = $(LDADD)
 ptableTest_DEPENDENCIES = $(LIBH5CPP_HL) $(LIBH5_HL) $(LIBH5CPP) \
 	$(LIBHDF5)
-DEFAULT_INCLUDES = -I. -I$(top_builddir)/src -I$(top_builddir)/c++/src@am__isrc@
+DEFAULT_INCLUDES = -I. -I$(top_builddir)/src@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
 am__depfiles_maybe = depfiles
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
