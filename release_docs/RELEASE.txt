@@ -999,9 +999,6 @@ Platforms marked with * were not tested for hdf5-1.8.0-beta2 release
     HP-UX B.11.23                 HP aC++/ANSI C B3910B A.06.00
                                   HP F90 v2.9.2
                                   HP aC++/ANSI C B3910B A.06.00
-*    IRIX64 6.5 (tesla -64)        MIPSpro cc 7.4.2m
-                                  F90 MIPSpro 7.4.2m
-                                  C++ MIPSpro cc 7.4.2m
 *    IRIX64 6.5 (64 & n32)         MIPSpro cc 7.4.4m
                                   F90 MIPSpro 7.4.4m 
                                   C++ MIPSpro cc 7.4.4m
@@ -1078,7 +1075,6 @@ HPUX11.23-64bit          n        y      n        y     y     y
 OSF1 v5.1                y        y      y        y     y     y
 Cray X1                  y        y      y        y     y     n
 Cray XT3           (16)  n        y      n        y     y     n
-IBM BG/L           (15)  n        n      n        n     y     y
 AIX-5.2 & 5.3 32-bit     y        y      y        y     y     y
 AIX-5.2 & 5.3 64-bit     y        y      y        y     y     y
 WinXP .Net 2003          y        y(16)  n        y(8)  y     y               
@@ -1116,7 +1112,6 @@ HPUX11.23-64bit          y       dna       n         y        n        y
 OSF1 v5.1                y                           y        n        y
 Cray X1                  n                           y        n        y
 Cray XT3           (16)  n                           y        n        y
-IBM BG/L           (15)  n                           y        n        n
 AIX-5.2 & 5.3 32-bit     n       n         n         y        n        y
 AIX-5.2 & 5.3 64-bit     n       n         n         y        n        y
 WinXP .Net 2003          y       y         y         y        y        n
@@ -1155,7 +1150,6 @@ Alpha OpenVMS 7.3.2      n       n         n         y        n        n
            (12) AMD Opteron x86_64
            (13) ifort
            (14) Yes with C and Fortran, but not with C++
-           (15) Only serial is ported.  PFS does not work for PHDF5 yet.
     Compiler versions for each platform are listed in the preceding
     "Platforms Tested" table.
 
@@ -1163,6 +1157,8 @@ Alpha OpenVMS 7.3.2      n       n         n         y        n        n
 
 Known Problems
 ==============
+* For SNL, spirit/liberty/thunderbird: The serial tests pass but parallel
+  tests failed with MPI-IO file locking message. AKC - 2007/6/25.
 * On Intel 64 Linux cluster (RH 4, Linux 2.6.9) with Intel 10.0 compilers use
   -mp -O1 compilation flags to build the libraries. Higher level of optimization 
   causes failures in several HDF5 library tests. 
@@ -1173,8 +1169,6 @@ Known Problems
 * For LLNL, uP: both serial and parallel pass.  Zeus: serial passes but
   parallel fails with a known proglem in MPI.  ubgl: serial passes but
   parallel fails. 
-* For LANL, QSC: serial works but parallel HDF5 failed parallel tests
-  that are suspected to be an MPI problem that is triggered by v1.8.
 * on SUN 5.10 C++ test fails in the "Testing Shared Datatypes with Attributes" test 
 * configuring with --enable-debug=all produces compiler errors on most
   platforms.  Users who want to run HDF5 in debug mode should use
