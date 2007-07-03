@@ -3431,8 +3431,11 @@ H5D_istore_initialize_by_extent(H5D_io_info_t *io_info)
             hsize_t bytes_accessed;	/* Bytes accessed in chunk */
 
             /* Compute the # of elements to leave with existing value, in each dimension */
-	    for(u = 0; u < rank; u++)
-		count[u] = MIN((chunk_offset[u] + layout->u.chunk.dim[u]), dset_dims[u] - chunk_offset[u]);
+            /* And, the number of bytes in the chunk being accessed */
+            for(u = 0, bytes_kept = layout->u.chunk.dim[rank]; u < rank; u++) {
+		count[u] = MIN(layout->u.chunk.dim[u], (dset_dims[u] - chunk_offset[u]));
+                bytes_kept *= count[u];
+            } /* end for */
 
 #ifdef H5D_ISTORE_DEBUG
 	    HDfputs("cache:initialize:offset:[", stdout);
@@ -3470,14 +3473,8 @@ H5D_istore_initialize_by_extent(H5D_io_info_t *io_info)
 	    if(H5S_select_fill(fill->buf, (size_t)dset_dims[rank], space_chunk, chunk) < 0)
 		HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, FAIL, "filling selection failed")
 
-            /* The number of bytes in the chunk being accessed */
-            for(u = 0, bytes_kept = 1; u < layout->u.chunk.ndims; u++) {
-                hsize_t sub_size;   /* Size of chunk accessed in a given dimension */
-
-                sub_size = MIN((chunk_offset[u] + layout->u.chunk.dim[u]), dset_dims[u])
-                        - chunk_offset[u];
-                bytes_kept *= sub_size;
-            } /* end for */
+            /* The number of bytes accessed in the chunk */
+            /* (i.e. the bytes replaced with fill values) */
             bytes_accessed = bytes_per_chunk - bytes_kept;
 
             /* Release lock on chunk */
