@@ -73,6 +73,7 @@
 
 ./config/COPYING
 ./config/BlankForm
+./config/apple
 ./config/commence.am
 ./config/conclude.am
 ./config/craynv
@@ -103,7 +104,6 @@
 ./config/Makefile.am.blank
 ./config/pgi-fflags
 ./config/pgi-flags
-./config/powerpc-apple
 ./config/powerpc-ibm-aix4.x
 ./config/powerpc-ibm-aix5.x
 ./config/rs6000-ibm-aix4.x
