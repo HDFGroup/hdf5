@@ -74,7 +74,6 @@ static hsize_t H5D_get_storage_size(H5D_t *dset, hid_t dxpl_id);
 static haddr_t H5D_get_offset(const H5D_t *dset);
 static herr_t H5D_iterate(void *buf, hid_t type_id, H5S_t *space,
     H5D_operator_t op, void *operator_data);
-static herr_t H5D_extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
 static herr_t H5D_set_extent(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
 
 
@@ -939,44 +938,6 @@ done:
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dget_create_plist() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Dextend
- *
- * Purpose:	This function makes sure that the dataset is at least of size
- *		SIZE. The dimensionality of SIZE is the same as the data
- *		space of the dataset being changed.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Friday, January 30, 1998
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Dextend(hid_t dset_id, const hsize_t *size)
-{
-    H5D_t	*dset;
-    herr_t       ret_value = SUCCEED;  /* Return value */
-
-    FUNC_ENTER_API(H5Dextend, FAIL)
-    H5TRACE2("e", "i*h", dset_id, size);
-
-    /* Check args */
-    if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
-    if(!size)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified")
-
-    /* Increase size */
-    if(H5D_extend(dset, size, H5AC_dxpl_id) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to extend dataset")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Dextend() */
 
 
 /*-------------------------------------------------------------------------
@@ -2139,90 +2100,6 @@ H5D_close(H5D_t *dataset)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_close() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5D_extend
- *
- * Purpose:	Increases the size of a dataset.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		Friday, January 30, 1998
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D_extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id)
-{
-    htri_t changed;                     /* Flag to indicate that the dataspace was successfully extended */
-    H5S_t *space;                       /* Dataset's dataspace */
-    H5O_fill_t *fill;                   /* Dataset's fill value */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI(H5D_extend, FAIL)
-
-    /* Check args */
-    HDassert(dataset);
-    HDassert(size);
-
-    /* Check if the filters in the DCPL will need to encode, and if so, can they?
-     * Filters need encoding if fill value is defined and a fill policy is set that requires
-     * writing on an extend.
-     */
-    fill = &dataset->shared->dcpl_cache.fill;
-    if(!dataset->shared->checked_filters) {
-        H5D_fill_value_t fill_status;       /* Whether the fill value is defined */
-
-        /* Retrieve the "defined" status of the fill value */
-        if(H5P_is_fill_value_defined(fill, &fill_status) < 0)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Couldn't retrieve fill value from dataset.")
-
-        /* See if we can check the filter status */
-        if(fill_status == H5D_FILL_VALUE_DEFAULT || fill_status == H5D_FILL_VALUE_USER_DEFINED) {
-            if(fill->fill_time == H5D_FILL_TIME_ALLOC ||
-                    (fill->fill_time == H5D_FILL_TIME_IFSET && fill_status == H5D_FILL_VALUE_USER_DEFINED)) {
-                /* Filters must have encoding enabled. Ensure that all filters can be applied */
-                if(H5Z_can_apply(dataset->shared->dcpl_id, dataset->shared->type_id) < 0)
-                    HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "can't apply filters")
-
-                dataset->shared->checked_filters = TRUE;
-            } /* end if */
-        } /* end if */
-    } /* end if */
-
-    /*
-     * NOTE: Restrictions on extensions were checked when the dataset was
-     *	     created.  All extensions are allowed here since none should be
-     *	     able to muck things up.
-     */
-
-    /* Increase the size of the data space */
-    space = dataset->shared->space;
-    if((changed = H5S_extend(space, size)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to increase size of data space")
-
-    /* Updated the dataset's info if the dataspace was successfully extended */
-    if(changed) {
-	/* Save the new dataspace in the file if necessary */
-	if(H5S_write(&(dataset->oloc), space, TRUE, dxpl_id) < 0)
-	    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update file with new dataspace")
-
-        /* Update the index values for the cached chunks for this dataset */
-        if(H5D_CHUNKED == dataset->shared->layout.type)
-            if(H5D_istore_update_cache(dataset, dxpl_id) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update cached chunk indices")
-
-	/* Allocate space for the new parts of the dataset, if appropriate */
-        if(fill->alloc_time == H5D_ALLOC_TIME_EARLY)
-            if(H5D_alloc_storage(dataset->oloc.file, dxpl_id, dataset, H5D_ALLOC_EXTEND, TRUE, FALSE) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset with fill value")
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_extend() */
 
 
 /*-------------------------------------------------------------------------

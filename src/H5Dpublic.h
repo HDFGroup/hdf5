@@ -107,7 +107,6 @@ H5_DLL herr_t H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 			hid_t file_space_id, hid_t plist_id, void *buf/*out*/);
 H5_DLL herr_t H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 			 hid_t file_space_id, hid_t plist_id, const void *buf);
-H5_DLL herr_t H5Dextend(hid_t dset_id, const hsize_t *size);
 H5_DLL herr_t H5Diterate(void *buf, hid_t type_id, hid_t space_id,
             H5D_operator_t op, void *operator_data);
 H5_DLL herr_t H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf);
@@ -125,6 +124,7 @@ H5_DLL herr_t H5Ddebug(hid_t dset_id);
 H5_DLL hid_t H5Dcreate(hid_t file_id, const char *name, hid_t type_id,
     hid_t space_id, hid_t plist_id);
 H5_DLL hid_t H5Dopen(hid_t file_id, const char *name);
+H5_DLL herr_t H5Dextend(hid_t dset_id, const hsize_t *size);
 
 #ifdef __cplusplus
 }
