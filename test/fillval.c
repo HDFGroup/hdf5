@@ -1164,6 +1164,177 @@ test_rdwr(hid_t fapl, const char *base_name, H5D_layout_t layout)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_extend_cases
+ *
+ * Purpose:	Called to test fill values with various different values
+ *
+ * Return:	Success:	0
+ *		Failure:	number of errors
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, July  3, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_extend_cases(hid_t file, hid_t dcpl, hsize_t *cur_size, hsize_t *max_size,
+    int *fillval)
+{
+    hid_t	fspace = -1, mspace = -1, dset = -1;
+    hsize_t	one[5] = {1, 1, 1, 1, 1};
+    hsize_t	hs_size[5], hs_stride[5];
+    hsize_t	hs_offset[5], nelmts;
+    int		val_rd, should_be;
+    int		i, j, *buf = NULL, odd;
+    unsigned    u;
+
+    /* Create a dataspace */
+    if((fspace = H5Screate_simple(5, cur_size, max_size))<0) TEST_ERROR
+
+    /* Create a file and dataset */
+    if((dset = H5Dcreate(file, "dset", H5T_NATIVE_INT, fspace, dcpl)) < 0) TEST_ERROR
+
+    /* Read some data and make sure it's the fill value */
+    if((mspace = H5Screate_simple(5, one, NULL)) < 0) TEST_ERROR
+    for(i = 0; i < 1000; i++) {
+	for(j = 0; j < 5; j++)
+	    hs_offset[j] = rand() % cur_size[j];
+
+	if(H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL, one, NULL) < 0) TEST_ERROR
+	if(H5Dread(dset, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT, &val_rd) < 0) TEST_ERROR
+	if(val_rd != *fillval) {
+	    H5_FAILED();
+            HDfprintf(stdout, "%u: Value read was not a fill value.\n", (unsigned)__LINE__);
+	    HDfprintf(stdout,"    Elmt = {%Hu, %Hu, %Hu, %Hu, %Hu}, read: %d, "
+                    "Fill value: %d\n",
+		    hs_offset[0], hs_offset[1],
+		    hs_offset[2], hs_offset[3],
+		    hs_offset[4], val_rd, *fillval);
+	    goto error;
+	} /* end if */
+    } /* end for */
+    if(H5Sclose(mspace) < 0) TEST_ERROR
+
+    /* Initialize dataspace & hyperslab info */
+    for(i = 0, nelmts = 1; i < 5; i++) {
+	hs_size[i] = cur_size[i] / 2;
+	hs_offset[i] = 0;
+	hs_stride[i] = 2;
+	nelmts *= hs_size[i];
+    } /* end for */
+
+    /* Create dataspace describing memory buffer */
+    if((mspace = H5Screate_simple(5, hs_size, hs_size)) < 0) TEST_ERROR
+
+    /*check for overflow*/
+    assert((nelmts * sizeof(int)) == (hsize_t)((size_t)(nelmts * sizeof(int))));
+
+    /* Allocate & initialize buffer */
+    buf = HDmalloc((size_t)(nelmts * sizeof(int)));
+    for(u = 0; u < nelmts; u++)
+        buf[u] = 9999;
+
+    /* Select elements within file dataspace */ 
+    if(H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, hs_stride, hs_size, NULL) < 0) TEST_ERROR
+
+    /* Write to all odd data locations */
+    if(H5Dwrite(dset, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT, buf) < 0) TEST_ERROR
+
+    /* Close memory dataspace */
+    if(H5Sclose(mspace) < 0) TEST_ERROR
+
+    /* Release memory buffer */
+    HDfree(buf);
+    buf = NULL;
+
+    /* Read some data and make sure it's the right value */
+    if((mspace = H5Screate_simple(5, one, NULL)) < 0) TEST_ERROR
+    for(i = 0; i < 1000; i++) {
+        /* Set offset for random element */
+	for(j = 0, odd = 0; j < 5; j++) {
+	    hs_offset[j] = rand() % cur_size[j];
+	    odd += (int)(hs_offset[j]%2);
+	} /* end for */
+
+        /* Select the random element */
+	if(H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL, one, NULL) < 0) TEST_ERROR
+
+        /* Read the random element */
+	if(H5Dread(dset, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT, &val_rd) < 0) TEST_ERROR
+
+        /* Verify the element read in */
+	should_be = odd ? *fillval : 9999;
+	if(val_rd != should_be) {
+	    H5_FAILED();
+            HDfprintf(stdout, "%u: Value read was not correct.\n", (unsigned)__LINE__);
+	    HDfprintf(stdout,"    Elmt = {%Hu, %Hu, %Hu, %Hu, %Hu}, read: %d, "
+                    "should be: %d\n",
+                    hs_offset[0], hs_offset[1],
+                    hs_offset[2], hs_offset[3],
+                    hs_offset[4], val_rd, should_be);
+	    goto error;
+	} /* end if */
+    } /* end for */
+    if(H5Sclose(mspace) < 0) TEST_ERROR
+
+    /* Extend the dataset */
+    if (H5Dextend(dset, max_size) < 0) TEST_ERROR
+
+    /* Re-open file dataspace */
+    if(H5Sclose(fspace) < 0) TEST_ERROR
+    if((fspace = H5Dget_space(dset)) < 0) TEST_ERROR
+
+    /* Read some data and make sure it's the right value */
+    if((mspace = H5Screate_simple(5, one, NULL)) < 0) TEST_ERROR
+    for(i = 0; i < 1000; i++) {
+        /* Set offset for random element */
+	for(j = 0, odd = 0; j < 5; j++) {
+	    hs_offset[j] = rand() % max_size[j];
+	    if((hsize_t)hs_offset[j] >= cur_size[j])
+		odd = 1;
+	    else
+  		odd += (int)(hs_offset[j]%2);
+	} /* end for */
+
+        /* Select the random element */
+	if(H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL, one, NULL) < 0) TEST_ERROR
+
+        /* Read the random element */
+	if(H5Dread(dset, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT, &val_rd) < 0) TEST_ERROR
+
+        /* Verify the element read in */
+	should_be = odd ? *fillval : 9999;
+	if(val_rd != should_be) {
+	    H5_FAILED();
+	    HDfprintf(stdout, "%u: Value read was not correct.\n", (unsigned)__LINE__);
+	    HDfprintf(stdout,"    Elmt = {%Hu, %Hu, %Hu, %Hu, %Hu}, read: %d, "
+                    "should be: %d\n",
+                    hs_offset[0], hs_offset[1],
+                    hs_offset[2], hs_offset[3],
+                    hs_offset[4], val_rd, should_be);
+	    goto error;
+	} /* end if */
+    } /* end for */
+    if(H5Sclose(mspace) < 0) TEST_ERROR
+
+    /* Cleanup */
+    if(H5Dclose(dset) < 0) TEST_ERROR
+    if(H5Sclose(fspace) < 0) TEST_ERROR
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Dclose(dset);
+	H5Sclose(fspace);
+	H5Sclose(mspace);
+    } H5E_END_TRY;
+
+    return -1;
+} /* end test_extend_cases() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	test_extend
  *
  * Purpose:	Test that filling works okay when a dataset is extended.
@@ -1182,33 +1353,28 @@ test_rdwr(hid_t fapl, const char *base_name, H5D_layout_t layout)
 static int
 test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
 {
-    hid_t	file=-1, fspace=-1, mspace=-1, dcpl=-1, dset=-1;
+    hid_t	file = -1, dcpl = -1;
     hsize_t	cur_size[5] = {32, 16, 8, 4, 2};
     hsize_t	max_size[5] = {128, 64, 32, 16, 8};
     hsize_t	ch_size[5] = {1, 16, 8, 4, 2};
-    hsize_t	one[5] = {1, 1, 1, 1, 1};
-    hsize_t	hs_size[5], hs_stride[5];
-    hsize_t	hs_offset[5], nelmts;
 #ifdef NO_FILLING
     int		fillval = 0;
 #else
     int		fillval = 0x4c70f1cd;
 #endif
-    int		val_rd, should_be;
-    int		i, j, *buf=NULL, odd, fd;
-    unsigned    u;
     char	filename[1024];
 
-    if (H5D_CHUNKED==layout) {
-	TESTING("chunked dataset extend");
-    } else {
-	TESTING("contiguous dataset extend");
-    }
+    /* Print testing message */
+    if(H5D_CHUNKED == layout)
+	TESTING("chunked dataset extend")
+    else
+	TESTING("contiguous dataset extend")
 
-    if ((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
-    if (H5D_CHUNKED==layout) {
-	if (H5Pset_chunk(dcpl, 5, ch_size)<0) goto error;
-    }
+    /* Create dataset creation property list */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
+    if(H5D_CHUNKED == layout)
+	if(H5Pset_chunk(dcpl, 5, ch_size) < 0) TEST_ERROR
+
 #ifndef NO_FILLING
     if (H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval)<0) goto error;
 #endif
@@ -1243,6 +1409,9 @@ test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
      * skipped below.
      */
     if (H5D_CONTIGUOUS==layout) {
+        int fd;
+        hsize_t	nelmts;
+
 	nelmts = max_size[0]*max_size[1]*max_size[2]*max_size[3]*max_size[4];
 	if ((fd=open(FILE_NAME_RAW, O_RDWR|O_CREAT|O_TRUNC, 0666))<0 ||
 	    close(fd)<0) goto error;
@@ -1269,126 +1438,20 @@ test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
     h5_fixname(base_name, fapl, filename, sizeof filename);
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
 	goto error;
-    if ((fspace=H5Screate_simple(5, cur_size, max_size))<0) goto error;
-    if ((dset=H5Dcreate(file, "dset", H5T_NATIVE_INT, fspace, dcpl))<0)
-	goto error;
 
-    /* Read some data and make sure it's the fill value */
-    if ((mspace=H5Screate_simple(5, one, NULL))<0) goto error;
-    for (i=0; i<1000; i++) {
-	for (j=0; j<5; j++) {
-	    hs_offset[j] = rand() % cur_size[j];
-	}
-	if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL,
-				one, NULL)<0) goto error;
-	if (H5Dread(dset, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT,
-		    &val_rd)<0) goto error;
-	if (val_rd!=fillval) {
-	    H5_FAILED();
-            HDfprintf(stdout, "%u: Value read was not a fill value.\n", (unsigned)__LINE__);
-	    HDfprintf(stdout,"    Elmt={%Hu,%Hu,%Hu,%Hu,%Hu}, read: %u, "
-		   "Fill value: %u\n",
-		   hs_offset[0], hs_offset[1],
-		   hs_offset[2], hs_offset[3],
-		   hs_offset[4], val_rd, fillval);
-	    goto error;
-	}
-    }
-    if (H5Sclose(mspace)<0) goto error;
+    /* Test integer datatype case */
+    if(test_extend_cases(file, dcpl, cur_size, max_size, &fillval) < 0) TEST_ERROR
 
-    /* Write to all odd data locations */
-    for (i=0, nelmts=1; i<5; i++) {
-	hs_size[i] = cur_size[i]/2;
-	hs_offset[i] = 0;
-	hs_stride[i] = 2;
-	nelmts *= hs_size[i];
-    }
-    if ((mspace=H5Screate_simple(5, hs_size, hs_size))<0) goto error;
-    assert((nelmts*sizeof(int))==(hsize_t)((size_t)(nelmts*sizeof(int)))); /*check for overflow*/
-    buf = malloc((size_t)(nelmts*sizeof(int)));
-    for (u=0; u<nelmts; u++) buf[u] = 9999;
-    if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, hs_stride,
-			    hs_size, NULL)<0) goto error;
-    if (H5Dwrite(dset, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT,
-		 buf)<0) goto error;
-    free(buf);
-    buf = NULL;
-    H5Sclose(mspace);
+    /* Cleanup */
+    if(H5Pclose(dcpl) < 0) goto error;
+    if(H5Fclose(file) < 0) goto error;
 
-    /* Read some data and make sure it's the right value */
-    if ((mspace=H5Screate_simple(5, one, NULL))<0) goto error;
-    for (i=0; i<1000; i++) {
-	for (j=0, odd=0; j<5; j++) {
-	    hs_offset[j] = rand() % cur_size[j];
-	    odd += (int)(hs_offset[j]%2);
-	}
-	should_be = odd ? fillval : 9999;
-	if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL,
-				one, NULL)<0) goto error;
-	if (H5Dread(dset, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT,
-		    &val_rd)<0) goto error;
-
-	if (val_rd!=should_be) {
-	    H5_FAILED();
-            HDfprintf(stdout, "%u: Value read was not correct.\n", (unsigned)__LINE__);
-	    HDfprintf(stdout,"    Elmt={%Hu,%Hu,%Hu,%Hu,%Hu}, read: %u, "
-		   "should be: %u\n",
-		   hs_offset[0], hs_offset[1],
-		   hs_offset[2], hs_offset[3],
-		   hs_offset[4], val_rd, should_be);
-	    goto error;
-	}
-    }
-    if (H5Sclose(mspace)<0) goto error;
-
-    /* Extend the dataset */
-    if (H5Dextend(dset, max_size)<0) goto error;
-    if (H5Sclose(fspace)<0) goto error;
-    if ((fspace=H5Dget_space(dset))<0) goto error;
-
-    /* Read some data and make sure it's the right value */
-    if ((mspace=H5Screate_simple(5, one, NULL))<0) goto error;
-    for (i=0; i<1000; i++) {
-	for (j=0, odd=0; j<5; j++) {
-	    hs_offset[j] = rand() % max_size[j];
-	    if ((hsize_t)hs_offset[j]>=cur_size[j]) {
-		odd = 1;
-	    } else {
-  		odd += (int)(hs_offset[j]%2);
-	    }
-	}
-
-	should_be = odd ? fillval : 9999;
-	if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL,
-				one, NULL)<0) goto error;
-	if (H5Dread(dset, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT,
-		    &val_rd)<0) goto error;
-
-	if (val_rd!=should_be) {
-	    H5_FAILED();
-	    HDfprintf(stdout, "%u: Value read was not correct.\n", (unsigned)__LINE__);
-	    HDfprintf(stdout,"    Elmt={%Hu,%Hu,%Hu,%Hu,%Hu}, read: %u, "
-		   "should be: %u\n",
-		   hs_offset[0], hs_offset[1],
-		   hs_offset[2], hs_offset[3],
-		   hs_offset[4], val_rd, should_be);
-	    goto error;
-	}
-    }
-    if (H5Sclose(mspace)<0) goto error;
-
-    if (H5Dclose(dset)<0) goto error;
-    if (H5Sclose(fspace)<0) goto error;
-    if (H5Pclose(dcpl)<0) goto error;
-    if (H5Fclose(file)<0) goto error;
     PASSED();
+
     return 0;
 
  error:
     H5E_BEGIN_TRY {
-	H5Dclose(dset);
-	H5Sclose(fspace);
-	H5Sclose(mspace);
 	H5Pclose(dcpl);
 	H5Fclose(file);
     } H5E_END_TRY;
@@ -1396,14 +1459,11 @@ test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
 
  skip:
     H5E_BEGIN_TRY {
-	H5Dclose(dset);
-	H5Sclose(fspace);
-	H5Sclose(mspace);
 	H5Pclose(dcpl);
 	H5Fclose(file);
     } H5E_END_TRY;
     return 0;
-}
+} /* end test_extend() */
 
 /*-------------------------------------------------------------------------
  * Function:    test_compatible
