@@ -488,7 +488,7 @@ find_objs_cb(hid_t group, const char *name, void *op_data)
     herr_t ret_value = 0;
 
     if(H5Gget_objinfo(group, name, FALSE, &statbuf) < 0)
-        ret_value = FAIL;
+        ;     /* keep going */
     else {
         switch (statbuf.type) {
             char *tmp;

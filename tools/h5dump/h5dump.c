@@ -1417,7 +1417,7 @@ dump_all(hid_t group, const char *name, void * op_data)
 
     /* Stat the object */
     if(H5Gget_objinfo(group, name, FALSE, &statbuf) < 0) {
-        error_msg(progname, "unable to get object information\n");
+        error_msg(progname, "unable to get object information for \"%s\"\n", name);
         d_status = EXIT_FAILURE;
         ret = FAIL;
         goto done;
