@@ -2086,28 +2086,30 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5S_set_extent( H5S_t *space, const hsize_t *size )
+H5S_set_extent(H5S_t *space, const hsize_t *size)
 {
-    unsigned u;
-    herr_t ret_value=0;
+    unsigned u;                 /* Local index variable */
+    herr_t ret_value = 0;       /* Return value */
 
-    FUNC_ENTER_NOAPI( H5S_set_extent, FAIL );
+    FUNC_ENTER_NOAPI(H5S_set_extent, FAIL);
 
     /* Check args */
-    assert( space && H5S_SIMPLE==H5S_GET_EXTENT_TYPE(space) );
-    assert( size);
+    HDassert(space && H5S_SIMPLE == H5S_GET_EXTENT_TYPE(space));
+    HDassert(size);
 
     /* Verify that the dimensions being changed are allowed to change */
-    for ( u = 0; u < space->extent.rank; u++ ) {
-        if ( space->extent.max && H5S_UNLIMITED != space->extent.max[u] &&
-                 space->extent.max[u]!=size[u] )
-             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,"dimension cannot be modified")
-        ret_value++;
+    for(u = 0; u < space->extent.rank; u++) {
+        if(space->extent.size[u] != size[u]) {
+            if(space->extent.max && H5S_UNLIMITED != space->extent.max[u] &&
+                     space->extent.max[u] < size[u])
+                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dimension cannot be modified")
+            ret_value++;
+        } /* end if */
     } /* end for */
 
     /* Update */
-    if (ret_value)
-        H5S_set_extent_real(space,size);
+    if(ret_value)
+        H5S_set_extent_real(space, size);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -2185,6 +2187,10 @@ H5S_set_extent_real( H5S_t *space, const hsize_t *size )
     if(H5S_GET_SELECT_TYPE(space)==H5S_SEL_ALL)
         if(H5S_select_all(space, FALSE)<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
+
+    /* Mark the dataspace as no longer shared if it was before */
+    if(H5O_msg_reset_share(H5O_SDSPACE_ID, space) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRESET, FAIL, "can't stop sharing dataspace")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
