@@ -259,9 +259,8 @@ H5D_contig_fill(H5D_t *dset, hid_t dxpl_id)
 
 done:
     /* Release the fill buffer info, if it's been initialized */
-    if(fb_info_init)
-        if(H5D_fill_term(&fb_info) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release fill buffer info")
+    if(fb_info_init && H5D_fill_term(&fb_info) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release fill buffer info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_contig_fill() */

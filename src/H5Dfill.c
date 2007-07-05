@@ -158,8 +158,7 @@ done:
     Use the selection in the dataspace to fill elements in a memory buffer.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
-    If "fill" parameter is NULL, use all zeros as fill value.  If "fill_type"
-    parameter is NULL, use "buf_type" for the fill value datatype.
+    If "fill" parameter is NULL, use all zeros as fill value.
  EXAMPLES
  REVISION LOG
     Raymond Lu - 20 March 2007
