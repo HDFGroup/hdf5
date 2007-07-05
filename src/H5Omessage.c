@@ -1052,17 +1052,14 @@ H5O_msg_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, unsigned sequence,
         /*
          * Keep track of how many times we failed trying to remove constant
          * messages.
+         * (OK to remove constant messages - QAK)
          */
-        if(mesg->flags & H5O_MSG_FLAG_CONSTANT)
-            udata->nfailed++;
-        else {
-            /* Convert message into a null message */
-            if(H5O_release_mesg(udata->f, udata->dxpl_id, oh, mesg, udata->adj_link) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to release message")
+        /* Convert message into a null message */
+        if(H5O_release_mesg(udata->f, udata->dxpl_id, oh, mesg, udata->adj_link) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to release message")
 
-            /* Indicate that the object header was modified */
-            *oh_modified = TRUE;
-        } /* end else */
+        /* Indicate that the object header was modified */
+        *oh_modified = TRUE;
 
         /* Break out now, if we've found the correct message */
         if(udata->sequence == H5O_FIRST || udata->sequence != H5O_ALL)
