@@ -1964,9 +1964,8 @@ H5D_istore_lock(const H5D_io_info_t *io_info, H5D_istore_ud1_t *udata,
 
 done:
     /* Release the fill buffer info, if it's been initialized */
-    if(fb_info_init)
-        if(H5D_fill_term(&fb_info) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, NULL, "Can't release fill buffer info")
+    if(fb_info_init && H5D_fill_term(&fb_info) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, NULL, "Can't release fill buffer info")
 
     /* Release the chunk allocated, on error */
     if(!ret_value)
@@ -2524,45 +2523,25 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_istore_chunkmap(const H5D_io_info_t *io_info, haddr_t chunk_addr[],hsize_t down_chunks[])
+H5D_istore_chunkmap(const H5D_io_info_t *io_info, haddr_t chunk_addr[],
+    hsize_t down_chunks[])
 {
-    H5D_t *dset=io_info->dset;       /* Local pointer to dataset info */
-#if 0
-    const H5D_rdcc_t   *rdcc = &(dset->shared->cache.chunk);	/*raw data chunk cache */
-    H5D_rdcc_ent_t     *ent;    /*cache entry  */
-    H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
-    H5D_dxpl_cache_t *dxpl_cache=&_dxpl_cache;   /* Data transfer property cache */
-#endif
+    H5D_t *dset = io_info->dset;       /* Local pointer to dataset info */
     H5D_istore_it_ud5_t	udata;
-    hid_t  dxpl_id = io_info->dxpl_id;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5D_istore_chunkmap, FAIL)
 
     HDassert(dset);
 
-#if 0
-    /* Fill the DXPL cache values for later use */
-    if (H5D_get_dxpl_cache(dxpl_id,&dxpl_cache)<0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
-
-    /* Construct dataset I/O info */
-    H5D_BUILD_IO_INFO(&io_info,dset,dxpl_cache,dxpl_id,NULL);
-
-    /* Search for cached chunks that haven't been written out */
-    for(ent = rdcc->head; ent; ent = ent->next) {
-        /* Flush the chunk out to disk, to make certain the size is correct later */
-        if (H5D_istore_flush_entry(&io_info, ent, FALSE)<0)
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot flush indexed storage buffer")
-    } /* end for */
-#endif
-
-    HDmemset(&udata, 0, sizeof udata);
+    /* Set up user data for B-tree callback */
+    HDmemset(&udata, 0, sizeof(udata));
     udata.common.mesg = &dset->shared->layout;
     udata.down_chunks = down_chunks;
     udata.chunk_addr  = chunk_addr;
 
-    if (H5B_iterate(dset->oloc.file, dxpl_id, H5B_ISTORE, H5D_istore_iter_chunkmap, dset->shared->layout.u.chunk.addr, &udata)<0)
+    /* Build mapping of chunk addresses and indices */
+    if(H5B_iterate(dset->oloc.file, io_info->dxpl_id, H5B_ISTORE, H5D_istore_iter_chunkmap, dset->shared->layout.u.chunk.addr, &udata) < 0)
         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to iterate over chunk B-tree")
 
 done:
@@ -2935,7 +2914,7 @@ H5D_istore_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
 #endif /* H5_HAVE_PARALLEL */
                 } /* end if */
 
-                /* Release the chunk if we need to re-allocate it each time */
+                /* Release the fill buffer if we need to re-allocate it each time */
                 if(fb_info_init && fb_info.has_vlen_fill_type && pline->nused > 0)
                     H5D_fill_release(&fb_info);
             } /* end if */
@@ -2969,9 +2948,8 @@ H5D_istore_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
 
 done:
     /* Release the fill buffer info, if it's been initialized */
-    if(fb_info_init)
-        if(H5D_fill_term(&fb_info) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release fill buffer info")
+    if(fb_info_init && H5D_fill_term(&fb_info) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release fill buffer info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_istore_allocate() */
@@ -3347,8 +3325,11 @@ herr_t
 H5D_istore_initialize_by_extent(H5D_io_info_t *io_info)
 {
     H5S_t           *space_chunk = NULL;	/* Dataspace for a chunk */
-    const H5O_layout_t *layout = &(io_info->dset->shared->layout); /* Dataset's layout */
+    H5D_t           *dset = io_info->dset;      /* Local pointer to the dataset info */
+    const H5O_layout_t *layout = &(dset->shared->layout); /* Dataset's layout */
     H5D_storage_t    store;                     /* Dataset storage information */
+    H5D_fill_buf_info_t fb_info;        /* Dataset's fill buffer info */
+    hbool_t     fb_info_init = FALSE;   /* Whether the fill value buffer has been initialized */
     hsize_t          dset_dims[H5O_LAYOUT_NDIMS];   /* Current dataspace dimensions */
     hsize_t          chunk_dims[H5O_LAYOUT_NDIMS];  /* Current chunk dimensions */
     hsize_t          chunk_offset[H5O_LAYOUT_NDIMS]; /* Logical location of the chunks */
@@ -3371,7 +3352,7 @@ H5D_istore_initialize_by_extent(H5D_io_info_t *io_info)
     HDassert(H5F_addr_defined(layout->u.chunk.addr));
 
     /* Go get the rank & dimensions */
-    if((srank = H5S_get_simple_extent_dims(io_info->dset->shared->space, dset_dims, NULL)) < 0)
+    if((srank = H5S_get_simple_extent_dims(dset->shared->space, dset_dims, NULL)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions")
     H5_ASSIGN_OVERFLOW(rank, srank, int, unsigned);
 
@@ -3423,19 +3404,26 @@ H5D_istore_initialize_by_extent(H5D_io_info_t *io_info)
 	    } /* end if */
 
 	if(found) {
-            const H5O_fill_t *fill = &io_info->dset->shared->dcpl_cache.fill; /* Fill value information */
+            H5S_sel_iter_t chunk_iter;  /* Memory selection iteration info */
+            hssize_t nelmts;            /* Number of data elements */
             hsize_t count[H5O_LAYOUT_NDIMS];	/* Element count of hyperslab */
             uint8_t *chunk;	        /* The file chunk  */
             unsigned idx_hint;	        /* Which chunk we're dealing with */
-            hsize_t bytes_kept;		/* Bytes kept in chunk */
             hsize_t bytes_accessed;	/* Bytes accessed in chunk */
 
+            /* Initialize the fill value buffer, if necessary */
+            if(!fb_info_init) {
+                if(H5D_fill_init(&fb_info, NULL, FALSE, NULL, NULL, NULL, NULL,
+                        &dset->shared->dcpl_cache.fill,
+                        dset->shared->type, dset->shared->type_id, (size_t)(bytes_per_chunk / layout->u.chunk.dim[rank]),
+                        io_info->dxpl_cache->max_temp_buf, io_info->dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill buffer info")
+                fb_info_init = TRUE;
+            } /* end if */
+
             /* Compute the # of elements to leave with existing value, in each dimension */
-            /* And, the number of bytes in the chunk being accessed */
-            for(u = 0, bytes_kept = layout->u.chunk.dim[rank]; u < rank; u++) {
+            for(u = 0; u < rank; u++)
 		count[u] = MIN(layout->u.chunk.dim[u], (dset_dims[u] - chunk_offset[u]));
-                bytes_kept *= count[u];
-            } /* end for */
 
 #ifdef H5D_ISTORE_DEBUG
 	    HDfputs("cache:initialize:offset:[", stdout);
@@ -3465,17 +3453,41 @@ H5D_istore_initialize_by_extent(H5D_io_info_t *io_info)
 	    if(NULL == (chunk = H5D_istore_lock(io_info, NULL, FALSE, &idx_hint)))
 		HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to read raw data chunk")
 
+
 	    /* Fill the selection in the memory buffer */
             /* Use the size of the elements in the chunk directly instead of */
             /* relying on the fill.size, which might be set to 0 if there is */
             /* no fill-value defined for the dataset -QAK */
-            H5_CHECK_OVERFLOW(dset_dims[rank], hsize_t, size_t);
-	    if(H5S_select_fill(fill->buf, (size_t)dset_dims[rank], space_chunk, chunk) < 0)
-		HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, FAIL, "filling selection failed")
+
+            /* Get the number of elements in the selection */
+            nelmts = H5S_GET_SELECT_NPOINTS(space_chunk);
+            HDassert(nelmts >= 0);
+            H5_CHECK_OVERFLOW(nelmts, hssize_t, size_t);
+
+            /* Check for VL datatype & non-default fill value */
+            if(fb_info.has_vlen_fill_type)
+                /* Re-fill the buffer to use for this I/O operation */
+                if(H5D_fill_refill_vl(&fb_info, (size_t)nelmts, io_info->dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "can't refill fill value buffer")
+
+            /* Create a selection iterator for scattering the elements to memory buffer */
+            if(H5S_select_iter_init(&chunk_iter, space_chunk, layout->u.chunk.dim[rank]) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize chunk selection information")
+
+            /* Scatter the data into memory */
+            if(H5D_select_mscat(fb_info.fill_buf, space_chunk, &chunk_iter, (size_t)nelmts, io_info->dxpl_cache, chunk/*out*/) < 0) {
+                H5S_SELECT_ITER_RELEASE(&chunk_iter);
+                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "scatter failed")
+            } /* end if */
+
+            /* Release the selection iterator */
+            if(H5S_SELECT_ITER_RELEASE(&chunk_iter) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
+
 
             /* The number of bytes accessed in the chunk */
             /* (i.e. the bytes replaced with fill values) */
-            bytes_accessed = bytes_per_chunk - bytes_kept;
+            bytes_accessed = nelmts * layout->u.chunk.dim[rank];
 
             /* Release lock on chunk */
             H5_CHECK_OVERFLOW(bytes_accessed, hsize_t, size_t);
@@ -3500,6 +3512,8 @@ done:
     /* Release resources */
     if(space_chunk && H5S_close(space_chunk) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
+    if(fb_info_init && H5D_fill_term(&fb_info) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release fill buffer info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_istore_initialize_by_extent() */
