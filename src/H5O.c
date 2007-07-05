@@ -2073,28 +2073,24 @@ H5O_remove_cb(H5O_mesg_t *mesg/*in,out*/, unsigned idx, unsigned * oh_flags_ptr,
         /*
          * Keep track of how many times we failed trying to remove constant
          * messages.
+         * (OK to remove constant messages - QAK)
          */
-        if(mesg->flags & H5O_FLAG_CONSTANT) {
-            udata->nfailed++;
-        } /* end if */
-        else {
-            /* Free any space referred to in the file from this message */
-            if(H5O_delete_mesg(udata->f, udata->dxpl_id, mesg, udata->adj_link) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5O_ITER_ERROR, "unable to delete file space for object header message")
+        /* Free any space referred to in the file from this message */
+        if(H5O_delete_mesg(udata->f, udata->dxpl_id, mesg, udata->adj_link) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5O_ITER_ERROR, "unable to delete file space for object header message")
 
-            /* Free any native information */
-            H5O_free_mesg(mesg);
+        /* Free any native information */
+        H5O_free_mesg(mesg);
 
-            /* Change message type to nil and zero it */
-            mesg->type = H5O_MSG_NULL;
-            HDmemset(mesg->raw, 0, mesg->raw_size);
+        /* Change message type to nil and zero it */
+        mesg->type = H5O_MSG_NULL;
+        HDmemset(mesg->raw, 0, mesg->raw_size);
 
-            /* Indicate that the message was modified */
-            mesg->dirty = TRUE;
+        /* Indicate that the message was modified */
+        mesg->dirty = TRUE;
 
-            /* Indicate that the object header was modified */
-            *oh_flags_ptr = TRUE;
-        } /* end else */
+        /* Indicate that the object header was modified */
+        *oh_flags_ptr = TRUE;
 
         /* Break out now, if we've found the correct message */
         if(udata->sequence != H5O_ALL)
