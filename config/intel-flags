@@ -94,6 +94,9 @@ fi
 # Please follow the pattern below by adding new versions at the top, copying
 # the information from the previous version and adding modifications to that.
 case "$cc_vendor-$cc_version" in
+    icc-10.0*)
+        PROD_CFLAGS="-O1 -Wl,-s"
+        ;;
     icc-8.0*)
 	# v8.0 -O3 infinite loops when compiling test/tselect.c. Use -O2.
 	PROD_CFLAGS="-O2 -Wl,-s"
