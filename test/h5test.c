@@ -584,6 +584,9 @@ h5_fileaccess(void)
 	 * and copy buffer size to the default values. */
 	if (H5Pset_fapl_direct(fapl, 1024, 4096, 8*4096)<0) return -1;
 #endif
+    } else if (!HDstrcmp(name, "latest")) {
+	/* use the latest format */
+	if (H5Pset_latest_format(fapl, TRUE)<0) return -1;
     } else {
 	/* Unknown driver */
 	return -1;
