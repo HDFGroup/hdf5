@@ -20,20 +20,18 @@ Preconditions:
        gcc-3.4.2 is included in MinGW, which includes: 
        gcc    : GNU C compiler
        gcc-g++: GNU C++ compiler
-       gcc-g77: GNU Fortran 77 compiler
 
    2.2 Using Compilers Not Supported
        
-       The compilers in 2.1 and 2.2 are supported and tested by HDF 
-       group. Any other compilers may still work but they are not 
+       The compilers in 2.1 are supported and tested by The HDF 
+       Group. Any other compilers may still work but they are not 
        guaranteed by HDF group.
 
-       If users want to use other compilers except those in 2.1 and 2.2,
+       If users want to use other compilers except those in 2.1,
        try to set the following variables to override the default 
        choices.
        
        CXX : C++ compiler command
-
        
 3. HDF5 Dependencies
 
@@ -127,7 +125,15 @@ Build HDF5 on MinGW
           Therefore, each configuration must incude the parameter
           "--disable-stream-vfd".
           
-       2) Building Fortran libraries is also currently unsupported.
+       2) Building Fortran libraries is also currently unsupported.  This is
+          because the current release of gcc for mingw (3.4.5) is not compatible
+          with the current g95 for mingw (g95 0.91!, gcc version 4.0.3).
+          
+          However, if you would like to build gcc 4.x on your own, there are
+          instructions for doing so here: 
+          http://www.mingw.org/MinGWiki/index.php/How%20to%20Compile%20GCC%204.1
+          Remember that this is UNSUPPORTED, and any Fortran binaries build
+          should be considered experimental.
        
        4) Shared libraries can not be built on MinGW in release 1.8.0.
           
@@ -187,7 +193,7 @@ Build HDF5 on MinGW
        example, if users want to configure HDF5 C/C++
        library, with zlib library at /c/usr/, and 
        install HDF5 into directory /c/hdf5 using 
-       gcc/g++ as C/C++ compiler and g95 as Fortran compiler:
+       gcc/g++ as C/C++ compiler:
      
            $ ./configure
              --with-zlib=/c/usr/include,/c/usr/lib
