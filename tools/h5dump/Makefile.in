@@ -37,7 +37,7 @@ LIBTOOLS=../lib/libh5tools.la
 LIBHDF5=$(top_builddir)/src/libhdf5.la
 
 PUB_PROGS=h5dump
-PROGS=$(PUB_PROGS) $(TEST_PROGS)
+PROGS=$(PUB_PROGS) $(TEST_PROGS) binread
 
 ## Source and object files for the library; do not install
 ##
@@ -76,7 +76,7 @@ check-xml:
 ## How to build the programs...They all depend on the hdf5 library and
 ## the tools library compiled in this directory.
 ##
-$(PROGS): $(LIBTOOLS) $(LIBHDF5) binread
+$(PROGS): $(LIBTOOLS) $(LIBHDF5)
 
 h5dump: h5dump.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ h5dump.lo $(LIBTOOLS) $(LIBHDF5) $(LDFLAGS) $(LIBS)
