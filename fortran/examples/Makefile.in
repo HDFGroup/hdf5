@@ -36,6 +36,7 @@ TEST_SCRIPTS=testh5fc.sh
 ## These are the files that `make clean' (and derivatives) will remove from
 ## this directory.
 CLEAN=*.h5
+DISTCLEAN=testh5fc.sh
 
 ## List all source files here. The list of object files will be
 ## created by replacing the `.f90' with a `.o'. This list is necessary

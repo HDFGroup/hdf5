@@ -47,6 +47,7 @@ TEST_SCRIPTS=testh5c++.sh
 ## These are the files that `make clean' (and derivatives) will remove from
 ## this directory.
 CLEAN=*.h5
+DISTCLEAN=testh5c++.sh
 
 ## How to build the programs... they depend only on the installed library
 ## and h5c++.

@@ -36,6 +36,7 @@ TEST_SCRIPTS=testh5cc.sh
 ## this directory.
 ## *.clog are from MPE option
 CLEAN=*.h5 *.raw *.meta *.clog
+DISTCLEAN=testh5cc.sh
 
 ## List all source files here.  The list of object files will be
 ## created by replacing the `.c' with a `.o'.  This list is necessary
