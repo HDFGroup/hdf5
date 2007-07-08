@@ -1026,7 +1026,7 @@ test_attr_dtype_shared(void)
     h5_stat_size_t filesize;             /* Size of file after modifications */
 
     // Output message about test being performed
-    MESSAGE(5, ("Testing Shared Datatypes with Attributes\n"));
+    MESSAGE (5, ("Testing Shared Datatypes with Attributes\n"));
 
     try {
 	// Create a file
@@ -1057,6 +1057,11 @@ test_attr_dtype_shared(void)
 	// Create dataspace for dataset
 	DataSpace dspace;
 
+	// Enclose the following so that all temporary objects can be
+	// destroyed before testing reference count - this is to overcome
+	// the different time when the temporary objects are to be destroyed
+	// by different compilers.
+	{
 	// Create dataset
 	DataSet dset = fid1.createDataSet(DSET1_NAME, dtype, dspace);
 
@@ -1121,6 +1126,8 @@ test_attr_dtype_shared(void)
 
 	// Unlink the dataset
 	fid1.unlink(DSET1_NAME);
+
+	} // end of enclosing to test reference counts
 
 	// Check reference count on named datatype
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
