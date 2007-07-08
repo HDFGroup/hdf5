@@ -1061,6 +1061,12 @@ static void test_attr_dtype_shared()
 	// Create dataspace for dataset
 	DataSpace dspace;
 
+	// Enclose the following so that all temporary objects can be
+	// destroyed before testing reference count - this is to overcome
+	// the different time when the temporary objects are to be destroyed
+	// by different compilers.
+	{
+
 	// Create dataset
 	DataSet dset = fid1.createDataSet(DSET1_NAME, dtype, dspace);
 
@@ -1125,6 +1131,8 @@ static void test_attr_dtype_shared()
 
 	// Unlink the dataset
 	fid1.unlink(DSET1_NAME);
+
+        } // end of enclosing to test reference counts
 
 	// Check reference count on named datatype
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
