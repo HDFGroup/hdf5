@@ -149,7 +149,7 @@ echo. >> %build_results%
 for %%a in (debug release) DO (
     echo.       Building %%a libraries...
     echo.       Building %%a libraries... >> %build_results%
-    devenv .\windows\proj\all\all.sln /rebuild %%a >> %build_results% 2>%1
+    devenv .\windows\proj\all\all.sln /rebuild %%a >> %build_results% 2>&1
     if errorlevel 1 goto :eof
 )
 
