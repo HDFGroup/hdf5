@@ -1930,7 +1930,7 @@
 ./tools/testfiles/h5repack_deflate.h5
 ./tools/testfiles/h5repack_szip.h5
 ./tools/testfiles/h5repack_ext.h5
-./tools/h5repack/h5repack_ext.bin
+
 
 # jam utility and tests
 ./tools/h5jam/Dependencies
