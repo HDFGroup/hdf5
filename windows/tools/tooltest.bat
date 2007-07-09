@@ -281,7 +281,8 @@
     ::Echo tests results
     ::-------------------
      fc %exp_file% %actual_output% > ..\..\temp_fc.txt
-		 if %ERRORLEVEL%==0 (
+     type ..\..\temp_fc.txt | find "FC: no dif" > nul
+     if not errorlevel 1 (
      set result=PASSED
      ) else (
      set result=FAILED
