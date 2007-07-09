@@ -175,7 +175,9 @@ goto :eof
 
 set zlib_name=
 set szip_name=
-set build_results=
+
+:: Don't unset build_results if it is being used by hdf5bt.BAT
+if "x%bt_results%"=="x" set build_results=
 popd
 
 if defined hdf5_debug pause
