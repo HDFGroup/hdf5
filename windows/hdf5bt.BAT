@@ -140,8 +140,11 @@ goto :eof
 :: Cleanup our environment
 :cleanup
 
-set bt_results=
 set build_results=
+
+:: Don't unset bt_results if it is being used by autotest_hdf5.bat
+if "x%hdf5_auto_results%"=="x" set bt_results=
+
 popd
 
 if defined hdf5_debug pause

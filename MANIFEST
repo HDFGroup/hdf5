@@ -1633,14 +1633,6 @@
 ./windows/install_hlf90dll.bat
 ./windows/install_hlf90examples.BAT
 
-./windows/batch_intelc/convert_to_icproj.BAT
-./windows/batch_intelc/hdf5bt_intelc.BAT
-./windows/batch_intelc/hdf5build_intelc.BAT
-./windows/batch_net/convert.js
-./windows/batch_net/convert_to_vcproj.bat
-./windows/batch_net/hdf5bt_net.bat
-./windows/batch_net/hdf5build_net.bat
-
 # C++ Examples
 ./windows/c++/examples/testcppExamples.BAT
 ./windows/c++/examples/allcppexamples/allcppexamples.sln
