@@ -234,10 +234,11 @@ Platforms Tested
     IRIX64 6.5 (tesla -64)        MIPSpro cc 7.4.2m
                                   F90 MIPSpro 7.4.2m
                                   C++ MIPSpro cc 7.4.2m
-    IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1.3m
-                                  F90 MIPSpro 7.3.1.3m (64 only)
-                                  C++ MIPSpro cc 7.3.1.3m
-				  mpt 1.6
+    IRIX64 6.5 
+    (ucar mop1 64 & n32)
+                                  MIPSpro cc 7.4.4m
+                                  F90 MIPSpro 7.4.4m (64 only)
+                                  C++ MIPSpro cc 7.4.4m
     Linux 2.4.20-28.7             gcc 2.96
     (eirene, verbena)             gcc 3.3.2
                                   PGI compilers (pgcc, pgf90, pgCC) 
@@ -250,6 +251,9 @@ Platforms Tested
     (mir)                         PGI 5.2-1 C and F90 (with k3-32) 
                          	  Intel(R) C++ 32-bit Version 8.1
     				  Intel(R) Fortran 32-bit Version 8.1
+    Linux 2.6.16.46-0.12-debug #1 
+          SMP ia64 GNU/Linux      Intel(R) C++ Version 10.0.025
+    (ucar hir1)                   Intel(R) Fortran Itanium(R) Version 10.0.025
     Linux 2.6.5-7.283-rtgfx Altix 
           SMP ia64                Intel(R) C++ Version 9.0
     (cobalt)                      Intel(R) Fortran Itanium(R) Version 9.0
