@@ -386,6 +386,12 @@ Footnotes:  (1) Using mpich 1.2.6
 
 Known Problems
 ==============
+* QSC (an HP alpha-based OSF1 cluster) failed the testpar/testphdf5 sub-test
+  "calloc".  All other tests passed.  This indicates dataset using chunked
+  storage created by serial HDF5 may not work properly with parallel HDF5.
+  The calloc test can be skipped by running "prun ... testphdf5 -x calloc".
+  AKC - 2007/7/12.
+
 * Newer versions of g95 are not compatible with v1.6.5.  Last known g95
   version that is still compatiable with v1.6.5 is May 17, 2006.
   AKC - 2006/11/29.
