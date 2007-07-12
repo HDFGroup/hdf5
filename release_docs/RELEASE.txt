@@ -268,6 +268,10 @@ Platforms Tested
     Xeon Linux 2.4.21-32.0.1.ELsmp-perfctr-lustre
     (tungsten)	                  Intel(R) C++ Version 9.0
                                   Intel(R) Fortran Compiler Version 9.0
+    Xeon Linux 2.6.9-42.0.10.EL_lustre-1.4.10.1smp
+    (abe)                         Intel(R) C++ Version 10.0
+                                  Intel(R) Fortran Compiler Version 10.0
+                                  Open MPI 1.2.2
     IA-64 Linux 2.4.21.SuSE_292.til1 ia64
     (NCSA tg-login)               Intel(R) C++ Version 8.0
                                   Intel(R) Fortran Compiler Version 8.0
