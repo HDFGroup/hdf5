@@ -57,6 +57,7 @@
 ./bin/locate_sw
 ./bin/ltmain.sh
 ./bin/make_err
+./bin/make_vers
 ./bin/makehelp
 ./bin/missing
 ./bin/mkdirs
@@ -414,6 +415,8 @@
 ./src/H5system.c
 ./src/H5timer.c
 ./src/H5trace.c
+./src/H5vers.txt
+./src/H5version.h
 ./src/H5A.c
 ./src/H5Abtree2.c
 ./src/H5Adense.c

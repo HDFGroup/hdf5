@@ -30,6 +30,9 @@
  */
 #include "H5pubconf.h"		/*from configure                             */
 
+/* API Version macro wrapper definitions */
+#include "H5version.h"
+
 #ifdef H5_HAVE_FEATURES_H
 #include <features.h>           /*for setting POSIX, BSD, etc. compatibility */
 #endif

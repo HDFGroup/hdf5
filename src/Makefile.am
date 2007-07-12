@@ -89,29 +89,22 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
 
 
 # Public headers
-include_HEADERS =H5public.h H5Apublic.h H5ACpublic.h \
-        H5Cpublic.h H5Dpublic.h  \
+include_HEADERS = hdf5.h H5api_adpt.h H5pubconf.h H5public.h H5version.h \
+        H5Apublic.h H5ACpublic.h \
+        H5Cpublic.h H5Dpublic.h \
         H5Epubgen.h H5Epublic.h H5Fpublic.h H5FDpublic.h H5FDcore.h H5FDdirect.h \
 	H5FDfamily.h H5FDlog.h H5FDmpi.h H5FDmpio.h H5FDmpiposix.h              \
         H5FDmulti.h H5FDsec2.h  H5FDstdio.h H5FDstream.h \
         H5Gpublic.h  H5Ipublic.h H5Lpublic.h \
         H5MMpublic.h H5Opublic.h H5Ppublic.h H5Rpublic.h H5Spublic.h \
-        H5Tpublic.h H5Zpublic.h H5pubconf.h hdf5.h H5api_adpt.h
+        H5Tpublic.h H5Zpublic.h
 
 # install libhdf5.settings in lib directory
 settingsdir=$(libdir)
 settings_DATA=libhdf5.settings
 
-# Error header generation
-#
-# Actually, H5Einit.h, H5Eterm.h, H5Edefin.h and H5Epubgen.h all
-# depend on H5err.txt, but the perl script generates them all, so just
-# list one here.
-$(top_srcdir)/src/H5Edefin.h: $(top_srcdir)/src/H5err.txt
-	perl $(top_srcdir)/bin/make_err $>
-
 # Number format detection
-# The LD_LIBRARY_PATH setting is a klutch.
+# The LD_LIBRARY_PATH setting is a kludge.
 # Things should have been all set during H5detect making.
 # Remove the generated .c file if errors occur unless HDF5_Make_Ignore
 # is set to ignore the error.
@@ -121,6 +114,18 @@ H5Tinit.c: H5detect$(EXEEXT)
 	$(RUNSERIAL) ./H5detect > H5Tinit.c  ||                               \
 	    (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||          \
 	    ($(RM) $@ ; exit 1)
+
+# Error header generation
+#
+# Actually, H5Einit.h, H5Eterm.h, H5Edefin.h and H5Epubgen.h all
+# depend on H5err.txt, but the perl script generates them all, so just
+# list one here.
+$(top_srcdir)/src/H5Edefin.h: $(top_srcdir)/src/H5err.txt
+	perl $(top_srcdir)/bin/make_err $?
+
+# API version macro generation
+$(top_srcdir)/src/H5version.h: $(top_srcdir)/src/H5vers.txt
+	perl $(top_srcdir)/bin/make_vers $?
 
 # Add TRACE macros to library source files.  This is done via the trace script
 # in the hdf5/bin directory.  If the file contains HDF5 API macros, a "clean"

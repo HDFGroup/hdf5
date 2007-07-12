@@ -442,7 +442,7 @@ libhdf5_la_SOURCES = H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
 
 
 # Public headers
-include_HEADERS = H5public.h H5Apublic.h H5ACpublic.h \
+include_HEADERS = H5public.h H5version.h H5Apublic.h H5ACpublic.h \
         H5Cpublic.h H5Dpublic.h  \
         H5Epubgen.h H5Epublic.h H5Fpublic.h H5FDpublic.h H5FDcore.h H5FDdirect.h \
 	H5FDfamily.h H5FDlog.h H5FDmpi.h H5FDmpio.h H5FDmpiposix.h              \
@@ -1062,13 +1062,18 @@ help:
 # http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
 # access to either file, you may request a copy from help@hdfgroup.org.
 
+# API version macro generation
+#
+$(top_srcdir)/src/H5version.h: $(top_srcdir)/src/H5vers.txt
+	perl $(top_srcdir)/bin/make_vers $?
+
 # Error header generation
 #
 # Actually, H5Einit.h, H5Eterm.h, H5Edefin.h and H5Epubgen.h all
 # depend on H5err.txt, but the perl script generates them all, so just
 # list one here.
 $(top_srcdir)/src/H5Edefin.h: $(top_srcdir)/src/H5err.txt
-	perl $(top_srcdir)/bin/make_err $>
+	perl $(top_srcdir)/bin/make_err $?
 
 # Number format detection
 # The LD_LIBRARY_PATH setting is a klutch.
