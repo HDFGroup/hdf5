@@ -95,7 +95,7 @@ dnl
 DEFAULT_LIBS=""
 
 dnl Support F9X variable to define Fortran compiler if FC variable is
-dnl not used.  This should be depreciated in the future.
+dnl not used.  This should be deprecated in the future.
 if test "x" = "x$FC"; then
   FC=${F9X}
 fi
@@ -3679,6 +3679,30 @@ fi
 AM_CONDITIONAL([BUILD_ALL_CONDITIONAL], [test "X$BUILD_ALL" = "Xyes"])
 
 dnl ----------------------------------------------------------------------
+dnl Enable deprecated public API symbols
+dnl
+AC_SUBST([DEPRECATED_SYMBOLS])
+AC_MSG_CHECKING([if deprecated public symbols are available]);
+AC_ARG_ENABLE([deprecated-symbols],
+              [AC_HELP_STRING([--enable-deprecated-symbols],
+                     [Enable deprecated public API symbols [default=yes]])],
+             [DEPREC_SYMBOLS=$enableval],
+             [DEPREC_SYMBOLS=yes])
+
+case "X-$DEPREC_SYMBOLS" in
+  X-yes)
+    AC_MSG_RESULT([yes])
+    DEPRECATED_SYMBOLS=yes
+    ;;
+  X-no|*)
+    AC_MSG_RESULT([no])
+    DEPRECATED_SYMBOLS=no
+    AC_DEFINE([NO_DEPRECATED_SYMBOLS], [1],
+              [Define if deprecated public API symbols are disabled])
+    ;;
+esac
+
+dnl ----------------------------------------------------------------------
 dnl Create automake conditionals to tell automake makefiles which directories
 dnl need to be compiled
 
@@ -3925,6 +3949,9 @@ IF_YES_NO "$enable_static"
 
 PRINT_N "  Statically Linked Executables"
 IF_YES_NO "$STATIC_EXEC"
+
+PRINT_N " With Deprecated Public Symbols"
+IF_YES_NO "$DEPRECATED_SYMBOLS"
 
 PRINT_N "                        Tracing"
 IF_YES_NO "$TRACE_API"

@@ -118,11 +118,18 @@ echo
 echo "    Running trace script:"
 bin/trace src/H5*.c || exit 1
 
-# Run make_error
-# make_error automatically generates the H5E headers that create error message
+# Run make_err
+# make_err automatically generates the H5E headers that create error message
 # types for HDF5.
 echo
 echo "    Running error generation script:"
 bin/make_err src/H5err.txt || exit 1
+
+# Run make_vers
+# make_vers automatically generates the public headers that define the API version
+# macros for HDF5.
+echo
+echo "    Running API version generation script:"
+bin/make_vers src/H5vers.txt || exit 1
 
 exit 0
