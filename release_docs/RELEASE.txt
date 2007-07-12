@@ -214,23 +214,8 @@ Bug Fixes since HDF5-1.6.5 Release
 Platforms Tested
 ================
 
-    AIX 5.1  (32 and 64-bit)      xlc 6.0.0.6
-                                  xlf 8.1.1.3
-    				  xlC 6.0.0.6
-				  mpcc_r 6.0.0.6
-                                  mpxlf_r 8.1.1.3
-				  xlc 5.0.2.5
-				  xlf 7.1.1.2
-				  xlC 5.0.2.5
-				  mpcc_r 5.0.2.5
-				  mpxlf_r 7.1.1.2
     AIX 5.2 (32/64 bit)           xlc 6.0.0.8
                                   xlC 6.0.0.9
-                                  xlf 8.1.1.7
-                                  mpcc_r 6.0.0.8
-                                  mpxlf_r 8.1.1.7
-    AIX 5.2 (32/64 bit, LLNL frost)    xlc 6.0.0.8
-                                  xlC 6.0.0.8
                                   xlf 8.1.1.7
                                   mpcc_r 6.0.0.8
                                   mpxlf_r 8.1.1.7
@@ -243,12 +228,9 @@ Platforms Tested
     FreeBSD 4.11                  gcc 2.95.4
                                   g++ 2.95.4
                                   gcc 3.2.3, 3.3.6, 3.4.4, 4.0.0
-    HP-UX B.11.00                 HP C  HP92453-01 A.11.01.20 
-                                  HP F90 v2.4
-                                  HP ANSI C++ B3910B A.03.13
-    HP-UX B.11.23                 HP aC++/ANSI C B3910B A.06.00
-                                  HP F90 v2.9
-                                  HP aC++/ANSI C B3910B A.06.00
+    HP-UX B.11.23                 HP aC++/ANSI C B3910B A.06.02
+                                  HP F90 v3.1 (32-bit only)
+                                  HP aC++/ANSI C B3910B A.06.02
     IRIX64 6.5 (tesla -64)        MIPSpro cc 7.4.2m
                                   F90 MIPSpro 7.4.2m
                                   C++ MIPSpro cc 7.4.2m
@@ -276,15 +258,9 @@ Platforms Tested
                                   HP Fortran V5.5A-3548
 				  Compaq C++ V6.5-036  
 				  MPIX200_64_r13.4
-    OSF1 V5.1 (PSC)               Compaq C V6.5-303 
-                                  HP Fortran V5.5A-3548
-				  Compaq C++ V6.5-040  
     SunOS 5.8 32,46               Sun WorkShop 6 update 2 C 5.3
      (Solaris 2.8)                Sun WorkShop 6 update 2 Fortran 90
                                   Sun WorkShop 6 update 2 C++ 5.3
-    SunOS 5.9 32,64               Sun C 5.6 2004/07/15
-     (Solaris 2.9)                Sun Fortran 95 8.0 2004/07/15
-                                  Sun C++ 5.6 2004/07/15
     SunOS 5.10                    Sun WorkShop 6 update 2 C 5.3
                                   Sun WorkShop 6 update 2 Fortran 95 6.2
                                   Sun WorkShop 6 update 2 C++ 5.3
@@ -300,11 +276,8 @@ Platforms Tested
                                   Visual Studio .NET (with Intel Fortran 9.0)
                                   Visual Studio 2005 (with Intel Fortran 9.0)
                                   cygwin (gcc 3.4.4)
-    MAC OS X                      Darwin 7.5
-                                  gcc and g++ Apple Computer, Inc. GCC 
-                                  version 1175, based on gcc version 3.3.2
-                                  IBM XL Fortran version 8.1 
-                                  Absoft Fortran compiler v8.2
+    MAC OS X Intel                Darwin 8.10.1
+                                  i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1
 
 
 Supported Configuration Features Summary
