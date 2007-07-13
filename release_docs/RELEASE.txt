@@ -262,7 +262,7 @@ Platforms Tested
 				  Compaq C++ V6.5-036  
 				  MPIX200_64_r13.4
     SunOS 5.8 32,46               Sun WorkShop 6 update 2 C 5.3
-     (Solaris 2.8)                Sun WorkShop 6 update 2 Fortran 90
+     (Solaris 2.8)                Sun WorkShop 6 update 2 Fortran 95 6.2
                                   Sun WorkShop 6 update 2 C++ 5.3
     SunOS 5.10                    Sun WorkShop 6 update 2 C 5.3
                                   Sun WorkShop 6 update 2 Fortran 95 6.2
