@@ -124,6 +124,11 @@ typedef struct H5B_class_t {
     herr_t	(*debug_key)(FILE*, H5F_t*, hid_t, int, int, const void*, const void*);
 } H5B_class_t;
 
+typedef struct H5B_info_ud_t {
+        void    *udata;
+        hsize_t *btree_size;
+} H5B_info_ud_t;
+
 /*****************************/
 /* Library-private Variables */
 /*****************************/
@@ -145,6 +150,8 @@ H5_DLL herr_t H5B_insert (H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, hadd
                            void *udata);
 H5_DLL herr_t H5B_iterate (H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_operator_t
                             op, haddr_t addr, void *udata);
+H5_DLL herr_t H5B_iterate_btree_size (H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_operator_t
+                            op, haddr_t addr, H5B_info_ud_t *bh_udata);
 H5_DLL herr_t H5B_remove(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,
 			  void *udata);
 H5_DLL herr_t H5B_delete(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,

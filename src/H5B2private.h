@@ -122,6 +122,10 @@ H5_DLL herr_t H5B2_insert(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     haddr_t addr, void *udata);
 H5_DLL herr_t H5B2_iterate(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     haddr_t addr, H5B2_operator_t op, void *op_data);
+
+H5_DLL herr_t H5B2_info_iterate(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
+    haddr_t addr, hsize_t *op_data);
+
 H5_DLL herr_t H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,
     haddr_t addr, void *udata, H5B2_found_t op, void *op_data);
 H5_DLL herr_t H5B2_index(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type,

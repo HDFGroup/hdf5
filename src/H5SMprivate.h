@@ -56,6 +56,8 @@ H5_DLL herr_t H5SM_reconstitute(H5O_shared_t *sh_mesg, H5F_t *f,
     unsigned msg_type_id, H5O_fheap_id_t heap_id);
 H5_DLL herr_t H5SM_get_refcount(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     const H5O_shared_t *sh_mesg, hsize_t *ref_count);
+H5_DLL herr_t H5SM_ih_info(H5F_t *f, H5F_info_t *bh_info, hid_t dxpl_id);
+
 
 /* Debugging routines */
 H5_DLL herr_t H5SM_table_debug(H5F_t *f, hid_t dxpl_id, haddr_t table_addr,

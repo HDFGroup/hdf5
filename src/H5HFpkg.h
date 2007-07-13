@@ -722,6 +722,8 @@ H5_DLL herr_t H5HF_sect_indirect_add(H5HF_hdr_t *hdr, hid_t dxpl_id,
 /* Internal operator callbacks */
 H5_DLL herr_t H5HF_op_read(const void *obj, size_t obj_len, void *op_data);
 H5_DLL herr_t H5HF_op_write(const void *obj, size_t obj_len, void *op_data);
+H5_DLL herr_t H5HF_indirect_info(H5F_t *f, hid_t dxpl_id, H5HF_hdr_t *hdr,
+    haddr_t iblock_addr, unsigned nrows, hsize_t *heap_size/*out*/);
 
 /* Testing routines */
 #ifdef H5HF_TESTING

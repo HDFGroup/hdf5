@@ -965,3 +965,30 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_super_write() */
 
+/*-------------------------------------------------------------------------
+ * Function:    H5F_super_ext_info
+ *              Get storage size of the superblock extension
+ *
+ * Return:      Success:        non-negative on success
+ *              Failure:        Negative
+ *
+ * Programmer:  Vailin Choi
+ *              July 11, 2007
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_super_ext_info(H5F_t *f, H5F_info_t *finfo, hid_t dxpl_id)
+{
+    herr_t      ret_value=SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5F_super_ext_info, FAIL)
+
+    HDassert(f);
+    HDassert(finfo);
+
+    if (H5O_super_ext_size(f, &(finfo->super_ext_size), dxpl_id) < 0)
+	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve superblock extension size")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F_super_ext_info() */

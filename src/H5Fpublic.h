@@ -97,6 +97,14 @@ typedef enum H5F_close_degree_t {
     H5F_CLOSE_STRONG    = 3
 } H5F_close_degree_t;
 
+typedef struct H5F_info_t {
+    hsize_t		super_ext_size;	/* superblock extension size */
+    struct {
+	hsize_t		hdr_size;
+	H5_ih_info_t	msgs_info;
+    } sohm;
+} H5F_info_t;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -132,6 +140,8 @@ H5_DLL herr_t H5Fget_mdc_size(hid_t file_id,
                               int * cur_num_entries_ptr);
 H5_DLL herr_t H5Freset_mdc_hit_rate_stats(hid_t file_id);
 H5_DLL ssize_t H5Fget_name(hid_t obj_id, char *name, size_t size);
+H5_DLL herr_t H5Fget_info(hid_t obj_id, H5F_info_t *bh_info);
+
 
 #ifdef __cplusplus
 }

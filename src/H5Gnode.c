@@ -2015,4 +2015,36 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_node_debug() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5G_btree_node_iterate
+ *
+ * Purpose:     This function gets called by H5B_iterate_btree_size()
+ *              to gather storage info for SNODs.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Vailin Choi
+ *              Jun 19 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_btree_node_iterate(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t UNUSED addr,
+    const void UNUSED *_rt_key, void *_udata)
+{
+    herr_t              ret_value=SUCCEED;
+    hsize_t             *stab_size=(hsize_t *)_udata;
 
+    FUNC_ENTER_NOAPI(H5G_btree_node_iterate, FAIL)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(stab_size);
+
+    *stab_size += H5G_node_size(f);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_btree_node_iterate() */

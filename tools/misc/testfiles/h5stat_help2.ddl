@@ -20,4 +20,5 @@ Usage: h5stat [OPTIONS] file
      -d, --dset            Print dataset information
      -D, --dsetmetadata    Print dataset metadata
      -T, --dtypemetadata   Print datatype metadata
+     -A, --attribute       Print attribute information
 

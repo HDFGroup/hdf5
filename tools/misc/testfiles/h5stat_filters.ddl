@@ -14,6 +14,20 @@ File information
 Object header size: (total/unused)
 	Groups: 48/8
 	Datasets: 4936/1344
+Storage information:
+	Groups:
+		B-tree/List: 1200
+		Heap: 288
+	Attributes:
+		B-tree/List: 0
+		Heap: 0
+	Chunked datasets:
+		B-tree: 31392
+	Shared Messages:
+		Header: 0
+		B-tree/List: 0
+		Heap: 0
+	Superblock extension: 0
 Small groups:
 	Total # of small groups: 0
 Group bins:
@@ -57,3 +71,8 @@ Dataset datatype information:
 		Count (total/named) = (1/0)
 		Size (desc./elmt) = (14/4)
 	Total dataset datatype count: 15
+Small # of attributes:
+	Total # of objects with small # of attributes: 0
+Attribute bins:
+	Total # of objects with attributes: 0
+	Max. # of attributes to objects: 0

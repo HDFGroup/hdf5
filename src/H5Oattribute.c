@@ -1687,4 +1687,63 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_exists */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_attr_bh_info
+ *
+ * Purpose:     For 1.8 attribute, returns storage amount for btree and fractal heap
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Vailin Choi
+ *              June 19, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_attr_bh_info(H5O_loc_t *oloc, H5O_t *oh, hid_t dxpl_id, H5_ih_info_t *bh_info)
+{
+    H5O_ainfo_t ainfo;          /* Attribute information for object */
+    herr_t      ret_value=SUCCEED;      /* Return value */
+    hsize_t     huge_bt_size=0;
 
+    FUNC_ENTER_NOAPI(H5O_attr_bh_info, FAIL)
+
+    HDassert(oloc);
+    HDassert(oh);
+    HDassert(bh_info);
+
+    /* Check for attribute info stored */
+    ainfo.nattrs = 0;
+    ainfo.fheap_addr = HADDR_UNDEF;
+    ainfo.corder_bt2_addr = HADDR_UNDEF;
+    ainfo.name_bt2_addr = HADDR_UNDEF;
+    if(oh->version > H5O_VERSION_1 && NULL == H5A_get_ainfo(oloc->file, dxpl_id, oh, &ainfo))
+        /* Clear error stack from not finding attribute info */
+       	H5E_clear_stack(NULL);
+
+    if(oh->version > H5O_VERSION_1) {
+        if (H5F_addr_defined(ainfo.corder_bt2_addr)) {
+	    if (H5B2_info_iterate(oloc->file, dxpl_id, H5A_BT2_CORDER,
+		ainfo.corder_bt2_addr, &(bh_info->index_size)) < 0)
+		    HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree storage info")
+        }
+
+        if (H5F_addr_defined(ainfo.name_bt2_addr)) {
+	    if (H5B2_info_iterate(oloc->file, dxpl_id, H5A_BT2_NAME,
+		ainfo.name_bt2_addr, &(bh_info->index_size)) < 0)
+		    HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree storage info")
+        }
+
+        huge_bt_size = 0;
+        if (H5F_addr_defined(ainfo.fheap_addr)) {
+	    HDassert(H5O_msg_count_real(oh, H5O_MSG_ATTR) == 0);
+	    if (H5HF_fheap_info(oloc->file, dxpl_id, ainfo.fheap_addr, &(bh_info->heap_size), &huge_bt_size) < 0)
+		HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree storage info")
+	    bh_info->index_size += huge_bt_size;
+        }
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* H5O_attr_bh_info() */

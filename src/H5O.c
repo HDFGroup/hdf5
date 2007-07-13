@@ -488,7 +488,6 @@ H5Oget_info(hid_t loc_id, const char *name, H5O_info_t *oinfo, hid_t lapl_id)
     /* Retrieve the object's information */
     if(H5G_loc_info(&loc, name, oinfo/*out*/, lapl_id, H5AC_ind_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
-
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oget_info() */
@@ -1825,6 +1824,13 @@ done:
  * Programmer:	Quincey Koziol
  *		November 21 2006
  *
+ * Modifications: 
+ *		12 July 2007 by Vailin Choi
+ *              Modified to retrieve the following information:
+ *              1. GROUP: storage for btree and heap (1.6 and 1.8)
+ *              2. DATASET: btree storage for chunked dataset
+ *              3. ATTRIBUTE: storage for 1.8 btree and fractal heap
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1856,6 +1862,16 @@ H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id)
     /* Retrieve the type of the object */
     if(H5O_obj_type_real(oh, &oinfo->type) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to determine object type")
+
+    /* Retrieve btree and heap storage info */
+    HDmemset(&oinfo->meta_size.obj, 0, sizeof(H5_ih_info_t));
+    if (oinfo->type == H5O_TYPE_GROUP) {
+	if (H5O_group_bh_info(oloc, oh, dxpl_id, &(oinfo->meta_size.obj)/*out*/) < 0)
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't retrieve 1.8 group btree & heap info")
+    } else if (oinfo->type == H5O_TYPE_DATASET) {
+	if (H5O_dset_bh_info(oloc, oh, dxpl_id, &(oinfo->meta_size.obj)/*out*/) < 0)
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't retrieve chunked dataset btree info")
+    }
 
     /* Set the object's reference count */
     oinfo->rc = oh->nlink;
@@ -1927,6 +1943,9 @@ H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id)
 
     /* Retrieve # of attributes */
     oinfo->num_attrs = H5O_attr_count_real(oloc->file, dxpl_id, oh);
+    HDmemset(&oinfo->meta_size.attr, 0, sizeof(H5_ih_info_t));
+    if ((oinfo->num_attrs > 0) && (H5O_attr_bh_info(oloc, oh, dxpl_id, &oinfo->meta_size.attr/*out*/) < 0))
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve attribute btree & heap info")
 
     /* Iterate over all the chunks, adding any gaps to the free space */
     oinfo->hdr.space.total = 0;
@@ -2121,3 +2140,47 @@ H5O_get_oh_addr(const H5O_t *oh)
     FUNC_LEAVE_NOAPI(oh->chunk[0].addr)
 } /* end H5O_get_oh_addr() */
 
+/*-------------------------------------------------------------------------
+ * Function:    H5O_super_ext_size
+ *
+ * Purpose:     Collect size of the superblock extension
+ *
+ * Return:      Success:        non-negative
+ *              Failure:        negative
+ *
+ * Programmer:  Vailin Choi
+ *              July 12, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_super_ext_size(H5F_t *f, hsize_t *ext_size, hid_t dxpl_id)
+{
+    H5O_t 	*oh = NULL; 		/* Object header */
+    H5O_chunk_t *curr_chunk;   		/* Pointer to current message being operated on */
+    unsigned 	u;            		/* Local index variable */
+    herr_t 	ret_value = SUCCEED; 	/* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_super_ext_size, FAIL)
+
+    /* Check args */
+    HDassert(f);
+    HDassert(ext_size);
+    HDassert(H5F_addr_defined(f->shared->extension_addr));
+
+    /* Get the object header */
+    if(NULL == (oh = H5AC_protect(f, dxpl_id, H5AC_OHDR, f->shared->extension_addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+
+    *ext_size = 0;
+    for(u = 0, curr_chunk = &oh->chunk[0]; u < oh->nchunks; u++, curr_chunk++) {
+        /* Accumulate the size of the header on disk */
+        *ext_size += curr_chunk->size;
+    }
+
+done:
+    if(oh && H5AC_unprotect(f, dxpl_id, H5AC_OHDR, f->shared->extension_addr, oh, H5AC__NO_FLAGS_SET) < 0)
+	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5O_super_ext_size() */

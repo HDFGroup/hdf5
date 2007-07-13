@@ -1187,4 +1187,76 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_modify() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5B2_info_iterate
+ *
+ * Purpose:     Iterate over all the records in the B-tree, collecting
+ *              storage info.
+ *
+ * Return:      non-negative on success, negative on error
+ *
+ * Programmer:  Vailin Choi
+ *              June 19 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2_info_iterate(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr, hsize_t *btree_size)
+{
+    H5B2_t      	*bt2=NULL;          /* Pointer to the B-tree header */
+    H5B2_shared_t	*shared;            /* Pointer to B-tree's shared information */
+    H5RC_t      	*bt2_shared=NULL;   /* Pointer to ref-counter for shared B-tree info */
+    hbool_t     	incr_rc=FALSE;      /* Flag to indicate that we've incremented the B-tree's shared info reference count */
+    H5B2_node_ptr_t 	root_ptr;           /* Node pointer info for root node */
+    unsigned    	depth;              /* Current depth of the tree */
+    herr_t      	ret_value=SUCCEED;
 
+
+    FUNC_ENTER_NOAPI(H5B2_info_iterate, FAIL)
+
+    /* Check arguments. */
+    HDassert(f);
+    HDassert(type);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(btree_size);
+
+    /* Look up the B-tree header */
+    if(NULL == (bt2 = H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
+
+    bt2_shared = bt2->shared;
+    H5RC_INC(bt2_shared);
+    incr_rc = TRUE;
+
+    /* Get the pointer to the shared B-tree info */
+    shared = H5RC_GET_OBJ(bt2->shared);
+    HDassert(shared);
+
+    *btree_size += H5B2_HEADER_SIZE(f);
+
+    /* Make copy of the root node pointer */
+    root_ptr = bt2->root;
+
+    /* Current depth of the tree */
+    depth = shared->depth;
+
+    /* Release header */
+    if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__NO_FLAGS_SET) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header info")
+    bt2 = NULL;
+
+    /* Iterate through records */
+    if(root_ptr.node_nrec > 0) {
+        /* Iterate through nodes */
+        if((ret_value = H5B2_info_iterate_node(f, dxpl_id, bt2_shared, depth, &root_ptr, btree_size)) < 0)
+            HERROR(H5E_BTREE, H5E_CANTLIST, "node iteration failed");
+    } /* end if */
+
+done:
+    /* Check if we need to decrement the reference count for the B-tree's shared info */
+    if(incr_rc)
+        H5RC_DEC(bt2_shared);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5B2_info_iterate() */

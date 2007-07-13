@@ -1346,4 +1346,45 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HL_get_size() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5HL_heapsize
+ *
+ * Purpose:     Compute the size in bytes of the specified instance of
+ *              H5HL_t via H5HL_compute_size()
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Vailin Choi
+ *              June 19 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HL_heapsize(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t *heap_size)
+{
+    H5HL_t      *heap = NULL;           /* Heap to query */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+    size_t	local_heap_size = 0;
 
+    FUNC_ENTER_NOAPI(H5HL_heapsize, FAIL)
+
+    /* check arguments */
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(heap_size);
+
+    /* Get heap pointer */
+    if(NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_READ)))
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap")
+
+    if (H5HL_compute_size(f, heap, &local_heap_size)<0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to compute size of local heap")
+    *heap_size = (hsize_t)local_heap_size;
+
+done:
+    if(heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release local heap")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HL_get_size() */

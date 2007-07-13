@@ -385,6 +385,10 @@ H5_DLL herr_t H5G_stab_lookup(H5O_loc_t *grp_oloc, const char *name,
 H5_DLL herr_t H5G_stab_lookup_by_idx(H5O_loc_t *grp_oloc, H5_iter_order_t order,
     hsize_t n, H5O_link_t *lnk, hid_t dxpl_id);
 
+H5_DLL herr_t H5G_stab_bh_info(struct H5O_loc_t *grp_oloc, H5O_stab_t *stabinfo,
+    hid_t dxpl_id, H5_ih_info_t *bh_info);
+
+
 /*
  * Functions that understand symbol table entries.
  */
@@ -404,6 +408,10 @@ H5_DLL herr_t H5G_ent_debug(H5F_t *f, const H5G_entry_t *ent,
 H5_DLL herr_t H5G_node_init(H5F_t *f);
 H5_DLL int H5G_node_iterate(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
 		     const void *_rt_key, void *_udata);
+
+H5_DLL herr_t H5G_btree_node_iterate(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
+                     const void *_rt_key, void *_udata);
+
 H5_DLL int H5G_node_sumup(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
 		     const void *_rt_key, void *_udata);
 H5_DLL int H5G_node_by_idx(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,

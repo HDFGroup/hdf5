@@ -493,4 +493,51 @@ HDfprintf(stderr, "%s: fspace->hdr->tot_sect_count = %Hu\n", "H5FS_assert", fspa
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FS_assert() */
 #endif /* H5FS_DEBUG */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FS_meta_info
+ *
+ * Purpose:     Collect meta storage info used by the free space manager
+ *
+ * Return:      Success:        non-negative 
+ *              Failure:        negative
+ *
+ * Programmer:  Vailin Choi
+ *              June 19, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FS_meta_info(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr, hsize_t *meta_size)
+{
+    H5FS_t      *fspace = NULL;         /* Free space header info */
+    H5FS_prot_t fs_prot;                /* Information for protecting free space manager */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
+    FUNC_ENTER_NOAPI(H5FS_meta_info, FAIL)
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(H5F_addr_defined(fs_addr));
+    HDassert(meta_size);
+
+    /* Initialize user data for protecting the free space manager */
+    fs_prot.nclasses = 0;
+    fs_prot.classes = NULL;
+    fs_prot.cls_init_udata = NULL;
+ 
+    /*
+     * Load the free space header.
+     */
+    if(NULL == (fspace = H5AC_protect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, &fs_prot, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, FAIL, "unable to load free space header")
+
+    *meta_size = H5FS_HEADER_SIZE(f) + fspace->alloc_sect_size;
+ 
+done:
+    if(fspace && H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, fspace, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_FSPACE, H5E_PROTECT, FAIL, "unable to release free space header")
+
+    FUNC_LEAVE_NOAPI(ret_value) 
+}   

@@ -300,6 +300,14 @@ typedef enum H5_index_t {
     H5_INDEX_N			/* Number of indices defined 		*/
 } H5_index_t;
 
+/*
+ * Storage info struct used by H5O_info_t and H5F_info_t
+ */
+typedef struct H5_ih_info_t {
+    hsize_t     index_size;     /* btree and/or list */
+    hsize_t     heap_size;
+} H5_ih_info_t;
+
 /* Functions in H5.c */
 H5_DLL herr_t H5open(void);
 H5_DLL herr_t H5close(void);

@@ -2069,3 +2069,106 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /* H5B_DEBUG */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5B_iterate_btree_size
+ *
+ * Purpose:     Return the amount of storage used for the btree.
+ *		Keep following the left-most child until reaching the leaf node.
+ *		For each level, gather storage for all the nodes on that level.
+ *		For 0 level, also gather storage for the SNODs.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Vailin Choi
+ *              June 19, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B_iterate_btree_size(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, H5B_operator_t op, haddr_t addr, H5B_info_ud_t *bh_udata)
+{
+    H5B_t		*bt = NULL;     /* Pointer to current B-tree node */
+    herr_t		ret_value;      /* Return value */
+    H5B_shared_t        *shared;        /* Pointer to shared B-tree info */
+    H5B_t	*start_bt;       /* Pointer to next B-tree node */
+    haddr_t	start_addr;      /* Address of next node to iterate over */
+
+            haddr_t	*child;         /* Pointer to node's child addresses */
+            uint8_t	*key;           /* Pointer to node's native keys */
+            unsigned	u;              /* Local index variable */
+
+    FUNC_ENTER_NOAPI(H5B_iterate_btree_size, FAIL)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(type);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(bh_udata);
+
+    /* Protect the initial/current node */
+    if(NULL == (bt = (H5B_t *)H5AC_protect(f, dxpl_id, H5AC_BT, addr, type, bh_udata->udata, H5AC_READ)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree node")
+    shared = H5RC_GET_OBJ(bt->rc_shared);
+    HDassert(shared);
+
+    if (bt->level > 0) {
+	/* Keep following the left-most child until we reach a leaf node. */
+	if((ret_value = H5B_iterate_btree_size(f, dxpl_id, type, op, bt->child[0], bh_udata)) < 0)
+	    HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "unable to list B-tree node")
+    }
+    ret_value = H5_ITER_CONT;
+    while(bt && ret_value == H5_ITER_CONT) {
+	/* count the SNOD sizes for leaf nodes */
+	if (bt->level == 0) { /* for leaf node only */
+	    for(u = 0, child = bt->child, key = bt->native; u < bt->nchildren && ret_value == H5_ITER_CONT; u++, child++, key += type->sizeof_nkey) {
+		if (op != NULL) { /* only for symbol table nodes */
+		    ret_value = (*op)(f, dxpl_id, key, *child, key + type->sizeof_nkey, bh_udata->btree_size);
+		}
+		if(ret_value < 0)
+		    HERROR(H5E_BTREE, H5E_CANTLIST, "iterator function failed");
+	    } /* end for */
+	}  /* end if */
+
+        /* Check for continuing iteration */
+        if(ret_value == H5_ITER_CONT) {
+                H5B_t	*next_bt;       /* Pointer to next B-tree node */
+                haddr_t	next_addr;      /* Address of next node to iterate over */
+
+	    /* count the size of bt */
+	    *(bh_udata->btree_size) += H5B_nodesize(f, shared, NULL);
+
+	    /* Protect bt's next node to the right, if there is one */
+	    if(H5F_addr_defined(bt->right)) {
+		next_addr = bt->right;
+		if(NULL == (next_bt = (H5B_t *)H5AC_protect(f, dxpl_id, H5AC_BT, next_addr, type, bh_udata->udata, H5AC_READ)))
+		    HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "B-tree node")
+	    } else {
+		next_addr = HADDR_UNDEF;
+                next_bt = NULL;
+           } /* end if */
+
+	    /* Unprotect bt */
+           if(H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET) < 0) {
+		if(next_bt) {
+		    HDassert(H5F_addr_defined(next_addr));
+		    if(H5AC_unprotect(f, dxpl_id, H5AC_BT, next_addr, next_bt, H5AC__NO_FLAGS_SET) < 0)
+			HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree node")
+		} /* end if */
+		HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree node")
+	    } /* end if */
+
+	    /* Advance to the next node */
+	    bt = next_bt;
+	    addr = next_addr;
+	} /* end if */
+    } /* end while */
+
+done:
+    if(bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree node")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5B_iterate_btree_size() */

@@ -3584,4 +3584,49 @@ H5Fget_name(hid_t obj_id, char *name/*out*/, size_t size)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_name() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fget_info
+ *		1. Get storage size for superblock extension if there is one
+ *              2. Get the amount of btree and heap storage for entries
+ *                 in the SOHM table if there is one.
+ *		Consider success when there is no superblock extension and/or SOHM table
+ *
+ * Return:      Success:        non-negative on success
+ *              Failure:        Negative
+ *
+ * Programmer:  Vailin Choi
+ *              July 11, 2007
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fget_info(hid_t obj_id, H5F_info_t *finfo)
+{
+    H5F_t         *f;
+    herr_t      ret_value=SUCCEED;
 
+    FUNC_ENTER_API(H5Fget_info, FAIL)
+
+    HDassert(finfo);
+
+    HDmemset(finfo, 0, sizeof(H5F_info_t));
+    if(H5I_get_type(obj_id) == H5I_FILE ) {
+        if(NULL == (f = H5I_object(obj_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file")
+        else {
+	    HDassert(f->shared);
+	    if (H5F_addr_defined(f->shared->extension_addr)) {
+		if (H5F_super_ext_info(f, finfo, H5AC_ind_dxpl_id) < 0)
+		    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve superblock extension size")
+	    }
+            if(H5F_addr_defined(f->shared->sohm_addr)) {
+		if (H5SM_ih_info(f, finfo, H5AC_ind_dxpl_id) < 0)
+		    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve SOHM btree & heap storage info")
+	    }
+	}
+    } else
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid object ID")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Fget_info() */
