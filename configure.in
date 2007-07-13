@@ -3702,6 +3702,36 @@ case "X-$DEPREC_SYMBOLS" in
     ;;
 esac
 
+dnl --------------------------------------------------------------------------
+dnl Which version of the public APIs should the 'base' versioned symbols use?
+dnl
+
+AC_SUBST([DEFAULT_API_VERSION])
+AC_MSG_CHECKING([which version of public symbols to use by default])
+AC_ARG_WITH([default-api-version],
+            [AC_HELP_STRING([--with-default-api-version=(v16|v18)],
+                            [Specify default release version of public symbols
+                             [default=v18]])],,
+            withval=v18)
+
+if test "X$withval" = "Xv16"; then
+    AC_MSG_RESULT([v16])
+    DEFAULT_API_VERSION=v16
+    AC_DEFINE([USE_16_API], [1],
+              [Define using v1.6 public API symbols by default])
+elif test "X$withval" = "Xv18"; then
+    AC_MSG_RESULT([v18])
+    DEFAULT_API_VERSION=v18
+else
+    AC_MSG_ERROR([invalid version of public symbols given])
+fi
+
+dnl It's an error to try to disable deprecated public API symbols while
+dnl choosing an older version of the public API as the default.
+if test "X${DEFAULT_API_VERSION}" != "Xv18" -a "X${DEPRECATED_SYMBOLS}" = "Xno" ; then
+  AC_MSG_ERROR([Removing old public API symbols not allowed when using them as default public API symbols])
+fi
+
 dnl ----------------------------------------------------------------------
 dnl Create automake conditionals to tell automake makefiles which directories
 dnl need to be compiled
@@ -3949,6 +3979,9 @@ IF_YES_NO "$enable_static"
 
 PRINT_N "  Statically Linked Executables"
 IF_YES_NO "$STATIC_EXEC"
+
+PRINT_N "Default Version of Public Symbols"
+PRINT $DEFAULT_API_VERSION
 
 PRINT_N " With Deprecated Public Symbols"
 IF_YES_NO "$DEPRECATED_SYMBOLS"

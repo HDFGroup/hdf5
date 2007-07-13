@@ -604,6 +604,9 @@
    floating-point values. */
 #undef ULONG_TO_FP_BOTTOM_BIT_ACCURATE
 
+/* Define using v1.6 public API symbols by default */
+#undef USE_16_API
+
 /* Define if a memory checking tool will be used on the library, to cause
    library to be very picky about memory operations and also disable the
    internal free list manager code. */
