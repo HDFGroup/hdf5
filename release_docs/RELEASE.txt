@@ -253,6 +253,10 @@ Platforms Tested
     Linux 2.6.16.46-0.12-debug #1 
           SMP ia64 GNU/Linux      Intel(R) C++ Version 10.0.025
     (ucar hir1)                   Intel(R) Fortran Itanium(R) Version 10.0.025
+    Linux 2.6.16.46-0.14-smp #1   Intel(R) C++ for Intel(R) EM64T Ver. 9.1.037
+	 SMP x86_64 GNU/Linux     Intel(R) Fortran Intel(R) EM64T Ver. 9.1.031
+    (smirom)			  PGI C, Fortran, C++ Version 6.2-5
+				         for 64-bit target on x86-64
     Linux 2.6.5-7.283-rtgfx Altix 
           SMP ia64                Intel(R) C++ Version 9.0
     (cobalt)                      Intel(R) Fortran Itanium(R) Version 9.0
