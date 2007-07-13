@@ -243,6 +243,10 @@ int h5repack_addlayout(const char* str,
  * Programmer: pvn@ncsa.uiuc.edu
  *
  * Date: September, 22, 2003
+ * 
+ * Modification:
+ *   Peter Cao, July 9, 2007
+ *   Add "-L, --latest" and other options to pack a file with the latest file format
  *
  *-------------------------------------------------------------------------
  */
@@ -368,6 +372,25 @@ static int check_options(pack_opt_t *options)
   return -1;
  }
 
+ /* check options for the latest format */
+ if (options->grp_compact < 0) {
+  error_msg(progname, "invalid maximum number of links to store as header messages\n");
+  return -1;
+ }
+ if (options->grp_indexed < 0) {
+  error_msg(progname, "invalid minimum number of links to store in the indexed format\n");
+  return -1;
+ }
+ if (options->grp_indexed > options->grp_compact) {
+  error_msg(progname, "minimum indexed size is greater than the maximum compact size\n");
+  return -1;
+ }
+ for (i=0; i<8; i++) {
+  if (options->msg_size[i]<0) {
+   error_msg(progname, "invalid shared message size\n");
+   return -1;
+  }
+ }
 
  return 0;
 }

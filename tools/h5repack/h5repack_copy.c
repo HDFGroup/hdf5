@@ -54,6 +54,9 @@ static int   copy_attr(hid_t loc_in,hid_t loc_out,pack_opt_t *options);
  *
  * Date: October, 23, 2003
  *
+ * Modification:
+ *   Peter Cao, June 13, 2007
+ *   Add "-L, --latest" and other options to pack a file with the latest file format
  *-------------------------------------------------------------------------
  */
 
@@ -64,6 +67,8 @@ int copy_objects(const char* fnamein,
  hid_t         fidin;
  hid_t         fidout=-1;
  trav_table_t  *travt=NULL;
+ hid_t         fapl=H5P_DEFAULT;              /* File access property list ID */
+ hid_t         fcpl=H5P_DEFAULT;              /* File creation property list ID */
 
 /*-------------------------------------------------------------------------
  * open the files
@@ -73,7 +78,66 @@ int copy_objects(const char* fnamein,
   error_msg(progname, "<%s>: %s\n", fnamein, H5FOPENERROR );
   goto out;
  }
- if ((fidout=H5Fcreate(fnameout,H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0 ){
+
+ if (options->latest) {
+    unsigned i=0, nindex=0, mesg_type_flags[5], min_mesg_sizes[5];
+
+    /* Create file creation property list */
+    if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0){
+        error_msg(progname, "fail to create a file creation property list\n");
+        goto out;
+    } 
+
+    /* Adjust group creation parameters for root group */
+    /* (So that it is created in "dense storage" form) */
+    if(H5Pset_link_phase_change(fcpl, (unsigned)options->grp_compact, (unsigned)options->grp_indexed) < 0) {
+        error_msg(progname, "fail to adjust group creation parameters for root group\n");
+        goto out;
+    }
+
+    for (i=0; i<5; i++) {
+     if (options->msg_size[i]>0) {
+      switch (i) {
+       case 0: mesg_type_flags[nindex]=H5O_MESG_SDSPACE_FLAG; break;
+       case 1: mesg_type_flags[nindex]=H5O_MESG_DTYPE_FLAG; break;
+       case 2: mesg_type_flags[nindex]=H5O_MESG_FILL_FLAG; break;
+       case 3: mesg_type_flags[nindex]=H5O_MESG_PLINE_FLAG; break;
+       case 4: mesg_type_flags[nindex]=H5O_MESG_ATTR_FLAG; break;
+      }
+      min_mesg_sizes[nindex] = (unsigned)options->msg_size[i];
+
+      nindex++;
+     }
+    }
+
+    if (nindex>0) {
+     nindex++; /* add one for default size */
+     if (H5Pset_shared_mesg_nindexes(fcpl, nindex) < 0) {
+      error_msg(progname, "fail to set the number of shared object header message indexes\n");
+      goto out;
+     }
+     /* msg_size[0]=dataspace, 1=datatype, 2=file value, 3=filter pipleline, 4=attribute */
+     for (i=0; i<nindex-1; i++) {
+       if (H5Pset_shared_mesg_index(fcpl, i, mesg_type_flags[i], min_mesg_sizes[i])<0) {
+         error_msg(progname, "fail to configure the specified shared object header message index\n");
+         goto out;
+        }
+     }
+    } /* if (nindex>0) */
+
+    /* Create file access property list */
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
+        error_msg(progname, "Could not create file access property list\n");
+        goto out;
+    } /* end if */
+
+    if(H5Pset_latest_format(fapl, TRUE) < 0) {
+        error_msg(progname, "Could not set property for using latest version of the format\n");
+        goto out;
+    } /* end if */
+ }
+
+ if ((fidout=H5Fcreate(fnameout,H5F_ACC_TRUNC, fcpl, fapl))<0 ){
   error_msg(progname, "<%s>: Could not create file\n", fnameout );
   goto out;
  }
@@ -116,6 +180,12 @@ int copy_objects(const char* fnamein,
  *-------------------------------------------------------------------------
  */
 
+ if (fapl>0)
+    H5Pclose(fapl);
+
+ if (fcpl>0)
+    H5Pclose(fcpl);
+
  H5Fclose(fidin);
  H5Fclose(fidout);
  return 0;
@@ -127,6 +197,8 @@ int copy_objects(const char* fnamein,
 
 out:
  H5E_BEGIN_TRY {
+  H5Pclose(fapl);
+  H5Pclose(fcpl);
   H5Fclose(fidin);
   H5Fclose(fidout);
  } H5E_END_TRY;
@@ -213,6 +285,7 @@ int do_copy_objects(hid_t fidin,
  hid_t    grp_out=-1;        /* group ID */
  hid_t    dset_in=-1;        /* read dataset ID */
  hid_t    dset_out=-1;       /* write dataset ID */
+ hid_t    gcpl_id=-1;        /* group creation property list */
  hid_t    type_in=-1;        /* named type ID */
  hid_t    type_out=-1;       /* named type ID */
  hid_t    dcpl_id=-1;        /* dataset creation property list ID */
@@ -261,8 +334,21 @@ int do_copy_objects(hid_t fidin,
    if (options->verbose)
     printf(FORMAT_OBJ,"group",travt->objs[i].name );
 
-   if ((grp_out=H5Gcreate(fidout,travt->objs[i].name, 0))<0)
-    goto error;
+   if (options->grp_compact>0 || options->grp_indexed>0) {
+    /* Set up group creation property list */
+    if((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0)
+      goto error;
+
+     if(H5Pset_link_phase_change(gcpl_id, (unsigned)options->grp_compact, (unsigned)options->grp_indexed) < 0)
+      goto error;
+
+     if((grp_out = H5Gcreate2(fidout, travt->objs[i].name, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0)
+      goto error; 
+   }
+   else {
+    if ((grp_out=H5Gcreate(fidout,travt->objs[i].name, 0))<0)
+     goto error;
+   }
 
    if((grp_in = H5Gopen (fidin,travt->objs[i].name))<0)
     goto error;
@@ -274,6 +360,10 @@ int do_copy_objects(hid_t fidin,
    if (copy_attr(grp_in,grp_out,options)<0)
     goto error;
 
+   if (gcpl_id>0) {
+     if (H5Pclose(gcpl_id)<0)
+      goto error;
+   }
    if (H5Gclose(grp_out)<0)
     goto error;
    if (H5Gclose(grp_in)<0)
@@ -729,6 +819,7 @@ error:
   H5Gclose(grp_in);
   H5Gclose(grp_out);
   H5Pclose(dcpl_id);
+  H5Pclose(gcpl_id);
   H5Sclose(f_space_id);
   H5Dclose(dset_in);
   H5Dclose(dset_out);

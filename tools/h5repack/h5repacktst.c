@@ -1301,6 +1301,31 @@ if (szip_can_encode) {
   GOERROR;
  PASSED();
 
+/*-------------------------------------------------------------------------
+ * test --latest options 
+ *-------------------------------------------------------------------------
+ */
+ TESTING("    latest file format options");
+ if (h5repack_init (&pack_options, 0)<0)
+  GOERROR;
+ pack_options.latest=1;
+ pack_options.grp_compact=10;
+ pack_options.grp_indexed=5;
+ pack_options.msg_size[0] = 10;
+ pack_options.msg_size[1] = 20;
+ pack_options.msg_size[2] = 30;
+ pack_options.msg_size[3] = 40;
+ pack_options.msg_size[4] = 50;
+ if (h5repack(FNAME1,FNAME1OUT,&pack_options) < 0)
+  GOERROR;
+ if (h5diff(FNAME1,FNAME1OUT,NULL,NULL,&diff_options) > 0)
+  GOERROR;
+ if (h5repack_verify(FNAME1OUT,&pack_options)<=0)
+  GOERROR;
+ if (h5repack_end (&pack_options)<0)
+  GOERROR;
+ PASSED();
+
 
 /*-------------------------------------------------------------------------
  * clean temporary test files

@@ -43,6 +43,10 @@ void usage(void)
  printf("[-h]           Print this message\n");
  printf("[-v]           Verbose mode\n");
  printf("[-n]           Use a native HDF5 type when repacking. Default is the file type\n");
+ printf("[-L, --latest]      Use latest version of file format to create groups, datasets and datatypes\n");
+ printf("[-compact=<size>]      Set the maximum number of links to store as header messages in a group\n");
+ printf("[-indexed=<size>]      Set the minimum number of links to store in the indexed format\n");
+ printf("[-ssize=<size>[:<dspace|dtype|fill|pline|attr>]]      Set the shared object header message minimum size\n");
  printf("[-m size]      Do not apply the filter to objects smaller than size\n");
  printf("[-e file]      Name of file with the -f and -l options\n");
  printf("[-f FILTER]    Filter type\n");
@@ -105,6 +109,10 @@ void usage(void)
  printf("   Chunked layout, with a layout size of 20x10, to objects A and B\n");
  printf("   and remove filters to objects C, D, F\n");
  printf("\n");
+ printf("4) h5repack -L -compact=10 -ssize=20:dtype -i file1 -o file2 \n");
+ printf("\n");
+ printf("   Using latest file format with maximum compact group size fo 10 and minimum shared datatype size of 20\n");
+ printf("\n");
 }
 
 /*-------------------------------------------------------------------------
@@ -125,10 +133,11 @@ void usage(void)
  *  October 2006: Added a new switch -n, that allows to write the dataset 
  *                using a native type. The default to write is the file type.
  *
+ * Modification:
+ *   Peter Cao, June 13, 2007
+ *   Add "-L, --latest" option to pack a file with the latest file format
  *-------------------------------------------------------------------------
  */
-
-
 int main(int argc, char **argv)
 {
  char          *infile  = NULL;
@@ -151,6 +160,7 @@ int main(int argc, char **argv)
     usage();
     exit(0);
   }
+
   if (strcmp(argv[i], "-i") == 0) {
    infile = argv[++i];
   }
@@ -201,11 +211,61 @@ int main(int argc, char **argv)
    options.use_native = 1;
   }
 
+  else if ( (strcmp(argv[i], "-L") == 0) || (strcmp(argv[i], "--latest") == 0)) {
+   options.latest = 1; 
+  }
+
+  else if ( strncmp(argv[i], "-compact=", 9) == 0 ) {
+   options.grp_compact = atoi(argv[i]+9);
+   if (options.grp_compact>0)
+    options.latest = 1; /* must use latest format */
+  }
+
+  else if ( strncmp(argv[i], "-indexed=", 9) == 0 ) {
+   options.grp_indexed = atoi(argv[i]+9);
+   if (options.grp_indexed>0)
+    options.latest = 1; /* must use latest format */
+  }
+
+  else if ( strncmp(argv[i], "-ssize=", 7) == 0 ) {
+   int idx = 0;
+   int ssize = 0;
+   char *msgPtr = strchr(argv[i]+7, ':');
+   options.latest = 1; /* must use latest format */
+   if (msgPtr == NULL) {
+    ssize = atoi(argv[i]+7);
+    for (idx=0; idx<5; idx++)
+     options.msg_size[idx] = ssize; 
+   }
+   else {
+    char msgType[10];
+    strcpy(msgType, msgPtr+1);
+    msgPtr[0] = '\0';
+    ssize = atoi(argv[i]+7);
+    if (strcmp(msgType, "dspace") == 0) {
+     options.msg_size[0] = ssize;
+    }
+    else if (strcmp(msgType, "dtype") == 0) {
+     options.msg_size[1] = ssize;
+    }
+    else if (strcmp(msgType, "fill") == 0) {
+     options.msg_size[2] = ssize;
+    }
+    else if (strcmp(msgType, "pline") == 0) {
+     options.msg_size[3] = ssize;
+    }
+    else if (strcmp(msgType, "attr") == 0) {
+     options.msg_size[4] = ssize;
+    }
+   }
+  } /*  else if ( strncmp(argv[i], "-ssize=", 7) == 0 ) */
+
   else if (argv[i][0] == '-') {
    error_msg(progname, " - is not a valid argument\n");
    usage();
    exit(1);
   }
+
  }
 
  if (infile == NULL || outfile == NULL)
