@@ -33,119 +33,110 @@
 
 :: By default, only C and C++ libraries are built and tested.
 
-if defined hdf5_debug echo ON
-
 if "x%1"=="x" goto main
 goto help
 
 :: Print a help message
 :help
-echo.Builds and tests HDF5 Libraries and Tools.
-echo.
-echo %0 [OPTION]
-echo.
-echo.Please use one of the following options!
-echo.
-echo.   %0                   Build and tests HDF5 C/C++ Library and Tools
-echo.   %0 /?                Help information
 
-if defined hdf5_debug pause
-goto :eof
+    echo.Builds and tests HDF5 Libraries and Tools.
+    echo.
+    echo %~nx0 [OPTION]
+    echo.
+    echo.Please use one of the following options!
+    echo.
+    echo.   %~nx0                   Build and tests HDF5 C/C++ Library and Tools
+    echo.   %~nx0 /?                Help information
+
+    exit /b
 
 
 :: This is where the magic happens
 :main
 
-call :setup
+    call :setup
 
-echo.Build and testing all HDF5 libraries and tools
-echo.
+    echo.Build and testing all HDF5 libraries and tools
+    echo.
 
-echo.***************************************************************************** >> %bt_results%
-echo.                        Build and Test HDF5 Library and Tools >> %bt_results%
-echo.***************************************************************************** >> %bt_results%
-echo. >> %bt_results%
+    echo.***************************************************************************** >> %bt_results%
+    echo.                        Build and Test HDF5 Library and Tools >> %bt_results%
+    echo.***************************************************************************** >> %bt_results%
+    echo. >> %bt_results%
 
-call :build
-if errorlevel 1 (
-    echo.Error building HDF5 libraries!
-    goto error
-)
+    call :build
+    if %errorlevel% neq 0 (
+        echo.Error building HDF5 libraries!
+        goto error
+    )
 
-call :test
-if errorlevel 1 (
-    echo.Error testing HDF5 libraries!
-    goto error
-)
+    call :test
+    if %errorlevel% neq 0 (
+        echo.Error testing HDF5 libraries!
+        goto error
+    )
 
-echo. All HDF5 libraries and tools build and tested successfully!
-echo. All HDF5 libraries and tools build and tested successfully! >> %build_results%
+    echo. All HDF5 libraries and tools build and tested successfully!
+    echo. All HDF5 libraries and tools build and tested successfully! >> %build_results%
 
-call :cleanup
+    call :cleanup
 
-if defined hdf5_debug pause
-goto :eof
+    exit /b 0
 
 
 :: Setup our environment
 :setup
 
-:: Put us in the directory of the batch file.
-pushd %~dp0
+    :: Put us in the directory of the batch file.
+    pushd %~dp0
 
-:: Constants
-if "x%bt_results%"=="x" set bt_results="%CD%\bt_results.txt"
-if "x%build_results%"=="x" set build_results="%CD%\build_results.txt"
+    :: Constants
+    if "x%bt_results%"=="x" set bt_results="%CD%\bt_results.txt"
+    if "x%build_results%"=="x" set build_results="%CD%\build_results.txt"
 
-:: Create our results file
-type nul > %bt_results%
+    :: Create our results file
+    type nul > %bt_results%
 
-if defined hdf5_debug pause
-goto :eof
+    exit /b 0
 
 
 :: Build HDF5 libraries and tools
 :build
 
-call hdf5build.BAT
-type %build_results% >> %bt_results%
+    call hdf5build.BAT
+    type %build_results% >> %bt_results%
 
-if defined hdf5_debug pause
-goto :eof
+    exit /b
 
 
 :: Test our libraries and tools
 :test
 
-call hdf5check enablecpp
-type check_results.txt >> %bt_results%
+    call hdf5check enablecpp
+    type check_results.txt >> %bt_results%
 
-if defined hdf5_debug pause
-goto :eof
+    exit /b
 
 
 :: Handle errors
 :error
 
-:: For now, our error handling just consists of calling cleanup, and exiting
-echo.hdf5bt failed.
-echo.hdf5bt failed. >> %bt_results%
-call :cleanup
-set errorlevel=1
-
-if defined hdf5_debug pause
-goto :eof
+    :: For now, our error handling just consists of calling cleanup, and exiting
+    echo.hdf5bt failed.
+    echo.hdf5bt failed. >> %bt_results%
+    call :cleanup
+    
+    exit /b
 
 
 :: Cleanup our environment
 :cleanup
 
-set build_results=
+    set build_results=
 
-:: Don't unset bt_results if it is being used by autotest_hdf5.bat
-if "x%hdf5_auto_results%"=="x" set bt_results=
+    :: Don't unset bt_results if it is being used by autotest_hdf5.bat
+    if "x%hdf5_auto_results%"=="x" set bt_results=
 
-popd
+    popd
 
-if defined hdf5_debug pause
-goto :eof
+    exit /b 0
