@@ -405,6 +405,9 @@ fix_name(const char *path, const char *base)
  *		     (groups and attributes)
  *		  2. Gathered info for attributes
  *		  
+ *		  Vailin Choi 14 July 2007
+ *		  Cast "num_objs" and "num_attrs" to size_t
+ *		  Due to the -Mbounds problem for the pgi-32 bit compiler on indexing
  *
  *-------------------------------------------------------------------------
  */
@@ -438,7 +441,7 @@ group_stats (hid_t group, const char *name, const char * fullname, H5G_stat_t * 
     H5Gget_num_objs(gid, &num_objs);
 
     if(num_objs < SIZE_SMALL_GROUPS)
-        (iter->num_small_groups[num_objs])++;
+        (iter->num_small_groups[(size_t)num_objs])++;
     if(num_objs > iter->max_fanout)
         iter->max_fanout = num_objs;
 
@@ -473,7 +476,7 @@ group_stats (hid_t group, const char *name, const char * fullname, H5G_stat_t * 
     }
 
     if(num_attrs < SIZE_SMALL_ATTRS)
-        (iter->num_small_attrs[num_attrs])++;
+        (iter->num_small_attrs[(size_t)num_attrs])++;
     if(num_attrs > iter->max_attrs)
         iter->max_attrs = num_attrs;
 
@@ -530,6 +533,10 @@ group_stats (hid_t group, const char *name, const char * fullname, H5G_stat_t * 
  *                   (chunked datasets and attributes)
  *                2. Gathered info for attributes
  *
+ *		  Vailin Choi 14 July 2007
+ *		  Cast "dims" and "num_attrs" to size_t
+ *		  Due to the -Mbounds problem for the pgi-32bit compiler on indexing
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -579,7 +586,7 @@ dataset_stats (hid_t group, const char *name, H5G_stat_t * _sb,  iter_t *_iter)
     }
 
     if(num_attrs < SIZE_SMALL_ATTRS)
-        (iter->num_small_attrs[num_attrs])++;
+        (iter->num_small_attrs[(size_t)num_attrs])++;
     if(num_attrs > iter->max_attrs)
         iter->max_attrs = num_attrs;
 
@@ -623,7 +630,7 @@ dataset_stats (hid_t group, const char *name, H5G_stat_t * _sb,  iter_t *_iter)
     if(ndims == 1) {
            iter->max_dset_dims = dims[0];
        if(dims[0] < SIZE_SMALL_DSETS)
-           (iter->small_dset_dims[dims[0]])++;
+           (iter->small_dset_dims[(size_t)dims[0]])++;
 
        /* Add dim count to proper bin */
        bin = ceil_log10((unsigned long)dims[0]);
