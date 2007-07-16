@@ -100,8 +100,8 @@ goto main
     ) else set hdf5_sln="%CD%\windows\proj\all\all.sln"
     
     :: Set external libraries if they aren't already set
-    if x%hdf5_ext_zlib%==x set hdf5_ext_zlib=%zlib_name%
-    if x%hdf5_ext_szip%==x set hdf5_ext_szip=%szip_name%
+    if "x%hdf5_ext_zlib%"=="x" set hdf5_ext_zlib=%zlib_name%
+    if "x%hdf5_ext_szip%"=="x" set hdf5_ext_szip=%szip_name%
 
     
     :: Setup Visual Studio environment.  By default, use the Visual Studio .NET environment
@@ -120,6 +120,7 @@ goto main
             echo.Building Fortran from commandline with .NET not yet implemented!
             echo.Building Fortran from commandline with .NET not yet implemented! >> %build_results%
             exit /b 1
+        )
     )
 
     exit /b 0

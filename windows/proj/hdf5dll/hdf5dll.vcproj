@@ -7422,6 +7422,9 @@
 				RelativePath="..\..\..\src\H5ACprivate.h">
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5version.h">
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5WBprivate.h">
 			</File>
 		</Filter>

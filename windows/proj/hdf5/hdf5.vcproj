@@ -7504,6 +7504,9 @@
 				RelativePath="..\..\..\src\H5Tpublic.h">
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5version.h">
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5Vprivate.h">
 			</File>
 			<File
