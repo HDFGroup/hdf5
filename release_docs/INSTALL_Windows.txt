@@ -1888,7 +1888,7 @@ Installing:
  
  
 ========================================================================
-                  Section XIII: How to generate H5tinit.c
+                  Section XII: How to generate H5tinit.c
 ========================================================================
 
 In HDF5, H5tinit.c is used to to describe the byte-order and floating point
@@ -1905,14 +1905,23 @@ advanced configuration.  This might include:
     
 To generate your own H5tinit.c, follow the steps below.
         
-    1.  Open the solution typegen.sln from the folder .\windows\misc\typgen.
+    1. Open the solution typegen.sln from the folder .\windows\misc\typgen.
         
-    2.  Build H5tinit.exe
+    2. Edit the code
+	
+	   Open the source file H5detect.c, and remove or comment the line:
+	   
+		siglongjmp(jbuf_g, 1);
+		
+	   This function is unsupported on Windows, and will cause Visual Studio
+	   2005 to crash.
+	   
+    3. Build H5tinit.exe
     
-        Make sure your configuration is set to Release, and build the project.  
+        Make sure your configuration is set to Debug, and build the project.  
         This will generate H5tinit.exe in the .\src folder.
         
-    3.5 Create H5tinit.c
+    4. Create H5tinit.c
     
         From a command prompt, go to the .\src directory and issue the command:
             .\H5tinit.exe > H5tinit.c
