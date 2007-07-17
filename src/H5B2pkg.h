@@ -269,11 +269,8 @@ H5_DLL herr_t H5B2_insert_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 H5_DLL herr_t H5B2_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     unsigned depth, const H5B2_node_ptr_t *curr_node, H5B2_operator_t op,
     void *op_data);
-
-H5_DLL herr_t H5B2_info_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
+H5_DLL herr_t H5B2_iterate_size_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     unsigned depth, const H5B2_node_ptr_t *curr_node, hsize_t *op_data);
-
-
 
 /* Routines for locating records */
 H5_DLL int H5B2_locate_record(const H5B2_class_t *type, unsigned nrec,

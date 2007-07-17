@@ -372,6 +372,8 @@ H5_DLL herr_t H5G_stab_iterate(const H5O_loc_t *oloc, hid_t dxpl_id,
     H5_iter_order_t order, hsize_t skip, hsize_t *last_lnk, hid_t gid,
     H5G_link_iterate_t *lnk_op, void *op_data);
 H5_DLL herr_t H5G_stab_count(struct H5O_loc_t *oloc, hsize_t *num_objs, hid_t dxpl_id);
+H5_DLL herr_t H5G_stab_bh_size(H5F_t *f, hid_t dxpl_id, const H5O_stab_t *stab,
+    H5_ih_info_t *bh_info);
 H5_DLL ssize_t H5G_stab_get_name_by_idx(H5O_loc_t *oloc, H5_iter_order_t order,
     hsize_t n, char* name, size_t size, hid_t dxpl_id);
 H5_DLL H5G_obj_t H5G_stab_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx,
@@ -384,9 +386,6 @@ H5_DLL herr_t H5G_stab_lookup(H5O_loc_t *grp_oloc, const char *name,
     H5O_link_t *lnk, hid_t dxpl_id);
 H5_DLL herr_t H5G_stab_lookup_by_idx(H5O_loc_t *grp_oloc, H5_iter_order_t order,
     hsize_t n, H5O_link_t *lnk, hid_t dxpl_id);
-
-H5_DLL herr_t H5G_stab_bh_info(struct H5O_loc_t *grp_oloc, H5O_stab_t *stabinfo,
-    hid_t dxpl_id, H5_ih_info_t *bh_info);
 
 
 /*
@@ -408,10 +407,6 @@ H5_DLL herr_t H5G_ent_debug(H5F_t *f, const H5G_entry_t *ent,
 H5_DLL herr_t H5G_node_init(H5F_t *f);
 H5_DLL int H5G_node_iterate(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
 		     const void *_rt_key, void *_udata);
-
-H5_DLL herr_t H5G_btree_node_iterate(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
-                     const void *_rt_key, void *_udata);
-
 H5_DLL int H5G_node_sumup(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
 		     const void *_rt_key, void *_udata);
 H5_DLL int H5G_node_by_idx(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
@@ -420,6 +415,8 @@ H5_DLL int H5G_node_copy(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t a
 		     const void *_rt_key, void *_udata);
 H5_DLL int H5G_node_build_table(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
 		     const void *_rt_key, void *_udata);
+H5_DLL herr_t H5G_node_iterate_size(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
+                     const void *_rt_key, void *_udata);
 
 /* Functions that understand links in groups */
 H5_DLL int H5G_link_cmp_name_inc(const void *lnk1, const void *lnk2);

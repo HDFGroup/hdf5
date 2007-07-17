@@ -242,6 +242,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_group_get_oloc() */
 
+
 /*-------------------------------------------------------------------------
  * Function:    H5O_group_bh_info
  *
@@ -256,50 +257,51 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_group_bh_info(H5O_loc_t *oloc, H5O_t *oh, hid_t dxpl_id, H5_ih_info_t *bh_info)
+H5O_group_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
 {
-    herr_t      	ret_value=SUCCEED;  	/* Return value */
-    hsize_t     	huge_bt_size=0;
     H5O_linfo_t         linfo;          	/* Link info message */
-    H5O_stab_t          stabinfo;       	/* Info about symbol table */
-
-
+    herr_t      	ret_value = SUCCEED;  	/* Return value */
 
     FUNC_ENTER_NOAPI(H5O_group_bh_info, FAIL)
 
     /* Sanity check */
-    HDassert(oloc);
+    HDassert(f);
     HDassert(oh);
     HDassert(bh_info);
 
-    if(NULL==H5O_msg_read_real(oloc->file, dxpl_id, oh, H5O_LINFO_ID, &linfo)) { 
+    /* Check for "new style" group info */
+    if(NULL == H5O_msg_read_real(f, dxpl_id, oh, H5O_LINFO_ID, &linfo)) { 
+        H5O_stab_t          stab;       	/* Info about symbol table */
+
+        /* Must be "old style" group, clear error stack */
 	H5E_clear_stack(NULL);
-        if(NULL==H5O_msg_read_real(oloc->file, dxpl_id, oh, H5O_STAB_ID, &stabinfo)) {
+
+        /* Get symbol table message */
+        if(NULL == H5O_msg_read_real(f, dxpl_id, oh, H5O_STAB_ID, &stab))
 	    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't find LINFO nor STAB messages")
-	} else { /* STAB */
-	    if (H5G_stab_bh_info(oloc, &stabinfo, dxpl_id, bh_info) < 0)
-		HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve pre-1.8 group btree & heap info")
-	}
-    } else { /* LINFO */
-	if (H5F_addr_defined(linfo.corder_bt2_addr)) {
-            if (H5B2_info_iterate(oloc->file, dxpl_id, H5G_BT2_CORDER,
-                linfo.corder_bt2_addr, &bh_info->index_size) < 0)
-                    HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree storage info")
-        }
-        if (H5F_addr_defined(linfo.name_bt2_addr)) {
-            if (H5B2_info_iterate(oloc->file, dxpl_id, H5G_BT2_NAME,
-                linfo.name_bt2_addr, &bh_info->index_size) < 0)
-                    HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree storage info")
-        }
-        huge_bt_size = 0;
-        if (H5F_addr_defined(linfo.fheap_addr)) {
-            if (H5HF_fheap_info(oloc->file, dxpl_id, linfo.fheap_addr,
-                &bh_info->heap_size, &huge_bt_size) < 0)
-                    HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't retrieve fractal heap storage info")
-        }
-        bh_info->index_size += huge_bt_size;
-    } 
+	
+        /* Get symbol table size info */
+        if(H5G_stab_bh_size(f, dxpl_id, &stab, bh_info) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve symbol table size info")
+    } /* end if */
+    else { /* LINFO */
+        /* Get creation order B-tree size, if available */
+	if(H5F_addr_defined(linfo.corder_bt2_addr))
+            if(H5B2_iterate_size(f, dxpl_id, H5G_BT2_CORDER, linfo.corder_bt2_addr, &bh_info->index_size) < 0)
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree storage info")
+
+        /* Get name order B-tree size, if available */
+        if(H5F_addr_defined(linfo.name_bt2_addr))
+            if(H5B2_iterate_size(f, dxpl_id, H5G_BT2_NAME, linfo.name_bt2_addr, &bh_info->index_size) < 0)
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree storage info")
+
+        /* Get fractal heap size, if available */
+        if(H5F_addr_defined(linfo.fheap_addr))
+            if(H5HF_size(f, dxpl_id, linfo.fheap_addr, &bh_info->heap_size) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't retrieve fractal heap storage info")
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_group_bh_info() */
+

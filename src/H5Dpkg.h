@@ -329,7 +329,8 @@ H5_DLL herr_t H5D_istore_dest (H5D_t *dset, hid_t dxpl_id);
 H5_DLL herr_t H5D_istore_allocate (H5D_t *dset, hid_t dxpl_id,
         hbool_t full_overwrite);
 H5_DLL hsize_t H5D_istore_allocated(H5D_t *dset, hid_t dxpl_id);
-H5_DLL herr_t H5D_obj_istore_bh_info(H5O_loc_t *oloc, H5O_layout_t *layout, hid_t dxpl_id, hsize_t *btree_size);
+H5_DLL herr_t H5D_istore_bh_info(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
+    hsize_t *btree_size);
 H5_DLL herr_t H5D_istore_prune_by_extent(const H5D_io_info_t *io_info,
     const hsize_t *old_dims);
 H5_DLL herr_t H5D_istore_initialize_by_extent(H5D_io_info_t *io_info);

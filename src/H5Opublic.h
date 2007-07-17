@@ -120,11 +120,10 @@ typedef struct H5O_info_t {
             uint64_t shared;		/* Flags to indicate message type is shared in header */
         } mesg;
     } hdr;
-    /* btree and heap storage info for obj & attributes */
-    /* (B-tree & heap for groups, B-tree for chunked dataset, 1.8 B-tree & heap for attributes) */
+    /* Extra metadata storage for obj & attributes */
     struct {
-        H5_ih_info_t   obj;
-        H5_ih_info_t   attr;
+        H5_ih_info_t   obj;             /* v1/v2 B-tree & local/fractal heap for groups, B-tree for chunked datasets */
+        H5_ih_info_t   attr;            /* v2 B-tree & heap for attributes */
     } meta_size;
 } H5O_info_t;
 

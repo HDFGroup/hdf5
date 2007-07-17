@@ -2474,8 +2474,9 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_list_debug() */
 
+
 /*-------------------------------------------------------------------------
- * Function:    H5SM_ih_info
+ * Function:    H5SM_ih_size
  *
  * Purpose:     Loop through the master SOHM table (if there is one) to:
  *			1. collect storage used for header
@@ -2491,15 +2492,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5SM_ih_info(H5F_t *f, H5F_info_t *finfo, hid_t dxpl_id)
+H5SM_ih_size(H5F_t *f, hid_t dxpl_id, H5F_info_t *finfo)
 {
-    H5SM_master_table_t *table=NULL;            /* SOHM master table */
-    herr_t              ret_value=SUCCEED;      /* Return value */
-    unsigned    	x;
-    hsize_t     	huge_bt_size=0;
+    H5SM_master_table_t *table = NULL;          /* SOHM master table */
+    unsigned    	u;                      /* Local index variable */
+    herr_t              ret_value = SUCCEED;    /* Return value */
 
-
-    FUNC_ENTER_NOAPI(H5SM_ih_info, FAIL)
+    FUNC_ENTER_NOAPI(H5SM_ih_size, FAIL)
 
     /* Sanity check */
     HDassert(f);
@@ -2510,32 +2509,32 @@ H5SM_ih_info(H5F_t *f, H5F_info_t *finfo, hid_t dxpl_id)
     if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
 
+    /* Get SOHM header size */
     finfo->sohm.hdr_size = (hsize_t) H5SM_TABLE_SIZE(f) +
                            (hsize_t)(table->num_indexes * H5SM_INDEX_HEADER_SIZE(f));
 
-    for(x = 0; x < table->num_indexes; x++) {
-	if (table->indexes[x].index_type==H5SM_BTREE) {
-	    if (H5F_addr_defined(table->indexes[x].index_addr)) {
-		if (H5B2_info_iterate(f, dxpl_id, H5SM_INDEX,
-		    table->indexes[x].index_addr, &(finfo->sohm.msgs_info.index_size)) < 0)
-			HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree storage info")
-                }
-        }
-	if (table->indexes[x].index_type==H5SM_LIST)
-	    finfo->sohm.msgs_info.index_size += H5SM_LIST_SIZE(f, table->indexes[x].list_max);
+    /* Loop over all the indices for shared messages */
+    for(u = 0; u < table->num_indexes; u++) {
+        /* Get index storage size (for either B-tree or list) */
+	if(table->indexes[u].index_type == H5SM_BTREE) {
+	    if(H5F_addr_defined(table->indexes[u].index_addr))
+		if(H5B2_iterate_size(f, dxpl_id, H5SM_INDEX, table->indexes[u].index_addr, &(finfo->sohm.msgs_info.index_size)) < 0)
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree storage info")
+        } /* end if */
+        else if(table->indexes[u].index_type == H5SM_LIST)
+	    finfo->sohm.msgs_info.index_size += H5SM_LIST_SIZE(f, table->indexes[u].list_max);
 
-	huge_bt_size = 0;
-	if (H5F_addr_defined(table->indexes[x].heap_addr)) {
-	    if (H5HF_fheap_info(f, dxpl_id, table->indexes[x].heap_addr, &(finfo->sohm.msgs_info.heap_size), &huge_bt_size) < 0)
+        /* Get heap storage size */
+	if(H5F_addr_defined(table->indexes[u].heap_addr))
+	    if(H5HF_size(f, dxpl_id, table->indexes[u].heap_addr, &(finfo->sohm.msgs_info.heap_size)) < 0)
 		HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't retrieve fractal heap storage info")
-        }
-	finfo->sohm.msgs_info.index_size += huge_bt_size;
     } /* end for */
 
+done:
     /* Release resources */
     if(table && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, table, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_CACHE, H5E_CANTRELEASE, FAIL, "unable to close SOHM master table")
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5SM_ih_info() */
+} /* end H5SM_ih_size() */
+

@@ -604,6 +604,48 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5G_stab_bh_size
+ *
+ * Purpose:	Retrieve storage for btree and heap (1.6)
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi
+ *		June 25 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_stab_bh_size(H5F_t *f, hid_t dxpl_id, const H5O_stab_t *stab, H5_ih_info_t *bh_info)
+{
+    H5B_info_ud_t       bh_udata;               /* User-data for B-tree callbacks */
+    herr_t              ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5G_stab_bh_size, FAIL)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(stab);
+    HDassert(bh_info);
+
+    /* Set up user data for B-tree callback */
+    bh_udata.udata = NULL;
+    bh_udata.btree_size = &(bh_info->index_size);
+
+    /* Get the B-tree & symbol table node size info */
+    if(H5B_iterate_size(f, dxpl_id, H5B_SNODE, H5G_node_iterate_size, stab->btree_addr, &bh_udata) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "iteration operator failed")
+
+    /* Get the size of the local heap for the group */
+    if(H5HL_heapsize(f, dxpl_id, stab->heap_addr, &(bh_info->heap_size)) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "iteration operator failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_stab_bh_size() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5G_stab_get_name_by_idx_cb
  *
  * Purpose:     Callback for B-tree iteration 'by index' info query to 
@@ -1046,43 +1088,4 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_stab_lookup_by_idx() */
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_stab_bh_info
- *
- * Purpose:	Retrieve storage for btree and heap (1.6)
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Vailin Choi
- *		June 25 2007
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5G_stab_bh_info(H5O_loc_t *oloc, H5O_stab_t *stab, hid_t dxpl_id,  H5_ih_info_t *bh_info)
-{
-    hsize_t             stab_size=0;            /* storage used for symbol table nodes */
-    herr_t              ret_value = SUCCEED;
 
-    H5B_info_ud_t bh_udata;
-
-    FUNC_ENTER_NOAPI(H5G_stab_bh_info, FAIL)
-
-    /* Sanity check */
-    HDassert(oloc);
-    HDassert(stab);
-    HDassert(bh_info);
-
-    bh_udata.udata = NULL;
-    bh_udata.btree_size = &(bh_info->index_size);
-
-    if (H5B_iterate_btree_size(oloc->file, dxpl_id, H5B_SNODE, H5G_btree_node_iterate, stab->btree_addr, &bh_udata) <0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "iteration operator failed")
-
-    if (H5HL_heapsize(oloc->file, dxpl_id, stab->heap_addr, &(bh_info->heap_size)) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "iteration operator failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_stab_bh_info() */

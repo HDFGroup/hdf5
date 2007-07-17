@@ -73,7 +73,7 @@ typedef struct H5G_node_t {
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5G_node_serialize(H5F_t *f, H5G_node_t *sym, size_t size, uint8_t *buf);
-static size_t H5G_node_size(const H5F_t *f);
+static size_t H5G_node_size_real(const H5F_t *f);
 static herr_t H5G_node_shared_free(void *shared);
 
 /* Metadata cache callbacks */
@@ -83,7 +83,7 @@ static herr_t H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t a
 			     H5G_node_t *sym, unsigned UNUSED * flags_ptr);
 static herr_t H5G_node_dest(H5F_t *f, H5G_node_t *sym);
 static herr_t H5G_node_clear(H5F_t *f, H5G_node_t *sym, hbool_t destroy);
-static herr_t H5G_compute_size(const H5F_t *f, const H5G_node_t *sym, size_t *size_ptr);
+static herr_t H5G_node_size(const H5F_t *f, const H5G_node_t *sym, size_t *size_ptr);
 
 /* B-tree callbacks */
 static H5RC_t *H5G_node_get_shared(const H5F_t *f, const void *_udata);
@@ -119,7 +119,7 @@ const H5AC_class_t H5AC_SNODE[1] = {{
     (H5AC_flush_func_t)H5G_node_flush,
     (H5AC_dest_func_t)H5G_node_dest,
     (H5AC_clear_func_t)H5G_node_clear,
-    (H5AC_size_func_t)H5G_compute_size,
+    (H5AC_size_func_t)H5G_node_size,
 }};
 
 /* H5G inherits B-tree like properties from H5B */
@@ -294,7 +294,7 @@ H5G_node_debug_key(FILE *stream, H5F_t *f, hid_t UNUSED dxpl_id, int indent,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_node_size
+ * Function:	H5G_node_size_real
  *
  * Purpose:	Returns the total size of a symbol table node.
  *
@@ -311,9 +311,9 @@ H5G_node_debug_key(FILE *stream, H5F_t *f, hid_t UNUSED dxpl_id, int indent,
  *-------------------------------------------------------------------------
  */
 static size_t
-H5G_node_size(const H5F_t *f)
+H5G_node_size_real(const H5F_t *f)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_size);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_size_real);
 
     FUNC_LEAVE_NOAPI(H5G_NODE_SIZEOF_HDR(f) +
                      (2 * H5F_SYM_LEAF_K(f)) * H5G_SIZEOF_ENTRY(f));
@@ -373,7 +373,7 @@ H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED  *_udata1
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't wrap buffer")
 
     /* Compute the size of the serialized symbol table node on disk */
-    size = H5G_node_size(f);
+    size = H5G_node_size_real(f);
 
     /* Get a pointer to a buffer that's large enough for node */
     if(NULL == (node = H5WB_actual(wb, size)))
@@ -500,7 +500,7 @@ H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5G_node_
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wrap buffer")
 
         /* Compute the size of the serialized symbol table node on disk */
-        size = H5G_node_size(f);
+        size = H5G_node_size_real(f);
 
         /* Get a pointer to a buffer that's large enough for node */
         if(NULL == (node = H5WB_actual(wb, size)))
@@ -671,7 +671,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_compute_size
+ * Function:	H5G_node_size
  *
  * Purpose:	Compute the size in bytes of the specified instance of
  *		H5G_node_t on disk, and return it in *size_ptr.  On failure
@@ -687,20 +687,20 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_compute_size(const H5F_t *f, const H5G_node_t UNUSED *sym, size_t *size_ptr)
+H5G_node_size(const H5F_t *f, const H5G_node_t UNUSED *sym, size_t *size_ptr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_compute_size);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_size);
 
     /*
      * Check arguments.
      */
-    assert(f);
-    assert(size_ptr);
+    HDassert(f);
+    HDassert(size_ptr);
 
-    *size_ptr = H5G_node_size(f);
+    *size_ptr = H5G_node_size_real(f);
 
     FUNC_LEAVE_NOAPI(SUCCEED);
-} /* H5G_compute_size() */
+} /* H5G_node_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -742,7 +742,7 @@ H5G_node_create(H5F_t *f, hid_t dxpl_id, H5B_ins_t UNUSED op, void *_lt_key,
 
     if(NULL == (sym = H5FL_CALLOC(H5G_node_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-    size = H5G_node_size(f);
+    size = H5G_node_size_real(f);
     if(HADDR_UNDEF == (*addr_p = H5MF_alloc(f, H5FD_MEM_BTREE, dxpl_id, size)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to allocate file space");
 
@@ -1297,7 +1297,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
             *rt_key = *lt_key;
             *rt_key_changed = TRUE;
             sn->nsyms = 0;
-            if(H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, (hsize_t)H5G_node_size(f)) < 0
+            if(H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, (hsize_t)H5G_node_size_real(f)) < 0
                     || H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__DIRTIED_FLAG | H5C__DELETED_FLAG) < 0) {
                 sn = NULL;
                 HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to free symbol table node")
@@ -1369,7 +1369,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
         *rt_key = *lt_key;
         *rt_key_changed = TRUE;
         sn->nsyms = 0;
-        if(H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, (hsize_t)H5G_node_size(f)) < 0
+        if(H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, (hsize_t)H5G_node_size_real(f)) < 0
                 || H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__DIRTIED_FLAG | H5C__DELETED_FLAG) < 0) {
             sn = NULL;
             HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to free symbol table node")
@@ -1928,6 +1928,37 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5G_node_iterate_size
+ *
+ * Purpose:     This function gets called by H5B_iterate_btree_size()
+ *              to gather storage info for SNODs.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Vailin Choi
+ *              Jun 19 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_node_iterate_size(H5F_t *f, hid_t UNUSED dxpl_id, const void UNUSED *_lt_key, haddr_t UNUSED addr,
+    const void UNUSED *_rt_key, void *_udata)
+{
+    hsize_t     *stab_size = (hsize_t *)_udata;         /* User data */
+
+    FUNC_ENTER_NOAPI_NOFUNC(H5G_node_iterate_size)
+
+    /* Check arguments */
+    HDassert(f);
+    HDassert(stab_size);
+
+    *stab_size += H5G_node_size_real(f);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5G_btree_node_iterate() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5G_node_debug
  *
  * Purpose:	Prints debugging information about a symbol table node
@@ -1984,7 +2015,7 @@ H5G_node_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
                 "Dirty:",
                 sn->cache_info.is_dirty ? "Yes" : "No");
         fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
-                "Size of Node (in bytes):", (unsigned)H5G_node_size(f));
+                "Size of Node (in bytes):", (unsigned)H5G_node_size_real(f));
         fprintf(stream, "%*s%-*s %u of %u\n", indent, "", fwidth,
                 "Number of Symbols:",
                 sn->nsyms, (unsigned)(2 * H5F_SYM_LEAF_K(f)));
@@ -2015,36 +2046,4 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_node_debug() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5G_btree_node_iterate
- *
- * Purpose:     This function gets called by H5B_iterate_btree_size()
- *              to gather storage info for SNODs.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Vailin Choi
- *              Jun 19 2007
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5G_btree_node_iterate(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t UNUSED addr,
-    const void UNUSED *_rt_key, void *_udata)
-{
-    herr_t              ret_value=SUCCEED;
-    hsize_t             *stab_size=(hsize_t *)_udata;
 
-    FUNC_ENTER_NOAPI(H5G_btree_node_iterate, FAIL)
-
-    /*
-     * Check arguments.
-     */
-    HDassert(f);
-    HDassert(stab_size);
-
-    *stab_size += H5G_node_size(f);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_btree_node_iterate() */

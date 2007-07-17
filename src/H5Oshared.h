@@ -373,8 +373,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5_inline herr_t
-H5O_SHARED_POST_COPY_FILE(H5O_loc_t *oloc_src, void *mesg_src, H5O_loc_t *oloc_dst,
-    void *mesg_dst, hid_t dxpl_id, H5O_copy_t *cpy_info)
+H5O_SHARED_POST_COPY_FILE(const H5O_loc_t *oloc_src, const void *mesg_src,
+    H5O_loc_t *oloc_dst, void *mesg_dst, hid_t dxpl_id, H5O_copy_t *cpy_info)
 {
     const H5O_shared_t  *shared_dst = (const H5O_shared_t *)mesg_dst; /* Alias to shared info in native source */
     herr_t ret_value = SUCCEED;         /* Return value */

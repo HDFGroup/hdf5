@@ -327,6 +327,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_dset_get_oloc() */
 
+
 /*-------------------------------------------------------------------------
  * Function:    H5O_dset_bh_info
  *
@@ -342,28 +343,28 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_dset_bh_info(H5O_loc_t *oloc, H5O_t *oh, hid_t dxpl_id, H5_ih_info_t *bh_info)
+H5O_dset_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
 {
     H5O_layout_t        layout;         	/* Data storage layout message */
-    herr_t      	ret_value=SUCCEED;      /* Return value */
+    herr_t      	ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_dset_bh_info, FAIL)
 
     /* Sanity check */
-    HDassert(oloc);
+    HDassert(f);
     HDassert(oh);
     HDassert(bh_info);
 
-    if (NULL==H5O_msg_read_real(oloc->file, dxpl_id, oh, H5O_LAYOUT_ID, &layout))
+    /* Get the layout message from the object header */
+    if(NULL == H5O_msg_read_real(f, dxpl_id, oh, H5O_LAYOUT_ID, &layout))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't find LAYOUT message")
-    else {
-	if ((layout.type == H5D_CHUNKED) && (layout.u.chunk.addr != HADDR_UNDEF)) {
-	    ret_value = H5D_obj_istore_bh_info(oloc, &layout, dxpl_id, &(bh_info->index_size));
-	    if (ret_value < 0)
-		HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't determine chunked dataset btree info")
-	}
-    }
+
+    /* Check for chunked dataset storage */
+    if((layout.type == H5D_CHUNKED) && H5F_addr_defined(layout.u.chunk.addr))
+        if(H5D_istore_bh_info(f, dxpl_id, &layout, &(bh_info->index_size)) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't determine chunked dataset btree info")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_dset_bh_info() */
+

@@ -479,13 +479,13 @@ H5_DLL void *H5O_msg_copy_file(const H5O_msg_class_t *type, H5F_t *file_src,
 H5_DLL herr_t H5O_msg_iterate_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type,
     const H5O_mesg_operator_t *op, void *op_data, hid_t dxpl_id);
 
-/* collect storage info for btree and heap */
-H5_DLL herr_t H5O_group_bh_info(H5O_loc_t *oloc, H5O_t *oh, hid_t dxpl_id, H5_ih_info_t *bh_info);
-H5_DLL herr_t H5O_dset_bh_info(H5O_loc_t *oloc, H5O_t *oh, hid_t dxpl_id, H5_ih_info_t *bh_info);
-H5_DLL herr_t H5O_attr_bh_info(H5O_loc_t *oloc, H5O_t *oh, hid_t dxpl_id, H5_ih_info_t *bh_info);
-
-
-
+/* Collect storage info for btree and heap */
+H5_DLL herr_t H5O_group_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
+    H5_ih_info_t *bh_info);
+H5_DLL herr_t H5O_dset_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
+    H5_ih_info_t *bh_info);
+H5_DLL herr_t H5O_attr_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
+    H5_ih_info_t *bh_info);
 
 /* Object header allocation routines */
 H5_DLL herr_t H5O_alloc_msgs(H5O_t *oh, size_t min_alloc);

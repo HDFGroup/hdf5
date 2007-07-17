@@ -22,12 +22,12 @@ Dataset layout information:
 	Dataset layout counts[CHUNKED]: 12
 	Number of external files : 2
 Dataset filters information:
-	Number of datasets with 
-	                        NO filter: 7
-	                        GZIP filter: 2
-	                        SHUFFLE filter: 2
-	                        FLETCHER32 filter: 2
-	                        SZIP filter: 2
-	                        NBIT filter: 2
-	                        SCALEOFFSET filter: 1
-	                        USER-DEFINED filter: 1
+	Number of datasets with:
+		NO filter: 7
+		GZIP filter: 2
+		SHUFFLE filter: 2
+		FLETCHER32 filter: 2
+		SZIP filter: 2
+		NBIT filter: 2
+		SCALEOFFSET filter: 1
+		USER-DEFINED filter: 1

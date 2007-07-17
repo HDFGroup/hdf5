@@ -63,7 +63,7 @@ static H5HL_t *H5HL_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udat
 static herr_t H5HL_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, H5HL_t *heap, unsigned UNUSED * flags_ptr);
 static herr_t H5HL_dest(H5F_t *f, H5HL_t *heap);
 static herr_t H5HL_clear(H5F_t *f, H5HL_t *heap, hbool_t destroy);
-static herr_t H5HL_compute_size(const H5F_t *f, const H5HL_t *heap, size_t *size_ptr);
+static herr_t H5HL_size(const H5F_t *f, const H5HL_t *heap, size_t *size_ptr);
 
 /*
  * H5HL inherits cache-like properties from H5AC
@@ -74,7 +74,7 @@ const H5AC_class_t H5AC_LHEAP[1] = {{
     (H5AC_flush_func_t)H5HL_flush,
     (H5AC_dest_func_t)H5HL_dest,
     (H5AC_clear_func_t)H5HL_clear,
-    (H5AC_size_func_t)H5HL_compute_size,
+    (H5AC_size_func_t)H5HL_size,
 }};
 
 /* Declare a free list to manage the H5HL_free_t struct */
@@ -682,7 +682,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HL_compute_size
+ * Function:	H5HL_size
  *
  * Purpose:	Compute the size in bytes of the specified instance of
  *              H5HL_t on disk, and return it in *len_ptr.  On failure,
@@ -697,9 +697,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL_compute_size(const H5F_t *f, const H5HL_t *heap, size_t *size_ptr)
+H5HL_size(const H5F_t *f, const H5HL_t *heap, size_t *size_ptr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_compute_size);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_size);
 
     /* check arguments */
     HDassert(f);
@@ -709,7 +709,7 @@ H5HL_compute_size(const H5F_t *f, const H5HL_t *heap, size_t *size_ptr)
     *size_ptr = H5HL_SIZEOF_HDR(f) + heap->heap_alloc;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5HL_compute_size() */
+} /* H5HL_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -1346,12 +1346,13 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HL_get_size() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5HL_heapsize
  *
  * Purpose:     Compute the size in bytes of the specified instance of
- *              H5HL_t via H5HL_compute_size()
+ *              H5HL_t via H5HL_size()
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -1364,8 +1365,8 @@ herr_t
 H5HL_heapsize(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t *heap_size)
 {
     H5HL_t      *heap = NULL;           /* Heap to query */
-    herr_t      ret_value = SUCCEED;    /* Return value */
     size_t	local_heap_size = 0;
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5HL_heapsize, FAIL)
 
@@ -1378,13 +1379,17 @@ H5HL_heapsize(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t *heap_size)
     if(NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_READ)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap")
 
-    if (H5HL_compute_size(f, heap, &local_heap_size)<0)
+    /* Get the total size of the local heap */
+    if(H5HL_size(f, heap, &local_heap_size) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to compute size of local heap")
-    *heap_size = (hsize_t)local_heap_size;
+
+    /* Accumulate the size of the local heap */
+    *heap_size += (hsize_t)local_heap_size;
 
 done:
     if(heap && H5AC_unprotect(f, dxpl_id, H5AC_LHEAP, addr, heap, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release local heap")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5HL_get_size() */
+} /* end H5HL_heapsize() */
+

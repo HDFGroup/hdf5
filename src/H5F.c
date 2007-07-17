@@ -31,6 +31,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
+#include "H5SMprivate.h"	/* Shared Object Header Messages	*/
 #include "H5Tprivate.h"		/* Datatypes				*/
 
 /* Predefined file drivers */
@@ -3488,37 +3489,25 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5Freset_mdc_hit_rate_stats(hid_t file_id)
 {
-    H5F_t      *file=NULL;      /* File object for file ID */
-    herr_t     ret_value = SUCCEED;      /* Return value */
-    herr_t     result;
+    H5F_t      *file;                   /* File object for file ID */
+    herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(H5Freset_mdc_hit_rate_stats, FAIL)
     H5TRACE1("e", "i", file_id);
 
     /* Check args */
-    if ( NULL == (file = H5I_object_verify(file_id, H5I_FILE)) ) {
-
+    if(NULL == (file = H5I_object_verify(file_id, H5I_FILE)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
-    }
 
     /* Reset the hit rate statistic */
-    result = H5AC_reset_cache_hit_rate_stats(file->shared->cache);
-
-    if ( result != SUCCEED ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "H5AC_reset_cache_hit_rate_stats() failed.");
-    }
-
+    if(H5AC_reset_cache_hit_rate_stats(file->shared->cache) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't reset cache hit rate")
 
 done:
-
     FUNC_LEAVE_API(ret_value)
-
 } /* H5Freset_mdc_hit_rate_stats() */
 
 
@@ -3538,8 +3527,6 @@ done:
  *
  * Programmer:  Raymond Lu
  *              June 29, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3579,11 +3566,12 @@ H5Fget_name(hid_t obj_id, char *name/*out*/, size_t size)
     } /* end if */
 
     /* Set return value */
-    ret_value=(ssize_t)len;
+    ret_value = (ssize_t)len;
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_name() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_info
@@ -3602,31 +3590,47 @@ done:
 herr_t
 H5Fget_info(hid_t obj_id, H5F_info_t *finfo)
 {
-    H5F_t         *f;
-    herr_t      ret_value=SUCCEED;
+    H5F_t *f;                           /* Top file in mount hierarchy */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(H5Fget_info, FAIL)
 
-    HDassert(finfo);
+    /* Check args */
+    if(!finfo)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
 
-    HDmemset(finfo, 0, sizeof(H5F_info_t));
+    /* For file IDs, get the file object directly */
+    /* (This prevents the H5G_loc() call from returning the file pointer for
+     * the top file in a mount hierarchy)
+     */
     if(H5I_get_type(obj_id) == H5I_FILE ) {
         if(NULL == (f = H5I_object(obj_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file")
-        else {
-	    HDassert(f->shared);
-	    if (H5F_addr_defined(f->shared->extension_addr)) {
-		if (H5F_super_ext_info(f, finfo, H5AC_ind_dxpl_id) < 0)
-		    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve superblock extension size")
-	    }
-            if(H5F_addr_defined(f->shared->sohm_addr)) {
-		if (H5SM_ih_info(f, finfo, H5AC_ind_dxpl_id) < 0)
-		    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve SOHM btree & heap storage info")
-	    }
-	}
-    } else
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid object ID")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+    } /* end if */
+    else {
+        H5G_loc_t     loc;        /* Object location */
+
+        /* Get symbol table entry */
+        if(H5G_loc(obj_id, &loc) < 0)
+             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid object ID")
+        f = loc.oloc->file;
+    } /* end else */
+    HDassert(f->shared);
+
+    /* Reset file info struct */
+    HDmemset(finfo, 0, sizeof(H5F_info_t));
+
+    /* Check for superblock extension info */
+    if(H5F_addr_defined(f->shared->extension_addr))
+        if(H5F_super_ext_size(f, H5AC_ind_dxpl_id, &finfo->super_ext_size) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve superblock extension size")
+
+    /* Check for SOHM info */
+    if(H5F_addr_defined(f->shared->sohm_addr))
+        if(H5SM_ih_size(f, H5AC_ind_dxpl_id, finfo) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve SOHM btree & heap storage info")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_info() */
+

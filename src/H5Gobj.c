@@ -1247,3 +1247,4 @@ H5G_obj_lookup_by_idx(H5O_loc_t *grp_oloc, H5_index_t idx_type,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_obj_lookup_by_idx() */
+

@@ -3147,6 +3147,67 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_delete_node() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5B2_iterate_size_node
+ *      
+ * Purpose:     Iterate over all the records from a B-tree node, collecting
+ *		btree storage info.
+ *  
+ * Return:      non-negative on success, negative on error
+ *  
+ * Programmer:  Vailin Choi
+ *              July 12 2007
+ *      
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2_iterate_size_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
+    const H5B2_node_ptr_t *curr_node, hsize_t *btree_size)
+{
+    H5B2_shared_t 	*shared;        	/* Pointer to B-tree's shared information */    
+    H5B2_internal_t 	*internal = NULL;     	/* Pointer to internal node */
+    herr_t 		ret_value = SUCCEED;  	/* Iterator return value */
+
+    FUNC_ENTER_NOAPI(H5B2_iterate_size_node, FAIL)
+
+    /* Check arguments. */
+    HDassert(f);
+    HDassert(bt2_shared);
+    HDassert(curr_node);
+    HDassert(btree_size);
+    HDassert(depth > 0);
+
+    /* Get the pointer to the shared B-tree info */
+    shared = (H5B2_shared_t *)H5RC_GET_OBJ(bt2_shared);
+    HDassert(shared);
+
+    /* Lock the current B-tree node */
+    if(NULL == (internal = H5B2_protect_internal(f, dxpl_id, bt2_shared, curr_node->addr, curr_node->node_nrec, depth, H5AC_READ)))
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
+
+    /* Recursively descend into child nodes, if we are above the "twig" level in the B-tree */
+    if(depth > 1) {
+        unsigned 	u;                      /* Local index */
+
+        /* Descend into children */
+        for(u = 0; u < internal->nrec + 1; u++)
+            if(H5B2_iterate_size_node(f, dxpl_id, bt2_shared, (depth - 1), &(internal->node_ptrs[u]), btree_size) < 0)
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "node iteration failed")
+    } /* end if */
+    else /* depth is 1: count all the leaf nodes from this node */
+        *btree_size += (internal->nrec + 1) * shared->node_size;
+
+    /* Count this node */
+    *btree_size += shared->node_size;
+
+done:
+    if(internal && H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node->addr, internal, H5AC__NO_FLAGS_SET) < 0)
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5B2_iterate_size_node() */
+
 #ifdef H5B2_DEBUG
 
 /*-------------------------------------------------------------------------
@@ -3304,63 +3365,4 @@ H5B2_assert_internal2(hsize_t parent_all_nrec, H5B2_shared_t *shared, H5B2_inter
     return(0);
 } /* end H5B2_assert_internal2() */
 #endif /* H5B2_DEBUG */
-
-/*-------------------------------------------------------------------------
- * Function:    H5B2_info_iterate_node
- *      
- * Purpose:     Iterate over all the records from a B-tree node, collecting
- *		btree storage info.
- *  
- * Return:      non-negative on success, negative on error
- *  
- * Programmer:  Vailin Choi
- *              July 12 2007
- *      
- *-------------------------------------------------------------------------
- */
-herr_t
-H5B2_info_iterate_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
-const H5B2_node_ptr_t *curr_node, hsize_t *btree_size)
-{
-    H5B2_shared_t 	*shared;        	/* Pointer to B-tree's shared information */    
-    herr_t 		ret_value = SUCCEED;  	/* Iterator return value */
-    H5B2_internal_t 	*internal = NULL;     	/* Pointer to internal node */
-    unsigned 		u;                      /* Local index */
 
-    FUNC_ENTER_NOAPI(H5B2_info_iterate_node, FAIL)
-
-    /* Check arguments. */
-    HDassert(f);
-    HDassert(bt2_shared);
-    HDassert(curr_node);
-    HDassert(btree_size);
-
-    /* Get the pointer to the shared B-tree info */
-    shared=(H5B2_shared_t *)H5RC_GET_OBJ(bt2_shared);
-    HDassert(shared);
-
-
-    if(depth > 0) {
-        /* Lock the current B-tree node */
-        if(NULL == (internal = H5B2_protect_internal(f, dxpl_id, bt2_shared, curr_node->addr, curr_node->node_nrec, depth, H5AC_READ)))
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
-
-	if(depth>1) {
-	    /* Descend into children */
-	    for(u=0; u<internal->nrec+1; u++)
-		if(H5B2_info_iterate_node(f, dxpl_id, bt2_shared, (depth-1), &(internal->node_ptrs[u]), btree_size) < 0)
-		    HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "node iteration failed")
-	} /* end if */
-	else /* depth is 1: count all the leaf nodes from this node */
-	    *btree_size += (internal->nrec + 1) * shared->node_size;
-    } /* end if */
-
-    /* Count this node */
-    *btree_size += shared->node_size;
-
-done:
-    if(internal && H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node->addr, internal, H5AC__NO_FLAGS_SET) < 0)
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5B2_info_iterate_node() */

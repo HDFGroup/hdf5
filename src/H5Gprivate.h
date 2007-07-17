@@ -175,7 +175,6 @@ H5_DLL herr_t H5G_obj_ent_decode(H5F_t *f, const uint8_t **pp,
 H5_DLL herr_t H5G_obj_ent_encode(const H5F_t *f, uint8_t **pp,
     const struct H5O_loc_t *oloc);
 
-
 /*
  * These functions operate on group hierarchy names.
  */

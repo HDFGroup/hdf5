@@ -3883,6 +3883,57 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5D_istore_bh_size
+ *
+ * Purpose:     Retrieve the amount of B-tree storage for chunked dataset
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        negative
+ *
+ * Programmer:  Vailin Choi
+ *              June 8, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_istore_bh_info(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout, hsize_t *btree_size)
+{
+    H5D_istore_it_ud1_t udata;                  /* User-data for loading istore nodes */
+    H5B_info_ud_t       bh_udata;               /* User-data for B-tree size iteration */
+    herr_t              ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5D_istore_bh_info, FAIL)
+
+    /* Check args */
+    HDassert(f);
+    HDassert(layout);
+    HDassert(btree_size);
+
+    /* Initialize the shared info for the B-tree traversal */
+    if(H5D_istore_shared_create(f, layout) < 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create wrapper for shared B-tree info")
+
+    /* Initialize istore node user-data */
+    HDmemset(&udata, 0, sizeof udata);
+    udata.common.mesg = layout;
+
+    /* Iterate over B-tree, accumulating metadata size */
+    bh_udata.udata = &udata;
+    bh_udata.btree_size = btree_size;
+    if(H5B_iterate_size(f, dxpl_id, H5B_ISTORE, NULL, layout->u.chunk.addr, &bh_udata) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "unable to iterate over chunk B-tree")
+
+done:
+    if(layout->u.chunk.btree_shared == NULL)
+	HDONE_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "ref-counted page nil")
+    if(H5RC_DEC(layout->u.chunk.btree_shared) < 0)
+	HDONE_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "unable to decrement ref-counted page")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_istore_bh_info() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D_istore_dump_btree
  *
  * Purpose:	Prints information about the storage B-tree to the specified
@@ -4027,47 +4078,4 @@ H5D_istore_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int inden
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_istore_debug() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5D_istore_btree_size
- *
- * Purpose:     Retrieve the amount of B-tree storage for chunked dataset
- *
- * Return:      Success:        Non-negative
- *              Failure:        negative
- *
- * Programmer:  Vailin Choi
- *              June 8, 2007
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5D_obj_istore_bh_info(H5O_loc_t *oloc, H5O_layout_t *layout, hid_t dxpl_id, hsize_t *btree_size)
-{
-    H5D_istore_it_ud1_t udata;
-    herr_t              ret_value=SUCCEED;
-    H5B_info_ud_t        bh_udata;
 
-    FUNC_ENTER_NOAPI(H5D_obj_istore_bh_info, FAIL)
-
-    HDassert(oloc);
-    HDassert(layout);
-    HDassert(btree_size);
-
-    if(H5D_istore_shared_create(oloc->file, layout)<0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create wrapper for shared B-tree info")
-
-    HDmemset(&udata, 0, sizeof udata);
-    udata.common.mesg = layout;
-
-    bh_udata.udata = &udata;
-    bh_udata.btree_size = btree_size;
-    if ((ret_value = H5B_iterate_btree_size(oloc->file, dxpl_id, H5B_ISTORE, NULL, layout->u.chunk.addr, &bh_udata)) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "unable to iterate over chunk B-tree")
-done:
-    if(layout->u.chunk.btree_shared==NULL)
-	HGOTO_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "ref-counted page nil")
-    if(H5RC_DEC(layout->u.chunk.btree_shared)<0)
-	HGOTO_ERROR(H5E_IO, H5E_CANTFREE, FAIL, "unable to decrement ref-counted page")
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_obj_istore_bh_info() */

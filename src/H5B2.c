@@ -1187,9 +1187,10 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_modify() */
+
 
 /*-------------------------------------------------------------------------
- * Function:    H5B2_info_iterate
+ * Function:    H5B2_iterate_size
  *
  * Purpose:     Iterate over all the records in the B-tree, collecting
  *              storage info.
@@ -1202,18 +1203,17 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B2_info_iterate(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr, hsize_t *btree_size)
+H5B2_iterate_size(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr, hsize_t *btree_size)
 {
-    H5B2_t      	*bt2=NULL;          /* Pointer to the B-tree header */
+    H5B2_t      	*bt2 = NULL;        /* Pointer to the B-tree header */
     H5B2_shared_t	*shared;            /* Pointer to B-tree's shared information */
-    H5RC_t      	*bt2_shared=NULL;   /* Pointer to ref-counter for shared B-tree info */
-    hbool_t     	incr_rc=FALSE;      /* Flag to indicate that we've incremented the B-tree's shared info reference count */
+    H5RC_t      	*bt2_shared = NULL; /* Pointer to ref-counter for shared B-tree info */
+    hbool_t     	incr_rc = FALSE;    /* Flag to indicate that we've incremented the B-tree's shared info reference count */
     H5B2_node_ptr_t 	root_ptr;           /* Node pointer info for root node */
     unsigned    	depth;              /* Current depth of the tree */
-    herr_t      	ret_value=SUCCEED;
+    herr_t      	ret_value = SUCCEED;
 
-
-    FUNC_ENTER_NOAPI(H5B2_info_iterate, FAIL)
+    FUNC_ENTER_NOAPI(H5B2_iterate_size, FAIL)
 
     /* Check arguments. */
     HDassert(f);
@@ -1225,6 +1225,7 @@ H5B2_info_iterate(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t add
     if(NULL == (bt2 = H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, type, NULL, H5AC_READ)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
 
+    /* Safely grab pointer to reference counted shared B-tree info, so we can release the B-tree header if necessary */
     bt2_shared = bt2->shared;
     H5RC_INC(bt2_shared);
     incr_rc = TRUE;
@@ -1233,6 +1234,7 @@ H5B2_info_iterate(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t add
     shared = H5RC_GET_OBJ(bt2->shared);
     HDassert(shared);
 
+    /* Add size of header to B-tree metadata total */
     *btree_size += H5B2_HEADER_SIZE(f);
 
     /* Make copy of the root node pointer */
@@ -1248,9 +1250,13 @@ H5B2_info_iterate(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t add
 
     /* Iterate through records */
     if(root_ptr.node_nrec > 0) {
-        /* Iterate through nodes */
-        if((ret_value = H5B2_info_iterate_node(f, dxpl_id, bt2_shared, depth, &root_ptr, btree_size)) < 0)
-            HERROR(H5E_BTREE, H5E_CANTLIST, "node iteration failed");
+        /* Check for root node being a leaf */
+        if(depth == 0)
+            *btree_size += shared->node_size;
+        else
+            /* Iterate through nodes */
+            if(H5B2_iterate_size_node(f, dxpl_id, bt2_shared, depth, &root_ptr, btree_size) < 0)
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTLIST, FAIL, "node iteration failed");
     } /* end if */
 
 done:
@@ -1259,4 +1265,5 @@ done:
         H5RC_DEC(bt2_shared);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5B2_info_iterate() */
+} /* H5B2_iterate_size() */
+

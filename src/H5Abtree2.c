@@ -273,7 +273,7 @@ H5A_dense_btree2_name_compare(const void *_bt2_udata, const void *_bt2_rec)
     const H5A_dense_bt2_name_rec_t *bt2_rec = (const H5A_dense_bt2_name_rec_t *)_bt2_rec;
     herr_t ret_value;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5A_dense_btree2_name_compare)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_dense_btree2_name_compare)
 
     /* Sanity check */
     HDassert(bt2_udata);

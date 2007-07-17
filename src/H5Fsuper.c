@@ -965,8 +965,9 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_super_write() */
 
+
 /*-------------------------------------------------------------------------
- * Function:    H5F_super_ext_info
+ * Function:    H5F_super_ext_size
  *              Get storage size of the superblock extension
  *
  * Return:      Success:        non-negative on success
@@ -977,18 +978,31 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_super_ext_info(H5F_t *f, H5F_info_t *finfo, hid_t dxpl_id)
+H5F_super_ext_size(H5F_t *f, hid_t dxpl_id, hsize_t *super_ext_size)
 {
-    herr_t      ret_value=SUCCEED;
+    H5O_loc_t ext_loc;                  /* "Object location" for superblock extension */
+    H5O_info_t oinfo;                   /* Object info for superblock extension */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5F_super_ext_info, FAIL)
+    FUNC_ENTER_NOAPI(H5F_super_ext_size, FAIL)
 
+    /* Sanity check */
     HDassert(f);
-    HDassert(finfo);
+    HDassert(super_ext_size);
 
-    if (H5O_super_ext_size(f, &(finfo->super_ext_size), dxpl_id) < 0)
-	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve superblock extension size")
+    /* Set up "fake" object location for superblock extension */
+    H5O_loc_reset(&ext_loc);
+    ext_loc.file = f;
+    ext_loc.addr = f->shared->extension_addr;
+
+    /* Get object header info for superblock extension */
+    if(H5O_get_info(&ext_loc, &oinfo, dxpl_id) < 0)
+	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to retrieve superblock extension info")
+
+    /* Set the superblock extension size */
+    *super_ext_size = oinfo.hdr.space.total;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5F_super_ext_info() */
+} /* H5F_super_ext_size() */
+
