@@ -136,7 +136,7 @@ main(void)
             TEST_ERROR
 
         /* Make certain that chunk #0 in the object header can be encoded with a 1-byte size */
-        if(H5O_get_info(&oh_loc, &oinfo, H5P_DATASET_XFER_DEFAULT) < 0)
+        if(H5O_get_info(&oh_loc, H5P_DATASET_XFER_DEFAULT, FALSE, &oinfo) < 0)
             FAIL_STACK_ERROR
         if(oinfo.hdr.space.total >=256)
             TEST_ERROR
@@ -161,7 +161,7 @@ main(void)
             FAIL_STACK_ERROR
 
         /* Make certain that chunk #0 in the object header will be encoded with a 2-byte size */
-        if(H5O_get_info(&oh_loc, &oinfo, H5P_DATASET_XFER_DEFAULT) < 0)
+        if(H5O_get_info(&oh_loc, H5P_DATASET_XFER_DEFAULT, FALSE, &oinfo) < 0)
             FAIL_STACK_ERROR
         if(oinfo.hdr.space.total < 256)
             TEST_ERROR
