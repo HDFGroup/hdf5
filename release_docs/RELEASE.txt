@@ -268,10 +268,10 @@ Platforms Tested
     SunOS 5.8 32,46               Sun WorkShop 6 update 2 C 5.3
      (Solaris 2.8)                Sun WorkShop 6 update 2 Fortran 95 6.2
                                   Sun WorkShop 6 update 2 C++ 5.3
-    SunOS 5.10                    Sun WorkShop 6 update 2 C 5.3
-                                  Sun WorkShop 6 update 2 Fortran 95 6.2
-                                  Sun WorkShop 6 update 2 C++ 5.3
-                                  Patch 111685-13 
+    SunOS 5.10                    Sun WorkShop 6 update 2 C 5.8
+                                  Sun WorkShop 6 update 2 Fortran 95 8.2
+                                  Sun WorkShop 6 update 2 C++ 5.8
+                                  Patch 121019-06 
     Xeon Linux 2.4.21-32.0.1.ELsmp-perfctr-lustre
     (tungsten)	                  Intel(R) C++ Version 9.0
                                   Intel(R) Fortran Compiler Version 9.0
