@@ -484,7 +484,7 @@ H5G_link_copy_file(H5F_t *dst_file, hid_t dxpl_id, const H5O_link_t *_src_lnk,
         grp_loc.oloc = (H5O_loc_t *)src_oloc;    /* Casting away const OK -QAK */
 
         /* Check if the object pointed by the soft link exists in the source file */
-        if(H5G_loc_info(&grp_loc, tmp_src_lnk.u.soft.name, &oinfo, H5P_DEFAULT, dxpl_id) >= 0) {
+        if(H5G_loc_info(&grp_loc, tmp_src_lnk.u.soft.name, FALSE, &oinfo, H5P_DEFAULT, dxpl_id) >= 0) {
             /* Convert soft link to hard link */
             tmp_src_lnk.u.soft.name = H5MM_xfree(tmp_src_lnk.u.soft.name);
             tmp_src_lnk.type = H5L_TYPE_HARD;

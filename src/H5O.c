@@ -486,7 +486,7 @@ H5Oget_info(hid_t loc_id, const char *name, H5O_info_t *oinfo, hid_t lapl_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
 
     /* Retrieve the object's information */
-    if(H5G_loc_info(&loc, name, oinfo/*out*/, lapl_id, H5AC_ind_dxpl_id) < 0)
+    if(H5G_loc_info(&loc, name, TRUE, oinfo/*out*/, lapl_id, H5AC_ind_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
 done:
     FUNC_LEAVE_API(ret_value)
@@ -550,7 +550,7 @@ H5Oget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     loc_found = TRUE;
 
     /* Retrieve the object's information */
-    if(H5O_get_info(obj_loc.oloc, oinfo, H5AC_ind_dxpl_id) < 0)
+    if(H5O_get_info(obj_loc.oloc, H5AC_ind_dxpl_id, TRUE, oinfo) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve object info")
 
 done:
@@ -1827,7 +1827,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id)
+H5O_get_info(H5O_loc_t *oloc, hid_t dxpl_id, hbool_t want_ih_info, H5O_info_t *oinfo)
 {
     H5O_t *oh = NULL;                   /* Object header */
     H5O_chunk_t *curr_chunk;	        /* Pointer to current message being operated on */
@@ -1859,14 +1859,16 @@ H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id)
     if(H5O_obj_type_real(oh, &oinfo->type) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to determine object type")
 
-    /* Retrieve btree and heap storage info */
-    if(oinfo->type == H5O_TYPE_GROUP) {
-	if(H5O_group_bh_info(oloc->file, dxpl_id, oh, &(oinfo->meta_size.obj)/*out*/) < 0)
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't retrieve group btree & heap info")
-    } else if(oinfo->type == H5O_TYPE_DATASET) {
-	if(H5O_dset_bh_info(oloc->file, dxpl_id, oh, &(oinfo->meta_size.obj)/*out*/) < 0)
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't retrieve chunked dataset btree info")
-    }
+    /* Retrieve btree and heap storage info, if requested */
+    if(want_ih_info) {
+        if(oinfo->type == H5O_TYPE_GROUP) {
+            if(H5O_group_bh_info(oloc->file, dxpl_id, oh, &(oinfo->meta_size.obj)/*out*/) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't retrieve group btree & heap info")
+        } else if(oinfo->type == H5O_TYPE_DATASET) {
+            if(H5O_dset_bh_info(oloc->file, dxpl_id, oh, &(oinfo->meta_size.obj)/*out*/) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't retrieve chunked dataset btree info")
+        }
+    } /* end if */
 
     /* Set the object's reference count */
     oinfo->rc = oh->nlink;
@@ -1938,8 +1940,12 @@ H5O_get_info(H5O_loc_t *oloc, H5O_info_t *oinfo, hid_t dxpl_id)
 
     /* Retrieve # of attributes */
     oinfo->num_attrs = H5O_attr_count_real(oloc->file, dxpl_id, oh);
-    if((oinfo->num_attrs > 0) && (H5O_attr_bh_info(oloc->file, dxpl_id, oh, &oinfo->meta_size.attr/*out*/) < 0))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve attribute btree & heap info")
+
+    /* Get B-tree & heap metadata storage size, if requested */
+    if(want_ih_info) {
+        if((oinfo->num_attrs > 0) && (H5O_attr_bh_info(oloc->file, dxpl_id, oh, &oinfo->meta_size.attr/*out*/) < 0))
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve attribute btree & heap info")
+    } /* end if */
 
     /* Iterate over all the chunks, adding any gaps to the free space */
     oinfo->hdr.space.total = 0;

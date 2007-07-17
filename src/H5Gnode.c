@@ -1785,7 +1785,7 @@ H5G_node_copy(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
             link_name = (char *)H5HL_offset_into(f, heap, tmp_src_ent.cache.slink.lval_offset);
 
             /* Check if the object pointed by the soft link exists in the source file */
-            if(H5G_loc_info(&grp_loc, link_name, &oinfo, H5P_DEFAULT, dxpl_id) >= 0) {
+            if(H5G_loc_info(&grp_loc, link_name, FALSE, &oinfo, H5P_DEFAULT, dxpl_id) >= 0) {
                 tmp_src_ent.header = oinfo.addr;
                 src_ent = &tmp_src_ent;
             } /* end if */

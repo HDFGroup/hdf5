@@ -1052,7 +1052,8 @@ H5G_get_objinfo_cb(H5G_loc_t *grp_loc/*in*/, const char UNUSED *name, const H5O_
             H5O_info_t oinfo;           /* Object information */
 
             /* Go retrieve the object information */
-            if(H5O_get_info(obj_loc->oloc, &oinfo, udata->dxpl_id) < 0)
+            /* (don't need index & heap info) */
+            if(H5O_get_info(obj_loc->oloc, udata->dxpl_id, FALSE, &oinfo) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to get object info")
 
             /* Get mapped object type */

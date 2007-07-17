@@ -1094,7 +1094,7 @@ H5G_refname_iterator(hid_t group, const char *name, const H5L_info_t *link_info,
             /* Go retrieve the object information */
             tmp_oloc.file = loc.oloc->file;
             tmp_oloc.addr = link_info->u.address;
-            if(H5O_get_info(&tmp_oloc, &oinfo, udata->dxpl_id) < 0)
+            if(H5O_get_info(&tmp_oloc, udata->dxpl_id, FALSE, &oinfo) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5_ITER_ERROR, "unable to get object info")
 
             /* If its ref count is > 1, we add it to the list of visited objects */

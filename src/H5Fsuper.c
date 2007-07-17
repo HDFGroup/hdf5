@@ -996,7 +996,7 @@ H5F_super_ext_size(H5F_t *f, hid_t dxpl_id, hsize_t *super_ext_size)
     ext_loc.addr = f->shared->extension_addr;
 
     /* Get object header info for superblock extension */
-    if(H5O_get_info(&ext_loc, &oinfo, dxpl_id) < 0)
+    if(H5O_get_info(&ext_loc, dxpl_id, FALSE, &oinfo) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to retrieve superblock extension info")
 
     /* Set the superblock extension size */

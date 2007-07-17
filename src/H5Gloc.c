@@ -73,6 +73,7 @@ typedef struct {
 typedef struct {
     /* downward */
     hid_t dxpl_id;              /* DXPL to use for operation */
+    hbool_t want_ih_info;       /* Whether to retrieve the index & heap info */
 
     /* upward */
     H5O_info_t  *oinfo;         /* Object information to retrieve */
@@ -629,7 +630,7 @@ H5G_loc_info_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name, const 
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist")
 
     /* Query object information */
-    if(H5O_get_info(obj_loc->oloc, udata->oinfo, udata->dxpl_id) < 0)
+    if(H5O_get_info(obj_loc->oloc, udata->dxpl_id, udata->want_ih_info, udata->oinfo) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object info")
 
 done:
@@ -655,7 +656,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_loc_info(H5G_loc_t *loc, const char *name, H5O_info_t *oinfo/*out*/,
+H5G_loc_info(H5G_loc_t *loc, const char *name, hbool_t want_ih_info, H5O_info_t *oinfo/*out*/,
     hid_t lapl_id, hid_t dxpl_id)
 {
     H5G_loc_info_t udata;               /* User data for traversal callback */
@@ -670,6 +671,7 @@ H5G_loc_info(H5G_loc_t *loc, const char *name, H5O_info_t *oinfo/*out*/,
 
     /* Set up user data for locating object */
     udata.dxpl_id = dxpl_id;
+    udata.want_ih_info = want_ih_info;
     udata.oinfo = oinfo;
 
     /* Traverse group hierarchy to locate object */
