@@ -3758,6 +3758,114 @@ test_attr_corder_create_dense(hid_t fcpl, hid_t fapl)
 
 /****************************************************************
 **
+**  test_attr_corder_create_reopen(): Test basic H5A (attribute) code.
+**      Test creating attributes w/reopening file from using new format
+**      to using old format
+**
+****************************************************************/
+static void
+test_attr_corder_create_reopen(hid_t fcpl, hid_t fapl)
+{
+    hid_t fid = -1;             /* File ID */
+    hid_t gcpl_id = -1;         /* Group creation property list ID */
+    hid_t gid = -1;             /* Group ID */
+    hid_t sid = -1;             /* Dataspace ID */
+    hid_t aid = -1;             /* Attribute ID */
+    int buf;                    /* Attribute data */
+    herr_t	ret;		/* Generic return value	*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Creating Attributes w/New & Old Format\n"));
+
+    /* Create dataspace for attributes */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Create file */
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create group */
+    gcpl_id = H5Pcreate(H5P_GROUP_CREATE);
+    CHECK(gcpl_id, FAIL, "H5Pcreate");
+    ret = H5Pset_attr_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED);
+    CHECK(ret, FAIL, "H5Pset_attr_creation_order");
+    gid = H5Gcreate2(fid, GROUP1_NAME, H5P_DEFAULT, gcpl_id, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gcreate2");
+
+    /* Create a couple of attributes */
+    aid = H5Acreate2(gid, ".", "attr-003", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(aid, FAIL, "H5Acreate2");
+    buf = 3;
+    ret = H5Awrite(aid, H5T_NATIVE_INT, &buf);
+    CHECK(ret, FAIL, "H5Awrite");
+    ret = H5Aclose(aid);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    aid = H5Acreate2(gid, ".", "attr-004", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(aid, FAIL, "H5Acreate2");
+    buf = 4;
+    ret = H5Awrite(aid, H5T_NATIVE_INT, &buf);
+    CHECK(ret, FAIL, "H5Awrite");
+    ret = H5Aclose(aid);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /***** Close group & GCPL *****/
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+    ret = H5Pclose(gcpl_id);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+
+    /* Re-open file, without "use the latest format" flag */
+    fid = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Re-open group */
+    gid = H5Gopen(fid, GROUP1_NAME);
+    CHECK(gid, FAIL, "H5Gopen");
+
+    /* Delete attribute */
+    ret = H5Adelete2(gid, ".", "attr-003", H5P_DEFAULT);
+    CHECK(aid, FAIL, "H5Adelete2");
+
+    /* Create some additional attributes */
+    aid = H5Acreate2(gid, ".", "attr-008", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(aid, FAIL, "H5Acreate2");
+    buf = 8;
+    ret = H5Awrite(aid, H5T_NATIVE_INT, &buf);
+    CHECK(ret, FAIL, "H5Awrite");
+    ret = H5Aclose(aid);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    aid = H5Acreate2(gid, ".", "attr-006", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(aid, FAIL, "H5Acreate2");
+    buf = 6;
+    ret = H5Awrite(aid, H5T_NATIVE_INT, &buf);
+    CHECK(ret, FAIL, "H5Awrite");
+    ret = H5Aclose(aid);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /***** Close group *****/
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close attribute dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+}   /* test_attr_corder_create_reopen() */
+
+
+/****************************************************************
+**
 **  test_attr_corder_transition(): Test basic H5A (attribute) code.
 **      Tests attribute storage transitions on objects with attribute creation order info
 **
@@ -8131,6 +8239,7 @@ test_attr(void)
                 test_attr_corder_create_basic(my_fcpl, my_fapl);/* Test creating an object w/attribute creation order info */
                 test_attr_corder_create_compact(my_fcpl, my_fapl);  /* Test compact attribute storage on an object w/attribute creation order info */
                 test_attr_corder_create_dense(my_fcpl, my_fapl);/* Test dense attribute storage on an object w/attribute creation order info */
+                test_attr_corder_create_reopen(my_fcpl, my_fapl);/* Test creating attributes w/reopening file from using new format to using old format */
                 test_attr_corder_transition(my_fcpl, my_fapl);  /* Test attribute storage transitions on an object w/attribute creation order info */
                 test_attr_corder_delete(my_fcpl, my_fapl);      /* Test deleting object using dense storage w/attribute creation order info */
 

@@ -878,9 +878,14 @@ H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
 
     /* Find correct attribute message to rename */
     if(HDstrcmp(((H5A_t *)mesg->native)->name, udata->old_name) == 0) {
+        unsigned old_version = ((H5A_t *)mesg->native)->version;        /* Old version of the attribute */
+
         /* Change the name for the attribute */
         H5MM_xfree(((H5A_t *)mesg->native)->name);
         ((H5A_t *)mesg->native)->name = H5MM_xstrdup(udata->new_name);
+
+        /* Recompute the version to encode the attribute with */
+        ((H5A_t *)mesg->native)->version = H5A_get_version(udata->f, ((H5A_t *)mesg->native));
 
         /* Mark message as dirty */
         mesg->dirty = TRUE;
@@ -896,7 +901,8 @@ H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
             HDassert(H5O_msg_is_shared(H5O_ATTR_ID, (H5A_t *)mesg->native) == FALSE);
 
             /* Check for attribute message changing size */
-            if(HDstrlen(udata->new_name) != HDstrlen(udata->old_name)) {
+            if(HDstrlen(udata->new_name) != HDstrlen(udata->old_name) ||
+                    old_version != ((H5A_t *)mesg->native)->version) {
                 H5A_t *attr;            /* Attribute to re-add */
 
                 /* Take ownership of the message's native info (the attribute) 

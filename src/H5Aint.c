@@ -669,3 +669,60 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_get_ainfo() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5A_get_version
+ *
+ * Purpose:     Retrieves the correct version to encode attribute with.
+ *              Chooses the oldest version possible, unless the "use the
+ *              latest format" flag is set.
+ *
+ * Return:	Success:	Version to encode attribute with.
+ *              Failure:        Can't fail
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              Jul 17 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+unsigned
+H5A_get_version(const H5F_t *f, const H5A_t *attr)
+{
+    hbool_t type_shared, space_shared;  /* Flags to indicate that shared messages are used for this attribute */
+    hbool_t use_latest_format;          /* Flag indicating the newest file format should be used */
+    unsigned ret_value;                 /* Return value */
+    
+    FUNC_ENTER_NOAPI_NOFUNC(H5A_get_version)
+
+    /* check arguments */
+    HDassert(f);
+    HDassert(attr);
+
+    /* Get the file's 'use the latest version of the format' flag */
+    use_latest_format = H5F_USE_LATEST_FORMAT(f);
+
+    /* Check whether datatype and dataspace are shared */
+    if(H5O_msg_is_shared(H5O_DTYPE_ID, attr->dt) > 0)
+        type_shared = TRUE;
+    else
+        type_shared = FALSE;
+
+    if(H5O_msg_is_shared(H5O_SDSPACE_ID, attr->ds) > 0)
+        space_shared = TRUE;
+    else
+        space_shared = FALSE;
+
+    /* Check which version to encode attribute with */
+    if(use_latest_format)
+        ret_value = H5O_ATTR_VERSION_LATEST;      /* Write out latest version of format */
+    else if(attr->encoding != H5T_CSET_ASCII)
+        ret_value = H5O_ATTR_VERSION_3;   /* Write version which includes the character encoding */
+    else if(type_shared || space_shared)
+        ret_value = H5O_ATTR_VERSION_2;   /* Write out version with flag for indicating shared datatype or dataspace */
+    else
+        ret_value = H5O_ATTR_VERSION_1;   /* Write out basic version */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5A_get_version() */
+

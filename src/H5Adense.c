@@ -907,6 +907,9 @@ H5A_dense_rename(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *
     H5MM_xfree(attr_copy->name);
     attr_copy->name = H5MM_xstrdup(new_name);
 
+    /* Recompute the version to encode the attribute with */
+    attr_copy->version = H5A_get_version(f, attr_copy);
+
     /* Insert renamed attribute back into dense storage */
     /* (Possibly making it shared) */
     if(H5A_dense_insert(f, dxpl_id, ainfo, attr_copy) < 0)

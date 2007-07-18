@@ -51,6 +51,23 @@
 /* Package Private Macros */
 /**************************/
 
+/* This is the initial version, which does not have support for shared datatypes */
+#define H5O_ATTR_VERSION_1	1
+
+/* This version allows support for shared datatypes & dataspaces by adding a
+ *      'flag' byte indicating when those components are shared.  This version
+ *      also dropped the alignment on all the components.
+ */
+#define H5O_ATTR_VERSION_2	2
+
+/* Add support for different character encodings of attribute names */
+#define H5O_ATTR_VERSION_3      3
+
+/* The latest version of the format.  Look through the 'encode', 'decode'
+ *      and 'size' message callbacks for places to change when updating this.
+ */
+#define H5O_ATTR_VERSION_LATEST H5O_ATTR_VERSION_3
+
 
 /****************************/
 /* Package Private Typedefs */
@@ -60,16 +77,21 @@
 struct H5A_t {
     H5O_shared_t sh_loc;    /* Shared message info (must be first) */
 
+    unsigned    version;    /* Version to encode attribute with */
     hbool_t     initialized;/* Indicate whether the attribute has been modified */
     hbool_t     obj_opened; /* Object header entry opened? */
     H5O_loc_t   oloc;       /* Object location for object attribute is on */
     H5G_name_t  path;       /* Group hierarchy path */
+
     char        *name;      /* Attribute's name */
     H5T_cset_t  encoding;   /* Character encoding of attribute name */
+
     H5T_t       *dt;        /* Attribute's datatype */
     size_t      dt_size;    /* Size of datatype on disk */
+
     H5S_t       *ds;        /* Attribute's dataspace */
     size_t      ds_size;    /* Size of dataspace on disk */
+
     void        *data;      /* Attribute data (on a temporary basis) */
     size_t      data_size;  /* Size of data on disk */
     H5O_msg_crt_idx_t crt_idx;  /* Attribute's creation index in the object header */
@@ -186,6 +208,7 @@ H5_DLL herr_t H5A_free(H5A_t *attr);
 H5_DLL herr_t H5A_close(H5A_t *attr);
 H5_DLL H5O_ainfo_t *H5A_get_ainfo(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     H5O_ainfo_t *ainfo);
+H5_DLL unsigned H5A_get_version(const H5F_t *f, const H5A_t *attr);
 
 /* Attribute "dense" storage routines */
 H5_DLL herr_t H5A_dense_create(H5F_t *f, hid_t dxpl_id, H5O_ainfo_t *ainfo);
