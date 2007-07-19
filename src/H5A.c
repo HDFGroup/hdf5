@@ -399,7 +399,8 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     attr->obj_opened = TRUE;
 
     /* Set the version to encode the attribute with */
-    attr->version = H5A_get_version(attr->oloc.file, attr);
+    if(H5A_set_version(attr->oloc.file, attr) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "unable to update attribute version")
 
     /* Insert the attribute into the object header */
     if(H5O_attr_create(&(attr->oloc), dxpl_id, attr) < 0)

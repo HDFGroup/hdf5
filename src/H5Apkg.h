@@ -208,7 +208,7 @@ H5_DLL herr_t H5A_free(H5A_t *attr);
 H5_DLL herr_t H5A_close(H5A_t *attr);
 H5_DLL H5O_ainfo_t *H5A_get_ainfo(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     H5O_ainfo_t *ainfo);
-H5_DLL unsigned H5A_get_version(const H5F_t *f, const H5A_t *attr);
+H5_DLL herr_t H5A_set_version(const H5F_t *f, H5A_t *attr);
 
 /* Attribute "dense" storage routines */
 H5_DLL herr_t H5A_dense_create(H5F_t *f, hid_t dxpl_id, H5O_ainfo_t *ainfo);

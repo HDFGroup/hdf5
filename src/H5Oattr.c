@@ -833,7 +833,8 @@ H5O_attr_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t UNUSED *mesg_ty
     } /* end if(attr_src->data) */
 
     /* Recompute the version to encode the destination attribute */
-    attr_dst->version = H5A_get_version(file_dst, attr_dst);
+    if(H5A_set_version(file_dst, attr_dst) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, NULL, "unable to update attribute version")
 
     /* Indicate that the fill values aren't to be written out */
     attr_dst->initialized = TRUE;

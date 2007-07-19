@@ -671,14 +671,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5A_get_version
+ * Function:    H5A_set_version
  *
- * Purpose:     Retrieves the correct version to encode attribute with.
+ * Purpose:     Sets the correct version to encode attribute with.
  *              Chooses the oldest version possible, unless the "use the
  *              latest format" flag is set.
  *
- * Return:	Success:	Version to encode attribute with.
- *              Failure:        Can't fail
+ * Return:	Success:        Non-negative
+ *		Failure:	Negative
  *
  * Programmer:  Quincey Koziol
  *              koziol@hdfgroup.org
@@ -686,14 +686,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-unsigned
-H5A_get_version(const H5F_t *f, const H5A_t *attr)
+herr_t
+H5A_set_version(const H5F_t *f, H5A_t *attr)
 {
     hbool_t type_shared, space_shared;  /* Flags to indicate that shared messages are used for this attribute */
     hbool_t use_latest_format;          /* Flag indicating the newest file format should be used */
-    unsigned ret_value;                 /* Return value */
     
-    FUNC_ENTER_NOAPI_NOFUNC(H5A_get_version)
+    FUNC_ENTER_NOAPI_NOFUNC(H5A_set_version)
 
     /* check arguments */
     HDassert(f);
@@ -715,14 +714,14 @@ H5A_get_version(const H5F_t *f, const H5A_t *attr)
 
     /* Check which version to encode attribute with */
     if(use_latest_format)
-        ret_value = H5O_ATTR_VERSION_LATEST;      /* Write out latest version of format */
+        attr->version = H5O_ATTR_VERSION_LATEST;      /* Write out latest version of format */
     else if(attr->encoding != H5T_CSET_ASCII)
-        ret_value = H5O_ATTR_VERSION_3;   /* Write version which includes the character encoding */
+        attr->version = H5O_ATTR_VERSION_3;   /* Write version which includes the character encoding */
     else if(type_shared || space_shared)
-        ret_value = H5O_ATTR_VERSION_2;   /* Write out version with flag for indicating shared datatype or dataspace */
+        attr->version = H5O_ATTR_VERSION_2;   /* Write out version with flag for indicating shared datatype or dataspace */
     else
-        ret_value = H5O_ATTR_VERSION_1;   /* Write out basic version */
+        attr->version = H5O_ATTR_VERSION_1;   /* Write out basic version */
 
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5A_get_version() */
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5A_set_version() */
 

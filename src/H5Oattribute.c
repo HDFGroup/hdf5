@@ -885,7 +885,8 @@ H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
         ((H5A_t *)mesg->native)->name = H5MM_xstrdup(udata->new_name);
 
         /* Recompute the version to encode the attribute with */
-        ((H5A_t *)mesg->native)->version = H5A_get_version(udata->f, ((H5A_t *)mesg->native));
+        if(H5A_set_version(udata->f, ((H5A_t *)mesg->native)) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5_ITER_ERROR, "unable to update attribute version")
 
         /* Mark message as dirty */
         mesg->dirty = TRUE;
