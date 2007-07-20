@@ -287,7 +287,7 @@ h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size)
 
 	if (H5FD_FAMILY == driver)
 	    suffix = "%05d.h5";
-	else if (H5FD_CORE == driver || H5FD_MULTI == driver)
+	else if (H5FD_MULTI == driver)
 	    suffix = NULL;
     }
 
