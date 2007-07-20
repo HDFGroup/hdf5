@@ -180,8 +180,8 @@ H5Gcreate(hid_t loc_id, const char *name, size_t size_hint)
         if((tmp_gcpl = H5P_copy_plist(gc_plist)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to copy the creation property list")
 
-        /* Get the copy of the property list */
-        if(NULL == (gc_plist = H5I_object(H5P_GROUP_CREATE_DEFAULT)))
+        /* Get pointer to the copied property list */
+        if(NULL == (gc_plist = H5I_object(tmp_gcpl)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
         /* Get the group info property */
