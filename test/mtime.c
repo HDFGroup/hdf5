@@ -122,6 +122,7 @@ main(void)
         printf("    got: %s\n    ans: %s\n", buf1, buf2);
         goto error;
     }
+    PASSED();
 
 
     /* Check opening existing file with old-style modification time information
