@@ -570,7 +570,7 @@ h5_fileaccess(void)
 	if (H5Pset_fapl_family(fapl, fam_size, H5P_DEFAULT)<0)
             return -1;
     } else if (!HDstrcmp(name, "log")) {
-        unsigned log_flags = H5FD_LOG_LOC_IO;
+        unsigned log_flags = H5FD_LOG_LOC_IO | H5FD_LOG_ALLOC;
 
         /* Log file access */
         if ((val = HDstrtok(NULL, " \t\n\r")))
