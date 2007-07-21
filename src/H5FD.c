@@ -2736,19 +2736,21 @@ H5FD_can_extend(const H5FD_t *file, H5FD_mem_t type, haddr_t addr, hsize_t size,
         } /* end else */
 
         /* Scan through the existing blocks for the mapped type to see if we can extend one */
-        curr = file->fl[mapped_type];
-        end = addr + size;
-        while(curr != NULL) {
-            if(end == curr->addr) {
-                if(extra_requested <= curr->size)
-                    HGOTO_DONE(TRUE)
-                else
-                    HGOTO_DONE(FALSE)
-            } /* end if */
+        if(mapped_type >= H5FD_MEM_DEFAULT) {
+            curr = file->fl[mapped_type];
+            end = addr + size;
+            while(curr != NULL) {
+                if(end == curr->addr) {
+                    if(extra_requested <= curr->size)
+                        HGOTO_DONE(TRUE)
+                    else
+                        HGOTO_DONE(FALSE)
+                } /* end if */
 
-            /* Advance to next node in list */
-            curr=curr->next;
-        } /* end while */
+                /* Advance to next node in list */
+                curr=curr->next;
+            } /* end while */
+        } /* end if */
     } /* end else */
 
 done:
