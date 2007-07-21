@@ -338,6 +338,7 @@ H5D_mpio_select_read(H5D_io_info_t *io_info,
 		     const H5S_t UNUSED *file_space, 
 		     const H5S_t UNUSED *mem_space,
 		     haddr_t addr,		     
+                     void UNUSED *pointer,
 		     void *buf/*out*/)
 {
     herr_t ret_value = SUCCEED;
@@ -369,6 +370,7 @@ H5D_mpio_select_write(H5D_io_info_t *io_info,
 		      const H5S_t UNUSED *file_space, 
 		      const H5S_t UNUSED *mem_space,
 		      haddr_t addr,
+                      void UNUSED *pointer,
 		      const void *buf)
 {
     herr_t ret_value = SUCCEED;
@@ -1168,15 +1170,13 @@ H5D_multi_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,const void *buf,
             if(do_write) {
                 if((io_info->ops.write)(io_info,
                          chunk_info->chunk_points,H5T_get_size(io_info->dset->shared->type),
-                         chunk_info->fspace,chunk_info->mspace,0,
-                         buf) < 0)
+                         chunk_info->fspace,chunk_info->mspace,0, NULL, buf) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "optimized write failed")
             }
             else {
                  if((io_info->ops.read)(io_info,
                           chunk_info->chunk_points,H5T_get_size(io_info->dset->shared->type),
-                          chunk_info->fspace,chunk_info->mspace,0,
-                          buf) < 0)
+                          chunk_info->fspace,chunk_info->mspace,0, NULL, buf) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "optimized read failed")
               }
 #else
@@ -1322,15 +1322,13 @@ H5D_multi_chunk_collective_io_no_opt(H5D_io_info_t *io_info,fm_map *fm,const voi
               if(do_write) {
                 if((io_info->ops.write)(io_info,
                          chunk_info->chunk_points,H5T_get_size(io_info->dset->shared->type),
-                         chunk_info->fspace,chunk_info->mspace, (hsize_t)0,
-                         buf) < 0)
+                         chunk_info->fspace,chunk_info->mspace, (hsize_t)0, NULL, buf) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "optimized write failed")
               }
               else {
                 if((io_info->ops.read)(io_info,
                           chunk_info->chunk_points,H5T_get_size(io_info->dset->shared->type),
-                          chunk_info->fspace,chunk_info->mspace, (hsize_t)0,
-                          buf) < 0)
+                          chunk_info->fspace,chunk_info->mspace, (hsize_t)0, NULL, buf) < 0)
                   HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "optimized read failed")
               }
             }
@@ -1470,13 +1468,13 @@ H5D_final_collective_io(H5D_io_info_t *io_info,MPI_Datatype*mpi_file_type,MPI_Da
     if(do_write) {
         if((io_info->ops.write)(io_info,
 		coll_info->mpi_buf_count,0,NULL,NULL,coll_info->chunk_addr,
-                buf) < 0)
+                NULL, buf) < 0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "optimized write failed")
     }
     else {
         if((io_info->ops.read)(io_info,
 	        coll_info->mpi_buf_count,0,NULL,NULL,coll_info->chunk_addr,
-                buf) < 0)
+                NULL, buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "optimized read failed")
     }
 

@@ -80,7 +80,7 @@ H5FL_SEQ_DEFINE_STATIC(hsize_t);
 herr_t
 H5D_select_fscat (H5D_io_info_t *io_info,
     const H5S_t *space, H5S_sel_iter_t *iter, size_t nelmts,
-    const void *_buf)
+    haddr_t chunk_addr, void *chunk/*in*/, const void *_buf)
 {
     const uint8_t *buf=_buf;       /* Alias for pointer arithmetic */
     hsize_t _off[H5D_IO_VECTOR_SIZE];             /* Array to store sequence offsets */
@@ -129,7 +129,7 @@ H5D_select_fscat (H5D_io_info_t *io_info,
         mem_off=0;
 
         /* Write sequence list out */
-        if((*io_info->ops.writevv)(io_info, nseq, &dset_curr_seq, len, off, (size_t)1, &mem_curr_seq, &mem_len, &mem_off, buf) < 0)
+        if((*io_info->ops.writevv)(io_info, nseq, &dset_curr_seq, len, off, (size_t)1, &mem_curr_seq, &mem_len, &mem_off, chunk_addr, chunk, buf) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error");
 
         /* Update buffer */
@@ -174,9 +174,9 @@ done:
 size_t
 H5D_select_fgath (H5D_io_info_t *io_info,
     const H5S_t *space, H5S_sel_iter_t *iter, size_t nelmts,
-    void *_buf/*out*/)
+    haddr_t chunk_addr, void *chunk/*in*/, void *_buf/*out*/)
 {
-    uint8_t *buf=_buf;          /* Alias for pointer arithmetic */
+    uint8_t *buf=(uint8_t*)_buf;          /* Alias for pointer arithmetic */
     hsize_t _off[H5D_IO_VECTOR_SIZE];          /* Array to store sequence offsets */
     hsize_t *off=NULL;          /* Pointer to sequence offsets */
     hsize_t mem_off;            /* Offset in memory */
@@ -224,7 +224,8 @@ H5D_select_fgath (H5D_io_info_t *io_info,
         mem_off=0;
 
         /* Read sequence list in */
-        if((*io_info->ops.readvv)(io_info, nseq, &dset_curr_seq, len, off, (size_t)1, &mem_curr_seq, &mem_len, &mem_off, buf) < 0)
+        if((*io_info->ops.readvv)(io_info, nseq, &dset_curr_seq, len, off, (size_t)1, 
+                                  &mem_curr_seq, &mem_len, &mem_off, chunk_addr, chunk, buf) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error");
 
         /* Update buffer */
@@ -433,7 +434,7 @@ herr_t
 H5D_select_read(H5D_io_info_t *io_info,
     size_t nelmts, size_t elmt_size,
     const H5S_t *file_space, const H5S_t *mem_space,
-    haddr_t UNUSED addr,
+    haddr_t addr, void *chunk/*in*/,
     void *buf/*out*/)
 {
     H5S_sel_iter_t mem_iter;    /* Memory selection iteration info */
@@ -525,7 +526,7 @@ H5D_select_read(H5D_io_info_t *io_info,
         if ((tmp_file_len=(*io_info->ops.readvv)(io_info,
                 file_nseq, &curr_file_seq, file_len, file_off,
                 mem_nseq, &curr_mem_seq, mem_len, mem_off,
-                buf))<0)
+                addr, chunk, buf))<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, FAIL, "read error");
 
         /* Decrement number of elements left to process */
@@ -577,7 +578,7 @@ herr_t
 H5D_select_write(H5D_io_info_t *io_info,
     size_t nelmts, size_t elmt_size,
     const H5S_t *file_space, const H5S_t *mem_space,
-    haddr_t UNUSED addr,
+    haddr_t addr, void *chunk/*in*/,
     const void *buf/*out*/)
 {
     H5S_sel_iter_t mem_iter;    /* Memory selection iteration info */
@@ -668,7 +669,7 @@ H5D_select_write(H5D_io_info_t *io_info,
         if ((tmp_file_len=(*io_info->ops.writevv)(io_info,
                 file_nseq, &curr_file_seq, file_len, file_off,
                 mem_nseq, &curr_mem_seq, mem_len, mem_off,
-                buf))<0)
+                addr, chunk, buf))<0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error");
 
         /* Decrement number of elements left to process */

@@ -821,10 +821,10 @@ H5D_contig_read(H5D_io_info_t *io_info, hsize_t nelmts,
 	}
 	else
 #endif
-         {
+        {
             if((io_info->ops.read)(io_info, (size_t)nelmts,
                     H5T_get_size(dataset->shared->type), file_space, mem_space,
-                    (haddr_t)0, buf/*out*/) < 0)
+                    (haddr_t)0, NULL, buf/*out*/) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "contiguous read failed ");
 	}
 
@@ -926,7 +926,7 @@ H5D_contig_read(H5D_io_info_t *io_info, hsize_t nelmts,
                 || (dataset->shared->layout.type == H5D_CHUNKED && H5F_addr_defined(dataset->shared->layout.u.chunk.addr)))
             || dataset->shared->dcpl_cache.efl.nused > 0 ||
              dataset->shared->layout.type == H5D_COMPACT);
-        n = H5D_select_fgath(io_info, file_space, &file_iter, smine_nelmts, tconv_buf/*out*/);
+        n = H5D_select_fgath(io_info, file_space, &file_iter, smine_nelmts, (haddr_t)0, NULL, tconv_buf/*out*/);
 
 #ifdef H5S_DEBUG
 	H5_timer_end(&(io_info->stats->stats[1].gath_timer), &timer);
@@ -1096,7 +1096,7 @@ H5D_contig_write(H5D_io_info_t *io_info, hsize_t nelmts,
         {
             if((io_info->ops.write)(io_info, (size_t)nelmts,
                     H5T_get_size(dataset->shared->type), file_space, mem_space,
-                    (haddr_t)0, buf/*out*/) < 0)
+                    (haddr_t)0, NULL, buf/*out*/) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "contiguous write failed ")
 	}
 
@@ -1221,9 +1221,8 @@ H5D_contig_write(H5D_io_info_t *io_info, hsize_t nelmts,
 #ifdef H5S_DEBUG
                 H5_timer_begin(&timer);
 #endif
-                n = H5D_select_fgath(io_info,
-                    file_space, &bkg_iter, smine_nelmts,
-                    bkg_buf/*out*/);
+                n = H5D_select_fgath(io_info, file_space, &bkg_iter, smine_nelmts,
+                                    (haddr_t)0, NULL, bkg_buf/*out*/);
 
 #ifdef H5S_DEBUG
                 H5_timer_end(&(io_info->stats->stats[0].bkg_timer), &timer);
@@ -1253,7 +1252,7 @@ H5D_contig_write(H5D_io_info_t *io_info, hsize_t nelmts,
         H5_timer_begin(&timer);
 #endif
 	status = H5D_select_fscat(io_info, file_space, &file_iter, smine_nelmts,
-                    tconv_buf);
+                    (haddr_t)0, NULL, tconv_buf);
 #ifdef H5S_DEBUG
         H5_timer_end(&(io_info->stats->stats[0].scat_timer), &timer);
         io_info->stats->stats[0].scat_nbytes += smine_nelmts * dst_type_size;
@@ -1297,6 +1296,12 @@ done:
  * Programmer:	Raymond Lu
  *		Thursday, April 10, 2003
  *
+ * Modification: 
+ *              Raymond Lu
+ *              20 July 2007
+ *              Moved H5D_istore_lock and H5D_istore_unlock to this level
+ *              from H5D_istore_readvv to avoid frequent lock and unlock
+ *              and to improve performance.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1320,6 +1325,7 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
     size_t	request_nelmts;		/*requested strip mine	*/
     hsize_t     smine_start;            /*strip mine start loc  */
     size_t      n, smine_nelmts;        /*elements per strip    */
+    size_t      accessed_bytes;         /*total accessed size in a chunk */
     H5S_sel_iter_t mem_iter;            /*memory selection iteration info*/
     hbool_t	mem_iter_init = FALSE;	/*memory selection iteration info has been initialized */
     H5S_sel_iter_t bkg_iter;            /*background iteration info*/
@@ -1330,6 +1336,10 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
     uint8_t	*tconv_buf = NULL;	/*datatype conv buffer	*/
     uint8_t	*bkg_buf = NULL;	/*background buffer	*/
     H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
+    void        *chunk = NULL;
+    haddr_t	chunk_addr;             /* Chunk address on disk */
+    H5D_istore_ud1_t udata;		/*B-tree pass-through	*/
+    unsigned    idx_hint=0;             /* Cache index hint      */
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_read)
@@ -1383,11 +1393,27 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
                 store.chunk.offset = chunk_info->coords;
                 store.chunk.index = chunk_info->index;
 
+                /* Load the chunk into cache and lock it. */
+		chunk_addr = H5D_istore_get_addr(io_info, &udata);
+
+                if (H5D_istore_if_load(dataset, chunk_addr)) {
+		    if(NULL == (chunk = H5D_istore_lock(io_info, &udata, FALSE, &idx_hint)))
+			HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk")
+		} else
+		    chunk = NULL;
+
                 /* Perform the actual read operation */
                 if((io_info->ops.read)(io_info, chunk_info->chunk_points,
                         H5T_get_size(dataset->shared->type), chunk_info->fspace,
-                        chunk_info->mspace, (haddr_t)0, buf) < 0)
+                        chunk_info->mspace, chunk_addr, chunk, buf) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, " chunked read failed")
+  
+                /* Release the cache lock on the chunk. */
+                if (H5D_istore_if_load(dataset, chunk_addr)) {
+                    accessed_bytes = chunk_info->chunk_points * H5T_get_size(dataset->shared->type);
+		    if(H5D_istore_unlock(io_info, FALSE, idx_hint, chunk, accessed_bytes) < 0)
+			HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to unlock raw data chunk")
+		}
 
                 /* Advance to next chunk in list */
                 chunk_node = H5SL_next(chunk_node);
@@ -1492,6 +1518,15 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
         store.chunk.offset = chunk_info->coords;
         store.chunk.index = chunk_info->index;
 
+        /* Load the chunk into cache and lock it. */
+        chunk_addr = H5D_istore_get_addr(io_info, &udata);
+
+        if (H5D_istore_if_load(dataset, chunk_addr)) {
+            if(NULL == (chunk = H5D_istore_lock(io_info, &udata, FALSE, &idx_hint)))
+                HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk")
+        } else
+            chunk = NULL;
+
         for (smine_start=0; smine_start<chunk_info->chunk_points; smine_start+=smine_nelmts) {
             /* Go figure out how many elements to read from the file */
             assert(H5S_SELECT_ITER_NELMTS(&file_iter)==(chunk_info->chunk_points-smine_start));
@@ -1509,7 +1544,14 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
             HDassert(((dataset->shared->layout.type == H5D_CONTIGUOUS && H5F_addr_defined(dataset->shared->layout.u.contig.addr))
                     || (dataset->shared->layout.type == H5D_CHUNKED && H5F_addr_defined(dataset->shared->layout.u.chunk.addr)))
                 || dataset->shared->dcpl_cache.efl.nused > 0 || dataset->shared->layout.type == H5D_COMPACT);
-            n = H5D_select_fgath(io_info, chunk_info->fspace, &file_iter, smine_nelmts, tconv_buf/*out*/);
+
+            if(chunk) {
+                n = H5D_select_mgath(chunk, chunk_info->fspace, &file_iter, 
+                                 smine_nelmts, dxpl_cache, tconv_buf/*out*/);
+            } else {
+                n = H5D_select_fgath(io_info, chunk_info->fspace, &file_iter, smine_nelmts, 
+                                 (haddr_t)0, NULL, tconv_buf/*out*/);
+            }
 
 #ifdef H5S_DEBUG
             H5_timer_end(&(io_info->stats->stats[1].gath_timer), &timer);
@@ -1577,6 +1619,13 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "scatter failed")
         } /* end for */
 
+        /* Release the cache lock on the chunk. */
+        if (H5D_istore_if_load(dataset, chunk_addr)) {
+            accessed_bytes = chunk_info->chunk_points * H5T_get_size(dataset->shared->type);
+            if(H5D_istore_unlock(io_info, FALSE, idx_hint, chunk, accessed_bytes) < 0)
+                HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to unlock raw data chunk")
+        }
+
         /* Release selection iterators */
         if(file_iter_init) {
             if(H5S_SELECT_ITER_RELEASE(&file_iter) < 0)
@@ -1636,6 +1685,12 @@ done:
  * Programmer:	Raymond Lu
  *		Thursday, April 10, 2003
  *
+ * Modification: 
+ *              Raymond Lu
+ *              20 July 2007
+ *              Moved H5D_istore_lock and H5D_istore_unlock to this level
+ *              from H5D_istore_writevv to avoid frequent lock and unlock
+ *              and to improve performance.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1657,6 +1712,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
     size_t	max_type_size;	        /* Size of largest source/destination type */
     size_t	target_size;		/*desired buffer size	*/
     size_t	request_nelmts;		/*requested strip mine	*/
+    size_t      accessed_bytes;         /*total accessed size in a chunk */
     hsize_t     smine_start;            /*strip mine start loc  */
     size_t      n, smine_nelmts;        /*elements per strip    */
     H5S_sel_iter_t mem_iter;            /*memory selection iteration info*/
@@ -1669,7 +1725,11 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
     uint8_t	*tconv_buf = NULL;	/*datatype conv buffer	*/
     uint8_t	*bkg_buf = NULL;	/*background buffer	*/
     H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
-
+    void     *chunk = NULL;
+    haddr_t	chunk_addr;             /* Chunk address on disk */
+    H5D_istore_ud1_t udata;		/*B-tree pass-through	*/
+    unsigned    idx_hint=0;             /* Cache index hint      */
+    hbool_t     relax=TRUE;             /* Whether whole chunk is selected */
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_write)
@@ -1680,6 +1740,16 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
 
     /* Set dataset storage for I/O info */
     io_info->store=&store;
+
+#ifdef H5_HAVE_PARALLEL
+    /* Additional sanity checks when operating in parallel */
+    if(IS_H5FD_MPI(dataset->oloc.file)) {
+        if (chunk_addr==HADDR_UNDEF)
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to locate raw data chunk")
+        if (dataset->shared->dcpl_cache.pline.nused>0)
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot write to chunked storage with filters in parallel")
+    } /* end if */
+#endif /* H5_HAVE_PARALLEL */
 
     /*
      * If there is no type conversion then write directly from the
@@ -1718,11 +1788,32 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
                 store.chunk.offset = chunk_info->coords;
                 store.chunk.index = chunk_info->index;
 
+                /* Load the chunk into cache.  But if the whole chunk is written,
+                 * simply allocate space instead of load the chunk. */
+                chunk_addr = H5D_istore_get_addr(io_info, &udata);
+
+                if (H5D_istore_if_load(dataset, chunk_addr)) {
+                    accessed_bytes = chunk_info->chunk_points * H5T_get_size(dataset->shared->type);
+                    if(accessed_bytes != dataset->shared->layout.u.chunk.size)
+                        relax=FALSE;
+
+		    if(NULL == (chunk = H5D_istore_lock(io_info, &udata, relax, &idx_hint)))
+			HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk")
+		} else
+		    chunk = NULL;
+
                 /* Perform the actual read operation */
                 if((io_info->ops.write)(io_info, chunk_info->chunk_points,
                         H5T_get_size(dataset->shared->type), chunk_info->fspace,
-                        chunk_info->mspace, (haddr_t)0, buf) < 0)
+                        chunk_info->mspace, chunk_addr, chunk, buf) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, " chunked write failed")
+
+                /* Release the cache lock on the chunk. */
+                if (H5D_istore_if_load(dataset, chunk_addr)) {
+		    if(H5D_istore_unlock(io_info, TRUE, idx_hint, chunk, accessed_bytes) < 0)
+			HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to unlock raw data chunk")
+		}
+                relax=TRUE;
 
                 /* Advance to next chunk in list */
                 chunk_node = H5SL_next(chunk_node);
@@ -1830,6 +1921,25 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
         store.chunk.offset = chunk_info->coords;
         store.chunk.index = chunk_info->index;
 
+        /* Load the chunk into cache.  But if the whole chunk is written,
+         * simply allocate space instead of load the chunk. */
+        chunk_addr = H5D_istore_get_addr(io_info, &udata);
+
+        if (H5D_istore_if_load(dataset, chunk_addr)) {
+            accessed_bytes = chunk_info->chunk_points * H5T_get_size(dataset->shared->type);
+            if(accessed_bytes != dataset->shared->layout.u.chunk.size)
+                relax=FALSE;
+            if(relax) {
+                accessed_bytes = H5S_GET_SELECT_NPOINTS(chunk_info->mspace)*H5T_get_size(mem_type);
+                if(accessed_bytes != dataset->shared->layout.u.chunk.size)
+                    relax = FALSE;
+            }
+
+	    if(NULL == (chunk = H5D_istore_lock(io_info, &udata, relax, &idx_hint)))
+		HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk")
+	} else
+	    chunk = NULL;
+
         for (smine_start=0; smine_start<chunk_info->chunk_points; smine_start+=smine_nelmts) {
             /* Go figure out how many elements to read from the file */
             assert(H5S_SELECT_ITER_NELMTS(&file_iter)==(chunk_info->chunk_points-smine_start));
@@ -1868,8 +1978,13 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
 #ifdef H5S_DEBUG
                     H5_timer_begin(&timer);
 #endif
-                    n = H5D_select_fgath(io_info, chunk_info->fspace, &bkg_iter, smine_nelmts,
-                            bkg_buf/*out*/);
+                    if(chunk) {
+                        n = H5D_select_mgath(chunk, chunk_info->fspace, &bkg_iter, 
+                                 smine_nelmts, dxpl_cache, bkg_buf/*out*/);
+                    } else {
+                        n = H5D_select_fgath(io_info, chunk_info->fspace, &bkg_iter, smine_nelmts, 
+                                 (haddr_t)0, NULL, bkg_buf/*out*/);
+                    }
 
 #ifdef H5S_DEBUG
                     H5_timer_end(&(io_info->stats->stats[0].bkg_timer), &timer);
@@ -1900,7 +2015,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
 #endif
             status = H5D_select_fscat(io_info,
                 chunk_info->fspace, &file_iter, smine_nelmts,
-                tconv_buf);
+                chunk_addr, chunk, tconv_buf);
 
 #ifdef H5S_DEBUG
             H5_timer_end(&(io_info->stats->stats[0].scat_timer), &timer);
@@ -1910,6 +2025,14 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
             if (status<0)
                 HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "scatter failed")
         } /* end for */
+
+        /* Release the cache lock on the chunk. */
+        if (H5D_istore_if_load(dataset, chunk_addr)) {
+            accessed_bytes = chunk_info->chunk_points * H5T_get_size(dataset->shared->type);
+	    if(H5D_istore_unlock(io_info, TRUE, idx_hint, chunk, accessed_bytes) < 0)
+		HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to unlock raw data chunk")
+	}
+        relax=TRUE;
 
         /* Release selection iterators */
         if(file_iter_init) {

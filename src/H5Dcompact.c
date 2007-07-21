@@ -139,7 +139,7 @@ ssize_t
 H5D_compact_readvv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[],
-    void *buf)
+    haddr_t UNUSED addr, void UNUSED *pointer/*in*/, void *buf)
 {
     ssize_t ret_value;          /* Return value */
 
@@ -181,7 +181,7 @@ ssize_t
 H5D_compact_writevv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[],
-    const void *buf)
+    haddr_t UNUSED addr, void UNUSED *pointer/*in*/, const void *buf)
 {
     ssize_t ret_value;          /* Return value */
 

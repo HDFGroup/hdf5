@@ -129,37 +129,6 @@ typedef struct H5D_rdcc_ent_t {
 typedef H5D_rdcc_ent_t *H5D_rdcc_ent_ptr_t; /* For free lists */
 
 /*
- * B-tree key.	A key contains the minimum logical N-dimensional address and
- * the logical size of the chunk to which this key refers.  The
- * fastest-varying dimension is assumed to reference individual bytes of the
- * array, so a 100-element 1-d array of 4-byte integers would really be a 2-d
- * array with the slow varying dimension of size 100 and the fast varying
- * dimension of size 4 (the storage dimensionality has very little to do with
- * the real dimensionality).
- *
- * Only the first few values of the OFFSET and SIZE fields are actually
- * stored on disk, depending on the dimensionality.
- *
- * The chunk's file address is part of the B-tree and not part of the key.
- */
-typedef struct H5D_istore_key_t {
-    size_t	nbytes;				/*size of stored data	*/
-    hsize_t	offset[H5O_LAYOUT_NDIMS];	/*logical offset to start*/
-    unsigned	filter_mask;			/*excluded filters	*/
-} H5D_istore_key_t;
-
-/*
- * Common data exchange structure for indexed storage nodes.  This structure is
- * passed through the B-link tree layer to the methods for the objects
- * to which the B-link tree points.
- */
-typedef struct H5D_istore_bt_ud_common_t {
-    /* downward */
-    H5D_istore_key_t	key;	                /*key values		*/
-    const H5O_layout_t	*mesg;		        /*layout message	*/
-} H5D_istore_bt_ud_common_t;
-
-/*
  * Data exchange structure for indexed storage nodes.  This structure is
  * passed through the B-link tree layer to the methods for the objects
  * to which the B-link tree points for operations which require no
@@ -168,12 +137,6 @@ typedef struct H5D_istore_bt_ud_common_t {
  * (Just an alias for the "common" info).
  */
 typedef H5D_istore_bt_ud_common_t H5D_istore_ud0_t;
-
-/* B-tree callback info for various operations */
-typedef struct H5D_istore_ud1_t {
-    H5D_istore_bt_ud_common_t common;           /* Common info for B-tree user data (must be first) */
-    haddr_t		addr;			/*file address of chunk */
-} H5D_istore_ud1_t;
 
 /* B-tree callback info for iteration to total allocated space */
 typedef struct H5D_istore_it_ud1_t {
@@ -1715,7 +1678,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static void *
+void *
 H5D_istore_lock(const H5D_io_info_t *io_info, H5D_istore_ud1_t *udata,
     hbool_t relax, unsigned *idx_hint/*in,out*/)
 {
@@ -1781,6 +1744,10 @@ H5D_istore_lock(const H5D_io_info_t *io_info, H5D_istore_ud1_t *udata,
 #endif
         if(NULL == (chunk = H5D_istore_chunk_alloc(chunk_size, pline)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk")
+	
+        /* In the case that some dataset functions look through this data,
+         * clear it to all 0s. */
+        HDmemset(chunk, 0, chunk_size);
 
     } /* end if */
     else {
@@ -1897,7 +1864,7 @@ H5D_istore_lock(const H5D_io_info_t *io_info, H5D_istore_ud1_t *udata,
             ent->offset[u] = io_info->store->chunk.offset[u];
         ent->rd_count = chunk_size;
         ent->wr_count = chunk_size;
-        ent->chunk = chunk;
+        ent->chunk = (uint8_t*)chunk;
 
         /* Add it to the cache */
         assert(NULL==rdcc->slot[idx]);
@@ -1998,9 +1965,9 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5D_istore_unlock(const H5D_io_info_t *io_info,
-    hbool_t dirty, unsigned idx_hint, uint8_t *chunk, size_t naccessed)
+    hbool_t dirty, unsigned idx_hint, void *chunk, size_t naccessed)
 {
     const H5O_layout_t *layout=&(io_info->dset->shared->layout); /* Dataset layout */
     const H5D_rdcc_t	*rdcc = &(io_info->dset->shared->cache.chunk);
@@ -2029,7 +1996,7 @@ H5D_istore_unlock(const H5D_io_info_t *io_info,
             assert(layout->u.chunk.size>0);
             H5_ASSIGN_OVERFLOW(x.chunk_size,layout->u.chunk.size,hsize_t,size_t);
             x.alloc_size = x.chunk_size;
-            x.chunk = chunk;
+            x.chunk = (uint8_t*)chunk;
 
             if (H5D_istore_flush_entry(io_info, &x, TRUE)<0)
                 HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot flush indexed storage buffer")
@@ -2063,6 +2030,48 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5D_istore_if_load
+ *
+ * Purpose:	A small internal function to if it's necessary to load the
+ *              chunk into cache.  If the chunk is too large to load into 
+ *              the cache and it has no filters in the pipeline (i.e. not 
+ *              compressed) and if the address for the chunk has been 
+ *              defined, then don't load the chunk into the cache, just 
+ *              read the data from it directly. If MPI based VFD is used, 
+ *              must bypass the chunk-cache scheme because other MPI 
+ *              processes could be writing to other elements in the same 
+ *              chunk.  Do a direct read-through of only the elements 
+ *              requested.
+ *
+ * Return:	TRUE or FALSE
+ *
+ * Programmer:	Raymond Lu
+ *		17 July 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t 
+H5D_istore_if_load(H5D_t *dataset, haddr_t caddr)
+{
+    hbool_t ret_value;
+ 
+    FUNC_ENTER_NOAPI_NOINIT(H5D_istore_if_load)
+
+    assert(dataset);
+
+    if (dataset->shared->dcpl_cache.pline.nused==0 && ((dataset->shared->layout.u.chunk.size > 
+            dataset->shared->cache.chunk.nbytes && caddr!=HADDR_UNDEF)
+            || (IS_H5FD_MPI(dataset->oloc.file) && (H5F_ACC_RDWR & 
+            H5F_get_intent(dataset->oloc.file))))) {
+        ret_value = FALSE;
+    } else
+        ret_value = TRUE;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D_istore_readvv
  *
  * Purpose:	Reads a multi-dimensional buffer from (part of) an indexed raw
@@ -2073,19 +2082,25 @@ done:
  * Programmer:	Quincey Koziol
  *		Wednesday, May  7, 2003
  *
+ * Modification: 
+ *              Raymond Lu
+ *              20 July 2007
+ *              Moved H5D_istore_lock and H5D_istore_unlock to H5D_chunk_read
+ *              from this function to avoid frequent lock and unlock.
+ *
  *-------------------------------------------------------------------------
  */
 ssize_t
 H5D_istore_readvv(const H5D_io_info_t *io_info,
     size_t chunk_max_nseq, size_t *chunk_curr_seq, size_t chunk_len_arr[], hsize_t chunk_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
-    void *buf)
+    haddr_t chunk_addr, void *chunk, void *buf)
 {
     H5D_t *dset=io_info->dset;          /* Local pointer to the dataset info */
     H5D_istore_ud1_t udata;		/*B-tree pass-through	*/
-    haddr_t	        chunk_addr;     /* Chunk address on disk */
     size_t		u;              /* Local index variables */
     ssize_t             ret_value;      /* Return value */
+        ssize_t         naccessed;      /* Number of bytes accessed in chunk */
 
     FUNC_ENTER_NOAPI(H5D_istore_readvv, FAIL)
 
@@ -2106,9 +2121,7 @@ H5D_istore_readvv(const H5D_io_info_t *io_info,
 HDfprintf(stderr,"%s: io_info->store->chunk.offset={",FUNC);
 for(u=0; u<dset->shared->layout.u.chunk.ndims; u++)
     HDfprintf(stderr,"%Hd%s",io_info->store->chunk.offset[u],(u<(dset->shared->layout.u.chunk.ndims-1) ? ", " : "}\n"));
-#endif /* QAK */
-    chunk_addr = H5D_istore_get_addr(io_info, &udata);
-#ifdef QAK
+
 HDfprintf(stderr,"%s: chunk_addr=%a, chunk_size=%Zu\n",FUNC,chunk_addr,dset->shared->layout.u.chunk.size);
 HDfprintf(stderr,"%s: chunk_len_arr[%Zu]=%Zu\n",FUNC,*chunk_curr_seq,chunk_len_arr[*chunk_curr_seq]);
 HDfprintf(stderr,"%s: chunk_offset_arr[%Zu]=%Hu\n",FUNC,*chunk_curr_seq,chunk_offset_arr[*chunk_curr_seq]);
@@ -2128,8 +2141,7 @@ HDfprintf(stderr,"%s: buf=%p\n",FUNC,buf);
      * writing to other elements in the same chunk.  Do a direct
      * read-through of only the elements requested.
      */
-    if (dset->shared->dcpl_cache.pline.nused==0 && ((dset->shared->layout.u.chunk.size>dset->shared->cache.chunk.nbytes && chunk_addr!=HADDR_UNDEF)
-            || (IS_H5FD_MPI(dset->oloc.file) && (H5F_ACC_RDWR & H5F_get_intent(dset->oloc.file))))) {
+    if (!H5D_istore_if_load(dset, chunk_addr)) {
         H5D_io_info_t chk_io_info;      /* Temporary I/O info object */
         H5D_storage_t chk_store;        /* Chunk storage information */
 
@@ -2141,12 +2153,11 @@ HDfprintf(stderr,"%s: buf=%p\n",FUNC,buf);
         H5D_BUILD_IO_INFO(&chk_io_info,dset,io_info->dxpl_cache,io_info->dxpl_id,&chk_store);
 
         /* Do I/O directly on chunk without reading it into the cache */
-        if ((ret_value=H5D_contig_readvv(&chk_io_info, chunk_max_nseq, chunk_curr_seq, chunk_len_arr, chunk_offset_arr, mem_max_nseq, mem_curr_seq, mem_len_arr, mem_offset_arr, buf))<0)
+        if ((ret_value=H5D_contig_readvv(&chk_io_info, chunk_max_nseq, chunk_curr_seq, chunk_len_arr, 
+                chunk_offset_arr, mem_max_nseq, mem_curr_seq, mem_len_arr, mem_offset_arr, (haddr_t)0, NULL, buf))<0)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data to file")
     } /* end if */
     else {
-        uint8_t         *chunk;         /* Pointer to cached chunk in memory */
-        unsigned        idx_hint=0;     /* Cache index hint      */
         ssize_t         naccessed;      /* Number of bytes accessed in chunk */
 
         /* If the chunk address is not defined, check if the fill value is
@@ -2229,20 +2240,11 @@ HDfprintf(stderr,"%s: buf=%p\n",FUNC,buf);
             } /* end if */
         } /* end if */
 
-        /*
-         * Lock the chunk, copy from application to chunk, then unlock the
-         * chunk.
-         */
-        if(NULL == (chunk = H5D_istore_lock(io_info, &udata, FALSE, &idx_hint)))
-            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk")
-
         /* Use the vectorized memory copy routine to do actual work */
         if((naccessed = H5V_memcpyvv(buf, mem_max_nseq, mem_curr_seq, mem_len_arr, mem_offset_arr, chunk, chunk_max_nseq, chunk_curr_seq, chunk_len_arr, chunk_offset_arr)) < 0)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "vectorized memcpy failed")
 
         H5_CHECK_OVERFLOW(naccessed, ssize_t, size_t);
-        if(H5D_istore_unlock(io_info, FALSE, idx_hint, chunk, (size_t)naccessed) < 0)
-            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to unlock raw data chunk")
 
         /* Set return value */
         ret_value = naccessed;
@@ -2264,17 +2266,22 @@ done:
  * Programmer:	Quincey Koziol
  *		Friday, May  2, 2003
  *
+ * Modification: 
+ *              Raymond Lu
+ *              20 July 2007
+ *              Moved H5D_istore_lock and H5D_istore_unlock to H5D_chunk_write
+ *              from this function to avoid frequent lock and unlock.
+ *
  *-------------------------------------------------------------------------
  */
 ssize_t
 H5D_istore_writevv(const H5D_io_info_t *io_info,
     size_t chunk_max_nseq, size_t *chunk_curr_seq, size_t chunk_len_arr[], hsize_t chunk_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
-    const void *buf)
+    haddr_t chunk_addr, void *chunk, const void *buf)
 {
     H5D_t *dset = io_info->dset;          /* Local pointer to the dataset info */
     H5D_istore_ud1_t udata;		/*B-tree pass-through	*/
-    haddr_t	        chunk_addr;     /* Chunk address on disk */
     size_t		u;              /* Local index variables */
     ssize_t             ret_value;      /* Return value */
 
@@ -2292,14 +2299,11 @@ H5D_istore_writevv(const H5D_io_info_t *io_info,
     HDassert(mem_offset_arr);
     HDassert(buf);
 
-    /* Get the address of this chunk on disk */
 #ifdef QAK
 HDfprintf(stderr,"%s: io_info->store->chunk.offset={",FUNC);
 for(u=0; u<dset->shared->layout.u.chunk.ndims; u++)
     HDfprintf(stderr,"%Hd%s",io_info->store->chunk.offset[u],(u<(dset->shared->layout.u.chunk.ndims-1) ? ", " : "}\n"));
-#endif /* QAK */
-    chunk_addr = H5D_istore_get_addr(io_info, &udata);
-#ifdef QAK
+
 HDfprintf(stderr,"%s: chunk_addr=%a, chunk_size=%Zu\n",FUNC,chunk_addr,dset->shared->layout.u.chunk.size);
 HDfprintf(stderr,"%s: chunk_len_arr[%Zu]=%Zu\n",FUNC,*chunk_curr_seq,chunk_len_arr[*chunk_curr_seq]);
 HDfprintf(stderr,"%s: chunk_offset_arr[%Zu]=%Hu\n",FUNC,*chunk_curr_seq,chunk_offset_arr[*chunk_curr_seq]);
@@ -2318,18 +2322,7 @@ HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_a
      * writing to other elements in the same chunk.  Do a direct
      * write-through of only the elements requested.
      */
-#ifdef H5_HAVE_PARALLEL
-    /* Additional sanity checks when operating in parallel */
-    if(IS_H5FD_MPI(dset->oloc.file)) {
-        if (chunk_addr==HADDR_UNDEF)
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to locate raw data chunk")
-        if (dset->shared->dcpl_cache.pline.nused>0)
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot write to chunked storage with filters in parallel")
-    } /* end if */
-#endif /* H5_HAVE_PARALLEL */
-
-    if (dset->shared->dcpl_cache.pline.nused==0 && ((dset->shared->layout.u.chunk.size>dset->shared->cache.chunk.nbytes && chunk_addr!=HADDR_UNDEF)
-            || (IS_H5FD_MPI(dset->oloc.file) && (H5F_ACC_RDWR & H5F_get_intent(dset->oloc.file))))) {
+    if (!H5D_istore_if_load(dset, chunk_addr)) {
         H5D_io_info_t chk_io_info;      /* Temporary I/O info object */
         H5D_storage_t chk_store;        /* Chunk storage information */
 
@@ -2341,56 +2334,17 @@ HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_a
         H5D_BUILD_IO_INFO(&chk_io_info,dset,io_info->dxpl_cache,io_info->dxpl_id,&chk_store);
 
         /* Do I/O directly on chunk without reading it into the cache */
-        if ((ret_value=H5D_contig_writevv(&chk_io_info, chunk_max_nseq, chunk_curr_seq, chunk_len_arr, chunk_offset_arr, mem_max_nseq, mem_curr_seq, mem_len_arr, mem_offset_arr, buf))<0)
+        if ((ret_value=H5D_contig_writevv(&chk_io_info, chunk_max_nseq, chunk_curr_seq, chunk_len_arr, chunk_offset_arr, mem_max_nseq, mem_curr_seq, mem_len_arr, mem_offset_arr, (haddr_t)0, NULL, buf))<0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file")
     } /* end if */
     else {
-        uint8_t         *chunk;         /* Pointer to cached chunk in memory */
-        unsigned        idx_hint=0;     /* Cache index hint      */
         ssize_t         naccessed;      /* Number of bytes accessed in chunk */
-        size_t          total_bytes;    /* Total # of bytes accessed on disk & memory */
-        hbool_t         relax;          /* Whether whole chunk is selected */
-
-        /*
-         * Lock the chunk, copy from application to chunk, then unlock the
-         * chunk.
-         */
-#ifdef OLD_WAY
-/* Note that this is technically OK, since eventually all the data in the chunk
- * will be overwritten.  However, it seems risky and a better approach would
- * be to lock the chunk in the dataset I/O routine (setting the relax flag
- * appropriately) and then unlock it after all the I/O the chunk was finished. -QAK
- */
-        if(chunk_max_nseq==1 && chunk_len_arr[0] == dset->shared->layout.u.chunk.size)
-            relax = TRUE;
-        else
-            relax = FALSE;
-#else /* OLD_WAY */
-        relax=TRUE;
-        total_bytes=0;
-        for(u=*chunk_curr_seq; u<chunk_max_nseq; u++)
-            total_bytes+=chunk_len_arr[u];
-        if(total_bytes!=dset->shared->layout.u.chunk.size)
-            relax=FALSE;
-        if(relax) {
-            total_bytes=0;
-            for(u=*mem_curr_seq; u<mem_max_nseq; u++)
-                total_bytes+=mem_len_arr[u];
-            if(total_bytes!=dset->shared->layout.u.chunk.size)
-                relax=FALSE;
-        } /* end if */
-#endif /* OLD_WAY */
-
-        if (NULL==(chunk=H5D_istore_lock(io_info, &udata, relax, &idx_hint)))
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to read raw data chunk")
 
         /* Use the vectorized memory copy routine to do actual work */
         if((naccessed=H5V_memcpyvv(chunk,chunk_max_nseq,chunk_curr_seq,chunk_len_arr,chunk_offset_arr,buf,mem_max_nseq,mem_curr_seq,mem_len_arr,mem_offset_arr))<0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed")
 
         H5_CHECK_OVERFLOW(naccessed,ssize_t,size_t);
-        if (H5D_istore_unlock(io_info, TRUE, idx_hint, chunk, (size_t)naccessed)<0)
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "uanble to unlock raw data chunk")
 
         /* Set return value */
         ret_value=naccessed;

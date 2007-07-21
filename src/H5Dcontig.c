@@ -359,8 +359,8 @@ H5D_contig_write(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
     assert (buf);
 
     H5D_BUILD_IO_INFO(&io_info,dset,dxpl_cache,dxpl_id,store);
-    if(H5D_contig_writevv(&io_info, (size_t)1, &dset_curr_seq, &dset_len,
-            &dset_off, (size_t)1, &mem_curr_seq, &mem_len, &mem_off, buf) < 0)
+    if(H5D_contig_writevv(&io_info, (size_t)1, &dset_curr_seq, &dset_len, &dset_off, 
+            (size_t)1, &mem_curr_seq, &mem_len, &mem_off, (haddr_t)0, NULL, buf) < 0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vector write failed")
 
 done:
@@ -390,7 +390,7 @@ ssize_t
 H5D_contig_readvv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
-    void *_buf)
+    haddr_t UNUSED address, void UNUSED *pointer, void *_buf)
 {
     H5F_t *file = io_info->dset->oloc.file;        /* File for dataset */
     H5D_rdcdc_t *dset_contig=&(io_info->dset->shared->cache.contig); /* Cached information about contiguous data */
@@ -655,7 +655,7 @@ ssize_t
 H5D_contig_writevv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
-    const void *_buf)
+    haddr_t UNUSED address, void UNUSED *pointer, const void *_buf)
 {
     H5F_t *file = io_info->dset->oloc.file;        /* File for dataset */
     H5D_rdcdc_t *dset_contig=&(io_info->dset->shared->cache.contig); /* Cached information about contiguous data */
