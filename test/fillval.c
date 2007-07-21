@@ -1826,9 +1826,9 @@ test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
     hid_t	file = -1;              /* File ID */
     hid_t	dcpl = -1;              /* Dataset creation property list ID */
     hid_t	cmpd_vl_tid = -1;       /* Compound+vl datatype ID */
-    hsize_t	start_size[5] = {32, 16, 8, 4, 2};
-    hsize_t	max_size[5] = {128, 64, 32, 16, 8};
-    hsize_t	ch_size[5] = {1, 16, 8, 4, 2};
+    hsize_t	start_size[5] = {8, 8, 8, 4, 2};
+    hsize_t	max_size[5] = {32, 32, 32, 16, 8};
+    hsize_t	ch_size[5] = {1, 8, 8, 4, 2};
 #ifdef NO_FILLING
     int		fillval_i = 0;
 #else
