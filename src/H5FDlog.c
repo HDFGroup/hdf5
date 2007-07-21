@@ -861,7 +861,7 @@ H5FD_log_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, hsize_t siz
         } /* end if */
 
         if(file->fa.flags&H5FD_LOG_ALLOC)
-            HDfprintf(file->logfp,"%10a-%10a (%10Hu bytes) Allocated, flavor=%s\n",addr,addr+size-1,size,flavors[type]);
+            HDfprintf(file->logfp,"%10a-%10a (%10Hu bytes) (%s) Allocated\n",addr,addr+size-1,size,flavors[type]);
     } /* end if */
 
     /* Set return value */
@@ -1035,7 +1035,7 @@ done:
  */
 /* ARGSUSED */
 static herr_t
-H5FD_log_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr_t addr,
+H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t addr,
 	       size_t size, void *buf/*out*/)
 {
     H5FD_log_t		*file = (H5FD_log_t*)_file;
@@ -1075,11 +1075,8 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr
 
         /* Log information about the read */
         if(file->fa.flags&H5FD_LOG_LOC_READ) {
-            /* Output the flavor information, if we have it */
-            if(file->fa.flags&H5FD_LOG_FLAVOR)
-                HDfprintf(file->logfp,"%10a-%10a (%10Zu bytes) Read, flavor=%s\n",addr,addr+size-1,size,flavors[file->flavor[addr]]);
-            else
-                HDfprintf(file->logfp,"%10a-%10a (%10Zu bytes) Read\n",addr,addr+size-1,size);
+            HDfprintf(file->logfp,"%10a-%10a (%10Zu bytes) (%s) Read\n",addr,addr+size-1,size,flavors[type]);
+/* XXX: Verify the flavor information, if we have it? */
         } /* end if */
     } /* end if */
 
@@ -1264,11 +1261,7 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t UNUSED dxpl_id, haddr_t add
 
     /* Log information about the write */
     if(file->fa.flags&H5FD_LOG_LOC_WRITE) {
-        /* Output the flavor information, if desired */
-        if(file->fa.flags&H5FD_LOG_FLAVOR)
-            HDfprintf(file->logfp,"%10a-%10a (%10Zu bytes) (%s) Written",orig_addr,orig_addr+orig_size-1,orig_size,flavors[file->flavor[orig_addr]]);
-        else
-            HDfprintf(file->logfp,"%10a-%10a (%10Zu bytes) Written",orig_addr,orig_addr+orig_size-1,orig_size);
+        HDfprintf(file->logfp,"%10a-%10a (%10Zu bytes) (%s) Written",orig_addr,orig_addr+orig_size-1,orig_size,flavors[type]);
 
         /* Check if this is the first write into a "default" section, grabbed by the metadata agregation algorithm */
         if(file->fa.flags&H5FD_LOG_FLAVOR) {
