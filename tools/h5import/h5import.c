@@ -345,7 +345,7 @@ readIntegerData(FILE **strm, struct Input *in)
   int j;
 
   const char *err1 = "Unable to get integer value from file.\n";
-  const char *err2 = "Unrecongnized input class type.\n";
+  const char *err2 = "Unrecognized input class type.\n";
   const char *err3 = "Invalid input size.\n";
 
   for (j=0; j<in->rank;j++)
@@ -508,7 +508,7 @@ readUIntegerData(FILE **strm, struct Input *in)
   hsize_t i;
   int j;
   const char *err1 = "Unable to get unsigned integer value from file.\n";
-  const char *err2 = "Unrecongnized input class type.\n";
+  const char *err2 = "Unrecognized input class type.\n";
   const char *err3 = "Invalid input size.\n";
 
   for (j=0; j<in->rank;j++)
@@ -666,7 +666,7 @@ readFloatData(FILE **strm, struct Input *in)
   hsize_t i;
   int j;
   const char *err1 = "Unable to get integer value from file.\n";
-  const char *err2 = "Unrecongnized input class type.\n";
+  const char *err2 = "Unrecognized input class type.\n";
   const char *err3 = "Invalid input size type.\n";
 
   for (j=0; j<in->rank;j++)
