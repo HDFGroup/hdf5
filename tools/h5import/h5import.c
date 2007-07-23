@@ -2466,7 +2466,7 @@ help(char *name)
   (void) fprintf(stdout, "\t		<configfile> is the name of the configuration file.\n");
   (void) fprintf(stdout, "\t		(See Section \"CONFIGURATION FILE\")\n\n");
   (void) fprintf(stdout, "\t   -o[utfile] <outfile>:\n");
-  (void) fprintf(stdout, "\t           Name of the HDF 5 output file. Data from one or more \n");
+  (void) fprintf(stdout, "\t           Name of the HDF5 output file. Data from one or more \n");
   (void) fprintf(stdout, "\t		input files are stored as one or more data sets in \n");
   (void) fprintf(stdout, "\t		<outfile>. The output file may be an existing file or \n");
   (void) fprintf(stdout, "\t		it maybe new in which case it will be created.\n\n\n");
@@ -2513,7 +2513,7 @@ help(char *name)
   (void) fprintf(stdout, "\t			\"STR\", \"TEXTUIN\", \"UIN\"). \n");
   (void) fprintf(stdout, "\t			INPUT-CLASS \"TEXTIN\" denotes an ASCII text \n");
   (void) fprintf(stdout, "\t			file with signed integer data in ASCII form,\n");
-  (void) fprintf(stdout, "\t			INPUT-CLASS \"TEXTIN\" denotes an ASCII text \n");
+  (void) fprintf(stdout, "\t			INPUT-CLASS \"TEXTUIN\" denotes an ASCII text \n");
   (void) fprintf(stdout, "\t			file with unsigned integer data in ASCII form,\n");
   (void) fprintf(stdout, "\t			\"TEXTFP\" denotes an ASCII text file containing\n");
   (void) fprintf(stdout, "\t			floating point data in the fixed notation\n");
