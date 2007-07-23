@@ -21,7 +21,7 @@
  *      h5importtest
  *
  * Description:
- *      This program creates that can be
+ *      This program creates files  that can be
  *      used to test the h5import program.
  *
  */
