@@ -684,7 +684,6 @@
 ./src/H5Tfields.c
 ./src/H5Tfixed.c
 ./src/H5Tfloat.c
-./src/H5Titerate.c
 ./src/H5Tnative.c
 ./src/H5Toffset.c
 ./src/H5Topaque.c
@@ -696,6 +695,7 @@
 ./src/H5Tprivate.h
 ./src/H5Tpublic.h
 ./src/H5Tstrpad.c
+./src/H5Tvisit.c
 ./src/H5Tvlen.c
 ./src/H5TS.c
 ./src/H5TSprivate.h

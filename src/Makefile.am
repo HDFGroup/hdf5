@@ -82,10 +82,10 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5T.c H5Tarray.c H5Tbit.c H5Tcommit.c H5Tcompound.c H5Tconv.c \
         H5Tcset.c H5Tdbg.c H5Tdeprec.c H5Tenum.c H5Tfields.c \
         H5Tfixed.c \
-        H5Tfloat.c H5Tinit.c H5Titerate.c H5Tnative.c H5Toffset.c H5Toh.c \
+        H5Tfloat.c H5Tinit.c H5Tnative.c H5Toffset.c H5Toh.c \
         H5Topaque.c \
         H5Torder.c \
-        H5Tpad.c H5Tprecis.c H5Tstrpad.c H5Tvlen.c H5TS.c H5V.c H5WB.c H5Z.c  \
+        H5Tpad.c H5Tprecis.c H5Tstrpad.c H5Tvisit.c H5Tvlen.c H5TS.c H5V.c H5WB.c H5Z.c  \
         H5Zdeflate.c H5Zfletcher32.c H5Znbit.c H5Zshuffle.c H5Zszip.c  \
         H5Zscaleoffset.c H5Ztrans.c
 

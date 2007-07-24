@@ -22,11 +22,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5Tdbg.c
+ * Created:		H5Tvisit.c
  *			Jul 19 2007
  *			Quincey Koziol <koziol@hdfgroup.org>
  *
- * Purpose:		Dump debugging information about a datatype
+ * Purpose:		Visit all the components of a datatype
  *
  *-------------------------------------------------------------------------
  */
