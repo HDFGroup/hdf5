@@ -1255,6 +1255,7 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
         if(share_in_ohdr && open_oh) {
             /* Set up shared component info */
             shared.type = H5O_SHARE_TYPE_HERE;
+
             /* Retrieve any creation index from the native message */
             if(H5O_msg_get_crt_index(type_id, mesg, &shared.u.loc.index) < 0)
                 HGOTO_ERROR(H5E_SOHM, H5E_CANTGET, FAIL, "unable to retrieve creation index")
