@@ -158,11 +158,12 @@ H5T_array_create(H5T_t *base, unsigned ndims, const hsize_t dim[/* ndims */])
     /* Set the array's size (number of elements * element datatype's size) */
     ret_value->shared->size = ret_value->shared->parent->shared->size * ret_value->shared->u.array.nelem;
 
-    /*
-     * Set the "force conversion" flag if the base datatype indicates
-     */
+    /* Set the "force conversion" flag if the base datatype indicates */
     if(base->shared->force_conv == TRUE)
         ret_value->shared->force_conv = TRUE;
+
+    /* Array datatypes need a later version of the datatype object header message */
+    ret_value->shared->version = MAX(base->shared->version, H5O_DTYPE_VERSION_2);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -220,7 +221,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5T_get_array_ndims(H5T_t *dt)
+H5T_get_array_ndims(const H5T_t *dt)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_get_array_ndims)
 
@@ -283,7 +284,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5T_get_array_dims(H5T_t *dt, hsize_t dims[])
+H5T_get_array_dims(const H5T_t *dt, hsize_t dims[])
 {
     unsigned u;         /* Local index variable */
     int	ret_value;	/* return value			*/

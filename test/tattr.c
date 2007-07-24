@@ -6567,6 +6567,7 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
             ret = H5Pset_shared_mesg_nindexes(my_fcpl, (unsigned)1);
             CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
             ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)0, H5O_MESG_ATTR_FLAG, (unsigned)500);
+            CHECK_I(ret, "H5Pset_shared_mesg_index");
         } /* end if */
         else {
             /* Set up copy of file creation property list */
@@ -6576,9 +6577,9 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
 
             /* Make attributes > 500 bytes shared */
             ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)0, H5O_MESG_ATTR_FLAG, (unsigned)500);
+            CHECK_I(ret, "H5Pset_shared_mesg_index");
 
             /* Make datatypes & dataspaces > 1 byte shared (i.e. all of them :-) */
-            CHECK_I(ret, "H5Pset_shared_mesg_index");
             ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)1, H5O_MESG_DTYPE_FLAG, (unsigned)1);
             CHECK_I(ret, "H5Pset_shared_mesg_index");
             ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)2, H5O_MESG_SDSPACE_FLAG, (unsigned)1);
@@ -6625,12 +6626,12 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
 
         /* Check on dataset's message storage status */
         if(test_shared != 0) {
-            /* Dataset's datatypes are immutable and shouldn't be shared */
+            /* Datasets' datatypes can be shared */
             ret = H5F_get_sohm_mesg_count_test(fid, H5O_DTYPE_ID, &mesg_count);
             CHECK(ret, FAIL, "H5F_get_sohm_mesg_count_test");
-            VERIFY(mesg_count, 0, "H5F_get_sohm_mesg_count_test");
+            VERIFY(mesg_count, 1, "H5F_get_sohm_mesg_count_test");
 
-            /* Dataset's dataspace can be shared */
+            /* Datasets' dataspace can be shared */
             ret = H5F_get_sohm_mesg_count_test(fid, H5O_SDSPACE_ID, &mesg_count);
             CHECK(ret, FAIL, "H5F_get_sohm_mesg_count_test");
             VERIFY(mesg_count, 1, "H5F_get_sohm_mesg_count_test");
@@ -6775,7 +6776,7 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
                 /* Check on datatype storage status */
                 ret = H5F_get_sohm_mesg_count_test(fid, H5O_DTYPE_ID, &mesg_count);
                 CHECK(ret, FAIL, "H5F_get_sohm_mesg_count_test");
-                VERIFY(mesg_count, 1, "H5F_get_sohm_mesg_count_test");
+                VERIFY(mesg_count, 2, "H5F_get_sohm_mesg_count_test");
             } /* end if */
 
             /* Check on dataspace storage status */
@@ -6892,6 +6893,7 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
             ret = H5Pset_shared_mesg_nindexes(my_fcpl, (unsigned)1);
             CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
             ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)0, H5O_MESG_ATTR_FLAG, (unsigned)500);
+            CHECK_I(ret, "H5Pset_shared_mesg_index");
         } /* end if */
         else {
             /* Set up copy of file creation property list */
@@ -6901,9 +6903,9 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
 
             /* Make attributes > 500 bytes shared */
             ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)0, H5O_MESG_ATTR_FLAG, (unsigned)500);
+            CHECK_I(ret, "H5Pset_shared_mesg_index");
 
             /* Make datatypes & dataspaces > 1 byte shared (i.e. all of them :-) */
-            CHECK_I(ret, "H5Pset_shared_mesg_index");
             ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)1, H5O_MESG_DTYPE_FLAG, (unsigned)1);
             CHECK_I(ret, "H5Pset_shared_mesg_index");
             ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)2, H5O_MESG_SDSPACE_FLAG, (unsigned)1);
@@ -6950,12 +6952,12 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
 
         /* Check on dataset's message storage status */
         if(test_shared != 0) {
-            /* Dataset's datatypes are immutable and shouldn't be shared */
+            /* Datasets' datatypes can be shared */
             ret = H5F_get_sohm_mesg_count_test(fid, H5O_DTYPE_ID, &mesg_count);
             CHECK(ret, FAIL, "H5F_get_sohm_mesg_count_test");
-            VERIFY(mesg_count, 0, "H5F_get_sohm_mesg_count_test");
+            VERIFY(mesg_count, 1, "H5F_get_sohm_mesg_count_test");
 
-            /* Dataset's dataspace can be shared */
+            /* Datasets' dataspace can be shared */
             ret = H5F_get_sohm_mesg_count_test(fid, H5O_SDSPACE_ID, &mesg_count);
             CHECK(ret, FAIL, "H5F_get_sohm_mesg_count_test");
             VERIFY(mesg_count, 1, "H5F_get_sohm_mesg_count_test");
@@ -7216,7 +7218,7 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
                 /* Check on datatype storage status */
                 ret = H5F_get_sohm_mesg_count_test(fid, H5O_DTYPE_ID, &mesg_count);
                 CHECK(ret, FAIL, "H5F_get_sohm_mesg_count_test");
-                VERIFY(mesg_count, 1, "H5F_get_sohm_mesg_count_test");
+                VERIFY(mesg_count, 2, "H5F_get_sohm_mesg_count_test");
             } /* end if */
 
             /* Check on dataspace storage status */
@@ -7332,6 +7334,7 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
             ret = H5Pset_shared_mesg_nindexes(my_fcpl, (unsigned)1);
             CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
             ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)0, H5O_MESG_ATTR_FLAG, (unsigned)500);
+            CHECK_I(ret, "H5Pset_shared_mesg_index");
         } /* end if */
         else {
             /* Set up copy of file creation property list */
@@ -7341,9 +7344,9 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
 
             /* Make attributes > 500 bytes shared */
             ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)0, H5O_MESG_ATTR_FLAG, (unsigned)500);
+            CHECK_I(ret, "H5Pset_shared_mesg_index");
 
             /* Make datatypes & dataspaces > 1 byte shared (i.e. all of them :-) */
-            CHECK_I(ret, "H5Pset_shared_mesg_index");
             ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)1, H5O_MESG_DTYPE_FLAG, (unsigned)1);
             CHECK_I(ret, "H5Pset_shared_mesg_index");
             ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)2, H5O_MESG_SDSPACE_FLAG, (unsigned)1);
@@ -7390,12 +7393,12 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
 
         /* Check on dataset's message storage status */
         if(test_shared != 0) {
-            /* Dataset's datatypes are immutable and shouldn't be shared */
+            /* Datasets' datatypes can be shared */
             ret = H5F_get_sohm_mesg_count_test(fid, H5O_DTYPE_ID, &mesg_count);
             CHECK(ret, FAIL, "H5F_get_sohm_mesg_count_test");
-            VERIFY(mesg_count, 0, "H5F_get_sohm_mesg_count_test");
+            VERIFY(mesg_count, 1, "H5F_get_sohm_mesg_count_test");
 
-            /* Dataset's dataspace can be shared */
+            /* Datasets' dataspace can be shared */
             ret = H5F_get_sohm_mesg_count_test(fid, H5O_SDSPACE_ID, &mesg_count);
             CHECK(ret, FAIL, "H5F_get_sohm_mesg_count_test");
             VERIFY(mesg_count, 1, "H5F_get_sohm_mesg_count_test");
@@ -7579,7 +7582,7 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
                 /* Check on datatype storage status */
                 ret = H5F_get_sohm_mesg_count_test(fid, H5O_DTYPE_ID, &mesg_count);
                 CHECK(ret, FAIL, "H5F_get_sohm_mesg_count_test");
-                VERIFY(mesg_count, 1, "H5F_get_sohm_mesg_count_test");
+                VERIFY(mesg_count, 2, "H5F_get_sohm_mesg_count_test");
             } /* end if */
 
             /* Check on dataspace storage status */
@@ -7695,6 +7698,7 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
             ret = H5Pset_shared_mesg_nindexes(my_fcpl, (unsigned)1);
             CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
             ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)0, H5O_MESG_ATTR_FLAG, (unsigned)500);
+            CHECK_I(ret, "H5Pset_shared_mesg_index");
         } /* end if */
         else {
             /* Set up copy of file creation property list */
@@ -7704,9 +7708,9 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
 
             /* Make attributes > 500 bytes shared */
             ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)0, H5O_MESG_ATTR_FLAG, (unsigned)500);
+            CHECK_I(ret, "H5Pset_shared_mesg_index");
 
             /* Make datatypes & dataspaces > 1 byte shared (i.e. all of them :-) */
-            CHECK_I(ret, "H5Pset_shared_mesg_index");
             ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)1, H5O_MESG_DTYPE_FLAG, (unsigned)1);
             CHECK_I(ret, "H5Pset_shared_mesg_index");
             ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)2, H5O_MESG_SDSPACE_FLAG, (unsigned)1);
@@ -7753,12 +7757,12 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
 
         /* Check on dataset's message storage status */
         if(test_shared != 0) {
-            /* Dataset's datatypes are immutable and shouldn't be shared */
+            /* Datasets' datatypes can be shared */
             ret = H5F_get_sohm_mesg_count_test(fid, H5O_DTYPE_ID, &mesg_count);
             CHECK(ret, FAIL, "H5F_get_sohm_mesg_count_test");
-            VERIFY(mesg_count, 0, "H5F_get_sohm_mesg_count_test");
+            VERIFY(mesg_count, 1, "H5F_get_sohm_mesg_count_test");
 
-            /* Dataset's dataspace can be shared */
+            /* Datasets' dataspace can be shared */
             ret = H5F_get_sohm_mesg_count_test(fid, H5O_SDSPACE_ID, &mesg_count);
             CHECK(ret, FAIL, "H5F_get_sohm_mesg_count_test");
             VERIFY(mesg_count, 1, "H5F_get_sohm_mesg_count_test");

@@ -350,6 +350,11 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     if(H5T_set_loc(attr->dt, loc->oloc->file, H5T_LOC_DISK) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid datatype location")
 
+    /* Set the latest format for datatype, if requested */
+    if(H5F_USE_LATEST_FORMAT(loc->oloc->file))
+        if(H5T_set_latest_version(attr->dt) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set latest version of datatype")
+
     /* Copy the dataspace for the attribute */
     attr->ds = H5S_copy(space, FALSE);
 

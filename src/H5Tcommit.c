@@ -314,6 +314,11 @@ H5T_commit(H5F_t *file, H5T_t *type, hid_t tcpl_id, hid_t dxpl_id)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "unable to initialize path")
     loc_init = TRUE;
 
+    /* Set the latest format, if requested */
+    if(H5F_USE_LATEST_FORMAT(file))
+        if(H5T_set_latest_version(type) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set latest version of datatype")
+
     /* Calculate message size infomation, for creating object header */
     dtype_size = H5O_msg_size_f(file, tcpl_id, H5O_DTYPE_ID, type, (size_t)0);
     HDassert(dtype_size);

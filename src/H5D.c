@@ -1020,6 +1020,7 @@ H5D_init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type)
 {
     htri_t relocatable;                 /* Flag whether the type is relocatable */
     htri_t immutable;                   /* Flag whether the type is immutable */
+    hbool_t use_latest_format;          /* Flag indicating the newest file format should be used */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_init_type)
@@ -1037,15 +1038,23 @@ H5D_init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type)
     if((immutable = H5T_is_immutable(type)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't check datatype?")
 
+    /* Get the file's 'use the latest version of the format' flag */
+    use_latest_format = H5F_USE_LATEST_FORMAT(file);
+
     /* Copy the datatype if it's a custom datatype or if it'll change when it's location is changed */
-    if(!immutable || relocatable) {
+    if(!immutable || relocatable || use_latest_format) {
         /* Copy datatype for dataset */
-        if((dset->shared->type = H5T_copy(type, H5T_COPY_ALL))==NULL)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL, "can't copy datatype")
+        if((dset->shared->type = H5T_copy(type, H5T_COPY_ALL)) == NULL)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy datatype")
 
         /* Mark any datatypes as being on disk now */
         if(H5T_set_loc(dset->shared->type, file, H5T_LOC_DISK) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid datatype location")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't set datatype location")
+
+        /* Set the latest format, if requested */
+        if(use_latest_format)
+            if(H5T_set_latest_version(dset->shared->type) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set latest version of datatype")
 
         /* Get a datatype ID for the dataset's datatype */
 	if((dset->shared->type_id = H5I_register(H5I_DATATYPE, dset->shared->type)) < 0)

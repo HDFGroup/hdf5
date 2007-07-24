@@ -678,11 +678,13 @@
 ./src/H5Tcompound.c
 ./src/H5Tconv.c
 ./src/H5Tcset.c
+./src/H5Tdbg.c
 ./src/H5Tdeprec.c
 ./src/H5Tenum.c
 ./src/H5Tfields.c
 ./src/H5Tfixed.c
 ./src/H5Tfloat.c
+./src/H5Titerate.c
 ./src/H5Tnative.c
 ./src/H5Toffset.c
 ./src/H5Topaque.c

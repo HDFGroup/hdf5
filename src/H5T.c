@@ -260,7 +260,6 @@ H5FL_DEFINE(H5T_shared_t);
 H5FL_DEFINE(H5T_path_t);
 
 /* Static local functions */
-static herr_t H5T_print_stats(H5T_path_t *path, int *nprint/*in,out*/);
 static herr_t H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src,
                 H5T_t *dst, H5T_conv_t func, hid_t dxpl_id);
 static herr_t H5T_register(H5T_pers_t pers, const char *name, H5T_t *src,
@@ -287,38 +286,38 @@ static H5T_t *H5T_decode(const unsigned char *buf);
 
 /* Define the code template for bitfields for the "GUTS" in the H5T_INIT_TYPE macro */
 #define H5T_INIT_TYPE_BITFIELD_CORE {					      \
-    dt->shared->type = H5T_BITFIELD;						      \
+    dt->shared->type = H5T_BITFIELD;					      \
 }
 
 /* Define the code template for times for the "GUTS" in the H5T_INIT_TYPE macro */
 #define H5T_INIT_TYPE_TIME_CORE {					      \
-    dt->shared->type = H5T_TIME;						      \
+    dt->shared->type = H5T_TIME;					      \
 }
 
 /* Define the code template for types which reset the offset for the "GUTS" in the H5T_INIT_TYPE macro */
 #define H5T_INIT_TYPE_OFFSET_CORE {					      \
-    dt->shared->u.atomic.offset = 0;						      \
+    dt->shared->u.atomic.offset = 0;					      \
 }
 
 /* Define common code for all numeric types (floating-point & int, signed & unsigned) */
 #define H5T_INIT_TYPE_NUM_COMMON(ENDIANNESS) {				      \
-    dt->shared->u.atomic.order = ENDIANNESS;					      \
-    dt->shared->u.atomic.offset = 0;						      \
-    dt->shared->u.atomic.lsb_pad = H5T_PAD_ZERO;				      \
-    dt->shared->u.atomic.msb_pad = H5T_PAD_ZERO;				      \
+    dt->shared->u.atomic.order = ENDIANNESS;				      \
+    dt->shared->u.atomic.offset = 0;					      \
+    dt->shared->u.atomic.lsb_pad = H5T_PAD_ZERO;			      \
+    dt->shared->u.atomic.msb_pad = H5T_PAD_ZERO;			      \
 }
 
 /* Define the code templates for standard floats for the "GUTS" in the H5T_INIT_TYPE macro */
 #define H5T_INIT_TYPE_FLOAT_COMMON(ENDIANNESS) {			      \
     H5T_INIT_TYPE_NUM_COMMON(ENDIANNESS)				      \
-    dt->shared->u.atomic.u.f.sign = 31;						      \
-    dt->shared->u.atomic.u.f.epos = 23;						      \
-    dt->shared->u.atomic.u.f.esize = 8;						      \
-    dt->shared->u.atomic.u.f.ebias = 0x7f;					      \
-    dt->shared->u.atomic.u.f.mpos = 0;						      \
-    dt->shared->u.atomic.u.f.msize = 23;					      \
-    dt->shared->u.atomic.u.f.norm = H5T_NORM_IMPLIED;				      \
-    dt->shared->u.atomic.u.f.pad = H5T_PAD_ZERO;				      \
+    dt->shared->u.atomic.u.f.sign = 31;					      \
+    dt->shared->u.atomic.u.f.epos = 23;					      \
+    dt->shared->u.atomic.u.f.esize = 8;					      \
+    dt->shared->u.atomic.u.f.ebias = 0x7f;				      \
+    dt->shared->u.atomic.u.f.mpos = 0;					      \
+    dt->shared->u.atomic.u.f.msize = 23;				      \
+    dt->shared->u.atomic.u.f.norm = H5T_NORM_IMPLIED;			      \
+    dt->shared->u.atomic.u.f.pad = H5T_PAD_ZERO;			      \
 }
 
 #define H5T_INIT_TYPE_FLOATLE_CORE {					      \
@@ -332,14 +331,14 @@ static H5T_t *H5T_decode(const unsigned char *buf);
 /* Define the code templates for standard doubles for the "GUTS" in the H5T_INIT_TYPE macro */
 #define H5T_INIT_TYPE_DOUBLE_COMMON(ENDIANNESS) {			      \
     H5T_INIT_TYPE_NUM_COMMON(ENDIANNESS)				      \
-    dt->shared->u.atomic.u.f.sign = 63;						      \
-    dt->shared->u.atomic.u.f.epos = 52;						      \
-    dt->shared->u.atomic.u.f.esize = 11;					      \
-    dt->shared->u.atomic.u.f.ebias = 0x03ff;					      \
-    dt->shared->u.atomic.u.f.mpos = 0;						      \
-    dt->shared->u.atomic.u.f.msize = 52;					      \
-    dt->shared->u.atomic.u.f.norm = H5T_NORM_IMPLIED;				      \
-    dt->shared->u.atomic.u.f.pad = H5T_PAD_ZERO;				      \
+    dt->shared->u.atomic.u.f.sign = 63;					      \
+    dt->shared->u.atomic.u.f.epos = 52;					      \
+    dt->shared->u.atomic.u.f.esize = 11;				      \
+    dt->shared->u.atomic.u.f.ebias = 0x03ff;				      \
+    dt->shared->u.atomic.u.f.mpos = 0;					      \
+    dt->shared->u.atomic.u.f.msize = 52;				      \
+    dt->shared->u.atomic.u.f.norm = H5T_NORM_IMPLIED;			      \
+    dt->shared->u.atomic.u.f.pad = H5T_PAD_ZERO;			      \
 }
 
 #define H5T_INIT_TYPE_DOUBLELE_CORE {					      \
@@ -353,33 +352,35 @@ static H5T_t *H5T_decode(const unsigned char *buf);
 /* Define the code templates for VAX float for the "GUTS" in the H5T_INIT_TYPE macro */
 #define H5T_INIT_TYPE_FLOATVAX_CORE {			                      \
     H5T_INIT_TYPE_NUM_COMMON(H5T_ORDER_VAX)				      \
-    dt->shared->u.atomic.u.f.sign = 31;						      \
-    dt->shared->u.atomic.u.f.epos = 23;						      \
-    dt->shared->u.atomic.u.f.esize = 8;						      \
-    dt->shared->u.atomic.u.f.ebias = 0x81;					      \
-    dt->shared->u.atomic.u.f.mpos = 0;						      \
-    dt->shared->u.atomic.u.f.msize = 23;					      \
-    dt->shared->u.atomic.u.f.norm = H5T_NORM_IMPLIED;				      \
-    dt->shared->u.atomic.u.f.pad = H5T_PAD_ZERO;				      \
+    dt->shared->u.atomic.u.f.sign = 31;					      \
+    dt->shared->u.atomic.u.f.epos = 23;					      \
+    dt->shared->u.atomic.u.f.esize = 8;					      \
+    dt->shared->u.atomic.u.f.ebias = 0x81;				      \
+    dt->shared->u.atomic.u.f.mpos = 0;					      \
+    dt->shared->u.atomic.u.f.msize = 23;				      \
+    dt->shared->u.atomic.u.f.norm = H5T_NORM_IMPLIED;			      \
+    dt->shared->u.atomic.u.f.pad = H5T_PAD_ZERO;			      \
+    dt->shared->version = H5O_DTYPE_VERSION_3;				      \
 }
 
 /* Define the code templates for VAX double for the "GUTS" in the H5T_INIT_TYPE macro */
 #define H5T_INIT_TYPE_DOUBLEVAX_CORE {                                        \
     H5T_INIT_TYPE_NUM_COMMON(H5T_ORDER_VAX)				      \
-    dt->shared->u.atomic.u.f.sign = 63;						      \
-    dt->shared->u.atomic.u.f.epos = 52;						      \
-    dt->shared->u.atomic.u.f.esize = 11;					      \
-    dt->shared->u.atomic.u.f.ebias = 0x0401;					      \
-    dt->shared->u.atomic.u.f.mpos = 0;						      \
-    dt->shared->u.atomic.u.f.msize = 52;					      \
-    dt->shared->u.atomic.u.f.norm = H5T_NORM_IMPLIED;				      \
-    dt->shared->u.atomic.u.f.pad = H5T_PAD_ZERO;				      \
+    dt->shared->u.atomic.u.f.sign = 63;					      \
+    dt->shared->u.atomic.u.f.epos = 52;					      \
+    dt->shared->u.atomic.u.f.esize = 11;				      \
+    dt->shared->u.atomic.u.f.ebias = 0x0401;				      \
+    dt->shared->u.atomic.u.f.mpos = 0;					      \
+    dt->shared->u.atomic.u.f.msize = 52;				      \
+    dt->shared->u.atomic.u.f.norm = H5T_NORM_IMPLIED;			      \
+    dt->shared->u.atomic.u.f.pad = H5T_PAD_ZERO;			      \
+    dt->shared->version = H5O_DTYPE_VERSION_3;				      \
 }
 
 /* Define the code templates for standard signed integers for the "GUTS" in the H5T_INIT_TYPE macro */
 #define H5T_INIT_TYPE_SINT_COMMON(ENDIANNESS) {				      \
     H5T_INIT_TYPE_NUM_COMMON(ENDIANNESS)				      \
-    dt->shared->u.atomic.u.i.sign = H5T_SGN_2;					      \
+    dt->shared->u.atomic.u.i.sign = H5T_SGN_2;				      \
 }
 
 #define H5T_INIT_TYPE_SINTLE_CORE {					      \
@@ -407,30 +408,30 @@ static H5T_t *H5T_decode(const unsigned char *buf);
 /* Define a macro for common code for all newly allocate datatypes */
 #define H5T_INIT_TYPE_ALLOC_COMMON(TYPE) {				      \
     dt->sh_loc.type = H5O_SHARE_TYPE_UNSHARED;				      \
-    dt->shared->type = TYPE;							      \
+    dt->shared->type = TYPE;						      \
 }
 
 /* Define the code templates for opaque for the "GUTS" in the H5T_INIT_TYPE macro */
 #define H5T_INIT_TYPE_OPAQ_CORE {					      \
     H5T_INIT_TYPE_ALLOC_COMMON(H5T_OPAQUE)				      \
-    dt->shared->u.opaque.tag = H5MM_xstrdup("");					      \
+    dt->shared->u.opaque.tag = H5MM_xstrdup("");			      \
 }
 
 /* Define the code templates for strings for the "GUTS" in the H5T_INIT_TYPE macro */
 #define H5T_INIT_TYPE_STRING_COMMON {					      \
     H5T_INIT_TYPE_ALLOC_COMMON(H5T_STRING)				      \
     H5T_INIT_TYPE_NUM_COMMON(H5T_ORDER_NONE)				      \
-    dt->shared->u.atomic.u.s.cset = H5F_DEFAULT_CSET;				      \
+    dt->shared->u.atomic.u.s.cset = H5F_DEFAULT_CSET;			      \
 }
 
 #define H5T_INIT_TYPE_CSTRING_CORE {					      \
     H5T_INIT_TYPE_STRING_COMMON						      \
-    dt->shared->u.atomic.u.s.pad = H5T_STR_NULLTERM;				      \
+    dt->shared->u.atomic.u.s.pad = H5T_STR_NULLTERM;			      \
 }
 
 #define H5T_INIT_TYPE_FORSTRING_CORE {					      \
     H5T_INIT_TYPE_STRING_COMMON						      \
-    dt->shared->u.atomic.u.s.pad = H5T_STR_SPACEPAD;				      \
+    dt->shared->u.atomic.u.s.pad = H5T_STR_SPACEPAD;			      \
 }
 
 /* Define the code templates for references for the "GUTS" in the H5T_INIT_TYPE macro */
@@ -441,20 +442,20 @@ static H5T_t *H5T_decode(const unsigned char *buf);
 
 #define H5T_INIT_TYPE_OBJREF_CORE {					      \
     H5T_INIT_TYPE_REF_COMMON						      \
-    dt->shared->force_conv = TRUE;						      \
-    dt->shared->u.atomic.u.r.rtype = H5R_OBJECT;				      \
-    dt->shared->u.atomic.u.r.loc = H5T_LOC_MEMORY;				      \
+    dt->shared->force_conv = TRUE;					      \
+    dt->shared->u.atomic.u.r.rtype = H5R_OBJECT;			      \
+    dt->shared->u.atomic.u.r.loc = H5T_LOC_MEMORY;			      \
 }
 
 #define H5T_INIT_TYPE_REGREF_CORE {					      \
     H5T_INIT_TYPE_REF_COMMON						      \
-    dt->shared->u.atomic.u.r.rtype = H5R_DATASET_REGION;			      \
+    dt->shared->u.atomic.u.r.rtype = H5R_DATASET_REGION;		      \
 }
 
 /* Define the code templates for the "SIZE_TMPL" in the H5T_INIT_TYPE macro */
 #define H5T_INIT_TYPE_SET_SIZE(SIZE) {					      \
-    dt->shared->size = SIZE;							      \
-    dt->shared->u.atomic.prec = 8*SIZE;						      \
+    dt->shared->size = SIZE;						      \
+    dt->shared->u.atomic.prec = 8 * SIZE;				      \
 }
 
 #define H5T_INIT_TYPE_NOSET_SIZE(SIZE) {				      \
@@ -463,13 +464,13 @@ static H5T_t *H5T_decode(const unsigned char *buf);
 /* Define the code templates for the "CRT_TMPL" in the H5T_INIT_TYPE macro */
 #define H5T_INIT_TYPE_COPY_CREATE(BASE) {				      \
     /* Base off of existing datatype */					      \
-    if(NULL==(dt = H5T_copy(BASE,H5T_COPY_TRANSIENT)))			      \
+    if(NULL == (dt = H5T_copy(BASE, H5T_COPY_TRANSIENT)))		      \
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCOPY, FAIL, "duplicating base type failed") \
 }
 
 #define H5T_INIT_TYPE_ALLOC_CREATE(BASE) {				      \
     /* Allocate new datatype info */					      \
-    if (NULL==(dt = H5T_alloc()))				              \
+    if(NULL == (dt = H5T_alloc()))				              \
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed") \
 }
 
@@ -479,14 +480,14 @@ static H5T_t *H5T_decode(const unsigned char *buf);
     H5_GLUE3(H5T_INIT_TYPE_,CRT_TMPL,_CREATE)(BASE)			      \
 									      \
     /* Adjust information for all types */				      \
-    dt->shared->state = H5T_STATE_IMMUTABLE;					      \
+    dt->shared->state = H5T_STATE_IMMUTABLE;				      \
     H5_GLUE3(H5T_INIT_TYPE_,SIZE_TMPL,_SIZE)(SIZE)			      \
 									      \
     /* Adjust information for this type */				      \
     H5_GLUE3(H5T_INIT_TYPE_,GUTS,_CORE)					      \
 									      \
     /* Atomize result */						      \
-    if ((GLOBAL = H5I_register(H5I_DATATYPE, dt)) < 0)			      \
+    if((GLOBAL = H5I_register(H5I_DATATYPE, dt)) < 0)			      \
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom") \
 }
 
@@ -3277,7 +3278,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
     /* Copy shared location information if the new type is named or if it is
      * shared in the heap.
      */
-    if(old_dt->sh_loc.type == H5O_SHARE_TYPE_SOHM ||
+    if((old_dt->sh_loc.type == H5O_SHARE_TYPE_SOHM || old_dt->sh_loc.type == H5O_SHARE_TYPE_HERE) ||
             new_dt->shared->state == H5T_STATE_NAMED || new_dt->shared->state == H5T_STATE_OPEN) {
         if(H5O_set_shared(&(new_dt->sh_loc), &(old_dt->sh_loc)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy shared information")
@@ -3357,8 +3358,6 @@ done:
  * Programmer:	Quincey Koziol
  *		Monday, August 29, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 H5T_t *
@@ -3369,23 +3368,25 @@ H5T_alloc(void)
 
     FUNC_ENTER_NOAPI(H5T_alloc, NULL)
 
-    /* Allocate & initialize new datatype info */
+    /* Allocate & initialize datatype wrapper info */
     if(NULL == (dt = H5FL_CALLOC(H5T_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     H5O_loc_reset(&(dt->oloc));
     H5G_name_reset(&(dt->path));
     H5O_msg_reset_share(H5O_DTYPE_ID, dt);
 
+    /* Allocate & initialize shared datatype structure */
     if(NULL == (dt->shared = H5FL_CALLOC(H5T_shared_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    dt->shared->version = H5O_DTYPE_VERSION_1;
 
     /* Assign return value */
     ret_value = dt;
 
 done:
     if(ret_value == NULL)
-        if(dt != NULL) {
-            if(dt->shared != NULL)
+        if(dt) {
+            if(dt->shared)
                 H5FL_FREE(H5T_shared_t, dt->shared);
             H5FL_FREE(H5T_t, dt);
         } /* end if */
@@ -5071,8 +5072,6 @@ done:
  * Programmer:  Quincey Koziol
  *              Thursday, June 24, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 htri_t
@@ -5080,323 +5079,124 @@ H5T_is_relocatable(const H5T_t *dt)
 {
     htri_t ret_value = FALSE;
 
-    FUNC_ENTER_NOAPI(H5T_is_relocatable, FAIL);
+    FUNC_ENTER_NOAPI(H5T_is_relocatable, FAIL)
 
-    assert(dt);
+    /* Sanity check */
+    HDassert(dt);
 
-    if(H5T_detect_class(dt, H5T_VLEN))
-        ret_value = TRUE;
-    else if(H5T_detect_class(dt, H5T_REFERENCE))
+    /* VL and reference datatypes are relocatable */
+    if(H5T_detect_class(dt, H5T_VLEN) || H5T_detect_class(dt, H5T_REFERENCE))
         ret_value = TRUE;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_is_relocatable() */
 
 
-
 /*-------------------------------------------------------------------------
- * Function:	H5T_print_stats
+ * Function:    H5T_upgrade_version_cb
  *
- * Purpose:	Print statistics about a conversion path.  Statistics are
- *		printed only if all the following conditions are true:
+ * Purpose:     H5T_visit callback to Upgrade the version of a datatype
+ *              (if there's any benefit to doing so)
  *
- * 		1. The library was compiled with H5T_DEBUG defined.
- *		2. Data type debugging is turned on at run time.
- *		3. The path was called at least one time.
+ * Note:	The behavior below is tightly coupled with the "better"
+ *              encodings for datatype messages in the datatype message
+ *              encoding routine.
  *
- *		The optional NPRINT argument keeps track of the number of
- *		conversions paths for which statistics have been shown. If
- *		its value is zero then table headers are printed before the
- *		first line of output.
+ * Return:	Non-negative on success/Negative on failure
  *
- * Return:	Success:	non-negative
- *
- *		Failure:	negative
- *
- * Programmer:	Robb Matzke
- *              Monday, December 14, 1998
- *
- * Modifications:
+ * Programmer:  Quincey Koziol
+ *              Thursday, July 19, 2007
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T_print_stats(H5T_path_t UNUSED * path, int UNUSED * nprint/*in,out*/)
+H5T_upgrade_version_cb(H5T_t *dt, void *op_value)
 {
-#ifdef H5T_DEBUG
-    hsize_t	nbytes;
-    char	bandwidth[32];
-#endif
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_upgrade_version_cb)
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_print_stats);
+    /* Sanity check */
+    HDassert(dt);
+    HDassert(op_value);
 
-#ifdef H5T_DEBUG
-    if (H5DEBUG(T) && path->stats.ncalls>0) {
-	if (nprint && 0==(*nprint)++) {
-	    HDfprintf (H5DEBUG(T), "H5T: type conversion statistics:\n");
-	    HDfprintf (H5DEBUG(T), "   %-16s %10s %10s %8s %8s %8s %10s\n",
-		       "Conversion", "Elmts", "Calls", "User",
-		       "System", "Elapsed", "Bandwidth");
-	    HDfprintf (H5DEBUG(T), "   %-16s %10s %10s %8s %8s %8s %10s\n",
-		       "----------", "-----", "-----", "----",
-		       "------", "-------", "---------");
-	}
-        if(path->src && path->dst)
-            nbytes = MAX (H5T_get_size (path->src),
-                          H5T_get_size (path->dst));
-        else if(path->src)
-            nbytes = H5T_get_size (path->src);
-        else if(path->dst)
-            nbytes = H5T_get_size (path->dst);
-        else
-            nbytes = 0;
-	nbytes *= path->stats.nelmts;
-	H5_bandwidth(bandwidth, (double)nbytes,
-		     path->stats.timer.etime);
-	HDfprintf (H5DEBUG(T), "   %-16s %10Hd %10d %8.2f %8.2f %8.2f %10s\n",
-		   path->name,
-		   path->stats.nelmts,
-		   path->stats.ncalls,
-		   path->stats.timer.utime,
-		   path->stats.timer.stime,
-		   path->stats.timer.etime,
-		   bandwidth);
-    }
-#endif
-    FUNC_LEAVE_NOAPI(SUCCEED);
-}
+    /* Special behavior for each type of datatype */
+    switch(dt->shared->type) {
+        case H5T_COMPOUND:
+        case H5T_ARRAY:
+        case H5T_ENUM:
+            /* These types benefit from "upgrading" their version */
+            if(*(unsigned *)op_value > dt->shared->version)
+                dt->shared->version = *(unsigned *)op_value;
+            break;
 
+        default:
+            break;
+    } /* end switch */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5T_upgrade_version_cb() */
+
+
 /*-------------------------------------------------------------------------
- * Function:	H5T_debug
+ * Function:    H5T_upgrade_version
  *
- * Purpose:	Prints information about a data type.
+ * Purpose:     Upgrade the version of a datatype (if there's any benefit to
+ *              doing so) and recursively apply to compound members and/or
+ *              parent datatypes.
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Wednesday, January  7, 1998
- *
- * Modifications:
+ * Programmer:  Quincey Koziol
+ *              Thursday, July 19, 2007
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_debug(const H5T_t *dt, FILE *stream)
+H5T_upgrade_version(H5T_t *dt, unsigned new_version)
 {
-    const char	*s1="", *s2="";
-    unsigned	i;
-    size_t	k, base_size;
-    uint64_t	tmp;
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_debug, FAIL);
+    FUNC_ENTER_NOAPI(H5T_upgrade_version, FAIL)
 
-    /* Check args */
-    assert(dt);
-    assert(stream);
+    /* Sanity check */
+    HDassert(dt);
 
-    switch (dt->shared->type) {
-        case H5T_INTEGER:
-            s1 = "int";
-            break;
-        case H5T_FLOAT:
-            s1 = "float";
-            break;
-        case H5T_TIME:
-            s1 = "time";
-            break;
-        case H5T_STRING:
-            s1 = "str";
-            break;
-        case H5T_BITFIELD:
-            s1 = "bits";
-            break;
-        case H5T_OPAQUE:
-            s1 = "opaque";
-            break;
-        case H5T_COMPOUND:
-            s1 = "struct";
-            break;
-        case H5T_ENUM:
-            s1 = "enum";
-            break;
-        case H5T_VLEN:
-            if(H5T_IS_VL_STRING(dt->shared))
-                s1 = "str";
-            else
-                s1 = "vlen";
-            break;
-        default:
-            s1 = "";
-            break;
-    }
-
-    switch (dt->shared->state) {
-        case H5T_STATE_TRANSIENT:
-            s2 = "[transient]";
-            break;
-        case H5T_STATE_RDONLY:
-            s2 = "[constant]";
-            break;
-        case H5T_STATE_IMMUTABLE:
-            s2 = "[predefined]";
-            break;
-        case H5T_STATE_NAMED:
-            s2 = "[named,closed]";
-            break;
-        case H5T_STATE_OPEN:
-            s2 = "[named,open]";
-            break;
-    }
-
-    fprintf(stream, "%s%s {nbytes=%lu", s1, s2, (unsigned long)(dt->shared->size));
-
-    if (H5T_IS_ATOMIC(dt->shared)) {
-	switch (dt->shared->u.atomic.order) {
-            case H5T_ORDER_BE:
-                s1 = "BE";
-                break;
-            case H5T_ORDER_LE:
-                s1 = "LE";
-                break;
-            case H5T_ORDER_VAX:
-                s1 = "VAX";
-                break;
-            case H5T_ORDER_NONE:
-                s1 = "NONE";
-                break;
-            default:
-                s1 = "order?";
-                break;
-	}
-	fprintf(stream, ", %s", s1);
-
-	if (dt->shared->u.atomic.offset) {
-	    fprintf(stream, ", offset=%lu",
-		    (unsigned long) (dt->shared->u.atomic.offset));
-	}
-	if (dt->shared->u.atomic.prec != 8 * dt->shared->size) {
-	    fprintf(stream, ", prec=%lu",
-		    (unsigned long) (dt->shared->u.atomic.prec));
-	}
-	switch (dt->shared->type) {
-            case H5T_INTEGER:
-                switch (dt->shared->u.atomic.u.i.sign) {
-                    case H5T_SGN_NONE:
-                        s1 = "unsigned";
-                        break;
-                    case H5T_SGN_2:
-                        s1 = NULL;
-                        break;
-                    default:
-                        s1 = "sign?";
-                        break;
-                }
-                if (s1) fprintf(stream, ", %s", s1);
-                break;
-
-            case H5T_FLOAT:
-                switch (dt->shared->u.atomic.u.f.norm) {
-                    case H5T_NORM_IMPLIED:
-                        s1 = "implied";
-                        break;
-                    case H5T_NORM_MSBSET:
-                        s1 = "msbset";
-                        break;
-                    case H5T_NORM_NONE:
-                        s1 = "no-norm";
-                        break;
-                    default:
-                        s1 = "norm?";
-                        break;
-                }
-                fprintf(stream, ", sign=%lu+1",
-                        (unsigned long) (dt->shared->u.atomic.u.f.sign));
-                fprintf(stream, ", mant=%lu+%lu (%s)",
-                        (unsigned long) (dt->shared->u.atomic.u.f.mpos),
-                        (unsigned long) (dt->shared->u.atomic.u.f.msize), s1);
-                fprintf(stream, ", exp=%lu+%lu",
-                        (unsigned long) (dt->shared->u.atomic.u.f.epos),
-                        (unsigned long) (dt->shared->u.atomic.u.f.esize));
-                tmp = dt->shared->u.atomic.u.f.ebias >> 32;
-                if (tmp) {
-                    size_t hi=(size_t)tmp;
-                    size_t lo =(size_t)(dt->shared->u.atomic.u.f.ebias & 0xffffffff);
-                    fprintf(stream, " bias=0x%08lx%08lx",
-                            (unsigned long)hi, (unsigned long)lo);
-                } else {
-                    size_t lo = (size_t)(dt->shared->u.atomic.u.f.ebias & 0xffffffff);
-                    fprintf(stream, " bias=0x%08lx", (unsigned long)lo);
-                }
-                break;
-
-            default:
-                /* No additional info */
-                break;
-	}
-
-    } else if (H5T_COMPOUND==dt->shared->type) {
-	/* Compound data type */
-	for (i=0; i<dt->shared->u.compnd.nmembs; i++) {
-	    fprintf(stream, "\n\"%s\" @%lu",
-		    dt->shared->u.compnd.memb[i].name,
-		    (unsigned long) (dt->shared->u.compnd.memb[i].offset));
-	    fprintf(stream, " ");
-	    H5T_debug(dt->shared->u.compnd.memb[i].type, stream);
-	}
-	fprintf(stream, "\n");
-
-    } else if (H5T_VLEN==dt->shared->type) {
-        switch(dt->shared->u.vlen.loc) {
-            case H5T_LOC_MEMORY:
-                fprintf(stream, ", loc=memory");
-                break;
-
-            case H5T_LOC_DISK:
-                fprintf(stream, ", loc=disk");
-                break;
-
-            default:
-                fprintf(stream, ", loc=UNKNOWN");
-                break;
-        } /* end switch */
-
-        if(H5T_IS_VL_STRING(dt->shared)) {
-            /* Variable length string datatype */
-            fprintf(stream, ", variable-length");
-        } /* end if */
-        else {
-            /* Variable length sequence datatype */
-            fprintf(stream, " VLEN ");
-            H5T_debug(dt->shared->parent, stream);
-            fprintf(stream, "\n");
-        } /* end else */
- 
-    } else if (H5T_ENUM==dt->shared->type) {
-	/* Enumeration data type */
-	fprintf(stream, " ");
-	H5T_debug(dt->shared->parent, stream);
-	base_size = dt->shared->parent->shared->size;
-	for (i=0; i<dt->shared->u.enumer.nmembs; i++) {
-	    fprintf(stream, "\n\"%s\" = 0x", dt->shared->u.enumer.name[i]);
-	    for (k=0; k<base_size; k++) {
-		fprintf(stream, "%02lx",
-			(unsigned long)(dt->shared->u.enumer.value+i*base_size+k));
-	    }
-	}
-	fprintf(stream, "\n");
-
-    } else if (H5T_OPAQUE==dt->shared->type) {
-	fprintf(stream, ", tag=\"%s\"", dt->shared->u.opaque.tag);
-
-    } else {
-	/* Unknown */
-	fprintf(stream, "unknown class %d\n", (int)(dt->shared->type));
-    }
-    fprintf(stream, "}");
+    /* Iterate over entire datatype, upgrading the version of components, if it's useful */
+    if(H5T_visit(dt, (H5T_VISIT_SIMPLE | H5T_VISIT_COMPLEX_LAST), H5T_upgrade_version_cb, &new_version) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADITER, FAIL, "iteration to upgrade datatype encoding version failed")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_upgrade_version() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T_set_latest_version
+ *
+ * Purpose:     Set the encoding for a datatype to the latest version.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Thursday, July 19, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_set_latest_version(H5T_t *dt)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5T_set_latest_version, FAIL)
+
+    /* Sanity check */
+    HDassert(dt);
+
+    /* Upgrade the format version for the datatype to the latest */
+    if(H5T_upgrade_version(dt, H5O_DTYPE_VERSION_LATEST) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't upgrade datatype encoding")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_set_latest_version() */
 

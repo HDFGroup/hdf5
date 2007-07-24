@@ -68,6 +68,45 @@
 #define H5T_IS_ATOMIC(dt)       (!(H5T_IS_COMPLEX((dt)->type) || (dt)->type==H5T_OPAQUE))
 
 
+/*
+ * Datatype encoding versions
+ */
+
+/* This is the version to create all datatypes which don't contain
+ * array datatypes (atomic types, compound datatypes without array fields,
+ * vlen sequences of objects which aren't arrays, etc.) or VAX byte-ordered
+ * objects.
+ */
+#define H5O_DTYPE_VERSION_1	1
+
+/* This is the version to create all datatypes which contain H5T_ARRAY
+ * class objects (array definitely, potentially compound & vlen sequences also),
+ * but not VAX byte-ordered objects.
+ */
+#define H5O_DTYPE_VERSION_2	2
+
+/* This is the version to create all datatypes which contain VAX byte-ordered
+ * objects (floating-point types, currently).
+ */
+/* This version also packs compound & enum field names without padding */
+/* This version also encodes the member offset of compound fields more efficiently */
+/* This version also encodes array types more efficiently */
+#define H5O_DTYPE_VERSION_3	3
+
+/* The latest version of the format.  Look through the 'encode helper' routine
+ *      and 'size' callback for places to change when updating this. */
+#define H5O_DTYPE_VERSION_LATEST H5O_DTYPE_VERSION_3
+
+
+/* Flags for visiting datatype */
+#define H5T_VISIT_COMPLEX_FIRST 0x01            /* Visit complex datatype before visiting member/parent datatypes */
+#define H5T_VISIT_COMPLEX_LAST  0x02            /* Visit complex datatype after visiting member/parent datatypes */
+                                                /* (setting both flags will mean visiting complex type twice) */
+#define H5T_VISIT_SIMPLE        0x04            /* Visit simple datatypes (at all) */
+                                                /* (setting H5T_VISIT_SIMPLE and _not_ setting either H5T_VISIT_COMPLEX_FIRST or H5T_VISIT_COMPLEX_LAST will mean visiting _only_ "simple" "leafs" in the "tree" */
+                                                /* (_not_ setting H5T_VISIT_SIMPLE and setting either H5T_VISIT_COMPLEX_FIRST or H5T_VISIT_COMPLEX_LAST will mean visiting all nodes _except_ "simple" "leafs" in the "tree" */
+
+
 /* Define an internal macro for converting between floating number(float and double) and floating number.
  * All Cray compilers don't support denormalized floating values generating exception(?). */
 #if H5_CONVERT_DENORMAL_FLOAT
@@ -314,6 +353,7 @@ typedef struct H5T_shared_t {
     H5T_state_t		state;	/*current state of the type		     */
     H5T_class_t		type;	/*which class of type is this?		     */
     size_t		size;	/*total size of an instance of this type     */
+    unsigned            version;        /* Version of object header message to encode this object with */
     hbool_t		force_conv;/* Set if this type always needs to be converted and H5T_conv_noop cannot be called */
     struct H5T_t	*parent;/*parent type for derived datatypes	     */
     union {
@@ -361,6 +401,9 @@ typedef struct {
     H5T_t *dt;                  /* Datatype to commit */
     hid_t tcpl_id;              /* Named datatype creation property list */
 } H5T_obj_create_t;
+
+/* Typedef for datatype iteration operations */
+typedef herr_t (*H5T_operator_t)(H5T_t *dt, void *op_data/*in,out*/);
 
 /*
  * Alignment information for native types. A value of N indicates that the
@@ -458,20 +501,11 @@ H5_DLL herr_t H5T_commit_named(const H5G_loc_t *loc, const char *name,
     H5T_t *dt, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id);
 H5_DLL H5T_t *H5T_alloc(void);
 H5_DLL herr_t H5T_free(H5T_t *dt);
-H5_DLL H5T_sign_t H5T_get_sign(H5T_t const *dt);
+H5_DLL herr_t H5T_visit(H5T_t *dt, unsigned visit_flags, H5T_operator_t op,
+    void *op_value);
 H5_DLL H5T_t *H5T_get_super(H5T_t *dt);
-H5_DLL char  *H5T_get_member_name(H5T_t const *dt, unsigned membno);
-H5_DLL herr_t H5T_get_member_value(const H5T_t *dt, unsigned membno, void *value);
-H5_DLL int H5T_get_nmembers(const H5T_t *dt);
-H5_DLL herr_t H5T_insert(const H5T_t *parent, const char *name, size_t offset,
-        const H5T_t *member);
-H5_DLL H5T_t *H5T_enum_create(const H5T_t *parent);
-H5_DLL herr_t H5T_enum_insert(const H5T_t *dt, const char *name, const void *value);
-H5_DLL int    H5T_get_array_ndims(H5T_t *dt);
-H5_DLL int    H5T_get_array_dims(H5T_t *dt, hsize_t dims[]);
-H5_DLL herr_t H5T_sort_value(const H5T_t *dt, int *map);
-H5_DLL herr_t H5T_sort_name(const H5T_t *dt, int *map);
 H5_DLL herr_t H5T_set_size(H5T_t *dt, size_t size);
+H5_DLL herr_t H5T_upgrade_version(H5T_t *dt, unsigned new_version);
 
 /* Conversion functions */
 H5_DLL herr_t H5T_conv_noop(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
@@ -1326,6 +1360,9 @@ H5_DLL htri_t H5T_bit_inc(uint8_t *buf, size_t start, size_t size);
 H5_DLL htri_t H5T_bit_dec(uint8_t *buf, size_t start, size_t size);
 H5_DLL void H5T_bit_neg(uint8_t *buf, size_t start, size_t size);
 
+/* Fixed-point functions */
+H5_DLL H5T_sign_t H5T_get_sign(H5T_t const *dt);
+
 /* VL functions */
 H5_DLL H5T_t * H5T_vlen_create(const H5T_t *base);
 H5_DLL htri_t H5T_vlen_set_loc(const H5T_t *dt, H5F_t *f, H5T_loc_t loc);
@@ -1333,13 +1370,31 @@ H5_DLL htri_t H5T_vlen_set_loc(const H5T_t *dt, H5F_t *f, H5T_loc_t loc);
 /* Array functions */
 H5_DLL H5T_t * H5T_array_create(H5T_t *base, unsigned ndims,
         const hsize_t dim[/* ndims */]);
+H5_DLL int    H5T_get_array_ndims(const H5T_t *dt);
+H5_DLL int    H5T_get_array_dims(const H5T_t *dt, hsize_t dims[]);
 
 /* Compound functions */
+H5_DLL herr_t H5T_insert(H5T_t *parent, const char *name, size_t offset,
+        const H5T_t *member);
 H5_DLL H5T_t *H5T_get_member_type(const H5T_t *dt, unsigned membno);
 H5_DLL size_t H5T_get_member_offset(const H5T_t *dt, unsigned membno);
 H5_DLL size_t H5T_get_member_size(const H5T_t *dt, unsigned membno);
 H5_DLL htri_t H5T_is_packed(const H5T_t *dt);
 H5_DLL H5T_subset_t H5T_conv_struct_subset(const H5T_cdata_t *cdata);
+
+/* Enumerated type functions */
+H5_DLL H5T_t *H5T_enum_create(const H5T_t *parent);
+H5_DLL herr_t H5T_enum_insert(const H5T_t *dt, const char *name, const void *value);
+H5_DLL herr_t H5T_get_member_value(const H5T_t *dt, unsigned membno, void *value);
+
+/* Field functions (for both compound & enumerated types) */
+H5_DLL char  *H5T_get_member_name(H5T_t const *dt, unsigned membno);
+H5_DLL int H5T_get_nmembers(const H5T_t *dt);
+H5_DLL herr_t H5T_sort_value(const H5T_t *dt, int *map);
+H5_DLL herr_t H5T_sort_name(const H5T_t *dt, int *map);
+
+/* Debugging functions */
+H5_DLL herr_t H5T_print_stats(H5T_path_t *path, int *nprint/*in,out*/);
 
 #endif /* _H5Tpkg_H */
 
