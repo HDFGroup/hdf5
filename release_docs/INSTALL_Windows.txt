@@ -352,11 +352,18 @@ STEP 1: Building HDF5 Libraries and Tools
        ONLY when you choose to build HDF5 C++ libraries:
 
             c:\MyHDFstuff\hdf5\proj\hdf5_cpp\debug -
+
+                hdf5_cppd.lib- the HDF5 C++ API static library
+
         and c:\MyHDFstuff\hdf5\proj\hdf5_cpp\release -
 
                hdf5_cpp.lib- the HDF5 C++ API static library
 
             c:\MyHDFstuff\hdf5\proj\hdf5_cppdll\debug -
+
+               hdf5_cppdlld.dll- the HDF5 C++ API DLL
+               hdf5_cppdlld.lib - the C++ API export library
+
         and c:\MyHDFstuff\hdf5\proj\hdf5_cppdll\release -
 
                hdf5_cppdll.dll- the HDF5 C++ API DLL
@@ -367,11 +374,16 @@ STEP 1: Building HDF5 Libraries and Tools
        ONLY when you choose to build HDF5 High Level libraries:
 
             c:\MyHDFstuff\hdf5\proj\hdf5_hl\Release -
+               hdf5_hl.lib  - HDF5 High Level static Library
+
         and c:\MyHDFstuff\hdf5\proj\hdf5_hl\Debug -
 
                hdf5_hld.lib - HDF5 High Level Static Library
 
            c:\MyHDFstuff\hdf5\proj\hdf5_hldll\Release -
+               hdf5_hldll.dll - HDF5 High Level DLL
+               hdf5_hldll.lib - HDF5 High Level export Library
+
        and c:\MyHDFstuff\hdf5\proj\hdf5_hldll\Debug -
 
                hdf5_hldlld.dll - HDF5 High Level DLL
@@ -381,9 +393,12 @@ STEP 1: Building HDF5 Libraries and Tools
        ONLY when you choose to build HDF5 High Level C++ libraries:
 
             c:\MyHDFstuff\hdf5\proj\hdf5_hl_cpp\Release -
-        and c:\MyHDFstuff\hdf5\proj\hdf5_hl_cpp\Debug -
 
                hdf5_hl_cpp.lib - HDF5 High Level C++ Static Library
+
+        and c:\MyHDFstuff\hdf5\proj\hdf5_hl_cpp\Debug -
+
+               hdf5_hl_cppd.lib - HDF5 High Level C++ Static Library
 
             c:\MyHDFstuff\hdf5\proj\hdf5_hl_cppdll\Release -
         and c:\MyHDFstuff\hdf5\proj\hdf5_hl_cppdll\Debug -
