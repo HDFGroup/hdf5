@@ -21,12 +21,14 @@
  */
 
 #define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#define H5Z_PACKAGE		/*suppress error about including H5Zpkg	  */
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists				*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
+#include "H5Zpkg.h"		/* Data filters				*/
 
 
 /* PRIVATE PROTOTYPES */
@@ -86,19 +88,6 @@ const H5O_msg_class_t H5O_MSG_PLINE[1] = {{
 }};
 
 
-/* The initial version of the format */
-#define H5O_PLINE_VERSION_1	1
-
-/* This version encodes the message fields more efficiently */
-/* (Drops the reserved bytes, doesn't align the name and doesn't encode the
- *      filter name at all if it's a filter provided by the library)
- */
-#define H5O_PLINE_VERSION_2	2
-
-/* The latest version of the format.  Look through the 'encode' and 'size'
- *      callbacks for places to change when updating this. */
-#define H5O_PLINE_VERSION_LATEST H5O_PLINE_VERSION_2
-
 /* Declare a free list to manage the H5O_pline_t struct */
 H5FL_DEFINE(H5O_pline_t);
 
@@ -122,7 +111,6 @@ H5O_pline_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_fla
 {
     H5O_pline_t		*pline = NULL;          /* Pipeline message */
     H5Z_filter_info_t   *filter;                /* Filter to decode */
-    unsigned		version;                /* Message version # */
     size_t		name_length;            /* Length of filter name */
     size_t		i;                      /* Local index variable */
     void		*ret_value;             /* Return value */
@@ -137,8 +125,8 @@ H5O_pline_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_fla
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Version */
-    version = *p++;
-    if(version < H5O_PLINE_VERSION_1 || version > H5O_PLINE_VERSION_LATEST)
+    pline->version = *p++;
+    if(pline->version < H5O_PLINE_VERSION_1 || pline->version > H5O_PLINE_VERSION_LATEST)
 	HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL, "bad version number for filter pipeline message")
 
     /* Number of filters */
@@ -147,7 +135,7 @@ H5O_pline_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_fla
 	HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL, "filter pipeline message has too many filters")
 
     /* Reserved */
-    if(version == H5O_PLINE_VERSION_1)
+    if(pline->version == H5O_PLINE_VERSION_1)
         p += 6;
 
     /* Allocate array for filters */
@@ -161,11 +149,11 @@ H5O_pline_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_fla
 	UINT16DECODE(p, filter->id);
 
         /* Length of filter name */
-        if(version > H5O_PLINE_VERSION_1 && filter->id < H5Z_FILTER_RESERVED)
+        if(pline->version > H5O_PLINE_VERSION_1 && filter->id < H5Z_FILTER_RESERVED)
             name_length = 0;
         else {
             UINT16DECODE(p, name_length);
-            if(version == H5O_PLINE_VERSION_1 && name_length % 8)
+            if(pline->version == H5O_PLINE_VERSION_1 && name_length % 8)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL, "filter name length is not a multiple of eight")
         } /* end if */
 
@@ -214,7 +202,7 @@ H5O_pline_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_fla
 	     */
 	    for(j = 0; j < filter->cd_nelmts; j++)
 		UINT32DECODE(p, filter->cd_values[j]);
-            if(version == H5O_PLINE_VERSION_1)
+            if(pline->version == H5O_PLINE_VERSION_1)
                 if(filter->cd_nelmts % 2)
                     p += 4; /*padding*/
 	} /* end if */
@@ -250,7 +238,6 @@ H5O_pline_encode(H5F_t UNUSED *f, uint8_t *p/*out*/, const void *mesg)
 {
     const H5O_pline_t	*pline = (const H5O_pline_t*)mesg;      /* Pipeline message to encode */
     const       H5Z_filter_info_t *filter;      /* Filter to encode */
-    unsigned	version;                /* Message version # */
     size_t	i, j;                   /* Local index variables */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_pline_encode)
@@ -259,16 +246,10 @@ H5O_pline_encode(H5F_t UNUSED *f, uint8_t *p/*out*/, const void *mesg)
     HDassert(p);
     HDassert(mesg);
 
-    /* Set the version of the message to encode */
-    if(H5F_USE_LATEST_FORMAT(f))
-        version = H5O_PLINE_VERSION_LATEST;
-    else
-        version = H5O_PLINE_VERSION_1;
-
     /* Message header */
-    *p++ = version;
+    *p++ = pline->version;
     *p++ = (uint8_t)(pline->nused);
-    if(version == H5O_PLINE_VERSION_1) {
+    if(pline->version == H5O_PLINE_VERSION_1) {
         *p++ = 0;	/*reserved 1*/
         *p++ = 0;	/*reserved 2*/
         *p++ = 0;	/*reserved 3*/
@@ -286,7 +267,7 @@ H5O_pline_encode(H5F_t UNUSED *f, uint8_t *p/*out*/, const void *mesg)
 	UINT16ENCODE(p, filter->id);
 
         /* Skip writing the name length & name if the filter is an internal filter */
-        if(version > H5O_PLINE_VERSION_1 && filter->id < H5Z_FILTER_RESERVED) {
+        if(pline->version > H5O_PLINE_VERSION_1 && filter->id < H5Z_FILTER_RESERVED) {
             name_length = 0;
             name = NULL;
         } /* end if */
@@ -303,7 +284,7 @@ H5O_pline_encode(H5F_t UNUSED *f, uint8_t *p/*out*/, const void *mesg)
             name_length = name ? HDstrlen(name) + 1 : 0;
 
             /* Filter name length */
-            UINT16ENCODE(p, version == H5O_PLINE_VERSION_1 ? H5O_ALIGN_OLD(name_length) : name_length);
+            UINT16ENCODE(p, pline->version == H5O_PLINE_VERSION_1 ? H5O_ALIGN_OLD(name_length) : name_length);
         } /* end else */
 
         /* Filter flags */
@@ -319,7 +300,7 @@ H5O_pline_encode(H5F_t UNUSED *f, uint8_t *p/*out*/, const void *mesg)
 	    p += name_length;
 
             /* Pad out name to alignment, in older versions */
-            if(version == H5O_PLINE_VERSION_1)
+            if(pline->version == H5O_PLINE_VERSION_1)
                 while(name_length++ % 8)
                     *p++ = 0;
 	} /* end if */
@@ -329,7 +310,7 @@ H5O_pline_encode(H5F_t UNUSED *f, uint8_t *p/*out*/, const void *mesg)
 	    UINT32ENCODE(p, filter->cd_values[j]);
 
         /* Align the parameters for older versions of the format */
-        if(version == H5O_PLINE_VERSION_1)
+        if(pline->version == H5O_PLINE_VERSION_1)
             if(filter->cd_nelmts % 2)
                 UINT32ENCODE(p, 0);
     } /* end for */
@@ -449,25 +430,18 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_pline_size(const H5F_t *f, const void *mesg)
+H5O_pline_size(const H5F_t UNUSED *f, const void *mesg)
 {
     const H5O_pline_t	*pline = (const H5O_pline_t*)mesg;      /* Pipeline message */
-    unsigned	version;        /* Message version # */
     size_t i;                   /* Local index variable */
     size_t ret_value;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_pline_size)
 
-    /* Set the version of the message to encode */
-    if(H5F_USE_LATEST_FORMAT(f))
-        version = H5O_PLINE_VERSION_LATEST;
-    else
-        version = H5O_PLINE_VERSION_1;
-
     /* Message header */
     ret_value = 1 +			/*version			*/
 	   1 +				/*number of filters		*/
-	   (version == H5O_PLINE_VERSION_1 ? 6 : 0);	/*reserved			*/
+	   (pline->version == H5O_PLINE_VERSION_1 ? 6 : 0);	/*reserved			*/
 
     /* Calculate size of each filter in pipeline */
     for(i = 0; i < pline->nused; i++) {
@@ -475,7 +449,7 @@ H5O_pline_size(const H5F_t *f, const void *mesg)
         const char *name;               /* Filter name */
 
         /* Don't write the name length & name if the filter is an internal filter */
-        if(version > H5O_PLINE_VERSION_1 && pline->filter[i].id < H5Z_FILTER_RESERVED)
+        if(pline->version > H5O_PLINE_VERSION_1 && pline->filter[i].id < H5Z_FILTER_RESERVED)
             name_len = 0;
         else {
             H5Z_class_t	*cls;                   /* Filter class */
@@ -487,13 +461,13 @@ H5O_pline_size(const H5F_t *f, const void *mesg)
         } /* end else */
 
 	ret_value += 2 +			/*filter identification number	*/
-		((version == H5O_PLINE_VERSION_1 || pline->filter[i].id >= H5Z_FILTER_RESERVED) ? 2 : 0) +				/*name length			*/
+		((pline->version == H5O_PLINE_VERSION_1 || pline->filter[i].id >= H5Z_FILTER_RESERVED) ? 2 : 0) +				/*name length			*/
 		2 +				/*flags				*/
 		2 +				/*number of client data values	*/
-		(version == H5O_PLINE_VERSION_1 ? H5O_ALIGN_OLD(name_len) : name_len);	/*length of the filter name	*/
+		(pline->version == H5O_PLINE_VERSION_1 ? H5O_ALIGN_OLD(name_len) : name_len);	/*length of the filter name	*/
 
 	ret_value += pline->filter[i].cd_nelmts * 4;
-        if(version == H5O_PLINE_VERSION_1)
+        if(pline->version == H5O_PLINE_VERSION_1)
             if(pline->filter[i].cd_nelmts % 2)
                 ret_value += 4;
     } /* end for */
@@ -543,6 +517,9 @@ H5O_pline_reset(void *mesg)
 
     /* Reset # of filters */
     pline->nused = pline->nalloc = 0;
+
+    /* Reset version # of pipeline message */
+    pline->version = H5O_PLINE_VERSION_1;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_pline_reset() */

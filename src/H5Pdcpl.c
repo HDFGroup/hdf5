@@ -28,6 +28,7 @@
 /* Module Setup */
 /****************/
 #define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
+#define H5Z_PACKAGE		/*suppress error about including H5Zpkg	  */
 
 
 /***********/
@@ -39,7 +40,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Ppkg.h"		/* Property lists		  	*/
-#include "H5Zprivate.h"		/* Data filters				*/
+#include "H5Zpkg.h"		/* Data filters				*/
 
 
 /****************/
@@ -71,7 +72,7 @@
 #define H5D_CRT_EXT_FILE_LIST_CMP  H5P_dcrt_ext_file_list_cmp
 /* Definitions for data filter pipeline */
 #define H5D_CRT_DATA_PIPELINE_SIZE sizeof(H5O_pline_t)
-#define H5D_CRT_DATA_PIPELINE_DEF  {{0, NULL, H5O_NULL_ID, {{0, HADDR_UNDEF}}}, 0, 0, NULL}
+#define H5D_CRT_DATA_PIPELINE_DEF  {{0, NULL, H5O_NULL_ID, {{0, HADDR_UNDEF}}}, H5O_PLINE_VERSION_1, 0, 0, NULL}
 #define H5D_CRT_DATA_PIPELINE_CMP  H5P_dcrt_data_pipeline_cmp
 
 

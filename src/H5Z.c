@@ -785,6 +785,10 @@ H5Z_append(H5O_pline_t *pline, H5Z_filter_t filter, unsigned flags,
     if(pline->nused >= H5Z_MAX_NFILTERS)
 	HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "too many filters in pipeline")
 
+    /* Check for freshly allocated filter pipeline */
+    if(pline->version == 0)
+        pline->version = H5O_PLINE_VERSION_1;
+
     /* Allocate additional space in the pipeline if it's full */
     if(pline->nused >= pline->nalloc) {
 	H5O_pline_t x;
@@ -1236,6 +1240,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z_delete() */
 
+
 /*-------------------------------------------------------------------------
  * Function: H5Zget_filter_info
  *
@@ -1283,4 +1288,34 @@ herr_t H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags
 done:
     FUNC_LEAVE_API(ret_value)
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Z_set_latest_version
+ *
+ * Purpose:     Set the encoding for a I/O filter pipeline to the latest version.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Tuesday, July 24, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Z_set_latest_version(H5O_pline_t *pline)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5Z_set_latest_version, FAIL)
+
+    /* Sanity check */
+    HDassert(pline);
+
+    /* Set encoding of I/O pipeline to latest version */
+    pline->version = H5O_PLINE_VERSION_LATEST;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z_set_latest_version() */
 

@@ -383,6 +383,7 @@ typedef struct H5O_ginfo_t {
 typedef struct H5O_pline_t {
     H5O_shared_t        sh_loc;         /* Shared message info (must be first) */
 
+    unsigned	version;	        /* Encoding version number */
     size_t	nalloc;			/*num elements in `filter' array     */
     size_t	nused;			/*num filters defined		     */
     H5Z_filter_info_t *filter;		/*array of filters		     */

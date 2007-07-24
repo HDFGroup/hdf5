@@ -23,6 +23,21 @@
 /* Include private header file */
 #include "H5Zprivate.h"          /* Filter functions                */
 
+
+/* The initial version of the format */
+#define H5O_PLINE_VERSION_1	1
+
+/* This version encodes the message fields more efficiently */
+/* (Drops the reserved bytes, doesn't align the name and doesn't encode the
+ *      filter name at all if it's a filter provided by the library)
+ */
+#define H5O_PLINE_VERSION_2	2
+
+/* The latest version of the format.  Look through the 'encode' and 'size'
+ *      callbacks for places to change when updating this. */
+#define H5O_PLINE_VERSION_LATEST H5O_PLINE_VERSION_2
+
+
 #ifdef H5_HAVE_FILTER_DEFLATE
 /*
  * Deflate filter
