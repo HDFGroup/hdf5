@@ -652,6 +652,7 @@
 ./src/H5RSprivate.h
 ./src/H5S.c
 ./src/H5Sall.c
+./src/H5Sdbg.c
 ./src/H5Shyper.c
 ./src/H5Smpio.c
 ./src/H5Snone.c

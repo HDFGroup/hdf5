@@ -313,6 +313,10 @@ H5S_create(H5S_class_t type)
 
     /* Initialize default dataspace state */
     new_ds->extent.type = type;
+    if(type == H5S_NULL)
+        new_ds->extent.version = H5O_SDSPACE_VERSION_2;
+    else
+        new_ds->extent.version = H5O_SDSPACE_VERSION_1;
     new_ds->extent.rank = 0;
     new_ds->extent.size = new_ds->extent.max = NULL;
 
@@ -618,6 +622,7 @@ H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src)
 
     /* Copy the regular fields */
     dst->type = src->type;
+    dst->version = src->version;
     dst->nelem = src->nelem;
     dst->rank = src->rank;
 
@@ -2322,50 +2327,31 @@ H5S_extent_nelem(const H5S_extent_t *ext)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_debug
+ * Function:    H5S_set_latest_version
  *
- * Purpose:	Prints debugging information about a data space.
+ * Purpose:     Set the encoding for a dataspace to the latest version.
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *              Tuesday, July 21, 1998
- *
- * Modifications:
+ * Programmer:  Quincey Koziol
+ *              Tuesday, July 24, 2007
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream, int indent, int fwidth)
+H5S_set_latest_version(H5S_t *ds)
 {
-    const H5S_t	*mesg = (const H5S_t*)_mesg;
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_debug)
+    FUNC_ENTER_NOAPI(H5S_set_latest_version, FAIL)
 
-    switch(H5S_GET_EXTENT_TYPE(mesg)) {
-        case H5S_NULL:
-            fprintf(stream, "%*s%-*s H5S_NULL\n", indent, "", fwidth,
-                    "Space class:");
-            break;
+    /* Sanity check */
+    HDassert(ds);
 
-        case H5S_SCALAR:
-            fprintf(stream, "%*s%-*s H5S_SCALAR\n", indent, "", fwidth,
-                    "Space class:");
-            break;
+    /* Set encoding of extent to latest version */
+    ds->extent.version = H5O_SDSPACE_VERSION_LATEST;
 
-        case H5S_SIMPLE:
-            fprintf(stream, "%*s%-*s H5S_SIMPLE\n", indent, "", fwidth,
-                    "Space class:");
-            H5O_debug_id(H5O_SDSPACE_ID, f, dxpl_id, &(mesg->extent), stream,
-                                 indent + 3, MAX(0, fwidth - 3));
-            break;
-
-        default:
-            fprintf(stream, "%*s%-*s **UNKNOWN-%ld**\n", indent, "", fwidth,
-                    "Space class:", (long)(H5S_GET_EXTENT_TYPE(mesg)));
-            break;
-    } /* end switch */
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5S_debug() */
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S_set_latest_version() */
 

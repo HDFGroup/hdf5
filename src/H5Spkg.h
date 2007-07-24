@@ -34,6 +34,21 @@
 #define H5S_VALID_MAX	0x01
 #define H5S_VALID_PERM	0x02
 
+
+/* Initial version of the dataspace information */
+#define H5O_SDSPACE_VERSION_1	1
+
+/* This version adds support for "null" dataspaces, encodes the type of the
+ *      dataspace in the message and eliminated the rest of the "reserved"
+ *      bytes.
+ */
+#define H5O_SDSPACE_VERSION_2	2
+
+/* The latest version of the format.  Look through the 'encode' 
+ *      and 'size' callbacks for places to change when updating this. */
+#define H5O_SDSPACE_VERSION_LATEST H5O_SDSPACE_VERSION_2
+
+
 /*
  * Dataspace extent information
  */
@@ -42,6 +57,7 @@ struct H5S_extent_t {
     H5O_shared_t sh_loc;        /* Shared message info (must be first) */
 
     H5S_class_t	type;           /* Type of extent */
+    unsigned version;           /* Version of object header message to encode this object with */
     hsize_t nelem;              /* Number of elements in extent */
 
     unsigned rank;              /* Number of dimensions */

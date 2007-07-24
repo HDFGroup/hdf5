@@ -358,6 +358,11 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     /* Copy the dataspace for the attribute */
     attr->ds = H5S_copy(space, FALSE);
 
+    /* Set the latest format for dataspace, if requested */
+    if(H5F_USE_LATEST_FORMAT(loc->oloc->file))
+        if(H5S_set_latest_version(attr->ds) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set latest version of dataspace")
+
     /* Mark it initially set to initialized */
     attr->initialized = TRUE; /*for now, set to false later*/
 

@@ -67,6 +67,7 @@ static herr_t H5D_init_storage(H5D_t *dataset, hbool_t full_overwrite, hid_t dxp
 static H5D_shared_t *H5D_new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type);
 static herr_t H5D_init_type(H5F_t *file, const H5D_t *dset, hid_t type_id,
     const H5T_t *type);
+static herr_t H5D_init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space);
 static herr_t H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset);
 static herr_t H5D_open_oid(H5D_t *dataset, hid_t dxpl_id);
 static herr_t H5D_get_space_status(H5D_t *dset, H5D_space_status_t *allocation, hid_t dxpl_id);
@@ -1076,6 +1077,54 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5D_init_space
+ *
+ * Purpose:	Copy a dataspace for a dataset's use, performing all the
+ *              necessary adjustments, etc.
+ *
+ * Return:	Success:    SUCCEED
+ *		Failure:    FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, July 24, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space)
+{
+    hbool_t use_latest_format;          /* Flag indicating the newest file format should be used */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_init_space)
+
+    /* Sanity checking */
+    HDassert(file);
+    HDassert(dset);
+    HDassert(space);
+
+    /* Get the file's 'use the latest version of the format' flag */
+    use_latest_format = H5F_USE_LATEST_FORMAT(file);
+
+    /* Copy dataspace for dataset */
+    if(NULL == (dset->shared->space = H5S_copy(space, FALSE)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy dataspace")
+
+    /* Set the latest format, if requested */
+    if(use_latest_format)
+        if(H5S_set_latest_version(dset->shared->space) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set latest version of datatype")
+
+    /* Set the dataset's dataspace to 'all' selection */
+    if(H5S_select_all(dset->shared->space, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to set all selection")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_init_space() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D_update_oh_info
  *
  * Purpose:	Create and fill object header for dataset
@@ -1389,34 +1438,30 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     if(NULL == (new_dset->shared = H5D_new(dcpl_id, TRUE, has_vl_type)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    /* Copy datatype for dataset */
+    /* Copy & initialize datatype for dataset */
     if(H5D_init_type(file, new_dset, type_id, type) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "can't copy datatype")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't copy datatype")
 
-    /* Check if the filters in the DCPL can be applied to this dataset */
-    if(H5Z_can_apply(new_dset->shared->dcpl_id,new_dset->shared->type_id) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "I/O filters can't operate on this dataset")
+    /* Copy & initialize dataspace for dataset */
+    if(H5D_init_space(file, new_dset, space) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't copy dataspace")
 
     /* Set the dataset's checked_filters flag to enable writing */
     new_dset->shared->checked_filters = TRUE;
-
-    /* Copy dataspace for dataset */
-    if((new_dset->shared->space = H5S_copy(space, FALSE))==NULL)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy dataspace")
-
-    /* Set the dataset's dataspace to 'all' selection */
-    if(H5S_select_all(new_dset->shared->space, TRUE) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, NULL, "unable to set all selection")
-
-    /* Make the "set local" filter callbacks for this dataset */
-    if(H5Z_set_local(new_dset->shared->dcpl_id,new_dset->shared->type_id) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to set local filter parameters")
 
     /* Check if the dataset has a non-default DCPL & get important values, if so */
     if(new_dset->shared->dcpl_id != H5P_DATASET_CREATE_DEFAULT) {
         H5D_layout_t    *layout;        /* Dataset's layout information */
         H5O_pline_t     *pline;         /* Dataset's I/O pipeline information */
         H5O_fill_t      *fill;          /* Dataset's fill value info */
+
+        /* Check if the filters in the DCPL can be applied to this dataset */
+        if(H5Z_can_apply(new_dset->shared->dcpl_id, new_dset->shared->type_id) < 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "I/O filters can't operate on this dataset")
+
+        /* Make the "set local" filter callbacks for this dataset */
+        if(H5Z_set_local(new_dset->shared->dcpl_id, new_dset->shared->type_id) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to set local filter parameters")
 
         /* Get new dataset's property list object */
         if(NULL == (dc_plist = (H5P_genplist_t *)H5I_object(new_dset->shared->dcpl_id)))

@@ -81,19 +81,6 @@ const H5O_msg_class_t H5O_MSG_SDSPACE[1] = {{
     H5O_sdspace_shared_debug	/* debug the message		    	*/
 }};
 
-/* Initial version of the dataspace information */
-#define H5O_SDSPACE_VERSION_1	1
-
-/* This version adds support for "null" dataspaces, encodes the type of the
- *      dataspace in the message and eliminated the rest of the "reserved"
- *      bytes.
- */
-#define H5O_SDSPACE_VERSION_2	2
-
-/* The latest version of the format.  Look through the 'encode' 
- *      and 'size' callbacks for places to change when updating this. */
-#define H5O_SDSPACE_VERSION_LATEST H5O_SDSPACE_VERSION_2
-
 /* Declare external the free list for H5S_extent_t's */
 H5FL_EXTERN(H5S_extent_t);
 
@@ -143,6 +130,7 @@ H5O_sdspace_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
     version = *p++;
     if(version < H5O_SDSPACE_VERSION_1 || version > H5O_SDSPACE_VERSION_2)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "wrong version number in dataspace message")
+    sdim->version = version;
 
     /* Get rank */
     sdim->rank = *p++;
@@ -165,6 +153,7 @@ H5O_sdspace_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
         /* Increment past reserved byte */
         p++;
     } /* end else */
+    HDassert(sdim->type != H5S_NULL || sdim->version >= H5O_SDSPACE_VERSION_2);
 
     /* Only Version 1 has these reserved bytes */
     if(version == H5O_SDSPACE_VERSION_1)
@@ -248,8 +237,6 @@ H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *_mesg)
 {
     const H5S_extent_t	*sdim = (const H5S_extent_t *)_mesg;
     unsigned		flags = 0;
-    unsigned		version;
-    hbool_t             use_latest_format;      /* Flag indicating the newest file format should be used */
     unsigned		u;  /* Local counting variable */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_sdspace_encode)
@@ -259,17 +246,10 @@ H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *_mesg)
     HDassert(p);
     HDassert(sdim);
 
-    /* Get the file's 'use the latest version of the format' flag */
-    use_latest_format = H5F_USE_LATEST_FORMAT(f);
-
     /* Version */
-    if(use_latest_format)
-        version = H5O_SDSPACE_VERSION_LATEST;
-    else if(sdim->type == H5S_NULL)
-        version = H5O_SDSPACE_VERSION_2;
-    else
-        version = H5O_SDSPACE_VERSION_1;
-    *p++ = version;
+    HDassert(sdim->version > 0);
+    HDassert(sdim->type != H5S_NULL || sdim->version >= H5O_SDSPACE_VERSION_2);
+    *p++ = sdim->version;
 
     /* Rank */
     *p++ = sdim->rank;
@@ -280,7 +260,7 @@ H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *_mesg)
     *p++ = flags;
 
     /* Dataspace type */
-    if(version > H5O_SDSPACE_VERSION_1)
+    if(sdim->version > H5O_SDSPACE_VERSION_1)
         *p++ = sdim->type;
     else {
         *p++ = 0; /*reserved*/
@@ -370,20 +350,16 @@ static size_t
 H5O_sdspace_size(const H5F_t *f, const void *_mesg)
 {
     const H5S_extent_t	*space = (const H5S_extent_t *)_mesg;
-    hbool_t             use_latest_format;      /* Flag indicating the newest file format should be used */
     size_t		ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_sdspace_size)
-
-    /* Get the file's 'use the latest version of the format' flag */
-    use_latest_format = H5F_USE_LATEST_FORMAT(f);
 
     /* Basic information for all dataspace messages */
     ret_value = 1 +             /* Version */
             1 +                 /* Rank */
             1 +                 /* Flags */
             1 +                 /* Dataspace type/reserved */
-            (use_latest_format ? 0 : 4); /* Eliminated/reserved */
+            ((space->version > H5O_SDSPACE_VERSION_1) ? 0 : 4); /* Eliminated/reserved */
 
     /* Add in the dimension sizes */
     ret_value += space->rank * H5F_SIZEOF_SIZE(f);
