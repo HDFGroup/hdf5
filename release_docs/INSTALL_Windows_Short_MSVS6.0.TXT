@@ -92,11 +92,6 @@ hdf5check.bat has four options:
       
    hdf5check enablecpp           test HDF5 C/C++ libraries and tools
          
-   hdf5check enablefortran       test HDF5 C/Fortran libraries 
-                                 and tools
-         
-   hdf5check enableall           test HDF5 C/C++/Fortran libraries
-                                 and tools
    
 
 Invoke a command prompt and run hdf5check with appropriate
