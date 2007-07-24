@@ -56,7 +56,7 @@
 /* Older version, with just address of object as link for object header sharing */
 #define H5O_SHARED_VERSION_2	2
 
-/* Newest version, which recognizes messages that are stored in the heap */
+/* Newest version, which recognizes messages that are stored in the SOHM heap */
 #define H5O_SHARED_VERSION_3	3
 #define H5O_SHARED_VERSION_LATEST	H5O_SHARED_VERSION_3
 
@@ -378,7 +378,7 @@ H5O_shared_encode(const H5F_t *f, uint8_t *buf/*out*/, const H5O_shared_t *sh_me
     /* If this message is shared in the heap, we need to use version 3 of the
      * encoding and encode the SHARED_IN_HEAP flag.
      */
-    if(sh_mesg->type == H5O_SHARE_TYPE_SOHM || H5F_USE_LATEST_FORMAT(f))
+    if(sh_mesg->type == H5O_SHARE_TYPE_SOHM)
         version = H5O_SHARED_VERSION_LATEST;
     else {
         HDassert(sh_mesg->type == H5O_SHARE_TYPE_COMMITTED);
