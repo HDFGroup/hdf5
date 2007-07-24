@@ -13,13 +13,6 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Module Info: This module contains most of the "core" functionality of
- *      the H5T interface, including the API initialization code, etc.
- *      Many routines that are infrequently used, or are specialized for
- *      one particular datatype class are in another module.
- */
-
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Tdbg.c
