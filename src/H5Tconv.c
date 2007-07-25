@@ -2324,7 +2324,7 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                 buf_stride = src->shared->size;
             }
 
-            if(priv->smembs_subset == H5T_SUBSET_SRC) {
+            if(priv->smembs_subset == H5T_SUBSET_SRC || priv->smembs_subset == H5T_SUBSET_DST) {
                 /* If the optimization flag is set to indicate source members are a subset and 
                  * in the top of the destination, simply copy the source members to background buffer. */
                 xbuf = buf;
@@ -2340,29 +2340,6 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                     copy_size = dst->shared->size;
                 else
                     copy_size = src->shared->size;
-
-                for (elmtno=0; elmtno<nelmts; elmtno++) {
-                    HDmemmove(xbkg, xbuf, copy_size); 
-
-                    /* Update pointers */
-                    xbuf += buf_stride;
-                    xbkg += bkg_stride;
-                }
-            } else if(priv->smembs_subset == H5T_SUBSET_DST) {
-                /* If the optimization flag is set to indicate destination members are a subset 
-                 * and in the top of the source, simply copy the source members to background 
-                 * buffer. */
-                xbuf = buf;
-                xbkg = bkg;
-
-                if(src->shared->size <= dst->shared->size)
-                    /* This is to deal with a very special situation when the fields and their
-                     * offset for both source and destination are identical but the datatype 
-                     * sizes of source and destination are different.
-                     */
-                    copy_size = src->shared->size;
-                else
-                    copy_size = dst->shared->size;
 
                 for (elmtno=0; elmtno<nelmts; elmtno++) {
                     HDmemmove(xbkg, xbuf, copy_size); 
