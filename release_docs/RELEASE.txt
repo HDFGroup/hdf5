@@ -51,6 +51,8 @@ New Features
 
     Configuration:
     --------------
+        - Updated versions of autotools. HDF5 now uses automake 1.10.0, 
+          autoconf 2.61, and libtool 1.5.22. MAM - 2007/7/25.
         - Changed default fortran compiler to g95 when gcc is used. - AKC
           2007/2/17.
         - 'make check-vfd' can now be run from the top level directory. Not all
