@@ -41,6 +41,7 @@ New Features
 ============
     Configuration:
     -------------------------
+        - HDF5 now uses autoconf 2.61 to generate configure. MAM - 2007/7/25.
 
     Source code distribution:
     -------------------------
