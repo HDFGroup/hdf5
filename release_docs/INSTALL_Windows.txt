@@ -69,7 +69,7 @@ Preconditions:
       called 'hdf5-1.8.x' under MyHDFstuff which contains several files and 
       directories.  Rename "hdf5-1.8.x" to "hdf5".
 
-   6. HDF5 provide options to do in-memory compress within HDF5 library.  
+   6. HDF5 provide options to do in-memory compression  within HDF5 library.  
       Currently, two external compression libraries Zlib and Szip can be used 
       with HDF5.
 
