@@ -3594,6 +3594,7 @@ H5Fget_info(hid_t obj_id, H5F_info_t *finfo)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(H5Fget_info, FAIL)
+    H5TRACE2("e", "i*x", obj_id, finfo);
 
     /* Check args */
     if(!finfo)

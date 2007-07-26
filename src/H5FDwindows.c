@@ -1018,3 +1018,4 @@ done:
 }
 
 #endif /* H5_HAVE_WINDOWS */
+

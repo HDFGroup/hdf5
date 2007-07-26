@@ -54441,9 +54441,6 @@ IF_YES_NO "$HAVE_DMALLOC"
 PRINT_N "         Function Stack Tracing"
 IF_ENABLED_DISABLED "$CODESTACK"
 
-PRINT_N "                 Group Revision"
-IF_ENABLED_DISABLED "$GROUPREVISION"
-
 PRINT_N "                           GPFS"
 IF_YES_NO "$GPFS"
 
