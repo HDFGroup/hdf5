@@ -69,6 +69,7 @@
 #define H5B2_METADATA_PREFIX_SIZE (                                           \
     H5B2_SIZEOF_MAGIC   /* Signature */                                       \
     + 1 /* Version */                                                         \
+    + 1 /* Tree type */                                                       \
     + H5B2_SIZEOF_CHKSUM /* Metadata checksum */                              \
     )
 
@@ -78,7 +79,6 @@
     H5B2_METADATA_PREFIX_SIZE                                                 \
                                                                               \
     /* Header specific fields */                                              \
-    + 1 /* Tree type */                                                       \
     + 4 /* Node size, in bytes */                                             \
     + 2 /* Record size, in bytes */                                           \
     + 2 /* Depth of tree */                                                   \

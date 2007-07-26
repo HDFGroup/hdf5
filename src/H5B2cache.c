@@ -647,6 +647,7 @@ H5B2_cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr
 
         /* B-tree type */
         *p++ = shared->type->id;
+        HDassert((size_t)(p - shared->page) == (H5B2_INT_PREFIX_SIZE - H5B2_SIZEOF_CHKSUM));
 
         /* Serialize records for internal node */
         native = internal->int_native;
@@ -982,6 +983,7 @@ H5B2_cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5
 
         /* b-tree type */
         *p++ = shared->type->id;
+        HDassert((size_t)(p - shared->page) == (H5B2_LEAF_PREFIX_SIZE - H5B2_SIZEOF_CHKSUM));
 
         /* Serialize records for leaf node */
         native = leaf->leaf_native;

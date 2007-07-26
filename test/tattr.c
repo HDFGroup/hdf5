@@ -129,6 +129,8 @@ float attr_data5=(float)-5.123;        /* Test data for 5th attribute */
 #define ATTR7_NAME      "attr 1 - 000000"
 #define ATTR8_NAME      "attr 2"
 
+#define NATTR_MANY      35000
+
 /* Attribute iteration struct */
 typedef struct {
     H5_iter_order_t order;      /* Direction of iteration */
@@ -3213,6 +3215,86 @@ test_attr_null_space(hid_t fcpl, hid_t fapl)
     filesize = h5_get_file_size(FILENAME);
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
 }   /* test_attr_null_space() */
+
+
+/****************************************************************
+**
+**  test_attr_many(): Test basic H5A (attribute) code.
+**      Tests storing lots of attributes
+**
+****************************************************************/
+static void
+test_attr_many(hid_t fcpl, hid_t fapl)
+{
+    hid_t	fid;		/* HDF5 File ID			*/
+    hid_t	sid;	        /* Dataspace ID			*/
+    hid_t	aid;	        /* Attribute ID			*/
+    char	attrname[NAME_BUF_SIZE];        /* Name of attribute */
+    unsigned    u;              /* Local index variable */
+    herr_t	ret;		/* Generic return value		*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Storing Many Attributes\n"));
+
+    /* Create file */
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create dataspace for attribute */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Create many attributes (on root group) */
+    for(u = 0; u < NATTR_MANY; u++) {
+        sprintf(attrname, "a-%06u", u);
+
+        aid = H5Acreate(fid, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT);
+        CHECK(aid, FAIL, "H5Acreate");
+
+        ret = H5Awrite(aid, H5T_NATIVE_UINT, &u);
+        CHECK(ret, FAIL, "H5Awrite");
+
+        ret = H5Aclose(aid);
+        CHECK(ret, FAIL, "H5Aclose");
+    } /* end for */
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+
+    /* Re-open the file and check on the attributes */
+
+    /* Re-open file */
+    fid = H5Fopen(FILENAME, H5F_ACC_RDONLY, fapl);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Verify attributes */
+    for(u = 0; u < NATTR_MANY; u++) {
+        unsigned    value;          /* Attribute value */
+
+        sprintf(attrname, "a-%06u", u);
+
+        aid = H5Aopen_name(fid, attrname);
+        CHECK(aid, FAIL, "H5Aopen_name");
+
+        ret = H5Aread(aid, H5T_NATIVE_UINT, &value);
+        CHECK(ret, FAIL, "H5Aread");
+        VERIFY(value, u, "H5Aread");
+
+        ret = H5Aclose(aid);
+        CHECK(ret, FAIL, "H5Aclose");
+    } /* end for */
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+
+    /* Close dataspaces */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+}   /* test_attr_many() */
 
 
 /****************************************************************
@@ -8238,6 +8320,7 @@ test_attr(void)
                 test_attr_dense_limits(my_fcpl, my_fapl);       /* Test dense attribute storage limits */
                 test_attr_big(my_fcpl, my_fapl);                /* Test storing big attribute */
                 test_attr_null_space(my_fcpl, my_fapl);         /* Test storing attribute with NULL dataspace */
+                test_attr_many(my_fcpl, my_fapl);               /* Test storing lots of attributes */
 
                 /* Attribute creation order tests */
                 test_attr_corder_create_basic(my_fcpl, my_fapl);/* Test creating an object w/attribute creation order info */
