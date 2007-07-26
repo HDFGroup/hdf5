@@ -61,7 +61,7 @@
 /* Definitions for fill value.  size=0 means fill value will be 0 as
  * library default; size=-1 means fill value is undefined. */
 #define H5D_CRT_FILL_VALUE_SIZE    sizeof(H5O_fill_t)
-#define H5D_CRT_FILL_VALUE_DEF     {{0, NULL, H5O_NULL_ID, {{0, HADDR_UNDEF}}}, NULL, 0, NULL, H5D_ALLOC_TIME_LATE, H5D_FILL_TIME_IFSET, FALSE}
+#define H5D_CRT_FILL_VALUE_DEF     {{0, NULL, H5O_NULL_ID, {{0, HADDR_UNDEF}}}, H5O_FILL_VERSION_2, NULL, 0, NULL, H5D_ALLOC_TIME_LATE, H5D_FILL_TIME_IFSET, FALSE}
 #define H5D_CRT_FILL_VALUE_CMP     H5P_fill_value_cmp
 /* Definitions for space allocation time state */
 #define H5D_CRT_ALLOC_TIME_STATE_SIZE   sizeof(unsigned)

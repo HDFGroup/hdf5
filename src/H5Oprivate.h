@@ -232,18 +232,31 @@ typedef struct H5O_linfo_t {
     haddr_t     name_bt2_addr;          /* Address of v2 B-tree for indexing names of links */
 } H5O_linfo_t;
 
+/* Initial version of the "old" fill value information */
+/* (It doesn't look like this value was ever used in the file -QAK) */
+#define H5O_FILL_VERSION_1 	1
+/* Revised version of the "new" fill value information */
+#define H5O_FILL_VERSION_2 	2
+/* Version of the "new" fill value information with smaller default format */
+#define H5O_FILL_VERSION_3 	3
+
+/* The latest version of the format.  Look through the 'encode', 'decode'
+ *      and 'size' callback for places to change when updating this. */
+#define H5O_FILL_VERSION_LATEST H5O_FILL_VERSION_3
+
 /*
- * New Fill Value Message.
+ * Fill Value Message.
  * (Data structure in memory for both "old" and "new" fill value messages)
  *
- * The new fill value message is fill value plus
- * space allocation time, fill value writing time, whether fill
- * value is defined, and the location of the message if it's shared
+ * The fill value message is fill value plus space allocation time, fill value
+ * writing time, whether fill value is defined, and the location of the
+ * message if it's shared.
  */
 
 typedef struct H5O_fill_t {
     H5O_shared_t        sh_loc;         /* Shared message info (must be first) */
 
+    unsigned	        version;	/* Encoding version number           */
     H5T_t		*type;		/*type. Null implies same as dataset */
     ssize_t		size;		/*number of bytes in the fill value  */
     void		*buf;		/*the fill value		     */
@@ -609,6 +622,7 @@ H5_DLL hsize_t H5O_efl_total_size(H5O_efl_t *efl);
 /* Fill value operators */
 H5_DLL herr_t H5O_fill_reset_dyn(H5O_fill_t *fill);
 H5_DLL herr_t H5O_fill_convert(H5O_fill_t *fill, H5T_t *type, hbool_t *fill_changed, hid_t dxpl_id);
+H5_DLL herr_t H5O_fill_set_latest_version(H5O_fill_t *fill);
 
 /* Link operators */
 H5_DLL herr_t H5O_link_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,

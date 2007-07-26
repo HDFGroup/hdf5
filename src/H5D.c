@@ -1499,13 +1499,17 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
         /* Get the dataset's external file list information */
         if(H5P_get(dc_plist, H5D_CRT_EXT_FILE_LIST_NAME, &new_dset->shared->dcpl_cache.efl) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve external file list")
+    } /* end if */
 
-        /* Set the latest version of the pline & fill messages, if requested */
-        if(H5F_USE_LATEST_FORMAT(file)) {
-            /* Set the latest version for the I/O pipeline message */
-            if(H5Z_set_latest_version(pline) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of I/O filter pipeline")
-        } /* end if */
+    /* Set the latest version of the pline & fill messages, if requested */
+    if(H5F_USE_LATEST_FORMAT(file)) {
+        /* Set the latest version for the I/O pipeline message */
+        if(H5Z_set_latest_version(&new_dset->shared->dcpl_cache.pline) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of I/O filter pipeline")
+
+        /* Set the latest version for the fill value message */
+        if(H5O_fill_set_latest_version(&new_dset->shared->dcpl_cache.fill) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of fill value")
     } /* end if */
 
     /* Check if this dataset is going into a parallel file and set space allocation time */
