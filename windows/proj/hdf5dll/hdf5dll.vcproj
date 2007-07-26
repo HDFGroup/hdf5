@@ -5704,6 +5704,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5Sdbg.c">
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5Shyper.c">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -6444,6 +6447,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5Tdbg.c">
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5Tdeprec.c">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -7034,6 +7040,9 @@
 						ObjectFile="../../../proj/hdf5dll/Release/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Release/"/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5Tvisit.c">
 			</File>
 			<File
 				RelativePath="..\..\..\src\H5Tvlen.c">
