@@ -3810,7 +3810,8 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/misc/Makefile
                  tools/misc/h5cc
                  tools/misc/testh5repart.sh
-                 tools/misc/testh5stat.sh
+                 tools/h5stat/testh5stat.sh
+                 tools/h5stat/Makefile
                  examples/Makefile
                  examples/testh5cc.sh
                  c++/Makefile
