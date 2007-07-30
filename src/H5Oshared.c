@@ -104,9 +104,10 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, H5O_shared_t *shared, const H5O_msg_cla
     HDassert(type);
 
     /* Get the shared message */
-    ret_value = H5O_read_real(&(shared->ent), type, 0, mesg, dxpl_id);
+    if(NULL == (ret_value = H5O_read_real(&(shared->ent), type, 0, mesg, dxpl_id)))
+        HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to retrieve shared message")
     if(type->set_share && (type->set_share)(f, ret_value, shared) < 0)
-        HGOTO_ERROR (H5E_OHDR, H5E_CANTINIT, NULL, "unable to set sharing information")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to set sharing information")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
