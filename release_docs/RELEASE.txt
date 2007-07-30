@@ -1,12 +1,12 @@
-HDF5 version 1.8.0-beta2post1 currently under development
+HDF5 version 1.8.0-beta3 released on Mon Jul 30 14:12:08 CDT 2007
 ================================================================================
 
 
 INTRODUCTION
 
 This document describes the differences between HDF5-1.6.* and
-HDF5-1.8.0-beta2, and contains information on the platforms tested and
-known problems in HDF5-1.8.0-beta2. For more details check the HISTORY.txt
+HDF5-1.8.0-beta3, and contains information on the platforms tested and
+known problems in HDF5-1.8.0-beta3. For more details check the HISTORY.txt
 file in the HDF5 source.
 
 
@@ -972,7 +972,7 @@ Bug Fixes since HDF5-1.6.0 release
 
 Platforms Tested
 ================
-Platforms marked with * were not tested for hdf5-1.8.0-beta2 release
+Platforms marked with * were not tested for hdf5-1.8.0-beta3 release
 (This information is somewhat out of date and may be inaccurate.  It will be
     updated for a later release)
 
@@ -1048,11 +1048,11 @@ Platforms marked with * were not tested for hdf5-1.8.0-beta2 release
 
     MAC OS  10.4 (Intel)          gcc i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1 
                                   G95 (GCC 4.0.3 (g95 0.91!) Nov 21 2006)
-    Alpha Open VMS 7.3
+*    Alpha Open VMS 7.3
 
 
 Supported Configuration Features Summary
-(This table was not modified for 1.8.0-beta2 release; for information contact help@hdfgroup.org)
+(This table was not modified for 1.8.0-beta3 release; for information contact help@hdfgroup.org)
 ========================================
 
     In the tables below

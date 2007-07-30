@@ -2,6 +2,9 @@
 	Instructions for the Installation of HDF5 Software
 	==================================================
 
+WARNING: This file was not updated for the 1.8.0-beta* releases. If you have any problems with the HDF5
+         installation please contact help@hdfgroup.org
+
 	CONTENTS
 	--------
 	1. Obtaining HDF5
