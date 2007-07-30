@@ -1,4 +1,4 @@
-HDF5 version 1.8.0-beta3 released on Mon Jul 30 14:12:08 CDT 2007
+HDF5 version 1.8.0-beta3post1 currently under development
 ================================================================================
 
 
