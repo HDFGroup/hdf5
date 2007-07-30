@@ -58,9 +58,9 @@
        :: NOTE1
        ::Set some variables to contain .h5 file and its path for convenience
        
-       set file1=..\..\misc\testfiles\h5stat_filters.h5     
-       set file2=..\..\misc\testfiles\h5stat_tsohm.h5     
-       set file3=..\..\misc\testfiles\h5stat_newgrat.h5     
+       set file1=..\..\h5stat\testfiles\h5stat_filters.h5     
+       set file2=..\..\h5stat\testfiles\h5stat_tsohm.h5     
+       set file3=..\..\h5stat\testfiles\h5stat_newgrat.h5     
        
        ::Create the file to contain the tests output
        type nul > %tempResults%

@@ -90,7 +90,7 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat;f90;for;f;fpp"
 # Begin Source File
 
-SOURCE=..\..\..\tools\misc\h5stat.c
+SOURCE=..\..\..\tools\h5stat\h5stat.c
 # End Source File
 # End Group
 # Begin Group "Header Files"

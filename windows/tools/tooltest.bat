@@ -218,7 +218,7 @@
          more /e +%ln% ..\..\temptest\temp.txt > %actual_output%
 	
 	 if %test_exefile%==h5stat (
-         	more /e +%ln_exp% ..\..\misc\testfiles\%1 > %exp_file%
+         	more /e +%ln_exp% ..\..\h5stat\testfiles\%1 > %exp_file%
          )	else (
       		more /e +%ln_exp% ..\..\testfiles\%1 > %exp_file%
 	 )
