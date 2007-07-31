@@ -1550,7 +1550,7 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
                                  smine_nelmts, dxpl_cache, tconv_buf/*out*/);
             } else {
                 n = H5D_select_fgath(io_info, chunk_info->fspace, &file_iter, smine_nelmts, 
-                                 (haddr_t)0, NULL, tconv_buf/*out*/);
+                                 chunk_addr, NULL, tconv_buf/*out*/);
             }
 
 #ifdef H5S_DEBUG
@@ -1983,7 +1983,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
                                  smine_nelmts, dxpl_cache, bkg_buf/*out*/);
                     } else {
                         n = H5D_select_fgath(io_info, chunk_info->fspace, &bkg_iter, smine_nelmts, 
-                                 (haddr_t)0, NULL, bkg_buf/*out*/);
+                                 chunk_addr, NULL, bkg_buf/*out*/);
                     }
 
 #ifdef H5S_DEBUG
