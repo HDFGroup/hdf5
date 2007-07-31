@@ -1,4 +1,4 @@
-HDF5 version 1.6.6-snap20 released on Mon Apr 23 10:53:42 CDT 2007
+HDF5 version 1.6.6-pre2 released on Mon Jul 30 21:56:25 CDT 2007
 ================================================================================
 
 INTRODUCTION
@@ -41,6 +41,7 @@ New Features
 ============
     Configuration:
     -------------------------
+        - HDF5 now uses autoconf 2.61 to generate configure. MAM - 2007/7/25.
 
     Source code distribution:
     -------------------------
@@ -59,10 +60,10 @@ New Features
        - h5dump: added support for double long type H5T_NATIVE_LDOUBLE. PVN
           2007/03/13
        - h5dump: added support for binary output, see usage. PVN 2007/03/13
-       - h5repack: added support for reading and comparing by hyperslabs for
+       - h5repack: added support for reading and writing  by hyperslabs for
          large files. PVN - 2007/03/01
        - h5repack: a new option allows the copy using the file type (default)
-         instead of the previous conversion to native type. PVN - 2007/03/01
+          instead of the previous conversion to native type. PVN - 2007/03/01
        - h5repack: output the percentage of compression used. PVN - 2007/03/01
        - h5diff: added support for comparing dataset regions. PVN - 2007/02/20
        - h5diff: added support for reading and comparing by hyperslabs for large files.
@@ -75,6 +76,10 @@ New Features
 
     C++ API:
     --------
+	- Added support for szip: DSetCreatPropList::setSzip - BMR 2007/01/24
+
+
+
 
 
 Support for New Platforms, Languages and Compilers
@@ -90,6 +95,8 @@ Bug Fixes since HDF5-1.6.5 Release
 
     Library
     -------
+        - Fixed several bugs with writing fill values for datasets that have
+            a variable-length datatype or component datatype.  QAK - 2007/06/19
         - STDIO driver didn't support files bigger than 2GB because the OFFSET
             parameter of fseek is of type LONG INT, not big enough for big files.
             Use fseeko instead for big files if it's available on the system.
@@ -147,6 +154,11 @@ Bug Fixes since HDF5-1.6.5 Release
 
     Configuration
     -------------
+	- Changed to default to --disable-shared if parallel is enabled. - AKC
+	  2007/5/12
+	- Correct an coding error in configure when it tries to locate the
+	  needed MPI and MPI-IO library for the fortran interface. - AKC
+	  2007/5/9.
 	- Changed default fortran compiler to g95 when gcc is used. - AKC
           2007/2/17.
 	- Configure can now use any tr command.  No more need for
@@ -175,7 +187,27 @@ Bug Fixes since HDF5-1.6.5 Release
                                 
     C++ API
     -------
-
+	- Changed
+	        StrType::StrType(const size_t& size);
+	  to
+	        StrType::StrType(const int dummy, const size_t& size);
+	  because the first one clashed with
+	        StrType::StrType(const hid_t existing_id); - BMR 2007/05/03
+	- Wrappers of H5Rcreate had incorrect prototypes.  Added these
+	  overloaded functions:
+	        IdComponent::reference(void* ref, const char* name, DataSpace&
+	                dataspace, H5R_type_t ref_type = H5R_DATASET_REGION)
+	        IdComponent::void reference(void* ref, const char* name)
+	        IdComponent::reference(void* ref, const H5std_string& name)
+	  and will remove these incorrect member functions:
+	        DataSet::Reference
+	        DataType::Reference
+	        Group::Reference
+	        H5File::Reference
+	- Added wrappers for H5Rdereference as constructors
+	        DataSet(IdComponent& obj, void* ref);
+	        Group(IdComponent& obj, void* ref);
+	        DataType(IdComponent& obj, void* ref);
 
 
    
@@ -183,23 +215,8 @@ Bug Fixes since HDF5-1.6.5 Release
 Platforms Tested
 ================
 
-    AIX 5.1  (32 and 64-bit)      xlc 6.0.0.6
-                                  xlf 8.1.1.3
-    				  xlC 6.0.0.6
-				  mpcc_r 6.0.0.6
-                                  mpxlf_r 8.1.1.3
-				  xlc 5.0.2.5
-				  xlf 7.1.1.2
-				  xlC 5.0.2.5
-				  mpcc_r 5.0.2.5
-				  mpxlf_r 7.1.1.2
     AIX 5.2 (32/64 bit)           xlc 6.0.0.8
                                   xlC 6.0.0.9
-                                  xlf 8.1.1.7
-                                  mpcc_r 6.0.0.8
-                                  mpxlf_r 8.1.1.7
-    AIX 5.2 (32/64 bit, LLNL frost)    xlc 6.0.0.8
-                                  xlC 6.0.0.8
                                   xlf 8.1.1.7
                                   mpcc_r 6.0.0.8
                                   mpxlf_r 8.1.1.7
@@ -209,22 +226,19 @@ Platforms Tested
     Cray X1 water 3.0.35          Cray Standard C Version 5.4.0.7.4
                                   Cray Fortran 5.4.0.7.3
                                   Cray C++ 5.4.0.7.4
-    FreeBSD 4.11                  gcc 2.95.4
-                                  g++ 2.95.4
-                                  gcc 3.2.3, 3.3.6, 3.4.4, 4.0.0
-    HP-UX B.11.00                 HP C  HP92453-01 A.11.01.20 
-                                  HP F90 v2.4
-                                  HP ANSI C++ B3910B A.03.13
-    HP-UX B.11.23                 HP aC++/ANSI C B3910B A.06.00
-                                  HP F90 v2.9
-                                  HP aC++/ANSI C B3910B A.06.00
+    FreeBSD 6.2                   gcc 3.4.6
+                                  g++ 3.4.6
+    HP-UX B.11.23                 HP aC++/ANSI C B3910B A.06.02
+                                  HP F90 v3.1 (32-bit only)
+                                  HP aC++/ANSI C B3910B A.06.02
     IRIX64 6.5 (tesla -64)        MIPSpro cc 7.4.2m
                                   F90 MIPSpro 7.4.2m
                                   C++ MIPSpro cc 7.4.2m
-    IRIX64 6.5 (64 & n32)         MIPSpro cc 7.3.1.3m
-                                  F90 MIPSpro 7.3.1.3m (64 only)
-                                  C++ MIPSpro cc 7.3.1.3m
-				  mpt 1.6
+    IRIX64 6.5 
+    (ucar mop1 64 & n32)
+                                  MIPSpro cc 7.4.4m
+                                  F90 MIPSpro 7.4.4m (64 only)
+                                  C++ MIPSpro cc 7.4.4m
     Linux 2.4.20-28.7             gcc 2.96
     (eirene, verbena)             gcc 3.3.2
                                   PGI compilers (pgcc, pgf90, pgCC) 
@@ -237,42 +251,45 @@ Platforms Tested
     (mir)                         PGI 5.2-1 C and F90 (with k3-32) 
                          	  Intel(R) C++ 32-bit Version 8.1
     				  Intel(R) Fortran 32-bit Version 8.1
-    Linux 2.4.21-sgi306rp21 Altix 
-          SMP ia64                Intel(R) C++ Version 8.1
-    (cobalt)                      Intel(R) Fortran Itanium(R) Version 8.1
+    Linux 2.6.16.46-0.12-debug #1 
+          SMP ia64 GNU/Linux      Intel(R) C++ Version 10.0.025
+    (ucar hir1)                   Intel(R) Fortran Itanium(R) Version 10.0.025
+    Linux 2.6.16.46-0.14-smp #1   Intel(R) C++ for Intel(R) EM64T Ver. 9.1.037
+	 SMP x86_64 GNU/Linux     Intel(R) Fortran Intel(R) EM64T Ver. 9.1.031
+    (smirom)			  PGI C, Fortran, C++ Version 6.2-5
+				         for 64-bit target on x86-64
+    Linux 2.6.5-7.283-rtgfx Altix 
+          SMP ia64                Intel(R) C++ Version 9.0
+    (cobalt)                      Intel(R) Fortran Itanium(R) Version 9.0
                                   SGI MPI
     OSF1 V5.1 (QSC)               Compaq C V6.5-011 
                                   HP Fortran V5.5A-3548
 				  Compaq C++ V6.5-036  
 				  MPIX200_64_r13.4
-    OSF1 V5.1 (PSC)               Compaq C V6.5-303 
-                                  HP Fortran V5.5A-3548
-				  Compaq C++ V6.5-040  
     SunOS 5.8 32,46               Sun WorkShop 6 update 2 C 5.3
-     (Solaris 2.8)                Sun WorkShop 6 update 2 Fortran 90
+     (Solaris 2.8)                Sun WorkShop 6 update 2 Fortran 95 6.2
                                   Sun WorkShop 6 update 2 C++ 5.3
-    SunOS 5.9 32,64               Sun C 5.6 2004/07/15
-     (Solaris 2.9)                Sun Fortran 95 8.0 2004/07/15
-                                  Sun C++ 5.6 2004/07/15
-    SunOS 5.10                    Sun WorkShop 6 update 2 C 5.3
-                                  Sun WorkShop 6 update 2 Fortran 95 6.2
-                                  Sun WorkShop 6 update 2 C++ 5.3
-                                  Patch 111685-13 
+    SunOS 5.10                    Sun WorkShop 6 update 2 C 5.8
+                                  Sun WorkShop 6 update 2 Fortran 95 8.2
+                                  Sun WorkShop 6 update 2 C++ 5.8
+                                  Patch 121019-06 
     Xeon Linux 2.4.21-32.0.1.ELsmp-perfctr-lustre
     (tungsten)	                  Intel(R) C++ Version 9.0
                                   Intel(R) Fortran Compiler Version 9.0
+    Xeon Linux 2.6.9-42.0.10.EL_lustre-1.4.10.1smp
+    (abe)                         Intel(R) C++ Version 10.0
+                                  Intel(R) Fortran Compiler Version 10.0
+                                  Open MPI 1.2.2
     IA-64 Linux 2.4.21.SuSE_292.til1 ia64
     (NCSA tg-login)               Intel(R) C++ Version 8.0
                                   Intel(R) Fortran Compiler Version 8.0
 				  mpich-gm-1.2.5..10-intel-r2
-    Windows XP                    MSVC++.NET
-                                  MSVC++ 6.0
-                                  Intel 8.1 C++
-    MAC OS X                      Darwin 7.5
-                                  gcc and g++ Apple Computer, Inc. GCC 
-                                  version 1175, based on gcc version 3.3.2
-                                  IBM XL Fortran version 8.1 
-                                  Absoft Fortran compiler v8.2
+    Windows XP                    Visual Studio 6.0
+                                  Visual Studio .NET (with Intel Fortran 9.0)
+                                  Visual Studio 2005 (with Intel Fortran 9.0)
+                                  cygwin (gcc 3.4.4)
+    MAC OS X Intel                Darwin 8.10.1
+                                  i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1
 
 
 Supported Configuration Features Summary
@@ -286,7 +303,7 @@ Key:   y   = tested and supported
 
 Platform                             C        F90    F90      C++  zlib  SZIP
                                      parallel        parallel      
-IBM BG/L (16)			     n        n      n        n    y     y
+IBM BG/L (15)			     n        n      n        n    y     y
 Solaris2.8 64-bit                    y        y      y(1)     y    y     y
 Solaris2.8 32-bit                    y        y      y(1)     y    y     y
 Solaris2.9 64-bit                    y(1)     y      y(1)     y    y     y
@@ -302,16 +319,18 @@ OSF1 v5.1                            y        y      y        y    y     y
 X1                                   y        y      y        y    y     n
 AIX-5.1, 5.2 & 5.3 32-bit            y        y      y        y    y     y
 AIX-5.1, 5.2 & 5.3 64-bit            y        y      y        y    y     y
-WinXP Visual Studio 6.0              n        n(9)   n        y    y     y
-WinXP .Net                           n        n      n        y(8) y     y
-Mac OS X 10.3                        n        y(10)  n        y    y     y
-FreeBSD 4.11                         n        n      n        y    y     y
-RedHat 7.3  W (3)                    y(1)     y(11)  n        y    y     y
+Windows XP Visual Studio 6.0         n        n      n        y    y     y
+Windows XP Visual Studio .NET        n        y(8)   n        y    y     y
+Windows XP Visual Studio 2005        n        y(8)   n        y    y     y
+Windows XP Cygwin                    n        n      n        y    y     y
+Mac OS X 10.3                        n        y(9)   n        y    y     y
+FreeBSD 6.2                          n        n      n        y    y     y
+RedHat 7.3  W (3)                    y(1)     y(10)  n        y    y     y
 RedHat 7.3  W Intel (3)              n        y      n        y    y     y
 RedHat 7.3  W PGI (3)                n        y      n        y    y     y
-RedStorm (16)			     n        y      n        y    y     n
-SuSe x86_64 gcc (3,13)               n        y(12)  n        y    y     y
-SuSe x86_64 icc (3,13)               n        y(14)  n        y    y     y
+RedStorm (15)			     n        y      n        y    y     n
+SuSe x86_64 gcc (3,13)               n        y(11)  n        y    y     y
+SuSe x86_64 icc (3,13)               n        y(13)  n        y    y     y
 Linux 2.4 Xeon C Lustre Intel (3,6)  n        y      n        y    y     y
 Linux 2.4 SuSE ia64 C Intel (3,7)    y        y      y        y    y     y
 Linux 2.4 SGI Altix ia64 Intel (3)   y        y      y        y    y     y
@@ -334,16 +353,18 @@ OSF1 v5.1                            y              y       n        y
 X1                                   n              y       n        y
 AIX-5.1, 5.2 & 5.3 32-bit            n              y       n        y
 AIX-5.1, 5.2 & 5.3 64-bit            n              y       n        y
-WinXP Visual Studio 6.0              y              y       n        n
-WinXP .Net                           y              y       n        n
+Windows XP Visual Studio 6.0         y              y       n        n
+Windows XP Visual Studio .Net        y              y       n        n
+Windows XP Visual Studio 2005        y              y       n        n
+Windows XP Cygwin                    y              y       n        n
 Mac OS X 10.3                        y              y       n        y
-FreeBSD 4.11                         y              y       y        y
+FreeBSD 6.2                          y              y       y        y
 RedHat 7.3   W (3)                   y              y       y        y
 RedHat 7.3  W  Intel (3)             n              y       n        y
 RedHat 7.3  W  PGI (3)               n              y       n        y
 RedStorm 			     n              y       n        y
 SuSe x86_64 gcc (3,13)               n              y       n        y
-SuSe x86_64 icc (3,13)               y              y(15)   n        y
+SuSe x86_64 icc (3,13)               y              y(14)   n        y
 Linux 2.4 Xeon C Lustre Intel (3,6)  y              y       n        y
 Linux 2.4 SuSE ia64 C Intel (3,7)    y              y       n        n
 Linux 2.4 SGI Altix ia64 Intel  (3)  y              y       n        y
@@ -363,25 +384,26 @@ Footnotes:  (1) Using mpich 1.2.6
             (6) Linux 2.4.21-32.0.1.  Xeon cluster with ELsmp-perfctr-lustre 
                 and Intel compilers
             (7) Linux 2.4.21, SuSE_292.til1.  Ia64 cluster with Intel compilers
-            (8) Intel 8.1
-            (9) One test of this release failed with Compaq Visual Fortran 6.6c.
-                No binary fortran release will be provided. Users should build
-                the library by themselves and use it at their own risk. 
-                We recommend that users use HDF5 1.7 instead 
-                or use Compaq Visual Fortran 6.0.
-           (10) IBM XLF and Absoft
-           (11) PGI, Absoft.  No shared libraries with Absoft; 
+            (8) Requires Intel Fortran Compiler 9.0 integration
+            (9) IBM XLF and Absoft
+           (10) PGI, Absoft.  No shared libraries with Absoft; 
                 use '--disable-shared'.
-           (12) PGI and Intel compilers for both C and Fortran
-           (13) AMD Opteron x86_64
-           (14) ifort
-           (15) Yes with C and Fortran, but not with C++
-           (16) Only serial is ported.  PFS does not work for PHDF5 yet.
+           (11) PGI and Intel compilers for both C and Fortran
+           (12) AMD Opteron x86_64
+           (13) ifort
+           (14) Yes with C and Fortran, but not with C++
+           (15) Only serial is ported.  PFS does not work for PHDF5 yet.
            FMB/EIP - 2005/11/10
 
 
 Known Problems
 ==============
+* QSC (an HP alpha-based OSF1 cluster) failed the testpar/testphdf5 sub-test
+  "calloc".  All other tests passed.  This indicates dataset using chunked
+  storage created by serial HDF5 may not work properly with parallel HDF5.
+  The calloc test can be skipped by running "prun ... testphdf5 -x calloc".
+  AKC - 2007/7/12.
+
 * Newer versions of g95 are not compatible with v1.6.5.  Last known g95
   version that is still compatiable with v1.6.5 is May 17, 2006.
   AKC - 2006/11/29.
@@ -390,16 +412,6 @@ Known Problems
   optimization error in the data types conversion code.  Before running
   configure, edit the file config/intel-flags by changing the setting of
   PROD_CFLAGS from -O3 to -O0, then run configure.  AKC - 2005/11/10.
-
-* Fortran testing and compiling failures on windows XP 
-  1. Compaq visual fortran 6.6c with VS 6.0
-     The Fortran tests failed for both release, release dll, debug and debug
-     dll. The failure is a random one. We won't provide fortran libraries. The
-     same test passed with the 1.7.51 snapshot. You may find the 1.7.51 
-     snapshot under ftp://hdf.ncsa.uiuc.edu/pub/outgoing/hdf5/snapshots/.
-  2. Intel fortran 8.1 under .Net environment
-     The fortran library cannot even be compiled. Some users have pointed this
-     to intel forum.
 
 * When testing parallel HDF5 with the C compiler version MIPSpro 7.4.3 at IRIX
   6.5, set enviroment variable MPI_TYPE_MAX to be a bigger number, for example 
@@ -452,10 +464,6 @@ Known Problems
   Ask your system administrator to clean them out.  Lastly, request IBM
   to provide a means to run poe without the debug socket.
 
-* Two h5dump xml tests(h5dump --xml thlink.h5 and h5dump --xml tmany.h5) 
-  failed on windows xp with .NET for debug and debug dll. Release and 
-  Release dll work fine. 
-
 * The h5dump tests may fail to match the expected output on some platforms
   (e.g. parallel jobs, Windows) where the error messages directed to
   "stderr" do not appear in the "right order" with output from stdout.
@@ -481,7 +489,7 @@ Known Problems
   It is suggested that you don't use this option on these platforms
   during configuration.
 
-* The Stream VFD was not tested yet under Windows.
+* The Stream VFD is not supported under Windows.
 
 
 * Before building HDF5 F90 Library from source on Crays 
@@ -504,15 +512,6 @@ Known Problems
   If -ieee is not used, the converted double values are mostly 0.0 but
   occasionally as 1**-308.  This has been reported to the system staff.
   All other tests have passed.
-
-* Fortran release DLL randomly failed with Compaq Visual Fortran 6.6c on
-  Windows. 
-
-* Fortran DLL built with Intel 8.1 in .NET environment crushed the compiler,
-  Building Fortran static library with Intel 8.1 in .NET environment 
-  requires manually setting the project file.
-  Please contact to hdfhelp@ncsa.uiuc.edu if you need to build
-  Fortran static library with Intel 8.1 with .NET environment.
 
 * On at least one system, SDSC DataStar, the scheduler (in this case
   LoadLeveler) sends job status updates to standard error when you run
