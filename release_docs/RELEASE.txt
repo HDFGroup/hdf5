@@ -398,6 +398,30 @@ Footnotes:  (1) Using mpich 1.2.6
 
 Known Problems
 ==============
+* On IRIX64 6.5(UCAR SGI mop1), when testing HDF5 tools with HDF5 shared
+  library, especially for h5repacktst and h52gifgentst; The following (or
+  similar error message may appear:
+  "523648:lt-h5repacktst: rld: Fatal Error: Cannot Successfully map soname
+  'libh5test.so.1' under any of the filenames .......(bunch of directories)
+  "
+  And the testing will fail. 
+  We believe this is a libtool problem. One way to get rid of this is to
+  add the paths of libh5test.so.1 and libh5.so.1 to the shared library path.
+
+  For 32-bit:
+  you may do this, under csh,
+  setenv LD_LIBRARYN32_PATH .......(existing pathes):[full path of HDF5
+  directory/test/.libs]:[full path of HDF5 directory/src/.libs]
+
+  For 64-bit:
+  setenv LD_LIBRARY64_PATH ......(existing pathes):[full path of HDF5
+  directory/test/.libs]:[full path of HDF5 directory/src/.libs]
+
+  NOTE: This problem ONLY affects the testing of HDF5 library when you build
+  from source. It won't affect any applications who would like to link with HDF5
+  shared library since the shared library path needs to be set anyway.
+
+  KY - 2007/8/2
 * QSC (an HP alpha-based OSF1 cluster) failed the testpar/testphdf5 sub-test
   "calloc".  All other tests passed.  This indicates dataset using chunked
   storage created by serial HDF5 may not work properly with parallel HDF5.
