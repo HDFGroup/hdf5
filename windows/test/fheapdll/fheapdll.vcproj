@@ -43,7 +43,6 @@
 				OutputFile=".\../../../test/fheapdll/Release/fheapdll.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ForceSymbolReferences="_gethostname@8"
 				ProgramDatabaseFile=".\../../../test/fheapdll/Release/fheapdll.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
@@ -104,7 +103,6 @@
 				OutputFile=".\../../../test/fheapdll/Debug/fheapdll.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ForceSymbolReferences="_gethostname@8"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../test/fheapdll/Debug/fheapdll.pdb"
 				SubSystem="1"

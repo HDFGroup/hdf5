@@ -158,7 +158,6 @@
 				OutputFile=".\../../../test/mountdll/Debug/mountdll.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ForceSymbolReferences="_gethostname@8"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../test/mountdll/Debug/mountdll.pdb"
 				SubSystem="1"
@@ -221,7 +220,6 @@
 				OutputFile=".\../../../test/mountdll/Release/mountdll.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ForceSymbolReferences="_gethostname@8"
 				ProgramDatabaseFile=".\../../../test/mountdll/Release/mountdll.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>

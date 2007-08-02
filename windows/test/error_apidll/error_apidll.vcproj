@@ -42,7 +42,6 @@
 				OutputFile=".\../../../test/error_apidll/Debug/error_apidll.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ForceSymbolReferences="_gethostname@8"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../test/error_apidll/Debug/error_apidll.pdb"
 				SubSystem="1"
@@ -105,7 +104,6 @@
 				OutputFile=".\../../../test/error_apidll/Release/error_apidll.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ForceSymbolReferences="_gethostname@8"
 				ProgramDatabaseFile=".\../../../test/error_apidll/Release/error_apidll.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>

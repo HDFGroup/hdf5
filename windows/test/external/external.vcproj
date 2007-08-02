@@ -42,7 +42,6 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				IgnoreDefaultLibraryNames="libc.lib"
-				ForceSymbolReferences="_gethostname@8"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../test/external/Debug/external.pdb"
 				SubSystem="1"
@@ -106,7 +105,6 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				IgnoreDefaultLibraryNames="libcd.lib"
-				ForceSymbolReferences="_gethostname@8"
 				ProgramDatabaseFile=".\../../../test/external/Release/external.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>

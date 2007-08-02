@@ -43,7 +43,6 @@
 				OutputFile=".\../../../test/fillvaldll/Release/fillvaldll.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ForceSymbolReferences="_gethostname@8"
 				ProgramDatabaseFile=".\../../../test/fillvaldll/Release/fillvaldll.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
@@ -220,7 +219,6 @@
 				OutputFile=".\../../../test/fillvaldll/Debug/fillvaldll.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ForceSymbolReferences="_gethostname@8"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../test/fillvaldll/Debug/fillvaldll.pdb"
 				SubSystem="1"

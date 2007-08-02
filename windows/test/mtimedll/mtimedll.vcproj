@@ -43,7 +43,6 @@
 				OutputFile=".\../../../test/mtimedll/Release/mtimedll.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ForceSymbolReferences="_gethostname@8"
 				ProgramDatabaseFile=".\../../../test/mtimedll/Release/mtimedll.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
@@ -220,7 +219,6 @@
 				OutputFile=".\../../../test/mtimedll/Debug/mtimedll.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ForceSymbolReferences="_gethostname@8"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../test/mtimedll/Debug/mtimedll.pdb"
 				SubSystem="1"

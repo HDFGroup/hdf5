@@ -41,7 +41,6 @@
 				OutputFile=".\../../../test/dtypesdll/Debug/dtypesdll.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ForceSymbolReferences="_gethostname@8"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../test/dtypesdll/Debug/dtypesdll.pdb"
 				SubSystem="1"
@@ -221,7 +220,6 @@
 				OutputFile=".\../../../test/dtypesdll/Release/dtypesdll.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ForceSymbolReferences="_gethostname@8"
 				ProgramDatabaseFile=".\../../../test/dtypesdll/Release/dtypesdll.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>

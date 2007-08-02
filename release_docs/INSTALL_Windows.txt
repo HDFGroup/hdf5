@@ -1831,13 +1831,7 @@ Building:
           
         4.3 Modify Project Settings
         
-            Similar to Step 3.3, we must remove "gethostname@8" from the list of
-            "Force Symbol References" for each project that has it.  Although
-            tedious, this must be done, or Visual Studio will issue a linker
-            error.  For Visual Studio 2005, this must be done for both debug
-            and release versions.  In .NET, we only build release.
-            
-            In .NET, we also need to add "bufferoverflowU.lib" as a dependency
+            In .NET, we need to add "bufferoverflowU.lib" as a dependency
             for several projects.  You can simply add it to all projects that
             produce an executable or dll, or identify specific projects that
             need it at build-time because they will fail with a link error

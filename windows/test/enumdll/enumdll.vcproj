@@ -160,7 +160,6 @@
 				OutputFile=".\../../../test/enumdll/Release/enumdll.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ForceSymbolReferences="_gethostname@8"
 				ProgramDatabaseFile=".\../../../test/enumdll/Release/enumdll.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
@@ -220,7 +219,6 @@
 				OutputFile=".\../../../test/enumdll/Debug/enumdll.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ForceSymbolReferences="_gethostname@8"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../test/enumdll/Debug/enumdll.pdb"
 				SubSystem="1"

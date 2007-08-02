@@ -160,7 +160,6 @@
 				OutputFile=".\../../../test/istoredll/Release/istoredll.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ForceSymbolReferences="_gethostname@8"
 				ProgramDatabaseFile=".\../../../test/istoredll/Release/istoredll.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
@@ -220,7 +219,6 @@
 				OutputFile=".\../../../test/istoredll/Debug/istoredll.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ForceSymbolReferences="_gethostname@8"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../test/istoredll/Debug/istoredll.pdb"
 				SubSystem="1"

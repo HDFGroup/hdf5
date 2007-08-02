@@ -105,7 +105,6 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				IgnoreDefaultLibraryNames="libcd.lib"
-				ForceSymbolReferences="_gethostname@8"
 				ProgramDatabaseFile=".\../../../test/objcopy/Release/objcopy.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>

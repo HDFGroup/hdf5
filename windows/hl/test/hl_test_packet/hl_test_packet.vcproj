@@ -43,7 +43,6 @@
 				OutputFile=".\../../../../hl/test/hl_test_packet/Release/hl_test_packet.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ForceSymbolReferences="_gethostname@8"
 				ProgramDatabaseFile=".\../../../../hl/test/hl_test_packet/Release/hl_test_packet.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
@@ -105,7 +104,6 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				IgnoreDefaultLibraryNames="libc.lib"
-				ForceSymbolReferences="_gethostname@8"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../../hl/test/hl_test_packet/Debug/hl_test_packet.pdb"
 				SubSystem="1"

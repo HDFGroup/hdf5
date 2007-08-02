@@ -43,7 +43,6 @@
 				OutputFile=".\../../../test/unlinkdll/Release/unlinkdll.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ForceSymbolReferences="_gethostname@8"
 				ProgramDatabaseFile=".\../../../test/unlinkdll/Release/unlinkdll.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
@@ -220,7 +219,6 @@
 				OutputFile=".\../../../test/unlinkdll/Debug/unlinkdll.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ForceSymbolReferences="_gethostname@8"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../test/unlinkdll/Debug/unlinkdll.pdb"
 				SubSystem="1"

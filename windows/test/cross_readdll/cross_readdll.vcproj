@@ -42,7 +42,6 @@
 				OutputFile=".\../../../test/cross_readdll/Debug/cross_readdll.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ForceSymbolReferences="_gethostname@8"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../test/cross_readdll/Debug/cross_readdll.pdb"
 				SubSystem="1"
@@ -105,7 +104,6 @@
 				OutputFile=".\../../../test/cross_readdll/Release/cross_readdll.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ForceSymbolReferences="_gethostname@8"
 				ProgramDatabaseFile=".\../../../test/cross_readdll/Release/cross_readdll.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>

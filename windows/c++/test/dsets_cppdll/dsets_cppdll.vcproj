@@ -43,7 +43,6 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\..\..\proj\hdf5dll\Debug"
-				ForceSymbolReferences="_gethostname@8"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../../test/dsets_cppdll/Debug/dsets_cppdll.pdb"
 				SubSystem="1"
@@ -107,7 +106,6 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\..\..\proj\hdf5dll\Release"
-				ForceSymbolReferences="_gethostname@8"
 				ProgramDatabaseFile=".\../../../../test/dsets_cppdll/Release/dsets_cppdll.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>

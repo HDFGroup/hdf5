@@ -99,7 +99,6 @@
 				OutputFile=".\../../../test/stabdll/Debug/stabdll.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ForceSymbolReferences="_gethostname@8"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../test/stabdll/Debug/stabdll.pdb"
 				SubSystem="1"
@@ -162,7 +161,6 @@
 				OutputFile=".\../../../test/stabdll/Release/stabdll.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ForceSymbolReferences="_gethostname@8"
 				ProgramDatabaseFile=".\../../../test/stabdll/Release/stabdll.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>

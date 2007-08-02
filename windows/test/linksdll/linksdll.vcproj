@@ -99,7 +99,6 @@
 				OutputFile=".\../../../test/linksdll/Debug/linksdll.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ForceSymbolReferences="_gethostname@8"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../test/linksdll/Debug/linksdll.pdb"
 				SubSystem="1"
@@ -162,7 +161,6 @@
 				OutputFile=".\../../../test/linksdll/Release/linksdll.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ForceSymbolReferences="_gethostname@8"
 				ProgramDatabaseFile=".\../../../test/linksdll/Release/linksdll.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>

@@ -44,7 +44,6 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				IgnoreDefaultLibraryNames="libcd.lib"
-				ForceSymbolReferences="_gethostname@8"
 				ProgramDatabaseFile=".\../../../../c++/test/testhdf5_cpp/Release/testhdf5_cpp.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
@@ -106,7 +105,6 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				IgnoreDefaultLibraryNames="libc.lib"
-				ForceSymbolReferences="_gethostname@8"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../../c++/test/testhdf5_cpp/Debug/testhdf5_cpp.pdb"
 				SubSystem="1"

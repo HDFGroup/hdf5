@@ -43,7 +43,6 @@
 				OutputFile=".\../../../test/cmpd_dsetdll/Release/cmpd_dsetdll.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ForceSymbolReferences="_gethostname@8"
 				ProgramDatabaseFile=".\../../../test/cmpd_dsetdll/Release/cmpd_dsetdll.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
@@ -220,7 +219,6 @@
 				OutputFile=".\../../../test/cmpd_dsetdll/Debug/cmpd_dsetdll.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				ForceSymbolReferences="_gethostname@8"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../test/cmpd_dsetdll/Debug/cmpd_dsetdll.pdb"
 				SubSystem="1"
