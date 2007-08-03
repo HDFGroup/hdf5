@@ -104,12 +104,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="odbc32.lib odbccp32.lib $(HDF5_EXT_ZLIB) $(HDF5_EXT_SZIP)"
-				OutputFile="..\..\..\proj\hdf5_hldll\Debug/hdf5_hldlld.dll"
+				OutputFile="..\..\..\proj\hdf5_hldll\Debug/hdf5_hlddll.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile=".\..\..\..\proj\hdf5_hldll\Debug/hdf5_hldlld.pdb"
-				ImportLibrary=".\..\..\..\proj\hdf5_hldll\Debug/hdf5_hldlld.lib"
+				ProgramDatabaseFile=".\..\..\..\proj\hdf5_hldll\Debug/hdf5_hlddll.pdb"
+				ImportLibrary=".\..\..\..\proj\hdf5_hldll\Debug/hdf5_hlddll.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"

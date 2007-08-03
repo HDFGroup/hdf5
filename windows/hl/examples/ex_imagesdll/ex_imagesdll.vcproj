@@ -38,7 +38,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib hdf5ddll.lib hdf5_hldlld.lib $(HDF5_EXT_ZLIB) $(HDF5_EXT_SZIP)"
+				AdditionalDependencies="odbc32.lib odbccp32.lib hdf5ddll.lib hdf5_hlddll.lib $(HDF5_EXT_ZLIB) $(HDF5_EXT_SZIP)"
 				OutputFile=".\..\..\..\..\hl\examples\ex_imagesdll\Debug/ex_imagesdll.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"

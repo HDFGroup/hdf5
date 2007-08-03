@@ -108,17 +108,17 @@ copy proj\hdf5_hl_fortran\debug\hdf5_hl_fortrand.lib hdf5lib\debug\lib
 copy proj\hdf5_hl_fortran\debug\hdf5_hl_fortran_libd.lib hdf5lib\debug\lib
 
 
-copy proj\hdf5_hldll\debug\hdf5_hldlld.lib hdf5lib\debug\dll
-copy proj\hdf5_hldll\debug\hdf5_hldlld.dll hdf5lib\debug\dll
+copy proj\hdf5_hldll\debug\hdf5_hlddll.lib hdf5lib\debug\dll
+copy proj\hdf5_hldll\debug\hdf5_hlddll.dll hdf5lib\debug\dll
 
-copy proj\hdf5_hl_cppdll\debug\hdf5_hl_cppdlld.lib hdf5lib\debug\dll
-copy proj\hdf5_hl_cppdll\debug\hdf5_hl_cppdlld.dll hdf5lib\debug\dll
+copy proj\hdf5_hl_cppdll\debug\hdf5_hl_cppddll.lib hdf5lib\debug\dll
+copy proj\hdf5_hl_cppdll\debug\hdf5_hl_cppddll.dll hdf5lib\debug\dll
 
-copy proj\hdf5_hl_fortrandll\debug\hdf5_hl_fortrandlld.lib hdf5lib\debug\dll
-copy proj\hdf5_hl_fortrandll\debug\hdf5_hl_fortrandlld.dll hdf5lib\debug\dll
+copy proj\hdf5_hl_fortrandll\debug\hdf5_hl_fortranddll.lib hdf5lib\debug\dll
+copy proj\hdf5_hl_fortrandll\debug\hdf5_hl_fortranddll.dll hdf5lib\debug\dll
 
-copy proj\hdf5_hl_f90cstubdll\debug\hdf5_hl_f90cstubdlld.lib hdf5lib\debug\dll
-copy proj\hdf5_hl_f90cstubdll\debug\hdf5_hl_f90cstubdlld.dll hdf5lib\debug\dll
+copy proj\hdf5_hl_f90cstubdll\debug\hdf5_hl_f90cstubddll.lib hdf5lib\debug\dll
+copy proj\hdf5_hl_f90cstubdll\debug\hdf5_hl_f90cstubddll.dll hdf5lib\debug\dll
 
 copy hl\src\*.h hdf5lib\release\include
 copy "hl\c++\src\*.h" hdf5lib\release\include

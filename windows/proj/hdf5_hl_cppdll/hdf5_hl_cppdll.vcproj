@@ -103,12 +103,12 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="..\..\..\proj\hdf5_hl_cppdll\Debug/hdf5_hl_cppdlld.dll"
+				OutputFile="..\..\..\proj\hdf5_hl_cppdll\Debug/hdf5_hl_cppddll.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile=".\..\..\..\proj\hdf5_hl_cppdll\Debug/hdf5_hl_cppdlld.pdb"
-				ImportLibrary=".\..\..\..\proj\hdf5_hl_cppdll\Debug/hdf5_hl_cppdlld.lib"
+				ProgramDatabaseFile=".\..\..\..\proj\hdf5_hl_cppdll\Debug/hdf5_hl_cppddll.pdb"
+				ImportLibrary=".\..\..\..\proj\hdf5_hl_cppdll\Debug/hdf5_hl_cppddll.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"

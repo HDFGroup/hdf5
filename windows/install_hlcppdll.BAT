@@ -19,5 +19,5 @@
 
 @ ECHO OFF
 copy proj\hdf5_hl_cppdll\Release\hdf5_hl_cppdll.dll %SystemRoot%\system >temp.txt
-copy proj\hdf5_hl_cppdll\Debug\hdf5_hl_cppdlld.dll %SystemRoot%\system >temp.txt
+copy proj\hdf5_hl_cppdll\Debug\hdf5_hl_cppddll.dll %SystemRoot%\system >temp.txt
 del temp.txt

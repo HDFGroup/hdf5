@@ -19,6 +19,6 @@
 @REM Last Updated: 
 
 @ ECHO OFF
-copy proj\hdf5_hldll\Debug\hdf5_hldlld.dll %SystemRoot%\system >temp.txt
+copy proj\hdf5_hldll\Debug\hdf5_hlddll.dll %SystemRoot%\system >temp.txt
 copy proj\hdf5_hldll\Release\hdf5_hldll.dll %SystemRoot%\system >temp.txt
 del temp.txt

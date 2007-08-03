@@ -361,8 +361,8 @@ STEP 1: Building HDF5 Libraries and Tools
 
             c:\MyHDFstuff\hdf5\proj\hdf5_cppdll\debug -
 
-               hdf5_cppdlld.dll- the HDF5 C++ API DLL
-               hdf5_cppdlld.lib - the C++ API export library
+               hdf5_cppddll.dll- the HDF5 C++ API DLL
+               hdf5_cppddll.lib - the C++ API export library
 
         and c:\MyHDFstuff\hdf5\proj\hdf5_cppdll\release -
 
@@ -386,8 +386,8 @@ STEP 1: Building HDF5 Libraries and Tools
 
        and c:\MyHDFstuff\hdf5\proj\hdf5_hldll\Debug -
 
-               hdf5_hldlld.dll - HDF5 High Level DLL
-               hdf5_hldlld.lib - HDF5 High Level export Library
+               hdf5_hlddll.dll - HDF5 High Level DLL
+               hdf5_hlddll.lib - HDF5 High Level export Library
 
        The directories listed below will contain the following files
        ONLY when you choose to build HDF5 High Level C++ libraries:
@@ -403,8 +403,8 @@ STEP 1: Building HDF5 Libraries and Tools
             c:\MyHDFstuff\hdf5\proj\hdf5_hl_cppdll\Release -
         and c:\MyHDFstuff\hdf5\proj\hdf5_hl_cppdll\Debug -
 
-               hdf5_hl_cppdlld.dll - HDF5 High Level C++ DLL
-               hdf5_hl_cppdlld.lib - HDF5 High Level C++ export Library
+               hdf5_hl_cppddll.dll - HDF5 High Level C++ DLL
+               hdf5_hl_cppddll.lib - HDF5 High Level C++ export Library
 
 
 STEP 2: Testing HDF5 Libraries and Tools
@@ -611,7 +611,7 @@ We provide 2 options for users to test HDF5 libraries and tools.
     be copied to the system directory.
 
     c:\MyHDFstuff\hdf5\proj\hdf5_hldll\Release\hdf5_hldll.dll
-    c:\MyHDFstuff\hdf5\proj\hdf5_hldll\Debug\hdf5_hldlld.dll
+    c:\MyHDFstuff\hdf5\proj\hdf5_hldll\Debug\hdf5_hlddll.dll
 
     Run test_hdf5_hl.bat in the hdf5\hl\test directory at the command prompt as 
     below:
@@ -642,7 +642,7 @@ We provide 2 options for users to test HDF5 libraries and tools.
     will be copied to the system directory.
 
     c:\MyHDFstuff\hdf5\proj\hdf5_hlcppdll\Release\hdf5_hlcppdll.dll
-    c:\MyHDFstuff\hdf5\proj\hdf5_hlcppdll\Debug\hdf5_hlcppdlld.dll
+    c:\MyHDFstuff\hdf5\proj\hdf5_hlcppdll\Debug\hdf5_hlcppddll.dll
 
     Run test_hdf5_hl_cpp.bat in the hdf5\hl\c++\test directory at the command 
     prompt as below:
@@ -673,9 +673,9 @@ We provide 2 options for users to test HDF5 libraries and tools.
     DLLs will be copied to the system directory.
 
         c:\MyHDFstuff\hdf5\proj\hdf5_hl_f90cstubdll\Release\hdf5_hl_f90cstubdll.dll
-        c:\MyHDFstuff\hdf5\proj\hdf5_hl_f90cstubdll\Debug\hdf5_hl_f90cstubdlld.dll
+        c:\MyHDFstuff\hdf5\proj\hdf5_hl_f90cstubdll\Debug\hdf5_hl_f90cstubddll.dll
         c:\MyHDFstuff\hdf5\proj\hdf5_hlfortrandll\Release\hdf5_hlfortrandll.dll
-        c:\MyHDFstuff\hdf5\proj\hdf5_hlfortrandll\Debug\hdf5_hlfortrandlld.dll
+        c:\MyHDFstuff\hdf5\proj\hdf5_hlfortrandll\Debug\hdf5_hlfortranddll.dll
 
     Run test_hdf5_hl_fortran.bat in the hdf5\hl\fortran\test directory at the 
     command prompt as below:

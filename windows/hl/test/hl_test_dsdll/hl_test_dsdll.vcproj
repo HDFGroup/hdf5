@@ -43,7 +43,7 @@
 				OutputFile=".\../../../../hl/test/hl_test_dsdll/Release/hl_test_dsdll.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="..\..\..\..\proj\hdf5_hldll\hdf5_hldlld.dll"
+				AdditionalLibraryDirectories="..\..\..\..\proj\hdf5_hldll\hdf5_hlddll.dll"
 				ProgramDatabaseFile=".\../../../../hl/test/hl_test_dsdll/Release/hl_test_dsdll.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>

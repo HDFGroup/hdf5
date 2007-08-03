@@ -102,12 +102,12 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="..\..\..\proj\hdf5_hl_f90cstubdll\Debug/hdf5_hl_f90cstubdlld.dll"
+				OutputFile="..\..\..\proj\hdf5_hl_f90cstubdll\Debug/hdf5_hl_f90cstubddll.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile=".\..\..\..\proj\hdf5_hl_f90cstubdll\Debug/hdf5_hl_f90cstubdlld.pdb"
-				ImportLibrary=".\..\..\..\proj\hdf5_hl_f90cstubdll\Debug/hdf5_hl_f90cstubdlld.lib"
+				ProgramDatabaseFile=".\..\..\..\proj\hdf5_hl_f90cstubdll\Debug/hdf5_hl_f90cstubddll.pdb"
+				ImportLibrary=".\..\..\..\proj\hdf5_hl_f90cstubdll\Debug/hdf5_hl_f90cstubddll.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"

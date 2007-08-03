@@ -19,8 +19,8 @@
 @REM Last Updated: 
 
 @ECHO OFF
-copy proj\hdf5_hl_fortrandll\Debug\hdf5_hl_fortrandlld.dll %SystemRoot%\system >temp.txt
-copy proj\hdf5_hl_f90cstubdll\Debug\hdf5_hl_f90cstubdlld.dll %SystemRoot%\system >temp.txt
+copy proj\hdf5_hl_fortrandll\Debug\hdf5_hl_fortranddll.dll %SystemRoot%\system >temp.txt
+copy proj\hdf5_hl_f90cstubdll\Debug\hdf5_hl_f90cstubddll.dll %SystemRoot%\system >temp.txt
 copy proj\hdf5_hl_fortrandll\Release\hdf5_hl_fortrandll.dll %SystemRoot%\system >temp.txt
 copy proj\hdf5_hl_f90cstubdll\Release\hdf5_hl_f90cstubdll.dll %SystemRoot%\system >temp.txt
 
