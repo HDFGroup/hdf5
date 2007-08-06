@@ -244,9 +244,13 @@ Platforms Tested
                                   F90 MIPSpro 7.4.4m (64 only)
                                   C++ MIPSpro cc 7.4.4m
 
+    Linux 2.4.21-47.ELsmp #1 SMP  gcc 3.2.3
+    i686 i386 GNU/Linux
+    (osage)
+
     Linux 2.6.9-42.0.10.ELsmp #1  gcc (GCC) 3.4.6
     SMP i686 i386                 G95 (GCC 4.0.3 (g95 0.91!) Nov 21 2006)
-                                  PGI C, Fortran, C++ 6.2-5 32-bit 
+    (kagiso)                      PGI C, Fortran, C++ 6.2-5 32-bit 
                                   icc (ICC) 9.1 
                                   Intel(R) C++ Compiler for 32-bit applications, Version 9.1
                                   Intel(R) Fortran Compiler for 32-bit applications, Version 9.1 
