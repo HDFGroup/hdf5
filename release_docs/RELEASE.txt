@@ -4,8 +4,8 @@ HDF5 version 1.6.6-pre3 currently under development
 INTRODUCTION
 ============
 This document describes the differences between HDF5-1.6.5 and
-HDF5-1.6.5-*.  It contains information on the platforms tested and
-known problems in HDF5-1.6.5. For more details, check the HISTORY.txt
+HDF5-1.6.6  It contains information on the platforms tested and
+known problems in HDF5-1.6.6. For more details, check the HISTORY.txt
 file in the HDF5 source.
 
 The HDF5 documentation can be found on the NCSA ftp server
@@ -23,7 +23,7 @@ For more information look at the HDF5 home page at:
 
 If you have any questions or comments, please send them to:
 
-    hdfhelp@ncsa.uiuc.edu
+    help@hdfgroup.org
 
 
 CONTENTS
@@ -48,10 +48,12 @@ New Features
 
     Library:
     --------
+        - None
 
     Parallel Library:
     -----------------
-
+        - None
+      
     Tools:
     ------
        - h52gif and gif2h5: Both these tools were revised to include the High
@@ -73,6 +75,7 @@ New Features
 
     F90 API:
     --------
+       - None
 
     C++ API:
     --------
@@ -86,9 +89,9 @@ Support for New Platforms, Languages and Compilers
 ==================================================
 	- Added support for MAC Intel (Darwin 8.8.2)  (gcc 4.0.1 and g95 0.91)
 				EIP - 2007/02/13
+        - Added support for GNU C compiler version 4.2.1 for FreeBSD 6.2 
+          (32 and 64-bit)
 
-    Configuration
-    -------------
 
 Bug Fixes since HDF5-1.6.5 Release
 ==================================
@@ -146,7 +149,7 @@ Bug Fixes since HDF5-1.6.5 Release
 
             If your files have been affected by this bug, or you are concerned
             that your files might have been, please contact the HDF Helpdesk
-            at hdfhelp@ncsa.uiuc.edu for a tool to detect and repair files
+            at help@hdfgroup.org for a tool to detect and repair files
             affected by this problem.  QAK - 2006/6/16
 
         - Fixed various problems with retrieving names of objects, especially
@@ -166,6 +169,7 @@ Bug Fixes since HDF5-1.6.5 Release
 
     Performance
     -------------
+       - None
    
     Tools
     -----
@@ -184,6 +188,7 @@ Bug Fixes since HDF5-1.6.5 Release
 
     F90 API
     -------
+       - None
                                 
     C++ API
     -------
@@ -223,14 +228,13 @@ Platforms Tested
     AIX 5.3 (32/64 bit)           xlc 7.0.0.0
                                   xlC 7.0.
                                   xlf 9.1.0.3
-    Cray X1 water 3.0.35          Cray Standard C Version 5.4.0.7.4
-                                  Cray Fortran 5.4.0.7.3
-                                  Cray C++ 5.4.0.7.4
-    FreeBSD 6.2                   gcc 3.4.6
-                                  g++ 3.4.6
+    FreeBSD 6.2 (32 and 64-bit)   gcc  and g++3.4.6
+                                  gcc and g++ 4.2.1
+
     HP-UX B.11.23                 HP aC++/ANSI C B3910B A.06.02
                                   HP F90 v3.1 (32-bit only)
                                   HP aC++/ANSI C B3910B A.06.02
+
     IRIX64 6.5 (tesla -64)        MIPSpro cc 7.4.2m
                                   F90 MIPSpro 7.4.2m
                                   C++ MIPSpro cc 7.4.2m
@@ -239,21 +243,18 @@ Platforms Tested
                                   MIPSpro cc 7.4.4m
                                   F90 MIPSpro 7.4.4m (64 only)
                                   C++ MIPSpro cc 7.4.4m
-    Linux 2.4.20-28.7             gcc 2.96
-    (eirene, verbena)             gcc 3.3.2
-                                  PGI compilers (pgcc, pgf90, pgCC) 
-                                  version 5.2-1
-                                  Absoft Fortran compiler v9.0
-                         	  Intel(R) C++ 32-bit Version 8.1
-    				  Intel(R) Fortran 32-bit Version 8.1
-                                  MPIch 1.2.6
-    Linux 2.4.21-268-smp x86_64   gcc 3.3.1 (SuSE Linux, AMD)
-    (mir)                         PGI 5.2-1 C and F90 (with k3-32) 
-                         	  Intel(R) C++ 32-bit Version 8.1
-    				  Intel(R) Fortran 32-bit Version 8.1
+
+    Linux 2.6.9-42.0.10.ELsmp #1  gcc (GCC) 3.4.6
+    SMP i686 i386                 G95 (GCC 4.0.3 (g95 0.91!) Nov 21 2006)
+                                  PGI C, Fortran, C++ 6.2-5 32-bit 
+                                  icc (ICC) 9.1 
+                                  Intel(R) C++ Compiler for 32-bit applications, Version 9.1
+                                  Intel(R) Fortran Compiler for 32-bit applications, Version 9.1 
+
     Linux 2.6.16.46-0.12-debug #1 
           SMP ia64 GNU/Linux      Intel(R) C++ Version 10.0.025
     (ucar hir1)                   Intel(R) Fortran Itanium(R) Version 10.0.025
+
     Linux 2.6.16.46-0.14-smp #1   Intel(R) C++ for Intel(R) EM64T Ver. 9.1.037
 	 SMP x86_64 GNU/Linux     Intel(R) Fortran Intel(R) EM64T Ver. 9.1.031
     (smirom)			  PGI C, Fortran, C++ Version 6.2-5
@@ -262,23 +263,28 @@ Platforms Tested
           SMP ia64                Intel(R) C++ Version 9.0
     (cobalt)                      Intel(R) Fortran Itanium(R) Version 9.0
                                   SGI MPI
+
     OSF1 V5.1 (QSC)               Compaq C V6.5-011 
                                   HP Fortran V5.5A-3548
 				  Compaq C++ V6.5-036  
 				  MPIX200_64_r13.4
+
     SunOS 5.8 32,46               Sun WorkShop 6 update 2 C 5.3
      (Solaris 2.8)                Sun WorkShop 6 update 2 Fortran 95 6.2
                                   Sun WorkShop 6 update 2 C++ 5.3
+
     SunOS 5.10                    Sun WorkShop 6 update 2 C 5.8
                                   Sun WorkShop 6 update 2 Fortran 95 8.2
                                   Sun WorkShop 6 update 2 C++ 5.8
                                   Patch 121019-06 
+
     Xeon Linux 2.4.21-32.0.1.ELsmp-perfctr-lustre
     (tungsten)	                  Intel(R) C++ Version 9.0
                                   Intel(R) Fortran Compiler Version 9.0
 				  PGI C Version 6.0
 				  PGI C++ Version 6.0
 				  PGI Fortran Version 6.0
+
     Xeon Linux 2.6.9-42.0.10.EL_lustre-1.4.10.1smp
     (abe)                         Intel(R) C++ Version 10.0
                                   Intel(R) Fortran Compiler Version 10.0
@@ -293,6 +299,7 @@ Platforms Tested
                                   cygwin (gcc 3.4.4)
     MAC OS X Intel                Darwin 8.10.1
                                   i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1
+                                  g95 0.91
 
 
 Supported Configuration Features Summary
@@ -306,97 +313,16 @@ Key:   y   = tested and supported
 
 Platform                             C        F90    F90      C++  zlib  SZIP
                                      parallel        parallel      
-IBM BG/L (15)			     n        n      n        n    y     y
-Solaris2.8 64-bit                    y        y      y(1)     y    y     y
-Solaris2.8 32-bit                    y        y      y(1)     y    y     y
-Solaris2.9 64-bit                    y(1)     y      y(1)     y    y     y
-Solaris2.9 32-bit                    y(1)     y      y(1)     y    y     y
-Solaris2.10 64-bit                   y(1)     y      n        y    y     y
-Solaris2.10 32-bit                   y(1)     y      n        y    y     y
-IRIX64_6.5 64-bit                    y(2)     y      y        y    y     y
-IRIX64_6.5 32-bit                    y(2)     n      n        n    y     y
-HPUX11.00                            y(1)     y      y        y    y     y
-HPUX11.23-32bit                      n        y      n        y    y     y
-HPUX11.23-64bit                      n        n      n        y    y     y
-OSF1 v5.1                            y        y      y        y    y     y
-X1                                   y        y      y        y    y     n
-AIX-5.1, 5.2 & 5.3 32-bit            y        y      y        y    y     y
-AIX-5.1, 5.2 & 5.3 64-bit            y        y      y        y    y     y
-Windows XP Visual Studio 6.0         n        n      n        y    y     y
-Windows XP Visual Studio .NET        n        y(8)   n        y    y     y
-Windows XP Visual Studio 2005        n        y(8)   n        y    y     y
-Windows XP Cygwin                    n        n      n        y    y     y
-Mac OS X 10.3                        n        y(9)   n        y    y     y
-FreeBSD 6.2                          n        n      n        y    y     y
-RedHat 7.3  W (3)                    y(1)     y(10)  n        y    y     y
-RedHat 7.3  W Intel (3)              n        y      n        y    y     y
-RedHat 7.3  W PGI (3)                n        y      n        y    y     y
-RedStorm (15)			     n        y      n        y    y     n
-SuSe x86_64 gcc (3,13)               n        y(11)  n        y    y     y
-SuSe x86_64 icc (3,13)               n        y(13)  n        y    y     y
-Linux 2.4 Xeon C Lustre Intel (3,6)  n        y      n        y    y     y
-Linux 2.4 SuSE ia64 C Intel (3,7)    y        y      y        y    y     y
-Linux 2.4 SGI Altix ia64 Intel (3)   y        y      y        y    y     y
 
 
 Platform                             Shared        static-  Thread-  STREAM- 
                                      libraries(4)  exec     safe     VFD    
-IBM BG/L 			     n              y       n        n
-Solaris2.8 64-bit                    y              x       y        y
-Solaris2.8 32-bit                    y              x       y        y
-Solaris2.9 64-bit                    y              x       y        y
-Solaris2.9 32-bit                    y              x       y        y
-Solaris2.10 64-bit                   y              x       y        y
-Solaris2.10 32-bit                   y              x       y        y
-IRIX64_6.5 64-bit                    y              y       y        y
-IRIX64_6.5 32-bit                    y              y       y        y
-HPUX11.00                            y              x       n        y
-HPUX11.23                            y              y       n        y
-OSF1 v5.1                            y              y       n        y
-X1                                   n              y       n        y
-AIX-5.1, 5.2 & 5.3 32-bit            n              y       n        y
-AIX-5.1, 5.2 & 5.3 64-bit            n              y       n        y
-Windows XP Visual Studio 6.0         y              y       n        n
-Windows XP Visual Studio .Net        y              y       n        n
-Windows XP Visual Studio 2005        y              y       n        n
-Windows XP Cygwin                    y              y       n        n
-Mac OS X 10.3                        y              y       n        y
-FreeBSD 6.2                          y              y       y        y
-RedHat 7.3   W (3)                   y              y       y        y
-RedHat 7.3  W  Intel (3)             n              y       n        y
-RedHat 7.3  W  PGI (3)               n              y       n        y
-RedStorm 			     n              y       n        y
-SuSe x86_64 gcc (3,13)               n              y       n        y
-SuSe x86_64 icc (3,13)               y              y(14)   n        y
-Linux 2.4 Xeon C Lustre Intel (3,6)  y              y       n        y
-Linux 2.4 SuSE ia64 C Intel (3,7)    y              y       n        n
-Linux 2.4 SGI Altix ia64 Intel  (3)  y              y       n        y
-
 
 Compiler versions for each platform are listed in the "Platforms Tested" 
 table found elsewhere in this file (RELEASE.txt).  Unless otherwise noted, 
 compilers used are the system compilers.
 
-Footnotes:  (1) Using mpich 1.2.6
-            (2) Using mpt and mpich 1.2.6.
-            (3) Linux 2.4 with GNU, Intel, and PGI compilers, as indicated.  
-                  W or C indicates workstation or cluster, respectively.
-            (4) Shared libraries are provided only for the C library, 
-                except on Windows where they are provided for C and C++.
-            (5) Using mpt.
-            (6) Linux 2.4.21-32.0.1.  Xeon cluster with ELsmp-perfctr-lustre 
-                and Intel compilers
-            (7) Linux 2.4.21, SuSE_292.til1.  Ia64 cluster with Intel compilers
-            (8) Requires Intel Fortran Compiler 9.0 integration
-            (9) IBM XLF and Absoft
-           (10) PGI, Absoft.  No shared libraries with Absoft; 
-                use '--disable-shared'.
-           (11) PGI and Intel compilers for both C and Fortran
-           (12) AMD Opteron x86_64
-           (13) ifort
-           (14) Yes with C and Fortran, but not with C++
-           (15) Only serial is ported.  PFS does not work for PHDF5 yet.
-           FMB/EIP - 2005/11/10
+Footnotes:  
 
 
 Known Problems
@@ -518,12 +444,6 @@ Known Problems
 
 * The Stream VFD is not supported under Windows.
 
-
-* Before building HDF5 F90 Library from source on Crays 
-  replace H5Aff.f90, H5Dff.f90 and H5Pff.f90 files in the fortran/src
-  subdirectory in the top level directory with the Cray-specific files
-  from the site:
-  ftp://ftp.ncsa.uiuc.edu/HDF/HDF5/current/src/patches/
 
 * Use --disable-shared configure flag if building with Absoft Fortran
   compiler.
