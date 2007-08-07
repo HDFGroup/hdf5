@@ -74,6 +74,7 @@ cd ..\..\..\
 
        ::Set up variables for h5import configure files
        for %%i in (h5import\testfiles\text*) do set %%~ni=..\..\h5import\testfiles\%%~ni
+       for %%i in (h5import\testfiles\txt*) do set %%~ni=..\..\h5import\testfiles\%%~ni
        for %%i in (h5import\testfiles\con*) do set %%~ni=..\..\h5import\testfiles\%%~ni
        for %%i in (in1 fp1 fp2) do ( set %%i=..\..\h5import\testfiles\%%i)
 
@@ -149,6 +150,10 @@ call %tooltest% conbuin.txt test12.h5
 set flag=%buin32% -c %conbuin32% -o %out.test13%
 call %tooltest% conbuin32.txt test13.h5
 
+::TESTING "STR" 
+set flag=%txtstr% -c %textstr% -o %out.teststr%
+call %tooltest% textstr.txt teststr.h5
+
 ::Change directory to hdf5\tools
 cd ..\..
 
@@ -178,6 +183,7 @@ for %%i in (testfiles\h5importtst\%1\b*) do set %%~ni=
 
 ::Clean up the variables set for h5import configure files
 for %%i in (h5import\testfiles\text*) do set %%~ni=
+for %%i in (h5import\testfiles\txt*) do set %%~ni=
 for %%i in (h5import\testfiles\con*) do set %%~ni=
 for %%i in (in1 fp1 fp2) do ( set %%i=..\..\h5import\testfiles\%%i)
 
