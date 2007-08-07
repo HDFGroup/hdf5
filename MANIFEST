@@ -76,12 +76,10 @@
 ./config/dependN.in
 ./config/freebsd
 ./config/gnu-flags
-./config/hpux10.20
 ./config/hpux11.00
 ./config/hpux11.23
-./config/hpux9.03
 ./config/i386-pc-cygwin32
-./config/i686-darwin8.8.2
+./config/i686-apple
 ./config/i686-pc-cygwin
 ./config/ia64-linux-gnu
 ./config/intel-flags
@@ -845,12 +843,10 @@
 ./fortran/config/dependN.in
 ./fortran/config/freebsd
 ./fortran/config/gnu-flags
-./fortran/config/hpux10.20
 ./fortran/config/hpux11.00
 ./fortran/config/hpux11.23
-./fortran/config/hpux9.03
+./fortran/config/i686-apple
 ./fortran/config/i386-pc-cygwin32
-./fortran/config/i686-darwin8.8.2
 ./fortran/config/ia64-linux-gnu
 ./fortran/config/intel-fflags
 ./fortran/config/intel-flags
