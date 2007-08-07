@@ -1134,8 +1134,6 @@
 ./release_docs/COPYING
 ./release_docs/INSTALL
 ./release_docs/INSTALL_Cygwin.txt
-./release_docs/INSTALL_TFLOPS
-./release_docs/INSTALL_VFL
 ./release_docs/INSTALL_parallel
 ./release_docs/INSTALL_Windows.txt
 ./release_docs/INSTALL_Windows_From_Command_Line.txt
