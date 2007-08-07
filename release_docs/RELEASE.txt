@@ -234,14 +234,9 @@ Platforms Tested
     HP-UX B.11.23                 HP aC++/ANSI C B3910B A.06.02
     (sirius)                      HP F90 v3.1 (32-bit only)
                                   HP aC++/ANSI C B3910B A.06.02
-
-    IRIX64 6.5 (tesla -64)        MIPSpro cc 7.4.2m
-                                  F90 MIPSpro 7.4.2m
-                                  C++ MIPSpro cc 7.4.2m
-    IRIX64 6.5 
-    (ucar mop1 64 & n32)
-                                  MIPSpro cc 7.4.4m
-                                  F90 MIPSpro 7.4.4m (64 only)
+    
+    IRIX64 6.5                    MIPSpro cc 7.4.4m
+    (ucar mop1 64 & n32)          F90 MIPSpro 7.4.4m (64 only)
                                   C++ MIPSpro cc 7.4.4m
 
     Linux 2.4.21-47.ELsmp #1 SMP  gcc 3.2.3
@@ -275,7 +270,7 @@ Platforms Tested
                                   SGI MPI
 
     OSF1 V5.1 (QSC)               Compaq C V6.5-011 
-                                  HP Fortran V5.5A-3548
+    (see known problems.)         HP Fortran V5.5A-3548
 				  Compaq C++ V6.5-036  
 				  MPIX200_64_r13.4
 
@@ -338,6 +333,10 @@ Footnotes:
 
 Known Problems
 ==============
+* QSC (an HP alpha-based OSF1 cluster) does not create h5pfc correctly. It
+  does not include the -lmpi properly.  This will be fixed in the next
+  release.  AKC - 2007/08/07.
+
 * On IRIX64 6.5(UCAR SGI mop1), when testing HDF5 tools with HDF5 shared
   library, especially for h5repacktst and h52gifgentst; The following (or
   similar error message may appear:
@@ -360,8 +359,8 @@ Known Problems
   NOTE: This problem ONLY affects the testing of HDF5 library when you build
   from source. It won't affect any applications who would like to link with HDF5
   shared library since the shared library path needs to be set anyway.
-
   KY - 2007/8/2
+
 * QSC (an HP alpha-based OSF1 cluster) failed the testpar/testphdf5 sub-test
   "calloc".  All other tests passed.  This indicates dataset using chunked
   storage created by serial HDF5 may not work properly with parallel HDF5.
