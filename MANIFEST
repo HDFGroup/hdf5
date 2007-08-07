@@ -917,6 +917,11 @@
 ./tools/h5import/testfiles/test11.h5
 ./tools/h5import/testfiles/test12.h5
 ./tools/h5import/testfiles/test13.h5
+./tools/h5import/testfiles/teststr.h5
+./tools/h5import/testfiles/txtstr
+./tools/h5import/testfiles/textstr
+
+
 
 # h5diff sources
 ./tools/h5diff/Makefile.am
