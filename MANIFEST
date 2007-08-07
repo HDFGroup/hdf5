@@ -67,7 +67,6 @@
 ./config/commence.in
 ./config/conclude.in
 ./config/dec-flags
-./config/dec-osf4.x
 ./config/dec-osf5.x
 ./config/depend1.in
 ./config/depend2.in
@@ -83,7 +82,6 @@
 ./config/i686-pc-cygwin
 ./config/ia64-linux-gnu
 ./config/intel-flags
-./config/intel-osf1
 ./config/irix5.x
 ./config/irix6.x
 ./config/linux-gnu
@@ -94,17 +92,14 @@
 ./config/nv1-cray
 ./config/pgi-flags
 ./config/powerpc-apple
-./config/powerpc-ibm-aix4.x
 ./config/powerpc-ibm-aix5.x
 ./config/powerpc-ibm-linux-gnu
-./config/rs6000-ibm-aix4.x
 ./config/solaris2.x
 ./config/sv1-cray
 ./config/unicos
 ./config/unicos10.0.X
 ./config/unicosmk
 ./config/unicosmk2.0.X
-./config/unicosmk2.0.5.X
 ./config/unicosmk2.0.6.X
 
 ./config/site-specific/BlankForm
@@ -833,7 +828,6 @@
 ./fortran/config/commence.in
 ./fortran/config/conclude.in
 ./fortran/config/dec-flags
-./fortran/config/dec-osf4.x
 ./fortran/config/dec-osf5.x
 ./fortran/config/depend
 ./fortran/config/depend1.in
@@ -850,8 +844,6 @@
 ./fortran/config/ia64-linux-gnu
 ./fortran/config/intel-fflags
 ./fortran/config/intel-flags
-./fortran/config/intel-osf1
-./fortran/config/irix5.x
 ./fortran/config/irix6.x
 ./fortran/config/linux-gnu
 ./fortran/config/linux-gnuaout
@@ -861,16 +853,13 @@
 ./fortran/config/pgi-fflags
 ./fortran/config/pgi-flags
 ./fortran/config/powerpc-apple
-./fortran/config/powerpc-ibm-aix4.x
 ./fortran/config/powerpc-ibm-aix5.x
-./fortran/config/rs6000-ibm-aix4.x
 ./fortran/config/solaris2.x
 ./fortran/config/sv1-cray
 ./fortran/config/unicos
 ./fortran/config/unicos10.0.X
 ./fortran/config/unicosmk
 ./fortran/config/unicosmk2.0.X
-./fortran/config/unicosmk2.0.5.X
 ./fortran/config/unicosmk2.0.6.X
 
 ./fortran/examples/attrexample.f90
@@ -999,7 +988,6 @@
 ./c++/config/linux-gnulibc2
 ./c++/config/nv1-cray
 ./c++/config/powerpc-ibm-aix
-./c++/config/rs6000-ibm-aix4.x
 ./c++/config/solaris2.x
 ./c++/config/sv1-cray
 ./c++/config/unicos10.0.X
