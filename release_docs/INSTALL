@@ -6,48 +6,41 @@
 	--------
 	1. Obtaining HDF5
 
-	2. Warnings about compilers
-	2.1. GNU (Intel platforms)
-	2.2. DEC
-	2.3. SGI (Irix64 6.2)
+	2. Quick installation
+	2.1. Windows
 
-	3. Quick installation
-	3.1. TFLOPS
-	3.2. Windows
-	3.3. Certain Virtual File Layer(VFL)
+	3. HDF5 dependencies
+	3.1. Zlib
+	3.2  Szip
+	3.3. MPI and MPI-IO
 
-	4. HDF5 dependencies
-	4.1. Zlib
-	4.2  Szip
-	4.3. MPI and MPI-IO
+	4. Full installation instructions for source distributions
+	4.1. Unpacking the distribution
+	4.1.1. Non-compressed tar archive (*.tar)
+	4.1.2. Compressed tar archive (*.tar.Z)
+	4.1.3. Gzip'd tar archive (*.tar.gz)
+	4.1.4. Bzip'd tar archive (*.tar.bz2)
+	4.2. Source vs. Build Directories
+	4.3. Configuring
+	4.3.1. Specifying the installation directories
+	4.3.2. Using an alternate C compiler
+	4.3.3. Additional compilation flags
+	4.3.4. Compiling HDF5 wrapper libraries
+	4.3.5. Specifying other programs
+	4.3.6. Specifying other libraries and headers
+	4.3.7. Static versus shared linking
+	4.3.8. Optimization versus symbolic debugging
+	4.3.9. Parallel vs. serial library
+	4.3.10. Disabling High-Level C APIs 
+	4.3.11. Threadsafe capability
+	4.3.12. Backward compatibility with HDF5 1.4* releases
+	4.4. Building
+	4.5. Testing
+	4.6. Installing
 
-	5. Full installation instructions for source distributions
-	5.1. Unpacking the distribution
-	5.1.1. Non-compressed tar archive (*.tar)
-	5.1.2. Compressed tar archive (*.tar.Z)
-	5.1.3. Gzip'd tar archive (*.tar.gz)
-	5.1.4. Bzip'd tar archive (*.tar.bz2)
-	5.2. Source vs. Build Directories
-	5.3. Configuring
-	5.3.1. Specifying the installation directories
-	5.3.2. Using an alternate C compiler
-	5.3.3. Additional compilation flags
-	5.3.4. Compiling HDF5 wrapper libraries
-	5.3.5. Specifying other programs
-	5.3.6. Specifying other libraries and headers
-	5.3.7. Static versus shared linking
-	5.3.8. Optimization versus symbolic debugging
-	5.3.9. Large (>2GB) vs. small (<2GB) file capability
-	5.3.10. Parallel vs. serial library
-	5.4. Building
-	5.5. Testing
-	5.6. Installing
-	5.7  Building and testing with Intel compilers
-	5.8  Building and testing with PGI compilers
+	5. Using the Library
 
-	6. Using the Library
-
-	7. Support
+	6. Support
 
 *****************************************************************************
 
@@ -67,36 +60,7 @@
 	number of formats.
 
 
-2. Warnings about compilers
-	OUTPUT FROM THE FOLLOWING COMPILERS SHOULD BE EXTREMELY SUSPECT
-	WHEN USED TO COMPILE THE HDF5 LIBRARY, ESPECIALLY IF
-	OPTIMIZATIONS ARE ENABLED. IN ALL CASES, HDF5 ATTEMPTS TO WORK
-	AROUND THE COMPILER BUGS BUT THE HDF5 DEVELOPMENT TEAM MAKES NO
-	GUARANTEES THAT THERE ARE OTHER CODE GENERATION PROBLEMS.
-
-2.1. GNU (Intel platforms)
-	Versions before 2.8.1 have serious problems allocating registers
-	when functions contain operations on `long long' data types.
-	Supplying the `--disable-hsizet' switch to configure (documented
-	below) will prevent hdf5 from using `long long' data types in
-	situations that are known not to work, but it limits the hdf5
-	address space to 2GB.
-
-2.2. COMPAQ/DEC
-	The V5.2-038 compiler (and possibly others) occasionally
-	generates incorrect code for memcpy() calls when optimizations
-	are enabled, resulting in unaligned access faults. HDF5 works
-	around the problem by casting the second argument to `char *'.
-        The fortran module (5.4.1a) fails in compiling some fortran
-        programs.  Need to use 5.5.0 or more.
-
-2.3. SGI (Irix64 6.2)
-	The Mongoose 7.00 compiler has serious optimization bugs and
-	should be upgraded to MIPSpro 7.2.1.2m. Patches are available
-	from SGI.
-
-
-3. Quick installation
+2. Quick installation
 	For those that don't like to read ;-) the following steps can be
 	used to configure, build, test, and install the HDF5 library,
 	header files, and support programs. "#" in "hdf5-1.6.#" below stands
@@ -109,29 +73,20 @@
 	    $ make check
 	    $ make install
 
-3.1. TFLOPS
-	Users of the Intel TFLOPS machine, after reading this file,
-	should see the INSTALL_TFLOPS for more instructions.
-
-3.2. Windows
+2.1. Windows
 	Users of Microsoft Windows should see the INSTALL_Windows for
 	detailed instructions.
 
-3.3. Certain Virtual File Layer(VFL)
-	If users want to install with special Virtual File Layer(VFL),
-	please go to read INSTALL_VFL file.  SRB and Globus-GASS have
-	been documented. 
 
-
-4. HDF5 dependencies
-4.1. Zlib 
+3. HDF5 dependencies
+3.1. Zlib 
 	The HDF5 library has a predefined compression filter that uses
 	the "deflate" method for chunked datatsets. If zlib-1.1.2 or
 	later is found then HDF5 will use it, otherwise HDF5's predefined
 	compression method will degenerate to a no-op (the compression
 	filter will succeed but the data will not be compressed).
 
-4.2. Szip (optional)
+3.2. Szip (optional)
 	The HDF5 library has a predefined compression filter that uses
 	the extended-Rice lossless compression algorithm for chunked 
         datatsets. For more information about Szip compression and license terms
@@ -140,7 +95,7 @@
         file can be found at ftp://ftp.ncsa.uiuc.edu/HDF/szip/
         
         To configure HDF5 library with Szip compression filter, use 
-        --enable-szlib=/PATH_TO_SZIP flag. For more information see 5.3.6.
+        --enable-szlib=/PATH_TO_SZIP flag. For more information see 4.3.6.
 
         Starting with the release 1.6.3 Szip library binaries are distributed 
         with encoder enabled (license may be required to use this binary) 
@@ -150,36 +105,36 @@
         an HDF5 application can always read Szip compressed data if Szip filter
         is present.
 
-4.3. MPI and MPI-IO
+3.3. MPI and MPI-IO
 	The parallel version of the library is built upon the foundation
 	provided by MPI and MPI-IO. If these libraries are not available
 	when HDF5 is configured then only a serial version of HDF5 can be
 	built.
 
 
-5. Full installation instructions for source distributions
-5.1. Unpacking the distribution
+4. Full installation instructions for source distributions
+4.1. Unpacking the distribution
 	The HDF5 source code is distributed in a variety of formats which
 	can be unpacked with the following commands, each of which
 	creates an `hdf5-1.6.#' directory.
 
-5.1.1. Non-compressed tar archive (*.tar)
+4.1.1. Non-compressed tar archive (*.tar)
 
 	    $ tar xf hdf5-1.6.#.tar
 
-5.1.2. Compressed tar archive (*.tar.Z)
+4.1.2. Compressed tar archive (*.tar.Z)
 
 	    $ uncompress -c < hdf5-1.6.#.tar.Z | tar xf -
 
-5.1.3. Gzip'd tar archive (*.tar.gz)
+4.1.3. Gzip'd tar archive (*.tar.gz)
 
 	    $ gunzip < hdf5-1.6.#.tar.gz | tar xf -
 
-5.1.4. Bzip'd tar archive (*.tar.bz2)
+4.1.4. Bzip'd tar archive (*.tar.bz2)
 
 	    $ bunzip2 < hdf5-1.6.#.tar.bz2 | tar xf -
 
-5.2. Source vs. Build Directories
+4.2. Source vs. Build Directories
 	On most systems the build can occur in a directory other than the
 	source directory, allowing multiple concurrent builds and/or
 	read-only source code. In order to accomplish this, one should
@@ -203,7 +158,7 @@
 		version of make. The VPATH facility should not be used
 		with the new parallel make option.
 
-5.3. Configuring
+4.3. Configuring
 	HDF5 uses the GNU autoconf system for configuration, which
 	detects various features of the host system and creates the
 	Makefiles. On most systems it should be sufficient to say:
@@ -223,11 +178,11 @@
 	`configure' output. The host config file influences the behavior
 	of configure by setting or augmenting shell variables.
 
-5.3.1. Specifying the installation directories
+4.3.1. Specifying the installation directories
 	Typing `make install' will install the HDF5 library, header
 	files, examples, and support programs in hdf5/lib,
 	hdf5/include, hdf5/examples and hdf5/bin under the directory where it
-        was built (hdf5-1.6.# or build directory mentioned in 5.2)
+        was built (hdf5-1.6.# or build directory mentioned in 4.2)
         To use a path other than hdf5 specify the path with 
         the `--prefix=PATH' switch:
 
@@ -237,7 +192,7 @@
 	home of the shared library must be specified with this switch
 	before the library and executables are built.
 
-5.3.2. Using an alternate C compiler
+4.3.2. Using an alternate C compiler
 	By default, configure will look for the C compiler specified
         in the host configuration file in the config directory or by trying
 	`gcc' and `cc'. However, if the environment variable "CC" is set
@@ -276,7 +231,7 @@
 	    $ CFLAGS=-q64 FFLAGS=-q64 AR='ar -X 64'\
 	    $ ./configure --enable-fortran --enable-parallel
 
-5.3.3. Additional compilation flags
+4.3.3. Additional compilation flags
 	If addtional flags must be passed to the compilation commands
 	then specify those flags with the CFLAGS variable. For instance,
 	to enable symbolic debugging of a production version of HDF5 one
@@ -284,7 +239,7 @@
 
 	    $ CFLAGS=-g ./configure --enable-production
 
-5.3.4. Compiling HDF5 wrapper libraries
+4.3.4. Compiling HDF5 wrapper libraries
 	One can optionally build the Fortran and/or C++ interface to the
 	HDF5 C library. By default, both options are disabled. To build
 	them, specify `--enable-fortran' and `--enable-cxx' respectively.
@@ -310,19 +265,8 @@
 	Note: Fortran interface supports parallel HDF5 while the 
               C++ interface does not.
           
-        Note:  On Cray T3E machines the following files need to be modified
-               before building the Fortran Library:
-                 fortran/src/H5Dff.f90
-                 fortran/src/H5Aff.f90
-                 fortran/src/H5Pff.f90
-               Check for "Comment if on T3E ..." comment and comment out 
-               specified lines or use a patch from HDF FTP server
-               ftp://ftp.ncsa.uiuc.edu/HDF/HDF5/current/
 
-        Note: See sections 5.7 and 5.8 for how to build Fortran Library with
-              PGI or Intel compilers. 
-
-5.3.5. Specifying other programs
+4.3.5. Specifying other programs
 	The build system has been tuned for use with GNU make but works
 	also with other versions of make.  If the `make' command runs a
 	non-GNU version but a GNU version is available under a different
@@ -356,7 +300,7 @@
 	       because the HDF5 makefiles also use the install program to
 	       also change file ownership and/or access permissions.
 
-5.3.6. Specifying other libraries and headers
+4.3.6. Specifying other libraries and headers
 	Configure searches the standard places (those places known by the
 	systems compiler) for include files and header files. However,
 	additional directories can be specified by using the CPPFLAGS
@@ -366,10 +310,9 @@
               LDFLAGS=-L/home/robb/lib \
 	      ./configure
 
-	HDF5 uses the zlib library for two purposes: it provides support
-	for the HDF5 deflate data compression filter, and it is used by
-	the h5toh4 converter and  the h4toh5 converter in support of
-	HDF4. Configure searches the standard places (plus those
+	HDF5 uses the zlib library to  provide support
+	for the HDF5 deflate data compression filter.
+	Configure searches the standard places (plus those
 	specified above with CPPFLAGS and LDFLAGS variables) for the zlib
 	headers and library. The search can be disabled by specifying
 	`--without-zlib' or alternate directories can be specified with
@@ -382,13 +325,13 @@
 	      LDFLAGS=-L/PATH_TO_ZLIB/lib \
 	      ./configure
 
-	HDF5 has Szip predefined compression method (see 4.2).  To enable
+	HDF5 has Szip predefined compression method (see 3.2).  To enable
 	Szip compression, HDF5 library has to be configured and build using 
 	Szip Library
 
         $ ./configure --with-szlib=/PATH_TO_SZIP
 
-5.3.7. Static versus shared linking
+4.3.7. Static versus shared linking
 	The build process will create static libraries on all systems and
 	shared libraries on systems that support dynamic linking to a
 	sufficient degree. Either form of library may be suppressed by
@@ -396,15 +339,12 @@
 
 	    $ ./configure --disable-shared
 
-	The C++ and Fortran libraries are currently only available in the
-	static format.
-
 	To build only statically linked executables on platforms which
 	support shared libraries, use the `--enable-static-exec' flag.
 
 	    $ ./configure --enable-static-exec
 
-5.3.8. Optimization versus symbolic debugging
+4.3.8. Optimization versus symbolic debugging
 	The library can be compiled to provide symbolic debugging support
 	so it can be debugged with gdb, dbx, ddd, etc or it can be
 	compiled with various optimizations. To compile for symbolic
@@ -442,22 +382,18 @@
 	releases). The tracing must also be enabled at runtime to see any
 	output (see Debugging.html).
 
-5.3.9. Large (>2GB) vs. small (<2GB) file capability
-	In order to read or write files that could potentially be larger
-	than 2GB it is necessary to use the non-ANSI `long long' data
-	type on some platforms. However, some compilers (e.g., GNU gcc
-	versions before 2.8.1 on Intel platforms) are unable to produce
-	correct machine code for this data type. To disable use of the
-	`long long' type on these machines say:
 
-	    $ ./configure --disable-hsizet
-
-5.3.10. Parallel vs. serial library
+4.3.9. Parallel vs. serial library
 	The HDF5 library can be configured to use MPI and MPI-IO for
 	parallelizm on a distributed multi-processor system.  Read the
 	file INSTALL_parallel for detailed explanations.
 
-5.3.11. Threadsafe capability
+4.3.10. Disabling high-level C APIs
+	By default the HDF5 library is configured to build high-level C APIs.
+        If this feature is not desired, use --disable-hl configuration flag to
+        bypass building and testing high-level C APIs.
+
+4.3.11. Threadsafe capability
 	The HDF5 library can be configured to be thread-safe (on a very
 	large scale) with the with the `--enable-threadsafe' flag to
         the configure script.  Some platforms may also require the 
@@ -465,23 +401,21 @@
         script as well.  Read the file doc/html/TechNotes/ThreadSafeLibrary.html
          in the source directory for further details.
 
-5.3.12. Backward compatibility
+4.3.12. Backward compatibility with HDF5 1.4* releases
 	The 1.6 version of the HDF5 library can be configured to operate
 	identically to the v1.4 library with the `--enable-hdf5v1_4'
 	configure flag. This allows existing code to be compiled with the
 	v1.6 library without requiring immediate changes to the
 	application source code. This flag will only be supported in the
-	v1.6 branch of the library, it will not be available in v1.7+.
+	v1.6 branch of the library, it will not be available in v1.8+.
 
-5.3.13. Network stream capability
-	The HDF5 library can be configured with a network stream file
-	driver with the `--enable-stream-vfd' configure flag. This option
-	compiles the "stream" Virtual File Driver into the main library.
-	See the documentation on the Virtual File Layer for more details
-	about the use of this driver. This option is ON by default. Use
-        --disable-stream-vfd configuration flag to turn it OFF.
+4.3.12. Network stream capability
+	By default the HDF5 library is configured with a network stream file
+	driver. See the documentation on the Virtual File Layer for more details
+	about the use of this driver. Use --disable-stream-vfd configuration  
+        flag to turn it OFF.
 
-5.4. Building
+4.4. Building
 	The library, confidence tests, and programs can be build by
 	saying just:
 
@@ -498,7 +432,7 @@
 
 	    $ make -j -l6
 
-5.5. Testing
+4.5. Testing
 	HDF5 comes with various test suites, all of which can be run by
 	saying
 
@@ -514,7 +448,7 @@
 	fails. To prevent deletion of the files define the HDF5_NOCLEANUP
 	environment variable.
 
-5.6. Installing
+4.6. Installing
 	The HDF5 library, include files, and support programs can be
 	installed in a (semi-)public place by saying `make install'. The
 	files are installed under the directory specified with
@@ -552,84 +486,17 @@
     	The support programs that are useful are:
 	    ./tools/h5ls/h5ls		(list file contents)
 	    ./tools/h5dump/h5dump	(dump file contents)
+	    ./tools/h5repack/h5repack	(repacks HDF5 file)
+	    ./tools/h5jam/h5jam(unjam)	( adds/removes user block to/from HDF5 file)
 	    ./tools/misc/h5repart	(repartition file families)
 	    ./tools/misc/h5debug	(low-level file debugging)
 	    ./tools/h5import/h5import	(imports data to HDF5 file)
             ./tools/h5diff/h5diff       (compares two HDF5 files)
-            ./tools/gifconv/h52gif	(HDF5 to GIF converter) 
-            ./tools/gifconv/gif2h5      (GIF to HDF5 converter)
-
-5.7  Building and testing with Intel compilers
+            ./hl//tools/h52gif/h52gif	(HDF5 to GIF converter) 
+            ./hl//tools/gif2h5/gif2h5   (GIF to HDF5 converter)
 
 
-     When Intel compilers are used (icc or ecc), you will need to 
-     modify the generated "libtool" program after configuration is finished.
-     On or around line 104 of the libtool file, there are lines which 
-     look like:
-
-          # How to pass a linker flag through the compiler.
-          wl=""
-
-      Change these lines to this:
-
-          # How to pass a linker flag through the compiler.
-          wl="-Wl,"
-
-      UPDATE: This is now done automatically by the configure script. However,
-      if you still experience a problem, you may want to check this line in
-      the libtool file and make sure that it has the correct value.
-
-    * To build the Fortran library using Intel compiler on Linux 2.4, one has to 
-          x Use -fpp -DDEC$=DEC_ -DMS$=MS_ compiler flags to disable
-            DEC and MS compiler directives in source files in fortran/src, fortran/test 
-            and fortran/examples directories.
-	    e.g., setenv F9X 'ifc -fpp -DDEC$=DEC_ -DMS$=MS_'
-	    (do not use double quotes since $ is interpreted in them.)
-
-          x If Version 6.0 of Fortran compiler is used, build fails in 
-            the fortran/test directory and then in the
-            fortran/examples directory; to proceed, edit the work.pcl files in
-            those directories to contain two lines
-
-                    work.pc
-                    ../src/work.pc 
-
-          x Do the same in fortran/examples directory
-          x Problem with work.pc files was resolved for newest version of the compiler (7.0)
-
-    * To build the Fortran Library on IA32 follow step described above, except 
-      that DEC and MS compiler directives should be removed manually or 
-      use a patch from HDF FTP server ftp://ftp.ncsa.uiuc.edu/HDF/HDF5/current/
-      Also check "How to build HDF5 Fortran with Intel Compiler" under HDF5 FAQ
-      http://hdf.ncsa.uiuc.edu/hdf5-quest.html#plat-intel
-
-
-5.8  Building and testing with PGI compilers
-     
-     When PGI C and C++ compilers are used (pgcc or pgCC), you will need to 
-     modify the generated "libtool" program after configuration is finished.
-     On or around line 104 of the libtool file, there are lines which 
-     look like:
-
-          # How to pass a linker flag through the compiler.
-          wl=""
-
-      Change these lines to this:
-
-          # How to pass a linker flag through the compiler.
-          wl="-Wl,"
-
-      UPDATE: This is now done automatically by the configure script. However,
-      if you still experience a problem, you may want to check this line in
-      the libtool file and make sure that it has the correct value.
-
-      To build HDF5 C++ Library with pgCC (version 4.0 and later), set
-      environment variable CXX to "pgCC -tlocal"
-         setenv CXX "pgCC -tlocal"
-      before running the configure script.
-
-
-6. Using the Library
+5. Using the Library
 	Please see the User Manual in the doc/html directory.
 
 	Most programs will include <hdf5.h> and link with -lhdf5.
@@ -645,7 +512,7 @@
         scripts are installed under bin subdirectory when make install is run.
 
 
-6.1 Using the C++ API
+5.1 Using the C++ API
 	To use the C++ API, one must include the header file H5Cpp.h
 	in the application.  Please refer to the examples in c++/examples
 	for sample code.
@@ -662,5 +529,5 @@
 	the stylesheet that can be used to change the document layout.
 
 
-7. Support
+6. Support
 	Support is described in the README file.
