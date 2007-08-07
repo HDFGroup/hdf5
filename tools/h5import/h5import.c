@@ -2593,7 +2593,7 @@ help(char *name)
   (void) fprintf(stdout, "\t	3. Binary file with native integer (signed or unsigned)\n");
   (void) fprintf(stdout, "\t	data (8-bit or 16-bit or 32-bit or 64-bit). \n");
   (void) fprintf(stdout, "\t	4. ASCII text file containing strings (text data).\n");
-  (void) fprintf(stdout, "\t   (Not implemented)\n\n");
+  (void) fprintf(stdout, "\t    \n");
   (void) fprintf(stdout, "\t	Every input file is associated with a configuration file \n");
   (void) fprintf(stdout, "\t	also provided as an input to the utility. (See Section \n");
   (void) fprintf(stdout, "\t	\"CONFIGURATION FILE\" to know how it is to be organised).\n");
