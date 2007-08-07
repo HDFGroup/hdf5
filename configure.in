@@ -1850,7 +1850,7 @@ dnl Check for functions.
 dnl tmpfile needed by h5pdiff.
 dnl
 AC_CHECK_FUNCS(alarm fork frexpf frexpl gethostname getpwuid getrusage)
-AC_CHECK_FUNCS(BSDgettimeofday longjmp setsysinfo sigaction)
+AC_CHECK_FUNCS(BSDgettimeofday siglongjmp longjmp setsysinfo sigaction)
 AC_CHECK_FUNCS(signal snprintf vasprintf strdup system waitpid)
 AC_CHECK_FUNCS(rand_r random srandom)
 AC_CHECK_FUNCS(tmpfile)

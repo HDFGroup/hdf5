@@ -252,6 +252,9 @@
 /* Define to 1 if you have the `sigaction' function. */
 #undef HAVE_SIGACTION
 
+/* Define to 1 if you have the `siglongjmp' function. */
+#undef HAVE_SIGLONGJMP
+
 /* Define to 1 if you have the `signal' function. */
 #undef HAVE_SIGNAL
 
