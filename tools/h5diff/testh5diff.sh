@@ -492,7 +492,7 @@ TOOLTEST h5diff_70.txt $FILE5 $FILE6 -v
 TOOLTEST h5diff_80.txt $FILE7 $FILE8 -v
 
 # 9. compare a file with itself
-TOOLTEST h5diff_90.txt $FILE1 $FILE1
+TOOLTEST h5diff_90.txt $FILE2 $FILE2
 
 # 10. read by hyperslab, print indexes
 TOOLTEST h5diff_100.txt $FILE9 $FILE10 -v

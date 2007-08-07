@@ -1,7 +1,3 @@
 #############################
-Expected output for 'h5diff h5diff_basic1.h5 h5diff_basic1.h5'
+Expected output for 'h5diff h5diff_basic2.h5 h5diff_basic2.h5'
 #############################
-dataset: </g1/fp15> and </g1/fp15>
-2 differences found
-dataset: </g1/fp16> and </g1/fp16>
-2 differences found
