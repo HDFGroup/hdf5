@@ -221,18 +221,18 @@ Platforms Tested
 ================
 
     AIX 5.2 (32/64 bit)           xlc 6.0.0.8
-                                  xlC 6.0.0.9
+    (datastar)                    xlC 6.0.0.9
                                   xlf 8.1.1.7
                                   mpcc_r 6.0.0.8
                                   mpxlf_r 8.1.1.7
     AIX 5.3 (32/64 bit)           xlc 7.0.0.0
-                                  xlC 7.0.
+    (copper)                      xlC 7.0.
                                   xlf 9.1.0.3
     FreeBSD 6.2 (32 and 64-bit)   gcc  and g++3.4.6
-                                  gcc and g++ 4.2.1
+    (duty and liberty)            gcc and g++ 4.2.1
 
     HP-UX B.11.23                 HP aC++/ANSI C B3910B A.06.02
-                                  HP F90 v3.1 (32-bit only)
+    (sirius)                      HP F90 v3.1 (32-bit only)
                                   HP aC++/ANSI C B3910B A.06.02
 
     IRIX64 6.5 (tesla -64)        MIPSpro cc 7.4.2m
@@ -252,8 +252,13 @@ Platforms Tested
     SMP i686 i386                 G95 (GCC 4.0.3 (g95 0.91!) Nov 21 2006)
     (kagiso)                      PGI C, Fortran, C++ 6.2-5 32-bit 
                                   icc (ICC) 9.1 
-                                  Intel(R) C++ Compiler for 32-bit applications, Version 9.1
-                                  Intel(R) Fortran Compiler for 32-bit applications, Version 9.1 
+                                  Intel(R) C++ Compiler for 32-bit applications, 
+                                  Version 9.1
+                                  Intel(R) Fortran Compiler for 32-bit applications, 
+                                  Version 9.1 
+                                  Absoft 32-bit Fortran 95 10.0.4
+                                  MPICH mpich2-1.0.4p1 compiled with  
+                                  gcc 3.4.6 and G95 (GCC 4.0.3 (g95 0.91!) 
 
     Linux 2.6.16.46-0.12-debug #1 
           SMP ia64 GNU/Linux      Intel(R) C++ Version 10.0.025
@@ -263,6 +268,7 @@ Platforms Tested
 	 SMP x86_64 GNU/Linux     Intel(R) Fortran Intel(R) EM64T Ver. 9.1.031
     (smirom)			  PGI C, Fortran, C++ Version 6.2-5
 				         for 64-bit target on x86-64
+                                  tested for both 32 and 64-bit binaries
     Linux 2.6.5-7.283-rtgfx Altix 
           SMP ia64                Intel(R) C++ Version 9.0
     (cobalt)                      Intel(R) Fortran Itanium(R) Version 9.0
@@ -273,12 +279,12 @@ Platforms Tested
 				  Compaq C++ V6.5-036  
 				  MPIX200_64_r13.4
 
-    SunOS 5.8 32,46               Sun WorkShop 6 update 2 C 5.3
-     (Solaris 2.8)                Sun WorkShop 6 update 2 Fortran 95 6.2
+    SunOS 5.8 32 and 64-bit       Sun WorkShop 6 update 2 C 5.3
+    (sol)                         Sun WorkShop 6 update 2 Fortran 95 6.2
                                   Sun WorkShop 6 update 2 C++ 5.3
 
-    SunOS 5.10                    Sun WorkShop 6 update 2 C 5.8
-                                  Sun WorkShop 6 update 2 Fortran 95 8.2
+    SunOS 5.10 32 and 64-bit      Sun WorkShop 6 update 2 C 5.8
+    (linew)                       Sun WorkShop 6 update 2 Fortran 95 8.2
                                   Sun WorkShop 6 update 2 C++ 5.8
                                   Patch 121019-06 
 
@@ -288,13 +294,14 @@ Platforms Tested
 				  PGI C Version 6.0
 				  PGI C++ Version 6.0
 				  PGI Fortran Version 6.0
+                                  gcc (GCC) 3.2.2 (Red Hat Linux 3.2.2-5)
 
     Xeon Linux 2.6.9-42.0.10.EL_lustre-1.4.10.1smp
     (abe)                         Intel(R) C++ Version 10.0
                                   Intel(R) Fortran Compiler Version 10.0
                                   Open MPI 1.2.2
-    IA-64 Linux 2.4.21.SuSE_292.til1 ia64
-    (NCSA tg-login)               Intel(R) C++ Version 8.0
+    IA-64 Linux 2.4.21.SuSE_292.til1  gcc (GCC) 3.2.2
+    ia64  (NCSA tg-login)         Intel(R) C++ Version 8.0
                                   Intel(R) Fortran Compiler Version 8.0
 				  mpich-gm-1.2.5..10-intel-r2
     Windows XP                    Visual Studio 6.0
