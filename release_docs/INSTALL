@@ -46,7 +46,7 @@
 
 1. Obtaining HDF5
 	The latest supported public release of HDF5 is available from
-	ftp://hdf.ncsa.uiuc.edu/HDF5/current/src.  It is
+	ftp://ftp.hdfgroup.org/HDF5/current/src.  It is
 	available in tar format compressed with gzip. 
 
 	The HDF team also makes snapshots of the source code available on
@@ -56,8 +56,8 @@
 	Furthermore, the snapshots have only been tested on a few
 	machines and may not test correctly for parallel applications.
 	Snapshots can be found at
-	ftp://hdf.ncsa.uiuc.edu/pub/outgoing/hdf5/snapshots in a limited
-	number of formats.
+	ftp://ftp.hdfgroup.uiuc.edu/pub/outgoing/hdf5/snapshots in a 
+	limited number of formats.
 
 
 2. Quick installation
@@ -89,10 +89,10 @@
 3.2. Szip (optional)
 	The HDF5 library has a predefined compression filter that uses
 	the extended-Rice lossless compression algorithm for chunked 
-        datatsets. For more information about Szip compression and license terms
-        see http://hdf.ncsa.uiuc.edu/doc_resource/SZIP/index.html.
-        Precompiled szip binaries for each supported platform and source tar ball
-        file can be found at ftp://ftp.ncsa.uiuc.edu/HDF/szip/
+        datatsets. For more information about Szip compression and license 
+        terms, see http://hdfgroup.org/doc_resource/SZIP/index.html.
+        Precompiled szip binaries for each supported platform and source tar 
+        ball file can be found at ftp://ftp.hdfgroup.org/lib-external/szip/.
         
         To configure HDF5 library with Szip compression filter, use 
         --enable-szlib=/PATH_TO_SZIP flag. For more information see 4.3.6.
@@ -265,6 +265,7 @@
 	Note: Fortran interface supports parallel HDF5 while the 
               C++ interface does not.
           
+               ftp://ftp.hdfgroup.org/HDF5/current/
 
 4.3.5. Specifying other programs
 	The build system has been tuned for use with GNU make but works

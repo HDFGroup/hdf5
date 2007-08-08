@@ -15,7 +15,7 @@ run simple tests of your MPI compilers and the parallel file system.
 
 If you still have difficulties installing PHDF5 in your system, please
 send mail to
-	hdfhelp@ncsa.uiuc.edu
+	help@hdfgroup.org
 
 In your mail, please include the output of "uname -a". If you have run the
 "configure" command, attach the output of the command and the content of
