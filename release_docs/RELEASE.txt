@@ -1,4 +1,4 @@
-HDF5 version 1.6.6-pre3 currently under development
+HDF5 version 1.6.6, released in August 2007
 ================================================================================
 
 INTRODUCTION
@@ -8,18 +8,18 @@ HDF5-1.6.6  It contains information on the platforms tested and
 known problems in HDF5-1.6.6. For more details, check the HISTORY.txt
 file in the HDF5 source.
 
-The HDF5 documentation can be found on the NCSA ftp server
-(ftp.ncsa.uiuc.edu) in the directory:
+The HDF5 documentation can be found on the THG (The HDF Group) 
+ftp server (ftp.hdfgroup.org) in the directory:
 
-     /HDF/HDF5/docs/
+     /HDF5/docs/
 
 Documentation for the current release is also on the HDF web site:
 
-     http://hdf.ncsa.uiuc.edu/HDF5/doc/
+     http://hdfgroup.org/HDF5/doc/
 
-For more information look at the HDF5 home page at:
+For more information, see the HDF5 home page at:
 
-    http://hdf.ncsa.uiuc.edu/HDF5/
+    http://hdfgroup.org/HDF5/
 
 If you have any questions or comments, please send them to:
 
@@ -311,24 +311,80 @@ Platforms Tested
 Supported Configuration Features Summary
 ========================================
 
-Key:   y   = tested and supported
-       n   = not supported or not tested in this release
-       x   = not working in this release
-       dna = does not apply
-       ( ) = footnote appears below second table
+Key:   y   = Tested and supported
+       n   = Not supported or not tested in this release
+       C   = Cluster
+       W   = Workstation
+       ( ) = Footnote appears below second table
 
-Platform                             C        F90    F90      C++  zlib  SZIP
-                                     parallel        parallel      
+Platform                              C        F90  F90      C++  zlib  SZIP
+                                      parallel      parallel
+Solaris2.8 32- and 64-bit             n        y    n        y    y     y
+Solaris2.10 32- and 64-bit            n        y    n        y    y     y
+IRIX64_6.5 32-bit                     n        n    n        n    y     y
+IRIX64_6.5 64-bit                     n        y    n        n    y     y
+HPUX11.23-32bit                       n        y    n        y    y     y
+HPUX11.23-64bit                       n        n    n        y    y     y
+WinXP Visual Studio 6.0               n        n    n        y    y     y
+WinXP CYGWIN                          n        n    n        y    y     y
+WinXP 2005                            n        y    n        y    y     y
+WinXP .Net                            n        y    n        y    y     y
+Mac OS X 10.4.10                      n        y    n        y    y     y
+AIX-5.2 & 5.3 32 and 64-bit           y        y    y        y    y     y
+FreeBSD 6.2 32 and 64-bit             n        n    n        y    y     y
+RedHat Linux 2.4.21              W    n        n    n        y    y     y
+SuSE Linux 2.6.9-42 i686 GNU (1) W    y        y    y        y    y     y
+SuSE Linux 2.6.9-42 i686 Intel   W    n        y    n        y    y     y
+SuSE Linux 2.6.9-42 i686 PGI     W    n        y    n        y    y     y
+SuSE Linux 2.6.16 x86_64 GNU (1) W    y        y    y        y    y     y
+SuSE Linux 2.6.16 x86_64 Intel   W    n        y    n        y    y     y
+SuSE Linux 2.6.16 x86_64 PGI     W    n        y    n        y    y     y
+RHEL 4 Linux 2.6.9 Xeon Lustre   C    y        y    y        y    y     y
+RedHat Linux 2.4 Xeon Lustre     C    n        y    n        y    y     y
+SuSE Linux 2.4 ia64              C    y        y    y        y    y     y
+SuSe Linux 2.6.16 SGI Altix ia64      n        y    n        y    y     y
+SuSe Linux 2.6.5 SGI Altix ia64       n        y    n        y    y     y
+OSF1 v5.1                             y        y    y        y    y     n
 
 
-Platform                             Shared        static-  Thread-  STREAM- 
-                                     libraries(4)  exec     safe     VFD    
+Platform                              Shared        static-  Thread-  STREAM-
+                                      libraries(4)  exec     safe     VFD
+Solaris2.8 32- and 64-bit             y             n        y        y
+Solaris2.10 32- and 64-bit            y             n        y        y
+IRIX64_6.5 32-bit                     y             n        y        y
+IRIX64_6.5 64-bit                     y             n        y        y
+HPUX11.23-32bit                       y (3)         n        n        y
+HPUX11.23-64bit                       y (3)         n        n        y
+WinXP Visual Studio 6.0               y             n        n        n
+WinXP CYGWIN                          y             n        n        n
+WinXP 2005                            y             n        n        n
+WinXP .Net                            y             n        n        n
+Mac OS X 10.4.10                      y             n        n        y
+AIX-5.2 & 5.3 32 and 64-bit           n             n        n        y
+FreeBSD 6.2 32 and 64-bit             y             n        n        y
+RedHat Linux 2.4.21              W    y             n        n        y
+SuSE Linux 2.6.9-42 i686 GNU (1) W    y             n        y        y
+SuSE Linux 2.6.9-42 i686 Intel   W    y             n        n        y
+SuSE Linux 2.6.9-42 i686 PGI     W    n             n        n        y
+SuSE Linux 2.6.16 x86_64 GNU (1) W    y             n        n        y
+SuSE Linux 2.6.16 x86_64 Intel   W    y             n        n        y
+SuSE Linux 2.6.16 x86_64 PGI     W    n             n        n        y
+RHEL 4 Linux 2.6.9 Xeon Lustre   C    y             n        n        y
+RedHat Linux 2.4 Xeon Lustre     C    y             n        n        y
+SuSE Linux 2.4 ia64              C    y             n        n        y
+SuSe Linux 2.6.16 SGI Altix ia64      n             n        n        y
+SuSe Linux 2.6.5 SGI Altix ia64       n             n        n        y
+OSF1 v5.1                             n             n        n        y
 
 Compiler versions for each platform are listed in the "Platforms Tested" 
 table found elsewhere in this file (RELEASE.txt).  Unless otherwise noted, 
 compilers used are the system compilers.
 
-Footnotes:  
+Footnotes:
+(1) Fortran compiled with g95.
+(2) In most cases, shared libraries are provided only for the C library, 
+    except on Windows where they are provided for C, C++, and Fortran.
+(3) C++ works only with static libraries.
 
 
 Known Problems
