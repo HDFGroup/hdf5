@@ -356,7 +356,7 @@ precision (detected_t *d)
     COMP_ALIGN = (size_t)((char*)(&(s.x)) - (char*)(&s));                     \
 }
 
-#if defined(H5_HAVE_LONGJMP) && defined(H5_HAVE_SIGNAL)
+#if defined(H5_HAVE_LONGJMP) && defined(H5_HAVE_SIGNAL) && defined(H5_HAVE_SIGLONGJMP)
 #define ALIGNMENT(TYPE,INFO) {						      \
     char		*volatile _buf=NULL;				      \
     volatile TYPE	_val=1;						      \

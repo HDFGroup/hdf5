@@ -1916,21 +1916,12 @@ To generate your own H5tinit.c, follow the steps below.
         
     1. Open the solution typegen.sln from the folder .\windows\misc\typgen.
         
-    2. Edit the code
-	
-	   Open the source file H5detect.c, and remove or comment the line:
-	   
-		siglongjmp(jbuf_g, 1);
-		
-	   This function is unsupported on Windows, and will cause Visual Studio
-	   2005 to crash.
-	   
-    3. Build H5tinit.exe
+    2. Build H5tinit.exe
     
         Make sure your configuration is set to Debug, and build the project.  
         This will generate H5tinit.exe in the .\src folder.
         
-    4. Create H5tinit.c
+    3. Create H5tinit.c
     
         From a command prompt, go to the .\src directory and issue the command:
             .\H5tinit.exe > H5tinit.c
@@ -1940,8 +1931,7 @@ To generate your own H5tinit.c, follow the steps below.
 Note:
 
     If you are building on 64-bit Windows, make sure you set your build
-    "Machine Type" to "X64".  Also, you will need to comment out any lines
-    referencing "siglongjmp", as this function is not present on 64-bit Windows.
+    "Machine Type" to "X64".
  
 ========================================================================
                             Section XIII: Misc.
