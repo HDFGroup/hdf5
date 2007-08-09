@@ -21,7 +21,7 @@
 #include "H5IMpublic.h"
 
 /* operator functions */
-static herr_t verifiy_scale(hid_t dset, unsigned dim, hid_t scale, void *visitor_data);
+static herr_t verify_scale(hid_t dset, unsigned dim, hid_t scale, void *visitor_data);
 static herr_t read_scale(hid_t dset, unsigned dim, hid_t scale, void *visitor_data);
 static herr_t match_dim_scale(hid_t did, unsigned dim, hid_t dsid, void *visitor_data);
 static herr_t op_bogus(hid_t did, unsigned dim, hid_t dsid, void *visitor_data);
@@ -1211,7 +1211,7 @@ static int test_simple(void)
  PASSED();
 
 /*-------------------------------------------------------------------------
- * test 6: test iterate scales with a function verifiy_scale
+ * test 6: test iterate scales with a function verify_scale
  *-------------------------------------------------------------------------
  */
  TESTING2("iterate scales (verify scale)");
@@ -1223,7 +1223,7 @@ static int test_simple(void)
  dim = 0;
 
  /* iterate trough the 1st dimension of "dset_a" and verify that its DS is valid  */
- if (H5DSiterate_scales(did,dim,NULL,verifiy_scale,NULL)<0)
+ if (H5DSiterate_scales(did,dim,NULL,verify_scale,NULL)<0)
   goto out;
 
  /* iterate trough the 2nd dimension of "dset_a" and verify that its DS is valid
@@ -1231,7 +1231,7 @@ static int test_simple(void)
  dim = 1;
  scale_idx = 2;
 
- if (H5DSiterate_scales(did,dim,&scale_idx,verifiy_scale,NULL)<0)
+ if (H5DSiterate_scales(did,dim,&scale_idx,verify_scale,NULL)<0)
   goto out;
 
  /* close dataset ID of "dset_a" */
@@ -1452,7 +1452,7 @@ out:
 
 
 /*-------------------------------------------------------------------------
- * Function: verifiy_scale
+ * Function: verify_scale
  *
  * Purpose: example operator function used by H5DSiterate_scales, used
  *  to verify that SCALE_ID refers to a valid DS dataset
@@ -1468,7 +1468,7 @@ out:
  *-------------------------------------------------------------------------
  */
 
-static herr_t verifiy_scale(hid_t dset, unsigned dim, hid_t scale_id, void *visitor_data)
+static herr_t verify_scale(hid_t dset, unsigned dim, hid_t scale_id, void *visitor_data)
 {
  /* define a default zero value for return. This will cause the iterator to continue */
  int ret = 0;
@@ -2135,7 +2135,7 @@ static int test_iterators(void)
   goto out;
 
  /* try to iterate trough the 1st dimension of "dset_a", return error */
- if (H5DSiterate_scales(did,0,NULL,verifiy_scale,NULL)<0)
+ if (H5DSiterate_scales(did,0,NULL,verify_scale,NULL)<0)
   goto out;
 
  /* close */
@@ -2157,7 +2157,7 @@ static int test_iterators(void)
   goto out;
 
  /* try to iterate trough the 3rd dimension of "dset_a", return error */
- if (H5DSiterate_scales(did,3,NULL,verifiy_scale,NULL)==SUCCEED)
+ if (H5DSiterate_scales(did,3,NULL,verify_scale,NULL)==SUCCEED)
   goto out;
 
  /* close */
@@ -2216,7 +2216,7 @@ static int test_iterators(void)
   goto out;
 
  /* try to iterate, return error */
- if (H5DSiterate_scales(gid,0,NULL,verifiy_scale,NULL)==SUCCEED)
+ if (H5DSiterate_scales(gid,0,NULL,verify_scale,NULL)==SUCCEED)
   goto out;
 
  /* close */
