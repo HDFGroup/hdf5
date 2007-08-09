@@ -425,7 +425,7 @@ call %tooltest% h5diff_80.txt
 ::9. compare a %file with itself
 ::-----------------------------
 
-set flag=%file1% %file1%
+set flag=%file2% %file2%
 call %tooltest% h5diff_90.txt  
 
 ::-----------------------------
