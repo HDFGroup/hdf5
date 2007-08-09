@@ -73,132 +73,6 @@
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 		<Configuration
-			Name="AlphaRel|Win32"
-			OutputDirectory=".\Release"
-			IntermediateDirectory=".\Release"
-			ConfigurationType="2"
-			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE">
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="2"
-				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\src"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_"
-				StringPooling="TRUE"
-				RuntimeLibrary="2"
-				EnableFunctionLevelLinking="TRUE"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\Release/hdf5dll.pch"
-				AssemblerListingLocation=".\Release/"
-				ObjectFile=".\Release/"
-				ProgramDataBaseFileName=".\Release/"
-				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				CompileAs="0"/>
-			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLinkerTool"
-				OutputFile=".\Release/hdf5dll.dll"
-				LinkIncremental="1"
-				SuppressStartupBanner="TRUE"
-				ProgramDatabaseFile=".\Release/hdf5dll.pdb"
-				SubSystem="2"
-				ImportLibrary=".\Release/hdf5dll.lib"/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="NDEBUG"
-				MkTypLibCompatible="TRUE"
-				SuppressStartupBanner="TRUE"
-				TargetEnvironment="1"
-				TypeLibraryName=".\Release/hdf5dll.tlb"
-				HeaderFileName=""/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG"
-				Culture="1033"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-		</Configuration>
-		<Configuration
-			Name="AlphaDbg|Win32"
-			OutputDirectory=".\Debug"
-			IntermediateDirectory=".\Debug"
-			ConfigurationType="2"
-			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE">
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions="/MDd "
-				Optimization="0"
-				AdditionalIncludeDirectories="..\..\src"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_"
-				RuntimeLibrary="5"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\Debug/hdf5dll.pch"
-				AssemblerListingLocation=".\Debug/"
-				ObjectFile=".\Debug/"
-				ProgramDataBaseFileName=".\Debug/"
-				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				DebugInformationFormat="3"
-				CompileAs="0"/>
-			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLinkerTool"
-				OutputFile=".\Debug/hdf5dll.dll"
-				LinkIncremental="1"
-				SuppressStartupBanner="TRUE"
-				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile=".\Debug/hdf5dll.pdb"
-				SubSystem="2"
-				ImportLibrary=".\Debug/hdf5dll.lib"/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="_DEBUG"
-				MkTypLibCompatible="TRUE"
-				SuppressStartupBanner="TRUE"
-				TargetEnvironment="1"
-				TypeLibraryName=".\Debug/hdf5dll.tlb"
-				HeaderFileName=""/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_DEBUG"
-				Culture="1033"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCWebDeploymentTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-		</Configuration>
-		<Configuration
 			Name="Release|Win32"
 			OutputDirectory=".\../../../proj/hdf5dll/Release"
 			IntermediateDirectory=".\../../../proj/hdf5dll/Release"
@@ -280,23 +154,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -318,23 +175,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -352,23 +192,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -390,23 +213,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -426,23 +232,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -458,23 +247,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -494,23 +266,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -526,23 +281,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -564,23 +302,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -600,23 +321,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -632,23 +336,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -668,23 +355,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -700,23 +370,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -736,23 +389,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -770,23 +406,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -802,23 +421,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -840,23 +442,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -874,23 +459,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -912,23 +480,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -948,23 +499,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -982,23 +516,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -1022,23 +539,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1058,23 +558,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1092,23 +575,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -1135,23 +601,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1171,23 +620,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -1211,23 +643,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1247,23 +662,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1281,23 +679,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -1321,23 +702,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1359,23 +723,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1395,23 +742,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1427,23 +757,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -1463,23 +776,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -1503,23 +799,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1539,23 +818,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -1579,23 +841,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1615,23 +860,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -1655,23 +883,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1689,23 +900,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -1727,23 +921,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1763,23 +940,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1797,23 +957,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -1837,23 +980,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1873,23 +999,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -1913,23 +1022,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1949,23 +1041,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1981,23 +1056,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -2019,23 +1077,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2053,23 +1094,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -2091,23 +1115,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2127,23 +1134,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2159,23 +1149,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -2195,23 +1168,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2227,23 +1183,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -2263,23 +1202,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2297,23 +1219,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2329,23 +1234,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -2367,23 +1255,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2403,23 +1274,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2435,23 +1289,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -2471,23 +1308,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2503,23 +1323,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -2541,23 +1344,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2577,23 +1363,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2609,23 +1378,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -2645,23 +1397,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2677,23 +1412,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -2715,23 +1433,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2751,23 +1452,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2783,23 +1467,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -2821,23 +1488,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2857,23 +1507,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2889,23 +1522,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -2925,23 +1541,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2957,23 +1556,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -2993,23 +1575,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3025,23 +1590,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -3061,23 +1609,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3093,23 +1624,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -3129,23 +1643,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3161,23 +1658,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -3197,23 +1677,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3229,23 +1692,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -3265,23 +1711,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3297,23 +1726,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -3333,23 +1745,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3365,23 +1760,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -3401,23 +1779,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3433,23 +1794,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -3469,23 +1813,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -3509,23 +1836,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3545,23 +1855,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -3585,23 +1878,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3621,23 +1897,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -3661,23 +1920,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3697,23 +1939,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3729,23 +1954,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -3765,23 +1973,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -3805,23 +1996,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3841,23 +2015,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3873,23 +2030,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -3911,23 +2051,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3947,23 +2070,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3979,23 +2085,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -4017,23 +2106,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4051,23 +2123,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -4089,23 +2144,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4125,23 +2163,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4157,23 +2178,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -4195,23 +2199,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4231,23 +2218,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4263,23 +2233,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -4299,23 +2252,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4333,23 +2269,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -4373,23 +2292,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4411,23 +2313,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4445,23 +2330,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -4483,23 +2351,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4519,23 +2370,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4551,23 +2385,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -4587,23 +2404,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4621,23 +2421,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -4661,23 +2444,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4697,23 +2463,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -4737,23 +2486,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4773,23 +2505,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4807,23 +2522,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -4847,23 +2545,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4881,23 +2562,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -4919,23 +2583,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4955,23 +2602,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -4987,23 +2617,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -5025,23 +2638,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5061,23 +2657,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5095,23 +2674,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -5135,23 +2697,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5171,23 +2716,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -5211,23 +2739,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5247,23 +2758,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5279,23 +2773,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -5315,23 +2792,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5347,23 +2807,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -5383,23 +2826,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5415,23 +2841,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -5451,23 +2860,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5485,23 +2877,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -5525,23 +2900,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5561,23 +2919,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -5601,23 +2942,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5639,23 +2963,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5675,23 +2982,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -5718,23 +3008,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5756,23 +3029,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5792,23 +3048,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5826,23 +3065,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5858,23 +3080,6 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -5896,23 +3101,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5932,23 +3120,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -5966,23 +3137,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -6006,23 +3160,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -6042,23 +3179,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -6082,23 +3202,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -6120,23 +3223,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -6156,23 +3242,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -6190,23 +3259,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -6230,23 +3282,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -6266,23 +3301,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -6306,23 +3324,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -6342,23 +3343,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -6382,23 +3366,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -6418,23 +3385,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -6459,23 +3409,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -6493,23 +3426,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -6533,23 +3449,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -6569,23 +3468,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -6609,23 +3491,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -6645,23 +3510,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -6679,23 +3527,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -6719,23 +3550,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -6757,23 +3571,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -6793,23 +3590,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -6827,23 +3607,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -6867,23 +3630,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -6903,23 +3649,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -6943,23 +3672,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -6979,23 +3691,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -7013,23 +3708,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -7056,23 +3734,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -7092,23 +3753,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -7135,23 +3779,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -7171,23 +3798,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -7211,23 +3821,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -7249,23 +3842,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -7285,23 +3861,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -7319,23 +3878,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -7359,23 +3901,6 @@
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -7395,23 +3920,6 @@
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 						ObjectFile="../../../proj/hdf5dll/Debug/"
 						ProgramDataBaseFileName="../../../proj/hdf5dll/Debug/"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
-						RuntimeLibrary="2"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">

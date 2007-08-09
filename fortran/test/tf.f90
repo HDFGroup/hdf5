@@ -90,7 +90,7 @@
                                full_name, full_namelen)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5_FIXNAME_C':: h5_fixname_c
+              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5_FIXNAME_C':: h5_fixname_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: base_name 
               !DEC$ATTRIBUTES reference :: full_name 
@@ -146,7 +146,7 @@
               INTEGER FUNCTION h5_cleanup_c(base_name, base_namelen, fapl)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5_CLEANUP_C':: h5_cleanup_c
+              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5_CLEANUP_C':: h5_cleanup_c
               !DEC$ ENDIF
               !DEC$ATTRIBUTES reference :: base_name 
               CHARACTER(LEN=*), INTENT(IN) :: base_name
@@ -192,7 +192,7 @@
             INTERFACE
               SUBROUTINE h5_exit_c(status)
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !MS$ATTRIBUTES C,reference,alias:'_H5_EXIT_C':: h5_exit_c
+              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5_EXIT_C':: h5_exit_c
               !DEC$ ENDIF
               INTEGER, INTENT(IN) :: status
               END SUBROUTINE h5_exit_c

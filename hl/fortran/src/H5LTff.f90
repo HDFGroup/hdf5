@@ -133,7 +133,7 @@ subroutine h5ltmake_dataset_f_int1(loc_id,&
   integer function h5ltmake_dataset_int1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_INT1_C'::h5ltmake_dataset_int1_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_INT1_C'::h5ltmake_dataset_int1_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -199,7 +199,7 @@ subroutine h5ltmake_dataset_f_int2(loc_id,&
   integer function h5ltmake_dataset_int2_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_INT2_C'::h5ltmake_dataset_int2_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_INT2_C'::h5ltmake_dataset_int2_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -266,7 +266,7 @@ subroutine h5ltmake_dataset_f_int3(loc_id,&
   integer function h5ltmake_dataset_int3_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_INT3_C'::h5ltmake_dataset_int3_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_INT3_C'::h5ltmake_dataset_int3_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -333,7 +333,7 @@ subroutine h5ltmake_dataset_f_float1(loc_id,&
   integer function h5ltmake_dataset_fl1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_FL1_C'::h5ltmake_dataset_fl1_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_FL1_C'::h5ltmake_dataset_fl1_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -399,7 +399,7 @@ subroutine h5ltmake_dataset_f_float2(loc_id,&
   integer function h5ltmake_dataset_fl2_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_FL2_C'::h5ltmake_dataset_fl2_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_FL2_C'::h5ltmake_dataset_fl2_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -466,7 +466,7 @@ subroutine h5ltmake_dataset_f_float3(loc_id,&
   integer function h5ltmake_dataset_fl3_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_FL3_C'::h5ltmake_dataset_fl3_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_FL3_C'::h5ltmake_dataset_fl3_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -532,7 +532,7 @@ subroutine h5ltmake_dataset_f_double1(loc_id,&
   integer function h5ltmake_dataset_dl1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_DL1_C'::h5ltmake_dataset_dl1_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_DL1_C'::h5ltmake_dataset_dl1_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -598,7 +598,7 @@ subroutine h5ltmake_dataset_f_double2(loc_id,&
   integer function h5ltmake_dataset_dl2_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_DL2_C'::h5ltmake_dataset_dl2_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_DL2_C'::h5ltmake_dataset_dl2_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -665,7 +665,7 @@ subroutine h5ltmake_dataset_f_double3(loc_id,&
   integer function h5ltmake_dataset_dl3_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_DL3_C'::h5ltmake_dataset_dl3_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_DL3_C'::h5ltmake_dataset_dl3_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -731,7 +731,7 @@ subroutine h5ltread_dataset_f_int1(loc_id,&
   integer function h5ltread_dataset_int1_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_INT1_C'::h5ltread_dataset_int1_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_INT1_C'::h5ltread_dataset_int1_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(HID_T),   intent(IN) :: loc_id                  ! file or group identifier
@@ -794,7 +794,7 @@ subroutine h5ltread_dataset_f_int2(loc_id,&
   integer function h5ltread_dataset_int2_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_INT2_C'::h5ltread_dataset_int2_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_INT2_C'::h5ltread_dataset_int2_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -858,7 +858,7 @@ subroutine h5ltread_dataset_f_int3(loc_id,&
   integer function h5ltread_dataset_int3_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_INT3_C'::h5ltread_dataset_int3_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_INT3_C'::h5ltread_dataset_int3_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -924,7 +924,7 @@ subroutine h5ltread_dataset_f_float1(loc_id,&
   integer function h5ltread_dataset_fl1_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_FL1_C'::h5ltread_dataset_fl1_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_FL1_C'::h5ltread_dataset_fl1_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -988,7 +988,7 @@ subroutine h5ltread_dataset_f_float2(loc_id,&
   integer function h5ltread_dataset_fl2_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_FL2_C'::h5ltread_dataset_fl2_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_FL2_C'::h5ltread_dataset_fl2_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -1052,7 +1052,7 @@ subroutine h5ltread_dataset_f_float3(loc_id,&
   integer function h5ltread_dataset_fl3_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_FL3_C'::h5ltread_dataset_fl3_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_FL3_C'::h5ltread_dataset_fl3_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -1116,7 +1116,7 @@ subroutine h5ltread_dataset_f_double1(loc_id,&
   integer function h5ltread_dataset_dl1_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_DL1_C'::h5ltread_dataset_dl1_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_DL1_C'::h5ltread_dataset_dl1_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -1179,7 +1179,7 @@ subroutine h5ltread_dataset_f_double2(loc_id,&
   integer function h5ltread_dataset_dl2_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_DL2_C'::h5ltread_dataset_dl2_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_DL2_C'::h5ltread_dataset_dl2_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -1243,7 +1243,7 @@ subroutine h5ltread_dataset_f_double3(loc_id,&
   integer function h5ltread_dataset_dl3_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_DL3_C'::h5ltread_dataset_dl3_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_DL3_C'::h5ltread_dataset_dl3_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -1307,7 +1307,7 @@ subroutine h5ltmake_dataset_int_f_1 (loc_id,&
   integer function h5ltmake_dataset_nint1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_NINT1_C'::h5ltmake_dataset_nint1_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_NINT1_C'::h5ltmake_dataset_nint1_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -1372,7 +1372,7 @@ subroutine h5ltmake_dataset_int_f_2 (loc_id,&
   integer function h5ltmake_dataset_nint2_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_NINT2_C'::h5ltmake_dataset_nint2_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_NINT2_C'::h5ltmake_dataset_nint2_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -1439,7 +1439,7 @@ subroutine h5ltmake_dataset_int_f_3 (loc_id,&
   integer function h5ltmake_dataset_nint3_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_NINT3_C'::h5ltmake_dataset_nint3_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_NINT3_C'::h5ltmake_dataset_nint3_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -1505,7 +1505,7 @@ subroutine h5ltmake_dataset_float_f_1 (loc_id,&
   integer function h5ltmake_dataset_nfl1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_NFL1_C'::h5ltmake_dataset_nfl1_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_NFL1_C'::h5ltmake_dataset_nfl1_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -1569,7 +1569,7 @@ subroutine h5ltmake_dataset_float_f_2 (loc_id,&
   integer function h5ltmake_dataset_nfl2_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_NFL2_C'::h5ltmake_dataset_nfl2_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_NFL2_C'::h5ltmake_dataset_nfl2_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -1634,7 +1634,7 @@ subroutine h5ltmake_dataset_float_f_3 (loc_id,&
   integer function h5ltmake_dataset_nfl3_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_NFL3_C'::h5ltmake_dataset_nfl3_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_NFL3_C'::h5ltmake_dataset_nfl3_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -1702,7 +1702,7 @@ subroutine h5ltmake_dataset_double_f_1 (loc_id,&
   integer function h5ltmake_dataset_ndl1_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_NDL1_C'::h5ltmake_dataset_ndl1_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_NDL1_C'::h5ltmake_dataset_ndl1_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -1768,7 +1768,7 @@ subroutine h5ltmake_dataset_double_f_2 (loc_id,&
   integer function h5ltmake_dataset_ndl2_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_NDL2_C'::h5ltmake_dataset_ndl2_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_NDL2_C'::h5ltmake_dataset_ndl2_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -1833,7 +1833,7 @@ subroutine h5ltmake_dataset_double_f_3 (loc_id,&
   integer function h5ltmake_dataset_ndl3_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_NDL3_C'::h5ltmake_dataset_ndl3_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_NDL3_C'::h5ltmake_dataset_ndl3_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -1898,7 +1898,7 @@ subroutine h5ltread_dataset_int_f_1(loc_id,&
   integer function h5ltread_dataset_nint1_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_NINT1_C'::h5ltread_dataset_nint1_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_NINT1_C'::h5ltread_dataset_nint1_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -1961,7 +1961,7 @@ subroutine h5ltread_dataset_int_f_2(loc_id,&
   integer function h5ltread_dataset_nint2_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_NINT2_C'::h5ltread_dataset_nint2_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_NINT2_C'::h5ltread_dataset_nint2_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -2023,7 +2023,7 @@ subroutine h5ltread_dataset_int_f_3(loc_id,&
   integer function h5ltread_dataset_nint3_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_NINT3_C'::h5ltread_dataset_nint3_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_NINT3_C'::h5ltread_dataset_nint3_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -2086,7 +2086,7 @@ subroutine h5ltread_dataset_float_f_1(loc_id,&
   integer function h5ltread_dataset_nfl1_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_NFL1_C'::h5ltread_dataset_nfl1_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_NFL1_C'::h5ltread_dataset_nfl1_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -2149,7 +2149,7 @@ subroutine h5ltread_dataset_float_f_2(loc_id,&
   integer function h5ltread_dataset_nfl2_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_NFL2_C'::h5ltread_dataset_nfl2_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_NFL2_C'::h5ltread_dataset_nfl2_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -2211,7 +2211,7 @@ subroutine h5ltread_dataset_float_f_3(loc_id,&
   integer function h5ltread_dataset_nfl3_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_NFL3_C'::h5ltread_dataset_nfl3_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_NFL3_C'::h5ltread_dataset_nfl3_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -2273,7 +2273,7 @@ subroutine h5ltread_dataset_double_f_1(loc_id,&
   integer function h5ltread_dataset_ndl1_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_NDL1_C'::h5ltread_dataset_ndl1_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_NDL1_C'::h5ltread_dataset_ndl1_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -2336,7 +2336,7 @@ subroutine h5ltread_dataset_double_f_2(loc_id,&
   integer function h5ltread_dataset_ndl2_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_NDL2_C'::h5ltread_dataset_ndl2_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_NDL2_C'::h5ltread_dataset_ndl2_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -2398,7 +2398,7 @@ subroutine h5ltread_dataset_double_f_3(loc_id,&
   integer function h5ltread_dataset_ndl3_c(loc_id,namelen,dset_name,type_id,buf,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_NDL3_C'::h5ltread_dataset_ndl3_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_NDL3_C'::h5ltread_dataset_ndl3_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -2458,7 +2458,7 @@ subroutine h5ltmake_dataset_string_f(loc_id,&
   integer function h5ltmake_dataset_string_c(loc_id,namelen,dset_name,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTMAKE_DATASET_STRING_C'::h5ltmake_dataset_string_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_STRING_C'::h5ltmake_dataset_string_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -2514,7 +2514,7 @@ subroutine h5ltread_dataset_string_f(loc_id,&
   integer function h5ltread_dataset_string_c(loc_id,namelen,dset_name,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTREAD_DATASET_STRING_C'::h5ltread_dataset_string_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTREAD_DATASET_STRING_C'::h5ltread_dataset_string_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -2583,7 +2583,7 @@ subroutine h5ltset_attribute_int_f(loc_id,&
   integer function h5ltset_attribute_int_c(loc_id,namelen,dset_name,attrlen,attr_name,size,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTSET_ATTRIBUTE_INT_C'::h5ltset_attribute_int_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTSET_ATTRIBUTE_INT_C'::h5ltset_attribute_int_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: attr_name
@@ -2649,7 +2649,7 @@ subroutine h5ltset_attribute_float_f(loc_id,&
   integer function h5ltset_attribute_float_c(loc_id,namelen,dset_name,attrlen,attr_name,size,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTSET_ATTRIBUTE_FLOAT_C'::h5ltset_attribute_float_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTSET_ATTRIBUTE_FLOAT_C'::h5ltset_attribute_float_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: attr_name
@@ -2715,7 +2715,7 @@ subroutine h5ltset_attribute_double_f(loc_id,&
   integer function h5ltset_attribute_double_c(loc_id,namelen,dset_name,attrlen,attr_name,size,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTSET_ATTRIBUTE_DOUBLE_C'::h5ltset_attribute_double_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTSET_ATTRIBUTE_DOUBLE_C'::h5ltset_attribute_double_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: attr_name
@@ -2780,7 +2780,7 @@ subroutine h5ltset_attribute_string_f(loc_id,&
   integer function h5ltset_attribute_string_c(loc_id,namelen,dset_name,attrlen,attr_name,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTSET_ATTRIBUTE_STRING_C'::h5ltset_attribute_string_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTSET_ATTRIBUTE_STRING_C'::h5ltset_attribute_string_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: attr_name
@@ -2845,7 +2845,7 @@ subroutine h5ltget_attribute_int_f(loc_id,&
   integer function h5ltget_attribute_int_c(loc_id,namelen,dset_name,attrlen,attr_name,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTGET_ATTRIBUTE_INT_C'::h5ltget_attribute_int_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTGET_ATTRIBUTE_INT_C'::h5ltget_attribute_int_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: attr_name
@@ -2909,7 +2909,7 @@ subroutine h5ltget_attribute_float_f(loc_id,&
   integer function h5ltget_attribute_float_c(loc_id,namelen,dset_name,attrlen,attr_name,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTGET_ATTRIBUTE_FLOAT_C'::h5ltget_attribute_float_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTGET_ATTRIBUTE_FLOAT_C'::h5ltget_attribute_float_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: attr_name
@@ -2972,7 +2972,7 @@ subroutine h5ltget_attribute_double_f(loc_id,&
   integer function h5ltget_attribute_double_c(loc_id,namelen,dset_name,attrlen,attr_name,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTGET_ATTRIBUTE_DOUBLE_C'::h5ltget_attribute_double_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTGET_ATTRIBUTE_DOUBLE_C'::h5ltget_attribute_double_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: attr_name
@@ -3035,7 +3035,7 @@ subroutine h5ltget_attribute_string_f(loc_id,&
   integer function h5ltget_attribute_string_c(loc_id,namelen,dset_name,attrlen,attr_name,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTGET_ATTRIBUTE_STRING_C'::h5ltget_attribute_string_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTGET_ATTRIBUTE_STRING_C'::h5ltget_attribute_string_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: attr_name
@@ -3099,7 +3099,7 @@ subroutine h5ltget_dataset_ndims_f(loc_id,&
   integer function h5ltget_dataset_ndims_c(loc_id,namelen,dset_name,rank)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTGET_DATASET_NDIMS_C'::h5ltget_dataset_ndims_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTGET_DATASET_NDIMS_C'::h5ltget_dataset_ndims_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -3154,7 +3154,7 @@ integer function h5ltfind_dataset_f(loc_id,&
   integer function h5ltfind_dataset_c(loc_id,namelen,dset_name)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTFIND_DATASET_C'::h5ltfind_dataset_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTFIND_DATASET_C'::h5ltfind_dataset_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -3214,7 +3214,7 @@ subroutine h5ltget_dataset_info_f(loc_id,&
   integer function h5ltget_dataset_info_c(loc_id,namelen,dset_name,dims,type_class,type_size)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTGET_DATASET_INFO_C'::h5ltget_dataset_info_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTGET_DATASET_INFO_C'::h5ltget_dataset_info_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -3281,7 +3281,7 @@ subroutine h5ltget_attribute_ndims_f(loc_id,&
   integer function h5ltget_attribute_ndims_c(loc_id,namelen,dset_name,attrlen,attr_name,rank)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTGET_ATTRIBUTE_NDIMS_C'::h5ltget_attribute_ndims_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTGET_ATTRIBUTE_NDIMS_C'::h5ltget_attribute_ndims_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: attr_name
@@ -3349,7 +3349,7 @@ subroutine h5ltget_attribute_info_f(loc_id,&
   integer function h5ltget_attribute_info_c(loc_id,namelen,dset_name,attrlen,attr_name,dims,type_class,type_size)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5LTGET_ATTRIBUTE_INFO_C'::h5ltget_attribute_info_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTGET_ATTRIBUTE_INFO_C'::h5ltget_attribute_info_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: attr_name

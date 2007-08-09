@@ -11,55 +11,6 @@
 	</Platforms>
 	<Configurations>
 		<Configuration
-			Name="AlphaRel|Win32"
-			OutputDirectory=".\toolsli0"
-			IntermediateDirectory=".\toolsli0"
-			ConfigurationType="4"
-			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE">
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="2"
-				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..,..\..\src"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5USEDLL_"
-				StringPooling="TRUE"
-				RuntimeLibrary="4"
-				EnableFunctionLevelLinking="TRUE"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\toolsli0/toolslibD.pch"
-				AssemblerListingLocation=".\toolsli0/"
-				ObjectFile=".\toolsli0/"
-				ProgramDataBaseFileName=".\toolsli0/"
-				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				CompileAs="0"/>
-			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLibrarianTool"
-				OutputFile=".\toolsli0\toolslibD.lib"
-				SuppressStartupBanner="TRUE"/>
-			<Tool
-				Name="VCMIDLTool"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
-			<Tool
-				Name="VCResourceCompilerTool"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-		</Configuration>
-		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory=".\..\..\..\tools\toolslibD\Debug"
 			IntermediateDirectory=".\..\..\..\tools\toolslibD\Debug"
@@ -98,53 +49,6 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				Culture="1033"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-		</Configuration>
-		<Configuration
-			Name="AlphaDbg|Win32"
-			OutputDirectory=".\toolslib"
-			IntermediateDirectory=".\toolslib"
-			ConfigurationType="4"
-			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE">
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="0"
-				AdditionalIncludeDirectories="..,..\..\src"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5USEDLL_"
-				RuntimeLibrary="5"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\toolslib/toolslibD.pch"
-				AssemblerListingLocation=".\toolslib/"
-				ObjectFile=".\toolslib/"
-				ProgramDataBaseFileName=".\toolslib/"
-				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				DebugInformationFormat="1"
-				CompileAs="0"/>
-			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLibrarianTool"
-				OutputFile=".\toolslib\toolslibD.lib"
-				SuppressStartupBanner="TRUE"/>
-			<Tool
-				Name="VCMIDLTool"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
-			<Tool
-				Name="VCResourceCompilerTool"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -214,23 +118,7 @@
 			<File
 				RelativePath="..\..\..\tools\lib\h5diff.c">
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
@@ -249,23 +137,7 @@
 			<File
 				RelativePath="..\..\..\tools\lib\h5diff_array.c">
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
@@ -284,23 +156,7 @@
 			<File
 				RelativePath="..\..\..\tools\lib\h5diff_attr.c">
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
@@ -319,23 +175,7 @@
 			<File
 				RelativePath="..\..\..\tools\lib\h5diff_dset.c">
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
@@ -354,23 +194,7 @@
 			<File
 				RelativePath="..\..\..\tools\lib\h5diff_util.c">
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
@@ -389,23 +213,7 @@
 			<File
 				RelativePath="..\..\..\tools\lib\h5tools.c">
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
@@ -424,23 +232,7 @@
 			<File
 				RelativePath="..\..\..\tools\lib\h5tools_filters.c">
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
@@ -459,23 +251,7 @@
 			<File
 				RelativePath="..\..\..\tools\lib\h5tools_ref.c">
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
@@ -494,23 +270,7 @@
 			<File
 				RelativePath="..\..\..\tools\lib\h5tools_str.c">
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
@@ -529,23 +289,7 @@
 			<File
 				RelativePath="..\..\..\tools\lib\h5tools_type.c">
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
@@ -564,23 +308,7 @@
 			<File
 				RelativePath="..\..\..\tools\lib\h5tools_utils.c">
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
@@ -599,23 +327,7 @@
 			<File
 				RelativePath="..\..\..\tools\lib\h5trav.c">
 				<FileConfiguration
-					Name="AlphaRel|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="AlphaDbg|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"

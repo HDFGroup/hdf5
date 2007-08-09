@@ -68,7 +68,7 @@ subroutine h5immake_image_8bit_f(loc_id,&
   integer function h5immake_image_8bit_c(loc_id,namelen,dset_name,width,height,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5IMMAKE_IMAGE_8BIT_C'::h5immake_image_8bit_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5IMMAKE_IMAGE_8BIT_C'::h5immake_image_8bit_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -128,7 +128,7 @@ subroutine h5imread_image_f(loc_id,&
   integer function h5imread_image_c(loc_id,namelen,dset_name,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5IMREAD_IMAGE_C'::h5imread_image_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5IMREAD_IMAGE_C'::h5imread_image_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -192,7 +192,7 @@ subroutine h5immake_image_24bit_f(loc_id,&
   integer function h5immake_image_24bit_c(loc_id,namelen,dset_name,ilen,il,width,height,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5IMMAKE_IMAGE_24BIT_C'::h5immake_image_24bit_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5IMMAKE_IMAGE_24BIT_C'::h5immake_image_24bit_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: il
@@ -266,7 +266,7 @@ subroutine h5imget_image_info_f(loc_id,&
   integer function h5imget_image_info_c(loc_id,namelen,dset_name,width,height,planes,npals,ilen,interlace)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5IMGET_IMAGE_INFO_C'::h5imget_image_info_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5IMGET_IMAGE_INFO_C'::h5imget_image_info_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: interlace
@@ -327,7 +327,7 @@ integer function h5imis_image_f(loc_id,&
   integer function h5imis_image_c(loc_id,namelen,dset_name)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5IMIS_IMAGE_C'::h5imis_image_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5IMIS_IMAGE_C'::h5imis_image_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -386,7 +386,7 @@ subroutine h5immake_palette_f(loc_id,&
   integer function h5immake_palette_c(loc_id,namelen,dset_name,pal_dims,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5IMMAKE_PALETTE_C'::h5immake_palette_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5IMMAKE_PALETTE_C'::h5immake_palette_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -445,7 +445,7 @@ subroutine h5imlink_palette_f(loc_id,&
   integer function h5imlink_palette_c(loc_id,namelen,dset_name,ilen,pal_name)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5IMLINK_PALETTE_C'::h5imlink_palette_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5IMLINK_PALETTE_C'::h5imlink_palette_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: pal_name
@@ -507,7 +507,7 @@ subroutine h5imunlink_palette_f(loc_id,&
   integer function h5imunlink_palette_c(loc_id,namelen,dset_name,ilen,pal_name)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5IMUNLINK_PALETTE_C'::h5imunlink_palette_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5IMUNLINK_PALETTE_C'::h5imunlink_palette_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   !DEC$ATTRIBUTES reference :: pal_name
@@ -568,7 +568,7 @@ subroutine h5imget_npalettes_f(loc_id,&
   integer function h5imget_npalettes_c(loc_id,namelen,dset_name,npals)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5IMGET_NPALETTES_C'::h5imget_npalettes_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5IMGET_NPALETTES_C'::h5imget_npalettes_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id             ! file or group identifier 
@@ -628,7 +628,7 @@ subroutine h5imget_palette_info_f(loc_id,&
   integer function h5imget_palette_info_c(loc_id,namelen,dset_name,pal_number,dims)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5IMGET_PALETTE_INFO_C'::h5imget_palette_info_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5IMGET_PALETTE_INFO_C'::h5imget_palette_info_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                ! file or group identifier 
@@ -690,7 +690,7 @@ subroutine h5imget_palette_f(loc_id,&
   integer function h5imget_palette_c(loc_id,namelen,dset_name,pal_number,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5IMGET_PALETTE_C'::h5imget_palette_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5IMGET_PALETTE_C'::h5imget_palette_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
@@ -745,7 +745,7 @@ integer function h5imis_palette_f(loc_id,&
   integer function h5imis_palette_c(loc_id,namelen,dset_name)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-  !MS$ATTRIBUTES C,reference,alias:'_H5IMIS_PALETTE_C'::h5imis_palette_c
+  !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5IMIS_PALETTE_C'::h5imis_palette_c
   !DEC$ ENDIF
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
