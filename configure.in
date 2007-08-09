@@ -167,32 +167,12 @@ case $host_os in
     ;;
 esac
 
-AC_ARG_ENABLE([hsizet],
-              [AC_HELP_STRING([--disable-hsizet],
-                              [Datasets can normally be larger than
-                               memory and/or files but some compilers are
-                               unable to handle this (including versions
-                               of GCC before 2.8.0). Disabling the
-                               feature causes dataset sizes to be
-                               restricted to the size of core memory, or
-                               'size_t'.])],
-              [HSIZET=$enableval])
-
 AC_MSG_CHECKING([for sizeof hsize_t and hssize_t])
-
 AC_SUBST(HSIZET)
-case $HSIZET in
-  no|small)
-    AC_MSG_RESULT([small])
-    HSIZET=small
-    ;;
-  *)
-    AC_MSG_RESULT([large])
-    HSIZET=large
-    AC_DEFINE([HAVE_LARGE_HSIZET], [1],
-              [Define if it's safe to use `long long' for hsize_t and hssize_t])
-    ;;
-esac
+AC_MSG_RESULT([large])
+HSIZET=large
+AC_DEFINE([HAVE_LARGE_HSIZET], [1],
+          [Define if it's safe to use `long long' for hsize_t and hssize_t])
 
 host_config="none"
 for f in $host_cpu-$host_vendor-$host_os \
