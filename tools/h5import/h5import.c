@@ -2837,7 +2837,7 @@ help(char *name)
   (void) fprintf(stdout, "\t	(6 X 3 X 5 x 2 x 4)  in a binary file with the rank and \n");
   (void) fprintf(stdout, "\t	dimension sizes specified and will save it in a chunked data-set\n");
   (void) fprintf(stdout, "\t	(of pattern 2 X 2 X 2 X 2 X 2) of 32-bit floating point in \n");
-  (void) fprintf(stdout, "\t	native format (as output-architecure is not specified). The \n");
+  (void) fprintf(stdout, "\t	native format (as output-architecture is not specified). The \n");
   (void) fprintf(stdout, "\t	first and the third dimension will be defined as unlimited. The \n");
   (void) fprintf(stdout, "\t	data-set will be compressed using GZIP and a compression level \n");
   (void) fprintf(stdout, "\t	of 7.\n");
