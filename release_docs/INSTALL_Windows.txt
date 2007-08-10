@@ -1916,16 +1916,11 @@ To generate your own H5tinit.c, follow the steps below.
         
     1. Open the solution typegen.sln from the folder .\windows\misc\typgen.
         
-    2. Build H5tinit.exe
+    2. Build H5tinit.exe and create H5tinit.c
     
         Make sure your configuration is set to Debug, and build the project.  
-        This will generate H5tinit.exe in the .\src folder.
-        
-    3. Create H5tinit.c
-    
-        From a command prompt, go to the .\src directory and issue the command:
-            .\H5tinit.exe > H5tinit.c
-        This will generate our H5tinit.c file.
+        This will generate H5tinit.exe in the .\src folder.  The build process
+        will also run this program to generate H5tinit.c automatically.
         
 
 Note:

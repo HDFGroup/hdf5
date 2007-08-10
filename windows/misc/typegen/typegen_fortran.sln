@@ -1,0 +1,49 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "h5tinit", "h5tinit\h5tinit.vcproj", "{B123D196-2F43-4FEB-80B5-990F06DED319}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "h5fortran_detect", "h5fortran_detect\h5fortran_detect.vfproj", "{4505FF13-2C16-4348-8989-BB10AF85FB95}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "h5fort_type_defines", "h5fort_type_defines\h5fort_type_defines.vfproj", "{4D3CE514-F22D-4FBC-82FF-7A3BE15DAE10}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4505FF13-2C16-4348-8989-BB10AF85FB95} = {4505FF13-2C16-4348-8989-BB10AF85FB95}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "H5match_types", "h5match_types\h5match_types.vcproj", "{B6430FB3-3BEF-48C3-84DD-98106C6F6113}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4D3CE514-F22D-4FBC-82FF-7A3BE15DAE10} = {4D3CE514-F22D-4FBC-82FF-7A3BE15DAE10}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectDependencies) = postSolution
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{B123D196-2F43-4FEB-80B5-990F06DED319}.Debug.ActiveCfg = Debug|Win32
+		{B123D196-2F43-4FEB-80B5-990F06DED319}.Debug.Build.0 = Debug|Win32
+		{B123D196-2F43-4FEB-80B5-990F06DED319}.Release.ActiveCfg = Release|Win32
+		{B123D196-2F43-4FEB-80B5-990F06DED319}.Release.Build.0 = Release|Win32
+		{4505FF13-2C16-4348-8989-BB10AF85FB95}.Debug.ActiveCfg = Debug|Win32
+		{4505FF13-2C16-4348-8989-BB10AF85FB95}.Debug.Build.0 = Debug|Win32
+		{4505FF13-2C16-4348-8989-BB10AF85FB95}.Release.ActiveCfg = Release|Win32
+		{4505FF13-2C16-4348-8989-BB10AF85FB95}.Release.Build.0 = Release|Win32
+		{4D3CE514-F22D-4FBC-82FF-7A3BE15DAE10}.Debug.ActiveCfg = Debug|Win32
+		{4D3CE514-F22D-4FBC-82FF-7A3BE15DAE10}.Debug.Build.0 = Debug|Win32
+		{4D3CE514-F22D-4FBC-82FF-7A3BE15DAE10}.Release.ActiveCfg = Release|Win32
+		{4D3CE514-F22D-4FBC-82FF-7A3BE15DAE10}.Release.Build.0 = Release|Win32
+		{B6430FB3-3BEF-48C3-84DD-98106C6F6113}.Debug.ActiveCfg = Debug|Win32
+		{B6430FB3-3BEF-48C3-84DD-98106C6F6113}.Debug.Build.0 = Debug|Win32
+		{B6430FB3-3BEF-48C3-84DD-98106C6F6113}.Release.ActiveCfg = Release|Win32
+		{B6430FB3-3BEF-48C3-84DD-98106C6F6113}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

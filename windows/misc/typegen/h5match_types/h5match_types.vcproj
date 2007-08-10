@@ -3,6 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="H5match_types"
+	ProjectGUID="{B6430FB3-3BEF-48C3-84DD-98106C6F6113}"
 	SccProjectName=""
 	SccLocalPath="">
 	<Platforms>
@@ -21,7 +22,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../../fortran/src,../../../src"
+				AdditionalIncludeDirectories="../../../../fortran/src,../../../../src"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"
@@ -38,7 +39,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="../../../fortran/src/H5match_types.exe"
+				OutputFile="../../../../fortran/src/H5match_types.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
@@ -50,7 +51,9 @@
 				TypeLibraryName=".\Debug/H5match_types.tlb"
 				HeaderFileName=""/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCPostBuildEventTool"
+				Description="Generating H5f90i_gen.h and H5fortran_types.f90"
+				CommandLine="$(TargetPath)"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -82,6 +85,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
+				AdditionalIncludeDirectories="../../../../fortran/src,../../../../src"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				StringPooling="TRUE"
 				RuntimeLibrary="4"
@@ -97,7 +101,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile=".\Release/H5match_types.exe"
+				OutputFile="../../../../fortran/src/H5match_types.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				ProgramDatabaseFile=".\Release/H5match_types.pdb"
@@ -108,7 +112,9 @@
 				TypeLibraryName=".\Release/H5match_types.tlb"
 				HeaderFileName=""/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCPostBuildEventTool"
+				Description="Generating H5f90i_gen.h and H5fortran_types.f90"
+				CommandLine="$(TargetPath)"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -136,7 +142,7 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat;f90;for;f;fpp">
 			<File
-				RelativePath="..\..\..\fortran\src\H5match_types.c">
+				RelativePath="..\..\..\..\fortran\src\H5match_types.c">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool

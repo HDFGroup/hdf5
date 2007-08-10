@@ -3,6 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="h5tinit"
+	RootNamespace="h5tinit"
 	SccProjectName=""
 	SccLocalPath="">
 	<Platforms>
@@ -37,7 +38,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile=".\Release/h5tinit.exe"
+				OutputFile="../../../../src/h5tinit.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				ProgramDatabaseFile=".\Release/h5tinit.pdb"
@@ -48,7 +49,9 @@
 				TypeLibraryName=".\Release/h5tinit.tlb"
 				HeaderFileName=""/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCPostBuildEventTool"
+				Description="Generating H5tinit.c"
+				CommandLine="$(TargetPath) &gt;$(TargetDir)H5tinit.c"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -107,7 +110,9 @@
 				TypeLibraryName=".\Debug/h5tinit.tlb"
 				HeaderFileName=""/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCPostBuildEventTool"
+				Description="Generating H5tinit.c"
+				CommandLine="$(TargetPath) &gt;$(TargetDir)H5tinit.c"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
