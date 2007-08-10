@@ -1,39 +1,46 @@
-HDF5 version 1.6.6-pre3 currently under development
+HDF5 version 1.6.6, August 2007
 Please refer to the release_docs/INSTALL file for installation instructions.
 ------------------------------------------------------------------------------
 
-This release is almost fully functional for the entire API defined in the
-documentation, see the RELEASE.txt file in the release_docs directory for information
-specific to this release of the library.  The INSTALL file contains
-instructions on compiling and installing the library.  The INSTALL_parallel
-file contains instructions on installing the parallel version of the
-library.  The INSTALL* files can be found in the release_docs/ directory.
+This release is fully functional for the entire API defined in the
+documentation.  
 
-Documentation for this release is in the html directory.  Start with the
-"index.html" in that directory.
+See the RELEASE.txt file in the release_docs/ directory for information 
+specific to this release of the library.  
 
-Four mailing lists are currently set up for use with the HDF5
-library.
+Several INSTALL* files can be found in the release_docs/ directory.
+The INSTALL file contains instructions for compiling and installing the 
+library.  The INSTALL_parallel file contains instructions for installing the 
+parallel version of the library.  Other INSTALL* files have similarly
+descriptive names.
+
+Documentation for this release will be released separately; it is not 
+included in the source code tar ball.  The documentation tar ball will
+include a doc/html/ directory; start with the file "index.html" in that 
+directory.  An online document set for current release can also be found
+online at http:/hdfgroup.org/HDF5/doc/.
+
+Several mailing lists are currently set up for use with the HDF5 library:
 
    news         - For announcements of HDF5 related developments,
-		  not a discussion list.
+                  not a discussion list.
 
    hdf-forum    - For general discussion of the HDF5 library with
-		  other users.
+                  other users.
 
-   hdf5dev      - For discussion of the HDF5 library development
-		  with developers and other interested parties.
+   hdf5dev      - For discussion of HDF5 library development
+                  with developers and other interested parties.
 
 To subscribe to a list, send mail to "<list>-subscribe@hdfgroup.org".
-where <list> is the name of the list.
-E.g., mail hdf5-subscribe@hdfgroup.org
+where <list> is the name of the list.  E.g., 
+    mail hdf5-subscribe@hdfgroup.org
 
 Messages to be sent to the list should be sent to "<list>@hdfgroup.org".
 
 Periodic code snapshots are provided at the following URL:
     ftp://ftp.hdfgroup.uiuc.edu/pub/outgoing/hdf5/snapshots
-Please read the README.txt file in that directory before working with a library
-snapshot.
+Please read the README.txt file in that directory before working with a 
+library snapshot.
 
 The HDF5 website is located at http://hdfgroup.org/HDF5/
 
