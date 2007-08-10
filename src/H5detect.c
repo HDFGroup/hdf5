@@ -356,7 +356,7 @@ precision (detected_t *d)
     COMP_ALIGN = (size_t)((char*)(&(s.x)) - (char*)(&s));                     \
 }
 
-#if defined(H5_HAVE_LONGJMP) && defined(H5_HAVE_SIGNAL) && defined(H5_HAVE_SIGLONGJMP)
+#if defined(H5_HAVE_LONGJMP) && defined(H5_HAVE_SIGNAL)
 #define ALIGNMENT(TYPE,INFO) {						      \
     char		*volatile _buf=NULL;				      \
     volatile TYPE	_val=1;						      \
@@ -493,7 +493,9 @@ sigbus_handler(int UNUSED signo)
 {
     signal(SIGBUS, sigbus_handler);
     longjmp(jbuf_g, 1);
+#ifdef H5_HAVE_SIGLONGJMP
     siglongjmp(jbuf_g, 1);
+#endif /* H5_HAVE_SIGLONGJMP */
 }
 
 
