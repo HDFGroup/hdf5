@@ -2040,7 +2040,7 @@ H5AC_resize_pinned_entry(H5F_t * f,
          ( H5C_get_trace_file_ptr(f->shared->cache, &trace_file_ptr) >= 0 ) &&
          ( trace_file_ptr != NULL ) ) {
 
-        sprintf(trace, "H5AC_resize_pinned_entry 0x%lx %d %d",
+        sprintf(trace, "H5AC_resize_pinned_entry 0x%lx %d",
 	        (unsigned long)(((H5C_cache_entry_t *)thing)->addr),
 		(int)new_size);
     }
@@ -2611,7 +2611,6 @@ H5AC_get_cache_auto_resize_config(H5AC_t * cache_ptr,
     config_ptr->open_trace_file        = FALSE;
     config_ptr->close_trace_file       = FALSE;
     config_ptr->trace_file_name[0]     = '\0';
-    config_ptr->set_evictions_enabled  = FALSE;
     config_ptr->evictions_enabled      = evictions_enabled;
     config_ptr->set_initial_size       = internal_config.set_initial_size;
     config_ptr->initial_size           = internal_config.initial_size;
@@ -2827,7 +2826,6 @@ H5AC_set_cache_auto_resize_config(H5AC_t * cache_ptr,
     /* const char *        fcn_name = "H5AC_set_cache_auto_resize_config"; */
     herr_t              result;
     herr_t              ret_value = SUCCEED;      /* Return value */
-    int                 name_len;
     H5C_auto_size_ctl_t internal_config;
 #if H5AC__TRACE_FILE_ENABLED
     H5AC_cache_config_t trace_config = H5AC__DEFAULT_CACHE_CONFIG;
@@ -2941,16 +2939,14 @@ H5AC_set_cache_auto_resize_config(H5AC_t * cache_ptr,
                     "H5C_set_cache_auto_resize_config() failed.")
     }
 
-    if ( config_ptr->set_evictions_enabled ) {
 
-        result = H5C_set_evictions_enabled((H5C_t *)cache_ptr,
-			                   config_ptr->evictions_enabled);
+    result = H5C_set_evictions_enabled((H5C_t *)cache_ptr,
+                                       config_ptr->evictions_enabled);
 
-	if ( result < 0 ) {
+    if ( result < 0 ) {
 
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                        "H5C_set_evictions_enabled() failed.")
-	}
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                    "H5C_set_evictions_enabled() failed.")
     }
 
 #ifdef H5_HAVE_PARALLEL
@@ -2973,14 +2969,13 @@ done:
          ( trace_file_ptr != NULL ) ) {
 
 	HDfprintf(trace_file_ptr, 
-                  "%s %d %d %d %d \"%s\" %d %d %d %d %f %d %d %ld %d %f %f %d %d %d %f %f %d %d %d %d %f %d %d\n", 
+                  "%s %d %d %d %d \"%s\" %d %d %d %f %d %d %ld %d %f %f %d %d %d %f %f %d %d %d %d %f %d %d\n", 
 		  "H5AC_set_cache_auto_resize_config",
 		  trace_config.version,
 		  (int)(trace_config.rpt_fcn_enabled),
 		  (int)(trace_config.open_trace_file),
 		  (int)(trace_config.close_trace_file),
 		  trace_config.trace_file_name,
-		  (int)(trace_config.set_evictions_enabled),
 		  (int)(trace_config.evictions_enabled),
 		  (int)(trace_config.set_initial_size),
 		  (int)(trace_config.initial_size),
@@ -3041,8 +3036,8 @@ done:
  *
  *	      - Added code testing the evictions enabled field.  At 
  *	        present this consists of verifying that if 
- *	        set_evictions_enabled is TRUE and evictions_enabled
- *	        is FALSE, then automatic cache resizing in disabled.
+ *	        evictions_enabled is FALSE, then automatic cache 
+ *		resizing in disabled.
  *
  *	        					JRM - 7/28/07
  *
@@ -3112,13 +3107,6 @@ H5AC_validate_config(H5AC_cache_config_t * config_ptr)
 	}
     }
 
-    if ( ( config_ptr->set_evictions_enabled != TRUE ) &&
-         ( config_ptr->set_evictions_enabled != FALSE ) ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-            "config_ptr->set_evictions_enabled must be either TRUE or FALSE.")
-    }
-
     if ( ( config_ptr->evictions_enabled != TRUE ) &&
          ( config_ptr->evictions_enabled != FALSE ) ) {
 
@@ -3126,8 +3114,7 @@ H5AC_validate_config(H5AC_cache_config_t * config_ptr)
             "config_ptr->evictions_enabled must be either TRUE or FALSE.")
     }
 
-    if ( ( config_ptr->set_evictions_enabled == TRUE ) &&
-         ( config_ptr->evictions_enabled == FALSE ) &&
+    if ( ( config_ptr->evictions_enabled == FALSE ) &&
 	 ( ( config_ptr->incr_mode != H5C_incr__off ) || 
 	   ( config_ptr->incr_mode != H5C_decr__off ) ) ) {
 

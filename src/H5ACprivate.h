@@ -201,7 +201,6 @@ extern hid_t H5AC_ind_dxpl_id;
   /* hbool_t     open_trace_file        = */ FALSE,                           \
   /* hbool_t     close_trace_file       = */ FALSE,                           \
   /* char        trace_file_name[]      = */ "",                              \
-  /* hbool_t     set_evictions_enabled  = */ FALSE,                           \
   /* hbool_t     evictions_enabled      = */ TRUE,                            \
   /* hbool_t     set_initial_size       = */ TRUE,                            \
   /* size_t      initial_size           = */ ( 1 * 1024 * 1024),              \

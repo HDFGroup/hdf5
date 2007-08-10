@@ -37,7 +37,7 @@
 #include "H5Fprivate.h"		/* File access				*/
 
 
-#define H5C_DO_SANITY_CHECKS		1
+#define H5C_DO_SANITY_CHECKS		0
 #define H5C_DO_EXTREME_SANITY_CHECKS	0
 
 /* This sanity checking constant was picked out of the air.  Increase
@@ -51,7 +51,7 @@
 /* H5C_COLLECT_CACHE_STATS controls overall collection of statistics
  * on cache activity.  In general, this #define should be set to 0.
  */
-#define H5C_COLLECT_CACHE_STATS	1
+#define H5C_COLLECT_CACHE_STATS	0
 
 /* H5C_COLLECT_CACHE_ENTRY_STATS controls collection of statistics
  * in individual cache entries.

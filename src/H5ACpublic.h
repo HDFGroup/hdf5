@@ -107,14 +107,9 @@ extern "C" {
  * 	The length of the path must not exceed H5AC__MAX_TRACE_FILE_NAME_LEN
  * 	characters.
  *
- * set_evictions_enabled: Boolean flag indicating whether the cache
- * 	evictions_enabled flag is to be set to the value specified
- * 	in the evictions_enabled field below.
- *
  * evictions_enabled:  Boolean field used to either report the current
- * 	evictions enabled status of the cache, or, when 
- * 	set_evictions_enabled is TRUE, to set the cache's evictions
- * 	enabled status.
+ * 	evictions enabled status of the cache, or to set the cache's 
+ *	evictions enabled status.
  *
  * 	In general, the metadata cache should always be allowed to 
  * 	evict entries.  However, in some cases it is advantageous to 
@@ -346,7 +341,6 @@ typedef struct H5AC_cache_config_t
     hbool_t                  close_trace_file;
     char                     trace_file_name[H5AC__MAX_TRACE_FILE_NAME_LEN + 1];
 
-    hbool_t                  set_evictions_enabled;
     hbool_t                  evictions_enabled;
 
     hbool_t                  set_initial_size;
