@@ -2596,7 +2596,7 @@ help(char *name)
   (void) fprintf(stdout, "\t    \n");
   (void) fprintf(stdout, "\t	Every input file is associated with a configuration file \n");
   (void) fprintf(stdout, "\t	also provided as an input to the utility. (See Section \n");
-  (void) fprintf(stdout, "\t	\"CONFIGURATION FILE\" to know how it is to be organised).\n");
+  (void) fprintf(stdout, "\t	\"CONFIGURATION FILE\" to know how it is to be organized).\n");
   (void) fprintf(stdout, "\t	The class, size and dimensions of the input data is \n");
   (void) fprintf(stdout, "\t	specified in this configuration file. A point to note is\n");
   (void) fprintf(stdout, "\t	that the floating point data in the ASCII text file may be\n");
