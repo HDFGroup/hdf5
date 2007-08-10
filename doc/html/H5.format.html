@@ -1703,7 +1703,7 @@ TABLE.list TD { border:none; }
         <tr>
           <td>Version</td>
           <td colspan=3>Reserved (zero)</td>
-        </td>
+        </tr>
           
         <tr>
           <td colspan=4>Data Segment Size<sup>L</sup></td>
@@ -1870,7 +1870,7 @@ TABLE.list TD { border:none; }
         <tr>
           <td>Version</td>
           <td colspan=3>Reserved (zero)</td>
-        </td>
+        </tr>
           
         <tr>
           <td colspan=4>Collection Size<sup>L</sup></td>
@@ -5131,8 +5131,8 @@ TABLE.list TD { border:none; }
     </div>
 
     <br>
-    <P>Class-specific information for compact layout (Class 0.  The dimensionality information
-       is in Dataspace message):
+    <P>Class-specific information for compact layout (Class 0):  (Note: The dimensionality information
+       is in the Dataspace message)
 
     <br>
     <div align=center>
@@ -5180,8 +5180,8 @@ TABLE.list TD { border:none; }
     </div>
 
     <br>
-    <P>Class-specific information for contiguous layout (Class 1.  The dimensionality information
-       is in Dataspace message):
+    <P>Class-specific information for contiguous layout (Class 1):  (Note: The dimensionality information
+       is in the Dataspace message)
 
     <br>
     <div align=center>
@@ -5320,7 +5320,7 @@ TABLE.list TD { border:none; }
 
     <P class=item><B>Description:</B> This message describes the
       filter pipeline which should be applied to the data stream by
-      providing filter identification numbers, flags, a name, an
+      providing filter identification numbers, flags, a name, and
       client data.</P>
 
     <P class=item><B>Format of Data:</B>
@@ -5387,7 +5387,7 @@ TABLE.list TD { border:none; }
     <div align=center>
       <table class=format>
 	<caption>
-	  Filter Pipeline Message
+	  Filter Description
 	</caption>
 
 	<tr>
@@ -5439,7 +5439,7 @@ TABLE.list TD { border:none; }
 	    values are allocated to specific filters by contacting the 
 	    HDF5 Development Team at
             <img src="Graphics/help.png" align=top height=16>.
-            The filter currently in library version 1.6.5 are 
+            The filters currently in library version 1.6.5 are 
 	    listed below:
 	    <table class=list>
 	      <tr>
@@ -5451,19 +5451,19 @@ TABLE.list TD { border:none; }
 	      <tr>
 		<td align=center><code>1</code></td>
 		<td>deflate</td>
-		<td>Deflation</td>
+		<td>GZIP deflate compression</td>
 	      </tr>
 
 	      <tr>
 		<td align=center><code>2</code></td>
 		<td>shuffle</td>
-		<td>Data shuffling</td>
+		<td>Data element shuffling</td>
 	      </tr>
 
 	      <tr>
 		<td align=center><code>3</code></td>
-		<td>flecther32</td>
-		<td>Flecther32 checksum</td>
+		<td>fletcher32</td>
+		<td>Fletcher32 checksum</td>
 	      </tr>
 
 	      <tr>
@@ -5550,7 +5550,7 @@ TABLE.list TD { border:none; }
       associated with any type of object which has an object header
       (groups, datasets, named types and spaces, etc.).
 
-    <p>Note: Attributes on an object must have unique names.  (The HDF5 library
+    <P class=item2>Note: Attributes on an object must have unique names.  (The HDF5 library
       currently enforces this by causing the creation of an attribute with
       a duplicate name to fail).  Attributes on different objects may have the 
       same name, however.
@@ -5577,8 +5577,8 @@ TABLE.list TD { border:none; }
 	</tr>
 
 	<tr>
-	  <td colspan=2>Type Size</td>
-	  <td colspan=2>Space Size</td>
+	  <td colspan=2>Datatype Size</td>
+	  <td colspan=2>Dataspace Size</td>
 	</tr>
 
 	<tr>
@@ -5586,11 +5586,11 @@ TABLE.list TD { border:none; }
 	</tr>
 
 	<tr>
-	  <td colspan=4><br>Type<br><br></td>
+	  <td colspan=4><br>Datatype<br><br></td>
 	</tr>
 
 	<tr>
-	  <td colspan=4><br>Space<br><br></td>
+	  <td colspan=4><br>Dataspace<br><br></td>
 	</tr>
 
 	<tr>
@@ -5646,16 +5646,16 @@ TABLE.list TD { border:none; }
 	</tr>
 
 	<tr>
-	  <td>Type Size</td>
-	  <td><P>The length of the datatype description in the Type
-	    field below.  Note that the Type field may contain
+	  <td>Datatype Size</td>
+	  <td><P>The length of the datatype description in the Datatype
+	    field below.  Note that the Datatype field may contain
 	    additional padding not represented by this field.</P></td>
 	</tr>
 
 	<tr>
-	  <td>Space Size</td>
-	  <td><P>The length of the dataspace description in the Space
-	    field below.  Note that the Space field may contain
+	  <td>Dataspace Size</td>
+	  <td><P>The length of the dataspace description in the Dataspace
+	    field below.  Note that the Dataspace field may contain
 	    additional padding not represented by this field.</P></td>
 	</tr>
 
@@ -5667,7 +5667,7 @@ TABLE.list TD { border:none; }
 	</tr>
 
 	<tr>
-	  <td>Type</td>
+	  <td>Datatype</td>
 	  <td><P>The datatype description follows the same format as
 	    described for the datatype object header message.  This
 	    field is padded with additional zero bytes to make it a
@@ -5675,7 +5675,7 @@ TABLE.list TD { border:none; }
 	</tr>
 
 	<tr>
-	  <td>Space</td>
+	  <td>Dataspace</td>
 	  <td><P>The dataspace description follows the same format as
 	    described for the dataspace object header message.  This
 	    field is padded with additional zero bytes to make it a
@@ -5773,12 +5773,12 @@ TABLE.list TD { border:none; }
 
 	      <tr>
 		<td align=center><code>0</code></td>
-		<td>Data type is <em>not</em> shared.</td>
+		<td>Datatype is <em>not</em> shared.</td>
 	      </tr>
 
 	      <tr>
 		<td align=center><code>1</code></td>
-		<td>Data type is shared.</td>
+		<td>Datatype is shared.</td>
 	      </tr>
 	    </table>
 	  </td>
@@ -5791,14 +5791,14 @@ TABLE.list TD { border:none; }
 	</tr>
 
 	<tr>
-	  <td>Type Size</td>
-	  <td><P>The length of the datatype description in the Type
+	  <td>Datatype Size</td>
+	  <td><P>The length of the datatype description in the Datatype
 	    field below.</P></td>
 	</tr>
 
 	<tr>
-	  <td>Space Size</td>
-	  <td><P>The length of the dataspace description in the Space
+	  <td>Dataspace Size</td>
+	  <td><P>The length of the dataspace description in the Dataspace
 	    field below.</P></td>
 	</tr>
 
@@ -5809,14 +5809,14 @@ TABLE.list TD { border:none; }
 	</tr>
 
 	<tr>
-	  <td>Type</td>
+	  <td>Datatype</td>
 	  <td><P>The datatype description follows the same format as
 	    described for the datatype object header message.  This
 	    field is <em>not</em> padded with additional bytes.</P></td>
 	</tr>
 
 	<tr>
-	  <td>Space</td>
+	  <td>Dataspace</td>
 	  <td><P>The dataspace description follows the same format as
 	    described for the dataspace object header message.  This
 	    field is <em>not</em> padded with additional bytes.</P></td>
@@ -6043,8 +6043,8 @@ TABLE.list TD { border:none; }
 
 	<tr>
 	  <td>Version</td>
-	  <td><P>The version number is used the changes in the format of shared 
-	    object message and is described here:</P>
+	  <td><P>The version number is used when there are changes in the format
+            of a shared object message and is described here:</P>
 	    <table class=list>
 	      <tr>
 		<th width="30%">Version</th>
@@ -6096,8 +6096,8 @@ TABLE.list TD { border:none; }
 
 	<tr>
 	  <td>Pointer</td>
-	  <td><P>This field points to the actual object header message to be 
-	    shared.</P></td>
+	  <td><P>The address of the object header
+            containing the message to be shared.</P></td>
 	</tr>
       </table>
     </div>
@@ -6138,8 +6138,8 @@ TABLE.list TD { border:none; }
 
 	<tr>
 	  <td>Version</td>
-	  <td><P>The version number is used the changes in the format of shared 
-	    object message and is described here:</P>
+	  <td><P>The version number is used when there are changes in the format
+            of a shared object message and is described here:</P>
 	    <table class=list>
 	      <tr>
 		<th width="30%">Version</th>
@@ -6150,7 +6150,7 @@ TABLE.list TD { border:none; }
 		<td align=center><code>2</code></td>
 		<td>Used by the library of version 1.6.1 and after.  In this version, 
 		  The Flags field is not used and the Pointer field contains the address
-		  of object header to be shared. </td>
+		  of the object header containing the message to be shared. </td>
 	      </tr>
 	    </table>
 	</tr>
@@ -6162,8 +6162,8 @@ TABLE.list TD { border:none; }
 
 	<tr>
 	  <td>Pointer</td>
-	  <td><P>This field points to the actual message.  It contains the address
-	    of the header message to be shared.</P></td>
+	  <td><P>The address of the object header
+            containing the message to be shared.</P></td>
 	</tr>
       </table>
     </div>
@@ -6176,7 +6176,7 @@ TABLE.list TD { border:none; }
     <P class=item><B>Status:</B> Optional, may be repeated.</P>
     <P class=item><B>Description:</B>  The object header continuation is the location
         in the file of more header messages for the current data object.  This can be
-        used when header blocks are large, or likely to change over time.</P>
+        used when header blocks become too large or are likely to change over time.</P>
 
     <P class=item><B>Format of Data:</B>
     <br>
