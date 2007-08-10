@@ -367,8 +367,10 @@
         (such as type conversion execution times and extensive invariant 
         condition checking). To enable this debugging, supply a
         comma-separated list of package names to the '--enable-debug'
-        switch (see doc/html/Debugging.html in the source directory
-        for a list of package names).
+        switch.  (See "Debugging HDF5 Applications" for a list of package 
+        names.  In the HDF5 documentation at http:hdfgroup.org/HDF5/doc/, 
+        select "HDF5 User's Guide from Release 1.4.5," then select 
+        "Debugging.")
 
         Debugging can be disabled by saying '--disable-debug'. The
         default debugging level for snapshots is a subset of the
@@ -402,9 +404,10 @@
         The HDF5 Library can be configured to be thread-safe (on a very
         large scale) with the '--enable-threadsafe' flag to the configure 
         script.  Some platforms may also require the '-with-pthread=INC,LIB' 
-        flag (or '--with-pthread=DIR') to the configure script.  Read the 
-        file doc/html/TechNotes/ThreadSafeLibrary.html in the source 
-        directory for further details.
+        flag (or '--with-pthread=DIR') to the configure script.  
+        (For further details, see "Thread Safe HDF5 Library Implementation" 
+        in the "HDF5 Technical Notes."  This document is included in the 
+        HDF5 documentation available at http:hdfgroup.org/HDF5/doc/.)
 
 4.3.12. Backward compatibility with HDF5 1.4* releases
         The 1.6 version of the HDF5 Library can be configured to operate
@@ -504,7 +507,8 @@
 
 
 5. Using the Library
-        Please see the HDF5 User's Manual in the doc/html directory.
+        Please see the HDF5 User's Guide and the HDF5 Reference Manual 
+        in the HDF5 documentation.
 
         C programs must include <hdf5.h> and link with the HDF5 Libraries.
         Additional libraries may also be necessary depending on whether
@@ -532,9 +536,8 @@
         for sample code.
 
         A Doxygen-generated Reference Manual for the C++ API is provided 
-        in the doc/html/cpplus_RM directory.  It can be invoked from 
-        index.html.  If an updated version or a different format is 
-        desired, users can re-generate this document with Doxygen.
+        in the HDF5 documentation.  If an updated version or a different 
+        format is desired, users can re-generate this document with Doxygen.
 
         When running in c++/src, Doxygen will put the generated html 
         files in doc/html/cpplus_RM.  Users may specify a different

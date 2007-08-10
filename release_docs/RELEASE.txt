@@ -215,6 +215,24 @@ Bug Fixes since HDF5-1.6.5 Release
                   DataType(IdComponent& obj, void* ref);
 
 
+Documentation
+=============
+
+    Documentation for this release will be released separately; it is not 
+    included in the source code tar ball.  The documentation tar ball will
+    include a doc/html/ directory; start with the file "index.html" in that 
+    directory.
+
+    Online documentation can be found on the THG (The HDF Group) web site:
+
+         http://hdfgroup.org/HDF5/doc/
+
+    The documentation tar ball will be posted shortly after the release on 
+    the THG (The HDF Group) ftp server (ftp.hdfgroup.org) in this directory:
+
+         /HDF5/docs/
+
+
 Platforms Tested
 ================
 
