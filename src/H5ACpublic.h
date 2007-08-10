@@ -107,6 +107,30 @@ extern "C" {
  * 	The length of the path must not exceed H5AC__MAX_TRACE_FILE_NAME_LEN
  * 	characters.
  *
+ * set_evictions_enabled: Boolean flag indicating whether the cache
+ * 	evictions_enabled flag is to be set to the value specified
+ * 	in the evictions_enabled field below.
+ *
+ * evictions_enabled:  Boolean field used to either report the current
+ * 	evictions enabled status of the cache, or, when 
+ * 	set_evictions_enabled is TRUE, to set the cache's evictions
+ * 	enabled status.
+ *
+ * 	In general, the metadata cache should always be allowed to 
+ * 	evict entries.  However, in some cases it is advantageous to 
+ * 	disable evictions briefly, and thereby postpone metadata 
+ * 	writes.  However, this must be done with care, as the cache
+ * 	can grow quickly.  If you do this, re-enable evictions as
+ * 	soon as possible and monitor cache size.
+ *
+ * 	At present, evictions can only be disabled if automatic
+ * 	cache resizing is also disabled (that is, ( incr_mode ==
+ *	H5C_incr__off ) && ( decr_mode == H5C_decr__off )).  There
+ *	is no logical reason why this should be so, but it simplifies
+ *	implementation and testing, and I can't think of any reason
+ *	why it would be desireable.  If you can think of one, I'll
+ *	revisit the issue.
+ *
  * set_initial_size: Boolean flag indicating whether the size of the
  *      initial size of the cache is to be set to the value given in
  *      the initial_size field.  If set_initial_size is FALSE, the
@@ -159,6 +183,9 @@ extern "C" {
  *              Note that this attempt will fail if the cache is already
  *              at its maximum size, or if the cache is not already using
  *              all available space.
+ *
+ *      Note that you must set decr_mode to H5C_incr__off if you 
+ *      disable metadata cache entry evictions.
  *
  * lower_hr_threshold: Lower hit rate threshold.  If the increment mode
  *      (incr_mode) is H5C_incr__threshold and the hit rate drops below the
@@ -216,6 +243,9 @@ extern "C" {
  *              attempt to reduce the cache size when the hit rate observed
  *              over the last epoch exceeds the value provided in the
  *              upper_hr_threshold field.
+ *
+ *      Note that you must set decr_mode to H5C_decr__off if you 
+ *      disable metadata cache entry evictions.
  *
  * upper_hr_threshold: Upper hit rate threshold.  The use of this field
  *      varies according to the current decr_mode:
@@ -315,6 +345,9 @@ typedef struct H5AC_cache_config_t
     hbool_t		     open_trace_file;
     hbool_t                  close_trace_file;
     char                     trace_file_name[H5AC__MAX_TRACE_FILE_NAME_LEN + 1];
+
+    hbool_t                  set_evictions_enabled;
+    hbool_t                  evictions_enabled;
 
     hbool_t                  set_initial_size;
     size_t                   initial_size;

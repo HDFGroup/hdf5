@@ -176,6 +176,18 @@
  *		entry is flushed to disk.
  *
  *
+ * In cases where memory is plentiful, and performance is an issue, it
+ * is useful to disable all cache evictions, and thereby postpone metadata
+ * writes.  The following field is used to implement this.
+ *
+ * evictions_enabled:  Boolean flag that is initialized to TRUE.  When
+ * 		this flag is set to FALSE, the metadata cache will not 
+ * 		attempt to evict entries to make space for newly protected
+ * 		entries, and instead the will grow without limit.
+ * 		
+ * 		Needless to say, this feature must be used with care.
+ *
+ *
  * The cache requires an index to facilitate searching for entries.  The
  * following fields support that index.
  *
@@ -801,6 +813,8 @@ struct H5C_t
     hbool_t			write_permitted;
 
     H5C_log_flush_func_t	log_flush;
+
+    hbool_t			evictions_enabled;
 
     int32_t                     index_len;
     size_t                      index_size;

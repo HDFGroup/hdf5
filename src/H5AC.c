@@ -2537,6 +2537,15 @@ done:
  *		JRM - 6/8/06
  *		Added support for the new trace file related fields.
  *
+ *		JRM - 7/28/07
+ *		Added support for the new evictions enabled related fields.
+ *		
+ *		Observe that H5AC_get_cache_auto_resize_config() and 
+ *		H5AC_set_cache_auto_resize_config() are becoming generic
+ *		metadata cache configuration routines as they gain 
+ *		switches for functions that are only tenuously related 
+ *		to auto resize configuration.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -2546,6 +2555,7 @@ H5AC_get_cache_auto_resize_config(H5AC_t * cache_ptr,
 {
     herr_t result;
     herr_t ret_value = SUCCEED;      /* Return value */
+    hbool_t evictions_enabled;
     H5C_auto_size_ctl_t internal_config;
 
     FUNC_ENTER_NOAPI(H5AC_get_cache_auto_resize_config, FAIL)
@@ -2581,6 +2591,14 @@ H5AC_get_cache_auto_resize_config(H5AC_t * cache_ptr,
                     "H5C_get_cache_auto_resize_config() failed.")
     }
 
+    result = H5C_get_evictions_enabled((H5C_t *)cache_ptr, &evictions_enabled);
+
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+		    "H5C_get_resize_enabled() failed.")
+    }
+
     if ( internal_config.rpt_fcn == NULL ) {
 
         config_ptr->rpt_fcn_enabled = FALSE;
@@ -2593,6 +2611,8 @@ H5AC_get_cache_auto_resize_config(H5AC_t * cache_ptr,
     config_ptr->open_trace_file        = FALSE;
     config_ptr->close_trace_file       = FALSE;
     config_ptr->trace_file_name[0]     = '\0';
+    config_ptr->set_evictions_enabled  = FALSE;
+    config_ptr->evictions_enabled      = evictions_enabled;
     config_ptr->set_initial_size       = internal_config.set_initial_size;
     config_ptr->initial_size           = internal_config.initial_size;
     config_ptr->min_clean_fraction     = internal_config.min_clean_fraction;
@@ -2788,6 +2808,15 @@ done:
  *		John Mainzer -- 6/7/06
  *		Added trace file support.
  *
+ *		John Mainzer -- 7/28/07
+ *		Added support for the new evictions enabled related fields.
+ *		
+ *		Observe that H5AC_get_cache_auto_resize_config() and 
+ *		H5AC_set_cache_auto_resize_config() are becoming generic
+ *		metadata cache configuration routines as they gain 
+ *		switches for functions that are only tenuously related 
+ *		to auto resize configuration.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -2835,56 +2864,11 @@ H5AC_set_cache_auto_resize_config(H5AC_t * cache_ptr,
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "bad cache_ptr on entry.")
     }
 
-    if ( config_ptr == NULL ) {
+    result = H5AC_validate_config(config_ptr);
 
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL config_ptr on entry.")
-    }
+    if ( result != SUCCEED ) {
 
-    if ( config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown config version.")
-    }
-
-    if ( ( config_ptr->rpt_fcn_enabled != TRUE ) &&
-         ( config_ptr->rpt_fcn_enabled != FALSE ) ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                    "config_ptr->rpt_fcn_enabled must be either TRUE or FALSE.")
-    }
-
-    if ( ( config_ptr->open_trace_file != TRUE ) &&
-         ( config_ptr->open_trace_file != FALSE ) ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                    "config_ptr->open_trace_file must be either TRUE or FALSE.")
-    }
-
-    if ( ( config_ptr->close_trace_file != TRUE ) &&
-         ( config_ptr->close_trace_file != FALSE ) ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                  "config_ptr->close_trace_file must be either TRUE or FALSE.")
-    }
-
-    /* don't bother to test trace_file_name unless open_trace_file is TRUE */
-    if ( config_ptr->open_trace_file ) {
-
-        /* Can't really test the trace_file_name field without trying to
-         * open the file, so we will content ourselves with a couple of
-         * sanity checks on the length of the file name.
-         */
-        name_len = HDstrlen(config_ptr->trace_file_name);
-
-        if ( name_len <= 0 ) {
-
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                        "config_ptr->trace_file_name is empty.")
-
-        } else if ( name_len > H5AC__MAX_TRACE_FILE_NAME_LEN ) {
-
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                        "config_ptr->trace_file_name too long.")
-        }
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Bad cache configuration");
     }
 
     if ( config_ptr->open_trace_file ) {
@@ -2957,6 +2941,18 @@ H5AC_set_cache_auto_resize_config(H5AC_t * cache_ptr,
                     "H5C_set_cache_auto_resize_config() failed.")
     }
 
+    if ( config_ptr->set_evictions_enabled ) {
+
+        result = H5C_set_evictions_enabled((H5C_t *)cache_ptr,
+			                   config_ptr->evictions_enabled);
+
+	if ( result < 0 ) {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                        "H5C_set_evictions_enabled() failed.")
+	}
+    }
+
 #ifdef H5_HAVE_PARALLEL
     if ( cache_ptr->aux_ptr != NULL ) {
 
@@ -2977,13 +2973,15 @@ done:
          ( trace_file_ptr != NULL ) ) {
 
 	HDfprintf(trace_file_ptr, 
-                  "%s %d %d %d %d \"%s\" %d %d %f %d %d %ld %d %f %f %d %d %d %f %f %d %d %d %d %f %d %d\n", 
+                  "%s %d %d %d %d \"%s\" %d %d %d %d %f %d %d %ld %d %f %f %d %d %d %f %f %d %d %d %d %f %d %d\n", 
 		  "H5AC_set_cache_auto_resize_config",
 		  trace_config.version,
 		  (int)(trace_config.rpt_fcn_enabled),
 		  (int)(trace_config.open_trace_file),
 		  (int)(trace_config.close_trace_file),
 		  trace_config.trace_file_name,
+		  (int)(trace_config.set_evictions_enabled),
+		  (int)(trace_config.evictions_enabled),
 		  (int)(trace_config.set_initial_size),
 		  (int)(trace_config.initial_size),
 		  trace_config.min_clean_fraction,
@@ -3040,6 +3038,13 @@ done:
  *              be caught until the directives contained in these fields
  *              are applied.
  *              					JRM - 5/15/06
+ *
+ *	      - Added code testing the evictions enabled field.  At 
+ *	        present this consists of verifying that if 
+ *	        set_evictions_enabled is TRUE and evictions_enabled
+ *	        is FALSE, then automatic cache resizing in disabled.
+ *
+ *	        					JRM - 7/28/07
  *
  *-------------------------------------------------------------------------
  */
@@ -3105,6 +3110,29 @@ H5AC_validate_config(H5AC_cache_config_t * config_ptr)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
                         "config_ptr->trace_file_name too long.")
 	}
+    }
+
+    if ( ( config_ptr->set_evictions_enabled != TRUE ) &&
+         ( config_ptr->set_evictions_enabled != FALSE ) ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+            "config_ptr->set_evictions_enabled must be either TRUE or FALSE.")
+    }
+
+    if ( ( config_ptr->evictions_enabled != TRUE ) &&
+         ( config_ptr->evictions_enabled != FALSE ) ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+            "config_ptr->evictions_enabled must be either TRUE or FALSE.")
+    }
+
+    if ( ( config_ptr->set_evictions_enabled == TRUE ) &&
+         ( config_ptr->evictions_enabled == FALSE ) &&
+	 ( ( config_ptr->incr_mode != H5C_incr__off ) || 
+	   ( config_ptr->incr_mode != H5C_decr__off ) ) ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                    "Can't disable evictions while auto-resize is enabled.")
     }
 
     if ( config_ptr->dirty_bytes_threshold < H5AC__MIN_DIRTY_BYTES_THRESHOLD ) {

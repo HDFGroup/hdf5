@@ -2835,6 +2835,10 @@ done:
  *		Added initialization for the new is_read_only and 
  *		ro_ref_count fields.
  *
+ *		JRM -- 7/27/07
+*		Added initialization for the new evictions_enabled 
+*		field of H5C_t.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -2905,6 +2909,8 @@ H5C_create(size_t		      max_cache_size,
     cache_ptr->write_permitted			= write_permitted;
 
     cache_ptr->log_flush			= log_flush;
+
+    cache_ptr->evictions_enabled		= TRUE;
 
     cache_ptr->index_len			= 0;
     cache_ptr->index_size			= (size_t)0;
@@ -4260,6 +4266,52 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5C_get_evictions_enabled()
+ *
+ * Purpose:	Copy the current value of cache_ptr->evictions_enabled into
+ * 		*evictions_enabled_ptr.
+ *
+ * Return:      SUCCEED on success, and FAIL on failure.
+ *
+ * Programmer:  John Mainzer
+ *		7/27/07
+ *
+ * Modifications:
+ *
+ *		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5C_get_evictions_enabled(H5C_t * cache_ptr,
+                          hbool_t * evictions_enabled_ptr)
+{
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5C_get_evictions_enabled, FAIL)
+
+    if ( ( cache_ptr == NULL ) || ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr on entry.")
+    }
+
+    if ( evictions_enabled_ptr == NULL ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+		    "Bad evictions_enabled_ptr on entry.")
+    }
+
+    *evictions_enabled_ptr = cache_ptr->evictions_enabled;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C_get_evictions_enabled() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5C_get_trace_file_ptr
  *
  * Purpose:     Get the trace_file_ptr field from the cache.
@@ -4378,6 +4430,10 @@ done:
  *		Added initialization for the new is_read_only and 
  *		ro_ref_count fields.
  *
+ *		JRM -- 8/1/07
+ *		Added code to disable evictions when the new 
+ *		evictions_enabled field is FALSE.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -4468,7 +4524,9 @@ H5C_insert_entry(H5F_t * 	     f,
 
     H5C__RESET_CACHE_ENTRY_STATS(entry_ptr)
 
-    if ((cache_ptr->index_size + entry_ptr->size) > cache_ptr->max_cache_size) {
+    if ( ( cache_ptr->evictions_enabled ) &&
+         ( (cache_ptr->index_size + entry_ptr->size) > 
+	    cache_ptr->max_cache_size ) ) {
 
         size_t space_needed;
 
@@ -5545,6 +5603,10 @@ done:
  * 		Also added code to allow multiple read only protects
  * 		of cache entries.
  *
+ * 		JRM -- 7/27/07
+ * 		Added code supporting the new evictions_enabled fieled
+ * 		in H5C_t.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -5616,9 +5678,10 @@ H5C_protect(H5F_t *	        f,
 
         entry_ptr = (H5C_cache_entry_t *)thing;
 
-        /* try to free up some space if necessary */
-        if ( (cache_ptr->index_size + entry_ptr->size) >
-              cache_ptr->max_cache_size ) {
+        /* try to free up some space if necessary and if evictions are permitted */
+        if ( ( cache_ptr->evictions_enabled ) &&
+	     ( (cache_ptr->index_size + entry_ptr->size) > 
+	       cache_ptr->max_cache_size ) ) {
 
             size_t space_needed;
 
@@ -5754,10 +5817,11 @@ H5C_protect(H5F_t *	        f,
 
     ret_value = thing;
 
-    if ( ( cache_ptr->size_decreased ) ||
-         ( ( cache_ptr->resize_enabled ) &&
-           ( cache_ptr->cache_accesses >=
-             (cache_ptr->resize_ctl).epoch_length ) ) ) {
+    if ( ( cache_ptr->evictions_enabled ) &&
+	 ( ( cache_ptr->size_decreased ) ||
+           ( ( cache_ptr->resize_enabled ) &&
+             ( cache_ptr->cache_accesses >=
+               (cache_ptr->resize_ctl).epoch_length ) ) ) ) {
 
         if ( ! have_write_permitted ) {
 
@@ -6137,6 +6201,66 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5C_set_cache_auto_resize_config() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C_set_evictions_enabled()
+ *
+ * Purpose:	Set cache_ptr->evictions_enabled to the value of the 
+ * 		evictions enabled parameter.
+ *
+ * Return:      SUCCEED on success, and FAIL on failure.
+ *
+ * Programmer:  John Mainzer
+ *		7/27/07
+ *
+ * Modifications:
+ *
+ *		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5C_set_evictions_enabled(H5C_t * cache_ptr,
+                          hbool_t evictions_enabled)
+{
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5C_set_evictions_enabled, FAIL)
+
+    if ( ( cache_ptr == NULL ) || ( cache_ptr->magic != H5C__H5C_T_MAGIC ) ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr on entry.")
+    }
+
+    if ( ( evictions_enabled != TRUE ) && ( evictions_enabled != FALSE ) ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+		    "Bad evictions_enabled on entry.")
+    }
+
+    /* There is no fundamental reason why we should not permit 
+     * evictions to be disabled while automatic resize is enabled.
+     * However, I can't think of any good reason why one would 
+     * want to, and allowing it would greatly complicate testing
+     * the feature.  Hence the following:
+     */
+    if ( ( evictions_enabled != TRUE ) &&
+         ( ( cache_ptr->resize_ctl.incr_mode != H5C_incr__off ) ||
+	   ( cache_ptr->resize_ctl.decr_mode != H5C_decr__off ) ) ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+		    "Can't disable evictions when auto resize enabled.")
+    }
+
+    cache_ptr->evictions_enabled = evictions_enabled;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C_set_evictions_enabled() */
 
 
 /*-------------------------------------------------------------------------

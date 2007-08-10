@@ -34,6 +34,8 @@ static void smoke_check_5(void);
 static void smoke_check_6(void);
 static void smoke_check_7(void);
 static void smoke_check_8(void);
+static void smoke_check_9(void);
+static void smoke_check_10(void);
 static void write_permitted_check(void);
 static void check_insert_entry(void);
 static void check_flush_cache(void);
@@ -98,6 +100,7 @@ static void check_rename_entry__run_test(H5C_t * cache_ptr, int test_num,
                                       struct rename_entry_test_spec * spec_ptr);
 static void check_pin_protected_entry(void);
 static void check_resize_entry(void);
+static void check_evictions_enabled(void);
 static void check_destroy_pinned_err(void);
 static void check_destroy_protected_err(void);
 static void check_duplicate_insert_err(void);
@@ -112,6 +115,7 @@ static void check_expunge_entry_errs(void);
 static void check_resize_entry_errs(void);
 static void check_unprotect_ro_dirty_err(void);
 static void check_protect_ro_rw_err(void);
+static void check_check_evictions_enabled_err(void);
 static void check_auto_cache_resize(void);
 static void check_auto_cache_resize_disable(void);
 static void check_auto_cache_resize_epoch_markers(void);
@@ -1839,6 +1843,615 @@ smoke_check_8(void)
     return;
 
 } /* smoke_check_8() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	smoke_check_9()
+ *
+ * Purpose:	A repeat of smoke check 1, only with the cache corked
+ * 		part of the time.
+ *
+ * 		Recall that smoke check 1 is a basic functional test, 
+ * 		with inserts, destroys, and renames in the mix, along 
+ * 		with repeated protects and unprotects.  All entries are 
+ * 		marked as clean.
+ *
+ * Return:	void
+ *
+ * Programmer:	John Mainzer
+ *              8/1/07
+ *
+ * Modifications:
+ *
+ *		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static void
+smoke_check_9(void)
+{
+    const char * fcn_name = "smoke_check_9";
+    herr_t result;
+    hbool_t show_progress = FALSE;
+    hbool_t dirty_inserts = FALSE;
+    int dirty_unprotects = FALSE;
+    int dirty_destroys = FALSE;
+    hbool_t display_stats = FALSE;
+    hbool_t display_detailed_stats = FALSE;
+    int32_t lag = 10;
+    int mile_stone = 1;
+    H5C_t * cache_ptr = NULL;
+
+    TESTING("smoke check #9 -- all clean, ins, dest, ren, 4/2 MB, corked");
+
+    if ( skip_long_tests ) {
+
+        SKIPPED();
+
+        HDfprintf(stdout, "	Long tests disabled.\n");
+
+        return;
+    }
+
+    pass = TRUE;
+
+    if ( show_progress ) /* 1 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    reset_entries();
+
+    if ( show_progress ) /* 2 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    cache_ptr = setup_cache((size_t)(4 * 1024 * 1024),
+                            (size_t)(2 * 1024 * 1024));
+
+    /* disable evictions */
+
+    if ( show_progress ) /* 3 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    if ( pass ) {
+
+        result = H5C_set_evictions_enabled(cache_ptr, FALSE);
+
+        if ( result < 0 ) {
+
+             pass = FALSE;
+	     failure_mssg = "can't disable evictions 1.\n";
+	}
+    }
+
+    if ( show_progress ) /* 4 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    row_major_scan_forward(/* cache_ptr              */ cache_ptr,
+                           /* lag                    */ lag,
+                           /* verbose                */ FALSE,
+                           /* reset_stats            */ TRUE,
+                           /* display_stats          */ display_stats,
+                           /* display_detailed_stats */ display_detailed_stats,
+                           /* do_inserts             */ TRUE,
+                           /* dirty_inserts          */ dirty_inserts,
+                           /* do_renames             */ TRUE,
+                           /* rename_to_main_addr    */ FALSE,
+                           /* do_destroys            */ TRUE,
+			   /* do_mult_ro_protects    */ TRUE,
+                           /* dirty_destroys         */ dirty_destroys,
+                           /* dirty_unprotects       */ dirty_unprotects);
+
+    /* enable evictions */
+
+    if ( show_progress ) /* 5 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    if ( pass ) {
+
+        result = H5C_set_evictions_enabled(cache_ptr, TRUE);
+
+        if ( result < 0 ) {
+
+             pass = FALSE;
+	     failure_mssg = "can't enable evictions 1.\n";
+	}
+    }
+
+    if ( show_progress ) /* 6 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled \n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    row_major_scan_backward(/* cache_ptr              */ cache_ptr,
+                            /* lag                    */ lag,
+                            /* verbose                */ FALSE,
+                            /* reset_stats            */ TRUE,
+                            /* display_stats          */ display_stats,
+                            /* display_detailed_stats */ display_detailed_stats,
+                            /* do_inserts             */ FALSE,
+                            /* dirty_inserts          */ dirty_inserts,
+                            /* do_renames             */ TRUE,
+                            /* rename_to_main_addr    */ TRUE,
+                            /* do_destroys            */ FALSE,
+			    /* do_mult_ro_protects    */ TRUE,
+                            /* dirty_destroys         */ dirty_destroys,
+                            /* dirty_unprotects       */ dirty_unprotects);
+
+    if ( show_progress ) /* 7 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    if ( pass ) {
+
+        result = H5C_set_evictions_enabled(cache_ptr, FALSE);
+
+        if ( result < 0 ) {
+
+             pass = FALSE;
+	     failure_mssg = "can't disable evictions 2.\n";
+	}
+    }
+
+    if ( show_progress ) /* 8 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled \n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    row_major_scan_forward(/* cache_ptr              */ cache_ptr,
+                           /* lag                    */ lag,
+                           /* verbose                */ FALSE,
+                           /* reset_stats            */ TRUE,
+                           /* display_stats          */ display_stats,
+                           /* display_detailed_stats */ display_detailed_stats,
+                           /* do_inserts             */ TRUE,
+                           /* dirty_inserts          */ dirty_inserts,
+                           /* do_renames             */ TRUE,
+                           /* rename_to_main_addr    */ FALSE,
+                           /* do_destroys            */ FALSE,
+			   /* do_mult_ro_protects    */ TRUE,
+                           /* dirty_destroys         */ dirty_destroys,
+                           /* dirty_unprotects       */ dirty_unprotects);
+
+    if ( show_progress ) /* 9 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    if ( pass ) {
+
+        result = H5C_set_evictions_enabled(cache_ptr, TRUE);
+
+        if ( result < 0 ) {
+
+             pass = FALSE;
+	     failure_mssg = "can't enable evictions 2.\n";
+	}
+    }
+
+    if ( show_progress ) /* 10 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled \n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* flush and destroy all entries in the cache: */
+
+    flush_cache(/* cache_ptr           */ cache_ptr,
+                /* destroy_entries     */ TRUE,
+                /* dump_stats          */ FALSE,
+                /* dump_detailed_stats */ FALSE);
+
+    if ( show_progress ) /* 11 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    if ( pass ) {
+
+        result = H5C_set_evictions_enabled(cache_ptr, FALSE);
+
+        if ( result < 0 ) {
+
+             pass = FALSE;
+	     failure_mssg = "can't disable evictions 3.\n";
+	}
+    }
+
+    if ( show_progress ) /* 12 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    col_major_scan_forward(/* cache_ptr              */ cache_ptr,
+                           /* lag                    */ lag,
+                           /* verbose                */ FALSE,
+                           /* reset_stats            */ TRUE,
+                           /* display_stats          */ display_stats,
+                           /* display_detailed_stats */ display_detailed_stats,
+                           /* do_inserts             */ TRUE,
+                           /* dirty_inserts          */ dirty_inserts,
+                           /* dirty_unprotects       */ dirty_unprotects);
+
+    if ( show_progress ) /* 13 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* flush all entries in the cache: */
+
+    flush_cache(/* cache_ptr           */ cache_ptr,
+                /* destroy_entries     */ FALSE,
+                /* dump_stats          */ FALSE,
+                /* dump_detailed_stats */ FALSE);
+
+    if ( show_progress ) /* 14 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    if ( pass ) {
+
+        result = H5C_set_evictions_enabled(cache_ptr, TRUE);
+
+        if ( result < 0 ) {
+
+             pass = FALSE;
+	     failure_mssg = "can't enable evictions 3.\n";
+	}
+    }
+
+    if ( show_progress ) /* 15 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    col_major_scan_backward(/* cache_ptr              */ cache_ptr,
+                            /* lag                    */ lag,
+                            /* verbose                */ FALSE,
+                            /* reset_stats            */ TRUE,
+                            /* display_stats          */ display_stats,
+                            /* display_detailed_stats */ display_detailed_stats,
+                            /* do_inserts             */ TRUE,
+                            /* dirty_inserts          */ dirty_inserts,
+                            /* dirty_unprotects       */ dirty_unprotects);
+
+    if ( show_progress ) /* 16 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    if ( pass ) {
+
+        result = H5C_set_evictions_enabled(cache_ptr, FALSE);
+
+        if ( result < 0 ) {
+
+             pass = FALSE;
+	     failure_mssg = "can't disable evictions 4.\n";
+	}
+    }
+
+
+    if ( show_progress ) /* 17 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    takedown_cache(cache_ptr, display_stats, TRUE);
+
+    if ( show_progress ) /* 18 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    verify_clean();
+    verify_unprotected();
+
+    if ( pass ) { PASSED(); } else { H5_FAILED(); }
+
+    if ( ! pass ) {
+
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n",
+                  fcn_name, failure_mssg);
+    }
+
+    return;
+
+} /* smoke_check_9() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	smoke_check_10()
+ *
+ * Purpose:	A repeat of smoke check 2, only with the cache corked
+ * 		part of the time.
+ *
+ * 		Recall that smoke check 2 is a basic functional test, 
+ * 		with inserts, destroys, and renames in the mix, along 
+ * 		with some repeated protects and unprotects.  About half 
+ * 		the entries are marked as dirty.
+ *
+ * Return:	void
+ *
+ * Programmer:	John Mainzer
+ *              8/1/07
+ *
+ * Modifications:
+ *
+ *		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static void
+smoke_check_10(void)
+{
+    const char * fcn_name = "smoke_check_10";
+    herr_t result;
+    hbool_t show_progress = FALSE;
+    hbool_t dirty_inserts = TRUE;
+    int dirty_unprotects = TRUE;
+    int dirty_destroys = TRUE;
+    hbool_t display_stats = FALSE;
+    hbool_t display_detailed_stats = FALSE;
+    int32_t lag = 10;
+    int mile_stone = 1;
+    H5C_t * cache_ptr = NULL;
+
+    TESTING("smoke check #10 -- ~1/2 dirty, ins, dest, ren, 4/2 MB, corked");
+
+    if ( skip_long_tests ) {
+
+        SKIPPED();
+
+        HDfprintf(stdout, "	Long tests disabled.\n");
+
+        return;
+    }
+
+    pass = TRUE;
+
+    if ( show_progress ) /* 1 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    reset_entries();
+
+    if ( show_progress ) /* 2 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    cache_ptr = setup_cache((size_t)(4 * 1024 * 1024),
+                            (size_t)(2 * 1024 * 1024));
+
+    if ( show_progress ) /* 3 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    row_major_scan_forward(/* cache_ptr              */ cache_ptr,
+                           /* lag                    */ lag,
+                           /* verbose                */ FALSE,
+                           /* reset_stats            */ TRUE,
+                           /* display_stats          */ display_stats,
+                           /* display_detailed_stats */ display_detailed_stats,
+                           /* do_inserts             */ TRUE,
+                           /* dirty_inserts          */ dirty_inserts,
+                           /* do_renames             */ TRUE,
+                           /* rename_to_main_addr    */ FALSE,
+                           /* do_destroys            */ TRUE,
+			   /* do_mult_ro_protects    */ TRUE,
+                           /* dirty_destroys         */ dirty_destroys,
+                           /* dirty_unprotects       */ dirty_unprotects);
+
+    if ( show_progress ) /* 4 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    if ( pass ) {
+
+        result = H5C_set_evictions_enabled(cache_ptr, FALSE);
+
+        if ( result < 0 ) {
+
+             pass = FALSE;
+	     failure_mssg = "can't disable evictions 1.\n";
+	}
+    }
+
+    if ( show_progress ) /* 5 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    row_major_scan_backward(/* cache_ptr              */ cache_ptr,
+                            /* lag                    */ lag,
+                            /* verbose                */ FALSE,
+                            /* reset_stats            */ TRUE,
+                            /* display_stats          */ display_stats,
+                            /* display_detailed_stats */ display_detailed_stats,
+                            /* do_inserts             */ FALSE,
+                            /* dirty_inserts          */ dirty_inserts,
+                            /* do_renames             */ TRUE,
+                            /* rename_to_main_addr    */ TRUE,
+                            /* do_destroys            */ FALSE,
+			    /* do_mult_ro_protects    */ TRUE,
+                            /* dirty_destroys         */ dirty_destroys,
+                            /* dirty_unprotects       */ dirty_unprotects);
+
+    if ( show_progress ) /* 6 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    if ( pass ) {
+
+        result = H5C_set_evictions_enabled(cache_ptr, TRUE);
+
+        if ( result < 0 ) {
+
+             pass = FALSE;
+	     failure_mssg = "can't enable evictions 1.\n";
+	}
+    }
+
+    if ( show_progress ) /* 7 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    row_major_scan_forward(/* cache_ptr              */ cache_ptr,
+                           /* lag                    */ lag,
+                           /* verbose                */ FALSE,
+                           /* reset_stats            */ TRUE,
+                           /* display_stats          */ display_stats,
+                           /* display_detailed_stats */ display_detailed_stats,
+                           /* do_inserts             */ TRUE,
+                           /* dirty_inserts          */ dirty_inserts,
+                           /* do_renames             */ TRUE,
+                           /* rename_to_main_addr    */ FALSE,
+                           /* do_destroys            */ FALSE,
+			   /* do_mult_ro_protects    */ TRUE,
+                           /* dirty_destroys         */ dirty_destroys,
+                           /* dirty_unprotects       */ dirty_unprotects);
+
+    if ( show_progress ) /* 8 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    if ( pass ) {
+
+        result = H5C_set_evictions_enabled(cache_ptr, FALSE);
+
+        if ( result < 0 ) {
+
+             pass = FALSE;
+	     failure_mssg = "can't disable evictions 2.\n";
+	}
+    }
+
+    if ( show_progress ) /* 9 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* flush and destroy all entries in the cache: */
+
+    flush_cache(/* cache_ptr           */ cache_ptr,
+                /* destroy_entries     */ TRUE,
+                /* dump_stats          */ FALSE,
+                /* dump_detailed_stats */ FALSE);
+
+    if ( show_progress ) /* 10 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    if ( pass ) {
+
+        result = H5C_set_evictions_enabled(cache_ptr, TRUE);
+
+        if ( result < 0 ) {
+
+             pass = FALSE;
+	     failure_mssg = "can't enable evictions 2.\n";
+	}
+    }
+
+    if ( show_progress ) /* 11 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    col_major_scan_forward(/* cache_ptr              */ cache_ptr,
+                           /* lag                    */ lag,
+                           /* verbose                */ FALSE,
+                           /* reset_stats            */ TRUE,
+                           /* display_stats          */ display_stats,
+                           /* display_detailed_stats */ display_detailed_stats,
+                           /* do_inserts             */ TRUE,
+                           /* dirty_inserts          */ dirty_inserts,
+                           /* dirty_unprotects       */ dirty_unprotects);
+
+    if ( show_progress ) /* 12 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    if ( pass ) {
+
+        result = H5C_set_evictions_enabled(cache_ptr, FALSE);
+
+        if ( result < 0 ) {
+
+             pass = FALSE;
+	     failure_mssg = "can't disable evictions 3.\n";
+	}
+    }
+
+    if ( show_progress ) /* 13 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* flush all entries in the cache: */
+
+    flush_cache(/* cache_ptr           */ cache_ptr,
+                /* destroy_entries     */ FALSE,
+                /* dump_stats          */ FALSE,
+                /* dump_detailed_stats */ FALSE);
+
+    if ( show_progress ) /* 14 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    if ( pass ) {
+
+        result = H5C_set_evictions_enabled(cache_ptr, TRUE);
+
+        if ( result < 0 ) {
+
+             pass = FALSE;
+	     failure_mssg = "can't enable evictions 3.\n";
+	}
+    }
+
+    if ( show_progress ) /* 15 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    col_major_scan_backward(/* cache_ptr              */ cache_ptr,
+                            /* lag                    */ lag,
+                            /* verbose                */ FALSE,
+                            /* reset_stats            */ TRUE,
+                            /* display_stats          */ display_stats,
+                            /* display_detailed_stats */ display_detailed_stats,
+                            /* do_inserts             */ TRUE,
+                            /* dirty_inserts          */ dirty_inserts,
+                            /* dirty_unprotects       */ dirty_unprotects);
+
+    if ( show_progress ) /* 16 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    if ( pass ) {
+
+        result = H5C_set_evictions_enabled(cache_ptr, FALSE);
+
+        if ( result < 0 ) {
+
+             pass = FALSE;
+	     failure_mssg = "can't disable evictions 4.\n";
+	}
+    }
+
+    if ( show_progress ) /* 17 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    takedown_cache(cache_ptr, display_stats, TRUE);
+
+    if ( show_progress ) /* 18 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    verify_clean();
+    verify_unprotected();
+
+    if ( pass ) { PASSED(); } else { H5_FAILED(); }
+
+    if ( ! pass ) {
+
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n",
+                  fcn_name, failure_mssg);
+    }
+
+    return;
+
+} /* smoke_check_10() */
 
 
 /*-------------------------------------------------------------------------
@@ -14393,6 +15006,708 @@ check_resize_entry(void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	check_evictions_enabled()
+ *
+ * Purpose:	Verify that H5C_get_evictions_enabled() and 
+ * 		H5C_set_evictions_enabled() functions perform as expected.
+ *
+ * Return:	void
+ *
+ * Programmer:	John Mainzer
+ *              8/2/07
+ *
+ * Modifications:
+ *
+ * 		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static void
+check_evictions_enabled(void)
+{
+    const char *   fcn_name = "check_evictions_enabled";
+    static char    msg[128];
+    herr_t         result;
+    hbool_t	   show_progress = FALSE;
+    hbool_t	   evictions_enabled;
+    hbool_t	   in_cache;
+    int 	   i;
+    int		   mile_stone = 1;
+    size_t	   entry_size;
+    H5C_t *        cache_ptr = NULL;
+    test_entry_t * base_addr;
+    test_entry_t * entry_ptr;
+
+    TESTING("evictions enabled/disabled functionality");
+
+    /* Setup a cache and verify that it is empty.
+     *
+     * Use H5C_get_evictions_enabled() to determine if evictions are
+     * currently enabled -- they should be.
+     *
+     * Load entries until the cache is full.  Load one more.  Verify that
+     * this caused an entry to be evicted.
+     *
+     * Insert an entry.  Verify that this cases and entry to be evicted.
+     *
+     * Used H5C_set_evictions_enabled() to disable evictions.  Verify
+     * with a call to H5C_get_evictions_enabled().
+     *
+     * Load another entry -- verify that this does not cause an entry
+     * to be evicted.
+     *
+     * Insert an entry -- verify that this does not cause an entry to 
+     * be evicted.
+     *
+     * Use H5C_set_evictions_enabled() to re-enable evictions.  Verify
+     * with a call to H5C_get_evictions_enabled().
+     *
+     * Protect and unprotect some of the entries in the cache.  Verify
+     * that there are no evictions (since we only try to make space
+     * when we either insert or load a new entry).
+     *
+     * Protect an entry not in the cache.  Verify that this causes
+     * two evictions.
+     *
+     * Used H5C_set_evictions_enabled() to disable evictions again.  
+     * Verify with a call to H5C_get_evictions_enabled().
+     *
+     * Now flush and discard the cache -- should succeed.
+     */
+
+    pass = TRUE;
+
+    if ( show_progress ) /* 1 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* create the cache */
+    if ( pass ) {
+
+        reset_entries();
+
+        cache_ptr = setup_cache((size_t)(1 * 1024 * 1024),
+                                (size_t)(     512 * 1024));
+
+        base_addr = entries[MONSTER_ENTRY_TYPE];
+	entry_size = MONSTER_ENTRY_SIZE;
+    }
+
+    if ( show_progress ) /* 2 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* verivy that it is empty */
+    if ( pass ) {
+
+	if ( ( cache_ptr->index_len != 0 ) ||
+	     ( cache_ptr->index_size != 0 ) ||
+	     ( cache_ptr->slist_len != 0 ) ||
+	     ( cache_ptr->slist_size != 0 ) ||
+	     ( cache_ptr->evictions_enabled != TRUE ) ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "Unexpected cache status 1.");
+            failure_mssg = msg;
+
+	}
+    }
+
+    if ( show_progress ) /* 3 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* verify that H5C_get_evictions_enabled() returns the expected value */
+    if ( pass ) {
+
+        result = H5C_get_evictions_enabled(cache_ptr, &evictions_enabled);
+
+	if ( ( result != SUCCEED ) || ( evictions_enabled != TRUE ) ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "Unexpected evictions enabled 1.");
+            failure_mssg = msg;
+	}
+    }
+
+    if ( show_progress ) /* 4 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* fill the cache */
+    for ( i = 0; i < 16 ; i++ )
+    {
+        protect_entry(cache_ptr, MONSTER_ENTRY_TYPE, i);
+        unprotect_entry(cache_ptr, MONSTER_ENTRY_TYPE, i, 
+			FALSE, H5C__NO_FLAGS_SET);
+    }
+
+    if ( show_progress ) /* 5 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* verify that the cache is full */
+    if ( pass ) {
+
+	if ( ( cache_ptr->index_len != 16 ) ||
+	     ( cache_ptr->index_size != 16 * MONSTER_ENTRY_SIZE ) ||
+	     ( cache_ptr->slist_len != 0 ) ||
+	     ( cache_ptr->slist_size != 0 ) ||
+	     ( cache_ptr->evictions_enabled != TRUE ) ) {
+
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "Unexpected cache status 2.");
+            failure_mssg = msg;
+
+	}
+    }
+
+    if ( show_progress ) /* 6 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* protect and unprotect another entry */
+    protect_entry(cache_ptr, MONSTER_ENTRY_TYPE, 16);
+    unprotect_entry(cache_ptr, MONSTER_ENTRY_TYPE, 16, 
+		    FALSE, H5C__NO_FLAGS_SET);
+
+    if ( show_progress ) /* 7 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* verify that the an entry has been evicted */
+    if ( pass ) {
+
+	if ( ( cache_ptr->index_len != 16 ) ||
+	     ( cache_ptr->index_size != 16 * MONSTER_ENTRY_SIZE ) ||
+	     ( cache_ptr->slist_len != 0 ) ||
+	     ( cache_ptr->slist_size != 0 ) ||
+	     ( cache_ptr->evictions_enabled != TRUE ) ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "Unexpected cache status 3.");
+            failure_mssg = msg;
+
+	}
+    }
+
+    if ( show_progress ) /* 8 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    if ( pass ) {
+
+        entry_ptr = &(base_addr[0]);
+
+        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, 
+			              NULL, &in_cache, NULL, NULL, NULL);
+
+	if ( result < 0 ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128,
+                       "H5AC_get_entry_status() reports failure 1.");
+            failure_mssg = msg;
+
+	} else if ( in_cache ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "Unexpected status 1.");
+            failure_mssg = msg;
+
+        } else if ( ( ! entry_ptr->loaded ) ||
+                    ( entry_ptr->cleared ) ||
+		    ( ! entry_ptr->flushed ) ||
+		    ( ! entry_ptr->destroyed ) ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "Unexpected entry history 1.");
+            failure_mssg = msg;
+
+	}
+    }
+
+    if ( show_progress ) /* 9 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* insert an entry */
+    insert_entry(cache_ptr, MONSTER_ENTRY_TYPE, 17, TRUE, H5C__NO_FLAGS_SET);
+
+    if ( show_progress ) /* 10 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* verify that another entry has been evicted */
+    if ( pass ) {
+
+	if ( ( cache_ptr->index_len != 16 ) ||
+	     ( cache_ptr->index_size != 16 * MONSTER_ENTRY_SIZE ) ||
+	     ( cache_ptr->slist_len != 1 ) ||
+	     ( cache_ptr->slist_size != MONSTER_ENTRY_SIZE ) ||
+	     ( cache_ptr->evictions_enabled != TRUE ) ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "Unexpected cache status 4.");
+            failure_mssg = msg;
+
+	}
+    }
+
+    if ( show_progress ) /* 11 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    if ( pass ) {
+
+        entry_ptr = &(base_addr[1]);
+
+        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, 
+			              NULL, &in_cache, NULL, NULL, NULL);
+
+	if ( result < 0 ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128,
+                       "H5AC_get_entry_status() reports failure 2.");
+            failure_mssg = msg;
+
+	} else if ( in_cache ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "Unexpected status 2.");
+            failure_mssg = msg;
+
+        } else if ( ( ! entry_ptr->loaded ) ||
+                    ( entry_ptr->cleared ) ||
+		    ( ! entry_ptr->flushed ) ||
+		    ( ! entry_ptr->destroyed ) ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "Unexpected entry history 2.");
+            failure_mssg = msg;
+
+	}
+    }
+
+    if ( show_progress ) /* 12 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* disable evictions */
+    if ( pass ) {
+
+        result = H5C_set_evictions_enabled(cache_ptr, FALSE);
+
+	if ( result != SUCCEED ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "can't disable evictions 1.");
+            failure_mssg = msg;
+	}
+    }
+
+    if ( show_progress ) /* 13 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* verify that evictions are disabled */
+    if ( pass ) {
+
+	if ( ( cache_ptr->index_len != 16 ) ||
+	     ( cache_ptr->index_size != 16 * MONSTER_ENTRY_SIZE ) ||
+	     ( cache_ptr->slist_len != 1 ) ||
+	     ( cache_ptr->slist_size != MONSTER_ENTRY_SIZE ) ||
+	     ( cache_ptr->evictions_enabled != FALSE ) ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "Unexpected cache status 5.");
+            failure_mssg = msg;
+
+	}
+    }
+
+    if ( show_progress ) /* 14 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* protect and unprotect another entry */
+    protect_entry(cache_ptr, MONSTER_ENTRY_TYPE, 18);
+    unprotect_entry(cache_ptr, MONSTER_ENTRY_TYPE, 18, 
+		    FALSE, H5C__NO_FLAGS_SET);
+
+    if ( show_progress ) /* 15 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* verify that no entry has been evicted */
+    if ( pass ) {
+
+	if ( ( cache_ptr->index_len != 17 ) ||
+	     ( cache_ptr->index_size != 17 * MONSTER_ENTRY_SIZE ) ||
+	     ( cache_ptr->slist_len != 1 ) ||
+	     ( cache_ptr->slist_size != MONSTER_ENTRY_SIZE ) ||
+	     ( cache_ptr->evictions_enabled != FALSE ) ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "Unexpected cache status 6.");
+            failure_mssg = msg;
+
+	}
+    }
+
+    if ( show_progress ) /* 16 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* insert another entry */
+    insert_entry(cache_ptr, MONSTER_ENTRY_TYPE, 19, TRUE, H5C__NO_FLAGS_SET);
+
+    if ( show_progress ) /* 17 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* verify that no entry has been evicted */
+    if ( pass ) {
+
+	if ( ( cache_ptr->index_len != 18 ) ||
+	     ( cache_ptr->index_size != 18 * MONSTER_ENTRY_SIZE ) ||
+	     ( cache_ptr->slist_len != 2 ) ||
+	     ( cache_ptr->slist_size != 2 * MONSTER_ENTRY_SIZE ) ||
+	     ( cache_ptr->evictions_enabled != FALSE ) ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "Unexpected cache status 7.");
+            failure_mssg = msg;
+
+	}
+    }
+
+    if ( show_progress ) /* 18 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* re-enable evictions */
+    if ( pass ) {
+
+        result = H5C_set_evictions_enabled(cache_ptr, TRUE);
+
+	if ( result != SUCCEED ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "can't enable evictions 1.");
+            failure_mssg = msg;
+	}
+    }
+
+    if ( show_progress ) /* 19 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* protect and unprotect an entry that is in the cache */
+    protect_entry(cache_ptr, MONSTER_ENTRY_TYPE, 19);
+    unprotect_entry(cache_ptr, MONSTER_ENTRY_TYPE, 19, 
+		    FALSE, H5C__NO_FLAGS_SET);
+
+    if ( show_progress ) /* 20 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* verify that no entries have been evicted */
+    if ( pass ) {
+
+	if ( ( cache_ptr->index_len != 18 ) ||
+	     ( cache_ptr->index_size != 18 * MONSTER_ENTRY_SIZE ) ||
+	     ( cache_ptr->slist_len != 2 ) ||
+	     ( cache_ptr->slist_size != 2 * MONSTER_ENTRY_SIZE ) ||
+	     ( cache_ptr->evictions_enabled != TRUE ) ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "Unexpected cache status 8.");
+            failure_mssg = msg;
+
+	}
+    }
+
+    if ( show_progress ) /* 21 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* protect and unprotect an entry that isn't in the cache */
+    protect_entry(cache_ptr, MONSTER_ENTRY_TYPE, 20);
+    unprotect_entry(cache_ptr, MONSTER_ENTRY_TYPE, 20, 
+		    FALSE, H5C__NO_FLAGS_SET);
+
+    if ( show_progress ) /* 22 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* verify that the entries have been evicted to bring the 
+     * cache back down to its normal size.
+     */
+
+    if ( pass ) {
+
+	if ( ( cache_ptr->index_len != 16 ) ||
+	     ( cache_ptr->index_size != 16 * MONSTER_ENTRY_SIZE ) ||
+	     ( cache_ptr->slist_len != 2 ) ||
+	     ( cache_ptr->slist_size != 2 * MONSTER_ENTRY_SIZE ) ||
+	     ( cache_ptr->evictions_enabled != TRUE ) ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "Unexpected cache status 9.");
+            failure_mssg = msg;
+
+	}
+    }
+
+    if ( show_progress ) /* 23 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    if ( pass ) {
+
+        entry_ptr = &(base_addr[2]);
+
+        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, 
+			              NULL, &in_cache, NULL, NULL, NULL);
+
+	if ( result < 0 ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128,
+                       "H5AC_get_entry_status() reports failure 3.");
+            failure_mssg = msg;
+
+	} else if ( in_cache ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "Unexpected status 3.");
+            failure_mssg = msg;
+
+        } else if ( ( ! entry_ptr->loaded ) ||
+                    ( entry_ptr->cleared ) ||
+		    ( ! entry_ptr->flushed ) ||
+		    ( ! entry_ptr->destroyed ) ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "Unexpected entry history 3.");
+            failure_mssg = msg;
+
+	}
+    }
+
+    if ( show_progress ) /* 24 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    if ( pass ) {
+
+        entry_ptr = &(base_addr[3]);
+
+        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, 
+			              NULL, &in_cache, NULL, NULL, NULL);
+
+	if ( result < 0 ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128,
+                       "H5AC_get_entry_status() reports failure 4.");
+            failure_mssg = msg;
+
+	} else if ( in_cache ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "Unexpected status 4.");
+            failure_mssg = msg;
+
+        } else if ( ( ! entry_ptr->loaded ) ||
+                    ( entry_ptr->cleared ) ||
+		    ( ! entry_ptr->flushed ) ||
+		    ( ! entry_ptr->destroyed ) ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "Unexpected entry history 4.");
+            failure_mssg = msg;
+
+	}
+    }
+
+    if ( show_progress ) /* 25 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* disable evictions again */
+    if ( pass ) {
+
+        result = H5C_set_evictions_enabled(cache_ptr, FALSE);
+
+	if ( result != SUCCEED ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "can't disable evictions 2.");
+            failure_mssg = msg;
+	}
+    }
+
+    if ( show_progress ) /* 26 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* protect and unprotect an entry that isn't in the cache, forcing 
+     * the cache to grow.
+     */
+    protect_entry(cache_ptr, MONSTER_ENTRY_TYPE, 21);
+    unprotect_entry(cache_ptr, MONSTER_ENTRY_TYPE, 21, 
+		    FALSE, H5C__NO_FLAGS_SET);
+
+
+    if ( show_progress ) /* 27 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* verify that the cache has grown */
+    if ( pass ) {
+
+	if ( ( cache_ptr->index_len != 17 ) ||
+	     ( cache_ptr->index_size != 17 * MONSTER_ENTRY_SIZE ) ||
+	     ( cache_ptr->slist_len != 2 ) ||
+	     ( cache_ptr->slist_size != 2 * MONSTER_ENTRY_SIZE ) ||
+	     ( cache_ptr->evictions_enabled != FALSE ) ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "Unexpected cache status 10.");
+            failure_mssg = msg;
+
+	}
+    }
+
+    if ( show_progress ) /* 28 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* re-enable evictions again */
+    if ( pass ) {
+
+        result = H5C_set_evictions_enabled(cache_ptr, TRUE);
+
+	if ( result != SUCCEED ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "can't enable evictions 2.");
+            failure_mssg = msg;
+	}
+    }
+
+    if ( show_progress ) /* 29 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* insert an entry */
+    insert_entry(cache_ptr, MONSTER_ENTRY_TYPE, 22, TRUE, H5C__NO_FLAGS_SET);
+
+    if ( show_progress ) /* 30 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* verify that the cache has returned to its maximum size */
+    if ( pass ) {
+
+	if ( ( cache_ptr->index_len != 16 ) ||
+	     ( cache_ptr->index_size != 16 * MONSTER_ENTRY_SIZE ) ||
+	     ( cache_ptr->slist_len != 3 ) ||
+	     ( cache_ptr->slist_size != 3 * MONSTER_ENTRY_SIZE ) ||
+	     ( cache_ptr->evictions_enabled != TRUE ) ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "Unexpected cache status 11.");
+            failure_mssg = msg;
+
+	}
+    }
+
+    if ( show_progress ) /* 31 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    if ( pass ) {
+
+        entry_ptr = &(base_addr[4]);
+
+        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, 
+			              NULL, &in_cache, NULL, NULL, NULL);
+
+	if ( result < 0 ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128,
+                       "H5AC_get_entry_status() reports failure 5.");
+            failure_mssg = msg;
+
+	} else if ( in_cache ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "Unexpected status 5.");
+            failure_mssg = msg;
+
+        } else if ( ( ! entry_ptr->loaded ) ||
+                    ( entry_ptr->cleared ) ||
+		    ( ! entry_ptr->flushed ) ||
+		    ( ! entry_ptr->destroyed ) ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "Unexpected entry history 5.");
+            failure_mssg = msg;
+
+	}
+    }
+
+    if ( show_progress ) /* 32 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    /* disable evictions one last time before we shut down */
+    if ( pass ) {
+
+        result = H5C_set_evictions_enabled(cache_ptr, FALSE);
+
+	if ( result != SUCCEED ) {
+
+            pass = FALSE;
+            HDsnprintf(msg, (size_t)128, "can't disable evictions 3.");
+            failure_mssg = msg;
+	}
+    }
+
+    if ( show_progress ) /* 33 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    if ( pass ) {
+
+        takedown_cache(cache_ptr, FALSE, FALSE);
+    }
+
+    if ( show_progress ) /* 34 */
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
+                  fcn_name, mile_stone++, (int)pass);
+
+    if ( pass ) { PASSED(); } else { H5_FAILED(); }
+
+    if ( ! pass ) {
+
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n",
+                  fcn_name, failure_mssg);
+    }
+
+    return;
+
+} /* check_evictions_enabled() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	check_flush_protected_err()
  *
  * Purpose:	Verify that an attempt to flush the cache when it contains
@@ -15826,6 +17141,143 @@ check_protect_ro_rw_err(void)
     return;
 
 } /* check_protect_ro_rw_err() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	check_evictions_enabled_err()
+ *
+ * Purpose:	Verify that H5C_get_evictions_enabled() and 
+ *              H5C_set_evictions_enabled() generate errors as expected.
+ *
+ * Return:	void
+ *
+ * Programmer:	John Mainzer
+ *              8/3/07
+ *
+ * Modifications:
+ *
+ *		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static void
+check_check_evictions_enabled_err(void)
+{
+    const char * fcn_name = "check_evictions_enabled_err()";
+    herr_t result;
+    hbool_t evictions_enabled;
+    H5C_t * cache_ptr = NULL;
+
+    TESTING("get/set evictions enabled errors");
+
+    pass = TRUE;
+
+    /* allocate a cache.
+     *
+     * Call H5C_get_evictions_enabled(), passing it a NULL cache_ptr,
+     * should fail.
+     *
+     * Repeat with a NULL evictions_enabled_ptr, should fail as well.
+     *
+     * Configure the cache to use auto cache resize.  Call 
+     * H5C_set_evictions_enabled() to disable evictions.  Should fail.
+     *
+     * Unprotect the entry and destroy the cache -- should succeed.
+     */
+
+    if ( pass ) {
+
+        reset_entries();
+
+        cache_ptr = setup_cache((size_t)(2 * 1024),
+                                (size_t)(1 * 1024));
+    }
+
+    if ( pass ) {
+
+	result = H5C_get_evictions_enabled(NULL, &evictions_enabled);
+
+	if ( result == SUCCEED ) {
+
+            pass = FALSE;
+            failure_mssg = "H5C_get_evictions_enabled succeeded() 1.\n";
+        }
+    }
+
+    if ( pass ) {
+
+	result = H5C_get_evictions_enabled(cache_ptr, NULL);
+
+	if ( result == SUCCEED ) {
+
+            pass = FALSE;
+            failure_mssg = "H5C_get_evictions_enabled succeeded() 2.\n";
+        }
+    }
+
+    if ( pass ) {
+
+	result = H5C_set_evictions_enabled(cache_ptr, TRUE);
+
+	if ( result != SUCCEED ) {
+
+            pass = FALSE;
+            failure_mssg = "H5C_set_evictions_enabled failed().\n";
+
+	}
+    }
+
+    if ( pass ) {
+
+        (cache_ptr->resize_ctl).incr_mode = H5C_incr__threshold;
+
+	result = H5C_get_evictions_enabled(cache_ptr, FALSE);
+
+	if ( result == SUCCEED ) {
+
+            pass = FALSE;
+            failure_mssg = "H5C_set_evictions_enabled succeeded() 1.\n";
+
+        } else if ( cache_ptr->evictions_enabled == TRUE ) {
+
+	}
+
+        (cache_ptr->resize_ctl).incr_mode = H5C_incr__off;
+    }
+
+    if ( pass ) {
+
+        (cache_ptr->resize_ctl).decr_mode = H5C_decr__threshold;
+
+	result = H5C_get_evictions_enabled(cache_ptr, FALSE);
+
+	if ( result == SUCCEED ) {
+
+            pass = FALSE;
+            failure_mssg = "H5C_set_evictions_enabled succeeded() 2.\n";
+        }
+
+        (cache_ptr->resize_ctl).decr_mode = H5C_decr__off;
+    }
+
+
+    if ( pass ) {
+
+        takedown_cache(cache_ptr, FALSE, FALSE);
+    }
+
+    if ( pass ) { PASSED(); } else { H5_FAILED(); }
+
+    if ( ! pass ) {
+
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
+                  fcn_name, failure_mssg);
+    }
+
+    return;
+
+} /* check_evictions_enabled_err() */
 
 
 /*-------------------------------------------------------------------------
@@ -24823,6 +26275,8 @@ main(void)
     smoke_check_6();
     smoke_check_7();
     smoke_check_8();
+    smoke_check_9();
+    smoke_check_10();
 #endif
 
     write_permitted_check();
@@ -24834,6 +26288,7 @@ main(void)
     check_rename_entry();
     check_pin_protected_entry();
     check_resize_entry();
+    check_evictions_enabled();
     check_flush_protected_err();
     check_destroy_pinned_err();
     check_destroy_protected_err();
@@ -24849,6 +26304,7 @@ main(void)
     check_resize_entry_errs();
     check_unprotect_ro_dirty_err();
     check_protect_ro_rw_err();
+    check_check_evictions_enabled_err();
     check_auto_cache_resize();
     check_auto_cache_resize_disable();
     check_auto_cache_resize_epoch_markers();

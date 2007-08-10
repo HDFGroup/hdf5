@@ -118,29 +118,34 @@ static void check_file_mdc_api_errs(void);
  *-------------------------------------------------------------------------
  */
 
-#define CACHE_CONFIGS_EQUAL(a, b, cmp_set_init, cmp_init_size)      \
-  ( ( (a).version                == (b).version ) &&                \
-    ( (a).rpt_fcn_enabled        == (b).rpt_fcn_enabled ) &&        \
-    ( ( ! cmp_set_init ) ||                                         \
-      ( (a).set_initial_size     == (b).set_initial_size ) ) &&     \
-    ( ( ! cmp_init_size ) ||                                        \
-      ( (a).initial_size         == (b).initial_size ) ) &&         \
-    ( (a).min_clean_fraction     == (b).min_clean_fraction ) &&     \
-    ( (a).max_size               == (b).max_size ) &&               \
-    ( (a).min_size               == (b).min_size ) &&               \
-    ( (a).epoch_length           == (b).epoch_length ) &&           \
-    ( (a).incr_mode              == (b).incr_mode ) &&              \
-    ( (a).lower_hr_threshold     == (b).lower_hr_threshold ) &&     \
-    ( (a).increment              == (b).increment ) &&              \
-    ( (a).apply_max_increment    == (b).apply_max_increment ) &&    \
-    ( (a).max_increment          == (b).max_increment ) &&          \
-    ( (a).decr_mode              == (b).decr_mode ) &&              \
-    ( (a).upper_hr_threshold     == (b).upper_hr_threshold ) &&     \
-    ( (a).decrement              == (b).decrement ) &&              \
-    ( (a).apply_max_decrement    == (b).apply_max_decrement ) &&    \
-    ( (a).max_decrement          == (b).max_decrement ) &&          \
-    ( (a).epochs_before_eviction == (b).epochs_before_eviction ) && \
-    ( (a).apply_empty_reserve    == (b).apply_empty_reserve ) &&    \
+#define CACHE_CONFIGS_EQUAL(a, b, cmp_set_init, cmp_init_size)       \
+  ( ( (a).version                == (b).version ) &&                 \
+    ( (a).rpt_fcn_enabled        == (b).rpt_fcn_enabled ) &&         \
+    ( (a).open_trace_file        == (b).open_trace_file ) &&         \
+    ( (a).close_trace_file       == (b).close_trace_file ) &&        \
+    ( ( (a).open_trace_file == FALSE ) ||                            \
+      ( strcmp((a).trace_file_name, (b).trace_file_name) == 0 ) ) && \
+    ( (a).evictions_enabled      == (b).evictions_enabled ) &&       \
+    ( ( ! cmp_set_init ) ||                                          \
+      ( (a).set_initial_size     == (b).set_initial_size ) ) &&      \
+    ( ( ! cmp_init_size ) ||                                         \
+      ( (a).initial_size         == (b).initial_size ) ) &&          \
+    ( (a).min_clean_fraction     == (b).min_clean_fraction ) &&      \
+    ( (a).max_size               == (b).max_size ) &&                \
+    ( (a).min_size               == (b).min_size ) &&                \
+    ( (a).epoch_length           == (b).epoch_length ) &&            \
+    ( (a).incr_mode              == (b).incr_mode ) &&               \
+    ( (a).lower_hr_threshold     == (b).lower_hr_threshold ) &&      \
+    ( (a).increment              == (b).increment ) &&               \
+    ( (a).apply_max_increment    == (b).apply_max_increment ) &&     \
+    ( (a).max_increment          == (b).max_increment ) &&           \
+    ( (a).decr_mode              == (b).decr_mode ) &&               \
+    ( (a).upper_hr_threshold     == (b).upper_hr_threshold ) &&      \
+    ( (a).decrement              == (b).decrement ) &&               \
+    ( (a).apply_max_decrement    == (b).apply_max_decrement ) &&     \
+    ( (a).max_decrement          == (b).max_decrement ) &&           \
+    ( (a).epochs_before_eviction == (b).epochs_before_eviction ) &&  \
+    ( (a).apply_empty_reserve    == (b).apply_empty_reserve ) &&     \
     ( (a).empty_reserve          == (b).empty_reserve ) )
 
 #define XLATE_EXT_TO_INT_MDC_CONFIG(i, e)                           \
@@ -191,6 +196,7 @@ check_fapl_mdc_api_calls(void)
       /* hbool_t     open_trace_file        = */ FALSE,
       /* hbool_t     close_trace_file       = */ FALSE,
       /* char        trace_file_name[]      = */ "",
+      /* hbool_t     evictions_enabled      = */ TRUE,
       /* hbool_t     set_initial_size       = */ TRUE,
       /* size_t      initial_size           = */ (1 * 1024 * 1024 + 1),
       /* double      min_clean_fraction     = */ 0.2,
@@ -755,6 +761,7 @@ check_file_mdc_api_calls(void)
       /* hbool_t     open_trace_file        = */ FALSE,
       /* hbool_t     close_trace_file       = */ FALSE,
       /* char        trace_file_name[]      = */ "",
+      /* hbool_t     evictions_enabled      = */ TRUE,
       /* hbool_t     set_initial_size       = */ TRUE,
       /* size_t      initial_size           = */ (1 * 1024 * 1024 + 1),
       /* double      min_clean_fraction     = */ 0.2,
@@ -783,6 +790,7 @@ check_file_mdc_api_calls(void)
       /* hbool_t     open_trace_file        = */ FALSE,
       /* hbool_t     close_trace_file       = */ FALSE,
       /* char        trace_file_name[]      = */ "",
+      /* hbool_t     evictions_enabled      = */ TRUE,
       /* hbool_t     set_initial_size       = */ TRUE,
       /* size_t      initial_size           = */ (512 * 1024),
       /* double      min_clean_fraction     = */ 0.1,
@@ -811,6 +819,7 @@ check_file_mdc_api_calls(void)
       /* hbool_t     open_trace_file        = */ FALSE,
       /* hbool_t     close_trace_file       = */ FALSE,
       /* char        trace_file_name[]      = */ "",
+      /* hbool_t     evictions_enabled      = */ TRUE,
       /* hbool_t     set_initial_size       = */ TRUE,
       /* size_t      initial_size           = */ (1 * 1024 * 1024),
       /* double      min_clean_fraction     = */ 0.2,
@@ -839,6 +848,7 @@ check_file_mdc_api_calls(void)
       /* hbool_t     open_trace_file        = */ FALSE,
       /* hbool_t     close_trace_file       = */ FALSE,
       /* char        trace_file_name[]      = */ "",
+      /* hbool_t     evictions_enabled      = */ TRUE,
       /* hbool_t     set_initial_size       = */ TRUE,
       /* size_t      initial_size           = */ (1 * 1024 * 1024),
       /* double      min_clean_fraction     = */ 0.15,
@@ -1367,6 +1377,7 @@ mdc_api_call_smoke_check(void)
       /* hbool_t     open_trace_file        = */ FALSE,
       /* hbool_t     close_trace_file       = */ FALSE,
       /* char        trace_file_name[]      = */ "",
+      /* hbool_t     evictions_enabled      = */ TRUE,
       /* hbool_t     set_initial_size       = */ TRUE,
       /* size_t      initial_size           = */ 500000,
       /* double      min_clean_fraction     = */ 0.1,
@@ -1395,6 +1406,7 @@ mdc_api_call_smoke_check(void)
       /* hbool_t     open_trace_file        = */ FALSE,
       /* hbool_t     close_trace_file       = */ FALSE,
       /* char        trace_file_name[]      = */ "",
+      /* hbool_t     evictions_enabled      = */ TRUE,
       /* hbool_t     set_initial_size       = */ TRUE,
       /* size_t      initial_size           = */ 12000000,
       /* double      min_clean_fraction     = */ 0.1,
@@ -1423,6 +1435,7 @@ mdc_api_call_smoke_check(void)
       /* hbool_t     open_trace_file        = */ FALSE,
       /* hbool_t     close_trace_file       = */ FALSE,
       /* char        trace_file_name[]      = */ "",
+      /* hbool_t     evictions_enabled      = */ TRUE,
       /* hbool_t     set_initial_size       = */ TRUE,
       /* size_t      initial_size           = */ 2000000,
       /* double      min_clean_fraction     = */ 0.1,
@@ -2079,7 +2092,7 @@ mdc_api_call_smoke_check(void)
  * used to test error rejection in the MDC related API calls.
  */
 
-#define NUM_INVALID_CONFIGS	34
+#define NUM_INVALID_CONFIGS	36
 
 H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
 {
@@ -2090,6 +2103,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 0.25,
@@ -2118,6 +2132,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 0.25,
@@ -2146,6 +2161,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ (hbool_t)-1,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 0.25,
@@ -2174,6 +2190,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ (hbool_t)-1,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 0.25,
@@ -2202,6 +2219,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ TRUE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 0.25,
@@ -2230,6 +2248,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ 2,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 0.25,
@@ -2258,6 +2277,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 0.25,
@@ -2286,6 +2306,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 0.25,
@@ -2314,6 +2335,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ FALSE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 0.25,
@@ -2342,6 +2364,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (16 * 1024 * 1024 + 1),
     /* double      min_clean_fraction     = */ 0.25,
@@ -2370,6 +2393,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024 - 1),
     /* double      min_clean_fraction     = */ 0.25,
@@ -2398,6 +2422,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 1.000001,
@@ -2426,6 +2451,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ -0.00000001,
@@ -2454,6 +2480,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 0.25,
@@ -2482,6 +2509,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 0.25,
@@ -2510,6 +2538,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 0.25,
@@ -2538,6 +2567,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 0.25,
@@ -2566,6 +2596,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 0.25,
@@ -2594,6 +2625,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 0.25,
@@ -2622,6 +2654,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 0.25,
@@ -2650,6 +2683,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 0.25,
@@ -2678,6 +2712,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 0.25,
@@ -2706,6 +2741,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 0.25,
@@ -2734,6 +2770,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 0.25,
@@ -2762,6 +2799,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 0.25,
@@ -2790,6 +2828,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 0.25,
@@ -2818,6 +2857,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 0.25,
@@ -2846,6 +2886,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 0.25,
@@ -2874,6 +2915,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 0.25,
@@ -2902,6 +2944,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 0.25,
@@ -2930,6 +2973,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 0.25,
@@ -2958,6 +3002,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 0.25,
@@ -2986,6 +3031,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 0.25,
@@ -3014,6 +3060,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     open_trace_file        = */ FALSE,
     /* hbool_t     close_trace_file       = */ FALSE,
     /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
     /* hbool_t     set_initial_size       = */ TRUE,
     /* size_t      initial_size           = */ (1 * 1024 * 1024),
     /* double      min_clean_fraction     = */ 0.25,
@@ -3034,6 +3081,64 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
     /* int         dirty_bytes_threshold  = */ (H5C__MAX_MAX_CACHE_SIZE / 4) + 1
+  },
+  {
+    /* 34 -- attempt to disable evictions when auto incr enabled */
+    /* int         version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
+    /* hbool_t     rpt_fcn_enabled        = */ FALSE,
+    /* hbool_t     open_trace_file        = */ FALSE,
+    /* hbool_t     close_trace_file       = */ FALSE,
+    /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ FALSE,
+    /* hbool_t     set_initial_size       = */ TRUE,
+    /* size_t      initial_size           = */ (1 * 1024 * 1024),
+    /* double      min_clean_fraction     = */ 0.25,
+    /* size_t      max_size               = */ (16 * 1024 * 1024),
+    /* size_t      min_size               = */ ( 1 * 1024 * 1024),
+    /* long int    epoch_length           = */ 50000,
+    /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,
+    /* double      lower_hr_threshold     = */ 0.9,
+    /* double      increment              = */ 2.0,
+    /* hbool_t     apply_max_increment    = */ TRUE,
+    /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__off,
+    /* double      upper_hr_threshold     = */ 0.9,
+    /* double      decrement              = */ 0.9,
+    /* hbool_t     apply_max_decrement    = */ TRUE,
+    /* size_t      max_decrement          = */ (1 * 1024 * 1024),
+    /* int         epochs_before_eviction = */ 3,
+    /* hbool_t     apply_empty_reserve    = */ TRUE,
+    /* double      empty_reserve          = */ 0.1,
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
+  },
+  {
+    /* 35 -- attempt to disable evictions when auto decr enabled */
+    /* int         version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
+    /* hbool_t     rpt_fcn_enabled        = */ FALSE,
+    /* hbool_t     open_trace_file        = */ FALSE,
+    /* hbool_t     close_trace_file       = */ FALSE,
+    /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ FALSE,
+    /* hbool_t     set_initial_size       = */ TRUE,
+    /* size_t      initial_size           = */ (1 * 1024 * 1024),
+    /* double      min_clean_fraction     = */ 0.25,
+    /* size_t      max_size               = */ (16 * 1024 * 1024),
+    /* size_t      min_size               = */ ( 1 * 1024 * 1024),
+    /* long int    epoch_length           = */ 50000,
+    /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,
+    /* double      lower_hr_threshold     = */ 0.9,
+    /* double      increment              = */ 2.0,
+    /* hbool_t     apply_max_increment    = */ TRUE,
+    /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__age_out,
+    /* double      upper_hr_threshold     = */ 0.9,
+    /* double      decrement              = */ 0.9,
+    /* hbool_t     apply_max_decrement    = */ TRUE,
+    /* size_t      max_decrement          = */ (1 * 1024 * 1024),
+    /* int         epochs_before_eviction = */ 3,
+    /* hbool_t     apply_empty_reserve    = */ TRUE,
+    /* double      empty_reserve          = */ 0.1,
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   }
 };
 
@@ -3580,7 +3685,7 @@ main(void)
 #if 1
     check_file_mdc_api_calls();
 #endif
-#if 1
+#if 0
     mdc_api_call_smoke_check();
 #endif
 #if 1

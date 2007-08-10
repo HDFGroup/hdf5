@@ -37,7 +37,7 @@
 #include "H5Fprivate.h"		/* File access				*/
 
 
-#define H5C_DO_SANITY_CHECKS		0
+#define H5C_DO_SANITY_CHECKS		1
 #define H5C_DO_EXTREME_SANITY_CHECKS	0
 
 /* This sanity checking constant was picked out of the air.  Increase
@@ -51,7 +51,7 @@
 /* H5C_COLLECT_CACHE_STATS controls overall collection of statistics
  * on cache activity.  In general, this #define should be set to 0.
  */
-#define H5C_COLLECT_CACHE_STATS	0
+#define H5C_COLLECT_CACHE_STATS	1
 
 /* H5C_COLLECT_CACHE_ENTRY_STATS controls collection of statistics
  * in individual cache entries.
@@ -901,6 +901,9 @@ H5_DLL herr_t H5C_get_entry_status(H5C_t *   cache_ptr,
                                    hbool_t * is_protected_ptr,
 				   hbool_t * is_pinned_ptr);
 
+H5_DLL herr_t H5C_get_evictions_enabled(H5C_t * cache_ptr,
+                                        hbool_t * evictions_enabled_ptr);
+
 H5_DLL herr_t H5C_get_trace_file_ptr(H5C_t * cache_ptr,
 		                     FILE ** trace_file_ptr_ptr);
 
@@ -954,6 +957,9 @@ H5_DLL herr_t H5C_resize_pinned_entry(H5C_t * cache_ptr,
 
 H5_DLL herr_t H5C_set_cache_auto_resize_config(H5C_t * cache_ptr,
                                                H5C_auto_size_ctl_t *config_ptr);
+
+H5_DLL herr_t H5C_set_evictions_enabled(H5C_t * cache_ptr,
+                                        hbool_t evictions_enabled);
 
 H5_DLL herr_t H5C_set_prefix(H5C_t * cache_ptr, char * prefix);
 
