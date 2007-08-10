@@ -2585,7 +2585,7 @@ help(char *name)
   (void) fprintf(stdout, "\t	text files and store the contents in a compact form as an\n");
   (void) fprintf(stdout, "\t	array of one-dimensional strings.\n\n");
   (void) fprintf(stdout, "\t	The input data to be written as a data-set can be provided\n");
-  (void) fprintf(stdout, "\t	to the utility in one of the follwing forms:\n");
+  (void) fprintf(stdout, "\t	to the utility in one of the following forms:\n");
   (void) fprintf(stdout, "\t	1. ASCII text file with numeric data (floating point or \n");
   (void) fprintf(stdout, "\t	integer data). \n");
   (void) fprintf(stdout, "\t	2. Binary file with native floating point data (32-bit or \n");
