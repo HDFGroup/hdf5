@@ -3,7 +3,8 @@ HDF5 Build and Install Instructions for Windows 2000/XP (Short Version)
 Note: This short instruction is written for users who want to quickly
       build HDF5 library and tools from the HDF5 source code package
       but do not want to know HDF5 building and installation details
-      on Windows 2000/XP.
+      on Windows 2000/XP.  This is written for the Microsoft Visual
+      Studio 6.0 compiler.
          
       For detailed HDF5 build and install information, or if you have
       trouble following any steps in the instructions, please refer to
@@ -79,18 +80,12 @@ built correctly.
 HDF5 libraries and tools can be tested with hdf5check.bat batch file 
 in c:\MyHDFstuff\hdf5 directory.
 
-hdf5check.bat has four options:
+The following options are supported:
    
    hdf5check                     test HDF5 C library and tools only
       
    hdf5check enablecpp           test HDF5 C/C++ libraries and tools
-         
-   hdf5check enablefortran       test HDF5 C/Fortran libraries 
-                                 and tools
-         
-   hdf5check enableall           test HDF5 C/C++/Fortran libraries
-                                 and tools
-   
+            
 
 Invoke a command prompt window and run hdf5check with appropriate
 options.

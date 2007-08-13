@@ -7,7 +7,10 @@ Note: This instruction is written for users who would like to build HDF5
       line.
          
       Currently, we only support building and testing HDF5 on command
-      line with Microsoft Visual C++ 6.0 and DEC Fortran 6.0.
+      line with Microsoft Visual C++ 6.0.  Building Fortran libraries 
+      from the commandline is not supported.  This is because building
+      Fortran libraries requires Visual Studio .NET or 2005, which are
+      also not supported on commandline.
       
       For all other Windows development tools, HDF5 should be built in
       the development environment.  Please refer to INSTALL_Windows.txt
@@ -24,15 +27,13 @@ notes in INSTALL_Windows.txt before starting below procedures.
 
 Extra Preconditions
 
-   1. Set path for Microsoft Visual C++ 6.0 and DEC Fortran 6.0
+   1. Set path for Microsoft Visual C++ 6.0
    
       Open "System" in Control Panel.
    
       On the "Advanced" tab, click "Environment Variables", click 
       "Path" in the "System variables" box, then click "Edit" and 
       add your Visual C++ 6.0 path (For example, 
-      C:\Program Files\Microsoft Visual Studio\Common\MSDev98\Bin\)
-      and DEC Fortran 6.0 path (For example, 
       C:\Program Files\Microsoft Visual Studio\Common\MSDev98\Bin\)
       into "Variable Value" and click "OK".
 
@@ -124,18 +125,12 @@ Step 1. Building and testing HDF5 libraries and tools
          is provided for users to build and test HDF5 library and tools
          together from command line.
 
-         hdf5bt.bat has four options:
+         You may use the following options:
 
             hdf5bt                 build and test C library and tools
 
             hdf5bt enablecpp       build and test C/C++ libraries 
                                    and tools
-
-            hdf5bt enablefortran   build and test C/Fortran libraries
-                                   and tools
-
-            hdf5bt enableall       build and test C/C++/Fortran 
-                                   libraries and tools
 
          Invoke a command prompt window and run hdf5bt with
          appropriate options.
@@ -162,19 +157,13 @@ Step 1. Building and testing HDF5 libraries and tools
             directory is provided for users to build HDF5 library and 
             tools from command line.
 
-            hdf5build.bat has four options:
+         You may use the following options:
   
                hdf5build                 build HDF5 C library 
                                          and tools
 
                hdf5build enablecpp       build HDF5 C/C++ libraries 
                                          and tools
-
-               hdf5build enablefortran   build HDF5 C/Fortran libraries
-                                         and tools
-
-               hdf5build enableall       build HDF5 C/C++/Fortran 
-                                         libraries and tools
 
             Invoke a command prompt window and run hdf5build with 
             appropriate options.  Compiling outputs are saved in 
@@ -188,19 +177,13 @@ Step 1. Building and testing HDF5 libraries and tools
             directory is provided for users to test HDF5 library 
             and tools from command line.
 
-            hdf5check.bat has four options:
+         You may use the following options:
 
                hdf5check                 test HDF5 C library and tools
       
                hdf5check enablecpp       test HDF5 C/C++ libraries 
                                          and tools
       
-               hdf5check enablefortran   test HDF5 C/Fortran libraries
-                                         and tools
-      
-               hdf5check enableall       test HDF5 C/C++/Fortran 
-                                         libraries and tools
-
             Invoke a command prompt window and run hdf5check with 
             appropriate options.
 

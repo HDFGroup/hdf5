@@ -141,27 +141,11 @@ Install HDF5 on Cygwin
 
            $ ./configure --without-zlib
            
-   3.6 Two ways to configure HDF5 C with specified Zlib
+   3.6 To configure HDF5 C with Zlib,
      
-     3.6.1 Using
+     To enable zlib, using
 
-           $ ./configure --with-zlib=INCDIR,LIBDIR
-
-       For example, if the zlib library is installed in
-       /cygdrive/c/usr, which is the parent directory of directories
-       "include" and "lib", 
-
- $ ./configure --with-zlib=/cygdrive/c/usr/include,/cygdrive/c/usr/lib
-
-     3.6.2 Through the CPPFLAGS and LDFLAGS Variables
-           
-       For example, if zlib was installed in the directory 
-       /cygdrive/c/usr then using the following command to configure 
-       HDF5 with zib
-
-           $ CPPFLAGS=-I/cygdrive/c/usr/include \
-           $ LDFLAGS=-L/cygdrive/c/usr/lib \
-           $ ./configure
+           $ ./configure --with-zlib
 
    3.7 To specify the installation directories, using 
 
@@ -185,7 +169,7 @@ Install HDF5 on Cygwin
      
            $ ./configure
              --with-szlib=/cygdrive/c/szip
-             --with-zlib=/cygdrive/c/usr/include,/cygdrive/c/usr/lib
+             --with-zlib
              --prefix=/cygdrive/c/hdf5
              --enable-cxx
              --enable-fortran 
@@ -196,19 +180,7 @@ Install HDF5 on Cygwin
               space between each line, No "Enter" until users finish 
               the switches and want to run the configure. 
 
- 
-     or do it through CPPFLAGS and LDFLAGS variables:
-     
-           $ CPPFLAGS=-I/cygdrive/c/usr/include \
-           $ LDFLAGS=-L/cygdrive/c/usr/lib \
-
-           $ ./configure
-             --with-szlib=/cygdrive/c/szip
-             --prefix=/cygdrive/c/hdf5
-             --enable-cxx
-             --enable-fortran 
-             <"If no more switches, then hit Enter">
-                          
+                           
 4. Make and Make Check
 
    After configuration is done successfully, run the following series of
@@ -222,7 +194,8 @@ Install HDF5 on Cygwin
 
 5. Make Install
 
-            $ make install  > "output file name"
+            $ make install           > "output file name"
+            $ make check-install    > "output file name"
    
      
 6. Check installed HDF5 library
