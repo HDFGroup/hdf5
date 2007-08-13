@@ -67,7 +67,7 @@ transition from the HDF5 Release 1.6.5 to Release 1.6.6.
 <p>
 
 Release 1.6.6 is primarily a bug-fix release and includes
-no changes in the syntax or [proper] behavior of 
+no changes in the syntax or intended behavior of 
 the library&rsquo;s public interfaces.
 
 There are, however, two changes in tool interfaces.
@@ -195,22 +195,71 @@ There are, however, two changes in tool interfaces.
 	
         <dl>
           <dt>The following tools have changed in this release; 
-              these changes will be documented on the 
+              these changes are documented on the 
               <a href="../Tools.html">Tools page</a> of the
               <a href="../RM_H5Front.html"><cite>HDF5 Reference Manual</cite></a>.
                   <br>&nbsp;
               <dd><code>h5repack</code>:
                   <br>
-                  A new option allows the new copy of a file, as created
-                  by <code>h5repack</code>, to use the file datatype. 
-                  This is now the default behavior.
-                  (The previous implementation offered conversion 
-                  only to native datatype.)
+                  A new <code>-n</code> option allows the user to specify
+                  that a new file created by <code>h5repack</code> will use
+                  native datatypes.  
+                  The default behavior is to use the original file datatypes.
+                  <table>
+                      <tr valign=top>
+                      <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                      <td><code>-n</code>&nbsp;&nbsp;</td>
+                      <td>Use native HDF5 datatypes when repacking. 
+                          <br>    
+                          (Default behavior is to use the original 
+                          file datatypes.)
+                      </td></tr>
+                  </table>
+                  <em>Note that the default behavior of this tool 
+                  has changed;
+                  prior to Release 1.6.6, </em><code>h5repack</code>
+                  <em> generated files only with native datatypes.</em>
 
-                  <br>&nbsp;
+
+              <p>
               <dd><code>h5dump</code>: 
                   <br>
-                  This tool includes new options for binary output.
+                  This tool includes a new <code>-b</code> option 
+                  for binary output.
+                  <table>
+                      <tr valign=top>
+                      <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                      <td><code>-b&nbsp;<em>B</em></code> &nbsp; or
+                          <br>
+                          <code>--binary=<em>B</em>&nbsp;&nbsp;&nbsp;</code></td>
+                      <td valign="top">Output dataset to a binary file
+                           using the datatype specified by 
+                           <code><em>B</em></code>.
+                           <br>              
+                           <code><em>B</em></code> must have one of the 
+                           following values:
+                           <br>
+                           &nbsp;&nbsp;&nbsp;&nbsp;
+                           <code>LE &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>
+                               Little-endian
+                           <br>
+                           &nbsp;&nbsp;&nbsp;&nbsp;
+                           <code>BE &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>
+                               Big-endian 
+                           <br>        
+                           &nbsp;&nbsp;&nbsp;&nbsp;
+                           <code>MEMORY &nbsp;&nbsp;</code>
+                               Memory datatype 
+                           <br>        
+                           &nbsp;&nbsp;&nbsp;&nbsp;
+                           <code>FILE &nbsp;&nbsp;&nbsp;&nbsp;</code>
+                               File datatype 
+                           <br>            
+                           Recommended usage is with the <code>-d</code> and 
+                           <code>-o</code> options.    
+                      </td>         
+                      </tr>               
+                  </table>
 
 
         </dl>
@@ -2693,7 +2742,7 @@ Describes HDF5 Release 1.6.6, April 2007
 </address>
 <!-- #EndLibraryItem --><!-- Created: Spring 1999 -->
 <!-- hhmts start -->
-Last modified: 10 April 2007
+Last modified: 13 August 2007
 <!-- hhmts end -->
 
 </body>
