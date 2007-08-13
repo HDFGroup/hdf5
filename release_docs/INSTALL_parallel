@@ -4,18 +4,32 @@
 
 1. Overview
 -----------
-
 This file contains instructions for the installation of parallel HDF5 (PHDF5).
-PHDF5 requires an MPI compiler with MPI-IO support and a parallel file system. 
+It is assumed that you are familiar with the general installation steps as
+described in the INSATLL file.  Get familiar with that file before trying
+the parallel HDF5 installation.
+
+The remaining of this section explains the requirements to run PHDF5.
+Section 2 shows quick instructions for some well know systems.  Section 3
+explains the details of the installation steps. Section 4 shows some details
+of running the parallel test suites.
+
+
+1.1. Requirements
+-----------------
+PHDF5 requires an MPI compiler with MPI-IO support and a parallel file system.
 If you don't know yet, you should first consult with your system support staff
 of information how to compile an MPI program, how to run an MPI application,
 and how to access the parallel file system.  There are sample MPI-IO C and
-Fortran programs in the section of "Sample programs".  You can use them to
-run simple tests of your MPI compilers and the parallel file system.
+Fortran programs in the appendix section of "Sample programs".  You can use
+them to run simple tests of your MPI compilers and the parallel file system.
 
-If you still have difficulties installing PHDF5 in your system, please
-send mail to
-	hdfhelp@ncsa.uiuc.edu
+
+1.2. Further Help
+-----------------
+If you still have difficulties installing PHDF5 in your system, please send
+mail to
+	help@hdfgroup.org
 
 In your mail, please include the output of "uname -a". If you have run the
 "configure" command, attach the output of the command and the content of
@@ -24,19 +38,17 @@ the file "config.log".
 
 2. Quick Instruction for known systems
 --------------------------------------
+The following shows particular steps to run the parallel HDF5 configure for
+a few machines we've tested. If your particular platform is not shown or
+somehow the steps do not work for yours, please go to the next section for
+more detailed explanations.
 
-The following shows particular steps to run the parallel HDF5
-configure for a few machines we've tested. If your particular platform
-is not shown or somehow the steps do not work for yours, please go
-to the next section for more detailed explanations.
 
-------
-Know parallel compilers
-------
-
-HDF5 knows several parallel compilers: mpicc, hcc, mpcc, mpcc_r.
-To build parallel HDF5 with one of the above, just set CC as it
-and configure.  The "--enable-parallel" is optional in this case.
+2.1. Know parallel compilers
+----------------------------
+HDF5 knows several parallel compilers: mpicc, hcc, mpcc, mpcc_r.  To build
+parallel HDF5 with one of the above, just set CC as it and configure.
+The "--enable-parallel" is optional in this case.
 
     $ CC=/usr/local/mpi/bin/mpicc ./configure --prefix=<install-directory>
     $ make
@@ -44,14 +56,12 @@ and configure.  The "--enable-parallel" is optional in this case.
     $ make install
 
 
--------
-IBM SP
--------
-
-First of all, make sure your environment variables are set correctly
-to compile and execute a single process mpi applications for the SP
-machine. Unfortunately, the setting varies from machine to machine.
-E.g., the following works for the Blue machine of LLNL.
+2.2. IBM SP
+-----------
+Make sure your environment variables are set correctly to compile and execute
+a single process mpi applications for the SP machine. Unfortunately, the
+setting varies from machine to machine.  E.g., the following works for the
+Blue machine of LLNL.
 
     setenv MP_PROCS     1
     setenv MP_NODES     1
@@ -59,126 +69,46 @@ E.g., the following works for the Blue machine of LLNL.
     setenv MP_RMPOOL    0
     setenv LLNL_COMPILE_SINGLE_THREADED TRUE    # for LLNL site only
 
-The shared library configuration for this version is broken. So, only
-static library is supported.
+The shared library configuration is problematic.  So, only static library
+is supported.
 
 Then do the following steps:
 
     $ ./configure --disable-shared --prefix=<install-directory>
     $ make		# build the library
     $ make check	# verify the correctness
+			# Read the Details section about parallel tests.
     $ make install
 
-
-We also suggest that you add "-qxlf90=autodealloc" to FFLAGS when 
-building parallel with fortran enabled.  This can be done by invoking:
+We also suggest that you add "-qxlf90=autodealloc" to FFLAGS when building
+parallel with fortran enabled.  This can be done by invoking:
 
     setenv FFLAGS -qxlf90=autodealloc		# 32 bit build
-
 or
-
     setenv FFLAGS "-q64 -qxlf90=autodealloc"	# 64 bit build
 
-prior to running configure.  Recall that the "-q64" is necessary
-for 64 bit builds.
-
----------------
-SGI Origin 2000
-Cray T3E
-(where MPI-IO is part of system MPI library such as the mpt module)
----------------
-
-#!/bin/sh
-
-RUNPARALLEL="mpirun -np 3"
-export RUNPARALLEL
-LIBS="-lmpi"
-export LIBS
-./configure --enable-parallel --prefix=$PWD/installdir
-make
-make check
-make install
+prior to running configure.  Recall that the "-q64" is necessary for 64
+bit builds.
 
 
-***Known problem***
-Some O2K system may encounter an error during make.
-    ld32: FATAL 9: I/O error (-lmpi): No such file or directory
-
-This is because libtool tries too hard to locate the loader 'ld'
-but ends up with one that does not know where to find the right
-version of libmpi.a for the particular ABI requested.
-The fix is to edit the file 'libtool' at the top of the build directory.
-Search for a string that looks like the following:
-    LD="/opt/MIPSpro/MIPSpro_default/opt/MIPSpro/bin/ld -n32"
-
-Replace it with something that knows how to find the right libmpi.a.
-E.g.,
-    LD="/opt/MIPSpro/MIPSpro_default/opt/MIPSpro/bin/cc -n32"
-
-Or you can pre-empt it by setting LD at configure time
-    $ LD="cc" ./configure --enable-parallel ...
-
-
----------------
-SGI Origin 2000
-Cray T3E
-(where MPI-IO is not part of system MPI library or I want to use my own
- version of MPIO)
----------------
-
-mpi1_inc=""                                     #mpi-1 include
-mpi1_lib=""                                     #mpi-1 library
-mpio_inc=-I$HOME/ROMIO/include                  #mpio include
-mpio_lib="-L$HOME/ROMIO/lib/IRIX64"             #mpio library
-
-MPI_INC="$mpio_inc $mpi1_inc"
-MPI_LIB="$mpio_lib $mpi1_lib"
-
-#for version 1.1
-CPPFLAGS=$MPI_INC
-export CPPFLAGS
-LDFLAGS=$MPI_LIB
-export LDFLAGS
-RUNPARALLEL="mpirun -np 3"
-export RUNPARALLEL
-LIBS="-lmpio -lmpi"
-export LIBS
-
-./configure --enable-parallel --prefix=$PWD/installdir
-make
-make check
-make install
-
-
----------------------
-Linux 2.4 and greater
----------------------
-
+2.3. Linux 2.4 and greater
+--------------------------
 Be sure that your installation of MPICH was configured with the following
 configuration command-line option:
 
     -cflags="-D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64"
 
-This allows for >2GB sized files on Linux systems and is only available
-with Linux kernels 2.4 and greater.
+This allows for >2GB sized files on Linux systems and is only available with
+Linux kernels 2.4 and greater.
 
 
-------------------
-HP V2500 and N4000
-------------------
-
-Follow the instructions in section 3.
-
-
-------------------
-Red Storm (Cray XT3)
-------------------
-
+2.4. Red Storm (Cray XT3) (for v1.8 only)
+-------------------------
 The following steps are for building the Parallel HDF5 for the Red Storm
 compute nodes.  They would probably work for other Cray XT3 systems but have
 not been verified.
 
-# Assume you alrady have a copy of HDF5 source code in directory `hdf5' and
+# Assume you already have a copy of HDF5 source code in directory `hdf5' and
 # want to install the binary in directory `/project/hdf5/phdf5'.  You also
 # have done the proper setup to have mpicc and mpif90 as the compiler commands.
 
@@ -198,35 +128,48 @@ $ make install
 3. Detail explanation
 ---------------------
 
-The HDF5 library can be configured to use MPI and MPI-IO for parallelism
-on a distributed multi-processor system. The easiest way to do this is to
-have a properly installed parallel compiler (e.g., MPICH's mpicc or IBM's
-mpcc_r) and supply that executable as the value of the CC environment
-variable.  For examples,
+3.1. Installation steps (Uni/Multiple processes modes)
+-----------------------
+During the step of configure, you must be running in the uni-process mode.
+If multiple processes are doing the configure simultaneously, they will
+incur errors.
+
+In the build step (make), it depends on your make command whether it can
+run correctly in multiple processes mode.  If you are not sure, you should
+try running it in uni-process mode.
+
+In the test step (make check), if your system can control number of processes
+running in the MPI application, you can just use "make check".  But if your
+system (e.g., IBM SP) has a fixed number of processes for each batch run,
+you need to do the serial tests by "make check-s", requesting 1 process and
+then do the parallel tests by "make check-p", requesting n processes.
+
+Lastly, "make install" should be run in the uni-process mode.
+
+
+3.2. Configure details
+----------------------
+The HDF5 library can be configured to use MPI and MPI-IO for parallelism on
+a distributed multi-processor system. The easiest way to do this is to have
+a properly installed parallel compiler (e.g., MPICH's mpicc or IBM's mpcc_r)
+and supply the compiler name as the value of the CC environment variable.
+For examples,
 
     $ CC=mpcc_r ./configure
-    
     $ CC=/usr/local/mpi/bin/mpicc ./configure
 
-If no such wrapper script is available then you must specify your normal
-C compiler along with the distribution of MPI/MPI-IO which is to be used
-(values other than `mpich' will be added at a later date):
-
-    $ ./configure --enable-parallel=mpich
-
-If the MPI/MPI-IO include files and/or libraries cannot be found by the
-compiler then their directories must be given as arguments to CPPFLAGS
-and/or LDFLAGS:
+If no such a compiler command is available then you must use your normal
+C compiler along with the location(s) of MPI/MPI-IO files to be used.
+For example,
 
     $ CPPFLAGS=-I/usr/local/mpi/include \
       LDFLAGS=-L/usr/local/mpi/lib/LINUX/ch_p4 \
       ./configure --enable-parallel=mpich
 
-If a parallel library is being built then configure attempts to determine
-how to run a parallel application on one processor and on many
-processors. If the compiler is `mpicc' and the user hasn't specified
-values for RUNSERIAL and RUNPARALLEL then configure chooses `mpirun' from
-the same directory as `mpicc':
+If a parallel library is being built then configure attempts to determine how
+to run a parallel application on one processor and on many processors. If the
+compiler is `mpicc' and the user hasn't specified values for RUNSERIAL and
+RUNPARALLEL then configure chooses `mpirun' from the same directory as `mpicc':
 
     RUNSERIAL:    /usr/local/mpi/bin/mpirun -np 1
     RUNPARALLEL:  /usr/local/mpi/bin/mpirun -np $${NPROCS:=3}
@@ -235,38 +178,35 @@ The `$${NPROCS:=3}' will be substituted with the value of the NPROCS
 environment variable at the time `make check' is run (or the value 3).
 
 
-4. Parallel tests
------------------
-
-The testpar/ directory contains tests for Parallel HDF5 and MPI-IO.
-The t_mpi tests the basic functionalities of some MPI-IO features used by
-Parallel HDF5.  It usually exits with non-zero code if a required MPI-IO
-feature does not succeed as expected.  One exception is the testing of
-accessing files larger than 2GB.  If the underlaying filesystem or if
-the MPI-IO library fails to handle file sizes larger than 2GB, the test
-will print informational messages stating the failure but will not exit
-with non-zero code.  Failure to support file size greater than 2GB is
-not a fatal error for HDF5 because HDF5 can use other file-drivers such
-as families of files to by pass the file size limit.
+4. Parallel test suite
+----------------------
+The testpar/ directory contains tests for Parallel HDF5 and MPI-IO.  The t_mpi
+tests the basic functionalities of some MPI-IO features used by Parallel HDF5.
+It usually exits with non-zero code if a required MPI-IO feature does not
+succeed as expected.  One exception is the testing of accessing files larger
+than 2GB.  If the underlying filesystem or if the MPI-IO library fails to
+handle file sizes larger than 2GB, the test will print informational messages
+stating the failure but will not exit with non-zero code.  Failure to support
+file size greater than 2GB is not a fatal error for HDF5 because HDF5 can
+use other file-drivers such as families of files to bypass the file size limit.
 
 By default, the parallel tests use the current directory as the test directory.
-This can be changed by the environment variable $HDF5_PARAPREFIX.
-For example, if the tests should use directory /PFS/user/me, do
+This can be changed by the environment variable $HDF5_PARAPREFIX.  For example,
+if the tests should use directory /PFS/user/me, do
     HDF5_PARAPREFIX=/PFS/user/me
     export HDF5_PARAPREFIX
     make check
 
-(In some batch job system, you many need to hardset HDF5_PARAPREFIX in
-the shell initial files like .profile, .cshrc, etc.)
+(In some batch job system, you many need to hardset HDF5_PARAPREFIX in the
+shell initial files like .profile, .cshrc, etc.)
 
 
-5. Sample programs
-------------------
-
+Appendix A. Sample programs
+---------------------------
 Here are sample MPI-IO C and Fortran programs.  You may use them to run simple
 tests of your MPI compilers and the parallel file system.  The MPI commands
 used here are mpicc, mpif90 and mpirun.  Replace them with the commands of
-your system.  
+your system.
 
 The programs assume they run in the parallel file system. Thus they create
 the test data file in the current directory.  If the parallel file system
