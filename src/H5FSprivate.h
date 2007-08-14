@@ -158,8 +158,7 @@ H5_DLL H5FS_t *H5FS_create(H5F_t *f, hid_t dxpl_id, haddr_t *fs_addr,
     const H5FS_section_class_t *classes[], void *cls_init_udata);
 H5_DLL H5FS_t *H5FS_open(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr,
     size_t nclasses, const H5FS_section_class_t *classes[], void *cls_init_udata);
-H5_DLL herr_t H5FS_size(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr,
-    hsize_t *meta_size);
+H5_DLL herr_t H5FS_size(const H5F_t *f, const H5FS_t *fspace, hsize_t *meta_size);
 H5_DLL herr_t H5FS_delete(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr);
 H5_DLL herr_t H5FS_close(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace);
 

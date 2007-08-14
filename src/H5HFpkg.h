@@ -697,6 +697,7 @@ H5_DLL herr_t H5HF_space_add(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_free_section_t *node, unsigned flags);
 H5_DLL htri_t H5HF_space_find(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t request,
     H5HF_free_section_t **node);
+H5_DLL herr_t H5HF_space_size(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t *fs_size);
 H5_DLL herr_t H5HF_space_remove(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_free_section_t *node);
 H5_DLL herr_t H5HF_space_close(H5HF_hdr_t *hdr, hid_t dxpl_id);

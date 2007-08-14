@@ -1205,6 +1205,7 @@ HDfprintf(stderr, "%s: request = %Hu\n", FUNC, request);
 
     /* Check arguments. */
     HDassert(fspace);
+    HDassert(fspace->nclasses);
     HDassert(request);
     HDassert(node);
 

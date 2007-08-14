@@ -2744,6 +2744,146 @@ error:
     return(1);
 } /* test_filtered_create() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	test_size
+ *
+ * Purpose:	Test querying heap size
+ *
+ * Return:	Success:	0
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, August 14, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_size(hid_t fapl, H5HF_create_t *cparam)
+{
+    hid_t	file = -1;              /* File ID */
+    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
+    H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
+    haddr_t     fh_addr;                /* Address of fractal heap */
+    hsize_t     empty_heap_size;        /* Total size of empty heap on disk */
+    hsize_t     one_heap_size;          /* Total size of heap on disk after inserting one object */
+    hsize_t     heap_size;              /* Total size of heap on disk */
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+
+    /* Create the file to work on */
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f = H5I_object(file)))
+        FAIL_STACK_ERROR
+
+    /* Display testing message */
+    TESTING("querying heap statistics")
+
+
+    /* Create absolute heap */
+    if(NULL == (fh = H5HF_create(f, dxpl, cparam)))
+        FAIL_STACK_ERROR
+
+    /* Get heap's address */
+    if(H5HF_get_heap_addr(fh, &fh_addr) < 0)
+        FAIL_STACK_ERROR
+    if(!H5F_addr_defined(fh_addr))
+        TEST_ERROR
+
+    /* Get an empty heap's size */
+    empty_heap_size = 0;
+    if(H5HF_size(f, dxpl, fh_addr, &empty_heap_size) < 0)
+        FAIL_STACK_ERROR
+    if(empty_heap_size == 0)
+        TEST_ERROR
+
+    /* Insert an object */
+    if(add_obj(fh, dxpl, (size_t)0, (size_t)10, NULL, NULL) < 0)
+        TEST_ERROR
+
+    /* Get the heap's size after inserting one object */
+    one_heap_size = 0;
+    if(H5HF_size(f, dxpl, fh_addr, &one_heap_size) < 0)
+        FAIL_STACK_ERROR
+    if(one_heap_size <= empty_heap_size)
+        TEST_ERROR
+
+    /* Close the fractal heap */
+    if(H5HF_close(fh, dxpl) < 0)
+        FAIL_STACK_ERROR
+    fh = NULL;
+
+    /* Close the file */
+    if(H5Fclose(file) < 0)
+        FAIL_STACK_ERROR
+
+
+    /* Re-open the file */
+    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f = H5I_object(file)))
+        FAIL_STACK_ERROR
+
+    /* Check the heap's size */
+    heap_size = 0;
+    if(H5HF_size(f, dxpl, fh_addr, &heap_size) < 0)
+        FAIL_STACK_ERROR
+    if(heap_size != one_heap_size)
+        TEST_ERROR
+
+    /* Re-open the heap */
+    if(NULL == (fh = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr)))
+        FAIL_STACK_ERROR
+
+    /* Check the heap's size */
+    heap_size = 0;
+    if(H5HF_size(f, dxpl, fh_addr, &heap_size) < 0)
+        FAIL_STACK_ERROR
+    if(heap_size != one_heap_size)
+        TEST_ERROR
+
+    /* Insert another object */
+    if(add_obj(fh, dxpl, (size_t)1, (size_t)10, NULL, NULL) < 0)
+        TEST_ERROR
+
+    /* Check the heap's size */
+    heap_size = 0;
+    if(H5HF_size(f, dxpl, fh_addr, &heap_size) < 0)
+        FAIL_STACK_ERROR
+    if(heap_size != one_heap_size)
+        TEST_ERROR
+
+    /* Close the fractal heap */
+    if(H5HF_close(fh, H5P_DATASET_XFER_DEFAULT) < 0)
+        FAIL_STACK_ERROR
+
+
+    /* Close the file */
+    if(H5Fclose(file) < 0)
+        FAIL_STACK_ERROR
+
+    /* All tests passed */
+    PASSED()
+
+    return(0);
+
+error:
+    H5E_BEGIN_TRY {
+        if(fh)
+            H5HF_close(fh, dxpl);
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return(1);
+} /* test_size() */
+
 #ifndef QAK2
 
 /*-------------------------------------------------------------------------
@@ -15622,6 +15762,7 @@ curr_test = FHEAP_TEST_NORMAL;
         nerrors += test_delete_open(fapl, &small_cparam, &tparam);
         nerrors += test_id_limits(fapl, &small_cparam);
         nerrors += test_filtered_create(fapl, &small_cparam);
+        nerrors += test_size(fapl, &small_cparam);
 
 #ifndef QAK2
 #ifndef QAK

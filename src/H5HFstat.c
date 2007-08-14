@@ -175,7 +175,7 @@ H5HF_size(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr, hsize_t *heap_size)
 
     /* Get storage for free-space tracking info */
     if(H5F_addr_defined(hdr->fs_addr))
-        if(H5FS_size(f, dxpl_id, hdr->fs_addr, heap_size) < 0)
+        if(H5HF_space_size(hdr, dxpl_id, heap_size) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "can't retrieve FS meta storage info")
 
 done:

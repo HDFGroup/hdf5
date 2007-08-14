@@ -234,6 +234,47 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5HF_space_size
+ *
+ * Purpose:	Query the size of the heap's free space info on disk
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		August 14 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_space_size(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t *fs_size)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_space_size)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
+    HDassert(fs_size);
+
+    /* Check if the free space for the heap has been initialized */
+    if(!hdr->fspace)
+        if(H5HF_space_start(hdr, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize heap free space")
+
+    /* Get free space metadata size */
+    if(H5FS_size(hdr->f, hdr->fspace, fs_size) < 0)
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "can't retrieve FS meta storage info")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_space_size() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5HF_space_remove
  *
  * Purpose:	Remove a section from the free space for the heap
