@@ -331,7 +331,7 @@ H5FS_close(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace)
     HDassert(f);
     HDassert(fspace);
 #ifdef QAK
-HDfprintf(stderr, "%s: Entering\n", FUNC);
+HDfprintf(stderr, "%s: Entering, fspace = %p, fspace->sinfo = %p\n", FUNC, fspace, fspace->sinfo);
 #endif /* QAK */
 
     /* Check if section info is valid */
@@ -371,10 +371,22 @@ HDfprintf(stderr, "%s: fspace->tot_sect_count = %Hu\n", FUNC, fspace->tot_sect_c
         } /* end if */
     } /* end if */
     else {
-        /* Unpin the free space header in the cache */
-        /* (the section info destructor would unpin it if the section info existed) */
-        if(H5AC_unpin_entry(f, fspace) < 0)
-            HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPIN, FAIL, "unable to unpin free space header")
+        unsigned sect_status = 0;       /* Free space section's status in the metadata cache */
+
+        /* Check the free space section's status in the metadata cache */
+        if(H5AC_get_entry_status(f, fspace->sect_addr, &sect_status) < 0)
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "unable to check metadata cache status for free space header")
+
+        /* If this free list header's section info is still in the cache, don't
+         *      unpin the header - let the section info do it, when the section
+         *      into is evicted from the cache. -QAK
+         */
+        if(!(sect_status & H5AC_ES__IN_CACHE)) {
+            /* Unpin the free space header in the cache */
+            /* (the section info destructor would unpin it if the section info existed) */
+            if(H5AC_unpin_entry(f, fspace) < 0)
+                HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPIN, FAIL, "unable to unpin free space header")
+        } /* end if */
     } /* end else */
 
     /* Reset the header's pointer to the section info, so it will get pinned again

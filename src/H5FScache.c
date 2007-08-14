@@ -869,6 +869,8 @@ HDfprintf(stderr, "%s: Flushing free space header, addr = %a, destroy = %u\n", F
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
     HDassert(sinfo);
+    HDassert(sinfo->fspace);
+    HDassert(sinfo->fspace->sect_cls);
 
     if(sinfo->cache_info.is_dirty) {
         H5FS_iter_ud_t udata;       /* User data for callbacks */
