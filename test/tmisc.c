@@ -274,7 +274,7 @@ unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset
 #define MISC24_DATATYPE_NAME    "datatype"
 #define MISC24_DATATYPE_LINK    "datatype_link"
 
-/* Definitions for misc. test #25 'a' & 'b' */
+/* Definitions for misc. test #25 'a', 'b' & 'c' */
 #define MISC25A_FILE            "foo.h5"
 #define MISC25A_GROUP0_NAME     "grp0"
 #define MISC25A_GROUP1_NAME     "/grp0/grp1"
@@ -288,6 +288,16 @@ unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset
 #define MISC25A_ATTR3_LEN       1
 #define MISC25B_FILE            "mergemsg.h5"
 #define MISC25B_GROUP           "grp1"
+#define MISC25C_FILE            "nc4_rename.h5"
+#define MISC25C_DSETNAME        "da"
+#define MISC25C_DSETNAME2       "dz"
+#define MISC25C_DSETGRPNAME     "ga"
+#define MISC25C_GRPNAME         "gb"
+#define MISC25C_GRPNAME2        "gc"
+#define MISC25C_ATTRNAME        "aa"
+#define MISC25C_ATTRNAME2       "ab"
+
+/* Definitions for misc. test #26 */
 #define MISC26_FILE             "dcpl_file"
 
 /****************************************************************
@@ -4595,8 +4605,143 @@ test_misc25b(void)
     /* Close file */
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
-} /* end test_misc25a() */
+} /* end test_misc25b() */
 
+
+/****************************************************************
+**
+**  test_misc25c(): Exercise another null object header message merge bug.
+**
+****************************************************************/
+static void
+test_misc25c(void)
+{
+    hid_t fid;          /* File ID */
+    hid_t fapl;         /* File access property list ID */
+    hid_t gcpl;         /* Group creation property list ID */
+    hid_t sid;          /* Dataspace ID */
+    hid_t did;          /* Dataset ID */
+    hid_t gid;          /* Group ID */
+    hid_t gid2;         /* Group ID */
+    hid_t aid;          /* Attribute ID */
+    herr_t ret;         /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Exercise another null object header message bug\n"));
+
+    /* Compose file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+    ret = H5Pset_latest_format(fapl, 1);
+    CHECK(ret, FAIL, "H5Pset_latest_format");
+
+    /* Create the file */
+    fid = H5Fcreate(MISC25C_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Compose group creation property list */
+    gcpl = H5Pcreate(H5P_GROUP_CREATE);
+    CHECK(gcpl, FAIL, "H5Pcreate");
+    ret = H5Pset_link_creation_order(gcpl, (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED));
+    CHECK(ret, FAIL, "H5Pset_link_creation_order");
+    ret = H5Pset_attr_creation_order(gcpl, (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED));
+    CHECK(ret, FAIL, "H5Pset_attr_creation_order");
+    ret = H5Pset_est_link_info(gcpl, 1, 18);
+    CHECK(ret, FAIL, "H5Pset_est_link_info");
+
+    /* Create a group for the dataset */
+    gid = H5Gcreate2(fid, MISC25C_DSETGRPNAME, H5P_DEFAULT, gcpl, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gcreate");
+
+    /* Create the dataspace */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Create the dataset */
+    did = H5Dcreate(gid, MISC25C_DSETNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT);
+    CHECK(did, FAIL, "H5Dcreate");
+
+    /* Create an extra group */
+    gid2 = H5Gcreate(fid, MISC25C_GRPNAME, (size_t)0);
+    CHECK(gid2, FAIL, "H5Gcreate");
+
+    /* Close the extra group */
+    ret = H5Gclose(gid2);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Add an attribute to the dataset group */
+    aid = H5Acreate(gid, MISC25C_ATTRNAME, H5T_NATIVE_CHAR, sid, H5P_DEFAULT);
+    CHECK(aid, FAIL, "H5Acreate");
+
+    /* Close the attribute */
+    ret = H5Aclose(aid);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Create a second extra group */
+    gid2 = H5Gcreate(fid, MISC25C_GRPNAME2, (size_t)0);
+    CHECK(gid2, FAIL, "H5Gcreate");
+
+    /* Close the second extra group */
+    ret = H5Gclose(gid2);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Add second attribute to the dataset group */
+    aid = H5Acreate(gid, MISC25C_ATTRNAME2, H5T_NATIVE_INT, sid, H5P_DEFAULT);
+    CHECK(aid, FAIL, "H5Acreate");
+
+    /* Close the attribute */
+    ret = H5Aclose(aid);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Close the dataset */
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close the dataset group */
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Close the dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close the file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close the property lists */
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+    ret = H5Pclose(gcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+
+    /* Re-open the file */
+    fid = H5Fopen(MISC25C_FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Re-open the dataset group */
+    gid = H5Gopen(fid, MISC25C_DSETGRPNAME);
+    CHECK(gid, FAIL, "H5Gopen");
+
+    /* Rename the dataset */
+    ret = H5Gmove(gid, MISC25C_DSETNAME, MISC25C_DSETNAME2);
+    CHECK(ret, FAIL, "H5Gmove");
+
+    /* Delete the first attribute */
+    ret = H5Adelete(gid, MISC25C_ATTRNAME);
+    CHECK(ret, FAIL, "H5Adelete");
+
+    /* Close the dataset group */
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Close the file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+} /* end test_misc25c() */
+
+
 /****************************************************************
 **
 **  test_misc26(): Regression test: ensure that copying filter
@@ -4721,6 +4866,7 @@ test_misc(void)
     test_misc24();      /* Test inappropriate API opens of objects */
     test_misc25a();     /* Exercise null object header message merge bug */
     test_misc25b();     /* Exercise null object header message merge bug on existing file */
+    test_misc25c();     /* Exercise another null object header message merge bug */
     test_misc26();      /* Test closing property lists with long filter pipelines */
 
 
@@ -4774,6 +4920,7 @@ cleanup_misc(void)
     HDremove(MISC23_FILE);
     HDremove(MISC24_FILE);
     HDremove(MISC25A_FILE);
+    HDremove(MISC25C_FILE);
     HDremove(MISC26_FILE);
 }
 

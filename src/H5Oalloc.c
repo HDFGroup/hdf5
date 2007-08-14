@@ -1216,6 +1216,18 @@ H5O_move_msgs_forward(H5O_t *oh)
 
                             /* Mark null message dirty */
                             null_msg->dirty = TRUE;
+
+                            /* Check for gap in null message's chunk */
+                            if(oh->chunk[old_chunkno].gap > 0) {
+                                /* Eliminate the gap in the chunk */
+                                if(H5O_eliminate_gap(oh, null_msg, 
+                                        ((oh->chunk[old_chunkno].image + oh->chunk[old_chunkno].size) - (H5O_SIZEOF_CHKSUM_OH(oh) + oh->chunk[old_chunkno].gap)),
+                                        oh->chunk[old_chunkno].gap) < 0)
+                                    HGOTO_ERROR(H5E_OHDR, H5E_CANTREMOVE, FAIL, "can't eliminate gap in chunk")
+
+                                /* Set the gap size to zero for the chunk */
+                                oh->chunk[old_chunkno].gap = 0;
+                            } /* end if */
                         } /* end if */
                         else {
                             unsigned new_null_msg;          /* Message index for new null message */
