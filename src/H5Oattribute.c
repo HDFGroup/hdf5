@@ -1711,7 +1711,8 @@ done:
 herr_t
 H5O_attr_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
 {
-    herr_t      ret_value = SUCCEED;      /* Return value */
+    H5HF_t      *fheap = NULL;              /* Fractal heap handle */
+    herr_t      ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_attr_bh_info, FAIL)
 
@@ -1739,13 +1740,28 @@ H5O_attr_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree storage info")
 
             /* Get storage size of fractal heap, if it's used */
-            if(H5F_addr_defined(ainfo.fheap_addr))
-                if(H5HF_size(f, dxpl_id, ainfo.fheap_addr, &(bh_info->heap_size)) < 0)
+            if(H5F_addr_defined(ainfo.fheap_addr)) {
+                /* Open the fractal heap for attributes */
+                if(NULL == (fheap = H5HF_open(f, dxpl_id, ainfo.fheap_addr)))
+                    HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
+
+                /* Get heap storage size */
+                if(H5HF_size(fheap, dxpl_id, &(bh_info->heap_size)) < 0)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree storage info")
+
+                /* Release the fractal heap */
+                if(H5HF_close(fheap, dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_HEAP, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+                fheap = NULL;
+            } /* end if */
         } /* end else */
     } /* end if */
 
 done:
+    /* Release resources */
+    if(fheap && H5HF_close(fheap, dxpl_id) < 0)
+        HDONE_ERROR(H5E_HEAP, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5O_attr_bh_info() */
 

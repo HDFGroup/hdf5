@@ -2496,6 +2496,7 @@ herr_t
 H5SM_ih_size(H5F_t *f, hid_t dxpl_id, H5F_info_t *finfo)
 {
     H5SM_master_table_t *table = NULL;          /* SOHM master table */
+    H5HF_t              *fheap = NULL;          /* Fractal heap handle */
     unsigned    	u;                      /* Local index variable */
     herr_t              ret_value = SUCCEED;    /* Return value */
 
@@ -2525,14 +2526,27 @@ H5SM_ih_size(H5F_t *f, hid_t dxpl_id, H5F_info_t *finfo)
         else if(table->indexes[u].index_type == H5SM_LIST)
 	    finfo->sohm.msgs_info.index_size += H5SM_LIST_SIZE(f, table->indexes[u].list_max);
 
-        /* Get heap storage size */
-	if(H5F_addr_defined(table->indexes[u].heap_addr))
-	    if(H5HF_size(f, dxpl_id, table->indexes[u].heap_addr, &(finfo->sohm.msgs_info.heap_size)) < 0)
+        /* Check for heap for this index */
+	if(H5F_addr_defined(table->indexes[u].heap_addr)) {
+            /* Open the fractal heap for this index */
+            if(NULL == (fheap = H5HF_open(f, dxpl_id, table->indexes[u].heap_addr)))
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
+
+            /* Get heap storage size */
+	    if(H5HF_size(fheap, dxpl_id, &(finfo->sohm.msgs_info.heap_size)) < 0)
 		HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't retrieve fractal heap storage info")
+
+            /* Release the fractal heap */
+            if(H5HF_close(fheap, dxpl_id) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
+            fheap = NULL;
+        } /* end if */
     } /* end for */
 
 done:
     /* Release resources */
+    if(fheap && H5HF_close(fheap, dxpl_id) < 0)
+        HDONE_ERROR(H5E_HEAP, H5E_CLOSEERROR, FAIL, "can't close fractal heap")
     if(table && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, table, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_CACHE, H5E_CANTRELEASE, FAIL, "unable to close SOHM master table")
 

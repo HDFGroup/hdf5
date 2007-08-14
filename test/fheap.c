@@ -2798,7 +2798,7 @@ test_size(hid_t fapl, H5HF_create_t *cparam)
 
     /* Get an empty heap's size */
     empty_heap_size = 0;
-    if(H5HF_size(f, dxpl, fh_addr, &empty_heap_size) < 0)
+    if(H5HF_size(fh, dxpl, &empty_heap_size) < 0)
         FAIL_STACK_ERROR
     if(empty_heap_size == 0)
         TEST_ERROR
@@ -2809,7 +2809,7 @@ test_size(hid_t fapl, H5HF_create_t *cparam)
 
     /* Get the heap's size after inserting one object */
     one_heap_size = 0;
-    if(H5HF_size(f, dxpl, fh_addr, &one_heap_size) < 0)
+    if(H5HF_size(fh, dxpl, &one_heap_size) < 0)
         FAIL_STACK_ERROR
     if(one_heap_size <= empty_heap_size)
         TEST_ERROR
@@ -2832,20 +2832,13 @@ test_size(hid_t fapl, H5HF_create_t *cparam)
     if(NULL == (f = H5I_object(file)))
         FAIL_STACK_ERROR
 
-    /* Check the heap's size */
-    heap_size = 0;
-    if(H5HF_size(f, dxpl, fh_addr, &heap_size) < 0)
-        FAIL_STACK_ERROR
-    if(heap_size != one_heap_size)
-        TEST_ERROR
-
     /* Re-open the heap */
     if(NULL == (fh = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr)))
         FAIL_STACK_ERROR
 
     /* Check the heap's size */
     heap_size = 0;
-    if(H5HF_size(f, dxpl, fh_addr, &heap_size) < 0)
+    if(H5HF_size(fh, dxpl, &heap_size) < 0)
         FAIL_STACK_ERROR
     if(heap_size != one_heap_size)
         TEST_ERROR
@@ -2856,7 +2849,7 @@ test_size(hid_t fapl, H5HF_create_t *cparam)
 
     /* Check the heap's size */
     heap_size = 0;
-    if(H5HF_size(f, dxpl, fh_addr, &heap_size) < 0)
+    if(H5HF_size(fh, dxpl, &heap_size) < 0)
         FAIL_STACK_ERROR
     if(heap_size != one_heap_size)
         TEST_ERROR

@@ -124,9 +124,9 @@ H5HF_stat_info(const H5HF_t *fh, H5HF_stat_t *stats)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_size(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr, hsize_t *heap_size)
+H5HF_size(const H5HF_t *fh, hid_t dxpl_id, hsize_t *heap_size)
 {
-    H5HF_hdr_t *hdr = NULL;                     /* Fractal heap header */
+    H5HF_hdr_t *hdr;                            /* Fractal heap header */
     herr_t      ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_NOAPI(H5HF_size, FAIL)
@@ -134,13 +134,11 @@ H5HF_size(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr, hsize_t *heap_size)
     /*
      * Check arguments.
      */
-    HDassert(f);
-    HDassert(H5F_addr_defined(fh_addr));
+    HDassert(fh);
     HDassert(heap_size);
 
-    /* Lock the heap header into memory */
-    if(NULL == (hdr = H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, NULL, NULL, H5AC_READ)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load fractal heap header")
+    /* Get "convenience" pointer to fractal heap header */
+    hdr = fh->hdr;
 
     /* Add in values already known */
     *heap_size += hdr->heap_size;               /* Heap header */
@@ -149,7 +147,7 @@ H5HF_size(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr, hsize_t *heap_size)
 
     /* Check for indirect blocks for managed objects */
     if(H5F_addr_defined(hdr->man_dtable.table_addr) && hdr->man_dtable.curr_root_rows != 0)
-        if(H5HF_man_iblock_size(f, dxpl_id, hdr, hdr->man_dtable.table_addr, hdr->man_dtable.curr_root_rows, heap_size) < 0)
+        if(H5HF_man_iblock_size(hdr->f, dxpl_id, hdr, hdr->man_dtable.table_addr, hdr->man_dtable.curr_root_rows, heap_size) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to get fractal heap storage info for indirect block")
 
     /* Get B-tree storage for huge objects in fractal heap */
@@ -169,7 +167,7 @@ H5HF_size(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr, hsize_t *heap_size)
                 huge_bt2_class = H5HF_BT2_INDIR;
 
         /* Get the B-tree storage for the appropriate class */
-        if(H5B2_iterate_size(f, dxpl_id, huge_bt2_class, hdr->huge_bt2_addr, heap_size) < 0)
+        if(H5B2_iterate_size(hdr->f, dxpl_id, huge_bt2_class, hdr->huge_bt2_addr, heap_size) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "can't retrieve B-tree storage info")
     } /* end if */
 
@@ -179,10 +177,6 @@ H5HF_size(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr, hsize_t *heap_size)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "can't retrieve FS meta storage info")
 
 done:
-    /* Release resources */
-    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap header")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_size() */
 

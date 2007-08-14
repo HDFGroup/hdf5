@@ -128,8 +128,7 @@ H5_DLL herr_t H5HF_delete(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr);
 
 /* Statistics routines */
 H5_DLL herr_t H5HF_stat_info(const H5HF_t *fh, H5HF_stat_t *stats);
-H5_DLL herr_t H5HF_size(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr,
-    hsize_t *heap_size/*out*/);
+H5_DLL herr_t H5HF_size(const H5HF_t *fh, hid_t dxpl_id, hsize_t *heap_size/*out*/);
 
 /* Debugging routines */
 #ifdef H5HF_DEBUGGING
