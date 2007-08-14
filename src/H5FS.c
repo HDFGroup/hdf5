@@ -181,7 +181,7 @@ HDfprintf(stderr, "%s: Opening free space manager, nclasses = %Zu\n", FUNC, ncla
     fs_prot.cls_init_udata = cls_init_udata;
 
     /* Protect the free space header */
-    if(NULL == (fspace = H5AC_protect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, &fs_prot, NULL, H5AC_WRITE)))
+    if(NULL == (fspace = H5AC_protect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, &fs_prot, NULL, H5AC_READ)))
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTPROTECT, NULL, "unable to load free space header")
 #ifdef QAK
 HDfprintf(stderr, "%s: fspace->sect_addr = %a\n", FUNC, fspace->sect_addr);
