@@ -76,7 +76,7 @@ H5File::H5File() : IdComponent(0) {}
 ///		For info on file creation in the case of an already-open file,
 ///		please refer to the \b Special \b case section in the C layer
 ///		Reference Manual at:
-/// http://hdfgroup.org/HDF5/doc/RM_H5F.html#File-Create
+/// <A HREF="../RM_H5F.html#File-Create">../RM_H5F.html#File-Create</A>
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5File::H5File( const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : IdComponent(0)

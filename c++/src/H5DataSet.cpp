@@ -400,7 +400,7 @@ int DataSet::iterateElems( void* buf, const DataType& type, const DataSpace& spa
 ///		For more information, please see the Description section in
 ///		C layer Reference Manual at:
 ///\par
-/// http://hdfgroup.org/HDF5/doc/RM_H5D.html#Dataset-Extend
+/// <A HREF="../RM_H5D.html#Dataset-Extend">../RM_H5D.html#Dataset-Extend</A>
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void DataSet::extend( const hsize_t* size ) const

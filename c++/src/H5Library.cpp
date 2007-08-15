@@ -106,7 +106,7 @@ void H5Library::getLibVersion( unsigned& majnum, unsigned& minnum, unsigned& rel
 ///\par Description
 ///		For information about library version, please refer to
 ///		the C layer Reference Manual at:
-/// http://hdfgroup.org/HDF5/doc/RM_H5.html#Library-VersCheck
+/// <A HREF="../RM_H5.html#Library-VersCheck">../RM_H5.html#Library-VersCheck</A>
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void H5Library::checkVersion(unsigned majnum, unsigned minnum, unsigned relnum)
@@ -161,7 +161,7 @@ void H5Library::garbageCollect()
 ///		Setting a value of -1 for a limit means no limit of that type.
 ///		For more information on free list limits, please refer to C
 ///		layer Reference Manual at:
-/// http://hdfgroup.org/HDF5/doc/RM_H5.html#Library-SetFreeListLimits
+/// <A HREF="../RM_H5.html#Library-SetFreeListLimits">../RM_H5.html#Library-SetFreeListLimits</A>
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void H5Library::setFreeListLimits(int reg_global_lim, int reg_list_lim,

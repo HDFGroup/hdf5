@@ -197,7 +197,7 @@ Attribute H5Object::openAttribute( const unsigned int idx ) const
 ///\par Description
 ///		For information, please refer to the C layer Reference Manual
 ///		at:
-/// http://hdfgroup.org/HDF5/doc/RM_H5A.html#Annot-Iterate
+/// <A HREF="../RM_H5A.html#Annot-Iterate">../RM_H5A.html#Annot-Iterate</A>
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 int H5Object::iterateAttrs( attr_operator_t user_op, unsigned * idx, void *op_data )
