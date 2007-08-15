@@ -152,8 +152,14 @@ Notes
       at Section IV.
 
    6. For .NET users, please read section VI.
+ 
+   7. For fortran users, please read section VII.
 
-   7. For users who would like to build, test and use HDF5 snapshot
+   8. We no longer support compaq viusal fortran compiler. Compaq visual
+      fortran projects are still included for forward compatibility with intel
+      fortran 9.1.  
+
+   9. For users who would like to build, test and use HDF5 snapshot
       release, please read Section VIII.
 
 ------------------------------------------------------------------------
