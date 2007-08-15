@@ -14,11 +14,9 @@ library.  The INSTALL_parallel file contains instructions for installing the
 parallel version of the library.  Other INSTALL* files have similarly
 descriptive names.
 
-Documentation for this release will be released separately; it is not 
-included in the source code tar ball.  The documentation tar ball will
-include a doc/html/ directory; start with the file "index.html" in that 
-directory.  An online document set for current release can also be found
-online at http:/hdfgroup.org/HDF5/doc/.
+Documentation for this release can be found in the doc/html/ directory;
+start with the file "index.html" in that directory.  Online documentation
+for the current release is available at http:/hdfgroup.org/HDF5/doc/.
 
 Several mailing lists are currently set up for use with the HDF5 library:
 
