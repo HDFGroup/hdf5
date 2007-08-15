@@ -127,7 +127,6 @@ and set and retrieve their constant or persistent properties.
       <li><a href="#Dataset-Extend">H5Dextend</a>
       <li><a href="#Dataset-Fill">H5Dfill</a>
       <li><a href="#Dataset-GetCreatePlist">H5Dget_create_plist</a>
-      <li><a href="#Dataset-GetOffset">H5Dget_offset</a>
 	</ul>     
     </td>
     
@@ -135,12 +134,12 @@ and set and retrieve their constant or persistent properties.
     
     <td valign="top">
 	<ul>
+      <li><a href="#Dataset-GetOffset">H5Dget_offset</a>
       <li><a href="#Dataset-GetSpace">H5Dget_space</a>
       <li><a href="#Dataset-GetSpaceStatus">H5Dget_space_status</a>
       <li><a href="#Dataset-GetStorageSize">H5Dget_storage_size</a>
       <li><a href="#Dataset-GetType">H5Dget_type</a>
       <li><a href="#Dataset-Iterate">H5Diterate</a>
-      <li><a href="#Dataset-Open">H5Dopen</a>
 	</ul>
     </td>
     
@@ -148,6 +147,7 @@ and set and retrieve their constant or persistent properties.
     
     <td valign="top">
 	<ul>
+      <li><a href="#Dataset-Open">H5Dopen</a>
       <li><a href="#Dataset-Read">H5Dread</a>
       <li><a href="#Dataset-VLGetBuf">H5Dvlen_get_buf_size</a>
       <li><a href="#Dataset-VLReclaim">H5Dvlen_reclaim</a>
@@ -185,7 +185,9 @@ as the corresponding C function.
 </td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td valign=top>
 <ul>
     <li><a href="#Dataset-Read">h5dread_f</a>
+    <li><a href="#Dataset-Read">h5dread_vl_f</a>
     <li><a href="#Dataset-Write">h5dwrite_f</a>
+    <li><a href="#Dataset-Write">h5dwrite_vl_f</a>
 <!--<li><a href="#Dataset-Iterate">h5diterate_f</a>                     -->
 <!--<li><a href="#Dataset-Debug">h5ddebug_f</a>                         -->
     <li><a href="#Dataset-Extend">h5dextend_f</a>
@@ -1195,12 +1197,35 @@ END SUBROUTINE h5dopen_f
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
 <dt><strong>Fortran90 Interface:</strong> h5dread_f
-    
-	<dd>
+    <dd>There is no direct FORTRAN couterpart for the C function 
+        <code>H5Dread</code>.  
+        Instead, that functionality is provided by two FORTRAN functions:
+        
+    <center>
+    <table width=80%>
+      <tr valign=top align=left>
+            <td>
+              <code>h5dread_f</code>
+            </td>
+            <td>&nbsp;&nbsp;</td><td>
+              <strong>Purpose:</strong>
+              Reads data other than variable-length data. 
+            </td>
+        </tr>
+        <tr valign=top align=left>
+            <td>
+              <code>h5dread_vl_f</code>
+            </td><td>&nbsp;&nbsp;</td><td>
+              <strong>Purpose:</strong>
+              Reads variable-length data. 
+            </td>
+        </tr>
+    </table>
+    </center>
+				
 	<pre>
 SUBROUTINE h5dread_f(dset_id, mem_type_id, buf, dims, hdferr, &amp; 
                      mem_space_id, file_space_id, xfer_prp)
-
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
   INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1224,9 +1249,48 @@ SUBROUTINE h5dread_f(dset_id, mem_type_id, buf, dims, hdferr, &amp;
                                             ! Default value is H5S_ALL_F
   INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
                                             ! Transfer property list identifier
-                                            ! Default value is H5P_DEFAULT_F             
+                                            ! Default value is H5P_DEFAULT_F 
 END SUBROUTINE h5dread_f
 	</pre>
+
+	<pre>
+
+SUBROUTINE h5dread_vl_f(dset_id, mem_type_id, buf, dims, len, hdferr, &amp; 
+                     mem_space_id, file_space_id, xfer_prp)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
+  INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
+  TYPE, INTENT(INOUT), & DIMENSION(dims(1),dims(2)) :: buf
+                                            ! Data buffer; may be a scalar 
+                                            ! or an array
+                                            ! TYPE must be one of the following
+                                            !     INTEGER
+                                            !     REAL
+                                            !     CHARACTER
+  INTEGER(HSIZE_T), INTENT(IN), DIMENSION(2)  :: dims 
+                                            ! Array to hold corresponding 
+                                            ! dimension sizes of data 
+                                            ! buffer buf 
+                                            ! dim(k) has value of the k-th 
+                                            ! dimension of buffer buf
+                                            ! Values are ignored if buf is 
+                                            ! a scalar
+  INTEGER(SIZE_T), INTENT(INOUT), DIMENSION(*)  :: len 
+                                            ! Array to store length of
+                                            ! each element
+  INTEGER, INTENT(OUT) :: hdferr            ! Error code 
+                                            ! 0 on success and -1 on failure
+  INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
+                                            ! Memory dataspace identfier 
+                                            ! Default value is H5S_ALL_F 
+  INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
+                                            ! File dataspace identfier 
+                                            ! Default value is H5S_ALL_F
+  INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
+                                            ! Transfer property list identifier
+                                            ! Default value is H5P_DEFAULT_F
+END SUBROUTINE h5dread_vl_f
+        </pre>
 
 		<!--<dt><strong>Non-C API(s):</strong>
     	<dd>
@@ -1588,12 +1652,35 @@ SUBROUTINE
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
 <dt><strong>Fortran90 Interface:</strong> h5dwrite_f
-	
-	<dd>
+    <dd>There is no direct FORTRAN couterpart for the C function 
+        <code>H5Dwrite</code>.  
+        Instead, that functionality is provided by two FORTRAN functions:
+        
+    <center>
+    <table width=80%>
+      <tr valign=top align=left>
+            <td>
+              <code>h5dwrite_f</code>
+            </td>
+            <td>&nbsp;&nbsp;</td><td>
+              <strong>Purpose:</strong>
+              Writes data other than variable-length data. 
+            </td>
+        </tr>
+        <tr valign=top align=left>
+            <td>
+              <code>h5dwrite_vl_f</code>
+            </td><td>&nbsp;&nbsp;</td><td>
+              <strong>Purpose:</strong>
+              Writes variable-length data. 
+            </td>
+        </tr>
+    </table>
+    </center>
+				
 	<pre>
 SUBROUTINE h5dwrite_f(dset_id, mem_type_id, buf, dims, hdferr, &amp; 
                       mem_space_id, file_space_id, xfer_prp)
-
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: dset_id      ! Dataset identifier
   INTEGER(HID_T), INTENT(IN) :: mem_type_id  ! Memory datatype identifier
@@ -1619,9 +1706,48 @@ SUBROUTINE h5dwrite_f(dset_id, mem_type_id, buf, dims, hdferr, &amp;
                                              ! Transfer property list 
                                              ! identifier; default value 
                                              ! is H5P_DEFAULT_F 
-            
 END SUBROUTINE h5dwrite_f
 	</pre>
+
+	<pre>
+
+SUBROUTINE h5dwrite_vl_f(dset_id, mem_type_id, buf, dims, len, hdferr, &amp; 
+                     mem_space_id, file_space_id, xfer_prp)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
+  INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
+  TYPE, INTENT(IN), & DIMENSION(dims(1),dims(2)) :: buf
+                                            ! Data buffer; may be a scalar 
+                                            ! or an array
+                                            ! TYPE must be one of the following
+                                            !     INTEGER
+                                            !     REAL
+                                            !     CHARACTER
+  INTEGER(HSIZE_T), INTENT(IN), DIMENSION(2)  :: dims 
+                                            ! Array to hold corresponding 
+                                            ! dimension sizes of data 
+                                            ! buffer buf 
+                                            ! dim(k) has value of the k-th 
+                                            ! dimension of buffer buf
+                                            ! Values are ignored if buf is 
+                                            ! a scalar
+  INTEGER(SIZE_T), INTENT(IN), DIMENSION(*)  :: len 
+                                            ! Array to store length of
+                                            ! each element
+  INTEGER, INTENT(OUT) :: hdferr            ! Error code 
+                                            ! 0 on success and -1 on failure
+  INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
+                                            ! Memory dataspace identfier 
+                                            ! Default value is H5S_ALL_F 
+  INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
+                                            ! File dataspace identfier 
+                                            ! Default value is H5S_ALL_F
+  INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
+                                            ! Transfer property list identifier
+                                            ! Default value is H5P_DEFAULT_F
+END SUBROUTINE h5dwrite_vl_f
+        </pre>
+
 		
 		<!--<dt><strong>Non-C API(s):</strong>
     	<dd>
@@ -1688,7 +1814,7 @@ Describes HDF5 Release 1.6.6, August 2007
 </address>
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 11 October 2006");
+document.writeln("Last modified: 15 August 2007");
 -->
 </SCRIPT>
  
