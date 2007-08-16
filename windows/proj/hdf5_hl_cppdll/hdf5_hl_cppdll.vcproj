@@ -1,88 +1,244 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.10"
+	Version="8.00"
 	Name="hdf5_hl_cppdll"
-	SccProjectName=""
-	SccLocalPath="">
+	ProjectGUID="{3EDEB434-F59E-4C50-8884-F0BB29845619}"
+	>
 	<Platforms>
 		<Platform
-			Name="Win32"/>
+			Name="Win32"
+		/>
+		<Platform
+			Name="x64"
+		/>
 	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\..\..\..\proj\hdf5_hl_cppdll\Release"
-			IntermediateDirectory=".\..\..\..\proj\hdf5_hl_cppdll\Release"
+			OutputDirectory="..\..\..\proj\$(ProjectName)\$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="2"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE"
-			CharacterSet="2">
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="NDEBUG"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="1"
+				TypeLibraryName=".\..\..\..\proj\hdf5_hl_cppdll\Release/hdf5_hl_cppdll.tlb"
+				HeaderFileName=""
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="../../../src,../../../hl/src,../../../c++/src"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;HDF5_HL_CPPDLL_EXPORTS;_HDF5USEHLDLL_"
-				StringPooling="TRUE"
+				StringPooling="true"
 				RuntimeLibrary="2"
-				EnableFunctionLevelLinking="TRUE"
-				UsePrecompiledHeader="2"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile=".\..\..\..\proj\hdf5_hl_cppdll\Release/hdf5_hl_cppdll.pch"
 				AssemblerListingLocation=".\..\..\..\proj\hdf5_hl_cppdll\Release/"
 				ObjectFile=".\..\..\..\proj\hdf5_hl_cppdll\Release/"
 				ProgramDataBaseFileName=".\..\..\..\proj\hdf5_hl_cppdll\Release/"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				CompileAs="0"/>
+				SuppressStartupBanner="true"
+				CompileAs="0"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib $(HDF5_EXT_ZLIB) $(HDF5_EXT_SZIP)"
-				OutputFile=".\..\..\..\proj\hdf5_hl_cppdll\Release/hdf5_hl_cppdll.dll"
-				LinkIncremental="1"
-				SuppressStartupBanner="TRUE"
-				ProgramDatabaseFile=".\..\..\..\proj\hdf5_hl_cppdll\Release/hdf5_hl_cppdll.pdb"
-				ImportLibrary=".\..\..\..\proj\hdf5_hl_cppdll\Release/hdf5_hl_cppdll.lib"
-				TargetMachine="1"/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="NDEBUG"
-				MkTypLibCompatible="TRUE"
-				SuppressStartupBanner="TRUE"
-				TargetEnvironment="1"
-				TypeLibraryName=".\..\..\..\proj\hdf5_hl_cppdll\Release/hdf5_hl_cppdll.tlb"
-				HeaderFileName=""/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
-				Culture="1033"/>
+				Culture="1033"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
+				Name="VCLinkerTool"
+				AdditionalDependencies="odbc32.lib odbccp32.lib $(HDF5_EXT_ZLIB) $(HDF5_EXT_SZIP)"
+				OutputFile="$(OutDir)\hdf5_hl_cppdll.dll"
+				LinkIncremental="1"
+				SuppressStartupBanner="true"
+				ManifestFile="$(TargetPath).intermediate.manifest"
+				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
+				ImportLibrary="$(TargetDir)$(TargetName).lib"
+				TargetMachine="1"
+			/>
 			<Tool
-				Name="VCWebDeploymentTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
+				Name="VCManifestTool"
+			/>
 			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|x64"
+			OutputDirectory="..\..\..\proj\$(ProjectName)\$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)"
+			ConfigurationType="2"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="NDEBUG"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="3"
+				TypeLibraryName=".\..\..\..\proj\hdf5_hl_cppdll\Release/hdf5_hl_cppdll.tlb"
+				HeaderFileName=""
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				InlineFunctionExpansion="1"
+				AdditionalIncludeDirectories="../../../src,../../../hl/src,../../../c++/src"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;HDF5_HL_CPPDLL_EXPORTS;_HDF5USEHLDLL_"
+				StringPooling="true"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
+				PrecompiledHeaderFile=".\..\..\..\proj\hdf5_hl_cppdll\Release/hdf5_hl_cppdll.pch"
+				AssemblerListingLocation=".\..\..\..\proj\hdf5_hl_cppdll\Release/"
+				ObjectFile=".\..\..\..\proj\hdf5_hl_cppdll\Release/"
+				ProgramDataBaseFileName=".\..\..\..\proj\hdf5_hl_cppdll\Release/"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				CompileAs="0"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="odbc32.lib odbccp32.lib $(HDF5_EXT_ZLIB) $(HDF5_EXT_SZIP)"
+				OutputFile="$(OutDir)\hdf5_hl_cppdll.dll"
+				LinkIncremental="1"
+				SuppressStartupBanner="true"
+				ManifestFile="$(TargetPath).intermediate.manifest"
+				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
+				ImportLibrary="$(TargetDir)$(TargetName).lib"
+				TargetMachine="17"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\..\..\..\proj\hdf5_hl_cppdll\Debug"
-			IntermediateDirectory=".\..\..\..\proj\hdf5_hl_cppdll\Debug"
+			OutputDirectory="..\..\..\proj\$(ProjectName)\$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="2"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE"
-			CharacterSet="2">
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="_DEBUG"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="1"
+				TypeLibraryName=".\..\..\..\proj\hdf5_hl_cppdll\Debug/hdf5_hl_cppdll.tlb"
+				HeaderFileName=""
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
@@ -90,54 +246,157 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;HDF5_HL_CPPDLL_EXPORTS;_HDF5USEHLDLL_"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
-				UsePrecompiledHeader="2"
+				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile=".\..\..\..\proj\hdf5_hl_cppdll\Debug/hdf5_hl_cppdll.pch"
 				AssemblerListingLocation=".\..\..\..\proj\hdf5_hl_cppdll\Debug/"
 				ObjectFile=".\..\..\..\proj\hdf5_hl_cppdll\Debug/"
 				ProgramDataBaseFileName=".\..\..\..\proj\hdf5_hl_cppdll\Debug/"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
+				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
-				CompileAs="0"/>
+				CompileAs="0"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLinkerTool"
-				OutputFile="..\..\..\proj\hdf5_hl_cppdll\Debug/hdf5_hl_cppddll.dll"
-				LinkIncremental="1"
-				SuppressStartupBanner="TRUE"
-				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile=".\..\..\..\proj\hdf5_hl_cppdll\Debug/hdf5_hl_cppddll.pdb"
-				ImportLibrary=".\..\..\..\proj\hdf5_hl_cppdll\Debug/hdf5_hl_cppddll.lib"
-				TargetMachine="1"/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="_DEBUG"
-				MkTypLibCompatible="TRUE"
-				SuppressStartupBanner="TRUE"
-				TargetEnvironment="1"
-				TypeLibraryName=".\..\..\..\proj\hdf5_hl_cppdll\Debug/hdf5_hl_cppdll.tlb"
-				HeaderFileName=""/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_DEBUG"
-				Culture="1033"/>
+				Culture="1033"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
+				Name="VCLinkerTool"
+				OutputFile="$(OutDir)\hdf5_hl_cppddll.dll"
+				LinkIncremental="1"
+				SuppressStartupBanner="true"
+				ManifestFile="$(TargetPath).intermediate.manifest"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
+				ImportLibrary="$(TargetDir)$(TargetName).lib"
+				TargetMachine="1"
+			/>
 			<Tool
-				Name="VCWebDeploymentTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
+				Name="VCManifestTool"
+			/>
 			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug|x64"
+			OutputDirectory="..\..\..\proj\$(ProjectName)\$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)"
+			ConfigurationType="2"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="_DEBUG"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="3"
+				TypeLibraryName=".\..\..\..\proj\hdf5_hl_cppdll\Debug/hdf5_hl_cppdll.tlb"
+				HeaderFileName=""
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="../../../src,../../../hl/src,../../../c++/src"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;HDF5_HL_CPPDLL_EXPORTS;_HDF5USEHLDLL_"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				UsePrecompiledHeader="0"
+				PrecompiledHeaderFile=".\..\..\..\proj\hdf5_hl_cppdll\Debug/hdf5_hl_cppdll.pch"
+				AssemblerListingLocation=".\..\..\..\proj\hdf5_hl_cppdll\Debug/"
+				ObjectFile=".\..\..\..\proj\hdf5_hl_cppdll\Debug/"
+				ProgramDataBaseFileName=".\..\..\..\proj\hdf5_hl_cppdll\Debug/"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				DebugInformationFormat="3"
+				CompileAs="0"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="1033"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				OutputFile="$(OutDir)\hdf5_hl_cppddll.dll"
+				LinkIncremental="1"
+				SuppressStartupBanner="true"
+				ManifestFile="$(TargetPath).intermediate.manifest"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
+				ImportLibrary="$(TargetDir)$(TargetName).lib"
+				TargetMachine="17"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 	</Configurations>
 	<References>
@@ -145,35 +404,64 @@
 	<Files>
 		<Filter
 			Name="Source Files"
-			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat;f90;for;f;fpp">
+			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat;f90;for;f;fpp"
+			>
 			<File
-				RelativePath="..\..\..\hl\c++\src\H5PacketTable.cpp">
+				RelativePath="..\..\..\hl\c++\src\H5PacketTable.cpp"
+				>
 				<FileConfiguration
-					Name="Release|Win32">
+					Name="Release|Win32"
+					>
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;HDF5_HL_CPPDLL_EXPORTS;_HDF5USEHLDLL_;$(NoInherit)"/>
+						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;HDF5_HL_CPPDLL_EXPORTS;_HDF5USEHLDLL_;$(NoInherit)"
+					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|Win32">
+					Name="Release|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;HDF5_HL_CPPDLL_EXPORTS;_HDF5USEHLDLL_;$(NoInherit)"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;HDF5_HL_CPPDLL_EXPORTS;_HDF5USEHLDLL_;$(NoInherit)"
-						BasicRuntimeChecks="3"/>
+						BasicRuntimeChecks="3"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;HDF5_HL_CPPDLL_EXPORTS;_HDF5USEHLDLL_;$(NoInherit)"
+						BasicRuntimeChecks="3"
+					/>
 				</FileConfiguration>
 			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl;fi;fd">
+			Filter="h;hpp;hxx;hm;inl;fi;fd"
+			>
 		</Filter>
 		<Filter
 			Name="Resource Files"
-			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
+			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
+			>
 		</Filter>
 	</Files>
 	<Globals>

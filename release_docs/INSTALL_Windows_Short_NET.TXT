@@ -1,12 +1,12 @@
 ************************************************************************
-* Build and Install HDF5 C/C++ Library with VS .NET 2003 or 2005       *
+*       Build and Install HDF5 C/C++ Library with VS .NET 2003         *
 *                     with Windows XP (Short Version)                  *
 ************************************************************************
 
 Notes: This short instruction is written for users who want to quickly
        build HDF5 library and tools from the HDF5 source code package
-       with Microsoft Visual Studio .NET 2003 or 2005 but do not want 
-       to know HDF5 building and installation details on Windows XP.
+       with Microsoft Visual Studio .NET 2003 but do not want to know 
+       HDF5 building and installation details on Windows XP.
          
        For detailed HDF5 build and install information, or if you have
        trouble following any steps in the instructions, please refer to
@@ -16,9 +16,6 @@ Notes: This short instruction is written for users who want to quickly
        command line, please refer to
        INSATLL_Windows_From_Command_Line.txt.
 
-       For .Net and Intel users, If  you are not building HDF5 with 
-       Thread-Safe Feature, ttsafedll.dsp should always be turned off.
-        
 WARNINGS:
 
 Please read CAREFULLY about HDF5 build and install preconditions and 
@@ -29,17 +26,7 @@ notes in INSTALL_Windows.txt before starting below procedures.
                             Preconditions                                                           
 ========================================================================                          
 
-   1. Setup path Visual Studio .Net or 2005 Compiler.  
-   
-      Open "System" in Control Panel.
-   
-      On the "Advanced" tab, click "Environment Variables", click 
-      "Path" in the "System variables" box, then click "Edit" and 
-      add your Visual C++ .Net or 2005 path (For example, 
-      C:\Program Files\Microsoft Visual Studio .NET 2003\Common7\IDE)
-      into "Variable Value" and click "OK".                          
-                                                                         
-   2. Set up path for external libraries and headers                     
+   1. Set up path for external libraries and headers                     
                                                                          
       Skip this part if you don't want to use ANY compression features     
       provided by HDF5.  Please do read Section V in INSTALL_Windows.txt.                         
@@ -65,29 +52,6 @@ notes in INSTALL_Windows.txt before starting below procedures.
       (c:\zlib123\lib, c:\szip\dll) to the library directories.            
 
 ========================================================================
-                Building HDF5 C/C++ Libraries with VS 2005
-========================================================================
- 
-    Note: These extra steps on apply to Visual Studio 2005.  If you will be
-          building with .Net 2003, please skip to the section below.
- 
-     The building procedure is almost the same as building HDF5 on .Net 2003.
-
-     1) To use zlib or szlib compression packages:
-        Use zlib 1.2.2 DLL provided at
-        ftp://ftp.hdfgroup.org/lib-external/zlib/1.2/bin/zlib123-windows.zip
-        Use szlib 2.0 DLL provided at
-        ftp://ftp.hdfgroup.org/lib-external/szip/2.0/bin/windows/xp-net
-     2) Make sure that WIN32 macro is set at Visual Studio 2005.
-     3) You may use _CRT_SECURE_NO_DEPRECATE to disable the warnings.
-     Please refer to the next section, "Building HDF5 C/C++ Libraries 
-     with VS .NET"
-     
-     Please also note that the example workspace may not work properly. 
-     You may need to reset hdf5 library path.
- 
- 
-========================================================================
                 Building HDF5 C/C++ Libraries with VS .NET
 ========================================================================
 
@@ -102,21 +66,54 @@ notes in INSTALL_Windows.txt before starting below procedures.
 
       Invoke Microsoft Visual Studio.  From the main menu, go to "File" and 
       select the "Open Solution" option. Then open the
-      c:\MyHDFstuff\hdf5\windows\proj\all\all.sln solution if you are building
-      without Fortran libraries, or 
-      c:\MyHDFstuff\hdf5\windows\proj\all_fortran\all_fortran.sln if you would
-      like to use Fortran.
+      c:\MyHDFstuff\hdf5\windows_vs6\proj\all\all.dsw workspace.  When prompted
+      to convert project files to Visual Studio .NET format, select "Yes to All".
 
       You should find Windows project files listed as "all", "big", etc. on the
       left.
 
-
-   3. (Optional) Disable HDF5 C++ and High level C++
+   3. Disable Projects
+   
+      In Visual Studio .NET, we do not support building Fortran libraries.  If
+      you would like to build Fortran libraries, please read about Visual Studio
+      2005 with Intel Fortran 9.1 in the Install_Windows.txt document.
+      
+      The following projects must be disabled.  Go to "Build", "Configuration 
+      Manager", and uncheck the following for both Release and Debug builds:
+      
+        flush1_fortran
+        flush1_fortrandll
+        flush2_fortran
+        flush2_fortrandll
+        hdf5_f90cstub
+        hdf5_f90cstubdll
+        hdf5_fortran
+        hdf5_fortrandll
+        hdf5_hl_f90cstubdll
+        hdf5_hl_fortran
+        hdf5_hl_fortrandll
+        hl_test_image_fortran
+        hl_test_image_fortrandll
+        hl_test_lite_fortran
+        hl_test_lite_fortrandll
+        hl_test_table_fortran
+        hl_test_table_fortrandll
+        libtest_cstubdll
+        libtest_fortran
+        libtest_fortrandll
+        testhdf5_fortran
+        testhdf5_fortrandll
+        
+        If you don't plan on building threadsafe HDF5, disable project
+        "ttsafedll" as well.  If you would like to build threadsafe HDF5, please
+        see Install_Windows.txt.
+        
+   4. (Optional) Disable HDF5 C++ and High level C++
    
       In HDF5 1.8, C++ and HL C++ libraries are built by default.  To opt-out,
       you must explicitly disable them.
 
-      3.1 Skip this step if you do want to build HDF5 High-Level C++ libraries
+      4.1 Skip this step if you do want to build HDF5 High-Level C++ libraries
 
           Go to "Project" and select "Project Dependencies".  Select "all", and 
           disable all of the following projects:
@@ -126,7 +123,7 @@ notes in INSTALL_Windows.txt before starting below procedures.
             hl_test_table_cpp
             hl_test_table_cppdll
       
-      3.2 Skip this step if you do want to build HDF5 High-Level libraries
+      4.2 Skip this step if you do want to build HDF5 High-Level libraries
 
           Go to "Project" and select "Project Dependencies".  Select "all", and 
           disable all of the project files listed in the previous step, as well
@@ -150,15 +147,15 @@ notes in INSTALL_Windows.txt before starting below procedures.
    Libraries.                                                                                           
              
 
-   4. Select "Build", then Select "Configuration Manager".
+   5. Select "Build", then Select "Configuration Manager".
 
-      4.1 To build debug static libraries, debug multithreaded DLLs, and tests:
+      5.1 To build debug static libraries, debug multithreaded DLLs, and tests:
 
       In "Active Solution Configuration", select "Debug". Select "Close". 
       Select "Build" -> "Build Solution" or "Rebuild Solution" to build debug 
       version of project "all".
 
-      4.2 To build release static libraries, multithreaded DLLs and tests:
+      5.2 To build release static libraries, multithreaded DLLs and tests:
 
       In "Active Solution Configuration", select "Release". Select "Close". 
       Select "Build" -> "Build Solution" or "Rebuild Solution" to build release 

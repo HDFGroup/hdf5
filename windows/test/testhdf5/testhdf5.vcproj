@@ -1,615 +1,1491 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.10"
+	Version="8.00"
 	Name="testhdf5"
-	SccProjectName=""
-	SccLocalPath="">
+	ProjectGUID="{D1518671-CB9D-471F-8BCE-A03DE67F26B1}"
+	>
 	<Platforms>
 		<Platform
-			Name="Win32"/>
+			Name="Win32"
+		/>
+		<Platform
+			Name="x64"
+		/>
 	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\../../../test/testhdf5/Debug"
-			IntermediateDirectory=".\../../../test/testhdf5/Debug"
+			OutputDirectory="..\..\..\test\$(ProjectName)\$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE"
-			CharacterSet="2">
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TypeLibraryName=".\../../../test/testhdf5/Debug/testhdf5.tlb"
+				HeaderFileName=""
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\src,..\..\..\test"
 				PreprocessorDefinitions="_CONSOLE;_DEBUG;WIN32"
-				RuntimeLibrary="5"
-				UsePrecompiledHeader="2"
+				RuntimeLibrary="1"
+				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile=".\../../../test/testhdf5/Debug/testhdf5.pch"
 				AssemblerListingLocation=".\../../../test/testhdf5/Debug/"
 				ObjectFile=".\../../../test/testhdf5/Debug/"
 				ProgramDataBaseFileName=".\../../../test/testhdf5/Debug/"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
+				SuppressStartupBanner="true"
 				DebugInformationFormat="4"
-				CompileAs="0"/>
+				CompileAs="0"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib WS2_32.lib $(HDF5_EXT_ZLIB) $(HDF5_EXT_SZIP)"
-				OutputFile=".\../../../test/testhdf5/Debug/testhdf5.exe"
-				LinkIncremental="1"
-				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libc.lib"
-				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile=".\../../../test/testhdf5/Debug/testhdf5.pdb"
-				SubSystem="1"
-				TargetMachine="1"/>
-			<Tool
-				Name="VCMIDLTool"
-				TypeLibraryName=".\../../../test/testhdf5/Debug/testhdf5.tlb"
-				HeaderFileName=""/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_DEBUG"
-				Culture="1033"/>
+				Culture="1033"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
+				Name="VCLinkerTool"
+				AdditionalDependencies="odbc32.lib odbccp32.lib WS2_32.lib $(HDF5_EXT_ZLIB) $(HDF5_EXT_SZIP)"
+				OutputFile="$(OutDir)\$(ProjectName).exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="true"
+				IgnoreDefaultLibraryNames="libc.lib"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile=".\../../../test/testhdf5/Debug/testhdf5.pdb"
+				SubSystem="1"
+				TargetMachine="1"
+			/>
 			<Tool
-				Name="VCWebDeploymentTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
+				Name="VCManifestTool"
+			/>
 			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug|x64"
+			OutputDirectory="..\..\..\test\$(ProjectName)\$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+				TypeLibraryName=".\../../../test/testhdf5/Debug/testhdf5.tlb"
+				HeaderFileName=""
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\..\..\src,..\..\..\test"
+				PreprocessorDefinitions="_CONSOLE;_DEBUG;WIN32"
+				RuntimeLibrary="1"
+				UsePrecompiledHeader="0"
+				PrecompiledHeaderFile=".\../../../test/testhdf5/Debug/testhdf5.pch"
+				AssemblerListingLocation=".\../../../test/testhdf5/Debug/"
+				ObjectFile=".\../../../test/testhdf5/Debug/"
+				ProgramDataBaseFileName=".\../../../test/testhdf5/Debug/"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				DebugInformationFormat="3"
+				CompileAs="0"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="1033"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="odbc32.lib odbccp32.lib WS2_32.lib $(HDF5_EXT_ZLIB) $(HDF5_EXT_SZIP)"
+				OutputFile="$(OutDir)\$(ProjectName).exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="true"
+				IgnoreDefaultLibraryNames="libc.lib"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile=".\../../../test/testhdf5/Debug/testhdf5.pdb"
+				SubSystem="1"
+				TargetMachine="17"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\../../../test/testhdf5/Release"
-			IntermediateDirectory=".\../../../test/testhdf5/Release"
+			OutputDirectory="..\..\..\test\$(ProjectName)\$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE"
-			CharacterSet="2">
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TypeLibraryName=".\../../../test/testhdf5/Release/testhdf5.tlb"
+				HeaderFileName=""
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..\src,..\..\..\test"
 				PreprocessorDefinitions="_CONSOLE;NDEBUG;WIN32"
-				StringPooling="TRUE"
-				RuntimeLibrary="4"
-				EnableFunctionLevelLinking="TRUE"
-				UsePrecompiledHeader="2"
+				StringPooling="true"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile=".\../../../test/testhdf5/Release/testhdf5.pch"
 				AssemblerListingLocation=".\../../../test/testhdf5/Release/"
 				ObjectFile=".\../../../test/testhdf5/Release/"
 				ProgramDataBaseFileName=".\../../../test/testhdf5/Release/"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				CompileAs="0"/>
+				SuppressStartupBanner="true"
+				CompileAs="0"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib WS2_32.lib $(HDF5_EXT_ZLIB) $(HDF5_EXT_SZIP)"
-				OutputFile=".\../../../test/testhdf5/Release/testhdf5.exe"
-				LinkIncremental="1"
-				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libcd.lib"
-				ProgramDatabaseFile=".\../../../test/testhdf5/Release/testhdf5.pdb"
-				SubSystem="1"
-				TargetMachine="1"/>
-			<Tool
-				Name="VCMIDLTool"
-				TypeLibraryName=".\../../../test/testhdf5/Release/testhdf5.tlb"
-				HeaderFileName=""/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
-				Culture="1033"/>
+				Culture="1033"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
+				Name="VCLinkerTool"
+				AdditionalDependencies="odbc32.lib odbccp32.lib WS2_32.lib $(HDF5_EXT_ZLIB) $(HDF5_EXT_SZIP)"
+				OutputFile="$(OutDir)\$(ProjectName).exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="true"
+				IgnoreDefaultLibraryNames="libcd.lib"
+				ProgramDatabaseFile=".\../../../test/testhdf5/Release/testhdf5.pdb"
+				SubSystem="1"
+				TargetMachine="1"
+			/>
 			<Tool
-				Name="VCWebDeploymentTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
+				Name="VCManifestTool"
+			/>
 			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|x64"
+			OutputDirectory="..\..\..\test\$(ProjectName)\$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				TargetEnvironment="3"
+				TypeLibraryName=".\../../../test/testhdf5/Release/testhdf5.tlb"
+				HeaderFileName=""
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				InlineFunctionExpansion="1"
+				AdditionalIncludeDirectories="..\..\..\src,..\..\..\test"
+				PreprocessorDefinitions="_CONSOLE;NDEBUG;WIN32"
+				StringPooling="true"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
+				PrecompiledHeaderFile=".\../../../test/testhdf5/Release/testhdf5.pch"
+				AssemblerListingLocation=".\../../../test/testhdf5/Release/"
+				ObjectFile=".\../../../test/testhdf5/Release/"
+				ProgramDataBaseFileName=".\../../../test/testhdf5/Release/"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				CompileAs="0"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="odbc32.lib odbccp32.lib WS2_32.lib $(HDF5_EXT_ZLIB) $(HDF5_EXT_SZIP)"
+				OutputFile="$(OutDir)\$(ProjectName).exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="true"
+				IgnoreDefaultLibraryNames="libcd.lib"
+				ProgramDatabaseFile=".\../../../test/testhdf5/Release/testhdf5.pdb"
+				SubSystem="1"
+				TargetMachine="17"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 	</Configurations>
 	<References>
 	</References>
 	<Files>
 		<File
-			RelativePath="..\..\..\test\tarray.c">
+			RelativePath="..\..\..\test\tarray.c"
+			>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="Debug|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="0"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="Debug|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="0"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="2"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\test\tattr.c">
+			RelativePath="..\..\..\test\tattr.c"
+			>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="Debug|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="0"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="Debug|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="0"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="2"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\test\tchecksum.c">
+			RelativePath="..\..\..\test\tchecksum.c"
+			>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="Debug|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="0"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="Debug|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="0"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="2"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\test\tconfig.c">
+			RelativePath="..\..\..\test\tconfig.c"
+			>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="Debug|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="0"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="Debug|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="0"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="2"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\test\testframe.c">
+			RelativePath="..\..\..\test\testframe.c"
+			>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="Debug|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="0"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="Debug|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="0"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="2"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\test\testhdf5.c">
+			RelativePath="..\..\..\test\testhdf5.c"
+			>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="Debug|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="0"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="Debug|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="0"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="2"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\test\tfile.c">
+			RelativePath="..\..\..\test\tfile.c"
+			>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="Debug|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="0"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="Debug|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="0"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="2"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\test\tgenprop.c">
+			RelativePath="..\..\..\test\tgenprop.c"
+			>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="Debug|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="0"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="Debug|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="0"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="2"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\test\th5o.c">
+			RelativePath="..\..\..\test\th5o.c"
+			>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="Debug|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="0"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="Debug|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="0"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="2"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\test\th5s.c">
+			RelativePath="..\..\..\test\th5s.c"
+			>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="Debug|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="0"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="Debug|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="0"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="2"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\test\theap.c">
+			RelativePath="..\..\..\test\theap.c"
+			>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="Debug|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="0"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="Debug|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="0"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="2"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\test\tid.c">
+			RelativePath="..\..\..\test\tid.c"
+			>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="Debug|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="0"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="Debug|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="0"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="2"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\test\titerate.c">
+			RelativePath="..\..\..\test\titerate.c"
+			>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="Debug|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="0"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="Debug|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="0"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="2"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\test\tmeta.c">
+			RelativePath="..\..\..\test\tmeta.c"
+			>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="Debug|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="0"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="Debug|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="0"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="2"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\test\tmisc.c">
+			RelativePath="..\..\..\test\tmisc.c"
+			>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="Debug|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="0"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="Debug|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="0"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="2"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\test\trefer.c">
+			RelativePath="..\..\..\test\trefer.c"
+			>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="Debug|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="0"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="Debug|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="0"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="2"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\test\trefstr.c">
+			RelativePath="..\..\..\test\trefstr.c"
+			>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="Debug|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="0"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="Debug|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="0"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="2"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\test\tselect.c">
+			RelativePath="..\..\..\test\tselect.c"
+			>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="Debug|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="0"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="Debug|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="0"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="2"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\test\tskiplist.c">
+			RelativePath="..\..\..\test\tskiplist.c"
+			>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="Debug|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="0"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="Debug|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="0"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="2"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\test\tsohm.c">
+			RelativePath="..\..\..\test\tsohm.c"
+			>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="Debug|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="0"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="Debug|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="0"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="2"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\test\ttime.c">
+			RelativePath="..\..\..\test\ttime.c"
+			>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="Debug|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="0"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="Debug|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="0"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="2"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\test\ttst.c">
+			RelativePath="..\..\..\test\ttst.c"
+			>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="Debug|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="0"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="Debug|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="0"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="2"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\test\tunicode.c">
+			RelativePath="..\..\..\test\tunicode.c"
+			>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="Debug|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="0"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="Debug|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="0"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="2"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\test\tvlstr.c">
+			RelativePath="..\..\..\test\tvlstr.c"
+			>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="Debug|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="0"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="Debug|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="0"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="2"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\..\test\tvltypes.c">
+			RelativePath="..\..\..\test\tvltypes.c"
+			>
 			<FileConfiguration
-				Name="Debug|Win32">
+				Name="Debug|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="0"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32">
+				Name="Debug|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="0"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
 				<Tool
 					Name="VCCLCompilerTool"
 					Optimization="2"
 					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""/>
+					PreprocessorDefinitions=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|x64"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					Optimization="2"
+					AdditionalIncludeDirectories=""
+					PreprocessorDefinitions=""
+				/>
 			</FileConfiguration>
 		</File>
 	</Files>

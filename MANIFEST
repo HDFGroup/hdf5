@@ -393,6 +393,7 @@
 ./release_docs/INSTALL_Windows_From_Command_Line.txt
 ./release_docs/INSTALL_Windows_Short_MSVS6.0.TXT
 ./release_docs/INSTALL_Windows_Short_NET.TXT
+./release_docs/INSTALL_Windows_Short_VS2005.TXT
 ./release_docs/INSTALL_parallel
 ./release_docs/RELEASE.txt
 
@@ -1743,7 +1744,7 @@
 ./windows/fortran/test/flush2_fortran/flush2_fortran.vfproj
 ./windows/fortran/test/flush2_fortrandll/flush2_fortrandll.vfproj
 ./windows/fortran/test/libtest_cstubdll/libtest_cstubdll.vcproj
-./windows/fortran/test/libtest_fortran/libtest_fortran_lib.vcproj
+./windows/fortran/test/libtest_fortran/libtest_cstub.vcproj
 ./windows/fortran/test/libtest_fortran/libtest_fortran.vfproj
 ./windows/fortran/test/libtest_fortrandll/libtest_fortrandll.vfproj
 ./windows/fortran/test/testhdf5_fortran/testhdf5_fortran.vfproj
@@ -1831,7 +1832,7 @@
 ./windows/proj/hdf5_hl_cppdll/hdf5_hl_cppdll.vcproj
 ./windows/proj/hdf5_hldll/hdf5_hldll.vcproj
 ./windows/proj/hdf5_hl_f90cstubdll/hdf5_hl_f90cstubdll.vcproj
-./windows/proj/hdf5_hl_fortran/hdf5_hl_fortran_lib.vcproj
+./windows/proj/hdf5_hl_fortran/hdf5_hl_f90cstub.vcproj
 ./windows/proj/hdf5_hl_fortran/hdf5_hl_fortran.vfproj
 ./windows/proj/hdf5_hl_fortrandll/hdf5_hl_fortrandll.vfproj
 
@@ -1901,7 +1902,7 @@
 ./windows/test/lheap/lheap.vcproj
 ./windows/test/lheapdll/lheapdll.vcproj
 ./windows/test/libtest/libtest.vcproj
-./windows/test/libtestD/libtestD.vcproj
+./windows/test/libtestdll/libtestdll.vcproj
 ./windows/test/links/links.vcproj
 ./windows/test/linksdll/linksdll.vcproj
 ./windows/test/mount/mount.vcproj
@@ -1979,7 +1980,7 @@
 ./windows/tools/testfiles/testh5repack_detect_szip/testh5repack_detect_szip.vcproj
 ./windows/tools/testfiles/testh5repack_detect_szipdll/testh5repack_detect_szipdll.vcproj
 ./windows/tools/toolslib/toolslib.vcproj
-./windows/tools/toolslibD/toolslibD.vcproj
+./windows/tools/toolslibdll/toolslibdll.vcproj
 
 
 # Visual Studio 6.0 Project Files

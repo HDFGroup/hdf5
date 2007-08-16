@@ -20,12 +20,10 @@ Contents:
    Section V     :  How to disable Gzip(Zlib)/Szip compression
    Section VI    :  How to build HDF5 with Fortran Support
    Section VII   :  How to build Multi-threaded version of HDF5 library
-   Section VIII  :  How to build and test HDF5 snapshot release
-   Section IX    :  How to build HDF5 with Thread-Safe Feature
-   Section X     :  How to build HDF5 in Visual Studio 2005
-   Section XI    :  How to build HDF5 for 64-bit Windows
-   Section XII   :  How to generate H5tinit.c
-   Section XIII  :  Misc.
+   Section VIII  :  How to build HDF5 with Thread-Safe Feature
+   Section IX    :  How to build HDF5 for 64-bit Windows
+   Section X     :  How to generate H5tinit.c
+   Section XI    :  Misc.
 
 
 ========================================================================
@@ -34,7 +32,7 @@ Contents:
 
 Preconditions:
 
-   1. Installed Microsoft Visual Studio .Net or Visual Studio 2005.
+   1. Installed Microsoft Visual Studio 2005.
    
    2. (Optional) Installed Intel Compiler 9.1 if you want to build HDF5 Fortran 
       libraries.
@@ -157,7 +155,11 @@ Notes:
    2. Users who prefer to use Visual Studio 6.0 can follow instructions in 
       INSTALL_Windows_Short_MSVS6.0.txt.  Note, however, that Visual Studio
       6.0 will not be supported in future versions of HDF5.
-      
+
+   2. Users who prefer to use Visual Studio .NET can follow instructions in 
+      INSTALL_Windows_Short_Net.txt.  Note, however, that Visual Studio
+      .NET will not be supported in future versions of HDF5.
+
    3. For users who want to quickly build HDF5 library or do not want to know 
       HDF5 building and installation details, please read the 
       INSTALL_Windows_Short_***.txt relating to your compiler.
@@ -236,7 +238,14 @@ STEP 1: Building HDF5 Libraries and Tools
       text files saved under c:\MyHDFstuff\hdf5\windows directory to the 
       corresponding directories under hdf5.
 
-   2. Invoke Microsoft Visual Studio compiler
+   2. (Optional) Generate H5tinit.c
+   
+        HDF5 uses source file H5tinit.c to outline the specifics of internal
+        datatypes.  We provide a generic version of this file for common 
+        platforms.  It may be generated dynamically for non-standard 
+        configurations.  To generate H5tinit.c, please see read Section X.
+        
+   3. Open the HDF5 library project in Visual Studio
 
       Invoke Microsoft Visual Studio.  From the main menu, go to "File" and 
       select the "Open Solution" option. Then open the
@@ -245,12 +254,12 @@ STEP 1: Building HDF5 Libraries and Tools
       You should find Windows project files listed as "all", "big", etc. on the
       left.
 
-   3. (Optional) Disable HDF5 C++ and High level C++
+   4. (Optional) Disable HDF5 C++ and High level C++
    
       In HDF5 1.8, C++ and HL C++ libraries are built by default.  To opt-out,
       you must explicitly disable them.
 
-      3.1 Skip this step if you do want to build HDF5 High-Level C++ libraries
+      4.1 Skip this step if you do want to build HDF5 High-Level C++ libraries
 
           Go to "Project" and select "Project Dependencies".  Select "all", and 
           disable all of the following projects:
@@ -260,7 +269,7 @@ STEP 1: Building HDF5 Libraries and Tools
             hl_test_table_cpp
             hl_test_table_cppdll
       
-      3.2 Skip this step if you do want to build HDF5 High-Level libraries
+      4.2 Skip this step if you do want to build HDF5 High-Level libraries
 
           Go to "Project" and select "Project Dependencies".  Select "all", and 
           disable all of the project files listed in the previous step, as well
@@ -280,15 +289,15 @@ STEP 1: Building HDF5 Libraries and Tools
              hl_test_packetdll
 
 
-   4. Select "Build", then Select "Configuration Manager".
+   5. Select "Build", then Select "Configuration Manager".
 
-      4.1 To build debug static libraries, debug multithreaded DLLs, and tests:
+      5.1 To build debug static libraries, debug multithreaded DLLs, and tests:
 
       In "Active Solution Configuration", select "Debug". Select "Close". 
       Select "Build" -> "Build Solution" or "Rebuild Solution" to build debug 
       version of project "all".
 
-      4.2 To build release static libraries, multithreaded DLLs and tests:
+      5.2 To build release static libraries, multithreaded DLLs and tests:
 
       In "Active Solution Configuration", select "Release". Select "Close". 
       Select "Build" -> "Build Solution" or "Rebuild Solution" to build release 
@@ -324,15 +333,15 @@ STEP 1: Building HDF5 Libraries and Tools
 
                libtest.lib - the internal library for test
 
-            c:\MyHDFstuff\hdf5\test\libtestD\debug -
+            c:\MyHDFstuff\hdf5\test\libtestdll\debug -
 
-               libtestD.dll - the internal DLL for test
-               libtestD.lib - the internal DLL export library for test
+               libtestddll.dll - the internal DLL for test
+               libtestddll.lib - the internal DLL export library for test
 
-            c:\MyHDFstuff\hdf5\test\libtestD\release -
+            c:\MyHDFstuff\hdf5\test\libtestdll\release -
 
-               libtestD.dll - the internal DLL for test
-               libtestD.lib - the internal DLL export library for test
+               libtestdll.dll - the internal DLL for test
+               libtestdll.lib - the internal DLL export library for test
 
             c:\MyHDFstuff\hdf5\tools\toolslib\debug -
         and c:\MyHDFstuff\hdf5\tools\toolslib\release -
@@ -469,8 +478,8 @@ We provide 2 options for users to test HDF5 libraries and tools.
 
       hdf5\proj\hdf5dll\release\hdf5dll.dll
       hdf5\proj\hdf5dll\debug\hdf5ddll.dll
-      hdf5\test\libtestD\release\libtestD.dll
-      hdf5\test\libtestD\debug\libtestDd.dll
+      hdf5\test\libtestdll\release\libtestdll.dll
+      hdf5\test\libtestdll\debug\libtestddll.dll
 
    1. HDF5 library testing
 
@@ -1160,14 +1169,12 @@ Notes:  1. For Intel Compiler users, Intel fortran Compiler 9.1 is currently
 
         2. The Compaq Fortran Compiler is no longer supported for HDF5 1.8.
 
-        3. Intel Fortran 9.1 works only under .Net 2003 or Visual Studio 2005
-        environments.
+        3. Intel Fortran 9.1 works only under Visual Studio 2005 environments.
         
-        4. For Visual Studio 2005 users, parallel builds should be disabled.  To
-        do so: Go to  Tools > Options > Projects and Solutions > Build and Run. 
-        Set "Maximum Number of Parallel Project Builds" to 1.
+        4. Parallel builds should be disabled.  To do so: Go to  Tools > 
+        Options > Projects and Solutions > Build and Run. Set "Maximum Number of
+        Parallel Project Builds" to 1.
         
-
 
   Preconditions:
 
@@ -1187,7 +1194,7 @@ Notes:  1. For Intel Compiler users, Intel fortran Compiler 9.1 is currently
       You have to read this part even if you want to use only Zlib
       or Szip.  You also need to read Section V.
 
-        1) Invoke Microsoft Visual C++ .Net 2003 or 2005.  
+        1) Invoke Microsoft Visual Studio 2005.  
         
         2) From the main menu, Go to Tools > Options > Intel(R) Fortran. In the 
            right panel, make sure your "Selected Compiler" is Intel Fortran 9.1.
@@ -1201,37 +1208,19 @@ Notes:  1. For Intel Compiler users, Intel fortran Compiler 9.1 is currently
         5) Then click "OK".
 
       
-1. Build with Intel Fortran Compiler 9.1 under Visual Studio .Net / 2005
+1. Build with Intel Fortran Compiler 9.1 under Visual Studio 2005
 
-  Note: This step will build HDF5 Static and DLL C and C++ Library using .Net
-        or Visual Studio 2005 Compiler as well as HDF5 Static and High Level 
+  Note: This step will build HDF5 Static and DLL C and C++ Library using
+        Visual Studio 2005 Compiler as well as HDF5 Static and High Level 
         Fortran Library using Intel Fortran 9.1 Compiler.
 
   1.1 Open all_fortran.sln
 
-      Invoke Microsoft Visual C++ .Net or 2005.  From the main menu, 
+      Invoke Microsoft Visual Studio 2005.  From the main menu, 
       go to "File" and select "Open Solution".  Choose "all_fortran.sln" 
       under the directory c:\MyHDFstuff\hdf5\windows\proj\all_fortran.
 
 
-  (.Net 2003 ONLY) Fix Runtime Libraries
-  
-    Due to a incompatibilities between Visual Studio .Net, Intel Fortran 9.1,
-    and the Microsoft Platform SDK, the static debug run-time libraries cannot
-    be used for some Fortran projects.  To remedy this, make the following
-    changes:
-    
-        a) Select the "flush1_fortran" project, and go to Project->Properties.
-        
-        b) Make sure "Debug" is selected in the "Configuration" drop-down.
-        
-        c) From the Properties dialog, navigate to Fortran->Libraries.
-        
-        d) In the field "Runtime Library", select "Single-threaded".
-        
-        e) Do the same for projects "flush2_fortran", and "testhdf5_fortran".
-
-    
   1.2 Build as Normal
 
     Follow steps as in Section II to build all HDF5 library files, including
@@ -1312,7 +1301,7 @@ Notes:  1. For Intel Compiler users, Intel fortran Compiler 9.1 is currently
 
        1. Open allf90examples.sln
 
-          Invoke Microsoft Visual C++ .Net or 2005.  From the main menu, 
+          Invoke Microsoft Visual Studio 2005.  From the main menu, 
           go to "File" and select "Open Solution".  Choose "allf90examples.sln" 
           under the directory 
           c:\MyHDFstuff\hdf5\windows\fortran\examples\allf90examples.
@@ -1377,7 +1366,7 @@ Notes:  1. For Intel Compiler users, Intel fortran Compiler 9.1 is currently
 
        1. Open allhlf90examples.sln
 
-          Invoke Microsoft Visual C++ .Net or 2005.  From the main menu, 
+          Invoke Microsoft Visual Studio 2005.  From the main menu, 
           go to "File" and select "Open Solution".  Choose 
           "allhlf90examples.sln" under the directory 
           c:\MyHDFstuff\hdf5\windows\hl\fortran\examples\allhlf90examples.        
@@ -1452,7 +1441,7 @@ Notes: In Visual Studio 2005, the Single-threaded runtime libraries have been
        those two sections carefully before go to the following part.
 
        
-In Visual Studio .Net, users have the option of building multi-threaded
+In Visual Studio 6.0 and .Net, users have the option of building multi-threaded
 libraries by manipulating the project settings.  Otherwise, the build process
 is very much the same.  Therefore, follow the instructions below, and refer
 to the earlier sections of this document for details on building and testing.
@@ -1493,83 +1482,7 @@ to the earlier sections of this document for details on building and testing.
     
     
 ========================================================================
-        Section VIII: Building and testing HDF5 snapshot release
-========================================================================
-
-Note: This section is only for users who would like to build and test HDF5 
-      snapshot release.  These releases are development builds, and are
-      unstable!  Use for testing only, and backup any data which will be
-      manipulated.
-
-Step I: Generate H5Tinit.c using Microsoft Visual Studio
-
-For users who would like to build and test HDF5 C and C++ library ONLY, it is 
-necessary to manually generate H5Tinit.c before building HDF5.  Follow the steps 
-in Section XII to generate H5Tinit.c manually using Microsoft Visual Studio 6.0. 
-We don't guarantee that H5Tinit.c can be sucesessfully created by other 
-compilers.
-
-
-Step II: Generate H5f90i_gen.h and H5fortran_types.f90 using Compaq
-         Visual Fortran 6.6c
-
-Note: The users who don't want to build fortran library can skip
-      this step.
-
-For users who would like to build and test HDF5 with Fortran library.
-It is necessary to manually generate the following three files with
-the given compiler before go to Section II:
-
-       Files to be Generated    Compiler to be Used
-
-       H5f90i_gen.h             Compaq Visual Fortran 6.6
-       H5fortran_types.f90      Compaq Visual Fortran 6.6
-       H5Tinit.c                Visual C++ 6.0
-
-We don't guarantee that these three files can be created successfully
-by other compilers.
-
- 1) Open and build H5fortran_detect_gen.dsw with Compaq Visual Fortran
-
-     Go to the following directory
-     c:\myHDFstuff\hdf5\windows\misc\H5fortran_detect_gen
-     Open H5fortran_detect_gen.dsw with Compaq Visual Fortran and
-     build the project file.
-
- 2) Invoke command prompt and go to c:\myHDFstuff\hdf5\fortran\src.
-    Type
-         H5fortran_detect_gen.exe > H5fortran_detect.f90
-
- 3) Open and build fortrantypegen.dsw with Compaq Visual Fortran
-
-     Go to the following directory
-     c:\myHDFstuff\hdf5\windows\misc\fortrantypegen
-     Open fortrantypegen.dsw with Compaq Visual Fortran and
-     build the project file.
-
- 4) Invoke command prompt and go to c:\myHDFstuff\hdf5\fortran\src.
-    Type
-
-          H5fortran_detect.exe > H5fort_type_defines.h
-
- 5) Open and build matchtypegen.dsw with Compaq Visual Fortran
-    Go to the following directory
-    c:\myHDFstuff\hdf5\windows\misc\matchtypegen
-    Open matchtypegen.dsw and build the project file.
-
- 6) Invoke command prompt and go to c:\myHDFstuff\hdf5\fortran\src.
-    Type
-          H5match_types.exe
-
-    This step will generate H5f90i_gen.h and H5fortran_types.f90
-    automatically.
-
- 7) Go back to Section II, step 1(2) to build and test HDF5 Libraries
-    and Tools
-
-
-========================================================================
-    Section IX: How To Build And Test HDF5 With Thread-Safe Feature
+    Section VIII: How To Build And Test HDF5 With Thread-Safe Feature
 ========================================================================
 
    All of the preconditions in "Preconditions" Section at the beginning of this 
@@ -1695,13 +1608,13 @@ by other compilers.
 
 2. Test Thread-safe Feature of HDF5 Release DLL
 
-   2.1 Build Release Version of Project libtestD
+   2.1 Build Release Version of Project libtestdll
 
    Go to Build->Set Active Configuration, choose
-   "libtestD-Win32 Release" under "Project configurations:", Click "OK".
+   "libtestdll-Win32 Release" under "Project configurations:", Click "OK".
 
-   Go to Build->Build libtestD.dll to build release version of Project
-   libtestD.
+   Go to Build->Build libtestdll.dll to build release version of Project
+   libtestdll.
 
    2.2 Build Release Version of Project ttsafedll
 
@@ -1745,27 +1658,18 @@ by other compilers.
    tools.
    
 ========================================================================
-            Section X: How to build HDF5 in Visual Studio 2005
-========================================================================
- 
- The building procedure is almost the same as building HDF5 on .Net 2003.
- Please refer to Section VI: How to build HDF5 in Visual Studio .Net 2003.
-
- 
-========================================================================
-            Section XI: How to build HDF5 for 64-bit Windows
+            Section IX: How to build HDF5 for 64-bit Windows
 ========================================================================
 
-HDF5 can be built for 64-bit Windows in Visual Studio .NET 2003 or Visual
-Studio 2005.  Visual Studio 2005 offers much greater support, and the build
-process is much more straight-forward, so we recommend all users switch to 
-Visual Studio 2005 for 64-bit builds.  However, we still provide instruction
-for .NET.
+HDF5 can be built for 64-bit Windows in Visual Studio 2005.  Visual Studio .NET
+has very primative 64-bit support, but it is very difficult to setup, and
+debugging is not supported.  Therefore, we recommend all users switch to 
+Visual Studio 2005 for 64-bit builds.  
 
 Notes:
   
     1. 32-bit binaries cannot be linked with 64-bit binaries, and therefore
-       external libraries (szip and zlib. and currently not supported.  In the
+       external libraries (szip and zlib) and currently not supported.  In the
        future we plan to build these libraries natively and offer support.
        
     2. Fortran libraries are currently untested and unsupported.
@@ -1779,125 +1683,54 @@ Prerequisites:
 
     1. A 64-bit Windows machine.  Either AMD64 and Itanium is supported.
     
-    2. Either Visual Studio .NET or 2005.  Visual Studio 2005 is recommended.
-    
-    3. If building with .NET, the lastest version of the Windows Platform SDK
-       must be installed.  The latest version can be found at:
-          http://www.microsoft.com/msdownload/platformsdk/sdkupdate/
-       If building with 2005, Visual Studio must have been installed with the
-       x64 compiler tools.
-       
+    2. Microsoft Visual Studio 2005 installed with x64 Extensions.
+           
 
 Building:
 
-    1. Copy Windows-related files
+    Building 64-bit Windows binaries is very similar to the process for 32-bit.
+    Therefore, you may follow the instructions in Section II with the following
+    modifications.
     
-        From the directory .\windows, run copy_hdf.bat.  This will copy
-        Windows-related files to their neccessarily locations within the source
-        directory.
-        
-    2. Open the IDE
-
-        For Visual Studio 2005, this simply involves opening as normal.
-        
-        In .NET, you must first open a 64-bit build environment command prompt.
-        To do this, go to the start menu and open Microsoft Platform SDK,
-        Open Build Environment Window, Windows XP 64-bit Build Environment,
-        and Set Windows XP x64 Build Env (Retail).  This sets up the neccessary
-        path for Visual Studio.  .NET must then be launched from that command
-        prompt.  This can be done by issuing the command:
-        
-          start "" "C:\Program Files (x86)\Microsoft Visual Studio .NET 2003\
-          Common7\IDE\devenv.exe" /useenv
-            
-    
-    3. Generate H5tinit.c
-        
-        Follow the instructions in Section XII to generate H5tinit.c
-                        
-    4. Build the library
-        
-        4.1 Open the workspace all.sln from the folder .\windows\proj\all.  If
-            using Visual Studio .NET, this should be launched from the same 
-            window, or open another window the same way you did in Step 2.
-            
-        4.2 Select the Target Machine
-        
-            In the same way you did in Step 3.2, set the Target Machine for
-            64-bit.  If using .NET, this needs to be done for all projects
-            that produce an executable or dll.  You can recognize these because
-            in the Property dialog, they have a "Linker" section, rather than
-            a "Librarian" section.
-          
-        4.3 Modify Project Settings
-        
-            In .NET, we need to add "bufferoverflowU.lib" as a dependency
-            for several projects.  You can simply add it to all projects that
-            produce an executable or dll, or identify specific projects that
-            need it at build-time because they will fail with a link error
-            such as:
-                error LNK2001: unresolved external symbol __security_cookie
-                this library must be explicitly added for that project.
-                
-        4.4 Modify H5pubconf.h
-        
-            Open H5pubconf.h from the .\src directory.  Because we are not using
-            zlib or szip libraries, we must comment out the following lines:
-            
-                #define H5_HAVE_FILTER_DEFLATE 1
-                #define H5_HAVE_ZLIB_H 1
-                
-                #define H5_HAVE_SZLIB_H 1
-                #define H5_HAVE_FILTER_SZIP 1
-
-        4.5 Disable projects
-        
-            In Visual Studio, open the configuration manager and disable 
-            ttsafedll.  If you aren't using the C++ library, you may disable 
-            those projects as well.  For Visual Studio 2005, this must be done 
-            for both Release and Debug versions.
-            
-        4.6 Build
-        
-            In Visual Studio, select Build, Build Solution.  In Visual Studio
-            2005, you may build Debug and Release versions, but in .NET, only
-            release builds are supported.
-        
+        1. It is very important that you generate H5tinit.c before building
+           HDF5.  The version we provide is for 32-bit versions of Windows,
+           and are not valid for x64.
+           
+        2. The x64 platform must be selected in the build configuration for
+           debug and release versions.  Before building, go to "Build", 
+           "Configuration Manager".  In the "Active solution platform" box, 
+           select "x64", and press "Close".
+           
+        3. If building Fortran libraries, the 64-bit Intel Fortran compiler
+           must be selected.  In Visual Studio, go to "Tools", "Options".  In
+           the right pane, select "Intel(R) Fortran", "General".  In the 
+           "Target Platform" box, select "x64".
+           
+        4. 64-bit HDF5 must be built with 64-bit external libraries, unless
+           external library support is disabled.  You must add the include and
+           library paths for x64 configurations as you have in the 
+           "Prerequisites" section.  This is also true for Intel Fortran if
+           Fortran libraries are to be built.  If you do not wish to use
+           external libraries, please read Section V about disabling them.        
         
 Testing:
     
     We provide a test suite to verify all libraries and tools were built
     successfully.  This test suite should work identically on 32- and 64- bit
-    builds.
-    
-    Note that because 64-bit binaries were built, these tests must run on a
-    64-bit machine.
-    
-    If built with Visual Studio 2005, simply open a command prompt, and from
-    the root hdf5 directory, issue the command "hdf5check".  If C++ libraries
-    were built, you may test them at the same time with the command
-    "hdf5check enablecpp".
-    
-    If built with Visual Studio .NET, debug versions of the library will not
-    be present, and the test scripts must be altered by hand to reflect this.
-    In a text editor, open hdf5check.bat from the root hdf5 folder, and comment
-    or remove test sections for "Debug" or "Debug DLL".  The layout is fairly
-    straight-forward, but as an alternative, you may manually run each of the
-    other various sub- test scripts with the "release" and "release dll"
-    parameters.
-    
-    
+    builds.  Therefore, you may follow the instructions in Section II about
+    testing.  Note that because 64-bit binaries were built, these tests must 
+    run on a 64-bit machine.
+        
 Installing:
 
     We provide a script that will install all headers, libraries, and tools
-    into one folder, hdf5lib.  From the root hdf5 directory, run the script
-    "installhdf5lib.bat".  This will create the hdf5lib folder, and create
-    subdirectories containing all relevent files.  This should work identically
-    on 32- an 64-bit Windows.
+    into one folder, hdf5lib.  This script should work identically on 32- and 
+    64-bit  builds.  Therefore, you may follow the instructions in Section II 
+    about installing.  
  
  
 ========================================================================
-                  Section XII: How to generate H5tinit.c
+                  Section X: How to generate H5tinit.c
 ========================================================================
 
 In HDF5, H5tinit.c is used to to describe the byte-order and floating point
@@ -1914,22 +1747,19 @@ advanced configuration.  This might include:
     
 To generate your own H5tinit.c, follow the steps below.
         
-    1. Open the solution typegen.sln from the folder .\windows\misc\typgen.
+    1. Open the solution typegen.sln from the folder .\windows\misc\typgen.  If
+       you plan on building Fortran libraries, open typegen_fortran.sln instead.
         
-    2. Build H5tinit.exe and create H5tinit.c
+    2. Build solution
     
-        Make sure your configuration is set to Debug, and build the project.  
-        This will generate H5tinit.exe in the .\src folder.  The build process
-        will also run this program to generate H5tinit.c automatically.
+        You may build release or debug versions of the project, but make sure
+        the active platform configuration matches that of your system.  Go to
+        "Build", "Build soltuion".  This will generate and run the neccessary
+        scripts to produce H5tinit.c, and other configuration files for Fortran.
         
-
-Note:
-
-    If you are building on 64-bit Windows, make sure you set your build
-    "Machine Type" to "X64".
  
 ========================================================================
-                            Section XIII: Misc.
+                            Section XI: Misc.
 ========================================================================
 
 1. Helpful Pointers
