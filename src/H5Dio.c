@@ -289,6 +289,7 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     H5D_t		   *dset = NULL;
     const H5S_t		   *mem_space = NULL;
     const H5S_t		   *file_space = NULL;
+    char                    fake_char;
     herr_t                  ret_value=SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(H5Dread, FAIL)
@@ -325,6 +326,13 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
     if (!buf && H5S_GET_SELECT_NPOINTS(file_space)!=0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
+
+    /* If the buffer is nil, and 0 element is selected, make a fake buffer.
+     * This is for some MPI package like ChaMPIon on NCSA's tungsten which 
+     * doesn't support this feature. 
+     */ 
+    if (!buf)
+        buf = &fake_char;
 
     /* read raw data */
     if (H5D_read(dset, mem_type_id, mem_space, file_space, plist_id, buf/*out*/) < 0)
@@ -373,6 +381,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     H5D_t		   *dset = NULL;
     const H5S_t		   *mem_space = NULL;
     const H5S_t		   *file_space = NULL;
+    char                    fake_char;
     herr_t                  ret_value=SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(H5Dwrite, FAIL)
@@ -409,6 +418,13 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
     if(!buf && H5S_GET_SELECT_NPOINTS(file_space)!=0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
+    
+    /* If the buffer is nil, and 0 element is selected, make a fake buffer.
+     * This is for some MPI package like ChaMPIon on NCSA's tungsten which 
+     * doesn't support this feature. 
+     */ 
+    if (!buf)
+        buf = &fake_char;
 
     /* write raw data */
     if(H5D_write(dset, mem_type_id, mem_space, file_space, plist_id, buf) < 0)
@@ -788,6 +804,8 @@ H5D_contig_read(H5D_io_info_t *io_info, hsize_t nelmts,
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_contig_read)
 
+    assert (buf);
+
     /* Initialize storage info for this dataset */
     if (dataset->shared->dcpl_cache.efl.nused > 0)
         HDmemcpy(&store.efl, &(dataset->shared->dcpl_cache.efl), sizeof(H5O_efl_t));
@@ -1066,6 +1084,8 @@ H5D_contig_write(H5D_io_info_t *io_info, hsize_t nelmts,
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_contig_write)
 
+    assert (buf);
+
     /* Initialize storage info for this dataset */
     if(dataset->shared->dcpl_cache.efl.nused > 0)
         HDmemcpy(&store.efl, &(dataset->shared->dcpl_cache.efl), sizeof(H5O_efl_t));
@@ -1343,6 +1363,8 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_read)
+
+    assert (buf);
 
     /* Map elements between file and memory for each chunk*/
     if(H5D_create_chunk_map(dataset, mem_type, file_space, mem_space, &fm) < 0)
@@ -1733,6 +1755,8 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_write)
+
+    assert (buf);
 
     /* Map elements between file and memory for each chunk*/
     if(H5D_create_chunk_map(dataset, mem_type, file_space, mem_space, &fm) < 0)

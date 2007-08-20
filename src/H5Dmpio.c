@@ -988,6 +988,7 @@ H5D_link_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,const void *buf, 
 	for ( i = 0; i< num_chunk;i++){
 	  if (MPI_SUCCESS != (mpi_code= MPI_Type_free( chunk_mtype+i )))
             HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code);
+
 	  if (MPI_SUCCESS != (mpi_code= MPI_Type_free( chunk_ftype+i )))
             HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code);
 	}
@@ -1014,7 +1015,7 @@ H5D_link_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,const void *buf, 
   if(H5DEBUG(D))
     HDfprintf(H5DEBUG(D),"before coming to final collective IO\n");
 #endif
-      
+
       if(H5D_final_collective_io(io_info,&chunk_final_ftype,&chunk_final_mtype,&coll_info,buf,do_write)<0)
 	HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL,"couldn't finish MPI-IO");
 
@@ -1059,7 +1060,6 @@ done:
 static herr_t 
 H5D_multi_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,const void *buf, hbool_t do_write) 
 {
-
       unsigned          i, total_chunk;
       hsize_t           ori_total_chunk;
       uint8_t          *chunk_io_option;
@@ -1070,6 +1070,16 @@ H5D_multi_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,const void *buf,
       H5D_storage_t     store;                /* union of EFL and chunk pointer in file space */
       hbool_t           select_chunk;
       hbool_t 	        last_io_mode_coll = TRUE;
+
+      void             *chunk = NULL;         /* Pointer to the data chunk in cache */
+      H5D_t            *dataset=io_info->dset;/* Local pointer to dataset info */
+      H5D_istore_ud1_t  udata;		      /*B-tree pass-through	*/
+      haddr_t           caddr;                /* Address of the cached chunk */
+      size_t            accessed_bytes;       /*total accessed size in a chunk */
+      unsigned          idx_hint=0;           /* Cache index hint      */
+      hbool_t           dirty = TRUE;         /* Flag for cache flushing */
+      hbool_t           relax=TRUE;           /* Whether whole chunk is selected */
+
       herr_t            ret_value = SUCCEED;    
 #ifdef H5Dmpio_DEBUG
       int mpi_rank;
@@ -1167,18 +1177,41 @@ H5D_multi_chunk_collective_io(H5D_io_info_t *io_info,fm_map *fm,const void *buf,
                 if(H5D_ioinfo_make_ind(io_info) < 0)
                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't switch to independent I/O")
 
+            /* Load the chunk into cache.  But if the whole chunk is written,
+             * simply allocate space instead of load the chunk. */
+            if(HADDR_UNDEF==(caddr = H5D_istore_get_addr(io_info, &udata)))
+                HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL,"couldn't get chunk info from skipped list");
+
+            if (H5D_istore_if_load(dataset, caddr)) {
+                accessed_bytes = chunk_info->chunk_points * H5T_get_size(dataset->shared->type);
+                if((do_write && (accessed_bytes != dataset->shared->layout.u.chunk.size)) || !do_write)
+                    relax=FALSE;
+
+	        if(NULL == (chunk = H5D_istore_lock(io_info, &udata, relax, &idx_hint)))
+		    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk")
+	    } else
+		chunk = NULL;
+ 
             if(do_write) {
                 if((io_info->ops.write)(io_info,
                          chunk_info->chunk_points,H5T_get_size(io_info->dset->shared->type),
-                         chunk_info->fspace,chunk_info->mspace,0, NULL, buf) < 0)
+                         chunk_info->fspace,chunk_info->mspace,caddr,chunk, buf) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "optimized write failed")
             }
             else {
                  if((io_info->ops.read)(io_info,
                           chunk_info->chunk_points,H5T_get_size(io_info->dset->shared->type),
-                          chunk_info->fspace,chunk_info->mspace,0, NULL, buf) < 0)
+                          chunk_info->fspace,chunk_info->mspace,caddr,chunk, buf) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "optimized read failed")
-              }
+            }
+
+            /* Release the cache lock on the chunk. */
+            if (H5D_istore_if_load(dataset, caddr)) {
+                if(!do_write) dirty = FALSE;
+
+	        if(H5D_istore_unlock(io_info, dirty, idx_hint, chunk, accessed_bytes) < 0)
+		    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to unlock raw data chunk")
+	    }
 #else
             if(!last_io_mode_coll)
                 /* using independent I/O with file setview.*/
@@ -1250,6 +1283,16 @@ H5D_multi_chunk_collective_io_no_opt(H5D_io_info_t *io_info,fm_map *fm,const voi
       haddr_t           chunk_addr;
       H5SL_node_t      *chunk_node;           /* Current node in chunk skip list */
       H5D_storage_t     store;                /* union of EFL and chunk pointer in file space */
+      H5D_chunk_info_t *chunk_info;           /* chunk information */
+      hbool_t make_ind, make_coll;            /* Flags to indicate that the MPI mode should change */
+
+      void             *chunk = NULL;         /* Pointer to the data chunk in cache */
+      H5D_t            *dataset=io_info->dset;/* Local pointer to dataset info */
+      H5D_istore_ud1_t  udata;		      /*B-tree pass-through	*/
+      size_t            accessed_bytes;       /*total accessed size in a chunk */
+      unsigned          idx_hint=0;           /* Cache index hint      */
+      hbool_t           dirty = TRUE;         /* Flag for cache flushing */
+      hbool_t           relax=TRUE;           /* Whether whole chunk is selected */
       herr_t            ret_value = SUCCEED;    
 
 #ifdef H5Dmpio_DEBUG
@@ -1317,24 +1360,43 @@ H5D_multi_chunk_collective_io_no_opt(H5D_io_info_t *io_info,fm_map *fm,const voi
                 if(H5D_ioinfo_make_ind(io_info) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't switch to independent I/O")
 
+            if(HADDR_UNDEF==(chunk_addr = H5D_istore_get_addr(io_info, &udata)))
+                HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL,"couldn't get chunk info from skipped list");
+
             if(make_ind) {/*independent I/O */
-  
-              if(do_write) {
-                if((io_info->ops.write)(io_info,
+                /* Load the chunk into cache.  But if the whole chunk is written,
+                 * simply allocate space instead of load the chunk. */
+                if (H5D_istore_if_load(dataset, chunk_addr)) {
+                    accessed_bytes = chunk_info->chunk_points * H5T_get_size(dataset->shared->type);
+                    if((do_write && (accessed_bytes != dataset->shared->layout.u.chunk.size)) || !do_write)
+                        relax=FALSE;
+
+		    if(NULL == (chunk = H5D_istore_lock(io_info, &udata, relax, &idx_hint)))
+		        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk")
+		} else
+		    chunk = NULL;
+ 
+                if(do_write) {
+                    if((io_info->ops.write)(io_info,
                          chunk_info->chunk_points,H5T_get_size(io_info->dset->shared->type),
-                         chunk_info->fspace,chunk_info->mspace, (hsize_t)0, NULL, buf) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "optimized write failed")
-              }
-              else {
-                if((io_info->ops.read)(io_info,
+                         chunk_info->fspace,chunk_info->mspace, chunk_addr, chunk, buf) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "optimized write failed")
+                } else {
+                    if((io_info->ops.read)(io_info,
                           chunk_info->chunk_points,H5T_get_size(io_info->dset->shared->type),
-                          chunk_info->fspace,chunk_info->mspace, (hsize_t)0, NULL, buf) < 0)
-                  HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "optimized read failed")
-              }
+                          chunk_info->fspace,chunk_info->mspace, chunk_addr, chunk, buf) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "optimized read failed")
+                }
+
+                /* Release the cache lock on the chunk. */
+                if (H5D_istore_if_load(dataset, chunk_addr)) {
+                    if(!do_write) dirty = FALSE;
+
+		    if(H5D_istore_unlock(io_info, dirty, idx_hint, chunk, accessed_bytes) < 0)
+			HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to unlock raw data chunk")
+		}
             }
             else { /*collective I/O */
-              if(HADDR_UNDEF==(chunk_addr = H5D_istore_get_addr(io_info,NULL)))
-                  HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL,"couldn't get chunk info from skipped list");
               if(H5D_inter_collective_io(io_info,chunk_info->fspace,chunk_info->mspace,
                      chunk_addr,buf,do_write ) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL,"couldn't finish shared collective MPI-IO");

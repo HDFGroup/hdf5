@@ -662,6 +662,25 @@ case "$CC_BASENAME" in
     PARALLEL="$CC_BASENAME"
     ;;
 
+  cmpicc)
+    dnl The ChaMPIon compiler on NCSA tungsten. The cmpirun command on tungsten 
+    dnl isn't in the same path as cmpicc.
+    PARALLEL=cmpicc
+    AC_MSG_CHECKING([for cmpirun])
+
+    dnl Is there an cmpirun?
+    if test -x cmpirun; then
+      AC_MSG_RESULT([cmpirun])
+      RUNSERIAL="${RUNSERIAL:-none}"
+
+      if test -z "$RUNPARALLEL"; then
+        RUNPARALLEL="cmpirun -np \$\${NPROCS:=3}"
+      fi
+    else
+      AC_MSG_RESULT([none])
+    fi
+    ;;
+
   *)
     dnl Probably not a parallel compiler, but if `--enable-parallel'
     dnl is defined below then we're still building a parallel hdf5.

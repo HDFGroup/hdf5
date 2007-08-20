@@ -116,6 +116,16 @@ fi
 
 # Check MPICH settings
 . $srcdir/config/mpich
+
+# The ChaMPIon on NCSA tungsten doesn't work correctly for either of the following
+# cases:
+#     1. collective I/O when some processes don't have any contributions;
+#     2. complex derived MPI data type.
+if test $CC_BASENAME = cmpicc; then
+  hdf5_mpi_special_collective_io_works=${hdf5_mpi_special_collective_io_works='no'}
+  hdf5_mpi_complex_derived_datatype_works=${hdf5_mpi_complex_derived_datatype_works='no'}
+fi
+
 #Comment out the following line if your system supports collective IO when some processes
 #don't have any contributions to IOs.
 #hdf5_mpi_special_collective_io_works=${hdf5_mpi_special_collective_io_works='no'}
