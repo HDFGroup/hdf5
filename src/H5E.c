@@ -22,7 +22,7 @@
  *		return some indication that an error occurred and the
  *		application can print the error stack.
  *
- *		Certain API functions in the H5E package (such as H5Eprint())
+ *		Certain API functions in the H5E package (such as H5Eprint2())
  *		do not clear the error stack.  Otherwise, any function which
  *		doesn't have an underscore immediately after the package name
  *		will clear the error stack.  For instance, H5Fopen() clears
@@ -151,6 +151,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5E_init() */
 
+
 /*--------------------------------------------------------------------------
  * Function:    H5E_init_interface
  *
@@ -190,13 +191,13 @@ H5E_init_interface(void)
 
 #ifndef H5_HAVE_THREADSAFE
     H5E_stack_g[0].nused = 0;
-#ifdef H5_WANT_H5_V1_6_COMPAT
-    H5E_stack_g[0].new_api = FALSE;
-    H5E_stack_g[0].u.func = (H5E_auto_t)H5Eprint;
-#else  /*H5_WANT_H5_V1_6_COMPAT*/
-    H5E_stack_g[0].new_api = TRUE;
-    H5E_stack_g[0].u.func2 = (H5E_auto2_t)H5Eprint2;
-#endif /*H5_WANT_H5_V1_6_COMPAT*/
+#ifdef H5_USE_16_API
+    H5E_stack_g[0].auto_op.vers = 1;
+    H5E_stack_g[0].auto_op.u.func1 = (H5E_auto1_t)H5Eprint1;
+#else /* H5_USE_16_API */
+    H5E_stack_g[0].auto_op.vers = 2;
+    H5E_stack_g[0].auto_op.u.func2 = (H5E_auto2_t)H5Eprint2;
+#endif /* H5_USE_16_API */
     H5E_stack_g[0].auto_data = NULL;
 #endif /* H5_HAVE_THREADSAFE */
 
@@ -320,8 +321,8 @@ H5E_get_stack(void)
 
         /* Set the thread-specific info */
         estack->nused = 0;
-        estack->new_api = TRUE;
-        estack->u.func2 = (H5E_auto2_t)H5Eprint2;
+        estack->auto_op.vers = 2;
+        estack->auto_op.u.func2 = (H5E_auto2_t)H5Eprint2;
         estack->auto_data = NULL;
 
         /* (It's not necessary to release this in this API, it is
@@ -633,6 +634,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Eclose_msg() */
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5E_close_msg
  *
@@ -662,6 +664,7 @@ H5E_close_msg(H5E_msg_t *err)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5E_close_msg() */
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5Ecreate_msg
  *
@@ -1373,7 +1376,7 @@ H5Eprint2(hid_t err_stack, FILE *stream)
     } /* end else */
 
     /* Print error stack */
-    if(H5E_print2(estack, stream, FALSE) < 0)
+    if(H5E_print(estack, stream, FALSE) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't display error stack")
 
 done:
@@ -1397,8 +1400,9 @@ done:
 herr_t
 H5Ewalk2(hid_t err_stack, H5E_direction_t direction, H5E_walk2_t stack_func, void *client_data)
 {
-    H5E_t *estack;            /* Error stack to operate on */
-    herr_t ret_value = SUCCEED;      /* Return value */
+    H5E_t *estack;                      /* Error stack to operate on */
+    H5E_walk_op_t op;                   /* Operator for walking error stack */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(H5Ewalk2, FAIL)
@@ -1418,7 +1422,9 @@ H5Ewalk2(hid_t err_stack, H5E_direction_t direction, H5E_walk2_t stack_func, voi
     } /* end else */
 
     /* Walk the error stack */
-    if(H5E_walk2(estack, direction, NULL, stack_func, FALSE, client_data) < 0)
+    op.vers = 2;
+    op.u.func2 = stack_func;
+    if(H5E_walk(estack, direction, &op, client_data) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack")
 
 done:
@@ -1445,7 +1451,7 @@ herr_t
 H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func, void **client_data)
 {
     H5E_t   *estack;            /* Error stack to operate on */
-    H5E_auto_op_t f;            /* Error stack function */
+    H5E_auto_op_t op;           /* Error stack function */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(H5Eget_auto2, FAIL)
@@ -1460,10 +1466,10 @@ H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func, void **client_data)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
 
     /* Get the automatic error reporting information */
-    if(H5E_get_auto2(estack, TRUE, &f, client_data) < 0)
+    if(H5E_get_auto(estack, &op, client_data) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get automatic error info")
     if(func)
-        *func = f.efunc2;
+        *func = op.u.func2;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1479,7 +1485,7 @@ done:
  *              call FUNC passing it CLIENT_DATA as an argument.
  *
  *		The default values before this function is called are
- *		H5Eprint() with client data being the standard error stream,
+ *		H5Eprint2() with client data being the standard error stream,
  *		stderr.
  *
  *		Automatic stack traversal is always in the H5E_WALK_DOWNWARD
@@ -1496,7 +1502,7 @@ herr_t
 H5Eset_auto2(hid_t estack_id, H5E_auto2_t func, void *client_data)
 {
     H5E_t   *estack;            /* Error stack to operate on */
-    H5E_auto_op_t f;            /* Error stack function */
+    H5E_auto_op_t op;           /* Error stack operator */
     herr_t ret_value = SUCCEED; /* Return value */
 
     /* Don't clear the error stack! :-) */
@@ -1512,54 +1518,14 @@ H5Eset_auto2(hid_t estack_id, H5E_auto2_t func, void *client_data)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
 
     /* Set the automatic error reporting information */
-    f.efunc2 = func;
-    if(H5E_set_auto2(estack, TRUE, &f, client_data) < 0)
+    op.vers = 2;
+    op.u.func2 = func;
+    if(H5E_set_auto(estack, &op, client_data) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTSET, FAIL, "can't set automatic error info")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Eset_auto2() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5E_dump_api_stack
- *
- * Purpose:	Private function to dump the error stack during an error in
- *              an API function if a callback function is defined for the
- *              current error stack.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Wednesday, August 6, 2003
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5E_dump_api_stack(int is_api)
-{
-    herr_t ret_value = SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5E_dump_api_stack, FAIL)
-
-    /* Only dump the error stack during an API call */
-    if(is_api) {
-        H5E_t *estack = H5E_get_my_stack();
-
-        assert(estack);
-        if(estack->new_api) {
-            if(estack->u.func2)
-                (void)((estack->u.func2)(H5E_DEFAULT, estack->auto_data));
-        } /* end if */
-        else {
-            if(estack->u.func)
-                (void)((estack->u.func)(estack->auto_data));
-        } /* end else */
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5E_dump_api_stack() */
 
 
 /*-------------------------------------------------------------------------
@@ -1596,7 +1562,7 @@ H5Eauto_is_v2(hid_t estack_id, unsigned *is_stack)
 
     /* Check if the error stack reporting function is the "newer" stack type */
     if(is_stack)
-        *is_stack = estack->new_api;
+        *is_stack = estack->auto_op.vers > 1;
 
 done:
     FUNC_LEAVE_API(ret_value)

@@ -3790,6 +3790,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  Makefile
                  src/Makefile
                  test/Makefile
+                 test/testerror.sh
                  testpar/Makefile
                  testpar/testph5.sh
                  perform/Makefile

@@ -21,13 +21,13 @@
  */
 #include "h5test.h"
 
-#ifndef H5_WANT_H5_V1_6_COMPAT
+#ifdef H5_NO_DEPRECATED_SYMBOLS
 int main(void)
 {
-    printf("Test skipped because backward compatbility with v1.6 is NOT configured in\n");
+    printf("Test skipped because backward compatability with v1.6 is NOT configured in\n");
     return 0;
 }
-#else
+#else /* H5_NO_DEPRECATED_SYMBOLS */
 
 const char *FILENAME[] = {
     "errors_compat",
@@ -42,7 +42,7 @@ int	ipoints2[DIM0][DIM1], icheck2[DIM0][DIM1];
 #define DSET_NAME               "a_dataset"
 #define FAKE_ID                 -1
 
-herr_t custom_print_cb(int n, H5E_error_t *err_desc, void* client_data);
+herr_t custom_print_cb(unsigned n, const H5E_error1_t *err_desc, void* client_data);
 
 
 /*-------------------------------------------------------------------------
@@ -68,7 +68,7 @@ test_error(hid_t file)
     hid_t		dataset, space;
     hsize_t		dims[2];
     const char          *FUNC_test_error="test_error";
-    H5E_auto_t          old_func;
+    H5E_auto1_t         old_func;
     void                *old_data;
 
     TESTING("error API based on data I/O");
@@ -87,32 +87,37 @@ test_error(hid_t file)
     /* Create the dataset */
     if ((dataset = H5Dcreate(file, DSET_NAME, H5T_STD_I32BE, space,
 			     H5P_DEFAULT))<0) {
-        H5Epush(__FILE__, FUNC_test_error, __LINE__, H5E_ERROR, H5E_CANTCREATE,
+        H5Epush1(__FILE__, FUNC_test_error, __LINE__, H5E_ERROR, H5E_CANTCREATE,
                 "H5Dcreate failed");
         goto error;
     }
 
     /* Test enabling and disabling default printing */
-    if (H5Eget_auto(&old_func, &old_data)<0)
+    if (H5Eget_auto1(&old_func, &old_data)<0)
 	TEST_ERROR;
     if (old_data != NULL)
 	TEST_ERROR;
     if (!old_func)
 	TEST_ERROR;
-    if (old_func != (H5E_auto_t)H5Eprint)
+#ifdef H5_USE_16_API
+    if (old_func != (H5E_auto1_t)H5Eprint1)
 	TEST_ERROR;
+#else /* H5_USE_16_API */
+    if (old_func != (H5E_auto1_t)H5Eprint2)
+	TEST_ERROR;
+#endif /* H5_USE_16_API */
 
-    if(H5Eset_auto(NULL, NULL)<0)
+    if(H5Eset_auto1(NULL, NULL)<0)
         TEST_ERROR;
 
     /* Make H5Dwrite fail, verify default print is disabled */
     if (H5Dwrite(FAKE_ID, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, ipoints2)<0) {
-        H5Epush(__FILE__, FUNC_test_error, __LINE__, H5E_ERROR, H5E_WRITEERROR,
+        H5Epush1(__FILE__, FUNC_test_error, __LINE__, H5E_ERROR, H5E_WRITEERROR,
                 "H5Dwrite shouldn't succeed");
         goto error;
     }
 
-    if(H5Eset_auto(old_func, old_data)<0)
+    if(H5Eset_auto1(old_func, old_data)<0)
         TEST_ERROR;
 
     /* In case program comes to this point, close dataset */
@@ -147,12 +152,12 @@ dump_error(void)
 {
     /* Print errors in library default way */
     fprintf(stderr, "********* Print error stack in HDF5 default way *********\n");
-    if(H5Eprint(stderr)<0)
+    if(H5Eprint1(stderr) < 0)
         TEST_ERROR;
 
     /* Customized way to print errors */
     fprintf(stderr, "\n********* Print error stack in customized way *********\n");
-    if(H5Ewalk(H5E_WALK_UPWARD, custom_print_cb, stderr)<0)
+    if(H5Ewalk1(H5E_WALK_UPWARD, custom_print_cb, stderr) < 0)
         TEST_ERROR;
 
     return 0;
@@ -179,30 +184,30 @@ dump_error(void)
  *-------------------------------------------------------------------------
  */
 herr_t
-custom_print_cb(int n, H5E_error_t *err_desc, void* client_data)
+custom_print_cb(unsigned n, const H5E_error1_t *err_desc, void* client_data)
 {
     FILE		*stream  = (FILE *)client_data;
-    const char          *maj;
-    const char          *min;
+    char                *maj;
+    char                *min;
     const int		indent = 4;
 
-    if((min = H5Eget_minor(err_desc->min_num))==NULL)
+    if(NULL == (min = H5Eget_minor(err_desc->min_num)))
         TEST_ERROR;
 
-    if((maj = H5Eget_major(err_desc->maj_num))==NULL)
+    if(NULL == (maj = H5Eget_major(err_desc->maj_num)))
         TEST_ERROR;
 
-    fprintf (stream, "%*serror #%03d: %s in %s(): line %u\n",
+    fprintf(stream, "%*serror #%03d: %s in %s(): line %u\n",
 	     indent, "", n, err_desc->file_name,
 	     err_desc->func_name, err_desc->line);
-    fprintf (stream, "%*smajor: %s\n", indent*2, "", maj);
+    fprintf(stream, "%*smajor: %s\n", indent*2, "", maj);
     HDfree(maj);
     fprintf (stream, "%*sminor: %s\n", indent*2, "", min);
     HDfree(min);
 
     return 0;
 
-  error:
+error:
     return -1;
 }
 
@@ -230,29 +235,29 @@ main(void)
     fapl = h5_fileaccess();
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
 	TEST_ERROR ;
 
     /* Test error stack */
 
     /* Push an error onto error stack */
-    H5Epush(__FILE__, FUNC_main, __LINE__, H5E_ERROR, H5E_BADVALUE,
+    H5Epush1(__FILE__, FUNC_main, __LINE__, H5E_ERROR, H5E_BADVALUE,
             "Error test failed");
 
     /* Print out the errors on stack */
     dump_error();
 
     /* Empty error stack */
-    H5Eclear();
+    H5Eclear1();
 
     /* Test error API */
-    if(test_error(file)<0) {
-        H5Epush(__FILE__, FUNC_main, __LINE__, H5E_ERROR, H5E_BADMESG,
+    if(test_error(file) < 0) {
+        H5Epush1(__FILE__, FUNC_main, __LINE__, H5E_ERROR, H5E_BADMESG,
                 "Error test failed");
-        H5Eprint(stderr);
+        H5Eprint1(stderr);
     }
 
-    if (H5Fclose(file)<0) TEST_ERROR ;
+    if(H5Fclose(file) < 0) TEST_ERROR ;
     h5_cleanup(FILENAME, fapl);
 
     printf("All error API tests passed.\n");
@@ -262,4 +267,5 @@ main(void)
     printf("***** ERROR TEST FAILED! *****\n");
     return 1;
 }
-#endif /*H5_WANT_H5_V1_6_COMPAT*/
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+

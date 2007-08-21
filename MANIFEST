@@ -801,10 +801,10 @@
 ./test/tbogus.h5
 ./test/tchecksum.c
 ./test/tconfig.c
+./test/testerror.sh.in
 ./test/testframe.c
 ./test/testhdf5.c
 ./test/testhdf5.h
-./test/testerror.sh
 ./test/testmeta.c
 ./test/tfile.c
 ./test/tgenprop.c

@@ -24,39 +24,8 @@
 /* Private headers needed by this file */
 #include "H5private.h"
 
-#define H5E_NSLOTS	32	/*number of slots in an error stack	     */
-
-/* Error class */
-typedef struct H5E_cls_t {
-    char *cls_name;             /* Name of error class */
-    char *lib_name;             /* Name of library within class */
-    char *lib_vers;             /* Version of library */
-} H5E_cls_t;
-
-/* Major or minor message */
-typedef struct H5E_msg_t {
-    char        *msg;           /* Message for error */
-    H5E_type_t   type;          /* Type of error (major or minor) */
-    H5E_cls_t   *cls;           /* Which error class this message belongs to */
-} H5E_msg_t;
-
-/* Error stack */
-typedef struct H5E_t {
-    size_t nused;		        /* Num slots currently used in stack  */
-    H5E_error2_t slot[H5E_NSLOTS];	/* Array of error records	     */
-    hbool_t  new_api;                   /* Indicate that the function pointer is for the new (stack) API or the old */
-    union {
-        H5E_auto_t  func;               /* Function for 'automatic' error reporting */
-        H5E_auto2_t func2;              /* Function for 'automatic' error reporting with error stacks */
-    } u;
-    void *auto_data;                    /* Callback data for 'automatic error reporting */
-} H5E_t;
-
-/* Printing information */
-typedef struct H5E_print_t {
-    FILE        *stream;
-    H5E_cls_t   cls;
-} H5E_print_t;
+/* Typedef for error stack (defined in H5Epkg.h) */
+typedef struct H5E_t H5E_t;
 
 /*
  * HERROR macro, used to facilitate error reporting between a FUNC_ENTER()

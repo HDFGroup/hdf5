@@ -21,13 +21,13 @@
  */
 #include "h5test.h"
 
-#ifdef H5_WANT_H5_V1_6_COMPAT
+#ifdef H5_USE_16_API
 int main(void)
 {
     printf("Test skipped because backward compatbility with v1.6 is configured in\n");
     return 0;
 }
-#else
+#else /* H5_USE_16_API */
 
 const char *FILENAME[] = {
     "errors",
@@ -119,7 +119,7 @@ test_error(hid_t file)
 
     /* Create the dataset */
     if((dataset = H5Dcreate(file, DSET_NAME, H5T_STD_I32BE, space, H5P_DEFAULT)) < 0) {
-        H5Epush2(H5E_DEFAULT, __FILE__, FUNC_test_error, __LINE__, ERR_CLS, ERR_MAJ_IO, ERR_MIN_CREATE,
+        H5Epush(H5E_DEFAULT, __FILE__, FUNC_test_error, __LINE__, ERR_CLS, ERR_MAJ_IO, ERR_MIN_CREATE,
                 "H5Dcreate failed");
         goto error;
     } /* end if */
@@ -129,15 +129,20 @@ test_error(hid_t file)
 	TEST_ERROR;
     if(old_data != NULL)
 	TEST_ERROR;
-    if(old_func != (H5E_auto2_t)H5Eprint2)
+#ifdef H5_USE_16_API
+    if (old_func != (H5E_auto_t)H5Eprint)
 	TEST_ERROR;
+#else /* H5_USE_16_API */
+    if (old_func != (H5E_auto2_t)H5Eprint2)
+	TEST_ERROR;
+#endif /* H5_USE_16_API */
 
     if(H5Eset_auto2(H5E_DEFAULT, NULL, NULL) < 0)
         TEST_ERROR;
 
     /* Make H5Dwrite fail, verify default print is disabled */
     if(H5Dwrite(FAKE_ID, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, ipoints2) >= 0) {
-        H5Epush2(H5E_DEFAULT, __FILE__, FUNC_test_error, __LINE__, ERR_CLS, ERR_MAJ_IO, ERR_MIN_WRITE,
+        H5Epush(H5E_DEFAULT, __FILE__, FUNC_test_error, __LINE__, ERR_CLS, ERR_MAJ_IO, ERR_MIN_WRITE,
                 "H5Dwrite shouldn't succeed");
         goto error;
     } /* end if */
@@ -147,7 +152,7 @@ test_error(hid_t file)
 
     /* Test saving and restoring the current error stack */
     if(H5Dwrite(FAKE_ID, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, ipoints2) < 0) {
-        H5Epush2(H5E_DEFAULT, __FILE__, FUNC_test_error, __LINE__, ERR_CLS, ERR_MAJ_IO, ERR_MIN_WRITE,
+        H5Epush(H5E_DEFAULT, __FILE__, FUNC_test_error, __LINE__, ERR_CLS, ERR_MAJ_IO, ERR_MIN_WRITE,
                 "H5Dwrite failed as supposed to");
         estack_id = H5Eget_current_stack();
         H5Dclose(dataset);
@@ -263,7 +268,7 @@ error_stack(void)
 
     /* Make it push error, force this function to fail */
     if((err_num = H5Eget_num(ERR_STACK)) == 0) {
-        H5Epush2(ERR_STACK, __FILE__, FUNC_error_stack, __LINE__, ERR_CLS, ERR_MAJ_API, ERR_MIN_GETNUM,
+        H5Epush(ERR_STACK, __FILE__, FUNC_error_stack, __LINE__, ERR_CLS, ERR_MAJ_API, ERR_MIN_GETNUM,
                 "Get number test failed, returned %d", err_num);
         goto error;
     } /* end if */
@@ -341,7 +346,7 @@ test_long_desc(void)
     if(H5Eclear2(H5E_DEFAULT) < 0) TEST_ERROR;
 
     /* Push an error with a long description */
-    if(H5Epush2(H5E_DEFAULT, __FILE__, test_FUNC, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, format, long_desc) < 0) TEST_ERROR;
+    if(H5Epush(H5E_DEFAULT, __FILE__, test_FUNC, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, format, long_desc) < 0) TEST_ERROR;
 
     /* Create the string that should be in the description */
     HDsnprintf(full_desc, LONG_DESC_SIZE + 128, format, long_desc);
@@ -518,7 +523,7 @@ main(void)
     /* Test error stack */
     if(error_stack() < 0) {
         /* Push an error onto error stack */
-        if(H5Epush2(ERR_STACK, __FILE__, FUNC_main, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_ERRSTACK,
+        if(H5Epush(ERR_STACK, __FILE__, FUNC_main, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_ERRSTACK,
                 "Error stack test failed") < 0) TEST_ERROR;
 
         /* Delete an error from the top of error stack */
@@ -536,7 +541,7 @@ main(void)
 
     /* Test error API */
     if(test_error(file) < 0) {
-        H5Epush2(H5E_DEFAULT, __FILE__, FUNC_main, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE,
+        H5Epush(H5E_DEFAULT, __FILE__, FUNC_main, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE,
                 "Error test failed, %s", "it's wrong");
         estack_id = H5Eget_current_stack();
         H5Eprint2(estack_id, stderr);
@@ -560,5 +565,5 @@ error:
     printf("***** ERROR TEST FAILED! *****\n");
     return 1;
 }
-#endif  /*H5_WANT_H5_V1_6_COMPAT*/
+#endif /* H5_USE_16_API */
 

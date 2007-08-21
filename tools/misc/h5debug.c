@@ -504,7 +504,7 @@ main(int argc, char *argv[])
     /* Check for an error when dumping information */
     if(status < 0) {
         fprintf(stderr, "An error occurred!\n");
-        H5Eprint(stderr);
+        H5Eprint2(H5E_DEFAULT, stderr);
         HDexit(5);
     } /* end if */
 

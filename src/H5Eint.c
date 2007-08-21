@@ -52,6 +52,12 @@
 /* Local Typedefs */
 /******************/
 
+/* Printing information */
+typedef struct H5E_print_t {
+    FILE        *stream;
+    H5E_cls_t   cls;
+} H5E_print_t;
+
 
 /********************/
 /* Package Typedefs */
@@ -61,8 +67,10 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5E_walk_cb(unsigned n, const H5E_error_t *err_desc,
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+static herr_t H5E_walk1_cb(unsigned n, const H5E_error1_t *err_desc,
     void *client_data);
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 static herr_t H5E_walk2_cb(unsigned n, const H5E_error2_t *err_desc,
     void *client_data);
 static herr_t  H5E_clear_entries(H5E_t *estack, size_t nentries);
@@ -105,7 +113,7 @@ hid_t H5E_ERR_CLS_g = FAIL;
  */
 char	H5E_mpi_error_str[MPI_MAX_ERROR_STRING];
 int	H5E_mpi_error_str_len;
-#endif
+#endif /* H5_HAVE_PARALLEL */
 
 
 
@@ -171,9 +179,10 @@ H5E_get_msg(const H5E_msg_t *msg, H5E_type_t *type, char *msg_str, size_t size)
     FUNC_LEAVE_NOAPI(len)
 } /* end H5E_get_msg() */
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*-------------------------------------------------------------------------
- * Function:	H5E_walk_cb
+ * Function:	H5E_walk1_cb
  *
  * Purpose:	This function is for backward compatibility.
  *              This is a default error stack traversal callback function
@@ -206,7 +215,7 @@ H5E_get_msg(const H5E_msg_t *msg, H5E_type_t *type, char *msg_str, size_t size)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5E_walk_cb(unsigned n, const H5E_error_t *err_desc, void *client_data)
+H5E_walk1_cb(unsigned n, const H5E_error1_t *err_desc, void *client_data)
 {
     H5E_print_t         *eprint  = (H5E_print_t *)client_data;
     FILE		*stream;        /* I/O stream to print output to */
@@ -217,7 +226,7 @@ H5E_walk_cb(unsigned n, const H5E_error_t *err_desc, void *client_data)
     const char		*min_str = "No minor description";      /* Minor error description */
     unsigned            have_desc = 1;  /* Flag to indicate whether the error has a "real" description */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_walk_cb)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_walk1_cb)
 
     /* Check arguments */
     HDassert(err_desc);
@@ -290,7 +299,8 @@ H5E_walk_cb(unsigned n, const H5E_error_t *err_desc, void *client_data)
     fprintf(stream, "%*sminor: %s\n", (H5E_INDENT * 2), "", min_str);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5E_walk_cb() */
+} /* end H5E_walk1_cb() */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
 /*-------------------------------------------------------------------------
@@ -413,7 +423,7 @@ H5E_walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5E_print2
+ * Function:	H5E_print
  *
  * Purpose:	Private function to print the error stack in some default
  *              way.  This is just a convenience function for H5Ewalk() and
@@ -429,13 +439,14 @@ H5E_walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5E_print2(const H5E_t *estack, FILE *stream, hbool_t bk_compatible)
+H5E_print(const H5E_t *estack, FILE *stream, hbool_t bk_compatible)
 {
-    H5E_print_t eprint;         /* Callback information to pass to H5E_walk2() */
+    H5E_print_t eprint;         /* Callback information to pass to H5E_walk() */
+    H5E_walk_op_t walk_op;      /* Error stack walking callback */
     herr_t ret_value = SUCCEED;
 
     /* Don't clear the error stack! :-) */
-    FUNC_ENTER_NOAPI_NOINIT(H5E_print2)
+    FUNC_ENTER_NOAPI_NOINIT(H5E_print)
 
     /* Sanity check */
     HDassert(estack);
@@ -451,21 +462,29 @@ H5E_print2(const H5E_t *estack, FILE *stream, hbool_t bk_compatible)
 
     /* Walk the error stack */
     if(bk_compatible) {
-        if(H5E_walk2(estack, H5E_WALK_DOWNWARD, H5E_walk_cb, NULL, TRUE, (void*)&eprint) < 0)
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+        walk_op.vers = 1;
+        walk_op.u.func1 = H5E_walk1_cb;
+        if(H5E_walk(estack, H5E_WALK_DOWNWARD, &walk_op, (void*)&eprint) < 0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack")
+#else /* H5_NO_DEPRECATED_SYMBOLS */
+        HDassert(0 && "version 1 error stack print without deprecated symbols!");
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
     } /* end if */
     else {
-        if(H5E_walk2(estack, H5E_WALK_DOWNWARD, NULL, H5E_walk2_cb, FALSE, (void*)&eprint) < 0)
+        walk_op.vers = 2;
+        walk_op.u.func2 = H5E_walk2_cb;
+        if(H5E_walk(estack, H5E_WALK_DOWNWARD, &walk_op, (void*)&eprint) < 0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack")
     } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5E_print2() */
+} /* end H5E_print() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5E_walk2
+ * Function:	H5E_walk
  *
  * Purpose:	Private function for H5Ewalk.
  *              Walks the error stack, calling the specified function for
@@ -480,7 +499,7 @@ done:
  *		each error record in the error stack. It's arguments will
  *		include an index number (beginning at zero regardless of
  *		stack traversal	direction), an error stack entry, and the
- *		CLIENT_DATA pointer passed to H5E_print2.
+ *		CLIENT_DATA pointer passed to H5E_print.
  *
  *		The function FUNC is also provided for backward compatibility.
  *		When BK_COMPATIBLE is set to be TRUE, FUNC is used to be
@@ -495,81 +514,91 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5E_walk2(const H5E_t *estack, H5E_direction_t direction, H5E_walk_t func, H5E_walk2_t stack_func,
-        hbool_t bk_compatible, void *client_data)
+H5E_walk(const H5E_t *estack, H5E_direction_t direction, const H5E_walk_op_t *op,
+    void *client_data)
 {
     int		i;              /* Local index variable */
     herr_t	status;         /* Status from callback function */
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5E_walk2)
+    FUNC_ENTER_NOAPI_NOINIT(H5E_walk)
 
     /* Sanity check */
     HDassert(estack);
+    HDassert(op);
 
     /* check args, but rather than failing use some default value */
     if(direction != H5E_WALK_UPWARD && direction != H5E_WALK_DOWNWARD)
 	direction = H5E_WALK_UPWARD;
 
     /* Walk the stack if a callback function was given */
-    if(bk_compatible && func) {
-        H5E_error_t old_err;
+    if(op->vers == 1) {
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+        if(op->u.func1) {
+            H5E_error1_t old_err;
 
-        status = SUCCEED;
-        if(H5E_WALK_UPWARD == direction) {
-            for(i = 0; i < (int)estack->nused && status >= 0; i++) {
-                /* Point to each error record on the stack and pass it to callback function.*/
-                old_err.maj_num = estack->slot[i].maj_num;
-                old_err.min_num = estack->slot[i].min_num;
-                old_err.func_name = estack->slot[i].func_name;
-                old_err.file_name = estack->slot[i].file_name;
-                old_err.desc = estack->slot[i].desc;
-                old_err.line = estack->slot[i].line;
+            status = SUCCEED;
+            if(H5E_WALK_UPWARD == direction) {
+                for(i = 0; i < (int)estack->nused && status >= 0; i++) {
+                    /* Point to each error record on the stack and pass it to callback function.*/
+                    old_err.maj_num = estack->slot[i].maj_num;
+                    old_err.min_num = estack->slot[i].min_num;
+                    old_err.func_name = estack->slot[i].func_name;
+                    old_err.file_name = estack->slot[i].file_name;
+                    old_err.desc = estack->slot[i].desc;
+                    old_err.line = estack->slot[i].line;
 
-                status = (func)((unsigned)i, &old_err, client_data);
-            } /* end for */
+                    status = (op->u.func1)((unsigned)i, &old_err, client_data);
+                } /* end for */
+            } /* end if */
+            else {
+                H5_CHECK_OVERFLOW(estack->nused - 1, size_t, int);
+                for(i = (int)(estack->nused - 1); i >= 0 && status >= 0; i--) {
+                    /* Point to each error record on the stack and pass it to callback function.*/
+                    old_err.maj_num = estack->slot[i].maj_num;
+                    old_err.min_num = estack->slot[i].min_num;
+                    old_err.func_name = estack->slot[i].func_name;
+                    old_err.file_name = estack->slot[i].file_name;
+                    old_err.desc = estack->slot[i].desc;
+                    old_err.line = estack->slot[i].line;
+
+                    status = (op->u.func1)((unsigned)(estack->nused - (size_t)(i + 1)), &old_err, client_data);
+                } /* end for */
+            } /* end else */
+
+            if(status < 0)
+                HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack")
         } /* end if */
-        else {
-            H5_CHECK_OVERFLOW(estack->nused - 1, size_t, int);
-            for(i = (int)(estack->nused - 1); i >= 0 && status >= 0; i--) {
-                /* Point to each error record on the stack and pass it to callback function.*/
-                old_err.maj_num = estack->slot[i].maj_num;
-                old_err.min_num = estack->slot[i].min_num;
-                old_err.func_name = estack->slot[i].func_name;
-                old_err.file_name = estack->slot[i].file_name;
-                old_err.desc = estack->slot[i].desc;
-                old_err.line = estack->slot[i].line;
-
-                status = (func)((unsigned)(estack->nused - (size_t)(i + 1)), &old_err, client_data);
-            } /* end for */
-        } /* end else */
-
-        if(status < 0)
-            HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack")
+#else /* H5_NO_DEPRECATED_SYMBOLS */
+        HDassert(0 && "version 1 error stack walk without deprecated symbols!");
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
     } /* end if */
-    else if(!bk_compatible && stack_func) {
-        status = SUCCEED;
-        if(H5E_WALK_UPWARD == direction) {
-            for(i = 0; i < (int)estack->nused && status >= 0; i++)
-                status = (stack_func)((unsigned)i, estack->slot + i, client_data);
+    else {
+        HDassert(op->vers == 2);
+        if(op->u.func2) {
+            status = SUCCEED;
+            if(H5E_WALK_UPWARD == direction) {
+                for(i = 0; i < (int)estack->nused && status >= 0; i++)
+                    status = (op->u.func2)((unsigned)i, estack->slot + i, client_data);
+            } /* end if */
+            else {
+                H5_CHECK_OVERFLOW(estack->nused - 1, size_t, int);
+                for(i = (int)(estack->nused - 1); i >= 0 && status >= 0; i--)
+                    status = (op->u.func2)((unsigned)(estack->nused - (size_t)(i + 1)), estack->slot + i, client_data);
+            } /* end else */
+
+            if(status < 0)
+                HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack")
         } /* end if */
-        else {
-            H5_CHECK_OVERFLOW(estack->nused - 1, size_t, int);
-            for(i = (int)(estack->nused - 1); i >= 0 && status >= 0; i--)
-                status = (stack_func)((unsigned)(estack->nused-(size_t)(i + 1)), estack->slot + i, client_data);
-        } /* end else */
-
-        if(status < 0)
-            HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't walk error stack")
-    } /* end if */
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5E_walk2() */
+} /* end H5E_walk() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5E_get_auto2
+ * Function:	H5E_get_auto
  *
  * Purpose:	Private function to return the current settings for the
  *              automatic error stack traversal function and its data
@@ -584,19 +613,15 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5E_get_auto2(const H5E_t *estack, hbool_t new_api, H5E_auto_op_t *func, void **client_data)
+H5E_get_auto(const H5E_t *estack, H5E_auto_op_t *op, void **client_data)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_get_auto2)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_get_auto)
 
     HDassert(estack);
 
     /* Retrieve the requested information */
-    if(func) {
-        if(new_api)
-            func->efunc2 = estack->u.func2;
-        else
-            func->efunc = estack->u.func;
-    } /* end if */
+    if(op)
+        *op = estack->auto_op;
     if(client_data)
         *client_data = estack->auto_data;
 
@@ -605,7 +630,7 @@ H5E_get_auto2(const H5E_t *estack, hbool_t new_api, H5E_auto_op_t *func, void **
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5E_set_auto2
+ * Function:	H5E_set_auto
  *
  * Purpose:	Private function to turn on or off automatic printing of
  *              errors for certain error stack.  When turned on (non-null
@@ -614,7 +639,7 @@ H5E_get_auto2(const H5E_t *estack, hbool_t new_api, H5E_auto_op_t *func, void **
  *              as an argument.
  *
  *		The default values before this function is called are
- *		H5Eprint() with client data being the standard error stream,
+ *		H5Eprint2() with client data being the standard error stream,
  *		stderr.
  *
  *		Automatic stack traversal is always in the H5E_WALK_DOWNWARD
@@ -628,22 +653,18 @@ H5E_get_auto2(const H5E_t *estack, hbool_t new_api, H5E_auto_op_t *func, void **
  *-------------------------------------------------------------------------
  */
 herr_t
-H5E_set_auto2(H5E_t *estack, hbool_t new_api, H5E_auto_op_t *func, void *client_data)
+H5E_set_auto(H5E_t *estack, const H5E_auto_op_t *op, void *client_data)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_set_auto2)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_set_auto)
 
     HDassert(estack);
 
     /* Set the automatic error reporting info */
-    estack->new_api = new_api;
-    if(new_api)
-        estack->u.func2 = func->efunc2;
-    else
-        estack->u.func = func->efunc;
+    estack->auto_op = *op;
     estack->auto_data = client_data;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5E_set_auto2() */
+} /* end H5E_set_auto() */
 
 
 /*-------------------------------------------------------------------------
@@ -668,7 +689,7 @@ H5E_set_auto2(H5E_t *estack, hbool_t new_api, H5E_auto_op_t *func, void *client_
  */
 herr_t
 H5E_push_stack(H5E_t *estack, const char *file, const char *func, unsigned line,
-        hid_t cls_id, hid_t maj_id, hid_t min_id, const char *desc)
+    hid_t cls_id, hid_t maj_id, hid_t min_id, const char *desc)
 {
     herr_t	ret_value = SUCCEED;      /* Return value */
 
@@ -856,4 +877,49 @@ H5E_pop(H5E_t *estack, size_t count)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5E_pop() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5E_dump_api_stack
+ *
+ * Purpose:	Private function to dump the error stack during an error in
+ *              an API function if a callback function is defined for the
+ *              current error stack.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, August 6, 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5E_dump_api_stack(int is_api)
+{
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5E_dump_api_stack, FAIL)
+
+    /* Only dump the error stack during an API call */
+    if(is_api) {
+        H5E_t *estack = H5E_get_my_stack();
+
+        HDassert(estack);
+        if(estack->auto_op.vers == 1) {
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+            if(estack->auto_op.u.func1)
+                (void)((estack->auto_op.u.func1)(estack->auto_data));
+#else /* H5_NO_DEPRECATED_SYMBOLS */
+            HDassert(0 && "version 1 error stack dump without deprecated symbols!");
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+        } /* end if */
+        else {
+            if(estack->auto_op.u.func2)
+                (void)((estack->auto_op.u.func2)(H5E_DEFAULT, estack->auto_data));
+        } /* end else */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5E_dump_api_stack() */
 

@@ -51,7 +51,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(top_srcdir)/config/commence.am \
+	$(srcdir)/testerror.sh.in $(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am COPYING
 check_PROGRAMS = $(am__EXEEXT_1) error_test$(EXEEXT) \
 	err_compat$(EXEEXT) testmeta$(EXEEXT)
@@ -64,7 +64,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = testerror.sh
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libh5test_la_LIBADD =
 am_libh5test_la_OBJECTS = h5test.lo testframe.lo cache_common.lo
@@ -610,7 +610,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog cmpd_dset.h5 \
 INCLUDES = -I$(top_srcdir)/src -I$(top_builddir)/src
 
 # Test script for error_test and err_compat
-TEST_SCRIPT = $(top_srcdir)/test/testerror.sh
+TEST_SCRIPT = testerror.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT)
 
@@ -663,6 +663,9 @@ testhdf5_SOURCES = testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
     tvlstr.c
 
 
+# Temporary files.
+DISTCLEANFILES = testerror.sh
+
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
 # lib_LIBRARIES are built for lib target), but EXTRA_LIB, EXTRA_PROG, and
@@ -711,6 +714,8 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+testerror.sh: $(top_builddir)/config.status $(srcdir)/testerror.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 clean-noinstLTLIBRARIES:
 	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
@@ -1121,6 +1126,7 @@ clean-generic:
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
+	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"

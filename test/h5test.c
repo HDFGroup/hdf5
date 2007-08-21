@@ -113,7 +113,7 @@ static herr_t
 h5_errors(void UNUSED *client_data)
 {
     H5_FAILED();
-    H5Eprint(stdout);
+    H5Eprint2(H5E_DEFAULT, stdout);
     return 0;
 }
 
@@ -215,7 +215,7 @@ h5_reset(void)
     HDfflush(stdout);
     HDfflush(stderr);
     H5close();
-    H5Eset_auto(h5_errors, NULL);
+    H5Eset_auto2(H5E_DEFAULT, h5_errors, NULL);
 
     /*
      * Cause the library to emit some diagnostics early so they don't

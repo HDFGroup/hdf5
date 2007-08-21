@@ -99,11 +99,11 @@ sub print_globalapivers ($) {
     my $curr_idx;               # Current API version index
 
     # Print the descriptive comment
-    print $fh "\n/* If a particular \"global\" version of the library's interfaces is chosen,\n";
-    print $fh " *      set the versions for the API routines affected.\n";
+    print $fh "\n\n/* If a particular \"global\" version of the library's interfaces is chosen,\n";
+    print $fh " *      set the versions for the API symbols affected.\n";
     print $fh " *\n";
     print $fh " * Note: If an application has already chosen a particular version for an\n";
-    print $fh " *      API routine, the individual API version macro takes priority.\n";
+    print $fh " *      API symbol, the individual API version macro takes priority.\n";
     print $fh " */\n";
 
     # Loop over supported older library APIs and define the appropriate macros
@@ -113,14 +113,28 @@ sub print_globalapivers ($) {
 
         # Print the version macro info for each function that is defined for
         # this API version
-        for $name (sort keys %{$api_vers[$curr_idx]}) {
+        print $fh "\n/*************/\n";
+        print $fh "/* Functions */\n";
+        print $fh "/*************/\n";
+        for $name (sort keys %{$func_vers[$curr_idx]}) {
             print $fh "#if !defined(", $name, "_vers)\n";
-            print $fh  "#define ", $name, "_vers $api_vers[$curr_idx]{$name}\n";
+            print $fh  "#define ", $name, "_vers $func_vers[$curr_idx]{$name}\n";
+            print $fh  "#endif /* !defined(", $name, "_vers) */\n";
+        }
+
+        # Print the version macro info for each typedef that is defined for
+        # this API version
+        print $fh "\n/************/\n";
+        print $fh "/* Typedefs */\n";
+        print $fh "/************/\n";
+        for $name (sort keys %{$type_vers[$curr_idx]}) {
+            print $fh "#if !defined(", $name, "_vers)\n";
+            print $fh  "#define ", $name, "_vers $type_vers[$curr_idx]{$name}\n";
             print $fh  "#endif /* !defined(", $name, "_vers) */\n";
         }
 
         # Print API version endif
-        print $fh "#endif /* H5_USE_1", ($curr_idx * 2), "_API */\n";
+        print $fh "\n#endif /* H5_USE_1", ($curr_idx * 2), "_API */\n";
     }
 }
 
@@ -132,30 +146,79 @@ sub print_defaultapivers ($) {
     my $curr_name;              # Current API function
 
     # Print the descriptive comment
-    print $fh "\n/* Choose the correct version of each API routine, defaulting to the latest\n";
-    print $fh " *      version of each API routine.  The \"best\" name for API parameters/data\n";
-    print $fh " *      structures that have changed definitions is also set.  An error is\n";
-    print $fh " *      issued for specifying an invalid API version.\n";
+    print $fh "\n\n/* Choose the correct version of each API symbol, defaulting to the latest\n";
+    print $fh " *      version of each.  The \"best\" name for API parameters/data structures\n";
+    print $fh " *      that have changed definitions is also set.  An error is issued for\n";
+    print $fh " *      specifying an invalid API version.\n";
     print $fh " */\n";
 
     # Loop over function names that are versioned and set up the version macros
+    print $fh "\n/*************/\n";
+    print $fh "/* Functions */\n";
+    print $fh "/*************/\n";
     for $curr_name (sort keys %functions) {
         my $curr_vers_name;     # Name of version macro for current function
         my $curr_vers;          # Version of function
+        my @param_list;         # Typedefs for the function parameters
 
         # Set up variables for later use
         $curr_vers_name = $curr_name . "_vers";
         $curr_vers = $functions{$curr_name};
 
+        # Split up parameter info
+        @param_list = split(/\s*,\s*/, $func_params{$curr_name});
+#print "print_defaultapivers: param_list=(@param_list)\n";
+
         # Set up default/latest version name mapping
-        print $fh "#if !defined($curr_vers_name) || $curr_vers_name == $curr_vers\n";
+        print $fh "\n#if !defined($curr_vers_name) || $curr_vers_name == $curr_vers\n";
         print $fh "#define $curr_name $curr_name$curr_vers\n";
+
+        # Print function's dependent parameter types
+        foreach(sort(@param_list)) {
+            print $fh "#define ${_}_t $_${curr_vers}_t\n";
+        }
 
         # Loop to print earlier version name mappings
         $curr_vers--;
         while($curr_vers > 0) {
             print $fh "#elif $curr_vers_name == $curr_vers\n";
             print $fh "#define $curr_name $curr_name$curr_vers\n";
+
+            # Print function's dependent parameter types
+            foreach(sort(@param_list)) {
+                print $fh "#define ${_}_t $_${curr_vers}_t\n";
+            }
+
+            $curr_vers--;
+        }
+
+        # Finish up with error for unknown version and endif
+        print $fh "#else /* $curr_vers_name */\n";
+        print $fh "#error \"$curr_vers_name set to invalid value\"\n";
+        print $fh "#endif /* $curr_vers_name */\n";
+    }
+
+    # Loop over typedefs that are versioned and set up the version macros
+    print $fh "\n/************/\n";
+    print $fh "/* Typedefs */\n";
+    print $fh "/************/\n";
+    for $curr_name (sort keys %typedefs) {
+        my $curr_vers_name;     # Name of version macro for current function
+        my $curr_vers;          # Version of function
+
+        # Set up variables for later use
+        $curr_vers_name = $curr_name . "_vers";
+        $curr_vers = $typedefs{$curr_name};
+
+        # Set up default/latest version name mapping
+        print $fh "#if !defined($curr_vers_name) || $curr_vers_name == $curr_vers\n";
+        print $fh "#define ${curr_name}_t $curr_name${curr_vers}_t\n";
+
+        # Loop to print earlier version name mappings
+        $curr_vers--;
+        while($curr_vers > 0) {
+            print $fh "#elif $curr_vers_name == $curr_vers\n";
+            print $fh "#define ${curr_name}_t $curr_name${curr_vers}_t\n";
             $curr_vers--;
         }
 
@@ -176,7 +239,7 @@ sub print_endprotect ($$) {
     $file =~ s/(\w*)\.h/$1/;
 
     # Print the endif info
-    print $fh "\n#endif /* ${file}_H */\n\n";
+    print $fh "#endif /* ${file}_H */\n\n";
 }
 
 ##############################################################################
@@ -188,22 +251,37 @@ sub parse_line ($) {
 
     # Parse API function lines
 #print "line=$line\n";
-    if($line =~ /^\s*FUNCTION,/) {
+    if($line =~ /^\s*FUNCTION:/ || $line =~ /^\s*TYPEDEF:/) {
         my $name;           # The name of the function
+        my $params;         # Typedefs for function parameters
         my $vers;           # The version info for the function
         my @vers_list;      # Version info, as a list
         my $num_versions;   # Number of versions for function
-        my %func_versions;  # Versions for a function
+        my %sym_versions;   # Versions for a symbol
         my $last_idx;       # The previous version index seen for a function
         my $last_vers;      # The previous version # seen for a function
+        my $line_type;      # Type of line we are parsing
 
-        # Get the function's name & version info
-        ($name, $vers) = ($line =~ /^\s*FUNCTION,\s*(\w*),\s*(.*?)\s*$/);
-#print "FUNCTION: name='$name', vers='$vers'\n";
+        # Determine the type of the line to parse
+        if($line =~ /^\s*FUNCTION:/) {
+            $line_type = 1;
+            # Get the function's name & version info
+            ($name, $params, $vers) = ($line =~ /^\s*FUNCTION:\s*(\w*);\s*(.*?)\s*;\s*(.*?)\s*$/);
+#print "parse_line: name='$name', params='$params', vers='$vers'\n";
+        }
+        elsif($line =~ /^\s*TYPEDEF:/) {
+            $line_type = 2;
 
-        # Check if the name already exists in the list of functions
-        if(exists($functions{$name})) {
-            die "duplicated name: $name";
+            # Get the typedefs's name & version info
+            ($name, $vers) = ($line =~ /^\s*TYPEDEF:\s*(\w*);\s*(.*?)\s*$/);
+#print "parse_line: name='$name', vers='$vers'\n";
+        }
+#print "parse_line: line_type='$line_type'\n";
+
+
+        # Check if the name already exists in the list of symbols
+        if(exists($functions{$name}) || exists($typedefs{$name})) {
+            die "duplicated symbol: $name";
         }
 
         # Check for no version info given
@@ -213,7 +291,7 @@ sub parse_line ($) {
 
         # Split up version info
         @vers_list = split(/\s*,\s*/, $vers);
-#print "FUNCTION: vers_list=(@vers_list)\n";
+#print "parse_line: vers_list=(@vers_list)\n";
 
         # Check for invalid version info given
         $last_idx = -1;
@@ -221,31 +299,37 @@ sub parse_line ($) {
         foreach(sort(@vers_list)) {
             my $vers_idx;       # Index of version in array
 
-#print "FUNCTION: _=$_ last_idx='$last_idx'\n";
+#print "parse_line: _=$_ last_idx='$last_idx'\n";
             # Do some validation on the input
             if(!($_ =~ /v1[02468]/)) {
                 die "bad version information: $name";
             }
-            if(exists($func_versions{$_})) {
+            if(exists($sym_versions{$_})) {
                 die "duplicate version information: $name";
             }
 
             # Store the versions for the function in a local hash table, indexed by the version
-            $func_versions{$_}=$_;
+            $sym_versions{$_}=$_;
 
             # Get the index of the version
             ($vers_idx) = ($_ =~ /v1(\d)/);
             $vers_idx /= 2;
-#print "FUNCTION: vers_idx='$vers_idx'\n";
+#print "parse_line: vers_idx='$vers_idx'\n";
 
             # Update intermediate versions of the library that included the API routine
             if($last_idx >= 0) {
-#print "FUNCTION: last_idx='$last_idx'\n";
+#print "parse_line: last_idx='$last_idx'\n";
 
                 # Add the function to the list of API routines available in
                 # different versions of the library
                 while($last_idx < $vers_idx) {
-                    $api_vers[$last_idx]{$name} = $last_vers;
+                    if($line_type == 1) {
+                        $func_vers[$last_idx]{$name} = $last_vers;
+                    } elsif($line_type == 2) {
+                        $type_vers[$last_idx]{$name} = $last_vers;
+                    } else {
+                        die "unknown line type: $line";
+                    }
                     $last_idx++;
                 }
 
@@ -259,18 +343,33 @@ sub parse_line ($) {
 
         # Finish updating versions of the library that included the API routine
         if($last_idx >= 0) {
-#print "FUNCTION: max_idx='$max_idx'\n";
+#print "parse_line: max_idx='$max_idx'\n";
 
             # Add the function to the list of API routines available in
             # different versions of the library
             while($last_idx <= $max_idx) {
-                $api_vers[$last_idx]{$name} = $last_vers;
+                if($line_type == 1) {
+                    $func_vers[$last_idx]{$name} = $last_vers;
+                } elsif($line_type == 2) {
+                    $type_vers[$last_idx]{$name} = $last_vers;
+                } else {
+                    die "unknown line type: $line";
+                }
                 $last_idx++;
             }
         }
 
-        # Store the number of function versions in a hash table, indexed by the name
-        $functions{$name} = $#vers_list + 1;
+        # Store the number of symbol versions in a hash table, indexed by the name
+        if($line_type == 1) {
+            $functions{$name} = $#vers_list + 1;
+
+            # Store the function's parameter types for later
+            $func_params{$name} = $params;
+        } elsif($line_type == 2) {
+            $typedefs{$name} = $#vers_list + 1;
+        } else {
+            die "unknown line type: $line";
+        }
     }
     # Unknown keyword
     else {
@@ -334,12 +433,12 @@ for $file (@ARGV) {
 #    print "functions{$name} = $functions{$name}\n";
 #}
 
-#for $i (0 .. $#api_vers) {
+#for $i (0 .. $#func_vers) {
 #    my $vers_name;      # Name of indexed version
 #    $vers_name = "v1." . ($i * 2);
 #    print "$vers_name functions: ";
-#    for $name (sort keys %{$api_vers[$i]}) {
-#        print "$name$api_vers[$i]{$name} ";
+#    for $name (sort keys %{$func_vers[$i]}) {
+#        print "$name$func_vers[$i]{$name} ";
 #    }
 #    print "\n";
 #}

@@ -15,6 +15,9 @@
 #
 # Tests for test_error and err_compat 
 
+# Determine backward compatibility options eneabled
+DEPRECATED_SYMBOLS="@DEPRECATED_SYMBOLS@"
+
 CMP='cmp -s'
 DIFF='diff -c'
 
@@ -32,8 +35,8 @@ test -d ./testfiles || mkdir ./testfiles
 # beginning with the word "Testing".
 #
 TESTING() {
-   SPACES="                                                               "
-   echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
+    SPACES="                                                               "
+    echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
 }
 
 # Run a test and print PASS or *FAIL*.  If a test fails then increment
@@ -88,6 +91,12 @@ TEST() {
    fi
 }
 
+# Print a "SKIP" message
+SKIP() {
+    TESTING $@
+    echo  " -SKIP-"
+}
+  
 ##############################################################################
 ##############################################################################
 ###			  T H E   T E S T S                                ###
@@ -95,7 +104,11 @@ TEST() {
 ##############################################################################
 
 # test for err_compat
+if test $DEPRECATED_SYMBOLS != "yes"; then
+SKIP err_compat
+else
 TEST err_compat
+fi
 
 # test for error_test
 TEST error_test

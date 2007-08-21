@@ -70,7 +70,7 @@ nh5eprint_c1(_fcd name, int_f* namelen)
   file = fopen(c_name, "a");
        if(!file) goto DONE;
   /*
-   * Call H5Eprint function.
+   * Call H5Eprint2 function.
    */
   status = H5Eprint2(H5E_DEFAULT, file);
   if (status >=0 ) ret_val = 0;
@@ -100,7 +100,7 @@ nh5eprint_c2()
   herr_t status;
 
   /*
-   * Call H5Eprint function.
+   * Call H5Eprint2 function.
    */
   status = H5Eprint2(H5E_DEFAULT, NULL);
   if(status >= 0) ret_val = 0;
@@ -192,9 +192,9 @@ nh5eset_auto_c(int_f* printflag)
   herr_t status = -1;
 
   if (*printflag == 1)
-    status = H5Eset_auto2(H5E_DEFAULT, (H5E_auto2_t)H5Eprint, stderr);
-  if (*printflag == 0)
-    status = H5Eset_auto2(H5E_DEFAULT, NULL,NULL);
+    status = H5Eset_auto2(H5E_DEFAULT, H5Eprint2, stderr);
+  else if (*printflag == 0)
+    status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
   if (status >= 0) ret_val = 0;
   return ret_val;
 }

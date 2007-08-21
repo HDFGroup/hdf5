@@ -25,20 +25,119 @@
 #error "Can't choose old API versions when deprecated APIs are disabled"
 #endif /* defined(H5_USE_16_API) && defined(H5_NO_DEPRECATED_SYMBOLS) */
 
+
 /* If a particular "global" version of the library's interfaces is chosen,
- *      set the versions for the API routines affected.
+ *      set the versions for the API symbols affected.
  *
  * Note: If an application has already chosen a particular version for an
- *      API routine, the individual API version macro takes priority.
+ *      API symbol, the individual API version macro takes priority.
  */
 #ifdef H5_USE_16_API
+
+/*************/
+/* Functions */
+/*************/
+#if !defined(H5Eclear_vers)
+#define H5Eclear_vers 1
+#endif /* !defined(H5Eclear_vers) */
+#if !defined(H5Eget_auto_vers)
+#define H5Eget_auto_vers 1
+#endif /* !defined(H5Eget_auto_vers) */
+#if !defined(H5Eprint_vers)
+#define H5Eprint_vers 1
+#endif /* !defined(H5Eprint_vers) */
+#if !defined(H5Epush_vers)
+#define H5Epush_vers 1
+#endif /* !defined(H5Epush_vers) */
+#if !defined(H5Eset_auto_vers)
+#define H5Eset_auto_vers 1
+#endif /* !defined(H5Eset_auto_vers) */
+#if !defined(H5Ewalk_vers)
+#define H5Ewalk_vers 1
+#endif /* !defined(H5Ewalk_vers) */
+
+/************/
+/* Typedefs */
+/************/
+#if !defined(H5E_auto_vers)
+#define H5E_auto_vers 1
+#endif /* !defined(H5E_auto_vers) */
+
 #endif /* H5_USE_16_API */
 
-/* Choose the correct version of each API routine, defaulting to the latest
- *      version of each API routine.  The "best" name for API parameters/data
- *      structures that have changed definitions is also set.  An error is
- *      issued for specifying an invalid API version.
+
+/* Choose the correct version of each API symbol, defaulting to the latest
+ *      version of each.  The "best" name for API parameters/data structures
+ *      that have changed definitions is also set.  An error is issued for
+ *      specifying an invalid API version.
  */
+
+/*************/
+/* Functions */
+/*************/
+
+#if !defined(H5Eclear_vers) || H5Eclear_vers == 2
+#define H5Eclear H5Eclear2
+#elif H5Eclear_vers == 1
+#define H5Eclear H5Eclear1
+#else /* H5Eclear_vers */
+#error "H5Eclear_vers set to invalid value"
+#endif /* H5Eclear_vers */
+
+#if !defined(H5Eget_auto_vers) || H5Eget_auto_vers == 2
+#define H5Eget_auto H5Eget_auto2
+#elif H5Eget_auto_vers == 1
+#define H5Eget_auto H5Eget_auto1
+#else /* H5Eget_auto_vers */
+#error "H5Eget_auto_vers set to invalid value"
+#endif /* H5Eget_auto_vers */
+
+#if !defined(H5Eprint_vers) || H5Eprint_vers == 2
+#define H5Eprint H5Eprint2
+#elif H5Eprint_vers == 1
+#define H5Eprint H5Eprint1
+#else /* H5Eprint_vers */
+#error "H5Eprint_vers set to invalid value"
+#endif /* H5Eprint_vers */
+
+#if !defined(H5Epush_vers) || H5Epush_vers == 2
+#define H5Epush H5Epush2
+#elif H5Epush_vers == 1
+#define H5Epush H5Epush1
+#else /* H5Epush_vers */
+#error "H5Epush_vers set to invalid value"
+#endif /* H5Epush_vers */
+
+#if !defined(H5Eset_auto_vers) || H5Eset_auto_vers == 2
+#define H5Eset_auto H5Eset_auto2
+#elif H5Eset_auto_vers == 1
+#define H5Eset_auto H5Eset_auto1
+#else /* H5Eset_auto_vers */
+#error "H5Eset_auto_vers set to invalid value"
+#endif /* H5Eset_auto_vers */
+
+#if !defined(H5Ewalk_vers) || H5Ewalk_vers == 2
+#define H5Ewalk H5Ewalk2
+#define H5E_error_t H5E_error2_t
+#define H5E_walk_t H5E_walk2_t
+#elif H5Ewalk_vers == 1
+#define H5Ewalk H5Ewalk1
+#define H5E_error_t H5E_error1_t
+#define H5E_walk_t H5E_walk1_t
+#else /* H5Ewalk_vers */
+#error "H5Ewalk_vers set to invalid value"
+#endif /* H5Ewalk_vers */
+
+/************/
+/* Typedefs */
+/************/
+#if !defined(H5E_auto_vers) || H5E_auto_vers == 2
+#define H5E_auto_t H5E_auto2_t
+#elif H5E_auto_vers == 1
+#define H5E_auto_t H5E_auto1_t
+#else /* H5E_auto_vers */
+#error "H5E_auto_vers set to invalid value"
+#endif /* H5E_auto_vers */
 
 #endif /* H5version_H */
 

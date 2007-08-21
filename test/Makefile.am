@@ -24,7 +24,7 @@ include $(top_srcdir)/config/commence.am
 INCLUDES=-I$(top_srcdir)/src -I$(top_builddir)/src
 
 # Test script for error_test and err_compat
-TEST_SCRIPT = $(top_srcdir)/test/testerror.sh
+TEST_SCRIPT = testerror.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT)
 
@@ -124,5 +124,8 @@ testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
     tgenprop.c th5o.c th5s.c theap.c tid.c titerate.c tmeta.c tmisc.c ttime.c \
     trefer.c trefstr.c tselect.c tsohm.c tskiplist.c ttst.c tunicode.c tvltypes.c \
     tvlstr.c
+
+# Temporary files.
+DISTCLEANFILES=testerror.sh
 
 include $(top_srcdir)/config/conclude.am
