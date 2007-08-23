@@ -30,6 +30,7 @@ HDF5/H5P API Specification
 
 
 <!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" -->
+
 <hr>
 <center>
 <table border=0 width=98%>
@@ -66,6 +67,8 @@ of complete manual formatted as print volume)&nbsp;&nbsp;&nbsp;</small></i>
 </table>
 </center>
 <hr>
+
+
 <!-- #EndLibraryItem --><center>
 <h1>H5P: Property List Interface</h1>
 </center>
@@ -265,10 +268,13 @@ which require many different parameters to be easily manipulated.
 </td>
 <td valign="top" width="3%">&nbsp;</td>
 <td valign="top" width="31%">
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
 <br>
-&nbsp;&nbsp;&nbsp;|| <i>Indicates functions<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;available only in the<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;parallel HDF5 library.</i>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|| <i>Indicates functions<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;available only in the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;parallel HDF5 library.</i>
 </td>
 </tr>
 </table>
@@ -366,9 +372,11 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-SetFaplStdio">H5Pset_fapl_stdio</a>
     <li><a href="#Property-SetFaplStream">H5Pset_fapl_stream</a>
     <li><a href="#Property-GetFaplStream">H5Pget_fapl_stream</a>
+<!-- FOR USE WITH ELECTRONIC VERSION ----------------------------------->
 <!--<li><a href="#Property-SetDriver">H5Pset_driver</a>                              -->
 <!-- FOR USE WITH ELECTRONIC VERSION ----------------------------------->
     <li><a href="#Property-GetDriver">H5Pget_driver</a>
+<!-- FOR USE WITH ELECTRONIC VERSION ----------------------------------->
 <!--<li><a href="#Property-GetDriverInfo">H5Pget_driver_info</a>                     -->
 <!-- FOR USE WITH ELECTRONIC VERSION ----------------------------------->
     <li><a href="#Property-SetMetaBlockSize">H5Pset_meta_block_size</a>
@@ -387,6 +395,7 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-GetFaplSrb">H5Pget_fapl_srb</a>
     <li><a href="#Property-SetSmallData">H5Pset_small_data_block_size</a>
     <li><a href="#Property-GetSmallData">H5Pget_small_data_block_size</a>
+<!-- FOR USE WITH ELECTRONIC VERSION ----------------------------------->
     <!--
     <li><a href="#Property-xxx">xxx</a>
     <li><a href="#Property-xxx">xxx</a>&nbsp;&nbsp;&nbsp;||
@@ -404,6 +413,7 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-SetChunk">H5Pset_chunk</a>
     <li><a href="#Property-GetChunk">H5Pget_chunk</a>
     <li><a href="#Property-SetDeflate">H5Pset_deflate</a>
+<!-- FOR USE WITH ELECTRONIC VERSION ----------------------------------->
 <!--
     <li><a href="#Property-GetDeflate">H5Pget_deflate</a>
     <li><a href="#Property-SetCompression">H5Pset_compression</a>
@@ -457,6 +467,7 @@ which require many different parameters to be easily manipulated.
 
 </td></tr>
 
+<!-- FOR USE WITH ELECTRONIC VERSION ----------------------------------->
 <!--
 <tr><td colspan=5 align=right>
 <br>
@@ -3882,9 +3893,9 @@ END SUBROUTINE h5pget_filter_f
             <td valign="top">OUT: Name of filter.</td></tr>
     </table></ul>
   <dt><strong>Returns:</strong>
+<!-- NEW PAGE -->
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-<!-- NEW PAGE -->
   <dt><strong>Fortran90 Interface:</strong> h5pget_filter_by_id_f
     <dd>
 	<pre>
@@ -7743,7 +7754,7 @@ END SUBROUTINE h5pset_fapl_mpio_f
 
 
 <!-- NEW PAGE -->
-<!-- HEADER RIGHT "H5Pget_fapl_mpio" -->
+<!-- HEADER RIGHT "H5Pset_fapl_mpiposix" -->
 <hr>
 <dl>
   <dt><strong>Name:</strong> <a name="Property-SetFaplMpiPosix">H5Pset_fapl_mpiposix</a>
@@ -8798,6 +8809,7 @@ END SUBROUTINE h5pset_fill_value_f
 	Also see <a href="#Property-SetEdcCheck">H5Pset_edc_check</a> and
 	<a href="Property-SetFilterCallback">H5Pset_filter_callback</a>.
 	
+<!-- NEW PAGE -->
   <dt><strong>Notes:</strong>
     <dd>This function currently supports only the permanent filter
         pipeline; <code>plist</code> must be a dataset creation 
@@ -10739,6 +10751,7 @@ END SUBROUTINE h5punregister_f
 
 
 <!-- #BeginLibraryItem "/ed_libs/NavBar_RM.lbi" -->
+
 <hr>
 <center>
 <table border=0 width=98%>
@@ -10775,12 +10788,17 @@ of complete manual formatted as print volume)&nbsp;&nbsp;&nbsp;</small></i>
 </table>
 </center>
 <hr>
+
+
 <!-- #EndLibraryItem --><!-- #BeginLibraryItem "/ed_libs/Footer.lbi" -->
+
 <address>
 THG Help Desk: <img src="Graphics/help.png" align=top height=16>
 <br>
 Describes HDF5 Release 1.6.6, August 2007 
 </address>
+
+
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
 document.writeln("Last modified: 12 October 2006");
