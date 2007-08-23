@@ -770,7 +770,8 @@ H5Epush(const char *file, const char *func, unsigned line, H5E_major_t maj,
 {
     herr_t	ret_value;
 
-    FUNC_ENTER_API(H5Epush, FAIL)
+    /* Don't clear the error stack! */
+    FUNC_ENTER_API_NOCLEAR(H5Epush, FAIL)
     H5TRACE6("e","ssIuEjEns",file,func,line,maj,min,str);
 
     ret_value = H5E_push(maj, min, func, file, line, str);
@@ -836,35 +837,31 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5E_walk (H5E_direction_t direction, H5E_walk_t func, void *client_data)
+H5E_walk(H5E_direction_t direction, H5E_walk_t func, void *client_data)
 {
-    H5E_t	*estack = H5E_get_my_stack ();
+    H5E_t	*estack = H5E_get_my_stack();
     int		i;
-    herr_t	status;
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t      ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5E_walk, FAIL)
 
     /* check args, but rather than failing use some default value */
-    if (direction!=H5E_WALK_UPWARD && direction!=H5E_WALK_DOWNWARD) {
+    if(direction != H5E_WALK_UPWARD && direction != H5E_WALK_DOWNWARD)
 	direction = H5E_WALK_UPWARD;
-    }
 
     /* walk the stack */
-    assert (estack);
-    if (func && H5E_WALK_UPWARD==direction) {
-	for (i=0, status=SUCCEED; i<estack->nused && status>=0; i++) {
-	    status = (func)(i, estack->slot+i, client_data);
-	}
-    } else if (func && H5E_WALK_DOWNWARD==direction) {
-	for (i=estack->nused-1, status=SUCCEED; i>=0 && status>=0; --i) {
-	    status = (func)(estack->nused-(i+1), estack->slot+i, client_data);
-	}
+    assert(estack);
+    if(func && H5E_WALK_UPWARD==direction) {
+	for(i = 0; i < estack->nused && ret_value >= 0; i++)
+	    ret_value = (func)(i, estack->slot + i, client_data);
+    } else if(func && H5E_WALK_DOWNWARD == direction) {
+	for(i = estack->nused-1; i >= 0 && ret_value >= 0; --i)
+	    ret_value = (func)(estack->nused - (i + 1), estack->slot + i, client_data);
     }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5E_walk() */
 
 
 /*-------------------------------------------------------------------------
