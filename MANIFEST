@@ -707,11 +707,14 @@
 
 ./doc/html/ed_libs/Dependencies
 ./doc/html/ed_libs/Footer.lbi
+./doc/html/ed_libs/Footer_Null.lbi
 ./doc/html/ed_libs/Makefile.in
 ./doc/html/ed_libs/NavBar_ADevG.lbi
+./doc/html/ed_libs/NavBar_ADevG_Null.lbi
 ./doc/html/ed_libs/NavBar_Common.lbi
 ./doc/html/ed_libs/NavBar_Intro.lbi
 ./doc/html/ed_libs/NavBar_RM.lbi
+./doc/html/ed_libs/NavBar_RM_Null.lbi
 ./doc/html/ed_libs/NavBar_TechN.lbi
 ./doc/html/ed_libs/NavBar_UG.lbi
 ./doc/html/ed_libs/copyright-html.lbi
