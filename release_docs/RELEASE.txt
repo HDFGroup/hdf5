@@ -70,6 +70,10 @@ Bug Fixes since HDF5-1.6.6 Release
 
     Library
     -------
+        - Fixed bug in H5Epush() which was clearing the error stack before
+            pushing new error value.  QAK - 2007/08/23
+        - Fixed bug in H5Ewalk() which was not passing back the return value
+            from error stack walking callback.  QAK - 2007/08/23
 
 
     Configuration
