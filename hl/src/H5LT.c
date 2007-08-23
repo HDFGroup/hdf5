@@ -1994,7 +1994,7 @@ out:
  */
 hid_t H5LTtext_to_dtype(const char *text, H5LT_lang_t lang_type)
 {
- extern int yyparse(void);
+ extern int H5LTyyparse(void);
  hid_t   type_id;
 
  if(lang_type <= H5LT_LANG_ERR || lang_type >= H5LT_NO_LANG)
@@ -2008,7 +2008,7 @@ hid_t H5LTtext_to_dtype(const char *text, H5LT_lang_t lang_type)
  input_len = strlen(text);
  myinput = strdup(text);
 
- if((type_id = yyparse())<0)
+ if((type_id = H5LTyyparse())<0)
      goto out;
 
  free(myinput);

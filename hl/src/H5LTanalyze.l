@@ -140,7 +140,7 @@ OPQ_TAG          {return token(OPQ_TAG_TOKEN);}
                         if( is_str_size || (is_enum && is_enum_memb) || 
                             is_opq_size || (asindex>-1 && arr_stack[asindex].is_dim) ||
                             (csindex>-1 && cmpd_stack[csindex].is_field) ) {
-                            yylval.ival = atoi(yytext);
+                            H5LTyylval.ival = atoi(yytext);
                             return NUMBER; 
                         } else
                             REJECT;
@@ -157,7 +157,7 @@ OPQ_TAG          {return token(OPQ_TAG_TOKEN);}
                     return token('"');
                  }
 <TAG_STRING>[^\"]+       {
-                    yylval.sval = strdup(yytext);
+                    H5LTyylval.sval = strdup(yytext);
                     BEGIN INITIAL;
                     return STRING;
                  }
@@ -181,7 +181,7 @@ int my_yyinput(char *buf, int max_size)
    return ret;
 }
 
-int yyerror(char *msg)
+int H5LTyyerror(char *msg)
 {
    printf("ERROR: %s before \"%s\".\n", msg, yytext);
 }
