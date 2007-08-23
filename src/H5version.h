@@ -70,9 +70,9 @@
 /* Typedefs */
 /************/
 
-#if !defined(H5E_auto_vers)
-#define H5E_auto_vers 1
-#endif /* !defined(H5E_auto_vers) */
+#if !defined(H5E_auto_t_vers)
+#define H5E_auto_t_vers 1
+#endif /* !defined(H5E_auto_t_vers) */
 
 #endif /* H5_USE_16_API */
 
@@ -151,13 +151,13 @@
 /* Typedefs */
 /************/
 
-#if !defined(H5E_auto_vers) || H5E_auto_vers == 2
+#if !defined(H5E_auto_t_vers) || H5E_auto_t_vers == 2
 #define H5E_auto_t H5E_auto2_t
-#elif H5E_auto_vers == 1
+#elif H5E_auto_t_vers == 1
 #define H5E_auto_t H5E_auto1_t
-#else /* H5E_auto_vers */
-#error "H5E_auto_vers set to invalid value"
-#endif /* H5E_auto_vers */
+#else /* H5E_auto_t_vers */
+#error "H5E_auto_t_vers set to invalid value"
+#endif /* H5E_auto_t_vers */
 
 #endif /* H5version_H */
 

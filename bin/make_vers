@@ -128,9 +128,9 @@ sub print_globalapivers ($) {
         print $fh "/* Typedefs */\n";
         print $fh "/************/\n";
         for $name (sort keys %{$type_vers[$curr_idx]}) {
-            print $fh "\n#if !defined(", $name, "_vers)\n";
-            print $fh  "#define ", $name, "_vers $type_vers[$curr_idx]{$name}\n";
-            print $fh  "#endif /* !defined(", $name, "_vers) */\n";
+            print $fh "\n#if !defined(", $name, "_t_vers)\n";
+            print $fh  "#define ", $name, "_t_vers $type_vers[$curr_idx]{$name}\n";
+            print $fh  "#endif /* !defined(", $name, "_t_vers) */\n";
         }
 
         # Print API version endif
@@ -207,7 +207,7 @@ sub print_defaultapivers ($) {
         my $curr_vers;          # Version of function
 
         # Set up variables for later use
-        $curr_vers_name = $curr_name . "_vers";
+        $curr_vers_name = $curr_name . "_t_vers";
         $curr_vers = $typedefs{$curr_name};
 
         # Set up default/latest version name mapping
