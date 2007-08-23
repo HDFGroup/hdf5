@@ -42,7 +42,7 @@ int	ipoints2[DIM0][DIM1], icheck2[DIM0][DIM1];
 #define DSET_NAME               "a_dataset"
 #define FAKE_ID                 -1
 
-herr_t custom_print_cb(unsigned n, const H5E_error1_t *err_desc, void* client_data);
+herr_t custom_print_cb(int n, H5E_error1_t *err_desc, void* client_data);
 
 
 /*-------------------------------------------------------------------------
@@ -184,7 +184,7 @@ dump_error(void)
  *-------------------------------------------------------------------------
  */
 herr_t
-custom_print_cb(unsigned n, const H5E_error1_t *err_desc, void* client_data)
+custom_print_cb(int n, H5E_error1_t *err_desc, void* client_data)
 {
     FILE		*stream  = (FILE *)client_data;
     char                *maj;

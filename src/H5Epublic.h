@@ -205,8 +205,7 @@ typedef struct H5E_error1_t {
 } H5E_error1_t;
 
 /* Error stack traversal callback function pointers */
-typedef herr_t (*H5E_walk1_t)(unsigned n, const H5E_error1_t *err_desc,
-    void *client_data);
+typedef herr_t (*H5E_walk1_t)(int n, H5E_error1_t *err_desc, void *client_data);
 typedef herr_t (*H5E_auto1_t)(void *client_data);
 
 /* Function prototypes */
