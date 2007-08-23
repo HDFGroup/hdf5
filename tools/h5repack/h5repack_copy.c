@@ -346,8 +346,8 @@ int do_copy_objects(hid_t fidin,
       goto error; 
    }
    else {
-    if ((grp_out=H5Gcreate(fidout,travt->objs[i].name, 0))<0)
-     goto error;
+    if((grp_out = H5Gcreate2(fidout, travt->objs[i].name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
    }
 
    if((grp_in = H5Gopen (fidin,travt->objs[i].name))<0)

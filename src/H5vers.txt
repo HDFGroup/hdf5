@@ -51,6 +51,7 @@ FUNCTION: H5Eprint; ; v10, v18
 FUNCTION: H5Epush; ; v14, v18
 FUNCTION: H5Eset_auto; ; v10, v18
 FUNCTION: H5Ewalk; H5E_walk, H5E_error; v10, v18
+FUNCTION: H5Gcreate; ; v10, v18
 
 # API typedefs
 # (although not required, it's easier to compare this file with the headers

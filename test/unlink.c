@@ -107,25 +107,25 @@ test_one(hid_t file)
     herr_t	status;
 
     /* Create a test group */
-    if((work=H5Gcreate(file, "/test_one", (size_t)0)) < 0) goto error;
+    if((work = H5Gcreate2(file, "/test_one", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
 
     /* Delete by absolute name */
     TESTING("unlink by absolute name");
-    if((grp=H5Gcreate(work, "foo", (size_t)0)) < 0) TEST_ERROR
+    if((grp = H5Gcreate2(work, "foo", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Gclose(grp) < 0) TEST_ERROR
     if(H5Gunlink(file, "/test_one/foo") < 0) TEST_ERROR
     PASSED();
 
     /* Delete by local name */
     TESTING("unlink by local name");
-    if((grp=H5Gcreate(work, "foo", (size_t)0)) < 0) TEST_ERROR
+    if((grp = H5Gcreate2(work, "foo", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Gclose(grp) < 0) TEST_ERROR
     if(H5Gunlink(work, "foo") < 0) TEST_ERROR
     PASSED();
 
     /* Delete directly - should fail */
     TESTING("unlink without a name");
-    if((grp=H5Gcreate(work, "foo", (size_t)0)) < 0) TEST_ERROR
+    if((grp = H5Gcreate2(work, "foo", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     H5E_BEGIN_TRY {
 	status = H5Gunlink(grp, ".");
     } H5E_END_TRY;
@@ -172,8 +172,8 @@ test_many(hid_t file)
     char	name[32];
 
     /* Create a test group */
-    if((work=H5Gcreate(file, "/test_many", (size_t)0)) < 0) goto error;
-    if((grp = H5Gcreate(work, "/test_many_foo", (size_t)0)) < 0) goto error;
+    if((work = H5Gcreate2(file, "/test_many", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
+    if((grp = H5Gcreate2(work, "/test_many_foo", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
     if(H5Gclose(grp) < 0) goto error;
 
     /* Create a bunch of names and unlink them in order */
@@ -268,9 +268,9 @@ test_symlink(hid_t file)
     TESTING("symlink removal");
 
     /* Create a test group and symlink */
-    if ((work=H5Gcreate(file, "/test_symlink", (size_t)0)) < 0) TEST_ERROR
-    if (H5Glink(work, H5L_TYPE_SOFT, "link_value", "link") < 0) TEST_ERROR
-    if (H5Gunlink(work, "link") < 0) TEST_ERROR
+    if((work = H5Gcreate2(file, "/test_symlink", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Glink(work, H5L_TYPE_SOFT, "link_value", "link") < 0) TEST_ERROR
+    if(H5Gunlink(work, "link") < 0) TEST_ERROR
 
     /* Cleanup */
     if (H5Gclose(work) < 0) TEST_ERROR
@@ -308,14 +308,14 @@ test_rename(hid_t file)
 
     /* Create a test group and rename something */
     TESTING("object renaming");
-    if ((work=H5Gcreate(file, "/test_rename", (size_t)0)) < 0) TEST_ERROR
-    if ((foo=H5Gcreate(work, "foo", (size_t)0)) < 0) TEST_ERROR
-    if (H5Gmove(work, "foo", "bar") < 0) TEST_ERROR
-    if ((inner=H5Gcreate(foo, "inner", (size_t)0)) < 0) TEST_ERROR
-    if (H5Gclose(inner) < 0) TEST_ERROR
-    if (H5Gclose(foo) < 0) TEST_ERROR
-    if ((inner=H5Gopen(work, "bar/inner")) < 0) TEST_ERROR
-    if (H5Gclose(inner) < 0) TEST_ERROR
+    if((work = H5Gcreate2(file, "/test_rename", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((foo = H5Gcreate2(work, "foo", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Gmove(work, "foo", "bar") < 0) TEST_ERROR
+    if((inner = H5Gcreate2(foo, "inner", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Gclose(inner) < 0) TEST_ERROR
+    if(H5Gclose(foo) < 0) TEST_ERROR
+    if((inner = H5Gopen(work, "bar/inner")) < 0) TEST_ERROR
+    if(H5Gclose(inner) < 0) TEST_ERROR
     PASSED();
 
     /* Try renaming a symlink */
@@ -370,9 +370,9 @@ test_new_move(hid_t fapl)
     if((file_b = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create groups in first file */
-    if((grp_1 = H5Gcreate(file_a, "group1", (size_t)0)) < 0) TEST_ERROR
-    if((grp_2 = H5Gcreate(file_a, "group2", (size_t)0)) < 0) TEST_ERROR
-    if((grp_move = H5Gcreate(grp_1, "group_move", (size_t)0)) < 0) TEST_ERROR
+    if((grp_1 = H5Gcreate2(file_a, "group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((grp_2 = H5Gcreate2(file_a, "group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((grp_move = H5Gcreate2(grp_1, "group_move", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Create hard and soft links. */
     if(H5Glink2(grp_1, "group_move", H5L_TYPE_HARD, H5G_SAME_LOC, "hard") < 0) TEST_ERROR
@@ -886,7 +886,7 @@ test_filespace(hid_t fapl)
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create a single group to remove */
-    if((group = H5Gcreate (file, GROUPNAME, (size_t)0)) < 0) TEST_ERROR
+    if((group = H5Gcreate2(file, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Gclose (group) < 0) TEST_ERROR
 
     /* Remove the group */
@@ -912,7 +912,7 @@ test_filespace(hid_t fapl)
     /* Create a many groups to remove */
     for(u = 0; u < UNLINK_NGROUPS; u++) {
         sprintf(objname, "%s %u", GROUPNAME, u);
-        if((group = H5Gcreate(file, objname, (size_t)0)) < 0) TEST_ERROR
+        if((group = H5Gcreate2(file, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
         if(H5Gclose (group) < 0) TEST_ERROR
     } /* end for */
 
@@ -941,8 +941,8 @@ test_filespace(hid_t fapl)
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create a small group hierarchy to remove */
-    if((group = H5Gcreate(file, GROUPNAME, (size_t)0)) < 0) TEST_ERROR
-    if((group2 = H5Gcreate (group, GROUP2NAME, (size_t)0)) < 0) TEST_ERROR
+    if((group = H5Gcreate2(file, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((group2 = H5Gcreate2(group, GROUP2NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Gclose (group2) < 0) TEST_ERROR
     if(H5Gclose (group) < 0) TEST_ERROR
 
@@ -981,13 +981,13 @@ test_filespace(hid_t fapl)
     for(u=0; u<FILESPACE_TOP_GROUPS; u++) {
         /* Create group */
         sprintf(objname,"%s %u",GROUPNAME,u);
-        if((group = H5Gcreate (file, objname, (size_t)0)) < 0) TEST_ERROR
+        if((group = H5Gcreate2(file, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
         /* Create nested groups inside top groups */
         for(v=0; v<FILESPACE_NESTED_GROUPS; v++) {
             /* Create group */
             sprintf(objname,"%s %u",GROUP2NAME,v);
-            if((group2 = H5Gcreate (group, objname, (size_t)0)) < 0) TEST_ERROR
+            if((group2 = H5Gcreate2(group, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
             /* Create datasets inside nested groups */
             for(w=0; w<FILESPACE_NDATASETS; w++) {
@@ -1093,12 +1093,12 @@ test_filespace(hid_t fapl)
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create a single group to remove */
-    if((group = H5Gcreate (file, GROUPNAME, (size_t)0)) < 0) TEST_ERROR
+    if((group = H5Gcreate2(file, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Gclose (group) < 0) TEST_ERROR
 
     /* Create another group with same name */
     H5E_BEGIN_TRY {
-        group = H5Gcreate (file, GROUPNAME, (size_t)0);
+        group = H5Gcreate2(file, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
     if (group>=0) {
         H5Gclose(group);
@@ -1249,7 +1249,8 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int test_create_unlink(const char *msg, hid_t fapl)
+static int
+test_create_unlink(const char *msg, hid_t fapl)
 {
     hid_t 	file, group;
     unsigned u;
@@ -1266,7 +1267,7 @@ static int test_create_unlink(const char *msg, hid_t fapl)
     /* Create a many groups to remove */
     for(u=0; u<UNLINK_NGROUPS; u++) {
         sprintf(groupname,"%s %u",GROUPNAME,u);
-        if((group = H5Gcreate (file, groupname, (size_t)0)) < 0) {
+        if((group = H5Gcreate2(file, groupname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
             H5_FAILED();
             printf("group %s creation failed\n", groupname);
             goto error;
@@ -1331,10 +1332,10 @@ test_link_slashes(hid_t fapl)
     if((fid=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Create a group in the root group */
-    if((gid = H5Gcreate(fid, SLASHES_GROUP_NAME, (size_t)0)) < 0) TEST_ERROR
+    if((gid = H5Gcreate2(fid, SLASHES_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Create a nested group in the root group */
-    if((gid2 = H5Gcreate(gid, SLASHES_GROUP_NAME, (size_t)0)) < 0) TEST_ERROR
+    if((gid2 = H5Gcreate2(gid, SLASHES_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Close the nested group */
     if(H5Gclose(gid2) < 0) TEST_ERROR
@@ -1500,14 +1501,14 @@ test_unlink_rightleaf(hid_t fid)
     /* Create all the groups */
     for (n = 0; n < ngroups; n++) {
         sprintf(name, "Zone%d", n + 1);
-        if((gids[n] = H5Gcreate (rootid, name, (size_t)0)) < 0) TEST_ERROR
+        if((gids[n] = H5Gcreate2(rootid, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     } /* end for */
 
     /* Unlink & re-create each group */
     for (n = 0; n < ngroups; n++) {
         if(delete_node (rootid, gids[n]) < 0) TEST_ERROR
         sprintf(name, "Zone%d", n + 1);
-        if((gids[n] = H5Gcreate (rootid, name, (size_t)0)) < 0) TEST_ERROR
+        if((gids[n] = H5Gcreate2(rootid, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     } /* end for */
 
     /* Close all the groups */
@@ -1564,7 +1565,7 @@ test_unlink_rightnode(hid_t fid)
     /* Create all the groups */
     for (n = 0; n < ngroups; n++) {
         sprintf(name, "ZoneB%d", n + 1);
-        if((gids[n] = H5Gcreate (rootid, name, (size_t)0)) < 0) TEST_ERROR
+        if((gids[n] = H5Gcreate2(rootid, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     } /* end for */
 
     /* Close all the groups */
@@ -1628,7 +1629,7 @@ test_unlink_middlenode(hid_t fid)
     /* Create all the groups */
     for (n = 0; n < ngroups; n++) {
         sprintf(name, "ZoneC%d", n + 1);
-        if((gids[n] = H5Gcreate (rootid, name, (size_t)0)) < 0) TEST_ERROR
+        if((gids[n] = H5Gcreate2(rootid, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     } /* end for */
 
     /* Close all the groups */
@@ -1970,7 +1971,7 @@ test_resurrect_group(hid_t fapl)
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create a group in the file */
-    if((group = H5Gcreate (file, GROUPNAME, (size_t)0)) < 0) TEST_ERROR
+    if((group = H5Gcreate2(file, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Unlink the group while it's open (will mark it for deletion when closed) */
     if(H5Gunlink(file, GROUPNAME) < 0) TEST_ERROR
@@ -2127,12 +2128,12 @@ test_full_group_compact(hid_t fapl)
     if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create group to link objects to */
-    if((gid = H5Gcreate(file_id, "/keep", (size_t)0)) < 0) TEST_ERROR
+    if((gid = H5Gcreate2(file_id, "/keep", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Create several objects to link to */
     for(u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
         sprintf(objname, "keep %u\n", u);
-        if((gid2 = H5Gcreate(gid, objname, (size_t)0)) < 0) TEST_ERROR
+        if((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
         if(H5Gclose(gid2) < 0) TEST_ERROR
     } /* end for */
 
@@ -2149,7 +2150,7 @@ test_full_group_compact(hid_t fapl)
     if((file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
 
     /* Create group to delete */
-    if((gid = H5Gcreate(file_id, "/delete", (size_t)0)) < 0) TEST_ERROR
+    if((gid = H5Gcreate2(file_id, "/delete", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Create external link (doesn't matter if it dangles) */
     if(H5Lcreate_external("foo.h5", "/dst", gid, "external", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
@@ -2167,7 +2168,7 @@ test_full_group_compact(hid_t fapl)
     /* Create several objects to delete */
     for(u = 0; u < FULL_GROUP_NUM_DELETE_COMPACT; u++) {
         sprintf(objname, "delete %u\n", u);
-        if((gid2 = H5Gcreate(gid, objname, (size_t)0)) < 0) TEST_ERROR
+        if((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
         if(H5Gclose(gid2) < 0) TEST_ERROR
     } /* end for */
 
@@ -2261,12 +2262,12 @@ test_full_group_dense(hid_t fapl)
     if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create group to link objects to */
-    if((gid = H5Gcreate(file_id, "/keep", (size_t)0)) < 0) TEST_ERROR
+    if((gid = H5Gcreate2(file_id, "/keep", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Create several objects to link to */
     for(u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
         sprintf(objname, "keep %u\n", u);
-        if((gid2 = H5Gcreate(gid, objname, (size_t)0)) < 0) TEST_ERROR
+        if((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
         if(H5Gclose(gid2) < 0) TEST_ERROR
     } /* end for */
 
@@ -2313,7 +2314,7 @@ test_full_group_dense(hid_t fapl)
     /* Create several objects to delete */
     for(u = 0; u < FULL_GROUP_NUM_DELETE_DENSE; u++) {
         sprintf(objname, "delete %u\n", u);
-        if((gid2 = H5Gcreate(gid, objname, (size_t)0)) < 0) TEST_ERROR
+        if((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
         if(H5Gclose(gid2) < 0) TEST_ERROR
     } /* end for */
 

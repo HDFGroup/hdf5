@@ -106,8 +106,8 @@ test_reference_obj(void)
     CHECK(sid1, FAIL, "H5Screate_simple");
 
     /* Create a group */
-    group=H5Gcreate(fid1,"Group1",(size_t)-1);
-    CHECK(group, FAIL, "H5Gcreate");
+    group = H5Gcreate2(fid1, "Group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(group, FAIL, "H5Gcreate2");
 
     /* Set group's comment */
     ret=H5Gset_comment(group,".",write_comment);
@@ -999,17 +999,17 @@ test_reference_group(void)
     CHECK(sid, FAIL, "H5Screate");
 
     /* Create group to refer to */
-    gid = H5Gcreate(fid, GROUPNAME, (size_t)0);
-    CHECK(gid, FAIL, "H5Gcreate");
+    gid = H5Gcreate2(fid, GROUPNAME,  H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gcreate2");
 
     /* Create nested groups */
-    gid2 = H5Gcreate(gid, GROUPNAME2, (size_t)0);
-    CHECK(gid2, FAIL, "H5Gcreate");
+    gid2 = H5Gcreate2(gid, GROUPNAME2,  H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(gid2, FAIL, "H5Gcreate2");
     ret = H5Gclose(gid2);
     CHECK(ret, FAIL, "H5Gclose");
 
-    gid2 = H5Gcreate(gid, GROUPNAME3, (size_t)0);
-    CHECK(gid2, FAIL, "H5Gcreate");
+    gid2 = H5Gcreate2(gid, GROUPNAME3,  H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(gid2, FAIL, "H5Gcreate2");
     ret = H5Gclose(gid2);
     CHECK(ret, FAIL, "H5Gclose");
 

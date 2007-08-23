@@ -48,7 +48,7 @@ main(void)
     /*
      * Create a group in the file.
      */
-    g1_id = H5Gcreate(file, "/G1", 0);
+    g1_id = H5Gcreate2(file, "/G1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     H5Gclose(g1_id);
     H5Fclose(file);

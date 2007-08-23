@@ -39,7 +39,7 @@ H5Acreate example: Show how to create an attribute for a dataset and a group
     H5Dclose(dataset);
 
     /* Create a group */
-    group=H5Gcreate(file,"/Group One",0);
+    group=H5Gcreate2(file, "/Group One", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Create an attribute for the dataset */
     attr=H5Acreate(group,"Attr1",H5T_INT32,H5S_SCALAR,H5P_DEFAULT);

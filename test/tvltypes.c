@@ -2602,6 +2602,10 @@ test_vltypes_fill_value(void)
 #endif /* H5_HAVE_FILTER_DEFLATE */
                     }
                     break;
+
+                default:
+                    assert(0 && "Unknown layout type!");
+                    break;
             } /* end switch */
 
             /* Create first data set with default setting - no space is allocated */
@@ -2698,6 +2702,10 @@ test_vltypes_fill_value(void)
                     dset_dspace_id = large_dspace_id;
                     dset_select_dspace_id = large_select_dspace_id;
                     dset_elmts = SPACE4_DIM_LARGE;
+                    break;
+
+                default:
+                    assert(0 && "Unknown layout type!");
                     break;
             } /* end switch */
 
@@ -2889,6 +2897,10 @@ test_vltypes_fill_value(void)
                     dset_dspace_id = large_dspace_id;
                     dset_select_dspace_id = large_select_dspace_id;
                     dset_elmts = SPACE4_DIM_LARGE;
+                    break;
+
+                default:
+                    assert(0 && "Unknown layout type!");
                     break;
             } /* end switch */
 

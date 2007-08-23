@@ -42,7 +42,7 @@ int main(void)
     if((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) <0) goto error;
 
     /* Create empty group that uses "symbol table" form to store links */
-    if((gid = H5Gcreate(fid, "old", (size_t)0)) < 0) goto error;
+    if((gid = H5Gcreate2(fid, "old", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
     if(H5Gclose(gid) < 0) goto error;
 
     /* Close file */

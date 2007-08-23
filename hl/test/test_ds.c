@@ -854,7 +854,7 @@ static int test_simple(void)
  */
 
   /* create a group */
- if ((gid=H5Gcreate(fid,"grp",(size_t)0))<0)
+ if((gid = H5Gcreate2(fid, "grp", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
   goto out;
 
  /* create the data space for the dataset */
@@ -1733,7 +1733,7 @@ static int test_errors(void)
  if ((fid=H5Fcreate(FILE2,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
   goto out;
  /* create a group */
- if ((gid=H5Gcreate(fid,"grp",(size_t)0))<0)
+ if((gid = H5Gcreate2(fid, "grp", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
   goto out;
  /* create the data space for the dataset */
  if ((sid=H5Screate_simple(rank,dims,NULL))<0)
@@ -2111,7 +2111,7 @@ static int test_iterators(void)
  if ((fid=H5Fcreate(FILE3,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
   goto out;
  /* create a group */
- if ((gid=H5Gcreate(fid,"grp",(size_t)0))<0)
+ if((gid = H5Gcreate2(fid, "grp", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
   goto out;
   /* close */
  if (H5Gclose(gid)<0)

@@ -33,7 +33,7 @@ const char *FILENAME[] = {
 #define FAMILY_SIZE	1024*1024*1024
 
 /* Define big file as 2GB */
-#define BIG_FILE 0x80000000UL
+#define BIG_FILE (off_t)0x80000000UL
 
 #define MAX_TRIES	100
 

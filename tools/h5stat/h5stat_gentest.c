@@ -35,45 +35,45 @@
 /* 
  * Generate 1.8 HDF5 file
  * with NUM_GRPS groups
- * with NUM_ATTRS for the
+ * with NUM_ATTRS attributes on the dataset
  */
 static void gen_file(void)
 {
-        int     	ret, i;
-	hid_t		fapl, gid;
- 	hid_t   	file, type_id, space_id, attr_id, dset_id;
-	char		name[30];
-	char		attrname[30];
+    int     	ret, i;
+    hid_t	fapl, gid;
+    hid_t   	file, type_id, space_id, attr_id, dset_id;
+    char	name[30];
+    char	attrname[30];
 
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    ret = H5Pset_latest_format(fapl, 1);
 
-	fapl = H5Pcreate(H5P_FILE_ACCESS);
-	ret = H5Pset_latest_format(fapl,1);
+     /* Create dataset */
+    file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    for(i = 1; i <= NUM_GRPS; i++) {
+        sprintf(name, "%s%d", GROUP_NAME,i);
+        gid = H5Gcreate2(file, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        H5Gclose(gid);
+    }
 
-	 /* Create dataset */
-	file=H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
-	for (i=1; i<=NUM_GRPS; i++) {
-		sprintf(name, "%s%d", GROUP_NAME,i);
-		gid = H5Gcreate(file, name, (size_t)0);
-		H5Gclose(gid);
-	}
+    /* Create a datatype to commit and use */
+    type_id = H5Tcopy(H5T_NATIVE_INT);
 
+    /* Create dataspace for dataset */
+    space_id = H5Screate(H5S_SCALAR);
 
-	/* Create a datatype to commit and use */
-    	type_id=H5Tcopy(H5T_NATIVE_INT);
-	/* Create dataspace for dataset */
-    	space_id=H5Screate(H5S_SCALAR);
-	 /* Create dataset */
-    	dset_id=H5Dcreate(file, DATASET_NAME,type_id,space_id,H5P_DEFAULT);
-	for (i=1; i<=NUM_ATTRS; i++) {
-		sprintf(attrname, "%s%d", ATTR_NAME,i);
-    		attr_id=H5Acreate(dset_id,attrname, type_id,space_id,H5P_DEFAULT);
-    		ret=H5Aclose(attr_id);
-	}
+     /* Create dataset */
+    dset_id = H5Dcreate(file, DATASET_NAME, type_id, space_id, H5P_DEFAULT);
+    for(i = 1; i <= NUM_ATTRS; i++) {
+        sprintf(attrname, "%s%d", ATTR_NAME,i);
+        attr_id = H5Acreate(dset_id, attrname, type_id, space_id, H5P_DEFAULT);
+        ret = H5Aclose(attr_id);
+    }
 
-    	ret=H5Dclose(dset_id);
-    	ret=H5Sclose(space_id);
-    	ret=H5Tclose(type_id);
-    	ret=H5Fclose(file);
+    ret = H5Dclose(dset_id);
+    ret = H5Sclose(space_id);
+    ret = H5Tclose(type_id);
+    ret = H5Fclose(file);
 }
 
 int main(void)
@@ -82,3 +82,4 @@ int main(void)
 
     return 0;
 }
+

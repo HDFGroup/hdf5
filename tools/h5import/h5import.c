@@ -848,17 +848,14 @@ processStrData(FILE **strm, struct Input *in, hid_t file_id)
     {
         
         /* create parent groups */
-        if (in->path.count > 1)
-        {
+        if(in->path.count > 1) {
             j = 0;
             handle = file_id;
-            while (j<in->path.count-1)
-            {
-                if ((group_id = H5Gopen(handle, in->path.group[j])) < 0)
-                {
-                    group_id = H5Gcreate(handle, in->path.group[j++], 0);
-                    for (; j<in->path.count-1; j++)
-                        group_id = H5Gcreate(group_id, in->path.group[j], 0);
+            while(j < in->path.count - 1) {
+                if((group_id = H5Gopen(handle, in->path.group[j])) < 0) {
+                    group_id = H5Gcreate2(handle, in->path.group[j++], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+                    for(; j < in->path.count - 1; j++)
+                        group_id = H5Gcreate2(group_id, in->path.group[j], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
                     handle = group_id;
                     break;
                 }
@@ -866,10 +863,9 @@ processStrData(FILE **strm, struct Input *in, hid_t file_id)
                 j++;
             }
         }
-        else
-        {
+        else {
             handle = file_id;
-            j=0;
+            j = 0;
         }
         
         /*enable error reporting */
@@ -2443,31 +2439,26 @@ process(struct Options *opt)
 
     /* disable error reporting */
     H5E_BEGIN_TRY {
-
-    /* create parent groups */
-    if (in->path.count > 1)
-    {
-      j = 0;
-      handle = file_id;
-      while (j<in->path.count-1)
-      {
-        if ((group_id = H5Gopen(handle, in->path.group[j])) < 0)
-        {
-          group_id = H5Gcreate(handle, in->path.group[j++], 0);
-          for (; j<in->path.count-1; j++)
-            group_id = H5Gcreate(group_id, in->path.group[j], 0);
-          handle = group_id;
-          break;
+        /* create parent groups */
+        if(in->path.count > 1) {
+            j = 0;
+            handle = file_id;
+            while(j < in->path.count - 1) {
+                if((group_id = H5Gopen(handle, in->path.group[j])) < 0) {
+                  group_id = H5Gcreate2(handle, in->path.group[j++], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+                  for (; j < in->path.count - 1; j++)
+                    group_id = H5Gcreate2(group_id, in->path.group[j], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+                  handle = group_id;
+                  break;
+                }
+                handle = group_id;
+                j++;
+            }
         }
-        handle = group_id;
-        j++;
-      }
-    }
-    else
-    {
-      handle = file_id;
-      j=0;
-    }
+        else {
+          handle = file_id;
+          j=0;
+        }
 
     /*enable error reporting */
     } H5E_END_TRY;

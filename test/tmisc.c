@@ -628,19 +628,19 @@ test_misc4(void)
     CHECK(file1, FAIL, "H5Fcreate");
 
     /* Create the first group */
-    group1 = H5Gcreate(file1, MISC4_GROUP_1, (size_t)0);
-    CHECK(group1, FAIL, "H5Gcreate");
+    group1 = H5Gcreate2(file1, MISC4_GROUP_1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(group1, FAIL, "H5Gcreate2");
 
     /* Create the second group */
-    group2 = H5Gcreate(file1, MISC4_GROUP_2, (size_t)0);
-    CHECK(group2, FAIL, "H5Gcreate");
+    group2 = H5Gcreate2(file1, MISC4_GROUP_2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(group2, FAIL, "H5Gcreate2");
 
     file2 = H5Fcreate(MISC4_FILE_2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(file2, FAIL, "H5Fcreate");
 
     /* Create the first group */
-    group3 = H5Gcreate(file2, MISC4_GROUP_1, (size_t)0);
-    CHECK(group3, FAIL, "H5Gcreate");
+    group3 = H5Gcreate2(file2, MISC4_GROUP_1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(group3, FAIL, "H5Gcreate2");
 
     /* Get the stat information for each group */
     ret = H5Gget_objinfo(file1,MISC4_GROUP_1,0,&stat1);
@@ -2181,12 +2181,12 @@ create_hdf_file(const char *name)
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Create a group in the root group */
-    gid = H5Gcreate(fid, MISC13_GROUP1_NAME, (size_t)0);
-    CHECK(gid, FAIL, "H5Gcreate");
+    gid = H5Gcreate2(fid, MISC13_GROUP1_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gcreate2");
 
     /* Create another group in the new group */
-    gid2 = H5Gcreate(gid, MISC13_GROUP2_NAME, (size_t)0);
-    CHECK(gid2, FAIL, "H5Gcreate");
+    gid2 = H5Gcreate2(gid, MISC13_GROUP2_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(gid2, FAIL, "H5Gcreate2");
 
     /* Close the second group */
     ret = H5Gclose(gid2);
@@ -3255,8 +3255,8 @@ test_misc19(void)
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Create a group */
-    gid = H5Gcreate(fid, MISC19_GROUP_NAME, (size_t)0);
-    CHECK(gid, FAIL, "H5Gcreate");
+    gid = H5Gcreate2(fid, MISC19_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gcreate2");
 
     /* Check the reference count */
     rc = H5Iget_ref(gid);
@@ -3813,8 +3813,8 @@ test_misc23(void)
 
 
     /* Build some infrastructure */
-    group_id = H5Gcreate(file_id, "/A", (size_t)0);
-    CHECK(group_id, FAIL, "H5Gcreate");
+    group_id = H5Gcreate2(file_id, "/A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(group_id, FAIL, "H5Gcreate2");
 
     space_id = H5Screate_simple(1, dims, NULL);
     CHECK(space_id, FAIL, "H5Screate_simple");
@@ -3828,13 +3828,13 @@ test_misc23(void)
     **********************************************************************/
 
     H5E_BEGIN_TRY {
-        tmp_id = H5Gcreate(file_id, "/A/B00a/grp", (size_t)0);
+        tmp_id = H5Gcreate2(file_id, "/A/B00a/grp", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(tmp_id, FAIL, "H5Gcreate");
+    VERIFY(tmp_id, FAIL, "H5Gcreate2");
 
 
-    tmp_id = H5Gcreate(file_id, "/A/grp", (size_t)0);
-    CHECK(tmp_id, FAIL, "H5Gcreate");
+    tmp_id = H5Gcreate2(file_id, "/A/grp", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(tmp_id, FAIL, "H5Gcreate2");
 
     status = H5Gclose(tmp_id);
     CHECK(status, FAIL, "H5Gclose");
@@ -4075,8 +4075,8 @@ test_misc24(void)
     CHECK(space_id, FAIL, "H5Screate");
 
     /* Create group, dataset & named datatype objects */
-    group_id = H5Gcreate(file_id, MISC24_GROUP_NAME, (size_t)0);
-    CHECK(group_id, FAIL, "H5Gcreate");
+    group_id = H5Gcreate2(file_id, MISC24_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(group_id, FAIL, "H5Gcreate2");
 
     dset_id = H5Dcreate(file_id, MISC24_DATASET_NAME, H5T_NATIVE_INT, space_id, H5P_DEFAULT);
     CHECK(dset_id, FAIL, "H5Dcreate");
@@ -4282,24 +4282,24 @@ test_misc25a(void)
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Create top group */
-    gid = H5Gcreate(fid, MISC25A_GROUP0_NAME, (size_t)0);
-    CHECK(gid, FAIL, "H5Gcreate");
+    gid = H5Gcreate2(fid, MISC25A_GROUP0_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gcreate2");
 
     /* Close top group */
     ret = H5Gclose(gid);
     CHECK(ret, FAIL, "H5Gclose");
 
     /* Create first group */
-    gid = H5Gcreate(fid, MISC25A_GROUP1_NAME, (size_t)0);
-    CHECK(gid, FAIL, "H5Gcreate");
+    gid = H5Gcreate2(fid, MISC25A_GROUP1_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gcreate2");
 
     /* Close first group */
     ret = H5Gclose(gid);
     CHECK(ret, FAIL, "H5Gclose");
 
     /* Create second group */
-    gid2 = H5Gcreate(fid, MISC25A_GROUP2_NAME, (size_t)0);
-    CHECK(gid2, FAIL, "H5Gcreate");
+    gid2 = H5Gcreate2(fid, MISC25A_GROUP2_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(gid2, FAIL, "H5Gcreate2");
 
     /* Close second group */
     ret = H5Gclose(gid2);
@@ -4384,8 +4384,8 @@ test_misc25a(void)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Create third group */
-    gid3 = H5Gcreate(fid, MISC25A_GROUP3_NAME, (size_t)0);
-    CHECK(gid3, FAIL, "H5Gcreate");
+    gid3 = H5Gcreate2(fid, MISC25A_GROUP3_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(gid3, FAIL, "H5Gcreate2");
 
     /* Close third group */
     ret = H5Gclose(gid3);
@@ -4651,7 +4651,7 @@ test_misc25c(void)
 
     /* Create a group for the dataset */
     gid = H5Gcreate2(fid, MISC25C_DSETGRPNAME, H5P_DEFAULT, gcpl, H5P_DEFAULT);
-    CHECK(gid, FAIL, "H5Gcreate");
+    CHECK(gid, FAIL, "H5Gcreate2");
 
     /* Create the dataspace */
     sid = H5Screate(H5S_SCALAR);
@@ -4662,8 +4662,8 @@ test_misc25c(void)
     CHECK(did, FAIL, "H5Dcreate");
 
     /* Create an extra group */
-    gid2 = H5Gcreate(fid, MISC25C_GRPNAME, (size_t)0);
-    CHECK(gid2, FAIL, "H5Gcreate");
+    gid2 = H5Gcreate2(fid, MISC25C_GRPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(gid2, FAIL, "H5Gcreate2");
 
     /* Close the extra group */
     ret = H5Gclose(gid2);
@@ -4678,8 +4678,8 @@ test_misc25c(void)
     CHECK(ret, FAIL, "H5Aclose");
 
     /* Create a second extra group */
-    gid2 = H5Gcreate(fid, MISC25C_GRPNAME2, (size_t)0);
-    CHECK(gid2, FAIL, "H5Gcreate");
+    gid2 = H5Gcreate2(fid, MISC25C_GRPNAME2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(gid2, FAIL, "H5Gcreate2");
 
     /* Close the second extra group */
     ret = H5Gclose(gid2);

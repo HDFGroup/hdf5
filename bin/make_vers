@@ -117,7 +117,7 @@ sub print_globalapivers ($) {
         print $fh "/* Functions */\n";
         print $fh "/*************/\n";
         for $name (sort keys %{$func_vers[$curr_idx]}) {
-            print $fh "#if !defined(", $name, "_vers)\n";
+            print $fh "\n#if !defined(", $name, "_vers)\n";
             print $fh  "#define ", $name, "_vers $func_vers[$curr_idx]{$name}\n";
             print $fh  "#endif /* !defined(", $name, "_vers) */\n";
         }
@@ -128,7 +128,7 @@ sub print_globalapivers ($) {
         print $fh "/* Typedefs */\n";
         print $fh "/************/\n";
         for $name (sort keys %{$type_vers[$curr_idx]}) {
-            print $fh "#if !defined(", $name, "_vers)\n";
+            print $fh "\n#if !defined(", $name, "_vers)\n";
             print $fh  "#define ", $name, "_vers $type_vers[$curr_idx]{$name}\n";
             print $fh  "#endif /* !defined(", $name, "_vers) */\n";
         }
@@ -211,7 +211,7 @@ sub print_defaultapivers ($) {
         $curr_vers = $typedefs{$curr_name};
 
         # Set up default/latest version name mapping
-        print $fh "#if !defined($curr_vers_name) || $curr_vers_name == $curr_vers\n";
+        print $fh "\n#if !defined($curr_vers_name) || $curr_vers_name == $curr_vers\n";
         print $fh "#define ${curr_name}_t $curr_name${curr_vers}_t\n";
 
         # Loop to print earlier version name mappings

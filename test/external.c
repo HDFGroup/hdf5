@@ -623,31 +623,27 @@ test_2 (hid_t fapl)
      * output looks like.
      */
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
-	goto error;
-    }
-    if ((grp=H5Gcreate(file, "emit-diagnostics", 8))<0) goto error;
-    if (H5Gclose(grp)<0) goto error;
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
+    if((grp = H5Gcreate2(file, "emit-diagnostics", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(grp) < 0) FAIL_STACK_ERROR
 
     /* Create the dataset */
-    if((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
-    if (H5Pset_external (dcpl, "extern_1a.raw",  (off_t)0, (hsize_t)sizeof part)<0 ||
-	H5Pset_external (dcpl, "extern_2a.raw", (off_t)10, (hsize_t)sizeof part)<0 ||
-	H5Pset_external (dcpl, "extern_3a.raw", (off_t)20, (hsize_t)sizeof part)<0 ||
-	H5Pset_external (dcpl, "extern_4a.raw", (off_t)30, (hsize_t)sizeof part)<0)
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+    if(H5Pset_external(dcpl, "extern_1a.raw",  (off_t)0, (hsize_t)sizeof part) < 0 ||
+            H5Pset_external(dcpl, "extern_2a.raw", (off_t)10, (hsize_t)sizeof part) < 0 ||
+            H5Pset_external(dcpl, "extern_3a.raw", (off_t)20, (hsize_t)sizeof part) < 0 ||
+            H5Pset_external(dcpl, "extern_4a.raw", (off_t)30, (hsize_t)sizeof part) < 0)
 	goto error;
     cur_size = 100;
-    if ((space=H5Screate_simple (1, &cur_size, NULL))<0) goto error;
-    if ((dset=H5Dcreate(file, "dset1", H5T_NATIVE_INT, space, dcpl))<0)
-	goto error;
+    if((space = H5Screate_simple(1, &cur_size, NULL)) < 0) goto error;
+    if((dset = H5Dcreate(file, "dset1", H5T_NATIVE_INT, space, dcpl)) < 0) goto error;
 
     /*
      * Read the entire dataset and compare with the original
      */
-    memset (whole, 0, sizeof(whole));
-    if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole)<0)
-	goto error;
-    for (i=0; i<100; i++) {
+    memset(whole, 0, sizeof(whole));
+    if(H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole) < 0) goto error;
+    for(i = 0; i < 100; i++) {
 	if (whole[i]!=(signed)i) {
 	    H5_FAILED();
 	    puts("    Incorrect value(s) read.");
@@ -842,11 +838,9 @@ main (void)
 	h5_reset();
 	fapl = h5_fileaccess();
 	h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-	if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
-	    goto error;
-	}
-	if ((grp=H5Gcreate(file, "emit-diagnostics", 8))<0) goto error;
-	if (H5Gclose (grp)<0) goto error;
+	if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
+	if((grp = H5Gcreate2(file, "emit-diagnostics", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+	if(H5Gclose(grp) < 0) goto error;
 
 	nerrors += test_1a(file);
 	nerrors += test_1b(file);

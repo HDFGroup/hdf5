@@ -83,15 +83,14 @@ hid_t create_file(char* name, hid_t fapl)
 	    the_data[i][j] = (double)(hssize_t)i/(hssize_t)(j+1);
 	}
     }
-    if (H5Dwrite(dset, H5T_NATIVE_DOUBLE, space, space, plist,
-		the_data)<0) goto error;
+    if(H5Dwrite(dset, H5T_NATIVE_DOUBLE, space, space, plist, the_data) < 0) goto error;
 
     /* Create some groups */
-    if ((groups=H5Gcreate(file, "some_groups", 0))<0) goto error;
-    for (i=0; i<100; i++) {
+    if((groups = H5Gcreate2(file, "some_groups", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
+    for(i = 0; i < 100; i++) {
 	sprintf(name, "grp%02u", (unsigned)i);
-	if ((grp=H5Gcreate(groups, name, 0))<0) goto error;
-	if (H5Gclose(grp)<0) goto error;
+	if((grp = H5Gcreate2(groups, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
+	if(H5Gclose(grp) < 0) goto error;
     }
 
 

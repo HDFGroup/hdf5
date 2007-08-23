@@ -58,42 +58,37 @@ create_file(char* name, hid_t fapl)
     hsize_t	ch_size[2] = {5, 5};
     size_t	i, j;
 
-    if ((file=H5Fcreate(name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) goto error;
+    if((file = H5Fcreate(name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Create a chunked dataset */
-    if ((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
-    if (H5Pset_chunk(dcpl, 2, ch_size)<0) goto error;
-    if ((space=H5Screate_simple(2, ds_size, NULL))<0) goto error;
-    if ((dset=H5Dcreate(file, "dset", H5T_NATIVE_FLOAT, space, H5P_DEFAULT))<0)
-	goto error;
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
+    if(H5Pset_chunk(dcpl, 2, ch_size) < 0) FAIL_STACK_ERROR
+    if((space = H5Screate_simple(2, ds_size, NULL)) < 0) FAIL_STACK_ERROR
+    if((dset = H5Dcreate(file, "dset", H5T_NATIVE_FLOAT, space, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Write some data */
-    for (i=0; i<ds_size[0]; i++) {
+    for(i = 0; i < ds_size[0]; i++)
 	/*
 	 * The extra cast in the following statement is a bug workaround
 	 * for the Win32 version 5.0 compiler.
 	 * 1998-11-06 ptl
 	 */
-	for (j=0; j<(size_t)ds_size[1]; j++) {
+        for(j = 0; j < (size_t)ds_size[1]; j++)
 	    the_data[i][j] = (double)(hssize_t)i/(hssize_t)(j+1);
-	}
-    }
-    if (H5Dwrite(dset, H5T_NATIVE_DOUBLE, space, space, H5P_DEFAULT,
-		the_data)<0) goto error;
+    if(H5Dwrite(dset, H5T_NATIVE_DOUBLE, space, space, H5P_DEFAULT, the_data) < 0) FAIL_STACK_ERROR
 
     /* Create some groups */
-    if ((groups=H5Gcreate(file, "some_groups", 0))<0) goto error;
-    for (i=0; i<100; i++) {
+    if((groups = H5Gcreate2(file, "some_groups", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    for(i = 0; i < 100; i++) {
 	sprintf(name, "grp%02u", (unsigned)i);
-	if ((grp=H5Gcreate(groups, name, 0))<0) goto error;
-	if (H5Gclose(grp)<0) goto error;
-    }
+	if((grp = H5Gcreate2(groups, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+	if(H5Gclose(grp)<0) FAIL_STACK_ERROR
+    } /* end for */
 
     return file;
 
 error:
-        HD_exit(1);
-
+    HD_exit(1);
 }
 
 

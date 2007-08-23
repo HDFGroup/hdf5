@@ -55,7 +55,7 @@ main(void)
     /*
      * Create a group in the file.
      */
-    grp = H5Gcreate(file, "/Data", 0);
+    grp = H5Gcreate2(file, "/Data", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
      * Create dataset "Compressed Data" in the group using absolute

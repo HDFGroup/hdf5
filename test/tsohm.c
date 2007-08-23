@@ -996,8 +996,8 @@ static void sohm_attr_helper(hid_t fcpl_id)
     CHECK_I(space_id, "H5Screate_simple");
 
     /* Create and verify an attribute on a group */
-    group_id = H5Gcreate(file_id, "group", 100);
-    CHECK_I(group_id, "H5Gcreate");
+    group_id = H5Gcreate2(file_id, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK_I(group_id, "H5Gcreate2");
     attr_id = H5Acreate(group_id, "attribute", type_id, space_id, H5P_DEFAULT);
     CHECK_I(attr_id, "H5Acreate");
     ret = H5Awrite(attr_id, H5T_NATIVE_INT, wdata);
@@ -1032,8 +1032,8 @@ static void sohm_attr_helper(hid_t fcpl_id)
     CHECK_I(ret, "H5Tcommit");
 
     /* Create and verify an attribute */
-    group_id = H5Gcreate(file_id, "another_group", 100);
-    CHECK_I(group_id, "H5Gcreate");
+    group_id = H5Gcreate2(file_id, "another_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK_I(group_id, "H5Gcreate2");
     attr_id = H5Acreate(group_id, "attribute", type_id, space_id, H5P_DEFAULT);
     CHECK_I(attr_id, "H5Acreate");
     ret = H5Awrite(attr_id, H5T_NATIVE_INT, wdata);
@@ -1524,8 +1524,8 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
     /* Now create a new group filled with datasets that use all different messages */
     file_id = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK_I(file_id, "H5Fopen");
-    group_id = H5Gcreate(file_id, "group", 0);
-    CHECK_I(group_id, "H5Gcreate");
+    group_id = H5Gcreate2(file_id, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK_I(group_id, "H5Gcreate2");
 
     /* Create NUM_DATASETS datasets in the new group */
     for(x=0; x<NUM_DATASETS; ++x)
@@ -1565,8 +1565,8 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
     /* Create a new group and interleave writes of datasets types 1 and 2. */
     file_id = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK_I(file_id, "H5Fopen");
-    group_id = H5Gcreate(file_id, "interleaved group", 0);
-    CHECK_I(group_id, "H5Gcreate");
+    group_id = H5Gcreate2(file_id, "interleaved group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK_I(group_id, "H5Gcreate2");
 
     /* Create NUM_DATASETS datasets in the new group */
     for(x=0; x<NUM_DATASETS; x+=2)

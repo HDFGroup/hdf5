@@ -334,8 +334,8 @@ test_attr_basic_write(hid_t fapl)
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Create group */
-    group = H5Gcreate(fid1, GROUP1_NAME, (size_t)0);
-    CHECK(group, FAIL, "H5Gcreate");
+    group = H5Gcreate2(fid1, GROUP1_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(group, FAIL, "H5Gcreate2");
 
     /* Create dataspace for attribute */
     sid2 = H5Screate_simple(ATTR2_RANK, dims3, NULL);
@@ -8099,8 +8099,8 @@ test_attr_bug1(hid_t fcpl, hid_t fapl)
     fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
     CHECK(fid, FAIL, "H5Fcreate");
 
-    gid = H5Gcreate(fid, GROUP1_NAME, (size_t)0);
-    CHECK(gid, FAIL, "H5Gcreate");
+    gid = H5Gcreate2(fid, GROUP1_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gcreate2");
 
     ret = H5Gclose(gid);
     CHECK(ret, FAIL, "H5Gclose");
@@ -8114,8 +8114,8 @@ test_attr_bug1(hid_t fcpl, hid_t fapl)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Create second group */
-    gid = H5Gcreate(fid, GROUP2_NAME, (size_t)0);
-    CHECK(gid, FAIL, "H5Gcreate");
+    gid = H5Gcreate2(fid, GROUP2_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gcreate2");
 
     ret = H5Gclose(gid);
     CHECK(ret, FAIL, "H5Gclose");
@@ -8143,8 +8143,8 @@ test_attr_bug1(hid_t fcpl, hid_t fapl)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Create third group */
-    gid = H5Gcreate(fid, GROUP3_NAME, (size_t)0);
-    CHECK(gid, FAIL, "H5Gcreate");
+    gid = H5Gcreate2(fid, GROUP3_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gcreate2");
 
     ret = H5Gclose(gid);
     CHECK(ret, FAIL, "H5Gclose");

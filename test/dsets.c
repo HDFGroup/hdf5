@@ -4690,7 +4690,7 @@ test_types(hid_t file)
     unsigned char	buf[32];
 
     TESTING("various datatypes");
-    if((grp = H5Gcreate(file, "typetests", (size_t)0)) < 0) goto error;
+    if((grp = H5Gcreate2(file, "typetests", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
 
     /* bitfield_1 */
     nelmts = sizeof(buf);
@@ -6271,7 +6271,7 @@ main(void)
                 goto error;
 
             /* Cause the library to emit initial messages */
-            if((grp = H5Gcreate(file, "emit diagnostics", (size_t)0)) < 0)
+            if((grp = H5Gcreate2(file, "emit diagnostics", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                 goto error;
             if(H5Gset_comment(grp, ".", "Causes diagnostic messages to be emitted") < 0)
                 goto error;

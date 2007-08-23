@@ -126,9 +126,10 @@ H5G_init_deprec_interface(void)
     FUNC_LEAVE_NOAPI(H5G_init())
 } /* H5G_init_deprec_interface() */
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*-------------------------------------------------------------------------
- * Function:	H5Gcreate
+ * Function:	H5Gcreate1
  *
  * Purpose:	Creates a new group relative to LOC_ID and gives it the
  *		specified NAME.  The group is opened for write access
@@ -151,14 +152,14 @@ H5G_init_deprec_interface(void)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Gcreate(hid_t loc_id, const char *name, size_t size_hint)
+H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
 {
     H5G_loc_t	    loc;                /* Location to create group */
     H5G_t	   *grp = NULL;         /* New group created */
     hid_t           tmp_gcpl = (-1);    /* Temporary group creation property list */
     hid_t	    ret_value;          /* Return value */
 
-    FUNC_ENTER_API(H5Gcreate, FAIL)
+    FUNC_ENTER_API(H5Gcreate1, FAIL)
     H5TRACE3("i", "i*sz", loc_id, name, size_hint);
 
     /* Check arguments */
@@ -213,7 +214,8 @@ done:
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
 
     FUNC_LEAVE_API(ret_value)
-} /* end H5Gcreate() */
+} /* end H5Gcreate1() */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
 /*-------------------------------------------------------------------------

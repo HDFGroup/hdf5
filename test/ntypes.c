@@ -1906,8 +1906,7 @@ test_refer_dtype(hid_t file)
 	    TEST_ERROR;
 
 	/* Create a group */
-	if((group=H5Gcreate(file,"Group1",(size_t)-1))<0)
-	    TEST_ERROR;
+	if((group = H5Gcreate2(file, "Group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
 	/* Create a datatype to refer to */
 	if((tid1 = H5Tcreate (H5T_COMPOUND, sizeof(s1_t)))<0)

@@ -67,15 +67,29 @@ namespace H5 {
 //--------------------------------------------------------------------------
 Group CommonFG::createGroup( const char* name, size_t size_hint ) const
 {
-   // Call C routine H5Gcreate to create the named group, giving the
+   // Create group creation property list for size_hint
+   hid_t gcpl_id = H5Pcreate(H5P_GROUP_CREATE);
+
+   // If the creation of the property list failed, throw an exception
+   if( gcpl_id < 0 )
+      throwException("createGroup", "H5Pcreate failed");
+
+   // Set the local heap size hint
+   if( H5Pset_local_heap_size_hint(gcpl_id, size_hint) < 0) {
+      H5Pclose(gcpl_id);
+      throwException("createGroup", "H5Pset_local_heap_size failed");
+   }
+
+   // Call C routine H5Gcreate2 to create the named group, giving the
    // location id which can be a file id or a group id
-   hid_t group_id = H5Gcreate( getLocId(), name, size_hint );
+   hid_t group_id = H5Gcreate2( getLocId(), name, H5P_DEFAULT, gcpl_id, H5P_DEFAULT );
+
+   // Close the group creation property list
+   H5Pclose(gcpl_id);
 
    // If the creation of the group failed, throw an exception
    if( group_id < 0 )
-   {
-      throwException("createGroup", "H5Gcreate failed");
-   }
+      throwException("createGroup", "H5Gcreate2 failed");
 
    // No failure, create and return the Group object
    Group group( group_id );

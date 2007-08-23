@@ -794,7 +794,7 @@ void collective_group_write(void)
      * datasets in parallel. */
     for(m = 0; m < ngroups; m++) {
         sprintf(gname, "group%d", m);
-        gid = H5Gcreate(fid, gname, 0);
+        gid = H5Gcreate2(fid, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         VRFY((gid > 0), gname);
 
         sprintf(dname, "dataset%d", m);
@@ -1000,7 +1000,7 @@ void multiple_group_write(void)
      * parallel. */
     for(m = 0; m < ngroups; m++) {
         sprintf(gname, "group%d", m);
-        gid = H5Gcreate(fid, gname, 0);
+        gid = H5Gcreate2(fid, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         VRFY((gid > 0), gname);
 
         /* create attribute for these groups. */
@@ -1101,7 +1101,7 @@ void create_group_recursive(hid_t memspace, hid_t filespace, hid_t gid,
 #endif /* BARRIER_CHECKS */
 
    sprintf(gname, "%dth_child_group", counter+1);
-   child_gid = H5Gcreate(gid, gname, 0);
+   child_gid = H5Gcreate2(gid, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
    VRFY((child_gid > 0), gname);
 
    /* write datasets in parallel. */

@@ -828,8 +828,8 @@ create_objects(hid_t fid1, hid_t fid2, hid_t *ret_did, hid_t *ret_gid1,
     /* Create a group in the second file open */
     {
         hid_t   gid1, gid2, gid3;
-        gid1 = H5Gcreate(fid2, "/group", (size_t)0);
-        CHECK(gid1, FAIL, "H5Gcreate");
+        gid1 = H5Gcreate2(fid2, "/group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(gid1, FAIL, "H5Gcreate2");
         if(ret_gid1 != NULL)
             *ret_gid1 = gid1;
 
@@ -897,8 +897,8 @@ test_get_file_id(void)
     /* Create a group in the file.  Make a duplicated file ID from the group.
      * And close this duplicated ID
      */
-    group_id = H5Gcreate(fid, GRP_NAME, (size_t)0);
-    CHECK(group_id, FAIL, "H5Gcreate");
+    group_id = H5Gcreate2(fid, GRP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(group_id, FAIL, "H5Gcreate2");
 
     /* Test H5Iget_file_id() */
     check_file_id(fid, group_id);
@@ -918,7 +918,7 @@ test_get_file_id(void)
     CHECK(fid, FAIL, "H5Fcreate");
 
     group_id = H5Gopen(fid, GRP_NAME);
-    CHECK(group_id, FAIL, "H5Gcreate");
+    CHECK(group_id, FAIL, "H5Gopen");
 
     /* Test H5Iget_file_id() */
     check_file_id(fid, group_id);
@@ -1374,8 +1374,8 @@ test_file_open_dot(void)
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Create a group in the HDF5 file */
-    gid = H5Gcreate(fid, GRP_NAME, (size_t)0);
-    CHECK(gid, FAIL, "H5Gcreate");
+    gid = H5Gcreate2(fid, GRP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gcreate2");
 
     /* Create a dataspace for creating datasets */
     sid = H5Screate(H5S_SCALAR);
@@ -1435,15 +1435,15 @@ test_file_open_dot(void)
 
     /* Create a group with no name using the file ID */
     H5E_BEGIN_TRY {
-        gid2 = H5Gcreate(fid, ".", (size_t)0);
+        gid2 = H5Gcreate2(fid, ".", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(gid2, FAIL, "H5Gcreate");
+    VERIFY(gid2, FAIL, "H5Gcreate2");
 
     /* Create a group with no name using the group ID */
     H5E_BEGIN_TRY {
-        gid2 = H5Gcreate(gid, ".", (size_t)0);
+        gid2 = H5Gcreate2(gid, ".", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(gid2, FAIL, "H5Gcreate");
+    VERIFY(gid2, FAIL, "H5Gcreate2");
 
     /* Open a group with no name using the file ID (should open the root group) */
     gid2 = H5Gopen(fid, ".");
@@ -1507,8 +1507,8 @@ test_file_open_overlap(void)
     VERIFY(intent, H5F_ACC_RDWR, "H5Fget_intent");
 
     /* Create a group in file */
-    gid = H5Gcreate(fid1, GROUP1, (size_t)0);
-    CHECK(gid, FAIL, "H5Gcreate");
+    gid = H5Gcreate2(fid1, GROUP1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gcreate2");
 
     /* Create dataspace for dataset */
     sid = H5Screate(H5S_SCALAR);
@@ -1595,8 +1595,8 @@ test_file_getname(void)
     VERIFY_STR(name, FILE1, "H5Fget_name");
 
     /* Create a group in the root group */
-    group_id = H5Gcreate(file_id, TESTA_GROUPNAME, (size_t)0);
-    CHECK(group_id, FAIL, "H5Gcreate");
+    group_id = H5Gcreate2(file_id, TESTA_GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(group_id, FAIL, "H5Gcreate2");
 
     /* Get and verify file name */
     name_len = H5Fget_name(group_id, name, (size_t)TESTA_NAME_BUF_SIZE);
@@ -1734,8 +1734,8 @@ test_file_double_group_open(void)
     file2_id = H5Fopen (FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(file2_id, FAIL, "H5Fopen");
 
-    grp1_id  = H5Gcreate(file1_id, GRP_NAME, (size_t)0);
-    CHECK(grp1_id, FAIL, "H5Gcreate");
+    grp1_id  = H5Gcreate2(file1_id, GRP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(grp1_id, FAIL, "H5Gcreate2");
     grp2_id  = H5Gopen(file2_id, GRP_NAME);
     CHECK(grp2_id, FAIL, "H5Gopen");
 

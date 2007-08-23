@@ -1544,75 +1544,75 @@ out:
  */
 int make_all_objects(hid_t loc_id)
 {
- hid_t   dset_id;
- hid_t   group_id;
- hid_t   type_id;
- hid_t   root_id;
- hid_t   space_id;
- hsize_t dims[1]={2};
- /* Compound datatype */
- typedef struct s_t
- {
-  int    a;
-  float  b;
- } s_t;
+    hid_t   dset_id;
+    hid_t   group_id;
+    hid_t   type_id;
+    hid_t   root_id;
+    hid_t   space_id;
+    hsize_t dims[1]={2};
+    /* Compound datatype */
+    typedef struct s_t
+    {
+        int    a;
+        float  b;
+    } s_t;
 
-/*-------------------------------------------------------------------------
- * H5G_DATASET
- *-------------------------------------------------------------------------
- */
- space_id = H5Screate_simple(1,dims,NULL);
- dset_id  = H5Dcreate(loc_id,"dset_referenced",H5T_NATIVE_INT,space_id,H5P_DEFAULT);
- H5Sclose(space_id);
+    /*-------------------------------------------------------------------------
+    * H5G_DATASET
+    *-------------------------------------------------------------------------
+    */
+    space_id = H5Screate_simple(1,dims,NULL);
+    dset_id  = H5Dcreate(loc_id,"dset_referenced",H5T_NATIVE_INT,space_id,H5P_DEFAULT);
+    H5Sclose(space_id);
 
-/*-------------------------------------------------------------------------
- * H5G_GROUP
- *-------------------------------------------------------------------------
- */
- group_id  = H5Gcreate(loc_id,"g1",0);
- root_id   = H5Gopen(loc_id, "/");
+    /*-------------------------------------------------------------------------
+    * H5G_GROUP
+    *-------------------------------------------------------------------------
+    */
+    group_id  = H5Gcreate2(loc_id, "g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    root_id   = H5Gopen(loc_id, "/");
 
-/*-------------------------------------------------------------------------
- * H5G_TYPE
- *-------------------------------------------------------------------------
- */
+    /*-------------------------------------------------------------------------
+    * H5G_TYPE
+    *-------------------------------------------------------------------------
+    */
 
- /* Create a memory compound datatype */
- type_id = H5Tcreate (H5T_COMPOUND, sizeof(s_t));
- H5Tinsert(type_id, "a", HOFFSET(s_t, a), H5T_NATIVE_INT);
- H5Tinsert(type_id, "b", HOFFSET(s_t, b), H5T_NATIVE_FLOAT);
- /* Commit compound datatype and close it */
- H5Tcommit(loc_id, "type", type_id);
- H5Tclose(type_id);
+    /* Create a memory compound datatype */
+    type_id = H5Tcreate (H5T_COMPOUND, sizeof(s_t));
+    H5Tinsert(type_id, "a", HOFFSET(s_t, a), H5T_NATIVE_INT);
+    H5Tinsert(type_id, "b", HOFFSET(s_t, b), H5T_NATIVE_FLOAT);
 
-/*-------------------------------------------------------------------------
- * H5G_LINK
- *-------------------------------------------------------------------------
- */
+    /* Commit compound datatype and close it */
+    H5Tcommit(loc_id, "type", type_id);
+    H5Tclose(type_id);
 
- H5Glink(loc_id, H5L_TYPE_SOFT, "dset", "link");
+    /*-------------------------------------------------------------------------
+    * H5G_LINK
+    *-------------------------------------------------------------------------
+    */
 
-/*-------------------------------------------------------------------------
- * H5G_UDLINK
- *-------------------------------------------------------------------------
- */
- /* Create an external link. Other UD links are not supported by h5repack */
- H5Lcreate_external("file", "path", loc_id, "ext_link", H5P_DEFAULT, H5P_DEFAULT);
+    H5Glink(loc_id, H5L_TYPE_SOFT, "dset", "link");
 
-/*-------------------------------------------------------------------------
- * write a series of datasetes
- *-------------------------------------------------------------------------
- */
+    /*-------------------------------------------------------------------------
+    * H5G_UDLINK
+    *-------------------------------------------------------------------------
+    */
+    /* Create an external link. Other UD links are not supported by h5repack */
+    H5Lcreate_external("file", "path", loc_id, "ext_link", H5P_DEFAULT, H5P_DEFAULT);
 
- write_dset_in(root_id,"dset_referenced",loc_id,0);
+    /*-------------------------------------------------------------------------
+    * write a series of datasetes
+    *-------------------------------------------------------------------------
+    */
 
- /* Close */
- H5Dclose(dset_id);
- H5Gclose(group_id);
- H5Gclose(root_id);
+    write_dset_in(root_id,"dset_referenced",loc_id,0);
 
- return 0;
+    /* Close */
+    H5Dclose(dset_id);
+    H5Gclose(group_id);
+    H5Gclose(root_id);
 
+    return 0;
 }
 
 
@@ -1625,45 +1625,43 @@ int make_all_objects(hid_t loc_id)
  */
 int make_attributes(hid_t loc_id)
 {
- hid_t   dset_id;
- hid_t   group_id;
- hid_t   root_id;
- hid_t   space_id;
- hsize_t dims[1]={2};
+    hid_t   dset_id;
+    hid_t   group_id;
+    hid_t   root_id;
+    hid_t   space_id;
+    hsize_t dims[1]={2};
 
+    /*-------------------------------------------------------------------------
+    * H5G_DATASET
+    *-------------------------------------------------------------------------
+    */
 
-/*-------------------------------------------------------------------------
- * H5G_DATASET
- *-------------------------------------------------------------------------
- */
+    space_id = H5Screate_simple(1,dims,NULL);
+    dset_id  = H5Dcreate(loc_id,"dset",H5T_NATIVE_INT,space_id,H5P_DEFAULT);
+    H5Sclose(space_id);
 
- space_id = H5Screate_simple(1,dims,NULL);
- dset_id  = H5Dcreate(loc_id,"dset",H5T_NATIVE_INT,space_id,H5P_DEFAULT);
- H5Sclose(space_id);
+    /*-------------------------------------------------------------------------
+    * H5G_GROUP
+    *-------------------------------------------------------------------------
+    */
+    group_id  = H5Gcreate2(loc_id, "g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    root_id   = H5Gopen(loc_id, "/");
 
-/*-------------------------------------------------------------------------
- * H5G_GROUP
- *-------------------------------------------------------------------------
- */
- group_id  = H5Gcreate(loc_id,"g1",0);
- root_id   = H5Gopen(loc_id, "/");
+    /*-------------------------------------------------------------------------
+    * write a series of attributes on the dataset, group, and root group
+    *-------------------------------------------------------------------------
+    */
 
-/*-------------------------------------------------------------------------
- * write a series of attributes on the dataset, group, and root group
- *-------------------------------------------------------------------------
- */
+    write_attr_in(dset_id,"dset",loc_id,0);
+    write_attr_in(group_id,"dset",loc_id,0);
+    write_attr_in(root_id,"dset",loc_id,0);
 
- write_attr_in(dset_id,"dset",loc_id,0);
- write_attr_in(group_id,"dset",loc_id,0);
- write_attr_in(root_id,"dset",loc_id,0);
+    /* Close */
+    H5Dclose(dset_id);
+    H5Gclose(group_id);
+    H5Gclose(root_id);
 
- /* Close */
- H5Dclose(dset_id);
- H5Gclose(group_id);
- H5Gclose(root_id);
-
- return 0;
-
+    return 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -1675,50 +1673,49 @@ int make_attributes(hid_t loc_id)
  */
 int make_hlinks(hid_t loc_id)
 {
- hid_t   group1_id;
- hid_t   group2_id;
- hid_t   group3_id;
- hsize_t dims[2]={3,2};
- int     buf[3][2]= {{1,1},{1,2},{2,2}};
+    hid_t   group1_id;
+    hid_t   group2_id;
+    hid_t   group3_id;
+    hsize_t dims[2]={3,2};
+    int     buf[3][2]= {{1,1},{1,2},{2,2}};
 
-/*-------------------------------------------------------------------------
- * create a dataset and some hard links to it
- *-------------------------------------------------------------------------
- */
+    /*-------------------------------------------------------------------------
+    * create a dataset and some hard links to it
+    *-------------------------------------------------------------------------
+    */
 
- if (write_dset(loc_id,2,dims,"dset",H5T_NATIVE_INT,buf)<0)
-  return -1;
- if (H5Glink(loc_id, H5L_TYPE_HARD, "dset", "link1 to dset")<0)
-  return -1;
- if (H5Glink(loc_id, H5L_TYPE_HARD, "dset", "link2 to dset")<0)
-  return -1;
- if (H5Glink(loc_id, H5L_TYPE_HARD, "dset", "link3 to dset")<0)
-  return -1;
+    if(write_dset(loc_id,2,dims,"dset",H5T_NATIVE_INT,buf)<0)
+        return -1;
+    if(H5Glink(loc_id, H5L_TYPE_HARD, "dset", "link1 to dset")<0)
+        return -1;
+    if(H5Glink(loc_id, H5L_TYPE_HARD, "dset", "link2 to dset")<0)
+        return -1;
+    if(H5Glink(loc_id, H5L_TYPE_HARD, "dset", "link3 to dset")<0)
+        return -1;
 
 
-/*-------------------------------------------------------------------------
- * create a group and some hard links to it
- *-------------------------------------------------------------------------
- */
+    /*-------------------------------------------------------------------------
+    * create a group and some hard links to it
+    *-------------------------------------------------------------------------
+    */
 
- if ((group1_id = H5Gcreate(loc_id,"g1",0))<0)
-  return -1;
- if ((group2_id = H5Gcreate(group1_id,"g2",0))<0)
-  return -1;
- if ((group3_id = H5Gcreate(group2_id,"g3",0))<0)
-  return -1;
+    if((group1_id = H5Gcreate2(loc_id, "g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        return -1;
+    if((group2_id = H5Gcreate2(group1_id, "g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        return -1;
+    if((group3_id = H5Gcreate2(group2_id, "g3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        return -1;
 
- if (H5Glink2(loc_id, "g1", H5L_TYPE_HARD, group2_id, "link1 to g1")<0)
-  return -1;
- if (H5Glink2(group1_id, "g2", H5L_TYPE_HARD, group3_id, "link1 to g2")<0)
-  return -1;
+    if(H5Glink2(loc_id, "g1", H5L_TYPE_HARD, group2_id, "link1 to g1")<0)
+        return -1;
+    if(H5Glink2(group1_id, "g2", H5L_TYPE_HARD, group3_id, "link1 to g2")<0)
+        return -1;
 
- H5Gclose(group1_id);
- H5Gclose(group2_id);
- H5Gclose(group3_id);
+    H5Gclose(group1_id);
+    H5Gclose(group2_id);
+    H5Gclose(group3_id);
 
- return 0;
-
+    return 0;
 }
 
 

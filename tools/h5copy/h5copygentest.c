@@ -336,7 +336,7 @@ static void gent_empty_group(hid_t loc_id)
     hid_t   gid;
 
     /* Create group in location */
-    gid = H5Gcreate(loc_id, GROUP_EMPTY, (size_t)0);
+    gid = H5Gcreate2(loc_id, GROUP_EMPTY, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Release resources */
     H5Gclose(gid);
@@ -355,7 +355,7 @@ static void gent_nested_datasets(hid_t loc_id)
     hid_t   gid;
 
     /* Create group in location */
-    gid = H5Gcreate(loc_id, GROUP_DATASETS, (size_t)0);
+    gid = H5Gcreate2(loc_id, GROUP_DATASETS, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Add datasets to group created */
     gent_datasets(gid);
@@ -377,7 +377,7 @@ static void gent_nested_group(hid_t loc_id)
     hid_t   gid;
 
     /* Create group in location */
-    gid = H5Gcreate(loc_id, GROUP_NESTED, (size_t)0);
+    gid = H5Gcreate2(loc_id, GROUP_NESTED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Add datasets to group created */
     gent_nested_datasets(gid);

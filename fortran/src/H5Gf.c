@@ -29,40 +29,54 @@
  * Programmer:  Elena Pourmal
  *              Wednesday, August 5, 1999
  * Modifications:
+ *              Changed to call H5Gcreate2 because H5Gcreate flip-flops and
+ *              H5Gcreate1 can be compiled out of the library
+ *              QAK - 2007/08/23
  *---------------------------------------------------------------------------*/
 int_f
 nh5gcreate_c (hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size_hint,  hid_t_f *grp_id)
 {
-     int ret_value = -1;
-     char *c_name;
-     size_t c_namelen;
-     size_t c_size_hint;
-     hid_t c_grp_id;
-     hid_t c_loc_id;
+    hid_t gcpl_id = -1;          /* Group creation property list */
+    char *c_name = NULL;
+    hid_t c_grp_id;
+    int_f ret_value = -1;
 
-     /*
-      * Convert FORTRAN name to C name
-      */
-     c_namelen = *namelen;
-     c_name = (char *)HD5f2cstring(name, c_namelen);
-     if (c_name == NULL) return ret_value;
-     /*
-      * Call H5Gcreate function.
-      */
-     c_loc_id = *loc_id;
-     if ( *size_hint == OBJECT_NAMELEN_DEFAULT_F )
-     c_grp_id = H5Gcreate(c_loc_id, c_name, 0);
-     else {
-          c_size_hint = (size_t)*size_hint;
-          c_grp_id = H5Gcreate(c_loc_id, c_name, c_size_hint);
-     }
-     if (c_grp_id < 0) goto DONE;
-     *grp_id = (hid_t_f)c_grp_id;
-     ret_value = 0;
+    /*
+     * Convert FORTRAN name to C name
+     */
+    if(NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
+        goto DONE;
+
+    /*
+     * Call H5Gcreate function.
+     */
+    if(*size_hint == OBJECT_NAMELEN_DEFAULT_F )
+        c_grp_id = H5Gcreate2((hid_t)*loc_id, c_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    else {
+        /* Create the group creation property list */
+        if((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0)
+            goto DONE;
+
+        /* Set the local heap size hint */
+        if(H5Pset_local_heap_size_hint(gcpl_id, (size_t)*size_hint) < 0)
+            goto DONE;
+
+        /* Create the group */
+        c_grp_id = H5Gcreate2((hid_t)*loc_id, c_name, H5P_DEFAULT, gcpl_id, H5P_DEFAULT);
+    }
+    if(c_grp_id < 0)
+        goto DONE;
+
+    /* Everything OK, set values to return */
+    *grp_id = (hid_t_f)c_grp_id;
+    ret_value = 0;
 
 DONE:
-     HDfree(c_name);
-     return ret_value;
+    if(gcpl_id > 0)
+        H5Pclose(gcpl_id);
+    if(c_name)
+        HDfree(c_name);
+    return ret_value;
 }
 
 /*----------------------------------------------------------------------------

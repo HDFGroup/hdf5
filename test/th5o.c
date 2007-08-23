@@ -57,8 +57,8 @@ test_h5o_open(void)
 
     /* Create a group, dataset, and committed datatype within the file */
     /* Create the group */
-    grp = H5Gcreate(fid, "group", (size_t)0);
-    CHECK(grp, FAIL, "H5Gcreate");
+    grp = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(grp, FAIL, "H5Gcreate2");
     ret = H5Gclose(grp);
     CHECK(ret, FAIL, "H5Gclose");
 
@@ -162,8 +162,8 @@ test_h5o_close(void)
 
     /* Create a group, dataset, and committed datatype within the file */
     /* Create the group and close it with H5Oclose */
-    grp = H5Gcreate(fid, "group", (size_t)0);
-    CHECK(grp, FAIL, "H5Gcreate");
+    grp = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(grp, FAIL, "H5Gcreate2");
     VERIFY(H5Iget_type(grp), H5I_GROUP, "H5Iget_type");
     ret = H5Oclose(grp);
     CHECK(ret, FAIL, "H5Oclose");
@@ -259,8 +259,8 @@ test_h5o_open_by_addr(void)
 
     /* Create a group, dataset, and committed datatype within the file */
     /* Create the group */
-    grp = H5Gcreate(fid, "group", (size_t)0);
-    CHECK(grp, FAIL, "H5Gcreate");
+    grp = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(grp, FAIL, "H5Gcreate2");
     ret = H5Gclose(grp);
     CHECK(ret, FAIL, "H5Gclose");
 
@@ -388,8 +388,8 @@ test_h5o_refcount(void)
 
     /* Create a group, dataset, and committed datatype within the file */
     /* Create the group */
-    grp = H5Gcreate(fid, "group", (size_t)0);
-    CHECK(grp, FAIL, "H5Gcreate");
+    grp = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(grp, FAIL, "H5Gcreate2");
 
     /* Commit the type inside the group */
     dtype = H5Tcopy(H5T_NATIVE_INT);

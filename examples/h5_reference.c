@@ -52,7 +52,7 @@ main(void) {
    /*
     *  Create  group "A" in the file.
     */
-   gid_a = H5Gcreate(fid, "A", 0);
+   gid_a = H5Gcreate2(fid, "A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
   /*
    *  Create dataset "B" in the file.

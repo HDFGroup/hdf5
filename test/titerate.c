@@ -165,8 +165,8 @@ static void test_iter_group(hid_t fapl, hbool_t new_format)
     /* Create a group and named datatype under root group for testing
      * H5Gget_objtype_by_idx.
      */
-    grp = H5Gcreate(file, "grp", (size_t)0);
-    CHECK(ret, FAIL, "H5Gcreate");
+    grp = H5Gcreate2(file, "grp", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Gcreate2");
 
     lnames[NDATASETS] = HDstrdup("grp");
     CHECK(lnames[NDATASETS], NULL, "strdup");
@@ -611,8 +611,8 @@ static void test_iter_group_large(hid_t fapl)
         names[i].type = H5G_GROUP;
 
         /* Create a group */
-        group = H5Gcreate(file, gname, (size_t)0);
-        CHECK(group, FAIL, "H5Gcreate");
+        group = H5Gcreate2(file, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(group, FAIL, "H5Gcreate2");
 
         /* Close a group */
         ret = H5Gclose(group);
@@ -730,8 +730,8 @@ static void test_grp_memb_funcs(hid_t fapl)
     /* Create a group and named datatype under root group for testing
      * H5Gget_objtype_by_idx.
      */
-    grp = H5Gcreate(file, "grp", (size_t)0);
-    CHECK(ret, FAIL, "H5Gcreate");
+    grp = H5Gcreate2(file, "grp", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Gcreate2");
 
     dnames[NDATASETS] = HDstrdup("grp");
     CHECK(dnames[NDATASETS], NULL, "strdup");
@@ -852,11 +852,11 @@ static void test_links(hid_t fapl)
     CHECK(file, FAIL, "H5Fcreate");
 
     /* create groups */
-    gid = H5Gcreate(file, "/g1", (size_t)0);
-    CHECK(gid, FAIL, "H5Gcreate");
+    gid = H5Gcreate2(file, "/g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gcreate2");
 
-    gid1 = H5Gcreate(file, "/g1/g1.1", (size_t)0);
-    CHECK(gid1, FAIL, "H5Gcreate");
+    gid1 = H5Gcreate2(file, "/g1/g1.1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(gid1, FAIL, "H5Gcreate2");
 
     /* create soft and hard links to the group "/g1". */
     ret = H5Glink (gid, H5L_TYPE_SOFT, "something", "softlink");

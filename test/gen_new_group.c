@@ -73,11 +73,11 @@ int main(void)
     if((sid = H5Screate(H5S_SCALAR)) < 0) goto error;
 
     /* Create empty group (w/default group creation properties) */
-    if((gid = H5Gcreate(fid, "empty", (size_t)0)) < 0) goto error;
+    if((gid = H5Gcreate2(fid, "empty", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
     if(H5Gclose(gid) < 0) goto error;
 
     /* Create group which will contain link messages (w/default group creation properties) */
-    if((gid = H5Gcreate(fid, "links", (size_t)0)) < 0) goto error;
+    if((gid = H5Gcreate2(fid, "links", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
 
     /* Create dataset in group */
     if((did = H5Dcreate(gid, "dset1", H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) goto error;

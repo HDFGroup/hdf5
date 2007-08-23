@@ -52,7 +52,7 @@ int main()
     assert(fid > 0);
 
     /* Create first group */
-    gid = H5Gcreate(fid, GROUP1, (size_t)0);
+    gid = H5Gcreate2(fid, GROUP1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     assert(gid > 0);
 
     /* Close first group */
@@ -60,7 +60,7 @@ int main()
     assert(ret >= 0);
 
     /* Create second group */
-    gid2 = H5Gcreate(fid, GROUP2, (size_t)0);
+    gid2 = H5Gcreate2(fid, GROUP2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     assert(gid2 > 0);
 
     /* Close second group */
@@ -146,7 +146,7 @@ int main()
     assert(fid > 0);
 
     /* Create third group */
-    gid3 = H5Gcreate(fid, GROUP3, (size_t)0);
+    gid3 = H5Gcreate2(fid, GROUP3, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     assert(gid3 > 0);
 
     /* Close third group */

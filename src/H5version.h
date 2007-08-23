@@ -37,28 +37,39 @@
 /*************/
 /* Functions */
 /*************/
+
 #if !defined(H5Eclear_vers)
 #define H5Eclear_vers 1
 #endif /* !defined(H5Eclear_vers) */
+
 #if !defined(H5Eget_auto_vers)
 #define H5Eget_auto_vers 1
 #endif /* !defined(H5Eget_auto_vers) */
+
 #if !defined(H5Eprint_vers)
 #define H5Eprint_vers 1
 #endif /* !defined(H5Eprint_vers) */
+
 #if !defined(H5Epush_vers)
 #define H5Epush_vers 1
 #endif /* !defined(H5Epush_vers) */
+
 #if !defined(H5Eset_auto_vers)
 #define H5Eset_auto_vers 1
 #endif /* !defined(H5Eset_auto_vers) */
+
 #if !defined(H5Ewalk_vers)
 #define H5Ewalk_vers 1
 #endif /* !defined(H5Ewalk_vers) */
 
+#if !defined(H5Gcreate_vers)
+#define H5Gcreate_vers 1
+#endif /* !defined(H5Gcreate_vers) */
+
 /************/
 /* Typedefs */
 /************/
+
 #if !defined(H5E_auto_vers)
 #define H5E_auto_vers 1
 #endif /* !defined(H5E_auto_vers) */
@@ -128,9 +139,18 @@
 #error "H5Ewalk_vers set to invalid value"
 #endif /* H5Ewalk_vers */
 
+#if !defined(H5Gcreate_vers) || H5Gcreate_vers == 2
+#define H5Gcreate H5Gcreate2
+#elif H5Gcreate_vers == 1
+#define H5Gcreate H5Gcreate1
+#else /* H5Gcreate_vers */
+#error "H5Gcreate_vers set to invalid value"
+#endif /* H5Gcreate_vers */
+
 /************/
 /* Typedefs */
 /************/
+
 #if !defined(H5E_auto_vers) || H5E_auto_vers == 2
 #define H5E_auto_t H5E_auto2_t
 #elif H5E_auto_vers == 1

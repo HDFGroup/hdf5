@@ -54,7 +54,7 @@ int main(void)
     * Create first file and a group in it.
     */
    fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-   gid = H5Gcreate(fid1, "/G", 0);
+   gid = H5Gcreate2(fid1, "/G", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
    /*
     * Close group and file

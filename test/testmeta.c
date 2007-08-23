@@ -18,10 +18,10 @@
  * to HDF5 1.4.1-post2 or 1.4.2-pre3 debug library.
  *
  * If the assertion errors are ignored, the program eventially causes
- * an error in H5Gcreate when writing object 83381.
+ * an error in H5Gcreate2 when writing object 83381.
  *
  * When writing in single file mode, the assertion errors still occur
- * but the H5Gcreate error does not.
+ * but the H5Gcreate2 error does not.
  */
 
 
@@ -102,7 +102,7 @@ int main(void)
     status = H5Pclose(prop_id);
 
     /* Create group to hold data object data arrays */
-    group_id = H5Gcreate(file_id, "/DataArray", 0);
+    group_id = H5Gcreate2(file_id, "/DataArray", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Gclose(group_id);
 
     for(j=0; j<NDATAOBJECTS; j++)
@@ -114,9 +114,8 @@ int main(void)
 
         /* Create group to hold data arrays for this object */
         sprintf(name, "/DataArray/%06d", j);
-        group_id = H5Gcreate(file_id, name, 0);
-        if(group_id < 0)
-        {
+        group_id = H5Gcreate2(file_id, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        if(group_id < 0) {
             fprintf(stderr, "Failed to create DataArray group.\n");
             status = H5Fclose(file_id);
             return -1;
@@ -240,3 +239,4 @@ int main(void)
 
     return 0;
 }
+

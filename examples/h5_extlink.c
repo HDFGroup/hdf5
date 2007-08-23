@@ -61,7 +61,7 @@ static void extlink_example(void)
     targ_file_id = H5Fcreate(TARGET_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Create a group in the target file for the external link to point to. */
-    group_id = H5Gcreate(targ_file_id, "target_group", (size_t) 0);
+    group_id = H5Gcreate2(targ_file_id, "target_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Close the group and the target file */
     H5Gclose(group_id);
@@ -76,7 +76,7 @@ static void extlink_example(void)
      * target group (even though the target file is closed!).  The external
      * link works just like a soft link.
      */
-    group_id = H5Gcreate(source_file_id, "ext_link/new_group", (size_t) 0);
+    group_id = H5Gcreate2(source_file_id, "ext_link/new_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* The group is inside the target file and we can access it normally.
      * Here, group_id and group2_id point to the same group inside the
@@ -155,7 +155,7 @@ static void extlink_prefix_example(void)
     /* Now we can use the open group ID to create a new group inside the
      * "red" file.
      */
-    group2_id = H5Gcreate(group_id, "pink", (size_t) 0);
+    group2_id = H5Gcreate2(group_id, "pink", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Close both groups. */
     H5Gclose(group2_id);
@@ -166,7 +166,7 @@ static void extlink_prefix_example(void)
      */
     H5Pset_elink_prefix(gapl_id, "blue/");
     group_id = H5Gopen2(source_file_id, "ext_link", gapl_id);
-    group2_id = H5Gcreate(group_id, "sky blue", (size_t) 0);
+    group2_id = H5Gcreate2(group_id, "sky blue", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Close both groups. */
     H5Gclose(group2_id);
@@ -243,7 +243,7 @@ static void soft_link_example(void)
      * point to.
      */
     file_id = H5Fcreate(SOFT_LINK_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    group_id = H5Gcreate(file_id, TARGET_GROUP, (size_t) 0);
+    group_id = H5Gcreate2(file_id, TARGET_GROUP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Gclose(group_id);
 
     /* This is how we create a normal soft link to the group.
@@ -346,7 +346,7 @@ static void hard_link_example(void)
      * point to.
      */
     file_id = H5Fcreate(HARD_LINK_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    group_id = H5Gcreate(file_id, TARGET_GROUP, (size_t) 0);
+    group_id = H5Gcreate2(file_id, TARGET_GROUP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Gclose(group_id);
 
     /* This is how we create a normal hard link to the group. This
@@ -565,9 +565,9 @@ static void plist_link_example(void)
      * point to.
      */
     file_id = H5Fcreate(HARD_LINK_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    group_id = H5Gcreate(file_id, "group_1", (size_t) 0);
+    group_id = H5Gcreate2(file_id, "group_1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Gclose(group_id);
-    group_id = H5Gcreate(file_id, "group_1/group_2", (size_t) 0);
+    group_id = H5Gcreate2(file_id, "group_1/group_2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Gclose(group_id);
 
     /* Register "plist links" and create one.  It has no udata at all. */

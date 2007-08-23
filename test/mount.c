@@ -61,40 +61,37 @@ int bm[NX][NY], bm_out[NX][NY]; /* Data buffers */
 static int
 setup(hid_t fapl)
 {
-    hid_t	file=-1;
+    hid_t	file = -1;
     char	filename[1024];
 
     /* file 1 */
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
-	goto error;
-    if (H5Gclose(H5Gcreate(file, "/mnt1", (size_t)0))<0) goto error;
-    if (H5Gclose(H5Gcreate(file, "/mnt1/file1", (size_t)0))<0) goto error;
-    if (H5Gclose(H5Gcreate(file, "/mnt_unlink", (size_t)0))<0) goto error;
-    if (H5Gclose(H5Gcreate(file, "/mnt_move_a", (size_t)0))<0) goto error;
-    if (H5Glink(file, H5L_TYPE_HARD, "/mnt1/file1", "/file1")<0) goto error;
-    if (H5Glink(file, H5L_TYPE_HARD, "/mnt1", "/mnt1_link")<0) goto error;
-    if (H5Fclose(file)<0) goto error;
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(H5Gcreate2(file, "/mnt1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(H5Gcreate2(file, "/mnt1/file1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(H5Gcreate2(file, "/mnt_unlink", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(H5Gcreate2(file, "/mnt_move_a", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Glink(file, H5L_TYPE_HARD, "/mnt1/file1", "/file1") < 0) FAIL_STACK_ERROR
+    if(H5Glink(file, H5L_TYPE_HARD, "/mnt1", "/mnt1_link") < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
     /* file 2 */
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
-	goto error;
-    if (H5Gclose(H5Gcreate(file, "/file2", (size_t)0))<0) goto error;
-    if (H5Gclose(H5Gcreate(file, "/rename_a", (size_t)0))<0) goto error;
-    if (H5Gclose(H5Gcreate(file, "/rename_b", (size_t)0))<0) goto error;
-    if (H5Gclose(H5Gcreate(file, "/rename_a/x", (size_t)0))<0) goto error;
-    if (H5Fclose(file)<0) goto error;
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(H5Gcreate2(file, "/file2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(H5Gcreate2(file, "/rename_a", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(H5Gcreate2(file, "/rename_b", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(H5Gcreate2(file, "/rename_a/x", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
     /* file 3 */
     h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
-	goto error;
-    if (H5Fclose(file)<0) goto error;
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
     return 0;
 
- error:
+error:
     H5E_BEGIN_TRY {
 	H5Fclose(file);
     } H5E_END_TRY;
@@ -1103,11 +1100,11 @@ test_mount_after_close(hid_t fapl)
     */
     if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR
-    if((gidA = H5Gcreate(fid1, "A", (size_t)0)) < 0)
+    if((gidA = H5Gcreate2(fid1, "A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
-    if((gidAB = H5Gcreate(gidA , "B", (size_t)0)) < 0)
+    if((gidAB = H5Gcreate2(gidA, "B", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
-    if((gidABM = H5Gcreate(gidAB , "M", (size_t)0)) < 0) /* Mount point */
+    if((gidABM = H5Gcreate2(gidAB, "M", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) /* Mount point */
         TEST_ERROR
     if(H5Glink(gidAB, H5L_TYPE_SOFT, "./M/X/Y", "C") < 0) /* Soft link */
         TEST_ERROR
@@ -1139,9 +1136,9 @@ test_mount_after_close(hid_t fapl)
     if((sid = H5Screate_simple(RANK, dims, NULL)) < 0)
         TEST_ERROR
 
-    if((gidX = H5Gcreate(fid2, "/X", (size_t)0)) < 0)
+    if((gidX = H5Gcreate2(fid2, "/X", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
-    if((gidXY = H5Gcreate(gidX, "Y", (size_t)0)) < 0)
+    if((gidXY = H5Gcreate2(gidX, "Y", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
     if((did = H5Dcreate(gidXY, "D", H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0)
         TEST_ERROR
@@ -1322,17 +1319,17 @@ test_mount_after_unmount(hid_t fapl)
     /* Create first file and some groups in it. */
     if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR
-    if((gidA = H5Gcreate(fid1, "A", (size_t)0)) < 0)
+    if((gidA = H5Gcreate2(fid1, "A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
-    if((gidAM = H5Gcreate(gidA, "M", (size_t)0)) < 0)
+    if((gidAM = H5Gcreate2(gidA, "M", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
     if(H5Gclose(gidAM) < 0)
         TEST_ERROR
     if(H5Gclose(gidA) < 0)
         TEST_ERROR
-    if((gidB = H5Gcreate(fid1, "B", (size_t)0)) < 0)
+    if((gidB = H5Gcreate2(fid1, "B", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
-    if((gidBM = H5Gcreate(gidB, "M", (size_t)0)) < 0)
+    if((gidBM = H5Gcreate2(gidB, "M", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
     if(H5Gclose(gidBM) < 0)
         TEST_ERROR
@@ -1344,13 +1341,13 @@ test_mount_after_unmount(hid_t fapl)
    /* Create second file and a group in it. */
     if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR
-    if((gidX = H5Gcreate(fid2, "/X", (size_t)0)) < 0)
+    if((gidX = H5Gcreate2(fid2, "/X", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
-    if((gidXM = H5Gcreate(gidX, "M", (size_t)0)) < 0)
+    if((gidXM = H5Gcreate2(gidX, "M", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
     if(H5Gclose(gidXM) < 0)
         TEST_ERROR
-    if((gidXX = H5Gcreate(gidX, "X", (size_t)0)) < 0)
+    if((gidXX = H5Gcreate2(gidX, "X", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
     if(H5Gclose(gidXX) < 0)
         TEST_ERROR
@@ -1362,7 +1359,7 @@ test_mount_after_unmount(hid_t fapl)
    /* Create third file and a group in it. */
     if((fid3 = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR
-    if((gidY = H5Gcreate(fid3, "/Y", (size_t)0)) < 0)
+    if((gidY = H5Gcreate2(fid3, "/Y", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
     if(H5Gclose(gidY) < 0)
         TEST_ERROR
@@ -1372,7 +1369,7 @@ test_mount_after_unmount(hid_t fapl)
    /* Create fourth file and a group in it. */
     if((fid4 = H5Fcreate(filename4, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR
-    if((gidZ = H5Gcreate(fid4, "/Z", (size_t)0)) < 0)
+    if((gidZ = H5Gcreate2(fid4, "/Z", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
     if(H5Gclose(gidZ) < 0)
         TEST_ERROR
@@ -1583,7 +1580,7 @@ test_missing_unmount(hid_t fapl)
     if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidA = H5Gcreate(fid1, "A", (size_t)0)) < 0)
+    if((gidA = H5Gcreate2(fid1, "A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     if(H5Gclose(gidA) < 0)
@@ -1597,7 +1594,7 @@ test_missing_unmount(hid_t fapl)
     if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidE = H5Gcreate(fid2, "E", (size_t)0)) < 0)
+    if((gidE = H5Gcreate2(fid2, "E", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     if(H5Gclose(gidE) < 0)
@@ -1611,7 +1608,7 @@ test_missing_unmount(hid_t fapl)
     if((fid3 = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidM = H5Gcreate(fid3, "M", (size_t)0)) < 0)
+    if((gidM = H5Gcreate2(fid3, "M", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     if(H5Gclose(gidM) < 0)
@@ -1737,7 +1734,7 @@ test_hold_open_file(hid_t fapl)
     if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidA = H5Gcreate(fid1, "A", (size_t)0)) < 0)
+    if((gidA = H5Gcreate2(fid1, "A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     if(H5Gclose(gidA) < 0)
@@ -1751,7 +1748,7 @@ test_hold_open_file(hid_t fapl)
     if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidM = H5Gcreate(fid2, "M", (size_t)0)) < 0)
+    if((gidM = H5Gcreate2(fid2, "M", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     if(H5Gclose(gidM) < 0)
@@ -1870,7 +1867,7 @@ test_hold_open_group(hid_t fapl)
     if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidA = H5Gcreate(fid1, "A", (size_t)0)) < 0)
+    if((gidA = H5Gcreate2(fid1, "A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     if(H5Gclose(gidA) < 0)
@@ -1884,7 +1881,7 @@ test_hold_open_group(hid_t fapl)
     if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidM = H5Gcreate(fid2, "M", (size_t)0)) < 0)
+    if((gidM = H5Gcreate2(fid2, "M", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     if(H5Gclose(gidM) < 0)
@@ -2031,7 +2028,7 @@ test_fcdegree_same(hid_t fapl)
     if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidA = H5Gcreate(fid1, "A", (size_t)0)) < 0)
+    if((gidA = H5Gcreate2(fid1, "A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     if(H5Gclose(gidA) < 0)
@@ -2045,7 +2042,7 @@ test_fcdegree_same(hid_t fapl)
     if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidM = H5Gcreate(fid2, "M", (size_t)0)) < 0)
+    if((gidM = H5Gcreate2(fid2, "M", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     if(H5Gclose(gidM) < 0)
@@ -2176,7 +2173,7 @@ test_fcdegree_semi(hid_t fapl)
     if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidA = H5Gcreate(fid1, "A", (size_t)0)) < 0)
+    if((gidA = H5Gcreate2(fid1, "A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     if(H5Gclose(gidA) < 0)
@@ -2190,7 +2187,7 @@ test_fcdegree_semi(hid_t fapl)
     if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidM = H5Gcreate(fid2, "M", (size_t)0)) < 0)
+    if((gidM = H5Gcreate2(fid2, "M", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     if(H5Gclose(gidM) < 0)
@@ -2318,7 +2315,7 @@ test_fcdegree_strong(hid_t fapl)
     if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidA = H5Gcreate(fid1, "A", (size_t)0)) < 0)
+    if((gidA = H5Gcreate2(fid1, "A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     if(H5Gclose(gidA) < 0)
@@ -2332,7 +2329,7 @@ test_fcdegree_strong(hid_t fapl)
     if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidM = H5Gcreate(fid2, "M", (size_t)0)) < 0)
+    if((gidM = H5Gcreate2(fid2, "M", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     if(H5Gclose(gidM) < 0)
@@ -2461,7 +2458,7 @@ test_acc_perm(hid_t fapl)
     if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidA = H5Gcreate(fid1, "A", (size_t)0)) < 0)
+    if((gidA = H5Gcreate2(fid1, "A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     if(H5Gclose(gidA) < 0)
@@ -2475,7 +2472,7 @@ test_acc_perm(hid_t fapl)
     if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidM = H5Gcreate(fid2, "M", (size_t)0)) < 0)
+    if((gidM = H5Gcreate2(fid2, "M", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     if(H5Gclose(gidM) < 0)
@@ -2529,24 +2526,24 @@ test_acc_perm(hid_t fapl)
 
     /* Attempt to create objects in read only file (should fail) */
     H5E_BEGIN_TRY {
-        bad_id = H5Gcreate(gidAM, "Z", (size_t)0);
+        bad_id = H5Gcreate2(gidAM, "Z", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
     if(bad_id >= 0)
         TEST_ERROR
     H5E_BEGIN_TRY {
-        bad_id = H5Gcreate(fid1, "/A/L", (size_t)0);
+        bad_id = H5Gcreate2(fid1, "/A/L", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
     if(bad_id >= 0)
         TEST_ERROR
 
     /* Attempt to create objects in read/write file (should succeed) */
-    if((gidB = H5Gcreate(fid2, "/B", (size_t)0)) < 0)
+    if((gidB = H5Gcreate2(fid2, "/B", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
     if(H5Gclose(gidB) < 0)
         TEST_ERROR
 
     /* (Note that this object should get created in the "hidden" group for "A" in parent file) */
-    if((gidC = H5Gcreate(gidA, "C", (size_t)0)) < 0)
+    if((gidC = H5Gcreate2(gidA, "C", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
     if(H5Gclose(gidC) < 0)
         TEST_ERROR
@@ -2560,7 +2557,7 @@ test_acc_perm(hid_t fapl)
         TEST_ERROR
 
     /* Attempt to create objects in read/write file (should succeed) */
-    if((gidAMZ = H5Gcreate(fid1, "/A/M/Z", (size_t)0)) < 0)
+    if((gidAMZ = H5Gcreate2(fid1, "/A/M/Z", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     /* Get and verify file name */
@@ -2576,7 +2573,7 @@ test_acc_perm(hid_t fapl)
 
     /* Attempt to create objects in read only file again (should fail) */
     H5E_BEGIN_TRY {
-        bad_id = H5Gcreate(fid1, "/A/L", (size_t)0);
+        bad_id = H5Gcreate2(fid1, "/A/L", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
     if(bad_id >= 0)
         TEST_ERROR
@@ -2666,13 +2663,13 @@ test_mult_mount(hid_t fapl)
     if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidA = H5Gcreate(fid1, "A", (size_t)0)) < 0)
+    if((gidA = H5Gcreate2(fid1, "A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     if(H5Gclose(gidA) < 0)
         TEST_ERROR
 
-    if((gidB = H5Gcreate(fid1, "B", (size_t)0)) < 0)
+    if((gidB = H5Gcreate2(fid1, "B", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     if(H5Gclose(gidB) < 0)
@@ -2686,13 +2683,13 @@ test_mult_mount(hid_t fapl)
     if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidM = H5Gcreate(fid2, "M", (size_t)0)) < 0)
+    if((gidM = H5Gcreate2(fid2, "M", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     if(H5Gclose(gidM) < 0)
         TEST_ERROR
 
-    if((gidN = H5Gcreate(fid2, "N", (size_t)0)) < 0)
+    if((gidN = H5Gcreate2(fid2, "N", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     if(H5Gclose(gidN) < 0)
@@ -2706,13 +2703,13 @@ test_mult_mount(hid_t fapl)
     if((fid3 = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidS = H5Gcreate(fid3, "S", (size_t)0)) < 0)
+    if((gidS = H5Gcreate2(fid3, "S", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     if(H5Gclose(gidS) < 0)
         TEST_ERROR
 
-    if((gidT = H5Gcreate(fid3, "T", (size_t)0)) < 0)
+    if((gidT = H5Gcreate2(fid3, "T", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     if(H5Gclose(gidT) < 0)
@@ -2770,7 +2767,7 @@ test_mult_mount(hid_t fapl)
         TEST_ERROR
 
     /* Create object in file #3 */
-    if((gidU = H5Gcreate(gidAMT, "U", (size_t)0)) < 0)
+    if((gidU = H5Gcreate2(gidAMT, "U", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     if(H5Gclose(gidU) < 0)
@@ -2894,7 +2891,7 @@ test_nested_survive(hid_t fapl)
     if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidA = H5Gcreate(fid1, "A", (size_t)0)) < 0)
+    if((gidA = H5Gcreate2(fid1, "A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     if(H5Gclose(gidA) < 0)
@@ -2908,7 +2905,7 @@ test_nested_survive(hid_t fapl)
     if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidM = H5Gcreate(fid2, "M", (size_t)0)) < 0)
+    if((gidM = H5Gcreate2(fid2, "M", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     if(H5Gclose(gidM) < 0)
@@ -2922,7 +2919,7 @@ test_nested_survive(hid_t fapl)
     if((fid3 = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidS = H5Gcreate(fid3, "S", (size_t)0)) < 0)
+    if((gidS = H5Gcreate2(fid3, "S", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     if(H5Gclose(gidS) < 0)
@@ -3104,7 +3101,7 @@ test_close_parent(hid_t fapl)
     if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidA = H5Gcreate(fid1, "A", (size_t)0)) < 0)
+    if((gidA = H5Gcreate2(fid1, "A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     if(H5Gclose(gidA) < 0)
@@ -3118,7 +3115,7 @@ test_close_parent(hid_t fapl)
     if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidM = H5Gcreate(fid2, "M", (size_t)0)) < 0)
+    if((gidM = H5Gcreate2(fid2, "M", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     if(H5Gclose(gidM) < 0)
@@ -3295,12 +3292,12 @@ test_cut_graph(hid_t fapl)
     if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidA = H5Gcreate(fid1, "A", (size_t)0)) < 0)
+    if((gidA = H5Gcreate2(fid1, "A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
     if(H5Gclose(gidA) < 0)
         TEST_ERROR
 
-    if((gidB = H5Gcreate(fid1, "B", (size_t)0)) < 0)
+    if((gidB = H5Gcreate2(fid1, "B", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
     if(H5Gclose(gidB) < 0)
         TEST_ERROR
@@ -3313,12 +3310,12 @@ test_cut_graph(hid_t fapl)
     if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidD = H5Gcreate(fid2, "D", (size_t)0)) < 0)
+    if((gidD = H5Gcreate2(fid2, "D", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
     if(H5Gclose(gidD) < 0)
         TEST_ERROR
 
-    if((gidE = H5Gcreate(fid2, "E", (size_t)0)) < 0)
+    if((gidE = H5Gcreate2(fid2, "E", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
     if(H5Gclose(gidE) < 0)
         TEST_ERROR
@@ -3331,12 +3328,12 @@ test_cut_graph(hid_t fapl)
     if((fid3 = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidH = H5Gcreate(fid3, "H", (size_t)0)) < 0)
+    if((gidH = H5Gcreate2(fid3, "H", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
     if(H5Gclose(gidH) < 0)
         TEST_ERROR
 
-    if((gidI = H5Gcreate(fid3, "I", (size_t)0)) < 0)
+    if((gidI = H5Gcreate2(fid3, "I", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
     if(H5Gclose(gidI) < 0)
         TEST_ERROR
@@ -3348,7 +3345,7 @@ test_cut_graph(hid_t fapl)
     if((fid4 = H5Fcreate(filename4, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidK = H5Gcreate(fid4, "K", (size_t)0)) < 0)
+    if((gidK = H5Gcreate2(fid4, "K", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
     if(H5Gclose(gidK) < 0)
         TEST_ERROR
@@ -3360,7 +3357,7 @@ test_cut_graph(hid_t fapl)
     if((fid5 = H5Fcreate(filename5, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidM = H5Gcreate(fid5, "M", (size_t)0)) < 0)
+    if((gidM = H5Gcreate2(fid5, "M", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
     if(H5Gclose(gidM) < 0)
         TEST_ERROR
@@ -3372,7 +3369,7 @@ test_cut_graph(hid_t fapl)
     if((fid6 = H5Fcreate(filename6, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidO = H5Gcreate(fid6, "O", (size_t)0)) < 0)
+    if((gidO = H5Gcreate2(fid6, "O", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
     if(H5Gclose(gidO) < 0)
         TEST_ERROR
@@ -3384,7 +3381,7 @@ test_cut_graph(hid_t fapl)
     if((fid7 = H5Fcreate(filename7, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidQ = H5Gcreate(fid7, "Q", (size_t)0)) < 0)
+    if((gidQ = H5Gcreate2(fid7, "Q", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
     if(H5Gclose(gidQ) < 0)
         TEST_ERROR
@@ -3676,12 +3673,12 @@ test_symlink(hid_t fapl)
     if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidA = H5Gcreate(fid1, "A", (size_t)0)) < 0)
+    if((gidA = H5Gcreate2(fid1, "A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
     if(H5Gclose(gidA) < 0)
         TEST_ERROR
 
-    if((gidB = H5Gcreate(fid1, "B", (size_t)0)) < 0)
+    if((gidB = H5Gcreate2(fid1, "B", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
     if(H5Gclose(gidB) < 0)
         TEST_ERROR
@@ -3698,12 +3695,12 @@ test_symlink(hid_t fapl)
     if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidD = H5Gcreate(fid2, "D", (size_t)0)) < 0)
+    if((gidD = H5Gcreate2(fid2, "D", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
     if(H5Gclose(gidD) < 0)
         TEST_ERROR
 
-    if((gidE = H5Gcreate(fid2, "E", (size_t)0)) < 0)
+    if((gidE = H5Gcreate2(fid2, "E", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
     if(H5Gclose(gidE) < 0)
         TEST_ERROR
@@ -3716,12 +3713,12 @@ test_symlink(hid_t fapl)
     if((fid3 = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
-    if((gidH = H5Gcreate(fid3, "H", (size_t)0)) < 0)
+    if((gidH = H5Gcreate2(fid3, "H", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
     if(H5Gclose(gidH) < 0)
         TEST_ERROR
 
-    if((gidI = H5Gcreate(fid3, "I", (size_t)0)) < 0)
+    if((gidI = H5Gcreate2(fid3, "I", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
     if(H5Gclose(gidI) < 0)
         TEST_ERROR

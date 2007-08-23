@@ -22,6 +22,7 @@
  * trying it on a new platform, ...), you need to verify the correctness
  * of the expected output and update the corresponding *.ddl files.
  */
+#include <assert.h>
 #include <limits.h>
 
 #include "hdf5.h"
@@ -122,10 +123,12 @@ typedef struct s1_t {
 #define VLSTR_TYPE      "vl_string_type"
 
 /* A UD link traversal function.  Shouldn't actually be called. */
-static hid_t UD_traverse(const char UNUSED * link_name, hid_t UNUSED cur_group, void UNUSED * udata, size_t UNUSED udata_size, hid_t UNUSED lapl_id)
+static hid_t UD_traverse(const char UNUSED * link_name, hid_t UNUSED cur_group,
+    const void UNUSED * udata, size_t UNUSED udata_size, hid_t UNUSED lapl_id)
 {
-return -1;
+    return -1;
 }
+
 #define MY_LINKCLASS 187
 const H5L_class_t UD_link_class[1] = {{
     H5L_LINK_CLASS_T_VERS,    /* H5L_class_t version       */
@@ -184,19 +187,19 @@ gent_ub(const char * filename, size_t ub_size, size_t ub_fill)
   }
 
   /* create groups */
-  group = H5Gcreate(fid, "/g1", (size_t)0);
+  group = H5Gcreate2(fid, "/g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   H5Gclose(group);
 
-  group = H5Gcreate(fid, "/g2", (size_t)0);
+  group = H5Gcreate2(fid, "/g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   H5Gclose(group);
 
-  group = H5Gcreate(fid, "/g1/g1.1", (size_t)0);
+  group = H5Gcreate2(fid, "/g1/g1.1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   H5Gclose(group);
 
-  group = H5Gcreate(fid, "/g1/g1.2", (size_t)0);
+  group = H5Gcreate2(fid, "/g1/g1.2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   H5Gclose(group);
 
-  group = H5Gcreate(fid, "/g1/g1.2/g1.2.1", (size_t)0);
+  group = H5Gcreate2(fid, "/g1/g1.2/g1.2.1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   H5Gclose(group);
 
   /* root attributes */
@@ -330,28 +333,23 @@ create_textfile(const char *name, size_t size)
     size_t i;
     char *bp;
 
-	#ifdef _WIN32
-	fd = _creat(name, _S_IREAD | _S_IWRITE);
-	#else /* _WIN32 */
-	fd = creat(name,(mode_t)0777);
-	#endif /* _WIN32 */
-	if (fd < 0) {
-		/* panic */
-	}
-	buf = calloc(size, (size_t)1);
-	if (buf == NULL) {
-		/* panic */
-	}
-	/* fill buf with pattern */
-	bp = buf;
-	for (i = 0; i < size; i++) {
-		*bp++ = pattern[i%10];
-	}
+#ifdef _WIN32
+    fd = _creat(name, _S_IREAD | _S_IWRITE);
+#else /* _WIN32 */
+    fd = creat(name,(mode_t)0777);
+#endif /* _WIN32 */
+    assert(fd >= 0);
+    buf = calloc(size, (size_t)1);
+    assert(buf);
 
+    /* fill buf with pattern */
+    bp = buf;
+    for(i = 0; i < size; i++)
+        *bp++ = pattern[i % 10];
 
-	HDwrite(fd,buf,size);
+    HDwrite(fd, buf, size);
 
-	close(fd);
+    close(fd);
 }
 
 #ifdef notdef

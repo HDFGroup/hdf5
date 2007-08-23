@@ -391,8 +391,8 @@ void test_objnames(hid_t fid, const char* string)
   herr_t ret;
 
   /* Create a group with a UTF-8 name */
-  grp_id = H5Gcreate(fid, string, (size_t)0);
-  CHECK(grp_id, FAIL, "H5Gcreate");
+  grp_id = H5Gcreate2(fid, string, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  CHECK(grp_id, FAIL, "H5Gcreate2");
 
   /* Set a comment on the group to test that we can access the group
    * Also test that UTF-8 comments can be read.
@@ -408,8 +408,8 @@ void test_objnames(hid_t fid, const char* string)
   VERIFY(strcmp(string, read_buf), 0, "strcmp");
 
   /* Create a new dataset with a UTF-8 name */
-  grp1_id = H5Gcreate(fid, GROUP1_NAME, (size_t)0);
-  CHECK(grp1_id, FAIL, "H5Gcreate");
+  grp1_id = H5Gcreate2(fid, GROUP1_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  CHECK(grp1_id, FAIL, "H5Gcreate2");
 
   space_id = H5Screate_simple(RANK, &dims, NULL);
   CHECK(space_id, FAIL, "H5Screate_simple");
@@ -430,8 +430,8 @@ void test_objnames(hid_t fid, const char* string)
   CHECK(ret, FAIL, "H5Gclose");
 
   /* Do the same for a named datatype */
-  grp2_id = H5Gcreate(fid, GROUP2_NAME, (size_t)0);
-  CHECK(grp2_id, FAIL, "H5Gcreate");
+  grp2_id = H5Gcreate2(fid, GROUP2_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  CHECK(grp2_id, FAIL, "H5Gcreate2");
 
   type_id = H5Tcreate(H5T_OPAQUE, (size_t)1);
   CHECK(type_id, FAIL, "H5Tcreate");
@@ -483,8 +483,8 @@ void test_objnames(hid_t fid, const char* string)
    * pointing through the hard link to the datatype.  Give the soft
    * link a name in UTF-8.  Ensure that the soft link works. */
 
-  grp3_id = H5Gcreate(fid, GROUP3_NAME, (size_t)0);
-  CHECK(grp3_id, FAIL, "H5Gcreate");
+  grp3_id = H5Gcreate2(fid, GROUP3_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  CHECK(grp3_id, FAIL, "H5Gcreate2");
 
   ret = H5Glink2(fid, GROUP2_NAME, H5G_LINK_HARD, grp3_id, GROUP2_NAME);
   CHECK(ret, FAIL, "H5Glink2");
@@ -519,8 +519,8 @@ void test_attrname(hid_t fid, const char * string)
  /* Create a new group and give it an attribute whose
   * name and value are UTF-8 strings.
   */
-  group_id = H5Gcreate(fid, GROUP4_NAME, (size_t)0);
-  CHECK(group_id, FAIL, "H5Gcreate");
+  group_id = H5Gcreate2(fid, GROUP4_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  CHECK(group_id, FAIL, "H5Gcreate2");
 
   space_id = H5Screate_simple(RANK, &dims, NULL);
   CHECK(space_id, FAIL, "H5Screate_simple");

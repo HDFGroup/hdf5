@@ -174,17 +174,16 @@ test_dangle_group(H5F_close_degree_t degree)
     if((fid = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
         TEST_ERROR;
 
-    if((gid = H5Gcreate (fid, GROUPNAME, 0))<0)
-        TEST_ERROR;
+    if((gid = H5Gcreate2(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     if(H5Gclose(gid)<0)
         TEST_ERROR;
 
     /* Try creating duplicate group */
     H5E_BEGIN_TRY {
-        if((gid = H5Gcreate (fid, GROUPNAME, 0))>=0)
-            TEST_ERROR;
+        gid = H5Gcreate2(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
+    if(gid >= 0) TEST_ERROR
 
     /* Leave open a _lot_ of objects */
     for(u=0; u<MAX_DANGLE; u++) {
