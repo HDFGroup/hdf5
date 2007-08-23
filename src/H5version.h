@@ -88,6 +88,9 @@
 /*************/
 
 #if !defined(H5Eclear_vers) || H5Eclear_vers == 2
+#ifndef H5Eclear_vers
+#define H5Eclear_vers 2
+#endif /* H5Eclear_vers */
 #define H5Eclear H5Eclear2
 #elif H5Eclear_vers == 1
 #define H5Eclear H5Eclear1
@@ -96,6 +99,9 @@
 #endif /* H5Eclear_vers */
 
 #if !defined(H5Eget_auto_vers) || H5Eget_auto_vers == 2
+#ifndef H5Eget_auto_vers
+#define H5Eget_auto_vers 2
+#endif /* H5Eget_auto_vers */
 #define H5Eget_auto H5Eget_auto2
 #elif H5Eget_auto_vers == 1
 #define H5Eget_auto H5Eget_auto1
@@ -104,6 +110,9 @@
 #endif /* H5Eget_auto_vers */
 
 #if !defined(H5Eprint_vers) || H5Eprint_vers == 2
+#ifndef H5Eprint_vers
+#define H5Eprint_vers 2
+#endif /* H5Eprint_vers */
 #define H5Eprint H5Eprint2
 #elif H5Eprint_vers == 1
 #define H5Eprint H5Eprint1
@@ -112,6 +121,9 @@
 #endif /* H5Eprint_vers */
 
 #if !defined(H5Epush_vers) || H5Epush_vers == 2
+#ifndef H5Epush_vers
+#define H5Epush_vers 2
+#endif /* H5Epush_vers */
 #define H5Epush H5Epush2
 #elif H5Epush_vers == 1
 #define H5Epush H5Epush1
@@ -120,6 +132,9 @@
 #endif /* H5Epush_vers */
 
 #if !defined(H5Eset_auto_vers) || H5Eset_auto_vers == 2
+#ifndef H5Eset_auto_vers
+#define H5Eset_auto_vers 2
+#endif /* H5Eset_auto_vers */
 #define H5Eset_auto H5Eset_auto2
 #elif H5Eset_auto_vers == 1
 #define H5Eset_auto H5Eset_auto1
@@ -128,6 +143,9 @@
 #endif /* H5Eset_auto_vers */
 
 #if !defined(H5Ewalk_vers) || H5Ewalk_vers == 2
+#ifndef H5Ewalk_vers
+#define H5Ewalk_vers 2
+#endif /* H5Ewalk_vers */
 #define H5Ewalk H5Ewalk2
 #define H5E_error_t H5E_error2_t
 #define H5E_walk_t H5E_walk2_t
@@ -140,6 +158,9 @@
 #endif /* H5Ewalk_vers */
 
 #if !defined(H5Gcreate_vers) || H5Gcreate_vers == 2
+#ifndef H5Gcreate_vers
+#define H5Gcreate_vers 2
+#endif /* H5Gcreate_vers */
 #define H5Gcreate H5Gcreate2
 #elif H5Gcreate_vers == 1
 #define H5Gcreate H5Gcreate1
@@ -152,6 +173,9 @@
 /************/
 
 #if !defined(H5E_auto_t_vers) || H5E_auto_t_vers == 2
+#ifndef H5E_auto_t_vers
+#define H5E_auto_t_vers 2
+#endif /* H5E_auto_t_vers */
 #define H5E_auto_t H5E_auto2_t
 #elif H5E_auto_t_vers == 1
 #define H5E_auto_t H5E_auto1_t

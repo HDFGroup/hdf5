@@ -68,7 +68,7 @@ typedef struct H5E_print_t {
 /* Local Prototypes */
 /********************/
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-static herr_t H5E_walk1_cb(unsigned n, const H5E_error1_t *err_desc,
+static herr_t H5E_walk1_cb(int n, H5E_error1_t *err_desc,
     void *client_data);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 static herr_t H5E_walk2_cb(unsigned n, const H5E_error2_t *err_desc,
@@ -215,7 +215,7 @@ H5E_get_msg(const H5E_msg_t *msg, H5E_type_t *type, char *msg_str, size_t size)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5E_walk1_cb(unsigned n, const H5E_error1_t *err_desc, void *client_data)
+H5E_walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
 {
     H5E_print_t         *eprint  = (H5E_print_t *)client_data;
     FILE		*stream;        /* I/O stream to print output to */
@@ -291,7 +291,7 @@ H5E_walk1_cb(unsigned n, const H5E_error1_t *err_desc, void *client_data)
         have_desc=0;
 
     /* Print error message */
-    fprintf(stream, "%*s#%03u: %s line %u in %s()%s%s\n",
+    fprintf(stream, "%*s#%03d: %s line %u in %s()%s%s\n",
 	     H5E_INDENT, "", n, err_desc->file_name, err_desc->line,
 	     err_desc->func_name, (have_desc ? ": " : ""),
              (have_desc ? err_desc->desc : ""));
@@ -548,7 +548,7 @@ H5E_walk(const H5E_t *estack, H5E_direction_t direction, const H5E_walk_op_t *op
                     old_err.desc = estack->slot[i].desc;
                     old_err.line = estack->slot[i].line;
 
-                    status = (op->u.func1)((unsigned)i, &old_err, client_data);
+                    status = (op->u.func1)(i, &old_err, client_data);
                 } /* end for */
             } /* end if */
             else {
@@ -562,7 +562,7 @@ H5E_walk(const H5E_t *estack, H5E_direction_t direction, const H5E_walk_op_t *op
                     old_err.desc = estack->slot[i].desc;
                     old_err.line = estack->slot[i].line;
 
-                    status = (op->u.func1)((unsigned)(estack->nused - (size_t)(i + 1)), &old_err, client_data);
+                    status = (op->u.func1)((int)(estack->nused - (size_t)(i + 1)), &old_err, client_data);
                 } /* end for */
             } /* end else */
 

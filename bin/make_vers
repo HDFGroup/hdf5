@@ -171,6 +171,9 @@ sub print_defaultapivers ($) {
 
         # Set up default/latest version name mapping
         print $fh "\n#if !defined($curr_vers_name) || $curr_vers_name == $curr_vers\n";
+        print $fh "#ifndef $curr_vers_name\n";
+        print $fh "#define $curr_vers_name $curr_vers\n";
+        print $fh "#endif /* $curr_vers_name */\n";
         print $fh "#define $curr_name $curr_name$curr_vers\n";
 
         # Print function's dependent parameter types
@@ -212,6 +215,9 @@ sub print_defaultapivers ($) {
 
         # Set up default/latest version name mapping
         print $fh "\n#if !defined($curr_vers_name) || $curr_vers_name == $curr_vers\n";
+        print $fh "#ifndef $curr_vers_name\n";
+        print $fh "#define $curr_vers_name $curr_vers\n";
+        print $fh "#endif /* $curr_vers_name */\n";
         print $fh "#define ${curr_name}_t $curr_name${curr_vers}_t\n";
 
         # Loop to print earlier version name mappings
