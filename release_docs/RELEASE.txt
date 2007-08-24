@@ -1159,6 +1159,26 @@ Alpha OpenVMS 7.3.2      n       n         n         y        n        n
 
 Known Problems
 ==============
+* We discovered two problems when running collective IO parallel HDF5 tests 
+  with chunking storage on  ChaMPIon MPI compiler on tungsten, a linux 
+  cluster at NCSA.
+  Under some complex selection cases, 
+  1) MPI_Get_element returns the wrong value.
+  2) MPI_Type_struct also generates wrong derived data type and corrupt data
+     may be generated.
+  This only happens when turning on collective IO with chunking storage 
+  with some complex selections. We haven't found these problems on other
+  MPI-IO compilers. If you encounter these problems, you may use Independent IO
+  instead.
+
+  Change the following line in your code:
+  H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
+
+  to
+  H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_INDEPENDENT);
+
+  KY - 2007/08/24
+
 * For SNL, spirit/liberty/thunderbird: The serial tests pass but parallel
   tests failed with MPI-IO file locking message. AKC - 2007/6/25.
 * On Intel 64 Linux cluster (RH 4, Linux 2.6.9) with Intel 10.0 compilers use
