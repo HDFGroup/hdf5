@@ -190,11 +190,11 @@ test_long(hid_t fapl, hbool_t new_format)
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Group names */
-    name1 = HDmalloc((size_t)LONG_NAME_LEN);
+    name1 = (char *)HDmalloc((size_t)LONG_NAME_LEN);
     for(i = 0; i < LONG_NAME_LEN; i++)
         name1[i] = (char)('A' + i%26);
     name1[LONG_NAME_LEN - 1] = '\0';
-    name2 = HDmalloc((size_t)((2 * LONG_NAME_LEN) + 2));
+    name2 = (char *)HDmalloc((size_t)((2 * LONG_NAME_LEN) + 2));
     sprintf(name2, "%s/%s", name1, name1);
 
     /* Create groups */
@@ -558,7 +558,7 @@ long_compact(hid_t fapl2)
     if((empty_size = h5_get_file_size(filename)) < 0) TEST_ERROR
 
     /* Construct very long object name template */
-    if((objname = HDmalloc((size_t)(LONG_COMPACT_LENGTH + 1))) == NULL) TEST_ERROR
+    if((objname = (char *)HDmalloc((size_t)(LONG_COMPACT_LENGTH + 1))) == NULL) TEST_ERROR
     HDmemset(objname, 'a', (size_t)LONG_COMPACT_LENGTH);
     objname[LONG_COMPACT_LENGTH] = '\0';
 
@@ -1014,7 +1014,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-old_api(hid_t fapl)
+old_api(hid_t fapl, const char *driver)
 {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     hid_t	fid = (-1);             /* File ID */
@@ -1042,8 +1042,12 @@ old_api(hid_t fapl)
     /* Close file */
     if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
 
-    /* Get the size of the file with a "small" heap for group */
-    if((small_file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+    /* Avoid size comparisons if we are using the core VFD */
+    if(HDstrcmp(driver, "core")) {
+        /* Get the size of the file with a "small" heap for group */
+        if((small_file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+    } /* end if */
+
 
     /* Create file */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
@@ -1057,11 +1061,14 @@ old_api(hid_t fapl)
     /* Close file */
     if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
 
-    /* Get the size of the file with a "large" heap for group */
-    if((large_file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+    /* Avoid size comparisons if we are using the core VFD */
+    if(HDstrcmp(driver, "core")) {
+        /* Get the size of the file with a "large" heap for group */
+        if((large_file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
 
-    /* Check that the file with a "large" group heap is actually bigger */
-    if(large_file_size <= small_file_size) TEST_ERROR
+        /* Check that the file with a "large" group heap is actually bigger */
+        if(large_file_size <= small_file_size) TEST_ERROR
+    } /* end if */
 
     PASSED();
 #else /* H5_NO_DEPRECATED_SYMBOLS */
@@ -1141,7 +1148,7 @@ main(void)
 	nerrors += gcpl_on_root(fapl2);
 
         /* Old group API specific tests */
-	nerrors += old_api(fapl);
+	nerrors += old_api(fapl, envval);
 
         /* Close 2nd FAPL */
 	H5Pclose(fapl2);
