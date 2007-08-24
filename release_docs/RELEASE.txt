@@ -294,6 +294,28 @@ Footnotes:
 
 Known Problems
 ==============
+* We discovered two problems when running collective IO parallel HDF5 tests
+  with chunking storage on  ChaMPIon MPI compiler on tungsten, a linux
+  cluster at NCSA.
+  Under some complex selection cases, 
+  1) MPI_Get_element returns the wrong value.
+  2) MPI_Type_struct also generates wrong derived data type and corrupt data
+     may be generated.
+  This only happens when turning on collective IO with chunking storage
+  with some complex selections. We haven't found these problems on other MPI-IO
+  compilers. If you encounter these problems, you may use Independent IO
+  instead.
+
+  Change the following line in your code:
+  H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
+
+  to
+  H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_INDEPENDENT);
+ 
+  KY - 2007/08/24
+
+
+
 * QSC (an HP alpha-based OSF1 cluster) does not create h5pfc correctly. It
   does not include the -lmpi properly.  This will be fixed in the next
   release.  AKC - 2007/08/07.
