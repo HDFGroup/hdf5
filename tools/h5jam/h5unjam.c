@@ -252,7 +252,7 @@ main(int argc, const char *argv[])
             exit(EXIT_FAILURE);
         }
     } else {
-        h5fid = open(output_file,O_WRONLY|O_CREAT|O_TRUNC, 0644 );
+        h5fid = HDopen(output_file,O_WRONLY|O_CREAT|O_TRUNC, 0644 );
 
         if (h5fid < 0) {
             error_msg(progname, "unable to open output HDF5 file \"%s\"\n", output_file);
