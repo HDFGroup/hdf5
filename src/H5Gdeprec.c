@@ -264,7 +264,6 @@ done:
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gopen1() */
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
 /*-------------------------------------------------------------------------
@@ -310,6 +309,7 @@ H5Glink(hid_t cur_loc_id, H5L_type_t type, const char *cur_name, const char *new
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Glink() */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
 /*-------------------------------------------------------------------------

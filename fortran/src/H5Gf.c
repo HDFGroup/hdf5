@@ -253,14 +253,13 @@ DONE:
  *---------------------------------------------------------------------------*/
 
 int_f
-nh5gclose_c ( hid_t_f *grp_id )
+nh5gclose_c(hid_t_f *grp_id)
 {
-  int ret_value = 0;
-  hid_t c_grp_id;
+    int ret_value = 0;
 
-  c_grp_id = (hid_t)*grp_id;
-  if ( H5Gclose(c_grp_id) < 0  ) ret_value = -1;
-  return ret_value;
+    if(H5Gclose((hid_t)*grp_id) < 0)
+        ret_value = -1;
+    return ret_value;
 }
 
 
@@ -281,40 +280,46 @@ nh5gclose_c ( hid_t_f *grp_id )
  *---------------------------------------------------------------------------*/
 
 int_f
-nh5glink_c(hid_t_f *loc_id, int_f *link_type, _fcd current_name, int_f *current_namelen, _fcd new_name, int_f *new_namelen)
+nh5glink_c(hid_t_f *loc_id, int_f *link_type, _fcd current_name,
+    int_f *current_namelen, _fcd new_name, int_f *new_namelen)
 {
-  int ret_value = -1;
-  hid_t c_loc_id;
-  H5G_link_t c_link_type;
-  char *c_current_name, *c_new_name;
-  size_t c_current_namelen, c_new_namelen;
-  herr_t c_ret_value;
-  /*
-   *  Convert Fortran name to C name
-   */
-  c_current_namelen =*current_namelen;
-  c_new_namelen =*new_namelen;
-  c_current_name = (char *)HD5f2cstring(current_name, c_current_namelen);
-  if (c_current_name == NULL) return ret_value;
+    char *c_current_name = NULL, *c_new_name = NULL;
+    int ret_value = -1;
 
-  c_new_name = (char *)HD5f2cstring(new_name, c_new_namelen);
-  if(c_new_name == NULL) { HDfree(c_current_name);
-                           return ret_value;
-                         }
-  /*
-   *  Call H5Glink function
-   */
-  c_loc_id = *loc_id;
-  c_link_type = (H5G_link_t)*link_type;
-  c_ret_value = H5Glink(c_loc_id, c_link_type, c_current_name, c_new_name);
+    /*
+    *  Convert Fortran name to C name
+    */
+    if(NULL == (c_current_name = (char *)HD5f2cstring(current_name, (size_t)*current_namelen)))
+        goto DONE;
+    if(NULL == (c_new_name = (char *)HD5f2cstring(new_name, (size_t)new_namelen)))
+        goto DONE;
 
-  if(c_ret_value < 0) goto DONE;
-  ret_value = 0;
+    /*
+    *  Call appropriate link creation function
+    */
+    switch((H5G_link_t)*link_type) {
+        case H5L_TYPE_HARD:
+            if(H5Lcreate_hard((hid_t)*loc_id, c_current_name, H5L_SAME_LOC, c_new_name, H5P_DEFAULT, H5P_DEFAULT) < 0)
+                goto DONE;
+            break;
+
+        case H5L_TYPE_SOFT:
+            if(H5Lcreate_soft(c_current_name, (hid_t)*loc_id, c_new_name, H5P_DEFAULT, H5P_DEFAULT) < 0)
+                goto DONE;
+            break;
+
+        default:        /* Unknown/unhandled link type */
+            goto DONE;
+    } /* end switch */
+    ret_value = 0;
 
 DONE:
-  HDfree(c_current_name);
-  HDfree(c_new_name);
-  return ret_value ;
+    if(c_current_name)
+        HDfree(c_current_name);
+    if(c_new_name)
+        HDfree(c_new_name);
+
+    return ret_value ;
 }
 
 /*----------------------------------------------------------------------------

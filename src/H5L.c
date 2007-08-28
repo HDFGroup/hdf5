@@ -466,12 +466,12 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Lcreate_soft
  *
- * Purpose:	Creates a soft link from NEW_NAME to TARGET_PATH.
+ * Purpose:	Creates a soft link from LINK_NAME to LINK_TARGET.
  *
- * 		TARGET_PATH can be anything and is interpreted at lookup
+ * 		LINK_TARGET can be anything and is interpreted at lookup
  *              time relative to the group which contains the final component
- *              of NEW_NAME.  For instance, if TARGET_PATH is `./foo' and
- *              NEW_NAME is `./x/y/bar' and a request is made for `./x/y/bar'
+ *              of LINK_NAME.  For instance, if LINK_TARGET is `./foo' and
+ *              LINK_NAME is `./x/y/bar' and a request is made for `./x/y/bar'
  *              then the actual object looked up is `./x/y/./foo'.
  *
  * Return:	Non-negative on success/Negative on failure
@@ -482,27 +482,27 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Lcreate_soft(const char *target_path,
-    hid_t cur_loc_id, const char *new_name, hid_t lcpl_id, hid_t lapl_id)
+H5Lcreate_soft(const char *link_target,
+    hid_t link_loc_id, const char *link_name, hid_t lcpl_id, hid_t lapl_id)
 {
-    H5G_loc_t	cur_loc;                /* Group location for new link */
+    H5G_loc_t	link_loc;               /* Group location for new link */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(H5Lcreate_soft, FAIL)
-    H5TRACE5("e", "*si*sii", target_path, cur_loc_id, new_name, lcpl_id, lapl_id);
+    H5TRACE5("e", "*si*sii", link_target, link_loc_id, link_name, lcpl_id, lapl_id);
 
     /* Check arguments */
-    if(H5G_loc(cur_loc_id, &cur_loc) < 0)
+    if(H5G_loc(link_loc_id, &link_loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(!target_path || !*target_path)
+    if(!link_target || !*link_target)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no target specified")
-    if(!new_name || !*new_name)
+    if(!link_name || !*link_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no new name specified")
     if(lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list")
 
     /* Create the link */
-    if(H5L_create_soft(target_path, &cur_loc, new_name, lcpl_id, lapl_id, H5AC_dxpl_id) < 0)
+    if(H5L_create_soft(link_target, &link_loc, link_name, lcpl_id, lapl_id, H5AC_dxpl_id) < 0)
 	HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:

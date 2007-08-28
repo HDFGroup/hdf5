@@ -178,9 +178,9 @@ test_many(hid_t file)
 
     /* Create a bunch of names and unlink them in order */
     TESTING("forward unlink");
-    for (i=0; i<how_many; i++) {
+    for(i = 0; i < how_many; i++) {
 	sprintf(name, "obj_%05d", i);
-	if (H5Glink(work, H5L_TYPE_HARD, "/test_many_foo", name) < 0) TEST_ERROR
+	if(H5Glink2(work, "/test_many_foo", H5L_TYPE_HARD, H5G_SAME_LOC, name) < 0) TEST_ERROR
     }
     for (i=0; i<how_many; i++) {
 	sprintf(name, "obj_%05d", i);
@@ -190,9 +190,9 @@ test_many(hid_t file)
 
     /* Create a bunch of names and unlink them in reverse order */
     TESTING("backward unlink");
-    for (i=0; i<how_many; i++) {
+    for(i = 0; i < how_many; i++) {
 	sprintf(name, "obj_%05d", i);
-	if (H5Glink(work, H5L_TYPE_HARD, "/test_many_foo", name) < 0) TEST_ERROR
+	if(H5Glink2(work, "/test_many_foo", H5L_TYPE_HARD, H5G_SAME_LOC, name) < 0) TEST_ERROR
     }
     for (i=how_many-1; i>=0; --i) {
 	sprintf(name, "obj_%05d", i);
@@ -202,9 +202,9 @@ test_many(hid_t file)
 
     /* Create a bunch of names and unlink them from both directions */
     TESTING("inward unlink");
-    for (i=0; i<how_many; i++) {
+    for(i = 0; i < how_many; i++) {
 	sprintf(name, "obj_%05d", i);
-	if (H5Glink(work, H5L_TYPE_HARD, "/test_many_foo", name) < 0) TEST_ERROR
+	if(H5Glink2(work, "/test_many_foo", H5L_TYPE_HARD, H5G_SAME_LOC, name) < 0) TEST_ERROR
     }
     for (i=0; i<how_many; i++) {
 	if (i%2) {
@@ -218,9 +218,9 @@ test_many(hid_t file)
 
     /* Create a bunch of names and unlink them from the midle */
     TESTING("outward unlink");
-    for (i=0; i<how_many; i++) {
+    for(i = 0; i < how_many; i++) {
 	sprintf(name, "obj_%05d", i);
-	if (H5Glink(work, H5L_TYPE_HARD, "/test_many_foo", name) < 0) TEST_ERROR
+	if(H5Glink2(work, "/test_many_foo", H5L_TYPE_HARD, H5G_SAME_LOC, name) < 0) TEST_ERROR
     }
     for (i=how_many-1; i>=0; --i) {
 	if (i%2) {
@@ -269,7 +269,7 @@ test_symlink(hid_t file)
 
     /* Create a test group and symlink */
     if((work = H5Gcreate2(file, "/test_symlink", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Glink(work, H5L_TYPE_SOFT, "link_value", "link") < 0) TEST_ERROR
+    if(H5Lcreate_soft("link_value", work, "link", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
     if(H5Gunlink(work, "link") < 0) TEST_ERROR
 
     /* Cleanup */
@@ -320,8 +320,8 @@ test_rename(hid_t file)
 
     /* Try renaming a symlink */
     TESTING("symlink renaming");
-    if (H5Glink(work, H5L_TYPE_SOFT, "link_value", "link_one") < 0) TEST_ERROR
-    if (H5Gmove(work, "link_one", "link_two") < 0) TEST_ERROR
+    if(H5Lcreate_soft("link_value", work, "link_one", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gmove(work, "link_one", "link_two") < 0) TEST_ERROR
     PASSED();
 
     /* Cleanup */

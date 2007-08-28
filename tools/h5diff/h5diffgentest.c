@@ -365,8 +365,8 @@ int test_types(const char *fname)
     *-------------------------------------------------------------------------
     */
 
-    status = H5Glink(fid1, H5L_TYPE_SOFT, "g1", "l1");
-    status = H5Glink(fid1, H5L_TYPE_SOFT, "g2", "l2");
+    status = H5Lcreate_soft("g1", fid1, "l1", H5P_DEFAULT, H5P_DEFAULT);
+    status = H5Lcreate_soft("g2", fid1, "l2", H5P_DEFAULT, H5P_DEFAULT);
 
     /*-------------------------------------------------------------------------
     * H5G_UDLINK

@@ -859,11 +859,11 @@ static void test_links(hid_t fapl)
     CHECK(gid1, FAIL, "H5Gcreate2");
 
     /* create soft and hard links to the group "/g1". */
-    ret = H5Glink (gid, H5L_TYPE_SOFT, "something", "softlink");
-    CHECK(ret, FAIL, "H5Glink");
+    ret = H5Glink2(gid, "something", H5L_TYPE_SOFT, H5G_SAME_LOC, "softlink");
+    CHECK(ret, FAIL, "H5Glink2");
 
-    ret = H5Glink (gid, H5L_TYPE_HARD, "/g1", "hardlink");
-    CHECK(ret, FAIL, "H5Glink");
+    ret = H5Glink2(gid, "/g1", H5L_TYPE_HARD, H5G_SAME_LOC, "hardlink");
+    CHECK(ret, FAIL, "H5Glink2");
 
     ret = H5Gget_num_objs(gid, &nobjs);
     CHECK(ret, FAIL, "H5Gget_num_objs");

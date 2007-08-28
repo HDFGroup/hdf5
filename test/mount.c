@@ -71,8 +71,8 @@ setup(hid_t fapl)
     if(H5Gclose(H5Gcreate2(file, "/mnt1/file1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if(H5Gclose(H5Gcreate2(file, "/mnt_unlink", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if(H5Gclose(H5Gcreate2(file, "/mnt_move_a", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-    if(H5Glink(file, H5L_TYPE_HARD, "/mnt1/file1", "/file1") < 0) FAIL_STACK_ERROR
-    if(H5Glink(file, H5L_TYPE_HARD, "/mnt1", "/mnt1_link") < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_hard(file, "/file1", H5L_SAME_LOC, "/mnt1/file1", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_hard(file, "/mnt1_link", H5L_SAME_LOC, "/mnt1", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
     /* file 2 */
@@ -847,7 +847,7 @@ test_interlink(hid_t fapl)
 
     /* Try an interfile hard link directly */
     H5E_BEGIN_TRY {
-	status = H5Glink(file1, H5L_TYPE_HARD, "/mnt1/file2",  "/file2");
+	status = H5Lcreate_hard(file1, "/mnt1/file2", H5L_SAME_LOC, "/file2", H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
     if(status >= 0) {
 	H5_FAILED();
@@ -1097,9 +1097,9 @@ test_mount_after_close(hid_t fapl)
     /* Mount point */
     if((gidABM = H5Gcreate2(gidAB, "M", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     /* Soft link */
-    if(H5Glink(gidAB, H5L_TYPE_SOFT, "./M/X/Y", "C") < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_soft("./M/X/Y", gidAB, "C", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     /* Soft link */
-    if(H5Glink(gidAB, H5L_TYPE_SOFT, "/A", "T") < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_soft("/A", gidAB, "T", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Close groups and file */
     if(H5Gclose(gidABM) < 0) FAIL_STACK_ERROR
@@ -1124,7 +1124,7 @@ test_mount_after_close(hid_t fapl)
     if((gidXY = H5Gcreate2(gidX, "Y", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if((did = H5Dcreate(gidXY, "D", H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     /* Soft link */
-    if(H5Glink(gidX, H5L_TYPE_SOFT, "./Y", "T") < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_soft("./Y", gidX, "T", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Write data to the dataset. */
     if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, bm) < 0) FAIL_STACK_ERROR
@@ -3637,7 +3637,7 @@ test_symlink(hid_t fapl)
         TEST_ERROR
 
     /* Create soft link to mounted object */
-    if(H5Glink(fid1, H5L_TYPE_SOFT, "./A/D/H", "L") < 0) /* Soft link */
+    if(H5Lcreate_soft("./A/D/H", fid1, "L", H5P_DEFAULT, H5P_DEFAULT) < 0) /* Soft link */
         TEST_ERROR
 
     if(H5Fclose(fid1) < 0)

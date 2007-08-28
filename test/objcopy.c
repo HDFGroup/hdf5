@@ -4979,13 +4979,13 @@ test_copy_group_links(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Dclose(did) < 0) TEST_ERROR
 
     /* make a hard link to the dataset */
-    if(H5Glink(fid_src, H5L_TYPE_HARD, NAME_LINK_DATASET, NAME_LINK_HARD) < 0) TEST_ERROR
+    if(H5Glink2(fid_src, NAME_LINK_DATASET, H5L_TYPE_HARD, H5G_SAME_LOC, NAME_LINK_HARD) < 0) TEST_ERROR
 
     /* make a soft link to the dataset */
-    if(H5Glink(fid_src, H5L_TYPE_SOFT, NAME_LINK_DATASET, NAME_LINK_SOFT) < 0) TEST_ERROR
+    if(H5Glink2(fid_src, NAME_LINK_DATASET, H5L_TYPE_SOFT, H5G_SAME_LOC, NAME_LINK_SOFT) < 0) TEST_ERROR
 
     /* make a soft link to nowhere */
-    if(H5Glink(fid_src, H5L_TYPE_SOFT, "nowhere", NAME_LINK_SOFT_DANGLE) < 0) TEST_ERROR
+    if(H5Glink2(fid_src, "nowhere", H5L_TYPE_SOFT, H5G_SAME_LOC, NAME_LINK_SOFT_DANGLE) < 0) TEST_ERROR
 
     /* make a dangling external link */
     if(H5Lcreate_external("filename", "obj_name", fid_src, NAME_LINK_EXTERN, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
@@ -5114,7 +5114,7 @@ test_copy_soft_link(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Dclose(did) < 0) TEST_ERROR
 
     /* make a soft link to the dataset */
-    if(H5Glink(fid_src, H5L_TYPE_SOFT, NAME_LINK_DATASET, NAME_LINK_SOFT) < 0) TEST_ERROR
+    if(H5Glink2(fid_src, NAME_LINK_DATASET, H5L_TYPE_SOFT, H5G_SAME_LOC, NAME_LINK_SOFT) < 0) TEST_ERROR
 
     /* close the group */
     if(H5Gclose(gid) < 0) TEST_ERROR
@@ -7013,14 +7013,14 @@ test_copy_option(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl, unsigned flag, hboo
     if((flag & H5O_COPY_EXPAND_SOFT_LINK_FLAG) > 0) {
         /* Create group to copy */
         if((gid = H5Gcreate2(fid_src, NAME_GROUP_LINK, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-        if(H5Glink(fid_src, H5L_TYPE_SOFT, NAME_DATASET_SUB_SUB, NAME_LINK_SOFT) < 0) TEST_ERROR
-        if(H5Glink(fid_src, H5L_TYPE_SOFT, "nowhere", NAME_LINK_SOFT_DANGLE) < 0) TEST_ERROR
+        if(H5Glink2(fid_src, NAME_DATASET_SUB_SUB, H5L_TYPE_SOFT, H5G_SAME_LOC, NAME_LINK_SOFT) < 0) TEST_ERROR
+        if(H5Glink2(fid_src, "nowhere", H5L_TYPE_SOFT, H5G_SAME_LOC, NAME_LINK_SOFT_DANGLE) < 0) TEST_ERROR
         if(H5Gclose(gid) < 0) TEST_ERROR
 
         /* Create group to compare with */
         if((gid = H5Gcreate2(fid_src, NAME_GROUP_LINK2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-        if(H5Glink(fid_src, H5L_TYPE_HARD, NAME_DATASET_SUB_SUB, NAME_LINK_SOFT2) < 0) TEST_ERROR
-        if(H5Glink(fid_src, H5L_TYPE_SOFT, "nowhere", NAME_LINK_SOFT_DANGLE2) < 0) TEST_ERROR
+        if(H5Glink2(fid_src, NAME_DATASET_SUB_SUB, H5L_TYPE_HARD, H5G_SAME_LOC, NAME_LINK_SOFT2) < 0) TEST_ERROR
+        if(H5Glink2(fid_src, "nowhere", H5L_TYPE_SOFT, H5G_SAME_LOC, NAME_LINK_SOFT_DANGLE2) < 0) TEST_ERROR
         if(H5Gclose(gid) < 0) TEST_ERROR
     } /* end if */
 

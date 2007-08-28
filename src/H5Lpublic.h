@@ -148,8 +148,8 @@ H5_DLL herr_t H5Lcopy(hid_t src_loc, const char *src_name, hid_t dst_loc,
     const char *dst_name, hid_t lcpl_id, hid_t lapl_id);
 H5_DLL herr_t H5Lcreate_hard(hid_t cur_loc, const char *cur_name,
     hid_t dst_loc, const char *dst_name, hid_t lcpl_id, hid_t lapl_id);
-H5_DLL herr_t H5Lcreate_soft(const char *target_path, hid_t cur_loc,
-    const char *cur_name, hid_t lcpl_id, hid_t lapl_id);
+H5_DLL herr_t H5Lcreate_soft(const char *link_target, hid_t link_loc_id,
+    const char *link_name, hid_t lcpl_id, hid_t lapl_id);
 H5_DLL herr_t H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id);
 H5_DLL herr_t H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id);

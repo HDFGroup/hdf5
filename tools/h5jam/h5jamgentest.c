@@ -271,7 +271,7 @@ gent_ub(const char * filename, size_t ub_size, size_t ub_fill)
 
   /* soft link */
   group = H5Gopen2(fid, "/g1/g1.2/g1.2.1", H5P_DEFAULT);
-  H5Glink (group, H5L_TYPE_SOFT, "somevalue", "slink");
+  H5Lcreate_soft("somevalue", group, "slink", H5P_DEFAULT, H5P_DEFAULT);
   H5Gclose(group);
 
   group = H5Gopen2(fid, "/g2", H5P_DEFAULT);

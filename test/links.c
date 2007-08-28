@@ -1467,6 +1467,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 static int
 test_compat(hid_t fapl, hbool_t new_format)
 {
@@ -1562,6 +1563,7 @@ error:
     } H5E_END_TRY;
     return 1;
 } /* end test_compat() */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
 /*-------------------------------------------------------------------------
@@ -5172,7 +5174,7 @@ linkinfo(hid_t fapl, hbool_t new_format)
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
     if(H5Tcommit(fid, "datatype", tid) < 0) TEST_ERROR
     if((gid = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Glink(fid, H5G_LINK_SOFT, "group", "softlink") < 0) TEST_ERROR
+    if(H5Glink2(fid, "group", H5G_LINK_SOFT, H5G_SAME_LOC, "softlink") < 0) TEST_ERROR
 
     if((sid = H5Screate(H5S_SCALAR)) < 0) TEST_ERROR
     if((did = H5Dcreate(fid, "dataset", H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -9580,7 +9582,9 @@ main(void)
             nerrors += test_move((new_format ? fapl2 : fapl), new_format);
             nerrors += test_copy((new_format ? fapl2 : fapl), new_format);
             nerrors += test_move_preserves((new_format ? fapl2 : fapl), new_format);
+#ifndef H5_NO_DEPRECATED_SYMBOLS
             nerrors += test_compat((new_format ? fapl2 : fapl), new_format);
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 #ifndef H5_CANNOT_OPEN_TWICE
             nerrors += external_link_root((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
 #endif /* H5_CANNOT_OPEN_TWICE */

@@ -245,10 +245,25 @@ DataSet CommonFG::openDataSet( const H5std_string& name ) const
 //--------------------------------------------------------------------------
 void CommonFG::link( H5G_link_t link_type, const char* curr_name, const char* new_name ) const
 {
-   herr_t ret_value = H5Glink( getLocId(), link_type, curr_name, new_name );
+    herr_t ret_value;
+
+    switch(link_type) {
+        case H5L_TYPE_HARD:
+            ret_value = H5Lcreate_hard( getLocId(), curr_name, H5L_SAME_LOC, new_name, H5P_DEFAULT, H5P_DEFAULT );
+            break;
+
+        case H5L_TYPE_SOFT:
+            ret_value = H5Lcreate_soft( curr_name, getLocId(), new_name, H5P_DEFAULT, H5P_DEFAULT );
+            break;
+
+        default:
+            throwException("link", "unknown link type");
+            break;
+    } /* end switch */
+
    if( ret_value < 0 )
    {
-      throwException("link", "H5Glink failed");
+      throwException("link", "creating link failed");
    }
 }
 

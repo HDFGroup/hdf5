@@ -431,8 +431,8 @@ static void gent_softlink(void)
 
     fid = H5Fcreate(FILE4, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     root = H5Gopen2(fid, "/", H5P_DEFAULT);
-    H5Glink (root, H5L_TYPE_SOFT, "somevalue", "slink1");
-    H5Glink (root, H5L_TYPE_SOFT, "linkvalue", "slink2");
+    H5Lcreate_soft("somevalue", root, "slink1", H5P_DEFAULT, H5P_DEFAULT);
+    H5Lcreate_soft("linkvalue", root, "slink2", H5P_DEFAULT, H5P_DEFAULT);
 
     H5Gclose(root);
     H5Fclose(fid);
@@ -469,19 +469,19 @@ static void gent_hardlink(void)
     H5Dclose(dataset);
 
     group = H5Gcreate2(fid, "/g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Glink (group, H5L_TYPE_HARD, "/dset1", "dset2");
+    H5Lcreate_hard(group, "/dset1", H5L_SAME_LOC, "dset2", H5P_DEFAULT, H5P_DEFAULT);
     H5Gclose(group);
 
     group = H5Gcreate2(fid, "/g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Glink (group, H5L_TYPE_HARD, "/dset1", "dset3");
+    H5Lcreate_hard(group, "/dset1", H5L_SAME_LOC, "dset3", H5P_DEFAULT, H5P_DEFAULT);
     H5Gclose(group);
 
     group = H5Gopen2(fid, "/g1", H5P_DEFAULT);
-    H5Glink (group, H5L_TYPE_HARD, "/g2", "g1.1");
+    H5Lcreate_hard(group, "/g2", H5L_SAME_LOC, "g1.1", H5P_DEFAULT, H5P_DEFAULT);
     H5Gclose(group);
 
      /* create a link to the root group */
-    H5Glink (fid, H5L_TYPE_HARD, "/", "g3");
+    H5Lcreate_hard(fid, "/", H5L_SAME_LOC, "g3", H5P_DEFAULT, H5P_DEFAULT);
     H5Fclose(fid);
 }
 
@@ -906,127 +906,126 @@ static void gent_all(void)
     int i, j;
     float dset2_1[10], dset2_2[3][5];
 
-  fid = H5Fcreate(FILE7, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(FILE7, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-  /* create groups */
-  group = H5Gcreate2(fid, "/g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-  H5Gclose(group);
+    /* create groups */
+    group = H5Gcreate2(fid, "/g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Gclose(group);
 
-  group = H5Gcreate2(fid, "/g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-  H5Gclose(group);
+    group = H5Gcreate2(fid, "/g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Gclose(group);
 
-  group = H5Gcreate2(fid, "/g1/g1.1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-  H5Gclose(group);
+    group = H5Gcreate2(fid, "/g1/g1.1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Gclose(group);
 
-  group = H5Gcreate2(fid, "/g1/g1.2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-  H5Gclose(group);
+    group = H5Gcreate2(fid, "/g1/g1.2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Gclose(group);
 
-  group = H5Gcreate2(fid, "/g1/g1.2/g1.2.1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-  H5Gclose(group);
+    group = H5Gcreate2(fid, "/g1/g1.2/g1.2.1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Gclose(group);
 
-  /* root attributes */
-  group = H5Gopen2(fid, "/", H5P_DEFAULT);
+    /* root attributes */
+    group = H5Gopen2(fid, "/", H5P_DEFAULT);
 
-  dims[0] = 10;
-  space = H5Screate_simple(1, dims, NULL);
-  attr = H5Acreate (group, "attr1", H5T_STD_I8BE, space, H5P_DEFAULT);
-  sprintf(buf, "abcdefghi");
-  H5Awrite(attr, H5T_NATIVE_SCHAR, buf);
-  H5Sclose(space);
-  H5Aclose(attr);
+    dims[0] = 10;
+    space = H5Screate_simple(1, dims, NULL);
+    attr = H5Acreate (group, "attr1", H5T_STD_I8BE, space, H5P_DEFAULT);
+    sprintf(buf, "abcdefghi");
+    H5Awrite(attr, H5T_NATIVE_SCHAR, buf);
+    H5Sclose(space);
+    H5Aclose(attr);
 
-  dims[0] = 2; dims[1] = 2;
-  space = H5Screate_simple(2, dims, NULL);
-  attr = H5Acreate (group, "attr2", H5T_STD_I32BE, space, H5P_DEFAULT);
-  data[0][0] = 0; data[0][1] = 1; data[1][0] = 2; data[1][1] = 3;
-  H5Awrite(attr, H5T_NATIVE_INT, data);
-  H5Sclose(space);
-  H5Aclose(attr);
+    dims[0] = 2; dims[1] = 2;
+    space = H5Screate_simple(2, dims, NULL);
+    attr = H5Acreate (group, "attr2", H5T_STD_I32BE, space, H5P_DEFAULT);
+    data[0][0] = 0; data[0][1] = 1; data[1][0] = 2; data[1][1] = 3;
+    H5Awrite(attr, H5T_NATIVE_INT, data);
+    H5Sclose(space);
+    H5Aclose(attr);
 
-  H5Gclose(group);
+    H5Gclose(group);
 
-  group = H5Gopen2(fid, "/g1/g1.1", H5P_DEFAULT);
+    group = H5Gopen2(fid, "/g1/g1.1", H5P_DEFAULT);
 
-  /* dset1.1.1 */
-  dims[0] = 10; dims[1] = 10;
-  space = H5Screate_simple(2, dims, NULL);
-  dataset = H5Dcreate(group, "dset1.1.1", H5T_STD_I32BE, space, H5P_DEFAULT);
-  for (i = 0; i < 10; i++)
-       for (j = 0; j < 10; j++)
+    /* dset1.1.1 */
+    dims[0] = 10; dims[1] = 10;
+    space = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate(group, "dset1.1.1", H5T_STD_I32BE, space, H5P_DEFAULT);
+    for (i = 0; i < 10; i++)
+        for (j = 0; j < 10; j++)
             dset1[i][j] = j*i;
-  H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1);
-  H5Sclose(space);
+    H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1);
+    H5Sclose(space);
 
-  /* attributes of dset1.1.1 */
-  dims[0] = 27;
-  space = H5Screate_simple(1, dims, NULL);
-  attr = H5Acreate (dataset, "attr1", H5T_STD_I8BE, space, H5P_DEFAULT);
-  sprintf(buf, "1st attribute of dset1.1.1");
-  H5Awrite(attr, H5T_NATIVE_SCHAR, buf);
-  H5Sclose(space);
-  H5Aclose(attr);
+    /* attributes of dset1.1.1 */
+    dims[0] = 27;
+    space = H5Screate_simple(1, dims, NULL);
+    attr = H5Acreate (dataset, "attr1", H5T_STD_I8BE, space, H5P_DEFAULT);
+    sprintf(buf, "1st attribute of dset1.1.1");
+    H5Awrite(attr, H5T_NATIVE_SCHAR, buf);
+    H5Sclose(space);
+    H5Aclose(attr);
 
-  dims[0] = 27;
-  space = H5Screate_simple(1, dims, NULL);
-  attr = H5Acreate (dataset, "attr2", H5T_STD_I8BE, space, H5P_DEFAULT);
-  sprintf(buf, "2nd attribute of dset1.1.1");
-  H5Awrite(attr, H5T_NATIVE_SCHAR, buf);
-  H5Sclose(space);
-  H5Aclose(attr);
+    dims[0] = 27;
+    space = H5Screate_simple(1, dims, NULL);
+    attr = H5Acreate (dataset, "attr2", H5T_STD_I8BE, space, H5P_DEFAULT);
+    sprintf(buf, "2nd attribute of dset1.1.1");
+    H5Awrite(attr, H5T_NATIVE_SCHAR, buf);
+    H5Sclose(space);
+    H5Aclose(attr);
 
-  H5Dclose(dataset);
+    H5Dclose(dataset);
 
-  /* dset1.1.2 */
-  dims[0] = 20;
-  space = H5Screate_simple(1, dims, NULL);
-  dataset = H5Dcreate(group, "dset1.1.2", H5T_STD_I32BE, space, H5P_DEFAULT);
-  for (i = 0; i < 20; i++)
-       dset2[i] = i;
-  H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2);
-  H5Sclose(space);
-  H5Dclose(dataset);
+    /* dset1.1.2 */
+    dims[0] = 20;
+    space = H5Screate_simple(1, dims, NULL);
+    dataset = H5Dcreate(group, "dset1.1.2", H5T_STD_I32BE, space, H5P_DEFAULT);
+    for (i = 0; i < 20; i++)
+        dset2[i] = i;
+    H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2);
+    H5Sclose(space);
+    H5Dclose(dataset);
 
-  H5Gclose(group);
+    H5Gclose(group);
 
-  /* external link */
-  H5Lcreate_external("somefile", "somepath", fid, "/g1/g1.2/extlink", H5P_DEFAULT, H5P_DEFAULT);
+    /* external link */
+    H5Lcreate_external("somefile", "somepath", fid, "/g1/g1.2/extlink", H5P_DEFAULT, H5P_DEFAULT);
 
-  /* soft link */
-  group = H5Gopen2(fid, "/g1/g1.2/g1.2.1", H5P_DEFAULT);
-  H5Glink (group, H5L_TYPE_SOFT, "somevalue", "slink");
-  H5Gclose(group);
+    /* soft link */
+    group = H5Gopen2(fid, "/g1/g1.2/g1.2.1", H5P_DEFAULT);
+    H5Lcreate_soft("somevalue", group, "slink", H5P_DEFAULT, H5P_DEFAULT);
+    H5Gclose(group);
 
-  group = H5Gopen2(fid, "/g2", H5P_DEFAULT);
+    group = H5Gopen2(fid, "/g2", H5P_DEFAULT);
 
-  /* dset2.1 */
-  dims[0] = 10;
-  space = H5Screate_simple(1, dims, NULL);
-  dataset = H5Dcreate(group, "dset2.1", H5T_IEEE_F32BE, space, H5P_DEFAULT);
-  for (i = 0; i < 10; i++)
-       dset2_1[i] = (float)(i*0.1+1);
-  H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2_1);
-  H5Sclose(space);
-  H5Dclose(dataset);
+    /* dset2.1 */
+    dims[0] = 10;
+    space = H5Screate_simple(1, dims, NULL);
+    dataset = H5Dcreate(group, "dset2.1", H5T_IEEE_F32BE, space, H5P_DEFAULT);
+    for (i = 0; i < 10; i++)
+        dset2_1[i] = (float)(i*0.1+1);
+    H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2_1);
+    H5Sclose(space);
+    H5Dclose(dataset);
 
-  /* dset2.2 */
-  dims[0] = 3; dims[1] = 5;
-  space = H5Screate_simple(2, dims, NULL);
-  dataset = H5Dcreate(group, "dset2.2", H5T_IEEE_F32BE, space, H5P_DEFAULT);
-  for (i = 0; i < 3; i++)
-       for (j = 0; j < 5; j++)
+    /* dset2.2 */
+    dims[0] = 3; dims[1] = 5;
+    space = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate(group, "dset2.2", H5T_IEEE_F32BE, space, H5P_DEFAULT);
+    for (i = 0; i < 3; i++)
+        for (j = 0; j < 5; j++)
             dset2_2[i][j] = (float)((i+1)*j*0.1);
-  H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2_2);
-  H5Sclose(space);
-  H5Dclose(dataset);
+    H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2_2);
+    H5Sclose(space);
+    H5Dclose(dataset);
 
-  H5Gclose(group);
+    H5Gclose(group);
 
-  /* user-defined link */
-  H5Lregister(UD_link_class);
-  H5Lcreate_ud(fid, "/g2/udlink", MY_LINKCLASS, NULL, 0, H5P_DEFAULT, H5P_DEFAULT);
+    /* user-defined link */
+    H5Lregister(UD_link_class);
+    H5Lcreate_ud(fid, "/g2/udlink", MY_LINKCLASS, NULL, 0, H5P_DEFAULT, H5P_DEFAULT);
 
-  H5Fclose(fid);
-
+    H5Fclose(fid);
 }
 
 /*
@@ -1041,42 +1040,42 @@ o - group objects
 */
 
 static void gent_loop(void) {
-hid_t fid, group;
+    hid_t fid, group;
 
-  fid = H5Fcreate(FILE10, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(FILE10, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-  group = H5Gcreate2(fid, "/g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-  H5Gclose(group);
-  group = H5Gcreate2(fid, "/g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-  H5Gclose(group);
+    group = H5Gcreate2(fid, "/g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Gclose(group);
+    group = H5Gcreate2(fid, "/g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Gclose(group);
 
-  H5Glink(fid, H5L_TYPE_HARD, "/g2", "/g1/g1.1");
-  H5Glink(fid, H5L_TYPE_HARD, "/g1", "/g2/g2.1");
+    H5Lcreate_hard(fid, "/g2", H5L_SAME_LOC, "/g1/g1.1", H5P_DEFAULT, H5P_DEFAULT);
+    H5Lcreate_hard(fid, "/g1", H5L_SAME_LOC, "/g2/g2.1", H5P_DEFAULT, H5P_DEFAULT);
 
-  H5Fclose(fid);
+    H5Fclose(fid);
 }
 
-static void gent_loop2(void) {
-hid_t fid, group;
+static void gent_loop2(void)
+{
+    hid_t fid, group;
 
-  fid = H5Fcreate(FILE11, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(FILE11, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-  /* create group object g1 and implcit path from root object */
-  group = H5Gcreate2(fid, "/g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-  H5Gclose(group);
+    /* create group object g1 and implcit path from root object */
+    group = H5Gcreate2(fid, "/g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Gclose(group);
 
-  /* create group object g2 and implcit path from root object */
-  group = H5Gcreate2(fid, "/g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-  H5Gclose(group);
+    /* create group object g2 and implcit path from root object */
+    group = H5Gcreate2(fid, "/g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Gclose(group);
 
-  /* create path from object at /g1 to object at /g2 and name it g1.1 */
-  H5Glink (fid, H5L_TYPE_HARD, "/g2", "/g1/g1.1");
+    /* create path from object at /g1 to object at /g2 and name it g1.1 */
+    H5Lcreate_hard(fid, "/g2", H5L_SAME_LOC, "/g1/g1.1", H5P_DEFAULT, H5P_DEFAULT);
 
-  /* create path from object at /g2 to object at /g1 and name it g2.1 */
-  H5Glink (fid, H5L_TYPE_SOFT, "/g1", "/g2/g2.1");
+    /* create path from object at /g2 to object at /g1 and name it g2.1 */
+    H5Lcreate_soft("/g1", fid, "/g2/g2.1", H5P_DEFAULT, H5P_DEFAULT);
 
-  H5Fclose(fid);
-
+    H5Fclose(fid);
 }
 
 /*
@@ -1215,11 +1214,11 @@ static void gent_many(void)
   H5Gclose(group);
 
   group = H5Gcreate2(fid, "/g1/g1.2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-  H5Glink (group, H5L_TYPE_HARD, "/g1/g1.1/dset1", "link1");
+  H5Lcreate_hard(group, "/g1/g1.1/dset1", H5L_SAME_LOC, "link1", H5P_DEFAULT, H5P_DEFAULT);
   H5Gclose(group);
 
   group = H5Gcreate2(fid, "/g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-  H5Glink (group, H5L_TYPE_SOFT, "/g1", "slink2");
+  H5Lcreate_soft("/g1", group, "slink2", H5P_DEFAULT, H5P_DEFAULT);
   H5Gclose(group);
 
   group = H5Gcreate2(fid, "/g3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -1243,7 +1242,7 @@ static void gent_many(void)
   H5Gclose(group);
 
   group = H5Gopen2(fid, "/g3", H5P_DEFAULT);
-  H5Glink (group, H5L_TYPE_HARD, "/g4/dset2", "link3");
+  H5Lcreate_hard(group, "/g4/dset2", H5L_SAME_LOC, "link3", H5P_DEFAULT, H5P_DEFAULT);
   H5Gclose(group);
 
   group = H5Gcreate2(fid, "/g5", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -1266,7 +1265,7 @@ static void gent_many(void)
   H5Gclose(group);
 
   group = H5Gopen2(fid, "/g5", H5P_DEFAULT);
-  H5Glink (group, H5L_TYPE_SOFT, "/g6/dset3", "slink4");
+  H5Lcreate_soft("/g6/dset3", group, "slink4", H5P_DEFAULT, H5P_DEFAULT);
   H5Gclose(group);
   H5Pclose(create_plist);
 
@@ -1281,9 +1280,9 @@ static void gent_many(void)
   H5Lcreate_ud(fid, "/g8/udlink", MY_LINKCLASS, NULL, 0, H5P_DEFAULT, H5P_DEFAULT);
 
   /* Create links to external and UD links */
-  ret= H5Glink (fid, H5L_TYPE_SOFT, "/g8/elink", "/g7/slink5");
+  ret= H5Lcreate_soft("/g8/elink", fid, "/g7/slink5", H5P_DEFAULT, H5P_DEFAULT);
   HDassert(ret >= 0);
-  ret= H5Glink (fid, H5L_TYPE_SOFT, "/g8/udlink", "/g7/slink6");
+  ret= H5Lcreate_soft("/g8/udlink", fid, "/g7/slink6", H5P_DEFAULT, H5P_DEFAULT);
   HDassert(ret >= 0);
 
   H5Fclose(fid);
@@ -5010,39 +5009,39 @@ static void gent_fcontents(void)
 
     /* hard link to "dset" */
     gid1 = H5Gcreate2(fid, "/g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Glink (gid1, H5L_TYPE_HARD, "/dset", "dset1");
+    H5Lcreate_hard(gid1, "/dset", H5L_SAME_LOC, "dset1", H5P_DEFAULT, H5P_DEFAULT);
     H5Gclose(gid1);
 
 
     /* hard link to "dset" */
     gid1 = H5Gcreate2(fid, "/g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Glink (gid1, H5L_TYPE_HARD, "/dset", "dset2");
+    H5Lcreate_hard(gid1, "/dset", H5L_SAME_LOC, "dset2", H5P_DEFAULT, H5P_DEFAULT);
     H5Gclose(gid1);
 
 
     /* hard link to "g2" */
     gid1 = H5Gopen2(fid, "/g1", H5P_DEFAULT);
-    H5Glink (gid1, H5L_TYPE_HARD, "/g2", "g1.1");
+    H5Lcreate_hard(gid1, "/g2", H5L_SAME_LOC, "g1.1", H5P_DEFAULT, H5P_DEFAULT);
     H5Gclose(gid1);
 
 
     /* hard link to "dset" */
-    ret=H5Glink (fid, H5L_TYPE_HARD, "/dset", "dset3");
+    ret=H5Lcreate_hard(fid, "/dset", H5L_SAME_LOC, "dset3", H5P_DEFAULT, H5P_DEFAULT);
     assert(ret>=0);
 
 
     /* hard link to "dset" */
-    ret=H5Glink (fid, H5L_TYPE_HARD, "/dset", "dset4");
+    ret=H5Lcreate_hard(fid, "/dset", H5L_SAME_LOC, "dset4", H5P_DEFAULT, H5P_DEFAULT);
     assert(ret>=0);
 
 
     /* soft link to itself */
-    ret=H5Glink (fid, H5L_TYPE_SOFT, "mylink", "mylink");
+    ret=H5Lcreate_soft("mylink", fid, "mylink", H5P_DEFAULT, H5P_DEFAULT);
     assert(ret>=0);
 
 
     /* soft link to "dset" */
-    ret=H5Glink (fid, H5L_TYPE_SOFT, "/dset", "softlink");
+    ret=H5Lcreate_soft("/dset", fid, "softlink", H5P_DEFAULT, H5P_DEFAULT);
     assert(ret>=0);
 
     /* dangling external link */

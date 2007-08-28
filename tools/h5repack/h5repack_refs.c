@@ -111,8 +111,7 @@ int do_copy_refobjs(hid_t fidin,
 
                 if(travt->objs[i].nlinks)
                     for(j = 0; j < travt->objs[i].nlinks; j++)
-                        H5Glink(fidout, H5G_LINK_HARD, travt->objs[i].name, travt->objs[i].links[j].new_name);
-
+                        H5Lcreate_hard(fidout, travt->objs[i].name, H5L_SAME_LOC, travt->objs[i].links[j].new_name, H5P_DEFAULT, H5P_DEFAULT);
                 break;
 
             /*-------------------------------------------------------------------------
@@ -343,7 +342,7 @@ int do_copy_refobjs(hid_t fidin,
                     */
                     if(travt->objs[i].nlinks)
                         for(j = 0; j < travt->objs[i].nlinks; j++)
-                            H5Glink(fidout, H5G_LINK_HARD, travt->objs[i].name, travt->objs[i].links[j].new_name);
+                            H5Lcreate_hard(fidout, travt->objs[i].name, H5L_SAME_LOC, travt->objs[i].links[j].new_name, H5P_DEFAULT, H5P_DEFAULT);
 
                     if(H5Dclose(dset_out)<0)
                         goto error;

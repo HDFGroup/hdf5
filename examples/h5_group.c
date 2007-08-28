@@ -118,7 +118,7 @@ main(void)
     /*
      * Create hard link to the Data group.
      */
-    status = H5Glink(file, H5G_LINK_HARD, "Data", "Data_new");
+    status = H5Lcreate_hard(file, "Data", H5L_SAME_LOC, "Data_new", H5P_DEFAULT, H5P_DEFAULT);
 
     /*
      * We can access "Compressed_Data" dataset using created

@@ -1591,7 +1591,7 @@ int make_all_objects(hid_t loc_id)
     *-------------------------------------------------------------------------
     */
 
-    H5Glink(loc_id, H5L_TYPE_SOFT, "dset", "link");
+    H5Lcreate_soft("dset", loc_id, "link", H5P_DEFAULT, H5P_DEFAULT);
 
     /*-------------------------------------------------------------------------
     * H5G_UDLINK
@@ -1684,13 +1684,13 @@ int make_hlinks(hid_t loc_id)
     *-------------------------------------------------------------------------
     */
 
-    if(write_dset(loc_id,2,dims,"dset",H5T_NATIVE_INT,buf)<0)
+    if(write_dset(loc_id, 2, dims, "dset", H5T_NATIVE_INT, buf) < 0)
         return -1;
-    if(H5Glink(loc_id, H5L_TYPE_HARD, "dset", "link1 to dset")<0)
+    if(H5Lcreate_hard(loc_id, "dset", H5L_SAME_LOC, "link1 to dset", H5P_DEFAULT, H5P_DEFAULT) < 0)
         return -1;
-    if(H5Glink(loc_id, H5L_TYPE_HARD, "dset", "link2 to dset")<0)
+    if(H5Lcreate_hard(loc_id, "dset", H5L_SAME_LOC, "link2 to dset", H5P_DEFAULT, H5P_DEFAULT) < 0)
         return -1;
-    if(H5Glink(loc_id, H5L_TYPE_HARD, "dset", "link3 to dset")<0)
+    if(H5Lcreate_hard(loc_id, "dset", H5L_SAME_LOC, "link3 to dset", H5P_DEFAULT, H5P_DEFAULT) < 0)
         return -1;
 
 
@@ -2860,7 +2860,7 @@ void write_dset_in(hid_t loc_id,
 
 
  /* create hard link */
- status = H5Glink(loc_id, H5L_TYPE_HARD, "string", "string_link");
+ status = H5Lcreate_hard(loc_id, "string", H5L_SAME_LOC, "string_link", H5P_DEFAULT, H5P_DEFAULT);
 
 /*-------------------------------------------------------------------------
  * H5T_BITFIELD
