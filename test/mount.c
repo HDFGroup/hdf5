@@ -71,8 +71,8 @@ setup(hid_t fapl)
     if(H5Gclose(H5Gcreate2(file, "/mnt1/file1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if(H5Gclose(H5Gcreate2(file, "/mnt_unlink", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if(H5Gclose(H5Gcreate2(file, "/mnt_move_a", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-    if(H5Lcreate_hard(file, "/file1", H5L_SAME_LOC, "/mnt1/file1", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
-    if(H5Lcreate_hard(file, "/mnt1_link", H5L_SAME_LOC, "/mnt1", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_hard(file, "/mnt1/file1", H5L_SAME_LOC, "/file1", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_hard(file, "/mnt1", H5L_SAME_LOC, "/mnt1_link", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
     /* file 2 */
