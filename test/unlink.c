@@ -373,8 +373,8 @@ test_new_move(hid_t fapl)
     if((grp_move = H5Gcreate2(grp_1, "group_move", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Create hard and soft links. */
-    if(H5Lcreate_hard(grp_1, "group_move", H5G_SAME_LOC, "hard", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
-    if(H5Lcreate_soft("/group1/group_move", grp_1, "soft", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_hard(grp_1, "group_move", H5L_SAME_LOC, "hard", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_soft("/group1/group_move", grp_2, "soft", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Move a group within the file.  Both of source and destination use
      * H5G_SAME_LOC.  Should fail. */
@@ -2151,7 +2151,7 @@ test_full_group_compact(hid_t fapl)
     if(H5Lcreate_external("foo.h5", "/dst", gid, "external", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Create soft link (doesn't matter if it dangles) */
-    if(H5Lcreate_soft("/foo", file_id, "soft", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_soft("/foo", gid, "soft", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Create hard links to objects in group to keep */
     for(u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
@@ -2297,7 +2297,7 @@ test_full_group_dense(hid_t fapl)
     if(H5Lcreate_external("foo.h5", "/dst", gid, "external", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Create soft link (doesn't matter if it dangles) */
-    if(H5Lcreate_soft("/foo", file_id, "soft", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_soft("/foo", gid, "soft", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Create hard links to objects in group to keep */
     for(u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
