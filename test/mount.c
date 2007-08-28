@@ -442,7 +442,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:	test_move
  *
- * Purpose:	An object cannot be moved or renamed with H5Gmove() in such a
+ * Purpose:	An object cannot be moved or renamed with H5Lmove() in such a
  *		way that the new location would be in a different file than
  *		the original location.
  *

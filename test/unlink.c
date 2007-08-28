@@ -286,7 +286,7 @@ test_symlink(hid_t file)
 /*-------------------------------------------------------------------------
  * Function:	test_rename
  *
- * Purpose:	Tests H5Gmove()
+ * Purpose:	Tests H5Lmove()
  *
  * Return:	Success:	0
  *
@@ -306,34 +306,35 @@ test_rename(hid_t file)
 
     /* Create a test group and rename something */
     TESTING("object renaming");
-    if((work = H5Gcreate2(file, "/test_rename", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if((foo = H5Gcreate2(work, "foo", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Gmove(work, "foo", "bar") < 0) TEST_ERROR
-    if((inner = H5Gcreate2(foo, "inner", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Gclose(inner) < 0) TEST_ERROR
-    if(H5Gclose(foo) < 0) TEST_ERROR
+    if((work = H5Gcreate2(file, "/test_rename", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((foo = H5Gcreate2(work, "foo", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Lmove(work, "foo", H5L_SAME_LOC, "bar", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if((inner = H5Gcreate2(foo, "inner", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(inner) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(foo) < 0) FAIL_STACK_ERROR
     if((inner = H5Gopen2(work, "bar/inner", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-    if(H5Gclose(inner) < 0) TEST_ERROR
+    if(H5Gclose(inner) < 0) FAIL_STACK_ERROR
     PASSED();
 
     /* Try renaming a symlink */
     TESTING("symlink renaming");
-    if(H5Lcreate_soft("link_value", work, "link_one", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
-    if(H5Gmove(work, "link_one", "link_two") < 0) TEST_ERROR
-    PASSED();
+    if(H5Lcreate_soft("link_value", work, "link_one", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Lmove(work, "link_one", H5L_SAME_LOC, "link_two", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Cleanup */
-    if (H5Gclose(work) < 0) goto error;
+    if (H5Gclose(work) < 0) FAIL_STACK_ERROR
+
+    PASSED();
     return 0;
 
- error:
+error:
     H5E_BEGIN_TRY {
 	H5Gclose(work);
 	H5Gclose(foo);
 	H5Gclose(inner);
     } H5E_END_TRY;
     return 1;
-}
+} /* end test_rename() */
 
 
 /*-------------------------------------------------------------------------

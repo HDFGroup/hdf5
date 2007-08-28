@@ -416,7 +416,6 @@ H5G_link_hard(hid_t cur_loc_id, const char *cur_name, hid_t new_loc_id,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_link_hard() */
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
 /*-------------------------------------------------------------------------
@@ -441,6 +440,7 @@ H5Gmove(hid_t src_loc_id, const char *src_name, const char *dst_name)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gmove() */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
 /*-------------------------------------------------------------------------

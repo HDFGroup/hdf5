@@ -2516,7 +2516,7 @@ herr_t H5TBinsert_field( hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
- if ( H5Gmove( loc_id, "new", dset_name ) < 0 )
+ if ( H5Lmove( loc_id, "new", H5L_SAME_LOC, dset_name, H5P_DEFAULT, H5P_DEFAULT ) < 0 )
   return -1;
 
 /*-------------------------------------------------------------------------
@@ -3001,7 +3001,7 @@ herr_t H5TBdelete_field( hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
- if ( H5Gmove( loc_id, "new", dset_name ) < 0 )
+ if ( H5Lmove( loc_id, "new", H5L_SAME_LOC, dset_name, H5P_DEFAULT, H5P_DEFAULT ) < 0 )
   return -1;
 
 /*-------------------------------------------------------------------------

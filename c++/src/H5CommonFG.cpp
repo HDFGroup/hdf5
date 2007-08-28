@@ -322,10 +322,10 @@ void CommonFG::unlink( const H5std_string& name ) const
 //--------------------------------------------------------------------------
 void CommonFG::move( const char* src, const char* dst ) const
 {
-   herr_t ret_value = H5Gmove( getLocId(), src, dst );
+   herr_t ret_value = H5Lmove( getLocId(), src, H5L_SAME_LOC, dst, H5P_DEFAULT, H5P_DEFAULT );
    if( ret_value < 0 )
    {
-      throwException("move", "H5Gmove failed");
+      throwException("move", "H5Lmove failed");
    }
 }
 

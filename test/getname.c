@@ -333,17 +333,17 @@ test_main(hid_t file_id, hid_t fapl)
 
 
    /*-------------------------------------------------------------------------
-    * Test H5Iget_name with H5Gmove and H5Gopen2
+    * Test H5Iget_name with H5Lmove and H5Gopen2
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5Iget_name with H5Gmove and H5Gopen2");
+    TESTING("H5Iget_name with H5Lmove and H5Gopen2");
 
     /* Reopen the group */
     if((group_id = H5Gopen2(file_id, "/g1", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Rename group */
-    if(H5Gmove(file_id, "/g1", "/g1a") < 0) FAIL_STACK_ERROR
+    if(H5Lmove(file_id, "/g1", H5L_SAME_LOC, "/g1a", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group_id, "/g1a", "/g1a") < 0) TEST_ERROR
@@ -355,58 +355,57 @@ test_main(hid_t file_id, hid_t fapl)
 
 
 
-
-/*-------------------------------------------------------------------------
-    * Test H5Iget_name with H5Gmove and H5Dopen
+   /*-------------------------------------------------------------------------
+    * Test H5Iget_name with H5Lmove and H5Dopen
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5Iget_name with H5Gmove and H5Dopen");
+    TESTING("H5Iget_name with H5Lmove and H5Dopen");
 
     /* Reopen the dataset */
-    if((dataset_id = H5Dopen(file_id, "/d1")) < 0) TEST_ERROR
+    if((dataset_id = H5Dopen(file_id, "/d1")) < 0) FAIL_STACK_ERROR
 
     /* Rename dataset */
-    if(H5Gmove(file_id, "/d1", "/d1a") < 0) TEST_ERROR
+    if(H5Lmove(file_id, "/d1", H5L_SAME_LOC, "/d1a", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
-    if(check_name(dataset_id, "/d1a", "/d1a") < 0) TEST_ERROR
+    if(check_name(dataset_id, "/d1a", "/d1a") < 0) FAIL_STACK_ERROR
 
     /* Close */
-    H5Dclose(dataset_id);
+    if(H5Dclose(dataset_id) < 0) FAIL_STACK_ERROR
 
     PASSED();
 
 
 
-
-/*-------------------------------------------------------------------------
-    * Test H5Iget_name with H5Gmove and H5Topen
+   /*-------------------------------------------------------------------------
+    * Test H5Iget_name with H5Lmove and H5Topen
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5Iget_name with H5Gmove and H5Topen");
+    TESTING("H5Iget_name with H5Lmove and H5Topen");
 
     /* Open the named datatype */
-    if((type_id=H5Topen(file_id, "/t1")) < 0) TEST_ERROR
+    if((type_id = H5Topen(file_id, "/t1")) < 0) FAIL_STACK_ERROR
 
     /* Rename datatype */
-    if(H5Gmove(file_id, "/t1", "/t1a") < 0) TEST_ERROR
+    if(H5Lmove(file_id, "/t1", H5L_SAME_LOC, "/t1a", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
-    if(check_name(type_id, "/t1a", "/t1a") < 0) TEST_ERROR
+    if(check_name(type_id, "/t1a", "/t1a") < 0) FAIL_STACK_ERROR
 
     /* Close datatype */
-    H5Tclose(type_id);
+    if(H5Tclose(type_id) < 0) FAIL_STACK_ERROR
 
     PASSED();
 
+
     /*-------------------------------------------------------------------------
-    * Test H5Iget_name with H5Gmove and relative names
+    * Test H5Iget_name with H5Lmove and relative names
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5Iget_name with H5Gmove and relative names");
+    TESTING("H5Iget_name with H5Lmove and relative names");
 
     /* Create group "/g3" */
     if((group_id = H5Gcreate2(file_id, "/g3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
@@ -418,7 +417,7 @@ test_main(hid_t file_id, hid_t fapl)
     if((group3_id = H5Gopen2(file_id, "/g3/foo1", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Rename group */
-    if(H5Gmove(group_id, "foo1", "foo2") < 0) FAIL_STACK_ERROR
+    if(H5Lmove(group_id, "foo1", H5L_SAME_LOC, "foo2", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group_id, "/g3", "/g3") < 0) TEST_ERROR
@@ -430,7 +429,7 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group3_id, "/g3/foo2", "/g3/foo2") < 0) TEST_ERROR
 
     /* Rename group again */
-    if(H5Gmove(file_id, "g3/foo2", "g3/foo1") < 0) FAIL_STACK_ERROR
+    if(H5Lmove(file_id, "g3/foo2", H5L_SAME_LOC, "g3/foo1", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group_id, "/g3", "/g3") < 0) TEST_ERROR
@@ -442,21 +441,20 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group3_id, "/g3/foo1", "/g3/foo1") < 0) TEST_ERROR
 
     /* Close */
-    H5Gclose(group_id);
-    H5Gclose(group2_id);
-    H5Gclose(group3_id);
-
+    if(H5Gclose(group_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group2_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group3_id) < 0) FAIL_STACK_ERROR
 
     PASSED();
 
 
 
-/*-------------------------------------------------------------------------
-    * Test H5Iget_name with H5Gmove and a long path
+   /*-------------------------------------------------------------------------
+    * Test H5Iget_name with H5Lmove and a long path
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5Iget_name with H5Gmove and a long path");
+    TESTING("H5Iget_name with H5Lmove and a long path");
 
     /* Create group "g4/A/B" */
     if((group_id = H5Gcreate2(file_id, "g4", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
@@ -471,19 +469,19 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group3_id, "/g4/A/B", "/g4/A/B") < 0) TEST_ERROR
 
     /* Move group "B" to "D"*/
-    if(H5Gmove(file_id, "/g4/A/B", "/g5/C/D") < 0)  TEST_ERROR
+    if(H5Lmove(file_id, "/g4/A/B", H5L_SAME_LOC, "/g5/C/D", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group3_id, "/g5/C/D", "/g5/C/D") < 0) TEST_ERROR
 
     /* Move group "/g5/C/D" back to "/g4/A/B" using relative name */
-    if(H5Gmove2(group5_id, "D", group2_id, "B") < 0)  TEST_ERROR
+    if(H5Gmove2(group5_id, "D", group2_id, "B") < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group3_id, "/g4/A/B", "/g4/A/B") < 0) TEST_ERROR
 
     /* Move group "/g4/A/B" to "/g4/F/B" using relative name */
-    if(H5Gmove2(group_id, "A", group_id, "F") < 0)  TEST_ERROR
+    if(H5Gmove2(group_id, "A", group_id, "F") < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group3_id, "/g4/F/B", "/g4/F/B") < 0) TEST_ERROR
@@ -492,21 +490,21 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group2_id, "/g4/F", "/g4/F") < 0) TEST_ERROR
 
     /* Close */
-    H5Gclose(group_id);
-    H5Gclose(group2_id);
-    H5Gclose(group3_id);
-    H5Gclose(group4_id);
-    H5Gclose(group5_id);
+    if(H5Gclose(group_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group2_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group3_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group4_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group5_id) < 0) FAIL_STACK_ERROR
 
     PASSED();
 
 
-    /*-------------------------------------------------------------------------
-    * Test H5Iget_name with H5Gmove and a long path #2
+   /*-------------------------------------------------------------------------
+    * Test H5Iget_name with H5Lmove and a long path #2
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5Iget_name with H5Gmove and a long path #2");
+    TESTING("H5Iget_name with H5Lmove and a long path #2");
 
     /* Create group "g6/A/B" and "g7" */
     if((group_id = H5Gcreate2(file_id, "g6", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
@@ -518,7 +516,7 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group3_id, "/g6/A/B", "/g6/A/B") < 0) TEST_ERROR
 
     /* Move group "A" to "C"*/
-    if(H5Gmove(file_id, "/g6/A", "/g7/C") < 0)  TEST_ERROR
+    if(H5Lmove(file_id, "/g6/A", H5L_SAME_LOC, "/g7/C", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group2_id, "/g7/C", "/g7/C") < 0) TEST_ERROR
@@ -527,14 +525,15 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group3_id, "/g7/C/B", "/g7/C/B") < 0) TEST_ERROR
 
     /* Close */
-    H5Gclose(group_id);
-    H5Gclose(group2_id);
-    H5Gclose(group3_id);
-    H5Gclose(group4_id);
+    if(H5Gclose(group_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group2_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group3_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group4_id) < 0) FAIL_STACK_ERROR
 
     PASSED();
 
-/*-------------------------------------------------------------------------
+
+   /*-------------------------------------------------------------------------
     * Test H5Iget_name with H5Gunlink
     *-------------------------------------------------------------------------
     */
@@ -1397,15 +1396,15 @@ test_main(hid_t file_id, hid_t fapl)
 
 
 
-/*-------------------------------------------------------------------------
-    * Test H5Iget_name with H5Fmount and H5Gmove
+   /*-------------------------------------------------------------------------
+    * Test H5Iget_name with H5Fmount and H5Lmove
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5Iget_name with H5Fmount and H5Gmove");
+    TESTING("H5Iget_name with H5Fmount and H5Lmove");
 
     /* Create a file and group "/g1/g2" in it */
-    file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    if((file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
     if((group_id = H5Gcreate2(file1_id, "/g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if((group2_id = H5Gcreate2(file1_id, "/g1/g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
@@ -1415,7 +1414,7 @@ test_main(hid_t file_id, hid_t fapl)
     if((group4_id = H5Gcreate2(file2_id, "/g3/g4", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Mount first file at "g3/g4" in the second file */
-    if(H5Fmount(file2_id, "/g3/g4", file1_id, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Fmount(file2_id, "/g3/g4", file1_id, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group4_id, "/g3/g4", "/g3/g4") < 0) TEST_ERROR
@@ -1433,14 +1432,14 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group6_id, "/g3/g4/g1", "/g3/g4/g1") < 0) TEST_ERROR
 
     /* Rename group */
-    if(H5Gmove(file2_id, "/g3/g4/g1/g2", "/g3/g4/g1/g5") < 0)  TEST_ERROR
+    if(H5Lmove(file2_id, "/g3/g4/g1/g2", H5L_SAME_LOC, "/g3/g4/g1/g5", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group5_id, "/g3/g4/g1/g5", "/g3/g4/g1/g5") < 0) TEST_ERROR
     if(check_name(group2_id, "/g1/g5", "/g1/g5") < 0) TEST_ERROR
 
     /* Rename group */
-    if(H5Gmove(file2_id, "/g3/g4/g1", "/g3/g4/g1a") < 0)  TEST_ERROR
+    if(H5Lmove(file2_id, "/g3/g4/g1", H5L_SAME_LOC, "/g3/g4/g1a", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group5_id, "/g3/g4/g1a/g5", "/g3/g4/g1a/g5") < 0) TEST_ERROR
@@ -1451,7 +1450,7 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group_id, "/g1a", "/g1a") < 0) TEST_ERROR
 
     /* Rename middle group back, using relative path */
-    if(H5Gmove(group3_id, "g4/g1a", "g4/g1") < 0)  TEST_ERROR
+    if(H5Lmove(group3_id, "g4/g1a", H5L_SAME_LOC, "g4/g1", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group5_id, "/g3/g4/g1/g5", "/g3/g4/g1/g5") < 0) TEST_ERROR
@@ -1460,7 +1459,7 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group_id, "/g1", "/g1") < 0) TEST_ERROR
 
     /* Rename end group back, using relative path */
-    if(H5Gmove(group3_id, "g4/g1/g5", "g4/g1/g2") < 0)  TEST_ERROR
+    if(H5Lmove(group3_id, "g4/g1/g5", H5L_SAME_LOC, "g4/g1/g2", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group5_id, "/g3/g4/g1/g2", "/g3/g4/g1/g2") < 0) TEST_ERROR
@@ -1469,7 +1468,7 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group_id, "/g1", "/g1") < 0) TEST_ERROR
 
     /* Rename mount point */
-    if(H5Gmove(file2_id, "/g3/g4", "/g3/g4a") < 0)  TEST_ERROR
+    if(H5Lmove(file2_id, "/g3/g4", H5L_SAME_LOC, "/g3/g4a", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group4_id, "/g3/g4a", "/g3/g4a") < 0) TEST_ERROR
@@ -1477,7 +1476,7 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group6_id, "/g3/g4a/g1", "/g3/g4a/g1") < 0) TEST_ERROR
 
     /* Rename mount point back, using relative path*/
-    if(H5Gmove(group3_id, "g4a", "g4") < 0)  TEST_ERROR
+    if(H5Lmove(group3_id, "g4a", H5L_SAME_LOC, "g4", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group4_id, "/g3/g4", "/g3/g4") < 0) TEST_ERROR
@@ -1485,16 +1484,17 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group6_id, "/g3/g4/g1", "/g3/g4/g1") < 0) TEST_ERROR
 
     /* Close */
-    H5Gclose(group_id);
-    H5Gclose(group2_id);
-    H5Gclose(group3_id);
-    H5Gclose(group4_id);
-    H5Gclose(group5_id);
-    H5Gclose(group6_id);
-    H5Fclose(file1_id);
-    H5Fclose(file2_id);
+    if(H5Gclose(group_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group2_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group3_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group4_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group5_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group6_id) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file1_id) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file2_id) < 0) FAIL_STACK_ERROR
 
     PASSED();
+
 
    /*-------------------------------------------------------------------------
     * Test H5Iget_name with H5Lcreate_hard
@@ -1520,14 +1520,14 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group3_id, "/g19/g2", "/g19/g2") < 0) TEST_ERROR
 
     /* Rename original group */
-    if(H5Gmove(file_id, "/g19/g1", "/g19/g3") < 0) FAIL_STACK_ERROR
+    if(H5Lmove(file_id, "/g19/g1", H5L_SAME_LOC, "/g19/g3", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group2_id, "/g19/g3", "/g19/g3") < 0) TEST_ERROR
     if(check_name(group3_id, "/g19/g2", "/g19/g2") < 0) TEST_ERROR
 
     /* Rename original group back, using relative path */
-    if(H5Gmove(group_id, "g3", "g1") < 0) FAIL_STACK_ERROR
+    if(H5Lmove(group_id, "g3", H5L_SAME_LOC, "g1", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group2_id, "/g19/g1", "/g19/g1") < 0) TEST_ERROR
@@ -1543,7 +1543,7 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group4_id, "/g19/g3", "/g19/g3") < 0) TEST_ERROR
 
     /* Delete group */
-    if(H5Gunlink(file_id, "/g19/g3") < 0) TEST_ERROR
+    if(H5Gunlink(file_id, "/g19/g3") < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group4_id, "/g19/g1", "") < 0) TEST_ERROR
@@ -1563,7 +1563,7 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group4_id, "/g19/g3", "/g19/g3") < 0) TEST_ERROR
 
     /* Delete group, using relative path */
-    if(H5Gunlink(group_id, "g3") < 0) TEST_ERROR
+    if(H5Gunlink(group_id, "g3") < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group4_id, "/g19/g1", "") < 0) TEST_ERROR
@@ -1634,7 +1634,7 @@ test_main(hid_t file_id, hid_t fapl)
     if((group3_id = H5Gopen2(file_id, "/g21/g2", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Rename group */
-    if(H5Gmove(file_id, "/g21/g1", "/g21/g3") < 0) FAIL_STACK_ERROR
+    if(H5Lmove(file_id, "/g21/g1", H5L_SAME_LOC, "/g21/g3", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group2_id, "/g21/g3", "/g21/g3") < 0) TEST_ERROR
@@ -1669,14 +1669,14 @@ test_main(hid_t file_id, hid_t fapl)
     if((group3_id = H5Gopen2(file_id, "/g22/g2", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Rename soft link */
-    if(H5Gmove(file_id, "/g22/g2", "/g22/g3") < 0) FAIL_STACK_ERROR
+    if(H5Lmove(file_id, "/g22/g2", H5L_SAME_LOC, "/g22/g3", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group2_id, "/g22/g1", "/g22/g1") < 0) TEST_ERROR
     if(check_name(group3_id, "/g22/g3", "/g22/g3") < 0) TEST_ERROR
 
     /* Rename soft link, using relative paths */
-    if(H5Gmove(group_id, "g3", "g2") < 0) FAIL_STACK_ERROR
+    if(H5Lmove(group_id, "g3", H5L_SAME_LOC, "g2", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group2_id, "/g22/g1", "/g22/g1") < 0) TEST_ERROR
@@ -1890,12 +1890,12 @@ test_main(hid_t file_id, hid_t fapl)
     PASSED();
 
 
-/*-------------------------------------------------------------------------
-    * Test H5Iget_name and H5Gmove with repeated path components
+   /*-------------------------------------------------------------------------
+    * Test H5Iget_name and H5Lmove with repeated path components
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5Iget_name and H5Gmove with repeated path components");
+    TESTING("H5Iget_name and H5Lmove with repeated path components");
 
     /* Create a group "g29/g1/g2/g1/g2" in a file */
     if((group_id = H5Gcreate2(file_id, "/g29", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
@@ -1905,31 +1905,31 @@ test_main(hid_t file_id, hid_t fapl)
     if((group5_id = H5Gcreate2(file_id, "/g29/g1/g2/g1/g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Rename group */
-    if(H5Gmove(file_id, "/g29/g1/g2/g1/g2", "/g29/g1/g2/g1/g3") < 0)  TEST_ERROR
+    if(H5Lmove(file_id, "/g29/g1/g2/g1/g2", H5L_SAME_LOC, "/g29/g1/g2/g1/g3", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group5_id, "/g29/g1/g2/g1/g3", "/g29/g1/g2/g1/g3") < 0) TEST_ERROR
 
     /* Rename group in middle of path, keeping within the same group */
-    if(H5Gmove(file_id, "/g29/g1/g2/g1", "/g29/g1/g2/g3") < 0)  TEST_ERROR
+    if(H5Lmove(file_id, "/g29/g1/g2/g1", H5L_SAME_LOC, "/g29/g1/g2/g3", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group4_id, "/g29/g1/g2/g3", "/g29/g1/g2/g3") < 0) TEST_ERROR
     if(check_name(group5_id, "/g29/g1/g2/g3/g3", "/g29/g1/g2/g3/g3") < 0) TEST_ERROR
 
     /* Rename group in middle of path, moving to another group in file */
-    if(H5Gmove(file_id, "/g29/g1/g2/g3", "/g29/g3") < 0)  TEST_ERROR
+    if(H5Lmove(file_id, "/g29/g1/g2/g3", H5L_SAME_LOC, "/g29/g3", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group4_id, "/g29/g3", "/g29/g3") < 0) TEST_ERROR
     if(check_name(group5_id, "/g29/g3/g3", "/g29/g3/g3") < 0) TEST_ERROR
 
     /* Close */
-    H5Gclose(group_id);
-    H5Gclose(group2_id);
-    H5Gclose(group3_id);
-    H5Gclose(group4_id);
-    H5Gclose(group5_id);
+    if(H5Gclose(group_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group2_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group3_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group4_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group5_id) < 0) FAIL_STACK_ERROR
 
     PASSED();
 

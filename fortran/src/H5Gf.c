@@ -438,36 +438,31 @@ DONE:
 int_f
 nh5gmove_c(hid_t_f *loc_id, _fcd src_name, int_f *src_namelen, _fcd dst_name, int_f*dst_namelen)
 {
-  int ret_value = -1;
-  hid_t c_loc_id;
-  char *c_src_name, *c_dst_name;
-  size_t c_src_namelen, c_dst_namelen;
-  herr_t c_ret_value;
-  /*
-   *  Convert Fortran name to C name
-   */
-  c_src_namelen = *src_namelen;
-  c_dst_namelen = *dst_namelen;
-  c_src_name = (char *)HD5f2cstring(src_name, c_src_namelen);
-  if(c_src_name == NULL) return ret_value;
+    char *c_src_name = NULL, *c_dst_name = NULL;
+    int ret_value = -1;
 
-  c_dst_name = (char *)HD5f2cstring(dst_name, c_dst_namelen);
-  if(c_dst_name == NULL) { HDfree(c_src_name);
-                           return ret_value;
-                         }
-  /*
-   *  Call H5Gmove function
-   */
-  c_loc_id = (hid_t)*loc_id;
-  c_ret_value = H5Gmove(c_loc_id, c_src_name, c_dst_name);
-  if(c_ret_value < 0) goto DONE;
+    /*
+     *  Convert Fortran name to C name
+     */
+    if(NULL == (c_src_name = (char *)HD5f2cstring(src_name, (size_t)*src_namelen)))
+        goto DONE;
+    if(NULL == (c_dst_name = (char *)HD5f2cstring(dst_name, (size_t)*dst_namelen)))
+        goto DONE;
 
-  ret_value = 0;
+    /*
+     *  Call H5Gmove function
+     */
+    if(H5Lmove((hid_t)*loc_id, c_src_name, H5L_SAME_LOC, c_dst_name, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        goto DONE;
+
+    ret_value = 0;
 
 DONE:
-  HDfree(c_src_name);
-  HDfree(c_dst_name);
-  return ret_value ;
+    if(c_src_name)
+        HDfree(c_src_name);
+    if(c_dst_name)
+        HDfree(c_dst_name);
+    return ret_value ;
 }
 
 /*----------------------------------------------------------------------------

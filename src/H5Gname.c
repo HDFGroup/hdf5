@@ -843,7 +843,7 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
         * H5G_NAME_MOVE
         *-------------------------------------------------------------------------
         */
-        case H5G_NAME_MOVE: /* H5Gmove case, check for relative names case */
+        case H5G_NAME_MOVE: /* Link move case, check for relative names case */
             /* Check if the src object moved is in the current object's path */
             if(H5G_common_path(obj_path->full_path_r, names->src_full_path_r)) {
                 const char *full_path;      /* Full path of current object */

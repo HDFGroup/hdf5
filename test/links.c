@@ -2982,129 +2982,129 @@ external_link_move(hid_t fapl, hbool_t new_format)
 /* Move external link to different name within same group */
 
     /* Open first file */
-    if((fid = H5Fopen(filename1, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
+    if((fid = H5Fopen(filename1, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Move external link within same group */
-    if(H5Gmove(fid, "src", "src2") < 0) TEST_ERROR
+    if(H5Lmove(fid, "src", H5L_SAME_LOC, "src2", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Open object through external link */
     if((gid = H5Gopen2(fid, "src2", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Check name */
-    if((name_len = H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE )) < 0) TEST_ERROR
+    if((name_len = H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE )) < 0) FAIL_STACK_ERROR
     if(HDstrcmp(objname, "/dst")) TEST_ERROR
 
     /* Create object in external file */
-    if((gid2 = H5Gcreate2(gid, "new_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((gid2 = H5Gcreate2(gid, "new_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Close group in external file */
-    if(H5Gclose(gid2) < 0) TEST_ERROR
+    if(H5Gclose(gid2) < 0) FAIL_STACK_ERROR
 
     /* Close external object */
-    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
 
     /* Close first file */
-    if(H5Fclose(fid) < 0) TEST_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
 
     /* Open second file */
-    if((fid = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Open group created through external link */
     if((gid = H5Gopen2(fid, "dst/new_group", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Close group */
-    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
 
     /* Close file */
-    if(H5Fclose(fid) < 0) TEST_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
 
 /* Move external link to different group */
 
     /* Open first file */
-    if((fid = H5Fopen(filename1, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
+    if((fid = H5Fopen(filename1, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Create another group, to move the external link into */
-    if((gid = H5Gcreate2(fid, "group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((gid = H5Gcreate2(fid, "group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Move external link to different group */
-    if(H5Gmove2(fid, "src2", gid, "src3") < 0) TEST_ERROR
+    if(H5Gmove2(fid, "src2", gid, "src3") < 0) FAIL_STACK_ERROR
 
     /* Close new group */
-    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
 
     /* Open object through external link */
     if((gid = H5Gopen2(fid, "/group2/src3", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Check name */
-    if((name_len = H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE )) < 0) TEST_ERROR
+    if((name_len = H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE )) < 0) FAIL_STACK_ERROR
     if(HDstrcmp(objname, "/dst")) TEST_ERROR
 
     /* Create object in external file */
-    if((gid2 = H5Gcreate2(gid, "new_group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((gid2 = H5Gcreate2(gid, "new_group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Close group in external file */
-    if(H5Gclose(gid2) < 0) TEST_ERROR
+    if(H5Gclose(gid2) < 0) FAIL_STACK_ERROR
 
     /* Close external object */
-    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
 
     /* Close first file */
-    if(H5Fclose(fid) < 0) TEST_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
 
     /* Open second file */
-    if((fid = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Open group created through external link */
     if((gid = H5Gopen2(fid, "dst/new_group2", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Close group */
-    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
 
     /* Close file */
-    if(H5Fclose(fid) < 0) TEST_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
 
 /* Move external link back to original group */
 
     /* Open first file */
-    if((fid = H5Fopen(filename1, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
+    if((fid = H5Fopen(filename1, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Open object through external link */
     if((gid = H5Gopen2(fid, "/group2/src3", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Check name */
-    if((name_len = H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE )) < 0) TEST_ERROR
+    if((name_len = H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE )) < 0) FAIL_STACK_ERROR
     if(HDstrcmp(objname, "/dst")) TEST_ERROR
 
     /* Move external link back to original location */
-    if(H5Gmove(fid, "/group2/src3", "/src") < 0) TEST_ERROR
+    if(H5Lmove(fid, "/group2/src3", H5L_SAME_LOC, "/src", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Check name */
-    if((name_len = H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE )) < 0) TEST_ERROR
+    if((name_len = H5Iget_name(gid, objname, (size_t)NAME_BUF_SIZE )) < 0) FAIL_STACK_ERROR
     if(HDstrcmp(objname, "/dst")) TEST_ERROR
 
     /* Create object in external file */
-    if((gid2 = H5Gcreate2(gid, "new_group3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((gid2 = H5Gcreate2(gid, "new_group3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Close group in external file */
-    if(H5Gclose(gid2) < 0) TEST_ERROR
+    if(H5Gclose(gid2) < 0) FAIL_STACK_ERROR
 
     /* Close external object */
-    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
 
     /* Close first file */
-    if(H5Fclose(fid) < 0) TEST_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
 
     /* Open second file */
-    if((fid = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Open group created through external link */
     if((gid = H5Gopen2(fid, "dst/new_group3", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Close group */
-    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
 
     /* Close file */
-    if(H5Fclose(fid) < 0) TEST_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
 
     PASSED();
     return 0;
@@ -4365,62 +4365,62 @@ ud_callbacks(hid_t fapl, hbool_t new_format)
     }
 
     /* Fill the query buffer */
-    if(H5Gget_linkval(fid, UD_CB_LINK_NAME, (size_t)NAME_BUF_SIZE, query_buf) < 0) TEST_ERROR
+    if(H5Gget_linkval(fid, UD_CB_LINK_NAME, (size_t)NAME_BUF_SIZE, query_buf) < 0) FAIL_STACK_ERROR
     if(HDstrcmp(query_buf, "query succeeded") != 0) TEST_ERROR
 
     /* Move the link */
-    if(H5Gmove(fid, UD_CB_LINK_NAME, NEW_UD_CB_LINK_NAME) < 0) TEST_ERROR
+    if(H5Lmove(fid, UD_CB_LINK_NAME, H5L_SAME_LOC, NEW_UD_CB_LINK_NAME, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Re-open group to ensure that move worked */
     if((gid = H5Gopen2(fid, NEW_UD_CB_LINK_NAME, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
 
     /* Remove UD link */
-    if(H5Gunlink(fid, NEW_UD_CB_LINK_NAME) < 0) TEST_ERROR
+    if(H5Gunlink(fid, NEW_UD_CB_LINK_NAME) < 0) FAIL_STACK_ERROR
 
 
     /* Test that the callbacks don't work if the link class is not registered */
 
     /* Create a new link. Just for fun, give it a non-default character
      * encoding (to test that LAPLs work) */
-    if((lcpl = H5Pcreate(H5P_LINK_CREATE)) < 0) TEST_ERROR
-    if(H5Pset_char_encoding(lcpl, H5T_CSET_UTF8) < 0) TEST_ERROR
-    if(H5Lcreate_ud(fid, UD_CB_LINK_NAME, UD_CB_TYPE, ud_target_name, (size_t)UD_CB_TARGET_LEN, lcpl, H5P_DEFAULT) < 0) TEST_ERROR
-    if(H5Pclose(lcpl) < 0) TEST_ERROR
+    if((lcpl = H5Pcreate(H5P_LINK_CREATE)) < 0) FAIL_STACK_ERROR
+    if(H5Pset_char_encoding(lcpl, H5T_CSET_UTF8) < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_ud(fid, UD_CB_LINK_NAME, UD_CB_TYPE, ud_target_name, (size_t)UD_CB_TARGET_LEN, lcpl, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Pclose(lcpl) < 0) FAIL_STACK_ERROR
 
     /* Check its character encoding */
-    if(H5Lget_info(fid, UD_CB_LINK_NAME, &li, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(fid, UD_CB_LINK_NAME, &li, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     if(li.cset != H5T_CSET_UTF8) TEST_ERROR
 
     /* Unregister the link class so the library forgets what its callbacks do */
-    if(H5Lunregister(UD_CB_TYPE) < 0) TEST_ERROR
+    if(H5Lunregister(UD_CB_TYPE) < 0) FAIL_STACK_ERROR
 
     /* Now test that each of the callbacks fails */
     H5E_BEGIN_TRY {
-        if(H5Lcreate_ud(fid, NEW_UD_CB_LINK_NAME, UD_CB_TYPE, ud_target_name, (size_t)UD_CB_TARGET_LEN, H5P_DEFAULT, H5P_DEFAULT) >= 0) TEST_ERROR
-        if(H5Gmove(fid, UD_CB_LINK_NAME, NEW_UD_CB_LINK_NAME) >= 0) TEST_ERROR
-        if(H5Gunlink(fid, UD_CB_LINK_NAME) >= 0) TEST_ERROR
+        if(H5Lcreate_ud(fid, NEW_UD_CB_LINK_NAME, UD_CB_TYPE, ud_target_name, (size_t)UD_CB_TARGET_LEN, H5P_DEFAULT, H5P_DEFAULT) >= 0) FAIL_STACK_ERROR
+        if(H5Lmove(fid, UD_CB_LINK_NAME, H5L_SAME_LOC, NEW_UD_CB_LINK_NAME, H5P_DEFAULT, H5P_DEFAULT) >= 0) FAIL_STACK_ERROR
+        if(H5Gunlink(fid, UD_CB_LINK_NAME) >= 0) FAIL_STACK_ERROR
         if((gid = H5Gopen2(gid, UD_CB_LINK_NAME, H5P_DEFAULT)) >= 0) FAIL_STACK_ERROR
-        if(H5Gunlink(fid, UD_CB_LINK_NAME) >= 0) TEST_ERROR
+        if(H5Gunlink(fid, UD_CB_LINK_NAME) >= 0) FAIL_STACK_ERROR
     } H5E_END_TRY
 
     /* The query callback should NOT fail, but should be unable to give a linklen */
-    if(H5Lget_info(fid, UD_CB_LINK_NAME, &li, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(fid, UD_CB_LINK_NAME, &li, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     if(li.u.val_size != 0) TEST_ERROR
     if(li.type != UD_CB_TYPE) TEST_ERROR
-    if(H5Gget_objinfo(fid, UD_CB_LINK_NAME, FALSE, &sb) < 0) TEST_ERROR
+    if(H5Gget_objinfo(fid, UD_CB_LINK_NAME, FALSE, &sb) < 0) FAIL_STACK_ERROR
     if(sb.type != H5G_UDLINK) TEST_ERROR
 
     /* Unregister the UD hard links */
-    if(H5Lunregister(UD_HARD_TYPE) < 0) TEST_ERROR
+    if(H5Lunregister(UD_HARD_TYPE) < 0) FAIL_STACK_ERROR
 
     /* Close file */
-    if(H5Fclose(fid) < 0) TEST_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
 
     PASSED();
     return 0;
 
- error:
+error:
     H5E_BEGIN_TRY {
     	H5Pclose (lcpl);
     	H5Gclose (gid);
@@ -4809,47 +4809,51 @@ ud_link_errors(hid_t fapl, hbool_t new_format)
     if(H5Lregister(UD_plist_class) < 0) TEST_ERROR
     /* Now register the first class we'll be using.
      * It has the same ID as the plist class, and should replace it. */
-    if(H5Lregister(UD_cbfail_class1) < 0) TEST_ERROR
+    if(H5Lregister(UD_cbfail_class1) < 0) FAIL_STACK_ERROR
 
     /* Create a group for the UD link to point to */
-    if((gid = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Gclose(gid) < 0) TEST_ERROR
+    if((gid = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
 
     /* Create a user-defined link to the group. */
     strcpy(group_name, "/group");
-    if(H5Lcreate_ud(fid, "/ud_link", UD_CBFAIL_TYPE, &group_name, HDstrlen(group_name) + 1, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lcreate_ud(fid, "/ud_link", UD_CBFAIL_TYPE, &group_name, HDstrlen(group_name) + 1, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Open the group through the ud link */
     if((gid = H5Gopen2(fid, "ud_link", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
 
     /* Now test that each of the callbacks will cause a failure if it returns -1 */
     H5E_BEGIN_TRY {
         /* The create callback will fail if we pass in no udata */
         if(H5Lcreate_ud(fid, "fail", UD_CBFAIL_TYPE, NULL, (size_t)0, H5P_DEFAULT, H5P_DEFAULT) >= 0) TEST_ERROR
+
         /* The move and copy callbacks will fail */
-        if(H5Gmove(fid, "ud_link", "move_fail") >= 0) TEST_ERROR
+        if(H5Lmove(fid, "ud_link", H5L_SAME_LOC, "move_fail", H5P_DEFAULT, H5P_DEFAULT) >= 0) TEST_ERROR
         if(H5Lcopy(fid, "ud_link", fid, "copy_fail", H5P_DEFAULT, H5P_DEFAULT) >= 0) TEST_ERROR
+
         /* The traversal callback will fail if we remove its target */
         if(H5Gunlink(fid, "group") < 0) TEST_ERROR
-        if((gid = H5Gopen2(gid, "ud_link", H5P_DEFAULT)) >= 0) FAIL_STACK_ERROR
+        if((gid = H5Gopen2(gid, "ud_link", H5P_DEFAULT)) >= 0) TEST_ERROR
+
         /* The deletion callback will always fail */
         if(H5Gunlink(fid, "ud_link") >= 0) TEST_ERROR
+
         /* The query callback will fail */
         if(H5Lget_info(fid, "ud_link", &li, H5P_DEFAULT) >=0) TEST_ERROR
     } H5E_END_TRY
 
     /* Now use a class with different callback functions */
-    if(H5Lregister(UD_cbfail_class2) < 0) TEST_ERROR
+    if(H5Lregister(UD_cbfail_class2) < 0) FAIL_STACK_ERROR
 
     /* Moving should still fail, but copying will succeed */
     H5E_BEGIN_TRY {
-        if(H5Gmove(fid, "ud_link", "move_fail") >= 0) TEST_ERROR
+        if(H5Lmove(fid, "ud_link", H5L_SAME_LOC, "move_fail", H5P_DEFAULT, H5P_DEFAULT) >= 0) TEST_ERROR
     } H5E_END_TRY
-    if(H5Lcopy(fid, "ud_link", fid, "copy_succ", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lcopy(fid, "ud_link", fid, "copy_succ", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* The query callback will succeed when we only want to get the size of the buffer... */
-    if(H5Lget_info(fid, "ud_link", &li, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(fid, "ud_link", &li, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     if(li.u.val_size != 0) TEST_ERROR
     /* ...but fail when we try to write data to the buffer itself*/
     H5E_BEGIN_TRY {
@@ -4857,34 +4861,34 @@ ud_link_errors(hid_t fapl, hbool_t new_format)
     } H5E_END_TRY
 
     /* Register a new class */
-    if(H5Lregister(UD_cbfail_class3) < 0) TEST_ERROR
+    if(H5Lregister(UD_cbfail_class3) < 0) FAIL_STACK_ERROR
 
     /* Now querying should succeed */
-    if(H5Lget_info(fid, "ud_link", &li, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_info(fid, "ud_link", &li, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     if(li.u.val_size != 8) TEST_ERROR
-    if(H5Lget_val(fid, "ud_link", query_buf, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lget_val(fid, "ud_link", query_buf, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     if(HDstrcmp(query_buf, "succeed") != 0) TEST_ERROR
 
     /* Moving and copying should both succeed */
-    if(H5Gmove(fid, "copy_succ", "move_succ") < 0) TEST_ERROR
-    if(H5Lcopy(fid, "ud_link", fid, "copy_succ2", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lmove(fid, "copy_succ", H5L_SAME_LOC, "move_succ", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Lcopy(fid, "ud_link", fid, "copy_succ2", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Delete link (this callback should work now) */
-    if(H5Gunlink(fid, "ud_link") < 0) TEST_ERROR
+    if(H5Gunlink(fid, "ud_link") < 0) FAIL_STACK_ERROR
 
     /* Close file */
-    if(H5Fclose(fid) < 0) TEST_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
 
     PASSED();
     return 0;
 
- error:
+error:
     H5E_BEGIN_TRY {
     	H5Gclose (gid);
     	H5Fclose (fid);
     } H5E_END_TRY;
     return -1;
-}
+} /* end ud_link_errors() */
 
 
 /*-------------------------------------------------------------------------

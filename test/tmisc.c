@@ -4725,8 +4725,8 @@ test_misc25c(void)
     CHECK(gid, FAIL, "H5Gopen2");
 
     /* Rename the dataset */
-    ret = H5Gmove(gid, MISC25C_DSETNAME, MISC25C_DSETNAME2);
-    CHECK(ret, FAIL, "H5Gmove");
+    ret = H5Lmove(gid, MISC25C_DSETNAME, H5L_SAME_LOC, MISC25C_DSETNAME2, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Lmove");
 
     /* Delete the first attribute */
     ret = H5Adelete(gid, MISC25C_ATTRNAME);
