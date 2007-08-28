@@ -36,14 +36,16 @@ const char  *progname = "h5dump";
     } while(0);
 
 #define end_obj(obj,end)                                        \
-    if(HDstrlen(end)) {                                         \
-        printf("%s", end);                                      \
+    do {							\
+        if(HDstrlen(end)) {                                     \
+            printf("%s", end);                                  \
+            if(HDstrlen(obj))                                   \
+                printf(" ");                                    \
+        }                                                       \
         if(HDstrlen(obj))                                       \
-            printf(" ");                                        \
-    }                                                           \
-    if(HDstrlen(obj))                                           \
-        printf("%s", obj);                                      \
-    printf("\n");
+            printf("%s", obj);                                  \
+        printf("\n");						\
+    } while(0);
 
 /* 3 private values: can't be set, but can be read.
    Note: these are defined in H5Zprivate, they are
