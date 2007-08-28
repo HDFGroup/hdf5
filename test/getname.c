@@ -475,13 +475,13 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group3_id, "/g5/C/D", "/g5/C/D") < 0) TEST_ERROR
 
     /* Move group "/g5/C/D" back to "/g4/A/B" using relative name */
-    if(H5Gmove2(group5_id, "D", group2_id, "B") < 0) FAIL_STACK_ERROR
+    if(H5Lmove(group5_id, "D", group2_id, "B", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group3_id, "/g4/A/B", "/g4/A/B") < 0) TEST_ERROR
 
     /* Move group "/g4/A/B" to "/g4/F/B" using relative name */
-    if(H5Gmove2(group_id, "A", group_id, "F") < 0) FAIL_STACK_ERROR
+    if(H5Lmove(group_id, "A", group_id, "F", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group3_id, "/g4/F/B", "/g4/F/B") < 0) TEST_ERROR

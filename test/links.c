@@ -3027,7 +3027,7 @@ external_link_move(hid_t fapl, hbool_t new_format)
     if((gid = H5Gcreate2(fid, "group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Move external link to different group */
-    if(H5Gmove2(fid, "src2", gid, "src3") < 0) FAIL_STACK_ERROR
+    if(H5Lmove(fid, "src2", gid, "src3", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Close new group */
     if(H5Gclose(gid) < 0) FAIL_STACK_ERROR

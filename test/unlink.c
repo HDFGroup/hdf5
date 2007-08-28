@@ -340,7 +340,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_new_move
  *
- * Purpose:     Tests H5Gmove2()
+ * Purpose:     Tests H5Lmove() with different locations
  *
  * Return:      Success:        0
  *
@@ -364,9 +364,9 @@ test_new_move(hid_t fapl)
 
     /* Create a second file */
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
-    if((file_a = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((file_a = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
     h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
-    if((file_b = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((file_b = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Create groups in first file */
     if((grp_1 = H5Gcreate2(file_a, "group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
@@ -380,26 +380,26 @@ test_new_move(hid_t fapl)
     /* Move a group within the file.  Both of source and destination use
      * H5G_SAME_LOC.  Should fail. */
     H5E_BEGIN_TRY {
-        if(H5Gmove2(H5G_SAME_LOC, "group_move", H5G_SAME_LOC, "group_new_name") !=FAIL) TEST_ERROR
+        if(H5Lmove(H5G_SAME_LOC, "group_move", H5G_SAME_LOC, "group_new_name", H5P_DEFAULT, H5P_DEFAULT) != FAIL) TEST_ERROR
     } H5E_END_TRY;
 
     /* Move a group across files.  Should fail. */
     H5E_BEGIN_TRY {
-        if(H5Gmove2(grp_1, "group_move", file_b, "group_new_name")!=FAIL) TEST_ERROR
+        if(H5Lmove(grp_1, "group_move", file_b, "group_new_name", H5P_DEFAULT, H5P_DEFAULT) != FAIL) TEST_ERROR
     } H5E_END_TRY;
 
     /* Move a group across groups in the same file. */
-    if(H5Gmove2(grp_1, "group_move", grp_2, "group_new_name") < 0) TEST_ERROR
+    if(H5Lmove(grp_1, "group_move", grp_2, "group_new_name", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Open the group just moved to the new location. */
     if((moved_grp = H5Gopen2(grp_2, "group_new_name", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
-    if(H5Gclose(grp_1) < 0) TEST_ERROR
-    if(H5Gclose(grp_2) < 0) TEST_ERROR
-    if(H5Gclose(grp_move) < 0) TEST_ERROR
-    if(H5Gclose(moved_grp) < 0) TEST_ERROR
-    if(H5Fclose(file_a) < 0) TEST_ERROR
-    if(H5Fclose(file_b) < 0) TEST_ERROR
+    if(H5Gclose(grp_1) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(grp_2) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(grp_move) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(moved_grp) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file_a) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file_b) < 0) FAIL_STACK_ERROR
 
     PASSED();
     return 0;
@@ -420,7 +420,7 @@ test_new_move(hid_t fapl)
 /*-------------------------------------------------------------------------
  * Function:    check_new_move
  *
- * Purpose:     Checks result of H5Gmove2()
+ * Purpose:     Checks result of H5Lmove() with different locations
  *
  * Return:      Success:        0
  *

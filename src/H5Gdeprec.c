@@ -78,9 +78,9 @@ typedef struct {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 static herr_t H5G_link_hard(hid_t cur_loc_id, const char *cur_name,
     hid_t new_loc_id, const char *new_name);
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
 static herr_t H5G_move(hid_t src_loc_id, const char *src_name,
     hid_t dst_loc_id, const char *dst_name);
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 static herr_t H5G_set_comment(H5G_loc_t *loc, const char *name,
     const char *buf, hid_t dxpl_id);
 static int H5G_get_comment(H5G_loc_t *loc, const char *name,
@@ -440,7 +440,6 @@ H5Gmove(hid_t src_loc_id, const char *src_name, const char *dst_name)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gmove() */
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
 /*-------------------------------------------------------------------------
@@ -523,6 +522,7 @@ H5G_move(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_move() */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
 /*-------------------------------------------------------------------------
