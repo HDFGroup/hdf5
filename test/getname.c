@@ -1035,7 +1035,7 @@ test_main(hid_t file_id, hid_t fapl)
     if((dataset_id = H5Dopen(file_id, "/g17/d")) < 0) FAIL_STACK_ERROR
 
     /* Create link to dataset named "link" */
-    if(H5Glink2(dataset_id,".",H5G_LINK_HARD,file_id,"/g17/link") < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_hard(dataset_id, ".", file_id, "/g17/link", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     if((dataset2_id = H5Dopen(file_id, "/g17/link")) < 0) FAIL_STACK_ERROR
 
     /* Make sure that the two IDs use two different names */

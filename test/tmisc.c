@@ -4088,14 +4088,14 @@ test_misc24(void)
     CHECK(ret, FAIL, "H5Tcommit");
 
     /* Create soft links to the objects created */
-    ret = H5Glink2(file_id, MISC24_GROUP_NAME, H5L_TYPE_SOFT, file_id, MISC24_GROUP_LINK);
-    CHECK(ret, FAIL, "H5Glink2");
+    ret = H5Lcreate_soft(MISC24_GROUP_NAME, file_id, MISC24_GROUP_LINK, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Lcreate_soft");
 
-    ret = H5Glink2(file_id, MISC24_DATASET_NAME, H5L_TYPE_SOFT, file_id, MISC24_DATASET_LINK);
-    CHECK(ret, FAIL, "H5Glink2");
+    ret = H5Lcreate_soft(MISC24_DATASET_NAME, file_id, MISC24_DATASET_LINK, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Lcreate_soft");
 
-    ret = H5Glink2(file_id, MISC24_DATATYPE_NAME, H5L_TYPE_SOFT, file_id, MISC24_DATATYPE_LINK);
-    CHECK(ret, FAIL, "H5Glink2");
+    ret = H5Lcreate_soft(MISC24_DATATYPE_NAME, file_id, MISC24_DATATYPE_LINK, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Lcreate_soft");
 
     /* Close IDs for objects */
     ret = H5Dclose(dset_id);

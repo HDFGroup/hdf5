@@ -4717,7 +4717,7 @@ test_copy_group_loop(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if((gid_sub2 = H5Gcreate2(gid, NAME_GROUP_SUB_SUB, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Create link to top group */
-    if(H5Glink2(gid, ".", H5L_TYPE_HARD, gid_sub2, NAME_GROUP_LOOP) < 0) TEST_ERROR
+    if(H5Lcreate_hard(gid, ".", gid_sub2, NAME_GROUP_LOOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* close sub sub group */
     if( H5Gclose(gid_sub2) < 0) TEST_ERROR
@@ -4835,19 +4835,19 @@ test_copy_group_wide_loop(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 
         for(v = 0; v < NUM_WIDE_LOOP_GROUPS; v++) {
             sprintf(objname, "%s-%u", NAME_GROUP_SUB_SUB2, v);
-            if((gid_sub2 = H5Gcreate2(gid_sub, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+            if((gid_sub2 = H5Gcreate2(gid_sub, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
             /* Create link to top group */
-            if(H5Glink2(gid, ".", H5L_TYPE_HARD, gid_sub2, NAME_GROUP_LOOP) < 0) TEST_ERROR
+            if(H5Lcreate_hard(gid, ".", gid_sub2, NAME_GROUP_LOOP, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
             /* Create link to sub-group */
-            if(H5Glink2(gid_sub, ".", H5L_TYPE_HARD, gid_sub2, NAME_GROUP_LOOP2) < 0) TEST_ERROR
+            if(H5Lcreate_hard(gid_sub, ".", gid_sub2, NAME_GROUP_LOOP2, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
             /* Create link to self :-) */
-            if(H5Glink2(gid_sub2, ".", H5L_TYPE_HARD, gid_sub2, NAME_GROUP_LOOP3) < 0) TEST_ERROR
+            if(H5Lcreate_hard(gid_sub2, ".", gid_sub2, NAME_GROUP_LOOP3, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
             /* close sub sub group */
-            if( H5Gclose(gid_sub2) < 0) TEST_ERROR
+            if(H5Gclose(gid_sub2) < 0) FAIL_STACK_ERROR
         } /* end for */
 
         /* close sub group */
@@ -4979,16 +4979,16 @@ test_copy_group_links(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Dclose(did) < 0) TEST_ERROR
 
     /* make a hard link to the dataset */
-    if(H5Glink2(fid_src, NAME_LINK_DATASET, H5L_TYPE_HARD, H5G_SAME_LOC, NAME_LINK_HARD) < 0) TEST_ERROR
+    if(H5Lcreate_hard(fid_src, NAME_LINK_DATASET, H5G_SAME_LOC, NAME_LINK_HARD, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* make a soft link to the dataset */
-    if(H5Glink2(fid_src, NAME_LINK_DATASET, H5L_TYPE_SOFT, H5G_SAME_LOC, NAME_LINK_SOFT) < 0) TEST_ERROR
+    if(H5Lcreate_soft(NAME_LINK_DATASET, fid_src, NAME_LINK_SOFT, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* make a soft link to nowhere */
-    if(H5Glink2(fid_src, "nowhere", H5L_TYPE_SOFT, H5G_SAME_LOC, NAME_LINK_SOFT_DANGLE) < 0) TEST_ERROR
+    if(H5Lcreate_soft("nowhere", fid_src, NAME_LINK_SOFT_DANGLE, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* make a dangling external link */
-    if(H5Lcreate_external("filename", "obj_name", fid_src, NAME_LINK_EXTERN, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lcreate_external("filename", "obj_name", fid_src, NAME_LINK_EXTERN, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* close the group */
     if(H5Gclose(gid) < 0) TEST_ERROR
@@ -5108,19 +5108,19 @@ test_copy_soft_link(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close dataspace */
-    if(H5Sclose(sid) < 0) TEST_ERROR
+    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
 
     /* close the dataset */
-    if(H5Dclose(did) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) FAIL_STACK_ERROR
 
     /* make a soft link to the dataset */
-    if(H5Glink2(fid_src, NAME_LINK_DATASET, H5L_TYPE_SOFT, H5G_SAME_LOC, NAME_LINK_SOFT) < 0) TEST_ERROR
+    if(H5Lcreate_soft(NAME_LINK_DATASET, fid_src, NAME_LINK_SOFT, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* close the group */
-    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
 
     /* close the SRC file */
-    if(H5Fclose(fid_src) < 0) TEST_ERROR
+    if(H5Fclose(fid_src) < 0) FAIL_STACK_ERROR
 
 
     /* open the source file with read-only */
@@ -7008,20 +7008,20 @@ test_copy_option(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl, unsigned flag, hboo
     if(H5Gclose(gid_sub) < 0) TEST_ERROR
 
     /* close the group */
-    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
 
     if((flag & H5O_COPY_EXPAND_SOFT_LINK_FLAG) > 0) {
         /* Create group to copy */
-        if((gid = H5Gcreate2(fid_src, NAME_GROUP_LINK, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-        if(H5Glink2(fid_src, NAME_DATASET_SUB_SUB, H5L_TYPE_SOFT, H5G_SAME_LOC, NAME_LINK_SOFT) < 0) TEST_ERROR
-        if(H5Glink2(fid_src, "nowhere", H5L_TYPE_SOFT, H5G_SAME_LOC, NAME_LINK_SOFT_DANGLE) < 0) TEST_ERROR
-        if(H5Gclose(gid) < 0) TEST_ERROR
+        if((gid = H5Gcreate2(fid_src, NAME_GROUP_LINK, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+        if(H5Lcreate_soft(NAME_DATASET_SUB_SUB, fid_src, NAME_LINK_SOFT, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+        if(H5Lcreate_soft("nowhere", fid_src, NAME_LINK_SOFT_DANGLE, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+        if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
 
         /* Create group to compare with */
-        if((gid = H5Gcreate2(fid_src, NAME_GROUP_LINK2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-        if(H5Glink2(fid_src, NAME_DATASET_SUB_SUB, H5L_TYPE_HARD, H5G_SAME_LOC, NAME_LINK_SOFT2) < 0) TEST_ERROR
-        if(H5Glink2(fid_src, "nowhere", H5L_TYPE_SOFT, H5G_SAME_LOC, NAME_LINK_SOFT_DANGLE2) < 0) TEST_ERROR
-        if(H5Gclose(gid) < 0) TEST_ERROR
+        if((gid = H5Gcreate2(fid_src, NAME_GROUP_LINK2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+        if(H5Lcreate_hard(fid_src, NAME_DATASET_SUB_SUB, H5G_SAME_LOC, NAME_LINK_SOFT2, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+        if(H5Lcreate_soft("nowhere", fid_src, NAME_LINK_SOFT_DANGLE2, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+        if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
     } /* end if */
 
     if((flag & H5O_COPY_EXPAND_REFERENCE_FLAG) > 0) {

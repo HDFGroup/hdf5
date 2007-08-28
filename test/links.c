@@ -4937,23 +4937,23 @@ lapl_nlinks(hid_t fapl, hbool_t new_format)
     if((gid = H5Gcreate2(fid, "final", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Create chain of soft links to existing object (limited) */
-    if(H5Glink2(fid, "final", H5G_LINK_SOFT, fid, "soft1") < 0) TEST_ERROR
-    if(H5Glink2(fid, "soft1", H5G_LINK_SOFT, fid, "soft2") < 0) TEST_ERROR
-    if(H5Glink2(fid, "soft2", H5G_LINK_SOFT, fid, "soft3") < 0) TEST_ERROR
-    if(H5Glink2(fid, "soft3", H5G_LINK_SOFT, fid, "soft4") < 0) TEST_ERROR
-    if(H5Glink2(fid, "soft4", H5G_LINK_SOFT, fid, "soft5") < 0) TEST_ERROR
-    if(H5Glink2(fid, "soft5", H5G_LINK_SOFT, fid, "soft6") < 0) TEST_ERROR
-    if(H5Glink2(fid, "soft6", H5G_LINK_SOFT, fid, "soft7") < 0) TEST_ERROR
-    if(H5Glink2(fid, "soft7", H5G_LINK_SOFT, fid, "soft8") < 0) TEST_ERROR
-    if(H5Glink2(fid, "soft8", H5G_LINK_SOFT, fid, "soft9") < 0) TEST_ERROR
-    if(H5Glink2(fid, "soft9", H5G_LINK_SOFT, fid, "soft10") < 0) TEST_ERROR
-    if(H5Glink2(fid, "soft10", H5G_LINK_SOFT, fid, "soft11") < 0) TEST_ERROR
-    if(H5Glink2(fid, "soft11", H5G_LINK_SOFT, fid, "soft12") < 0) TEST_ERROR
-    if(H5Glink2(fid, "soft12", H5G_LINK_SOFT, fid, "soft13") < 0) TEST_ERROR
-    if(H5Glink2(fid, "soft13", H5G_LINK_SOFT, fid, "soft14") < 0) TEST_ERROR
-    if(H5Glink2(fid, "soft14", H5G_LINK_SOFT, fid, "soft15") < 0) TEST_ERROR
-    if(H5Glink2(fid, "soft15", H5G_LINK_SOFT, fid, "soft16") < 0) TEST_ERROR
-    if(H5Glink2(fid, "soft16", H5G_LINK_SOFT, fid, "soft17") < 0) TEST_ERROR
+    if(H5Lcreate_soft("final", fid, "soft1", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_soft("soft1", fid, "soft2", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_soft("soft2", fid, "soft3", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_soft("soft3", fid, "soft4", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_soft("soft4", fid, "soft5", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_soft("soft5", fid, "soft6", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_soft("soft6", fid, "soft7", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_soft("soft7", fid, "soft8", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_soft("soft8", fid, "soft9", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_soft("soft9", fid, "soft10", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_soft("soft10", fid, "soft11", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_soft("soft11", fid, "soft12", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_soft("soft12", fid, "soft13", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_soft("soft13", fid, "soft14", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_soft("soft14", fid, "soft15", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_soft("soft15", fid, "soft16", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_soft("soft16", fid, "soft17", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Close objects */
     if(H5Gclose(gid) < 0) TEST_ERROR
@@ -5173,8 +5173,8 @@ linkinfo(hid_t fapl, hbool_t new_format)
     /* Create an object of each type */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
     if(H5Tcommit(fid, "datatype", tid) < 0) TEST_ERROR
-    if((gid = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Glink2(fid, "group", H5G_LINK_SOFT, H5G_SAME_LOC, "softlink") < 0) TEST_ERROR
+    if((gid = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_soft("group", fid, "softlink", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     if((sid = H5Screate(H5S_SCALAR)) < 0) TEST_ERROR
     if((did = H5Dcreate(fid, "dataset", H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) TEST_ERROR

@@ -486,13 +486,13 @@ void test_objnames(hid_t fid, const char* string)
   grp3_id = H5Gcreate2(fid, GROUP3_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   CHECK(grp3_id, FAIL, "H5Gcreate2");
 
-  ret = H5Glink2(fid, GROUP2_NAME, H5G_LINK_HARD, grp3_id, GROUP2_NAME);
-  CHECK(ret, FAIL, "H5Glink2");
+  ret = H5Lcreate_hard(fid, GROUP2_NAME, grp3_id, GROUP2_NAME, H5P_DEFAULT, H5P_DEFAULT);
+  CHECK(ret, FAIL, "H5Lcreate_hard");
   HDstrcpy(path_buf, GROUP2_NAME);
   HDstrcat(path_buf, "/");
   HDstrcat(path_buf, string);
-  ret = H5Glink2(grp3_id, path_buf, H5G_LINK_SOFT, H5G_SAME_LOC, string);
-  CHECK(ret, FAIL, "H5Glink2");
+  ret = H5Lcreate_hard(grp3_id, path_buf, H5G_SAME_LOC, string, H5P_DEFAULT, H5P_DEFAULT);
+  CHECK(ret, FAIL, "H5Lcreate_hard");
 
   /* Open named datatype using soft link */
   type_id = H5Topen(grp3_id, string);

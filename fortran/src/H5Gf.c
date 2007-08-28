@@ -342,42 +342,45 @@ DONE:
  *---------------------------------------------------------------------------*/
 
 int_f
-nh5glink2_c(hid_t_f *cur_loc_id, _fcd cur_name, int_f *cur_namelen,  int_f *link_type, hid_t_f *new_loc_id, _fcd new_name, int_f *new_namelen)
+nh5glink2_c(hid_t_f *cur_loc_id, _fcd cur_name, int_f *cur_namelen,
+    int_f *link_type, hid_t_f *new_loc_id, _fcd new_name, int_f *new_namelen)
 {
-  int ret_value = -1;
-  hid_t c_cur_loc_id;
-  hid_t c_new_loc_id;
-  H5G_link_t c_link_type;
-  char *c_cur_name, *c_new_name;
-  size_t c_cur_namelen, c_new_namelen;
-  herr_t c_ret_value;
-  /*
-   *  Convert Fortran name to C name
-   */
-  c_cur_namelen =*cur_namelen;
-  c_new_namelen =*new_namelen;
-  c_cur_name = (char *)HD5f2cstring(cur_name, c_cur_namelen);
-  c_new_name = (char *)HD5f2cstring(new_name, c_new_namelen);
-  if (c_cur_name == NULL) return ret_value;
-  if (c_new_name == NULL) { HDfree(c_cur_name);
-                            return ret_value;
-                          }
+    char *c_cur_name = NULL, *c_new_name = NULL;
+    int ret_value = -1;
 
-  /*
-   *  Call H5Glink2 function
-   */
-  c_cur_loc_id = *cur_loc_id;
-  c_new_loc_id = *new_loc_id;
-  c_link_type = (H5G_link_t)*link_type;
-  c_ret_value = H5Glink2(c_cur_loc_id, c_cur_name, c_link_type, c_new_loc_id, c_new_name);
+    /*
+     *  Convert Fortran name to C name
+     */
+    if(NULL == (c_cur_name = (char *)HD5f2cstring(cur_name, (size_t)*cur_namelen)))
+        goto DONE;
+    if(NULL == (c_new_name = (char *)HD5f2cstring(new_name, (size_t)*new_namelen)))
+        goto DONE;
 
-  if(c_ret_value < 0) goto DONE;
-  ret_value = 0;
+    /*
+    *  Call appropriate link creation function
+    */
+    switch((H5G_link_t)*link_type) {
+        case H5L_TYPE_HARD:
+            if(H5Lcreate_hard((hid_t)*cur_loc_id, c_cur_name, (hid_t)*new_loc_id, c_new_name, H5P_DEFAULT, H5P_DEFAULT) < 0)
+                goto DONE;
+            break;
+
+        case H5L_TYPE_SOFT:
+            if(H5Lcreate_soft(c_cur_name, (hid_t)*cur_loc_id, c_new_name, H5P_DEFAULT, H5P_DEFAULT) < 0)
+                goto DONE;
+            break;
+
+        default:        /* Unknown/unhandled link type */
+            goto DONE;
+    } /* end switch */
+    ret_value = 0;
 
 DONE:
-  HDfree(c_cur_name);
-  HDfree(c_new_name);
-  return ret_value ;
+    if(c_cur_name)
+        HDfree(c_cur_name);
+    if(c_new_name)
+        HDfree(c_new_name);
+    return ret_value ;
 }
 
 /*----------------------------------------------------------------------------

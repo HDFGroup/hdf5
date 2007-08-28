@@ -180,56 +180,54 @@ test_many(hid_t file)
     TESTING("forward unlink");
     for(i = 0; i < how_many; i++) {
 	sprintf(name, "obj_%05d", i);
-	if(H5Glink2(work, "/test_many_foo", H5L_TYPE_HARD, H5G_SAME_LOC, name) < 0) TEST_ERROR
-    }
-    for (i=0; i<how_many; i++) {
+	if(H5Lcreate_hard(work, "/test_many_foo", H5G_SAME_LOC, name, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    } /* end for */
+    for(i = 0; i < how_many; i++) {
 	sprintf(name, "obj_%05d", i);
-	if (H5Gunlink(work, name) < 0) TEST_ERROR
-    }
+	if(H5Gunlink(work, name) < 0) FAIL_STACK_ERROR
+    } /* end for */
     PASSED();
 
     /* Create a bunch of names and unlink them in reverse order */
     TESTING("backward unlink");
     for(i = 0; i < how_many; i++) {
 	sprintf(name, "obj_%05d", i);
-	if(H5Glink2(work, "/test_many_foo", H5L_TYPE_HARD, H5G_SAME_LOC, name) < 0) TEST_ERROR
-    }
-    for (i=how_many-1; i>=0; --i) {
+	if(H5Lcreate_hard(work, "/test_many_foo", H5G_SAME_LOC, name, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    } /* end for */
+    for(i = (how_many - 1); i >= 0; --i) {
 	sprintf(name, "obj_%05d", i);
-	if (H5Gunlink(work, name) < 0) TEST_ERROR
-    }
+	if(H5Gunlink(work, name) < 0) FAIL_STACK_ERROR
+    } /* end for */
     PASSED();
 
     /* Create a bunch of names and unlink them from both directions */
     TESTING("inward unlink");
     for(i = 0; i < how_many; i++) {
 	sprintf(name, "obj_%05d", i);
-	if(H5Glink2(work, "/test_many_foo", H5L_TYPE_HARD, H5G_SAME_LOC, name) < 0) TEST_ERROR
-    }
-    for (i=0; i<how_many; i++) {
-	if (i%2) {
-	    sprintf(name, "obj_%05d", how_many-(1+i/2));
-	} else {
-	    sprintf(name, "obj_%05d", i/2);
-	}
-	if (H5Gunlink(work, name) < 0) TEST_ERROR
-    }
+	if(H5Lcreate_hard(work, "/test_many_foo", H5G_SAME_LOC, name, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    } /* end for */
+    for(i = 0; i < how_many; i++) {
+	if(i % 2)
+	    sprintf(name, "obj_%05d", how_many - (1 + i / 2));
+	else
+	    sprintf(name, "obj_%05d", i / 2);
+	if(H5Gunlink(work, name) < 0) FAIL_STACK_ERROR
+    } /* end for */
     PASSED();
 
     /* Create a bunch of names and unlink them from the midle */
     TESTING("outward unlink");
     for(i = 0; i < how_many; i++) {
 	sprintf(name, "obj_%05d", i);
-	if(H5Glink2(work, "/test_many_foo", H5L_TYPE_HARD, H5G_SAME_LOC, name) < 0) TEST_ERROR
-    }
-    for (i=how_many-1; i>=0; --i) {
-	if (i%2) {
-	    sprintf(name, "obj_%05d", how_many-(1+i/2));
-	} else {
-	    sprintf(name, "obj_%05d", i/2);
-	}
-	if (H5Gunlink(work, name) < 0) TEST_ERROR
-    }
+	if(H5Lcreate_hard(work, "/test_many_foo", H5G_SAME_LOC, name, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    } /* end for */
+    for(i = (how_many - 1); i >= 0; --i) {
+	if(i % 2)
+	    sprintf(name, "obj_%05d", how_many - (1 + i / 2));
+	else
+	    sprintf(name, "obj_%05d", i / 2);
+	if(H5Gunlink(work, name) < 0) FAIL_STACK_ERROR
+    } /* end for */
     PASSED();
 
 
@@ -370,13 +368,13 @@ test_new_move(hid_t fapl)
     if((file_b = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Create groups in first file */
-    if((grp_1 = H5Gcreate2(file_a, "group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if((grp_2 = H5Gcreate2(file_a, "group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if((grp_move = H5Gcreate2(grp_1, "group_move", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((grp_1 = H5Gcreate2(file_a, "group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((grp_2 = H5Gcreate2(file_a, "group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((grp_move = H5Gcreate2(grp_1, "group_move", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Create hard and soft links. */
-    if(H5Glink2(grp_1, "group_move", H5L_TYPE_HARD, H5G_SAME_LOC, "hard") < 0) TEST_ERROR
-    if(H5Glink2(grp_1, "/group1/group_move", H5L_TYPE_SOFT, grp_2, "soft") < 0) TEST_ERROR
+    if(H5Lcreate_hard(grp_1, "group_move", H5G_SAME_LOC, "hard", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_soft("/group1/group_move", grp_1, "soft", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Move a group within the file.  Both of source and destination use
      * H5G_SAME_LOC.  Should fail. */
@@ -1320,7 +1318,7 @@ static int
 test_link_slashes(hid_t fapl)
 {
     hid_t fid;          /* File ID */
-    hid_t gid,gid2;     /* Group ID */
+    hid_t gid, gid2;     /* Group ID */
     char	filename[1024];
 
     TESTING("creating links with multiple slashes");
@@ -1329,37 +1327,37 @@ test_link_slashes(hid_t fapl)
     h5_fixname(FILENAME[5], fapl, filename, sizeof filename);
 
     /* Create a file */
-    if((fid=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Create a group in the root group */
-    if((gid = H5Gcreate2(fid, SLASHES_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((gid = H5Gcreate2(fid, SLASHES_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Create a nested group in the root group */
-    if((gid2 = H5Gcreate2(gid, SLASHES_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((gid2 = H5Gcreate2(gid, SLASHES_GROUP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Close the nested group */
-    if(H5Gclose(gid2) < 0) TEST_ERROR
+    if(H5Gclose(gid2) < 0) FAIL_STACK_ERROR
 
     /* Create a hard link to the nested group */
-    if(H5Glink2(gid, SLASHES_GROUP_NAME, H5L_TYPE_HARD, H5G_SAME_LOC, SLASHES_HARDLINK_NAME) < 0) TEST_ERROR
+    if(H5Lcreate_hard(gid, SLASHES_GROUP_NAME, H5L_SAME_LOC, SLASHES_HARDLINK_NAME, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Create a soft link with a relative path to the nested group */
-    if(H5Glink2(gid, SLASHES_GROUP_NAME, H5L_TYPE_SOFT, H5G_SAME_LOC, SLASHES_SOFTLINK_NAME) < 0) TEST_ERROR
+    if(H5Lcreate_soft(SLASHES_GROUP_NAME, gid, SLASHES_SOFTLINK_NAME, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Create a soft link with the full path to the nested group */
-    if(H5Glink2(gid, "////"SLASHES_GROUP_NAME""SLASHES_GROUP_NAME, H5L_TYPE_SOFT, H5G_SAME_LOC, SLASHES_SOFTLINK2_NAME) < 0) TEST_ERROR
+    if(H5Lcreate_soft("////"SLASHES_GROUP_NAME""SLASHES_GROUP_NAME, gid, SLASHES_SOFTLINK2_NAME, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Create a soft link to the root group */
-    if(H5Glink2(gid, "////", H5L_TYPE_SOFT, H5G_SAME_LOC, SLASHES_ROOTLINK_NAME) < 0) TEST_ERROR
+    if(H5Lcreate_soft("////", gid, SLASHES_ROOTLINK_NAME, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Close the group */
-    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
 
     /* Create a hard link to the existing group */
-    if(H5Glink2(fid, SLASHES_GROUP_NAME, H5L_TYPE_HARD, H5G_SAME_LOC, SLASHES_HARDLINK_NAME) < 0) TEST_ERROR
+    if(H5Lcreate_hard(fid, SLASHES_GROUP_NAME, H5L_SAME_LOC, SLASHES_HARDLINK_NAME, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Close the file */
-    if(H5Fclose(fid) < 0) TEST_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
 
     PASSED();
     return 0;
@@ -1825,35 +1823,35 @@ test_resurrect_dataset(hid_t fapl)
     h5_fixname(FILENAME[6], fapl, filename, sizeof filename);
 
     /* Create the file */
-    if((f = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((f = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Create a dataset in the file */
-    if((s = H5Screate(H5S_SCALAR)) < 0) TEST_ERROR
-    if((d = H5Dcreate(f, DATASETNAME, H5T_NATIVE_INT, s, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Sclose(s) < 0) TEST_ERROR
+    if((s = H5Screate(H5S_SCALAR)) < 0) FAIL_STACK_ERROR
+    if((d = H5Dcreate(f, DATASETNAME, H5T_NATIVE_INT, s, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Sclose(s) < 0) FAIL_STACK_ERROR
 
     /* Unlink the dataset while it's open (will mark it for deletion when closed) */
-    if(H5Gunlink(f, DATASETNAME) < 0) TEST_ERROR
+    if(H5Gunlink(f, DATASETNAME) < 0) FAIL_STACK_ERROR
 
     /* Check that dataset name is NULL */
-    if(H5Iget_name(d, NULL, (size_t)0) != 0) TEST_ERROR
+    if(H5Iget_name(d, NULL, (size_t)0) != 0) FAIL_STACK_ERROR
 
     /* Re-link the dataset to the group hierarchy (shouldn't get deleted now) */
-    if(H5Glink2(d, ".", H5L_TYPE_HARD, f, DATASET2NAME) < 0) TEST_ERROR
+    if(H5Lcreate_hard(d, ".", f, DATASET2NAME, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Close things */
-    if(H5Dclose(d) < 0) TEST_ERROR
-    if(H5Fclose(f) < 0) TEST_ERROR
+    if(H5Dclose(d) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(f) < 0) FAIL_STACK_ERROR
 
     /* Re-open the file */
-    if((f=H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((f=H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Attempt to open the dataset under the new name */
-    if((d=H5Dopen(f,DATASET2NAME)) < 0) TEST_ERROR
+    if((d = H5Dopen(f,DATASET2NAME)) < 0) FAIL_STACK_ERROR
 
     /* Close things */
-    if(H5Dclose(d) < 0) TEST_ERROR
-    if(H5Fclose(f) < 0) TEST_ERROR
+    if(H5Dclose(d) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(f) < 0) FAIL_STACK_ERROR
 
     PASSED();
     return 0;
@@ -1887,7 +1885,7 @@ error:
 static int
 test_resurrect_datatype(hid_t fapl)
 {
-    hid_t       file=-1, type=-1;
+    hid_t       file = -1, type = -1;
     char        filename[1024];
 
     TESTING("resurrecting datatype after deletion");
@@ -1896,34 +1894,34 @@ test_resurrect_datatype(hid_t fapl)
     h5_fixname(FILENAME[7], fapl, filename, sizeof filename);
 
     /* Create the file */
-    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Create a named datatype in the file */
-    if((type = H5Tcopy (H5T_NATIVE_INT)) < 0) TEST_ERROR
-    if(H5Tcommit (file, TYPENAME, type) < 0) TEST_ERROR
+    if((type = H5Tcopy (H5T_NATIVE_INT)) < 0) FAIL_STACK_ERROR
+    if(H5Tcommit (file, TYPENAME, type) < 0) FAIL_STACK_ERROR
 
     /* Unlink the datatype while it's open (will mark it for deletion when closed) */
-    if(H5Gunlink(file, TYPENAME) < 0) TEST_ERROR
+    if(H5Gunlink(file, TYPENAME) < 0) FAIL_STACK_ERROR
 
     /* Check that datatype name is NULL */
-    if(H5Iget_name(type, NULL, (size_t)0) != 0) TEST_ERROR
+    if(H5Iget_name(type, NULL, (size_t)0) != 0) FAIL_STACK_ERROR
 
     /* Re-link the datatype to the group hierarchy (shouldn't get deleted now) */
-    if(H5Glink2(type, ".", H5L_TYPE_HARD, file, TYPE2NAME) < 0) TEST_ERROR
+    if(H5Lcreate_hard(type, ".", file, TYPE2NAME, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Close things */
-    if(H5Tclose(type) < 0) TEST_ERROR
-    if(H5Fclose(file) < 0) TEST_ERROR
+    if(H5Tclose(type) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
     /* Re-open the file */
-    if((file=H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Attempt to open the datatype under the new name */
-    if((type=H5Topen(file,TYPE2NAME)) < 0) TEST_ERROR
+    if((type = H5Topen(file,TYPE2NAME)) < 0) FAIL_STACK_ERROR
 
     /* Close things */
-    if(H5Tclose(type) < 0) TEST_ERROR
-    if(H5Fclose(file) < 0) TEST_ERROR
+    if(H5Tclose(type) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
     PASSED();
     return 0;
@@ -1956,7 +1954,7 @@ error:
 static int
 test_resurrect_group(hid_t fapl)
 {
-    hid_t       file=-1, group=-1;
+    hid_t       file = -1, group = -1;
     char        filename[1024];
 
     TESTING("resurrecting group after deletion");
@@ -1965,33 +1963,33 @@ test_resurrect_group(hid_t fapl)
     h5_fixname(FILENAME[8], fapl, filename, sizeof filename);
 
     /* Create the file */
-    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Create a group in the file */
-    if((group = H5Gcreate2(file, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((group = H5Gcreate2(file, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Unlink the group while it's open (will mark it for deletion when closed) */
-    if(H5Gunlink(file, GROUPNAME) < 0) TEST_ERROR
+    if(H5Gunlink(file, GROUPNAME) < 0) FAIL_STACK_ERROR
 
     /* Check that group's name is NULL */
-    if(H5Iget_name(group, NULL, (size_t)0) != 0) TEST_ERROR
+    if(H5Iget_name(group, NULL, (size_t)0) != 0) FAIL_STACK_ERROR
 
     /* Re-link the group into the group hierarchy (shouldn't get deleted now) */
-    if(H5Glink2(group, ".", H5L_TYPE_HARD, file, GROUP2NAME) < 0) TEST_ERROR
+    if(H5Lcreate_hard(group, ".", file, GROUP2NAME, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Close things */
-    if(H5Gclose(group) < 0) TEST_ERROR
-    if(H5Fclose(file) < 0) TEST_ERROR
+    if(H5Gclose(group) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
     /* Re-open the file */
-    if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Attempt to open the datatype under the new name */
     if((group = H5Gopen2(file, GROUP2NAME, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Close things */
-    if(H5Gclose(group) < 0) TEST_ERROR
-    if(H5Fclose(file) < 0) TEST_ERROR
+    if(H5Gclose(group) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
     PASSED();
     return 0;
@@ -2122,51 +2120,51 @@ test_full_group_compact(hid_t fapl)
     h5_fixname(FILENAME[10], fapl, filename, sizeof filename);
 
     /* Create the file */
-    if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Create group to link objects to */
-    if((gid = H5Gcreate2(file_id, "/keep", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((gid = H5Gcreate2(file_id, "/keep", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Create several objects to link to */
     for(u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
         sprintf(objname, "keep %u\n", u);
-        if((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-        if(H5Gclose(gid2) < 0) TEST_ERROR
+        if((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+        if(H5Gclose(gid2) < 0) FAIL_STACK_ERROR
     } /* end for */
 
     /* Close group with objects to keep */
-    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
 
     /* Close the file */
-    if(H5Fclose(file_id) < 0) TEST_ERROR
+    if(H5Fclose(file_id) < 0) FAIL_STACK_ERROR
 
     /* Get the size of the file with only the objects to keep */
     if((keep_size = h5_get_file_size(filename)) < 0) TEST_ERROR
 
     /* Re-open the file */
-    if((file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
+    if((file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Create group to delete */
-    if((gid = H5Gcreate2(file_id, "/delete", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((gid = H5Gcreate2(file_id, "/delete", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Create external link (doesn't matter if it dangles) */
-    if(H5Lcreate_external("foo.h5", "/dst", gid, "external", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lcreate_external("foo.h5", "/dst", gid, "external", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Create soft link (doesn't matter if it dangles) */
-    if(H5Glink2(file_id, "/foo", H5L_TYPE_SOFT, gid, "soft") < 0) TEST_ERROR
+    if(H5Lcreate_soft("/foo", file_id, "soft", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Create hard links to objects in group to keep */
     for(u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
         sprintf(objname, "/keep/keep %u\n", u);
         sprintf(objname2, "keep %u\n", u);
-        if(H5Glink2(file_id, objname, H5L_TYPE_HARD, gid, objname2) < 0) TEST_ERROR
+        if(H5Lcreate_hard(file_id, objname, gid, objname2, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     } /* end for */
 
     /* Create several objects to delete */
     for(u = 0; u < FULL_GROUP_NUM_DELETE_COMPACT; u++) {
         sprintf(objname, "delete %u\n", u);
-        if((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-        if(H5Gclose(gid2) < 0) TEST_ERROR
+        if((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+        if(H5Gclose(gid2) < 0) FAIL_STACK_ERROR
     } /* end for */
 
     /* Check on group's status */
@@ -2175,34 +2173,34 @@ test_full_group_compact(hid_t fapl)
     if(H5G_has_stab_test(gid) == TRUE) TEST_ERROR
 
     /* Close group with objects to delete */
-    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
 
     /* Check reference count on objects to keep */
     for(u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
         sprintf(objname, "/keep/keep %u\n", u);
-        if(H5Gget_objinfo(file_id, objname, TRUE, &sb) < 0) TEST_ERROR
+        if(H5Gget_objinfo(file_id, objname, TRUE, &sb) < 0) FAIL_STACK_ERROR
         if(sb.nlink != 2) TEST_ERROR
     } /* end for */
 
     /* Close the file */
-    if(H5Fclose(file_id) < 0) TEST_ERROR
+    if(H5Fclose(file_id) < 0) FAIL_STACK_ERROR
 
 
     /* Re-open the file */
-    if((file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
+    if((file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Delete the full group */
-    if(H5Gunlink(file_id, "/delete") < 0) TEST_ERROR
+    if(H5Gunlink(file_id, "/delete") < 0) FAIL_STACK_ERROR
 
     /* Check reference count on objects to keep */
     for(u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
         sprintf(objname, "/keep/keep %u\n", u);
-        if(H5Gget_objinfo(file_id, objname, TRUE, &sb) < 0) TEST_ERROR
+        if(H5Gget_objinfo(file_id, objname, TRUE, &sb) < 0) FAIL_STACK_ERROR
         if(sb.nlink != 1) TEST_ERROR
     } /* end for */
 
     /* Close the file */
-    if(H5Fclose(file_id) < 0) TEST_ERROR
+    if(H5Fclose(file_id) < 0) FAIL_STACK_ERROR
 
     /* Get the size of the file */
     if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
@@ -2256,33 +2254,33 @@ test_full_group_dense(hid_t fapl)
     h5_fixname(FILENAME[10], fapl, filename, sizeof filename);
 
     /* Create the file */
-    if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Create group to link objects to */
-    if((gid = H5Gcreate2(file_id, "/keep", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((gid = H5Gcreate2(file_id, "/keep", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Create several objects to link to */
     for(u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
         sprintf(objname, "keep %u\n", u);
-        if((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-        if(H5Gclose(gid2) < 0) TEST_ERROR
+        if((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+        if(H5Gclose(gid2) < 0) FAIL_STACK_ERROR
     } /* end for */
 
     /* Close group with objects to keep */
-    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
 
     /* Close the file */
-    if(H5Fclose(file_id) < 0) TEST_ERROR
+    if(H5Fclose(file_id) < 0) FAIL_STACK_ERROR
 
     /* Get the size of the file with only the objects to keep */
     if((keep_size = h5_get_file_size(filename)) < 0) TEST_ERROR
 
     /* Re-open the file */
-    if((file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
+    if((file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Set group creation "est. link info" closer to what will actually occur */
-    if((gcpl = H5Pcreate(H5P_GROUP_CREATE)) < 0) TEST_ERROR
-    if(H5Pset_est_link_info(gcpl, FULL_GROUP_EST_NUM_ENTRIES, FULL_GROUP_EST_ENTRY_LEN) < 0) TEST_ERROR
+    if((gcpl = H5Pcreate(H5P_GROUP_CREATE)) < 0) FAIL_STACK_ERROR
+    if(H5Pset_est_link_info(gcpl, FULL_GROUP_EST_NUM_ENTRIES, FULL_GROUP_EST_ENTRY_LEN) < 0) FAIL_STACK_ERROR
 
     /* Create group to delete */
     /* (use non-default GCPL, in order to make certain that the group's object
@@ -2290,29 +2288,29 @@ test_full_group_dense(hid_t fapl)
      *  another object header message chunk - in order to make the file size
      *  computation below easier/correct - QAK)
      */
-    if((gid = H5Gcreate2(file_id, "/delete", H5P_DEFAULT, gcpl, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((gid = H5Gcreate2(file_id, "/delete", H5P_DEFAULT, gcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Close GCPL */
-    if(H5Pclose(gcpl) < 0) TEST_ERROR
+    if(H5Pclose(gcpl) < 0) FAIL_STACK_ERROR
 
     /* Create external link (doesn't matter if it dangles) */
-    if(H5Lcreate_external("foo.h5", "/dst", gid, "external", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lcreate_external("foo.h5", "/dst", gid, "external", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Create soft link (doesn't matter if it dangles) */
-    if(H5Glink2(file_id, "/foo", H5L_TYPE_SOFT, gid, "soft") < 0) TEST_ERROR
+    if(H5Lcreate_soft("/foo", file_id, "soft", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Create hard links to objects in group to keep */
     for(u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
         sprintf(objname, "/keep/keep %u\n", u);
         sprintf(objname2, "keep %u\n", u);
-        if(H5Glink2(file_id, objname, H5L_TYPE_HARD, gid, objname2) < 0) TEST_ERROR
+        if(H5Lcreate_hard(file_id, objname, gid, objname2, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     } /* end for */
 
     /* Create several objects to delete */
     for(u = 0; u < FULL_GROUP_NUM_DELETE_DENSE; u++) {
         sprintf(objname, "delete %u\n", u);
-        if((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-        if(H5Gclose(gid2) < 0) TEST_ERROR
+        if((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+        if(H5Gclose(gid2) < 0) FAIL_STACK_ERROR
     } /* end for */
 
     /* Check on group's status */
@@ -2321,34 +2319,34 @@ test_full_group_dense(hid_t fapl)
     if(H5G_is_new_dense_test(gid) != TRUE) TEST_ERROR
 
     /* Close group with objects to delete */
-    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
 
     /* Check reference count on objects to keep */
     for(u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
         sprintf(objname, "/keep/keep %u\n", u);
-        if(H5Gget_objinfo(file_id, objname, TRUE, &sb) < 0) TEST_ERROR
+        if(H5Gget_objinfo(file_id, objname, TRUE, &sb) < 0) FAIL_STACK_ERROR
         if(sb.nlink != 2) TEST_ERROR
     } /* end for */
 
     /* Close the file */
-    if(H5Fclose(file_id) < 0) TEST_ERROR
+    if(H5Fclose(file_id) < 0) FAIL_STACK_ERROR
 
 
     /* Re-open the file */
-    if((file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
+    if((file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Delete the full group */
-    if(H5Gunlink(file_id, "/delete") < 0) TEST_ERROR
+    if(H5Gunlink(file_id, "/delete") < 0) FAIL_STACK_ERROR
 
     /* Check reference count on objects to keep */
     for(u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
         sprintf(objname, "/keep/keep %u\n", u);
-        if(H5Gget_objinfo(file_id, objname, TRUE, &sb) < 0) TEST_ERROR
+        if(H5Gget_objinfo(file_id, objname, TRUE, &sb) < 0) FAIL_STACK_ERROR
         if(sb.nlink != 1) TEST_ERROR
     } /* end for */
 
     /* Close the file */
-    if(H5Fclose(file_id) < 0) TEST_ERROR
+    if(H5Fclose(file_id) < 0) FAIL_STACK_ERROR
 
     /* Get the size of the file */
     if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR

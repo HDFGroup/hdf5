@@ -1706,9 +1706,9 @@ int make_hlinks(hid_t loc_id)
     if((group3_id = H5Gcreate2(group2_id, "g3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         return -1;
 
-    if(H5Glink2(loc_id, "g1", H5L_TYPE_HARD, group2_id, "link1 to g1")<0)
+    if(H5Lcreate_hard(loc_id, "g1", group2_id, "link1 to g1", H5P_DEFAULT, H5P_DEFAULT) < 0)
         return -1;
-    if(H5Glink2(group1_id, "g2", H5L_TYPE_HARD, group3_id, "link1 to g2")<0)
+    if(H5Lcreate_hard(group1_id, "g2", group3_id, "link1 to g2", H5P_DEFAULT, H5P_DEFAULT) < 0)
         return -1;
 
     H5Gclose(group1_id);

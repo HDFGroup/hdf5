@@ -75,8 +75,10 @@ typedef struct {
 /* Local Prototypes */
 /********************/
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 static herr_t H5G_link_hard(hid_t cur_loc_id, const char *cur_name,
     hid_t new_loc_id, const char *new_name);
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 static herr_t H5G_move(hid_t src_loc_id, const char *src_name,
     hid_t dst_loc_id, const char *dst_name);
 static herr_t H5G_set_comment(H5G_loc_t *loc, const char *name,
@@ -309,7 +311,6 @@ H5Glink(hid_t cur_loc_id, H5L_type_t type, const char *cur_name, const char *new
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Glink() */
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
 /*-------------------------------------------------------------------------
@@ -415,6 +416,7 @@ H5G_link_hard(hid_t cur_loc_id, const char *cur_name, hid_t new_loc_id,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_link_hard() */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
 /*-------------------------------------------------------------------------
