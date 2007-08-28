@@ -291,7 +291,7 @@ nh5glink_c(hid_t_f *loc_id, int_f *link_type, _fcd current_name,
     */
     if(NULL == (c_current_name = (char *)HD5f2cstring(current_name, (size_t)*current_namelen)))
         goto DONE;
-    if(NULL == (c_new_name = (char *)HD5f2cstring(new_name, (size_t)new_namelen)))
+    if(NULL == (c_new_name = (char *)HD5f2cstring(new_name, (size_t)*new_namelen)))
         goto DONE;
 
     /*
