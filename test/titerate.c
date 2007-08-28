@@ -202,8 +202,8 @@ static void test_iter_group(hid_t fapl, hbool_t new_format)
      * iterate through B-tree for group members in internal library design.
      */
     {
-        root_group = H5Gopen(file, "/");
-        CHECK(root_group, FAIL, "H5Gopen");
+        root_group = H5Gopen2(file, "/", H5P_DEFAULT);
+        CHECK(root_group, FAIL, "H5Gopen2");
 
         ret = H5Gget_num_objs(root_group, &num_membs);
         CHECK(ret, FAIL, "H5Gget_num_objs");
@@ -765,8 +765,8 @@ static void test_grp_memb_funcs(hid_t fapl)
     /* These two functions, H5Gget_num_objs and H5Gget_objname_by_idx, actually
      * iterate through B-tree for group members in internal library design.
      */
-    root_group = H5Gopen(file, "/");
-    CHECK(root_group, FAIL, "H5Gopen");
+    root_group = H5Gopen2(file, "/", H5P_DEFAULT);
+    CHECK(root_group, FAIL, "H5Gopen2");
 
     ret = H5Gget_num_objs(root_group, &num_membs);
     CHECK(ret, FAIL, "H5Gget_num_objs");

@@ -34,8 +34,8 @@ extern char  *progname;
  *-------------------------------------------------------------------------
  */
 
-int has_filter(hid_t dcpl_id,
-               H5Z_filter_t filtnin)
+static int
+has_filter(hid_t dcpl_id, H5Z_filter_t filtnin)
 {
 
  int          nfilters;       /* number of filters */

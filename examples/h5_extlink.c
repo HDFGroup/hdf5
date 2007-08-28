@@ -82,7 +82,7 @@ static void extlink_example(void)
      * Here, group_id and group2_id point to the same group inside the
      * target file.
      */
-    group2_id = H5Gopen(targ_file_id, "target_group/new_group");
+    group2_id = H5Gopen2(targ_file_id, "target_group/new_group", H5P_DEFAULT);
 
     /* Don't forget to close the IDs we opened. */
     H5Gclose(group2_id);
@@ -173,8 +173,8 @@ static void extlink_prefix_example(void)
     H5Gclose(group_id);
 
     /* Each file has had a group created inside it using the same external link. */
-    group_id = H5Gopen(red_file_id, "pink");
-    group2_id = H5Gopen(blue_file_id, "sky blue");
+    group_id = H5Gopenw(red_file_id, "pink", H5P_DEFAULT);
+    group2_id = H5Gopen2(blue_file_id, "sky blue", H5P_DEFAULT);
 
     /* Clean up our open IDs */
     H5Gclose(group2_id);
@@ -265,7 +265,7 @@ static void soft_link_example(void)
      * a normal soft link. This link will still dangle if the object's
      * original name is changed or unlinked.
      */
-    group_id = H5Gopen(file_id, UD_SOFT_LINK_NAME);
+    group_id = H5Gopen2(file_id, UD_SOFT_LINK_NAME, H5P_DEFAULT);
 
     /* The group is now open normally.  Don't forget to close it! */
     H5Gclose(group_id);
@@ -382,7 +382,7 @@ static void hard_link_example(void)
     /* The group is still accessible through the UD hard link. If this were
      * a soft link instead, the object would have been deleted when the last
      * hard link to it was unlinked. */
-    group_id = H5Gopen(file_id, UD_HARD_LINK_NAME);
+    group_id = H5Gopen2(file_id, UD_HARD_LINK_NAME, H5P_DEFAULT);
 
     /* The group is now open normally.  Don't forget to close it! */
     H5Gclose(group_id);

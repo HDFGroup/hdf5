@@ -234,7 +234,7 @@ file_info(hid_t loc_id, const char *name, void *opdata)
     /*
      * Open the group using its name.
      */
-    group = H5Gopen(loc_id, name);
+    group = H5Gopen2(loc_id, name, H5P_DEFAULT);
 
     /*
      * Display group name.

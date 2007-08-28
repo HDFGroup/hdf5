@@ -1068,8 +1068,8 @@ test_multi(void)
         TEST_ERROR;
 
     /* Create and write attribute for the root group. */
-    if((root = H5Gopen(file, "/"))<0)
-        TEST_ERROR;
+    if((root = H5Gopen2(file, "/", H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
 
     /* Attribute string. */
     if((atype = H5Tcopy(H5T_C_S1))<0)

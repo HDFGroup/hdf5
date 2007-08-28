@@ -1010,33 +1010,34 @@ hsize_t diff (hid_t file1_id,
     */
     case H5G_GROUP:
 
-        ret = HDstrcmp(path1,path2);
+        ret = HDstrcmp(path1, path2);
     
         /* if "path1" != "path2" then the groups are "different" */
-        nfound = (ret!=0) ? 1 : 0;
+        nfound = (ret != 0) ? 1 : 0;
         
-        if (print_objname(options,nfound))
-            do_print_objname ("group", path1, path2);
+        if(print_objname(options, nfound))
+            do_print_objname("group", path1, path2);
 
         /* always print the number of differences found in verbose mode */
-        if (options->m_verbose)
+        if(options->m_verbose)
             print_found(nfound);
         
-        if ((grp1_id = H5Gopen(file1_id, path1))<0)
+        if((grp1_id = H5Gopen2(file1_id, path1, H5P_DEFAULT)) < 0)
             goto out;
-        if ((grp2_id = H5Gopen(file2_id, path2))<0)
+        if((grp2_id = H5Gopen2(file2_id, path2, H5P_DEFAULT)) < 0)
             goto out;
+
         /*-------------------------------------------------------------------------
          * compare attributes
          * the if condition refers to cases when the dataset is a referenced object
          *-------------------------------------------------------------------------
          */
-        if (path1)
-            nfound += diff_attr(grp1_id,grp2_id,path1,path2,options);
+        if(path1)
+            nfound += diff_attr(grp1_id, grp2_id, path1, path2, options);
         
-        if ( H5Gclose(grp1_id)<0)
+        if(H5Gclose(grp1_id) < 0)
             goto out;
-        if ( H5Gclose(grp2_id)<0)
+        if(H5Gclose(grp2_id) < 0)
             goto out;
         
         break;

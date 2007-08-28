@@ -336,6 +336,8 @@ H5_DLLVAR const H5B2_class_t H5G_BT2_CORDER[1];
 H5_DLL H5G_t *H5G_create(H5F_t *file, hid_t gcpl_id, hid_t dxpl_id);
 H5_DLL H5G_t *H5G_create_named(const H5G_loc_t *loc, const char *name,
     hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id);
+H5_DLL H5G_t *H5G_open_name(const H5G_loc_t *loc, const char *name,
+    hid_t gapl_id, hid_t dxpl_id);
 
 /*
  * Group hierarchy traversal routines

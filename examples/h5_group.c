@@ -101,7 +101,7 @@ main(void)
      * Now reopen the file and group in the file.
      */
     file = H5Fopen(H5FILE_NAME, H5F_ACC_RDWR, H5P_DEFAULT);
-    grp  = H5Gopen(file, "Data");
+    grp  = H5Gopen2(file, "Data", H5P_DEFAULT);
 
     /*
      * Access "Compressed_Data" dataset in the group.

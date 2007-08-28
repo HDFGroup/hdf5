@@ -77,7 +77,7 @@ int main()
     assert(fid > 0);
 
     /* Re-open first group */
-    gid = H5Gopen(fid, GROUP1);
+    gid = H5Gopen2(fid, GROUP1, H5P_DEFAULT);
     assert(gid > 0);
 
     /* Create dataspace for attribute */
@@ -154,7 +154,7 @@ int main()
     assert(ret >= 0);
 
     /* Re-open first group */
-    gid = H5Gopen(fid, GROUP1);
+    gid = H5Gopen2(fid, GROUP1, H5P_DEFAULT);
     assert(gid > 0);
 
     /* Delete 2nd attribute */
@@ -177,7 +177,7 @@ int main()
     assert(fid > 0);
 
     /* Re-open first group */
-    gid = H5Gopen(fid, GROUP1);
+    gid = H5Gopen2(fid, GROUP1, H5P_DEFAULT);
     assert(gid > 0);
 
     /* Create dataspace for 3rd attribute */
@@ -221,7 +221,7 @@ int main()
     assert(fid > 0);
 
     /* Re-open first group */
-    gid = H5Gopen(fid, GROUP1);
+    gid = H5Gopen2(fid, GROUP1, H5P_DEFAULT);
     assert(gid > 0);
 
     /* Delete 3rd attribute */
@@ -268,7 +268,7 @@ int main()
     assert(fid > 0);
 
     /* Re-open first group */
-    gid = H5Gopen(fid, GROUP1);
+    gid = H5Gopen2(fid, GROUP1, H5P_DEFAULT);
     assert(gid > 0);
 
     /* Delete 2nd attribute */
@@ -289,7 +289,7 @@ int main()
     assert(fid > 0);
 
     /* Re-open first group */
-    gid = H5Gopen(fid, GROUP1);
+    gid = H5Gopen2(fid, GROUP1, H5P_DEFAULT);
     assert(gid > 0);
 
     /* Create dataspace for 3rd attribute */

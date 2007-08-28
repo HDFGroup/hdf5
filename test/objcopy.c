@@ -1334,8 +1334,8 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
 
                 case H5G_GROUP:
                     /* Open groups */
-                    if((oid = H5Gopen(gid, objname)) < 0) TEST_ERROR
-                    if((oid2 = H5Gopen(gid2, objname2)) < 0) TEST_ERROR
+                    if((oid = H5Gopen2(gid, objname, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+                    if((oid2 = H5Gopen2(gid2, objname2, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
                     /* Compare groups */
                     if(compare_groups(oid, oid2, pid, depth - 1, copy_flags) != TRUE) TEST_ERROR
@@ -3045,10 +3045,10 @@ test_copy_dataset_named_dtype_hier(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the group for copy */
-    if((gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid = H5Gopen2(fid_src, NAME_GROUP_TOP, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* open the destination group */
-    if((gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid2 = H5Gopen2(fid_dst, NAME_GROUP_TOP, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Check if the groups are equal */
     if(compare_groups(gid, gid2, H5P_DEFAULT, -1, 0) != TRUE) TEST_ERROR
@@ -3184,10 +3184,10 @@ test_copy_dataset_named_dtype_hier_outside(hid_t fcpl_src, hid_t fcpl_dst, hid_t
     if(H5Ocopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the group for copy */
-    if((gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid = H5Gopen2(fid_src, NAME_GROUP_TOP, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* open the destination group */
-    if((gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid2 = H5Gopen2(fid_dst, NAME_GROUP_TOP, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Check if the groups are equal */
     if(compare_groups(gid, gid2, H5P_DEFAULT, -1, 0) != TRUE) TEST_ERROR
@@ -3318,10 +3318,10 @@ test_copy_dataset_multi_ohdr_chunks(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the group for copy */
-    if((gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid = H5Gopen2(fid_src, NAME_GROUP_TOP, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* open the destination group */
-    if((gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid2 = H5Gopen2(fid_dst, NAME_GROUP_TOP, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Check if the groups are equal */
     if(compare_groups(gid, gid2, H5P_DEFAULT, -1, 0) != TRUE) TEST_ERROR
@@ -3459,10 +3459,10 @@ test_copy_dataset_attr_named_dtype(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the group for copy */
-    if((gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid = H5Gopen2(fid_src, NAME_GROUP_TOP, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* open the destination group */
-    if((gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid2 = H5Gopen2(fid_dst, NAME_GROUP_TOP, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Check if the groups are equal */
     if(compare_groups(gid, gid2, H5P_DEFAULT, -1, 0) != TRUE) TEST_ERROR
@@ -4228,10 +4228,10 @@ test_copy_group_empty(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_GROUP_EMPTY, fid_dst, NAME_GROUP_EMPTY, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the group for copy */
-    if((gid = H5Gopen(fid_src, NAME_GROUP_EMPTY)) < 0) TEST_ERROR
+    if((gid = H5Gopen2(fid_src, NAME_GROUP_EMPTY, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* open the destination group */
-    if((gid2 = H5Gopen(fid_dst, NAME_GROUP_EMPTY)) < 0) TEST_ERROR
+    if((gid2 = H5Gopen2(fid_dst, NAME_GROUP_EMPTY, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Check if the groups are equal */
     if(compare_groups(gid, gid2, H5P_DEFAULT, -1, 0) != TRUE) TEST_ERROR
@@ -4359,10 +4359,10 @@ test_copy_group(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the group for copy */
-    if((gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid = H5Gopen2(fid_src, NAME_GROUP_TOP, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* open the destination group */
-    if((gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid2 = H5Gopen2(fid_dst, NAME_GROUP_TOP, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Check if the groups are equal */
     if(compare_groups(gid, gid2, H5P_DEFAULT, -1, 0) != TRUE) TEST_ERROR
@@ -4492,10 +4492,10 @@ test_copy_root_group(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, "/", fid_dst, "/root_from_src", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the group for copy */
-    if((gid = H5Gopen(fid_src, "/")) < 0) TEST_ERROR
+    if((gid = H5Gopen2(fid_src, "/", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* open the destination group */
-    if((gid2 = H5Gopen(fid_dst, "/root_from_src")) < 0) TEST_ERROR
+    if((gid2 = H5Gopen2(fid_dst, "/root_from_src", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Check if the groups are equal */
     if(compare_groups(gid, gid2, H5P_DEFAULT, -1, 0) != TRUE) TEST_ERROR
@@ -4634,10 +4634,10 @@ test_copy_group_deep(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the group for copy */
-    if((gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid = H5Gopen2(fid_src, NAME_GROUP_TOP, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* open the destination group */
-    if((gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid2 = H5Gopen2(fid_dst, NAME_GROUP_TOP, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Check if the groups are equal */
     if(compare_groups(gid, gid2, H5P_DEFAULT, -1, 0) != TRUE) TEST_ERROR
@@ -4745,10 +4745,10 @@ test_copy_group_loop(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the group for copy */
-    if((gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid = H5Gopen2(fid_src, NAME_GROUP_TOP, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* open the destination group */
-    if((gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid2 = H5Gopen2(fid_dst, NAME_GROUP_TOP, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Check if the groups are equal */
     if(compare_groups(gid, gid2, H5P_DEFAULT, -1, 0) != TRUE) TEST_ERROR
@@ -4874,10 +4874,10 @@ test_copy_group_wide_loop(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the group for copy */
-    if((gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid = H5Gopen2(fid_src, NAME_GROUP_TOP, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* open the destination group */
-    if((gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
+    if((gid2 = H5Gopen2(fid_dst, NAME_GROUP_TOP, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Check if the groups are equal */
     if(compare_groups(gid, gid2, H5P_DEFAULT, -1, 0) != TRUE) TEST_ERROR
@@ -5010,10 +5010,10 @@ test_copy_group_links(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_GROUP_LINK, fid_dst, NAME_GROUP_LINK, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the group for copy */
-    if((gid = H5Gopen(fid_src, NAME_GROUP_LINK)) < 0) TEST_ERROR
+    if((gid = H5Gopen2(fid_src, NAME_GROUP_LINK, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* open the destination group */
-    if((gid2 = H5Gopen(fid_dst, NAME_GROUP_LINK)) < 0) TEST_ERROR
+    if((gid2 = H5Gopen2(fid_dst, NAME_GROUP_LINK, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Check if the groups are equal */
     if(compare_groups(gid, gid2, H5P_DEFAULT, -1, 0) != TRUE) TEST_ERROR
@@ -7081,10 +7081,10 @@ test_copy_option(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl, unsigned flag, hboo
         if(H5Pclose(lcpl_id) < 0) TEST_ERROR
 
         /* open the group for copy */
-        if((gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR
+        if((gid = H5Gopen2(fid_src, NAME_GROUP_TOP, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
         /* open the destination group */
-        if((gid2 = H5Gopen(fid_dst, "/new_g0/new_g00")) < 0) TEST_ERROR
+        if((gid2 = H5Gopen2(fid_dst, "/new_g0/new_g00", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     } else if((flag & H5O_COPY_EXPAND_SOFT_LINK_FLAG) > 0) {
         if(H5Ocopy(fid_src, NAME_GROUP_LINK, fid_dst, NAME_GROUP_LINK, pid, H5P_DEFAULT) < 0) TEST_ERROR
@@ -7094,27 +7094,27 @@ test_copy_option(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl, unsigned flag, hboo
         if(H5Gunlink(fid_src, NAME_DATASET_SUB_SUB) < 0) TEST_ERROR
 
         /* open the group for copy */
-        if((gid = H5Gopen(fid_src, NAME_GROUP_LINK2)) < 0) TEST_ERROR
+        if((gid = H5Gopen2(fid_src, NAME_GROUP_LINK2, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
         /* open the destination group */
-        if((gid2 = H5Gopen(fid_dst, NAME_GROUP_LINK)) < 0) TEST_ERROR
+        if((gid2 = H5Gopen2(fid_dst, NAME_GROUP_LINK, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     } else if(flag & (H5O_COPY_WITHOUT_ATTR_FLAG | H5O_COPY_PRESERVE_NULL_FLAG)) {
         if(H5Ocopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, pid, H5P_DEFAULT) < 0) TEST_ERROR
 
         /* open the group for copy */
-        if((gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR
+        if((gid = H5Gopen2(fid_src, NAME_GROUP_TOP, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
         /* open the destination group */
-        if((gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
+        if((gid2 = H5Gopen2(fid_dst, NAME_GROUP_TOP, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     } else if(flag & H5O_COPY_SHALLOW_HIERARCHY_FLAG) {
         if(H5Ocopy(fid_src, NAME_GROUP_TOP, fid_dst, NAME_GROUP_TOP, pid, H5P_DEFAULT) < 0) TEST_ERROR
 
         /* open the group for copy */
-        if((gid = H5Gopen(fid_src, NAME_GROUP_TOP)) < 0) TEST_ERROR
+        if((gid = H5Gopen2(fid_src, NAME_GROUP_TOP, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
         /* open the destination group */
-        if((gid2 = H5Gopen(fid_dst, NAME_GROUP_TOP)) < 0) TEST_ERROR
+        if((gid2 = H5Gopen2(fid_dst, NAME_GROUP_TOP, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
         /* Set the copy depth */
         depth = 1;
@@ -7122,10 +7122,10 @@ test_copy_option(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl, unsigned flag, hboo
         if(H5Ocopy(fid_src, NAME_GROUP_REF, fid_dst, NAME_GROUP_REF, pid, H5P_DEFAULT) < 0) TEST_ERROR
 
         /* open the group for copy */
-        if((gid = H5Gopen(fid_src, NAME_GROUP_REF)) < 0) TEST_ERROR
+        if((gid = H5Gopen2(fid_src, NAME_GROUP_REF, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
         /* open the destination group */
-        if((gid2 = H5Gopen(fid_dst, NAME_GROUP_REF)) < 0) TEST_ERROR
+        if((gid2 = H5Gopen2(fid_dst, NAME_GROUP_REF, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     } else {
         /* Unknown flag */
         TEST_ERROR

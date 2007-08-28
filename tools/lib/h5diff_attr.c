@@ -22,7 +22,7 @@
  *
  * Purpose: compare attributes located in LOC1_ID and LOC2_ID, which are
  *  obtained either from
- * loc_id = H5Gopen( fid, name);
+ * loc_id = H5Gopen2( fid, name, H5P_DEFAULT);
  * loc_id = H5Dopen( fid, name);
  * loc_id = H5Topen( fid, name);
  *

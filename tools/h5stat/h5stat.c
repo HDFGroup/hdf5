@@ -476,7 +476,7 @@ group_stats(hid_t group, const char *name, const char *fullname,
     iter->group_ohdr_info.total_size += oi->hdr.space.total;
     iter->group_ohdr_info.free_size += oi->hdr.space.free;
 
-    gid = H5Gopen(group, name);
+    gid = H5Gopen2(group, name, H5P_DEFAULT);
     assert(gid > 0);
 
     /* Get number of links in this group */

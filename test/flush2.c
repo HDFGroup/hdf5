@@ -90,7 +90,7 @@ error:
     return 1;
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	check_file
  *
@@ -112,33 +112,31 @@ check_file(char* filename, hid_t fapl, int flag)
     char	name[1024];
     int		i;
 
-    if ((file=H5Fopen(filename, H5F_ACC_RDONLY, fapl))<0) goto error;
+    if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) goto error;
     if(check_dset(file, "dset")) goto error;
 
     /* Open some groups */
-    if ((groups=H5Gopen(file, "some_groups"))<0) goto error;
-    for (i=0; i<100; i++) {
+    if((groups = H5Gopen2(file, "some_groups", H5P_DEFAULT)) < 0) goto error;
+    for(i = 0; i < 100; i++) {
 	sprintf(name, "grp%02u", (unsigned)i);
-	if ((grp=H5Gopen(groups, name))<0) goto error;
-	if (H5Gclose(grp)<0) goto error;
-    }
+	if((grp = H5Gopen2(groups, name, H5P_DEFAULT)) < 0) goto error;
+	if(H5Gclose(grp) < 0) goto error;
+    } /* end for */
 
     /* Check to see if that last added dataset in the third file is accessible 
      * (it shouldn't be...but it might.  Flag an error in case it is for now */
-    if(flag)
-    {
-	if(check_dset(file, "dset2")) goto error;
-    }
+    if(flag && check_dset(file, "dset2")) goto error;
 
-    if (H5Gclose(groups)<0) goto error;
-    if (H5Fclose(file)<0) goto error;
+    if(H5Gclose(groups) < 0) goto error;
+    if(H5Fclose(file) < 0) goto error;
+
     return 0;
+
 error:
     return 1;
+} /* end check_file() */
 
-    
-}
-
+
 /*-------------------------------------------------------------------------
  * Function:	main
  *
@@ -177,8 +175,7 @@ main(void)
     if (HDstrcmp(envval, "core") && HDstrcmp(envval, "split")) {
 	/* Check the case where the file was flushed */
 	h5_fixname(FILENAME[0], fapl, name, sizeof name);
-	if(check_file(name, fapl, FALSE))
-	{
+	if(check_file(name, fapl, FALSE)) {
 	    H5_FAILED()
 	    goto error;
 	}

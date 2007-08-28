@@ -66,6 +66,10 @@
 #define H5Gcreate_vers 1
 #endif /* !defined(H5Gcreate_vers) */
 
+#if !defined(H5Gopen_vers)
+#define H5Gopen_vers 1
+#endif /* !defined(H5Gopen_vers) */
+
 /************/
 /* Typedefs */
 /************/
@@ -167,6 +171,17 @@
 #else /* H5Gcreate_vers */
 #error "H5Gcreate_vers set to invalid value"
 #endif /* H5Gcreate_vers */
+
+#if !defined(H5Gopen_vers) || H5Gopen_vers == 2
+#ifndef H5Gopen_vers
+#define H5Gopen_vers 2
+#endif /* H5Gopen_vers */
+#define H5Gopen H5Gopen2
+#elif H5Gopen_vers == 1
+#define H5Gopen H5Gopen1
+#else /* H5Gopen_vers */
+#error "H5Gopen_vers set to invalid value"
+#endif /* H5Gopen_vers */
 
 /************/
 /* Typedefs */

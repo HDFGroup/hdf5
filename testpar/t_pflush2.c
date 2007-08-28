@@ -89,25 +89,26 @@ int check_file(char* name, hid_t fapl)
     }
 
     /* Open some groups */
-    if ((groups=H5Gopen(file, "some_groups"))<0) goto error;
-    for (i=0; i<100; i++) {
+    if((groups = H5Gopen2(file, "some_groups", H5P_DEFAULT)) < 0) goto error;
+    for(i = 0; i < 100; i++) {
 	sprintf(name, "grp%02u", (unsigned)i);
-	if ((grp=H5Gopen(groups, name))<0) goto error;
-	if (H5Gclose(grp)<0) goto error;
+	if((grp = H5Gopen2(groups, name, H5P_DEFAULT)) < 0) goto error;
+	if(H5Gclose(grp) < 0) goto error;
     }
 
-    if (H5Gclose(groups)<0) goto error;
-    if (H5Dclose(dset)<0) goto error;
-    if (H5Fclose(file)<0) goto error;
-    if (H5Pclose(plist)<0) goto error;
+    if(H5Gclose(groups) < 0) goto error;
+    if(H5Dclose(dset) < 0) goto error;
+    if(H5Fclose(file) < 0) goto error;
+    if(H5Pclose(plist) < 0) goto error;
+
     return 0;
+
 error:
-    if (H5Fclose(file)<0) goto error;
-    if (H5Pclose(plist)<0) goto error;
-
+    H5E_BEGIN_TRY {
+        H5Fclose(file);
+        H5Pclose(plist);
+    } H5E_END_TRY;
     return 1;
-
-    
 }
 
 /*-------------------------------------------------------------------------

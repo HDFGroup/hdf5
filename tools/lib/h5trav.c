@@ -340,7 +340,7 @@ static hssize_t get_nnames( hid_t loc_id, const char *group_name )
     hsize_t nobjs = 0;
 
     /* Open the group */
-    if((gid = H5Gopen(loc_id, group_name)) < 0)
+    if((gid = H5Gopen2(loc_id, group_name, H5P_DEFAULT)) < 0)
         return(-1);
 
     /* Retrieve the number of objects in it */

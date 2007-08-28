@@ -1549,8 +1549,8 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
             CHECK_I(ret, "H5Gclose");
             file_id = close_reopen_file(file_id, FILENAME, H5P_DEFAULT);
             CHECK_I(file_id, "H5Fopen");
-            group_id = H5Gopen(file_id, "group");
-            CHECK_I(group_id, "H5Gopen");
+            group_id = H5Gopen2(file_id, "group", H5P_DEFAULT);
+            CHECK_I(group_id, "H5Gopen2");
         }
     }
 
@@ -1603,8 +1603,8 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
             CHECK_I(ret, "H5Gclose");
             file_id = close_reopen_file(file_id, FILENAME, H5P_DEFAULT);
             CHECK_I(file_id, "H5Fopen");
-            group_id = H5Gopen(file_id, "interleaved group");
-            CHECK_I(group_id, "H5Gopen");
+            group_id = H5Gopen2(file_id, "interleaved group", H5P_DEFAULT);
+            CHECK_I(group_id, "H5Gopen2");
         }
     }
 
@@ -1620,8 +1620,8 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
      */
     file_id = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK_I(file_id, "H5Fopen");
-    group_id = H5Gopen(file_id, "group");
-    CHECK_I(group_id, "H5Gopen");
+    group_id = H5Gopen2(file_id, "group", H5P_DEFAULT);
+    CHECK_I(group_id, "H5Gopen2");
 
     strcpy(attr_name, "00 index");
 
@@ -1646,8 +1646,8 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
             CHECK_I(ret, "H5Gclose");
             file_id = close_reopen_file(file_id, FILENAME, H5P_DEFAULT);
             CHECK_I(file_id, "H5Fopen");
-            group_id = H5Gopen(file_id, "group");
-            CHECK_I(group_id, "H5Gopen");
+            group_id = H5Gopen2(file_id, "group", H5P_DEFAULT);
+            CHECK_I(group_id, "H5Gopen2");
         }
     }
 
@@ -1662,8 +1662,8 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
     /* Create all of the attributes again on the other group */
     file_id = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK_I(file_id, "H5Fopen");
-    group_id = H5Gopen(file_id, "interleaved group");
-    CHECK_I(group_id, "H5Gopen");
+    group_id = H5Gopen2(file_id, "interleaved group", H5P_DEFAULT);
+    CHECK_I(group_id, "H5Gopen2");
 
     for(x=0; x<NUM_ATTRIBUTES; ++x)
     {
@@ -1686,8 +1686,8 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
             CHECK_I(ret, "H5Gclose");
             file_id = close_reopen_file(file_id, FILENAME, H5P_DEFAULT);
             CHECK_I(file_id, "H5Fopen");
-            group_id = H5Gopen(file_id, "interleaved group");
-            CHECK_I(group_id, "H5Gopen");
+            group_id = H5Gopen2(file_id, "interleaved group", H5P_DEFAULT);
+            CHECK_I(group_id, "H5Gopen2");
         }
     }
     /* Close file and get its size now */
@@ -1784,8 +1784,8 @@ static void size2_verify(void)
     }
 
     /* Get property lists from second batch of datasets */
-    group1_id = H5Gopen(file_id, "group");
-    CHECK_I(group1_id, "H5Gopen");
+    group1_id = H5Gopen2(file_id, "group", H5P_DEFAULT);
+    CHECK_I(group1_id, "H5Gopen2");
     for(x=0; x<NUM_DATASETS; ++x)
     {
         dset_id = H5Dopen(group1_id, DSETNAME[x]);
@@ -1814,8 +1814,8 @@ static void size2_verify(void)
     CHECK_I(ret, "H5Gclose");
 
     /* Get property lists from interleaved group of datasets */
-    group1_id = H5Gopen(file_id, "interleaved group");
-    CHECK_I(group1_id, "H5Gopen");
+    group1_id = H5Gopen2(file_id, "interleaved group", H5P_DEFAULT);
+    CHECK_I(group1_id, "H5Gopen2");
     for(x = 0; x < NUM_DATASETS; x += 2) {
         /* First "type 1" dataset */
         dset_id = H5Dopen(group1_id, DSETNAME[x]);
@@ -1876,10 +1876,10 @@ static void size2_verify(void)
     CHECK_I(ret, "H5Tset_size");
 
     /* Read attributes on both groups and verify that they are correct */
-    group1_id = H5Gopen(file_id, "group");
-    CHECK_I(group1_id, "H5Gopen");
-    group2_id = H5Gopen(file_id, "interleaved group");
-    CHECK_I(group2_id, "H5Gopen");
+    group1_id = H5Gopen2(file_id, "group", H5P_DEFAULT);
+    CHECK_I(group1_id, "H5Gopen2");
+    group2_id = H5Gopen2(file_id, "interleaved group", H5P_DEFAULT);
+    CHECK_I(group2_id, "H5Gopen2");
 
     HDmemset(attr_string, 0, NAME_BUF_SIZE);
     HDmemset(attr_correct_string, 0, NAME_BUF_SIZE);

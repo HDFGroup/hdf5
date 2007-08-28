@@ -203,7 +203,7 @@ gent_ub(const char * filename, size_t ub_size, size_t ub_fill)
   H5Gclose(group);
 
   /* root attributes */
-  group = H5Gopen(fid, "/");
+  group = H5Gopen2(fid, "/", H5P_DEFAULT);
 
   dims[0] = 10;
   space = H5Screate_simple(1, dims, NULL);
@@ -223,7 +223,7 @@ gent_ub(const char * filename, size_t ub_size, size_t ub_fill)
 
   H5Gclose(group);
 
-  group = H5Gopen (fid, "/g1/g1.1");
+  group = H5Gopen2(fid, "/g1/g1.1", H5P_DEFAULT);
 
   /* dset1.1.1 */
   dims[0] = 10; dims[1] = 10;
@@ -270,11 +270,11 @@ gent_ub(const char * filename, size_t ub_size, size_t ub_fill)
   H5Lcreate_external("somefile", "somepath", fid, "/g1/g1.2/extlink", H5P_DEFAULT, H5P_DEFAULT);
 
   /* soft link */
-  group = H5Gopen (fid, "/g1/g1.2/g1.2.1");
+  group = H5Gopen2(fid, "/g1/g1.2/g1.2.1", H5P_DEFAULT);
   H5Glink (group, H5L_TYPE_SOFT, "somevalue", "slink");
   H5Gclose(group);
 
-  group = H5Gopen (fid, "/g2");
+  group = H5Gopen2(fid, "/g2", H5P_DEFAULT);
 
   /* dset2.1 */
   dims[0] = 10;

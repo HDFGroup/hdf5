@@ -186,13 +186,12 @@ test_dangle_group(H5F_close_degree_t degree)
     if(gid >= 0) TEST_ERROR
 
     /* Leave open a _lot_ of objects */
-    for(u=0; u<MAX_DANGLE; u++) {
-        if((gid = H5Gopen (fid, GROUPNAME))<0)
-            TEST_ERROR;
-    } /* end for */
+    for(u = 0; u < MAX_DANGLE; u++)
+        if((gid = H5Gopen2(fid, GROUPNAME, H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR
 
-    if((gid = H5Gopen (fid, GROUPNAME))<0)
-        TEST_ERROR;
+    if((gid = H5Gopen2(fid, GROUPNAME, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
 
     if(degree==H5F_CLOSE_SEMI) {
         H5E_BEGIN_TRY {

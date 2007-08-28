@@ -629,7 +629,7 @@ int test_attributes(const char *file,
 
     /* Create groups */
     gid  = H5Gcreate2(fid, "g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    root_id   = H5Gopen(fid, "/");
+    root_id   = H5Gopen2(fid, "/", H5P_DEFAULT);
 
     /*-------------------------------------------------------------------------
     * write a series of attributes on the dataset, group, and root group

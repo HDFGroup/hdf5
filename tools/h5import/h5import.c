@@ -852,7 +852,7 @@ processStrData(FILE **strm, struct Input *in, hid_t file_id)
             j = 0;
             handle = file_id;
             while(j < in->path.count - 1) {
-                if((group_id = H5Gopen(handle, in->path.group[j])) < 0) {
+                if((group_id = H5Gopen2(handle, in->path.group[j], H5P_DEFAULT)) < 0) {
                     group_id = H5Gcreate2(handle, in->path.group[j++], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
                     for(; j < in->path.count - 1; j++)
                         group_id = H5Gcreate2(group_id, in->path.group[j], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -2444,7 +2444,7 @@ process(struct Options *opt)
             j = 0;
             handle = file_id;
             while(j < in->path.count - 1) {
-                if((group_id = H5Gopen(handle, in->path.group[j])) < 0) {
+                if((group_id = H5Gopen2(handle, in->path.group[j], H5P_DEFAULT)) < 0) {
                   group_id = H5Gcreate2(handle, in->path.group[j++], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
                   for (; j < in->path.count - 1; j++)
                     group_id = H5Gcreate2(group_id, in->path.group[j], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);

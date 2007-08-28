@@ -893,7 +893,7 @@ void group_dataset_read(hid_t fid, int mpi_rank, int m)
 
     /* open every group under root group. */
     sprintf(gname, "group%d", m);
-    gid = H5Gopen(fid, gname);
+    gid = H5Gopen2(fid, gname, H5P_DEFAULT);
     VRFY((gid > 0), gname);
 
     /* check the data. */
@@ -1020,7 +1020,7 @@ void multiple_group_write(void)
     }
 
     /* recursively creates subgroups under the first group. */
-    gid = H5Gopen(fid, "group0");
+    gid = H5Gopen2(fid, "group0", H5P_DEFAULT);
     create_group_recursive(memspace, filespace, gid, 0);
     ret = H5Gclose(gid);
     VRFY((ret>=0), "H5Gclose");
@@ -1163,7 +1163,7 @@ void multiple_group_read(void)
     /* open every group under root group. */
     for(m=0; m<ngroups; m++) {
         sprintf(gname, "group%d", m);
-        gid = H5Gopen(fid, gname);
+        gid = H5Gopen2(fid, gname, H5P_DEFAULT);
         VRFY((gid > 0), gname);
 
         /* check the data. */
@@ -1185,7 +1185,7 @@ void multiple_group_read(void)
     }
 
     /* open all the groups in vertical direction. */
-    gid = H5Gopen(fid, "group0");
+    gid = H5Gopen2(fid, "group0", H5P_DEFAULT);
     VRFY((gid>0), "group0");
     recursive_read_group(memspace, filespace, gid, 0);
     H5Gclose(gid);
@@ -1278,7 +1278,7 @@ void recursive_read_group(hid_t memspace, hid_t filespace, hid_t gid,
 
     if( counter < GROUP_DEPTH ) {
         sprintf(gname, "%dth_child_group", counter+1);
-        child_gid = H5Gopen(gid, gname);
+        child_gid = H5Gopen2(gid, gname, H5P_DEFAULT);
         VRFY((child_gid>0), gname);
         recursive_read_group(memspace, filespace, child_gid, counter+1);
         H5Gclose(child_gid);

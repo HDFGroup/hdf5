@@ -53,406 +53,390 @@ int do_copy_refobjs(hid_t fidin,
                     trav_table_t *travt,
                     pack_opt_t *options) /* repack options */
 {
- hid_t     grp_in=(-1);            /* read group ID */
- hid_t     grp_out=(-1);           /* write group ID */
- hid_t     dset_in=(-1);           /* read dataset ID */
- hid_t     dset_out=(-1);          /* write dataset ID */
- hid_t     type_in=(-1);           /* named type ID */
- hid_t     dcpl_id=(-1);           /* dataset creation property list ID */
- hid_t     space_id=(-1);          /* space ID */
- hid_t     ftype_id=(-1);          /* file data type ID */
- hid_t     mtype_id=(-1);          /* memory data type ID */
- size_t    msize;                  /* memory size of memory type */
- hsize_t   nelmts;                 /* number of elements in dataset */
- int       rank;                   /* rank of dataset */
- hsize_t   dims[H5S_MAX_RANK];     /* dimensions of dataset */
- unsigned int i, j;
- int       k;
-
-/*-------------------------------------------------------------------------
- * browse
- *-------------------------------------------------------------------------
- */
-
- for ( i = 0; i < travt->nobjs; i++)
- {
-  switch ( travt->objs[i].type )
-  {
- /*-------------------------------------------------------------------------
-  * H5G_GROUP
-  *-------------------------------------------------------------------------
-  */
-  case H5G_GROUP:
-      
-  /*-------------------------------------------------------------------------
-   * copy referenced objects in attributes
-   *-------------------------------------------------------------------------
-   */
-
-      if ((grp_out=H5Gopen(fidout,travt->objs[i].name))<0)
-          goto error;
-      
-      if((grp_in = H5Gopen (fidin,travt->objs[i].name))<0)
-          goto error;
-      
-      if (copy_refs_attr(grp_in,grp_out,options,travt,fidout)<0)
-          goto error;
-      
-      if (H5Gclose(grp_out)<0)
-          goto error;
-      if (H5Gclose(grp_in)<0)
-          goto error;
-
-
-
-
-   /*-------------------------------------------------------------------------
-    * check for hard links
-    *-------------------------------------------------------------------------
-    */
-
-   if (travt->objs[i].nlinks)
-   {
-    for ( j=0; j<travt->objs[i].nlinks; j++)
-    {
-      H5Glink(fidout,
-      H5G_LINK_HARD,
-      travt->objs[i].name,
-      travt->objs[i].links[j].new_name);
-    }
-   }
-
-   break;
-
-  /*-------------------------------------------------------------------------
-   * H5G_DATASET
-   *-------------------------------------------------------------------------
-   */
-  case H5G_DATASET:
-
-   if ((dset_in=H5Dopen(fidin,travt->objs[i].name))<0)
-    goto error;
-   if ((space_id=H5Dget_space(dset_in))<0)
-    goto error;
-   if ((ftype_id=H5Dget_type (dset_in))<0)
-    goto error;
-   if ((dcpl_id=H5Dget_create_plist(dset_in))<0)
-    goto error;
-   if ( (rank=H5Sget_simple_extent_ndims(space_id))<0)
-    goto error;
-   if ( H5Sget_simple_extent_dims(space_id,dims,NULL)<0)
-    goto error;
-   nelmts=1;
-   for (k=0; k<rank; k++)
-    nelmts*=dims[k];
-
-   if ((mtype_id=h5tools_get_native_type(ftype_id))<0)
-    goto error;
-
-   if ((msize=H5Tget_size(mtype_id))==0)
-    goto error;
-/*-------------------------------------------------------------------------
- * check if the dataset creation property list has filters that
- * are not registered in the current configuration
- * 1) the external filters GZIP and SZIP might not be available
- * 2) the internal filters might be turned off
- *-------------------------------------------------------------------------
- */
-   if (h5tools_canreadf((NULL),dcpl_id)==1)
-   {
-/*-------------------------------------------------------------------------
- * test for a valid output dataset
- *-------------------------------------------------------------------------
- */
-   dset_out = FAIL;
-
-/*-------------------------------------------------------------------------
- * object references are a special case
- * we cannot just copy the buffers, but instead we recreate the reference
- *-------------------------------------------------------------------------
- */
-   if (H5Tequal(mtype_id, H5T_STD_REF_OBJ))
-   {
-    H5G_obj_t1       obj_type;
-    hid_t            refobj_id;
-    hobj_ref_t       *refbuf=NULL; /* buffer for object references */
-    hobj_ref_t       *buf=NULL;
-    const char*      refname;
-    unsigned         u;
-
-   /*-------------------------------------------------------------------------
-    * read to memory
-    *-------------------------------------------------------------------------
-    */
-
-    if (nelmts)
-    {
-     buf=(void *) HDmalloc((unsigned)(nelmts*msize));
-     if ( buf==NULL){
-      printf( "cannot read into memory\n" );
-      goto error;
-     }
-     if (H5Dread(dset_in,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
-      goto error;
-
-     if ((obj_type = H5Rget_obj_type(dset_in,H5R_OBJECT,buf))<0)
-      goto error;
-     refbuf=HDcalloc((unsigned)nelmts,msize);
-     if ( refbuf==NULL){
-      printf( "cannot allocate memory\n" );
-      goto error;
-     }
-     for ( u=0; u<nelmts; u++)
-     {
-      H5E_BEGIN_TRY {
-       if ((refobj_id = H5Rdereference(dset_in,H5R_OBJECT,&buf[u]))<0)
-        continue;
-      } H5E_END_TRY;
-      /* get the name. a valid name could only occur in the
-      second traversal of the file */
-      if ((refname=MapIdToName(refobj_id,travt))!=NULL)
-      {
-       /* create the reference, -1 parameter for objects */
-       if (H5Rcreate(&refbuf[u],fidout,refname,H5R_OBJECT,-1)<0)
-        goto error;
-       if (options->verbose)
-        printf("object <%s> object reference created to <%s>\n",
-        travt->objs[i].name,
-        refname);
-      }/*refname*/
-      close_obj(obj_type,refobj_id);
-     }/*  u */
-    }/*nelmts*/
+    hid_t     grp_in=(-1);            /* read group ID */
+    hid_t     grp_out=(-1);           /* write group ID */
+    hid_t     dset_in=(-1);           /* read dataset ID */
+    hid_t     dset_out=(-1);          /* write dataset ID */
+    hid_t     type_in=(-1);           /* named type ID */
+    hid_t     dcpl_id=(-1);           /* dataset creation property list ID */
+    hid_t     space_id=(-1);          /* space ID */
+    hid_t     ftype_id=(-1);          /* file data type ID */
+    hid_t     mtype_id=(-1);          /* memory data type ID */
+    size_t    msize;                  /* memory size of memory type */
+    hsize_t   nelmts;                 /* number of elements in dataset */
+    int       rank;                   /* rank of dataset */
+    hsize_t   dims[H5S_MAX_RANK];     /* dimensions of dataset */
+    unsigned int i, j;
+    int       k;
 
     /*-------------------------------------------------------------------------
-     * create/write dataset/close
-     *-------------------------------------------------------------------------
-     */
-    if ((dset_out=H5Dcreate(fidout,travt->objs[i].name,mtype_id,space_id,dcpl_id))<0)
-     goto error;
-    if (nelmts) {
-     if (H5Dwrite(dset_out,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,refbuf)<0)
-      goto error;
-    }
-
-    if (buf)
-     free(buf);
-    if (refbuf)
-     free(refbuf);
-
-   }/*H5T_STD_REF_OBJ*/
-
-/*-------------------------------------------------------------------------
- * dataset region references
- *-------------------------------------------------------------------------
- */
-   else if (H5Tequal(mtype_id, H5T_STD_REF_DSETREG))
-   {
-    H5G_obj_t1       obj_type;
-    hid_t            refobj_id;
-    hdset_reg_ref_t  *refbuf=NULL; /* input buffer for region references */
-    hdset_reg_ref_t  *buf=NULL;    /* output buffer */
-    const char*      refname;
-    unsigned         u;
-
-   /*-------------------------------------------------------------------------
-    * read input to memory
+    * browse
     *-------------------------------------------------------------------------
     */
-    if (nelmts)
+
+    for ( i = 0; i < travt->nobjs; i++)
     {
-     buf=(void *) HDmalloc((unsigned)(nelmts*msize));
-     if ( buf==NULL){
-      printf( "cannot read into memory\n" );
-      goto error;
-     }
-     if (H5Dread(dset_in,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
-      goto error;
-     if ((obj_type = H5Rget_obj_type(dset_in,H5R_DATASET_REGION,buf))<0)
-      goto error;
+        switch ( travt->objs[i].type )
+        {
+            /*-------------------------------------------------------------------------
+            * H5G_GROUP
+            *-------------------------------------------------------------------------
+            */
+            case H5G_GROUP:
 
-     /*-------------------------------------------------------------------------
-      * create output
-      *-------------------------------------------------------------------------
-      */
+                /*-------------------------------------------------------------------------
+                * copy referenced objects in attributes
+                *-------------------------------------------------------------------------
+                */
 
-     refbuf=HDcalloc(sizeof(hdset_reg_ref_t),(size_t)nelmts); /*init to zero */
-     if ( refbuf==NULL){
-      printf( "cannot allocate memory\n" );
-      goto error;
-     }
-     for ( u=0; u<nelmts; u++)
-     {
-      H5E_BEGIN_TRY {
-       if ((refobj_id = H5Rdereference(dset_in,H5R_DATASET_REGION,&buf[u]))<0)
-        continue;
-      } H5E_END_TRY;
+                if ((grp_out = H5Gopen2(fidout, travt->objs[i].name, H5P_DEFAULT)) < 0)
+                    goto error;
 
-      /* get the name. a valid name could only occur in the
-      second traversal of the file */
-      if ((refname=MapIdToName(refobj_id,travt))!=NULL)
-      {
-       hid_t region_id;    /* region id of the referenced dataset */
-       if ((region_id = H5Rget_region(dset_in,H5R_DATASET_REGION,&buf[u]))<0)
-        goto error;
-       /* create the reference, we need the space_id */
-       if (H5Rcreate(&refbuf[u],fidout,refname,H5R_DATASET_REGION,region_id)<0)
-        goto error;
-       if (H5Sclose(region_id)<0)
-        goto error;
-       if (options->verbose)
-        printf("object <%s> region reference created to <%s>\n",
-        travt->objs[i].name,
-        refname);
-      }/*refname*/
-      close_obj(obj_type,refobj_id);
-     }/*  u */
-    }/*nelmts*/
+                if ((grp_in = H5Gopen2(fidin, travt->objs[i].name, H5P_DEFAULT)) < 0)
+                    goto error;
+
+                if (copy_refs_attr(grp_in,grp_out,options,travt,fidout) < 0)
+                    goto error;
+
+                if (H5Gclose(grp_out) < 0)
+                    goto error;
+                if (H5Gclose(grp_in) < 0)
+                    goto error;
+
+
+                /*-------------------------------------------------------------------------
+                * check for hard links
+                *-------------------------------------------------------------------------
+                */
+
+                if(travt->objs[i].nlinks)
+                    for(j = 0; j < travt->objs[i].nlinks; j++)
+                        H5Glink(fidout, H5G_LINK_HARD, travt->objs[i].name, travt->objs[i].links[j].new_name);
+
+                break;
+
+            /*-------------------------------------------------------------------------
+            * H5G_DATASET
+            *-------------------------------------------------------------------------
+            */
+            case H5G_DATASET:
+
+                if ((dset_in=H5Dopen(fidin,travt->objs[i].name))<0)
+                    goto error;
+                if ((space_id=H5Dget_space(dset_in))<0)
+                    goto error;
+                if ((ftype_id=H5Dget_type (dset_in))<0)
+                    goto error;
+                if ((dcpl_id=H5Dget_create_plist(dset_in))<0)
+                    goto error;
+                if ( (rank=H5Sget_simple_extent_ndims(space_id))<0)
+                    goto error;
+                if ( H5Sget_simple_extent_dims(space_id,dims,NULL)<0)
+                    goto error;
+                nelmts=1;
+                for (k=0; k<rank; k++)
+                    nelmts*=dims[k];
+
+                if ((mtype_id=h5tools_get_native_type(ftype_id))<0)
+                    goto error;
+
+                if ((msize=H5Tget_size(mtype_id))==0)
+                    goto error;
+                /*-------------------------------------------------------------------------
+                * check if the dataset creation property list has filters that
+                * are not registered in the current configuration
+                * 1) the external filters GZIP and SZIP might not be available
+                * 2) the internal filters might be turned off
+                *-------------------------------------------------------------------------
+                */
+                if (h5tools_canreadf((NULL),dcpl_id)==1)
+                {
+                    /*-------------------------------------------------------------------------
+                    * test for a valid output dataset
+                    *-------------------------------------------------------------------------
+                    */
+                    dset_out = FAIL;
+
+                    /*-------------------------------------------------------------------------
+                    * object references are a special case
+                    * we cannot just copy the buffers, but instead we recreate the reference
+                    *-------------------------------------------------------------------------
+                    */
+                    if (H5Tequal(mtype_id, H5T_STD_REF_OBJ))
+                    {
+                        H5G_obj_t1       obj_type;
+                        hid_t            refobj_id;
+                        hobj_ref_t       *refbuf=NULL; /* buffer for object references */
+                        hobj_ref_t       *buf=NULL;
+                        const char*      refname;
+                        unsigned         u;
+
+                        /*-------------------------------------------------------------------------
+                        * read to memory
+                        *-------------------------------------------------------------------------
+                        */
+
+                        if (nelmts)
+                        {
+                            buf=(void *) HDmalloc((unsigned)(nelmts*msize));
+                            if ( buf==NULL){
+                                printf( "cannot read into memory\n" );
+                                goto error;
+                            }
+                            if (H5Dread(dset_in,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+                                goto error;
+
+                            if ((obj_type = H5Rget_obj_type(dset_in,H5R_OBJECT,buf))<0)
+                                goto error;
+                            refbuf=HDcalloc((unsigned)nelmts,msize);
+                            if ( refbuf==NULL){
+                                printf( "cannot allocate memory\n" );
+                                goto error;
+                            }
+                            for ( u=0; u<nelmts; u++)
+                            {
+                                H5E_BEGIN_TRY {
+                                    if ((refobj_id = H5Rdereference(dset_in,H5R_OBJECT,&buf[u]))<0)
+                                        continue;
+                                } H5E_END_TRY;
+                                /* get the name. a valid name could only occur in the
+                                second traversal of the file */
+                                if ((refname=MapIdToName(refobj_id,travt))!=NULL)
+                                {
+                                    /* create the reference, -1 parameter for objects */
+                                    if (H5Rcreate(&refbuf[u],fidout,refname,H5R_OBJECT,-1)<0)
+                                        goto error;
+                                    if (options->verbose)
+                                        printf("object <%s> object reference created to <%s>\n",
+                                            travt->objs[i].name,
+                                            refname);
+                                }/*refname*/
+                                close_obj(obj_type,refobj_id);
+                            }/*  u */
+                        }/*nelmts*/
+
+                        /*-------------------------------------------------------------------------
+                        * create/write dataset/close
+                        *-------------------------------------------------------------------------
+                        */
+                        if ((dset_out=H5Dcreate(fidout,travt->objs[i].name,mtype_id,space_id,dcpl_id))<0)
+                            goto error;
+                        if (nelmts) {
+                            if (H5Dwrite(dset_out,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,refbuf)<0)
+                                goto error;
+                        }
+
+                        if (buf)
+                            free(buf);
+                        if (refbuf)
+                            free(refbuf);
+
+                    }/*H5T_STD_REF_OBJ*/
+
+                    /*-------------------------------------------------------------------------
+                    * dataset region references
+                    *-------------------------------------------------------------------------
+                    */
+                    else if (H5Tequal(mtype_id, H5T_STD_REF_DSETREG))
+                    {
+                        H5G_obj_t1       obj_type;
+                        hid_t            refobj_id;
+                        hdset_reg_ref_t  *refbuf=NULL; /* input buffer for region references */
+                        hdset_reg_ref_t  *buf=NULL;    /* output buffer */
+                        const char*      refname;
+                        unsigned         u;
+
+                        /*-------------------------------------------------------------------------
+                        * read input to memory
+                        *-------------------------------------------------------------------------
+                        */
+                        if (nelmts)
+                        {
+                            buf=(void *) HDmalloc((unsigned)(nelmts*msize));
+                            if ( buf==NULL){
+                                printf( "cannot read into memory\n" );
+                                goto error;
+                            }
+                            if (H5Dread(dset_in,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+                                goto error;
+                            if ((obj_type = H5Rget_obj_type(dset_in,H5R_DATASET_REGION,buf))<0)
+                                goto error;
+
+                            /*-------------------------------------------------------------------------
+                            * create output
+                            *-------------------------------------------------------------------------
+                            */
+
+                            refbuf=HDcalloc(sizeof(hdset_reg_ref_t),(size_t)nelmts); /*init to zero */
+                            if ( refbuf==NULL){
+                                printf( "cannot allocate memory\n" );
+                                goto error;
+                            }
+                            for ( u=0; u<nelmts; u++)
+                            {
+                                H5E_BEGIN_TRY {
+                                    if ((refobj_id = H5Rdereference(dset_in,H5R_DATASET_REGION,&buf[u]))<0)
+                                        continue;
+                                } H5E_END_TRY;
+
+                                /* get the name. a valid name could only occur in the
+                                second traversal of the file */
+                                if ((refname=MapIdToName(refobj_id,travt))!=NULL)
+                                {
+                                    hid_t region_id;    /* region id of the referenced dataset */
+                                    if ((region_id = H5Rget_region(dset_in,H5R_DATASET_REGION,&buf[u]))<0)
+                                        goto error;
+                                    /* create the reference, we need the space_id */
+                                    if (H5Rcreate(&refbuf[u],fidout,refname,H5R_DATASET_REGION,region_id)<0)
+                                        goto error;
+                                    if (H5Sclose(region_id)<0)
+                                        goto error;
+                                    if (options->verbose)
+                                        printf("object <%s> region reference created to <%s>\n",
+                                            travt->objs[i].name,
+                                            refname);
+                                }/*refname*/
+                                close_obj(obj_type,refobj_id);
+                            }/*  u */
+                        }/*nelmts*/
+
+                        /*-------------------------------------------------------------------------
+                        * create/write dataset/close
+                        *-------------------------------------------------------------------------
+                        */
+                        if ((dset_out=H5Dcreate(fidout,travt->objs[i].name,mtype_id,space_id,dcpl_id))<0)
+                            goto error;
+                        if (nelmts) {
+                            if (H5Dwrite(dset_out,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,refbuf)<0)
+                                goto error;
+                        }
+
+                        if (buf)
+                            free(buf);
+                        if (refbuf)
+                            free(refbuf);
+                    } /* H5T_STD_REF_DSETREG */
+
+
+                    /*-------------------------------------------------------------------------
+                    * not references, open previously created object in 1st traversal
+                    *-------------------------------------------------------------------------
+                    */
+                    else
+                    {
+                        if ((dset_out=H5Dopen(fidout,travt->objs[i].name))<0)
+                            goto error;
+                    }
+
+                    assert(dset_out!=FAIL);
+
+                    /*-------------------------------------------------------------------------
+                    * copy referenced objects in attributes
+                    *-------------------------------------------------------------------------
+                    */
+                    if (copy_refs_attr(dset_in,dset_out,options,travt,fidout)<0)
+                        goto error;
+
+                    /*-------------------------------------------------------------------------
+                    * check for hard links
+                    *-------------------------------------------------------------------------
+                    */
+                    if(travt->objs[i].nlinks)
+                        for(j = 0; j < travt->objs[i].nlinks; j++)
+                            H5Glink(fidout, H5G_LINK_HARD, travt->objs[i].name, travt->objs[i].links[j].new_name);
+
+                    if(H5Dclose(dset_out)<0)
+                        goto error;
+
+                }/*can_read*/
+
+                /*-------------------------------------------------------------------------
+                * close
+                *-------------------------------------------------------------------------
+                */
+
+                if (H5Tclose(ftype_id)<0)
+                    goto error;
+                if (H5Tclose(mtype_id)<0)
+                    goto error;
+                if (H5Pclose(dcpl_id)<0)
+                    goto error;
+                if (H5Sclose(space_id)<0)
+                    goto error;
+                if (H5Dclose(dset_in)<0)
+                    goto error;
+
+                break;
+
+            /*-------------------------------------------------------------------------
+            * H5G_TYPE
+            *-------------------------------------------------------------------------
+            */
+            case H5G_TYPE:
+
+                if ((type_in = H5Topen (fidin,travt->objs[i].name))<0)
+                    goto error;
+
+                if (H5Tclose(type_in)<0)
+                    goto error;
+
+                break;
+
+            /*-------------------------------------------------------------------------
+            * H5G_LINK
+            *-------------------------------------------------------------------------
+            */
+
+            case H5G_LINK:
+
+                /*nothing to do */
+                break;
+
+            default:
+
+                break;
+        }
+    }
+
+
 
     /*-------------------------------------------------------------------------
-     * create/write dataset/close
-     *-------------------------------------------------------------------------
-     */
-    if ((dset_out=H5Dcreate(fidout,travt->objs[i].name,mtype_id,space_id,dcpl_id))<0)
-     goto error;
-    if (nelmts) {
-     if (H5Dwrite(dset_out,mtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,refbuf)<0)
-      goto error;
-    }
-
-    if (buf)
-     free(buf);
-    if (refbuf)
-     free(refbuf);
-   } /* H5T_STD_REF_DSETREG */
-
-
-/*-------------------------------------------------------------------------
- * not references, open previously created object in 1st traversal
- *-------------------------------------------------------------------------
- */
-   else
-   {
-    if ((dset_out=H5Dopen(fidout,travt->objs[i].name))<0)
-     goto error;
-   }
-
-   assert(dset_out!=FAIL);
-
-/*-------------------------------------------------------------------------
- * copy referenced objects in attributes
- *-------------------------------------------------------------------------
- */
-   if (copy_refs_attr(dset_in,dset_out,options,travt,fidout)<0)
-    goto error;
-
-/*-------------------------------------------------------------------------
- * check for hard links
- *-------------------------------------------------------------------------
- */
-   if (travt->objs[i].nlinks)
-   {
-    for ( j=0; j<travt->objs[i].nlinks; j++){
-     H5Glink(fidout,
-      H5G_LINK_HARD,
-      travt->objs[i].name,
-      travt->objs[i].links[j].new_name);
-    }
-   }
-
-   if (H5Dclose(dset_out)<0)
-    goto error;
-
-   }/*can_read*/
-
-   /*-------------------------------------------------------------------------
-    * close
+    * the root is a special case, we get an ID for the root group
+    * and copy its attributes using that ID
+    * it must be done last, because the attributes might contain references to
+    * objects in the object list
     *-------------------------------------------------------------------------
     */
 
-   if (H5Tclose(ftype_id)<0)
-    goto error;
-   if (H5Tclose(mtype_id)<0)
-    goto error;
-   if (H5Pclose(dcpl_id)<0)
-    goto error;
-   if (H5Sclose(space_id)<0)
-    goto error;
-   if (H5Dclose(dset_in)<0)
-    goto error;
+    if ((grp_out = H5Gopen2(fidout, "/", H5P_DEFAULT)) < 0)
+        goto error;
 
-   break;
+    if ((grp_in  = H5Gopen2(fidin, "/", H5P_DEFAULT)) < 0)
+        goto error;
 
-  /*-------------------------------------------------------------------------
-   * H5G_TYPE
-   *-------------------------------------------------------------------------
-   */
-  case H5G_TYPE:
+    if (copy_refs_attr(grp_in, grp_out, options, travt, fidout) < 0)
+        goto error;
 
-   if ((type_in = H5Topen (fidin,travt->objs[i].name))<0)
-    goto error;
+    if (H5Gclose(grp_out) < 0)
+        goto error;
+    if (H5Gclose(grp_in) < 0)
+        goto error;
 
-   if (H5Tclose(type_in)<0)
-    goto error;
-
-   break;
-
-  /*-------------------------------------------------------------------------
-   * H5G_LINK
-   *-------------------------------------------------------------------------
-   */
-
-  case H5G_LINK:
-
-   /*nothing to do */
-   break;
-
-  default:
-
-   break;
-  }
- }
-
-
-
-/*-------------------------------------------------------------------------
- * the root is a special case, we get an ID for the root group
- * and copy its attributes using that ID
- * it must be done last, because the attributes might contain references to
- * objects in the object list
- *-------------------------------------------------------------------------
- */
-
- if ((grp_out = H5Gopen(fidout,"/"))<0)
-  goto error;
-
- if ((grp_in  = H5Gopen(fidin,"/"))<0)
-  goto error;
-
- if (copy_refs_attr(grp_in,grp_out,options,travt,fidout)<0)
-  goto error;
-
- if (H5Gclose(grp_out)<0)
-  goto error;
- if (H5Gclose(grp_in)<0)
-  goto error;
-
- return 0;
+    return 0;
 
 error:
- H5E_BEGIN_TRY {
-  H5Gclose(grp_in);
-  H5Gclose(grp_out);
-  H5Pclose(dcpl_id);
-  H5Sclose(space_id);
-  H5Dclose(dset_in);
-  H5Dclose(dset_out);
-  H5Tclose(ftype_id);
-  H5Tclose(mtype_id);
-  H5Tclose(type_in);
- } H5E_END_TRY;
- return -1;
-
+    H5E_BEGIN_TRY {
+        H5Gclose(grp_in);
+        H5Gclose(grp_out);
+        H5Pclose(dcpl_id);
+        H5Sclose(space_id);
+        H5Dclose(dset_in);
+        H5Dclose(dset_out);
+        H5Tclose(ftype_id);
+        H5Tclose(mtype_id);
+        H5Tclose(type_in);
+    } H5E_END_TRY;
+    return -1;
 }
 
 
@@ -461,7 +445,7 @@ error:
  *
  * Purpose: duplicate all referenced HDF5 located in attributes
  *  relative to LOC_IN, which is obtained either from
- * loc_id = H5Gopen( fid, name);
+ * loc_id = H5Gopen2( fid, name, H5P_DEFAULT);
  * loc_id = H5Dopen( fid, name);
  * loc_id = H5Topen( fid, name);
  *

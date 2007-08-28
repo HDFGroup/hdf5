@@ -34,7 +34,8 @@
  *              QAK - 2007/08/23
  *---------------------------------------------------------------------------*/
 int_f
-nh5gcreate_c (hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size_hint,  hid_t_f *grp_id)
+nh5gcreate_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size_hint,
+    hid_t_f *grp_id)
 {
     hid_t gcpl_id = -1;          /* Group creation property list */
     char *c_name = NULL;
@@ -92,33 +93,31 @@ DONE:
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5gopen_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *grp_id)
+nh5gopen_c(hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *grp_id)
 {
-     int ret_value = -1;
-     char *c_name;
-     size_t c_namelen;
+     char *c_name = NULL;
      hid_t c_grp_id;
-     hid_t c_loc_id;
+     int ret_value = -1;
 
      /*
       * Convert FORTRAN name to C name
       */
-     c_namelen = *namelen;
-     c_name = (char *)HD5f2cstring(name, c_namelen);
-     if (c_name == NULL) return ret_value;
+    if(NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
+        goto DONE;
 
      /*
       * Call H5Gopen function.
       */
-     c_loc_id = *loc_id;
-     c_grp_id = H5Gopen(c_loc_id, c_name);
+    if((c_grp_id = H5Gopen2((hid_t)*loc_id, c_name, H5P_DEFAULT)) < 0)
+        goto DONE;
 
-     if (c_grp_id < 0) goto DONE;
-     ret_value = 0;
-     *grp_id = (hid_t_f)c_grp_id;
+    /* Everything OK, set values to return */
+    *grp_id = (hid_t_f)c_grp_id;
+    ret_value = 0;
 
 DONE:
-     HDfree(c_name);
+     if(c_name)
+         HDfree(c_name);
      return ret_value;
 }
 
@@ -139,57 +138,61 @@ DONE:
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5gget_obj_info_idx_c
-(hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *idx, _fcd obj_name, int_f *obj_namelen, int_f *obj_type)
+nh5gget_obj_info_idx_c(hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *idx,
+    _fcd obj_name, int_f *obj_namelen, int_f *obj_type)
 {
-     int ret_value = -1;
-     hid_t c_loc_id = (hid_t)*loc_id;
-     char *c_name;
-     size_t c_namelen;
-     size_t c_obj_namelen;
-     char *c_obj_name = NULL;
-     int type;
-     hsize_t c_idx = *idx;
-     hid_t gid = (-1);                 /* Temporary group ID */
+    hid_t c_loc_id = (hid_t)*loc_id;
+    char *c_name = NULL;
+    size_t c_obj_namelen;
+    char *c_obj_name = NULL;
+    int type;
+    hsize_t c_idx = *idx;
+    hid_t gid = (-1);                 /* Temporary group ID */
+    int ret_value = -1;
 
-     /*
-      * Convert FORTRAN name to C name
-      */
-     c_namelen = *namelen;
-     c_obj_namelen = *obj_namelen;
-     c_name = (char *)HD5f2cstring(name, c_namelen);
-     if (c_name == NULL) return ret_value;
+    /*
+     * Convert FORTRAN name to C name
+     */
+    if(NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
+        goto DONE;
 
-     /*
-      * Allocate buffer to hold name of the object
-      */
-     if (c_obj_namelen) c_obj_name = (char *)HDmalloc(c_obj_namelen + 1);
-     if (c_obj_name == NULL) { HDfree(c_name);
-                               return ret_value;
-                             }
+    /*
+     * Allocate buffer to hold name of the object
+     */
+    c_obj_namelen = *obj_namelen;
+    if(c_obj_namelen) {
+       if(NULL == (c_obj_name = (char *)HDmalloc(c_obj_namelen + 1)))
+           goto DONE;
+    } /* end if */
 
-     /* Get a temporary group ID for the group to query */
-     if((gid=H5Gopen(c_loc_id,c_name))<0) goto DONE;
+    /* Get a temporary group ID for the group to query */
+    if((gid = H5Gopen2(c_loc_id, c_name, H5P_DEFAULT)) < 0)
+        goto DONE;
 
-     /* Query the object's information */
-     if(H5Gget_objname_by_idx(gid, c_idx, c_obj_name, c_obj_namelen)<0) goto DONE;
-     if((type=H5Gget_objtype_by_idx(gid, c_idx))==H5G_UNKNOWN) goto DONE;
+    /* Query the object's information */
+    if(H5Gget_objname_by_idx(gid, c_idx, c_obj_name, c_obj_namelen) < 0)
+        goto DONE;
+    if((type = H5Gget_objtype_by_idx(gid, c_idx)) == H5G_UNKNOWN)
+        goto DONE;
 
-     *obj_type = type;
+    *obj_type = type;
 
-     /*
-      * Convert C name to FORTRAN and place it in the given buffer
-      */
-     HD5packFstring(c_obj_name, _fcdtocp(obj_name), c_obj_namelen);
-     ret_value = 0;
+    /*
+     * Convert C name to FORTRAN and place it in the given buffer
+     */
+    HD5packFstring(c_obj_name, _fcdtocp(obj_name), c_obj_namelen);
+    ret_value = 0;
 
 DONE:
-     /* Close the temporary group, if it was opened */
-     if(gid>0) H5Gclose(gid);
+    /* Close the temporary group, if it was opened */
+    if(gid > 0)
+        H5Gclose(gid);
 
-     HDfree(c_obj_name);
-     HDfree(c_name);
-     return ret_value;
+    if(c_obj_name)
+        HDfree(c_obj_name);
+    if(c_name)
+        HDfree(c_name);
+    return ret_value;
 }
 
 /*----------------------------------------------------------------------------
@@ -205,38 +208,40 @@ DONE:
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5gn_members_c (hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *nmembers)
+nh5gn_members_c(hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *nmembers)
 {
-     int ret_value = -1;
-     hid_t c_loc_id=(hid_t)*loc_id;
-     char *c_name;
-     size_t c_namelen;
-     hsize_t c_nmembers;
-     hid_t gid = (-1);
+    char *c_name = NULL;
+    hsize_t c_nmembers;
+    hid_t gid = (-1);
+    int ret_value = -1;
 
-     /*
-      * Convert FORTRAN name to C name
-      */
-     c_namelen = *namelen;
-     c_name = (char *)HD5f2cstring(name, c_namelen);
-     if (c_name == NULL) return ret_value;
+    /*
+     * Convert FORTRAN name to C name
+     */
+    if(NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
+        goto DONE;
 
-     /* Get a temporary group ID for the group to query */
-     if((gid=H5Gopen(c_loc_id,c_name))<0) goto DONE;
+    /* Get a temporary group ID for the group to query */
+    if((gid = H5Gopen2((hid_t)*loc_id, c_name, H5P_DEFAULT)) < 0)
+        goto DONE;
 
-     /* Call H5Gget_num_objs() for the number of objects in the group */
-     if(H5Gget_num_objs(gid,&c_nmembers)<0) goto DONE;
+    /* Call H5Gget_num_objs() for the number of objects in the group */
+    if(H5Gget_num_objs(gid, &c_nmembers) < 0)
+        goto DONE;
 
-     *nmembers = (int_f)c_nmembers;
-     ret_value = 0;
+    *nmembers = (int_f)c_nmembers;
+    ret_value = 0;
 
 DONE:
     /* Close the temporary group, if it was opened */
-    if(gid>0) H5Gclose(gid);
+    if(gid > 0)
+        H5Gclose(gid);
 
-     HDfree(c_name);
-     return ret_value;
+    if(c_name)
+        HDfree(c_name);
+    return ret_value;
 }
+
 /*----------------------------------------------------------------------------
  * Name:        h5gclose_c
  * Purpose:     Call H5Gclose to close the group

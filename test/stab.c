@@ -117,9 +117,9 @@ test_misc(hid_t fapl, hbool_t new_format)
     if(H5Gclose(g3) < 0) TEST_ERROR
 
     /* Open all groups with absolute names to check for exsistence */
-    if((g1 = H5Gopen(fid, "/test_1a")) < 0) TEST_ERROR
-    if((g2 = H5Gopen(fid, "/test_1a/sub_1")) < 0) TEST_ERROR
-    if((g3 = H5Gopen(fid, "/test_1b")) < 0) TEST_ERROR
+    if((g1 = H5Gopen2(fid, "/test_1a", H5P_DEFAULT)) < 0) TEST_ERROR
+    if((g2 = H5Gopen2(fid, "/test_1a/sub_1", H5P_DEFAULT)) < 0) TEST_ERROR
+    if((g3 = H5Gopen2(fid, "/test_1b", H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Gget_comment(g3, "././.", sizeof comment, comment) < 0) TEST_ERROR
     if(HDstrcmp(comment, "hello world")) {
 	H5_FAILED();
@@ -204,8 +204,8 @@ test_long(hid_t fapl, hbool_t new_format)
     if(H5Gclose(g2) < 0) TEST_ERROR
 
     /* Open groups */
-    if((g1 = H5Gopen(fid, name1)) < 0) TEST_ERROR
-    if((g2 = H5Gopen(fid, name2)) < 0) TEST_ERROR
+    if((g1 = H5Gopen2(fid, name1, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((g2 = H5Gopen2(fid, name2, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Gclose(g1) < 0) TEST_ERROR
     if(H5Gclose(g2) < 0) TEST_ERROR
 
@@ -708,7 +708,7 @@ read_old(hid_t fapl2)
     if((fid = H5Fopen(filename2, H5F_ACC_RDWR, fapl2)) < 0) TEST_ERROR
 
     /* Attempt to open "old" group */
-    if((gid = H5Gopen(fid, "old")) < 0) TEST_ERROR
+    if((gid = H5Gopen2(fid, "old", H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check on old group's status */
     if(H5G_is_empty_test(gid) == FALSE) TEST_ERROR
@@ -929,7 +929,7 @@ gcpl_on_root(hid_t fapl2)
     if(H5Pclose(fcpl) < 0) TEST_ERROR
 
     /* Open the root group */
-    if((gid = H5Gopen(fid, "/")) < 0) TEST_ERROR
+    if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Query the group creation properties */
     if((gcpl = H5Gget_create_plist(gid)) < 0) TEST_ERROR
@@ -963,7 +963,7 @@ gcpl_on_root(hid_t fapl2)
     if(H5Gclose(gid2) < 0) TEST_ERROR
 
     /* Open the middle group */
-    if((gid2 = H5Gopen(fid, GCPL_ON_ROOT_MIDDLE_GROUP)) < 0) TEST_ERROR
+    if((gid2 = H5Gopen2(fid, GCPL_ON_ROOT_MIDDLE_GROUP, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Query the group creation properties */
     if((gcpl = H5Gget_create_plist(gid2)) < 0) TEST_ERROR
@@ -1058,6 +1058,12 @@ old_api(hid_t fapl, const char *driver)
     /* Close group */
     if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
 
+    /* Re-open group */
+    if((gid = H5Gopen1(fid, OLD_API_GROUP)) < 0) FAIL_STACK_ERROR
+
+    /* Close group */
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
+
     /* Close file */
     if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
 
@@ -1074,6 +1080,7 @@ old_api(hid_t fapl, const char *driver)
 #else /* H5_NO_DEPRECATED_SYMBOLS */
     /* Shut compiler up */
     fapl = fapl;
+    driver = driver;
 
     SKIPPED();
     puts("    Deprecated API symbols not enabled");

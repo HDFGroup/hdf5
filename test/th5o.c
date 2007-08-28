@@ -213,8 +213,8 @@ test_h5o_close(void)
     CHECK(ret, FAIL, "H5Oclose");
 
     /* Make sure H5Oclose can close objects opened with H5*open */
-    grp = H5Gopen(fid, "group");
-    CHECK(grp, FAIL, "H5Gopen");
+    grp = H5Gopen2(fid, "group", H5P_DEFAULT);
+    CHECK(grp, FAIL, "H5Gopen2");
     dtype = H5Topen(fid, "group/datatype");
     CHECK(dtype, FAIL, "H5Topen");
     dset = H5Dopen(fid, "dataset");
@@ -478,12 +478,12 @@ test_h5o_refcount(void)
     fid = H5Fopen(TEST_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fopen");
 
-    grp = H5Gopen(fid, "group");
-    CHECK(grp, FAIL, "H5Gopen");
+    grp = H5Gopen2(fid, "group", H5P_DEFAULT);
+    CHECK(grp, FAIL, "H5Gopen2");
     dtype = H5Topen(fid, "datatype");
-    CHECK(dtype, FAIL, "H5Gopen");
+    CHECK(dtype, FAIL, "H5Topen");
     dset = H5Dopen(fid, "dataset");
-    CHECK(dset, FAIL, "H5Gopen");
+    CHECK(dset, FAIL, "H5Dopen");
 
     ret = H5Gget_objinfo(fid, "group", FALSE, &sb);
     CHECK(ret, FAIL, "H5Gget_objinfo");
@@ -516,12 +516,12 @@ test_h5o_refcount(void)
     fid = H5Fopen(TEST_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fopen");
 
-    grp = H5Gopen(fid, "group");
-    CHECK(grp, FAIL, "H5Gopen");
+    grp = H5Gopen2(fid, "group", H5P_DEFAULT);
+    CHECK(grp, FAIL, "H5Gopen2");
     dtype = H5Topen(fid, "datatype");
-    CHECK(dtype, FAIL, "H5Gopen");
+    CHECK(dtype, FAIL, "H5Topen");
     dset = H5Dopen(fid, "dataset");
-    CHECK(dset, FAIL, "H5Gopen");
+    CHECK(dset, FAIL, "H5Dopen");
 
     ret = H5Gget_objinfo(fid, "group", FALSE, &sb);
     CHECK(ret, FAIL, "H5Gget_objinfo");
@@ -706,8 +706,8 @@ test_h5o_plist(void)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Re-open objects */
-    grp = H5Gopen(fid, "group");
-    CHECK(grp, FAIL, "H5Gopen");
+    grp = H5Gopen2(fid, "group", H5P_DEFAULT);
+    CHECK(grp, FAIL, "H5Gopen2");
     dtype = H5Topen(fid, "datatype");
     CHECK(dtype, FAIL, "H5Topen");
     dset = H5Dopen(fid, "dataset");

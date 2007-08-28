@@ -590,8 +590,8 @@ static void test_write_vl_string_attribute(void)
     ret = H5Tset_size (type, H5T_VARIABLE);
     CHECK(ret, FAIL, "H5Tset_size");
 
-    root = H5Gopen(file, "/");
-    CHECK(root, FAIL, "H5Gopen");
+    root = H5Gopen2(file, "/", H5P_DEFAULT);
+    CHECK(root, FAIL, "H5Gopen2");
 
     dataspace = H5Screate(H5S_SCALAR);
     CHECK(dataspace, FAIL, "H5Screate");
@@ -676,8 +676,8 @@ static void test_read_vl_string_attribute(void)
     ret = H5Tset_size (type, H5T_VARIABLE);
     CHECK(ret, FAIL, "H5Tset_size");
 
-    root = H5Gopen(file, "/");
-    CHECK(root, FAIL, "H5Gopen");
+    root = H5Gopen2(file, "/", H5P_DEFAULT);
+    CHECK(root, FAIL, "H5Gopen2");
 
     /* Test reading "normal" sized string attribute */
     att = H5Aopen_name(root, "test_scalar");

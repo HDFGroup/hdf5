@@ -1299,31 +1299,26 @@ herr_t H5LT_open_id( hid_t loc_id,
                      const char *obj_name,
                      int obj_type /*basic object type*/ )
 {
+    hid_t   obj_id = -1;
 
- hid_t   obj_id = -1;
+    switch(obj_type) {
+        case H5G_DATASET:
+            /* Open the dataset. */
+            if((obj_id = H5Dopen(loc_id, obj_name)) < 0)
+                return -1;
+            break;
 
- switch ( obj_type )
- {
-  case H5G_DATASET:
+        case H5G_GROUP:
+            /* Open the group. */
+            if((obj_id = H5Gopen2(loc_id, obj_name, H5P_DEFAULT)) < 0)
+                return -1;
+            break;
 
-   /* Open the dataset. */
-   if ( (obj_id = H5Dopen( loc_id, obj_name )) < 0 )
-    return -1;
-   break;
+        default:
+            return -1;
+    }
 
-  case H5G_GROUP:
-
-   /* Open the group. */
-   if ( (obj_id = H5Gopen( loc_id, obj_name )) < 0 )
-    return -1;
-   break;
-
-  default:
-   return -1;
- }
-
- return obj_id;
-
+    return obj_id;
 }
 
 

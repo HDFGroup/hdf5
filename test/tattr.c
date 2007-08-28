@@ -199,8 +199,8 @@ test_attr_basic_write(hid_t fapl)
     CHECK(ret, FAIL, "H5Aclose");
 
     /* Open the root group */
-    group = H5Gopen(fid1, "/");
-    CHECK(group, FAIL, "H5Gopen");
+    group = H5Gopen2(fid1, "/", H5P_DEFAULT);
+    CHECK(group, FAIL, "H5Gopen2");
 
     /* Open attribute again */
     attr = H5Aopen_name(group, ATTR1_NAME);
@@ -432,8 +432,8 @@ test_attr_basic_read(hid_t fapl)
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Open the group */
-    group = H5Gopen(fid1,GROUP1_NAME);
-    CHECK(group, FAIL, "H5Gopen");
+    group = H5Gopen2(fid1, GROUP1_NAME, H5P_DEFAULT);
+    CHECK(group, FAIL, "H5Gopen2");
 
     /* Verify the correct number of attributes */
     ret=H5Aget_num_attrs(group);
@@ -3908,8 +3908,8 @@ test_attr_corder_create_reopen(hid_t fcpl, hid_t fapl)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Re-open group */
-    gid = H5Gopen(fid, GROUP1_NAME);
-    CHECK(gid, FAIL, "H5Gopen");
+    gid = H5Gopen2(fid, GROUP1_NAME, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gopen2");
 
     /* Delete attribute */
     ret = H5Adelete2(gid, ".", "attr-003", H5P_DEFAULT);
@@ -8121,8 +8121,8 @@ test_attr_bug1(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Gclose");
 
     /* Re-open first group */
-    gid = H5Gopen(fid, GROUP1_NAME);
-    CHECK(gid, FAIL, "H5Gopen");
+    gid = H5Gopen2(fid, GROUP1_NAME, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gopen2");
 
     /* Create attribute on first group */
     aid = H5Acreate(gid, ATTR7_NAME, H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT);
@@ -8154,8 +8154,8 @@ test_attr_bug1(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Gunlink");
 
     /* Re-open first group */
-    gid = H5Gopen(fid, GROUP1_NAME);
-    CHECK(gid, FAIL, "H5Gopen");
+    gid = H5Gopen2(fid, GROUP1_NAME, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gopen2");
 
     /* Create another attribute on first group */
     aid = H5Acreate(gid, ATTR8_NAME, H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT);
@@ -8176,8 +8176,8 @@ test_attr_bug1(hid_t fcpl, hid_t fapl)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Re-open first group */
-    gid = H5Gopen(fid, GROUP1_NAME);
-    CHECK(gid, FAIL, "H5Gopen");
+    gid = H5Gopen2(fid, GROUP1_NAME, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gopen2");
 
     /* Delete first attribute */
     ret = H5Adelete(gid, ATTR7_NAME);

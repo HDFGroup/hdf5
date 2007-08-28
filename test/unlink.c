@@ -314,7 +314,7 @@ test_rename(hid_t file)
     if((inner = H5Gcreate2(foo, "inner", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Gclose(inner) < 0) TEST_ERROR
     if(H5Gclose(foo) < 0) TEST_ERROR
-    if((inner = H5Gopen(work, "bar/inner")) < 0) TEST_ERROR
+    if((inner = H5Gopen2(work, "bar/inner", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if(H5Gclose(inner) < 0) TEST_ERROR
     PASSED();
 
@@ -393,7 +393,7 @@ test_new_move(hid_t fapl)
     if(H5Gmove2(grp_1, "group_move", grp_2, "group_new_name") < 0) TEST_ERROR
 
     /* Open the group just moved to the new location. */
-    if((moved_grp = H5Gopen(grp_2, "group_new_name")) < 0) TEST_ERROR
+    if((moved_grp = H5Gopen2(grp_2, "group_new_name", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     if(H5Gclose(grp_1) < 0) TEST_ERROR
     if(H5Gclose(grp_2) < 0) TEST_ERROR
@@ -1010,13 +1010,13 @@ test_filespace(hid_t fapl)
     for(u=FILESPACE_TOP_GROUPS; u>0; u--) {
         /* Open group */
         sprintf(objname,"%s %u",GROUPNAME,(u-1));
-        if((group = H5Gopen (file, objname)) < 0) TEST_ERROR
+        if((group = H5Gopen2(file, objname, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
         /* Open nested groups inside top groups */
         for(v=0; v<FILESPACE_NESTED_GROUPS; v++) {
             /* Create group */
             sprintf(objname,"%s %u",GROUP2NAME,v);
-            if((group2 = H5Gopen (group, objname)) < 0) TEST_ERROR
+            if((group2 = H5Gopen2(group, objname, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
             /* Remove datasets inside nested groups */
             for(w=0; w<FILESPACE_NDATASETS; w++) {
@@ -1400,7 +1400,7 @@ test_unlink_slashes(hid_t fapl)
     if((fid=H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Open the top level group */
-    if((gid = H5Gopen(fid, SLASHES_GROUP_NAME)) < 0) TEST_ERROR
+    if((gid = H5Gopen2(fid, SLASHES_GROUP_NAME, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Delete the root link */
     if(H5Gunlink(gid,SLASHES_ROOTLINK_NAME) < 0) TEST_ERROR
@@ -1456,7 +1456,7 @@ static int delete_node (hid_t pid, hid_t id)
     if(HDstrcmp(name,"/Zone81")==0) {
         hid_t gid;
 
-        if((gid = H5Gopen (pid, "/Zone80")) < 0) return(-1);
+        if((gid = H5Gopen2(pid, "/Zone80", H5P_DEFAULT)) < 0) return(-1);
         if(H5Gclose(gid) < 0) return(-1);
     } /* end if */
 
@@ -1493,10 +1493,9 @@ test_unlink_rightleaf(hid_t fid)
     TESTING("deleting right-most child in non-leaf B-tree node");
 
     /* Allocate space for the group IDs */
-    gids = (hid_t *) HDmalloc (ngroups * sizeof(hid_t));
-    if(gids==NULL) TEST_ERROR
+    if(NULL == (gids = (hid_t *)HDmalloc(ngroups * sizeof(hid_t)))) TEST_ERROR
 
-    if((rootid = H5Gopen (fid, "/")) < 0) TEST_ERROR
+    if((rootid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Create all the groups */
     for (n = 0; n < ngroups; n++) {
@@ -1557,10 +1556,9 @@ test_unlink_rightnode(hid_t fid)
     TESTING("deleting right-most child in non-leaf B-tree node");
 
     /* Allocate space for the group IDs */
-    gids = (hid_t *) HDmalloc (ngroups * sizeof(hid_t));
-    if(gids==NULL) TEST_ERROR
+    if(NULL == (gids = (hid_t *)HDmalloc(ngroups * sizeof(hid_t)))) TEST_ERROR
 
-    if((rootid = H5Gopen (fid, "/")) < 0) TEST_ERROR
+    if((rootid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Create all the groups */
     for (n = 0; n < ngroups; n++) {
@@ -1621,10 +1619,9 @@ test_unlink_middlenode(hid_t fid)
     TESTING("deleting right-most child in non-leaf B-tree node");
 
     /* Allocate space for the group IDs */
-    gids = (hid_t *) HDmalloc (ngroups * sizeof(hid_t));
-    if(gids==NULL) TEST_ERROR
+    if(NULL == (gids = (hid_t *)HDmalloc(ngroups * sizeof(hid_t)))) TEST_ERROR
 
-    if((rootid = H5Gopen (fid, "/")) < 0) TEST_ERROR
+    if((rootid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Create all the groups */
     for (n = 0; n < ngroups; n++) {
@@ -1987,10 +1984,10 @@ test_resurrect_group(hid_t fapl)
     if(H5Fclose(file) < 0) TEST_ERROR
 
     /* Re-open the file */
-    if((file=H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* Attempt to open the datatype under the new name */
-    if((group=H5Gopen(file,GROUP2NAME)) < 0) TEST_ERROR
+    if((group = H5Gopen2(file, GROUP2NAME, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Close things */
     if(H5Gclose(group) < 0) TEST_ERROR

@@ -833,13 +833,13 @@ create_objects(hid_t fid1, hid_t fid2, hid_t *ret_did, hid_t *ret_gid1,
         if(ret_gid1 != NULL)
             *ret_gid1 = gid1;
 
-        gid2 = H5Gopen(fid2, "/group");
-        CHECK(gid2, FAIL, "H5Gopen");
+        gid2 = H5Gopen2(fid2, "/group", H5P_DEFAULT);
+        CHECK(gid2, FAIL, "H5Gopen2");
         if(ret_gid2 != NULL)
             *ret_gid2 = gid2;
 
-        gid3 = H5Gopen(fid2, "/group");
-        CHECK(gid3, FAIL, "H5Gopen");
+        gid3 = H5Gopen2(fid2, "/group", H5P_DEFAULT);
+        CHECK(gid3, FAIL, "H5Gopen2");
         if(ret_gid3 != NULL)
             *ret_gid3 = gid3;
     }
@@ -917,8 +917,8 @@ test_get_file_id(void)
     fid = H5Fopen(FILE4, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
 
-    group_id = H5Gopen(fid, GRP_NAME);
-    CHECK(group_id, FAIL, "H5Gopen");
+    group_id = H5Gopen2(fid, GRP_NAME, H5P_DEFAULT);
+    CHECK(group_id, FAIL, "H5Gopen2");
 
     /* Test H5Iget_file_id() */
     check_file_id(fid, group_id);
@@ -1446,15 +1446,15 @@ test_file_open_dot(void)
     VERIFY(gid2, FAIL, "H5Gcreate2");
 
     /* Open a group with no name using the file ID (should open the root group) */
-    gid2 = H5Gopen(fid, ".");
-    CHECK(gid2, FAIL, "H5Gopen");
+    gid2 = H5Gopen2(fid, ".", H5P_DEFAULT);
+    CHECK(gid2, FAIL, "H5Gopen2");
 
     ret = H5Gclose(gid2);
     CHECK(ret, FAIL, "H5Gclose");
 
     /* Open a group with no name using the group ID (should open the group again) */
-    gid2 = H5Gopen(gid, ".");
-    CHECK(gid2, FAIL, "H5Gopen");
+    gid2 = H5Gopen2(gid, ".", H5P_DEFAULT);
+    CHECK(gid2, FAIL, "H5Gopen2");
 
     ret = H5Gclose(gid2);
     CHECK(ret, FAIL, "H5Gclose");
@@ -1695,10 +1695,10 @@ test_file_double_root_open(void)
     file2_id = H5Fopen (FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(file2_id, FAIL, "H5Fopen");
 
-    grp1_id  = H5Gopen(file1_id, "/");
-    CHECK(grp1_id, FAIL, "H5Gopen");
-    grp2_id  = H5Gopen(file2_id, "/");
-    CHECK(grp2_id, FAIL, "H5Gopen");
+    grp1_id  = H5Gopen2(file1_id, "/", H5P_DEFAULT);
+    CHECK(grp1_id, FAIL, "H5Gopen2");
+    grp2_id  = H5Gopen2(file2_id, "/", H5P_DEFAULT);
+    CHECK(grp2_id, FAIL, "H5Gopen2");
 
     /* Note "assymetric" close order */
     ret = H5Gclose(grp1_id);
@@ -1736,8 +1736,8 @@ test_file_double_group_open(void)
 
     grp1_id  = H5Gcreate2(file1_id, GRP_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(grp1_id, FAIL, "H5Gcreate2");
-    grp2_id  = H5Gopen(file2_id, GRP_NAME);
-    CHECK(grp2_id, FAIL, "H5Gopen");
+    grp2_id  = H5Gopen2(file2_id, GRP_NAME, H5P_DEFAULT);
+    CHECK(grp2_id, FAIL, "H5Gopen2");
 
     /* Note "assymetric" close order */
     ret = H5Gclose(grp1_id);

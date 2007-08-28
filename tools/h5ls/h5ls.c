@@ -62,7 +62,7 @@ static struct {
 /* Information about how to display each type of object */
 static struct dispatch_t {
     const char *name;
-    hid_t (*open)(hid_t loc, const char *name);
+    hid_t (*open)(hid_t loc, const char *name, hid_t apl_id);
     herr_t (*close)(hid_t obj);
     herr_t (*list1)(hid_t obj);
     herr_t (*list2)(hid_t obj, const char *name);
@@ -1728,11 +1728,11 @@ datatype_list2(hid_t type, const char UNUSED *name)
  *-------------------------------------------------------------------------
  */
 static hid_t
-slink_open(hid_t location, const char *name)
+slink_open(hid_t location, const char *name, hid_t UNUSED apl_id)
 {
     H5G_stat_t  statbuf;
 
-    if (H5Gget_objinfo(location, name, FALSE, &statbuf) < 0) 
+    if(H5Gget_objinfo(location, name, FALSE, &statbuf) < 0) 
         return -1;
 
     if(statbuf.type == H5G_LINK) {    /* Soft link */
@@ -1771,7 +1771,7 @@ slink_open(hid_t location, const char *name)
  *-------------------------------------------------------------------------
  */
 static hid_t
-udlink_open(hid_t location, const char *name)
+udlink_open(hid_t location, const char *name, hid_t UNUSED apl_id)
 {
     H5L_info_t linfo;
     char * buf = NULL;
@@ -1789,7 +1789,8 @@ udlink_open(hid_t location, const char *name)
             if(H5Lget_val(location, name, buf, linfo.u.val_size, H5P_DEFAULT) < 0)
                 goto error;
 
-            if(H5Lunpack_elink_val(buf, linfo.u.val_size, NULL, &filename, &path) < 0) goto error;
+            if(H5Lunpack_elink_val(buf, linfo.u.val_size, NULL, &filename, &path) < 0)
+                goto error;
             HDfputs("file: ", stdout);
             HDfputs(filename, stdout);
             HDfputs("    path: ", stdout);
@@ -1879,17 +1880,16 @@ list (hid_t group, const char *name, void *_iter)
 
     /* Open the object.  Not all objects can be opened.  If this is the case
      * then return right away. */
-    if (sb.type>=0 &&
-            (NULL==dispatch_g[sb.type].open ||
-            (obj=(dispatch_g[sb.type].open)(group, name))<0)) {
+    if(sb.type >= 0 &&
+            (NULL == dispatch_g[sb.type].open ||
+            (obj = (dispatch_g[sb.type].open)(group, name, H5P_DEFAULT)) < 0)) {
         printf(" *ERROR*\n");
         goto done;
-    }
+    } /* end if */
 
     /* List the first line of information for the object. */
-    if (sb.type>=0 && dispatch_g[sb.type].list1) {
+    if(sb.type >= 0 && dispatch_g[sb.type].list1)
         (dispatch_g[sb.type].list1)(obj);
-    }
     putchar('\n');
 
     /* Show detailed information about the object, beginning with information
@@ -2120,9 +2120,9 @@ main (int argc, const char *argv[])
     h5tools_init();
 
     /* Build display table */
-    DISPATCH(H5G_DATASET, "Dataset", H5Dopen, H5Dclose, dataset_list1, dataset_list2);
-    DISPATCH(H5G_GROUP, "Group", H5Gopen, H5Gclose, NULL, group_list2);
-    DISPATCH(H5G_TYPE, "Type", H5Topen, H5Tclose, NULL, datatype_list2);
+    DISPATCH(H5G_DATASET, "Dataset", H5Dopen2, H5Dclose, dataset_list1, dataset_list2);
+    DISPATCH(H5G_GROUP, "Group", H5Gopen2, H5Gclose, NULL, group_list2);
+    DISPATCH(H5G_TYPE, "Type", H5Topen2, H5Tclose, NULL, datatype_list2);
     DISPATCH(H5G_LINK, "-> ", slink_open, NULL, NULL, NULL);
     DISPATCH(H5G_UDLINK, "-> ", udlink_open, NULL, NULL, NULL);
 
@@ -2317,30 +2317,31 @@ main (int argc, const char *argv[])
             fprintf(stderr, "%s: unable to open file\n", argv[argno-1]);
             continue;
         }
-        if (oname) oname++;
-        if (!oname || !*oname) oname = root_name;
+        if(oname)
+            oname++;
+        if(!oname || !*oname)
+            oname = root_name;
 
         /* Open the object and display it's information */
-        if (H5Gget_objinfo(file, oname, TRUE, &sb)>=0 &&
-                H5G_GROUP==sb.type && !grp_literal_g) {
-            /* Specified name is a group. List the complete contents of the
-             * group. */
+        if(H5Gget_objinfo(file, oname, TRUE, &sb) >= 0 && H5G_GROUP == sb.type && !grp_literal_g) {
+            /* Specified name is a group. List the complete contents of the group. */
             sym_insert(&sb, oname);
-            iter.container = container = fix_name(show_file_name_g?fname:"", oname);
+            iter.container = container = fix_name((show_file_name_g ? fname : ""), oname);
+
             /* list root attributes */
-            if (verbose_g>0)
-            {
-             if ((root=H5Gopen(file, "/"))<0)
-              leave(1);
-             H5Aiterate(root, NULL, list_attr, NULL);
-             if (H5Gclose(root)<0)
-              leave(1);
-            }
+            if(verbose_g > 0) {
+                if((root = H5Gopen2(file, "/", H5P_DEFAULT)) < 0)
+                    leave(1);
+                H5Aiterate(root, NULL, list_attr, NULL);
+                if(H5Gclose(root) < 0)
+                    leave(1);
+            } /* end if */
+
             /* list */
             H5Giterate(file, oname, NULL, list, &iter);
             free(container);
 
-        } else if ((root=H5Gopen(file, "/"))<0) {
+        } else if((root = H5Gopen2(file, "/", H5P_DEFAULT)) < 0) {
             leave(1); /*major problem!*/
 
         } else {
@@ -2348,7 +2349,8 @@ main (int argc, const char *argv[])
             * container for the object is everything up to the base name. */
             iter.container = show_file_name_g ? fname : "/";
             list(root, oname, &iter);
-            if (H5Gclose(root)<0) leave(1);
+            if(H5Gclose(root) < 0)
+                leave(1);
         }
         H5Fclose(file);
         free(fname);

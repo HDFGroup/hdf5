@@ -215,11 +215,10 @@ done:
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gcreate1() */
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Gopen
+ * Function:	H5Gopen1
  *
  * Purpose:	Opens an existing group for modification.  When finished,
  *		call H5Gclose() to close it and release resources.
@@ -234,18 +233,13 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Gopen(hid_t loc_id, const char *name)
+H5Gopen1(hid_t loc_id, const char *name)
 {
-    H5G_t       *grp = NULL;
-    H5G_loc_t	loc;
-    H5G_loc_t   grp_loc;                /* Location used to open group */
-    H5G_name_t  grp_path;            	/* Opened object group hier. path */
-    H5O_loc_t   grp_oloc;            	/* Opened object object location */
-    H5O_type_t  obj_type;               /* Type of object at location */
-    hbool_t     loc_found = FALSE;      /* Location at 'name' found */
+    H5G_t       *grp = NULL;            /* Group opened */
+    H5G_loc_t	loc;                    /* Location of parent for group */
     hid_t       ret_value;              /* Return value */
 
-    FUNC_ENTER_API(H5Gopen, FAIL)
+    FUNC_ENTER_API(H5Gopen1, FAIL)
     H5TRACE2("i", "i*s", loc_id, name);
 
     /* Check args */
@@ -254,24 +248,8 @@ H5Gopen(hid_t loc_id, const char *name)
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
-    /* Set up opened group location to fill in */
-    grp_loc.oloc = &grp_oloc;
-    grp_loc.path = &grp_path;
-    H5G_loc_reset(&grp_loc);
-
-    /* Find the group object */
-    if(H5G_loc_find(&loc, name, &grp_loc/*out*/, H5P_DEFAULT, H5AC_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
-    loc_found = TRUE;
-
-    /* Check that the object found is the correct type */
-    if(H5O_obj_type(&grp_oloc, &obj_type, H5AC_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object type")
-    if(obj_type != H5O_TYPE_GROUP)
-        HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "not a group")
-
     /* Open the group */
-    if((grp = H5G_open(&grp_loc, H5AC_dxpl_id)) == NULL)
+    if((grp = H5G_open_name(&loc, name, H5P_DEFAULT, H5AC_dxpl_id)) == NULL)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
 
     /* Register an atom for the group */
@@ -280,18 +258,13 @@ H5Gopen(hid_t loc_id, const char *name)
 
 done:
     if(ret_value < 0) {
-        if(grp) {
-            if(H5G_close(grp) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
-        } /* end if */
-        else {
-            if(loc_found && H5G_loc_free(&grp_loc) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
-        } /* end else */
+        if(grp && H5G_close(grp) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)
-} /* end H5Gopen() */
+} /* end H5Gopen1() */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
 /*-------------------------------------------------------------------------

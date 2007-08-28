@@ -329,7 +329,7 @@ done:
  *		call H5Gclose() to close it and release resources.
  *
  *              This function allows the user the pass in a Group Access
- *              Property List, which H5Gopen() does not.
+ *              Property List, which H5Gopen1() does not.
  *
  * Return:	Success:	Object ID of the group.
  *		Failure:	FAIL
@@ -342,13 +342,8 @@ done:
 hid_t
 H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id)
 {
-    H5G_t       *grp = NULL;
-    H5G_loc_t	loc;
-    H5G_loc_t   grp_loc;                /* Location used to open group */
-    H5G_name_t  grp_path;            	/* Opened object group hier. path */
-    H5O_loc_t   grp_oloc;            	/* Opened object object location */
-    H5O_type_t  obj_type;               /* Type of object at location */
-    hbool_t     loc_found = FALSE;      /* Location at 'name' found */
+    H5G_t       *grp = NULL;            /* Group opened */
+    H5G_loc_t	loc;                    /* Location of parent for group */
     hid_t       ret_value;              /* Return value */
 
     FUNC_ENTER_API(H5Gopen2, FAIL)
@@ -367,24 +362,8 @@ H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id)
         if(TRUE != H5P_isa_class(gapl_id, H5P_GROUP_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group access property list")
 
-    /* Set up opened group location to fill in */
-    grp_loc.oloc = &grp_oloc;
-    grp_loc.path = &grp_path;
-    H5G_loc_reset(&grp_loc);
-
-    /* Find the group object using the gapl passed in */
-    if(H5G_loc_find(&loc, name, &grp_loc/*out*/, gapl_id, H5AC_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
-    loc_found = TRUE;
-
-    /* Check that the object found is the correct type */
-    if(H5O_obj_type(&grp_oloc, &obj_type, H5AC_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object type")
-    if(obj_type != H5O_TYPE_GROUP)
-        HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "not a group")
-
     /* Open the group */
-    if((grp = H5G_open(&grp_loc, H5AC_dxpl_id)) == NULL)
+    if((grp = H5G_open_name(&loc, name, gapl_id, H5AC_dxpl_id)) == NULL)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
 
     /* Register an atom for the group */
@@ -393,14 +372,8 @@ H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id)
 
 done:
     if(ret_value < 0) {
-        if(grp) {
-            if(H5G_close(grp) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
-        } /* end if */
-        else {
-            if(loc_found && H5G_loc_free(&grp_loc) < 0)
-                HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
-        } /* end else */
+        if(grp && H5G_close(grp) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)
@@ -982,6 +955,70 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5G_open_name
+ *
+ * Purpose:	Opens an existing group by name.
+ *
+ * Return:	Success:	Ptr to a new group.
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *		Monday, August	27, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+H5G_t *
+H5G_open_name(const H5G_loc_t *loc, const char *name, hid_t gapl_id,
+    hid_t dxpl_id)
+{
+    H5G_t      *grp = NULL;             /* Group to open */
+    H5G_loc_t   grp_loc;                /* Location used to open group */
+    H5G_name_t  grp_path;            	/* Opened object group hier. path */
+    H5O_loc_t   grp_oloc;            	/* Opened object object location */
+    H5O_type_t  obj_type;               /* Type of object at location */
+    hbool_t     loc_found = FALSE;      /* Location at 'name' found */
+    H5G_t      *ret_value;              /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_open_name, NULL)
+
+    /* Check args */
+    HDassert(loc);
+    HDassert(name);
+
+    /* Set up opened group location to fill in */
+    grp_loc.oloc = &grp_oloc;
+    grp_loc.path = &grp_path;
+    H5G_loc_reset(&grp_loc);
+
+    /* Find the group object using the gapl passed in */
+    if(H5G_loc_find(loc, name, &grp_loc/*out*/, gapl_id, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "group not found")
+    loc_found = TRUE;
+
+    /* Check that the object found is the correct type */
+    if(H5O_obj_type(&grp_oloc, &obj_type, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't get object type")
+    if(obj_type != H5O_TYPE_GROUP)
+        HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, NULL, "not a group")
+
+    /* Open the group */
+    if((grp = H5G_open(&grp_loc, dxpl_id)) == NULL)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, NULL, "unable to open group")
+
+    /* Set return value */
+    ret_value = grp;
+
+done:
+    if(!ret_value) {
+        if(loc_found && H5G_loc_free(&grp_loc) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_open_name() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5G_open
  *
  * Purpose:	Opens an existing group.  The group should eventually be
@@ -999,9 +1036,9 @@ done:
 H5G_t *
 H5G_open(const H5G_loc_t *loc, hid_t dxpl_id)
 {
-    H5G_t           *grp = NULL;
-    H5G_shared_t    *shared_fo = NULL;
-    H5G_t           *ret_value = NULL;
+    H5G_t           *grp = NULL;        /* Group opened */
+    H5G_shared_t    *shared_fo;         /* Shared group object */
+    H5G_t           *ret_value;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_open, NULL)
 
@@ -1064,12 +1101,11 @@ H5G_open(const H5G_loc_t *loc, hid_t dxpl_id)
     ret_value = grp;
 
 done:
-    if (!ret_value && grp)
-    {
+    if (!ret_value && grp) {
         H5O_loc_free(&(grp->oloc));
         H5G_name_free(&(grp->path));
         H5FL_FREE(H5G_t,grp);
-    }
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_open() */

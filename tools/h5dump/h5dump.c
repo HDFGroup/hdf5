@@ -28,10 +28,12 @@ const char  *progname = "h5dump";
 
 /* Macros for displaying objects */
 #define begin_obj(obj,name,begin)                               \
-    if (name)                                                   \
-        printf("%s \"%s\" %s\n", (obj), (name), (begin));       \
-    else                                                        \
-        printf("%s %s\n", (obj), (begin));
+    do {							\
+        if (name)                                               \
+            printf("%s \"%s\" %s\n", (obj), (name), (begin));   \
+        else                                                    \
+            printf("%s %s\n", (obj), (begin));			\
+    } while(0);
 
 #define end_obj(obj,end)                                        \
     if(HDstrlen(end)) {                                         \
@@ -1294,99 +1296,95 @@ dump_selected_attr(hid_t loc_id, const char *name)
           dump_header_format->attributeblockbegin);
     H5Gget_objinfo(loc_id, obj_name, FALSE, &statbuf);
 
-    switch (statbuf.type) {
-    case H5G_GROUP:
-    if ((oid = H5Gopen(loc_id, obj_name)) < 0) {
-        indentation(COL);
-            error_msg(progname, "unable to open group \"%s\"\n", obj_name);
+    switch(statbuf.type) {
+        case H5G_GROUP:
+            if((oid = H5Gopen2(loc_id, obj_name, H5P_DEFAULT)) < 0) {
+                indentation(COL);
+                error_msg(progname, "unable to open group \"%s\"\n", obj_name);
+                end_obj(dump_header_format->attributeend, dump_header_format->attributeblockend);
+                d_status = EXIT_FAILURE;
+                return FAIL;
+            } /* end if */
+            break;
+
+        case H5G_DATASET:
+            if((oid = H5Dopen(loc_id, obj_name)) < 0) {
+                indentation(COL);
+                error_msg(progname, "unable to open dataset \"%s\"\n", obj_name);
+                end_obj(dump_header_format->attributeend, dump_header_format->attributeblockend);
+                d_status = EXIT_FAILURE;
+                return FAIL;
+            } /* end if */
+            break;
+
+        case H5G_TYPE:
+            if((oid = H5Topen(loc_id, obj_name)) < 0) {
+                indentation(COL);
+                error_msg(progname, "unable to open datatype \"%s\"\n", obj_name);
+                end_obj(dump_header_format->attributeend, dump_header_format->attributeblockend);
+                d_status = EXIT_FAILURE;
+                return FAIL;
+            } /* end if */
+            break;
+
+        default:
+            indentation(COL);
+            error_msg(progname, "unable to open unknown \"%s\"\n", obj_name);
+            end_obj(dump_header_format->attributeend, dump_header_format->attributeblockend);
+            d_status = EXIT_FAILURE;
+            return FAIL;
+    } /* end switch */
+
+    if((attr_id = H5Aopen_name(oid, attr_name)) >= 0) {
+        type = H5Aget_type(attr_id);
+        space = H5Aget_space(attr_id);
+        dump_datatype(type);
+        dump_dataspace(space);
+
+        if(display_oid)
+            dump_oid(attr_id);
+
+        if(display_data || display_attr_data)
+            dump_data(attr_id, ATTRIBUTE_DATA, NULL, display_ai);
+
+        H5Tclose(type);
+        H5Sclose(space);
+        H5Aclose(attr_id);
         end_obj(dump_header_format->attributeend,
-            dump_header_format->attributeblockend);
-        d_status = EXIT_FAILURE;
-        return FAIL;
-    }
-    break;
-
-    case H5G_DATASET:
-    if ((oid = H5Dopen(loc_id, obj_name)) < 0) {
-        indentation(COL);
-            error_msg(progname, "unable to open dataset \"%s\"\n", obj_name);
-        end_obj(dump_header_format->attributeend,
-            dump_header_format->attributeblockend);
-        d_status = EXIT_FAILURE;
-        return FAIL;
-    }
-    break;
-
-    case H5G_TYPE:
-    if ((oid = H5Topen(loc_id, obj_name)) < 0) {
-        indentation(COL);
-            error_msg(progname, "unable to open datatype \"%s\"\n", obj_name);
-        end_obj(dump_header_format->attributeend,
-            dump_header_format->attributeblockend);
-        d_status = EXIT_FAILURE;
-        return FAIL;
-    }
-    break;
-
-    default:
-    indentation(COL);
-        error_msg(progname, "unable to open unknown \"%s\"\n", obj_name);
-    end_obj(dump_header_format->attributeend,
-        dump_header_format->attributeblockend);
-    d_status = EXIT_FAILURE;
-    return FAIL;
-    }
-
-    if ((attr_id = H5Aopen_name(oid, attr_name)) >= 0) {
-    type = H5Aget_type(attr_id);
-    space = H5Aget_space(attr_id);
-    dump_datatype(type);
-    dump_dataspace(space);
-
-    if (display_oid)
-        dump_oid(attr_id);
-
-    if (display_data || display_attr_data)
-        dump_data(attr_id, ATTRIBUTE_DATA, NULL, display_ai);
-
-    H5Tclose(type);
-    H5Sclose(space);
-    H5Aclose(attr_id);
-    end_obj(dump_header_format->attributeend,
         dump_header_format->attributeblockend);
     } else {
-    indentation(COL);
+        indentation(COL);
         error_msg(progname, "unable to open attribute \"%s\"\n", obj_name);
-    end_obj(dump_header_format->attributeend,
-        dump_header_format->attributeblockend);
-    d_status = EXIT_FAILURE;
+        end_obj(dump_header_format->attributeend, dump_header_format->attributeblockend);
+        d_status = EXIT_FAILURE;
     }
 
-    switch (statbuf.type) {
-    case H5G_GROUP:
-    if (H5Gclose(oid) < 0) {
-        d_status = EXIT_FAILURE;
-        return FAIL;
-    }
-    break;
+    switch(statbuf.type) {
+        case H5G_GROUP:
+            if(H5Gclose(oid) < 0) {
+                d_status = EXIT_FAILURE;
+                return FAIL;
+            } /* end if */
+            break;
 
-    case H5G_DATASET:
-    if (H5Dclose(oid) < 0) {
-        d_status = EXIT_FAILURE;
-        return FAIL;
-    }
-    break;
+        case H5G_DATASET:
+            if(H5Dclose(oid) < 0) {
+                d_status = EXIT_FAILURE;
+                return FAIL;
+            } /* end if */
+            break;
 
-    case H5G_TYPE:
-    if (H5Tclose(oid) < 0) {
-        d_status = EXIT_FAILURE;
-        return FAIL;
-    }
-    break;
-    default:
-    d_status = EXIT_FAILURE;
-    return FAIL;
-    }
+        case H5G_TYPE:
+            if(H5Tclose(oid) < 0) {
+                d_status = EXIT_FAILURE;
+                return FAIL;
+            } /* end if */
+            break;
+
+        default:
+            d_status = EXIT_FAILURE;
+            return FAIL;
+    } /* end switch */
 
     free(obj_name);
     return SUCCEED;
@@ -1542,130 +1540,124 @@ dump_all(hid_t group, const char *name, void * op_data)
             break;
         }
         case H5G_UDLINK:
-        {
             indentation(indent);
             switch(linfo.type) {
-              case H5L_TYPE_EXTERNAL:
-              {
-                char *targbuf;
+                case H5L_TYPE_EXTERNAL:
+                    {
+                    char *targbuf;
 
-                targbuf = HDmalloc(statbuf.linklen);
-                HDassert(targbuf);
-                if(!doxml) {
-                    begin_obj(dump_header_format->extlinkbegin, name, dump_header_format->extlinkblockbegin);
-                } /* end if */
+                    targbuf = HDmalloc(statbuf.linklen);
+                    HDassert(targbuf);
+                    if(!doxml)
+                        begin_obj(dump_header_format->extlinkbegin, name, dump_header_format->extlinkblockbegin);
 
-                if(H5Lget_val(group, name, targbuf, statbuf.linklen, H5P_DEFAULT) < 0) {
-                    error_msg(progname, "unable to get external link value\n");
-                    d_status = EXIT_FAILURE;
-                    ret = FAIL;
-                } else {
-                    const char *filename;
-                    const char *targname;
-
-                    if(H5Lunpack_elink_val(targbuf, statbuf.linklen, NULL, &filename, &targname) < 0) {
-                      error_msg(progname, "unable to unpack external link value\n");
-                      d_status = EXIT_FAILURE;
-                      ret = FAIL;
+                    if(H5Lget_val(group, name, targbuf, statbuf.linklen, H5P_DEFAULT) < 0) {
+                        error_msg(progname, "unable to get external link value\n");
+                        d_status = EXIT_FAILURE;
+                        ret = FAIL;
                     } else {
-                      if (!doxml) {
-                          indentation(indent + COL);
-                          printf("LINKCLASS %d\n", linfo.type);
-                          indentation(indent + COL);
-                          printf("TARGETFILE \"%s\"\n", filename);
-                          indentation(indent + COL);
-                          printf("TARGETPATH \"%s\"\n", targname);
-                      }
-                      else /* XML */
-                      {
-                        char linkxid[100];
-                        char parentxid[100];
-                        char *t_name = xml_escape_the_name(name);
-                        char *t_prefix = xml_escape_the_name(HDstrcmp(prefix,"") ? prefix : "/");
-                        char *t_obj_path = xml_escape_the_name(obj_path);
-                        char *t_filename = xml_escape_the_name(filename);
-                        char *t_targname = xml_escape_the_name(targname);
+                        const char *filename;
+                        const char *targname;
 
-                        /* Create OBJ-XIDs for the parent and object */
-                        xml_name_to_XID(t_obj_path, linkxid, sizeof(linkxid), 1);
-                        xml_name_to_XID(prefix, parentxid, sizeof(parentxid), 1);
+                        if(H5Lunpack_elink_val(targbuf, statbuf.linklen, NULL, &filename, &targname) < 0) {
+                                error_msg(progname, "unable to unpack external link value\n");
+                                d_status = EXIT_FAILURE;
+                                ret = FAIL;
+                        } else {
+                            if (!doxml) {
+                                indentation(indent + COL);
+                                printf("LINKCLASS %d\n", linfo.type);
+                                indentation(indent + COL);
+                                printf("TARGETFILE \"%s\"\n", filename);
+                                indentation(indent + COL);
+                                printf("TARGETPATH \"%s\"\n", targname);
+                            }
+                            /* XML */
+                            else {
+                                char linkxid[100];
+                                char parentxid[100];
+                                char *t_name = xml_escape_the_name(name);
+                                char *t_prefix = xml_escape_the_name(HDstrcmp(prefix,"") ? prefix : "/");
+                                char *t_obj_path = xml_escape_the_name(obj_path);
+                                char *t_filename = xml_escape_the_name(filename);
+                                char *t_targname = xml_escape_the_name(targname);
 
-                            printf("<%sExternalLink LinkName=\"%s\" "
-                                  "OBJ-XID=\"%s\" "
-                                  "H5SourcePath=\"%s\" "
-                                  "TargetFilename=\"%s\"  "
-                                  "TargetPath=\"%s\"  "
-                                  "Parents=\"%s\" H5ParentPaths=\"%s\" />\n",
-                                    xmlnsprefix,
-                                    t_name,         /* LinkName */
-                                    linkxid,        /* OBJ-XID */
-                                    t_obj_path,     /* H5SourcePath */
-                                    filename,       /* TargetFilename */
-                                    targname,       /* TargetPath*/
-                                    parentxid,      /* Parents */
-                                    t_prefix);      /* H5ParentPaths */
-                        HDfree(t_prefix);
-                        HDfree(t_name);
-                        HDfree(t_filename);
-                        HDfree(t_targname);
-                        HDfree(t_obj_path);
-                      }
+                                /* Create OBJ-XIDs for the parent and object */
+                                xml_name_to_XID(t_obj_path, linkxid, sizeof(linkxid), 1);
+                                xml_name_to_XID(prefix, parentxid, sizeof(parentxid), 1);
+
+                                printf("<%sExternalLink LinkName=\"%s\" "
+                                          "OBJ-XID=\"%s\" "
+                                          "H5SourcePath=\"%s\" "
+                                          "TargetFilename=\"%s\"  "
+                                          "TargetPath=\"%s\"  "
+                                          "Parents=\"%s\" H5ParentPaths=\"%s\" />\n",
+                                            xmlnsprefix,
+                                            t_name,         /* LinkName */
+                                            linkxid,        /* OBJ-XID */
+                                            t_obj_path,     /* H5SourcePath */
+                                            filename,       /* TargetFilename */
+                                            targname,       /* TargetPath*/
+                                            parentxid,      /* Parents */
+                                            t_prefix);      /* H5ParentPaths */
+                                HDfree(t_prefix);
+                                HDfree(t_name);
+                                HDfree(t_filename);
+                                HDfree(t_targname);
+                                HDfree(t_obj_path);
+                            }
+                        }
                     }
-                }
-                if (!doxml) {
-                    end_obj(dump_header_format->extlinkend,
-                            dump_header_format->extlinkblockend);
-                }
-                HDfree(targbuf);
-              }
-              break;
+                    if (!doxml)
+                        end_obj(dump_header_format->extlinkend, dump_header_format->extlinkblockend);
+                    HDfree(targbuf);
+                  }
+                  break;
+
               default:
                   if (!doxml) {
-                      begin_obj(dump_header_format->udlinkbegin, name,
-                                dump_header_format->udlinkblockbegin);
+                      begin_obj(dump_header_format->udlinkbegin, name, dump_header_format->udlinkblockbegin);
                       indentation(indent + COL);
                   }
-                  if (!doxml) {
+                  if (!doxml)
                       printf("LINKCLASS %d\n", linfo.type);
-                  }
                   else /* XML */
                   {
-                    char linkxid[100];
-                    char parentxid[100];
-                    char *t_name = xml_escape_the_name(name);
-                    char *t_prefix = xml_escape_the_name(HDstrcmp(prefix,"") ? prefix : "/");
-                    char *t_obj_path = xml_escape_the_name(obj_path);
+                      char linkxid[100];
+                      char parentxid[100];
+                      char *t_name = xml_escape_the_name(name);
+                      char *t_prefix = xml_escape_the_name(HDstrcmp(prefix,"") ? prefix : "/");
+                      char *t_obj_path = xml_escape_the_name(obj_path);
 
-                    /* Create OBJ-XIDs for the parent and object */
-                    xml_name_to_XID(t_obj_path, linkxid, sizeof(linkxid), 1);
-                    xml_name_to_XID(prefix, parentxid, sizeof(parentxid), 1);
+                      /* Create OBJ-XIDs for the parent and object */
+                      xml_name_to_XID(t_obj_path, linkxid, sizeof(linkxid), 1);
+                      xml_name_to_XID(prefix, parentxid, sizeof(parentxid), 1);
 
-                        printf("<%sUserDefined LinkName=\"%s\" "
-                               "OBJ-XID=\"%s\" "
-                               "H5SourcePath=\"%s\" "
-                               "LinkClass=\"%d\"  "
-                               "Parents=\"%s\" H5ParentPaths=\"%s\" />\n",
-                                xmlnsprefix,
-                                t_name,             /* LinkName */
-                                linkxid,            /* OBJ-XID */
-                                t_obj_path,         /* H5SourcePath */
-                                linfo.type,    /* LinkClass */
-                                parentxid,          /* Parents */
-                                t_prefix);          /* H5ParentPaths */
-                    HDfree(t_prefix);
-                    HDfree(t_name);
-                    HDfree(t_obj_path);
+                      printf("<%sUserDefined LinkName=\"%s\" "
+                                 "OBJ-XID=\"%s\" "
+                                 "H5SourcePath=\"%s\" "
+                                 "LinkClass=\"%d\"  "
+                                 "Parents=\"%s\" H5ParentPaths=\"%s\" />\n",
+                                  xmlnsprefix,
+                                  t_name,             /* LinkName */
+                                  linkxid,            /* OBJ-XID */
+                                  t_obj_path,         /* H5SourcePath */
+                                  linfo.type,    /* LinkClass */
+                                  parentxid,          /* Parents */
+                                  t_prefix);          /* H5ParentPaths */
+                      HDfree(t_prefix);
+                      HDfree(t_name);
+                      HDfree(t_obj_path);
                   }
                   if (!doxml) {
                       indentation(indent);
-                      end_obj(dump_header_format->udlinkend,
-                              dump_header_format->udlinkblockend);
+                      end_obj(dump_header_format->udlinkend, dump_header_format->udlinkblockend);
                   }
             }
             break;
-          }
+
         case H5G_GROUP:
-            if ((obj = H5Gopen(group, name)) < 0) {
+            if((obj = H5Gopen2(group, name, H5P_DEFAULT)) < 0) {
                 error_msg(progname, "unable to dump group \"%s\"\n", name);
                 d_status = EXIT_FAILURE;
                 ret = FAIL;
@@ -1689,7 +1681,6 @@ dump_all(hid_t group, const char *name, void * op_data)
                 /* Close group */
                 H5Gclose(obj);
             }
-
             break;
 
         case H5G_DATASET:
@@ -3173,29 +3164,27 @@ handle_groups(hid_t fid, char *group, void UNUSED * data)
 {
     hid_t       gid;
 
-    if ((gid = H5Gopen(fid, group)) < 0) {
-        begin_obj(dump_header_format->groupbegin, group,
-                  dump_header_format->groupblockbegin);
+    if((gid = H5Gopen2(fid, group, H5P_DEFAULT)) < 0) {
+        begin_obj(dump_header_format->groupbegin, group, dump_header_format->groupblockbegin);
         indentation(COL);
         error_msg(progname, "unable to open group \"%s\"\n", group);
-        end_obj(dump_header_format->groupend,
-                dump_header_format->groupblockend);
+        end_obj(dump_header_format->groupend, dump_header_format->groupblockend);
         d_status = EXIT_FAILURE;
     } else {
         size_t new_len = HDstrlen(group) + 1;
 
-        if (prefix_len <= new_len) {
+        if(prefix_len <= new_len) {
             prefix_len = new_len;
             prefix = HDrealloc(prefix, prefix_len);
-        }
+        } /* end if */
 
         HDstrcpy(prefix, group);
         dump_group(gid, group);
 
-        if (H5Gclose(gid) < 0)
+        if(H5Gclose(gid) < 0)
             d_status = EXIT_FAILURE;
-    }
-}
+    } /* end else */
+} /* end handle_groups() */
 
 /*-------------------------------------------------------------------------
  * Function:    handle_links
@@ -3797,32 +3786,31 @@ main(int argc, const char *argv[])
     init_ref_path_table(fid);      /* Insert the root group into the ref. path table */
     H5Giterate(fid, (const char *)"/", NULL, fill_ref_path_table, (void *)"");
 
-    if (doxml) {
-    /* initialize XML */
+    if(doxml) {
+        /* initialize XML */
 
-    /* reset prefix! */
-    HDstrcpy(prefix, "");
+        /* reset prefix! */
+        HDstrcpy(prefix, "");
 
-    /* make sure the URI is initialized to something */
-    if (xml_dtd_uri == NULL) {
-        if (useschema) {
-            xml_dtd_uri = DEFAULT_XSD;
+        /* make sure the URI is initialized to something */
+        if (xml_dtd_uri == NULL) {
+            if (useschema) {
+                xml_dtd_uri = DEFAULT_XSD;
+            } else {
+                xml_dtd_uri = DEFAULT_DTD;
+                xmlnsprefix = "";
+            }
         } else {
-            xml_dtd_uri = DEFAULT_DTD;
-            xmlnsprefix = "";
+            if (useschema && strcmp(xmlnsprefix,"")) {
+                error_msg(progname, "Cannot set Schema URL for a qualified namespace--use -X or -U option with -D \n");
+                leave(EXIT_FAILURE);
+            }
         }
-    } else {
-        if (useschema && strcmp(xmlnsprefix,"")) {
-        error_msg(progname, "Cannot set Schema URL for a qualified namespace--use -X or -U option with -D \n");
-            leave(EXIT_FAILURE);
-        }
-    }
     }
 
     /* find all shared objects */
     if(init_objs(fid, &info, &group_table, &dset_table, &type_table) < 0) {
-        error_msg(progname, "internal error (file %s:line %d)\n",
-                  __FILE__, __LINE__);
+        error_msg(progname, "internal error (file %s:line %d)\n", __FILE__, __LINE__);
         d_status = EXIT_FAILURE;
         goto done;
     }
@@ -3882,42 +3870,40 @@ main(int argc, const char *argv[])
             dump_fcpl(fid);
     }
 
-    if (display_all) {
-        if ((gid = H5Gopen(fid, "/")) < 0) {
+    if(display_all) {
+        if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) {
             error_msg(progname, "unable to open root group\n");
             d_status = EXIT_FAILURE;
         } else {
-        dump_function_table->dump_group_function(gid, "/");
+            dump_function_table->dump_group_function(gid, "/");
         }
 
-        if (H5Gclose(gid) < 0) {
+        if(H5Gclose(gid) < 0) {
             error_msg(progname, "unable to close root group\n");
             d_status = EXIT_FAILURE;
         }
     } else {
-    if (doxml) {
         /* Note: this option is not supported for XML */
-            error_msg(progname, "internal error (file %s:line %d)\n",
-                      __FILE__, __LINE__);
+        if(doxml) {
+            error_msg(progname, "internal error (file %s:line %d)\n", __FILE__, __LINE__);
             d_status = EXIT_FAILURE;
-        goto done;
-    }
+            goto done;
+        } /* end if */
 
-        for (i = 0; i < argc; i++)
-            if (hand[i].func)
+        for(i = 0; i < argc; i++)
+            if(hand[i].func)
                 hand[i].func(fid, hand[i].obj, hand[i].subset_info);
     }
 
     if (!doxml) {
-    end_obj(dump_header_format->fileend,
-        dump_header_format->fileblockend);
+        end_obj(dump_header_format->fileend, dump_header_format->fileblockend);
     } else {
-    printf("</%sHDF5-File>\n", xmlnsprefix);
+        printf("</%sHDF5-File>\n", xmlnsprefix);
     }
 
 done:
     if (H5Fclose(fid) < 0)
-    d_status = EXIT_FAILURE;
+        d_status = EXIT_FAILURE;
 
     free_handler(hand, argc);
 

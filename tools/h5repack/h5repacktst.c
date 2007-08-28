@@ -1570,7 +1570,7 @@ int make_all_objects(hid_t loc_id)
     *-------------------------------------------------------------------------
     */
     group_id  = H5Gcreate2(loc_id, "g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    root_id   = H5Gopen(loc_id, "/");
+    root_id   = H5Gopen2(loc_id, "/", H5P_DEFAULT);
 
     /*-------------------------------------------------------------------------
     * H5G_TYPE
@@ -1645,7 +1645,7 @@ int make_attributes(hid_t loc_id)
     *-------------------------------------------------------------------------
     */
     group_id  = H5Gcreate2(loc_id, "g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    root_id   = H5Gopen(loc_id, "/");
+    root_id   = H5Gopen2(loc_id, "/", H5P_DEFAULT);
 
     /*-------------------------------------------------------------------------
     * write a series of attributes on the dataset, group, and root group

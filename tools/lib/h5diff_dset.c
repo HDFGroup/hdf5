@@ -25,7 +25,7 @@
  *
  *-------------------------------------------------------------------------
  */
-void
+static void
 print_size (int rank, hsize_t *dims)
 {
     int i;

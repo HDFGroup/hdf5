@@ -423,8 +423,8 @@ static void test_misc2_write_attribute(void)
     file1 = H5Fcreate(MISC2_FILE_1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(file1, FAIL, "H5Fcreate");
 
-    root1 = H5Gopen(file1, "/");
-    CHECK(root1, FAIL, "H5Gopen");
+    root1 = H5Gopen2(file1, "/", H5P_DEFAULT);
+    CHECK(root1, FAIL, "H5Gopen2");
 
     att1 = H5Acreate(root1, MISC2_ATT_NAME_1, type, dataspace, H5P_DEFAULT);
     CHECK(att1, FAIL, "H5Acreate");
@@ -450,8 +450,8 @@ static void test_misc2_write_attribute(void)
 
 
 
-    root2 = H5Gopen(file2, "/");
-    CHECK(root2, FAIL, "H5Gopen");
+    root2 = H5Gopen2(file2, "/", H5P_DEFAULT);
+    CHECK(root2, FAIL, "H5Gopen2");
 
     att2 = H5Acreate(root2, MISC2_ATT_NAME_2, type, dataspace, H5P_DEFAULT);
     CHECK(att2, FAIL, "H5Acreate");
@@ -499,8 +499,8 @@ static void test_misc2_read_attribute(const char *filename, const char *att_name
     file = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(file, FAIL, "H5Fopen");
 
-    root = H5Gopen(file, "/");
-    CHECK(root, FAIL, "H5Gopen");
+    root = H5Gopen2(file, "/", H5P_DEFAULT);
+    CHECK(root, FAIL, "H5Gopen2");
 
     att = H5Aopen_name(root, att_name);
     CHECK(att, FAIL, "H5Aopen_name");
@@ -2330,8 +2330,8 @@ verify_file(const char *name, hsize_t blk_size, unsigned check_new_data)
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Open the first group */
-    gid = H5Gopen(fid, MISC13_GROUP1_NAME);
-    CHECK(gid, FAIL, "H5Gopen");
+    gid = H5Gopen2(fid, MISC13_GROUP1_NAME, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gopen2");
 
     /* Verify the contiguous dataset in the first group */
     verify_dataset(gid,MISC13_DSET1_NAME);
@@ -2351,8 +2351,8 @@ verify_file(const char *name, hsize_t blk_size, unsigned check_new_data)
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Open the second group */
-    gid2 = H5Gopen(gid, MISC13_GROUP2_NAME);
-    CHECK(gid2, FAIL, "H5Gopen");
+    gid2 = H5Gopen2(gid, MISC13_GROUP2_NAME, H5P_DEFAULT);
+    CHECK(gid2, FAIL, "H5Gopen2");
 
     /* Close the second group */
     ret = H5Gclose(gid2);
@@ -3199,8 +3199,8 @@ test_misc19(void)
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Open the root group */
-    gid = H5Gopen(fid,"/");
-    CHECK(gid, FAIL, "H5Gopen");
+    gid = H5Gopen2(fid, "/", H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gopen2");
 
     /* Create a dataspace */
     sid = H5Screate(H5S_SCALAR);
@@ -3877,8 +3877,8 @@ test_misc23(void)
     CHECK(status, FAIL, "H5Gclose");
 
     /* Check that intermediate group is set up correctly */
-    tmp_id = H5Gopen(file_id, "/A/B01");
-    CHECK(tmp_id, FAIL, "H5Gopen");
+    tmp_id = H5Gopen2(file_id, "/A/B01", H5P_DEFAULT);
+    CHECK(tmp_id, FAIL, "H5Gopen2");
 
     status = H5Gget_objinfo(tmp_id, ".", FALSE, &sb);
     CHECK(status, FAIL, "H5Gget_objinfo");
@@ -4132,14 +4132,14 @@ test_misc24(void)
     VERIFY(tmp_id, FAIL, "H5Topen");
 
     H5E_BEGIN_TRY {
-        tmp_id = H5Gopen(file_id, MISC24_DATASET_NAME);
+        tmp_id = H5Gopen2(file_id, MISC24_DATASET_NAME, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(tmp_id, FAIL, "H5Gopen");
+    VERIFY(tmp_id, FAIL, "H5Gopen2");
 
     H5E_BEGIN_TRY {
-        tmp_id = H5Gopen(file_id, MISC24_DATASET_LINK);
+        tmp_id = H5Gopen2(file_id, MISC24_DATASET_LINK, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(tmp_id, FAIL, "H5Gopen");
+    VERIFY(tmp_id, FAIL, "H5Gopen2");
 
     H5E_BEGIN_TRY {
         tmp_id = H5Topen(file_id, MISC24_DATASET_NAME);
@@ -4152,14 +4152,14 @@ test_misc24(void)
     VERIFY(tmp_id, FAIL, "H5Topen");
 
     H5E_BEGIN_TRY {
-        tmp_id = H5Gopen(file_id, MISC24_DATATYPE_NAME);
+        tmp_id = H5Gopen2(file_id, MISC24_DATATYPE_NAME, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(tmp_id, FAIL, "H5Gopen");
+    VERIFY(tmp_id, FAIL, "H5Gopen2");
 
     H5E_BEGIN_TRY {
-        tmp_id = H5Gopen(file_id, MISC24_DATATYPE_LINK);
+        tmp_id = H5Gopen2(file_id, MISC24_DATATYPE_LINK, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(tmp_id, FAIL, "H5Gopen");
+    VERIFY(tmp_id, FAIL, "H5Gopen2");
 
     H5E_BEGIN_TRY {
         tmp_id = H5Dopen(file_id, MISC24_DATATYPE_NAME);
@@ -4173,8 +4173,8 @@ test_misc24(void)
 
     /* Try again, with the object already open through valid call */
     /* Open group */
-    group_id = H5Gopen(file_id, MISC24_GROUP_NAME);
-    CHECK(group_id, FAIL, "H5Gopen");
+    group_id = H5Gopen2(file_id, MISC24_GROUP_NAME, H5P_DEFAULT);
+    CHECK(group_id, FAIL, "H5Gopen2");
 
     H5E_BEGIN_TRY {
         tmp_id = H5Dopen(file_id, MISC24_GROUP_NAME);
@@ -4204,14 +4204,14 @@ test_misc24(void)
     CHECK(dset_id, FAIL, "H5Dopen");
 
     H5E_BEGIN_TRY {
-        tmp_id = H5Gopen(file_id, MISC24_DATASET_NAME);
+        tmp_id = H5Gopen2(file_id, MISC24_DATASET_NAME, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(tmp_id, FAIL, "H5Gopen");
+    VERIFY(tmp_id, FAIL, "H5Gopen2");
 
     H5E_BEGIN_TRY {
-        tmp_id = H5Gopen(file_id, MISC24_DATASET_LINK);
+        tmp_id = H5Gopen2(file_id, MISC24_DATASET_LINK, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(tmp_id, FAIL, "H5Gopen");
+    VERIFY(tmp_id, FAIL, "H5Gopen2");
 
     H5E_BEGIN_TRY {
         tmp_id = H5Topen(file_id, MISC24_DATASET_NAME);
@@ -4231,14 +4231,14 @@ test_misc24(void)
     CHECK(ret, FAIL, "H5Topen");
 
     H5E_BEGIN_TRY {
-        tmp_id = H5Gopen(file_id, MISC24_DATATYPE_NAME);
+        tmp_id = H5Gopen2(file_id, MISC24_DATATYPE_NAME, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(tmp_id, FAIL, "H5Gopen");
+    VERIFY(tmp_id, FAIL, "H5Gopen2");
 
     H5E_BEGIN_TRY {
-        tmp_id = H5Gopen(file_id, MISC24_DATATYPE_LINK);
+        tmp_id = H5Gopen2(file_id, MISC24_DATATYPE_LINK, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(tmp_id, FAIL, "H5Gopen");
+    VERIFY(tmp_id, FAIL, "H5Gopen2");
 
     H5E_BEGIN_TRY {
         tmp_id = H5Dopen(file_id, MISC24_DATATYPE_NAME);
@@ -4315,8 +4315,8 @@ test_misc25a(void)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Re-open first group */
-    gid = H5Gopen(fid, MISC25A_GROUP1_NAME);
-    CHECK(gid, FAIL, "H5Gopen");
+    gid = H5Gopen2(fid, MISC25A_GROUP1_NAME, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gopen2");
 
     /* Create dataspace for attribute */
     sid = H5Screate(H5S_SCALAR);
@@ -4392,8 +4392,8 @@ test_misc25a(void)
     CHECK(ret, FAIL, "H5Gclose");
 
     /* Re-open first group */
-    gid = H5Gopen(fid, MISC25A_GROUP1_NAME);
-    CHECK(gid, FAIL, "H5Gopen");
+    gid = H5Gopen2(fid, MISC25A_GROUP1_NAME, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gopen2");
 
     /* Delete 2nd attribute */
     ret = H5Adelete(gid, MISC25A_ATTR2_NAME);
@@ -4414,8 +4414,8 @@ test_misc25a(void)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Re-open first group */
-    gid = H5Gopen(fid, MISC25A_GROUP1_NAME);
-    CHECK(gid, FAIL, "H5Gopen");
+    gid = H5Gopen2(fid, MISC25A_GROUP1_NAME, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gopen2");
 
     /* Create dataspace for 3rd attribute */
     sid = H5Screate(H5S_SCALAR);
@@ -4458,8 +4458,8 @@ test_misc25a(void)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Re-open first group */
-    gid = H5Gopen(fid, MISC25A_GROUP1_NAME);
-    CHECK(gid, FAIL, "H5Gopen");
+    gid = H5Gopen2(fid, MISC25A_GROUP1_NAME, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gopen2");
 
     /* Delete 3rd attribute */
     ret = H5Adelete(gid, MISC25A_ATTR3_NAME);
@@ -4505,8 +4505,8 @@ test_misc25a(void)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Re-open first group */
-    gid = H5Gopen(fid, MISC25A_GROUP1_NAME);
-    CHECK(gid, FAIL, "H5Gopen");
+    gid = H5Gopen2(fid, MISC25A_GROUP1_NAME, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gopen2");
 
     /* Delete 2nd attribute */
     ret = H5Adelete(gid, MISC25A_ATTR2_NAME);
@@ -4526,8 +4526,8 @@ test_misc25a(void)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Re-open first group */
-    gid = H5Gopen(fid, MISC25A_GROUP1_NAME);
-    CHECK(gid, FAIL, "H5Gopen");
+    gid = H5Gopen2(fid, MISC25A_GROUP1_NAME, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gopen2");
 
     /* Create dataspace for 3rd attribute */
     sid = H5Screate(H5S_SCALAR);
@@ -4595,8 +4595,8 @@ test_misc25b(void)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Re-open group with object header messages that will merge */
-    gid = H5Gopen(fid, MISC25B_GROUP);
-    CHECK(gid, FAIL, "H5Gopen");
+    gid = H5Gopen2(fid, MISC25B_GROUP, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gopen2");
 
     /* Close first group */
     ret = H5Gclose(gid);
@@ -4721,8 +4721,8 @@ test_misc25c(void)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Re-open the dataset group */
-    gid = H5Gopen(fid, MISC25C_DSETGRPNAME);
-    CHECK(gid, FAIL, "H5Gopen");
+    gid = H5Gopen2(fid, MISC25C_DSETGRPNAME, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gopen2");
 
     /* Rename the dataset */
     ret = H5Gmove(gid, MISC25C_DSETNAME, MISC25C_DSETNAME2);

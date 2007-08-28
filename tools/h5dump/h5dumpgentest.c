@@ -225,7 +225,8 @@ typedef struct s1_t {
 /* "File 51" macros */
 #define F51_MAX_NAME_LEN    ((64*1024)+1024)
 
-static void gent_group(void)
+static void
+gent_group(void)
 {
     hid_t fid, group;
 
@@ -270,7 +271,8 @@ static void gent_group(void)
     H5Fclose(fid);
 }
 
-static void gent_dataset(void)
+static void
+gent_dataset(void)
 {
     hid_t fid, dataset, space;
     hsize_t dims[2];
@@ -309,7 +311,8 @@ static void gent_dataset(void)
     H5Fclose(fid);
 }
 
-static void gent_dataset2(void)
+static void
+gent_dataset2(void)
 {
     hid_t fid, dataset, space, create_plist;
     hsize_t dims[2];
@@ -356,7 +359,8 @@ static void gent_dataset2(void)
 }
 
 
-static void gent_attribute(void)
+static void
+gent_attribute(void)
 {
     hid_t fid, root, space, attr, type;
     hsize_t dims[2];
@@ -367,7 +371,7 @@ static void gent_attribute(void)
     int point = 100;
 
     fid = H5Fcreate(FILE3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    root = H5Gopen (fid, "/");
+    root = H5Gopen2(fid, "/", H5P_DEFAULT);
 
     /* attribute 1 */
     dims[0] = 24;
@@ -426,7 +430,7 @@ static void gent_softlink(void)
     hid_t fid, root;
 
     fid = H5Fcreate(FILE4, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    root = H5Gopen (fid, "/");
+    root = H5Gopen2(fid, "/", H5P_DEFAULT);
     H5Glink (root, H5L_TYPE_SOFT, "somevalue", "slink1");
     H5Glink (root, H5L_TYPE_SOFT, "linkvalue", "slink2");
 
@@ -472,7 +476,7 @@ static void gent_hardlink(void)
     H5Glink (group, H5L_TYPE_HARD, "/dset1", "dset3");
     H5Gclose(group);
 
-    group = H5Gopen(fid, "/g1");
+    group = H5Gopen2(fid, "/g1", H5P_DEFAULT);
     H5Glink (group, H5L_TYPE_HARD, "/g2", "g1.1");
     H5Gclose(group);
 
@@ -921,7 +925,7 @@ static void gent_all(void)
   H5Gclose(group);
 
   /* root attributes */
-  group = H5Gopen (fid, "/");
+  group = H5Gopen2(fid, "/", H5P_DEFAULT);
 
   dims[0] = 10;
   space = H5Screate_simple(1, dims, NULL);
@@ -941,7 +945,7 @@ static void gent_all(void)
 
   H5Gclose(group);
 
-  group = H5Gopen (fid, "/g1/g1.1");
+  group = H5Gopen2(fid, "/g1/g1.1", H5P_DEFAULT);
 
   /* dset1.1.1 */
   dims[0] = 10; dims[1] = 10;
@@ -988,11 +992,11 @@ static void gent_all(void)
   H5Lcreate_external("somefile", "somepath", fid, "/g1/g1.2/extlink", H5P_DEFAULT, H5P_DEFAULT);
 
   /* soft link */
-  group = H5Gopen (fid, "/g1/g1.2/g1.2.1");
+  group = H5Gopen2(fid, "/g1/g1.2/g1.2.1", H5P_DEFAULT);
   H5Glink (group, H5L_TYPE_SOFT, "somevalue", "slink");
   H5Gclose(group);
 
-  group = H5Gopen (fid, "/g2");
+  group = H5Gopen2(fid, "/g2", H5P_DEFAULT);
 
   /* dset2.1 */
   dims[0] = 10;
@@ -1238,7 +1242,7 @@ static void gent_many(void)
   H5Sclose(space);
   H5Gclose(group);
 
-  group = H5Gopen(fid, "/g3");
+  group = H5Gopen2(fid, "/g3", H5P_DEFAULT);
   H5Glink (group, H5L_TYPE_HARD, "/g4/dset2", "link3");
   H5Gclose(group);
 
@@ -1261,7 +1265,7 @@ static void gent_many(void)
   H5Sclose(space);
   H5Gclose(group);
 
-  group = H5Gopen(fid, "/g5");
+  group = H5Gopen2(fid, "/g5", H5P_DEFAULT);
   H5Glink (group, H5L_TYPE_SOFT, "/g6/dset3", "slink4");
   H5Gclose(group);
   H5Pclose(create_plist);
@@ -2937,7 +2941,7 @@ void gent_split_file(void)
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT);
     fid = H5Fcreate(FILE34, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
-    root = H5Gopen(fid, "/");
+    root = H5Gopen2(fid, "/", H5P_DEFAULT);
 
     atype = H5Tcopy(H5T_C_S1);
     H5Tset_size(atype, strlen(meta) + 1);
@@ -3112,7 +3116,7 @@ static void gent_vlstr(void)
     H5Tcommit(fid1, "vl_string_type", tid1);
 
     /* Create an group attribute of VL string type */
-    root = H5Gopen(fid1, "/");
+    root = H5Gopen2(fid1, "/", H5P_DEFAULT);
     dataspace = H5Screate(H5S_SCALAR);
 
     att = H5Acreate(root, "test_scalar", tid1, dataspace, H5P_DEFAULT);
@@ -4094,7 +4098,7 @@ static void gent_attr_all(void)
     /* Create groups */
     group_id  = H5Gcreate2(fid, "g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     group2_id = H5Gcreate2(fid, "g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    root_id   = H5Gopen(fid, "/");
+    root_id   = H5Gopen2(fid, "/", H5P_DEFAULT);
 
     /*-------------------------------------------------------------------------
     * write a series of attributes on the dataset, group
@@ -4497,7 +4501,7 @@ static void gent_null_space(void)
     int point = 4;
 
     fid = H5Fcreate(FILE45, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    root = H5Gopen (fid, "/");
+    root = H5Gopen2(fid, "/", H5P_DEFAULT);
 
     /* null space */
     space = H5Screate(H5S_NULL);
@@ -5017,7 +5021,7 @@ static void gent_fcontents(void)
 
 
     /* hard link to "g2" */
-    gid1 = H5Gopen(fid, "/g1");
+    gid1 = H5Gopen2(fid, "/g1", H5P_DEFAULT);
     H5Glink (gid1, H5L_TYPE_HARD, "/g2", "g1.1");
     H5Gclose(gid1);
 
@@ -5626,7 +5630,8 @@ gent_binary(void)
 #define GB4LL    ((unsigned long_long) 4*1024*1024*1024)
 #define DIM_4GB  (GB4LL + 10)
 
-static void gent_bigdims(void)
+static void
+gent_bigdims(void)
 {
     hid_t   fid;
     hid_t   did;
@@ -5727,27 +5732,28 @@ out:
  *
  *-------------------------------------------------------------------------
  */
-static void gent_hyperslab(void)
+static void
+gent_hyperslab(void)
 {
- hid_t    fid;     /* file id */
- hsize_t  dims[2]  = {32,4097}; /* big enough data size to force a second stripmine read */
- double   *buf;
- int      i, ret;
+    hid_t    fid;     /* file id */
+    hsize_t  dims[2]  = {32,4097}; /* big enough data size to force a second stripmine read */
+    double   *buf;
+    int      i, ret;
 
- buf = malloc(32 * 4097 * sizeof(double) );
- for (i = 0; i < 32 * 4097; i++)
-  buf[i] = 1;
+    buf = malloc(32 * 4097 * sizeof(double) );
+    for (i = 0; i < 32 * 4097; i++)
+        buf[i] = 1;
 
- /* create a file */
- fid  = H5Fcreate(FILE57, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
- assert(fid>=0);
+    /* create a file */
+    fid  = H5Fcreate(FILE57, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    assert(fid>=0);
 
- write_dset(fid,2,dims,"stripmine",H5T_NATIVE_DOUBLE,buf);
+    write_dset(fid,2,dims,"stripmine",H5T_NATIVE_DOUBLE,buf);
 
- ret=H5Fclose(fid);
- assert(ret>=0);
+    ret=H5Fclose(fid);
+    assert(ret>=0);
 
- free(buf);
+    free(buf);
 }
 
 

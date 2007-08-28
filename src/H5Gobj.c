@@ -640,6 +640,7 @@ H5G_obj_iterate(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t skip, hsize_t *last_lnk,
     H5G_link_iterate_t *lnk_op, void *op_data, hid_t dxpl_id)
 {
+    H5G_loc_t	loc;            /* Location of parent for group */
     H5O_linfo_t	linfo;		/* Link info message */
     hid_t gid = -1;             /* ID of group to iterate over */
     H5G_t *grp;                 /* Pointer to group data structure to iterate over */
@@ -656,10 +657,12 @@ H5G_obj_iterate(hid_t loc_id, const char *group_name,
      * Open the group on which to operate.  We also create a group ID which
      * we can pass to the application-defined operator.
      */
-    if((gid = H5Gopen(loc_id, group_name)) < 0)
+    if(H5G_loc(loc_id, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if((grp = H5G_open_name(&loc, group_name, H5P_DEFAULT, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
-    if((grp = H5I_object(gid)) == NULL)
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "bad group ID")
+    if((gid = H5I_register(H5I_GROUP, grp)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
 
     /* Attempt to get the link info for this group */
     if(H5G_obj_get_linfo(&(grp->oloc), &linfo, dxpl_id)) {

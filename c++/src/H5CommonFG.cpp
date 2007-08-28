@@ -119,14 +119,14 @@ Group CommonFG::createGroup( const H5std_string& name, size_t size_hint ) const
 //--------------------------------------------------------------------------
 Group CommonFG::openGroup( const char* name ) const
 {
-   // Call C routine H5Gopen to open the named group, giving the
+   // Call C routine H5Gopen2 to open the named group, giving the
    // location id which can be a file id or a group id
-   hid_t group_id = H5Gopen( getLocId(), name );
+   hid_t group_id = H5Gopen2( getLocId(), name, H5P_DEFAULT );
 
    // If the opening of the group failed, throw an exception
    if( group_id < 0 )
    {
-      throwException("openGroup", "H5Gopen failed");
+      throwException("openGroup", "H5Gopen2 failed");
    }
 
    // No failure, create and return the Group object

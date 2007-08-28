@@ -169,7 +169,7 @@ unix2win_example(void)
 #endif
 
     /* Now follow the link */
-    if((gid = H5Gopen(fid, "ext_link")) < 0) goto error;
+    if((gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT)) < 0) goto error;
     printf("Successfully followed external link.\n");
 
     /* Close the group and the file */

@@ -1962,7 +1962,7 @@ static int test_errors(void)
   goto out;
 
  /* open the group. */
- if ((gid = H5Gopen(fid,"grp"))<0)
+ if ((gid = H5Gopen2(fid, "grp", H5P_DEFAULT)) < 0)
   goto out;
 
  /* verify that it is not a dimension scale dataset  */
@@ -2016,7 +2016,7 @@ static int test_errors(void)
   goto out;
 
  /* open the group. */
- if ((gid = H5Gopen(fid,"grp"))<0)
+ if ((gid = H5Gopen2(fid, "grp", H5P_DEFAULT)) < 0)
   goto out;
 
  /* try to detach "ds_a" from "grp" */
@@ -2044,7 +2044,7 @@ static int test_errors(void)
   goto out;
 
  /* open the group. */
- if ((gid = H5Gopen(fid,"grp"))<0)
+ if ((gid = H5Gopen2(fid, "grp", H5P_DEFAULT)) < 0)
   goto out;
 
  /* try to detach "grp" from "dset_a" */
@@ -2212,7 +2212,7 @@ static int test_iterators(void)
  TESTING2("iterate on group ");
 
  /* open */
- if ((gid = H5Gopen(fid,"grp"))<0)
+ if ((gid = H5Gopen2(fid, "grp", H5P_DEFAULT)) < 0)
   goto out;
 
  /* try to iterate, return error */
