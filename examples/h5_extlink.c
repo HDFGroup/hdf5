@@ -173,7 +173,7 @@ static void extlink_prefix_example(void)
     H5Gclose(group_id);
 
     /* Each file has had a group created inside it using the same external link. */
-    group_id = H5Gopenw(red_file_id, "pink", H5P_DEFAULT);
+    group_id = H5Gopen2(red_file_id, "pink", H5P_DEFAULT);
     group2_id = H5Gopen2(blue_file_id, "sky blue", H5P_DEFAULT);
 
     /* Clean up our open IDs */
