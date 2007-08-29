@@ -416,10 +416,10 @@ H5std_string CommonFG::getLinkval( const char* name, size_t size ) const
 {
    char* value_C = new char[size+1];  // temporary C-string for C API
 
-   herr_t ret_value = H5Gget_linkval( getLocId(), name, size, value_C );
+   herr_t ret_value = H5Lget_val( getLocId(), name, value_C, size, H5P_DEFAULT );
    if( ret_value < 0 )
    {
-      throwException("getLinkval", "H5Gget_linkval failed");
+      throwException("getLinkval", "H5Lget_val failed");
    }
    H5std_string value = H5std_string( value_C );
    delete []value_C;

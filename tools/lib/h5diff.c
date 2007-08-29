@@ -1052,33 +1052,33 @@ hsize_t diff (hid_t file1_id,
             char *buf1 = NULL;
             char *buf2 = NULL;
             
-            if (H5Gget_objinfo (file1_id, path1, FALSE, &sb1) < 0)
+            if(H5Gget_objinfo(file1_id, path1, FALSE, &sb1) < 0)
                 goto out;
-            if (H5Gget_objinfo (file1_id, path1, FALSE, &sb2) < 0)
-                goto out;
-            
-            buf1 = HDmalloc (sb1.linklen);
-            buf2 = HDmalloc (sb2.linklen);
-            
-            if (H5Gget_linkval (file1_id, path1, sb1.linklen, buf1) < 0)
-                goto out;
-            if (H5Gget_linkval (file2_id, path2, sb1.linklen, buf2) < 0)
+            if(H5Gget_objinfo(file1_id, path1, FALSE, &sb2) < 0)
                 goto out;
             
-            ret = HDstrcmp (buf1, buf2);
+            buf1 = HDmalloc(sb1.linklen);
+            buf2 = HDmalloc(sb2.linklen);
+            
+            if(H5Lget_val(file1_id, path1, buf1, sb1.linklen, H5P_DEFAULT) < 0)
+                goto out;
+            if(H5Lget_val(file2_id, path2, buf2, sb2.linklen, H5P_DEFAULT) < 0)
+                goto out;
+            
+            ret = HDstrcmp(buf1, buf2);
             
             /* if "buf1" != "buf2" then the links are "different" */
             nfound = (ret != 0) ? 1 : 0;
             
-            if (print_objname (options, nfound))
-                do_print_objname ("link", path1, path2);
+            if(print_objname(options, nfound))
+                do_print_objname("link", path1, path2);
 
             /* always print the number of differences found in verbose mode */
-            if (options->m_verbose)
+            if(options->m_verbose)
                 print_found(nfound);
             
-            HDfree (buf1);
-            HDfree (buf2);
+            HDfree(buf1);
+            HDfree(buf2);
         }
         break;
         

@@ -294,108 +294,109 @@ cklinks(hid_t fapl, hbool_t new_format)
 
     /* Open the file */
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
-    if ((file=H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Hard link */
-    if (H5Gget_objinfo(file, "d1", TRUE, &sb1) < 0) TEST_ERROR
-    if (H5Gget_objinfo(file, "grp1/hard", TRUE, &sb2) < 0) TEST_ERROR
-    if (H5G_DATASET!=sb2.type) {
+    if(H5Gget_objinfo(file, "d1", TRUE, &sb1) < 0) FAIL_STACK_ERROR
+    if(H5Gget_objinfo(file, "grp1/hard", TRUE, &sb2) < 0) FAIL_STACK_ERROR
+    if(H5G_DATASET != sb2.type) {
 	H5_FAILED();
 	printf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
 	TEST_ERROR
-    }
-    if (HDmemcmp(&sb1.objno, &sb2.objno, sizeof(sb1.objno))) {
+    } /* end if */
+    if(HDmemcmp(&sb1.objno, &sb2.objno, sizeof(sb1.objno))) {
 	H5_FAILED();
 	puts("    Hard link test failed. Link seems not to point to the ");
 	puts("    expected file location.");
 	TEST_ERROR
-    }
-    if(H5Lexists(file, "d1", H5P_DEFAULT) != TRUE) TEST_ERROR
-    if(H5Lexists(file, "grp1/hard", H5P_DEFAULT) != TRUE) TEST_ERROR
+    } /* end if */
+    if(H5Lexists(file, "d1", H5P_DEFAULT) != TRUE) FAIL_STACK_ERROR
+    if(H5Lexists(file, "grp1/hard", H5P_DEFAULT) != TRUE) FAIL_STACK_ERROR
 
     /* Symbolic link */
-    if (H5Gget_objinfo(file, "grp1/soft", TRUE, &sb2) < 0) TEST_ERROR
-    if (H5G_DATASET!=sb2.type) {
+    if(H5Gget_objinfo(file, "grp1/soft", TRUE, &sb2) < 0) FAIL_STACK_ERROR
+    if(H5G_DATASET != sb2.type) {
 	H5_FAILED();
 	printf("    %d: Unexpected object type should have been a dataset\n", __LINE__);
 	TEST_ERROR
-    }
-    if (HDmemcmp(&sb1.objno, &sb2.objno, sizeof(sb1.objno))) {
+    } /* end if */
+    if(HDmemcmp(&sb1.objno, &sb2.objno, sizeof(sb1.objno))) {
 	H5_FAILED();
 	puts("    Soft link test failed. Link seems not to point to the ");
 	puts("    expected file location.");
 	TEST_ERROR
-    }
-    if (H5Lget_val(file, "grp1/soft", linkval, sizeof linkval, H5P_DEFAULT) < 0) TEST_ERROR
-    if (HDstrcmp(linkval, "/d1")) {
+    } /* end if */
+    if(H5Lget_val(file, "grp1/soft", linkval, sizeof linkval, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(HDstrcmp(linkval, "/d1")) {
 	H5_FAILED();
 	puts("    Soft link test failed. Wrong link value");
 	TEST_ERROR
-    }
-    if(H5Lexists(file, "grp1/soft", H5P_DEFAULT) != TRUE) TEST_ERROR
+    } /* end if */
+    if(H5Lexists(file, "grp1/soft", H5P_DEFAULT) != TRUE) FAIL_STACK_ERROR
 
     /* Dangling link */
     H5E_BEGIN_TRY {
 	status = H5Gget_objinfo(file, "grp1/dangle", TRUE, &sb2);
     } H5E_END_TRY;
-    if (status>=0) {
+    if(status >= 0) {
 	H5_FAILED();
 	puts("    H5Gget_objinfo() should have failed for a dangling link.");
 	TEST_ERROR
-    }
-    if (H5Gget_objinfo(file, "grp1/dangle", FALSE, &sb2) < 0) TEST_ERROR
-    if (H5G_LINK!=sb2.type) {
+    } /* end if */
+    if(H5Gget_objinfo(file, "grp1/dangle", FALSE, &sb2) < 0) FAIL_STACK_ERROR
+    if(H5G_LINK != sb2.type) {
 	H5_FAILED();
 	printf("    %d: Unexpected object type should have been a symbolic link\n", __LINE__);
 	TEST_ERROR
-    }
-    if (H5Gget_linkval(file, "grp1/dangle", sizeof linkval, linkval) < 0) {
+    } /* end if */
+    if(H5Lget_val(file, "grp1/dangle", linkval, sizeof linkval, H5P_DEFAULT) < 0) {
 	H5_FAILED();
 	printf("    %d: Can't retrieve link value\n", __LINE__);
 	TEST_ERROR
-    }
-    if (HDstrcmp(linkval, "foobar")) {
+    } /* end if */
+    if(HDstrcmp(linkval, "foobar")) {
 	H5_FAILED();
 	puts("    Dangling link test failed. Wrong link value");
 	TEST_ERROR
-    }
-    if(H5Lexists(file, "grp1/dangle", H5P_DEFAULT) != TRUE) TEST_ERROR
+    } /* end if */
+    if(H5Lexists(file, "grp1/dangle", H5P_DEFAULT) != TRUE) FAIL_STACK_ERROR
 
     /* Recursive link */
     H5E_BEGIN_TRY {
 	status = H5Gget_objinfo(file, "grp1/recursive", TRUE, &sb2);
     } H5E_END_TRY;
-    if (status>=0) {
+    if(status >= 0) {
 	H5_FAILED();
 	puts("    H5Gget_objinfo() should have failed for a recursive link.");
 	TEST_ERROR
-    }
-    if (H5Gget_objinfo(file, "grp1/recursive", FALSE, &sb2) < 0) TEST_ERROR
-    if (H5G_LINK!=sb2.type) {
+    } /* end if */
+    if(H5Gget_objinfo(file, "grp1/recursive", FALSE, &sb2) < 0) FAIL_STACK_ERROR
+    if(H5G_LINK != sb2.type) {
 	H5_FAILED();
 	printf("    %d: Unexpected object type should have been a symbolic link\n", __LINE__);
 	TEST_ERROR
-    }
-    if (H5Gget_linkval(file, "grp1/recursive", sizeof linkval, linkval) < 0) {
+    } /* end if */
+    if(H5Lget_val(file, "grp1/recursive", linkval, sizeof linkval, H5P_DEFAULT) < 0) {
 	H5_FAILED();
 	printf("    %d: Can't retrieve link value\n", __LINE__);
 	TEST_ERROR
-    }
-    if (HDstrcmp(linkval, "/grp1/recursive")) {
+    } /* end if */
+    if(HDstrcmp(linkval, "/grp1/recursive")) {
 	H5_FAILED();
 	puts("   Recursive link test failed. Wrong link value");
 	TEST_ERROR
-    }
+    } /* end if */
 
     /* Non-existant link */
-    if(H5Lexists(file, "foobar", H5P_DEFAULT) == TRUE) TEST_ERROR
+    if(H5Lexists(file, "foobar", H5P_DEFAULT) == TRUE) FAIL_STACK_ERROR
 
     /* Cleanup */
-    if (H5Fclose(file) < 0) TEST_ERROR
+    if(H5Fclose(file) < 0) FAIL_STACK_ERROR
+
     PASSED();
     return 0;
 
- error:
+error:
     return -1;
 }
 
@@ -4365,7 +4366,7 @@ ud_callbacks(hid_t fapl, hbool_t new_format)
     }
 
     /* Fill the query buffer */
-    if(H5Gget_linkval(fid, UD_CB_LINK_NAME, (size_t)NAME_BUF_SIZE, query_buf) < 0) FAIL_STACK_ERROR
+    if(H5Lget_val(fid, UD_CB_LINK_NAME, query_buf, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     if(HDstrcmp(query_buf, "query succeeded") != 0) TEST_ERROR
 
     /* Move the link */

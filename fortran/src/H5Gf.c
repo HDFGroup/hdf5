@@ -523,51 +523,46 @@ DONE:
  *---------------------------------------------------------------------------*/
 
 int_f
-nh5gget_linkval_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size, _fcd value )
+nh5gget_linkval_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size,
+    _fcd value)
 {
-  int ret_value = -1;
-  hid_t c_loc_id;
-  char *c_name;
-  size_t c_namelen;
-  char *c_value = NULL;
-  size_t c_size;
-  herr_t c_ret_value;
-  /*
-   *  Convert Fortran name to C name
-   */
-  c_namelen = *namelen;
-  c_name = (char *)HD5f2cstring(name, c_namelen);
-  if(c_name == NULL) return ret_value;
+    char *c_name = NULL;
+    char *c_value = NULL;
+    int ret_value = -1;
 
-  /*
-   *  Allocate buffer to hold name of the value
-   */
-  if(*size) c_value = (char *)HDmalloc((size_t)*size);
-  if(c_value == NULL) {
-                     HDfree(c_name);
-                     return ret_value;
-                     }
+    /*
+     *  Convert Fortran name to C name
+     */
+    if(NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
+        goto DONE;
 
-  /*
-   *  Call H5Gget_linkval function
-   */
+    /*
+     *  Allocate buffer to hold name of the value
+     */
+    if(*size) c_value = (char *)HDmalloc((size_t)*size);
+    if(c_value == NULL) {
+                       HDfree(c_name);
+                       return ret_value;
+                       }
 
-  c_size = (size_t)*size;
-  c_loc_id = (hid_t)*loc_id;
-  c_ret_value = H5Gget_linkval(c_loc_id, c_name, c_size, c_value);
-  if(c_ret_value < 0) goto DONE;
+    /*
+     *  Call H5Lget_val function
+     */
+    if(H5Lget_val((hid_t)*loc_id, c_name, c_value, (size_t)*size, H5P_DEFAULT) < 0)
+         goto DONE;
 
-
-  /*
-   *  Convert C name to FORTRAN and place it in the given buffer
-   */
-  HD5packFstring(c_value, _fcdtocp(value), (size_t)*size);
-  ret_value = 0;
+    /*
+     *  Convert C name to FORTRAN and place it in the given buffer
+     */
+    HD5packFstring(c_value, _fcdtocp(value), (size_t)*size);
+    ret_value = 0;
 
 DONE:
-  HDfree(c_value);
-  HDfree(c_name);
-  return ret_value ;
+    if(c_value)
+        HDfree(c_value);
+    if(c_name)
+        HDfree(c_name);
+    return ret_value;
 }
 
 /*----------------------------------------------------------------------------

@@ -553,7 +553,6 @@ H5Gunlink(hid_t loc_id, const char *name)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gunlink() */
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
 /*-------------------------------------------------------------------------
@@ -586,6 +585,7 @@ H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *buf/*out*/)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_linkval() */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
 /*-------------------------------------------------------------------------

@@ -447,32 +447,32 @@ check_new_move(hid_t fapl)
 
     /* Open file */
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
-    if((file=H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Get hard link info */
-    if(H5Gget_objinfo(file, "/group2/group_new_name", TRUE, &sb_hard1) < 0) TEST_ERROR
-    if(H5Gget_objinfo(file, "/group1/hard", TRUE, &sb_hard2) < 0) TEST_ERROR
+    if(H5Gget_objinfo(file, "/group2/group_new_name", TRUE, &sb_hard1) < 0) FAIL_STACK_ERROR
+    if(H5Gget_objinfo(file, "/group1/hard", TRUE, &sb_hard2) < 0) FAIL_STACK_ERROR
 
     /* Check hard links */
-    if(H5G_GROUP!=sb_hard1.type || H5G_GROUP!=sb_hard2.type)
+    if(H5G_GROUP != sb_hard1.type || H5G_GROUP != sb_hard2.type)
         FAIL_PUTS_ERROR("    Unexpected object type, should have been a group")
     if(HDmemcmp(&sb_hard1.objno, &sb_hard2.objno, sizeof(sb_hard1.objno)))
         FAIL_PUTS_ERROR("    Hard link test failed.  Link seems not to point to the expected file location.")
 
     /* Check soft links */
-    if(H5Gget_linkval(file, "group2/soft", sizeof linkval, linkval) < 0) TEST_ERROR
+    if(H5Lget_val(file, "group2/soft", linkval, sizeof linkval, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     if(HDstrcmp(linkval, "/group1/group_move"))
         FAIL_PUTS_ERROR("    Soft link test failed. Wrong link value")
 
     /* Cleanup */
-    if(H5Fclose(file) < 0) TEST_ERROR
+    if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
     PASSED();
     return 0;
 
-  error:
+error:
     return 1;
-}
+} /* end check_new_move() */
 
 
 /*-------------------------------------------------------------------------

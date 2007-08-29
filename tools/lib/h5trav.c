@@ -611,85 +611,80 @@ static int traverse( hid_t loc_id,
    break;
 
 
-  /*-------------------------------------------------------------------------
-   * H5G_LINK
-   *-------------------------------------------------------------------------
-   */
+        /*-------------------------------------------------------------------------
+         * H5G_LINK
+         *-------------------------------------------------------------------------
+         */
 
-  case H5G_LINK:
-  {
-    /* increment */
-    inserted_objs++;
+        case H5G_LINK:
+            /* increment */
+            inserted_objs++;
 
-    /* add object to table */
-    trav_table_add(HADDR_UNDEF, path, H5G_LINK, table );
+            /* add object to table */
+            trav_table_add(HADDR_UNDEF, path, H5G_LINK, table);
 
-    if (statbuf.linklen>0)
-    {
-     char *targbuf;
+            if(statbuf.linklen > 0) {
+                char *targbuf;
 
-     targbuf = HDmalloc(statbuf.linklen);
-     assert(targbuf);
-     H5Gget_linkval(loc_id,path,statbuf.linklen,targbuf);
-     if (print)
-      printf(" %-10s %s -> %s\n", "link", path, targbuf);
-     free(targbuf);
-    }
-    else
-    {
-     if (print)
-      printf(" %-10s %s ->\n", "link", path);
-    }
-   }
+                targbuf = HDmalloc(statbuf.linklen);
+                assert(targbuf);
+                H5Lget_val(loc_id, path, targbuf, statbuf.linklen, H5P_DEFAULT);
+                if(print)
+                    printf(" %-10s %s -> %s\n", "link", path, targbuf);
+                free(targbuf);
+            }
+            else {
+                if(print)
+                    printf(" %-10s %s ->\n", "link", path);
+            }
+            break;
 
-   break;
+        /*-------------------------------------------------------------------------
+         * H5G_UDLINK
+         *-------------------------------------------------------------------------
+         */
 
-  /*-------------------------------------------------------------------------
-   * H5G_UDLINK
-   *-------------------------------------------------------------------------
-   */
+        case H5G_UDLINK:
+            {
+            H5L_info_t linkbuf;
 
-  case H5G_UDLINK:
-  {
-    H5L_info_t linkbuf;
+            /* increment */
+            inserted_objs++;
 
-    /* increment */
-    inserted_objs++;
+            /* add object to table */
+            trav_table_add(HADDR_UNDEF, path, H5G_UDLINK, table );
 
-    /* add object to table */
-    trav_table_add(HADDR_UNDEF, path, H5G_UDLINK, table );
+            /* Get type of link */
+            H5E_BEGIN_TRY {
+                /* get link class info */
+                H5Lget_info( loc_id, path, &linkbuf, H5P_DEFAULT);
+            } H5E_END_TRY;
 
-    /* Get type of link */
-    H5E_BEGIN_TRY {
-        /* get link class info */
-        H5Lget_info( loc_id, path, &linkbuf, H5P_DEFAULT);
-    } H5E_END_TRY;
+            if(linkbuf.type == H5L_TYPE_EXTERNAL) {
+                if(statbuf.linklen > 0) {
+                    char *targbuf;
+                    const char *filename;
+                    const char *objname;
 
-    if(linkbuf.type == H5L_TYPE_EXTERNAL) {
-        if(statbuf.linklen > 0) {
-            char *targbuf;
-            const char *filename;
-            const char *objname;
-
-            targbuf = HDmalloc(statbuf.linklen);
-            assert(targbuf);
-            H5Gget_linkval(loc_id, path, statbuf.linklen, targbuf);
-            H5Lunpack_elink_val(targbuf, statbuf.linklen, NULL, &filename, &objname);
-            if(print)
-                printf(" %-10s %s -> %s %s\n", "ext link", path, filename, objname);
-            free(targbuf);
-        } /* end if */
-        else {
-            if(print)
-                printf(" %-10s %s ->\n", "udlink", path);
-        } /* end else */
-    } /* end if */
-    else {  /* Unknown user-defined type */
-        if(print)
-            printf(" %-10s %s ->\n", "UD link type", path);
-    } /* end else */
-  }
-  break;
+                    targbuf = HDmalloc(statbuf.linklen);
+                    assert(targbuf);
+                    H5Lget_val(loc_id, path, targbuf, statbuf.linklen, H5P_DEFAULT);
+                    H5Lunpack_elink_val(targbuf, statbuf.linklen, NULL, &filename, &objname);
+                    if(print)
+                        printf(" %-10s %s -> %s %s\n", "ext link", path, filename, objname);
+                    free(targbuf);
+                } /* end if */
+                else {
+                    if(print)
+                        printf(" %-10s %s ->\n", "udlink", path);
+                } /* end else */
+            } /* end if */
+            else {  /* Unknown user-defined type */
+                if(print)
+                    printf(" %-10s %s ->\n", "UD link type", path);
+            } /* end else */
+            }
+            break;
 
 
   default:
