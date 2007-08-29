@@ -1011,7 +1011,7 @@ H5G_open_name(const H5G_loc_t *loc, const char *name, hid_t gapl_id,
 done:
     if(!ret_value) {
         if(loc_found && H5G_loc_free(&grp_loc) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
+            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, NULL, "can't free location")
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
