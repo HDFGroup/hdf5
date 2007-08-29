@@ -7091,7 +7091,7 @@ test_copy_option(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl, unsigned flag, hboo
 
         /* Unlink dataset to copy from original location */
         /* (So group comparison works properly) */
-        if(H5Gunlink(fid_src, NAME_DATASET_SUB_SUB) < 0) TEST_ERROR
+        if(H5Ldelete(fid_src, NAME_DATASET_SUB_SUB, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
         /* open the group for copy */
         if((gid = H5Gopen2(fid_src, NAME_GROUP_LINK2, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR

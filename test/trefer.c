@@ -887,8 +887,8 @@ test_reference_obj_deleted(void)
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Delete referenced dataset */
-    ret = H5Gunlink(fid1,"/Dataset1");
-    CHECK(ret, FAIL, "H5Gunlink");
+    ret = H5Ldelete(fid1, "/Dataset1", H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Ldelete");
 
     /* Close disk dataspace */
     ret = H5Sclose(sid1);
@@ -1078,12 +1078,12 @@ test_reference_group(void)
     VERIFY(objtype, H5G_DATASET, "H5Gget_objtype_by_idx");
 
     /* Unlink one of the objects in the dereferenced group */
-    ret = H5Gunlink(gid, GROUPNAME2);
-    CHECK(ret, FAIL, "H5Gunlink");
+    ret = H5Ldelete(gid, GROUPNAME2, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Ldelete");
 
     /* Delete dataset object in dereferenced group (with other dataset still open) */
-    ret = H5Gunlink(gid, DSETNAME2);
-    CHECK(ret, FAIL, "H5Gunlink");
+    ret = H5Ldelete(gid, DSETNAME2, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Ldelete");
 
     /* Close objects */
     ret = H5Dclose(did);

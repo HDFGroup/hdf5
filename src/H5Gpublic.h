@@ -137,7 +137,6 @@ H5_DLL herr_t H5Gclose(hid_t group_id);
  * 
  * Use of these functions and variables is deprecated.
  */
-H5_DLL herr_t H5Gunlink(hid_t loc_id, const char *name);
 H5_DLL herr_t H5Gget_linkval(hid_t loc_id, const char *name, size_t size,
     char *buf/*out*/);
 H5_DLL ssize_t H5Gget_objname_by_idx(hid_t loc_id, hsize_t idx, char* name,
@@ -170,6 +169,7 @@ H5_DLL herr_t H5Gmove(hid_t src_loc_id, const char *src_name,
     const char *dst_name);
 H5_DLL herr_t H5Gmove2(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     const char *dst_name);
+H5_DLL herr_t H5Gunlink(hid_t loc_id, const char *name);
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 

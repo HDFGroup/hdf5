@@ -522,7 +522,6 @@ H5G_move(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_move() */
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
 /*-------------------------------------------------------------------------
@@ -554,6 +553,7 @@ H5Gunlink(hid_t loc_id, const char *name)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gunlink() */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
 /*-------------------------------------------------------------------------

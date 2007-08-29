@@ -808,24 +808,24 @@ static void test_vl_rewrite(void)
     }
 
     /* Read back from file 2 */
-    for(i=0; i<REWRITE_NDATASETS; i++) {
+    for(i = 0; i < REWRITE_NDATASETS; i++) {
         sprintf(name, "/set_%d", i);
         read_scalar_dset(file2, type, space, name, name);
-    }
+    } /* end for */
 
     /* Remove from file 2. */
-    for(i=0; i<REWRITE_NDATASETS; i++) {
+    for(i = 0; i < REWRITE_NDATASETS; i++) {
         sprintf(name, "/set_%d", i);
-        ret = H5Gunlink(file2, name);
-        CHECK(ret, FAIL, "H5Gunlink");
-    }
+        ret = H5Ldelete(file2, name, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Ldelete");
+    } /* end for */
 
     /* Effectively copy from file 1 to file 2 */
-    for(i=0; i<REWRITE_NDATASETS; i++) {
+    for(i = 0; i < REWRITE_NDATASETS; i++) {
         sprintf(name, "/set_%d", i);
         read_scalar_dset(file1, type, space, name, name);
         write_scalar_dset(file2, type, space, name, name);
-    }
+    } /* end for */
 
     /* Close everything */
     ret = H5Tclose(type);

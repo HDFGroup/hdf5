@@ -2508,7 +2508,7 @@ herr_t H5TBinsert_field( hid_t loc_id,
  * Delete 1st table
  *-------------------------------------------------------------------------
  */
- if ( H5Gunlink( loc_id, dset_name ) < 0 )
+ if ( H5Ldelete( loc_id, dset_name, H5P_DEFAULT ) < 0 )
   return -1;
 
 /*-------------------------------------------------------------------------
@@ -2993,7 +2993,7 @@ herr_t H5TBdelete_field( hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
- if ( H5Gunlink( loc_id, dset_name ) < 0 )
+ if ( H5Ldelete( loc_id, dset_name, H5P_DEFAULT ) < 0 )
   return -1;
 
 /*-------------------------------------------------------------------------

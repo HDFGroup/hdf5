@@ -2384,92 +2384,90 @@ out:
  */
 int make_early(void)
 {
- hsize_t dims[1] ={3000};
- hsize_t cdims[1]={30};
- hid_t   fid=-1;
- hid_t   dset_id=-1;
- hid_t   sid=-1;
- hid_t   tid=-1;
- hid_t   dcpl=-1;
- int     i;
- char    name[10];
- int     iter=100;
+    hsize_t dims[1] ={3000};
+    hsize_t cdims[1]={30};
+    hid_t   fid=-1;
+    hid_t   dset_id=-1;
+    hid_t   sid=-1;
+    hid_t   tid=-1;
+    hid_t   dcpl=-1;
+    int     i;
+    char    name[10];
+    int     iter=100;
 
- if ((fid = H5Fcreate(FNAME5,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
-  return -1;
- if (H5Fclose(fid)<0)
-  goto out;
+    if((fid = H5Fcreate(FNAME5, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        return -1;
+    if(H5Fclose(fid) < 0)
+        goto out;
 
- if ((sid = H5Screate_simple(1, dims, NULL))<0)
-  goto out;
- if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
-  goto out;
- if (H5Pset_chunk(dcpl,1,cdims)<0)
-  goto out;
- if (H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY)<0)
-  goto out;
+    if((sid = H5Screate_simple(1, dims, NULL)) < 0)
+        goto out;
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        goto out;
+    if(H5Pset_chunk(dcpl, 1, cdims) < 0)
+        goto out;
+    if(H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0)
+        goto out;
 
- for (i=0; i<iter; i++)
- {
-  if ((fid = H5Fopen(FNAME5,H5F_ACC_RDWR,H5P_DEFAULT))<0)
-   goto out;
-  if ((dset_id = H5Dcreate(fid,"early",H5T_NATIVE_DOUBLE,sid,dcpl))<0)
-   goto out;
-  if ((tid = H5Tcopy(H5T_NATIVE_DOUBLE))<0)
-   goto out;
-  sprintf(name,"%d", i);
-  if ((H5Tcommit(fid,name,tid))<0)
-   goto out;
-  if (H5Tclose(tid)<0)
-   goto out;
-  if (H5Dclose(dset_id)<0)
-   goto out;
-  if (H5Gunlink(fid,"early")<0)
-   goto out;
-  if (H5Fclose(fid)<0)
-   goto out;
- }
+    for(i = 0; i < iter; i++)
+    {
+        if((fid = H5Fopen(FNAME5, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+            goto out;
+        if((dset_id = H5Dcreate(fid, "early", H5T_NATIVE_DOUBLE, sid, dcpl)) < 0)
+            goto out;
+        if((tid = H5Tcopy(H5T_NATIVE_DOUBLE)) < 0)
+            goto out;
+        sprintf(name, "%d", i);
+        if((H5Tcommit(fid, name, tid)) < 0)
+            goto out;
+        if(H5Tclose(tid) < 0)
+            goto out;
+        if(H5Dclose(dset_id) < 0)
+            goto out;
+        if(H5Ldelete(fid, "early", H5P_DEFAULT) < 0)
+            goto out;
+        if(H5Fclose(fid) < 0)
+            goto out;
+    }
 
-/*-------------------------------------------------------------------------
- * do the same without close/opening the file and creating the dataset
- *-------------------------------------------------------------------------
- */
+    /*-------------------------------------------------------------------------
+    * do the same without close/opening the file and creating the dataset
+    *-------------------------------------------------------------------------
+    */
 
- if ((fid = H5Fcreate(FNAME6,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
-  return -1;
+    if((fid = H5Fcreate(FNAME6, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        return -1;
 
- for (i=0; i<iter; i++)
- {
-  if ((tid = H5Tcopy(H5T_NATIVE_DOUBLE))<0)
-   goto out;
-  sprintf(name,"%d", i);
-  if ((H5Tcommit(fid,name,tid))<0)
-   goto out;
-  if (H5Tclose(tid)<0)
-   goto out;
- }
+    for(i = 0; i < iter; i++)
+    {
+        if((tid = H5Tcopy(H5T_NATIVE_DOUBLE)) < 0)
+            goto out;
+        sprintf(name, "%d", i);
+        if((H5Tcommit(fid, name, tid)) < 0)
+            goto out;
+        if(H5Tclose(tid) < 0)
+            goto out;
+    }
 
- if (H5Sclose(sid)<0)
-  goto out;
- if (H5Pclose(dcpl)<0)
-  goto out;
- if (H5Fclose(fid)<0)
-  goto out;
+    if(H5Sclose(sid) < 0)
+        goto out;
+    if(H5Pclose(dcpl) < 0)
+        goto out;
+    if(H5Fclose(fid) < 0)
+        goto out;
 
-
- return 0;
+    return 0;
 
 out:
- H5E_BEGIN_TRY {
-  H5Tclose(tid);
-  H5Pclose(dcpl);
-  H5Sclose(sid);
-  H5Dclose(dset_id);
-  H5Fclose(fid);
- } H5E_END_TRY;
- return -1;
+    H5E_BEGIN_TRY {
+        H5Tclose(tid);
+        H5Pclose(dcpl);
+        H5Sclose(sid);
+        H5Dclose(dset_id);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
 }
-
 
 
 /*-------------------------------------------------------------------------

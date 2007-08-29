@@ -397,28 +397,26 @@ DONE:
 int_f
 nh5gunlink_c(hid_t_f *loc_id, _fcd name, int_f *namelen)
 {
-  int ret_value = -1;
-  hid_t c_loc_id;
-  char *c_name;
-  size_t c_namelen;
-  herr_t c_ret_value;
-  /*
-   *  Convert Fortran name to C name
-   */
-  c_namelen = *namelen;
-  c_name = (char *)HD5f2cstring(name, c_namelen);
-  if(c_name == NULL) return ret_value;
-  /*
-   *  Call H5Gunlink function
-   */
-  c_loc_id = (hid_t)*loc_id;
-  c_ret_value = H5Gunlink(c_loc_id, c_name);
-  if(c_ret_value < 0) goto DONE;
-  ret_value = 0;
+    char *c_name = NULL;
+    int ret_value = -1;
+
+    /*
+     *  Convert Fortran name to C name
+     */
+    if(NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
+        goto DONE;
+
+    /*
+     *  Call H5Gunlink function
+     */
+    if(H5Ldelete((hid_t)*loc_id, c_name, H5P_DEFAULT) < 0)
+        goto DONE;
+    ret_value = 0;
 
 DONE:
-  HDfree(c_name);
-  return ret_value ;
+    if(c_name)
+        HDfree(c_name);
+    return ret_value;
 }
 
 /*----------------------------------------------------------------------------

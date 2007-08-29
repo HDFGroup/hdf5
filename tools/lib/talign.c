@@ -63,12 +63,12 @@ int main(void)
     fil = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     if (fil < 0) {
-            puts("*FAILED*");
-            return 1;
+        puts("*FAILED*");
+        return 1;
     }
 
     H5E_BEGIN_TRY {
-            H5Gunlink(fil, setname);
+        H5Ldelete(fil, setname, H5P_DEFAULT);
     } H5E_END_TRY;
 
     cs6 = H5Tcopy(H5T_C_S1);

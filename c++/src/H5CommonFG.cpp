@@ -288,10 +288,10 @@ void CommonFG::link( H5G_link_t link_type, const H5std_string& curr_name, const 
 //--------------------------------------------------------------------------
 void CommonFG::unlink( const char* name ) const
 {
-   herr_t ret_value = H5Gunlink( getLocId(), name );
+   herr_t ret_value = H5Ldelete( getLocId(), name, H5P_DEFAULT );
    if( ret_value < 0 )
    {
-      throwException("unlink", "H5Gunlink failed");
+      throwException("unlink", "H5Ldelete failed");
    }
 }
 

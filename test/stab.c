@@ -456,7 +456,7 @@ lifecycle(hid_t fapl2)
     while(u >= LIFECYCLE_MIN_DENSE) {
         sprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
 
-        if(H5Gunlink(gid, objname) < 0) TEST_ERROR
+        if(H5Ldelete(gid, objname, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
         u--;
     } /* end while */
@@ -468,7 +468,7 @@ lifecycle(hid_t fapl2)
 
     /* Unlink one more object from the group, which should transform back to using links */
     sprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
-    if(H5Gunlink(gid, objname) < 0) TEST_ERROR
+    if(H5Ldelete(gid, objname, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     u--;
 
     /* Check on top group's status */
@@ -478,10 +478,10 @@ lifecycle(hid_t fapl2)
 
     /* Unlink last two objects from top group */
     sprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
-    if(H5Gunlink(gid, objname) < 0) TEST_ERROR
+    if(H5Ldelete(gid, objname, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     u--;
     sprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
-    if(H5Gunlink(gid, objname) < 0) TEST_ERROR
+    if(H5Ldelete(gid, objname, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Check on top group's status */
     if(H5G_is_empty_test(gid) != TRUE) TEST_ERROR
@@ -490,7 +490,7 @@ lifecycle(hid_t fapl2)
     if(H5Gclose(gid) < 0) TEST_ERROR
 
     /* Unlink top group */
-    if(H5Gunlink(fid, LIFECYCLE_TOP_GROUP) < 0) TEST_ERROR
+    if(H5Ldelete(fid, LIFECYCLE_TOP_GROUP, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Close GCPL */
     if(H5Pclose(gcpl) < 0) TEST_ERROR
@@ -603,7 +603,7 @@ long_compact(hid_t fapl2)
     if(H5G_is_new_dense_test(gid) != TRUE) TEST_ERROR
 
     /* Unlink second object from top group */
-    if(H5Gunlink(gid, objname) < 0) TEST_ERROR
+    if(H5Ldelete(gid, objname, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Check on top group's status */
     /* (Should still be dense storage to hold links, since name is too long for object header message) */
@@ -613,7 +613,7 @@ long_compact(hid_t fapl2)
 
     /* Unlink first object from top group */
     objname[0] = 'a';
-    if(H5Gunlink(gid, objname) < 0) TEST_ERROR
+    if(H5Ldelete(gid, objname, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Check on top group's status */
     /* (Should have deleted the dense storage now) */
@@ -626,7 +626,7 @@ long_compact(hid_t fapl2)
     if(H5Gclose(gid) < 0) TEST_ERROR
 
     /* Unlink top group */
-    if(H5Gunlink(fid, "top") < 0) TEST_ERROR
+    if(H5Ldelete(fid, "top", H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Close file */
     if(H5Fclose(fid) < 0) TEST_ERROR
@@ -736,7 +736,7 @@ read_old(hid_t fapl2)
     /* Delete new objects from old group */
     for(u = 0; u < READ_OLD_NGROUPS; u++) {
         sprintf(objname, "Group %u", u);
-        if(H5Gunlink(gid, objname) < 0) TEST_ERROR
+        if(H5Ldelete(gid, objname, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     } /* end for */
 
     /* Check on old group's status */
@@ -844,7 +844,7 @@ no_compact(hid_t fapl2)
 
     /* Unlink object from top group */
     sprintf(objname, NO_COMPACT_BOTTOM_GROUP, (unsigned)0);
-    if(H5Gunlink(gid, objname) < 0) TEST_ERROR
+    if(H5Ldelete(gid, objname, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Check on top group's status */
     if(H5G_is_empty_test(gid) != TRUE) TEST_ERROR
@@ -853,7 +853,7 @@ no_compact(hid_t fapl2)
     if(H5Gclose(gid) < 0) TEST_ERROR
 
     /* Unlink top group */
-    if(H5Gunlink(fid, NO_COMPACT_TOP_GROUP) < 0) TEST_ERROR
+    if(H5Ldelete(fid, NO_COMPACT_TOP_GROUP, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Close file */
     if(H5Fclose(fid) < 0) TEST_ERROR

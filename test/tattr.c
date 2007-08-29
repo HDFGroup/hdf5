@@ -1735,8 +1735,8 @@ test_attr_dtype_shared(hid_t fapl)
     VERIFY(statbuf.nlink, 3, "H5Gget_objinfo");
 
     /* Unlink the dataset */
-    ret=H5Gunlink(file_id,DSET1_NAME);
-    CHECK(ret, FAIL, "H5Gunlink");
+    ret = H5Ldelete(file_id, DSET1_NAME, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Ldelete");
 
     /* Check reference count on named datatype */
     ret=H5Gget_objinfo(file_id,TYPE1_NAME,0,&statbuf);
@@ -1744,8 +1744,8 @@ test_attr_dtype_shared(hid_t fapl)
     VERIFY(statbuf.nlink, 1, "H5Gget_objinfo");
 
     /* Unlink the named datatype */
-    ret=H5Gunlink(file_id,TYPE1_NAME);
-    CHECK(ret, FAIL, "H5Gunlink");
+    ret = H5Ldelete(file_id, TYPE1_NAME, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Ldelete");
 
     /* Close file */
     ret=H5Fclose(file_id);
@@ -1945,8 +1945,8 @@ test_attr_dense_create(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Unlink dataset with attributes */
-    ret = H5Gunlink(fid, DSET1_NAME);
-    CHECK(ret, FAIL, "H5Gunlink");
+    ret = H5Ldelete(fid, DSET1_NAME, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Ldelete");
 
     /* Close file */
     ret = H5Fclose(fid);
@@ -2084,8 +2084,8 @@ test_attr_dense_open(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Unlink dataset with attributes */
-    ret = H5Gunlink(fid, DSET1_NAME);
-    CHECK(ret, FAIL, "H5Gunlink");
+    ret = H5Ldelete(fid, DSET1_NAME, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Ldelete");
 
     /* Close file */
     ret = H5Fclose(fid);
@@ -2262,8 +2262,8 @@ test_attr_dense_delete(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Unlink dataset with attributes */
-    ret = H5Gunlink(fid, DSET1_NAME);
-    CHECK(ret, FAIL, "H5Gunlink");
+    ret = H5Ldelete(fid, DSET1_NAME, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Ldelete");
 
     /* Close file */
     ret = H5Fclose(fid);
@@ -2421,8 +2421,8 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Unlink dataset with attributes */
-    ret = H5Gunlink(fid, DSET1_NAME);
-    CHECK(ret, FAIL, "H5Gunlink");
+    ret = H5Ldelete(fid, DSET1_NAME, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Ldelete");
 
     /* Close file */
     ret = H5Fclose(fid);
@@ -2546,8 +2546,8 @@ test_attr_dense_unlink(hid_t fcpl, hid_t fapl)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Unlink dataset */
-    ret = H5Gunlink(fid, DSET1_NAME);
-    CHECK(ret, FAIL, "H5Gunlink");
+    ret = H5Ldelete(fid, DSET1_NAME, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Ldelete");
 
     /* Check on dataset's attribute storage status */
     ret = H5F_get_sohm_mesg_count_test(fid, H5O_ATTR_ID, &mesg_count);
@@ -2716,8 +2716,8 @@ test_attr_dense_limits(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Unlink dataset */
-    ret = H5Gunlink(fid, DSET1_NAME);
-    CHECK(ret, FAIL, "H5Gunlink");
+    ret = H5Ldelete(fid, DSET1_NAME, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Ldelete");
 
     /* Close file */
     ret = H5Fclose(fid);
@@ -2986,8 +2986,8 @@ test_attr_big(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Unlink dataset */
-    ret = H5Gunlink(fid, DSET1_NAME);
-    CHECK(ret, FAIL, "H5Gunlink");
+    ret = H5Ldelete(fid, DSET1_NAME, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Ldelete");
 
     /* Close file */
     ret = H5Fclose(fid);
@@ -3196,8 +3196,8 @@ test_attr_null_space(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Unlink dataset */
-    ret = H5Gunlink(fid, DSET1_NAME);
-    CHECK(ret, FAIL, "H5Gunlink");
+    ret = H5Ldelete(fid, DSET1_NAME, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Ldelete");
 
     /* Close file */
     ret = H5Fclose(fid);
@@ -6868,15 +6868,15 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
         } /* end if */
 
         /* Unlink datasets with attributes */
-        ret = H5Gunlink(fid, DSET1_NAME);
-        CHECK(ret, FAIL, "H5Gunlink");
-        ret = H5Gunlink(fid, DSET2_NAME);
-        CHECK(ret, FAIL, "H5Gunlink");
+        ret = H5Ldelete(fid, DSET1_NAME, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Ldelete");
+        ret = H5Ldelete(fid, DSET2_NAME, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Ldelete");
 
         /* Unlink committed datatype */
         if(test_shared == 2) {
-            ret = H5Gunlink(fid, TYPE1_NAME);
-            CHECK(ret, FAIL, "H5Gunlink");
+            ret = H5Ldelete(fid, TYPE1_NAME, H5P_DEFAULT);
+            CHECK(ret, FAIL, "H5Ldelete");
         } /* end if */
 
         /* Check on attribute storage status */
@@ -7310,15 +7310,15 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
         } /* end if */
 
         /* Unlink datasets with attributes */
-        ret = H5Gunlink(fid, DSET1_NAME);
-        CHECK(ret, FAIL, "H5Gunlink");
-        ret = H5Gunlink(fid, DSET2_NAME);
-        CHECK(ret, FAIL, "H5Gunlink");
+        ret = H5Ldelete(fid, DSET1_NAME, H5P_DEFAULT);
+        CHECK(ret, FAIL, "HLdelete");
+        ret = H5Ldelete(fid, DSET2_NAME, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Ldelete");
 
         /* Unlink committed datatype */
         if(test_shared == 2) {
-            ret = H5Gunlink(fid, TYPE1_NAME);
-            CHECK(ret, FAIL, "H5Gunlink");
+            ret = H5Ldelete(fid, TYPE1_NAME, H5P_DEFAULT);
+            CHECK(ret, FAIL, "H5Ldelete");
         } /* end if */
 
         /* Check on attribute storage status */
@@ -7674,15 +7674,15 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
         } /* end if */
 
         /* Unlink datasets with attributes */
-        ret = H5Gunlink(fid, DSET1_NAME);
-        CHECK(ret, FAIL, "H5Gunlink");
-        ret = H5Gunlink(fid, DSET2_NAME);
-        CHECK(ret, FAIL, "H5Gunlink");
+        ret = H5Ldelete(fid, DSET1_NAME, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Ldelete");
+        ret = H5Ldelete(fid, DSET2_NAME, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Ldelete");
 
         /* Unlink committed datatype */
         if(test_shared == 2) {
-            ret = H5Gunlink(fid, TYPE1_NAME);
-            CHECK(ret, FAIL, "H5Gunlink");
+            ret = H5Ldelete(fid, TYPE1_NAME, H5P_DEFAULT);
+            CHECK(ret, FAIL, "H5Ldelete");
         } /* end if */
 
         /* Check on attribute storage status */
@@ -7983,8 +7983,8 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
         CHECK(ret, FAIL, "H5Dclose");
 
         /* Unlink second dataset */
-        ret = H5Gunlink(fid, DSET2_NAME);
-        CHECK(ret, FAIL, "H5Gunlink");
+        ret = H5Ldelete(fid, DSET2_NAME, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Ldelete");
 
 
         /* Check on first dataset's attribute storage status */
@@ -8026,13 +8026,13 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
         CHECK(ret, FAIL, "H5Dclose");
 
         /* Unlink first dataset */
-        ret = H5Gunlink(fid, DSET1_NAME);
-        CHECK(ret, FAIL, "H5Gunlink");
+        ret = H5Ldelete(fid, DSET1_NAME, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Ldelete");
 
         /* Unlink committed datatype */
         if(test_shared == 2) {
-            ret = H5Gunlink(fid, TYPE1_NAME);
-            CHECK(ret, FAIL, "H5Gunlink");
+            ret = H5Ldelete(fid, TYPE1_NAME, H5P_DEFAULT);
+            CHECK(ret, FAIL, "H5Ldelete");
         } /* end if */
 
         /* Check on attribute storage status */
@@ -8150,8 +8150,8 @@ test_attr_bug1(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Gclose");
 
     /* Unlink second group */
-    ret = H5Gunlink(fid, GROUP2_NAME);
-    CHECK(ret, FAIL, "H5Gunlink");
+    ret = H5Ldelete(fid, GROUP2_NAME, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Ldelete");
 
     /* Re-open first group */
     gid = H5Gopen2(fid, GROUP1_NAME, H5P_DEFAULT);

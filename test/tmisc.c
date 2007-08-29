@@ -335,8 +335,8 @@ test_misc1(void)
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Remove the dataset. */
-    ret = H5Gunlink(file, MISC1_DSET_NAME);
-    CHECK(ret, FAIL, "H5Gunlink");
+    ret = H5Ldelete(file, MISC1_DSET_NAME, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Ldelete");
 
     /* Write the dataset for the second time with a different value. */
     dataset = H5Dcreate(file, MISC1_DSET_NAME, H5T_NATIVE_INT, dataspace, H5P_DEFAULT);
@@ -2476,8 +2476,8 @@ test_misc14(void)
         TestErrPrintf("Error on line %d: data1!=rdata\n",__LINE__);
 
     /* Unlink second dataset */
-    ret = H5Gunlink(file_id, MISC14_DSET2_NAME);
-    CHECK(ret, FAIL, "H5Gunlink");
+    ret = H5Ldelete(file_id, MISC14_DSET2_NAME, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Ldelete");
 
     /* Close second dataset */
     ret = H5Dclose(Dataset2);
@@ -2524,8 +2524,8 @@ test_misc14(void)
         TestErrPrintf("Error on line %d: data2!=rdata\n",__LINE__);
 
     /* Unlink first dataset */
-    ret = H5Gunlink(file_id, MISC14_DSET1_NAME);
-    CHECK(ret, FAIL, "H5Gunlink");
+    ret = H5Ldelete(file_id, MISC14_DSET1_NAME, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Ldelete");
 
     /* Close first dataset */
     ret = H5Dclose(Dataset1);
@@ -2585,8 +2585,8 @@ test_misc14(void)
         TestErrPrintf("Error on line %d: data3!=rdata\n",__LINE__);
 
     /* Unlink second dataset */
-    ret = H5Gunlink(file_id, MISC14_DSET2_NAME);
-    CHECK(ret, FAIL, "H5Gunlink");
+    ret = H5Ldelete(file_id, MISC14_DSET2_NAME, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Ldelete");
 
     /* Close second dataset */
     ret = H5Dclose(Dataset2);
@@ -3683,15 +3683,15 @@ test_misc22(void)
     MESSAGE(5, ("Testing datatypes with SZIP filter\n"));
 
     /* Allocate space for the buffer */
-    buf = (char *)HDcalloc(MISC22_SPACE_DIM0*MISC22_SPACE_DIM1,8);
+    buf = (char *)HDcalloc(MISC22_SPACE_DIM0*MISC22_SPACE_DIM1, 8);
     CHECK(buf, NULL, "HDcalloc");
 
     /* Create the file */
-    fid = H5Fcreate (MISC22_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(MISC22_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Create the dataspace for the dataset */
-    sid = H5Screate_simple (MISC22_SPACE_RANK, dims, NULL);
+    sid = H5Screate_simple(MISC22_SPACE_RANK, dims, NULL);
     CHECK(sid, FAIL, "H5Screate_simple");
 
     for (i = 0; i < 4; i++) {
@@ -3704,14 +3704,14 @@ test_misc22(void)
                 MESSAGE(5, ("  Testing datatypes size=%d precision=%u offset=%d\n",H5Tget_size(idts[i]),(unsigned)prec[j],(unsigned)offsets[k]));
 
                 /* Create the DCPL */
-                dcpl = H5Pcreate (H5P_DATASET_CREATE);
+                dcpl = H5Pcreate(H5P_DATASET_CREATE);
                 CHECK(dcpl, FAIL, "H5Pcreate");
 
                 /* Set DCPL properties */
-                ret = H5Pset_chunk (dcpl, MISC22_SPACE_RANK, chunk_size);
+                ret = H5Pset_chunk(dcpl, MISC22_SPACE_RANK, chunk_size);
                 CHECK(ret, FAIL, "H5Pset_chunk");
                 /* Set custom DCPL properties */
-                ret = H5Pset_szip (dcpl, H5_SZIP_NN_OPTION_MASK, 32);  /* vary the PPB */
+                ret = H5Pset_szip(dcpl, H5_SZIP_NN_OPTION_MASK, 32);  /* vary the PPB */
                 CHECK(ret, FAIL, "H5Pset_szip");
 
                 /* set up the datatype according to the loop */
@@ -3734,40 +3734,40 @@ test_misc22(void)
                 }
 
                 /* Create the dataset */
-                dsid = H5Dcreate (fid, MISC22_DSET_NAME, dtype, sid, dcpl);
+                dsid = H5Dcreate(fid, MISC22_DSET_NAME, dtype, sid, dcpl);
                 CHECK(dsid, FAIL, "H5Dwrite");
 
                 /* Write out the whole dataset */
-                ret = H5Dwrite (dsid, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+                ret = H5Dwrite(dsid, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
                 CHECK(ret, FAIL, "H5Dwrite");
 
                 /* Close everything */
-                ret = H5Dclose (dsid);
+                ret = H5Dclose(dsid);
                 CHECK(ret, FAIL, "H5Dclose");
-                ret = H5Tclose (dtype);
+                ret = H5Tclose(dtype);
                 CHECK(ret, FAIL, "H5Tclose");
-                ret = H5Pclose (dcpl);
+                ret = H5Pclose(dcpl);
                 CHECK(ret, FAIL, "H5Pclose");
 
-                dsid = H5Dopen (fid, MISC22_DSET_NAME);
+                dsid = H5Dopen(fid, MISC22_DSET_NAME);
                 CHECK(dsid, FAIL, "H5Topen");
 
                 dcpl2 = H5Dget_create_plist(dsid);
                 CHECK(dcpl2, FAIL, "H5Dget_create_plist");
 
-                ret= H5Pget_filter_by_id( dcpl2, H5Z_FILTER_SZIP, &flags,
-                      &cd_nelmts, cd_values, 0, NULL , NULL );
+                ret= H5Pget_filter_by_id(dcpl2, H5Z_FILTER_SZIP, &flags,
+                      &cd_nelmts, cd_values, 0, NULL , NULL);
                 CHECK(ret, FAIL, "H5Pget_filter_by_id");
 
                 VERIFY(cd_values[2], correct, "SZIP filter returned value for precision");
 
-                ret = H5Dclose (dsid);
+                ret = H5Dclose(dsid);
                 CHECK(ret, FAIL, "H5Dclose");
 
-                ret = H5Gunlink (fid, MISC22_DSET_NAME );
-                CHECK(ret, FAIL, "H5Dunlink");
+                ret = H5Ldelete(fid, MISC22_DSET_NAME, H5P_DEFAULT);
+                CHECK(ret, FAIL, "H5Ldelete");
 
-                ret = H5Pclose (dcpl2);
+                ret = H5Pclose(dcpl2);
                 CHECK(ret, FAIL, "H5Pclose");
             }
         }
@@ -3780,9 +3780,9 @@ test_misc22(void)
     CHECK(ret, FAIL, "H5Tclose");
     ret = H5Tclose(idts[3]);
     CHECK(ret, FAIL, "H5Tclose");
-    ret = H5Sclose (sid);
+    ret = H5Sclose(sid);
     CHECK(ret, FAIL, "H5Sclose");
-    ret = H5Fclose (fid);
+    ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
 
     HDfree(buf);

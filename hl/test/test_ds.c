@@ -2233,19 +2233,19 @@ static int test_iterators(void)
 
  TESTING2("iterate in deleted scales ");
 
- if (H5Gunlink(fid,"ds_0")<0)
+ if(H5Ldelete(fid, "ds_0", H5P_DEFAULT) < 0)
   goto out;
 
  /* open the previously written "dset_a" */
- if ((did = H5Dopen(fid,"dset_a"))<0)
+ if((did = H5Dopen(fid, "dset_a")) < 0)
   goto out;
 
  /* iterate  */
- if (H5DSiterate_scales(did,0,NULL,op_bogus,NULL)==SUCCEED)
+ if(H5DSiterate_scales(did, 0, NULL, op_bogus, NULL) == SUCCEED)
   goto out;
 
  /* close */
- if (H5Dclose(did)<0)
+ if(H5Dclose(did) < 0)
   goto out;
 
  PASSED();

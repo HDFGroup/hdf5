@@ -143,8 +143,8 @@ main(void)
      * Unlink  name "Data" and use iterator to see the names
      * of the objects in the file root direvtory.
      */
-    if (H5Gunlink(file, "Data") < 0)
-      printf(" H5Gunlink failed \n");
+    if(H5Ldelete(file, "Data", H5P_DEFAULT) < 0)
+      printf(" H5Ldelete failed \n");
     else
       printf("\"Data\" is unlinked \n");
 

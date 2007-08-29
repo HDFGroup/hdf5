@@ -534,32 +534,33 @@ test_main(hid_t file_id, hid_t fapl)
 
 
    /*-------------------------------------------------------------------------
-    * Test H5Iget_name with H5Gunlink
+    * Test H5Iget_name with H5Ldelete
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5Iget_name with H5Gunlink");
+    TESTING("H5Iget_name with H5Ldelete");
 
     /* Create a new group. */
     if((group_id = H5Gcreate2(file_id, "/g8", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Delete */
-    if(H5Gunlink(file_id, "/g8") < 0) TEST_ERROR
+    if(H5Ldelete(file_id, "/g8", H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group_id, "", "") < 0) TEST_ERROR
 
     /* Close */
-    H5Gclose(group_id);
+    if(H5Gclose(group_id) < 0) FAIL_STACK_ERROR
 
     PASSED();
 
-/*-------------------------------------------------------------------------
-    * Test H5Iget_name with H5Gunlink and a long path
+
+   /*-------------------------------------------------------------------------
+    * Test H5Iget_name with H5Ldelete and a long path
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5Iget_name with H5Gunlink and a long path");
+    TESTING("H5Iget_name with H5Ldelete and a long path");
 
     /* Create group "g9/a/b" */
     if((group_id = H5Gcreate2(file_id, "g9", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
@@ -567,7 +568,7 @@ test_main(hid_t file_id, hid_t fapl)
     if((group3_id = H5Gcreate2(file_id, "g9/a/b", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Delete */
-    if(H5Gunlink(file_id, "/g9/a") < 0) TEST_ERROR
+    if(H5Ldelete(file_id, "/g9/a", H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group2_id, "", "") < 0) TEST_ERROR
@@ -576,15 +577,15 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group3_id, "", "") < 0) TEST_ERROR
 
     /* Close */
-    H5Gclose(group2_id);
-    H5Gclose(group3_id);
+    if(H5Gclose(group2_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group3_id) < 0) FAIL_STACK_ERROR
 
     /* Recreate groups */
     if((group2_id = H5Gcreate2(group_id, "a", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if((group3_id = H5Gcreate2(group_id, "a/b", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Delete, using relative path */
-    if(H5Gunlink(group_id, "a") < 0) TEST_ERROR
+    if(H5Ldelete(group_id, "a", H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group2_id, "", "") < 0) TEST_ERROR
@@ -593,11 +594,11 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group3_id, "", "") < 0) TEST_ERROR
 
     /* Close */
-    H5Gclose(group2_id);
-    H5Gclose(group3_id);
+    if(H5Gclose(group2_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group3_id) < 0) FAIL_STACK_ERROR
 
     /* Close */
-    H5Gclose(group_id);
+    if(H5Gclose(group_id) < 0) FAIL_STACK_ERROR
 
     /* Create group "g10/a/b" */
     if((group_id = H5Gcreate2(file_id, "g10", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
@@ -605,51 +606,51 @@ test_main(hid_t file_id, hid_t fapl)
     if((group3_id = H5Gcreate2(file_id, "g10/a/b", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Delete */
-    if(H5Gunlink(file_id, "/g10/a/b") < 0) TEST_ERROR
+    if(H5Ldelete(file_id, "/g10/a/b", H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group3_id, "", "") < 0) TEST_ERROR
 
     /* Close */
-    H5Gclose(group3_id);
+    if(H5Gclose(group3_id) < 0) FAIL_STACK_ERROR
 
     /* Recreate group */
     if((group3_id = H5Gcreate2(group_id, "a/b", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Delete, using relative path */
-    if(H5Gunlink(group_id, "a/b") < 0) TEST_ERROR
+    if(H5Ldelete(group_id, "a/b", H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group3_id, "", "") < 0) TEST_ERROR
 
     /* Close */
-    H5Gclose(group3_id);
+    if(H5Gclose(group3_id) < 0) FAIL_STACK_ERROR
 
     /* Close */
-    H5Gclose(group_id);
-    H5Gclose(group2_id);
+    if(H5Gclose(group_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group2_id) < 0) FAIL_STACK_ERROR
 
     PASSED();
 
-/*-------------------------------------------------------------------------
-    * Test H5Iget_name with H5Gunlink, same names
+
+   /*-------------------------------------------------------------------------
+    * Test H5Iget_name with H5Ldelete, same names
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5Iget_name with H5Gunlink, same names");
-
+    TESTING("H5Iget_name with H5Ldelete, same names");
 
     /* Create group "g11/g" */
     if((group_id = H5Gcreate2(file_id, "g11", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if((group2_id = H5Gcreate2(file_id, "g11/g", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Create two datasets "g11/d" and "g11/g/d"*/
-    if((space_id = H5Screate_simple(1, dims, NULL)) < 0) TEST_ERROR
-    if((dataset_id = H5Dcreate(group_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) TEST_ERROR
-    if((dataset2_id = H5Dcreate(group2_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((space_id = H5Screate_simple(1, dims, NULL)) < 0) FAIL_STACK_ERROR
+    if((dataset_id = H5Dcreate(group_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((dataset2_id = H5Dcreate(group2_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Delete */
-    if(H5Gunlink(file_id, "/g11/d") < 0) TEST_ERROR
+    if(H5Ldelete(file_id, "/g11/d", H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(dataset_id, "", "") < 0) TEST_ERROR
@@ -658,16 +659,16 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(dataset2_id, "/g11/g/d", "/g11/g/d") < 0) TEST_ERROR
 
     /* Close */
-    H5Dclose(dataset_id);
-    H5Dclose(dataset2_id);
-    H5Sclose(space_id);
-    H5Gclose(group_id);
-    H5Gclose(group2_id);
+    if(H5Dclose(dataset_id) < 0) FAIL_STACK_ERROR
+    if(H5Dclose(dataset2_id) < 0) FAIL_STACK_ERROR
+    if(H5Sclose(space_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group2_id) < 0) FAIL_STACK_ERROR
 
     PASSED();
 
 
-/*-------------------------------------------------------------------------
+   /*-------------------------------------------------------------------------
     * Test H5Iget_name with H5Fmount; with IDs on the list
     *-------------------------------------------------------------------------
     */
@@ -1046,6 +1047,7 @@ test_main(hid_t file_id, hid_t fapl)
 
     PASSED();
 
+
    /*-------------------------------------------------------------------------
     * Test H5Iget_name with different files, test1
     *-------------------------------------------------------------------------
@@ -1054,22 +1056,22 @@ test_main(hid_t file_id, hid_t fapl)
     TESTING("H5Iget_name with different files");
 
     /* Create a new file using default properties. */
-    if((file2_id = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((file2_id = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
-/* Create a new file using default properties. */
-    if((file3_id = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    /* Create a new file using default properties. */
+    if((file3_id = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Create the dataspace  */
-    if((space_id = H5Screate_simple(1, dims, NULL)) < 0) TEST_ERROR
+    if((space_id = H5Screate_simple(1, dims, NULL)) < 0) FAIL_STACK_ERROR
 
     /* Create a new dataset */
-    if((dataset_id = H5Dcreate(file2_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((dataset_id = H5Dcreate(file2_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Create a new dataset */
-    if((dataset2_id = H5Dcreate(file3_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((dataset2_id = H5Dcreate(file3_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Delete */
-    if(H5Gunlink(file2_id, "/d") < 0) TEST_ERROR
+    if(H5Ldelete(file2_id, "/d", H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(dataset_id, "", "") < 0) TEST_ERROR
@@ -1078,16 +1080,16 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(dataset2_id, "/d", "/d") < 0) TEST_ERROR
 
     /* Close */
-    H5Dclose(dataset_id);
-    H5Dclose(dataset2_id);
-    H5Sclose(space_id);
-    H5Fclose(file2_id);
-    H5Fclose(file3_id);
+    if(H5Dclose(dataset_id) < 0) FAIL_STACK_ERROR
+    if(H5Dclose(dataset2_id) < 0) FAIL_STACK_ERROR
+    if(H5Sclose(space_id) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file2_id) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file3_id) < 0) FAIL_STACK_ERROR
 
     PASSED();
 
 
-/*-------------------------------------------------------------------------
+   /*-------------------------------------------------------------------------
     * Test H5Iget_name with different files, test2
     *-------------------------------------------------------------------------
     */
@@ -1095,22 +1097,22 @@ test_main(hid_t file_id, hid_t fapl)
     TESTING("H5Iget_name with different files #2");
 
     /* Create a new file using default properties. */
-    if((file2_id = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((file2_id = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
-/* Create a new file using default properties. */
-    if((file3_id = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    /* Create a new file using default properties. */
+    if((file3_id = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Create the dataspace  */
-    if((space_id = H5Screate_simple(1, dims, NULL)) < 0) TEST_ERROR
+    if((space_id = H5Screate_simple(1, dims, NULL)) < 0) FAIL_STACK_ERROR
 
     /* Create a new dataset */
-    if((dataset_id = H5Dcreate(file2_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((dataset_id = H5Dcreate(file2_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Create a new dataset */
-    if((dataset2_id = H5Dcreate(file3_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((dataset2_id = H5Dcreate(file3_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Delete */
-    if(H5Gunlink(file3_id, "/d") < 0) TEST_ERROR
+    if(H5Ldelete(file3_id, "/d", H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(dataset_id, "/d", "/d") < 0) TEST_ERROR
@@ -1119,15 +1121,16 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(dataset2_id, "", "") < 0) TEST_ERROR
 
     /* Close */
-    H5Dclose(dataset_id);
-    H5Dclose(dataset2_id);
-    H5Sclose(space_id);
-    H5Fclose(file2_id);
-    H5Fclose(file3_id);
+    if(H5Dclose(dataset_id) < 0) FAIL_STACK_ERROR
+    if(H5Dclose(dataset2_id) < 0) FAIL_STACK_ERROR
+    if(H5Sclose(space_id) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file2_id) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file3_id) < 0) FAIL_STACK_ERROR
 
     PASSED();
 
-/*-------------------------------------------------------------------------
+
+   /*-------------------------------------------------------------------------
     * Test H5Iget_name with a small buffer for name
     *-------------------------------------------------------------------------
     */
@@ -1320,7 +1323,7 @@ test_main(hid_t file_id, hid_t fapl)
     PASSED();
 
 
-/*-------------------------------------------------------------------------
+   /*-------------------------------------------------------------------------
     * Test H5Iget_name with H5Fclose
     *-------------------------------------------------------------------------
     */
@@ -1328,7 +1331,7 @@ test_main(hid_t file_id, hid_t fapl)
     TESTING("H5Iget_name with H5Fclose");
 
     /* Create a file and group "/g1/g2" in it */
-    file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    if((file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
     if((group_id = H5Gcreate2(file1_id, "/g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if((group2_id = H5Gcreate2(file1_id, "/g1/g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
@@ -1336,27 +1339,27 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group2_id, "/g1/g2", "/g1/g2") < 0) TEST_ERROR
 
     /* Close file */
-    H5Fclose(file1_id);
+    if(H5Fclose(file1_id) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group2_id, "/g1/g2", "/g1/g2") < 0) TEST_ERROR
 
     /* Close */
-    H5Gclose(group_id);
-    H5Gclose(group2_id);
+    if(H5Gclose(group_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group2_id) < 0) FAIL_STACK_ERROR
 
     PASSED();
 
 
-/*-------------------------------------------------------------------------
-    * Test H5Iget_name with H5Fmount and H5Gunlink
+   /*-------------------------------------------------------------------------
+    * Test H5Iget_name with H5Fmount and H5Ldelete
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5Iget_name with H5Fmount and H5Gunlink");
+    TESTING("H5Iget_name with H5Fmount and H5Ldelete");
 
     /* Create a file and group "/g1/g2" in it */
-    file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    if((file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
     if((group_id = H5Gcreate2(file1_id, "/g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if((group2_id = H5Gcreate2(file1_id, "/g1/g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
@@ -1366,7 +1369,7 @@ test_main(hid_t file_id, hid_t fapl)
     if((group4_id = H5Gcreate2(file2_id, "/g3/g4", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Mount first file at "/g3/g4" in the second file */
-    if(H5Fmount(file2_id, "/g3/g4", file1_id, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Fmount(file2_id, "/g3/g4", file1_id, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Open the mounted group */
     if((group5_id = H5Gopen2(file2_id, "/g3/g4/g1/g2", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
@@ -1375,7 +1378,7 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group5_id, "/g3/g4/g1/g2", "/g3/g4/g1/g2") < 0) TEST_ERROR
 
     /* Delete */
-    if(H5Gunlink(file1_id, "/g3/g4/g1/g2") < 0) TEST_ERROR
+    if(H5Ldelete(file1_id, "/g3/g4/g1/g2", H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group5_id, "", "") < 0) TEST_ERROR
@@ -1384,16 +1387,15 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group2_id, "", "") < 0) TEST_ERROR
 
     /* Close */
-    H5Gclose(group_id);
-    H5Gclose(group2_id);
-    H5Gclose(group3_id);
-    H5Gclose(group4_id);
-    H5Gclose(group5_id);
-    H5Fclose(file1_id);
-    H5Fclose(file2_id);
+    if(H5Gclose(group_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group2_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group3_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group4_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group5_id) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file1_id) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file2_id) < 0) FAIL_STACK_ERROR
 
     PASSED();
-
 
 
    /*-------------------------------------------------------------------------
@@ -1543,7 +1545,7 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group4_id, "/g19/g3", "/g19/g3") < 0) TEST_ERROR
 
     /* Delete group */
-    if(H5Gunlink(file_id, "/g19/g3") < 0) FAIL_STACK_ERROR
+    if(H5Ldelete(file_id, "/g19/g3", H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group4_id, "/g19/g1", "") < 0) TEST_ERROR
@@ -1563,7 +1565,7 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group4_id, "/g19/g3", "/g19/g3") < 0) TEST_ERROR
 
     /* Delete group, using relative path */
-    if(H5Gunlink(group_id, "g3") < 0) FAIL_STACK_ERROR
+    if(H5Ldelete(group_id, "g3", H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group4_id, "/g19/g1", "") < 0) TEST_ERROR
@@ -1579,7 +1581,6 @@ test_main(hid_t file_id, hid_t fapl)
     if(H5Gclose(group3_id) < 0) FAIL_STACK_ERROR
 
     PASSED();
-
 
 
    /*-------------------------------------------------------------------------
@@ -1712,7 +1713,7 @@ test_main(hid_t file_id, hid_t fapl)
     if((group3_id = H5Gopen2(file_id, "/g23/g2", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Delete group */
-    if(H5Gunlink(file_id, "/g23/g1") < 0) FAIL_STACK_ERROR
+    if(H5Ldelete(file_id, "/g23/g1", H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group3_id, "/g23/g2", "/g23/g2") < 0) TEST_ERROR
@@ -1723,6 +1724,7 @@ test_main(hid_t file_id, hid_t fapl)
     if(H5Gclose(group3_id) < 0) FAIL_STACK_ERROR
 
     PASSED();
+
 
    /*-------------------------------------------------------------------------
     * Test H5Iget_name with H5Lcreate_soft and unlink source
@@ -1745,7 +1747,7 @@ test_main(hid_t file_id, hid_t fapl)
     if((group3_id = H5Gopen2(file_id, "/g24/g2", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Delete symbolic link */
-    if(H5Gunlink(file_id, "/g24/g2") < 0) FAIL_STACK_ERROR
+    if(H5Ldelete(file_id, "/g24/g2", H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group3_id, "/g24/g1", "") < 0) TEST_ERROR
@@ -1757,7 +1759,8 @@ test_main(hid_t file_id, hid_t fapl)
 
     PASSED();
 
-/*-------------------------------------------------------------------------
+
+   /*-------------------------------------------------------------------------
     * Test H5Iget_name with several nested mounted files
     *-------------------------------------------------------------------------
     */
@@ -1770,45 +1773,45 @@ test_main(hid_t file_id, hid_t fapl)
     if((group3_id = H5Gcreate2(file_id, "/g25/g1/g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Close */
-    H5Gclose(group_id);
-    H5Gclose(group2_id);
-    H5Gclose(group3_id);
+    if(H5Gclose(group_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group2_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group3_id) < 0) FAIL_STACK_ERROR
 
     /* Create second file and group "/g26/g3/g4" in it */
-    file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    if((file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
     if((group_id = H5Gcreate2(file1_id, "/g26", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if((group2_id = H5Gcreate2(file1_id, "/g26/g3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if((group3_id = H5Gcreate2(file1_id, "/g26/g3/g4", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Close */
-    H5Gclose(group_id);
-    H5Gclose(group2_id);
-    H5Gclose(group3_id);
+    if(H5Gclose(group_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group2_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group3_id) < 0) FAIL_STACK_ERROR
 
     /* Create third file and group "/g27/g5/g6" in it */
-    file2_id = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    if((file2_id = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
     if((group_id = H5Gcreate2(file2_id, "/g27", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if((group2_id = H5Gcreate2(file2_id, "/g27/g5", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if((group3_id = H5Gcreate2(file2_id, "/g27/g5/g6", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Close */
-    H5Gclose(group_id);
-    H5Gclose(group2_id);
-    H5Gclose(group3_id);
+    if(H5Gclose(group_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group2_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group3_id) < 0) FAIL_STACK_ERROR
 
     /* Create fourth file and group "/g28/g5/g6" in it */
-    file3_id = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    if((file3_id = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
     if((group_id = H5Gcreate2(file3_id, "/g28", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if((group2_id = H5Gcreate2(file3_id, "/g28/g7", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if((group3_id = H5Gcreate2(file3_id, "/g28/g7/g8", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Close */
-    H5Gclose(group_id);
-    H5Gclose(group2_id);
-    H5Gclose(group3_id);
+    if(H5Gclose(group_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group2_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group3_id) < 0) FAIL_STACK_ERROR
 
     /* Access group which will be hidden in the first file */
     if((group_id = H5Gopen2(file_id, "/g25/g1/g2", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
@@ -1817,7 +1820,7 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group_id, "/g25/g1/g2", "/g25/g1/g2") < 0) TEST_ERROR
 
     /* Mount second file under "/g25/g1" in the first file */
-    if(H5Fmount(file_id, "/g25/g1", file1_id, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Fmount(file_id, "/g25/g1", file1_id, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group_id, "", "/g25/g1/g2") < 0) TEST_ERROR
@@ -1829,7 +1832,7 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group2_id, "/g25/g1/g26/g3/g4", "/g25/g1/g26/g3/g4") < 0) TEST_ERROR
 
     /* Mount third file under "/g25/g1/g26/g3" in the first file */
-    if(H5Fmount(file_id, "/g25/g1/g26/g3", file2_id, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Fmount(file_id, "/g25/g1/g26/g3", file2_id, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group2_id, "", "/g25/g1/g26/g3/g4") < 0) TEST_ERROR
@@ -1841,7 +1844,7 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group3_id, "/g25/g1/g26/g3/g27/g5/g6", "/g25/g1/g26/g3/g27/g5/g6") < 0) TEST_ERROR
 
     /* Mount fourth file under "/g25/g1/g26/g3/g27/g5" in the first file */
-    if(H5Fmount(file_id, "/g25/g1/g26/g3/g27/g5", file3_id, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Fmount(file_id, "/g25/g1/g26/g3/g27/g5", file3_id, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group3_id, "", "/g25/g1/g26/g3/g27/g5/g6") < 0) TEST_ERROR
@@ -1852,7 +1855,7 @@ test_main(hid_t file_id, hid_t fapl)
     /* Verify */
     if(check_name(group4_id, "/g25/g1/g26/g3/g27/g5/g28/g7/g8", "/g25/g1/g26/g3/g27/g5/g28/g7/g8") < 0) TEST_ERROR
 
-    if(H5Funmount(file_id, "/g25/g1/g26/g3/g27/g5") < 0) TEST_ERROR
+    if(H5Funmount(file_id, "/g25/g1/g26/g3/g27/g5") < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group4_id, "/g28/g7/g8", "") < 0) TEST_ERROR
@@ -1861,10 +1864,10 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group_id, "", "/g25/g1/g2") < 0) TEST_ERROR
 
     /* Close */
-    H5Gclose(group4_id);
-    H5Fclose(file3_id);
+    if(H5Gclose(group4_id) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file3_id) < 0) FAIL_STACK_ERROR
 
-    if(H5Funmount(file_id, "/g25/g1/g26/g3") < 0) TEST_ERROR
+    if(H5Funmount(file_id, "/g25/g1/g26/g3") < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group3_id, "/g27/g5/g6", "") < 0) TEST_ERROR
@@ -1872,20 +1875,19 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group_id, "", "/g25/g1/g2") < 0) TEST_ERROR
 
     /* Close */
-    H5Gclose(group3_id);
-    H5Fclose(file2_id);
+    if(H5Gclose(group3_id) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file2_id) < 0) FAIL_STACK_ERROR
 
-    if(H5Funmount(file_id, "/g25/g1") < 0) TEST_ERROR
+    if(H5Funmount(file_id, "/g25/g1") < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group2_id, "/g26/g3/g4", "") < 0) TEST_ERROR
     if(check_name(group_id, "/g25/g1/g2", "/g25/g1/g2") < 0) TEST_ERROR
 
     /* Close */
-    H5Gclose(group_id);
-    H5Gclose(group2_id);
-    H5Fclose(file1_id);
-
+    if(H5Gclose(group_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group2_id) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file1_id) < 0) FAIL_STACK_ERROR
 
     PASSED();
 
@@ -2143,12 +2145,12 @@ test_main(hid_t file_id, hid_t fapl)
     if((group3_id = H5Gcreate2(file_id, "/g36/g1/g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Close */
-    H5Gclose(group_id);
-    H5Gclose(group2_id);
-    H5Gclose(group3_id);
+    if(H5Gclose(group_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group2_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group3_id) < 0) FAIL_STACK_ERROR
 
     /* Create second file and group "/g37/g4" in it */
-    file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    if((file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
     if((group_id = H5Gcreate2(file1_id, "/g37", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if((group2_id = H5Gcreate2(file1_id, "/g37/g4", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
@@ -2156,7 +2158,7 @@ test_main(hid_t file_id, hid_t fapl)
     if((group4_id = H5Gcreate2(file1_id, "/g37/g4/g5b", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Mount second file under "/g36/g1" in the first file */
-    if(H5Fmount(file_id, "/g36/g1", file1_id, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Fmount(file_id, "/g36/g1", file1_id, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Open group in mounted file */
     if((group5_id = H5Gopen2(file_id, "/g36/g1/g37/", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
@@ -2171,14 +2173,14 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group6_id, "/g36/g1/g37/g4/g5a", "/g36/g1/g37/g4/g5a") < 0) TEST_ERROR
 
     /* Delete end group in mounted file, using relative paths */
-    if(H5Gunlink(group5_id, "g4/g5a") < 0) TEST_ERROR
+    if(H5Ldelete(group5_id, "g4/g5a", H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group6_id, "", "") < 0) TEST_ERROR
     if(check_name(group3_id, "", "") < 0) TEST_ERROR
 
     /* Close deleted group */
-    H5Gclose(group6_id);
+    if(H5Gclose(group6_id) < 0) FAIL_STACK_ERROR
 
     /* Open groups to delete in mounted file */
     if((group6_id = H5Gopen2(file_id, "/g36/g1/g37/g4", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
@@ -2189,7 +2191,7 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group7_id, "/g36/g1/g37/g4/g5b", "/g36/g1/g37/g4/g5b") < 0) TEST_ERROR
 
     /* Delete middle group in mounted file, using relative paths */
-    if(H5Gunlink(group5_id, "g4") < 0) TEST_ERROR
+    if(H5Ldelete(group5_id, "g4", H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(group6_id, "", "") < 0) TEST_ERROR
@@ -2198,23 +2200,22 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(group4_id, "", "") < 0) TEST_ERROR
 
     /* Close deleted groups */
-    H5Gclose(group6_id);
-    H5Gclose(group7_id);
+    if(H5Gclose(group6_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group7_id) < 0) FAIL_STACK_ERROR
 
     /* Close group in mounted file */
-    H5Gclose(group5_id);
+    if(H5Gclose(group5_id) < 0) FAIL_STACK_ERROR
 
-    if(H5Funmount(file_id, "/g36/g1") < 0) TEST_ERROR
+    if(H5Funmount(file_id, "/g36/g1") < 0) FAIL_STACK_ERROR
 
     /* Close */
-    H5Gclose(group_id);
-    H5Gclose(group2_id);
-    H5Gclose(group3_id);
-    H5Gclose(group4_id);
-    H5Fclose(file1_id);
+    if(H5Gclose(group_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group2_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group3_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group4_id) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file1_id) < 0) FAIL_STACK_ERROR
 
     PASSED();
-
 
 
 /*-------------------------------------------------------------------------
@@ -2225,7 +2226,7 @@ test_main(hid_t file_id, hid_t fapl)
     TESTING("H5Iget_name with mounting already mounted files");
 
     /* Create file and group "/g38/g1/g2" in it */
-    file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    if((file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
     if((group_id = H5Gcreate2(file1_id, "/g38", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if((group2_id = H5Gcreate2(file1_id, "/g38/g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
@@ -2237,7 +2238,7 @@ test_main(hid_t file_id, hid_t fapl)
     H5Gclose(group3_id);
 
     /* Create second file and group "/g39/g1/g2" in it */
-    file2_id = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    if((file2_id = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
     if((group_id = H5Gcreate2(file2_id, "/g39", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if((group2_id = H5Gcreate2(file2_id, "/g39/g3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
@@ -2249,7 +2250,7 @@ test_main(hid_t file_id, hid_t fapl)
     H5Gclose(group3_id);
 
     /* Create third file and group "/g40/g5/g6" in it */
-    file3_id = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    if((file3_id = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
     if((group_id = H5Gcreate2(file3_id, "/g40", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if((group2_id = H5Gcreate2(file3_id, "/g40/g5", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
@@ -2607,7 +2608,7 @@ test_obj_ref(hid_t fapl)
     /* Now we try unlinking dataset2 from the file and searching for it.  It shouldn't be found */
     if((dataset2 = H5Rdereference(dataset, H5R_OBJECT, &wbuf[1])) < 0)
         FAIL_STACK_ERROR
-    if(H5Gunlink(fid1, "/Group1/Dataset2") < 0)
+    if(H5Ldelete(fid1, "/Group1/Dataset2", H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
  
     TESTING("getting path to dataset that has been unlinked"); 

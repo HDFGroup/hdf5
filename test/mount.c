@@ -689,7 +689,7 @@ test_unlink(hid_t fapl)
     } /* end if */
 
     /* Unlink the mount point */
-    if(H5Gunlink(file1, "/mnt_unlink") < 0) FAIL_STACK_ERROR
+    if(H5Ldelete(file1, "/mnt_unlink", H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /*
      * We should still be able to get to "/file2" of file2 by starting at

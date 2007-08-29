@@ -1254,8 +1254,8 @@ test_file_freespace(void)
     /* Delete datasets in file */
     for(u = 0; u < 10; u++) {
         sprintf(name, "Dataset %u", u);
-        ret = H5Gunlink(file, name);
-        CHECK(ret, FAIL, "H5Gunlink");
+        ret = H5Ldelete(file, name, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Ldelete");
     } /* end for */
 
     /* Check that there is the right amount of free space in the file */
