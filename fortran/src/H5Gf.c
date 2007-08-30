@@ -581,7 +581,7 @@ DONE:
 
 int_f
 nh5gset_comment_c(hid_t_f *loc_id, _fcd name, int_f *namelen, _fcd comment,
-    int_f*commentlen)
+    int_f *commentlen)
 {
     char *c_name = NULL, *c_comment = NULL;
     int ret_value = -1;
@@ -589,7 +589,7 @@ nh5gset_comment_c(hid_t_f *loc_id, _fcd name, int_f *namelen, _fcd comment,
     /*
      *  Convert Fortran name to C name
      */
-    if(NULL == (c_name = (char *)HD5f2cstring(name, c_namelen)))
+    if(NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
         goto DONE;
     if(NULL == (c_comment = (char *)HD5f2cstring(comment, (size_t)*commentlen)))
         goto DONE;
