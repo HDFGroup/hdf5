@@ -659,7 +659,7 @@ H5G_obj_iterate(hid_t loc_id, const char *group_name,
      */
     if(H5G_loc(loc_id, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if((grp = H5G_open_name(&loc, group_name, H5P_DEFAULT, dxpl_id)) < 0)
+    if(NULL == (grp = H5G_open_name(&loc, group_name, H5P_DEFAULT, dxpl_id)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
     if((gid = H5I_register(H5I_GROUP, grp)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
