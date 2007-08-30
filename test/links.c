@@ -1493,6 +1493,11 @@ test_compat(hid_t fapl, hbool_t new_format)
     if((group1_id = H5Gcreate2(file_id, "group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if((group2_id = H5Gcreate2(file_id, "group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
+    /* Test H5Gset and get comment */
+    if(H5Gset_comment(file_id, "group1", "comment") < 0) FAIL_STACK_ERROR
+    if(H5Gget_comment(file_id, "group1", sizeof(linkval), linkval) < 0) FAIL_STACK_ERROR
+    if(HDstrcmp(linkval, "comment")) TEST_ERROR
+
     /* Create links using H5Glink and H5Glink2 */
     if(H5Glink(file_id, H5G_LINK_HARD, "group2", "group1/link_to_group2") < 0) FAIL_STACK_ERROR
     if(H5Glink2(file_id, "group1", H5G_LINK_HARD, group2_id, "link_to_group1") < 0) FAIL_STACK_ERROR
@@ -3400,42 +3405,43 @@ external_link_closing(hid_t fapl, hbool_t new_format)
         "elink/elink/elink/group1_moved", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Open file 4 so we can do some fancy things */
-    if((fid4 = H5Fopen(filename4, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
+    if((fid4 = H5Fopen(filename4, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
     if(H5Lmove(fid1, "elink/elink/elink/type1", fid4,
-        "type1_moved", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+        "type1_moved", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     if(H5Lmove(fid4, "dataset1", fid1,
-        "elink/elink/elink/dataset1_moved", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+        "elink/elink/elink/dataset1_moved", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Close file 4 again */
-    if(H5Fclose(fid4) < 0) TEST_ERROR
+    if(H5Fclose(fid4) < 0) FAIL_STACK_ERROR
 
     /* Test copy (as of this test, it uses the same code as move) */
     if(H5Lcopy(fid1, "elink/elink/elink", fid1,
-      "elink/elink/elink_copied", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+      "elink/elink/elink_copied", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     if(H5Lcopy(fid1, "elink/elink/elink", fid1,
-      "elink/elink/elink/elink_copied2", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+      "elink/elink/elink/elink_copied2", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Test H5Gset and get comment */
-    if(H5Gset_comment(fid1, "elink/elink/elink/group1_moved", "comment") < 0) TEST_ERROR
-    if(H5Gget_comment(fid1, "elink/elink/elink/group1_moved", sizeof(buf), buf) < 0) TEST_ERROR
+    if(H5Oset_comment(fid1, "elink/elink/elink/group1_moved", "comment", H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Oget_comment(fid1, "elink/elink/elink/group1_moved", buf, sizeof(buf), H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(HDstrcmp(buf, "comment")) TEST_ERROR
 
     /* Test H5*open */
     if((gid = H5Gopen2(fid1, "elink/elink/elink/group1_moved", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-    if((tid = H5Topen(fid1, "elink/elink/elink/type1_moved")) < 0) TEST_ERROR
-    if((did = H5Dopen(fid1, "elink/elink/elink/dataset1_moved")) < 0) TEST_ERROR
+    if((tid = H5Topen(fid1, "elink/elink/elink/type1_moved")) < 0) FAIL_STACK_ERROR
+    if((did = H5Dopen(fid1, "elink/elink/elink/dataset1_moved")) < 0) FAIL_STACK_ERROR
     /* Close objects */
-    if(H5Gclose(gid) < 0) TEST_ERROR
-    if(H5Tclose(tid) < 0) TEST_ERROR
-    if(H5Dclose(did) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
+    if(H5Tclose(tid) < 0) FAIL_STACK_ERROR
+    if(H5Dclose(did) < 0) FAIL_STACK_ERROR
 
     /* Test H5*open2 */
     if((gid = H5Gopen2(fid1, "elink/elink/elink/group1_moved", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-    if((tid = H5Topen2(fid1, "elink/elink/elink/type1_moved", H5P_DEFAULT)) < 0) TEST_ERROR
-    if((did = H5Dopen2(fid1, "elink/elink/elink/dataset1_moved", H5P_DEFAULT)) < 0) TEST_ERROR
+    if((tid = H5Topen2(fid1, "elink/elink/elink/type1_moved", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((did = H5Dopen2(fid1, "elink/elink/elink/dataset1_moved", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     /* Close objects */
-    if(H5Gclose(gid) < 0) TEST_ERROR
-    if(H5Tclose(tid) < 0) TEST_ERROR
-    if(H5Dclose(did) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
+    if(H5Tclose(tid) < 0) FAIL_STACK_ERROR
+    if(H5Dclose(did) < 0) FAIL_STACK_ERROR
 
     /* Test H5Oopen */
     if((did = H5Oopen(fid1, "elink/elink/elink/dataset1_moved", H5P_DEFAULT)) < 0) TEST_ERROR

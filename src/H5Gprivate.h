@@ -200,6 +200,10 @@ H5_DLL herr_t H5G_loc_find_by_idx(H5G_loc_t *loc, const char *group_name,
 H5_DLL herr_t H5G_loc_info(H5G_loc_t *loc, const char *name,
     hbool_t want_ih_info, H5O_info_t *oinfo/*out*/, hid_t lapl_id,
     hid_t dxpl_id);
+H5_DLL herr_t H5G_loc_set_comment(H5G_loc_t *loc, const char *name,
+    const char *comment, hid_t lapl_id, hid_t dxpl_id);
+H5_DLL ssize_t H5G_loc_get_comment(H5G_loc_t *loc, const char *name,
+    char *comment/*out*/, size_t bufsize, hid_t lapl_id, hid_t dxpl_id);
 H5_DLL herr_t H5G_loc_reset(H5G_loc_t *loc);
 H5_DLL herr_t H5G_loc_free(H5G_loc_t *loc);
 

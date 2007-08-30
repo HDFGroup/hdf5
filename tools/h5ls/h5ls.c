@@ -1894,40 +1894,42 @@ list (hid_t group, const char *name, void *_iter)
 
     /* Show detailed information about the object, beginning with information
      * which is common to all objects. */
-    if (verbose_g>0 && H5G_LINK!=sb.type && H5G_UDLINK!=sb.type) {
-        if (sb.type>=0)
+    if(verbose_g > 0 && H5G_LINK != sb.type && H5G_UDLINK != sb.type) {
+        if(sb.type >= 0)
             H5Aiterate(obj, NULL, list_attr, NULL);
         printf("    %-10s %lu:"H5_PRINTF_HADDR_FMT"\n", "Location:", sb.fileno[0], objno);
         printf("    %-10s %u\n", "Links:", sb.nlink);
-        if (sb.mtime>0) {
-            if (simple_output_g) tm=gmtime(&(sb.mtime));
-            else tm=localtime(&(sb.mtime));
-            if (tm) {
-                strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
+        if(sb.mtime > 0) {
+            if(simple_output_g)
+                tm = HDgmtime(&(sb.mtime));
+            else
+                tm = HDlocaltime(&(sb.mtime));
+            if(tm) {
+                HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
                 printf("    %-10s %s\n", "Modified:", buf);
-            }
-        }
+            } /* end if */
+        } /* end if */
         comment[0] = '\0';
-        H5Gget_comment(group, name, sizeof(comment), comment);
-        strcpy(comment+sizeof(comment)-4, "...");
-        if (comment[0]) {
+        H5Oget_comment(group, name, comment, sizeof(comment), H5P_DEFAULT);
+        HDstrcpy(comment + sizeof(comment) - 4, "...");
+        if(comment[0]) {
             printf("    %-10s \"", "Comment:");
             display_string(stdout, comment, FALSE);
             puts("\"");
-        }
-    }
-    if (sb.type>=0 && dispatch_g[sb.type].list2) {
+        } /* end if */
+    } /* end if */
+    if(sb.type>=0 && dispatch_g[sb.type].list2)
         (dispatch_g[sb.type].list2)(obj, fullname);
-    }
 
-    /* Close the object. */
 done:
-    if (sb.type>=0 && obj>=0 && dispatch_g[sb.type].close) {
+    /* Close the object. */
+    if(sb.type >= 0 && obj >= 0 && dispatch_g[sb.type].close)
         (dispatch_g[sb.type].close)(obj);
-    }
-    if (fullname) free(fullname);
+
+    if (fullname)
+        free(fullname);
     return 0;
-}
+} /* end list() */
 
 
 /*-------------------------------------------------------------------------

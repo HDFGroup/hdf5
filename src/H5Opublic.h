@@ -156,6 +156,10 @@ H5_DLL herr_t H5Oincr_refcount(hid_t object_id);
 H5_DLL herr_t H5Odecr_refcount(hid_t object_id);
 H5_DLL herr_t H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id);
+H5_DLL herr_t H5Oset_comment(hid_t loc_id, const char *name,
+    const char *comment, hid_t lapl_id);
+H5_DLL ssize_t H5Oget_comment(hid_t loc_id, const char *name, char *comment,
+    size_t bufsize, hid_t lapl_id);
 H5_DLL herr_t H5Oclose(hid_t object_id);
 
 #ifdef __cplusplus

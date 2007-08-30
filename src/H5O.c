@@ -488,6 +488,7 @@ H5Oget_info(hid_t loc_id, const char *name, H5O_info_t *oinfo, hid_t lapl_id)
     /* Retrieve the object's information */
     if(H5G_loc_info(&loc, name, TRUE, oinfo/*out*/, lapl_id, H5AC_ind_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oget_info() */
@@ -560,6 +561,97 @@ done:
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oget_info_by_idx() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Oset_comment
+ *
+ * Purpose:     Gives the specified object a comment.  The COMMENT string
+ *		should be a null terminated string.  An object can have only
+ *		one comment at a time.  Passing NULL for the COMMENT argument
+ *		will remove the comment property from the object.
+ *
+ * Note:	Deprecated in favor of using attributes on objects
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		August 30 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Oset_comment(hid_t loc_id, const char *name, const char *comment,
+    hid_t lapl_id)
+{
+    H5G_loc_t	loc;                    /* Location of group */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(H5Oset_comment, FAIL)
+
+    /* Check args */
+    if(H5G_loc(loc_id, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(!name || !*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+    if(H5P_DEFAULT == lapl_id)
+        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* (Re)set the object's comment */
+    if(H5G_loc_set_comment(&loc, name, comment, lapl_id, H5AC_ind_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Oset_comment() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Oget_comment
+ *
+ * Purpose:	Retrieve comment for an object.
+ *
+ * Return:	Success:	Number of bytes in the comment including the
+ *				null terminator.  Zero if the object has no
+ *				comment.
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		August 30 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+ssize_t
+H5Oget_comment(hid_t loc_id, const char *name, char *comment, size_t bufsize,
+    hid_t lapl_id)
+{
+    H5G_loc_t	loc;                    /* Location of group */
+    ssize_t     ret_value;              /* Return value */
+
+    FUNC_ENTER_API(H5Oget_comment, FAIL)
+
+    /* Check args */
+    if(H5G_loc(loc_id, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(!name || !*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+    if(H5P_DEFAULT == lapl_id)
+        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Retrieve the object's comment */
+    if((ret_value = H5G_loc_get_comment(&loc, name, comment/*out*/, bufsize, lapl_id, H5AC_ind_dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Oget_comment() */
 
 
 /*-------------------------------------------------------------------------

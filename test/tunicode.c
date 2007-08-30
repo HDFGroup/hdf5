@@ -397,10 +397,10 @@ void test_objnames(hid_t fid, const char* string)
   /* Set a comment on the group to test that we can access the group
    * Also test that UTF-8 comments can be read.
    */
-  ret = H5Gset_comment(fid, string, string);
-  CHECK(ret, FAIL, "H5Gset_comment");
-  ret = H5Gget_comment(fid, string, (size_t)MAX_STRING_LENGTH, read_buf);
-  CHECK(ret, FAIL, "H5Gget_comment");
+  ret = H5Oset_comment(fid, string, string, H5P_DEFAULT);
+  CHECK(ret, FAIL, "H5Oset_comment");
+  ret = H5Oget_comment(fid, string, read_buf, (size_t)MAX_STRING_LENGTH, H5P_DEFAULT);
+  CHECK(ret, FAIL, "H5Oget_comment");
 
   ret = H5Gclose(grp_id);
   CHECK(ret, FAIL, "H5Gclose");

@@ -2291,21 +2291,21 @@ dump_oid(hid_t oid)
  *
  *-------------------------------------------------------------------------
  */
-
-static void dump_comment(hid_t obj_id)
+static void
+dump_comment(hid_t obj_id)
 {
     char comment[50];
 
     comment[0] = '\0';
-    H5Gget_comment(obj_id, ".", sizeof(comment), comment);
+    H5Oget_comment(obj_id, ".", comment, sizeof(comment), H5P_DEFAULT);
 
-    if (comment[0]) {
+    if(comment[0]) {
         indentation(indent);
         printf("COMMENT \"%s\"\n", comment);
-    }
-}
+    } /* end if */
+} /* end dump_comment() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:    dump_fill_value
  *

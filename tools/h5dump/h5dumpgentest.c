@@ -1643,12 +1643,12 @@ static void gent_objref(void)
                *tbuf;       /* temp. buffer read from disk */
     uint32_t   *tu32;      /* Temporary pointer to uint32 data */
     int        i;          /* counting variables */
-    const char *write_comment="Foo!"; /* Comments for group */
+    const char *write_comment = "Foo!"; /* Comments for group */
 
     /* Allocate write & read buffers */
-    wbuf=malloc(sizeof(hobj_ref_t)*SPACE1_DIM1);
-    rbuf=malloc(sizeof(hobj_ref_t)*SPACE1_DIM1);
-    tbuf=malloc(sizeof(hobj_ref_t)*SPACE1_DIM1);
+    wbuf = malloc(sizeof(hobj_ref_t) * SPACE1_DIM1);
+    rbuf = malloc(sizeof(hobj_ref_t) * SPACE1_DIM1);
+    tbuf = malloc(sizeof(hobj_ref_t) * SPACE1_DIM1);
 
     /* Create file */
     fid1 = H5Fcreate(FILE16, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -1660,38 +1660,38 @@ static void gent_objref(void)
     group = H5Gcreate2(fid1, "Group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Set group's comment */
-    H5Gset_comment(group,".",write_comment);
+    H5Oset_comment(group, ".", write_comment, H5P_DEFAULT);
 
     /* Create a dataset (inside Group1) */
-    dataset=H5Dcreate(group,"Dataset1",H5T_STD_U32BE,sid1,H5P_DEFAULT);
+    dataset = H5Dcreate(group, "Dataset1", H5T_STD_U32BE, sid1, H5P_DEFAULT);
 
-    for(tu32=(uint32_t *)((void*)wbuf),i=0; i<SPACE1_DIM1; i++)
-        *tu32++=i*3;
+    for(tu32 = (uint32_t *)((void*)wbuf), i = 0; i < SPACE1_DIM1; i++)
+        *tu32++ = i * 3;
 
     /* Write selection to disk */
-    H5Dwrite(dataset,H5T_NATIVE_UINT,H5S_ALL,H5S_ALL,H5P_DEFAULT,wbuf);
+    H5Dwrite(dataset, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf);
 
     /* Close Dataset */
     H5Dclose(dataset);
 
     /* Create another dataset (inside Group1) */
-    dataset=H5Dcreate(group,"Dataset2",H5T_STD_U8BE,sid1,H5P_DEFAULT);
+    dataset = H5Dcreate(group, "Dataset2", H5T_STD_U8BE, sid1, H5P_DEFAULT);
 
     /* Close Dataset */
     H5Dclose(dataset);
 
     /* Create a datatype to refer to */
-    tid1 = H5Tcreate (H5T_COMPOUND, sizeof(s1_t));
+    tid1 = H5Tcreate(H5T_COMPOUND, sizeof(s1_t));
 
     /* Insert fields */
-    H5Tinsert (tid1, "a", HOFFSET(s1_t,a), H5T_STD_I32BE);
+    H5Tinsert(tid1, "a", HOFFSET(s1_t,a), H5T_STD_I32BE);
 
-    H5Tinsert (tid1, "b", HOFFSET(s1_t,b), H5T_IEEE_F32BE);
+    H5Tinsert(tid1, "b", HOFFSET(s1_t,b), H5T_IEEE_F32BE);
 
-    H5Tinsert (tid1, "c", HOFFSET(s1_t,c), H5T_IEEE_F32BE);
+    H5Tinsert(tid1, "c", HOFFSET(s1_t,c), H5T_IEEE_F32BE);
 
     /* Save datatype for later */
-    H5Tcommit (group, "Datatype1", tid1);
+    H5Tcommit(group, "Datatype1", tid1);
 
     /* Close datatype */
     H5Tclose(tid1);
@@ -1700,22 +1700,22 @@ static void gent_objref(void)
     H5Gclose(group);
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset3",H5T_STD_REF_OBJ,sid1,H5P_DEFAULT);
+    dataset = H5Dcreate(fid1, "Dataset3", H5T_STD_REF_OBJ, sid1, H5P_DEFAULT);
 
     /* Create reference to dataset */
-    H5Rcreate(&wbuf[0],fid1,"/Group1/Dataset1",H5R_OBJECT,-1);
+    H5Rcreate(&wbuf[0], fid1, "/Group1/Dataset1", H5R_OBJECT, -1);
 
     /* Create reference to dataset */
-    H5Rcreate(&wbuf[1],fid1,"/Group1/Dataset2",H5R_OBJECT,-1);
+    H5Rcreate(&wbuf[1], fid1, "/Group1/Dataset2", H5R_OBJECT, -1);
 
     /* Create reference to group */
-    H5Rcreate(&wbuf[2],fid1,"/Group1",H5R_OBJECT,-1);
+    H5Rcreate(&wbuf[2], fid1, "/Group1", H5R_OBJECT, -1);
 
     /* Create reference to named datatype */
-    H5Rcreate(&wbuf[3],fid1,"/Group1/Datatype1",H5R_OBJECT,-1);
+    H5Rcreate(&wbuf[3], fid1, "/Group1/Datatype1", H5R_OBJECT, -1);
 
     /* Write selection to disk */
-    H5Dwrite(dataset,H5T_STD_REF_OBJ,H5S_ALL,H5S_ALL,H5P_DEFAULT,wbuf);
+    H5Dwrite(dataset, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf);
 
     /* Close disk dataspace */
     H5Sclose(sid1);
@@ -1730,7 +1730,6 @@ static void gent_objref(void)
     free(wbuf);
     free(rbuf);
     free(tbuf);
-
 }
 
 static void gent_datareg(void)
@@ -2870,7 +2869,8 @@ static void gent_empty(void)
     assert(ret>=0);
 }
 
-static void gent_group_comments(void)
+static void
+gent_group_comments(void)
 {
     hid_t fid, group;
 
@@ -2878,51 +2878,51 @@ static void gent_group_comments(void)
 
     /* / */
     group = H5Gcreate2(fid, "/g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Gset_comment(group, "/g1", "Comment for group /g1");
+    H5Oset_comment(group, "/g1", "Comment for group /g1", H5P_DEFAULT);
     H5Gclose(group);
     group = H5Gcreate2(fid, "/g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Gset_comment(group, "/g2", "Comment for group /g2");
+    H5Oset_comment(group, "/g2", "Comment for group /g2", H5P_DEFAULT);
     H5Gclose(group);
     group = H5Gcreate2(fid, "/g3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Gset_comment(group, "/g3", "Comment for group /g3");
+    H5Oset_comment(group, "/g3", "Comment for group /g3", H5P_DEFAULT);
     H5Gclose(group);
 
     /* /g1 */
     group = H5Gcreate2(fid, "/g1/g1.1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Gset_comment(group, "/g1/g1.1", "Comment for group /g1/g1.1");
+    H5Oset_comment(group, "/g1/g1.1", "Comment for group /g1/g1.1", H5P_DEFAULT);
     H5Gclose(group);
     group = H5Gcreate2(fid, "/g1/g1.2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Gset_comment(group, "/g1/g1.2", "Comment for group /g1/g1.2");
+    H5Oset_comment(group, "/g1/g1.2", "Comment for group /g1/g1.2", H5P_DEFAULT);
     H5Gclose(group);
 
     /* /g2 */
     group = H5Gcreate2(fid, "/g2/g2.1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Gset_comment(group, "/g2/g2.1", "Comment for group /g2/g2.1");
+    H5Oset_comment(group, "/g2/g2.1", "Comment for group /g2/g2.1", H5P_DEFAULT);
     H5Gclose(group);
 
     /* /g3 */
     group = H5Gcreate2(fid, "/g3/g3.1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Gset_comment(group, "/g3/g3.1", "Comment for group /g3/g3.1");
+    H5Oset_comment(group, "/g3/g3.1", "Comment for group /g3/g3.1", H5P_DEFAULT);
     H5Gclose(group);
     group = H5Gcreate2(fid, "/g3/g3.2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Gset_comment(group, "/g3/g3.2", "Comment for group /g3/g3.2");
+    H5Oset_comment(group, "/g3/g3.2", "Comment for group /g3/g3.2", H5P_DEFAULT);
     H5Gclose(group);
     group = H5Gcreate2(fid, "/g3/g3.3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Gset_comment(group, "/g3/g3.3", "Comment for group /g3/g3.3");
+    H5Oset_comment(group, "/g3/g3.3", "Comment for group /g3/g3.3", H5P_DEFAULT);
     H5Gclose(group);
     group = H5Gcreate2(fid, "/g3/g3.4", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Gset_comment(group, "/g3/g3.4", "Comment for group /g3/g3.4");
+    H5Oset_comment(group, "/g3/g3.4", "Comment for group /g3/g3.4", H5P_DEFAULT);
     H5Gclose(group);
 
     /* /g2/g2.1 */
     group = H5Gcreate2(fid, "/g2/g2.1/g2.1.1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Gset_comment(group, "/g2/g2.1/g2.1.1", "Comment for group /g2/g2.1/g2.1.1");
+    H5Oset_comment(group, "/g2/g2.1/g2.1.1", "Comment for group /g2/g2.1/g2.1.1", H5P_DEFAULT);
     H5Gclose(group);
     group = H5Gcreate2(fid, "/g2/g2.1/g2.1.2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Gset_comment(group, "/g2/g2.1/g2.1.2", "Comment for group /g2/g2.1/g2.1.2");
+    H5Oset_comment(group, "/g2/g2.1/g2.1.2", "Comment for group /g2/g2.1/g2.1.2", H5P_DEFAULT);
     H5Gclose(group);
     group = H5Gcreate2(fid, "/g2/g2.1/g2.1.3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Gset_comment(group, "/g2/g2.1/g2.1.3", "Comment for group /g2/g2.1/g2.1.3");
+    H5Oset_comment(group, "/g2/g2.1/g2.1.3", "Comment for group /g2/g2.1/g2.1.3", H5P_DEFAULT);
     H5Gclose(group);
 
     H5Fclose(fid);
@@ -4654,8 +4654,8 @@ static void gent_filters(void)
  ret=make_dset(fid,"compact",sid,H5T_NATIVE_INT,dcpl,buf1);
  assert(ret>=0);
 
- ret=H5Gset_comment(fid,"compact", "This is a dataset with compact storage");
- assert(ret>=0);
+ ret = H5Oset_comment(fid, "compact", "This is a dataset with compact storage", H5P_DEFAULT);
+ assert(ret >= 0);
 
  ret=H5Pset_layout(dcpl, H5D_CONTIGUOUS);
  assert(ret>=0);
@@ -4663,8 +4663,8 @@ static void gent_filters(void)
  ret=make_dset(fid,"contiguous",sid,H5T_NATIVE_INT,dcpl,buf1);
  assert(ret>=0);
 
- ret=H5Gset_comment(fid,"contiguous", "This is a dataset with contiguous storage");
- assert(ret>=0);
+ ret = H5Oset_comment(fid, "contiguous", "This is a dataset with contiguous storage", H5P_DEFAULT);
+ assert(ret >= 0);
 
  ret=H5Pset_layout(dcpl, H5D_CHUNKED);
  assert(ret>=0);
@@ -4675,8 +4675,8 @@ static void gent_filters(void)
  ret=make_dset(fid,"chunked",sid,H5T_NATIVE_INT,dcpl,buf1);
  assert(ret>=0);
 
- ret=H5Gset_comment(fid,"chunked", "This is a dataset with chunked storage");
- assert(ret>=0);
+ ret = H5Oset_comment(fid, "chunked", "This is a dataset with chunked storage", H5P_DEFAULT);
+ assert(ret >= 0);
 
 /*-------------------------------------------------------------------------
  * make several dataset with filters
@@ -4906,8 +4906,8 @@ static void gent_filters(void)
  ret=H5Tcommit(fid, "mytype", tid);
  assert(ret>=0);
 
- ret=H5Gset_comment(fid,"mytype", "This is a commited datatype");
- assert(ret>=0);
+ ret = H5Oset_comment(fid, "mytype", "This is a commited datatype", H5P_DEFAULT);
+ assert(ret >= 0);
 
  ret=H5Tclose(tid);
  assert(ret>=0);

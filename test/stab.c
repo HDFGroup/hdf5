@@ -111,7 +111,7 @@ test_misc(hid_t fapl, hbool_t new_format)
     if((g1 = H5Gcreate2(fid, "test_1a", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if((g2 = H5Gcreate2(g1, "sub_1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if((g3 = H5Gcreate2(fid, "test_1b", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Gset_comment(g3, ".", "hello world") < 0) TEST_ERROR
+    if(H5Oset_comment(g3, ".", "hello world", H5P_DEFAULT) < 0) TEST_ERROR
     if(H5Gclose(g1) < 0) TEST_ERROR
     if(H5Gclose(g2) < 0) TEST_ERROR
     if(H5Gclose(g3) < 0) TEST_ERROR
@@ -120,7 +120,7 @@ test_misc(hid_t fapl, hbool_t new_format)
     if((g1 = H5Gopen2(fid, "/test_1a", H5P_DEFAULT)) < 0) TEST_ERROR
     if((g2 = H5Gopen2(fid, "/test_1a/sub_1", H5P_DEFAULT)) < 0) TEST_ERROR
     if((g3 = H5Gopen2(fid, "/test_1b", H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Gget_comment(g3, "././.", sizeof comment, comment) < 0) TEST_ERROR
+    if(H5Oget_comment(g3, "././.", comment, sizeof comment, H5P_DEFAULT) < 0) TEST_ERROR
     if(HDstrcmp(comment, "hello world")) {
 	H5_FAILED();
 	puts("    Read the wrong comment string from the group.");

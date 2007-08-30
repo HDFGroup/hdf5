@@ -455,10 +455,10 @@ H5std_string CommonFG::getLinkval( const H5std_string& name, size_t size ) const
 //--------------------------------------------------------------------------
 void CommonFG::setComment( const char* name, const char* comment ) const
 {
-   herr_t ret_value = H5Gset_comment( getLocId(), name, comment );
+   herr_t ret_value = H5Oset_comment( getLocId(), name, comment, H5P_DEFAULT );
    if( ret_value < 0 )
    {
-      throwException("setComment", "H5Gset_comment failed");
+      throwException("setComment", "H5Oset_comment failed");
    }
 }
 
@@ -483,10 +483,10 @@ void CommonFG::setComment( const H5std_string& name, const H5std_string& comment
 //--------------------------------------------------------------------------
 void CommonFG::removeComment(const char* name) const
 {
-   herr_t ret_value = H5Gset_comment(getLocId(), name, NULL);
+   herr_t ret_value = H5Oset_comment(getLocId(), name, NULL, H5P_DEFAULT);
    if( ret_value < 0 )
    {
-      throwException("removeComment", "H5Gset_comment failed");
+      throwException("removeComment", "H5Oset_comment failed");
    }
 }
 
@@ -517,23 +517,23 @@ H5std_string CommonFG::getComment (const H5std_string& name) const
 
    // temporary C-string for the object's comment
    char* comment_C = new char[bufsize+1];
-   herr_t ret_value = H5Gget_comment (loc_id, name.c_str(), bufsize, comment_C);
+   herr_t ret_value = H5Oget_comment(loc_id, name.c_str(), comment_C, bufsize, H5P_DEFAULT);
 
    // if the actual length of the comment is longer than the anticipated
-   // value, then call H5Gget_comment again with the correct value
+   // value, then call H5Oget_comment again with the correct value
    if (ret_value > bufsize)
    {
 	bufsize = ret_value;
 	delete []comment_C;
 	comment_C = new char[bufsize+1];
-	ret_value = H5Gget_comment (loc_id, name.c_str(), bufsize, comment_C);
+	ret_value = H5Oget_comment(loc_id, name.c_str(), comment_C, bufsize, H5P_DEFAULT);
    }
 
-   // if H5Gget_comment returns SUCCEED, return the string comment,
+   // if H5Oget_comment returns SUCCEED, return the string comment,
    // otherwise, throw an exception
    if( ret_value < 0 )
    {
-      throwException("getComment", "H5Gget_comment failed");
+      throwException("getComment", "H5Oget_comment failed");
    }
    H5std_string comment = H5std_string(comment_C);
    delete []comment_C;
@@ -555,12 +555,12 @@ H5std_string CommonFG::getComment( const char* name, size_t bufsize ) const
    // temporary C-string for the object's comment
    char* comment_C = new char[bufsize+1];
 
-   herr_t ret_value = H5Gget_comment( getLocId(), name, bufsize, comment_C );
+   herr_t ret_value = H5Oget_comment( getLocId(), name, comment_C, bufsize, H5P_DEFAULT );
 
-   // if H5Gget_comment returns SUCCEED, return the string comment
+   // if H5Oget_comment returns SUCCEED, return the string comment
    if( ret_value < 0 )
    {
-      throwException("getComment", "H5Gget_comment failed");
+      throwException("getComment", "H5Oget_comment failed");
    }
    H5std_string comment = H5std_string(comment_C);
    delete []comment_C;

@@ -580,39 +580,34 @@ DONE:
  *---------------------------------------------------------------------------*/
 
 int_f
-nh5gset_comment_c(hid_t_f *loc_id, _fcd name, int_f *namelen, _fcd comment, int_f*commentlen)
+nh5gset_comment_c(hid_t_f *loc_id, _fcd name, int_f *namelen, _fcd comment,
+    int_f*commentlen)
 {
-  int ret_value = -1;
-  hid_t c_loc_id;
-  char *c_name, *c_comment;
-  size_t c_namelen, c_commentlen;
-  herr_t c_ret_value;
-  /*
-   *  Convert Fortran name to C name
-   */
-  c_namelen = *namelen;
-  c_commentlen =*commentlen;
-  c_name = (char *)HD5f2cstring(name, c_namelen);
-  if(c_name == NULL) return ret_value;
+    char *c_name = NULL, *c_comment = NULL;
+    int ret_value = -1;
 
-  c_comment = (char *)HD5f2cstring(comment, c_commentlen);
-  if(c_comment == NULL) { HDfree (c_name);
-                          return ret_value;
-                        }
-  /*
-   *  Call H5Gset_comment function
-   */
-  c_loc_id = (hid_t)*loc_id;
-  c_ret_value = H5Gset_comment(c_loc_id, c_name, c_comment);
-  if(c_ret_value < 0) goto DONE;
-  ret_value = 0;
+    /*
+     *  Convert Fortran name to C name
+     */
+    if(NULL == (c_name = (char *)HD5f2cstring(name, c_namelen)))
+        goto DONE;
+    if(NULL == (c_comment = (char *)HD5f2cstring(comment, (size_t)*commentlen)))
+        goto DONE;
+
+    /*
+     *  Call H5Gset_comment function
+     */
+    if(H5Oset_comment((hid_t)*loc_id, c_name, c_comment, H5P_DEFAULT) < 0)
+        goto DONE;
+    ret_value = 0;
 
 DONE:
-  HDfree(c_name);
-  HDfree(c_comment);
-  return ret_value ;
+    if(c_name)
+        HDfree(c_name);
+    if(c_comment)
+        HDfree(c_comment);
+    return ret_value;
 }
-
 
 /*----------------------------------------------------------------------------
  * Name:        h5gget_comment_c
@@ -629,48 +624,45 @@ DONE:
  *---------------------------------------------------------------------------*/
 
 int_f
-nh5gget_comment_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *bufsize, _fcd comment)
+nh5gget_comment_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *bufsize,
+    _fcd comment)
 {
-  int ret_value = -1;
-  hid_t c_loc_id;
-  char *c_name;
-  size_t c_namelen;
-  char *c_comment = NULL;
-  size_t c_bufsize;
-  herr_t c_ret_value;
+    char *c_name = NULL, *c_comment = NULL;
+    size_t c_bufsize;
+    int ret_value = -1;
 
-  /*
-   *  Convert Fortran name to C name
-   */
-  c_namelen = *namelen;
-  c_name = (char *)HD5f2cstring(name, c_namelen);
-  if(c_name == NULL)  return ret_value;
+    /*
+     *  Convert Fortran name to C name
+     */
+    if(NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
+        goto DONE;
 
-  /*
-   *  Allocate buffer to hold the comment
-   */
-  c_bufsize = (size_t)*bufsize;
-  if(c_bufsize) c_comment = (char *)malloc(c_bufsize + 1);
-  if(c_comment == NULL) {
-                        HDfree(c_name);
-                        return ret_value;
-                        }
+    /*
+     *  Allocate buffer to hold the comment
+     */
+    c_bufsize = (size_t)*bufsize;
+    if(c_bufsize) {
+        if(NULL == (c_comment = (char *)HDmalloc(c_bufsize + 1)))
+            goto DONE;
+    } /* end if */
 
-  /*
-   *  Call H5Gget_comment function
-   */
-  c_loc_id = *loc_id;
-  c_ret_value = H5Gget_comment(c_loc_id, c_name, c_bufsize, c_comment);
-  if(c_ret_value < 0) goto DONE;
+    /*
+     *  Call H5Gget_comment function
+     */
+    if(H5Oget_comment((hid_t)*loc_id, c_name, c_comment, c_bufsize, H5P_DEFAULT) < 0)
+        goto DONE;
 
-  /*
-   *  Convert C name to FORTRAN and place it in the given buffer
-   */
-  HD5packFstring(c_comment, _fcdtocp(comment), (size_t)*bufsize);
-  ret_value = 0;
+    /*
+    *  Convert C name to FORTRAN and place it in the given buffer
+    */
+    HD5packFstring(c_comment, _fcdtocp(comment), c_bufsize);
+    ret_value = 0;
 
 DONE:
-  HDfree(c_name);
-  HDfree(c_comment);
-  return ret_value ;
+    if(c_name)
+        HDfree(c_name);
+    if(c_comment)
+        HDfree(c_comment);
+    return ret_value;
 }
+

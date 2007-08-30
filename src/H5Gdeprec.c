@@ -81,10 +81,6 @@ static herr_t H5G_link_hard(hid_t cur_loc_id, const char *cur_name,
 static herr_t H5G_move(hid_t src_loc_id, const char *src_name,
     hid_t dst_loc_id, const char *dst_name);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-static herr_t H5G_set_comment(H5G_loc_t *loc, const char *name,
-    const char *buf, hid_t dxpl_id);
-static int H5G_get_comment(H5G_loc_t *loc, const char *name,
-    size_t bufsize, char *buf, hid_t dxpl_id);
 static herr_t H5G_get_objinfo_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
@@ -637,6 +633,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_objname_by_idx() */
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*-------------------------------------------------------------------------
  * Function:	H5Gset_comment
@@ -646,7 +643,7 @@ done:
  *		one comment at a time.  Passing NULL for the COMMENT argument
  *		will remove the comment property from the object.
  *
- * Note:	Deprecated in favor of using attributes on group
+ * Note:	Deprecated in favor of using attributes on object
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -669,7 +666,7 @@ H5Gset_comment(hid_t loc_id, const char *name, const char *comment)
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
 
-    if(H5G_set_comment(&loc, name, comment, H5AC_dxpl_id) < 0)
+    if(H5G_loc_set_comment(&loc, name, comment, H5P_DEFAULT, H5AC_dxpl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to set comment value")
 
 done:
@@ -716,123 +713,13 @@ H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf)
     if(bufsize > 0 && !buf)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no buffer specified")
 
-    if((ret_value = H5G_get_comment(&loc, name, bufsize, buf, H5AC_ind_dxpl_id)) < 0)
+    if((ret_value = (int)H5G_loc_get_comment(&loc, name, buf, bufsize, H5P_DEFAULT, H5AC_ind_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to get comment value")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_comment() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_set_comment
- *
- * Purpose:	(Re)sets the comment for an object.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Monday, July 20, 1998
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5G_set_comment(H5G_loc_t *loc, const char *name, const char *buf, hid_t dxpl_id)
-{
-    H5G_loc_t   obj_loc;                  /* Object's location */
-    H5G_name_t	path;
-    H5O_loc_t	oloc;
-    hbool_t     loc_valid = FALSE;
-    H5O_name_t	comment;
-    herr_t      ret_value = SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5G_set_comment)
-
-    /* Get the symbol table entry for the object */
-    obj_loc.path = &path;
-    obj_loc.oloc = &oloc;
-    H5G_loc_reset(&obj_loc);
-    if(H5G_loc_find(loc, name, &obj_loc/*out*/, H5P_DEFAULT, dxpl_id) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
-    loc_valid = TRUE;
-
-    /* Remove the previous comment message if any */
-    if(H5O_msg_remove(obj_loc.oloc, H5O_NAME_ID, 0, TRUE, dxpl_id) < 0)
-        H5E_clear_stack(NULL);
-
-    /* Add the new message */
-    if(buf && *buf) {
-        /* Casting away const OK -QAK */
-	comment.s = (char *)buf;
-	if(H5O_msg_create(obj_loc.oloc, H5O_NAME_ID, 0, H5O_UPDATE_TIME, &comment, dxpl_id) < 0)
-	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to set comment object header message")
-    } /* end if */
-
-done:
-    /* Release obj_loc */
-    if(loc_valid && H5G_loc_free(&obj_loc) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location")
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_set_comment() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_get_comment
- *
- * Purpose:	Get the comment value for an object.
- *
- * Return:	Success:	Number of bytes in the comment including the
- *				null terminator.  Zero if the object has no
- *				comment.
- *
- *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *              Monday, July 20, 1998
- *
- *-------------------------------------------------------------------------
- */
-static int
-H5G_get_comment(H5G_loc_t *loc, const char *name, size_t bufsize, char *buf, hid_t dxpl_id)
-{
-    H5O_name_t	comment;
-    H5G_loc_t	obj_loc;               /* Object's location */
-    H5G_name_t	path;
-    H5O_loc_t	oloc;
-    hbool_t     loc_valid = FALSE;
-    int	ret_value;                     /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5G_get_comment)
-
-    /* Get the symbol table entry for the object */
-    obj_loc.path = &path;
-    obj_loc.oloc = &oloc;
-    H5G_loc_reset(&obj_loc);
-    if(H5G_loc_find(loc, name, &obj_loc/*out*/, H5P_DEFAULT, dxpl_id) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
-    loc_valid = TRUE;
-
-    /* Get the message */
-    comment.s = NULL;
-    if(NULL == H5O_msg_read(obj_loc.oloc, H5O_NAME_ID, &comment, dxpl_id)) {
-	if(buf && bufsize > 0)
-            buf[0] = '\0';
-	ret_value = 0;
-    } else {
-        if(buf && bufsize)
-	   HDstrncpy(buf, comment.s, bufsize);
-	ret_value = (int)HDstrlen(comment.s);
-	H5O_msg_reset(H5O_NAME_ID, &comment);
-    } /* end else */
-
-done:
-    /* Release obj_loc */
-    if(loc_valid && H5G_loc_free(&obj_loc) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free location")
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_get_comment() */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
 /*-------------------------------------------------------------------------
