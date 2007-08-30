@@ -76,7 +76,7 @@ static struct dispatch_t {
     dispatch_g[TYPE].list2 = (LIST2);           \
 }
 
-static herr_t list (hid_t group, const char *name, void *cd);
+static herr_t list (hid_t group, const char *name, const H5L_info_t *linfo, void *cd);
 static void display_type(hid_t type, int ind);
 static char *fix_name(const char *path, const char *base);
 
@@ -1673,7 +1673,7 @@ group_list2(hid_t grp, const char *name)
 
     if (recursive_g) {
         iter.container = name;
-        H5Giterate(grp, ".", NULL, list, &iter);
+        H5Literate(grp, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, list, &iter, H5P_DEFAULT);
     }
     return 0;
 }
@@ -1830,10 +1830,10 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-list (hid_t group, const char *name, void *_iter)
+list(hid_t group, const char *name, const H5L_info_t UNUSED *linfo, void *_iter)
 {
-    hid_t obj=-1;
-    char buf[512], comment[50], *fullname=NULL, *s=NULL;
+    hid_t obj = -1;
+    char buf[512], comment[50], *fullname = NULL, *s = NULL;
     H5G_stat_t sb;
     haddr_t objno;              /* Compact form of object's location */
     struct tm *tm;
@@ -1855,21 +1855,20 @@ list (hid_t group, const char *name, void *_iter)
     H5E_BEGIN_TRY {
         status = H5Gget_objinfo(group, name, FALSE, &sb);
     } H5E_END_TRY;
-    if (status<0) {
+    if(status < 0) {
         puts("**NOT FOUND**");
         return 0;
-    } else if (sb.type<0 || sb.type>=H5G_NTYPES) {
+    } else if(sb.type < 0 || sb.type >= H5G_NTYPES) {
         printf("Unknown type(%d)", sb.type);
         sb.type = H5G_UNKNOWN;
     }
-    if (sb.type>=0 && dispatch_g[sb.type].name) {
+    if(sb.type >= 0 && dispatch_g[sb.type].name)
         fputs(dispatch_g[sb.type].name, stdout);
-    }
     objno = (haddr_t)sb.objno[0] | ((haddr_t)sb.objno[1] << (8 * sizeof(long)));
 
     /* If the object has already been printed then just show the object ID
      * and return. */
-    if ((s=sym_lookup(&sb))) {
+    if((s = sym_lookup(&sb))) {
         printf(", same as ");
         display_string(stdout, s, TRUE);
         printf("\n");
@@ -1918,7 +1917,7 @@ list (hid_t group, const char *name, void *_iter)
             puts("\"");
         } /* end if */
     } /* end if */
-    if(sb.type>=0 && dispatch_g[sb.type].list2)
+    if(sb.type >= 0 && dispatch_g[sb.type].list2)
         (dispatch_g[sb.type].list2)(obj, fullname);
 
 done:
@@ -2340,7 +2339,7 @@ main (int argc, const char *argv[])
             } /* end if */
 
             /* list */
-            H5Giterate(file, oname, NULL, list, &iter);
+            H5Literate(file, oname, H5_INDEX_NAME, H5_ITER_INC, NULL, list, &iter, H5P_DEFAULT);
             free(container);
 
         } else if((root = H5Gopen2(file, "/", H5P_DEFAULT)) < 0) {
@@ -2350,7 +2349,7 @@ main (int argc, const char *argv[])
             /* Specified name is a non-group object -- list that object.  The
             * container for the object is everything up to the base name. */
             iter.container = show_file_name_g ? fname : "/";
-            list(root, oname, &iter);
+            list(root, oname, NULL, &iter);
             if(H5Gclose(root) < 0)
                 leave(1);
         }

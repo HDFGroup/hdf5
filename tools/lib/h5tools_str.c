@@ -845,15 +845,15 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
         if (h5tools_is_zero(vp, H5Tget_size(type))) {
             h5tools_str_append(str, "NULL");
         } else {
-            char name[1024];
+            char ref_name[1024];
 
             obj = H5Rdereference(container, H5R_DATASET_REGION, vp);
             region = H5Rget_region(container, H5R_DATASET_REGION, vp);
             H5Gget_objinfo(obj, ".", FALSE, &sb);
             
             /* get name of the dataset the region reference points to using H5Rget_name */
-            H5Rget_name(obj, H5R_DATASET_REGION, vp, (char*)name, 1024);
-            h5tools_str_append(str, info->dset_format, name);
+            H5Rget_name(obj, H5R_DATASET_REGION, vp, (char*)ref_name, 1024);
+            h5tools_str_append(str, info->dset_format, ref_name);
 
             h5tools_str_dump_region(str, region, info);
             H5Sclose(region);

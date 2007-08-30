@@ -55,7 +55,7 @@ const char *FILENAME[] = {
 #define UD_PLIST_TYPE 128
 #define UD_CBFAIL_TYPE UD_PLIST_TYPE
 #define UD_ERROR_TYPE 189
-#define UD_BAD_TYPE1 H5G_LINK_HARD
+#define UD_BAD_TYPE1 H5L_TYPE_HARD
 #define UD_BAD_TYPE2 (H5L_TYPE_UD_MIN - 5)
 #define UD_BAD_VERS (H5L_LINK_CLASS_T_VERS + 1)
 
@@ -5209,7 +5209,7 @@ linkinfo(hid_t fapl, hbool_t new_format)
     if(H5Lget_info(fid, "ext_link", &li, H5P_DEFAULT) < 0) TEST_ERROR
     if(li.type != H5L_TYPE_EXTERNAL) TEST_ERROR
     if(H5Lget_info(fid, "softlink", &li, H5P_DEFAULT) < 0) TEST_ERROR
-    if(li.type != H5G_LINK_SOFT) TEST_ERROR
+    if(li.type != H5L_TYPE_SOFT) TEST_ERROR
     if(H5Lget_info(fid, "ud_link", &li, H5P_DEFAULT) < 0) TEST_ERROR
     if(li.type != UD_PLIST_TYPE) TEST_ERROR
 
@@ -7148,6 +7148,7 @@ HDfprintf(stderr, "op_data->curr = %Hd\n", op_data->curr);
     return(H5_ITER_CONT);
 } /* end link_iterate_cb() */
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*-------------------------------------------------------------------------
  * Function:    group_iterate_cb
@@ -7168,6 +7169,7 @@ group_iterate_cb(hid_t group_id, const char *link_name, void *_op_data)
 {
     return(link_iterate_cb(group_id, link_name, NULL, _op_data));
 } /* end group_iterate_cb() */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
 /*-------------------------------------------------------------------------
@@ -7211,7 +7213,9 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
 {
     unsigned    v;                      /* Local index variable */
     hsize_t     skip;                   /* # of links to skip in group */
+#ifndef H5_NO_DEPRECATED_SYMBOLS
     int         gskip;                  /* # of links to skip in group, with H5Giterate */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
     herr_t      ret;                    /* Generic return value */
 
     /* Iterate over links in group */
@@ -7229,6 +7233,7 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
         if(iter_info->visited[v] == FALSE) TEST_ERROR
 
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
     /* Iterate over links in group, with H5Giterate */
     iter_info->nskipped = gskip = 0;
     iter_info->order = order;
@@ -7242,6 +7247,7 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
     if(gskip != (int)max_links) TEST_ERROR
     for(v = 0; v < max_links; v++)
         if(iter_info->visited[v] == FALSE) TEST_ERROR
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
     /* Skip over some links in group */
@@ -7275,6 +7281,7 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
     } /* end else */
 
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
     /* Skip over some links in group, with H5Giterate */
     iter_info->nskipped = gskip = max_links / 2;
     iter_info->order = order;
@@ -7304,6 +7311,7 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
 
         if(nvisit != (max_links / 2)) TEST_ERROR
     } /* end else */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
     /* Iterate over links in group, stopping in the middle */
@@ -7318,6 +7326,7 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
     if(iter_info->ncalled != 3) TEST_ERROR
 
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
     /* Iterate over links in group, stopping in the middle, with H5Giterate() */
     iter_info->nskipped = gskip = 0;
     iter_info->order = order;
@@ -7328,6 +7337,7 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
     if((ret = H5Giterate(group_id, ".", &gskip, group_iterate_cb, iter_info)) < 0) TEST_ERROR
     if(ret != CORDER_ITER_STOP) TEST_ERROR
     if(iter_info->ncalled != 3) TEST_ERROR
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
     /* Check for iteration routine indicating failure */
@@ -7617,6 +7627,7 @@ HDfprintf(stderr, "op_data->curr = %Hd\n", op_data->curr);
     return(H5_ITER_CONT);
 } /* end link_iterate_old_cb() */
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*-------------------------------------------------------------------------
  * Function:    group_iterate_old_cb
@@ -7637,6 +7648,7 @@ group_iterate_old_cb(hid_t group_id, const char *link_name, void *_op_data)
 {
     return(link_iterate_old_cb(group_id, link_name, NULL, _op_data));
 } /* end group_iterate_old_cb() */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
 /*-------------------------------------------------------------------------
@@ -7658,7 +7670,9 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order,
 {
     unsigned    v;                      /* Local index variable */
     hsize_t     skip;                   /* # of links to skip in group */
+#ifndef H5_NO_DEPRECATED_SYMBOLS
     int         gskip;                  /* # of links to skip in group, with H5Giterate */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
     herr_t      ret;                    /* Generic return value */
 
     /* Iterate over links in group */
@@ -7676,6 +7690,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order,
         if(iter_info->visited[v] == FALSE) TEST_ERROR
 
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
     /* Iterate over links in group, with H5Giterate */
     iter_info->nskipped = gskip = 0;
     iter_info->order = order;
@@ -7689,6 +7704,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order,
     if(gskip != (int)max_links) TEST_ERROR
     for(v = 0; v < max_links; v++)
         if(iter_info->visited[v] == FALSE) TEST_ERROR
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
     /* Skip over some links in group */
@@ -7722,6 +7738,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order,
     } /* end else */
 
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
     /* Skip over some links in group, with H5Giterate */
     iter_info->nskipped = gskip = max_links / 2;
     iter_info->order = order;
@@ -7751,6 +7768,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order,
 
         if(nvisit != (max_links / 2)) TEST_ERROR
     } /* end else */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
     /* Iterate over links in group, stopping in the middle */
@@ -7765,6 +7783,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order,
     if(iter_info->ncalled != 3) TEST_ERROR
 
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
     /* Iterate over links in group, stopping in the middle, with H5Giterate() */
     iter_info->nskipped = gskip = 0;
     iter_info->order = order;
@@ -7775,6 +7794,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order,
     if((ret = H5Giterate(group_id, ".", &gskip, group_iterate_old_cb, iter_info)) < 0) TEST_ERROR
     if(ret != CORDER_ITER_STOP) TEST_ERROR
     if(iter_info->ncalled != 3) TEST_ERROR
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
     /* Check for iteration routine indicating failure */

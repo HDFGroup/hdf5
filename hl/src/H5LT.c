@@ -1032,32 +1032,27 @@ out:
  *-------------------------------------------------------------------------
  */
 
-static herr_t find_dataset( hid_t loc_id, const char *name, void *op_data)
+static herr_t
+find_dataset(hid_t loc_id, const char *name, const H5L_info_t *linfo, void *op_data)
 {
+    /* Define a default zero value for return. This will cause the iterator to continue if
+     * the dataset is not found yet.
+     */
+    int ret = 0;
 
- /* Define a default zero value for return. This will cause the iterator to continue if
-  * the dataset is not found yet.
-  */
+    /* Shut the compiler up */
+    loc_id = loc_id;
+    linfo = linfo;
 
- int ret = 0;
+    /* Define a positive value for return value if the dataset was found. This will
+     * cause the iterator to immediately return that positive value,
+     * indicating short-circuit success
+     */
+    if(strcmp(name, (char *)op_data) == 0)
+        ret = 1;
 
- char *dset_name = (char*)op_data;
-
- /* Shut the compiler up */
- loc_id=loc_id;
-
- /* Define a positive value for return value if the dataset was found. This will
-  * cause the iterator to immediately return that positive value,
-  * indicating short-circuit success
-  */
-
- if( strcmp( name, dset_name ) == 0 )
-  ret = 1;
-
-
- return ret;
+    return ret;
 }
-
 
 
 /*-------------------------------------------------------------------------
@@ -1082,14 +1077,10 @@ static herr_t find_dataset( hid_t loc_id, const char *name, void *op_data)
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LTfind_dataset( hid_t loc_id, const char *dset_name )
+herr_t
+H5LTfind_dataset( hid_t loc_id, const char *dset_name )
 {
-
- herr_t  ret;
-
- ret = H5Giterate( loc_id, ".", 0, find_dataset, (void *)dset_name );
-
- return ret;
+    return H5Literate(loc_id, ".", H5_INDEX_NAME, H5_ITER_INC, 0, find_dataset, (void *)dset_name, H5P_DEFAULT );
 }
 
 

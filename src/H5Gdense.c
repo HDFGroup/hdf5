@@ -906,10 +906,12 @@ H5G_dense_iterate_bt2_cb(const void *_record, void *_bt2_udata)
 
         /* Check which type of callback to make */
         switch(bt2_udata->lnk_op->op_type) {
+#ifndef H5_NO_DEPRECATED_SYMBOLS
             case H5G_LINK_OP_OLD:
                 /* Make the old-type application callback */
                 ret_value = (bt2_udata->lnk_op->u.old_op)(bt2_udata->gid, fh_udata.lnk->name, bt2_udata->op_data);
                 break;
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
             case H5G_LINK_OP_APP:
                 {

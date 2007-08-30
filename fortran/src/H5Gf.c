@@ -297,7 +297,7 @@ nh5glink_c(hid_t_f *loc_id, int_f *link_type, _fcd current_name,
     /*
     *  Call appropriate link creation function
     */
-    switch((H5G_link_t)*link_type) {
+    switch((H5L_type_t)*link_type) {
         case H5L_TYPE_HARD:
             if(H5Lcreate_hard((hid_t)*loc_id, c_current_name, H5L_SAME_LOC, c_new_name, H5P_DEFAULT, H5P_DEFAULT) < 0)
                 goto DONE;
@@ -359,7 +359,7 @@ nh5glink2_c(hid_t_f *cur_loc_id, _fcd cur_name, int_f *cur_namelen,
     /*
     *  Call appropriate link creation function
     */
-    switch((H5G_link_t)*link_type) {
+    switch((H5L_type_t)*link_type) {
         case H5L_TYPE_HARD:
             if(H5Lcreate_hard((hid_t)*cur_loc_id, c_cur_name, (hid_t)*new_loc_id, c_new_name, H5P_DEFAULT, H5P_DEFAULT) < 0)
                 goto DONE;

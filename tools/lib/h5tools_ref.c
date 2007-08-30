@@ -339,7 +339,8 @@ lookup_ref_path(haddr_t ref)
  *-------------------------------------------------------------------------
  */
 herr_t
-fill_ref_path_table(hid_t group, const char *obj_name, void *op_data)
+fill_ref_path_table(hid_t group, const char *obj_name, const H5L_info_t UNUSED *linfo,
+    void *op_data)
 {
     const char *obj_prefix = (const char *)op_data;
     H5G_stat_t              statbuf;
@@ -372,7 +373,7 @@ fill_ref_path_table(hid_t group, const char *obj_name, void *op_data)
             /* Iterate over objects in this group, using this group's
              * name as their prefix
              */
-            if(H5Giterate(group, obj_name, NULL, fill_ref_path_table, thepath) < 0) {
+            if(H5Literate(group, obj_name, H5_INDEX_NAME, H5_ITER_INC, NULL, fill_ref_path_table, thepath, H5P_DEFAULT) < 0) {
                 error_msg(progname, "unable to dump group \"%s\"\n", obj_name);
                 d_status = EXIT_FAILURE;
             }

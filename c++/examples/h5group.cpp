@@ -46,7 +46,8 @@ const H5std_string FILE_NAME( "Group.h5" );
 const int	   RANK = 2;
 
 // Operator function
-extern "C" herr_t file_info(hid_t loc_id, const char *name, void *opdata);
+extern "C" herr_t file_info(hid_t loc_id, const char *name, const H5L_info_t *linfo,
+    void *opdata);
 
 int main(void)
 {
@@ -166,7 +167,7 @@ int main(void)
 	 * root directory.
 	 */
 	cout << endl << "Iterating over elements in the file" << endl;
-	herr_t idx = H5Giterate(file->getId(), "/", NULL, file_info, NULL);
+	herr_t idx = H5Literate(file->getId(), "/", H5_INDEX_NAME, H5_ITER_INC, NULL, file_info, NULL, H5P_DEFAULT);
 	cout << endl;
 
 	/*
@@ -184,7 +185,7 @@ int main(void)
 	cout << "\"Data\" is unlinked" << endl;
 
 	cout << endl << "Iterating over elements in the file again" << endl;
-	idx = H5Giterate(file->getId(), "/", NULL, file_info, NULL);
+	idx = H5Literate(file->getId(), "/", H5_INDEX_NAME, H5_ITER_INC, NULL, file_info, NULL, H5P_DEFAULT);
 	cout << endl;
 
 	/*
@@ -228,9 +229,10 @@ int main(void)
  * Operator function.
  */
 herr_t
-file_info(hid_t loc_id, const char *name, void *opdata)
+file_info(hid_t loc_id, const char *name, const H5L_info_t *linfo, void *opdata)
 {
     hid_t group;
+
     /*
      * Open the group using its name.
      */

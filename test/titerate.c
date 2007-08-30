@@ -61,8 +61,10 @@ typedef struct {
 /* Local functions */
 int iter_strcmp(const void *s1, const void *s2);
 int iter_strcmp2(const void *s1, const void *s2);
-herr_t giter_cb(hid_t group, const char *name, void *op_data);
-herr_t giter_cb2(hid_t group, const char *name, void *op_data);
+static herr_t liter_cb(hid_t group, const char *name, const H5L_info_t *info,
+    void *op_data);
+static herr_t liter_cb2(hid_t group, const char *name, const H5L_info_t *info,
+    void *op_data);
 herr_t aiter_cb(hid_t loc_id, const char *name, void *op_data);
 
 /****************************************************************
@@ -77,10 +79,12 @@ int iter_strcmp(const void *s1, const void *s2)
 
 /****************************************************************
 **
-**  giter_cb(): Custom group iteration callback routine.
+**  liter_cb(): Custom link iteration callback routine.
 **
 ****************************************************************/
-herr_t giter_cb(hid_t UNUSED group, const char *name, void *op_data)
+static herr_t
+liter_cb(hid_t UNUSED group, const char *name, const H5L_info_t UNUSED *link_info,
+    void *op_data)
 {
     iter_info *info = (iter_info *)op_data;
     static int count = 0;
@@ -107,14 +111,15 @@ herr_t giter_cb(hid_t UNUSED group, const char *name, void *op_data)
             printf("invalid iteration command");
             return(-1);
     } /* end switch */
-} /* end giter_cb() */
+} /* end liter_cb() */
 
 /****************************************************************
 **
 **  test_iter_group(): Test group iteration functionality
 **
 ****************************************************************/
-static void test_iter_group(hid_t fapl, hbool_t new_format)
+static void
+test_iter_group(hid_t fapl, hbool_t new_format)
 {
     hid_t file;             /* File ID */
     hid_t dataset;          /* Dataset ID */
@@ -122,7 +127,7 @@ static void test_iter_group(hid_t fapl, hbool_t new_format)
     hid_t filespace;        /* Common dataspace ID */
     hid_t root_group,grp;   /* Root group ID */
     int i;                  /* counting variable */
-    int idx;                /* Index in the group */
+    hsize_t idx;            /* Index in the group */
     char name[NAMELEN];     /* temporary name buffer */
     char *lnames[NDATASETS + 2];/* Names of the links created */
     char dataset_name[NAMELEN];  /* dataset name */
@@ -138,10 +143,10 @@ static void test_iter_group(hid_t fapl, hbool_t new_format)
     CHECK(file, FAIL, "H5Fcreate");
 
     /* Test iterating over empty group */
-    info.command=RET_ZERO;
-    idx=0;
-    ret=H5Giterate(file,"/",&idx,giter_cb,&info);
-    VERIFY(ret, SUCCEED, "H5Giterate");
+    info.command = RET_ZERO;
+    idx = 0;
+    ret = H5Literate(file, "/", H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info, H5P_DEFAULT);
+    VERIFY(ret, SUCCEED, "H5Literate");
 
     datatype = H5Tcopy(H5T_NATIVE_INT);
     CHECK(datatype, FAIL, "H5Tcopy");
@@ -255,45 +260,45 @@ static void test_iter_group(hid_t fapl, hbool_t new_format)
 
     /* Test invalid indices for starting iteration */
     info.command = RET_ZERO;
-    idx = -1;
+    idx = (hsize_t)-1;
     H5E_BEGIN_TRY {
-        ret = H5Giterate(file, "/", &idx, giter_cb, &info);
+        ret = H5Literate(file, "/", H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(ret, FAIL, "H5Giterate");
+    VERIFY(ret, FAIL, "H5Literate");
 
     /* Test skipping exactly as many entries as in the group */
     idx = NDATASETS + 2;
     H5E_BEGIN_TRY {
-        ret = H5Giterate(file, "/", &idx, giter_cb, &info);
+        ret = H5Literate(file, "/", H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(ret, FAIL, "H5Giterate");
+    VERIFY(ret, FAIL, "H5Literate");
 
     /* Test skipping more entries than are in the group */
     idx = NDATASETS + 3;
     H5E_BEGIN_TRY {
-        ret = H5Giterate(file, "/", &idx, giter_cb, &info);
+        ret = H5Literate(file, "/", H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(ret, FAIL, "H5Giterate");
+    VERIFY(ret, FAIL, "H5Literate");
 
     /* Test all objects in group, when callback always returns 0 */
     info.command = RET_ZERO;
     idx = 0;
-    if((ret = H5Giterate(file, "/", &idx, giter_cb, &info)) > 0)
+    if((ret = H5Literate(file, "/", H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info, H5P_DEFAULT)) > 0)
         TestErrPrintf("Group iteration function didn't return zero correctly!\n");
 
     /* Test all objects in group, when callback always returns 1 */
     /* This also tests the "restarting" ability, because the index changes */
     info.command = RET_TWO;
     idx = i = 0;
-    while((ret = H5Giterate(file, "/", &idx, giter_cb, &info)) > 0) {
+    while((ret = H5Literate(file, "/", H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info, H5P_DEFAULT)) > 0) {
         /* Verify return value from iterator gets propagated correctly */
-        VERIFY(ret, 2, "H5Giterate");
+        VERIFY(ret, 2, "H5Literate");
 
         /* Increment the number of times "2" is returned */
         i++;
 
         /* Verify that the index is the correct value */
-        VERIFY(idx, i, "H5Giterate");
+        VERIFY(idx, (hsize_t)i, "H5Literate");
         if(idx > (NDATASETS + 2))
             TestErrPrintf("Group iteration function walked too far!\n");
 
@@ -301,7 +306,7 @@ static void test_iter_group(hid_t fapl, hbool_t new_format)
         if(HDstrcmp(info.name, lnames[idx - 1]) != 0)
             TestErrPrintf("Group iteration function didn't return name correctly for link - lnames[%u] = '%s'!\n", (idx - 1), lnames[idx - 1]);
     } /* end while */
-    VERIFY(ret, -1, "H5Giterate");
+    VERIFY(ret, -1, "H5Literate");
 
     if(i != (NDATASETS + 2))
         TestErrPrintf("%u: Group iteration function didn't perform multiple iterations correctly!\n", __LINE__);
@@ -310,15 +315,15 @@ static void test_iter_group(hid_t fapl, hbool_t new_format)
     /* This also tests the "restarting" ability, because the index changes */
     info.command = new_format ? RET_CHANGE2 : RET_CHANGE;
     idx = i = 0;
-    while((ret = H5Giterate(file, "/", &idx, giter_cb, &info)) >= 0) {
+    while((ret = H5Literate(file, "/", H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info, H5P_DEFAULT)) >= 0) {
         /* Verify return value from iterator gets propagated correctly */
-        VERIFY(ret, 1, "H5Giterate");
+        VERIFY(ret, 1, "H5Literate");
 
         /* Increment the number of times "1" is returned */
         i++;
 
         /* Verify that the index is the correct value */
-        VERIFY(idx, (i + 10), "H5Giterate");
+        VERIFY(idx, (hsize_t)(i + 10), "H5Literate");
         if(idx > (NDATASETS + 2))
             TestErrPrintf("Group iteration function walked too far!\n");
 
@@ -326,7 +331,7 @@ static void test_iter_group(hid_t fapl, hbool_t new_format)
         if(HDstrcmp(info.name, lnames[idx - 1]) != 0)
             TestErrPrintf("Group iteration function didn't return name correctly for link - lnames[%u] = '%s'!\n", (idx - 1), lnames[idx - 1]);
     } /* end while */
-    VERIFY(ret, -1, "H5Giterate");
+    VERIFY(ret, -1, "H5Literate");
 
     if(i != 42 || idx != 52)
         TestErrPrintf("%u: Group iteration function didn't perform multiple iterations correctly!\n", __LINE__);
@@ -534,10 +539,12 @@ int iter_strcmp2(const void *s1, const void *s2)
 
 /****************************************************************
 **
-**  giter_cb2(): Custom group iteration callback routine.
+**  liter_cb2(): Custom link iteration callback routine.
 **
 ****************************************************************/
-herr_t giter_cb2(hid_t loc_id, const char *name, void *opdata)
+static herr_t
+liter_cb2(hid_t loc_id, const char *name, const H5L_info_t UNUSED *link_info,
+    void *opdata)
 {
     const iter_info *test_info = (const iter_info *)opdata;
     H5G_stat_t statbuf;
@@ -545,7 +552,7 @@ herr_t giter_cb2(hid_t loc_id, const char *name, void *opdata)
 
     if(HDstrcmp(name, test_info->name)) {
         TestErrPrintf("name = '%s', test_info = '%s'\n", name, test_info->name);
-        return(-1);
+        return(H5_ITER_ERROR);
     } /* end if */
 
     /*
@@ -556,11 +563,11 @@ herr_t giter_cb2(hid_t loc_id, const char *name, void *opdata)
 
     if(test_info->type != statbuf.type) {
         TestErrPrintf("test_info->type = %d, statbuf.type = %d\n", test_info->type, statbuf.type);
-        return(-1);
+        return(H5_ITER_ERROR);
     } /* end if */
 
-    return(1);
-} /* giter_cb2() */
+    return(H5_ITER_STOP);
+} /* liter_cb2() */
 
 /****************************************************************
 **
@@ -568,7 +575,8 @@ herr_t giter_cb2(hid_t loc_id, const char *name, void *opdata)
 **          for groups with large #'s of objects
 **
 ****************************************************************/
-static void test_iter_group_large(hid_t fapl)
+static void
+test_iter_group_large(hid_t fapl)
 {
     hid_t		file;		/* HDF5 File IDs		*/
     hid_t		dataset;	/* Dataset ID			*/
@@ -666,12 +674,14 @@ static void test_iter_group_large(hid_t fapl)
 
     /* Iterate through the file to see members of the root group */
     curr_name = &names[0];
-    ret = H5Giterate(file, "/", NULL, giter_cb2, curr_name);
-    CHECK(ret, FAIL, "H5Giterate");
-    for(i = 1; i < 100; ) {
+    ret = H5Literate(file, "/", H5_INDEX_NAME, H5_ITER_INC, NULL, liter_cb2, curr_name, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Literate");
+    for(i = 1; i < 100; i++) {
+        hsize_t idx = i;
+
         curr_name = &names[i];
-        ret = H5Giterate(file, "/", &i, giter_cb2, curr_name);
-        CHECK(ret, FAIL, "H5Giterate");
+        ret = H5Literate(file, "/", H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb2, curr_name, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Literate");
     } /* end for */
 
     /* Close file */

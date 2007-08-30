@@ -491,7 +491,7 @@ void test_objnames(hid_t fid, const char* string)
   HDstrcpy(path_buf, GROUP2_NAME);
   HDstrcat(path_buf, "/");
   HDstrcat(path_buf, string);
-  ret = H5Lcreate_hard(grp3_id, path_buf, H5G_SAME_LOC, string, H5P_DEFAULT, H5P_DEFAULT);
+  ret = H5Lcreate_hard(grp3_id, path_buf, H5L_SAME_LOC, string, H5P_DEFAULT, H5P_DEFAULT);
   CHECK(ret, FAIL, "H5Lcreate_hard");
 
   /* Open named datatype using soft link */

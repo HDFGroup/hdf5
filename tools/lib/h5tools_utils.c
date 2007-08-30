@@ -46,7 +46,8 @@ static void dump_table(char* tablename, table_t *table);
 #endif  /* H5DUMP_DEBUG */
 static void add_obj(table_t *table, haddr_t objno, char *objname, hbool_t recorded);
 static char * build_obj_path_name(const char *prefix, const char *name);
-static herr_t find_objs_cb(hid_t group, const char *name, void *op_data);
+static herr_t find_objs_cb(hid_t group, const char *name, const H5L_info_t *info,
+    void *op_data);
 
 
 /*-------------------------------------------------------------------------
@@ -480,7 +481,7 @@ build_obj_path_name(const char *prefix, const char *name)
  *-------------------------------------------------------------------------
  */
 static herr_t
-find_objs_cb(hid_t group, const char *name, void *op_data)
+find_objs_cb(hid_t group, const char *name, const H5L_info_t UNUSED *linfo, void *op_data)
 {
     H5G_stat_t statbuf;
     find_objs_t *info = (find_objs_t*)op_data;
@@ -508,7 +509,7 @@ find_objs_cb(hid_t group, const char *name, void *op_data)
                     info->prefix = HDmalloc(tmp_len+1);
                     HDstrcpy(info->prefix, tmp);
 
-                    if(H5Giterate(group, name, NULL, find_objs_cb, (void *)info) < 0)
+                    if(H5Literate(group, name, H5_INDEX_NAME, H5_ITER_INC, NULL, find_objs_cb, (void *)info, H5P_DEFAULT) < 0)
                         ret_value = FAIL;
 
                     info->prefix = old_prefix;
@@ -625,7 +626,7 @@ init_objs(hid_t fid, find_objs_t *info, table_t **group_table,
 
 
     /* Find all shared objects */
-    return(H5Giterate(fid, "/", NULL, find_objs_cb, (void *)info));
+    return(H5Literate(fid, "/", H5_INDEX_NAME, H5_ITER_INC, NULL, find_objs_cb, (void *)info, H5P_DEFAULT));
 }
 
 

@@ -86,15 +86,17 @@ class H5_DLLCPP CommonFG {
 	H5G_obj_t getObjTypeByIdx(hsize_t idx) const;
 	H5G_obj_t getObjTypeByIdx(hsize_t idx, H5std_string& type_name) const;
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 	// Iterates over the elements of this group - not implemented in
 	// C++ style yet.
 	int iterateElems(const char* name, int *idx, H5G_iterate_t op, void *op_data);
 	int iterateElems(const H5std_string& name, int *idx, H5G_iterate_t op, void *op_data);
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 	// Creates a link of the specified type from new_name to current_name;
 	// both names are interpreted relative to the specified location id.
-	void link(H5G_link_t link_type, const char* curr_name, const char* new_name) const;
-	void link(H5G_link_t link_type, const H5std_string& curr_name, const H5std_string& new_name) const;
+	void link(H5L_type_t link_type, const char* curr_name, const char* new_name) const;
+	void link(H5L_type_t link_type, const H5std_string& curr_name, const H5std_string& new_name) const;
 
 	// Removes the specified name at this location.
 	void unlink(const char* name) const;

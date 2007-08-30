@@ -371,19 +371,19 @@ static hssize_t get_nnames( hid_t loc_id, const char *group_name )
  *-------------------------------------------------------------------------
  */
 
-static herr_t opget_info( hid_t loc_id, const char *name, void *op_data)
+static herr_t
+opget_info(hid_t loc_id, const char *name, const H5L_info_t *linfo, void *op_data)
 {
+    H5G_stat_t statbuf;
 
- H5G_stat_t statbuf;
+    if(H5Gget_objinfo(loc_id, name, FALSE, &statbuf) < 0)
+        return -1;
 
- if (H5Gget_objinfo( loc_id, name, FALSE, &statbuf) < 0 )
-  return -1;
+    ((trav_info_t *)op_data)->type = statbuf.type;
+    ((trav_info_t *)op_data)->name = (char *)HDstrdup(name);
 
- ((trav_info_t *)op_data)->type = statbuf.type;
- ((trav_info_t *)op_data)->name = (char *)HDstrdup(name);
-
- /* Define 1 for return. This will cause the iterator to stop */
- return 1;
+    /* Define 1 for return. This will cause the iterator to stop */
+    return 1;
 }
 
 
@@ -410,20 +410,20 @@ static herr_t opget_info( hid_t loc_id, const char *name, void *op_data)
 
 static herr_t get_name_type( hid_t loc_id,
                              const char *group_name,
-                             int idx,
+                             int _idx,
                              char **name,
                              H5G_obj_t *type )
 {
+    trav_info_t info;
+    hsize_t idx = (hsize_t)_idx;
 
- trav_info_t info;
+    if(H5Literate(loc_id, group_name, H5_INDEX_NAME, H5_ITER_INC, &idx, opget_info, (void *)&info, H5P_DEFAULT) < 0)
+        return -1;
 
- if (H5Giterate( loc_id, group_name, &idx, opget_info, (void *)&info) < 0 )
-  return -1;
+    *name = info.name;
+    *type = info.type;
 
- *name = info.name;
- *type = info.type;
-
- return 0;
+    return 0;
 }
 
 /*-------------------------------------------------------------------------

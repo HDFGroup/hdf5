@@ -494,7 +494,7 @@ H5G_stab_iterate(const H5O_loc_t *oloc, hid_t dxpl_id, H5_iter_order_t order,
 
     /* Sanity check */
     HDassert(oloc);
-    HDassert(lnk_op && lnk_op->u.old_op);
+    HDassert(lnk_op && lnk_op->u.app_op);
 
     /* Get the B-tree info */
     if(NULL == H5O_msg_read(oloc, H5O_STAB_ID, &stab, dxpl_id))

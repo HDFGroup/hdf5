@@ -894,9 +894,8 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
                 if (count == 1)
                     flags |= END_OF_DATA;
                 
-                for (i = 0; i < ctx.ndims; i++) {
+                for (i = 0; i < ctx.ndims; i++)
                     ctx.p_max_idx[i] = ctx.p_min_idx[i] + MIN(total_size[i], sm_size[i]);
-                }
                 
                 /* print array indices. get the lower bound of the hyperslab and calulate
                 the element position at the start of hyperslab */

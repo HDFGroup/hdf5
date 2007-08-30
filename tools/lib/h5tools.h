@@ -348,7 +348,7 @@ typedef struct h5tools_context_t {
     size_t cur_column;                       /*current column for output */
     size_t cur_elmt;                         /*current element/output line */
     int  need_prefix;                        /*is line prefix needed? */
-    int  ndims;                              /*dimensionality  */
+    unsigned ndims;                          /*dimensionality  */
     hsize_t p_min_idx[H5S_MAX_RANK];         /*min selected index */
     hsize_t p_max_idx[H5S_MAX_RANK];         /*max selected index */
     int  prev_multiline;                     /*was prev datum multiline? */

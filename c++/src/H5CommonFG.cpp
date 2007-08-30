@@ -243,7 +243,7 @@ DataSet CommonFG::openDataSet( const H5std_string& name ) const
 ///		specified location.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void CommonFG::link( H5G_link_t link_type, const char* curr_name, const char* new_name ) const
+void CommonFG::link( H5L_type_t link_type, const char* curr_name, const char* new_name ) const
 {
     herr_t ret_value;
 
@@ -274,7 +274,7 @@ void CommonFG::link( H5G_link_t link_type, const char* curr_name, const char* ne
 ///		\c std::string for \a curr_name and \a new_name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void CommonFG::link( H5G_link_t link_type, const H5std_string& curr_name, const H5std_string& new_name ) const
+void CommonFG::link( H5L_type_t link_type, const H5std_string& curr_name, const H5std_string& new_name ) const
 {
    link( link_type, curr_name.c_str(), new_name.c_str() );
 }
@@ -935,6 +935,7 @@ VarLenType CommonFG::openVarLenType( const H5std_string& name ) const
    return( openVarLenType( name.c_str()) );
 }
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 //--------------------------------------------------------------------------
 // Function:	CommonFG::iterateElems
 ///\brief	Iterates a user's function over the entries of a group.
@@ -969,6 +970,7 @@ int CommonFG::iterateElems( const H5std_string& name, int *idx, H5G_iterate_t op
 {
    return( iterateElems( name.c_str(), idx, op, op_data ));
 }
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 //--------------------------------------------------------------------------
 // Function:	CommonFG::getNumObjs

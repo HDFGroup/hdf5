@@ -273,7 +273,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Glink(hid_t cur_loc_id, H5L_type_t type, const char *cur_name, const char *new_name)
+H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new_name)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -318,7 +318,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Glink2(hid_t cur_loc_id, const char *cur_name, H5L_type_t type,
+H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
     hid_t new_loc_id, const char *new_name)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -719,7 +719,6 @@ H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_comment() */
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
 /*-------------------------------------------------------------------------
@@ -788,6 +787,7 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op,
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Giterate() */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
 /*-------------------------------------------------------------------------

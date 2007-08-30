@@ -937,7 +937,8 @@ test_reference_obj_deleted(void)
 **
 ****************************************************************/
 static herr_t
-test_deref_iter_op(hid_t UNUSED group, const char *name, void *op_data)
+test_deref_iter_op(hid_t UNUSED group, const char *name, const H5L_info_t *info,
+    void *op_data)
 {
     int *count = (int *)op_data;        /* Pointer to name counter */
     herr_t ret_value;
@@ -1060,8 +1061,8 @@ test_reference_group(void)
     CHECK(gid, FAIL, "H5Rdereference");
 
     /* Iterate through objects in dereferenced group */
-    ret = H5Giterate(gid, ".", NULL, test_deref_iter_op, &count);
-    CHECK(ret, FAIL, "H5Giterate");
+    ret = H5Literate(gid, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, test_deref_iter_op, &count, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Literate");
 
     /* Various queries on the group opened */
     ret = H5Gget_num_objs(gid, &nobjs);

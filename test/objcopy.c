@@ -4979,7 +4979,7 @@ test_copy_group_links(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Dclose(did) < 0) TEST_ERROR
 
     /* make a hard link to the dataset */
-    if(H5Lcreate_hard(fid_src, NAME_LINK_DATASET, H5G_SAME_LOC, NAME_LINK_HARD, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Lcreate_hard(fid_src, NAME_LINK_DATASET, H5L_SAME_LOC, NAME_LINK_HARD, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* make a soft link to the dataset */
     if(H5Lcreate_soft(NAME_LINK_DATASET, fid_src, NAME_LINK_SOFT, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
@@ -7019,7 +7019,7 @@ test_copy_option(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl, unsigned flag, hboo
 
         /* Create group to compare with */
         if((gid = H5Gcreate2(fid_src, NAME_GROUP_LINK2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-        if(H5Lcreate_hard(fid_src, NAME_DATASET_SUB_SUB, H5G_SAME_LOC, NAME_LINK_SOFT2, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+        if(H5Lcreate_hard(fid_src, NAME_DATASET_SUB_SUB, H5L_SAME_LOC, NAME_LINK_SOFT2, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
         if(H5Lcreate_soft("nowhere", fid_src, NAME_LINK_SOFT_DANGLE2, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
         if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
     } /* end if */

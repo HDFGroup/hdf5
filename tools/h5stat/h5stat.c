@@ -459,7 +459,7 @@ attribute_stats(iter_t *iter, const H5O_info_t *oi)
  */
 static herr_t
 group_stats(hid_t group, const char *name, const char *fullname,
-    const H5O_info_t *oi, H5G_iterate_t walk, iter_t *iter)
+    const H5O_info_t *oi, H5L_iterate_t walk, iter_t *iter)
 {
     hid_t 		gid;                    /* Group ID */
     const char 		*last_container;
@@ -525,7 +525,7 @@ group_stats(hid_t group, const char *name, const char *fullname,
     iter->curr_depth++;
 
     /* Recursively descend into current group's objects */
-    H5Giterate(group, name, NULL, walk, iter);
+    H5Literate(group, name, H5_INDEX_NAME, H5_ITER_INC, NULL, walk, iter, H5P_DEFAULT);
 
     /* Revert current container info */
     iter->container = last_container;
@@ -742,7 +742,7 @@ dataset_stats(hid_t group, const char *name, const H5O_info_t *oi, iter_t *iter)
  *-------------------------------------------------------------------------
  */
 static herr_t
-walk(hid_t group, const char *name, void *_iter)
+walk(hid_t group, const char *name, const H5L_info_t *linfo, void *_iter)
 {
     iter_t *iter = (iter_t *)_iter;
     H5O_info_t oi;
@@ -1359,7 +1359,7 @@ main(int argc, const char *argv[])
     for(i = 0; i < argc; i++) { 
          if(hand[i].obj) {
               if(hand[i].flag) {
-                   walk(fid, hand[i].obj, &iter);
+                   walk(fid, hand[i].obj, NULL, &iter);
                    print_statistics(hand[i].obj, &iter);
               }
          }

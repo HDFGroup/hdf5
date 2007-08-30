@@ -623,10 +623,12 @@ H5G_link_iterate_table(const H5G_link_table_t *ltable, hsize_t skip,
     for(; u < ltable->nlinks && !ret_value; u++) {
         /* Check which kind of callback to make */
         switch(lnk_op->op_type) {
+#ifndef H5_NO_DEPRECATED_SYMBOLS
             case H5G_LINK_OP_OLD:
                 /* Make the old-type application callback */
                 ret_value = (lnk_op->u.old_op)(gid, ltable->lnks[u].name, op_data);
                 break;
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
             case H5G_LINK_OP_APP:
                 {

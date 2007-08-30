@@ -181,7 +181,7 @@ test_many(hid_t file)
     TESTING("forward unlink");
     for(i = 0; i < how_many; i++) {
 	sprintf(name, "obj_%05d", i);
-	if(H5Lcreate_hard(work, "/test_many_foo", H5G_SAME_LOC, name, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+	if(H5Lcreate_hard(work, "/test_many_foo", H5L_SAME_LOC, name, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     } /* end for */
     for(i = 0; i < how_many; i++) {
 	sprintf(name, "obj_%05d", i);
@@ -193,7 +193,7 @@ test_many(hid_t file)
     TESTING("backward unlink");
     for(i = 0; i < how_many; i++) {
 	sprintf(name, "obj_%05d", i);
-	if(H5Lcreate_hard(work, "/test_many_foo", H5G_SAME_LOC, name, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+	if(H5Lcreate_hard(work, "/test_many_foo", H5L_SAME_LOC, name, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     } /* end for */
     for(i = (how_many - 1); i >= 0; --i) {
 	sprintf(name, "obj_%05d", i);
@@ -205,7 +205,7 @@ test_many(hid_t file)
     TESTING("inward unlink");
     for(i = 0; i < how_many; i++) {
 	sprintf(name, "obj_%05d", i);
-	if(H5Lcreate_hard(work, "/test_many_foo", H5G_SAME_LOC, name, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+	if(H5Lcreate_hard(work, "/test_many_foo", H5L_SAME_LOC, name, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     } /* end for */
     for(i = 0; i < how_many; i++) {
 	if(i % 2)
@@ -220,7 +220,7 @@ test_many(hid_t file)
     TESTING("outward unlink");
     for(i = 0; i < how_many; i++) {
 	sprintf(name, "obj_%05d", i);
-	if(H5Lcreate_hard(work, "/test_many_foo", H5G_SAME_LOC, name, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+	if(H5Lcreate_hard(work, "/test_many_foo", H5L_SAME_LOC, name, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     } /* end for */
     for(i = (how_many - 1); i >= 0; --i) {
 	if(i % 2)
@@ -380,9 +380,9 @@ test_new_move(hid_t fapl)
     if(H5Lcreate_soft("/group1/group_move", grp_2, "soft", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Move a group within the file.  Both of source and destination use
-     * H5G_SAME_LOC.  Should fail. */
+     * H5L_SAME_LOC.  Should fail. */
     H5E_BEGIN_TRY {
-        if(H5Lmove(H5G_SAME_LOC, "group_move", H5G_SAME_LOC, "group_new_name", H5P_DEFAULT, H5P_DEFAULT) != FAIL) TEST_ERROR
+        if(H5Lmove(H5L_SAME_LOC, "group_move", H5L_SAME_LOC, "group_new_name", H5P_DEFAULT, H5P_DEFAULT) != FAIL) TEST_ERROR
     } H5E_END_TRY;
 
     /* Move a group across files.  Should fail. */

@@ -24,7 +24,7 @@ extern "C" {
 
 int init_ref_path_table(hid_t fid);
 const char *lookup_ref_path(haddr_t ref);
-herr_t      fill_ref_path_table(hid_t, const char *, void *);
+herr_t      fill_ref_path_table(hid_t, const char *, const H5L_info_t *, void *);
 int         get_next_xid(void);
 haddr_t     get_fake_xid (void);
 haddr_t ref_path_table_lookup(const char *);
