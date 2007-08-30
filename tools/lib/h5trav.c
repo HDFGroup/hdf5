@@ -62,21 +62,20 @@ int h5trav_getinfo(hid_t file_id,
                    trav_info_t *info,
                    int print )
 {
+    trav_table_t  *table = NULL;
+    int           nnames = 0;
 
- trav_table_t  *table=NULL;
- int           nnames=0;
+    /* init table */
+    trav_table_init(&table);
 
- /* init table */
- trav_table_init( &table );
+    /* iterate starting on the root group */
+    if((nnames = traverse(file_id, "/", table, info, &nnames, print)) < 0)
+        return -1;
 
- /* iterate starting on the root group */
- if (( nnames = traverse( file_id, "/", table, info, &nnames, print )) < 0 )
-  return -1;
+    /* free table */
+    trav_table_free(table);
 
- /* free table */
- trav_table_free( table );
-
- return nnames;
+    return nnames;
 }
 
 /*-------------------------------------------------------------------------
@@ -253,14 +252,13 @@ int h5trav_getindext(const char *name, trav_table_t *table)
 
 int h5trav_gettable(hid_t fid, trav_table_t *travt)
 {
- int nnames=0;
+    int nnames = 0;
 
- /* iterate starting on the root group */
- if (( nnames = traverse(fid,"/",travt,NULL,&nnames,0))<0)
-  return -1;
+    /* iterate starting on the root group */
+    if((nnames = traverse(fid, "/", travt, NULL, &nnames, 0)) < 0)
+        return -1;
 
- return 0;
-
+    return 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -440,274 +438,239 @@ static herr_t get_name_type( hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
-static int traverse( hid_t loc_id,
+static int traverse(hid_t loc_id,
                      const char *group_name,
                      trav_table_t *table,
                      trav_info_t *info,
                      int *idx,
                      int print)
 {
- haddr_t       objno;              /* Compact form of object's location */
- char          *name=NULL;
- H5G_obj_t     type;
- int           n_names;
- char          *path=NULL;
- H5G_stat_t    statbuf;
- int           inserted_objs=0;
- int           i, j;
+    haddr_t       objno;              /* Compact form of object's location */
+    char          *name = NULL;
+    H5G_obj_t     type;
+    int           n_names;
+    char          *path = NULL;
+    H5G_stat_t    statbuf;
+    int           inserted_objs = 0;
+    int           i, j;
 
- /* get the number of names */
- if (( n_names = (int)get_nnames( loc_id, group_name )) < 0 )
-  return -1;
+    /* get the number of names */
+    if((n_names = (int)get_nnames(loc_id, group_name)) < 0)
+        return -1;
 
- for ( i = 0; i < n_names; i++)
- {
-  if (get_name_type( loc_id, group_name, i, &name, &type ) < 0 )
-   return -1;
+    for(i = 0; i < n_names; i++) {
+        if(get_name_type(loc_id, group_name, i, &name, &type) < 0)
+            return -1;
 
-  /* allocate path buffer */
-  path = (char*) HDmalloc(HDstrlen(group_name) + HDstrlen(name) + 2);
+        /* allocate path buffer */
+        path = (char*) HDmalloc(HDstrlen(group_name) + HDstrlen(name) + 2);
 
-  /* initialize path */
-  HDstrcpy( path, group_name );
-  if ( HDstrcmp(group_name, "/") != 0 )
-   HDstrcat( path, "/" );
-  HDstrcat( path, name );
+        /* initialize path */
+        HDstrcpy( path, group_name );
+        if(HDstrcmp(group_name, "/") != 0)
+            HDstrcat( path, "/" );
+        HDstrcat(path, name);
 
-  /* disable error reporting */
-  H5E_BEGIN_TRY {
+        /* disable error reporting */
+        H5E_BEGIN_TRY {
+            /* get info */
+            H5Gget_objinfo( loc_id, path, FALSE, &statbuf);
+        } H5E_END_TRY;
+        objno = (haddr_t)statbuf.objno[0] | ((haddr_t)statbuf.objno[1] << (8 * sizeof(long)));
 
-  /* get info */
-   H5Gget_objinfo( loc_id, path, FALSE, &statbuf);
-  } H5E_END_TRY;
-  objno = (haddr_t)statbuf.objno[0] | ((haddr_t)statbuf.objno[1] << (8 * sizeof(long)));
+        /* add to array */
+        if(info) {
+            info[*idx].name = (char *)HDstrdup(path);
+            info[*idx].type = type;
+            (*idx)++;
+        } /* end if */
 
-  /* add to array */
-  if ( info )
-  {
-   info[*idx].name = (char *)HDstrdup(path);
-   info[*idx].type = type;
-   (*idx)++;
-  }
+        switch(type) {
+            /*-------------------------------------------------------------------------
+             * H5G_GROUP
+             *-------------------------------------------------------------------------
+             */
+            case H5G_GROUP:
+                /* increment */
+                inserted_objs++;
 
+                /* nlink is number of hard links to object */
+                if(statbuf.nlink > 0  && trav_table_search(objno, table) == -1) {
+                    /* add object to table */
+                    trav_table_add(objno, path, H5G_GROUP, table);
 
-  switch ( type )
-  {
+                    /* print it */
+                    if(print)
+                        printf(" %-10s %s\n", "group", path);
 
-  /*-------------------------------------------------------------------------
-   * H5G_GROUP
-   *-------------------------------------------------------------------------
-   */
+                    /* recurse with the absolute name */
+                    inserted_objs += traverse(loc_id, path, table, info, idx, print);
+                } /* end if */
 
-  case H5G_GROUP:
+                /* search table group with more than one link to it */
+                if(statbuf.nlink > 1) {
+                    if((j = trav_table_search(objno, table)) < 0)
+                        return -1;
 
-    /* increment */
-   inserted_objs++;
+                    trav_table_addlink(table, j, path);
 
-   /* nlink is number of hard links to object */
-   if (statbuf.nlink > 0  && trav_table_search(objno, table ) == -1)
-   {
-    /* add object to table */
-    trav_table_add(objno, path, H5G_GROUP, table );
+                    if(table->objs[j].displayed == 0) {
+                        table->objs[j].displayed = 1;
+                    }
+                    else {
+                        /* print it */
+                        if (print)
+                            printf(" %-10s %s %s %s\n", "group", path, "->", table->objs[j].name  );
+                    }
+                } /* end if */
+                break;
 
-    /* print it */
-    if (print)
-     printf(" %-10s %s\n", "group", path  );
+            /*-------------------------------------------------------------------------
+             * H5G_DATASET
+             *-------------------------------------------------------------------------
+             */
+            case H5G_DATASET:
+                /* increment */
+                inserted_objs++;
 
-    /* recurse with the absolute name */
-    inserted_objs += traverse( loc_id, path, table, info, idx, print );
-   }
+                /* nlink is number of hard links to object */
+                if(statbuf.nlink > 0  && trav_table_search(objno, table) == -1) {
+                    /* add object to table */
+                    trav_table_add(objno, path, H5G_DATASET, table );
 
-     /* search table
-       group with more than one link to it */
-   if (statbuf.nlink > 1)
-   {
-    if ((j = trav_table_search(objno, table )) < 0 )
-     return -1;
+                    /* print it */
+                    if(print)
+                        printf(" %-10s %s\n", "dataset", path  );
+                } /* end if */
 
-    trav_table_addlink(table,j,path);
+                /* search table dataset with more than one link to it */
+                if(statbuf.nlink > 1) {
+                    if((j = trav_table_search(objno, table)) < 0)
+                        return -1;
 
-    if ( table->objs[j].displayed == 0 )
-    {
-     table->objs[j].displayed = 1;
-    }
-    else
-    {
-     /* print it */
-     if (print)
-      printf(" %-10s %s %s %s\n", "group", path, "->", table->objs[j].name  );
-    }
+                    trav_table_addlink(table, j, path);
 
-   }
+                    if(table->objs[j].displayed == 0) {
+                        table->objs[j].displayed = 1;
+                    }
+                    else {
+                        /* print it */
+                        if(print)
+                            printf(" %-10s %s %s %s\n", "dataset", path, "->", table->objs[j].name);
+                    } /* displayed==1 */
+                } /* nlink>1 */
+                break;
 
-   break;
+            /*-------------------------------------------------------------------------
+             * H5G_TYPE
+             *-------------------------------------------------------------------------
+             */
 
-  /*-------------------------------------------------------------------------
-   * H5G_DATASET
-   *-------------------------------------------------------------------------
-   */
+            case H5G_TYPE:
+                /* increment */
+                inserted_objs++;
 
-  case H5G_DATASET:
+                /* nlink is number of hard links to object */
+                if(statbuf.nlink > 0  && trav_table_search(objno, table) == -1) {
+                    /* add object to table */
+                    trav_table_add(objno, path, H5G_TYPE, table);
 
-    /* increment */
-   inserted_objs++;
-
-   /* nlink is number of hard links to object */
-   if (statbuf.nlink > 0  && trav_table_search(objno, table ) == -1)
-   {
-    /* add object to table */
-    trav_table_add(objno, path, H5G_DATASET, table );
-
-    /* print it */
-    if (print)
-     printf(" %-10s %s\n", "dataset", path  );
-   }
-
-   /* search table
-       dataset with more than one link to it */
-   if (statbuf.nlink > 1)
-   {
-    if ((j = trav_table_search(objno, table )) < 0 )
-     return -1;
-
-    trav_table_addlink(table,j,path);
-
-    if ( table->objs[j].displayed == 0 )
-    {
-     table->objs[j].displayed = 1;
-    }
-    else
-    {
-     /* print it */
-     if (print)
-      printf(" %-10s %s %s %s\n", "dataset", path, "->", table->objs[j].name  );
-    } /* displayed==1 */
-   } /* nlink>1 */
-
-
-   break;
-
-  /*-------------------------------------------------------------------------
-   * H5G_TYPE
-   *-------------------------------------------------------------------------
-   */
-
-  case H5G_TYPE:
-
-   /* increment */
-   inserted_objs++;
-
-   /* nlink is number of hard links to object */
-   if (statbuf.nlink > 0  && trav_table_search(objno, table ) == -1)
-   {
-    /* add object to table */
-    trav_table_add(objno, path, H5G_TYPE, table );
-
-     /* print it */
-    if (print)
-     printf(" %-10s %s\n", "datatype", path  );
-   }
-
-   break;
+                    /* print it */
+                    if(print)
+                        printf(" %-10s %s\n", "datatype", path  );
+                } /* end if */
+                break;
 
 
-        /*-------------------------------------------------------------------------
-         * H5G_LINK
-         *-------------------------------------------------------------------------
-         */
+            /*-------------------------------------------------------------------------
+             * H5G_LINK
+             *-------------------------------------------------------------------------
+             */
 
-        case H5G_LINK:
-            /* increment */
-            inserted_objs++;
+            case H5G_LINK:
+                /* increment */
+                inserted_objs++;
 
-            /* add object to table */
-            trav_table_add(HADDR_UNDEF, path, H5G_LINK, table);
+                /* add object to table */
+                trav_table_add(HADDR_UNDEF, path, H5G_LINK, table);
 
-            if(statbuf.linklen > 0) {
-                char *targbuf;
-
-                targbuf = HDmalloc(statbuf.linklen);
-                assert(targbuf);
-                H5Lget_val(loc_id, path, targbuf, statbuf.linklen, H5P_DEFAULT);
-                if(print)
-                    printf(" %-10s %s -> %s\n", "link", path, targbuf);
-                free(targbuf);
-            }
-            else {
-                if(print)
-                    printf(" %-10s %s ->\n", "link", path);
-            }
-            break;
-
-        /*-------------------------------------------------------------------------
-         * H5G_UDLINK
-         *-------------------------------------------------------------------------
-         */
-
-        case H5G_UDLINK:
-            {
-            H5L_info_t linkbuf;
-
-            /* increment */
-            inserted_objs++;
-
-            /* add object to table */
-            trav_table_add(HADDR_UNDEF, path, H5G_UDLINK, table );
-
-            /* Get type of link */
-            H5E_BEGIN_TRY {
-                /* get link class info */
-                H5Lget_info( loc_id, path, &linkbuf, H5P_DEFAULT);
-            } H5E_END_TRY;
-
-            if(linkbuf.type == H5L_TYPE_EXTERNAL) {
                 if(statbuf.linklen > 0) {
                     char *targbuf;
-                    const char *filename;
-                    const char *objname;
 
                     targbuf = HDmalloc(statbuf.linklen);
                     assert(targbuf);
                     H5Lget_val(loc_id, path, targbuf, statbuf.linklen, H5P_DEFAULT);
-                    H5Lunpack_elink_val(targbuf, statbuf.linklen, NULL, &filename, &objname);
                     if(print)
-                        printf(" %-10s %s -> %s %s\n", "ext link", path, filename, objname);
+                        printf(" %-10s %s -> %s\n", "link", path, targbuf);
                     free(targbuf);
-                } /* end if */
+                }
                 else {
                     if(print)
-                        printf(" %-10s %s ->\n", "udlink", path);
+                        printf(" %-10s %s ->\n", "link", path);
+                }
+                break;
+
+            /*-------------------------------------------------------------------------
+             * H5G_UDLINK
+             *-------------------------------------------------------------------------
+             */
+
+            case H5G_UDLINK:
+                {
+                H5L_info_t linkbuf;
+
+                /* increment */
+                inserted_objs++;
+
+                /* add object to table */
+                trav_table_add(HADDR_UNDEF, path, H5G_UDLINK, table);
+
+                /* Get type of link */
+                H5E_BEGIN_TRY {
+                    /* get link class info */
+                    H5Lget_info(loc_id, path, &linkbuf, H5P_DEFAULT);
+                } H5E_END_TRY;
+
+                if(linkbuf.type == H5L_TYPE_EXTERNAL) {
+                    if(statbuf.linklen > 0) {
+                        char *targbuf;
+                        const char *filename;
+                        const char *objname;
+
+                        targbuf = HDmalloc(statbuf.linklen);
+                        assert(targbuf);
+                        H5Lget_val(loc_id, path, targbuf, statbuf.linklen, H5P_DEFAULT);
+                        H5Lunpack_elink_val(targbuf, statbuf.linklen, NULL, &filename, &objname);
+                        if(print)
+                            printf(" %-10s %s -> %s %s\n", "ext link", path, filename, objname);
+                        free(targbuf);
+                    } /* end if */
+                    else {
+                        if(print)
+                            printf(" %-10s %s ->\n", "udlink", path);
+                    } /* end else */
+                } /* end if */
+                else {  /* Unknown user-defined type */
+                    if(print)
+                        printf(" %-10s %s ->\n", "UD link type", path);
                 } /* end else */
-            } /* end if */
-            else {  /* Unknown user-defined type */
-                if(print)
-                    printf(" %-10s %s ->\n", "UD link type", path);
-            } /* end else */
-            }
-            break;
+                }
+                break;
 
 
-  default:
-    HDfprintf(stderr, "traverse: Unknown object %d!\n", type);
-    return (-1);
-   break;
+            default:
+                HDfprintf(stderr, "traverse: Unknown object %d!\n", type);
+                return(-1);
+                break;
+        } /* end switch */
 
-  }
+        if(name)
+            HDfree(name);
+        if(path)
+            HDfree(path);
+    } /* i */
 
-  /*-------------------------------------------------------------------------
-   * end switch
-   *-------------------------------------------------------------------------
-   */
-
-  if ( name )
-   HDfree( name );
-
-  if ( path )
-   HDfree( path );
-
- } /* i */
-
- return inserted_objs;
+    return inserted_objs;
 }
 
 /*-------------------------------------------------------------------------

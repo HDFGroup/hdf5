@@ -255,7 +255,7 @@ hsize_t h5diff(const char *fname1,
 
  if (nobjects1 < 0 || nobjects2 < 0)
  {
-  printf ("Error: Could not get get file contents\n");
+  printf ("Error: Could not get file contents\n");
   options->err_stat = 1;
 #ifdef H5_HAVE_PARALLEL
   if(g_Parallel)
