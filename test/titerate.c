@@ -303,8 +303,8 @@ test_iter_group(hid_t fapl, hbool_t new_format)
             TestErrPrintf("Group iteration function walked too far!\n");
 
         /* Verify that the correct name is retrieved */
-        if(HDstrcmp(info.name, lnames[idx - 1]) != 0)
-            TestErrPrintf("Group iteration function didn't return name correctly for link - lnames[%u] = '%s'!\n", (idx - 1), lnames[idx - 1]);
+        if(HDstrcmp(info.name, lnames[(size_t)(idx - 1)]) != 0)
+            TestErrPrintf("Group iteration function didn't return name correctly for link - lnames[%u] = '%s'!\n", (unsigned)(idx - 1), lnames[(size_t)(idx - 1)]);
     } /* end while */
     VERIFY(ret, -1, "H5Literate");
 
@@ -328,8 +328,8 @@ test_iter_group(hid_t fapl, hbool_t new_format)
             TestErrPrintf("Group iteration function walked too far!\n");
 
         /* Verify that the correct name is retrieved */
-        if(HDstrcmp(info.name, lnames[idx - 1]) != 0)
-            TestErrPrintf("Group iteration function didn't return name correctly for link - lnames[%u] = '%s'!\n", (idx - 1), lnames[idx - 1]);
+        if(HDstrcmp(info.name, lnames[(size_t)(idx - 1)]) != 0)
+            TestErrPrintf("Group iteration function didn't return name correctly for link - lnames[%u] = '%s'!\n", (unsigned)(idx - 1), lnames[(size_t)(idx - 1)]);
     } /* end while */
     VERIFY(ret, -1, "H5Literate");
 
