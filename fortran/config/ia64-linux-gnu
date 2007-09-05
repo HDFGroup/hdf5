@@ -19,12 +19,22 @@
 # the various compile modes.
 
 # Use Intel C & Fortran compiler by default.
+# Use mpicc & mpif90 for parallel by default (if it is available).
 if test "X-" =  "X-$CC"; then
-    CC=icc
-    CC_BASENAME=icc
+    if test "X-$enable_parallel" = "X-yes" && which mpicc > /dev/null; then
+        CC=mpicc
+        CC_BASENAME=mpicc
+    elif which icc > /dev/null; then
+        CC=icc
+        CC_BASENAME=icc
+    fi
 fi
 if test "X-" =  "X-$F9X"; then
-    F9X=ifort
+    if test "X-$enable_parallel" = "X-yes" && which mpif90 > /dev/null; then
+        F9X=mpif90
+    elif which ifort > /dev/null; then
+	F9X=ifort
+    fi
 fi
 
 #----------------------------------------------------------------------------

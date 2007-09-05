@@ -18,10 +18,16 @@
 # after configure starts and defines, among other things, flags for
 # the various compile modes.
 
-# Use Intel C compiler by default (if it's available).
-if test "X$CC" = "X" && which icc > /dev/null; then
-  CC=icc
-  CC_BASENAME=icc
+# Use Intel C compiler by default (if it is available).
+# Use mpicc for parallel by default (if it is available).
+if test "X$CC" = "X"; then
+    if test "X-$enable_parallel" = "X-yes" && which mpicc > /dev/null; then
+        CC=mpicc
+        CC_BASENAME=mpicc
+    elif which icc > /dev/null; then
+        CC=icc
+        CC_BASENAME=icc
+    fi
 fi
 
 #----------------------------------------------------------------------------
