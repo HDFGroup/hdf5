@@ -397,30 +397,6 @@ int do_copy_refobjs(hid_t fidin,
         }
     }
 
-
-
-    /*-------------------------------------------------------------------------
-    * the root is a special case, we get an ID for the root group
-    * and copy its attributes using that ID
-    * it must be done last, because the attributes might contain references to
-    * objects in the object list
-    *-------------------------------------------------------------------------
-    */
-
-    if ((grp_out = H5Gopen2(fidout, "/", H5P_DEFAULT)) < 0)
-        goto error;
-
-    if ((grp_in  = H5Gopen2(fidin, "/", H5P_DEFAULT)) < 0)
-        goto error;
-
-    if (copy_refs_attr(grp_in, grp_out, options, travt, fidout) < 0)
-        goto error;
-
-    if (H5Gclose(grp_out) < 0)
-        goto error;
-    if (H5Gclose(grp_in) < 0)
-        goto error;
-
     return 0;
 
 error:

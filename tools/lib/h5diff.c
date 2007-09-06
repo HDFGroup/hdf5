@@ -186,180 +186,156 @@ hsize_t h5diff(const char *fname1,
                const char *objname2,
                diff_opt_t *options)
 {
- int nobjects1, nobjects2;
- trav_info_t *info1 = NULL;
- trav_info_t *info2 = NULL;
- hid_t        file1_id=(-1), file2_id=(-1);
- char         filenames[2][1024];
- hsize_t      nfound = 0;
+    trav_info_t  *info1;
+    trav_info_t  *info2;
+    hid_t        file1_id = (-1), file2_id = (-1);
+    char         filenames[2][1024];
+    hsize_t      nfound = 0;
 
- memset(filenames, 0, 1024*2);
+    memset(filenames, 0, 1024*2);
 
- if (options->m_quiet &&
-  (options->m_verbose || options->m_report))
- {
-  printf("Error: -q (quiet mode) cannot be added to verbose or report modes\n");
-  options->err_stat=1;
-  return 0;
- }
+    if(options->m_quiet &&
+            (options->m_verbose || options->m_report))
+    {
+        printf("Error: -q (quiet mode) cannot be added to verbose or report modes\n");
+        options->err_stat=1;
+        return 0;
+    }
 
-/*-------------------------------------------------------------------------
- * open the files first; if they are not valid, no point in continuing
- *-------------------------------------------------------------------------
- */
+    /*-------------------------------------------------------------------------
+    * open the files first; if they are not valid, no point in continuing
+    *-------------------------------------------------------------------------
+    */
 
- /* disable error reporting */
- H5E_BEGIN_TRY
- {
-  /* Open the files */
-  if ((file1_id = H5Fopen (fname1, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
-  {
-   printf ("h5diff: <%s>: unable to open file\n", fname1);
-   options->err_stat = 1;
-
-#ifdef H5_HAVE_PARALLEL
-   if(g_Parallel)
-   {
-    /* Let tasks know that they won't be needed */
-    phdiff_dismiss_workers();
-   }
-#endif
-
-   goto out;
-  }
-  if ((file2_id = H5Fopen (fname2, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
-  {
-   printf ("h5diff: <%s>: unable to open file\n", fname2);
-   options->err_stat = 1;
+    /* disable error reporting */
+    H5E_BEGIN_TRY
+    {
+        /* Open the files */
+        if ((file1_id = H5Fopen (fname1, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        {
+            printf ("h5diff: <%s>: unable to open file\n", fname1);
+            options->err_stat = 1;
 
 #ifdef H5_HAVE_PARALLEL
-   if(g_Parallel)
-   {
-    /* Let tasks know that they won't be needed */
-    phdiff_dismiss_workers();
-   }
+            if(g_Parallel)
+            {
+                /* Let tasks know that they won't be needed */
+                phdiff_dismiss_workers();
+            }
 #endif
 
-   goto out;
-  }
-  /* enable error reporting */
- }
- H5E_END_TRY;
-
-/*-------------------------------------------------------------------------
- * get the number of objects in the files
- *-------------------------------------------------------------------------
- */
- nobjects1 = h5trav_getinfo (file1_id, NULL, 0);
- nobjects2 = h5trav_getinfo (file2_id, NULL, 0);
-
- if (nobjects1 < 0 || nobjects2 < 0)
- {
-  printf ("Error: Could not get file contents\n");
-  options->err_stat = 1;
-#ifdef H5_HAVE_PARALLEL
-  if(g_Parallel)
-  {
-   /* Let tasks know that they won't be needed */
-   phdiff_dismiss_workers();
-  }
-#endif
-  goto out;
- }
-
-/*-------------------------------------------------------------------------
- * get the list of objects in the files
- *-------------------------------------------------------------------------
- */
-
- info1 = (trav_info_t *) malloc (nobjects1 * sizeof (trav_info_t));
- info2 = (trav_info_t *) malloc (nobjects2 * sizeof (trav_info_t));
- if (info1 == NULL || info2 == NULL)
- {
-  printf ("Error: Not enough memory for object list\n");
-  options->err_stat = 1;
-  if (info1) h5trav_freeinfo (info1, nobjects1);
-  if (info2) h5trav_freeinfo (info2, nobjects1);
-#ifdef H5_HAVE_PARALLEL
-  if(g_Parallel)
-  {
-   /* Let tasks know that they won't be needed */
-   phdiff_dismiss_workers();
-  }
-#endif
-  goto out;
- }
-
- h5trav_getinfo (file1_id, info1, 0);
- h5trav_getinfo (file2_id, info2, 0);
-
-/*-------------------------------------------------------------------------
- * object name was supplied
- *-------------------------------------------------------------------------
- */
-
- if (objname1)
- {
+            goto out;
+        }
+        if ((file2_id = H5Fopen (fname2, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        {
+            printf ("h5diff: <%s>: unable to open file\n", fname2);
+            options->err_stat = 1;
 
 #ifdef H5_HAVE_PARALLEL
-  if(g_Parallel)
-  {
-   /* Let tasks know that they won't be needed */
-   phdiff_dismiss_workers();
-  }
+            if(g_Parallel)
+            {
+                /* Let tasks know that they won't be needed */
+                phdiff_dismiss_workers();
+            }
 #endif
-  assert (objname2);
-  options->cmn_objs = 1; /* eliminate warning */
-  nfound = diff_compare (file1_id, fname1, objname1, nobjects1, info1,
-   file2_id, fname2, objname2, nobjects2, info2,
-   options);
- }
 
-/*-------------------------------------------------------------------------
- * compare all
- *-------------------------------------------------------------------------
- */
+            goto out;
+        }
+    /* enable error reporting */
+    }
+    H5E_END_TRY;
 
- else
- {
+    /*-------------------------------------------------------------------------
+    * Initialize the info structs
+    *-------------------------------------------------------------------------
+    */
+    trav_info_init(&info1);
+    trav_info_init(&info2);
+
+    /*-------------------------------------------------------------------------
+    * get the list of objects in the files
+    *-------------------------------------------------------------------------
+    */
+    if(h5trav_getinfo(file1_id, info1) < 0 || h5trav_getinfo(file2_id, info2) < 0)
+    {
+        printf("Error: Could not get file contents\n");
+        options->err_stat = 1;
+#ifdef H5_HAVE_PARALLEL
+        if(g_Parallel)
+        {
+            /* Let tasks know that they won't be needed */
+            phdiff_dismiss_workers();
+        }
+#endif
+        goto out;
+    }
+
+    /*-------------------------------------------------------------------------
+    * object name was supplied
+    *-------------------------------------------------------------------------
+    */
+
+    if (objname1)
+    {
 
 #ifdef H5_HAVE_PARALLEL
-  if(g_Parallel)
-  {
-   int i;
-
-   if(  (strlen(fname1) > 1024) || (strlen(fname2) > 1024))
-   {
-    fprintf(stderr, "The parallel diff only supports path names up to 1024 characters\n");
-    MPI_Abort(MPI_COMM_WORLD, 0);
-   }
-
-   strcpy(filenames[0], fname1);
-   strcpy(filenames[1], fname2);
-
-   /* Alert the worker tasks that there's going to be work. */
-
-   for(i=1; i<g_nTasks; i++)
-    MPI_Send(filenames, 1024*2, MPI_CHAR, i, MPI_TAG_PARALLEL, MPI_COMM_WORLD);
-  }
+        if(g_Parallel)
+        {
+            /* Let tasks know that they won't be needed */
+            phdiff_dismiss_workers();
+        }
 #endif
-  nfound = diff_match (file1_id, nobjects1, info1,
-   file2_id, nobjects2, info2, options);
- }
+        assert (objname2);
+        options->cmn_objs = 1; /* eliminate warning */
+        nfound = diff_compare (file1_id, fname1, objname1, info1,
+                               file2_id, fname2, objname2, info2,
+                               options);
+    }
 
- h5trav_freeinfo (info1, nobjects1);
- h5trav_freeinfo (info2, nobjects2);
+    /*-------------------------------------------------------------------------
+    * compare all
+    *-------------------------------------------------------------------------
+    */
+
+    else
+    {
+
+#ifdef H5_HAVE_PARALLEL
+        if(g_Parallel)
+        {
+            int i;
+
+            if((HDstrlen(fname1) > 1024) || (HDstrlen(fname2) > 1024))
+            {
+                fprintf(stderr, "The parallel diff only supports path names up to 1024 characters\n");
+                MPI_Abort(MPI_COMM_WORLD, 0);
+            }
+
+            HDstrcpy(filenames[0], fname1);
+            HDstrcpy(filenames[1], fname2);
+
+            /* Alert the worker tasks that there's going to be work. */
+
+            for(i = 1; i < g_nTasks; i++)
+                MPI_Send(filenames, 1024 * 2, MPI_CHAR, i, MPI_TAG_PARALLEL, MPI_COMM_WORLD);
+        }
+#endif
+        nfound = diff_match(file1_id, info1, file2_id, info2, options);
+    }
+
+    trav_info_free(info1);
+    trav_info_free(info2);
 
 out:
- /* close */
- H5E_BEGIN_TRY
- {
-  H5Fclose (file1_id);
-  H5Fclose (file2_id);
- }
- H5E_END_TRY;
+    /* close */
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file1_id);
+        H5Fclose(file2_id);
+    }
+    H5E_END_TRY;
 
- return nfound;
+    return nfound;
 }
 
 
@@ -383,18 +359,16 @@ out:
  *-------------------------------------------------------------------------
  */
 hsize_t diff_match (hid_t file1_id,
-                    int nobjects1,
                     trav_info_t * info1,
                     hid_t file2_id,
-                    int nobjects2,
                     trav_info_t * info2,
                     diff_opt_t * options)
 {
- int more_names_exist = (nobjects1 > 0 && nobjects2 > 0) ? 1 : 0;
+ int more_names_exist = (info1->nused > 0 && info2->nused > 0) ? 1 : 0;
  trav_table_t *table = NULL;
  int cmp;
- int curr1 = 0;
- int curr2 = 0;
+ size_t curr1 = 0;
+ size_t curr2 = 0;
  unsigned infile[2];
  char c1, c2;
  hsize_t nfound = 0;
@@ -409,12 +383,12 @@ hsize_t diff_match (hid_t file1_id,
  while (more_names_exist)
  {
   /* criteria is string compare */
-  cmp = strcmp (info1[curr1].name, info2[curr2].name);
+  cmp = HDstrcmp(info1->paths[curr1].path, info2->paths[curr2].path);
   if (cmp == 0)
   {
    infile[0] = 1;
    infile[1] = 1;
-   trav_table_addflags (infile, info1[curr1].name, info1[curr1].type,
+   trav_table_addflags (infile, info1->paths[curr1].path, info1->paths[curr1].type,
     table);
 
    curr1++;
@@ -424,7 +398,7 @@ hsize_t diff_match (hid_t file1_id,
   {
    infile[0] = 1;
    infile[1] = 0;
-   trav_table_addflags (infile, info1[curr1].name, info1[curr1].type,
+   trav_table_addflags (infile, info1->paths[curr1].path, info1->paths[curr1].type,
     table);
    curr1++;
   }
@@ -432,37 +406,36 @@ hsize_t diff_match (hid_t file1_id,
   {
    infile[0] = 0;
    infile[1] = 1;
-   trav_table_addflags (infile, info2[curr2].name, info2[curr2].type,
+   trav_table_addflags (infile, info2->paths[curr2].path, info2->paths[curr2].type,
     table);
    curr2++;
   }
 
-  more_names_exist = (curr1 < nobjects1 && curr2 < nobjects2) ? 1 : 0;
-
+  more_names_exist = (curr1 < info1->nused && curr2 < info2->nused) ? 1 : 0;
 
  }    /* end while */
 
  /* list1 did not end */
- if (curr1 < nobjects1)
+ if (curr1 < info1->nused)
  {
-  while (curr1 < nobjects1)
+  while (curr1 < info1->nused)
   {
    infile[0] = 1;
    infile[1] = 0;
-   trav_table_addflags (infile, info1[curr1].name, info1[curr1].type,
+   trav_table_addflags (infile, info1->paths[curr1].path, info1->paths[curr1].type,
     table);
    curr1++;
   }
  }
 
  /* list2 did not end */
- if (curr2 < nobjects2)
+ if (curr2 < info2->nused)
  {
-  while (curr2 < nobjects2)
+  while (curr2 < info2->nused)
   {
    infile[0] = 0;
    infile[1] = 1;
-   trav_table_addflags (infile, info2[curr2].name, info2[curr2].type,
+   trav_table_addflags (infile, info2->paths[curr2].path, info2->paths[curr2].type,
     table);
    curr2++;
   }
@@ -789,17 +762,6 @@ hsize_t diff_match (hid_t file1_id,
  /* free table */
  trav_table_free (table);
 
-
-/*-------------------------------------------------------------------------
- * do the diff for the root.
- * this is a special case, we get an ID for the root group and call diff()
- * with this ID; it compares only the root group attributes
- *-------------------------------------------------------------------------
- */
-
- /* the manager can do this. */
- nfound += diff (file1_id, "/", file2_id, "/", options, H5G_GROUP);
-
  return nfound;
 }
 
@@ -821,20 +783,18 @@ hsize_t diff_match (hid_t file1_id,
 hsize_t diff_compare (hid_t file1_id,
                       const char *file1_name,
                       const char *obj1_name,
-                      int nobjects1,
                       trav_info_t * info1,
                       hid_t file2_id,
                       const char *file2_name,
                       const char *obj2_name,
-                      int nobjects2,
                       trav_info_t * info2,
                       diff_opt_t * options)
 {
  int f1 = 0, f2 = 0;
  hsize_t nfound = 0;
 
- int i = h5trav_getindex (obj1_name, nobjects1, info1);
- int j = h5trav_getindex (obj2_name, nobjects2, info2);
+ ssize_t i = h5trav_getindex (info1, obj1_name);
+ ssize_t j = h5trav_getindex (info2, obj2_name);
 
  if (i == -1)
  {
@@ -855,23 +815,23 @@ hsize_t diff_compare (hid_t file1_id,
  }
 
  /* use the name with "/" first, as obtained by iterator function */
- obj1_name = info1[i].name;
- obj2_name = info2[j].name;
+ obj1_name = info1->paths[i].path;
+ obj2_name = info2->paths[j].path;
 
  /* objects are not the same type */
- if (info1[i].type != info2[j].type)
+ if (info1->paths[i].type != info2->paths[j].type)
  {
   if (options->m_verbose)
    parallel_print
    ("Comparison not possible: <%s> is of type %s and <%s> is of type %s\n",
-   obj1_name, get_type (info1[i].type), obj2_name,
-   get_type (info2[j].type));
+   obj1_name, get_type (info1->paths[i].type), obj2_name,
+   get_type (info2->paths[j].type));
   options->not_cmp=1;
   return 0;
  }
 
  nfound =
-  diff (file1_id, obj1_name, file2_id, obj2_name, options, info1[i].type);
+  diff (file1_id, obj1_name, file2_id, obj2_name, options, info1->paths[i].type);
 
  return nfound;
 }

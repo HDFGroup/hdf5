@@ -4,6 +4,7 @@ Expected output for 'h5dump -n tfcontents1.h5'
 HDF5 "tfcontents1.h5" {
 FILE_CONTENTS {
  datatype   /#5616
+ group      /
  dataset    /dset
  dataset    /dset3 -> /dset
  dataset    /dset4 -> /dset
@@ -17,6 +18,6 @@ FILE_CONTENTS {
  link       /mylink -> mylink
  datatype   /mytype
  link       /softlink -> /dset
- UD link type /udlink ->
+ unknown type of UD link /udlink -> ???
  }
 }

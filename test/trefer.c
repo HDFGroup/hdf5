@@ -985,7 +985,7 @@ test_reference_group(void)
     hid_t sid;                  /* Dataspace ID */
     hobj_ref_t wref;            /* Reference to write */
     hobj_ref_t rref;            /* Reference to read */
-    hsize_t nobjs;
+    H5G_info_t ginfo;           /* Group info struct */
     char objname[NAME_SIZE];    /* Buffer to store name */
     H5G_obj_t objtype;          /* Object type */
     int count = 0;              /* Count within iterated group */
@@ -1065,14 +1065,12 @@ test_reference_group(void)
     CHECK(ret, FAIL, "H5Literate");
 
     /* Various queries on the group opened */
-    ret = H5Gget_num_objs(gid, &nobjs);
-    CHECK(ret, FAIL, "H5Gget_num_objs");
-
-    VERIFY(nobjs, 3, "H5Gget_num_objs");
+    ret = H5Gget_info(gid, ".", &ginfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Gget_info");
+    VERIFY(ginfo.nlinks, 3, "H5Gget_info");
 
     ret = H5Gget_objname_by_idx(gid, (hsize_t)0, objname, (size_t)NAME_SIZE);
     CHECK(ret, FAIL, "H5Gget_objname_by_idx");
-
     VERIFY_STR(objname, DSETNAME2, "H5Gget_objname_by_idx");
 
     objtype = H5Gget_objtype_by_idx(gid, (hsize_t)0);

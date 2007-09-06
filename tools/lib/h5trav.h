@@ -32,9 +32,15 @@
 typedef H5G_obj_t H5G_obj_t1;
 
 
-typedef struct trav_info_t {
-    char      *name;
+typedef struct trav_path_t {
+    char      *path;
     H5G_obj_t type;
+} trav_path_t;
+
+typedef struct trav_info_t {
+    size_t      nalloc;
+    size_t      nused;
+    trav_path_t *paths;
 } trav_info_t;
 
 
@@ -56,11 +62,10 @@ typedef struct trav_obj_t {
     haddr_t     objno;     /* object number from H5Gget_objinfo */
     unsigned    flags[2];  /* h5diff.object is present or not in both files*/
     char        *name;     /* name */
-    int         displayed; /* hard link already traversed once */
     H5G_obj_t   type;      /* type of object */
     trav_link_t *links;    /* array of possible link names */
-    int         sizelinks; /* size of links array */
-    unsigned    nlinks;    /* number of links */
+    size_t      sizelinks; /* size of links array */
+    size_t      nlinks;    /* number of links */
 } trav_obj_t;
 
 
@@ -70,8 +75,8 @@ typedef struct trav_obj_t {
  */
 
 typedef struct trav_table_t {
-    unsigned        size;
-    unsigned        nobjs;
+    size_t      size;
+    size_t      nobjs;
     trav_obj_t *objs;
 } trav_table_t;
 
@@ -89,23 +94,35 @@ extern "C" {
  * "h5trav info" public functions
  *-------------------------------------------------------------------------
  */
-int  h5trav_getinfo( hid_t fid, trav_info_t *info, int print );
-int  h5trav_getindex( const char *obj, int nobjs, trav_info_t *info );
-void h5trav_freeinfo( trav_info_t *info, int nobjs );
-void h5trav_printinfo(int nobjs, trav_info_t *info);
+int h5trav_getinfo(hid_t file_id, trav_info_t *info);
+ssize_t h5trav_getindex(const trav_info_t *info, const char *obj);
 
 /*-------------------------------------------------------------------------
  * "h5trav table" public functions
  *-------------------------------------------------------------------------
  */
 
-int  h5trav_getindext(const char *obj,trav_table_t *travt);
 int  h5trav_gettable(hid_t fid, trav_table_t *travt);
-void h5trav_printtable(trav_table_t *table);
+int  h5trav_getindext(const char *obj, const trav_table_t *travt);
+
+/*-------------------------------------------------------------------------
+ * "h5trav print" public functions
+ *-------------------------------------------------------------------------
+ */
+int h5trav_print(hid_t fid);
 
 #ifdef __cplusplus
 }
 #endif
+
+/*-------------------------------------------------------------------------
+ * info private functions
+ *-------------------------------------------------------------------------
+ */
+
+void trav_info_init(trav_info_t **info);
+
+void trav_info_free(trav_info_t *info);
 
 /*-------------------------------------------------------------------------
  * table private functions
@@ -116,24 +133,10 @@ void trav_table_init(trav_table_t **table);
 
 void trav_table_free(trav_table_t *table);
 
-int  trav_table_search(haddr_t objno,
-                       trav_table_t *table );
-
-void trav_table_add(haddr_t objno,
-                    char *objname,
-                    H5G_obj_t type,
-                    trav_table_t *table);
-
 void trav_table_addflags(unsigned *flags,
                          char *objname,
                          H5G_obj_t type,
                          trav_table_t *table);
-
-
-void trav_table_addlink(trav_table_t *table,
-                        int j /* the object index */,
-                        char *path );
-
 
 #endif  /* H5TRAV_H__ */
 

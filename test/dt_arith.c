@@ -4947,7 +4947,7 @@ run_int_fp_conv(const char *name)
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_LONG, H5T_NATIVE_LDOUBLE);
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_ULONG, H5T_NATIVE_LDOUBLE);
 #endif
-#ifdef H5_SIZEOF_LONG_LONG!=H5_SIZEOF_LONG
+#if H5_SIZEOF_LONG_LONG!=H5_SIZEOF_LONG
 #if H5_LLONG_TO_LDOUBLE_CORRECT
     nerrors += test_conv_int_fp(name, TEST_NORMAL, H5T_NATIVE_LLONG, H5T_NATIVE_LDOUBLE);
 #else /* H5_LLONG_TO_LDOUBLE_CORRECT */
@@ -5071,7 +5071,7 @@ run_fp_int_conv(const char *name)
             nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_DOUBLE, H5T_NATIVE_ULONG);
 #endif
 
-#ifdef H5_SIZEOF_LONG_LONG!=H5_SIZEOF_LONG
+#if H5_SIZEOF_LONG_LONG!=H5_SIZEOF_LONG
             if(!strcmp(name, "hw")) { /* Hardware conversion */
                 /* Windows .NET 2003 doesn't work for hardware conversion of this case.
                  * .NET should define this macro H5_HW_FP_TO_LLONG_NOT_WORKS. */

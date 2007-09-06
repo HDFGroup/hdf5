@@ -94,20 +94,16 @@ hsize_t diff( hid_t      file1_id,
 hsize_t diff_compare( hid_t file1_id,
                       const char *file1_name,
                       const char *obj1_name,
-                      int nobjects1,
                       trav_info_t *info1,
                       hid_t file2_id,
                       const char *file2_name,
                       const char *obj2_name,
-                      int nobjects2,
                       trav_info_t *info2,
                       diff_opt_t *options );
 
 hsize_t diff_match( hid_t file1_id,
-                    int nobjects1,
                     trav_info_t *info1,
                     hid_t file2_id,
-                    int nobjects2,
                     trav_info_t *info2,
                     diff_opt_t *options );
 

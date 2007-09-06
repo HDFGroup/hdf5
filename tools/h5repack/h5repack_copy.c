@@ -329,9 +329,18 @@ int do_copy_objects(hid_t fidin,
             */
             case H5G_GROUP:
                 if (options->verbose)
-                printf(FORMAT_OBJ,"group",travt->objs[i].name );
+                    printf(FORMAT_OBJ,"group",travt->objs[i].name );
 
-                if (options->grp_compact>0 || options->grp_indexed>0) {
+                /*-------------------------------------------------------------------------
+                * the root is a special case, we get an ID for the root group
+                * and copy its attributes using that ID
+                *-------------------------------------------------------------------------
+                */
+                if(HDstrcmp(travt->objs[i].name, "/") == 0) {
+                    if ((grp_out = H5Gopen2(fidout, "/", H5P_DEFAULT)) < 0)
+                        goto error;
+                }
+                else if (options->grp_compact>0 || options->grp_indexed>0) {
                     /* Set up group creation property list */
                     if((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0)
                         goto error;
@@ -779,26 +788,6 @@ int do_copy_objects(hid_t fidin,
         }
 
     } /* i */
-
-    /*-------------------------------------------------------------------------
-    * the root is a special case, we get an ID for the root group
-    * and copy its attributes using that ID
-    *-------------------------------------------------------------------------
-    */
-
-    if ((grp_out = H5Gopen2(fidout, "/", H5P_DEFAULT)) < 0)
-        goto error;
-
-    if ((grp_in  = H5Gopen2(fidin, "/", H5P_DEFAULT)) < 0)
-        goto error;
-
-    if (copy_attr(grp_in,grp_out,options)<0)
-        goto error;
-
-    if (H5Gclose(grp_out)<0)
-        goto error;
-    if (H5Gclose(grp_in)<0)
-        goto error;
 
     return 0;
 

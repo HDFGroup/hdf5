@@ -1476,6 +1476,7 @@ test_compat(hid_t fapl, hbool_t new_format)
     hid_t group1_id = -1;
     hid_t group2_id = -1;
     H5G_stat_t	sb_hard1, sb_hard2, sb_soft1;
+    hsize_t num_objs;           /* Number of objects in a group */
     char filename[1024];
     char linkval[1024];
 
@@ -1502,6 +1503,12 @@ test_compat(hid_t fapl, hbool_t new_format)
     if(H5Glink(file_id, H5G_LINK_HARD, "group2", "group1/link_to_group2") < 0) FAIL_STACK_ERROR
     if(H5Glink2(file_id, "group1", H5G_LINK_HARD, group2_id, "link_to_group1") < 0) FAIL_STACK_ERROR
     if(H5Glink2(file_id, "link_to_group1", H5G_LINK_SOFT, H5G_SAME_LOC, "group2/soft_link_to_group1") < 0) FAIL_STACK_ERROR
+
+    /* Test getting the number of objects in a group */
+    if(H5Gget_num_objs(file_id, &num_objs) < 0) FAIL_STACK_ERROR
+    if(num_objs != 2) TEST_ERROR
+    if(H5Gget_num_objs(group1_id, &num_objs) < 0) FAIL_STACK_ERROR
+    if(num_objs != 1) TEST_ERROR
 
     /* Test that H5Glink created hard links properly */
     if(H5Gget_objinfo(file_id, "/group2", TRUE, &sb_hard1) < 0) FAIL_STACK_ERROR
@@ -1556,7 +1563,7 @@ test_compat(hid_t fapl, hbool_t new_format)
         if(H5Gopen2(file_id, "moved_group1/moved_group2", H5P_DEFAULT) >=0) TEST_ERROR
     } H5E_END_TRY;
 
-    if(H5Fclose(file_id) < 0) TEST_ERROR
+    if(H5Fclose(file_id) < 0) FAIL_STACK_ERROR
 
     PASSED();
     return 0;

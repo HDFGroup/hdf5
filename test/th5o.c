@@ -47,7 +47,7 @@ test_h5o_open(void)
     hid_t       grp, dset, dtype, dspace;   /* Object identifiers */
     hsize_t     dims[RANK];
     H5I_type_t  id_type;                    /* Type of IDs returned from H5Oopen */
-    hsize_t     num_objs = 0;               /* Number of objects in the group */
+    H5G_info_t  ginfo;                      /* Group info struct */
     H5T_class_t type_class;                 /* Class of the datatype */
     herr_t      ret;                        /* Value returned from API calls */
 
@@ -102,9 +102,9 @@ test_h5o_open(void)
     VERIFY(id_type, H5I_DATASET, "H5Iget_type for dataset ID");
 
     /* Do something more complex with each of the IDs to make sure they "work" */
-    ret = H5Gget_num_objs(grp, &num_objs);
-    CHECK(ret, FAIL, "H5Gget_num_objs");
-    VERIFY(num_objs, 1, "H5Gget_num_objs"); /* There should be one object, the datatype */
+    ret = H5Gget_info(grp, ".", &ginfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Gget_info");
+    VERIFY(ginfo.nlinks, 1, "H5Gget_info"); /* There should be one object, the datatype */
 
     type_class = H5Tget_class(dtype);
     VERIFY(type_class, H5T_INTEGER, "H5Tget_class");
@@ -249,7 +249,7 @@ test_h5o_open_by_addr(void)
     haddr_t dtype_addr;
     hsize_t     dims[RANK];
     H5I_type_t  id_type;                    /* Type of IDs returned from H5Oopen */
-    hsize_t     num_objs = 0;               /* Number of objects in the group */
+    H5G_info_t  ginfo;                      /* Group info struct */
     H5T_class_t type_class;                 /* Class of the datatype */
     herr_t      ret;                        /* Value returned from API calls */
 
@@ -315,9 +315,9 @@ test_h5o_open_by_addr(void)
     VERIFY(id_type, H5I_DATASET, "H5Iget_type for dataset ID");
 
     /* Do something more complex with each of the IDs to make sure they "work" */
-    ret = H5Gget_num_objs(grp, &num_objs);
-    CHECK(ret, FAIL, "H5Gget_num_objs");
-    VERIFY(num_objs, 1, "H5Gget_num_objs"); /* There should be one object, the datatype */
+    ret = H5Gget_info(grp, ".", &ginfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Gget_info");
+    VERIFY(ginfo.nlinks, 1, "H5Gget_info"); /* There should be one object, the datatype */
 
     type_class = H5Tget_class(dtype);
     VERIFY(type_class, H5T_INTEGER, "H5Tget_class");

@@ -2792,7 +2792,7 @@ static void dump_fcontents(hid_t fid)
     }
 
     /* print objects in the files */
-    h5trav_getinfo(fid, NULL, 1);
+    h5trav_print(fid);
 
     printf(" %s\n",END);
 }

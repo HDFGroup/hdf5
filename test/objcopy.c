@@ -1242,8 +1242,8 @@ error:
 static int
 compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
 {
-    hsize_t num_objs;           /* Number of objects in group */
-    hsize_t num_objs2;          /* Number of objects in group */
+    H5G_info_t ginfo;           /* Group info struct */
+    H5G_info_t ginfo2;          /* Group info struct */
     hsize_t idx;                /* Index over the objects in group */
     unsigned cpy_flags;         /* Object copy flags */
 
@@ -1255,17 +1255,17 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
         cpy_flags = 0;
 
     /* Check if both groups have the same # of objects */
-    if(H5Gget_num_objs(gid, &num_objs) < 0) TEST_ERROR
-    if(H5Gget_num_objs(gid2, &num_objs2) < 0) TEST_ERROR
+    if(H5Gget_info(gid, ".", &ginfo, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gget_info(gid2, ".", &ginfo2, H5P_DEFAULT) < 0) TEST_ERROR
     if((cpy_flags & H5O_COPY_SHALLOW_HIERARCHY_FLAG) && depth == 0) {
-        if(num_objs2 != 0) TEST_ERROR
+        if(ginfo2.nlinks != 0) TEST_ERROR
     } /* end if */
     else {
-        if(num_objs != num_objs2) TEST_ERROR
+        if(ginfo.nlinks != ginfo2.nlinks) TEST_ERROR
     } /* end if */
 
     /* Check contents of groups */
-    if(num_objs2 > 0) {
+    if(ginfo2.nlinks > 0) {
         char objname[NAME_BUF_SIZE];            /* Name of object in group */
         char objname2[NAME_BUF_SIZE];           /* Name of object in group */
         H5G_obj_t objtype;                      /* Type of object in group */
@@ -1277,7 +1277,7 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
         hid_t oid, oid2;                        /* IDs of objects within group */
 
         /* Loop over contents of groups */
-        for(idx = 0; idx < num_objs; idx++) {
+        for(idx = 0; idx < ginfo.nlinks; idx++) {
             /* Check name of objects */
             if(H5Gget_objname_by_idx(gid, idx, objname, (size_t)NAME_BUF_SIZE) < 0) TEST_ERROR
             if(H5Gget_objname_by_idx(gid2, idx, objname2, (size_t)NAME_BUF_SIZE) < 0) TEST_ERROR

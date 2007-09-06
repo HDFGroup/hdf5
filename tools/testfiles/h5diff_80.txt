@@ -4,6 +4,7 @@ Expected output for 'h5diff h5diff_dset1.h5 h5diff_dset2.h5 -v'
 
 file1     file2
 ---------------------------------------
+    x      x    /              
     x      x    /dset          
     x      x    /dsetref       
     x      x    /g1            
@@ -39,6 +40,8 @@ file1     file2
     x      x    /g1/vlen3D     
     x      x    /refreg        
 
+group  : </> and </>
+0 differences found
 dataset: </dset> and </dset>
 size:           [2]           [2]
 position        dset            dset            difference          
@@ -782,8 +785,6 @@ point #1              (2,2)              (3,3)
 point #3              (1,6)              (2,5)
 point #4              (2,8)              (1,7)
 4 differences found
-group  : </> and </>
-0 differences found
 --------------------------------
 Some objects are not comparable
 --------------------------------

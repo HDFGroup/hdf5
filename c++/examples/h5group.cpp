@@ -142,7 +142,7 @@ int main(void)
 	/*
 	 * Create hard link to the Data group.
 	 */
-	file->link( H5G_LINK_HARD, "Data", "Data_new" );
+	file->link( H5L_TYPE_HARD, "Data", "Data_new" );
 
 	/*
 	 * We can access "Compressed_Data" dataset using created

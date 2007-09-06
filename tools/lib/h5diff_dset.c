@@ -25,6 +25,7 @@
  *
  *-------------------------------------------------------------------------
  */
+#if defined (H5DIFF_DEBUG)
 static void
 print_size (int rank, hsize_t *dims)
 {
@@ -40,6 +41,7 @@ print_size (int rank, hsize_t *dims)
     parallel_print("]\n" );
     
 }
+#endif /* H5DIFF_DEBUG */
 
 
 
@@ -279,8 +281,6 @@ hsize_t diff_datasetid( hid_t did1,
 
  storage_size1=H5Dget_storage_size(did1);
  storage_size2=H5Dget_storage_size(did2);
- if (storage_size1<0 || storage_size2<0)
-  goto error;
 
  if (storage_size1==0 || storage_size2==0)
  {

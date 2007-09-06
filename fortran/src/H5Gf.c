@@ -197,7 +197,7 @@ DONE:
 
 /*----------------------------------------------------------------------------
  * Name:        h5gn_members_c
- * Purpose:     Call H5Gn_members to find number of objects in the group
+ * Purpose:     Call H5Gget_num_objs to find number of objects in the group
  * Inputs:      loc_id - file or group identifier
  *              name - name of the group
  *              namelen - name length
@@ -211,8 +211,7 @@ int_f
 nh5gn_members_c(hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *nmembers)
 {
     char *c_name = NULL;
-    hsize_t c_nmembers;
-    hid_t gid = (-1);
+    H5G_info_t ginfo;
     int ret_value = -1;
 
     /*
@@ -221,22 +220,14 @@ nh5gn_members_c(hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *nmembers)
     if(NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
         goto DONE;
 
-    /* Get a temporary group ID for the group to query */
-    if((gid = H5Gopen2((hid_t)*loc_id, c_name, H5P_DEFAULT)) < 0)
+    /* Call H5Gget_info() for the number of objects in the group */
+    if(H5Gget_info((hid_t)*loc_id, c_name, &ginfo, H5P_DEFAULT) < 0)
         goto DONE;
 
-    /* Call H5Gget_num_objs() for the number of objects in the group */
-    if(H5Gget_num_objs(gid, &c_nmembers) < 0)
-        goto DONE;
-
-    *nmembers = (int_f)c_nmembers;
+    *nmembers = (int_f)ginfo.nlinks;
     ret_value = 0;
 
 DONE:
-    /* Close the temporary group, if it was opened */
-    if(gid > 0)
-        H5Gclose(gid);
-
     if(c_name)
         HDfree(c_name);
     return ret_value;

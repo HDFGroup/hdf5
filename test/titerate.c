@@ -132,7 +132,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     char *lnames[NDATASETS + 2];/* Names of the links created */
     char dataset_name[NAMELEN];  /* dataset name */
     iter_info info;         /* Custom iteration information */
-    hsize_t num_membs;      /* Number of group members */
+    H5G_info_t ginfo;       /* Buffer for querying object's info */
     herr_t ret;		    /* Generic return value */
 
     /* Output message about test being performed */
@@ -203,18 +203,18 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     file = H5Fopen(DATAFILE, H5F_ACC_RDONLY, fapl);
     CHECK(file, FAIL, "H5Fopen");
 
-    /* These two functions, H5Gget_num_objs and H5Gget_objname_by_idx, actually
+    /* These two functions, H5Gget_objtype_by_idx and H5Gget_objname_by_idx, actually
      * iterate through B-tree for group members in internal library design.
      */
     {
         root_group = H5Gopen2(file, "/", H5P_DEFAULT);
         CHECK(root_group, FAIL, "H5Gopen2");
 
-        ret = H5Gget_num_objs(root_group, &num_membs);
-        CHECK(ret, FAIL, "H5Gget_num_objs");
-        VERIFY(num_membs, (NDATASETS + 2), "H5Gget_num_objs");
+        ret = H5Gget_info(root_group, ".", &ginfo, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Gget_info");
+        VERIFY(ginfo.nlinks, (NDATASETS + 2), "H5Gget_info");
 
-        for(i = 0; i< (int)num_membs; i++) {
+        for(i = 0; i< (int)ginfo.nlinks; i++) {
             H5G_obj_t obj_type;         /* Type of object in file */
 
             ret = (herr_t)H5Gget_objname_by_idx(root_group, (hsize_t)i, dataset_name, (size_t)NAMELEN);
@@ -233,16 +233,16 @@ test_iter_group(hid_t fapl, hbool_t new_format)
         CHECK(ret, FAIL, "H5Gclose");
     }
 
-    /* These two functions, H5Gget_num_objs and H5Gget_objname_by_idx, actually
+    /* These two functions, H5Gget_objtype_by_idx and H5Gget_objname_by_idx, actually
      * iterate through B-tree for group members in internal library design.
      *  (Same as test above, but with the file ID instead of opening the root group)
      */
     {
-        ret = H5Gget_num_objs(file, &num_membs);
-        CHECK(ret, FAIL, "H5Gget_num_objs");
-        VERIFY(num_membs, NDATASETS + 2, "H5Gget_num_objs");
+        ret = H5Gget_info(file, ".", &ginfo, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Gget_info");
+        VERIFY(ginfo.nlinks, NDATASETS + 2, "H5Gget_info");
 
-        for(i = 0; i< (int)num_membs; i++) {
+        for(i = 0; i< (int)ginfo.nlinks; i++) {
             H5G_obj_t obj_type;         /* Type of object in file */
 
             ret = (herr_t)H5Gget_objname_by_idx(file, (hsize_t)i, dataset_name, (size_t)NAMELEN);
@@ -708,7 +708,7 @@ static void test_grp_memb_funcs(hid_t fapl)
     char *obj_names[NDATASETS+2];/* Names of the objects in group */
     char dataset_name[NAMELEN];  /* dataset name */
     ssize_t name_len;       /* Length of object's name */
-    hsize_t num_membs;      /* Number of group members */
+    H5G_info_t ginfo;       /* Buffer for querying object's info */
     herr_t ret;		    /* Generic return value */
 
     /* Output message about test being performed */
@@ -772,17 +772,17 @@ static void test_grp_memb_funcs(hid_t fapl)
     file = H5Fopen(DATAFILE, H5F_ACC_RDONLY, fapl);
     CHECK(file, FAIL, "H5Fopen");
 
-    /* These two functions, H5Gget_num_objs and H5Gget_objname_by_idx, actually
+    /* These two functions, H5Gget_objtype_by_idx and H5Gget_objname_by_idx, actually
      * iterate through B-tree for group members in internal library design.
      */
     root_group = H5Gopen2(file, "/", H5P_DEFAULT);
     CHECK(root_group, FAIL, "H5Gopen2");
 
-    ret = H5Gget_num_objs(root_group, &num_membs);
-    CHECK(ret, FAIL, "H5Gget_num_objs");
-    VERIFY(num_membs,NDATASETS+2,"H5Gget_num_objs");
+    ret = H5Gget_info(root_group, ".", &ginfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Gget_info");
+    VERIFY(ginfo.nlinks, (NDATASETS + 2), "H5Gget_info");
 
-    for(i=0; i< (int)num_membs; i++) {
+    for(i=0; i< (int)ginfo.nlinks; i++) {
         H5G_obj_t obj_type;         /* Type of object in file */
 
         /* Test with NULL for name, to query length */
@@ -819,7 +819,7 @@ static void test_grp_memb_funcs(hid_t fapl)
     HDqsort(obj_names, (size_t)(NDATASETS + 2), sizeof(char *), iter_strcmp);
 
     /* Compare object names */
-    for(i = 0; i< (int)num_membs; i++) {
+    for(i = 0; i< (int)ginfo.nlinks; i++) {
         ret = HDstrcmp(dnames[i], obj_names[i]);
         VERIFY(ret, 0, "HDstrcmp");
     } /* end for */
@@ -848,11 +848,11 @@ static void test_links(hid_t fapl)
     hid_t file;             /* File ID */
     char obj_name[NAMELEN]; /* Names of the object in group */
     ssize_t name_len;       /* Length of object's name */
-    herr_t ret;		    /* Generic return value */
     hid_t    gid, gid1;
-    hsize_t i;
     H5G_obj_t obj_type;     /* Type of object */
-    hsize_t   nobjs;        /* Number of objects */
+    H5G_info_t ginfo;       /* Buffer for querying object's info */
+    hsize_t i;
+    herr_t ret;		    /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Soft and Hard Link Iteration Functionality\n"));
@@ -875,12 +875,12 @@ static void test_links(hid_t fapl)
     ret = H5Lcreate_hard(gid, "/g1", H5L_SAME_LOC, "hardlink", H5P_DEFAULT, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Lcreate_hard");
 
-    ret = H5Gget_num_objs(gid, &nobjs);
-    CHECK(ret, FAIL, "H5Gget_num_objs");
-    VERIFY(nobjs,3,"H5Gget_num_objs");
+    ret = H5Gget_info(gid, ".", &ginfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Gget_info");
+    VERIFY(ginfo.nlinks, 3, "H5Gget_info");
 
-    /* Test these two functions, H5Gget_num_objs and H5Gget_objname_by_idx */
-    for(i = 0; i < nobjs; i++) {
+    /* Test these two functions, H5Gget_objtype_by_idx and H5Gget_objname_by_idx */
+    for(i = 0; i < ginfo.nlinks; i++) {
         /* Get object name */
         name_len = H5Gget_objname_by_idx(gid, i, obj_name, (size_t)NAMELEN);
         CHECK(name_len, FAIL, "H5Gget_objname_by_idx");

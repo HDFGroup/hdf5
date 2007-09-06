@@ -981,13 +981,14 @@ int CommonFG::iterateElems( const H5std_string& name, int *idx, H5G_iterate_t op
 //--------------------------------------------------------------------------
 hsize_t CommonFG::getNumObjs() const
 {
-   hsize_t num_objs;
-   herr_t ret_value = H5Gget_num_objs(getLocId(), &num_objs);
+   H5G_info_t 		ginfo;                  /* Group information */
+
+   herr_t ret_value = H5Gget_info(getLocId(), ".", &ginfo, H5P_DEFAULT);
    if(ret_value < 0)
    {
-      throwException("getNumObjs", "H5Gget_num_objs failed");
+      throwException("getNumObjs", "H5Gget_info failed");
    }
-   return (num_objs);
+   return (ginfo.nlinks);
 }
 
 //--------------------------------------------------------------------------
@@ -1118,3 +1119,4 @@ CommonFG::~CommonFG() {}
 #ifndef H5_NO_NAMESPACE
 }
 #endif
+

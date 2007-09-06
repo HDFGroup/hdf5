@@ -461,9 +461,8 @@ static herr_t
 group_stats(hid_t group, const char *name, const char *fullname,
     const H5O_info_t *oi, H5L_iterate_t walk, iter_t *iter)
 {
-    hid_t 		gid;                    /* Group ID */
     const char 		*last_container;
-    hsize_t 		num_objs;
+    H5G_info_t 		ginfo;                  /* Group information */
     unsigned 		bin;                   	/* "bin" the number of objects falls in */
     herr_t 		ret;
 
@@ -476,21 +475,18 @@ group_stats(hid_t group, const char *name, const char *fullname,
     iter->group_ohdr_info.total_size += oi->hdr.space.total;
     iter->group_ohdr_info.free_size += oi->hdr.space.free;
 
-    gid = H5Gopen2(group, name, H5P_DEFAULT);
-    assert(gid > 0);
-
-    /* Get number of links in this group */
-    ret = H5Gget_num_objs(gid, &num_objs);
+    /* Get group information */
+    ret = H5Gget_info(group, name, &ginfo, H5P_DEFAULT);
     assert(ret >= 0);
 
     /* Update link stats */
-    if(num_objs < SIZE_SMALL_GROUPS)
-        (iter->num_small_groups[(size_t)num_objs])++;
-    if(num_objs > iter->max_fanout)
-        iter->max_fanout = num_objs;
+    if(ginfo.nlinks < SIZE_SMALL_GROUPS)
+        (iter->num_small_groups[(size_t)ginfo.nlinks])++;
+    if(ginfo.nlinks > iter->max_fanout)
+        iter->max_fanout = ginfo.nlinks;
 
     /* Add group count to proper bin */
-    bin = ceil_log10((unsigned long)num_objs);
+    bin = ceil_log10((unsigned long)ginfo.nlinks);
     if((bin + 1) > iter->group_nbins) {
         /* Allocate more storage for info about dataset's datatype */
         iter->group_bins = realloc(iter->group_bins, (bin + 1) * sizeof(unsigned long));
@@ -513,10 +509,6 @@ group_stats(hid_t group, const char *name, const char *fullname,
 
     /* Update attribute metadata info */
     ret = attribute_stats(iter, oi);
-    assert(ret >= 0);
-
-    /* Close current group */
-    ret = H5Gclose(gid);
     assert(ret >= 0);
 
     /* Update current container info */
@@ -742,7 +734,7 @@ dataset_stats(hid_t group, const char *name, const H5O_info_t *oi, iter_t *iter)
  *-------------------------------------------------------------------------
  */
 static herr_t
-walk(hid_t group, const char *name, const H5L_info_t *linfo, void *_iter)
+walk(hid_t group, const char *name, const H5L_info_t UNUSED *linfo, void *_iter)
 {
     iter_t *iter = (iter_t *)_iter;
     H5O_info_t oi;
