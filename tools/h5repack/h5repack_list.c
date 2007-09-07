@@ -120,7 +120,7 @@ int check_objects(const char* fname,
                 }
                 else
                 {
-                    if ((did=H5Dopen(fid,travt->objs[i].name))<0)
+                    if ((did=H5Dopen(fid,name))<0)
                         goto out;
                     if ((sid=H5Dget_space(did))<0)
                         goto out;
