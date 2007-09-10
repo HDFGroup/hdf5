@@ -445,16 +445,8 @@ We provide 2 options for users to test HDF5 libraries and tools.
                                  libraries must have been built.
 
    Invoke a command prompt window and run hdf5check with appropriate option.
-
-   Test results are saved in two files:
-
-      c:\MyHDFstuff\hdf5\check_results.txt
-
-      c:\MyHDFstuff\hdf5\tests_results.txt.
-
-   In general, you only need to check tests_results.txt.  If all the tests 
-   passed, then you do not have to check check_results.txt.  If some tests 
-   failed, check check_results.txt can help you figure out what was wrong.
+   Users are encouraged to pipe the test output into a file.  You should find
+   no "*FAILED*" marks.
 
    Option 2: Step-by-step HDF5 libraries and tools testings
 
@@ -463,24 +455,20 @@ We provide 2 options for users to test HDF5 libraries and tools.
 
    They are:
 
-      release version
-      release dll version
-      debug version
-      debug dll version
+      release
+      release dll
+      debug
+      debug dll
 
    We strongly suggest you to redirect your testing results into an output file 
    so that you can easily check the testing results.
 
-   DLLs listed below should be placed into the Windows system directory.  A 
-   batch file named install_dll.bat is included in c:\MyHDFstuff\hdf5 directory.
-   Run this batch file and the following HDF5 DLLs will be copied to the system 
-   directory:
-
-      hdf5\proj\hdf5dll\release\hdf5dll.dll
-      hdf5\proj\hdf5dll\debug\hdf5ddll.dll
-      hdf5\test\libtestdll\release\libtestdll.dll
-      hdf5\test\libtestdll\debug\libtestddll.dll
-
+   HDF5 DLLs should be placed into the Windows system directory.  A batch file 
+   named install_dll.bat is included in c:\MyHDFstuff\hdf5 directory.  Run this 
+   batch file and all neccessary HDF5 DLLS will be placed in the system
+   directory.
+   
+   
    1. HDF5 library testing
 
       Open a command prompt in the hdf5\test directory
@@ -488,87 +476,76 @@ We provide 2 options for users to test HDF5 libraries and tools.
          (1) Basic tests
 
              a) Release Static, type:
-                hdf5test release >"Your output filename"
+                checktests release >"Your output filename"
 
              b) Release DLL, type:
-                hdf5test release dll >"Your output filename"
+                checktests release dll >"Your output filename"
 
              c) Debug Static, type:
-                hdf5test debug >"Your output filename"
+                checktests debug >"Your output filename"
 
              d) Debug DLL, type:
-                hdf5test debug dll >"Your output filename"
+                checktests debug dll >"Your output filename"
 
-         (2) Timing Tests
+      Use a text editor to check results. You should not find any FAILED marks 
+      in your output files.
+                
+   2. HDF5 performance testing
 
+      Open a command prompt in the hdf5\perform directory
+   
              a) Release Static, type:
-                hdf5timingtest release >"Your output filename"
+                checkperformtests release >"Your output filename"
 
              b) Release DLL, type:
-                hdf5timingtest release dll >"Your output filename"
+                checkperformtests release dll >"Your output filename"
 
              c) Debug Static, type:
-                hdf5timingtest debug >"Your output filename"
+                checkperformtests debug >"Your output filename"
 
              d) Debug DLL, type:
-                hdf5timingtest debug dll >"Your output filename"
+                checkperformtests debug dll >"Your output filename"
 
       Use a text editor to check results. You should not find any FAILED marks 
       in your output files.
 
-   2. HDF5 tools testing
+   3. HDF5 tools testing
 
-      To test HDF5 tools, cd back into hdf5 directory and then to tools 
-      directory (c:\MyHDFstuff\hdf5\tools).  The HDF5 tools testing results are 
-      saved into output files in tools directory by the testhdf5tools.bat as 
-      described below.
+      Open a command prompt in the hdf5\tools directory
 
          a) Release Static, type:
-            testhdf5tools release
-         Output file: toolstest_release.txt
+            checktools release >"Your output filename"
 
          b) Release DLL, type:
-            testhdf5tools release dll
-         Output file: toolstest_releasedll.txt
+            checktools release dll >"Your output filename"
 
          c) Debug Static, type:
-            testhdf5tools debug
-         Output file: toolstest_debug.txt
+            checktools debug >"Your output filename"
 
          d) Debug DLL, type:
-            testhdf5tools debug dll
-         Output file: toolstest_debugdll.txt
+            checktools debug dll >"Your output filename"
 
       Use a text editor to check results. You should not find any FAILED marks 
       in your output files.
 
-   3. HDF5 C++ library test
+   4. HDF5 C++ library test
 
       Skip this step UNLESS you have built HDF5 C++ libraries and want to test 
       them.
 
-      DLLs listed below should be placed into the Windows system directory.  A 
-      batch file named install_cppdll.bat is included in c:\MyHDFstuff\hdf5 
-      directory.  Run this batch file and the following HDF5 C++ DLLs will be 
-      copied to the system directory.
-
-         hdf5\proj\hdf5_cppdll\release\hdf5_cppdll.dll
-         hdf5\proj\hdf5_cppdll\debug\hdf5_cppddll.dll
-
-      Run hdf5cpptest.bat in the hdf5\c++\test directory at the
-      command prompt as below:
+      Open a command prompt in the hdf5\c++\test directory
 
          a) Release Static, type:
-            hdf5cpptest release >"Your output filename"
+            checkcpptests release >"Your output filename"
 
          b) Release DLL, type:
-            hdf5cpptest release dll >"Your output filename"
+            checkcpptests release dll >"Your output filename"
 
          c) Debug Static, type:
-            hdf5cpptest debug >"Your output filename"
+            checkcpptests debug >"Your output filename"
 
          d) Debug DLL, type:
-            hdf5cpptest debug dll >"Your output filename"
+            checkcpptests debug dll >"Your output filename"
 
       Use a text editor to check results. You should not find any FAILED marks 
       in your output files.
@@ -578,33 +555,19 @@ We provide 2 options for users to test HDF5 libraries and tools.
       Skip this step UNLESS you have built HDF5 Fortran libraries in Section 
       VII, and want to test them.
 
-      DLLs listed below should be placed into the Windows system directory.  A 
-      batch file named install_f90dll.bat is included in c:\MyHDFstuff\hdf5 
-      directory.  Run this batch file and the following HDF5 Fortran DLLs will 
-      be copied to the system directory.
-
-         hdf5\proj\hdf5_f90cstubdll\release\hdf5_f90cstubdll.dll
-         hdf5\proj\hdf5_f90cstubdll\debug\hdf5_f90cstubddll.dll
-         hdf5\proj\hdf5_fortrandll\release\hdf5_fortrandll.dll
-         hdf5\proj\hdf5_fortrandll\debug\hdf5_fortranddll.dll
-         hdf5\fortran\test\libtest_cstubdll\release\libtest_cstubdll.dll
-         hdf5\fortran\test\libtest_cstubdll\debug\libtest_cstubddll.dll
-         hdf5\fortran\test\libtest_fortrandll\release\libtest_fortrandll.dll
-         hdf5\fortran\test\libtest_fortrandll\debug\libtest_fortranddll.dll
-
-      Run testhdf5_fortran.bat at the command prompt as below:
+      Open a command prompt in the hdf5\fortran\test directory
       
          a) Release Static, type:
-            testhdf5_fortran release >"Your output filename"
+            checkfortrantests release >"Your output filename"
 
          b) Release DLL, type:
-            testhdf5_fortran release dll >"Your output filename"
+            checkfortrantests release dll >"Your output filename"
 
          c) Debug Static, type:
-            testhdf5_fortran debug >"Your output filename"
+            checkfortrantests debug >"Your output filename"
 
          d) Debug DLL, type:
-            testhdf5_fortran debug dll >"Your output filename"
+            checkfortrantests debug dll >"Your output filename"
 
       Use a text editor to check results. You should not find any FAILED marks 
       in your output files.
@@ -614,28 +577,19 @@ We provide 2 options for users to test HDF5 libraries and tools.
     Skip this step UNLESS you have built HDF5 High-Level libraries and want to 
     test them.
 
-    DLLs listed below should be placed into the Windows system directory.  A 
-    batch file named install_hldll.bat is included in c:\MyHDFstuff\hdf5 
-    directory.  Run this batch file and the following HDF5 high level DLLs will 
-    be copied to the system directory.
-
-    c:\MyHDFstuff\hdf5\proj\hdf5_hldll\Release\hdf5_hldll.dll
-    c:\MyHDFstuff\hdf5\proj\hdf5_hldll\Debug\hdf5_hlddll.dll
-
-    Run test_hdf5_hl.bat in the hdf5\hl\test directory at the command prompt as 
-    below:
+      Open a command prompt in the hdf5\hl\test directory
 
          a) Release Static, type:
-            test_hdf5_hl release >"Your output filename"
+            checkhltests release >"Your output filename"
 
          b) Release DLL, type:
-            test_hdf5_hl release dll >"Your output filename"
+            checkhltests release dll >"Your output filename"
 
          c) Debug Static, type:
-            test_hdf5_hl debug >"Your output filename"
+            checkhltests debug >"Your output filename"
 
          d) Debug DLL, type:
-            test_hdf5_hl debug dll >"Your output filename"
+            checkhltests debug dll >"Your output filename"
 
       Use a text editor to check results. You should not find any FAILED marks 
       in your output files.
@@ -645,28 +599,19 @@ We provide 2 options for users to test HDF5 libraries and tools.
     Skip this step UNLESS you have built HDF5 High-Level C++ libraries and want 
     to test them.
 
-    DLLs listed below should be placed into the Windows system directory.  A 
-    batch file named install_hlcppdll.bat is included in c:\MyHDFstuff\hdf5 
-    directory.  Run this batch file and the following HDF5 high level c++ DLLs 
-    will be copied to the system directory.
-
-    c:\MyHDFstuff\hdf5\proj\hdf5_hlcppdll\Release\hdf5_hlcppdll.dll
-    c:\MyHDFstuff\hdf5\proj\hdf5_hlcppdll\Debug\hdf5_hlcppddll.dll
-
-    Run test_hdf5_hl_cpp.bat in the hdf5\hl\c++\test directory at the command 
-    prompt as below:
+      Open a command prompt in the hdf5\hl\c++\test directory
 
          a) Release Static, type:
-            test_hdf5_hl_cpp release >"Your output filename"
+            checkhlcpptests release >"Your output filename"
 
          b) Release DLL, type:
-            test_hdf5_hl_cpp release dll >"Your output filename"
+            checkhlcpptests release dll >"Your output filename"
 
          c) Debug Static, type:
-            test_hdf5_hl_cpp debug >"Your output filename"
+            checkhlcpptests debug >"Your output filename"
 
          d) Debug DLL, type:
-            test_hdf5_hl_cpp debug dll >"Your output filename"
+            checkhlcpptests debug dll >"Your output filename"
 
       Use a text editor to check results. You should not find any FAILED marks 
       in your output files.
@@ -676,30 +621,19 @@ We provide 2 options for users to test HDF5 libraries and tools.
     Skip this step UNLESS you have built HDF5 High-Level Fortran libraries and 
     want to test them.
 
-    DLLs listed below should be placed into the Windows system directory.  A 
-    batch file named install_hlf90dll.bat is included in c:\MyHDFstuff\hdf5 
-    directory.  Run this batch file and the following HDF5 High Level Fortran 
-    DLLs will be copied to the system directory.
-
-        c:\MyHDFstuff\hdf5\proj\hdf5_hl_f90cstubdll\Release\hdf5_hl_f90cstubdll.dll
-        c:\MyHDFstuff\hdf5\proj\hdf5_hl_f90cstubdll\Debug\hdf5_hl_f90cstubddll.dll
-        c:\MyHDFstuff\hdf5\proj\hdf5_hlfortrandll\Release\hdf5_hlfortrandll.dll
-        c:\MyHDFstuff\hdf5\proj\hdf5_hlfortrandll\Debug\hdf5_hlfortranddll.dll
-
-    Run test_hdf5_hl_fortran.bat in the hdf5\hl\fortran\test directory at the 
-    command prompt as below:
+      Open a command prompt in the hdf5\hl\fortran\test directory
 
          a) Release Static, type:
-            test_hdf5_hl_fortran release >"Your output filename"
+            checkhlfortrantests release >"Your output filename"
 
          b) Release DLL, type:
-            test_hdf5_hl_fortran release dll >"Your output filename"
+            checkhlfortrantests release dll >"Your output filename"
 
          c) Debug Static, type:
-            test_hdf5_hl_fortran debug >"Your output filename"
+            checkhlfortrantests debug >"Your output filename"
 
          d) Debug DLL, type:
-            test_hdf5_hl_fortran debug dll >"Your output filename"
+            checkhlfortrantests debug dll >"Your output filename"
 
       Use a text editor to check results. You should not find any FAILED marks 
       in your output files.
@@ -1247,17 +1181,8 @@ Notes:  1. For Intel Compiler users, Intel fortran Compiler 9.1 is currently
                                      libraries must have been built.
 
        Invoke a command prompt window and run hdf5check with appropriate option.
-
-       Test results are saved in two files:
-
-          c:\MyHDFstuff\hdf5\check_results.txt
-
-          c:\MyHDFstuff\hdf5\tests_results.txt.
-
-       In general, you only need to check tests_results.txt.  If all the tests 
-       passed, then you do not have to check check_results.txt.  If some tests 
-       failed, check check_results.txt can help you figure out what was wrong.
-
+       Users are encouraged to redirect their ouput into a file.  There should
+       be no "*FAILED*" marks.
        
     Option 2: Step-by-step HDF5 libraries and tools testings
 
@@ -1268,24 +1193,38 @@ Notes:  1. For Intel Compiler users, Intel fortran Compiler 9.1 is currently
        
        a. Test HDF5 Static Fortran Library
 
-       Go to directory c:\myHDFstuff\hdf5\fortran\test, Run batch file
-       testhdf5_fortran.bat with the following two options to test Fortran 
-       static library:
+      Open a command prompt in the hdf5\fortran\test directory
+      
+         a) Release Static, type:
+            checkfortrantests release >"Your output filename"
 
-         testhdf5_fortran release >> "Your output file name"
-         testhdf5_fortran debug   >> "Your output file name"
+         b) Release DLL, type:
+            checkfortrantests release dll >"Your output filename"
+
+         c) Debug Static, type:
+            checkfortrantests debug >"Your output filename"
+
+         d) Debug DLL, type:
+            checkfortrantests debug dll >"Your output filename"
 
       Use a text editor to check results. You should not find any FAILED marks 
       in your output files.
 
        b. Test HDF5 High Level Fortran Library
 
-       Go to directory c:\myHDFstuff\hdf5\hl\fortran\test, Run batch file
-       testhdf5_fortran.bat with the following two options to test Fortran 
-       static library
+      Open a command prompt in the hdf5\hl\fortran\test directory
 
-            test_hdf5_hl_fortran release >> "Your output file name"
-            test_hdf5_hl_fortran debug   >> "Your output file name"
+         a) Release Static, type:
+            checkhlfortrantests release >"Your output filename"
+
+         b) Release DLL, type:
+            checkhlfortrantests release dll >"Your output filename"
+
+         c) Debug Static, type:
+            checkhlfortrantests debug >"Your output filename"
+
+         d) Debug DLL, type:
+            checkhlfortrantests debug dll >"Your output filename"
 
       Use a text editor to check results. You should not find any FAILED marks 
       in your output files.
