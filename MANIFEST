@@ -1638,17 +1638,12 @@
 ./windows/hdf5bt.BAT
 ./windows/hdf5build.BAT
 ./windows/hdf5check.BAT
-./windows/install_cppdll.BAT
 ./windows/InstallcppExamples.BAT
 ./windows/install_dll.BAT
 ./windows/InstallExamples.bat
-./windows/install_f90dll.BAT
 ./windows/Installf90Examples.BAT
 ./windows/installhdf5lib.bat
 ./windows/install_hlcexamples.BAT
-./windows/install_hlcppdll.BAT
-./windows/install_hldll.BAT
-./windows/install_hlf90dll.bat
 ./windows/install_hlf90examples.BAT
 
 # C++ Examples
@@ -1671,7 +1666,7 @@
 ./windows/c++/examples/writedatatestdll/writedatatestdll.vcproj
 
 # C++ Tests
-./windows/c++/test/hdf5cpptest.bat
+./windows/c++/test/checkcpptests.bat
 ./windows/c++/test/dsets_cpp/dsets_cpp.vcproj
 ./windows/c++/test/dsets_cppdll/dsets_cppdll.vcproj
 ./windows/c++/test/testhdf5_cpp/testhdf5_cpp.vcproj
@@ -1738,7 +1733,7 @@
 ./windows/fortran/src/H5fortran_types.f90
 
 # Fortran Tests
-./windows/fortran/test/testhdf5_fortran.bat
+./windows/fortran/test/checkfortrantests.bat
 ./windows/fortran/test/flush1_fortran/flush1_fortran.vfproj
 ./windows/fortran/test/flush1_fortrandll/flush1_fortrandll.vfproj
 ./windows/fortran/test/flush2_fortran/flush2_fortran.vfproj
@@ -1751,7 +1746,7 @@
 ./windows/fortran/test/testhdf5_fortrandll/testhdf5_fortrandll.vfproj
 
 # High-Leve C++ Tests
-./windows/hl/c++/test/test_hdf5_hl_cpp.bat
+./windows/hl/c++/test/checkhlcpptests.bat
 ./windows/hl/c++/test/hl_test_table_cpp/hl_test_table_cpp.vcproj
 ./windows/hl/c++/test/hl_test_table_cppdll/hl_test_table_cppdll.vcproj
 
@@ -1778,7 +1773,7 @@
 ./windows/hl/fortran/examples/ex_litedll/ex_litedll.vfproj
 
 # High-Level Fortran Tests
-./windows/hl/fortran/test/test_hdf5_hl_fortran.BAT
+./windows/hl/fortran/test/checkhlfortrantests.bat
 ./windows/hl/fortran/test/hl_test_image_fortran/hl_test_image_fortran.vfproj
 ./windows/hl/fortran/test/hl_test_image_fortrandll/hl_test_image_fortrandll.vfproj
 ./windows/hl/fortran/test/hl_test_lite_fortran/hl_test_lite_fortran.vfproj
@@ -1787,7 +1782,7 @@
 ./windows/hl/fortran/test/hl_test_table_fortrandll/hl_test_table_fortrandll.vfproj
 
 # High-Level Library Tests
-./windows/hl/test/test_hdf5_hl.BAT
+./windows/hl/test/checkhltests.bat
 ./windows/hl/test/hl_test_ds/hl_test_ds.vcproj
 ./windows/hl/test/hl_test_dsdll/hl_test_dsdll.vcproj
 ./windows/hl/test/hl_test_image/hl_test_image.vcproj
@@ -1813,6 +1808,9 @@
 ./windows/misc/typegen/h5fortran_detect/h5fortran_detect.vfproj
 ./windows/misc/typegen/h5match_types/h5match_types.vcproj
 ./windows/misc/typegen/h5tinit/h5tinit.vcproj
+
+# Performance Tests
+./windows/perform/checkperformtests.bat
 
 # Project Files
 ./windows/proj/all/all.sln
@@ -1841,9 +1839,8 @@
 ./windows/src/H5Tinit.c
 
 # Library Test Projects
-./windows/test/hdf5test.bat
-./windows/test/hdf5timingtest.bat
-./windows/test/testerr.bat
+./windows/test/checktests.bat
+./windows/test/testerror.bat
 ./windows/test/big/big.vcproj
 ./windows/test/bigdll/bigdll.vcproj
 ./windows/test/bittests/bittests.vcproj
@@ -1872,10 +1869,10 @@
 ./windows/test/dtypesdll/dtypesdll.vcproj
 ./windows/test/enum/enum.vcproj
 ./windows/test/enumdll/enumdll.vcproj
-./windows/test/error_api/error_api.vcproj
-./windows/test/error_apidll/error_apidll.vcproj
-./windows/test/error_compat/error_compat.vcproj
-./windows/test/error_compatdll/error_compatdll.vcproj
+./windows/test/error_test/error_test.vcproj
+./windows/test/error_testdll/error_testdll.vcproj
+./windows/test/err_compat/err_compat.vcproj
+./windows/test/err_compatdll/err_compatdll.vcproj
 ./windows/test/extend/extend.vcproj
 ./windows/test/extenddll/extenddll.vcproj
 ./windows/test/external/external.vcproj
@@ -1936,35 +1933,36 @@
 ./windows/test/vfddll/vfddll.vcproj
 
 # Library Tools
-./windows/tools/copytest.BAT
-./windows/tools/difftest.BAT
-./windows/tools/dumptest.bat
-./windows/tools/importtest.BAT
-./windows/tools/jamtest.bat
-./windows/tools/lstest.BAT
-./windows/tools/mask.BAT
-./windows/tools/repacktest.BAT
-./windows/tools/stattest.BAT
-./windows/tools/testhdf5tools.BAT
-./windows/tools/tooltest.bat
+./windows/tools/checktools.bat
 ./windows/tools/h5copy/h5copy.vcproj
+./windows/tools/h5copy/testh5copy.bat
 ./windows/tools/h5debug/h5debug.vcproj
 ./windows/tools/h5debugdll/h5debugdll.vcproj
 ./windows/tools/h5diff/h5diff.vcproj
+./windows/tools/h5diff/testh5diff.bat
 ./windows/tools/h5diffdll/h5diffdll.vcproj
 ./windows/tools/h5dump/h5dump.vcproj
+./windows/tools/h5dump/testh5dump.bat
+./windows/tools/h5dump/testh5dumpxml.bat
 ./windows/tools/h5dumpdll/h5dumpdll.vcproj
 ./windows/tools/h5import/h5import.vcproj
+./windows/tools/h5import/h5importtestutil.bat
 ./windows/tools/h5importdll/h5importdll.vcproj
 ./windows/tools/h5jam/h5jam.vcproj
+./windows/tools/h5jam/testh5jam.bat
 ./windows/tools/h5ls/h5ls.vcproj
+./windows/tools/h5ls/testh5ls.bat
 ./windows/tools/h5lsdll/h5lsdll.vcproj
 ./windows/tools/h5mkgrp/h5mkgrp.vcproj
+./windows/tools/h5mkgrp/testh5mkgrp.bat
 ./windows/tools/h5repack/h5repack.vcproj
+./windows/tools/h5repack/h5repack.bat
 ./windows/tools/h5repackdll/h5repackdll.vcproj
 ./windows/tools/h5repart/h5repart.vcproj
+./windows/tools/h5repart/testh5repart.bat
 ./windows/tools/h5repartdll/h5repartdll.vcproj
 ./windows/tools/h5stat/h5stat.vcproj
+./windows/tools/h5stat/testh5stat.bat
 ./windows/tools/h5statdll/h5statdll.vcproj
 ./windows/tools/h5unjam/h5unjam.vcproj
 ./windows/tools/talign/talign.vcproj
@@ -2155,10 +2153,10 @@
 ./windows_vs6/test/dtypesdll/dtypesdll.dsp
 ./windows_vs6/test/enum/enum.dsp
 ./windows_vs6/test/enumdll/enumdll.dsp
-./windows_vs6/test/error_api/error_api.dsp
-./windows_vs6/test/error_apidll/error_apidll.dsp
-./windows_vs6/test/error_compat/error_compat.dsp
-./windows_vs6/test/error_compatdll/error_compatdll.dsp
+./windows_vs6/test/error_test/error_test.dsp
+./windows_vs6/test/error_testdll/error_testdll.dsp
+./windows_vs6/test/err_compat/err_compat.dsp
+./windows_vs6/test/err_compatdll/err_compatdll.dsp
 ./windows_vs6/test/extend/extend.dsp
 ./windows_vs6/test/extenddll/extenddll.dsp
 ./windows_vs6/test/external/external.dsp

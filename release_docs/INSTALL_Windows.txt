@@ -840,20 +840,20 @@ To build and test HDF5 C++ examples:
    When the debug build or release build is done, there should be the following 
    subdirectories in c:\MyHDFstuff\hdf5\c++\examples\
 
-          chunkstest
-          chunkstestdll
-          compoundtest
-          compoundtestdll
-          createtest
-          createtestdll
-          extend_dstest
-          extend_dstestdll
-          h5grouptest
-          h5grouptestdll
-          readdatatest
-          readdatatestdll
-          writedatatest
-          writedatatestdll
+          chunks
+          chunksdll
+          compound
+          compounddll
+          create
+          createdll
+          extend_ds
+          extend_dsll
+          h5group
+          h5groupdll
+          readdata
+          readdatadll
+          writedata
+          writedatadll
 
    3. Invoke a command prompt window and run the batch file 
       InstallcppExamples.bat which resides in the top level directory

@@ -420,16 +420,16 @@ Package=<4>
     Project_Dep_Name vfddll
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name error_api
+    Project_Dep_Name error_test
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name error_apidll
+    Project_Dep_Name error_testdll
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name error_compat
+    Project_Dep_Name err_compat
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name error_compatdll
+    Project_Dep_Name err_compatdll
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name h5mkgrp
@@ -1011,7 +1011,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "error_api"="..\..\test\error_api\error_api.dsp" - Package Owner=<4>
+Project: "error_test"="..\..\test\error_test\error_test.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1029,7 +1029,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "error_apidll"="..\..\test\error_apidll\error_apidll.dsp" - Package Owner=<4>
+Project: "error_testdll"="..\..\test\error_testdll\error_testdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1047,7 +1047,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "error_compat"="..\..\test\error_compat\error_compat.dsp" - Package Owner=<4>
+Project: "err_compat"="..\..\test\err_compat\err_compat.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1065,7 +1065,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "error_compatdll"="..\..\test\error_compatdll\error_compatdll.dsp" - Package Owner=<4>
+Project: "err_compatdll"="..\..\test\err_compatdll\err_compatdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{

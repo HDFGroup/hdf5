@@ -357,25 +357,25 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "enumdll", "..\..\test\enumd
 		{C9535AD9-C61D-4691-A5CE-52EF359892AF} = {C9535AD9-C61D-4691-A5CE-52EF359892AF}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "error_api", "..\..\test\error_api\error_api.vcproj", "{7ABA5DD5-77E7-42D3-9C29-84A13B0CAA91}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "error_test", "..\..\test\error_test\error_test.vcproj", "{7ABA5DD5-77E7-42D3-9C29-84A13B0CAA91}"
 	ProjectSection(ProjectDependencies) = postProject
 		{26346A09-C500-49E7-963A-D22A8E09AAB7} = {26346A09-C500-49E7-963A-D22A8E09AAB7}
 		{A80D439C-37B4-4619-A122-1C69F567733B} = {A80D439C-37B4-4619-A122-1C69F567733B}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "error_apidll", "..\..\test\error_apidll\error_apidll.vcproj", "{55894CDC-C220-40FE-B403-D74EAC6EBACF}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "error_testdll", "..\..\test\error_testdll\error_testdll.vcproj", "{55894CDC-C220-40FE-B403-D74EAC6EBACF}"
 	ProjectSection(ProjectDependencies) = postProject
 		{54BDA057-C716-4807-A35E-73185DCB236D} = {54BDA057-C716-4807-A35E-73185DCB236D}
 		{C9535AD9-C61D-4691-A5CE-52EF359892AF} = {C9535AD9-C61D-4691-A5CE-52EF359892AF}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "error_compat", "..\..\test\error_compat\error_compat.vcproj", "{265C41B2-30D7-4FF8-A08C-B997363DA763}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "err_compat", "..\..\test\err_compat\err_compat.vcproj", "{265C41B2-30D7-4FF8-A08C-B997363DA763}"
 	ProjectSection(ProjectDependencies) = postProject
 		{26346A09-C500-49E7-963A-D22A8E09AAB7} = {26346A09-C500-49E7-963A-D22A8E09AAB7}
 		{A80D439C-37B4-4619-A122-1C69F567733B} = {A80D439C-37B4-4619-A122-1C69F567733B}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "error_compatdll", "..\..\test\error_compatdll\error_compatdll.vcproj", "{309CE6F8-4658-44CB-8E99-0B86DCA77EFC}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "err_compatdll", "..\..\test\err_compatdll\err_compatdll.vcproj", "{309CE6F8-4658-44CB-8E99-0B86DCA77EFC}"
 	ProjectSection(ProjectDependencies) = postProject
 		{54BDA057-C716-4807-A35E-73185DCB236D} = {54BDA057-C716-4807-A35E-73185DCB236D}
 		{C9535AD9-C61D-4691-A5CE-52EF359892AF} = {C9535AD9-C61D-4691-A5CE-52EF359892AF}
