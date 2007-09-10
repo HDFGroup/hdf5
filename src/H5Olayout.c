@@ -143,17 +143,13 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
 
         /* Read the size */
         if(mesg->type != H5D_CHUNKED) {
-            size_t temp_dim[H5O_LAYOUT_NDIMS];
-
-            for(u = 0; u < ndims; u++)
-                UINT32DECODE(p, temp_dim[u]);
-
             /* Don't compute size of contiguous storage here, due to possible
              * truncation of the dimension sizes when they were stored in this
              * version of the layout message.  Compute the contiguous storage
              * size in the dataset code, where we've got the dataspace
              * information available also.  - QAK 5/26/04
              */
+            p += ndims * 4;     /* Skip over dimension sizes (32-bit quantities) */
         } /* end if */
         else {
             mesg->u.chunk.ndims=ndims;
