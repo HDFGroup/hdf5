@@ -147,7 +147,7 @@ rem $* everything else arguments for h5copy.
         )
     )
     
-    if %runh5diff neq no (
+    if %runh5diff% neq no (
         call :h5difftest %inputfile% %outputfile%
     )
     
