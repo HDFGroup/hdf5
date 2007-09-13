@@ -66,17 +66,17 @@ static struct dispatch_t {
     herr_t (*close)(hid_t obj);
     herr_t (*list1)(hid_t obj);
     herr_t (*list2)(hid_t obj, const char *name);
-} dispatch_g[H5G_NLIBTYPES];
+} dispatch_g[H5O_TYPE_NTYPES];
 
-#define DISPATCH(TYPE,NAME,OPEN,CLOSE,LIST1,LIST2) {         \
-    dispatch_g[TYPE].name = (NAME);           \
-    dispatch_g[TYPE].open = (OPEN);           \
+#define DISPATCH(TYPE, NAME, OPEN, CLOSE, LIST1, LIST2) {         \
+    dispatch_g[TYPE].name = (NAME);             \
+    dispatch_g[TYPE].open = (OPEN);             \
     dispatch_g[TYPE].close = (CLOSE);           \
     dispatch_g[TYPE].list1 = (LIST1);           \
     dispatch_g[TYPE].list2 = (LIST2);           \
 }
 
-static herr_t list (hid_t group, const char *name, const H5L_info_t *linfo, void *cd);
+static herr_t list(hid_t group, const char *name, const H5L_info_t *linfo, void *cd);
 static void display_type(hid_t type, int ind);
 static char *fix_name(const char *path, const char *base);
 
@@ -145,30 +145,24 @@ usage: %s [OPTIONS] [OBJECTS...]\n\
  *-------------------------------------------------------------------------
  */
 static void
-sym_insert(H5G_stat_t *sb, const char *name)
+sym_insert(const H5O_info_t *oi, const char *name)
 {
-    haddr_t objno;              /* Compact form of object's location */
     int  n;
 
     /* Don't add it if the link count is 1 because such an object can only
      * have one name. */
-    if (sb->nlink<2) return;
+    if(oi->rc < 2)
+        return;
 
     /* Extend the table */
-    if (idtab_g.nobjs>=idtab_g.nalloc) {
+    if(idtab_g.nobjs >= idtab_g.nalloc) {
         idtab_g.nalloc = MAX(256, 2*idtab_g.nalloc);
-        idtab_g.obj = realloc(idtab_g.obj,
-            idtab_g.nalloc*sizeof(idtab_g.obj[0]));
-    }
+        idtab_g.obj = realloc(idtab_g.obj, idtab_g.nalloc*sizeof(idtab_g.obj[0]));
+    } /* end if */
 
     /* Insert the entry */
     n = idtab_g.nobjs++;
-#if H5_SIZEOF_UINT64_T > H5_SIZEOF_LONG
-    objno = (haddr_t)sb->objno[0] | ((haddr_t)sb->objno[1] << (8 * sizeof(long)));
-#else
-    objno = (haddr_t)sb->objno[0];
-#endif
-    idtab_g.obj[n].id = objno;
+    idtab_g.obj[n].id = oi->addr;
     idtab_g.obj[n].name = HDstrdup(name);
 }
 
@@ -190,17 +184,18 @@ sym_insert(H5G_stat_t *sb, const char *name)
  *-------------------------------------------------------------------------
  */
 static char *
-sym_lookup(H5G_stat_t *sb)
+sym_lookup(const H5O_info_t *oi)
 {
-    haddr_t objno;              /* Compact form of object's location */
     int  n;
 
-    if (sb->nlink<2) return NULL; /*only one name possible*/
-    objno = (haddr_t)sb->objno[0] | ((haddr_t)sb->objno[1] << (8 * sizeof(long)));
-    for (n=0; n<idtab_g.nobjs; n++) {
-        if(idtab_g.obj[n].id == objno)
+    /*only one name possible*/
+    if(oi->rc < 2)
+        return NULL;
+
+    for(n = 0; n < idtab_g.nobjs; n++)
+        if(idtab_g.obj[n].id == oi->addr)
             return idtab_g.obj[n].name;
-    }
+
     return NULL;
 }
 
@@ -1173,21 +1168,18 @@ display_type(hid_t type, int ind)
     }
 
     /* Shared? If so then print the type's OID */
-    if (H5Tcommitted(type)) {
-        H5G_stat_t  sb;
+    if(H5Tcommitted(type)) {
+        H5O_info_t  oi;
 
-        if (H5Gget_objinfo(type, ".", FALSE, &sb)>=0) {
-            haddr_t objno;              /* Compact form of object's location */
-
-            objno = (haddr_t)sb.objno[0] | ((haddr_t)sb.objno[1] << (8 * sizeof(long)));
+        if(H5Oget_info(type, ".", &oi, H5P_DEFAULT) >= 0)
             printf("shared-%lu:"H5_PRINTF_HADDR_FMT" ",
-                    sb.fileno[0], objno);
-        } else
+                    oi.fileno, oi.addr);
+        else
             printf("shared ");
-    }
+    } /* end if */
 
     /* Print the type */
-    if ((!simple_output_g && display_native_type(type, ind)) ||
+    if((!simple_output_g && display_native_type(type, ind)) ||
             display_ieee_type(type, ind) ||
             display_int_type(type, ind) ||
             display_float_type(type, ind) ||
@@ -1709,108 +1701,6 @@ datatype_list2(hid_t type, const char UNUSED *name)
 
 
 /*-------------------------------------------------------------------------
- * Function: slink_open
- *
- * Purpose: This gets called to open a symbolic link.  Since symbolic
- *  links don't correspond to actual objects we simply print the
- *  link information and return failure.
- *
- * Return: Success: 0 - an invalid object but successful return
- *    of this function.
- *
- *  Failure: -1
- *
- * Programmer: Robb Matzke
- *              Thursday, August 27, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static hid_t
-slink_open(hid_t location, const char *name, hid_t UNUSED apl_id)
-{
-    H5G_stat_t  statbuf;
-
-    if(H5Gget_objinfo(location, name, FALSE, &statbuf) < 0) 
-        return -1;
-
-    if(statbuf.type == H5G_LINK) {    /* Soft link */
-        char *buf = HDmalloc(statbuf.linklen);
-
-        if(H5Lget_val(location, name, buf, statbuf.linklen, H5P_DEFAULT) < 0) {
-            HDfree(buf);
-            return -1;
-        }
-
-        HDfputs(buf, stdout);
-        HDfree(buf);
-    }
-
-    return 0;
-}
-
-
-/*-------------------------------------------------------------------------
- * Function: udlink_open
- *
- * Purpose: This gets called to open a user-defined link.  Since these
- *  links don't correspond to actual objects we simply print a message
- *  and return failure.
- *
- * Return: Success: 0 - an invalid object but successful return
- *    of this function.
- *
- *  Failure: -1
- *
- * Programmer: James Laird
- *              Tuesday, June 6, 2006
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static hid_t
-udlink_open(hid_t location, const char *name, hid_t UNUSED apl_id)
-{
-    H5L_info_t linfo;
-    char * buf = NULL;
-    const char * filename;
-    const char * path;
-
-    if(H5Lget_info(location, name, &linfo, H5P_DEFAULT) < 0)
-        return -1;
-
-    switch(linfo.type) {
-        /* For external links, try to display info for the object it points to */
-        case H5L_TYPE_EXTERNAL:
-            if((buf = HDmalloc(linfo.u.val_size)) == NULL)
-                goto error;
-            if(H5Lget_val(location, name, buf, linfo.u.val_size, H5P_DEFAULT) < 0)
-                goto error;
-
-            if(H5Lunpack_elink_val(buf, linfo.u.val_size, NULL, &filename, &path) < 0)
-                goto error;
-            HDfputs("file: ", stdout);
-            HDfputs(filename, stdout);
-            HDfputs("    path: ", stdout);
-            HDfputs(path, stdout);
-            break;
-
-        default:
-            HDfputs("cannot follow UD links", stdout);
-    }
-
-    return 0;
-
-error:
-    if(buf)
-        HDfree(buf);
-    return -1;
-}
-
-
-/*-------------------------------------------------------------------------
  * Function: list
  *
  * Purpose: Prints the group member name.
@@ -1830,102 +1720,162 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-list(hid_t group, const char *name, const H5L_info_t UNUSED *linfo, void *_iter)
+list(hid_t group, const char *name, const H5L_info_t *linfo, void *_iter)
 {
-    hid_t obj = -1;
-    char buf[512], comment[50], *fullname = NULL, *s = NULL;
-    H5G_stat_t sb;
-    haddr_t objno;              /* Compact form of object's location */
-    struct tm *tm;
-    herr_t status;
     iter_t *iter = (iter_t*)_iter;
+    char *fullname = NULL;
     int  n;
 
     /* Print the object name, either full name or base name */
     fullname = fix_name(iter->container, name);
-    if (fullname_g) {
+    if(fullname_g)
         n = display_string(stdout, fullname, TRUE);
-        printf("%*s ", MAX(0, 24-n), "");
-    } else {
+    else
         n = display_string(stdout, name, TRUE);
-        printf("%*s ", MAX(0, 24-n), "");
-    }
+    printf("%*s ", MAX(0, (24 - n)), "");
 
-    /* Get object information */
-    H5E_BEGIN_TRY {
-        status = H5Gget_objinfo(group, name, FALSE, &sb);
-    } H5E_END_TRY;
-    if(status < 0) {
-        puts("**NOT FOUND**");
-        return 0;
-    } else if(sb.type < 0 || sb.type >= H5G_NTYPES) {
-        printf("Unknown type(%d)", sb.type);
-        sb.type = H5G_UNKNOWN;
-    }
-    if(sb.type >= 0 && dispatch_g[sb.type].name)
-        fputs(dispatch_g[sb.type].name, stdout);
-    objno = (haddr_t)sb.objno[0] | ((haddr_t)sb.objno[1] << (8 * sizeof(long)));
+    /* Actions on objects */
+    if(linfo->type == H5L_TYPE_HARD) {
+        H5O_info_t oi;
+        char *s;
+        hid_t obj;
 
-    /* If the object has already been printed then just show the object ID
-     * and return. */
-    if((s = sym_lookup(&sb))) {
-        printf(", same as ");
-        display_string(stdout, s, TRUE);
-        printf("\n");
-        goto done;
-    } else {
-        sym_insert(&sb, fullname);
-    }
+        /* Get object information */
+        if(H5Oget_info(group, name, &oi, H5P_DEFAULT) < 0) {
+            puts("**NOT FOUND**");
+            return 0;
+        } else if(oi.type < 0 || oi.type >= H5O_TYPE_NTYPES) {
+            printf("Unknown type(%d)", (int)oi.type);
+            oi.type = H5O_TYPE_UNKNOWN;
+        }
+        if(oi.type >= 0 && dispatch_g[oi.type].name)
+            fputs(dispatch_g[oi.type].name, stdout);
 
-    /* Open the object.  Not all objects can be opened.  If this is the case
-     * then return right away. */
-    if(sb.type >= 0 &&
-            (NULL == dispatch_g[sb.type].open ||
-            (obj = (dispatch_g[sb.type].open)(group, name, H5P_DEFAULT)) < 0)) {
-        printf(" *ERROR*\n");
-        goto done;
-    } /* end if */
+        /* If the object has already been printed then just show the object ID
+         * and return. */
+        if((s = sym_lookup(&oi))) {
+            printf(", same as ");
+            display_string(stdout, s, TRUE);
+            printf("\n");
+            goto done;
+        } /* end if */
+        else
+            sym_insert(&oi, fullname);
 
-    /* List the first line of information for the object. */
-    if(sb.type >= 0 && dispatch_g[sb.type].list1)
-        (dispatch_g[sb.type].list1)(obj);
-    putchar('\n');
+        /* Open the object.  Not all objects can be opened.  If this is the case
+         * then return right away.
+         */
+        if(oi.type >= 0 &&
+                (NULL == dispatch_g[oi.type].open ||
+                (obj = (dispatch_g[oi.type].open)(group, name, H5P_DEFAULT)) < 0)) {
+            printf(" *ERROR*\n");
+            goto done;
+        } /* end if */
 
-    /* Show detailed information about the object, beginning with information
-     * which is common to all objects. */
-    if(verbose_g > 0 && H5G_LINK != sb.type && H5G_UDLINK != sb.type) {
-        if(sb.type >= 0)
-            H5Aiterate(obj, NULL, list_attr, NULL);
-        printf("    %-10s %lu:"H5_PRINTF_HADDR_FMT"\n", "Location:", sb.fileno[0], objno);
-        printf("    %-10s %u\n", "Links:", sb.nlink);
-        if(sb.mtime > 0) {
-            if(simple_output_g)
-                tm = HDgmtime(&(sb.mtime));
-            else
-                tm = HDlocaltime(&(sb.mtime));
-            if(tm) {
-                HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
-                printf("    %-10s %s\n", "Modified:", buf);
+        /* List the first line of information for the object. */
+        if(oi.type >= 0 && dispatch_g[oi.type].list1)
+            (dispatch_g[oi.type].list1)(obj);
+        putchar('\n');
+
+        /* Show detailed information about the object, beginning with information
+         * which is common to all objects. */
+        if(verbose_g > 0) {
+            char comment[50];
+
+            /* Display attributes */
+            if(oi.type >= 0)
+                H5Aiterate(obj, NULL, list_attr, NULL);
+
+            /* Object location & reference count */
+            printf("    %-10s %lu:"H5_PRINTF_HADDR_FMT"\n", "Location:", oi.fileno, oi.addr);
+            printf("    %-10s %u\n", "Links:", (unsigned)oi.rc);
+
+            /* Modification time */
+            if(oi.mtime > 0) {
+                char buf[256];
+                struct tm *tm;
+
+                if(simple_output_g)
+                    tm = HDgmtime(&(oi.mtime));
+                else
+                    tm = HDlocaltime(&(oi.mtime));
+                if(tm) {
+                    HDstrftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S %Z", tm);
+                    printf("    %-10s %s\n", "Modified:", buf);
+                } /* end if */
+            } /* end if */
+
+            /* Object comment */
+            comment[0] = '\0';
+            H5Oget_comment(group, name, comment, sizeof(comment), H5P_DEFAULT);
+            HDstrcpy(comment + sizeof(comment) - 4, "...");
+            if(comment[0]) {
+                printf("    %-10s \"", "Comment:");
+                display_string(stdout, comment, FALSE);
+                puts("\"");
             } /* end if */
         } /* end if */
-        comment[0] = '\0';
-        H5Oget_comment(group, name, comment, sizeof(comment), H5P_DEFAULT);
-        HDstrcpy(comment + sizeof(comment) - 4, "...");
-        if(comment[0]) {
-            printf("    %-10s \"", "Comment:");
-            display_string(stdout, comment, FALSE);
-            puts("\"");
-        } /* end if */
+
+        /* Detailed list for object */
+        if(oi.type >= 0 && dispatch_g[oi.type].list2)
+            (dispatch_g[oi.type].list2)(obj, fullname);
+
+        /* Close the object. */
+        if(oi.type >= 0 && dispatch_g[oi.type].close)
+            (dispatch_g[oi.type].close)(obj);
     } /* end if */
-    if(sb.type >= 0 && dispatch_g[sb.type].list2)
-        (dispatch_g[sb.type].list2)(obj, fullname);
+    /* Actions on links */
+    else {
+        char *buf;
+
+        HDfputs("-> ", stdout);
+        switch(linfo->type) {
+            case H5L_TYPE_SOFT:
+                if((buf = HDmalloc(linfo->u.val_size)) == NULL)
+                    goto done;
+
+                if(H5Lget_val(group, name, buf, linfo->u.val_size, H5P_DEFAULT) < 0) {
+                    HDfree(buf);
+                    goto done;
+                } /* end if */
+
+                HDfputs(buf, stdout);
+                HDfree(buf);
+                break;
+
+            case H5L_TYPE_EXTERNAL:
+                {
+                const char *filename;
+                const char *path;
+
+                if((buf = HDmalloc(linfo->u.val_size)) == NULL)
+                    goto done;
+
+                if(H5Lget_val(group, name, buf, linfo->u.val_size, H5P_DEFAULT) < 0) {
+                    HDfree(buf);
+                    goto done;
+                } /* end if */
+                if(H5Lunpack_elink_val(buf, linfo->u.val_size, NULL, &filename, &path) < 0) {
+                    HDfree(buf);
+                    goto done;
+                } /* end if */
+
+                HDfputs("file: ", stdout);
+                HDfputs(filename, stdout);
+                HDfputs("    path: ", stdout);
+                HDfputs(path, stdout);
+                }
+                break;
+
+            default:
+                HDfputs("cannot follow UD links", stdout);
+                break;
+        } /* end switch */
+        HDfputc('\n', stdout);
+    } /* end else */
 
 done:
-    /* Close the object. */
-    if(sb.type >= 0 && obj >= 0 && dispatch_g[sb.type].close)
-        (dispatch_g[sb.type].close)(obj);
-
-    if (fullname)
+    if(fullname)
         free(fullname);
     return 0;
 } /* end list() */
@@ -2104,178 +2054,182 @@ leave(int ret)
  *-------------------------------------------------------------------------
  */
 int
-main (int argc, const char *argv[])
+main(int argc, const char *argv[])
 {
-    hid_t file=-1, root=-1;
-    char *fname=NULL, *oname=NULL, *x;
+    hid_t file = -1, root = -1;
+    char *fname = NULL, *oname = NULL, *x;
     const char *s = NULL;
-    char *rest, *container=NULL;
+    char *rest, *container = NULL;
     int  argno;
-    H5G_stat_t sb;
-    iter_t iter;
     static char root_name[] = "/";
     char        drivername[50];
-    const char                *preferred_driver=NULL;
+    const char *preferred_driver = NULL;
 
     /* Initialize h5tools lib */
     h5tools_init();
 
-    /* Build display table */
+    /* Build object display table */
     DISPATCH(H5G_DATASET, "Dataset", H5Dopen2, H5Dclose, dataset_list1, dataset_list2);
     DISPATCH(H5G_GROUP, "Group", H5Gopen2, H5Gclose, NULL, group_list2);
     DISPATCH(H5G_TYPE, "Type", H5Topen2, H5Tclose, NULL, datatype_list2);
-    DISPATCH(H5G_LINK, "-> ", slink_open, NULL, NULL, NULL);
-    DISPATCH(H5G_UDLINK, "-> ", udlink_open, NULL, NULL, NULL);
-
-#if 0
-    /* Name of this program without the path */
-    if ((progname=strrchr(argv[0], '/'))) progname++;
-    else progname = argv[0];
-#endif
 
     /* Default output width */
     width_g = get_width();
 
     /* Switches come before non-switch arguments */
-    for (argno=1; argno<argc && '-'==argv[argno][0]; argno++) {
-        if (!strcmp(argv[argno], "--")) {
+    for(argno = 1; argno < argc && '-' == argv[argno][0]; argno++) {
+        if(!HDstrcmp(argv[argno], "--")) {
             /* Last switch */
             argno++;
             break;
-        } else if (!strcmp(argv[argno], "--help")) {
+        } else if(!HDstrcmp(argv[argno], "--help")) {
             usage();
             leave(0);
-        } else if (!strcmp(argv[argno], "--address")) {
+        } else if(!HDstrcmp(argv[argno], "--address")) {
             address_g = TRUE;
-        } else if (!strcmp(argv[argno], "--data")) {
+        } else if(!HDstrcmp(argv[argno], "--data")) {
             data_g = TRUE;
-        } else if (!strcmp(argv[argno], "--errors")) {
+        } else if(!HDstrcmp(argv[argno], "--errors")) {
             show_errors_g = TRUE;
-        } else if (!strcmp(argv[argno], "--full")) {
+        } else if(!HDstrcmp(argv[argno], "--full")) {
             fullname_g = TRUE;
-        } else if (!strcmp(argv[argno], "--group")) {
+        } else if(!HDstrcmp(argv[argno], "--group")) {
             grp_literal_g = TRUE;
-        } else if (!strcmp(argv[argno], "--label")) {
+        } else if(!HDstrcmp(argv[argno], "--label")) {
             label_g = TRUE;
-        } else if (!strcmp(argv[argno], "--recursive")) {
+        } else if(!HDstrcmp(argv[argno], "--recursive")) {
             recursive_g = TRUE;
             fullname_g = TRUE;
-        } else if (!strcmp(argv[argno], "--simple")) {
+        } else if(!HDstrcmp(argv[argno], "--simple")) {
             simple_output_g = TRUE;
-        } else if (!strcmp(argv[argno], "--string")) {
+        } else if(!HDstrcmp(argv[argno], "--string")) {
             string_g = TRUE;
-        } else if (!strncmp(argv[argno], "--vfd=", 6)) {
+        } else if(!HDstrncmp(argv[argno], "--vfd=", 6)) {
             preferred_driver = argv[argno]+6;
-        } else if (!strncmp(argv[argno], "--width=", 8)) {
-            width_g = (int)strtol(argv[argno]+8, &rest, 0);
+        } else if(!HDstrncmp(argv[argno], "--width=", 8)) {
+            width_g = (int)HDstrtol(argv[argno]+8, &rest, 0);
 
-            if (0 == width_g)
+            if(0 == width_g)
                 no_line_wrap_g = TRUE;
-            else if (width_g<0 || *rest) {
+            else if(width_g < 0 || *rest) {
                 usage();
                 leave(1);
             }
-        } else if (!strcmp(argv[argno], "--width")) {
-            if (argno+1>=argc) {
+        } else if(!HDstrcmp(argv[argno], "--width")) {
+            if((argno + 1) >= argc) {
                 usage();
                 leave(1);
             } else {
                 s = argv[++argno];
             }
-            width_g = (int)strtol(s, &rest, 0);
-            if (width_g<=0 || *rest) {
+            width_g = (int)HDstrtol(s, &rest, 0);
+            if(width_g <= 0 || *rest) {
                 usage();
                 leave(1);
             }
-        } else if (!strcmp(argv[argno], "--verbose")) {
+        } else if(!HDstrcmp(argv[argno], "--verbose")) {
             verbose_g++;
-        } else if (!strcmp(argv[argno], "--version")) {
+        } else if(!HDstrcmp(argv[argno], "--version")) {
             print_version(progname);
             leave(0);
-        } else if (!strcmp(argv[argno], "--hexdump")) {
+        } else if(!HDstrcmp(argv[argno], "--hexdump")) {
             hexdump_g = TRUE;
-        } else if (!strncmp(argv[argno], "-w", 2)) {
-            if (argv[argno][2]) {
-                s = argv[argno]+2;
-            } else if (argno+1>=argc) {
+        } else if(!HDstrncmp(argv[argno], "-w", 2)) {
+            if(argv[argno][2]) {
+                s = argv[argno] + 2;
+            } else if((argno + 1) >= argc) {
                 usage();
                 leave(1);
             } else {
                 s = argv[++argno];
             }
-            width_g = (int)strtol(s, &rest, 0);
+            width_g = (int)HDstrtol(s, &rest, 0);
 
-            if (0 == width_g)
+            if(0 == width_g)
                 no_line_wrap_g = TRUE;
-            else if (width_g<0 || *rest) {
+            else if(width_g < 0 || *rest) {
                 usage();
                 leave(1);
             }
-        } else if ('-'!=argv[argno][1]) {
+        } else if('-'!=argv[argno][1]) {
             /* Single-letter switches */
-            for (s=argv[argno]+1; *s; s++) {
-                switch (*s) {
+            for(s = argv[argno] + 1; *s; s++) {
+                switch(*s) {
                     case '?':
                     case 'h': /* --help */
                         usage();
                         leave(0);
+
                     case 'a': /* --address */
                         address_g = TRUE;
                         break;
+
                     case 'd': /* --data */
                         data_g = TRUE;
                         break;
+
                     case 'e': /* --errors */
                         show_errors_g = TRUE;
                         break;
+
                     case 'f': /* --full */
                         fullname_g = TRUE;
                         break;
+
                     case 'g': /* --group */
                         grp_literal_g = TRUE;
                         break;
+
                     case 'l': /* --label */
                         label_g = TRUE;
                         break;
+
                     case 'r': /* --recursive */
                         recursive_g = TRUE;
                         fullname_g = TRUE;
                         break;
+
                     case 'S': /* --simple */
                         simple_output_g = TRUE;
                         break;
+
                     case 's': /* --string */
                         string_g = TRUE;
                         break;
+
                     case 'v': /* --verbose */
                         verbose_g++;
                         break;
+
                     case 'V': /* --version */
                         print_version(progname);
                         leave(0);
+
                     case 'x': /* --hexdump */
                         hexdump_g = TRUE;
                         break;
+
                     default:
                         usage();
                         leave(1);
-                }
-            }
+                } /* end switch */
+            } /* end for */
         } else {
             usage();
             leave(1);
         }
-    }
+    } /* end for */
 
     /* If no arguments remain then print a usage message (instead of doing
      * absolutely nothing ;-) */
-    if (argno>=argc) {
+    if(argno >= argc) {
         usage();
         leave(1);
-    }
+    } /* end if */
 
     /* Turn off HDF5's automatic error printing unless you're debugging h5ls */
-    if (!show_errors_g) H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+    if(!show_errors_g)
+        H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
 
     /* Each remaining argument is an hdf5 file followed by an optional slash
@@ -2291,42 +2245,67 @@ main (int argc, const char *argv[])
      * then there must have been something wrong with the file (perhaps it
      * doesn't exist). */
     show_file_name_g = (argc-argno > 1); /*show file names if more than one*/
-    while (argno<argc) {
+    while(argno < argc) {
+        H5O_info_t oi;
+        H5L_info_t li;
+        iter_t iter;
+
         fname = HDstrdup(argv[argno++]);
         oname = NULL;
         file = -1;
 
-        while (fname && *fname) {
+        while(fname && *fname) {
             file = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, preferred_driver, drivername, sizeof drivername);
 
-            if (file>=0) {
-                if (verbose_g) {
-                    printf("Opened \"%s\" with %s driver.\n",
-                    fname, drivername);
-                }
+            if(file >= 0) {
+                if(verbose_g)
+                    printf("Opened \"%s\" with %s driver.\n", fname, drivername);
                 break; /*success*/
-            }
+            } /* end if */
 
             /* Shorten the file name; lengthen the object name */
             x = oname;
             oname = strrchr(fname, '/');
-            if (x) *x = '/';
-            if (!oname) break;
+            if(x)
+                *x = '/';
+            if(!oname)
+                break;
             *oname = '\0';
-        }
-        if (file<0) {
+        } /* end while */
+        if(file < 0) {
             fprintf(stderr, "%s: unable to open file\n", argv[argno-1]);
             continue;
-        }
+        } /* end if */
         if(oname)
             oname++;
         if(!oname || !*oname)
             oname = root_name;
 
+        /* Check for root group as object name */
+        if(HDstrcmp(oname, root_name)) {
+            /* Check the type of link given */
+            if(H5Lget_info(file, oname, &li, H5P_DEFAULT) < 0) {
+                char *fullname = NULL;
+                int n;
+
+                fullname = fix_name(oname, "/");
+                if(fullname_g)
+                    n = display_string(stdout, fullname, TRUE);
+                else
+                    n = display_string(stdout, oname, TRUE);
+                printf("%*s \n", MAX(0, (24 - n)), "**NOT FOUND**");
+
+                HDfree(fullname);
+                leave(1);
+            } /* end if */
+        } /* end if */
+        else
+            li.type = H5L_TYPE_HARD;
+
         /* Open the object and display it's information */
-        if(H5Gget_objinfo(file, oname, TRUE, &sb) >= 0 && H5G_GROUP == sb.type && !grp_literal_g) {
+        if(li.type == H5L_TYPE_HARD && H5Oget_info(file, oname, &oi, H5P_DEFAULT) >= 0 && H5O_TYPE_GROUP == oi.type && !grp_literal_g) {
             /* Specified name is a group. List the complete contents of the group. */
-            sym_insert(&sb, oname);
+            sym_insert(&oi, oname);
             iter.container = container = fix_name((show_file_name_g ? fname : ""), oname);
 
             /* list root attributes */
@@ -2341,21 +2320,21 @@ main (int argc, const char *argv[])
             /* list */
             H5Literate(file, oname, H5_INDEX_NAME, H5_ITER_INC, NULL, list, &iter, H5P_DEFAULT);
             free(container);
-
         } else if((root = H5Gopen2(file, "/", H5P_DEFAULT)) < 0) {
             leave(1); /*major problem!*/
-
         } else {
             /* Specified name is a non-group object -- list that object.  The
-            * container for the object is everything up to the base name. */
+             * container for the object is everything up to the base name.
+             */
             iter.container = show_file_name_g ? fname : "/";
-            list(root, oname, NULL, &iter);
+            list(root, oname, &li, &iter);
             if(H5Gclose(root) < 0)
                 leave(1);
         }
         H5Fclose(file);
         free(fname);
-    }
+    } /* end while */
+
     leave(0);
 }
 

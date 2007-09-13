@@ -308,7 +308,6 @@ dset                     Dataset {2/2}
             (2,2,1) 18, 19, 20, 21, 22, 23, 24
     Location:  1:976
     Links:     1
-    Modified:  XXXX-XX-XX XX:XX:XX XXX
     Storage:   8 logical bytes, 0 allocated bytes
     Type:      32-bit little-endian integer
 g1                       Group

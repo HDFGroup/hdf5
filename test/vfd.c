@@ -1017,10 +1017,8 @@ test_multi(void)
     /* Before any data is written, the raw data file is empty.  So
      * the file size is only the size of b-tree + HADDR_MAX/4.
      */
-#ifdef H5_HAVE_LARGE_HSIZET
     if(file_size < HADDR_MAX/4 || file_size > HADDR_MAX/2)
         TEST_ERROR;
-#endif /* H5_HAVE_LARGE_HSIZET */
 
     if((dset=H5Dcreate(file, dname, H5T_NATIVE_INT, space, H5P_DEFAULT))<0)
         TEST_ERROR;
@@ -1055,10 +1053,8 @@ test_multi(void)
      * beginning of raw data file is set at HADDR_MAX/2.  It's supposed
      * to be (HADDR_MAX/2 + 128*128*4)
      */
-#ifdef H5_HAVE_LARGE_HSIZET
     if(file_size < HADDR_MAX/2 || file_size > HADDR_MAX)
         TEST_ERROR;
-#endif /* H5_HAVE_LARGE_HSIZET */
 
     if(H5Sclose(space)<0)
         TEST_ERROR;

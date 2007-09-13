@@ -72,40 +72,40 @@ int main(int argc, const char *argv[])
 
     if(g_nTasks == 1)
     {
-    printf("Only 1 task available...doing serial diff\n");
+        printf("Only 1 task available...doing serial diff\n");
 
-    g_Parallel = 0;
+        g_Parallel = 0;
 
-    parse_input(argc, argv, &fname1, &fname2, &objname1, &objname2, &options);
+        parse_input(argc, argv, &fname1, &fname2, &objname1, &objname2, &options);
 
-    nfound = h5diff(fname1,fname2,objname1,objname2,&options);
+        nfound = h5diff(fname1, fname2, objname1, objname2, &options);
 
-    print_info(&options);
+        print_info(&options);
 
-    MPI_Finalize();
+        MPI_Finalize();
 
-    return 0;
+        return 0;
     }
 
     /* Have the manager process the command-line */
     if(nID == 0)
     {
-    parse_input(argc, argv, &fname1, &fname2, &objname1, &objname2, &options);
+        parse_input(argc, argv, &fname1, &fname2, &objname1, &objname2, &options);
 
-    nfound = h5diff(fname1,fname2,objname1,objname2,&options);
+        nfound = h5diff(fname1, fname2, objname1, objname2, &options);
 
-    MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Barrier(MPI_COMM_WORLD);
 
-    print_info(&options);
-    print_manager_output();
+        print_info(&options);
+        print_manager_output();
 
-    MPI_Finalize();
+        MPI_Finalize();
 
-    return 0;
+        return 0;
     }
     /* All other tasks become workers and wait for assignments. */
     else
-    ph5diff_worker(nID);
+        ph5diff_worker(nID);
 }
 
 /*-------------------------------------------------------------------------

@@ -57,6 +57,7 @@
 /* Local Typedefs */
 /******************/
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 /* User data for path traversal routine for getting object info */
 typedef struct {
     H5G_stat_t  *statbuf;			/* Stat buffer about object */
@@ -75,17 +76,16 @@ typedef struct {
 /* Local Prototypes */
 /********************/
 
-#ifndef H5_NO_DEPRECATED_SYMBOLS
 static herr_t H5G_link_hard(hid_t cur_loc_id, const char *cur_name,
     hid_t new_loc_id, const char *new_name);
 static herr_t H5G_move(hid_t src_loc_id, const char *src_name,
     hid_t dst_loc_id, const char *dst_name);
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
 static herr_t H5G_get_objinfo_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
 static herr_t H5G_get_objinfo(const H5G_loc_t *loc, const char *name,
     hbool_t follow_link, H5G_stat_t *statbuf/*out*/, hid_t dxpl_id);
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
 /*********************/
@@ -837,50 +837,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_num_objs() */
 
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Gget_objtype_by_idx
- *
- * Purpose:     Returns the type of objects in the group by giving index.
- *
- * Note:	Deprecated in favor of H5Lget_info/H5Oget_info
- *
- * Return:	Success:        H5G_GROUP(1), H5G_DATASET(2), H5G_TYPE(3)
- *		Failure:	H5G_UNKNOWN
- *
- * Programmer:	Raymond Lu
- *	        Nov 20, 2002
- *
- *-------------------------------------------------------------------------
- */
-H5G_obj_t
-H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx)
-{
-    H5G_loc_t		loc;            /* Object location */
-    H5O_type_t          obj_type;       /* Type of object at location */
-    H5G_obj_t		ret_value;
-
-    FUNC_ENTER_API(H5Gget_objtype_by_idx, H5G_UNKNOWN)
-    H5TRACE2("Go", "ih", loc_id, idx);
-
-    /* Check args */
-    if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "not a location ID")
-    if(H5O_obj_type(loc.oloc, &obj_type, H5AC_ind_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object type")
-    if(obj_type != H5O_TYPE_GROUP)
-        HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "not a group")
-
-    /* Call internal function*/
-    if((ret_value = H5G_obj_get_type_by_idx(loc.oloc, idx, H5AC_ind_dxpl_id)) == H5G_UNKNOWN)
-	HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "can't get object type")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Gget_objtype_by_idx() */
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5Gget_objinfo
@@ -1071,4 +1027,48 @@ H5G_get_objinfo(const H5G_loc_t *loc, const char *name, hbool_t follow_link,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_get_objinfo() */
+
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Gget_objtype_by_idx
+ *
+ * Purpose:     Returns the type of objects in the group by giving index.
+ *
+ * Note:	Deprecated in favor of H5Lget_info/H5Oget_info
+ *
+ * Return:	Success:        H5G_GROUP(1), H5G_DATASET(2), H5G_TYPE(3)
+ *		Failure:	H5G_UNKNOWN
+ *
+ * Programmer:	Raymond Lu
+ *	        Nov 20, 2002
+ *
+ *-------------------------------------------------------------------------
+ */
+H5G_obj_t
+H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx)
+{
+    H5G_loc_t		loc;            /* Object location */
+    H5O_type_t          obj_type;       /* Type of object at location */
+    H5G_obj_t		ret_value;
+
+    FUNC_ENTER_API(H5Gget_objtype_by_idx, H5G_UNKNOWN)
+    H5TRACE2("Go", "ih", loc_id, idx);
+
+    /* Check args */
+    if(H5G_loc(loc_id, &loc) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "not a location ID")
+    if(H5O_obj_type(loc.oloc, &obj_type, H5AC_ind_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object type")
+    if(obj_type != H5O_TYPE_GROUP)
+        HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "not a group")
+
+    /* Call internal function*/
+    if((ret_value = H5G_obj_get_type_by_idx(loc.oloc, idx, H5AC_ind_dxpl_id)) == H5G_UNKNOWN)
+	HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "can't get object type")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Gget_objtype_by_idx() */
 

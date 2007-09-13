@@ -695,6 +695,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                     }
                     break;
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
                 case 's':
                     if(ptr) {
                         if(vp)
@@ -707,6 +708,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                         fprintf(out, "0x%lx", (unsigned long)statbuf);
                     }
                     break;
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
                 default:
                     fprintf(out, "BADTYPE(G%c)", type[1]);

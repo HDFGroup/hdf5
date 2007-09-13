@@ -307,6 +307,295 @@ Expected output for 'h5dump --xml tsaf.h5'
          </hdf5:DataFromFile>
       </hdf5:Data>
    </hdf5:Dataset>
+   <hdf5:Group Name=".attributes" OBJ-XID="xid_5072" H5Path="/.attributes" Parents="xid_696" H5ParentPaths="/" >
+      <hdf5:Group Name="database" OBJ-XID="xid_5728" H5Path="/.attributes/database" Parents="xid_5072" H5ParentPaths="/.attributes" >
+         <hdf5:Dataset Name=".SAF_DbProps" OBJ-XID="xid_6104" H5Path= "/.attributes/database/.SAF_DbProps" Parents="xid_5728" H5ParentPaths="/.attributes/database">
+            <hdf5:StorageLayout>
+               <hdf5:ContiguousLayout/>
+            </hdf5:StorageLayout>
+                     <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
+               <hdf5:FillValue>
+                     <hdf5:NoFill/>
+               </hdf5:FillValue>
+            </hdf5:FillValueInfo>
+            <hdf5:Dataspace>
+               <hdf5:SimpleDataspace Ndims="1">
+                  <hdf5:Dimension  DimSize="1" MaxDimSize="1"/>
+               </hdf5:SimpleDataspace>
+            </hdf5:Dataspace>
+            <hdf5:DataType>
+               <hdf5:CompoundType>
+                  <hdf5:Field FieldName="magic">
+                     <hdf5:DataType>
+                        <hdf5:AtomicType>
+                           <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                        </hdf5:AtomicType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+                  <hdf5:Field FieldName="SFileDir">
+                     <hdf5:DataType>
+                        <hdf5:AtomicType>
+                           <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="1024" StrPad="H5T_STR_NULLTERM"/>
+                        </hdf5:AtomicType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+                  <hdf5:Field FieldName="ImportFile">
+                     <hdf5:DataType>
+                        <hdf5:AtomicType>
+                           <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="1024" StrPad="H5T_STR_NULLTERM"/>
+                        </hdf5:AtomicType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+                  <hdf5:Field FieldName="parallel">
+                     <hdf5:DataType>
+                        <hdf5:AtomicType>
+                           <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                        </hdf5:AtomicType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+                  <hdf5:Field FieldName="safapi">
+                     <hdf5:DataType>
+                        <hdf5:CompoundType>
+                           <hdf5:Field FieldName="vmajor">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="vminor">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="rel">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="annot">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                        </hdf5:CompoundType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+                  <hdf5:Field FieldName="saflib">
+                     <hdf5:DataType>
+                        <hdf5:CompoundType>
+                           <hdf5:Field FieldName="vmajor">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="vminor">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="rel">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="annot">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                        </hdf5:CompoundType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+                  <hdf5:Field FieldName="vbt">
+                     <hdf5:DataType>
+                        <hdf5:CompoundType>
+                           <hdf5:Field FieldName="vmajor">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="vminor">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="rel">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="annot">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                        </hdf5:CompoundType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+                  <hdf5:Field FieldName="dsl">
+                     <hdf5:DataType>
+                        <hdf5:CompoundType>
+                           <hdf5:Field FieldName="vmajor">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="vminor">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="rel">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="annot">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                        </hdf5:CompoundType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+                  <hdf5:Field FieldName="hdf5">
+                     <hdf5:DataType>
+                        <hdf5:CompoundType>
+                           <hdf5:Field FieldName="vmajor">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="vminor">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="rel">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="annot">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                        </hdf5:CompoundType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+                  <hdf5:Field FieldName="mpi">
+                     <hdf5:DataType>
+                        <hdf5:CompoundType>
+                           <hdf5:Field FieldName="vmajor">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="vminor">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="rel">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                           <hdf5:Field FieldName="annot">
+                              <hdf5:DataType>
+                                 <hdf5:AtomicType>
+                                    <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
+                                 </hdf5:AtomicType>
+                              </hdf5:DataType>
+                           </hdf5:Field>
+                        </hdf5:CompoundType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+                  <hdf5:Field FieldName="DoToc">
+                     <hdf5:DataType>
+                        <hdf5:AtomicType>
+                           <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                        </hdf5:AtomicType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+                  <hdf5:Field FieldName="ReadOnly">
+                     <hdf5:DataType>
+                        <hdf5:AtomicType>
+                           <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                        </hdf5:AtomicType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+                  <hdf5:Field FieldName="Clobber">
+                     <hdf5:DataType>
+                        <hdf5:AtomicType>
+                           <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                        </hdf5:AtomicType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+                  <hdf5:Field FieldName="OSModes">
+                     <hdf5:DataType>
+                        <hdf5:AtomicType>
+                           <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                        </hdf5:AtomicType>
+                     </hdf5:DataType>
+                  </hdf5:Field>
+               </hdf5:CompoundType>
+            </hdf5:DataType>
+         <!-- Note: format of compound data not specified -->
+            <hdf5:Data>
+               <hdf5:DataFromFile>
+               -604320037 "." "don't import" 1 0 0 0 "none" 0 1 0 "devel" 1 3 0 "" 0 0 0 "none" 1 2 1 "" 1 2 0 "" 1 0 1 0
+               </hdf5:DataFromFile>
+            </hdf5:Data>
+         </hdf5:Dataset>
+      </hdf5:Group>
+   </hdf5:Group>
    <hdf5:Dataset Name="Blob" OBJ-XID="xid_17612" H5Path= "/Blob" Parents="xid_696" H5ParentPaths="/">
       <hdf5:StorageLayout>
          <hdf5:ChunkedLayout Ndims="1">
@@ -2628,294 +2917,5 @@ Expected output for 'h5dump --xml tsaf.h5'
          </hdf5:DataFromFile>
       </hdf5:Data>
    </hdf5:Dataset>
-   <hdf5:Group Name=".attributes" OBJ-XID="xid_5072" H5Path="/.attributes" Parents="xid_696" H5ParentPaths="/" >
-      <hdf5:Group Name="database" OBJ-XID="xid_5728" H5Path="/.attributes/database" Parents="xid_5072" H5ParentPaths="/.attributes" >
-         <hdf5:Dataset Name=".SAF_DbProps" OBJ-XID="xid_6104" H5Path= "/.attributes/database/.SAF_DbProps" Parents="xid_5728" H5ParentPaths="/.attributes/database">
-            <hdf5:StorageLayout>
-               <hdf5:ContiguousLayout/>
-            </hdf5:StorageLayout>
-                     <hdf5:FillValueInfo FillTime="FillIfSet" AllocationTime="Late">
-               <hdf5:FillValue>
-                     <hdf5:NoFill/>
-               </hdf5:FillValue>
-            </hdf5:FillValueInfo>
-            <hdf5:Dataspace>
-               <hdf5:SimpleDataspace Ndims="1">
-                  <hdf5:Dimension  DimSize="1" MaxDimSize="1"/>
-               </hdf5:SimpleDataspace>
-            </hdf5:Dataspace>
-            <hdf5:DataType>
-               <hdf5:CompoundType>
-                  <hdf5:Field FieldName="magic">
-                     <hdf5:DataType>
-                        <hdf5:AtomicType>
-                           <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                        </hdf5:AtomicType>
-                     </hdf5:DataType>
-                  </hdf5:Field>
-                  <hdf5:Field FieldName="SFileDir">
-                     <hdf5:DataType>
-                        <hdf5:AtomicType>
-                           <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="1024" StrPad="H5T_STR_NULLTERM"/>
-                        </hdf5:AtomicType>
-                     </hdf5:DataType>
-                  </hdf5:Field>
-                  <hdf5:Field FieldName="ImportFile">
-                     <hdf5:DataType>
-                        <hdf5:AtomicType>
-                           <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="1024" StrPad="H5T_STR_NULLTERM"/>
-                        </hdf5:AtomicType>
-                     </hdf5:DataType>
-                  </hdf5:Field>
-                  <hdf5:Field FieldName="parallel">
-                     <hdf5:DataType>
-                        <hdf5:AtomicType>
-                           <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                        </hdf5:AtomicType>
-                     </hdf5:DataType>
-                  </hdf5:Field>
-                  <hdf5:Field FieldName="safapi">
-                     <hdf5:DataType>
-                        <hdf5:CompoundType>
-                           <hdf5:Field FieldName="vmajor">
-                              <hdf5:DataType>
-                                 <hdf5:AtomicType>
-                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </hdf5:AtomicType>
-                              </hdf5:DataType>
-                           </hdf5:Field>
-                           <hdf5:Field FieldName="vminor">
-                              <hdf5:DataType>
-                                 <hdf5:AtomicType>
-                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </hdf5:AtomicType>
-                              </hdf5:DataType>
-                           </hdf5:Field>
-                           <hdf5:Field FieldName="rel">
-                              <hdf5:DataType>
-                                 <hdf5:AtomicType>
-                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </hdf5:AtomicType>
-                              </hdf5:DataType>
-                           </hdf5:Field>
-                           <hdf5:Field FieldName="annot">
-                              <hdf5:DataType>
-                                 <hdf5:AtomicType>
-                                    <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
-                                 </hdf5:AtomicType>
-                              </hdf5:DataType>
-                           </hdf5:Field>
-                        </hdf5:CompoundType>
-                     </hdf5:DataType>
-                  </hdf5:Field>
-                  <hdf5:Field FieldName="saflib">
-                     <hdf5:DataType>
-                        <hdf5:CompoundType>
-                           <hdf5:Field FieldName="vmajor">
-                              <hdf5:DataType>
-                                 <hdf5:AtomicType>
-                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </hdf5:AtomicType>
-                              </hdf5:DataType>
-                           </hdf5:Field>
-                           <hdf5:Field FieldName="vminor">
-                              <hdf5:DataType>
-                                 <hdf5:AtomicType>
-                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </hdf5:AtomicType>
-                              </hdf5:DataType>
-                           </hdf5:Field>
-                           <hdf5:Field FieldName="rel">
-                              <hdf5:DataType>
-                                 <hdf5:AtomicType>
-                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </hdf5:AtomicType>
-                              </hdf5:DataType>
-                           </hdf5:Field>
-                           <hdf5:Field FieldName="annot">
-                              <hdf5:DataType>
-                                 <hdf5:AtomicType>
-                                    <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
-                                 </hdf5:AtomicType>
-                              </hdf5:DataType>
-                           </hdf5:Field>
-                        </hdf5:CompoundType>
-                     </hdf5:DataType>
-                  </hdf5:Field>
-                  <hdf5:Field FieldName="vbt">
-                     <hdf5:DataType>
-                        <hdf5:CompoundType>
-                           <hdf5:Field FieldName="vmajor">
-                              <hdf5:DataType>
-                                 <hdf5:AtomicType>
-                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </hdf5:AtomicType>
-                              </hdf5:DataType>
-                           </hdf5:Field>
-                           <hdf5:Field FieldName="vminor">
-                              <hdf5:DataType>
-                                 <hdf5:AtomicType>
-                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </hdf5:AtomicType>
-                              </hdf5:DataType>
-                           </hdf5:Field>
-                           <hdf5:Field FieldName="rel">
-                              <hdf5:DataType>
-                                 <hdf5:AtomicType>
-                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </hdf5:AtomicType>
-                              </hdf5:DataType>
-                           </hdf5:Field>
-                           <hdf5:Field FieldName="annot">
-                              <hdf5:DataType>
-                                 <hdf5:AtomicType>
-                                    <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
-                                 </hdf5:AtomicType>
-                              </hdf5:DataType>
-                           </hdf5:Field>
-                        </hdf5:CompoundType>
-                     </hdf5:DataType>
-                  </hdf5:Field>
-                  <hdf5:Field FieldName="dsl">
-                     <hdf5:DataType>
-                        <hdf5:CompoundType>
-                           <hdf5:Field FieldName="vmajor">
-                              <hdf5:DataType>
-                                 <hdf5:AtomicType>
-                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </hdf5:AtomicType>
-                              </hdf5:DataType>
-                           </hdf5:Field>
-                           <hdf5:Field FieldName="vminor">
-                              <hdf5:DataType>
-                                 <hdf5:AtomicType>
-                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </hdf5:AtomicType>
-                              </hdf5:DataType>
-                           </hdf5:Field>
-                           <hdf5:Field FieldName="rel">
-                              <hdf5:DataType>
-                                 <hdf5:AtomicType>
-                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </hdf5:AtomicType>
-                              </hdf5:DataType>
-                           </hdf5:Field>
-                           <hdf5:Field FieldName="annot">
-                              <hdf5:DataType>
-                                 <hdf5:AtomicType>
-                                    <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
-                                 </hdf5:AtomicType>
-                              </hdf5:DataType>
-                           </hdf5:Field>
-                        </hdf5:CompoundType>
-                     </hdf5:DataType>
-                  </hdf5:Field>
-                  <hdf5:Field FieldName="hdf5">
-                     <hdf5:DataType>
-                        <hdf5:CompoundType>
-                           <hdf5:Field FieldName="vmajor">
-                              <hdf5:DataType>
-                                 <hdf5:AtomicType>
-                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </hdf5:AtomicType>
-                              </hdf5:DataType>
-                           </hdf5:Field>
-                           <hdf5:Field FieldName="vminor">
-                              <hdf5:DataType>
-                                 <hdf5:AtomicType>
-                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </hdf5:AtomicType>
-                              </hdf5:DataType>
-                           </hdf5:Field>
-                           <hdf5:Field FieldName="rel">
-                              <hdf5:DataType>
-                                 <hdf5:AtomicType>
-                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </hdf5:AtomicType>
-                              </hdf5:DataType>
-                           </hdf5:Field>
-                           <hdf5:Field FieldName="annot">
-                              <hdf5:DataType>
-                                 <hdf5:AtomicType>
-                                    <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
-                                 </hdf5:AtomicType>
-                              </hdf5:DataType>
-                           </hdf5:Field>
-                        </hdf5:CompoundType>
-                     </hdf5:DataType>
-                  </hdf5:Field>
-                  <hdf5:Field FieldName="mpi">
-                     <hdf5:DataType>
-                        <hdf5:CompoundType>
-                           <hdf5:Field FieldName="vmajor">
-                              <hdf5:DataType>
-                                 <hdf5:AtomicType>
-                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </hdf5:AtomicType>
-                              </hdf5:DataType>
-                           </hdf5:Field>
-                           <hdf5:Field FieldName="vminor">
-                              <hdf5:DataType>
-                                 <hdf5:AtomicType>
-                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </hdf5:AtomicType>
-                              </hdf5:DataType>
-                           </hdf5:Field>
-                           <hdf5:Field FieldName="rel">
-                              <hdf5:DataType>
-                                 <hdf5:AtomicType>
-                                    <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                                 </hdf5:AtomicType>
-                              </hdf5:DataType>
-                           </hdf5:Field>
-                           <hdf5:Field FieldName="annot">
-                              <hdf5:DataType>
-                                 <hdf5:AtomicType>
-                                    <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="10" StrPad="H5T_STR_NULLTERM"/>
-                                 </hdf5:AtomicType>
-                              </hdf5:DataType>
-                           </hdf5:Field>
-                        </hdf5:CompoundType>
-                     </hdf5:DataType>
-                  </hdf5:Field>
-                  <hdf5:Field FieldName="DoToc">
-                     <hdf5:DataType>
-                        <hdf5:AtomicType>
-                           <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                        </hdf5:AtomicType>
-                     </hdf5:DataType>
-                  </hdf5:Field>
-                  <hdf5:Field FieldName="ReadOnly">
-                     <hdf5:DataType>
-                        <hdf5:AtomicType>
-                           <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                        </hdf5:AtomicType>
-                     </hdf5:DataType>
-                  </hdf5:Field>
-                  <hdf5:Field FieldName="Clobber">
-                     <hdf5:DataType>
-                        <hdf5:AtomicType>
-                           <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                        </hdf5:AtomicType>
-                     </hdf5:DataType>
-                  </hdf5:Field>
-                  <hdf5:Field FieldName="OSModes">
-                     <hdf5:DataType>
-                        <hdf5:AtomicType>
-                           <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                        </hdf5:AtomicType>
-                     </hdf5:DataType>
-                  </hdf5:Field>
-               </hdf5:CompoundType>
-            </hdf5:DataType>
-         <!-- Note: format of compound data not specified -->
-            <hdf5:Data>
-               <hdf5:DataFromFile>
-               -604320037 "." "don't import" 1 0 0 0 "none" 0 1 0 "devel" 1 3 0 "" 0 0 0 "none" 1 2 1 "" 1 2 0 "" 1 0 1 0
-               </hdf5:DataFromFile>
-            </hdf5:Data>
-         </hdf5:Dataset>
-      </hdf5:Group>
-   </hdf5:Group>
 </hdf5:RootGroup>
 </hdf5:HDF5-File>

@@ -138,7 +138,7 @@ herr_t H5DSattach_scale(hid_t did,
  hobj_ref_t ref_j;        /* iterator reference */
  hvl_t      *buf;         /* VL buffer to store in the attribute */
  hid_t      dsid_j;       /* DS dataset ID in DIMENSION_LIST */
- H5G_stat_t sb1, sb2;
+ H5O_info_t oi1, oi2;
  H5I_type_t it1, it2;
  int        i, len;
  int        found_ds=0;
@@ -152,15 +152,15 @@ herr_t H5DSattach_scale(hid_t did,
   return FAIL;
 
  /* get info for the dataset in the parameter list */
- if (H5Gget_objinfo(did,".",TRUE,&sb1)<0)
+ if(H5Oget_info(did, ".", &oi1, H5P_DEFAULT) < 0)
   return FAIL;
 
  /* get info for the scale in the parameter list */
- if (H5Gget_objinfo(dsid,".",TRUE,&sb2)<0)
+ if(H5Oget_info(dsid, ".", &oi2, H5P_DEFAULT) < 0)
   return FAIL;
 
  /* same object, not valid */
- if (!memcmp(&sb1.fileno, &sb2.fileno, sizeof(sb1.fileno)) && !memcmp(&sb1.objno, &sb2.objno, sizeof(sb1.objno)))
+ if(oi1.fileno == oi2.fileno && oi1.addr == oi2.addr)
   return FAIL;
 
  /* get ID type */
@@ -329,18 +329,16 @@ herr_t H5DSattach_scale(hid_t did,
     goto out;
 
    /* get info for DS in the parameter list */
-   if (H5Gget_objinfo(dsid,".",TRUE,&sb1)<0)
+   if(H5Oget_info(dsid, ".", &oi1, H5P_DEFAULT) < 0)
     goto out;
 
    /* get info for this DS */
-   if (H5Gget_objinfo(dsid_j,".",TRUE,&sb2)<0)
+   if(H5Oget_info(dsid_j, ".", &oi2, H5P_DEFAULT) < 0)
     goto out;
 
    /* same object, so this DS scale is already in this DIM IDX */
-   if (!memcmp(&sb1.fileno, &sb2.fileno, sizeof(sb1.fileno)) && !memcmp(&sb1.objno, &sb2.objno, sizeof(sb1.objno)))
-   {
+   if(oi1.fileno == oi2.fileno && oi1.addr == oi2.addr)
     found_ds = 1;
-   }
 
    /* close the dereferenced dataset */
    if (H5Dclose(dsid_j)<0)
@@ -596,14 +594,14 @@ herr_t H5DSdetach_scale(hid_t did,
  hid_t      tid = -1;     /* attribute type ID */
  hid_t      aid = -1;     /* attribute ID */
  int        rank;         /* rank of dataset */
- ds_list_t  *dsbuf=NULL;  /* array of attribute data in the DS pointing to the dataset */
- ds_list_t  *dsbufn=NULL; /* array of attribute data in the DS pointing to the dataset */
- hsize_t    *dims=NULL;   /* dimension of the "REFERENCE_LIST" array */
+ ds_list_t  *dsbuf = NULL;  /* array of attribute data in the DS pointing to the dataset */
+ ds_list_t  *dsbufn = NULL; /* array of attribute data in the DS pointing to the dataset */
+ hsize_t    *dims = NULL;   /* dimension of the "REFERENCE_LIST" array */
  hobj_ref_t ref;          /* reference to the DS */
- hvl_t      *buf=NULL;    /* VL buffer to store in the attribute */
+ hvl_t      *buf = NULL;  /* VL buffer to store in the attribute */
  unsigned   i, j, jj;
- H5G_stat_t sb1, sb2, sb3, sb4;
- int        found_dset=0, found_ds=0;
+ H5O_info_t oi1, oi2, oi3, oi4;
+ int        found_dset = 0, found_ds = 0;
  H5I_type_t it1, it2;
 
 /*-------------------------------------------------------------------------
@@ -615,15 +613,15 @@ herr_t H5DSdetach_scale(hid_t did,
   return FAIL;
 
  /* get info for the dataset in the parameter list */
- if (H5Gget_objinfo(did,".",TRUE,&sb1)<0)
+ if(H5Oget_info(did, ".", &oi1, H5P_DEFAULT) < 0)
   return FAIL;
 
  /* get info for the scale in the parameter list */
- if (H5Gget_objinfo(dsid,".",TRUE,&sb2)<0)
+ if(H5Oget_info(dsid, ".", &oi2, H5P_DEFAULT) < 0)
   return FAIL;
 
  /* same object, not valid */
- if (!memcmp(&sb1.fileno, &sb2.fileno, sizeof(sb1.fileno)) && !memcmp(&sb1.objno, &sb2.objno, sizeof(sb1.objno)))
+ if(oi1.fileno == oi2.fileno && oi1.addr == oi2.addr)
   return FAIL;
 
  /* get ID type */
@@ -709,20 +707,17 @@ herr_t H5DSdetach_scale(hid_t did,
     goto out;
 
    /* get info for DS in the parameter list */
-   if (H5Gget_objinfo(dsid,".",TRUE,&sb1)<0)
+   if(H5Oget_info(dsid, ".", &oi1, H5P_DEFAULT) < 0)
     goto out;
 
    /* get info for this DS */
-   if (H5Gget_objinfo(dsid_j,".",TRUE,&sb2)<0)
+   if(H5Oget_info(dsid_j, ".", &oi2, H5P_DEFAULT) < 0)
     goto out;
 
    /* same object, reset */
-   if (!memcmp(&sb1.fileno, &sb2.fileno, sizeof(sb1.fileno)) && !memcmp(&sb1.objno, &sb2.objno, sizeof(sb1.objno)))
-   {
+   if(oi1.fileno == oi2.fileno && oi1.addr == oi2.addr) {
     for(jj=j; jj<buf[idx].len-1; jj++)
-    {
      ((hobj_ref_t *)buf[idx].p)[jj] = ((hobj_ref_t *)buf[idx].p)[jj+1];
-    }
     buf[idx].len--;
 
     found_ds = 1;
@@ -794,21 +789,17 @@ herr_t H5DSdetach_scale(hid_t did,
    goto out;
 
   /* get info for dataset in the parameter list */
-  if (H5Gget_objinfo(did,".",TRUE,&sb3)<0)
+  if(H5Oget_info(did, ".", &oi3, H5P_DEFAULT) < 0)
    goto out;
 
   /* get info for this dataset */
-  if (H5Gget_objinfo(did_i,".",TRUE,&sb4)<0)
+  if(H5Oget_info(did_i, ".", &oi4, H5P_DEFAULT) < 0)
    goto out;
 
   /* same object, reset. we want to detach only for this DIM */
-  if (!memcmp(&sb3.fileno, &sb4.fileno, sizeof(sb3.fileno)) && !memcmp(&sb3.objno, &sb4.objno, sizeof(sb3.objno))
-          && (int)idx==dsbuf[i].dim_idx)
-  {
+  if(oi3.fileno == oi4.fileno && oi3.addr == oi4.addr && (int)idx == dsbuf[i].dim_idx) {
    for(jj=i; jj<nelmts-1; jj++)
-   {
     dsbuf[jj] = dsbuf[jj+1];
-   }
    nelmts--;
    found_dset=1;
 
@@ -966,7 +957,7 @@ htri_t H5DSis_attached(hid_t did,
  hvl_t      *buf;         /* VL buffer to store in the attribute */
  hid_t      dsid_j;       /* DS dataset ID in DIMENSION_LIST */
 	hid_t      did_i;        /* dataset ID in REFERENCE_LIST */
- H5G_stat_t sb1, sb2, sb3, sb4;
+ H5O_info_t oi1, oi2, oi3, oi4;
  H5I_type_t it1, it2;
  int        i;
  int        found_dset=0, found_ds=0;
@@ -980,15 +971,15 @@ htri_t H5DSis_attached(hid_t did,
   return FAIL;
 
  /* get info for the dataset in the parameter list */
- if (H5Gget_objinfo(did,".",TRUE,&sb1)<0)
+ if(H5Oget_info(did, ".", &oi1, H5P_DEFAULT) < 0)
   return FAIL;
 
  /* get info for the scale in the parameter list */
- if (H5Gget_objinfo(dsid,".",TRUE,&sb2)<0)
+ if(H5Oget_info(dsid, ".", &oi2, H5P_DEFAULT) < 0)
   return FAIL;
 
  /* same object, not valid */
- if (!memcmp(&sb1.fileno, &sb2.fileno, sizeof(sb1.fileno)) && !memcmp(&sb1.objno, &sb2.objno, sizeof(sb1.objno)))
+ if(oi1.fileno == oi2.fileno && oi1.addr == oi2.addr)
   return FAIL;
 
  /* get ID type */
@@ -1062,18 +1053,16 @@ htri_t H5DSis_attached(hid_t did,
     goto out;
 
    /* get info for DS in the parameter list */
-   if (H5Gget_objinfo(dsid,".",TRUE,&sb1)<0)
+   if(H5Oget_info(dsid, ".", &oi1, H5P_DEFAULT) < 0)
     goto out;
 
    /* get info for this DS */
-   if (H5Gget_objinfo(dsid_j,".",TRUE,&sb2)<0)
+   if(H5Oget_info(dsid_j, ".", &oi2, H5P_DEFAULT) < 0)
     goto out;
 
    /* same object */
-   if (!memcmp(&sb1.fileno, &sb2.fileno, sizeof(sb1.fileno)) && !memcmp(&sb1.objno, &sb2.objno, sizeof(sb1.objno)))
-   {
+   if(oi1.fileno == oi2.fileno && oi1.addr == oi2.addr)
     found_ds = 1;
-   }
 
    /* close the dereferenced dataset */
    if (H5Dclose(dsid_j)<0)
@@ -1150,18 +1139,16 @@ htri_t H5DSis_attached(hid_t did,
      goto out;
 
     /* get info for dataset in the parameter list */
-    if (H5Gget_objinfo(did,".",TRUE,&sb3)<0)
+    if(H5Oget_info(did, ".", &oi3, H5P_DEFAULT) < 0)
      goto out;
 
     /* get info for this dataset */
-    if (H5Gget_objinfo(did_i,".",TRUE,&sb4)<0)
+    if(H5Oget_info(did_i, ".", &oi4, H5P_DEFAULT) < 0)
      goto out;
 
     /* same object */
-    if (!memcmp(&sb3.fileno, &sb4.fileno, sizeof(sb3.fileno)) && !memcmp(&sb3.objno, &sb4.objno, sizeof(sb3.objno))
-          && (int)idx==dsbuf[i].dim_idx) {
+    if(oi3.fileno == oi4.fileno && oi3.addr == oi4.addr && (int)idx==dsbuf[i].dim_idx)
      found_dset=1;
-    } /* if */
 
     /* close the dereferenced dataset */
     if (H5Dclose(did_i)<0)

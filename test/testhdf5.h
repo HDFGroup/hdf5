@@ -69,15 +69,16 @@
 }
 
 /* Used to make certain a return value _is_ a value */
-#define VERIFY(x, val, where) do {					      \
-    if (GetTestVerbosity()>=VERBO_HI) {					      \
+#define VERIFY(_x, _val, where) do {					      \
+    long __x = (long)_x, __val = (long)_val;				      \
+    if(GetTestVerbosity() >= VERBO_HI) {				      \
 	print_func("   Call to routine: %15s at line %4d in %s had value "    \
-		   "%ld \n", (where), (int)__LINE__, __FILE__, (long)(x));    \
+		   "%ld \n", (where), (int)__LINE__, __FILE__, __x);	      \
     }									      \
-    if ((x) != (val)) {							      \
+    if((__x) != (__val)) {						      \
 	TestErrPrintf("*** UNEXPECTED VALUE from %s should be %ld, but is %ld at line %4d " \
-		   "in %s\n", (where), (long)(val), (long)(x), (int)__LINE__, __FILE__); \
-	H5Eprint2(H5E_DEFAULT, stdout);				      \
+		   "in %s\n", (where), __val, __x, (int)__LINE__, __FILE__);  \
+	H5Eprint2(H5E_DEFAULT, stdout);					      \
     }									      \
 } while(0)
 

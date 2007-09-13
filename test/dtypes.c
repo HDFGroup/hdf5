@@ -4362,7 +4362,7 @@ test_latest(void)
     hid_t       file = (-1);            /* File ID */
     hid_t       tid1 = (-1), tid2 = (-1); /* Datatype ID */
     hid_t       fapl = (-1);            /* File access property list */
-    H5G_stat_t	sb;                     /* Stat buffer for committed datatype */
+    H5O_info_t	oi;                     /* Stat buffer for committed datatype */
     hsize_t     old_dtype_oh_size;      /* Size of object header with "old" format */
     hsize_t     new_dtype_oh_size;      /* Size of object header with "new" format */
     char        filename[1024];         /* Buffer for filename */
@@ -4396,9 +4396,9 @@ test_latest(void)
         FAIL_STACK_ERROR
 
     /* Get information about datatype on disk */
-    if(H5Gget_objinfo(file, compnd_type, TRUE, &sb) < 0)
+    if(H5Oget_info(file, compnd_type, &oi, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
-    old_dtype_oh_size = sb.ohdr.size;
+    old_dtype_oh_size = oi.hdr.space.total;
 
     /* Close datatype */
     if(H5Tclose(tid2) < 0)
@@ -4421,11 +4421,11 @@ test_latest(void)
         FAIL_STACK_ERROR
 
     /* Get information about datatype on disk */
-    if(H5Gget_objinfo(file, compnd_type, TRUE, &sb) < 0)
+    if(H5Oget_info(file, compnd_type, &oi, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
 
     /* Check that the object header info is still the same */
-    if(old_dtype_oh_size != sb.ohdr.size)
+    if(old_dtype_oh_size != oi.hdr.space.total)
         TEST_ERROR
 
     /* Close datatype */
@@ -4457,9 +4457,9 @@ test_latest(void)
         FAIL_STACK_ERROR
 
     /* Get information about datatype on disk */
-    if(H5Gget_objinfo(file, compnd_type, TRUE, &sb) < 0)
+    if(H5Oget_info(file, compnd_type, &oi, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
-    new_dtype_oh_size = sb.ohdr.size;
+    new_dtype_oh_size = oi.hdr.space.total;
     
     /* Check that the new format is smaller than the old format */
     if(old_dtype_oh_size <= new_dtype_oh_size)
@@ -4486,11 +4486,11 @@ test_latest(void)
         FAIL_STACK_ERROR
 
     /* Get information about datatype on disk */
-    if(H5Gget_objinfo(file, compnd_type, TRUE, &sb) < 0)
+    if(H5Oget_info(file, compnd_type, &oi, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
 
     /* Check that the object header info is still the same */
-    if(new_dtype_oh_size != sb.ohdr.size)
+    if(new_dtype_oh_size != oi.hdr.space.total)
         TEST_ERROR
 
     /* Close datatype */

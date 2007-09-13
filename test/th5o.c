@@ -378,7 +378,7 @@ test_h5o_refcount(void)
 {
     hid_t       fid;                        /* HDF5 File ID      */
     hid_t       grp, dset, dtype, dspace;   /* Object identifiers */
-    H5G_stat_t	sb;                         /* Statbuffer for H5Gget_objinfo */
+    H5O_info_t	oinfo;                      /* Object info struct */
     hsize_t     dims[RANK];
     herr_t      ret;                        /* Value returned from API calls */
 
@@ -410,15 +410,15 @@ test_h5o_refcount(void)
     CHECK(ret, FAIL, "H5Sclose");
 
     /* Get ref counts for each object.  They should all be 1, since each object has a hard link. */
-    ret = H5Gget_objinfo(fid, "group", FALSE, &sb);
-    CHECK(ret, FAIL, "H5Gget_objinfo");
-    VERIFY(sb.nlink, 1, "reference count in H5Gget_objinfo");
-    ret = H5Gget_objinfo(fid, "datatype", FALSE, &sb);
-    CHECK(ret, FAIL, "H5Gget_objinfo");
-    VERIFY(sb.nlink, 1, "reference count in H5Gget_objinfo");
-    ret = H5Gget_objinfo(fid, "dataset", FALSE, &sb);
-    CHECK(ret, FAIL, "H5Gget_objinfo");
-    VERIFY(sb.nlink, 1, "reference count in H5Gget_objinfo");
+    ret = H5Oget_info(fid, "group", &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.rc, 1, "reference count in H5Oget_info");
+    ret = H5Oget_info(fid, "datatype", &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.rc, 1, "reference count in H5Oget_info");
+    ret = H5Oget_info(fid, "dataset", &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.rc, 1, "reference count in H5Oget_info");
 
     /* Increment each object's reference count. */
     ret = H5Oincr_refcount(grp);
@@ -429,15 +429,15 @@ test_h5o_refcount(void)
     CHECK(ret, FAIL, "H5Oincr_refcount");
 
     /* Get ref counts for each object.  They should all be 2 now. */
-    ret = H5Gget_objinfo(fid, "group", FALSE, &sb);
-    CHECK(ret, FAIL, "H5Gget_objinfo");
-    VERIFY(sb.nlink, 2, "reference count in H5Gget_objinfo");
-    ret = H5Gget_objinfo(fid, "datatype", FALSE, &sb);
-    CHECK(ret, FAIL, "H5Gget_objinfo");
-    VERIFY(sb.nlink, 2, "reference count in H5Gget_objinfo");
-    ret = H5Gget_objinfo(fid, "dataset", FALSE, &sb);
-    CHECK(ret, FAIL, "H5Gget_objinfo");
-    VERIFY(sb.nlink, 2, "reference count in H5Gget_objinfo");
+    ret = H5Oget_info(fid, "group", &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.rc, 2, "reference count in H5Oget_info");
+    ret = H5Oget_info(fid, "datatype", &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.rc, 2, "reference count in H5Oget_info");
+    ret = H5Oget_info(fid, "dataset", &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.rc, 2, "reference count in H5Oget_info");
 
     /* Decrement the reference counts and check that they decrease back to 1. */
     ret = H5Odecr_refcount(grp);
@@ -447,15 +447,15 @@ test_h5o_refcount(void)
     ret = H5Odecr_refcount(dset);
     CHECK(ret, FAIL, "H5Odecr_refcount");
 
-    ret = H5Gget_objinfo(fid, "group", FALSE, &sb);
-    CHECK(ret, FAIL, "H5Gget_objinfo");
-    VERIFY(sb.nlink, 1, "reference count in H5Gget_objinfo");
-    ret = H5Gget_objinfo(fid, "datatype", FALSE, &sb);
-    CHECK(ret, FAIL, "H5Gget_objinfo");
-    VERIFY(sb.nlink, 1, "reference count in H5Gget_objinfo");
-    ret = H5Gget_objinfo(fid, "dataset", FALSE, &sb);
-    CHECK(ret, FAIL, "H5Gget_objinfo");
-    VERIFY(sb.nlink, 1, "reference count in H5Gget_objinfo");
+    ret = H5Oget_info(fid, "group", &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.rc, 1, "reference count in H5Oget_info");
+    ret = H5Oget_info(fid, "datatype", &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.rc, 1, "reference count in H5Oget_info");
+    ret = H5Oget_info(fid, "dataset", &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.rc, 1, "reference count in H5Oget_info");
 
     /* Increment the reference counts and then close the file to make sure the increment is permanant */
     ret = H5Oincr_refcount(grp);
@@ -485,15 +485,15 @@ test_h5o_refcount(void)
     dset = H5Dopen(fid, "dataset");
     CHECK(dset, FAIL, "H5Dopen");
 
-    ret = H5Gget_objinfo(fid, "group", FALSE, &sb);
-    CHECK(ret, FAIL, "H5Gget_objinfo");
-    VERIFY(sb.nlink, 2, "reference count in H5Gget_objinfo");
-    ret = H5Gget_objinfo(fid, "datatype", FALSE, &sb);
-    CHECK(ret, FAIL, "H5Gget_objinfo");
-    VERIFY(sb.nlink, 2, "reference count in H5Gget_objinfo");
-    ret = H5Gget_objinfo(fid, "dataset", FALSE, &sb);
-    CHECK(ret, FAIL, "H5Gget_objinfo");
-    VERIFY(sb.nlink, 2, "reference count in H5Gget_objinfo");
+    ret = H5Oget_info(fid, "group", &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.rc, 2, "reference count in H5Oget_info");
+    ret = H5Oget_info(fid, "datatype", &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.rc, 2, "reference count in H5Oget_info");
+    ret = H5Oget_info(fid, "dataset", &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.rc, 2, "reference count in H5Oget_info");
 
     /* Decrement the reference counts and close the file */
     ret = H5Odecr_refcount(grp);
@@ -523,15 +523,15 @@ test_h5o_refcount(void)
     dset = H5Dopen(fid, "dataset");
     CHECK(dset, FAIL, "H5Dopen");
 
-    ret = H5Gget_objinfo(fid, "group", FALSE, &sb);
-    CHECK(ret, FAIL, "H5Gget_objinfo");
-    VERIFY(sb.nlink, 1, "reference count in H5Gget_objinfo");
-    ret = H5Gget_objinfo(fid, "datatype", FALSE, &sb);
-    CHECK(ret, FAIL, "H5Gget_objinfo");
-    VERIFY(sb.nlink, 1, "reference count in H5Gget_objinfo");
-    ret = H5Gget_objinfo(fid, "dataset", FALSE, &sb);
-    CHECK(ret, FAIL, "H5Gget_objinfo");
-    VERIFY(sb.nlink, 1, "reference count in H5Gget_objinfo");
+    ret = H5Oget_info(fid, "group", &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.rc, 1, "reference count in H5Oget_info");
+    ret = H5Oget_info(fid, "datatype", &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.rc, 1, "reference count in H5Oget_info");
+    ret = H5Oget_info(fid, "dataset", &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.rc, 1, "reference count in H5Oget_info");
 
     /* Close the IDs */
     ret = H5Gclose(grp);

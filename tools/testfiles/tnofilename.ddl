@@ -25,7 +25,7 @@ usage: h5dump [OPTIONS] file
                           with -o (output file) and -d (dataset). B can be:
                           MEMORY for a memory type, FILE for the file type,
                           LE or BE for pre-existing little or big endian types
-     -t P, --datatype=P   Print the specified named data type
+     -t P, --datatype=P   Print the specified named datatype
      -w N, --width=N      Set the number of columns of output
      -x, --xml            Output in XML using Schema
      -u, --use-dtd        Output in XML using DTD

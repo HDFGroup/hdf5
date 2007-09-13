@@ -1026,7 +1026,7 @@ H5T_conv_order_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
              * the addresses in the file must be) and just get out now, there
              * is no need to convert the object reference.  Yes, this is
              * icky and non-portable, but I can't think of a better way to
-             * support allowing the objno in the H5G_stat_t struct and the
+             * support allowing the objno in the H5O_info_t struct and the
              * hobj_ref_t type to be compared directly without introducing a
              * "native" hobj_ref_t datatype and I think that would break a
              * lot of existing programs.  -QAK

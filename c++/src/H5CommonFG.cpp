@@ -341,6 +341,7 @@ void CommonFG::move( const H5std_string& src, const H5std_string& dst ) const
    move( src.c_str(), dst.c_str() );
 }
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 //--------------------------------------------------------------------------
 // Function:	CommonFG::getObjinfo
 ///\brief	Returns information about an object.
@@ -402,6 +403,7 @@ void CommonFG::getObjinfo( const H5std_string& name, H5G_stat_t& statbuf ) const
 {
    getObjinfo( name.c_str(), statbuf );
 }
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 //--------------------------------------------------------------------------
 // Function:	CommonFG::getLinkval

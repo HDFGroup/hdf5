@@ -165,11 +165,10 @@ H5O_sdspace_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
         for(i = 0; i < sdim->rank; i++) {
             H5F_DECODE_LENGTH(f, p, sdim->size[i]);
-#ifndef H5_HAVE_LARGE_HSIZET
+
             /* Rudimentary check for overflow of the dimension size */
             if(sdim->size[i] == 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_BADSIZE, NULL, "invalid size detected")
-#endif /* H5_HAVE_LARGE_HSIZET */
         } /* end for */
 
         if(flags & H5S_VALID_MAX) {

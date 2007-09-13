@@ -2178,189 +2178,165 @@ hsize_t diff_region(hid_t obj1_id,
                     diff_opt_t *options)
 
 {
- hssize_t   nblocks1, npoints1;
- hssize_t   nblocks2, npoints2;
- H5G_stat_t sb1;
- H5G_stat_t sb2;
- hsize_t    alloc_size;
- hsize_t    *ptdata1;
- hsize_t    *ptdata2;
- int        ndims1;
- int        ndims2;
- int        i, j;
- haddr_t    objno1, objno2; /* compact form of object's location */
- hsize_t    nfound_b=0;     /* block differences found */
- hsize_t    nfound_p=0;     /* point differences found */
+    hssize_t   nblocks1, npoints1;
+    hssize_t   nblocks2, npoints2;
+    hsize_t    alloc_size;
+    hsize_t    *ptdata1;
+    hsize_t    *ptdata2;
+    int        ndims1;
+    int        ndims2;
+    int        i, j;
+    hsize_t    nfound_b = 0;     /* block differences found */
+    hsize_t    nfound_p = 0;     /* point differences found */
 
- ndims1 = H5Sget_simple_extent_ndims(region1_id);
- ndims2 = H5Sget_simple_extent_ndims(region2_id);
+    ndims1 = H5Sget_simple_extent_ndims(region1_id);
+    ndims2 = H5Sget_simple_extent_ndims(region2_id);
 
- H5Gget_objinfo(obj1_id, ".", FALSE, &sb1);
- H5Gget_objinfo(obj2_id, ".", FALSE, &sb2);
+    /*
+    * These two functions fail if the region does not have blocks or points,
+    * respectively. They do not currently know how to translate from one to
+    * the other.
+    */
+    H5E_BEGIN_TRY {
+        nblocks1 = H5Sget_select_hyper_nblocks(region1_id);
+        nblocks2 = H5Sget_select_hyper_nblocks(region2_id);
 
- objno1 = (haddr_t)sb1.objno[0] | ((haddr_t)sb1.objno[1] << (8 * sizeof(long)));
- objno2 = (haddr_t)sb2.objno[0] | ((haddr_t)sb2.objno[1] << (8 * sizeof(long)));
+        npoints1 = H5Sget_select_elem_npoints(region1_id);
+        npoints2 = H5Sget_select_elem_npoints(region2_id);
+    } H5E_END_TRY;
 
-/*
- * These two functions fail if the region does not have blocks or points,
- * respectively. They do not currently know how to translate from one to
- * the other.
- */
- H5E_BEGIN_TRY {
-  nblocks1 = H5Sget_select_hyper_nblocks(region1_id);
-  nblocks2 = H5Sget_select_hyper_nblocks(region2_id);
-
-  npoints1 = H5Sget_select_elem_npoints(region1_id);
-  npoints2 = H5Sget_select_elem_npoints(region2_id);
- } H5E_END_TRY;
-
- if (nblocks1!=nblocks2 || npoints1!=npoints2 || ndims1!=ndims2)
- {
-  options->not_cmp=1;
-  return 0;
- }
-
-/*-------------------------------------------------------------------------
- * compare block information
- *-------------------------------------------------------------------------
- */
- if (nblocks1 > 0)
- {
-
-  alloc_size = nblocks1 * ndims1 * 2 * sizeof(ptdata1[0]);
-  assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
-
-  ptdata1 = malloc((size_t)alloc_size);
-  H5_CHECK_OVERFLOW(nblocks1, hssize_t, hsize_t);
-  H5Sget_select_hyper_blocklist(region1_id, (hsize_t)0, (hsize_t)nblocks1, ptdata1);
-
-  ptdata2 = malloc((size_t)alloc_size);
-  H5_CHECK_OVERFLOW(nblocks2, hssize_t, hsize_t);
-  H5Sget_select_hyper_blocklist(region2_id, (hsize_t)0, (hsize_t)nblocks2, ptdata2);
-
-  for (i = 0; i < nblocks1; i++)
-  {
-   /* start coordinates and opposite corner */
-   for (j = 0; j < ndims1; j++)
-   {
-    hsize_t start1, start2, end1, end2;
-    start1 = ptdata1[i * 2 * ndims1 + j];
-    start2 = ptdata2[i * 2 * ndims1 + j];
-    end1   = ptdata1[i * 2 * ndims1 + j + ndims1];
-    end2   = ptdata2[i * 2 * ndims1 + j + ndims1];
-    if (start1 != start2 || end1 != end2)
-    {
-     nfound_b++;
+    if(nblocks1 != nblocks2 || npoints1 != npoints2 || ndims1 != ndims2) {
+        options->not_cmp = 1;
+        return 0;
     }
-   }
-  }
+
+    /*-------------------------------------------------------------------------
+    * compare block information
+    *-------------------------------------------------------------------------
+    */
+    if(nblocks1 > 0) {
+        alloc_size = nblocks1 * ndims1 * 2 * sizeof(ptdata1[0]);
+        assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
+
+        ptdata1 = malloc((size_t)alloc_size);
+        H5_CHECK_OVERFLOW(nblocks1, hssize_t, hsize_t);
+        H5Sget_select_hyper_blocklist(region1_id, (hsize_t)0, (hsize_t)nblocks1, ptdata1);
+
+        ptdata2 = malloc((size_t)alloc_size);
+        H5_CHECK_OVERFLOW(nblocks2, hssize_t, hsize_t);
+        H5Sget_select_hyper_blocklist(region2_id, (hsize_t)0, (hsize_t)nblocks2, ptdata2);
+
+        for (i = 0; i < nblocks1; i++) {
+            /* start coordinates and opposite corner */
+            for (j = 0; j < ndims1; j++) {
+                hsize_t start1, start2, end1, end2;
+
+                start1 = ptdata1[i * 2 * ndims1 + j];
+                start2 = ptdata2[i * 2 * ndims1 + j];
+                end1   = ptdata1[i * 2 * ndims1 + j + ndims1];
+                end2   = ptdata2[i * 2 * ndims1 + j + ndims1];
+                if (start1 != start2 || end1 != end2)
+                    nfound_b++;
+            }
+        }
 
 
-  /* print differences if found */
-  if (nfound_b && options->m_verbose)
-  {
-   parallel_print("Referenced dataset      %lu            %lu\n",
-    (unsigned long)objno1,(unsigned long)objno2);
-   parallel_print("------------------------------------------------------------\n");
+        /* print differences if found */
+        if (nfound_b && options->m_verbose) {
+            H5O_info_t oi1, oi2;
 
-   parallel_print("Region blocks\n");
-   for (i = 0; i < nblocks1; i++)
-   {
-    parallel_print("block #%d", i);
-    print_region_block(i, ptdata1, ndims1);
-    print_region_block(i, ptdata2, ndims1);
-    parallel_print("\n");
+            H5Oget_info(obj1_id, ".", &oi1, H5P_DEFAULT);
+            H5Oget_info(obj2_id, ".", &oi2, H5P_DEFAULT);
 
-   }
-  }
+            parallel_print("Referenced dataset      %lu            %lu\n",
+                    (unsigned long)oi1.addr, (unsigned long)oi2.addr);
+            parallel_print("------------------------------------------------------------\n");
 
-  HDfree(ptdata1);
-  HDfree(ptdata2);
- }
+            parallel_print("Region blocks\n");
+            for (i = 0; i < nblocks1; i++) {
+                parallel_print("block #%d", i);
+                print_region_block(i, ptdata1, ndims1);
+                print_region_block(i, ptdata2, ndims1);
+                parallel_print("\n");
+            }
+        }
 
-/*-------------------------------------------------------------------------
- * compare point information
- *-------------------------------------------------------------------------
- */
-
- if (npoints1 > 0)
- {
-  alloc_size = npoints1 * ndims1 * sizeof(ptdata1[0]);
-  assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
-
-  ptdata1 = malloc((size_t)alloc_size);
-  H5_CHECK_OVERFLOW(npoints1,hssize_t,hsize_t);
-  H5Sget_select_elem_pointlist(region1_id, (hsize_t)0, (hsize_t)npoints1, ptdata1);
-
-  ptdata2 = malloc((size_t)alloc_size);
-  H5_CHECK_OVERFLOW(npoints1,hssize_t,hsize_t);
-  H5Sget_select_elem_pointlist(region2_id, (hsize_t)0, (hsize_t)npoints2, ptdata2);
-
-  for (i = 0; i < npoints1; i++)
-  {
-   hsize_t pt1, pt2;
-
-   for (j = 0; j < ndims1; j++)
-   {
-    pt1 = ptdata1[i * ndims1 + j];
-    pt2 = ptdata2[i * ndims1 + j];
-    if (pt1 != pt2)
-     nfound_p++;
-   }
-  }
-
-  if (nfound_p && options->m_verbose)
-  {
-   parallel_print("Region points\n");
-   for (i = 0; i < npoints1; i++)
-   {
-    hsize_t pt1, pt2;
-    int     diff_data = 0;
-    for (j = 0; j < ndims1; j++)
-    {
-     pt1 = ptdata1[i * ndims1 + j];
-     pt2 = ptdata2[i * ndims1 + j];
-     if (pt1 != pt2)
-     {
-      diff_data = 1;
-      break;
-     }
+        HDfree(ptdata1);
+        HDfree(ptdata2);
     }
-    if (diff_data)
-    {
-     parallel_print("point #%d", i);
-     print_points(i, ptdata1, ndims1);
-     print_points(i, ptdata2, ndims1);
-     parallel_print("\n");
-    }
-   }
-  }
+
+    /*-------------------------------------------------------------------------
+    * compare point information
+    *-------------------------------------------------------------------------
+    */
+    if(npoints1 > 0) {
+        alloc_size = npoints1 * ndims1 * sizeof(ptdata1[0]);
+        assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
+
+        ptdata1 = malloc((size_t)alloc_size);
+        H5_CHECK_OVERFLOW(npoints1,hssize_t,hsize_t);
+        H5Sget_select_elem_pointlist(region1_id, (hsize_t)0, (hsize_t)npoints1, ptdata1);
+
+        ptdata2 = malloc((size_t)alloc_size);
+        H5_CHECK_OVERFLOW(npoints1,hssize_t,hsize_t);
+        H5Sget_select_elem_pointlist(region2_id, (hsize_t)0, (hsize_t)npoints2, ptdata2);
+
+        for(i = 0; i < npoints1; i++) {
+            hsize_t pt1, pt2;
+
+            for(j = 0; j < ndims1; j++) {
+                pt1 = ptdata1[i * ndims1 + j];
+                pt2 = ptdata2[i * ndims1 + j];
+                if(pt1 != pt2)
+                    nfound_p++;
+            }
+        }
+
+        if(nfound_p && options->m_verbose) {
+            parallel_print("Region points\n");
+            for(i = 0; i < npoints1; i++) {
+                hsize_t pt1, pt2;
+                int     diff_data = 0;
+
+                for(j = 0; j < ndims1; j++) {
+                    pt1 = ptdata1[i * ndims1 + j];
+                    pt2 = ptdata2[i * ndims1 + j];
+                    if(pt1 != pt2) {
+                        diff_data = 1;
+                        break;
+                    }
+                }
+                if(diff_data) {
+                    parallel_print("point #%d", i);
+                    print_points(i, ptdata1, ndims1);
+                    print_points(i, ptdata2, ndims1);
+                    parallel_print("\n");
+                }
+            }
+        }
 
 
 #if defined (H5DIFF_DEBUG)
-  for (i = 0; i < npoints1; i++)
-  {
-   int j;
+        for (i = 0; i < npoints1; i++) {
+            int j;
 
-   parallel_print("%sPt%lu: " ,
-    i ? "," : "",
-    (unsigned long)i);
+            parallel_print("%sPt%lu: " , i ? "," : "", (unsigned long)i);
 
-   for (j = 0; j < ndims1; j++)
-    parallel_print("%s%lu", j ? "," : "(",
-    (unsigned long)(ptdata1[i * ndims1 + j]));
+            for (j = 0; j < ndims1; j++)
+                parallel_print("%s%lu", j ? "," : "(",
+                        (unsigned long)(ptdata1[i * ndims1 + j]));
 
-   parallel_print(")");
-  }
+            parallel_print(")");
+        }
 #endif
 
-  HDfree(ptdata1);
-  HDfree(ptdata2);
- }
+        HDfree(ptdata1);
+        HDfree(ptdata2);
+    }
 
- nfound_b = nfound_b/ndims1;
- nfound_p = nfound_p/ndims1;
- return (nfound_p + nfound_b);
+    nfound_b = nfound_b/ndims1;
+    nfound_p = nfound_p/ndims1;
+    return (nfound_p + nfound_b);
 }
 
 

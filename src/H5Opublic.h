@@ -77,20 +77,14 @@
 /*******************/
 /* Public Typedefs */
 /*******************/
-/* A struct that's part of the H5G_stat_t routine (deprecated) */
-typedef struct H5O_stat_t {
-    hsize_t size;               /* Total size of object header in file */
-    hsize_t free;               /* Free space within object header */
-    unsigned nmesgs;            /* Number of object header messages */
-    unsigned nchunks;           /* Number of object header chunks */
-} H5O_stat_t;
 
 /* Types of objects in file */
 typedef enum H5O_type_t {
     H5O_TYPE_UNKNOWN = -1,	/* Unknown object type		*/
     H5O_TYPE_GROUP,	        /* Object is a group		*/
     H5O_TYPE_DATASET,		/* Object is a dataset		*/
-    H5O_TYPE_NAMED_DATATYPE 	/* Object is a named data type	*/
+    H5O_TYPE_NAMED_DATATYPE, 	/* Object is a named data type	*/
+    H5O_TYPE_NTYPES             /* Number of different object types (must be last!) */
 } H5O_type_t;
 
 /* Information struct for object (for H5Oget_info/H5Oget_info_by_idx) */
@@ -161,6 +155,28 @@ H5_DLL herr_t H5Oset_comment(hid_t loc_id, const char *name,
 H5_DLL ssize_t H5Oget_comment(hid_t loc_id, const char *name, char *comment,
     size_t bufsize, hid_t lapl_id);
 H5_DLL herr_t H5Oclose(hid_t object_id);
+
+/* Symbols defined for compatibility with previous versions of the HDF5 API.
+ * 
+ * Use of these symbols is deprecated.
+ */
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+
+/* Macros */
+
+/* Typedefs */
+
+/* A struct that's part of the H5G_stat_t routine (deprecated) */
+typedef struct H5O_stat_t {
+    hsize_t size;               /* Total size of object header in file */
+    hsize_t free;               /* Free space within object header */
+    unsigned nmesgs;            /* Number of object header messages */
+    unsigned nchunks;           /* Number of object header chunks */
+} H5O_stat_t;
+
+/* Function prototypes */
+
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 #ifdef __cplusplus
 }

@@ -38,13 +38,11 @@ int  indent = 0;
  *
  *-------------------------------------------------------------------------
  */
-
-herr_t H5LT_open_id( hid_t loc_id,
-                     const char *obj_name,
-                     int obj_type );
-
-herr_t H5LT_close_id( hid_t obj_id,
-                      int obj_type );
+static herr_t H5LT_get_attribute_mem(hid_t loc_id,
+                           const char *obj_name,
+                           const char *attr_name,
+                           hid_t mem_type_id,
+                           void *data);
 
 /*-------------------------------------------------------------------------
  *
@@ -1121,16 +1119,10 @@ herr_t H5LTset_attribute_string( hid_t loc_id,
  hid_t      attr_id;
  hid_t      obj_id;
  int        has_attr;
- H5G_stat_t statbuf;
  size_t     attr_size;
 
-
- /* Get the type of object */
- if (H5Gget_objinfo( loc_id, obj_name, 1, &statbuf )<0)
-  return -1;
-
  /* Open the object */
- if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
+ if ((obj_id = H5Oopen(loc_id, obj_name, H5P_DEFAULT)) < 0)
   return -1;
 
  /* Create the attribute */
@@ -1176,14 +1168,14 @@ herr_t H5LTset_attribute_string( hid_t loc_id,
   goto out;
 
  /* Close the object */
- if ( H5LT_close_id( obj_id, statbuf.type ) < 0 )
+ if(H5Oclose(obj_id) < 0)
   return -1;
 
   return 0;
 
 out:
 
- H5LT_close_id( obj_id, statbuf.type );
+ H5Oclose(obj_id);
  return -1;
 }
 
@@ -1219,14 +1211,9 @@ herr_t H5LT_set_attribute_numerical( hid_t loc_id,
  hid_t      obj_id, sid, attr_id;
  hsize_t    dim_size=size;
  int        has_attr;
- H5G_stat_t statbuf;
-
- /* Get the type of object */
- if (H5Gget_objinfo(loc_id, obj_name, 1, &statbuf)<0)
-  return -1;
 
  /* Open the object */
- if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
+ if ((obj_id = H5Oopen(loc_id, obj_name, H5P_DEFAULT)) < 0)
   return -1;
 
  /* Create the data space for the attribute. */
@@ -1260,97 +1247,14 @@ herr_t H5LT_set_attribute_numerical( hid_t loc_id,
   goto out;
 
  /* Close the object */
- if ( H5LT_close_id( obj_id, statbuf.type ) < 0 )
+ if(H5Oclose(obj_id) < 0 )
   return -1;
 
  return 0;
 
 out:
- H5LT_close_id( obj_id, statbuf.type );
+ H5Oclose(obj_id);
  return -1;
-}
-
-/*-------------------------------------------------------------------------
- * Function: H5LT_open_id
- *
- * Purpose: Private function used by H5LT_set_attribute_*
- *
- * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: September 19, 2002
- *
- * Comments:
- *
- *-------------------------------------------------------------------------
- */
-
-herr_t H5LT_open_id( hid_t loc_id,
-                     const char *obj_name,
-                     int obj_type /*basic object type*/ )
-{
-    hid_t   obj_id = -1;
-
-    switch(obj_type) {
-        case H5G_DATASET:
-            /* Open the dataset. */
-            if((obj_id = H5Dopen(loc_id, obj_name)) < 0)
-                return -1;
-            break;
-
-        case H5G_GROUP:
-            /* Open the group. */
-            if((obj_id = H5Gopen2(loc_id, obj_name, H5P_DEFAULT)) < 0)
-                return -1;
-            break;
-
-        default:
-            return -1;
-    }
-
-    return obj_id;
-}
-
-
-/*-------------------------------------------------------------------------
- * Function: H5LT_close_id
- *
- * Purpose: Private function used by H5LT_set_attribute_*
- *
- * Return: Success: 0, Failure: -1
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: September 19, 2002
- *
- * Comments:
- *
- *-------------------------------------------------------------------------
- */
-
-herr_t H5LT_close_id( hid_t obj_id,
-                      int obj_type /*basic object type*/ )
-{
- switch ( obj_type )
- {
-  case H5G_DATASET:
-   /* Close the dataset. */
-   if ( H5Dclose( obj_id ) < 0 )
-    return -1;
-   break;
-
-  case H5G_GROUP:
-  /* Close the group. */
-   if ( H5Gclose( obj_id ) < 0 )
-    return -1;
-   break;
-
-  default:
-   return -1;
- }
-
- return 0;
 }
 
 
@@ -1825,21 +1729,16 @@ herr_t H5LTget_attribute_ndims( hid_t loc_id,
 {
  hid_t       attr_id;
  hid_t       sid;
- H5G_stat_t  statbuf;
  hid_t       obj_id;
 
- /* Get the type of object */
- if (H5Gget_objinfo( loc_id, obj_name, 1, &statbuf )<0)
-  return -1;
-
  /* Open the object */
- if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
+ if ((obj_id = H5Oopen(loc_id, obj_name, H5P_DEFAULT)) < 0)
   return -1;
 
  /* Open the attribute. */
  if ( ( attr_id = H5Aopen_name( obj_id, attr_name ) ) < 0 )
  {
-  H5LT_close_id( obj_id, statbuf.type );
+  H5Oclose(obj_id);
   return -1;
  }
 
@@ -1860,14 +1759,14 @@ herr_t H5LTget_attribute_ndims( hid_t loc_id,
   goto out;;
 
  /* Close the object */
- if ( H5LT_close_id( obj_id, statbuf.type ) < 0 )
+ if(H5Oclose(obj_id) < 0 )
   return -1;
 
  return 0;
 
 out:
  H5Aclose( attr_id );
- H5LT_close_id( obj_id, statbuf.type );
+ H5Oclose(obj_id);
  return -1;
 
 }
@@ -1897,21 +1796,16 @@ herr_t H5LTget_attribute_info( hid_t loc_id,
  hid_t       attr_id;
  hid_t       tid;
  hid_t       sid;
- H5G_stat_t  statbuf;
  hid_t       obj_id;
 
- /* Get the type of object */
- if (H5Gget_objinfo( loc_id, obj_name, 1, &statbuf )<0)
-  return -1;
-
  /* Open the object */
- if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
+ if ((obj_id = H5Oopen(loc_id, obj_name, H5P_DEFAULT)) < 0)
   return -1;
 
   /* Open the attribute. */
  if ( ( attr_id = H5Aopen_name( obj_id, attr_name ) ) < 0 )
  {
-  H5LT_close_id( obj_id, statbuf.type );
+  H5Oclose(obj_id);
   return -1;
  }
 
@@ -1945,15 +1839,15 @@ herr_t H5LTget_attribute_info( hid_t loc_id,
   goto out;
 
   /* Close the object */
- if ( H5LT_close_id( obj_id, statbuf.type ) < 0 )
+ if(H5Oclose(obj_id) < 0 )
   return -1;
 
  return 0;
 
 out:
- H5Tclose( tid );
- H5Aclose( attr_id );
- H5LT_close_id( obj_id, statbuf.type );
+ H5Tclose(tid);
+ H5Aclose(attr_id);
+ H5Oclose(obj_id);
  return -1;
 
 }
@@ -2695,17 +2589,11 @@ herr_t H5LTget_attribute_string( hid_t loc_id,
                                  const char *attr_name,
                                  char *data )
 {
-
  /* identifiers */
  hid_t      obj_id;
- H5G_stat_t statbuf;
-
- /* Get the type of object */
- if (H5Gget_objinfo(loc_id, obj_name, 1, &statbuf)<0)
-  return -1;
 
  /* Open the object */
- if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
+ if ((obj_id = H5Oopen( loc_id, obj_name, H5P_DEFAULT)) < 0)
   return -1;
 
  /* Get the attribute */
@@ -2713,7 +2601,7 @@ herr_t H5LTget_attribute_string( hid_t loc_id,
   return -1;
 
  /* Close the object */
- if ( H5LT_close_id( obj_id, statbuf.type ) < 0 )
+ if(H5Oclose(obj_id) < 0)
   return -1;
 
  return 0;
@@ -2742,29 +2630,11 @@ herr_t H5LTget_attribute_char( hid_t loc_id,
                                 const char *attr_name,
                                 char *data )
 {
+    /* Get the attribute */
+    if(H5LT_get_attribute_mem(loc_id, obj_name, attr_name, H5T_NATIVE_CHAR, data) < 0)
+        return -1;
 
- /* identifiers */
- hid_t      obj_id;
- H5G_stat_t statbuf;
-
- /* Get the type of object */
- if (H5Gget_objinfo(loc_id, obj_name, 1, &statbuf)<0)
-  return -1;
-
- /* Open the object */
- if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
-  return -1;
-
- /* Get the attribute */
- if ( H5LT_get_attribute_mem( obj_id, attr_name, H5T_NATIVE_CHAR, data ) < 0 )
-  return -1;
-
- /* Close the object */
- if ( H5LT_close_id( obj_id, statbuf.type ) < 0 )
-  return -1;
-
- return 0;
-
+    return 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -2789,29 +2659,11 @@ herr_t H5LTget_attribute_uchar( hid_t loc_id,
                                 const char *attr_name,
                                 unsigned char *data )
 {
+    /* Get the attribute */
+    if(H5LT_get_attribute_mem(loc_id, obj_name, attr_name, H5T_NATIVE_UCHAR, data) < 0)
+        return -1;
 
- /* identifiers */
- hid_t      obj_id;
- H5G_stat_t statbuf;
-
- /* Get the type of object */
- if (H5Gget_objinfo(loc_id, obj_name, 1, &statbuf)<0)
-  return -1;
-
- /* Open the object */
- if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
-  return -1;
-
- /* Get the attribute */
- if ( H5LT_get_attribute_mem( obj_id, attr_name, H5T_NATIVE_UCHAR, data ) < 0 )
-  return -1;
-
- /* Close the object */
- if ( H5LT_close_id( obj_id, statbuf.type ) < 0 )
-  return -1;
-
- return 0;
-
+    return 0;
 }
 
 
@@ -2838,29 +2690,11 @@ herr_t H5LTget_attribute_short( hid_t loc_id,
                                 const char *attr_name,
                                 short *data )
 {
+    /* Get the attribute */
+    if(H5LT_get_attribute_mem(loc_id, obj_name, attr_name, H5T_NATIVE_SHORT, data) < 0)
+        return -1;
 
- /* identifiers */
- hid_t      obj_id;
- H5G_stat_t statbuf;
-
- /* Get the type of object */
- if (H5Gget_objinfo(loc_id, obj_name, 1, &statbuf)<0)
-  return -1;
-
- /* Open the object */
- if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
-  return -1;
-
- /* Get the attribute */
- if ( H5LT_get_attribute_mem( obj_id, attr_name, H5T_NATIVE_SHORT, data ) < 0 )
-  return -1;
-
- /* Close the object */
- if ( H5LT_close_id( obj_id, statbuf.type ) < 0 )
-  return -1;
-
- return 0;
-
+    return 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -2885,29 +2719,11 @@ herr_t H5LTget_attribute_ushort( hid_t loc_id,
                                 const char *attr_name,
                                 unsigned short *data )
 {
+    /* Get the attribute */
+    if(H5LT_get_attribute_mem(loc_id, obj_name, attr_name, H5T_NATIVE_USHORT, data) < 0)
+        return -1;
 
- /* identifiers */
- hid_t      obj_id;
- H5G_stat_t statbuf;
-
- /* Get the type of object */
- if (H5Gget_objinfo(loc_id, obj_name, 1, &statbuf)<0)
-  return -1;
-
- /* Open the object */
- if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
-  return -1;
-
- /* Get the attribute */
- if ( H5LT_get_attribute_mem( obj_id, attr_name, H5T_NATIVE_USHORT, data ) < 0 )
-  return -1;
-
- /* Close the object */
- if ( H5LT_close_id( obj_id, statbuf.type ) < 0 )
-  return -1;
-
- return 0;
-
+    return 0;
 }
 
 
@@ -2934,29 +2750,11 @@ herr_t H5LTget_attribute_int( hid_t loc_id,
                               const char *attr_name,
                               int *data )
 {
+    /* Get the attribute */
+    if(H5LT_get_attribute_mem(loc_id, obj_name, attr_name, H5T_NATIVE_INT, data) < 0)
+        return -1;
 
- /* identifiers */
- hid_t      obj_id;
- H5G_stat_t statbuf;
-
- /* Get the type of object */
- if (H5Gget_objinfo(loc_id, obj_name, 1, &statbuf)<0)
-  return -1;
-
- /* Open the object */
- if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
-  return -1;
-
- /* Get the attribute */
- if ( H5LT_get_attribute_mem( obj_id, attr_name, H5T_NATIVE_INT, data ) < 0 )
-  return -1;
-
- /* Close the object */
- if ( H5LT_close_id( obj_id, statbuf.type ) < 0 )
-  return -1;
-
- return 0;
-
+    return 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -2981,29 +2779,11 @@ herr_t H5LTget_attribute_uint( hid_t loc_id,
                               const char *attr_name,
                               unsigned int *data )
 {
+    /* Get the attribute */
+    if(H5LT_get_attribute_mem(loc_id, obj_name, attr_name, H5T_NATIVE_UINT, data) < 0)
+        return -1;
 
- /* identifiers */
- hid_t      obj_id;
- H5G_stat_t statbuf;
-
- /* Get the type of object */
- if (H5Gget_objinfo(loc_id, obj_name, 1, &statbuf)<0)
-  return -1;
-
- /* Open the object */
- if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
-  return -1;
-
- /* Get the attribute */
- if ( H5LT_get_attribute_mem( obj_id, attr_name, H5T_NATIVE_UINT, data ) < 0 )
-  return -1;
-
- /* Close the object */
- if ( H5LT_close_id( obj_id, statbuf.type ) < 0 )
-  return -1;
-
- return 0;
-
+    return 0;
 }
 
 
@@ -3030,30 +2810,13 @@ herr_t H5LTget_attribute_long( hid_t loc_id,
                               const char *attr_name,
                               long *data )
 {
+    /* Get the attribute */
+    if(H5LT_get_attribute_mem(loc_id, obj_name, attr_name, H5T_NATIVE_LONG, data) < 0)
+        return -1;
 
- /* identifiers */
- hid_t      obj_id;
- H5G_stat_t statbuf;
-
- /* Get the type of object */
- if (H5Gget_objinfo(loc_id, obj_name, 1, &statbuf)<0)
-  return -1;
-
- /* Open the object */
- if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
-  return -1;
-
- /* Get the attribute */
- if ( H5LT_get_attribute_mem( obj_id, attr_name, H5T_NATIVE_LONG, data ) < 0 )
-  return -1;
-
- /* Close the object */
- if ( H5LT_close_id( obj_id, statbuf.type ) < 0 )
-  return -1;
-
- return 0;
-
+    return 0;
 }
+
 /*-------------------------------------------------------------------------
  * Function: H5LTget_attribute_long_long
  *
@@ -3076,29 +2839,11 @@ herr_t H5LTget_attribute_long_long( hid_t loc_id,
                               const char *attr_name,
                               long_long *data )
 {
+    /* Get the attribute */
+    if(H5LT_get_attribute_mem(loc_id, obj_name, attr_name, H5T_NATIVE_LLONG, data) < 0)
+        return -1;
 
- /* identifiers */
- hid_t      obj_id;
- H5G_stat_t statbuf;
-
- /* Get the type of object */
- if (H5Gget_objinfo(loc_id, obj_name, 1, &statbuf)<0)
-  return -1;
-
- /* Open the object */
- if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
-  return -1;
-
- /* Get the attribute */
- if ( H5LT_get_attribute_mem( obj_id, attr_name, H5T_NATIVE_LLONG, data ) < 0 )
-  return -1;
-
- /* Close the object */
- if ( H5LT_close_id( obj_id, statbuf.type ) < 0 )
-  return -1;
-
- return 0;
-
+    return 0;
 }
 
 
@@ -3124,29 +2869,11 @@ herr_t H5LTget_attribute_ulong( hid_t loc_id,
                               const char *attr_name,
                               unsigned long *data )
 {
+    /* Get the attribute */
+    if(H5LT_get_attribute_mem(loc_id, obj_name, attr_name, H5T_NATIVE_ULONG, data) < 0)
+        return -1;
 
- /* identifiers */
- hid_t      obj_id;
- H5G_stat_t statbuf;
-
- /* Get the type of object */
- if (H5Gget_objinfo(loc_id, obj_name, 1, &statbuf)<0)
-  return -1;
-
- /* Open the object */
- if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
-  return -1;
-
- /* Get the attribute */
- if ( H5LT_get_attribute_mem( obj_id, attr_name, H5T_NATIVE_ULONG, data ) < 0 )
-  return -1;
-
- /* Close the object */
- if ( H5LT_close_id( obj_id, statbuf.type ) < 0 )
-  return -1;
-
- return 0;
-
+    return 0;
 }
 
 
@@ -3174,29 +2901,11 @@ herr_t H5LTget_attribute_float( hid_t loc_id,
                                 const char *attr_name,
                                 float *data )
 {
+    /* Get the attribute */
+    if(H5LT_get_attribute_mem(loc_id, obj_name, attr_name, H5T_NATIVE_FLOAT, data) < 0)
+        return -1;
 
- /* identifiers */
- hid_t      obj_id;
- H5G_stat_t statbuf;
-
- /* Get the type of object */
- if (H5Gget_objinfo(loc_id, obj_name, 1, &statbuf)<0)
-  return -1;
-
- /* Open the object */
- if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
-  return -1;
-
- /* Get the attribute */
- if ( H5LT_get_attribute_mem( obj_id, attr_name, H5T_NATIVE_FLOAT, data ) < 0 )
-  return -1;
-
- /* Close the object */
- if ( H5LT_close_id( obj_id, statbuf.type ) < 0 )
-  return -1;
-
- return 0;
-
+    return 0;
 }
 
 
@@ -3224,29 +2933,11 @@ herr_t H5LTget_attribute_double( hid_t loc_id,
                                  const char *attr_name,
                                  double *data )
 {
+    /* Get the attribute */
+    if(H5LT_get_attribute_mem(loc_id, obj_name, attr_name, H5T_NATIVE_DOUBLE, data) < 0)
+        return -1;
 
- /* identifiers */
- hid_t      obj_id;
- H5G_stat_t statbuf;
-
- /* Get the type of object */
- if (H5Gget_objinfo(loc_id, obj_name, 1, &statbuf)<0)
-  return -1;
-
- /* Open the object */
- if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
-  return -1;
-
- /* Get the attribute */
- if ( H5LT_get_attribute_mem( obj_id, attr_name, H5T_NATIVE_DOUBLE, data ) < 0 )
-  return -1;
-
- /* Close the object */
- if ( H5LT_close_id( obj_id, statbuf.type ) < 0 )
-  return -1;
-
- return 0;
-
+    return 0;
 }
 
 
@@ -3275,31 +2966,11 @@ herr_t H5LTget_attribute( hid_t loc_id,
                           hid_t mem_type_id,
                           void *data )
 {
+    /* Get the attribute */
+    if(H5LT_get_attribute_mem(loc_id, obj_name, attr_name, mem_type_id, data) < 0)
+        return -1;
 
- /* identifiers */
- hid_t      obj_id;
- H5G_stat_t statbuf;
-
- /* Get the type of object */
- if (H5Gget_objinfo(loc_id, obj_name, 1, &statbuf)<0)
-  return -1;
-
- /* Open the object */
- if ((obj_id = H5LT_open_id( loc_id, obj_name, statbuf.type )) < 0)
-  return -1;
-
- /* Get the attribute */
- if ( H5LT_get_attribute_mem( obj_id, attr_name, mem_type_id, data ) < 0 )
- {
-  H5LT_close_id( obj_id, statbuf.type );
-  return -1;
- }
-
- /* Close the object */
- if ( H5LT_close_id( obj_id, statbuf.type ) < 0 )
-  return -1;
-
- return 0;
+    return 0;
 }
 
 
@@ -3328,29 +2999,41 @@ herr_t H5LTget_attribute( hid_t loc_id,
  */
 
 
-herr_t H5LT_get_attribute_mem( hid_t obj_id,
+static herr_t H5LT_get_attribute_mem(hid_t loc_id,
+                           const char *obj_name,
                            const char *attr_name,
                            hid_t mem_type_id,
-                           void *data )
+                           void *data)
 {
+    /* identifiers */
+    hid_t obj_id = -1;
+    hid_t attr_id = -1;
 
- /* identifiers */
- hid_t attr_id;
+    /* Open the object */
+    if((obj_id = H5Oopen(loc_id, obj_name, H5P_DEFAULT)) < 0)
+        goto out;
 
- if ( ( attr_id = H5Aopen_name( obj_id, attr_name ) ) < 0 )
-  return -1;
+    if((attr_id = H5Aopen_name(obj_id, attr_name)) < 0)
+        goto out;
 
- if ( H5Aread( attr_id, mem_type_id, data ) < 0 )
-  goto out;
+    if(H5Aread(attr_id, mem_type_id, data) < 0)
+        goto out;
 
- if ( H5Aclose( attr_id ) < 0 )
-  return -1;
+    if(H5Aclose(attr_id) < 0)
+        goto out;
+    attr_id = -1;
 
- return 0;
+    /* Close the object */
+    if(H5Oclose(obj_id) < 0)
+      goto out;
+    obj_id = -1;
+
+    return 0;
 
 out:
- H5Aclose( attr_id );
- return -1;
+    if(attr_id > 0)
+        H5Aclose(attr_id);
+    return -1;
 }
 
 /*-------------------------------------------------------------------------

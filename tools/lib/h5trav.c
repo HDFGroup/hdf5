@@ -171,11 +171,13 @@ traverse_cb(hid_t loc_id, const char *link_name, const H5L_info_t *linfo,
         is_group = (oinfo.type == H5O_TYPE_GROUP) ? TRUE : FALSE;
 
         /* Make 'visit object' callback */
-        (*udata->visitor->visit_obj)(link_path, &oinfo, already_visited, udata->visitor->udata);
+        if(udata->visitor->visit_obj)
+            (*udata->visitor->visit_obj)(link_path, &oinfo, already_visited, udata->visitor->udata);
     } /* end if */
     else {
         /* Make 'visit link' callback */
-        (*udata->visitor->visit_lnk)(link_path, linfo, udata->visitor->udata);
+        if(udata->visitor->visit_lnk)
+            (*udata->visitor->visit_lnk)(link_path, linfo, udata->visitor->udata);
     } /* end else */
 
     /* Check for group that we haven't visited yet & recurse */
@@ -267,7 +269,7 @@ traverse(hid_t file_id, const trav_visitor_t *visitor)
  *-------------------------------------------------------------------------
  */
 static void
-trav_info_add(trav_info_t *info, const char *path, H5G_obj_t obj_type)
+trav_info_add(trav_info_t *info, const char *path, h5trav_type_t obj_type)
 {
     size_t idx;         /* Index of address to use  */
 
@@ -302,8 +304,8 @@ trav_info_visit_obj(const char *path, const H5O_info_t *oinfo,
     hbool_t UNUSED already_visited, void *udata)
 {
     /* Add the object to the 'info' struct */
-    /* (object types map directly to "group" types) */
-    trav_info_add((trav_info_t *)udata, path, (H5G_obj_t)oinfo->type);
+    /* (object types map directly to "traversal" types) */
+    trav_info_add((trav_info_t *)udata, path, (h5trav_type_t)oinfo->type);
 
     return(0);
 } /* end trav_info_visit_obj() */
@@ -326,7 +328,7 @@ static int
 trav_info_visit_lnk(const char *path, const H5L_info_t *linfo, void *udata)
 {
     /* Add the link to the 'info' struct */
-    trav_info_add((trav_info_t *)udata, path, ((linfo->type == H5L_TYPE_SOFT) ? H5G_LINK : H5G_UDLINK));
+    trav_info_add((trav_info_t *)udata, path, ((linfo->type == H5L_TYPE_SOFT) ? H5TRAV_TYPE_LINK : H5TRAV_TYPE_UDLINK));
 
     return(0);
 } /* end trav_info_visit_lnk() */
@@ -647,7 +649,7 @@ trav_table_add(trav_table_t *table,
     table->objs[new].objno = oinfo ? oinfo->addr : HADDR_UNDEF;
     table->objs[new].flags[0] = table->objs[new].flags[1] = 0;
     table->objs[new].name = (char *)HDstrdup(path);
-    table->objs[new].type = oinfo ? (H5G_obj_t)oinfo->type : H5G_LINK;
+    table->objs[new].type = oinfo ? (h5trav_type_t)oinfo->type : H5TRAV_TYPE_LINK;
     table->objs[new].nlinks = 0;
     table->objs[new].sizelinks = 0;
     table->objs[new].links = NULL;
@@ -707,7 +709,7 @@ trav_table_addlink(trav_table_t *table,
 
 void trav_table_addflags(unsigned *flags,
                          char *name,
-                         H5G_obj_t type,
+                         h5trav_type_t type,
                          trav_table_t *table)
 {
     unsigned int new;
@@ -715,7 +717,7 @@ void trav_table_addflags(unsigned *flags,
     if(table->nobjs == table->size) {
         table->size = MAX(1, table->size * 2);
         table->objs = (trav_obj_t *)HDrealloc(table->objs, table->size * sizeof(trav_obj_t));
-    }
+    } /* end if */
 
     new = table->nobjs++;
     table->objs[new].objno = 0;

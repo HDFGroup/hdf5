@@ -439,7 +439,7 @@ static int
 check_new_move(hid_t fapl)
 {
     hid_t 	file;
-    H5G_stat_t	sb_hard1, sb_hard2;
+    H5O_info_t	oi_hard1, oi_hard2;
     char 	filename[1024];
     char 	linkval[1024];
 
@@ -447,20 +447,24 @@ check_new_move(hid_t fapl)
 
     /* Open file */
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
-    if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) FAIL_STACK_ERROR
+    if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        FAIL_STACK_ERROR
 
     /* Get hard link info */
-    if(H5Gget_objinfo(file, "/group2/group_new_name", TRUE, &sb_hard1) < 0) FAIL_STACK_ERROR
-    if(H5Gget_objinfo(file, "/group1/hard", TRUE, &sb_hard2) < 0) FAIL_STACK_ERROR
+    if(H5Oget_info(file, "/group2/group_new_name", &oi_hard1, H5P_DEFAULT) < 0)
+        FAIL_STACK_ERROR
+    if(H5Oget_info(file, "/group1/hard", &oi_hard2, H5P_DEFAULT) < 0)
+        FAIL_STACK_ERROR
 
     /* Check hard links */
-    if(H5G_GROUP != sb_hard1.type || H5G_GROUP != sb_hard2.type)
+    if(H5O_TYPE_GROUP != oi_hard1.type || H5O_TYPE_GROUP != oi_hard2.type)
         FAIL_PUTS_ERROR("    Unexpected object type, should have been a group")
-    if(HDmemcmp(&sb_hard1.objno, &sb_hard2.objno, sizeof(sb_hard1.objno)))
+    if(H5F_addr_ne(oi_hard1.addr, oi_hard2.addr))
         FAIL_PUTS_ERROR("    Hard link test failed.  Link seems not to point to the expected file location.")
 
     /* Check soft links */
-    if(H5Lget_val(file, "group2/soft", linkval, sizeof linkval, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Lget_val(file, "group2/soft", linkval, sizeof linkval, H5P_DEFAULT) < 0)
+        FAIL_STACK_ERROR
     if(HDstrcmp(linkval, "/group1/group_move"))
         FAIL_PUTS_ERROR("    Soft link test failed. Wrong link value")
 
@@ -2128,7 +2132,7 @@ test_full_group_compact(hid_t fapl)
 {
     hid_t file_id = -1;
     hid_t gid = -1, gid2 = -1;  /* Group IDs */
-    H5G_stat_t	sb;             /* Stat buffer for object */
+    H5O_info_t	oi;             /* Stat buffer for object */
     char objname[128];          /* Buffer for name of objects to create */
     char objname2[128];         /* Buffer for name of objects to create */
     char filename[1024];        /* Buffer for filename */
@@ -2200,8 +2204,8 @@ test_full_group_compact(hid_t fapl)
     /* Check reference count on objects to keep */
     for(u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
         sprintf(objname, "/keep/keep %u\n", u);
-        if(H5Gget_objinfo(file_id, objname, TRUE, &sb) < 0) FAIL_STACK_ERROR
-        if(sb.nlink != 2) TEST_ERROR
+        if(H5Oget_info(file_id, objname, &oi, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+        if(oi.rc != 2) TEST_ERROR
     } /* end for */
 
     /* Close the file */
@@ -2217,8 +2221,8 @@ test_full_group_compact(hid_t fapl)
     /* Check reference count on objects to keep */
     for(u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
         sprintf(objname, "/keep/keep %u\n", u);
-        if(H5Gget_objinfo(file_id, objname, TRUE, &sb) < 0) FAIL_STACK_ERROR
-        if(sb.nlink != 1) TEST_ERROR
+        if(H5Oget_info(file_id, objname, &oi, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+        if(oi.rc != 1) TEST_ERROR
     } /* end for */
 
     /* Close the file */
@@ -2262,7 +2266,7 @@ test_full_group_dense(hid_t fapl)
     hid_t file_id = -1;
     hid_t gcpl = (-1);          /* Group creation property list ID */
     hid_t gid = -1, gid2 = -1;  /* Group IDs */
-    H5G_stat_t	sb;             /* Stat buffer for object */
+    H5O_info_t	oi;             /* Stat buffer for object */
     char objname[128];          /* Buffer for name of objects to create */
     char objname2[128];         /* Buffer for name of objects to create */
     char filename[1024];        /* Buffer for filename */
@@ -2346,8 +2350,8 @@ test_full_group_dense(hid_t fapl)
     /* Check reference count on objects to keep */
     for(u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
         sprintf(objname, "/keep/keep %u\n", u);
-        if(H5Gget_objinfo(file_id, objname, TRUE, &sb) < 0) FAIL_STACK_ERROR
-        if(sb.nlink != 2) TEST_ERROR
+        if(H5Oget_info(file_id, objname, &oi, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+        if(oi.rc != 2) TEST_ERROR
     } /* end for */
 
     /* Close the file */
@@ -2363,8 +2367,8 @@ test_full_group_dense(hid_t fapl)
     /* Check reference count on objects to keep */
     for(u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
         sprintf(objname, "/keep/keep %u\n", u);
-        if(H5Gget_objinfo(file_id, objname, TRUE, &sb) < 0) FAIL_STACK_ERROR
-        if(sb.nlink != 1) TEST_ERROR
+        if(H5Oget_info(file_id, objname, &oi, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+        if(oi.rc != 1) TEST_ERROR
     } /* end for */
 
     /* Close the file */

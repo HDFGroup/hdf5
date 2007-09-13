@@ -39,14 +39,6 @@
 /* Public Macros */
 /*****************/
 
-/* Deprecated macros, for backward compatibility */
-
-/* Macros for types of objects in a group (see H5G_obj_t definition) */
-#define H5G_NTYPES	256		/* Max possible number of types	*/
-#define H5G_NLIBTYPES	8		/* Number of internal types	*/
-#define H5G_NUSERTYPES	(H5G_NTYPES-H5G_NLIBTYPES)
-#define H5G_USERTYPE(X)	(8+(X))		/* User defined types		*/
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -70,38 +62,6 @@ typedef struct H5G_info_t {
     hsize_t 	nlinks;		        /* Number of links in group */
     int64_t     max_corder;             /* Current max. creation order value for group */
 } H5G_info_t;
-
-/* Deprecated typedefs, for backward compatibility */
-
-/*
- * An object has a certain type. The first few numbers are reserved for use
- * internally by HDF5. Users may add their own types with higher values.  The
- * values are never stored in the file -- they only exist while an
- * application is running.  An object may satisfy the `isa' function for more
- * than one type.
- */
-typedef enum H5G_obj_t {
-    H5G_UNKNOWN = -1,		/* Unknown object type		*/
-    H5G_GROUP,		        /* Object is a group		*/
-    H5G_DATASET,		/* Object is a dataset		*/
-    H5G_TYPE,			/* Object is a named data type	*/
-    H5G_LINK,		        /* Object is a symbolic link	*/
-    H5G_UDLINK,		        /* Object is a user-defined link */
-    H5G_RESERVED_5,		/* Reserved for future use	*/
-    H5G_RESERVED_6,		/* Reserved for future use	*/
-    H5G_RESERVED_7		/* Reserved for future use	*/
-} H5G_obj_t;
-
-/* Information about an object */
-typedef struct H5G_stat_t {
-    unsigned long 	fileno[2];	/*file number			*/
-    unsigned long 	objno[2];	/*object number			*/
-    unsigned 		nlink;		/*number of hard links to object*/
-    H5G_obj_t 		type;		/*basic object type		*/
-    time_t		mtime;		/*modification time		*/
-    size_t		linklen;	/*symbolic link value length	*/
-    H5O_stat_t          ohdr;           /* Object header information    */
-} H5G_stat_t;
 
 /********************/
 /* Public Variables */
@@ -128,11 +88,28 @@ H5_DLL herr_t H5Gclose(hid_t group_id);
  * 
  * Use of these functions and variables is deprecated.
  */
+/*
+ * An object has a certain type. The first few numbers are reserved for use
+ * internally by HDF5. Users may add their own types with higher values.  The
+ * values are never stored in the file -- they only exist while an
+ * application is running.  An object may satisfy the `isa' function for more
+ * than one type.
+ */
+typedef enum H5G_obj_t {
+    H5G_UNKNOWN = -1,		/* Unknown object type		*/
+    H5G_GROUP,		        /* Object is a group		*/
+    H5G_DATASET,		/* Object is a dataset		*/
+    H5G_TYPE,			/* Object is a named data type	*/
+    H5G_LINK,		        /* Object is a symbolic link	*/
+    H5G_UDLINK,		        /* Object is a user-defined link */
+    H5G_RESERVED_5,		/* Reserved for future use	*/
+    H5G_RESERVED_6,		/* Reserved for future use	*/
+    H5G_RESERVED_7		/* Reserved for future use	*/
+} H5G_obj_t;
+
 H5_DLL ssize_t H5Gget_objname_by_idx(hid_t loc_id, hsize_t idx, char* name,
     size_t size);
 H5_DLL H5G_obj_t H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx);
-H5_DLL herr_t H5Gget_objinfo(hid_t loc_id, const char *name,
-    hbool_t follow_link, H5G_stat_t *statbuf/*out*/);
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  * 
  * Use of these symbols is deprecated.
@@ -148,11 +125,28 @@ H5_DLL herr_t H5Gget_objinfo(hid_t loc_id, const char *name,
 #define H5G_LINK_SOFT H5L_TYPE_SOFT
 #define H5G_link_t H5L_type_t
 
+/* Macros for types of objects in a group (see H5G_obj_t definition) */
+#define H5G_NTYPES	256		/* Max possible number of types	*/
+#define H5G_NLIBTYPES	8		/* Number of internal types	*/
+#define H5G_NUSERTYPES	(H5G_NTYPES - H5G_NLIBTYPES)
+#define H5G_USERTYPE(X)	(8 + (X))	/* User defined types		*/
+
 
 /* Typedefs */
 
 /* Prototype for H5Giterate() operator */
 typedef herr_t (*H5G_iterate_t)(hid_t group, const char *name, void *op_data);
+
+/* Information about an object */
+typedef struct H5G_stat_t {
+    unsigned long 	fileno[2];	/*file number			*/
+    unsigned long 	objno[2];	/*object number			*/
+    unsigned 		nlink;		/*number of hard links to object*/
+    H5G_obj_t 		type;		/*basic object type		*/
+    time_t		mtime;		/*modification time		*/
+    size_t		linklen;	/*symbolic link value length	*/
+    H5O_stat_t          ohdr;           /* Object header information    */
+} H5G_stat_t;
 
 
 /* Function prototypes */
@@ -175,6 +169,8 @@ H5_DLL int H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize,
 H5_DLL herr_t H5Giterate(hid_t loc_id, const char *name, int *idx,
         H5G_iterate_t op, void *op_data);
 H5_DLL herr_t H5Gget_num_objs(hid_t loc_id, hsize_t *num_objs);
+H5_DLL herr_t H5Gget_objinfo(hid_t loc_id, const char *name,
+    hbool_t follow_link, H5G_stat_t *statbuf/*out*/);
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 

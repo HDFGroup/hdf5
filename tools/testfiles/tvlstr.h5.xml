@@ -15,13 +15,6 @@ Expected output for 'h5dump --xml tvlstr.h5'
          </hdf5:DataFromFile>
       </hdf5:Data>
    </hdf5:Attribute>
-   <hdf5:NamedDataType Name="vl_string_type" OBJ-XID="xid_1576" H5Path="/vl_string_type" Parents="xid_928" H5ParentPaths="/">
-      <hdf5:DataType>
-         <hdf5:AtomicType>
-            <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="H5T_VARIABLE" StrPad="H5T_STR_NULLPAD"/>
-         </hdf5:AtomicType>
-      </hdf5:DataType>
-   </hdf5:NamedDataType>
    <hdf5:Dataset Name="Dataset1" OBJ-XID="xid_976" H5Path= "/Dataset1" Parents="xid_928" H5ParentPaths="/">
       <hdf5:StorageLayout>
          <hdf5:ContiguousLayout/>
@@ -53,5 +46,12 @@ Expected output for 'h5dump --xml tvlstr.h5'
          </hdf5:DataFromFile>
       </hdf5:Data>
    </hdf5:Dataset>
+   <hdf5:NamedDataType Name="vl_string_type" OBJ-XID="xid_1576" H5Path="/vl_string_type" Parents="xid_928" H5ParentPaths="/">
+      <hdf5:DataType>
+         <hdf5:AtomicType>
+            <hdf5:StringType Cset="H5T_CSET_ASCII" StrSize="H5T_VARIABLE" StrPad="H5T_STR_NULLPAD"/>
+         </hdf5:AtomicType>
+      </hdf5:DataType>
+   </hdf5:NamedDataType>
 </hdf5:RootGroup>
 </hdf5:HDF5-File>

@@ -35,33 +35,6 @@ Expected output for 'h5dump --xml tobjref.h5'
    </hdf5:Data>
    </hdf5:Dataset>
    <hdf5:Group Name="Group1" OBJ-XID="xid_1320" H5Path="/Group1" Parents="xid_696" H5ParentPaths="/" >
-      <hdf5:NamedDataType Name="Datatype1" OBJ-XID="xid_2268" H5Path="/Group1/Datatype1" Parents="xid_1320" H5ParentPaths="/Group1">
-         <hdf5:DataType>
-            <hdf5:CompoundType>
-               <hdf5:Field FieldName="a">
-                  <hdf5:DataType>
-                     <hdf5:AtomicType>
-                        <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
-                     </hdf5:AtomicType>
-                  </hdf5:DataType>
-               </hdf5:Field>
-               <hdf5:Field FieldName="b">
-                  <hdf5:DataType>
-                     <hdf5:AtomicType>
-                        <hdf5:FloatType ByteOrder="BE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
-                     </hdf5:AtomicType>
-                  </hdf5:DataType>
-               </hdf5:Field>
-               <hdf5:Field FieldName="c">
-                  <hdf5:DataType>
-                     <hdf5:AtomicType>
-                        <hdf5:FloatType ByteOrder="BE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
-                     </hdf5:AtomicType>
-                  </hdf5:DataType>
-               </hdf5:Field>
-            </hdf5:CompoundType>
-         </hdf5:DataType>
-      </hdf5:NamedDataType>
       <hdf5:Dataset Name="Dataset1" OBJ-XID="xid_1696" H5Path= "/Group1/Dataset1" Parents="xid_1320" H5ParentPaths="/Group1">
          <hdf5:StorageLayout>
             <hdf5:ContiguousLayout/>
@@ -112,6 +85,33 @@ Expected output for 'h5dump --xml tobjref.h5'
             </hdf5:DataFromFile>
          </hdf5:Data>
       </hdf5:Dataset>
+      <hdf5:NamedDataType Name="Datatype1" OBJ-XID="xid_2268" H5Path="/Group1/Datatype1" Parents="xid_1320" H5ParentPaths="/Group1">
+         <hdf5:DataType>
+            <hdf5:CompoundType>
+               <hdf5:Field FieldName="a">
+                  <hdf5:DataType>
+                     <hdf5:AtomicType>
+                        <hdf5:IntegerType ByteOrder="BE" Sign="true" Size="4" />
+                     </hdf5:AtomicType>
+                  </hdf5:DataType>
+               </hdf5:Field>
+               <hdf5:Field FieldName="b">
+                  <hdf5:DataType>
+                     <hdf5:AtomicType>
+                        <hdf5:FloatType ByteOrder="BE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
+                     </hdf5:AtomicType>
+                  </hdf5:DataType>
+               </hdf5:Field>
+               <hdf5:Field FieldName="c">
+                  <hdf5:DataType>
+                     <hdf5:AtomicType>
+                        <hdf5:FloatType ByteOrder="BE" Size="4" SignBitLocation="31" ExponentBits="8" ExponentLocation="23" MantissaBits="23" MantissaLocation="0" />
+                     </hdf5:AtomicType>
+                  </hdf5:DataType>
+               </hdf5:Field>
+            </hdf5:CompoundType>
+         </hdf5:DataType>
+      </hdf5:NamedDataType>
    </hdf5:Group>
 </hdf5:RootGroup>
 </hdf5:HDF5-File>

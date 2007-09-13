@@ -87,7 +87,7 @@ H5FL_BLK_DEFINE_STATIC(meta_accum);
 /*
  * Global count of the number of H5FD_t's handed out.  This is used as a
  * "serial number" for files that are currently open and is used for the
- * 'fileno' field in H5G_stat_t.  However, if a VFL driver is not able
+ * 'fileno' field in H5O_info_t.  However, if a VFL driver is not able
  * to detect whether two files are the same, a file that has been opened
  * by H5Fopen more than once with that VFL driver will have two different
  * serial numbers.  :-/

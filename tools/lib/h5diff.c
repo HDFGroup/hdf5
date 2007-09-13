@@ -192,15 +192,13 @@ hsize_t h5diff(const char *fname1,
     char         filenames[2][1024];
     hsize_t      nfound = 0;
 
-    memset(filenames, 0, 1024*2);
+    HDmemset(filenames, 0, 1024 * 2);
 
-    if(options->m_quiet &&
-            (options->m_verbose || options->m_report))
-    {
+    if(options->m_quiet && (options->m_verbose || options->m_report)) {
         printf("Error: -q (quiet mode) cannot be added to verbose or report modes\n");
         options->err_stat=1;
         return 0;
-    }
+    } /* end if */
 
     /*-------------------------------------------------------------------------
     * open the files first; if they are not valid, no point in continuing
@@ -208,42 +206,32 @@ hsize_t h5diff(const char *fname1,
     */
 
     /* disable error reporting */
-    H5E_BEGIN_TRY
-    {
+    H5E_BEGIN_TRY {
         /* Open the files */
-        if ((file1_id = H5Fopen (fname1, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
-        {
-            printf ("h5diff: <%s>: unable to open file\n", fname1);
+        if((file1_id = H5Fopen(fname1, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) {
+            printf("h5diff: <%s>: unable to open file\n", fname1);
             options->err_stat = 1;
 
 #ifdef H5_HAVE_PARALLEL
             if(g_Parallel)
-            {
                 /* Let tasks know that they won't be needed */
                 phdiff_dismiss_workers();
-            }
 #endif
-
             goto out;
-        }
-        if ((file2_id = H5Fopen (fname2, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
-        {
-            printf ("h5diff: <%s>: unable to open file\n", fname2);
+        } /* end if */
+        if((file2_id = H5Fopen(fname2, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) {
+            printf("h5diff: <%s>: unable to open file\n", fname2);
             options->err_stat = 1;
 
 #ifdef H5_HAVE_PARALLEL
             if(g_Parallel)
-            {
                 /* Let tasks know that they won't be needed */
                 phdiff_dismiss_workers();
-            }
 #endif
-
             goto out;
-        }
+        } /* end if */
     /* enable error reporting */
-    }
-    H5E_END_TRY;
+    } H5E_END_TRY;
 
     /*-------------------------------------------------------------------------
     * Initialize the info structs
@@ -256,84 +244,69 @@ hsize_t h5diff(const char *fname1,
     * get the list of objects in the files
     *-------------------------------------------------------------------------
     */
-    if(h5trav_getinfo(file1_id, info1) < 0 || h5trav_getinfo(file2_id, info2) < 0)
-    {
+    if(h5trav_getinfo(file1_id, info1) < 0 || h5trav_getinfo(file2_id, info2) < 0) {
         printf("Error: Could not get file contents\n");
         options->err_stat = 1;
 #ifdef H5_HAVE_PARALLEL
         if(g_Parallel)
-        {
             /* Let tasks know that they won't be needed */
             phdiff_dismiss_workers();
-        }
 #endif
         goto out;
-    }
+    } /* end if */
 
     /*-------------------------------------------------------------------------
     * object name was supplied
     *-------------------------------------------------------------------------
     */
-
-    if (objname1)
-    {
-
+    if(objname1) {
 #ifdef H5_HAVE_PARALLEL
         if(g_Parallel)
-        {
             /* Let tasks know that they won't be needed */
             phdiff_dismiss_workers();
-        }
 #endif
-        assert (objname2);
+        assert(objname2);
         options->cmn_objs = 1; /* eliminate warning */
-        nfound = diff_compare (file1_id, fname1, objname1, info1,
-                               file2_id, fname2, objname2, info2,
-                               options);
-    }
+        nfound = diff_compare(file1_id, fname1, objname1, info1,
+                              file2_id, fname2, objname2, info2,
+                              options);
+    } /* end if */
 
     /*-------------------------------------------------------------------------
     * compare all
     *-------------------------------------------------------------------------
     */
 
-    else
-    {
-
+    else {
 #ifdef H5_HAVE_PARALLEL
-        if(g_Parallel)
-        {
+        if(g_Parallel) {
             int i;
 
-            if((HDstrlen(fname1) > 1024) || (HDstrlen(fname2) > 1024))
-            {
+            if((HDstrlen(fname1) > 1024) || (HDstrlen(fname2) > 1024)) {
                 fprintf(stderr, "The parallel diff only supports path names up to 1024 characters\n");
                 MPI_Abort(MPI_COMM_WORLD, 0);
-            }
+            } /* end if */
 
             HDstrcpy(filenames[0], fname1);
             HDstrcpy(filenames[1], fname2);
 
             /* Alert the worker tasks that there's going to be work. */
-
             for(i = 1; i < g_nTasks; i++)
-                MPI_Send(filenames, 1024 * 2, MPI_CHAR, i, MPI_TAG_PARALLEL, MPI_COMM_WORLD);
-        }
+                MPI_Send(filenames, (1024 * 2), MPI_CHAR, i, MPI_TAG_PARALLEL, MPI_COMM_WORLD);
+        } /* end if */
 #endif
         nfound = diff_match(file1_id, info1, file2_id, info2, options);
-    }
+    } /* end else */
 
     trav_info_free(info1);
     trav_info_free(info2);
 
 out:
     /* close */
-    H5E_BEGIN_TRY
-    {
+    H5E_BEGIN_TRY {
         H5Fclose(file1_id);
         H5Fclose(file2_id);
-    }
-    H5E_END_TRY;
+    } H5E_END_TRY;
 
     return nfound;
 }
@@ -358,411 +331,360 @@ out:
  *
  *-------------------------------------------------------------------------
  */
-hsize_t diff_match (hid_t file1_id,
+hsize_t diff_match(hid_t file1_id,
                     trav_info_t * info1,
                     hid_t file2_id,
                     trav_info_t * info2,
                     diff_opt_t * options)
 {
- int more_names_exist = (info1->nused > 0 && info2->nused > 0) ? 1 : 0;
- trav_table_t *table = NULL;
- int cmp;
- size_t curr1 = 0;
- size_t curr2 = 0;
- unsigned infile[2];
- char c1, c2;
- hsize_t nfound = 0;
- unsigned i;
+    trav_table_t *table = NULL;
+    size_t curr1, curr2;
+    unsigned infile[2];
+    hsize_t nfound = 0;
+    unsigned i;
 
-/*-------------------------------------------------------------------------
- * build the list
- *-------------------------------------------------------------------------
- */
- trav_table_init (&table);
+    /*-------------------------------------------------------------------------
+    * build the list
+    *-------------------------------------------------------------------------
+    */
+    trav_table_init(&table);
 
- while (more_names_exist)
- {
-  /* criteria is string compare */
-  cmp = HDstrcmp(info1->paths[curr1].path, info2->paths[curr2].path);
-  if (cmp == 0)
-  {
-   infile[0] = 1;
-   infile[1] = 1;
-   trav_table_addflags (infile, info1->paths[curr1].path, info1->paths[curr1].type,
-    table);
+    curr1 = 0;
+    curr2 = 0;
+    while(curr1 < info1->nused && curr2 < info2->nused) {
+        /* criteria is string compare */
+        int cmp = HDstrcmp(info1->paths[curr1].path, info2->paths[curr2].path);
 
-   curr1++;
-   curr2++;
-  }
-  else if (cmp < 0)
-  {
-   infile[0] = 1;
-   infile[1] = 0;
-   trav_table_addflags (infile, info1->paths[curr1].path, info1->paths[curr1].type,
-    table);
-   curr1++;
-  }
-  else
-  {
-   infile[0] = 0;
-   infile[1] = 1;
-   trav_table_addflags (infile, info2->paths[curr2].path, info2->paths[curr2].type,
-    table);
-   curr2++;
-  }
+        if(cmp == 0) {
+            infile[0] = 1;
+            infile[1] = 1;
+            trav_table_addflags(infile, info1->paths[curr1].path, info1->paths[curr1].type, table);
 
-  more_names_exist = (curr1 < info1->nused && curr2 < info2->nused) ? 1 : 0;
+            curr1++;
+            curr2++;
+        } /* end if */
+        else if(cmp < 0) {
+            infile[0] = 1;
+            infile[1] = 0;
+            trav_table_addflags(infile, info1->paths[curr1].path, info1->paths[curr1].type, table);
+            curr1++;
+        } /* end else-if */
+        else {
+            infile[0] = 0;
+            infile[1] = 1;
+            trav_table_addflags(infile, info2->paths[curr2].path, info2->paths[curr2].type, table);
+            curr2++;
+        } /* end else */
+    } /* end while */
 
- }    /* end while */
+    /* list1 did not end */
+    infile[0] = 1;
+    infile[1] = 0;
+    while(curr1 < info1->nused) {
+        trav_table_addflags(infile, info1->paths[curr1].path, info1->paths[curr1].type, table);
+        curr1++;
+    } /* end while */
 
- /* list1 did not end */
- if (curr1 < info1->nused)
- {
-  while (curr1 < info1->nused)
-  {
-   infile[0] = 1;
-   infile[1] = 0;
-   trav_table_addflags (infile, info1->paths[curr1].path, info1->paths[curr1].type,
-    table);
-   curr1++;
-  }
- }
+    /* list2 did not end */
+    infile[0] = 0;
+    infile[1] = 1;
+    while(curr2 < info2->nused) {
+        trav_table_addflags(infile, info2->paths[curr2].path, info2->paths[curr2].type, table);
+        curr2++;
+    } /* end while */
 
- /* list2 did not end */
- if (curr2 < info2->nused)
- {
-  while (curr2 < info2->nused)
-  {
-   infile[0] = 0;
-   infile[1] = 1;
-   trav_table_addflags (infile, info2->paths[curr2].path, info2->paths[curr2].type,
-    table);
-   curr2++;
-  }
- }
+    /*-------------------------------------------------------------------------
+    * print the list
+    *-------------------------------------------------------------------------
+    */
+    if(options->m_verbose) {
+        printf("\n");
+        printf("file1     file2\n");
+        printf("---------------------------------------\n");
+        for(i = 0; i < table->nobjs; i++) {
+            char c1, c2;
 
-/*-------------------------------------------------------------------------
- * print the list
- *-------------------------------------------------------------------------
- */
-
- if (options->m_verbose)
- {
-  printf ("\n");
-  printf ("file1     file2\n");
-  printf ("---------------------------------------\n");
-  for (i = 0; i < table->nobjs; i++)
-  {
-   c1 = (table->objs[i].flags[0]) ? 'x' : ' ';
-   c2 = (table->objs[i].flags[1]) ? 'x' : ' ';
-   printf ("%5c %6c    %-15s\n", c1, c2, table->objs[i].name);
-  }
-  printf ("\n");
- }
+            c1 = (table->objs[i].flags[0]) ? 'x' : ' ';
+            c2 = (table->objs[i].flags[1]) ? 'x' : ' ';
+            printf("%5c %6c    %-15s\n", c1, c2, table->objs[i].name);
+        } /* end for */
+        printf ("\n");
+    } /* end if */
 
 
-/*-------------------------------------------------------------------------
- * do the diff for common objects
- *-------------------------------------------------------------------------
- */
- {
+    /*-------------------------------------------------------------------------
+    * do the diff for common objects
+    *-------------------------------------------------------------------------
+    */
 #ifdef H5_HAVE_PARALLEL
-  char* workerTasks = malloc((g_nTasks-1) * sizeof(char));
-  int n;
-  int busyTasks=0;
-  struct diffs_found nFoundbyWorker;
-  struct diff_args args;
-  int havePrintToken = 1;
-  MPI_Status Status;
+{
+    char *workerTasks = HDmalloc((g_nTasks - 1) * sizeof(char));
+    int n;
+    int busyTasks = 0;
+    struct diffs_found nFoundbyWorker;
+    struct diff_args args;
+    int havePrintToken = 1;
+    MPI_Status Status;
 
-  /*set all tasks as free */
-  memset(workerTasks, 1, g_nTasks-1);
+    /*set all tasks as free */
+    HDmemset(workerTasks, 1, (g_nTasks - 1));
 #endif
 
-  for (i = 0; i < table->nobjs; i++)
-  {
-   if (table->objs[i].flags[0] && table->objs[i].flags[1])
-   {
+    for(i = 0; i < table->nobjs; i++) {
+        if(table->objs[i].flags[0] && table->objs[i].flags[1]) {
+            options->cmn_objs = 1;
+            if(!g_Parallel) {
+                nfound += diff(file1_id,
+                        table->objs[i].name,
+                        file2_id,
+                        table->objs[i].name, options, table->objs[i].type);
+            } /* end if */
 #ifdef H5_HAVE_PARALLEL
-    int workerFound = 0;
+            else {
+                int workerFound = 0;
+
+                h5diffdebug("beginning of big else block\n");
+                /* We're in parallel mode */
+                /* Since the data type of diff value is hsize_t which can
+                * be arbitary large such that there is no MPI type that
+                * matches it, the value is passed between processes as
+                * an array of bytes in order to be portable.  But this
+                * may not work in non-homogeneous MPI environments.
+                */
+
+                /*Set up args to pass to worker task. */
+                if(strlen(table->objs[i].name) > 255) {
+                    printf("The parallel diff only supports object names up to 255 characters\n");
+                    MPI_Abort(MPI_COMM_WORLD, 0);
+                } /* end if */
+
+                HDstrcpy(args.name, table->objs[i].name);
+                args.options = *options;
+                args.type= table->objs[i].type;
+
+                h5diffdebug2("busyTasks=%d\n", busyTasks);
+                /* if there are any outstanding print requests, let's handle one. */
+                if(busyTasks > 0) {
+                    int incomingMessage;
+
+                    /* check if any tasks freed up, and didn't need to print. */
+                    MPI_Iprobe(MPI_ANY_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &incomingMessage, &Status);
+
+                    /* first block*/
+                    if(incomingMessage) {
+                        workerTasks[Status.MPI_SOURCE - 1] = 1;
+                        MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &Status);
+                        nfound += nFoundbyWorker.nfound;
+                        options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
+                        busyTasks--;
+                    } /* end if */
+
+                    /* check to see if the print token was returned. */
+                    if(!havePrintToken) {
+                        /* If we don't have the token, someone is probably sending us output */
+                        print_incoming_data();
+
+                        /* check incoming queue for token */
+                        MPI_Iprobe(MPI_ANY_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &incomingMessage, &Status);
+
+                        /* incoming token implies free task. */
+                        if(incomingMessage) {
+                            workerTasks[Status.MPI_SOURCE - 1] = 1;
+                            MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
+                            nfound += nFoundbyWorker.nfound;
+                            options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
+                            busyTasks--;
+                            havePrintToken = 1;
+                        } /* end if */
+                    } /* end if */
+
+                    /* check to see if anyone needs the print token. */
+                    if(havePrintToken) {
+                        /* check incoming queue for print token requests */
+                        MPI_Iprobe(MPI_ANY_SOURCE, MPI_TAG_TOK_REQUEST, MPI_COMM_WORLD, &incomingMessage, &Status);
+                        if(incomingMessage) {
+                            MPI_Recv(NULL, 0, MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_REQUEST, MPI_COMM_WORLD, &Status);
+                            MPI_Send(NULL, 0, MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_PRINT_TOK, MPI_COMM_WORLD);
+                            havePrintToken = 0;
+                        } /* end if */
+                    } /* end if */
+                } /* end if */
+
+                /* check array of tasks to see which ones are free.
+                * Manager task never does work, so freeTasks[0] is really
+                * worker task 0. */
+                for(n = 1; (n < g_nTasks) && !workerFound; n++) {
+                    if(workerTasks[n-1]) {
+                        /* send file id's and names to first free worker */
+                        MPI_Send(&args, sizeof(struct diff_args), MPI_BYTE, n, MPI_TAG_ARGS, MPI_COMM_WORLD);
+
+                        /* increment counter for total number of prints. */
+                        busyTasks++;
+
+                        /* mark worker as busy */
+                        workerTasks[n - 1] = 0;
+                        workerFound = 1;
+                    } /* end if */
+                } /* end for */
+
+                h5diffdebug2("workerfound is %d \n", workerFound);
+                if(!workerFound) {
+                    /* if they were all busy, we've got to wait for one free up
+                     *  before we can move on.  If we don't have the token, some
+                     * task is currently printing so we'll wait for that task to
+                     * return it.
+                     */
+
+                    if(!havePrintToken) {
+                        while(!havePrintToken) {
+                            int incomingMessage;
+
+                            print_incoming_data();
+                            MPI_Iprobe(MPI_ANY_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &incomingMessage, &Status);
+                            if(incomingMessage) {
+                                MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, MPI_ANY_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
+                                havePrintToken = 1;
+                                nfound += nFoundbyWorker.nfound;
+                                options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
+                                /* send this task the work unit. */
+                                MPI_Send(&args, sizeof(struct diff_args), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_ARGS, MPI_COMM_WORLD);
+                            } /* end if */
+                        } /* end while */
+                    } /* end if */
+                    /* if we do have the token, check for task to free up, or wait for a task to request it */
+                    else {
+                        /* But first print all the data in our incoming queue */
+                        print_incoming_data();
+                        MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
+                        if(Status.MPI_TAG == MPI_TAG_DONE) {
+                            MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &Status);
+                            nfound += nFoundbyWorker.nfound;
+                            options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
+                            MPI_Send(&args, sizeof(struct diff_args), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_ARGS, MPI_COMM_WORLD);
+                        } /* end if */
+                        else if(Status.MPI_TAG == MPI_TAG_TOK_REQUEST) {
+                            int incomingMessage;
+
+                            MPI_Recv(NULL, 0, MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_REQUEST, MPI_COMM_WORLD, &Status);
+                            MPI_Send(NULL, 0, MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_PRINT_TOK, MPI_COMM_WORLD);
+
+                            do {
+                                MPI_Iprobe(MPI_ANY_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &incomingMessage, &Status);
+
+                                print_incoming_data();
+                            } while(!incomingMessage);
+
+                            MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
+                            nfound += nFoundbyWorker.nfound;
+                            options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
+                            MPI_Send(&args, sizeof(struct diff_args), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_ARGS, MPI_COMM_WORLD);
+                        } /* end else-if */
+                        else {
+                            printf("ERROR: Invalid tag (%d) received \n", Status.MPI_TAG);
+                            MPI_Abort(MPI_COMM_WORLD, 0);
+                            MPI_Finalize();
+                        } /* end else */
+                    } /* end else */
+                } /* end if */
+            } /* end else */
 #endif /* H5_HAVE_PARALLEL */
-    options->cmn_objs = 1;
-    if(!g_Parallel)
-    {
-     nfound += diff (file1_id,
-      table->objs[i].name,
-      file2_id,
-      table->objs[i].name, options, table->objs[i].type);
-    }
+        } /* end if */
+    } /* end for */
+    h5diffdebug("done with for loop\n");
+
 #ifdef H5_HAVE_PARALLEL
-    else
-    {
-     h5diffdebug("beginning of big else block\n");
-     /* We're in parallel mode */
-     /* Since the data type of diff value is hsize_t which can
-     * be arbitary large such that there is no MPI type that
-     * matches it, the value is passed between processes as
-     * an array of bytes in order to be portable.  But this
-     * may not work in non-homogeneous MPI environments.
-     */
+    if(g_Parallel) {
+        /* make sure all tasks are done */
+        while(busyTasks > 0) {
+            MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
+            if(Status.MPI_TAG == MPI_TAG_DONE) {
+                MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &Status);
+                nfound += nFoundbyWorker.nfound;
+                options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
+                busyTasks--;
+            } /* end if */
+            else if(Status.MPI_TAG == MPI_TAG_TOK_RETURN) {
+                MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &Status);
+                nfound += nFoundbyWorker.nfound;
+                options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
+                busyTasks--;
+                havePrintToken = 1;
+            } /* end else-if */
+            else if(Status.MPI_TAG == MPI_TAG_TOK_REQUEST) {
+                MPI_Recv(NULL, 0, MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_REQUEST, MPI_COMM_WORLD, &Status);
+                if(havePrintToken) {
+                    int incomingMessage;
 
-     /*Set up args to pass to worker task. */
-     if(strlen(table->objs[i].name) > 255)
-     {
-      printf("The parallel diff only supports object names up to 255 characters\n");
-      MPI_Abort(MPI_COMM_WORLD, 0);
-     }
+                    MPI_Send(NULL, 0, MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_PRINT_TOK, MPI_COMM_WORLD);
 
-     strcpy(args.name, table->objs[i].name);
-     args.options = *options;
-     args.type= table->objs[i].type;
+                    do {
+                        MPI_Iprobe(MPI_ANY_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &incomingMessage, &Status);
 
-     h5diffdebug2("busyTasks=%d\n", busyTasks);
-     /* if there are any outstanding print requests, let's handle one. */
-     if(busyTasks > 0)
-     {
-      int incomingMessage;
-      /* check if any tasks freed up, and didn't need to print. */
-      MPI_Iprobe(MPI_ANY_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &incomingMessage, &Status);
+                        print_incoming_data();
+                    } while(!incomingMessage);
 
-      /* first block*/
-      if(incomingMessage)
-      {
-       workerTasks[Status.MPI_SOURCE-1] = 1;
-       MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &Status);
-       nfound += nFoundbyWorker.nfound;
-       options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
-       busyTasks--;
-      }
+                    MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
+                    nfound += nFoundbyWorker.nfound;
+                    options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
+                    busyTasks--;
+                } /* end if */
+                /* someone else must have it...wait for them to return it, then give it to the task that just asked for it. */
+                else {
+                    int source = Status.MPI_SOURCE;
+                    int incomingMessage;
 
-      /* check to see if the print token was returned. */
-      if(!havePrintToken)
-      {
-       /* If we don't have the token, someone is probably sending us output */
-       print_incoming_data();
+                    do {
+                        MPI_Iprobe(MPI_ANY_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &incomingMessage, &Status);
 
-       /* check incoming queue for token */
-       MPI_Iprobe(MPI_ANY_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &incomingMessage, &Status);
-
-       /* incoming token implies free task. */
-       if(incomingMessage)
-       {
-        workerTasks[Status.MPI_SOURCE-1] = 1;
-        MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
-        nfound += nFoundbyWorker.nfound;
-        options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
-        busyTasks--;
-        havePrintToken = 1;
-       }
-      }
-
-      /* check to see if anyone needs the print token. */
-      if(havePrintToken)
-      {
-       /* check incoming queue for print token requests */
-       MPI_Iprobe(MPI_ANY_SOURCE, MPI_TAG_TOK_REQUEST, MPI_COMM_WORLD, &incomingMessage, &Status);
-       if(incomingMessage)
-       {
-        MPI_Recv(NULL, 0, MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_REQUEST, MPI_COMM_WORLD, &Status);
-        MPI_Send(NULL, 0, MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_PRINT_TOK, MPI_COMM_WORLD);
-        havePrintToken = 0;
-       }
-      }
-     }
-
-     /* check array of tasks to see which ones are free.
-     * Manager task never does work, so freeTasks[0] is really
-     * worker task 0. */
-
-     for(n=1; (n<g_nTasks) && !workerFound; n++)
-     {
-      if(workerTasks[n-1])
-      {
-       /* send file id's and names to first free worker */
-       MPI_Send(&args, sizeof(struct diff_args), MPI_BYTE, n, MPI_TAG_ARGS, MPI_COMM_WORLD);
-
-       /* increment counter for total number of prints. */
-       busyTasks++;
-
-       /* mark worker as busy */
-       workerTasks[n-1] = 0;
-       workerFound = 1;
-      }
-
-     }
+                        print_incoming_data();
+                    } while(!incomingMessage);
 
 
-     h5diffdebug2("workerfound is %d \n", workerFound);
-     if(!workerFound)
-     {
-     /* if they were all busy, we've got to wait for one free up before we can move on.
-      * if we don't have the token, some task is currently printing so we'll wait for that task to return it. */
+                    MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, MPI_ANY_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
+                    nfound += nFoundbyWorker.nfound;
+                    options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
+                    busyTasks--;
+                    MPI_Send(NULL, 0, MPI_BYTE, source, MPI_TAG_PRINT_TOK, MPI_COMM_WORLD);
+                } /* end else */
+            } /* end else-if */
+            else if(Status.MPI_TAG == MPI_TAG_TOK_RETURN) {
+                MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
+                nfound += nFoundbyWorker.nfound;
+                options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
+                busyTasks--;
+                havePrintToken = 1;
+            } /* end else-if */
+            else if(Status.MPI_TAG == MPI_TAG_PRINT_DATA)
+            {
+                char  data[PRINT_DATA_MAX_SIZE + 1];
+                HDmemset(data, 0, PRINT_DATA_MAX_SIZE + 1);
 
-      if(!havePrintToken)
-      {
-       while(!havePrintToken) {
-        int incomingMessage;
+                MPI_Recv(data, PRINT_DATA_MAX_SIZE, MPI_CHAR, Status.MPI_SOURCE, MPI_TAG_PRINT_DATA, MPI_COMM_WORLD, &Status);
+
+                printf("%s", data);
+            } /* end else-if */
+            else {
+                printf("ph5diff-manager: ERROR!! Invalid tag (%d) received \n", Status.MPI_TAG);
+                MPI_Abort(MPI_COMM_WORLD, 0);
+            } /* end else */
+        } /* end while */
+
+        for(i = 1; i < g_nTasks; i++)
+            MPI_Send(NULL, 0, MPI_BYTE, i, MPI_TAG_END, MPI_COMM_WORLD);
+
+        /* Print any final data waiting in our queue */
         print_incoming_data();
-        MPI_Iprobe(MPI_ANY_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &incomingMessage, &Status);
-        if(incomingMessage)
-        {
-         MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, MPI_ANY_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
-         havePrintToken = 1;
-         nfound += nFoundbyWorker.nfound;
-         options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
-         /* send this task the work unit. */
-         MPI_Send(&args, sizeof(struct diff_args), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_ARGS, MPI_COMM_WORLD);
-        }
-       }
-      }
-      /* if we do have the token, check for task to free up, or wait for a task to request it */
-      else
-      {
-       /* But first print all the data in our incoming queue */
-       print_incoming_data();
-       MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
-       if(Status.MPI_TAG == MPI_TAG_DONE)
-       {
-        MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &Status);
-        nfound += nFoundbyWorker.nfound;
-        options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
-        MPI_Send(&args, sizeof(struct diff_args), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_ARGS, MPI_COMM_WORLD);
-       }
-       else if(Status.MPI_TAG == MPI_TAG_TOK_REQUEST)
-       {
-        int incomingMessage;
-        MPI_Recv(NULL, 0, MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_REQUEST, MPI_COMM_WORLD, &Status);
-        MPI_Send(NULL, 0, MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_PRINT_TOK, MPI_COMM_WORLD);
+    } /* end if */
+    h5diffdebug("done with if block\n");
 
-        do
-        {
-         MPI_Iprobe(MPI_ANY_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &incomingMessage, &Status);
-
-         print_incoming_data();
-        }
-        while(!incomingMessage);
-
-
-        MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
-        nfound += nFoundbyWorker.nfound;
-        options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
-        MPI_Send(&args, sizeof(struct diff_args), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_ARGS, MPI_COMM_WORLD);
-       }
-       else
-       {
-        printf("ERROR: Invalid tag (%d) received \n", Status.MPI_TAG);
-        MPI_Abort(MPI_COMM_WORLD, 0);
-        MPI_Finalize();
-       }
-      }
-     }
-  }
+    free(workerTasks);
+}
 #endif /* H5_HAVE_PARALLEL */
-     }
- }
- h5diffdebug("done with for loop\n");
 
-#ifdef H5_HAVE_PARALLEL
- if(g_Parallel)
- {
-  while(busyTasks > 0) /* make sure all tasks are done */
-  {
-   MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
-   if(Status.MPI_TAG == MPI_TAG_DONE)
-   {
-    MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &Status);
-    nfound += nFoundbyWorker.nfound;
-    options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
-    busyTasks--;
-   }
-   else if(Status.MPI_TAG == MPI_TAG_TOK_RETURN)
-   {
-    MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &Status);
-    nfound += nFoundbyWorker.nfound;
-    options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
-    busyTasks--;
-    havePrintToken = 1;
-   }
-   else if(Status.MPI_TAG == MPI_TAG_TOK_REQUEST)
-   {
-    MPI_Recv(NULL, 0, MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_REQUEST, MPI_COMM_WORLD, &Status);
-    if(havePrintToken)
-    {
-     int incomingMessage;
-     MPI_Send(NULL, 0, MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_PRINT_TOK, MPI_COMM_WORLD);
-     do
-     {
-      MPI_Iprobe(MPI_ANY_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &incomingMessage, &Status);
+    /* free table */
+    trav_table_free(table);
 
-      print_incoming_data();
-     }
-     while(!incomingMessage);
-     MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
-     nfound += nFoundbyWorker.nfound;
-     options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
-     busyTasks--;
-    }
-    else /* someone else must have it...wait for them to return it, then give it to the task that just asked for it. */
-    {
-     int source = Status.MPI_SOURCE;
-     int incomingMessage;
-     do
-     {
-      MPI_Iprobe(MPI_ANY_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &incomingMessage, &Status);
-
-      print_incoming_data();
-     }
-     while(!incomingMessage);
-
-
-     MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, MPI_ANY_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
-     nfound += nFoundbyWorker.nfound;
-     options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
-     busyTasks--;
-     MPI_Send(NULL, 0, MPI_BYTE, source, MPI_TAG_PRINT_TOK, MPI_COMM_WORLD);
-    }
-   }
-   else if(Status.MPI_TAG == MPI_TAG_TOK_RETURN)
-   {
-    MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
-    nfound += nFoundbyWorker.nfound;
-    options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
-    busyTasks--;
-    havePrintToken = 1;
-   }
-   else if(Status.MPI_TAG == MPI_TAG_PRINT_DATA)
-   {
-    char  data[PRINT_DATA_MAX_SIZE+1];
-    memset(data, 0, PRINT_DATA_MAX_SIZE+1);
-
-    MPI_Recv(data, PRINT_DATA_MAX_SIZE, MPI_CHAR, Status.MPI_SOURCE, MPI_TAG_PRINT_DATA, MPI_COMM_WORLD, &Status);
-
-    printf("%s", data);
-   }
-   else
-   {
-    printf("ph5diff-manager: ERROR!! Invalid tag (%d) received \n", Status.MPI_TAG);
-    MPI_Abort(MPI_COMM_WORLD, 0);
-   }
-  }
-
-  for(i=1; i<g_nTasks; i++)
-   MPI_Send(NULL, 0, MPI_BYTE, i, MPI_TAG_END, MPI_COMM_WORLD);
-
-  /* Print any final data waiting in our queue */
-  print_incoming_data();
-
- }
- h5diffdebug("done with if block\n");
-
- free(workerTasks);
-#endif /* H5_HAVE_PARALLEL */
- }
-
- /* free table */
- trav_table_free (table);
-
- return nfound;
+    return nfound;
 }
 
 
@@ -856,173 +778,157 @@ hsize_t diff_compare (hid_t file1_id,
  *-------------------------------------------------------------------------
  */
 
-hsize_t diff (hid_t file1_id,
+hsize_t diff(hid_t file1_id,
               const char *path1,
               hid_t file2_id, 
               const char *path2, 
               diff_opt_t * options, 
-              H5G_obj_t1 type)
+              h5trav_type_t type)
 {
-    hid_t       type1_id=(-1);
-    hid_t       type2_id=(-1);
-    hid_t       grp1_id=(-1);
-    hid_t       grp2_id=(-1);
+    hid_t       type1_id = (-1);
+    hid_t       type2_id = (-1);
+    hid_t       grp1_id = (-1);
+    hid_t       grp2_id = (-1);
     int ret;
-    H5G_stat_t sb1;
-    H5G_stat_t sb2;
     hsize_t nfound = 0;
     
-    switch (type)
-    {
-    
-   /*-------------------------------------------------------------------------
-    * H5G_DATASET
-    *-------------------------------------------------------------------------
-    */
-    case H5G_DATASET:
-        
+    switch(type) {
        /*-------------------------------------------------------------------------
-        * verbose, always print name
+        * H5TRAV_TYPE_DATASET
         *-------------------------------------------------------------------------
         */
-        if (options->m_verbose)
-        {
-            if (print_objname(options,(hsize_t)1))
-                do_print_objname ("dataset", path1, path2);
-            nfound=diff_dataset(file1_id,file2_id,path1,path2,options);
-            print_found(nfound);
+        case H5TRAV_TYPE_DATASET:
+           /*-------------------------------------------------------------------------
+            * verbose, always print name
+            *-------------------------------------------------------------------------
+            */
+            if(options->m_verbose) {
+                if(print_objname(options, (hsize_t)1))
+                    do_print_objname("dataset", path1, path2);
+                nfound = diff_dataset(file1_id, file2_id, path1, path2, options);
+                print_found(nfound);
+            } /* end if */
+           /*-------------------------------------------------------------------------
+            * non verbose, check first if we have differences by enabling quiet mode
+            * so that printing is off, and compare again if differences found,
+            * disabling quite mode
+            *-------------------------------------------------------------------------
+            */
+            else {
+                if(options->m_quiet == 0) {
+                    /* shut up temporarily */
+                    options->m_quiet = 1;
+                    nfound = diff_dataset(file1_id, file2_id, path1, path2, options);
+
+                    /* print again */
+                    options->m_quiet = 0;
+                    if(nfound) {
+                        if(print_objname(options,nfound))
+                            do_print_objname("dataset", path1, path2);
+                        nfound = diff_dataset(file1_id, file2_id, path1, path2, options);
+                        print_found(nfound);
+                    } /* end if */
+                }  /* end if */
+                /* in quiet mode, just count differences */
+                else
+                    nfound = diff_dataset(file1_id, file2_id, path1, path2, options);
+            } /* end else */
+            break;
             
-        }
        /*-------------------------------------------------------------------------
-        * non verbose, check first if we have differences by enabling quiet mode
-        * so that printing is off, and compare again if differences found,
-        * disabling quite mode
+        * H5TRAV_TYPE_NAMED_DATATYPE
         *-------------------------------------------------------------------------
         */
-        else
-        {
-            if (options->m_quiet==0)
+        case H5TRAV_TYPE_NAMED_DATATYPE:
+            if((type1_id = H5Topen(file1_id, path1)) < 0)
+                goto out;
+            if((type2_id = H5Topen(file2_id, path2)) < 0)
+                goto out;
+            
+            if((ret = H5Tequal(type1_id, type2_id)) < 0)
+                goto out;
+            
+            /* if H5Tequal is > 0 then the datatypes refer to the same datatype */
+            nfound = (ret > 0) ? 0 : 1;
+            
+            if(print_objname(options,nfound))
+                do_print_objname("datatype", path1, path2);
+
+            /* always print the number of differences found in verbose mode */
+            if(options->m_verbose)
+                print_found(nfound);
+            
+            /*-------------------------------------------------------------------------
+             * compare attributes
+             * the if condition refers to cases when the dataset is a referenced object
+             *-------------------------------------------------------------------------
+             */
+            if(path1)
+                nfound += diff_attr(type1_id, type2_id, path1, path2, options);
+            
+            if(H5Tclose(type1_id) < 0)
+                goto out;
+            if(H5Tclose(type2_id) < 0)
+                goto out;
+            break;
+            
+       /*-------------------------------------------------------------------------
+        * H5TRAV_TYPE_GROUP
+        *-------------------------------------------------------------------------
+        */
+        case H5TRAV_TYPE_GROUP:
+            ret = HDstrcmp(path1, path2);
+        
+            /* if "path1" != "path2" then the groups are "different" */
+            nfound = (ret != 0) ? 1 : 0;
+            
+            if(print_objname(options, nfound))
+                do_print_objname("group", path1, path2);
+
+            /* always print the number of differences found in verbose mode */
+            if(options->m_verbose)
+                print_found(nfound);
+            
+            if((grp1_id = H5Gopen2(file1_id, path1, H5P_DEFAULT)) < 0)
+                goto out;
+            if((grp2_id = H5Gopen2(file2_id, path2, H5P_DEFAULT)) < 0)
+                goto out;
+
+            /*-------------------------------------------------------------------------
+             * compare attributes
+             * the if condition refers to cases when the dataset is a referenced object
+             *-------------------------------------------------------------------------
+             */
+            if(path1)
+                nfound += diff_attr(grp1_id, grp2_id, path1, path2, options);
+            
+            if(H5Gclose(grp1_id) < 0)
+                goto out;
+            if(H5Gclose(grp2_id) < 0)
+                goto out;
+            break;
+            
+            
+       /*-------------------------------------------------------------------------
+        * H5TRAV_TYPE_LINK
+        *-------------------------------------------------------------------------
+        */
+        case H5TRAV_TYPE_LINK:
             {
-                /* shut up temporarily */
-                options->m_quiet=1;
-                nfound=diff_dataset(file1_id,file2_id,path1,path2,options);
-                /* print again */
-                options->m_quiet=0;
-                if (nfound)
-                {
-                    if (print_objname(options,nfound))
-                        do_print_objname ("dataset", path1, path2);
-                    nfound=diff_dataset(file1_id,file2_id,path1,path2,options);
-                    print_found(nfound);
-                } 
-            } 
-            /* in quiet mode, just count differences */
-            else
-            {
-                nfound=diff_dataset(file1_id,file2_id,path1,path2,options);
-            }
-        }
-        
-        break;
-        
-   /*-------------------------------------------------------------------------
-    * H5G_TYPE
-    *-------------------------------------------------------------------------
-    */
-    case H5G_TYPE:
-
-        if ((type1_id = H5Topen(file1_id, path1))<0)
-            goto out;
-        if ((type2_id = H5Topen(file2_id, path2))<0)
-            goto out;
-        
-        if ((ret = H5Tequal(type1_id,type2_id))<0)
-            goto out;
-        
-        /* if H5Tequal is > 0 then the datatypes refer to the same datatype */
-        nfound = (ret>0) ? 0 : 1;
-        
-        if (print_objname(options,nfound))
-            do_print_objname ("datatype", path1, path2);
-
-        /* always print the number of differences found in verbose mode */
-        if (options->m_verbose)
-            print_found(nfound);
-        
-        /*-------------------------------------------------------------------------
-         * compare attributes
-         * the if condition refers to cases when the dataset is a referenced object
-         *-------------------------------------------------------------------------
-         */
-        if (path1)
-            nfound += diff_attr(type1_id,type2_id,path1,path2,options);
-        
-        if ( H5Tclose(type1_id)<0)
-            goto out;
-        if ( H5Tclose(type2_id)<0)
-            goto out;
-        
-        break;
-        
-   /*-------------------------------------------------------------------------
-    * H5G_GROUP
-    *-------------------------------------------------------------------------
-    */
-    case H5G_GROUP:
-
-        ret = HDstrcmp(path1, path2);
-    
-        /* if "path1" != "path2" then the groups are "different" */
-        nfound = (ret != 0) ? 1 : 0;
-        
-        if(print_objname(options, nfound))
-            do_print_objname("group", path1, path2);
-
-        /* always print the number of differences found in verbose mode */
-        if(options->m_verbose)
-            print_found(nfound);
-        
-        if((grp1_id = H5Gopen2(file1_id, path1, H5P_DEFAULT)) < 0)
-            goto out;
-        if((grp2_id = H5Gopen2(file2_id, path2, H5P_DEFAULT)) < 0)
-            goto out;
-
-        /*-------------------------------------------------------------------------
-         * compare attributes
-         * the if condition refers to cases when the dataset is a referenced object
-         *-------------------------------------------------------------------------
-         */
-        if(path1)
-            nfound += diff_attr(grp1_id, grp2_id, path1, path2, options);
-        
-        if(H5Gclose(grp1_id) < 0)
-            goto out;
-        if(H5Gclose(grp2_id) < 0)
-            goto out;
-        
-        break;
-        
-        
-   /*-------------------------------------------------------------------------
-    * H5G_LINK
-    *-------------------------------------------------------------------------
-    */
-    case H5G_LINK:
-        {
-            char *buf1 = NULL;
-            char *buf2 = NULL;
+            H5L_info_t li1, li2;
+            char *buf1, *buf2;
             
-            if(H5Gget_objinfo(file1_id, path1, FALSE, &sb1) < 0)
+            if(H5Lget_info(file1_id, path1, &li1, H5P_DEFAULT) < 0)
                 goto out;
-            if(H5Gget_objinfo(file1_id, path1, FALSE, &sb2) < 0)
+            if(H5Lget_info(file1_id, path1, &li2, H5P_DEFAULT) < 0)
                 goto out;
             
-            buf1 = HDmalloc(sb1.linklen);
-            buf2 = HDmalloc(sb2.linklen);
+            buf1 = HDmalloc(li1.u.val_size);
+            buf2 = HDmalloc(li2.u.val_size);
             
-            if(H5Lget_val(file1_id, path1, buf1, sb1.linklen, H5P_DEFAULT) < 0)
+            if(H5Lget_val(file1_id, path1, buf1, li1.u.val_size, H5P_DEFAULT) < 0)
                 goto out;
-            if(H5Lget_val(file2_id, path2, buf2, sb2.linklen, H5P_DEFAULT) < 0)
+            if(H5Lget_val(file2_id, path2, buf2, li2.u.val_size, H5P_DEFAULT) < 0)
                 goto out;
             
             ret = HDstrcmp(buf1, buf2);
@@ -1039,19 +945,16 @@ hsize_t diff (hid_t file1_id,
             
             HDfree(buf1);
             HDfree(buf2);
-        }
-        break;
-        
-   /*-------------------------------------------------------------------------
-    * H5G_UDLINK
-    *-------------------------------------------------------------------------
-    */
-    case H5G_UDLINK:
-        {
-            char *buf1 = NULL;
-            char *buf2 = NULL;
-            H5L_info_t li1;
-            H5L_info_t li2;
+            }
+            break;
+            
+       /*-------------------------------------------------------------------------
+        * H5TRAV_TYPE_UDLINK
+        *-------------------------------------------------------------------------
+        */
+        case H5TRAV_TYPE_UDLINK:
+            {
+            H5L_info_t li1, li2;
             
             if(H5Lget_info(file1_id, path1, &li1, H5P_DEFAULT) < 0)
                 goto out;
@@ -1059,36 +962,36 @@ hsize_t diff (hid_t file1_id,
                 goto out;
             
             /* Only external links will have a query function registered */
-            if(li1.type == H5L_TYPE_EXTERNAL && li2.type == H5L_TYPE_EXTERNAL)
-            {
-                buf1 = HDmalloc (li1.u.val_size);
-                buf2 = HDmalloc (li2.u.val_size);
+            if(li1.type == H5L_TYPE_EXTERNAL && li2.type == H5L_TYPE_EXTERNAL) {
+                char *buf1, *buf2;
+
+                buf1 = HDmalloc(li1.u.val_size);
+                buf2 = HDmalloc(li2.u.val_size);
                 
-                if(H5Lget_val(file1_id, path1, buf1, li1.u.val_size, H5P_DEFAULT) < 0)
-                {
-                    HDfree (buf1); HDfree (buf2);
+                if(H5Lget_val(file1_id, path1, buf1, li1.u.val_size, H5P_DEFAULT) < 0) {
+                    HDfree(buf1);
+                    HDfree(buf2);
                     goto out;
-                }
-                if(H5Lget_val(file2_id, path2, buf2, li2.u.val_size, H5P_DEFAULT) < 0)
-                {
-                    HDfree (buf1); HDfree (buf2);
+                } /* end if */
+                if(H5Lget_val(file2_id, path2, buf2, li2.u.val_size, H5P_DEFAULT) < 0) {
+                    HDfree(buf1);
+                    HDfree(buf2);
                     goto out;
-                }
+                } /* end if */
                 
                 /* If the buffers are the same size, compare them */
-                if(li1.u.val_size == li2.u.val_size)
-                {
-                    if(H5Lget_val(file1_id, path1, buf1, li1.u.val_size, H5P_DEFAULT) < 0)
-                    {
-                        HDfree (buf1); HDfree (buf2);
+                if(li1.u.val_size == li2.u.val_size) {
+                    if(H5Lget_val(file1_id, path1, buf1, li1.u.val_size, H5P_DEFAULT) < 0) {
+                        HDfree(buf1);
+                        HDfree(buf2);
                         goto out;
-                    }
-                    if(H5Lget_val(file2_id, path2, buf2, li2.u.val_size, H5P_DEFAULT) < 0)
-                    {
-                        HDfree (buf1); HDfree (buf2);
+                    } /* end if */
+                    if(H5Lget_val(file2_id, path2, buf2, li2.u.val_size, H5P_DEFAULT) < 0) {
+                        HDfree(buf1);
+                        HDfree(buf2);
                         goto out;
-                    }
-                    ret = HDmemcmp (buf1, buf2, li1.u.val_size);
+                    } /* end if */
+                    ret = HDmemcmp(buf1, buf2, li1.u.val_size);
                 }
                 else
                     ret = 1;
@@ -1096,18 +999,20 @@ hsize_t diff (hid_t file1_id,
                 /* if "buf1" != "buf2" then the links are "different" */
                 nfound = (ret != 0) ? 1 : 0;
                 
-                if (print_objname (options, nfound))
-                    do_print_objname ("external link", path1, path2);
-            }
-            else
-            {
-            /* If one or both of these links isn't an external link, we can only
-             * compare information from H5Lget_info since we don't have a query
-             * function registered for them. 
-             *
-             * If the link classes or the buffer length are not the
-             * same, the links are "different"
-             */
+                if(print_objname(options, nfound))
+                    do_print_objname("external link", path1, path2);
+            
+                HDfree(buf1);
+                HDfree(buf2);
+            } /* end if */
+            else {
+                /* If one or both of these links isn't an external link, we can only
+                 * compare information from H5Lget_info since we don't have a query
+                 * function registered for them. 
+                 *
+                 * If the link classes or the buffer length are not the
+                 * same, the links are "different"
+                 */
                 if((li1.type != li2.type) || (li1.u.val_size != li2.u.val_size))
                     nfound = 1;
                 else
@@ -1115,47 +1020,37 @@ hsize_t diff (hid_t file1_id,
                 
                 if (print_objname (options, nfound))
                     do_print_objname ("user defined link", path1, path2);
-            }
+            } /* end else */
             
             /* always print the number of differences found in verbose mode */
-            if (options->m_verbose)
+            if(options->m_verbose)
                 print_found(nfound);
+            }
+            break;
             
-            HDfree (buf1);
-            HDfree (buf2);
-        }
-        break;
-        
-    default:
-        if (options->m_verbose) 
-        {
-            printf("Comparison not supported: <%s> and <%s> are of type %s\n",
-                path1, path2, get_type(type) );
-        }
-        options->not_cmp=1;
-        break;
- }
+        default:
+            if(options->m_verbose)
+                printf("Comparison not supported: <%s> and <%s> are of type %s\n",
+                    path1, path2, get_type(type) );
+            options->not_cmp = 1;
+            break;
+     }
  
- 
- return nfound;
+    return nfound;
  
 out:
+    options->err_stat = 1;
 
- options->err_stat=1;
- 
- /* close */
- /* disable error reporting */
- H5E_BEGIN_TRY
- {
-     H5Tclose (type1_id);
-     H5Tclose (type2_id);
-     H5Gclose (grp1_id);
-     H5Tclose (grp2_id);
-     /* enable error reporting */
- }
- H5E_END_TRY;
- 
- return nfound;
+    /* close */
+    /* disable error reporting */
+    H5E_BEGIN_TRY {
+        H5Tclose(type1_id);
+        H5Tclose(type2_id);
+        H5Gclose(grp1_id);
+        H5Tclose(grp2_id);
+        /* enable error reporting */
+    } H5E_END_TRY;
+
+    return nfound;
 }
-
 

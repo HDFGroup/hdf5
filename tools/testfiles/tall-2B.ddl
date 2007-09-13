@@ -48,7 +48,7 @@ GROUP "/" {
             LINKCLASS 64
             TARGETFILE "somefile"
             TARGETPATH "somepath"
-}
+         }
          GROUP "g1.2.1" {
             SOFTLINK "slink" {
                LINKTARGET "somevalue"

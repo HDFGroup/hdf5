@@ -1246,11 +1246,8 @@ test_file_freespace(void)
     /* Check that there is the right amount of free space in the file */
     free_space = H5Fget_freespace(file);
     CHECK(free_space, FAIL, "H5Fget_freespace");
-#ifdef H5_HAVE_LARGE_HSIZET
     VERIFY(free_space, 2376, "H5Fget_freespace");
-#else /* H5_HAVE_LARGE_HSIZET */
-    VERIFY(free_space, 588, "H5Fget_freespace");        /* XXX: fix me */
-#endif /* H5_HAVE_LARGE_HSIZET */
+
     /* Delete datasets in file */
     for(u = 0; u < 10; u++) {
         sprintf(name, "Dataset %u", u);

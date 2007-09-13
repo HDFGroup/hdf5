@@ -735,7 +735,7 @@ static void test_sohm_size1(void)
     h5_stat_size_t norm_final_filesize2;
     h5_stat_size_t sohm_final_filesize2;
     h5_stat_size_t sohm_btree_final_filesize2;
-    H5G_stat_t  statbuf;
+    H5O_info_t  oinfo;
     unsigned    num_indexes = 1;
     unsigned    index_flags = H5O_MESG_DTYPE_FLAG;
     unsigned    min_mesg_size = 50;
@@ -776,11 +776,11 @@ static void test_sohm_size1(void)
     CHECK_I(file, "size1_helper");
 
     /* Get the size of a dataset object header */
-    ret = H5Gget_objinfo(file, DSETNAME[0], 0, &statbuf);
-    CHECK_I(ret, "H5Gget_objinfo");
+    ret = H5Oget_info(file, DSETNAME[0], &oinfo, H5P_DEFAULT);
+    CHECK_I(ret, "H5Oget_info");
     ret = H5Fclose(file);
     CHECK_I(ret, "H5Fclose");
-    norm_oh_size = statbuf.ohdr.size;
+    norm_oh_size = oinfo.hdr.space.total;
 
     /* Get the new file size */
     norm_final_filesize = h5_get_file_size(FILENAME);
@@ -832,11 +832,11 @@ static void test_sohm_size1(void)
     CHECK_I(file, "size1_helper");
 
     /* Get the size of a dataset object header */
-    ret = H5Gget_objinfo(file, DSETNAME[0], 0, &statbuf);
-    CHECK_I(ret, "H5Gget_objinfo");
+    ret = H5Oget_info(file, DSETNAME[0], &oinfo, H5P_DEFAULT);
+    CHECK_I(ret, "H5Oget_info");
     ret = H5Fclose(file);
     CHECK_I(ret, "H5Fclose");
-    sohm_oh_size = statbuf.ohdr.size;
+    sohm_oh_size = oinfo.hdr.space.total;
 
     /* Get the new file size */
     sohm_final_filesize = h5_get_file_size(FILENAME);
@@ -887,11 +887,11 @@ static void test_sohm_size1(void)
     CHECK_I(file, "size1_helper");
 
     /* Get the size of a dataset object header */
-    ret = H5Gget_objinfo(file, DSETNAME[0], 0, &statbuf);
-    CHECK_I(ret, "H5Gget_objinfo");
+    ret = H5Oget_info(file, DSETNAME[0], &oinfo, H5P_DEFAULT);
+    CHECK_I(ret, "H5Oget_info");
     ret = H5Fclose(file);
     CHECK_I(ret, "H5Fclose");
-    sohm_btree_oh_size = statbuf.ohdr.size;
+    sohm_btree_oh_size = oinfo.hdr.space.total;
 
     /* Get the new file size */
     sohm_btree_final_filesize = h5_get_file_size(FILENAME);
@@ -924,10 +924,10 @@ static void test_sohm_size1(void)
      * continuation message and a NULL message.
 
     if(sohm_oh_size >= norm_oh_size)
-        VERIFY(sohm_oh_size, 1, "H5Gget_objinfo");
+        VERIFY(sohm_oh_size, 1, "H5Oget_info");
     */
     if(sohm_oh_size != sohm_btree_oh_size)
-        VERIFY(sohm_btree_oh_size, 1, "H5Gget_objinfo");
+        VERIFY(sohm_btree_oh_size, 1, "H5Oget_info");
 
     /* Both sohm files should be bigger than a normal file when empty.
      * It's hard to say whether a B-tree with no nodes allocated should be

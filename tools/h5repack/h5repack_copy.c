@@ -626,12 +626,12 @@ int do_copy_objects(hid_t fidin,
                                 */
                                 if ( has_filter && apply_s == 0 )
                                     printf(" <warning: filter not applied to %s. dataset smaller than %d bytes>\n",
-                                travt->objs[i].name,
-                                (int)options->threshold);
+                                            travt->objs[i].name,
+                                            (int)options->threshold);
 
                                 if ( has_filter && apply_f == 0 )
                                     printf(" <warning: could not apply the filter to %s>\n",
-                                travt->objs[i].name);
+                                            travt->objs[i].name);
 
                             } /* verbose */
 

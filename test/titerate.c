@@ -54,7 +54,7 @@ typedef enum {
 /* Custom group iteration callback data */
 typedef struct {
     char name[NAMELEN];     /* The name of the object */
-    int type;               /* The type of the object */
+    H5O_type_t type;        /* The type of the object */
     iter_enum command;      /* The type of return value */
 } iter_info;
 
@@ -547,7 +547,7 @@ liter_cb2(hid_t loc_id, const char *name, const H5L_info_t UNUSED *link_info,
     void *opdata)
 {
     const iter_info *test_info = (const iter_info *)opdata;
-    H5G_stat_t statbuf;
+    H5O_info_t oinfo;
     herr_t ret;		/* Generic return value		*/
 
     if(HDstrcmp(name, test_info->name)) {
@@ -558,11 +558,11 @@ liter_cb2(hid_t loc_id, const char *name, const H5L_info_t UNUSED *link_info,
     /*
      * Get type of the object and check it.
      */
-    ret = H5Gget_objinfo(loc_id, name, FALSE, &statbuf);
-    CHECK(ret, FAIL, "H5Gget_objinfo");
+    ret = H5Oget_info(loc_id, name, &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
 
-    if(test_info->type != statbuf.type) {
-        TestErrPrintf("test_info->type = %d, statbuf.type = %d\n", test_info->type, statbuf.type);
+    if(test_info->type != oinfo.type) {
+        TestErrPrintf("test_info->type = %d, oinfo.type = %d\n", test_info->type, (int)oinfo.type);
         return(H5_ITER_ERROR);
     } /* end if */
 

@@ -27,11 +27,6 @@
  *-------------------------------------------------------------------------
  */
 
-H5_HLDLL herr_t  H5LT_get_attribute_mem( hid_t obj_id,
-                           const char *attr_name,
-                           hid_t mem_type_id,
-                           void *data );
-
 H5_HLDLL herr_t  H5LT_get_attribute_disk( hid_t obj_id,
                            const char *attr_name,
                            void *data );

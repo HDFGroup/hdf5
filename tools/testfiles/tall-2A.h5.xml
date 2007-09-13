@@ -127,10 +127,10 @@ Expected output for 'h5dump --xml -A tall.h5'
          </hdf5:Dataset>
       </hdf5:Group>
       <hdf5:Group Name="g1.2" OBJ-XID="xid_3568" H5Path="/g1/g1.2" Parents="xid_800" H5ParentPaths="/g1" >
+         <hdf5:ExternalLink LinkName="extlink" OBJ-XID="xid_18446744073709551614" H5SourcePath="/g1/g1.2/extlink" TargetFilename="somefile"  TargetPath="somepath"  Parents="xid_3568" H5ParentPaths="/g1/g1.2" />
          <hdf5:Group Name="g1.2.1" OBJ-XID="xid_4272" H5Path="/g1/g1.2/g1.2.1" Parents="xid_3568" H5ParentPaths="/g1/g1.2" >
-            <hdf5:SoftLink LinkName="slink" OBJ-XID="xid_18446744073709551614" H5SourcePath="/g1/g1.2/g1.2.1/slink" TargetPath="somevalue"  Parents="xid_4272" H5ParentPaths="/g1/g1.2/g1.2.1" />
+            <hdf5:SoftLink LinkName="slink" OBJ-XID="xid_18446744073709551613" H5SourcePath="/g1/g1.2/g1.2.1/slink" TargetPath="somevalue"  Parents="xid_4272" H5ParentPaths="/g1/g1.2/g1.2.1" />
          </hdf5:Group>
-         <hdf5:ExternalLink LinkName="extlink" OBJ-XID="xid_18446744073709551613" H5SourcePath="/g1/g1.2/extlink" TargetFilename="somefile"  TargetPath="somepath"  Parents="xid_3568" H5ParentPaths="/g1/g1.2" />
       </hdf5:Group>
    </hdf5:Group>
    <hdf5:Group Name="g2" OBJ-XID="xid_1832" H5Path="/g2" Parents="xid_96" H5ParentPaths="/" >

@@ -147,13 +147,13 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
  *-------------------------------------------------------------------------
  */
 static void
-addr_insert(H5G_stat_t *sb)
+addr_insert(H5O_info_t *oi)
 {
     size_t  n;
 
     /* Don't add it if the link count is 1 because such an object can only
      * be encountered once. */
-    if(sb->nlink < 2)
+    if(oi->rc < 2)
         return;
 
     /* Extend the table */
@@ -164,11 +164,7 @@ addr_insert(H5G_stat_t *sb)
 
     /* Insert the entry */
     n = idtab_g.nobjs++;
-#if H5_SIZEOF_UINT64_T > H5_SIZEOF_LONG
-    idtab_g.obj[n] = (haddr_t)sb->objno[0] | ((haddr_t)sb->objno[1] << (8 * sizeof(long)));
-#else
-    idtab_g.obj[n] = (haddr_t)sb->objno[0];
-#endif
+    idtab_g.obj[n] = oi->addr;
 } /* end addr_insert() */
 
 
@@ -187,21 +183,16 @@ addr_insert(H5G_stat_t *sb)
  *-------------------------------------------------------------------------
  */
 static hbool_t
-addr_lookup(H5G_stat_t *sb)
+addr_lookup(H5O_info_t *oi)
 {
-    haddr_t obj_addr;           /* Object's address in the file */
     size_t  n;
 
-    if(sb->nlink<2) return FALSE; /*only one link possible*/
+    if(oi->rc < 2) return FALSE; /*only one link possible*/
 
-#if H5_SIZEOF_UINT64_T > H5_SIZEOF_LONG
-    obj_addr = (haddr_t)sb->objno[0] | ((haddr_t)sb->objno[1] << (8 * sizeof(long)));
-#else
-    obj_addr = (haddr_t)sb->objno[0];
-#endif
     for(n = 0; n < idtab_g.nobjs; n++)
-        if(idtab_g.obj[n] == obj_addr)
+        if(H5F_addr_eq(idtab_g.obj[n], oi->addr))
             return TRUE;
+
     return FALSE;
 } /* end addr_lookup() */
 
@@ -897,11 +888,12 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
                 if((obj2_id = H5Rdereference(parent2, H5R_OBJECT, ref_buf2)) < 0) TEST_ERROR
 
                 /* break the infinite loop when the ref_object points to itself */
-                if (obj_owner > 0) {
-                    H5G_stat_t stat1, stat2;
-                    if (H5Gget_objinfo(obj_owner, ".", 0, &stat1) < 0) TEST_ERROR
-                    if (H5Gget_objinfo(obj1_id, ".", 0, &stat2) < 0) TEST_ERROR
-                    if ( (stat1.objno[0] == stat2.objno[0]) && (stat1.objno[1] == stat2.objno[1]) ) {
+                if(obj_owner > 0) {
+                    H5O_info_t oinfo1, oinfo2;
+
+                    if(H5Oget_info(obj_owner, ".", &oinfo1, H5P_DEFAULT) < 0) TEST_ERROR
+                    if(H5Oget_info(obj1_id, ".", &oinfo2, H5P_DEFAULT) < 0) TEST_ERROR
+                    if(H5F_addr_eq(oinfo1.addr, oinfo2.addr)) {
                         if(H5Oclose(obj1_id) < 0) TEST_ERROR
                         if(H5Oclose(obj2_id) < 0) TEST_ERROR
                         return TRUE;
@@ -953,12 +945,12 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
                 if((obj2_id = H5Rdereference(parent2, H5R_DATASET_REGION, ref_buf2)) < 0) TEST_ERROR
 
                 /* break the infinite loop when the ref_object points to itself */
-                if (obj_owner > 0) {
-                    H5G_stat_t stat1, stat2;
-                    if (H5Gget_objinfo(obj_owner, ".", 0, &stat1) < 0) TEST_ERROR
-                    if (H5Gget_objinfo(obj1_id, ".", 0, &stat2) < 0) TEST_ERROR
+                if(obj_owner > 0) {
+                    H5O_info_t oinfo1, oinfo2;
 
-                    if ( (stat1.objno[0] == stat2.objno[0]) && (stat1.objno[1] == stat2.objno[1]) ) {
+                    if(H5Oget_info(obj_owner, ".", &oinfo1, H5P_DEFAULT) < 0) TEST_ERROR
+                    if(H5Oget_info(obj1_id, ".", &oinfo2, H5P_DEFAULT) < 0) TEST_ERROR
+                    if(H5F_addr_eq(oinfo1.addr, oinfo2.addr)) {
                         if(H5Oclose(obj1_id) < 0) TEST_ERROR
                         if(H5Oclose(obj2_id) < 0) TEST_ERROR
                         return TRUE;
@@ -1270,10 +1262,8 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
         char objname2[NAME_BUF_SIZE];           /* Name of object in group */
         H5G_obj_t objtype;                      /* Type of object in group */
         H5G_obj_t objtype2;                     /* Type of object in group */
-        H5G_stat_t objstat;                     /* Object info */
-        H5G_stat_t objstat2;                    /* Object info */
-        H5L_info_t linfo;                   /* Link information */
-        H5L_info_t linfo2;                  /* Link information */
+        H5L_info_t linfo;                       /* Link information */
+        H5L_info_t linfo2;                      /* Link information */
         hid_t oid, oid2;                        /* IDs of objects within group */
 
         /* Loop over contents of groups */
@@ -1288,12 +1278,22 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
             if((objtype2 = H5Gget_objtype_by_idx(gid2, idx)) < 0) TEST_ERROR
             if(objtype != objtype2) TEST_ERROR
 
-            /* Compare some pieces of the H5G_stat_t */
-            if(H5Gget_objinfo(gid, objname, FALSE, &objstat) < 0) TEST_ERROR
-            if(H5Gget_objinfo(gid2, objname2, FALSE, &objstat2) < 0) TEST_ERROR
-            if(objstat.type != objstat2.type) TEST_ERROR
-            if(objstat.type != H5G_LINK && objstat.type != H5G_UDLINK) {
-                if(objstat.nlink != objstat2.nlink) TEST_ERROR
+            /* Get link info */
+            if(H5Lget_info(gid, objname, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
+            if(H5Lget_info(gid2, objname2, &linfo2, H5P_DEFAULT) < 0) TEST_ERROR
+            if(linfo.type != linfo2.type) TEST_ERROR
+
+            /* Extra checks for "real" objects */
+            if(linfo.type == H5L_TYPE_HARD) {
+                H5O_info_t oinfo;                       /* Object info */
+                H5O_info_t oinfo2;                      /* Object info */
+
+                /* Compare some pieces of the object info */
+                if(H5Oget_info(gid, objname, &oinfo, H5P_DEFAULT) < 0) TEST_ERROR
+                if(H5Oget_info(gid2, objname2, &oinfo2, H5P_DEFAULT) < 0) TEST_ERROR
+
+                if(oinfo.type != oinfo2.type) TEST_ERROR
+                if(oinfo.rc != oinfo2.rc) TEST_ERROR
 
                 /* If NULL messages are preserved, the number of messages
                  * should be the same in the destination.
@@ -1301,22 +1301,18 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
                  * of messages hasn't increased.
                  */
                  if(H5O_COPY_PRESERVE_NULL_FLAG & copy_flags) {
-                    if(objstat.ohdr.nmesgs != objstat2.ohdr.nmesgs)
+                    if(oinfo.hdr.nmesgs != oinfo2.hdr.nmesgs)
                         ;
                     else
-                        if(objstat.ohdr.nmesgs < objstat2.ohdr.nmesgs) TEST_ERROR
+                        if(oinfo.hdr.nmesgs < oinfo2.hdr.nmesgs) TEST_ERROR
                  }
+
+                /* Check for object already having been compared */
+                if(addr_lookup(&oinfo))
+                    continue;
+                else
+                    addr_insert(&oinfo);
             } /* end if */
-
-            /* Get link info */
-            if(H5Lget_info(gid, objname, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
-            if(H5Lget_info(gid2, objname2, &linfo2, H5P_DEFAULT) < 0) TEST_ERROR
-
-            /* Check for object already having been compared */
-            if(addr_lookup(&objstat))
-                continue;
-            else
-                addr_insert(&objstat);
 
             /* Compare objects within group */
             switch(objtype) {
@@ -1385,7 +1381,7 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
                       if(H5Lget_val(gid2, objname2, linkval2, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
 
                       /* Compare link udata */
-                      if(HDmemcmp(linkval, linkval2, objstat.linklen)) TEST_ERROR
+                      if(HDmemcmp(linkval, linkval2, linfo.u.val_size)) TEST_ERROR
                   }
                   break;
 

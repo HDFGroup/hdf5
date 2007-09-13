@@ -19,22 +19,32 @@
 #include "hdf5.h"
 
 /*-------------------------------------------------------------------------
- * public struct to store name and type of an object
+ * public enum to specify type of an object
  * the TYPE can be:
- *    H5G_UNKNOWN = -1,
- *    H5G_GROUP,            Object is a group
- *    H5G_DATASET,          Object is a dataset
- *    H5G_TYPE,             Object is a named data type
- *    H5G_LINK,             Object is a symbolic link
+ *    H5TRAV_TYPE_UNKNOWN = -1,
+ *    H5TRAV_TYPE_GROUP,            Object is a group
+ *    H5TRAV_TYPE_DATASET,          Object is a dataset
+ *    H5TRAV_TYPE_TYPE,             Object is a named datatype
+ *    H5TRAV_TYPE_LINK,             Object is a symbolic link
+ *    H5TRAV_TYPE_UDLINK,           Object is a user-defined link
  *-------------------------------------------------------------------------
  */
+typedef enum {
+    H5TRAV_TYPE_UNKNOWN = -1,   /* Unknown object type */
+    H5TRAV_TYPE_GROUP,          /* Object is a group */
+    H5TRAV_TYPE_DATASET,        /* Object is a dataset */
+    H5TRAV_TYPE_NAMED_DATATYPE, /* Object is a named datatype */
+    H5TRAV_TYPE_LINK,           /* Object is a symbolic link */
+    H5TRAV_TYPE_UDLINK          /* Object is a user-defined link */
+} h5trav_type_t;
 
-typedef H5G_obj_t H5G_obj_t1;
-
-
+/*-------------------------------------------------------------------------
+ * public struct to store name and type of an object
+ *-------------------------------------------------------------------------
+ */
 typedef struct trav_path_t {
     char      *path;
-    H5G_obj_t type;
+    h5trav_type_t type;
 } trav_path_t;
 
 typedef struct trav_info_t {
@@ -59,10 +69,10 @@ typedef struct trav_link_t {
  */
 
 typedef struct trav_obj_t {
-    haddr_t     objno;     /* object number from H5Gget_objinfo */
+    haddr_t     objno;     /* object address */
     unsigned    flags[2];  /* h5diff.object is present or not in both files*/
     char        *name;     /* name */
-    H5G_obj_t   type;      /* type of object */
+    h5trav_type_t type;    /* type of object */
     trav_link_t *links;    /* array of possible link names */
     size_t      sizelinks; /* size of links array */
     size_t      nlinks;    /* number of links */
@@ -135,9 +145,8 @@ void trav_table_free(trav_table_t *table);
 
 void trav_table_addflags(unsigned *flags,
                          char *objname,
-                         H5G_obj_t type,
+                         h5trav_type_t type,
                          trav_table_t *table);
 
 #endif  /* H5TRAV_H__ */
-
 

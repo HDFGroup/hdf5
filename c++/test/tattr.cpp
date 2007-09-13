@@ -1026,7 +1026,9 @@ static void test_attr_dtype_shared()
 {
     int data=8;                 /* Data to write */
     int rdata=0;                /* Read read in */
+#ifndef H5_NO_DEPRECATED_SYMBOLS
     H5G_stat_t statbuf;         /* Object's information */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
     h5_stat_size_t filesize;             /* Size of file after modifications */
 
     // Output message about test being performed
@@ -1054,9 +1056,11 @@ static void test_attr_dtype_shared()
 	// Commit datatype to file
 	dtype.commit(fid1, TYPE1_NAME);
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 	// Check reference count on named datatype
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
 	verify_val((int)statbuf.nlink, 1, "DataType::getObjinfo", __LINE__, __FILE__);
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 	// Create dataspace for dataset
 	DataSpace dspace;
@@ -1070,16 +1074,20 @@ static void test_attr_dtype_shared()
 	// Create dataset
 	DataSet dset = fid1.createDataSet(DSET1_NAME, dtype, dspace);
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 	// Check reference count on named datatype
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
 	verify_val((int)statbuf.nlink, 2, "H5File::getObjinfo", __LINE__, __FILE__);
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 	// Create attribute on dataset
 	Attribute attr = dset.createAttribute(ATTR1_NAME,dtype,dspace);
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 	// Check reference count on named datatype
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
 	verify_val((int)statbuf.nlink, 3, "DataSet::getObjinfo", __LINE__, __FILE__);
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 	// Close attribute
 	attr.close();
@@ -1087,16 +1095,20 @@ static void test_attr_dtype_shared()
 	// Delete attribute
 	dset.removeAttr(ATTR1_NAME);
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 	// Check reference count on named datatype
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
 	verify_val((int)statbuf.nlink, 2, "DataSet::getObjinfo after DataSet::removeAttr", __LINE__, __FILE__);
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 	// Create attribute on dataset
 	attr = dset.createAttribute(ATTR1_NAME,dtype,dspace);
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 	// Check reference count on named datatype
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
 	verify_val((int)statbuf.nlink, 3, "DataSet::createAttribute", __LINE__, __FILE__);
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 	// Write data into the attribute
 	attr.write(PredType::NATIVE_INT,&data);
@@ -1125,18 +1137,22 @@ static void test_attr_dtype_shared()
 	delete attr2;
 	delete dset2;
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 	// Check reference count on named datatype
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
 	verify_val((int)statbuf.nlink, 3, "DataSet::openAttribute", __LINE__, __FILE__);
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 	// Unlink the dataset
 	fid1.unlink(DSET1_NAME);
 
         } // end of enclosing to test reference counts
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 	// Check reference count on named datatype
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
 	verify_val((int)statbuf.nlink, 1, "H5File::unlink", __LINE__, __FILE__);
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 	// Unlink the named datatype
 	fid1.unlink(TYPE1_NAME);

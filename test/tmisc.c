@@ -233,13 +233,8 @@ unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset
 #define MISC20_SPACE_RANK       2
 /* Make sure the product of the following 2 does not get too close to */
 /* 64 bits, risking an overflow. */
-#ifdef H5_HAVE_LARGE_HSIZET
 #define MISC20_SPACE_DIM0       (8*1024*1024*(uint64_t)1024)
 #define MISC20_SPACE_DIM1       ((256*1024*(uint64_t)1024)+1)
-#else /* H5_HAVE_LARGE_HSIZET */
-#define MISC20_SPACE_DIM0       (128*(uint64_t)1024)
-#define MISC20_SPACE_DIM1       ((4*(uint64_t)1024)+1)
-#endif /* H5_HAVE_LARGE_HSIZET */
 #define MISC20_SPACE2_DIM0      8
 #define MISC20_SPACE2_DIM1      4
 
@@ -610,7 +605,7 @@ test_misc3(void)
 
 /****************************************************************
 **
-**  test_misc4(): Test the that 'fileno' field in H5G_stat_t is
+**  test_misc4(): Test the that 'fileno' field in H5O_info_t is
 **      valid.
 **
 ****************************************************************/
@@ -618,11 +613,11 @@ static void
 test_misc4(void)
 {
     hid_t file1, file2, group1, group2, group3;
-    H5G_stat_t stat1, stat2, stat3;
+    H5O_info_t oinfo1, oinfo2, oinfo3;
     herr_t ret;
 
     /* Output message about test being performed */
-    MESSAGE(5, ("Testing fileno working in H5G_stat_t\n"));
+    MESSAGE(5, ("Testing fileno working in H5O_info_t\n"));
 
     file1 = H5Fcreate(MISC4_FILE_1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(file1, FAIL, "H5Fcreate");
@@ -643,21 +638,21 @@ test_misc4(void)
     CHECK(group3, FAIL, "H5Gcreate2");
 
     /* Get the stat information for each group */
-    ret = H5Gget_objinfo(file1,MISC4_GROUP_1,0,&stat1);
-    CHECK(ret, FAIL, "H5Gget_objinfo");
-    ret = H5Gget_objinfo(file1,MISC4_GROUP_2,0,&stat2);
-    CHECK(ret, FAIL, "H5Gget_objinfo");
-    ret = H5Gget_objinfo(file2,MISC4_GROUP_1,0,&stat3);
-    CHECK(ret, FAIL, "H5Gget_objinfo");
+    ret = H5Oget_info(file1, MISC4_GROUP_1, &oinfo1, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    ret = H5Oget_info(file1, MISC4_GROUP_2, &oinfo2, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    ret = H5Oget_info(file2, MISC4_GROUP_1, &oinfo3, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
 
     /* Verify that the fileno values are the same for groups from file1 */
-    VERIFY(stat1.fileno[0],stat2.fileno[0],"H5Gget_objinfo");
+    VERIFY(oinfo1.fileno, oinfo2.fileno, "H5Oget_info");
 
     /* Verify that the fileno values are not the same between file1 & file2 */
-    if(stat1.fileno[0]==stat3.fileno[0])
-        TestErrPrintf("Error on line %d: stat1.fileno==stat3.fileno\n",__LINE__);
-    if(stat2.fileno[0]==stat3.fileno[0])
-        TestErrPrintf("Error on line %d: stat1.fileno==stat3.fileno\n",__LINE__);
+    if(oinfo1.fileno == oinfo3.fileno)
+        TestErrPrintf("Error on line %d: oinfo1.fileno != oinfo3.fileno\n", __LINE__);
+    if(oinfo2.fileno == oinfo3.fileno)
+        TestErrPrintf("Error on line %d: oinfo2.fileno != oinfo3.fileno\n", __LINE__);
 
     /* Close the objects */
     ret = H5Gclose(group1);
@@ -2832,7 +2827,7 @@ test_misc17(void)
 
 /****************************************************************
 **
-**  test_misc18(): Test new object header information in H5G_stat_t
+**  test_misc18(): Test new object header information in H5O_info_t
 **  struct.
 **
 ****************************************************************/
@@ -2843,7 +2838,7 @@ test_misc18(void)
     hid_t sid;          /* 'Space ID */
     hid_t did1, did2;   /* Dataset IDs */
     hid_t aid;          /* Attribute ID */
-    H5G_stat_t statbuf; /* Information about object */
+    H5O_info_t oinfo;   /* Information about object */
     char attr_name[32]; /* Attribute name buffer */
     unsigned u;         /* Local index variable */
     herr_t ret;         /* Generic return value */
@@ -2861,34 +2856,26 @@ test_misc18(void)
     CHECK(did1, FAIL, "H5Dcreate");
 
     /* Get object information */
-    ret = H5Gget_objinfo(fid,MISC18_DSET1_NAME,0,&statbuf);
-    CHECK(ret, FAIL, "H5Gget_objinfo");
-    VERIFY(statbuf.ohdr.nmesgs, 6, "H5Gget_objinfo");
-    VERIFY(statbuf.ohdr.nchunks, 1, "H5Gget_objinfo");
-    VERIFY(statbuf.ohdr.size, 272, "H5Gget_objinfo");
-#ifdef H5_HAVE_LARGE_HSIZET
-    VERIFY(statbuf.ohdr.free, 152, "H5Gget_objinfo");
-#else /* H5_HAVE_LARGE_HSIZET */
-    VERIFY(statbuf.ohdr.free, 160, "H5Gget_objinfo");
-#endif /* H5_HAVE_LARGE_HSIZET */
-    VERIFY(statbuf.linklen, 0, "H5Gget_objinfo");
+    ret = H5Oget_info(fid, MISC18_DSET1_NAME, &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.hdr.nmesgs, 6, "H5Oget_info");
+    VERIFY(oinfo.hdr.nchunks, 1, "H5Oget_info");
+    VERIFY(oinfo.hdr.space.total, 272, "H5Oget_info");
+    VERIFY(oinfo.hdr.space.free, 152, "H5Oget_info");
+    VERIFY(oinfo.num_attrs, 0, "H5Oget_info");
 
     /* Create second dataset */
     did2 = H5Dcreate(fid, MISC18_DSET2_NAME, H5T_STD_U32LE, sid, H5P_DEFAULT);
     CHECK(did2, FAIL, "H5Screate_simple");
 
     /* Get object information */
-    ret = H5Gget_objinfo(fid,MISC18_DSET2_NAME,0,&statbuf);
-    CHECK(ret, FAIL, "H5Gget_objinfo");
-    VERIFY(statbuf.ohdr.nmesgs, 6, "H5Gget_objinfo");
-    VERIFY(statbuf.ohdr.nchunks, 1, "H5Gget_objinfo");
-    VERIFY(statbuf.ohdr.size, 272, "H5Gget_objinfo");
-#ifdef H5_HAVE_LARGE_HSIZET
-    VERIFY(statbuf.ohdr.free, 152, "H5Gget_objinfo");
-#else /* H5_HAVE_LARGE_HSIZET */
-    VERIFY(statbuf.ohdr.free, 160, "H5Gget_objinfo");
-#endif /* H5_HAVE_LARGE_HSIZET */
-    VERIFY(statbuf.linklen, 0, "H5Gget_objinfo");
+    ret = H5Oget_info(fid, MISC18_DSET2_NAME, &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.hdr.nmesgs, 6, "H5Oget_info");
+    VERIFY(oinfo.hdr.nchunks, 1, "H5Oget_info");
+    VERIFY(oinfo.hdr.space.total, 272, "H5Oget_info");
+    VERIFY(oinfo.hdr.space.free, 152, "H5Oget_info");
+    VERIFY(oinfo.num_attrs, 0, "H5Oget_info");
 
     /* Loop creating attributes on each dataset, flushing them to the file each time */
     for(u=0; u<10; u++) {
@@ -2897,14 +2884,14 @@ test_misc18(void)
 
         /* Create & close attribute on first dataset */
         aid = H5Acreate(did1, attr_name, H5T_STD_U32LE, sid, H5P_DEFAULT);
-        CHECK(aid, FAIL, "H5Gget_objinfo");
+        CHECK(aid, FAIL, "H5Acreate");
 
         ret = H5Aclose(aid);
         CHECK(ret, FAIL, "HAclose");
 
         /* Create & close attribute on second dataset */
         aid = H5Acreate(did2, attr_name, H5T_STD_U32LE, sid, H5P_DEFAULT);
-        CHECK(aid, FAIL, "H5Gget_objinfo");
+        CHECK(aid, FAIL, "H5Acreate");
 
         ret = H5Aclose(aid);
         CHECK(ret, FAIL, "HAclose");
@@ -2915,36 +2902,22 @@ test_misc18(void)
     } /* end for */
 
     /* Get object information for dataset #1 now */
-    ret = H5Gget_objinfo(fid,MISC18_DSET1_NAME,0,&statbuf);
-    CHECK(ret, FAIL, "H5Gget_objinfo");
-#ifdef H5_HAVE_LARGE_HSIZET
-    VERIFY(statbuf.ohdr.nmesgs, 24, "H5Gget_objinfo");
-    VERIFY(statbuf.ohdr.nchunks, 9, "H5Gget_objinfo");
-    VERIFY(statbuf.ohdr.size, 888, "H5Gget_objinfo");
-    VERIFY(statbuf.ohdr.free, 16, "H5Gget_objinfo");
-#else /* H5_HAVE_LARGE_HSIZET */
-    VERIFY(statbuf.ohdr.nmesgs, 26, "H5Gget_objinfo");
-    VERIFY(statbuf.ohdr.nchunks, 9, "H5Gget_objinfo");
-    VERIFY(statbuf.ohdr.size, 888, "H5Gget_objinfo");
-    VERIFY(statbuf.ohdr.free, 24, "H5Gget_objinfo");
-#endif /* H5_HAVE_LARGE_HSIZET */
-    VERIFY(statbuf.linklen, 0, "H5Gget_objinfo");
+    ret = H5Oget_info(fid, MISC18_DSET1_NAME, &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.hdr.nmesgs, 24, "H5Oget_info");
+    VERIFY(oinfo.hdr.nchunks, 9, "H5Oget_info");
+    VERIFY(oinfo.hdr.space.total, 888, "H5Oget_info");
+    VERIFY(oinfo.hdr.space.free, 16, "H5Oget_info");
+    VERIFY(oinfo.num_attrs, 10, "H5Oget_info");
 
     /* Get object information for dataset #2 now */
-    ret = H5Gget_objinfo(fid,MISC18_DSET2_NAME,0,&statbuf);
-    CHECK(ret, FAIL, "H5Gget_objinfo");
-#ifdef H5_HAVE_LARGE_HSIZET
-    VERIFY(statbuf.ohdr.nmesgs, 24, "H5Gget_objinfo");
-    VERIFY(statbuf.ohdr.nchunks, 9, "H5Gget_objinfo");
-    VERIFY(statbuf.ohdr.size, 888, "H5Gget_objinfo");
-    VERIFY(statbuf.ohdr.free, 16, "H5Gget_objinfo");
-#else /* H5_HAVE_LARGE_HSIZET */
-    VERIFY(statbuf.ohdr.nmesgs, 26, "H5Gget_objinfo");
-    VERIFY(statbuf.ohdr.nchunks, 9, "H5Gget_objinfo");
-    VERIFY(statbuf.ohdr.size, 888, "H5Gget_objinfo");
-    VERIFY(statbuf.ohdr.free, 24, "H5Gget_objinfo");
-#endif /* H5_HAVE_LARGE_HSIZET */
-    VERIFY(statbuf.linklen, 0, "H5Gget_objinfo");
+    ret = H5Oget_info(fid, MISC18_DSET2_NAME, &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.hdr.nmesgs, 24, "H5Oget_info");
+    VERIFY(oinfo.hdr.nchunks, 9, "H5Oget_info");
+    VERIFY(oinfo.hdr.space.total, 888, "H5Oget_info");
+    VERIFY(oinfo.hdr.space.free, 16, "H5Oget_info");
+    VERIFY(oinfo.num_attrs, 10, "H5Oget_info");
 
     /* Close second dataset */
     ret = H5Dclose(did2);
@@ -3426,10 +3399,8 @@ test_misc20(void)
     CHECK(dcpl, FAIL, "H5Pcreate");
 
     /* Try to use chunked storage for this dataset */
-#ifdef H5_HAVE_LARGE_HSIZET
-    ret = H5Pset_chunk(dcpl,rank,big_dims);
+    ret = H5Pset_chunk(dcpl, rank, big_dims);
     VERIFY(ret, FAIL, "H5Pset_chunk");
-#endif /* H5_HAVE_LARGE_HSIZET */
 
     /* Verify that the storage for the dataset is the correct size and hasn't
      * been truncated.
@@ -3440,11 +3411,11 @@ test_misc20(void)
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Create dataspace with _really_ big dimensions */
-    sid = H5Screate_simple(rank,big_dims,NULL);
+    sid = H5Screate_simple(rank, big_dims, NULL);
     CHECK(sid, FAIL, "H5Screate_simple");
 
     /* Make certain that the dataset's storage doesn't get allocated :-) */
-    ret = H5Pset_alloc_time(dcpl,H5D_ALLOC_TIME_LATE);
+    ret = H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_LATE);
     CHECK(ret, FAIL, "H5Pset_alloc_time");
 
     /* Create dataset with big dataspace */
@@ -3452,15 +3423,15 @@ test_misc20(void)
     CHECK(did, FAIL, "H5Dcreate");
 
     /* Close datasset */
-    ret=H5Dclose(did);
+    ret = H5Dclose(did);
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Close dataspace */
-    ret=H5Sclose(sid);
+    ret = H5Sclose(sid);
     CHECK(ret, FAIL, "H5Sclose");
 
     /* Create dataspace with small dimensions */
-    sid = H5Screate_simple(rank,small_dims,NULL);
+    sid = H5Screate_simple(rank, small_dims, NULL);
     CHECK(sid, FAIL, "H5Screate_simple");
 
     /* Create dataset with big dataspace */
@@ -3468,15 +3439,15 @@ test_misc20(void)
     CHECK(did, FAIL, "H5Dcreate");
 
     /* Close datasset */
-    ret=H5Dclose(did);
+    ret = H5Dclose(did);
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Close dataspace */
-    ret=H5Sclose(sid);
+    ret = H5Sclose(sid);
     CHECK(ret, FAIL, "H5Sclose");
 
     /* Close dataset creation property list */
-    ret=H5Pclose(dcpl);
+    ret = H5Pclose(dcpl);
     CHECK(ret, FAIL, "H5Pclose");
 
     /* Close file */
@@ -3494,15 +3465,15 @@ test_misc20(void)
     /* Get the layout version */
     ret = H5D_layout_version_test(did,&version);
     CHECK(ret, FAIL, "H5D_layout_version_test");
-    VERIFY(version,3,"H5D_layout_version_test");
+    VERIFY(version, 3, "H5D_layout_version_test");
 
     /* Get the layout contiguous storage size */
     ret = H5D_layout_contig_size_test(did,&contig_size);
     CHECK(ret, FAIL, "H5D_layout_contig_size_test");
-    VERIFY(contig_size, MISC20_SPACE_DIM0*MISC20_SPACE_DIM1*H5Tget_size(H5T_NATIVE_INT), "H5D_layout_contig_size_test");
+    VERIFY(contig_size, (MISC20_SPACE_DIM0 * MISC20_SPACE_DIM1 * H5Tget_size(H5T_NATIVE_INT)), "H5D_layout_contig_size_test");
 
     /* Close datasset */
-    ret=H5Dclose(did);
+    ret = H5Dclose(did);
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Open dataset with small dimensions */
@@ -3512,15 +3483,15 @@ test_misc20(void)
     /* Get the layout version */
     ret = H5D_layout_version_test(did,&version);
     CHECK(ret, FAIL, "H5D_layout_version_test");
-    VERIFY(version,3,"H5D_layout_version_test");
+    VERIFY(version, 3, "H5D_layout_version_test");
 
     /* Get the layout contiguous storage size */
     ret = H5D_layout_contig_size_test(did,&contig_size);
     CHECK(ret, FAIL, "H5D_layout_contig_size_test");
-    VERIFY(contig_size, MISC20_SPACE2_DIM0*MISC20_SPACE2_DIM1*H5Tget_size(H5T_NATIVE_INT), "H5D_layout_contig_size_test");
+    VERIFY(contig_size, (MISC20_SPACE2_DIM0 * MISC20_SPACE2_DIM1 * H5Tget_size(H5T_NATIVE_INT)), "H5D_layout_contig_size_test");
 
     /* Close datasset */
-    ret=H5Dclose(did);
+    ret = H5Dclose(did);
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Close file */
@@ -3530,7 +3501,7 @@ test_misc20(void)
     /* Verify that the storage size is computed correctly for older versions of layout info */
 
     /* Generate the correct name for the test file, by prepending the source path */
-    if (srcdir && ((HDstrlen(srcdir) + HDstrlen(MISC20_FILE_OLD) + 1) < sizeof(testfile))) {
+    if(srcdir && ((HDstrlen(srcdir) + HDstrlen(MISC20_FILE_OLD) + 1) < sizeof(testfile))) {
         HDstrcpy(testfile, srcdir);
         HDstrcat(testfile, "/");
     }
@@ -3539,30 +3510,26 @@ test_misc20(void)
     /*
      * Open the old file and the dataset and get old settings.
      */
-    fid =    H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
+    fid = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Open dataset with small dimensions */
     did = H5Dopen(fid, MISC20_DSET_NAME);
-#ifdef H5_HAVE_LARGE_HSIZET
     CHECK(did, FAIL, "H5Dopen");
 
     /* Get the layout version */
     ret = H5D_layout_version_test(did,&version);
     CHECK(ret, FAIL, "H5D_layout_version_test");
-    VERIFY(version,2,"H5D_layout_version_test");
+    VERIFY(version, 2, "H5D_layout_version_test");
 
     /* Get the layout contiguous storage size */
     ret = H5D_layout_contig_size_test(did,&contig_size);
     CHECK(ret, FAIL, "H5D_layout_contig_size_test");
-    VERIFY(contig_size, MISC20_SPACE_DIM0*MISC20_SPACE_DIM1*H5Tget_size(H5T_STD_I32LE), "H5D_layout_contig_size_test");
+    VERIFY(contig_size, (MISC20_SPACE_DIM0 * MISC20_SPACE_DIM1 * H5Tget_size(H5T_STD_I32LE)), "H5D_layout_contig_size_test");
 
     /* Close datasset */
-    ret=H5Dclose(did);
+    ret = H5Dclose(did);
     CHECK(ret, FAIL, "H5Dclose");
-#else /* H5_HAVE_LARGE_HSIZET */
-    VERIFY(did, FAIL, "H5Dopen");
-#endif /* H5_HAVE_LARGE_HSIZET */
 
     /* Close file */
     ret = H5Fclose(fid);
@@ -3797,12 +3764,12 @@ test_misc22(void)
 static void
 test_misc23(void)
 {
-    herr_t      status;
     hsize_t     dims[] = {10};
     hid_t       file_id=0, group_id=0, type_id=0, space_id=0,
                 tmp_id=0, create_id=H5P_DEFAULT, access_id=H5P_DEFAULT;
     char        objname[MISC23_NAME_BUF_SIZE];  /* Name of object */
-    H5G_stat_t  sb;
+    H5O_info_t  oinfo;
+    herr_t      status;
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing intermediate group creation\n"));
@@ -3869,7 +3836,7 @@ test_misc23(void)
     CHECK(tmp_id, FAIL, "H5Gcreate2");
 
     /* Query that the name of the new group is correct */
-    status = H5Iget_name( tmp_id, objname, (size_t)MISC23_NAME_BUF_SIZE );
+    status = H5Iget_name(tmp_id, objname, (size_t)MISC23_NAME_BUF_SIZE);
     CHECK(status, FAIL, "H5Iget_name");
     VERIFY_STR(objname, "/A/B01/grp", "H5Iget_name");
 
@@ -3880,9 +3847,9 @@ test_misc23(void)
     tmp_id = H5Gopen2(file_id, "/A/B01", H5P_DEFAULT);
     CHECK(tmp_id, FAIL, "H5Gopen2");
 
-    status = H5Gget_objinfo(tmp_id, ".", FALSE, &sb);
-    CHECK(status, FAIL, "H5Gget_objinfo");
-    VERIFY(sb.nlink,1,"H5Gget_objinfo");
+    status = H5Oget_info(tmp_id, ".", &oinfo, H5P_DEFAULT);
+    CHECK(status, FAIL, "H5Oget_info");
+    VERIFY(oinfo.rc, 1, "H5Oget_info");
 
     status = H5Gclose(tmp_id);
     CHECK(status, FAIL, "H5Gclose");
@@ -4841,7 +4808,7 @@ test_misc(void)
     test_misc1();       /* Test unlinking a dataset & immediately re-using name */
     test_misc2();       /* Test storing a VL-derived datatype in two different files */
     test_misc3();       /* Test reading from chunked dataset with non-zero fill value */
-    test_misc4();       /* Test retrieving the fileno for various objects with H5Gget_objinfo() */
+    test_misc4();       /* Test retrieving the fileno for various objects with H5Oget_info() */
     test_misc5();       /* Test several level deep nested compound & VL datatypes */
     test_misc6();       /* Test object header continuation code */
     test_misc7();       /* Test for sensible datatypes stored on disk */
@@ -4855,7 +4822,7 @@ test_misc(void)
     test_misc15();      /* Test that checking a file's access property list more than once works */
     test_misc16();      /* Test array of fixed-length string */
     test_misc17();      /* Test array of ASCII character */
-    test_misc18();      /* Test new object header information in H5G_stat_t struct */
+    test_misc18();      /* Test new object header information in H5O_info_t struct */
     test_misc19();      /* Test incrementing & decrementing ref count on IDs */
     test_misc20();      /* Test problems with truncated dimensions in version 2 of storage layout message */
 #if defined H5_HAVE_FILTER_SZIP

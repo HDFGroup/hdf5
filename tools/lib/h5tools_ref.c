@@ -49,49 +49,8 @@ extern int   d_status;
 
 static int ref_path_table_put(const char *, haddr_t objno);
 static hbool_t ref_path_table_find(haddr_t objno);
-
-/*-------------------------------------------------------------------------
- * Function:    init_ref_path_table
- *
- * Purpose:     Enter the root group ("/") into the path table
- *
- * Return:      Non-negative on success, negative on failure
- *
- * Programmer:  Quincey Koziol
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-int
-init_ref_path_table(hid_t fid)
-{
-    H5G_stat_t sb;
-    haddr_t objno;              /* Compact form of object's location */
-    char *root_path;
-
-    /* Set file ID for later queries (XXX: this should be fixed) */
-    thefile = fid;
-
-    /* Create skip list to store reference path information */
-    if((ref_path_table = H5SL_create(H5SL_TYPE_HADDR, 0.5, (size_t)16))==NULL)
-    return (-1);
-
-    if((root_path = HDstrdup("/")) == NULL)
-    return (-1);
-
-    if(H5Gget_objinfo(fid, "/", TRUE, &sb)<0) {
-    /* fatal error? */
-    HDfree(root_path);
-    return (-1);
-    }
-    objno = (haddr_t)sb.objno[0] | ((haddr_t)sb.objno[1] << (8 * sizeof(long)));
-
-    /* Insert into table (takes ownership of path) */
-    ref_path_table_put(root_path, objno);
-
-    return(0);
-}
+static herr_t fill_ref_path_table_cb(hid_t group, const char *obj_name,
+    const H5L_info_t *linfo, void *op_data);
 
 /*-------------------------------------------------------------------------
  * Function:    free_ref_path_info
@@ -158,35 +117,31 @@ term_ref_path_table(void)
 haddr_t
 ref_path_table_lookup(const char *thepath)
 {
-    H5G_stat_t  sb;
-    haddr_t objno;              /* Compact form of object's location */
+    H5O_info_t  oi;
 
-    /* Check for external link first, so we don't return the OID of an object in another file */
-    if(H5Gget_objinfo(thefile, thepath, FALSE, &sb)<0)
-    return HADDR_UNDEF;
-    if(sb.type == H5G_LINK) {
-        /* Get object ID for object at path */
-        /* (If the object is not a soft link, we've already retrieved the
-         *      correct information and don't have to perform this call. -QAK
-         */
-        if(H5Gget_objinfo(thefile, thepath, TRUE, &sb)<0)
-            /*  fatal error ? */
+    /* Allow lookups on the root group, even though it doesn't have any link info */
+    if(HDstrcmp(thepath, "/")) {
+        H5L_info_t  li;
+
+        /* Check for external link first, so we don't return the OID of an object in another file */
+        if(H5Lget_info(thefile, thepath, &li, H5P_DEFAULT) < 0)
             return HADDR_UNDEF;
-    } else if(sb.type == H5G_UDLINK)
-    {
-        /* UD links can't be followed, so they always "dangle" like
-         * soft links.
-         */
-        return HADDR_UNDEF;
-    } /* end if */
-    objno = (haddr_t)sb.objno[0] | ((haddr_t)sb.objno[1] << (8 * sizeof(long)));
 
+        /* UD links can't be followed, so they always "dangle" like soft links.  */
+        if(li.type >= H5L_TYPE_UD_MIN)
+            return HADDR_UNDEF;
+    } /* end if */
+
+    /* Get the object info now */
+    /* (returns failure for dangling soft links) */
+    if(H5Oget_info(thefile, thepath, &oi, H5P_DEFAULT) < 0)
+        return HADDR_UNDEF;
 
     /* All existing objects in the file had better be in the table */
-    HDassert(ref_path_table_find(objno));
+    HDassert(ref_path_table_find(oi.addr));
 
     /* Return OID */
-    return(objno);
+    return(oi.addr);
 }
 
 /*-------------------------------------------------------------------------
@@ -325,6 +280,65 @@ lookup_ref_path(haddr_t ref)
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    fill_ref_path_table_cb
+ *
+ * Purpose:     Called by interator to create references for
+ *              all objects and enter them in the table.
+ *
+ * Return:      Error status.
+ *
+ * Programmer:  REMcG
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+fill_ref_path_table_cb(hid_t group, const char *obj_name, const H5L_info_t *linfo,
+    void *op_data)
+{
+    if(linfo->type == H5L_TYPE_HARD) {
+        H5O_info_t              oinfo;
+
+        H5Oget_info(group, obj_name, &oinfo, H5P_DEFAULT);
+
+        /* Check if the object is already in the path table */
+        if(!ref_path_table_find(oinfo.addr)) {
+            const char *obj_prefix = (const char *)op_data;
+            size_t                  tmp_len;
+            char                   *thepath;
+
+            /* Compute length for this object's path */
+            tmp_len = HDstrlen(obj_prefix) + HDstrlen(obj_name) + 2;
+
+            /* Allocate room for the path for this object */
+            if((thepath = (char *)HDmalloc(tmp_len)) == NULL)
+                return FAIL;
+
+            /* Build the name for this object */
+            HDstrcpy(thepath, obj_prefix);
+            HDstrcat(thepath, "/");
+            HDstrcat(thepath, obj_name);
+
+            /* Insert the object into the path table (takes ownership of the path) */
+            ref_path_table_put(thepath, oinfo.addr);
+
+            if(oinfo.type == H5O_TYPE_GROUP) {
+                /* Iterate over objects in this group, using this group's
+                 * name as their prefix
+                 */
+                if(H5Literate(group, obj_name, H5_INDEX_NAME, H5_ITER_INC, NULL, fill_ref_path_table_cb, thepath, H5P_DEFAULT) < 0) {
+                    error_msg(progname, "unable to dump group \"%s\"\n", thepath);
+                    d_status = EXIT_FAILURE;
+                } /* end if */
+            } /* end if */
+        } /* end if */
+    } /* end if */
+
+    return 0;
+}
+
+/*-------------------------------------------------------------------------
  * Function:    fill_ref_path_table
  *
  * Purpose:     Called by interator to create references for
@@ -339,46 +353,32 @@ lookup_ref_path(haddr_t ref)
  *-------------------------------------------------------------------------
  */
 herr_t
-fill_ref_path_table(hid_t group, const char *obj_name, const H5L_info_t UNUSED *linfo,
-    void *op_data)
+fill_ref_path_table(hid_t fid)
 {
-    const char *obj_prefix = (const char *)op_data;
-    H5G_stat_t              statbuf;
-    haddr_t objno;              /* Compact form of object's location */
+    H5O_info_t              oinfo;
+    char                   *root_path;
 
-    H5Gget_objinfo(group, obj_name, FALSE, &statbuf);
-    objno = (haddr_t)statbuf.objno[0] | ((haddr_t)statbuf.objno[1] << (8 * sizeof(long)));
+    /* Set file ID for later queries (XXX: this should be fixed) */
+    thefile = fid;
 
-    /* Check if the object is in the path table */
-    if (!ref_path_table_find(objno)) {
-        size_t                  tmp_len;
-        char                   *thepath;
+    /* Create skip list to store reference path information */
+    if((ref_path_table = H5SL_create(H5SL_TYPE_HADDR, 0.5, (size_t)16))==NULL)
+        return (-1);
 
-        /* Compute length for this object's path */
-        tmp_len = HDstrlen(obj_prefix) + HDstrlen(obj_name) + 2;
+    /* Build the name for root group */
+    root_path = HDstrdup("/");
 
-        /* Allocate room for the path for this object */
-        if ((thepath = (char *) HDmalloc(tmp_len)) == NULL)
-            return FAIL;
+    /* Get info for root group */
+    H5Oget_info(fid, root_path, &oinfo, H5P_DEFAULT);
 
-        /* Build the name for this object */
-        HDstrcpy(thepath, obj_prefix);
-        HDstrcat(thepath, "/");
-        HDstrcat(thepath, obj_name);
+    /* Insert the root group into the path table (takes ownership of path) */
+    ref_path_table_put(root_path, oinfo.addr);
 
-        /* Insert the object into the path table */
-        ref_path_table_put(thepath, objno);
-
-        if(statbuf.type == H5G_GROUP) {
-            /* Iterate over objects in this group, using this group's
-             * name as their prefix
-             */
-            if(H5Literate(group, obj_name, H5_INDEX_NAME, H5_ITER_INC, NULL, fill_ref_path_table, thepath, H5P_DEFAULT) < 0) {
-                error_msg(progname, "unable to dump group \"%s\"\n", obj_name);
-                d_status = EXIT_FAILURE;
-            }
-        }
-    }
+    /* Iterate over objects in this file */
+    if(H5Literate(fid, root_path, H5_INDEX_NAME, H5_ITER_INC, NULL, fill_ref_path_table_cb, (void *)"", H5P_DEFAULT) < 0) {
+        error_msg(progname, "unable to dump root group\n");
+        d_status = EXIT_FAILURE;
+    } /* end if */
 
     return 0;
 }
