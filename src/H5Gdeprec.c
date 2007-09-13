@@ -138,6 +138,8 @@ H5G_init_deprec_interface(void)
  *		group. If a non-positive value is supplied for the SIZE_HINT
  *		then a default size is chosen.
  *
+ * Note:	Deprecated in favor of H5Gcreate2
+ *
  * Return:	Success:	The object ID of a new, empty group open for
  *				writing.  Call H5Gclose() when finished with
  *				the group.
@@ -220,6 +222,8 @@ done:
  *
  * Purpose:	Opens an existing group for modification.  When finished,
  *		call H5Gclose() to close it and release resources.
+ *
+ * Note:	Deprecated in favor of H5Gopen2
  *
  * Return:	Success:	Object ID of the group.
  *
@@ -581,59 +585,7 @@ H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *buf/*out*/)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_linkval() */
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
-
-/*-------------------------------------------------------------------------
- * Function:	H5Gget_objname_by_idx
- *
- * Purpose:     Returns the name of objects in the group by giving index.
- *              If `name' is non-NULL then write up to `size' bytes into that
- *              buffer and always return the length of the entry name.
- *              Otherwise `size' is ignored and the function does not store the name,
- *              just returning the number of characters required to store the name.
- *              If an error occurs then the buffer pointed to by `name' (NULL or non-NULL)
- *              is unchanged and the function returns a negative value.
- *              If a zero is returned for the name's length, then there is no name
- *              associated with the ID.
- *
- * Note:	Deprecated in favor of H5Lget_name_by_idx
- *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
- *
- * Programmer:	Raymond Lu
- *	        Nov 20, 2002
- *
- *-------------------------------------------------------------------------
- */
-ssize_t
-H5Gget_objname_by_idx(hid_t loc_id, hsize_t idx, char *name, size_t size)
-{
-    H5G_loc_t		loc;            /* Object location */
-    H5O_type_t          obj_type;       /* Type of object at location */
-    ssize_t		ret_value;
-
-    FUNC_ENTER_API(H5Gget_objname_by_idx, FAIL)
-    H5TRACE4("Zs", "ih*sz", loc_id, idx, name, size);
-
-    /* Check args */
-    if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location ID")
-    if(H5O_obj_type(loc.oloc, &obj_type, H5AC_ind_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get object type")
-    if(obj_type != H5O_TYPE_GROUP)
-        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a group")
-
-    /* Call internal function */
-    if((ret_value = H5G_obj_get_name_by_idx(loc.oloc, H5_INDEX_NAME, H5_ITER_INC, idx, name, size, H5AC_ind_dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "can't get object name")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Gget_objname_by_idx() */
-
-#ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*-------------------------------------------------------------------------
  * Function:	H5Gset_comment
@@ -643,7 +595,7 @@ done:
  *		one comment at a time.  Passing NULL for the COMMENT argument
  *		will remove the comment property from the object.
  *
- * Note:	Deprecated in favor of using attributes on object
+ * Note:	Deprecated in favor of H5Oset_comment
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -684,7 +636,7 @@ done:
  *		have a comment value then no bytes are copied to the BUF
  *		buffer.
  *
- * Note:	Deprecated in favor of using attributes on group
+ * Note:	Deprecated in favor of H5Oget_comment
  *
  * Return:	Success:	Number of characters in the comment counting
  *				the null terminator.  The value returned may
@@ -1027,6 +979,56 @@ H5G_get_objinfo(const H5G_loc_t *loc, const char *name, hbool_t follow_link,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_get_objinfo() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Gget_objname_by_idx
+ *
+ * Purpose:     Returns the name of objects in the group by giving index.
+ *              If `name' is non-NULL then write up to `size' bytes into that
+ *              buffer and always return the length of the entry name.
+ *              Otherwise `size' is ignored and the function does not store the name,
+ *              just returning the number of characters required to store the name.
+ *              If an error occurs then the buffer pointed to by `name' (NULL or non-NULL)
+ *              is unchanged and the function returns a negative value.
+ *              If a zero is returned for the name's length, then there is no name
+ *              associated with the ID.
+ *
+ * Note:	Deprecated in favor of H5Lget_name_by_idx
+ *
+ * Return:	Success:        Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Raymond Lu
+ *	        Nov 20, 2002
+ *
+ *-------------------------------------------------------------------------
+ */
+ssize_t
+H5Gget_objname_by_idx(hid_t loc_id, hsize_t idx, char *name, size_t size)
+{
+    H5G_loc_t		loc;            /* Object location */
+    H5O_type_t          obj_type;       /* Type of object at location */
+    ssize_t		ret_value;
+
+    FUNC_ENTER_API(H5Gget_objname_by_idx, FAIL)
+    H5TRACE4("Zs", "ih*sz", loc_id, idx, name, size);
+
+    /* Check args */
+    if(H5G_loc(loc_id, &loc) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location ID")
+    if(H5O_obj_type(loc.oloc, &obj_type, H5AC_ind_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get object type")
+    if(obj_type != H5O_TYPE_GROUP)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a group")
+
+    /* Call internal function */
+    if((ret_value = H5G_obj_get_name_by_idx(loc.oloc, H5_INDEX_NAME, H5_ITER_INC, idx, name, size, H5AC_ind_dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "can't get object name")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Gget_objname_by_idx() */
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 

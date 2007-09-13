@@ -767,8 +767,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5G_obj_get_name_by_idx
  *
- * Purpose:     Private function for H5Gget_objname_by_idx.
- *              Returns the name of objects in the group by giving index.
+ * Purpose:     Returns the name of link in a group by giving index.
  *
  * Return:	Success:        Non-negative, length of name
  *		Failure:	Negative

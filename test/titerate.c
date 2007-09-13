@@ -203,60 +203,56 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     file = H5Fopen(DATAFILE, H5F_ACC_RDONLY, fapl);
     CHECK(file, FAIL, "H5Fopen");
 
-    /* These two functions, H5Gget_objtype_by_idx and H5Gget_objname_by_idx, actually
+    /* These two functions, H5Gget_objtype_by_idx and H5Lget_name_by_idx, actually
      * iterate through B-tree for group members in internal library design.
      */
-    {
-        root_group = H5Gopen2(file, "/", H5P_DEFAULT);
-        CHECK(root_group, FAIL, "H5Gopen2");
+    root_group = H5Gopen2(file, "/", H5P_DEFAULT);
+    CHECK(root_group, FAIL, "H5Gopen2");
 
-        ret = H5Gget_info(root_group, ".", &ginfo, H5P_DEFAULT);
-        CHECK(ret, FAIL, "H5Gget_info");
-        VERIFY(ginfo.nlinks, (NDATASETS + 2), "H5Gget_info");
+    ret = H5Gget_info(root_group, ".", &ginfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Gget_info");
+    VERIFY(ginfo.nlinks, (NDATASETS + 2), "H5Gget_info");
 
-        for(i = 0; i< (int)ginfo.nlinks; i++) {
-            H5G_obj_t obj_type;         /* Type of object in file */
+    for(i = 0; i< (int)ginfo.nlinks; i++) {
+        H5G_obj_t obj_type;         /* Type of object in file */
 
-            ret = (herr_t)H5Gget_objname_by_idx(root_group, (hsize_t)i, dataset_name, (size_t)NAMELEN);
-            CHECK(ret, FAIL, "H5Gget_objname_by_idx");
+        ret = (herr_t)H5Lget_name_by_idx(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i, dataset_name, (size_t)NAMELEN, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Lget_name_by_idx");
 
-            obj_type = H5Gget_objtype_by_idx(root_group, (hsize_t)i);
-            CHECK(obj_type, H5G_UNKNOWN, "H5Gget_objtype_by_idx");
-        } /* end for */
+        obj_type = H5Gget_objtype_by_idx(root_group, (hsize_t)i);
+        CHECK(obj_type, H5G_UNKNOWN, "H5Gget_objtype_by_idx");
+    } /* end for */
 
-        H5E_BEGIN_TRY {
-            ret = (herr_t)H5Gget_objname_by_idx(root_group, (hsize_t)(NDATASETS+3), dataset_name, (size_t)NAMELEN);
-        } H5E_END_TRY;
-        VERIFY(ret, FAIL, "H5Gget_objname_by_idx");
+    H5E_BEGIN_TRY {
+        ret = (herr_t)H5Lget_name_by_idx(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)(NDATASETS+3), dataset_name, (size_t)NAMELEN, H5P_DEFAULT);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Lget_name_by_idx");
 
-        ret = H5Gclose(root_group);
-        CHECK(ret, FAIL, "H5Gclose");
-    }
+    ret = H5Gclose(root_group);
+    CHECK(ret, FAIL, "H5Gclose");
 
-    /* These two functions, H5Gget_objtype_by_idx and H5Gget_objname_by_idx, actually
+    /* These two functions, H5Gget_objtype_by_idx and H5Lget_name_by_idx, actually
      * iterate through B-tree for group members in internal library design.
      *  (Same as test above, but with the file ID instead of opening the root group)
      */
-    {
-        ret = H5Gget_info(file, ".", &ginfo, H5P_DEFAULT);
-        CHECK(ret, FAIL, "H5Gget_info");
-        VERIFY(ginfo.nlinks, NDATASETS + 2, "H5Gget_info");
+    ret = H5Gget_info(file, ".", &ginfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Gget_info");
+    VERIFY(ginfo.nlinks, NDATASETS + 2, "H5Gget_info");
 
-        for(i = 0; i< (int)ginfo.nlinks; i++) {
-            H5G_obj_t obj_type;         /* Type of object in file */
+    for(i = 0; i< (int)ginfo.nlinks; i++) {
+        H5G_obj_t obj_type;         /* Type of object in file */
 
-            ret = (herr_t)H5Gget_objname_by_idx(file, (hsize_t)i, dataset_name, (size_t)NAMELEN);
-            CHECK(ret, FAIL, "H5Gget_objname_by_idx");
+        ret = (herr_t)H5Lget_name_by_idx(file, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i, dataset_name, (size_t)NAMELEN, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Lget_name_by_idx");
 
-            obj_type = H5Gget_objtype_by_idx(file, (hsize_t)i);
-            CHECK(obj_type, H5G_UNKNOWN, "H5Gget_objtype_by_idx");
-        }
-
-        H5E_BEGIN_TRY {
-            ret = (herr_t)H5Gget_objname_by_idx(file, (hsize_t)(NDATASETS + 3), dataset_name, (size_t)NAMELEN);
-        } H5E_END_TRY;
-        VERIFY(ret, FAIL, "H5Gget_objname_by_idx");
+        obj_type = H5Gget_objtype_by_idx(file, (hsize_t)i);
+        CHECK(obj_type, H5G_UNKNOWN, "H5Gget_objtype_by_idx");
     }
+
+    H5E_BEGIN_TRY {
+        ret = (herr_t)H5Lget_name_by_idx(file, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)(NDATASETS + 3), dataset_name, (size_t)NAMELEN, H5P_DEFAULT);
+    } H5E_END_TRY;
+    VERIFY(ret, FAIL, "H5Lget_name_by_idx");
 
     /* Test invalid indices for starting iteration */
     info.command = RET_ZERO;
@@ -772,7 +768,7 @@ static void test_grp_memb_funcs(hid_t fapl)
     file = H5Fopen(DATAFILE, H5F_ACC_RDONLY, fapl);
     CHECK(file, FAIL, "H5Fopen");
 
-    /* These two functions, H5Gget_objtype_by_idx and H5Gget_objname_by_idx, actually
+    /* These two functions, H5Gget_objtype_by_idx and H5Lget_name_by_idx, actually
      * iterate through B-tree for group members in internal library design.
      */
     root_group = H5Gopen2(file, "/", H5P_DEFAULT);
@@ -786,14 +782,14 @@ static void test_grp_memb_funcs(hid_t fapl)
         H5G_obj_t obj_type;         /* Type of object in file */
 
         /* Test with NULL for name, to query length */
-        name_len = H5Gget_objname_by_idx(root_group, (hsize_t)i, NULL, (size_t)NAMELEN);
-        CHECK(name_len, FAIL, "H5Gget_objname_by_idx");
+        name_len = H5Lget_name_by_idx(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i, NULL, (size_t)NAMELEN, H5P_DEFAULT);
+        CHECK(name_len, FAIL, "H5Lget_name_by_idx");
 
-        ret = (herr_t)H5Gget_objname_by_idx(root_group, (hsize_t)i, dataset_name, (size_t)(name_len + 1));
-        CHECK(ret, FAIL, "H5Gget_objname_by_idx");
+        ret = (herr_t)H5Lget_name_by_idx(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i, dataset_name, (size_t)(name_len + 1), H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Lget_name_by_idx");
 
         /* Double-check that the length is the same */
-        VERIFY(ret, name_len, "H5Gget_objname_by_idx");
+        VERIFY(ret, name_len, "H5Lget_name_by_idx");
 
         /* Keep a copy of the dataset names around for later */
         obj_names[i] = HDstrdup(dataset_name);
@@ -803,17 +799,17 @@ static void test_grp_memb_funcs(hid_t fapl)
         CHECK(obj_type, H5G_UNKNOWN, "H5Gget_objtype_by_idx");
 
         if(!HDstrcmp(dataset_name, "grp"))
-            VERIFY(obj_type, H5G_GROUP, "H5Gget_objname_by_idx");
+            VERIFY(obj_type, H5G_GROUP, "H5Lget_name_by_idx");
         if(!HDstrcmp(dataset_name, "dtype"))
-            VERIFY(obj_type, H5G_TYPE, "H5Gget_objname_by_idx");
+            VERIFY(obj_type, H5G_TYPE, "H5Lget_name_by_idx");
         if(!HDstrncmp(dataset_name, "Dataset", (size_t)7))
-            VERIFY(obj_type, H5G_DATASET, "H5Gget_objname_by_idx");
+            VERIFY(obj_type, H5G_DATASET, "H5Lget_name_by_idx");
     } /* end for */
 
     H5E_BEGIN_TRY {
-        ret = (herr_t)H5Gget_objname_by_idx(root_group, (hsize_t)(NDATASETS+3), dataset_name, (size_t)NAMELEN);
+        ret = (herr_t)H5Lget_name_by_idx(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)(NDATASETS+3), dataset_name, (size_t)NAMELEN, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(ret, FAIL, "H5Gget_objname_by_idx");
+    VERIFY(ret, FAIL, "H5Lget_name_by_idx");
 
     /* Sort the dataset names */
     HDqsort(obj_names, (size_t)(NDATASETS + 2), sizeof(char *), iter_strcmp);
@@ -879,21 +875,21 @@ static void test_links(hid_t fapl)
     CHECK(ret, FAIL, "H5Gget_info");
     VERIFY(ginfo.nlinks, 3, "H5Gget_info");
 
-    /* Test these two functions, H5Gget_objtype_by_idx and H5Gget_objname_by_idx */
+    /* Test these two functions, H5Gget_objtype_by_idx and H5Lget_name_by_idx */
     for(i = 0; i < ginfo.nlinks; i++) {
         /* Get object name */
-        name_len = H5Gget_objname_by_idx(gid, i, obj_name, (size_t)NAMELEN);
-        CHECK(name_len, FAIL, "H5Gget_objname_by_idx");
+        name_len = H5Lget_name_by_idx(gid, ".", H5_INDEX_NAME, H5_ITER_INC, i, obj_name, (size_t)NAMELEN, H5P_DEFAULT);
+        CHECK(name_len, FAIL, "H5Lget_name_by_idx");
 
         obj_type = H5Gget_objtype_by_idx(gid, i);
         CHECK(obj_type, H5G_UNKNOWN, "H5Gget_objtype_by_idx");
 
         if(!HDstrcmp(obj_name, "g1.1"))
-            VERIFY(obj_type, H5G_GROUP, "H5Gget_objname_by_idx");
+            VERIFY(obj_type, H5G_GROUP, "H5Lget_name_by_idx");
         else if(!HDstrcmp(obj_name, "hardlink"))
-            VERIFY(obj_type, H5G_GROUP, "H5Gget_objname_by_idx");
+            VERIFY(obj_type, H5G_GROUP, "H5Lget_name_by_idx");
         else if(!HDstrcmp(obj_name, "softlink"))
-            VERIFY(obj_type, H5G_LINK, "H5Gget_objname_by_idx");
+            VERIFY(obj_type, H5G_LINK, "H5Lget_name_by_idx");
         else
             CHECK(0, 0, "unknown object name");
     }

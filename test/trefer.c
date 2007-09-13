@@ -1069,9 +1069,9 @@ test_reference_group(void)
     CHECK(ret, FAIL, "H5Gget_info");
     VERIFY(ginfo.nlinks, 3, "H5Gget_info");
 
-    ret = H5Gget_objname_by_idx(gid, (hsize_t)0, objname, (size_t)NAME_SIZE);
-    CHECK(ret, FAIL, "H5Gget_objname_by_idx");
-    VERIFY_STR(objname, DSETNAME2, "H5Gget_objname_by_idx");
+    ret = H5Lget_name_by_idx(gid, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)0, objname, (size_t)NAME_SIZE, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Lget_name_by_idx");
+    VERIFY_STR(objname, DSETNAME2, "H5Lget_name_by_idx");
 
     objtype = H5Gget_objtype_by_idx(gid, (hsize_t)0);
     VERIFY(objtype, H5G_DATASET, "H5Gget_objtype_by_idx");

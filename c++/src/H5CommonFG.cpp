@@ -1010,16 +1010,16 @@ hsize_t CommonFG::getNumObjs() const
 //--------------------------------------------------------------------------
 H5std_string CommonFG::getObjnameByIdx(hsize_t idx) const
 {
-    // call H5Gget_objname_by_idx with name as NULL to get its length
-    ssize_t name_len = H5Gget_objname_by_idx(getLocId(), idx, NULL, 0);
+    // call H5Lget_name_by_idx with name as NULL to get its length
+    ssize_t name_len = H5Lget_name_by_idx(getLocId(), ".", H5_INDEX_NAME, H5_ITER_INC, idx, NULL, 0, H5P_DEFAULT);
     if(name_len < 0)
     {
-      throwException("getObjnameByIdx", "H5Gget_objname_by_idx failed");
+      throwException("getObjnameByIdx", "H5Lget_name_by_idx failed");
     }
 
     // now, allocate C buffer to get the name
     char* name_C = new char[name_len+1];
-    name_len = H5Gget_objname_by_idx(getLocId(), idx, name_C, name_len+1);
+    name_len = H5Lget_name_by_idx(getLocId(), ".", H5_INDEX_NAME, H5_ITER_INC, idx, name_C, name_len+1, H5P_DEFAULT);
 
     // clean up and return the string
     H5std_string name = H5std_string(name_C);
@@ -1047,10 +1047,10 @@ H5std_string CommonFG::getObjnameByIdx(hsize_t idx) const
 ssize_t CommonFG::getObjnameByIdx(hsize_t idx, H5std_string& name, size_t size) const
 {
    char* name_C = new char[size];
-   ssize_t name_len = H5Gget_objname_by_idx(getLocId(), idx, name_C, size);
+   ssize_t name_len = H5Lget_name_by_idx(getLocId(), ".", H5_INDEX_NAME, H5_ITER_INC, idx, name_C, size, H5P_DEFAULT);
    if(name_len < 0)
    {
-      throwException("getObjnameByIdx", "H5Gget_objname_by_idx failed");
+      throwException("getObjnameByIdx", "H5Lget_name_by_idx failed");
    }
    name = H5std_string(name_C);
    delete []name_C;

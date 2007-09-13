@@ -1480,7 +1480,7 @@ test_compat(hid_t fapl, hbool_t new_format)
     H5G_stat_t	sb_hard1, sb_hard2, sb_soft1;
     hsize_t num_objs;           /* Number of objects in a group */
     char filename[1024];
-    char linkval[1024];
+    char tmpstr[1024];
 
     if(new_format)
         TESTING("backwards compatibility (w/new group format)")
@@ -1498,13 +1498,20 @@ test_compat(hid_t fapl, hbool_t new_format)
 
     /* Test H5Gset and get comment */
     if(H5Gset_comment(file_id, "group1", "comment") < 0) FAIL_STACK_ERROR
-    if(H5Gget_comment(file_id, "group1", sizeof(linkval), linkval) < 0) FAIL_STACK_ERROR
-    if(HDstrcmp(linkval, "comment")) TEST_ERROR
+    if(H5Gget_comment(file_id, "group1", sizeof(tmpstr), tmpstr) < 0) FAIL_STACK_ERROR
+    if(HDstrcmp(tmpstr, "comment")) TEST_ERROR
 
     /* Create links using H5Glink and H5Glink2 */
     if(H5Glink(file_id, H5G_LINK_HARD, "group2", "group1/link_to_group2") < 0) FAIL_STACK_ERROR
     if(H5Glink2(file_id, "group1", H5G_LINK_HARD, group2_id, "link_to_group1") < 0) FAIL_STACK_ERROR
     if(H5Glink2(file_id, "link_to_group1", H5G_LINK_SOFT, H5G_SAME_LOC, "group2/soft_link_to_group1") < 0) FAIL_STACK_ERROR
+
+    /* Test getting the names for objects */
+    if(H5Gget_objname_by_idx(group1_id, (hsize_t)0, tmpstr, sizeof(tmpstr)) < 0) FAIL_STACK_ERROR
+    if(HDstrcmp(tmpstr, "link_to_group2")) TEST_ERROR
+    H5E_BEGIN_TRY {
+        if(H5Gget_objname_by_idx(group1_id, (hsize_t)1, tmpstr, sizeof(tmpstr)) >= 0) TEST_ERROR
+    } H5E_END_TRY;
 
     /* Test getting the number of objects in a group */
     if(H5Gget_num_objs(file_id, &num_objs) < 0) FAIL_STACK_ERROR
@@ -1539,8 +1546,8 @@ test_compat(hid_t fapl, hbool_t new_format)
     if(sb_soft1.type != H5G_LINK) TEST_ERROR
     if(sb_soft1.linklen != HDstrlen("link_to_group1") + 1) TEST_ERROR
 
-    if(H5Gget_linkval(group2_id, "soft_link_to_group1", sb_soft1.linklen, linkval) < 0) FAIL_STACK_ERROR
-    if(HDstrcmp("link_to_group1", linkval)) TEST_ERROR
+    if(H5Gget_linkval(group2_id, "soft_link_to_group1", sb_soft1.linklen, tmpstr) < 0) FAIL_STACK_ERROR
+    if(HDstrcmp("link_to_group1", tmpstr)) TEST_ERROR
 
 
     /* Test H5Gmove and H5Gmove2 */

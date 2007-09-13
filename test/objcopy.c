@@ -1269,8 +1269,8 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
         /* Loop over contents of groups */
         for(idx = 0; idx < ginfo.nlinks; idx++) {
             /* Check name of objects */
-            if(H5Gget_objname_by_idx(gid, idx, objname, (size_t)NAME_BUF_SIZE) < 0) TEST_ERROR
-            if(H5Gget_objname_by_idx(gid2, idx, objname2, (size_t)NAME_BUF_SIZE) < 0) TEST_ERROR
+            if(H5Lget_name_by_idx(gid, ".", H5_INDEX_NAME, H5_ITER_INC, idx, objname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
+            if(H5Lget_name_by_idx(gid2, ".", H5_INDEX_NAME, H5_ITER_INC, idx, objname2, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
             if(HDstrcmp(objname, objname2)) TEST_ERROR
 
             /* Check type of objects */
