@@ -452,19 +452,11 @@ void IdComponent::dereference(IdComponent& obj, void* ref)
 //--------------------------------------------------------------------------
 H5G_obj_t IdComponent::p_get_obj_type(void *ref, H5R_type_t ref_type) const
 {
-#ifdef H5_WANT_H5_V1_4_COMPAT
-   H5G_obj_t obj_type = H5Rget_object_type(id, ref);
-#else
    H5G_obj_t obj_type = H5Rget_obj_type(id, ref_type, ref);
-#endif
 
    if (obj_type == H5G_UNKNOWN)
    {
-#ifdef H5_WANT_H5_V1_4_COMPAT
-      throw IdComponentException("", "H5Rget_object_type failed");
-#else
       throw IdComponentException("", "H5Rget_obj_type failed");
-#endif
    }
    return(obj_type);
 }

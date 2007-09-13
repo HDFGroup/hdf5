@@ -4848,11 +4848,7 @@ static void gent_filters(void)
  ret=H5Premove_filter(dcpl,H5Z_FILTER_ALL);
  assert(ret>=0);
 
-#ifdef H5_WANT_H5_V1_4_COMPAT
- ret=H5Zregister (MYFILTER_ID, "myfilter", myfilter);
-#else
  ret=H5Zregister (H5Z_MYFILTER);
-#endif
  assert(ret>=0);
 
  ret=H5Pset_filter (dcpl, MYFILTER_ID, 0, 0, NULL);
