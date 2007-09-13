@@ -937,7 +937,7 @@ test_reference_obj_deleted(void)
 **
 ****************************************************************/
 static herr_t
-test_deref_iter_op(hid_t UNUSED group, const char *name, const H5L_info_t *info,
+test_deref_iter_op(hid_t UNUSED group, const char *name, const H5L_info_t UNUSED *info,
     void *op_data)
 {
     int *count = (int *)op_data;        /* Pointer to name counter */
@@ -987,7 +987,7 @@ test_reference_group(void)
     hobj_ref_t rref;            /* Reference to read */
     H5G_info_t ginfo;           /* Group info struct */
     char objname[NAME_SIZE];    /* Buffer to store name */
-    H5G_obj_t objtype;          /* Object type */
+    H5O_info_t oinfo;           /* Object info struct */
     int count = 0;              /* Count within iterated group */
     herr_t ret;
 
@@ -1073,8 +1073,9 @@ test_reference_group(void)
     CHECK(ret, FAIL, "H5Lget_name_by_idx");
     VERIFY_STR(objname, DSETNAME2, "H5Lget_name_by_idx");
 
-    objtype = H5Gget_objtype_by_idx(gid, (hsize_t)0);
-    VERIFY(objtype, H5G_DATASET, "H5Gget_objtype_by_idx");
+    ret = H5Oget_info_by_idx(gid, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)0, &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info_by_idx");
+    VERIFY(oinfo.type, H5O_TYPE_DATASET, "H5Oget_info_by_idx");
 
     /* Unlink one of the objects in the dereferenced group */
     ret = H5Ldelete(gid, GROUPNAME2, H5P_DEFAULT);

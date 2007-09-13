@@ -107,7 +107,6 @@ typedef enum H5G_obj_t {
     H5G_RESERVED_7		/* Reserved for future use	*/
 } H5G_obj_t;
 
-H5_DLL H5G_obj_t H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx);
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  * 
  * Use of these symbols is deprecated.
@@ -171,6 +170,7 @@ H5_DLL herr_t H5Gget_objinfo(hid_t loc_id, const char *name,
     hbool_t follow_link, H5G_stat_t *statbuf/*out*/);
 H5_DLL ssize_t H5Gget_objname_by_idx(hid_t loc_id, hsize_t idx, char* name,
     size_t size);
+H5_DLL H5G_obj_t H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx);
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 

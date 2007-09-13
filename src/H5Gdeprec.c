@@ -85,6 +85,8 @@ static herr_t H5G_get_objinfo_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     H5G_own_loc_t *own_loc/*out*/);
 static herr_t H5G_get_objinfo(const H5G_loc_t *loc, const char *name,
     hbool_t follow_link, H5G_stat_t *statbuf/*out*/, hid_t dxpl_id);
+static H5G_obj_t H5G_obj_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx,
+    hid_t dxpl_id);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
@@ -1030,8 +1032,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_objname_by_idx() */
 
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5Gget_objtype_by_idx
@@ -1073,4 +1073,58 @@ H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gget_objtype_by_idx() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_obj_get_type_by_idx
+ *
+ * Purpose:     Private function for H5Gget_objtype_by_idx.
+ *              Returns the type of objects in the group by giving index.
+ *
+ * Return:	Success:        H5G_GROUP(1), H5G_DATASET(2), H5G_TYPE(3)
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Raymond Lu
+ *	        Nov 20, 2002
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5G_obj_t
+H5G_obj_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx, hid_t dxpl_id)
+{
+    H5O_linfo_t	linfo;		/* Link info message */
+    H5G_obj_t ret_value;        /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_obj_get_type_by_idx, H5G_UNKNOWN)
+
+    /* Sanity check */
+    HDassert(oloc);
+
+    /* Attempt to get the link info for this group */
+    if(H5G_obj_get_linfo(oloc, &linfo, dxpl_id)) {
+        if(H5F_addr_defined(linfo.fheap_addr)) {
+            /* Get the object's name from the dense link storage */
+            if((ret_value = H5G_dense_get_type_by_idx(oloc->file, dxpl_id, &linfo, idx)) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5G_UNKNOWN, "can't locate type")
+        } /* end if */
+        else {
+            /* Get the object's type from the link messages */
+            if((ret_value = H5G_compact_get_type_by_idx(oloc, dxpl_id, &linfo, idx)) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5G_UNKNOWN, "can't locate type")
+        } /* end else */
+    } /* end if */
+    else {
+        /* Clear error stack from not finding the link info message */
+        H5E_clear_stack(NULL);
+
+        /* Get the object's type from the symbol table */
+        if((ret_value = H5G_stab_get_type_by_idx(oloc, idx, dxpl_id)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5G_UNKNOWN, "can't locate type")
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_obj_get_type_by_idx() */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 

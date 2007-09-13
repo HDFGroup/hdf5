@@ -260,72 +260,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_compact_get_type_by_idx
- *
- * Purpose:     Returns the type of objects in the group by giving index.
- *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *	        Sep 12, 2005
- *
- *-------------------------------------------------------------------------
- */
-H5G_obj_t
-H5G_compact_get_type_by_idx(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo,
-    hsize_t idx)
-{
-    H5G_link_table_t    ltable = {0, NULL};         /* Link table */
-    H5G_obj_t		ret_value;      /* Return value */
-
-    FUNC_ENTER_NOAPI(H5G_compact_get_type_by_idx, H5G_UNKNOWN)
-
-    /* Sanity check */
-    HDassert(oloc);
-
-    /* Build table of all link messages */
-    if(H5G_compact_build_table(oloc, dxpl_id, linfo, H5_INDEX_NAME, H5_ITER_INC, &ltable) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5G_UNKNOWN, "can't create link message table")
-
-    /* Check for going out of bounds */
-    if(idx >= ltable.nlinks)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, H5G_UNKNOWN, "index out of bound")
-
-    /* Determine type of object */
-    if(ltable.lnks[idx].type == H5L_TYPE_SOFT)
-        ret_value = H5G_LINK;
-    else if(ltable.lnks[idx].type >= H5L_TYPE_UD_MIN)
-        ret_value = H5G_UDLINK;
-    else if(ltable.lnks[idx].type == H5L_TYPE_HARD){
-        H5O_loc_t tmp_oloc;             /* Temporary object location */
-        H5O_type_t obj_type;            /* Type of object at location */
-
-        /* Build temporary object location */
-        tmp_oloc.file = oloc->file;
-        tmp_oloc.addr = ltable.lnks[idx].u.hard.addr;
-
-        /* Get the type of the object */
-        if(H5O_obj_type(&tmp_oloc, &obj_type, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5G_UNKNOWN, "can't get object type")
-
-        /* Map to group object type */
-        if(H5G_UNKNOWN == (ret_value = H5G_map_obj_type(obj_type)))
-            HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, H5G_UNKNOWN, "can't determine object type")
-    } else {
-        HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, H5G_UNKNOWN, "unknown link type")
-    } /* end else */
-
-done:
-    /* Release link table */
-    if(ltable.lnks && H5G_link_release_table(&ltable) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, H5G_UNKNOWN, "unable to release link table")
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_compact_get_type_by_idx() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5G_compact_remove_common_cb
  *
  * Purpose:	Common callback routine for deleting 'link' message for a
@@ -644,4 +578,72 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_compact_lookup_by_idx() */
+
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_compact_get_type_by_idx
+ *
+ * Purpose:     Returns the type of objects in the group by giving index.
+ *
+ * Return:	Success:        Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *	        Sep 12, 2005
+ *
+ *-------------------------------------------------------------------------
+ */
+H5G_obj_t
+H5G_compact_get_type_by_idx(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo,
+    hsize_t idx)
+{
+    H5G_link_table_t    ltable = {0, NULL};         /* Link table */
+    H5G_obj_t		ret_value;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_compact_get_type_by_idx, H5G_UNKNOWN)
+
+    /* Sanity check */
+    HDassert(oloc);
+
+    /* Build table of all link messages */
+    if(H5G_compact_build_table(oloc, dxpl_id, linfo, H5_INDEX_NAME, H5_ITER_INC, &ltable) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5G_UNKNOWN, "can't create link message table")
+
+    /* Check for going out of bounds */
+    if(idx >= ltable.nlinks)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, H5G_UNKNOWN, "index out of bound")
+
+    /* Determine type of object */
+    if(ltable.lnks[idx].type == H5L_TYPE_SOFT)
+        ret_value = H5G_LINK;
+    else if(ltable.lnks[idx].type >= H5L_TYPE_UD_MIN)
+        ret_value = H5G_UDLINK;
+    else if(ltable.lnks[idx].type == H5L_TYPE_HARD){
+        H5O_loc_t tmp_oloc;             /* Temporary object location */
+        H5O_type_t obj_type;            /* Type of object at location */
+
+        /* Build temporary object location */
+        tmp_oloc.file = oloc->file;
+        tmp_oloc.addr = ltable.lnks[idx].u.hard.addr;
+
+        /* Get the type of the object */
+        if(H5O_obj_type(&tmp_oloc, &obj_type, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5G_UNKNOWN, "can't get object type")
+
+        /* Map to group object type */
+        if(H5G_UNKNOWN == (ret_value = H5G_map_obj_type(obj_type)))
+            HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, H5G_UNKNOWN, "can't determine object type")
+    } else {
+        HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, H5G_UNKNOWN, "unknown link type")
+    } /* end else */
+
+done:
+    /* Release link table */
+    if(ltable.lnks && H5G_link_release_table(&ltable) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTFREE, H5G_UNKNOWN, "unable to release link table")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_compact_get_type_by_idx() */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 

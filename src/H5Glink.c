@@ -705,7 +705,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_link_obj_type
+ * Function:	H5G_link_name_replace
  *
  * Purpose:	Determine the type of object referred to (for hard links) or
  *              the link type (for soft links and user-defined links).

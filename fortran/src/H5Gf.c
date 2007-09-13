@@ -141,11 +141,11 @@ int_f
 nh5gget_obj_info_idx_c(hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *idx,
     _fcd obj_name, int_f *obj_namelen, int_f *obj_type)
 {
+    H5O_info_t oinfo;
     hid_t c_loc_id = (hid_t)*loc_id;
     char *c_name = NULL;
     size_t c_obj_namelen;
     char *c_obj_name = NULL;
-    int type;
     hsize_t c_idx = *idx;
     hid_t gid = (-1);                 /* Temporary group ID */
     int ret_value = -1;
@@ -160,10 +160,9 @@ nh5gget_obj_info_idx_c(hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *idx,
      * Allocate buffer to hold name of the object
      */
     c_obj_namelen = *obj_namelen;
-    if(c_obj_namelen) {
+    if(c_obj_namelen)
        if(NULL == (c_obj_name = (char *)HDmalloc(c_obj_namelen + 1)))
            goto DONE;
-    } /* end if */
 
     /* Get a temporary group ID for the group to query */
     if((gid = H5Gopen2(c_loc_id, c_name, H5P_DEFAULT)) < 0)
@@ -172,10 +171,13 @@ nh5gget_obj_info_idx_c(hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *idx,
     /* Query the object's information */
     if(H5Lget_name_by_idx(gid, ".", H5_INDEX_NAME, H5_ITER_INC, c_idx, c_obj_name, c_obj_namelen, H5P_DEFAULT) < 0)
         goto DONE;
-    if((type = H5Gget_objtype_by_idx(gid, c_idx)) == H5G_UNKNOWN)
+    if(H5Oget_info_by_idx(gid, ".", H5_INDEX_NAME, H5_ITER_INC, c_idx, &oinfo, H5P_DEFAULT) < 0)
         goto DONE;
 
-    *obj_type = type;
+/* XXX: Switch from using H5Gget_objtype_by_idx() means that this routine won't
+ *      work on non-hard links - QAK
+ */
+    *obj_type = oinfo.type;
 
     /*
      * Convert C name to FORTRAN and place it in the given buffer

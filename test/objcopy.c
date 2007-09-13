@@ -1260,11 +1260,8 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
     if(ginfo2.nlinks > 0) {
         char objname[NAME_BUF_SIZE];            /* Name of object in group */
         char objname2[NAME_BUF_SIZE];           /* Name of object in group */
-        H5G_obj_t objtype;                      /* Type of object in group */
-        H5G_obj_t objtype2;                     /* Type of object in group */
         H5L_info_t linfo;                       /* Link information */
         H5L_info_t linfo2;                      /* Link information */
-        hid_t oid, oid2;                        /* IDs of objects within group */
 
         /* Loop over contents of groups */
         for(idx = 0; idx < ginfo.nlinks; idx++) {
@@ -1273,11 +1270,6 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
             if(H5Lget_name_by_idx(gid2, ".", H5_INDEX_NAME, H5_ITER_INC, idx, objname2, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
             if(HDstrcmp(objname, objname2)) TEST_ERROR
 
-            /* Check type of objects */
-            if((objtype = H5Gget_objtype_by_idx(gid, idx)) < 0) TEST_ERROR
-            if((objtype2 = H5Gget_objtype_by_idx(gid2, idx)) < 0) TEST_ERROR
-            if(objtype != objtype2) TEST_ERROR
-
             /* Get link info */
             if(H5Lget_info(gid, objname, &linfo, H5P_DEFAULT) < 0) TEST_ERROR
             if(H5Lget_info(gid2, objname2, &linfo2, H5P_DEFAULT) < 0) TEST_ERROR
@@ -1285,8 +1277,8 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
 
             /* Extra checks for "real" objects */
             if(linfo.type == H5L_TYPE_HARD) {
-                H5O_info_t oinfo;                       /* Object info */
-                H5O_info_t oinfo2;                      /* Object info */
+                hid_t oid, oid2;                /* IDs of objects within group */
+                H5O_info_t oinfo, oinfo2;       /* Object info */
 
                 /* Compare some pieces of the object info */
                 if(H5Oget_info(gid, objname, &oinfo, H5P_DEFAULT) < 0) TEST_ERROR
@@ -1312,83 +1304,59 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
                     continue;
                 else
                     addr_insert(&oinfo);
-            } /* end if */
 
-            /* Compare objects within group */
-            switch(objtype) {
-                case H5G_LINK:
-                    {
-                        char linkname[NAME_BUF_SIZE];            /* Link value */
-                        char linkname2[NAME_BUF_SIZE];           /* Link value */
+                /* Open objects */
+                if((oid = H5Oopen(gid, objname, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+                if((oid2 = H5Oopen(gid2, objname2, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
-                        /* Check link values */
-                        if(H5Lget_val(gid, objname, linkname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
-                        if(H5Lget_val(gid2, objname2, linkname2, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
-                        if(HDstrcmp(linkname, linkname2)) TEST_ERROR
-                    }
-                    break;
+                /* Compare objects within group */
+                switch(oinfo.type) {
+                    case H5O_TYPE_GROUP:
+                        /* Compare groups */
+                        if(compare_groups(oid, oid2, pid, depth - 1, copy_flags) != TRUE) TEST_ERROR
+                        break;
 
-                case H5G_GROUP:
-                    /* Open groups */
-                    if((oid = H5Gopen2(gid, objname, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-                    if((oid2 = H5Gopen2(gid2, objname2, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+                    case H5O_TYPE_DATASET:
+                        /* Compare datasets */
+                        if(compare_datasets(oid, oid2, pid, NULL) != TRUE) TEST_ERROR
+                        break;
 
-                    /* Compare groups */
-                    if(compare_groups(oid, oid2, pid, depth - 1, copy_flags) != TRUE) TEST_ERROR
+                    case H5O_TYPE_NAMED_DATATYPE:
+                        /* Compare datatypes */
+                        if(H5Tequal(oid, oid2) != TRUE) TEST_ERROR
+                        break;
 
-                    /* Close groups */
-                    if(H5Gclose(oid) < 0) TEST_ERROR
-                    if(H5Gclose(oid2) < 0) TEST_ERROR
-                    break;
-
-                case H5G_DATASET:
-                    /* Open datasets */
-                    if((oid = H5Dopen(gid, objname)) < 0) TEST_ERROR
-                    if((oid2 = H5Dopen(gid2, objname2)) < 0) TEST_ERROR
-
-                    /* Compare datasets */
-                    if(compare_datasets(oid, oid2, pid, NULL) != TRUE) TEST_ERROR
-
-                    /* Close datasets */
-                    if(H5Dclose(oid) < 0) TEST_ERROR
-                    if(H5Dclose(oid2) < 0) TEST_ERROR
-                    break;
-
-                case H5G_TYPE:
-                    /* Open datatypes */
-                    if((oid = H5Topen(gid, objname)) < 0) TEST_ERROR
-                    if((oid2 = H5Topen(gid2, objname2)) < 0) TEST_ERROR
-
-                    /* Compare datatypes */
-                    if(H5Tequal(oid, oid2) != TRUE) TEST_ERROR
-
-                    /* Close datatypes */
-                    if(H5Tclose(oid) < 0) TEST_ERROR
-                    if(H5Tclose(oid2) < 0) TEST_ERROR
-                    break;
-
-                case H5G_UDLINK:
-                  {
-                      char linkval[NAME_BUF_SIZE];            /* Link value */
-                      char linkval2[NAME_BUF_SIZE];           /* Link value */
-
-                      /* Check that both links are the same type and the same size */
-                      if(linfo.type != linfo2.type) TEST_ERROR
-                      if(linfo.u.val_size != linfo2.u.val_size) TEST_ERROR
-
-                      /* Get link udata */
-                      if(H5Lget_val(gid, objname, linkval, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
-                      if(H5Lget_val(gid2, objname2, linkval2, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
-
-                      /* Compare link udata */
-                      if(HDmemcmp(linkval, linkval2, linfo.u.val_size)) TEST_ERROR
-                  }
-                  break;
-
-                default:
+                    default:
 HDassert(0 && "Unknown type of object");
-                    break;
-            } /* end switch */
+                        break;
+                } /* end switch */
+
+                /* Close objects */
+                if(H5Oclose(oid) < 0) TEST_ERROR
+                if(H5Oclose(oid2) < 0) TEST_ERROR
+            } /* end if */
+            else {
+                /* Check that both links are the same size */
+                if(linfo.u.val_size != linfo2.u.val_size) TEST_ERROR
+
+                /* Compare link values */
+                if(linfo.type == H5L_TYPE_SOFT || 
+                        (linfo.type >= H5L_TYPE_UD_MIN && linfo.type <= H5L_TYPE_MAX)) {
+                    char linkval[NAME_BUF_SIZE];            /* Link value */
+                    char linkval2[NAME_BUF_SIZE];           /* Link value */
+
+                    /* Get link values */
+                    HDassert(linfo.u.val_size <= NAME_BUF_SIZE);
+                    if(H5Lget_val(gid, objname, linkval, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
+                    if(H5Lget_val(gid2, objname2, linkval2, (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0) TEST_ERROR
+
+                    /* Compare link data */
+                    if(HDmemcmp(linkval, linkval2, linfo.u.val_size)) TEST_ERROR
+                } /* end else-if */
+                else {
+HDassert(0 && "Unknown type of link");
+                } /* end else */
+            } /* end else */
         } /* end for */
     } /* end if */
 

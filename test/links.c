@@ -1478,6 +1478,7 @@ test_compat(hid_t fapl, hbool_t new_format)
     hid_t group1_id = -1;
     hid_t group2_id = -1;
     H5G_stat_t	sb_hard1, sb_hard2, sb_soft1;
+    H5G_obj_t obj_type;         /* Object type */
     hsize_t num_objs;           /* Number of objects in a group */
     char filename[1024];
     char tmpstr[1024];
@@ -1511,6 +1512,13 @@ test_compat(hid_t fapl, hbool_t new_format)
     if(HDstrcmp(tmpstr, "link_to_group2")) TEST_ERROR
     H5E_BEGIN_TRY {
         if(H5Gget_objname_by_idx(group1_id, (hsize_t)1, tmpstr, sizeof(tmpstr)) >= 0) TEST_ERROR
+    } H5E_END_TRY;
+
+    /* Test getting the type for objects */
+    if((obj_type = H5Gget_objtype_by_idx(group1_id, (hsize_t)0)) < 0) FAIL_STACK_ERROR
+    if(obj_type != H5G_GROUP) TEST_ERROR
+    H5E_BEGIN_TRY {
+        if(H5Gget_objtype_by_idx(group1_id, (hsize_t)1) >= 0) TEST_ERROR
     } H5E_END_TRY;
 
     /* Test getting the number of objects in a group */

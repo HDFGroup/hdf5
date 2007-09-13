@@ -1057,6 +1057,7 @@ ssize_t CommonFG::getObjnameByIdx(hsize_t idx, H5std_string& name, size_t size) 
    return (name_len);
 }
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 //--------------------------------------------------------------------------
 // Function:	CommonFG::getObjTypeByIdx
 ///\brief	Returns the type of an object in this group, given the
@@ -1104,6 +1105,8 @@ H5G_obj_t CommonFG::getObjTypeByIdx(hsize_t idx, H5std_string& type_name) const
    }
    return (obj_type);
 }
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+
 //--------------------------------------------------------------------------
 // Function:	CommonFG default constructor
 ///\brief	Default constructor.
