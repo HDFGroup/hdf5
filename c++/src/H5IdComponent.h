@@ -98,8 +98,10 @@ class H5_DLLCPP IdComponent {
 	void p_reference(void* ref, const char* name, hid_t space_id, H5R_type_t ref_type) const;
 	void* p_reference(const char* name, hid_t space_id, H5R_type_t ref_type) const; // will be removed
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 	// Retrieves the type of object that an object reference points to.
 	H5G_obj_t p_get_obj_type(void *ref, H5R_type_t ref_type) const;
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 	// Retrieves a dataspace with the region pointed to selected.
 	hid_t p_get_region(void *ref, H5R_type_t ref_type) const;

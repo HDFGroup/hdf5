@@ -70,6 +70,10 @@
 #define H5Gopen_vers 1
 #endif /* !defined(H5Gopen_vers) */
 
+#if !defined(H5Rget_obj_type_vers)
+#define H5Rget_obj_type_vers 1
+#endif /* !defined(H5Rget_obj_type_vers) */
+
 /************/
 /* Typedefs */
 /************/
@@ -182,6 +186,17 @@
 #else /* H5Gopen_vers */
 #error "H5Gopen_vers set to invalid value"
 #endif /* H5Gopen_vers */
+
+#if !defined(H5Rget_obj_type_vers) || H5Rget_obj_type_vers == 2
+#ifndef H5Rget_obj_type_vers
+#define H5Rget_obj_type_vers 2
+#endif /* H5Rget_obj_type_vers */
+#define H5Rget_obj_type H5Rget_obj_type2
+#elif H5Rget_obj_type_vers == 1
+#define H5Rget_obj_type H5Rget_obj_type1
+#else /* H5Rget_obj_type_vers */
+#error "H5Rget_obj_type_vers set to invalid value"
+#endif /* H5Rget_obj_type_vers */
 
 /************/
 /* Typedefs */

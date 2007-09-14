@@ -664,6 +664,7 @@ void* DataType::Reference(const H5std_string& name) const
    return(Reference(name.c_str()));
 }
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 //--------------------------------------------------------------------------
 // Function:	DataType::getObjType
 ///\brief	Retrieves the type of object that an object reference points to.
@@ -686,6 +687,7 @@ H5G_obj_t DataType::getObjType(void *ref, H5R_type_t ref_type) const
       throw DataTypeIException(inMemFunc("getObjType"), E.getDetailMsg());
    }
 }
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 //--------------------------------------------------------------------------
 // Function:	DataType::getRegion

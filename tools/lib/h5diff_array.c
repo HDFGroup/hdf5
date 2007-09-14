@@ -117,7 +117,6 @@ static int   not_comparable;
  * local prototypes
  *-------------------------------------------------------------------------
  */
-static void    close_obj(H5G_obj_t obj_type, hid_t obj_id);
 static hsize_t diff_region(hid_t obj1_id, hid_t obj2_id,hid_t region1_id, hid_t region2_id, diff_opt_t *options);
 static hbool_t all_zero(const void *_mem, size_t size);
 static int     ull2float(unsigned long_long ull_value, float *f_value);
@@ -435,8 +434,6 @@ hsize_t diff_datum(void       *_mem1,
  size_t        size=0;
  int           iszero1;
  int           iszero2;
- H5G_obj_t     obj1_type;
- H5G_obj_t     obj2_type;
  hid_t         obj1_id;
  hid_t         obj2_id;
  hsize_t       nfound=0;   /* differences found */
@@ -746,8 +743,8 @@ hsize_t diff_datum(void       *_mem1,
 
     nfound = diff_region(obj1_id,obj2_id,region1_id,region2_id,options);
 
-    close_obj(H5G_DATASET,obj1_id);
-    close_obj(H5G_DATASET,obj2_id);
+    H5Oclose(obj1_id);
+    H5Oclose(obj2_id);
     H5Sclose(region1_id);
     H5Sclose(region2_id);
 
@@ -761,51 +758,50 @@ hsize_t diff_datum(void       *_mem1,
   */
    else if (H5Tequal(m_type, H5T_STD_REF_OBJ))
    {
+    H5O_type_t     obj1_type;
+    H5O_type_t     obj2_type;
 
-    if ((obj1_type = H5Rget_obj_type(container1_id, H5R_OBJECT, _mem1))<0)
-     ret= -1;
-    if ((obj2_type = H5Rget_obj_type(container2_id, H5R_OBJECT, _mem2))<0)
-     ret= -1;
-    if (ret==-1) {
-     options->err_stat=1;
+    if(H5Rget_obj_type2(container1_id, H5R_OBJECT, _mem1, &obj1_type) < 0)
+     ret = -1;
+    if(H5Rget_obj_type2(container2_id, H5R_OBJECT, _mem2, &obj2_type) < 0)
+     ret = -1;
+    if(ret == -1) {
+     options->err_stat = 1;
      return 0;
-    }
+    } /* end if */
 
     /* check object type */
-    if (obj1_type!=obj2_type)
+    if(obj1_type != obj2_type)
     {
      parallel_print("Different object types referenced: <%s> and <%s>", obj1, obj2);
-     options->not_cmp=1;
+     options->not_cmp = 1;
      return 0;
     }
 
-    if ((obj1_id = H5Rdereference(container1_id, H5R_OBJECT, _mem1))<0)
-     ret= -1;
-    if ((obj2_id = H5Rdereference(container2_id, H5R_OBJECT, _mem2))<0)
-     ret= -1;
-    if (ret==-1) {
-     options->err_stat=1;
+    if((obj1_id = H5Rdereference(container1_id, H5R_OBJECT, _mem1)) < 0)
+     ret = -1;
+    if((obj2_id = H5Rdereference(container2_id, H5R_OBJECT, _mem2)) < 0)
+     ret = -1;
+    if(ret == -1) {
+     options->err_stat = 1;
      return 0;
-    }
+    } /* end if */
 
     /* compare */
-    switch (obj1_type) {
-    case H5G_DATASET:
-     nfound=diff_datasetid(obj1_id,
+    if(obj1_type == H5O_TYPE_DATASET)
+     nfound = diff_datasetid(obj1_id,
       obj2_id,
       NULL,
       NULL,
       options);
-     break;
-    default:
+    else {
      parallel_print("Warning: Comparison not possible of object types referenced: <%s> and <%s>",
       obj1, obj2);
-     options->not_cmp=1;
-     break;
+     options->not_cmp = 1;
     }
 
-    close_obj(obj1_type,obj1_id);
-    close_obj(obj2_type,obj2_id);
+    H5Oclose(obj1_id);
+    H5Oclose(obj2_id);
 
    }/*object reference*/
 
@@ -2075,39 +2071,13 @@ hsize_t diff_datum(void       *_mem1,
 
 static hbool_t all_zero(const void *_mem, size_t size)
 {
- const unsigned char *mem = (const unsigned char *)_mem;
+    const unsigned char *mem = (const unsigned char *)_mem;
 
- while (size-- > 0)
-  if (mem[size])
-   return FALSE;
+    while(size-- > 0)
+        if(mem[size])
+            return FALSE;
 
-  return TRUE;
-}
-
-/*-------------------------------------------------------------------------
- * Function: close_obj
- *
- * Purpose: Auxialiary function to close an object
- *
- *-------------------------------------------------------------------------
- */
-
-static void close_obj(H5G_obj_t obj_type, hid_t obj_id)
-{
- switch (obj_type) {
- case H5G_GROUP:
-  H5Gclose(obj_id);
-  break;
- case H5G_DATASET:
-  H5Dclose(obj_id);
-  break;
- case H5G_TYPE:
-  H5Tclose(obj_id);
-  break;
- default:
-  assert(0);
-  break;
- }
+    return TRUE;
 }
 
 /*-------------------------------------------------------------------------

@@ -643,6 +643,8 @@
 ./src/H5Pstrcpl.c
 ./src/H5Ptest.c
 ./src/H5R.c
+./src/H5Rdeprec.c
+./src/H5Rpkg.h
 ./src/H5Rprivate.h
 ./src/H5Rpublic.h
 ./src/H5RC.c

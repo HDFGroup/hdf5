@@ -220,20 +220,22 @@ nh5rget_region_region_c (hid_t_f *dset_id, int_f *ref, hid_t_f *space_id)
 int_f
 nh5rget_object_type_obj_c (hid_t_f *dset_id, haddr_t_f *ref, int_f *obj_type)
 {
-     int ret_value = -1;
-     hid_t c_dset_id;
-     int c_obj_type;
+     H5O_type_t c_obj_type;
      hobj_ref_t ref_c;
+     int_f ret_value = -1;
 
-     ref_c=*ref;
+     ref_c = *ref;
 
      /*
       * Call H5Rget_object_type function.
       */
-     c_dset_id = *dset_id;
-     c_obj_type = H5Rget_obj_type(c_dset_id, H5R_OBJECT, &ref_c);
-     if(c_obj_type < 0) return ret_value;
+     if(H5Rget_obj_type2((hid_t)*dset_id, H5R_OBJECT, &ref_c, &c_obj_type) < 0)
+         return ret_value;
+
      *obj_type = (int_f)c_obj_type;
+
      ret_value = 0;
+
      return ret_value;
 }
+

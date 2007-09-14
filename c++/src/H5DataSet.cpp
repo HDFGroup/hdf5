@@ -503,6 +503,7 @@ void* DataSet::Reference(const H5std_string& name) const
    return(Reference(name.c_str()));
 }
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 //--------------------------------------------------------------------------
 // Function:	DataSet::getObjType
 ///\brief	Retrieves the type of object that an object reference points to.
@@ -527,6 +528,7 @@ H5G_obj_t DataSet::getObjType(void *ref, H5R_type_t ref_type) const
       throw DataSetIException("DataSet::getObjType", E.getDetailMsg());
    }
 }
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 //--------------------------------------------------------------------------
 // Function:	DataSet::getRegion

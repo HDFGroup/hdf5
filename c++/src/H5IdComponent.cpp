@@ -436,6 +436,7 @@ void IdComponent::dereference(IdComponent& obj, void* ref)
    }
 }
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 //--------------------------------------------------------------------------
 // Function:	IdComponent::p_get_obj_type (protected)
 // Purpose	Retrieves the type of object that an object reference points to.
@@ -452,7 +453,7 @@ void IdComponent::dereference(IdComponent& obj, void* ref)
 //--------------------------------------------------------------------------
 H5G_obj_t IdComponent::p_get_obj_type(void *ref, H5R_type_t ref_type) const
 {
-   H5G_obj_t obj_type = H5Rget_obj_type(id, ref_type, ref);
+   H5G_obj_t obj_type = H5Rget_obj_type1(id, ref_type, ref);
 
    if (obj_type == H5G_UNKNOWN)
    {
@@ -460,6 +461,7 @@ H5G_obj_t IdComponent::p_get_obj_type(void *ref, H5R_type_t ref_type) const
    }
    return(obj_type);
 }
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 //--------------------------------------------------------------------------
 // Function:	IdComponent::p_get_region (protected)

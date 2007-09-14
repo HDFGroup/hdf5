@@ -876,11 +876,11 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
             ref_buf2 = buf2;
             for(u = 0; u < nelmts; u++, ref_buf1++, ref_buf2++) {
                 hid_t obj1_id, obj2_id;         /* IDs for objects referenced */
-                H5G_obj_t obj1_type, obj2_type; /* Types of objects referenced */
+                H5O_type_t obj1_type, obj2_type; /* Types of objects referenced */
 
                 /* Check for types of objects handled */
-                if((obj1_type = H5Rget_obj_type(parent1, H5R_OBJECT, ref_buf1)) < 0) TEST_ERROR
-                if((obj2_type = H5Rget_obj_type(parent2, H5R_OBJECT, ref_buf2)) < 0) TEST_ERROR
+                if(H5Rget_obj_type2(parent1, H5R_OBJECT, ref_buf1, &obj1_type) < 0) TEST_ERROR
+                if(H5Rget_obj_type2(parent2, H5R_OBJECT, ref_buf2, &obj2_type) < 0) TEST_ERROR
                 if(obj1_type != obj2_type) TEST_ERROR
 
                 /* Open referenced objects */
@@ -903,15 +903,15 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
                 /* Check for types of objects handled */
                 switch(obj1_type)
                 {
-                    case H5G_DATASET:
+                    case H5O_TYPE_DATASET:
                         if(compare_datasets(obj1_id, obj2_id, pid, NULL) != TRUE) TEST_ERROR
                         break;
 
-                    case H5G_GROUP:
+                    case H5O_TYPE_GROUP:
                         if(compare_groups(obj1_id, obj2_id, pid, -1, 0) != TRUE) TEST_ERROR
                         break;
 
-                    case H5G_TYPE:
+                    case H5O_TYPE_NAMED_DATATYPE:
                         if(H5Tequal(obj1_id, obj2_id) != TRUE) TEST_ERROR
                         break;
 
@@ -933,11 +933,11 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
             for(u = 0; u < nelmts; u++, ref_buf1++, ref_buf2++) {
                 hid_t obj1_id, obj2_id;         /* IDs for objects referenced */
                 hid_t obj1_sid, obj2_sid;       /* Dataspace IDs for objects referenced */
-                H5G_obj_t obj1_type, obj2_type; /* Types of objects referenced */
+                H5O_type_t obj1_type, obj2_type; /* Types of objects referenced */
 
                 /* Check for types of objects handled */
-                if((obj1_type = H5Rget_obj_type(parent1, H5R_DATASET_REGION, ref_buf1)) < 0) TEST_ERROR
-                if((obj2_type = H5Rget_obj_type(parent2, H5R_DATASET_REGION, ref_buf2)) < 0) TEST_ERROR
+                if(H5Rget_obj_type2(parent1, H5R_DATASET_REGION, ref_buf1, &obj1_type) < 0) TEST_ERROR
+                if(H5Rget_obj_type2(parent2, H5R_DATASET_REGION, ref_buf2, &obj2_type) < 0) TEST_ERROR
                 if(obj1_type != obj2_type) TEST_ERROR
 
                 /* Open referenced objects */
@@ -960,15 +960,15 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
                 /* Check for types of objects handled */
                 switch(obj1_type)
                 {
-                    case H5G_DATASET:
+                    case H5O_TYPE_DATASET:
                         if(compare_datasets(obj1_id, obj2_id, pid, NULL) != TRUE) TEST_ERROR
                         break;
 
-                    case H5G_GROUP:
+                    case H5O_TYPE_GROUP:
                         if(compare_groups(obj1_id, obj2_id, pid, -1, 0) != TRUE) TEST_ERROR
                         break;
 
-                    case H5G_TYPE:
+                    case H5O_TYPE_NAMED_DATATYPE:
                         if(H5Tequal(obj1_id, obj2_id) != TRUE) TEST_ERROR
                         break;
 

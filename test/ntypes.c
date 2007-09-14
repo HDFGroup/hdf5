@@ -1897,6 +1897,8 @@ test_refer_dtype(hid_t file)
     if (envval == NULL) 
         envval = "nomatch";
     if (HDstrcmp(envval, "multi")) {
+        H5O_type_t          obj_type;       /* Object type */
+
 	/* Allocate write & read buffers */
 	wbuf=HDmalloc(MAX(sizeof(unsigned),sizeof(hobj_ref_t)));
 	rbuf=HDmalloc(MAX(sizeof(unsigned),sizeof(hobj_ref_t)));
@@ -1939,9 +1941,11 @@ test_refer_dtype(hid_t file)
 	    TEST_ERROR;
 
 	/* Create reference to named datatype */
-	if(H5Rcreate(wbuf,file,"/Group1/Datatype1",H5R_OBJECT,-1)<0)
+	if(H5Rcreate(wbuf, file, "/Group1/Datatype1", H5R_OBJECT, -1) < 0)
 	    TEST_ERROR;
-	if(H5Rget_obj_type(dataset,H5R_OBJECT,wbuf)!=H5G_TYPE)
+	if(H5Rget_obj_type2(dataset, H5R_OBJECT, wbuf, &obj_type) < 0)
+	    TEST_ERROR;
+	if(obj_type != H5O_TYPE_NAMED_DATATYPE)
 	    TEST_ERROR;
 
 	/* Write selection to disk */
@@ -2050,6 +2054,7 @@ test_refer_dtype2(hid_t file)
     uint8_t             *dwbuf,      /* Buffer for writing numeric data to disk */
                         *drbuf;      /* Buffer for reading numeric data from disk */
     uint8_t             *tu8;        /* Temporary pointer to uint8 data */
+    H5O_type_t          obj_type;    /* Object type */
     int                 i;           /* counting variables */
 
     /* Output message about test being performed */
@@ -2080,61 +2085,63 @@ test_refer_dtype2(hid_t file)
 
 
     /* Create dataspace for the reference dataset */
-    if((sid1=H5Screate_simple(SPACE1_RANK, dims1, NULL))<0)
+    if((sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL)) < 0)
         TEST_ERROR;
 
     /* Create a reference dataset */
-    if((dset1=H5Dcreate(file,"Dataset1",H5T_STD_REF_DSETREG,sid1,H5P_DEFAULT))<0)
+    if((dset1 = H5Dcreate(file, "Dataset1", H5T_STD_REF_DSETREG, sid1, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Create references */
     /* Select 6x6 hyperslab for first reference */
-    start[0]=2; start[1]=2;
-    stride[0]=1; stride[1]=1;
-    count[0]=1; count[1]=1;
-    block[0]=6; block[1]=6;
+    start[0] = 2; start[1] = 2;
+    stride[0] = 1; stride[1] = 1;
+    count[0] = 1; count[1] = 1;
+    block[0] = 6; block[1] = 6;
 
-    if(H5Sselect_hyperslab(sid2,H5S_SELECT_SET,start,stride,count,block)<0)
+    if(H5Sselect_hyperslab(sid2, H5S_SELECT_SET, start, stride, count, block) < 0)
         TEST_ERROR;
 
     if((int)H5Sget_select_npoints(sid2) != 36)
         TEST_ERROR;
 
     /* Store first dataset region */
-    if(H5Rcreate(&wbuf,file,"/Dataset2",H5R_DATASET_REGION,sid2)<0)
+    if(H5Rcreate(&wbuf, file, "/Dataset2", H5R_DATASET_REGION, sid2) < 0)
         TEST_ERROR;
-    if(H5Rget_obj_type(dset1,H5R_DATASET_REGION,&wbuf) != H5G_DATASET)
+    if(H5Rget_obj_type2(dset1, H5R_DATASET_REGION, &wbuf, &obj_type) < 0)
+        TEST_ERROR;
+    if(obj_type != H5O_TYPE_DATASET)
         TEST_ERROR;
 
     /* Write selection to disk */
-    if(H5Dwrite(dset1,H5T_STD_REF_DSETREG,H5S_ALL,H5S_ALL,H5P_DEFAULT,&wbuf)<0)
+    if(H5Dwrite(dset1, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wbuf) < 0)
         TEST_ERROR;
 
     /* Close disk dataspace */
-    if(H5Sclose(sid1)<0)
+    if(H5Sclose(sid1) < 0)
         TEST_ERROR;
 
     /* Close Dataset */
-    if(H5Dclose(dset1)<0)
+    if(H5Dclose(dset1) < 0)
         TEST_ERROR;
 
     /* Close uint8 dataset dataspace */
-    if(H5Sclose(sid2)<0)
+    if(H5Sclose(sid2) < 0)
         TEST_ERROR;
 
 
 
 
     /* Open the dataset */
-    if((dset1=H5Dopen(file,"/Dataset1"))<0)
+    if((dset1 = H5Dopen(file, "/Dataset1")) < 0)
         TEST_ERROR;
 
     /* Get datatype for dataset */
-    if((dtype = H5Dget_type(dset1))<0)
+    if((dtype = H5Dget_type(dset1)) < 0)
         TEST_ERROR;
 
     /* Construct native type */
-    if((native_type=H5Tget_native_type(dtype, H5T_DIR_DEFAULT))<0)
+    if((native_type = H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Check if the data type is equal */
@@ -2142,34 +2149,36 @@ test_refer_dtype2(hid_t file)
         TEST_ERROR;
 
     /* Read selection from disk */
-    if(H5Dread(dset1,H5T_STD_REF_DSETREG,H5S_ALL,H5S_ALL,H5P_DEFAULT,&rbuf)<0)
+    if(H5Dread(dset1, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rbuf) < 0)
         TEST_ERROR;
 
     /* Try to open objects */
-    if((dset2=H5Rdereference(dset1,H5R_DATASET_REGION,&rbuf))<0)
+    if((dset2 = H5Rdereference(dset1, H5R_DATASET_REGION, &rbuf)) < 0)
         TEST_ERROR;
 
-    /* Check what H5Rget_obj_type function returns */
-    if(H5Rget_obj_type(dset1, H5R_DATASET_REGION,&rbuf) != H5G_DATASET)
+    /* Check what H5Rget_obj_type2 function returns */
+    if(H5Rget_obj_type2(dset1, H5R_DATASET_REGION, &rbuf, &obj_type) < 0)
+        TEST_ERROR;
+    if(obj_type != H5O_TYPE_DATASET)
         TEST_ERROR;
 
     /* Check information in referenced dataset */
-    if((sid1 = H5Dget_space(dset2))<0)
+    if((sid1 = H5Dget_space(dset2)) < 0)
         TEST_ERROR;
 
-    if((int)H5Sget_simple_extent_npoints(sid1)!=100)
+    if((int)H5Sget_simple_extent_npoints(sid1) != 100)
         TEST_ERROR;
 
     /* Read from disk */
-    if(H5Dread(dset2,H5T_STD_U8LE,H5S_ALL,H5S_ALL,H5P_DEFAULT,drbuf)<0)
+    if(H5Dread(dset2, H5T_STD_U8LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, drbuf) < 0)
         TEST_ERROR;
 
-    for(tu8=(uint8_t *)drbuf,i=0; i<SPACE2_DIM1*SPACE2_DIM2; i++,tu8++)
-        if(*tu8 != (uint8_t)(i*3))
+    for(tu8 = (uint8_t *)drbuf, i = 0; i < (SPACE2_DIM1 * SPACE2_DIM2); i++, tu8++)
+        if(*tu8 != (uint8_t)(i * 3))
             TEST_ERROR;
 
     /* Get the hyperslab selection */
-    if((sid2=H5Rget_region(dset1,H5R_DATASET_REGION,&rbuf))<0)
+    if((sid2 = H5Rget_region(dset1, H5R_DATASET_REGION, &rbuf)) < 0)
         TEST_ERROR;
 
     /* Verify correct hyperslab selected */
@@ -2179,19 +2188,19 @@ test_refer_dtype2(hid_t file)
         TEST_ERROR;
 
     /* Close region space */
-    if(H5Sclose(sid2)<0)
+    if(H5Sclose(sid2) < 0)
         TEST_ERROR;
 
     /* Close first space */
-    if(H5Sclose(sid1)<0)
+    if(H5Sclose(sid1) < 0)
         TEST_ERROR;
 
     /* Close dereferenced Dataset */
-    if(H5Dclose(dset2)<0)
+    if(H5Dclose(dset2) < 0)
         TEST_ERROR;
 
     /* Close Dataset */
-    if(H5Dclose(dset1)<0)
+    if(H5Dclose(dset1) < 0)
         TEST_ERROR;
 
     /* Free memory buffers */

@@ -303,3 +303,4 @@ H5S_mpio_space_span_type( const H5S_t *space, size_t elmt_size,
 #endif /* H5_HAVE_PARALLEL */
 
 #endif /* _H5Sprivate_H */
+

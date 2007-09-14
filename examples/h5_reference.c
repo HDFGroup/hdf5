@@ -35,6 +35,7 @@ main(void) {
    hid_t gid_a;                       /* and  dataspaces identifiers   */
    hid_t did_b, sid_b, tid_b;
    hid_t did_r, tid_r, sid_r;
+   H5O_type_t obj_type;
    herr_t status;
 
    hobj_ref_t *wbuf; /* buffer to write to disk */
@@ -118,13 +119,14 @@ main(void) {
    /*
     * Find the type of referenced objects.
     */
-    status = H5Rget_obj_type(did_r, H5R_OBJECT, &rbuf[0]);
-    if ( status == H5G_GROUP )
-    printf("First dereferenced object is a group. \n");
+    status = H5Rget_obj_type2(did_r, H5R_OBJECT, &rbuf[0], &obj_type);
+    if ( obj_type == H5O_TYPE_GROUP )
+        printf("First dereferenced object is a group. \n");
 
-    status = H5Rget_obj_type(did_r, H5R_OBJECT, &rbuf[1]);
-    if ( status == H5G_DATASET )
-    printf("Second dereferenced object is a dataset. \n");
+    status = H5Rget_obj_type2(did_r, H5R_OBJECT, &rbuf[1], &obj_type);
+    if ( obj_type == H5O_TYPE_DATASET )
+        printf("Second dereferenced object is a dataset. \n");
+
    /*
     *  Get datatype of the dataset "B"
     */
