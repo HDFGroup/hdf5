@@ -6823,6 +6823,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5Rdeprec.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5RS.c"
 				>
 				<FileConfiguration
@@ -9210,6 +9214,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\src\H5RCprivate.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5Rpkg.h"
 				>
 			</File>
 			<File
