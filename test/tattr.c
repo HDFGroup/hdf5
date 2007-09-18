@@ -3397,7 +3397,7 @@ test_attr_corder_create_basic(hid_t fcpl, hid_t fapl)
 
     /* Query the attribute creation properties */
     ret = H5Pget_attr_creation_order(dcpl, &crt_order_flags);
-    CHECK(ret, FAIL, "H5Pget_link_creation_order");
+    CHECK(ret, FAIL, "H5Pget_attr_creation_order");
     VERIFY(crt_order_flags, (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED) , "H5Pget_attr_creation_order");
 
     /* Close property list */
