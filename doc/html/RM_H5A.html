@@ -492,7 +492,9 @@ END SUBROUTINE h5aget_num_attrs_f
     <dd>Gets a copy of the dataspace for an attribute.
 <dt><strong>Description:</strong>
     <dd><code>H5Aget_space</code> retrieves a copy of the dataspace 
-        for an attribute.  The dataspace identifier returned from 
+        for an attribute.  
+        <p>
+        The dataspace identifier returned from 
         this function must be released with <code>H5Sclose</code>
         or resource leaks will develop.
 <dt><strong>Parameters:</strong>
@@ -672,9 +674,11 @@ SUBROUTINE
         to the object specified with <code>loc_id</code>. 
         The location object may be either a group, dataset, or 
         named datatype, all of which may have any sort of attribute.  
+        <p>
         The attribute specified by the index, <code>idx</code>, 
         indicates the attribute to access.  
         The value of <code>idx</code> is a 0-based, non-negative integer.
+        <p>
         The attribute identifier returned from this function must be 
         released with <code>H5Aclose</code> or resource leaks will develop. 
 <dt><strong>Parameters:</strong>
@@ -728,6 +732,7 @@ END SUBROUTINE h5aopen_idx_f
          object specified with <code>loc_id</code>. 
          The location object may be either a group, dataset, or 
          named datatype, which may have any sort of attribute. 
+         <p>
          The attribute identifier returned from this function must 
          be released with <code>H5Aclose</code> or resource leaks 
          will develop. 
@@ -980,7 +985,7 @@ Describes HDF5 Release 1.6.6, August 2007
 
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 11 October 2006");
+document.writeln("Last modified: 20 September 2007");
 -->
 </SCRIPT>
  

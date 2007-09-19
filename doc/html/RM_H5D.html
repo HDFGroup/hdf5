@@ -579,6 +579,7 @@ END SUBROUTINE h5dfill_f
 <dt><strong>Description:</strong>
     <dd><code>H5Dget_create_plist</code> returns an identifier for a 
         copy of the dataset creation property list for a dataset.
+        <p>
         The creation property list identifier should be released with 
         the <code>H5Pclose</code> function.
 <dt><strong>Parameters:</strong>
@@ -676,6 +677,7 @@ SUBROUTINE
 <dt><strong>Description:</strong>
     <dd><code>H5Dget_space</code> returns an identifier for a copy of the 
         dataspace for a dataset.  
+        <p>
         The dataspace identifier should be released with the 
         <code>H5Sclose</code> function.
 <dt><strong>Parameters:</strong>
@@ -861,6 +863,7 @@ END SUBROUTINE h5dget_storage_size_f
 <dt><strong>Description:</strong>
     <dd><code>H5Dget_type</code> returns an identifier for a copy of the 
         datatype for a dataset.  
+        <p>
         The datatype should be released with the <code>H5Tclose</code> function.
         <p>
         If a dataset has a named datatype, then an identifier to the 
@@ -1824,7 +1827,7 @@ Describes HDF5 Release 1.6.6, August 2007
 
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 15 August 2007");
+document.writeln("Last modified: 20 September 2007");
 -->
 </SCRIPT>
  
