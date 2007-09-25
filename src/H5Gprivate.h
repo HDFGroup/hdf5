@@ -128,6 +128,7 @@ typedef struct {
 /* Forward declarations (for prototypes & struct definitions) */
 struct H5P_genplist_t;
 struct H5O_loc_t;
+struct H5O_link_t;
 struct H5O_t;
 
 /*
@@ -158,7 +159,9 @@ H5_DLL herr_t H5G_free_grp_name(H5G_t *grp);
 H5_DLL herr_t H5G_get_shared_count(H5G_t *grp);
 H5_DLL herr_t H5G_mount(H5G_t *grp);
 H5_DLL herr_t H5G_unmount(H5G_t *grp);
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 H5_DLL H5G_obj_t H5G_map_obj_type(H5O_type_t obj_type);
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 /*
  * These functions operate on symbol table nodes.
@@ -178,9 +181,9 @@ H5_DLL herr_t H5G_obj_ent_encode(const H5F_t *f, uint8_t **pp,
 /*
  * These functions operate on group hierarchy names.
  */
-H5_DLL herr_t H5G_name_replace(H5G_obj_t type, H5F_t *src_file,
-    H5RS_str_t *src_full_path_r, H5RS_str_t *new_name, H5F_t *dst_file,
-    H5RS_str_t *dst_full_path_r, H5G_names_op_t op);
+H5_DLL herr_t H5G_name_replace(const struct H5O_link_t *lnk, H5G_names_op_t op,
+    H5F_t *src_file, H5RS_str_t *src_full_path_r, H5F_t *dst_file,
+    H5RS_str_t *dst_full_path_r, hid_t dxpl_id);
 H5_DLL herr_t H5G_name_reset(H5G_name_t *name);
 H5_DLL herr_t H5G_name_copy(H5G_name_t *dst, const H5G_name_t *src, H5_copy_depth_t depth);
 H5_DLL herr_t H5G_name_free(H5G_name_t *name);

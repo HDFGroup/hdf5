@@ -324,18 +324,18 @@ int do_copy_objects(hid_t fidin,
         buf = NULL;
         switch ( travt->objs[i].type ) {
             /*-------------------------------------------------------------------------
-            * H5G_GROUP
-            *-------------------------------------------------------------------------
-            */
-            case H5G_GROUP:
+             * H5TRAV_TYPE_GROUP
+             *-------------------------------------------------------------------------
+             */
+            case H5TRAV_TYPE_GROUP:
                 if (options->verbose)
                     printf(FORMAT_OBJ,"group",travt->objs[i].name );
 
                 /*-------------------------------------------------------------------------
-                * the root is a special case, we get an ID for the root group
-                * and copy its attributes using that ID
-                *-------------------------------------------------------------------------
-                */
+                 * the root is a special case, we get an ID for the root group
+                 * and copy its attributes using that ID
+                 *-------------------------------------------------------------------------
+                 */
                 if(HDstrcmp(travt->objs[i].name, "/") == 0) {
                     if ((grp_out = H5Gopen2(fidout, "/", H5P_DEFAULT)) < 0)
                         goto error;
@@ -360,9 +360,9 @@ int do_copy_objects(hid_t fidin,
                     goto error;
 
                 /*-------------------------------------------------------------------------
-                * copy attrs
-                *-------------------------------------------------------------------------
-                */
+                 * copy attrs
+                 *-------------------------------------------------------------------------
+                 */
                 if (copy_attr(grp_in,grp_out,options)<0)
                     goto error;
 
@@ -378,10 +378,10 @@ int do_copy_objects(hid_t fidin,
                 break;
 
             /*-------------------------------------------------------------------------
-            * H5G_DATASET
-            *-------------------------------------------------------------------------
-            */
-            case H5G_DATASET:
+             * H5TRAV_TYPE_DATASET
+             *-------------------------------------------------------------------------
+             */
+            case H5TRAV_TYPE_DATASET:
 
                 has_filter = 0;
 
@@ -399,11 +399,11 @@ int do_copy_objects(hid_t fidin,
                   
 
                 /*-------------------------------------------------------------------------
-                * check if we should use H5Ocopy or not
-                * if there is a request for filters/layout, we read/write the object
-                * otherwise we do a copy using H5Ocopy
-                *-------------------------------------------------------------------------
-                */
+                 * check if we should use H5Ocopy or not
+                 * if there is a request for filters/layout, we read/write the object
+                 * otherwise we do a copy using H5Ocopy
+                 *-------------------------------------------------------------------------
+                 */
                 if (options->op_tbl->nelems
                    ||
                    options->all_filter==1 || options->all_layout==1 
@@ -445,7 +445,7 @@ int do_copy_objects(hid_t fidin,
                      * 1) the external filters GZIP and SZIP might not be available
                      * 2) the internal filters might be turned off
                      *-------------------------------------------------------------------------
-                    */
+                     */
                     if (h5tools_canreadf((travt->objs[i].name),dcpl_id)==1)
                     {
                         apply_s=1;
@@ -473,11 +473,11 @@ int do_copy_objects(hid_t fidin,
                             }
 
                             /*-------------------------------------------------------------------------
-                            * create the output dataset;
-                            * disable error checking in case the dataset cannot be created with the
-                            * modified dcpl; in that case use the original instead
-                            *-------------------------------------------------------------------------
-                            */
+                             * create the output dataset;
+                             * disable error checking in case the dataset cannot be created with the
+                             * modified dcpl; in that case use the original instead
+                             *-------------------------------------------------------------------------
+                             */
                             H5E_BEGIN_TRY {
                                 dset_out=H5Dcreate(fidout,travt->objs[i].name,wtype_id,f_space_id,dcpl_out);
                             } H5E_END_TRY;
@@ -489,9 +489,9 @@ int do_copy_objects(hid_t fidin,
                             }
 
                             /*-------------------------------------------------------------------------
-                            * read/write
-                            *-------------------------------------------------------------------------
-                            */
+                             * read/write
+                             *-------------------------------------------------------------------------
+                             */
                             if (nelmts)
                             {
                                 size_t need = (size_t)(nelmts*msize);  /* bytes needed */
@@ -532,9 +532,9 @@ int do_copy_objects(hid_t fidin,
                                         vl_data = TRUE;
 
                                     /*
-                                    * determine the strip mine size and allocate a buffer. The strip mine is
-                                    * a hyperslab whose size is manageable.
-                                    */
+                                     * determine the strip mine size and allocate a buffer. The strip mine is
+                                     * a hyperslab whose size is manageable.
+                                     */
                                     sm_nbytes = p_type_nbytes;
 
                                     for (k = rank; k > 0; --k) {
@@ -606,9 +606,9 @@ int do_copy_objects(hid_t fidin,
                             }/*nelmts*/
 
                             /*-------------------------------------------------------------------------
-                            * amount of compression used
-                            *-------------------------------------------------------------------------
-                            */
+                             * amount of compression used
+                             *-------------------------------------------------------------------------
+                             */
                             if (options->verbose) 
                             {
                                 if (apply_s && apply_f)
@@ -636,9 +636,9 @@ int do_copy_objects(hid_t fidin,
                             } /* verbose */
 
                             /*-------------------------------------------------------------------------
-                            * copy attrs
-                            *-------------------------------------------------------------------------
-                            */
+                             * copy attrs
+                             *-------------------------------------------------------------------------
+                             */
                             if (copy_attr(dset_in,dset_out,options)<0)
                                 goto error;
 
@@ -651,9 +651,9 @@ int do_copy_objects(hid_t fidin,
 
 
                     /*-------------------------------------------------------------------------
-                    * close
-                    *-------------------------------------------------------------------------
-                    */
+                     * close
+                     *-------------------------------------------------------------------------
+                     */
                     if (H5Tclose(ftype_id)<0)
                         goto error;
                     if (H5Tclose(wtype_id)<0)
@@ -669,9 +669,9 @@ int do_copy_objects(hid_t fidin,
 
                 }
                 /*-------------------------------------------------------------------------
-                * we do not have request for filter/chunking use H5Ocopy instead
-                *-------------------------------------------------------------------------
-                */
+                 * we do not have request for filter/chunking use H5Ocopy instead
+                 *-------------------------------------------------------------------------
+                 */
                 else 
                 {
                     hid_t        pid;
@@ -685,9 +685,9 @@ int do_copy_objects(hid_t fidin,
                         goto error;
 
                     /*-------------------------------------------------------------------------
-                    * do the copy
-                    *-------------------------------------------------------------------------
-                    */
+                     * do the copy
+                     *-------------------------------------------------------------------------
+                     */
 
                     if (H5Ocopy(fidin,          /* Source file or group identifier */
                             travt->objs[i].name,       /* Name of the source object to be copied */
@@ -703,9 +703,9 @@ int do_copy_objects(hid_t fidin,
 
 
                     /*-------------------------------------------------------------------------
-                    * copy attrs manually
-                    *-------------------------------------------------------------------------
-                    */
+                     * copy attrs manually
+                     *-------------------------------------------------------------------------
+                     */
                     if ((dset_in=H5Dopen(fidin,travt->objs[i].name))<0)
                         goto error;
                     if ((dset_out=H5Dopen(fidout,travt->objs[i].name))<0)
@@ -723,10 +723,10 @@ int do_copy_objects(hid_t fidin,
                 break;
 
             /*-------------------------------------------------------------------------
-            * H5G_TYPE
-            *-------------------------------------------------------------------------
-            */
-            case H5G_TYPE:
+             * H5TRAV_TYPE_NAMED_DATATYPE
+             *-------------------------------------------------------------------------
+             */
+            case H5TRAV_TYPE_NAMED_DATATYPE:
 
                 if ((type_in = H5Topen (fidin,travt->objs[i].name))<0)
                     goto error;
@@ -738,9 +738,9 @@ int do_copy_objects(hid_t fidin,
                     goto error;
 
                 /*-------------------------------------------------------------------------
-                * copy attrs
-                *-------------------------------------------------------------------------
-                */
+                 * copy attrs
+                 *-------------------------------------------------------------------------
+                 */
                 if (copy_attr(type_in,type_out,options)<0)
                     goto error;
 
@@ -756,16 +756,16 @@ int do_copy_objects(hid_t fidin,
 
 
             /*-------------------------------------------------------------------------
-            * H5G_LINK
-            * H5G_UDLINK
-            *
-            * Only handles external links; H5Lcopy will fail for other UD link types
-            * since we don't have creation or copy callbacks for them.
-            *-------------------------------------------------------------------------
-            */
+             * H5TRAV_TYPE_LINK
+             * H5TRAV_TYPE_UDLINK
+             *
+             * Only handles external links; H5Lcopy will fail for other UD link types
+             * since we don't have creation or copy callbacks for them.
+             *-------------------------------------------------------------------------
+             */
 
-            case H5G_LINK:
-            case H5G_UDLINK:
+            case H5TRAV_TYPE_LINK:
+            case H5TRAV_TYPE_UDLINK:
             {
                 if(H5Lcopy(fidin, travt->objs[i].name,fidout, travt->objs[i].name, H5P_DEFAULT, H5P_DEFAULT) < 0)
                     goto error;

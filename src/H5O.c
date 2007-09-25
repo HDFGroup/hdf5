@@ -114,9 +114,9 @@ const H5O_msg_class_t *const H5O_msg_class_g[] = {
  * datatype message is a datatype but only some of them are datasets.
  */
 const H5O_obj_class_t *const H5O_obj_class_g[] = {
-    H5O_OBJ_DATATYPE,		/* Datatype object (H5G_TYPE - 2) */
-    H5O_OBJ_DATASET,		/* Dataset object (H5G_DATASET - 1) */
-    H5O_OBJ_GROUP,		/* Group object (H5G_GROUP - 0) */
+    H5O_OBJ_DATATYPE,		/* Datatype object (H5O_TYPE_NAMED_DATATYPE - 2) */
+    H5O_OBJ_DATASET,		/* Dataset object (H5O_TYPE_DATASET - 1) */
+    H5O_OBJ_GROUP,		/* Group object (H5O_TYPE_GROUP - 0) */
 };
 
 /* Declare a free list to manage the H5O_t struct */

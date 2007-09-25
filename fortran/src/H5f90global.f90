@@ -205,6 +205,7 @@
       INTEGER :: H5G_GROUP_F
       INTEGER :: H5G_DATASET_F
       INTEGER :: H5G_TYPE_F
+! XXX: Fix problems with H5G_LINK_F! - QAK
       INTEGER :: H5G_LINK_F
       INTEGER :: H5G_LINK_ERROR_F
       INTEGER :: H5G_LINK_HARD_F
@@ -214,6 +215,7 @@
       EQUIVALENCE(H5G_flags(2), H5G_GROUP_F)
       EQUIVALENCE(H5G_flags(3), H5G_DATASET_F)
       EQUIVALENCE(H5G_flags(4), H5G_TYPE_F) 
+! XXX: Fix problems with H5G_LINK_F! - QAK
       EQUIVALENCE(H5G_flags(5), H5G_LINK_F)
       EQUIVALENCE(H5G_flags(6), H5G_LINK_ERROR_F) 
       EQUIVALENCE(H5G_flags(7), H5G_LINK_HARD_F) 

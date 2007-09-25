@@ -352,10 +352,10 @@ int do_copy_refobjs(hid_t fidin,
                 break;
 
             /*-------------------------------------------------------------------------
-            * H5G_LINK
+            * H5TRAV_TYPE_LINK
             *-------------------------------------------------------------------------
             */
-            case H5G_LINK:
+            case H5TRAV_TYPE_LINK:
                 /*nothing to do */
                 break;
 

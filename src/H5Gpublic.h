@@ -83,30 +83,6 @@ H5_DLL herr_t H5Gget_info_by_idx(hid_t loc_id, const char *group_name,
     hid_t lapl_id);
 H5_DLL herr_t H5Gclose(hid_t group_id);
 
-/* Functions and variables defined for compatibility with previous versions
- * of the HDF5 API.
- * 
- * Use of these functions and variables is deprecated.
- */
-/*
- * An object has a certain type. The first few numbers are reserved for use
- * internally by HDF5. Users may add their own types with higher values.  The
- * values are never stored in the file -- they only exist while an
- * application is running.  An object may satisfy the `isa' function for more
- * than one type.
- */
-typedef enum H5G_obj_t {
-    H5G_UNKNOWN = -1,		/* Unknown object type		*/
-    H5G_GROUP,		        /* Object is a group		*/
-    H5G_DATASET,		/* Object is a dataset		*/
-    H5G_TYPE,			/* Object is a named data type	*/
-    H5G_LINK,		        /* Object is a symbolic link	*/
-    H5G_UDLINK,		        /* Object is a user-defined link */
-    H5G_RESERVED_5,		/* Reserved for future use	*/
-    H5G_RESERVED_6,		/* Reserved for future use	*/
-    H5G_RESERVED_7		/* Reserved for future use	*/
-} H5G_obj_t;
-
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  * 
  * Use of these symbols is deprecated.
@@ -130,6 +106,25 @@ typedef enum H5G_obj_t {
 
 
 /* Typedefs */
+
+/*
+ * An object has a certain type. The first few numbers are reserved for use
+ * internally by HDF5. Users may add their own types with higher values.  The
+ * values are never stored in the file -- they only exist while an
+ * application is running.  An object may satisfy the `isa' function for more
+ * than one type.
+ */
+typedef enum H5G_obj_t {
+    H5G_UNKNOWN = -1,		/* Unknown object type		*/
+    H5G_GROUP,		        /* Object is a group		*/
+    H5G_DATASET,		/* Object is a dataset		*/
+    H5G_TYPE,			/* Object is a named data type	*/
+    H5G_LINK,		        /* Object is a symbolic link	*/
+    H5G_UDLINK,		        /* Object is a user-defined link */
+    H5G_RESERVED_5,		/* Reserved for future use	*/
+    H5G_RESERVED_6,		/* Reserved for future use	*/
+    H5G_RESERVED_7		/* Reserved for future use	*/
+} H5G_obj_t;
 
 /* Prototype for H5Giterate() operator */
 typedef herr_t (*H5G_iterate_t)(hid_t group, const char *name, void *op_data);

@@ -168,7 +168,7 @@ ph5diff_worker(int nID)
         if(Status.MPI_TAG == MPI_TAG_ARGS)
         {
         /*Recv parameters for diff from manager task */
-        MPI_Recv(&args, sizeof(struct diff_args), MPI_BYTE, 0, MPI_TAG_ARGS, MPI_COMM_WORLD, &Status);
+        MPI_Recv(&args, sizeof(args), MPI_BYTE, 0, MPI_TAG_ARGS, MPI_COMM_WORLD, &Status);
         /*Do the diff */
         nfound = diff(file1_id, args.name, file2_id, args.name, &(args.options), args.type);
         diffs.nfound = nfound;

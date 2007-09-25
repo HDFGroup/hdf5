@@ -1295,7 +1295,7 @@ H5G_dense_remove_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
 
     /* Replace open objects' names, if requested */
     if(udata->replace_names)
-        if(H5G_link_name_replace(udata->f, udata->dxpl_id, udata->grp_full_path_r, lnk->name, lnk->type, lnk->u.hard.addr) < 0)
+        if(H5G_link_name_replace(udata->f, udata->dxpl_id, udata->grp_full_path_r, lnk) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTRENAME, FAIL, "unable to rename open objects")
 
     /* Perform the deletion action on the link, if requested */
@@ -1537,7 +1537,7 @@ H5G_dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
     } /* end if */
 
     /* Replace open objects' names */
-    if(H5G_link_name_replace(bt2_udata->f, bt2_udata->dxpl_id, bt2_udata->grp_full_path_r, fh_udata.lnk->name, fh_udata.lnk->type, fh_udata.lnk->u.hard.addr) < 0)
+    if(H5G_link_name_replace(bt2_udata->f, bt2_udata->dxpl_id, bt2_udata->grp_full_path_r, fh_udata.lnk) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTRENAME, FAIL, "unable to rename open objects")
 
     /* Perform the deletion action on the link */

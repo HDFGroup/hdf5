@@ -448,8 +448,7 @@ H5_DLL herr_t H5G_link_iterate_table(const H5G_link_table_t *ltable,
     void *op_data);
 H5_DLL herr_t H5G_link_release_table(H5G_link_table_t *ltable);
 H5_DLL herr_t H5G_link_name_replace(H5F_t *file, hid_t dxpl_id,
-    H5RS_str_t *grp_full_path_r, const char *lnk_name, H5L_type_t lnk_type,
-    haddr_t lnk_addr);
+    H5RS_str_t *grp_full_path_r, const H5O_link_t *lnk);
 
 /* Functions that understand "compact" link storage */
 H5_DLL herr_t H5G_compact_insert(const H5O_loc_t *grp_oloc, H5O_link_t *obj_lnk,

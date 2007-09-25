@@ -288,8 +288,8 @@ H5G_compact_remove_common_cb(const void *_mesg, unsigned UNUSED idx, void *_udat
 
     /* If we've found the right link, get the object type */
     if(HDstrcmp(lnk->name, udata->name) == 0) {
-        /* Determine the object's type */
-        if(H5G_link_name_replace(udata->file, udata->dxpl_id, udata->grp_full_path_r, lnk->name, lnk->type, lnk->u.hard.addr) < 0)
+        /* Replace path names for link being removed */
+        if(H5G_link_name_replace(udata->file, udata->dxpl_id, udata->grp_full_path_r, lnk) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5_ITER_ERROR, "unable to get object type")
 
         /* Stop the iteration, we found the correct link */

@@ -235,8 +235,9 @@ H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child,
 
     /* Search the open IDs and replace names for mount operation */
     /* We pass H5G_UNKNOWN as object type; search all IDs */
-    if(H5G_name_replace(H5G_UNKNOWN, mp_loc.oloc->file, mp_loc.path->full_path_r,
-            NULL, root_loc.oloc->file, root_loc.path->full_path_r, H5G_NAME_MOUNT) < 0)
+    if(H5G_name_replace(NULL, H5G_NAME_MOUNT, mp_loc.oloc->file,
+            mp_loc.path->full_path_r, root_loc.oloc->file, root_loc.path->full_path_r,
+            dxpl_id) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to replace name")
 
 done:
@@ -244,12 +245,12 @@ done:
         if(mount_point) {
             if(H5G_close(mount_point) < 0)
                 HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to close mounted group")
-        }
+        } /* end if */
         else {
             if(H5G_loc_free(&mp_loc) < 0)
                 HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free mount location")
-        }
-    }
+        } /* end else */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_mount() */
@@ -369,8 +370,9 @@ H5F_unmount(H5G_loc_t *loc, const char *name, hid_t dxpl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get path for root group")
 
     /* Search the open IDs replace names to reflect unmount operation */
-    if(H5G_name_replace(H5G_UNKNOWN, mp_loc.oloc->file, mp_loc.path->full_path_r,
-            NULL, root_loc.oloc->file, root_loc.path->full_path_r, H5G_NAME_UNMOUNT) < 0)
+    if(H5G_name_replace(NULL, H5G_NAME_UNMOUNT, mp_loc.oloc->file,
+            mp_loc.path->full_path_r, root_loc.oloc->file, root_loc.path->full_path_r,
+            dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to replace name")
 
     /* Eliminate the mount point from the table */

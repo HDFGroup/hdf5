@@ -51,6 +51,7 @@ typedef struct H5G_bt_it_gnbi_t {
     char         *name;         /*member name to be returned                 */
 } H5G_bt_it_gnbi_t;
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 /* Data passed through B-tree iteration for looking up a type by index */
 typedef struct H5G_bt_it_gtbi_t {
     /* downward */
@@ -60,6 +61,7 @@ typedef struct H5G_bt_it_gtbi_t {
     /* upward */
     H5G_obj_t    type;          /*member type to be returned                 */
 } H5G_bt_it_gtbi_t;
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 /* Data passed through B-tree iteration for looking up a link by index */
 typedef struct H5G_bt_it_lbi_t {

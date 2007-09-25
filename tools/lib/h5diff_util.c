@@ -261,23 +261,22 @@ diff_basename(const char *name)
  *-------------------------------------------------------------------------
  */
 const char*
-get_type(int type)
+get_type(h5trav_type_t type)
 {
- switch (type)
- {
- case H5G_DATASET:
-  return("H5G_DATASET");
- case H5G_GROUP:
-  return("H5G_GROUP");
- case H5G_TYPE:
-  return("H5G_TYPE");
- case H5G_LINK:
-  return("H5G_LINK");
- case H5G_UDLINK:
-  return("H5G_UDLINK");
- default:
-  return("user defined type");
- }
+    switch(type) {
+        case H5TRAV_TYPE_DATASET:
+            return("H5G_DATASET");
+        case H5TRAV_TYPE_GROUP:
+            return("H5G_GROUP");
+        case H5TRAV_TYPE_NAMED_DATATYPE:
+            return("H5G_TYPE");
+        case H5TRAV_TYPE_LINK:
+            return("H5G_LINK");
+        case H5TRAV_TYPE_UDLINK:
+            return("H5G_UDLINK");
+        default:
+            return("unknown type");
+    }
 }
 
 /*-------------------------------------------------------------------------

@@ -297,7 +297,7 @@ out:
 /*-------------------------------------------------------------------------
  * Function: test_types
  *
- * Purpose: Compare different HDF5 types (H5G_obj_t):
+ * Purpose: Compare different HDF5 object & link types:
  * H5G_DATASET, H5G_TYPE, H5G_GROUP, H5G_LINK, H5G_UDLINK
  *
  *-------------------------------------------------------------------------

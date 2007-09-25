@@ -655,6 +655,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 
 	case 'G':
 	    switch(type[1]) {
+#ifndef H5_NO_DEPRECATED_SYMBOLS
                 case 'o':
                     if(ptr) {
                         if(vp)
@@ -668,34 +669,40 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                             case H5G_UNKNOWN:
                                 fprintf(out, "H5G_UNKNOWN");
                                 break;
-                            case H5G_LINK:
-                                fprintf(out, "H5G_LINK");
-                                break;
-                            case H5G_UDLINK:
-                                fprintf(out, "H5G_UDLINK");
-                                break;
+
                             case H5G_GROUP:
                                 fprintf(out, "H5G_GROUP");
                                 break;
+
                             case H5G_DATASET:
                                 fprintf(out, "H5G_DATASET");
                                 break;
+
                             case H5G_TYPE:
                                 fprintf(out, "H5G_TYPE");
                                 break;
+
+                            case H5G_LINK:
+                                fprintf(out, "H5G_LINK");
+                                break;
+
+                            case H5G_UDLINK:
+                                fprintf(out, "H5G_UDLINK");
+                                break;
+
                             case H5G_RESERVED_5:
                             case H5G_RESERVED_6:
                             case H5G_RESERVED_7:
                                 fprintf(out, "H5G_RESERVED(%ld)",(long)obj_type);
                                 break;
+
                             default:
                                 fprintf(out, "%ld", (long)obj_type);
                                 break;
-                        }
-                    }
+                        } /* end switch */
+                    } /* end else */
                     break;
 
-#ifndef H5_NO_DEPRECATED_SYMBOLS
                 case 's':
                     if(ptr) {
                         if(vp)

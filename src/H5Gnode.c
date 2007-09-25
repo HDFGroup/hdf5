@@ -1216,11 +1216,9 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
 
     /* "Normal" removal of a single entry from the symbol table node */
     if(udata->common.name != NULL) {
-        H5L_type_t lnk_type;    /* Type of link being removed */
-        haddr_t lnk_addr;       /* Address of object (for hard link) */
+        H5O_link_t lnk;         /* Constructed link for replacement */
         size_t len;             /* Length of string in local heap */
         const char *base;       /* Base of heap */
-        const char *s;          /* Pointer to string in local heap */
 
         /* Get base address of heap */
         base = H5HL_offset_into(f, udata->common.heap, (size_t)0);
@@ -1228,6 +1226,8 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
         /* Find the name with a binary search */
         rt = sn->nsyms;
         while(lt < rt && cmp) {
+            const char *s;          /* Pointer to string in local heap */
+
             idx = (lt + rt) / 2;
             s = base + sn->entry[idx].name_off;
             cmp = HDstrcmp(udata->common.name, s);
@@ -1240,48 +1240,50 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
         if(cmp)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5B_INS_ERROR, "name not found")
 
-        if(sn->entry[idx].type == H5G_CACHED_SLINK) {
-                /* Set the type of the link removed */
-                lnk_type = H5L_TYPE_SOFT;
-                lnk_addr = HADDR_UNDEF;
-
-                /* Remove the soft link's value from the local heap */
-                s = H5HL_offset_into(f, udata->common.heap, sn->entry[idx].cache.slink.lval_offset);
-                if(s) {
-                    len = HDstrlen(s) + 1;
-                    if(H5HL_remove(f, dxpl_id, udata->common.heap, sn->entry[idx].cache.slink.lval_offset, len) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, H5B_INS_ERROR, "unable to remove soft link from local heap")
-                } /* end if */
-        } /* end if */
-        else {
-            /* Set the link information */
-            lnk_type = H5L_TYPE_HARD;
-            HDassert(H5F_addr_defined(sn->entry[idx].header));
-            lnk_addr = sn->entry[idx].header;
-        } /* end else */
-
         /* Get a pointer to the name of the link */
-        if(NULL == (s = H5HL_offset_into(f, udata->common.heap, sn->entry[idx].name_off)))
+        if(NULL == (lnk.name = H5HL_offset_into(f, udata->common.heap, sn->entry[idx].name_off)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get link name")
 
-        /* Get the object's type */
-        if(H5G_link_name_replace(f, dxpl_id, udata->grp_full_path_r, s, lnk_type, lnk_addr) < 0)
+        /* Set up rest of link structure */
+        lnk.corder_valid = FALSE;
+        lnk.corder = 0;
+        lnk.cset = H5T_CSET_ASCII;
+        if(sn->entry[idx].type == H5G_CACHED_SLINK) {
+            lnk.type = H5L_TYPE_SOFT;
+            lnk.u.soft.name = H5HL_offset_into(f, udata->common.heap, sn->entry[idx].cache.slink.lval_offset);
+        } /* end if */
+        else {
+            lnk.type = H5L_TYPE_HARD;
+            HDassert(H5F_addr_defined(sn->entry[idx].header));
+            lnk.u.hard.addr = sn->entry[idx].header;
+        } /* end else */
+
+        /* Replace any object names */
+        if(H5G_link_name_replace(f, dxpl_id, udata->grp_full_path_r, &lnk) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get object type")
 
         /* Decrement the ref. count for hard links */
-        if(lnk_type == H5L_TYPE_HARD) {
+        if(lnk.type == H5L_TYPE_HARD) {
             H5O_loc_t tmp_oloc;             /* Temporary object location */
 
             /* Build temporary object location */
             tmp_oloc.file = f;
-            tmp_oloc.addr = lnk_addr;
+            tmp_oloc.addr = lnk.u.hard.addr;
 
             if(H5O_link(&tmp_oloc, -1, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5B_INS_ERROR, "unable to decrement object link count")
         } /* end if */
+        else {
+            /* Remove the soft link's value from the local heap */
+            if(lnk.u.soft.name) {
+                len = HDstrlen(lnk.u.soft.name) + 1;
+                if(H5HL_remove(f, dxpl_id, udata->common.heap, sn->entry[idx].cache.slink.lval_offset, len) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, H5B_INS_ERROR, "unable to remove soft link from local heap")
+            } /* end if */
+        } /* end else */
 
         /* Remove the link's name from the local heap */
-        len = HDstrlen(s) + 1;
+        len = HDstrlen(lnk.name) + 1;
         if(H5HL_remove(f, dxpl_id, udata->common.heap, sn->entry[idx].name_off, len) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, H5B_INS_ERROR, "unable to remove link name from local heap")
 

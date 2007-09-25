@@ -439,13 +439,13 @@ H5_DLLVAR const H5O_msg_class_t H5O_MSG_UNKNOWN[1];
  * Object header "object" types
  */
 
-/* Group Object. (H5G_GROUP - 0) */
+/* Group Object. (H5O_TYPE_GROUP - 0) */
 H5_DLLVAR const H5O_obj_class_t H5O_OBJ_GROUP[1];
 
-/* Dataset Object. (H5G_DATASET - 1) */
+/* Dataset Object. (H5O_TYPE_DATASET - 1) */
 H5_DLLVAR const H5O_obj_class_t H5O_OBJ_DATASET[1];
 
-/* Datatype Object. (H5G_TYPE - 2) */
+/* Datatype Object. (H5O_TYPE_NAMED_DATATYPE - 2) */
 H5_DLLVAR const H5O_obj_class_t H5O_OBJ_DATATYPE[1];
 
 

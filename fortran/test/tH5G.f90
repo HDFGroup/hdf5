@@ -151,6 +151,7 @@
      !
 !     CALL h5gget_obj_info_idx_f(file_id, linkname1, 2, name, obj_type, error)
 !     CALL check("h5gget_obj_info_idx_f", error, total_error) 
+! XXX: Fix problems with H5G_LINK_F! - QAK
 !     if (obj_type .ne. H5G_LINK_F) then
 !         write(*,*)  "got object  ", name, " type error ", obj_type
 !         total_error = total_error +1

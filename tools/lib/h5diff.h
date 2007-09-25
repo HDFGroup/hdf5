@@ -150,7 +150,7 @@ void        print_found(hsize_t nfound);
 void        parallel_print(const char* format, ... );
 void        print_type(hid_t type);
 const char* diff_basename(const char *name);
-const char* get_type(int type);
+const char* get_type(h5trav_type_t type);
 const char* get_class(H5T_class_t tclass);
 const char* get_sign(H5T_sign_t sign);
 void        print_dimensions (int rank, hsize_t *dims);

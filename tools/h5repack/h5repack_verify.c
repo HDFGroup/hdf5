@@ -248,9 +248,7 @@ int h5repack_verify(const char *fname,
   {
    char* name=travt->objs[i].name;
 
-   switch ( travt->objs[i].type )
-   {
-   case H5G_DATASET:
+   if ( travt->objs[i].type == H5TRAV_TYPE_DATASET) {
 
  /*-------------------------------------------------------------------------
   * open
@@ -296,11 +294,7 @@ int h5repack_verify(const char *fname,
      goto error;
     if (H5Dclose(dset_id)<0)
      goto error;
-
-    break;
-   default:
-    break;
-   } /* switch */
+   } /* if */
 
   } /* i */
 
@@ -402,20 +396,7 @@ int h5repack_cmpdcpl(const char *fname1,
 
  for ( i=0; i < travt1->nobjs; i++)
  {
-  switch ( travt1->objs[i].type )
-  {
-/*-------------------------------------------------------------------------
- * nothing to do for groups, links and types
- *-------------------------------------------------------------------------
- */
-  default:
-   break;
-
-/*-------------------------------------------------------------------------
- * H5G_DATASET
- *-------------------------------------------------------------------------
- */
-  case H5G_DATASET:
+  if ( travt1->objs[i].type == H5TRAV_TYPE_DATASET) {
    if ((dset1=H5Dopen(fid1,travt1->objs[i].name))<0)
     goto error;
    if ((dset2=H5Dopen(fid2,travt1->objs[i].name))<0)
@@ -450,10 +431,7 @@ int h5repack_cmpdcpl(const char *fname1,
     goto error;
    if (H5Dclose(dset2)<0)
     goto error;
-
-   break;
-
-  } /*switch*/
+  } /*if*/
  } /*i*/
 
 /*-------------------------------------------------------------------------

@@ -453,14 +453,14 @@ hsize_t diff_match(hid_t file1_id,
                 */
 
                 /*Set up args to pass to worker task. */
-                if(strlen(table->objs[i].name) > 255) {
+                if(HDstrlen(table->objs[i].name) > 255) {
                     printf("The parallel diff only supports object names up to 255 characters\n");
                     MPI_Abort(MPI_COMM_WORLD, 0);
                 } /* end if */
 
                 HDstrcpy(args.name, table->objs[i].name);
                 args.options = *options;
-                args.type= table->objs[i].type;
+                args.type = table->objs[i].type;
 
                 h5diffdebug2("busyTasks=%d\n", busyTasks);
                 /* if there are any outstanding print requests, let's handle one. */
@@ -516,7 +516,7 @@ hsize_t diff_match(hid_t file1_id,
                 for(n = 1; (n < g_nTasks) && !workerFound; n++) {
                     if(workerTasks[n-1]) {
                         /* send file id's and names to first free worker */
-                        MPI_Send(&args, sizeof(struct diff_args), MPI_BYTE, n, MPI_TAG_ARGS, MPI_COMM_WORLD);
+                        MPI_Send(&args, sizeof(args), MPI_BYTE, n, MPI_TAG_ARGS, MPI_COMM_WORLD);
 
                         /* increment counter for total number of prints. */
                         busyTasks++;
@@ -547,7 +547,7 @@ hsize_t diff_match(hid_t file1_id,
                                 nfound += nFoundbyWorker.nfound;
                                 options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
                                 /* send this task the work unit. */
-                                MPI_Send(&args, sizeof(struct diff_args), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_ARGS, MPI_COMM_WORLD);
+                                MPI_Send(&args, sizeof(args), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_ARGS, MPI_COMM_WORLD);
                             } /* end if */
                         } /* end while */
                     } /* end if */
@@ -560,7 +560,7 @@ hsize_t diff_match(hid_t file1_id,
                             MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_DONE, MPI_COMM_WORLD, &Status);
                             nfound += nFoundbyWorker.nfound;
                             options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
-                            MPI_Send(&args, sizeof(struct diff_args), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_ARGS, MPI_COMM_WORLD);
+                            MPI_Send(&args, sizeof(args), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_ARGS, MPI_COMM_WORLD);
                         } /* end if */
                         else if(Status.MPI_TAG == MPI_TAG_TOK_REQUEST) {
                             int incomingMessage;
@@ -577,7 +577,7 @@ hsize_t diff_match(hid_t file1_id,
                             MPI_Recv(&nFoundbyWorker, sizeof(nFoundbyWorker), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_TOK_RETURN, MPI_COMM_WORLD, &Status);
                             nfound += nFoundbyWorker.nfound;
                             options->not_cmp = options->not_cmp | nFoundbyWorker.not_cmp;
-                            MPI_Send(&args, sizeof(struct diff_args), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_ARGS, MPI_COMM_WORLD);
+                            MPI_Send(&args, sizeof(args), MPI_BYTE, Status.MPI_SOURCE, MPI_TAG_ARGS, MPI_COMM_WORLD);
                         } /* end else-if */
                         else {
                             printf("ERROR: Invalid tag (%d) received \n", Status.MPI_TAG);
@@ -744,10 +744,9 @@ hsize_t diff_compare (hid_t file1_id,
  if (info1->paths[i].type != info2->paths[j].type)
  {
   if (options->m_verbose)
-   parallel_print
-   ("Comparison not possible: <%s> is of type %s and <%s> is of type %s\n",
-   obj1_name, get_type (info1->paths[i].type), obj2_name,
-   get_type (info2->paths[j].type));
+   parallel_print("Comparison not possible: <%s> is of type %s and <%s> is of type %s\n",
+     obj1_name, get_type(info1->paths[i].type), obj2_name,
+     get_type(info2->paths[j].type));
   options->not_cmp=1;
   return 0;
  }

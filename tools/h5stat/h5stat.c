@@ -115,16 +115,11 @@ static int        display_group = FALSE;
 static int        display_dset_metadata = FALSE;
 static int        display_dset = FALSE;
 static int        display_dtype_metadata = FALSE;
-/* Not used yet 11/17/06 EIP
-static int        display_dtype = FALSE;
-*/
 static int        display_object = FALSE;
 static int        display_attr = FALSE;
 
 /* a structure for handling the order command-line parameters come in */
 struct handler_t {
-    void (*func)(void *);
-    int flag;
     char *obj;
 };
 
@@ -734,47 +729,58 @@ dataset_stats(hid_t group, const char *name, const H5O_info_t *oi, iter_t *iter)
  *-------------------------------------------------------------------------
  */
 static herr_t
-walk(hid_t group, const char *name, const H5L_info_t UNUSED *linfo, void *_iter)
+walk(hid_t group, const char *name, const H5L_info_t *linfo, void *_iter)
 {
     iter_t *iter = (iter_t *)_iter;
-    H5O_info_t oi;
     char *fullname = NULL;
-    char *s;
     herr_t ret;                     /* Generic return value */
 
-    /* Get the full object name */
-    fullname = fix_name(iter->container, name);
+    if(!linfo || linfo->type == H5L_TYPE_HARD) {
+        H5O_info_t oi;
+        char *s;
 
-    /* Get object information */
-    ret = H5Oget_info(group, name, &oi, H5P_DEFAULT);
-    assert(ret >= 0);
+        /* Get object information */
+        ret = H5Oget_info(group, name, &oi, H5P_DEFAULT);
+        assert(ret >= 0);
 
-    /* If the object has already been printed then just show the object ID
-     * and return. */
-    if((s = sym_lookup(&oi))) {
-        printf("%s same as %s\n", name, s);
-    } else {
-        sym_insert(&oi, fullname);
+        /* If the object has already been printed then just show the object ID
+         * and return. */
+        if((s = sym_lookup(&oi))) {
+            printf("%s same as %s\n", name, s);
+        } else {
+            /* Get the full object name */
+            fullname = fix_name(iter->container, name);
+            sym_insert(&oi, fullname);
 
-        /* Gather some statistics about the object */
-        if(oi.rc > iter->max_links)
-            iter->max_links = oi.rc;
+            /* Gather some statistics about the object */
+            if(oi.rc > iter->max_links)
+                iter->max_links = oi.rc;
 
-        switch(oi.type) {
-            case H5G_GROUP:
-                group_stats(group, name, fullname, &oi, walk, iter);
-                break;
+            switch(oi.type) {
+                case H5O_TYPE_GROUP:
+                    group_stats(group, name, fullname, &oi, walk, iter);
+                    break;
 
-            case H5G_DATASET:
-                dataset_stats(group, name, &oi, iter);
-                break;
+                case H5O_TYPE_DATASET:
+                    dataset_stats(group, name, &oi, iter);
+                    break;
 
-            case H5G_TYPE:
-                /* Gather statistics about this type of object */
-                iter->uniq_types++;
-                break;
+                case H5O_TYPE_NAMED_DATATYPE:
+                    /* Gather statistics about this type of object */
+                    iter->uniq_types++;
+                    break;
 
-            case H5G_LINK:
+                default:
+                    /* Gather statistics about this type of object */
+                    iter->uniq_others++;
+                    break;
+            } /* end switch */
+        }
+    } /* end if */
+    else {
+        switch(linfo->type) {
+            case H5L_TYPE_SOFT:
+            case H5L_TYPE_EXTERNAL:
                 /* Gather statistics about links and UD links */
                 iter->uniq_links++;
                 break;
@@ -783,8 +789,8 @@ walk(hid_t group, const char *name, const H5L_info_t UNUSED *linfo, void *_iter)
                 /* Gather statistics about this type of object */
                 iter->uniq_others++;
                 break;
-        } /* end switch */
-    }
+        } /* end switch() */
+    } /* end else */
 
     if(fullname)
         free(fullname);
@@ -823,66 +829,77 @@ parse_command_line(int argc, const char *argv[])
     /* parse command line options */
     while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
-        case 'A':
-            display_all = FALSE;
-            display_attr = TRUE;
-	    break;
-        case 'F':
-            display_all = FALSE;
-            display_file_metadata = TRUE;
-            break;
-        case 'f':
-            display_all = FALSE;
-            display_file = TRUE;
-            break;
-        case 'G':
-            display_all = FALSE;
-            display_group_metadata = TRUE;
-            break;
-        case 'g':
-            display_all = FALSE;
-            display_group = TRUE;
-            break;
-        case 'T':
-            display_all = FALSE;
-            display_dtype_metadata = TRUE;
-            break;
-        case 'D':
-            display_all = FALSE;
-            display_dset_metadata = TRUE;
-            break;
-        case 'd':
-            display_all = FALSE;
-            display_dset = TRUE;
-            break;
-        case 'h':
-            usage(progname);
-            leave(EXIT_SUCCESS);
-        case 'V':
-            print_version(progname);
-            leave(EXIT_SUCCESS);
-            break;
-        case 'O':
-            display_object = TRUE;
-            for (i = 0; i < argc; i++)
-                if (!hand[i].obj) {
-                    hand[i].obj = HDstrdup(opt_arg);
-                    hand[i].flag = 1;
-                    break;
-                }
-            break;
-        default:
-            usage(progname);
-            leave(EXIT_FAILURE);
-        }
-    }
+            case 'A':
+                display_all = FALSE;
+                display_attr = TRUE;
+                break;
+
+            case 'F':
+                display_all = FALSE;
+                display_file_metadata = TRUE;
+                break;
+
+            case 'f':
+                display_all = FALSE;
+                display_file = TRUE;
+                break;
+
+            case 'G':
+                display_all = FALSE;
+                display_group_metadata = TRUE;
+                break;
+
+            case 'g':
+                display_all = FALSE;
+                display_group = TRUE;
+                break;
+
+            case 'T':
+                display_all = FALSE;
+                display_dtype_metadata = TRUE;
+                break;
+
+            case 'D':
+                display_all = FALSE;
+                display_dset_metadata = TRUE;
+                break;
+
+            case 'd':
+                display_all = FALSE;
+                display_dset = TRUE;
+                break;
+
+            case 'h':
+                usage(progname);
+                leave(EXIT_SUCCESS);
+
+            case 'V':
+                print_version(progname);
+                leave(EXIT_SUCCESS);
+                break;
+
+            case 'O':
+                display_object = TRUE;
+                for(i = 0; i < argc; i++)
+                    if(!hand[i].obj) {
+                        hand[i].obj = HDstrdup(opt_arg);
+                        break;
+                    } /* end if */
+                break;
+
+            default:
+                usage(progname);
+                leave(EXIT_FAILURE);
+        } /* end switch */
+    } /* end while */
 
     /* check for file name to be processed */
     if (argc <= opt_ind) {
         error_msg(progname, "missing file name\n");
         usage(progname);
         leave(EXIT_FAILURE);
-    }
+    } /* end if */
+
     return hand;
 }
 
@@ -1322,9 +1339,8 @@ main(int argc, const char *argv[])
     }
 
     fname = argv[opt_ind];
-    hand[opt_ind].obj = root;
-    hand[opt_ind].flag = 1;
-    if (display_object) hand[opt_ind].flag = 0;
+    if(!display_object)
+        hand[0].obj = root;
 
     printf("Filename: %s\n", fname);
 
@@ -1348,14 +1364,12 @@ main(int argc, const char *argv[])
     }
 
     /* Walk the objects or all file */
-    for(i = 0; i < argc; i++) { 
-         if(hand[i].obj) {
-              if(hand[i].flag) {
-                   walk(fid, hand[i].obj, NULL, &iter);
-                   print_statistics(hand[i].obj, &iter);
-              }
-         }
-    }
+    i = 0;
+    while(hand[i].obj) {
+        walk(fid, hand[i].obj, NULL, &iter);
+        print_statistics(hand[i].obj, &iter);
+        i++;
+    } /* end while */
 
     free(hand);
 

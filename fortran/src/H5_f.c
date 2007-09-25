@@ -298,11 +298,13 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5f_flags,
  *  H5G flags
  */
 
-      h5g_flags[0] = H5G_UNKNOWN;
-      h5g_flags[1] = H5G_GROUP;
-      h5g_flags[2] = H5G_DATASET;
-      h5g_flags[3] = H5G_TYPE;
-      h5g_flags[4] = H5G_LINK;
+      h5g_flags[0] = H5O_TYPE_UNKNOWN;
+      h5g_flags[1] = H5O_TYPE_GROUP;
+      h5g_flags[2] = H5O_TYPE_DATASET;
+      h5g_flags[3] = H5O_TYPE_NAMED_DATATYPE;
+/* This value can no longer be returned and all these flags should be updated
+ *      to reflect the refinements between links and objects. -QAK */
+/*      h5g_flags[4] = H5G_LINK; */
       h5g_flags[5] = H5L_TYPE_ERROR;
       h5g_flags[6] = H5L_TYPE_HARD;
       h5g_flags[7] = H5L_TYPE_SOFT;

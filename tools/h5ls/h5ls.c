@@ -2069,9 +2069,9 @@ main(int argc, const char *argv[])
     h5tools_init();
 
     /* Build object display table */
-    DISPATCH(H5G_DATASET, "Dataset", H5Dopen2, H5Dclose, dataset_list1, dataset_list2);
-    DISPATCH(H5G_GROUP, "Group", H5Gopen2, H5Gclose, NULL, group_list2);
-    DISPATCH(H5G_TYPE, "Type", H5Topen2, H5Tclose, NULL, datatype_list2);
+    DISPATCH(H5O_TYPE_GROUP, "Group", H5Gopen2, H5Gclose, NULL, group_list2);
+    DISPATCH(H5O_TYPE_DATASET, "Dataset", H5Dopen2, H5Dclose, dataset_list1, dataset_list2);
+    DISPATCH(H5O_TYPE_NAMED_DATATYPE, "Type", H5Topen2, H5Tclose, NULL, datatype_list2);
 
     /* Default output width */
     width_g = get_width();

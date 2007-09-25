@@ -610,7 +610,7 @@ test_iter_group_large(hid_t fapl)
 
         /* Add the name to the list of objects in the root group */
         HDstrcpy(names[i].name, gname);
-        names[i].type = H5G_GROUP;
+        names[i].type = H5O_TYPE_GROUP;
 
         /* Create a group */
         group = H5Gcreate2(file, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -627,7 +627,7 @@ test_iter_group_large(hid_t fapl)
 
     /* Add the name to the list of objects in the root group */
     HDstrcpy(names[ITER_NGROUPS].name, "Dataset1");
-    names[ITER_NGROUPS].type = H5G_DATASET;
+    names[ITER_NGROUPS].type = H5O_TYPE_DATASET;
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -657,7 +657,7 @@ test_iter_group_large(hid_t fapl)
 
     /* Add the name to the list of objects in the root group */
     HDstrcpy(names[ITER_NGROUPS + 1].name, "Datatype1");
-    names[ITER_NGROUPS + 1].type = H5G_TYPE;
+    names[ITER_NGROUPS + 1].type = H5O_TYPE_NAMED_DATATYPE;
 
     /* Close datatype */
     ret = H5Tclose(tid);

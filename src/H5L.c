@@ -2363,7 +2363,6 @@ H5L_move_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
 {
     H5L_trav_mv_t *udata = (H5L_trav_mv_t *)_udata;   /* User data passed in */
     H5L_trav_mv2_t udata_out;           /* User data for H5L_move_dest_cb traversal */
-    H5G_obj_t type;                     /* Type of object being moved */
     char * orig_name = NULL;            /* The name of the link in this group */
     hbool_t link_copied = FALSE;        /* Has udata_out.lnk been allocated? */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -2377,29 +2376,6 @@ H5L_move_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
     /* Check for operations on '.' */
     if(lnk == NULL)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "the name of a link must be supplied to move or copy")
-
-    /* Get object type */
-    switch(lnk->type) {
-        case H5L_TYPE_HARD:
-            {
-                H5O_type_t obj_type;            /* Type of object at location */
-
-                if(H5O_obj_type(obj_loc->oloc, &obj_type, udata->dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object type")
-                if(H5G_UNKNOWN == (type = H5G_map_obj_type(obj_type)))
-                    HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "unknown object type to move")
-            }
-            break;
-
-        case H5L_TYPE_SOFT:
-            type = H5G_LINK;
-            break;
-
-        default:
-            if(lnk->type < H5L_TYPE_UD_MIN)
-                HGOTO_ERROR(H5E_LINK, H5E_BADTYPE, FAIL, "unrecognized link type")
-            type = H5G_UDLINK;
-    } /* end switch */
 
     /* Set up user data for move_dest_cb */
     if((udata_out.lnk = (H5O_link_t *)H5O_msg_copy(H5O_LINK_ID, lnk, NULL)) == NULL)
@@ -2427,12 +2403,22 @@ H5L_move_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
     if(!udata->copy) {
         H5RS_str_t *dst_name_r;      /* Ref-counted version of dest name */
 
-        /* Fix names up */
-        dst_name_r = H5RS_wrap(udata->dst_name);
+        /* Make certain that the destination name is a full (not relative) path */
+        if(*(udata->dst_name) != '/') {
+            HDassert(udata->dst_loc->path->full_path_r);
+
+            /* Create reference counted string for full dst path */
+            if((dst_name_r = H5G_build_fullpath_refstr_str(udata->dst_loc->path->full_path_r,
+                    udata->dst_name)) == NULL)
+                HGOTO_ERROR(H5E_SYM, H5E_PATH, FAIL, "can't build destination path name")
+        } /* end if */
+        else
+            dst_name_r = H5RS_wrap(udata->dst_name);
         HDassert(dst_name_r);
-        if(H5G_name_replace(type, obj_loc->oloc->file, obj_loc->path->full_path_r,
-                dst_name_r, udata->dst_loc->oloc->file, udata->dst_loc->path->full_path_r,
-                H5G_NAME_MOVE) < 0) {
+
+        /* Fix names up */
+        if(H5G_name_replace(lnk, H5G_NAME_MOVE, obj_loc->oloc->file, obj_loc->path->full_path_r,
+                udata->dst_loc->oloc->file, dst_name_r, udata->dxpl_id) < 0) {
             H5RS_decr(dst_name_r);
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to replace name")
         } /* end if */

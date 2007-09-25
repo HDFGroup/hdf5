@@ -1366,48 +1366,6 @@ H5G_fileof(H5G_t *grp)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_map_obj_type
- *
- * Purpose:	Maps the object type to the older "group" object type
- *
- * Return:	Object type (can't fail)
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, November 21, 2006
- *
- *-------------------------------------------------------------------------
- */
-H5G_obj_t
-H5G_map_obj_type(H5O_type_t obj_type)
-{
-    H5G_obj_t ret_value;        /* Return value */
-
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_map_obj_type)
-
-    /* Map object type to older "group" object type */
-    switch(obj_type) {
-        case H5O_TYPE_GROUP:
-            ret_value = H5G_GROUP;
-            break;
-
-        case H5O_TYPE_DATASET:
-            ret_value = H5G_DATASET;
-            break;
-
-        case H5O_TYPE_NAMED_DATATYPE:
-            ret_value = H5G_TYPE;
-            break;
-
-        default:
-            ret_value = H5G_UNKNOWN;
-    } /* end switch */
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_map_obj_type() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5G_free_grp_name
  *
  * Purpose:	Free the 'ID to name' buffers.

@@ -47,7 +47,6 @@ typedef struct H5G_names_t {
     H5RS_str_t  *src_full_path_r;       /* Source location's full path */
     H5F_t       *dst_file;              /* Destination location's file */
     H5RS_str_t  *dst_full_path_r;       /* Destination location's full path */
-    H5RS_str_t  *new_name_r;            /* Name of object relative to destination location */
 } H5G_names_t;
 
 /* Info to pass to the iteration function when building name */
@@ -79,7 +78,9 @@ H5FL_DEFINE_STATIC(haddr_t);
 /* PRIVATE PROTOTYPES */
 static htri_t H5G_common_path(const H5RS_str_t *fullpath_r, const H5RS_str_t *prefix_r);
 static H5RS_str_t *H5G_build_fullpath(const char *prefix, const char *name);
+#ifdef NOT_YET
 static H5RS_str_t *H5G_build_fullpath_refstr_refstr(const H5RS_str_t *prefix_r, const H5RS_str_t *name_r);
+#endif /* NOT_YET */
 static herr_t H5G_name_move_path(H5RS_str_t **path_r_ptr,
     const char *full_suffix, const char *src_path, const char *dst_path);
 static int H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key);
@@ -246,6 +247,7 @@ H5G_build_fullpath_refstr_str(H5RS_str_t *prefix_r, const char *name)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_build_fullpath_refstr_str() */
 
+#ifdef NOT_YET
 
 /*-------------------------------------------------------------------------
  * Function: H5G_name_build_refstr_refstr
@@ -281,6 +283,7 @@ H5G_build_fullpath_refstr_refstr(const H5RS_str_t *prefix_r, const H5RS_str_t *n
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_build_fullpath_refstr_refstr() */
+#endif /* NOT_YET */
 
 
 /*-------------------------------------------------------------------------
@@ -735,9 +738,9 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
 
     switch(names->op) {
         /*-------------------------------------------------------------------------
-        * H5G_NAME_MOUNT
-        *-------------------------------------------------------------------------
-        */
+         * H5G_NAME_MOUNT
+         *-------------------------------------------------------------------------
+         */
         case H5G_NAME_MOUNT:
             /* Check if object is in child mount hier. */
             if(obj_in_child) {
@@ -780,9 +783,9 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
             break;
 
         /*-------------------------------------------------------------------------
-        * H5G_NAME_UNMOUNT
-        *-------------------------------------------------------------------------
-        */
+         * H5G_NAME_UNMOUNT
+         *-------------------------------------------------------------------------
+         */
         case H5G_NAME_UNMOUNT:
             if(obj_in_child) {
                 const char *full_path;      /* Full path of current object */
@@ -828,9 +831,9 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
             break;
 
         /*-------------------------------------------------------------------------
-        * H5G_NAME_DELETE
-        *-------------------------------------------------------------------------
-        */
+         * H5G_NAME_DELETE
+         *-------------------------------------------------------------------------
+         */
         case H5G_NAME_DELETE:
             /* Check if the location being unlinked is in the path for the current object */
             if(H5G_common_path(obj_path->full_path_r, names->src_full_path_r)) {
@@ -840,9 +843,9 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
             break;
 
         /*-------------------------------------------------------------------------
-        * H5G_NAME_MOVE
-        *-------------------------------------------------------------------------
-        */
+         * H5G_NAME_MOVE
+         *-------------------------------------------------------------------------
+         */
         case H5G_NAME_MOVE: /* Link move case, check for relative names case */
             /* Check if the src object moved is in the current object's path */
             if(H5G_common_path(obj_path->full_path_r, names->src_full_path_r)) {
@@ -850,30 +853,20 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
                 const char *full_suffix;    /* Suffix of full path, after src_path */
                 char *new_full_path;        /* New full path of object */
                 size_t new_full_len;        /* Length of new full path */
-                H5RS_str_t *src_path_r;     /* Full path of source name */
                 const char *src_path;       /* Full path of source object */
-                H5RS_str_t *dst_path_r;     /* Full path of destination name */
                 const char *dst_path;       /* Full path of destination object */
 
                 /* Sanity check */
-                HDassert(*(H5RS_get_str(names->src_full_path_r)) == '/');
-                HDassert(names->new_name_r);
-
-                /* Make certain that the source and destination names are full (not relative) paths */
-                src_path_r = H5RS_dup(names->src_full_path_r);
-                if(*(H5RS_get_str(names->new_name_r)) != '/') {
-                    HDassert(names->dst_full_path_r);
-                    /* Create reference counted string for full dst path */
-                    if((dst_path_r = H5G_build_fullpath_refstr_refstr(names->dst_full_path_r, names->new_name_r)) == NULL)
-                        HGOTO_ERROR(H5E_SYM, H5E_PATH, FAIL, "can't build destination path name")
-                } /* end if */
-                else
-                    dst_path_r = H5RS_dup(names->new_name_r);
+                HDassert(names->dst_full_path_r);
 
                 /* Get pointers to paths of interest */
                 full_path = H5RS_get_str(obj_path->full_path_r);
-                src_path = H5RS_get_str(src_path_r);
-                dst_path = H5RS_get_str(dst_path_r);
+                src_path = H5RS_get_str(names->src_full_path_r);
+                dst_path = H5RS_get_str(names->dst_full_path_r);
+
+                /* Make certain that the source and destination names are full (not relative) paths */
+                HDassert(*src_path == '/');
+                HDassert(*dst_path == '/');
 
                 /* Get pointer to "full suffix" */
                 full_suffix = full_path + HDstrlen(src_path);
@@ -899,10 +892,6 @@ H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key)
 
                 /* Take ownership of the new full path */
                 obj_path->full_path_r = H5RS_own(new_full_path);
-
-                /* Release source & destination full paths */
-                H5RS_decr(src_path_r);
-                H5RS_decr(dst_path_r);
             } /* end if */
             break;
 
@@ -934,8 +923,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_name_replace(H5G_obj_t type, H5F_t *src_file, H5RS_str_t *src_full_path_r,
-    H5RS_str_t *new_name_r, H5F_t *dst_file, H5RS_str_t *dst_full_path_r, H5G_names_op_t op)
+H5G_name_replace(const H5O_link_t *lnk, H5G_names_op_t op, H5F_t *src_file,
+    H5RS_str_t *src_full_path_r, H5F_t *dst_file, H5RS_str_t *dst_full_path_r, 
+    hid_t dxpl_id)
 {
     herr_t ret_value = SUCCEED;
 
@@ -946,55 +936,71 @@ H5G_name_replace(H5G_obj_t type, H5F_t *src_file, H5RS_str_t *src_full_path_r,
 
     /* Check if the object we are manipulating has a path */
     if(src_full_path_r) {
-        unsigned search_group = 0;  /* Flag to indicate that groups are to be searched */
-        unsigned search_dataset = 0;  /* Flag to indicate that datasets are to be searched */
-        unsigned search_datatype = 0; /* Flag to indicate that datatypes are to be searched */
+        hbool_t search_group = FALSE;  /* Flag to indicate that groups are to be searched */
+        hbool_t search_dataset = FALSE;  /* Flag to indicate that datasets are to be searched */
+        hbool_t search_datatype = FALSE; /* Flag to indicate that datatypes are to be searched */
 
-        /* Determine which types of IDs need to be operated on */
-        switch(type) {
-            /* Object is a group  */
-            case H5G_GROUP:
-                /* Search and replace names through group IDs */
-                search_group = 1;
-                break;
+        /* Check for particular link to operate on */
+        if(lnk) {
+            /* Look up the object type for each type of link */
+            switch(lnk->type) {
+                case H5L_TYPE_HARD:
+                    {
+                        H5O_loc_t tmp_oloc;             /* Temporary object location */
+                        H5O_type_t obj_type;            /* Type of object at location */
 
-            /* Object is a dataset */
-            case H5G_DATASET:
-                /* Search and replace names through dataset IDs */
-                search_dataset = 1;
-                break;
+                        /* Build temporary object location */
+                        tmp_oloc.file = src_file;
+                        tmp_oloc.addr = lnk->u.hard.addr;
 
-            /* Object is a named datatype */
-            case H5G_TYPE:
-                /* Search and replace names through datatype IDs */
-                search_datatype = 1;
-                break;
+                        /* Get the type of the object */
+                        if(H5O_obj_type(&tmp_oloc, &obj_type, dxpl_id) < 0)
+                            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object type")
 
-            case H5G_UNKNOWN:   /* We pass H5G_UNKNOWN as object type when we need to search all IDs */
-            case H5G_LINK:      /* Symbolic links might resolve to any object, so we need to search all IDs */
-                /* Check if we will need to search groups */
-                if(H5I_nmembers(H5I_GROUP) > 0)
-                    search_group = 1;
+                        /* Determine which type of objects to operate on */
+                        switch(obj_type) {
+                            case H5O_TYPE_GROUP:
+                                /* Search and replace names through group IDs */
+                                search_group = TRUE;
+                                break;
 
-                /* Check if we will need to search datasets */
-                if(H5I_nmembers(H5I_DATASET) > 0)
-                    search_dataset = 1;
+                            case H5O_TYPE_DATASET:
+                                /* Search and replace names through dataset IDs */
+                                search_dataset = TRUE;
+                                break;
 
-                /* Check if we will need to search datatypes */
-                if(H5I_nmembers(H5I_DATATYPE) > 0)
-                    search_datatype = 1;
-                break;
+                            case H5O_TYPE_NAMED_DATATYPE:
+                                /* Search and replace names through datatype IDs */
+                                search_datatype = TRUE;
+                                break;
 
-            case H5G_UDLINK:
-              /* User-defined links automatically wipe out names (because it
-               * would be too much work to track them), so there's no point
-               * in searching them.
-               */
-              break;
+                            default:
+                                HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "not valid object type")
+                        } /* end switch */
+                    } /* end case */
+                    break;
 
-            default:
-                HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "not valid object type")
-        } /* end switch */
+                case H5L_TYPE_SOFT:
+                    /* Symbolic links might resolve to any object, so we need to search all IDs */
+                    search_group = search_dataset = search_datatype = TRUE;
+                    break;
+
+                default:  /* User-defined link */
+                    /* Check for unknown library-defined link type */
+                    if(lnk->type < H5L_TYPE_UD_MIN)
+                       HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unknown link type")
+
+                    /* User-defined & external links automatically wipe out
+                     * names (because it would be too much work to track them),
+                     * so there's no point in searching them.
+                     */
+                    break;
+            } /* end switch */
+        } /* end if */
+        else {
+            /* We pass NULL as link pointer when we need to search all IDs */
+            search_group = search_dataset = search_datatype = TRUE;
+        } /* end else */
 
         /* Check if we need to operate on the objects affected */
         if(search_group || search_dataset || search_datatype) {
@@ -1009,7 +1015,6 @@ H5G_name_replace(H5G_obj_t type, H5F_t *src_file, H5RS_str_t *src_full_path_r,
             names.src_full_path_r = src_full_path_r;
             names.dst_file = dst_file;
             names.dst_full_path_r = dst_full_path_r;
-            names.new_name_r = new_name_r;
             names.op = op;
 
             /* Search through group IDs */
@@ -1114,7 +1119,7 @@ H5G_refname_iterator(hid_t group, const char *name, const H5L_info_t *link_info,
             } /* end if */
 
             /* If it's a group, we recurse into it */
-            if(oinfo.type == H5G_GROUP) {
+            if(oinfo.type == H5O_TYPE_GROUP) {
                 H5G_link_iterate_t lnk_op;          /* Link operator */
                 hsize_t last_obj;
                 size_t len_needed;                  /* Length of container string needed */
