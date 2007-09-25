@@ -41,7 +41,7 @@ extern char  *progname;
 static void  print_dataset_info(hid_t dcpl_id,char *objname,double per);
 static int   do_copy_objects(hid_t fidin,hid_t fidout,trav_table_t *travt,pack_opt_t *options);
 static int   copy_attr(hid_t loc_in,hid_t loc_out,pack_opt_t *options);
-
+static int   copy_user_block(char *infile, char *outfile, hsize_t size);
 
 /*-------------------------------------------------------------------------
  * Function: copy_objects
@@ -57,6 +57,11 @@ static int   copy_attr(hid_t loc_in,hid_t loc_out,pack_opt_t *options);
  * Modification:
  *   Peter Cao, June 13, 2007
  *   Add "-L, --latest" and other options to pack a file with the latest file format
+ *
+ * Modification:
+ *   Peter Cao, September 25, 2007
+ *   Copy user block when repacking a file
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -67,6 +72,7 @@ int copy_objects(const char* fnamein,
  hid_t         fidin;
  hid_t         fidout=-1;
  trav_table_t  *travt=NULL;
+ hsize_t       ub_size=0;                     /* Size of user block */
  hid_t         fapl=H5P_DEFAULT;              /* File access property list ID */
  hid_t         fcpl=H5P_DEFAULT;              /* File creation property list ID */
 
@@ -79,14 +85,28 @@ int copy_objects(const char* fnamein,
   goto out;
  }
 
- if (options->latest) {
-    unsigned i=0, nindex=0, mesg_type_flags[5], min_mesg_sizes[5];
+ /* get user block size */
+ {
+    hid_t fcpl_in = H5Fget_create_plist(fidin);
+    H5Pget_userblock(fcpl_in, &ub_size);
+    if (fcpl_in != H5P_DEFAULT)
+    H5Pclose(fcpl_in);
+ }
 
+ if (options->latest || ub_size>=512) {
     /* Create file creation property list */
     if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0){
         error_msg(progname, "fail to create a file creation property list\n");
         goto out;
     } 
+ }
+
+ if (ub_size>=512) {
+  H5Pset_userblock(fcpl, ub_size);
+ }
+
+ if (options->latest) {
+    unsigned i=0, nindex=0, mesg_type_flags[5], min_mesg_sizes[5];
 
     /* Adjust group creation parameters for root group */
     /* (So that it is created in "dense storage" form) */
@@ -188,6 +208,10 @@ int copy_objects(const char* fnamein,
 
  H5Fclose(fidin);
  H5Fclose(fidout);
+
+  if (ub_size >= 512)
+      copy_user_block(fnamein, fnameout, ub_size);
+
  return 0;
 
 /*-------------------------------------------------------------------------
@@ -1093,5 +1117,64 @@ static void print_dataset_info(hid_t dcpl_id,
  }
 }
 
+/*-------------------------------------------------------------------------
+ * Function: copy_user_block 
+ *
+ * Purpose: copy user block from one file to another
+ *
+ * Return: 0, ok, -1 no
+ *
+ * Programmer: Peter Cao 
+ *
+ * Date: October, 25, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static int copy_user_block(char *infile, char *outfile, hsize_t size)
+{
+    int infid=-1, outfid=-1, status=0;
+    off_t offset;
+    ssize_t how_much_left = (ssize_t)size;
+    ssize_t nchars;
+    char buf[512];
+
+
+    /* User block must be any power of 2 equal to 512 or greater (512, 1024, 2048, etc.) */
+    if (size<512)
+        return 0;
+
+    if ((infid = HDopen(infile,O_RDONLY,0)) < 0) {
+        status = -1;
+        goto done;
+    }
+
+
+    if ((outfid = HDopen(outfile,O_WRONLY,0644)) < 0) {
+        status = -1;
+        goto done;
+    }
+
+    offset = 0;
+    while (how_much_left > 0) {
+        HDlseek(infid,offset,SEEK_SET);
+        if (how_much_left > 512)
+            nchars = HDread(infid,buf,(unsigned)512);
+        else
+            nchars = HDread(infid,buf,(unsigned)how_much_left);
+        HDlseek(outfid, offset, SEEK_SET);
+        HDwrite(outfid, buf, (unsigned)nchars);
+        how_much_left -= nchars;
+        offset += nchars;
+    }
+
+done:
+    if (infid > 0)
+        close(infid);
+  
+    if (outfid > 0)
+        close (outfid);
+
+    return status;    
+}
 
 
