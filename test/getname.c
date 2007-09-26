@@ -286,23 +286,23 @@ test_main(hid_t file_id, hid_t fapl)
     PASSED();
 
 
-/*-------------------------------------------------------------------------
-    * Test H5Iget_name with H5Tcommit
-    *-------------------------------------------------------------------------
-    */
+    /*-------------------------------------------------------------------------
+     * Test H5Iget_name with H5Tcommit2
+     *-------------------------------------------------------------------------
+     */
 
-    TESTING("H5Iget_name with H5Tcommit");
+    TESTING("H5Iget_name with H5Tcommit2");
 
     /* Create a datatype */
     if((type_id = H5Tcreate(H5T_COMPOUND, sizeof(s1_t))) < 0) TEST_ERROR
 
     /* Insert fields */
-    if(H5Tinsert(type_id, "a", HOFFSET(s1_t,a), H5T_NATIVE_INT) < 0) TEST_ERROR
-    if(H5Tinsert(type_id, "b", HOFFSET(s1_t,b), H5T_NATIVE_INT) < 0) TEST_ERROR
-    if(H5Tinsert(type_id, "c", HOFFSET(s1_t,c), H5T_NATIVE_FLOAT) < 0) TEST_ERROR
+    if(H5Tinsert(type_id, "a", HOFFSET(s1_t, a), H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(H5Tinsert(type_id, "b", HOFFSET(s1_t, b), H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(H5Tinsert(type_id, "c", HOFFSET(s1_t, c), H5T_NATIVE_FLOAT) < 0) TEST_ERROR
 
     /* Save datatype for later */
-    if(H5Tcommit(file_id, "t1", type_id) < 0) TEST_ERROR
+    if(H5Tcommit2(file_id, "t1", type_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Verify */
     if(check_name(type_id, "/t1", "/t1") < 0) TEST_ERROR
@@ -976,15 +976,15 @@ test_main(hid_t file_id, hid_t fapl)
     if((type_id = H5Tcreate(H5T_COMPOUND, sizeof(s1_t))) < 0) TEST_ERROR
 
     /* Insert fields */
-    if(H5Tinsert(type_id, "a", HOFFSET(s1_t,a), H5T_NATIVE_INT) < 0) TEST_ERROR
-    if(H5Tinsert(type_id, "b", HOFFSET(s1_t,b), H5T_NATIVE_INT) < 0) TEST_ERROR
-    if(H5Tinsert(type_id, "c", HOFFSET(s1_t,c), H5T_NATIVE_FLOAT) < 0) TEST_ERROR
+    if(H5Tinsert(type_id, "a", HOFFSET(s1_t, a), H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(H5Tinsert(type_id, "b", HOFFSET(s1_t, b), H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(H5Tinsert(type_id, "c", HOFFSET(s1_t, c), H5T_NATIVE_FLOAT) < 0) TEST_ERROR
 
     /* Create group "g17" */
     if((group_id = H5Gcreate2(file_id, "g17", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Save datatype for later */
-    if(H5Tcommit(group_id, "t", type_id) < 0) TEST_ERROR
+    if(H5Tcommit2(group_id, "t", type_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Create a dataspace  */
     if((space_id = H5Screate_simple(1, dims, NULL)) < 0) TEST_ERROR
@@ -1257,10 +1257,9 @@ test_main(hid_t file_id, hid_t fapl)
     /* Also create a dataset and a datatype */
     if((space_id = H5Screate_simple(1, dims, NULL)) < 0) TEST_ERROR
     if((type_id = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
-    if((dataset_id = H5Dcreate(file_id, "g18/d2", type_id, space_id,
-    H5P_DEFAULT)) < 0) TEST_ERROR
+    if((dataset_id = H5Dcreate(file_id, "g18/d2", type_id, space_id, H5P_DEFAULT)) < 0) TEST_ERROR
 
-    if(H5Tcommit(file_id, "g18/t2", type_id) <0) TEST_ERROR
+    if(H5Tcommit2(file_id, "g18/t2", type_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Create second file and group "/g3/g4/g5" in it */
     file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
@@ -2430,15 +2429,15 @@ test_obj_ref(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Insert fields */
-    if(H5Tinsert(tid1, "a", HOFFSET(s1_t,a), H5T_NATIVE_INT) < 0)
+    if(H5Tinsert(tid1, "a", HOFFSET(s1_t, a), H5T_NATIVE_INT) < 0)
         FAIL_STACK_ERROR
-    if(H5Tinsert(tid1, "b", HOFFSET(s1_t,b), H5T_NATIVE_INT) < 0)
+    if(H5Tinsert(tid1, "b", HOFFSET(s1_t, b), H5T_NATIVE_INT) < 0)
         FAIL_STACK_ERROR
-    if(H5Tinsert(tid1, "c", HOFFSET(s1_t,c), H5T_NATIVE_FLOAT) < 0)
+    if(H5Tinsert(tid1, "c", HOFFSET(s1_t, c), H5T_NATIVE_FLOAT) < 0)
         FAIL_STACK_ERROR
 
     /* Save datatype for later */
-    if(H5Tcommit(group, "Datatype1", tid1) < 0)
+    if(H5Tcommit2(group, "Datatype1", tid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
 
     /* Close datatype */

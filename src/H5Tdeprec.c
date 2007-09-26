@@ -105,10 +105,12 @@ H5T_init_deprec_interface(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Tcommit
+ * Function:	H5Tcommit1
  *
  * Purpose:	Save a transient datatype to a file and turn the type handle
  *		into a named, immutable type.
+ *
+ * Note:	Deprecated in favor of H5Tcommit2
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -118,13 +120,13 @@ H5T_init_deprec_interface(void)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Tcommit(hid_t loc_id, const char *name, hid_t type_id)
+H5Tcommit1(hid_t loc_id, const char *name, hid_t type_id)
 {
     H5G_loc_t	loc;                    /* Location to create datatype */
     H5T_t	*type;                  /* Datatype for ID */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Tcommit, FAIL)
+    FUNC_ENTER_API(H5Tcommit1, FAIL)
     H5TRACE3("e", "i*si", loc_id, name, type_id);
 
     /* Check arguments */
@@ -142,13 +144,15 @@ H5Tcommit(hid_t loc_id, const char *name, hid_t type_id)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Tcommit() */
+} /* end H5Tcommit1() */
 
 
 /*-------------------------------------------------------------------------
  * Function:	H5Topen
  *
  * Purpose:	Opens a named datatype.
+ *
+ * Note:	Deprecated in favor of H5Topen2
  *
  * Return:	Success:	Object ID of the named datatype.
  *

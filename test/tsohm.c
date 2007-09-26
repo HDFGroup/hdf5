@@ -1028,8 +1028,8 @@ static void sohm_attr_helper(hid_t fcpl_id)
     /* Repeat with a committed datatype */
     type_id = H5Tcopy(H5T_NATIVE_INT);
     CHECK_I(type_id, "H5Tcopy");
-    ret = H5Tcommit(file_id, "datatype", type_id);
-    CHECK_I(ret, "H5Tcommit");
+    ret = H5Tcommit2(file_id, "datatype", type_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK_I(ret, "H5Tcommit2");
 
     /* Create and verify an attribute */
     group_id = H5Gcreate2(file_id, "another_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);

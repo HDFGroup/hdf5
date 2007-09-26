@@ -979,29 +979,29 @@ test_derived_flt(void)
         goto error;
     }
 
-    if(H5Tset_ebias(tid1, 511)<0) {
+    if(H5Tset_ebias(tid1, 511) < 0) {
         H5_FAILED();
         printf("Can't set exponent bias\n");
         goto error;
     }
-    if(H5Tset_pad(tid1, H5T_PAD_ZERO, H5T_PAD_ZERO)<0) {
+    if(H5Tset_pad(tid1, H5T_PAD_ZERO, H5T_PAD_ZERO) < 0) {
         H5_FAILED();
         printf("Can't set padding\n");
         goto error;
     }
 
-    if(H5Tcommit(file, "new float type 1", tid1)<0) {
+    if(H5Tcommit2(file, "new float type 1", tid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) {
         H5_FAILED();
         printf("Can't set inpad\n");
         goto error;
     }
-    if(H5Tclose(tid1)<0) {
+    if(H5Tclose(tid1) < 0) {
         H5_FAILED();
         printf("Can't close datatype\n");
         goto error;
     }
 
-    if((tid1 = H5Topen(file, "new float type 1"))<0) {
+    if((tid1 = H5Topen(file, "new float type 1")) < 0) {
         H5_FAILED();
         printf("Can't open datatype\n");
         goto error;
@@ -1141,29 +1141,29 @@ test_derived_flt(void)
         printf("Can't set size\n");
         goto error;
     }
-    if(H5Tset_ebias(tid2, 63)<0) {
+    if(H5Tset_ebias(tid2, 63) < 0) {
         H5_FAILED();
         printf("Can't set size\n");
         goto error;
     }
-    if(H5Tset_pad(tid2, H5T_PAD_ZERO, H5T_PAD_ZERO)<0) {
+    if(H5Tset_pad(tid2, H5T_PAD_ZERO, H5T_PAD_ZERO) < 0) {
         H5_FAILED();
         printf("Can't set padding\n");
         goto error;
     }
 
-    if(H5Tcommit(file, "new float type 2", tid2)<0) {
+    if(H5Tcommit2(file, "new float type 2", tid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) {
         H5_FAILED();
         printf("Can't set inpad\n");
         goto error;
     }
-    if(H5Tclose(tid2)<0) {
+    if(H5Tclose(tid2) < 0) {
         H5_FAILED();
         printf("Can't close datatype\n");
         goto error;
     }
 
-    if((tid2 = H5Topen(file, "new float type 2"))<0) {
+    if((tid2 = H5Topen(file, "new float type 2")) < 0) {
         H5_FAILED();
         printf("Can't open datatype\n");
         goto error;
@@ -1403,31 +1403,31 @@ test_derived_integer(void)
         goto error;
     }
 
-    if(H5Tset_precision(tid1,24)<0) {
+    if(H5Tset_precision(tid1, 24) < 0) {
         H5_FAILED();
         printf("Can't set precision\n");
         goto error;
     }
 
-    if(H5Tset_order(tid1, H5T_ORDER_BE)<0) {
+    if(H5Tset_order(tid1, H5T_ORDER_BE) < 0) {
         H5_FAILED();
         printf("Can't set order\n");
         goto error;
     }
 
-    if(H5Tcommit(file, "new integer type 1", tid1)<0) {
+    if(H5Tcommit2(file, "new integer type 1", tid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) {
         H5_FAILED();
         printf("Can't commit data type\n");
         goto error;
     }
 
-    if(H5Tclose(tid1)<0) {
+    if(H5Tclose(tid1) < 0) {
         H5_FAILED();
         printf("Can't close datatype\n");
         goto error;
     }
 
-    if((tid1 = H5Topen(file, "new integer type 1"))<0) {
+    if((tid1 = H5Topen(file, "new integer type 1")) < 0) {
         H5_FAILED();
         printf("Can't open datatype\n");
         goto error;
@@ -1468,31 +1468,31 @@ test_derived_integer(void)
         goto error;
     }
 
-    if(H5Tset_offset(tid2,10)<0) {
+    if(H5Tset_offset(tid2, 10) < 0) {
         H5_FAILED();
         printf("Can't set offset\n");
         goto error;
     }
 
-    if(H5Tset_sign(tid2,H5T_SGN_2)<0) {
+    if(H5Tset_sign(tid2, H5T_SGN_2) < 0) {
         H5_FAILED();
         printf("Can't set offset\n");
         goto error;
     }
 
-    if(H5Tcommit(file, "new integer type 2", tid2)<0) {
+    if(H5Tcommit2(file, "new integer type 2", tid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) {
         H5_FAILED();
         printf("Can't commit data type\n");
         goto error;
     }
 
-    if(H5Tclose(tid2)<0) {
+    if(H5Tclose(tid2) < 0) {
         H5_FAILED();
         printf("Can't close datatype\n");
         goto error;
     }
 
-    if((tid2 = H5Topen(file, "new integer type 2"))<0) {
+    if((tid2 = H5Topen(file, "new integer type 2")) < 0) {
         H5_FAILED();
         printf("Can't open datatype\n");
         goto error;

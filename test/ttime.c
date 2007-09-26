@@ -48,29 +48,29 @@ test_time_commit(void)
 
     tid = H5Tcopy (H5T_UNIX_D32LE);
     CHECK(tid, FAIL, "H5Tcopy");
-    status = H5Tcommit(file_id, "Committed D32LE type", tid);
-    CHECK(status, FAIL, "H5Tcommit");
+    status = H5Tcommit2(file_id, "Committed D32LE type", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(status, FAIL, "H5Tcommit2");
     status = H5Tclose (tid);
     CHECK(status, FAIL, "H5Tclose");
 
     tid = H5Tcopy (H5T_UNIX_D32BE);
     CHECK(tid, FAIL, "H5Tcopy");
-    status = H5Tcommit(file_id, "Committed D32BE type", tid);
-    CHECK(status, FAIL, "H5Tcommit");
+    status = H5Tcommit2(file_id, "Committed D32BE type", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(status, FAIL, "H5Tcommit2");
     status = H5Tclose (tid);
     CHECK(status, FAIL, "H5Tclose");
 
     tid = H5Tcopy (H5T_UNIX_D64LE);
     CHECK(tid, FAIL, "H5Tcopy");
-    status = H5Tcommit(file_id, "Committed D64LE type", tid);
-    CHECK(status, FAIL, "H5Tcommit");
+    status = H5Tcommit2(file_id, "Committed D64LE type", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(status, FAIL, "H5Tcommit2");
     status = H5Tclose (tid);
     CHECK(status, FAIL, "H5Tclose");
 
     tid = H5Tcopy (H5T_UNIX_D64BE);
     CHECK(tid, FAIL, "H5Tcopy");
-    status = H5Tcommit(file_id, "Committed D64BE type", tid);
-    CHECK(status, FAIL, "H5Tcommit");
+    status = H5Tcommit2(file_id, "Committed D64BE type", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(status, FAIL, "H5Tcommit2");
     status = H5Tclose (tid);
     CHECK(status, FAIL, "H5Tclose");
 

@@ -1100,83 +1100,83 @@ test_misc7(void)
     /* Attempt to commit a non-sensible datatype */
 
     /* Create the file */
-    fid=H5Fcreate(MISC7_FILE,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT);
-    CHECK(fid,FAIL,"H5Fcreate");
+    fid = H5Fcreate(MISC7_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
 
     /* Create the dataspace */
-    sid=H5Screate(H5S_SCALAR);
-    CHECK(sid,FAIL,"H5Screate");
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
 
     /* Create the compound datatype to commit*/
     tid = H5Tcreate(H5T_COMPOUND, (size_t)32);
     CHECK(tid, FAIL, "H5Tcreate");
 
     /* Attempt to commit an empty compound datatype */
-    ret=H5Tcommit(fid,MISC7_TYPENAME1,tid);
-    VERIFY(ret,FAIL,"H5Tcommit");
+    ret = H5Tcommit2(fid, MISC7_TYPENAME1, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    VERIFY(ret, FAIL, "H5Tcommit2");
 
     /* Attempt to use empty compound datatype to create dataset */
-    did=H5Dcreate(fid,MISC7_DSETNAME1,tid,sid,H5P_DEFAULT);
-    VERIFY(ret,FAIL,"H5Dcreate");
+    did = H5Dcreate(fid, MISC7_DSETNAME1, tid, sid, H5P_DEFAULT);
+    VERIFY(ret, FAIL, "H5Dcreate");
 
     /* Add a field to the compound datatype */
     ret = H5Tinsert(tid, "a", (size_t)0, H5T_NATIVE_INT);
     CHECK(ret, FAIL, "H5Tinsert");
 
     /* Attempt to commit the compound datatype now - should work */
-    ret=H5Tcommit(fid,MISC7_TYPENAME1,tid);
-    CHECK(ret,FAIL,"H5Tcommit");
+    ret = H5Tcommit2(fid, MISC7_TYPENAME1, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tcommit2");
 
     /* Attempt to use compound datatype to create dataset now - should work */
-    did=H5Dcreate(fid,MISC7_DSETNAME1,tid,sid,H5P_DEFAULT);
-    CHECK(did,FAIL,"H5Dcreate");
+    did = H5Dcreate(fid, MISC7_DSETNAME1, tid, sid, H5P_DEFAULT);
+    CHECK(did, FAIL, "H5Dcreate");
 
     /* Close dataset */
-    ret=H5Dclose(did);
+    ret = H5Dclose(did);
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Close compound datatype */
-    ret=H5Tclose(tid);
+    ret = H5Tclose(tid);
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Create the enum datatype to commit*/
-    tid=H5Tenum_create(H5T_NATIVE_INT);
-    CHECK(tid,FAIL,"H5Tenum_create");
+    tid = H5Tenum_create(H5T_NATIVE_INT);
+    CHECK(tid, FAIL, "H5Tenum_create");
 
     /* Attempt to commit an empty enum datatype */
-    ret=H5Tcommit(fid,MISC7_TYPENAME2,tid);
-    VERIFY(ret,FAIL,"H5Tcommit");
+    ret = H5Tcommit2(fid, MISC7_TYPENAME2, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    VERIFY(ret, FAIL, "H5Tcommit2");
 
     /* Attempt to use empty enum datatype to create dataset */
-    did=H5Dcreate(fid,MISC7_DSETNAME2,tid,sid,H5P_DEFAULT);
+    did = H5Dcreate(fid, MISC7_DSETNAME2, tid, sid, H5P_DEFAULT);
     VERIFY(did,FAIL,"H5Dcreate");
 
     /* Add a member to the enum datatype */
-    ret=H5Tenum_insert(tid,"a",&enum_value);
+    ret = H5Tenum_insert(tid, "a", &enum_value);
     CHECK(ret,FAIL,"H5Tenum_insert");
 
     /* Attempt to commit the enum datatype now - should work */
-    ret=H5Tcommit(fid,MISC7_TYPENAME2,tid);
-    CHECK(ret,FAIL,"H5Tcommit");
+    ret = H5Tcommit2(fid, MISC7_TYPENAME2, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tcommit2");
 
     /* Attempt to use enum datatype to create dataset now - should work */
-    did=H5Dcreate(fid,MISC7_DSETNAME2,tid,sid,H5P_DEFAULT);
-    CHECK(did,FAIL,"H5Dcreate");
+    did = H5Dcreate(fid, MISC7_DSETNAME2, tid, sid, H5P_DEFAULT);
+    CHECK(did, FAIL, "H5Dcreate");
 
     /* Close dataset */
-    ret=H5Dclose(did);
+    ret = H5Dclose(did);
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Close enum datatype */
-    ret=H5Tclose(tid);
+    ret = H5Tclose(tid);
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Close dataspace */
-    ret=H5Sclose(sid);
+    ret = H5Sclose(sid);
     CHECK(ret, FAIL, "H5Sclose");
 
     /* Close file */
-    ret=H5Fclose(fid);
+    ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
 
 } /* end test_misc7() */
@@ -2152,27 +2152,27 @@ create_hdf_file(const char *name)
     CHECK(ret, FAIL, "H5Pset_layout");
 
     /* Use chunked storage for this DCPL */
-    chunk_dims[0]=MISC13_CHUNK_DIM1;
-    chunk_dims[1]=MISC13_CHUNK_DIM2;
-    ret = H5Pset_chunk(dcpl,MISC13_RANK,chunk_dims);
+    chunk_dims[0] = MISC13_CHUNK_DIM1;
+    chunk_dims[1] = MISC13_CHUNK_DIM2;
+    ret = H5Pset_chunk(dcpl, MISC13_RANK, chunk_dims);
     CHECK(ret, FAIL, "H5Pset_chunk");
 
     /* Create contiguous dataset in root group */
-    create_dataset(fid,MISC13_DSET1_NAME,H5P_DEFAULT);
+    create_dataset(fid, MISC13_DSET1_NAME, H5P_DEFAULT);
 
     /* Create chunked dataset in root group */
-    create_dataset(fid,MISC13_DSET2_NAME,dcpl);
+    create_dataset(fid, MISC13_DSET2_NAME, dcpl);
 
     /* Create a datatype to commit to the file */
-    tid=H5Tcopy(H5T_NATIVE_INT);
+    tid = H5Tcopy(H5T_NATIVE_INT);
     CHECK(tid, FAIL, "H5Tcopy");
 
     /* Create a named datatype in the root group */
-    ret=H5Tcommit(fid,MISC13_DTYPE_NAME,tid);
-    CHECK(ret, FAIL, "H5Tcommit");
+    ret = H5Tcommit2(fid, MISC13_DTYPE_NAME, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tcommit2");
 
     /* Close named datatype */
-    ret=H5Tclose(tid);
+    ret = H5Tclose(tid);
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Create a group in the root group */
@@ -2188,21 +2188,21 @@ create_hdf_file(const char *name)
     CHECK(ret, FAIL, "H5Gclose");
 
     /* Create contiguous dataset in new group */
-    create_dataset(gid,MISC13_DSET1_NAME,H5P_DEFAULT);
+    create_dataset(gid, MISC13_DSET1_NAME, H5P_DEFAULT);
 
     /* Create chunked dataset in new group */
-    create_dataset(gid,MISC13_DSET2_NAME,dcpl);
+    create_dataset(gid, MISC13_DSET2_NAME, dcpl);
 
     /* Create a datatype to commit to the new group */
-    tid=H5Tcopy(H5T_NATIVE_INT);
+    tid = H5Tcopy(H5T_NATIVE_INT);
     CHECK(tid, FAIL, "H5Tcopy");
 
     /* Create a named datatype in the new group */
-    ret=H5Tcommit(gid,MISC13_DTYPE_NAME,tid);
-    CHECK(ret, FAIL, "H5Tcommit");
+    ret = H5Tcommit2(gid, MISC13_DTYPE_NAME, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tcommit2");
 
     /* Close named datatype */
-    ret=H5Tclose(tid);
+    ret = H5Tclose(tid);
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Close the first group */
@@ -2215,7 +2215,7 @@ create_hdf_file(const char *name)
 
     /* Close the file */
     ret = H5Fclose(fid);
-    assert(ret>=0);
+    assert(ret >= 0);
     CHECK(ret, FAIL, "H5Fclose");
 }
 
@@ -4051,8 +4051,8 @@ test_misc24(void)
     type_id = H5Tcopy(H5T_NATIVE_INT);
     CHECK(type_id, FAIL, "H5Tcopy");
 
-    ret = H5Tcommit(file_id, MISC24_DATATYPE_NAME, type_id);
-    CHECK(ret, FAIL, "H5Tcommit");
+    ret = H5Tcommit2(file_id, MISC24_DATATYPE_NAME, type_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tcommit2");
 
     /* Create soft links to the objects created */
     ret = H5Lcreate_soft(MISC24_GROUP_NAME, file_id, MISC24_GROUP_LINK, H5P_DEFAULT, H5P_DEFAULT);

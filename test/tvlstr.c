@@ -435,8 +435,8 @@ static void test_vlstring_type(void)
     VERIFY(pad, H5T_STR_NULLPAD, "H5Tget_strpad");
 
     /* Commit variable-length string datatype to storage */
-    ret = H5Tcommit(fid, VLSTR_TYPE, tid_vlstr);
-    CHECK(ret, FAIL, "H5Tcommit");
+    ret = H5Tcommit2(fid, VLSTR_TYPE, tid_vlstr, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tcommit2");
 
     /* Close datatype */
     ret = H5Tclose(tid_vlstr);

@@ -152,8 +152,8 @@ test_reference_obj(void)
     CHECK(ret, FAIL, "H5Tinsert");
 
     /* Save datatype for later */
-    ret = H5Tcommit(group, "Datatype1", tid1);
-    CHECK(ret, FAIL, "H5Tcommit");
+    ret = H5Tcommit2(group, "Datatype1", tid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tcommit2");
 
     /* Close datatype */
     ret = H5Tclose(tid1);
@@ -1196,8 +1196,8 @@ test_reference_compat(void)
     CHECK(ret, FAIL, "H5Tinsert");
 
     /* Save datatype for later */
-    ret = H5Tcommit(group, "Datatype1", tid1);
-    CHECK(ret, FAIL, "H5Tcommit");
+    ret = H5Tcommit2(group, "Datatype1", tid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tcommit2");
 
     /* Close datatype */
     ret = H5Tclose(tid1);

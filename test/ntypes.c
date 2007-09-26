@@ -1918,26 +1918,26 @@ test_refer_dtype(hid_t file)
 	if(H5Tinsert (tid1, "a", HOFFSET(s1_t,a), H5T_NATIVE_INT)<0)
 	    TEST_ERROR;
 
-	if(H5Tinsert (tid1, "b", HOFFSET(s1_t,b), H5T_NATIVE_INT)<0)
+	if(H5Tinsert (tid1, "b", HOFFSET(s1_t, b), H5T_NATIVE_INT) < 0)
 	    TEST_ERROR;
 
-	if(H5Tinsert (tid1, "c", HOFFSET(s1_t,c), H5T_NATIVE_FLOAT)<0)
+	if(H5Tinsert(tid1, "c", HOFFSET(s1_t, c), H5T_NATIVE_FLOAT) < 0)
 	    TEST_ERROR;
 
 	/* Save datatype for later */
-	if(H5Tcommit (group, "Datatype1", tid1)<0)
+	if(H5Tcommit2(group, "Datatype1", tid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
 	    TEST_ERROR;
 
 	/* Close datatype */
-	if(H5Tclose(tid1)<0)
+	if(H5Tclose(tid1) < 0)
 	    TEST_ERROR;
 
 	/* Close group */
-	if(H5Gclose(group)<0)
+	if(H5Gclose(group) < 0)
 	    TEST_ERROR;
 
 	/* Create a dataset */
-	if((dataset=H5Dcreate(file,"Dataset3",H5T_STD_REF_OBJ,sid1,H5P_DEFAULT))<0)
+	if((dataset = H5Dcreate(file, "Dataset3", H5T_STD_REF_OBJ, sid1, H5P_DEFAULT)) < 0)
 	    TEST_ERROR;
 
 	/* Create reference to named datatype */

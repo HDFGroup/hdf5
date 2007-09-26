@@ -349,15 +349,15 @@ int test_types(const char *fname)
     */
 
     /* create and commit datatype 1 */
-    tid1 = H5Tcreate (H5T_COMPOUND, sizeof(s1_t));
+    tid1 = H5Tcreate(H5T_COMPOUND, sizeof(s1_t));
     H5Tinsert(tid1, "a", HOFFSET(s1_t, a), H5T_NATIVE_INT);
     H5Tinsert(tid1, "b", HOFFSET(s1_t, b), H5T_NATIVE_FLOAT);
-    H5Tcommit(fid1, "t1", tid1);
+    H5Tcommit2(fid1, "t1", tid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Tclose(tid1);
     /* create and commit datatype 2 */
-    tid2 = H5Tcreate (H5T_COMPOUND, sizeof(s2_t));
+    tid2 = H5Tcreate(H5T_COMPOUND, sizeof(s2_t));
     H5Tinsert(tid2, "a", HOFFSET(s2_t, a), H5T_NATIVE_INT);
-    H5Tcommit(fid1, "t2", tid2);
+    H5Tcommit2(fid1, "t2", tid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Tclose(tid2);
 
     /*-------------------------------------------------------------------------

@@ -1560,31 +1560,31 @@ test_compound_9(void)
         goto error;
     } /* end if */
 
-    if(H5Tinsert(cmpd_tid,"vl_string",HOFFSET(cmpd_struct,str),str_id)<0) {
+    if(H5Tinsert(cmpd_tid, "vl_string", HOFFSET(cmpd_struct, str), str_id) < 0) {
         H5_FAILED(); AT();
         printf("Can't insert field 'i1'\n");
         goto error;
     } /* end if */
 
-    if(H5Tinsert(cmpd_tid,"i2",HOFFSET(struct cmpd_struct,i2),H5T_NATIVE_INT)<0) {
+    if(H5Tinsert(cmpd_tid, "i2", HOFFSET(struct cmpd_struct, i2), H5T_NATIVE_INT) < 0) {
         H5_FAILED(); AT();
         printf("Can't insert field 'i2'\n");
         goto error;
     } /* end if */
 
-    if(H5Tcommit(file,"compound",cmpd_tid)<0) {
+    if(H5Tcommit2(file, "compound", cmpd_tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) {
         H5_FAILED(); AT();
         printf("Can't commit datatype\n");
         goto error;
     } /* end if */
 
-    if(H5Tclose(cmpd_tid)<0) {
+    if(H5Tclose(cmpd_tid) < 0) {
         H5_FAILED(); AT();
         printf("Can't close datatype\n");
         goto error;
     } /* end if */
 
-    if((cmpd_tid = H5Topen(file, "compound"))<0) {
+    if((cmpd_tid = H5Topen(file, "compound")) < 0) {
         H5_FAILED(); AT();
         printf("Can't open datatype\n");
         goto error;
@@ -2301,60 +2301,60 @@ test_query(void)
     } /* end if */
 
     /* Query member number and member index by member name, for enumeration type. */
-    if(H5Tget_nmembers(tid2)!=5) {
+    if(H5Tget_nmembers(tid2) != 5) {
         H5_FAILED();
         printf("Can't get member number\n");
         goto error;
     } /* end if */
-    if(H5Tget_member_index(tid2, "ORANGE")!=3) {
+    if(H5Tget_member_index(tid2, "ORANGE") != 3) {
         H5_FAILED();
         printf("Can't get correct index number\n");
         goto error;
     } /* end if */
 
     /* Commit compound datatype and close it */
-    if(H5Tcommit(file, compnd_type, tid1)<0) {
+    if(H5Tcommit2(file, compnd_type, tid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) {
         H5_FAILED();
         printf("Can't commit compound datatype\n");
         goto error;
     } /* end if */
-    if(H5Tclose(tid1)<0) {
+    if(H5Tclose(tid1) < 0) {
         H5_FAILED();
         printf("Can't close datatype\n");
         goto error;
     } /* end if */
 
     /* Commit enumeration datatype and close it */
-    if(H5Tcommit(file, enum_type, tid2)<0) {
+    if(H5Tcommit2(file, enum_type, tid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) {
         H5_FAILED();
         printf("Can't commit compound datatype\n");
         goto error;
     } /* end if */
-    if(H5Tclose(tid2)<0) {
+    if(H5Tclose(tid2) < 0) {
         H5_FAILED();
         printf("Can't close datatype\n");
         goto error;
     } /* end if */
 
     /* Open the dataytpe for query */
-    if((tid1=H5Topen(file, compnd_type))<0) {
+    if((tid1 = H5Topen(file, compnd_type)) < 0) {
         H5_FAILED();
         printf("Can't open datatype\n");
         goto error;
     } /* end if */
-    if((tid2=H5Topen(file, enum_type))<0) {
+    if((tid2 = H5Topen(file, enum_type)) < 0) {
         H5_FAILED();
         printf("Can't open datatype\n");
         goto error;
     } /* end if */
 
     /* Query member number and member index by name, for compound type */
-    if(H5Tget_nmembers(tid1)!=4) {
+    if(H5Tget_nmembers(tid1) != 4) {
         H5_FAILED();
         printf("Can't get member number\n");
         goto error;
     } /* end if */
-    if(H5Tget_member_index(tid1, "c")!=2) {
+    if(H5Tget_member_index(tid1, "c") != 2) {
         H5_FAILED();
         printf("Can't get correct index number\n");
         goto error;
@@ -2603,20 +2603,19 @@ test_named (hid_t fapl)
 
     /* Predefined types cannot be committed */
     H5E_BEGIN_TRY {
-	status = H5Tcommit (file, "test_named_1 (should not exist)",
-			    H5T_NATIVE_INT);
+	status = H5Tcommit2(file, "test_named_1 (should not exist)", H5T_NATIVE_INT, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
-    if (status>=0) {
+    if(status >= 0) {
 	H5_FAILED();
 	HDputs ("    Predefined types should not be committable!");
 	goto error;
     }
 
     /* Copy a predefined data type and commit the copy */
-    if ((type = H5Tcopy (H5T_NATIVE_INT))<0) goto error;
-    if (H5Tcommit (file, "native-int", type)<0) goto error;
-    if ((status=H5Tcommitted (type))<0) goto error;
-    if (0==status) {
+    if((type = H5Tcopy(H5T_NATIVE_INT)) < 0) goto error;
+    if(H5Tcommit2(file, "native-int", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) goto error;
+    if((status = H5Tcommitted(type)) < 0) goto error;
+    if(0 == status) {
 	H5_FAILED();
 	HDputs ("    H5Tcommitted() returned false!");
 	goto error;
@@ -2634,72 +2633,71 @@ test_named (hid_t fapl)
 
     /* We should not be able to re-commit a committed type */
     H5E_BEGIN_TRY {
-	status = H5Tcommit(file, "test_named_2 (should not exist)", type);
+	status = H5Tcommit2(file, "test_named_2 (should not exist)", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
-    if (status>=0) {
+    if(status >= 0) {
 	H5_FAILED();
 	HDputs ("    Committed types should not be recommitted!");
 	goto error;
     }
 
     /* It should be possible to define an attribute for the named type */
-    if ((attr1=H5Acreate (type, "attr1", H5T_NATIVE_UCHAR, space,
-			  H5P_DEFAULT))<0) goto error;
-    for (i=0; i<(size_t)ds_size[0]; i++)
-        for (j=0; j<(size_t)ds_size[1]; j++)
-            attr_data[i][j] = (int)(i*ds_size[1]+j);
-    if (H5Awrite(attr1, H5T_NATIVE_UINT, attr_data)<0) goto error;
-    if (H5Aclose (attr1)<0) goto error;
+    if((attr1 = H5Acreate (type, "attr1", H5T_NATIVE_UCHAR, space,
+			  H5P_DEFAULT)) < 0) goto error;
+    for(i = 0; i < (size_t)ds_size[0]; i++)
+        for(j = 0; j < (size_t)ds_size[1]; j++)
+            attr_data[i][j] = (int)(i * ds_size[1] + j);
+    if(H5Awrite(attr1, H5T_NATIVE_UINT, attr_data) < 0) goto error;
+    if(H5Aclose(attr1) < 0) goto error;
 
     /*
      * Copying a committed type should result in a transient type which is
      * not locked.
      */
-    if ((t2 = H5Tcopy (type))<0) goto error;
-    if ((status=H5Tcommitted (t2))<0) goto error;
-    if (status) {
+    if((t2 = H5Tcopy(type)) < 0) goto error;
+    if((status = H5Tcommitted(t2)) < 0) goto error;
+    if(status) {
 	H5_FAILED();
 	HDputs ("    Copying a named type should result in a transient type!");
 	goto error;
     }
-    if (H5Tset_precision (t2, 256)<0) goto error;
-    if (H5Tclose (t2)<0) goto error;
+    if(H5Tset_precision(t2, 256) < 0) goto error;
+    if(H5Tclose(t2) < 0) goto error;
 
     /*
      * Close the committed type and reopen it.  It should return a named type.
      */
-    if (H5Tclose (type)<0) goto error;
-    if ((type=H5Topen (file, "native-int"))<0) goto error;
-    if ((status=H5Tcommitted (type))<0) goto error;
-    if (!status) {
+    if(H5Tclose(type) < 0) goto error;
+    if((type = H5Topen(file, "native-int")) < 0) goto error;
+    if((status = H5Tcommitted(type)) < 0) goto error;
+    if(!status) {
 	H5_FAILED();
 	HDputs ("    Opened named types should be named types!");
 	goto error;
     }
 
     /* Create a dataset that uses the named type */
-    if ((dset = H5Dcreate (file, "dset1", type, space, H5P_DEFAULT))<0) {
+    if((dset = H5Dcreate(file, "dset1", type, space, H5P_DEFAULT)) < 0)
 	goto error;
-    }
 
     /* Get the dataset's data type and make sure it's a named type */
-    if ((t2 = H5Dget_type (dset))<0) goto error;
-    if ((status=H5Tcommitted (t2))<0) goto error;
-    if (!status) {
+    if((t2 = H5Dget_type(dset)) < 0) goto error;
+    if((status = H5Tcommitted(t2)) < 0) goto error;
+    if(!status) {
 	H5_FAILED();
 	HDputs ("    Dataset type should be a named type!");
 	goto error;
     }
 
     /* Close the dataset, then close its type, then reopen the dataset */
-    if (H5Dclose (dset)<0) goto error;
-    if (H5Tclose (t2)<0) goto error;
-    if ((dset = H5Dopen (file, "dset1"))<0) goto error;
+    if(H5Dclose(dset) < 0) goto error;
+    if(H5Tclose(t2) < 0) goto error;
+    if((dset = H5Dopen(file, "dset1")) < 0) goto error;
 
     /* Get the dataset's type and make sure it's named */
-    if ((t2 = H5Dget_type (dset))<0) goto error;
-    if ((status=H5Tcommitted (t2))<0) goto error;
-    if (!status) {
+    if((t2 = H5Dget_type(dset)) < 0) goto error;
+    if((status = H5Tcommitted(t2)) < 0) goto error;
+    if(!status) {
 	H5_FAILED();
 	HDputs ("    Dataset type should be a named type!");
 	goto error;
@@ -2709,67 +2707,67 @@ test_named (hid_t fapl)
      * Close the dataset and create another with the type returned from the
      * first dataset.
      */
-    if (H5Dclose (dset)<0) goto error;
-    if ((dset=H5Dcreate (file, "dset2", t2, space, H5P_DEFAULT))<0) goto error;
+    if(H5Dclose(dset) < 0) goto error;
+    if((dset = H5Dcreate(file, "dset2", t2, space, H5P_DEFAULT)) < 0) goto error;
 
     /* Reopen the second dataset and make sure the type is shared */
-    if (H5Tclose (t2)<0) goto error;
-    if (H5Dclose (dset)<0) goto error;
-    if ((dset = H5Dopen (file, "dset2"))<0) goto error;
-    if ((t2 = H5Dget_type (dset))<0) goto error;
-    if ((status=H5Tcommitted (t2))<0) goto error;
-    if (!status) {
+    if(H5Tclose(t2) < 0) goto error;
+    if(H5Dclose(dset) < 0) goto error;
+    if((dset = H5Dopen(file, "dset2")) < 0) goto error;
+    if((t2 = H5Dget_type(dset)) < 0) goto error;
+    if((status = H5Tcommitted(t2)) < 0) goto error;
+    if(!status) {
 	H5_FAILED();
 	HDputs ("    Dataset type should be a named type!");
 	goto error;
     }
-    if (H5Tclose (t2)<0) goto error;
+    if(H5Tclose(t2) < 0) goto error;
 
     /*
      * Get the dataset data type by applying H5Tcopy() to the dataset. The
      * result should be modifiable.
      */
-    if ((t2=H5Tcopy (dset))<0) goto error;
-    if (H5Tset_precision (t2, 256)<0) goto error;
-    if (H5Tclose (t2)<0) goto error;
-    if (H5Dclose (dset)<0) goto error;
+    if((t2 = H5Tcopy(dset)) < 0) goto error;
+    if(H5Tset_precision(t2, 256) < 0) goto error;
+    if(H5Tclose(t2) < 0) goto error;
+    if(H5Dclose(dset) < 0) goto error;
 
     /*
      * Copy of committed type used as dataset type should not be name type
      */
-    if ((t2 = H5Tcopy (type))<0) goto error;
-    if ((status=H5Tcommitted (t2))<0) goto error;
-    if (status) {
+    if((t2 = H5Tcopy(type)) < 0) goto error;
+    if((status = H5Tcommitted(t2)) < 0) goto error;
+    if(status) {
 	H5_FAILED();
 	HDputs ("    Copied type should not be a named type!");
 	goto error;
     }
-    if ((dset=H5Dcreate (file, "dset3", t2, space, H5P_DEFAULT))<0) goto error;
-    if ((t3 = H5Dget_type (dset))<0) goto error;
-    if ((status=H5Tcommitted (t3))<0) goto error;
-    if (status) {
+    if((dset = H5Dcreate(file, "dset3", t2, space, H5P_DEFAULT)) < 0) goto error;
+    if((t3 = H5Dget_type(dset)) < 0) goto error;
+    if((status = H5Tcommitted(t3)) < 0) goto error;
+    if(status) {
 	H5_FAILED();
 	HDputs ("    Datatype from dataset using copied type should not be a named type!");
 	goto error;
     }
-    if (H5Tclose (t3)<0) goto error;
-    if (H5Dclose (dset)<0) goto error;
+    if(H5Tclose(t3) < 0) goto error;
+    if(H5Dclose(dset) < 0) goto error;
 
     /* Clean up */
-    if (H5Tclose (type)<0) goto error;
-    if (H5Sclose (space)<0) goto error;
-    if (H5Fclose (file)<0) goto error;
+    if(H5Tclose(type) < 0) goto error;
+    if(H5Sclose(space) < 0) goto error;
+    if(H5Fclose(file) < 0) goto error;
     PASSED();
     return 0;
 
- error:
+error:
     H5E_BEGIN_TRY {
-	H5Tclose (t3);
-	H5Tclose (t2);
-	H5Tclose (type);
-	H5Sclose (space);
-	H5Dclose (dset);
-	H5Fclose (file);
+	H5Tclose(t3);
+	H5Tclose(t2);
+	H5Tclose(type);
+	H5Sclose(space);
+	H5Dclose(dset);
+	H5Fclose(file);
     } H5E_END_TRY;
     return 1;
 }
@@ -4139,7 +4137,7 @@ test_encode(void)
         printf("Can't get member number\n");
         goto error;
     } /* end if */
-    if(H5Tget_member_index(decoded_tid2, "ORANGE")!=3) {
+    if(H5Tget_member_index(decoded_tid2, "ORANGE") != 3) {
         H5_FAILED();
         printf("Can't get correct index number\n");
         goto error;
@@ -4150,17 +4148,17 @@ test_encode(void)
      *-----------------------------------------------------------------------
      */
     /* Commit compound datatype and close it */
-    if(H5Tcommit(file, compnd_type, tid1)<0) {
+    if(H5Tcommit2(file, compnd_type, tid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) {
         H5_FAILED();
         printf("Can't commit compound datatype\n");
         goto error;
     } /* end if */
-    if(H5Tclose(tid1)<0) {
+    if(H5Tclose(tid1) < 0) {
         H5_FAILED();
         printf("Can't close datatype\n");
         goto error;
     } /* end if */
-    if(H5Tclose(decoded_tid1)<0) {
+    if(H5Tclose(decoded_tid1) < 0) {
         H5_FAILED();
         printf("Can't close datatype\n");
         goto error;
@@ -4169,17 +4167,17 @@ test_encode(void)
     cmpd_buf_size = 0;
 
     /* Commit enumeration datatype and close it */
-    if(H5Tcommit(file, enum_type, tid2)<0) {
+    if(H5Tcommit2(file, enum_type, tid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) {
         H5_FAILED();
         printf("Can't commit compound datatype\n");
         goto error;
     } /* end if */
-    if(H5Tclose(tid2)<0) {
+    if(H5Tclose(tid2) < 0) {
         H5_FAILED();
         printf("Can't close datatype\n");
         goto error;
     } /* end if */
-    if(H5Tclose(decoded_tid2)<0) {
+    if(H5Tclose(decoded_tid2) < 0) {
         H5_FAILED();
         printf("Can't close datatype\n");
         goto error;
@@ -4392,7 +4390,7 @@ test_latest(void)
         FAIL_STACK_ERROR
 
     /* Commit compound datatype */
-    if(H5Tcommit(file, compnd_type, tid2) < 0)
+    if(H5Tcommit2(file, compnd_type, tid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
 
     /* Get information about datatype on disk */
@@ -4453,7 +4451,7 @@ test_latest(void)
         FAIL_STACK_ERROR
 
     /* Commit compound datatype */
-    if(H5Tcommit(file, compnd_type, tid2) < 0)
+    if(H5Tcommit2(file, compnd_type, tid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
 
     /* Get information about datatype on disk */

@@ -67,7 +67,7 @@ test_named(hid_t file)
     if(H5Tenum_insert(type, "BLUE",  CPTR(val, E1_BLUE )) < 0) FAIL_STACK_ERROR
     if(H5Tenum_insert(type, "WHITE", CPTR(val, E1_WHITE)) < 0) FAIL_STACK_ERROR
     if(H5Tenum_insert(type, "BLACK", CPTR(val, E1_BLACK)) < 0) FAIL_STACK_ERROR
-    if(H5Tcommit(cwg, "e1_a", type) < 0) FAIL_STACK_ERROR
+    if(H5Tcommit2(cwg, "e1_a", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     if(H5Tclose(type) < 0) FAIL_STACK_ERROR
 
     /* A smaller type */
@@ -77,7 +77,7 @@ test_named(hid_t file)
     if(H5Tenum_insert(type, "BLUE",  CPTR(val8, E1_BLUE )) < 0) FAIL_STACK_ERROR
     if(H5Tenum_insert(type, "WHITE", CPTR(val8, E1_WHITE)) < 0) FAIL_STACK_ERROR
     if(H5Tenum_insert(type, "BLACK", CPTR(val8, E1_BLACK)) < 0) FAIL_STACK_ERROR
-    if(H5Tcommit(cwg, "e1_b", type) < 0) FAIL_STACK_ERROR
+    if(H5Tcommit2(cwg, "e1_b", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     if(H5Tclose(type) < 0) FAIL_STACK_ERROR
 
     /* A non-native type */
@@ -91,7 +91,7 @@ test_named(hid_t file)
     if(H5Tenum_insert(type, "BLUE",  CPTR(val8, E1_BLUE )) < 0) FAIL_STACK_ERROR
     if(H5Tenum_insert(type, "WHITE", CPTR(val8, E1_WHITE)) < 0) FAIL_STACK_ERROR
     if(H5Tenum_insert(type, "BLACK", CPTR(val8, E1_BLACK)) < 0) FAIL_STACK_ERROR
-    if(H5Tcommit(cwg, "e1_c", type) < 0) FAIL_STACK_ERROR
+    if(H5Tcommit2(cwg, "e1_c", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     if(H5Tclose(type) < 0) FAIL_STACK_ERROR
 
     if(H5Gclose(cwg) < 0) FAIL_STACK_ERROR

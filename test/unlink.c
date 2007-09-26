@@ -876,7 +876,7 @@ test_filespace(hid_t fapl)
     if((type = H5Tcopy(H5T_NATIVE_INT)) < 0) FAIL_STACK_ERROR
 
     /* Create a single named datatype to remove */
-    if(H5Tcommit(file, TYPENAME, type) < 0) FAIL_STACK_ERROR
+    if(H5Tcommit2(file, TYPENAME, type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     if(H5Tclose(type) < 0) FAIL_STACK_ERROR
 
     /* Remove the named datatype */
@@ -1150,7 +1150,7 @@ test_filespace(hid_t fapl)
     if((type = H5Tcopy(H5T_NATIVE_INT)) < 0) FAIL_STACK_ERROR
 
     /* Create a single named datatype to remove */
-    if(H5Tcommit(file, TYPENAME, type) < 0) FAIL_STACK_ERROR
+    if(H5Tcommit2(file, TYPENAME, type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     if(H5Tclose(type) < 0) FAIL_STACK_ERROR
 
     /* Create datatype to commit */
@@ -1158,7 +1158,7 @@ test_filespace(hid_t fapl)
 
     /* Create another named datatype with same name */
     H5E_BEGIN_TRY {
-        status = H5Tcommit(file, TYPENAME, type);
+        status = H5Tcommit2(file, TYPENAME, type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
     if(status >= 0) TEST_ERROR
     if(H5Tclose(type) < 0) FAIL_STACK_ERROR
@@ -1924,7 +1924,7 @@ test_resurrect_datatype(hid_t fapl)
 
     /* Create a named datatype in the file */
     if((type = H5Tcopy (H5T_NATIVE_INT)) < 0) FAIL_STACK_ERROR
-    if(H5Tcommit(file, TYPENAME, type) < 0) FAIL_STACK_ERROR
+    if(H5Tcommit2(file, TYPENAME, type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Unlink the datatype while it's open (will mark it for deletion when closed) */
     if(H5Ldelete(file, TYPENAME, H5P_DEFAULT) < 0) FAIL_STACK_ERROR

@@ -62,7 +62,7 @@ nh5topen_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id)
 
 /*----------------------------------------------------------------------------
  * Name:        h5tcommit_c
- * Purpose:     Call H5Tcommit to commit a datatype
+ * Purpose:     Call H5Tcommit2 to commit a datatype
  * Inputs:      loc_id - file or group identifier
  *              name - name of the datatype within file or  group
  *              namelen - name length
@@ -73,32 +73,25 @@ nh5topen_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id)
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5tcommit_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id)
+nh5tcommit_c(hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id)
 {
-     int ret_value = -1;
-     char *c_name;
-     size_t c_namelen;
-     hid_t c_type_id;
-     hid_t c_loc_id;
-     herr_t status;
+    char *c_name = NULL;
+    int ret_value = -1;
 
-     /*
-      * Convert FORTRAN name to C name
-      */
-     c_namelen = *namelen;
-     c_name = (char *)HD5f2cstring(name, c_namelen);
-     if (c_name == NULL) return ret_value;
+    /* Convert FORTRAN name to C name */
+    if(NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
+        goto done;
 
-     /*
-      * Call H5Tcommit function.
-      */
-     c_loc_id = *loc_id;
-     c_type_id = *type_id;
-     status = H5Tcommit(c_loc_id, c_name, c_type_id);
-     HDfree(c_name);
-     if (status < 0) return ret_value;
-     ret_value = 0;
-     return ret_value;
+    /* Call H5Tcommit2 function */
+    if(H5Tcommit2((hid_t)*loc_id, c_name, (hid_t)*type_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        goto done;
+
+    ret_value = 0;
+
+done:
+    if(c_name)
+        HDfree(c_name);
+    return ret_value;
 }
 
 /*----------------------------------------------------------------------------

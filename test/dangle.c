@@ -243,70 +243,70 @@ static int
 test_dangle_datatype1(H5F_close_degree_t degree)
 {
     char	filename[1024];
-    hid_t fid;  /* File ID */
-    hid_t fapl; /* File access property list */
-    hid_t tid;  /* Datatype ID */
-    unsigned u; /* Local index variable */
+    hid_t       fid;                    /* File ID */
+    hid_t       fapl;                   /* File access property list */
+    hid_t       tid;                    /* Datatype ID */
+    unsigned    u;                      /* Local index variable */
 
     TESTING("    dangling named datatype IDs");
 
-    if(H5open()<0)
+    if(H5open() < 0)
         TEST_ERROR;
 
     /* Create file access property list */
-    if((fapl=H5Pcreate(H5P_FILE_ACCESS))<0)
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
 
     /* Set file close degree */
-    if(H5Pset_fclose_degree(fapl,degree)<0)
+    if(H5Pset_fclose_degree(fapl, degree) < 0)
         TEST_ERROR;
 
     h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof filename);
-    if((fid = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
 
-    if((tid = H5Tcopy (H5T_NATIVE_INT))<0)
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)
         TEST_ERROR;
 
-    if(H5Tcommit(fid,TYPENAME,tid)<0)
+    if(H5Tcommit2(fid, TYPENAME, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-    if(H5Tclose(tid)<0)
+    if(H5Tclose(tid) < 0)
         TEST_ERROR;
 
     /* Try creating duplicate named datatype */
     if((tid = H5Tcopy (H5T_NATIVE_INT))<0)
         TEST_ERROR;
     H5E_BEGIN_TRY {
-        if(H5Tcommit(fid,TYPENAME,tid)>=0)
+        if(H5Tcommit2(fid, TYPENAME, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) >= 0)
             TEST_ERROR;
     } H5E_END_TRY;
-    if(H5Tclose(tid)<0)
+    if(H5Tclose(tid) < 0)
         TEST_ERROR;
 
     /* Leave open a _lot_ of objects */
-    for(u=0; u<MAX_DANGLE; u++) {
-        if((tid = H5Topen (fid, TYPENAME))<0)
+    for(u = 0; u < MAX_DANGLE; u++) {
+        if((tid = H5Topen(fid, TYPENAME)) < 0)
             TEST_ERROR;
     } /* end for */
 
-    if(degree==H5F_CLOSE_SEMI) {
+    if(degree == H5F_CLOSE_SEMI) {
         H5E_BEGIN_TRY {
-            if(H5Fclose(fid)>=0)
+            if(H5Fclose(fid) >= 0)
                 TEST_ERROR;
         } H5E_END_TRY;
     } /* end if */
     else
-        if(H5Fclose(fid)<0)
+        if(H5Fclose(fid) < 0)
             TEST_ERROR;
 
-    if(H5Pclose(fapl)<0)
+    if(H5Pclose(fapl) < 0)
         TEST_ERROR;
 
-    if(H5close()<0)
+    if(H5close() < 0)
         TEST_ERROR;
 
-    if(h5_get_file_size(filename)<0)
+    if(h5_get_file_size(filename) < 0)
         TEST_ERROR;
 
     /* Clean up temporary file */
@@ -340,33 +340,33 @@ static int
 test_dangle_datatype2(H5F_close_degree_t degree)
 {
     char	filename[1024];
-    hid_t fid;  /* File ID */
-    hid_t fapl; /* File access property list */
-    hid_t did;  /* Dataset ID */
-    hid_t sid;  /* Dataspace ID */
-    hid_t tid;  /* Datatype ID */
+    hid_t       fid;                    /* File ID */
+    hid_t       fapl;                   /* File access property list */
+    hid_t       did;                    /* Dataset ID */
+    hid_t       sid;                    /* Dataspace ID */
+    hid_t       tid;                    /* Datatype ID */
 
     TESTING("    dangling named datatype ID used by dataset");
 
-    if(H5open()<0)
+    if(H5open() < 0)
         TEST_ERROR;
 
     /* Create file access property list */
-    if((fapl=H5Pcreate(H5P_FILE_ACCESS))<0)
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
 
     /* Set file close degree */
-    if(H5Pset_fclose_degree(fapl,degree)<0)
+    if(H5Pset_fclose_degree(fapl, degree) < 0)
         TEST_ERROR;
 
     h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof filename);
-    if((fid = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
 
-    if((tid = H5Tcopy (H5T_NATIVE_INT))<0)
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)
         TEST_ERROR;
 
-    if(H5Tcommit(fid,TYPENAME,tid)<0)
+    if(H5Tcommit2(fid, TYPENAME, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
     /* Create a dataset that uses the named datatype & leave it open */
@@ -374,26 +374,26 @@ test_dangle_datatype2(H5F_close_degree_t degree)
         TEST_ERROR;
     if((did = H5Dcreate(fid, DSETNAME, tid, sid, H5P_DEFAULT)) < 0)
         TEST_ERROR;
-    if(H5Sclose(sid)<0)
+    if(H5Sclose(sid) < 0)
         TEST_ERROR;
 
-    if(degree==H5F_CLOSE_SEMI) {
+    if(degree == H5F_CLOSE_SEMI) {
         H5E_BEGIN_TRY {
-            if(H5Fclose(fid)>=0)
+            if(H5Fclose(fid) >= 0)
                 TEST_ERROR;
         } H5E_END_TRY;
     } /* end if */
     else
-        if(H5Fclose(fid)<0)
+        if(H5Fclose(fid) < 0)
             TEST_ERROR;
 
-    if(H5Pclose(fapl)<0)
+    if(H5Pclose(fapl) < 0)
         TEST_ERROR;
 
-    if(H5close()<0)
+    if(H5close() < 0)
         TEST_ERROR;
 
-    if(h5_get_file_size(filename)<0)
+    if(h5_get_file_size(filename) < 0)
         TEST_ERROR;
 
     /* Clean up temporary file */

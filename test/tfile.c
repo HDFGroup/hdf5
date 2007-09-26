@@ -963,8 +963,8 @@ test_get_file_id(void)
     datatype_id=H5Tcopy(H5T_NATIVE_INT);
     CHECK(ret, FAIL, "H5Acreate");
 
-    ret = H5Tcommit(fid, TYPE_NAME, datatype_id);
-    CHECK(ret, FAIL, "H5Tcommit");
+    ret = H5Tcommit2(fid, TYPE_NAME, datatype_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tcommit2");
 
     /* Test H5Iget_file_id() */
     check_file_id(fid, datatype_id);
@@ -1408,15 +1408,15 @@ test_file_open_dot(void)
 
     /* Create a named datatype with no name using the file ID */
     H5E_BEGIN_TRY {
-        ret = H5Tcommit(fid, ".", tid);
+        ret = H5Tcommit2(fid, ".", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(ret, FAIL, "H5Tcommit");
+    VERIFY(ret, FAIL, "H5Tcommit2");
 
     /* Create a named datatype with no name using the group ID */
     H5E_BEGIN_TRY {
-        ret = H5Tcommit(gid, ".", tid);
+        ret = H5Tcommit2(gid, ".", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(ret, FAIL, "H5Tcommit");
+    VERIFY(ret, FAIL, "H5Tcommit2");
 
     /* Open a named datatype with no name using the file ID */
     H5E_BEGIN_TRY {
@@ -1641,8 +1641,8 @@ test_file_getname(void)
     CHECK(ret, FAIL, "H5Tinsert");
 
     /* Save it on file */
-    ret = H5Tcommit(file_id, TESTA_DTYPENAME, type_id);
-    CHECK(ret, FAIL, "H5Tcommit");
+    ret = H5Tcommit2(file_id, TESTA_DTYPENAME, type_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tcommit2");
 
     /* Get and verify file name */
     name_len = H5Fget_name(type_id, name, (size_t)TESTA_NAME_BUF_SIZE);
@@ -1820,8 +1820,8 @@ test_file_double_datatype_open(void)
 
     type1_id  = H5Tcopy(H5T_NATIVE_INT);
     CHECK(type1_id, FAIL, "H5Tcopy");
-    ret  = H5Tcommit(file1_id, TYPE_NAME, type1_id);
-    CHECK(ret, FAIL, "H5Tcommit");
+    ret  = H5Tcommit2(file1_id, TYPE_NAME, type1_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tcommit2");
     type2_id  = H5Topen(file2_id, TYPE_NAME);
     CHECK(type2_id, FAIL, "H5Topen");
 

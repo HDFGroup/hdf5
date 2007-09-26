@@ -174,8 +174,8 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     lnames[NDATASETS] = HDstrdup("grp");
     CHECK(lnames[NDATASETS], NULL, "strdup");
 
-    ret = H5Tcommit(file, "dtype", datatype);
-    CHECK(ret, FAIL, "H5Tcommit");
+    ret = H5Tcommit2(file, "dtype", datatype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tcommit2");
 
     lnames[NDATASETS + 1] = HDstrdup("dtype");
     CHECK(lnames[NDATASETS], NULL, "strdup");
@@ -652,8 +652,8 @@ test_iter_group_large(hid_t fapl)
     CHECK(ret, FAIL, "H5Tinsert");
 
     /* Save datatype for later */
-    ret = H5Tcommit(file, "Datatype1", tid);
-    CHECK(ret, FAIL, "H5Tcommit");
+    ret = H5Tcommit2(file, "Datatype1", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tcommit2");
 
     /* Add the name to the list of objects in the root group */
     HDstrcpy(names[ITER_NGROUPS + 1].name, "Datatype1");
@@ -738,8 +738,8 @@ static void test_grp_memb_funcs(hid_t fapl)
     dnames[NDATASETS] = HDstrdup("grp");
     CHECK(dnames[NDATASETS], NULL, "strdup");
 
-    ret = H5Tcommit(file, "dtype", datatype);
-    CHECK(ret, FAIL, "H5Tcommit");
+    ret = H5Tcommit2(file, "dtype", datatype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tcommit2");
 
     dnames[NDATASETS + 1] = HDstrdup("dtype");
     CHECK(dnames[NDATASETS], NULL, "strdup");

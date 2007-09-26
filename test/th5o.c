@@ -65,8 +65,8 @@ test_h5o_open(void)
     /* Commit the type inside the group */
     dtype = H5Tcopy(H5T_NATIVE_INT);
     CHECK(dtype, FAIL, "H5Tcopy");
-    ret = H5Tcommit(fid, "group/datatype", dtype);
-    CHECK(ret, FAIL, "H5Tcommit");
+    ret = H5Tcommit2(fid, "group/datatype", dtype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tcommit2");
     ret = H5Tclose(dtype);
     CHECK(ret, FAIL, "H5Tclose");
 
@@ -171,8 +171,8 @@ test_h5o_close(void)
     /* Commit the type inside the group */
     dtype = H5Tcopy(H5T_NATIVE_INT);
     CHECK(dtype, FAIL, "H5Tcopy");
-    ret = H5Tcommit(fid, "group/datatype", dtype);
-    CHECK(ret, FAIL, "H5Tcommit");
+    ret = H5Tcommit2(fid, "group/datatype", dtype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tcommit2");
     ret = H5Oclose(dtype);
     CHECK(ret, FAIL, "H5Oclose");
 
@@ -267,8 +267,8 @@ test_h5o_open_by_addr(void)
     /* Commit the type inside the group */
     dtype = H5Tcopy(H5T_NATIVE_INT);
     CHECK(dtype, FAIL, "H5Tcopy");
-    ret = H5Tcommit(fid, "group/datatype", dtype);
-    CHECK(ret, FAIL, "H5Tcommit");
+    ret = H5Tcommit2(fid, "group/datatype", dtype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tcommit2");
     ret = H5Tclose(dtype);
     CHECK(ret, FAIL, "H5Tclose");
 
@@ -394,8 +394,8 @@ test_h5o_refcount(void)
     /* Commit the type inside the group */
     dtype = H5Tcopy(H5T_NATIVE_INT);
     CHECK(dtype, FAIL, "H5Tcopy");
-    ret = H5Tcommit(fid, "datatype", dtype);
-    CHECK(ret, FAIL, "H5Tcommit");
+    ret = H5Tcommit2(fid, "datatype", dtype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tcommit2");
 
     /* Create the data space for the dataset. */
     dims[0] = DIM0;

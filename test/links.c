@@ -3410,7 +3410,7 @@ external_link_closing(hid_t fapl, hbool_t new_format)
 
     /* Test creating each kind of object */
     if((gid = H5Gcreate2(fid1, "elink/elink/elink/group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if(H5Tcommit(fid1, "elink/elink/elink/type1", tid) < 0) TEST_ERROR
+    if(H5Tcommit2(fid1, "elink/elink/elink/type1", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
     if((did = H5Dcreate(fid1, "elink/elink/elink/dataset1", tid2, sid, H5P_DEFAULT)) < 0) TEST_ERROR
     /* Close objects */
     if(H5Gclose(gid) < 0) TEST_ERROR
@@ -5081,7 +5081,7 @@ lapl_nlinks(hid_t fapl, hbool_t new_format)
 
     /* Create a datatype and dataset as targets inside the group */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
-    if(H5Tcommit(gid, "datatype", tid) < 0) TEST_ERROR
+    if(H5Tcommit2(gid, "datatype", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
 
     dims[0] = 2;
@@ -5196,14 +5196,14 @@ linkinfo(hid_t fapl, hbool_t new_format)
     /* Set up filename and create file*/
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
-    if((fid=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Register a couple of user-defined link classes with the library */
     if(H5Lregister(UD_plist_class) < 0) TEST_ERROR
 
     /* Create an object of each type */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
-    if(H5Tcommit(fid, "datatype", tid) < 0) TEST_ERROR
+    if(H5Tcommit2(fid, "datatype", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
     if((gid = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if(H5Lcreate_soft("group", fid, "softlink", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 

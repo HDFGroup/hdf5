@@ -871,7 +871,7 @@ test_interlink(hid_t fapl)
 
     /* Try an interfile hard link by sharing a data type */
     if((type = H5Tcopy(H5T_NATIVE_INT)) < 0) FAIL_STACK_ERROR
-    if(H5Tcommit(file1, "/type1", type) < 0) FAIL_STACK_ERROR
+    if(H5Tcommit2(file1, "/type1", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     if((space = H5Screate_simple(1, cur_dims, NULL)) < 0) FAIL_STACK_ERROR
     H5E_BEGIN_TRY {
 	dset = H5Dcreate(file1, "/mnt1/file2/dset", type, space, H5P_DEFAULT);

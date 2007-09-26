@@ -1558,52 +1558,52 @@ int make_all_objects(hid_t loc_id)
     } s_t;
 
     /*-------------------------------------------------------------------------
-    * H5G_DATASET
-    *-------------------------------------------------------------------------
-    */
+     * H5G_DATASET
+     *-------------------------------------------------------------------------
+     */
     space_id = H5Screate_simple(1,dims,NULL);
     dset_id  = H5Dcreate(loc_id,"dset_referenced",H5T_NATIVE_INT,space_id,H5P_DEFAULT);
     H5Sclose(space_id);
 
     /*-------------------------------------------------------------------------
-    * H5G_GROUP
-    *-------------------------------------------------------------------------
-    */
+     * H5G_GROUP
+     *-------------------------------------------------------------------------
+     */
     group_id  = H5Gcreate2(loc_id, "g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     root_id   = H5Gopen2(loc_id, "/", H5P_DEFAULT);
 
     /*-------------------------------------------------------------------------
-    * H5G_TYPE
-    *-------------------------------------------------------------------------
-    */
+     * H5G_TYPE
+     *-------------------------------------------------------------------------
+     */
 
     /* Create a memory compound datatype */
-    type_id = H5Tcreate (H5T_COMPOUND, sizeof(s_t));
+    type_id = H5Tcreate(H5T_COMPOUND, sizeof(s_t));
     H5Tinsert(type_id, "a", HOFFSET(s_t, a), H5T_NATIVE_INT);
     H5Tinsert(type_id, "b", HOFFSET(s_t, b), H5T_NATIVE_FLOAT);
 
     /* Commit compound datatype and close it */
-    H5Tcommit(loc_id, "type", type_id);
+    H5Tcommit2(loc_id, "type", type_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Tclose(type_id);
 
     /*-------------------------------------------------------------------------
-    * H5G_LINK
-    *-------------------------------------------------------------------------
-    */
+     * H5G_LINK
+     *-------------------------------------------------------------------------
+     */
 
     H5Lcreate_soft("dset", loc_id, "link", H5P_DEFAULT, H5P_DEFAULT);
 
     /*-------------------------------------------------------------------------
-    * H5G_UDLINK
-    *-------------------------------------------------------------------------
-    */
+     * H5G_UDLINK
+     *-------------------------------------------------------------------------
+     */
     /* Create an external link. Other UD links are not supported by h5repack */
     H5Lcreate_external("file", "path", loc_id, "ext_link", H5P_DEFAULT, H5P_DEFAULT);
 
     /*-------------------------------------------------------------------------
-    * write a series of datasetes
-    *-------------------------------------------------------------------------
-    */
+     * write a series of datasetes
+     *-------------------------------------------------------------------------
+     */
 
     write_dset_in(root_id,"dset_referenced",loc_id,0);
 
@@ -2409,8 +2409,7 @@ int make_early(void)
     if(H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0)
         goto out;
 
-    for(i = 0; i < iter; i++)
-    {
+    for(i = 0; i < iter; i++) {
         if((fid = H5Fopen(FNAME5, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
             goto out;
         if((dset_id = H5Dcreate(fid, "early", H5T_NATIVE_DOUBLE, sid, dcpl)) < 0)
@@ -2418,7 +2417,7 @@ int make_early(void)
         if((tid = H5Tcopy(H5T_NATIVE_DOUBLE)) < 0)
             goto out;
         sprintf(name, "%d", i);
-        if((H5Tcommit(fid, name, tid)) < 0)
+        if((H5Tcommit2(fid, name, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto out;
         if(H5Tclose(tid) < 0)
             goto out;
@@ -2438,12 +2437,11 @@ int make_early(void)
     if((fid = H5Fcreate(FNAME6, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         return -1;
 
-    for(i = 0; i < iter; i++)
-    {
+    for(i = 0; i < iter; i++) {
         if((tid = H5Tcopy(H5T_NATIVE_DOUBLE)) < 0)
             goto out;
         sprintf(name, "%d", i);
-        if((H5Tcommit(fid, name, tid)) < 0)
+        if((H5Tcommit2(fid, name, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto out;
         if(H5Tclose(tid) < 0)
             goto out;

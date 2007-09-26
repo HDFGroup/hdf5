@@ -1628,13 +1628,13 @@ test_attr_dtype_shared(hid_t fapl)
     CHECK(type_id, FAIL, "H5Tcopy");
 
     /* Commit datatype to file */
-    ret = H5Tcommit(file_id, TYPE1_NAME, type_id);
-    CHECK(ret, FAIL, "H5Tcommit");
+    ret = H5Tcommit2(file_id, TYPE1_NAME, type_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tcommit2");
 
     /* Check reference count on named datatype */
     ret = H5Oget_info(file_id, TYPE1_NAME, &oinfo, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info");
-    VERIFY(oinfo.rc, 1, "H5Tcommit");
+    VERIFY(oinfo.rc, 1, "H5Oget_info");
 
     /* Create dataspace for dataset */
     space_id = H5Screate(H5S_SCALAR);
@@ -6693,8 +6693,8 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
 
         /* Commit datatype to file */
         if(test_shared == 2) {
-            ret = H5Tcommit(fid, TYPE1_NAME, attr_tid);
-            CHECK(ret, FAIL, "H5Tcommit");
+            ret = H5Tcommit2(fid, TYPE1_NAME, attr_tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+            CHECK(ret, FAIL, "H5Tcommit2");
         } /* end if */
 
         /* Set up to query the object creation properties */
@@ -7019,8 +7019,8 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
 
         /* Commit datatype to file */
         if(test_shared == 2) {
-            ret = H5Tcommit(fid, TYPE1_NAME, attr_tid);
-            CHECK(ret, FAIL, "H5Tcommit");
+            ret = H5Tcommit2(fid, TYPE1_NAME, attr_tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+            CHECK(ret, FAIL, "H5Tcommit2");
         } /* end if */
 
         /* Set up to query the object creation properties */
@@ -7460,8 +7460,8 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
 
         /* Commit datatype to file */
         if(test_shared == 2) {
-            ret = H5Tcommit(fid, TYPE1_NAME, attr_tid);
-            CHECK(ret, FAIL, "H5Tcommit");
+            ret = H5Tcommit2(fid, TYPE1_NAME, attr_tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+            CHECK(ret, FAIL, "H5Tcommit2");
         } /* end if */
 
         /* Set up to query the object creation properties */
@@ -7824,8 +7824,8 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
 
         /* Commit datatype to file */
         if(test_shared == 2) {
-            ret = H5Tcommit(fid, TYPE1_NAME, attr_tid);
-            CHECK(ret, FAIL, "H5Tcommit");
+            ret = H5Tcommit2(fid, TYPE1_NAME, attr_tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+            CHECK(ret, FAIL, "H5Tcommit2");
         } /* end if */
 
         /* Set up to query the object creation properties */

@@ -236,7 +236,7 @@ static void gent_named_vl(hid_t loc_id)
     tid = H5Tvlen_create(H5T_NATIVE_INT);
 
     /* create named datatype */
-    H5Tcommit(loc_id, "vl", tid);
+    H5Tcommit2(loc_id, "vl", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* create dataset */
     did = H5Dcreate(loc_id, DATASET_NAMED_VL, tid, sid, H5P_DEFAULT);

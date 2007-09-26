@@ -752,29 +752,29 @@ int do_copy_objects(hid_t fidin,
              */
             case H5TRAV_TYPE_NAMED_DATATYPE:
 
-                if ((type_in = H5Topen (fidin,travt->objs[i].name))<0)
+                if((type_in = H5Topen(fidin, travt->objs[i].name)) < 0)
                     goto error;
 
-                if ((type_out = H5Tcopy(type_in))<0)
+                if((type_out = H5Tcopy(type_in)) < 0)
                     goto error;
 
-                if ((H5Tcommit(fidout,travt->objs[i].name,type_out))<0)
+                if((H5Tcommit2(fidout, travt->objs[i].name, type_out, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                     goto error;
 
                 /*-------------------------------------------------------------------------
                  * copy attrs
                  *-------------------------------------------------------------------------
                  */
-                if (copy_attr(type_in,type_out,options)<0)
+                if(copy_attr(type_in, type_out, options) < 0)
                     goto error;
 
-                if (H5Tclose(type_in)<0)
+                if(H5Tclose(type_in) < 0)
                     goto error;
-                if (H5Tclose(type_out)<0)
+                if(H5Tclose(type_out) < 0)
                     goto error;
 
-                if (options->verbose)
-                    printf(FORMAT_OBJ,"type",travt->objs[i].name );
+                if(options->verbose)
+                    printf(FORMAT_OBJ, "type", travt->objs[i].name);
 
                 break;
 

@@ -1412,7 +1412,7 @@ test_copy_named_datatype(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
 
     /* create named datatype */
-    if((H5Tcommit(fid_src, NAME_DATATYPE_SIMPLE, tid)) < 0) TEST_ERROR
+    if((H5Tcommit2(fid_src, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* close the datatype */
     if(H5Tclose(tid) < 0) TEST_ERROR
@@ -1505,7 +1505,7 @@ test_copy_named_datatype_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if((tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
 
     /* create named datatype */
-    if((H5Tcommit(fid_src, NAME_DATATYPE_VL, tid)) < 0) TEST_ERROR
+    if((H5Tcommit2(fid_src, NAME_DATATYPE_VL, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* close the datatype */
     if(H5Tclose(tid) < 0) TEST_ERROR
@@ -1601,7 +1601,7 @@ test_copy_named_datatype_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if((tid2 = H5Tvlen_create(tid)) < 0) TEST_ERROR
 
     /* create named datatype */
-    if((H5Tcommit(fid_src, NAME_DATATYPE_VL_VL, tid2)) < 0) TEST_ERROR
+    if((H5Tcommit2(fid_src, NAME_DATATYPE_VL_VL, tid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* close the first datatype */
     if(H5Tclose(tid) < 0) TEST_ERROR
@@ -2838,7 +2838,7 @@ test_copy_dataset_named_dtype(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 
     /* create named datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
-    if((H5Tcommit(fid_src, NAME_DATATYPE_SIMPLE, tid)) < 0) TEST_ERROR
+    if((H5Tcommit2(fid_src, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
     if((did = H5Dcreate(fid_src, NAME_DATASET_NAMED_DTYPE, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -2963,7 +2963,7 @@ test_copy_dataset_named_dtype_hier(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 
     /* create named datatype _inside_ hierarchy to copy */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
-    if((H5Tcommit(gid, NAME_DATATYPE_SIMPLE, tid)) < 0) TEST_ERROR
+    if((H5Tcommit2(gid, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create first dataset at SRC file */
     if((did = H5Dcreate(gid, NAME_DATASET_NAMED_DTYPE, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -3102,7 +3102,7 @@ test_copy_dataset_named_dtype_hier_outside(hid_t fcpl_src, hid_t fcpl_dst, hid_t
 
     /* create named datatype _outside_ hierarchy to copy */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
-    if((H5Tcommit(fid_src, NAME_DATATYPE_SIMPLE, tid)) < 0) TEST_ERROR
+    if((H5Tcommit2(fid_src, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create first dataset at SRC file */
     if((did = H5Dcreate(gid, NAME_DATASET_NAMED_DTYPE, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -3374,7 +3374,7 @@ test_copy_dataset_attr_named_dtype(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 
     /* create named datatype _outside_ hierarchy to copy */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
-    if((H5Tcommit(fid_src, NAME_DATATYPE_SIMPLE, tid)) < 0) TEST_ERROR
+    if((H5Tcommit2(fid_src, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create first dataset at SRC file */
     if((did = H5Dcreate(gid, NAME_DATASET_MULTI_OHDR, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -5549,7 +5549,7 @@ test_copy_same_file_named_datatype(hid_t fcpl_src, hid_t fapl)
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
 
     /* create named datatype */
-    if((H5Tcommit(fid, NAME_DATATYPE_SIMPLE, tid)) < 0) TEST_ERROR
+    if((H5Tcommit2(fid, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
 
     /* copy the datatype from SRC to DST */
@@ -5732,7 +5732,7 @@ test_copy_dataset_compact_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if((tid_copy = H5Tcopy(tid)) < 0)TEST_ERROR
 
     /* named data type */
-    if((H5Tcommit(fid_src, NAME_DATATYPE_VL, tid)) < 0) TEST_ERROR
+    if((H5Tcommit2(fid_src, NAME_DATATYPE_VL, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create and set compact plist */
     if((pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
@@ -5879,7 +5879,7 @@ test_copy_dataset_contig_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if((tid_copy = H5Tcopy(tid)) < 0)TEST_ERROR
 
     /* named data type */
-    if((H5Tcommit(fid_src, NAME_DATATYPE_VL, tid)) < 0) TEST_ERROR
+    if((H5Tcommit2(fid_src, NAME_DATATYPE_VL, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
     if((did = H5Dcreate(fid_src, NAME_DATASET_VL, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -6020,7 +6020,7 @@ test_copy_dataset_chunked_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if((tid_copy = H5Tcopy(tid)) < 0)TEST_ERROR
 
     /* named data type */
-    if((H5Tcommit(fid_src, NAME_DATATYPE_VL, tid)) < 0) TEST_ERROR
+    if((H5Tcommit2(fid_src, NAME_DATATYPE_VL, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
      /* create and set chunk plist */
     if((pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
@@ -6169,7 +6169,7 @@ test_copy_dataset_compressed_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl
     if((tid_copy = H5Tcopy(tid)) < 0)TEST_ERROR
 
     /* named data type */
-    if((H5Tcommit(fid_src, NAME_DATATYPE_VL, tid)) < 0) TEST_ERROR
+    if((H5Tcommit2(fid_src, NAME_DATATYPE_VL, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
      /* create and set chunk plist */
     if((pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR

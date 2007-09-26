@@ -435,8 +435,8 @@ void test_objnames(hid_t fid, const char* string)
 
   type_id = H5Tcreate(H5T_OPAQUE, (size_t)1);
   CHECK(type_id, FAIL, "H5Tcreate");
-  ret = H5Tcommit(grp2_id, string, type_id);
-  CHECK(type_id, FAIL, "H5Tcommit");
+  ret = H5Tcommit2(grp2_id, string, type_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  CHECK(type_id, FAIL, "H5Tcommit2");
   ret = H5Tclose(type_id);
   CHECK(type_id, FAIL, "H5Tclose");
 

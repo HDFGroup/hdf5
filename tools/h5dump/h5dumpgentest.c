@@ -602,7 +602,7 @@ static void gent_compound_dt(void) {       /* test compound data type */
     type = H5Tcreate (H5T_COMPOUND, sizeof(dset2_t));
     H5Tinsert(type, "int_name", HOFFSET(dset2_t, a), H5T_STD_I32BE);
     H5Tinsert(type, "float_name", HOFFSET(dset2_t, b), H5T_IEEE_F32BE);
-    H5Tcommit(fid, "type1", type);
+    H5Tcommit2(fid, "type1", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     type2 = H5Tcreate (H5T_COMPOUND, sizeof(dset2_t));
     H5Tinsert(type2, "int_name", HOFFSET(dset2_t, a), H5T_NATIVE_INT);
     H5Tinsert(type2, "float_name", HOFFSET(dset2_t, b), H5T_NATIVE_FLOAT);
@@ -639,7 +639,7 @@ static void gent_compound_dt(void) {       /* test compound data type */
     H5Tinsert(type2, "float_array", HOFFSET(dset3_t, b), array_dt);
     H5Tclose(array_dt);
 
-    H5Tcommit(fid, "type2", type);
+    H5Tcommit2(fid, "type2", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
 
     dset3_dim[0] = 3;  dset3_dim[1] = 6;
@@ -665,7 +665,7 @@ static void gent_compound_dt(void) {       /* test compound data type */
     type2 = H5Tcreate (H5T_COMPOUND, sizeof(dset4_t));
     H5Tinsert(type, "int", HOFFSET(dset4_t, a), H5T_STD_I32BE);
     H5Tinsert(type, "float", HOFFSET(dset4_t, b), H5T_IEEE_F32BE);
-    H5Tcommit(group, "type3", type);
+    H5Tcommit2(group, "type3", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Tinsert(type2, "int", HOFFSET(dset4_t, a), H5T_NATIVE_INT);
     H5Tinsert(type2, "float", HOFFSET(dset4_t, b), H5T_NATIVE_FLOAT);
     dataset = H5Dcreate(group, "dset4", type, space, H5P_DEFAULT);
@@ -680,11 +680,11 @@ static void gent_compound_dt(void) {       /* test compound data type */
     /* unamed data type */
     group = H5Gcreate2(fid, "/group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    type = H5Tcreate (H5T_COMPOUND, sizeof(dset5_t));
+    type = H5Tcreate(H5T_COMPOUND, sizeof(dset5_t));
     H5Tinsert(type, "int", HOFFSET(dset5_t, a), H5T_STD_I32BE);
     H5Tinsert(type, "float", HOFFSET(dset5_t, b), H5T_IEEE_F32BE);
-    H5Tcommit(group, "type4", type);
-    type2 = H5Tcreate (H5T_COMPOUND, sizeof(dset5_t));
+    H5Tcommit2(group, "type4", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    type2 = H5Tcreate(H5T_COMPOUND, sizeof(dset5_t));
     H5Tinsert(type2, "int", HOFFSET(dset5_t, a), H5T_NATIVE_INT);
     H5Tinsert(type2, "float", HOFFSET(dset5_t, b), H5T_NATIVE_FLOAT);
     dataset = H5Dcreate(group, "dset5", type, space, H5P_DEFAULT);
@@ -804,10 +804,10 @@ static void gent_compound_dt2(void) {       /* test compound data type */
     space = H5Screate_simple(1, &sdim, &maxdim);
 
     /* shared data type 1 */
-    type = H5Tcreate (H5T_COMPOUND, sizeof(dset2_t));
+    type = H5Tcreate(H5T_COMPOUND, sizeof(dset2_t));
     H5Tinsert(type, "int_name", HOFFSET(dset2_t, a), H5T_STD_I32BE);
     H5Tinsert(type, "float_name", HOFFSET(dset2_t, b), H5T_IEEE_F32BE);
-    H5Tcommit(fid, "type1", type);
+    H5Tcommit2(fid, "type1", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     group = H5Gcreate2(fid, "/group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -836,14 +836,14 @@ static void gent_compound_dt2(void) {       /* test compound data type */
     H5Tinsert(type, "float_array", HOFFSET(dset3_t, b), array_dt);
     H5Tclose(array_dt);
 
-    H5Tcommit(fid, "type2", type);
+    H5Tcommit2(fid, "type2", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Tclose(type);
 
     /* shared data type 3 */
-    type = H5Tcreate (H5T_COMPOUND, sizeof(dset4_t));
+    type = H5Tcreate(H5T_COMPOUND, sizeof(dset4_t));
     H5Tinsert(type, "int", HOFFSET(dset4_t, a), H5T_STD_I32BE);
     H5Tinsert(type, "float", HOFFSET(dset4_t, b), H5T_IEEE_F32BE);
-    H5Tcommit(group, "type3", type);
+    H5Tcommit2(group, "type3", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     dataset = H5Dcreate(group, "dset4", type, space, create_plist);
 
@@ -861,12 +861,12 @@ static void gent_compound_dt2(void) {       /* test compound data type */
     /* unamed data type */
     group = H5Gcreate2(fid, "/group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    type = H5Tcreate (H5T_COMPOUND, sizeof(dset5_t));
+    type = H5Tcreate(H5T_COMPOUND, sizeof(dset5_t));
     H5Tinsert(type, "int", HOFFSET(dset5_t, a), H5T_STD_I32BE);
     H5Tinsert(type, "float", HOFFSET(dset5_t, b), H5T_IEEE_F32BE);
-    H5Tcommit(group, "type4", type);
+    H5Tcommit2(group, "type4", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     dataset = H5Dcreate(group, "dset5", type, space, create_plist);
-    type2 = H5Tcreate (H5T_COMPOUND, sizeof(dset5_t));
+    type2 = H5Tcreate(H5T_COMPOUND, sizeof(dset5_t));
     H5Tinsert(type2, "int", HOFFSET(dset5_t, a), H5T_NATIVE_INT);
     H5Tinsert(type2, "float", HOFFSET(dset5_t, b), H5T_NATIVE_FLOAT);
     H5Dwrite(dataset, type2, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset5);
@@ -1617,7 +1617,7 @@ static void gent_enum(void)
     H5Tenum_insert(type, "BLUE blue",  (val = 2, &val));
     H5Tenum_insert(type, "WHITE \"white\"", (val = 3, &val));
     H5Tenum_insert(type, "BLACK \'black\'", (val = 4, &val));
-    H5Tcommit(file, "enum normal", type);
+    H5Tcommit2(file, "enum normal", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     space = H5Screate_simple(1,size,NULL);
     dset = H5Dcreate(file,"table",type, space, H5P_DEFAULT);
@@ -1691,7 +1691,7 @@ static void gent_objref(void)
     H5Tinsert(tid1, "c", HOFFSET(s1_t,c), H5T_IEEE_F32BE);
 
     /* Save datatype for later */
-    H5Tcommit(group, "Datatype1", tid1);
+    H5Tcommit2(group, "Datatype1", tid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Close datatype */
     H5Tclose(tid1);
@@ -3111,7 +3111,7 @@ static void gent_vlstr(void)
 
     /* Create a named VL string type.  Change padding of datatype */
     H5Tset_strpad(tid1, H5T_STR_NULLPAD);
-    H5Tcommit(fid1, "vl_string_type", tid1);
+    H5Tcommit2(fid1, "vl_string_type", tid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Create an group attribute of VL string type */
     root = H5Gopen2(fid1, "/", H5P_DEFAULT);
@@ -4410,8 +4410,8 @@ static void gent_named_dtype_attr(void)
    assert(tid>0);
 
    /* Commit datatype to file */
-   ret=H5Tcommit(fid,F42_TYPENAME,tid);
-   assert(ret>=0);
+   ret = H5Tcommit2(fid, F42_TYPENAME, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+   assert(ret >= 0);
 
    /* Create a scalar dataspace used for all objects */
    sid=H5Screate(H5S_SCALAR);
@@ -4898,9 +4898,9 @@ static void gent_filters(void)
  * commit a H5G_TYPE type with a comment
  *-------------------------------------------------------------------------
  */
- tid=H5Tcopy(H5T_STD_B8LE);
- ret=H5Tcommit(fid, "mytype", tid);
- assert(ret>=0);
+ tid = H5Tcopy(H5T_STD_B8LE);
+ ret = H5Tcommit2(fid, "mytype", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ assert(ret >= 0);
 
  ret = H5Oset_comment(fid, "mytype", "This is a commited datatype", H5P_DEFAULT);
  assert(ret >= 0);
@@ -5051,16 +5051,16 @@ static void gent_fcontents(void)
     * datatypes
     *-------------------------------------------------------------------------
     */
-    tid=H5Tcopy(H5T_NATIVE_INT);
-    ret=H5Tcommit(fid, "mytype", tid);
-    assert(ret>=0);
-    ret=H5Tclose(tid);
-    assert(ret>=0);
+    tid = H5Tcopy(H5T_NATIVE_INT);
+    ret = H5Tcommit2(fid, "mytype", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    assert(ret >= 0);
+    ret = H5Tclose(tid);
+    assert(ret >= 0);
 
 
     /* no name datatype */
     tid = H5Tcopy(H5T_NATIVE_INT);
-    ret = H5Tcommit(fid, "mytype2", tid);
+    ret = H5Tcommit2(fid, "mytype2", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     assert(ret >= 0);
     write_dset(fid, 1, dims, "dsetmytype2", tid, buf);
     ret = H5Ldelete(fid, "mytype2", H5P_DEFAULT);

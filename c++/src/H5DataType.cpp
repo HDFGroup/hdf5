@@ -223,11 +223,9 @@ bool DataType::operator==(const DataType& compared_type ) const
 void DataType::p_commit(hid_t loc_id, const char* name)
 {
    // Call C routine to commit the transient datatype
-   herr_t ret_value = H5Tcommit(loc_id, name, id);
+   herr_t ret_value = H5Tcommit2(loc_id, name, id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
    if( ret_value < 0 )
-   {
-      throw DataTypeIException(inMemFunc("p_commit"), "H5Tcommit failed");
-   }
+      throw DataTypeIException(inMemFunc("p_commit"), "H5Tcommit2 failed");
 }
 
 //--------------------------------------------------------------------------

@@ -74,6 +74,10 @@
 #define H5Rget_obj_type_vers 1
 #endif /* !defined(H5Rget_obj_type_vers) */
 
+#if !defined(H5Tcommit_vers)
+#define H5Tcommit_vers 1
+#endif /* !defined(H5Tcommit_vers) */
+
 /************/
 /* Typedefs */
 /************/
@@ -197,6 +201,17 @@
 #else /* H5Rget_obj_type_vers */
 #error "H5Rget_obj_type_vers set to invalid value"
 #endif /* H5Rget_obj_type_vers */
+
+#if !defined(H5Tcommit_vers) || H5Tcommit_vers == 2
+#ifndef H5Tcommit_vers
+#define H5Tcommit_vers 2
+#endif /* H5Tcommit_vers */
+#define H5Tcommit H5Tcommit2
+#elif H5Tcommit_vers == 1
+#define H5Tcommit H5Tcommit1
+#else /* H5Tcommit_vers */
+#error "H5Tcommit_vers set to invalid value"
+#endif /* H5Tcommit_vers */
 
 /************/
 /* Typedefs */
