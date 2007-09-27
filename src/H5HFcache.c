@@ -228,7 +228,7 @@ H5HF_dtable_encode(H5F_t *f, uint8_t **pp, const H5HF_dtable_t *dtable)
     /* Starting # of rows in root indirect block */
     UINT16ENCODE(*pp, dtable->cparam.start_root_rows);
 
-    /* Address of table */
+    /* Address of root direct/indirect block */
     H5F_addr_encode(f, pp, dtable->table_addr);
 
     /* Current # of rows in root indirect block */
