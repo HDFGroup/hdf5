@@ -334,11 +334,14 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Aget_num_attrs() */
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*-------------------------------------------------------------------------
- * Function:	H5Arename
+ * Function:	H5Arename1
  *
  * Purpose:     Rename an attribute
+ *
+ * Note:	Deprecated in favor of H5Arename2
  *
  * Return:	Success:             Non-negative
  *		Failure:             Negative
@@ -349,12 +352,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
+H5Arename1(hid_t loc_id, const char *old_name, const char *new_name)
 {
     H5G_loc_t	loc;	                /* Object location */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Arename, FAIL)
+    FUNC_ENTER_API(H5Arename1, FAIL)
     H5TRACE3("e", "i*s*s", loc_id, old_name, new_name);
 
     /* check arguments */
@@ -373,7 +376,8 @@ H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* H5Arename() */
+} /* H5Arename1() */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
 /*--------------------------------------------------------------------------

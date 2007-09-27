@@ -236,51 +236,51 @@ test_attr_basic_write(hid_t fapl)
     CHECK(ret, FAIL, "H5Awrite");
 
     /* Check storage size for attribute */
-    attr_size=H5Aget_storage_size(attr);
-    VERIFY(attr_size, (ATTR1_DIM1*sizeof(int)), "H5A_get_storage_size");
+    attr_size = H5Aget_storage_size(attr);
+    VERIFY(attr_size, (ATTR1_DIM1 * sizeof(int)), "H5A_get_storage_size");
 
     /* Read attribute information immediately, without closing attribute */
-    ret=H5Aread(attr,H5T_NATIVE_INT,read_data1);
+    ret = H5Aread(attr, H5T_NATIVE_INT, read_data1);
     CHECK(ret, FAIL, "H5Aread");
 
     /* Verify values read in */
-    for(i=0; i<ATTR1_DIM1; i++)
-        if(attr_data1[i]!=read_data1[i])
-            TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
+    for(i = 0; i < ATTR1_DIM1; i++)
+        if(attr_data1[i] != read_data1[i])
+            TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n", __LINE__, i, attr_data1[i], i, read_data1[i]);
 
     /* Close attribute */
-    ret=H5Aclose(attr);
+    ret = H5Aclose(attr);
     CHECK(ret, FAIL, "H5Aclose");
 
     /* Close attribute */
-    ret=H5Aclose(attr2);
+    ret = H5Aclose(attr2);
     CHECK(ret, FAIL, "H5Aclose");
 
     /* change attribute name */
-    ret=H5Arename(dataset, ATTR1_NAME, ATTR_TMP_NAME);
-    CHECK(ret, FAIL, "H5Arename");
+    ret = H5Arename2(dataset, ".", ATTR1_NAME, ATTR_TMP_NAME, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Arename2");
 
     /* Open attribute again */
-    attr=H5Aopen_name(dataset, ATTR_TMP_NAME);
+    attr = H5Aopen_name(dataset, ATTR_TMP_NAME);
     CHECK(attr, FAIL, "H5Aopen_name");
 
     /* Verify new attribute name */
     attr_name_size = H5Aget_name(attr, (size_t)0, NULL);
     CHECK(attr_name_size, FAIL, "H5Aget_name");
 
-    if(attr_name_size>0)
-        attr_name = (char*)HDcalloc((size_t)(attr_name_size+1), sizeof(char));
+    if(attr_name_size > 0)
+        attr_name = (char*)HDcalloc((size_t)(attr_name_size + 1), sizeof(char));
 
-    ret=(herr_t)H5Aget_name(attr, (size_t)(attr_name_size+1), attr_name);
+    ret = (herr_t)H5Aget_name(attr, (size_t)(attr_name_size + 1), attr_name);
     CHECK(ret, FAIL, "H5Aget_name");
-    ret=HDstrcmp(attr_name, ATTR_TMP_NAME);
+    ret = HDstrcmp(attr_name, ATTR_TMP_NAME);
     VERIFY(ret, 0, "HDstrcmp");
 
     if(attr_name)
         HDfree(attr_name);
 
     /* Read attribute information immediately, without closing attribute */
-    ret=H5Aread(attr,H5T_NATIVE_INT,read_data1);
+    ret = H5Aread(attr, H5T_NATIVE_INT, read_data1);
     CHECK(ret, FAIL, "H5Aread");
 
     /* Verify values read in */
@@ -3273,7 +3273,7 @@ test_attr_deprec(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 
 
-    /* Re-open the file and delete the attribute */
+    /* Re-open the file and operate on the attribute */
 
     /* Re-open file */
     fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
@@ -3284,8 +3284,12 @@ test_attr_deprec(hid_t fcpl, hid_t fapl)
     CHECK(dataset, FAIL, "H5Dopen");
 
 
+    /* Rename attribute */
+    ret = H5Arename1(dataset, "attr", "attr2");
+    CHECK(ret, FAIL, "H5Arename1");
+
     /* Delete attribute */
-    ret = H5Adelete1(dataset, "attr");
+    ret = H5Adelete1(dataset, "attr2");
     CHECK(ret, FAIL, "H5Adelete1");
 
 

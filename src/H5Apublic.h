@@ -89,7 +89,6 @@ H5_DLL hid_t   H5Acreate(hid_t loc_id, const char *name, hid_t type_id,
 H5_DLL hid_t   H5Aopen_name(hid_t loc_id, const char *name);
 H5_DLL hid_t   H5Aopen_idx(hid_t loc_id, unsigned idx);
 H5_DLL int     H5Aget_num_attrs(hid_t loc_id);
-H5_DLL herr_t  H5Arename(hid_t loc_id, const char *old_name, const char *new_name);
 H5_DLL herr_t  H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op,
     void *op_data);
 
@@ -107,6 +106,7 @@ H5_DLL herr_t  H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op,
 
 /* Function prototypes */
 H5_DLL herr_t  H5Adelete1(hid_t loc_id, const char *name);
+H5_DLL herr_t  H5Arename1(hid_t loc_id, const char *old_name, const char *new_name);
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
