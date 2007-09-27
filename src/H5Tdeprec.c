@@ -47,6 +47,7 @@
 #include "H5Tpkg.h"		/* Datatypes				*/
 
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 /****************/
 /* Local Macros */
 /****************/
@@ -224,4 +225,5 @@ done:
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Topen1() */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 

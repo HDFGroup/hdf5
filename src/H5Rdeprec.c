@@ -47,6 +47,7 @@
 #include "H5Rpkg.h"		/* References				*/
 
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 /****************/
 /* Local Macros */
 /****************/
@@ -103,7 +104,6 @@ H5R_init_deprec_interface(void)
     FUNC_LEAVE_NOAPI(H5R_init())
 } /* H5R_init_deprec_interface() */
 
-#ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*--------------------------------------------------------------------------
  NAME
