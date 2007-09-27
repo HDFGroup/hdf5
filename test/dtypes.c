@@ -17,7 +17,7 @@
  * Programmer:  Robb Matzke <matzke@llnl.gov>
  *              Tuesday, December  9, 1997
  *
- * Purpose:     Tests the data type interface (H5T)
+ * Purpose:     Tests the datatype interface (H5T)
  */
 
 #include <math.h>
@@ -44,7 +44,7 @@
 
 /*
  * Define if you want to test alignment code on a machine that doesn't
- * normally require alignment. When set, all native data types must be aligned
+ * normally require alignment. When set, all native datatypes must be aligned
  * on a byte boundary equal to the data size.
  */
 #define TEST_ALIGNMENT
@@ -247,7 +247,7 @@ test_classes(void)
 /*-------------------------------------------------------------------------
  * Function:    test_copy
  *
- * Purpose:     Are we able to copy a data type?
+ * Purpose:     Are we able to copy a datatype?
  *
  * Return:      Success:        0
  *
@@ -476,7 +476,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_compound_1
  *
- * Purpose:     Tests various things about compound data types.
+ * Purpose:     Tests various things about compound datatypes.
  *
  * Return:      Success:        0
  *
@@ -504,7 +504,7 @@ test_compound_1(void)
     int                 offset;
     herr_t ret;
 
-    TESTING("compound data types");
+    TESTING("compound datatypes");
 
     /* Create the empty type */
     if ((complex_id = H5Tcreate(H5T_COMPOUND, sizeof(complex_t)))<0) goto error;
@@ -1352,7 +1352,7 @@ test_compound_7(void)
 /*-------------------------------------------------------------------------
  * Function:    test_compound_8
  *
- * Purpose:     Tests H5Tpack for compound data types.
+ * Purpose:     Tests H5Tpack for compound datatypes.
  *
  * Return:      Success:        0
  *
@@ -1381,7 +1381,7 @@ test_compound_8(void)
     hid_t  tid1, tid2, tid3;
     herr_t ret;
 
-    TESTING("packing compound data types");
+    TESTING("packing compound datatypes");
 
     /* Create first compound datatype */
     if((tid1 = H5Tcreate( H5T_COMPOUND, sizeof(struct s1)))<0) {
@@ -1405,20 +1405,20 @@ test_compound_8(void)
     /* Test H5Tpack for the first compound type */
     if(H5Tpack(tid1)<0) {
         H5_FAILED(); AT();
-        printf("Can't pack the compound data type\n");
+        printf("Can't pack the compound datatype\n");
         goto error;
     } /* end if */
 
     if(H5Tlock(tid1)<0) {
         H5_FAILED(); AT();
-        printf("Can't lock the compound data type\n");
+        printf("Can't lock the compound datatype\n");
         goto error;
     } /* end if */
 
     /* If the type is already packed, packing a locked type is OK */
     if(H5Tpack(tid1)<0) {
         H5_FAILED(); AT();
-        printf("Can't pack the compound data type for second time\n");
+        printf("Can't pack the compound datatype for second time\n");
         goto error;
     } /* end if */
 
@@ -1452,27 +1452,27 @@ test_compound_8(void)
     /* Test H5Tpack for the second compound type */
     if(H5Tpack(tid2)<0) {
         H5_FAILED(); AT();
-        printf("Can't pack the compound data type\n");
+        printf("Can't pack the compound datatype\n");
         goto error;
     } /* end if */
 
     if(H5Tlock(tid2)<0) {
         H5_FAILED(); AT();
-        printf("Can't lock the compound data type\n");
+        printf("Can't lock the compound datatype\n");
         goto error;
     } /* end if */
 
     /* If the type is already packed, packing a locked type is OK */
     if(H5Tpack(tid2)<0) {
         H5_FAILED(); AT();
-        printf("Can't pack the compound data type for second time\n");
+        printf("Can't pack the compound datatype for second time\n");
         goto error;
     } /* end if */
 
     /* Lock unpacked type */
     if(H5Tlock(tid3)<0) {
         H5_FAILED(); AT();
-        printf("Can't lock the compound data type\n");
+        printf("Can't lock the compound datatype\n");
         goto error;
     } /* end if */
 
@@ -1499,7 +1499,7 @@ test_compound_8(void)
 /*-------------------------------------------------------------------------
  * Function:    test_compound_9
  *
- * Purpose:     Tests compound data type with VL string as field.
+ * Purpose:     Tests compound datatype with VL string as field.
  *
  * Return:      Success:        0
  *
@@ -1530,7 +1530,7 @@ test_compound_9(void)
     hsize_t     dim1[1];
     char        filename[1024];
 
-    TESTING("compound data type with VL string");
+    TESTING("compound datatype with VL string");
 
     /* Create File */
     h5_fixname(FILENAME[3], H5P_DEFAULT, filename, sizeof filename);
@@ -1702,7 +1702,7 @@ test_compound_9(void)
 /*-------------------------------------------------------------------------
  * Function:    test_compound_10
  *
- * Purpose:     Tests array data type of compound type with VL string as field.
+ * Purpose:     Tests array datatype of compound type with VL string as field.
  *
  * Return:      Success:        0
  *
@@ -1738,7 +1738,7 @@ test_compound_10(void)
     int         len;
     int         i;
 
-    TESTING("array data type of compound type with VL string");
+    TESTING("array datatype of compound type with VL string");
 
     for(i=0; i<ARRAY_DIM; i++) {
         wdata[i].i1 = i*10+i;
@@ -1786,7 +1786,7 @@ test_compound_10(void)
         goto error;
     } /* end if */
 
-    /* Create vl-string data type */
+    /* Create vl-string datatype */
     if((vlstr_id =  H5Tvlen_create(H5T_NATIVE_CHAR))<0) {
         H5_FAILED(); AT();
         printf("Can't create VL string\n");
@@ -1805,7 +1805,7 @@ test_compound_10(void)
         goto error;
     } /* end if */
 
-    /* Create the array data type for c_string data */
+    /* Create the array datatype for c_string data */
     if((arr_tid = H5Tarray_create(cmpd_tid, 1, arr_dim, NULL)) < 0) {
         H5_FAILED(); AT();
         printf("Can't create array type\n");
@@ -2108,7 +2108,7 @@ test_compound_11(void)
 /*-------------------------------------------------------------------------
  * Function:    test_compound_12
  *
- * Purpose:     Tests size adjustment of compound data types.  Start with
+ * Purpose:     Tests size adjustment of compound datatypes.  Start with
  *              no member and 0 size, increase the size as inserting
  *              members.
  *
@@ -2131,7 +2131,7 @@ test_compound_12(void)
     size_t                  offset, new_size, tmp_size;
     herr_t ret;
 
-    TESTING("adjust size of compound data types");
+    TESTING("adjust size of compound datatypes");
 
     /* Create a compound type of minimal size */
     if ((complex_id = H5Tcreate(H5T_COMPOUND, 1))<0) goto error;
@@ -2409,7 +2409,7 @@ test_query(void)
         goto error;
     } /* end if */
 
-    /* Close data type and file */
+    /* Close datatype and file */
     if(H5Tclose(tid1)<0) {
         H5_FAILED();
         printf("Can't close datatype\n");
@@ -2443,7 +2443,7 @@ test_query(void)
 /*-------------------------------------------------------------------------
  * Function:	test_transient
  *
- * Purpose:	Tests transient data types.
+ * Purpose:	Tests transient datatypes.
  *
  * Return:	Success:	0
  *
@@ -2464,7 +2464,7 @@ test_transient (hid_t fapl)
     char		filename[1024];
     herr_t		status;
 
-    TESTING("transient data types");
+    TESTING("transient datatypes");
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if ((file=H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
@@ -2504,7 +2504,7 @@ test_transient (hid_t fapl)
 	goto error;
     }
 
-    /* Create a dataset from a transient data type */
+    /* Create a dataset from a transient datatype */
     if (H5Tclose (type)<0) goto error;
     if ((type = H5Tcopy (H5T_NATIVE_INT))<0) goto error;
     if ((dset=H5Dcreate (file, "dset1", type, space, H5P_DEFAULT))<0)
@@ -2517,7 +2517,7 @@ test_transient (hid_t fapl)
     } H5E_END_TRY;
     if (status>=0) {
 	H5_FAILED();
-	HDputs ("    Dataset data types should not be modifiable!");
+	HDputs ("    Dataset datatypes should not be modifiable!");
 	goto error;
     }
     if (H5Tclose (t2)<0) goto error;
@@ -2534,13 +2534,13 @@ test_transient (hid_t fapl)
     } H5E_END_TRY;
     if (status>=0) {
 	H5_FAILED();
-	HDputs ("    Dataset data types should not be modifiable!");
+	HDputs ("    Dataset datatypes should not be modifiable!");
 	goto error;
     }
     if (H5Tclose (t2)<0) goto error;
 
     /*
-     * Get the dataset data type by applying H5Tcopy() to the dataset. The
+     * Get the dataset datatype by applying H5Tcopy() to the dataset. The
      * result should be modifiable.
      */
     if ((t2=H5Tcopy (dset))<0) goto error;
@@ -2570,7 +2570,7 @@ test_transient (hid_t fapl)
 /*-------------------------------------------------------------------------
  * Function:	test_named
  *
- * Purpose:	Tests named data types.
+ * Purpose:	Tests named datatypes.
  *
  * Return:	Success:	0
  *
@@ -2593,7 +2593,7 @@ test_named (hid_t fapl)
     unsigned 		attr_data[10][20];
     char		filename[1024];
 
-    TESTING("named data types");
+    TESTING("named datatypes");
 
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
     if ((file=H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
@@ -2611,7 +2611,7 @@ test_named (hid_t fapl)
 	goto error;
     }
 
-    /* Copy a predefined data type and commit the copy */
+    /* Copy a predefined datatype and commit the copy */
     if((type = H5Tcopy(H5T_NATIVE_INT)) < 0) goto error;
     if(H5Tcommit2(file, "native-int", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) goto error;
     if((status = H5Tcommitted(type)) < 0) goto error;
@@ -2680,7 +2680,7 @@ test_named (hid_t fapl)
     if((dset = H5Dcreate(file, "dset1", type, space, H5P_DEFAULT)) < 0)
 	goto error;
 
-    /* Get the dataset's data type and make sure it's a named type */
+    /* Get the dataset's datatype and make sure it's a named type */
     if((t2 = H5Dget_type(dset)) < 0) goto error;
     if((status = H5Tcommitted(t2)) < 0) goto error;
     if(!status) {
@@ -2724,7 +2724,7 @@ test_named (hid_t fapl)
     if(H5Tclose(t2) < 0) goto error;
 
     /*
-     * Get the dataset data type by applying H5Tcopy() to the dataset. The
+     * Get the dataset datatype by applying H5Tcopy() to the dataset. The
      * result should be modifiable.
      */
     if((t2 = H5Tcopy(dset)) < 0) goto error;
@@ -2776,7 +2776,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:	mkstr
  *
- * Purpose:	Create a new string data type
+ * Purpose:	Create a new string datatype
  *
  * Return:	Success:	New type
  *
@@ -3237,7 +3237,7 @@ test_conv_str_3(void)
 /*-------------------------------------------------------------------------
  * Function:	test_conv_enum_1
  *
- * Purpose:	Test conversion speed for enum data types
+ * Purpose:	Test conversion speed for enum datatypes
  *
  * Return:	Success:	0
  *
@@ -3260,7 +3260,7 @@ test_conv_enum_1(void)
     char	s[80];
     int		ret_value = 1;
 
-    /* Build the data types */
+    /* Build the datatypes */
     t1 = H5Tcreate(H5T_ENUM, sizeof(int));
     t2 = H5Tenum_create(H5T_NATIVE_INT);
     s[1] = '\0';
@@ -3490,7 +3490,7 @@ test_conv_bitfield(void)
 /*-------------------------------------------------------------------------
  * Function:	test_bitfield_funcs
  *
- * Purpose:	Test some data type functions that are and aren't supposed
+ * Purpose:	Test some datatype functions that are and aren't supposed
  *              work for bitfield type.
  *
  * Return:	Success:	0
@@ -3945,7 +3945,7 @@ opaque_funcs(void)
 /*-------------------------------------------------------------------------
  * Function:    test_encode
  *
- * Purpose:     Tests functions of encoding and decoding data type.
+ * Purpose:     Tests functions of encoding and decoding datatype.
  *
  * Return:      Success:        0
  *
@@ -3977,7 +3977,7 @@ test_encode(void)
     unsigned char       *cmpd_buf=NULL, *enum_buf=NULL;
     herr_t      ret;
 
-    TESTING("functions of encoding and decoding data types");
+    TESTING("functions of encoding and decoding datatypes");
 
     /* Create File */
     h5_fixname(FILENAME[5], H5P_DEFAULT, filename, sizeof filename);
@@ -3985,7 +3985,7 @@ test_encode(void)
         goto error;
 
     /*-----------------------------------------------------------------------
-     * Create compound and enumerate data types
+     * Create compound and enumerate datatypes
      *-----------------------------------------------------------------------
      */
     /* Create a compound datatype */
@@ -4048,7 +4048,7 @@ test_encode(void)
     } /* end if */
 
     /*-----------------------------------------------------------------------
-     * Test encoding and decoding compound and enumerate data types
+     * Test encoding and decoding compound and enumerate datatypes
      *-----------------------------------------------------------------------
      */
     /* Encode compound type in a buffer */
@@ -4144,7 +4144,7 @@ test_encode(void)
     } /* end if */
 
     /*-----------------------------------------------------------------------
-     * Commit and reopen the compound and enumerate data types
+     * Commit and reopen the compound and enumerate datatypes
      *-----------------------------------------------------------------------
      */
     /* Commit compound datatype and close it */
@@ -4238,7 +4238,7 @@ test_encode(void)
     } /* end if */
 
     /*-----------------------------------------------------------------------
-     * Test encoding and decoding compound and enumerate data types
+     * Test encoding and decoding compound and enumerate datatypes
      *-----------------------------------------------------------------------
      */
     /* Encode enumerate type in a buffer */
@@ -4287,7 +4287,7 @@ test_encode(void)
      * Close and release
      *-----------------------------------------------------------------------
      */
-    /* Close data type and file */
+    /* Close datatype and file */
     if(H5Tclose(tid1)<0) {
         H5_FAILED();
         printf("Can't close datatype\n");
@@ -4696,9 +4696,91 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_compat
+ *
+ * Purpose:	Tests deprecated API routines for datatypes.
+ *
+ * Return:	Success:	0
+ *		Failure:	number of errors
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, September 27, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+static int
+test_compat(hid_t fapl)
+{
+    hid_t		file = -1;              /* File ID */
+    hid_t		type = -1;              /* Datatype ID */
+    char		filename[1024];
+    herr_t		status;                 /* Generic routine value */
+
+    TESTING("deprected API routines for datatypes");
+
+    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Predefined types cannot be committed */
+    H5E_BEGIN_TRY {
+	status = H5Tcommit1(file, "test_named_1 (should not exist)", H5T_NATIVE_INT);
+    } H5E_END_TRY;
+    if(status >= 0)
+	FAIL_PUTS_ERROR("    Predefined types should not be committable!")
+
+    /* Copy a predefined datatype and commit the copy */
+    if((type = H5Tcopy(H5T_NATIVE_INT)) < 0) FAIL_STACK_ERROR
+    if(H5Tcommit1(file, "native-int", type) < 0) FAIL_STACK_ERROR
+    if((status = H5Tcommitted(type)) < 0) FAIL_STACK_ERROR
+    if(0 == status)
+	FAIL_PUTS_ERROR("    H5Tcommitted() returned false!")
+
+    /* We should not be able to modify a type after it has been committed. */
+    H5E_BEGIN_TRY {
+	status = H5Tset_precision(type, 256);
+    } H5E_END_TRY;
+    if(status >= 0)
+	FAIL_PUTS_ERROR("    Committed type is not constant!")
+
+    /* We should not be able to re-commit a committed type */
+    H5E_BEGIN_TRY {
+	status = H5Tcommit1(file, "test_named_2 (should not exist)", type);
+    } H5E_END_TRY;
+    if(status >= 0)
+	FAIL_PUTS_ERROR("    Committed types should not be recommitted!")
+
+    /*
+     * Close the committed type and reopen it.  It should return a named type.
+     */
+    if(H5Tclose(type) < 0) FAIL_STACK_ERROR
+    if((type = H5Topen(file, "native-int")) < 0) FAIL_STACK_ERROR
+    if((status = H5Tcommitted(type)) < 0) FAIL_STACK_ERROR
+    if(!status)
+	FAIL_PUTS_ERROR("    Opened named types should be named types!")
+
+    /* Clean up */
+    if(H5Tclose(type) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file) < 0) FAIL_STACK_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Tclose(type);
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_compat() */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
- * Purpose:     Test the data type interface.
+ * Purpose:     Test the datatype interface.
  *
  * Return:      Success:
  *
@@ -4715,7 +4797,7 @@ int
 main(void)
 {
     unsigned long	nerrors = 0;
-    hid_t		fapl=-1;
+    hid_t		fapl = -1;
 
     /* Set the random # seed */
     HDsrandom((unsigned long)HDtime(NULL));
@@ -4737,6 +4819,9 @@ main(void)
     nerrors += test_encode();
     nerrors += test_latest();
     nerrors += test_int_float_except();
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+    nerrors += test_compat(fapl);
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
     h5_cleanup(FILENAME, fapl); /*must happen before first reset*/
     reset_hdf5();
 
@@ -4760,11 +4845,14 @@ main(void)
     nerrors += test_bitfield_funcs();
     nerrors += test_opaque();
 
-    if (nerrors) {
+    if(nerrors) {
         printf("***** %lu FAILURE%s! *****\n",
                nerrors, 1==nerrors?"":"S");
         HDexit(1);
     }
-    printf("All data type tests passed.\n");
+
+    printf("All datatype tests passed.\n");
+
     return 0;
 }
+
