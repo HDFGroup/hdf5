@@ -67,6 +67,9 @@
 /* external file  */
 #define FNAME15    "h5repack_ext.h5"
 #define FNAME15OUT "h5repack_ext_out.h5"
+/* File w/userblock */
+#define FNAME16    "h5repack_ub.h5"
+#define FNAME16OUT "h5repack_ub_out.h5"
 
 
 const char *H5REPACK_FILENAMES[] = {
@@ -87,6 +90,9 @@ int d_status = EXIT_SUCCESS;
 #define CDIM2   DIM2/2
 #define RANK    2
 #define GBLL    ((unsigned long_long) 1024*1024*1024)
+
+/* Size of userblock (for userblock test) */
+#define USERBLOCK_SIZE  2048
 
 /*-------------------------------------------------------------------------
  * prototypes
@@ -116,6 +122,8 @@ int make_dset(hid_t loc_id,const char *name,hid_t sid,hid_t dcpl,void *buf);
 int make_attr(hid_t loc_id,int rank,hsize_t *dims,const char *attr_name,hid_t type_id,void *buf);
 void make_dset_reg_ref(hid_t loc_id);
 int make_external(hid_t loc_id);
+static int make_userblock(void);
+static int verify_userblock(void);
 
 
 /*-------------------------------------------------------------------------
@@ -1302,6 +1310,25 @@ if (szip_can_encode) {
  PASSED();
 
 /*-------------------------------------------------------------------------
+ * test file with userblock
+ *-------------------------------------------------------------------------
+ */
+ TESTING("    file with userblock");
+ if(h5repack_init(&pack_options, 0) < 0)
+  GOERROR;
+ if(h5repack(FNAME16, FNAME16OUT, &pack_options) < 0)
+  GOERROR;
+ if(h5diff(FNAME16, FNAME16OUT, NULL, NULL, &diff_options) > 0)
+  GOERROR;
+ if(h5repack_verify(FNAME16OUT, &pack_options) <= 0)
+  GOERROR;
+ if(verify_userblock() < 0)
+  GOERROR;
+ if(h5repack_end(&pack_options) < 0)
+  GOERROR;
+ PASSED();
+
+/*-------------------------------------------------------------------------
  * test --latest options 
  *-------------------------------------------------------------------------
  */
@@ -1525,6 +1552,13 @@ int make_testfiles(void)
   goto out;
  if(H5Fclose(loc_id)<0)
   return -1;
+
+/*-------------------------------------------------------------------------
+ * create a file with userblock
+ *-------------------------------------------------------------------------
+ */
+ if(make_userblock() < 0)
+  goto out;
 
  return 0;
 
@@ -2747,6 +2781,137 @@ out:
 
 }
 
+/*-------------------------------------------------------------------------
+ * Function: make_userblock
+ *
+ * Purpose: create a file for the userblock copying test
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+make_userblock(void)
+{
+    hid_t   fid = -1;
+    hid_t   fcpl = -1;
+    int     fd = -1;            /* File descriptor for writing userblock */
+    char    ub[USERBLOCK_SIZE]; /* User block data */
+    ssize_t nwritten;           /* # of bytes written */
+    size_t  u;                  /* Local index variable */
+
+    /* Create file creation property list with userblock set */
+    if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+        goto out;
+    if(H5Pset_userblock(fcpl, (hsize_t)USERBLOCK_SIZE) < 0)
+        goto out;
+
+    /* Create file with userblock */
+    if((fid = H5Fcreate(FNAME16, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0)
+        goto out;
+    if(H5Fclose(fid) < 0)
+        goto out;
+
+    /* Close file creation property list */
+    if(H5Pclose(fcpl) < 0)
+        goto out;
+
+
+    /* Initialize userblock data */
+    for(u = 0; u < USERBLOCK_SIZE; u++)
+        ub[u] = 'a' + (u % 26);
+
+    /* Re-open HDF5 file, as "plain" file */
+    if((fd = HDopen(FNAME16, O_WRONLY, 0644)) < 0)
+        goto out;
+
+    /* Write userblock data */
+    nwritten = HDwrite(fd, ub, (size_t)USERBLOCK_SIZE);
+    assert(nwritten == USERBLOCK_SIZE);
+
+    /* Close file */
+    HDclose(fd);
+
+    return 0;
+
+out:
+    H5E_BEGIN_TRY {
+        H5Pclose(fcpl);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    if(fd > 0)
+        HDclose(fd);
+
+    return -1;
+} /* end make_userblock() */
+
+/*-------------------------------------------------------------------------
+ * Function: verify_userblock
+ *
+ * Purpose: Verify that the userblock was copied correctly
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+verify_userblock(void)
+{
+    hid_t   fid = -1;
+    hid_t   fcpl = -1;
+    int     fd = -1;            /* File descriptor for writing userblock */
+    char    ub[USERBLOCK_SIZE]; /* User block data */
+    hsize_t ub_size = 0;        /* User block size */
+    ssize_t nread;              /* # of bytes read */
+    size_t  u;                  /* Local index variable */
+
+    /* Open file with userblock */
+    if((fid = H5Fopen(FNAME16OUT, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        goto out;
+
+    /* Retrieve file creation property list & userblock size */
+    if((fcpl = H5Fget_create_plist(fid)) < 0)
+        goto out;
+    if(H5Pget_userblock(fcpl, &ub_size) < 0)
+        goto out;
+
+    /* Verify userblock size is correct */
+    if(ub_size != USERBLOCK_SIZE)
+        goto out;
+
+    /* Close file creation property list */
+    if(H5Pclose(fcpl) < 0)
+        goto out;
+
+    if(H5Fclose(fid) < 0)
+        goto out;
+
+
+    /* Re-open HDF5 file, as "plain" file */
+    if((fd = HDopen(FNAME16, O_RDONLY, 0)) < 0)
+        goto out;
+
+    /* Read userblock data */
+    nread = HDread(fd, ub, (size_t)USERBLOCK_SIZE);
+    assert(nread == USERBLOCK_SIZE);
+
+    /* Verify userblock data */
+    for(u = 0; u < USERBLOCK_SIZE; u++)
+        if(ub[u] != (char)('a' + (u % 26)))
+            goto out;
+
+    /* Close file */
+    HDclose(fd);
+
+    return 0;
+
+out:
+    H5E_BEGIN_TRY {
+        H5Pclose(fcpl);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    if(fd > 0)
+        HDclose(fd);
+
+    return -1;
+} /* end verify_userblock() */
+
 
 /*-------------------------------------------------------------------------
  * Function: write_dset_in
@@ -2850,7 +3015,7 @@ void write_dset_in(hid_t loc_id,
 
 
  type_id = H5Tcopy(H5T_C_S1);
- status  = H5Tset_size(type_id, 2);
+ status  = H5Tset_size(type_id, (size_t)2);
  write_dset(loc_id,1,dims,"string",type_id,buf1);
  status = H5Tclose(type_id);
 
@@ -2886,7 +3051,7 @@ void write_dset_in(hid_t loc_id,
   }
  }
 
- type_id = H5Tcreate(H5T_OPAQUE, 1);
+ type_id = H5Tcreate(H5T_OPAQUE, (size_t)1);
  status = H5Tset_tag(type_id, "1-byte opaque type"); /* must set this */
  write_dset(loc_id,1,dims,"opaque",type_id,buf2);
  status = H5Tclose(type_id);
@@ -3024,7 +3189,7 @@ void write_dset_in(hid_t loc_id,
 
 
  type_id = H5Tcopy(H5T_C_S1);
- status  = H5Tset_size(type_id, 2);
+ status  = H5Tset_size(type_id, (size_t)2);
  write_dset(loc_id,2,dims2,"string2D",type_id,buf12);
  status = H5Tclose(type_id);
 
@@ -3047,7 +3212,7 @@ void write_dset_in(hid_t loc_id,
  * H5T_OPAQUE
  *-------------------------------------------------------------------------
  */
- type_id = H5Tcreate(H5T_OPAQUE, 1);
+ type_id = H5Tcreate(H5T_OPAQUE, (size_t)1);
  status = H5Tset_tag(type_id, "1-byte opaque type"); /* must set this */
  write_dset(loc_id,2,dims2,"opaque2D",type_id,buf22);
  status = H5Tclose(type_id);
@@ -3075,12 +3240,8 @@ void write_dset_in(hid_t loc_id,
  /* Create references to dataset */
  if (dset_name)
  {
-  for (i = 0; i < 1; i++) {
-   for (j = 0; j < 1; j++) {
-    status=H5Rcreate(&buf42[i][j],file_id,dset_name,H5R_OBJECT,-1);
-   }
-  }
-  write_dset(loc_id,2,dims2r,"refobj2D",H5T_STD_REF_OBJ,buf42);
+  status = H5Rcreate(&buf42[0][0], file_id, dset_name, H5R_OBJECT, -1);
+  write_dset(loc_id, 2, dims2r, "refobj2D", H5T_STD_REF_OBJ, buf42);
  }
 
 /*-------------------------------------------------------------------------
@@ -3183,7 +3344,7 @@ void write_dset_in(hid_t loc_id,
  }
 
  type_id = H5Tcopy(H5T_C_S1);
- status  = H5Tset_size(type_id, 2);
+ status  = H5Tset_size(type_id, (size_t)2);
  write_dset(loc_id,3,dims3,"string3D",type_id,buf13);
  status = H5Tclose(type_id);
 
@@ -3212,7 +3373,7 @@ void write_dset_in(hid_t loc_id,
  * H5T_OPAQUE
  *-------------------------------------------------------------------------
  */
- type_id = H5Tcreate(H5T_OPAQUE, 1);
+ type_id = H5Tcreate(H5T_OPAQUE, (size_t)1);
  status = H5Tset_tag(type_id, "1-byte opaque type"); /* must set this */
  write_dset(loc_id,3,dims3,"opaque3D",type_id,buf23);
  status = H5Tclose(type_id);
@@ -3252,13 +3413,8 @@ void write_dset_in(hid_t loc_id,
  /* Create references to dataset */
  if (dset_name)
  {
-  for (i = 0; i < 1; i++) {
-   for (j = 0; j < 1; j++) {
-    for (k = 0; k < 1; k++)
-     status=H5Rcreate(&buf43[i][j][k],file_id,dset_name,H5R_OBJECT,-1);
-   }
-  }
- write_dset(loc_id,3,dims3r,"refobj3D",H5T_STD_REF_OBJ,buf43);
+   status = H5Rcreate(&buf43[0][0][0], file_id, dset_name, H5R_OBJECT, -1);
+   write_dset(loc_id, 3, dims3r, "refobj3D", H5T_STD_REF_OBJ, buf43);
  }
 
 /*-------------------------------------------------------------------------
@@ -3379,8 +3535,8 @@ void make_dset_reg_ref(hid_t loc_id)
  herr_t          ret;    /* Generic return value  */
 
  /* Allocate write & read buffers */
- wbuf=calloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
- dwbuf=malloc(sizeof(int)*SPACE2_DIM1*SPACE2_DIM2);
+ wbuf=(hdset_reg_ref_t *)calloc(sizeof(hdset_reg_ref_t), (size_t)SPACE1_DIM1);
+ dwbuf=(int *)malloc(sizeof(int)*SPACE2_DIM1*SPACE2_DIM2);
 
  /* Create dataspace for datasets */
  sid2 = H5Screate_simple(SPACE2_RANK, dims2, NULL);
@@ -3536,7 +3692,7 @@ void write_attr_in(hid_t loc_id,
 [ 1 ]          e                z
  */
  type_id = H5Tcopy(H5T_C_S1);
- status  = H5Tset_size(type_id, 2);
+ status  = H5Tset_size(type_id, (size_t)2);
  make_attr(loc_id,1,dims,"string",type_id,buf1);
  status = H5Tclose(type_id);
 
@@ -3583,7 +3739,7 @@ void write_attr_in(hid_t loc_id,
 [ 1 ]          2               0               2
 */
 
- type_id = H5Tcreate(H5T_OPAQUE, 1);
+ type_id = H5Tcreate(H5T_OPAQUE, (size_t)1);
  status = H5Tset_tag(type_id, "1-byte opaque type"); /* must set this */
  make_attr(loc_id,1,dims,"opaque",type_id,buf2);
  status = H5Tclose(type_id);
@@ -3799,7 +3955,7 @@ position        array of </g1>  array of </g1>  difference
  */
 
  type_id = H5Tcopy(H5T_C_S1);
- status  = H5Tset_size(type_id, 2);
+ status  = H5Tset_size(type_id, (size_t)2);
  make_attr(loc_id,2,dims2,"string2D",type_id,buf12);
  status = H5Tclose(type_id);
 
@@ -3850,7 +4006,7 @@ position        array of </g1>  array of </g1>  difference
 [ 2 0 ]          5               0               5
 [ 2 1 ]          6               0               6
  */
- type_id = H5Tcreate(H5T_OPAQUE, 1);
+ type_id = H5Tcreate(H5T_OPAQUE, (size_t)1);
  status = H5Tset_tag(type_id, "1-byte opaque type"); /* must set this */
  make_attr(loc_id,2,dims2,"opaque2D",type_id,buf22);
  status = H5Tclose(type_id);
@@ -4121,7 +4277,7 @@ position        string3D of </g1> string3D of </g1> difference
  */
 
  type_id = H5Tcopy(H5T_C_S1);
- status  = H5Tset_size(type_id, 2);
+ status  = H5Tset_size(type_id, (size_t)2);
  make_attr(loc_id,3,dims3,"string3D",type_id,buf13);
  status = H5Tclose(type_id);
 
@@ -4177,7 +4333,7 @@ position        bitfield3D of </g1> bitfield3D of </g1> difference
  * H5T_OPAQUE
  *-------------------------------------------------------------------------
  */
- type_id = H5Tcreate(H5T_OPAQUE, 1);
+ type_id = H5Tcreate(H5T_OPAQUE, (size_t)1);
  status = H5Tset_tag(type_id, "1-byte opaque type"); /* must set this */
  make_attr(loc_id,3,dims3,"opaque3D",type_id,buf23);
  status = H5Tclose(type_id);

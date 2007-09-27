@@ -415,32 +415,22 @@ TOOLTEST $FILE4 -l COMPA
 # layout conversions (file has no filters)
 ###############################################################
 
-arg1="$FILE4 -l dset_compact:CONTI"
-arg2="$FILE4 -l dset_compact:CHUNK=2x5"
-arg3="$FILE4 -l dset_compact:COMPA"
-arg4="$FILE4 -l dset_contiguous:COMPA"
-arg5="$FILE4 -l dset_contiguous:CHUNK=3x6"
-arg6="$FILE4 -l dset_contiguous:CONTI"
-arg7="$FILE4 -l dset_chunk:COMPA"
-arg8="$FILE4 -l dset_chunk:CONTI"
-arg9="$FILE4 -l dset_chunk:CHUNK=18x13"
-TOOLTEST $arg1
-TOOLTEST $arg2
-TOOLTEST $arg3
-TOOLTEST $arg4
-TOOLTEST $arg5
-TOOLTEST $arg6
-TOOLTEST $arg7
-TOOLTEST $arg8
-TOOLTEST $arg9
+TOOLTEST $FILE4 -l dset_compact:CONTI
+TOOLTEST $FILE4 -l dset_compact:CHUNK=2x5
+TOOLTEST $FILE4 -l dset_compact:COMPA
+TOOLTEST $FILE4 -l dset_contiguous:COMPA
+TOOLTEST $FILE4 -l dset_contiguous:CHUNK=3x6
+TOOLTEST $FILE4 -l dset_contiguous:CONTI
+TOOLTEST $FILE4 -l dset_chunk:COMPA
+TOOLTEST $FILE4 -l dset_chunk:CONTI
+TOOLTEST $FILE4 -l dset_chunk:CHUNK=18x13
 
-#native option
-arg="$FILE1 -n"
-TOOLTEST $arg
-
+# Native option
+TOOLTEST $FILE1 -n
 
 if test $nerrors -eq 0 ; then
    echo "All $H5REPACK tests passed."
 fi
 
 exit $nerrors
+
