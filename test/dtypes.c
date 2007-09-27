@@ -1584,20 +1584,17 @@ test_compound_9(void)
         goto error;
     } /* end if */
 
-    if((cmpd_tid = H5Topen(file, "compound")) < 0) {
-        H5_FAILED(); AT();
-        printf("Can't open datatype\n");
-        goto error;
-    } /* end if */
+    if((cmpd_tid = H5Topen2(file, "compound", H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
 
-    if((dup_tid = H5Tcopy(cmpd_tid))<0) {
+    if((dup_tid = H5Tcopy(cmpd_tid)) < 0) {
         H5_FAILED(); AT();
         printf("Can't copy datatype\n");
         goto error;
     } /* end if */
 
     dim1[0] = 1;
-    if((space_id=H5Screate_simple(1,dim1,NULL))<0) {
+    if((space_id = H5Screate_simple(1, dim1, NULL)) < 0) {
         H5_FAILED(); AT();
         printf("Can't create space\n");
         goto error;
@@ -2337,16 +2334,10 @@ test_query(void)
     } /* end if */
 
     /* Open the dataytpe for query */
-    if((tid1 = H5Topen(file, compnd_type)) < 0) {
-        H5_FAILED();
-        printf("Can't open datatype\n");
-        goto error;
-    } /* end if */
-    if((tid2 = H5Topen(file, enum_type)) < 0) {
-        H5_FAILED();
-        printf("Can't open datatype\n");
-        goto error;
-    } /* end if */
+    if((tid1 = H5Topen2(file, compnd_type, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+    if((tid2 = H5Topen2(file, enum_type, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
 
     /* Query member number and member index by name, for compound type */
     if(H5Tget_nmembers(tid1) != 4) {
@@ -2668,7 +2659,8 @@ test_named (hid_t fapl)
      * Close the committed type and reopen it.  It should return a named type.
      */
     if(H5Tclose(type) < 0) goto error;
-    if((type = H5Topen(file, "native-int")) < 0) goto error;
+    if((type = H5Topen2(file, "native-int", H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
     if((status = H5Tcommitted(type)) < 0) goto error;
     if(!status) {
 	H5_FAILED();
@@ -4186,16 +4178,10 @@ test_encode(void)
     enum_buf_size = 0;
 
     /* Open the dataytpe for query */
-    if((tid1=H5Topen(file, compnd_type))<0) {
-        H5_FAILED();
-        printf("Can't open datatype\n");
-        goto error;
-    } /* end if */
-    if((tid2=H5Topen(file, enum_type))<0) {
-        H5_FAILED();
-        printf("Can't open datatype\n");
-        goto error;
-    } /* end if */
+    if((tid1 = H5Topen2(file, compnd_type, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+    if((tid2 = H5Topen2(file, enum_type, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
 
 
     /* Encode compound type in a buffer */
@@ -4411,7 +4397,7 @@ test_latest(void)
         FAIL_STACK_ERROR
 
     /* Open the dataytpe for query */
-    if((tid2 = H5Topen(file, compnd_type)) < 0)
+    if((tid2 = H5Topen2(file, compnd_type, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
 
     /* Verify that the datatype was encoded/decoded correctly */
@@ -4476,7 +4462,7 @@ test_latest(void)
         FAIL_STACK_ERROR
 
     /* Open the dataytpe for query */
-    if((tid2 = H5Topen(file, compnd_type)) < 0)
+    if((tid2 = H5Topen2(file, compnd_type, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
 
     /* Verify that the datatype was encoded/decoded correctly */
@@ -4755,7 +4741,7 @@ test_compat(hid_t fapl)
      * Close the committed type and reopen it.  It should return a named type.
      */
     if(H5Tclose(type) < 0) FAIL_STACK_ERROR
-    if((type = H5Topen(file, "native-int")) < 0) FAIL_STACK_ERROR
+    if((type = H5Topen1(file, "native-int")) < 0) FAIL_STACK_ERROR
     if((status = H5Tcommitted(type)) < 0) FAIL_STACK_ERROR
     if(!status)
 	FAIL_PUTS_ERROR("    Opened named types should be named types!")

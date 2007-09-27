@@ -148,7 +148,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Topen
+ * Function:	H5Topen1
  *
  * Purpose:	Opens a named datatype.
  *
@@ -164,7 +164,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Topen(hid_t loc_id, const char *name)
+H5Topen1(hid_t loc_id, const char *name)
 {
     H5T_t       *type = NULL;
     H5G_loc_t	 loc;
@@ -176,7 +176,7 @@ H5Topen(hid_t loc_id, const char *name)
     hid_t        dxpl_id = H5AC_dxpl_id; /* dxpl to use to open datatype */
     hid_t        ret_value = FAIL;
 
-    FUNC_ENTER_API(H5Topen, FAIL)
+    FUNC_ENTER_API(H5Topen1, FAIL)
     H5TRACE2("i", "i*s", loc_id, name);
 
     /* Check args */
@@ -223,5 +223,5 @@ done:
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)
-} /* end H5Topen() */
+} /* end H5Topen1() */
 

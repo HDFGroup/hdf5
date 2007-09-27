@@ -442,8 +442,8 @@ static void test_vlstring_type(void)
     ret = H5Tclose(tid_vlstr);
     CHECK(ret, FAIL, "H5Tclose");
 
-    tid_vlstr = H5Topen(fid, VLSTR_TYPE);
-    CHECK(tid_vlstr, FAIL, "H5Topen");
+    tid_vlstr = H5Topen2(fid, VLSTR_TYPE, H5P_DEFAULT);
+    CHECK(tid_vlstr, FAIL, "H5Topen2");
 
     ret = H5Tclose(tid_vlstr);
     CHECK(ret, FAIL, "H5Tclose");
@@ -456,8 +456,8 @@ static void test_vlstring_type(void)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Open the variable-length string datatype just created */
-    tid_vlstr = H5Topen(fid, VLSTR_TYPE);
-    CHECK(tid_vlstr, FAIL, "H5Topen");
+    tid_vlstr = H5Topen2(fid, VLSTR_TYPE, H5P_DEFAULT);
+    CHECK(tid_vlstr, FAIL, "H5Topen2");
 
     /* Verify character set and padding */
     cset = H5Tget_cset(tid_vlstr);

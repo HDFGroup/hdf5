@@ -1434,10 +1434,10 @@ test_copy_named_datatype(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_DATATYPE_SIMPLE, fid_dst, NAME_DATATYPE_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the datatype for copy */
-    if((tid = H5Topen(fid_src, NAME_DATATYPE_SIMPLE)) < 0) TEST_ERROR
+    if((tid = H5Topen2(fid_src, NAME_DATATYPE_SIMPLE, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* open the copied datatype */
-    if((tid2 = H5Topen(fid_dst, NAME_DATATYPE_SIMPLE)) < 0) TEST_ERROR
+    if((tid2 = H5Topen2(fid_dst, NAME_DATATYPE_SIMPLE, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Compare the datatypes */
     if(H5Tequal(tid, tid2) != TRUE) TEST_ERROR
@@ -1527,10 +1527,10 @@ test_copy_named_datatype_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_DATATYPE_VL, fid_dst, NAME_DATATYPE_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the datatype for copy */
-    if((tid = H5Topen(fid_src, NAME_DATATYPE_VL)) < 0) TEST_ERROR
+    if((tid = H5Topen2(fid_src, NAME_DATATYPE_VL, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* open the copied datatype */
-    if((tid2 = H5Topen(fid_dst, NAME_DATATYPE_VL)) < 0) TEST_ERROR
+    if((tid2 = H5Topen2(fid_dst, NAME_DATATYPE_VL, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Compare the datatypes */
     if(H5Tequal(tid, tid2) != TRUE) TEST_ERROR
@@ -1626,10 +1626,10 @@ test_copy_named_datatype_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_DATATYPE_VL_VL, fid_dst, NAME_DATATYPE_VL_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the datatype for copy */
-    if((tid = H5Topen(fid_src, NAME_DATATYPE_VL_VL)) < 0) TEST_ERROR
+    if((tid = H5Topen2(fid_src, NAME_DATATYPE_VL_VL, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* open the copied datatype */
-    if((tid2 = H5Topen(fid_dst, NAME_DATATYPE_VL_VL)) < 0) TEST_ERROR
+    if((tid2 = H5Topen2(fid_dst, NAME_DATATYPE_VL_VL, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Compare the datatypes */
     if(H5Tequal(tid, tid2) != TRUE) TEST_ERROR
@@ -5556,7 +5556,7 @@ test_copy_same_file_named_datatype(hid_t fcpl_src, hid_t fapl)
     if(H5Ocopy(fid, NAME_DATATYPE_SIMPLE, fid, NAME_DATATYPE_SIMPLE2, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the copied datatype */
-    if((tid2 = H5Topen(fid, NAME_DATATYPE_SIMPLE2)) < 0) TEST_ERROR
+    if((tid2 = H5Topen2(fid, NAME_DATATYPE_SIMPLE2, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Compare the datatypes */
     if(H5Tequal(tid, tid2) != TRUE) TEST_ERROR

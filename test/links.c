@@ -778,7 +778,7 @@ test_h5l_create(hid_t fapl, hbool_t new_format)
     if(H5Tclose(type_id) < 0) TEST_ERROR
 
     /* Re-open datatype using new link */
-    if((type_id = H5Topen(group_id, "datatype")) < 0) TEST_ERROR
+    if((type_id = H5Topen2(group_id, "datatype", H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Link nameless group to root group and close the group ID*/
     if(H5Llink(file_id, "/group", group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
@@ -3450,7 +3450,7 @@ external_link_closing(hid_t fapl, hbool_t new_format)
 
     /* Test H5*open */
     if((gid = H5Gopen2(fid1, "elink/elink/elink/group1_moved", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-    if((tid = H5Topen(fid1, "elink/elink/elink/type1_moved")) < 0) FAIL_STACK_ERROR
+    if((tid = H5Topen2(fid1, "elink/elink/elink/type1_moved", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if((did = H5Dopen(fid1, "elink/elink/elink/dataset1_moved")) < 0) FAIL_STACK_ERROR
     /* Close objects */
     if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
@@ -5095,21 +5095,12 @@ lapl_nlinks(hid_t fapl, hbool_t new_format)
 
     /* Try to open the objects using too many symlinks with default *APLs */
     H5E_BEGIN_TRY {
-        if((gid = H5Gopen2(fid, "soft17", H5P_DEFAULT)) >=0) {
-            H5_FAILED();
-            puts("    Should have failed for too many nested links.");
-            TEST_ERROR
-        }
-        if((tid = H5Topen2(fid, "soft17/datatype", H5P_DEFAULT)) >=0) {
-            H5_FAILED();
-            puts("    Should have failed for too many nested links.");
-            TEST_ERROR
-        }
-        if((did = H5Dopen2(fid, "soft17/dataset", H5P_DEFAULT)) >=0) {
-            H5_FAILED();
-            puts("    Should have failed for too many nested links.");
-            TEST_ERROR
-        }
+        if((gid = H5Gopen2(fid, "soft17", H5P_DEFAULT)) >= 0)
+            FAIL_PUTS_ERROR("    Should have failed for too many nested links.")
+        if((tid = H5Topen2(fid, "soft17/datatype", H5P_DEFAULT)) >= 0)
+            FAIL_PUTS_ERROR("    Should have failed for too many nested links.")
+        if((did = H5Dopen2(fid, "soft17/dataset", H5P_DEFAULT)) >= 0)
+            FAIL_PUTS_ERROR("    Should have failed for too many nested links.")
     } H5E_END_TRY
 
     /* Create property lists with nlinks set */

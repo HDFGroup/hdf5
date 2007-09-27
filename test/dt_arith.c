@@ -1001,23 +1001,20 @@ test_derived_flt(void)
         goto error;
     }
 
-    if((tid1 = H5Topen(file, "new float type 1")) < 0) {
-        H5_FAILED();
-        printf("Can't open datatype\n");
-        goto error;
-    }
-    if(H5Tget_fields(tid1, &spos, &epos, &esize, &mpos, &msize)<0) {
+    if((tid1 = H5Topen2(file, "new float type 1", H5P_DEFAULT)) < 0)
+        FAIL_PUTS_ERROR("Can't open datatype")
+    if(H5Tget_fields(tid1, &spos, &epos, &esize, &mpos, &msize) < 0) {
         H5_FAILED();
         printf("Can't get fields\n");
         goto error;
     }
-    if(spos!=44 || epos!=34 || esize!=10 || mpos!=3 || msize!=31) {
+    if(spos != 44 || epos != 34 || esize != 10 || mpos != 3 || msize != 31) {
         H5_FAILED();
         printf("Wrong field values\n");
         goto error;
     }
 
-    if(H5Tget_precision(tid1)!=42) {
+    if(H5Tget_precision(tid1) != 42) {
         H5_FAILED();
         printf("Can't get precision or wrong precision\n");
         goto error;
@@ -1163,23 +1160,20 @@ test_derived_flt(void)
         goto error;
     }
 
-    if((tid2 = H5Topen(file, "new float type 2")) < 0) {
-        H5_FAILED();
-        printf("Can't open datatype\n");
-        goto error;
-    }
-    if(H5Tget_fields(tid2, &spos, &epos, &esize, &mpos, &msize)<0) {
+    if((tid2 = H5Topen2(file, "new float type 2", H5P_DEFAULT)) < 0)
+        FAIL_PUTS_ERROR("Can't open datatype")
+    if(H5Tget_fields(tid2, &spos, &epos, &esize, &mpos, &msize) < 0) {
         H5_FAILED();
         printf("Can't get fields\n");
         goto error;
     }
-    if(spos!=23 || epos!=16 || esize!=7 || mpos!=0 || msize!=16) {
+    if(spos != 23 || epos != 16 || esize != 7 || mpos != 0 || msize != 16) {
         H5_FAILED();
         printf("Wrong field values\n");
         goto error;
     }
 
-    if(H5Tget_precision(tid2)!=24) {
+    if(H5Tget_precision(tid2) != 24) {
         H5_FAILED();
         printf("Can't get precision or wrong precision\n");
         goto error;
@@ -1427,23 +1421,19 @@ test_derived_integer(void)
         goto error;
     }
 
-    if((tid1 = H5Topen(file, "new integer type 1")) < 0) {
-        H5_FAILED();
-        printf("Can't open datatype\n");
-        goto error;
-    }
-
-    if(H5Tget_precision(tid1)!=24) {
+    if((tid1 = H5Topen2(file, "new integer type 1", H5P_DEFAULT)) < 0)
+        FAIL_PUTS_ERROR("Can't open datatype")
+    if(H5Tget_precision(tid1) != 24) {
         H5_FAILED();
         printf("Can't get precision or wrong precision\n");
         goto error;
     }
-    if(H5Tget_offset(tid1)!=0) {
+    if(H5Tget_offset(tid1) != 0) {
         H5_FAILED();
         printf("Can't get offset or wrong offset\n");
         goto error;
     }
-    if(H5Tget_size(tid1)!=3) {
+    if(H5Tget_size(tid1) != 3) {
         H5_FAILED();
         printf("Can't get size or wrong size\n");
         goto error;
@@ -1492,23 +1482,19 @@ test_derived_integer(void)
         goto error;
     }
 
-    if((tid2 = H5Topen(file, "new integer type 2")) < 0) {
-        H5_FAILED();
-        printf("Can't open datatype\n");
-        goto error;
-    }
-
-    if(H5Tget_precision(tid2)!=48) {
+    if((tid2 = H5Topen2(file, "new integer type 2", H5P_DEFAULT)) < 0)
+        FAIL_PUTS_ERROR("Can't open datatype")
+    if(H5Tget_precision(tid2) != 48) {
         H5_FAILED();
         printf("Can't get precision or wrong precision\n");
         goto error;
     }
-    if(H5Tget_offset(tid2)!=10) {
+    if(H5Tget_offset(tid2) != 10) {
         H5_FAILED();
         printf("Can't get offset or wrong offset\n");
         goto error;
     }
-    if(H5Tget_size(tid2)!=8) {
+    if(H5Tget_size(tid2) != 8) {
         H5_FAILED();
         printf("Can't get size or wrong size\n");
         goto error;

@@ -20,7 +20,7 @@
 
 /*----------------------------------------------------------------------------
  * Name:        h5topen_c
- * Purpose:     Call H5Topen to open a datatype
+ * Purpose:     Call H5Topen2 to open a datatype
  * Inputs:      loc_id - file or group identifier
  *              name - name of the datatype within file or  group
  *              namelen - name length
@@ -33,30 +33,30 @@
 int_f
 nh5topen_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id)
 {
-     int ret_value = -1;
-     char *c_name;
-     size_t c_namelen;
-     hid_t c_type_id;
-     hid_t c_loc_id;
+    char *c_name = NULL;
+    hid_t c_type_id;
+    int ret_value = -1;
 
-     /*
-      * Convert FORTRAN name to C name
-      */
-     c_namelen = *namelen;
-     c_name = (char *)HD5f2cstring(name, c_namelen);
-     if (c_name == NULL) return ret_value;
+    /*
+     * Convert FORTRAN name to C name
+     */
+    if(NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
+        goto done;
 
-     /*
-      * Call H5Topen function.
-      */
-     c_loc_id = *loc_id;
-     c_type_id = H5Topen(c_loc_id, c_name);
+    /*
+     * Call H5Topen2 function.
+     */
+    if((c_type_id = H5Topen2((hid_t)*loc_id, c_name, H5P_DEFAULT)) < 0)
+        goto done;
+    *type_id = (hid_t_f)c_type_id;
 
-     if (c_type_id < 0) return ret_value;
-     *type_id = (hid_t_f)c_type_id;
-     HDfree(c_name);
-     ret_value = 0;
-     return ret_value;
+    ret_value = 0;
+
+done:
+    if(c_name)
+        HDfree(c_name);
+
+    return ret_value;
 }
 
 

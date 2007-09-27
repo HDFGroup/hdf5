@@ -78,6 +78,10 @@
 #define H5Tcommit_vers 1
 #endif /* !defined(H5Tcommit_vers) */
 
+#if !defined(H5Topen_vers)
+#define H5Topen_vers 1
+#endif /* !defined(H5Topen_vers) */
+
 /************/
 /* Typedefs */
 /************/
@@ -212,6 +216,17 @@
 #else /* H5Tcommit_vers */
 #error "H5Tcommit_vers set to invalid value"
 #endif /* H5Tcommit_vers */
+
+#if !defined(H5Topen_vers) || H5Topen_vers == 2
+#ifndef H5Topen_vers
+#define H5Topen_vers 2
+#endif /* H5Topen_vers */
+#define H5Topen H5Topen2
+#elif H5Topen_vers == 1
+#define H5Topen H5Topen1
+#else /* H5Topen_vers */
+#error "H5Topen_vers set to invalid value"
+#endif /* H5Topen_vers */
 
 /************/
 /* Typedefs */

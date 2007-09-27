@@ -1943,7 +1943,7 @@ test_resurrect_datatype(hid_t fapl)
     if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Attempt to open the datatype under the new name */
-    if((type = H5Topen(file,TYPE2NAME)) < 0) FAIL_STACK_ERROR
+    if((type = H5Topen2(file,TYPE2NAME, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Close things */
     if(H5Tclose(type) < 0) FAIL_STACK_ERROR

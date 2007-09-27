@@ -345,7 +345,7 @@ int do_copy_refobjs(hid_t fidin,
             *-------------------------------------------------------------------------
             */
             case H5TRAV_TYPE_NAMED_DATATYPE:
-                if((type_in = H5Topen(fidin, travt->objs[i].name)) < 0)
+                if((type_in = H5Topen2(fidin, travt->objs[i].name, H5P_DEFAULT)) < 0)
                     goto error;
                 if(H5Tclose(type_in) < 0)
                     goto error;
@@ -390,7 +390,7 @@ error:
  *  relative to LOC_IN, which is obtained either from
  * loc_id = H5Gopen2( fid, name, H5P_DEFAULT);
  * loc_id = H5Dopen( fid, name);
- * loc_id = H5Topen( fid, name);
+ * loc_id = H5Topen2( fid, name, H5P_DEFAULT);
  *
  * Return: 0, ok, -1 no
  *

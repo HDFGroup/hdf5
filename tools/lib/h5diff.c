@@ -839,9 +839,9 @@ hsize_t diff(hid_t file1_id,
         *-------------------------------------------------------------------------
         */
         case H5TRAV_TYPE_NAMED_DATATYPE:
-            if((type1_id = H5Topen(file1_id, path1)) < 0)
+            if((type1_id = H5Topen2(file1_id, path1, H5P_DEFAULT)) < 0)
                 goto out;
-            if((type2_id = H5Topen(file2_id, path2)) < 0)
+            if((type2_id = H5Topen2(file2_id, path2, H5P_DEFAULT)) < 0)
                 goto out;
             
             if((ret = H5Tequal(type1_id, type2_id)) < 0)

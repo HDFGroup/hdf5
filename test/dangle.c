@@ -285,10 +285,9 @@ test_dangle_datatype1(H5F_close_degree_t degree)
         TEST_ERROR;
 
     /* Leave open a _lot_ of objects */
-    for(u = 0; u < MAX_DANGLE; u++) {
-        if((tid = H5Topen(fid, TYPENAME)) < 0)
-            TEST_ERROR;
-    } /* end for */
+    for(u = 0; u < MAX_DANGLE; u++)
+        if((tid = H5Topen2(fid, TYPENAME, H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR
 
     if(degree == H5F_CLOSE_SEMI) {
         H5E_BEGIN_TRY {

@@ -251,10 +251,10 @@ test_main(hid_t file_id, hid_t fapl)
 
 
 
-/*-------------------------------------------------------------------------
-    * Test H5Iget_name with a long path
-    *-------------------------------------------------------------------------
-    */
+    /*-------------------------------------------------------------------------
+     * Test H5Iget_name with a long path
+     *-------------------------------------------------------------------------
+     */
 
     TESTING("H5Iget_name with a long path");
 
@@ -312,21 +312,21 @@ test_main(hid_t file_id, hid_t fapl)
 
     PASSED();
 
-/*-------------------------------------------------------------------------
-    * Test H5Iget_name with H5Topen
-    *-------------------------------------------------------------------------
-    */
+    /*-------------------------------------------------------------------------
+     * Test H5Iget_name with H5Topen2
+     *-------------------------------------------------------------------------
+     */
 
-    TESTING("H5Iget_name with H5Topen");
+    TESTING("H5Iget_name with H5Topen2");
 
     /* Open the named datatype */
-    if((type_id=H5Topen(file_id, "t1")) < 0) TEST_ERROR
+    if((type_id = H5Topen2(file_id, "t1", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(type_id, "/t1", "/t1") < 0) TEST_ERROR
 
     /* Close datatype */
-    H5Tclose(type_id);
+    if(H5Tclose(type_id) < 0) FAIL_STACK_ERROR
 
     PASSED();
 
@@ -379,14 +379,14 @@ test_main(hid_t file_id, hid_t fapl)
 
 
    /*-------------------------------------------------------------------------
-    * Test H5Iget_name with H5Lmove and H5Topen
+    * Test H5Iget_name with H5Lmove and H5Topen2
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5Iget_name with H5Lmove and H5Topen");
+    TESTING("H5Iget_name with H5Lmove and H5Topen2");
 
     /* Open the named datatype */
-    if((type_id = H5Topen(file_id, "/t1")) < 0) FAIL_STACK_ERROR
+    if((type_id = H5Topen2(file_id, "/t1", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Rename datatype */
     if(H5Lmove(file_id, "/t1", H5L_SAME_LOC, "/t1a", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
@@ -965,61 +965,60 @@ test_main(hid_t file_id, hid_t fapl)
     PASSED();
 
 
-/*-------------------------------------------------------------------------
-    * Test H5Iget_name with a defined type dataset
-    *-------------------------------------------------------------------------
-    */
+    /*-------------------------------------------------------------------------
+     * Test H5Iget_name with a defined type dataset
+     *-------------------------------------------------------------------------
+     */
 
     TESTING("H5Iget_name with a defined type dataset");
 
     /* Create a datatype */
-    if((type_id = H5Tcreate(H5T_COMPOUND, sizeof(s1_t))) < 0) TEST_ERROR
+    if((type_id = H5Tcreate(H5T_COMPOUND, sizeof(s1_t))) < 0) FAIL_STACK_ERROR
 
     /* Insert fields */
-    if(H5Tinsert(type_id, "a", HOFFSET(s1_t, a), H5T_NATIVE_INT) < 0) TEST_ERROR
-    if(H5Tinsert(type_id, "b", HOFFSET(s1_t, b), H5T_NATIVE_INT) < 0) TEST_ERROR
-    if(H5Tinsert(type_id, "c", HOFFSET(s1_t, c), H5T_NATIVE_FLOAT) < 0) TEST_ERROR
+    if(H5Tinsert(type_id, "a", HOFFSET(s1_t, a), H5T_NATIVE_INT) < 0) FAIL_STACK_ERROR
+    if(H5Tinsert(type_id, "b", HOFFSET(s1_t, b), H5T_NATIVE_INT) < 0) FAIL_STACK_ERROR
+    if(H5Tinsert(type_id, "c", HOFFSET(s1_t, c), H5T_NATIVE_FLOAT) < 0) FAIL_STACK_ERROR
 
     /* Create group "g17" */
     if((group_id = H5Gcreate2(file_id, "g17", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Save datatype for later */
-    if(H5Tcommit2(group_id, "t", type_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Tcommit2(group_id, "t", type_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Create a dataspace  */
-    if((space_id = H5Screate_simple(1, dims, NULL)) < 0) TEST_ERROR
+    if((space_id = H5Screate_simple(1, dims, NULL)) < 0) FAIL_STACK_ERROR
 
     /* Create a new dataset */
-    if((dataset_id = H5Dcreate(group_id , "d", type_id, space_id,
-    H5P_DEFAULT)) < 0) TEST_ERROR
+    if((dataset_id = H5Dcreate(group_id , "d", type_id, space_id, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Close */
-    H5Dclose(dataset_id);
-    H5Tclose(type_id);
-    H5Sclose(space_id);
-    H5Gclose(group_id);
+    if(H5Dclose(dataset_id) < 0) FAIL_STACK_ERROR
+    if(H5Tclose(type_id) < 0) FAIL_STACK_ERROR
+    if(H5Sclose(space_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group_id) < 0) FAIL_STACK_ERROR
 
     /* Open the named datatype */
-    if((type_id=H5Topen(file_id, "/g17/t")) < 0) TEST_ERROR
+    if((type_id = H5Topen2(file_id, "/g17/t", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(type_id, "/g17/t", "/g17/t") < 0) TEST_ERROR
 
     /* Close datatype */
-    H5Tclose(type_id);
+    if(H5Tclose(type_id) < 0) FAIL_STACK_ERROR
 
     /* Reopen the dataset */
-    if((dataset_id = H5Dopen(file_id, "/g17/d")) < 0) TEST_ERROR
+    if((dataset_id = H5Dopen(file_id, "/g17/d")) < 0) FAIL_STACK_ERROR
 
     /* Get datatype*/
-    if((type_id=H5Dget_type(dataset_id)) < 0) TEST_ERROR
+    if((type_id = H5Dget_type(dataset_id)) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(type_id, "/g17/t", "/g17/t") < 0) TEST_ERROR
 
     /* Close */
-    H5Dclose(dataset_id);
-    H5Tclose(type_id);
+    if(H5Dclose(dataset_id) < 0) FAIL_STACK_ERROR
+    if(H5Tclose(type_id) < 0) FAIL_STACK_ERROR
 
     PASSED();
 
@@ -1243,10 +1242,10 @@ test_main(hid_t file_id, hid_t fapl)
     PASSED();
 
 
-/*-------------------------------------------------------------------------
-    * Test H5Iget_name with added names with mounting
-    *-------------------------------------------------------------------------
-    */
+    /*-------------------------------------------------------------------------
+     * Test H5Iget_name with added names with mounting
+     *-------------------------------------------------------------------------
+     */
 
     TESTING("H5Iget_name with added names with mounting");
 
@@ -1255,14 +1254,14 @@ test_main(hid_t file_id, hid_t fapl)
     if((group2_id = H5Gcreate2(file_id, "/g18/g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Also create a dataset and a datatype */
-    if((space_id = H5Screate_simple(1, dims, NULL)) < 0) TEST_ERROR
-    if((type_id = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
-    if((dataset_id = H5Dcreate(file_id, "g18/d2", type_id, space_id, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((space_id = H5Screate_simple(1, dims, NULL)) < 0) FAIL_STACK_ERROR
+    if((type_id = H5Tcopy(H5T_NATIVE_INT)) < 0) FAIL_STACK_ERROR
+    if((dataset_id = H5Dcreate(file_id, "g18/d2", type_id, space_id, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
-    if(H5Tcommit2(file_id, "g18/t2", type_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Tcommit2(file_id, "g18/t2", type_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     /* Create second file and group "/g3/g4/g5" in it */
-    file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    if((file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
     if((group3_id = H5Gcreate2(file1_id, "/g3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if((group4_id = H5Gcreate2(file1_id, "/g3/g4", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if((group5_id = H5Gcreate2(file1_id, "/g3/g4/g5", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
@@ -1282,7 +1281,7 @@ test_main(hid_t file_id, hid_t fapl)
     /* Open the mounted group, dataset, and datatype through their new names */
     if((group6_id = H5Gopen2(file1_id, "/g3/g4/g18/g2", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if((dataset2_id = H5Dopen(file1_id, "/g3/g4/g18/d2")) < 0) FAIL_STACK_ERROR
-    if((type2_id = H5Topen(file1_id, "/g3/g4/g18/t2")) < 0) FAIL_STACK_ERROR
+    if((type2_id = H5Topen2(file1_id, "/g3/g4/g18/t2", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Verify names */
     if(check_name(group6_id, "/g3/g4/g18/g2", "/g3/g4/g18/g2") < 0) TEST_ERROR
@@ -1295,7 +1294,7 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(type_id, "/g18/t2", "/g18/t2") < 0) TEST_ERROR
 
     /* Unmount */
-    if(H5Funmount(file1_id, "/g3/g4") < 0) TEST_ERROR
+    if(H5Funmount(file1_id, "/g3/g4") < 0) FAIL_STACK_ERROR
 
     /* Get name for the IDs of the first file, should be unchanged */
     if(check_name(group2_id, "/g18/g2", "/g18/g2") < 0) TEST_ERROR
@@ -1307,17 +1306,17 @@ test_main(hid_t file_id, hid_t fapl)
     if(check_name(dataset2_id, "/g18/d2", "") < 0) TEST_ERROR
     if(check_name(type2_id, "/g18/t2", "") < 0) TEST_ERROR
 
-    H5Tclose(type_id);
-    H5Tclose(type2_id);
-    H5Dclose(dataset_id);
-    H5Dclose(dataset2_id);
-    H5Gclose(group_id);
-    H5Gclose(group2_id);
-    H5Gclose(group3_id);
-    H5Gclose(group4_id);
-    H5Gclose(group5_id);
-    H5Gclose(group6_id);
-    H5Fclose(file1_id);
+    if(H5Tclose(type_id) < 0) FAIL_STACK_ERROR
+    if(H5Tclose(type2_id) < 0) FAIL_STACK_ERROR
+    if(H5Dclose(dataset_id) < 0) FAIL_STACK_ERROR
+    if(H5Dclose(dataset2_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group2_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group3_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group4_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group5_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group6_id) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file1_id) < 0) FAIL_STACK_ERROR
 
     PASSED();
 

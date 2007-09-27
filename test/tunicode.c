@@ -440,8 +440,8 @@ void test_objnames(hid_t fid, const char* string)
   ret = H5Tclose(type_id);
   CHECK(type_id, FAIL, "H5Tclose");
 
-  type_id = H5Topen(grp2_id, string);
-  CHECK(type_id, FAIL, "H5Topen");
+  type_id = H5Topen2(grp2_id, string, H5P_DEFAULT);
+  CHECK(type_id, FAIL, "H5Topen2");
   ret = H5Tclose(type_id);
   CHECK(type_id, FAIL, "H5Tclose");
 
@@ -495,8 +495,8 @@ void test_objnames(hid_t fid, const char* string)
   CHECK(ret, FAIL, "H5Lcreate_hard");
 
   /* Open named datatype using soft link */
-  type_id = H5Topen(grp3_id, string);
-  CHECK(type_id, FAIL, "H5Topen");
+  type_id = H5Topen2(grp3_id, string, H5P_DEFAULT);
+  CHECK(type_id, FAIL, "H5Topen2");
 
   ret = H5Tclose(type_id);
   CHECK(type_id, FAIL, "H5Tclose");

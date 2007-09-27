@@ -782,7 +782,7 @@ int do_copy_objects(hid_t fidin,
              */
             case H5TRAV_TYPE_NAMED_DATATYPE:
 
-                if((type_in = H5Topen(fidin, travt->objs[i].name)) < 0)
+                if((type_in = H5Topen2(fidin, travt->objs[i].name, H5P_DEFAULT)) < 0)
                     goto error;
 
                 if((type_out = H5Tcopy(type_in)) < 0)

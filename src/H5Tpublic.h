@@ -592,13 +592,6 @@ H5_DLL htri_t H5Tcompiler_conv(hid_t src_id, hid_t dst_id);
 H5_DLL herr_t H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts,
 			  void *buf, void *background, hid_t plist_id);
 
-/* Functions and variables defined for compatibility with previous versions
- * of the HDF5 API.
- * 
- * Use of these functions and variables is deprecated.
- */
-H5_DLL hid_t H5Topen(hid_t loc_id, const char *name);
-
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  * 
  * Use of these symbols is deprecated.
@@ -613,6 +606,7 @@ H5_DLL hid_t H5Topen(hid_t loc_id, const char *name);
 
 /* Function prototypes */
 H5_DLL herr_t H5Tcommit1(hid_t loc_id, const char *name, hid_t type_id);
+H5_DLL hid_t H5Topen1(hid_t loc_id, const char *name);
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 

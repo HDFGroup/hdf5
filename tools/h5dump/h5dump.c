@@ -1500,7 +1500,7 @@ dump_all(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED *op
                 break;
 
             case H5O_TYPE_NAMED_DATATYPE:
-                if((obj = H5Topen(group, name)) < 0) {
+                if((obj = H5Topen2(group, name, H5P_DEFAULT)) < 0) {
                     error_msg(progname, "unable to dump datatype \"%s\"\n", name);
                     d_status = EXIT_FAILURE;
                     ret = FAIL;
@@ -3232,25 +3232,25 @@ handle_datatypes(hid_t fid, char *type, void UNUSED * data)
 {
     hid_t       type_id;
 
-    if ((type_id = H5Topen(fid, type)) < 0) {
+    if((type_id = H5Topen2(fid, type, H5P_DEFAULT)) < 0) {
         /* check if type is unamed datatype */
         unsigned idx = 0;
 
-        while (idx < type_table->nobjs ) {
+        while(idx < type_table->nobjs ) {
             char name[128];
 
-            if (!type_table->objs[idx].recorded) {
+            if(!type_table->objs[idx].recorded) {
                 /* unamed datatype */
                 sprintf(name, "/#"H5_PRINTF_HADDR_FMT, type_table->objs[idx].objno);
 
-                if (!HDstrcmp(name, type))
+                if(!HDstrcmp(name, type))
                     break;
-            }
+            } /* end if */
 
             idx++;
-        }
+        } /* end while */
 
-        if (idx ==  type_table->nobjs) {
+        if(idx ==  type_table->nobjs) {
             /* unknown type */
             begin_obj(dump_header_format->datatypebegin, type,
                       dump_header_format->datatypeblockbegin);
@@ -3269,7 +3269,7 @@ handle_datatypes(hid_t fid, char *type, void UNUSED * data)
     } else {
         dump_named_datatype(type_id, type);
 
-        if (H5Tclose(type_id) < 0)
+        if(H5Tclose(type_id) < 0)
             d_status = EXIT_FAILURE;
     }
 }

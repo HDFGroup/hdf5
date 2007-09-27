@@ -659,15 +659,14 @@ void CommonFG::unmount( const H5std_string& name ) const
 //--------------------------------------------------------------------------
 DataType CommonFG::openDataType( const char* name ) const
 {
-   // Call C function H5Topen to open the named datatype in this group,
+   // Call C function H5Topen2 to open the named datatype in this group,
    // given either the file or group id
-   hid_t type_id = H5Topen(getLocId(), name);
+   hid_t type_id = H5Topen2(getLocId(), name, H5P_DEFAULT);
 
    // If the datatype's opening failed, throw an exception
    if( type_id < 0 )
-   {
-      throwException("openDataType", "H5Topen failed");
-   }
+      throwException("openDataType", "H5Topen2 failed");
+
    // No failure, create and return the DataType object
    DataType data_type(type_id);
    return(data_type);
@@ -695,15 +694,14 @@ DataType CommonFG::openDataType( const H5std_string& name ) const
 //--------------------------------------------------------------------------
 ArrayType CommonFG::openArrayType( const char* name ) const
 {
-   // Call C function H5Topen to open the named datatype in this group,
+   // Call C function H5Topen2 to open the named datatype in this group,
    // given either the file or group id
-   hid_t type_id = H5Topen(getLocId(), name);
+   hid_t type_id = H5Topen2(getLocId(), name, H5P_DEFAULT);
 
    // If the datatype's opening failed, throw an exception
    if( type_id < 0 )
-   {
-      throwException("openArrayType", "H5Topen failed");
-   }
+      throwException("openArrayType", "H5Topen2 failed");
+
    // No failure, create and return the ArrayType object
    ArrayType array_type (type_id);
    return(array_type);
@@ -731,15 +729,14 @@ ArrayType CommonFG::openArrayType( const H5std_string& name ) const
 //--------------------------------------------------------------------------
 CompType CommonFG::openCompType( const char* name ) const
 {
-   // Call C function H5Topen to open the named datatype in this group,
+   // Call C function H5Topen2 to open the named datatype in this group,
    // given either the file or group id
-   hid_t type_id = H5Topen(getLocId(), name);
+   hid_t type_id = H5Topen2(getLocId(), name, H5P_DEFAULT);
 
    // If the datatype's opening failed, throw an exception
    if( type_id < 0 )
-   {
-      throwException("openCompType", "H5Topen failed");
-   }
+      throwException("openCompType", "H5Topen2 failed");
+
    // No failure, create and return the CompType object
    CompType comp_type(type_id);
    return(comp_type);
@@ -767,15 +764,14 @@ CompType CommonFG::openCompType( const H5std_string& name ) const
 //--------------------------------------------------------------------------
 EnumType CommonFG::openEnumType( const char* name ) const
 {
-   // Call C function H5Topen to open the named datatype in this group,
+   // Call C function H5Topen2 to open the named datatype in this group,
    // given either the file or group id
-   hid_t type_id = H5Topen(getLocId(), name);
+   hid_t type_id = H5Topen2(getLocId(), name, H5P_DEFAULT);
 
    // If the datatype's opening failed, throw an exception
    if( type_id < 0 )
-   {
-      throwException("openEnumType", "H5Topen failed");
-   }
+      throwException("openEnumType", "H5Topen2 failed");
+
    // No failure, create and return the EnumType object
    EnumType enum_type(type_id);
    return(enum_type);
@@ -803,15 +799,14 @@ EnumType CommonFG::openEnumType( const H5std_string& name ) const
 //--------------------------------------------------------------------------
 IntType CommonFG::openIntType( const char* name ) const
 {
-   // Call C function H5Topen to open the named datatype in this group,
+   // Call C function H5Topen2 to open the named datatype in this group,
    // given either the file or group id
-   hid_t type_id = H5Topen(getLocId(), name);
+   hid_t type_id = H5Topen2(getLocId(), name, H5P_DEFAULT);
 
    // If the datatype's opening failed, throw an exception
    if( type_id < 0 )
-   {
-      throwException("openIntType", "H5Topen failed");
-   }
+      throwException("openIntType", "H5Topen2 failed");
+
    // No failure, create and return the IntType object
    IntType int_type(type_id);
    return(int_type);
@@ -839,15 +834,14 @@ IntType CommonFG::openIntType( const H5std_string& name ) const
 //--------------------------------------------------------------------------
 FloatType CommonFG::openFloatType( const char* name ) const
 {
-   // Call C function H5Topen to open the named datatype in this group,
+   // Call C function H5Topen2 to open the named datatype in this group,
    // given either the file or group id
-   hid_t type_id = H5Topen(getLocId(), name);
+   hid_t type_id = H5Topen2(getLocId(), name, H5P_DEFAULT);
 
    // If the datatype's opening failed, throw an exception
    if( type_id < 0 )
-   {
-      throwException("openFloatType", "H5Topen failed");
-   }
+      throwException("openFloatType", "H5Topen2 failed");
+
    // No failure, create and return the FloatType object
    FloatType float_type(type_id);
    return(float_type);
@@ -875,15 +869,14 @@ FloatType CommonFG::openFloatType( const H5std_string& name ) const
 //--------------------------------------------------------------------------
 StrType CommonFG::openStrType( const char* name ) const
 {
-   // Call C function H5Topen to open the named datatype in this group,
+   // Call C function H5Topen2 to open the named datatype in this group,
    // given either the file or group id
-   hid_t type_id = H5Topen(getLocId(), name);
+   hid_t type_id = H5Topen2(getLocId(), name, H5P_DEFAULT);
 
    // If the datatype's opening failed, throw an exception
    if( type_id < 0 )
-   {
-      throwException("openStrType", "H5Topen failed");
-   }
+      throwException("openStrType", "H5Topen2 failed");
+
    // No failure, create and return the StrType object
    StrType str_type(type_id);
    return(str_type);
@@ -911,15 +904,14 @@ StrType CommonFG::openStrType( const H5std_string& name ) const
 //--------------------------------------------------------------------------
 VarLenType CommonFG::openVarLenType( const char* name ) const
 {
-   // Call C function H5Topen to open the named datatype in this group,
+   // Call C function H5Topen2 to open the named datatype in this group,
    // given either the file or group id
-   hid_t type_id = H5Topen(getLocId(), name);
+   hid_t type_id = H5Topen2(getLocId(), name, H5P_DEFAULT);
 
    // If the datatype's opening failed, throw an exception
    if( type_id < 0 )
-   {
-      throwException("openVarLenType", "H5Topen failed");
-   }
+      throwException("openVarLenType", "H5Topen2 failed");
+
    // No failure, create and return the VarLenType object
    VarLenType varlen_type(type_id);
    return(varlen_type);

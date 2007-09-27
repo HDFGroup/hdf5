@@ -2314,8 +2314,8 @@ verify_file(const char *name, hsize_t blk_size, unsigned check_new_data)
         verify_dataset(fid,MISC13_DSET3_NAME);
 
     /* Open the named datatype in the root group */
-    tid = H5Topen(fid, MISC13_DTYPE_NAME);
-    CHECK(tid, FAIL, "H5Topen");
+    tid = H5Topen2(fid, MISC13_DTYPE_NAME, H5P_DEFAULT);
+    CHECK(tid, FAIL, "H5Topen2");
 
     /* Verify the type is correct */
     VERIFY(H5Tequal(tid,H5T_NATIVE_INT), TRUE, "H5Tequal");
@@ -2335,8 +2335,8 @@ verify_file(const char *name, hsize_t blk_size, unsigned check_new_data)
     verify_dataset(gid,MISC13_DSET2_NAME);
 
     /* Open the named datatype in the first group */
-    tid = H5Topen(gid,MISC13_DTYPE_NAME);
-    CHECK(tid, FAIL, "H5Topen");
+    tid = H5Topen2(gid,MISC13_DTYPE_NAME, H5P_DEFAULT);
+    CHECK(tid, FAIL, "H5Topen2");
 
     /* Verify the type is correct */
     VERIFY(H5Tequal(tid,H5T_NATIVE_INT), TRUE, "H5Tequal");
@@ -3717,7 +3717,7 @@ test_misc22(void)
                 CHECK(ret, FAIL, "H5Pclose");
 
                 dsid = H5Dopen(fid, MISC22_DSET_NAME);
-                CHECK(dsid, FAIL, "H5Topen");
+                CHECK(dsid, FAIL, "H5Dopen");
 
                 dcpl2 = H5Dget_create_plist(dsid);
                 CHECK(dcpl2, FAIL, "H5Dget_create_plist");
@@ -4089,14 +4089,14 @@ test_misc24(void)
     VERIFY(tmp_id, FAIL, "H5Dopen");
 
     H5E_BEGIN_TRY {
-        tmp_id = H5Topen(file_id, MISC24_GROUP_NAME);
+        tmp_id = H5Topen2(file_id, MISC24_GROUP_NAME, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(tmp_id, FAIL, "H5Topen");
+    VERIFY(tmp_id, FAIL, "H5Topen2");
 
     H5E_BEGIN_TRY {
-        tmp_id = H5Topen(file_id, MISC24_GROUP_LINK);
+        tmp_id = H5Topen2(file_id, MISC24_GROUP_LINK, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(tmp_id, FAIL, "H5Topen");
+    VERIFY(tmp_id, FAIL, "H5Topen2");
 
     H5E_BEGIN_TRY {
         tmp_id = H5Gopen2(file_id, MISC24_DATASET_NAME, H5P_DEFAULT);
@@ -4109,14 +4109,14 @@ test_misc24(void)
     VERIFY(tmp_id, FAIL, "H5Gopen2");
 
     H5E_BEGIN_TRY {
-        tmp_id = H5Topen(file_id, MISC24_DATASET_NAME);
+        tmp_id = H5Topen2(file_id, MISC24_DATASET_NAME, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(tmp_id, FAIL, "H5Topen");
+    VERIFY(tmp_id, FAIL, "H5Topen2");
 
     H5E_BEGIN_TRY {
-        tmp_id = H5Topen(file_id, MISC24_DATASET_LINK);
+        tmp_id = H5Topen2(file_id, MISC24_DATASET_LINK, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(tmp_id, FAIL, "H5Topen");
+    VERIFY(tmp_id, FAIL, "H5Topen2");
 
     H5E_BEGIN_TRY {
         tmp_id = H5Gopen2(file_id, MISC24_DATATYPE_NAME, H5P_DEFAULT);
@@ -4154,14 +4154,14 @@ test_misc24(void)
     VERIFY(tmp_id, FAIL, "H5Dopen");
 
     H5E_BEGIN_TRY {
-        tmp_id = H5Topen(file_id, MISC24_GROUP_NAME);
+        tmp_id = H5Topen2(file_id, MISC24_GROUP_NAME, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(tmp_id, FAIL, "H5Topen");
+    VERIFY(tmp_id, FAIL, "H5Topen2");
 
     H5E_BEGIN_TRY {
-        tmp_id = H5Topen(file_id, MISC24_GROUP_LINK);
+        tmp_id = H5Topen2(file_id, MISC24_GROUP_LINK, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(tmp_id, FAIL, "H5Topen");
+    VERIFY(tmp_id, FAIL, "H5Topen2");
 
     ret = H5Gclose(group_id);
     CHECK(ret, FAIL, "H5Gclose");
@@ -4181,21 +4181,21 @@ test_misc24(void)
     VERIFY(tmp_id, FAIL, "H5Gopen2");
 
     H5E_BEGIN_TRY {
-        tmp_id = H5Topen(file_id, MISC24_DATASET_NAME);
+        tmp_id = H5Topen2(file_id, MISC24_DATASET_NAME, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(tmp_id, FAIL, "H5Topen");
+    VERIFY(tmp_id, FAIL, "H5Topen2");
 
     H5E_BEGIN_TRY {
-        tmp_id = H5Topen(file_id, MISC24_DATASET_LINK);
+        tmp_id = H5Topen2(file_id, MISC24_DATASET_LINK, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(tmp_id, FAIL, "H5Topen");
+    VERIFY(tmp_id, FAIL, "H5Topen2");
 
     ret = H5Dclose(dset_id);
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Open named datatype */
-    type_id = H5Topen(file_id, MISC24_DATATYPE_NAME);
-    CHECK(ret, FAIL, "H5Topen");
+    type_id = H5Topen2(file_id, MISC24_DATATYPE_NAME, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Topen2");
 
     H5E_BEGIN_TRY {
         tmp_id = H5Gopen2(file_id, MISC24_DATATYPE_NAME, H5P_DEFAULT);

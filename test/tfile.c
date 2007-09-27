@@ -1420,15 +1420,15 @@ test_file_open_dot(void)
 
     /* Open a named datatype with no name using the file ID */
     H5E_BEGIN_TRY {
-        tid2 = H5Topen(fid, ".");
+        tid2 = H5Topen2(fid, ".", H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(tid2, FAIL, "H5Topen");
+    VERIFY(tid2, FAIL, "H5Topen2");
 
     /* Open a named datatype with no name using the group ID */
     H5E_BEGIN_TRY {
-        tid2 = H5Topen(gid, ".");
+        tid2 = H5Topen2(gid, ".", H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(tid2, FAIL, "H5Topen");
+    VERIFY(tid2, FAIL, "H5Topen2");
 
     /* Create a group with no name using the file ID */
     H5E_BEGIN_TRY {
@@ -1822,8 +1822,8 @@ test_file_double_datatype_open(void)
     CHECK(type1_id, FAIL, "H5Tcopy");
     ret  = H5Tcommit2(file1_id, TYPE_NAME, type1_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Tcommit2");
-    type2_id  = H5Topen(file2_id, TYPE_NAME);
-    CHECK(type2_id, FAIL, "H5Topen");
+    type2_id  = H5Topen2(file2_id, TYPE_NAME, H5P_DEFAULT);
+    CHECK(type2_id, FAIL, "H5Topen2");
 
     /* Note "assymetric" close order */
     ret = H5Tclose(type1_id);
