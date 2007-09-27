@@ -612,7 +612,7 @@ herr_t H5IMlink_palette( hid_t loc_id,
    goto out;
  
   /* The attribute must be deleted, in order to the new one can reflect the changes*/
-  if ( H5Adelete( image_id, "PALETTE" ) < 0 )
+  if(H5Adelete2(image_id, ".", "PALETTE", H5P_DEFAULT) < 0)
    goto out;
   
   /* Create a new reference for this palette. */
@@ -736,7 +736,7 @@ herr_t H5IMunlink_palette( hid_t loc_id,
   {
 
    /* Deelete the attribute */
-   if ( H5Adelete( image_id, "PALETTE" ) < 0 )
+   if(H5Adelete2(image_id, ".", "PALETTE", H5P_DEFAULT) < 0)
     goto out;
 
   }  /* H5T_REFERENCE */

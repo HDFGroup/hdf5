@@ -38,6 +38,10 @@
 /* Functions */
 /*************/
 
+#if !defined(H5Adelete_vers)
+#define H5Adelete_vers 1
+#endif /* !defined(H5Adelete_vers) */
+
 #if !defined(H5Eclear_vers)
 #define H5Eclear_vers 1
 #endif /* !defined(H5Eclear_vers) */
@@ -102,6 +106,17 @@
 /*************/
 /* Functions */
 /*************/
+
+#if !defined(H5Adelete_vers) || H5Adelete_vers == 2
+#ifndef H5Adelete_vers
+#define H5Adelete_vers 2
+#endif /* H5Adelete_vers */
+#define H5Adelete H5Adelete2
+#elif H5Adelete_vers == 1
+#define H5Adelete H5Adelete1
+#else /* H5Adelete_vers */
+#error "H5Adelete_vers set to invalid value"
+#endif /* H5Adelete_vers */
 
 #if !defined(H5Eclear_vers) || H5Eclear_vers == 2
 #ifndef H5Eclear_vers

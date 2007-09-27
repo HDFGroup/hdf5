@@ -1146,7 +1146,7 @@ herr_t H5LTset_attribute_string( hid_t loc_id,
  /* The attribute already exists, delete it */
  if ( has_attr == 1 )
  {
-  if ( H5Adelete( obj_id, attr_name ) < 0 )
+  if(H5Adelete2(obj_id, ".", attr_name, H5P_DEFAULT) < 0)
     goto out;
  }
 
@@ -1226,7 +1226,7 @@ herr_t H5LT_set_attribute_numerical( hid_t loc_id,
  /* The attribute already exists, delete it */
  if ( has_attr == 1 )
  {
-  if ( H5Adelete( obj_id, attr_name ) < 0 )
+  if(H5Adelete2(obj_id, ".", attr_name, H5P_DEFAULT) < 0)
     goto out;
  }
 
@@ -3119,7 +3119,7 @@ herr_t H5LT_set_attribute_string(hid_t dset_id,
  /* the attribute already exists, delete it */
  if ( has_attr == 1 )
  {
-  if ( H5Adelete(dset_id,name)<0)
+  if(H5Adelete2(dset_id, ".", name, H5P_DEFAULT) < 0)
     return FAIL;
  }
 

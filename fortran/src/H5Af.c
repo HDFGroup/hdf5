@@ -810,7 +810,7 @@ done:
 
 /*----------------------------------------------------------------------------
  * Name:        h5adelete_c
- * Purpose:     Call H5Adelete to delete an attribute
+ * Purpose:     Call H5Adelete2 to delete an attribute
  * Inputs:      obj_id - object identifier
  *              name - name of the attribute
  *              namelen - name length
@@ -822,23 +822,25 @@ done:
 int_f
 nh5adelete_c (hid_t_f *obj_id, _fcd name, size_t_f *namelen)
 {
-    char *c_name=NULL;          /* Buffer to hold C string */
-    int_f ret_value=0;          /* Return value */
+    char *c_name = NULL;        /* Buffer to hold C string */
+    int_f ret_value = 0;        /* Return value */
 
      /*
       * Convert FORTRAN name to C name
       */
-     if ((c_name = HD5f2cstring(name, (size_t)*namelen)) == NULL)
+     if((c_name = HD5f2cstring(name, (size_t)*namelen)) == NULL)
         HGOTO_DONE(FAIL);
 
      /*
-      * Call H5Adelete function.
+      * Call H5Adelete2 function.
       */
-     if (H5Adelete((hid_t)*obj_id, c_name) < 0)
+     if(H5Adelete2((hid_t)*obj_id, ".", c_name, H5P_DEFAULT) < 0)
          HGOTO_DONE(FAIL);
 
 done:
-    if(c_name) HDfree(c_name);
+    if(c_name)
+        HDfree(c_name);
+
     return ret_value;
 }
 

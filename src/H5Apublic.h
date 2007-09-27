@@ -92,7 +92,23 @@ H5_DLL int     H5Aget_num_attrs(hid_t loc_id);
 H5_DLL herr_t  H5Arename(hid_t loc_id, const char *old_name, const char *new_name);
 H5_DLL herr_t  H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op,
     void *op_data);
-H5_DLL herr_t  H5Adelete(hid_t loc_id, const char *name);
+
+/* Symbols defined for compatibility with previous versions of the HDF5 API.
+ * 
+ * Use of these symbols is deprecated.
+ */
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+
+/* Macros */
+
+
+/* Typedefs */
+
+
+/* Function prototypes */
+H5_DLL herr_t  H5Adelete1(hid_t loc_id, const char *name);
+
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 #ifdef __cplusplus
 }

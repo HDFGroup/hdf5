@@ -1490,85 +1490,85 @@ test_attr_delete(hid_t fapl)
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
-    dataset=H5Dopen(fid1,DSET1_NAME);
+    dataset = H5Dopen(fid1, DSET1_NAME);
     CHECK(dataset, FAIL, "H5Dopen");
 
     /* Verify the correct number of attributes */
-    ret=H5Aget_num_attrs(dataset);
+    ret = H5Aget_num_attrs(dataset);
     VERIFY(ret, 3, "H5Aget_num_attrs");
 
     /* Try to delete bogus attribute */
-    ret=H5Adelete(dataset,"Bogus");
-    VERIFY(ret, FAIL, "H5Adelete");
+    ret = H5Adelete2(dataset, ".", "Bogus", H5P_DEFAULT);
+    VERIFY(ret, FAIL, "H5Adelete2");
 
     /* Verify the correct number of attributes */
-    ret=H5Aget_num_attrs(dataset);
+    ret = H5Aget_num_attrs(dataset);
     VERIFY(ret, 3, "H5Aget_num_attrs");
 
     /* Delete middle (2nd) attribute */
-    ret=H5Adelete(dataset,ATTR2_NAME);
-    CHECK(ret, FAIL, "H5Adelete");
+    ret = H5Adelete2(dataset, ".", ATTR2_NAME, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Adelete2");
 
     /* Verify the correct number of attributes */
-    ret=H5Aget_num_attrs(dataset);
+    ret = H5Aget_num_attrs(dataset);
     VERIFY(ret, 2, "H5Aget_num_attrs");
 
     /* Open 1st attribute for the dataset */
-    attr=H5Aopen_idx(dataset,0);
+    attr = H5Aopen_idx(dataset, 0);
     CHECK(attr, FAIL, "H5Aopen_idx");
 
     /* Verify Name */
-    name_len=H5Aget_name(attr, (size_t)ATTR_NAME_LEN,attr_name);
+    name_len = H5Aget_name(attr, (size_t)ATTR_NAME_LEN,attr_name);
     VERIFY(name_len, HDstrlen(ATTR1_NAME), "H5Aget_name");
-    if(HDstrcmp(attr_name,ATTR1_NAME))
+    if(HDstrcmp(attr_name, ATTR1_NAME))
         TestErrPrintf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR1_NAME);
 
     /* Close attribute */
-    ret=H5Aclose(attr);
+    ret = H5Aclose(attr);
     CHECK(ret, FAIL, "H5Aclose");
 
     /* Open last (formally 3rd) attribute for the dataset */
-    attr=H5Aopen_idx(dataset,1);
+    attr = H5Aopen_idx(dataset, 1);
     CHECK(attr, FAIL, "H5Aopen_idx");
 
     /* Verify Name */
-    name_len=H5Aget_name(attr, (size_t)ATTR_NAME_LEN, attr_name);
+    name_len = H5Aget_name(attr, (size_t)ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR3_NAME), "H5Aget_name");
     if(HDstrcmp(attr_name,ATTR3_NAME))
         TestErrPrintf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR3_NAME);
 
     /* Close attribute */
-    ret=H5Aclose(attr);
+    ret = H5Aclose(attr);
     CHECK(ret, FAIL, "H5Aclose");
 
     /* Delete first attribute */
-    ret=H5Adelete(dataset,ATTR1_NAME);
-    CHECK(ret, FAIL, "H5Adelete");
+    ret = H5Adelete2(dataset, ".", ATTR1_NAME, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Adelete2");
 
     /* Verify the correct number of attributes */
-    ret=H5Aget_num_attrs(dataset);
+    ret = H5Aget_num_attrs(dataset);
     VERIFY(ret, 1, "H5Aget_num_attrs");
 
     /* Open last (formally 3rd) attribute for the dataset */
-    attr=H5Aopen_idx(dataset,0);
+    attr = H5Aopen_idx(dataset, 0);
     CHECK(attr, FAIL, "H5Aopen_idx");
 
     /* Verify Name */
-    name_len=H5Aget_name(attr, (size_t)ATTR_NAME_LEN, attr_name);
+    name_len = H5Aget_name(attr, (size_t)ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR3_NAME), "H5Aget_name");
-    if(HDstrcmp(attr_name,ATTR3_NAME))
+    if(HDstrcmp(attr_name, ATTR3_NAME))
         TestErrPrintf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR3_NAME);
 
     /* Close attribute */
-    ret=H5Aclose(attr);
+    ret = H5Aclose(attr);
     CHECK(ret, FAIL, "H5Aclose");
 
     /* Delete first attribute */
-    ret=H5Adelete(dataset,ATTR3_NAME);
-    CHECK(ret, FAIL, "H5Adelete");
+    ret = H5Adelete2(dataset, ".", ATTR3_NAME, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Adelete2");
 
     /* Verify the correct number of attributes */
-    ret=H5Aget_num_attrs(dataset);
+    ret = H5Aget_num_attrs(dataset);
     VERIFY(ret, 0, "H5Aget_num_attrs");
 
     /* Close dataset */
@@ -1663,13 +1663,13 @@ test_attr_dtype_shared(hid_t fapl)
     CHECK(ret, FAIL, "H5Aclose");
 
     /* Delete attribute */
-    ret = H5Adelete(dset_id, ATTR1_NAME);
-    CHECK(ret, FAIL, "H5Adelete");
+    ret = H5Adelete2(dset_id, ".", ATTR1_NAME, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Adelete2");
 
     /* Check reference count on named datatype */
     ret = H5Oget_info(file_id, TYPE1_NAME, &oinfo, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info");
-    VERIFY(oinfo.rc, 2, "H5Adelete");
+    VERIFY(oinfo.rc, 2, "H5Adelete2");
 
     /* Create attribute on dataset */
     attr_id = H5Acreate(dset_id, ATTR1_NAME, type_id, space_id, H5P_DEFAULT);
@@ -2220,8 +2220,8 @@ test_attr_dense_delete(hid_t fcpl, hid_t fapl)
     for(u--; u >= min_dense; u--) {
         /* Delete attribute */
         sprintf(attrname, "attr %02u", u);
-        ret = H5Adelete(dataset, attrname);
-        CHECK(ret, FAIL, "H5Adelete");
+        ret = H5Adelete2(dataset, ".", attrname, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Adelete2");
 
         /* Verify attributes still left */
         ret = test_attr_dense_verify(dataset, u);
@@ -2234,8 +2234,8 @@ test_attr_dense_delete(hid_t fcpl, hid_t fapl)
 
     /* Delete one more attribute, which should cause reversion to compact storage */
     sprintf(attrname, "attr %02u", u);
-    ret = H5Adelete(dataset, attrname);
-    CHECK(ret, FAIL, "H5Adelete");
+    ret = H5Adelete2(dataset, ".", attrname, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Adelete2");
 
     /* Check on dataset's attribute storage status */
     is_dense = H5O_is_attr_dense_test(dataset);
@@ -2247,8 +2247,8 @@ test_attr_dense_delete(hid_t fcpl, hid_t fapl)
 
     /* Delete another attribute, to verify deletion in compact storage */
     sprintf(attrname, "attr %02u", (u - 1));
-    ret = H5Adelete(dataset, attrname);
-    CHECK(ret, FAIL, "H5Adelete");
+    ret = H5Adelete2(dataset, ".", attrname, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Adelete2");
 
     /* Check on dataset's attribute storage status */
     is_dense = H5O_is_attr_dense_test(dataset);
@@ -2687,8 +2687,8 @@ test_attr_dense_limits(hid_t fcpl, hid_t fapl)
     /* Delete second attribute, attributes should still be stored densely */
 
     /* Delete attribute */
-    ret = H5Adelete(dataset, attrname);
-    CHECK(ret, FAIL, "H5Adelete");
+    ret = H5Adelete2(dataset, ".", attrname, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Adelete2");
 
     /* Check on dataset's attribute storage status */
     is_dense = H5O_is_attr_dense_test(dataset);
@@ -2700,8 +2700,8 @@ test_attr_dense_limits(hid_t fcpl, hid_t fapl)
     /* Delete attribute */
     u = 0;
     sprintf(attrname, "attr %02u", u);
-    ret = H5Adelete(dataset, attrname);
-    CHECK(ret, FAIL, "H5Adelete");
+    ret = H5Adelete2(dataset, ".", attrname, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Adelete2");
 
     /* Check on dataset's attribute storage status */
     is_dense = H5O_is_attr_dense_test(dataset);
@@ -2908,8 +2908,8 @@ test_attr_big(hid_t fcpl, hid_t fapl)
         /* Delete attribute */
         u = 1;
         sprintf(attrname, "attr %02u", u);
-        ret = H5Adelete(dataset, attrname);
-        CHECK(ret, FAIL, "H5Adelete");
+        ret = H5Adelete2(dataset, ".", attrname, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Adelete2");
 
         /* Check on dataset's attribute storage status */
         is_empty = H5O_is_attr_empty_test(dataset);
@@ -2923,8 +2923,8 @@ test_attr_big(hid_t fcpl, hid_t fapl)
         /* Delete attribute */
         u = 3;
         sprintf(attrname, "attr %02u", u);
-        ret = H5Adelete(dataset, attrname);
-        CHECK(ret, FAIL, "H5Adelete");
+        ret = H5Adelete2(dataset, ".", attrname, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Adelete2");
 
         /* Check on dataset's attribute storage status */
         is_empty = H5O_is_attr_empty_test(dataset);
@@ -2938,8 +2938,8 @@ test_attr_big(hid_t fcpl, hid_t fapl)
         /* Delete attribute */
         u = 2;
         sprintf(attrname, "attr %02u", u);
-        ret = H5Adelete(dataset, attrname);
-        CHECK(ret, FAIL, "H5Adelete");
+        ret = H5Adelete2(dataset, ".", attrname, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Adelete2");
 
         /* Check on dataset's attribute storage status */
         is_empty = H5O_is_attr_empty_test(dataset);
@@ -2953,8 +2953,8 @@ test_attr_big(hid_t fcpl, hid_t fapl)
         /* Delete attribute */
         u = 0;
         sprintf(attrname, "attr %02u", u);
-        ret = H5Adelete(dataset, attrname);
-        CHECK(ret, FAIL, "H5Adelete");
+        ret = H5Adelete2(dataset, ".", attrname, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Adelete2");
 
         /* Check on dataset's attribute storage status */
         is_empty = H5O_is_attr_empty_test(dataset);
@@ -3216,6 +3216,95 @@ test_attr_null_space(hid_t fcpl, hid_t fapl)
     filesize = h5_get_file_size(FILENAME);
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
 }   /* test_attr_null_space() */
+
+
+/****************************************************************
+**
+**  test_attr_deprec(): Test basic H5A (attribute) code.
+**      Tests deprecated API routines
+**
+****************************************************************/
+static void
+test_attr_deprec(hid_t fcpl, hid_t fapl)
+{
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+    hid_t	fid;		/* HDF5 File ID			*/
+    hid_t	dataset;	/* Dataset ID			*/
+    hid_t	sid;	        /* Dataspace ID			*/
+    hid_t	attr;	        /* Attribute ID			*/
+    herr_t	ret;		/* Generic return value		*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Deprecated Attribute Routines\n"));
+
+    /* Create file */
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create dataspace for dataset attributes */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Create a dataset */
+    dataset = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate");
+
+
+    /* Add attribute to dataset */
+
+    /* Create attribute */
+    attr = H5Acreate(dataset, "attr", H5T_NATIVE_UINT, sid, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Acreate");
+
+    /* Close attribute */
+    ret = H5Aclose(attr);
+    CHECK(ret, FAIL, "H5Aclose");
+
+
+    /* Close dataspaces */
+    ret = H5Sclose(sid);
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+
+    /* Re-open the file and delete the attribute */
+
+    /* Re-open file */
+    fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Open dataset */
+    dataset = H5Dopen(fid, DSET1_NAME);
+    CHECK(dataset, FAIL, "H5Dopen");
+
+
+    /* Delete attribute */
+    ret = H5Adelete1(dataset, "attr");
+    CHECK(ret, FAIL, "H5Adelete1");
+
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+#else /* H5_NO_DEPRECATED_SYMBOLS */
+    /* Shut compiler up */
+    fcpl = fcpl; fapl = fapl;
+
+    /* Output message about test being skipped */
+    MESSAGE(5, ("Skipping Test On Deprecated Attribute Routines\n"));
+
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+}   /* test_attr_deprec() */
 
 
 /****************************************************************
@@ -8181,8 +8270,8 @@ test_attr_bug1(hid_t fcpl, hid_t fapl)
     CHECK(gid, FAIL, "H5Gopen2");
 
     /* Delete first attribute */
-    ret = H5Adelete(gid, ATTR7_NAME);
-    CHECK(ret, FAIL, "H5Adelete");
+    ret = H5Adelete2(gid, ".", ATTR7_NAME, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Adelete2");
 
     /* Re-create first attribute */
     aid = H5Acreate(gid, ATTR7_NAME, H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT);
@@ -8192,8 +8281,8 @@ test_attr_bug1(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Aclose");
 
     /* Delete second attribute */
-    ret = H5Adelete(gid, ATTR8_NAME);
-    CHECK(ret, FAIL, "H5Adelete");
+    ret = H5Adelete2(gid, ".", ATTR8_NAME, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Adelete2");
 
     /* Re-create second attribute */
     aid = H5Acreate(gid, ATTR8_NAME, H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT);
@@ -8321,6 +8410,7 @@ test_attr(void)
                 test_attr_dense_limits(my_fcpl, my_fapl);       /* Test dense attribute storage limits */
                 test_attr_big(my_fcpl, my_fapl);                /* Test storing big attribute */
                 test_attr_null_space(my_fcpl, my_fapl);         /* Test storing attribute with NULL dataspace */
+                test_attr_deprec(fcpl, my_fapl);                /* Test deprecated API routines */
                 test_attr_many(my_fcpl, my_fapl);               /* Test storing lots of attributes */
 
                 /* Attribute creation order tests */
@@ -8359,6 +8449,7 @@ test_attr(void)
             test_attr_open(new_format, fcpl, my_fapl);          /* Test opening attributes by name */
             test_attr_big(fcpl, my_fapl);                       /* Test storing big attribute */
             test_attr_null_space(fcpl, my_fapl);                /* Test storing attribute with NULL dataspace */
+            test_attr_deprec(fcpl, my_fapl);                    /* Test deprecated API routines */
 
             /* Tests that address specific bugs */
             test_attr_bug1(fcpl, my_fapl);                      /* Test odd allocation operations */
