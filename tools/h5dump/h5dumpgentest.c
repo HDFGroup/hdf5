@@ -85,6 +85,9 @@
 #define FILE55  "tbinary.h5"
 #define FILE56  "tbigdims.h5"
 #define FILE57  "thyperslab.h5"
+#define FILE58  "tordergr.h5"
+
+
 
 /*-------------------------------------------------------------------------
  * prototypes
@@ -5751,6 +5754,213 @@ gent_hyperslab(void)
 }
 
 
+
+/*-------------------------------------------------------------------------
+ * Function: gent_link_creation_order
+ *
+ * Purpose: generate a file with several groups and set H5Pset_link_creation_order 
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+gent_link_creation_order(char* fname, unsigned crt_order_flags)
+{
+    hid_t    fid;      /* file id */
+    hid_t    gid;      /* group id */
+    hid_t    fcpl_id;  /* file creation property list id */
+    
+    if ((fcpl_id = H5Pcreate(H5P_FILE_CREATE)) < 0) 
+        goto out;
+
+    if ( crt_order_flags )
+    {
+        
+        if (H5Pset_link_creation_order(fcpl_id, crt_order_flags ) < 0) 
+            goto out;
+        
+    }
+  
+    if ((fid = H5Fcreate(fname, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT)) < 0) 
+        goto out;
+    
+    /* create some groups */
+    if ((gid = H5Gcreate2(fid, "c", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+        goto out;
+    if (H5Gclose(gid) < 0) 
+        goto out;
+    if ((gid = H5Gcreate2(fid, "b", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+        goto out;
+    if (H5Gclose(gid) < 0) 
+        goto out;
+    if ((gid = H5Gcreate2(fid, "a", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+        goto out;
+    if (H5Gclose(gid) < 0) 
+        goto out;
+    
+        
+    if (H5Pclose(fcpl_id) < 0) 
+        goto out;
+    if (H5Fclose(fid) < 0) 
+        goto out;
+    
+    return;
+    
+out:
+    printf("Error.....\n");
+    H5E_BEGIN_TRY {
+        H5Gclose(gid);
+        H5Pclose(fcpl_id);
+        H5Fclose(fid);
+        
+    } H5E_END_TRY;
+    return;
+    
+}
+
+
+
+/*-------------------------------------------------------------------------
+ * Function: gent_group_creation_order
+ *
+ * Purpose: generate a file with several groups with creation order set and not
+ *  set tru its hierarchy 
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+gent_group_creation_order()
+{
+    hid_t    fid;      /* file id */
+    hid_t    gid;      /* group id */
+    hid_t    gcpl_id;  /* group creation property list id */
+    hid_t    fcpl_id;  /* file creation property list id (to set root group order) */
+    
+    if ((fcpl_id = H5Pcreate(H5P_FILE_CREATE)) < 0) 
+        goto out;
+    
+    if (H5Pset_link_creation_order(fcpl_id, H5P_CRT_ORDER_TRACKED ) < 0) 
+        goto out;
+    
+    if ((fid = H5Fcreate(FILE58, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT)) < 0) 
+        goto out;
+    
+    
+    /* create group creation property list */
+    if((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0) 
+        goto out;
+
+/*-------------------------------------------------------------------------
+ * create a group "2" 
+ *-------------------------------------------------------------------------
+ */  
+    
+
+    if ((gid = H5Gcreate2(fid, "2", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) 
+        goto out;
+    if (H5Gclose(gid) < 0) 
+        goto out;
+    
+    if ((gid = H5Gcreate2(fid, "2/c", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+        goto out;
+    if (H5Gclose(gid) < 0) 
+        goto out;
+    if ((gid = H5Gcreate2(fid, "2/b", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+        goto out;
+    if (H5Gclose(gid) < 0) 
+        goto out;
+    if ((gid = H5Gcreate2(fid, "2/a", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+        goto out;
+    if (H5Gclose(gid) < 0) 
+        goto out;
+
+    if ((gid = H5Gcreate2(fid, "2/a/a2", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) 
+        goto out;
+    if (H5Gclose(gid) < 0) 
+        goto out;
+    if ((gid = H5Gcreate2(fid, "2/a/a1", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) 
+        goto out;
+    if (H5Gclose(gid) < 0) 
+        goto out;
+
+     if ((gid = H5Gcreate2(fid, "2/a/a2/a22", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+        goto out;
+    if (H5Gclose(gid) < 0) 
+        goto out;
+    if ((gid = H5Gcreate2(fid, "2/a/a2/a21", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+        goto out;
+    if (H5Gclose(gid) < 0) 
+        goto out;
+
+  
+/*-------------------------------------------------------------------------
+ * create a group "1" with H5P_CRT_ORDER_TRACKED set
+ *-------------------------------------------------------------------------
+ */  
+    if(H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) 
+        goto out;
+
+
+    if ((gid = H5Gcreate2(fid, "1", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) 
+        goto out;
+    if (H5Gclose(gid) < 0) 
+        goto out;
+    
+    if ((gid = H5Gcreate2(fid, "1/c", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+        goto out;
+    if (H5Gclose(gid) < 0) 
+        goto out;
+    if ((gid = H5Gcreate2(fid, "1/b", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+        goto out;
+    if (H5Gclose(gid) < 0) 
+        goto out;
+    if ((gid = H5Gcreate2(fid, "1/a", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+        goto out;
+    if (H5Gclose(gid) < 0) 
+        goto out;
+
+    if ((gid = H5Gcreate2(fid, "1/a/a2", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) 
+        goto out;
+    if (H5Gclose(gid) < 0) 
+        goto out;
+    if ((gid = H5Gcreate2(fid, "1/a/a1", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) 
+        goto out;
+    if (H5Gclose(gid) < 0) 
+        goto out;
+
+     if ((gid = H5Gcreate2(fid, "1/a/a2/a22", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+        goto out;
+    if (H5Gclose(gid) < 0) 
+        goto out;
+    if ((gid = H5Gcreate2(fid, "1/a/a2/a21", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+        goto out;
+    if (H5Gclose(gid) < 0) 
+        goto out;
+    
+  
+    if (H5Pclose(gcpl_id) < 0) 
+        goto out;
+    if (H5Pclose(fcpl_id) < 0) 
+        goto out;
+    if (H5Fclose(fid) < 0) 
+        goto out;
+    
+    return;
+    
+out:
+    printf("Error.....\n");
+    H5E_BEGIN_TRY {
+        H5Gclose(gid);
+        H5Pclose(gcpl_id);
+        H5Pclose(fcpl_id);
+        H5Fclose(fid);
+        
+    } H5E_END_TRY;
+    return;
+    
+}
+
+
+
 /*-------------------------------------------------------------------------
  * Function: main
  *
@@ -5816,6 +6026,8 @@ int main(void)
     gent_binary();
     gent_bigdims();
     gent_hyperslab();
+    gent_group_creation_order();
+
 
     return 0;
 }

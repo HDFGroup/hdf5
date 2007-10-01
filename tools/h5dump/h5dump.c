@@ -490,7 +490,7 @@ static struct long_options l_opts[] = {
 /* The dump functions of the dump_function_table */
 
 /* standard format:  no change */
-static void             dump_group(hid_t, const char *);
+static void             dump_group(hid_t, const char *, H5_index_t idx_type);
 static void             dump_named_datatype(hid_t, const char *);
 static void             dump_dataset(hid_t, const char *, struct subset_t *);
 static void             dump_dataspace(hid_t space);
@@ -504,7 +504,7 @@ static void             dump_fcontents(hid_t fid);
 
 /* XML format:   same interface, alternative output */
 
-static void             xml_dump_group(hid_t, const char *);
+static void             xml_dump_group(hid_t, const char *, H5_index_t idx_type);
 static void             xml_dump_named_datatype(hid_t, const char *);
 static void             xml_dump_dataset(hid_t, const char *, struct subset_t *);
 static void             xml_dump_dataspace(hid_t space);
@@ -519,7 +519,7 @@ static void             xml_dump_data(hid_t, int, struct subset_t *, int);
  **/
 /* the table of dump functions */
 typedef struct dump_functions_t {
-    void                (*dump_group_function) (hid_t, const char *);
+    void                (*dump_group_function) (hid_t, const char *, H5_index_t idx_type);
     void                (*dump_named_datatype_function) (hid_t, const char *);
     void                (*dump_dataset_function) (hid_t, const char *, struct subset_t *);
     void                (*dump_dataspace_function) (hid_t);
@@ -1355,9 +1355,11 @@ dump_selected_attr(hid_t loc_id, const char *name)
  * Programmer:  Ruey-Hsia Li
  *
  * Modifications:
- *          RMcG, November 2000
- *          Added XML support. Also, optionally checks the op_data
- *          argument.
+ *  RMcG, November 2000
+ *   Added XML support. Also, optionally checks the op_data argument
+ *
+ * Pedro Vicente, September 26, 2007
+ *  handle creation order for groups
  *
  *-------------------------------------------------------------------------
  */
@@ -1365,8 +1367,10 @@ static herr_t
 dump_all(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED *op_data)
 {
     hid_t       obj;
-    char       *obj_path = NULL;        /* Full path of object */
+    char       *obj_path = NULL;    /* Full path of object */
     herr_t      ret = SUCCEED;
+    hid_t       gcpl_id;            /* group creation property list ID */
+    unsigned    crt_order_flags;    /* status of creation order info */
 
     /* Build the object's path name */
     obj_path = HDmalloc(HDstrlen(prefix) + HDstrlen(name) + 2);
@@ -1387,32 +1391,63 @@ dump_all(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED *op
         } /* end if */
 
         switch(oinfo.type) {
-            case H5O_TYPE_GROUP:
-                if((obj = H5Gopen2(group, name, H5P_DEFAULT)) < 0) {
-                    error_msg(progname, "unable to dump group \"%s\"\n", name);
+        case H5O_TYPE_GROUP:
+            if((obj = H5Gopen2(group, name, H5P_DEFAULT)) < 0) 
+            {
+                error_msg(progname, "unable to dump group \"%s\"\n", name);
+                d_status = EXIT_FAILURE;
+                ret = FAIL;
+            } 
+            else 
+            {
+                char *old_prefix;                /* Pointer to previous prefix */
+                
+                /* Keep copy of prefix before iterating into group */
+                old_prefix = HDstrdup(prefix);
+                HDassert(old_prefix);
+                
+                /* Append group name to prefix */
+                add_prefix(&prefix, &prefix_len, name);
+                
+                
+                if((gcpl_id = H5Gget_create_plist(obj)) < 0)
+                {
+                    error_msg(progname, "error in getting group creation property list ID\n");
                     d_status = EXIT_FAILURE;
-                    ret = FAIL;
-                } else {
-                    char *old_prefix;                /* Pointer to previous prefix */
-
-                    /* Keep copy of prefix before iterating into group */
-                    old_prefix = HDstrdup(prefix);
-                    HDassert(old_prefix);
-
-                    /* Append group name to prefix */
-                    add_prefix(&prefix, &prefix_len, name);
-
-                    /* Iterate into group */
-                    dump_function_table->dump_group_function(obj, name);
-
-                    /* Restore old prefix name */
-                    HDstrcpy(prefix, old_prefix);
-                    HDfree(old_prefix);
-
-                    /* Close group */
-                    H5Gclose(obj);
                 }
-                break;
+                
+                /* query the group creation properties */
+                if(H5Pget_link_creation_order(gcpl_id, &crt_order_flags) < 0) 
+                {
+                    error_msg(progname, "error in getting group creation properties\n");
+                    d_status = EXIT_FAILURE;
+                }
+                
+                /* Iterate into group */
+                
+                if( (crt_order_flags == H5P_CRT_ORDER_TRACKED ) ||
+                    (crt_order_flags == (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED)))
+                {
+                    
+                    dump_function_table->dump_group_function(obj, name, H5_INDEX_CRT_ORDER );               
+                }
+                else
+                {
+                    dump_function_table->dump_group_function(obj, name, H5_INDEX_NAME );
+                }
+                
+                if(H5Pclose(gcpl_id) < 0)
+                    d_status = EXIT_FAILURE;
+                
+                
+                /* Restore old prefix name */
+                HDstrcpy(prefix, old_prefix);
+                HDfree(old_prefix);
+                
+                /* Close group */
+                H5Gclose(obj);
+            }
+            break;
 
             case H5O_TYPE_DATASET:
                 if((obj = H5Dopen(group, name)) >= 0) {
@@ -1784,12 +1819,15 @@ dump_named_datatype(hid_t type, const char *name)
  *
  * Modifications:
  *
- *      Call to dump_all -- add parameter to select everything.
+ * Call to dump_all -- add parameter to select everything.
+ *
+ * Pedro Vicente, September 26, 2007
+ *  extra parameter H5_index_t to handle H5Literate iteration order
  *
  *-------------------------------------------------------------------------
  */
 static void
-dump_group(hid_t gid, const char *name)
+dump_group(hid_t gid, const char *name, H5_index_t idx_type)
 {
     H5O_info_t  oinfo;
     hid_t       dset, type;
@@ -1840,11 +1878,11 @@ dump_group(hid_t gid, const char *name)
         } else {
             found_obj->displayed = TRUE;
             H5Aiterate(gid, NULL, dump_attr, NULL);
-            H5Literate(gid, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, dump_all, NULL, H5P_DEFAULT);
+            H5Literate(gid, ".", idx_type, H5_ITER_INC, NULL, dump_all, NULL, H5P_DEFAULT);
         }
     } else {
         H5Aiterate(gid, NULL, dump_attr, NULL);
-        H5Literate(gid, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, dump_all, NULL, H5P_DEFAULT);
+        H5Literate(gid, ".", idx_type, H5_ITER_INC, NULL, dump_all, NULL, H5P_DEFAULT);
     }
 
     indent -= COL;
@@ -3093,32 +3131,68 @@ handle_datasets(hid_t fid, char *dset, void *data)
  * Programmer:  Bill Wendling
  *              Tuesday, 9. January 2001
  *
- * Modifications:
+ * Modifications: Pedro Vicente, September 26, 2007
+ *  handle creation order
  *
  *-------------------------------------------------------------------------
  */
 static void
 handle_groups(hid_t fid, char *group, void UNUSED * data)
 {
-    hid_t       gid;
-
-    if((gid = H5Gopen2(fid, group, H5P_DEFAULT)) < 0) {
+    hid_t      gid;
+    hid_t      gcpl_id; 	       /* group creation property list ID */
+    unsigned   crt_order_flags;    /* status of creation order info */
+    
+    if((gid = H5Gopen2(fid, group, H5P_DEFAULT)) < 0) 
+    {
         begin_obj(dump_header_format->groupbegin, group, dump_header_format->groupblockbegin);
         indentation(COL);
         error_msg(progname, "unable to open group \"%s\"\n", group);
         end_obj(dump_header_format->groupend, dump_header_format->groupblockend);
         d_status = EXIT_FAILURE;
-    } else {
+    } 
+    else 
+    {
         size_t new_len = HDstrlen(group) + 1;
-
-        if(prefix_len <= new_len) {
+        
+        if(prefix_len <= new_len) 
+        {
             prefix_len = new_len;
             prefix = HDrealloc(prefix, prefix_len);
         } /* end if */
-
+        
         HDstrcpy(prefix, group);
-        dump_group(gid, group);
+        
+        
+        if((gcpl_id = H5Gget_create_plist(gid)) < 0)
+        {
+            error_msg(progname, "error in getting group creation property list ID\n");
+            d_status = EXIT_FAILURE;
+        }
+        
+        /* query the group creation properties */
+        if(H5Pget_link_creation_order(gcpl_id, &crt_order_flags) < 0) 
+        {
+            error_msg(progname, "error in getting group creation properties\n");
+            d_status = EXIT_FAILURE;
+        }
+        
+        if( (crt_order_flags == H5P_CRT_ORDER_TRACKED ) ||
+            (crt_order_flags == (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED)))
+        {
+            
+            dump_group(gid, group, H5_INDEX_CRT_ORDER );
+        }
+        else
+        {
+            dump_group(gid, group, H5_INDEX_NAME );
+            
+        }
 
+        if(H5Pclose(gcpl_id) < 0)
+            d_status = EXIT_FAILURE;
+             
+        
         if(H5Gclose(gid) < 0)
             d_status = EXIT_FAILURE;
     } /* end else */
@@ -3467,6 +3541,7 @@ parse_start:
         
         break;
 
+      
         /** begin XML parameters **/
         case 'x':
             /* select XML output */
@@ -3647,12 +3722,18 @@ free_handler(struct handler_t *hand, int len)
  *        August 2003
  *        Major upgrade to XML support.
  *
+ *        Pedro Vicente
+ *        September 2007
+ *        list objects in requested order (creation order or alphabetically)
+ *
  *-------------------------------------------------------------------------
  */
 int
 main(int argc, const char *argv[])
 {
     hid_t               fid, gid;
+    hid_t               gcpl_id; 	       /* group creation property list ID */
+    unsigned            crt_order_flags;   /* status of creation order info */
     char               *fname = NULL;
     void               *edata;
     H5E_auto2_t         func;
@@ -3744,6 +3825,7 @@ main(int argc, const char *argv[])
         }
     }
 
+
     /* find all shared objects */
     if(init_objs(fid, &info, &group_table, &dset_table, &type_table) < 0) {
         error_msg(progname, "internal error (file %s:line %d)\n", __FILE__, __LINE__);
@@ -3806,19 +3888,58 @@ main(int argc, const char *argv[])
             dump_fcpl(fid);
     }
 
-    if(display_all) {
-        if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) {
+    if(display_all) 
+    {
+        if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) 
+        {
             error_msg(progname, "unable to open root group\n");
             d_status = EXIT_FAILURE;
-        } else {
-            dump_function_table->dump_group_function(gid, "/");
+        } 
+        else 
+        {
+
+            if ((gcpl_id = H5Gget_create_plist(gid)) < 0)
+            {
+                error_msg(progname, "error in getting group creation property list ID\n");
+                d_status = EXIT_FAILURE;
+            }
+            
+            /* query the group creation properties */
+            if (H5Pget_link_creation_order(gcpl_id, &crt_order_flags) < 0) 
+            {
+                error_msg(progname, "error in getting group creation properties\n");
+                d_status = EXIT_FAILURE;
+            }
+                
+            if( (crt_order_flags == H5P_CRT_ORDER_TRACKED ) ||
+                (crt_order_flags == (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED)))
+            {
+
+                dump_function_table->dump_group_function(gid, "/", H5_INDEX_CRT_ORDER );
+            }
+            else
+            {
+                dump_function_table->dump_group_function(gid, "/", H5_INDEX_NAME );
+
+            }
+            
         }
 
-        if(H5Gclose(gid) < 0) {
+        if(H5Gclose(gid) < 0) 
+        {
             error_msg(progname, "unable to close root group\n");
             d_status = EXIT_FAILURE;
         }
-    } else {
+
+        if(H5Pclose(gcpl_id) < 0)
+        {
+            error_msg(progname, "group creation property list ID\n");
+            d_status = EXIT_FAILURE;
+        }
+
+    } 
+    else 
+    {
         /* Note: this option is not supported for XML */
         if(doxml) {
             error_msg(progname, "internal error (file %s:line %d)\n", __FILE__, __LINE__);
@@ -5051,7 +5172,7 @@ xml_dump_named_datatype(hid_t type, const char *name)
  *-------------------------------------------------------------------------
  */
 static void
-xml_dump_group(hid_t gid, const char *name)
+xml_dump_group(hid_t gid, const char *name, H5_index_t UNUSED idx_type)
 {
     H5O_info_t              oinfo;
     char                   *cp;
@@ -5669,9 +5790,9 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    xml_dump_group
+ * Function:    xml_dump_dataset 
  *
- * Purpose:     Dump a description of an HDF5 Group (and its members) in XML.
+ * Purpose:     Dump a description of an HDF5 dataset in XML.
  *
  * Return:      void
  *
