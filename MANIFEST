@@ -1219,6 +1219,8 @@
 ./tools/testfiles/thyperslab.h5
 # h5dump h5import validation
 ./tools/testfiles/out3.h5import
+./tools/testfiles/tordergr.h5
+
 
 
 # Expected output from h5ls tests
