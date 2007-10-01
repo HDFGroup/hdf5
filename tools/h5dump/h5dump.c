@@ -76,6 +76,10 @@ static int          display_fi        = FALSE; /*file index */
 static int          display_ai        = TRUE;  /*array index */
 static int          display_escape    = FALSE; /*escape non printable characters */
 
+/* sort parameters */
+static H5_index_t   sort_by           = H5_INDEX_NAME; /*sort_by [creation_order | name]  */
+static H5_iter_order_t sort_order     = H5_ITER_INC; /*sort_order [ascending | descending]   */
+
 /**
  **  Added for XML  **
  **/
@@ -362,7 +366,7 @@ struct handler_t {
  * parameters. The long-named ones can be partially spelled. When
  * adding more, make sure that they don't clash with each other.
  */
-static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b:F:s:S:A";
+static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b:F:s:S:Aq:z:";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
@@ -472,8 +476,11 @@ static struct long_options l_opts[] = {
     { "noindex", no_arg, 'y' },
     { "binary", require_arg, 'b' },
     { "form", require_arg, 'F' },
+    { "sort_by", require_arg, 'q' },
+    { "sort_order", require_arg, 'z' },
     { NULL, 0, '\0' }
 };
+
 
 /**
  **  Change for XML  **
@@ -490,27 +497,27 @@ static struct long_options l_opts[] = {
 /* The dump functions of the dump_function_table */
 
 /* standard format:  no change */
-static void             dump_group(hid_t, const char *, H5_index_t idx_type);
-static void             dump_named_datatype(hid_t, const char *);
-static void             dump_dataset(hid_t, const char *, struct subset_t *);
-static void             dump_dataspace(hid_t space);
-static void             dump_datatype(hid_t type);
-static herr_t           dump_attr(hid_t, const char *, void *);
-static void             dump_data(hid_t, int, struct subset_t *, int);
-static void             dump_dcpl(hid_t dcpl, hid_t type_id, hid_t obj_id);
-static void             dump_comment(hid_t obj_id);
-static void             dump_fcpl(hid_t fid);
-static void             dump_fcontents(hid_t fid);
+static void      dump_group(hid_t, const char *, H5_index_t idx_type, H5_iter_order_t iter_order);
+static void      dump_named_datatype(hid_t, const char *);
+static void      dump_dataset(hid_t, const char *, struct subset_t *);
+static void      dump_dataspace(hid_t space);
+static void      dump_datatype(hid_t type);
+static herr_t    dump_attr(hid_t, const char *, void *);
+static void      dump_data(hid_t, int, struct subset_t *, int);
+static void      dump_dcpl(hid_t dcpl, hid_t type_id, hid_t obj_id);
+static void      dump_comment(hid_t obj_id);
+static void      dump_fcpl(hid_t fid);
+static void      dump_fcontents(hid_t fid);
 
 /* XML format:   same interface, alternative output */
 
-static void             xml_dump_group(hid_t, const char *, H5_index_t idx_type);
-static void             xml_dump_named_datatype(hid_t, const char *);
-static void             xml_dump_dataset(hid_t, const char *, struct subset_t *);
-static void             xml_dump_dataspace(hid_t space);
-static void             xml_dump_datatype(hid_t type);
-static herr_t           xml_dump_attr(hid_t, const char *, void *);
-static void             xml_dump_data(hid_t, int, struct subset_t *, int);
+static void      xml_dump_group(hid_t, const char *, H5_index_t idx_type, H5_iter_order_t iter_order);
+static void      xml_dump_named_datatype(hid_t, const char *);
+static void      xml_dump_dataset(hid_t, const char *, struct subset_t *);
+static void      xml_dump_dataspace(hid_t space);
+static void      xml_dump_datatype(hid_t type);
+static herr_t    xml_dump_attr(hid_t, const char *, void *);
+static void      xml_dump_data(hid_t, int, struct subset_t *, int);
 
 /**
  ** Added for XML **
@@ -519,13 +526,13 @@ static void             xml_dump_data(hid_t, int, struct subset_t *, int);
  **/
 /* the table of dump functions */
 typedef struct dump_functions_t {
-    void                (*dump_group_function) (hid_t, const char *, H5_index_t idx_type);
-    void                (*dump_named_datatype_function) (hid_t, const char *);
-    void                (*dump_dataset_function) (hid_t, const char *, struct subset_t *);
-    void                (*dump_dataspace_function) (hid_t);
-    void                (*dump_datatype_function) (hid_t);
-    herr_t              (*dump_attribute_function) (hid_t, const char *, void *);
-    void                (*dump_data_function) (hid_t, int, struct subset_t *, int);
+    void     (*dump_group_function) (hid_t, const char *, H5_index_t idx_type, H5_iter_order_t iter_order);
+    void     (*dump_named_datatype_function) (hid_t, const char *);
+    void     (*dump_dataset_function) (hid_t, const char *, struct subset_t *);
+    void     (*dump_dataspace_function) (hid_t);
+    void     (*dump_datatype_function) (hid_t);
+    herr_t   (*dump_attribute_function) (hid_t, const char *, void *);
+    void     (*dump_data_function) (hid_t, int, struct subset_t *, int);
 } dump_functions;
 
 /* Standard DDL output */
@@ -1425,6 +1432,7 @@ dump_all(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED *op
                 
                 /* Iterate into group */
                 
+#if 0
                 if( (crt_order_flags == H5P_CRT_ORDER_TRACKED ) ||
                     (crt_order_flags == (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED)))
                 {
@@ -1435,6 +1443,13 @@ dump_all(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED *op
                 {
                     dump_function_table->dump_group_function(obj, name, H5_INDEX_NAME );
                 }
+
+#endif
+
+
+                dump_function_table->dump_group_function(obj, name, sort_by, sort_order);
+
+
                 
                 if(H5Pclose(gcpl_id) < 0)
                     d_status = EXIT_FAILURE;
@@ -1821,13 +1836,14 @@ dump_named_datatype(hid_t type, const char *name)
  *
  * Call to dump_all -- add parameter to select everything.
  *
- * Pedro Vicente, September 26, 2007
- *  extra parameter H5_index_t to handle H5Literate iteration order
+ * Pedro Vicente, October 1, 2007
+ *  extra parameters H5_index_t and H5_iter_order_t to handle H5Literate 
+ *  iteration order
  *
  *-------------------------------------------------------------------------
  */
 static void
-dump_group(hid_t gid, const char *name, H5_index_t idx_type)
+dump_group(hid_t gid, const char *name, H5_index_t idx_type, H5_iter_order_t iter_order)
 {
     H5O_info_t  oinfo;
     hid_t       dset, type;
@@ -1878,11 +1894,11 @@ dump_group(hid_t gid, const char *name, H5_index_t idx_type)
         } else {
             found_obj->displayed = TRUE;
             H5Aiterate(gid, NULL, dump_attr, NULL);
-            H5Literate(gid, ".", idx_type, H5_ITER_INC, NULL, dump_all, NULL, H5P_DEFAULT);
+            H5Literate(gid, ".", idx_type, iter_order, NULL, dump_all, NULL, H5P_DEFAULT);
         }
     } else {
         H5Aiterate(gid, NULL, dump_attr, NULL);
-        H5Literate(gid, ".", idx_type, H5_ITER_INC, NULL, dump_all, NULL, H5P_DEFAULT);
+        H5Literate(gid, ".", idx_type, iter_order, NULL, dump_all, NULL, H5P_DEFAULT);
     }
 
     indent -= COL;
@@ -2864,6 +2880,67 @@ set_binary_form(const char *form)
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    set_sort_by 
+ *
+ * Purpose: set the "by" form of sorting by translating from a string input
+ *          parameter to a H5_index_t return value
+ *          current sort values are [creation_order | name] 
+ *
+ * Return: H5_index_t form of sort or H5_INDEX_UNKNOWN if none found
+ *
+ * Programmer:  Pedro Vicente Nunes
+ *              October 1, 2007
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5_index_t
+set_sort_by(const char *form)
+{
+ H5_index_t index = H5_INDEX_UNKNOWN;
+
+ if (strcmp(form,"name")==0) /* H5_INDEX_NAME */
+  index = H5_INDEX_NAME;
+ else if (strcmp(form,"creation_order")==0) /* H5_INDEX_CRT_ORDER */
+  index = H5_INDEX_CRT_ORDER;
+
+ return index;
+}
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:    set_sort_order  
+ *
+ * Purpose: set the order of sorting by translating from a string input
+ *          parameter to a H5_iter_order_t return value
+ *          current order values are [ascending | descending ] 
+ *
+ * Return: H5_iter_order_t form of order or H5_ITER_UNKNOWN if none found
+ *
+ * Programmer:  Pedro Vicente Nunes
+ *              October 1, 2007
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5_iter_order_t
+set_sort_order(const char *form)
+{
+ H5_iter_order_t iter_order = H5_ITER_UNKNOWN;
+
+ if (strcmp(form,"ascending")==0) /* H5_ITER_INC */
+  iter_order = H5_ITER_INC;
+ else if (strcmp(form,"descending")==0) /* H5_ITER_DEC */
+  iter_order = H5_ITER_DEC;
+
+ return iter_order;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:    handle_attributes
  *
  * Purpose:     Handle the attributes from the command.
@@ -3176,7 +3253,9 @@ handle_groups(hid_t fid, char *group, void UNUSED * data)
             error_msg(progname, "error in getting group creation properties\n");
             d_status = EXIT_FAILURE;
         }
+
         
+#if 0
         if( (crt_order_flags == H5P_CRT_ORDER_TRACKED ) ||
             (crt_order_flags == (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED)))
         {
@@ -3188,6 +3267,11 @@ handle_groups(hid_t fid, char *group, void UNUSED * data)
             dump_group(gid, group, H5_INDEX_NAME );
             
         }
+#endif
+
+
+        dump_group(gid, group, sort_by, sort_order );
+
 
         if(H5Pclose(gcpl_id) < 0)
             d_status = EXIT_FAILURE;
@@ -3541,7 +3625,28 @@ parse_start:
         
         break;
 
-      
+       case 'q':
+
+           if ( ( sort_by = set_sort_by(opt_arg)) < 0)
+           {
+               /* failed to set "sort by" form */
+               usage(progname);
+               leave(EXIT_FAILURE);
+           }
+
+           break;
+
+       case 'z':
+          
+           if ( ( sort_order = set_sort_order(opt_arg)) < 0)
+           {
+               /* failed to set "sort order" form */
+               usage(progname);
+               leave(EXIT_FAILURE);
+           }
+           
+           break;
+
         /** begin XML parameters **/
         case 'x':
             /* select XML output */
@@ -3911,6 +4016,7 @@ main(int argc, const char *argv[])
                 d_status = EXIT_FAILURE;
             }
                 
+#if 0
             if( (crt_order_flags == H5P_CRT_ORDER_TRACKED ) ||
                 (crt_order_flags == (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED)))
             {
@@ -3922,6 +4028,12 @@ main(int argc, const char *argv[])
                 dump_function_table->dump_group_function(gid, "/", H5_INDEX_NAME );
 
             }
+
+#endif
+
+            dump_function_table->dump_group_function(gid, "/", sort_by, sort_order );
+
+
             
         }
 
@@ -5172,7 +5284,7 @@ xml_dump_named_datatype(hid_t type, const char *name)
  *-------------------------------------------------------------------------
  */
 static void
-xml_dump_group(hid_t gid, const char *name, H5_index_t UNUSED idx_type)
+xml_dump_group(hid_t gid, const char *name, H5_index_t UNUSED idx_type, H5_iter_order_t UNUSED iter_order)
 {
     H5O_info_t              oinfo;
     char                   *cp;
