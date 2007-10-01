@@ -8,14 +8,13 @@ Note: This instruction is written for users who would like to build HDF5
          
       Currently, we support 
       
-      1. Building and testing HDF5 on command line with Microsoft Visual 
-         Studio .NET
-      
+      1. Building and testing HDF5 C/C++/Fortran libraries on command line with 
+         Microsoft Visual Studio 2005
       
       For all other Windows development tools, HDF5 should be built in
       the development environment.  Please refer to INSTALL_Windows.txt
       for detailed HDF5 building and installation information, or 
-      INSTALL_Windows_short.txt for quick HDF5 building and installation
+      INSTALL_Windows_Short.txt for quick HDF5 building and installation
       instructions.
                         
 WARNINGS:
@@ -26,26 +25,46 @@ notes in INSTALL_Windows.txt before starting below procedures.
 
 ========================================================================
    Section I: Building and testing HDF5 on command line with Microsoft 
-              Visual Studio .NET
+              Visual Studio 2005
 ========================================================================
     
 1. Preconditions: 
 
-   1.1 Verify environment for Visual Studio .NET
+   1.1 Verify environment for Visual Studio 2005
    
    Building from the command line requires environment variables for Visual
    Studio.  These are generally setup when Visual Studio is installed, but you
    can verify by running the command:
         
-        echo %vs71comntools%
+        echo %vs80comntools%
         
     This should output a path similar to:
     
-        C:\Program Files\Microsoft Visual Studio .NET 2003\Common7\Tools\
+        C:\Program Files\Microsoft Visual Studio 8\Common7\Tools\
       
    1.2 Run batch file copy_hdf.bat.
 
-   Go to  c:\MyHDFstuff\hdf5\windows and run copy_hdf.bat. 
+   Go to  c:\MyHDFstuff\hdf5\windows and run copy_hdf.bat.
+   
+   1.3 Setup evironment for external libraries
+   
+   Similarly to building from within Visual Studio, HDF5 requires environment
+   variables for szip and zlib library names.  To define these environment 
+   variables:
+
+   From the command prompt that you will be building HDF5 from, issue the
+   following command:
+   
+        set HDF5_EXT_ZLIB=zdll.lib
+        
+    replacing "zdll.lib" with the name of the zlib library on your system.
+    Similarly, set HDF5_EXT_SZIP to the name of the szip library on your system.
+    
+    (Optional) If you will be building using the /useenv switch, you must also
+    define variables INCLUDE and LIBPATH with a semi-colon deliminated list of
+    paths for szip and zlib include files, and libraries, respectively.  Set
+    these variables in the same way you set HDF5_EXT_ZLIB and HDF5_EXT_SZIP.
+
       
 2. Building and testing HDF5 libraries and tools
 
@@ -58,20 +77,19 @@ notes in INSTALL_Windows.txt before starting below procedures.
          provided for users to build and test HDF5 library and tools together 
          from command line.
 
-         hdf5bt.bat currently takes no parameters:
+        hdf5bt file takes the following options:
+              /fort             Build and test HDF5 with Fortran libraries
+              /useenv           Build HDF5 using compiler settings defined
+                                in the environment, rather than the IDE.
+              /?                Help information
 
-            hdf5bt                 build and test C/C++ library and tools
-
-         Invoke a command prompt window and run hdf5bt.  Test results are saved 
-         in two files:
-
-            c:\MyHDFstuff\hdf5\check_results.txt   
-
-            c:\MyHDFstuff\hdf5\tests_results.txt.
-
-         In general, you only need to check tests_results.txt.  If all the tests 
-         passed, then you do not have to check check_results.txt.  If some tests 
-         failed, check check_results.txt can help you figure out what was wrong.
+            If you specify the "/useenv" option, then include and library
+            directories for szip and zlib must have been set in the
+            Preconditions above.
+            
+            Invoke a command prompt window and run hdf5bt.  Users are 
+            encouraged to pipe the test output into a file.  You should find no 
+            compilation errors or "*FAILED*" marks.
 
     2.2 Options B: Build and test in two steps 
 
@@ -84,45 +102,42 @@ notes in INSTALL_Windows.txt before starting below procedures.
             directory is provided for users to build HDF5 library and 
             tools from command line.
 
-            hdf5build.bat currently takes no parameters:
-  
-               hdf5build                 build HDF5 C/C++ library and tools
-
-            Invoke a command prompt window and run hdf5build.  Compiling outputs 
-            are saved in c:\MyHDFstuff\hdf5\build_results.txt.  You can check 
+        hdf55build takes the following options:
+              /fort             Build HDF5 with Fortran libraries
+              /useenv           Build HDF5 using compiler settings defined
+                                in the environment, rather than the IDE.
+              /?                Help information
+            
+            If you specify the "/useenv" option, then include and library
+            directories for szip and zlib must have been set in the
+            Preconditions above.
+            
+            Invoke a command prompt window and run hdf5build.  Users are 
+            encouraged to pipe the test output into a file.  You can check 
             the file to find out whether there are any compilation errors.
 
          Step 2) Test HDF5 Libraries and Tools
    
-            A batch file named hdf5check.bat in c:\MyHDFstuff\hdf5
-            directory is provided for users to test HDF5 library 
-            and tools from command line.
+            HDF5 comes with various test suites, all of which can be tested with 
+            hdf5check.bat batch file in c:\MyHDFstuff\hdf5 directory.
 
-            hdf5check.bat has four options:
-            
-            hdf5check                 Test HDF5 C Libraries and Tools
+            hdf5check batch file can be run with one of the following four options:
 
-            hdf5check enablecpp       Test HDF5 C/C++ Libraries and Tools
+              hdf5check                  Test HDF5 C library and tools only.
 
-            hdf5check enablefortran   Test HDF5 C/Fortran Libraries
-                                      and Tools
+              hdf5check enablecpp        Test HDF5 C/C++ libraries and tools.
 
-            hdf5check enableall       Test HDF5 C/C++/Fortran Libraries
-                                      and Tools
+              hdf5check enablefortran    Test HDF5 C/Fortran libraries and 
+                                         tools.  To use this option, HDF5 
+                                         Fortran libraries must have been built.
 
-            Invoke a command prompt window and run hdf5check with apropriate 
-            options.
+              hdf5check enableall        Test HDF5 C/Fortran libraries and 
+                                         tools.  To use this option, HDF5 
+                                         Fortran libraries must have been built.
 
-            Test results are saved in two files:
-
-        	   c:\MyHDFstuff\hdf5\tests_results.txt   
-
-	           c:\MyHDFstuff\hdf5\check_results.txt.
-			
-            In general, you only need to check tests_results.txt.  If all the 
-            tests passed, then you do not have to check check_results.txt. If 
-            some tests failed, check check_results.txt can help you figure out 
-            what was wrong.
+            Invoke a command prompt window and run hdf5check with appropriate 
+            option.  Users are encouraged to pipe the test output into a file.  
+            You should find no "*FAILED*" marks.
 
 3. Installing HDF5 Libraries
 

@@ -1,74 +1,82 @@
-@rem Copyright by The HDF Group.
-@rem Copyright by the Board of Trustees of the University of Illinois.
-@rem All rights reserved.
-@rem
-@rem This file is part of HDF5.  The full HDF5 copyright notice, including
-@rem terms governing use, modification, and redistribution, is contained in
-@rem the files COPYING and Copyright.html.  COPYING can be found at the root
-@rem of the source code distribution tree; Copyright.html can be found at the
-@rem root level of an installed copy of the electronic HDF5 document set and
-@rem is linked from the top-level documents page.  It can also be found at
-@rem http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-@rem access to either file, you may request a copy from help@hdfgroup.org.
-
 @echo OFF
+rem Copyright by The HDF Group.
+rem Copyright by the Board of Trustees of the University of Illinois.
+rem All rights reserved.
+rem
+rem This file is part of HDF5.  The full HDF5 copyright notice, including
+rem terms governing use, modification, and redistribution, is contained in
+rem the files COPYING and Copyright.html.  COPYING can be found at the root
+rem of the source code distribution tree; Copyright.html can be found at the
+rem root level of an installed copy of the electronic HDF5 document set and
+rem is linked from the top-level documents page.  It can also be found at
+rem http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+rem access to either file, you may request a copy from helphdfgroup.org.
 
-:: File Name: hdf5build.bat
-:: This batch file is used to build HDF5 Libraries and Tools.
-:: There are currently only 2 options for this batch file:
-::   1. hdf5build                -- Print a usage message and quit
-::   1. hdf5build                -- Build HDF5 tools and c library
-:: By Xuan Bai
-:: Created: Aug. 16, 2004
-:: Last Updated: July 13, 2007
 
-:: This batch file makes the following assumptions:
-::    - The appropriate version of Visual Studio is installed and setup
-::    - The directory structure is setup from a fresh source copy
-::    - copy_hdf.bat has already been run from the ./windows directory
-::    - Visual Studio already contains the required paths for external libraries
-::    - szip and zlib DLLs are already placed in an accessible directory
-::    - If hdf5_ext_szip or hdf5_ext_zlib are not set, then %szip_name% and %zlib_name%
-::      will be used, respectively.
+rem File Name: hdf5build.bat
+rem This batch file is used to build HDF5 Libraries and Tools.
+rem This batch file takes the following options:
+rem .  /fort             Build HDF5 with Fortran libraries
+rem .  /useenv           Build HDF5 using compiler settings defined
+rem .                    in the environment, rather than the IDE.
+rem .  /?                Help information
+rem By Xuan Bai
+rem Created: Aug. 16, 2004
+rem Last Updated: July 13, 2007
 
-:: By default, only C and C++ libraries are built.
+rem This batch file makes the following assumptions:
+rem    - The appropriate version of Visual Studio is installed and setup
+rem    - The directory structure is setup from a fresh source copy
+rem    - copy_hdf.bat has already been run from the ./windows directory
+rem    - Visual Studio already contains the required paths for external libraries
+rem    - szip and zlib DLLs are already placed in an accessible directory
+rem    - hdf5_ext_szip or hdf5_ext_zlib have been set accordingly
+rem    - if building with the /useenv option, szip and zlib paths have been added
+rem      to %include% and %libpath% as necessary.
 
+rem By default, only C and C++ libraries are built.
+
+setlocal enabledelayedexpansion
+pushd %~dp0
+
+set nerrors=0
 goto main
 
-:: Print a help message
+rem Print a help message
 :help
 
     echo.Builds HDF5 Libraries and Tools.
     echo.
-    echo %~nx0 [OPTION]
+    echo.Usage: %~nx0 [OPTION]
     echo.
-    echo.Please use one of the following options!
-    echo.
-    echo.   %~nx0                   Build HDF5 C Library and Tools
-    echo.   %~nx0 /?                Help information
+    echo.   /fort             Build HDF5 with Fortran libraries
+    echo.   /useenv           Build HDF5 using compiler settings defined
+    echo.                     in the environment, rather than the IDE.
+    echo.   /?                Help information
 
     exit /b 0
 
 
-:: Parse through the parameters sent to file, and set appropriate variables
+rem Parse through the parameters sent to file, and set appropriate variables
 :parse_params
 
     for %%a in (%*) do (
-        if "%1"=="/vs8" (
-            :: Use VS2005 as our compiler
-            set hdf5_use_vs2005=true
-            
-        ) else if "%1"=="/fort" (
-            :: Enable Fortran
+        if "%%a"=="/fort" (
+            rem Enable Fortran
             set hdf5_enablefortran=true
             
-        ) else if "%1"=="/?" (
-            :: Set errorlevel 1 and send to help
+        ) else if "%%a"=="/useenv" (
+            rem Pass /useenv flag to devenv
+            set hdf5_useenv=true
+            
+        ) else if "%%a"=="/?" (
+            rem Set errorlevel 1 and send to help
             call :help
             exit /b 1
             
         ) else (
-            :: Set errorlevel 2 to send to help if we receive a bad parameter (or /?)
+            rem Set errorlevel 2 to send to help if we receive a bad parameter
+            echo.Unknown option: %%a
             call :help
             exit /b 2
         )
@@ -77,157 +85,164 @@ goto main
     exit /b 0
 
 
-:: Setup our environment
+rem Setup our environment
 :setup
 
-    echo.   Setting up environment >> %build_results%
-
-    :: Put us in the directory of the batch file.
-    pushd %~dp0
-
-    :: Constants
-    if "x%build_results%"=="x" set build_results="%CD%\build_results.txt"
-    type nul > %build_results%
+    rem Constants
     
-    if "x%zlib_name%"=="x" set zlib_name=zdll.lib
-    if "x%szip_name%"=="x" set szip_name=szlibdll.lib
-    
-    :: By default, use all.sln, unless hdf5_enablefortran is set
+    echo.Setting up environment
+
+    rem By default, use all.sln and typegen.sln, unless hdf5_enablefortran is set
     if defined hdf5_enablefortran (
         echo.Building Fortran projects enabled
-        echo.Building Fortran projects enabled >> %build_results%
         set hdf5_sln="%CD%\windows\proj\all_fortran\all_fortran.sln"
-    ) else set hdf5_sln="%CD%\windows\proj\all\all.sln"
-    
-    :: Set external libraries if they aren't already set
-    if "x%hdf5_ext_zlib%"=="x" set hdf5_ext_zlib=%zlib_name%
-    if "x%hdf5_ext_szip%"=="x" set hdf5_ext_szip=%szip_name%
-
-    
-    :: Setup Visual Studio environment.  By default, use the Visual Studio .NET environment
-    if defined hdf5_use_vs2005 (
-        echo.Using Visual Studio 2005
-        echo.Using Visual Studio 2005 >> %build_results%
-        call "%vs80comntools%\vsvars32.bat" >> %build_results%
+        set hdf5_tinit_sln="%CD%\windows\misc\typegen\typegen_fortran.sln"
     ) else (
-        echo.Using Visual Studio .NET 2003
-        echo.Using Visual Studio .NET 2003 >> %build_results%
-        call "%vs71comntools%\vsvars32.bat" >> %build_results%
+        set hdf5_sln="%CD%\windows\proj\all\all.sln"
+        set hdf5_tinit_sln="%CD%\windows\misc\typegen\typegen.sln"
+    )
+    
+    
+    rem Setup Visual Studio environment.  By default, use the Visual Studio 
+    rem 2005 environment.
+    
+    set ccflags=
+    
+    rem Currently VS2005 is the only compiler supported.  --SJW 9/26/07
+    echo.Using Visual Studio 2005
+    
+    if not defined hdf5_enablefortran (
+        if defined vs80comntools (
+            rem This sets the Visual Studio path and environment variables
+            call "%vs80comntools%\vsvars32.bat"
+        ) else (
+            echo.Error: Cannot setup Visual Studio 2005 environment.  Please
+            echo.make sure VS80COMNTOOLS is defined in the environment.
+            exit /b 1
+        )
         
-        :: If we are building Fortran libraries with .NET, we need to manually edit
-        :: some project files
-        if defined hdf5_enablefortran (
-            echo.Building Fortran from commandline with .NET not yet implemented!
-            echo.Building Fortran from commandline with .NET not yet implemented! >> %build_results%
+    ) else (
+        echo.with Intel Visual Fortran 9.1
+        
+        if defined ifort_compiler91 (
+            rem This sets the Intel Fortran 9.1 environment, as well as
+            rem setting the appropriate Visual Studio environment
+            
+            rem Assume 32-bit environment
+            call "%ifort_compiler91%\IA32\Bin\ifortvars.bat"
+        ) else (
+            echo.Error: Cannot setup Intel Fortran 9.1 environment.  Please
+            echo.make sure IFORT_COMPILER91 is defined in the environment.
             exit /b 1
         )
     )
+        
+    if defined hdf5_useenv (
+        rem This will tell Visual Studio to use include, library, etc. paths
+        rem defined by %INCLUDE% %LIBPATH%, etc.  Assume the user has already
+        rem added external library paths to these variables.
+        set ccflags=%ccflags% /useenv
+    )
 
     exit /b 0
 
 
-:: Build H5tinit.exe and generate h4tinit.c
+rem Build H5tinit.exe and generate h4tinit.c
 :h5tinit
 
-    echo.   Generating H5tint.c
+    echo.Generating H5tint.c
 
-    echo.***************************************************************************** >> %build_results%
-    echo.                        Build H5Tinit.exe >> %build_results%
-    echo.***************************************************************************** >> %build_results%
-    echo. >> %build_results%
-    devenv .\windows\misc\typegen\typegen.sln /rebuild Debug >> %build_results% 2>&1
-    if %errorlevel% neq 0 exit /b
-
-    :: Use output to generate h5tinit.c
-    .\src\h5tinit.exe > .\src\h5tinit.c
+    echo.*****************************************************************************
+    echo.                        Build H5Tinit.exe
+    echo.*****************************************************************************
+    echo.
+    devenv %hdf5_tinit_sln% %ccflags% /rebuild Debug
+    if %errorlevel% neq 0 exit /b 1
 
     exit /b
 
 
-:: Build the HDF5 libraries.  By default, C and C++ libraries are built.
+rem Build the HDF5 libraries.  By default, C and C++ libraries are built.
 :all
 
-    echo.   Building HDF5
+    echo.Building HDF5
 
-    echo.***************************************************************************** >> %build_results%
-    echo.                        Build HDF5 C Library and Tools >> %build_results%
-    echo.***************************************************************************** >> %build_results%
-    echo. >> %build_results%
+    echo.*****************************************************************************
+    echo.                        Build HDF5 Library and Tools
+    echo.*****************************************************************************
+    echo.
 
-    :: Build both debug and release versions
+    rem Build both debug and release versions
     for %%a in (debug release) DO (
-        echo.       Building %%a libraries...
-        echo.       Building %%a libraries... >> %build_results%
-        devenv .\windows\proj\all\all.sln /rebuild %%a >> %build_results% 2>&1
-        if %errorlevel% neq 0 exit /b
+        echo.Building %%a libraries...
+        devenv .\windows\proj\all\all.sln %ccflags% /rebuild %%a
+        if !errorlevel! neq 0 exit /b
     )
 
     exit /b
 
 
-:: Handle errors
+rem Handle errors
 :error
 
-    :: For now, our error handling just consists of calling cleanup, and setting errorlevel
+    rem For now, our error handling consists of setting nerrors and quitting
     echo.HDF5 build failed.
-    echo.HDF5 build failed. >> %build_results%
-    call :cleanup
-
-    exit /b 1
-
-
-:: Cleanup our environment
-:cleanup
-
-    set zlib_name=
-    set szip_name=
-    set hdf5_enablefortran=
-    set hdf5_use_vs2005=
-
-    :: Don't unset build_results if it is being used by hdf5bt.BAT
-    if "x%bt_results%"=="x" set build_results=
-    popd
-
-    exit /b 0
+    set /a nerrors=%nerrors%+1
+    goto end
+    
+    rem We'll never really get here, but we keep this line for consistency.
+    exit /b
 
 
-:: This is where the magic happens
+rem This is where the magic happens
 :main
 
     call :parse_params %*
     if %errorlevel% neq 0 (
-        if %errorlevel% equ 2 echo.Error parsing parameters!
-        exit /b
+        if !errorlevel! equ 1 (
+            rem This isn't an error case-- this means /? was specified.  Simply
+            rem quit.
+            goto end
+            
+        ) else (
+            rem Error case.
+            echo.Error parsing parameters!
+            goto error
+        )
     )
     
     call :setup
+    if %errorlevel% neq 0 (
+        echo.Error setting up build environment.
+        goto error
+    )
 
     echo.Building HDF5 Libraries and Tools
     echo.
 
-    echo.***************************************************************************** >> %build_results%
-    echo.                        Build HDF5 Libraries and Tools >> %build_results%
-    echo.***************************************************************************** >> %build_results%
-    echo. >> %build_results%
+    echo.*****************************************************************************
+    echo.                        Build HDF5 Libraries and Tools
+    echo.*****************************************************************************
+    echo.
 
 
     call :h5tinit
     if %errorlevel% neq 0 (
-        echo.   Error building h5tinit!
-        echo.   Error building h5tinit! >> %build_results%
+        echo.Error building h5tinit!
         goto error
     )
 
     call :all
     if %errorlevel% neq 0 (
-        echo.   Error building HDF5 libraries!
-        echo.   Error building HDF5 libraries! >> %build_results%
+        echo.Error building HDF5 libraries!
         goto error
     )
 
-    echo. All HDF5 libraries and tools build successfully!
-    echo. All HDF5 libraries and tools build successfully! >> %build_results%
+    if "%nerrors%"=="0" (
+        echo. All HDF5 libraries and tools build successfully!
+    )
+    rem Fall through to end
 
-    call :cleanup
-
-    exit /b 0
+:end
+    popd
+    endlocal & exit /b %nerrors%
