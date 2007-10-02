@@ -5755,68 +5755,6 @@ gent_hyperslab(void)
 
 
 
-/*-------------------------------------------------------------------------
- * Function: gent_link_creation_order
- *
- * Purpose: generate a file with several groups and set H5Pset_link_creation_order 
- *
- *-------------------------------------------------------------------------
- */
-static void
-gent_link_creation_order(char* fname, unsigned crt_order_flags)
-{
-    hid_t    fid;      /* file id */
-    hid_t    gid;      /* group id */
-    hid_t    fcpl_id;  /* file creation property list id */
-    
-    if ((fcpl_id = H5Pcreate(H5P_FILE_CREATE)) < 0) 
-        goto out;
-
-    if ( crt_order_flags )
-    {
-        
-        if (H5Pset_link_creation_order(fcpl_id, crt_order_flags ) < 0) 
-            goto out;
-        
-    }
-  
-    if ((fid = H5Fcreate(fname, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT)) < 0) 
-        goto out;
-    
-    /* create some groups */
-    if ((gid = H5Gcreate2(fid, "c", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
-        goto out;
-    if (H5Gclose(gid) < 0) 
-        goto out;
-    if ((gid = H5Gcreate2(fid, "b", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
-        goto out;
-    if (H5Gclose(gid) < 0) 
-        goto out;
-    if ((gid = H5Gcreate2(fid, "a", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
-        goto out;
-    if (H5Gclose(gid) < 0) 
-        goto out;
-    
-        
-    if (H5Pclose(fcpl_id) < 0) 
-        goto out;
-    if (H5Fclose(fid) < 0) 
-        goto out;
-    
-    return;
-    
-out:
-    printf("Error.....\n");
-    H5E_BEGIN_TRY {
-        H5Gclose(gid);
-        H5Pclose(fcpl_id);
-        H5Fclose(fid);
-        
-    } H5E_END_TRY;
-    return;
-    
-}
-
 
 
 /*-------------------------------------------------------------------------
