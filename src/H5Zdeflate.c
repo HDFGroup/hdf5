@@ -115,18 +115,21 @@ H5Z_filter_deflate (unsigned flags, size_t cd_nelmts,
 	    }
             else {
                 /* If we're not done and just ran out of buffer space, get more */
-                if (0==z_strm.avail_out) {
+                if(0 == z_strm.avail_out) {
+                    void	*new_outbuf;         /* Pointer to new output buffer */
+
                     /* Allocate a buffer twice as big */
                     nalloc *= 2;
-                    if (NULL==(outbuf = H5MM_realloc(outbuf, nalloc))) {
+                    if(NULL == (new_outbuf = H5MM_realloc(outbuf, nalloc))) {
                         (void)inflateEnd(&z_strm);
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for deflate uncompression")
-                    }
+                    } /* end if */
+                    outbuf = new_outbuf;
 
                     /* Update pointers to buffer for next set of uncompressed data */
                     z_strm.next_out = (unsigned char*)outbuf + z_strm.total_out;
                     z_strm.avail_out = (uInt)(nalloc - z_strm.total_out);
-                }
+                } /* end if */
             } /* end else */
 	} while(status==Z_OK);
 
