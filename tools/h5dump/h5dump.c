@@ -445,7 +445,6 @@ static struct long_options l_opts[] = {
     { "soft-l", require_arg, 'l' },
     { "soft", require_arg, 'l' },
     { "sof", require_arg, 'l' },
-    { "so", require_arg, 'l' },
     { "start", require_arg, 's' },
     { "star", require_arg, 's' },
     { "sta", require_arg, 's' },
