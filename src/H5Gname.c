@@ -1079,8 +1079,11 @@ H5G_refname_iterator(hid_t group, const char *name, const H5L_info_t *link_info,
             /* Build the object's full name */
             len_needed = HDstrlen(udata->container) + HDstrlen(name) + 2;
             if(len_needed > udata->max_container_len) {
-                if(NULL == (udata->container = H5MM_realloc(udata->container, len_needed)))
+                void *new_container;    /* Pointer to new container */
+
+                if(NULL == (new_container = H5MM_realloc(udata->container, len_needed)))
                     HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, H5_ITER_ERROR, "can't allocate path string")
+                udata->container = new_container;
                 udata->max_container_len = len_needed;
             } /* end if */
             HDstrcat(udata->container, name); 
@@ -1129,8 +1132,11 @@ H5G_refname_iterator(hid_t group, const char *name, const H5L_info_t *link_info,
                 len = HDstrlen(udata->container);
                 len_needed = len + HDstrlen(name) + 2;
                 if(len_needed > udata->max_container_len) {
-                    if(NULL == (udata->container = H5MM_realloc(udata->container, len_needed)))
+                    void *new_container;    /* Pointer to new container */
+
+                    if(NULL == (new_container = H5MM_realloc(udata->container, len_needed)))
                         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, H5_ITER_ERROR, "can't allocate path string")
+                    udata->container = new_container;
                     udata->max_container_len = len_needed;
                 } /* end if */
                 if(!udata->is_root_group)

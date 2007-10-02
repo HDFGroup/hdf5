@@ -1354,7 +1354,7 @@ H5L_register(const H5L_class_t *cls)
     /* Filter not already registered */
     if(i >= H5L_table_used_g) {
 	if(H5L_table_used_g >= H5L_table_alloc_g) {
-	    size_t n = MAX(H5L_MIN_TABLE_SIZE, 2 * H5L_table_alloc_g);
+	    size_t n = MAX(H5L_MIN_TABLE_SIZE, (2 * H5L_table_alloc_g));
 	    H5L_class_t *table = (H5L_class_t *)H5MM_realloc(H5L_table_g, (n * sizeof(H5L_class_t)));
             if(!table)
 		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to extend link type table")

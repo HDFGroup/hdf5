@@ -607,13 +607,15 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to reset location")
 
     /* Check for needing a larger buffer for the individual path name components */
-    if(HDstrlen(name) + 1 > H5G_comp_alloc_g) {
-        H5G_comp_alloc_g = MAX3(1024, 2 * H5G_comp_alloc_g, HDstrlen(name) + 1);
-        H5G_comp_g = H5MM_realloc(H5G_comp_g, H5G_comp_alloc_g);
-        if(!H5G_comp_g) {
-            H5G_comp_alloc_g = 0;
+    if((HDstrlen(name) + 1) > H5G_comp_alloc_g) {
+        char *new_comp;                 /* New component buffer */
+        size_t new_alloc;               /* New component buffer size */
+
+        new_alloc = MAX3(1024, (2 * H5G_comp_alloc_g), (HDstrlen(name) + 1));
+        if(NULL == (new_comp = H5MM_realloc(H5G_comp_g, new_alloc)))
             HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "unable to allocate component buffer")
-        } /* end if */
+        H5G_comp_g = new_comp;
+        H5G_comp_alloc_g = new_alloc;
     } /* end if */
 
     /* Traverse the path */

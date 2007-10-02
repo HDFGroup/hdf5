@@ -1015,12 +1015,16 @@ H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
 
     /* Resize the buf if it is too small to hold the data */
     if(nbytes > buf_size) {
+        void *new_buf;          /* New buffer for data */
+
         /* Re-allocate memory for copying the chunk */
-        if(NULL == (udata->buf = H5MM_realloc(udata->buf, nbytes)))
+        if(NULL == (new_buf = H5MM_realloc(udata->buf, nbytes)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR, "memory allocation failed for raw data chunk")
+        udata->buf = new_buf;
         if(udata->bkg) {
-            if(NULL == (udata->bkg = H5MM_realloc(udata->bkg, nbytes)))
+            if(NULL == (new_buf = H5MM_realloc(udata->bkg, nbytes)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR, "memory allocation failed for raw data chunk")
+            udata->bkg = new_buf;
             if(!udata->cpy_info->expand_ref)
                 HDmemset((uint8_t *)udata->bkg + buf_size, 0, (size_t)(nbytes - buf_size));
 
