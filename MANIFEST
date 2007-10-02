@@ -1064,7 +1064,6 @@
 ./tools/testfiles/tattr-2.ddl
 ./tools/testfiles/tattr-3.ddl
 ./tools/testfiles/tattr.h5
-./tools/testfiles/tbitfields-1.ddl
 ./tools/testfiles/tbitfields.h5
 ./tools/testfiles/tchar.h5
 ./tools/testfiles/tchar1.ddl
@@ -1081,13 +1080,11 @@
 ./tools/testfiles/tdset-2.ddl
 ./tools/testfiles/tdset-3s.ddl
 ./tools/testfiles/tdset.h5
-./tools/testfiles/tdset2-1s.ddl
 ./tools/testfiles/tdset2.h5
 ./tools/testfiles/tempty.ddl
 ./tools/testfiles/tempty.h5
 ./tools/testfiles/tempty.ls
 ./tools/testfiles/tenum.h5
-./tools/testfiles/tenum.ddl
 ./tools/testfiles/textlink.h5
 ./tools/testfiles/textlink.h5.xml
 ./tools/testfiles/textlink-1.ls
@@ -1136,9 +1133,7 @@
 ./tools/testfiles/tnullspace.h5
 ./tools/testfiles/tnullspace.ddl
 ./tools/testfiles/tobjref.h5
-./tools/testfiles/tobjref.ddl
 ./tools/testfiles/topaque.h5
-./tools/testfiles/topaque.ddl
 ./tools/testfiles/tsaf.ddl
 ./tools/testfiles/tsaf.h5
 ./tools/testfiles/tscaleoffset.ddl
@@ -1212,7 +1207,6 @@
 ./tools/testfiles/tindicessub3.ddl
 ./tools/testfiles/tindicessub4.ddl
 ./tools/testfiles/tindicessub1.ddl
-./tools/testfiles/tregref.ddl
 ./tools/testfiles/thyperslab.ddl
 ./tools/testfiles/tbigdims.ddl
 ./tools/testfiles/tbigdims.h5
@@ -1220,6 +1214,11 @@
 # h5dump h5import validation
 ./tools/testfiles/out3.h5import
 ./tools/testfiles/tordergr.h5
+./tools/testfiles/tordergr3.ddl
+./tools/testfiles/tordergr4.ddl
+./tools/testfiles/tordergr1.ddl
+./tools/testfiles/tordergr5.ddl
+./tools/testfiles/tordergr2.ddl
 
 
 

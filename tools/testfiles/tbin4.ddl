@@ -1,5 +1,5 @@
 #############################
-Expected output for 'h5dump -d double -o out4.bin -b FILE tbinary.h5'
+Expected output for 'h5dump -d double -o /home/pvn/kagiso/build_hdf5/tools/h5dump/../testfiles/out4.bin -b FILE tbinary.h5'
 #############################
 HDF5 "tbinary.h5" {
 DATASET "double" {

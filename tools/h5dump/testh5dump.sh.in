@@ -73,31 +73,31 @@ TOOLTEST() {
     # Run test.
     TESTING $DUMPER $@
     (
-	cd $srcdir/../testfiles
-	$RUNSERIAL $DUMPER_BIN $@
+      echo "#############################"
+      echo "Expected output for '$DUMPER $@'" 
+      echo "#############################"
+	  cd $srcdir/../testfiles
+  	  $RUNSERIAL $DUMPER_BIN $@
     ) >$actual 2>$actual_err
     cat $actual_err >> $actual
 
-    if [ ! -f $expect ]; then
-        echo "*FAILED*"
-	echo "    $expect missing"
-        nerrors="`expr $nerrors + 1`"
+	if [ ! -f $expect ]; then
+    # Create the expect file if it doesn't yet exist.
+     echo " CREATED"
+     cp $actual $expect
+    elif $CMP $expect $actual; then
+     echo " PASSED"
     else
-	# Skip the first three lines, which are label lines, before cmp.
-        if tail +4l $expect | $CMP - $actual; then
-	    echo " PASSED"
-        else
-	    echo "*FAILED*"
-	    echo "    Expected result (*.ddl) differs from actual result (*.out)"
-	    nerrors="`expr $nerrors + 1`"
-	    test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
-        fi
+     echo "*FAILED*"
+     echo "    Expected result (*.ddl) differs from actual result (*.out)"
+	 nerrors="`expr $nerrors + 1`"
+	 test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
     fi
 
     # Clean up output file
-    if test -z "$HDF5_NOCLEANUP"; then
-	rm -f $actual $actual_err
-    fi
+    # if test -z "$HDF5_NOCLEANUP"; then
+	# rm -f $actual $actual_err
+    # fi
 
 }
 
@@ -179,7 +179,7 @@ IMPORTTEST()
 
 ##############################################################################
 ##############################################################################
-###			  T H E   T E S T S                                ###
+###			  T H E   T E S T S                                            ###
 ##############################################################################
 ##############################################################################
 
@@ -221,7 +221,7 @@ TOOLTEST tcomp-1.ddl tcompound.h5
 # test for named data types
 TOOLTEST tcomp-2.ddl -t /type1 --datatype /type2 --datatype=/group1/type3 tcompound.h5
 # test for unamed type 
-TOOLTEST tcomp-3.ddl -t /#6632:0 -g /group2 tcompound.h5
+TOOLTEST tcomp-3.ddl -t /#6632 -g /group2 tcompound.h5
 # test complicated compound datatype
 TOOLTEST tcomp-4.ddl tcompound_complex.h5
 
@@ -416,7 +416,7 @@ TOOLTEST tnullspace.ddl tnullspace.h5
 TOOLTEST tvms.ddl tvms.h5
 
 # test for binary output
-TOOLTEST   tbin1.ddl -d array  -o $TESTDIR/out1.bin -b LE     tbinary.h5
+TOOLTEST   tbin1.ddl -d integer -o $TESTDIR/out1.bin -b LE    tbinary.h5
 TOOLTEST   tbin2.ddl -d float  -o $TESTDIR/out2.bin -b BE     tbinary.h5
 
 # the MEMORY test can be validated with h5import/h5diff
@@ -434,7 +434,15 @@ fi
 
 
 # test for dataset region references 
-TOOLTEST tregref.ddl tdatareg.h5
+TOOLTEST tdatareg.ddl tdatareg.h5
+
+# tests for group creation order
+# "1" tracked, "2" name, root tracked
+TOOLTEST tordergr1.ddl --group=1 --sort_by=creation_order --sort_order=ascending tordergr.h5
+TOOLTEST tordergr2.ddl --group=1 --sort_by=creation_order --sort_order=descending tordergr.h5
+TOOLTEST tordergr3.ddl -g 2 -q name -z ascending tordergr.h5
+TOOLTEST tordergr4.ddl -g 2 -q name -z descending tordergr.h5
+TOOLTEST tordergr5.ddl -q creation_order tordergr.h5
 
 
 if test $nerrors -eq 0 ; then
