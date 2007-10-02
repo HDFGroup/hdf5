@@ -1431,26 +1431,24 @@ dump_all(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED *op
                 }
                 
                 /* Iterate into group */
+                     
+                /* if there is a request to do H5_INDEX_CRT_ORDER and this flag is set
+                in the group, then, sort by creation order, otherwise by name */
                 
-#if 0
-                if( (crt_order_flags == H5P_CRT_ORDER_TRACKED ) ||
-                    (crt_order_flags == (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED)))
+                if( (sort_by == H5_INDEX_CRT_ORDER) &&
+                    (crt_order_flags == H5P_CRT_ORDER_TRACKED  ||
+                     crt_order_flags == (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED)))
                 {
                     
-                    dump_function_table->dump_group_function(obj, name, H5_INDEX_CRT_ORDER );               
+                    dump_function_table->dump_group_function(obj, name, sort_by, sort_order);
+                    
                 }
                 else
                 {
-                    dump_function_table->dump_group_function(obj, name, H5_INDEX_NAME );
+                    dump_function_table->dump_group_function(obj, name, H5_INDEX_NAME, sort_order);
+                    
                 }
-
-#endif
-
-
-                dump_function_table->dump_group_function(obj, name, sort_by, sort_order);
-
-
-                
+           
                 if(H5Pclose(gcpl_id) < 0)
                     d_status = EXIT_FAILURE;
                 
@@ -3254,24 +3252,21 @@ handle_groups(hid_t fid, char *group, void UNUSED * data)
             d_status = EXIT_FAILURE;
         }
 
+        /* if there is a request to do H5_INDEX_CRT_ORDER and this flag is set
+        in the group, then, sort by creation order, otherwise by name */
         
-#if 0
-        if( (crt_order_flags == H5P_CRT_ORDER_TRACKED ) ||
-            (crt_order_flags == (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED)))
+        if( (sort_by == H5_INDEX_CRT_ORDER) &&
+            (crt_order_flags == H5P_CRT_ORDER_TRACKED  ||
+             crt_order_flags == (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED)))
         {
             
-            dump_group(gid, group, H5_INDEX_CRT_ORDER );
+            dump_group(gid, group, sort_by, sort_order );
+            
         }
         else
         {
-            dump_group(gid, group, H5_INDEX_NAME );
-            
+           dump_group(gid, group, H5_INDEX_NAME, sort_order ); 
         }
-#endif
-
-
-        dump_group(gid, group, sort_by, sort_order );
-
 
         if(H5Pclose(gcpl_id) < 0)
             d_status = EXIT_FAILURE;
@@ -4016,25 +4011,24 @@ main(int argc, const char *argv[])
                 d_status = EXIT_FAILURE;
             }
                 
-#if 0
-            if( (crt_order_flags == H5P_CRT_ORDER_TRACKED ) ||
-                (crt_order_flags == (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED)))
+           
+            /* if there is a request to do H5_INDEX_CRT_ORDER and this flag is set
+            in the group, then, sort by creation order, otherwise by name */
+            
+            if( (sort_by == H5_INDEX_CRT_ORDER) &&
+                (crt_order_flags == H5P_CRT_ORDER_TRACKED  ||
+                 crt_order_flags == (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED)))
             {
-
-                dump_function_table->dump_group_function(gid, "/", H5_INDEX_CRT_ORDER );
+                
+                dump_function_table->dump_group_function(gid, "/", sort_by, sort_order );
+                
             }
             else
             {
-                dump_function_table->dump_group_function(gid, "/", H5_INDEX_NAME );
-
+                dump_function_table->dump_group_function(gid, "/", H5_INDEX_NAME, sort_order );
             }
 
-#endif
-
-            dump_function_table->dump_group_function(gid, "/", sort_by, sort_order );
-
-
-            
+           
         }
 
         if(H5Gclose(gid) < 0) 
