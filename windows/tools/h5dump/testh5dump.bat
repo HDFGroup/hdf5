@@ -52,6 +52,8 @@ set h5import_bin=%CD%\%h5import%
 set nerrors=0
 set verbose=yes
 
+set srcdir=%CD%
+
 if not exist %testdir% mkdir %testdir%
 
 goto main
@@ -103,9 +105,6 @@ rem
     
     rem Run test.
     
-    rem On Linux, we synchronize the expected and actual output by removing the
-    rem 3-line header from the expected.  There is no easy way to do this on
-    rem Windows, so we will instead add this header to our actual. --SJW 8/24/07
     (
         rem We need to replace PERCENT-ZERO here with "%0" for the tfamily test.
         rem Also remove quotes here, because Linux 'echo' command strips them.
@@ -121,12 +120,10 @@ rem
     type %actual_err% >> %actual%
     
     if not exist %expect% (
-        call :testing *FAILED* %params%
-        echo.    %expect% missing
-        set /a nerrors=!nerrors!+1
+        rem Create the expect file if it doesn't yet exist.
+        call :testing CREATED %params%
+        copy /y %actual% %expect% > nul
     ) else (
-        rem On Linux, this is where we parse the actual output.  On Windows, we
-        rem don't.  See note above.  --SJW 8/24/07
         fc /w %expect% %actual% | find "FC: no diff" > nul
         if !errorlevel! equ 0 (
             call :testing PASSED %params%
@@ -139,10 +136,63 @@ rem
     )
     
     rem Clean up output file
-    if not defined HDF5_NOCLEANUP del /f %actual% %actual_err%
+    if not defined hdf5_nocleanup (
+        del /f %actual% %actual_err%
+    )
     
     exit /b
     
+
+rem same as TOOLTEST but does not print the header Expected output
+rem use for the binary tests that expect a full path in -o
+:tooltest1
+
+    set expect=%srcdir%\..\testfiles\%1
+    set actual=%CD%\..\testfiles\%~n1.out
+    set actual_err=%CD%\..\testfiles\%~n1.err
+
+    rem We define %params% here because Windows `shift` command doesn't affect
+    rem the %* variable.  --SJW 8/23/07
+    set params=%*
+    rem If there is not 2nd parameter, that means we have no filename, which 
+    rem implies that we are on the "tnofilename" test.  Make sure we remove the
+    rem expected output from the params, and add a space.  --SJW 8/27/07
+    if "%2"=="" (
+        set params= 
+    ) else (
+        set params=!params:* =!
+    )
+    
+    rem Run test.
+    (
+        pushd %CD%\..\testfiles
+        %dumper_bin% !params:PERCENT-ZERO=%%0!
+        popd
+    ) > %actual% 2> %actual_err%
+    type %actual_err% >> %actual%
+        
+    if not exist %expect% (
+        rem Create the expect file if it doesn't yet exist.
+        call :testing CREATED %params%
+        copy /y %actual% %expect% > nul
+    ) else (
+        fc /w %expect% %actual% | find "FC: no diff" > nul
+        if !errorlevel! equ 0 (
+            call :testing PASSED %params%
+        ) else (
+            call :testing *FAILED* %params%
+            echo.    Expected results ^(*.ddl^) differs from actual results ^(*.out^)
+            set /a nerrors=!nerrors!+1
+            if "yes"=="%verbose%" fc /w %expect% %actual%
+        )
+    )
+    
+    rem Clean up output file
+    if not defined hdf5_nocleanup (
+        del /f %actual% %actual_err%
+    )
+    
+    exit /b
 
 rem Print a "SKIP" message
 :skip
@@ -287,7 +337,7 @@ rem ############################################################################
     rem test for named data types
     call :tooltest tcomp-2.ddl -t /type1 --datatype /type2 --datatype=/group1/type3 tcompound.h5
     rem test for unamed type 
-    call :tooltest tcomp-3.ddl -t /#6632:0 -g /group2 tcompound.h5
+    call :tooltest tcomp-3.ddl -t /#6632 -g /group2 tcompound.h5
     rem test complicated compound datatype
     call :tooltest tcomp-4.ddl tcompound_complex.h5
     
@@ -500,15 +550,15 @@ rem ############################################################################
     rem Don't use %testdir% here, because we are already in the correct
     rem directory, and using it only gets in the way of the output formatting.
     rem --SJW 8/24/07
-    call :tooltest   tbin1.ddl -d array -o out1.bin -b LE tbinary.h5
-    call :tooltest   tbin2.ddl -d float -o out2.bin -b BE tbinary.h5
+    call :tooltest1   tbin1.ddl -d integer -o out1.bin -b LE tbinary.h5
+    call :tooltest1   tbin2.ddl -d float -o out2.bin -b BE   tbinary.h5
 
     rem the MEMORY test can be validated with h5import/h5diff
-    call :tooltest   tbin3.ddl -d integer -o out3.bin -b MEMORY tbinary.h5
+    call :tooltest1   tbin3.ddl -d integer -o out3.bin -b MEMORY tbinary.h5
     call :importtest out3.bin -c out3.h5import -o out3.h5
     call :difftest tbinary.h5 out3.h5 /integer /integer
 
-    call :tooltest   tbin4.ddl -d double  -o out4.bin -b FILE   tbinary.h5
+    call :tooltest1   tbin4.ddl -d double  -o out4.bin -b FILE   tbinary.h5
        
     rem Clean up binary output files
     if not defined hdf5_nocleanup (
@@ -518,7 +568,15 @@ rem ############################################################################
     
 
     rem test for dataset region references 
-    call :tooltest tregref.ddl tdatareg.h5
+    call :tooltest tdatareg.ddl tdatareg.h5
+
+    rem tests for group creation order
+    rem "1" tracked, "2" name, root tracked
+    call :tooltest tordergr1.ddl --group=1 --sort_by=creation_order --sort_order=ascending tordergr.h5
+    call :tooltest tordergr2.ddl --group=1 --sort_by=creation_order --sort_order=descending tordergr.h5
+    call :tooltest tordergr3.ddl -g 2 -q name -z ascending tordergr.h5
+    call :tooltest tordergr4.ddl -g 2 -q name -z descending tordergr.h5
+    call :tooltest tordergr5.ddl -q creation_order tordergr.h5
 
 
     if %nerrors% equ 0 (
