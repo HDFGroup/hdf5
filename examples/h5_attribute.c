@@ -40,7 +40,7 @@
 #define ANAME  "Float attribute"      /* Name of the array attribute */
 #define ANAMES "Character attribute" /* Name of the string attribute */
 
-herr_t attr_info(hid_t loc_id, const char *name, void *opdata);
+static herr_t attr_info(hid_t loc_id, const char *name, const H5A_info_t *ainfo, void *opdata);
                                      /* Operator function */
 
 int
@@ -209,7 +209,7 @@ main (void)
    /*
     * Get attribute info using iteration function.
     */
-    ret = H5Aiterate(dataset, NULL, attr_info, NULL);
+    ret = H5Aiterate2(dataset, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, attr_info, NULL, H5P_DEFAULT);
 
    /*
     * Close the dataset and the file.
@@ -223,8 +223,8 @@ main (void)
 /*
  * Operator function.
  */
-herr_t
-attr_info(hid_t loc_id, const char *name, void *opdata)
+static herr_t
+attr_info(hid_t loc_id, const char *name, const H5A_info_t *ainfo, void *opdata)
 {
     hid_t attr, atype, aspace;  /* Attribute, datatype and dataspace identifiers */
     int   rank;
@@ -245,9 +245,7 @@ attr_info(hid_t loc_id, const char *name, void *opdata)
     /*
      * Display attribute name.
      */
-    printf("\n");
-    printf("Name : ");
-    puts(name);
+    printf("\nName : %s\n", name);
 
     /*
      * Get attribute datatype, dataspace, rank, and dimensions.
@@ -262,10 +260,11 @@ attr_info(hid_t loc_id, const char *name, void *opdata)
      */
 
     if(rank > 0) {
-    printf("Rank : %d \n", rank);
-    printf("Dimension sizes : ");
-    for (i=0; i< rank; i++) printf("%d ", (int)sdim[i]);
-    printf("\n");
+        printf("Rank : %d \n", rank);
+        printf("Dimension sizes : ");
+        for (i=0; i< rank; i++)
+            printf("%d ", (int)sdim[i]);
+        printf("\n");
     }
 
     /*
@@ -273,14 +272,15 @@ attr_info(hid_t loc_id, const char *name, void *opdata)
      */
 
     if (H5T_FLOAT == H5Tget_class(atype)) {
-    printf("Type : FLOAT \n");
-    npoints = H5Sget_simple_extent_npoints(aspace);
-    float_array = (float *)malloc(sizeof(float)*(int)npoints);
-    ret = H5Aread(attr, atype, float_array);
-    printf("Values : ");
-    for( i = 0; i < (int)npoints; i++) printf("%f ", float_array[i]);
-    printf("\n");
-    free(float_array);
+        printf("Type : FLOAT \n");
+        npoints = H5Sget_simple_extent_npoints(aspace);
+        float_array = (float *)malloc(sizeof(float)*(int)npoints);
+        ret = H5Aread(attr, atype, float_array);
+        printf("Values : ");
+        for( i = 0; i < (int)npoints; i++)
+            printf("%f ", float_array[i]);
+        printf("\n");
+        free(float_array);
     }
 
     /*
@@ -292,3 +292,4 @@ attr_info(hid_t loc_id, const char *name, void *opdata)
 
     return 0;
 }
+

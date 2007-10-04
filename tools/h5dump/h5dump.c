@@ -501,7 +501,7 @@ static void      dump_named_datatype(hid_t, const char *);
 static void      dump_dataset(hid_t, const char *, struct subset_t *);
 static void      dump_dataspace(hid_t space);
 static void      dump_datatype(hid_t type);
-static herr_t    dump_attr(hid_t, const char *, void *);
+static herr_t    dump_attr(hid_t, const char *, const H5A_info_t *, void *);
 static void      dump_data(hid_t, int, struct subset_t *, int);
 static void      dump_dcpl(hid_t dcpl, hid_t type_id, hid_t obj_id);
 static void      dump_comment(hid_t obj_id);
@@ -515,7 +515,7 @@ static void      xml_dump_named_datatype(hid_t, const char *);
 static void      xml_dump_dataset(hid_t, const char *, struct subset_t *);
 static void      xml_dump_dataspace(hid_t space);
 static void      xml_dump_datatype(hid_t type);
-static herr_t    xml_dump_attr(hid_t, const char *, void *);
+static herr_t    xml_dump_attr(hid_t, const char *, const H5A_info_t *, void *);
 static void      xml_dump_data(hid_t, int, struct subset_t *, int);
 
 /**
@@ -1223,7 +1223,8 @@ dump_dataspace(hid_t space)
  *-------------------------------------------------------------------------
  */
 static herr_t
-dump_attr(hid_t oid, const char *attr_name, void UNUSED * op_data)
+dump_attr(hid_t oid, const char *attr_name, const H5A_info_t UNUSED *info,
+    void UNUSED *op_data)
 {
     hid_t       attr_id;
     herr_t      ret = SUCCEED;
@@ -1817,7 +1818,7 @@ dump_named_datatype(hid_t type, const char *name)
 
     /* print attributes */
     indent += COL;
-    H5Aiterate(type, NULL, dump_attr, NULL);
+    H5Aiterate2(type, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, dump_attr, NULL, H5P_DEFAULT);
     indent -= COL;
 
     end_obj(dump_header_format->datatypeend,
@@ -1894,11 +1895,11 @@ dump_group(hid_t gid, const char *name, H5_index_t idx_type, H5_iter_order_t ite
             printf("%s \"%s\"\n", HARDLINK, found_obj->objname);
         } else {
             found_obj->displayed = TRUE;
-            H5Aiterate(gid, NULL, dump_attr, NULL);
+            H5Aiterate2(gid, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, dump_attr, NULL, H5P_DEFAULT);
             H5Literate(gid, ".", idx_type, iter_order, NULL, dump_all, NULL, H5P_DEFAULT);
         }
     } else {
-        H5Aiterate(gid, NULL, dump_attr, NULL);
+        H5Aiterate2(gid, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, dump_attr, NULL, H5P_DEFAULT);
         H5Literate(gid, ".", idx_type, iter_order, NULL, dump_all, NULL, H5P_DEFAULT);
     }
 
@@ -1973,7 +1974,7 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
         } /* end switch */
 
     indent += COL;
-    H5Aiterate(did, NULL, dump_attr, NULL);
+    H5Aiterate2(did, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, dump_attr, NULL, H5P_DEFAULT);
     indent -= COL;
 
     H5Tclose(type);
@@ -5074,7 +5075,8 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED * sset, int UNU
  *-------------------------------------------------------------------------
  */
 static herr_t
-xml_dump_attr(hid_t attr, const char *attr_name, void UNUSED * op_data)
+xml_dump_attr(hid_t attr, const char *attr_name, const H5A_info_t UNUSED *info,
+    void UNUSED * op_data)
 {
     hid_t   attr_id, type, space;
     H5S_class_t space_type;
@@ -5384,8 +5386,8 @@ xml_dump_group(hid_t gid, const char *name, H5_index_t UNUSED idx_type, H5_iter_
                 found_obj->displayed = TRUE;
 
                 /* 1.  do all the attributes of the group */
-                H5Aiterate(gid, NULL,
-                           dump_function_table->dump_attribute_function, NULL);
+                H5Aiterate2(gid, ".", H5_INDEX_NAME, H5_ITER_INC, NULL,
+                           dump_function_table->dump_attribute_function, NULL, H5P_DEFAULT);
 
                 if(isRoot && unamedtype) {
                     unsigned u;
@@ -5439,7 +5441,7 @@ xml_dump_group(hid_t gid, const char *name, H5_index_t UNUSED idx_type, H5_iter_
         free(parentxid);
 
         /* 1.  do all the attributes of the group */
-        H5Aiterate(gid, NULL, dump_function_table->dump_attribute_function, NULL);
+        H5Aiterate2(gid, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, dump_function_table->dump_attribute_function, NULL, H5P_DEFAULT);
 
         if(isRoot && unamedtype) {
             unsigned u;
@@ -6088,7 +6090,7 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t UNUSED * sset)
     dump_function_table->dump_datatype_function(type);
 
     indent += COL;
-    H5Aiterate(did, NULL, dump_function_table->dump_attribute_function, NULL);
+    H5Aiterate2(did, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, dump_function_table->dump_attribute_function, NULL, H5P_DEFAULT);
     indent -= COL;
     tempi = H5Dget_storage_size(did);
 

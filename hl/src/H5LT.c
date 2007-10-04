@@ -1619,31 +1619,23 @@ herr_t H5LTset_attribute_double( hid_t loc_id,
  *
  *-------------------------------------------------------------------------
  */
-
-static herr_t find_attr( hid_t loc_id, const char *name, void *op_data)
+static herr_t
+find_attr(hid_t loc_id, const char *name, const H5A_info_t *ainfo,
+    void *op_data)
 {
+    int ret = H5_ITER_CONT;
 
- /* Define a default zero value for return. This will cause the iterator to continue if
-  * the palette attribute is not found yet.
-  */
+    /* Shut compiler up */
+    loc_id = loc_id; ainfo = ainfo;
 
- int ret = 0;
+    /* Define a positive value for return value if the attribute was found. This will
+     * cause the iterator to immediately return that positive value,
+     * indicating short-circuit success
+     */
+    if(strcmp(name, (char *)op_data) == 0)
+        ret = H5_ITER_STOP;
 
- char *attr_name = (char*)op_data;
-
- /* Shut the compiler up */
- loc_id=loc_id;
-
- /* Define a positive value for return value if the attribute was found. This will
-  * cause the iterator to immediately return that positive value,
-  * indicating short-circuit success
-  */
-
- if( strcmp( name, attr_name ) == 0 )
-  ret = 1;
-
-
- return ret;
+    return ret;
 }
 
 
@@ -1680,7 +1672,7 @@ herr_t H5LTfind_attribute( hid_t loc_id, const char* attr_name )
  * Date: June 21, 2001
  *
  * Comments:
- *  The function uses H5Aiterate with the operator function find_attr
+ *  The function uses H5Aiterate2 with the operator function find_attr
  *
  * Return:
  *  Success: The return value of the first operator that
@@ -1694,16 +1686,10 @@ herr_t H5LTfind_attribute( hid_t loc_id, const char* attr_name )
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LT_find_attribute( hid_t loc_id, const char* attr_name )
+herr_t
+H5LT_find_attribute( hid_t loc_id, const char* attr_name )
 {
-
- unsigned int attr_num;
- herr_t       ret;
-
- attr_num = 0;
- ret = H5Aiterate( loc_id, &attr_num, find_attr, (void *)attr_name );
-
- return ret;
+    return H5Aiterate2(loc_id, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, find_attr, (void *)attr_name, H5P_DEFAULT);
 }
 
 

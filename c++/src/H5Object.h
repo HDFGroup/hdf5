@@ -38,7 +38,6 @@ typedef void (*attr_operator_t)( H5Object& loc/*in*/,
 
 class UserData4Aiterate { // user data for attribute iteration
    public:
-	unsigned int* idx;
 	attr_operator_t op;
 	void* opData;
 	H5Object* object;

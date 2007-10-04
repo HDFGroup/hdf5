@@ -377,19 +377,18 @@ H5Arename1(hid_t loc_id, const char *old_name, const char *new_name)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Arename1() */
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
 /*--------------------------------------------------------------------------
  NAME
-    H5Aiterate
+    H5Aiterate1
  PURPOSE
     Calls a user's function for each attribute on an object
  USAGE
-    herr_t H5Aiterate (loc_id, attr_num, op, data)
+    herr_t H5Aiterate1(loc_id, attr_num, op, data)
         hid_t loc_id;       IN: Object (dataset or group) to be iterated over
         unsigned *attr_num; IN/OUT: Starting (IN) & Ending (OUT) attribute number
-        H5A_operator_t op;  IN: User's function to pass each attribute to
+        H5A_operator1_t op;  IN: User's function to pass each attribute to
         void *op_data;      IN/OUT: User's data to pass through to iterator operator function
  RETURNS
         Returns a negative value if something is wrong, the return value of the
@@ -414,16 +413,18 @@ done:
         C. Negative causes the iterator to immediately return that value,
             indicating failure.  The iterator can be restarted at the next
             attribute.
+ NOTE
+    Deprecated in favor of H5Aiterate2
 --------------------------------------------------------------------------*/
 herr_t
-H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
+H5Aiterate1(hid_t loc_id, unsigned *attr_num, H5A_operator1_t op, void *op_data)
 {
     H5A_attr_iter_op_t  attr_op;        /* Attribute operator */
     hsize_t		start_idx;      /* Index of attribute to start iterating at */
     hsize_t		last_attr;      /* Index of last attribute examined */
     herr_t	        ret_value;      /* Return value */
 
-    FUNC_ENTER_API(H5Aiterate, FAIL)
+    FUNC_ENTER_API(H5Aiterate1, FAIL)
     H5TRACE4("e", "i*Iux*x", loc_id, attr_num, op, op_data);
 
     /* check arguments */
@@ -445,9 +446,8 @@ H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op, void *op_data)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* H5Aiterate() */
+} /* H5Aiterate1() */
 
-#ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*--------------------------------------------------------------------------
  NAME

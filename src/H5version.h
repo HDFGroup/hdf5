@@ -42,6 +42,10 @@
 #define H5Adelete_vers 1
 #endif /* !defined(H5Adelete_vers) */
 
+#if !defined(H5Aiterate_vers)
+#define H5Aiterate_vers 1
+#endif /* !defined(H5Aiterate_vers) */
+
 #if !defined(H5Arename_vers)
 #define H5Arename_vers 1
 #endif /* !defined(H5Arename_vers) */
@@ -121,6 +125,19 @@
 #else /* H5Adelete_vers */
 #error "H5Adelete_vers set to invalid value"
 #endif /* H5Adelete_vers */
+
+#if !defined(H5Aiterate_vers) || H5Aiterate_vers == 2
+#ifndef H5Aiterate_vers
+#define H5Aiterate_vers 2
+#endif /* H5Aiterate_vers */
+#define H5Aiterate H5Aiterate2
+#define H5A_operator_t H5A_operator2_t
+#elif H5Aiterate_vers == 1
+#define H5Aiterate H5Aiterate1
+#define H5A_operator_t H5A_operator1_t
+#else /* H5Aiterate_vers */
+#error "H5Aiterate_vers set to invalid value"
+#endif /* H5Aiterate_vers */
 
 #if !defined(H5Arename_vers) || H5Arename_vers == 2
 #ifndef H5Arename_vers

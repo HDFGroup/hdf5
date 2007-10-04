@@ -554,10 +554,12 @@ H5A_attr_iterate_table(const H5A_attr_table_t *atable, hsize_t skip,
                 break;
             }
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
             case H5A_ATTR_OP_APP:
                 /* Make the application callback */
                 ret_value = (attr_op->u.app_op)(loc_id, atable->attrs[u].name, op_data);
                 break;
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
             case H5A_ATTR_OP_LIB:
                 /* Call the library's callback */

@@ -36,10 +36,6 @@ typedef struct {
     hsize_t             data_size;      /* Size of raw data		  */
 } H5A_info_t;
 
-/* Typedef for H5Aiterate() callbacks */
-typedef herr_t (*H5A_operator_t)(hid_t location_id/*in*/,
-    const char *attr_name/*in*/, void *operator_data/*in,out*/);
-
 /* Typedef for H5Aiterate2() callbacks */
 typedef herr_t (*H5A_operator2_t)(hid_t location_id/*in*/,
     const char *attr_name/*in*/, const H5A_info_t *ainfo/*in*/, void *op_data/*in,out*/);
@@ -89,8 +85,6 @@ H5_DLL hid_t   H5Acreate(hid_t loc_id, const char *name, hid_t type_id,
 H5_DLL hid_t   H5Aopen_name(hid_t loc_id, const char *name);
 H5_DLL hid_t   H5Aopen_idx(hid_t loc_id, unsigned idx);
 H5_DLL int     H5Aget_num_attrs(hid_t loc_id);
-H5_DLL herr_t  H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op,
-    void *op_data);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  * 
@@ -103,10 +97,16 @@ H5_DLL herr_t  H5Aiterate(hid_t loc_id, unsigned *attr_num, H5A_operator_t op,
 
 /* Typedefs */
 
+/* Typedef for H5Aiterate1() callbacks */
+typedef herr_t (*H5A_operator1_t)(hid_t location_id/*in*/,
+    const char *attr_name/*in*/, void *operator_data/*in,out*/);
+
 
 /* Function prototypes */
 H5_DLL herr_t  H5Adelete1(hid_t loc_id, const char *name);
 H5_DLL herr_t  H5Arename1(hid_t loc_id, const char *old_name, const char *new_name);
+H5_DLL herr_t  H5Aiterate1(hid_t loc_id, unsigned *attr_num, H5A_operator1_t op,
+    void *op_data);
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 

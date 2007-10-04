@@ -33,9 +33,10 @@ namespace H5 {
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // userAttrOpWrpr simply interfaces between the user's function and the
-// C library function H5Aiterate; used to resolve the different prototype
+// C library function H5Aiterate2; used to resolve the different prototype
 // problem.  May be moved to Iterator later.
-extern "C" herr_t userAttrOpWrpr( hid_t loc_id, const char* attr_name, void* op_data )
+extern "C" herr_t userAttrOpWrpr(hid_t loc_id, const char *attr_name,
+    const H5A_info_t *ainfo, void *op_data)
 {
    H5std_string s_attr_name = H5std_string( attr_name );
 #ifdef NO_STATIC_CAST
@@ -200,26 +201,29 @@ Attribute H5Object::openAttribute( const unsigned int idx ) const
 /// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5A.html#Annot-Iterate
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-int H5Object::iterateAttrs( attr_operator_t user_op, unsigned * idx, void *op_data )
+int H5Object::iterateAttrs( attr_operator_t user_op, unsigned *_idx, void *op_data )
 {
    // store the user's function and data
    UserData4Aiterate* userData = new UserData4Aiterate;
    userData->opData = op_data;
-   userData->idx = idx;
    userData->op = user_op;
    userData->object = this;
 
-   // call the C library routine H5Aiterate to iterate the attributes
-   int ret_value = H5Aiterate( id, idx, userAttrOpWrpr, (void *) userData );
+   // call the C library routine H5Aiterate2 to iterate the attributes
+   hsize_t idx = (hsize_t)*_idx;
+   int ret_value = H5Aiterate2(id, ".", H5_INDEX_NAME, H5_ITER_INC, &idx, userAttrOpWrpr, (void *) userData, H5P_DEFAULT);
+
    // release memory
    delete userData;
 
-   if( ret_value >= 0 )
+   if( ret_value >= 0 ) {
+      /* Pass back update index value to calling code */
+      *_idx = (unsigned)idx;
+
       return( ret_value );
-   else  // raise exception when H5Aiterate returns a negative value
-   {
-      throw AttributeIException(inMemFunc("iterateAttrs"), "H5Aiterate failed");
    }
+   else  // raise exception when H5Aiterate returns a negative value
+      throw AttributeIException(inMemFunc("iterateAttrs"), "H5Aiterate2 failed");
 }
 
 //--------------------------------------------------------------------------

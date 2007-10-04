@@ -1322,10 +1322,11 @@ dump_dataset_values(hid_t dset)
  *-------------------------------------------------------------------------
  */
 static herr_t
-list_attr (hid_t obj, const char *attr_name, void UNUSED *op_data)
+list_attr(hid_t obj, const char *attr_name, const H5A_info_t UNUSED *ainfo,
+    void UNUSED *op_data)
 {
     hid_t attr, space, type, p_type;
-    hsize_t size[64], nelmts=1;
+    hsize_t size[64], nelmts = 1;
     int  ndims, i, n;
     size_t need;
     hsize_t     temp_need;
@@ -1784,7 +1785,7 @@ list(hid_t group, const char *name, const H5L_info_t *linfo, void *_iter)
 
             /* Display attributes */
             if(oi.type >= 0)
-                H5Aiterate(obj, NULL, list_attr, NULL);
+                H5Aiterate2(obj, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, list_attr, NULL, H5P_DEFAULT);
 
             /* Object location & reference count */
             printf("    %-10s %lu:"H5_PRINTF_HADDR_FMT"\n", "Location:", oi.fileno, oi.addr);
@@ -2312,7 +2313,7 @@ main(int argc, const char *argv[])
             if(verbose_g > 0) {
                 if((root = H5Gopen2(file, "/", H5P_DEFAULT)) < 0)
                     leave(1);
-                H5Aiterate(root, NULL, list_attr, NULL);
+                H5Aiterate2(root, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, list_attr, NULL, H5P_DEFAULT);
                 if(H5Gclose(root) < 0)
                     leave(1);
             } /* end if */

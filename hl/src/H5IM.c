@@ -166,30 +166,23 @@ herr_t H5IMmake_image_24bit( hid_t loc_id,
  *
  *-------------------------------------------------------------------------
  */
-
-static herr_t find_palette( hid_t loc_id, const char *name, void  *op_data )
+static herr_t
+find_palette(hid_t loc_id, const char *name, const H5A_info_t *ainfo,
+    void *op_data)
 {
+    int ret = H5_ITER_CONT;
 
- /* Define a default zero value for return. This will cause the iterator to continue if
-  * the palette attribute is not found yet.
-  */
+    /* Shut compiler up */
+    loc_id = loc_id; ainfo = ainfo; op_data = op_data;
 
- int ret = 0;
+    /* Define a positive value for return value if the attribute was found. This will
+     * cause the iterator to immediately return that positive value,
+     * indicating short-circuit success
+     */
+    if(strcmp(name, "PALETTE") == 0)
+        ret = H5_ITER_STOP;
 
- /* Shut compiler */
- loc_id=loc_id;
- op_data=op_data;
-
- /* Define a positive value for return value if the attribute was found. This will
-  * cause the iterator to immediately return that positive value,
-  * indicating short-circuit success
-  */
-
- if( strcmp( name, "PALETTE" ) == 0 )
-  ret = 1;
-
-
- return ret;
+    return ret;
 }
 
 
@@ -205,7 +198,7 @@ static herr_t find_palette( hid_t loc_id, const char *name, void  *op_data )
  * Date: May 11, 2001
  *
  * Comments:
- *  The function uses H5Aiterate with the operator function find_palette
+ *  The function uses H5Aiterate2 with the operator function find_palette
  *
  * Modifications:
  *
@@ -214,14 +207,7 @@ static herr_t find_palette( hid_t loc_id, const char *name, void  *op_data )
 
 herr_t H5IM_find_palette( hid_t loc_id )
 {
-
- unsigned int attr_num;     /* Starting attribute to look up */
- herr_t       ret;
-
- attr_num = 0;
- ret = H5Aiterate( loc_id, &attr_num, find_palette, 0 );
-
- return ret;
+    return H5Aiterate2(loc_id, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, find_palette, NULL, H5P_DEFAULT);
 }
 
 

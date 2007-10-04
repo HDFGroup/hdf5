@@ -142,7 +142,8 @@ typedef struct {
     hbool_t *visited;           /* Pointer to array of "visited attribute" flags */
 } attr_iter_info_t;
 
-static herr_t attr_op1(hid_t loc_id, const char *name, void *op_data);
+static herr_t attr_op1(hid_t loc_id, const char *name, const H5A_info_t *ainfo,
+    void *op_data);
 
 
 
@@ -1362,32 +1363,34 @@ test_attr_mult_read(hid_t fapl)
 **  attr_op1(): Attribute operator
 **
 ****************************************************************/
-herr_t attr_op1(hid_t UNUSED loc_id, const char *name, void *op_data)
+static herr_t
+attr_op1(hid_t UNUSED loc_id, const char *name, const H5A_info_t UNUSED *ainfo,
+    void *op_data)
 {
-    int *count=(int *)op_data;
-    herr_t ret=0;
+    int *count = (int *)op_data;
+    herr_t ret = 0;
 
     switch(*count) {
         case 0:
-            if(HDstrcmp(name,ATTR1_NAME))
-                TestErrPrintf("attribute name different: name=%s, should be %s\n",name,ATTR1_NAME);
+            if(HDstrcmp(name, ATTR1_NAME))
+                TestErrPrintf("attribute name different: name=%s, should be %s\n", name, ATTR1_NAME);
              (*count)++;
              break;
 
         case 1:
-            if(HDstrcmp(name,ATTR2_NAME))
-                TestErrPrintf("attribute name different: name=%s, should be %s\n",name,ATTR2_NAME);
+            if(HDstrcmp(name, ATTR2_NAME))
+                TestErrPrintf("attribute name different: name=%s, should be %s\n", name, ATTR2_NAME);
              (*count)++;
              break;
 
         case 2:
-            if(HDstrcmp(name,ATTR3_NAME))
-                TestErrPrintf("attribute name different: name=%s, should be %s\n",name,ATTR3_NAME);
+            if(HDstrcmp(name, ATTR3_NAME))
+                TestErrPrintf("attribute name different: name=%s, should be %s\n", name, ATTR3_NAME);
              (*count)++;
              break;
 
         default:
-            ret=-1;
+            ret = -1;
             break;
     }  /* end switch() */
 
@@ -1406,7 +1409,6 @@ test_attr_iterate(hid_t fapl)
     hid_t   file;		/* HDF5 File ID 		*/
     hid_t   dataset;	/* Dataset ID			*/
     hid_t   sid;	/* Dataspace ID			*/
-    unsigned start;     /* Starting attribute to look up */
     int     count;      /* operator data for the iterator */
     herr_t  ret;		/* Generic return value		*/
 
@@ -1418,11 +1420,11 @@ test_attr_iterate(hid_t fapl)
     CHECK(file, FAIL, "H5Fopen");
 
     /* Create a dataspace */
-    sid=H5Screate(H5S_SCALAR);
+    sid = H5Screate(H5S_SCALAR);
     CHECK(sid, FAIL, "H5Screate");
 
     /* Create a new dataset */
-    dataset=H5Dcreate(file,DSET2_NAME,H5T_NATIVE_INT,sid,H5P_DEFAULT);
+    dataset = H5Dcreate(file, DSET2_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT);
     CHECK(dataset, FAIL, "H5Dcreate");
 
     /* Close dataspace */
@@ -1430,32 +1432,30 @@ test_attr_iterate(hid_t fapl)
     CHECK(ret, FAIL, "H5Sclose");
 
     /* Verify the correct number of attributes */
-    ret=H5Aget_num_attrs(dataset);
+    ret = H5Aget_num_attrs(dataset);
     VERIFY(ret, 0, "H5Aget_num_attrs");
 
     /* Iterate over attributes on dataset */
-    start = 0;
     count = 0;
-    ret = H5Aiterate(dataset, &start, attr_op1, &count);
-    VERIFY(ret, 0, "H5Aiterate");
+    ret = H5Aiterate2(dataset, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, attr_op1, &count, H5P_DEFAULT);
+    VERIFY(ret, 0, "H5Aiterate2");
 
     /* Close dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Open existing dataset w/attributes */
-    dataset=H5Dopen(file,DSET1_NAME);
+    dataset = H5Dopen(file, DSET1_NAME);
     CHECK(dataset, FAIL, "H5Dopen");
 
     /* Verify the correct number of attributes */
-    ret=H5Aget_num_attrs(dataset);
+    ret = H5Aget_num_attrs(dataset);
     VERIFY(ret, 3, "H5Aget_num_attrs");
 
     /* Iterate over attributes on dataset */
-    start=0;
-    count=0;
-    ret = H5Aiterate(dataset,&start,attr_op1,&count);
-    VERIFY(ret, 0, "H5Aiterate");
+    count = 0;
+    ret = H5Aiterate2(dataset, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, attr_op1, &count, H5P_DEFAULT);
+    VERIFY(ret, 0, "H5Aiterate2");
 
     /* Close dataset */
     ret = H5Dclose(dataset);
@@ -5608,17 +5608,19 @@ HDfprintf(stderr, "op_data->curr = %Hd\n", op_data->curr);
     return(H5_ITER_CONT);
 } /* end attr_iterate2_cb() */
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /****************************************************************
 **
-**  attr_iterate_cb(): Attribute operator
+**  attr_iterate1_cb(): Attribute operator
 **
 ****************************************************************/
 static herr_t
-attr_iterate_cb(hid_t loc_id, const char *attr_name, void *_op_data)
+attr_iterate1_cb(hid_t loc_id, const char *attr_name, void *_op_data)
 {
     return(attr_iterate2_cb(loc_id, attr_name, NULL, _op_data));
-} /* end attr_iterate_cb() */
+} /* end attr_iterate1_cb() */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
 /*-------------------------------------------------------------------------
@@ -5662,7 +5664,9 @@ attr_iterate_check(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
 {
     unsigned    v;              /* Local index variable */
     hsize_t     skip;           /* # of attributes to skip on object */
-    unsigned    oskip;          /* # of attributes to skip on object, with H5Aiterate */
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+    unsigned    oskip;          /* # of attributes to skip on object, with H5Aiterate1 */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
     int         old_nerrs;      /* Number of errors when entering this check */
     herr_t      ret;            /* Generic return value */
 
@@ -5685,20 +5689,22 @@ attr_iterate_check(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
         VERIFY(iter_info->visited[v], TRUE, "H5Aiterate2");
 
 
-    /* Iterate over attributes on object, with H5Aiterate */
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+    /* Iterate over attributes on object, with H5Aiterate1 */
     iter_info->nskipped = oskip = 0;
     iter_info->order = order;
     iter_info->stop = -1;
     iter_info->ncalled = 0;
     iter_info->curr = order != H5_ITER_DEC ? 0 : (max_attrs - 1);
     HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
-    ret = H5Aiterate(obj_id, &oskip, attr_iterate_cb, iter_info);
-    CHECK(ret, FAIL, "H5Aiterate");
+    ret = H5Aiterate1(obj_id, &oskip, attr_iterate1_cb, iter_info);
+    CHECK(ret, FAIL, "H5Aiterate1");
 
     /* Verify that we visited all the attributes */
-    VERIFY(skip, max_attrs, "H5Aiterate");
+    VERIFY(skip, max_attrs, "H5Aiterate1");
     for(v = 0; v < max_attrs; v++)
-        VERIFY(iter_info->visited[v], TRUE, "H5Aiterate");
+        VERIFY(iter_info->visited[v], TRUE, "H5Aiterate1");
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
     /* Skip over some attributes on object */
@@ -5733,25 +5739,26 @@ attr_iterate_check(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
     } /* end else */
 
 
-    /* Skip over some attributes on object, with H5Aiterate */
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+    /* Skip over some attributes on object, with H5Aiterate1 */
     iter_info->nskipped = oskip = max_attrs / 2;
     iter_info->order = order;
     iter_info->stop = -1;
     iter_info->ncalled = 0;
     iter_info->curr = order != H5_ITER_DEC ? (unsigned)oskip : ((max_attrs - 1) - oskip);
     HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
-    ret = H5Aiterate(obj_id, &oskip, attr_iterate_cb, iter_info);
-    CHECK(ret, FAIL, "H5Aiterate");
+    ret = H5Aiterate1(obj_id, &oskip, attr_iterate1_cb, iter_info);
+    CHECK(ret, FAIL, "H5Aiterate1");
 
     /* Verify that we visited all the links */
-    VERIFY(oskip, max_attrs, "H5Aiterate");
+    VERIFY(oskip, max_attrs, "H5Aiterate1");
     if(order == H5_ITER_INC) {
         for(v = 0; v < (max_attrs / 2); v++)
-            VERIFY(iter_info->visited[v + (max_attrs / 2)], TRUE, "H5Aiterate");
+            VERIFY(iter_info->visited[v + (max_attrs / 2)], TRUE, "H5Aiterate1");
     } /* end if */
     else if(order == H5_ITER_DEC) {
         for(v = 0; v < (max_attrs / 2); v++)
-            VERIFY(iter_info->visited[v], TRUE, "H5Aiterate");
+            VERIFY(iter_info->visited[v], TRUE, "H5Aiterate1");
     } /* end if */
     else {
         unsigned nvisit = 0;        /* # of links visited */
@@ -5761,8 +5768,9 @@ attr_iterate_check(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
             if(iter_info->visited[v] == TRUE)
                 nvisit++;
 
-        VERIFY(skip, (max_attrs / 2), "H5Aiterate");
+        VERIFY(skip, (max_attrs / 2), "H5Aiterate1");
     } /* end else */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
     /* Iterate over attributes on object, stopping in the middle */
@@ -5778,17 +5786,19 @@ attr_iterate_check(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
     VERIFY(iter_info->ncalled, 3, "H5Aiterate2");
 
 
-    /* Iterate over attributes on object, stopping in the middle, with H5Aiterate() */
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+    /* Iterate over attributes on object, stopping in the middle, with H5Aiterate1() */
     iter_info->nskipped = oskip = 0;
     iter_info->order = order;
     iter_info->stop = 3;
     iter_info->ncalled = 0;
     iter_info->curr = order != H5_ITER_DEC ? 0 : (max_attrs - 1);
     HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
-    ret = H5Aiterate(obj_id, &oskip, attr_iterate_cb, iter_info);
-    CHECK(ret, FAIL, "H5Aiterate");
-    VERIFY(ret, CORDER_ITER_STOP, "H5Aiterate2");
-    VERIFY(iter_info->ncalled, 3, "H5Aiterate2");
+    ret = H5Aiterate1(obj_id, &oskip, attr_iterate1_cb, iter_info);
+    CHECK(ret, FAIL, "H5Aiterate1");
+    VERIFY(ret, CORDER_ITER_STOP, "H5Aiterate1");
+    VERIFY(iter_info->ncalled, 3, "H5Aiterate1");
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
     /* Check for iteration routine indicating failure */

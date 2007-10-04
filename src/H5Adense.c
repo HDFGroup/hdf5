@@ -1024,10 +1024,12 @@ H5A_dense_iterate_bt2_cb(const void *_record, void *_bt2_udata)
                 break;
             }
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
             case H5A_ATTR_OP_APP:
                 /* Make the application callback */
                 ret_value = (bt2_udata->attr_op->u.app_op)(bt2_udata->loc_id, fh_udata.attr->name, bt2_udata->op_data);
                 break;
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
             case H5A_ATTR_OP_LIB:
                 /* Call the library's callback */

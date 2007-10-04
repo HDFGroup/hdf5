@@ -65,7 +65,8 @@ static herr_t liter_cb(hid_t group, const char *name, const H5L_info_t *info,
     void *op_data);
 static herr_t liter_cb2(hid_t group, const char *name, const H5L_info_t *info,
     void *op_data);
-herr_t aiter_cb(hid_t loc_id, const char *name, void *op_data);
+herr_t aiter_cb(hid_t group, const char *name, const H5A_info_t *ainfo,
+    void *op_data);
 
 /****************************************************************
 **
@@ -344,7 +345,8 @@ test_iter_group(hid_t fapl, hbool_t new_format)
 **
 ****************************************************************/
 herr_t
-aiter_cb(hid_t UNUSED group, const char *name, void *op_data)
+aiter_cb(hid_t UNUSED group, const char *name, const H5A_info_t UNUSED *ainfo,
+    void *op_data)
 {
     iter_info *info = (iter_info *)op_data;
     static int count = 0;
@@ -385,7 +387,7 @@ static void test_iter_attr(hid_t fapl, hbool_t new_format)
     hid_t filespace;        /* Common dataspace ID */
     hid_t attribute;        /* Attribute ID */
     int i;                  /* counting variable */
-    unsigned idx;           /* Index in the attribute list */
+    hsize_t idx;            /* Index in the attribute list */
     char name[NAMELEN];     /* temporary name buffer */
     char *anames[NATTR];    /* Names of the attributes created */
     iter_info info;         /* Custom iteration information */
@@ -398,88 +400,88 @@ static void test_iter_attr(hid_t fapl, hbool_t new_format)
     file = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     CHECK(file, FAIL, "H5Fcreate");
 
-    filespace=H5Screate(H5S_SCALAR);
+    filespace = H5Screate(H5S_SCALAR);
     CHECK(filespace, FAIL, "H5Screate");
 
     dataset = H5Dcreate(file, "Dataset", H5T_NATIVE_INT, filespace, H5P_DEFAULT);
     CHECK(dataset, FAIL, "H5Dcreate");
 
-    for(i=0; i< NATTR; i++) {
-        sprintf(name,"Attribute %d",i);
+    for(i = 0; i < NATTR; i++) {
+        sprintf(name, "Attribute %02d", i);
         attribute = H5Acreate(dataset, name, H5T_NATIVE_INT, filespace, H5P_DEFAULT);
         CHECK(attribute, FAIL, "H5Acreate");
 
         /* Keep a copy of the attribute names around for later */
-        anames[i]=HDstrdup(name);
+        anames[i] = HDstrdup(name);
         CHECK(anames[i], NULL, "strdup");
 
-        ret=H5Aclose(attribute);
+        ret = H5Aclose(attribute);
         CHECK(ret, FAIL, "H5Aclose");
-    }
+    } /* end for */
 
     /* Close everything up */
-    ret=H5Dclose(dataset);
+    ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
 
-    ret=H5Sclose(filespace);
+    ret = H5Sclose(filespace);
     CHECK(ret, FAIL, "H5Sclose");
 
-    ret=H5Fclose(file);
+    ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
 
 
     /* Iterate through the attributes on the dataset in various ways */
-    file=H5Fopen(DATAFILE, H5F_ACC_RDONLY, fapl);
+    file = H5Fopen(DATAFILE, H5F_ACC_RDONLY, fapl);
     CHECK(file, FAIL, "H5Fopen");
 
-    dataset=H5Dopen(file, "Dataset");
+    dataset = H5Dopen(file, "Dataset");
     CHECK(dataset, FAIL, "H5Dopen");
 
     /* Test invalid indices for starting iteration */
-    info.command=RET_ZERO;
+    info.command = RET_ZERO;
 
     /* Test skipping exactly as many attributes as there are */
-    idx=NATTR;
+    idx = NATTR;
     H5E_BEGIN_TRY {
-        ret=H5Aiterate(dataset,&idx,aiter_cb,&info);
+        ret = H5Aiterate2(dataset, ".", H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(ret, FAIL, "H5Aiterate");
+    VERIFY(ret, FAIL, "H5Aiterate2");
 
     /* Test skipping more attributes than there are */
-    idx=NATTR+1;
+    idx = NATTR + 1;
     H5E_BEGIN_TRY {
-        ret=H5Aiterate(dataset,&idx,aiter_cb,&info);
+        ret = H5Aiterate2(dataset, ".", H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(ret, FAIL, "H5Aiterate");
+    VERIFY(ret, FAIL, "H5Aiterate2");
 
     /* Test all attributes on dataset, when callback always returns 0 */
     info.command = RET_ZERO;
     idx = 0;
-    if((ret = H5Aiterate(dataset, &idx, aiter_cb, &info)) > 0)
+    if((ret = H5Aiterate2(dataset, ".", H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info, H5P_DEFAULT)) > 0)
         TestErrPrintf("Attribute iteration function didn't return zero correctly!\n");
 
     /* Test all attributes on dataset, when callback always returns 1 */
     /* This also tests the "restarting" ability, because the index changes */
     info.command = RET_TWO;
     idx = i = 0;
-    while((ret = H5Aiterate(dataset, &idx, aiter_cb, &info)) > 0) {
+    while((ret = H5Aiterate2(dataset, ".", H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info, H5P_DEFAULT)) > 0) {
         /* Verify return value from iterator gets propagated correctly */
-        VERIFY(ret, 2, "H5Aiterate");
+        VERIFY(ret, 2, "H5Aiterate2");
 
         /* Increment the number of times "2" is returned */
         i++;
 
         /* Verify that the index is the correct value */
-        VERIFY(idx, (unsigned)i, "H5Aiterate");
+        VERIFY(idx, (unsigned)i, "H5Aiterate2");
 
         /* Don't check name when new format is used */
         if(!new_format) {
             /* Verify that the correct name is retrieved */
-            if(HDstrcmp(info.name, anames[idx - 1]) != 0)
-                TestErrPrintf("%u: Attribute iteration function didn't set names correctly, info.name = '%s', anames[idx - 1] = '%s'!\n", __LINE__, info.name, anames[idx - 1]);
+            if(HDstrcmp(info.name, anames[(size_t)idx - 1]) != 0)
+                TestErrPrintf("%u: Attribute iteration function didn't set names correctly, info.name = '%s', anames[%u] = '%s'!\n", __LINE__, info.name, (unsigned)(idx - 1), anames[(size_t)idx - 1]);
         } /* end if */
     } /* end while */
-    VERIFY(ret, -1, "H5Aiterate");
+    VERIFY(ret, -1, "H5Aiterate2");
     if(i != 50 || idx != 50)
         TestErrPrintf("%u: Attribute iteration function didn't perform multiple iterations correctly!\n", __LINE__);
 
@@ -488,24 +490,24 @@ static void test_iter_attr(hid_t fapl, hbool_t new_format)
     /* This also tests the "restarting" ability, because the index changes */
     info.command = new_format ? RET_CHANGE2 : RET_CHANGE;
     idx = i = 0;
-    while((ret = H5Aiterate(dataset, &idx, aiter_cb, &info)) > 0) {
+    while((ret = H5Aiterate2(dataset, ".", H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info, H5P_DEFAULT)) > 0) {
         /* Verify return value from iterator gets propagated correctly */
-        VERIFY(ret, 1, "H5Aiterate");
+        VERIFY(ret, 1, "H5Aiterate2");
 
         /* Increment the number of times "1" is returned */
         i++;
 
         /* Verify that the index is the correct value */
-        VERIFY(idx, (unsigned)i + 10, "H5Aiterate");
+        VERIFY(idx, (unsigned)i + 10, "H5Aiterate2");
 
         /* Don't check name when new format is used */
         if(!new_format) {
             /* Verify that the correct name is retrieved */
-            if(HDstrcmp(info.name, anames[idx - 1]) != 0)
-                TestErrPrintf("%u: Attribute iteration function didn't set names correctly, info.name = '%s', anames[idx - 1] = '%s'!\n", __LINE__, info.name, anames[idx - 1]);
+            if(HDstrcmp(info.name, anames[(size_t)idx - 1]) != 0)
+                TestErrPrintf("%u: Attribute iteration function didn't set names correctly, info.name = '%s', anames[%u] = '%s'!\n", __LINE__, info.name, (unsigned)(idx - 1), anames[(size_t)idx - 1]);
         } /* end if */
     } /* end while */
-    VERIFY(ret, -1, "H5Aiterate");
+    VERIFY(ret, -1, "H5Aiterate2");
     if(i != 40 || idx != 50)
         TestErrPrintf("%u: Attribute iteration function didn't perform multiple iterations correctly!\n", __LINE__);
 
