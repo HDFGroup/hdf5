@@ -483,6 +483,13 @@ TOOLTEST tordergr3.ddl -g 2 -q name -z ascending tordergr.h5
 TOOLTEST tordergr4.ddl -g 2 -q name -z descending tordergr.h5
 TOOLTEST tordergr5.ddl -q creation_order tordergr.h5
 
+# tests for dataset attribute order
+TOOLTEST torderattr1.ddl -H --sort_by=name --sort_order=ascending torderattr.h5
+TOOLTEST torderattr2.ddl -H --sort_by=name --sort_order=descending torderattr.h5
+TOOLTEST torderattr3.ddl -H --sort_by=creation_order --sort_order=ascending torderattr.h5
+TOOLTEST torderattr4.ddl -H --sort_by=creation_order --sort_order=descending torderattr.h5
+
+
 
 if test $nerrors -eq 0 ; then
    echo "All $DUMPER tests passed."

@@ -501,7 +501,7 @@ static void      dump_named_datatype(hid_t, const char *);
 static void      dump_dataset(hid_t, const char *, struct subset_t *);
 static void      dump_dataspace(hid_t space);
 static void      dump_datatype(hid_t type);
-static herr_t    dump_attr(hid_t, const char *, const H5A_info_t *, void *);
+static herr_t    dump_attr_cb(hid_t loc_id, const char *attr_name, const H5A_info_t *info, void *_op_data);
 static void      dump_data(hid_t, int, struct subset_t *, int);
 static void      dump_dcpl(hid_t dcpl, hid_t type_id, hid_t obj_id);
 static void      dump_comment(hid_t obj_id);
@@ -530,7 +530,7 @@ typedef struct dump_functions_t {
     void     (*dump_dataset_function) (hid_t, const char *, struct subset_t *);
     void     (*dump_dataspace_function) (hid_t);
     void     (*dump_datatype_function) (hid_t);
-    herr_t   (*dump_attribute_function) (hid_t, const char *, void *);
+    herr_t   (*dump_attribute_function) (hid_t, const char *, const H5A_info_t *, void *);
     void     (*dump_data_function) (hid_t, int, struct subset_t *, int);
 } dump_functions;
 
@@ -541,7 +541,7 @@ static const dump_functions ddl_function_table = {
     dump_dataset,
     dump_dataspace,
     dump_datatype,
-    dump_attr,
+    dump_attr_cb,
     dump_data
 };
 
@@ -1207,8 +1207,9 @@ dump_dataspace(hid_t space)
         dump_header_format->dataspaceblockend);
 }
 
+
 /*-------------------------------------------------------------------------
- * Function:    dump_attr
+ * Function:    dump_attr_cb
  *
  * Purpose:     dump the attribute
  *
@@ -1218,13 +1219,13 @@ dump_dataspace(hid_t space)
  *
  * Programmer:  Ruey-Hsia Li
  *
- * Modifications:
+ * Modifications: Pedro Vicente, October 4, 2007
+ *  Added H5A_info_t parameter to conform with H5Aiterate2
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-dump_attr(hid_t oid, const char *attr_name, const H5A_info_t UNUSED *info,
-    void UNUSED *op_data)
+static herr_t    
+dump_attr_cb(hid_t oid, const char *attr_name, const H5A_info_t UNUSED *info, void UNUSED *_op_data)
 {
     hid_t       attr_id;
     herr_t      ret = SUCCEED;
@@ -1260,8 +1261,7 @@ dump_attr(hid_t oid, const char *attr_name, const H5A_info_t UNUSED *info,
         H5Aclose(attr_id);
 
         indentation(indent);
-        end_obj(dump_header_format->attributeend,
-            dump_header_format->attributeblockend);
+        end_obj(dump_header_format->attributeend,dump_header_format->attributeblockend);
     }
 
     return ret;
@@ -1818,7 +1818,7 @@ dump_named_datatype(hid_t type, const char *name)
 
     /* print attributes */
     indent += COL;
-    H5Aiterate2(type, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, dump_attr, NULL, H5P_DEFAULT);
+    H5Aiterate2(type, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, dump_attr_cb, NULL, H5P_DEFAULT);
     indent -= COL;
 
     end_obj(dump_header_format->datatypeend,
@@ -1895,11 +1895,11 @@ dump_group(hid_t gid, const char *name, H5_index_t idx_type, H5_iter_order_t ite
             printf("%s \"%s\"\n", HARDLINK, found_obj->objname);
         } else {
             found_obj->displayed = TRUE;
-            H5Aiterate2(gid, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, dump_attr, NULL, H5P_DEFAULT);
+            H5Aiterate2(gid, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, dump_attr_cb, NULL, H5P_DEFAULT);
             H5Literate(gid, ".", idx_type, iter_order, NULL, dump_all, NULL, H5P_DEFAULT);
         }
     } else {
-        H5Aiterate2(gid, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, dump_attr, NULL, H5P_DEFAULT);
+        H5Aiterate2(gid, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, dump_attr_cb, NULL, H5P_DEFAULT);
         H5Literate(gid, ".", idx_type, iter_order, NULL, dump_all, NULL, H5P_DEFAULT);
     }
 
@@ -1918,7 +1918,10 @@ dump_group(hid_t gid, const char *name, H5_index_t idx_type, H5_iter_order_t ite
  *
  * Programmer:  Ruey-Hsia Li
  *
- * Modifications: pvn, 2004, added dcpl dump
+ * Modifications: 
+ *  Pedro Vicente, 2004, added dataset creation property list display
+ *  Pedro Vicente, October 4, 2007, added parameters to H5Aiterate2() to allow for
+ *   other  iteration orders 
  *
  *-------------------------------------------------------------------------
  */
@@ -1974,15 +1977,16 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
         } /* end switch */
 
     indent += COL;
-    H5Aiterate2(did, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, dump_attr, NULL, H5P_DEFAULT);
+
+    H5Aiterate2(did, ".", sort_by, sort_order, NULL, dump_attr_cb, NULL, H5P_DEFAULT);
+
     indent -= COL;
 
     H5Tclose(type);
     H5Sclose(space);
 
     indentation(indent);
-    end_obj(dump_header_format->datasetend,
-            dump_header_format->datasetblockend);
+    end_obj(dump_header_format->datasetend,dump_header_format->datasetblockend);
 }
 
 /*-------------------------------------------------------------------------

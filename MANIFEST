@@ -1219,6 +1219,11 @@
 ./tools/testfiles/tordergr1.ddl
 ./tools/testfiles/tordergr5.ddl
 ./tools/testfiles/tordergr2.ddl
+./tools/testfiles/torderattr1.ddl
+./tools/testfiles/torderattr2.ddl
+./tools/testfiles/torderattr3.ddl
+./tools/testfiles/torderattr4.ddl
+./tools/testfiles/torderattr.h5
 
 
 

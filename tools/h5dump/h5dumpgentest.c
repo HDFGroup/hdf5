@@ -86,7 +86,7 @@
 #define FILE56  "tbigdims.h5"
 #define FILE57  "thyperslab.h5"
 #define FILE58  "tordergr.h5"
-
+#define FILE59  "torderattr.h5"
 
 
 /*-------------------------------------------------------------------------
@@ -5753,10 +5753,6 @@ gent_hyperslab(void)
     free(buf);
 }
 
-
-
-
-
 /*-------------------------------------------------------------------------
  * Function: gent_group_creation_order
  *
@@ -5768,10 +5764,10 @@ gent_hyperslab(void)
 static void
 gent_group_creation_order()
 {
-    hid_t    fid;      /* file id */
-    hid_t    gid;      /* group id */
-    hid_t    gcpl_id;  /* group creation property list id */
-    hid_t    fcpl_id;  /* file creation property list id (to set root group order) */
+    hid_t    fid;      /* file ID */
+    hid_t    gid;      /* group ID */
+    hid_t    gcpl_id;  /* group creation property list ID */
+    hid_t    fcpl_id;  /* file creation property list ID (to set root group order) */
     
     if ((fcpl_id = H5Pcreate(H5P_FILE_CREATE)) < 0) 
         goto out;
@@ -5897,6 +5893,97 @@ out:
     
 }
 
+/*-------------------------------------------------------------------------
+ * Function: gent_attr_creation_order
+ *
+ * Purpose: generate a file with several objects with attributes with creation 
+ *  order set and not set 
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+gent_attr_creation_order()
+{
+    hid_t    fid;      /* file id */
+    hid_t    gid;      /* group id */
+    hid_t    did;      /* dataset id */
+    hid_t    sid;      /* space id */
+    hid_t    aid;      /* attribute id */
+    hid_t    gcpl_id;  /* group creation property list ID */
+    hid_t	 dcpl_id;  /* dataset creation property list ID */
+    int      i;
+    char     *attr_name[3] = {"c", "b", "a" };
+    
+    if ((fid = H5Fcreate(FILE59, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+        goto out;
+    
+    /* create group creation property list */
+    if((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0) 
+        goto out;
+
+    /* create dataset creation property list */
+    if((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0) 
+        goto out;
+
+#if 0
+    /* enable creation order tracking on attributes */
+    if(H5Pset_attr_creation_order(dcpl_id, H5P_CRT_ORDER_TRACKED) < 0) 
+        goto out;
+#endif
+/*-------------------------------------------------------------------------
+ * create a dataset and atributes in it
+ *-------------------------------------------------------------------------
+ */
+
+    /* create dataspace for dataset */
+    if ((sid = H5Screate(H5S_SCALAR)) < 0) 
+        goto out;
+
+    /* create a dataset */
+    if ((did = H5Dcreate(fid, "dset", H5T_NATIVE_UCHAR, sid, dcpl_id)) < 0) 
+        goto out;
+
+    /* add attributes */
+    for(i = 0; i < 3; i++) 
+    {
+        if ((aid = H5Acreate(did, attr_name[i], H5T_NATIVE_UCHAR, sid, H5P_DEFAULT)) < 0) 
+            goto out;
+        
+        /* close attribute */
+        if (H5Aclose(aid) < 0) 
+            goto out;
+        
+    } /* end for */
+    
+  
+    /* close */
+    if (H5Sclose(sid) < 0) 
+        goto out;
+    if (H5Dclose(did) < 0) 
+        goto out;
+    if (H5Pclose(dcpl_id) < 0) 
+        goto out;
+    if (H5Pclose(gcpl_id) < 0) 
+        goto out;
+    if (H5Fclose(fid) < 0) 
+        goto out;
+    
+    return;
+    
+out:
+    printf("Error.....\n");
+    H5E_BEGIN_TRY {
+        H5Gclose(gid);
+        H5Dclose(did);
+        H5Sclose(sid);
+        H5Pclose(gcpl_id);
+        H5Pclose(dcpl_id);
+        H5Fclose(fid);
+        
+    } H5E_END_TRY;
+    return;
+    
+}
 
 
 /*-------------------------------------------------------------------------
@@ -5965,6 +6052,7 @@ int main(void)
     gent_bigdims();
     gent_hyperslab();
     gent_group_creation_order();
+    gent_attr_creation_order();
 
 
     return 0;
