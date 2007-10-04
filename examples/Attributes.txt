@@ -1,6 +1,6 @@
 Attribute Examples: 
 
-H5Acreate example: Show how to create an attribute for a dataset and a group
+H5Acreate2 example: Show how to create an attribute for a dataset and a group
 ----------------
 {
     hid_t file;
@@ -22,15 +22,15 @@ H5Acreate example: Show how to create an attribute for a dataset and a group
     dataspace = H5Screate_simple(rank, dimsf, NULL); 
 
     /* Create a dataset */
-    dataset=H5Dcreate(file,"Dataset1",H5T_UINT8,dataspace,H5P_DEFAULT);
+    dataset = H5Dcreate(file, "Dataset1", H5T_UINT8, dataspace, H5P_DEFAULT);
 
     <Write data to first dataset>
 
     /* Create an attribute for the dataset */
-    attr=H5Acreate(dataset,"Attr1",H5T_INT32,H5S_SCALAR,H5P_DEFAULT);
+    attr = H5Acreate2(dataset, ".", "Attr1", H5T_INT32, H5S_SCALAR, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write attribute information */
-    H5Awrite(attr,H5T_INT32,&attr_data);
+    H5Awrite(attr, H5T_INT32, &attr_data);
 
     /* Close attribute */
     H5Aclose(attr);
@@ -39,13 +39,13 @@ H5Acreate example: Show how to create an attribute for a dataset and a group
     H5Dclose(dataset);
 
     /* Create a group */
-    group=H5Gcreate2(file, "/Group One", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    group = H5Gcreate2(file, "/Group One", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Create an attribute for the dataset */
-    attr=H5Acreate(group,"Attr1",H5T_INT32,H5S_SCALAR,H5P_DEFAULT);
+    attr = H5Acreate2(group, ".", "Attr1", H5T_INT32, H5S_SCALAR, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write attribute information */
-    H5Awrite(attr,H5T_INT32,&attr_data);
+    H5Awrite(attr, H5T_INT32, &attr_data);
 
     /* Close attribute */
     H5Aclose(attr);

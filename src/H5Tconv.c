@@ -1890,7 +1890,7 @@ H5T_subset_t
 H5T_conv_struct_subset(const H5T_cdata_t *cdata)
 {
     H5T_conv_struct_t	*priv;
-    H5T_subset_t        ret_value = FALSE;       /* Return value */
+    H5T_subset_t        ret_value;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_conv_struct_subset)
 

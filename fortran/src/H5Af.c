@@ -20,7 +20,7 @@
 
 /*----------------------------------------------------------------------------
  * Name:        h5acreate_c
- * Purpose:     Call H5Acreate to create an attribute
+ * Purpose:     Call H5Acreate2 to create an attribute
  * Inputs:      obj_id - object identifier
  *              name - name of the attribute
  *              namelen - name length
@@ -34,25 +34,27 @@
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5acreate_c (hid_t_f *obj_id, _fcd name, size_t_f *namelen, hid_t_f *type_id, hid_t_f *space_id, hid_t_f *crt_prp,  hid_t_f *attr_id)
+nh5acreate_c(hid_t_f *obj_id, _fcd name, size_t_f *namelen, hid_t_f *type_id,
+    hid_t_f *space_id, hid_t_f *crt_prp, hid_t_f *attr_id)
 {
-    char *c_name=NULL;          /* Buffer to hold C string */
-    int_f ret_value=0;          /* Return value */
+    char *c_name = NULL;        /* Buffer to hold C string */
+    int_f ret_value = 0;        /* Return value */
 
      /*
       * Convert FORTRAN name to C name
       */
-    if ((c_name = HD5f2cstring(name, (size_t)*namelen)) == NULL)
+    if(NULL == (c_name = HD5f2cstring(name, (size_t)*namelen)))
         HGOTO_DONE(FAIL);
 
      /*
-      * Call H5Acreate function.
+      * Call H5Acreate2 function.
       */
-    if((*attr_id = (hid_t_f)H5Acreate((hid_t)*obj_id, c_name, (hid_t)*type_id, (hid_t)*space_id, (hid_t)*crt_prp))<0)
+    if((*attr_id = (hid_t_f)H5Acreate2((hid_t)*obj_id, ".", c_name, (hid_t)*type_id, (hid_t)*space_id, (hid_t)*crt_prp, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         HGOTO_DONE(FAIL);
 
 done:
-    if(c_name) HDfree(c_name);
+    if(c_name)
+        HDfree(c_name);
     return ret_value;
 }
 

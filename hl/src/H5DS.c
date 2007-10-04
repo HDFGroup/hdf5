@@ -235,31 +235,30 @@ herr_t H5DSattach_scale(hid_t did,
   /* create one entry array */
   dims = (hsize_t*) malloc (1 * sizeof (hsize_t));
 
-  if (dims == NULL)
+  if(dims == NULL)
    return FAIL;
 
   dims[0] = rank;
 
   /* space for the attribute */
-  if ((sid = H5Screate_simple(1,dims,NULL)) < 0)
+  if((sid = H5Screate_simple(1, dims, NULL)) < 0)
    return FAIL;
 
   /* create the type for the attribute "DIMENSION_LIST" */
-  if ((tid = H5Tvlen_create(H5T_STD_REF_OBJ)) < 0)
+  if((tid = H5Tvlen_create(H5T_STD_REF_OBJ)) < 0)
    goto out;
 
   /* create the attribute */
-  if ((aid = H5Acreate(did,DIMENSION_LIST,tid,sid,H5P_DEFAULT)) < 0)
+  if((aid = H5Acreate2(did, ".", DIMENSION_LIST, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
    goto out;
 
   /* allocate and initialize the VL */
   buf = (hvl_t*)malloc((size_t)rank * sizeof(hvl_t));
 
-  if (buf == NULL)
+  if(buf == NULL)
    goto out;
 
-  for(i=0; i<rank; i++)
-  {
+  for(i = 0; i < rank; i++) {
    buf[i].len = 0;
    buf[i].p = NULL;
   }
@@ -410,32 +409,32 @@ herr_t H5DSattach_scale(hid_t did,
    goto out;
 
   /* create the compound datatype for the attribute "REFERENCE_LIST" */
-  if ((tid = H5Tcreate(H5T_COMPOUND,sizeof(ds_list_t))) < 0)
+  if((tid = H5Tcreate(H5T_COMPOUND, sizeof(ds_list_t))) < 0)
    goto out;
 
   /* insert reference field */
-  if (H5Tinsert(tid,"dataset",HOFFSET(ds_list_t,ref),H5T_STD_REF_OBJ) < 0)
+  if(H5Tinsert(tid, "dataset", HOFFSET(ds_list_t,ref), H5T_STD_REF_OBJ) < 0)
    goto out;
 
   /* insert dimension idx of the dataset field */
-  if (H5Tinsert(tid,"dimension",HOFFSET(ds_list_t,dim_idx),H5T_NATIVE_INT) < 0)
+  if(H5Tinsert(tid, "dimension", HOFFSET(ds_list_t, dim_idx), H5T_NATIVE_INT) < 0)
    goto out;
 
   /* create the attribute */
-  if ((aid = H5Acreate(dsid,REFERENCE_LIST,tid,sid,H5P_DEFAULT)) < 0)
+  if((aid = H5Acreate2(dsid, ".", REFERENCE_LIST, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
    goto out;
 
   /* store the IDX information */
   dsl.dim_idx = idx;
 
   /* write the attribute with the reference */
-  if (H5Awrite(aid,tid,&dsl) < 0)
+  if(H5Awrite(aid, tid, &dsl) < 0)
    goto out;
 
   /* close */
-  if (H5Sclose(sid) < 0)
+  if(H5Sclose(sid) < 0)
    goto out;
-  if (H5Tclose(tid) < 0)
+  if(H5Tclose(tid) < 0)
    goto out;
   if(H5Aclose(aid) < 0)
    goto out;
@@ -494,31 +493,31 @@ herr_t H5DSattach_scale(hid_t did,
   dsbuf[nelmts-1] = dsl;
 
   /* create a new data space for the new references array */
-  dims = (hsize_t*) malloc ( (size_t)nelmts * sizeof (hsize_t));
-  if (dims == NULL)
+  dims = (hsize_t *)malloc((size_t)nelmts * sizeof(hsize_t));
+  if(dims == NULL)
    goto out;
   dims[0] = nelmts;
 
-  if ((sid = H5Screate_simple(1,dims,NULL)) < 0)
+  if((sid = H5Screate_simple(1, dims, NULL)) < 0)
    goto out;
 
-  if (dims)
+  if(dims)
    free(dims);
 
   /* create the attribute again with the changes of space */
-  if ((aid = H5Acreate(dsid,REFERENCE_LIST,tid,sid,H5P_DEFAULT)) < 0)
+  if((aid = H5Acreate2(dsid, ".", REFERENCE_LIST, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
    goto out;
 
   /* write the attribute with the new references */
-  if (H5Awrite(aid,tid,dsbuf) < 0)
+  if(H5Awrite(aid, tid, dsbuf) < 0)
    goto out;
 
   /* close */
-  if (H5Sclose(sid) < 0)
+  if(H5Sclose(sid) < 0)
    goto out;
-  if (H5Tclose(tid) < 0)
+  if(H5Tclose(tid) < 0)
    goto out;
-  if (H5Aclose(aid) < 0)
+  if(H5Aclose(aid) < 0)
    goto out;
 
   if (dsbuf)
@@ -840,41 +839,38 @@ herr_t H5DSdetach_scale(hid_t did,
   goto out;
 
  /* don't do anything for an empty array */
- if (nelmts)
+ if(nelmts)
  {
   /* create a new data space for the new references array */
-  dims = (hsize_t*) malloc ( (size_t)nelmts * sizeof (hsize_t));
-  if (dims == NULL)
+  dims = (hsize_t*)malloc((size_t)nelmts * sizeof (hsize_t));
+  if(dims == NULL)
    goto out;
   dims[0] = nelmts;
 
   dsbufn = malloc((size_t)nelmts * sizeof(ds_list_t));
-  if (dsbufn == NULL)
+  if(dsbufn == NULL)
    goto out;
 
   /* store the new information */
-  for(i=0; i<nelmts; i++)
-  {
+  for(i = 0; i < nelmts; i++)
    dsbufn[i] = dsbuf[i];
-  }
 
-  if ((sid = H5Screate_simple(1,dims,NULL)) < 0)
+  if((sid = H5Screate_simple(1, dims, NULL)) < 0)
    goto out;
 
   /* create the attribute again with the changes of space */
-  if ((aid = H5Acreate(dsid,REFERENCE_LIST,tid,sid,H5P_DEFAULT)) < 0)
+  if((aid = H5Acreate2(dsid, ".", REFERENCE_LIST, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
    goto out;
 
   /* write the new attribute with the new references */
-  if (H5Awrite(aid,tid,dsbufn) < 0)
+  if(H5Awrite(aid, tid, dsbufn) < 0)
    goto out;
 
   /* close space and attribute */
-  if (H5Sclose(sid) < 0)
+  if(H5Sclose(sid) < 0)
    goto out;
-  if (H5Aclose(aid) < 0)
+  if(H5Aclose(aid) < 0)
    goto out;
-
  } /* nelmts */
 
  /* close type */
@@ -1445,26 +1441,26 @@ herr_t H5DSset_label(hid_t did,
   dims[0] = rank;
 
   /* space for the attribute */
-  if ((sid = H5Screate_simple(1,dims,NULL)) < 0)
+  if((sid = H5Screate_simple(1, dims, NULL)) < 0)
    goto out;
 
   /* create the datatype  */
-  if ((tid = H5Tcopy(H5T_C_S1)) < 0)
+  if((tid = H5Tcopy(H5T_C_S1)) < 0)
    goto out;
-  if (H5Tset_size(tid,H5T_VARIABLE) < 0)
+  if(H5Tset_size(tid, H5T_VARIABLE) < 0)
    goto out;
 
   /* create the attribute */
-  if ((aid = H5Acreate(did,DIMENSION_LABELS,tid,sid,H5P_DEFAULT)) < 0)
+  if((aid = H5Acreate2(did, ".", DIMENSION_LABELS, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
    goto out;
 
   /* allocate and initialize */
   buf = (const char **)malloc((size_t)rank * sizeof(char *));
 
-  if (buf == NULL)
+  if(buf == NULL)
    goto out;
 
-  for(i=0; i<(unsigned int)rank; i++)
+  for(i = 0; i < (unsigned int)rank; i++)
    buf[i] = NULL;
 
   /* store the label information in the required index */

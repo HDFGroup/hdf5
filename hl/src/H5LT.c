@@ -1141,30 +1141,28 @@ herr_t H5LTset_attribute_string( hid_t loc_id,
   goto out;
 
  /* Verify if the attribute already exists */
- has_attr = H5LT_find_attribute( obj_id, attr_name );
+ has_attr = H5LT_find_attribute(obj_id, attr_name);
 
  /* The attribute already exists, delete it */
- if ( has_attr == 1 )
- {
-  if(H5Adelete2(obj_id, ".", attr_name, H5P_DEFAULT) < 0)
-    goto out;
- }
+ if(has_attr == 1)
+   if(H5Adelete2(obj_id, ".", attr_name, H5P_DEFAULT) < 0)
+     goto out;
 
  /* Create and write the attribute */
 
- if ( (attr_id = H5Acreate( obj_id, attr_name, attr_type, attr_space_id, H5P_DEFAULT )) < 0 )
+ if((attr_id = H5Acreate2(obj_id, ".", attr_name, attr_type, attr_space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
   goto out;
 
- if ( H5Awrite( attr_id, attr_type, attr_data ) < 0 )
+ if(H5Awrite(attr_id, attr_type, attr_data) < 0)
   goto out;
 
- if ( H5Aclose( attr_id ) < 0 )
+ if(H5Aclose(attr_id) < 0)
   goto out;
 
- if ( H5Sclose( attr_space_id ) < 0 )
+ if(H5Sclose(attr_space_id) < 0)
   goto out;
 
- if ( H5Tclose(attr_type) < 0 )
+ if(H5Tclose(attr_type) < 0)
   goto out;
 
  /* Close the object */
@@ -1221,33 +1219,31 @@ herr_t H5LT_set_attribute_numerical( hid_t loc_id,
   goto out;
 
   /* Verify if the attribute already exists */
- has_attr = H5LT_find_attribute( obj_id, attr_name );
+ has_attr = H5LT_find_attribute(obj_id, attr_name);
 
  /* The attribute already exists, delete it */
- if ( has_attr == 1 )
- {
-  if(H5Adelete2(obj_id, ".", attr_name, H5P_DEFAULT) < 0)
-    goto out;
- }
+ if(has_attr == 1)
+   if(H5Adelete2(obj_id, ".", attr_name, H5P_DEFAULT) < 0)
+     goto out;
 
  /* Create the attribute. */
- if ( (attr_id = H5Acreate( obj_id, attr_name, tid, sid, H5P_DEFAULT )) < 0 )
+ if((attr_id = H5Acreate2(obj_id, ".", attr_name, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
   goto out;
 
  /* Write the attribute data. */
- if ( H5Awrite( attr_id, tid, data ) < 0 )
+ if(H5Awrite(attr_id, tid, data) < 0)
   goto out;
 
  /* Close the attribute. */
- if ( H5Aclose( attr_id ) < 0 )
+ if(H5Aclose(attr_id) < 0)
   goto out;
 
  /* Close the dataspace. */
- if ( H5Sclose( sid ) < 0 )
+ if(H5Sclose(sid) < 0)
   goto out;
 
  /* Close the object */
- if(H5Oclose(obj_id) < 0 )
+ if(H5Oclose(obj_id) < 0)
   return -1;
 
  return 0;
@@ -1874,7 +1870,7 @@ hid_t H5LTtext_to_dtype(const char *text, H5LT_lang_t lang_type)
  input_len = strlen(text);
  myinput = strdup(text);
 
- if((type_id = H5LTyyparse())<0)
+ if((type_id = H5LTyyparse()) < 0)
      goto out;
 
  free(myinput);
@@ -1944,7 +1940,7 @@ print_enum(hid_t type, char* str, int indt)
     if((nmembs = H5Tget_nmembers(type))==0)
         goto out;
     assert(nmembs>0);
-    if((super = H5Tget_super(type))<0)
+    if((super = H5Tget_super(type)) < 0)
         goto out;
 
     /* Use buffer of INT or UNSIGNED INT to print enum values because
@@ -1967,13 +1963,13 @@ print_enum(hid_t type, char* str, int indt)
     for (i = 0; i < nmembs; i++) {
  if((name[i] = H5Tget_member_name(type, (unsigned)i))==NULL)
             goto out;
- if(H5Tget_member_value(type, (unsigned)i, value + i * super_size)<0)
+ if(H5Tget_member_value(type, (unsigned)i, value + i * super_size) < 0)
             goto out;
     }
 
     /* Convert values to native data type */
     if (native > 0) {
-        if(H5Tconvert(super, native, (size_t)nmembs, value, NULL, H5P_DEFAULT)<0)
+        if(H5Tconvert(super, native, (size_t)nmembs, value, NULL, H5P_DEFAULT) < 0)
             goto out;
     }
 
@@ -2055,11 +2051,11 @@ herr_t H5LTdtype_to_text(hid_t dtype, char *str, H5LT_lang_t lang_type, size_t *
     if(len && !str) {
         text_str = (char*)calloc(str_len, sizeof(char));
         text_str[0]='\0';
-        if((ret = H5LT_dtype_to_text(dtype, &text_str, lang_type, &str_len, 1))<0)
+        if((ret = H5LT_dtype_to_text(dtype, &text_str, lang_type, &str_len, 1)) < 0)
             goto out;
         *len = strlen(text_str) + 1;
     } else if(len && str) {
-        if((ret = H5LT_dtype_to_text(dtype, &str, lang_type, len, 0))<0)
+        if((ret = H5LT_dtype_to_text(dtype, &str, lang_type, len, 0)) < 0)
             goto out;
         str[*len-1] = '\0';
     }
@@ -2110,7 +2106,7 @@ herr_t H5LT_dtype_to_text(hid_t dtype, char **dt_str, H5LT_lang_t lang, size_t *
         goto out;
     }
 
-    if((tcls = H5Tget_class(dtype))<0)
+    if((tcls = H5Tget_class(dtype)) < 0)
         goto out;
 
     switch (tcls) {
@@ -2207,15 +2203,15 @@ herr_t H5LT_dtype_to_text(hid_t dtype, char **dt_str, H5LT_lang_t lang, size_t *
             H5T_cset_t cset;
             htri_t is_vlstr;
 
-            if((tmp_type = H5Tcopy(dtype))<0)
+            if((tmp_type = H5Tcopy(dtype)) < 0)
                 goto out;
             if((size = H5Tget_size(tmp_type))==0)
                 goto out;
-            if((str_pad = H5Tget_strpad(tmp_type))<0)
+            if((str_pad = H5Tget_strpad(tmp_type)) < 0)
                 goto out;
-            if((cset = H5Tget_cset(tmp_type))<0)
+            if((cset = H5Tget_cset(tmp_type)) < 0)
                 goto out;
-            if((is_vlstr = H5Tis_variable_str(tmp_type))<0)
+            if((is_vlstr = H5Tis_variable_str(tmp_type)) < 0)
                 goto out;
 
             /* Print lead-in */
@@ -2253,18 +2249,18 @@ herr_t H5LT_dtype_to_text(hid_t dtype, char **dt_str, H5LT_lang_t lang, size_t *
 
 
             /* Reproduce a C type string */
-            if((str_type = H5Tcopy(H5T_C_S1))<0)
+            if((str_type = H5Tcopy(H5T_C_S1)) < 0)
                 goto out;
             if(is_vlstr) {
-                if(H5Tset_size(str_type, H5T_VARIABLE)<0)
+                if(H5Tset_size(str_type, H5T_VARIABLE) < 0)
                     goto out;
             } else {
-                if(H5Tset_size(str_type, size)<0)
+                if(H5Tset_size(str_type, size) < 0)
                     goto out;
             }
-            if(H5Tset_cset(str_type, cset)<0)
+            if(H5Tset_cset(str_type, cset) < 0)
                 goto out;
-            if(H5Tset_strpad(str_type, str_pad)<0)
+            if(H5Tset_strpad(str_type, str_pad) < 0)
                 goto out;
 
             indentation(indent + COL, *dt_str);
@@ -2276,13 +2272,13 @@ herr_t H5LT_dtype_to_text(hid_t dtype, char **dt_str, H5LT_lang_t lang, size_t *
             }
 
             /* Change the endianness and see if they're equal. */
-            if((order = H5Tget_order(tmp_type))<0)
+            if((order = H5Tget_order(tmp_type)) < 0)
                 goto out;
             if(order==H5T_ORDER_LE) {
-                if(H5Tset_order(str_type, H5T_ORDER_LE)<0)
+                if(H5Tset_order(str_type, H5T_ORDER_LE) < 0)
                     goto out;
             } else if(order==H5T_ORDER_BE) {
-                if(H5Tset_order(str_type, H5T_ORDER_BE)<0)
+                if(H5Tset_order(str_type, H5T_ORDER_BE) < 0)
                     goto out;
             }
 
@@ -2293,15 +2289,15 @@ herr_t H5LT_dtype_to_text(hid_t dtype, char **dt_str, H5LT_lang_t lang, size_t *
 
             /* If not equal to C variable-length string, check Fortran type.
              * Actually H5Tequal can't tell difference between H5T_C_S1 and H5T_FORTRAN_S1!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
-            if(H5Tclose(str_type)<0)
+            if(H5Tclose(str_type) < 0)
                 goto out;
-            if((str_type = H5Tcopy(H5T_FORTRAN_S1))<0)
+            if((str_type = H5Tcopy(H5T_FORTRAN_S1)) < 0)
                 goto out;
-            if(H5Tset_cset(str_type, cset)<0)
+            if(H5Tset_cset(str_type, cset) < 0)
                 goto out;
-            if(H5Tset_size(str_type, size)<0)
+            if(H5Tset_size(str_type, size) < 0)
                 goto out;
-            if(H5Tset_strpad(str_type, str_pad)<0)
+            if(H5Tset_strpad(str_type, str_pad) < 0)
                 goto out;
 
             /* Are the two types equal? */
@@ -2311,13 +2307,13 @@ herr_t H5LT_dtype_to_text(hid_t dtype, char **dt_str, H5LT_lang_t lang, size_t *
             }
 
             /* Change the endianness and see if they're equal. */
-            if((order = H5Tget_order(tmp_type))<0)
+            if((order = H5Tget_order(tmp_type)) < 0)
                 goto out;
             if(order==H5T_ORDER_LE) {
-                if(H5Tset_order(str_type, H5T_ORDER_LE)<0)
+                if(H5Tset_order(str_type, H5T_ORDER_LE) < 0)
                     goto out;
             } else if(order==H5T_ORDER_BE) {
-                if(H5Tset_order(str_type, H5T_ORDER_BE)<0)
+                if(H5Tset_order(str_type, H5T_ORDER_BE) < 0)
                     goto out;
             }
 
@@ -2371,19 +2367,19 @@ next:
             indent += COL;
             indentation(indent + COL, *dt_str);
 
-            if((super = H5Tget_super(dtype))<0)
+            if((super = H5Tget_super(dtype)) < 0)
                 goto out;
-            if(H5LTdtype_to_text(super, NULL, lang, &super_len)<0)
+            if(H5LTdtype_to_text(super, NULL, lang, &super_len) < 0)
                 goto out;
             stmp = (char*)calloc(super_len, sizeof(char));
-            if(H5LTdtype_to_text(super, stmp, lang, &super_len)<0)
+            if(H5LTdtype_to_text(super, stmp, lang, &super_len) < 0)
                 goto out;
             strcat(*dt_str, stmp);
             free(stmp);
             strcat(*dt_str, ";\n");
             H5Tclose(super);
 
-            if(print_enum(dtype, *dt_str, indent)<0)
+            if(print_enum(dtype, *dt_str, indent) < 0)
                 goto out;
 
             /* Print closing */
@@ -2404,12 +2400,12 @@ next:
             indent += COL;
             indentation(indent + COL, *dt_str);
 
-            if((super = H5Tget_super(dtype))<0)
+            if((super = H5Tget_super(dtype)) < 0)
                 goto out;
-            if(H5LTdtype_to_text(super, NULL, lang, &super_len)<0)
+            if(H5LTdtype_to_text(super, NULL, lang, &super_len) < 0)
                 goto out;
             stmp = (char*)calloc(super_len, sizeof(char));
-            if(H5LTdtype_to_text(super, stmp, lang, &super_len)<0)
+            if(H5LTdtype_to_text(super, stmp, lang, &super_len) < 0)
                 goto out;
             strcat(*dt_str, stmp);
             free(stmp);
@@ -2437,7 +2433,7 @@ next:
             indentation(indent + COL, *dt_str);
 
             /* Get array information */
-            if((ndims = H5Tget_array_ndims(dtype))<0)
+            if((ndims = H5Tget_array_ndims(dtype)) < 0)
                 goto out;
             if(H5Tget_array_dims(dtype, dims, NULL) < 0)
                 goto out;
@@ -2449,12 +2445,12 @@ next:
             }
             strcat(*dt_str, " ");
 
-            if((super = H5Tget_super(dtype))<0)
+            if((super = H5Tget_super(dtype)) < 0)
                 goto out;
-            if(H5LTdtype_to_text(super, NULL, lang, &super_len)<0)
+            if(H5LTdtype_to_text(super, NULL, lang, &super_len) < 0)
                 goto out;
             stmp = (char*)calloc(super_len, sizeof(char));
-            if(H5LTdtype_to_text(super, stmp, lang, &super_len)<0)
+            if(H5LTdtype_to_text(super, stmp, lang, &super_len) < 0)
                 goto out;
             strcat(*dt_str, stmp);
             free(stmp);
@@ -2478,7 +2474,7 @@ next:
             char*       mtmp;
             int         nmembs;
 
-            if((nmembs = H5Tget_nmembers(dtype))<0)
+            if((nmembs = H5Tget_nmembers(dtype)) < 0)
                 goto out;
 
             sprintf(*dt_str, "H5T_COMPOUND {\n");
@@ -2487,20 +2483,20 @@ next:
             for (i = 0; i < nmembs; i++) {
                 if((mname = H5Tget_member_name(dtype, (unsigned)i))==NULL)
                     goto out;
-                if((mtype = H5Tget_member_type(dtype, (unsigned)i))<0)
+                if((mtype = H5Tget_member_type(dtype, (unsigned)i)) < 0)
                     goto out;
                 moffset = H5Tget_member_offset(dtype, (unsigned)i);
                 indentation(indent + COL, *dt_str);
 
-                if((mclass = H5Tget_class(mtype))<0)
+                if((mclass = H5Tget_class(mtype)) < 0)
                     goto out;
                 if (H5T_COMPOUND == mclass)
                     indent += COL;
 
-                if(H5LTdtype_to_text(mtype, NULL, lang, &mlen)<0)
+                if(H5LTdtype_to_text(mtype, NULL, lang, &mlen) < 0)
                     goto out;
                 mtmp = (char*)calloc(mlen, sizeof(char));
-                if(H5LTdtype_to_text(mtype, mtmp, lang, &mlen)<0)
+                if(H5LTdtype_to_text(mtype, mtmp, lang, &mlen) < 0)
                     goto out;
                 strcat(*dt_str, mtmp);
                 free(mtmp);
@@ -3113,18 +3109,18 @@ herr_t H5LT_set_attribute_string(hid_t dset_id,
  * create the attribute type
  *-------------------------------------------------------------------------
  */
- if ((tid = H5Tcopy(H5T_C_S1))<0)
+ if ((tid = H5Tcopy(H5T_C_S1)) < 0)
   return FAIL;
 
  size = strlen(buf) + 1; /* extra null term */
 
- if (H5Tset_size(tid,(size_t)size)<0)
+ if (H5Tset_size(tid,(size_t)size) < 0)
   goto out;
 
- if (H5Tset_strpad(tid,H5T_STR_NULLTERM)<0)
+ if(H5Tset_strpad(tid, H5T_STR_NULLTERM) < 0)
   goto out;
 
- if ((sid = H5Screate(H5S_SCALAR))<0)
+ if((sid = H5Screate(H5S_SCALAR)) < 0)
   goto out;
 
 
@@ -3132,19 +3128,19 @@ herr_t H5LT_set_attribute_string(hid_t dset_id,
  * create and write the attribute
  *-------------------------------------------------------------------------
  */
- if ((aid = H5Acreate(dset_id,name,tid,sid,H5P_DEFAULT))<0)
+ if((aid = H5Acreate2(dset_id, ".", name, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
   goto out;
 
- if (H5Awrite(aid,tid,buf)<0)
+ if(H5Awrite(aid, tid, buf) < 0)
   goto out;
 
- if (H5Aclose(aid)<0)
+ if(H5Aclose(aid) < 0)
   goto out;
 
- if (H5Sclose(sid)<0)
+ if(H5Sclose(sid) < 0)
   goto out;
 
- if (H5Tclose(tid)<0)
+ if(H5Tclose(tid) < 0)
   goto out;
 
  return SUCCEED;

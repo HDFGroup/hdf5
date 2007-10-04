@@ -618,7 +618,7 @@ int test_attributes(const char *file,
     herr_t  status;
 
     /* Create a file  */
-    if ((fid  = H5Fcreate(file, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0)
+    if ((fid  = H5Fcreate(file, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         return -1;
 
     /* Create a 1D dataset */
@@ -682,7 +682,7 @@ int test_datasets(const char *file,
         memset(buf,0,sizeof buf);
 
     /* Create a file  */
-    if ((fid  = H5Fcreate(file, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0)
+    if ((fid  = H5Fcreate(file, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         return -1;
 
     /* Create a 1D dataset */
@@ -972,13 +972,13 @@ void write_attr_in(hid_t loc_id,
 [ 1 ]          3               0               3
  */
 
- sid = H5Screate_simple(1,dims,NULL);
+ sid = H5Screate_simple(1, dims, NULL);
  tid = H5Tvlen_create(H5T_NATIVE_INT);
- aid = H5Acreate(loc_id,"vlen",tid,sid,H5P_DEFAULT);
- status = H5Awrite(aid,tid,buf5);
- assert(status>=0);
- status = H5Dvlen_reclaim(tid,sid,H5P_DEFAULT,buf5);
- assert(status>=0);
+ aid = H5Acreate2(loc_id, ".", "vlen", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ status = H5Awrite(aid, tid, buf5);
+ assert(status >= 0);
+ status = H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf5);
+ assert(status >= 0);
  status = H5Aclose(aid);
  status = H5Tclose(tid);
  status = H5Sclose(sid);
@@ -1243,13 +1243,13 @@ position        enum2D of </g1> enum2D of </g1> difference
 [ 2 1 ]          11              0               11
 */
 
- sid = H5Screate_simple(2,dims2,NULL);
+ sid = H5Screate_simple(2, dims2, NULL);
  tid = H5Tvlen_create(H5T_NATIVE_INT);
- aid = H5Acreate(loc_id,"vlen2D",tid,sid,H5P_DEFAULT);
- status = H5Awrite(aid,tid,buf52);
- assert(status>=0);
- status = H5Dvlen_reclaim(tid,sid,H5P_DEFAULT,buf52);
- assert(status>=0);
+ aid = H5Acreate2(loc_id, ".", "vlen2D", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ status = H5Awrite(aid, tid, buf52);
+ assert(status >= 0);
+ status = H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf52);
+ assert(status >= 0);
  status = H5Aclose(aid);
  status = H5Tclose(tid);
  status = H5Sclose(sid);
@@ -1640,13 +1640,13 @@ position        vlen3D of </g1> vlen3D of </g1> difference
 [ 1 1 0 ]          10              0               10
 etc
 */
- sid = H5Screate_simple(3,dims3,NULL);
+ sid = H5Screate_simple(3, dims3, NULL);
  tid = H5Tvlen_create(H5T_NATIVE_INT);
- aid = H5Acreate(loc_id,"vlen3D",tid,sid,H5P_DEFAULT);
- status = H5Awrite(aid,tid,buf53);
- assert(status>=0);
- status = H5Dvlen_reclaim(tid,sid,H5P_DEFAULT,buf53);
- assert(status>=0);
+ aid = H5Acreate2(loc_id, ".", "vlen3D", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ status = H5Awrite(aid, tid, buf53);
+ assert(status >= 0);
+ status = H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf53);
+ assert(status >= 0);
  status = H5Aclose(aid);
  status = H5Tclose(tid);
  status = H5Sclose(sid);
@@ -2438,19 +2438,19 @@ int test_hyperslab(const char *fname,
 
  /* create */ 
  fid = H5Fcreate (fname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
- if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+ if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
   goto out;
- if (H5Pset_fill_value(dcpl, H5T_NATIVE_CHAR, &fillvalue)<0)
+ if (H5Pset_fill_value(dcpl, H5T_NATIVE_CHAR, &fillvalue) < 0)
   goto out;
- if(H5Pset_chunk(dcpl, 1, chunk_dims)<0)
+ if(H5Pset_chunk(dcpl, 1, chunk_dims) < 0)
   goto out;
- if ((f_sid = H5Screate_simple(1,dims,NULL))<0)
+ if ((f_sid = H5Screate_simple(1,dims,NULL)) < 0)
   goto out;
- if ((did = H5Dcreate(fid,"big",H5T_NATIVE_CHAR,f_sid,dcpl))<0)
+ if ((did = H5Dcreate(fid,"big",H5T_NATIVE_CHAR,f_sid,dcpl)) < 0)
   goto out;
- if ((m_sid = H5Screate_simple(1, hs_size, hs_size))<0) 
+ if ((m_sid = H5Screate_simple(1, hs_size, hs_size)) < 0) 
   goto out;
- if ((tid = H5Dget_type(did))<0) 
+ if ((tid = H5Dget_type(did)) < 0) 
   goto out;
  if ((size = H5Tget_size(tid))<=0)
   goto out;
@@ -2476,13 +2476,13 @@ int test_hyperslab(const char *fname,
   }
   
   hs_start[0] = i * GBLL/(1024*1024);
-  if (H5Sselect_hyperslab (f_sid,H5S_SELECT_SET,hs_start,NULL,hs_size, NULL)<0) 
+  if (H5Sselect_hyperslab (f_sid,H5S_SELECT_SET,hs_start,NULL,hs_size, NULL) < 0) 
    goto out;
 
   /* write only one hyperslab */
   if ( i==512*512)
   {
-   if (H5Dwrite (did,H5T_NATIVE_CHAR,m_sid,f_sid,H5P_DEFAULT,buf)<0) 
+   if (H5Dwrite (did,H5T_NATIVE_CHAR,m_sid,f_sid,H5P_DEFAULT,buf) < 0) 
     goto out;
   }
 
@@ -2491,13 +2491,13 @@ int test_hyperslab(const char *fname,
  buf=NULL;
 
  /* close */
- if(H5Sclose(f_sid)<0)
+ if(H5Sclose(f_sid) < 0)
   goto out;
- if(H5Sclose(m_sid)<0)
+ if(H5Sclose(m_sid) < 0)
   goto out;
- if(H5Pclose(dcpl)<0)
+ if(H5Pclose(dcpl) < 0)
   goto out;
- if(H5Dclose(did)<0)
+ if(H5Dclose(did) < 0)
   goto out;
  H5Fclose(fid);
 
@@ -2535,25 +2535,23 @@ int write_attr(hid_t loc_id,
  hid_t   sid;
 
  /* create a space  */
- if (( sid = H5Screate_simple(rank,dims,NULL)) < 0 )
+ if((sid = H5Screate_simple(rank, dims, NULL)) < 0)
      goto out;
 
  /* create the attribute */
- if (( aid = H5Acreate(loc_id,name,tid,sid,H5P_DEFAULT)) < 0 )
+ if((aid = H5Acreate2(loc_id, ".", name, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
      goto out;
 
  /* write */
- if ( buf )
- {
-  if ( H5Awrite(aid,tid,buf) < 0 )
+ if(buf)
+   if(H5Awrite(aid, tid, buf) < 0)
       goto out;
- }
 
  /* close */
  H5Aclose(aid);
  H5Sclose(sid);
 
-return SUCCEED;
+ return SUCCEED;
 
 out:
  

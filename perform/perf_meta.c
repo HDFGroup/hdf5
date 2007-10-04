@@ -379,38 +379,42 @@ create_attrs_1(void)
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT,
-	fapl))<0)
+	fapl)) < 0)
 	goto error;
 
-    if(create_dsets(file)<0)
+    if(create_dsets(file) < 0)
 	goto error;
 
     /*
      * Create all(user specifies the number) attributes for each dataset
      */
-    for(i=0; i<NUM_DSETS; i++) {
+    for(i = 0; i < NUM_DSETS; i++) {
 	sprintf(dset_name, "dataset %d", i);
         open_t.start = retrieve_time();
-	if((dataset=H5Dopen(file, dset_name))<0)
+	if((dataset = H5Dopen(file, dset_name)) < 0)
 		goto error;
 	perf(&open_t, open_t.start, retrieve_time());
 
-	for(j=0; j<NUM_ATTRS; j++) {
-		sprintf(attr_name, "all attrs for each dset %d", j);
-	        attr_t.start = retrieve_time();
-    		if((attr = H5Acreate(dataset, attr_name, H5T_NATIVE_DOUBLE,
-			small_space, H5P_DEFAULT)) < 0)
-    			goto error;
-    		if (H5Aclose(attr) < 0) goto error;
-	 	perf(&attr_t, attr_t.start, retrieve_time());
-                if(flush_attr && H5Fflush(file, H5F_SCOPE_LOCAL)<0) goto error;
-    	}
+	for(j = 0; j < NUM_ATTRS; j++) {
+            sprintf(attr_name, "all attrs for each dset %d", j);
+            attr_t.start = retrieve_time();
+            if((attr = H5Acreate2(dataset, ".", attr_name, H5T_NATIVE_DOUBLE,
+                    small_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                goto error;
+            if(H5Aclose(attr) < 0)
+                goto error;
+            perf(&attr_t, attr_t.start, retrieve_time());
+            if(flush_attr && H5Fflush(file, H5F_SCOPE_LOCAL) < 0)
+                goto error;
+    	} /* end for */
 
 	close_t.start = retrieve_time();
-    	if(H5Dclose(dataset)<0) goto error;
+    	if(H5Dclose(dataset) < 0)
+            goto error;
 	perf(&close_t, close_t.start, retrieve_time());
-        if(flush_dset && H5Fflush(file,  H5F_SCOPE_LOCAL) < 0) goto error;
-    }
+        if(flush_dset && H5Fflush(file,  H5F_SCOPE_LOCAL) < 0)
+            goto error;
+    } /* end for */
 
     if(facc_type == FACC_MPIO || facc_type == FACC_MPIPOSIX) {
 #ifdef H5_HAVE_PARALLEL
@@ -434,7 +438,7 @@ create_attrs_1(void)
         print_perf(open_t, close_t, attr_t);
     }
 
-    if (H5Fclose(file)<0) goto error;
+    if (H5Fclose(file) < 0) goto error;
 
     return 0;
 
@@ -480,36 +484,40 @@ create_attrs_2(void)
 
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
 
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
 	goto error;
 
     /*
      * Create all(user specifies the number) attributes for each new dataset
      */
-    for(i=0; i<NUM_DSETS; i++) {
+    for(i = 0; i < NUM_DSETS; i++) {
 	sprintf(dset_name, "dataset %d", i);
         create_t.start = retrieve_time();
    	if((dataset = H5Dcreate(file, dset_name, H5T_NATIVE_DOUBLE,
-				space, H5P_DEFAULT)) < 0)
-    		goto error;
+                space, H5P_DEFAULT)) < 0)
+            goto error;
 	perf(&create_t, create_t.start, retrieve_time());
 
-	for(j=0; j<NUM_ATTRS; j++) {
-		sprintf(attr_name, "all attrs for each dset %d", j);
-	        attr_t.start = retrieve_time();
-    		if((attr = H5Acreate(dataset, attr_name, H5T_NATIVE_DOUBLE,
-			small_space, H5P_DEFAULT)) < 0)
-    			goto error;
-    		if (H5Aclose(attr) < 0) goto error;
-	 	perf(&attr_t, attr_t.start, retrieve_time());
-                if(flush_attr && H5Fflush(file,  H5F_SCOPE_LOCAL) < 0) goto error;
-	}
+	for(j = 0; j < NUM_ATTRS; j++) {
+            sprintf(attr_name, "all attrs for each dset %d", j);
+            attr_t.start = retrieve_time();
+            if((attr = H5Acreate2(dataset, ".", attr_name, H5T_NATIVE_DOUBLE,
+                    small_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                goto error;
+            if(H5Aclose(attr) < 0)
+                goto error;
+            perf(&attr_t, attr_t.start, retrieve_time());
+            if(flush_attr && H5Fflush(file,  H5F_SCOPE_LOCAL) < 0)
+                goto error;
+	} /* end for */
 
 	close_t.start = retrieve_time();
-    	if(H5Dclose(dataset)<0) goto error;
+    	if(H5Dclose(dataset) < 0)
+            goto error;
 	perf(&close_t, close_t.start, retrieve_time());
-        if(flush_dset && H5Fflush(file,  H5F_SCOPE_LOCAL) < 0) goto error;
-    }
+        if(flush_dset && H5Fflush(file,  H5F_SCOPE_LOCAL) < 0)
+            goto error;
+    } /* end for */
 
     if(facc_type == FACC_MPIO || facc_type == FACC_MPIPOSIX) {
 #ifdef H5_HAVE_PARALLEL
@@ -534,7 +542,7 @@ create_attrs_2(void)
         print_perf(create_t, close_t, attr_t);
     }
 
-    if (H5Fclose(file)<0) goto error;
+    if (H5Fclose(file) < 0) goto error;
 
     return 0;
 
@@ -583,10 +591,10 @@ create_attrs_3(void)
     h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
 
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT,
-	fapl))<0)
+	fapl)) < 0)
 	goto error;
 
-    if(create_dsets(file)<0)
+    if(create_dsets(file) < 0)
 	goto error;
 
     /*
@@ -595,32 +603,35 @@ create_attrs_3(void)
      */
     loop_num = NUM_ATTRS/BATCH_ATTRS;
 
-    for(i=0; i<loop_num; i++) {
-    	for(j=0; j<NUM_DSETS; j++) {
-		sprintf(dset_name, "dataset %d", j);
-        	open_t.start = retrieve_time();
-   		if((dataset = H5Dopen(file, dset_name)) < 0)
-    			goto error;
-		perf(&open_t, open_t.start, retrieve_time());
+    for(i = 0; i < loop_num; i++) {
+    	for(j = 0; j < NUM_DSETS; j++) {
+            sprintf(dset_name, "dataset %d", j);
+            open_t.start = retrieve_time();
+            if((dataset = H5Dopen(file, dset_name)) < 0)
+                goto error;
+            perf(&open_t, open_t.start, retrieve_time());
 
-    		for(k=0; k<BATCH_ATTRS; k++) {
-			sprintf(attr_name, "some attrs for each dset %d %d",
-					i, k);
-	        	attr_t.start = retrieve_time();
-    			if((attr = H5Acreate(dataset, attr_name,
-				H5T_NATIVE_DOUBLE, small_space, H5P_DEFAULT))
-					< 0) goto error;
-    			if (H5Aclose(attr) < 0) goto error;
-	 		perf(&attr_t, attr_t.start, retrieve_time());
-                        if(flush_attr && H5Fflush(file,  H5F_SCOPE_LOCAL) < 0) goto error;
-    		}
+            for(k = 0; k < BATCH_ATTRS; k++) {
+                sprintf(attr_name, "some attrs for each dset %d %d", i, k);
+                attr_t.start = retrieve_time();
+                if((attr = H5Acreate2(dataset, ".", attr_name, H5T_NATIVE_DOUBLE,
+                        small_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                    goto error;
+                if(H5Aclose(attr) < 0)
+                    goto error;
+                perf(&attr_t, attr_t.start, retrieve_time());
+                if(flush_attr && H5Fflush(file,  H5F_SCOPE_LOCAL) < 0)
+                    goto error;
+            } /* end for */
 
-		close_t.start = retrieve_time();
-    		if(H5Dclose(dataset)<0) goto error;
-		perf(&close_t, close_t.start, retrieve_time());
-                if(flush_dset && H5Fflush(file,  H5F_SCOPE_LOCAL) < 0) goto error;
-    	}
-    }
+            close_t.start = retrieve_time();
+            if(H5Dclose(dataset) < 0)
+                goto error;
+            perf(&close_t, close_t.start, retrieve_time());
+            if(flush_dset && H5Fflush(file,  H5F_SCOPE_LOCAL) < 0)
+                goto error;
+    	} /* end for */
+    } /* end for */
 
     if(facc_type == FACC_MPIO || facc_type == FACC_MPIPOSIX) {
 #ifdef H5_HAVE_PARALLEL
@@ -644,7 +655,7 @@ create_attrs_3(void)
         print_perf(open_t, close_t, attr_t);
     }
 
-    if (H5Fclose(file)<0) goto error;
+    if (H5Fclose(file) < 0) goto error;
 
     return 0;
 
@@ -812,17 +823,17 @@ main(int argc, char **argv)
 #endif /*H5_HAVE_PARALLEL*/
     }
 
-    nerrors += create_dspace()<0 	?1:0;
+    nerrors += create_dspace() < 0 	?1:0;
 
     if((RUN_TEST & TEST_1) || !RUN_TEST)
-        nerrors += create_attrs_1()<0 	?1:0;
+        nerrors += create_attrs_1() < 0 	?1:0;
     if((RUN_TEST & TEST_2) || !RUN_TEST)
-        nerrors += create_attrs_2()<0 	?1:0;
+        nerrors += create_attrs_2() < 0 	?1:0;
     if(((RUN_TEST & TEST_3) || !RUN_TEST) && BATCH_ATTRS && NUM_ATTRS)
-        nerrors += create_attrs_3()<0 	?1:0;
+        nerrors += create_attrs_3() < 0 	?1:0;
 
-    if (H5Sclose(space)<0) goto error;
-    if (H5Sclose(small_space)<0) goto error;
+    if (H5Sclose(space) < 0) goto error;
+    if (H5Sclose(small_space) < 0) goto error;
 
     h5_cleanup(FILENAME, fapl);
 

@@ -198,12 +198,11 @@ rsrv_ohdr(void)
         attrval[3][i] = 3;
     }
 
-    for (i = 0; i< 2000; i++)
-    {
+    for(i = 0; i < 2000; i++) {
         sprintf(attrname, "attr %d", i);
         H5E_BEGIN_TRY{
             aid =  H5Screate_simple(2, dims, NULL);
-            attr_id = H5Acreate (dataset_id, attrname, H5T_STD_I32BE, aid, H5P_DEFAULT);
+            attr_id = H5Acreate2(dataset_id, ".", attrname, H5T_STD_I32BE, aid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
             H5Awrite(attr_id, H5T_NATIVE_INT, attrval);
             status = H5Aclose(attr_id);
         } H5E_END_TRY

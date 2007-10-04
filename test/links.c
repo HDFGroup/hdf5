@@ -8616,7 +8616,7 @@ object_info(hid_t fapl)
                         sprintf(attrname, "attr %02u", v);
 
                         /* Create attribute */
-                        if((attr_id = H5Acreate(group_id2, attrname, H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) TEST_ERROR
+                        if((attr_id = H5Acreate2(group_id2, ".", attrname, H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
                         /* Close attribute */
                         if(H5Aclose(attr_id) < 0) TEST_ERROR
@@ -8664,7 +8664,7 @@ object_info(hid_t fapl)
                         sprintf(attrname, "attr %02u", v);
 
                         /* Create attribute */
-                        if((attr_id = H5Acreate(group_id2, attrname, H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) TEST_ERROR
+                        if((attr_id = H5Acreate2(group_id2, ".", attrname, H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
                         /* Close attribute */
                         if(H5Aclose(attr_id) < 0) TEST_ERROR
@@ -8813,7 +8813,7 @@ object_info_old(hid_t fapl)
                 sprintf(attrname, "attr %02u", v);
 
                 /* Create attribute */
-                if((attr_id = H5Acreate(group_id2, attrname, H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) TEST_ERROR
+                if((attr_id = H5Acreate2(group_id2, ".", attrname, H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
                 /* Close attribute */
                 if(H5Aclose(attr_id) < 0) TEST_ERROR

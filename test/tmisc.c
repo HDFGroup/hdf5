@@ -421,8 +421,8 @@ static void test_misc2_write_attribute(void)
     root1 = H5Gopen2(file1, "/", H5P_DEFAULT);
     CHECK(root1, FAIL, "H5Gopen2");
 
-    att1 = H5Acreate(root1, MISC2_ATT_NAME_1, type, dataspace, H5P_DEFAULT);
-    CHECK(att1, FAIL, "H5Acreate");
+    att1 = H5Acreate2(root1, ".", MISC2_ATT_NAME_1, type, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(att1, FAIL, "H5Acreate2");
 
     data.string = string_att1;
 
@@ -448,8 +448,8 @@ static void test_misc2_write_attribute(void)
     root2 = H5Gopen2(file2, "/", H5P_DEFAULT);
     CHECK(root2, FAIL, "H5Gopen2");
 
-    att2 = H5Acreate(root2, MISC2_ATT_NAME_2, type, dataspace, H5P_DEFAULT);
-    CHECK(att2, FAIL, "H5Acreate");
+    att2 = H5Acreate2(root2, ".", MISC2_ATT_NAME_2, type, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(att2, FAIL, "H5Acreate2");
 
     data.string = string_att2;
 
@@ -1022,57 +1022,56 @@ test_misc6(void)
     CHECK(ret,FAIL,"H5Dclose");
 
     /* Close file */
-    ret=H5Fclose(loc_id);
-    CHECK(ret,FAIL,"H5Fclose");
+    ret = H5Fclose(loc_id);
+    CHECK(ret, FAIL, "H5Fclose");
 
     /* Loop through adding attributes to each dataset */
-    for(u=0; u<MISC6_NUMATTR; u++) {
+    for(u = 0; u < MISC6_NUMATTR; u++) {
         /* Create name for attribute */
-        sprintf(attr_name,"Attr#%u",u);
+        sprintf(attr_name, "Attr#%u", u);
 
         /* Open the file */
-        loc_id=H5Fopen(MISC6_FILE, H5F_ACC_RDWR, H5P_DEFAULT);
-        CHECK(loc_id,FAIL,"H5Fopen");
+        loc_id = H5Fopen(MISC6_FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+        CHECK(loc_id, FAIL, "H5Fopen");
 
 
         /* Open first dataset */
-        dataset_id=H5Dopen(loc_id, MISC6_DSETNAME1);
-        CHECK(dataset_id,FAIL,"H5Dopen");
+        dataset_id = H5Dopen(loc_id, MISC6_DSETNAME1);
+        CHECK(dataset_id, FAIL, "H5Dopen");
 
         /* Add attribute to dataset */
-        attr_id=H5Acreate(dataset_id,attr_name,H5T_NATIVE_INT,space_id,H5P_DEFAULT);
-        CHECK(attr_id, FAIL, "H5Acreate");
+        attr_id = H5Acreate2(dataset_id, ".", attr_name, H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(attr_id, FAIL, "H5Acreate2");
 
         /* Close attribute */
-        ret=H5Aclose(attr_id);
+        ret = H5Aclose(attr_id);
         CHECK(ret, FAIL, "H5Aclose");
 
         /* Close dataset */
-        ret=H5Dclose(dataset_id);
+        ret = H5Dclose(dataset_id);
         CHECK(ret, FAIL, "H5Dclose");
 
 
         /* Open second dataset */
-        dataset_id=H5Dopen(loc_id, MISC6_DSETNAME2);
-        CHECK(dataset_id,FAIL,"H5Dopen");
+        dataset_id = H5Dopen(loc_id, MISC6_DSETNAME2);
+        CHECK(dataset_id, FAIL, "H5Dopen");
 
         /* Add attribute to dataset */
-        attr_id=H5Acreate(dataset_id,attr_name,H5T_NATIVE_INT,space_id,H5P_DEFAULT);
-        CHECK(attr_id, FAIL, "H5Acreate");
+        attr_id = H5Acreate2(dataset_id, ".", attr_name, H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(attr_id, FAIL, "H5Acreate2");
 
         /* Close attribute */
-        ret=H5Aclose(attr_id);
+        ret = H5Aclose(attr_id);
         CHECK(ret, FAIL, "H5Aclose");
 
         /* Close dataset */
-        ret=H5Dclose(dataset_id);
+        ret = H5Dclose(dataset_id);
         CHECK(ret, FAIL, "H5Dclose");
 
 
         /* Close file */
-        ret=H5Fclose(loc_id);
+        ret = H5Fclose(loc_id);
         CHECK(ret,FAIL,"H5Fclose");
-
     } /* end for */
 
     /* Close dataspace */
@@ -2883,15 +2882,15 @@ test_misc18(void)
         sprintf(attr_name,"Attr %u",u);
 
         /* Create & close attribute on first dataset */
-        aid = H5Acreate(did1, attr_name, H5T_STD_U32LE, sid, H5P_DEFAULT);
-        CHECK(aid, FAIL, "H5Acreate");
+        aid = H5Acreate2(did1, ".", attr_name, H5T_STD_U32LE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(aid, FAIL, "H5Acreate2");
 
         ret = H5Aclose(aid);
         CHECK(ret, FAIL, "HAclose");
 
         /* Create & close attribute on second dataset */
-        aid = H5Acreate(did2, attr_name, H5T_STD_U32LE, sid, H5P_DEFAULT);
-        CHECK(aid, FAIL, "H5Acreate");
+        aid = H5Acreate2(did2, ".", attr_name, H5T_STD_U32LE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(aid, FAIL, "H5Acreate2");
 
         ret = H5Aclose(aid);
         CHECK(ret, FAIL, "HAclose");
@@ -3180,8 +3179,8 @@ test_misc19(void)
     CHECK(sid, FAIL, "H5Screate");
 
     /* Create an attribute */
-    aid = H5Acreate(gid,MISC19_ATTR_NAME,H5T_NATIVE_INT,sid,H5P_DEFAULT);
-    CHECK(aid, FAIL, "H5Acreate");
+    aid = H5Acreate2(gid, ".", MISC19_ATTR_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(aid, FAIL, "H5Acreate2");
 
     /* Check the reference count */
     rc = H5Iget_ref(aid);
@@ -4296,8 +4295,8 @@ test_misc25a(void)
     CHECK(ret, FAIL, "H5Tset_size");
 
     /* Add 1st attribute on first group */
-    aid = H5Acreate(gid, MISC25A_ATTR1_NAME, tid, sid, H5P_DEFAULT);
-    CHECK(aid, FAIL, "H5Acreate");
+    aid = H5Acreate2(gid, ".", MISC25A_ATTR1_NAME, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(aid, FAIL, "H5Acreate2");
 
     /* Close dataspace */
     ret = H5Sclose(sid);
@@ -4322,8 +4321,8 @@ test_misc25a(void)
     CHECK(ret, FAIL, "H5Tset_size");
 
     /* Add 2nd attribute on first group */
-    aid = H5Acreate(gid, MISC25A_ATTR2_NAME, tid, sid, H5P_DEFAULT);
-    CHECK(aid, FAIL, "H5Acreate");
+    aid = H5Acreate2(gid, ".", MISC25A_ATTR2_NAME, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(aid, FAIL, "H5Acreate2");
 
     /* Close dataspace */
     ret = H5Sclose(sid);
@@ -4395,8 +4394,8 @@ test_misc25a(void)
     CHECK(ret, FAIL, "H5Tset_size");
 
     /* Add 3rd attribute on first group (smaller than 2nd attribute) */
-    aid = H5Acreate(gid, MISC25A_ATTR3_NAME, tid, sid, H5P_DEFAULT);
-    CHECK(aid, FAIL, "H5Acreate");
+    aid = H5Acreate2(gid, ".", MISC25A_ATTR3_NAME, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(aid, FAIL, "H5Acreate2");
 
     /* Close dataspace */
     ret = H5Sclose(sid);
@@ -4443,8 +4442,8 @@ test_misc25a(void)
     CHECK(ret, FAIL, "H5Tset_size");
 
     /* Re-create 2nd attribute on first group */
-    aid = H5Acreate(gid, MISC25A_ATTR2_NAME, tid, sid, H5P_DEFAULT);
-    CHECK(aid, FAIL, "H5Acreate");
+    aid = H5Acreate2(gid, ".", MISC25A_ATTR2_NAME, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(aid, FAIL, "H5Acreate2");
 
     /* Close dataspace */
     ret = H5Sclose(sid);
@@ -4507,8 +4506,8 @@ test_misc25a(void)
     CHECK(ret, FAIL, "H5Tset_size");
 
     /* Re-create 2nd attribute on first group */
-    aid = H5Acreate(gid, MISC25A_ATTR2_NAME, tid, sid, H5P_DEFAULT);
-    CHECK(aid, FAIL, "H5Acreate");
+    aid = H5Acreate2(gid, ".", MISC25A_ATTR2_NAME, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(aid, FAIL, "H5Acreate2");
 
     /* Close dataspace */
     ret = H5Sclose(sid);
@@ -4637,8 +4636,8 @@ test_misc25c(void)
     CHECK(ret, FAIL, "H5Gclose");
 
     /* Add an attribute to the dataset group */
-    aid = H5Acreate(gid, MISC25C_ATTRNAME, H5T_NATIVE_CHAR, sid, H5P_DEFAULT);
-    CHECK(aid, FAIL, "H5Acreate");
+    aid = H5Acreate2(gid, ".", MISC25C_ATTRNAME, H5T_NATIVE_CHAR, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(aid, FAIL, "H5Acreate2");
 
     /* Close the attribute */
     ret = H5Aclose(aid);
@@ -4653,8 +4652,8 @@ test_misc25c(void)
     CHECK(ret, FAIL, "H5Gclose");
 
     /* Add second attribute to the dataset group */
-    aid = H5Acreate(gid, MISC25C_ATTRNAME2, H5T_NATIVE_INT, sid, H5P_DEFAULT);
-    CHECK(aid, FAIL, "H5Acreate");
+    aid = H5Acreate2(gid, ".", MISC25C_ATTRNAME2, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(aid, FAIL, "H5Acreate2");
 
     /* Close the attribute */
     ret = H5Aclose(aid);

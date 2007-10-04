@@ -288,14 +288,15 @@ create_standard_file(const char *filename, hid_t fcpl_id)
     /* Begin using the messages many times.  Do this by creating datasets
      * that use this datatype, dataspace, and have this attribute.
      */
-    for(x=0; x<NUM_DATASETS; ++x) {
+    for(x = 0; x < NUM_DATASETS; ++x) {
        /* Create a dataset */
        dset_id = H5Dcreate(file_id, DSETNAME[x], type_id, space_id, H5P_DEFAULT);
        if(dset_id < 0) goto error;
 
        /* Create an attribute on the dataset */
-       attr_id = H5Acreate(dset_id, "attr_name", attr_type_id, attr_space_id, H5P_DEFAULT);
+       attr_id = H5Acreate2(dset_id, ".", "attr_name", attr_type_id, attr_space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
        if(attr_id < 0) goto error;
+
        /* Write data to the attribute */
        ret = H5Awrite(attr_id, H5T_NATIVE_INT, attr_data);
        if(ret < 0) goto error;

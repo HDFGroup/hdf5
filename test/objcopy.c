@@ -256,7 +256,7 @@ attach_ref_attr(hid_t file_id, hid_t loc_id)
     /* create an attribute with two object references */
     if(H5Rcreate(&ref[0], file_id, dsetname1, H5R_OBJECT, -1) < 0) TEST_ERROR
     if(H5Rcreate(&ref[1], file_id, dsetname2, H5R_OBJECT, -1) < 0) TEST_ERROR
-    if((aid = H5Acreate(loc_id, "obj_ref_attr", H5T_STD_REF_OBJ, sid_ref, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((aid = H5Acreate2(loc_id, ".", "obj_ref_attr", H5T_STD_REF_OBJ, sid_ref, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Awrite(aid, H5T_STD_REF_OBJ, ref) < 0) TEST_ERROR
 
     if(H5Sclose(sid) < 0) TEST_ERROR
@@ -329,12 +329,12 @@ attach_reg_ref_attr(hid_t file_id, hid_t loc_id)
     if(H5Rcreate(&ref[1], file_id, dsetnamev, H5R_DATASET_REGION, space_id) < 0) TEST_ERROR
 
     /* create reg_ref attribute */
-    if((aid = H5Acreate(loc_id, "reg_ref_attr", H5T_STD_REF_DSETREG, spacer_id, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((aid = H5Acreate2(loc_id, ".", "reg_ref_attr", H5T_STD_REF_DSETREG, spacer_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Awrite(aid, H5T_STD_REF_DSETREG, ref) < 0) TEST_ERROR
 
     /* attach the reg_ref attribute to the dataset itself */
     if(H5Aclose(aid) < 0) TEST_ERROR
-    if((aid = H5Acreate(dsetv_id, "reg_ref_attr", H5T_STD_REF_DSETREG, spacer_id, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((aid = H5Acreate2(dsetv_id, ".", "reg_ref_attr", H5T_STD_REF_DSETREG, spacer_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Awrite(aid, H5T_STD_REF_DSETREG, ref) < 0) TEST_ERROR
 
     if(H5Sclose(spacer_id) < 0) TEST_ERROR
@@ -488,7 +488,7 @@ test_copy_attach_attribute_vl(hid_t loc_id)
             ((int *)buf[i].p)[j] = j+1;
     } /* end for */
 
-    if((aid = H5Acreate(loc_id, "vlen attribute", tid, sid, H5P_DEFAULT)) < 0)
+    if((aid = H5Acreate2(loc_id, ".", "vlen attribute", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto done;
 
     if(H5Awrite(aid, tid, buf) < 0)
@@ -542,7 +542,7 @@ test_copy_attach_attributes(hid_t loc_id, hid_t type_id)
         attr_data[0] = 100 * i;
         attr_data[1] = 200 * i;
 
-        if((aid = H5Acreate(loc_id, attr_name, type_id, sid, H5P_DEFAULT)) < 0)
+        if((aid = H5Acreate2(loc_id, ".", attr_name, type_id, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto done;
 
         if(H5Awrite(aid, H5T_NATIVE_INT, attr_data) < 0)
@@ -596,12 +596,12 @@ test_copy_attach_paired_attributes(hid_t loc_id, hid_t loc_id2, hid_t type_id)
         attr_data[1] = 200 * i;
 
         /* Add attribute to first object */
-        if((aid = H5Acreate(loc_id, attr_name, type_id, sid, H5P_DEFAULT)) < 0) goto done;
+        if((aid = H5Acreate2(loc_id, ".", attr_name, type_id, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto done;
         if(H5Awrite(aid, H5T_NATIVE_INT, attr_data) < 0) goto done;
         if(H5Aclose(aid) < 0) goto done;
 
         /* Add attribute to second object */
-        if((aid = H5Acreate(loc_id2, attr_name, type_id, sid, H5P_DEFAULT)) < 0) goto done;
+        if((aid = H5Acreate2(loc_id2, ".", attr_name, type_id, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto done;
         if(H5Awrite(aid, H5T_NATIVE_INT, attr_data) < 0) goto done;
         if(H5Aclose(aid) < 0) goto done;
     }

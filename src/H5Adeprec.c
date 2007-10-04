@@ -105,14 +105,15 @@ H5A_init_deprec_interface(void)
     FUNC_LEAVE_NOAPI(H5A_init())
 } /* H5A_init_deprec_interface() */
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*--------------------------------------------------------------------------
  NAME
-    H5Acreate
+    H5Acreate1
  PURPOSE
     Creates an attribute on an object
  USAGE
-    hid_t H5Acreate (loc_id, name, type_id, space_id, plist_id)
+    hid_t H5Acreate1(loc_id, name, type_id, space_id, plist_id)
         hid_t loc_id;       IN: Object (dataset or group) to be attached to
         const char *name;   IN: Name of attribute to create
         hid_t type_id;      IN: ID of datatype for attribute
@@ -129,9 +130,12 @@ H5A_init_deprec_interface(void)
     The attribute ID returned from this function must be released with H5Aclose
     or resource leaks will develop.
 
+ NOTE
+    Deprecated in favor of H5Acreate2
+
 --------------------------------------------------------------------------*/
 hid_t
-H5Acreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
+H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	  hid_t plist_id)
 {
     H5G_loc_t           loc;                    /* Object location */
@@ -139,7 +143,7 @@ H5Acreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     H5S_t		*space;                 /* Dataspace to use for attribute */
     hid_t		ret_value;              /* Return value */
 
-    FUNC_ENTER_API(H5Acreate, FAIL)
+    FUNC_ENTER_API(H5Acreate1, FAIL)
     H5TRACE5("i", "i*siii", loc_id, name, type_id, space_id, plist_id);
 
     /* check arguments */
@@ -162,9 +166,8 @@ H5Acreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* H5Acreate() */
+} /* H5Acreate1() */
 
-#ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*--------------------------------------------------------------------------
  NAME
@@ -185,6 +188,8 @@ done:
     H5Aclose or resource leaks will develop.
         The location object may be either a group or a dataset, both of
     which may have any sort of attribute.
+ NOTE
+    Deprecated in favor of H5Aopen
 --------------------------------------------------------------------------*/
 hid_t
 H5Aopen_name(hid_t loc_id, const char *name)

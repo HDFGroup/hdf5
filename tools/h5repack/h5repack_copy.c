@@ -417,16 +417,16 @@ int do_copy_objects(hid_t fidin,
                  * copy attrs
                  *-------------------------------------------------------------------------
                  */
-                if (copy_attr(grp_in,grp_out,options)<0)
+                if (copy_attr(grp_in,grp_out,options) < 0)
                     goto error;
 
                 if (gcpl_id>0) {
-                    if (H5Pclose(gcpl_id)<0)
+                    if (H5Pclose(gcpl_id) < 0)
                         goto error;
                 }
-                if (H5Gclose(grp_out)<0)
+                if (H5Gclose(grp_out) < 0)
                     goto error;
-                if (H5Gclose(grp_in)<0)
+                if (H5Gclose(grp_in) < 0)
                     goto error;
 
                 break;
@@ -440,15 +440,15 @@ int do_copy_objects(hid_t fidin,
                 has_filter = 0;
 
                 /* early detection of references */
-                if ((dset_in=H5Dopen(fidin,travt->objs[i].name))<0)
+                if ((dset_in=H5Dopen(fidin,travt->objs[i].name)) < 0)
                     goto error;
-                if ((ftype_id=H5Dget_type (dset_in))<0)
+                if ((ftype_id=H5Dget_type (dset_in)) < 0)
                     goto error;
                 if (H5T_REFERENCE==H5Tget_class(ftype_id))
                     is_ref=1;
-                if (H5Tclose(ftype_id)<0)
+                if (H5Tclose(ftype_id) < 0)
                     goto error;
-                if (H5Dclose(dset_in)<0)
+                if (H5Dclose(dset_in) < 0)
                     goto error;
                   
 
@@ -466,20 +466,20 @@ int do_copy_objects(hid_t fidin,
                 {
                     int j;
 
-                    if ((dset_in=H5Dopen(fidin,travt->objs[i].name))<0)
+                    if ((dset_in=H5Dopen(fidin,travt->objs[i].name)) < 0)
                         goto error;
-                    if ((f_space_id=H5Dget_space(dset_in))<0)
+                    if ((f_space_id=H5Dget_space(dset_in)) < 0)
                         goto error;
-                    if ((ftype_id=H5Dget_type (dset_in))<0)
+                    if ((ftype_id=H5Dget_type (dset_in)) < 0)
                         goto error;
-                    if ((dcpl_id=H5Dget_create_plist(dset_in))<0)
+                    if ((dcpl_id=H5Dget_create_plist(dset_in)) < 0)
                         goto error;
-                    if ((dcpl_out = H5Pcopy (dcpl_id))<0)
+                    if ((dcpl_out = H5Pcopy (dcpl_id)) < 0)
                         goto error;
-                    if ( (rank=H5Sget_simple_extent_ndims(f_space_id))<0)
+                    if ( (rank=H5Sget_simple_extent_ndims(f_space_id)) < 0)
                         goto error;
                     HDmemset(dims, 0, sizeof dims);
-                    if ( H5Sget_simple_extent_dims(f_space_id,dims,NULL)<0)
+                    if ( H5Sget_simple_extent_dims(f_space_id,dims,NULL) < 0)
                         goto error;
                     nelmts=1;
                     for (j=0; j<rank; j++)
@@ -522,7 +522,7 @@ int do_copy_objects(hid_t fidin,
 
                             /* apply the filter */
                             if (apply_s) {
-                                if (apply_filters(travt->objs[i].name,rank,dims,dcpl_out,options,&has_filter)<0)
+                                if (apply_filters(travt->objs[i].name,rank,dims,dcpl_out,options,&has_filter) < 0)
                                     goto error;
                             }
 
@@ -537,7 +537,7 @@ int do_copy_objects(hid_t fidin,
                             } H5E_END_TRY;
                             if (dset_out==FAIL)
                             {
-                                if ((dset_out=H5Dcreate(fidout,travt->objs[i].name,wtype_id,f_space_id,dcpl_id))<0)
+                                if ((dset_out=H5Dcreate(fidout,travt->objs[i].name,wtype_id,f_space_id,dcpl_id)) < 0)
                                     goto error;
                                 apply_f=0;
                             }
@@ -554,9 +554,9 @@ int do_copy_objects(hid_t fidin,
 
                                 if (buf != NULL )
                                 {
-                                    if (H5Dread(dset_in,wtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+                                    if (H5Dread(dset_in,wtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0)
                                         goto error;
-                                    if (H5Dwrite(dset_out,wtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+                                    if (H5Dwrite(dset_out,wtype_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0)
                                         goto error;
                                 }      
 
@@ -616,9 +616,9 @@ int do_copy_objects(hid_t fidin,
                                                 hs_nelmts *= hs_size[k];
                                             }
 
-                                            if (H5Sselect_hyperslab(f_space_id, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL)<0)
+                                            if (H5Sselect_hyperslab(f_space_id, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0)
                                                 goto error;
-                                            if (H5Sselect_hyperslab(sm_space, H5S_SELECT_SET, zero, NULL, &hs_nelmts, NULL)<0)
+                                            if (H5Sselect_hyperslab(sm_space, H5S_SELECT_SET, zero, NULL, &hs_nelmts, NULL) < 0)
                                                 goto error;
                                         } 
                                         else 
@@ -693,11 +693,11 @@ int do_copy_objects(hid_t fidin,
                              * copy attrs
                              *-------------------------------------------------------------------------
                              */
-                            if (copy_attr(dset_in,dset_out,options)<0)
+                            if (copy_attr(dset_in,dset_out,options) < 0)
                                 goto error;
 
                             /*close */
-                            if (H5Dclose(dset_out)<0)
+                            if (H5Dclose(dset_out) < 0)
                                 goto error;
 
                         }/*!H5T_REFERENCE*/
@@ -708,17 +708,17 @@ int do_copy_objects(hid_t fidin,
                      * close
                      *-------------------------------------------------------------------------
                      */
-                    if (H5Tclose(ftype_id)<0)
+                    if (H5Tclose(ftype_id) < 0)
                         goto error;
-                    if (H5Tclose(wtype_id)<0)
+                    if (H5Tclose(wtype_id) < 0)
                         goto error;
-                    if (H5Pclose(dcpl_id)<0)
+                    if (H5Pclose(dcpl_id) < 0)
                         goto error;
-                    if (H5Pclose(dcpl_out)<0)
+                    if (H5Pclose(dcpl_out) < 0)
                         goto error;
-                    if (H5Sclose(f_space_id)<0)
+                    if (H5Sclose(f_space_id) < 0)
                         goto error;
-                    if (H5Dclose(dset_in)<0)
+                    if (H5Dclose(dset_in) < 0)
                         goto error;
 
                 }
@@ -748,11 +748,11 @@ int do_copy_objects(hid_t fidin,
                             fidout,                    /* Destination file or group identifier  */
                             travt->objs[i].name,       /* Name of the destination object  */
                             pid,                       /* Properties which apply to the copy   */
-                            H5P_DEFAULT)<0)            /* Properties which apply to the new hard link */              
+                            H5P_DEFAULT) < 0)            /* Properties which apply to the new hard link */              
                         goto error;
 
                     /* close property */
-                    if (H5Pclose(pid)<0)
+                    if (H5Pclose(pid) < 0)
                         goto error;
 
 
@@ -760,15 +760,15 @@ int do_copy_objects(hid_t fidin,
                      * copy attrs manually
                      *-------------------------------------------------------------------------
                      */
-                    if ((dset_in=H5Dopen(fidin,travt->objs[i].name))<0)
+                    if ((dset_in=H5Dopen(fidin,travt->objs[i].name)) < 0)
                         goto error;
-                    if ((dset_out=H5Dopen(fidout,travt->objs[i].name))<0)
+                    if ((dset_out=H5Dopen(fidout,travt->objs[i].name)) < 0)
                         goto error;
-                    if (copy_attr(dset_in,dset_out,options)<0)
+                    if (copy_attr(dset_in,dset_out,options) < 0)
                         goto error;
-                    if (H5Dclose(dset_in)<0)
+                    if (H5Dclose(dset_in) < 0)
                         goto error;
-                    if (H5Dclose(dset_out)<0)
+                    if (H5Dclose(dset_out) < 0)
                         goto error;
 
                 } /* end do we have request for filter/chunking */
@@ -923,7 +923,7 @@ int copy_attr(hid_t loc_in,
    goto error;
 
   /* get name */
-  if (H5Aget_name( attr_id, (size_t)255, name )<0)
+  if (H5Aget_name( attr_id, (size_t)255, name ) < 0)
    goto error;
 
   /* get the file datatype  */
@@ -969,12 +969,12 @@ int copy_attr(hid_t loc_in,
   *-------------------------------------------------------------------------
   */
 
-   buf=(void *) HDmalloc((size_t)(nelmts*msize));
-   if ( buf==NULL){
+   buf = (void *)HDmalloc((size_t)(nelmts * msize));
+   if(buf == NULL) {
     error_msg(progname, "cannot read into memory\n" );
     goto error;
    }
-   if (H5Aread(attr_id,wtype_id,buf)<0)
+   if(H5Aread(attr_id, wtype_id, buf) < 0)
     goto error;
 
    /*-------------------------------------------------------------------------
@@ -982,24 +982,23 @@ int copy_attr(hid_t loc_in,
     *-------------------------------------------------------------------------
     */
 
-   if ((attr_out=H5Acreate(loc_out,name,ftype_id,space_id,H5P_DEFAULT))<0)
+   if((attr_out = H5Acreate2(loc_out, ".", name, ftype_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
     goto error;
-   if(H5Awrite(attr_out,wtype_id,buf)<0)
+   if(H5Awrite(attr_out, wtype_id, buf) < 0)
     goto error;
 
    /*close*/
-   if (H5Aclose(attr_out)<0)
+   if(H5Aclose(attr_out) < 0)
     goto error;
 
 
-   if (buf)
+   if(buf)
     free(buf);
-
 
   } /*H5T_REFERENCE*/
 
 
-  if (options->verbose)
+  if(options->verbose)
    printf(FORMAT_OBJ_ATTR, "attr", name);
 
 /*-------------------------------------------------------------------------
@@ -1007,10 +1006,10 @@ int copy_attr(hid_t loc_in,
  *-------------------------------------------------------------------------
  */
 
-  if (H5Tclose(ftype_id)<0) goto error;
-  if (H5Tclose(wtype_id)<0) goto error;
-  if (H5Sclose(space_id)<0) goto error;
-  if (H5Aclose(attr_id)<0) goto error;
+  if (H5Tclose(ftype_id) < 0) goto error;
+  if (H5Tclose(wtype_id) < 0) goto error;
+  if (H5Sclose(space_id) < 0) goto error;
+  if (H5Aclose(attr_id) < 0) goto error;
 
  } /* u */
 
@@ -1059,7 +1058,7 @@ static void print_dataset_info(hid_t dcpl_id,
  strcpy(strfilter,"\0");
 
  /* get information about input filters */
- if ((nfilters = H5Pget_nfilters(dcpl_id))<0)
+ if ((nfilters = H5Pget_nfilters(dcpl_id)) < 0)
   return;
 
  for ( i=0; i<nfilters; i++)

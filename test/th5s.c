@@ -280,10 +280,9 @@ test_h5s_basic(void)
 
     /* Now use the bad dataspace as the space for an attribute */
     H5E_BEGIN_TRY {
-    aid1 = H5Acreate(dset1, BASICATTR,
-                        H5T_NATIVE_INT, sid1, H5P_DEFAULT);
+    aid1 = H5Acreate2(dset1, ".", BASICATTR, H5T_NATIVE_INT, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY
-    VERIFY(aid1, FAIL, "H5Acreate");
+    VERIFY(aid1, FAIL, "H5Acreate2");
 
     /* Make sure that dataspace reads using the bad dataspace fail */
     H5E_BEGIN_TRY {
@@ -406,8 +405,8 @@ test_h5s_null(void)
     VERIFY(val, 1, "H5Dread");
 
     /* Create an attribute for the group */
-    attr=H5Acreate(did,NULLATTR,H5T_NATIVE_INT,sid,H5P_DEFAULT);
-    CHECK(attr, FAIL, "H5Acreate");
+    attr = H5Acreate2(did, ".", NULLATTR, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Acreate2");
 
     /* Write "nothing" to the attribute */
     ret = H5Awrite(attr, H5T_NATIVE_INT, &val);

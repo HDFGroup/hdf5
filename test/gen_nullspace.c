@@ -63,11 +63,11 @@ main(void)
     assert(gid > 0);
 
     /* Create an attribute for the group */
-    attr=H5Acreate(gid,NULLATTR,H5T_NATIVE_INT,sid,H5P_DEFAULT);
-    assert(attr>0);
+    attr = H5Acreate2(gid, ".", NULLATTR, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    assert(attr > 0);
 
     /* Close attribute */
-    ret=H5Aclose(attr);
+    ret = H5Aclose(attr);
     assert(ret>=0);
 
     /* Close the group */

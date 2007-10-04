@@ -338,16 +338,16 @@ void null_dataset(void)
 
 
     /* Write "nothing" to the dataset (with type conversion) */
-    ret=H5Dwrite (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, &uval);
+    ret=H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, &uval);
     VRFY((ret >= 0), "H5Dwrite succeeded");
 
     /* Create an attribute for the group */
-    attr=H5Acreate(dataset,attr_name,H5T_NATIVE_UINT,sid,H5P_DEFAULT);
-    VRFY((attr>=0), "H5Acreate");
+    attr = H5Acreate2(dataset, ".", attr_name, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    VRFY((attr >= 0), "H5Acreate2");
 
     /* Write "nothing" to the attribute (with type conversion) */
     ret = H5Awrite(attr, H5T_NATIVE_INT, &val);
-    VRFY((ret>=0), "H5Awrite");
+    VRFY((ret >= 0), "H5Awrite");
 
     H5Aclose (attr);
     H5Dclose (dataset);
@@ -1300,21 +1300,21 @@ void write_attribute(hid_t obj_id, int this_type, int num)
     if(this_type == is_group) {
         sprintf(attr_name, "Group Attribute %d", num);
         sid = H5Screate(H5S_SCALAR);
-        aid = H5Acreate(obj_id, attr_name, H5T_NATIVE_INT, sid, H5P_DEFAULT);
+        aid = H5Acreate2(obj_id, ".", attr_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         H5Awrite(aid, H5T_NATIVE_INT,  &num);
         H5Aclose(aid);
         H5Sclose(sid);
-    }
+    } /* end if */
     else if(this_type == is_dset) {
         sprintf(attr_name, "Dataset Attribute %d", num);
         for(i=0; i<8; i++)
             attr_data[i] = i;
         sid = H5Screate_simple(dspace_rank, dspace_dims, NULL);
-        aid = H5Acreate(obj_id, attr_name, H5T_NATIVE_INT, sid, H5P_DEFAULT);
+        aid = H5Acreate2(obj_id, ".", attr_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         H5Awrite(aid, H5T_NATIVE_INT, attr_data);
         H5Aclose(aid);
         H5Sclose(sid);
-    }
+    } /* end else-if */
 
 }
 

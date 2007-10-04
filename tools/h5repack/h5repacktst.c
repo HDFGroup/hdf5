@@ -157,7 +157,7 @@ int main (void)
 
  /* make the test files */
  TESTING("    generating datasets");
- if (make_testfiles()<0)
+ if (make_testfiles() < 0)
   GOERROR;
  PASSED();
 
@@ -175,7 +175,7 @@ int main (void)
  */
 
  TESTING("    copy of datasets (fill values)");
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
  if (h5repack(FNAME0,FNAME0OUT,&pack_options) < 0)
   GOERROR;
@@ -185,7 +185,7 @@ int main (void)
   GOERROR;
  if (h5repack_cmpdcpl(FNAME0,FNAME0OUT)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
  PASSED();
 
@@ -195,7 +195,7 @@ int main (void)
  *-------------------------------------------------------------------------
  */
  TESTING("    copy of datasets (all datatypes)");
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
  if (h5repack(FNAME1,FNAME1OUT,&pack_options) < 0)
   GOERROR;
@@ -205,7 +205,7 @@ int main (void)
   GOERROR;
  if (h5repack_cmpdcpl(FNAME1,FNAME1OUT)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
  PASSED();
 
@@ -215,7 +215,7 @@ int main (void)
  *-------------------------------------------------------------------------
  */
  TESTING("    copy of datasets (attributes)");
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
  if (h5repack(FNAME2,FNAME2OUT,&pack_options) < 0)
   GOERROR;
@@ -225,7 +225,7 @@ int main (void)
   GOERROR;
  if (h5repack_cmpdcpl(FNAME2,FNAME2OUT)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
  PASSED();
 
@@ -234,7 +234,7 @@ int main (void)
  *-------------------------------------------------------------------------
  */
  TESTING("    copy of datasets (hardlinks)");
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
  if (h5repack(FNAME3,FNAME3OUT,&pack_options) < 0)
   GOERROR;
@@ -244,7 +244,7 @@ int main (void)
   GOERROR;
  if (h5repack_cmpdcpl(FNAME3,FNAME3OUT)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
  PASSED();
@@ -254,7 +254,7 @@ int main (void)
  *-------------------------------------------------------------------------
  */
  TESTING("    copy of allocation early file");
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
  if (h5repack(FNAME5,FNAME5OUT,&pack_options) < 0)
   GOERROR;
@@ -262,7 +262,7 @@ int main (void)
   GOERROR;
  if (h5repack_verify(FNAME5OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
   PASSED();
 
@@ -284,11 +284,11 @@ int main (void)
  *-------------------------------------------------------------------------
  */
 
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addfilter("dset1:GZIP=9",&pack_options)<0)
+ if (h5repack_addfilter("dset1:GZIP=9",&pack_options) < 0)
   GOERROR;
- if (h5repack_addlayout("dset1:CHUNK=20x10",&pack_options)<0)
+ if (h5repack_addlayout("dset1:CHUNK=20x10",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   GOERROR;
@@ -296,7 +296,7 @@ int main (void)
   GOERROR;
  if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
  PASSED();
 #else
@@ -312,11 +312,11 @@ int main (void)
 
 #ifdef H5_HAVE_FILTER_DEFLATE
 
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addfilter("GZIP=1",&pack_options)<0)
+ if (h5repack_addfilter("GZIP=1",&pack_options) < 0)
   GOERROR;
- if (h5repack_addlayout("CHUNK=20x10",&pack_options)<0)
+ if (h5repack_addlayout("CHUNK=20x10",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   GOERROR;
@@ -324,7 +324,7 @@ int main (void)
   GOERROR;
  if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
  PASSED();
@@ -350,11 +350,11 @@ if (h5tools_can_encode(H5Z_FILTER_SZIP) >0) {
  */
 
 if (szip_can_encode) {
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addfilter("dset2:SZIP=8,EC",&pack_options)<0)
+ if (h5repack_addfilter("dset2:SZIP=8,EC",&pack_options) < 0)
   GOERROR;
- if (h5repack_addlayout("dset2:CHUNK=20x10",&pack_options)<0)
+ if (h5repack_addlayout("dset2:CHUNK=20x10",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   GOERROR;
@@ -362,7 +362,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
  PASSED();
@@ -382,9 +382,9 @@ TESTING("    adding szip filter to all");
 
 #if defined (H5_HAVE_FILTER_SZIP)
 if (szip_can_encode) {
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addfilter("SZIP=8,NN",&pack_options)<0)
+ if (h5repack_addfilter("SZIP=8,NN",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   GOERROR;
@@ -392,7 +392,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
  PASSED();
@@ -413,11 +413,11 @@ if (szip_can_encode) {
  *-------------------------------------------------------------------------
  */
 
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addfilter("dset1:SHUF",&pack_options)<0)
+ if (h5repack_addfilter("dset1:SHUF",&pack_options) < 0)
   GOERROR;
- if (h5repack_addlayout("dset1:CHUNK=20x10",&pack_options)<0)
+ if (h5repack_addlayout("dset1:CHUNK=20x10",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   GOERROR;
@@ -425,7 +425,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
  PASSED();
@@ -442,11 +442,11 @@ TESTING("    addding shuffle filter to all");
 
 #ifdef H5_HAVE_FILTER_SHUFFLE
 
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addfilter("SHUF",&pack_options)<0)
+ if (h5repack_addfilter("SHUF",&pack_options) < 0)
   GOERROR;
- if (h5repack_addlayout("CHUNK=20x10",&pack_options)<0)
+ if (h5repack_addlayout("CHUNK=20x10",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   GOERROR;
@@ -454,7 +454,7 @@ TESTING("    addding shuffle filter to all");
   GOERROR;
  if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
  PASSED();
@@ -471,11 +471,11 @@ TESTING("    addding shuffle filter to all");
  *-------------------------------------------------------------------------
  */
 
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addfilter("dset1:FLET",&pack_options)<0)
+ if (h5repack_addfilter("dset1:FLET",&pack_options) < 0)
   GOERROR;
- if (h5repack_addlayout("dset1:CHUNK=20x10",&pack_options)<0)
+ if (h5repack_addlayout("dset1:CHUNK=20x10",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   GOERROR;
@@ -483,7 +483,7 @@ TESTING("    addding shuffle filter to all");
   GOERROR;
  if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
  PASSED();
@@ -501,11 +501,11 @@ TESTING("    addding shuffle filter to all");
 
 #ifdef H5_HAVE_FILTER_FLETCHER32
 
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addfilter("FLET",&pack_options)<0)
+ if (h5repack_addfilter("FLET",&pack_options) < 0)
   GOERROR;
- if (h5repack_addlayout("CHUNK=20x10",&pack_options)<0)
+ if (h5repack_addlayout("CHUNK=20x10",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   GOERROR;
@@ -513,7 +513,7 @@ TESTING("    addding shuffle filter to all");
   GOERROR;
  if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
  PASSED();
@@ -529,30 +529,30 @@ TESTING("    addding shuffle filter to all");
  *-------------------------------------------------------------------------
  */
 
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addlayout("dset1:CHUNK 20x10",&pack_options)<0)
+ if (h5repack_addlayout("dset1:CHUNK 20x10",&pack_options) < 0)
   GOERROR;
 
 #if defined (H5_HAVE_FILTER_FLETCHER32)
- if (h5repack_addfilter("dset1:FLET",&pack_options)<0)
+ if (h5repack_addfilter("dset1:FLET",&pack_options) < 0)
   GOERROR;
 #endif
 
 #ifdef H5_HAVE_FILTER_SHUFFLE
- if (h5repack_addfilter("dset1:SHUF",&pack_options)<0)
+ if (h5repack_addfilter("dset1:SHUF",&pack_options) < 0)
   GOERROR;
 #endif
 
 #if defined (H5_HAVE_FILTER_SZIP)
 if (szip_can_encode) {
- if (h5repack_addfilter("dset1:SZIP=8,NN",&pack_options)<0)
+ if (h5repack_addfilter("dset1:SZIP=8,NN",&pack_options) < 0)
   GOERROR;
 }
 #endif
 
 #ifdef H5_HAVE_FILTER_DEFLATE
- if (h5repack_addfilter("dset1:GZIP=1",&pack_options)<0)
+ if (h5repack_addfilter("dset1:GZIP=1",&pack_options) < 0)
   GOERROR;
 #endif
 
@@ -562,7 +562,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
  PASSED();
@@ -575,9 +575,9 @@ if (szip_can_encode) {
  *-------------------------------------------------------------------------
  */
 
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addlayout("dset1:CHUNK=20x10",&pack_options)<0)
+ if (h5repack_addlayout("dset1:CHUNK=20x10",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   GOERROR;
@@ -585,7 +585,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
  PASSED();
 
@@ -595,9 +595,9 @@ if (szip_can_encode) {
  */
  TESTING("    adding layout chunked to all");
 
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addlayout("CHUNK=20x10",&pack_options)<0)
+ if (h5repack_addlayout("CHUNK=20x10",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   GOERROR;
@@ -605,7 +605,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
  PASSED();
@@ -616,9 +616,9 @@ if (szip_can_encode) {
  * test an individual object option
  *-------------------------------------------------------------------------
  */
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addlayout("dset1:CONTI",&pack_options)<0)
+ if (h5repack_addlayout("dset1:CONTI",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   GOERROR;
@@ -626,7 +626,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
  PASSED();
@@ -637,9 +637,9 @@ if (szip_can_encode) {
  * test all objects option
  *-------------------------------------------------------------------------
  */
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addlayout("CONTI",&pack_options)<0)
+ if (h5repack_addlayout("CONTI",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   GOERROR;
@@ -647,7 +647,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
  PASSED();
@@ -659,9 +659,9 @@ if (szip_can_encode) {
  *-------------------------------------------------------------------------
  */
 
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addlayout("dset1:COMPA",&pack_options)<0)
+ if (h5repack_addlayout("dset1:COMPA",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   GOERROR;
@@ -669,7 +669,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
  PASSED();
 
@@ -680,9 +680,9 @@ if (szip_can_encode) {
  *-------------------------------------------------------------------------
  */
 
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addlayout("COMPA",&pack_options)<0)
+ if (h5repack_addlayout("COMPA",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   GOERROR;
@@ -690,7 +690,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
  PASSED();
@@ -702,9 +702,9 @@ if (szip_can_encode) {
  * layout compact to contiguous conversion
  *-------------------------------------------------------------------------
  */
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addlayout("dset_compact:CONTI",&pack_options)<0)
+ if (h5repack_addlayout("dset_compact:CONTI",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   GOERROR;
@@ -712,7 +712,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
   PASSED();
 
@@ -722,9 +722,9 @@ if (szip_can_encode) {
  * layout compact to chunk conversion
  *-------------------------------------------------------------------------
  */
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addlayout("dset_compact:CHUNK=2x5",&pack_options)<0)
+ if (h5repack_addlayout("dset_compact:CHUNK=2x5",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   GOERROR;
@@ -732,7 +732,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
   PASSED();
 
@@ -742,9 +742,9 @@ if (szip_can_encode) {
  * layout compact to compact conversion
  *-------------------------------------------------------------------------
  */
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addlayout("dset_compact:COMPA",&pack_options)<0)
+ if (h5repack_addlayout("dset_compact:COMPA",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   GOERROR;
@@ -752,7 +752,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
   PASSED();
 
@@ -761,9 +761,9 @@ if (szip_can_encode) {
  * layout contiguous to compact conversion
  *-------------------------------------------------------------------------
  */
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addlayout("dset_contiguous:COMPA",&pack_options)<0)
+ if (h5repack_addlayout("dset_contiguous:COMPA",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   GOERROR;
@@ -771,7 +771,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
   PASSED();
 
@@ -780,9 +780,9 @@ if (szip_can_encode) {
  * layout contiguous to chunk conversion
  *-------------------------------------------------------------------------
  */
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addlayout("dset_contiguous:CHUNK=3x6",&pack_options)<0)
+ if (h5repack_addlayout("dset_contiguous:CHUNK=3x6",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   GOERROR;
@@ -790,7 +790,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
   PASSED();
 
@@ -800,9 +800,9 @@ if (szip_can_encode) {
  * layout contiguous to contiguous conversion
  *-------------------------------------------------------------------------
  */
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addlayout("dset_contiguous:CONTI",&pack_options)<0)
+ if (h5repack_addlayout("dset_contiguous:CONTI",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   GOERROR;
@@ -810,7 +810,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
   PASSED();
 
@@ -819,9 +819,9 @@ if (szip_can_encode) {
  * layout chunked to compact conversion
  *-------------------------------------------------------------------------
  */
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addlayout("dset_chunk:COMPA",&pack_options)<0)
+ if (h5repack_addlayout("dset_chunk:COMPA",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   GOERROR;
@@ -829,7 +829,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
   PASSED();
 
@@ -839,9 +839,9 @@ if (szip_can_encode) {
  * layout chunked to contiguous conversion
  *-------------------------------------------------------------------------
  */
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addlayout("dset_chunk:CONTI",&pack_options)<0)
+ if (h5repack_addlayout("dset_chunk:CONTI",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   GOERROR;
@@ -849,7 +849,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
   PASSED();
 
@@ -858,9 +858,9 @@ if (szip_can_encode) {
  * layout chunked to chunked conversion
  *-------------------------------------------------------------------------
  */
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addlayout("dset_chunk:CHUNK=18x13",&pack_options)<0)
+ if (h5repack_addlayout("dset_chunk:CHUNK=18x13",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME4,FNAME4OUT,&pack_options) < 0)
   GOERROR;
@@ -868,7 +868,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME4OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
   PASSED();
 
@@ -888,7 +888,7 @@ if (szip_can_encode) {
 
 #if defined (H5_HAVE_FILTER_SZIP)
 if (szip_can_encode) {
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
  if (h5repack(FNAME7,FNAME7OUT,&pack_options) < 0)
   GOERROR;
@@ -896,7 +896,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME7OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
  PASSED();
@@ -911,9 +911,9 @@ if (szip_can_encode) {
 
 #if defined (H5_HAVE_FILTER_SZIP)
 if (szip_can_encode) {
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addfilter("dset_szip:NONE",&pack_options)<0)
+ if (h5repack_addfilter("dset_szip:NONE",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME7,FNAME7OUT,&pack_options) < 0)
   GOERROR;
@@ -921,7 +921,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME7OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
  PASSED();
@@ -936,7 +936,7 @@ if (szip_can_encode) {
   TESTING("    copy of deflate filter");
 
 #ifdef H5_HAVE_FILTER_DEFLATE
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
  if (h5repack(FNAME8,FNAME8OUT,&pack_options) < 0)
   GOERROR;
@@ -944,7 +944,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME8OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
  PASSED();
@@ -956,9 +956,9 @@ if (szip_can_encode) {
  TESTING("    removing deflate filter");
 
 #ifdef H5_HAVE_FILTER_DEFLATE
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addfilter("dset_deflate:NONE",&pack_options)<0)
+ if (h5repack_addfilter("dset_deflate:NONE",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME8,FNAME8OUT,&pack_options) < 0)
   GOERROR;
@@ -966,7 +966,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME8OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
  PASSED();
@@ -979,7 +979,7 @@ if (szip_can_encode) {
  TESTING("    copy of shuffle filter");
 
 #ifdef H5_HAVE_FILTER_SHUFFLE
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
  if (h5repack(FNAME9,FNAME9OUT,&pack_options) < 0)
   GOERROR;
@@ -987,7 +987,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME9OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
  PASSED();
@@ -998,9 +998,9 @@ if (szip_can_encode) {
  TESTING("    removing shuffle filter");
 
 #ifdef H5_HAVE_FILTER_SHUFFLE
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addfilter("dset_shuffle:NONE",&pack_options)<0)
+ if (h5repack_addfilter("dset_shuffle:NONE",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME9,FNAME9OUT,&pack_options) < 0)
   GOERROR;
@@ -1008,7 +1008,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME9OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
  PASSED();
@@ -1019,7 +1019,7 @@ if (szip_can_encode) {
  TESTING("    copy of fletcher filter");
 
 #ifdef H5_HAVE_FILTER_FLETCHER32
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
  if (h5repack(FNAME10,FNAME10OUT,&pack_options) < 0)
   GOERROR;
@@ -1027,7 +1027,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME10OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
  PASSED();
@@ -1038,9 +1038,9 @@ if (szip_can_encode) {
   TESTING("    removing fletcher filter");
 
 #ifdef H5_HAVE_FILTER_FLETCHER32
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addfilter("dset_fletcher32:NONE",&pack_options)<0)
+ if (h5repack_addfilter("dset_fletcher32:NONE",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME10,FNAME10OUT,&pack_options) < 0)
   GOERROR;
@@ -1048,7 +1048,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME10OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
  PASSED();
@@ -1060,7 +1060,7 @@ if (szip_can_encode) {
  TESTING("    copy of nbit filter");
 
 #ifdef H5_HAVE_FILTER_NBIT
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
  if (h5repack(FNAME12,FNAME12OUT,&pack_options) < 0)
   GOERROR;
@@ -1068,7 +1068,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME12OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
  PASSED();
@@ -1079,9 +1079,9 @@ if (szip_can_encode) {
   TESTING("    removing nbit filter");
 
 #ifdef H5_HAVE_FILTER_NBIT
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addfilter("dset_nbit:NONE",&pack_options)<0)
+ if (h5repack_addfilter("dset_nbit:NONE",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME12,FNAME12OUT,&pack_options) < 0)
   GOERROR;
@@ -1089,7 +1089,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME12OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
  PASSED();
@@ -1100,9 +1100,9 @@ if (szip_can_encode) {
   TESTING("    adding nbit filter");
 
 #ifdef H5_HAVE_FILTER_NBIT
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addfilter("dset_int31:NBIT",&pack_options)<0)
+ if (h5repack_addfilter("dset_int31:NBIT",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME12,FNAME12OUT,&pack_options) < 0)
   GOERROR;
@@ -1110,7 +1110,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME12OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
  PASSED();
@@ -1120,7 +1120,7 @@ if (szip_can_encode) {
  TESTING("    copy of scaleoffset filter");
 
 #ifdef H5_HAVE_FILTER_SCALEOFFSET
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
  if (h5repack(FNAME13,FNAME13OUT,&pack_options) < 0)
   GOERROR;
@@ -1128,7 +1128,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME13OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
  PASSED();
@@ -1139,9 +1139,9 @@ if (szip_can_encode) {
   TESTING("    removing scaleoffset filter");
 
 #ifdef H5_HAVE_FILTER_SCALEOFFSET
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addfilter("dset_scaleoffset:NONE",&pack_options)<0)
+ if (h5repack_addfilter("dset_scaleoffset:NONE",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME13,FNAME13OUT,&pack_options) < 0)
   GOERROR;
@@ -1149,7 +1149,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME13OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
  PASSED();
@@ -1161,9 +1161,9 @@ if (szip_can_encode) {
   TESTING("    adding scaleoffset filter");
 
 #ifdef H5_HAVE_FILTER_SCALEOFFSET
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addfilter("dset_none:SOFF=31,IN",&pack_options)<0)
+ if (h5repack_addfilter("dset_none:SOFF=31,IN",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME13,FNAME13OUT,&pack_options) < 0)
   GOERROR;
@@ -1171,7 +1171,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME13OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
  PASSED();
@@ -1197,9 +1197,9 @@ if (szip_can_encode) {
     && defined (H5_HAVE_FILTER_FLETCHER32) && defined (H5_HAVE_FILTER_SHUFFLE)
 
 if (szip_can_encode) {
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addfilter("dset_deflate:SZIP=8,NN",&pack_options)<0)
+ if (h5repack_addfilter("dset_deflate:SZIP=8,NN",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME11,FNAME11OUT,&pack_options) < 0)
   GOERROR;
@@ -1207,7 +1207,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME11OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
  PASSED();
@@ -1225,9 +1225,9 @@ if (szip_can_encode) {
     && defined (H5_HAVE_FILTER_FLETCHER32) && defined (H5_HAVE_FILTER_SHUFFLE)
 
 if (szip_can_encode) {
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addfilter("dset_szip:GZIP=1",&pack_options)<0)
+ if (h5repack_addfilter("dset_szip:GZIP=1",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME11,FNAME11OUT,&pack_options) < 0)
   GOERROR;
@@ -1235,7 +1235,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME11OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
  PASSED();
@@ -1257,9 +1257,9 @@ if (szip_can_encode) {
 #if defined (H5_HAVE_FILTER_SZIP) && defined (H5_HAVE_FILTER_DEFLATE) \
     && defined (H5_HAVE_FILTER_FLETCHER32) && defined (H5_HAVE_FILTER_SHUFFLE)
 
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
- if (h5repack_addfilter("NONE",&pack_options)<0)
+ if (h5repack_addfilter("NONE",&pack_options) < 0)
   GOERROR;
  if (h5repack(FNAME11,FNAME11OUT,&pack_options) < 0)
   GOERROR;
@@ -1267,7 +1267,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME11OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
  PASSED();
@@ -1280,7 +1280,7 @@ if (szip_can_encode) {
  *-------------------------------------------------------------------------
  */
  TESTING("    big file");
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
  if (h5repack(FNAME14,FNAME14OUT,&pack_options) < 0)
   GOERROR;
@@ -1288,7 +1288,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME14OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
  PASSED();
 
@@ -1297,7 +1297,7 @@ if (szip_can_encode) {
  *-------------------------------------------------------------------------
  */
  TESTING("    external datasets");
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
  if (h5repack(FNAME15,FNAME15OUT,&pack_options) < 0)
   GOERROR;
@@ -1305,7 +1305,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME15OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
  PASSED();
 
@@ -1333,7 +1333,7 @@ if (szip_can_encode) {
  *-------------------------------------------------------------------------
  */
  TESTING("    latest file format options");
- if (h5repack_init (&pack_options, 0)<0)
+ if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
  pack_options.latest=1;
  pack_options.grp_compact=10;
@@ -1349,7 +1349,7 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME1OUT,&pack_options)<=0)
   GOERROR;
- if (h5repack_end (&pack_options)<0)
+ if (h5repack_end (&pack_options) < 0)
   GOERROR;
  PASSED();
 
@@ -1396,60 +1396,60 @@ int make_testfiles(void)
  * create a file for general copy test
  *-------------------------------------------------------------------------
  */
- if((loc_id = H5Fcreate(FNAME0,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+ if((loc_id = H5Fcreate(FNAME0,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT)) < 0)
   return -1;
- if (make_fill(loc_id)<0)
+ if (make_fill(loc_id) < 0)
   goto out;
- if(H5Fclose(loc_id)<0)
+ if(H5Fclose(loc_id) < 0)
   return -1;
 
 /*-------------------------------------------------------------------------
  * create another file for general copy test (all datatypes)
  *-------------------------------------------------------------------------
  */
- if((loc_id = H5Fcreate(FNAME1,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+ if((loc_id = H5Fcreate(FNAME1,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT)) < 0)
   return -1;
- if (make_all_objects(loc_id)<0)
+ if (make_all_objects(loc_id) < 0)
   goto out;
- if(H5Fclose(loc_id)<0)
+ if(H5Fclose(loc_id) < 0)
   return -1;
 
 /*-------------------------------------------------------------------------
  * create a file for attributes copy test
  *-------------------------------------------------------------------------
  */
- if((loc_id = H5Fcreate(FNAME2,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+ if((loc_id = H5Fcreate(FNAME2,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT)) < 0)
   return -1;
- if (make_attributes(loc_id)<0)
+ if (make_attributes(loc_id) < 0)
   goto out;
- if(H5Fclose(loc_id)<0)
+ if(H5Fclose(loc_id) < 0)
   return -1;
 /*-------------------------------------------------------------------------
  * create a file for hard links test
  *-------------------------------------------------------------------------
  */
- if((loc_id = H5Fcreate(FNAME3,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+ if((loc_id = H5Fcreate(FNAME3,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT)) < 0)
   return -1;
- if (make_hlinks(loc_id)<0)
+ if (make_hlinks(loc_id) < 0)
   goto out;
- if(H5Fclose(loc_id)<0)
+ if(H5Fclose(loc_id) < 0)
   return -1;
 /*-------------------------------------------------------------------------
  * create a file for layouts test
  *-------------------------------------------------------------------------
  */
- if((loc_id = H5Fcreate(FNAME4,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+ if((loc_id = H5Fcreate(FNAME4,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT)) < 0)
   return -1;
- if (make_layout(loc_id)<0)
+ if (make_layout(loc_id) < 0)
   goto out;
- if(H5Fclose(loc_id)<0)
+ if(H5Fclose(loc_id) < 0)
   return -1;
 
 /*-------------------------------------------------------------------------
  * create a file for the H5D_ALLOC_TIME_EARLY test
  *-------------------------------------------------------------------------
  */
- if (make_early()<0)
+ if (make_early() < 0)
   goto out;
 
 /*-------------------------------------------------------------------------
@@ -1457,11 +1457,11 @@ int make_testfiles(void)
  *-------------------------------------------------------------------------
  */
 #ifdef H5_HAVE_FILTER_SZIP
- if((loc_id = H5Fcreate(FNAME7,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+ if((loc_id = H5Fcreate(FNAME7,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT)) < 0)
   return -1;
- if (make_szip(loc_id)<0)
+ if (make_szip(loc_id) < 0)
   goto out;
- if(H5Fclose(loc_id)<0)
+ if(H5Fclose(loc_id) < 0)
   return -1;
 #endif /* H5_HAVE_FILTER_SZIP */
 
@@ -1469,88 +1469,88 @@ int make_testfiles(void)
  * create a file with the deflate filter
  *-------------------------------------------------------------------------
  */
- if((loc_id = H5Fcreate(FNAME8,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+ if((loc_id = H5Fcreate(FNAME8,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT)) < 0)
   return -1;
- if (make_deflate(loc_id)<0)
+ if (make_deflate(loc_id) < 0)
   goto out;
- if(H5Fclose(loc_id)<0)
+ if(H5Fclose(loc_id) < 0)
   return -1;
 
 /*-------------------------------------------------------------------------
  * create a file with the shuffle filter
  *-------------------------------------------------------------------------
  */
- if((loc_id = H5Fcreate(FNAME9,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+ if((loc_id = H5Fcreate(FNAME9,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT)) < 0)
   return -1;
- if (make_shuffle(loc_id)<0)
+ if (make_shuffle(loc_id) < 0)
   goto out;
- if(H5Fclose(loc_id)<0)
+ if(H5Fclose(loc_id) < 0)
   return -1;
 
 /*-------------------------------------------------------------------------
  * create a file with the fletcher32 filter
  *-------------------------------------------------------------------------
  */
- if((loc_id = H5Fcreate(FNAME10,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+ if((loc_id = H5Fcreate(FNAME10,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT)) < 0)
   return -1;
- if (make_fletcher32(loc_id)<0)
+ if (make_fletcher32(loc_id) < 0)
   goto out;
- if(H5Fclose(loc_id)<0)
+ if(H5Fclose(loc_id) < 0)
   return -1;
 
 /*-------------------------------------------------------------------------
  * create a file with all the filters
  *-------------------------------------------------------------------------
  */
- if((loc_id = H5Fcreate(FNAME11,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+ if((loc_id = H5Fcreate(FNAME11,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT)) < 0)
   return -1;
- if (make_all(loc_id)<0)
+ if (make_all(loc_id) < 0)
   goto out;
- if(H5Fclose(loc_id)<0)
+ if(H5Fclose(loc_id) < 0)
   return -1;
 
 /*-------------------------------------------------------------------------
  * create a file with the nbit filter
  *-------------------------------------------------------------------------
  */
- if((loc_id = H5Fcreate(FNAME12,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+ if((loc_id = H5Fcreate(FNAME12,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT)) < 0)
   return -1;
- if (make_nbit(loc_id)<0)
+ if (make_nbit(loc_id) < 0)
   goto out;
- if(H5Fclose(loc_id)<0)
+ if(H5Fclose(loc_id) < 0)
   return -1;
 
 /*-------------------------------------------------------------------------
  * create a file with the scaleoffset filter
  *-------------------------------------------------------------------------
  */
- if((loc_id = H5Fcreate(FNAME13,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+ if((loc_id = H5Fcreate(FNAME13,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT)) < 0)
   return -1;
- if (make_scaleoffset(loc_id)<0)
+ if (make_scaleoffset(loc_id) < 0)
   goto out;
- if(H5Fclose(loc_id)<0)
+ if(H5Fclose(loc_id) < 0)
   return -1;
 
 /*-------------------------------------------------------------------------
  * create a big dataset
  *-------------------------------------------------------------------------
  */
- if((loc_id = H5Fcreate(FNAME14,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+ if((loc_id = H5Fcreate(FNAME14,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT)) < 0)
   return -1;
- if (make_big(loc_id)<0)
+ if (make_big(loc_id) < 0)
   goto out;
- if(H5Fclose(loc_id)<0)
+ if(H5Fclose(loc_id) < 0)
   return -1;
 
 /*-------------------------------------------------------------------------
  * create a file with external dataset
  *-------------------------------------------------------------------------
  */
- if((loc_id = H5Fcreate(FNAME15,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT))<0)
+ if((loc_id = H5Fcreate(FNAME15,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT)) < 0)
   return -1;
- if (make_external(loc_id)<0)
+ if (make_external(loc_id) < 0)
   goto out;
- if(H5Fclose(loc_id)<0)
+ if(H5Fclose(loc_id) < 0)
   return -1;
 
 /*-------------------------------------------------------------------------
@@ -1779,13 +1779,13 @@ int make_szip(hid_t loc_id)
   }
  }
  /* create a space */
- if((sid = H5Screate_simple(RANK, dims, NULL))<0)
+ if((sid = H5Screate_simple(RANK, dims, NULL)) < 0)
   return -1;
  /* create a dcpl */
- if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+ if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
   goto out;
  /* set up chunk */
- if(H5Pset_chunk(dcpl, RANK, chunk_dims)<0)
+ if(H5Pset_chunk(dcpl, RANK, chunk_dims) < 0)
   goto out;
 
 /*-------------------------------------------------------------------------
@@ -1798,17 +1798,17 @@ if (h5tools_can_encode(H5Z_FILTER_SZIP) == 1) {
 }
 if (szip_can_encode) {
  /* set szip data */
- if(H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block)<0)
+ if(H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block) < 0)
   goto out;
- if (make_dset(loc_id,"dset_szip",sid,dcpl,buf)<0)
+ if (make_dset(loc_id,"dset_szip",sid,dcpl,buf) < 0)
   goto out;
 } else {
  /* WARNING? SZIP is decoder only, can't generate test files */
 }
 
- if(H5Sclose(sid)<0)
+ if(H5Sclose(sid) < 0)
   goto out;
- if(H5Pclose(dcpl)<0)
+ if(H5Pclose(dcpl) < 0)
   goto out;
 
  return 0;
@@ -1849,13 +1849,13 @@ int make_deflate(hid_t loc_id)
  }
 
  /* create a space */
- if((sid = H5Screate_simple(RANK, dims, NULL))<0)
+ if((sid = H5Screate_simple(RANK, dims, NULL)) < 0)
   return -1;
  /* create a dcpl */
- if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+ if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
   goto out;
  /* set up chunk */
- if(H5Pset_chunk(dcpl, RANK, chunk_dims)<0)
+ if(H5Pset_chunk(dcpl, RANK, chunk_dims) < 0)
   goto out;
 /*-------------------------------------------------------------------------
  * GZIP
@@ -1863,16 +1863,16 @@ int make_deflate(hid_t loc_id)
  */
 #if defined (H5_HAVE_FILTER_DEFLATE)
  /* set deflate data */
- if(H5Pset_deflate(dcpl, 9)<0)
+ if(H5Pset_deflate(dcpl, 9) < 0)
   goto out;
- if (make_dset(loc_id,"dset_deflate",sid,dcpl,buf)<0)
+ if (make_dset(loc_id,"dset_deflate",sid,dcpl,buf) < 0)
   goto out;
 
  /* create a reference to the dataset, test second seeep of file for references */
 
- if (H5Rcreate(&bufref[0],loc_id,"dset_deflate",H5R_OBJECT,-1)<0)
+ if (H5Rcreate(&bufref[0],loc_id,"dset_deflate",H5R_OBJECT,-1) < 0)
   goto out;
- if (write_dset(loc_id,1,dims1r,"ref",H5T_STD_REF_OBJ,bufref)<0)
+ if (write_dset(loc_id,1,dims1r,"ref",H5T_STD_REF_OBJ,bufref) < 0)
   goto out;
 #endif
 
@@ -1880,9 +1880,9 @@ int make_deflate(hid_t loc_id)
  * close space and dcpl
  *-------------------------------------------------------------------------
  */
- if(H5Sclose(sid)<0)
+ if(H5Sclose(sid) < 0)
   goto out;
- if(H5Pclose(dcpl)<0)
+ if(H5Pclose(dcpl) < 0)
   goto out;
 
  return 0;
@@ -1918,13 +1918,13 @@ int make_shuffle(hid_t loc_id)
   }
  }
  /* create a space */
- if((sid = H5Screate_simple(RANK, dims, NULL))<0)
+ if((sid = H5Screate_simple(RANK, dims, NULL)) < 0)
   return -1;
  /* create a dcpl */
- if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+ if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
   goto out;
  /* set up chunk */
- if(H5Pset_chunk(dcpl, RANK, chunk_dims)<0)
+ if(H5Pset_chunk(dcpl, RANK, chunk_dims) < 0)
   goto out;
 
 /*-------------------------------------------------------------------------
@@ -1933,9 +1933,9 @@ int make_shuffle(hid_t loc_id)
  */
 #if defined (H5_HAVE_FILTER_SHUFFLE)
  /* set the shuffle filter */
- if (H5Pset_shuffle(dcpl)<0)
+ if (H5Pset_shuffle(dcpl) < 0)
   goto out;
- if (make_dset(loc_id,"dset_shuffle",sid,dcpl,buf)<0)
+ if (make_dset(loc_id,"dset_shuffle",sid,dcpl,buf) < 0)
   goto out;
 #endif
 
@@ -1943,9 +1943,9 @@ int make_shuffle(hid_t loc_id)
  * close space and dcpl
  *-------------------------------------------------------------------------
  */
- if(H5Sclose(sid)<0)
+ if(H5Sclose(sid) < 0)
   goto out;
- if(H5Pclose(dcpl)<0)
+ if(H5Pclose(dcpl) < 0)
   goto out;
 
  return 0;
@@ -1980,13 +1980,13 @@ int make_fletcher32(hid_t loc_id)
   }
  }
  /* create a space */
- if((sid = H5Screate_simple(RANK, dims, NULL))<0)
+ if((sid = H5Screate_simple(RANK, dims, NULL)) < 0)
   return -1;
  /* create a dataset creation property list; the same DCPL is used for all dsets */
- if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+ if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
   goto out;
  /* set up chunk */
- if(H5Pset_chunk(dcpl, RANK, chunk_dims)<0)
+ if(H5Pset_chunk(dcpl, RANK, chunk_dims) < 0)
   goto out;
 
 
@@ -1996,12 +1996,12 @@ int make_fletcher32(hid_t loc_id)
  */
 #if defined (H5_HAVE_FILTER_FLETCHER32)
  /* remove the filters from the dcpl */
- if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0)
+ if (H5Premove_filter(dcpl,H5Z_FILTER_ALL) < 0)
   goto out;
  /* set the checksum filter */
- if (H5Pset_fletcher32(dcpl)<0)
+ if (H5Pset_fletcher32(dcpl) < 0)
   goto out;
- if (make_dset(loc_id,"dset_fletcher32",sid,dcpl,buf)<0)
+ if (make_dset(loc_id,"dset_fletcher32",sid,dcpl,buf) < 0)
   goto out;
 #endif
 
@@ -2009,9 +2009,9 @@ int make_fletcher32(hid_t loc_id)
  * close space and dcpl
  *-------------------------------------------------------------------------
  */
- if(H5Sclose(sid)<0)
+ if(H5Sclose(sid) < 0)
   goto out;
- if(H5Pclose(dcpl)<0)
+ if(H5Pclose(dcpl) < 0)
   goto out;
 
  return 0;
@@ -2049,13 +2049,13 @@ int make_nbit(hid_t loc_id)
   }
  }
  /* create a space */
- if((sid = H5Screate_simple(RANK, dims, NULL))<0)
+ if((sid = H5Screate_simple(RANK, dims, NULL)) < 0)
   return -1;
  /* create a dataset creation property list; the same DCPL is used for all dsets */
- if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+ if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
   goto out;
  /* set up chunk */
- if(H5Pset_chunk(dcpl, RANK, chunk_dims)<0)
+ if(H5Pset_chunk(dcpl, RANK, chunk_dims) < 0)
   goto out;
 
  dtid = H5Tcopy(H5T_NATIVE_INT);
@@ -2067,39 +2067,39 @@ int make_nbit(hid_t loc_id)
 
 #if defined (H5_HAVE_FILTER_NBIT)
  /* remove the filters from the dcpl */
- if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0)
+ if (H5Premove_filter(dcpl,H5Z_FILTER_ALL) < 0)
  {
   H5Tclose(dtid);
   goto out;
  }
- if (H5Pset_nbit(dcpl)<0)
+ if (H5Pset_nbit(dcpl) < 0)
  {
   H5Tclose(dtid);
   goto out;
  }
- if((dsid = H5Dcreate (loc_id,"dset_nbit",dtid,sid,dcpl))<0)
+ if((dsid = H5Dcreate (loc_id,"dset_nbit",dtid,sid,dcpl)) < 0)
  {
   H5Tclose(dtid);
   goto out;
  }
- if(H5Dwrite(dsid,dtid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+ if(H5Dwrite(dsid,dtid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0)
  {
   H5Tclose(dtid);
   goto out;
  }
  H5Dclose(dsid);
 
- if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0)
+ if (H5Premove_filter(dcpl,H5Z_FILTER_ALL) < 0)
  {
   H5Tclose(dtid);
   goto out;
  }
- if((dsid = H5Dcreate (loc_id,"dset_int31",dtid,sid,dcpl))<0)
+ if((dsid = H5Dcreate (loc_id,"dset_int31",dtid,sid,dcpl)) < 0)
  {
   H5Tclose(dtid);
   goto out;
  }
- if(H5Dwrite(dsid,dtid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+ if(H5Dwrite(dsid,dtid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0)
  {
   H5Tclose(dtid);
   goto out;
@@ -2111,11 +2111,11 @@ int make_nbit(hid_t loc_id)
  * close 
  *-------------------------------------------------------------------------
  */
- if(H5Sclose(sid)<0)
+ if(H5Sclose(sid) < 0)
   goto out;
- if(H5Pclose(dcpl)<0)
+ if(H5Pclose(dcpl) < 0)
   goto out;
- if (H5Tclose(dtid)<0)
+ if (H5Tclose(dtid) < 0)
   goto out;
 
  return 0;
@@ -2153,46 +2153,46 @@ int make_scaleoffset(hid_t loc_id)
   }
  }
  /* create a space */
- if((sid = H5Screate_simple(RANK, dims, NULL))<0)
+ if((sid = H5Screate_simple(RANK, dims, NULL)) < 0)
   return -1;
  /* create a dataset creation property list; the same DCPL is used for all dsets */
- if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+ if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
   goto out;
  /* set up chunk */
- if(H5Pset_chunk(dcpl, RANK, chunk_dims)<0)
+ if(H5Pset_chunk(dcpl, RANK, chunk_dims) < 0)
   goto out;
 
  dtid = H5Tcopy(H5T_NATIVE_INT);
 
 #if defined (H5_HAVE_FILTER_SCALEOFFSET)
  /* remove the filters from the dcpl */
- if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0)
+ if (H5Premove_filter(dcpl,H5Z_FILTER_ALL) < 0)
  {
   H5Tclose(dtid);
   goto out;
  }
- if (H5Pset_scaleoffset(dcpl,H5Z_SO_INT,31)<0)
+ if (H5Pset_scaleoffset(dcpl,H5Z_SO_INT,31) < 0)
  {
   H5Tclose(dtid);
   goto out;
  }
- if((dsid = H5Dcreate (loc_id,"dset_scaleoffset",dtid,sid,dcpl))<0)
+ if((dsid = H5Dcreate (loc_id,"dset_scaleoffset",dtid,sid,dcpl)) < 0)
  {
   H5Tclose(dtid);
   goto out;
  }
- if(H5Dwrite(dsid,dtid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+ if(H5Dwrite(dsid,dtid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0)
  {
   H5Tclose(dtid);
   goto out;
  }
  H5Dclose(dsid);
- if((dsid = H5Dcreate (loc_id,"dset_none",dtid,sid,H5P_DEFAULT))<0)
+ if((dsid = H5Dcreate (loc_id,"dset_none",dtid,sid,H5P_DEFAULT)) < 0)
  {
   H5Tclose(dtid);
   goto out;
  }
- if(H5Dwrite(dsid,dtid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+ if(H5Dwrite(dsid,dtid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0)
  {
   H5Tclose(dtid);
   goto out;
@@ -2205,9 +2205,9 @@ int make_scaleoffset(hid_t loc_id)
  * close space and dcpl
  *-------------------------------------------------------------------------
  */
- if(H5Sclose(sid)<0)
+ if(H5Sclose(sid) < 0)
   goto out;
- if(H5Pclose(dcpl)<0)
+ if(H5Pclose(dcpl) < 0)
   goto out;
 
  return 0;
@@ -2254,24 +2254,24 @@ int make_all(hid_t loc_id)
   }
  }
  /* create a space */
- if((sid = H5Screate_simple(RANK, dims, NULL))<0)
+ if((sid = H5Screate_simple(RANK, dims, NULL)) < 0)
   return -1;
  /* create a dataset creation property list; the same DCPL is used for all dsets */
- if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+ if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
   goto out;
  /* set up chunk */
- if(H5Pset_chunk(dcpl, RANK, chunk_dims)<0)
+ if(H5Pset_chunk(dcpl, RANK, chunk_dims) < 0)
   goto out;
 
 #if defined (H5_HAVE_FILTER_SHUFFLE)
  /* set the shuffle filter */
- if (H5Pset_shuffle(dcpl)<0)
+ if (H5Pset_shuffle(dcpl) < 0)
   goto out;
 #endif
 
 #if defined (H5_HAVE_FILTER_FLETCHER32)
  /* set the checksum filter */
- if (H5Pset_fletcher32(dcpl)<0)
+ if (H5Pset_fletcher32(dcpl) < 0)
   goto out;
 #endif
 
@@ -2281,7 +2281,7 @@ if (h5tools_can_encode(H5Z_FILTER_SZIP) == 1) {
 }
 if (szip_can_encode) {
  /* set szip data */
- if(H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block)<0)
+ if(H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block) < 0)
   goto out;
 } else {
  /* WARNING? SZIP is decoder only, can't generate test data using szip */
@@ -2290,11 +2290,11 @@ if (szip_can_encode) {
 
 #if defined (H5_HAVE_FILTER_DEFLATE)
  /* set deflate data */
- if(H5Pset_deflate(dcpl, 9)<0)
+ if(H5Pset_deflate(dcpl, 9) < 0)
   goto out;
 #endif
 
- if (make_dset(loc_id,"dset_all",sid,dcpl,buf)<0)
+ if (make_dset(loc_id,"dset_all",sid,dcpl,buf) < 0)
   goto out;
 
 /*-------------------------------------------------------------------------
@@ -2303,12 +2303,12 @@ if (szip_can_encode) {
  */
 #if defined (H5_HAVE_FILTER_FLETCHER32)
  /* remove the filters from the dcpl */
- if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0)
+ if (H5Premove_filter(dcpl,H5Z_FILTER_ALL) < 0)
   goto out;
  /* set the checksum filter */
- if (H5Pset_fletcher32(dcpl)<0)
+ if (H5Pset_fletcher32(dcpl) < 0)
   goto out;
- if (make_dset(loc_id,"dset_fletcher32",sid,dcpl,buf)<0)
+ if (make_dset(loc_id,"dset_fletcher32",sid,dcpl,buf) < 0)
   goto out;
 #endif
 
@@ -2320,12 +2320,12 @@ if (szip_can_encode) {
 #if defined (H5_HAVE_FILTER_SZIP)
 if (szip_can_encode) {
  /* remove the filters from the dcpl */
- if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0)
+ if (H5Premove_filter(dcpl,H5Z_FILTER_ALL) < 0)
   goto out;
  /* set szip data */
- if(H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block)<0)
+ if(H5Pset_szip (dcpl,szip_options_mask,szip_pixels_per_block) < 0)
   goto out;
- if (make_dset(loc_id,"dset_szip",sid,dcpl,buf)<0)
+ if (make_dset(loc_id,"dset_szip",sid,dcpl,buf) < 0)
   goto out;
 } else {
  /* WARNING? SZIP is decoder only, can't generate test dataset */
@@ -2338,12 +2338,12 @@ if (szip_can_encode) {
  */
 #if defined (H5_HAVE_FILTER_SHUFFLE)
  /* remove the filters from the dcpl */
- if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0)
+ if (H5Premove_filter(dcpl,H5Z_FILTER_ALL) < 0)
   goto out;
  /* set the shuffle filter */
- if (H5Pset_shuffle(dcpl)<0)
+ if (H5Pset_shuffle(dcpl) < 0)
   goto out;
- if (make_dset(loc_id,"dset_shuffle",sid,dcpl,buf)<0)
+ if (make_dset(loc_id,"dset_shuffle",sid,dcpl,buf) < 0)
   goto out;
 #endif
 
@@ -2353,12 +2353,12 @@ if (szip_can_encode) {
  */
 #if defined (H5_HAVE_FILTER_DEFLATE)
  /* remove the filters from the dcpl */
- if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0)
+ if (H5Premove_filter(dcpl,H5Z_FILTER_ALL) < 0)
   goto out;
  /* set deflate data */
- if(H5Pset_deflate(dcpl, 1)<0)
+ if(H5Pset_deflate(dcpl, 1) < 0)
   goto out;
- if (make_dset(loc_id,"dset_deflate",sid,dcpl,buf)<0)
+ if (make_dset(loc_id,"dset_deflate",sid,dcpl,buf) < 0)
   goto out;
 #endif
 
@@ -2369,22 +2369,22 @@ if (szip_can_encode) {
  */
 #if defined (H5_HAVE_FILTER_NBIT)
  /* remove the filters from the dcpl */
- if (H5Premove_filter(dcpl,H5Z_FILTER_ALL)<0)
+ if (H5Premove_filter(dcpl,H5Z_FILTER_ALL) < 0)
   goto out;
  /* set the shuffle filter */
- if (H5Pset_nbit(dcpl)<0)
+ if (H5Pset_nbit(dcpl) < 0)
   goto out;
  dtid = H5Tcopy(H5T_NATIVE_INT);
  H5Tset_precision(dtid,(H5Tget_precision(dtid)-1));
- if((dsid = H5Dcreate (loc_id,"dset_nbit",dtid,sid,dcpl))<0)
+ if((dsid = H5Dcreate (loc_id,"dset_nbit",dtid,sid,dcpl)) < 0)
   goto out;
- if(H5Dwrite(dsid,dtid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+ if(H5Dwrite(dsid,dtid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0)
   goto out;
 
  /* close */
- if(H5Tclose(dtid)<0)
+ if(H5Tclose(dtid) < 0)
   return -1;
- if(H5Dclose(dsid)<0)
+ if(H5Dclose(dsid) < 0)
   return -1;
 #endif
 
@@ -2392,9 +2392,9 @@ if (szip_can_encode) {
  * close space and dcpl
  *-------------------------------------------------------------------------
  */
- if(H5Sclose(sid)<0)
+ if(H5Sclose(sid) < 0)
   goto out;
- if(H5Pclose(dcpl)<0)
+ if(H5Pclose(dcpl) < 0)
   goto out;
 
  return 0;
@@ -2533,7 +2533,7 @@ int make_layout(hid_t loc_id)
  for (i=0; i<4; i++)
  {
   sprintf(name,"dset%d",i+1);
-  if (write_dset(loc_id,RANK,dims,name,H5T_NATIVE_INT,buf)<0)
+  if (write_dset(loc_id,RANK,dims,name,H5T_NATIVE_INT,buf) < 0)
    return -1;
  }
 
@@ -2543,46 +2543,46 @@ int make_layout(hid_t loc_id)
  *-------------------------------------------------------------------------
  */
  /* create a space */
- if((sid = H5Screate_simple(RANK, dims, NULL))<0)
+ if((sid = H5Screate_simple(RANK, dims, NULL)) < 0)
   return -1;
  /* create a dataset creation property list; the same DCPL is used for all dsets */
- if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+ if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
   goto out;
 
 /*-------------------------------------------------------------------------
  * H5D_COMPACT
  *-------------------------------------------------------------------------
  */
- if(H5Pset_layout (dcpl,H5D_COMPACT)<0)
+ if(H5Pset_layout (dcpl,H5D_COMPACT) < 0)
   goto out;
- if (make_dset(loc_id,"dset_compact",sid,dcpl,buf)<0)
+ if (make_dset(loc_id,"dset_compact",sid,dcpl,buf) < 0)
   goto out;
 
 /*-------------------------------------------------------------------------
  * H5D_CONTIGUOUS
  *-------------------------------------------------------------------------
  */
- if(H5Pset_layout (dcpl,H5D_CONTIGUOUS)<0)
+ if(H5Pset_layout (dcpl,H5D_CONTIGUOUS) < 0)
   goto out;
- if (make_dset(loc_id,"dset_contiguous",sid,dcpl,buf)<0)
+ if (make_dset(loc_id,"dset_contiguous",sid,dcpl,buf) < 0)
   goto out;
 
 /*-------------------------------------------------------------------------
  * H5D_CHUNKED
  *-------------------------------------------------------------------------
  */
- if(H5Pset_chunk(dcpl, RANK, chunk_dims)<0)
+ if(H5Pset_chunk(dcpl, RANK, chunk_dims) < 0)
   goto out;
- if (make_dset(loc_id,"dset_chunk",sid,dcpl,buf)<0)
+ if (make_dset(loc_id,"dset_chunk",sid,dcpl,buf) < 0)
   goto out;
 
 /*-------------------------------------------------------------------------
  * close space and dcpl
  *-------------------------------------------------------------------------
  */
- if(H5Sclose(sid)<0)
+ if(H5Sclose(sid) < 0)
   goto out;
- if(H5Pclose(dcpl)<0)
+ if(H5Pclose(dcpl) < 0)
   goto out;
 
  return 0;
@@ -2615,23 +2615,23 @@ int make_fill(hid_t loc_id)
  * H5T_INTEGER, write a fill value
  *-------------------------------------------------------------------------
  */
- if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+ if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
   goto out;
- if (H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillvalue)<0)
+ if (H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillvalue) < 0)
   goto out;
- if ((sid = H5Screate_simple(2,dims,NULL))<0)
+ if ((sid = H5Screate_simple(2,dims,NULL)) < 0)
   goto out;
- if ((did = H5Dcreate(loc_id,"dset_fill",H5T_NATIVE_INT,sid,dcpl))<0)
+ if ((did = H5Dcreate(loc_id,"dset_fill",H5T_NATIVE_INT,sid,dcpl)) < 0)
   goto out;
- if (H5Dwrite(did,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+ if (H5Dwrite(did,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0)
   goto out;
 
  /* close */
- if(H5Sclose(sid)<0)
+ if(H5Sclose(sid) < 0)
   goto out;
- if(H5Pclose(dcpl)<0)
+ if(H5Pclose(dcpl) < 0)
   goto out;
- if(H5Dclose(did)<0)
+ if(H5Dclose(did) < 0)
   goto out;
 
  return 0;
@@ -2676,19 +2676,19 @@ int make_big(hid_t loc_id)
  hs_size[0]  = 1024;
 
  /* create */ 
- if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+ if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
   goto out;
- if (H5Pset_fill_value(dcpl, H5T_NATIVE_SCHAR, &fillvalue)<0)
+ if (H5Pset_fill_value(dcpl, H5T_NATIVE_SCHAR, &fillvalue) < 0)
   goto out;
- if(H5Pset_chunk(dcpl, 1, chunk_dims)<0)
+ if(H5Pset_chunk(dcpl, 1, chunk_dims) < 0)
   goto out;
- if ((f_sid = H5Screate_simple(1,dims,NULL))<0)
+ if ((f_sid = H5Screate_simple(1,dims,NULL)) < 0)
   goto out;
- if ((did = H5Dcreate(loc_id,"dset",H5T_NATIVE_SCHAR,f_sid,dcpl))<0)
+ if ((did = H5Dcreate(loc_id,"dset",H5T_NATIVE_SCHAR,f_sid,dcpl)) < 0)
   goto out;
- if ((m_sid = H5Screate_simple(1, hs_size, hs_size))<0) 
+ if ((m_sid = H5Screate_simple(1, hs_size, hs_size)) < 0) 
   goto out;
- if ((tid = H5Dget_type(did))<0) 
+ if ((tid = H5Dget_type(did)) < 0) 
   goto out;
  if ((size = H5Tget_size(tid))<=0)
   goto out;
@@ -2696,22 +2696,22 @@ int make_big(hid_t loc_id)
  /* initialize buffer to 0  */
  buf=(signed  char *) calloc( nelmts, size);
  
- if (H5Sselect_hyperslab (f_sid,H5S_SELECT_SET,hs_start,NULL,hs_size, NULL)<0) 
+ if (H5Sselect_hyperslab (f_sid,H5S_SELECT_SET,hs_start,NULL,hs_size, NULL) < 0) 
   goto out;
- if (H5Dwrite (did,H5T_NATIVE_SCHAR,m_sid,f_sid,H5P_DEFAULT,buf)<0) 
+ if (H5Dwrite (did,H5T_NATIVE_SCHAR,m_sid,f_sid,H5P_DEFAULT,buf) < 0) 
   goto out;
 
  free(buf);
  buf=NULL;
 
  /* close */
- if(H5Sclose(f_sid)<0)
+ if(H5Sclose(f_sid) < 0)
   goto out;
- if(H5Sclose(m_sid)<0)
+ if(H5Sclose(m_sid) < 0)
   goto out;
- if(H5Pclose(dcpl)<0)
+ if(H5Pclose(dcpl) < 0)
   goto out;
- if(H5Dclose(did)<0)
+ if(H5Dclose(did) < 0)
   goto out;
 
  return 0;
@@ -2750,23 +2750,23 @@ int make_external(hid_t loc_id)
  size = max_size[0] * sizeof(int);
  
  /* create */ 
- if ((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+ if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
   goto out;
- if (H5Pset_external(dcpl, H5REPACK_EXTFILE, (off_t)0, size)<0) 
+ if (H5Pset_external(dcpl, H5REPACK_EXTFILE, (off_t)0, size) < 0) 
   goto out;
- if ((sid = H5Screate_simple(1,cur_size, max_size))<0)
+ if ((sid = H5Screate_simple(1,cur_size, max_size)) < 0)
   goto out;
- if ((did = H5Dcreate(loc_id,"external",H5T_NATIVE_INT,sid,dcpl))<0)
+ if ((did = H5Dcreate(loc_id,"external",H5T_NATIVE_INT,sid,dcpl)) < 0)
   goto out;
- if (H5Dwrite(did,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+ if (H5Dwrite(did,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0)
   goto out;
 
  /* close */
- if(H5Sclose(sid)<0)
+ if(H5Sclose(sid) < 0)
   goto out;
- if(H5Pclose(dcpl)<0)
+ if(H5Pclose(dcpl) < 0)
   goto out;
- if(H5Dclose(did)<0)
+ if(H5Dclose(did) < 0)
   goto out;
 
  return 0;
@@ -3827,15 +3827,15 @@ void write_attr_in(hid_t loc_id,
  buf5[0].p = malloc( 1 * sizeof(int));
  ((int *)buf5[0].p)[0]=1;
  buf5[1].len = 2;
- buf5[1].p = malloc( 2 * sizeof(int));
- ((int *)buf5[1].p)[0]=2;
- ((int *)buf5[1].p)[1]=3;
+ buf5[1].p = malloc(2 * sizeof(int));
+ ((int *)buf5[1].p)[0] = 2;
+ ((int *)buf5[1].p)[1] = 3;
 
- if (make_diffs)
+ if(make_diffs)
  {
-  ((int *)buf5[0].p)[0]=0;
-  ((int *)buf5[1].p)[0]=0;
-  ((int *)buf5[1].p)[1]=0;
+  ((int *)buf5[0].p)[0] = 0;
+  ((int *)buf5[1].p)[0] = 0;
+  ((int *)buf5[1].p)[1] = 0;
  }
  /*
  $h5diff file7.h5 file6.h5 g1 g1 -v
@@ -3847,13 +3847,13 @@ void write_attr_in(hid_t loc_id,
 [ 1 ]          3               0               3
  */
 
- space_id = H5Screate_simple(1,dims,NULL);
+ space_id = H5Screate_simple(1, dims, NULL);
  type_id = H5Tvlen_create(H5T_NATIVE_INT);
- attr_id = H5Acreate(loc_id,"vlen",type_id,space_id,H5P_DEFAULT);
- status = H5Awrite(attr_id,type_id,buf5);
- assert(status>=0);
- status = H5Dvlen_reclaim(type_id,space_id,H5P_DEFAULT,buf5);
- assert(status>=0);
+ attr_id = H5Acreate2(loc_id, ".", "vlen", type_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ status = H5Awrite(attr_id, type_id, buf5);
+ assert(status >= 0);
+ status = H5Dvlen_reclaim(type_id, space_id, H5P_DEFAULT, buf5);
+ assert(status >= 0);
  status = H5Aclose(attr_id);
  status = H5Tclose(type_id);
  status = H5Sclose(space_id);
@@ -4118,13 +4118,13 @@ position        enum2D of </g1> enum2D of </g1> difference
 [ 2 1 ]          11              0               11
 */
 
- space_id = H5Screate_simple(2,dims2,NULL);
+ space_id = H5Screate_simple(2, dims2, NULL);
  type_id = H5Tvlen_create(H5T_NATIVE_INT);
- attr_id = H5Acreate(loc_id,"vlen2D",type_id,space_id,H5P_DEFAULT);
- status = H5Awrite(attr_id,type_id,buf52);
- assert(status>=0);
- status = H5Dvlen_reclaim(type_id,space_id,H5P_DEFAULT,buf52);
- assert(status>=0);
+ attr_id = H5Acreate2(loc_id, ".", "vlen2D", type_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ status = H5Awrite(attr_id, type_id, buf52);
+ assert(status >= 0);
+ status = H5Dvlen_reclaim(type_id, space_id, H5P_DEFAULT, buf52);
+ assert(status >= 0);
  status = H5Aclose(attr_id);
  status = H5Tclose(type_id);
  status = H5Sclose(space_id);
@@ -4517,13 +4517,13 @@ position        vlen3D of </g1> vlen3D of </g1> difference
 [ 1 1 0 ]          10              0               10
 etc
 */
- space_id = H5Screate_simple(3,dims3,NULL);
+ space_id = H5Screate_simple(3, dims3, NULL);
  type_id = H5Tvlen_create(H5T_NATIVE_INT);
- attr_id = H5Acreate(loc_id,"vlen3D",type_id,space_id,H5P_DEFAULT);
- status = H5Awrite(attr_id,type_id,buf53);
- assert(status>=0);
- status = H5Dvlen_reclaim(type_id,space_id,H5P_DEFAULT,buf53);
- assert(status>=0);
+ attr_id = H5Acreate2(loc_id, ".", "vlen3D", type_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ status = H5Awrite(attr_id, type_id, buf53);
+ assert(status >= 0);
+ status = H5Dvlen_reclaim(type_id, space_id, H5P_DEFAULT, buf53);
+ assert(status >= 0);
  status = H5Aclose(attr_id);
  status = H5Tclose(type_id);
  status = H5Sclose(space_id);
@@ -4617,15 +4617,15 @@ int make_dset(hid_t loc_id,
  hid_t   dsid;
 
  /* create the dataset */
- if((dsid = H5Dcreate (loc_id,name,H5T_NATIVE_INT,sid,dcpl))<0)
+ if((dsid = H5Dcreate (loc_id,name,H5T_NATIVE_INT,sid,dcpl)) < 0)
   return -1;
 
  /* write */
- if(H5Dwrite(dsid,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+ if(H5Dwrite(dsid,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0)
   goto out;
 
  /* close */
- if(H5Dclose(dsid)<0)
+ if(H5Dclose(dsid) < 0)
   return -1;
 
  return 0;
@@ -4660,22 +4660,22 @@ int write_dset( hid_t loc_id,
  hid_t   space_id;
 
  /* Create a buf space  */
- if ((space_id = H5Screate_simple(rank,dims,NULL))<0)
+ if ((space_id = H5Screate_simple(rank,dims,NULL)) < 0)
   return -1;
 
  /* Create a dataset */
- if ((dset_id = H5Dcreate(loc_id,dset_name,type_id,space_id,H5P_DEFAULT))<0)
+ if ((dset_id = H5Dcreate(loc_id,dset_name,type_id,space_id,H5P_DEFAULT)) < 0)
   return -1;
 
  /* Write the buf */
  if ( buf )
-  if (H5Dwrite(dset_id,type_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf)<0)
+  if (H5Dwrite(dset_id,type_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0)
    return -1;
 
  /* Close */
- if (H5Dclose(dset_id)<0)
+ if (H5Dclose(dset_id) < 0)
   return -1;
- if (H5Sclose(space_id)<0)
+ if (H5Sclose(space_id) < 0)
   return -1;
 
  return 0;
@@ -4706,19 +4706,17 @@ int make_attr(hid_t loc_id,
  hid_t   space_id;
 
  /* create a space  */
- if ((space_id = H5Screate_simple(rank,dims,NULL))<0)
+ if((space_id = H5Screate_simple(rank, dims, NULL)) < 0)
   return -1;
 
  /* create the attribute */
- if ((attr_id = H5Acreate(loc_id,attr_name,type_id,space_id,H5P_DEFAULT))<0)
+ if((attr_id = H5Acreate2(loc_id, ".", attr_name, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
   goto out;
 
  /* write the buffer */
- if ( buf )
- {
-  if (H5Awrite(attr_id,type_id,buf)<0)
-   goto out;
- }
+ if(buf)
+   if(H5Awrite(attr_id, type_id, buf) < 0)
+     goto out;
 
  /* close */
  H5Aclose(attr_id);

@@ -38,6 +38,10 @@
 /* Functions */
 /*************/
 
+#if !defined(H5Acreate_vers)
+#define H5Acreate_vers 1
+#endif /* !defined(H5Acreate_vers) */
+
 #if !defined(H5Adelete_vers)
 #define H5Adelete_vers 1
 #endif /* !defined(H5Adelete_vers) */
@@ -114,6 +118,17 @@
 /*************/
 /* Functions */
 /*************/
+
+#if !defined(H5Acreate_vers) || H5Acreate_vers == 2
+#ifndef H5Acreate_vers
+#define H5Acreate_vers 2
+#endif /* H5Acreate_vers */
+#define H5Acreate H5Acreate2
+#elif H5Acreate_vers == 1
+#define H5Acreate H5Acreate1
+#else /* H5Acreate_vers */
+#error "H5Acreate_vers set to invalid value"
+#endif /* H5Acreate_vers */
 
 #if !defined(H5Adelete_vers) || H5Adelete_vers == 2
 #ifndef H5Adelete_vers

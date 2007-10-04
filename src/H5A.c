@@ -276,7 +276,7 @@ done:
  * Function:	H5A_create
  *
  * Purpose:
- *      This is the guts of the H5Acreate function.
+ *      This is the guts of creating an attribute.
  * Usage:
  *  hid_t H5A_create (ent, name, type, space)
  *      const H5G_entry_t *ent;   IN: Pointer to symbol table entry for object to attribute

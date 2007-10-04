@@ -102,29 +102,29 @@ herr_t H5TBmake_table( const char *table_title,
  dims_chunk[0] = chunk_size;
 
  /* Create the memory data type. */
- if ((mem_type_id = H5Tcreate (H5T_COMPOUND, type_size )) < 0 )
+ if ((mem_type_id = H5Tcreate (H5T_COMPOUND, type_size )) < 0)
   return -1;
 
  /* Insert fields. */
  for ( i = 0; i < nfields; i++)
  {
-  if ( H5Tinsert(mem_type_id, field_names[i], field_offset[i], field_types[i] ) < 0 )
+  if(H5Tinsert(mem_type_id, field_names[i], field_offset[i], field_types[i] ) < 0)
    return -1;
  }
 
  /* Create a simple data space with unlimited size */
- if ( (sid = H5Screate_simple( 1, dims, maxdims )) < 0 ) 
+ if((sid = H5Screate_simple( 1, dims, maxdims )) < 0) 
   return -1;
 
  /* Modify dataset creation properties, i.e. enable chunking  */
  plist_id = H5Pcreate (H5P_DATASET_CREATE);
- if ( H5Pset_chunk ( plist_id, 1, dims_chunk ) < 0 )
+ if(H5Pset_chunk ( plist_id, 1, dims_chunk ) < 0)
   return -1;
 
  /* Set the fill value using a struct as the data type. */
- if ( fill_data )
+ if(fill_data )
  {
-  if ( H5Pset_fill_value( plist_id, mem_type_id, fill_data ) < 0 )
+  if(H5Pset_fill_value( plist_id, mem_type_id, fill_data ) < 0)
    return -1;
  }
 
@@ -133,34 +133,34 @@ herr_t H5TBmake_table( const char *table_title,
   GZIP compression with the compression effort set to 6.
   Note that compression can be used only when dataset is chunked.
   */
- if ( compress )
+ if(compress )
  {
-  if ( H5Pset_deflate( plist_id, 6) < 0 )
+  if(H5Pset_deflate( plist_id, 6) < 0)
    return -1;
  }
 
  /* Create the dataset. */
- if ( (did = H5Dcreate( loc_id, dset_name, mem_type_id, sid, plist_id )) < 0 )
+ if((did = H5Dcreate( loc_id, dset_name, mem_type_id, sid, plist_id )) < 0)
   goto out;
 
  /* Only write if there is something to write */
- if ( data )
+ if(data )
  {
   /* Write data to the dataset. */
-  if ( H5Dwrite( did, mem_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, data ) < 0 )
+  if(H5Dwrite( did, mem_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, data ) < 0)
    goto out;
  }
 
  /* Terminate access to the data space. */
- if ( H5Sclose( sid ) < 0 )
+ if(H5Sclose( sid ) < 0)
   goto out;
 
  /* End access to the dataset */
- if ( H5Dclose( did ) < 0 )
+ if(H5Dclose( did ) < 0)
   goto out;
 
  /* End access to the property list */
- if ( H5Pclose( plist_id ) < 0 )
+ if(H5Pclose( plist_id ) < 0)
   goto out;
 
 /*-------------------------------------------------------------------------
@@ -169,15 +169,15 @@ herr_t H5TBmake_table( const char *table_title,
  */
 
  /* Attach the CLASS attribute */
- if ( H5LTset_attribute_string( loc_id, dset_name, "CLASS", TABLE_CLASS ) < 0 )
+ if(H5LTset_attribute_string( loc_id, dset_name, "CLASS", TABLE_CLASS ) < 0)
   goto out;
 
  /* Attach the VERSION attribute */
- if ( H5LTset_attribute_string( loc_id, dset_name, "VERSION", "2.0" ) < 0 )
+ if(H5LTset_attribute_string( loc_id, dset_name, "VERSION", "2.0" ) < 0)
   goto out;
 
  /* Attach the TITLE attribute */
- if ( H5LTset_attribute_string( loc_id, dset_name, "TITLE", table_title ) < 0 )
+ if(H5LTset_attribute_string( loc_id, dset_name, "TITLE", table_title ) < 0)
   goto out;
 
  /* Attach the FIELD_ name attribute */
@@ -194,7 +194,7 @@ herr_t H5TBmake_table( const char *table_title,
   strcat( attr_name, aux );
 
   /* Attach the attribute */
-  if ( H5LTset_attribute_string( loc_id, dset_name, attr_name, member_name ) < 0 )
+  if(H5LTset_attribute_string( loc_id, dset_name, attr_name, member_name ) < 0)
    goto out;
 
   free( member_name );
@@ -202,40 +202,40 @@ herr_t H5TBmake_table( const char *table_title,
  }
 
  /* Attach the FIELD_ fill value attribute */
- if ( fill_data )
+ if(fill_data )
  {
 
   tmp_buf = fill_data;
 
   /* Open the dataset. */
-  if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
+  if((did = H5Dopen( loc_id, dset_name )) < 0)
    return -1;
 
-  if (( sid = H5Screate(H5S_SCALAR)) < 0 )
+  if (( sid = H5Screate(H5S_SCALAR)) < 0)
    goto out;
 
   for ( i = 0; i < nfields; i++)
   {
 
    /* Get the member name */
-   member_name = H5Tget_member_name( mem_type_id, (unsigned) i );
+   member_name = H5Tget_member_name(mem_type_id, (unsigned)i);
 
-   strcpy( attr_name, "FIELD_" );
-   sprintf( aux, "%d", (int)i );
-   strcat( attr_name, aux );
-   sprintf( aux, "%s", "_FILL" );
-   strcat( attr_name, aux );
+   strcpy(attr_name, "FIELD_");
+   sprintf(aux, "%d", (int)i);
+   strcat(attr_name, aux);
+   sprintf(aux, "%s", "_FILL");
+   strcat(attr_name, aux);
 
-   if ( (attr_id = H5Acreate( did, attr_name, field_types[i], sid, H5P_DEFAULT )) < 0 )
+   if((attr_id = H5Acreate2(did, ".", attr_name, field_types[i], sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
     goto out;
 
-   if ( H5Awrite( attr_id, field_types[i], tmp_buf+field_offset[i] ) < 0 )
+   if(H5Awrite(attr_id, field_types[i], tmp_buf+field_offset[i]) < 0)
     goto out;
 
-   if ( H5Aclose( attr_id ) < 0 )
+   if(H5Aclose(attr_id) < 0)
     goto out;
 
-   free( member_name );
+   free(member_name);
   }
 
    /* Close the dataset. */
@@ -246,7 +246,7 @@ herr_t H5TBmake_table( const char *table_title,
  }
 
  /* Release the datatype. */
- if ( H5Tclose( mem_type_id ) < 0 )
+ if(H5Tclose( mem_type_id ) < 0)
   return -1;
 
 return 0;
@@ -309,15 +309,15 @@ herr_t H5TBappend_records( hid_t loc_id,
  hsize_t  nfields;
 
  /* Get the original number of records and fields  */
- if ( H5TBget_table_info ( loc_id, dset_name, &nfields, &nrecords_orig ) < 0 )
+ if(H5TBget_table_info ( loc_id, dset_name, &nfields, &nrecords_orig ) < 0)
   return -1;
 
  /* Open the dataset. */
- if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
+ if((did = H5Dopen( loc_id, dset_name )) < 0)
   goto out;
 
   /* Get the datatypes */
- if ( (tid = H5Dget_type( did )) < 0 )
+ if((tid = H5Dget_type( did )) < 0)
   goto out;
 
  if ((mem_type_id=H5TB_create_type(loc_id,dset_name,type_size,field_offset,field_sizes,tid))<0)
@@ -328,15 +328,15 @@ herr_t H5TBappend_records( hid_t loc_id,
   goto out;
 
  /* Release the datatype. */
- if ( H5Tclose( tid ) < 0 )
+ if(H5Tclose( tid ) < 0)
   return -1;
 
   /* Release the datatype. */
- if ( H5Tclose( mem_type_id ) < 0 )
+ if(H5Tclose( mem_type_id ) < 0)
   goto out;
 
  /* End access to the dataset */
- if ( H5Dclose( did ) < 0 )
+ if(H5Dclose( did ) < 0)
   goto out;
 
 
@@ -396,59 +396,59 @@ herr_t H5TBwrite_records( hid_t loc_id,
  hid_t    mem_type_id=-1;
 
  /* Open the dataset. */
- if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
+ if((did = H5Dopen( loc_id, dset_name )) < 0)
   return -1;
 
   /* Get the datatype */
- if ( (tid = H5Dget_type( did )) < 0 )
+ if((tid = H5Dget_type( did )) < 0)
   goto out;
 
  if ((mem_type_id=H5TB_create_type(loc_id,dset_name,type_size,field_offset,field_sizes,tid))<0)
   goto out;
 
  /* Get the dataspace handle */
- if ( (sid = H5Dget_space( did )) < 0 )
+ if((sid = H5Dget_space( did )) < 0)
   goto out;
 
   /* Get records */
- if ( H5Sget_simple_extent_dims( sid, dims, NULL) < 0 )
+ if(H5Sget_simple_extent_dims( sid, dims, NULL) < 0)
   goto out;
 
- if ( start + nrecords > dims[0] )
+ if(start + nrecords > dims[0] )
   goto out;
 
  /* Define a hyperslab in the dataset of the size of the records */
  offset[0] = start;
  count[0]  = nrecords;
- if ( H5Sselect_hyperslab( sid, H5S_SELECT_SET, offset, NULL, count, NULL) < 0 )
+ if(H5Sselect_hyperslab( sid, H5S_SELECT_SET, offset, NULL, count, NULL) < 0)
   goto out;
 
  /* Create a memory dataspace handle */
  mem_size[0] = count[0];
- if ( (mem_space_id = H5Screate_simple( 1, mem_size, NULL )) < 0 )
+ if((mem_space_id = H5Screate_simple( 1, mem_size, NULL )) < 0)
   goto out;
 
- if ( H5Dwrite( did, mem_type_id, mem_space_id, sid, H5P_DEFAULT, data ) < 0 )
+ if(H5Dwrite( did, mem_type_id, mem_space_id, sid, H5P_DEFAULT, data ) < 0)
   goto out;
 
  /* Terminate access to the memory dataspace */
- if ( H5Sclose( mem_space_id ) < 0 )
+ if(H5Sclose( mem_space_id ) < 0)
   goto out;
 
  /* Terminate access to the dataspace */
- if ( H5Sclose( sid ) < 0 )
+ if(H5Sclose( sid ) < 0)
   goto out;
 
  /* Release the datatype. */
- if ( H5Tclose( tid ) < 0 )
+ if(H5Tclose( tid ) < 0)
   goto out;
 
  /* Release the datatype. */
- if ( H5Tclose( mem_type_id ) < 0 )
+ if(H5Tclose( mem_type_id ) < 0)
   return -1;
 
  /* End access to the dataset */
- if ( H5Dclose( did ) < 0 )
+ if(H5Dclose( did ) < 0)
   return -1;
 
 
@@ -518,19 +518,19 @@ herr_t H5TBwrite_fields_name( hid_t loc_id,
   return -1;
 
  /* Open the dataset. */
- if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
+ if((did = H5Dopen( loc_id, dset_name )) < 0)
   goto out;
 
  /* Get the datatype */
- if ( (tid = H5Dget_type( did )) < 0 )
+ if((tid = H5Dget_type( did )) < 0)
   goto out;
 
  /* Get the number of fields */
- if ( ( nfields = H5Tget_nmembers( tid )) < 0 )
+ if(( nfields = H5Tget_nmembers( tid )) < 0)
   goto out;
 
  /* Create a write id */
- if ( ( write_type_id = H5Tcreate( H5T_COMPOUND, type_size )) < 0 )
+ if(( write_type_id = H5Tcreate( H5T_COMPOUND, type_size )) < 0)
   goto out;
 
  j = 0;
@@ -541,11 +541,11 @@ herr_t H5TBwrite_fields_name( hid_t loc_id,
   /* Get the member name */
   member_name = H5Tget_member_name( tid, (unsigned)i );
 
-  if ( H5TB_find_field( member_name, field_names ) > 0 )
+  if(H5TB_find_field( member_name, field_names ) > 0 )
   {
 
    /* Get the member type */
-   if ( ( member_type_id = H5Tget_member_type( tid,(unsigned) i )) < 0 )
+   if(( member_type_id = H5Tget_member_type( tid,(unsigned) i )) < 0)
     goto out;
 
    /* Convert to native type */
@@ -562,24 +562,24 @@ herr_t H5TBwrite_fields_name( hid_t loc_id,
    }
 
    /* The field in the file is found by its name */
-   if ( field_offset )
+   if(field_offset )
    {
-    if ( H5Tinsert( write_type_id, member_name, field_offset[j], nmtype_id ) < 0 )
+    if(H5Tinsert( write_type_id, member_name, field_offset[j], nmtype_id ) < 0)
      goto out;
    }
    /* Only one field */
    else
    {
-    if ( H5Tinsert( write_type_id, member_name, (size_t)0, nmtype_id ) < 0 )
+    if(H5Tinsert( write_type_id, member_name, (size_t)0, nmtype_id ) < 0)
      goto out;
    }
 
    j++;
 
    /* Close */
-   if ( H5Tclose( member_type_id ) < 0 )
+   if(H5Tclose( member_type_id ) < 0)
     goto out;
-   if ( H5Tclose( nmtype_id ) < 0 )
+   if(H5Tclose( nmtype_id ) < 0)
     goto out;
   }
 
@@ -588,33 +588,33 @@ herr_t H5TBwrite_fields_name( hid_t loc_id,
  }
 
   /* Get the dataspace handle */
- if ( (file_space_id = H5Dget_space( did )) < 0 )
+ if((file_space_id = H5Dget_space( did )) < 0)
   goto out;
- if ( (mem_space_id = H5Screate_simple(1, &nrecords, NULL)) < 0 )
+ if((mem_space_id = H5Screate_simple(1, &nrecords, NULL)) < 0)
   goto out;
 
  /* Define a hyperslab in the dataset */
  offset[0] = start;
  count[0]  = nrecords;
- if ( H5Sselect_hyperslab( file_space_id, H5S_SELECT_SET, offset, NULL, count, NULL) < 0 )
+ if(H5Sselect_hyperslab( file_space_id, H5S_SELECT_SET, offset, NULL, count, NULL) < 0)
   goto out;
 
  /* Write */
- if ( H5Dwrite( did, write_type_id, mem_space_id, file_space_id, PRESERVE, data ) < 0 )
+ if(H5Dwrite( did, write_type_id, mem_space_id, file_space_id, PRESERVE, data ) < 0)
   goto out;
 
  /* close */
- if ( H5Tclose( write_type_id ) )
+ if(H5Tclose( write_type_id ) )
   goto out;
- if ( H5Tclose( tid ) < 0 )
+ if(H5Tclose( tid ) < 0)
   return -1;
- if ( H5Dclose( did ) < 0 )
+ if(H5Dclose( did ) < 0)
   return -1;
- if ( H5Pclose( PRESERVE ) < 0 )
+ if(H5Pclose( PRESERVE ) < 0)
   return -1;
- if ( H5Sclose( file_space_id ) < 0 )
+ if(H5Sclose( file_space_id ) < 0)
   return -1;
- if ( H5Sclose( mem_space_id ) < 0 )
+ if(H5Sclose( mem_space_id ) < 0)
   return -1;
 
 return 0;
@@ -689,15 +689,15 @@ herr_t H5TBwrite_fields_index( hid_t loc_id,
   return -1;
 
  /* Open the dataset. */
- if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
+ if((did = H5Dopen( loc_id, dset_name )) < 0)
   goto out;
 
  /* Get the datatype */
- if ( (tid = H5Dget_type( did )) < 0 )
+ if((tid = H5Dget_type( did )) < 0)
   goto out;
 
  /* Create a write id */
- if ( ( write_type_id = H5Tcreate( H5T_COMPOUND, type_size )) < 0 )
+ if(( write_type_id = H5Tcreate( H5T_COMPOUND, type_size )) < 0)
   goto out;
 
  /* Iterate tru the members */
@@ -710,7 +710,7 @@ herr_t H5TBwrite_fields_index( hid_t loc_id,
   member_name = H5Tget_member_name( tid, (unsigned) j );
 
   /* Get the member type */
-  if ( ( member_type_id = H5Tget_member_type( tid, (unsigned) j )) < 0 )
+  if(( member_type_id = H5Tget_member_type( tid, (unsigned) j )) < 0)
    goto out;
 
    /* Convert to native type */
@@ -726,21 +726,21 @@ herr_t H5TBwrite_fields_index( hid_t loc_id,
   }
 
    /* The field in the file is found by its name */
-   if ( field_offset )
+   if(field_offset )
    {
-    if ( H5Tinsert( write_type_id, member_name, field_offset[ i ], nmtype_id ) < 0 )
+    if(H5Tinsert( write_type_id, member_name, field_offset[ i ], nmtype_id ) < 0)
      goto out;
    }
    /* Only one field */
    else
    {
-    if ( H5Tinsert( write_type_id, member_name, (size_t)0, nmtype_id ) < 0 )
+    if(H5Tinsert( write_type_id, member_name, (size_t)0, nmtype_id ) < 0)
      goto out;
    }
   /* Close */
-  if ( H5Tclose( member_type_id ) < 0 )
+  if(H5Tclose( member_type_id ) < 0)
    goto out;
-  if ( H5Tclose( nmtype_id ) < 0 )
+  if(H5Tclose( nmtype_id ) < 0)
    goto out;
 
   free( member_name );
@@ -748,33 +748,33 @@ herr_t H5TBwrite_fields_index( hid_t loc_id,
  }
 
   /* Get the dataspace handles */
- if ( (file_space_id = H5Dget_space( did )) < 0 )
+ if((file_space_id = H5Dget_space( did )) < 0)
   goto out;
- if ( (mem_space_id = H5Screate_simple(1, &nrecords, NULL)) < 0 )
+ if((mem_space_id = H5Screate_simple(1, &nrecords, NULL)) < 0)
   goto out;
 
  /* Define a hyperslab in the dataset */
  offset[0] = start;
  count[0]  = nrecords;
- if ( H5Sselect_hyperslab( file_space_id, H5S_SELECT_SET, offset, NULL, count, NULL) < 0 )
+ if(H5Sselect_hyperslab( file_space_id, H5S_SELECT_SET, offset, NULL, count, NULL) < 0)
   goto out;
 
  /* Write */
- if ( H5Dwrite( did, write_type_id, mem_space_id, file_space_id, PRESERVE, data ) < 0 )
+ if(H5Dwrite( did, write_type_id, mem_space_id, file_space_id, PRESERVE, data ) < 0)
   goto out;
 
  /* close */
- if ( H5Tclose( write_type_id ) )
+ if(H5Tclose( write_type_id ) )
   goto out;
- if ( H5Tclose( tid ) < 0 )
+ if(H5Tclose( tid ) < 0)
   return -1;
- if ( H5Dclose( did ) < 0 )
+ if(H5Dclose( did ) < 0)
   return -1;
- if ( H5Pclose( PRESERVE ) < 0 )
+ if(H5Pclose( PRESERVE ) < 0)
   return -1;
- if ( H5Sclose( file_space_id ) < 0 )
+ if(H5Sclose( file_space_id ) < 0)
   return -1;
- if ( H5Sclose( mem_space_id ) < 0 )
+ if(H5Sclose( mem_space_id ) < 0)
   return -1;
 
 return 0;
@@ -838,11 +838,11 @@ herr_t H5TBread_table( hid_t loc_id,
   return -1;
 
  /* get the dataspace handle */
- if ( (sid = H5Dget_space( did )) < 0 )
+ if((sid = H5Dget_space( did )) < 0)
   goto out;
 
  /* get dimensions */
- if ( H5Sget_simple_extent_dims( sid, dims, NULL) < 0 )
+ if(H5Sget_simple_extent_dims( sid, dims, NULL) < 0)
   goto out;
 
  /* get the datatypes */
@@ -853,17 +853,17 @@ herr_t H5TBread_table( hid_t loc_id,
   goto out;
 
  /* read */
- if ( H5Dread( did, mem_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, dst_buf) < 0 )
+ if(H5Dread( did, mem_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, dst_buf) < 0)
   goto out;
 
  /* close */
- if ( H5Tclose( ftype_id ) < 0 )
+ if(H5Tclose( ftype_id ) < 0)
   goto out;
- if ( H5Tclose( mem_type_id ) < 0 )
+ if(H5Tclose( mem_type_id ) < 0)
   goto out;
- if ( H5Sclose( sid ) < 0 )
+ if(H5Sclose( sid ) < 0)
   goto out;
- if ( H5Dclose( did ) < 0 )
+ if(H5Dclose( did ) < 0)
   return -1;
 
  return 0;
@@ -923,15 +923,15 @@ herr_t H5TBread_records( hid_t loc_id,
  hsize_t  nfields;
 
  /* get the number of records and fields  */
- if ( H5TBget_table_info ( loc_id, dset_name, &nfields, &nrecords_orig ) < 0 )
+ if(H5TBget_table_info ( loc_id, dset_name, &nfields, &nrecords_orig ) < 0)
   return -1;
 
  /* open the dataset */
- if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
+ if((did = H5Dopen( loc_id, dset_name )) < 0)
   return -1;
 
  /* get the datatypes */
- if ( (ftype_id = H5Dget_type( did )) < 0 )
+ if((ftype_id = H5Dget_type( did )) < 0)
   goto out;
 
  if ((mem_type_id=H5TB_create_type(loc_id,dset_name,type_size,field_offset,field_sizes,ftype_id))<0)
@@ -942,41 +942,41 @@ herr_t H5TBread_records( hid_t loc_id,
   goto out;
 
  /* get the dataspace handle */
- if ( (sid = H5Dget_space( did )) < 0 )
+ if((sid = H5Dget_space( did )) < 0)
   goto out;
 
  /* get records */
- if ( H5Sget_simple_extent_dims( sid, dims, NULL) < 0 )
+ if(H5Sget_simple_extent_dims( sid, dims, NULL) < 0)
   goto out;
 
- if ( start + nrecords > dims[0] )
+ if(start + nrecords > dims[0] )
   goto out;
 
  /* define a hyperslab in the dataset of the size of the records */
  offset[0] = start;
  count[0]  = nrecords;
- if ( H5Sselect_hyperslab( sid, H5S_SELECT_SET, offset, NULL, count, NULL) < 0 )
+ if(H5Sselect_hyperslab( sid, H5S_SELECT_SET, offset, NULL, count, NULL) < 0)
   goto out;
 
  /* create a memory dataspace handle */
  mem_size[0] = count[0];
- if ( (mem_space_id = H5Screate_simple( 1, mem_size, NULL )) < 0 )
+ if((mem_space_id = H5Screate_simple( 1, mem_size, NULL )) < 0)
   goto out;
 
  /* read */
- if ( H5Dread( did, mem_type_id, mem_space_id, sid, H5P_DEFAULT, data ) < 0 )
+ if(H5Dread( did, mem_type_id, mem_space_id, sid, H5P_DEFAULT, data ) < 0)
   goto out;
 
  /* close */
- if ( H5Sclose( mem_space_id ) < 0 )
+ if(H5Sclose( mem_space_id ) < 0)
   goto out;
- if ( H5Sclose( sid ) < 0 )
+ if(H5Sclose( sid ) < 0)
   goto out;
- if ( H5Tclose( ftype_id ) < 0 )
+ if(H5Tclose( ftype_id ) < 0)
   return -1;
- if ( H5Tclose( mem_type_id ) < 0 )
+ if(H5Tclose( mem_type_id ) < 0)
   return -1;
- if ( H5Dclose( did ) < 0 )
+ if(H5Dclose( did ) < 0)
   return -1;
 
  return 0;
@@ -1043,19 +1043,19 @@ herr_t H5TBread_fields_name( hid_t loc_id,
  hssize_t i, j;
 
  /* open the dataset */
- if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
+ if((did = H5Dopen( loc_id, dset_name )) < 0)
   goto out;
 
  /* get the datatype */
- if ( (ftype_id = H5Dget_type( did )) < 0 )
+ if((ftype_id = H5Dget_type( did )) < 0)
   goto out;
 
  /* get the number of fields */
- if ( ( nfields = H5Tget_nmembers( ftype_id )) < 0 )
+ if(( nfields = H5Tget_nmembers( ftype_id )) < 0)
   goto out;
 
  /* create a memory read id */
- if ( ( mem_type_id = H5Tcreate( H5T_COMPOUND, type_size )) < 0 )
+ if(( mem_type_id = H5Tcreate( H5T_COMPOUND, type_size )) < 0)
   goto out;
 
  /* iterate tru the members */
@@ -1064,10 +1064,10 @@ herr_t H5TBread_fields_name( hid_t loc_id,
   /* get the member name */
   member_name = H5Tget_member_name( ftype_id, (unsigned)i );
 
-  if ( H5TB_find_field( member_name, field_names ) > 0 )
+  if(H5TB_find_field( member_name, field_names ) > 0 )
   {
    /* get the member type */
-   if ( ( mtype_id = H5Tget_member_type( ftype_id, (unsigned) i )) < 0 )
+   if(( mtype_id = H5Tget_member_type( ftype_id, (unsigned) i )) < 0)
     goto out;
 
    /* convert to native type */
@@ -1082,21 +1082,21 @@ herr_t H5TBread_fields_name( hid_t loc_id,
      goto out;
    }
    /* the field in the file is found by its name */
-   if ( field_offset )
+   if(field_offset )
    {
-    if ( H5Tinsert( mem_type_id, member_name, field_offset[j], nmtype_id ) < 0 )
+    if(H5Tinsert( mem_type_id, member_name, field_offset[j], nmtype_id ) < 0)
      goto out;
    }
     else
    {
-    if ( H5Tinsert( mem_type_id, member_name, (size_t)0, nmtype_id ) < 0 )
+    if(H5Tinsert( mem_type_id, member_name, (size_t)0, nmtype_id ) < 0)
      goto out;
    }
 
    /* close */
-   if ( H5Tclose( mtype_id ) < 0 )
+   if(H5Tclose( mtype_id ) < 0)
     goto out;
-   if ( H5Tclose( nmtype_id ) < 0 )
+   if(H5Tclose( nmtype_id ) < 0)
     goto out;
    j++;
   }
@@ -1104,34 +1104,34 @@ herr_t H5TBread_fields_name( hid_t loc_id,
  }
 
  /* get the dataspace handle */
- if ( (sid = H5Dget_space( did )) < 0 )
+ if((sid = H5Dget_space( did )) < 0)
   goto out;
 
  /* define a hyperslab in the dataset */
  offset[0] = start;
  count[0]  = nrecords;
- if ( H5Sselect_hyperslab( sid, H5S_SELECT_SET, offset, NULL, count, NULL) < 0 )
+ if(H5Sselect_hyperslab( sid, H5S_SELECT_SET, offset, NULL, count, NULL) < 0)
   goto out;
 
  /* create a memory dataspace handle */
  mem_size[0] = count[0];
- if ( (mem_space_id = H5Screate_simple( 1, mem_size, NULL )) < 0 )
+ if((mem_space_id = H5Screate_simple( 1, mem_size, NULL )) < 0)
   goto out;
 
  /* read */
- if ( H5Dread( did, mem_type_id, mem_space_id, sid, H5P_DEFAULT, data ) < 0 )
+ if(H5Dread( did, mem_type_id, mem_space_id, sid, H5P_DEFAULT, data ) < 0)
   goto out;
 
  /* close */
- if ( H5Tclose( mem_type_id ) )
+ if(H5Tclose( mem_type_id ) )
   goto out;
- if ( H5Tclose( ftype_id ) < 0 )
+ if(H5Tclose( ftype_id ) < 0)
   return -1;
- if ( H5Sclose( sid ) < 0 )
+ if(H5Sclose( sid ) < 0)
   goto out;
- if ( H5Sclose( mem_space_id ) < 0 )
+ if(H5Sclose( mem_space_id ) < 0)
   goto out;
- if ( H5Dclose( did ) < 0 )
+ if(H5Dclose( did ) < 0)
   return -1;
 
  return 0;
@@ -1198,15 +1198,15 @@ herr_t H5TBread_fields_index( hid_t loc_id,
  hsize_t  i, j;
 
  /* Open the dataset. */
- if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
+ if((did = H5Dopen( loc_id, dset_name )) < 0)
   goto out;
 
  /* Get the datatype */
- if ( (tid = H5Dget_type( did )) < 0 )
+ if((tid = H5Dget_type( did )) < 0)
   goto out;
 
  /* Create a read id */
- if ( ( read_type_id = H5Tcreate( H5T_COMPOUND, type_size )) < 0 )
+ if(( read_type_id = H5Tcreate( H5T_COMPOUND, type_size )) < 0)
   goto out;
 
  /* Iterate tru the members */
@@ -1218,11 +1218,11 @@ herr_t H5TBread_fields_index( hid_t loc_id,
   member_name = H5Tget_member_name( tid, (unsigned) j );
 
   /* Get the member type */
-  if ( ( member_type_id = H5Tget_member_type( tid, (unsigned) j )) < 0 )
+  if(( member_type_id = H5Tget_member_type( tid, (unsigned) j )) < 0)
    goto out;
 
   /* Get the member size */
-  if ( H5Tget_size( member_type_id ) == 0 )
+  if(H5Tget_size( member_type_id ) == 0 )
    goto out;
 
   /* Convert to native type */
@@ -1238,63 +1238,63 @@ herr_t H5TBread_fields_index( hid_t loc_id,
   }
 
   /* The field in the file is found by its name */
-  if ( field_offset )
+  if(field_offset )
   {
-   if ( H5Tinsert( read_type_id, member_name, field_offset[i], nmtype_id ) < 0 )
+   if(H5Tinsert( read_type_id, member_name, field_offset[i], nmtype_id ) < 0)
     goto out;
   }
   else
   {
-   if ( H5Tinsert( read_type_id, member_name, (size_t)0, nmtype_id ) < 0 )
+   if(H5Tinsert( read_type_id, member_name, (size_t)0, nmtype_id ) < 0)
     goto out;
   }
 
   /* Close the member type */
-  if ( H5Tclose( member_type_id ) < 0 )
+  if(H5Tclose( member_type_id ) < 0)
    goto out;
-  if ( H5Tclose( nmtype_id ) < 0 )
+  if(H5Tclose( nmtype_id ) < 0)
    goto out;
 
   free( member_name );
  }
 
   /* Get the dataspace handle */
- if ( (sid = H5Dget_space( did )) < 0 )
+ if((sid = H5Dget_space( did )) < 0)
   goto out;
 
  /* Define a hyperslab in the dataset */
  offset[0] = start;
  count[0]  = nrecords;
- if ( H5Sselect_hyperslab( sid, H5S_SELECT_SET, offset, NULL, count, NULL) < 0 )
+ if(H5Sselect_hyperslab( sid, H5S_SELECT_SET, offset, NULL, count, NULL) < 0)
   goto out;
 
  /* Create a memory dataspace handle */
  mem_size[0] = count[0];
- if ( (mem_space_id = H5Screate_simple( 1, mem_size, NULL )) < 0 )
+ if((mem_space_id = H5Screate_simple( 1, mem_size, NULL )) < 0)
   goto out;
 
  /* Read */
- if ( H5Dread( did, read_type_id, mem_space_id, sid, H5P_DEFAULT, data ) < 0 )
+ if(H5Dread( did, read_type_id, mem_space_id, sid, H5P_DEFAULT, data ) < 0)
   goto out;
 
  /* Terminate access to the dataspace */
- if ( H5Sclose( sid ) < 0 )
+ if(H5Sclose( sid ) < 0)
   goto out;
 
  /* Terminate access to the memory dataspace */
-  if ( H5Sclose( mem_space_id ) < 0 )
+  if(H5Sclose( mem_space_id ) < 0)
    goto out;
 
  /* End access to the read id */
- if ( H5Tclose( read_type_id ) )
+ if(H5Tclose( read_type_id ) )
   goto out;
 
  /* Release the datatype. */
- if ( H5Tclose( tid ) < 0 )
+ if(H5Tclose( tid ) < 0)
   return -1;
 
  /* End access to the dataset */
- if ( H5Dclose( did ) < 0 )
+ if(H5Dclose( did ) < 0)
   return -1;
 
 return 0;
@@ -1370,17 +1370,17 @@ herr_t H5TBdelete_record( hid_t loc_id,
  */
 
  /* Get the number of records and fields  */
- if ( H5TBget_table_info ( loc_id, dset_name, &nfields, &ntotal_records ) < 0 )
+ if(H5TBget_table_info ( loc_id, dset_name, &nfields, &ntotal_records ) < 0)
   return -1;
 
  src_offset = (size_t *)malloc((size_t)nfields * sizeof(size_t));
  src_sizes = (size_t *)malloc((size_t)nfields * sizeof(size_t));
 
- if ( src_offset == NULL )
+ if(src_offset == NULL )
   return -1;
 
  /* Get field info */
- if ( H5TBget_field_info( loc_id, dset_name, NULL, src_sizes, src_offset, &src_size ) < 0 )
+ if(H5TBget_field_info( loc_id, dset_name, NULL, src_sizes, src_offset, &src_size ) < 0)
   return -1;
 
 /*-------------------------------------------------------------------------
@@ -1392,12 +1392,12 @@ herr_t H5TBdelete_record( hid_t loc_id,
  read_nrecords = ntotal_records - read_start;
  tmp_buf = (unsigned char *)calloc((size_t) read_nrecords, src_size );
 
- if ( tmp_buf == NULL )
+ if(tmp_buf == NULL )
   return -1;
 
  /* Read the records after the deleted one(s) */
- if ( H5TBread_records( loc_id, dset_name, read_start, read_nrecords, src_size,
-      src_offset, src_sizes, tmp_buf ) < 0 )
+ if(H5TBread_records( loc_id, dset_name, read_start, read_nrecords, src_size,
+      src_offset, src_sizes, tmp_buf ) < 0)
   return -1;
 
 
@@ -1407,41 +1407,41 @@ herr_t H5TBdelete_record( hid_t loc_id,
  */
 
  /* Open the dataset. */
- if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
+ if((did = H5Dopen( loc_id, dset_name )) < 0)
   return -1;
 
  /* Get the datatype */
- if ( (tid = H5Dget_type( did )) < 0 )
+ if((tid = H5Dget_type( did )) < 0)
   goto out;
 
  /* Get the dataspace handle */
- if ( (sid = H5Dget_space( did )) < 0 )
+ if((sid = H5Dget_space( did )) < 0)
   goto out;
 
  /* Define a hyperslab in the dataset of the size of the records */
  offset[0] = start;
  count[0]  = read_nrecords;
- if ( H5Sselect_hyperslab( sid, H5S_SELECT_SET, offset, NULL, count, NULL) < 0 )
+ if(H5Sselect_hyperslab( sid, H5S_SELECT_SET, offset, NULL, count, NULL) < 0)
   goto out;
 
  /* Create a memory dataspace handle */
  mem_size[0] = count[0];
- if ( (mem_space_id = H5Screate_simple( 1, mem_size, NULL )) < 0 )
+ if((mem_space_id = H5Screate_simple( 1, mem_size, NULL )) < 0)
   goto out;
 
- if ( H5Dwrite( did, tid, mem_space_id, sid, H5P_DEFAULT, tmp_buf ) < 0 )
+ if(H5Dwrite( did, tid, mem_space_id, sid, H5P_DEFAULT, tmp_buf ) < 0)
   goto out;
 
  /* Terminate access to the memory dataspace */
- if ( H5Sclose( mem_space_id ) < 0 )
+ if(H5Sclose( mem_space_id ) < 0)
   goto out;
 
  /* Terminate access to the dataspace */
- if ( H5Sclose( sid ) < 0 )
+ if(H5Sclose( sid ) < 0)
   goto out;
 
  /* Release the datatype. */
- if ( H5Tclose( tid ) < 0 )
+ if(H5Tclose( tid ) < 0)
   goto out;
 
 
@@ -1451,12 +1451,12 @@ herr_t H5TBdelete_record( hid_t loc_id,
  */
 #if defined (SHRINK)
  dims[0] = ntotal_records - nrecords;
- if ( H5Dset_extent( did, dims ) < 0 )
+ if(H5Dset_extent( did, dims ) < 0)
   goto out;
 #endif
 
  /* End access to the dataset */
- if ( H5Dclose( did ) < 0 )
+ if(H5Dclose( did ) < 0)
   return -1;
 
  free( tmp_buf );
@@ -1534,15 +1534,15 @@ herr_t H5TBinsert_record( hid_t loc_id,
  */
 
  /* Get the dimensions  */
- if ( H5TBget_table_info ( loc_id, dset_name, &nfields, &ntotal_records ) < 0 )
+ if(H5TBget_table_info ( loc_id, dset_name, &nfields, &ntotal_records ) < 0)
   return -1;
 
  /* Open the dataset. */
- if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
+ if((did = H5Dopen( loc_id, dset_name )) < 0)
   goto out;
 
   /* Get the datatype */
- if ( (tid = H5Dget_type( did )) < 0 )
+ if((tid = H5Dget_type( did )) < 0)
   goto out;
 
  /* Create the memory data type. */
@@ -1553,14 +1553,14 @@ herr_t H5TBinsert_record( hid_t loc_id,
  tmp_buf = (unsigned char *)calloc((size_t) read_nrecords, type_size );
 
  /* Read the records after the inserted one(s) */
- if ( H5TBread_records( loc_id, dset_name, start, read_nrecords, type_size, field_offset,
-  field_sizes, tmp_buf ) < 0 )
+ if(H5TBread_records( loc_id, dset_name, start, read_nrecords, type_size, field_offset,
+  field_sizes, tmp_buf ) < 0)
   return -1;
 
  /* Extend the dataset */
  dims[0] = ntotal_records + nrecords;
 
- if ( H5Dextend ( did, dims ) < 0 )
+ if(H5Dextend ( did, dims ) < 0)
   goto out;
 
 /*-------------------------------------------------------------------------
@@ -1570,26 +1570,26 @@ herr_t H5TBinsert_record( hid_t loc_id,
 
  /* Create a simple memory data space */
  mem_dims[0]=nrecords;
- if ( (mem_space_id = H5Screate_simple( 1, mem_dims, NULL )) < 0 )
+ if((mem_space_id = H5Screate_simple( 1, mem_dims, NULL )) < 0)
   return -1;
 
  /* Get the file data space */
- if ( (sid = H5Dget_space( did )) < 0 )
+ if((sid = H5Dget_space( did )) < 0)
   return -1;
 
  /* Define a hyperslab in the dataset to write the new data */
  offset[0] = start;
  count[0]  = nrecords;
- if ( H5Sselect_hyperslab( sid, H5S_SELECT_SET, offset, NULL, count, NULL) < 0 )
+ if(H5Sselect_hyperslab( sid, H5S_SELECT_SET, offset, NULL, count, NULL) < 0)
   goto out;
 
- if ( H5Dwrite( did, mem_type_id, mem_space_id, sid, H5P_DEFAULT, data ) < 0 )
+ if(H5Dwrite( did, mem_type_id, mem_space_id, sid, H5P_DEFAULT, data ) < 0)
   goto out;
 
  /* Terminate access to the dataspace */
- if ( H5Sclose( mem_space_id ) < 0 )
+ if(H5Sclose( mem_space_id ) < 0)
   goto out;
- if ( H5Sclose( sid ) < 0 )
+ if(H5Sclose( sid ) < 0)
   goto out;
 
 /*-------------------------------------------------------------------------
@@ -1599,39 +1599,39 @@ herr_t H5TBinsert_record( hid_t loc_id,
 
  /* Create a simple memory data space */
  mem_dims[0]=read_nrecords;
- if ( (mem_space_id = H5Screate_simple( 1, mem_dims, NULL )) < 0 )
+ if((mem_space_id = H5Screate_simple( 1, mem_dims, NULL )) < 0)
   return -1;
 
  /* Get the file data space */
- if ( (sid = H5Dget_space( did )) < 0 )
+ if((sid = H5Dget_space( did )) < 0)
   return -1;
 
  /* Define a hyperslab in the dataset to write the new data */
  offset[0] = start + nrecords;
  count[0]  = read_nrecords;
- if ( H5Sselect_hyperslab( sid, H5S_SELECT_SET, offset, NULL, count, NULL) < 0 )
+ if(H5Sselect_hyperslab( sid, H5S_SELECT_SET, offset, NULL, count, NULL) < 0)
   goto out;
 
- if ( H5Dwrite( did, mem_type_id, mem_space_id, sid, H5P_DEFAULT, tmp_buf ) < 0 )
+ if(H5Dwrite( did, mem_type_id, mem_space_id, sid, H5P_DEFAULT, tmp_buf ) < 0)
   goto out;
 
  /* Terminate access to the dataspace */
- if ( H5Sclose( mem_space_id ) < 0 )
+ if(H5Sclose( mem_space_id ) < 0)
   goto out;
 
- if ( H5Sclose( sid ) < 0 )
+ if(H5Sclose( sid ) < 0)
   goto out;
 
  /* Release the datatype. */
- if ( H5Tclose( tid ) < 0 )
+ if(H5Tclose( tid ) < 0)
   return -1;
 
  /* Release the datatype. */
- if ( H5Tclose( mem_type_id ) < 0 )
+ if(H5Tclose( mem_type_id ) < 0)
   return -1;
 
  /* End access to the dataset */
- if ( H5Dclose( did ) < 0 )
+ if(H5Dclose( did ) < 0)
   return -1;
 
  free( tmp_buf );
@@ -1700,17 +1700,17 @@ herr_t H5TBadd_records_from( hid_t loc_id,
  */
 
  /* Get the number of records and fields  */
- if ( H5TBget_table_info ( loc_id, dset_name1, &nfields, &ntotal_records ) < 0 )
+ if(H5TBget_table_info ( loc_id, dset_name1, &nfields, &ntotal_records ) < 0)
   return -1;
 
  src_offset = (size_t *)malloc((size_t)nfields * sizeof(size_t));
  src_sizes  = (size_t *)malloc((size_t)nfields * sizeof(size_t));
 
- if ( src_offset == NULL )
+ if(src_offset == NULL )
   return -1;
 
  /* Get field info */
- if ( H5TBget_field_info( loc_id, dset_name1, NULL, src_sizes, src_offset, &src_size ) < 0 )
+ if(H5TBget_field_info( loc_id, dset_name1, NULL, src_sizes, src_offset, &src_size ) < 0)
   return -1;
 
 /*-------------------------------------------------------------------------
@@ -1719,19 +1719,19 @@ herr_t H5TBadd_records_from( hid_t loc_id,
  */
 
  /* Open the 1st dataset. */
- if ( (dataset_id1 = H5Dopen( loc_id, dset_name1 )) < 0 )
+ if((dataset_id1 = H5Dopen( loc_id, dset_name1 )) < 0)
   return -1;
 
  /* Get the datatype */
- if ( (type_id1 = H5Dget_type( dataset_id1 )) < 0 )
+ if((type_id1 = H5Dget_type( dataset_id1 )) < 0)
   goto out;
 
  /* Get the dataspace handle */
- if ( (space_id1 = H5Dget_space( dataset_id1 )) < 0 )
+ if((space_id1 = H5Dget_space( dataset_id1 )) < 0)
   goto out;
 
  /* Get the size of the datatype */
- if ( ( type_size1 = H5Tget_size( type_id1 )) == 0 )
+ if(( type_size1 = H5Tget_size( type_id1 )) == 0 )
   goto out;
 
  tmp_buf = (unsigned char *)calloc((size_t)nrecords, type_size1 );
@@ -1739,22 +1739,22 @@ herr_t H5TBadd_records_from( hid_t loc_id,
  /* Define a hyperslab in the dataset of the size of the records */
  offset[0] = start1;
  count[0]  = nrecords;
- if ( H5Sselect_hyperslab( space_id1, H5S_SELECT_SET, offset, NULL, count, NULL) < 0 )
+ if(H5Sselect_hyperslab( space_id1, H5S_SELECT_SET, offset, NULL, count, NULL) < 0)
   goto out;
 
  /* Create a memory dataspace handle */
  mem_size[0] = count[0];
- if ( (mem_space_id1 = H5Screate_simple( 1, mem_size, NULL )) < 0 )
+ if((mem_space_id1 = H5Screate_simple( 1, mem_size, NULL )) < 0)
   goto out;
 
- if ( H5Dread( dataset_id1, type_id1, mem_space_id1, space_id1, H5P_DEFAULT, tmp_buf ) < 0 )
+ if(H5Dread( dataset_id1, type_id1, mem_space_id1, space_id1, H5P_DEFAULT, tmp_buf ) < 0)
   goto out;
 
 /*-------------------------------------------------------------------------
  * Add to the second table
  *-------------------------------------------------------------------------
  */
- if ( H5TBinsert_record(loc_id,dset_name2,start2,nrecords,src_size,src_offset,src_sizes,tmp_buf ) < 0 )
+ if(H5TBinsert_record(loc_id,dset_name2,start2,nrecords,src_size,src_offset,src_sizes,tmp_buf ) < 0)
   goto out;
 
 /*-------------------------------------------------------------------------
@@ -1763,19 +1763,19 @@ herr_t H5TBadd_records_from( hid_t loc_id,
  */
 
  /* Terminate access to the memory dataspace */
- if ( H5Sclose( mem_space_id1 ) < 0 )
+ if(H5Sclose( mem_space_id1 ) < 0)
   goto out;
 
  /* Terminate access to the dataspace */
- if ( H5Sclose( space_id1 ) < 0 )
+ if(H5Sclose( space_id1 ) < 0)
   goto out;
 
  /* Release the datatype. */
- if ( H5Tclose( type_id1 ) < 0 )
+ if(H5Tclose( type_id1 ) < 0)
   return -1;
 
  /* End access to the dataset */
- if ( H5Dclose( dataset_id1 ) < 0 )
+ if(H5Dclose( dataset_id1 ) < 0)
   return -1;
 
  free( tmp_buf );
@@ -1870,18 +1870,18 @@ herr_t H5TBcombine_tables( hid_t loc_id1,
  */
 
  /* Get the number of records and fields  */
- if ( H5TBget_table_info ( loc_id1, dset_name1, &nfields, &nrecords ) < 0 )
+ if(H5TBget_table_info ( loc_id1, dset_name1, &nfields, &nrecords ) < 0)
   return -1;
 
  src_offset = (size_t *)malloc((size_t)nfields * sizeof(size_t));
  src_sizes  = (size_t *)malloc((size_t)nfields * sizeof(size_t));
 
 
- if ( src_offset == NULL )
+ if(src_offset == NULL )
   return -1;
 
  /* Get field info */
- if ( H5TBget_field_info( loc_id1, dset_name1, NULL, src_sizes, src_offset, &src_size ) < 0 )
+ if(H5TBget_field_info( loc_id1, dset_name1, NULL, src_sizes, src_offset, &src_size ) < 0)
   return -1;
 
 /*-------------------------------------------------------------------------
@@ -1890,23 +1890,23 @@ herr_t H5TBcombine_tables( hid_t loc_id1,
  */
 
  /* Open the 1st dataset. */
- if ( (dataset_id1 = H5Dopen( loc_id1, dset_name1 )) < 0 )
+ if((dataset_id1 = H5Dopen( loc_id1, dset_name1 )) < 0)
   goto out;
 
  /* Get the datatype */
- if ( (type_id1 = H5Dget_type( dataset_id1 )) < 0 )
+ if((type_id1 = H5Dget_type( dataset_id1 )) < 0)
   goto out;
 
  /* Get the dataspace handle */
- if ( (space_id1 = H5Dget_space( dataset_id1 )) < 0 )
+ if((space_id1 = H5Dget_space( dataset_id1 )) < 0)
   goto out;
 
  /* Get creation properties list */
- if ( (plist_id1 = H5Dget_create_plist( dataset_id1 )) < 0 )
+ if((plist_id1 = H5Dget_create_plist( dataset_id1 )) < 0)
   goto out;
 
  /* Get the dimensions  */
- if ( H5TBget_table_info ( loc_id1, dset_name1, &nfields, &nrecords ) < 0 )
+ if(H5TBget_table_info ( loc_id1, dset_name1, &nfields, &nrecords ) < 0)
   return -1;
 
 /*-------------------------------------------------------------------------
@@ -1915,11 +1915,11 @@ herr_t H5TBcombine_tables( hid_t loc_id1,
  */
 
  /* Clone the property list */
- if ( ( plist_id3 = H5Pcopy( plist_id1 )) < 0 )
+ if(( plist_id3 = H5Pcopy( plist_id1 )) < 0)
   goto out;
 
  /* Clone the type id */
- if ( ( type_id3 = H5Tcopy( type_id1 )) < 0 )
+ if(( type_id3 = H5Tcopy( type_id1 )) < 0)
   goto out;
 
 /*-------------------------------------------------------------------------
@@ -1930,18 +1930,18 @@ herr_t H5TBcombine_tables( hid_t loc_id1,
  dims[0] = 0;
 
 /* Create a simple data space with unlimited size */
- if ( (space_id3 = H5Screate_simple( 1, dims, maxdims )) < 0 )
+ if((space_id3 = H5Screate_simple( 1, dims, maxdims )) < 0)
   return -1;
 
  /* Create the dataset */
- if ( (dataset_id3 = H5Dcreate( loc_id1, dset_name3, type_id3, space_id3, plist_id3 )) < 0 )
+ if((dataset_id3 = H5Dcreate( loc_id1, dset_name3, type_id3, space_id3, plist_id3 )) < 0)
   goto out;
 
 /*-------------------------------------------------------------------------
  * Attach the conforming table attributes
  *-------------------------------------------------------------------------
  */
- if ( H5TB_attach_attributes( "Merge table", loc_id1, dset_name3, nfields, type_id3 ) < 0 )
+ if(H5TB_attach_attributes( "Merge table", loc_id1, dset_name3, nfields, type_id3 ) < 0)
   goto out;
 
 /*-------------------------------------------------------------------------
@@ -1961,43 +1961,43 @@ herr_t H5TBcombine_tables( hid_t loc_id1,
  * Attach the fill attributes from previous table
  *-------------------------------------------------------------------------
  */
- if ( has_fill == 1 )
+ if(has_fill == 1 )
  {
 
-  if (( sid = H5Screate(H5S_SCALAR)) < 0 )
+  if (( sid = H5Screate(H5S_SCALAR)) < 0)
    goto out;
 
   for ( i = 0; i < nfields; i++)
   {
 
    /* Get the member type */
-   if ( ( member_type_id = H5Tget_member_type( type_id3, (unsigned) i )) < 0 )
+   if(( member_type_id = H5Tget_member_type( type_id3, (unsigned) i )) < 0)
     goto out;
 
    /* Get the member offset */
-   member_offset = H5Tget_member_offset( type_id3, (unsigned) i );
+   member_offset = H5Tget_member_offset(type_id3, (unsigned)i);
 
-   strcpy( attr_name, "FIELD_" );
-   sprintf( aux, "%d", (int) i );
-   strcat( attr_name, aux );
-   sprintf( aux, "%s", "_FILL" );
-   strcat( attr_name, aux );
+   strcpy(attr_name, "FIELD_");
+   sprintf(aux, "%d", (int)i);
+   strcat(attr_name, aux);
+   sprintf(aux, "%s", "_FILL");
+   strcat(attr_name, aux);
 
-   if ( (attr_id = H5Acreate( dataset_id3, attr_name, member_type_id, sid, H5P_DEFAULT )) < 0 )
+   if((attr_id = H5Acreate2(dataset_id3, ".", attr_name, member_type_id, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
     goto out;
 
-   if ( H5Awrite( attr_id, member_type_id, tmp_fill_buf+member_offset ) < 0 )
+   if(H5Awrite(attr_id, member_type_id, tmp_fill_buf+member_offset) < 0)
     goto out;
 
-   if ( H5Aclose( attr_id ) < 0 )
+   if(H5Aclose(attr_id) < 0)
     goto out;
 
-   if ( H5Tclose( member_type_id ) < 0 )
+   if(H5Tclose(member_type_id) < 0)
     goto out;
   }
 
   /* Close data space. */
-  if ( H5Sclose( sid ) < 0 )
+  if(H5Sclose( sid ) < 0)
    goto out;
  }
 
@@ -2011,15 +2011,15 @@ herr_t H5TBcombine_tables( hid_t loc_id1,
  /* Define a hyperslab in the dataset of the size of the records */
  offset[0] = 0;
  count[0]  = nrecords;
- if ( H5Sselect_hyperslab( space_id1, H5S_SELECT_SET, offset, NULL, count, NULL) < 0 )
+ if(H5Sselect_hyperslab( space_id1, H5S_SELECT_SET, offset, NULL, count, NULL) < 0)
   goto out;
 
  /* Create a memory dataspace handle */
  mem_size[0] = count[0];
- if ( (mem_space_id = H5Screate_simple( 1, mem_size, NULL )) < 0 )
+ if((mem_space_id = H5Screate_simple( 1, mem_size, NULL )) < 0)
   goto out;
 
- if ( H5Dread( dataset_id1, type_id1, mem_space_id, space_id1, H5P_DEFAULT, tmp_buf ) < 0 )
+ if(H5Dread( dataset_id1, type_id1, mem_space_id, space_id1, H5P_DEFAULT, tmp_buf ) < 0)
   goto out;
 
 /*-------------------------------------------------------------------------
@@ -2028,7 +2028,7 @@ herr_t H5TBcombine_tables( hid_t loc_id1,
  */
 
  /* Append the records to the new table */
- if ( H5TBappend_records( loc_id1, dset_name3, nrecords, src_size, src_offset, src_sizes, tmp_buf ) < 0 )
+ if(H5TBappend_records( loc_id1, dset_name3, nrecords, src_size, src_offset, src_sizes, tmp_buf ) < 0)
   goto out;
 
 /*-------------------------------------------------------------------------
@@ -2037,23 +2037,23 @@ herr_t H5TBcombine_tables( hid_t loc_id1,
  */
 
  /* Terminate access to the memory dataspace */
- if ( H5Sclose( mem_space_id ) < 0 )
+ if(H5Sclose( mem_space_id ) < 0)
   goto out;
 
  /* Terminate access to the dataspace */
- if ( H5Sclose( space_id1 ) < 0 )
+ if(H5Sclose( space_id1 ) < 0)
   goto out;
 
  /* Release the datatype. */
- if ( H5Tclose( type_id1 ) < 0 )
+ if(H5Tclose( type_id1 ) < 0)
   goto out;
 
  /* Terminate access to a property list */
- if ( H5Pclose( plist_id1 ) < 0 )
+ if(H5Pclose( plist_id1 ) < 0)
   goto out;
 
  /* End access to the dataset */
- if ( H5Dclose( dataset_id1 ) < 0 )
+ if(H5Dclose( dataset_id1 ) < 0)
   goto out;
 
  /* Release resources. */
@@ -2065,23 +2065,23 @@ herr_t H5TBcombine_tables( hid_t loc_id1,
  */
 
  /* Open the dataset. */
- if ( (dataset_id2 = H5Dopen( loc_id2, dset_name2 )) < 0 )
+ if((dataset_id2 = H5Dopen( loc_id2, dset_name2 )) < 0)
   goto out;
 
  /* Get the datatype */
- if ( (type_id2 = H5Dget_type( dataset_id2 )) < 0 )
+ if((type_id2 = H5Dget_type( dataset_id2 )) < 0)
   goto out;
 
  /* Get the dataspace handle */
- if ( (space_id2 = H5Dget_space( dataset_id2 )) < 0 )
+ if((space_id2 = H5Dget_space( dataset_id2 )) < 0)
   goto out;
 
  /* Get the property list handle */
- if ( (plist_id2 = H5Dget_create_plist( dataset_id2 )) < 0 )
+ if((plist_id2 = H5Dget_create_plist( dataset_id2 )) < 0)
   goto out;
 
  /* Get the dimensions  */
- if ( H5TBget_table_info ( loc_id2, dset_name2, &nfields, &nrecords ) < 0 )
+ if(H5TBget_table_info ( loc_id2, dset_name2, &nfields, &nrecords ) < 0)
   return -1;
 
 /*-------------------------------------------------------------------------
@@ -2094,15 +2094,15 @@ herr_t H5TBcombine_tables( hid_t loc_id1,
  /* Define a hyperslab in the dataset of the size of the records */
  offset[0] = 0;
  count[0]  = nrecords;
- if ( H5Sselect_hyperslab( space_id2, H5S_SELECT_SET, offset, NULL, count, NULL) < 0 )
+ if(H5Sselect_hyperslab( space_id2, H5S_SELECT_SET, offset, NULL, count, NULL) < 0)
   goto out;
 
  /* Create a memory dataspace handle */
  mem_size[0] = count[0];
- if ( (mem_space_id = H5Screate_simple( 1, mem_size, NULL )) < 0 )
+ if((mem_space_id = H5Screate_simple( 1, mem_size, NULL )) < 0)
   goto out;
 
- if ( H5Dread( dataset_id2, type_id2, mem_space_id, space_id2, H5P_DEFAULT, tmp_buf ) < 0 )
+ if(H5Dread( dataset_id2, type_id2, mem_space_id, space_id2, H5P_DEFAULT, tmp_buf ) < 0)
   goto out;
 
 
@@ -2112,7 +2112,7 @@ herr_t H5TBcombine_tables( hid_t loc_id1,
  */
 
  /* append the records to the new table */
- if ( H5TBappend_records( loc_id1, dset_name3, nrecords, src_size, src_offset, src_sizes, tmp_buf ) < 0 )
+ if(H5TBappend_records( loc_id1, dset_name3, nrecords, src_size, src_offset, src_sizes, tmp_buf ) < 0)
   goto out;
 
 /*-------------------------------------------------------------------------
@@ -2121,23 +2121,23 @@ herr_t H5TBcombine_tables( hid_t loc_id1,
  */
 
  /* Terminate access to the memory dataspace */
- if ( H5Sclose( mem_space_id ) < 0 )
+ if(H5Sclose( mem_space_id ) < 0)
   goto out;
 
  /* Terminate access to the dataspace */
- if ( H5Sclose( space_id2 ) < 0 )
+ if(H5Sclose( space_id2 ) < 0)
   goto out;
 
  /* Release the datatype. */
- if ( H5Tclose( type_id2 ) < 0 )
+ if(H5Tclose( type_id2 ) < 0)
   return -1;
 
  /* Terminate access to a property list */
- if ( H5Pclose( plist_id2 ) < 0 )
+ if(H5Pclose( plist_id2 ) < 0)
   goto out;
 
  /* End access to the dataset */
- if ( H5Dclose( dataset_id2 ) < 0 )
+ if(H5Dclose( dataset_id2 ) < 0)
   return -1;
 
 /*-------------------------------------------------------------------------
@@ -2146,19 +2146,19 @@ herr_t H5TBcombine_tables( hid_t loc_id1,
  */
 
  /* Terminate access to the dataspace */
- if ( H5Sclose( space_id3 ) < 0 )
+ if(H5Sclose( space_id3 ) < 0)
   return -1;
 
  /* Release the datatype. */
- if ( H5Tclose( type_id3 ) < 0 )
+ if(H5Tclose( type_id3 ) < 0)
   return -1;
 
  /* Terminate access to a property list */
- if ( H5Pclose( plist_id3 ) < 0 )
+ if(H5Pclose( plist_id3 ) < 0)
   return -1;
 
  /* End access to the dataset */
- if ( H5Dclose( dataset_id3 ) < 0 )
+ if(H5Dclose( dataset_id3 ) < 0)
   return -1;
 
  /* Release resources. */
@@ -2246,7 +2246,7 @@ herr_t H5TBinsert_field( hid_t loc_id,
  hsize_t  i;
 
  /* Get the number of records and fields  */
- if ( H5TBget_table_info ( loc_id, dset_name,  &nfields, &nrecords ) < 0 )
+ if(H5TBget_table_info ( loc_id, dset_name,  &nfields, &nrecords ) < 0)
   return -1;
 
 /*-------------------------------------------------------------------------
@@ -2255,27 +2255,27 @@ herr_t H5TBinsert_field( hid_t loc_id,
  */
 
  /* Open the dataset. */
- if ( (dataset_id1 = H5Dopen( loc_id, dset_name )) < 0 )
+ if((dataset_id1 = H5Dopen( loc_id, dset_name )) < 0)
   return -1;
 
  /* Get creation properties list */
- if ( (plist_id1 = H5Dget_create_plist( dataset_id1 )) < 0 )
+ if((plist_id1 = H5Dget_create_plist( dataset_id1 )) < 0)
   goto out;
 
  /* Get the datatype */
- if ( (type_id1 = H5Dget_type( dataset_id1 )) < 0 )
+ if((type_id1 = H5Dget_type( dataset_id1 )) < 0)
   goto out;
 
  /* Get the size of the datatype */
- if ( ( total_size = H5Tget_size( type_id1 )) == 0 )
+ if(( total_size = H5Tget_size( type_id1 )) == 0 )
   goto out;
 
  /* Get the dataspace handle */
- if ( (space_id1 = H5Dget_space( dataset_id1 )) < 0 )
+ if((space_id1 = H5Dget_space( dataset_id1 )) < 0)
   goto out;
 
  /* Get dimension */
- if ( H5Sget_simple_extent_dims( space_id1, dims, NULL) < 0 )
+ if(H5Sget_simple_extent_dims( space_id1, dims, NULL) < 0)
   goto out;
 
 /*-------------------------------------------------------------------------
@@ -2284,14 +2284,14 @@ herr_t H5TBinsert_field( hid_t loc_id,
  */
 
  /* Get the table title */
- if ( (H5TBAget_title( dataset_id1, table_title )) < 0 )
+ if((H5TBAget_title( dataset_id1, table_title )) < 0)
   goto out;
 
  /* alloc fill value attribute buffer */
  tmp_fill_buf = (unsigned char *)malloc(total_size );
 
  /* Get the fill value attributes */
- if ( (H5TBAget_fill( loc_id, dset_name, dataset_id1, tmp_fill_buf )) < 0 )
+ if((H5TBAget_fill( loc_id, dset_name, dataset_id1, tmp_fill_buf )) < 0)
   goto out;
 
 /*-------------------------------------------------------------------------
@@ -2303,7 +2303,7 @@ herr_t H5TBinsert_field( hid_t loc_id,
  member_size = H5Tget_size( field_type );
 
  /* Create the data type. */
- if (( type_id2 = H5Tcreate (H5T_COMPOUND,(size_t)(total_size + member_size) )) < 0 )
+ if (( type_id2 = H5Tcreate (H5T_COMPOUND,(size_t)(total_size + member_size) )) < 0)
   goto out;
 
  curr_offset = 0;
@@ -2314,17 +2314,17 @@ herr_t H5TBinsert_field( hid_t loc_id,
  {
 
   idx = i;
-  if ( inserted )
+  if(inserted )
    idx = i - 1;
 
-  if ( i == position )
+  if(i == position )
   {
 
    /* Get the new member size */
    new_member_size = H5Tget_size( field_type );
 
    /* Insert the new field type */
-   if ( H5Tinsert( type_id2, field_name, curr_offset, field_type ) < 0 )
+   if(H5Tinsert( type_id2, field_name, curr_offset, field_type ) < 0)
     goto out;
 
    curr_offset += new_member_size;
@@ -2339,14 +2339,14 @@ herr_t H5TBinsert_field( hid_t loc_id,
   member_name = H5Tget_member_name( type_id1, (unsigned)idx );
 
   /* Get the member type */
-  if ( ( member_type_id = H5Tget_member_type( type_id1,(unsigned)idx )) < 0 )
+  if(( member_type_id = H5Tget_member_type( type_id1,(unsigned)idx )) < 0)
    goto out;
 
   /* Get the member size */
   member_size = H5Tget_size( member_type_id );
 
   /* Insert it into the new type */
-  if ( H5Tinsert( type_id2, member_name, curr_offset, member_type_id ) < 0 )
+  if(H5Tinsert( type_id2, member_name, curr_offset, member_type_id ) < 0)
     goto out;
 
   curr_offset += member_size;
@@ -2354,7 +2354,7 @@ herr_t H5TBinsert_field( hid_t loc_id,
   free( member_name );
 
    /* Close the member type */
-  if ( H5Tclose( member_type_id ) < 0 )
+  if(H5Tclose( member_type_id ) < 0)
    goto out;
 
 
@@ -2366,20 +2366,20 @@ herr_t H5TBinsert_field( hid_t loc_id,
  */
 
  /* Retrieve the size of chunk */
- if ( H5Pget_chunk( plist_id1, 1, dims_chunk ) < 0 )
+ if(H5Pget_chunk( plist_id1, 1, dims_chunk ) < 0)
   goto out;
 
  /* Create a new simple data space with unlimited size, using the dimension */
- if ( ( space_id2 = H5Screate_simple( 1, dims, maxdims )) < 0 )
+ if(( space_id2 = H5Screate_simple( 1, dims, maxdims )) < 0)
   return -1;
 
  /* Modify dataset creation properties, i.e. enable chunking  */
  plist_id2 = H5Pcreate (H5P_DATASET_CREATE);
- if ( H5Pset_chunk ( plist_id2, 1, dims_chunk ) < 0 )
+ if(H5Pset_chunk ( plist_id2, 1, dims_chunk ) < 0)
   return -1;
 
  /* Create the dataset. */
- if ( ( dataset_id2 = H5Dcreate( loc_id, "new", type_id2, space_id2, plist_id2 )) < 0 )
+ if(( dataset_id2 = H5Dcreate( loc_id, "new", type_id2, space_id2, plist_id2 )) < 0)
   goto out;
 
 
@@ -2393,15 +2393,15 @@ herr_t H5TBinsert_field( hid_t loc_id,
  /* Define a hyperslab in the dataset of the size of the records */
  offset[0] = 0;
  count[0]  = nrecords;
- if ( H5Sselect_hyperslab( space_id1, H5S_SELECT_SET, offset, NULL, count, NULL) < 0 )
+ if(H5Sselect_hyperslab( space_id1, H5S_SELECT_SET, offset, NULL, count, NULL) < 0)
   goto out;
 
  /* Create a memory dataspace handle */
  mem_size[0] = count[0];
- if ( (mem_space_id1 = H5Screate_simple( 1, mem_size, NULL )) < 0 )
+ if((mem_space_id1 = H5Screate_simple( 1, mem_size, NULL )) < 0)
   goto out;
 
- if ( H5Dread( dataset_id1, type_id1, mem_space_id1, H5S_ALL, H5P_DEFAULT, tmp_buf ) < 0 )
+ if(H5Dread( dataset_id1, type_id1, mem_space_id1, H5S_ALL, H5P_DEFAULT, tmp_buf ) < 0)
   goto out;
 
 
@@ -2411,7 +2411,7 @@ herr_t H5TBinsert_field( hid_t loc_id,
  */
 
  /* Write */
- if ( H5Dwrite( dataset_id2, type_id1, mem_space_id1, H5S_ALL, H5P_DEFAULT, tmp_buf ) < 0 )
+ if(H5Dwrite( dataset_id2, type_id1, mem_space_id1, H5S_ALL, H5P_DEFAULT, tmp_buf ) < 0)
   goto out;
 
 
@@ -2422,11 +2422,11 @@ herr_t H5TBinsert_field( hid_t loc_id,
 
 
  /* Create a write id */
- if ( ( write_type_id = H5Tcreate( H5T_COMPOUND, (size_t)new_member_size )) < 0 )
+ if(( write_type_id = H5Tcreate( H5T_COMPOUND, (size_t)new_member_size )) < 0)
   goto out;
 
  /* The field in the file is found by its name */
- if ( H5Tinsert( write_type_id, field_name, (size_t)0, field_type ) < 0 )
+ if(H5Tinsert( write_type_id, field_name, (size_t)0, field_type ) < 0)
   goto out;
 
  /* Create xfer properties to preserve initialized data */
@@ -2436,24 +2436,24 @@ herr_t H5TBinsert_field( hid_t loc_id,
   goto out;
 
   /* Only write if there is something to write */
- if ( data )
+ if(data )
  {
 
   /* Create a memory dataspace handle */
-  if ( (mem_space_id2 = H5Screate_simple( 1, mem_size, NULL )) < 0 )
+  if((mem_space_id2 = H5Screate_simple( 1, mem_size, NULL )) < 0)
    goto out;
 
   /* Write */
-  if ( H5Dwrite( dataset_id2, write_type_id, mem_space_id2, space_id2, PRESERVE, data ) < 0 )
+  if(H5Dwrite( dataset_id2, write_type_id, mem_space_id2, space_id2, PRESERVE, data ) < 0)
    goto out;
 
    /* Terminate access to the memory dataspace */
-  if ( H5Sclose( mem_space_id2 ) < 0 )
+  if(H5Sclose( mem_space_id2 ) < 0)
    goto out;
  }
 
  /* End access to the property list */
- if ( H5Pclose( PRESERVE ) < 0 )
+ if(H5Pclose( PRESERVE ) < 0)
   goto out;
 
 
@@ -2464,23 +2464,23 @@ herr_t H5TBinsert_field( hid_t loc_id,
  */
 
  /* Terminate access to the memory dataspace */
- if ( H5Sclose( mem_space_id1 ) < 0 )
+ if(H5Sclose( mem_space_id1 ) < 0)
   goto out;
 
  /* Release the datatype. */
- if ( H5Tclose( type_id1 ) < 0 )
+ if(H5Tclose( type_id1 ) < 0)
   goto out;
 
  /* Terminate access to a property list */
- if ( H5Pclose( plist_id1 ) < 0 )
+ if(H5Pclose( plist_id1 ) < 0)
   goto out;
 
  /* Terminate access to the data space */
- if ( H5Sclose( space_id1 ) < 0 )
+ if(H5Sclose( space_id1 ) < 0)
   goto out;
 
  /* End access to the dataset */
- if ( H5Dclose( dataset_id1 ) < 0 )
+ if(H5Dclose( dataset_id1 ) < 0)
   goto out;
 
 
@@ -2490,25 +2490,25 @@ herr_t H5TBinsert_field( hid_t loc_id,
  */
 
  /* Terminate access to the dataspace */
- if ( H5Sclose( space_id2 ) < 0 )
+ if(H5Sclose( space_id2 ) < 0)
   goto out;
 
  /* Release the datatype. */
- if ( H5Tclose( type_id2 ) < 0 )
+ if(H5Tclose( type_id2 ) < 0)
   return -1;
 
  /* Terminate access to a property list */
- if ( H5Pclose( plist_id2 ) < 0 )
+ if(H5Pclose( plist_id2 ) < 0)
   goto out;
 
  /* End access to the dataset */
- if ( H5Dclose( dataset_id2 ) < 0 )
+ if(H5Dclose( dataset_id2 ) < 0)
   return -1;
 /*-------------------------------------------------------------------------
  * Delete 1st table
  *-------------------------------------------------------------------------
  */
- if ( H5Ldelete( loc_id, dset_name, H5P_DEFAULT ) < 0 )
+ if(H5Ldelete( loc_id, dset_name, H5P_DEFAULT ) < 0)
   return -1;
 
 /*-------------------------------------------------------------------------
@@ -2516,7 +2516,7 @@ herr_t H5TBinsert_field( hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
- if ( H5Lmove( loc_id, "new", H5L_SAME_LOC, dset_name, H5P_DEFAULT, H5P_DEFAULT ) < 0 )
+ if(H5Lmove( loc_id, "new", H5L_SAME_LOC, dset_name, H5P_DEFAULT, H5P_DEFAULT ) < 0)
   return -1;
 
 /*-------------------------------------------------------------------------
@@ -2525,54 +2525,54 @@ herr_t H5TBinsert_field( hid_t loc_id,
  */
 
  /* Get the number of records and fields  */
- if ( H5TBget_table_info ( loc_id, dset_name,  &nfields, &nrecords ) < 0 )
+ if(H5TBget_table_info ( loc_id, dset_name,  &nfields, &nrecords ) < 0)
   return -1;
 
  /* Open the dataset. */
- if ( (dataset_id1 = H5Dopen( loc_id, dset_name )) < 0 )
+ if((dataset_id1 = H5Dopen( loc_id, dset_name )) < 0)
   return -1;
 
  /* Get the datatype */
- if ( (type_id1 = H5Dget_type( dataset_id1 )) < 0 )
+ if((type_id1 = H5Dget_type( dataset_id1 )) < 0)
   goto out;
 
  /* Set the attributes */
- if ( H5TB_attach_attributes( table_title, loc_id, dset_name,(hsize_t) nfields, type_id1 ) < 0 )
+ if(H5TB_attach_attributes( table_title, loc_id, dset_name,(hsize_t) nfields, type_id1 ) < 0)
   return -1;
 /*-------------------------------------------------------------------------
  * Attach the fill attributes from previous table
  *-------------------------------------------------------------------------
  */
 
-  if (( space_id1 = H5Screate(H5S_SCALAR)) < 0 )
+  if (( space_id1 = H5Screate(H5S_SCALAR)) < 0)
    goto out;
 
   for ( i = 0; i < nfields-1; i++)
   {
     /* Get the member type */
-   if ( ( member_type_id = H5Tget_member_type( type_id1, (unsigned) i )) < 0 )
+   if(( member_type_id = H5Tget_member_type( type_id1, (unsigned) i )) < 0)
     goto out;
 
    /* Get the member offset */
-   member_offset = H5Tget_member_offset( type_id1, (unsigned) i );
+   member_offset = H5Tget_member_offset(type_id1, (unsigned)i);
 
-   strcpy( attr_name, "FIELD_" );
-   sprintf( aux, "%d", (int)i );
-   strcat( attr_name, aux );
-   sprintf( aux, "%s", "_FILL" );
-   strcat( attr_name, aux );
+   strcpy(attr_name, "FIELD_");
+   sprintf(aux, "%d", (int)i);
+   strcat(attr_name, aux);
+   sprintf(aux, "%s", "_FILL");
+   strcat(attr_name, aux);
 
-   if ( (attr_id = H5Acreate( dataset_id1, attr_name, member_type_id, space_id1, H5P_DEFAULT )) < 0 )
+   if((attr_id = H5Acreate2(dataset_id1, ".", attr_name, member_type_id, space_id1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
     goto out;
 
-   if ( H5Awrite( attr_id, member_type_id, tmp_fill_buf+member_offset ) < 0 )
+   if(H5Awrite(attr_id, member_type_id, tmp_fill_buf+member_offset) < 0)
     goto out;
 
-   if ( H5Aclose( attr_id ) < 0 )
+   if(H5Aclose(attr_id) < 0)
     goto out;
 
    /* Close the member type */
-   if ( H5Tclose( member_type_id ) < 0 )
+   if(H5Tclose(member_type_id) < 0)
     goto out;
   }
 
@@ -2580,43 +2580,43 @@ herr_t H5TBinsert_field( hid_t loc_id,
  * Attach the fill attribute from the new field, if present
  *-------------------------------------------------------------------------
  */
- if ( fill_data )
+ if(fill_data)
  {
 
-   strcpy( attr_name, "FIELD_" );
-   sprintf( aux, "%d",(int)( nfields-1) );
-   strcat( attr_name, aux );
-   sprintf( aux, "%s", "_FILL" );
-   strcat( attr_name, aux );
+   strcpy(attr_name, "FIELD_");
+   sprintf(aux, "%d",(int)(nfields - 1));
+   strcat(attr_name, aux);
+   sprintf(aux, "%s", "_FILL");
+   strcat(attr_name, aux);
 
     /* Get the member type */
-   if ( ( member_type_id = H5Tget_member_type( type_id1, (unsigned)nfields-1 )) < 0 )
+   if((member_type_id = H5Tget_member_type(type_id1, (unsigned)nfields - 1)) < 0)
     goto out;
 
-   if ( (attr_id = H5Acreate( dataset_id1, attr_name, member_type_id, space_id1, H5P_DEFAULT )) < 0 )
+   if((attr_id = H5Acreate2(dataset_id1, ".", attr_name, member_type_id, space_id1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
     goto out;
 
-   if ( H5Awrite( attr_id, member_type_id, fill_data ) < 0 )
+   if(H5Awrite(attr_id, member_type_id, fill_data) < 0)
     goto out;
 
-   if ( H5Aclose( attr_id ) < 0 )
+   if(H5Aclose(attr_id) < 0)
     goto out;
 
-   if ( H5Tclose( member_type_id ) < 0 )
+   if(H5Tclose(member_type_id) < 0)
     goto out;
 
  }
 
   /* Close data space. */
- if ( H5Sclose( space_id1 ) < 0 )
+ if(H5Sclose( space_id1 ) < 0)
   goto out;
 
  /* Release the datatype. */
- if ( H5Tclose( type_id1 ) < 0 )
+ if(H5Tclose( type_id1 ) < 0)
   goto out;
 
  /* End access to the dataset */
- if ( H5Dclose( dataset_id1 ) < 0 )
+ if(H5Dclose( dataset_id1 ) < 0)
   goto out;
 
  /* Release resources. */
@@ -2693,7 +2693,7 @@ herr_t H5TBdelete_field( hid_t loc_id,
  int      has_fill=0;
 
  /* Get the number of records and fields  */
- if ( H5TBget_table_info ( loc_id, dset_name,  &nfields, &nrecords ) < 0 )
+ if(H5TBget_table_info ( loc_id, dset_name,  &nfields, &nrecords ) < 0)
   return -1;
 
 /*-------------------------------------------------------------------------
@@ -2702,26 +2702,26 @@ herr_t H5TBdelete_field( hid_t loc_id,
  */
 
  /* Open the dataset. */
- if ( (dataset_id1 = H5Dopen( loc_id, dset_name )) < 0 )
+ if((dataset_id1 = H5Dopen( loc_id, dset_name )) < 0)
   return -1;
 
  /* Get creation properties list */
- if ( (plist_id1 = H5Dget_create_plist( dataset_id1 )) < 0 )
+ if((plist_id1 = H5Dget_create_plist( dataset_id1 )) < 0)
   goto out;
 
  /* Get the datatype */
- if ( (type_id1 = H5Dget_type( dataset_id1 )) < 0 )
+ if((type_id1 = H5Dget_type( dataset_id1 )) < 0)
   goto out;
 
  /* Get the size of the datatype */
  type_size1 = H5Tget_size( type_id1 );
 
  /* Get the dataspace handle */
- if ( (space_id1 = H5Dget_space( dataset_id1 )) < 0 )
+ if((space_id1 = H5Dget_space( dataset_id1 )) < 0)
   goto out;
 
  /* Get dimension */
- if ( H5Sget_simple_extent_dims( space_id1, dims, NULL) < 0 )
+ if(H5Sget_simple_extent_dims( space_id1, dims, NULL) < 0)
   goto out;
 
 /*-------------------------------------------------------------------------
@@ -2737,17 +2737,17 @@ herr_t H5TBdelete_field( hid_t loc_id,
   member_name = H5Tget_member_name( type_id1,(unsigned) i );
 
   /* We want to find the field to delete */
-  if ( H5TB_find_field( member_name, field_name ) > 0 )
+  if(H5TB_find_field( member_name, field_name ) > 0 )
   {
    /* Get the member type */
-   if ( ( member_type_id = H5Tget_member_type( type_id1,(unsigned) i )) < 0 )
+   if(( member_type_id = H5Tget_member_type( type_id1,(unsigned) i )) < 0)
     goto out;
 
    /* Get the member size */
    delete_member_size = H5Tget_size( member_type_id );
 
    /* Close the member type */
-   if ( H5Tclose( member_type_id ) < 0 )
+   if(H5Tclose( member_type_id ) < 0)
     goto out;
 
    free( member_name );
@@ -2761,7 +2761,7 @@ herr_t H5TBdelete_field( hid_t loc_id,
  } /* i */
 
  /* No field to delete was found */
- if ( delete_member_size == 0 )
+ if(delete_member_size == 0 )
   goto out;
 
 /*-------------------------------------------------------------------------
@@ -2772,7 +2772,7 @@ herr_t H5TBdelete_field( hid_t loc_id,
  type_size2 = type_size1 - delete_member_size;
 
  /* Create the data type. */
- if (( type_id2 = H5Tcreate (H5T_COMPOUND, type_size2 )) < 0 )
+ if (( type_id2 = H5Tcreate (H5T_COMPOUND, type_size2 )) < 0)
   goto out;
 
  curr_offset = 0;
@@ -2786,7 +2786,7 @@ herr_t H5TBdelete_field( hid_t loc_id,
  */
 
  /* Get the table title */
- if ( (H5TBAget_title( dataset_id1, table_title )) < 0 )
+ if((H5TBAget_title( dataset_id1, table_title )) < 0)
   goto out;
 
  /* Insert the old fields except the one to delete */
@@ -2797,21 +2797,21 @@ herr_t H5TBdelete_field( hid_t loc_id,
   member_name = H5Tget_member_name( type_id1, (unsigned) i );
 
   /* We want to skip the field to delete */
-  if ( H5TB_find_field( member_name, field_name ) > 0 )
+  if(H5TB_find_field( member_name, field_name ) > 0 )
   {
    free( member_name );
    continue;
   }
 
   /* Get the member type */
-  if ( ( member_type_id = H5Tget_member_type( type_id1, (unsigned)i )) < 0 )
+  if(( member_type_id = H5Tget_member_type( type_id1, (unsigned)i )) < 0)
    goto out;
 
   /* Get the member size */
   member_size = H5Tget_size( member_type_id );
 
   /* Insert it into the new type */
-  if ( H5Tinsert( type_id2, member_name, curr_offset, member_type_id ) < 0 )
+  if(H5Tinsert( type_id2, member_name, curr_offset, member_type_id ) < 0)
     goto out;
 
  /*-------------------------------------------------------------------------
@@ -2829,9 +2829,9 @@ herr_t H5TBdelete_field( hid_t loc_id,
   has_fill = H5LT_find_attribute( dataset_id1, attr_name );
 
   /* Get it */
-  if ( has_fill == 1 )
+  if(has_fill == 1 )
   {
-   if ( H5LT_get_attribute_disk( dataset_id1, attr_name, tmp_fill_buf+curr_offset ) < 0 )
+   if(H5LT_get_attribute_disk( dataset_id1, attr_name, tmp_fill_buf+curr_offset ) < 0)
     goto out;
   }
 
@@ -2840,7 +2840,7 @@ herr_t H5TBdelete_field( hid_t loc_id,
   free( member_name );
 
   /* Close the member type */
-  if ( H5Tclose( member_type_id ) < 0 )
+  if(H5Tclose( member_type_id ) < 0)
    goto out;
 
  } /* i */
@@ -2851,20 +2851,20 @@ herr_t H5TBdelete_field( hid_t loc_id,
  */
 
  /* Retrieve the size of chunk */
- if ( H5Pget_chunk( plist_id1, 1, dims_chunk ) < 0 )
+ if(H5Pget_chunk( plist_id1, 1, dims_chunk ) < 0)
   goto out;
 
  /* Create a new simple data space with unlimited size, using the dimension */
- if ( ( space_id2 = H5Screate_simple( 1, dims, maxdims )) < 0 )
+ if(( space_id2 = H5Screate_simple( 1, dims, maxdims )) < 0)
   return -1;
 
  /* Modify dataset creation properties, i.e. enable chunking  */
  plist_id2 = H5Pcreate (H5P_DATASET_CREATE);
- if ( H5Pset_chunk ( plist_id2, 1, dims_chunk ) < 0 )
+ if(H5Pset_chunk ( plist_id2, 1, dims_chunk ) < 0)
   return -1;
 
  /* Create the dataset. */
- if ( ( dataset_id2 = H5Dcreate( loc_id, "new", type_id2, space_id2, plist_id2 )) < 0 )
+ if(( dataset_id2 = H5Dcreate( loc_id, "new", type_id2, space_id2, plist_id2 )) < 0)
   goto out;
 
 /*-------------------------------------------------------------------------
@@ -2878,39 +2878,39 @@ herr_t H5TBdelete_field( hid_t loc_id,
   member_name = H5Tget_member_name( type_id1,(unsigned) i );
 
   /* Skip the field to delete */
-  if ( H5TB_find_field( member_name, field_name ) > 0 )
+  if(H5TB_find_field( member_name, field_name ) > 0 )
   {
    free( member_name );
    continue;
   }
 
   /* Get the member type */
-  if ( ( member_type_id = H5Tget_member_type( type_id1, (unsigned)i )) < 0 )
+  if(( member_type_id = H5Tget_member_type( type_id1, (unsigned)i )) < 0)
    goto out;
 
   /* Get the member size */
   member_size = H5Tget_size( member_type_id );
 
   /* Create a read id */
-  if ( ( read_type_id = H5Tcreate( H5T_COMPOUND, member_size )) < 0 )
+  if(( read_type_id = H5Tcreate( H5T_COMPOUND, member_size )) < 0)
    goto out;
 
   /* Insert it into the new type */
-  if ( H5Tinsert( read_type_id, member_name, (size_t)0, member_type_id ) < 0 )
+  if(H5Tinsert( read_type_id, member_name, (size_t)0, member_type_id ) < 0)
     goto out;
 
   tmp_buf = (unsigned char *)calloc((size_t) nrecords, member_size );
 
   /* Read */
-  if ( H5Dread( dataset_id1, read_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp_buf ) < 0 )
+  if(H5Dread( dataset_id1, read_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp_buf ) < 0)
    goto out;
 
   /* Create a write id */
-  if ( ( write_type_id = H5Tcreate( H5T_COMPOUND, member_size )) < 0 )
+  if(( write_type_id = H5Tcreate( H5T_COMPOUND, member_size )) < 0)
    goto out;
 
   /* The field in the file is found by its name */
-  if ( H5Tinsert( write_type_id, member_name, (size_t)0, member_type_id ) < 0 )
+  if(H5Tinsert( write_type_id, member_name, (size_t)0, member_type_id ) < 0)
    goto out;
 
   /* Create xfer properties to preserve initialized data */
@@ -2920,23 +2920,23 @@ herr_t H5TBdelete_field( hid_t loc_id,
    goto out;
 
   /* Write */
-  if ( H5Dwrite( dataset_id2, write_type_id, H5S_ALL, H5S_ALL, PRESERVE, tmp_buf ) < 0 )
+  if(H5Dwrite( dataset_id2, write_type_id, H5S_ALL, H5S_ALL, PRESERVE, tmp_buf ) < 0)
    goto out;
 
   /* End access to the property list */
-  if ( H5Pclose( PRESERVE ) < 0 )
+  if(H5Pclose( PRESERVE ) < 0)
    goto out;
 
  /* Close the member type */
-  if ( H5Tclose( member_type_id ) < 0 )
+  if(H5Tclose( member_type_id ) < 0)
    goto out;
 
   /* Close the read type */
-  if ( H5Tclose( read_type_id ) < 0 )
+  if(H5Tclose( read_type_id ) < 0)
    goto out;
 
   /* Close the write type */
-  if ( H5Tclose( write_type_id ) < 0 )
+  if(H5Tclose( write_type_id ) < 0)
    goto out;
 
   /* Release resources. */
@@ -2951,19 +2951,19 @@ herr_t H5TBdelete_field( hid_t loc_id,
  */
 
  /* Release the datatype. */
- if ( H5Tclose( type_id1 ) < 0 )
+ if(H5Tclose( type_id1 ) < 0)
   goto out;
 
  /* Terminate access to a property list */
- if ( H5Pclose( plist_id1 ) < 0 )
+ if(H5Pclose( plist_id1 ) < 0)
   goto out;
 
  /* Terminate access to the data space */
- if ( H5Sclose( space_id1 ) < 0 )
+ if(H5Sclose( space_id1 ) < 0)
   goto out;
 
  /* End access to the dataset */
- if ( H5Dclose( dataset_id1 ) < 0 )
+ if(H5Dclose( dataset_id1 ) < 0)
   goto out;
 
 
@@ -2973,19 +2973,19 @@ herr_t H5TBdelete_field( hid_t loc_id,
  */
 
  /* Terminate access to the dataspace */
- if ( H5Sclose( space_id2 ) < 0 )
+ if(H5Sclose( space_id2 ) < 0)
   goto out;
 
  /* Release the datatype. */
- if ( H5Tclose( type_id2 ) < 0 )
+ if(H5Tclose( type_id2 ) < 0)
   return -1;
 
  /* Terminate access to a property list */
- if ( H5Pclose( plist_id2 ) < 0 )
+ if(H5Pclose( plist_id2 ) < 0)
   goto out;
 
  /* End access to the dataset */
- if ( H5Dclose( dataset_id2 ) < 0 )
+ if(H5Dclose( dataset_id2 ) < 0)
   return -1;
 
 /*-------------------------------------------------------------------------
@@ -2993,7 +2993,7 @@ herr_t H5TBdelete_field( hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
- if ( H5Ldelete( loc_id, dset_name, H5P_DEFAULT ) < 0 )
+ if(H5Ldelete( loc_id, dset_name, H5P_DEFAULT ) < 0)
   return -1;
 
 /*-------------------------------------------------------------------------
@@ -3001,7 +3001,7 @@ herr_t H5TBdelete_field( hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
- if ( H5Lmove( loc_id, "new", H5L_SAME_LOC, dset_name, H5P_DEFAULT, H5P_DEFAULT ) < 0 )
+ if(H5Lmove( loc_id, "new", H5L_SAME_LOC, dset_name, H5P_DEFAULT, H5P_DEFAULT ) < 0)
   return -1;
 
 /*-------------------------------------------------------------------------
@@ -3010,19 +3010,19 @@ herr_t H5TBdelete_field( hid_t loc_id,
  */
 
  /* Get the number of records and fields  */
- if ( H5TBget_table_info ( loc_id, dset_name, &nfields, &nrecords ) < 0 )
+ if(H5TBget_table_info ( loc_id, dset_name, &nfields, &nrecords ) < 0)
   return -1;
 
  /* Open the dataset. */
- if ( (dataset_id1 = H5Dopen( loc_id, dset_name )) < 0 )
+ if((dataset_id1 = H5Dopen( loc_id, dset_name )) < 0)
   return -1;
 
  /* Get the datatype */
- if ( (type_id1 = H5Dget_type( dataset_id1 )) < 0 )
+ if((type_id1 = H5Dget_type( dataset_id1 )) < 0)
   goto out;
 
  /* Set the attributes */
- if ( H5TB_attach_attributes( table_title, loc_id, dset_name, nfields, type_id1 ) < 0 )
+ if(H5TB_attach_attributes( table_title, loc_id, dset_name, nfields, type_id1 ) < 0)
   return -1;
 
 /*-------------------------------------------------------------------------
@@ -3030,55 +3030,53 @@ herr_t H5TBdelete_field( hid_t loc_id,
  *-------------------------------------------------------------------------
  */
 
- if ( has_fill == 1 )
+ if(has_fill == 1)
  {
-
-  if (( space_id1 = H5Screate(H5S_SCALAR)) < 0 )
+  if((space_id1 = H5Screate(H5S_SCALAR)) < 0)
    goto out;
 
-  for ( i = 0; i < nfields; i++)
+  for(i = 0; i < nfields; i++)
   {
 
    /* Get the member type */
-   if ( ( member_type_id = H5Tget_member_type( type_id1, (unsigned)i )) < 0 )
+   if(( member_type_id = H5Tget_member_type( type_id1, (unsigned)i )) < 0)
     goto out;
 
    /* Get the member offset */
-   member_offset = H5Tget_member_offset( type_id1, (unsigned)i );
+   member_offset = H5Tget_member_offset(type_id1, (unsigned)i);
 
-   strcpy( attr_name, "FIELD_" );
-   sprintf( aux, "%d", (int)i );
-   strcat( attr_name, aux );
-   sprintf( aux, "%s", "_FILL" );
-   strcat( attr_name, aux );
+   strcpy(attr_name, "FIELD_");
+   sprintf(aux, "%d", (int)i);
+   strcat(attr_name, aux);
+   sprintf(aux, "%s", "_FILL");
+   strcat(attr_name, aux);
 
-   if ( (attr_id = H5Acreate( dataset_id1, attr_name, member_type_id, space_id1, H5P_DEFAULT )) < 0 )
+   if((attr_id = H5Acreate2(dataset_id1, ".", attr_name, member_type_id, space_id1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
     goto out;
 
-   if ( H5Awrite( attr_id, member_type_id, tmp_fill_buf+member_offset ) < 0 )
+   if(H5Awrite(attr_id, member_type_id, tmp_fill_buf+member_offset) < 0)
     goto out;
 
-   if ( H5Aclose( attr_id ) < 0 )
+   if(H5Aclose(attr_id) < 0)
     goto out;
 
    /* Close the member type */
-   if ( H5Tclose( member_type_id ) < 0 )
+   if(H5Tclose(member_type_id) < 0)
     goto out;
-
   }
 
   /* Close data space. */
-  if ( H5Sclose( space_id1 ) < 0 )
+  if(H5Sclose(space_id1) < 0)
    goto out;
 
  } /*has_fill*/
 
  /* Release the datatype. */
- if ( H5Tclose( type_id1 ) < 0 )
+ if(H5Tclose( type_id1 ) < 0)
   goto out;
 
  /* End access to the dataset */
- if ( H5Dclose( dataset_id1 ) < 0 )
+ if(H5Dclose( dataset_id1 ) < 0)
   goto out;
 
  /* Release resources. */
@@ -3121,7 +3119,7 @@ herr_t H5TBAget_title( hid_t loc_id,
 {
 
  /* Get the TITLE attribute */
- if ( H5LT_get_attribute_disk( loc_id, "TITLE", table_title ) < 0 )
+ if(H5LT_get_attribute_disk( loc_id, "TITLE", table_title ) < 0)
   return -1;
 
 
@@ -3163,7 +3161,7 @@ herr_t H5TBAget_fill( hid_t loc_id,
  int     has_fill=0;
 
  /* Get the number of records and fields  */
- if ( H5TBget_table_info ( loc_id, dset_name, &nfields, &nrecords ) < 0 )
+ if(H5TBget_table_info ( loc_id, dset_name, &nfields, &nrecords ) < 0)
   return -1;
 
  src_offset = (size_t *)malloc((size_t)nfields * sizeof(size_t));
@@ -3172,7 +3170,7 @@ herr_t H5TBAget_fill( hid_t loc_id,
   return -1;
 
  /* Get field info */
- if ( H5TBget_field_info( loc_id, dset_name, NULL, NULL, src_offset, NULL ) < 0 )
+ if(H5TBget_field_info( loc_id, dset_name, NULL, NULL, src_offset, NULL ) < 0)
   goto out;
 
  for ( i = 0; i < nfields; i++)
@@ -3187,9 +3185,9 @@ herr_t H5TBAget_fill( hid_t loc_id,
   has_fill = H5LT_find_attribute( dset_id, attr_name );
 
   /* Get it */
-  if ( has_fill == 1 )
+  if(has_fill == 1 )
   {
-   if ( H5LT_get_attribute_disk( dset_id, attr_name, dst_buf+src_offset[i] ) < 0 )
+   if(H5LT_get_attribute_disk( dset_id, attr_name, dst_buf+src_offset[i] ) < 0)
     goto out;
   }
 
@@ -3248,15 +3246,15 @@ herr_t H5TBget_table_info ( hid_t loc_id,
  hsize_t    n[1];
 
  /* Open the dataset. */
- if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
+ if((did = H5Dopen( loc_id, dset_name )) < 0)
   return -1;
 
  /* Get the datatype */
- if ( (tid = H5Dget_type( did )) < 0 )
+ if((tid = H5Dget_type( did )) < 0)
   goto out;
 
  /* Get the number of members */
- if ( (num_members = H5Tget_nmembers( tid )) < 0 )
+ if((num_members = H5Tget_nmembers( tid )) < 0)
   goto out;
 
  if (nfields)
@@ -3274,10 +3272,10 @@ herr_t H5TBget_table_info ( hid_t loc_id,
   has_attr = H5LT_find_attribute( did, "NROWS" );
 
   /* It exists, get it */
-  if ( has_attr == 1 )
+  if(has_attr == 1 )
   {
    /* Get the attribute */
-   if ( H5LTget_attribute(loc_id,dset_name,"NROWS",H5T_NATIVE_LLONG,n)<0)
+   if(H5LTget_attribute(loc_id,dset_name,"NROWS",H5T_NATIVE_LLONG,n)<0)
     return -1;
 
    /**nrecords = *n;*/
@@ -3286,15 +3284,15 @@ herr_t H5TBget_table_info ( hid_t loc_id,
   else
   {
    /* Get the dataspace handle */
-   if ( (sid = H5Dget_space( did )) < 0 )
+   if((sid = H5Dget_space( did )) < 0)
     goto out;
 
    /* Get records */
-   if ( H5Sget_simple_extent_dims( sid, dims, NULL) < 0 )
+   if(H5Sget_simple_extent_dims( sid, dims, NULL) < 0)
     goto out;
 
    /* Terminate access to the dataspace */
-   if ( H5Sclose( sid ) < 0 )
+   if(H5Sclose( sid ) < 0)
     goto out;
 
    *nrecords = dims[0];
@@ -3302,9 +3300,9 @@ herr_t H5TBget_table_info ( hid_t loc_id,
  }/*nrecords*/
 
  /* close */
- if ( H5Tclose( tid ) < 0 )
+ if(H5Tclose( tid ) < 0)
   goto out;
- if ( H5Dclose( did ) < 0 )
+ if(H5Dclose( did ) < 0)
   return -1;
 
 return 0;
@@ -3358,11 +3356,11 @@ herr_t H5TBget_field_info( hid_t loc_id,
  hssize_t      i;
 
  /* Open the dataset. */
- if ( ( did = H5Dopen( loc_id, dset_name )) < 0 )
+ if(( did = H5Dopen( loc_id, dset_name )) < 0)
   goto out;
 
  /* Get the datatype */
- if ( ( ftype_id = H5Dget_type( did )) < 0 )
+ if(( ftype_id = H5Dget_type( did )) < 0)
   goto out;
 
  if ((native_type_id = H5Tget_native_type(ftype_id,H5T_DIR_DEFAULT))<0)
@@ -3371,11 +3369,11 @@ herr_t H5TBget_field_info( hid_t loc_id,
  /* Get the type size */
  size = H5Tget_size( native_type_id );
 
- if ( type_size )
+ if(type_size )
   *type_size = size;
 
  /* Get the number of members */
- if ( ( nfields = H5Tget_nmembers( ftype_id )) < 0 )
+ if(( nfields = H5Tget_nmembers( ftype_id )) < 0)
   goto out;
 
  /* Iterate tru the members */
@@ -3384,11 +3382,11 @@ herr_t H5TBget_field_info( hid_t loc_id,
   /* Get the member name */
   member_name = H5Tget_member_name( ftype_id, (unsigned)i );
 
-  if ( field_names )
+  if(field_names )
    strcpy( field_names[i], member_name );
 
   /* Get the member type */
-  if ( ( member_type_id = H5Tget_member_type( ftype_id,(unsigned) i )) < 0 )
+  if(( member_type_id = H5Tget_member_type( ftype_id,(unsigned) i )) < 0)
    goto out;
   if ((nativem_type_id = H5Tget_native_type(member_type_id,H5T_DIR_DEFAULT))<0)
    goto out;
@@ -3396,19 +3394,19 @@ herr_t H5TBget_field_info( hid_t loc_id,
   /* Get the member size */
   member_size = H5Tget_size( nativem_type_id );
 
-  if ( field_sizes )
+  if(field_sizes )
    field_sizes[i] = member_size;
 
   /* Get the member offset */
   member_offset = H5Tget_member_offset( native_type_id,(unsigned) i );
 
-  if ( field_offsets )
+  if(field_offsets )
    field_offsets[i] = member_offset;
 
   /* Close the member type */
-  if ( H5Tclose( member_type_id ) < 0 )
+  if(H5Tclose( member_type_id ) < 0)
    goto out;
-  if ( H5Tclose( nativem_type_id ) < 0 )
+  if(H5Tclose( nativem_type_id ) < 0)
    goto out;
 
   free( member_name );
@@ -3416,13 +3414,13 @@ herr_t H5TBget_field_info( hid_t loc_id,
  } /* i */
 
  /* Release the datatype. */
- if ( H5Tclose( ftype_id ) < 0 )
+ if(H5Tclose( ftype_id ) < 0)
   return -1;
- if ( H5Tclose( native_type_id ) < 0 )
+ if(H5Tclose( native_type_id ) < 0)
   return -1;
 
  /* End access to the dataset */
- if ( H5Dclose( did ) < 0 )
+ if(H5Dclose( did ) < 0)
   return -1;
 
 return 0;
@@ -3463,12 +3461,12 @@ int H5TB_find_field( const char *field, const char *field_list )
     while ( (end = strstr( start, "," )) != 0 ) 
     {
         size_t count = end - start;
-        if ( strncmp(start, field, count) == 0 && count == strlen(field) )
+        if(strncmp(start, field, count) == 0 && count == strlen(field) )
             return 1;
         start = end + 1;
     }
     
-    if ( strcmp( start, field ) == 0 )
+    if(strcmp( start, field ) == 0 )
         return 1;
     
     return -1;
@@ -3510,15 +3508,15 @@ herr_t H5TB_attach_attributes( const char *table_title,
  hsize_t i;
 
  /* Attach the CLASS attribute */
- if ( H5LTset_attribute_string( loc_id, dset_name, "CLASS", TABLE_CLASS ) < 0 )
+ if(H5LTset_attribute_string( loc_id, dset_name, "CLASS", TABLE_CLASS ) < 0)
   goto out;
 
  /* Attach the VERSION attribute */
- if ( H5LTset_attribute_string( loc_id, dset_name, "VERSION", "2.0" ) < 0 )
+ if(H5LTset_attribute_string( loc_id, dset_name, "VERSION", "2.0" ) < 0)
   goto out;
 
  /* Attach the TITLE attribute */
- if ( H5LTset_attribute_string( loc_id, dset_name, "TITLE", table_title ) < 0 )
+ if(H5LTset_attribute_string( loc_id, dset_name, "TITLE", table_title ) < 0)
   goto out;
 
  /* Attach the FIELD_ name attribute */
@@ -3535,7 +3533,7 @@ herr_t H5TB_attach_attributes( const char *table_title,
   strcat( attr_name, aux );
 
   /* Attach the attribute */
-  if ( H5LTset_attribute_string( loc_id, dset_name, attr_name, member_name ) < 0 )
+  if(H5LTset_attribute_string( loc_id, dset_name, attr_name, member_name ) < 0)
    goto out;
 
   free( member_name );
@@ -3599,7 +3597,7 @@ hid_t H5TB_create_type(hid_t loc_id,
  }
 
  /* get field info */
- if ( H5TBget_field_info(loc_id,dset_name,fnames,NULL,NULL,NULL)<0)
+ if(H5TBget_field_info(loc_id,dset_name,fnames,NULL,NULL,NULL)<0)
   goto out;
 
  /* create the memory data type */
@@ -3619,7 +3617,7 @@ hid_t H5TB_create_type(hid_t loc_id,
    if (H5Tset_size(nmtype_id,field_sizes[i])<0)
     goto out;
   }
-  if (H5Tinsert(mem_type_id,fnames[i],field_offset[i],nmtype_id) < 0 )
+  if (H5Tinsert(mem_type_id,fnames[i],field_offset[i],nmtype_id) < 0)
    goto out;
   if (H5Tclose(mtype_id)<0)
    goto out;
@@ -3693,33 +3691,33 @@ herr_t H5TB_common_append_records( hid_t dataset_id,
 
  /* Extend the dataset */
  dims[0] = nrecords + orig_table_size;
- if ( H5Dextend ( dataset_id, dims ) < 0 )
+ if(H5Dextend ( dataset_id, dims ) < 0)
   goto out;
 
  /* Create a simple memory data space */
  mem_dims[0]=nrecords;
- if ( (mem_space_id = H5Screate_simple( 1, mem_dims, NULL )) < 0 )
+ if((mem_space_id = H5Screate_simple( 1, mem_dims, NULL )) < 0)
   goto out;
 
  /* Get a copy of the new file data space for writing */
- if ( (space_id = H5Dget_space( dataset_id )) < 0 )
+ if((space_id = H5Dget_space( dataset_id )) < 0)
   goto out;
 
  /* Define a hyperslab in the dataset */
  offset[0] = orig_table_size;
  count[0] = nrecords;
- if ( H5Sselect_hyperslab( space_id, H5S_SELECT_SET, offset, NULL, count, NULL)<0)
+ if(H5Sselect_hyperslab( space_id, H5S_SELECT_SET, offset, NULL, count, NULL)<0)
   goto out;
 
  /* Write the records */
- if ( H5Dwrite( dataset_id, mem_type_id, mem_space_id, space_id, H5P_DEFAULT, data )<0)
+ if(H5Dwrite( dataset_id, mem_type_id, mem_space_id, space_id, H5P_DEFAULT, data )<0)
   goto out;
 
  /* Terminate access to the dataspace */
- if ( H5Sclose( mem_space_id ) < 0 )
+ if(H5Sclose( mem_space_id ) < 0)
   goto out;
 
- if ( H5Sclose( space_id ) < 0 )
+ if(H5Sclose( space_id ) < 0)
   goto out;
 
  return 0;
@@ -3766,32 +3764,32 @@ herr_t H5TB_common_read_records( hid_t dataset_id,
  hsize_t  mem_size[1];
 
  /* Make sure the read request is in bounds */
- if ( start + nrecords > table_size )
+ if(start + nrecords > table_size )
   goto out;
 
  /* Get the dataspace handle */
- if ( (space_id = H5Dget_space( dataset_id )) < 0 )
+ if((space_id = H5Dget_space( dataset_id )) < 0)
   goto out;
 
  /* Define a hyperslab in the dataset of the size of the records */
  offset[0] = start;
  count[0]  = nrecords;
- if ( H5Sselect_hyperslab( space_id, H5S_SELECT_SET, offset, NULL, count, NULL) < 0 )
+ if(H5Sselect_hyperslab( space_id, H5S_SELECT_SET, offset, NULL, count, NULL) < 0)
   goto out;
 
  /* Create a memory dataspace handle */
  mem_size[0] = count[0];
- if ((mem_space_id = H5Screate_simple( 1, mem_size, NULL )) < 0 )
+ if ((mem_space_id = H5Screate_simple( 1, mem_size, NULL )) < 0)
   goto out;
  if ((H5Dread( dataset_id, mem_type_id, mem_space_id, space_id, H5P_DEFAULT, data))<0)
   goto out;
 
  /* Terminate access to the memory dataspace */
- if ( H5Sclose( mem_space_id ) < 0 )
+ if(H5Sclose( mem_space_id ) < 0)
   goto out;
 
  /* Terminate access to the dataspace */
- if ( H5Sclose( space_id ) < 0 )
+ if(H5Sclose( space_id ) < 0)
   goto out;
 
  return 0;

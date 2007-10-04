@@ -530,8 +530,8 @@ void test_attrname(hid_t fid, const char * string)
   CHECK(ret, FAIL, "H5Tset_size");
 
   /* Create the attribute and check that its name is correct */
-  attr_id = H5Acreate(group_id, string, dtype_id, space_id, H5P_DEFAULT);
-  CHECK(attr_id, FAIL, "H5Acreate");
+  attr_id = H5Acreate2(group_id, ".", string, dtype_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  CHECK(attr_id, FAIL, "H5Acreate2");
   ret = H5Aget_name(attr_id, (size_t)MAX_STRING_LENGTH, read_buf);
   CHECK(ret, FAIL, "H5Aget_name");
   ret = strcmp(read_buf, string);

@@ -63,28 +63,28 @@ test_dangle_dataset(H5F_close_degree_t degree)
 
     TESTING("    dangling dataset IDs");
 
-    if(H5open()<0)
+    if(H5open() < 0)
         TEST_ERROR;
 
     /* Create file access property list */
-    if((fapl=H5Pcreate(H5P_FILE_ACCESS))<0)
+    if((fapl=H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
 
     /* Set file close degree */
-    if(H5Pset_fclose_degree(fapl,degree)<0)
+    if(H5Pset_fclose_degree(fapl,degree) < 0)
         TEST_ERROR;
 
     h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof filename);
-    if((fid = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
+    if((fid = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
 
-    if((sid = H5Screate (H5S_SCALAR))<0)
+    if((sid = H5Screate (H5S_SCALAR)) < 0)
         TEST_ERROR;
 
-    if((dsid = H5Dcreate (fid, DSETNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT))<0)
+    if((dsid = H5Dcreate (fid, DSETNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-    if(H5Dclose(dsid)<0)
+    if(H5Dclose(dsid) < 0)
         TEST_ERROR;
 
     /* Try creating duplicate dataset */
@@ -93,12 +93,12 @@ test_dangle_dataset(H5F_close_degree_t degree)
             TEST_ERROR;
     } H5E_END_TRY;
 
-    if(H5Sclose(sid)<0)
+    if(H5Sclose(sid) < 0)
         TEST_ERROR;
 
     /* Leave open a _lot_ of objects */
     for(u=0; u<MAX_DANGLE; u++) {
-        if((dsid = H5Dopen (fid, DSETNAME))<0)
+        if((dsid = H5Dopen (fid, DSETNAME)) < 0)
             TEST_ERROR;
     } /* end for */
 
@@ -109,16 +109,16 @@ test_dangle_dataset(H5F_close_degree_t degree)
         } H5E_END_TRY;
     } /* end if */
     else
-        if(H5Fclose(fid)<0)
+        if(H5Fclose(fid) < 0)
             TEST_ERROR;
 
-    if(H5Pclose(fapl)<0)
+    if(H5Pclose(fapl) < 0)
         TEST_ERROR;
 
-    if(H5close()<0)
+    if(H5close() < 0)
         TEST_ERROR;
 
-    if(h5_get_file_size(filename)<0)
+    if(h5_get_file_size(filename) < 0)
         TEST_ERROR;
 
     /* Clean up temporary file */
@@ -159,24 +159,24 @@ test_dangle_group(H5F_close_degree_t degree)
 
     TESTING("    dangling group IDs");
 
-    if(H5open()<0)
+    if(H5open() < 0)
         TEST_ERROR;
 
     /* Create file access property list */
-    if((fapl=H5Pcreate(H5P_FILE_ACCESS))<0)
+    if((fapl=H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
 
     /* Set file close degree */
-    if(H5Pset_fclose_degree(fapl,degree)<0)
+    if(H5Pset_fclose_degree(fapl,degree) < 0)
         TEST_ERROR;
 
     h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof filename);
-    if((fid = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
+    if((fid = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
 
     if((gid = H5Gcreate2(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
-    if(H5Gclose(gid)<0)
+    if(H5Gclose(gid) < 0)
         TEST_ERROR;
 
     /* Try creating duplicate group */
@@ -200,16 +200,16 @@ test_dangle_group(H5F_close_degree_t degree)
         } H5E_END_TRY;
     } /* end if */
     else
-        if(H5Fclose(fid)<0)
+        if(H5Fclose(fid) < 0)
             TEST_ERROR;
 
-    if(H5Pclose(fapl)<0)
+    if(H5Pclose(fapl) < 0)
         TEST_ERROR;
 
-    if(H5close()<0)
+    if(H5close() < 0)
         TEST_ERROR;
 
-    if(h5_get_file_size(filename)<0)
+    if(h5_get_file_size(filename) < 0)
         TEST_ERROR;
 
     /* Clean up temporary file */
@@ -275,7 +275,7 @@ test_dangle_datatype1(H5F_close_degree_t degree)
         TEST_ERROR;
 
     /* Try creating duplicate named datatype */
-    if((tid = H5Tcopy (H5T_NATIVE_INT))<0)
+    if((tid = H5Tcopy (H5T_NATIVE_INT)) < 0)
         TEST_ERROR;
     H5E_BEGIN_TRY {
         if(H5Tcommit2(fid, TYPENAME, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) >= 0)
@@ -435,29 +435,29 @@ test_dangle_attribute(H5F_close_degree_t degree)
 
     TESTING("    dangling attribute IDs");
 
-    if(H5open()<0)
+    if(H5open() < 0)
         TEST_ERROR;
 
     /* Create file access property list */
-    if((fapl=H5Pcreate(H5P_FILE_ACCESS))<0)
+    if((fapl=H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
 
     /* Set file close degree */
-    if(H5Pset_fclose_degree(fapl,degree)<0)
+    if(H5Pset_fclose_degree(fapl,degree) < 0)
         TEST_ERROR;
 
     h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof filename);
-    if((fid = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
 
-    if((sid = H5Screate (H5S_SCALAR))<0)
+    if((sid = H5Screate(H5S_SCALAR)) < 0)
         TEST_ERROR;
 
-    if((dsid = H5Dcreate (fid, DSETNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT))<0)
+    if((dsid = H5Dcreate(fid, DSETNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Create an attribute on the dataset */
-    if((aid = H5Acreate (dsid, ATTRNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT))<0)
+    if((aid = H5Acreate2(dsid, ".", ATTRNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Don't worry about writing the attribute - it will have a fill value */
@@ -468,7 +468,7 @@ test_dangle_attribute(H5F_close_degree_t degree)
 
     /* Try creating duplicate attribute */
     H5E_BEGIN_TRY {
-        if((aid = H5Acreate(dsid, ATTRNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT)) >= 0)
+        if((aid = H5Acreate2(dsid, ".", ATTRNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0)
             TEST_ERROR;
     } H5E_END_TRY;
 
@@ -496,10 +496,10 @@ test_dangle_attribute(H5F_close_degree_t degree)
     if(H5Pclose(fapl) < 0)
         TEST_ERROR;
 
-    if(H5close()<0)
+    if(H5close() < 0)
         TEST_ERROR;
 
-    if(h5_get_file_size(filename)<0)
+    if(h5_get_file_size(filename) < 0)
         TEST_ERROR;
 
     /* Clean up temporary file */

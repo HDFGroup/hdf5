@@ -19,17 +19,17 @@
  * operations. -- Threaded program --
  * ------------------------------------------------------------------
  *
- * Plan: Attempt to break H5Acreate by making many simultaneous create
+ * Plan: Attempt to break H5Acreate2 by making many simultaneous create
  *       calls.
  *
- * Claim: N calls to H5Acreate should create N attributes for a dataset
+ * Claim: N calls to H5Acreate2 should create N attributes for a dataset
  *        if threadsafe. If some unprotected shared data exists for the
  *        dataset (eg, a count of the number of attributes in the
  *        dataset), there is a small chance that consecutive reads occur
  *        before a write to that shared variable.
  *
  * HDF5 APIs exercised in thread:
- * H5Acreate, H5Awrite, H5Aclose.
+ * H5Acreate2, H5Awrite, H5Aclose.
  *
  * Created: Oct 5 1999
  * Programmer: Chee Wai LEE
@@ -167,9 +167,9 @@ void *tts_acreate_thread(void *client_data)
 
     /* Create attribute */
     attribute_name = gen_name(attrib_data->current_index);
-    attribute = H5Acreate(attrib_data->dataset, attribute_name,
+    attribute = H5Acreate2(attrib_data->dataset, ".", attribute_name,
                           attrib_data->datatype, attrib_data->dataspace,
-                          H5P_DEFAULT);
+                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write data to the attribute */
     attribute_data = malloc(sizeof(int));

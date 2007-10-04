@@ -45,6 +45,7 @@
 # API function names
 # (although not required, it's easier to compare this file with the headers
 #       generated if the list below is in alphanumeric sort order - QAK)
+FUNCTION: H5Acreate; ; v10, v18
 FUNCTION: H5Adelete; ; v10, v18
 FUNCTION: H5Aiterate; H5A_operator; v10, v18
 FUNCTION: H5Arename; ; v16, v18

@@ -75,14 +75,6 @@ H5_DLL herr_t  H5Adelete2(hid_t loc_id, const char *obj_name,
 H5_DLL herr_t  H5Adelete_by_idx(hid_t loc_id, const char *obj_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id);
 
-/* Functions and variables defined for compatibility with previous versions
- * of the HDF5 API.
- * 
- * Use of these functions and variables is deprecated.
- */
-H5_DLL hid_t   H5Acreate(hid_t loc_id, const char *name, hid_t type_id,
-    hid_t space_id, hid_t plist_id);
-
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  * 
  * Use of these symbols is deprecated.
@@ -100,6 +92,8 @@ typedef herr_t (*H5A_operator1_t)(hid_t location_id/*in*/,
 
 
 /* Function prototypes */
+H5_DLL hid_t   H5Acreate1(hid_t loc_id, const char *name, hid_t type_id,
+    hid_t space_id, hid_t plist_id);
 H5_DLL hid_t   H5Aopen_name(hid_t loc_id, const char *name);
 H5_DLL hid_t   H5Aopen_idx(hid_t loc_id, unsigned idx);
 H5_DLL int     H5Aget_num_attrs(hid_t loc_id);
