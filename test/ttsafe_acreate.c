@@ -112,47 +112,47 @@ void tts_acreate(void)
      * Simultaneously create a large number of attributes to be associated
      * with the dataset
      */
-    for (i = 0; i < NUM_THREADS; i++) {
+    for(i = 0; i < NUM_THREADS; i++) {
         attrib_data = malloc(sizeof(ttsafe_name_data_t));
         attrib_data->dataset = dataset;
         attrib_data->datatype = datatype;
         attrib_data->dataspace = dataspace;
         attrib_data->current_index = i;
-        ret=pthread_create(&threads[i], NULL, tts_acreate_thread, attrib_data);
-        assert(ret==0);
-    }
+        ret = pthread_create(&threads[i], NULL, tts_acreate_thread, attrib_data);
+        assert(ret == 0);
+    } /* end for */
 
-    for (i = 0; i < NUM_THREADS; i++) {
-        ret=pthread_join(threads[i], NULL);
-        assert(ret==0);
-    }
+    for(i = 0; i < NUM_THREADS; i++) {
+        ret = pthread_join(threads[i], NULL);
+        assert(ret == 0);
+    } /* end for */
 
 
     /* verify the correctness of the test */
-    for (i = 0; i < NUM_THREADS; i++) {
-        attribute = H5Aopen_name(dataset,gen_name(i));
+    for(i = 0; i < NUM_THREADS; i++) {
+        attribute = H5Aopen(dataset, ".", gen_name(i), H5P_DEFAULT, H5P_DEFAULT);
 
-        if (attribute < 0)
+        if(attribute < 0)
             TestErrPrintf("unable to open appropriate attribute.  Test failed!\n");
         else {
             ret = H5Aread(attribute, H5T_NATIVE_INT, &buffer);
 
-            if (ret < 0 || buffer != i)
+            if(ret < 0 || buffer != i)
                 TestErrPrintf("wrong data values. Test failed!\n");
 
             H5Aclose(attribute);
-        }
-    }
+        } /* end else */
+    } /* end for */
 
     /* close remaining resources */
-    ret=H5Sclose(dataspace);
-    assert(ret>=0);
-    ret=H5Tclose(datatype);
-    assert(ret>=0);
-    ret=H5Dclose(dataset);
-    assert(ret>=0);
-    ret=H5Fclose(file);
-    assert(ret>=0);
+    ret = H5Sclose(dataspace);
+    assert(ret >= 0);
+    ret = H5Tclose(datatype);
+    assert(ret >= 0);
+    ret = H5Dclose(dataset);
+    assert(ret >= 0);
+    ret = H5Fclose(file);
+    assert(ret >= 0);
 }
 
 void *tts_acreate_thread(void *client_data)

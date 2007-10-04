@@ -478,19 +478,19 @@ herr_t H5IM_get_palette( hid_t loc_id,
  hid_t      pal_id;
 
  /* Open the dataset. */
- if ( (image_id = H5Dopen( loc_id, image_name )) < 0 )
+ if((image_id = H5Dopen(loc_id, image_name)) < 0)
   return -1;
 
  /* Try to find the attribute "PALETTE" on the >>image<< dataset */
- has_pal = H5IM_find_palette( image_id );
+ has_pal = H5IM_find_palette(image_id);
 
- if ( has_pal ==  1 )
+ if(has_pal ==  1 )
  {
 
-  if ( (attr_id = H5Aopen_name( image_id, "PALETTE" )) < 0 )
+  if((attr_id = H5Aopen(image_id, ".", "PALETTE", H5P_DEFAULT, H5P_DEFAULT)) < 0)
    goto out;
 
-  if ( (attr_type = H5Aget_type( attr_id )) < 0 )
+  if((attr_type = H5Aget_type(attr_id)) < 0)
    goto out;
 
   if ( (attr_class = H5Tget_class( attr_type )) < 0 )

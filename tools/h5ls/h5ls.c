@@ -1336,20 +1336,21 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t UNUSED *ainfo,
 
     printf("    Attribute: ");
     n = display_string(stdout, attr_name, TRUE);
-    printf("%*s", MAX(0, 9-n), "");
+    printf("%*s", MAX(0, (9 - n)), "");
 
-    if ((attr = H5Aopen_name(obj, attr_name))) {
+    if((attr = H5Aopen(obj, ".", attr_name, H5P_DEFAULT, H5P_DEFAULT))) {
         space = H5Aget_space(attr);
         type = H5Aget_type(attr);
 
         /* Data space */
         ndims = H5Sget_simple_extent_dims(space, size, NULL);
         space_type = H5Sget_simple_extent_type(space);
-        switch (space_type) {
+        switch(space_type) {
             case H5S_SCALAR:
                 /* scalar dataspace */
                 puts(" scalar");
                 break;
+
             case H5S_SIMPLE:
                 /* simple dataspace */
                 printf(" {");
@@ -1359,15 +1360,17 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t UNUSED *ainfo,
                 }
                 puts("}");
                 break;
+
             case H5S_NULL:
                 /* null dataspace */
                 puts(" null");
                 break;
+
             default:
                 /* Unknown dataspace type */
                 puts(" unknown");
                 break;
-        }
+        } /* end switch */
 
         /* Data type */
         printf("        Type:      ");
@@ -1377,7 +1380,7 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t UNUSED *ainfo,
         /* Data */
         memset(&info, 0, sizeof info);
         info.line_multi_new = 1;
-        if (nelmts<5) {
+        if(nelmts < 5) {
             info.idx_fmt = "";
             info.line_1st  = "        Data:  ";
             info.line_pre  = "               ";
@@ -1393,43 +1396,43 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t UNUSED *ainfo,
         }
 
         info.line_ncols = width_g;
-        if (label_g) info.cmpd_name = "%s=";
-        if (string_g && 1==H5Tget_size(type) &&
-            H5T_INTEGER==H5Tget_class(type)) {
+        if(label_g)
+            info.cmpd_name = "%s=";
+        if(string_g && 1==H5Tget_size(type) &&
+                H5T_INTEGER==H5Tget_class(type)) {
             info.ascii = TRUE;
             info.elmt_suf1 = "";
             info.elmt_suf2 = "";
             info.idx_fmt  = "(%s)";
             info.line_pre = "            %s \"";
             info.line_suf = "\"";
-        }
+        } /* end if */
 
         /* values of type reference */
         info.obj_format = "-%lu:"H5_PRINTF_HADDR_FMT;
         info.obj_hidefileno = 0;
-        if (hexdump_g)
+        if(hexdump_g)
            p_type = H5Tcopy(type);
         else
            p_type = h5tools_get_native_type(type);
 
-        if (p_type>=0) {
+        if(p_type >= 0) {
             temp_need= nelmts * MAX(H5Tget_size(type), H5Tget_size(p_type));
-            assert(temp_need==(hsize_t)((size_t)temp_need));
+            assert(temp_need == (hsize_t)((size_t)temp_need));
             need = (size_t)temp_need;
             buf = malloc(need);
             assert(buf);
-            if (H5Aread(attr, p_type, buf)>=0)
+            if(H5Aread(attr, p_type, buf) >= 0)
                h5tools_dump_mem(stdout, &info, attr, p_type, space, buf, -1);
             free(buf);
             H5Tclose(p_type);
-        }
+        } /* end if */
 
         H5Sclose(space);
         H5Tclose(type);
         H5Aclose(attr);
-    } else {
+    } else
         putchar('\n');
-    }
 
     return 0;
 }

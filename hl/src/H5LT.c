@@ -1718,22 +1718,22 @@ herr_t H5LTget_attribute_ndims( hid_t loc_id,
  hid_t       obj_id;
 
  /* Open the object */
- if ((obj_id = H5Oopen(loc_id, obj_name, H5P_DEFAULT)) < 0)
+ if((obj_id = H5Oopen(loc_id, obj_name, H5P_DEFAULT)) < 0)
   return -1;
 
  /* Open the attribute. */
- if ( ( attr_id = H5Aopen_name( obj_id, attr_name ) ) < 0 )
+ if((attr_id = H5Aopen(obj_id, ".", attr_name, H5P_DEFAULT, H5P_DEFAULT)) < 0)
  {
   H5Oclose(obj_id);
   return -1;
  }
 
  /* Get the dataspace handle */
- if ( (sid = H5Aget_space( attr_id )) < 0 )
+ if((sid = H5Aget_space(attr_id)) < 0)
   goto out;
 
  /* Get rank */
- if ( (*rank = H5Sget_simple_extent_ndims( sid )) < 0 )
+ if((*rank = H5Sget_simple_extent_ndims(sid)) < 0)
   goto out;
 
  /* Terminate access to the attribute */
@@ -1785,21 +1785,21 @@ herr_t H5LTget_attribute_info( hid_t loc_id,
  hid_t       obj_id;
 
  /* Open the object */
- if ((obj_id = H5Oopen(loc_id, obj_name, H5P_DEFAULT)) < 0)
+ if((obj_id = H5Oopen(loc_id, obj_name, H5P_DEFAULT)) < 0)
   return -1;
 
   /* Open the attribute. */
- if ( ( attr_id = H5Aopen_name( obj_id, attr_name ) ) < 0 )
+ if((attr_id = H5Aopen(obj_id, ".", attr_name, H5P_DEFAULT, H5P_DEFAULT)) < 0)
  {
   H5Oclose(obj_id);
   return -1;
  }
 
  /* Get an identifier for the datatype. */
- tid = H5Aget_type( attr_id );
+ tid = H5Aget_type(attr_id);
 
  /* Get the class. */
-  *type_class = H5Tget_class( tid );
+  *type_class = H5Tget_class(tid);
 
  /* Get the size. */
   *type_size = H5Tget_size( tid );
@@ -2999,7 +2999,7 @@ static herr_t H5LT_get_attribute_mem(hid_t loc_id,
     if((obj_id = H5Oopen(loc_id, obj_name, H5P_DEFAULT)) < 0)
         goto out;
 
-    if((attr_id = H5Aopen_name(obj_id, attr_name)) < 0)
+    if((attr_id = H5Aopen(obj_id, ".", attr_name, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
 
     if(H5Aread(attr_id, mem_type_id, data) < 0)
@@ -3048,16 +3048,16 @@ herr_t H5LT_get_attribute_disk( hid_t loc_id,
  hid_t attr_id;
  hid_t attr_type;
 
- if ( ( attr_id = H5Aopen_name( loc_id, attr_name ) ) < 0 )
+ if(( attr_id = H5Aopen(loc_id, ".", attr_name, H5P_DEFAULT, H5P_DEFAULT)) < 0)
   return -1;
 
- if ( (attr_type = H5Aget_type( attr_id )) < 0 )
+ if((attr_type = H5Aget_type(attr_id)) < 0)
   goto out;
 
- if ( H5Aread( attr_id, attr_type, attr_out ) < 0 )
+ if(H5Aread(attr_id, attr_type, attr_out) < 0)
   goto out;
 
- if ( H5Tclose( attr_type )  < 0 )
+ if(H5Tclose(attr_type) < 0)
   goto out;
 
  if ( H5Aclose( attr_id ) < 0 )

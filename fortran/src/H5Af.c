@@ -58,7 +58,7 @@ done:
 
 /*----------------------------------------------------------------------------
  * Name:        h5aopen_name _c
- * Purpose:     Call H5Aopen_name to open an attribute
+ * Purpose:     Call H5Aopen to open an attribute
  * Inputs:      obj_id - object identifier
  *              name - name of the attribute
  *              namelen - name length
@@ -71,23 +71,24 @@ done:
 int_f
 nh5aopen_name_c (hid_t_f *obj_id, _fcd name, size_t_f *namelen, hid_t_f *attr_id)
 {
-    char *c_name=NULL;          /* Buffer to hold C string */
-    int_f ret_value=0;          /* Return value */
+    char *c_name = NULL;          /* Buffer to hold C string */
+    int_f ret_value = 0;          /* Return value */
 
      /*
       * Convert FORTRAN name to C name
       */
-     if ((c_name = HD5f2cstring(name, (size_t)*namelen)) == NULL)
+     if((c_name = HD5f2cstring(name, (size_t)*namelen)) == NULL)
         HGOTO_DONE(FAIL);
 
      /*
       * Call H5Aopen function.
       */
-     if ((*attr_id = (hid_t_f)H5Aopen_name((hid_t)*obj_id, c_name)) < 0)
+     if((*attr_id = (hid_t_f)H5Aopen((hid_t)*obj_id, ".", c_name, H5P_DEFAULT, H5P_DEFAULT)) < 0)
          HGOTO_DONE(FAIL);
 
 done:
-    if(c_name) HDfree(c_name);
+    if(c_name)
+        HDfree(c_name);
     return ret_value;
 }
 

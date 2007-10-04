@@ -463,38 +463,37 @@ test_dangle_attribute(H5F_close_degree_t degree)
     /* Don't worry about writing the attribute - it will have a fill value */
 
     /* Close the attribute on the dataset */
-    if(H5Aclose (aid)<0)
+    if(H5Aclose(aid) < 0)
         TEST_ERROR;
 
     /* Try creating duplicate attribute */
     H5E_BEGIN_TRY {
-        if((aid = H5Acreate (dsid, ATTRNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT))>=0)
+        if((aid = H5Acreate(dsid, ATTRNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT)) >= 0)
             TEST_ERROR;
     } H5E_END_TRY;
 
-    if(H5Sclose(sid)<0)
+    if(H5Sclose(sid) < 0)
         TEST_ERROR;
 
     /* Leave open a _lot_ of objects */
-    for(u=0; u<MAX_DANGLE; u++) {
-        if((aid = H5Aopen_name (dsid, ATTRNAME))<0)
-            TEST_ERROR;
-    } /* end for */
+    for(u = 0; u < MAX_DANGLE; u++)
+        if((aid = H5Aopen(dsid, ".", ATTRNAME, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            TEST_ERROR
 
-    if(H5Dclose(dsid)<0)
-        TEST_ERROR;
+    if(H5Dclose(dsid) < 0)
+        TEST_ERROR
 
-    if(degree==H5F_CLOSE_SEMI) {
+    if(degree == H5F_CLOSE_SEMI) {
         H5E_BEGIN_TRY {
-            if(H5Fclose(fid)>=0)
+            if(H5Fclose(fid) >= 0)
                 TEST_ERROR;
         } H5E_END_TRY;
     } /* end if */
     else
-        if(H5Fclose(fid)<0)
+        if(H5Fclose(fid) < 0)
             TEST_ERROR;
 
-    if(H5Pclose(fapl)<0)
+    if(H5Pclose(fapl) < 0)
         TEST_ERROR;
 
     if(H5close()<0)

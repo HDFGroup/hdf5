@@ -253,29 +253,29 @@ herr_t H5IMget_image_info( hid_t loc_id,
  *npals = 0;
 
  /* Open the dataset. */
- if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
+ if((did = H5Dopen(loc_id, dset_name)) < 0)
   return -1;
 
  /* Try to find the attribute "INTERLACE_MODE" on the >>image<< dataset */
- has_attr = H5LT_find_attribute( did, "INTERLACE_MODE" );
+ has_attr = H5LT_find_attribute(did, "INTERLACE_MODE");
 
  /* It exists, get it */
- if ( has_attr == 1 )
+ if(has_attr == 1)
  {
 
-  if ( (attr_id = H5Aopen_name( did, "INTERLACE_MODE" )) < 0 )
+  if((attr_id = H5Aopen(did, ".", "INTERLACE_MODE", H5P_DEFAULT, H5P_DEFAULT)) < 0)
    goto out;
 
-  if ( (attr_type = H5Aget_type( attr_id )) < 0 )
+  if((attr_type = H5Aget_type(attr_id)) < 0)
    goto out;
 
-  if ( H5Aread( attr_id, attr_type, interlace ) < 0 )
+  if(H5Aread(attr_id, attr_type, interlace) < 0)
    goto out;
 
-  if ( H5Tclose( attr_type )  < 0 )
+  if(H5Tclose(attr_type) < 0)
    goto out;
 
-  if ( H5Aclose( attr_id )  < 0 )
+  if(H5Aclose(attr_id) < 0)
    goto out;
  }
 
@@ -327,23 +327,23 @@ herr_t H5IMget_image_info( hid_t loc_id,
 
 
  /* Try to find the attribute "PALETTE" on the >>image<< dataset */
- has_pal = H5IM_find_palette( did );
+ has_pal = H5IM_find_palette(did);
 
- if ( has_pal ==  1 )
+ if(has_pal ==  1)
  {
 
-  if ( (attr_id = H5Aopen_name( did, "PALETTE" )) < 0 )
+  if((attr_id = H5Aopen(did, ".", "PALETTE", H5P_DEFAULT, H5P_DEFAULT)) < 0)
    goto out;
 
-  if ( (attr_type = H5Aget_type( attr_id )) < 0 )
+  if((attr_type = H5Aget_type(attr_id)) < 0)
    goto out;
 
-  if ( (attr_class = H5Tget_class( attr_type )) < 0 )
+  if((attr_class = H5Tget_class(attr_type)) < 0)
    goto out;
 
   /* Check if it is really a reference */
 
-  if ( attr_class == H5T_REFERENCE )
+  if(attr_class == H5T_REFERENCE)
   {
 
    /* Get the reference(s) */
@@ -563,7 +563,7 @@ herr_t H5IMlink_palette( hid_t loc_id,
    goto out;
   if ( H5Tclose( attr_type ) < 0 )
    goto out;
-  if ( H5Aclose( attr_id ) < 0 )
+  if(H5Aclose(attr_id) < 0)
    goto out;
 
  }
@@ -572,23 +572,22 @@ herr_t H5IMlink_palette( hid_t loc_id,
  * The attribute already exists, open it
  *-------------------------------------------------------------------------
  */
- else if ( ok_pal ==  1 )
-  
+ else if(ok_pal ==  1)
  {
-  if ( (attr_id = H5Aopen_name( image_id, "PALETTE" )) < 0 )
+  if((attr_id = H5Aopen(image_id, ".", "PALETTE", H5P_DEFAULT, H5P_DEFAULT)) < 0)
    goto out;
   
-  if ( (attr_type = H5Aget_type( attr_id )) < 0 )
+  if((attr_type = H5Aget_type(attr_id)) < 0)
    goto out;
   
-  if ( (attr_class = H5Tget_class( attr_type )) < 0 )
+  if((attr_class = H5Tget_class(attr_type)) < 0)
    goto out;
   
   /* Get and save the old reference(s) */
-  if ( (attr_space_id = H5Aget_space( attr_id )) < 0 )
+  if((attr_space_id = H5Aget_space(attr_id)) < 0)
    goto out;
   
-  n_refs = H5Sget_simple_extent_npoints( attr_space_id );
+  n_refs = H5Sget_simple_extent_npoints(attr_space_id);
   
   dim_ref = n_refs + 1;
   
@@ -699,29 +698,29 @@ herr_t H5IMunlink_palette( hid_t loc_id,
   return -1;
 
  /* Try to find the attribute "PALETTE" on the >>image<< dataset */
- ok_pal = H5LT_find_attribute( image_id, "PALETTE" );
+ ok_pal = H5LT_find_attribute(image_id, "PALETTE");
 
  /* It does not exist. Nothing to do */
- if ( ok_pal == 0 )
+ if(ok_pal == 0)
   return -1;
 
  /* The attribute exists, open it */
- else if ( ok_pal ==  1 )
+ else if(ok_pal ==  1)
  {
-  if ( (attr_id = H5Aopen_name( image_id, "PALETTE" )) < 0 )
+  if((attr_id = H5Aopen(image_id, ".", "PALETTE", H5P_DEFAULT, H5P_DEFAULT)) < 0)
    goto out;
 
-  if ( (attr_type = H5Aget_type( attr_id )) < 0 )
+  if((attr_type = H5Aget_type(attr_id)) < 0)
    goto out;
 
-  if ( (attr_class = H5Tget_class( attr_type )) < 0 )
+  if((attr_class = H5Tget_class(attr_type)) < 0)
    goto out;
 
   /* Check if it is really a reference */
-  if ( attr_class == H5T_REFERENCE )
+  if(attr_class == H5T_REFERENCE)
   {
 
-   /* Deelete the attribute */
+   /* Delete the attribute */
    if(H5Adelete2(image_id, ".", "PALETTE", H5P_DEFAULT) < 0)
     goto out;
 
@@ -781,29 +780,29 @@ herr_t H5IMget_npalettes( hid_t loc_id,
  *npals = 0;
 
  /* Open the dataset. */
- if ( (image_id = H5Dopen( loc_id, image_name )) < 0 )
+ if((image_id = H5Dopen(loc_id, image_name)) < 0)
   return -1;
 
  /* Try to find the attribute "PALETTE" on the >>image<< dataset */
- has_pal = H5IM_find_palette( image_id );
+ has_pal = H5IM_find_palette(image_id);
 
- if ( has_pal ==  1 )
+ if(has_pal ==  1 )
  {
 
-  if ( (attr_id = H5Aopen_name( image_id, "PALETTE" )) < 0 )
+  if((attr_id = H5Aopen(image_id, ".", "PALETTE", H5P_DEFAULT, H5P_DEFAULT)) < 0)
    goto out;
 
-  if ( (attr_type = H5Aget_type( attr_id )) < 0 )
+  if((attr_type = H5Aget_type(attr_id)) < 0)
    goto out;
 
-  if ( (attr_class = H5Tget_class( attr_type )) < 0 )
+  if((attr_class = H5Tget_class(attr_type)) < 0)
    goto out;
 
   /* Check if it is really a reference */
 
-  if ( attr_class == H5T_REFERENCE )
+  if(attr_class == H5T_REFERENCE)
   {
-   if ( (attr_space_id = H5Aget_space( attr_id )) < 0 )
+   if((attr_space_id = H5Aget_space(attr_id)) < 0)
     goto out;
 
    *npals = H5Sget_simple_extent_npoints( attr_space_id );
@@ -874,28 +873,28 @@ herr_t H5IMget_palette_info( hid_t loc_id,
  hsize_t    pal_maxdims[2];
  
  /* Open the dataset. */
- if ( (image_id = H5Dopen( loc_id, image_name )) < 0 )
+ if((image_id = H5Dopen(loc_id, image_name)) < 0)
   return -1;
  
  /* Try to find the attribute "PALETTE" on the >>image<< dataset */
- has_pal = H5IM_find_palette( image_id );
+ has_pal = H5IM_find_palette(image_id);
  
- if ( has_pal ==  1 )
+ if(has_pal ==  1)
  {
-  if ( (attr_id = H5Aopen_name( image_id, "PALETTE" )) < 0 )
+  if((attr_id = H5Aopen(image_id, ".", "PALETTE", H5P_DEFAULT, H5P_DEFAULT)) < 0)
    goto out;
   
-  if ( (attr_type = H5Aget_type( attr_id )) < 0 )
+  if((attr_type = H5Aget_type(attr_id)) < 0)
    goto out;
   
-  if ( (attr_class = H5Tget_class( attr_type )) < 0 )
+  if((attr_class = H5Tget_class(attr_type)) < 0)
    goto out;
   
   /* Get the reference(s) */
-  if ( (attr_space_id = H5Aget_space( attr_id )) < 0 )
+  if((attr_space_id = H5Aget_space(attr_id)) < 0)
    goto out;
   
-  n_refs = H5Sget_simple_extent_npoints( attr_space_id );
+  n_refs = H5Sget_simple_extent_npoints(attr_space_id);
   
   dim_ref = n_refs;
   
@@ -986,28 +985,28 @@ herr_t H5IMget_palette( hid_t loc_id,
  hid_t      pal_id;
 
  /* Open the dataset. */
- if ( (image_id = H5Dopen( loc_id, image_name )) < 0 )
+ if((image_id = H5Dopen(loc_id, image_name)) < 0)
   return -1;
 
  /* Try to find the attribute "PALETTE" on the >>image<< dataset */
- has_pal = H5IM_find_palette( image_id );
+ has_pal = H5IM_find_palette(image_id);
 
- if ( has_pal ==  1 )
+ if(has_pal ==  1 )
  {
-  if ( (attr_id = H5Aopen_name( image_id, "PALETTE" )) < 0 )
+  if((attr_id = H5Aopen(image_id, ".", "PALETTE", H5P_DEFAULT, H5P_DEFAULT)) < 0)
    goto out;
   
-  if ( (attr_type = H5Aget_type( attr_id )) < 0 )
+  if((attr_type = H5Aget_type(attr_id)) < 0)
    goto out;
   
-  if ( (attr_class = H5Tget_class( attr_type )) < 0 )
+  if((attr_class = H5Tget_class(attr_type)) < 0)
    goto out;
   
   /* Get the reference(s) */
-  if ( (attr_space_id = H5Aget_space( attr_id )) < 0 )
+  if((attr_space_id = H5Aget_space(attr_id)) < 0)
    goto out;
   
-  n_refs = H5Sget_simple_extent_npoints( attr_space_id );
+  n_refs = H5Sget_simple_extent_npoints(attr_space_id);
   
   dim_ref = n_refs;
   
@@ -1089,30 +1088,29 @@ herr_t H5IMis_image( hid_t loc_id,
   return -1;
 
  /* Try to find the attribute "CLASS" on the dataset */
- has_class = H5LT_find_attribute( did, "CLASS" );
+ has_class = H5LT_find_attribute(did, "CLASS");
 
- if ( has_class ==  0 )
+ if(has_class == 0)
  {
-  H5Dclose( did );
+  H5Dclose(did);
   return 0;
  }
-
- else if ( has_class ==  1 )
+ else if(has_class ==  1)
  {
 
-  if ( (attr_id = H5Aopen_name( did, "CLASS" )) < 0 )
+  if((attr_id = H5Aopen(did, ".", "CLASS", H5P_DEFAULT, H5P_DEFAULT)) < 0)
    goto out;
 
-  if ( (attr_type = H5Aget_type( attr_id )) < 0 )
+  if((attr_type = H5Aget_type(attr_id)) < 0)
    goto out;
 
-  if ( H5Tget_class( attr_type ) < 0 )
+  if(H5Tget_class(attr_type) < 0)
    goto out;
 
-  if ( H5Aread( attr_id, attr_type, attr_data ) < 0 )
+  if(H5Aread(attr_id, attr_type, attr_data) < 0)
     goto out;
 
-  if( strcmp( attr_data, IMAGE_CLASS ) == 0 )
+  if(strcmp(attr_data, IMAGE_CLASS) == 0)
    ret = 1;
   else
    ret = 0;
@@ -1175,30 +1173,29 @@ herr_t H5IMis_palette( hid_t loc_id,
   return -1;
 
  /* Try to find the attribute "CLASS" on the dataset */
- has_class = H5LT_find_attribute( did, "CLASS" );
+ has_class = H5LT_find_attribute(did, "CLASS");
 
- if ( has_class ==  0 )
+ if(has_class ==  0)
  {
   H5Dclose( did );
   return 0;
  }
-
- else if ( has_class ==  1 )
+ else if(has_class ==  1)
  {
 
-  if ( (attr_id = H5Aopen_name( did, "CLASS" )) < 0 )
+  if((attr_id = H5Aopen(did, ".", "CLASS", H5P_DEFAULT, H5P_DEFAULT)) < 0)
    goto out;
 
-  if ( (attr_type = H5Aget_type( attr_id )) < 0 )
+  if((attr_type = H5Aget_type(attr_id)) < 0)
    goto out;
 
-  if ( H5Tget_class( attr_type ) < 0 )
+  if(H5Tget_class(attr_type) < 0)
    goto out;
 
-  if ( H5Aread( attr_id, attr_type, attr_data ) < 0 )
+  if(H5Aread(attr_id, attr_type, attr_data) < 0)
     goto out;
 
-  if( strcmp( attr_data, PALETTE_CLASS ) == 0 )
+  if(strcmp(attr_data, PALETTE_CLASS) == 0)
    ret = 1;
   else
    ret = 0;

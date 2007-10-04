@@ -380,8 +380,8 @@ void null_dataset(void)
     VRFY((uval==2), "H5Dread");
 
     /* Open the attribute for the dataset */
-    attr=H5Aopen_name(dataset,attr_name);
-    VRFY((attr>=0), "H5Aopen_name");
+    attr = H5Aopen(dataset, ".", attr_name, H5P_DEFAULT, H5P_DEFAULT);
+    VRFY((attr >= 0), "H5Aopen");
 
     /* Try reading from the attribute (make certain our buffer is unmodified) */    ret = H5Aread(attr, H5T_NATIVE_INT, &val);
     VRFY((ret>=0), "H5Aread");
@@ -1330,11 +1330,10 @@ int read_attribute(hid_t obj_id, int this_type, int num)
 
     if(this_type == is_group) {
         sprintf(attr_name, "Group Attribute %d", num);
-        aid = H5Aopen_name(obj_id, attr_name);
+        aid = H5Aopen(obj_id, ".", attr_name, H5P_DEFAULT, H5P_DEFAULT);
         if(MAINPROCESS) {
             H5Aread(aid, H5T_NATIVE_INT, &in_num);
-            vrfy_errors =  dataset_vrfy(NULL, NULL, NULL, group_block,
-                                        &in_num, &num);
+            vrfy_errors =  dataset_vrfy(NULL, NULL, NULL, group_block, &in_num, &num);
 	}
         H5Aclose(aid);
     }
@@ -1342,11 +1341,10 @@ int read_attribute(hid_t obj_id, int this_type, int num)
         sprintf(attr_name, "Dataset Attribute %d", num);
         for(i=0; i<8; i++)
             out_data[i] = i;
-        aid = H5Aopen_name(obj_id, attr_name);
+        aid = H5Aopen(obj_id, ".", attr_name, H5P_DEFAULT, H5P_DEFAULT);
         if(MAINPROCESS) {
             H5Aread(aid, H5T_NATIVE_INT, in_data);
-            vrfy_errors = dataset_vrfy(NULL, NULL, NULL, dset_block, in_data,
-                                       out_data);
+            vrfy_errors = dataset_vrfy(NULL, NULL, NULL, dset_block, in_data, out_data);
 	}
         H5Aclose(aid);
     }

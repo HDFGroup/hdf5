@@ -495,8 +495,8 @@ test_h5s_null(void)
     CHECK(ret, FAIL, "H5Sclose");
 
     /* Open the attribute for the dataset */
-    attr=H5Aopen_name(did,NULLATTR);
-    CHECK(attr, FAIL, "H5Aopen_name");
+    attr = H5Aopen(did, ".", NULLATTR, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen");
 
     /* Get the space of the dataset */
     attr_sid = H5Aget_space(attr);

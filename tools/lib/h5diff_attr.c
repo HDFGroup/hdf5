@@ -95,26 +95,24 @@ hsize_t diff_attr(hid_t loc1_id,
   /* use the name on the first file to open the second file */
   H5E_BEGIN_TRY 
   {
-   if ((attr2_id = H5Aopen_name(loc2_id, name1))<0)
-   {
+   if((attr2_id = H5Aopen(loc2_id, ".", name1, H5P_DEFAULT, H5P_DEFAULT)) < 0)
     goto error;
-   }
   } H5E_END_TRY;
 
   /* get name */
-  if (H5Aget_name( attr2_id, 255, name2 )<0)
+  if(H5Aget_name(attr2_id, 255, name2) < 0)
    goto error;
 
   /* get the file datatype  */
-  if ((ftype1_id = H5Aget_type( attr1_id )) < 0 )
+  if((ftype1_id = H5Aget_type(attr1_id)) < 0)
    goto error;
-  if ((ftype2_id = H5Aget_type( attr2_id )) < 0 )
+  if((ftype2_id = H5Aget_type(attr2_id)) < 0)
    goto error;
 
   /* get the dataspace handle  */
-  if ((space1_id = H5Aget_space( attr1_id )) < 0 )
+  if((space1_id = H5Aget_space(attr1_id)) < 0)
    goto error;
-  if ((space2_id = H5Aget_space( attr2_id )) < 0 )
+  if((space2_id = H5Aget_space(attr2_id)) < 0)
    goto error;
 
   /* get dimensions  */

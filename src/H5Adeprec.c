@@ -164,6 +164,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Acreate() */
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*--------------------------------------------------------------------------
  NAME
@@ -220,7 +221,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Aopen_name() */
 
-#ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*--------------------------------------------------------------------------
  NAME

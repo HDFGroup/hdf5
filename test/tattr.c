@@ -204,8 +204,8 @@ test_attr_basic_write(hid_t fapl)
     CHECK(group, FAIL, "H5Gopen2");
 
     /* Open attribute again */
-    attr = H5Aopen_name(group, ATTR1_NAME);
-    CHECK(attr, FAIL, "H5Aopen_name");
+    attr = H5Aopen(group, ".", ATTR1_NAME, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen");
 
     /* Close attribute */
     ret = H5Aclose(attr);
@@ -262,8 +262,8 @@ test_attr_basic_write(hid_t fapl)
     CHECK(ret, FAIL, "H5Arename2");
 
     /* Open attribute again */
-    attr = H5Aopen_name(dataset, ATTR_TMP_NAME);
-    CHECK(attr, FAIL, "H5Aopen_name");
+    attr = H5Aopen(dataset, ".", ATTR_TMP_NAME, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen");
 
     /* Verify new attribute name */
     attr_name_size = H5Aget_name(attr, (size_t)0, NULL);
@@ -294,8 +294,8 @@ test_attr_basic_write(hid_t fapl)
     CHECK(ret, FAIL, "H5Aclose");
 
     /* Open the second attribute again */
-    attr2=H5Aopen_name(dataset, ATTR1A_NAME);
-    CHECK(attr, FAIL, "H5Aopen_name");
+    attr2=H5Aopen(dataset, ".", ATTR1A_NAME, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen");
 
     /* Verify new attribute name */
     attr_name_size = H5Aget_name(attr2, (size_t)0, NULL);
@@ -415,8 +415,8 @@ test_attr_basic_read(hid_t fapl)
     VERIFY(oinfo.num_attrs, 2, "H5Oget_info");
 
     /* Open first attribute for the dataset */
-    attr = H5Aopen_name(dataset, ATTR_TMP_NAME);
-    CHECK(attr, FAIL, "H5Aopen_name");
+    attr = H5Aopen(dataset, ".", ATTR_TMP_NAME, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen");
 
     /* Read attribute information */
     ret = H5Aread(attr, H5T_NATIVE_INT, read_data1);
@@ -444,8 +444,8 @@ test_attr_basic_read(hid_t fapl)
     VERIFY(oinfo.num_attrs, 1, "H5Oget_info");
 
     /* Open the attribute for the group */
-    attr = H5Aopen_name(group, ATTR2_NAME);
-    CHECK(attr, FAIL, "H5Aopen_name");
+    attr = H5Aopen(group, ".", ATTR2_NAME, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen");
 
     /* Read attribute information */
     ret = H5Aread(attr, H5T_NATIVE_INT, read_data2);
@@ -627,8 +627,8 @@ test_attr_plist(hid_t fapl)
     CHECK(ret, FAIL, "H5Aclose");
 
     /* Re-open the second attribute and ensure that its character encoding is correct */
-    attr = H5Aopen_name(dataset, ATTR2_NAME);
-    CHECK(attr, FAIL, "H5Aopen_name");
+    attr = H5Aopen(dataset, ".", ATTR2_NAME, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen");
     plist = H5Aget_create_plist(attr);
     CHECK(plist, FAIL, "H5Aget_create_plist");
     ret = H5Pget_char_encoding(plist, &cset);
@@ -989,8 +989,8 @@ test_attr_scalar_read(hid_t fapl)
     VERIFY(oinfo.num_attrs, 1, "H5Oget_info");
 
     /* Open an attribute for the dataset */
-    attr = H5Aopen_name(dataset, ATTR5_NAME);
-    CHECK(attr, FAIL, "H5Aopen_name");
+    attr = H5Aopen(dataset, ".", ATTR5_NAME, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen");
 
     /* Read attribute information */
     ret = H5Aread(attr, H5T_NATIVE_FLOAT, &rdata);
@@ -1733,8 +1733,8 @@ test_attr_dtype_shared(hid_t fapl)
     CHECK(dset_id, FAIL, "H5Dopen");
 
     /* Open attribute */
-    attr_id = H5Aopen_name(dset_id, ATTR1_NAME);
-    CHECK(attr_id, FAIL, "H5Aopen_name");
+    attr_id = H5Aopen(dset_id, ".", ATTR1_NAME, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr_id, FAIL, "H5Aopen");
 
     /* Read data from the attribute */
     ret = H5Aread(attr_id, H5T_NATIVE_INT, &rdata);
@@ -1800,8 +1800,8 @@ test_attr_dense_verify(hid_t loc_id, unsigned max_attr)
     for(u = 0; u < max_attr; u++) {
         /* Open attribute */
         sprintf(attrname, "attr %02u", u);
-        attr = H5Aopen_name(loc_id, attrname);
-        CHECK(attr, FAIL, "H5Aopen_name");
+        attr = H5Aopen(loc_id, ".", attrname, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(attr, FAIL, "H5Aopen");
 
         /* Read data from the attribute */
         ret = H5Aread(attr, H5T_NATIVE_UINT, &value);
@@ -2423,8 +2423,8 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
 
         /* Open attribute */
         sprintf(attrname, "new attr %02u", u);
-        attr = H5Aopen_name(dataset, attrname);
-        CHECK(attr, FAIL, "H5Aopen_name");
+        attr = H5Aopen(dataset, ".", attrname, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(attr, FAIL, "H5Aopen");
 
         /* Read data from the attribute */
         ret = H5Aread(attr, H5T_NATIVE_UINT, &value);
@@ -3157,8 +3157,8 @@ test_attr_null_space(hid_t fcpl, hid_t fapl)
 
     /* Open first attribute */
     HDstrcpy(attrname, "null attr #2");
-    attr = H5Aopen_name(dataset, attrname);
-    CHECK(attr, FAIL, "H5Aopen_name");
+    attr = H5Aopen(dataset, ".", attrname, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen");
 
     /* Try to read data from the attribute */
     /* (shouldn't fail, but should leave buffer alone) */
@@ -3196,8 +3196,8 @@ test_attr_null_space(hid_t fcpl, hid_t fapl)
 
     /* Open second attribute */
     HDstrcpy(attrname, "null attr");
-    attr = H5Aopen_name(dataset, attrname);
-    CHECK(attr, FAIL, "H5Aopen_name");
+    attr = H5Aopen(dataset, ".", attrname, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen");
 
     /* Try to write data to the attribute */
     /* (shouldn't fail, but should leave buffer alone) */
@@ -3307,9 +3307,17 @@ test_attr_deprec(hid_t fcpl, hid_t fapl)
     ret = H5Aget_num_attrs(dataset);
     VERIFY(ret, 1, "H5Aget_num_attrs");
 
-    /* Open the attribute */
+    /* Open the attribute by index */
     attr = H5Aopen_idx(dataset, 0);
     CHECK(attr, FAIL, "H5Aopen_idx");
+
+    /* Close attribute */
+    ret = H5Aclose(attr);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Open the attribute by name */
+    attr = H5Aopen_name(dataset, "attr");
+    CHECK(attr, FAIL, "H5Aopen_name");
 
     /* Close attribute */
     ret = H5Aclose(attr);
@@ -3401,8 +3409,8 @@ test_attr_many(hid_t fcpl, hid_t fapl)
 
         sprintf(attrname, "a-%06u", u);
 
-        aid = H5Aopen_name(fid, attrname);
-        CHECK(aid, FAIL, "H5Aopen_name");
+        aid = H5Aopen(fid, ".", attrname, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(aid, FAIL, "H5Aopen");
 
         ret = H5Aread(aid, H5T_NATIVE_UINT, &value);
         CHECK(ret, FAIL, "H5Aread");
@@ -7315,8 +7323,8 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
             /* Check refcount on attributes now */
 
             /* Check refcount on renamed attribute */
-            attr = H5Aopen_name(dataset2, attrname2);
-            CHECK(attr, FAIL, "H5Aopen_name");
+            attr = H5Aopen(dataset2, ".", attrname2, H5P_DEFAULT, H5P_DEFAULT);
+            CHECK(attr, FAIL, "H5Aopen");
 
             if(u % 2) {
                 /* Check that attribute is not shared */
@@ -7339,8 +7347,8 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
             CHECK(ret, FAIL, "H5Aclose");
 
             /* Check refcount on original attribute */
-            attr = H5Aopen_name(dataset, attrname);
-            CHECK(attr, FAIL, "H5Aopen_name");
+            attr = H5Aopen(dataset, ".", attrname, H5P_DEFAULT, H5P_DEFAULT);
+            CHECK(attr, FAIL, "H5Aopen");
 
             if(u % 2) {
                 /* Check that attribute is not shared */
@@ -7371,8 +7379,8 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
             /* Check refcount on attributes now */
 
             /* Check refcount on renamed attribute */
-            attr = H5Aopen_name(dataset2, attrname);
-            CHECK(attr, FAIL, "H5Aopen_name");
+            attr = H5Aopen(dataset2, ".", attrname, H5P_DEFAULT, H5P_DEFAULT);
+            CHECK(attr, FAIL, "H5Aopen");
 
             if(u % 2) {
                 /* Check that attribute is not shared */
@@ -7395,8 +7403,8 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
             CHECK(ret, FAIL, "H5Aclose");
 
             /* Check refcount on original attribute */
-            attr = H5Aopen_name(dataset, attrname);
-            CHECK(attr, FAIL, "H5Aopen_name");
+            attr = H5Aopen(dataset, ".", attrname, H5P_DEFAULT, H5P_DEFAULT);
+            CHECK(attr, FAIL, "H5Aopen");
 
             if(u % 2) {
                 /* Check that attribute is not shared */
@@ -7759,8 +7767,8 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
             /* Check refcount on attributes now */
 
             /* Check refcount on first dataset's attribute */
-            attr = H5Aopen_name(dataset, attrname);
-            CHECK(attr, FAIL, "H5Aopen_name");
+            attr = H5Aopen(dataset, ".", attrname, H5P_DEFAULT, H5P_DEFAULT);
+            CHECK(attr, FAIL, "H5Aopen");
 
             if(u % 2) {
                 /* Check that attribute is not shared */
@@ -8133,7 +8141,7 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
             sprintf(attrname, "attr %02u", u);
 
             /* Open attribute on first dataset */
-            attr = H5Aopen_name(dataset, attrname);
+            attr = H5Aopen(dataset, ".", attrname, H5P_DEFAULT, H5P_DEFAULT);
             CHECK(attr, FAIL, "H5Acreate");
 
             if(u % 2) {
