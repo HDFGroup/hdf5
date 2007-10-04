@@ -100,10 +100,11 @@ static int              indent;              /*how far in to indent the line    
 static hid_t    h5_fileaccess(void);
 static void     dump_oid(hid_t oid);
 static void     print_enum(hid_t type);
-static herr_t   dump_all(hid_t group, const char *name, const H5L_info_t *linfo, void *op_data);
 static int      xml_name_to_XID(const char *, char *, int , int );
 static void     init_prefix(char **prfx, size_t prfx_len);
 static void     add_prefix(char **prfx, size_t *prfx_len, const char *name);
+/* callback function used by H5Literate() */
+static herr_t   dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void *op_data);
 
 
 static h5tool_format_t         dataformat = {
@@ -501,12 +502,14 @@ static void      dump_named_datatype(hid_t, const char *);
 static void      dump_dataset(hid_t, const char *, struct subset_t *);
 static void      dump_dataspace(hid_t space);
 static void      dump_datatype(hid_t type);
-static herr_t    dump_attr_cb(hid_t loc_id, const char *attr_name, const H5A_info_t *info, void *_op_data);
 static void      dump_data(hid_t, int, struct subset_t *, int);
 static void      dump_dcpl(hid_t dcpl, hid_t type_id, hid_t obj_id);
 static void      dump_comment(hid_t obj_id);
 static void      dump_fcpl(hid_t fid);
 static void      dump_fcontents(hid_t fid);
+/* callback function used by H5Aiterate2() */
+static herr_t    dump_attr_cb(hid_t loc_id, const char *attr_name, const H5A_info_t *info, void *_op_data);
+
 
 /* XML format:   same interface, alternative output */
 
@@ -1211,7 +1214,7 @@ dump_dataspace(hid_t space)
 /*-------------------------------------------------------------------------
  * Function:    dump_attr_cb
  *
- * Purpose:     dump the attribute
+ * Purpose:     attribute function callback called by H5Aiterate2, displays the attribute
  *
  * Return:      Success:        SUCCEED
  *
@@ -1355,9 +1358,10 @@ dump_selected_attr(hid_t loc_id, const char *name)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    dump_all
+ * Function:    dump_all_cb
  *
- * Purpose:     Dump everything in the specified object
+ * Purpose:     function callback called by H5Literate,
+ *                displays everything in the specified object
  *
  * Return:      Success:        SUCCEED
  *
@@ -1375,7 +1379,7 @@ dump_selected_attr(hid_t loc_id, const char *name)
  *-------------------------------------------------------------------------
  */
 static herr_t
-dump_all(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED *op_data)
+dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED *op_data)
 {
     hid_t       obj;
     char       *obj_path = NULL;    /* Full path of object */
@@ -1796,8 +1800,11 @@ done:
  *
  * Programmer:  Ruey-Hsia Li
  *
- * Modifications: pvn March 27, 2006
- *  add printing of attributes
+ * Modifications: 
+ *  Pedro Vicente, March 27, 2006
+ *   added display of attributes
+ *  Pedro Vicente, October 4, 2007, added parameters to H5Aiterate2() to allow for
+ *   other iteration orders 
  *
  *-------------------------------------------------------------------------
  */
@@ -1818,7 +1825,7 @@ dump_named_datatype(hid_t type, const char *name)
 
     /* print attributes */
     indent += COL;
-    H5Aiterate2(type, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, dump_attr_cb, NULL, H5P_DEFAULT);
+    H5Aiterate2(type, ".", sort_by, sort_order, NULL, dump_attr_cb, NULL, H5P_DEFAULT);
     indent -= COL;
 
     end_obj(dump_header_format->datatypeend,
@@ -1836,11 +1843,12 @@ dump_named_datatype(hid_t type, const char *name)
  *
  * Modifications:
  *
- * Call to dump_all -- add parameter to select everything.
+ * Call to dump_all_cb -- add parameter to select everything.
  *
  * Pedro Vicente, October 1, 2007
  *  extra parameters H5_index_t and H5_iter_order_t to handle H5Literate 
  *  iteration order
+ *  added parameters to H5Aiterate2() to allow for other iteration orders 
  *
  *-------------------------------------------------------------------------
  */
@@ -1863,46 +1871,56 @@ dump_group(hid_t gid, const char *name, H5_index_t idx_type, H5_iter_order_t ite
 
     dump_comment(gid);
 
-    if (!HDstrcmp(name, "/") && unamedtype) {
+    if (!HDstrcmp(name, "/") && unamedtype) 
+    {
         unsigned u;             /* Local index variable */
-
-    /* dump unamed type in root group */
-    for (u = 0; u < type_table->nobjs; u++)
-        if (!type_table->objs[u].recorded) {
-            dset = H5Dopen(gid, type_table->objs[u].objname);
-            type = H5Dget_type(dset);
-            sprintf(type_name, "#"H5_PRINTF_HADDR_FMT, type_table->objs[u].objno);
-                    dump_function_table->dump_named_datatype_function(type, type_name);
-            H5Tclose(type);
-            H5Dclose(dset);
-        }
+        
+        /* dump unamed type in root group */
+        for (u = 0; u < type_table->nobjs; u++)
+            if (!type_table->objs[u].recorded) 
+            {
+                dset = H5Dopen(gid, type_table->objs[u].objname);
+                type = H5Dget_type(dset);
+                sprintf(type_name, "#"H5_PRINTF_HADDR_FMT, type_table->objs[u].objno);
+                dump_function_table->dump_named_datatype_function(type, type_name);
+                H5Tclose(type);
+                H5Dclose(dset);
+            }
     } /* end if */
 
     H5Oget_info(gid, ".", &oinfo, H5P_DEFAULT);
 
-    if(oinfo.rc > 1) {
+    if(oinfo.rc > 1) 
+    {
         obj_t  *found_obj;    /* Found object */
-
+        
         found_obj = search_obj(group_table, oinfo.addr);
-
-        if (found_obj == NULL) {
+        
+        if (found_obj == NULL) 
+        {
             indentation(indent);
-                error_msg(progname, "internal error (file %s:line %d)\n",
-                          __FILE__, __LINE__);
+            error_msg(progname, "internal error (file %s:line %d)\n",
+                __FILE__, __LINE__);
             d_status = EXIT_FAILURE;
-        } else if (found_obj->displayed) {
+        } 
+        else if (found_obj->displayed) 
+        {
             indentation(indent);
             printf("%s \"%s\"\n", HARDLINK, found_obj->objname);
-        } else {
+        } 
+        else 
+        {
             found_obj->displayed = TRUE;
-            H5Aiterate2(gid, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, dump_attr_cb, NULL, H5P_DEFAULT);
-            H5Literate(gid, ".", idx_type, iter_order, NULL, dump_all, NULL, H5P_DEFAULT);
+            H5Aiterate2(gid, ".", idx_type, iter_order, NULL, dump_attr_cb, NULL, H5P_DEFAULT);
+            H5Literate(gid, ".", idx_type, iter_order, NULL, dump_all_cb, NULL, H5P_DEFAULT);
         }
-    } else {
-        H5Aiterate2(gid, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, dump_attr_cb, NULL, H5P_DEFAULT);
-        H5Literate(gid, ".", idx_type, iter_order, NULL, dump_all, NULL, H5P_DEFAULT);
+    } 
+    else 
+    {
+        H5Aiterate2(gid, ".", idx_type, iter_order, NULL, dump_attr_cb, NULL, H5P_DEFAULT);
+        H5Literate(gid, ".", idx_type, iter_order, NULL, dump_all_cb, NULL, H5P_DEFAULT);
     }
-
+    
     indent -= COL;
     indentation(indent);
     end_obj(dump_header_format->groupend, dump_header_format->groupblockend);
@@ -5410,7 +5428,7 @@ xml_dump_group(hid_t gid, const char *name, H5_index_t UNUSED idx_type, H5_iter_
                 }
 
                 /* iterate through all the links */
-                H5Literate(gid, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, dump_all, NULL, H5P_DEFAULT);
+                H5Literate(gid, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, dump_all_cb, NULL, H5P_DEFAULT);
             }
             free(t_name);
             free(grpxid);
@@ -5464,7 +5482,7 @@ xml_dump_group(hid_t gid, const char *name, H5_index_t UNUSED idx_type, H5_iter_
         }
 
         /* iterate through all the links */
-        H5Literate(gid, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, dump_all, NULL, H5P_DEFAULT);
+        H5Literate(gid, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, dump_all_cb, NULL, H5P_DEFAULT);
     }
 
     indent -= COL;

@@ -19,5 +19,19 @@ GROUP "/" {
          DATASPACE  SCALAR
       }
    }
+   GROUP "g" {
+      ATTRIBUTE "a" {
+         DATATYPE  H5T_STD_U8LE
+         DATASPACE  SCALAR
+      }
+      ATTRIBUTE "b" {
+         DATATYPE  H5T_STD_U8LE
+         DATASPACE  SCALAR
+      }
+      ATTRIBUTE "c" {
+         DATATYPE  H5T_STD_U8LE
+         DATASPACE  SCALAR
+      }
+   }
 }
 }

@@ -5925,11 +5925,14 @@ gent_attr_creation_order()
     if((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0) 
         goto out;
 
-#if 0
     /* enable creation order tracking on attributes */
     if(H5Pset_attr_creation_order(dcpl_id, H5P_CRT_ORDER_TRACKED) < 0) 
         goto out;
-#endif
+
+    /* enable creation order tracking on groups */
+    if(H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) 
+        goto out;
+
 /*-------------------------------------------------------------------------
  * create a dataset and atributes in it
  *-------------------------------------------------------------------------
@@ -5954,12 +5957,37 @@ gent_attr_creation_order()
             goto out;
         
     } /* end for */
+
+    if (H5Dclose(did) < 0) 
+        goto out;
     
+
+/*-------------------------------------------------------------------------
+ * create a group and atributes in it
+ *-------------------------------------------------------------------------
+ */
+
+    if ((gid = H5Gcreate2(fid, "g", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) 
+        goto out;
+    
+    /* add attributes */
+    for(i = 0; i < 3; i++) 
+    {
+        if ((aid = H5Acreate(gid, attr_name[i], H5T_NATIVE_UCHAR, sid, H5P_DEFAULT)) < 0) 
+            goto out;
+        
+        /* close attribute */
+        if (H5Aclose(aid) < 0) 
+            goto out;
+        
+    } /* end for */
+    
+    if (H5Gclose(gid) < 0) 
+        goto out;
+
   
     /* close */
     if (H5Sclose(sid) < 0) 
-        goto out;
-    if (H5Dclose(did) < 0) 
         goto out;
     if (H5Pclose(dcpl_id) < 0) 
         goto out;
