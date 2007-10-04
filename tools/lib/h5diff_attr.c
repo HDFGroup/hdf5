@@ -86,7 +86,7 @@ hsize_t diff_attr(hid_t loc1_id,
   buf2 = NULL;
 
   /* open attribute */
-  if((attr1_id = H5Aopen_idx(loc1_id, u)) < 0)
+  if((attr1_id = H5Aopen_by_idx(loc1_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, H5P_DEFAULT, H5P_DEFAULT)) < 0)
    goto error;
    /* get name */
   if(H5Aget_name(attr1_id, 255, name1) < 0)

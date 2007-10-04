@@ -220,6 +220,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Aopen_name() */
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*--------------------------------------------------------------------------
  NAME
@@ -240,6 +241,8 @@ done:
     H5Aclose or resource leaks will develop.
         The location object may be either a group or a dataset, both of
     which may have any sort of attribute.
+ NOTE
+    Deprecated in favor of H5Aopen_by_idx
 --------------------------------------------------------------------------*/
 hid_t
 H5Aopen_idx(hid_t loc_id, unsigned idx)
@@ -274,7 +277,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Aopen_idx() */
 
-#ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*--------------------------------------------------------------------------
  NAME
@@ -291,6 +293,8 @@ done:
  DESCRIPTION
         This function returns the number of attributes attached to a dataset or
     group, 'location_id'.
+ NOTE
+    Deprecated in favor of H5Oget_info
 --------------------------------------------------------------------------*/
 int
 H5Aget_num_attrs(hid_t loc_id)

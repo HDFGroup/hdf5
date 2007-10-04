@@ -173,7 +173,7 @@ Attribute H5Object::openAttribute( const H5std_string& name ) const
 //--------------------------------------------------------------------------
 Attribute H5Object::openAttribute( const unsigned int idx ) const
 {
-   hid_t attr_id = H5Aopen_idx( id, idx );
+   hid_t attr_id = H5Aopen_by_idx(id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)idx, H5P_DEFAULT, H5P_DEFAULT);
    if( attr_id > 0 )
    {
       Attribute attr( attr_id );
@@ -181,7 +181,7 @@ Attribute H5Object::openAttribute( const unsigned int idx ) const
    }
    else
    {
-      throw AttributeIException(inMemFunc("openAttribute"), "H5Aopen_idx failed");
+      throw AttributeIException(inMemFunc("openAttribute"), "H5Aopen_by_idx failed");
    }
 }
 

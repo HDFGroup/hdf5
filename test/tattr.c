@@ -786,8 +786,8 @@ test_attr_compound_read(hid_t fapl)
     VERIFY(oinfo.num_attrs, 1, "H5Oget_info");
 
     /* Open 1st attribute for the dataset */
-    attr = H5Aopen_idx(dataset, 0);
-    CHECK(attr, FAIL, "H5Aopen_idx");
+    attr = H5Aopen_by_idx(dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen_by_idx");
 
     /* Verify Dataspace */
     space = H5Aget_space(attr);
@@ -1191,8 +1191,8 @@ test_attr_mult_read(hid_t fapl)
     VERIFY(oinfo.num_attrs, 3, "H5Oget_info");
 
     /* Open 1st attribute for the dataset */
-    attr = H5Aopen_idx(dataset, (unsigned)0);
-    CHECK(attr, FAIL, "H5Aopen_idx");
+    attr = H5Aopen_by_idx(dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen_by_idx");
 
     /* Verify Dataspace */
     space = H5Aget_space(attr);
@@ -1244,8 +1244,8 @@ test_attr_mult_read(hid_t fapl)
     CHECK(ret, FAIL, "H5Aclose");
 
     /* Open 2nd attribute for the dataset */
-    attr = H5Aopen_idx(dataset, (unsigned)1);
-    CHECK(attr, FAIL, "H5Aopen_idx");
+    attr = H5Aopen_by_idx(dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)1, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen_by_idx");
 
     /* Verify Dataspace */
     space = H5Aget_space(attr);
@@ -1300,8 +1300,8 @@ test_attr_mult_read(hid_t fapl)
     CHECK(ret, FAIL, "H5Aclose");
 
     /* Open 2nd attribute for the dataset */
-    attr = H5Aopen_idx(dataset, (unsigned)2);
-    CHECK(attr, FAIL, "H5Aopen_idx");
+    attr = H5Aopen_by_idx(dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)2, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen_by_idx");
 
     /* Verify Dataspace */
     space = H5Aget_space(attr);
@@ -1531,8 +1531,8 @@ test_attr_delete(hid_t fapl)
     VERIFY(oinfo.num_attrs, 2, "H5Oget_info");
 
     /* Open 1st attribute for the dataset */
-    attr = H5Aopen_idx(dataset, 0);
-    CHECK(attr, FAIL, "H5Aopen_idx");
+    attr = H5Aopen_by_idx(dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen_by_idx");
 
     /* Verify Name */
     name_len = H5Aget_name(attr, (size_t)ATTR_NAME_LEN,attr_name);
@@ -1545,8 +1545,8 @@ test_attr_delete(hid_t fapl)
     CHECK(ret, FAIL, "H5Aclose");
 
     /* Open last (formally 3rd) attribute for the dataset */
-    attr = H5Aopen_idx(dataset, 1);
-    CHECK(attr, FAIL, "H5Aopen_idx");
+    attr = H5Aopen_by_idx(dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)1, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen_by_idx");
 
     /* Verify Name */
     name_len = H5Aget_name(attr, (size_t)ATTR_NAME_LEN, attr_name);
@@ -1568,8 +1568,8 @@ test_attr_delete(hid_t fapl)
     VERIFY(oinfo.num_attrs, 1, "H5Oget_info");
 
     /* Open last (formally 3rd) attribute for the dataset */
-    attr = H5Aopen_idx(dataset, 0);
-    CHECK(attr, FAIL, "H5Aopen_idx");
+    attr = H5Aopen_by_idx(dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen_by_idx");
 
     /* Verify Name */
     name_len = H5Aget_name(attr, (size_t)ATTR_NAME_LEN, attr_name);
@@ -1819,8 +1819,8 @@ test_attr_dense_verify(hid_t loc_id, unsigned max_attr)
         char check_name[ATTR_NAME_LEN]; /* Buffer for checking attribute names */
 
         /* Open attribute */
-        attr = H5Aopen_idx(loc_id, u);
-        CHECK(attr, FAIL, "H5Aopen_idx");
+        attr = H5Aopen_by_idx(loc_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(attr, FAIL, "H5Aopen_by_idx");
 
         /* Verify Name */
         sprintf(attrname, "attr %02u", u);
@@ -3306,6 +3306,15 @@ test_attr_deprec(hid_t fcpl, hid_t fapl)
     /* Get number of attributes */
     ret = H5Aget_num_attrs(dataset);
     VERIFY(ret, 1, "H5Aget_num_attrs");
+
+    /* Open the attribute */
+    attr = H5Aopen_idx(dataset, 0);
+    CHECK(attr, FAIL, "H5Aopen_idx");
+
+    /* Close attribute */
+    ret = H5Aclose(attr);
+    CHECK(ret, FAIL, "H5Aclose");
+
 
     /* Rename attribute */
     ret = H5Arename1(dataset, "attr", "attr2");

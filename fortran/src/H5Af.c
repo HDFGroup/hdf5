@@ -847,7 +847,7 @@ done:
 
 /*----------------------------------------------------------------------------
  * Name:        h5aopen_idx_c
- * Purpose:     Call H5Aopen_idx to open an attribute
+ * Purpose:     Call H5Aopen_by_idx to open an attribute
  * Inputs:      obj_id - object identifier
  *              idx    - attribute index ( zero based)
  * Outputs:     attr_id - attribute identifier
@@ -859,12 +859,12 @@ done:
 int_f
 nh5aopen_idx_c (hid_t_f *obj_id, int_f *idx, hid_t_f *attr_id)
 {
-    int_f ret_value=0;          /* Return value */
+    int_f ret_value = 0;          /* Return value */
 
      /*
-      * Call H5Aopen_idx function.
+      * Call H5Aopen_by_idx function.
       */
-     if ((*attr_id = (hid_t_f)H5Aopen_idx((hid_t)*obj_id, (unsigned)*idx)) < 0)
+     if((*attr_id = (hid_t_f)H5Aopen_by_idx((hid_t)*obj_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)*idx, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         HGOTO_DONE(FAIL);
 
 done:

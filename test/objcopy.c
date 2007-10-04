@@ -789,7 +789,7 @@ compare_std_attributes(hid_t oid, hid_t oid2, hid_t pid)
 
         /* Check the attributes are equal */
         for(i = 0; i < (unsigned)oinfo1.num_attrs; i++) {
-            if((aid = H5Aopen_idx(oid, i)) < 0) TEST_ERROR
+            if((aid = H5Aopen_by_idx(oid, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)i, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
             if(H5Aget_name(aid, ATTR_NAME_LEN, attr_name) < 0) TEST_ERROR
 
             if((aid2 = H5Aopen_name(oid2, attr_name)) < 0) TEST_ERROR
@@ -3945,8 +3945,8 @@ test_copy_attribute_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
 
     /* Check if the attributes are equal */
 
-    if((aid = H5Aopen_idx(did, 0)) < 0) TEST_ERROR
-    if((aid2 = H5Aopen_idx(did2, 0)) < 0) TEST_ERROR
+    if((aid = H5Aopen_by_idx(did, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((aid2 = H5Aopen_by_idx(did2, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(compare_attribute(aid, aid2, H5P_DEFAULT, NULL, did) != TRUE) TEST_ERROR
     if(H5Aclose(aid) < 0) TEST_ERROR
     if(H5Aclose(aid2) < 0) TEST_ERROR

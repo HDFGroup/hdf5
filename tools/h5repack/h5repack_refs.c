@@ -431,7 +431,7 @@ static int copy_refs_attr(hid_t loc_in,
         *-------------------------------------------------------------------------
         */
         /* open attribute */
-        if((attr_id = H5Aopen_idx(loc_in, u)) < 0)
+        if((attr_id = H5Aopen_by_idx(loc_in, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto error;
 
         /* get name */

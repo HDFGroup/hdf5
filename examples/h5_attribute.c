@@ -194,7 +194,7 @@ main (void)
     */
    ret = H5Oget_info(dataset, ".", &oinfo, H5P_DEFAULT);
    for(i = 0; i < (unsigned)oinfo.num_attrs; i++) {
-      attr  = H5Aopen_idx(dataset, i);
+      attr = H5Aopen_by_idx(dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)i, H5P_DEFAULT, H5P_DEFAULT);
       atype = H5Aget_type(attr);
       type_class = H5Tget_class(atype);
       if (type_class == H5T_STRING) {
