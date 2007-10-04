@@ -65,30 +65,31 @@ hsize_t diff_attr(hid_t loc1_id,
  char       name2[512];
  char       np1[512];
  char       np2[512];
- int        n1, n2, i, j;
- hsize_t    nfound=0;
- hsize_t    nfound_total=0;
+ H5O_info_t oinfo1, oinfo2;     /* Object info */
+ unsigned   u;                  /* Local index variable */
+ hsize_t    nfound = 0;
+ hsize_t    nfound_total = 0;
  int        cmp=1;
 
- if ((n1 = H5Aget_num_attrs(loc1_id))<0)
+ if(H5Oget_info(loc1_id, ".", &oinfo1, H5P_DEFAULT) < 0)
   goto error;
- if ((n2 = H5Aget_num_attrs(loc2_id))<0)
+ if(H5Oget_info(loc2_id, ".", &oinfo2, H5P_DEFAULT) < 0)
   goto error;
 
- if (n1!=n2)
+ if(oinfo1.num_attrs != oinfo2.num_attrs)
   return 1;
 
- for ( i = 0; i < n1; i++)
+ for(u = 0; u < (unsigned)oinfo1.num_attrs; u++)
  {
   /* reset buffers for every attribute, we might goto out and call free */
-  buf1=NULL;
-  buf2=NULL;
+  buf1 = NULL;
+  buf2 = NULL;
 
   /* open attribute */
-  if ((attr1_id = H5Aopen_idx(loc1_id, (unsigned)i))<0)
+  if((attr1_id = H5Aopen_idx(loc1_id, u)) < 0)
    goto error;
    /* get name */
-  if (H5Aget_name( attr1_id, 255, name1 )<0)
+  if(H5Aget_name(attr1_id, 255, name1) < 0)
    goto error;
 
   /* use the name on the first file to open the second file */
@@ -148,6 +149,7 @@ hsize_t diff_attr(hid_t loc1_id,
   */
   if (cmp)
   {
+     int j;
 
   /*-------------------------------------------------------------------------
    * read to memory
@@ -287,7 +289,7 @@ hsize_t diff_attr(hid_t loc1_id,
    HDfree(buf2);
 
   nfound_total += nfound;
- } /* i */
+ } /* u */
 
  return nfound_total;
 

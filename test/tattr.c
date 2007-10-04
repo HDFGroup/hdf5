@@ -388,14 +388,15 @@ test_attr_basic_write(hid_t fapl)
 static void
 test_attr_basic_read(hid_t fapl)
 {
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		group;	    /* Group ID			    */
-    hid_t		attr;	    /* Attribute ID			*/
-    int       read_data1[ATTR1_DIM1]={0}; /* Buffer for reading 1st attribute */
-    int       read_data2[ATTR2_DIM1][ATTR2_DIM2]={{0}}; /* Buffer for reading 2nd attribute */
-    int         i,j;
-    herr_t		ret;		/* Generic return value		*/
+    hid_t	fid1;		/* HDF5 File IDs		*/
+    hid_t	dataset;	/* Dataset ID			*/
+    hid_t	group;	        /* Group ID			*/
+    hid_t	attr;	        /* Attribute ID			*/
+    H5O_info_t  oinfo;          /* Object info                  */
+    int         read_data1[ATTR1_DIM1] = {0}; /* Buffer for reading 1st attribute */
+    int         read_data2[ATTR2_DIM1][ATTR2_DIM2] = {{0}}; /* Buffer for reading 2nd attribute */
+    int         i, j;           /* Local index variables        */
+    herr_t	ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Basic Attribute Functions\n"));
@@ -405,28 +406,29 @@ test_attr_basic_read(hid_t fapl)
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
-    dataset=H5Dopen(fid1,DSET1_NAME);
+    dataset = H5Dopen(fid1, DSET1_NAME);
     CHECK(dataset, FAIL, "H5Dopen");
 
     /* Verify the correct number of attributes */
-    ret=H5Aget_num_attrs(dataset);
-    VERIFY(ret, 2, "H5Aget_num_attrs");
+    ret = H5Oget_info(dataset, ".", &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.num_attrs, 2, "H5Oget_info");
 
     /* Open first attribute for the dataset */
-    attr=H5Aopen_name(dataset, ATTR_TMP_NAME);
+    attr = H5Aopen_name(dataset, ATTR_TMP_NAME);
     CHECK(attr, FAIL, "H5Aopen_name");
 
     /* Read attribute information */
-    ret=H5Aread(attr,H5T_NATIVE_INT,read_data1);
+    ret = H5Aread(attr, H5T_NATIVE_INT, read_data1);
     CHECK(ret, FAIL, "H5Aread");
 
     /* Verify values read in */
-    for(i=0; i<ATTR1_DIM1; i++)
-        if(attr_data1[i]!=read_data1[i])
-            TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
+    for(i = 0; i < ATTR1_DIM1; i++)
+        if(attr_data1[i] != read_data1[i])
+            TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n", __LINE__, i, attr_data1[i], i, read_data1[i]);
 
     /* Close attribute */
-    ret=H5Aclose(attr);
+    ret = H5Aclose(attr);
     CHECK(ret, FAIL, "H5Aclose");
 
     ret = H5Dclose(dataset);
@@ -437,25 +439,26 @@ test_attr_basic_read(hid_t fapl)
     CHECK(group, FAIL, "H5Gopen2");
 
     /* Verify the correct number of attributes */
-    ret=H5Aget_num_attrs(group);
-    VERIFY(ret, 1, "H5Aget_num_attrs");
+    ret = H5Oget_info(group, ".", &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.num_attrs, 1, "H5Oget_info");
 
     /* Open the attribute for the group */
-    attr=H5Aopen_name(group,ATTR2_NAME);
+    attr = H5Aopen_name(group, ATTR2_NAME);
     CHECK(attr, FAIL, "H5Aopen_name");
 
     /* Read attribute information */
-    ret=H5Aread(attr,H5T_NATIVE_INT,read_data2);
+    ret = H5Aread(attr, H5T_NATIVE_INT, read_data2);
     CHECK(ret, FAIL, "H5Aread");
 
     /* Verify values read in */
-    for(i=0; i<ATTR2_DIM1; i++)
-        for(j=0; j<ATTR2_DIM2; j++)
-            if(attr_data2[i][j]!=read_data2[i][j])
-                TestErrPrintf("%d: attribute data different: attr_data2[%d][%d]=%d, read_data2[%d][%d]=%d\n",__LINE__, i,j,attr_data2[i][j],i,j,read_data1[i]);
+    for(i = 0; i < ATTR2_DIM1; i++)
+        for(j = 0; j < ATTR2_DIM2; j++)
+            if(attr_data2[i][j] != read_data2[i][j])
+                TestErrPrintf("%d: attribute data different: attr_data2[%d][%d]=%d, read_data2[%d][%d]=%d\n", __LINE__,  i, j, attr_data2[i][j], i, j, read_data1[i]);
 
     /* Close attribute */
-    ret=H5Aclose(attr);
+    ret = H5Aclose(attr);
     CHECK(ret, FAIL, "H5Aclose");
 
     /* Close group */
@@ -745,11 +748,11 @@ test_attr_compound_write(hid_t fapl)
 static void
 test_attr_compound_read(hid_t fapl)
 {
-    hid_t   fid1;		/* HDF5 File IDs		*/
-    hid_t   dataset;	/* Dataset ID			*/
+    hid_t   fid1;	/* HDF5 File ID		*/
+    hid_t   dataset;	/* Dataset ID		*/
     hid_t   space;      /* Attribute dataspace  */
     hid_t   type;       /* Attribute datatype   */
-    hid_t   attr;	    /* Attribute ID			*/
+    hid_t   attr;	/* Attribute ID         */
     char    attr_name[ATTR_NAME_LEN]; /* Buffer for attribute names */
     int     rank;       /* Attribute rank */
     hsize_t dims[ATTR_MAX_DIMS];    /* Attribute dimensions */
@@ -758,12 +761,13 @@ test_attr_compound_read(hid_t fapl)
     size_t      size;   /* Attribute datatype size as stored in file */
     int     fields;     /* # of Attribute datatype fields */
     char *fieldname;    /* Name of a field */
-    size_t      offset; /* Attribute datatype field offset */
+    size_t  offset;     /* Attribute datatype field offset */
     hid_t   field;      /* Attribute field datatype */
     struct attr4_struct read_data4[ATTR4_DIM1][ATTR4_DIM2]; /* Buffer for reading 4th attribute */
-    int     i,j;
     size_t  name_len;   /* Length of attribute name */
-    herr_t  ret;		/* Generic return value		*/
+    H5O_info_t oinfo;   /* Object info */
+    int     i, j;       /* Local index variables */
+    herr_t  ret;	/* Generic return value	*/
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Basic Attribute Functions\n"));
@@ -773,106 +777,107 @@ test_attr_compound_read(hid_t fapl)
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
-    dataset=H5Dopen(fid1,DSET1_NAME);
+    dataset = H5Dopen(fid1, DSET1_NAME);
     CHECK(dataset, FAIL, "H5Dopen");
 
     /* Verify the correct number of attributes */
-    ret=H5Aget_num_attrs(dataset);
-    VERIFY(ret, 1, "H5Aget_num_attrs");
+    ret = H5Oget_info(dataset, ".", &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.num_attrs, 1, "H5Oget_info");
 
     /* Open 1st attribute for the dataset */
-    attr=H5Aopen_idx(dataset,0);
+    attr = H5Aopen_idx(dataset, 0);
     CHECK(attr, FAIL, "H5Aopen_idx");
 
     /* Verify Dataspace */
-    space=H5Aget_space(attr);
+    space = H5Aget_space(attr);
     CHECK(space, FAIL, "H5Aget_space");
-    rank=H5Sget_simple_extent_ndims(space);
+    rank = H5Sget_simple_extent_ndims(space);
     VERIFY(rank, ATTR4_RANK, "H5Sget_simple_extent_ndims");
-    ret=H5Sget_simple_extent_dims(space,dims, NULL);
+    ret = H5Sget_simple_extent_dims(space, dims, NULL);
     CHECK(ret, FAIL, "H5Sget_simple_extent_dims");
-    if(dims[0]!=ATTR4_DIM1)
-        TestErrPrintf("attribute dimensions different: dims[0]=%d, should be %d\n",(int)dims[0],ATTR4_DIM1);
-    if(dims[1]!=ATTR4_DIM2)
-        TestErrPrintf("attribute dimensions different: dims[1]=%d, should be %d\n",(int)dims[1],ATTR4_DIM2);
+    if(dims[0] != ATTR4_DIM1)
+        TestErrPrintf("attribute dimensions different: dims[0]=%d, should be %d\n", (int)dims[0], ATTR4_DIM1);
+    if(dims[1] != ATTR4_DIM2)
+        TestErrPrintf("attribute dimensions different: dims[1]=%d, should be %d\n", (int)dims[1], ATTR4_DIM2);
     H5Sclose(space);
 
     /* Verify Datatype */
-    type=H5Aget_type(attr);
+    type = H5Aget_type(attr);
     CHECK(type, FAIL, "H5Aget_type");
-    t_class=H5Tget_class(type);
+    t_class = H5Tget_class(type);
     VERIFY(t_class, H5T_COMPOUND, "H5Tget_class");
-    fields=H5Tget_nmembers(type);
+    fields = H5Tget_nmembers(type);
     VERIFY(fields, 3, "H5Tget_nmembers");
-    for(i=0; i<fields; i++) {
-        fieldname=H5Tget_member_name(type,(unsigned)i);
-        if(!(HDstrcmp(fieldname,ATTR4_FIELDNAME1) ||
-                HDstrcmp(fieldname,ATTR4_FIELDNAME2) ||
-                HDstrcmp(fieldname,ATTR4_FIELDNAME3)))
-            TestErrPrintf("invalid field name for field #%d: %s\n",i,fieldname);
+    for(i = 0; i < fields; i++) {
+        fieldname = H5Tget_member_name(type, (unsigned)i);
+        if(!(HDstrcmp(fieldname, ATTR4_FIELDNAME1) ||
+                HDstrcmp(fieldname, ATTR4_FIELDNAME2) ||
+                HDstrcmp(fieldname, ATTR4_FIELDNAME3)))
+            TestErrPrintf("invalid field name for field #%d: %s\n", i, fieldname);
         free(fieldname);
       } /* end for */
-    offset=H5Tget_member_offset(type,0);
+    offset = H5Tget_member_offset(type, 0);
     VERIFY(offset, attr4_field1_off, "H5Tget_member_offset");
-    offset=H5Tget_member_offset(type,1);
+    offset = H5Tget_member_offset(type, 1);
     VERIFY(offset, attr4_field2_off, "H5Tget_member_offset");
-    offset=H5Tget_member_offset(type,2);
+    offset = H5Tget_member_offset(type, 2);
     VERIFY(offset, attr4_field3_off, "H5Tget_member_offset");
 
     /* Verify each field's type, class & size */
-    field=H5Tget_member_type(type,0);
+    field = H5Tget_member_type(type, 0);
     CHECK(field, FAIL, "H5Tget_member_type");
-    t_class=H5Tget_class(field);
+    t_class = H5Tget_class(field);
     VERIFY(t_class, H5T_INTEGER, "H5Tget_class");
-    order=H5Tget_order(field);
+    order = H5Tget_order(field);
     VERIFY(order, H5Tget_order(H5T_NATIVE_INT), "H5Tget_order");
-    size=H5Tget_size(field);
+    size = H5Tget_size(field);
     VERIFY(size, H5Tget_size(H5T_NATIVE_INT), "H5Tget_size");
     H5Tclose(field);
-    field=H5Tget_member_type(type,1);
+    field = H5Tget_member_type(type, 1);
     CHECK(field, FAIL, "H5Tget_member_type");
-    t_class=H5Tget_class(field);
+    t_class = H5Tget_class(field);
     VERIFY(t_class, H5T_FLOAT, "H5Tget_class");
-    order=H5Tget_order(field);
+    order = H5Tget_order(field);
     VERIFY(order, H5Tget_order(H5T_NATIVE_DOUBLE), "H5Tget_order");
-    size=H5Tget_size(field);
+    size = H5Tget_size(field);
     VERIFY(size, H5Tget_size(H5T_NATIVE_DOUBLE), "H5Tget_size");
     H5Tclose(field);
-    field=H5Tget_member_type(type,2);
+    field = H5Tget_member_type(type, 2);
     CHECK(field, FAIL, "H5Tget_member_type");
-    t_class=H5Tget_class(field);
+    t_class = H5Tget_class(field);
     VERIFY(t_class, H5T_INTEGER, "H5Tget_class");
-    order=H5Tget_order(field);
+    order = H5Tget_order(field);
     VERIFY(order, H5Tget_order(H5T_NATIVE_SCHAR), "H5Tget_order");
-    size=H5Tget_size(field);
+    size = H5Tget_size(field);
     VERIFY(size, H5Tget_size(H5T_NATIVE_SCHAR), "H5Tget_size");
     H5Tclose(field);
 
     /* Read attribute information */
-    ret=H5Aread(attr,type,read_data4);
+    ret = H5Aread(attr, type, read_data4);
     CHECK(ret, FAIL, "H5Aread");
 
     /* Verify values read in */
-    for(i=0; i<ATTR4_DIM1; i++)
-        for(j=0; j<ATTR4_DIM2; j++)
-            if(HDmemcmp(&attr_data4[i][j],&read_data4[i][j],sizeof(struct attr4_struct))) {
-                printf("%d: attribute data different: attr_data4[%d][%d].i=%d, read_data4[%d][%d].i=%d\n",__LINE__,i,j,attr_data4[i][j].i,i,j,read_data4[i][j].i);
-                printf("%d: attribute data different: attr_data4[%d][%d].d=%f, read_data4[%d][%d].d=%f\n",__LINE__,i,j,attr_data4[i][j].d,i,j,read_data4[i][j].d);
-                TestErrPrintf("%d: attribute data different: attr_data4[%d][%d].c=%c, read_data4[%d][%d].c=%c\n",__LINE__,i,j,attr_data4[i][j].c,i,j,read_data4[i][j].c);
+    for(i = 0; i < ATTR4_DIM1; i++)
+        for(j = 0; j < ATTR4_DIM2; j++)
+            if(HDmemcmp(&attr_data4[i][j], &read_data4[i][j], sizeof(struct attr4_struct))) {
+                printf("%d: attribute data different: attr_data4[%d][%d].i=%d, read_data4[%d][%d].i=%d\n", __LINE__, i, j, attr_data4[i][j].i, i, j, read_data4[i][j].i);
+                printf("%d: attribute data different: attr_data4[%d][%d].d=%f, read_data4[%d][%d].d=%f\n", __LINE__, i, j, attr_data4[i][j].d, i, j, read_data4[i][j].d);
+                TestErrPrintf("%d: attribute data different: attr_data4[%d][%d].c=%c, read_data4[%d][%d].c=%c\n", __LINE__, i, j, attr_data4[i][j].c, i, j, read_data4[i][j].c);
              } /* end if */
 
     /* Verify Name */
-    name_len=H5Aget_name(attr, (size_t)ATTR_NAME_LEN, attr_name);
+    name_len = H5Aget_name(attr, (size_t)ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR4_NAME), "H5Aget_name");
-    if(HDstrcmp(attr_name,ATTR4_NAME))
-        TestErrPrintf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR4_NAME);
+    if(HDstrcmp(attr_name, ATTR4_NAME))
+        TestErrPrintf("attribute name different: attr_name=%s, should be %s\n", attr_name, ATTR4_NAME);
 
     /* Close attribute datatype */
-    ret=H5Tclose(type);
+    ret = H5Tclose(type);
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Close attribute */
-    ret=H5Aclose(attr);
+    ret = H5Aclose(attr);
     CHECK(ret, FAIL, "H5Aclose");
 
     /* Close dataset */
@@ -958,13 +963,14 @@ test_attr_scalar_write(hid_t fapl)
 static void
 test_attr_scalar_read(hid_t fapl)
 {
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid;	        /* Dataspace ID			*/
-    hid_t		attr;	        /* Attribute ID			*/
-    H5S_class_t         stype;          /* Dataspace class              */
-    float       rdata=0.0;  /* Buffer for reading 1st attribute */
-    herr_t		ret;		/* Generic return value		*/
+    hid_t	fid1;		/* HDF5 File IDs		*/
+    hid_t	dataset;	/* Dataset ID			*/
+    hid_t	sid;	        /* Dataspace ID			*/
+    hid_t	attr;	        /* Attribute ID			*/
+    H5S_class_t stype;          /* Dataspace class              */
+    float       rdata = 0.0;    /* Buffer for reading 1st attribute */
+    H5O_info_t  oinfo;          /* Object info                  */
+    herr_t	ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Basic Scalar Attribute Reading Functions\n"));
@@ -974,22 +980,24 @@ test_attr_scalar_read(hid_t fapl)
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
-    dataset=H5Dopen(fid1,DSET1_NAME);
+    dataset = H5Dopen(fid1, DSET1_NAME);
     CHECK(dataset, FAIL, "H5Dopen");
 
     /* Verify the correct number of attributes */
-    ret=H5Aget_num_attrs(dataset);
-    VERIFY(ret, 1, "H5Aget_num_attrs");
+    ret = H5Oget_info(dataset, ".", &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.num_attrs, 1, "H5Oget_info");
 
     /* Open an attribute for the dataset */
-    attr=H5Aopen_name(dataset,ATTR5_NAME);
+    attr = H5Aopen_name(dataset, ATTR5_NAME);
     CHECK(attr, FAIL, "H5Aopen_name");
 
     /* Read attribute information */
-    ret=H5Aread(attr,H5T_NATIVE_FLOAT,&rdata);
+    ret = H5Aread(attr, H5T_NATIVE_FLOAT, &rdata);
     CHECK(ret, FAIL, "H5Aread");
+
     /* Verify the floating-poing value in this way to avoid compiler warning. */
-    if(!FLT_ABS_EQUAL(rdata,attr_data5))
+    if(!FLT_ABS_EQUAL(rdata, attr_data5))
 	printf("*** UNEXPECTED VALUE from %s should be %f, but is %f at line %4d in %s\n",
 	    "H5Aread", attr_data5, rdata, (int)__LINE__, __FILE__);
  
@@ -998,7 +1006,7 @@ test_attr_scalar_read(hid_t fapl)
     CHECK(sid, FAIL, "H5Aget_space");
 
     /* Make certain the dataspace is scalar */
-    stype = H5Sget_simple_extent_type (sid);
+    stype = H5Sget_simple_extent_type(sid);
     VERIFY(stype, H5S_SCALAR, "H5Sget_simple_extent_type");
 
     /* Close dataspace */
@@ -1006,7 +1014,7 @@ test_attr_scalar_read(hid_t fapl)
     CHECK(ret, FAIL, "H5Sclose");
 
     /* Close attribute */
-    ret=H5Aclose(attr);
+    ret = H5Aclose(attr);
     CHECK(ret, FAIL, "H5Aclose");
 
     ret = H5Dclose(dataset);
@@ -1146,24 +1154,25 @@ test_attr_mult_write(hid_t fapl)
 static void
 test_attr_mult_read(hid_t fapl)
 {
-    hid_t   fid1;		/* HDF5 File IDs		*/
-    hid_t   dataset;	/* Dataset ID			*/
+    hid_t   fid1;	/* HDF5 File ID		*/
+    hid_t   dataset;	/* Dataset ID		*/
     hid_t   space;      /* Attribute dataspace  */
     hid_t   type;       /* Attribute datatype   */
-    hid_t   attr;	    /* Attribute ID			*/
+    hid_t   attr;	/* Attribute ID		*/
     char    attr_name[ATTR_NAME_LEN]; /* Buffer for attribute names */
     char    temp_name[ATTR_NAME_LEN]; /* Buffer for mangling attribute names */
     int     rank;       /* Attribute rank */
-    hsize_t dims[ATTR_MAX_DIMS];    /* Attribute dimensions */
-    H5T_class_t t_class;              /* Attribute datatype class */
-    H5T_order_t order;              /* Attribute datatype order */
-    size_t      size;               /* Attribute datatype size as stored in file */
-    int   read_data1[ATTR1_DIM1]={0}; /* Buffer for reading 1st attribute */
-    int   read_data2[ATTR2_DIM1][ATTR2_DIM2]={{0}}; /* Buffer for reading 2nd attribute */
-    double  read_data3[ATTR3_DIM1][ATTR3_DIM2][ATTR3_DIM3]={{{0}}}; /* Buffer for reading 3rd attribute */
-    int     i,j,k;
+    hsize_t dims[ATTR_MAX_DIMS];        /* Attribute dimensions */
+    H5T_class_t t_class;        /* Attribute datatype class */
+    H5T_order_t order;          /* Attribute datatype order */
+    size_t      size;           /* Attribute datatype size as stored in file */
+    int     read_data1[ATTR1_DIM1] = {0}; /* Buffer for reading 1st attribute */
+    int     read_data2[ATTR2_DIM1][ATTR2_DIM2] = {{0}}; /* Buffer for reading 2nd attribute */
+    double  read_data3[ATTR3_DIM1][ATTR3_DIM2][ATTR3_DIM3] = {{{0}}}; /* Buffer for reading 3rd attribute */
     size_t  name_len;   /* Length of attribute name */
-    herr_t  ret;		/* Generic return value		*/
+    H5O_info_t oinfo;   /* Object info */
+    int     i, j, k;    /* Local index values */
+    herr_t  ret;	/* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Basic Attribute Functions\n"));
@@ -1173,179 +1182,180 @@ test_attr_mult_read(hid_t fapl)
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
-    dataset=H5Dopen(fid1,DSET1_NAME);
+    dataset = H5Dopen(fid1, DSET1_NAME);
     CHECK(dataset, FAIL, "H5Dopen");
 
     /* Verify the correct number of attributes */
-    ret=H5Aget_num_attrs(dataset);
-    VERIFY(ret, 3, "H5Aget_num_attrs");
+    ret = H5Oget_info(dataset, ".", &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.num_attrs, 3, "H5Oget_info");
 
     /* Open 1st attribute for the dataset */
-    attr=H5Aopen_idx(dataset,0);
+    attr = H5Aopen_idx(dataset, (unsigned)0);
     CHECK(attr, FAIL, "H5Aopen_idx");
 
     /* Verify Dataspace */
-    space=H5Aget_space(attr);
+    space = H5Aget_space(attr);
     CHECK(space, FAIL, "H5Aget_space");
-    rank=H5Sget_simple_extent_ndims(space);
+    rank = H5Sget_simple_extent_ndims(space);
     VERIFY(rank, ATTR1_RANK, "H5Sget_simple_extent_ndims");
-    ret=H5Sget_simple_extent_dims(space,dims, NULL);
+    ret = H5Sget_simple_extent_dims(space, dims, NULL);
     CHECK(ret, FAIL, "H5Sget_simple_extent_dims");
-    if(dims[0]!=ATTR1_DIM1)
-        TestErrPrintf("attribute dimensions different: dims[0]=%d, should be %d\n",(int)dims[0],ATTR1_DIM1);
+    if(dims[0] != ATTR1_DIM1)
+        TestErrPrintf("attribute dimensions different: dims[0]=%d, should be %d\n", (int)dims[0], ATTR1_DIM1);
     H5Sclose(space);
 
     /* Verify Datatype */
-    type=H5Aget_type(attr);
+    type = H5Aget_type(attr);
     CHECK(type, FAIL, "H5Aget_type");
-    t_class=H5Tget_class(type);
+    t_class = H5Tget_class(type);
     VERIFY(t_class, H5T_INTEGER, "H5Tget_class");
-    order=H5Tget_order(type);
+    order = H5Tget_order(type);
     VERIFY(order, H5Tget_order(H5T_NATIVE_INT), "H5Tget_order");
-    size=H5Tget_size(type);
+    size = H5Tget_size(type);
     VERIFY(size, H5Tget_size(H5T_NATIVE_INT), "H5Tget_size");
     H5Tclose(type);
 
     /* Read attribute information */
-    ret=H5Aread(attr,H5T_NATIVE_INT,read_data1);
+    ret = H5Aread(attr, H5T_NATIVE_INT, read_data1);
     CHECK(ret, FAIL, "H5Aread");
 
     /* Verify values read in */
-    for(i=0; i<ATTR1_DIM1; i++)
-        if(attr_data1[i]!=read_data1[i])
-            TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n",__LINE__,i,attr_data1[i],i,read_data1[i]);
+    for(i = 0; i < ATTR1_DIM1; i++)
+        if(attr_data1[i] != read_data1[i])
+            TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n", __LINE__, i, attr_data1[i], i, read_data1[i]);
 
     /* Verify Name */
-    name_len=H5Aget_name(attr, (size_t)ATTR_NAME_LEN, attr_name);
+    name_len = H5Aget_name(attr, (size_t)ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR1_NAME), "H5Aget_name");
-    if(HDstrcmp(attr_name,ATTR1_NAME))
-        TestErrPrintf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR1_NAME);
+    if(HDstrcmp(attr_name, ATTR1_NAME))
+        TestErrPrintf("attribute name different: attr_name=%s, should be %s\n", attr_name, ATTR1_NAME);
 
     /* Verify Name with too small of a buffer */
-    name_len=H5Aget_name(attr,HDstrlen(ATTR1_NAME), attr_name);
+    name_len = H5Aget_name(attr,HDstrlen(ATTR1_NAME), attr_name);
     VERIFY(name_len, HDstrlen(ATTR1_NAME), "H5Aget_name");
-    HDstrcpy(temp_name,ATTR1_NAME);     /* make a copy of the name */
-    temp_name[HDstrlen(ATTR1_NAME)-1]='\0';   /* truncate it to match the one retrieved */
-    if(HDstrcmp(attr_name,temp_name))
-        TestErrPrintf("attribute name different: attr_name=%s, should be %s\n",attr_name,temp_name);
+    HDstrcpy(temp_name, ATTR1_NAME);     /* make a copy of the name */
+    temp_name[HDstrlen(ATTR1_NAME) - 1] = '\0';   /* truncate it to match the one retrieved */
+    if(HDstrcmp(attr_name, temp_name))
+        TestErrPrintf("attribute name different: attr_name=%s, should be %s\n", attr_name, temp_name);
 
     /* Close attribute */
-    ret=H5Aclose(attr);
+    ret = H5Aclose(attr);
     CHECK(ret, FAIL, "H5Aclose");
 
     /* Open 2nd attribute for the dataset */
-    attr=H5Aopen_idx(dataset,1);
+    attr = H5Aopen_idx(dataset, (unsigned)1);
     CHECK(attr, FAIL, "H5Aopen_idx");
 
     /* Verify Dataspace */
-    space=H5Aget_space(attr);
+    space = H5Aget_space(attr);
     CHECK(space, FAIL, "H5Aget_space");
-    rank=H5Sget_simple_extent_ndims(space);
+    rank = H5Sget_simple_extent_ndims(space);
     VERIFY(rank, ATTR2_RANK, "H5Sget_simple_extent_ndims");
-    ret=H5Sget_simple_extent_dims(space,dims, NULL);
+    ret = H5Sget_simple_extent_dims(space, dims, NULL);
     CHECK(ret, FAIL, "H5Sget_simple_extent_dims");
-    if(dims[0]!=ATTR2_DIM1)
-        TestErrPrintf("attribute dimensions different: dims[0]=%d, should be %d\n",(int)dims[0],ATTR2_DIM1);
-    if(dims[1]!=ATTR2_DIM2)
-        TestErrPrintf("attribute dimensions different: dims[1]=%d, should be %d\n",(int)dims[1],ATTR2_DIM2);
+    if(dims[0] != ATTR2_DIM1)
+        TestErrPrintf("attribute dimensions different: dims[0]=%d, should be %d\n", (int)dims[0], ATTR2_DIM1);
+    if(dims[1] != ATTR2_DIM2)
+        TestErrPrintf("attribute dimensions different: dims[1]=%d, should be %d\n", (int)dims[1], ATTR2_DIM2);
     H5Sclose(space);
 
     /* Verify Datatype */
-    type=H5Aget_type(attr);
+    type = H5Aget_type(attr);
     CHECK(type, FAIL, "H5Aget_type");
-    t_class=H5Tget_class(type);
+    t_class = H5Tget_class(type);
     VERIFY(t_class, H5T_INTEGER, "H5Tget_class");
-    order=H5Tget_order(type);
+    order = H5Tget_order(type);
     VERIFY(order, H5Tget_order(H5T_NATIVE_INT), "H5Tget_order");
-    size=H5Tget_size(type);
+    size = H5Tget_size(type);
     VERIFY(size, H5Tget_size(H5T_NATIVE_INT), "H5Tget_size");
     H5Tclose(type);
 
     /* Read attribute information */
-    ret=H5Aread(attr,H5T_NATIVE_INT,read_data2);
+    ret = H5Aread(attr, H5T_NATIVE_INT, read_data2);
     CHECK(ret, FAIL, "H5Aread");
 
     /* Verify values read in */
-    for(i=0; i<ATTR2_DIM1; i++)
-        for(j=0; j<ATTR2_DIM2; j++)
-            if(attr_data2[i][j]!=read_data2[i][j])
-                TestErrPrintf("%d: attribute data different: attr_data2[%d][%d]=%d, read_data2[%d][%d]=%d\n",__LINE__,i,j,attr_data2[i][j],i,j,read_data2[i][j]);
+    for(i = 0; i < ATTR2_DIM1; i++)
+        for(j = 0; j < ATTR2_DIM2; j++)
+            if(attr_data2[i][j] != read_data2[i][j])
+                TestErrPrintf("%d: attribute data different: attr_data2[%d][%d]=%d, read_data2[%d][%d]=%d\n", __LINE__, i, j, attr_data2[i][j], i, j, read_data2[i][j]);
 
     /* Verify Name */
-    name_len=H5Aget_name(attr, (size_t)ATTR_NAME_LEN, attr_name);
+    name_len = H5Aget_name(attr, (size_t)ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR2_NAME), "H5Aget_name");
-    if(HDstrcmp(attr_name,ATTR2_NAME))
-        TestErrPrintf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR2_NAME);
+    if(HDstrcmp(attr_name, ATTR2_NAME))
+        TestErrPrintf("attribute name different: attr_name=%s, should be %s\n", attr_name, ATTR2_NAME);
 
     /* Verify Name with too small of a buffer */
-    name_len=H5Aget_name(attr, HDstrlen(ATTR2_NAME), attr_name);
+    name_len = H5Aget_name(attr, HDstrlen(ATTR2_NAME), attr_name);
     VERIFY(name_len, HDstrlen(ATTR2_NAME), "H5Aget_name");
-    HDstrcpy(temp_name,ATTR2_NAME);     /* make a copy of the name */
-    temp_name[HDstrlen(ATTR2_NAME)-1]='\0';   /* truncate it to match the one retrieved */
-    if(HDstrcmp(attr_name,temp_name))
-        TestErrPrintf("attribute name different: attr_name=%s, should be %s\n",attr_name,temp_name);
+    HDstrcpy(temp_name, ATTR2_NAME);     /* make a copy of the name */
+    temp_name[HDstrlen(ATTR2_NAME) - 1] = '\0';   /* truncate it to match the one retrieved */
+    if(HDstrcmp(attr_name, temp_name))
+        TestErrPrintf("attribute name different: attr_name=%s, should be %s\n", attr_name, temp_name);
 
     /* Close attribute */
-    ret=H5Aclose(attr);
+    ret = H5Aclose(attr);
     CHECK(ret, FAIL, "H5Aclose");
 
     /* Open 2nd attribute for the dataset */
-    attr=H5Aopen_idx(dataset,2);
+    attr = H5Aopen_idx(dataset, (unsigned)2);
     CHECK(attr, FAIL, "H5Aopen_idx");
 
     /* Verify Dataspace */
-    space=H5Aget_space(attr);
+    space = H5Aget_space(attr);
     CHECK(space, FAIL, "H5Aget_space");
-    rank=H5Sget_simple_extent_ndims(space);
+    rank = H5Sget_simple_extent_ndims(space);
     VERIFY(rank, ATTR3_RANK, "H5Sget_simple_extent_ndims");
-    ret=H5Sget_simple_extent_dims(space,dims, NULL);
+    ret = H5Sget_simple_extent_dims(space, dims, NULL);
     CHECK(ret, FAIL, "H5Sget_simple_extent_dims");
-    if(dims[0]!=ATTR3_DIM1)
-        TestErrPrintf("attribute dimensions different: dims[0]=%d, should be %d\n",(int)dims[0],ATTR3_DIM1);
-    if(dims[1]!=ATTR3_DIM2)
-        TestErrPrintf("attribute dimensions different: dims[1]=%d, should be %d\n",(int)dims[1],ATTR3_DIM2);
-    if(dims[2]!=ATTR3_DIM3)
-        TestErrPrintf("attribute dimensions different: dims[2]=%d, should be %d\n",(int)dims[2],ATTR3_DIM3);
+    if(dims[0] != ATTR3_DIM1)
+        TestErrPrintf("attribute dimensions different: dims[0]=%d, should be %d\n", (int)dims[0], ATTR3_DIM1);
+    if(dims[1] != ATTR3_DIM2)
+        TestErrPrintf("attribute dimensions different: dims[1]=%d, should be %d\n", (int)dims[1], ATTR3_DIM2);
+    if(dims[2] != ATTR3_DIM3)
+        TestErrPrintf("attribute dimensions different: dims[2]=%d, should be %d\n", (int)dims[2], ATTR3_DIM3);
     H5Sclose(space);
 
     /* Verify Datatype */
-    type=H5Aget_type(attr);
+    type = H5Aget_type(attr);
     CHECK(type, FAIL, "H5Aget_type");
-    t_class=H5Tget_class(type);
+    t_class = H5Tget_class(type);
     VERIFY(t_class, H5T_FLOAT, "H5Tget_class");
-    order=H5Tget_order(type);
+    order = H5Tget_order(type);
     VERIFY(order, H5Tget_order(H5T_NATIVE_DOUBLE), "H5Tget_order");
-    size=H5Tget_size(type);
+    size = H5Tget_size(type);
     VERIFY(size, H5Tget_size(H5T_NATIVE_DOUBLE), "H5Tget_size");
     H5Tclose(type);
 
     /* Read attribute information */
-    ret=H5Aread(attr,H5T_NATIVE_DOUBLE,read_data3);
+    ret = H5Aread(attr, H5T_NATIVE_DOUBLE, read_data3);
     CHECK(ret, FAIL, "H5Aread");
 
     /* Verify values read in */
-    for(i=0; i<ATTR3_DIM1; i++)
-        for(j=0; j<ATTR3_DIM2; j++)
-            for(k=0; k<ATTR3_DIM3; k++)
-                if(!DBL_ABS_EQUAL(attr_data3[i][j][k],read_data3[i][j][k]))
-                    TestErrPrintf("%d: attribute data different: attr_data3[%d][%d][%d]=%f, read_data3[%d][%d][%d]=%f\n",__LINE__,i,j,k,attr_data3[i][j][k],i,j,k,read_data3[i][j][k]);
+    for(i = 0; i < ATTR3_DIM1; i++)
+        for(j = 0; j < ATTR3_DIM2; j++)
+            for(k = 0; k < ATTR3_DIM3; k++)
+                if(!DBL_ABS_EQUAL(attr_data3[i][j][k], read_data3[i][j][k]))
+                    TestErrPrintf("%d: attribute data different: attr_data3[%d][%d][%d]=%f, read_data3[%d][%d][%d]=%f\n", __LINE__, i, j, k, attr_data3[i][j][k], i, j, k, read_data3[i][j][k]);
 
     /* Verify Name */
-    name_len=H5Aget_name(attr, (size_t)ATTR_NAME_LEN, attr_name);
+    name_len = H5Aget_name(attr, (size_t)ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR3_NAME), "H5Aget_name");
-    if(HDstrcmp(attr_name,ATTR3_NAME))
-        TestErrPrintf("attribute name different: attr_name=%s, should be %s\n",attr_name,ATTR3_NAME);
+    if(HDstrcmp(attr_name, ATTR3_NAME))
+        TestErrPrintf("attribute name different: attr_name=%s, should be %s\n", attr_name, ATTR3_NAME);
 
     /* Verify Name with too small of a buffer */
-    name_len=H5Aget_name(attr, HDstrlen(ATTR3_NAME), attr_name);
+    name_len = H5Aget_name(attr, HDstrlen(ATTR3_NAME), attr_name);
     VERIFY(name_len, HDstrlen(ATTR3_NAME), "H5Aget_name");
-    HDstrcpy(temp_name,ATTR3_NAME);     /* make a copy of the name */
-    temp_name[HDstrlen(ATTR3_NAME)-1]='\0';   /* truncate it to match the one retrieved */
-    if(HDstrcmp(attr_name,temp_name))
-        TestErrPrintf("attribute name different: attr_name=%s, should be %s\n",attr_name,temp_name);
+    HDstrcpy(temp_name, ATTR3_NAME);     /* make a copy of the name */
+    temp_name[HDstrlen(ATTR3_NAME) - 1] = '\0';   /* truncate it to match the one retrieved */
+    if(HDstrcmp(attr_name, temp_name))
+        TestErrPrintf("attribute name different: attr_name=%s, should be %s\n", attr_name, temp_name);
 
     /* Close attribute */
-    ret=H5Aclose(attr);
+    ret = H5Aclose(attr);
     CHECK(ret, FAIL, "H5Aclose");
 
     /* Close dataset */
@@ -1406,11 +1416,12 @@ attr_op1(hid_t UNUSED loc_id, const char *name, const H5A_info_t UNUSED *ainfo,
 static void
 test_attr_iterate(hid_t fapl)
 {
-    hid_t   file;		/* HDF5 File ID 		*/
+    hid_t   file;	/* HDF5 File ID 		*/
     hid_t   dataset;	/* Dataset ID			*/
     hid_t   sid;	/* Dataspace ID			*/
     int     count;      /* operator data for the iterator */
-    herr_t  ret;		/* Generic return value		*/
+    H5O_info_t oinfo;   /* Object info                  */
+    herr_t  ret;	/* Generic return value		*/
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Basic Attribute Functions\n"));
@@ -1432,8 +1443,9 @@ test_attr_iterate(hid_t fapl)
     CHECK(ret, FAIL, "H5Sclose");
 
     /* Verify the correct number of attributes */
-    ret = H5Aget_num_attrs(dataset);
-    VERIFY(ret, 0, "H5Aget_num_attrs");
+    ret = H5Oget_info(dataset, ".", &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.num_attrs, 0, "H5Oget_info");
 
     /* Iterate over attributes on dataset */
     count = 0;
@@ -1449,8 +1461,9 @@ test_attr_iterate(hid_t fapl)
     CHECK(dataset, FAIL, "H5Dopen");
 
     /* Verify the correct number of attributes */
-    ret = H5Aget_num_attrs(dataset);
-    VERIFY(ret, 3, "H5Aget_num_attrs");
+    ret = H5Oget_info(dataset, ".", &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.num_attrs, 3, "H5Oget_info");
 
     /* Iterate over attributes on dataset */
     count = 0;
@@ -1475,12 +1488,13 @@ test_attr_iterate(hid_t fapl)
 static void
 test_attr_delete(hid_t fapl)
 {
-    hid_t   fid1;		/* HDF5 File ID 		*/
+    hid_t   fid1;	/* HDF5 File ID 		*/
     hid_t   dataset;	/* Dataset ID			*/
-    hid_t   attr;	    /* Attribute ID			*/
+    hid_t   attr;       /* Attribute ID			*/
     char    attr_name[ATTR_NAME_LEN]; /* Buffer for attribute names */
-    size_t  name_len;   /* Length of attribute name */
-    herr_t  ret;		/* Generic return value		*/
+    size_t  name_len;   /* Length of attribute name     */
+    H5O_info_t oinfo;   /* Object info                  */
+    herr_t  ret;	/* Generic return value		*/
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Basic Attribute Functions\n"));
@@ -1494,24 +1508,27 @@ test_attr_delete(hid_t fapl)
     CHECK(dataset, FAIL, "H5Dopen");
 
     /* Verify the correct number of attributes */
-    ret = H5Aget_num_attrs(dataset);
-    VERIFY(ret, 3, "H5Aget_num_attrs");
+    ret = H5Oget_info(dataset, ".", &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.num_attrs, 3, "H5Oget_info");
 
     /* Try to delete bogus attribute */
     ret = H5Adelete2(dataset, ".", "Bogus", H5P_DEFAULT);
     VERIFY(ret, FAIL, "H5Adelete2");
 
     /* Verify the correct number of attributes */
-    ret = H5Aget_num_attrs(dataset);
-    VERIFY(ret, 3, "H5Aget_num_attrs");
+    ret = H5Oget_info(dataset, ".", &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.num_attrs, 3, "H5Oget_info");
 
     /* Delete middle (2nd) attribute */
     ret = H5Adelete2(dataset, ".", ATTR2_NAME, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Adelete2");
 
     /* Verify the correct number of attributes */
-    ret = H5Aget_num_attrs(dataset);
-    VERIFY(ret, 2, "H5Aget_num_attrs");
+    ret = H5Oget_info(dataset, ".", &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.num_attrs, 2, "H5Oget_info");
 
     /* Open 1st attribute for the dataset */
     attr = H5Aopen_idx(dataset, 0);
@@ -1546,8 +1563,9 @@ test_attr_delete(hid_t fapl)
     CHECK(ret, FAIL, "H5Adelete2");
 
     /* Verify the correct number of attributes */
-    ret = H5Aget_num_attrs(dataset);
-    VERIFY(ret, 1, "H5Aget_num_attrs");
+    ret = H5Oget_info(dataset, ".", &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.num_attrs, 1, "H5Oget_info");
 
     /* Open last (formally 3rd) attribute for the dataset */
     attr = H5Aopen_idx(dataset, 0);
@@ -1568,8 +1586,9 @@ test_attr_delete(hid_t fapl)
     CHECK(ret, FAIL, "H5Adelete2");
 
     /* Verify the correct number of attributes */
-    ret = H5Aget_num_attrs(dataset);
-    VERIFY(ret, 0, "H5Aget_num_attrs");
+    ret = H5Oget_info(dataset, ".", &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info");
+    VERIFY(oinfo.num_attrs, 0, "H5Oget_info");
 
     /* Close dataset */
     ret = H5Dclose(dataset);
@@ -2119,7 +2138,7 @@ test_attr_dense_delete(hid_t fcpl, hid_t fapl)
     unsigned    u;              /* Local index variable */
     h5_stat_size_t empty_filesize;       /* Size of empty file */
     h5_stat_size_t filesize;             /* Size of file after modifications */
-    int         attr_count;     /* # of attributes */
+    H5O_info_t  oinfo;          /* Object info                  */
     herr_t	ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -2186,9 +2205,9 @@ test_attr_dense_delete(hid_t fcpl, hid_t fapl)
         CHECK(ret, FAIL, "H5Aclose");
 
         /* Check # of attributes */
-        attr_count = H5Aget_num_attrs(dataset);
-        CHECK(attr_count, FAIL, "H5Aget_num_attrs");
-        VERIFY(attr_count, (int)(u + 1), "H5Aget_num_attrs");
+        ret = H5Oget_info(dataset, ".", &oinfo, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Oget_info");
+        VERIFY(oinfo.num_attrs, (u + 1), "H5Oget_info");
     } /* end for */
 
     /* Check on dataset's attribute storage status */
@@ -2295,10 +2314,10 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
     unsigned    max_compact;    /* Maximum # of attributes to store compactly */
     unsigned    min_dense;      /* Minimum # of attributes to store "densely" */
     htri_t	is_dense;	/* Are attributes stored densely? */
-    int         attr_count;     /* # of attributes */
-    unsigned    u;              /* Local index variable */
     h5_stat_size_t empty_filesize;       /* Size of empty file */
     h5_stat_size_t filesize;             /* Size of file after modifications */
+    H5O_info_t  oinfo;          /* Object info */
+    unsigned    u;              /* Local index variable */
     herr_t	ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -2368,9 +2387,9 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
         CHECK(ret, FAIL, "H5Arename2");
 
         /* Check # of attributes */
-        attr_count = H5Aget_num_attrs(dataset);
-        CHECK(attr_count, FAIL, "H5Aget_num_attrs");
-        VERIFY(attr_count, (int)(u + 1), "H5Aget_num_attrs");
+        ret = H5Oget_info(dataset, ".", &oinfo, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Oget_info");
+        VERIFY(oinfo.num_attrs, (u + 1), "H5Oget_info");
     } /* end for */
 
     /* Check on dataset's attribute storage status */
@@ -2453,11 +2472,11 @@ test_attr_dense_unlink(hid_t fcpl, hid_t fapl)
     unsigned    max_compact;    /* Maximum # of attributes to store compactly */
     unsigned    min_dense;      /* Minimum # of attributes to store "densely" */
     htri_t	is_dense;	/* Are attributes stored densely? */
-    int         attr_count;     /* # of attributes */
     size_t      mesg_count;     /* # of shared messages */
-    unsigned    u;              /* Local index variable */
     h5_stat_size_t empty_filesize;       /* Size of empty file */
     h5_stat_size_t filesize;             /* Size of file after modifications */
+    H5O_info_t  oinfo;          /* Object info */
+    unsigned    u;              /* Local index variable */
     herr_t	ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -2520,9 +2539,9 @@ test_attr_dense_unlink(hid_t fcpl, hid_t fapl)
         CHECK(ret, FAIL, "H5Aclose");
 
         /* Check # of attributes */
-        attr_count = H5Aget_num_attrs(dataset);
-        CHECK(attr_count, FAIL, "H5Aget_num_attrs");
-        VERIFY(attr_count, (int)(u + 1), "H5Aget_num_attrs");
+        ret = H5Oget_info(dataset, ".", &oinfo, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Oget_info");
+        VERIFY(oinfo.num_attrs, (u + 1), "H5Oget_info");
     } /* end for */
 
     /* Check on dataset's attribute storage status */
@@ -3283,6 +3302,10 @@ test_attr_deprec(hid_t fcpl, hid_t fapl)
     dataset = H5Dopen(fid, DSET1_NAME);
     CHECK(dataset, FAIL, "H5Dopen");
 
+
+    /* Get number of attributes */
+    ret = H5Aget_num_attrs(dataset);
+    VERIFY(ret, 1, "H5Aget_num_attrs");
 
     /* Rename attribute */
     ret = H5Arename1(dataset, "attr", "attr2");

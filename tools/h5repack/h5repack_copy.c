@@ -901,10 +901,11 @@ int copy_attr(hid_t loc_in,
  int        rank;         /* rank of dataset */
  hsize_t    dims[H5S_MAX_RANK];/* dimensions of dataset */
  char       name[255];
- int        n, j;
+ H5O_info_t oinfo;              /* Object info */
+ int        j;
  unsigned   u;
 
- if ((n = H5Aget_num_attrs(loc_in))<0)
+ if(H5Oget_info(loc_in, ".", &oinfo, H5P_DEFAULT) < 0)
   goto error;
 
 /*-------------------------------------------------------------------------
@@ -912,7 +913,7 @@ int copy_attr(hid_t loc_in,
  *-------------------------------------------------------------------------
  */
 
- for ( u = 0; u < (unsigned)n; u++)
+ for ( u = 0; u < (unsigned)oinfo.num_attrs; u++)
  {
 
    buf=NULL;

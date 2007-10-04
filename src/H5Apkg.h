@@ -267,8 +267,10 @@ H5_DLL herr_t H5O_attr_remove(const H5O_loc_t *loc, const char *name,
     hid_t dxpl_id);
 H5_DLL herr_t H5O_attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, hid_t dxpl_id);
-H5_DLL int H5O_attr_count(const H5O_loc_t *loc, hid_t dxpl_id);
 H5_DLL htri_t H5O_attr_exists(const H5O_loc_t *loc, const char *name, hid_t dxpl_id);
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+H5_DLL int H5O_attr_count(const H5O_loc_t *loc, hid_t dxpl_id);
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 /* Testing functions */
 #ifdef H5A_TESTING

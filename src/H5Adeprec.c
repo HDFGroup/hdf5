@@ -274,6 +274,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Aopen_idx() */
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*--------------------------------------------------------------------------
  NAME
@@ -334,7 +335,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Aget_num_attrs() */
 
-#ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*-------------------------------------------------------------------------
  * Function:	H5Arename1

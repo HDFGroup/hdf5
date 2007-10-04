@@ -235,14 +235,12 @@ int H5Object::iterateAttrs( attr_operator_t user_op, unsigned *_idx, void *op_da
 //--------------------------------------------------------------------------
 int H5Object::getNumAttrs() const
 {
-   int num_attrs = H5Aget_num_attrs( id );
-   if( num_attrs < 0 )
-   {
-      throw AttributeIException(inMemFunc("getNumAttrs"),
-		"H5Aget_num_attrs failed - returned negative number of attributes");
-   }
+   H5O_info_t oinfo;    /* Object info */
+
+   if(H5Oget_info(id, ".", &oinfo, H5P_DEFAULT) < 0)
+      throw AttributeIException(inMemFunc("getNumAttrs"), "H5Oget_info failed");
    else
-      return( num_attrs );
+      return( (int)oinfo.num_attrs );
 }
 
 //--------------------------------------------------------------------------

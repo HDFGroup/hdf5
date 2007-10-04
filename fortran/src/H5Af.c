@@ -924,7 +924,7 @@ done:
 
 /*----------------------------------------------------------------------------
  * Name:        h5aget_num_attrs_c
- * Purpose:     Call H5Aget_num_attrs to determine number of
+ * Purpose:     Call H5Oget_info to determine number of
  *              attributes of an object
  * Inputs:      obj_id - object identifier
  *              attr_num - number of attributes
@@ -936,13 +936,17 @@ done:
 int_f
 nh5aget_num_attrs_c (hid_t_f *obj_id, int_f *attr_num)
 {
-    int_f ret_value=0;          /* Return value */
+    H5O_info_t oinfo;           /* Object info */
+    int_f ret_value = 0;        /* Return value */
 
-     /*
-      * Call H5Aget_num_attrs function.
-      */
-     if ((*attr_num = (int_f)H5Aget_num_attrs((hid_t)*obj_id)) < 0)
-         HGOTO_DONE(FAIL);
+    /*
+     * Call H5Oget_info function.
+     */
+    if(H5Oget_info((hid_t)*obj_id, ".", &oinfo, H5P_DEFAULT) < 0)
+        HGOTO_DONE(FAIL);
+
+    /* Set number of attributes */
+    *attr_num = (int_f)oinfo.num_attrs;
 
 done:
      return ret_value;

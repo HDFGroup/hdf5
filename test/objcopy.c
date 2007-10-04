@@ -760,11 +760,8 @@ static int
 compare_std_attributes(hid_t oid, hid_t oid2, hid_t pid)
 {
     hid_t aid = -1, aid2 = -1;                  /* Attribute IDs */
-    int num_attrs;                              /* Number of attributes */
-    int num_attrs2;                             /* Number of attributes */
-    char attr_name[ATTR_NAME_LEN];              /* Attribute name */
+    H5O_info_t oinfo1, oinfo2;                  /* Object info */
     unsigned cpy_flags;                         /* Object copy flags */
-    unsigned i;                                 /* Local index variable */
 
     /* Retrieve the object copy flags from the property list, if it's non-DEFAULT */
     if(pid != H5P_DEFAULT) {
@@ -774,23 +771,26 @@ compare_std_attributes(hid_t oid, hid_t oid2, hid_t pid)
         cpy_flags = 0;
 
     /* Check the number of attributes on source dataset */
-    if((num_attrs = H5Aget_num_attrs(oid)) < 0) TEST_ERROR
+    if(H5Oget_info(oid, ".", &oinfo1, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Check the number of attributes on destination dataset */
-    if((num_attrs2 = H5Aget_num_attrs(oid2)) < 0) TEST_ERROR
+    if(H5Oget_info(oid2, ".", &oinfo2, H5P_DEFAULT) < 0) TEST_ERROR
 
     if(cpy_flags & H5O_COPY_WITHOUT_ATTR_FLAG) {
         /* Check that the destination has no attributes */
-        if(num_attrs2 != 0) TEST_ERROR
+        if(oinfo2.num_attrs != 0) TEST_ERROR
     } /* end if */
     else {
+        char attr_name[ATTR_NAME_LEN];  /* Attribute name */
+        unsigned i;             /* Local index variable */
+
         /* Compare the number of attributes */
-        if(num_attrs != num_attrs2) TEST_ERROR
+        if(oinfo1.num_attrs != oinfo1.num_attrs) TEST_ERROR
 
         /* Check the attributes are equal */
-        for(i = 0; i < (unsigned)num_attrs; i++) {
-            if ( (aid = H5Aopen_idx(oid, i) ) < 0 ) TEST_ERROR
-            if ( H5Aget_name(aid, ATTR_NAME_LEN, attr_name ) < 0) TEST_ERROR
+        for(i = 0; i < (unsigned)oinfo1.num_attrs; i++) {
+            if((aid = H5Aopen_idx(oid, i)) < 0) TEST_ERROR
+            if(H5Aget_name(aid, ATTR_NAME_LEN, attr_name) < 0) TEST_ERROR
 
             if((aid2 = H5Aopen_name(oid2, attr_name)) < 0) TEST_ERROR
 

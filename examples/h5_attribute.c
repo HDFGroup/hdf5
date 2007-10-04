@@ -62,7 +62,8 @@ main (void)
    float matrix[ADIM1][ADIM2]; /* Attribute data */
 
    herr_t  ret;                /* Return value */
-   unsigned i,j;                /* Counters */
+   H5O_info_t oinfo;           /* Object info */
+   unsigned i, j;              /* Counters */
    char    string_out[80];     /* Buffer to read string attribute back */
    int     point_out;          /* Buffer to read scalar attribute back */
    int     num_attr;           /* Number of attributes */
@@ -191,8 +192,8 @@ main (void)
    /*
     * Find string attribute by iterating through all attributes
     */
-   num_attr = H5Aget_num_attrs(dataset);
-   for(i=0; i < num_attr; i++) {
+   ret = H5Oget_info(dataset, ".", &oinfo, H5P_DEFAULT);
+   for(i = 0; i < (unsigned)oinfo.num_attrs; i++) {
       attr  = H5Aopen_idx(dataset, i);
       atype = H5Aget_type(attr);
       type_class = H5Tget_class(atype);

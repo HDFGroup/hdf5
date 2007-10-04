@@ -1550,44 +1550,6 @@ H5O_attr_count_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_attr_count
- *
- * Purpose:	Determine the # of attributes on an object
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Monday, December 11, 2006
- *
- *-------------------------------------------------------------------------
- */
-int
-H5O_attr_count(const H5O_loc_t *loc, hid_t dxpl_id)
-{
-    H5O_t *oh = NULL;                   /* Pointer to actual object header */
-    int ret_value;                      /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_count)
-
-    /* Check arguments */
-    HDassert(loc);
-
-    /* Protect the object header to iterate over */
-    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
-
-    /* Retrieve # of attributes on object */
-    ret_value = (int)H5O_attr_count_real(loc->file, dxpl_id, oh);
-
-done:
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_attr_count */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5O_attr_exists_cb
  *
  * Purpose:	Object header iterator callback routine to check for an
@@ -1764,4 +1726,44 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5O_attr_bh_info() */
+
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_attr_count
+ *
+ * Purpose:	Determine the # of attributes on an object
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Monday, December 11, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5O_attr_count(const H5O_loc_t *loc, hid_t dxpl_id)
+{
+    H5O_t *oh = NULL;                   /* Pointer to actual object header */
+    int ret_value;                      /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_count)
+
+    /* Check arguments */
+    HDassert(loc);
+
+    /* Protect the object header to iterate over */
+    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
+
+    /* Retrieve # of attributes on object */
+    ret_value = (int)H5O_attr_count_real(loc->file, dxpl_id, oh);
+
+done:
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_attr_count */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
