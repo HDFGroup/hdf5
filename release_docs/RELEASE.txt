@@ -500,6 +500,9 @@ New Features
 
     Tools:
     ------
+        - h5dump lists groups and attributes in requested orders (by name and 
+           creation order, both ascending and descending). PVN - 2007/10/5
+        - h5import imports string (text) data. PVN - 2007/10/5
         - h52gif and gif2h5: Both these tools were revised to include the High
           Level Image API support, and tests were added to /hl/tools/gif2h5.
            PVN - 2007/04/13
