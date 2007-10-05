@@ -5912,8 +5912,10 @@ gent_attr_creation_order(void)
     hid_t    did;      /* dataset id */
     hid_t    sid;      /* space id */
     hid_t    aid;      /* attribute id */
+    hid_t    tid;      /* datatype id */
     hid_t    gcpl_id;  /* group creation property list ID */
     hid_t    dcpl_id;  /* dataset creation property list ID */
+    hid_t    tcpl_id;  /* datatype creation property list ID */
     int      i;
     const char *attr_name[3] = {"c", "b", "a" };
     
@@ -5928,29 +5930,38 @@ gent_attr_creation_order(void)
     if((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0) 
         goto out;
 
-    /* enable creation order tracking on attributes */
+    /* create dataset creation property list */
+    if((tcpl_id = H5Pcreate(H5P_DATATYPE_CREATE)) < 0) 
+        goto out;
+
+    /* enable attribute creation order tracking on dataset property list */
     if(H5Pset_attr_creation_order(dcpl_id, H5P_CRT_ORDER_TRACKED) < 0) 
         goto out;
 
-    /* enable creation order tracking on groups */
-    if(H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) 
+    /* enable attribute creation order tracking on group property list */
+    if(H5Pset_attr_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) 
+        goto out;
+
+    /* enable attribute creation order tracking on datatype property list */
+    if(H5Pset_attr_creation_order(tcpl_id, H5P_CRT_ORDER_TRACKED) < 0) 
+        goto out;
+
+    /* create a dataspace */
+    if((sid = H5Screate(H5S_SCALAR)) < 0) 
         goto out;
 
 /*-------------------------------------------------------------------------
  * create a dataset and atributes in it
  *-------------------------------------------------------------------------
  */
-
-    /* create dataspace for dataset */
-    if((sid = H5Screate(H5S_SCALAR)) < 0) 
-        goto out;
-
+  
     /* create a dataset */
     if((did = H5Dcreate(fid, "dset", H5T_NATIVE_UCHAR, sid, dcpl_id)) < 0) 
         goto out;
 
     /* add attributes */
-    for(i = 0; i < 3; i++) {
+    for(i = 0; i < 3; i++) 
+    {
         if((aid = H5Acreate2(did, ".", attr_name[i], H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
             goto out;
         
@@ -5958,41 +5969,75 @@ gent_attr_creation_order(void)
         if(H5Aclose(aid) < 0) 
             goto out;
     } /* end for */
-
+    
     if (H5Dclose(did) < 0) 
         goto out;
     
+
 
 /*-------------------------------------------------------------------------
  * create a group and atributes in it
  *-------------------------------------------------------------------------
  */
 
-    if((gid = H5Gcreate2(fid, "g", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) 
+    if ((gid = H5Gcreate2(fid, "g", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) 
         goto out;
     
     /* add attributes */
-    for(i = 0; i < 3; i++) {
-        if((aid = H5Acreate2(gid, ".", attr_name[i], H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+    for(i = 0; i < 3; i++) 
+    {
+        if ((aid = H5Acreate2(gid, ".", attr_name[i], H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
             goto out;
         
         /* close attribute */
-        if(H5Aclose(aid) < 0) 
+        if (H5Aclose(aid) < 0) 
             goto out;
+        
     } /* end for */
     
     if (H5Gclose(gid) < 0) 
         goto out;
-  
+
+/*-------------------------------------------------------------------------
+ * create a named datatype and atributes in it
+ *-------------------------------------------------------------------------
+ */
+
+    if ((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) 
+        goto out;
+    
+    if ((H5Tcommit2(fid, "t", tid, H5P_DEFAULT, tcpl_id, H5P_DEFAULT)) < 0)
+        goto out;
+    
+    /* add attributes */
+    for(i = 0; i < 3; i++) 
+    {
+        if ((aid = H5Acreate2(tid, ".", attr_name[i], H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+            goto out;
+        
+        /* close attribute */
+        if (H5Aclose(aid) < 0) 
+            goto out;
+        
+    } /* end for */
+    
+    if (H5Tclose(tid) < 0) 
+        goto out;
+
+
     /* close */
     if(H5Sclose(sid) < 0) 
         goto out;
+
     if(H5Pclose(dcpl_id) < 0) 
         goto out;
     if(H5Pclose(gcpl_id) < 0) 
         goto out;
-    if(H5Fclose(fid) < 0) 
+    if (H5Pclose(tcpl_id) < 0) 
         goto out;
+    if (H5Fclose(fid) < 0) 
+        goto out;
+
     
     return;
     
