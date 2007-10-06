@@ -6023,9 +6023,33 @@ gent_attr_creation_order(void)
     
     if (H5Tclose(tid) < 0) 
         goto out;
+/*-------------------------------------------------------------------------
+ * add some attributes to the root group
+ *-------------------------------------------------------------------------
+ */
+    if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) 
+        goto out;
+    
+    /* add attributes */
+    for(i = 0; i < 3; i++) 
+    {
+        if ((aid = H5Acreate2(gid, ".", attr_name[i], H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+            goto out;
+        
+        /* close attribute */
+        if (H5Aclose(aid) < 0) 
+            goto out;
+        
+    } /* end for */
+    
+    if (H5Gclose(gid) < 0) 
+        goto out;
 
 
-    /* close */
+/*-------------------------------------------------------------------------
+ * close
+ *-------------------------------------------------------------------------
+ */
     if(H5Sclose(sid) < 0) 
         goto out;
 
@@ -6038,6 +6062,7 @@ gent_attr_creation_order(void)
     if (H5Fclose(fid) < 0) 
         goto out;
 
+
     
     return;
     
@@ -6049,6 +6074,7 @@ out:
         H5Sclose(sid);
         H5Pclose(gcpl_id);
         H5Pclose(dcpl_id);
+        H5Pclose(tcpl_id);
         H5Fclose(fid);
         
     } H5E_END_TRY;

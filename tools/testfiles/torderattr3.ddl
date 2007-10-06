@@ -3,6 +3,18 @@ Expected output for 'h5dump -H --sort_by=creation_order --sort_order=ascending t
 #############################
 HDF5 "torderattr.h5" {
 GROUP "/" {
+   ATTRIBUTE "a" {
+      DATATYPE  H5T_STD_U8LE
+      DATASPACE  SCALAR
+   }
+   ATTRIBUTE "b" {
+      DATATYPE  H5T_STD_U8LE
+      DATASPACE  SCALAR
+   }
+   ATTRIBUTE "c" {
+      DATATYPE  H5T_STD_U8LE
+      DATASPACE  SCALAR
+   }
    DATASET "dset" {
       DATATYPE  H5T_STD_U8LE
       DATASPACE  SCALAR
@@ -20,7 +32,7 @@ GROUP "/" {
       }
    }
    GROUP "g" {
-      ATTRIBUTE "a" {
+      ATTRIBUTE "c" {
          DATATYPE  H5T_STD_U8LE
          DATASPACE  SCALAR
       }
@@ -28,7 +40,7 @@ GROUP "/" {
          DATATYPE  H5T_STD_U8LE
          DATASPACE  SCALAR
       }
-      ATTRIBUTE "c" {
+      ATTRIBUTE "a" {
          DATATYPE  H5T_STD_U8LE
          DATASPACE  SCALAR
       }

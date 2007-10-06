@@ -497,7 +497,7 @@ static struct long_options l_opts[] = {
 /* The dump functions of the dump_function_table */
 
 /* standard format:  no change */
-static void      dump_group(hid_t, const char *, H5_index_t idx_type, H5_iter_order_t iter_order);
+static void      dump_group(hid_t, const char *);
 static void      dump_named_datatype(hid_t, const char *);
 static void      dump_dataset(hid_t, const char *, struct subset_t *);
 static void      dump_dataspace(hid_t space);
@@ -513,7 +513,7 @@ static herr_t    dump_attr_cb(hid_t loc_id, const char *attr_name, const H5A_inf
 
 /* XML format:   same interface, alternative output */
 
-static void      xml_dump_group(hid_t, const char *, H5_index_t idx_type, H5_iter_order_t iter_order);
+static void      xml_dump_group(hid_t, const char *);
 static void      xml_dump_named_datatype(hid_t, const char *);
 static void      xml_dump_dataset(hid_t, const char *, struct subset_t *);
 static void      xml_dump_dataspace(hid_t space);
@@ -528,7 +528,7 @@ static void      xml_dump_data(hid_t, int, struct subset_t *, int);
  **/
 /* the table of dump functions */
 typedef struct dump_functions_t {
-    void     (*dump_group_function) (hid_t, const char *, H5_index_t idx_type, H5_iter_order_t iter_order);
+    void     (*dump_group_function) (hid_t, const char *);
     void     (*dump_named_datatype_function) (hid_t, const char *);
     void     (*dump_dataset_function) (hid_t, const char *, struct subset_t *);
     void     (*dump_dataspace_function) (hid_t);
@@ -599,7 +599,7 @@ leave(int ret)
  * Programmer:  Ruey-Hsia Li
  *
  * Modifications:
- *
+ * Pedro Vicente, October 5, 2007. Add -q and -z flags
  *-------------------------------------------------------------------------
  */
 static void
@@ -1373,9 +1373,6 @@ dump_selected_attr(hid_t loc_id, const char *name)
  *  RMcG, November 2000
  *   Added XML support. Also, optionally checks the op_data argument
  *
- * Pedro Vicente, September 26, 2007
- *  handle creation order for groups
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1384,9 +1381,7 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED 
     hid_t       obj;
     char       *obj_path = NULL;    /* Full path of object */
     herr_t      ret = SUCCEED;
-    hid_t       gcpl_id;            /* group creation property list ID */
-    unsigned    crt_order_flags;    /* status of creation order info */
-
+   
     /* Build the object's path name */
     obj_path = HDmalloc(HDstrlen(prefix) + HDstrlen(name) + 2);
     HDassert(obj_path);
@@ -1405,7 +1400,8 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED 
             goto done;
         } /* end if */
 
-        switch(oinfo.type) {
+        switch(oinfo.type) 
+        {
         case H5O_TYPE_GROUP:
             if((obj = H5Gopen2(group, name, H5P_DEFAULT)) < 0) 
             {
@@ -1415,7 +1411,7 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED 
             } 
             else 
             {
-                char *old_prefix;                /* Pointer to previous prefix */
+                char *old_prefix; /* Pointer to previous prefix */
                 
                 /* Keep copy of prefix before iterating into group */
                 old_prefix = HDstrdup(prefix);
@@ -1424,43 +1420,9 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED 
                 /* Append group name to prefix */
                 add_prefix(&prefix, &prefix_len, name);
                 
-                
-                if((gcpl_id = H5Gget_create_plist(obj)) < 0)
-                {
-                    error_msg(progname, "error in getting group creation property list ID\n");
-                    d_status = EXIT_FAILURE;
-                }
-                
-                /* query the group creation properties */
-                if(H5Pget_link_creation_order(gcpl_id, &crt_order_flags) < 0) 
-                {
-                    error_msg(progname, "error in getting group creation properties\n");
-                    d_status = EXIT_FAILURE;
-                }
-                
                 /* Iterate into group */
-                     
-                /* if there is a request to do H5_INDEX_CRT_ORDER and this flag is set
-                in the group, then, sort by creation order, otherwise by name */
-                
-                if( (sort_by == H5_INDEX_CRT_ORDER) &&
-                    (crt_order_flags == H5P_CRT_ORDER_TRACKED  ||
-                     crt_order_flags == (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED)))
-                {
-                    
-                    dump_function_table->dump_group_function(obj, name, sort_by, sort_order);
-                    
-                }
-                else
-                {
-                    dump_function_table->dump_group_function(obj, name, H5_INDEX_NAME, sort_order);
-                    
-                }
-           
-                if(H5Pclose(gcpl_id) < 0)
-                    d_status = EXIT_FAILURE;
-                
-                
+                 dump_function_table->dump_group_function(obj, name);
+              
                 /* Restore old prefix name */
                 HDstrcpy(prefix, old_prefix);
                 HDfree(old_prefix);
@@ -1846,24 +1808,52 @@ dump_named_datatype(hid_t type, const char *name)
  * Call to dump_all_cb -- add parameter to select everything.
  *
  * Pedro Vicente, October 1, 2007
- *  extra parameters H5_index_t and H5_iter_order_t to handle H5Literate 
- *  iteration order
- *  added parameters to H5Aiterate2() to allow for other iteration orders 
+ *  handle several iteration orders for attributes and groups
  *
  *-------------------------------------------------------------------------
  */
 static void
-dump_group(hid_t gid, const char *name, H5_index_t idx_type, H5_iter_order_t iter_order)
+dump_group(hid_t gid, const char *name)
 {
     H5O_info_t  oinfo;
     hid_t       dset, type;
     char        type_name[1024], *tmp;
+    unsigned    crt_order_flags;
+    unsigned    attr_crt_order_flags;
+    hid_t       gcpl_id;
+
+
+    if ((gcpl_id = H5Gget_create_plist(gid)) < 0)
+    {
+        error_msg(progname, "error in getting group creation property list ID\n");
+        d_status = EXIT_FAILURE;
+    }
+    
+    /* query the group creation properties for attributes */
+    if (H5Pget_attr_creation_order(gcpl_id, &attr_crt_order_flags) < 0) 
+    {
+        error_msg(progname, "error in getting group creation properties\n");
+        d_status = EXIT_FAILURE;
+    }
+
+    /* query the group creation properties */
+    if(H5Pget_link_creation_order(gcpl_id, &crt_order_flags) < 0) 
+    {
+        error_msg(progname, "error in getting group creation properties\n");
+        d_status = EXIT_FAILURE;
+    }
+    
+    if(H5Pclose(gcpl_id) < 0)
+    {
+        error_msg(progname, "error in closing group creation property list ID\n");
+        d_status = EXIT_FAILURE;
+    }
+
 
     tmp = HDmalloc(HDstrlen(prefix) + HDstrlen(name) + 2);
     HDstrcpy(tmp, prefix);
     indentation(indent);
-    begin_obj(dump_header_format->groupbegin, name,
-          dump_header_format->groupblockbegin);
+    begin_obj(dump_header_format->groupbegin, name, dump_header_format->groupblockbegin);
     indent += COL;
 
     if (display_oid)
@@ -1911,14 +1901,47 @@ dump_group(hid_t gid, const char *name, H5_index_t idx_type, H5_iter_order_t ite
         else 
         {
             found_obj->displayed = TRUE;
-            H5Aiterate2(gid, ".", idx_type, iter_order, NULL, dump_attr_cb, NULL, H5P_DEFAULT);
-            H5Literate(gid, ".", idx_type, iter_order, NULL, dump_all_cb, NULL, H5P_DEFAULT);
+            /* attribute iteration: if there is a request to do H5_INDEX_CRT_ORDER and tracking order is set
+               in the group for attributes, then, sort by creation order, otherwise by name */
+            
+            if( (sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED))
+                H5Aiterate2(gid, ".", sort_by, sort_order, NULL, dump_attr_cb, NULL, H5P_DEFAULT);
+            else
+                H5Aiterate2(gid, ".", H5_INDEX_NAME, sort_order, NULL, dump_attr_cb, NULL, H5P_DEFAULT);
+            
+            /* if there is a request to do H5_INDEX_CRT_ORDER and tracking order is set
+               in the group, then, sort by creation order, otherwise by name */
+            
+            if( (sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED))
+                H5Literate(gid, ".", sort_by, sort_order, NULL, dump_all_cb, NULL, H5P_DEFAULT);
+            else
+                H5Literate(gid, ".", H5_INDEX_NAME, sort_order, NULL, dump_all_cb, NULL, H5P_DEFAULT);
+            
+
         }
     } 
+
+
     else 
     {
-        H5Aiterate2(gid, ".", idx_type, iter_order, NULL, dump_attr_cb, NULL, H5P_DEFAULT);
-        H5Literate(gid, ".", idx_type, iter_order, NULL, dump_all_cb, NULL, H5P_DEFAULT);
+
+        /* attribute iteration: if there is a request to do H5_INDEX_CRT_ORDER and tracking order is set
+           in the group for attributes, then, sort by creation order, otherwise by name */
+            
+        if( (sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED))
+            H5Aiterate2(gid, ".", sort_by, sort_order, NULL, dump_attr_cb, NULL, H5P_DEFAULT);
+        else
+            H5Aiterate2(gid, ".", H5_INDEX_NAME, sort_order, NULL, dump_attr_cb, NULL, H5P_DEFAULT);
+
+         /* if there is a request to do H5_INDEX_CRT_ORDER and tracking order is set
+            in the group, then, sort by creation order, otherwise by name */
+
+         if( (sort_by == H5_INDEX_CRT_ORDER) && (crt_order_flags & H5P_CRT_ORDER_TRACKED))
+            H5Literate(gid, ".", sort_by, sort_order, NULL, dump_all_cb, NULL, H5P_DEFAULT);
+        else
+            H5Literate(gid, ".", H5_INDEX_NAME, sort_order, NULL, dump_all_cb, NULL, H5P_DEFAULT);
+
+        
     }
     
     indent -= COL;
@@ -3241,8 +3264,7 @@ static void
 handle_groups(hid_t fid, char *group, void UNUSED * data)
 {
     hid_t      gid;
-    hid_t      gcpl_id; 	       /* group creation property list ID */
-    unsigned   crt_order_flags;    /* status of creation order info */
+   
     
     if((gid = H5Gopen2(fid, group, H5P_DEFAULT)) < 0) 
     {
@@ -3263,41 +3285,9 @@ handle_groups(hid_t fid, char *group, void UNUSED * data)
         } /* end if */
         
         HDstrcpy(prefix, group);
-        
-        
-        if((gcpl_id = H5Gget_create_plist(gid)) < 0)
-        {
-            error_msg(progname, "error in getting group creation property list ID\n");
-            d_status = EXIT_FAILURE;
-        }
-        
-        /* query the group creation properties */
-        if(H5Pget_link_creation_order(gcpl_id, &crt_order_flags) < 0) 
-        {
-            error_msg(progname, "error in getting group creation properties\n");
-            d_status = EXIT_FAILURE;
-        }
-
-        /* if there is a request to do H5_INDEX_CRT_ORDER and this flag is set
-        in the group, then, sort by creation order, otherwise by name */
-        
-        if( (sort_by == H5_INDEX_CRT_ORDER) &&
-            (crt_order_flags == H5P_CRT_ORDER_TRACKED  ||
-             crt_order_flags == (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED)))
-        {
-            
-            dump_group(gid, group, sort_by, sort_order );
-            
-        }
-        else
-        {
-           dump_group(gid, group, H5_INDEX_NAME, sort_order ); 
-        }
-
-        if(H5Pclose(gcpl_id) < 0)
-            d_status = EXIT_FAILURE;
-             
-        
+          
+        dump_group(gid, group);
+       
         if(H5Gclose(gid) < 0)
             d_status = EXIT_FAILURE;
     } /* end else */
@@ -3858,8 +3848,6 @@ int
 main(int argc, const char *argv[])
 {
     hid_t               fid, gid;
-    hid_t               gcpl_id; 	       /* group creation property list ID */
-    unsigned            crt_order_flags;   /* status of creation order info */
     char               *fname = NULL;
     void               *edata;
     H5E_auto2_t         func;
@@ -4023,38 +4011,9 @@ main(int argc, const char *argv[])
         } 
         else 
         {
-
-            if ((gcpl_id = H5Gget_create_plist(gid)) < 0)
-            {
-                error_msg(progname, "error in getting group creation property list ID\n");
-                d_status = EXIT_FAILURE;
-            }
-            
-            /* query the group creation properties */
-            if (H5Pget_link_creation_order(gcpl_id, &crt_order_flags) < 0) 
-            {
-                error_msg(progname, "error in getting group creation properties\n");
-                d_status = EXIT_FAILURE;
-            }
-                
-           
-            /* if there is a request to do H5_INDEX_CRT_ORDER and this flag is set
-            in the group, then, sort by creation order, otherwise by name */
-            
-            if( (sort_by == H5_INDEX_CRT_ORDER) &&
-                (crt_order_flags == H5P_CRT_ORDER_TRACKED  ||
-                 crt_order_flags == (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED)))
-            {
-                
-                dump_function_table->dump_group_function(gid, "/", sort_by, sort_order );
-                
-            }
-            else
-            {
-                dump_function_table->dump_group_function(gid, "/", H5_INDEX_NAME, sort_order );
-            }
-
-           
+     
+            dump_function_table->dump_group_function(gid, "/" );
+     
         }
 
         if(H5Gclose(gid) < 0) 
@@ -4063,12 +4022,7 @@ main(int argc, const char *argv[])
             d_status = EXIT_FAILURE;
         }
 
-        if(H5Pclose(gcpl_id) < 0)
-        {
-            error_msg(progname, "group creation property list ID\n");
-            d_status = EXIT_FAILURE;
-        }
-
+        
     } 
     else 
     {
@@ -5305,7 +5259,7 @@ xml_dump_named_datatype(hid_t type, const char *name)
  *-------------------------------------------------------------------------
  */
 static void
-xml_dump_group(hid_t gid, const char *name, H5_index_t UNUSED idx_type, H5_iter_order_t UNUSED iter_order)
+xml_dump_group(hid_t gid, const char *name)
 {
     H5O_info_t              oinfo;
     char                   *cp;
