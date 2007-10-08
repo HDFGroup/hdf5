@@ -80,9 +80,9 @@ test_array_atomic_1d(void)
     MESSAGE(5, ("Testing 1-D Array of Atomic Datatypes Functionality\n"));
 
     /* Allocate and initialize array data to write */
-    for(i=0; i<SPACE1_DIM1; i++)
-        for(j=0; j<ARRAY1_DIM1; j++)
-            wdata[i][j]=i*10+j;
+    for(i = 0; i < SPACE1_DIM1; i++)
+        for(j = 0; j < ARRAY1_DIM1; j++)
+            wdata[i][j] = i * 10 + j;
 
     /* Create file */
     fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -97,11 +97,11 @@ test_array_atomic_1d(void)
     CHECK(tid1, FAIL, "H5Tarray_create");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",tid1,sid1,H5P_DEFAULT);
+    dataset = H5Dcreate(fid1, "Dataset1", tid1, sid1, H5P_DEFAULT);
     CHECK(dataset, FAIL, "H5Dcreate");
 
     /* Write dataset to disk */
-    ret=H5Dwrite(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata);
+    ret = H5Dwrite(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Close Dataset */
@@ -126,41 +126,39 @@ test_array_atomic_1d(void)
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
-    dataset=H5Dopen(fid1,"Dataset1");
-    CHECK(dataset, FAIL, "H5Dopen");
+    dataset = H5Dopen2(fid1, "Dataset1", H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
 
     /* Get the datatype */
     tid1 = H5Dget_type (dataset);
     CHECK(tid1, FAIL, "H5Dget_type");
 
     /* Check the array rank */
-    ndims=H5Tget_array_ndims(tid1);
-    VERIFY(ndims,ARRAY1_RANK,"H5Tget_array_ndims");
+    ndims = H5Tget_array_ndims(tid1);
+    VERIFY(ndims, ARRAY1_RANK, "H5Tget_array_ndims");
 
     /* Get the array dimensions */
-    ret=H5Tget_array_dims(tid1, rdims1, NULL);
+    ret = H5Tget_array_dims(tid1, rdims1, NULL);
     CHECK(ret, FAIL, "H5Tget_array_dims");
 
     /* Check the array dimensions */
-    for(i=0; i<ndims; i++)
-        if(rdims1[i]!=tdims1[i]) {
-            TestErrPrintf("Array dimension information doesn't match!, rdims1[%d]=%d, tdims1[%d]=%d\n",(int)i,(int)rdims1[i],(int)i,(int)tdims1[i]);
+    for(i = 0; i < ndims; i++)
+        if(rdims1[i] != tdims1[i]) {
+            TestErrPrintf("Array dimension information doesn't match!, rdims1[%d]=%d, tdims1[%d]=%d\n", (int)i, (int)rdims1[i], (int)i, (int)tdims1[i]);
             continue;
         } /* end if */
 
     /* Read dataset from disk */
-    ret=H5Dread(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,rdata);
+    ret = H5Dread(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
     CHECK(ret, FAIL, "H5Dread");
 
     /* Compare data read in */
-    for(i=0; i<SPACE1_DIM1; i++) {
-        for(j=0; j<ARRAY1_DIM1; j++) {
-            if(wdata[i][j]!=rdata[i][j]) {
-                TestErrPrintf("Array data information doesn't match!, wdata[%d][%d]=%d, rdata[%d][%d]=%d\n",(int)i,(int)j,(int)wdata[i][j],(int)i,(int)j,(int)rdata[i][j]);
+    for(i = 0; i < SPACE1_DIM1; i++)
+        for(j = 0; j < ARRAY1_DIM1; j++)
+            if(wdata[i][j] != rdata[i][j]) {
+                TestErrPrintf("Array data information doesn't match!, wdata[%d][%d]=%d, rdata[%d][%d]=%d\n", (int)i, (int)j, (int)wdata[i][j], (int)i, (int)j, (int)rdata[i][j]);
                 continue;
             } /* end if */
-        } /* end for */
-    } /* end for */
 
     /* Close Datatype */
     ret = H5Tclose(tid1);
@@ -173,7 +171,6 @@ test_array_atomic_1d(void)
     /* Close file */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
-
 } /* end test_array_atomic_1d() */
 
 /****************************************************************
@@ -260,11 +257,11 @@ test_array_atomic_3d(void)
     MESSAGE(5, ("Testing 3-D Array of Atomic Datatypes Functionality\n"));
 
     /* Allocate and initialize array data to write */
-    for(i=0; i<SPACE1_DIM1; i++)
-        for(j=0; j<ARRAY2_DIM1; j++)
-            for(k=0; k<ARRAY2_DIM2; k++)
-                for(l=0; l<ARRAY2_DIM3; l++)
-                    wdata[i][j][k][l]=i*1000+j*100+k*10+l;
+    for(i = 0; i < SPACE1_DIM1; i++)
+        for(j = 0; j < ARRAY2_DIM1; j++)
+            for(k = 0; k < ARRAY2_DIM2; k++)
+                for(l = 0; l < ARRAY2_DIM3; l++)
+                    wdata[i][j][k][l] = i * 1000 + j * 100 + k * 10 + l;
 
     /* Create file */
     fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -279,11 +276,11 @@ test_array_atomic_3d(void)
     CHECK(tid, FAIL, "H5Tarray_create");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid,"Dataset1",tid,sid,H5P_DEFAULT);
+    dataset = H5Dcreate(fid, "Dataset1", tid, sid, H5P_DEFAULT);
     CHECK(dataset, FAIL, "H5Dcreate");
 
     /* Write dataset to disk */
-    ret=H5Dwrite(dataset,tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata);
+    ret = H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Close Dataset */
@@ -308,45 +305,41 @@ test_array_atomic_3d(void)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Open the dataset */
-    dataset=H5Dopen(fid,"Dataset1");
-    CHECK(dataset, FAIL, "H5Dopen");
+    dataset = H5Dopen2(fid, "Dataset1", H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
 
     /* Get the datatype */
     tid = H5Dget_type (dataset);
     CHECK(tid, FAIL, "H5Dget_type");
 
     /* Check the array rank */
-    ndims=H5Tget_array_ndims(tid);
-    VERIFY(ndims,ARRAY2_RANK,"H5Tget_array_ndims");
+    ndims = H5Tget_array_ndims(tid);
+    VERIFY(ndims, ARRAY2_RANK, "H5Tget_array_ndims");
 
     /* Get the array dimensions */
     ret = H5Tget_array_dims(tid, rdims2, NULL);
     CHECK(ret, FAIL, "H5Tget_array_dims");
 
     /* Check the array dimensions */
-    for(i=0; i<ndims; i++)
-        if(rdims2[i]!=tdims2[i]) {
-            TestErrPrintf("Array dimension information doesn't match!, rdims2[%d]=%d, tdims2[%d]=%d\n",(int)i,(int)rdims2[i],(int)i,(int)tdims2[i]);
+    for(i = 0; i < ndims; i++)
+        if(rdims2[i] != tdims2[i]) {
+            TestErrPrintf("Array dimension information doesn't match!, rdims2[%d]=%d, tdims2[%d]=%d\n", (int)i, (int)rdims2[i], (int)i, (int)tdims2[i]);
             continue;
         } /* end if */
 
     /* Read dataset from disk */
-    ret=H5Dread(dataset,tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,rdata);
+    ret = H5Dread(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
     CHECK(ret, FAIL, "H5Dread");
 
     /* Compare data read in */
-    for(i=0; i<SPACE1_DIM1; i++) {
-        for(j=0; j<ARRAY2_DIM1; j++) {
-            for(k=0; k<ARRAY2_DIM2; k++) {
-                for(l=0; l<ARRAY2_DIM3; l++) {
-                    if(wdata[i][j][k][l]!=rdata[i][j][k][l]) {
-                        TestErrPrintf("Array data information doesn't match!, wdata[%d][%d][%d][%d]=%d, rdata[%d][%d][%d][%d]=%d\n",(int)i,(int)j,(int)k,(int)l,(int)wdata[i][j][k][l],(int)i,(int)j,(int)k,(int)l,(int)rdata[i][j][k][l]);
+    for(i = 0; i < SPACE1_DIM1; i++)
+        for(j = 0; j < ARRAY2_DIM1; j++)
+            for(k = 0; k < ARRAY2_DIM2; k++)
+                for(l = 0; l < ARRAY2_DIM3; l++)
+                    if(wdata[i][j][k][l] != rdata[i][j][k][l]) {
+                        TestErrPrintf("Array data information doesn't match!, wdata[%d][%d][%d][%d]=%d, rdata[%d][%d][%d][%d]=%d\n", (int)i, (int)j, (int)k, (int)l, (int)wdata[i][j][k][l], (int)i, (int)j, (int)k, (int)l, (int)rdata[i][j][k][l]);
                         continue;
                     } /* end if */
-                } /* end for */
-            } /* end for */
-        } /* end for */
-    } /* end for */
 
     /* Close Datatype */
     ret = H5Tclose(tid);
@@ -392,11 +385,11 @@ test_array_array_atomic(void)
     MESSAGE(5, ("Testing 1-D Array 2-D Arrays of Atomic Datatypes Functionality\n"));
 
     /* Allocate and initialize array data to write */
-    for(i=0; i<SPACE1_DIM1; i++)
-        for(j=0; j<ARRAY1_DIM1; j++)
-            for(k=0; k<ARRAY3_DIM1; k++)
-                for(l=0; l<ARRAY3_DIM2; l++)
-                    wdata[i][j][k][l]=i*1000+j*100+k*10+l;
+    for(i = 0; i < SPACE1_DIM1; i++)
+        for(j = 0; j < ARRAY1_DIM1; j++)
+            for(k = 0; k < ARRAY3_DIM1; k++)
+                for(l = 0; l < ARRAY3_DIM2; l++)
+                    wdata[i][j][k][l] = i * 1000 + j * 100 + k * 10 + l;
 
     /* Create file */
     fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -415,11 +408,11 @@ test_array_array_atomic(void)
     CHECK(tid1, FAIL, "H5Tarray_create");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid,"Dataset1",tid1,sid,H5P_DEFAULT);
+    dataset = H5Dcreate(fid, "Dataset1", tid1, sid, H5P_DEFAULT);
     CHECK(dataset, FAIL, "H5Dcreate");
 
     /* Write dataset to disk */
-    ret=H5Dwrite(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata);
+    ret = H5Dwrite(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Close Dataset */
@@ -446,64 +439,60 @@ test_array_array_atomic(void)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Open the dataset */
-    dataset=H5Dopen(fid,"Dataset1");
-    CHECK(dataset, FAIL, "H5Dopen");
+    dataset = H5Dopen2(fid, "Dataset1", H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
 
     /* Get the 1-D datatype */
-    tid1 = H5Dget_type (dataset);
+    tid1 = H5Dget_type(dataset);
     CHECK(tid1, FAIL, "H5Dget_type");
 
     /* Check the 1-D array rank */
     ndims1 = H5Tget_array_ndims(tid1);
-    VERIFY(ndims1,ARRAY1_RANK,"H5Tget_array_ndims");
+    VERIFY(ndims1, ARRAY1_RANK, "H5Tget_array_ndims");
 
     /* Get the 1-D array dimensions */
     ret = H5Tget_array_dims(tid1, rdims1, NULL);
     CHECK(ret, FAIL, "H5Tget_array_dims");
 
     /* Check the array dimensions */
-    for(i=0; i<ndims1; i++)
-        if(rdims1[i]!=tdims1[i]) {
-            TestErrPrintf("Array dimension information doesn't match!, rdims1[%d]=%d, tdims1[%d]=%d\n",(int)i,(int)rdims1[i],(int)i,(int)tdims1[i]);
+    for(i = 0; i < ndims1; i++)
+        if(rdims1[i] != tdims1[i]) {
+            TestErrPrintf("Array dimension information doesn't match!, rdims1[%d]=%d, tdims1[%d]=%d\n", (int)i, (int)rdims1[i], (int)i, (int)tdims1[i]);
             continue;
         } /* end if */
 
     /* Get the 2-D datatype */
-    tid2 = H5Tget_super (tid1);
+    tid2 = H5Tget_super(tid1);
     CHECK(tid2, FAIL, "H5Tget_super");
 
     /* Check the 2-D array rank */
-    ndims2=H5Tget_array_ndims(tid2);
-    VERIFY(ndims2,ARRAY3_RANK,"H5Tget_array_ndims");
+    ndims2 = H5Tget_array_ndims(tid2);
+    VERIFY(ndims2, ARRAY3_RANK, "H5Tget_array_ndims");
 
     /* Get the 2-D array dimensions */
     ret = H5Tget_array_dims(tid2, rdims2, NULL);
     CHECK(ret, FAIL, "H5Tget_array_dims");
 
     /* Check the array dimensions */
-    for(i=0; i<ndims2; i++)
-        if(rdims2[i]!=tdims2[i]) {
-            TestErrPrintf("Array dimension information doesn't match!, rdims2[%d]=%d, tdims2[%d]=%d\n",(int)i,(int)rdims2[i],(int)i,(int)tdims2[i]);
+    for(i = 0; i < ndims2; i++)
+        if(rdims2[i] != tdims2[i]) {
+            TestErrPrintf("Array dimension information doesn't match!, rdims2[%d]=%d, tdims2[%d]=%d\n", (int)i, (int)rdims2[i], (int)i, (int)tdims2[i]);
             continue;
         } /* end if */
 
     /* Read dataset from disk */
-    ret=H5Dread(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,rdata);
+    ret = H5Dread(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
     CHECK(ret, FAIL, "H5Dread");
 
     /* Compare data read in */
-    for(i=0; i<SPACE1_DIM1; i++) {
-        for(j=0; j<ARRAY1_DIM1; j++) {
-            for(k=0; k<ARRAY3_DIM1; k++) {
-                for(l=0; l<ARRAY3_DIM2; l++) {
-                    if(wdata[i][j][k][l]!=rdata[i][j][k][l]) {
-                        TestErrPrintf("Array data information doesn't match!, wdata[%d][%d][%d][%d]=%d, rdata[%d][%d][%d][%d]=%d\n",(int)i,(int)j,(int)k,(int)l,(int)wdata[i][j][k][l],(int)i,(int)j,(int)k,(int)l,(int)rdata[i][j][k][l]);
+    for(i = 0; i < SPACE1_DIM1; i++)
+        for(j = 0; j < ARRAY1_DIM1; j++)
+            for(k = 0; k < ARRAY3_DIM1; k++)
+                for(l = 0; l < ARRAY3_DIM2; l++)
+                    if(wdata[i][j][k][l] != rdata[i][j][k][l]) {
+                        TestErrPrintf("Array data information doesn't match!, wdata[%d][%d][%d][%d]=%d, rdata[%d][%d][%d][%d]=%d\n", (int)i, (int)j, (int)k, (int)l, (int)wdata[i][j][k][l], (int)i, (int)j, (int)k, (int)l, (int)rdata[i][j][k][l]);
                         continue;
                     } /* end if */
-                } /* end for */
-            } /* end for */
-        } /* end for */
-    } /* end for */
 
     /* Close Datatypes */
     ret = H5Tclose(tid1);
@@ -518,7 +507,6 @@ test_array_array_atomic(void)
     /* Close file */
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
-
 } /* end test_array_array_atomic() */
 
 /****************************************************************
@@ -556,10 +544,10 @@ test_array_compound_atomic(void)
     MESSAGE(5, ("Testing 1-D Array of Compound Atomic Datatypes Functionality\n"));
 
     /* Initialize array data to write */
-    for(i=0; i<SPACE1_DIM1; i++)
-        for(j=0; j<ARRAY1_DIM1; j++) {
-            wdata[i][j].i=i*10+j;
-            wdata[i][j].f=(float)(i*2.5+j);
+    for(i = 0; i < SPACE1_DIM1; i++)
+        for(j = 0; j < ARRAY1_DIM1; j++) {
+            wdata[i][j].i = i * 10 + j;
+            wdata[i][j].f = (float)(i * 2.5 + j);
         } /* end for */
 
     /* Create file */
@@ -575,11 +563,11 @@ test_array_compound_atomic(void)
     CHECK(tid2, FAIL, "H5Tcreate");
 
     /* Insert integer field */
-    ret = H5Tinsert (tid2, "i", HOFFSET(s1_t,i), H5T_NATIVE_INT);
+    ret = H5Tinsert(tid2, "i", HOFFSET(s1_t, i), H5T_NATIVE_INT);
     CHECK(ret, FAIL, "H5Tinsert");
 
     /* Insert float field */
-    ret = H5Tinsert (tid2, "f", HOFFSET(s1_t,f), H5T_NATIVE_FLOAT);
+    ret = H5Tinsert(tid2, "f", HOFFSET(s1_t, f), H5T_NATIVE_FLOAT);
     CHECK(ret, FAIL, "H5Tinsert");
 
     /* Create an array datatype to refer to */
@@ -587,15 +575,15 @@ test_array_compound_atomic(void)
     CHECK(tid1, FAIL, "H5Tarray_create");
 
     /* Close compound datatype */
-    ret=H5Tclose(tid2);
+    ret = H5Tclose(tid2);
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",tid1,sid1,H5P_DEFAULT);
+    dataset = H5Dcreate(fid1, "Dataset1", tid1, sid1, H5P_DEFAULT);
     CHECK(dataset, FAIL, "H5Dcreate");
 
     /* Write dataset to disk */
-    ret=H5Dwrite(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata);
+    ret = H5Dwrite(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Close Dataset */
@@ -620,15 +608,15 @@ test_array_compound_atomic(void)
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
-    dataset=H5Dopen(fid1,"Dataset1");
-    CHECK(dataset, FAIL, "H5Dopen");
+    dataset = H5Dopen2(fid1, "Dataset1", H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
 
     /* Get the datatype */
-    tid1 = H5Dget_type (dataset);
+    tid1 = H5Dget_type(dataset);
     CHECK(tid1, FAIL, "H5Dget_type");
 
     /* Check the array rank */
-    ndims=H5Tget_array_ndims(tid1);
+    ndims = H5Tget_array_ndims(tid1);
     VERIFY(ndims,ARRAY1_RANK,"H5Tget_array_ndims");
 
     /* Get the array dimensions */
@@ -636,9 +624,9 @@ test_array_compound_atomic(void)
     CHECK(ret, FAIL, "H5Tget_array_dims");
 
     /* Check the array dimensions */
-    for(i=0; i<ndims; i++)
-        if(rdims1[i]!=tdims1[i]) {
-            TestErrPrintf("Array dimension information doesn't match!, rdims1[%d]=%d, tdims1[%d]=%d\n",(int)i,(int)rdims1[i],(int)i,(int)tdims1[i]);
+    for(i = 0; i < ndims; i++)
+        if(rdims1[i] != tdims1[i]) {
+            TestErrPrintf("Array dimension information doesn't match!, rdims1[%d]=%d, tdims1[%d]=%d\n", (int)i, (int)rdims1[i], (int)i, (int)tdims1[i]);
             continue;
         } /* end if */
 
@@ -647,45 +635,45 @@ test_array_compound_atomic(void)
     CHECK(tid2, FAIL, "H5Tget_super");
 
     /* Check the number of members */
-    nmemb=H5Tget_nmembers(tid2);
+    nmemb = H5Tget_nmembers(tid2);
     VERIFY(nmemb,2,"H5Tget_nmembers");
 
     /* Check the 1st field's name */
-    mname=H5Tget_member_name(tid2,0);
+    mname = H5Tget_member_name(tid2, 0);
     CHECK(mname, NULL, "H5Tget_member_name");
-    if(HDstrcmp(mname,"i")!=0)
-        TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
+    if(HDstrcmp(mname, "i") != 0)
+        TestErrPrintf("Compound field name doesn't match!, mname=%s\n", mname);
     free(mname);
 
     /* Check the 1st field's offset */
-    off=H5Tget_member_offset(tid2,0);
-    VERIFY(off, HOFFSET(s1_t,i), "H5Tget_member_offset");
+    off = H5Tget_member_offset(tid2, 0);
+    VERIFY(off, HOFFSET(s1_t, i), "H5Tget_member_offset");
 
     /* Check the 1st field's datatype */
-    mtid=H5Tget_member_type(tid2,0);
+    mtid = H5Tget_member_type(tid2, 0);
     CHECK(mtid, FAIL, "H5Tget_member_type");
-    if((ret=H5Tequal(mtid,H5T_NATIVE_INT))<=0)
-        TestErrPrintf("Compound data type is incorrect!, ret=%d\n",(int)ret);
-    ret=H5Tclose(mtid);
+    if((ret = H5Tequal(mtid,H5T_NATIVE_INT)) <= 0)
+        TestErrPrintf("Compound data type is incorrect!, ret=%d\n", (int)ret);
+    ret = H5Tclose(mtid);
     CHECK(mtid, FAIL, "H5Tclose");
 
     /* Check the 2nd field's name */
-    mname=H5Tget_member_name(tid2,1);
+    mname = H5Tget_member_name(tid2, 1);
     CHECK(mname, NULL, "H5Tget_member_name");
-    if(HDstrcmp(mname,"f")!=0)
-        TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
+    if(HDstrcmp(mname, "f") != 0)
+        TestErrPrintf("Compound field name doesn't match!, mname=%s\n", mname);
     free(mname);
 
     /* Check the 2nd field's offset */
-    off=H5Tget_member_offset(tid2,1);
-    VERIFY(off, HOFFSET(s1_t,f), "H5Tget_member_offset");
+    off = H5Tget_member_offset(tid2, 1);
+    VERIFY(off, HOFFSET(s1_t, f), "H5Tget_member_offset");
 
     /* Check the 2nd field's datatype */
-    mtid=H5Tget_member_type(tid2,1);
+    mtid = H5Tget_member_type(tid2, 1);
     CHECK(mtid, FAIL, "H5Tget_member_type");
-    if((ret=H5Tequal(mtid,H5T_NATIVE_FLOAT))<=0)
-        TestErrPrintf("Compound data type is incorrect!, ret=%d\n",(int)ret);
-    ret=H5Tclose(mtid);
+    if((ret = H5Tequal(mtid, H5T_NATIVE_FLOAT)) <= 0)
+        TestErrPrintf("Compound data type is incorrect!, ret=%d\n", (int)ret);
+    ret = H5Tclose(mtid);
     CHECK(mtid, FAIL, "H5Tclose");
 
     /* Close Compound Datatype */
@@ -693,22 +681,21 @@ test_array_compound_atomic(void)
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Read dataset from disk */
-    ret=H5Dread(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,rdata);
+    ret = H5Dread(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
     CHECK(ret, FAIL, "H5Dread");
 
     /* Compare data read in */
-    for(i=0; i<SPACE1_DIM1; i++) {
-        for(j=0; j<ARRAY1_DIM1; j++) {
-            if(wdata[i][j].i!=rdata[i][j].i) {
-                TestErrPrintf("Array data information doesn't match!, wdata[%d][%d].i=%d, rdata[%d][%d].i=%d\n",(int)i,(int)j,(int)wdata[i][j].i,(int)i,(int)j,(int)rdata[i][j].i);
+    for(i = 0; i < SPACE1_DIM1; i++)
+        for(j = 0; j < ARRAY1_DIM1; j++) {
+            if(wdata[i][j].i != rdata[i][j].i) {
+                TestErrPrintf("Array data information doesn't match!, wdata[%d][%d].i=%d, rdata[%d][%d].i=%d\n", (int)i, (int)j, (int)wdata[i][j].i, (int)i, (int)j, (int)rdata[i][j].i);
                 continue;
             } /* end if */
             if(!FLT_ABS_EQUAL(wdata[i][j].f, rdata[i][j].f)) {
-                TestErrPrintf("Array data information doesn't match!, wdata[%d][%d].f=%f, rdata[%d][%d].f=%f\n",(int)i,(int)j,wdata[i][j].f,(int)i,(int)j,rdata[i][j].f);
+                TestErrPrintf("Array data information doesn't match!, wdata[%d][%d].f=%f, rdata[%d][%d].f=%f\n", (int)i, (int)j, wdata[i][j].f, (int)i, (int)j, rdata[i][j].f);
                 continue;
             } /* end if */
         } /* end for */
-    } /* end for */
 
     /* Close Datatype */
     ret = H5Tclose(tid1);
@@ -721,7 +708,6 @@ test_array_compound_atomic(void)
     /* Close file */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
-
 } /* end test_array_compound_atomic() */
 
 /****************************************************************
@@ -834,8 +820,8 @@ test_array_compound_array(void)
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
-    dataset=H5Dopen(fid1,"Dataset1");
-    CHECK(dataset, FAIL, "H5Dopen");
+    dataset = H5Dopen2(fid1, "Dataset1", H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
 
     /* Get the datatype */
     tid1 = H5Dget_type (dataset);
@@ -1117,8 +1103,8 @@ test_array_vlen_atomic(void)
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
-    dataset=H5Dopen(fid1,"Dataset1");
-    CHECK(dataset, FAIL, "H5Dopen");
+    dataset = H5Dopen2(fid1, "Dataset1", H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
 
     /* Get the dataspace */
     sid1 = H5Dget_space (dataset);
@@ -1337,8 +1323,8 @@ test_array_vlen_array(void)
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
-    dataset=H5Dopen(fid1,"Dataset1");
-    CHECK(dataset, FAIL, "H5Dopen");
+    dataset = H5Dopen2(fid1, "Dataset1", H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
 
     /* Get the dataspace */
     sid1 = H5Dget_space (dataset);
@@ -1678,8 +1664,8 @@ test_array_bkg(void)
     fid = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fopen");
 
-    dataset = H5Dopen(fid, FIELDNAME );
-    CHECK(dataset, FAIL, "H5Dopen");
+    dataset = H5Dopen2(fid, FIELDNAME, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
 
     type = H5Tcreate(H5T_COMPOUND, sizeof(fld_t));
     CHECK(type, FAIL, "H5Tcreate");
@@ -1758,8 +1744,8 @@ test_array_bkg(void)
     fid = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fopen");
 
-    dataset = H5Dopen(fid, FIELDNAME );
-    CHECK(dataset, FAIL, "H5Dopen");
+    dataset = H5Dopen2(fid, FIELDNAME, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
 
     type = H5Dget_type(dataset);
     CHECK(type, FAIL, "H5Dget_type");
@@ -1866,8 +1852,8 @@ test_compat(void)
     /* Only try to proceed if the file is around */
     if (fid1 >= 0){
         /* Open the first dataset (with no array fields) */
-        dataset = H5Dopen(fid1, "Dataset1");
-        CHECK_I(dataset, "H5Dopen");
+        dataset = H5Dopen2(fid1, "Dataset1", H5P_DEFAULT);
+        CHECK_I(dataset, "H5Dopen2");
 
         /* Get the datatype */
         tid1=H5Dget_type(dataset);
@@ -1948,8 +1934,8 @@ test_compat(void)
 
 
         /* Open the second dataset (with array fields) */
-        dataset = H5Dopen(fid1, "Dataset2");
-        CHECK_I(dataset, "H5Dopen");
+        dataset = H5Dopen2(fid1, "Dataset2", H5P_DEFAULT);
+        CHECK_I(dataset, "H5Dopen2");
 
         /* Get the datatype */
         tid1=H5Dget_type(dataset);

@@ -413,18 +413,18 @@ void test_objnames(hid_t fid, const char* string)
 
   space_id = H5Screate_simple(RANK, &dims, NULL);
   CHECK(space_id, FAIL, "H5Screate_simple");
-  dset_id=H5Dcreate(grp1_id, string, H5T_NATIVE_INT, space_id, H5P_DEFAULT);
+  dset_id = H5Dcreate(grp1_id, string, H5T_NATIVE_INT, space_id, H5P_DEFAULT);
   CHECK(dset_id, FAIL, "H5Dcreate");
 
   /* Make sure that dataset can be opened again */
-  ret=H5Dclose(dset_id);
+  ret = H5Dclose(dset_id);
   CHECK(ret, FAIL, "H5Dclose");
-  ret=H5Sclose(space_id);
+  ret = H5Sclose(space_id);
   CHECK(ret, FAIL, "H5Sclose");
 
-  dset_id=H5Dopen(grp1_id, string);
-  CHECK(ret, FAIL, "H5Dopen");
-  ret=H5Dclose(dset_id);
+  dset_id = H5Dopen2(grp1_id, string, H5P_DEFAULT);
+  CHECK(ret, FAIL, "H5Dopen2");
+  ret = H5Dclose(dset_id);
   CHECK(ret, FAIL, "H5Dclose");
   ret = H5Gclose(grp1_id);
   CHECK(ret, FAIL, "H5Gclose");

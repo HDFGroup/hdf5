@@ -268,34 +268,36 @@ herr_t H5IMread_imagef( hid_t loc_id,
                         const char *dset_name,
                         int_f *buf )
 {
- hid_t   did;
+    hid_t   did;
+    hid_t   tid;
 
- /* open the dataset */
- if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
-  return -1;
+    /* open the dataset */
+    if((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
+        return -1;
 
- /* read to memory type H5T_NATIVE_INT */
- if (sizeof(int_f) == sizeof(int)){
- if ( H5Dread( did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf ) < 0 )
-  goto out;}
- else if (sizeof(int_f) == sizeof(long)) {
- if ( H5Dread( did, H5T_NATIVE_LONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf ) < 0 )
-  goto out;}
- else if (sizeof(int_f) == sizeof(long_long)) {
- if ( H5Dread( did, H5T_NATIVE_LLONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf ) < 0 )
-  goto out;}
- else
-  goto out;
+    /* determine appropriate datatype to use */
+    if(sizeof(int_f) == sizeof(int))
+        tid = H5T_NATIVE_INT;
+    else if(sizeof(int_f) == sizeof(long))
+        tid = H5T_NATIVE_LONG;
+    else if(sizeof(int_f) == sizeof(long_long))
+        tid = H5T_NATIVE_LLONG;
+    else
+        goto out;
 
- /* close */
- if ( H5Dclose( did ) )
-  return -1;
- return 0;
+    /* read to memory */
+    if(H5Dread(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+        goto out;
+
+    /* close */
+    if(H5Dclose(did))
+        return -1;
+
+    return 0;
 
 out:
- H5Dclose( did );
- return -1;
-
+    H5Dclose(did);
+    return -1;
 }
 
 
@@ -478,7 +480,7 @@ herr_t H5IM_get_palette( hid_t loc_id,
  hid_t      pal_id;
 
  /* Open the dataset. */
- if((image_id = H5Dopen(loc_id, image_name)) < 0)
+ if((image_id = H5Dopen2(loc_id, image_name, H5P_DEFAULT)) < 0)
   return -1;
 
  /* Try to find the attribute "PALETTE" on the >>image<< dataset */

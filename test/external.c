@@ -106,42 +106,43 @@ test_1a(hid_t file)
     hsize_t	file_size;		/*sizeof external file segment	*/
 
     TESTING("fixed-size data space, exact storage");
+
     /* Create the dataset */
-    if((dcpl=H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
     cur_size[0] = max_size[0] = 100;
-    if (H5Pset_external(dcpl, "ext1.data", (off_t)0,
-	(hsize_t)(max_size[0]*sizeof(int))) < 0) goto error;
-    if ((space = H5Screate_simple (1, cur_size, max_size)) < 0) goto error;
-    if ((dset = H5Dcreate (file, "dset1", H5T_NATIVE_INT, space, dcpl)) < 0)
+    if(H5Pset_external(dcpl, "ext1.data", (off_t)0,
+	(hsize_t)(max_size[0] * sizeof(int))) < 0) goto error;
+    if((space = H5Screate_simple(1, cur_size, max_size)) < 0) goto error;
+    if((dset = H5Dcreate(file, "dset1", H5T_NATIVE_INT, space, dcpl)) < 0)
 	goto error;
-    if (H5Dclose (dset) < 0) goto error;
-    if (H5Sclose (space) < 0) goto error;
-    if (H5Pclose (dcpl) < 0) goto error;
+    if(H5Dclose(dset) < 0) goto error;
+    if(H5Sclose(space) < 0) goto error;
+    if(H5Pclose(dcpl) < 0) goto error;
 
     /* Read dataset creation information */
-    if ((dset = H5Dopen (file, "dset1")) < 0) goto error;
+    if((dset = H5Dopen2(file, "dset1", H5P_DEFAULT)) < 0) goto error;
 
     /* Test dataset address.  Should be undefined. */
-    if (H5Dget_offset(dset)!=HADDR_UNDEF) goto error;
+    if(H5Dget_offset(dset) != HADDR_UNDEF) goto error;
 
-    if ((dcpl = H5Dget_create_plist (dset)) < 0) goto error;
-    if ((n=H5Pget_external_count (dcpl)) < 0) goto error;
-    if (1!=n) {
+    if((dcpl = H5Dget_create_plist(dset)) < 0) goto error;
+    if((n = H5Pget_external_count(dcpl)) < 0) goto error;
+    if(1 != n) {
 	H5_FAILED();
 	puts("    Returned external count is wrong.");
 	printf("   got: %d\n    ans: 1\n", n);
 	goto error;
     }
-    strcpy (name+sizeof(name)-4, "...");
-    if (H5Pget_external (dcpl, 0, sizeof(name)-4, name, &file_offset,
+    HDstrcpy(name + sizeof(name) - 4, "...");
+    if(H5Pget_external(dcpl, 0, sizeof(name) - 4, name, &file_offset,
 			 &file_size) < 0) goto error;
-    if (file_offset!=0) {
+    if(file_offset != 0) {
 	H5_FAILED();
 	puts("    Wrong file offset.");
 	printf("    got: %lu\n    ans: 0\n", (unsigned long)file_offset);
 	goto error;
     }
-    if (file_size!=(max_size[0]*sizeof(int))) {
+    if(file_size != (max_size[0] * sizeof(int))) {
 	H5_FAILED();
 	puts("    Wrong file size.");
 	printf("    got: %lu\n    ans: %lu\n", (unsigned long)file_size,
@@ -358,44 +359,45 @@ test_1e(hid_t file)
     TESTING("unlimited dataspace, unlimited external storage");
 
     /* Create dataset */
-    if((dcpl=H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
-    if (H5Pset_external(dcpl, "ext1.data", (off_t)0, H5F_UNLIMITED) < 0) goto error;
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
+    if(H5Pset_external(dcpl, "ext1.data", (off_t)0, H5F_UNLIMITED) < 0) goto error;
     cur_size[0] = 100;
     max_size[0] = H5S_UNLIMITED;
-    if ((space=H5Screate_simple(1, cur_size, max_size)) < 0) goto error;
-    if ((dset=H5Dcreate(file, "dset5", H5T_NATIVE_INT, space, dcpl)) < 0)
+    if((space = H5Screate_simple(1, cur_size, max_size)) < 0) goto error;
+    if((dset = H5Dcreate(file, "dset5", H5T_NATIVE_INT, space, dcpl)) < 0)
 	goto error;
-    if (H5Dclose (dset) < 0) goto error;
-    if (H5Sclose (space) < 0) goto error;
-    if (H5Pclose (dcpl) < 0) goto error;
+    if(H5Dclose(dset) < 0) goto error;
+    if(H5Sclose(space) < 0) goto error;
+    if(H5Pclose(dcpl) < 0) goto error;
 
     /* Read dataset creation information */
-    if ((dset = H5Dopen (file, "dset5")) < 0) goto error;
-    if ((dcpl = H5Dget_create_plist (dset)) < 0) goto error;
-    if ((n = H5Pget_external_count (dcpl)) < 0) goto error;
-    if (1!=n) {
+    if((dset = H5Dopen2(file, "dset5", H5P_DEFAULT)) < 0) goto error;
+    if((dcpl = H5Dget_create_plist(dset)) < 0) goto error;
+    if((n = H5Pget_external_count(dcpl)) < 0) goto error;
+    if(1 != n) {
 	H5_FAILED();
 	puts("    Returned external count is wrong.");
 	printf("    got: %d\n    ans: 1\n", n);
 	goto error;
     }
-    strcpy (name+sizeof(name)-4, "...");
-    if (H5Pget_external (dcpl, 0, sizeof(name)-4, name, &file_offset,
+    HDstrcpy(name + sizeof(name) - 4, "...");
+    if(H5Pget_external(dcpl, 0, sizeof(name) - 4, name, &file_offset,
 			 &file_size) < 0) goto error;
-    if (file_offset!=0) {
+    if(file_offset != 0) {
 	H5_FAILED();
 	puts("    Wrong file offset.");
 	printf("    got: %lu\n    ans: 0\n", (unsigned long)file_offset);
 	goto error;
     }
-    if (H5F_UNLIMITED!=file_size) {
+    if(H5F_UNLIMITED != file_size) {
 	H5_FAILED();
 	puts("    Wrong file size.");
 	printf("    got: %lu\n    ans: INF\n", (unsigned long)file_size);
 	goto error;
     }
-    if (H5Pclose (dcpl) < 0) goto error;
-    if (H5Dclose (dset) < 0) goto error;
+    if(H5Pclose(dcpl) < 0) goto error;
+    if(H5Dclose(dset) < 0) goto error;
+
     PASSED();
     return 0;
 

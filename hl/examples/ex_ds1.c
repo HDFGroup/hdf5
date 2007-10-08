@@ -67,11 +67,11 @@ int main(void)
  */
 
  /* get the dataset id for DSET_NAME */
- if ((did = H5Dopen(fid,DSET_NAME))<0)
+ if ((did = H5Dopen2(fid,DSET_NAME, H5P_DEFAULT))<0)
   goto out;
 
  /* get the DS dataset id */
- if ((dsid = H5Dopen(fid,DS_1_NAME))<0)
+ if ((dsid = H5Dopen2(fid,DS_1_NAME, H5P_DEFAULT))<0)
   goto out;
 
  /* attach the DS_1_NAME dimension scale to DSET_NAME at dimension index 0 */
@@ -88,7 +88,7 @@ int main(void)
  */
 
  /* get the DS dataset id */
- if ((dsid = H5Dopen(fid,DS_2_NAME))<0)
+ if ((dsid = H5Dopen2(fid,DS_2_NAME, H5P_DEFAULT))<0)
   goto out;
 
  /* attach the DS_2_NAME dimension scale to DSET_NAME as the 2nd dimension (index 1)  */

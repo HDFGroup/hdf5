@@ -575,7 +575,7 @@ dataset_stats(hid_t group, const char *name, const H5O_info_t *oi, iter_t *iter)
     iter->dset_ohdr_info.total_size += oi->hdr.space.total;
     iter->dset_ohdr_info.free_size += oi->hdr.space.free;
 
-    did = H5Dopen(group, name);
+    did = H5Dopen2(group, name, H5P_DEFAULT);
     assert(did > 0);
 
     /* Update dataset metadata info */

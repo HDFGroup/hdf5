@@ -728,7 +728,7 @@ static void write_scalar_dset(hid_t file, hid_t type, hid_t space, char *name, c
       hid_t dset;
       herr_t ret;
 
-      dset = H5Dcreate (file, name, type, space, H5P_DEFAULT);
+      dset = H5Dcreate(file, name, type, space, H5P_DEFAULT);
       CHECK(dset, FAIL, "H5Dcreate");
 
       ret = H5Dwrite(dset, type, space, space, H5P_DEFAULT, &data);
@@ -745,8 +745,8 @@ static void read_scalar_dset(hid_t file, hid_t type, hid_t space, char *name, ch
     herr_t ret;
     char *data_read;
 
-    dset = H5Dopen (file, name);
-    CHECK(dset, FAIL, "H5Dopen");
+    dset = H5Dopen2(file, name, H5P_DEFAULT);
+    CHECK(dset, FAIL, "H5Dopen2");
 
     ret = H5Dread(dset, type, space, space, H5P_DEFAULT, &data_read);
     CHECK(ret, FAIL, "H5Dread");

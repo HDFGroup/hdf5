@@ -112,17 +112,17 @@ int do_copy_refobjs(hid_t fidin,
             *-------------------------------------------------------------------------
             */
             case H5TRAV_TYPE_DATASET:
-                if((dset_in = H5Dopen(fidin,travt->objs[i].name)) < 0)
+                if((dset_in = H5Dopen2(fidin, travt->objs[i].name, H5P_DEFAULT)) < 0)
                     goto error;
                 if((space_id = H5Dget_space(dset_in)) < 0)
                     goto error;
-                if((ftype_id = H5Dget_type (dset_in)) < 0)
+                if((ftype_id = H5Dget_type(dset_in)) < 0)
                     goto error;
                 if((dcpl_id = H5Dget_create_plist(dset_in)) < 0)
                     goto error;
                 if((rank = H5Sget_simple_extent_ndims(space_id)) < 0)
                     goto error;
-                if(H5Sget_simple_extent_dims(space_id,dims,NULL) < 0)
+                if(H5Sget_simple_extent_dims(space_id, dims, NULL) < 0)
                     goto error;
                 nelmts = 1;
                 for(k = 0; k < rank; k++)
@@ -299,7 +299,7 @@ int do_copy_refobjs(hid_t fidin,
                     *-------------------------------------------------------------------------
                     */
                     else {
-                        if((dset_out = H5Dopen(fidout,travt->objs[i].name)) < 0)
+                        if((dset_out = H5Dopen2(fidout, travt->objs[i].name, H5P_DEFAULT)) < 0)
                             goto error;
                     } /* end else */
 
@@ -388,9 +388,9 @@ error:
  *
  * Purpose: duplicate all referenced HDF5 located in attributes
  *  relative to LOC_IN, which is obtained either from
- * loc_id = H5Gopen2( fid, name, H5P_DEFAULT);
- * loc_id = H5Dopen( fid, name);
- * loc_id = H5Topen2( fid, name, H5P_DEFAULT);
+ * loc_id = H5Gopen2(fid, name, H5P_DEFAULT);
+ * loc_id = H5Dopen2(fid, name, H5P_DEFAULT);
+ * loc_id = H5Topen2(fid, name, H5P_DEFAULT);
  *
  * Return: 0, ok, -1 no
  *

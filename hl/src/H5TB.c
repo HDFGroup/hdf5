@@ -208,7 +208,7 @@ herr_t H5TBmake_table( const char *table_title,
   tmp_buf = fill_data;
 
   /* Open the dataset. */
-  if((did = H5Dopen( loc_id, dset_name )) < 0)
+  if((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
    return -1;
 
   if (( sid = H5Screate(H5S_SCALAR)) < 0)
@@ -313,18 +313,18 @@ herr_t H5TBappend_records( hid_t loc_id,
   return -1;
 
  /* Open the dataset. */
- if((did = H5Dopen( loc_id, dset_name )) < 0)
+ if((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
   goto out;
 
   /* Get the datatypes */
  if((tid = H5Dget_type( did )) < 0)
   goto out;
 
- if ((mem_type_id=H5TB_create_type(loc_id,dset_name,type_size,field_offset,field_sizes,tid))<0)
+ if ((mem_type_id=H5TB_create_type(loc_id,dset_name,type_size,field_offset,field_sizes,tid)) < 0)
   goto out;
 
  /* Append the records */
- if ((H5TB_common_append_records(did, mem_type_id, (size_t)nrecords, nrecords_orig, data))<0)
+ if ((H5TB_common_append_records(did, mem_type_id, (size_t)nrecords, nrecords_orig, data)) < 0)
   goto out;
 
  /* Release the datatype. */
@@ -396,14 +396,14 @@ herr_t H5TBwrite_records( hid_t loc_id,
  hid_t    mem_type_id=-1;
 
  /* Open the dataset. */
- if((did = H5Dopen( loc_id, dset_name )) < 0)
+ if((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
   return -1;
 
   /* Get the datatype */
  if((tid = H5Dget_type( did )) < 0)
   goto out;
 
- if ((mem_type_id=H5TB_create_type(loc_id,dset_name,type_size,field_offset,field_sizes,tid))<0)
+ if ((mem_type_id=H5TB_create_type(loc_id,dset_name,type_size,field_offset,field_sizes,tid)) < 0)
   goto out;
 
  /* Get the dataspace handle */
@@ -512,13 +512,13 @@ herr_t H5TBwrite_fields_name( hid_t loc_id,
  size_t   size_native;
 
  /* Create xfer properties to preserve initialized data */
- if ((PRESERVE = H5Pcreate (H5P_DATASET_XFER))<0)
+ if ((PRESERVE = H5Pcreate (H5P_DATASET_XFER)) < 0)
   return -1;
- if (H5Pset_preserve (PRESERVE, 1)<0)
+ if (H5Pset_preserve (PRESERVE, 1) < 0)
   return -1;
 
  /* Open the dataset. */
- if((did = H5Dopen( loc_id, dset_name )) < 0)
+ if((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
   goto out;
 
  /* Get the datatype */
@@ -549,7 +549,7 @@ herr_t H5TBwrite_fields_name( hid_t loc_id,
     goto out;
 
    /* Convert to native type */
-   if ((nmtype_id=H5Tget_native_type(member_type_id,H5T_DIR_DEFAULT))<0)
+   if ((nmtype_id=H5Tget_native_type(member_type_id,H5T_DIR_DEFAULT)) < 0)
     goto out;
 
    size_native=H5Tget_size(nmtype_id);
@@ -557,7 +557,7 @@ herr_t H5TBwrite_fields_name( hid_t loc_id,
    /* Adjust, if necessary */
    if (field_sizes[j]!=size_native)
    {
-    if (H5Tset_size(nmtype_id, field_sizes[j])<0)
+    if (H5Tset_size(nmtype_id, field_sizes[j]) < 0)
      goto out;
    }
 
@@ -683,13 +683,13 @@ herr_t H5TBwrite_fields_index( hid_t loc_id,
  size_t   size_native;
 
  /* Create xfer properties to preserve initialized data */
- if ((PRESERVE = H5Pcreate (H5P_DATASET_XFER))<0)
+ if ((PRESERVE = H5Pcreate (H5P_DATASET_XFER)) < 0)
   return -1;
- if (H5Pset_preserve (PRESERVE, 1)<0)
+ if (H5Pset_preserve (PRESERVE, 1) < 0)
   return -1;
 
  /* Open the dataset. */
- if((did = H5Dopen( loc_id, dset_name )) < 0)
+ if((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
   goto out;
 
  /* Get the datatype */
@@ -714,14 +714,14 @@ herr_t H5TBwrite_fields_index( hid_t loc_id,
    goto out;
 
    /* Convert to native type */
-  if ((nmtype_id=H5Tget_native_type(member_type_id,H5T_DIR_DEFAULT))<0)
+  if ((nmtype_id=H5Tget_native_type(member_type_id,H5T_DIR_DEFAULT)) < 0)
    goto out;
 
   size_native=H5Tget_size(nmtype_id);
 
   if (field_sizes[i]!=size_native)
   {
-   if (H5Tset_size(nmtype_id, field_sizes[i])<0)
+   if (H5Tset_size(nmtype_id, field_sizes[i]) < 0)
     goto out;
   }
 
@@ -834,7 +834,7 @@ herr_t H5TBread_table( hid_t loc_id,
  hsize_t  dims[1];
 
  /* open the dataset. */
- if ((did=H5Dopen(loc_id,dset_name))<0)
+ if((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
   return -1;
 
  /* get the dataspace handle */
@@ -846,10 +846,10 @@ herr_t H5TBread_table( hid_t loc_id,
   goto out;
 
  /* get the datatypes */
- if ((ftype_id=H5Dget_type (did))<0)
+ if ((ftype_id=H5Dget_type (did)) < 0)
   goto out;
 
- if ((mem_type_id=H5TB_create_type(loc_id,dset_name,type_size,field_offset,field_sizes,ftype_id))<0)
+ if ((mem_type_id=H5TB_create_type(loc_id,dset_name,type_size,field_offset,field_sizes,ftype_id)) < 0)
   goto out;
 
  /* read */
@@ -927,14 +927,14 @@ herr_t H5TBread_records( hid_t loc_id,
   return -1;
 
  /* open the dataset */
- if((did = H5Dopen( loc_id, dset_name )) < 0)
+ if((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
   return -1;
 
  /* get the datatypes */
  if((ftype_id = H5Dget_type( did )) < 0)
   goto out;
 
- if ((mem_type_id=H5TB_create_type(loc_id,dset_name,type_size,field_offset,field_sizes,ftype_id))<0)
+ if ((mem_type_id=H5TB_create_type(loc_id,dset_name,type_size,field_offset,field_sizes,ftype_id)) < 0)
   goto out;
 
  /* Read the records */
@@ -1043,7 +1043,7 @@ herr_t H5TBread_fields_name( hid_t loc_id,
  hssize_t i, j;
 
  /* open the dataset */
- if((did = H5Dopen( loc_id, dset_name )) < 0)
+ if((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
   goto out;
 
  /* get the datatype */
@@ -1071,14 +1071,14 @@ herr_t H5TBread_fields_name( hid_t loc_id,
     goto out;
 
    /* convert to native type */
-   if ((nmtype_id=H5Tget_native_type(mtype_id,H5T_DIR_DEFAULT))<0)
+   if ((nmtype_id=H5Tget_native_type(mtype_id,H5T_DIR_DEFAULT)) < 0)
     goto out;
 
    size_native=H5Tget_size(nmtype_id);
 
    if (field_sizes[j]!=size_native)
    {
-    if (H5Tset_size(nmtype_id, field_sizes[j])<0)
+    if (H5Tset_size(nmtype_id, field_sizes[j]) < 0)
      goto out;
    }
    /* the field in the file is found by its name */
@@ -1198,7 +1198,7 @@ herr_t H5TBread_fields_index( hid_t loc_id,
  hsize_t  i, j;
 
  /* Open the dataset. */
- if((did = H5Dopen( loc_id, dset_name )) < 0)
+ if((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
   goto out;
 
  /* Get the datatype */
@@ -1226,14 +1226,14 @@ herr_t H5TBread_fields_index( hid_t loc_id,
    goto out;
 
   /* Convert to native type */
-  if ((nmtype_id=H5Tget_native_type(member_type_id,H5T_DIR_DEFAULT))<0)
+  if ((nmtype_id=H5Tget_native_type(member_type_id,H5T_DIR_DEFAULT)) < 0)
    goto out;
 
   size_native=H5Tget_size(nmtype_id);
 
   if (field_sizes[i]!=size_native)
   {
-   if (H5Tset_size(nmtype_id, field_sizes[i])<0)
+   if (H5Tset_size(nmtype_id, field_sizes[i]) < 0)
     goto out;
   }
 
@@ -1407,7 +1407,7 @@ herr_t H5TBdelete_record( hid_t loc_id,
  */
 
  /* Open the dataset. */
- if((did = H5Dopen( loc_id, dset_name )) < 0)
+ if((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
   return -1;
 
  /* Get the datatype */
@@ -1472,7 +1472,7 @@ herr_t H5TBdelete_record( hid_t loc_id,
  nrows = ntotal_records - nrecords;
  /* Set the attribute */
  if (H5LT_set_attribute_numerical(loc_id,dset_name,"NROWS",(size_t)1,
-      H5T_NATIVE_LLONG,&nrows)<0)
+      H5T_NATIVE_LLONG,&nrows) < 0)
   return -1;
 
 
@@ -1538,7 +1538,7 @@ herr_t H5TBinsert_record( hid_t loc_id,
   return -1;
 
  /* Open the dataset. */
- if((did = H5Dopen( loc_id, dset_name )) < 0)
+ if((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
   goto out;
 
   /* Get the datatype */
@@ -1546,7 +1546,7 @@ herr_t H5TBinsert_record( hid_t loc_id,
   goto out;
 
  /* Create the memory data type. */
- if ((mem_type_id=H5TB_create_type(loc_id,dset_name,type_size,field_offset,field_sizes,tid))<0)
+ if ((mem_type_id=H5TB_create_type(loc_id,dset_name,type_size,field_offset,field_sizes,tid)) < 0)
   goto out;
 
  read_nrecords = ntotal_records - start;
@@ -1719,7 +1719,7 @@ herr_t H5TBadd_records_from( hid_t loc_id,
  */
 
  /* Open the 1st dataset. */
- if((dataset_id1 = H5Dopen( loc_id, dset_name1 )) < 0)
+ if((dataset_id1 = H5Dopen2(loc_id, dset_name1, H5P_DEFAULT)) < 0)
   return -1;
 
  /* Get the datatype */
@@ -1890,7 +1890,7 @@ herr_t H5TBcombine_tables( hid_t loc_id1,
  */
 
  /* Open the 1st dataset. */
- if((dataset_id1 = H5Dopen( loc_id1, dset_name1 )) < 0)
+ if((dataset_id1 = H5Dopen2(loc_id1, dset_name1, H5P_DEFAULT)) < 0)
   goto out;
 
  /* Get the datatype */
@@ -2065,7 +2065,7 @@ herr_t H5TBcombine_tables( hid_t loc_id1,
  */
 
  /* Open the dataset. */
- if((dataset_id2 = H5Dopen( loc_id2, dset_name2 )) < 0)
+ if((dataset_id2 = H5Dopen2(loc_id2, dset_name2, H5P_DEFAULT)) < 0)
   goto out;
 
  /* Get the datatype */
@@ -2255,7 +2255,7 @@ herr_t H5TBinsert_field( hid_t loc_id,
  */
 
  /* Open the dataset. */
- if((dataset_id1 = H5Dopen( loc_id, dset_name )) < 0)
+ if((dataset_id1 = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
   return -1;
 
  /* Get creation properties list */
@@ -2430,9 +2430,9 @@ herr_t H5TBinsert_field( hid_t loc_id,
   goto out;
 
  /* Create xfer properties to preserve initialized data */
- if ((PRESERVE = H5Pcreate (H5P_DATASET_XFER))<0)
+ if ((PRESERVE = H5Pcreate (H5P_DATASET_XFER)) < 0)
   goto out;
- if (H5Pset_preserve (PRESERVE, 1)<0)
+ if (H5Pset_preserve (PRESERVE, 1) < 0)
   goto out;
 
   /* Only write if there is something to write */
@@ -2529,7 +2529,7 @@ herr_t H5TBinsert_field( hid_t loc_id,
   return -1;
 
  /* Open the dataset. */
- if((dataset_id1 = H5Dopen( loc_id, dset_name )) < 0)
+ if((dataset_id1 = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
   return -1;
 
  /* Get the datatype */
@@ -2702,7 +2702,7 @@ herr_t H5TBdelete_field( hid_t loc_id,
  */
 
  /* Open the dataset. */
- if((dataset_id1 = H5Dopen( loc_id, dset_name )) < 0)
+ if((dataset_id1 = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
   return -1;
 
  /* Get creation properties list */
@@ -2914,9 +2914,9 @@ herr_t H5TBdelete_field( hid_t loc_id,
    goto out;
 
   /* Create xfer properties to preserve initialized data */
-  if ((PRESERVE = H5Pcreate (H5P_DATASET_XFER))<0)
+  if ((PRESERVE = H5Pcreate (H5P_DATASET_XFER)) < 0)
    goto out;
-  if (H5Pset_preserve (PRESERVE, 1)<0)
+  if (H5Pset_preserve (PRESERVE, 1) < 0)
    goto out;
 
   /* Write */
@@ -3014,7 +3014,7 @@ herr_t H5TBdelete_field( hid_t loc_id,
   return -1;
 
  /* Open the dataset. */
- if((dataset_id1 = H5Dopen( loc_id, dset_name )) < 0)
+ if((dataset_id1 = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
   return -1;
 
  /* Get the datatype */
@@ -3246,7 +3246,7 @@ herr_t H5TBget_table_info ( hid_t loc_id,
  hsize_t    n[1];
 
  /* Open the dataset. */
- if((did = H5Dopen( loc_id, dset_name )) < 0)
+ if((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
   return -1;
 
  /* Get the datatype */
@@ -3275,7 +3275,7 @@ herr_t H5TBget_table_info ( hid_t loc_id,
   if(has_attr == 1 )
   {
    /* Get the attribute */
-   if(H5LTget_attribute(loc_id,dset_name,"NROWS",H5T_NATIVE_LLONG,n)<0)
+   if(H5LTget_attribute(loc_id,dset_name,"NROWS",H5T_NATIVE_LLONG,n) < 0)
     return -1;
 
    /**nrecords = *n;*/
@@ -3356,14 +3356,14 @@ herr_t H5TBget_field_info( hid_t loc_id,
  hssize_t      i;
 
  /* Open the dataset. */
- if(( did = H5Dopen( loc_id, dset_name )) < 0)
+ if((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
   goto out;
 
  /* Get the datatype */
  if(( ftype_id = H5Dget_type( did )) < 0)
   goto out;
 
- if ((native_type_id = H5Tget_native_type(ftype_id,H5T_DIR_DEFAULT))<0)
+ if ((native_type_id = H5Tget_native_type(ftype_id,H5T_DIR_DEFAULT)) < 0)
   goto out;
 
  /* Get the type size */
@@ -3388,7 +3388,7 @@ herr_t H5TBget_field_info( hid_t loc_id,
   /* Get the member type */
   if(( member_type_id = H5Tget_member_type( ftype_id,(unsigned) i )) < 0)
    goto out;
-  if ((nativem_type_id = H5Tget_native_type(member_type_id,H5T_DIR_DEFAULT))<0)
+  if ((nativem_type_id = H5Tget_native_type(member_type_id,H5T_DIR_DEFAULT)) < 0)
    goto out;
 
   /* Get the member size */
@@ -3582,7 +3582,7 @@ hid_t H5TB_create_type(hid_t loc_id,
  unsigned i;
 
  /* get the number of fields  */
- if (H5TBget_table_info(loc_id,dset_name,&nfields,NULL)<0)
+ if (H5TBget_table_info(loc_id,dset_name,&nfields,NULL) < 0)
   return -1;
 
  if ((fnames=malloc(sizeof(char*)*(size_t)nfields))==NULL)
@@ -3597,31 +3597,31 @@ hid_t H5TB_create_type(hid_t loc_id,
  }
 
  /* get field info */
- if(H5TBget_field_info(loc_id,dset_name,fnames,NULL,NULL,NULL)<0)
+ if(H5TBget_field_info(loc_id,dset_name,fnames,NULL,NULL,NULL) < 0)
   goto out;
 
  /* create the memory data type */
- if ((mem_type_id=H5Tcreate(H5T_COMPOUND,type_size))<0)
+ if ((mem_type_id=H5Tcreate(H5T_COMPOUND,type_size)) < 0)
   goto out;
 
  /* get each field ID and adjust its size, if necessary */
  for ( i=0; i<nfields; i++)
  {
-  if ((mtype_id=H5Tget_member_type(ftype_id,i))<0)
+  if ((mtype_id=H5Tget_member_type(ftype_id,i)) < 0)
    goto out;
-  if ((nmtype_id=H5Tget_native_type(mtype_id,H5T_DIR_DEFAULT))<0)
+  if ((nmtype_id=H5Tget_native_type(mtype_id,H5T_DIR_DEFAULT)) < 0)
    goto out;
   size_native=H5Tget_size(nmtype_id);
   if (field_sizes[i]!=size_native)
   {
-   if (H5Tset_size(nmtype_id,field_sizes[i])<0)
+   if (H5Tset_size(nmtype_id,field_sizes[i]) < 0)
     goto out;
   }
   if (H5Tinsert(mem_type_id,fnames[i],field_offset[i],nmtype_id) < 0)
    goto out;
-  if (H5Tclose(mtype_id)<0)
+  if (H5Tclose(mtype_id) < 0)
    goto out;
-  if (H5Tclose(nmtype_id)<0)
+  if (H5Tclose(nmtype_id) < 0)
    goto out;
  }
 
@@ -3706,11 +3706,11 @@ herr_t H5TB_common_append_records( hid_t dataset_id,
  /* Define a hyperslab in the dataset */
  offset[0] = orig_table_size;
  count[0] = nrecords;
- if(H5Sselect_hyperslab( space_id, H5S_SELECT_SET, offset, NULL, count, NULL)<0)
+ if(H5Sselect_hyperslab( space_id, H5S_SELECT_SET, offset, NULL, count, NULL) < 0)
   goto out;
 
  /* Write the records */
- if(H5Dwrite( dataset_id, mem_type_id, mem_space_id, space_id, H5P_DEFAULT, data )<0)
+ if(H5Dwrite( dataset_id, mem_type_id, mem_space_id, space_id, H5P_DEFAULT, data ) < 0)
   goto out;
 
  /* Terminate access to the dataspace */
@@ -3781,7 +3781,7 @@ herr_t H5TB_common_read_records( hid_t dataset_id,
  mem_size[0] = count[0];
  if ((mem_space_id = H5Screate_simple( 1, mem_size, NULL )) < 0)
   goto out;
- if ((H5Dread( dataset_id, mem_type_id, mem_space_id, space_id, H5P_DEFAULT, data))<0)
+ if ((H5Dread( dataset_id, mem_type_id, mem_space_id, space_id, H5P_DEFAULT, data)) < 0)
   goto out;
 
  /* Terminate access to the memory dataspace */

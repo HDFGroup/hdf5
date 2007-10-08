@@ -260,8 +260,8 @@ void compact_dataset(void)
     }
 
 
-    dataset = H5Dopen(iof, dname);
-    VRFY((dataset >= 0), "H5Dcreate succeeded");
+    dataset = H5Dopen2(iof, dname, H5P_DEFAULT);
+    VRFY((dataset >= 0), "H5Dopen2 succeeded");
 
     ret = H5Dread(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, dxpl, inme);
     VRFY((ret >= 0), "H5Dread succeeded");
@@ -371,8 +371,8 @@ void null_dataset(void)
     }
 
  
-    dataset = H5Dopen(iof, dname);
-    VRFY((dataset >= 0), "H5Dcreate succeeded");
+    dataset = H5Dopen2(iof, dname, H5P_DEFAULT);
+    VRFY((dataset >= 0), "H5Dopen2 succeeded");
 
     /* Try reading from the dataset (make certain our buffer is unmodified) */
     ret = H5Dread(dataset, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, dxpl, &uval);
@@ -898,7 +898,7 @@ void group_dataset_read(hid_t fid, int mpi_rank, int m)
 
     /* check the data. */
     sprintf(dname, "dataset%d", m);
-    did = H5Dopen(gid, dname);
+    did = H5Dopen2(gid, dname, H5P_DEFAULT);
     VRFY((did>0), dname);
 
     H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, indata);
@@ -1226,7 +1226,7 @@ int read_dataset(hid_t memspace, hid_t filespace, hid_t gid)
 
     for(n=0; n<NDATASET; n++) {
         sprintf(dname, "dataset%d", n);
-        did = H5Dopen(gid, dname);
+        did = H5Dopen2(gid, dname, H5P_DEFAULT);
         VRFY((did>0), dname);
 
         H5Dread(did, H5T_NATIVE_INT, memspace, filespace, H5P_DEFAULT,

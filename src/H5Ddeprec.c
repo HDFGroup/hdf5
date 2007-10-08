@@ -180,16 +180,18 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dcreate() */
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*-------------------------------------------------------------------------
- * Function:	H5Dopen
+ * Function:	H5Dopen1
  *
  * Purpose:	Finds a dataset named NAME at LOC_ID, opens it, and returns
  *		its ID.	 The dataset should be close when the caller is no
  *		longer interested in it.
  *
- * Return:	Success:	A new dataset ID
+ * Note:	Deprecated in favor of H5Dopen2
  *
+ * Return:	Success:	A new dataset ID
  *		Failure:	FAIL
  *
  * Programmer:	Robb Matzke
@@ -198,7 +200,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Dopen(hid_t loc_id, const char *name)
+H5Dopen1(hid_t loc_id, const char *name)
 {
     H5D_t       *dset = NULL;
     H5G_loc_t	 loc;		        /* Object location of group */
@@ -210,7 +212,7 @@ H5Dopen(hid_t loc_id, const char *name)
     hid_t        dxpl_id = H5AC_dxpl_id;    /* dxpl to use to open datset */
     hid_t        ret_value;
 
-    FUNC_ENTER_API(H5Dopen, FAIL)
+    FUNC_ENTER_API(H5Dopen1, FAIL)
     H5TRACE2("i", "i*s", loc_id, name);
 
     /* Check args */
@@ -256,9 +258,8 @@ done:
     } /* end if */
 
     FUNC_LEAVE_API(ret_value)
-} /* end H5Dopen() */
+} /* end H5Dopen1() */
 
-#ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*-------------------------------------------------------------------------
  * Function:	H5Dextend

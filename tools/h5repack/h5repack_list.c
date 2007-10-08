@@ -43,17 +43,17 @@ int check_objects(const char* fname,
 {
     hid_t         fid;
     unsigned int  i;
-    trav_table_t  *travt=NULL;
+    trav_table_t  *travt = NULL;
     
     /* nothing to do */
-    if (options->op_tbl->nelems==0)
+    if(options->op_tbl->nelems == 0)
         return 0;
     
     /*-------------------------------------------------------------------------
      * open the file
      *-------------------------------------------------------------------------
      */
-    if ((fid=h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, 0))<0){
+    if((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, 0)) < 0){
         printf("<%s>: %s\n", fname, H5FOPENERROR );
         return -1;
     }
@@ -67,7 +67,7 @@ int check_objects(const char* fname,
     trav_table_init(&travt);
     
     /* get the list of objects in the file */
-    if (h5trav_gettable(fid,travt)<0)
+    if(h5trav_gettable(fid, travt) < 0)
         goto out;
     
     /*-------------------------------------------------------------------------
@@ -75,80 +75,66 @@ int check_objects(const char* fname,
      *-------------------------------------------------------------------------
      */
     
-    if (options->verbose)
-    {
-        printf("Opening file <%s>. Searching for objects to modify...\n",fname);
-    }
+    if(options->verbose)
+        printf("Opening file <%s>. Searching for objects to modify...\n", fname);
     
-    for ( i = 0; i < options->op_tbl->nelems; i++)
-    {
+    for(i = 0; i < options->op_tbl->nelems; i++) {
         char* name=options->op_tbl->objs[i].path;
-        if (options->verbose)
+        if(options->verbose)
             printf(" <%s>",name);
         
         /* the input object names are present in the file and are valid */
-        if (h5trav_getindext(name,travt)<0)
-        {
+        if(h5trav_getindext(name, travt) < 0) {
             error_msg(progname, "%s Could not find <%s> in file <%s>. Exiting...\n",
                 (options->verbose?"\n":""),name,fname);
             goto out;
         }
-        if (options->verbose)
+        if(options->verbose)
             printf("...Found\n");
-        
-        
+
         /* check for extra filter conditions */
-        switch (options->op_tbl->objs[i].filter->filtn)
-        {
-            
+        switch(options->op_tbl->objs[i].filter->filtn) {
             /* chunk size must be smaller than pixels per block */
-        case H5Z_FILTER_SZIP:
+            case H5Z_FILTER_SZIP:
             {
                 int     j;
-                int     csize=1;
-                int     ppb=options->op_tbl->objs[i].filter->cd_values[0];
+                int     csize = 1;
+                int     ppb = options->op_tbl->objs[i].filter->cd_values[0];
                 hsize_t dims[H5S_MAX_RANK];
                 int     rank;
                 hid_t   did;
                 hid_t   sid;
                 
-                if (options->op_tbl->objs[i].chunk.rank>0)
-                {
-                    rank=options->op_tbl->objs[i].chunk.rank;
-                    for (j=0; j<rank; j++)
-                        csize*=(int)options->op_tbl->objs[i].chunk.chunk_lengths[j];
+                if(options->op_tbl->objs[i].chunk.rank > 0) {
+                    rank = options->op_tbl->objs[i].chunk.rank;
+                    for(j = 0; j < rank; j++)
+                        csize *= (int)options->op_tbl->objs[i].chunk.chunk_lengths[j];
                 }
-                else
-                {
-                    if ((did=H5Dopen(fid,name))<0)
+                else {
+                    if((did = H5Dopen2(fid, name, H5P_DEFAULT)) < 0)
                         goto out;
-                    if ((sid=H5Dget_space(did))<0)
+                    if((sid = H5Dget_space(did)) < 0)
                         goto out;
-                    if ( (rank=H5Sget_simple_extent_ndims(sid))<0)
+                    if((rank = H5Sget_simple_extent_ndims(sid)) < 0)
                         goto out;
                     HDmemset(dims, 0, sizeof dims);
-                    if ( H5Sget_simple_extent_dims(sid,dims,NULL)<0)
+                    if(H5Sget_simple_extent_dims(sid, dims, NULL) < 0)
                         goto out;
-                    for (j=0; j<rank; j++)
-                        csize*=(int)dims[j];
-                    if (H5Sclose(sid)<0)
+                    for(j = 0; j < rank; j++)
+                        csize *= (int)dims[j];
+                    if(H5Sclose(sid) < 0)
                         goto out;
-                    if (H5Dclose(did)<0)
+                    if(H5Dclose(did) < 0)
                         goto out;
                 }
                 
-                if (csize < ppb )
-                {
+                if (csize < ppb ) {
                     printf(" <warning: SZIP settins, chunk size is smaller than pixels per block>\n");
                     goto out;
                 }
-                
-                
             }
             break;
-            
         }
-        
     } /* i */
       
    /*-------------------------------------------------------------------------

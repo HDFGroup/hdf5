@@ -188,8 +188,8 @@ test_h5s_basic(void)
     fid1 = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK_I(fid1, "H5Fopen");
     if (fid1 >= 0){
-	dset1 = H5Dopen(fid1, "dset");
-	VERIFY(dset1, FAIL, "H5Dopen");
+	dset1 = H5Dopen2(fid1, "dset", H5P_DEFAULT);
+	VERIFY(dset1, FAIL, "H5Dopen2");
 	ret = H5Fclose(fid1);
 	CHECK_I(ret, "H5Fclose");
     }
@@ -462,8 +462,8 @@ test_h5s_null(void)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Reopen the dataset */
-    did = H5Dopen(fid, NULLDATASET);
-    CHECK(did, FAIL, "H5Dopen");
+    did = H5Dopen2(fid, NULLDATASET, H5P_DEFAULT);
+    CHECK(did, FAIL, "H5Dopen2");
 
     /* Get the space of the dataset */
     dset_sid = H5Dget_space(did);
@@ -783,10 +783,10 @@ test_h5s_scalar_read(void)
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Create a dataset */
-    dataset=H5Dopen(fid1,"Dataset1");
-    CHECK(dataset, FAIL, "H5Dopen");
+    dataset = H5Dopen2(fid1, "Dataset1", H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
 
-    sid1=H5Dget_space(dataset);
+    sid1 = H5Dget_space(dataset);
     CHECK(sid1, FAIL, "H5Dget_space");
 
     n = H5Sget_simple_extent_npoints(sid1);
@@ -928,10 +928,10 @@ test_h5s_compound_scalar_read(void)
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Create a dataset */
-    dataset=H5Dopen(fid1,"Dataset1");
-    CHECK(dataset, FAIL, "H5Dopen");
+    dataset = H5Dopen2(fid1, "Dataset1", H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
 
-    sid1=H5Dget_space(dataset);
+    sid1 = H5Dget_space(dataset);
     CHECK(sid1, FAIL, "H5Dget_space");
 
     n = H5Sget_simple_extent_npoints(sid1);
@@ -1034,22 +1034,22 @@ test_h5s_chunk(void)
     CHECK(status, FAIL, "H5Fclose");
 
     /* Reset/initialize the data arrays to read in */
-    HDmemset(chunk_data_dbl,0,sizeof(double)*50000*3);
-    HDmemset(chunk_data_flt,0,sizeof(float)*50000*3);
+    HDmemset(chunk_data_dbl, 0, sizeof(double) * 50000 * 3);
+    HDmemset(chunk_data_flt, 0, sizeof(float) * 50000 * 3);
 
-    fileID = H5Fopen(DATAFILE,H5F_ACC_RDONLY,H5P_DEFAULT);
+    fileID = H5Fopen(DATAFILE, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(fileID, FAIL, "H5Fopen");
-    dsetID = H5Dopen(fileID,"coords");
-    CHECK(dsetID, FAIL, "H5Dopen");
+    dsetID = H5Dopen2(fileID, "coords", H5P_DEFAULT);
+    CHECK(dsetID, FAIL, "H5Dopen2");
 
-    status= H5Dread (dsetID,H5T_NATIVE_DOUBLE,H5S_ALL,H5S_ALL,H5P_DEFAULT,chunk_data_dbl);
+    status= H5Dread (dsetID, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, chunk_data_dbl);
     CHECK(status, FAIL, "H5Dread");
-    status= H5Dread (dsetID,H5T_NATIVE_FLOAT,H5S_ALL,H5S_ALL,H5P_DEFAULT,chunk_data_flt);
+    status= H5Dread (dsetID, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, chunk_data_flt);
     CHECK(status, FAIL, "H5Dread");
 
-    status=H5Dclose(dsetID);
+    status = H5Dclose(dsetID);
     CHECK(status, FAIL, "H5Dclose");
-    status=H5Fclose(fileID);
+    status = H5Fclose(fileID);
     CHECK(status, FAIL, "H5Fclose");
 
     for(i=0; i<50000; i++) {

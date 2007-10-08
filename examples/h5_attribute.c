@@ -178,7 +178,7 @@ main (void)
    /*
     * Open the dataset.
     */
-   dataset = H5Dopen(file,"Dataset");
+   dataset = H5Dopen2(file, "Dataset", H5P_DEFAULT);
 
    /*
     * Attach to the scalar attribute using attribute name, then read and

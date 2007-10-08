@@ -253,7 +253,7 @@ herr_t H5IMget_image_info( hid_t loc_id,
  *npals = 0;
 
  /* Open the dataset. */
- if((did = H5Dopen(loc_id, dset_name)) < 0)
+ if((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
   return -1;
 
  /* Try to find the attribute "INTERLACE_MODE" on the >>image<< dataset */
@@ -407,7 +407,7 @@ herr_t H5IMread_image( hid_t loc_id,
  hid_t   did;
 
  /* Open the dataset. */
- if ( (did = H5Dopen( loc_id, dset_name )) < 0)
+ if((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
   return -1;
 
  /* Read */
@@ -527,7 +527,7 @@ herr_t H5IMlink_palette( hid_t loc_id,
   */
 
  /* First we get the image id */
- if ( (image_id = H5Dopen( loc_id, image_name )) < 0)
+ if((image_id = H5Dopen2(loc_id, image_name, H5P_DEFAULT)) < 0)
   return -1;
 
  /* Try to find the attribute "PALETTE" on the >>image<< dataset */
@@ -694,7 +694,7 @@ herr_t H5IMunlink_palette( hid_t loc_id,
   */
 
  /* First we get the image id */
- if ( (image_id = H5Dopen( loc_id, image_name )) < 0)
+ if((image_id = H5Dopen2(loc_id, image_name, H5P_DEFAULT)) < 0)
   return -1;
 
  /* Try to find the attribute "PALETTE" on the >>image<< dataset */
@@ -780,7 +780,7 @@ herr_t H5IMget_npalettes( hid_t loc_id,
  *npals = 0;
 
  /* Open the dataset. */
- if((image_id = H5Dopen(loc_id, image_name)) < 0)
+ if((image_id = H5Dopen2(loc_id, image_name, H5P_DEFAULT)) < 0)
   return -1;
 
  /* Try to find the attribute "PALETTE" on the >>image<< dataset */
@@ -873,7 +873,7 @@ herr_t H5IMget_palette_info( hid_t loc_id,
  hsize_t    pal_maxdims[2];
  
  /* Open the dataset. */
- if((image_id = H5Dopen(loc_id, image_name)) < 0)
+ if((image_id = H5Dopen2(loc_id, image_name, H5P_DEFAULT)) < 0)
   return -1;
  
  /* Try to find the attribute "PALETTE" on the >>image<< dataset */
@@ -985,7 +985,7 @@ herr_t H5IMget_palette( hid_t loc_id,
  hid_t      pal_id;
 
  /* Open the dataset. */
- if((image_id = H5Dopen(loc_id, image_name)) < 0)
+ if((image_id = H5Dopen2(loc_id, image_name, H5P_DEFAULT)) < 0)
   return -1;
 
  /* Try to find the attribute "PALETTE" on the >>image<< dataset */
@@ -1084,7 +1084,7 @@ herr_t H5IMis_image( hid_t loc_id,
  ret = -1;
 
  /* Open the dataset. */
- if ( (did = H5Dopen( loc_id, dset_name )) < 0)
+ if((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
   return -1;
 
  /* Try to find the attribute "CLASS" on the dataset */
@@ -1169,7 +1169,7 @@ herr_t H5IMis_palette( hid_t loc_id,
  ret = -1;
 
  /* Open the dataset. */
- if ( (did = H5Dopen( loc_id, dset_name )) < 0)
+ if((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
   return -1;
 
  /* Try to find the attribute "CLASS" on the dataset */

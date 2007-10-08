@@ -520,14 +520,14 @@ find_objs_cb(hid_t group, const char *name, const H5L_info_t UNUSED *linfo, void
                     tmp = build_obj_path_name(info->prefix, name);
                     add_obj(info->dset_table, oinfo.addr, tmp, TRUE);
 
-                    if((dset = H5Dopen (group, name)) >= 0) {
+                    if((dset = H5Dopen2(group, name, H5P_DEFAULT)) >= 0) {
                         hid_t type;
 
                         type = H5Dget_type(dset);
 
                         if(H5Tcommitted(type) > 0) {
                             H5Oget_info(type, ".", &oinfo, H5P_DEFAULT);
-                            if (search_obj(info->type_table, oinfo.addr) == NULL) {
+                            if(search_obj(info->type_table, oinfo.addr) == NULL) {
                                 char *type_name = HDstrdup(tmp);
 
                                 add_obj(info->type_table, oinfo.addr, type_name, FALSE);

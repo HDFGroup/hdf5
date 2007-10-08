@@ -96,7 +96,7 @@ static int test_dsets( void )
 
  /* Read dataset using the basic HDF5 API */
 
- if ( ( dataset_id = H5Dopen ( file_id, DSET0_NAME) ) < 0 )
+ if ( ( dataset_id = H5Dopen2(file_id, DSET0_NAME, H5P_DEFAULT) ) < 0 )
   goto out;
 
  if ( H5Dread ( dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data_int_out ) < 0 )

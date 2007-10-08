@@ -179,28 +179,28 @@ test_classes(void)
     /*-------------------------------------------------------------
      *  Check class of some atomic types.
      *-----------------------------------------------------------*/
-    if ((tcls=H5Tget_class(H5T_NATIVE_INT))<0) TEST_ERROR
+    if ((tcls=H5Tget_class(H5T_NATIVE_INT)) < 0) TEST_ERROR
     if (H5T_INTEGER!=tcls) TEST_ERROR
 
-    if ((tcls=H5Tget_class(H5T_NATIVE_DOUBLE))<0) TEST_ERROR
+    if ((tcls=H5Tget_class(H5T_NATIVE_DOUBLE)) < 0) TEST_ERROR
     if (H5T_FLOAT!=tcls) TEST_ERROR
 
     /* Create a VL datatype of char.  It should be a VL, not a string class. */
-    if((vlc_id=H5Tvlen_create(H5T_NATIVE_CHAR))<0) TEST_ERROR
+    if((vlc_id=H5Tvlen_create(H5T_NATIVE_CHAR)) < 0) TEST_ERROR
 
     /* Make certain that the correct classes can be detected */
-    if ((tcls=H5Tget_class(vlc_id))<0) TEST_ERROR
+    if ((tcls=H5Tget_class(vlc_id)) < 0) TEST_ERROR
     if (H5T_VLEN!=tcls) TEST_ERROR
 
     /* Make certain that an incorrect class is not detected */
     if (H5T_STRING==tcls) TEST_ERROR
 
     /* Create a VL string.  It should be a string, not a VL class. */
-    if((vls_id=H5Tcopy(H5T_C_S1))<0) TEST_ERROR
-    if(H5Tset_size(vls_id, H5T_VARIABLE)<0) TEST_ERROR;
+    if((vls_id=H5Tcopy(H5T_C_S1)) < 0) TEST_ERROR
+    if(H5Tset_size(vls_id, H5T_VARIABLE) < 0) TEST_ERROR;
 
     /* Make certain that the correct classes can be detected */
-    if ((tcls=H5Tget_class(vls_id))<0) TEST_ERROR
+    if ((tcls=H5Tget_class(vls_id)) < 0) TEST_ERROR
     if (H5T_STRING!=tcls) TEST_ERROR
 
     /* Make certain that an incorrect class is not detected */
@@ -210,31 +210,31 @@ test_classes(void)
      *  Check class for member types of compound type.
      *-----------------------------------------------------------*/
     /* Create a compound datatype and insert some complex types */
-    if ((cmpd_id = H5Tcreate(H5T_COMPOUND, sizeof(struct complex)))<0) TEST_ERROR
-    if (H5Tinsert(cmpd_id, "vl_c", HOFFSET(struct complex, vl_c), vlc_id)<0) TEST_ERROR
-    if (H5Tinsert(cmpd_id, "vl_s", HOFFSET(struct complex, vl_s), vls_id)<0) TEST_ERROR
+    if ((cmpd_id = H5Tcreate(H5T_COMPOUND, sizeof(struct complex))) < 0) TEST_ERROR
+    if (H5Tinsert(cmpd_id, "vl_c", HOFFSET(struct complex, vl_c), vlc_id) < 0) TEST_ERROR
+    if (H5Tinsert(cmpd_id, "vl_s", HOFFSET(struct complex, vl_s), vls_id) < 0) TEST_ERROR
 
     nmembs = H5Tget_nmembers(cmpd_id);
 
     for (i=0;i<nmembs;i++)
     {
         /* Get member type ID */
-        if((memb_id = H5Tget_member_type(cmpd_id, i))<0) TEST_ERROR
+        if((memb_id = H5Tget_member_type(cmpd_id, i)) < 0) TEST_ERROR
 
         /* Get member type class */
-        if((memb_cls = H5Tget_member_class (cmpd_id, i))<0) TEST_ERROR
+        if((memb_cls = H5Tget_member_class (cmpd_id, i)) < 0) TEST_ERROR
 
         /* Verify member class */
-        if(H5Tdetect_class (memb_id, memb_cls)<0) TEST_ERROR
+        if(H5Tdetect_class (memb_id, memb_cls) < 0) TEST_ERROR
 
         /* Close member type ID */
-        if(H5Tclose(memb_id)<0) TEST_ERROR
+        if(H5Tclose(memb_id) < 0) TEST_ERROR
     }
 
     /* Close datatypes */
-    if(H5Tclose(cmpd_id)<0) TEST_ERROR
-    if(H5Tclose(vlc_id)<0) TEST_ERROR
-    if(H5Tclose(vls_id)<0) TEST_ERROR
+    if(H5Tclose(cmpd_id) < 0) TEST_ERROR
+    if(H5Tclose(vlc_id) < 0) TEST_ERROR
+    if(H5Tclose(vls_id) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -349,12 +349,12 @@ test_detect(void)
      *  Test class of a compound type with some atomic types as fields.
      *------------------------------------------------------------------------------*/
     /* Create a compound datatype and insert some atomic types */
-    if ((atom_cmpd_id = H5Tcreate(H5T_COMPOUND, sizeof(struct atomic)))<0) TEST_ERROR
-    if (H5Tinsert(atom_cmpd_id, "i", HOFFSET(struct atomic, i), H5T_NATIVE_INT)<0) TEST_ERROR
-    if (H5Tinsert(atom_cmpd_id, "f", HOFFSET(struct atomic, f), H5T_NATIVE_FLOAT)<0) TEST_ERROR
-    if (H5Tinsert(atom_cmpd_id, "c", HOFFSET(struct atomic, c), H5T_NATIVE_CHAR)<0) TEST_ERROR
-    if (H5Tinsert(atom_cmpd_id, "d", HOFFSET(struct atomic, d), H5T_NATIVE_DOUBLE)<0) TEST_ERROR
-    if (H5Tinsert(atom_cmpd_id, "s", HOFFSET(struct atomic, s), H5T_NATIVE_SHORT)<0) TEST_ERROR
+    if ((atom_cmpd_id = H5Tcreate(H5T_COMPOUND, sizeof(struct atomic))) < 0) TEST_ERROR
+    if (H5Tinsert(atom_cmpd_id, "i", HOFFSET(struct atomic, i), H5T_NATIVE_INT) < 0) TEST_ERROR
+    if (H5Tinsert(atom_cmpd_id, "f", HOFFSET(struct atomic, f), H5T_NATIVE_FLOAT) < 0) TEST_ERROR
+    if (H5Tinsert(atom_cmpd_id, "c", HOFFSET(struct atomic, c), H5T_NATIVE_CHAR) < 0) TEST_ERROR
+    if (H5Tinsert(atom_cmpd_id, "d", HOFFSET(struct atomic, d), H5T_NATIVE_DOUBLE) < 0) TEST_ERROR
+    if (H5Tinsert(atom_cmpd_id, "s", HOFFSET(struct atomic, s), H5T_NATIVE_SHORT) < 0) TEST_ERROR
 
     /* Make certain that the correct classes can be detected */
     if(H5Tdetect_class(atom_cmpd_id,H5T_COMPOUND)!=TRUE) TEST_ERROR
@@ -392,7 +392,7 @@ test_detect(void)
     if(H5Tdetect_class(atom_arr_id,H5T_INTEGER)!=FALSE) TEST_ERROR
 
     /* Create a VL datatype with an atomic base type of float*/
-    if((atom_vlf_id=H5Tvlen_create(H5T_NATIVE_FLOAT))<0) TEST_ERROR
+    if((atom_vlf_id=H5Tvlen_create(H5T_NATIVE_FLOAT)) < 0) TEST_ERROR
 
     /* Make certain that the correct classes can be detected */
     if(H5Tdetect_class(atom_vlf_id,H5T_VLEN)!=TRUE) TEST_ERROR
@@ -404,7 +404,7 @@ test_detect(void)
 
     /* Create a VL datatype with an atomic base type of char.  It should be a VL
      * but not a string class. */
-    if((atom_vlc_id=H5Tvlen_create(H5T_NATIVE_CHAR))<0) TEST_ERROR
+    if((atom_vlc_id=H5Tvlen_create(H5T_NATIVE_CHAR)) < 0) TEST_ERROR
 
     /* Make certain that the correct classes can be detected */
     if(H5Tdetect_class(atom_vlc_id,H5T_VLEN)!=TRUE) TEST_ERROR
@@ -414,8 +414,8 @@ test_detect(void)
     if(H5Tdetect_class(atom_vlc_id,H5T_STRING)!=FALSE) TEST_ERROR
 
     /* Create a VL string.  It should be a string, not a VL class. */
-    if((atom_vls_id=H5Tcopy(H5T_C_S1))<0) TEST_ERROR
-    if(H5Tset_size(atom_vls_id, H5T_VARIABLE)<0) TEST_ERROR;
+    if((atom_vls_id=H5Tcopy(H5T_C_S1)) < 0) TEST_ERROR
+    if(H5Tset_size(atom_vls_id, H5T_VARIABLE) < 0) TEST_ERROR;
 
     /* Make certain that the correct classes can be detected */
     if(H5Tdetect_class(atom_vls_id,H5T_STRING)!=TRUE) TEST_ERROR
@@ -427,12 +427,12 @@ test_detect(void)
      *  Test class of a compound type with some complex types as fields.
      *------------------------------------------------------------------------------*/
     /* Create a compound datatype and insert some complex types */
-    if ((cplx_cmpd_id = H5Tcreate(H5T_COMPOUND, sizeof(struct complex)))<0) TEST_ERROR
-    if (H5Tinsert(cplx_cmpd_id, "arr_r", HOFFSET(struct complex, arr_r), atom_arr_id)<0) TEST_ERROR
-    if (H5Tinsert(cplx_cmpd_id, "i", HOFFSET(struct complex, i), H5T_NATIVE_INT)<0) TEST_ERROR
-    if (H5Tinsert(cplx_cmpd_id, "vl_f", HOFFSET(struct complex, vl_f), atom_vlf_id)<0) TEST_ERROR
-    if (H5Tinsert(cplx_cmpd_id, "c", HOFFSET(struct complex, c), H5T_NATIVE_CHAR)<0) TEST_ERROR
-    if (H5Tinsert(cplx_cmpd_id, "s", HOFFSET(struct complex, s), H5T_NATIVE_SHORT)<0) TEST_ERROR
+    if ((cplx_cmpd_id = H5Tcreate(H5T_COMPOUND, sizeof(struct complex))) < 0) TEST_ERROR
+    if (H5Tinsert(cplx_cmpd_id, "arr_r", HOFFSET(struct complex, arr_r), atom_arr_id) < 0) TEST_ERROR
+    if (H5Tinsert(cplx_cmpd_id, "i", HOFFSET(struct complex, i), H5T_NATIVE_INT) < 0) TEST_ERROR
+    if (H5Tinsert(cplx_cmpd_id, "vl_f", HOFFSET(struct complex, vl_f), atom_vlf_id) < 0) TEST_ERROR
+    if (H5Tinsert(cplx_cmpd_id, "c", HOFFSET(struct complex, c), H5T_NATIVE_CHAR) < 0) TEST_ERROR
+    if (H5Tinsert(cplx_cmpd_id, "s", HOFFSET(struct complex, s), H5T_NATIVE_SHORT) < 0) TEST_ERROR
 
     /* Make certain that the correct classes can be detected */
     if(H5Tdetect_class(cplx_cmpd_id,H5T_COMPOUND)!=TRUE) TEST_ERROR
@@ -448,22 +448,22 @@ test_detect(void)
     if(H5Tdetect_class(cplx_cmpd_id,H5T_STRING)!=FALSE) TEST_ERROR
 
     /* Close complex compound datatype */
-    if(H5Tclose(cplx_cmpd_id)<0) TEST_ERROR
+    if(H5Tclose(cplx_cmpd_id) < 0) TEST_ERROR
 
     /* Close atomic VL datatype of float */
-    if(H5Tclose(atom_vlf_id)<0) TEST_ERROR
+    if(H5Tclose(atom_vlf_id) < 0) TEST_ERROR
 
     /* Close atomic VL datatype of char */
-    if(H5Tclose(atom_vlc_id)<0) TEST_ERROR
+    if(H5Tclose(atom_vlc_id) < 0) TEST_ERROR
 
     /* Close atomic VL string datatype  */
-    if(H5Tclose(atom_vls_id)<0) TEST_ERROR
+    if(H5Tclose(atom_vls_id) < 0) TEST_ERROR
 
     /* Close atomic array datatype */
-    if(H5Tclose(atom_arr_id)<0) TEST_ERROR
+    if(H5Tclose(atom_arr_id) < 0) TEST_ERROR
 
     /* Close atomic compound datatype */
-    if(H5Tclose(atom_cmpd_id)<0) TEST_ERROR
+    if(H5Tclose(atom_cmpd_id) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -507,7 +507,7 @@ test_compound_1(void)
     TESTING("compound datatypes");
 
     /* Create the empty type */
-    if ((complex_id = H5Tcreate(H5T_COMPOUND, sizeof(complex_t)))<0) goto error;
+    if ((complex_id = H5Tcreate(H5T_COMPOUND, sizeof(complex_t))) < 0) goto error;
 
     /* Attempt to add the new compound datatype as a field within itself */
     H5E_BEGIN_TRY {
@@ -521,9 +521,9 @@ test_compound_1(void)
 
     /* Add a couple fields */
     if (H5Tinsert(complex_id, "real", HOFFSET(complex_t, re),
-		  H5T_NATIVE_DOUBLE)<0) goto error;
+		  H5T_NATIVE_DOUBLE) < 0) goto error;
     if (H5Tinsert(complex_id, "imaginary", HOFFSET(complex_t, im),
-		  H5T_NATIVE_DOUBLE)<0) goto error;
+		  H5T_NATIVE_DOUBLE) < 0) goto error;
 
     /* Test some functions that aren't supposed to work for compound type */
     H5E_BEGIN_TRY {
@@ -635,7 +635,7 @@ test_compound_1(void)
         goto error;
     } /* end if */
 
-    if (H5Tclose (complex_id)<0) goto error;
+    if (H5Tclose (complex_id) < 0) goto error;
     PASSED();
     return 0;
 
@@ -700,27 +700,27 @@ test_compound_2(void)
 
     /* Build hdf5 datatypes */
     array_dt = H5Tarray_create(H5T_NATIVE_INT,1, &four, NULL);
-    if ((st=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
-            H5Tinsert(st, "a", HOFFSET(struct st, a), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(st, "c", HOFFSET(struct st, c), array_dt)<0 ||
-            H5Tinsert(st, "d", HOFFSET(struct st, d), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(st, "e", HOFFSET(struct st, e), H5T_NATIVE_INT)<0)
+    if ((st=H5Tcreate(H5T_COMPOUND, sizeof(struct st))) < 0 ||
+            H5Tinsert(st, "a", HOFFSET(struct st, a), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(st, "c", HOFFSET(struct st, c), array_dt) < 0 ||
+            H5Tinsert(st, "d", HOFFSET(struct st, d), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(st, "e", HOFFSET(struct st, e), H5T_NATIVE_INT) < 0)
         goto error;
     H5Tclose(array_dt);
 
     array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
-    if ((dt=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
-            H5Tinsert(dt, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(dt, "b", HOFFSET(struct dt, b), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(dt, "c", HOFFSET(struct dt, c), array_dt)<0 ||
-            H5Tinsert(dt, "d", HOFFSET(struct dt, d), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(dt, "e", HOFFSET(struct dt, e), H5T_NATIVE_INT)<0)
+    if ((dt=H5Tcreate(H5T_COMPOUND, sizeof(struct dt))) < 0 ||
+            H5Tinsert(dt, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(dt, "b", HOFFSET(struct dt, b), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(dt, "c", HOFFSET(struct dt, c), array_dt) < 0 ||
+            H5Tinsert(dt, "d", HOFFSET(struct dt, d), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(dt, "e", HOFFSET(struct dt, e), H5T_NATIVE_INT) < 0)
         goto error;
     H5Tclose(array_dt);
 
     /* Perform the conversion */
-    if (H5Tconvert(st, dt, nelmts, buf, bkg, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(st, dt, nelmts, buf, bkg, H5P_DEFAULT) < 0) goto error;
 
     /* Compare results */
     for (i=0; i<(int)nelmts; i++) {
@@ -750,7 +750,7 @@ test_compound_2(void)
     free(buf);
     free(bkg);
     free(orig);
-    if (H5Tclose(st)<0 || H5Tclose(dt)<0) goto error;
+    if (H5Tclose(st) < 0 || H5Tclose(dt) < 0) goto error;
 
     PASSED();
     reset_hdf5();
@@ -817,25 +817,25 @@ test_compound_3(void)
 
     /* Build hdf5 datatypes */
     array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
-    if ((st=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
-            H5Tinsert(st, "a", HOFFSET(struct st, a), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(st, "c", HOFFSET(struct st, c), array_dt)<0 ||
-            H5Tinsert(st, "d", HOFFSET(struct st, d), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(st, "e", HOFFSET(struct st, e), H5T_NATIVE_INT)<0)
+    if ((st=H5Tcreate(H5T_COMPOUND, sizeof(struct st))) < 0 ||
+            H5Tinsert(st, "a", HOFFSET(struct st, a), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(st, "c", HOFFSET(struct st, c), array_dt) < 0 ||
+            H5Tinsert(st, "d", HOFFSET(struct st, d), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(st, "e", HOFFSET(struct st, e), H5T_NATIVE_INT) < 0)
         goto error;
     H5Tclose(array_dt);
 
     array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
-    if ((dt=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
-            H5Tinsert(dt, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(dt, "c", HOFFSET(struct dt, c), array_dt)<0 ||
-            H5Tinsert(dt, "e", HOFFSET(struct dt, e), H5T_NATIVE_INT)<0)
+    if ((dt=H5Tcreate(H5T_COMPOUND, sizeof(struct dt))) < 0 ||
+            H5Tinsert(dt, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(dt, "c", HOFFSET(struct dt, c), array_dt) < 0 ||
+            H5Tinsert(dt, "e", HOFFSET(struct dt, e), H5T_NATIVE_INT) < 0)
         goto error;
     H5Tclose(array_dt);
 
     /* Perform the conversion */
-    if (H5Tconvert(st, dt, nelmts, buf, bkg, H5P_DEFAULT)<0)
+    if (H5Tconvert(st, dt, nelmts, buf, bkg, H5P_DEFAULT) < 0)
         goto error;
 
     /* Compare results */
@@ -864,7 +864,7 @@ test_compound_3(void)
     free(buf);
     free(bkg);
     free(orig);
-    if (H5Tclose(st)<0 || H5Tclose(dt)<0) goto error;
+    if (H5Tclose(st) < 0 || H5Tclose(dt) < 0) goto error;
 
     PASSED();
     reset_hdf5();
@@ -935,27 +935,27 @@ test_compound_4(void)
 
     /* Build hdf5 datatypes */
     array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
-    if ((st=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
-            H5Tinsert(st, "a", HOFFSET(struct st, a), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(st, "c", HOFFSET(struct st, c), array_dt)<0 ||
-            H5Tinsert(st, "d", HOFFSET(struct st, d), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(st, "e", HOFFSET(struct st, e), H5T_NATIVE_INT)<0)
+    if ((st=H5Tcreate(H5T_COMPOUND, sizeof(struct st))) < 0 ||
+            H5Tinsert(st, "a", HOFFSET(struct st, a), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(st, "c", HOFFSET(struct st, c), array_dt) < 0 ||
+            H5Tinsert(st, "d", HOFFSET(struct st, d), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(st, "e", HOFFSET(struct st, e), H5T_NATIVE_INT) < 0)
         goto error;
     H5Tclose(array_dt);
 
     array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
-    if ((dt=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
-            H5Tinsert(dt, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(dt, "b", HOFFSET(struct dt, b), H5T_NATIVE_SHORT)<0 ||
-            H5Tinsert(dt, "c", HOFFSET(struct dt, c), array_dt)<0 ||
-            H5Tinsert(dt, "d", HOFFSET(struct dt, d), H5T_NATIVE_SHORT)<0 ||
-            H5Tinsert(dt, "e", HOFFSET(struct dt, e), H5T_NATIVE_INT)<0)
+    if ((dt=H5Tcreate(H5T_COMPOUND, sizeof(struct dt))) < 0 ||
+            H5Tinsert(dt, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(dt, "b", HOFFSET(struct dt, b), H5T_NATIVE_SHORT) < 0 ||
+            H5Tinsert(dt, "c", HOFFSET(struct dt, c), array_dt) < 0 ||
+            H5Tinsert(dt, "d", HOFFSET(struct dt, d), H5T_NATIVE_SHORT) < 0 ||
+            H5Tinsert(dt, "e", HOFFSET(struct dt, e), H5T_NATIVE_INT) < 0)
         goto error;
     H5Tclose(array_dt);
 
     /* Perform the conversion */
-    if (H5Tconvert(st, dt, nelmts, buf, bkg, H5P_DEFAULT)<0)
+    if (H5Tconvert(st, dt, nelmts, buf, bkg, H5P_DEFAULT) < 0)
         goto error;
 
     /* Compare results */
@@ -986,7 +986,7 @@ test_compound_4(void)
     free(buf);
     free(bkg);
     free(orig);
-    if (H5Tclose(st)<0 || H5Tclose(dt)<0) goto error;
+    if (H5Tclose(st) < 0 || H5Tclose(dt) < 0) goto error;
 
     PASSED();
     reset_hdf5();
@@ -1157,22 +1157,22 @@ test_compound_6(void)
     HDmemcpy(buf, orig, nelmts*sizeof(struct st));
 
     /* Build hdf5 datatypes */
-    if ((st=H5Tcreate(H5T_COMPOUND, sizeof(struct st)))<0 ||
-            H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_SHORT)<0 ||
-            H5Tinsert(st, "d", HOFFSET(struct st, d), H5T_NATIVE_SHORT)<0) {
+    if ((st=H5Tcreate(H5T_COMPOUND, sizeof(struct st))) < 0 ||
+            H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_SHORT) < 0 ||
+            H5Tinsert(st, "d", HOFFSET(struct st, d), H5T_NATIVE_SHORT) < 0) {
         H5_FAILED();
         goto error;
     }
 
-    if ((dt=H5Tcreate(H5T_COMPOUND, sizeof(struct dt)))<0 ||
-            H5Tinsert(dt, "b", HOFFSET(struct dt, b), H5T_NATIVE_LONG)<0 ||
-            H5Tinsert(dt, "d", HOFFSET(struct dt, d), H5T_NATIVE_LONG)<0) {
+    if ((dt=H5Tcreate(H5T_COMPOUND, sizeof(struct dt))) < 0 ||
+            H5Tinsert(dt, "b", HOFFSET(struct dt, b), H5T_NATIVE_LONG) < 0 ||
+            H5Tinsert(dt, "d", HOFFSET(struct dt, d), H5T_NATIVE_LONG) < 0) {
         H5_FAILED();
         goto error;
     }
 
     /* Perform the conversion */
-    if (H5Tconvert(st, dt, nelmts, buf, bkg, H5P_DEFAULT)<0) {
+    if (H5Tconvert(st, dt, nelmts, buf, bkg, H5P_DEFAULT) < 0) {
         H5_FAILED();
         goto error;
     }
@@ -1197,7 +1197,7 @@ test_compound_6(void)
     free(buf);
     free(bkg);
     free(orig);
-    if (H5Tclose(st)<0 || H5Tclose(dt)<0) {
+    if (H5Tclose(st) < 0 || H5Tclose(dt) < 0) {
         H5_FAILED();
         goto error;
     }
@@ -1252,25 +1252,25 @@ test_compound_7(void)
 
     TESTING("compound element insertion");
 
-    if((tid1= H5Tcreate( H5T_COMPOUND, sizeof(struct s1)))<0) {
+    if((tid1= H5Tcreate( H5T_COMPOUND, sizeof(struct s1))) < 0) {
         H5_FAILED();
         printf("Can't create datatype!\n");
         goto error;
     } /* end if */
 
-    if(H5Tinsert(tid1,"a",HOFFSET(struct s1,a),H5T_NATIVE_INT)<0) {
+    if(H5Tinsert(tid1,"a",HOFFSET(struct s1,a),H5T_NATIVE_INT) < 0) {
         H5_FAILED();
         printf("Can't insert field 'a'\n");
         goto error;
     } /* end if */
 
-    if(H5Tinsert(tid1,"b",HOFFSET(struct s1,b),H5T_NATIVE_FLOAT)<0) {
+    if(H5Tinsert(tid1,"b",HOFFSET(struct s1,b),H5T_NATIVE_FLOAT) < 0) {
         H5_FAILED();
         printf("Can't insert field 'b'\n");
         goto error;
     } /* end if */
 
-    if(H5Tinsert(tid1,"c",HOFFSET(struct s1,c),H5T_NATIVE_LONG)<0) {
+    if(H5Tinsert(tid1,"c",HOFFSET(struct s1,c),H5T_NATIVE_LONG) < 0) {
         H5_FAILED();
         printf("Can't insert field 'c'\n");
         goto error;
@@ -1282,7 +1282,7 @@ test_compound_7(void)
         goto error;
     } /* end if */
 
-    if((tid2= H5Tcopy(tid1))<0) {
+    if((tid2= H5Tcopy(tid1)) < 0) {
         H5_FAILED();
         printf("Can't copy datatype\n");
         goto error;
@@ -1315,13 +1315,13 @@ test_compound_7(void)
     } /* end if */
 
     /* Increase compound type size and try inserting field again */
-    if(H5Tset_size(tid2, sizeof(struct s2))<0) {
+    if(H5Tset_size(tid2, sizeof(struct s2)) < 0) {
         H5_FAILED();
         printf("Can't increase size for compound type\n");
         goto error;
     } /* end if */
 
-    if( H5Tinsert(tid2,"d",HOFFSET(struct s2,d),H5T_NATIVE_DOUBLE)<0) {
+    if( H5Tinsert(tid2,"d",HOFFSET(struct s2,d),H5T_NATIVE_DOUBLE) < 0) {
         H5_FAILED();
         printf("Can't expand compound datatype\n");
         goto error;
@@ -1334,7 +1334,7 @@ test_compound_7(void)
     } /* end if */
 
     /* Release resources */
-    if (H5Tclose(tid1)<0 || H5Tclose(tid2)<0) {
+    if (H5Tclose(tid1) < 0 || H5Tclose(tid2) < 0) {
         H5_FAILED();
         printf("Can't close datatypes\n");
         goto error;
@@ -1384,39 +1384,39 @@ test_compound_8(void)
     TESTING("packing compound datatypes");
 
     /* Create first compound datatype */
-    if((tid1 = H5Tcreate( H5T_COMPOUND, sizeof(struct s1)))<0) {
+    if((tid1 = H5Tcreate( H5T_COMPOUND, sizeof(struct s1))) < 0) {
         H5_FAILED(); AT();
         printf("Can't create datatype!\n");
         goto error;
     } /* end if */
 
-    if(H5Tinsert(tid1,"a",HOFFSET(struct s1,a),H5T_NATIVE_CHAR)<0) {
+    if(H5Tinsert(tid1,"a",HOFFSET(struct s1,a),H5T_NATIVE_CHAR) < 0) {
         H5_FAILED(); AT();
         printf("Can't insert field 'a'\n");
         goto error;
     } /* end if */
 
-    if(H5Tinsert(tid1,"b",HOFFSET(struct s1,b),H5T_NATIVE_INT)<0) {
+    if(H5Tinsert(tid1,"b",HOFFSET(struct s1,b),H5T_NATIVE_INT) < 0) {
         H5_FAILED(); AT();
         printf("Can't insert field 'b'\n");
         goto error;
     } /* end if */
 
     /* Test H5Tpack for the first compound type */
-    if(H5Tpack(tid1)<0) {
+    if(H5Tpack(tid1) < 0) {
         H5_FAILED(); AT();
         printf("Can't pack the compound datatype\n");
         goto error;
     } /* end if */
 
-    if(H5Tlock(tid1)<0) {
+    if(H5Tlock(tid1) < 0) {
         H5_FAILED(); AT();
         printf("Can't lock the compound datatype\n");
         goto error;
     } /* end if */
 
     /* If the type is already packed, packing a locked type is OK */
-    if(H5Tpack(tid1)<0) {
+    if(H5Tpack(tid1) < 0) {
         H5_FAILED(); AT();
         printf("Can't pack the compound datatype for second time\n");
         goto error;
@@ -1424,53 +1424,53 @@ test_compound_8(void)
 
 
     /* Create second compound datatype */
-    if((tid2 = H5Tcreate( H5T_COMPOUND, sizeof(struct s2)))<0) {
+    if((tid2 = H5Tcreate( H5T_COMPOUND, sizeof(struct s2))) < 0) {
         H5_FAILED(); AT();
         printf("Can't create datatype!\n");
         goto error;
     } /* end if */
 
-    if(H5Tinsert(tid2,"c",HOFFSET(struct s2,c),H5T_NATIVE_CHAR)<0) {
+    if(H5Tinsert(tid2,"c",HOFFSET(struct s2,c),H5T_NATIVE_CHAR) < 0) {
         H5_FAILED(); AT();
         printf("Can't insert field 'c'\n");
         goto error;
     } /* end if */
 
-    if(H5Tinsert(tid2,"d",HOFFSET(struct s2,d),tid1)<0) {
+    if(H5Tinsert(tid2,"d",HOFFSET(struct s2,d),tid1) < 0) {
         H5_FAILED(); AT();
         printf("Can't insert field 'd'\n");
         goto error;
     } /* end if */
 
     /* Make a copy of the type for later */
-    if((tid3=H5Tcopy(tid2))<0) {
+    if((tid3=H5Tcopy(tid2)) < 0) {
         H5_FAILED(); AT();
         printf("Can't copy type #2\n");
         goto error;
     } /* end if */
 
     /* Test H5Tpack for the second compound type */
-    if(H5Tpack(tid2)<0) {
+    if(H5Tpack(tid2) < 0) {
         H5_FAILED(); AT();
         printf("Can't pack the compound datatype\n");
         goto error;
     } /* end if */
 
-    if(H5Tlock(tid2)<0) {
+    if(H5Tlock(tid2) < 0) {
         H5_FAILED(); AT();
         printf("Can't lock the compound datatype\n");
         goto error;
     } /* end if */
 
     /* If the type is already packed, packing a locked type is OK */
-    if(H5Tpack(tid2)<0) {
+    if(H5Tpack(tid2) < 0) {
         H5_FAILED(); AT();
         printf("Can't pack the compound datatype for second time\n");
         goto error;
     } /* end if */
 
     /* Lock unpacked type */
-    if(H5Tlock(tid3)<0) {
+    if(H5Tlock(tid3) < 0) {
         H5_FAILED(); AT();
         printf("Can't lock the compound datatype\n");
         goto error;
@@ -1534,27 +1534,27 @@ test_compound_9(void)
 
     /* Create File */
     h5_fixname(FILENAME[3], H5P_DEFAULT, filename, sizeof filename);
-    if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0) {
+    if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
         H5_FAILED(); AT();
         printf("Can't create file!\n");
         goto error;
     } /* end if */
 
     /* Create first compound datatype */
-    if((cmpd_tid = H5Tcreate( H5T_COMPOUND, sizeof(struct cmpd_struct)))<0) {
+    if((cmpd_tid = H5Tcreate( H5T_COMPOUND, sizeof(struct cmpd_struct))) < 0) {
         H5_FAILED(); AT();
         printf("Can't create datatype!\n");
         goto error;
     } /* end if */
 
-    if(H5Tinsert(cmpd_tid,"i1",HOFFSET(struct cmpd_struct,i1),H5T_NATIVE_INT)<0) {
+    if(H5Tinsert(cmpd_tid,"i1",HOFFSET(struct cmpd_struct,i1),H5T_NATIVE_INT) < 0) {
         H5_FAILED(); AT();
         printf("Can't insert field 'i1'\n");
         goto error;
     } /* end if */
 
     str_id = H5Tcopy(H5T_C_S1);
-    if(H5Tset_size(str_id,H5T_VARIABLE)<0) {
+    if(H5Tset_size(str_id,H5T_VARIABLE) < 0) {
         H5_FAILED(); AT();
         printf("Can't set size for VL string\n");
         goto error;
@@ -1600,19 +1600,19 @@ test_compound_9(void)
         goto error;
     } /* end if */
 
-    if((dset_id = H5Dcreate(file,"Dataset",dup_tid,space_id,H5P_DEFAULT))<0) {
+    if((dset_id = H5Dcreate(file,"Dataset",dup_tid,space_id,H5P_DEFAULT)) < 0) {
         H5_FAILED(); AT();
         printf("Can't create dataset\n");
         goto error;
     } /* end if */
 
-    if(H5Dwrite(dset_id,dup_tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,&wdata)<0) {
+    if(H5Dwrite(dset_id,dup_tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,&wdata) < 0) {
         H5_FAILED(); AT();
         printf("Can't write data\n");
         goto error;
     } /* end if */
 
-    if(H5Dread(dset_id,dup_tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,&rdata)<0) {
+    if(H5Dread(dset_id,dup_tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,&rdata) < 0) {
         H5_FAILED(); AT();
         printf("Can't read data\n");
         goto error;
@@ -1624,39 +1624,39 @@ test_compound_9(void)
         goto error;
     } /* end if */
 
-    if(H5Dclose(dset_id)<0)
+    if(H5Dclose(dset_id) < 0)
         goto error;
-    if(H5Tclose(cmpd_tid)<0)
+    if(H5Tclose(cmpd_tid) < 0)
         goto error;
-    if(H5Tclose(dup_tid)<0)
+    if(H5Tclose(dup_tid) < 0)
         goto error;
-    if(H5Tclose(str_id)<0)
+    if(H5Tclose(str_id) < 0)
         goto error;
-    if(H5Sclose(space_id)<0)
+    if(H5Sclose(space_id) < 0)
         goto error;
-    if(H5Fclose(file)<0)
+    if(H5Fclose(file) < 0)
         goto error;
 
 
-    if((file=H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT))<0) {
+    if((file = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) {
         H5_FAILED(); AT();
         printf("cannot open file\n");
         goto error;
     } /* end if */
 
-    if((dset_id = H5Dopen(file, "Dataset"))<0) {
+    if((dset_id = H5Dopen2(file, "Dataset", H5P_DEFAULT)) < 0) {
         H5_FAILED(); AT();
         printf("cannot open dataset\n");
         goto error;
     } /* end if */
 
-    if((cmpd_tid = H5Dget_type(dset_id))<0) {
+    if((cmpd_tid = H5Dget_type(dset_id)) < 0) {
          H5_FAILED(); AT();
         printf("cannot open dataset\n");
         goto error;
     } /* end if */
 
-    if((dup_tid = H5Tcopy(cmpd_tid))<0) {
+    if((dup_tid = H5Tcopy(cmpd_tid)) < 0) {
         H5_FAILED(); AT();
         printf("Can't copy datatype\n");
         goto error;
@@ -1665,7 +1665,7 @@ test_compound_9(void)
     rdata.i1 = rdata.i2 = 0;
     if(rdata.str) free(rdata.str);
 
-    if(H5Dread(dset_id,dup_tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,&rdata)<0) {
+    if(H5Dread(dset_id, dup_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata) < 0) {
         H5_FAILED(); AT();
         printf("Can't read data\n");
         goto error;
@@ -1679,13 +1679,13 @@ test_compound_9(void)
 
     if(rdata.str) free(rdata.str);
 
-    if(H5Dclose(dset_id)<0)
+    if(H5Dclose(dset_id) < 0)
         goto error;
-    if(H5Tclose(cmpd_tid)<0)
+    if(H5Tclose(cmpd_tid) < 0)
         goto error;
-    if(H5Tclose(dup_tid)<0)
+    if(H5Tclose(dup_tid) < 0)
         goto error;
-    if(H5Fclose(file)<0)
+    if(H5Fclose(file) < 0)
         goto error;
 
     PASSED();
@@ -1751,52 +1751,52 @@ test_compound_10(void)
 
     /* Create File */
     h5_fixname(FILENAME[4], H5P_DEFAULT, filename, sizeof filename);
-    if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0) {
+    if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
         H5_FAILED(); AT();
         printf("Can't create file!\n");
         goto error;
     } /* end if */
 
     /* Create first compound datatype */
-    if((cmpd_tid = H5Tcreate( H5T_COMPOUND, sizeof(struct cmpd_struct)))<0) {
+    if((cmpd_tid = H5Tcreate( H5T_COMPOUND, sizeof(struct cmpd_struct))) < 0) {
         H5_FAILED(); AT();
         printf("Can't create datatype!\n");
         goto error;
     } /* end if */
 
-    if(H5Tinsert(cmpd_tid,"i1",HOFFSET(struct cmpd_struct,i1),H5T_NATIVE_INT)<0) {
+    if(H5Tinsert(cmpd_tid,"i1",HOFFSET(struct cmpd_struct,i1),H5T_NATIVE_INT) < 0) {
         H5_FAILED(); AT();
         printf("Can't insert field 'i1'\n");
         goto error;
     } /* end if */
 
     cstr_id = H5Tcopy(H5T_C_S1);
-    if(H5Tset_size(cstr_id,H5T_VARIABLE)<0) {
+    if(H5Tset_size(cstr_id,H5T_VARIABLE) < 0) {
         H5_FAILED(); AT();
         printf("Can't set size for C string\n");
         goto error;
     } /* end if */
 
-    if(H5Tinsert(cmpd_tid,"c_string",HOFFSET(cmpd_struct,str),cstr_id)<0) {
+    if(H5Tinsert(cmpd_tid,"c_string",HOFFSET(cmpd_struct,str),cstr_id) < 0) {
         H5_FAILED(); AT();
         printf("Can't insert field 'str'\n");
         goto error;
     } /* end if */
 
     /* Create vl-string datatype */
-    if((vlstr_id =  H5Tvlen_create(H5T_NATIVE_CHAR))<0) {
+    if((vlstr_id =  H5Tvlen_create(H5T_NATIVE_CHAR)) < 0) {
         H5_FAILED(); AT();
         printf("Can't create VL string\n");
         goto error;
     } /* end if */
 
-    if(H5Tinsert(cmpd_tid, "vl_string",HOFFSET(cmpd_struct, text), vlstr_id)<0) {
+    if(H5Tinsert(cmpd_tid, "vl_string",HOFFSET(cmpd_struct, text), vlstr_id) < 0) {
         H5_FAILED(); AT();
         printf("Can't insert field 'text'\n");
         goto error;
     } /* end if */
 
-    if(H5Tinsert(cmpd_tid,"i2",HOFFSET(struct cmpd_struct,i2),H5T_NATIVE_INT)<0) {
+    if(H5Tinsert(cmpd_tid,"i2",HOFFSET(struct cmpd_struct,i2),H5T_NATIVE_INT) < 0) {
         H5_FAILED(); AT();
         printf("Can't insert field 'i2'\n");
         goto error;
@@ -1810,25 +1810,25 @@ test_compound_10(void)
     } /* end if */
 
     dim1[0] = 1;
-    if((space_id=H5Screate_simple(1,dim1,NULL))<0) {
+    if((space_id=H5Screate_simple(1,dim1,NULL)) < 0) {
         H5_FAILED(); AT();
         printf("Can't create space\n");
         goto error;
     } /* end if */
 
-    if((dset_id = H5Dcreate(file,"Dataset",arr_tid,space_id,H5P_DEFAULT))<0) {
+    if((dset_id = H5Dcreate(file,"Dataset",arr_tid,space_id,H5P_DEFAULT)) < 0) {
         H5_FAILED(); AT();
         printf("Can't create dataset\n");
         goto error;
     } /* end if */
 
-    if(H5Dwrite(dset_id,arr_tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,&wdata)<0) {
+    if(H5Dwrite(dset_id,arr_tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,&wdata) < 0) {
         H5_FAILED(); AT();
         printf("Can't write data\n");
         goto error;
     } /* end if */
 
-    if(H5Dread(dset_id,arr_tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,&rdata)<0) {
+    if(H5Dread(dset_id,arr_tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,&rdata) < 0) {
         H5_FAILED(); AT();
         printf("Can't read data\n");
         goto error;
@@ -1862,19 +1862,19 @@ test_compound_10(void)
         free(rdata[i].str);
     } /* end for */
 
-    if(H5Dclose(dset_id)<0)
+    if(H5Dclose(dset_id) < 0)
         goto error;
-    if(H5Tclose(cmpd_tid)<0)
+    if(H5Tclose(cmpd_tid) < 0)
         goto error;
-    if(H5Tclose(arr_tid)<0)
+    if(H5Tclose(arr_tid) < 0)
         goto error;
-    if(H5Tclose(cstr_id)<0)
+    if(H5Tclose(cstr_id) < 0)
         goto error;
-    if(H5Tclose(vlstr_id)<0)
+    if(H5Tclose(vlstr_id) < 0)
         goto error;
-    if(H5Sclose(space_id)<0)
+    if(H5Sclose(space_id) < 0)
         goto error;
-    if(H5Fclose(file)<0)
+    if(H5Fclose(file) < 0)
         goto error;
 
     PASSED();
@@ -1933,25 +1933,25 @@ test_compound_11(void)
     TESTING("registering type conversion routine with compound conversions");
 
     /* Create variable string type for use in both structs */
-    if((var_string_tid=H5Tcopy(H5T_C_S1))<0) TEST_ERROR
-    if(H5Tset_size(var_string_tid,H5T_VARIABLE)<0) TEST_ERROR
+    if((var_string_tid=H5Tcopy(H5T_C_S1)) < 0) TEST_ERROR
+    if(H5Tset_size(var_string_tid,H5T_VARIABLE) < 0) TEST_ERROR
 
     /* Create type for 'big' struct */
-    if((big_tid = H5Tcreate(H5T_COMPOUND, sizeof(big_t)))<0) TEST_ERROR
+    if((big_tid = H5Tcreate(H5T_COMPOUND, sizeof(big_t))) < 0) TEST_ERROR
 
-    if(H5Tinsert(big_tid, "d1", HOFFSET(big_t, d1), H5T_NATIVE_DOUBLE)<0) TEST_ERROR
-    if(H5Tinsert(big_tid, "i1", HOFFSET(big_t, i1), H5T_NATIVE_INT)<0) TEST_ERROR
-    if(H5Tinsert(big_tid, "s1", HOFFSET(big_t, s1), var_string_tid)<0) TEST_ERROR
-    if(H5Tinsert(big_tid, "i2", HOFFSET(big_t, i2), H5T_NATIVE_INT)<0) TEST_ERROR
-    if(H5Tinsert(big_tid, "d2", HOFFSET(big_t, d2), H5T_NATIVE_DOUBLE)<0) TEST_ERROR
-    if(H5Tinsert(big_tid, "d3", HOFFSET(big_t, d3), H5T_NATIVE_DOUBLE)<0) TEST_ERROR
+    if(H5Tinsert(big_tid, "d1", HOFFSET(big_t, d1), H5T_NATIVE_DOUBLE) < 0) TEST_ERROR
+    if(H5Tinsert(big_tid, "i1", HOFFSET(big_t, i1), H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(H5Tinsert(big_tid, "s1", HOFFSET(big_t, s1), var_string_tid) < 0) TEST_ERROR
+    if(H5Tinsert(big_tid, "i2", HOFFSET(big_t, i2), H5T_NATIVE_INT) < 0) TEST_ERROR
+    if(H5Tinsert(big_tid, "d2", HOFFSET(big_t, d2), H5T_NATIVE_DOUBLE) < 0) TEST_ERROR
+    if(H5Tinsert(big_tid, "d3", HOFFSET(big_t, d3), H5T_NATIVE_DOUBLE) < 0) TEST_ERROR
 
     /* Create type for 'little' struct (with "out of order" inserts) */
-    if((little_tid = H5Tcreate(H5T_COMPOUND, sizeof(little_t)))<0) TEST_ERROR
+    if((little_tid = H5Tcreate(H5T_COMPOUND, sizeof(little_t))) < 0) TEST_ERROR
 
-    if(H5Tinsert(little_tid, "d1", HOFFSET(little_t, d1), H5T_NATIVE_DOUBLE)<0) TEST_ERROR
-    if(H5Tinsert(little_tid, "s1", HOFFSET(little_t, s1), var_string_tid)<0) TEST_ERROR
-    if(H5Tinsert(little_tid, "i1", HOFFSET(little_t, i1), H5T_NATIVE_INT)<0) TEST_ERROR
+    if(H5Tinsert(little_tid, "d1", HOFFSET(little_t, d1), H5T_NATIVE_DOUBLE) < 0) TEST_ERROR
+    if(H5Tinsert(little_tid, "s1", HOFFSET(little_t, s1), var_string_tid) < 0) TEST_ERROR
+    if(H5Tinsert(little_tid, "i1", HOFFSET(little_t, i1), H5T_NATIVE_INT) < 0) TEST_ERROR
 
     /* Allocate buffers */
     if((buf=HDmalloc(sizeof(big_t)*NTESTELEM))==NULL) TEST_ERROR
@@ -1975,11 +1975,11 @@ test_compound_11(void)
     /* Make copies of the 'big' and 'little' datatypes, so the type
      * conversion routine doesn't use the same ones this time and next time
      */
-    if((big_tid2=H5Tcopy(big_tid))<0) TEST_ERROR
-    if((little_tid2=H5Tcopy(little_tid))<0) TEST_ERROR
+    if((big_tid2=H5Tcopy(big_tid)) < 0) TEST_ERROR
+    if((little_tid2=H5Tcopy(little_tid)) < 0) TEST_ERROR
 
     /* Convert buffer from 'big' to 'little' struct */
-    if(H5Tconvert(big_tid2,little_tid2,NTESTELEM,buf,bkg,H5P_DEFAULT)<0) TEST_ERROR
+    if(H5Tconvert(big_tid2,little_tid2,NTESTELEM,buf,bkg,H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Verify converted buffer is correct */
     for(u=0; u<NTESTELEM; u++) {
@@ -2007,19 +2007,19 @@ test_compound_11(void)
     } /* end for */
 
     /* Build source and destination types for conversion routine */
-    if((opaq_src_tid=H5Tcreate(H5T_OPAQUE, 4))<0) TEST_ERROR
-    if(H5Tset_tag(opaq_src_tid, "opaque source type")<0) TEST_ERROR
-    if((opaq_dst_tid=H5Tcreate(H5T_OPAQUE, 4))<0) TEST_ERROR
-    if(H5Tset_tag(opaq_dst_tid, "opaque destination type")<0) TEST_ERROR
+    if((opaq_src_tid=H5Tcreate(H5T_OPAQUE, 4)) < 0) TEST_ERROR
+    if(H5Tset_tag(opaq_src_tid, "opaque source type") < 0) TEST_ERROR
+    if((opaq_dst_tid=H5Tcreate(H5T_OPAQUE, 4)) < 0) TEST_ERROR
+    if(H5Tset_tag(opaq_dst_tid, "opaque destination type") < 0) TEST_ERROR
 
     /* Register new type conversion routine */
-    if(H5Tregister(H5T_PERS_HARD, "opaq_test", opaq_src_tid, opaq_dst_tid, convert_opaque)<0) TEST_ERROR
+    if(H5Tregister(H5T_PERS_HARD, "opaq_test", opaq_src_tid, opaq_dst_tid, convert_opaque) < 0) TEST_ERROR
 
     /* Recover the original buffer information */
     HDmemcpy(buf,buf_orig,sizeof(big_t)*NTESTELEM);
 
     /* Convert buffer from 'big' to 'little' struct */
-    if(H5Tconvert(big_tid,little_tid,NTESTELEM,buf,bkg,H5P_DEFAULT)<0) TEST_ERROR
+    if(H5Tconvert(big_tid,little_tid,NTESTELEM,buf,bkg,H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Verify converted buffer is correct */
     for(u=0; u<NTESTELEM; u++) {
@@ -2047,13 +2047,13 @@ test_compound_11(void)
     } /* end for */
 
     /* Unregister the conversion routine */
-    if(H5Tunregister(H5T_PERS_HARD, "opaq_test", opaq_src_tid, opaq_dst_tid, convert_opaque)<0) TEST_ERROR
+    if(H5Tunregister(H5T_PERS_HARD, "opaq_test", opaq_src_tid, opaq_dst_tid, convert_opaque) < 0) TEST_ERROR
 
     /* Recover the original buffer information */
     HDmemcpy(buf,buf_orig,sizeof(big_t)*NTESTELEM);
 
     /* Convert buffer from 'big' to 'little' struct */
-    if(H5Tconvert(big_tid,little_tid,NTESTELEM,buf,bkg,H5P_DEFAULT)<0) TEST_ERROR
+    if(H5Tconvert(big_tid,little_tid,NTESTELEM,buf,bkg,H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Verify converted buffer is correct */
     for(u=0; u<NTESTELEM; u++) {
@@ -2083,16 +2083,16 @@ test_compound_11(void)
     /* Free everything */
     for(u=0; u<NTESTELEM; u++)
         HDfree(((big_t *)buf_orig)[u].s1);
-    if(H5Tclose(opaq_dst_tid)<0) TEST_ERROR
-    if(H5Tclose(opaq_src_tid)<0) TEST_ERROR
-    if(H5Tclose(little_tid2)<0) TEST_ERROR
-    if(H5Tclose(big_tid2)<0) TEST_ERROR
+    if(H5Tclose(opaq_dst_tid) < 0) TEST_ERROR
+    if(H5Tclose(opaq_src_tid) < 0) TEST_ERROR
+    if(H5Tclose(little_tid2) < 0) TEST_ERROR
+    if(H5Tclose(big_tid2) < 0) TEST_ERROR
     HDfree(bkg);
     HDfree(buf_orig);
     HDfree(buf);
-    if(H5Tclose(little_tid)<0) TEST_ERROR
-    if(H5Tclose(big_tid)<0) TEST_ERROR
-    if(H5Tclose(var_string_tid)<0) TEST_ERROR
+    if(H5Tclose(little_tid) < 0) TEST_ERROR
+    if(H5Tclose(big_tid) < 0) TEST_ERROR
+    if(H5Tclose(var_string_tid) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -2131,7 +2131,7 @@ test_compound_12(void)
     TESTING("adjust size of compound datatypes");
 
     /* Create a compound type of minimal size */
-    if ((complex_id = H5Tcreate(H5T_COMPOUND, 1))<0) goto error;
+    if ((complex_id = H5Tcreate(H5T_COMPOUND, 1)) < 0) goto error;
 
     /* Verify the size */
     if((new_size=H5Tget_size(complex_id))==0) goto error;
@@ -2141,25 +2141,25 @@ test_compound_12(void)
     offset = size;
     if((tmp_size=H5Tget_size(H5T_NATIVE_DOUBLE))==0) goto error;
     size+=tmp_size;
-    if (H5Tset_size(complex_id, size)<0) goto error;
+    if (H5Tset_size(complex_id, size) < 0) goto error;
     if (H5Tinsert(complex_id, "real", offset,
-		  H5T_NATIVE_DOUBLE)<0) goto error;
+		  H5T_NATIVE_DOUBLE) < 0) goto error;
 
     offset = size;
     if((tmp_size=H5Tget_size(H5T_NATIVE_DOUBLE))==0) goto error;
     size+=tmp_size;
-    if (H5Tset_size(complex_id, size)<0) goto error;
+    if (H5Tset_size(complex_id, size) < 0) goto error;
     if (H5Tinsert(complex_id, "imaginary", offset,
-		  H5T_NATIVE_DOUBLE)<0) goto error;
+		  H5T_NATIVE_DOUBLE) < 0) goto error;
 
     /* Increase and decrease the size. */
     if((tmp_size=H5Tget_size(H5T_NATIVE_DOUBLE))==0) goto error;
     size+=tmp_size;
-    if (H5Tset_size(complex_id, size)<0) goto error;
+    if (H5Tset_size(complex_id, size) < 0) goto error;
 
     if((tmp_size=H5Tget_size(H5T_NATIVE_DOUBLE))==0) goto error;
     size-=tmp_size;
-    if (H5Tset_size(complex_id, size)<0) goto error;
+    if (H5Tset_size(complex_id, size) < 0) goto error;
 
     /* Verify the size */
     if((new_size=H5Tget_size(complex_id))==0) goto error;
@@ -2176,7 +2176,7 @@ test_compound_12(void)
         goto error;
     }
 
-    if (H5Tclose (complex_id)<0) goto error;
+    if (H5Tclose (complex_id) < 0) goto error;
     PASSED();
     return 0;
 
@@ -2223,63 +2223,63 @@ test_query(void)
 
     /* Create File */
     h5_fixname(FILENAME[2], H5P_DEFAULT, filename, sizeof filename);
-    if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0)
+    if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto error;
 
     /* Create a compound datatype */
-    if((tid1=H5Tcreate(H5T_COMPOUND, sizeof(struct s1)))<0) {
+    if((tid1=H5Tcreate(H5T_COMPOUND, sizeof(struct s1))) < 0) {
         H5_FAILED();
         printf("Can't create datatype!\n");
         goto error;
     } /* end if */
-    if(H5Tinsert(tid1, "a", HOFFSET(struct s1, a), H5T_NATIVE_INT)<0) {
+    if(H5Tinsert(tid1, "a", HOFFSET(struct s1, a), H5T_NATIVE_INT) < 0) {
         H5_FAILED();
         printf("Can't insert field 'a'\n");
         goto error;
     } /* end if */
-    if(H5Tinsert(tid1, "b", HOFFSET(struct s1, b), H5T_NATIVE_FLOAT)<0) {
+    if(H5Tinsert(tid1, "b", HOFFSET(struct s1, b), H5T_NATIVE_FLOAT) < 0) {
         H5_FAILED();
         printf("Can't insert field 'b'\n");
         goto error;
     } /* end if */
-    if(H5Tinsert(tid1, "c", HOFFSET(struct s1, c), H5T_NATIVE_LONG)<0) {
+    if(H5Tinsert(tid1, "c", HOFFSET(struct s1, c), H5T_NATIVE_LONG) < 0) {
         H5_FAILED();
         printf("Can't insert field 'c'\n");
         goto error;
     } /* end if */
-    if(H5Tinsert(tid1, "d", HOFFSET(struct s1, d), H5T_NATIVE_DOUBLE)<0) {
+    if(H5Tinsert(tid1, "d", HOFFSET(struct s1, d), H5T_NATIVE_DOUBLE) < 0) {
         H5_FAILED();
         printf("Can't insert field 'd'\n");
         goto error;
     } /* end if */
 
     /* Create a enumerate datatype */
-    if((tid2=H5Tcreate(H5T_ENUM, sizeof(short)))<0) {
+    if((tid2=H5Tcreate(H5T_ENUM, sizeof(short))) < 0) {
         H5_FAILED();
         printf("Can't create enumerate type\n");
         goto error;
     } /* end if */
-    if(H5Tenum_insert(tid2, "RED", (enum_val=10,&enum_val))<0) {
+    if(H5Tenum_insert(tid2, "RED", (enum_val=10,&enum_val)) < 0) {
         H5_FAILED();
         printf("Can't insert field into enumeration type\n");
         goto error;
     } /* end if */
-    if(H5Tenum_insert(tid2, "GREEN", (enum_val=11,&enum_val))<0) {
+    if(H5Tenum_insert(tid2, "GREEN", (enum_val=11,&enum_val)) < 0) {
         H5_FAILED();
         printf("Can't insert field into enumeration type\n");
         goto error;
     } /* end if */
-    if(H5Tenum_insert(tid2, "BLUE", (enum_val=12,&enum_val))<0) {
+    if(H5Tenum_insert(tid2, "BLUE", (enum_val=12,&enum_val)) < 0) {
         H5_FAILED();
         printf("Can't insert field into enumeration type\n");
         goto error;
     } /* end if */
-    if(H5Tenum_insert(tid2, "ORANGE", (enum_val=13,&enum_val))<0) {
+    if(H5Tenum_insert(tid2, "ORANGE", (enum_val=13,&enum_val)) < 0) {
         H5_FAILED();
         printf("Can't insert field into enumeration type\n");
         goto error;
     } /* end if */
-    if(H5Tenum_insert(tid2, "YELLOW", (enum_val=14,&enum_val))<0) {
+    if(H5Tenum_insert(tid2, "YELLOW", (enum_val=14,&enum_val)) < 0) {
         H5_FAILED();
         printf("Can't insert field into enumeration type\n");
         goto error;
@@ -2364,7 +2364,7 @@ test_query(void)
     } /* end if */
 
     /* Query member value by member name, for enumeration type */
-    if(H5Tenum_valueof (tid2, "ORANGE", &enum_val)<0) {
+    if(H5Tenum_valueof (tid2, "ORANGE", &enum_val) < 0) {
         H5_FAILED();
         printf("Can't get value for enumerate member\n");
         goto error;
@@ -2376,7 +2376,7 @@ test_query(void)
     } /* end if */
 
     /* Query member value by member index, for enumeration type */
-    if(H5Tget_member_value (tid2, 2, &enum_val)<0) {
+    if(H5Tget_member_value (tid2, 2, &enum_val) < 0) {
         H5_FAILED();
         printf("Can't get value for enum member\n");
         goto error;
@@ -2389,7 +2389,7 @@ test_query(void)
 
     /* Query member name by member value, for enumeration type */
     enum_val = 14;
-    if(H5Tenum_nameof(tid2, &enum_val, enum_name, 16)<0) {
+    if(H5Tenum_nameof(tid2, &enum_val, enum_name, 16) < 0) {
         H5_FAILED();
         printf("Can't get name for enum member\n");
         goto error;
@@ -2401,18 +2401,18 @@ test_query(void)
     } /* end if */
 
     /* Close datatype and file */
-    if(H5Tclose(tid1)<0) {
+    if(H5Tclose(tid1) < 0) {
         H5_FAILED();
         printf("Can't close datatype\n");
         goto error;
     } /* end if */
-    if(H5Tclose(tid2)<0) {
+    if(H5Tclose(tid2) < 0) {
         H5_FAILED();
         printf("Can't close datatype\n");
         goto error;
     } /* end if */
 
-    if(H5Fclose(file)<0) {
+    if(H5Fclose(file) < 0) {
         H5_FAILED();
         printf("Can't close file\n");
         goto error;
@@ -2458,10 +2458,10 @@ test_transient (hid_t fapl)
     TESTING("transient datatypes");
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-    if ((file=H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
+    if ((file=H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) {
 	goto error;
     }
-    if ((space = H5Screate_simple (2, ds_size, ds_size))<0) goto error;
+    if ((space = H5Screate_simple (2, ds_size, ds_size)) < 0) goto error;
 
     /* Predefined types cannot be modified or closed */
     H5E_BEGIN_TRY {
@@ -2482,8 +2482,8 @@ test_transient (hid_t fapl)
     }
 
     /* Copying a predefined type results in a modifiable copy */
-    if ((type=H5Tcopy (H5T_NATIVE_INT))<0) goto error;
-    if (H5Tset_precision (type, 256)<0) goto error;
+    if ((type=H5Tcopy (H5T_NATIVE_INT)) < 0) goto error;
+    if (H5Tset_precision (type, 256) < 0) goto error;
 
     /* It should not be possible to create an attribute for a transient type */
     H5E_BEGIN_TRY {
@@ -2496,53 +2496,54 @@ test_transient (hid_t fapl)
     }
 
     /* Create a dataset from a transient datatype */
-    if (H5Tclose (type)<0) goto error;
-    if ((type = H5Tcopy (H5T_NATIVE_INT))<0) goto error;
-    if ((dset=H5Dcreate (file, "dset1", type, space, H5P_DEFAULT))<0)
+    if(H5Tclose(type) < 0) goto error;
+    if((type = H5Tcopy(H5T_NATIVE_INT)) < 0) goto error;
+    if((dset = H5Dcreate(file, "dset1", type, space, H5P_DEFAULT)) < 0)
 	goto error;
 
     /* The type returned from a dataset should not be modifiable */
-    if ((t2 = H5Dget_type (dset))<0) goto error;
+    if((t2 = H5Dget_type(dset)) < 0) goto error;
     H5E_BEGIN_TRY {
-	status = H5Tset_precision (t2, 256);
+	status = H5Tset_precision(t2, 256);
     } H5E_END_TRY;
-    if (status>=0) {
+    if(status >= 0) {
 	H5_FAILED();
 	HDputs ("    Dataset datatypes should not be modifiable!");
 	goto error;
     }
-    if (H5Tclose (t2)<0) goto error;
+    if(H5Tclose(t2) < 0) goto error;
 
     /*
      * Close the dataset and reopen it, testing that it's type is still
      * read-only.
      */
-    if (H5Dclose (dset)<0) goto error;
-    if ((dset=H5Dopen (file, "dset1"))<0) goto error;
-    if ((t2 = H5Dget_type (dset))<0) goto error;
+    if(H5Dclose(dset) < 0) goto error;
+    if((dset = H5Dopen2(file, "dset1", H5P_DEFAULT)) < 0) goto error;
+    if((t2 = H5Dget_type(dset)) < 0) goto error;
     H5E_BEGIN_TRY {
-	status = H5Tset_precision (t2, 256);
+	status = H5Tset_precision(t2, 256);
     } H5E_END_TRY;
-    if (status>=0) {
+    if(status >= 0) {
 	H5_FAILED();
 	HDputs ("    Dataset datatypes should not be modifiable!");
 	goto error;
     }
-    if (H5Tclose (t2)<0) goto error;
+    if(H5Tclose(t2) < 0) goto error;
 
     /*
      * Get the dataset datatype by applying H5Tcopy() to the dataset. The
      * result should be modifiable.
      */
-    if ((t2=H5Tcopy (dset))<0) goto error;
-    if (H5Tset_precision (t2, 256)<0) goto error;
-    if (H5Tclose (t2)<0) goto error;
+    if((t2=H5Tcopy(dset)) < 0) goto error;
+    if(H5Tset_precision(t2, 256) < 0) goto error;
+    if(H5Tclose(t2) < 0) goto error;
 
 
-    H5Dclose (dset);
-    H5Fclose (file);
-    H5Tclose (type);
-    H5Sclose (space);
+    if(H5Dclose(dset) < 0) goto error;
+    if(H5Fclose(file) < 0) goto error;
+    if(H5Tclose(type) < 0) goto error;
+    if(H5Sclose(space) < 0) goto error;
+
     PASSED();
     return 0;
 
@@ -2587,10 +2588,10 @@ test_named (hid_t fapl)
     TESTING("named datatypes");
 
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
-    if ((file=H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
+    if ((file=H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) {
 	goto error;
     }
-    if ((space = H5Screate_simple (2, ds_size, ds_size))<0) goto error;
+    if ((space = H5Screate_simple (2, ds_size, ds_size)) < 0) goto error;
 
     /* Predefined types cannot be committed */
     H5E_BEGIN_TRY {
@@ -2684,7 +2685,7 @@ test_named (hid_t fapl)
     /* Close the dataset, then close its type, then reopen the dataset */
     if(H5Dclose(dset) < 0) goto error;
     if(H5Tclose(t2) < 0) goto error;
-    if((dset = H5Dopen(file, "dset1")) < 0) goto error;
+    if((dset = H5Dopen2(file, "dset1", H5P_DEFAULT)) < 0) goto error;
 
     /* Get the dataset's type and make sure it's named */
     if((t2 = H5Dget_type(dset)) < 0) goto error;
@@ -2705,7 +2706,7 @@ test_named (hid_t fapl)
     /* Reopen the second dataset and make sure the type is shared */
     if(H5Tclose(t2) < 0) goto error;
     if(H5Dclose(dset) < 0) goto error;
-    if((dset = H5Dopen(file, "dset2")) < 0) goto error;
+    if((dset = H5Dopen2(file, "dset2", H5P_DEFAULT)) < 0) goto error;
     if((t2 = H5Dget_type(dset)) < 0) goto error;
     if((status = H5Tcommitted(t2)) < 0) goto error;
     if(!status) {
@@ -2786,9 +2787,9 @@ mkstr(size_t len, H5T_str_t strpad)
 {
     hid_t	t;
 
-    if ((t=H5Tcopy(H5T_C_S1))<0) return -1;
-    if (H5Tset_size(t, len)<0) return -1;
-    if (H5Tset_strpad(t, strpad)<0) return -1;
+    if ((t=H5Tcopy(H5T_C_S1)) < 0) return -1;
+    if (H5Tset_size(t, len) < 0) return -1;
+    if (H5Tset_strpad(t, strpad) < 0) return -1;
     return t;
 }
 
@@ -2825,21 +2826,21 @@ test_conv_str_1(void)
     dst_type = mkstr(5, H5T_STR_NULLTERM);
     buf = (char*)HDcalloc(2, 10);
     HDmemcpy(buf, "abcdefghi\0abcdefghi\0", 20);
-    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT) < 0) goto error;
     if (HDmemcmp(buf, "abcd\0abcd\0abcdefghi\0", 20)) {
 	H5_FAILED();
 	HDputs("    Truncated C-string test failed");
 	goto error;
     }
-    if (H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT) < 0) goto error;
     if (HDmemcmp(buf, "abcd\0\0\0\0\0\0abcd\0\0\0\0\0\0", 20)) {
 	H5_FAILED();
 	HDputs("    Extended C-string test failed");
 	goto error;
     }
     HDfree(buf);
-    if (H5Tclose(src_type)<0) goto error;
-    if (H5Tclose(dst_type)<0) goto error;
+    if (H5Tclose(src_type) < 0) goto error;
+    if (H5Tclose(dst_type) < 0) goto error;
 
     /*
      * Convert a null padded string to a shorter and then longer string.
@@ -2848,21 +2849,21 @@ test_conv_str_1(void)
     dst_type = mkstr(5, H5T_STR_NULLPAD);
     buf = (char*)HDcalloc(2, 10);
     HDmemcpy(buf, "abcdefghijabcdefghij", 20);
-    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT) < 0) goto error;
     if (HDmemcmp(buf, "abcdeabcdeabcdefghij", 20)) {
 	H5_FAILED();
 	HDputs("    Truncated C buffer test failed");
 	goto error;
     }
-    if (H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT) < 0) goto error;
     if (HDmemcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", 20)) {
 	H5_FAILED();
 	HDputs("    Extended C buffer test failed");
 	goto error;
     }
     HDfree(buf);
-    if (H5Tclose(src_type)<0) goto error;
-    if (H5Tclose(dst_type)<0) goto error;
+    if (H5Tclose(src_type) < 0) goto error;
+    if (H5Tclose(dst_type) < 0) goto error;
 
     /*
      * Convert a space-padded string to a shorter and then longer string.
@@ -2871,21 +2872,21 @@ test_conv_str_1(void)
     dst_type = mkstr(5, H5T_STR_SPACEPAD);
     buf = (char*)HDcalloc(2, 10);
     HDmemcpy(buf, "abcdefghijabcdefghij", 20);
-    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT) < 0) goto error;
     if (HDmemcmp(buf, "abcdeabcdeabcdefghij", 20)) {
 	H5_FAILED();
 	HDputs("    Truncated Fortran-string test failed");
 	goto error;
     }
-    if (H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT) < 0) goto error;
     if (HDmemcmp(buf, "abcde     abcde     ", 20)) {
 	H5_FAILED();
 	HDputs("    Extended Fortran-string test failed");
 	goto error;
     }
     HDfree(buf);
-    if (H5Tclose(src_type)<0) goto error;
-    if (H5Tclose(dst_type)<0) goto error;
+    if (H5Tclose(src_type) < 0) goto error;
+    if (H5Tclose(dst_type) < 0) goto error;
 
     /*
      * What happens if a null-terminated string is not null terminated?  If
@@ -2897,7 +2898,7 @@ test_conv_str_1(void)
     dst_type = mkstr(10, H5T_STR_NULLTERM);
     buf = (char*)HDcalloc(2, 10);
     HDmemcpy(buf, "abcdefghijabcdefghij", 20);
-    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT) < 0) goto error;
     if (HDmemcmp(buf, "abcdefghijabcdefghij", 20)) {
 	H5_FAILED();
 	HDputs("    Non-terminated string test 1");
@@ -2906,22 +2907,22 @@ test_conv_str_1(void)
     H5Tclose(dst_type);
     dst_type = mkstr(5, H5T_STR_NULLTERM);
     HDmemcpy(buf, "abcdefghijabcdefghij", 20);
-    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT) < 0) goto error;
     if (HDmemcmp(buf, "abcd\0abcd\0abcdefghij", 20)) {
 	H5_FAILED();
 	HDputs("    Non-terminated string test 2");
 	goto error;
     }
     HDmemcpy(buf, "abcdeabcdexxxxxxxxxx", 20);
-    if (H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT) < 0) goto error;
     if (HDmemcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", 20)) {
 	H5_FAILED();
 	HDputs("    Non-terminated string test 2");
 	goto error;
     }
     HDfree(buf);
-    if (H5Tclose(src_type)<0) goto error;
-    if (H5Tclose(dst_type)<0) goto error;
+    if (H5Tclose(src_type) < 0) goto error;
+    if (H5Tclose(dst_type) < 0) goto error;
 
     /*
      * Test C string to Fortran and vice versa.
@@ -2930,53 +2931,53 @@ test_conv_str_1(void)
     dst_type = mkstr(10, H5T_STR_SPACEPAD);
     buf = (char*)HDcalloc(2, 10);
     HDmemcpy(buf, "abcdefghi\0abcdefghi\0", 20);
-    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT) < 0) goto error;
     if (HDmemcmp(buf, "abcdefghi abcdefghi ", 20)) {
 	H5_FAILED();
 	HDputs("    C string to Fortran test 1");
 	goto error;
     }
-    if (H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT) < 0) goto error;
     if (HDmemcmp(buf, "abcdefghi\0abcdefghi\0", 20)) {
 	H5_FAILED();
 	HDputs("    Fortran to C string test 1");
 	goto error;
     }
-    if (H5Tclose(dst_type)<0) goto error;
+    if (H5Tclose(dst_type) < 0) goto error;
     dst_type = mkstr(5, H5T_STR_SPACEPAD);
     HDmemcpy(buf, "abcdefgh\0\0abcdefgh\0\0", 20);
-    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT) < 0) goto error;
     if (HDmemcmp(buf, "abcdeabcdeabcdefgh\0\0", 20)) {
 	H5_FAILED();
 	HDputs("    C string to Fortran test 2");
 	goto error;
     }
-    if (H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT) < 0) goto error;
     if (HDmemcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", 20)) {
 	H5_FAILED();
 	HDputs("    Fortran to C string test 2");
 	goto error;
     }
-    if (H5Tclose(src_type)<0) goto error;
-    if (H5Tclose(dst_type)<0) goto error;
+    if (H5Tclose(src_type) < 0) goto error;
+    if (H5Tclose(dst_type) < 0) goto error;
     src_type = mkstr(5, H5T_STR_NULLTERM);
     dst_type = mkstr(10, H5T_STR_SPACEPAD);
     HDmemcpy(buf, "abcd\0abcd\0xxxxxxxxxx", 20);
-    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT) < 0) goto error;
     if (HDmemcmp(buf, "abcd      abcd      ", 20)) {
 	H5_FAILED();
 	HDputs("    C string to Fortran test 3");
 	goto error;
     }
-    if (H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT) < 0) goto error;
     if (HDmemcmp(buf, "abcd\0abcd\0abcd      ", 20)) {
 	H5_FAILED();
 	HDputs("    Fortran to C string test 3");
 	goto error;
     }
     HDfree(buf);
-    if (H5Tclose(src_type)<0) goto error;
-    if (H5Tclose(dst_type)<0) goto error;
+    if (H5Tclose(src_type) < 0) goto error;
+    if (H5Tclose(dst_type) < 0) goto error;
 
     /*
      * Test C buffer to Fortran and vice versa.
@@ -2985,53 +2986,53 @@ test_conv_str_1(void)
     dst_type = mkstr(10, H5T_STR_SPACEPAD);
     buf = (char*)HDcalloc(2, 10);
     HDmemcpy(buf, "abcdefghijabcdefghij", 20);
-    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT) < 0) goto error;
     if (HDmemcmp(buf, "abcdefghijabcdefghij", 20)) {
 	H5_FAILED();
 	HDputs("    C buffer to Fortran test 1");
 	goto error;
     }
-    if (H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT) < 0) goto error;
     if (HDmemcmp(buf, "abcdefghijabcdefghij", 20)) {
 	H5_FAILED();
 	HDputs("    Fortran to C buffer test 1");
 	goto error;
     }
-    if (H5Tclose(dst_type)<0) goto error;
+    if (H5Tclose(dst_type) < 0) goto error;
     dst_type = mkstr(5, H5T_STR_SPACEPAD);
     HDmemcpy(buf, "abcdefgh\0\0abcdefgh\0\0", 20);
-    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT) < 0) goto error;
     if (HDmemcmp(buf, "abcdeabcdeabcdefgh\0\0", 20)) {
 	H5_FAILED();
 	HDputs("    C buffer to Fortran test 2");
 	goto error;
     }
-    if (H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT) < 0) goto error;
     if (HDmemcmp(buf, "abcde\0\0\0\0\0abcde\0\0\0\0\0", 20)) {
 	H5_FAILED();
 	HDputs("    Fortran to C buffer test 2");
 	goto error;
     }
-    if (H5Tclose(src_type)<0) goto error;
-    if (H5Tclose(dst_type)<0) goto error;
+    if (H5Tclose(src_type) < 0) goto error;
+    if (H5Tclose(dst_type) < 0) goto error;
     src_type = mkstr(5, H5T_STR_NULLPAD);
     dst_type = mkstr(10, H5T_STR_SPACEPAD);
     HDmemcpy(buf, "abcd\0abcd\0xxxxxxxxxx", 20);
-    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(src_type, dst_type, 2, buf, NULL, H5P_DEFAULT) < 0) goto error;
     if (HDmemcmp(buf, "abcd      abcd      ", 20)) {
 	H5_FAILED();
 	HDputs("    C buffer to Fortran test 3");
 	goto error;
     }
-    if (H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(dst_type, src_type, 2, buf, NULL, H5P_DEFAULT) < 0) goto error;
     if (HDmemcmp(buf, "abcd\0abcd\0abcd      ", 20)) {
 	H5_FAILED();
 	HDputs("    Fortran to C buffer test 3");
 	goto error;
     }
     HDfree(buf);
-    if (H5Tclose(src_type)<0) goto error;
-    if (H5Tclose(dst_type)<0) goto error;
+    if (H5Tclose(src_type) < 0) goto error;
+    if (H5Tclose(dst_type) < 0) goto error;
 
     PASSED();
     reset_hdf5();
@@ -3092,9 +3093,9 @@ test_conv_str_2(void)
 	}
 	printf("%-70s", s);
 	HDfflush(stdout);
-	if (H5Tconvert(c_type, f_type, nelmts, buf, NULL, H5P_DEFAULT)<0)
+	if (H5Tconvert(c_type, f_type, nelmts, buf, NULL, H5P_DEFAULT) < 0)
             goto error;
-	if (H5Tconvert(f_type, c_type, nelmts, buf, NULL, H5P_DEFAULT)<0)
+	if (H5Tconvert(f_type, c_type, nelmts, buf, NULL, H5P_DEFAULT) < 0)
             goto error;
 	PASSED();
     }
@@ -3156,11 +3157,11 @@ test_conv_str_3(void)
 
     if ((size=H5Tget_precision(type))==0) goto error;
     if ((size=H5Tget_size(type))==0) goto error;
-    if (H5Tset_pad(type, H5T_PAD_ZERO, H5T_PAD_ONE)<0) goto error;
-    if ((cset=H5Tget_cset(type))<0) goto error;
-    if (H5Tget_strpad(type)<0) goto error;
-    if (H5Tset_offset(type, 0)<0) goto error;
-    if (H5Tget_order(type)<0) goto error;
+    if (H5Tset_pad(type, H5T_PAD_ZERO, H5T_PAD_ONE) < 0) goto error;
+    if ((cset=H5Tget_cset(type)) < 0) goto error;
+    if (H5Tget_strpad(type) < 0) goto error;
+    if (H5Tset_offset(type, 0) < 0) goto error;
+    if (H5Tget_order(type) < 0) goto error;
 
     H5E_BEGIN_TRY {
         ret=H5Tset_precision(type, nelmts);
@@ -3277,7 +3278,7 @@ test_conv_enum_1(void)
 	}
 	printf("%-70s", s);
 	HDfflush(stdout);
-	if (H5Tconvert(t1, t2, nelmts, buf, NULL, H5P_DEFAULT)<0) goto error;
+	if (H5Tconvert(t1, t2, nelmts, buf, NULL, H5P_DEFAULT) < 0) goto error;
 	PASSED();
     }
 
@@ -3290,7 +3291,7 @@ test_conv_enum_1(void)
 	}
 	printf("%-70s", s);
 	HDfflush(stdout);
-	if (H5Tconvert(t2, t1, nelmts, buf, NULL, H5P_DEFAULT)<0) goto error;
+	if (H5Tconvert(t2, t1, nelmts, buf, NULL, H5P_DEFAULT) < 0) goto error;
 	PASSED();
     }
     ret_value = 0;
@@ -3424,7 +3425,7 @@ test_conv_bitfield(void)
     dt = H5Tcopy(H5T_STD_B32LE);
     buf[0] = buf[1] = 0xAA;
     buf[2] = buf[3] = 0x55; /*irrelevant*/
-    if (H5Tconvert(st, dt, 1, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(st, dt, 1, buf, NULL, H5P_DEFAULT) < 0) goto error;
     if (buf[0]!=0xAA || buf[1]!=0xAA || buf[2]!=0 || buf[3]!=0) {
 	H5_FAILED();
 	printf("    s=0xaaaa, d=0x%02x%02x%02x%02x (test 1)\n",
@@ -3443,7 +3444,7 @@ test_conv_bitfield(void)
     H5Tset_precision(dt, 12);
     H5Tset_offset(dt, 10);
     buf[0] = 0xA8; buf[1] = 0x2A; buf[2] = buf[3] = 0;
-    if (H5Tconvert(st, dt, 1, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(st, dt, 1, buf, NULL, H5P_DEFAULT) < 0) goto error;
     if (buf[0]!=0 || buf[1]!=0xA8 || buf[2]!=0x2A || buf[3]!=0) {
 	H5_FAILED();
 	printf("    s=0x2AA8 d=0x%02x%02x%02x%02x (test 2)\n",
@@ -3457,7 +3458,7 @@ test_conv_bitfield(void)
      */
     H5Tset_pad(dt, H5T_PAD_ONE, H5T_PAD_ONE);
     buf[0] = 0xA8; buf[1] = 0x2A; buf[2] = buf[3] = 0;
-    if (H5Tconvert(st, dt, 1, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(st, dt, 1, buf, NULL, H5P_DEFAULT) < 0) goto error;
     if (buf[0]!=0xff || buf[1]!=0xAB || buf[2]!=0xEA || buf[3]!=0xff) {
 	H5_FAILED();
 	printf("    s=0x2AA8 d=0x%02x%02x%02x%02x (test 3)\n",
@@ -3512,18 +3513,18 @@ test_bitfield_funcs(void)
     /*
      * First create a bitfield type.
      */
-    if((type = H5Tcopy(H5T_STD_B32LE))<0) goto error;
+    if((type = H5Tcopy(H5T_STD_B32LE)) < 0) goto error;
 
     /*
      * Offset a 12-byte value in the middle of a 16 and 32 byte
      * field.  Pad unused bits with ones.
      *    ____ ____ __10 1010 1010 10__ ____ ____
      */
-    if(H5Tset_precision(type, 12)<0) goto error;
-    if(H5Tset_offset(type, 10)<0) goto error;
+    if(H5Tset_precision(type, 12) < 0) goto error;
+    if(H5Tset_offset(type, 10) < 0) goto error;
     if(H5Tset_pad(type, H5T_PAD_ONE, H5T_PAD_ONE)) goto error;
     if((size=H5Tget_size(type))==0) goto error;
-    if(H5Tset_order(type, H5T_ORDER_BE)<0) goto error;
+    if(H5Tset_order(type, H5T_ORDER_BE) < 0) goto error;
 
     H5E_BEGIN_TRY {
         size=H5Tget_ebias(type);
@@ -3710,12 +3711,12 @@ opaque_check(int tag_it)
     saved = num_opaque_conversions_g = 0;
 
     /* Build source and destination types */
-    if ((st=H5Tcreate(H5T_OPAQUE, 4))<0) goto error;
-    if (H5Tset_tag(st, "opaque source type")<0) goto error;
+    if ((st=H5Tcreate(H5T_OPAQUE, 4)) < 0) goto error;
+    if (H5Tset_tag(st, "opaque source type") < 0) goto error;
 
-    if ((dt=H5Tcreate(H5T_OPAQUE, 4))<0) goto error;
+    if ((dt=H5Tcreate(H5T_OPAQUE, 4)) < 0) goto error;
     if (tag_it) {
-        if (H5Tset_tag(dt, "opaque destination type")<0)
+        if (H5Tset_tag(dt, "opaque destination type") < 0)
             goto error;
     }
 
@@ -3730,11 +3731,11 @@ opaque_check(int tag_it)
     }
 
     /* Register a conversion function */
-    if (H5Tregister(H5T_PERS_HARD, "o_test", st, dt, convert_opaque)<0)
+    if (H5Tregister(H5T_PERS_HARD, "o_test", st, dt, convert_opaque) < 0)
 	goto error;
 
     /* Try the conversion again, this time it should work */
-    if (H5Tconvert(st, dt, OPAQUE_NELMTS, buf, NULL, H5P_DEFAULT)<0) goto error;
+    if (H5Tconvert(st, dt, OPAQUE_NELMTS, buf, NULL, H5P_DEFAULT) < 0) goto error;
     if (saved+1 != num_opaque_conversions_g) {
 	H5_FAILED();
 	printf("    unexpected number of opaque conversions\n");
@@ -3742,7 +3743,7 @@ opaque_check(int tag_it)
     }
 
     /* Unregister conversion function */
-    if (H5Tunregister(H5T_PERS_HARD, "o_test", st, dt, convert_opaque)<0)
+    if (H5Tunregister(H5T_PERS_HARD, "o_test", st, dt, convert_opaque) < 0)
 	goto error;
 
     H5Tclose(st);
@@ -3781,7 +3782,7 @@ opaque_long(void)
     herr_t      ret;
 
     /* Build opaque type */
-    if ((dt=H5Tcreate(H5T_OPAQUE, 4))<0) TEST_ERROR
+    if ((dt=H5Tcreate(H5T_OPAQUE, 4)) < 0) TEST_ERROR
 
     /* Create long tag */
     long_tag = HDmalloc(16384+1);
@@ -3839,8 +3840,8 @@ opaque_funcs(void)
     herr_t      ret;
 
     /* Build opaque type */
-    if ((type=H5Tcreate(H5T_OPAQUE, 4))<0) TEST_ERROR
-    if (H5Tset_tag(type, "opaque source type")<0) TEST_ERROR
+    if ((type=H5Tcreate(H5T_OPAQUE, 4)) < 0) TEST_ERROR
+    if (H5Tset_tag(type, "opaque source type") < 0) TEST_ERROR
 
     if ((size=H5Tget_size(type))==0) goto error;
 
@@ -3973,7 +3974,7 @@ test_encode(void)
 
     /* Create File */
     h5_fixname(FILENAME[5], H5P_DEFAULT, filename, sizeof filename);
-    if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0)
+    if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto error;
 
     /*-----------------------------------------------------------------------
@@ -3981,59 +3982,59 @@ test_encode(void)
      *-----------------------------------------------------------------------
      */
     /* Create a compound datatype */
-    if((tid1=H5Tcreate(H5T_COMPOUND, sizeof(struct s1)))<0) {
+    if((tid1=H5Tcreate(H5T_COMPOUND, sizeof(struct s1))) < 0) {
         H5_FAILED();
         printf("Can't create datatype!\n");
         goto error;
     } /* end if */
-    if(H5Tinsert(tid1, "a", HOFFSET(struct s1, a), H5T_NATIVE_INT)<0) {
+    if(H5Tinsert(tid1, "a", HOFFSET(struct s1, a), H5T_NATIVE_INT) < 0) {
         H5_FAILED();
         printf("Can't insert field 'a'\n");
         goto error;
     } /* end if */
-    if(H5Tinsert(tid1, "b", HOFFSET(struct s1, b), H5T_NATIVE_FLOAT)<0) {
+    if(H5Tinsert(tid1, "b", HOFFSET(struct s1, b), H5T_NATIVE_FLOAT) < 0) {
         H5_FAILED();
         printf("Can't insert field 'b'\n");
         goto error;
     } /* end if */
-    if(H5Tinsert(tid1, "c", HOFFSET(struct s1, c), H5T_NATIVE_LONG)<0) {
+    if(H5Tinsert(tid1, "c", HOFFSET(struct s1, c), H5T_NATIVE_LONG) < 0) {
         H5_FAILED();
         printf("Can't insert field 'c'\n");
         goto error;
     } /* end if */
-    if(H5Tinsert(tid1, "d", HOFFSET(struct s1, d), H5T_NATIVE_DOUBLE)<0) {
+    if(H5Tinsert(tid1, "d", HOFFSET(struct s1, d), H5T_NATIVE_DOUBLE) < 0) {
         H5_FAILED();
         printf("Can't insert field 'd'\n");
         goto error;
     } /* end if */
 
     /* Create a enumerate datatype */
-    if((tid2=H5Tcreate(H5T_ENUM, sizeof(short)))<0) {
+    if((tid2=H5Tcreate(H5T_ENUM, sizeof(short))) < 0) {
         H5_FAILED();
         printf("Can't create enumerate type\n");
         goto error;
     } /* end if */
-    if(H5Tenum_insert(tid2, "RED", (enum_val=0,&enum_val))<0) {
+    if(H5Tenum_insert(tid2, "RED", (enum_val=0,&enum_val)) < 0) {
         H5_FAILED();
         printf("Can't insert field into enumeration type\n");
         goto error;
     } /* end if */
-    if(H5Tenum_insert(tid2, "GREEN", (enum_val=1,&enum_val))<0) {
+    if(H5Tenum_insert(tid2, "GREEN", (enum_val=1,&enum_val)) < 0) {
         H5_FAILED();
         printf("Can't insert field into enumeration type\n");
         goto error;
     } /* end if */
-    if(H5Tenum_insert(tid2, "BLUE", (enum_val=2,&enum_val))<0) {
+    if(H5Tenum_insert(tid2, "BLUE", (enum_val=2,&enum_val)) < 0) {
         H5_FAILED();
         printf("Can't insert field into enumeration type\n");
         goto error;
     } /* end if */
-    if(H5Tenum_insert(tid2, "ORANGE", (enum_val=3,&enum_val))<0) {
+    if(H5Tenum_insert(tid2, "ORANGE", (enum_val=3,&enum_val)) < 0) {
         H5_FAILED();
         printf("Can't insert field into enumeration type\n");
         goto error;
     } /* end if */
-    if(H5Tenum_insert(tid2, "YELLOW", (enum_val=4,&enum_val))<0) {
+    if(H5Tenum_insert(tid2, "YELLOW", (enum_val=4,&enum_val)) < 0) {
         H5_FAILED();
         printf("Can't insert field into enumeration type\n");
         goto error;
@@ -4044,7 +4045,7 @@ test_encode(void)
      *-----------------------------------------------------------------------
      */
     /* Encode compound type in a buffer */
-    if(H5Tencode(tid1, NULL, &cmpd_buf_size)<0) {
+    if(H5Tencode(tid1, NULL, &cmpd_buf_size) < 0) {
         H5_FAILED();
         printf("Can't encode compound type\n");
         goto error;
@@ -4063,7 +4064,7 @@ test_encode(void)
         goto error;
     }
 
-    if(H5Tencode(tid1, cmpd_buf, &cmpd_buf_size)<0) {
+    if(H5Tencode(tid1, cmpd_buf, &cmpd_buf_size) < 0) {
         H5_FAILED();
         printf("Can't encode compound type\n");
         goto error;
@@ -4094,7 +4095,7 @@ test_encode(void)
 
 
     /* Encode enumerate type in a buffer */
-    if(H5Tencode(tid2, NULL, &enum_buf_size)<0) {
+    if(H5Tencode(tid2, NULL, &enum_buf_size) < 0) {
         H5_FAILED();
         printf("Can't encode enumerate type\n");
         goto error;
@@ -4103,14 +4104,14 @@ test_encode(void)
     if(enum_buf_size>0)
         enum_buf = (unsigned char*)calloc(1, enum_buf_size);
 
-    if(H5Tencode(tid2, enum_buf, &enum_buf_size)<0) {
+    if(H5Tencode(tid2, enum_buf, &enum_buf_size) < 0) {
         H5_FAILED();
         printf("Can't encode enumerate type\n");
         goto error;
     } /* end if */
 
     /* Decode from the enumerate buffer and return an object handle */
-    if((decoded_tid2=H5Tdecode(enum_buf))<0) {
+    if((decoded_tid2=H5Tdecode(enum_buf)) < 0) {
         H5_FAILED();
         printf("Can't decode enumerate type\n");
         goto error;
@@ -4185,7 +4186,7 @@ test_encode(void)
 
 
     /* Encode compound type in a buffer */
-    if(H5Tencode(tid1, NULL, &cmpd_buf_size)<0) {
+    if(H5Tencode(tid1, NULL, &cmpd_buf_size) < 0) {
         H5_FAILED();
         printf("Can't encode compound type\n");
         goto error;
@@ -4194,7 +4195,7 @@ test_encode(void)
     if(cmpd_buf_size>0)
         cmpd_buf = (unsigned char*)calloc(1, cmpd_buf_size);
 
-    if(H5Tencode(tid1, cmpd_buf, &cmpd_buf_size)<0) {
+    if(H5Tencode(tid1, cmpd_buf, &cmpd_buf_size) < 0) {
         H5_FAILED();
         printf("Can't encode compound type\n");
         goto error;
@@ -4228,7 +4229,7 @@ test_encode(void)
      *-----------------------------------------------------------------------
      */
     /* Encode enumerate type in a buffer */
-    if(H5Tencode(tid2, NULL, &enum_buf_size)<0) {
+    if(H5Tencode(tid2, NULL, &enum_buf_size) < 0) {
         H5_FAILED();
         printf("Can't encode enumerate type\n");
         goto error;
@@ -4237,14 +4238,14 @@ test_encode(void)
     if(enum_buf_size>0)
         enum_buf = (unsigned char*)calloc(1, enum_buf_size);
 
-    if(H5Tencode(tid2, enum_buf, &enum_buf_size)<0) {
+    if(H5Tencode(tid2, enum_buf, &enum_buf_size) < 0) {
         H5_FAILED();
         printf("Can't encode enumerate type\n");
         goto error;
     } /* end if */
 
     /* Decode from the enumerate buffer and return an object handle */
-    if((decoded_tid2=H5Tdecode(enum_buf))<0) {
+    if((decoded_tid2=H5Tdecode(enum_buf)) < 0) {
         H5_FAILED();
         printf("Can't decode enumerate type\n");
         goto error;
@@ -4274,29 +4275,29 @@ test_encode(void)
      *-----------------------------------------------------------------------
      */
     /* Close datatype and file */
-    if(H5Tclose(tid1)<0) {
+    if(H5Tclose(tid1) < 0) {
         H5_FAILED();
         printf("Can't close datatype\n");
         goto error;
     } /* end if */
-    if(H5Tclose(tid2)<0) {
-        H5_FAILED();
-        printf("Can't close datatype\n");
-        goto error;
-    } /* end if */
-
-    if(H5Tclose(decoded_tid1)<0) {
-        H5_FAILED();
-        printf("Can't close datatype\n");
-        goto error;
-    } /* end if */
-    if(H5Tclose(decoded_tid2)<0) {
+    if(H5Tclose(tid2) < 0) {
         H5_FAILED();
         printf("Can't close datatype\n");
         goto error;
     } /* end if */
 
-    if(H5Fclose(file)<0) {
+    if(H5Tclose(decoded_tid1) < 0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    } /* end if */
+    if(H5Tclose(decoded_tid2) < 0) {
+        H5_FAILED();
+        printf("Can't close datatype\n");
+        goto error;
+    } /* end if */
+
+    if(H5Fclose(file) < 0) {
         H5_FAILED();
         printf("Can't close file\n");
         goto error;

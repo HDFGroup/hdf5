@@ -1197,7 +1197,7 @@ test_mount_after_close(hid_t fapl)
     if(H5Gclose(gidABT) < 0) FAIL_STACK_ERROR
 
     /* Open "normal" dataset in mounted file */
-    if((didABMXYD = H5Dopen(gidAB, "M/X/Y/D")) < 0) FAIL_STACK_ERROR
+    if((didABMXYD = H5Dopen2(gidAB, "M/X/Y/D", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Check name */
     if(H5Iget_name(didABMXYD, objname, (size_t)NAME_BUF_SIZE) < 0) FAIL_STACK_ERROR

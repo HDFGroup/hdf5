@@ -366,7 +366,7 @@ create_attrs_1(void)
     char	attr_name[128];
     int		i, j;
     p_time      attr_t  = {0, 0, 0, 1000000, 0, ""};
-    p_time      open_t  = {0, 0, 0, 1000000, 0, "H5Dopen"};
+    p_time      open_t  = {0, 0, 0, 1000000, 0, "H5Dopen2"};
     p_time      close_t = {0, 0, 0, 1000000, 0, ""};
 
 #ifdef H5_HAVE_PARALLEL
@@ -391,7 +391,7 @@ create_attrs_1(void)
     for(i = 0; i < NUM_DSETS; i++) {
 	sprintf(dset_name, "dataset %d", i);
         open_t.start = retrieve_time();
-	if((dataset = H5Dopen(file, dset_name)) < 0)
+	if((dataset = H5Dopen2(file, dset_name, H5P_DEFAULT)) < 0)
 		goto error;
 	perf(&open_t, open_t.start, retrieve_time());
 
@@ -578,7 +578,7 @@ create_attrs_3(void)
     int		loop_num;
     int		i, j, k;
     p_time      attr_t  = {0, 0, 0, 1000000, 0, ""};
-    p_time      open_t  = {0, 0, 0, 1000000, 0, "H5Dopen"};
+    p_time      open_t  = {0, 0, 0, 1000000, 0, "H5Dopen2"};
     p_time      close_t = {0, 0, 0, 1000000, 0, ""};
 
 #ifdef H5_HAVE_PARALLEL
@@ -607,7 +607,7 @@ create_attrs_3(void)
     	for(j = 0; j < NUM_DSETS; j++) {
             sprintf(dset_name, "dataset %d", j);
             open_t.start = retrieve_time();
-            if((dataset = H5Dopen(file, dset_name)) < 0)
+            if((dataset = H5Dopen2(file, dset_name, H5P_DEFAULT)) < 0)
                 goto error;
             perf(&open_t, open_t.start, retrieve_time());
 

@@ -805,7 +805,7 @@ coll_chunktest(const char* filename,
   VRFY((status >= 0),"");
 
   /* open the collective dataset*/
-  dataset = H5Dopen(file, DSET_COLLECTIVE_CHUNK_NAME);
+  dataset = H5Dopen2(file, DSET_COLLECTIVE_CHUNK_NAME, H5P_DEFAULT);
   VRFY((dataset >= 0), "");
 
   /* set up dimensions of the slab this process accesses */

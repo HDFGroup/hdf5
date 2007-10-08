@@ -112,7 +112,7 @@ main(void) {
    /*
     *  Open and read dataset "R".
     */
-   did_r  = H5Dopen(fid, "R");
+   did_r  = H5Dopen2(fid, "R", H5P_DEFAULT);
    status = H5Dread(did_r, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL,
 		    H5P_DEFAULT, rbuf);
 

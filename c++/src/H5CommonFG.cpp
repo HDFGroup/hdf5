@@ -200,15 +200,13 @@ DataSet CommonFG::createDataSet( const H5std_string& name, const DataType& data_
 //--------------------------------------------------------------------------
 DataSet CommonFG::openDataSet( const char* name ) const
 {
-   // Call C function H5Dopen to open the specified dataset, giving
+   // Call C function H5Dopen2 to open the specified dataset, giving
    // the location id and the dataset's name
-   hid_t dataset_id = H5Dopen( getLocId(), name );
+   hid_t dataset_id = H5Dopen2( getLocId(), name, H5P_DEFAULT );
 
    // If the dataset's opening failed, throw an exception
-   if( dataset_id < 0 )
-   {
-      throwException("openDataSet", "H5Dopen failed");
-   }
+   if(dataset_id < 0)
+      throwException("openDataSet", "H5Dopen2 failed");
 
    // No failure, create and return the DataSet object
    DataSet dataset( dataset_id );

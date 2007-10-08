@@ -321,25 +321,23 @@ static int receiver (void)
    * the sender should have created.
    */
   tempfile = fopen (TEMPFILENAME, "r");
-  if (tempfile == NULL)
-  {
-    fprintf (stderr, "receiver: couldn't open temporary file to read "
+  if(tempfile == NULL) {
+    fprintf(stderr, "receiver: couldn't open temporary file to read "
                      "\"hostname:port\" information\n");
-    H5Pclose (fapl);
-    return (-3);
+    H5Pclose(fapl);
+    return(-3);
   }
-  fgets (filename, sizeof (filename) - 1, tempfile);
-  fclose (tempfile);
-  unlink (TEMPFILENAME);
+  fgets(filename, sizeof (filename) - 1, tempfile);
+  fclose(tempfile);
+  unlink(TEMPFILENAME);
 
   /*
    * Open the streamed HDF5 file for reading.
    */
-  printf ("  receiver: opening file '%s' for reading...\n", filename);
-  file = H5Fopen (filename, H5F_ACC_RDONLY, fapl);
-  H5Pclose (fapl);
-  if (file < 0)
-  {
+  printf("  receiver: opening file '%s' for reading...\n", filename);
+  file = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
+  H5Pclose(fapl);
+  if(file < 0) {
     fprintf (stderr, "receiver: couldn't open file from '%s'\n", filename);
     return (-4);
   }
@@ -348,9 +346,8 @@ static int receiver (void)
    * Open the file and the dataset.
    */
   printf ("  receiver: reading dataset '%s'...\n", DATASETNAME);
-  dataset = H5Dopen (file, DATASETNAME);
-  if (dataset < 0)
-  {
+  dataset = H5Dopen2(file, DATASETNAME, H5P_DEFAULT);
+  if(dataset < 0) {
     fprintf (stderr, "receiver: couldn't open dataset '%s'\n", DATASETNAME);
     return (-5);
   }
@@ -358,27 +355,25 @@ static int receiver (void)
   /*
    * Get dataset class, order, and size information
    */
-  datatype = H5Dget_type (dataset);
-  if (H5Tget_class (datatype) == H5T_INTEGER)
-  {
-    printf ("  receiver: dataset is of type INTEGER\n");
-  }
-  printf ("  receiver: datatype size is %d bytes\n",
+  datatype = H5Dget_type(dataset);
+  if(H5Tget_class(datatype) == H5T_INTEGER)
+    printf("  receiver: dataset is of type INTEGER\n");
+  printf("  receiver: datatype size is %d bytes\n",
           (int) H5Tget_size (datatype));
-  printf ("  receiver: byte ordering is %s endian\n",
+  printf("  receiver: byte ordering is %s endian\n",
           H5Tget_order (datatype) == H5T_ORDER_LE ? "little" : "big");
   H5Tclose(datatype);
 
   /*
    * Get dataset dimensions
    */
-  dataspace = H5Dget_space (dataset);
-  rank      = H5Sget_simple_extent_ndims (dataspace);
-  dims      = (hsize_t *) malloc (rank * sizeof (hsize_t));
-  H5Sget_simple_extent_dims (dataspace, dims, NULL);
-  H5Sclose (dataspace);
+  dataspace = H5Dget_space(dataset);
+  rank      = H5Sget_simple_extent_ndims(dataspace);
+  dims      = (hsize_t *)malloc(rank * sizeof (hsize_t));
+  H5Sget_simple_extent_dims(dataspace, dims, NULL);
+  H5Sclose(dataspace);
 
-  printf ("  receiver: rank %d, dimensions %u", rank, (unsigned int) dims[0]);
+  printf("  receiver: rank %d, dimensions %u", rank, (unsigned int)dims[0]);
   nelems = dims[0];
   for (i = 1; i < rank; i++)
   {

@@ -2921,34 +2921,34 @@ test_select_hyper_union_stagger(void)
     /* Close things */
     error=H5Sclose(dataspace);
     CHECK(error, FAIL, "H5Sclose");
-    error=H5Dclose(dset_id);
+    error = H5Dclose(dset_id);
     CHECK(error, FAIL, "H5Dclose");
-    error=H5Fclose(file_id);
+    error = H5Fclose(file_id);
     CHECK(error, FAIL, "H5Fclose");
 
     /* Initialize intput buffer */
-    memset(data_out,0,7*7*sizeof(int));
+    memset(data_out, 0, 7 * 7 * sizeof(int));
 
     /* Open file */
-    file_id=H5Fopen(FILENAME,H5F_ACC_RDONLY,H5P_DEFAULT);
+    file_id = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(file_id, FAIL, "H5Fopen");
 
     /* Open dataset */
-    dset_id=H5Dopen(file_id,"IntArray");
-    CHECK(dset_id, FAIL, "H5Dopen");
+    dset_id = H5Dopen2(file_id, "IntArray", H5P_DEFAULT);
+    CHECK(dset_id, FAIL, "H5Dopen2");
 
     /* Get the dataspace */
-    dataspace=H5Dget_space(dset_id);
+    dataspace = H5Dget_space(dset_id);
     CHECK(dataspace, FAIL, "H5Dget_space");
 
     /* Select the hyperslabs */
-    error=H5Sselect_hyperslab(dataspace,H5S_SELECT_SET,offset,stride,count,block);
+    error = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offset, stride, count, block);
     CHECK(error, FAIL, "H5Sselect_hyperslab");
-    tmp_space=H5Scombine_hyperslab(dataspace,H5S_SELECT_OR,offset2,stride,count2,block);
+    tmp_space = H5Scombine_hyperslab(dataspace, H5S_SELECT_OR, offset2, stride, count2, block);
     CHECK(tmp_space, FAIL, "H5Scombine_hyperslab");
 
     /* Copy the file dataspace and select hyperslab */
-    tmp2_space=H5Scopy(dataspace);
+    tmp2_space = H5Scopy(dataspace);
     CHECK(tmp2_space, FAIL, "H5Scopy");
     error=H5Sselect_hyperslab(tmp2_space,H5S_SELECT_SET,offset3,stride,count3,block);
     CHECK(error, FAIL, "H5Sselect_hyperslab");
@@ -4068,16 +4068,16 @@ test_select_hyper_chunk(hid_t fapl_plist, hid_t xfer_plist)
     /*
      * Open the file and the dataset.
      */
-    file = H5Fopen (FILENAME, H5F_ACC_RDONLY, fapl_plist);
+    file = H5Fopen(FILENAME, H5F_ACC_RDONLY, fapl_plist);
     CHECK(file, FAIL, "H5Fopen");
-    dataset = H5Dopen (file, DATASETNAME);
-    CHECK(dataset, FAIL, "H5Dopen");
+    dataset = H5Dopen2(file, DATASETNAME, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
 
-    dataspace = H5Dget_space (dataset);    /* dataspace handle */
+    dataspace = H5Dget_space(dataset);    /* dataspace handle */
     CHECK(dataspace, FAIL, "H5Dget_space");
-    rank      = H5Sget_simple_extent_ndims (dataspace);
+    rank = H5Sget_simple_extent_ndims(dataspace);
     VERIFY(rank, 3, "H5Sget_simple_extent_ndims");
-    status_n  = H5Sget_simple_extent_dims (dataspace, dims_out, NULL);
+    status_n = H5Sget_simple_extent_dims(dataspace, dims_out, NULL);
     CHECK(status_n, FAIL, "H5Sget_simple_extent_dims");
     VERIFY(dims_out[0], dimsf[0], "Dataset dimensions");
     VERIFY(dims_out[1], dimsf[1], "Dataset dimensions");
@@ -4301,48 +4301,48 @@ test_select_point_chunk(void)
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Close everything (except selections) */
-    ret=H5Pclose (dcpl);
+    ret = H5Pclose(dcpl);
     CHECK(ret, FAIL, "H5Pclose");
-    ret=H5Sclose (dataspace);
+    ret = H5Sclose(dataspace);
     CHECK(ret, FAIL, "H5Sclose");
-    ret=H5Dclose (dataset);
+    ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
-    ret=H5Fclose (file);
+    ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Re-open file & dataset */
-    file = H5Fopen (FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
+    file = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(file, FAIL, "H5Fopen");
-    dataset = H5Dopen (file, DATASETNAME);
-    CHECK(dataset, FAIL, "H5Dopen");
+    dataset = H5Dopen2(file, DATASETNAME, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
 
     /* Read data using 1st point selection for file and hyperslab for memory */
-    ret=H5Dread(dataset,H5T_NATIVE_UINT,hyp1_space,pnt1_space,H5P_DEFAULT,data_out);
+    ret = H5Dread(dataset, H5T_NATIVE_UINT, hyp1_space, pnt1_space, H5P_DEFAULT, data_out);
     CHECK(ret, FAIL, "H5Dread");
 
 /* Verify data (later) */
 
     /* Read data using 2nd hyperslab selection for file and point for memory */
-    ret=H5Dread(dataset,H5T_NATIVE_UINT,pnt2_space,hyp2_space,H5P_DEFAULT,data_out);
+    ret = H5Dread(dataset, H5T_NATIVE_UINT, pnt2_space, hyp2_space, H5P_DEFAULT, data_out);
     CHECK(ret, FAIL, "H5Dread");
 
 /* Verify data (later) */
 
     /* Close everything (inclusing selections) */
-    ret=H5Sclose (pnt1_space);
+    ret = H5Sclose(pnt1_space);
     CHECK(ret, FAIL, "H5Sclose");
-    ret=H5Sclose (pnt2_space);
+    ret = H5Sclose(pnt2_space);
     CHECK(ret, FAIL, "H5Sclose");
-    ret=H5Sclose (hyp1_space);
+    ret = H5Sclose(hyp1_space);
     CHECK(ret, FAIL, "H5Sclose");
-    ret=H5Sclose (hyp2_space);
+    ret = H5Sclose(hyp2_space);
     CHECK(ret, FAIL, "H5Sclose");
-    ret=H5Dclose (dataset);
+    ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
-    ret=H5Fclose (file);
+    ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
 
-    free (data);
+    free(data);
     free (data_out);
 }   /* test_select_point_chunk() */
 

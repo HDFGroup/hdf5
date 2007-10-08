@@ -139,8 +139,8 @@ void tts_error(void)
     if (error_count != NUM_THREAD - 1)
         TestErrPrintf("Error: %d threads failed instead of %d\n", error_count, NUM_THREAD-1);
 
-    dataset = H5Dopen(error_file, DATASETNAME);
-    assert(dataset>=0);
+    dataset = H5Dopen2(error_file, DATASETNAME, H5P_DEFAULT);
+    assert(dataset >= 0);
 
     ret=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &value);
     assert(ret>=0);

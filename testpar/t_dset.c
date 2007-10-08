@@ -419,11 +419,11 @@ dataset_readInd(void)
     VRFY((ret >= 0), "");
 
     /* open the dataset1 collectively */
-    dataset1 = H5Dopen(fid, DATASETNAME1);
+    dataset1 = H5Dopen2(fid, DATASETNAME1, H5P_DEFAULT);
     VRFY((dataset1 >= 0), "");
 
     /* open another dataset collectively */
-    dataset2 = H5Dopen(fid, DATASETNAME1);
+    dataset2 = H5Dopen2(fid, DATASETNAME1, H5P_DEFAULT);
     VRFY((dataset2 >= 0), "");
 
 
@@ -932,12 +932,12 @@ dataset_readAll(void)
      * Open the datasets in it
      * ------------------------- */
     /* open the dataset1 collectively */
-    dataset1 = H5Dopen(fid, DATASETNAME1);
-    VRFY((dataset1 >= 0), "H5Dopen succeeded");
+    dataset1 = H5Dopen2(fid, DATASETNAME1, H5P_DEFAULT);
+    VRFY((dataset1 >= 0), "H5Dopen2 succeeded");
 
     /* open another dataset collectively */
-    dataset2 = H5Dopen(fid, DATASETNAME2);
-    VRFY((dataset2 >= 0), "H5Dopen 2 succeeded");
+    dataset2 = H5Dopen2(fid, DATASETNAME2, H5P_DEFAULT);
+    VRFY((dataset2 >= 0), "H5Dopen2 2 succeeded");
 
     /*
      * Set up dimensions of the slab this process accesses.
@@ -1558,11 +1558,11 @@ extend_readInd(void)
     VRFY((ret >= 0), "");
 
     /* open the dataset1 collectively */
-    dataset1 = H5Dopen(fid, DATASETNAME1);
+    dataset1 = H5Dopen2(fid, DATASETNAME1, H5P_DEFAULT);
     VRFY((dataset1 >= 0), "");
 
     /* open another dataset collectively */
-    dataset2 = H5Dopen(fid, DATASETNAME1);
+    dataset2 = H5Dopen2(fid, DATASETNAME1, H5P_DEFAULT);
     VRFY((dataset2 >= 0), "");
 
     /* Try extend dataset1 which is open RDONLY.  Should fail. */
@@ -1990,11 +1990,11 @@ extend_readAll(void)
     VRFY((ret >= 0), "");
 
     /* open the dataset1 collectively */
-    dataset1 = H5Dopen(fid, DATASETNAME1);
+    dataset1 = H5Dopen2(fid, DATASETNAME1, H5P_DEFAULT);
     VRFY((dataset1 >= 0), "");
 
     /* open another dataset collectively */
-    dataset2 = H5Dopen(fid, DATASETNAME1);
+    dataset2 = H5Dopen2(fid, DATASETNAME1, H5P_DEFAULT);
     VRFY((dataset2 >= 0), "");
 
     /* Try extend dataset1 which is open RDONLY.  Should fail. */
@@ -2236,8 +2236,8 @@ compress_readAll(void)
 
 
     /* Open dataset with compressed chunks */
-    dataset = H5Dopen(fid, "compressed_data");
-    VRFY((dataset > 0), "H5Dopen succeeded");
+    dataset = H5Dopen2(fid, "compressed_data", H5P_DEFAULT);
+    VRFY((dataset > 0), "H5Dopen2 succeeded");
 
     /* Try reading & writing data */
     if(dataset>0) {

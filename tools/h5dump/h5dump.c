@@ -1433,7 +1433,7 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED 
             break;
 
             case H5O_TYPE_DATASET:
-                if((obj = H5Dopen(group, name)) >= 0) {
+                if((obj = H5Dopen2(group, name, H5P_DEFAULT)) >= 0) {
                     if(oinfo.rc > 1) {
                         obj_t  *found_obj;    /* Found object */
 
@@ -1843,8 +1843,7 @@ dump_group(hid_t gid, const char *name)
         d_status = EXIT_FAILURE;
     }
     
-    if(H5Pclose(gcpl_id) < 0)
-    {
+    if(H5Pclose(gcpl_id) < 0) {
         error_msg(progname, "error in closing group creation property list ID\n");
         d_status = EXIT_FAILURE;
     }
@@ -1856,20 +1855,18 @@ dump_group(hid_t gid, const char *name)
     begin_obj(dump_header_format->groupbegin, name, dump_header_format->groupblockbegin);
     indent += COL;
 
-    if (display_oid)
+    if(display_oid)
         dump_oid(gid);
 
     dump_comment(gid);
 
-    if (!HDstrcmp(name, "/") && unamedtype) 
-    {
+    if(!HDstrcmp(name, "/") && unamedtype) {
         unsigned u;             /* Local index variable */
         
         /* dump unamed type in root group */
-        for (u = 0; u < type_table->nobjs; u++)
-            if (!type_table->objs[u].recorded) 
-            {
-                dset = H5Dopen(gid, type_table->objs[u].objname);
+        for(u = 0; u < type_table->nobjs; u++)
+            if(!type_table->objs[u].recorded) {
+                dset = H5Dopen2(gid, type_table->objs[u].objname, H5P_DEFAULT);
                 type = H5Dget_type(dset);
                 sprintf(type_name, "#"H5_PRINTF_HADDR_FMT, type_table->objs[u].objno);
                 dump_function_table->dump_named_datatype_function(type, type_name);
@@ -1880,26 +1877,22 @@ dump_group(hid_t gid, const char *name)
 
     H5Oget_info(gid, ".", &oinfo, H5P_DEFAULT);
 
-    if(oinfo.rc > 1) 
-    {
+    if(oinfo.rc > 1) {
         obj_t  *found_obj;    /* Found object */
         
         found_obj = search_obj(group_table, oinfo.addr);
         
-        if (found_obj == NULL) 
-        {
+        if (found_obj == NULL) {
             indentation(indent);
             error_msg(progname, "internal error (file %s:line %d)\n",
                 __FILE__, __LINE__);
             d_status = EXIT_FAILURE;
         } 
-        else if (found_obj->displayed) 
-        {
+        else if (found_obj->displayed) {
             indentation(indent);
             printf("%s \"%s\"\n", HARDLINK, found_obj->objname);
         } 
-        else 
-        {
+        else {
             found_obj->displayed = TRUE;
             /* attribute iteration: if there is a request to do H5_INDEX_CRT_ORDER and tracking order is set
                in the group for attributes, then, sort by creation order, otherwise by name */
@@ -3153,7 +3146,7 @@ handle_datasets(hid_t fid, char *dset, void *data)
     hid_t            dsetid;
     struct subset_t *sset = (struct subset_t *)data;
 
-    if ((dsetid = H5Dopen(fid, dset)) < 0) {
+    if((dsetid = H5Dopen2(fid, dset, H5P_DEFAULT)) < 0) {
         begin_obj(dump_header_format->datasetbegin, dset,
                   dump_header_format->datasetblockbegin);
         indentation(COL);
@@ -3162,20 +3155,20 @@ handle_datasets(hid_t fid, char *dset, void *data)
                 dump_header_format->datasetblockend);
         d_status = EXIT_FAILURE;
         return;
-    }
+    } /* end if */
 
-    if (sset) {
-        if (!sset->start || !sset->stride || !sset->count || !sset->block) {
+    if(sset) {
+        if(!sset->start || !sset->stride || !sset->count || !sset->block) {
             /* they didn't specify a ``stride'' or ``block''. default to 1 in all
              * dimensions */
             hid_t sid = H5Dget_space(dsetid);
             unsigned int ndims = H5Sget_simple_extent_ndims(sid);
 
-            if (!sset->start)
+            if(!sset->start)
                 /* default to (0, 0, ...) for the start coord */
                 sset->start = calloc(ndims, sizeof(hsize_t));
 
-            if (!sset->stride) {
+            if(!sset->stride) {
                 unsigned int i;
 
                 sset->stride = calloc(ndims, sizeof(hsize_t));
@@ -3419,7 +3412,7 @@ handle_datatypes(hid_t fid, char *type, void UNUSED * data)
             idx++;
         } /* end while */
 
-        if(idx ==  type_table->nobjs) {
+        if(idx == type_table->nobjs) {
             /* unknown type */
             begin_obj(dump_header_format->datatypebegin, type,
                       dump_header_format->datatypeblockbegin);
@@ -3429,7 +3422,7 @@ handle_datatypes(hid_t fid, char *type, void UNUSED * data)
                     dump_header_format->datatypeblockend);
             d_status = EXIT_FAILURE;
         } else {
-            hid_t dsetid = H5Dopen(fid, type_table->objs[idx].objname);
+            hid_t dsetid = H5Dopen2(fid, type_table->objs[idx].objname, H5P_DEFAULT);
             type_id = H5Dget_type(dsetid);
             dump_named_datatype(type_id, type);
             H5Tclose(type_id);
@@ -5371,7 +5364,7 @@ xml_dump_group(hid_t gid, const char *name)
                     /* Very special case: dump unamed type in root group */
                     for(u = 0; u < type_table->nobjs; u++) {
                         if(!type_table->objs[u].recorded) {
-                            dset = H5Dopen(gid, type_table->objs[u].objname);
+                            dset = H5Dopen2(gid, type_table->objs[u].objname, H5P_DEFAULT);
                             type = H5Dget_type(dset);
                             sprintf(type_name, "#"H5_PRINTF_HADDR_FMT, type_table->objs[u].objno);
                             dump_function_table->dump_named_datatype_function(type, type_name);
@@ -5425,7 +5418,7 @@ xml_dump_group(hid_t gid, const char *name)
             /* Very special case: dump unamed type in root group */
             for(u = 0; u < type_table->nobjs; u++) {
                 if(!type_table->objs[u].recorded) {
-                    dset = H5Dopen(gid, type_table->objs[u].objname);
+                    dset = H5Dopen2(gid, type_table->objs[u].objname, H5P_DEFAULT);
                     type = H5Dget_type(dset);
                     sprintf(type_name, "#"H5_PRINTF_HADDR_FMT, type_table->objs[u].objno);
                     dump_function_table->dump_named_datatype_function(type, type_name);

@@ -110,51 +110,51 @@ void tts_dcreate(void)
      * creation plist and default file access plist
      */
     file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    assert(file>=0);
+    assert(file >= 0);
 
     /* simultaneously create a large number of datasets within the file */
-    for (i = 0; i < NUM_THREAD; i++) {
+    for(i = 0; i < NUM_THREAD; i++) {
         thread_out[i].id = i;
         thread_out[i].file = file;
         thread_out[i].dsetname = dsetname[i];
         ret=pthread_create(&threads[i], NULL, tts_dcreate_creator, &thread_out[i]);
         assert(ret==0);
-    }
+    } /* end for */
 
-    for (i = 0;i < NUM_THREAD; i++) {
-        ret=pthread_join(threads[i], NULL);
-        assert(ret==0);
+    for(i = 0;i < NUM_THREAD; i++) {
+        ret = pthread_join(threads[i], NULL);
+        assert(ret == 0);
     } /* end for */
 
     /* compare data to see if it is written correctly */
 
-    for (i = 0; i < NUM_THREAD; i++) {
-        if ((dataset = H5Dopen(file,dsetname[i])) < 0) {
+    for(i = 0; i < NUM_THREAD; i++) {
+        if((dataset = H5Dopen2(file, dsetname[i], H5P_DEFAULT)) < 0) {
             TestErrPrintf("Dataset name not found - test failed\n");
             H5Fclose(file);
             return;
         } else {
-            ret=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &datavalue);
-            assert(ret>=0);
+            ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &datavalue);
+            assert(ret >= 0);
 
-            if (datavalue != i) {
+            if(datavalue != i) {
                 TestErrPrintf("Wrong value read %d for dataset name %s - test failed\n",
                             datavalue, dsetname[i]);
-                ret=H5Dclose(dataset);
-                assert(ret>=0);
-                ret=H5Fclose(file);
-                assert(ret>=0);
+                ret = H5Dclose(dataset);
+                assert(ret >= 0);
+                ret = H5Fclose(file);
+                assert(ret >= 0);
                 return;
             }
 
-            ret=H5Dclose(dataset);
-            assert(ret>=0);
+            ret = H5Dclose(dataset);
+            assert(ret >= 0);
         }
     }
 
     /* close remaining resources */
-    ret=H5Fclose(file);
-    assert(ret>=0);
+    ret = H5Fclose(file);
+    assert(ret >= 0);
 
     /* Destroy the thread attribute */
     ret=pthread_attr_destroy(&attribute);

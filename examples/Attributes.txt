@@ -85,7 +85,7 @@ H5Aread Example: Attach to an attribute of a dataset and read in attr. data
     file=H5Fopen("example.h5", H5F_ACC_RDWR, H5P_DEFAULT);
 
     /* Open the dataset */
-    dataset=H5Dopen(file,"Dataset1");
+    dataset=H5Dopen2(file, "Dataset1", H5P_DEFAULT);
 
     /* Get the OID of the attribute */
     attr=H5Aopen(dataset, ".", "Attr1", H5P_DEFAULT, H5P_DEFAULT);
@@ -114,10 +114,10 @@ H5Alink Example: Shows how to share an attribute between two datasets.
     file=H5Fopen("example.h5", H5F_ACC_RDWR, H5P_DEFAULT);
 
     /* Open the first dataset */
-    dataset1=H5Dopen(file, "Dataset1");
+    dataset1=H5Dopen2(file, "Dataset1", H5P_DEFAULT);
 
     /* Open the first dataset */
-    dataset2=H5Dopen(file, "Dataset2");
+    dataset2=H5Dopen2(file, "Dataset2", H5P_DEFAULT);
 
     /* Get the OID of the attribute */
     attr=H5Aopen(dataset1, ".", "Foo", H5P_DEFAULT, H5P_DEFAULT);

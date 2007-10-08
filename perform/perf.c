@@ -209,37 +209,37 @@ int main(int argc, char **argv)
     file_dataspace = H5Dget_space (dataset);
     VRFY((file_dataspace >= 0), "H5Dget_space succeeded", H5FATAL);
 
-	/* now each process writes a block of opt_block chars in round robbin
-	 * fashion until the whole dataset is covered.
-	 */
-	for (j=0; j < opt_iter; j++) {
-	    /* setup a file dataspace selection */
-	    start[0] = (j*iter_jump)+(mynod*opt_block);
-	    stride[0] = block[0] = opt_block;
-	    count[0]= 1;
-	    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
-	    VRFY((ret >= 0), "H5Sset_hyperslab succeeded", H5FATAL);
+    /* now each process writes a block of opt_block chars in round robbin
+     * fashion until the whole dataset is covered.
+     */
+    for(j=0; j < opt_iter; j++) {
+        /* setup a file dataspace selection */
+        start[0] = (j*iter_jump)+(mynod*opt_block);
+        stride[0] = block[0] = opt_block;
+        count[0]= 1;
+        ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
+        VRFY((ret >= 0), "H5Sset_hyperslab succeeded", H5FATAL);
 
-		if (opt_correct) /* fill in buffer for iteration */ {
-			for (i=mynod+j, check=buf; i<opt_block; i++,check++) *check=(char)i;
-		}
+            if (opt_correct) /* fill in buffer for iteration */ {
+                    for (i=mynod+j, check=buf; i<opt_block; i++,check++) *check=(char)i;
+            }
 
-		/* discover the starting time of the operation */
-	   MPI_Barrier(MPI_COMM_WORLD);
-	   stim = MPI_Wtime();
+            /* discover the starting time of the operation */
+       MPI_Barrier(MPI_COMM_WORLD);
+       stim = MPI_Wtime();
 
-    /* write data */
-    ret = H5Dwrite(dataset, H5T_NATIVE_CHAR, mem_dataspace, file_dataspace,
-	    H5P_DEFAULT, buf);
-    VRFY((ret >= 0), "H5Dwrite dataset1 succeeded", !H5FATAL);
+        /* write data */
+        ret = H5Dwrite(dataset, H5T_NATIVE_CHAR, mem_dataspace, file_dataspace,
+                H5P_DEFAULT, buf);
+        VRFY((ret >= 0), "H5Dwrite dataset1 succeeded", !H5FATAL);
 
-		/* discover the ending time of the operation */
-	   etim = MPI_Wtime();
+            /* discover the ending time of the operation */
+       etim = MPI_Wtime();
 
-	   write_tim += (etim - stim);
+       write_tim += (etim - stim);
 
-		/* we are done with this "write" iteration */
-	}
+            /* we are done with this "write" iteration */
+    }
 
     /* close dataset and file */
     ret=H5Dclose(dataset);
@@ -249,67 +249,65 @@ int main(int argc, char **argv)
 
 
 
-	/* wait for everyone to synchronize at this point */
-	MPI_Barrier(MPI_COMM_WORLD);
+    /* wait for everyone to synchronize at this point */
+    MPI_Barrier(MPI_COMM_WORLD);
 
     /* reopen the file for reading */
     fid=H5Fopen(opt_file,H5F_ACC_RDONLY,acc_tpl);
     VRFY((fid >= 0), "", H5FATAL);
 
     /* open the dataset */
-    dataset = H5Dopen(fid, "Dataset1");
+    dataset = H5Dopen2(fid, "Dataset1", H5P_DEFAULT);
     VRFY((dataset >= 0), "H5Dopen succeeded", H5FATAL);
 
     /* we can re-use the same mem_dataspace and file_dataspace
      * the H5Dwrite used since the dimension size is the same.
      */
 
-	/* we are going to repeat the read the same pattern the write used */
-	for (j=0; j < opt_iter; j++) {
-	    /* setup a file dataspace selection */
-	    start[0] = (j*iter_jump)+(mynod*opt_block);
-	    stride[0] = block[0] = opt_block;
-	    count[0]= 1;
-	    ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
-	    VRFY((ret >= 0), "H5Sset_hyperslab succeeded", H5FATAL);
-		/* seek to the appropriate spot give the current iteration and
-		 * rank within the MPI processes */
+    /* we are going to repeat the read the same pattern the write used */
+    for (j=0; j < opt_iter; j++) {
+        /* setup a file dataspace selection */
+        start[0] = (j*iter_jump)+(mynod*opt_block);
+        stride[0] = block[0] = opt_block;
+        count[0]= 1;
+        ret=H5Sselect_hyperslab(file_dataspace, H5S_SELECT_SET, start, stride, count, block);
+        VRFY((ret >= 0), "H5Sset_hyperslab succeeded", H5FATAL);
+            /* seek to the appropriate spot give the current iteration and
+             * rank within the MPI processes */
 
-		/* discover the start time */
-	   MPI_Barrier(MPI_COMM_WORLD);
-	   stim = MPI_Wtime();
+            /* discover the start time */
+       MPI_Barrier(MPI_COMM_WORLD);
+       stim = MPI_Wtime();
 
-    /* read data */
-		/* read in the file data */
-		if (!opt_correct){
-    ret = H5Dread(dataset, H5T_NATIVE_CHAR, mem_dataspace, file_dataspace,
-	    H5P_DEFAULT, buf);
-		}
-		else{
-    ret = H5Dread(dataset, H5T_NATIVE_CHAR, mem_dataspace, file_dataspace,
-	    H5P_DEFAULT, buf2);
-		}
-		myerrno = errno;
-		/* discover the end time */
-	   etim = MPI_Wtime();
-	   read_tim += (etim - stim);
-    VRFY((ret >= 0), "H5Dwrite dataset1 succeeded", !H5FATAL);
+        /* read in the file data */
+        if (!opt_correct){
+            ret = H5Dread(dataset, H5T_NATIVE_CHAR, mem_dataspace, file_dataspace, H5P_DEFAULT, buf);
+        }
+        else{
+            ret = H5Dread(dataset, H5T_NATIVE_CHAR, mem_dataspace, file_dataspace, H5P_DEFAULT, buf2);
+        }
+        myerrno = errno;
+
+        /* discover the end time */
+       etim = MPI_Wtime();
+       read_tim += (etim - stim);
+        VRFY((ret >= 0), "H5Dwrite dataset1 succeeded", !H5FATAL);
 
 
-	   if (ret < 0) fprintf(stderr, "node %d, read error, loc = %Ld: %s\n",
-			mynod, mynod*opt_block, strerror(myerrno));
+       if (ret < 0) fprintf(stderr, "node %d, read error, loc = %Ld: %s\n",
+                    mynod, mynod*opt_block, strerror(myerrno));
 
-		/* if the user wanted to check correctness, compare the write
-		 * buffer to the read buffer */
-		if (opt_correct && memcmp(buf, buf2, opt_block)) {
-			fprintf(stderr, "node %d, correctness test failed\n", mynod);
-			my_correct = 0;
-			MPI_Allreduce(&my_correct, &correct, 1, MPI_INT, MPI_MIN,
-				MPI_COMM_WORLD);
-		}
+        /* if the user wanted to check correctness, compare the write
+         * buffer to the read buffer */
+        if (opt_correct && memcmp(buf, buf2, opt_block)) {
+                fprintf(stderr, "node %d, correctness test failed\n", mynod);
+                my_correct = 0;
+                MPI_Allreduce(&my_correct, &correct, 1, MPI_INT, MPI_MIN,
+                        MPI_COMM_WORLD);
+        }
 
-		/* we are done with this read iteration */
-	}
+        /* we are done with this read iteration */
+    }
 
     /* close dataset and file */
     ret=H5Dclose(dataset);

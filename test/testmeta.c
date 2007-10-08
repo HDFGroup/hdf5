@@ -133,8 +133,7 @@ int main(void)
             sprintf(name, "DataArray%06d", i);
             dataset_id = H5Dcreate(group_id, name,
                     H5T_NATIVE_FLOAT, dataspace_id, H5P_DEFAULT);
-            if(dataset_id < 0)
-            {
+            if(dataset_id < 0) {
                 fprintf(stderr, "Failed to create DataArray dataset.\n");
                 status = H5Fclose(file_id);
                 return -1;
@@ -143,8 +142,7 @@ int main(void)
             /* Write the data array data */
             status = H5Dwrite(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL,
                     H5S_ALL, H5P_DEFAULT, data);
-            if(status < 0)
-            {
+            if(status < 0) {
                 fprintf(stderr, "Failed to write DataArray dataset.\n");
                 status = H5Fclose(file_id);
                 return -1;
@@ -156,9 +154,8 @@ int main(void)
         }
 
         /* Open NumDataObj dataset */
-        dataset_id = H5Dopen(file_id, "/NumDataObj");
-        if(dataset_id < 0)
-        {
+        dataset_id = H5Dopen2(file_id, "/NumDataObj", H5P_DEFAULT);
+        if(dataset_id < 0) {
             fprintf(stderr, "Failed to open NumDataObj dataset.\n");
             status = H5Fclose(file_id);
             return -1;
@@ -168,8 +165,7 @@ int main(void)
         numdataobj = j + 1;
         status = H5Dwrite(dataset_id, H5T_NATIVE_UINT, H5S_ALL,
                 H5S_ALL, H5P_DEFAULT, &numdataobj);
-        if(status < 0)
-        {
+        if(status < 0) {
             fprintf(stderr, "Failed to write NumDataObj dataset.\n");
             status = H5Fclose(file_id);
             return -1;
@@ -183,7 +179,7 @@ int main(void)
         for(i = 0; i < NEXTARRAYS; i++) {
             /* Open extendable dataset */
             sprintf(name, "/ExtArray%06d", i);
-            dataset_id = H5Dopen(file_id, name);
+            dataset_id = H5Dopen2(file_id, name, H5P_DEFAULT);
             if(dataset_id < 0) {
                 fprintf(stderr, "Failed to open ExtArray dataset.\n");
                 status = H5Fclose(file_id);

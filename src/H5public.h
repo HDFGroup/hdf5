@@ -86,9 +86,8 @@ extern "C" {
  * The negative failure value is most commonly -1, but don't bet on it.  The
  * proper way to detect failure is something like:
  *
- * 	if ((dset = H5Dopen (file, name))<0) {
- *	    fprintf (stderr, "unable to open the requested dataset\n");
- *	}
+ * 	if((dset = H5Dopen2(file, name)) < 0)
+ *	    fprintf(stderr, "unable to open the requested dataset\n");
  */
 typedef int herr_t;
 
@@ -319,3 +318,4 @@ H5_DLL herr_t H5check_version(unsigned majnum, unsigned minnum,
 }
 #endif
 #endif
+

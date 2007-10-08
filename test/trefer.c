@@ -216,8 +216,8 @@ test_reference_obj(void)
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
-    dataset = H5Dopen(fid1, "/Dataset3");
-    CHECK(ret, FAIL, "H5Dcreate");
+    dataset = H5Dopen2(fid1, "/Dataset3", H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Dopen2");
 
     /* Read selection from disk */
     ret = H5Dread(dataset, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
@@ -442,8 +442,8 @@ test_reference_region(void)
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
-    dset1 = H5Dopen(fid1,"/Dataset1");
-    CHECK(dset1, FAIL, "H5Dopen");
+    dset1 = H5Dopen2(fid1, "/Dataset1", H5P_DEFAULT);
+    CHECK(dset1, FAIL, "H5Dopen2");
 
     /* Read selection from disk */
     ret = H5Dread(dset1, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
@@ -714,8 +714,8 @@ test_reference_region_1D(void)
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
-    dset1 = H5Dopen(fid1, "/Dataset1");
-    CHECK(dset1, FAIL, "H5Dopen");
+    dset1 = H5Dopen2(fid1, "/Dataset1", H5P_DEFAULT);
+    CHECK(dset1, FAIL, "H5Dopen2");
 
     /* Read selection from disk */
     ret = H5Dread(dset1, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
@@ -920,8 +920,8 @@ test_reference_obj_deleted(void)
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
-    dataset = H5Dopen(fid1, "/Dataset2");
-    CHECK(ret, FAIL, "H5Dopen");
+    dataset = H5Dopen2(fid1, "/Dataset2", H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Dopen2");
 
     /* Read selection from disk */
     HDmemset(&oref, 0, sizeof(hobj_ref_t));
@@ -1065,8 +1065,8 @@ test_reference_group(void)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Re-open dataset */
-    did = H5Dopen(fid, DSETNAME);
-    CHECK(did, FAIL, "H5Dopen");
+    did = H5Dopen2(fid, DSETNAME, H5P_DEFAULT);
+    CHECK(did, FAIL, "H5Dopen2");
 
     /* Read in the reference */
     ret = H5Dread(did, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rref);
@@ -1296,8 +1296,8 @@ test_reference_compat(void)
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the object reference dataset */
-    dataset = H5Dopen(fid1, "/Dataset3");
-    CHECK(ret, FAIL, "H5Dopen");
+    dataset = H5Dopen2(fid1, "/Dataset3", H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Dopen2");
 
     /* Read selection from disk */
     ret = H5Dread(dataset, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf_obj);
@@ -1326,8 +1326,8 @@ test_reference_compat(void)
 
 
     /* Open the dataset region reference dataset */
-    dataset = H5Dopen(fid1, "/Dataset4");
-    CHECK(ret, FAIL, "H5Dopen");
+    dataset = H5Dopen2(fid1, "/Dataset4", H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Dopen2");
 
     /* Read selection from disk */
     ret = H5Dread(dataset, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf_reg);

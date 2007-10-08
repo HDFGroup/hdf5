@@ -49,6 +49,7 @@ FUNCTION: H5Acreate; ; v10, v18
 FUNCTION: H5Adelete; ; v10, v18
 FUNCTION: H5Aiterate; H5A_operator; v10, v18
 FUNCTION: H5Arename; ; v16, v18
+FUNCTION: H5Dopen; ; v10, v18
 FUNCTION: H5Eclear; ; v10, v18
 FUNCTION: H5Eget_auto; ; v10, v18
 FUNCTION: H5Eprint; ; v10, v18

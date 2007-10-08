@@ -250,7 +250,7 @@ parallel_access_dataset(const char *filename, int nchunks, access_type action, h
 
     /* Open dataset*/
     if (*dataset<0){
-        *dataset = H5Dopen(*file_id, DATASETNAME);
+        *dataset = H5Dopen2(*file_id, DATASETNAME, H5P_DEFAULT);
         VRFY((*dataset >= 0), "");
     }
 
@@ -381,7 +381,7 @@ void verify_data(const char *filename, int nchunks, write_type write_pattern, in
 
     /* Open dataset*/
     if (*dataset<0){
-        *dataset = H5Dopen(*file_id, DATASETNAME);
+        *dataset = H5Dopen2(*file_id, DATASETNAME, H5P_DEFAULT);
         VRFY((*dataset >= 0), "");
     }
 

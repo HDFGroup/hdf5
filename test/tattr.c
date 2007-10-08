@@ -406,8 +406,8 @@ test_attr_basic_read(hid_t fapl)
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
-    dataset = H5Dopen(fid1, DSET1_NAME);
-    CHECK(dataset, FAIL, "H5Dopen");
+    dataset = H5Dopen2(fid1, DSET1_NAME, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
 
     /* Verify the correct number of attributes */
     ret = H5Oget_info(dataset, ".", &oinfo, H5P_DEFAULT);
@@ -777,8 +777,8 @@ test_attr_compound_read(hid_t fapl)
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
-    dataset = H5Dopen(fid1, DSET1_NAME);
-    CHECK(dataset, FAIL, "H5Dopen");
+    dataset = H5Dopen2(fid1, DSET1_NAME, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
 
     /* Verify the correct number of attributes */
     ret = H5Oget_info(dataset, ".", &oinfo, H5P_DEFAULT);
@@ -980,8 +980,8 @@ test_attr_scalar_read(hid_t fapl)
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
-    dataset = H5Dopen(fid1, DSET1_NAME);
-    CHECK(dataset, FAIL, "H5Dopen");
+    dataset = H5Dopen2(fid1, DSET1_NAME, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
 
     /* Verify the correct number of attributes */
     ret = H5Oget_info(dataset, ".", &oinfo, H5P_DEFAULT);
@@ -1182,8 +1182,8 @@ test_attr_mult_read(hid_t fapl)
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
-    dataset = H5Dopen(fid1, DSET1_NAME);
-    CHECK(dataset, FAIL, "H5Dopen");
+    dataset = H5Dopen2(fid1, DSET1_NAME, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
 
     /* Verify the correct number of attributes */
     ret = H5Oget_info(dataset, ".", &oinfo, H5P_DEFAULT);
@@ -1457,8 +1457,8 @@ test_attr_iterate(hid_t fapl)
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Open existing dataset w/attributes */
-    dataset = H5Dopen(file, DSET1_NAME);
-    CHECK(dataset, FAIL, "H5Dopen");
+    dataset = H5Dopen2(file, DSET1_NAME, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
 
     /* Verify the correct number of attributes */
     ret = H5Oget_info(dataset, ".", &oinfo, H5P_DEFAULT);
@@ -1504,8 +1504,8 @@ test_attr_delete(hid_t fapl)
     CHECK(fid1, FAIL, "H5Fopen");
 
     /* Open the dataset */
-    dataset = H5Dopen(fid1, DSET1_NAME);
-    CHECK(dataset, FAIL, "H5Dopen");
+    dataset = H5Dopen2(fid1, DSET1_NAME, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
 
     /* Verify the correct number of attributes */
     ret = H5Oget_info(dataset, ".", &oinfo, H5P_DEFAULT);
@@ -1729,8 +1729,8 @@ test_attr_dtype_shared(hid_t fapl)
     CHECK(file_id, FAIL, "H5Fopen");
 
     /* Open dataset */
-    dset_id = H5Dopen(file_id, DSET1_NAME);
-    CHECK(dset_id, FAIL, "H5Dopen");
+    dset_id = H5Dopen2(file_id, DSET1_NAME, H5P_DEFAULT);
+    CHECK(dset_id, FAIL, "H5Dopen2");
 
     /* Open attribute */
     attr_id = H5Aopen(dset_id, ".", ATTR1_NAME, H5P_DEFAULT, H5P_DEFAULT);
@@ -2232,8 +2232,8 @@ test_attr_dense_delete(hid_t fcpl, hid_t fapl)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Open dataset */
-    dataset = H5Dopen(fid, DSET1_NAME);
-    CHECK(dataset, FAIL, "H5Dopen");
+    dataset = H5Dopen2(fid, DSET1_NAME, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
 
     /* Delete attributes until the attributes revert to compact storage again */
     for(u--; u >= min_dense; u--) {
@@ -2414,8 +2414,8 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Open dataset */
-    dataset = H5Dopen(fid, DSET1_NAME);
-    CHECK(dataset, FAIL, "H5Dopen");
+    dataset = H5Dopen2(fid, DSET1_NAME, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
 
     /* Verify renamed attributes */
     for(u = 0; u < (max_compact * 2); u++) {
@@ -3151,8 +3151,8 @@ test_attr_null_space(hid_t fcpl, hid_t fapl)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Open dataset */
-    dataset = H5Dopen(fid, DSET1_NAME);
-    CHECK(dataset, FAIL, "H5Dopen");
+    dataset = H5Dopen2(fid, DSET1_NAME, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
 
 
     /* Open first attribute */
@@ -3299,8 +3299,8 @@ test_attr_deprec(hid_t fcpl, hid_t fapl)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Open dataset */
-    dataset = H5Dopen(fid, DSET1_NAME);
-    CHECK(dataset, FAIL, "H5Dopen");
+    dataset = H5Dopen2(fid, DSET1_NAME, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
 
 
     /* Get number of attributes */
@@ -3515,8 +3515,8 @@ test_attr_corder_create_basic(hid_t fcpl, hid_t fapl)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Open dataset created */
-    dataset = H5Dopen(fid, DSET1_NAME);
-    CHECK(dataset, FAIL, "H5Dopen");
+    dataset = H5Dopen2(fid, DSET1_NAME, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
 
     /* Check on dataset's attribute storage status */
     is_empty = H5O_is_attr_empty_test(dataset);
@@ -3680,12 +3680,12 @@ test_attr_corder_create_compact(hid_t fcpl, hid_t fapl)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Open datasets created */
-    dset1 = H5Dopen(fid, DSET1_NAME);
-    CHECK(dset1, FAIL, "H5Dopen");
-    dset2 = H5Dopen(fid, DSET2_NAME);
-    CHECK(dset2, FAIL, "H5Dopen");
-    dset3 = H5Dopen(fid, DSET3_NAME);
-    CHECK(dset3, FAIL, "H5Dopen");
+    dset1 = H5Dopen2(fid, DSET1_NAME, H5P_DEFAULT);
+    CHECK(dset1, FAIL, "H5Dopen2");
+    dset2 = H5Dopen2(fid, DSET2_NAME, H5P_DEFAULT);
+    CHECK(dset2, FAIL, "H5Dopen2");
+    dset3 = H5Dopen2(fid, DSET3_NAME, H5P_DEFAULT);
+    CHECK(dset3, FAIL, "H5Dopen2");
 
     /* Work on all the datasets */
     for(curr_dset = 0; curr_dset < NUM_DSETS; curr_dset++) {
@@ -3907,12 +3907,12 @@ test_attr_corder_create_dense(hid_t fcpl, hid_t fapl)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Open datasets created */
-    dset1 = H5Dopen(fid, DSET1_NAME);
-    CHECK(dset1, FAIL, "H5Dopen");
-    dset2 = H5Dopen(fid, DSET2_NAME);
-    CHECK(dset2, FAIL, "H5Dopen");
-    dset3 = H5Dopen(fid, DSET3_NAME);
-    CHECK(dset3, FAIL, "H5Dopen");
+    dset1 = H5Dopen2(fid, DSET1_NAME, H5P_DEFAULT);
+    CHECK(dset1, FAIL, "H5Dopen2");
+    dset2 = H5Dopen2(fid, DSET2_NAME, H5P_DEFAULT);
+    CHECK(dset2, FAIL, "H5Dopen2");
+    dset3 = H5Dopen2(fid, DSET3_NAME, H5P_DEFAULT);
+    CHECK(dset3, FAIL, "H5Dopen2");
 
     /* Work on all the datasets */
     for(curr_dset = 0; curr_dset < NUM_DSETS; curr_dset++) {
@@ -4190,12 +4190,12 @@ test_attr_corder_transition(hid_t fcpl, hid_t fapl)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Open datasets created */
-    dset1 = H5Dopen(fid, DSET1_NAME);
-    CHECK(dset1, FAIL, "H5Dopen");
-    dset2 = H5Dopen(fid, DSET2_NAME);
-    CHECK(dset2, FAIL, "H5Dopen");
-    dset3 = H5Dopen(fid, DSET3_NAME);
-    CHECK(dset3, FAIL, "H5Dopen");
+    dset1 = H5Dopen2(fid, DSET1_NAME, H5P_DEFAULT);
+    CHECK(dset1, FAIL, "H5Dopen2");
+    dset2 = H5Dopen2(fid, DSET2_NAME, H5P_DEFAULT);
+    CHECK(dset2, FAIL, "H5Dopen2");
+    dset3 = H5Dopen2(fid, DSET3_NAME, H5P_DEFAULT);
+    CHECK(dset3, FAIL, "H5Dopen2");
 
     /* Work on all the datasets */
     for(curr_dset = 0; curr_dset < NUM_DSETS; curr_dset++) {
@@ -4352,12 +4352,12 @@ test_attr_corder_transition(hid_t fcpl, hid_t fapl)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Open datasets created */
-    dset1 = H5Dopen(fid, DSET1_NAME);
-    CHECK(dset1, FAIL, "H5Dopen");
-    dset2 = H5Dopen(fid, DSET2_NAME);
-    CHECK(dset2, FAIL, "H5Dopen");
-    dset3 = H5Dopen(fid, DSET3_NAME);
-    CHECK(dset3, FAIL, "H5Dopen");
+    dset1 = H5Dopen2(fid, DSET1_NAME, H5P_DEFAULT);
+    CHECK(dset1, FAIL, "H5Dopen2");
+    dset2 = H5Dopen2(fid, DSET2_NAME, H5P_DEFAULT);
+    CHECK(dset2, FAIL, "H5Dopen2");
+    dset3 = H5Dopen2(fid, DSET3_NAME, H5P_DEFAULT);
+    CHECK(dset3, FAIL, "H5Dopen2");
 
     /* Work on all the datasets */
     for(curr_dset = 0; curr_dset < NUM_DSETS; curr_dset++) {

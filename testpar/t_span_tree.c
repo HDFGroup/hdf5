@@ -483,11 +483,11 @@ void coll_write_test(int chunk_factor)
   /*
    * Open the dataset.
    */
-  datasetc = H5Dopen(file,"collect_write");
-  VRFY((datasetc >= 0),"H5Dopen succeeded");
+  datasetc = H5Dopen2(file,"collect_write", H5P_DEFAULT);
+  VRFY((datasetc >= 0),"H5Dopen2 succeeded");
 
-  dataseti = H5Dopen(file,"independ_write");
-  VRFY((dataseti >= 0),"H5Dopen succeeded");
+  dataseti = H5Dopen2(file,"independ_write", H5P_DEFAULT);
+  VRFY((dataseti >= 0),"H5Dopen2 succeeded");
 
   /*
    * Get dataspace of the open dataset.
@@ -760,8 +760,8 @@ void coll_read_test(int chunk_factor)
   /*
    * Open the dataset.
    */
-  dataseti = H5Dopen(file,"independ_write");
-  VRFY((dataseti >= 0),"H5Dopen succeeded");
+  dataseti = H5Dopen2(file,"independ_write", H5P_DEFAULT);
+  VRFY((dataseti >= 0),"H5Dopen2 succeeded");
 
   /*
    * Get dataspace of the open dataset.

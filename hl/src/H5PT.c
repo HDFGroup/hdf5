@@ -232,10 +232,10 @@ hid_t H5PTopen( hid_t loc_id,
     if((H5PT_ptable_id_type = H5Iregister_type((size_t)H5PT_HASH_TABLE_SIZE, 0, (H5I_free_t)free))<0)
       goto out;
 
-  table = (htbl_t *) malloc(sizeof(htbl_t));
+  table = (htbl_t *)malloc(sizeof(htbl_t));
 
   /* Open the dataset */
-  if(( table->dset_id = H5Dopen(loc_id, dset_name)) <0)
+  if((table->dset_id = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
       goto out;
   if (table->dset_id < 0)
     goto out;

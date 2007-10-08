@@ -286,7 +286,7 @@ main(void)
                 TEST_ERROR
 
             /* Open the dataset with the unknown header message, but no extra flags */
-            if((dset = H5Dopen(file2, "/Dataset1")) < 0)
+            if((dset = H5Dopen2(file2, "/Dataset1", H5P_DEFAULT)) < 0)
                 TEST_ERROR
             if(H5Dclose(dset) < 0)
                 TEST_ERROR
@@ -297,7 +297,7 @@ main(void)
 
             /* Attempt to open the dataset with the unknown header message, and "fail if unknown" flag */
             H5E_BEGIN_TRY {
-                dset = H5Dopen(file2, "/Dataset2");
+                dset = H5Dopen2(file2, "/Dataset2", H5P_DEFAULT);
             } H5E_END_TRY;
             if(dset >= 0) {
                 H5Dclose(dset);
@@ -321,7 +321,7 @@ main(void)
                 TEST_ERROR
 
             /* Open the dataset with the "mark if unknown" message */
-            if((dset = H5Dopen(file, "/Dataset3")) < 0)
+            if((dset = H5Dopen2(file, "/Dataset3", H5P_DEFAULT)) < 0)
                 TEST_ERROR
 
             /* Check that the "unknown" message was _NOT_ marked */
@@ -341,7 +341,7 @@ main(void)
                 TEST_ERROR
 
             /* Open the dataset with the "mark if unknown" message */
-            if((dset = H5Dopen(file, "/Dataset3")) < 0)
+            if((dset = H5Dopen2(file, "/Dataset3", H5P_DEFAULT)) < 0)
                 TEST_ERROR
             if(H5Dclose(dset) < 0)
                 TEST_ERROR
@@ -355,7 +355,7 @@ main(void)
                 TEST_ERROR
 
             /* Re-open the dataset with the "mark if unknown" message */
-            if((dset = H5Dopen(file, "/Dataset3")) < 0)
+            if((dset = H5Dopen2(file, "/Dataset3", H5P_DEFAULT)) < 0)
                 TEST_ERROR
 
             /* Check that the "unknown" message was marked */

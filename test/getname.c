@@ -218,27 +218,27 @@ test_main(hid_t file_id, hid_t fapl)
 
 
     /*-------------------------------------------------------------------------
-    * Test H5Iget_name with H5Dopen
+    * Test H5Iget_name with H5Dopen2
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5Iget_name with H5Dopen");
+    TESTING("H5Iget_name with H5Dopen2");
 
     /* Reopen the dataset */
-    if((dataset_id = H5Dopen(file_id, "d1")) < 0) TEST_ERROR
+    if((dataset_id = H5Dopen2(file_id, "d1", H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Verify */
     if(check_name(dataset_id, "/d1", "/d1") < 0) TEST_ERROR
 
     /* Close */
-    H5Dclose(dataset_id);
+    if(H5Dclose(dataset_id) < 0) FAIL_STACK_ERROR
 
 
     /* Reopen the group */
     if((group_id = H5Gopen2(file_id, "g1", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Reopen the dataset */
-    if((dataset_id = H5Dopen(group_id, "d1")) < 0) FAIL_STACK_ERROR
+    if((dataset_id = H5Dopen2(group_id, "d1", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(dataset_id, "/g1/d1", "/g1/d1") < 0) TEST_ERROR
@@ -268,20 +268,20 @@ test_main(hid_t file_id, hid_t fapl)
     if((dataset_id = H5Dcreate(group3_id , "d1", H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Close */
-    H5Dclose(dataset_id);
-    H5Sclose(space_id);
-    H5Gclose(group_id);
-    H5Gclose(group2_id);
-    H5Gclose(group3_id);
+    if(H5Dclose(dataset_id) < 0) FAIL_STACK_ERROR
+    if(H5Sclose(space_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group2_id) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(group3_id) < 0) FAIL_STACK_ERROR
 
     /* Reopen the dataset */
-    if((dataset_id = H5Dopen(file_id, "/g2/bar/baz/d1")) < 0) TEST_ERROR
+    if((dataset_id = H5Dopen2(file_id, "/g2/bar/baz/d1", H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Verify */
     if(check_name(dataset_id, "/g2/bar/baz/d1", "/g2/bar/baz/d1") < 0) TEST_ERROR
 
     /* Close */
-    H5Dclose(dataset_id);
+    if(H5Dclose(dataset_id) < 0) FAIL_STACK_ERROR
 
     PASSED();
 
@@ -356,14 +356,14 @@ test_main(hid_t file_id, hid_t fapl)
 
 
    /*-------------------------------------------------------------------------
-    * Test H5Iget_name with H5Lmove and H5Dopen
+    * Test H5Iget_name with H5Lmove and H5Dopen2
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5Iget_name with H5Lmove and H5Dopen");
+    TESTING("H5Iget_name with H5Lmove and H5Dopen2");
 
     /* Reopen the dataset */
-    if((dataset_id = H5Dopen(file_id, "/d1")) < 0) FAIL_STACK_ERROR
+    if((dataset_id = H5Dopen2(file_id, "/d1", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Rename dataset */
     if(H5Lmove(file_id, "/d1", H5L_SAME_LOC, "/d1a", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
@@ -679,10 +679,10 @@ test_main(hid_t file_id, hid_t fapl)
     if((group_id = H5Gcreate2(file_id, "/g12", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Close */
-    H5Gclose(group_id);
+    if(H5Gclose(group_id) < 0) FAIL_STACK_ERROR
 
     /* Create second file and dataset "d" in it */
-    file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    if((file1_id = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Create a dataspace  */
     if((space_id = H5Screate_simple(1, dims, NULL)) < 0) TEST_ERROR
@@ -691,13 +691,13 @@ test_main(hid_t file_id, hid_t fapl)
     if((dataset_id = H5Dcreate(file1_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Close */
-    H5Dclose(dataset_id);
+    if(H5Dclose(dataset_id) < 0) FAIL_STACK_ERROR
 
     /* Mount second file under "g12" in the first file */
     if(H5Fmount(file_id, "/g12", file1_id, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Access dataset D in the first file under "/G/D" name */
-    if((dataset_id = H5Dopen(file_id, "/g12/d")) < 0) TEST_ERROR
+    if((dataset_id = H5Dopen2(file_id, "/g12/d", H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Verify */
     if(check_name(dataset_id, "/g12/d", "/g12/d") < 0) TEST_ERROR
@@ -705,9 +705,9 @@ test_main(hid_t file_id, hid_t fapl)
     if(H5Funmount(file_id, "/g12") < 0) TEST_ERROR
 
     /* Close */
-    H5Dclose(dataset_id);
-    H5Fclose(file1_id);
-    H5Sclose(space_id);
+    if(H5Dclose(dataset_id) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file1_id) < 0) FAIL_STACK_ERROR
+    if(H5Sclose(space_id) < 0) FAIL_STACK_ERROR
 
 
     PASSED();
@@ -1008,7 +1008,7 @@ test_main(hid_t file_id, hid_t fapl)
     if(H5Tclose(type_id) < 0) FAIL_STACK_ERROR
 
     /* Reopen the dataset */
-    if((dataset_id = H5Dopen(file_id, "/g17/d")) < 0) FAIL_STACK_ERROR
+    if((dataset_id = H5Dopen2(file_id, "/g17/d", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Get datatype*/
     if((type_id = H5Dget_type(dataset_id)) < 0) FAIL_STACK_ERROR
@@ -1031,11 +1031,11 @@ test_main(hid_t file_id, hid_t fapl)
     TESTING("H5Iget_name with datasets that have two names");
 
     /* Open dataset named "d"*/
-    if((dataset_id = H5Dopen(file_id, "/g17/d")) < 0) FAIL_STACK_ERROR
+    if((dataset_id = H5Dopen2(file_id, "/g17/d", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Create link to dataset named "link" */
     if(H5Lcreate_hard(dataset_id, ".", file_id, "/g17/link", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
-    if((dataset2_id = H5Dopen(file_id, "/g17/link")) < 0) FAIL_STACK_ERROR
+    if((dataset2_id = H5Dopen2(file_id, "/g17/link", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Make sure that the two IDs use two different names */
     if(check_name(dataset_id, "/g17/d", "/g17/d") < 0) TEST_ERROR
@@ -1280,7 +1280,7 @@ test_main(hid_t file_id, hid_t fapl)
 
     /* Open the mounted group, dataset, and datatype through their new names */
     if((group6_id = H5Gopen2(file1_id, "/g3/g4/g18/g2", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-    if((dataset2_id = H5Dopen(file1_id, "/g3/g4/g18/d2")) < 0) FAIL_STACK_ERROR
+    if((dataset2_id = H5Dopen2(file1_id, "/g3/g4/g18/d2", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if((type2_id = H5Topen2(file1_id, "/g3/g4/g18/t2", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Verify names */
@@ -2727,7 +2727,7 @@ test_reg_ref(hid_t fapl)
 	TEST_ERROR
 
     /* Reopen the dataset with object references and read references to the buffer */
-    if((dsetr_id = H5Dopen(file_id, REFREG_DSETNAMER)) , 0)
+    if((dsetr_id = H5Dopen2(file_id, REFREG_DSETNAMER, H5P_DEFAULT)) < 0)
 	TEST_ERROR
 
     if((status = H5Dread(dsetr_id, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_out)) < 0)

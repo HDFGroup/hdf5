@@ -785,7 +785,7 @@ test_h5l_create(hid_t fapl, hbool_t new_format)
     if(H5Gclose(group_id) < 0) TEST_ERROR
 
     /* Open dataset through root group and verify its data */
-    if((dset_id = H5Dopen(file_id, "/group/inter_group/dataset")) < 0) TEST_ERROR
+    if((dset_id = H5Dopen2(file_id, "/group/inter_group/dataset", H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Read data from dataset */
     if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0) TEST_ERROR
@@ -3451,7 +3451,7 @@ external_link_closing(hid_t fapl, hbool_t new_format)
     /* Test H5*open */
     if((gid = H5Gopen2(fid1, "elink/elink/elink/group1_moved", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if((tid = H5Topen2(fid1, "elink/elink/elink/type1_moved", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-    if((did = H5Dopen(fid1, "elink/elink/elink/dataset1_moved")) < 0) FAIL_STACK_ERROR
+    if((did = H5Dopen2(fid1, "elink/elink/elink/dataset1_moved", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     /* Close objects */
     if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
     if(H5Tclose(tid) < 0) FAIL_STACK_ERROR

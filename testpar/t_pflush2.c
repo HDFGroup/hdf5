@@ -58,17 +58,17 @@ int check_file(char* name, hid_t fapl)
 
     plist = H5Pcreate(H5P_DATASET_XFER);
     H5Pset_dxpl_mpio(plist, H5FD_MPIO_COLLECTIVE);
-    if ((file=H5Fopen(name, H5F_ACC_RDONLY, fapl))<0) goto error;
+    if((file = H5Fopen(name, H5F_ACC_RDONLY, fapl)) < 0) goto error;
 
     /* Open the dataset */
-    if ((dset=H5Dopen(file, "dset"))<0) goto error;
-    if ((space=H5Dget_space(dset))<0) goto error;
-    if (H5Sget_simple_extent_dims(space, ds_size, NULL)<0) goto error;
+    if((dset = H5Dopen2(file, "dset", H5P_DEFAULT)) < 0) goto error;
+    if((space = H5Dget_space(dset)) < 0) goto error;
+    if(H5Sget_simple_extent_dims(space, ds_size, NULL) < 0) goto error;
     assert(100==ds_size[0] && 100==ds_size[1]);
 
     /* Read some data */
     if (H5Dread(dset, H5T_NATIVE_DOUBLE, space, space, plist,
-		the_data)<0) goto error;
+		the_data) < 0) goto error;
     for (i=0; i<ds_size[0]; i++) {
 	for (j=0; j<ds_size[1]; j++) {
 	    /*

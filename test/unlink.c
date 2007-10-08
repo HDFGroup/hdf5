@@ -1873,7 +1873,7 @@ test_resurrect_dataset(hid_t fapl)
     if((f = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Attempt to open the dataset under the new name */
-    if((d = H5Dopen(f,DATASET2NAME)) < 0) FAIL_STACK_ERROR
+    if((d = H5Dopen2(f, DATASET2NAME, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Close things */
     if(H5Dclose(d) < 0) FAIL_STACK_ERROR

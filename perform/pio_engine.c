@@ -1667,12 +1667,12 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
 	    break;
     } /* end switch */
 
-    for (ndset = 1; ndset <= ndsets; ++ndset) {
+    for(ndset = 1; ndset <= ndsets; ++ndset) {
 
 	/* Calculate dataset offset within a file */
 
 	/* create dataset */
-	switch (parms->io_type) {
+	switch(parms->io_type) {
 	    case POSIXIO:
 	    case MPIO:
 		/* both posix and mpi io just need dataset offset in file*/
@@ -1681,12 +1681,11 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
 
 	    case PHDF5:
 		sprintf(dname, "Dataset_%ld", ndset);
-		h5ds_id = H5Dopen(fd->h5fd, dname);
-		if (h5ds_id < 0) {
+		h5ds_id = H5Dopen2(fd->h5fd, dname, H5P_DEFAULT);
+		if(h5ds_id < 0) {
 		    fprintf(stderr, "HDF5 Dataset open failed\n");
 		    GOTOERROR(FAIL);
 		}
-
 		break;
 	}
 

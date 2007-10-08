@@ -65,11 +65,11 @@ hsize_t diff_dataset( hid_t file1_id,
                       const char *obj2_name,
                       diff_opt_t *options)
 {
- hid_t   did1=-1;
- hid_t   did2=-1;
- hid_t   dcpl1=-1;
- hid_t   dcpl2=-1;
- hsize_t nfound=0;
+ hid_t   did1 = -1;
+ hid_t   did2 = -1;
+ hid_t   dcpl1 = -1;
+ hid_t   dcpl2 = -1;
+ hsize_t nfound = 0;
 
 /*-------------------------------------------------------------------------
  * open the handles
@@ -78,23 +78,21 @@ hsize_t diff_dataset( hid_t file1_id,
  /* disable error reporting */
  H5E_BEGIN_TRY {
  /* Open the datasets */
- if ( (did1 = H5Dopen(file1_id,obj1_name)) < 0 )
- {
-  printf("Cannot open dataset <%s>\n", obj1_name );
+ if((did1 = H5Dopen2(file1_id, obj1_name, H5P_DEFAULT)) < 0) {
+  printf("Cannot open dataset <%s>\n", obj1_name);
   goto error;
  }
- if ( (did2 = H5Dopen(file2_id,obj2_name)) < 0 )
- {
-  printf("Cannot open dataset <%s>\n", obj2_name );
+ if((did2 = H5Dopen2(file2_id, obj2_name, H5P_DEFAULT)) < 0) {
+  printf("Cannot open dataset <%s>\n", obj2_name);
   goto error;
  }
  /* enable error reporting */
  } H5E_END_TRY;
 
 
- if ((dcpl1=H5Dget_create_plist(did1))<0)
+ if((dcpl1 = H5Dget_create_plist(did1)) < 0)
   goto error;
- if ((dcpl2=H5Dget_create_plist(did2))<0)
+ if((dcpl2 = H5Dget_create_plist(did2)) < 0)
   goto error;
 
 /*-------------------------------------------------------------------------
@@ -315,10 +313,10 @@ hsize_t diff_datasetid( hid_t did1,
  * memory type and sizes
  *-------------------------------------------------------------------------
  */
- if ((m_tid1=h5tools_get_native_type(f_tid1))<0)
+ if ((m_tid1=h5tools_get_native_type(f_tid1)) < 0)
   goto error;
 
- if ((m_tid2=h5tools_get_native_type(f_tid2))<0)
+ if ((m_tid2=h5tools_get_native_type(f_tid2)) < 0)
   goto error;
 
  m_size1 = H5Tget_size( m_tid1 );
@@ -378,7 +376,7 @@ hsize_t diff_datasetid( hid_t did1,
   {
    H5Tclose(m_tid1);
 
-   if ((m_tid1=h5tools_get_native_type(f_tid2))<0)
+   if ((m_tid1=h5tools_get_native_type(f_tid2)) < 0)
     goto error;
 
    m_size1 = H5Tget_size( m_tid1 );
@@ -387,7 +385,7 @@ hsize_t diff_datasetid( hid_t did1,
   {
    H5Tclose(m_tid2);
 
-   if ((m_tid2=h5tools_get_native_type(f_tid1))<0)
+   if ((m_tid2=h5tools_get_native_type(f_tid1)) < 0)
     goto error;
 
    m_size2 = H5Tget_size( m_tid2 );
@@ -495,11 +493,11 @@ hsize_t diff_datasetid( hid_t did1,
      hs_size[i] = MIN(dims1[i] - hs_offset[i], sm_size[i]);
      hs_nelmts *= hs_size[i];
     }
-    if (H5Sselect_hyperslab(sid1, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL)<0)
+    if (H5Sselect_hyperslab(sid1, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0)
      goto error;
-    if (H5Sselect_hyperslab(sid2, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL)<0)
+    if (H5Sselect_hyperslab(sid2, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0)
      goto error;
-    if (H5Sselect_hyperslab(sm_space, H5S_SELECT_SET, zero, NULL, &hs_nelmts, NULL)<0)
+    if (H5Sselect_hyperslab(sm_space, H5S_SELECT_SET, zero, NULL, &hs_nelmts, NULL) < 0)
      goto error;
    } 
    else 
@@ -692,10 +690,10 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
  *-------------------------------------------------------------------------
  */
 
- if ((tclass1=H5Tget_class(f_tid1))<0)
+ if ((tclass1=H5Tget_class(f_tid1)) < 0)
   return -1;
 
- if ((tclass2=H5Tget_class(f_tid2))<0)
+ if ((tclass2=H5Tget_class(f_tid2)) < 0)
   return -1;
 
  if ( tclass1 != tclass2 )

@@ -357,8 +357,8 @@ test_misc1(void)
     dataspace = H5Screate(H5S_SCALAR);
     CHECK(dataspace, FAIL, "H5Screate");
 
-    dataset = H5Dopen(file, MISC1_DSET_NAME);
-    CHECK(dataset, FAIL, "H5Dopen");
+    dataset = H5Dopen2(file, MISC1_DSET_NAME, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
 
     ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &i_check);
     CHECK(ret, FAIL, "H5Dread");
@@ -924,24 +924,24 @@ test_misc5(void)
 
 
     /* Read the dataset back in & verify it */
-    loc_id=H5Fopen(MISC5_FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
-    CHECK(loc_id,FAIL,"H5Fopen");
+    loc_id = H5Fopen(MISC5_FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(loc_id, FAIL, "H5Fopen");
 
     /* Open dataset again */
-    dataset_id=H5Dopen(loc_id, MISC5_DSETNAME);
-    CHECK(dataset_id,FAIL,"H5Dopen");
+    dataset_id = H5Dopen2(loc_id, MISC5_DSETNAME, H5P_DEFAULT);
+    CHECK(dataset_id, FAIL, "H5Dopen2");
 
     /* Get the dataset's datatype */
-    mem_type_id=H5Dget_type(dataset_id);
-    CHECK(mem_type_id,FAIL,"H5Dget_type");
+    mem_type_id = H5Dget_type(dataset_id);
+    CHECK(mem_type_id, FAIL, "H5Dget_type");
 
     /* Get the dataset's dataspace */
-    space_id=H5Dget_space(dataset_id);
-    CHECK(space_id,FAIL,"H5Dget_space");
+    space_id = H5Dget_space(dataset_id);
+    CHECK(space_id, FAIL, "H5Dget_space");
 
     /* Read the data back in */
-    ret=H5Dread(dataset_id, mem_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &buf);
-    CHECK(ret,FAIL,"H5Dread");
+    ret = H5Dread(dataset_id, mem_type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &buf);
+    CHECK(ret, FAIL, "H5Dread");
 
     /* Verify the correct information was read in */
     for(i=0; i<(buf.len); i++) {
@@ -1036,8 +1036,8 @@ test_misc6(void)
 
 
         /* Open first dataset */
-        dataset_id = H5Dopen(loc_id, MISC6_DSETNAME1);
-        CHECK(dataset_id, FAIL, "H5Dopen");
+        dataset_id = H5Dopen2(loc_id, MISC6_DSETNAME1, H5P_DEFAULT);
+        CHECK(dataset_id, FAIL, "H5Dopen2");
 
         /* Add attribute to dataset */
         attr_id = H5Acreate2(dataset_id, ".", attr_name, H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -1053,8 +1053,8 @@ test_misc6(void)
 
 
         /* Open second dataset */
-        dataset_id = H5Dopen(loc_id, MISC6_DSETNAME2);
-        CHECK(dataset_id, FAIL, "H5Dopen");
+        dataset_id = H5Dopen2(loc_id, MISC6_DSETNAME2, H5P_DEFAULT);
+        CHECK(dataset_id, FAIL, "H5Dopen2");
 
         /* Add attribute to dataset */
         attr_id = H5Acreate2(dataset_id, ".", attr_name, H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -1730,8 +1730,8 @@ test_misc10(void)
     fcpl =  H5Fget_create_plist(file);
     CHECK(fcpl, FAIL, "H5Fget_create_plist");
 
-    dataset = H5Dopen(file, MISC10_DSETNAME);
-    CHECK(dataset, FAIL, "H5Dopen");
+    dataset = H5Dopen2(file, MISC10_DSETNAME, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
     dcpl =  H5Dget_create_plist(dataset);
     CHECK(dcpl, FAIL, "H5Dget_create_plist");
     space =   H5Dget_space(dataset);
@@ -2112,8 +2112,8 @@ verify_dataset(hid_t loc_id, const char *name)
     herr_t ret;         /* Generic return value */
 
     /* Open the contiguous dataset in the root group */
-    dsid = H5Dopen(loc_id, name);
-    CHECK(dsid, FAIL, "H5Dopen");
+    dsid = H5Dopen2(loc_id, name, H5P_DEFAULT);
+    CHECK(dsid, FAIL, "H5Dopen2");
 
     /* Read the data */
     ret = H5Dread(dsid, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, H5P_DEFAULT, m13_rdata);
@@ -3458,8 +3458,8 @@ test_misc20(void)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Open dataset with big dimensions */
-    did = H5Dopen(fid, MISC20_DSET_NAME);
-    CHECK(did, FAIL, "H5Dopen");
+    did = H5Dopen2(fid, MISC20_DSET_NAME, H5P_DEFAULT);
+    CHECK(did, FAIL, "H5Dopen2");
 
     /* Get the layout version */
     ret = H5D_layout_version_test(did,&version);
@@ -3476,8 +3476,8 @@ test_misc20(void)
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Open dataset with small dimensions */
-    did = H5Dopen(fid, MISC20_DSET2_NAME);
-    CHECK(did, FAIL, "H5Dopen");
+    did = H5Dopen2(fid, MISC20_DSET2_NAME, H5P_DEFAULT);
+    CHECK(did, FAIL, "H5Dopen2");
 
     /* Get the layout version */
     ret = H5D_layout_version_test(did,&version);
@@ -3513,8 +3513,8 @@ test_misc20(void)
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Open dataset with small dimensions */
-    did = H5Dopen(fid, MISC20_DSET_NAME);
-    CHECK(did, FAIL, "H5Dopen");
+    did = H5Dopen2(fid, MISC20_DSET_NAME, H5P_DEFAULT);
+    CHECK(did, FAIL, "H5Dopen2");
 
     /* Get the layout version */
     ret = H5D_layout_version_test(did,&version);
@@ -3715,8 +3715,8 @@ test_misc22(void)
                 ret = H5Pclose(dcpl);
                 CHECK(ret, FAIL, "H5Pclose");
 
-                dsid = H5Dopen(fid, MISC22_DSET_NAME);
-                CHECK(dsid, FAIL, "H5Dopen");
+                dsid = H5Dopen2(fid, MISC22_DSET_NAME, H5P_DEFAULT);
+                CHECK(dsid, FAIL, "H5Dopen2");
 
                 dcpl2 = H5Dget_create_plist(dsid);
                 CHECK(dcpl2, FAIL, "H5Dget_create_plist");
@@ -4078,14 +4078,14 @@ test_misc24(void)
 
     /* Attempt to open each kind of object with wrong API, including using soft links */
     H5E_BEGIN_TRY {
-        tmp_id = H5Dopen(file_id, MISC24_GROUP_NAME);
+        tmp_id = H5Dopen2(file_id, MISC24_GROUP_NAME, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(tmp_id, FAIL, "H5Dopen");
+    VERIFY(tmp_id, FAIL, "H5Dopen2");
 
     H5E_BEGIN_TRY {
-        tmp_id = H5Dopen(file_id, MISC24_GROUP_LINK);
+        tmp_id = H5Dopen2(file_id, MISC24_GROUP_LINK, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(tmp_id, FAIL, "H5Dopen");
+    VERIFY(tmp_id, FAIL, "H5Dopen2");
 
     H5E_BEGIN_TRY {
         tmp_id = H5Topen2(file_id, MISC24_GROUP_NAME, H5P_DEFAULT);
@@ -4128,14 +4128,14 @@ test_misc24(void)
     VERIFY(tmp_id, FAIL, "H5Gopen2");
 
     H5E_BEGIN_TRY {
-        tmp_id = H5Dopen(file_id, MISC24_DATATYPE_NAME);
+        tmp_id = H5Dopen2(file_id, MISC24_DATATYPE_NAME, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(tmp_id, FAIL, "H5Dopen");
+    VERIFY(tmp_id, FAIL, "H5Dopen2");
 
     H5E_BEGIN_TRY {
-        tmp_id = H5Dopen(file_id, MISC24_DATATYPE_LINK);
+        tmp_id = H5Dopen2(file_id, MISC24_DATATYPE_LINK, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(tmp_id, FAIL, "H5Dopen");
+    VERIFY(tmp_id, FAIL, "H5Dopen2");
 
     /* Try again, with the object already open through valid call */
     /* Open group */
@@ -4143,14 +4143,14 @@ test_misc24(void)
     CHECK(group_id, FAIL, "H5Gopen2");
 
     H5E_BEGIN_TRY {
-        tmp_id = H5Dopen(file_id, MISC24_GROUP_NAME);
+        tmp_id = H5Dopen2(file_id, MISC24_GROUP_NAME, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(tmp_id, FAIL, "H5Dopen");
+    VERIFY(tmp_id, FAIL, "H5Dopen2");
 
     H5E_BEGIN_TRY {
-        tmp_id = H5Dopen(file_id, MISC24_GROUP_LINK);
+        tmp_id = H5Dopen2(file_id, MISC24_GROUP_LINK, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(tmp_id, FAIL, "H5Dopen");
+    VERIFY(tmp_id, FAIL, "H5Dopen2");
 
     H5E_BEGIN_TRY {
         tmp_id = H5Topen2(file_id, MISC24_GROUP_NAME, H5P_DEFAULT);
@@ -4166,8 +4166,8 @@ test_misc24(void)
     CHECK(ret, FAIL, "H5Gclose");
 
     /* Open dataset */
-    dset_id = H5Dopen(file_id, MISC24_DATASET_NAME);
-    CHECK(dset_id, FAIL, "H5Dopen");
+    dset_id = H5Dopen2(file_id, MISC24_DATASET_NAME, H5P_DEFAULT);
+    CHECK(dset_id, FAIL, "H5Dopen2");
 
     H5E_BEGIN_TRY {
         tmp_id = H5Gopen2(file_id, MISC24_DATASET_NAME, H5P_DEFAULT);
@@ -4207,14 +4207,14 @@ test_misc24(void)
     VERIFY(tmp_id, FAIL, "H5Gopen2");
 
     H5E_BEGIN_TRY {
-        tmp_id = H5Dopen(file_id, MISC24_DATATYPE_NAME);
+        tmp_id = H5Dopen2(file_id, MISC24_DATATYPE_NAME, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(tmp_id, FAIL, "H5Dopen");
+    VERIFY(tmp_id, FAIL, "H5Dopen2");
 
     H5E_BEGIN_TRY {
-        tmp_id = H5Dopen(file_id, MISC24_DATATYPE_LINK);
+        tmp_id = H5Dopen2(file_id, MISC24_DATATYPE_LINK, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(tmp_id, FAIL, "H5Dopen");
+    VERIFY(tmp_id, FAIL, "H5Dopen2");
 
     ret = H5Tclose(type_id);
     CHECK(ret, FAIL, "H5Tclose");

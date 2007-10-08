@@ -174,8 +174,8 @@ test_time_io(void)
     fid = H5Fopen(DATAFILE, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fopen");
 
-    dsid = H5Dopen(fid, DATASETNAME);
-    CHECK(dsid, FAIL, "H5Dopen");
+    dsid = H5Dopen2(fid, DATASETNAME, H5P_DEFAULT);
+    CHECK(dsid, FAIL, "H5Dopen2");
 
 tid = H5Dget_type(dsid);
 CHECK(tid, FAIL, "H5Dget_type");

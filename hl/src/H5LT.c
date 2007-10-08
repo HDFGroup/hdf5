@@ -560,6 +560,44 @@ out:
 
 
 /*-------------------------------------------------------------------------
+ * Function: H5LT_read_dataset
+ *
+ * Purpose: Reads a dataset from disk.
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Quincey Koziol, koziol@hdfgroup.org
+ *
+ * Date: October 8, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t
+H5LT_read_dataset(hid_t loc_id, const char *dset_name, hid_t tid, void *data)
+{
+    hid_t   did;
+
+    /* Open the dataset. */
+    if((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
+        return -1;
+
+    /* Read */
+    if(H5Dread(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
+        goto out;
+
+    /* End access to the dataset and release resources used by it. */
+    if(H5Dclose(did))
+        return -1;
+
+    return 0;
+
+out:
+    H5Dclose(did);
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
  * Function: H5LTread_dataset
  *
  * Purpose: Reads a dataset from disk.
@@ -573,31 +611,12 @@ out:
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LTread_dataset( hid_t loc_id,
-                         const char *dset_name,
-                         hid_t tid,
-                         void *data )
+herr_t H5LTread_dataset(hid_t loc_id,
+                        const char *dset_name,
+                        hid_t tid,
+                        void *data)
 {
- hid_t   did;
-
- /* Open the dataset. */
- if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
-  return -1;
-
- /* Read */
- if ( H5Dread( did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, data ) < 0 )
-  goto out;
-
- /* End access to the dataset and release resources used by it. */
- if ( H5Dclose( did ) )
-  return -1;
-
- return 0;
-
-out:
- H5Dclose( did );
- return -1;
-
+    return(H5LT_read_dataset(loc_id, dset_name, tid, data));
 }
 
 
@@ -619,26 +638,7 @@ herr_t H5LTread_dataset_char( hid_t loc_id,
                               const char *dset_name,
                               char *data )
 {
- hid_t   did;
-
- /* Open the dataset. */
- if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
-  return -1;
-
- /* Read */
- if ( H5Dread( did, H5T_NATIVE_CHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, data ) < 0 )
-  goto out;
-
- /* End access to the dataset and release resources used by it. */
- if ( H5Dclose( did ) )
-  return -1;
-
- return 0;
-
-out:
- H5Dclose( did );
- return -1;
-
+    return(H5LTread_dataset(loc_id, dset_name, H5T_NATIVE_CHAR, data));
 }
 
 /*-------------------------------------------------------------------------
@@ -659,26 +659,7 @@ herr_t H5LTread_dataset_short( hid_t loc_id,
                                const char *dset_name,
                                short *data )
 {
- hid_t   did;
-
- /* Open the dataset. */
- if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
-  return -1;
-
- /* Read */
- if ( H5Dread( did, H5T_NATIVE_SHORT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data ) < 0 )
-  goto out;
-
- /* End access to the dataset and release resources used by it. */
- if ( H5Dclose( did ) )
-  return -1;
-
- return 0;
-
-out:
- H5Dclose( did );
- return -1;
-
+    return(H5LTread_dataset(loc_id, dset_name, H5T_NATIVE_SHORT, data));
 }
 
 /*-------------------------------------------------------------------------
@@ -699,26 +680,7 @@ herr_t H5LTread_dataset_int( hid_t loc_id,
                              const char *dset_name,
                              int *data )
 {
- hid_t   did;
-
- /* Open the dataset. */
- if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
-  return -1;
-
- /* Read */
- if ( H5Dread( did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data ) < 0 )
-  goto out;
-
- /* End access to the dataset and release resources used by it. */
- if ( H5Dclose( did ) )
-  return -1;
-
- return 0;
-
-out:
- H5Dclose( did );
- return -1;
-
+    return(H5LTread_dataset(loc_id, dset_name, H5T_NATIVE_INT, data));
 }
 
 /*-------------------------------------------------------------------------
@@ -739,26 +701,7 @@ herr_t H5LTread_dataset_long( hid_t loc_id,
                               const char *dset_name,
                               long *data )
 {
- hid_t   did;
-
- /* Open the dataset. */
- if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
-  return -1;
-
- /* Read */
- if ( H5Dread( did, H5T_NATIVE_LONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, data ) < 0 )
-  goto out;
-
- /* End access to the dataset and release resources used by it. */
- if ( H5Dclose( did ) )
-  return -1;
-
- return 0;
-
-out:
- H5Dclose( did );
- return -1;
-
+    return(H5LTread_dataset(loc_id, dset_name, H5T_NATIVE_LONG, data));
 }
 
 /*-------------------------------------------------------------------------
@@ -779,26 +722,7 @@ herr_t H5LTread_dataset_float( hid_t loc_id,
                                const char *dset_name,
                                float *data )
 {
- hid_t   did;
-
- /* Open the dataset. */
- if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
-  return -1;
-
- /* Read */
- if ( H5Dread( did, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data ) < 0 )
-  goto out;
-
- /* End access to the dataset and release resources used by it. */
- if ( H5Dclose( did ) )
-  return -1;
-
- return 0;
-
-out:
- H5Dclose( did );
- return -1;
-
+    return(H5LTread_dataset(loc_id, dset_name, H5T_NATIVE_FLOAT, data));
 }
 
 
@@ -820,26 +744,7 @@ herr_t H5LTread_dataset_double( hid_t loc_id,
                                 const char *dset_name,
                                 double *data )
 {
- hid_t   did;
-
- /* Open the dataset. */
- if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
-  return -1;
-
- /* Read */
- if ( H5Dread( did, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data ) < 0 )
-  goto out;
-
- /* End access to the dataset and release resources used by it. */
- if ( H5Dclose( did ) )
-  return -1;
-
- return 0;
-
-out:
- H5Dclose( did );
- return -1;
-
+    return(H5LTread_dataset(loc_id, dset_name, H5T_NATIVE_DOUBLE, data));
 }
 
 
@@ -861,33 +766,34 @@ herr_t H5LTread_dataset_string( hid_t loc_id,
                                 const char *dset_name,
                                 char *buf )
 {
- hid_t   did;
- hid_t   tid;
+    hid_t   did = -1;
+    hid_t   tid = -1;
 
- /* Open the dataset. */
- if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
-  return -1;
+    /* Open the dataset. */
+    if((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
+        return -1;
 
- if ( (tid = H5Dget_type(did)) < 0 )
-  goto out;
+    if((tid = H5Dget_type(did)) < 0)
+        goto out;
 
- /* Read */
- if ( H5Dread(did,tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0 )
-  goto out;
+    /* Read */
+    if(H5Dread(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+        goto out;
 
- /* close */
- if ( H5Dclose(did) )
-  goto out;
- if ( H5Tclose(tid) )
-  return -1;
+    /* close */
+    if(H5Dclose(did))
+        goto out;
+    if(H5Tclose(tid))
+        return -1;
 
- return 0;
+    return 0;
 
 out:
- H5Dclose( did );
- H5Tclose( tid );
- return -1;
-
+    H5E_BEGIN_TRY {
+        H5Dclose(did);
+        H5Tclose(tid);
+    } H5E_END_TRY;
+    return -1;
 }
 
 
@@ -909,36 +815,37 @@ herr_t H5LTget_dataset_ndims( hid_t loc_id,
                               const char *dset_name,
                               int *rank )
 {
- hid_t       did;
- hid_t       sid;
+    hid_t       did = -1;
+    hid_t       sid = -1;
 
- /* Open the dataset. */
- if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
-  return -1;
+    /* Open the dataset. */
+    if((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
+        return -1;
 
- /* Get the dataspace handle */
- if ( (sid = H5Dget_space( did )) < 0 )
-  goto out;
+    /* Get the dataspace handle */
+    if((sid = H5Dget_space(did)) < 0)
+        goto out;
 
- /* Get rank */
- if ( (*rank = H5Sget_simple_extent_ndims( sid )) < 0 )
-  goto out;
+    /* Get rank */
+    if((*rank = H5Sget_simple_extent_ndims(sid)) < 0)
+        goto out;
 
- /* Terminate access to the dataspace */
- if ( H5Sclose( sid ) < 0 )
-  goto out;
+    /* Terminate access to the dataspace */
+    if(H5Sclose(sid) < 0)
+        goto out;
 
- /* End access to the dataset */
- if ( H5Dclose( did ) )
-  return -1;
+    /* End access to the dataset */
+    if(H5Dclose(did))
+        return -1;
 
- return 0;
+    return 0;
 
 out:
- H5Dclose( did );
- H5Sclose( sid );
- return -1;
-
+    H5E_BEGIN_TRY {
+        H5Dclose(did);
+        H5Sclose(sid);
+    } H5E_END_TRY;
+    return -1;
 }
 
 
@@ -963,54 +870,56 @@ herr_t H5LTget_dataset_info( hid_t loc_id,
                              H5T_class_t *type_class,
                              size_t *type_size )
 {
- hid_t       did;
- hid_t       tid;
- hid_t       sid;
+    hid_t       did = -1;
+    hid_t       tid = -1;
+    hid_t       sid = -1;
 
- /* open the dataset. */
- if ( (did = H5Dopen( loc_id, dset_name )) < 0 )
-  return -1;
+    /* open the dataset. */
+    if((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
+        return -1;
 
- /* get an identifier for the datatype. */
- tid = H5Dget_type( did );
+    /* get an identifier for the datatype. */
+    tid = H5Dget_type(did);
 
- /* get the class. */
- if (type_class!=NULL)
-  *type_class = H5Tget_class( tid );
+    /* get the class. */
+    if(type_class != NULL)
+        *type_class = H5Tget_class(tid);
 
- /* get the size. */
- if (type_size!=NULL)
-  *type_size = H5Tget_size( tid );
+    /* get the size. */
+    if(type_size!=NULL)
+        *type_size = H5Tget_size(tid);
 
- if (dims!=NULL)
- {
-  /* get the dataspace handle */
-  if ( (sid = H5Dget_space( did )) < 0 )
-   goto out;
+    if(dims != NULL) {
+        /* get the dataspace handle */
+        if((sid = H5Dget_space(did)) < 0)
+            goto out;
 
-  /* get dimensions */
-  if ( H5Sget_simple_extent_dims( sid, dims, NULL) < 0 )
-   goto out;
+        /* get dimensions */
+        if(H5Sget_simple_extent_dims(sid, dims, NULL) < 0)
+            goto out;
 
-  /* terminate access to the dataspace */
-  if ( H5Sclose( sid ) < 0 )
-   goto out;
- }
+        /* terminate access to the dataspace */
+        if(H5Sclose(sid) < 0)
+            goto out;
+    } /* end if */
 
- /* release the datatype. */
- if ( H5Tclose( tid ) )
-  return -1;
+    /* release the datatype. */
+    if(H5Tclose(tid))
+        return -1;
 
- /* end access to the dataset */
- if ( H5Dclose( did ) )
-  return -1;
+    /* end access to the dataset */
+    if(H5Dclose(did))
+        return -1;
 
- return 0;
+    return 0;
 
 out:
- H5Tclose( tid );
- H5Dclose( did );
- return -1;
+    H5E_BEGIN_TRY {
+        H5Tclose(tid);
+        H5Sclose(sid);
+        H5Dclose(did);
+    } H5E_END_TRY;
+    return -1;
 
 }
 

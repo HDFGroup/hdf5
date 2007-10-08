@@ -199,16 +199,16 @@ test_compound (char *filename, hid_t fapl)
     hsize_t		memb_size[1] = {4};
 
     /* Create the file */
-    if ((file = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) {
+    if ((file = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) {
 	goto error;
     }
 
     /* Create the data space */
-    if ((space = H5Screate_simple (2, dim, NULL))<0) goto error;
+    if ((space = H5Screate_simple (2, dim, NULL)) < 0) goto error;
 
     /* Create xfer properties to preserve initialized data */
-    if ((PRESERVE = H5Pcreate (H5P_DATASET_XFER))<0) goto error;
-    if (H5Pset_preserve (PRESERVE, 1)<0) goto error;
+    if ((PRESERVE = H5Pcreate (H5P_DATASET_XFER)) < 0) goto error;
+    if (H5Pset_preserve (PRESERVE, 1) < 0) goto error;
 
     /*
      *######################################################################
@@ -229,24 +229,24 @@ test_compound (char *filename, hid_t fapl)
     }
 
     /* Create the memory data type */
-    if ((s1_tid = H5Tcreate (H5T_COMPOUND, sizeof(s1_t)))<0)
+    if ((s1_tid = H5Tcreate (H5T_COMPOUND, sizeof(s1_t))) < 0)
         goto error;
     array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, memb_size, NULL);
-    if (H5Tinsert (s1_tid, "a", HOFFSET(s1_t,a), H5T_NATIVE_INT)<0 ||
-            H5Tinsert (s1_tid, "b", HOFFSET(s1_t,b), H5T_NATIVE_INT)<0 ||
-            H5Tinsert (s1_tid, "c", HOFFSET(s1_t,c), array_dt)<0 ||
-            H5Tinsert (s1_tid, "d", HOFFSET(s1_t,d), H5T_NATIVE_INT)<0 ||
-            H5Tinsert (s1_tid, "e", HOFFSET(s1_t,e), H5T_NATIVE_INT)<0)
+    if (H5Tinsert (s1_tid, "a", HOFFSET(s1_t,a), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert (s1_tid, "b", HOFFSET(s1_t,b), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert (s1_tid, "c", HOFFSET(s1_t,c), array_dt) < 0 ||
+            H5Tinsert (s1_tid, "d", HOFFSET(s1_t,d), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert (s1_tid, "e", HOFFSET(s1_t,e), H5T_NATIVE_INT) < 0)
         goto error;
     H5Tclose(array_dt);
 
     /* Create the dataset */
-    if ((dataset = H5Dcreate (file, "s1", s1_tid, space, H5P_DEFAULT))<0) {
+    if ((dataset = H5Dcreate (file, "s1", s1_tid, space, H5P_DEFAULT)) < 0) {
 	goto error;
     }
 
     /* Write the data */
-    if (H5Dwrite (dataset, s1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s1)<0) {
+    if (H5Dwrite (dataset, s1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s1) < 0) {
 	goto error;
     }
     PASSED();
@@ -260,19 +260,19 @@ test_compound (char *filename, hid_t fapl)
     TESTING("basic compound read");
 
     /* Create a data type for s2 */
-    if ((s2_tid = H5Tcreate (H5T_COMPOUND, sizeof(s2_t)))<0)
+    if ((s2_tid = H5Tcreate (H5T_COMPOUND, sizeof(s2_t))) < 0)
         goto error;
     array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, memb_size, NULL);
-    if (H5Tinsert (s2_tid, "a", HOFFSET(s2_t,a), H5T_NATIVE_INT)<0 ||
-            H5Tinsert (s2_tid, "b", HOFFSET(s2_t,b), H5T_NATIVE_INT)<0 ||
-            H5Tinsert (s2_tid, "c", HOFFSET(s2_t,c), array_dt)<0 ||
-            H5Tinsert (s2_tid, "d", HOFFSET(s2_t,d), H5T_NATIVE_INT)<0 ||
-            H5Tinsert (s2_tid, "e", HOFFSET(s2_t,e), H5T_NATIVE_INT)<0)
+    if (H5Tinsert (s2_tid, "a", HOFFSET(s2_t,a), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert (s2_tid, "b", HOFFSET(s2_t,b), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert (s2_tid, "c", HOFFSET(s2_t,c), array_dt) < 0 ||
+            H5Tinsert (s2_tid, "d", HOFFSET(s2_t,d), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert (s2_tid, "e", HOFFSET(s2_t,e), H5T_NATIVE_INT) < 0)
         goto error;
     H5Tclose(array_dt);
 
     /* Read the data */
-    if (H5Dread (dataset, s2_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s2)<0) {
+    if (H5Dread (dataset, s2_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s2) < 0) {
 	goto error;
     }
 
@@ -302,19 +302,19 @@ test_compound (char *filename, hid_t fapl)
     TESTING("reversal of struct members");
 
     /* Create a data type for s3 */
-    if ((s3_tid = H5Tcreate (H5T_COMPOUND, sizeof(s3_t)))<0)
+    if ((s3_tid = H5Tcreate (H5T_COMPOUND, sizeof(s3_t))) < 0)
         goto error;
     array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, memb_size, NULL);
-    if (H5Tinsert (s3_tid, "a", HOFFSET(s3_t,a), H5T_NATIVE_INT)<0 ||
-            H5Tinsert (s3_tid, "b", HOFFSET(s3_t,b), H5T_NATIVE_INT)<0 ||
-            H5Tinsert (s3_tid, "c", HOFFSET(s3_t,c), array_dt)<0 ||
-            H5Tinsert (s3_tid, "d", HOFFSET(s3_t,d), H5T_NATIVE_INT)<0 ||
-            H5Tinsert (s3_tid, "e", HOFFSET(s3_t,e), H5T_NATIVE_INT)<0)
+    if (H5Tinsert (s3_tid, "a", HOFFSET(s3_t,a), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert (s3_tid, "b", HOFFSET(s3_t,b), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert (s3_tid, "c", HOFFSET(s3_t,c), array_dt) < 0 ||
+            H5Tinsert (s3_tid, "d", HOFFSET(s3_t,d), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert (s3_tid, "e", HOFFSET(s3_t,e), H5T_NATIVE_INT) < 0)
         goto error;
     H5Tclose(array_dt);
 
     /* Read the data */
-    if (H5Dread (dataset, s3_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s3)<0) {
+    if (H5Dread (dataset, s3_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s3) < 0) {
 	goto error;
     }
 
@@ -343,12 +343,12 @@ test_compound (char *filename, hid_t fapl)
     TESTING("subset struct read");
 
     /* Create a datatype for s4 */
-    if ((s4_tid = H5Tcreate (H5T_COMPOUND, sizeof(s4_t)))<0) goto error;
-    if (H5Tinsert (s4_tid, "b", HOFFSET(s4_t,b), H5T_NATIVE_INT)<0) goto error;
-    if (H5Tinsert (s4_tid, "d", HOFFSET(s4_t,d), H5T_NATIVE_INT)<0) goto error;
+    if ((s4_tid = H5Tcreate (H5T_COMPOUND, sizeof(s4_t))) < 0) goto error;
+    if (H5Tinsert (s4_tid, "b", HOFFSET(s4_t,b), H5T_NATIVE_INT) < 0) goto error;
+    if (H5Tinsert (s4_tid, "d", HOFFSET(s4_t,d), H5T_NATIVE_INT) < 0) goto error;
 
     /* Read the data */
-    if (H5Dread (dataset, s4_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s4)<0) {
+    if (H5Dread (dataset, s4_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s4) < 0) {
 	goto error;
     }
 
@@ -379,19 +379,19 @@ test_compound (char *filename, hid_t fapl)
     }
 
     /* Create a data type for s5 */
-    if ((s5_tid = H5Tcreate (H5T_COMPOUND, sizeof(s5_t)))<0)
+    if ((s5_tid = H5Tcreate (H5T_COMPOUND, sizeof(s5_t))) < 0)
         goto error;
     array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, memb_size, NULL);
-    if (H5Tinsert (s5_tid, "a", HOFFSET(s5_t,a), H5T_NATIVE_INT)<0 ||
-            H5Tinsert (s5_tid, "b", HOFFSET(s5_t,b), H5T_NATIVE_INT)<0 ||
-            H5Tinsert (s5_tid, "c", HOFFSET(s5_t,c), array_dt)<0 ||
-            H5Tinsert (s5_tid, "d", HOFFSET(s5_t,d), H5T_NATIVE_INT)<0 ||
+    if (H5Tinsert (s5_tid, "a", HOFFSET(s5_t,a), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert (s5_tid, "b", HOFFSET(s5_t,b), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert (s5_tid, "c", HOFFSET(s5_t,c), array_dt) < 0 ||
+            H5Tinsert (s5_tid, "d", HOFFSET(s5_t,d), H5T_NATIVE_INT) < 0 ||
             H5Tinsert (s5_tid, "e", HOFFSET(s5_t,e), H5T_NATIVE_INT))
         goto error;
     H5Tclose(array_dt);
 
     /* Read the data */
-    if (H5Dread (dataset, s5_tid, H5S_ALL, H5S_ALL, PRESERVE, s5)<0) {
+    if (H5Dread (dataset, s5_tid, H5S_ALL, H5S_ALL, PRESERVE, s5) < 0) {
 	goto error;
     }
 
@@ -451,23 +451,23 @@ test_compound (char *filename, hid_t fapl)
     }
 
     /* Create a data type for s6 */
-    if ((s6_tid = H5Tcreate (H5T_COMPOUND, sizeof(s6_t)))<0)
+    if ((s6_tid = H5Tcreate (H5T_COMPOUND, sizeof(s6_t))) < 0)
         goto error;
     array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, memb_size, NULL);
-    if (H5Tinsert (s6_tid, "a", HOFFSET(s6_t,a), H5T_NATIVE_INT)<0 ||
-            H5Tinsert (s6_tid, "b", HOFFSET(s6_t,b), H5T_NATIVE_INT)<0 ||
-            H5Tinsert (s6_tid, "c", HOFFSET(s6_t,c), array_dt)<0 ||
-            H5Tinsert (s6_tid, "d", HOFFSET(s6_t,d), H5T_NATIVE_INT)<0 ||
-            H5Tinsert (s6_tid, "e", HOFFSET(s6_t,e), H5T_NATIVE_INT)<0 ||
-            H5Tinsert (s6_tid, "pre", HOFFSET(s6_t,pre), H5T_NATIVE_INT)<0 ||
-            H5Tinsert (s6_tid, "mid1", HOFFSET(s6_t,mid1), H5T_NATIVE_INT)<0 ||
-            H5Tinsert (s6_tid, "mid2", HOFFSET(s6_t,mid2), H5T_NATIVE_INT)<0 ||
-            H5Tinsert (s6_tid, "post", HOFFSET(s6_t,post), H5T_NATIVE_INT)<0)
+    if (H5Tinsert (s6_tid, "a", HOFFSET(s6_t,a), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert (s6_tid, "b", HOFFSET(s6_t,b), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert (s6_tid, "c", HOFFSET(s6_t,c), array_dt) < 0 ||
+            H5Tinsert (s6_tid, "d", HOFFSET(s6_t,d), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert (s6_tid, "e", HOFFSET(s6_t,e), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert (s6_tid, "pre", HOFFSET(s6_t,pre), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert (s6_tid, "mid1", HOFFSET(s6_t,mid1), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert (s6_tid, "mid2", HOFFSET(s6_t,mid2), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert (s6_tid, "post", HOFFSET(s6_t,post), H5T_NATIVE_INT) < 0)
         goto error;
     H5Tclose(array_dt);
 
     /* Read the data */
-    if (H5Dread (dataset, s6_tid, H5S_ALL, H5S_ALL, PRESERVE, s6)<0) {
+    if (H5Dread (dataset, s6_tid, H5S_ALL, H5S_ALL, PRESERVE, s6) < 0) {
 	goto error;
     }
 
@@ -516,12 +516,12 @@ test_compound (char *filename, hid_t fapl)
     }
 
     /* Write the data to file */
-    if (H5Dwrite (dataset, s4_tid, H5S_ALL, H5S_ALL, PRESERVE, s4)<0) {
+    if (H5Dwrite (dataset, s4_tid, H5S_ALL, H5S_ALL, PRESERVE, s4) < 0) {
 	goto error;
     }
 
     /* Read the data back */
-    if (H5Dread (dataset, s1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s1)<0) {
+    if (H5Dread (dataset, s1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s1) < 0) {
 	goto error;
     }
 
@@ -556,10 +556,10 @@ test_compound (char *filename, hid_t fapl)
     TESTING("explicit data space");
 
     /* Create the data space */
-    if ((s7_sid = H5Screate_simple (2, dim, NULL))<0) goto error;
+    if ((s7_sid = H5Screate_simple (2, dim, NULL)) < 0) goto error;
 
     /* Read the dataset */
-    if (H5Dread (dataset, s2_tid, s7_sid, H5S_ALL, H5P_DEFAULT, s2)<0) {
+    if (H5Dread (dataset, s2_tid, s7_sid, H5S_ALL, H5P_DEFAULT, s2) < 0) {
 	goto error;
     }
 
@@ -589,21 +589,21 @@ test_compound (char *filename, hid_t fapl)
     TESTING("hyperslab partial read to array");
 
     /* Create the file data space */
-    if ((s8_f_sid = H5Dget_space (dataset))<0) goto error;
+    if ((s8_f_sid = H5Dget_space (dataset)) < 0) goto error;
     f_offset[0] = NX/3;
     f_offset[1] = NY/3;
     h_size[0] = 2*NX/3 - f_offset[0];
     h_size[1] = 2*NY/3 - f_offset[1];
     if (H5Sselect_hyperslab (s8_f_sid, H5S_SELECT_SET, f_offset, NULL,
-			     h_size, NULL)<0) goto error;
+			     h_size, NULL) < 0) goto error;
 
     /* Create memory data space */
-    if ((s8_m_sid = H5Screate_simple (2, h_size, NULL))<0) goto error;
+    if ((s8_m_sid = H5Screate_simple (2, h_size, NULL)) < 0) goto error;
 
     /* Read the dataset */
     s8 = calloc ((size_t)(h_size[0]*h_size[1]), sizeof(s1_t));
     assert (s8);
-    if (H5Dread (dataset, s1_tid, s8_m_sid, s8_f_sid, H5P_DEFAULT, s8)<0) {
+    if (H5Dread (dataset, s1_tid, s8_m_sid, s8_f_sid, H5P_DEFAULT, s8) < 0) {
 	goto error;
     }
 
@@ -647,7 +647,7 @@ test_compound (char *filename, hid_t fapl)
     }
 
     /* Read the hyperslab */
-    if (H5Dread (dataset, s2_tid, s8_f_sid, s8_f_sid, H5P_DEFAULT, s2)<0) {
+    if (H5Dread (dataset, s2_tid, s8_f_sid, s8_f_sid, H5P_DEFAULT, s2) < 0) {
 	goto error;
     }
 
@@ -705,7 +705,7 @@ test_compound (char *filename, hid_t fapl)
     }
 
     /* Read the hyperslab */
-    if (H5Dread (dataset, s5_tid, s8_f_sid, s8_f_sid, PRESERVE, s5)<0) {
+    if (H5Dread (dataset, s5_tid, s8_f_sid, s8_f_sid, PRESERVE, s5) < 0) {
 	goto error;
     }
 
@@ -777,14 +777,14 @@ test_compound (char *filename, hid_t fapl)
     }
 
     /* Write to disk */
-    if (H5Dwrite (dataset, s4_tid, s8_m_sid, s8_f_sid, PRESERVE, s11)<0) {
+    if (H5Dwrite (dataset, s4_tid, s8_m_sid, s8_f_sid, PRESERVE, s11) < 0) {
 	goto error;
     }
     free (s11);
     s11=NULL;
 
     /* Read the whole thing */
-    if (H5Dread (dataset, s1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s1)<0) {
+    if (H5Dread (dataset, s1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s1) < 0) {
 	goto error;
     }
 
@@ -1035,31 +1035,31 @@ create_stype1(void)
     const hsize_t	eight = 8, sixteen = 16;
 
     /* Build hdf5 datatypes */
-    if((array_dt1 = H5Tarray_create(H5T_NATIVE_INT,1, &eight, NULL))<0)
+    if((array_dt1 = H5Tarray_create(H5T_NATIVE_INT,1, &eight, NULL)) < 0)
         goto error;
-    if((array_dt2 = H5Tarray_create(H5T_NATIVE_FLOAT,1, &sixteen, NULL))<0)
-        goto error;
-
-    if ((tid=H5Tcreate(H5T_COMPOUND, sizeof(stype1)))<0 ||
-            H5Tinsert(tid, "a", HOFFSET(stype1, a), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(tid, "b", HOFFSET(stype1, b), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(tid, "c", HOFFSET(stype1, c), array_dt1)<0 ||
-            H5Tinsert(tid, "d", HOFFSET(stype1, d), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(tid, "e", HOFFSET(stype1, e), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(tid, "f", HOFFSET(stype1, f), H5T_NATIVE_FLOAT)<0 ||
-            H5Tinsert(tid, "g", HOFFSET(stype1, g), H5T_NATIVE_FLOAT)<0 ||
-            H5Tinsert(tid, "h", HOFFSET(stype1, h), array_dt2)<0 ||
-            H5Tinsert(tid, "i", HOFFSET(stype1, i), H5T_NATIVE_FLOAT)<0 ||
-            H5Tinsert(tid, "j", HOFFSET(stype1, j), H5T_NATIVE_FLOAT)<0 ||
-            H5Tinsert(tid, "k", HOFFSET(stype1, k), H5T_NATIVE_DOUBLE)<0 ||
-            H5Tinsert(tid, "l", HOFFSET(stype1, l), H5T_NATIVE_DOUBLE)<0 ||
-            H5Tinsert(tid, "m", HOFFSET(stype1, m), H5T_NATIVE_DOUBLE)<0 ||
-            H5Tinsert(tid, "n", HOFFSET(stype1, n), H5T_NATIVE_DOUBLE)<0) 
+    if((array_dt2 = H5Tarray_create(H5T_NATIVE_FLOAT,1, &sixteen, NULL)) < 0)
         goto error;
 
-    if(H5Tclose(array_dt1)<0)
+    if ((tid=H5Tcreate(H5T_COMPOUND, sizeof(stype1))) < 0 ||
+            H5Tinsert(tid, "a", HOFFSET(stype1, a), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(tid, "b", HOFFSET(stype1, b), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(tid, "c", HOFFSET(stype1, c), array_dt1) < 0 ||
+            H5Tinsert(tid, "d", HOFFSET(stype1, d), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(tid, "e", HOFFSET(stype1, e), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(tid, "f", HOFFSET(stype1, f), H5T_NATIVE_FLOAT) < 0 ||
+            H5Tinsert(tid, "g", HOFFSET(stype1, g), H5T_NATIVE_FLOAT) < 0 ||
+            H5Tinsert(tid, "h", HOFFSET(stype1, h), array_dt2) < 0 ||
+            H5Tinsert(tid, "i", HOFFSET(stype1, i), H5T_NATIVE_FLOAT) < 0 ||
+            H5Tinsert(tid, "j", HOFFSET(stype1, j), H5T_NATIVE_FLOAT) < 0 ||
+            H5Tinsert(tid, "k", HOFFSET(stype1, k), H5T_NATIVE_DOUBLE) < 0 ||
+            H5Tinsert(tid, "l", HOFFSET(stype1, l), H5T_NATIVE_DOUBLE) < 0 ||
+            H5Tinsert(tid, "m", HOFFSET(stype1, m), H5T_NATIVE_DOUBLE) < 0 ||
+            H5Tinsert(tid, "n", HOFFSET(stype1, n), H5T_NATIVE_DOUBLE) < 0) 
         goto error;
-    if(H5Tclose(array_dt2)<0)
+
+    if(H5Tclose(array_dt1) < 0)
+        goto error;
+    if(H5Tclose(array_dt2) < 0)
         goto error;
 
     return tid;
@@ -1091,34 +1091,34 @@ create_stype2(void)
     const hsize_t	eight = 8, sixteen = 16;
 
     /* Build hdf5 datatypes */
-    if((array_dt1 = H5Tarray_create(H5T_NATIVE_INT,1, &eight, NULL))<0)
+    if((array_dt1 = H5Tarray_create(H5T_NATIVE_INT,1, &eight, NULL)) < 0)
         goto error;
-    if((array_dt2 = H5Tarray_create(H5T_NATIVE_FLOAT,1, &sixteen, NULL))<0)
-        goto error;
-
-    if ((tid=H5Tcreate(H5T_COMPOUND, sizeof(stype2)))<0 ||
-            H5Tinsert(tid, "a", HOFFSET(stype2, a), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(tid, "b", HOFFSET(stype2, b), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(tid, "c", HOFFSET(stype2, c), array_dt1)<0 ||
-            H5Tinsert(tid, "d", HOFFSET(stype2, d), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(tid, "e", HOFFSET(stype2, e), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(tid, "f", HOFFSET(stype2, f), H5T_NATIVE_FLOAT)<0 ||
-            H5Tinsert(tid, "g", HOFFSET(stype2, g), H5T_NATIVE_FLOAT)<0 ||
-            H5Tinsert(tid, "h", HOFFSET(stype2, h), array_dt2)<0 ||
-            H5Tinsert(tid, "i", HOFFSET(stype2, i), H5T_NATIVE_FLOAT)<0 ||
-            H5Tinsert(tid, "j", HOFFSET(stype2, j), H5T_NATIVE_FLOAT)<0 ||
-            H5Tinsert(tid, "k", HOFFSET(stype2, k), H5T_NATIVE_DOUBLE)<0 ||
-            H5Tinsert(tid, "l", HOFFSET(stype2, l), H5T_NATIVE_DOUBLE)<0 ||
-            H5Tinsert(tid, "m", HOFFSET(stype2, m), H5T_NATIVE_DOUBLE)<0 ||
-            H5Tinsert(tid, "n", HOFFSET(stype2, n), H5T_NATIVE_DOUBLE)<0 ||
-            H5Tinsert(tid, "o", HOFFSET(stype2, o), H5T_NATIVE_LONG)<0 ||
-            H5Tinsert(tid, "p", HOFFSET(stype2, p), H5T_NATIVE_LONG)<0 ||
-            H5Tinsert(tid, "q", HOFFSET(stype2, q), H5T_NATIVE_LONG)<0)
+    if((array_dt2 = H5Tarray_create(H5T_NATIVE_FLOAT,1, &sixteen, NULL)) < 0)
         goto error;
 
-    if(H5Tclose(array_dt1)<0)
+    if ((tid=H5Tcreate(H5T_COMPOUND, sizeof(stype2))) < 0 ||
+            H5Tinsert(tid, "a", HOFFSET(stype2, a), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(tid, "b", HOFFSET(stype2, b), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(tid, "c", HOFFSET(stype2, c), array_dt1) < 0 ||
+            H5Tinsert(tid, "d", HOFFSET(stype2, d), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(tid, "e", HOFFSET(stype2, e), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(tid, "f", HOFFSET(stype2, f), H5T_NATIVE_FLOAT) < 0 ||
+            H5Tinsert(tid, "g", HOFFSET(stype2, g), H5T_NATIVE_FLOAT) < 0 ||
+            H5Tinsert(tid, "h", HOFFSET(stype2, h), array_dt2) < 0 ||
+            H5Tinsert(tid, "i", HOFFSET(stype2, i), H5T_NATIVE_FLOAT) < 0 ||
+            H5Tinsert(tid, "j", HOFFSET(stype2, j), H5T_NATIVE_FLOAT) < 0 ||
+            H5Tinsert(tid, "k", HOFFSET(stype2, k), H5T_NATIVE_DOUBLE) < 0 ||
+            H5Tinsert(tid, "l", HOFFSET(stype2, l), H5T_NATIVE_DOUBLE) < 0 ||
+            H5Tinsert(tid, "m", HOFFSET(stype2, m), H5T_NATIVE_DOUBLE) < 0 ||
+            H5Tinsert(tid, "n", HOFFSET(stype2, n), H5T_NATIVE_DOUBLE) < 0 ||
+            H5Tinsert(tid, "o", HOFFSET(stype2, o), H5T_NATIVE_LONG) < 0 ||
+            H5Tinsert(tid, "p", HOFFSET(stype2, p), H5T_NATIVE_LONG) < 0 ||
+            H5Tinsert(tid, "q", HOFFSET(stype2, q), H5T_NATIVE_LONG) < 0)
         goto error;
-    if(H5Tclose(array_dt2)<0)
+
+    if(H5Tclose(array_dt1) < 0)
+        goto error;
+    if(H5Tclose(array_dt2) < 0)
         goto error;
 
     return tid;
@@ -1150,18 +1150,18 @@ create_stype3(void)
     const hsize_t	eight = 8;
 
     /* Build hdf5 datatypes */
-    if((array_dt1 = H5Tarray_create(H5T_NATIVE_INT,1, &eight, NULL))<0)
+    if((array_dt1 = H5Tarray_create(H5T_NATIVE_INT,1, &eight, NULL)) < 0)
         goto error;
 
-    if ((tid=H5Tcreate(H5T_COMPOUND, sizeof(stype3)))<0 ||
-            H5Tinsert(tid, "a", HOFFSET(stype3, a), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(tid, "b", HOFFSET(stype3, b), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(tid, "c", HOFFSET(stype3, c), array_dt1)<0 ||
-            H5Tinsert(tid, "d", HOFFSET(stype3, d), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(tid, "e", HOFFSET(stype3, e), H5T_NATIVE_INT)<0)
+    if ((tid=H5Tcreate(H5T_COMPOUND, sizeof(stype3))) < 0 ||
+            H5Tinsert(tid, "a", HOFFSET(stype3, a), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(tid, "b", HOFFSET(stype3, b), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(tid, "c", HOFFSET(stype3, c), array_dt1) < 0 ||
+            H5Tinsert(tid, "d", HOFFSET(stype3, d), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(tid, "e", HOFFSET(stype3, e), H5T_NATIVE_INT) < 0)
         goto error;
 
-    if(H5Tclose(array_dt1)<0)
+    if(H5Tclose(array_dt1) < 0)
         goto error;
 
     return tid;
@@ -1193,37 +1193,37 @@ create_stype4(void)
     const hsize_t	eight = 8, sixteen = 16;
 
     /* Build hdf5 datatypes */
-    if((array_dt1 = H5Tarray_create(H5T_NATIVE_INT,1, &eight, NULL))<0)
+    if((array_dt1 = H5Tarray_create(H5T_NATIVE_INT,1, &eight, NULL)) < 0)
         goto error;
-    if((array_dt2 = H5Tarray_create(H5T_NATIVE_FLOAT,1, &sixteen, NULL))<0)
-        goto error;
-
-    if ((tid=H5Tcreate(H5T_COMPOUND, sizeof(stype4)))<0 ||
-            H5Tinsert(tid, "a", HOFFSET(stype4, a), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(tid, "b", HOFFSET(stype4, b), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(tid, "c", HOFFSET(stype4, c), array_dt1)<0 ||
-            H5Tinsert(tid, "d", HOFFSET(stype4, d), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(tid, "e", HOFFSET(stype4, e), H5T_NATIVE_INT)<0 ||
-            H5Tinsert(tid, "f", HOFFSET(stype4, f), H5T_NATIVE_FLOAT)<0 ||
-            H5Tinsert(tid, "g", HOFFSET(stype4, g), H5T_NATIVE_FLOAT)<0 ||
-            H5Tinsert(tid, "h", HOFFSET(stype4, h), array_dt2)<0 ||
-            H5Tinsert(tid, "i", HOFFSET(stype4, i), H5T_NATIVE_FLOAT)<0 ||
-            H5Tinsert(tid, "j", HOFFSET(stype4, j), H5T_NATIVE_FLOAT)<0 ||
-            H5Tinsert(tid, "k", HOFFSET(stype4, k), H5T_NATIVE_DOUBLE)<0 ||
-            H5Tinsert(tid, "l", HOFFSET(stype4, l), H5T_NATIVE_DOUBLE)<0 ||
-            H5Tinsert(tid, "m", HOFFSET(stype4, m), H5T_NATIVE_DOUBLE)<0 ||
-            H5Tinsert(tid, "n", HOFFSET(stype4, n), H5T_NATIVE_DOUBLE)<0 ||
-            H5Tinsert(tid, "o", HOFFSET(stype4, o), H5T_NATIVE_LONG)<0 ||
-            H5Tinsert(tid, "p", HOFFSET(stype4, p), H5T_NATIVE_LONG)<0 ||
-            H5Tinsert(tid, "q", HOFFSET(stype4, q), H5T_NATIVE_LONG)<0 ||
-            H5Tinsert(tid, "r", HOFFSET(stype4, r), H5T_NATIVE_LLONG)<0 ||
-            H5Tinsert(tid, "s", HOFFSET(stype4, s), H5T_NATIVE_LLONG)<0 ||
-            H5Tinsert(tid, "t", HOFFSET(stype4, t), H5T_NATIVE_LLONG)<0)
+    if((array_dt2 = H5Tarray_create(H5T_NATIVE_FLOAT,1, &sixteen, NULL)) < 0)
         goto error;
 
-    if(H5Tclose(array_dt1)<0)
+    if ((tid=H5Tcreate(H5T_COMPOUND, sizeof(stype4))) < 0 ||
+            H5Tinsert(tid, "a", HOFFSET(stype4, a), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(tid, "b", HOFFSET(stype4, b), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(tid, "c", HOFFSET(stype4, c), array_dt1) < 0 ||
+            H5Tinsert(tid, "d", HOFFSET(stype4, d), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(tid, "e", HOFFSET(stype4, e), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(tid, "f", HOFFSET(stype4, f), H5T_NATIVE_FLOAT) < 0 ||
+            H5Tinsert(tid, "g", HOFFSET(stype4, g), H5T_NATIVE_FLOAT) < 0 ||
+            H5Tinsert(tid, "h", HOFFSET(stype4, h), array_dt2) < 0 ||
+            H5Tinsert(tid, "i", HOFFSET(stype4, i), H5T_NATIVE_FLOAT) < 0 ||
+            H5Tinsert(tid, "j", HOFFSET(stype4, j), H5T_NATIVE_FLOAT) < 0 ||
+            H5Tinsert(tid, "k", HOFFSET(stype4, k), H5T_NATIVE_DOUBLE) < 0 ||
+            H5Tinsert(tid, "l", HOFFSET(stype4, l), H5T_NATIVE_DOUBLE) < 0 ||
+            H5Tinsert(tid, "m", HOFFSET(stype4, m), H5T_NATIVE_DOUBLE) < 0 ||
+            H5Tinsert(tid, "n", HOFFSET(stype4, n), H5T_NATIVE_DOUBLE) < 0 ||
+            H5Tinsert(tid, "o", HOFFSET(stype4, o), H5T_NATIVE_LONG) < 0 ||
+            H5Tinsert(tid, "p", HOFFSET(stype4, p), H5T_NATIVE_LONG) < 0 ||
+            H5Tinsert(tid, "q", HOFFSET(stype4, q), H5T_NATIVE_LONG) < 0 ||
+            H5Tinsert(tid, "r", HOFFSET(stype4, r), H5T_NATIVE_LLONG) < 0 ||
+            H5Tinsert(tid, "s", HOFFSET(stype4, s), H5T_NATIVE_LLONG) < 0 ||
+            H5Tinsert(tid, "t", HOFFSET(stype4, t), H5T_NATIVE_LLONG) < 0)
         goto error;
-    if(H5Tclose(array_dt2)<0)
+
+    if(H5Tclose(array_dt1) < 0)
+        goto error;
+    if(H5Tclose(array_dt2) < 0)
         goto error;
 
     return tid;
@@ -1257,11 +1257,11 @@ compare_data(void *src_data, void *dst_data, hbool_t src_subset)
 
     for(i = 0; i < (int)(NX * NY); i++) {
         if(src_subset) {
-	   s_ptr = ((stype1*)src_data) + i;
-	   d_ptr = ((stype2*)dst_data) + i;
+	   s_ptr = ((stype1 *)src_data) + i;
+	   d_ptr = ((stype2 *)dst_data) + i;
         } else {
-	   s_ptr = ((stype2*)src_data) + i;
-	   d_ptr = ((stype1*)dst_data) + i;
+	   s_ptr = (stype1 *)(((stype2 *)src_data) + i);
+	   d_ptr = (stype2 *)(((stype1 *)dst_data) + i);
         }
 
 	if (s_ptr->a    != d_ptr->a    ||
@@ -1353,17 +1353,17 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
 	goto error;
 
     /* Build hdf5 datatypes */
-    if ((src_tid=create_stype1())<0)
+    if ((src_tid=create_stype1()) < 0)
         goto error;
 
-    if ((dst_tid=create_stype2())<0)
+    if ((dst_tid=create_stype2()) < 0)
         goto error;
 
-    if ((rew_tid=create_stype3())<0)
+    if ((rew_tid=create_stype3()) < 0)
         goto error;
 
     /* Create the data space */
-    if((space = H5Screate_simple(2, dims, NULL))<0)
+    if((space = H5Screate_simple(2, dims, NULL)) < 0)
 	goto error;
 
     /* Allocate space and initialize data */
@@ -1377,7 +1377,7 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
 
 
     /* Create dataset creation property list */
-    if((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         goto error;
 
     /*
@@ -1387,26 +1387,26 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
     TESTING("writing data to contiguous and chunked datasets");
 
     /* Create contiguous data set */
-    if((dataset = H5Dcreate(file, DSET_NAME[0], src_tid, space, dcpl))<0)
+    if((dataset = H5Dcreate(file, DSET_NAME[0], src_tid, space, dcpl)) < 0)
         goto error;
 
     /* Write the data to the dataset */
-    if(H5Dwrite(dataset, src_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig)<0)
+    if(H5Dwrite(dataset, src_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig) < 0)
 	goto error;
 
     if(H5Dclose(dataset) < 0)
         goto error;
 
     /* Set chunking */
-    if(H5Pset_chunk(dcpl, 2, chunk_dims)<0)
+    if(H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
         goto error;
 
     /* Create chunked data set */
-    if((dataset = H5Dcreate(file, DSET_NAME[1], src_tid, space, dcpl))<0)
+    if((dataset = H5Dcreate(file, DSET_NAME[1], src_tid, space, dcpl)) < 0)
         goto error;
 
     /* Write the data to the dataset */
-    if(H5Dwrite(dataset, src_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig)<0)
+    if(H5Dwrite(dataset, src_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig) < 0)
 	goto error;
 
     if(H5Dclose(dataset) < 0)
@@ -1421,29 +1421,29 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
     TESTING("rewriting data with a subset of original data type");
 
     /* Create xfer properties to preserve initialized data */
-    if ((dxpl = H5Pcreate (H5P_DATASET_XFER))<0)
+    if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
        goto error;
 
-    if (H5Pset_preserve (dxpl, TRUE)<0)
+    if(H5Pset_preserve(dxpl, TRUE) < 0)
        goto error;
 
     /* Rewrite contiguous data set */
-    if((dataset = H5Dopen(file, DSET_NAME[0]))<0)
+    if((dataset = H5Dopen2(file, DSET_NAME[0], H5P_DEFAULT)) < 0)
         goto error;
 
     /* Write the data to the dataset */
-    if(H5Dwrite(dataset, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf)<0)
+    if(H5Dwrite(dataset, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf) < 0)
 	goto error;
 
     if(H5Dclose(dataset) < 0)
         goto error;
 
     /* Rewrite chunked data set */
-    if((dataset = H5Dopen(file, DSET_NAME[1]))<0)
+    if((dataset = H5Dopen2(file, DSET_NAME[1], H5P_DEFAULT)) < 0)
         goto error;
 
     /* Write the data to the dataset */
-    if(H5Dwrite(dataset, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf)<0)
+    if(H5Dwrite(dataset, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf) < 0)
 	goto error;
 
     if(H5Dclose(dataset) < 0)
@@ -1458,10 +1458,10 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
     TESTING("reading data with a subset of original data type");
 
     /* Check contiguous data set */
-    if((dataset = H5Dopen(file, DSET_NAME[0]))<0)
+    if((dataset = H5Dopen2(file, DSET_NAME[0], H5P_DEFAULT)) < 0)
         goto error;
 
-    if(H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf)<0)
+    if(H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         goto error;
 
     if(compare_data(orig, rbuf, TRUE) < 0) 
@@ -1471,10 +1471,10 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
         goto error;
 
     /* Check chunked data set */
-    if((dataset = H5Dopen(file, DSET_NAME[1]))<0)
+    if((dataset = H5Dopen2(file, DSET_NAME[1], H5P_DEFAULT)) < 0)
         goto error;
 
-    if(H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf)<0)
+    if(H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         goto error;
 
     if(compare_data(orig, rbuf, TRUE) < 0) 
@@ -1493,11 +1493,11 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
     if(H5Pclose(dxpl) < 0)
         goto error;
 
-    if(H5Tclose(src_tid)<0)
+    if(H5Tclose(src_tid) < 0)
         goto error;
-    if(H5Tclose(dst_tid)<0)
+    if(H5Tclose(dst_tid) < 0)
         goto error;
-    if(H5Tclose(rew_tid)<0)
+    if(H5Tclose(rew_tid) < 0)
         goto error;
     if(H5Fclose(file) < 0)
         goto error;
@@ -1558,17 +1558,17 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
 	goto error;
 
     /* Build hdf5 datatypes */
-    if ((src_tid=create_stype2())<0)
+    if ((src_tid=create_stype2()) < 0)
         goto error;
 
-    if ((dst_tid=create_stype1())<0)
+    if ((dst_tid=create_stype1()) < 0)
         goto error;
 
-    if ((rew_tid=create_stype4())<0)
+    if ((rew_tid=create_stype4()) < 0)
         goto error;
 
     /* Create the data space */
-    if((space = H5Screate_simple(2, dims, NULL))<0)
+    if((space = H5Screate_simple(2, dims, NULL)) < 0)
 	goto error;
 
     /* Allocate space and initialize data */
@@ -1581,7 +1581,7 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
     initialize_stype4(rew_buf, (size_t)NX*NY);
 
     /* Create dataset creation property list */
-    if((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         goto error;
 
     /*
@@ -1591,26 +1591,26 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
     TESTING("writing data to contiguous and chunked datasets");
 
     /* Create contiguous data set */
-    if((dataset = H5Dcreate(file, DSET_NAME[2], src_tid, space, dcpl))<0)
+    if((dataset = H5Dcreate(file, DSET_NAME[2], src_tid, space, dcpl)) < 0)
         goto error;
 
     /* Write the data to the dataset */
-    if(H5Dwrite(dataset, src_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig)<0)
+    if(H5Dwrite(dataset, src_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig) < 0)
 	goto error;
 
     if(H5Dclose(dataset) < 0)
         goto error;
 
     /* Set chunking */
-    if(H5Pset_chunk(dcpl, 2, chunk_dims)<0)
+    if(H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
         goto error;
 
     /* Create chunked data set */
-    if((dataset = H5Dcreate(file, DSET_NAME[3], src_tid, space, dcpl))<0)
+    if((dataset = H5Dcreate(file, DSET_NAME[3], src_tid, space, dcpl)) < 0)
         goto error;
 
     /* Write the data to the dataset */
-    if(H5Dwrite(dataset, src_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig)<0)
+    if(H5Dwrite(dataset, src_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig) < 0)
 	goto error;
 
     if(H5Dclose(dataset) < 0)
@@ -1625,29 +1625,29 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
     TESTING("rewriting data with a subset of original data type");
 
     /* Create xfer properties to preserve initialized data */
-    if ((dxpl = H5Pcreate (H5P_DATASET_XFER))<0)
+    if((dxpl = H5Pcreate (H5P_DATASET_XFER)) < 0)
        goto error;
 
-    if (H5Pset_preserve (dxpl, TRUE)<0)
+    if(H5Pset_preserve(dxpl, TRUE) < 0)
        goto error;
 
     /* Rewrite contiguous data set */
-    if((dataset = H5Dopen(file, DSET_NAME[2]))<0)
+    if((dataset = H5Dopen2(file, DSET_NAME[2], H5P_DEFAULT)) < 0)
         goto error;
 
     /* Write the data to the dataset */
-    if(H5Dwrite(dataset, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf)<0)
+    if(H5Dwrite(dataset, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf) < 0)
 	goto error;
 
     if(H5Dclose(dataset) < 0)
         goto error;
 
     /* Rewrite chunked data set */
-    if((dataset = H5Dopen(file, DSET_NAME[3]))<0)
+    if((dataset = H5Dopen2(file, DSET_NAME[3], H5P_DEFAULT)) < 0)
         goto error;
 
     /* Write the data to the dataset */
-    if(H5Dwrite(dataset, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf)<0)
+    if(H5Dwrite(dataset, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf) < 0)
 	goto error;
 
     if(H5Dclose(dataset) < 0)
@@ -1662,10 +1662,10 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
     TESTING("reading data with a subset of original data type");
 
     /* Check contiguous data set */
-    if((dataset = H5Dopen(file, DSET_NAME[2]))<0)
+    if((dataset = H5Dopen2(file, DSET_NAME[2], H5P_DEFAULT)) < 0)
         goto error;
 
-    if(H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf)<0)
+    if(H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         goto error;
 
     if(compare_data(orig, rbuf, FALSE) < 0) 
@@ -1675,10 +1675,10 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
         goto error;
 
     /* Check chunked data set */
-    if((dataset = H5Dopen(file, DSET_NAME[3]))<0)
+    if((dataset = H5Dopen2(file, DSET_NAME[3], H5P_DEFAULT)) < 0)
         goto error;
 
-    if(H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf)<0)
+    if(H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
         goto error;
 
     if(compare_data(orig, rbuf, FALSE) < 0) 
@@ -1697,11 +1697,11 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
     if(H5Pclose(dxpl) < 0)
         goto error;
 
-    if(H5Tclose(src_tid)<0)
+    if(H5Tclose(src_tid) < 0)
         goto error;
-    if(H5Tclose(dst_tid)<0)
+    if(H5Tclose(dst_tid) < 0)
         goto error;
-    if(H5Tclose(rew_tid)<0)
+    if(H5Tclose(rew_tid) < 0)
         goto error;
     if(H5Fclose(file) < 0)
         goto error;

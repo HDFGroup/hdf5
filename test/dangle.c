@@ -89,7 +89,7 @@ test_dangle_dataset(H5F_close_degree_t degree)
 
     /* Try creating duplicate dataset */
     H5E_BEGIN_TRY {
-        if((dsid = H5Dcreate (fid, DSETNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT))>=0)
+        if((dsid = H5Dcreate(fid, DSETNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT)) >= 0)
             TEST_ERROR;
     } H5E_END_TRY;
 
@@ -97,14 +97,13 @@ test_dangle_dataset(H5F_close_degree_t degree)
         TEST_ERROR;
 
     /* Leave open a _lot_ of objects */
-    for(u=0; u<MAX_DANGLE; u++) {
-        if((dsid = H5Dopen (fid, DSETNAME)) < 0)
+    for(u = 0; u < MAX_DANGLE; u++)
+        if((dsid = H5Dopen2(fid, DSETNAME, H5P_DEFAULT)) < 0)
             TEST_ERROR;
-    } /* end for */
 
-    if(degree==H5F_CLOSE_SEMI) {
+    if(degree == H5F_CLOSE_SEMI) {
         H5E_BEGIN_TRY {
-            if(H5Fclose(fid)>=0)
+            if(H5Fclose(fid) >= 0)
                 TEST_ERROR;
         } H5E_END_TRY;
     } /* end if */

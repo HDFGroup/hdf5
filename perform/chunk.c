@@ -210,9 +210,9 @@ test_rowmaj (int op, size_t cache_size, size_t io_size)
 #endif
     H5Pset_cache (fapl_g, mdc_nelmts, rdcc_nelmts,
 		  cache_size*SQUARE (CH_SIZE), w0);
-    file = H5Fopen (FILE_NAME, H5F_ACC_RDWR, fapl_g);
-    dset = H5Dopen (file, "dset");
-    file_space = H5Dget_space (dset);
+    file = H5Fopen(FILE_NAME, H5F_ACC_RDWR, fapl_g);
+    dset = H5Dopen2(file, "dset", H5P_DEFAULT);
+    file_space = H5Dget_space(dset);
     nio_g = 0;
 
     for (i=0; i<CH_SIZE*DS_SIZE; i+=io_size) {
@@ -287,9 +287,9 @@ test_diag (int op, size_t cache_size, size_t io_size, size_t offset)
 #endif
     H5Pset_cache (fapl_g, mdc_nelmts, rdcc_nelmts,
 		  cache_size*SQUARE (CH_SIZE), w0);
-    file = H5Fopen (FILE_NAME, H5F_ACC_RDWR, fapl_g);
-    dset = H5Dopen (file, "dset");
-    file_space = H5Dget_space (dset);
+    file = H5Fopen(FILE_NAME, H5F_ACC_RDWR, fapl_g);
+    dset = H5Dopen2(file, "dset", H5P_DEFAULT);
+    file_space = H5Dget_space(dset);
     nio_g = 0;
 
     for (i=0, hs_size[0]=io_size; hs_size[0]==io_size; i+=offset) {

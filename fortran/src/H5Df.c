@@ -74,7 +74,7 @@ DONE:
 
 /*----------------------------------------------------------------------------
  * Name:        h5dopen_c
- * Purpose:     Call H5Dopen to open a dataset
+ * Purpose:     Call H5Dopen2 to open a dataset
  * Inputs:      loc_id - file or group identifier
  *              name - name of the dataset
  *              namelen - name length
@@ -85,33 +85,30 @@ DONE:
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5dopen_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *dset_id)
+nh5dopen_c(hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *dset_id)
 {
-     int ret_value = -1;
-     char *c_name;
-     size_t c_namelen;
-     hid_t c_loc_id;
+     char *c_name = NULL;
      hid_t c_dset_id;
+     int ret_value = -1;
 
      /*
       * Convert FORTRAN name to C name
       */
-     c_namelen = *namelen;
-     c_name = (char *)HD5f2cstring(name, c_namelen);
-     if (c_name == NULL) return ret_value;
+     if(NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
+         goto DONE;
 
      /*
-      * Call H5Dopen function.
+      * Call H5Dopen2 function.
       */
-     c_loc_id = (hid_t)*loc_id;
-     c_dset_id = H5Dopen(c_loc_id, c_name);
+     if((c_dset_id = H5Dopen2((hid_t)*loc_id, c_name, H5P_DEFAULT)) < 0)
+         goto DONE;
 
-     if (c_dset_id < 0) goto DONE;
      *dset_id = (hid_t_f)c_dset_id;
      ret_value = 0;
 
 DONE:
-     HDfree(c_name);
+     if(c_name)
+         HDfree(c_name);
      return ret_value;
 }
 

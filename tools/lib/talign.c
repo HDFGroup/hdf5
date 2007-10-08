@@ -127,17 +127,17 @@ int main(void)
     /* Now open the set, and read it back in */
     data = malloc(H5Tget_size(fix));
 
-    if (!data) {
+    if(!data) {
         perror("malloc() failed");
         abort();
     }
 
-    set = H5Dopen(fil, setname);
+    set = H5Dopen2(fil, setname, H5P_DEFAULT);
 
     H5Dread(set, fix, spc, H5S_ALL, H5P_DEFAULT, data);
     fptr = (float *)(data + H5Tget_member_offset(fix, 1));
 
-    if (fok[0] != fptr[0] || fok[1] != fptr[1]
+    if(fok[0] != fptr[0] || fok[1] != fptr[1]
                     || fnok[0] != fptr[2] || fnok[1] != fptr[3]) {
         result = 1;
         printf("%14s (%2d) %6s = %s\n",

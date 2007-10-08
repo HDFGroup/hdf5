@@ -97,7 +97,7 @@ int main(void)
    /*
     * Access dataset D in the first file under /G/D name.
     */
-   did = H5Dopen(fid1,"/G/D");
+   did = H5Dopen2(fid1, "/G/D", H5P_DEFAULT);
    tid = H5Dget_type(did);
    status = H5Dread(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, bm_out);
 

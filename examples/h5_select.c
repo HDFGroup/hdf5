@@ -216,7 +216,7 @@ main (void)
     /*
      * Open the dataset.
      */
-    dataset = H5Dopen(file,"Matrix in file");
+    dataset = H5Dopen2(file, "Matrix in file", H5P_DEFAULT);
 
     /*
      * Get dataspace of the open dataset.

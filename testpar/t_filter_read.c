@@ -138,8 +138,8 @@ filter_read_internal(const char *filename, hid_t dcpl,
     file = H5Fopen(filename, H5F_ACC_RDWR, access_plist);
     VRFY((file >= 0), "H5Fopen");
 
-    dataset = H5Dopen (file, name);
-    VRFY((dataset >= 0), "H5Dopen");
+    dataset = H5Dopen2(file, name, H5P_DEFAULT);
+    VRFY((dataset >= 0), "H5Dopen2");
 
     hrc = H5Sselect_hyperslab(sid, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL);
     VRFY(hrc>=0, "H5Sselect_hyperslab");

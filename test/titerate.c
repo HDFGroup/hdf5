@@ -434,8 +434,8 @@ static void test_iter_attr(hid_t fapl, hbool_t new_format)
     file = H5Fopen(DATAFILE, H5F_ACC_RDONLY, fapl);
     CHECK(file, FAIL, "H5Fopen");
 
-    dataset = H5Dopen(file, "Dataset");
-    CHECK(dataset, FAIL, "H5Dopen");
+    dataset = H5Dopen2(file, "Dataset", H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
 
     /* Test invalid indices for starting iteration */
     info.command = RET_ZERO;

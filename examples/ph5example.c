@@ -404,11 +404,11 @@ phdf5readInd(char *filename)
     assert(ret != FAIL);
 
     /* open the dataset1 collectively */
-    dataset1 = H5Dopen(fid1, DATASETNAME1);
+    dataset1 = H5Dopen2(fid1, DATASETNAME1, H5P_DEFAULT);
     assert(dataset1 != FAIL);
 
     /* open another dataset collectively */
-    dataset2 = H5Dopen(fid1, DATASETNAME1);
+    dataset2 = H5Dopen2(fid1, DATASETNAME1, H5P_DEFAULT);
     assert(dataset2 != FAIL);
 
 
@@ -731,14 +731,14 @@ phdf5readAll(char *filename)
      * Open the datasets in it
      * ------------------------- */
     /* open the dataset1 collectively */
-    dataset1 = H5Dopen(fid1, DATASETNAME1);
+    dataset1 = H5Dopen2(fid1, DATASETNAME1, H5P_DEFAULT);
     assert(dataset1 != FAIL);
-    MESG("H5Dopen succeed");
+    MESG("H5Dopen2 succeed");
 
     /* open another dataset collectively */
-    dataset2 = H5Dopen(fid1, DATASETNAME1);
+    dataset2 = H5Dopen2(fid1, DATASETNAME1, H5P_DEFAULT);
     assert(dataset2 != FAIL);
-    MESG("H5Dopen 2 succeed");
+    MESG("H5Dopen2 2 succeed");
 
     /*
      * Set up dimensions of the slab this process accesses.

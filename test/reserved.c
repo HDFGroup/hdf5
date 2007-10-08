@@ -68,8 +68,7 @@ rsrv_heap(void)
     /* Write datasets until the file is full, at which point HDF5
      * should throw an error.
      */
-    for (i = 0; i < 200; i++)
-    {
+    for(i = 0; i < 200; i++) {
         H5E_BEGIN_TRY {
             dataspace_id = H5Screate_simple(1, dims, dims);
         } H5E_END_TRY
@@ -87,9 +86,9 @@ rsrv_heap(void)
             H5Dwrite(dataset_id, H5T_NATIVE_INT, dataspace_id, dataspace_id, H5P_DEFAULT, &i);
         } H5E_END_TRY
 
-        if( H5Dclose(dataset_id) < 0) TEST_ERROR;
-        if( H5Sclose(dataspace_id) < 0) TEST_ERROR;
-    }
+        if(H5Dclose(dataset_id) < 0) TEST_ERROR;
+        if(H5Sclose(dataspace_id) < 0) TEST_ERROR;
+    } /* end for */
 
     /* The loop should have broken before completing--the file should not have had
      * enough address space to hold 200 datasets (or this test needs to be updated!).
@@ -98,20 +97,20 @@ rsrv_heap(void)
         TEST_ERROR;
 
     /* Close the file, property lists, and library */
-    if( H5Fclose(file_id) < 0) TEST_ERROR;
-    if( H5Pclose(fapl) < 0) TEST_ERROR;
-    if( H5Pclose(fcpl) < 0) TEST_ERROR;
-    if( H5close() < 0) TEST_ERROR;
+    if(H5Fclose(file_id) < 0) TEST_ERROR;
+    if(H5Pclose(fapl) < 0) TEST_ERROR;
+    if(H5Pclose(fcpl) < 0) TEST_ERROR;
+    if(H5close() < 0) TEST_ERROR;
 
     /* Re-open the library and try to read a dataset from the file we created */
-    if( H5open() < 0) TEST_ERROR;
+    if(H5open() < 0) TEST_ERROR;
 
     sprintf(dset_name, "Dset %d", i - 2);
 
     file_id = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
-    if( file_id < 0) TEST_ERROR;
+    if(file_id < 0) TEST_ERROR;
 
-    dataset_id = H5Dopen(file_id, dset_name);
+    dataset_id = H5Dopen2(file_id, dset_name, H5P_DEFAULT);
 
     /* If we can read a dataset from the file, the file has been flushed to disk
      * (if the heap or object headers weren't flushed, the file would be empty).
@@ -119,22 +118,22 @@ rsrv_heap(void)
     if(dataset_id == H5I_BADID)
        TEST_ERROR;
 
-    if( H5Dclose(dataset_id) < 0) TEST_ERROR;
-    if( H5Fclose(file_id) < 0) TEST_ERROR;
+    if(H5Dclose(dataset_id) < 0) TEST_ERROR;
+    if(H5Fclose(file_id) < 0) TEST_ERROR;
 
     PASSED();
     return 0;
 
-   error:
-      /* Close everything we can and exit */
-   H5E_BEGIN_TRY {
+error:
+    /* Close everything we can and exit */
+    H5E_BEGIN_TRY {
       H5Dclose(dataset_id);
       H5Sclose(dataspace_id);
       H5Pclose(fcpl);
       H5Pclose(fapl);
       H5Fclose(file_id);
-   } H5E_END_TRY
-   return 1;
+    } H5E_END_TRY
+    return 1;
 }
 
 /*-------------------------------------------------------------------------
@@ -219,22 +218,22 @@ rsrv_ohdr(void)
         TEST_ERROR;
 
     /* End access to the dataset and dataspace and release resources. */
-    if( H5Dclose(dataset_id) < 0) TEST_ERROR;
-    if( H5Pclose (fapl) < 0) TEST_ERROR;
-    if( H5Pclose (fcpl) < 0) TEST_ERROR;
-    if( H5Sclose(dataspace_id) < 0) TEST_ERROR;
+    if(H5Dclose(dataset_id) < 0) TEST_ERROR;
+    if(H5Pclose(fapl) < 0) TEST_ERROR;
+    if(H5Pclose(fcpl) < 0) TEST_ERROR;
+    if(H5Sclose(dataspace_id) < 0) TEST_ERROR;
 
     /* Close the file and the library. */
-    if( H5Fclose(file_id) < 0) TEST_ERROR;
-    if( H5close() < 0) TEST_ERROR;
+    if(H5Fclose(file_id) < 0) TEST_ERROR;
+    if(H5close() < 0) TEST_ERROR;
 
     /* Re-open the library and try to read a dataset from the file we created */
-    if( H5open() < 0) TEST_ERROR;
+    if(H5open() < 0) TEST_ERROR;
 
     file_id = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
-    if( file_id < 0) TEST_ERROR;
+    if(file_id < 0) TEST_ERROR;
 
-    dataset_id = H5Dopen(file_id, "/dset");
+    dataset_id = H5Dopen2(file_id, "/dset", H5P_DEFAULT);
 
     /* If we can read the dataset from the file, the file has been flushed to disk
      * (if the heap or object headers weren't flushed, the file would be empty).
@@ -242,22 +241,22 @@ rsrv_ohdr(void)
     if(dataset_id == H5I_BADID)
         TEST_ERROR;
 
-    if( H5Dclose(dataset_id) < 0) TEST_ERROR;
-    if( H5Fclose(file_id) < 0) TEST_ERROR;
+    if(H5Dclose(dataset_id) < 0) TEST_ERROR;
+    if(H5Fclose(file_id) < 0) TEST_ERROR;
 
     PASSED();
     return 0;
 
-   error:
-          /* Close everything we can and exit */
-   H5E_BEGIN_TRY {
+error:
+    /* Close everything we can and exit */
+    H5E_BEGIN_TRY {
       H5Dclose(dataset_id);
       H5Sclose(dataspace_id);
       H5Pclose(fcpl);
       H5Pclose(fapl);
       H5Fclose(file_id);
-   } H5E_END_TRY
-   return 1;
+    } H5E_END_TRY
+    return 1;
 }
 
 /*-------------------------------------------------------------------------
@@ -360,24 +359,24 @@ rsrv_vlen(void)
         TEST_ERROR;
 
     /* End access to the dataset and dataspace and release resources. */
-    if( H5Dclose(dataset_id) < 0) TEST_ERROR;
-    if( H5Pclose(fcpl) < 0) TEST_ERROR;
-    if( H5Pclose(fapl) < 0) TEST_ERROR;
-    if( H5Sclose(dataspace_id) < 0) TEST_ERROR;
-    if( H5Tclose(type_id) < 0) TEST_ERROR;
-    if( H5Sclose(mem_space_id) < 0) TEST_ERROR;
+    if(H5Dclose(dataset_id) < 0) TEST_ERROR;
+    if(H5Pclose(fcpl) < 0) TEST_ERROR;
+    if(H5Pclose(fapl) < 0) TEST_ERROR;
+    if(H5Sclose(dataspace_id) < 0) TEST_ERROR;
+    if(H5Tclose(type_id) < 0) TEST_ERROR;
+    if(H5Sclose(mem_space_id) < 0) TEST_ERROR;
 
     /* Close the file and the library. */
-    if( H5Fclose(file_id) < 0) TEST_ERROR;
-    if( H5close() < 0) TEST_ERROR;
+    if(H5Fclose(file_id) < 0) TEST_ERROR;
+    if(H5close() < 0) TEST_ERROR;
 
     /* Re-open the library and try to read a dataset from the file we created */
-    if( H5open() < 0) TEST_ERROR;
+    if(H5open() < 0) TEST_ERROR;
 
     file_id = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
-    if( file_id < 0) TEST_ERROR;
+    if(file_id < 0) TEST_ERROR;
 
-    dataset_id = H5Dopen(file_id, "/dset");
+    dataset_id = H5Dopen2(file_id, "/dset", H5P_DEFAULT);
 
     /* If we can read the dataset from the file, the file has been flushed to disk
      * (if the heap or object headers weren't flushed, the file would be empty).
@@ -385,15 +384,15 @@ rsrv_vlen(void)
     if(dataset_id == H5I_BADID)
         TEST_ERROR;
 
-    if( H5Dclose(dataset_id) < 0) TEST_ERROR;
-    if( H5Fclose(file_id) < 0) TEST_ERROR;
+    if(H5Dclose(dataset_id) < 0) TEST_ERROR;
+    if(H5Fclose(file_id) < 0) TEST_ERROR;
 
     PASSED();
     return 0;
 
-   error:
-          /* Close everything we can and exit */
-   H5E_BEGIN_TRY {
+error:
+    /* Close everything we can and exit */
+    H5E_BEGIN_TRY {
       H5Dclose(dataset_id);
       H5Sclose(dataspace_id);
       H5Sclose(mem_space_id);
@@ -401,8 +400,8 @@ rsrv_vlen(void)
       H5Pclose(fcpl);
       H5Pclose(fapl);
       H5Fclose(file_id);
-   } H5E_END_TRY
-   return 1;
+    } H5E_END_TRY
+    return 1;
 }
 #endif /* BROKEN */
 

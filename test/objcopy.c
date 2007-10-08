@@ -1743,10 +1743,10 @@ test_copy_dataset_simple(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if((did = H5Dopen(fid_src, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR
+    if((did = H5Dopen2(fid_src, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if((did2 = H5Dopen(fid_dst, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
@@ -1850,10 +1850,10 @@ test_copy_dataset_simple_empty(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if((did = H5Dopen(fid_src, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR
+    if((did = H5Dopen2(fid_src, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if((did2 = H5Dopen(fid_dst, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, NULL) != TRUE) TEST_ERROR
@@ -1980,10 +1980,10 @@ test_copy_dataset_compound(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_DATASET_COMPOUND, fid_dst, NAME_DATASET_COMPOUND, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if((did = H5Dopen(fid_src, NAME_DATASET_COMPOUND)) < 0) TEST_ERROR
+    if((did = H5Dopen2(fid_src, NAME_DATASET_COMPOUND, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if((did2 = H5Dopen(fid_dst, NAME_DATASET_COMPOUND)) < 0) TEST_ERROR
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_COMPOUND, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
@@ -2108,10 +2108,10 @@ test_copy_dataset_chunked(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if((did = H5Dopen(fid_src, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR
+    if((did = H5Dopen2(fid_src, NAME_DATASET_CHUNKED, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if((did2 = H5Dopen(fid_dst, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
@@ -2225,10 +2225,10 @@ test_copy_dataset_chunked_empty(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if((did = H5Dopen(fid_src, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR
+    if((did = H5Dopen2(fid_src, NAME_DATASET_CHUNKED, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if((did2 = H5Dopen(fid_dst, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, NULL) != TRUE) TEST_ERROR
@@ -2363,10 +2363,10 @@ test_copy_dataset_chunked_sparse(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if((did = H5Dopen(fid_src, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR
+    if((did = H5Dopen2(fid_src, NAME_DATASET_CHUNKED, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if((did2 = H5Dopen(fid_dst, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, NULL) != TRUE) TEST_ERROR
@@ -2493,13 +2493,13 @@ test_copy_dataset_compressed(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if(H5Ocopy(fid_src,  NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Ocopy(fid_src, NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if((did = H5Dopen(fid_src, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR
+    if((did = H5Dopen2(fid_src, NAME_DATASET_CHUNKED, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if((did2 = H5Dopen(fid_dst, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, NULL) != TRUE) TEST_ERROR
@@ -2624,10 +2624,10 @@ test_copy_dataset_compact(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_DATASET_COMPACT, fid_dst, NAME_DATASET_COMPACT, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if((did = H5Dopen(fid_src, NAME_DATASET_COMPACT)) < 0) TEST_ERROR
+    if((did = H5Dopen2(fid_src, NAME_DATASET_COMPACT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if((did2 = H5Dopen(fid_dst, NAME_DATASET_COMPACT)) < 0) TEST_ERROR
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_COMPACT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
@@ -2751,10 +2751,10 @@ test_copy_dataset_external(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_DATASET_EXTERNAL, fid_dst, NAME_DATASET_EXTERNAL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if((did = H5Dopen(fid_src, NAME_DATASET_EXTERNAL)) < 0) TEST_ERROR
+    if((did = H5Dopen2(fid_src, NAME_DATASET_EXTERNAL, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if((did2 = H5Dopen(fid_dst, NAME_DATASET_EXTERNAL)) < 0) TEST_ERROR
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_EXTERNAL, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
@@ -2869,13 +2869,13 @@ test_copy_dataset_named_dtype(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* copy the dataset from SRC to DST */
-    if(H5Ocopy(fid_src,  NAME_DATASET_NAMED_DTYPE, fid_dst, NAME_DATASET_NAMED_DTYPE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Ocopy(fid_src, NAME_DATASET_NAMED_DTYPE, fid_dst, NAME_DATASET_NAMED_DTYPE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if((did = H5Dopen(fid_src, NAME_DATASET_NAMED_DTYPE)) < 0) TEST_ERROR
+    if((did = H5Dopen2(fid_src, NAME_DATASET_NAMED_DTYPE, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if((did2 = H5Dopen(fid_dst, NAME_DATASET_NAMED_DTYPE)) < 0) TEST_ERROR
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_NAMED_DTYPE, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
@@ -3543,10 +3543,10 @@ test_copy_dataset_contig_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if((did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR
+    if((did = H5Dopen2(fid_src, NAME_DATASET_VL, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if((did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_VL, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
@@ -3681,10 +3681,10 @@ test_copy_dataset_chunked_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if((did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR
+    if((did = H5Dopen2(fid_src, NAME_DATASET_VL, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if((did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_VL, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
@@ -3818,10 +3818,10 @@ test_copy_dataset_compact_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if((did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR
+    if((did = H5Dopen2(fid_src, NAME_DATASET_VL, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if((did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_VL, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
@@ -3938,10 +3938,10 @@ test_copy_attribute_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if((did = H5Dopen(fid_src, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR
+    if((did = H5Dopen2(fid_src, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if((did2 = H5Dopen(fid_dst, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the attributes are equal */
 
@@ -4081,10 +4081,10 @@ test_copy_dataset_compressed_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_DATASET_CHUNKED, fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if((did = H5Dopen(fid_src, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR
+    if((did = H5Dopen2(fid_src, NAME_DATASET_CHUNKED, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if((did2 = H5Dopen(fid_dst, NAME_DATASET_CHUNKED)) < 0) TEST_ERROR
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_CHUNKED, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, NULL) != TRUE) TEST_ERROR
@@ -5100,10 +5100,10 @@ test_copy_soft_link(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_LINK_SOFT, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset through the soft link for copy */
-    if((did = H5Dopen(fid_src, NAME_LINK_SOFT)) < 0) TEST_ERROR
+    if((did = H5Dopen2(fid_src, NAME_LINK_SOFT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if((did2 = H5Dopen(fid_dst, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
@@ -5231,10 +5231,10 @@ test_copy_ext_link(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_ext, NAME_LINK_EXTERN, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset through the external link */
-    if((did = H5Dopen(fid_ext, NAME_LINK_EXTERN)) < 0) TEST_ERROR
+    if((did = H5Dopen2(fid_ext, NAME_LINK_EXTERN, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if((did2 = H5Dopen(fid_dst, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
@@ -5478,10 +5478,10 @@ test_copy_path(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SUB_SUB, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if((did = H5Dopen(fid_src, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR
+    if((did = H5Dopen2(fid_src, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if((did2 = H5Dopen(fid_dst, NAME_DATASET_SUB_SUB)) < 0) TEST_ERROR
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_SUB_SUB, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
@@ -5637,10 +5637,10 @@ test_copy_old_layout(hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_OLD_FORMAT, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the source dataset */
-    if((did = H5Dopen(fid_src, NAME_OLD_FORMAT)) < 0) TEST_ERROR
+    if((did = H5Dopen2(fid_src, NAME_OLD_FORMAT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if((did2 = H5Dopen(fid_dst, NAME_DATASET_SIMPLE)) < 0) TEST_ERROR
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, NULL) != TRUE) TEST_ERROR
@@ -5770,10 +5770,10 @@ test_copy_dataset_compact_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if((did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR
+    if((did = H5Dopen2(fid_src, NAME_DATASET_VL, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if((did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_VL, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
@@ -5910,10 +5910,10 @@ test_copy_dataset_contig_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if((did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR
+    if((did = H5Dopen2(fid_src, NAME_DATASET_VL, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if((did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_VL, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
@@ -6058,10 +6058,10 @@ test_copy_dataset_chunked_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if((did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR
+    if((did = H5Dopen2(fid_src, NAME_DATASET_VL, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if((did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_VL, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
@@ -6208,10 +6208,10 @@ test_copy_dataset_compressed_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl
     if(H5Ocopy(fid_src, NAME_DATASET_VL, fid_dst, NAME_DATASET_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if((did = H5Dopen(fid_src, NAME_DATASET_VL)) < 0) TEST_ERROR
+    if((did = H5Dopen2(fid_src, NAME_DATASET_VL, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if((did2 = H5Dopen(fid_dst, NAME_DATASET_VL)) < 0) TEST_ERROR
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_VL, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
@@ -6364,10 +6364,10 @@ test_copy_dataset_compact_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_DATASET_VL_VL, fid_dst, NAME_DATASET_VL_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if((did = H5Dopen(fid_src, NAME_DATASET_VL_VL)) < 0) TEST_ERROR
+    if((did = H5Dopen2(fid_src, NAME_DATASET_VL_VL, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if((did2 = H5Dopen(fid_dst, NAME_DATASET_VL_VL)) < 0) TEST_ERROR
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_VL_VL, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
@@ -6518,10 +6518,10 @@ test_copy_dataset_contig_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_DATASET_VL_VL, fid_dst, NAME_DATASET_VL_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if((did = H5Dopen(fid_src, NAME_DATASET_VL_VL)) < 0) TEST_ERROR
+    if((did = H5Dopen2(fid_src, NAME_DATASET_VL_VL, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if((did2 = H5Dopen(fid_dst, NAME_DATASET_VL_VL)) < 0) TEST_ERROR
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_VL_VL, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
@@ -6672,10 +6672,10 @@ test_copy_dataset_chunked_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_DATASET_VL_VL, fid_dst, NAME_DATASET_VL_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if((did = H5Dopen(fid_src, NAME_DATASET_VL_VL)) < 0) TEST_ERROR
+    if((did = H5Dopen2(fid_src, NAME_DATASET_VL_VL, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if((did2 = H5Dopen(fid_dst, NAME_DATASET_VL_VL)) < 0) TEST_ERROR
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_VL_VL, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR
@@ -6829,10 +6829,10 @@ test_copy_dataset_compressed_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Ocopy(fid_src, NAME_DATASET_VL_VL, fid_dst, NAME_DATASET_VL_VL, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* open the dataset for copy */
-    if((did = H5Dopen(fid_src, NAME_DATASET_VL_VL)) < 0) TEST_ERROR
+    if((did = H5Dopen2(fid_src, NAME_DATASET_VL_VL, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* open the destination dataset */
-    if((did2 = H5Dopen(fid_dst, NAME_DATASET_VL_VL)) < 0) TEST_ERROR
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_VL_VL, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the datasets are equal */
     if(compare_datasets(did, did2, H5P_DEFAULT, buf) != TRUE) TEST_ERROR

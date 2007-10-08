@@ -422,8 +422,8 @@ test_file_open(void)
     VERIFY(intent, H5F_ACC_RDONLY, "H5Fget_intent");
 
     /* Open dataset */
-    did = H5Dopen(fid1, F2_DSET);
-    CHECK(did, FAIL, "H5Dopen");
+    did = H5Dopen2(fid1, F2_DSET, H5P_DEFAULT);
+    CHECK(did, FAIL, "H5Dopen2");
 
     /* Check that the intent works even if NULL is passed in */
     ret = H5Fget_intent(fid1, NULL);
@@ -1392,15 +1392,15 @@ test_file_open_dot(void)
 
     /* Open a dataset with no name using the file ID */
     H5E_BEGIN_TRY {
-        did = H5Dopen(fid, ".");
+        did = H5Dopen2(fid, ".", H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(did, FAIL, "H5Dopen");
+    VERIFY(did, FAIL, "H5Dopen2");
 
     /* Open a dataset with no name using the group ID */
     H5E_BEGIN_TRY {
-        did = H5Dopen(gid, ".");
+        did = H5Dopen2(gid, ".", H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(did, FAIL, "H5Dopen");
+    VERIFY(did, FAIL, "H5Dopen2");
 
     /* Make a copy of a datatype to use for creating a named datatype */
     tid = H5Tcopy(H5T_NATIVE_INT);
@@ -1777,8 +1777,8 @@ test_file_double_dataset_open(void)
 
     dset1_id  = H5Dcreate(file1_id, DSET_NAME, H5T_NATIVE_INT, space_id, H5P_DEFAULT);
     CHECK(dset1_id, FAIL, "H5Dcreate");
-    dset2_id  = H5Dopen(file2_id, DSET_NAME);
-    CHECK(dset2_id, FAIL, "H5Dopen");
+    dset2_id  = H5Dopen2(file2_id, DSET_NAME, H5P_DEFAULT);
+    CHECK(dset2_id, FAIL, "H5Dopen2");
 
     /* Close "supporting" dataspace */
     ret = H5Sclose(space_id);

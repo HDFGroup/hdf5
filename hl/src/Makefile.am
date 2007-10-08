@@ -26,7 +26,7 @@ AM_CPPFLAGS=-I$(top_srcdir)/src
 # This library is our main target.
 lib_LTLIBRARIES=libhdf5_hl.la
 
-libhdf5_hl_la_SOURCES=H5LT.c H5TB.c H5IM.c H5DS.c H5PT.c H5LTparse.c H5LTanalyze.c
+libhdf5_hl_la_SOURCES=H5DS.c H5IM.c H5LT.c H5LTanalyze.c H5LTparse.c H5PT.c H5TB.c
 
 # Public header files (to be installed)
 include_HEADERS=hdf5_hl.h H5IMpublic.h H5LTpublic.h H5TBpublic.h H5DSpublic.h H5PTpublic.h

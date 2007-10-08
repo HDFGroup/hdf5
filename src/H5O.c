@@ -176,8 +176,8 @@ H5O_init_interface(void)
  *
  * Purpose:	Opens an object within an HDF5 file.
  *
- *              This function opens an object in the same way that H5Gopen,
- *              H5Topen, and H5Dopen do. However, H5Oopen doesn't require
+ *              This function opens an object in the same way that H5Gopen2,
+ *              H5Topen2, and H5Dopen2 do. However, H5Oopen doesn't require
  *              the type of object to be known beforehand. This can be
  *              useful in user-defined links, for instance, when only a
  *              path is known.

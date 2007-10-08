@@ -217,8 +217,8 @@ test_h5o_close(void)
     CHECK(grp, FAIL, "H5Gopen2");
     dtype = H5Topen2(fid, "group/datatype", H5P_DEFAULT);
     CHECK(dtype, FAIL, "H5Topen2");
-    dset = H5Dopen(fid, "dataset");
-    CHECK(dset, FAIL, "H5Dopen");
+    dset = H5Dopen2(fid, "dataset", H5P_DEFAULT);
+    CHECK(dset, FAIL, "H5Dopen2");
 
     ret = H5Oclose(grp);
     CHECK(ret, FAIL, "H5Oclose");
@@ -482,8 +482,8 @@ test_h5o_refcount(void)
     CHECK(grp, FAIL, "H5Gopen2");
     dtype = H5Topen2(fid, "datatype", H5P_DEFAULT);
     CHECK(dtype, FAIL, "H5Topen2");
-    dset = H5Dopen(fid, "dataset");
-    CHECK(dset, FAIL, "H5Dopen");
+    dset = H5Dopen2(fid, "dataset", H5P_DEFAULT);
+    CHECK(dset, FAIL, "H5Dopen2");
 
     ret = H5Oget_info(fid, "group", &oinfo, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info");
@@ -520,8 +520,8 @@ test_h5o_refcount(void)
     CHECK(grp, FAIL, "H5Gopen2");
     dtype = H5Topen2(fid, "datatype", H5P_DEFAULT);
     CHECK(dtype, FAIL, "H5Topen2");
-    dset = H5Dopen(fid, "dataset");
-    CHECK(dset, FAIL, "H5Dopen");
+    dset = H5Dopen2(fid, "dataset", H5P_DEFAULT);
+    CHECK(dset, FAIL, "H5Dopen2");
 
     ret = H5Oget_info(fid, "group", &oinfo, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info");
@@ -710,8 +710,8 @@ test_h5o_plist(void)
     CHECK(grp, FAIL, "H5Gopen2");
     dtype = H5Topen2(fid, "datatype", H5P_DEFAULT);
     CHECK(dtype, FAIL, "H5Topen2");
-    dset = H5Dopen(fid, "dataset");
-    CHECK(dset, FAIL, "H5Dopen");
+    dset = H5Dopen2(fid, "dataset", H5P_DEFAULT);
+    CHECK(dset, FAIL, "H5Dopen2");
 
     /* Retrieve each object's creation property list */
     gcpl = H5Gget_create_plist(grp);

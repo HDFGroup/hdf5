@@ -52,7 +52,7 @@ has_filter(hid_t dcpl_id, H5Z_filter_t filtnin)
   return 1;
 
  /* get information about filters */
- if ((nfilters = H5Pget_nfilters(dcpl_id))<0)
+ if ((nfilters = H5Pget_nfilters(dcpl_id)) < 0)
   return -1;
 
  /* if we do not have filters and the requested filter is NONE, return 1 */
@@ -122,7 +122,7 @@ int has_layout(hid_t dcpl_id,
   return 1;
 
  /* check if we have filters in the input object */
- if ((nfilters = H5Pget_nfilters(dcpl_id))<0)
+ if ((nfilters = H5Pget_nfilters(dcpl_id)) < 0)
   return -1;
 
  /* a non chunked layout was requested on a filtered object; avoid the test */
@@ -130,7 +130,7 @@ int has_layout(hid_t dcpl_id,
   return 1;
 
  /* get layout */
- if ((layout = H5Pget_layout(dcpl_id))<0)
+ if ((layout = H5Pget_layout(dcpl_id)) < 0)
   return -1;
 
  if (obj->layout != layout)
@@ -138,7 +138,7 @@ int has_layout(hid_t dcpl_id,
 
  if (layout==H5D_CHUNKED)
  {
-  if ((rank = H5Pget_chunk(dcpl_id,NELMTS(chsize),chsize/*out*/))<0)
+  if ((rank = H5Pget_chunk(dcpl_id,NELMTS(chsize),chsize/*out*/)) < 0)
    return -1;
   if (obj->chunk.rank != rank)
    return 0;
@@ -170,60 +170,58 @@ int h5repack_verify(const char *fname,
                     pack_opt_t *options)
 {
  hid_t  fid;      /* file ID */
- hid_t  dset_id=-1;  /* dataset ID */
- hid_t  dcpl_id=-1;  /* dataset creation property list ID */
- hid_t  space_id=-1; /* space ID */
- int    ret=1;
+ hid_t  dset_id = -1;  /* dataset ID */
+ hid_t  dcpl_id = -1;  /* dataset creation property list ID */
+ hid_t  space_id = -1; /* space ID */
+ int    ret = 1;
  unsigned int i;
  int j;
- trav_table_t  *travt=NULL;
+ trav_table_t  *travt = NULL;
 
  /* open the file */
- if ((fid=H5Fopen(fname,H5F_ACC_RDONLY,H5P_DEFAULT))<0 )
+ if((fid = H5Fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0 )
   return -1;
 
- for ( i=0; i<options->op_tbl->nelems; i++)
- {
-  char* name=options->op_tbl->objs[i].path;
+ for(i = 0; i < options->op_tbl->nelems; i++) {
+  char* name = options->op_tbl->objs[i].path;
   pack_info_t *obj = &options->op_tbl->objs[i];
 
 /*-------------------------------------------------------------------------
  * open
  *-------------------------------------------------------------------------
  */
-  if ((dset_id=H5Dopen(fid,name))<0)
+  if((dset_id = H5Dopen2(fid, name, H5P_DEFAULT)) < 0)
    goto error;
-  if ((space_id=H5Dget_space(dset_id))<0)
+  if((space_id = H5Dget_space(dset_id)) < 0)
    goto error;
-  if ((dcpl_id=H5Dget_create_plist(dset_id))<0)
+  if((dcpl_id = H5Dget_create_plist(dset_id)) < 0)
    goto error;
 
 /*-------------------------------------------------------------------------
  * filter check
  *-------------------------------------------------------------------------
  */
-  for ( j=0; j<obj->nfilters; j++)
-  {
-   if (has_filter(dcpl_id,obj->filter[j].filtn)==0)
-    ret=0;
+  for(j = 0; j < obj->nfilters; j++) {
+   if(has_filter(dcpl_id, obj->filter[j].filtn) == 0)
+    ret = 0;
   }
 
 /*-------------------------------------------------------------------------
  * layout check
  *-------------------------------------------------------------------------
  */
-  if ((obj->layout!=-1) && (has_layout(dcpl_id,obj)==0))
-   ret=0;
+  if((obj->layout != -1) && (has_layout(dcpl_id, obj) == 0))
+   ret = 0;
 
 /*-------------------------------------------------------------------------
  * close
  *-------------------------------------------------------------------------
  */
-  if (H5Pclose(dcpl_id)<0)
+  if(H5Pclose(dcpl_id) < 0)
    goto error;
-  if (H5Sclose(space_id)<0)
+  if (H5Sclose(space_id) < 0)
    goto error;
-  if (H5Dclose(dset_id)<0)
+  if (H5Dclose(dset_id) < 0)
    goto error;
 
  }
@@ -234,53 +232,50 @@ int h5repack_verify(const char *fname,
  *-------------------------------------------------------------------------
  */
 
- if (options->all_filter==1 || options->all_layout==1)
- {
+ if(options->all_filter == 1 || options->all_layout == 1) {
 
   /* init table */
   trav_table_init(&travt);
 
   /* get the list of objects in the file */
-  if (h5trav_gettable(fid,travt)<0)
+  if(h5trav_gettable(fid, travt) < 0)
    goto error;
 
-  for ( i=0; i<travt->nobjs; i++)
-  {
-   char* name=travt->objs[i].name;
+  for(i = 0; i < travt->nobjs; i++) {
+   char *name = travt->objs[i].name;
 
-   if ( travt->objs[i].type == H5TRAV_TYPE_DATASET) {
+   if(travt->objs[i].type == H5TRAV_TYPE_DATASET) {
 
  /*-------------------------------------------------------------------------
   * open
   *-------------------------------------------------------------------------
   */
-    if ((dset_id=H5Dopen(fid,name))<0)
+    if((dset_id = H5Dopen2(fid, name, H5P_DEFAULT)) < 0)
      goto error;
-    if ((space_id=H5Dget_space(dset_id))<0)
+    if((space_id = H5Dget_space(dset_id)) < 0)
      goto error;
-    if ((dcpl_id=H5Dget_create_plist(dset_id))<0)
+    if((dcpl_id = H5Dget_create_plist(dset_id)) < 0)
      goto error;
 
  /*-------------------------------------------------------------------------
   * filter check
   *-------------------------------------------------------------------------
   */
-    if (options->all_filter==1 ){
-     if (has_filter(dcpl_id,options->filter_g.filtn)==0)
-      ret=0;
-    }
+    if(options->all_filter == 1)
+     if(has_filter(dcpl_id, options->filter_g.filtn) == 0)
+      ret = 0;
 
  /*-------------------------------------------------------------------------
   * layout check
   *-------------------------------------------------------------------------
   */
-    if (options->all_layout==1){
+    if(options->all_layout == 1) {
      pack_info_t pack;
      init_packobject(&pack);
-     pack.layout=options->layout_g;
-     pack.chunk=options->chunk_g;
-     if (has_layout(dcpl_id,&pack)==0)
-      ret=0;
+     pack.layout = options->layout_g;
+     pack.chunk = options->chunk_g;
+     if(has_layout(dcpl_id, &pack) == 0)
+      ret = 0;
     }
 
 
@@ -288,11 +283,11 @@ int h5repack_verify(const char *fname,
    * close
    *-------------------------------------------------------------------------
    */
-    if (H5Pclose(dcpl_id)<0)
+    if (H5Pclose(dcpl_id) < 0)
      goto error;
-    if (H5Sclose(space_id)<0)
+    if (H5Sclose(space_id) < 0)
      goto error;
-    if (H5Dclose(dset_id)<0)
+    if (H5Dclose(dset_id) < 0)
      goto error;
    } /* if */
 
@@ -307,7 +302,7 @@ int h5repack_verify(const char *fname,
  *-------------------------------------------------------------------------
  */
 
- if (H5Fclose(fid)<0)
+ if (H5Fclose(fid) < 0)
   return -1;
 
  return ret;
@@ -363,12 +358,12 @@ int h5repack_cmpdcpl(const char *fname1,
  H5E_BEGIN_TRY {
 
  /* Open the files */
- if ((fid1=H5Fopen(fname1,H5F_ACC_RDONLY,H5P_DEFAULT))<0 )
+ if ((fid1=H5Fopen(fname1,H5F_ACC_RDONLY,H5P_DEFAULT)) < 0 )
  {
   error_msg(progname, "<%s>: %s\n", fname1, H5FOPENERROR );
   return -1;
  }
- if ((fid2=H5Fopen(fname2,H5F_ACC_RDONLY,H5P_DEFAULT))<0 )
+ if ((fid2=H5Fopen(fname2,H5F_ACC_RDONLY,H5P_DEFAULT)) < 0 )
  {
   error_msg(progname, "<%s>: %s\n", fname2, H5FOPENERROR );
   H5Fclose(fid1);
@@ -383,9 +378,9 @@ int h5repack_cmpdcpl(const char *fname1,
  */
  trav_table_init(&travt1);
  trav_table_init(&travt2);
- if (h5trav_gettable(fid1,travt1)<0)
+ if(h5trav_gettable(fid1, travt1) < 0)
   goto error;
- if (h5trav_gettable(fid2,travt2)<0)
+ if(h5trav_gettable(fid2, travt2) < 0)
   goto error;
 
 
@@ -394,27 +389,25 @@ int h5repack_cmpdcpl(const char *fname1,
  *-------------------------------------------------------------------------
  */
 
- for ( i=0; i < travt1->nobjs; i++)
- {
-  if ( travt1->objs[i].type == H5TRAV_TYPE_DATASET) {
-   if ((dset1=H5Dopen(fid1,travt1->objs[i].name))<0)
+ for(i = 0; i < travt1->nobjs; i++) {
+  if(travt1->objs[i].type == H5TRAV_TYPE_DATASET) {
+   if((dset1 = H5Dopen2(fid1, travt1->objs[i].name, H5P_DEFAULT)) < 0)
     goto error;
-   if ((dset2=H5Dopen(fid2,travt1->objs[i].name))<0)
+   if((dset2 = H5Dopen2(fid2, travt1->objs[i].name, H5P_DEFAULT)) < 0)
     goto error;
-   if ((dcpl1=H5Dget_create_plist(dset1))<0)
+   if((dcpl1 = H5Dget_create_plist(dset1)) < 0)
     goto error;
-   if ((dcpl2=H5Dget_create_plist(dset2))<0)
+   if((dcpl2 = H5Dget_create_plist(dset2)) < 0)
     goto error;
 
 /*-------------------------------------------------------------------------
  * compare the property lists
  *-------------------------------------------------------------------------
  */
-   if ((ret=H5Pequal(dcpl1,dcpl2))<0)
+   if((ret = H5Pequal(dcpl1, dcpl2)) < 0)
     goto error;
 
-   if (ret==0)
-   {
+   if(ret == 0) {
     error_msg(progname, "property lists for <%s> are different\n",travt1->objs[i].name);
     goto error;
    }
@@ -423,13 +416,13 @@ int h5repack_cmpdcpl(const char *fname1,
  * close
  *-------------------------------------------------------------------------
  */
-   if (H5Pclose(dcpl1)<0)
+   if(H5Pclose(dcpl1) < 0)
     goto error;
-   if (H5Pclose(dcpl2)<0)
+   if(H5Pclose(dcpl2) < 0)
     goto error;
-   if (H5Dclose(dset1)<0)
+   if(H5Dclose(dset1) < 0)
     goto error;
-   if (H5Dclose(dset2)<0)
+   if(H5Dclose(dset2) < 0)
     goto error;
   } /*if*/
  } /*i*/

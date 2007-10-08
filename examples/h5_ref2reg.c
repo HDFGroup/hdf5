@@ -123,7 +123,7 @@ int main(void)
      * Reopen the dataset with object references and read references 
      * to the buffer.
      */
-    dsetr_id = H5Dopen (file_id, dsetnamer);
+    dsetr_id = H5Dopen2(file_id, dsetnamer, H5P_DEFAULT);
 
     status = H5Dread(dsetr_id, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, 
                    H5P_DEFAULT, ref_out);

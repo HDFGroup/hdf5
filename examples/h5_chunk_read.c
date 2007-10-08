@@ -55,7 +55,7 @@ main (void)
      * Open the file and the dataset.
      */
     file = H5Fopen(H5FILE_NAME, H5F_ACC_RDONLY, H5P_DEFAULT);
-    dataset = H5Dopen(file, DATASETNAME);
+    dataset = H5Dopen2(file, DATASETNAME, H5P_DEFAULT);
 
     /*
      * Get dataset rank and dimension.

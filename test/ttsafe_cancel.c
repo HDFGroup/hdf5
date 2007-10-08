@@ -101,7 +101,7 @@ void tts_cancel(void)
     ret=pthread_cancel(childthread);
     assert(ret==0);
 
-    dataset = H5Dopen(cancel_file, DATASETNAME);
+    dataset = H5Dopen2(cancel_file, DATASETNAME, H5P_DEFAULT);
     assert(dataset>=0);
     ret=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &buffer);
     assert(ret>=0);
