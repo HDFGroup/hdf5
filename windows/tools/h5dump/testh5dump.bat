@@ -578,7 +578,14 @@ rem ############################################################################
     call :tooltest tordergr4.ddl -g 2 -q name -z descending tordergr.h5
     call :tooltest tordergr5.ddl -q creation_order tordergr.h5
 
+    rem tests for attribute order
+    call :tooltest torderattr1.ddl -H --sort_by=name --sort_order=ascending torderattr.h5
+    call :tooltest torderattr2.ddl -H --sort_by=name --sort_order=descending torderattr.h5
+    call :tooltest torderattr3.ddl -H --sort_by=creation_order --sort_order=ascending torderattr.h5
+    call :tooltest torderattr4.ddl -H --sort_by=creation_order --sort_order=descending torderattr.h5
 
+    
+    
     if %nerrors% equ 0 (
         echo.All %dumper% tests passed.
     )
