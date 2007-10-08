@@ -180,27 +180,24 @@ int main(void)
         status = H5Gclose(group_id);
 
         /* Extend attribute arrays */
-        for(i=0; i<NEXTARRAYS; i++)
-        {
+        for(i = 0; i < NEXTARRAYS; i++) {
             /* Open extendable dataset */
             sprintf(name, "/ExtArray%06d", i);
             dataset_id = H5Dopen(file_id, name);
-            if(dataset_id < 0)
-            {
+            if(dataset_id < 0) {
                 fprintf(stderr, "Failed to open ExtArray dataset.\n");
                 status = H5Fclose(file_id);
                 return -1;
-            }
+            } /* end if */
 
             /* Extend attribute dataset */
             dims[0] = (hsize_t)j + 1;
-            status = H5Dextend(dataset_id, dims);
-            if(status < 0)
-            {
+            status = H5Dset_extent(dataset_id, dims);
+            if(status < 0) {
                 fprintf(stderr, "Failed to extend DataArray dataset.\n");
                 status = H5Fclose(file_id);
                 return -1;
-            }
+            } /* end if */
 
             /* Select element and write value to attribute dataset */
             dims[0] = 1;

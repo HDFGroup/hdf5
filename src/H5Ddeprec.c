@@ -65,7 +65,9 @@
 /* Local Prototypes */
 /********************/
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 static herr_t H5D_extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
 /*********************/
@@ -256,6 +258,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dopen() */
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*-------------------------------------------------------------------------
  * Function:	H5Dextend
@@ -263,6 +266,8 @@ done:
  * Purpose:	This function makes sure that the dataset is at least of size
  *		SIZE. The dimensionality of SIZE is the same as the data
  *		space of the dataset being changed.
+ *
+ * Note:	Deprecated in favor of H5Dset_extent
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -377,4 +382,5 @@ H5D_extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_extend() */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 

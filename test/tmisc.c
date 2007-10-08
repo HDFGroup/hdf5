@@ -1967,15 +1967,15 @@ test_misc12(void)
     MESSAGE(5, ("Testing VL-type in chunked dataset\n"));
 
     /* This test requirese a relatively "fresh" library environment */
-    ret=H5garbage_collect();
+    ret = H5garbage_collect();
     CHECK(ret, FAIL, "H5garbage_collect");
 
     /* Create file */
-    fid1 = H5Fcreate (MISC12_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(MISC12_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create dataspace for datasets */
-    sid1 = H5Screate_simple (MISC12_SPACE1_RANK, dims1, maxdims1);
+    sid1 = H5Screate_simple(MISC12_SPACE1_RANK, dims1, maxdims1);
     CHECK(sid1, FAIL, "H5Screate_simple");
 
     /* Create a datatype to refer to */
@@ -1988,66 +1988,66 @@ test_misc12(void)
     cparms = H5Pcreate(H5P_DATASET_CREATE);
     CHECK(cparms, FAIL, "H5Pcreate");
 
-    ret = H5Pset_chunk ( cparms, 1, chkdims1);
+    ret = H5Pset_chunk(cparms, 1, chkdims1);
     CHECK(ret, FAIL, "H5Pset_chunk");
 
     /* Create a dataset */
-    dataset = H5Dcreate (fid1, MISC12_DSET_NAME, tid1, sid1, cparms);
+    dataset = H5Dcreate(fid1, MISC12_DSET_NAME, tid1, sid1, cparms);
     CHECK(dataset, FAIL, "H5Dcreate");
 
     /* Write dataset to disk */
-    ret = H5Dwrite (dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
+    ret = H5Dwrite(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Extend dataset */
-    ret = H5Dextend (dataset, newsize);
-    CHECK(ret, FAIL, "H5Dextend");
+    ret = H5Dset_extent(dataset, newsize);
+    CHECK(ret, FAIL, "H5Dset_extent");
 
-    memspace = H5Screate_simple (MISC12_SPACE1_RANK, dimsn, NULL);
+    memspace = H5Screate_simple(MISC12_SPACE1_RANK, dimsn, NULL);
     CHECK(memspace, FAIL, "H5Screate_simple");
 
-    space = H5Dget_space (dataset);
+    space = H5Dget_space(dataset);
     CHECK(space, FAIL, "H5Dget_space");
 
-    ret = H5Sselect_hyperslab (space, H5S_SELECT_SET, offset, NULL, count, NULL);
+    ret = H5Sselect_hyperslab(space, H5S_SELECT_SET, offset, NULL, count, NULL);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* Write data to new portion of dataset */
-    ret = H5Dwrite (dataset, tid1, memspace, space, H5P_DEFAULT, wdata1);
+    ret = H5Dwrite(dataset, tid1, memspace, space, H5P_DEFAULT, wdata1);
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Read all data back */
-    ret= H5Dread (dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
+    ret= H5Dread(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
     CHECK(ret, FAIL, "H5Dread");
 
-    for(i=0; i<MISC12_SPACE1_DIM1; i++)
-        if(HDstrcmp(wdata[i],rdata[i]))
-            TestErrPrintf("Error on line %d: wdata[%d]=%s, rdata[%d]=%s\n",__LINE__,i,wdata[i],i,rdata[i]);
-    for(; i<(MISC12_SPACE1_DIM1+MISC12_APPEND_SIZE); i++)
-        if(HDstrcmp(wdata1[i-MISC12_SPACE1_DIM1],rdata[i]))
-            TestErrPrintf("Error on line %d: wdata1[%d]=%s, rdata[%d]=%s\n",__LINE__,i-MISC12_SPACE1_DIM1,wdata1[i-MISC12_SPACE1_DIM1],i,rdata[i]);
+    for(i = 0; i < MISC12_SPACE1_DIM1; i++)
+        if(HDstrcmp(wdata[i], rdata[i]))
+            TestErrPrintf("Error on line %d: wdata[%d]=%s, rdata[%d]=%s\n", __LINE__, i, wdata[i], i, rdata[i]);
+    for(; i < (MISC12_SPACE1_DIM1 + MISC12_APPEND_SIZE); i++)
+        if(HDstrcmp(wdata1[i - MISC12_SPACE1_DIM1], rdata[i]))
+            TestErrPrintf("Error on line %d: wdata1[%d]=%s, rdata[%d]=%s\n", __LINE__, i - MISC12_SPACE1_DIM1, wdata1[i - MISC12_SPACE1_DIM1], i, rdata[i]);
 
-    ret = H5Sselect_all (space);
+    ret = H5Sselect_all(space);
     CHECK(ret, FAIL, "H5Sselect_all");
 
     /* Reclaim VL data memory */
-    ret = H5Dvlen_reclaim (tid1, space, H5P_DEFAULT, rdata);
+    ret = H5Dvlen_reclaim(tid1, space, H5P_DEFAULT, rdata);
     CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
     /* Close Everything */
-    ret = H5Dclose (dataset);
+    ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
-    ret = H5Tclose (tid1);
+    ret = H5Tclose(tid1);
     CHECK(ret, FAIL, "H5Tclose");
-    ret = H5Sclose (space);
+    ret = H5Sclose(space);
     CHECK(ret, FAIL, "H5Sclose");
-    ret = H5Sclose (memspace);
+    ret = H5Sclose(memspace);
     CHECK(ret, FAIL, "H5Sclose");
-    ret = H5Sclose (sid1);
+    ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
-    ret = H5Pclose (cparms);
+    ret = H5Pclose(cparms);
     CHECK(ret, FAIL, "H5Pclose");
-    ret = H5Fclose (fid1);
+    ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_misc12() */
 

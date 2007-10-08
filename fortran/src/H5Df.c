@@ -1273,7 +1273,7 @@ nh5dget_create_plist_c ( hid_t_f *dset_id , hid_t_f *plist_id)
 
 /*----------------------------------------------------------------------------
  * Name:        h5dextend_c
- * Purpose:     Call H5Dextend to extend dataset with unlimited dimensions
+ * Purpose:     Call H5Dset_extent to extend dataset with unlimited dimensions
  * Inputs:      dset_id - identifier of the dataset
  * Outputs:     dims - array with the dimension sizes
  * Returns:     0 on success, -1 on failure
@@ -1285,34 +1285,27 @@ nh5dget_create_plist_c ( hid_t_f *dset_id , hid_t_f *plist_id)
 int_f
 nh5dextend_c ( hid_t_f *dset_id , hsize_t_f *dims)
 {
-  int ret_value = -1;
-  hsize_t *c_dims;
-  int status;
+  hid_t c_space_id;
+  hsize_t c_dims[H5S_MAX_RANK];
   int rank;
   int i;
-  hid_t c_dset_id;
-  hid_t c_space_id;
+  int status;
+  int ret_value = -1;
 
-  c_dset_id = (hid_t)*dset_id;
-  c_space_id = H5Dget_space(c_dset_id);
-  if (c_space_id < 0) return ret_value;
+  if((c_space_id = H5Dget_space((hid_t)*dset_id)) < 0) return ret_value;
 
-  rank = H5Sget_simple_extent_ndims(c_space_id);
-  if (rank < 0) return ret_value;
-
-  c_dims = malloc(sizeof(hsize_t)*rank);
-  if (!c_dims) return ret_value;
+  if((rank = H5Sget_simple_extent_ndims(c_space_id)) < 0) return ret_value;
 
   /*
    * Reverse dimensions due to C-FORTRAN storage order.
    */
-  for (i=0; i < rank; i++)
+  for(i = 0; i < rank; i++)
       c_dims[i] = dims[rank - i - 1];
 
-  status = H5Dextend(c_dset_id, c_dims);
+  status = H5Dset_extent((hid_t)*dset_id, c_dims);
 
-  if ( status >= 0  ) ret_value = 0;
-  HDfree(c_dims);
+  if(status >= 0)
+      ret_value = 0;
   return ret_value;
 }
 

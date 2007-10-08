@@ -1550,7 +1550,7 @@ herr_t H5TBinsert_record( hid_t loc_id,
   goto out;
 
  read_nrecords = ntotal_records - start;
- tmp_buf = (unsigned char *)calloc((size_t) read_nrecords, type_size );
+ tmp_buf = (unsigned char *)calloc((size_t) read_nrecords, type_size);
 
  /* Read the records after the inserted one(s) */
  if(H5TBread_records( loc_id, dset_name, start, read_nrecords, type_size, field_offset,
@@ -1560,7 +1560,7 @@ herr_t H5TBinsert_record( hid_t loc_id,
  /* Extend the dataset */
  dims[0] = ntotal_records + nrecords;
 
- if(H5Dextend ( did, dims ) < 0)
+ if(H5Dset_extent(did, dims) < 0)
   goto out;
 
 /*-------------------------------------------------------------------------
@@ -1569,8 +1569,8 @@ herr_t H5TBinsert_record( hid_t loc_id,
  */
 
  /* Create a simple memory data space */
- mem_dims[0]=nrecords;
- if((mem_space_id = H5Screate_simple( 1, mem_dims, NULL )) < 0)
+ mem_dims[0] = nrecords;
+ if((mem_space_id = H5Screate_simple(1, mem_dims, NULL)) < 0)
   return -1;
 
  /* Get the file data space */
@@ -3691,16 +3691,16 @@ herr_t H5TB_common_append_records( hid_t dataset_id,
 
  /* Extend the dataset */
  dims[0] = nrecords + orig_table_size;
- if(H5Dextend ( dataset_id, dims ) < 0)
+ if(H5Dset_extent(dataset_id, dims) < 0)
   goto out;
 
  /* Create a simple memory data space */
- mem_dims[0]=nrecords;
- if((mem_space_id = H5Screate_simple( 1, mem_dims, NULL )) < 0)
+ mem_dims[0] = nrecords;
+ if((mem_space_id = H5Screate_simple(1, mem_dims, NULL)) < 0)
   goto out;
 
  /* Get a copy of the new file data space for writing */
- if((space_id = H5Dget_space( dataset_id )) < 0)
+ if((space_id = H5Dget_space(dataset_id)) < 0)
   goto out;
 
  /* Define a hyperslab in the dataset */

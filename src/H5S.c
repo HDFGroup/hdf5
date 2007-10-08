@@ -1499,70 +1499,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_extend
- *
- * Purpose:	Extend the dimensions of a data space.
- *
- * Return:	Success:	Number of dimensions whose size increased.
- *
- *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *		Friday, January 30, 1998
- *
- *-------------------------------------------------------------------------
- */
-int
-H5S_extend(H5S_t *space, const hsize_t *size)
-{
-    unsigned	u;
-    int	ret_value = 0;
-
-    FUNC_ENTER_NOAPI(H5S_extend, FAIL)
-
-    /* Check args */
-    HDassert(space && H5S_SIMPLE == H5S_GET_EXTENT_TYPE(space));
-    HDassert(size);
-
-    /* Check through all the dimensions to see if modifying the dataspace is allowed */
-    for(u = 0; u < space->extent.rank; u++) {
-        if(space->extent.size[u]<size[u]) {
-            if(space->extent.max && H5S_UNLIMITED!=space->extent.max[u] &&
-                    space->extent.max[u]<size[u])
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dimension cannot be increased")
-            ret_value++;
-        } /* end if */
-    } /* end for */
-
-    /* Update */
-    if(ret_value) {
-        hsize_t nelem;  /* Number of elements in extent */
-
-        /* Change the dataspace size & re-compute the number of elements in the extent */
-        for(u = 0, nelem = 1; u < space->extent.rank; u++) {
-            if(space->extent.size[u] < size[u])
-                space->extent.size[u] = size[u];
-
-            nelem *= space->extent.size[u];
-        } /* end for */
-        space->extent.nelem = nelem;
-
-        /* If the selection is 'all', update the number of elements selected */
-        if(H5S_GET_SELECT_TYPE(space) == H5S_SEL_ALL)
-            if(H5S_select_all(space, FALSE) < 0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
-
-        /* Mark the dataspace as no longer shared if it was before */
-        if(H5O_msg_reset_share(H5O_SDSPACE_ID, space) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRESET, FAIL, "can't stop sharing dataspace")
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5S_extend() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5Screate_simple
  *
  * Purpose:	Creates a new simple data space object and opens it for
@@ -2354,4 +2290,70 @@ H5S_set_latest_version(H5S_t *ds)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_set_latest_version() */
+
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+
+/*-------------------------------------------------------------------------
+ * Function:	H5S_extend
+ *
+ * Purpose:	Extend the dimensions of a data space.
+ *
+ * Return:	Success:	Number of dimensions whose size increased.
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *		Friday, January 30, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5S_extend(H5S_t *space, const hsize_t *size)
+{
+    unsigned	u;
+    int	ret_value = 0;
+
+    FUNC_ENTER_NOAPI(H5S_extend, FAIL)
+
+    /* Check args */
+    HDassert(space && H5S_SIMPLE == H5S_GET_EXTENT_TYPE(space));
+    HDassert(size);
+
+    /* Check through all the dimensions to see if modifying the dataspace is allowed */
+    for(u = 0; u < space->extent.rank; u++) {
+        if(space->extent.size[u]<size[u]) {
+            if(space->extent.max && H5S_UNLIMITED!=space->extent.max[u] &&
+                    space->extent.max[u]<size[u])
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dimension cannot be increased")
+            ret_value++;
+        } /* end if */
+    } /* end for */
+
+    /* Update */
+    if(ret_value) {
+        hsize_t nelem;  /* Number of elements in extent */
+
+        /* Change the dataspace size & re-compute the number of elements in the extent */
+        for(u = 0, nelem = 1; u < space->extent.rank; u++) {
+            if(space->extent.size[u] < size[u])
+                space->extent.size[u] = size[u];
+
+            nelem *= space->extent.size[u];
+        } /* end for */
+        space->extent.nelem = nelem;
+
+        /* If the selection is 'all', update the number of elements selected */
+        if(H5S_GET_SELECT_TYPE(space) == H5S_SEL_ALL)
+            if(H5S_select_all(space, FALSE) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
+
+        /* Mark the dataspace as no longer shared if it was before */
+        if(H5O_msg_reset_share(H5O_SDSPACE_ID, space) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRESET, FAIL, "can't stop sharing dataspace")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S_extend() */
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 

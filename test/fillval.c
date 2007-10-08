@@ -1569,7 +1569,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name,
     /* Extend the dataset one element in each dimension */
     for(i = 0; i < 5; i++)
         extend_size[i] = start_size[i] + 1;
-    if(H5Dextend(dset, extend_size) < 0) TEST_ERROR
+    if(H5Dset_extent(dset, extend_size) < 0) TEST_ERROR
 
     /* Re-open file dataspace */
     if(H5Sclose(fspace) < 0) TEST_ERROR
@@ -1608,7 +1608,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name,
 
 
     /* Extend the dataset to the maximum dimension sizes */
-    if(H5Dextend(dset, max_size) < 0) TEST_ERROR
+    if(H5Dset_extent(dset, max_size) < 0) TEST_ERROR
 
     /* Re-open file dataspace */
     if(H5Sclose(fspace) < 0) TEST_ERROR

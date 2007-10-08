@@ -2335,7 +2335,7 @@ test_copy_dataset_chunked_sparse(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     new_dim2d[1] = DIM_SIZE_2 * 2;
 
     /* Extend dataset's dimensions */
-    if(H5Dextend(did, new_dim2d) < 0) TEST_ERROR
+    if(H5Dset_extent(did, new_dim2d) < 0) TEST_ERROR
 
     /* close dataspace */
     if(H5Sclose(sid) < 0) TEST_ERROR

@@ -1251,7 +1251,7 @@ test_vltypes_compound_vlstr(void)
 
 
     /* Create a VL datatype of first layer compound type */
-    tid1 = H5Tvlen_create (tid5);
+    tid1 = H5Tvlen_create(tid5);
     CHECK(tid1, FAIL, "H5Tvlen_create");
 
     /* Create the base compound type */
@@ -1259,33 +1259,32 @@ test_vltypes_compound_vlstr(void)
     CHECK(tid2, FAIL, "H5Tcreate");
 
     /* Insert fields */
-    ret=H5Tinsert(tid2, "v", HOFFSET(s1, v), tid1);
+    ret = H5Tinsert(tid2, "v", HOFFSET(s1, v), tid1);
     CHECK(ret, FAIL, "H5Tinsert");
 
     /* Modify dataset creation properties, i.e. enable chunking  */
-    cparms = H5Pcreate (H5P_DATASET_CREATE);
-    ret = H5Pset_chunk ( cparms, SPACE1_RANK, chunk_dims);
+    cparms = H5Pcreate(H5P_DATASET_CREATE);
+    ret = H5Pset_chunk(cparms, SPACE1_RANK, chunk_dims);
     CHECK(ret, FAIL, "H5Pset_chunk");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",tid2,sid1,cparms);
+    dataset = H5Dcreate(fid1, "Dataset1", tid2, sid1, cparms);
     CHECK(dataset, FAIL, "H5Dcreate");
 
     /* Extend the dataset. This call assures that dataset is 4.*/
-    ret = H5Dextend (dataset, size);
-    CHECK(ret, FAIL, "H5Dextend");
+    ret = H5Dset_extent(dataset, size);
+    CHECK(ret, FAIL, "H5Dset_extent");
 
     /* Select a hyperslab  */
-    filespace = H5Dget_space (dataset);
-    ret = H5Sselect_hyperslab (filespace, H5S_SELECT_SET, offset, NULL,
-                                  dims1, NULL);
+    filespace = H5Dget_space(dataset);
+    ret = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, NULL, dims1, NULL);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* Write dataset to disk */
-    ret=H5Dwrite(dataset,tid2,sid1,filespace,H5P_DEFAULT,wdata);
+    ret = H5Dwrite(dataset, tid2, sid1, filespace, H5P_DEFAULT, wdata);
     CHECK(ret, FAIL, "H5Dwrite");
 
-    ret=H5Fflush(fid1,H5F_SCOPE_GLOBAL);
+    ret = H5Fflush(fid1, H5F_SCOPE_GLOBAL);
     CHECK(ret, FAIL, "H5Fflush");
 
     /* Close Dataset */

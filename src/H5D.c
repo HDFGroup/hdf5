@@ -3077,8 +3077,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Dset_extent
  *
- * Purpose:	Modifies the dimensions of a dataset, based on H5Dextend.
- *		Can change to a lower dimension.
+ * Purpose:	Modifies the dimensions of a dataset.
+ *		Can change to a smaller dimension.
  *
  * Return:	Non-negative on success, negative on failure
  *
@@ -3130,10 +3130,7 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
     H5S_t   *space;                     /* Dataset's dataspace */
     int     rank;	                /* Dataspace # of dimensions */
     hsize_t curr_dims[H5O_LAYOUT_NDIMS];	/* Current dimension sizes */
-    hbool_t shrink = FALSE;             /* Flag to indicate a dimension has shrank */
-    hbool_t expand = FALSE;             /* Flag to indicate a dimension has grown */
     htri_t changed;                     /* Whether the dataspace changed size */
-    unsigned u;                         /* Local index variable */
     herr_t  ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_NOAPI(H5D_set_extent, FAIL)
@@ -3142,40 +3139,44 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
     HDassert(dset);
     HDassert(size);
 
- /*-------------------------------------------------------------------------
-  * Get the data space
-  *-------------------------------------------------------------------------
-  */
+    /*-------------------------------------------------------------------------
+     * Get the data space
+     *-------------------------------------------------------------------------
+     */
     space = dset->shared->space;
 
- /*-------------------------------------------------------------------------
-  * Check if we are shrinking or expanding any of the dimensions
-  *-------------------------------------------------------------------------
-  */
+    /*-------------------------------------------------------------------------
+     * Check if we are shrinking or expanding any of the dimensions
+     *-------------------------------------------------------------------------
+     */
     if((rank = H5S_get_simple_extent_dims(space, curr_dims, NULL)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions")
 
-    /* Determine if we are shrinking and/or expanding any dimensions */
-    for(u = 0; u < (unsigned)rank; u++) {
-	if(size[u] < curr_dims[u])
-	    shrink = TRUE;
-	if(size[u] > curr_dims[u])
-	    expand = TRUE;
-    } /* end for */
-
- /*-------------------------------------------------------------------------
-  * Modify the size of the data space
-  *-------------------------------------------------------------------------
-  */
+    /*-------------------------------------------------------------------------
+     * Modify the size of the data space
+     *-------------------------------------------------------------------------
+     */
     if((changed = H5S_set_extent(space, size)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space")
 
     /* Don't bother updating things, unless they've changed */
     if(changed) {
-     /*-------------------------------------------------------------------------
-      * Modify the dataset storage
-      *-------------------------------------------------------------------------
-      */
+        hbool_t shrink = FALSE;             /* Flag to indicate a dimension has shrank */
+        hbool_t expand = FALSE;             /* Flag to indicate a dimension has grown */
+        unsigned u;                         /* Local index variable */
+
+        /* Determine if we are shrinking and/or expanding any dimensions */
+        for(u = 0; u < (unsigned)rank; u++) {
+            if(size[u] < curr_dims[u])
+                shrink = TRUE;
+            if(size[u] > curr_dims[u])
+                expand = TRUE;
+        } /* end for */
+
+        /*-------------------------------------------------------------------------
+         * Modify the dataset storage
+         *-------------------------------------------------------------------------
+         */
         /* Save the new dataspace in the file if necessary */
         if(H5S_write(&(dset->oloc), space, TRUE, dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update file with new dataspace")
@@ -3191,11 +3192,11 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset storage")
 
 
-     /*-------------------------------------------------------------------------
-      * Remove chunk information in the case of chunked datasets
-      * This removal takes place only in case we are shrinking the dateset
-      *-------------------------------------------------------------------------
-      */
+        /*-------------------------------------------------------------------------
+         * Remove chunk information in the case of chunked datasets
+         * This removal takes place only in case we are shrinking the dateset
+         *-------------------------------------------------------------------------
+         */
         if(shrink && H5D_CHUNKED == dset->shared->layout.type) {
             H5D_io_info_t io_info;              /* Dataset I/O info */
             H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */

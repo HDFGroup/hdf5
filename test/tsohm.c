@@ -3267,8 +3267,8 @@ test_sohm_extend_dset_helper(hid_t fcpl_id, hbool_t close_reopen)
     }
 
     /* Extend the first dataset */
-    ret = H5Dextend(dset1_id, dims2);
-    CHECK_I(ret, "H5Dextend");
+    ret = H5Dset_extent(dset1_id, dims2);
+    CHECK_I(ret, "H5Dset_extent");
     if(close_reopen) {
         /* If requested, close all open IDs and reopen them */
         ret = H5Dclose(dset1_id);
@@ -3329,8 +3329,8 @@ test_sohm_extend_dset_helper(hid_t fcpl_id, hbool_t close_reopen)
     CHECK_I(ret, "H5Sclose");
 
     /* Extend the second dataset */
-    ret = H5Dextend(dset2_id, dims2);
-    CHECK_I(ret, "H5Dextend");
+    ret = H5Dset_extent(dset2_id, dims2);
+    CHECK_I(ret, "H5Dset_extent");
     if(close_reopen) {
         /* If requested, close all open IDs and reopen them */
         ret = H5Dclose(dset1_id);
@@ -3391,8 +3391,8 @@ test_sohm_extend_dset_helper(hid_t fcpl_id, hbool_t close_reopen)
     CHECK_I(ret, "H5Sclose");
 
     /* Extend the third dataset */
-    ret = H5Dextend(dset3_id, dims2);
-    CHECK_I(ret, "H5Dextend");
+    ret = H5Dset_extent(dset3_id, dims2);
+    CHECK_I(ret, "H5Dset_extent");
     if(close_reopen) {
         /* If requested, close all open IDs and reopen them */
         ret = H5Dclose(dset1_id);
@@ -3486,8 +3486,8 @@ test_sohm_extend_dset_helper(hid_t fcpl_id, hbool_t close_reopen)
     }
 
     /* Extend the first dataset */
-    ret = H5Dextend(dset1_id, dims2);
-    CHECK_I(ret, "H5Dextend");
+    ret = H5Dset_extent(dset1_id, dims2);
+    CHECK_I(ret, "H5Dset_extent");
     if(close_reopen) {
         /* If requested, close all open IDs and reopen them */
         ret = H5Dclose(dset1_id);
@@ -3524,8 +3524,8 @@ test_sohm_extend_dset_helper(hid_t fcpl_id, hbool_t close_reopen)
     }
 
     /* Extend the second dataset */
-    ret = H5Dextend(dset2_id, dims2);
-    CHECK_I(ret, "H5Dextend");
+    ret = H5Dset_extent(dset2_id, dims2);
+    CHECK_I(ret, "H5Dset_extent");
     if(close_reopen) {
         /* If requested, close all open IDs and reopen them */
         ret = H5Dclose(dset1_id);
@@ -3570,8 +3570,8 @@ test_sohm_extend_dset_helper(hid_t fcpl_id, hbool_t close_reopen)
     }
 
     /* Extend the third dataset */
-    ret = H5Dextend(dset3_id, dims2);
-    CHECK_I(ret, "H5Dextend");
+    ret = H5Dset_extent(dset3_id, dims2);
+    CHECK_I(ret, "H5Dset_extent");
     if(close_reopen) {
         /* If requested, close all open IDs and reopen them */
         ret = H5Dclose(dset1_id);

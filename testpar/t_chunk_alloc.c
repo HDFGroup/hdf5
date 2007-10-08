@@ -290,7 +290,7 @@ parallel_access_dataset(const char *filename, int nchunks, access_type action, h
         /* only extends the dataset */
         case extend_only:
             /* Extend dataset*/
-            hrc = H5Dextend(*dataset, size);
+            hrc = H5Dset_extent(*dataset, size);
             VRFY((hrc >= 0), "");
 
             break;

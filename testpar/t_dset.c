@@ -1238,8 +1238,8 @@ extend_writeInd(void)
     /* Extend its current dim sizes before writing */
     dims[0] = dim0;
     dims[1] = dim1;
-    ret = H5Dextend (dataset1, dims);
-    VRFY((ret >= 0), "H5Dextend succeeded");
+    ret = H5Dset_extent(dataset1, dims);
+    VRFY((ret >= 0), "H5Dset_extent succeeded");
 
     /* create a file dataspace independently */
     file_dataspace = H5Dget_space (dataset1);
@@ -1298,8 +1298,8 @@ extend_writeInd(void)
     /* Extend dataset2 and try again.  Should succeed. */
     dims[0] = dim0;
     dims[1] = dim1;
-    ret = H5Dextend (dataset2, dims);
-    VRFY((ret >= 0), "H5Dextend succeeded");
+    ret = H5Dset_extent(dataset2, dims);
+    VRFY((ret >= 0), "H5Dset_extent succeeded");
 
     /* create a file dataspace independently */
     file_dataspace = H5Dget_space (dataset2);
@@ -1448,9 +1448,9 @@ extend_writeInd2(void)
     /* -------------------------
      * Extend the dataset & retrieve new dataspace
      * -------------------------*/
-    ret =H5Dextend(dataset, &new_size);
-    VRFY((ret >= 0), "H5Dextend succeeded");
-    ret=H5Sclose(fs);
+    ret = H5Dset_extent(dataset, &new_size);
+    VRFY((ret >= 0), "H5Dset_extent succeeded");
+    ret = H5Sclose(fs);
     VRFY((ret >= 0), "H5Sclose succeeded");
     fs = H5Dget_space(dataset);
     VRFY((fs >= 0), "H5Dget_space succeeded");
@@ -1572,11 +1572,11 @@ extend_readInd(void)
 
     file_dataspace = H5Dget_space (dataset1);
     VRFY((file_dataspace >= 0), "H5Dget_space succeeded");
-    ret=H5Sget_simple_extent_dims(file_dataspace, dims, NULL);
+    ret = H5Sget_simple_extent_dims(file_dataspace, dims, NULL);
     VRFY((ret > 0), "H5Sget_simple_extent_dims succeeded");
     dims[0]++;
-    ret=H5Dextend(dataset1, dims);
-    VRFY((ret < 0), "H5Dextend failed as expected");
+    ret = H5Dset_extent(dataset1, dims);
+    VRFY((ret < 0), "H5Dset_extent failed as expected");
 
     /* restore auto error reporting */
     H5Eset_auto2(H5E_DEFAULT, old_func, old_client_data);
@@ -1812,8 +1812,8 @@ extend_writeAll(void)
     /* Extend its current dim sizes before writing */
     dims[0] = dim0;
     dims[1] = dim1;
-    ret = H5Dextend (dataset1, dims);
-    VRFY((ret >= 0), "H5Dextend succeeded");
+    ret = H5Dset_extent(dataset1, dims);
+    VRFY((ret >= 0), "H5Dset_extent succeeded");
 
     /* create a file dataspace independently */
     file_dataspace = H5Dget_space (dataset1);
@@ -1895,8 +1895,8 @@ extend_writeAll(void)
     /* Extend dataset2 and try again.  Should succeed. */
     dims[0] = dim0;
     dims[1] = dim1;
-    ret = H5Dextend (dataset2, dims);
-    VRFY((ret >= 0), "H5Dextend succeeded");
+    ret = H5Dset_extent(dataset2, dims);
+    VRFY((ret >= 0), "H5Dset_extent succeeded");
 
     /* create a file dataspace independently */
     file_dataspace = H5Dget_space (dataset2);
@@ -2004,11 +2004,11 @@ extend_readAll(void)
 
     file_dataspace = H5Dget_space (dataset1);
     VRFY((file_dataspace >= 0), "H5Dget_space succeeded");
-    ret=H5Sget_simple_extent_dims(file_dataspace, dims, NULL);
+    ret = H5Sget_simple_extent_dims(file_dataspace, dims, NULL);
     VRFY((ret > 0), "H5Sget_simple_extent_dims succeeded");
     dims[0]++;
-    ret=H5Dextend(dataset1, dims);
-    VRFY((ret < 0), "H5Dextend failed as expected");
+    ret = H5Dset_extent(dataset1, dims);
+    VRFY((ret < 0), "H5Dset_extent failed as expected");
 
     /* restore auto error reporting */
     H5Eset_auto2(H5E_DEFAULT, old_func, old_client_data);

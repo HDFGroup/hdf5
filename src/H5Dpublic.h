@@ -124,7 +124,23 @@ H5_DLL herr_t H5Ddebug(hid_t dset_id);
 H5_DLL hid_t H5Dcreate(hid_t file_id, const char *name, hid_t type_id,
     hid_t space_id, hid_t plist_id);
 H5_DLL hid_t H5Dopen(hid_t file_id, const char *name);
+
+/* Symbols defined for compatibility with previous versions of the HDF5 API.
+ * 
+ * Use of these symbols is deprecated.
+ */
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+
+/* Macros */
+
+
+/* Typedefs */
+
+
+/* Function prototypes */
 H5_DLL herr_t H5Dextend(hid_t dset_id, const hsize_t *size);
+
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 #ifdef __cplusplus
 }

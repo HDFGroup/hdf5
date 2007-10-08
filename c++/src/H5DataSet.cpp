@@ -405,11 +405,9 @@ int DataSet::iterateElems( void* buf, const DataType& type, const DataSpace& spa
 //--------------------------------------------------------------------------
 void DataSet::extend( const hsize_t* size ) const
 {
-   herr_t ret_value = H5Dextend( id, size );
-   if( ret_value < 0 )  // raise exception when H5Dextend returns a neg value
-   {
-      throw DataSetIException("DataSet::extend", "H5Dextend failed");
-   }
+   herr_t ret_value = H5Dset_extent( id, size );
+   if( ret_value < 0 )  // raise exception when H5Dset_extent returns a neg value
+      throw DataSetIException("DataSet::extend", "H5Dset_extent failed");
 }
 
 //--------------------------------------------------------------------------
