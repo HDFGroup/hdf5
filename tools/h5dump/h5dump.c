@@ -2010,13 +2010,6 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
         d_status = EXIT_FAILURE;
     }
 
-    if(H5Pclose(dcpl_id) < 0) {
-        error_msg(progname, "error in closing creation property list ID\n");
-        d_status = EXIT_FAILURE;
-    }
-
-
-
     indentation(indent);
     begin_obj(dump_header_format->datasetbegin, name,
             dump_header_format->datasetblockbegin);
@@ -2031,13 +2024,8 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
     if(display_oid)
         dump_oid(did);
 
-    if(display_dcpl) {
-        hid_t   dcpl_id;
-
-        dcpl_id = H5Dget_create_plist(did);
+    if(display_dcpl) 
         dump_dcpl(dcpl_id, type, did);
-        H5Pclose(dcpl_id);
-    } /* end if */
 
     if(display_data)
         switch(H5Tget_class(type)) {
@@ -2077,6 +2065,8 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
 
     H5Tclose(type);
     H5Sclose(space);
+    H5Pclose(dcpl_id);
+
 
     indentation(indent);
     end_obj(dump_header_format->datasetend,dump_header_format->datasetblockend);
@@ -2997,14 +2987,14 @@ set_binary_form(const char *form)
 static H5_index_t
 set_sort_by(const char *form)
 {
- H5_index_t index = H5_INDEX_UNKNOWN;
+ H5_index_t idx_type = H5_INDEX_UNKNOWN;
 
  if (strcmp(form,"name")==0) /* H5_INDEX_NAME */
-  index = H5_INDEX_NAME;
+  idx_type = H5_INDEX_NAME;
  else if (strcmp(form,"creation_order")==0) /* H5_INDEX_CRT_ORDER */
-  index = H5_INDEX_CRT_ORDER;
+  idx_type = H5_INDEX_CRT_ORDER;
 
- return index;
+ return idx_type;
 }
 
 
