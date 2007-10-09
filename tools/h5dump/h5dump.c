@@ -1771,25 +1771,56 @@ done:
  *-------------------------------------------------------------------------
  */
 static void
-dump_named_datatype(hid_t type, const char *name)
+dump_named_datatype(hid_t tid, const char *name)
 {
+
+    unsigned  attr_crt_order_flags;
+    hid_t     tcpl_id;  /* datatype creation property list ID */
+    
+    
+    if ((tcpl_id = H5Tget_create_plist(tid)) < 0)
+    {
+        error_msg(progname, "error in getting creation property list ID\n");
+        d_status = EXIT_FAILURE;
+    }
+    
+    /* query the creation properties for attributes */
+    if (H5Pget_attr_creation_order(tcpl_id, &attr_crt_order_flags) < 0) 
+    {
+        error_msg(progname, "error in getting creation properties\n");
+        d_status = EXIT_FAILURE;
+    }
+    
+    if(H5Pclose(tcpl_id) < 0) {
+        error_msg(progname, "error in closing creation property list ID\n");
+        d_status = EXIT_FAILURE;
+    }
+
+
     indentation(indent);
     printf("%s \"%s\" %s", dump_header_format->datatypebegin, name,
             dump_header_format->datatypeblockbegin);
 
-    if(H5Tget_class(type) == H5T_COMPOUND)
-        print_datatype(type, 1);
+    if(H5Tget_class(tid) == H5T_COMPOUND)
+        print_datatype(tid, 1);
     else {
         indentation(indent + COL);
-        print_datatype(type, 1);
+        print_datatype(tid, 1);
         printf(";\n");
     } /* end else */
 
     /* print attributes */
     indent += COL;
-    H5Aiterate2(type, ".", sort_by, sort_order, NULL, dump_attr_cb, NULL, H5P_DEFAULT);
-    indent -= COL;
 
+    /* attribute iteration: if there is a request to do H5_INDEX_CRT_ORDER and tracking order is set
+      in the datatype's create property list for attributes, then, sort by creation order, otherwise by name */
+    
+    if( (sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED))
+        H5Aiterate2(tid, ".", sort_by, sort_order, NULL, dump_attr_cb, NULL, H5P_DEFAULT);
+    else
+        H5Aiterate2(tid, ".", H5_INDEX_NAME, sort_order, NULL, dump_attr_cb, NULL, H5P_DEFAULT);
+
+    indent -= COL;
     end_obj(dump_header_format->datatypeend,
             dump_header_format->datatypeblockend);
 }
