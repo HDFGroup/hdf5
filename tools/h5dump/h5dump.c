@@ -5297,6 +5297,8 @@ xml_dump_named_datatype(hid_t type, const char *name)
  * Programmer:  REMcG
  *
  * Modifications:
+ *  Pedro Vicente, October 9, 2007
+ *   added parameters to H5A(L)iterate to allow for other iteration orders 
  *
  *-------------------------------------------------------------------------
  */
@@ -5309,9 +5311,38 @@ xml_dump_group(hid_t gid, const char *name)
     char                    type_name[1024], *tmp = NULL;
     char                   *par = NULL;
     int                     isRoot = 0;
-    char *ptrstr;
-    char *t_objname;
-    char *par_name;
+    char                   *ptrstr;
+    char                   *t_objname;
+    char                   *par_name;
+    unsigned                crt_order_flags;
+    unsigned                attr_crt_order_flags;
+    hid_t                   gcpl_id;
+
+
+    if ((gcpl_id = H5Gget_create_plist(gid)) < 0)
+    {
+        error_msg(progname, "error in getting group creation property list ID\n");
+        d_status = EXIT_FAILURE;
+    }
+    
+    /* query the group creation properties for attributes */
+    if (H5Pget_attr_creation_order(gcpl_id, &attr_crt_order_flags) < 0) 
+    {
+        error_msg(progname, "error in getting group creation properties\n");
+        d_status = EXIT_FAILURE;
+    }
+
+    /* query the group creation properties */
+    if(H5Pget_link_creation_order(gcpl_id, &crt_order_flags) < 0) 
+    {
+        error_msg(progname, "error in getting group creation properties\n");
+        d_status = EXIT_FAILURE;
+    }
+    
+    if(H5Pclose(gcpl_id) < 0) {
+        error_msg(progname, "error in closing group creation property list ID\n");
+        d_status = EXIT_FAILURE;
+    }
 
     if(HDstrcmp(name, "/") == 0) {
         isRoot = 1;
@@ -5404,8 +5435,11 @@ xml_dump_group(hid_t gid, const char *name)
                 found_obj->displayed = TRUE;
 
                 /* 1.  do all the attributes of the group */
-                H5Aiterate2(gid, ".", H5_INDEX_NAME, H5_ITER_INC, NULL,
-                           dump_function_table->dump_attribute_function, NULL, H5P_DEFAULT);
+               
+                if( (sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED))
+                    H5Aiterate2(gid, ".", sort_by, sort_order, NULL, dump_function_table->dump_attribute_function, NULL, H5P_DEFAULT);
+                else
+                    H5Aiterate2(gid, ".", H5_INDEX_NAME, sort_order, NULL, dump_function_table->dump_attribute_function, NULL, H5P_DEFAULT);
 
                 if(isRoot && unamedtype) {
                     unsigned u;
@@ -5424,7 +5458,13 @@ xml_dump_group(hid_t gid, const char *name)
                 }
 
                 /* iterate through all the links */
-                H5Literate(gid, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, dump_all_cb, NULL, H5P_DEFAULT);
+
+                if( (sort_by == H5_INDEX_CRT_ORDER) && (crt_order_flags & H5P_CRT_ORDER_TRACKED))
+                    H5Literate(gid, ".", sort_by, sort_order, NULL, dump_all_cb, NULL, H5P_DEFAULT);
+                else
+                    H5Literate(gid, ".", H5_INDEX_NAME, sort_order, NULL, dump_all_cb, NULL, H5P_DEFAULT);
+
+
             }
             free(t_name);
             free(grpxid);
@@ -5459,7 +5499,12 @@ xml_dump_group(hid_t gid, const char *name)
         free(parentxid);
 
         /* 1.  do all the attributes of the group */
-        H5Aiterate2(gid, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, dump_function_table->dump_attribute_function, NULL, H5P_DEFAULT);
+        
+        if( (sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED))
+            H5Aiterate2(gid, ".", sort_by, sort_order, NULL, dump_function_table->dump_attribute_function, NULL, H5P_DEFAULT);
+        else
+            H5Aiterate2(gid, ".", H5_INDEX_NAME, sort_order, NULL, dump_function_table->dump_attribute_function, NULL, H5P_DEFAULT);
+
 
         if(isRoot && unamedtype) {
             unsigned u;
@@ -5478,7 +5523,11 @@ xml_dump_group(hid_t gid, const char *name)
         }
 
         /* iterate through all the links */
-        H5Literate(gid, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, dump_all_cb, NULL, H5P_DEFAULT);
+
+        if( (sort_by == H5_INDEX_CRT_ORDER) && (crt_order_flags & H5P_CRT_ORDER_TRACKED))
+            H5Literate(gid, ".", sort_by, sort_order, NULL, dump_all_cb, NULL, H5P_DEFAULT);
+        else
+            H5Literate(gid, ".", H5_INDEX_NAME, sort_order, NULL, dump_all_cb, NULL, H5P_DEFAULT);
     }
 
     indent -= COL;
@@ -5928,6 +5977,8 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
  * Programmer:  REMcG
  *
  * Modifications:
+ *  Pedro Vicente, October 9, 2007
+ *   added parameters to H5Aiterate2 to allow for other iteration orders 
  *
  *-------------------------------------------------------------------------
  */
@@ -5946,6 +5997,7 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t UNUSED * sset)
     hsize_t                 tempi;
     char                   *tmp;
     char                   *t_name, *t_tmp, *t_prefix;
+    unsigned                attr_crt_order_flags;
     char *rstr = HDmalloc(100);
     char *pstr = HDmalloc(100);
 
@@ -5974,6 +6026,9 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t UNUSED * sset)
     dcpl = H5Dget_create_plist(did);
     type = H5Dget_type(did);
     space = H5Dget_space(did);
+
+     /* query the creation properties for attributes */
+    H5Pget_attr_creation_order(dcpl, &attr_crt_order_flags);
 
     /* Print information about storage layout */
     if(H5D_CHUNKED == H5Pget_layout(dcpl)) {
@@ -6108,7 +6163,12 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t UNUSED * sset)
     dump_function_table->dump_datatype_function(type);
 
     indent += COL;
-    H5Aiterate2(did, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, dump_function_table->dump_attribute_function, NULL, H5P_DEFAULT);
+
+    if( (sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED))
+        H5Aiterate2(did, ".", sort_by, sort_order, NULL, dump_function_table->dump_attribute_function, NULL, H5P_DEFAULT);
+    else
+        H5Aiterate2(did, ".", H5_INDEX_NAME, sort_order, NULL, dump_function_table->dump_attribute_function, NULL, H5P_DEFAULT);
+
     indent -= COL;
     tempi = H5Dget_storage_size(did);
 
