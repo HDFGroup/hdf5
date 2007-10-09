@@ -1905,11 +1905,10 @@ dump_group(hid_t gid, const char *name)
             /* if there is a request to do H5_INDEX_CRT_ORDER and tracking order is set
                in the group, then, sort by creation order, otherwise by name */
             
-            if( (sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED))
+            if( (sort_by == H5_INDEX_CRT_ORDER) && (crt_order_flags & H5P_CRT_ORDER_TRACKED))
                 H5Literate(gid, ".", sort_by, sort_order, NULL, dump_all_cb, NULL, H5P_DEFAULT);
             else
                 H5Literate(gid, ".", H5_INDEX_NAME, sort_order, NULL, dump_all_cb, NULL, H5P_DEFAULT);
-            
 
         }
     } 
@@ -1924,7 +1923,7 @@ dump_group(hid_t gid, const char *name)
         if( (sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED))
             H5Aiterate2(gid, ".", sort_by, sort_order, NULL, dump_attr_cb, NULL, H5P_DEFAULT);
         else
-            H5Aiterate2(gid, ".", H5_INDEX_NAME, sort_order, NULL, dump_attr_cb, NULL, H5P_DEFAULT);
+            H5Aiterate2(gid, ".", H5_INDEX_NAME, sort_order, NULL, dump_attr_cb, NULL, H5P_DEFAULT); 
 
          /* if there is a request to do H5_INDEX_CRT_ORDER and tracking order is set
             in the group, then, sort by creation order, otherwise by name */
@@ -1932,7 +1931,7 @@ dump_group(hid_t gid, const char *name)
          if( (sort_by == H5_INDEX_CRT_ORDER) && (crt_order_flags & H5P_CRT_ORDER_TRACKED))
             H5Literate(gid, ".", sort_by, sort_order, NULL, dump_all_cb, NULL, H5P_DEFAULT);
         else
-            H5Literate(gid, ".", H5_INDEX_NAME, sort_order, NULL, dump_all_cb, NULL, H5P_DEFAULT);
+            H5Literate(gid, ".", H5_INDEX_NAME, sort_order, NULL, dump_all_cb, NULL, H5P_DEFAULT); 
 
         
     }
@@ -1962,7 +1961,30 @@ dump_group(hid_t gid, const char *name)
 static void
 dump_dataset(hid_t did, const char *name, struct subset_t *sset)
 {
-    hid_t   type, space;
+    hid_t       type, space;
+    unsigned    attr_crt_order_flags;
+    hid_t       dcpl_id;  /* dataset creation property list ID */
+
+
+    if ((dcpl_id = H5Dget_create_plist(did)) < 0)
+    {
+        error_msg(progname, "error in getting creation property list ID\n");
+        d_status = EXIT_FAILURE;
+    }
+    
+    /* query the creation properties for attributes */
+    if (H5Pget_attr_creation_order(dcpl_id, &attr_crt_order_flags) < 0) 
+    {
+        error_msg(progname, "error in getting creation properties\n");
+        d_status = EXIT_FAILURE;
+    }
+
+    if(H5Pclose(dcpl_id) < 0) {
+        error_msg(progname, "error in closing creation property list ID\n");
+        d_status = EXIT_FAILURE;
+    }
+
+
 
     indentation(indent);
     begin_obj(dump_header_format->datasetbegin, name,
@@ -2012,7 +2034,13 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
 
     indent += COL;
 
-    H5Aiterate2(did, ".", sort_by, sort_order, NULL, dump_attr_cb, NULL, H5P_DEFAULT);
+    /* attribute iteration: if there is a request to do H5_INDEX_CRT_ORDER and tracking order is set
+    in the group for attributes, then, sort by creation order, otherwise by name */
+    
+    if( (sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED))
+        H5Aiterate2(did, ".", sort_by, sort_order, NULL, dump_attr_cb, NULL, H5P_DEFAULT);
+    else
+        H5Aiterate2(did, ".", H5_INDEX_NAME, sort_order, NULL, dump_attr_cb, NULL, H5P_DEFAULT);
 
     indent -= COL;
 
