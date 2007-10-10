@@ -27,10 +27,10 @@
  * Function: H5DSset_scale
  *
  * Purpose: The dataset DSID is converted to a Dimension Scale dataset.
-	*   Creates the CLASS attribute, set to the value "DIMENSION_SCALE"
-	*   and an empty REFERENCE_LIST attribute.
+ *   Creates the CLASS attribute, set to the value "DIMENSION_SCALE"
+ *   and an empty REFERENCE_LIST attribute.
  *   If DIMNAME is specified, then an attribute called NAME is created,
-	*   with the value DIMNAME.
+ *   with the value DIMNAME.
  *
  * Return: Success: SUCCEED, Failure: FAIL
  *
@@ -97,14 +97,14 @@ herr_t H5DSset_scale(hid_t dsid,
  * Function: H5DSattach_scale
  *
  * Purpose: Define Dimension Scale DSID to be associated with dimension IDX
-	*  of Dataset DID. Entries are created in the DIMENSION_LIST and
-	*  REFERENCE_LIST attributes.
+ *  of Dataset DID. Entries are created in the DIMENSION_LIST and
+ *  REFERENCE_LIST attributes.
  *
  * Return:
  *   Success: SUCCEED
  *   Failure: FAIL
-	*
-	* Fails if: Bad arguments
+ *
+ * Fails if: Bad arguments
  *           If DSID is not a Dimension Scale
  *           If DID is a Dimension Scale (A Dimension Scale cannot have scales)
  *
@@ -555,19 +555,19 @@ out:
  * Function: H5DSdetach_scale
  *
  * Purpose: If possible, deletes association of Dimension Scale DSID with
-	*     dimension IDX of Dataset DID. This deletes the entries in the
-	*     DIMENSION_LIST and REFERENCE_LIST attributes.
+ *     dimension IDX of Dataset DID. This deletes the entries in the
+ *     DIMENSION_LIST and REFERENCE_LIST attributes.
  *
  * Return:
  *   Success: SUCCEED
  *   Failure: FAIL
-	*
-	* Fails if: Bad arguments
+ *
+ * Fails if: Bad arguments
  *           The dataset DID or DSID do not exist.
  *           The DSID is not a Dimension Scale
  *           DSID is not attached to DID.
  * Note that a scale may be associated with more than dimension of the same dataset.
-	* If so, the detach operation only deletes one of the associations, for DID.
+ * If so, the detach operation only deletes one of the associations, for DID.
  *
  * Programmer: pvn@ncsa.uiuc.edu
  *
@@ -588,7 +588,7 @@ herr_t H5DSdetach_scale(hid_t did,
  int        has_reflist;
  hssize_t   nelmts;
  hid_t      dsid_j;       /* DS dataset ID in DIMENSION_LIST */
-	hid_t      did_i;        /* dataset ID in REFERENCE_LIST */
+    hid_t      did_i;        /* dataset ID in REFERENCE_LIST */
  hid_t      sid;          /* space ID */
  hid_t      tid = -1;     /* attribute type ID */
  hid_t      aid = -1;     /* attribute ID */
@@ -921,8 +921,8 @@ out:
  *   1: both the DS and the dataset pointers match
  *   0: one of them or both do not match
  *   FAIL (-1): error
-	*
-	* Fails if: Bad arguments
+ *
+ * Fails if: Bad arguments
  *           If DSID is not a Dimension Scale
  *           If DID is a Dimension Scale (A Dimension Scale cannot have scales)
  *
@@ -952,7 +952,7 @@ htri_t H5DSis_attached(hid_t did,
  hobj_ref_t ref;          /* reference to the DS */
  hvl_t      *buf;         /* VL buffer to store in the attribute */
  hid_t      dsid_j;       /* DS dataset ID in DIMENSION_LIST */
-	hid_t      did_i;        /* dataset ID in REFERENCE_LIST */
+    hid_t      did_i;        /* dataset ID in REFERENCE_LIST */
  H5O_info_t oi1, oi2, oi3, oi4;
  H5I_type_t it1, it2;
  int        i;
@@ -1194,7 +1194,7 @@ out:
  *  hid_t DID;               IN: the dataset
  *  unsigned int dim;        IN: the dimension of the dataset
  *  int *idx;                IN/OUT: input the index to start iterating, output the
-	*                             next index to visit. If NULL, start at the first position.
+ *                             next index to visit. If NULL, start at the first position.
  *  H5DS_iterate_t visitor;  IN: the visitor function
  *  void *visitor_data;      IN: arbitrary data to pass to the visitor function.
  *
