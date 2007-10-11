@@ -87,7 +87,7 @@ main(void)
     /*
      * Create the dataset.
      */
-    dataset = H5Dcreate(file, DATASETNAME, s1_tid, space, H5P_DEFAULT);
+    dataset = H5Dcreate2(file, DATASETNAME, s1_tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
      * Wtite data to the dataset;

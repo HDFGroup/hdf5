@@ -76,7 +76,7 @@ rsrv_heap(void)
         sprintf(dset_name, "Dset %d", i);
 
         H5E_BEGIN_TRY {
-            dataset_id = H5Dcreate(file_id, dset_name, H5T_NATIVE_INT, dataspace_id, H5P_DEFAULT);
+            dataset_id = H5Dcreate2(file_id, dset_name, H5T_NATIVE_INT, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         } H5E_END_TRY
 
         if(dataset_id < 0)
@@ -174,28 +174,27 @@ rsrv_ohdr(void)
 
     fcpl = H5Pcreate(H5P_FILE_CREATE);
     if(fcpl < 0) TEST_ERROR;
-    if( H5Pset_sizes(fcpl, (size_t)2,(size_t)2) < 0) TEST_ERROR;
+    if(H5Pset_sizes(fcpl, (size_t)2,(size_t)2) < 0) TEST_ERROR;
 
     file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
-    if( file_id < 0) TEST_ERROR;
+    if(file_id < 0) TEST_ERROR;
 
     /* Create the data space for the dataset. */
     dims[0] = 4;
     dims[1] = 6;
     dataspace_id = H5Screate_simple(2, dims, NULL);
-    if( dataspace_id < 0) TEST_ERROR;
+    if(dataspace_id < 0) TEST_ERROR;
 
     /* Create the dataset. */
-    dataset_id = H5Dcreate(file_id, "/dset", H5T_STD_I32BE, dataspace_id, H5P_DEFAULT);
-    if( dataset_id < 0) TEST_ERROR;
+    dataset_id = H5Dcreate2(file_id, "/dset", H5T_STD_I32BE, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if(dataset_id < 0) TEST_ERROR;
 
-    for(i=0; i<6; i++)
-    {
+    for(i = 0; i < 6; i++) {
         attrval[0][i] = 0;
         attrval[1][i] = 1;
         attrval[2][i] = 2;
         attrval[3][i] = 3;
-    }
+    } /* end for */
 
     for(i = 0; i < 2000; i++) {
         sprintf(attrname, "attr %d", i);
@@ -208,7 +207,7 @@ rsrv_ohdr(void)
 
         if(status < 0)
             break;
-    }
+    } /* end for */
 
     /* The loop should have broken before completing--the file should not have had
      * enough address space to hold 2000 attributes (or this test needs to be updated
@@ -302,43 +301,41 @@ rsrv_vlen(void)
 
     /* Make file address space very small */
     fcpl = H5Pcreate(H5P_FILE_CREATE);
-    if( fcpl < 0) TEST_ERROR;
-    if( H5Pset_sizes(fcpl, (size_t)2,(size_t)2) < 0) TEST_ERROR;
+    if(fcpl < 0) TEST_ERROR;
+    if(H5Pset_sizes(fcpl, (size_t)2,(size_t)2) < 0) TEST_ERROR;
 
     file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
-    if( file_id < 0) TEST_ERROR;
+    if(file_id < 0) TEST_ERROR;
 
     /* Create the data space for the dataset. */
     dims[0] = 2000;
     dataspace_id = H5Screate_simple(1, dims, NULL);
-    if( dataspace_id < 0) TEST_ERROR;
+    if(dataspace_id < 0) TEST_ERROR;
 
     /* Create a variable length type */
     type_id = H5Tvlen_create(H5T_NATIVE_INT);
-    if( type_id < 0) TEST_ERROR;
+    if(type_id < 0) TEST_ERROR;
 
     /* Create the dataset. */
-    dataset_id = H5Dcreate(file_id, "/dset", type_id, dataspace_id, H5P_DEFAULT);
-    if( dataset_id < 0) TEST_ERROR;
+    dataset_id = H5Dcreate2(file_id, "/dset", type_id, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if(dataset_id < 0) TEST_ERROR;
 
     /* Create some data to write */
-    for (i = 0; i < 20; i++)
-        write_buf[i] = i+1;
+    for(i = 0; i < 20; i++)
+        write_buf[i] = i + 1;
     vlen_data.p = write_buf;
 
     /* Create a memory dataspace for writing */
     dims[0] = 1;
     mem_space_id = H5Screate_simple(1, dims, NULL);
-    if( mem_space_id < 0) TEST_ERROR;
+    if(mem_space_id < 0) TEST_ERROR;
 
     /* Create a selection to write to */
     start[0] = 0;
     count[0] = 1;
-    if( H5Sselect_hyperslab(dataspace_id, H5S_SELECT_SET,
-                            start, NULL, count, NULL)  < 0) TEST_ERROR;
+    if(H5Sselect_hyperslab(dataspace_id, H5S_SELECT_SET, start, NULL, count, NULL)  < 0) TEST_ERROR;
 
-    for (i = 0; i< 2000; i++)
-    {
+    for(i = 0; i< 2000; i++) {
         vlen_data.len = (i%20) + 1;
 
         offset[0] = i;
@@ -350,7 +347,7 @@ rsrv_vlen(void)
 
         if(status < 0)
             break;
-    }
+    } /* end for */
 
     /* The loop should have broken before completing--the file should not have had
      * enough address space to hold 2000 attributes (or this test needs to be updated!).

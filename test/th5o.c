@@ -77,8 +77,8 @@ test_h5o_open(void)
     CHECK(dspace, FAIL, "H5Screate_simple");
 
     /* Create the dataset. */
-    dset = H5Dcreate(fid, "dataset", H5T_NATIVE_INT, dspace, H5P_DEFAULT);
-    CHECK(dset, FAIL, "H5Dcreate");
+    dset = H5Dcreate2(fid, "dataset", H5T_NATIVE_INT, dspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dset, FAIL, "H5Dcreate2");
     ret = H5Dclose(dset);
     CHECK(ret, FAIL, "H5Dclose");
     ret = H5Sclose(dspace);
@@ -183,8 +183,8 @@ test_h5o_close(void)
     CHECK(dspace, FAIL, "H5Screate_simple");
 
     /* Create the dataset. */
-    dset = H5Dcreate(fid, "dataset", H5T_NATIVE_INT, dspace, H5P_DEFAULT);
-    CHECK(dset, FAIL, "H5Dcreate");
+    dset = H5Dcreate2(fid, "dataset", H5T_NATIVE_INT, dspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dset, FAIL, "H5Dcreate2");
     ret = H5Oclose(dset);
     CHECK(ret, FAIL, "H5Oclose");
 
@@ -279,8 +279,8 @@ test_h5o_open_by_addr(void)
     CHECK(dspace, FAIL, "H5Screate_simple");
 
     /* Create the dataset. */
-    dset = H5Dcreate(fid, "dataset", H5T_NATIVE_INT, dspace, H5P_DEFAULT);
-    CHECK(dset, FAIL, "H5Dcreate");
+    dset = H5Dcreate2(fid, "dataset", H5T_NATIVE_INT, dspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dset, FAIL, "H5Dcreate2");
     ret = H5Dclose(dset);
     CHECK(ret, FAIL, "H5Dclose");
     ret = H5Sclose(dspace);
@@ -404,8 +404,8 @@ test_h5o_refcount(void)
     CHECK(dspace, FAIL, "H5Screate_simple");
 
     /* Create the dataset. */
-    dset = H5Dcreate(fid, "dataset", H5T_NATIVE_INT, dspace, H5P_DEFAULT);
-    CHECK(dset, FAIL, "H5Dcreate");
+    dset = H5Dcreate2(fid, "dataset", H5T_NATIVE_INT, dspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dset, FAIL, "H5Dcreate2");
     ret = H5Sclose(dspace);
     CHECK(ret, FAIL, "H5Sclose");
 

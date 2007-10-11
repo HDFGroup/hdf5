@@ -54,6 +54,10 @@
 #define H5Arename_vers 1
 #endif /* !defined(H5Arename_vers) */
 
+#if !defined(H5Dcreate_vers)
+#define H5Dcreate_vers 1
+#endif /* !defined(H5Dcreate_vers) */
+
 #if !defined(H5Dopen_vers)
 #define H5Dopen_vers 1
 #endif /* !defined(H5Dopen_vers) */
@@ -168,6 +172,17 @@
 #else /* H5Arename_vers */
 #error "H5Arename_vers set to invalid value"
 #endif /* H5Arename_vers */
+
+#if !defined(H5Dcreate_vers) || H5Dcreate_vers == 2
+#ifndef H5Dcreate_vers
+#define H5Dcreate_vers 2
+#endif /* H5Dcreate_vers */
+#define H5Dcreate H5Dcreate2
+#elif H5Dcreate_vers == 1
+#define H5Dcreate H5Dcreate1
+#else /* H5Dcreate_vers */
+#error "H5Dcreate_vers set to invalid value"
+#endif /* H5Dcreate_vers */
 
 #if !defined(H5Dopen_vers) || H5Dopen_vers == 2
 #ifndef H5Dopen_vers

@@ -107,28 +107,28 @@ const int transformData[ROWS][COLS] =
     hid_t dataspace, dxpl_id_f_to_c, dxpl_id_utrans, dset;			\
     hsize_t dim[2] = {ROWS, COLS};						\
 										\
-    if((dataspace = H5Screate_simple(2, dim, NULL))<0) TEST_ERROR;		\
-    if((dset = H5Dcreate(file_id, "/transformtest_"TEST_STR, HDF_TYPE, dataspace, H5P_DEFAULT))<0) TEST_ERROR;	\
+    if((dataspace = H5Screate_simple(2, dim, NULL)) < 0) TEST_ERROR;		\
+    if((dset = H5Dcreate2(file_id, "/transformtest_"TEST_STR, HDF_TYPE, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;	\
 										\
     if(SIGNED)									\
     {										\
-	if((dxpl_id_f_to_c = H5Pcreate(H5P_DATASET_XFER))<0) TEST_ERROR;	\
-	if(H5Pset_data_transform(dxpl_id_f_to_c, f_to_c)<0) TEST_ERROR;	\
-	if(H5Dwrite(dset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_f_to_c, windchillFfloat)<0) TEST_ERROR;	\
-	if(H5Pclose(dxpl_id_f_to_c)<0) TEST_ERROR;			\
+	if((dxpl_id_f_to_c = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR;	\
+	if(H5Pset_data_transform(dxpl_id_f_to_c, f_to_c) < 0) TEST_ERROR;	\
+	if(H5Dwrite(dset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_f_to_c, windchillFfloat) < 0) TEST_ERROR;	\
+	if(H5Pclose(dxpl_id_f_to_c) < 0) TEST_ERROR;			\
     }										\
     else									\
     {										\
-	if((dxpl_id_utrans = H5Pcreate(H5P_DATASET_XFER))<0) TEST_ERROR;	\
-	if(H5Pset_data_transform(dxpl_id_utrans, utrans)<0) TEST_ERROR;	\
-	if(H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_utrans, transformData)<0) TEST_ERROR;	\
-	if(H5Pclose(dxpl_id_utrans)<0) TEST_ERROR;			\
+	if((dxpl_id_utrans = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR;	\
+	if(H5Pset_data_transform(dxpl_id_utrans, utrans) < 0) TEST_ERROR;	\
+	if(H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_utrans, transformData) < 0) TEST_ERROR;	\
+	if(H5Pclose(dxpl_id_utrans) < 0) TEST_ERROR;			\
     }										\
 										\
 										\
     TESTING("contiguous, no data type conversion ("TEST_STR"->"TEST_STR")")	\
 										\
-    if(H5Dread(dset, HDF_TYPE, H5S_ALL, H5S_ALL, XFORM, array)<0) TEST_ERROR;	\
+    if(H5Dread(dset, HDF_TYPE, H5S_ALL, H5S_ALL, XFORM, array) < 0) TEST_ERROR;	\
     if(SIGNED)									\
         COMPARE(TYPE, array, COMPARE_DATA, 2)					\
     else									\
@@ -138,15 +138,15 @@ const int transformData[ROWS][COLS] =
     {    									\
         TESTING("contiguous, with type conversion (float->"TEST_STR")")	\
 										\
-	if(H5Dread(dset_id_float, HDF_TYPE, H5S_ALL, H5S_ALL, XFORM, array)<0) TEST_ERROR;	\
+	if(H5Dread(dset_id_float, HDF_TYPE, H5S_ALL, H5S_ALL, XFORM, array) < 0) TEST_ERROR;	\
 	if(SIGNED)								\
 	    COMPARE(TYPE, array, COMPARE_DATA, 2)				\
 	else									\
 	    UCOMPARE(TYPE, array, COMPARE_DATA, 4)				\
     }										\
 										\
-   if(H5Dclose(dset)<0) TEST_ERROR;					\
-   if(H5Sclose(dataspace)<0) TEST_ERROR;				\
+   if(H5Dclose(dset) < 0) TEST_ERROR;					\
+   if(H5Sclose(dataspace) < 0) TEST_ERROR;				\
 }
 
 #define TEST_TYPE_CHUNK(XFORM, TYPE, HDF_TYPE, TEST_STR, COMPARE_DATA, SIGNED)	\
@@ -161,35 +161,35 @@ const int transformData[ROWS][COLS] =
     hsize_t offset[2] = {0, 0};						\
 										\
 										\
-    if((dataspace = H5Screate_simple(2, dim, NULL))<0) TEST_ERROR;		\
+    if((dataspace = H5Screate_simple(2, dim, NULL)) < 0) TEST_ERROR;		\
 										\
     cparms = H5Pcreate(H5P_DATASET_CREATE);					\
     if(H5Pset_chunk(cparms, 2, dim) < 0) TEST_ERROR;			\
 										\
-    if((dset_chunk = H5Dcreate(file_id, "/transformtest_chunk_"TEST_STR, HDF_TYPE, dataspace, cparms))<0) TEST_ERROR;	\
+    if((dset_chunk = H5Dcreate2(file_id, "/transformtest_chunk_"TEST_STR, HDF_TYPE, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT)) < 0) TEST_ERROR;	\
     filespace = H5Dget_space (dset_chunk);					\
     memspace = H5Screate_simple(2, dim, NULL);    		\
     if(H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, NULL, dim, NULL) < 0) TEST_ERROR;			\
     										\
     if(SIGNED)									\
     {										\
-	if((dxpl_id_f_to_c = H5Pcreate(H5P_DATASET_XFER))<0) TEST_ERROR;	\
-	if(H5Pset_data_transform(dxpl_id_f_to_c, f_to_c)<0) TEST_ERROR;	\
-	if(H5Dwrite(dset_chunk, H5T_NATIVE_FLOAT, dataspace, filespace, dxpl_id_f_to_c, windchillFfloat)<0) TEST_ERROR;	\
-	if(H5Pclose(dxpl_id_f_to_c)<0) TEST_ERROR;			\
+	if((dxpl_id_f_to_c = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR;	\
+	if(H5Pset_data_transform(dxpl_id_f_to_c, f_to_c) < 0) TEST_ERROR;	\
+	if(H5Dwrite(dset_chunk, H5T_NATIVE_FLOAT, dataspace, filespace, dxpl_id_f_to_c, windchillFfloat) < 0) TEST_ERROR;	\
+	if(H5Pclose(dxpl_id_f_to_c) < 0) TEST_ERROR;			\
     }										\
     else									\
     {										\
-	if((dxpl_id_utrans = H5Pcreate(H5P_DATASET_XFER))<0) TEST_ERROR;	\
-	if(H5Pset_data_transform(dxpl_id_utrans, utrans)<0) TEST_ERROR;	\
-	if(H5Dwrite(dset_chunk, H5T_NATIVE_INT, dataspace, filespace, dxpl_id_utrans, transformData)<0) TEST_ERROR;	\
-	if(H5Pclose(dxpl_id_utrans)<0) TEST_ERROR;			\
+	if((dxpl_id_utrans = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR;	\
+	if(H5Pset_data_transform(dxpl_id_utrans, utrans) < 0) TEST_ERROR;	\
+	if(H5Dwrite(dset_chunk, H5T_NATIVE_INT, dataspace, filespace, dxpl_id_utrans, transformData) < 0) TEST_ERROR;	\
+	if(H5Pclose(dxpl_id_utrans) < 0) TEST_ERROR;			\
     }										\
 										\
 										\
     TESTING("chunked, no data type conversion ("TEST_STR"->"TEST_STR")")	\
 										\
-    if(H5Dread(dset_chunk, HDF_TYPE, memspace, filespace, XFORM, array)<0) TEST_ERROR;	\
+    if(H5Dread(dset_chunk, HDF_TYPE, memspace, filespace, XFORM, array) < 0) TEST_ERROR;	\
     if(SIGNED)									\
         COMPARE(TYPE, array, COMPARE_DATA, 2)					\
     else									\
@@ -199,7 +199,7 @@ const int transformData[ROWS][COLS] =
     {    									\
         TESTING("chunked, with type conversion (float->"TEST_STR")")	\
 										\
-	if(H5Dread(dset_id_float_chunk, HDF_TYPE, memspace, filespace, XFORM, array)<0) TEST_ERROR;	\
+	if(H5Dread(dset_id_float_chunk, HDF_TYPE, memspace, filespace, XFORM, array) < 0) TEST_ERROR;	\
 	if(SIGNED)								\
 	    COMPARE(TYPE, array, COMPARE_DATA, 2)				\
 	else									\
@@ -207,15 +207,15 @@ const int transformData[ROWS][COLS] =
     }										\
 										\
 									\
-   if(H5Pclose(cparms)<0) TEST_ERROR;				\
-   if(H5Dclose(dset_chunk)<0) TEST_ERROR;					\
-   if(H5Sclose(dataspace)<0) TEST_ERROR;				\
-   if(H5Sclose(memspace)<0) TEST_ERROR;				\
+   if(H5Pclose(cparms) < 0) TEST_ERROR;				\
+   if(H5Dclose(dset_chunk) < 0) TEST_ERROR;					\
+   if(H5Sclose(dataspace) < 0) TEST_ERROR;				\
+   if(H5Sclose(memspace) < 0) TEST_ERROR;				\
 }
 
 #define INVALID_SET_TEST(TRANSFORM)			\
 {							\
-    if(H5Pset_data_transform(dxpl_id, TRANSFORM)<0)	\
+    if(H5Pset_data_transform(dxpl_id, TRANSFORM) < 0)	\
     {							\
 	PASSED();					\
     }							\
@@ -237,16 +237,16 @@ int main(void)
     /* inverses the utrans transform in init_test to get back original array */
     const char* utrans_inv = "(x/3)*4 - 100";
     
-    if((file_id = H5Fcreate("dtransform.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0) TEST_ERROR;
+    if((file_id = H5Fcreate("dtransform.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
-    if((dxpl_id_c_to_f = H5Pcreate(H5P_DATASET_XFER))<0) TEST_ERROR;
-    if((dxpl_id_simple = H5Pcreate(H5P_DATASET_XFER))<0) TEST_ERROR;
-    if((dxpl_id_utrans_inv = H5Pcreate(H5P_DATASET_XFER))<0) TEST_ERROR;
-    if((dxpl_id_polynomial =  H5Pcreate(H5P_DATASET_XFER))<0) TEST_ERROR;
-    if(H5Pset_data_transform(dxpl_id_c_to_f, c_to_f)<0) TEST_ERROR;
-    if(H5Pset_data_transform(dxpl_id_polynomial, polynomial)<0) TEST_ERROR;
-    if(H5Pset_data_transform(dxpl_id_simple, simple)<0) TEST_ERROR;
-    if(H5Pset_data_transform(dxpl_id_utrans_inv, utrans_inv)<0) TEST_ERROR;
+    if((dxpl_id_c_to_f = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR;
+    if((dxpl_id_simple = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR;
+    if((dxpl_id_utrans_inv = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR;
+    if((dxpl_id_polynomial =  H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR;
+    if(H5Pset_data_transform(dxpl_id_c_to_f, c_to_f) < 0) TEST_ERROR;
+    if(H5Pset_data_transform(dxpl_id_polynomial, polynomial) < 0) TEST_ERROR;
+    if(H5Pset_data_transform(dxpl_id_simple, simple) < 0) TEST_ERROR;
+    if(H5Pset_data_transform(dxpl_id_utrans_inv, utrans_inv) < 0) TEST_ERROR;
     if((dxpl_id_polynomial_copy = H5Pcopy(dxpl_id_polynomial)) < 0) TEST_ERROR;
     if((dxpl_id_c_to_f_copy = H5Pcopy(dxpl_id_c_to_f)) < 0) TEST_ERROR;
 
@@ -317,17 +317,17 @@ int main(void)
     if(test_getset(dxpl_id_c_to_f) < 0) TEST_ERROR;
 
     /* Close the objects we opened/created */
-    if(H5Dclose(dset_id_int)<0) TEST_ERROR;
-    if(H5Dclose(dset_id_int_chunk)<0) TEST_ERROR;
-    if(H5Dclose(dset_id_float)<0) TEST_ERROR;
-    if(H5Dclose(dset_id_float_chunk)<0) TEST_ERROR;
-    if(H5Fclose(file_id)<0) TEST_ERROR;
-    if(H5Pclose(dxpl_id_c_to_f)<0) TEST_ERROR;
-    if(H5Pclose(dxpl_id_c_to_f_copy)<0) TEST_ERROR;
-    if(H5Pclose(dxpl_id_polynomial)<0) TEST_ERROR;
-    if(H5Pclose(dxpl_id_polynomial_copy)<0) TEST_ERROR;
-    if(H5Pclose(dxpl_id_simple)<0) TEST_ERROR;
-    if(H5Pclose(dxpl_id_utrans_inv)<0) TEST_ERROR;
+    if(H5Dclose(dset_id_int) < 0) TEST_ERROR;
+    if(H5Dclose(dset_id_int_chunk) < 0) TEST_ERROR;
+    if(H5Dclose(dset_id_float) < 0) TEST_ERROR;
+    if(H5Dclose(dset_id_float_chunk) < 0) TEST_ERROR;
+    if(H5Fclose(file_id) < 0) TEST_ERROR;
+    if(H5Pclose(dxpl_id_c_to_f) < 0) TEST_ERROR;
+    if(H5Pclose(dxpl_id_c_to_f_copy) < 0) TEST_ERROR;
+    if(H5Pclose(dxpl_id_polynomial) < 0) TEST_ERROR;
+    if(H5Pclose(dxpl_id_polynomial_copy) < 0) TEST_ERROR;
+    if(H5Pclose(dxpl_id_simple) < 0) TEST_ERROR;
+    if(H5Pclose(dxpl_id_utrans_inv) < 0) TEST_ERROR;
 
 
    return 0;
@@ -346,43 +346,43 @@ int init_test(hid_t file_id)
     hsize_t dim[2] = {ROWS, COLS};
     hsize_t offset[2] = {0, 0};
 
-    if((dxpl_id_f_to_c = H5Pcreate(H5P_DATASET_XFER))<0) TEST_ERROR;
-    if((dxpl_id_utrans = H5Pcreate(H5P_DATASET_XFER))<0) TEST_ERROR;
+    if((dxpl_id_f_to_c = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR;
+    if((dxpl_id_utrans = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR;
 
-    if(H5Pset_data_transform(dxpl_id_f_to_c, f_to_c)<0) TEST_ERROR;
-    if(H5Pset_data_transform(dxpl_id_utrans, utrans)<0) TEST_ERROR;
+    if(H5Pset_data_transform(dxpl_id_f_to_c, f_to_c) < 0) TEST_ERROR;
+    if(H5Pset_data_transform(dxpl_id_utrans, utrans) < 0) TEST_ERROR;
 
 
     cparms = H5Pcreate(H5P_DATASET_CREATE);
-    if(H5Pset_chunk(cparms, 2, dim)<0) TEST_ERROR;
+    if(H5Pset_chunk(cparms, 2, dim) < 0) TEST_ERROR;
 
-    if((dataspace = H5Screate_simple(2, dim, NULL))<0) TEST_ERROR;
+    if((dataspace = H5Screate_simple(2, dim, NULL)) < 0) TEST_ERROR;
 
     TESTING("Intializing test...")
 
-    if((dset_id_int = H5Dcreate(file_id, "/default_int", H5T_NATIVE_INT, dataspace, H5P_DEFAULT))<0) TEST_ERROR;
-    if(H5Dwrite(dset_id_int, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_f_to_c, windchillFfloat)<0) TEST_ERROR;
+    if((dset_id_int = H5Dcreate2(file_id, "/default_int", H5T_NATIVE_INT, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
+    if(H5Dwrite(dset_id_int, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_f_to_c, windchillFfloat) < 0) TEST_ERROR;
 
-    if((dset_id_float = H5Dcreate(file_id, "/default_float", H5T_NATIVE_FLOAT, dataspace, H5P_DEFAULT))<0) TEST_ERROR;
-    if(H5Dwrite(dset_id_float, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_f_to_c, windchillFfloat)<0) TEST_ERROR;
+    if((dset_id_float = H5Dcreate2(file_id, "/default_float", H5T_NATIVE_FLOAT, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
+    if(H5Dwrite(dset_id_float, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_f_to_c, windchillFfloat) < 0) TEST_ERROR;
 
-    if((dset_id_int_chunk = H5Dcreate(file_id, "/default_chunk_int", H5T_NATIVE_INT, dataspace, cparms))<0) TEST_ERROR;
+    if((dset_id_int_chunk = H5Dcreate2(file_id, "/default_chunk_int", H5T_NATIVE_INT, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     filespace = H5Dget_space (dset_id_int_chunk);
     if(H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset, NULL, dim, NULL) < 0) TEST_ERROR;
-    if(H5Dwrite(dset_id_int_chunk, H5T_NATIVE_FLOAT, dataspace, filespace, dxpl_id_f_to_c, windchillFfloat)<0) TEST_ERROR;
+    if(H5Dwrite(dset_id_int_chunk, H5T_NATIVE_FLOAT, dataspace, filespace, dxpl_id_f_to_c, windchillFfloat) < 0) TEST_ERROR;
 
-    if((dset_id_float_chunk = H5Dcreate(file_id, "/default_chunk_float", H5T_NATIVE_FLOAT, dataspace, cparms))<0) TEST_ERROR;
-    if(H5Dwrite(dset_id_float_chunk, H5T_NATIVE_FLOAT, dataspace, filespace, dxpl_id_f_to_c, windchillFfloat)<0) TEST_ERROR;
+    if((dset_id_float_chunk = H5Dcreate2(file_id, "/default_chunk_float", H5T_NATIVE_FLOAT, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT)) < 0) TEST_ERROR;
+    if(H5Dwrite(dset_id_float_chunk, H5T_NATIVE_FLOAT, dataspace, filespace, dxpl_id_f_to_c, windchillFfloat) < 0) TEST_ERROR;
 
 
     PASSED();
 
 
-    if(H5Pclose(cparms)<0) TEST_ERROR;
-    if(H5Pclose(dxpl_id_f_to_c)<0) TEST_ERROR;
-    if(H5Pclose(dxpl_id_utrans)<0) TEST_ERROR;
-    if(H5Sclose(dataspace)<0) TEST_ERROR;
+    if(H5Pclose(cparms) < 0) TEST_ERROR;
+    if(H5Pclose(dxpl_id_f_to_c) < 0) TEST_ERROR;
+    if(H5Pclose(dxpl_id_utrans) < 0) TEST_ERROR;
+    if(H5Sclose(dataspace) < 0) TEST_ERROR;
 
    return 0;
 error:
@@ -407,7 +407,7 @@ int test_poly(const hid_t dxpl_id_polynomial)
     }
 
     TESTING("data transform, polynomial transform (int->float)")
-    if(H5Dread(dset_id_int, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_polynomial, polyflread)<0) TEST_ERROR;
+    if(H5Dread(dset_id_int, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_polynomial, polyflread) < 0) TEST_ERROR;
     COMPARE(float, polyflread, polyflres, 2.0)
 
 
@@ -421,7 +421,7 @@ int test_poly(const hid_t dxpl_id_polynomial)
     }
 
     TESTING("data transform, polynomial transform (float->int)")
-    if(H5Dread(dset_id_float, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_polynomial, polyintread)<0) TEST_ERROR;
+    if(H5Dread(dset_id_float, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_polynomial, polyintread) < 0) TEST_ERROR;
     COMPARE(int, polyintread, polyflres, 4)
 
     return 0;
@@ -449,11 +449,11 @@ int test_copy(const hid_t dxpl_id_c_to_f_copy, const hid_t dxpl_id_polynomial_co
 
 
     TESTING("data transform, linear transform w/ copied property")
-    if(H5Dread(dset_id_float, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_c_to_f_copy, windchillFintread)<0) TEST_ERROR;
+    if(H5Dread(dset_id_float, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_c_to_f_copy, windchillFintread) < 0) TEST_ERROR;
     COMPARE(int, windchillFintread, windchillFfloat, 2)
 
     TESTING("data transform, polynomial transform w/ copied property")
-    if(H5Dread(dset_id_float, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_polynomial_copy, polyintread)<0) TEST_ERROR;
+    if(H5Dread(dset_id_float, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_polynomial_copy, polyintread) < 0) TEST_ERROR;
     COMPARE(int, polyintread, polyflres, 2)
 
     return 0;
@@ -469,7 +469,7 @@ int test_trivial(const hid_t dxpl_id_simple)
     int row, col;
 
     TESTING("data transform, trivial transform, without type conversion")
-    if(H5Dread(dset_id_float, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_simple, windchillFfloatread)<0) TEST_ERROR;
+    if(H5Dread(dset_id_float, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_simple, windchillFfloatread) < 0) TEST_ERROR;
     for(row = 0; row<ROWS; row++)
     {
 	for(col = 0; col<COLS; col++)
@@ -485,7 +485,7 @@ int test_trivial(const hid_t dxpl_id_simple)
     PASSED();
 
     TESTING("data transform, trivial transform, with type conversion")
-    if(H5Dread(dset_id_float, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_simple, windchillFintread)<0) TEST_ERROR;
+    if(H5Dread(dset_id_float, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_simple, windchillFintread) < 0) TEST_ERROR;
     for(row = 0; row<ROWS; row++)
     {
 	for(col = 0; col<COLS; col++)
@@ -525,10 +525,10 @@ int test_getset(const hid_t dxpl_id_c_to_f)
 	PASSED();
     free(ptrgetTest);
 
-    if(H5Pset_data_transform(dxpl_id_c_to_f, simple)<0) TEST_ERROR;
+    if(H5Pset_data_transform(dxpl_id_c_to_f, simple) < 0) TEST_ERROR;
 
     TESTING("data transform, read after reseting of transform property")
-    if(H5Dread(dset_id_float, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_c_to_f, windchillFfloatread)<0) TEST_ERROR;
+    if(H5Dread(dset_id_float, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_c_to_f, windchillFfloatread) < 0) TEST_ERROR;
     for(row = 0; row<ROWS; row++)
     {
 	for(col = 0; col<COLS; col++)
@@ -573,7 +573,7 @@ int test_set(void)
     const char* str = "(9/5.0)*x + 32";
     char* ptrgetTest = malloc(strlen(str)+1);
 
-    if((dxpl_id = H5Pcreate(H5P_DATASET_XFER))<0) TEST_ERROR;
+    if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR;
 
     /* Test get before set */
     H5Eget_auto2(H5E_DEFAULT,&func,NULL);

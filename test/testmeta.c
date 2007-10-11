@@ -64,8 +64,8 @@ int main(void)
     dataspace_id = H5Screate(H5S_SCALAR);
 
     /* Create dataset */
-    dataset_id = H5Dcreate(file_id, "/NumDataObj",
-                                    H5T_NATIVE_UINT, dataspace_id, H5P_DEFAULT);
+    dataset_id = H5Dcreate2(file_id, "/NumDataObj",
+                                    H5T_NATIVE_UINT, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write value to NumDataObj dataset */
     status = H5Dwrite(dataset_id, H5T_NATIVE_UINT, H5S_ALL,
@@ -90,8 +90,8 @@ int main(void)
     {
         /* Create dataset */
         sprintf(name, "/ExtArray%06d", i);
-        dataset_id = H5Dcreate(file_id, name,
-                H5T_NATIVE_FLOAT, dataspace_id, prop_id);
+        dataset_id = H5Dcreate2(file_id, name,
+                H5T_NATIVE_FLOAT, dataspace_id, H5P_DEFAULT, prop_id, H5P_DEFAULT);
 
         /* Close the identifier */
         status = H5Dclose(dataset_id);
@@ -131,8 +131,8 @@ int main(void)
 
             /* Create dataset */
             sprintf(name, "DataArray%06d", i);
-            dataset_id = H5Dcreate(group_id, name,
-                    H5T_NATIVE_FLOAT, dataspace_id, H5P_DEFAULT);
+            dataset_id = H5Dcreate2(group_id, name,
+                    H5T_NATIVE_FLOAT, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
             if(dataset_id < 0) {
                 fprintf(stderr, "Failed to create DataArray dataset.\n");
                 status = H5Fclose(file_id);

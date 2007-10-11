@@ -51,7 +51,7 @@ main(void)
     assert(sid>0);
 
     /* Create dataset */
-    did = H5Dcreate(fid, NULLDATASET, H5T_NATIVE_UINT, sid, H5P_DEFAULT);
+    did = H5Dcreate2(fid, NULLDATASET, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     assert(did>0);
 
     /* Close the dataset */

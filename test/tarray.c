@@ -97,8 +97,8 @@ test_array_atomic_1d(void)
     CHECK(tid1, FAIL, "H5Tarray_create");
 
     /* Create a dataset */
-    dataset = H5Dcreate(fid1, "Dataset1", tid1, sid1, H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid1, "Dataset1", tid1, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Write dataset to disk */
     ret = H5Dwrite(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
@@ -276,8 +276,8 @@ test_array_atomic_3d(void)
     CHECK(tid, FAIL, "H5Tarray_create");
 
     /* Create a dataset */
-    dataset = H5Dcreate(fid, "Dataset1", tid, sid, H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid, "Dataset1", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Write dataset to disk */
     ret = H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
@@ -408,8 +408,8 @@ test_array_array_atomic(void)
     CHECK(tid1, FAIL, "H5Tarray_create");
 
     /* Create a dataset */
-    dataset = H5Dcreate(fid, "Dataset1", tid1, sid, H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid, "Dataset1", tid1, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Write dataset to disk */
     ret = H5Dwrite(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
@@ -579,8 +579,8 @@ test_array_compound_atomic(void)
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Create a dataset */
-    dataset = H5Dcreate(fid1, "Dataset1", tid1, sid1, H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid1, "Dataset1", tid1, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Write dataset to disk */
     ret = H5Dwrite(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
@@ -775,11 +775,11 @@ test_array_compound_array(void)
     CHECK(tid3, FAIL, "H5Tarray_create");
 
     /* Insert float array field */
-    ret = H5Tinsert (tid2, "f", HOFFSET(s1_t,f), tid3);
+    ret = H5Tinsert(tid2, "f", HOFFSET(s1_t, f), tid3);
     CHECK(ret, FAIL, "H5Tinsert");
 
     /* Close array of floats field datatype */
-    ret=H5Tclose(tid3);
+    ret = H5Tclose(tid3);
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Create an array datatype to refer to */
@@ -787,15 +787,15 @@ test_array_compound_array(void)
     CHECK(tid1, FAIL, "H5Tarray_create");
 
     /* Close compound datatype */
-    ret=H5Tclose(tid2);
+    ret = H5Tclose(tid2);
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",tid1,sid1,H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid1, "Dataset1", tid1, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Write dataset to disk */
-    ret=H5Dwrite(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata);
+    ret = H5Dwrite(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Close Dataset */
@@ -1070,15 +1070,15 @@ test_array_vlen_atomic(void)
     CHECK(tid1, FAIL, "H5Tarray_create");
 
     /* Close VL datatype */
-    ret=H5Tclose(tid2);
+    ret = H5Tclose(tid2);
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",tid1,sid1,H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid1, "Dataset1", tid1, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Write dataset to disk */
-    ret=H5Dwrite(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata);
+    ret = H5Dwrite(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Close Dataset */
@@ -1282,7 +1282,7 @@ test_array_vlen_array(void)
     CHECK(tid2, FAIL, "H5Tcreate");
 
     /* Close nested array datatype */
-    ret=H5Tclose(tid3);
+    ret = H5Tclose(tid3);
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Create an array datatype to refer to */
@@ -1290,15 +1290,15 @@ test_array_vlen_array(void)
     CHECK(tid1, FAIL, "H5Tarray_create");
 
     /* Close VL datatype */
-    ret=H5Tclose(tid2);
+    ret = H5Tclose(tid2);
     CHECK(ret, FAIL, "H5Tclose");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",tid1,sid1,H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid1, "Dataset1", tid1, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Write dataset to disk */
-    ret=H5Dwrite(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata);
+    ret = H5Dwrite(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Close Dataset */
@@ -1605,8 +1605,8 @@ test_array_bkg(void)
 
     /* Create the dataset */
     /* ------------------ */
-    dataset = H5Dcreate(fid, FIELDNAME, type, space, H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid, FIELDNAME, type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Write data to the dataset */
     /* ------------------------- */

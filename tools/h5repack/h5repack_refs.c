@@ -204,7 +204,7 @@ int do_copy_refobjs(hid_t fidin,
                         * create/write dataset/close
                         *-------------------------------------------------------------------------
                         */
-                        if((dset_out = H5Dcreate(fidout, travt->objs[i].name, mtype_id, space_id, dcpl_id)) < 0)
+                        if((dset_out = H5Dcreate2(fidout, travt->objs[i].name, mtype_id, space_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
                             goto error;
                         if(nelmts)
                             if(H5Dwrite(dset_out, mtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, refbuf) < 0)
@@ -283,7 +283,7 @@ int do_copy_refobjs(hid_t fidin,
                         * create/write dataset/close
                         *-------------------------------------------------------------------------
                         */
-                        if((dset_out = H5Dcreate(fidout, travt->objs[i].name, mtype_id, space_id, dcpl_id)) < 0)
+                        if((dset_out = H5Dcreate2(fidout, travt->objs[i].name, mtype_id, space_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
                             goto error;
                         if(nelmts)
                             if(H5Dwrite(dset_out, mtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, refbuf) < 0)

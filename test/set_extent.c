@@ -68,17 +68,17 @@ int main( void )
 
 
     /* Create a new file using default properties. */
-    if ((file_id = H5Fcreate( "set_extent_create.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT )) < 0) TEST_ERROR;
+    if((file_id = H5Fcreate("set_extent_create.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     TESTING("extend dataset create with fill value");
 
     /* Create the data space with unlimited dimensions. */
-    if ((space_id = H5Screate_simple( RANK, dims, maxdims )) < 0) TEST_ERROR;
+    if((space_id = H5Screate_simple(RANK, dims, maxdims)) < 0) TEST_ERROR;
 
     /* Modify dataset creation properties, i.e. enable chunking. */
-    if ((plist_id = H5Pcreate (H5P_DATASET_CREATE )) < 0) TEST_ERROR;
-    if (H5Pset_chunk( plist_id, RANK, dims_chunk ) < 0) TEST_ERROR;
-    if (H5Pset_fill_value( plist_id, H5T_NATIVE_INT, &fillvalue ) < 0) TEST_ERROR;
+    if((plist_id = H5Pcreate (H5P_DATASET_CREATE)) < 0) TEST_ERROR;
+    if(H5Pset_chunk(plist_id, RANK, dims_chunk) < 0) TEST_ERROR;
+    if(H5Pset_fill_value(plist_id, H5T_NATIVE_INT, &fillvalue) < 0) TEST_ERROR;
 
 
     /*-------------------------------------------------------------------------
@@ -87,10 +87,10 @@ int main( void )
     */
 
     /* Create a new dataset */
-    if ((dataset_id = H5Dcreate( file_id , "Dataset1", H5T_NATIVE_INT, space_id, plist_id )) < 0) TEST_ERROR;
+    if((dataset_id = H5Dcreate2(file_id , "Dataset1", H5T_NATIVE_INT, space_id, H5P_DEFAULT, plist_id, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Write the data. */
-    if (H5Dwrite( dataset_id , H5T_NATIVE_INT, space_id, H5S_ALL, H5P_DEFAULT, data ) < 0) TEST_ERROR;
+    if(H5Dwrite(dataset_id , H5T_NATIVE_INT, space_id, H5S_ALL, H5P_DEFAULT, data) < 0) TEST_ERROR;
 
     /*-------------------------------------------------------------------------
     * Set new dimensions for the array; shrink it
@@ -98,16 +98,16 @@ int main( void )
     */
 
     /* Set new dimensions for the array. */
-    if (H5Dset_extent( dataset_id , dims_new ) < 0) TEST_ERROR;
+    if(H5Dset_extent(dataset_id , dims_new) < 0) TEST_ERROR;
 
     /* Get the space. */
-    if ((space_id = H5Dget_space( dataset_id )) < 0) TEST_ERROR;
+    if((space_id = H5Dget_space(dataset_id)) < 0) TEST_ERROR;
 
     /* Get dimensions. */
-    if (H5Sget_simple_extent_dims( space_id, dims_out, NULL ) < 0) TEST_ERROR;
+    if(H5Sget_simple_extent_dims(space_id, dims_out, NULL) < 0) TEST_ERROR;
 
-    if ( dims_out[0] != dims_new[0] ) TEST_ERROR;
-    if ( dims_out[1] != dims_new[1] ) TEST_ERROR;
+    if(dims_out[0] != dims_new[0]) TEST_ERROR;
+    if(dims_out[1] != dims_new[1]) TEST_ERROR;
 
 
     /*-------------------------------------------------------------------------
@@ -175,20 +175,20 @@ int main( void )
     *-------------------------------------------------------------------------
     */
 
-    H5Dclose( dataset_id );
-    H5Sclose( space_id );
-    H5Pclose( plist_id  );
+    if(H5Dclose(dataset_id) < 0) TEST_ERROR
+    if(H5Sclose(space_id) < 0) TEST_ERROR
+    if(H5Pclose(plist_id) < 0) TEST_ERROR
 
     PASSED();
     TESTING("extend dataset create without fill value");
 
     /* Create the data space with unlimited dimensions. */
-    if ((space_id = H5Screate_simple( RANK, dims, maxdims )) < 0) TEST_ERROR;
+    if((space_id = H5Screate_simple(RANK, dims, maxdims)) < 0) TEST_ERROR;
 
     /* Modify dataset creation properties, i.e. enable chunking. */
-    if ((plist_id = H5Pcreate (H5P_DATASET_CREATE )) < 0) TEST_ERROR;
-    if (H5Pset_chunk( plist_id, RANK, dims_chunk ) < 0) TEST_ERROR;
-    if (H5Pset_fill_time( plist_id, H5D_FILL_TIME_ALLOC) < 0) TEST_ERROR;
+    if((plist_id = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR;
+    if(H5Pset_chunk(plist_id, RANK, dims_chunk) < 0) TEST_ERROR;
+    if(H5Pset_fill_time(plist_id, H5D_FILL_TIME_ALLOC) < 0) TEST_ERROR;
 
     /*-------------------------------------------------------------------------
     * Create and write one dataset
@@ -196,10 +196,10 @@ int main( void )
     */
 
     /* Create a new dataset */
-    if ((dataset_id = H5Dcreate( file_id , "Dataset2", H5T_NATIVE_INT, space_id, plist_id )) < 0) TEST_ERROR;
+    if((dataset_id = H5Dcreate2(file_id , "Dataset2", H5T_NATIVE_INT, space_id, H5P_DEFAULT, plist_id, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Write the data. */
-    if (H5Dwrite( dataset_id , H5T_NATIVE_INT, space_id, H5S_ALL, H5P_DEFAULT, data ) < 0) TEST_ERROR;
+    if(H5Dwrite(dataset_id , H5T_NATIVE_INT, space_id, H5S_ALL, H5P_DEFAULT, data) < 0) TEST_ERROR;
 
     /*-------------------------------------------------------------------------
     * Set new dimensions for the array; shrink it
@@ -207,15 +207,15 @@ int main( void )
     */
 
     /* Set new dimensions for the array. */
-    if (H5Dset_extent( dataset_id , dims_new ) < 0) TEST_ERROR;
+    if(H5Dset_extent(dataset_id , dims_new) < 0) TEST_ERROR;
 
     /* Get the space. */
-    if ((space_id = H5Dget_space( dataset_id )) < 0) TEST_ERROR;
+    if((space_id = H5Dget_space(dataset_id)) < 0) TEST_ERROR;
 
     /* Get dimensions. */
-    if (H5Sget_simple_extent_dims( space_id, dims_out, NULL ) < 0) TEST_ERROR;
+    if(H5Sget_simple_extent_dims(space_id, dims_out, NULL) < 0) TEST_ERROR;
 
-    if ( dims_out[0] != dims_new[0] ) TEST_ERROR;
+    if(dims_out[0] != dims_new[0]) TEST_ERROR;
 
 
     /*-------------------------------------------------------------------------
@@ -298,7 +298,7 @@ int main( void )
     if(H5Pset_istore_k(fcpl,ISTORE_IK) < 0) TEST_ERROR;
 
     /* Create a new file using properties. */
-    if ((file_id = H5Fcreate( "set_extent_read.h5", H5F_ACC_TRUNC, fcpl, H5P_DEFAULT )) < 0) TEST_ERROR;
+    if((file_id = H5Fcreate("set_extent_read.h5", H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Close property list */
     if(H5Pclose(fcpl) < 0) TEST_ERROR;
@@ -314,7 +314,7 @@ int main( void )
     if(H5Pset_fill_value(plist_id, H5T_NATIVE_INT, &fillvalue) < 0) TEST_ERROR;
 
     /* Create a new dataset within the file using cparms creation properties. */
-    if((dataset_id = H5Dcreate(file_id , "Dataset1", H5T_NATIVE_INT, space_id, plist_id)) < 0) TEST_ERROR;
+    if((dataset_id = H5Dcreate2(file_id , "Dataset1", H5T_NATIVE_INT, space_id, H5P_DEFAULT, plist_id, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Write the data. */
     if(H5Dwrite(dataset_id , H5T_NATIVE_INT, space_id, H5S_ALL, H5P_DEFAULT, data) < 0) TEST_ERROR;
@@ -406,7 +406,7 @@ int main( void )
     if(H5Pset_fill_time(plist_id, H5D_FILL_TIME_ALLOC) < 0) TEST_ERROR;
 
     /* Create a new dataset within the file using cparms creation properties. */
-    if((dataset_id = H5Dcreate(file_id , "Dataset2", H5T_NATIVE_INT, space_id, plist_id)) < 0) TEST_ERROR;
+    if((dataset_id = H5Dcreate2(file_id , "Dataset2", H5T_NATIVE_INT, space_id, H5P_DEFAULT, plist_id, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Write the data. */
     if(H5Dwrite(dataset_id , H5T_NATIVE_INT, space_id, H5S_ALL, H5P_DEFAULT, data) < 0) TEST_ERROR;

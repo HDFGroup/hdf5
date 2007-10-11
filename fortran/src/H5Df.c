@@ -19,7 +19,7 @@
 
 /*----------------------------------------------------------------------------
  * Name:        h5dcreate_c
- * Purpose:     Call H5Dcreate to create a dataset
+ * Purpose:     Call H5Dcreate2 to create a dataset
  * Inputs:      loc_id - file or group identifier
  *              name - name of the dataset
  *              namelen - name length
@@ -35,41 +35,29 @@
 int_f
 nh5dcreate_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id, hid_t_f *space_id, hid_t_f *crt_prp,  hid_t_f *dset_id)
 {
-     int ret_value = -1;
-     char *c_name;
-     size_t c_namelen;
-     hid_t c_loc_id;
-     hid_t c_type_id;
-     hid_t c_space_id;
+     char *c_name = NULL;
      hid_t c_dset_id;
-     hid_t c_crt_prp;
-
-     /*
-      * Define creation property
-      */
-     c_crt_prp = (hid_t)*crt_prp;
+     int ret_value = -1;
 
      /*
       * Convert FORTRAN name to C name
       */
-     c_namelen = *namelen;
-     c_name = (char *)HD5f2cstring(name, c_namelen);
-     if (c_name == NULL) return ret_value;
+     if(NULL == ( c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
+         goto DONE;
 
      /*
-      * Call H5Dcreate function.
+      * Call H5Dcreate2 function.
       */
-     c_loc_id = (hid_t)*loc_id;
-     c_type_id = (hid_t)*type_id;
-     c_space_id = (hid_t)*space_id;
-     c_dset_id = H5Dcreate(c_loc_id, c_name, c_type_id, c_space_id, c_crt_prp);
-     if (c_dset_id < 0) goto DONE;
+     if((c_dset_id = H5Dcreate2((hid_t)*loc_id, c_name, (hid_t)*type_id, (hid_t)*space_id, H5P_DEFAULT, (hid_t)*crt_prp, H5P_DEFAULT)) < 0)
+         goto DONE;
      *dset_id = (hid_t_f)c_dset_id;
+
      ret_value = 0;
 
 DONE:
-     HDfree(c_name);
-     return ret_value;
+    if(c_name)
+        HDfree(c_name);
+    return ret_value;
 }
 
 /*----------------------------------------------------------------------------

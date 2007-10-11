@@ -149,29 +149,29 @@ create_dataset (void)
 
     /* The data space */
     size[0] = size[1] = DS_SIZE * CH_SIZE;
-    space = H5Screate_simple (2, size, size);
+    space = H5Screate_simple(2, size, size);
 
     /* The storage layout and compression */
-    dcpl = H5Pcreate (H5P_DATASET_CREATE);
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
     size[0] = size[1] = CH_SIZE;
-    H5Pset_chunk (dcpl, 2, size);
-    H5Zregister (H5Z_COUNTER);
-    H5Pset_filter (dcpl, FILTER_COUNTER, 0, 0, NULL);
+    H5Pset_chunk(dcpl, 2, size);
+    H5Zregister(H5Z_COUNTER);
+    H5Pset_filter(dcpl, FILTER_COUNTER, 0, 0, NULL);
 
     /* The dataset */
-    dset = H5Dcreate (file, "dset", H5T_NATIVE_SCHAR, space, dcpl);
-    assert (dset>=0);
+    dset = H5Dcreate2(file, "dset", H5T_NATIVE_SCHAR, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    assert(dset>=0);
 
     /* The data */
-    buf = calloc (1, SQUARE (DS_SIZE*CH_SIZE));
-    H5Dwrite (dset, H5T_NATIVE_SCHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
-    free (buf);
+    buf = calloc(1, SQUARE (DS_SIZE*CH_SIZE));
+    H5Dwrite(dset, H5T_NATIVE_SCHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+    free(buf);
 
     /* Close */
-    H5Dclose (dset);
-    H5Sclose (space);
-    H5Pclose (dcpl);
-    H5Fclose (file);
+    H5Dclose(dset);
+    H5Sclose(space);
+    H5Pclose(dcpl);
+    H5Fclose(file);
 }
 
 

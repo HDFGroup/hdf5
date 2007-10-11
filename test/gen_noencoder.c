@@ -55,7 +55,7 @@ main(void)
     H5Pset_fill_time(dcpl_id, H5D_FILL_TIME_ALLOC);
 
 /* Create dataset noencoder_szip_dset.h5 */
-    dset_id = H5Dcreate(file_id, "noencoder_szip_dset.h5", H5T_NATIVE_INT, space_id, dcpl_id);
+    dset_id = H5Dcreate2(file_id, "noencoder_szip_dset.h5", H5T_NATIVE_INT, space_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
 
     H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, write_buf);
 
@@ -71,7 +71,7 @@ main(void)
     H5Pset_fill_time(dcpl_id, H5D_FILL_TIME_ALLOC);
 
 /* Create dataset noencoder_szip_shuffle_fletcher_dset.h5 */
-    dset_id = H5Dcreate(file_id, "noencoder_szip_shuffle_fletcher_dset.h5", H5T_NATIVE_INT, space_id, dcpl_id);
+    dset_id = H5Dcreate2(file_id, "noencoder_szip_shuffle_fletcher_dset.h5", H5T_NATIVE_INT, space_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
 
     H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, write_buf);
 

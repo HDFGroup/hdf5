@@ -243,7 +243,7 @@ test_direct(void)
         TEST_ERROR;
 
     /* Create the dset1 */
-    if((dset1 = H5Dcreate(file, DSET1_NAME, H5T_NATIVE_INT, space1, H5P_DEFAULT)) < 0)
+    if((dset1 = H5Dcreate2(file, DSET1_NAME, H5T_NATIVE_INT, space1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Write the data to the dset1 */
@@ -278,7 +278,7 @@ test_direct(void)
         TEST_ERROR;
 
     /* Create the dset2 */
-    if((dset2 = H5Dcreate(file, DSET2_NAME, H5T_NATIVE_INT, space2, H5P_DEFAULT)) < 0)
+    if((dset2 = H5Dcreate2(file, DSET2_NAME, H5T_NATIVE_INT, space2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Write the data to the dset1 */
@@ -438,7 +438,7 @@ test_core(void)
         TEST_ERROR;
 
     /* Create the dset1 */
-    if((dset1 = H5Dcreate(file, DSET1_NAME, H5T_NATIVE_INT, space1, H5P_DEFAULT)) < 0)
+    if((dset1 = H5Dcreate2(file, DSET1_NAME, H5T_NATIVE_INT, space1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Write the data to the dset1 */
@@ -482,7 +482,7 @@ test_core(void)
         TEST_ERROR;
 
     /* Create the dset1 */
-    if((dset1 = H5Dcreate(file, DSET1_NAME, H5T_NATIVE_INT, space1, H5P_DEFAULT)) < 0)
+    if((dset1 = H5Dcreate2(file, DSET1_NAME, H5T_NATIVE_INT, space1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Write the data to the dset1 */
@@ -706,7 +706,7 @@ test_family(void)
     if (H5Pclose(access_fapl) < 0)
         TEST_ERROR;
 
-    if((dset=H5Dcreate(file, dname, H5T_NATIVE_INT, space, H5P_DEFAULT)) < 0)
+    if((dset=H5Dcreate2(file, dname, H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     for(i=0; i<FAMILY_NUMBER; i++)
@@ -1013,7 +1013,7 @@ test_multi(void)
     if(file_size < HADDR_MAX/4 || file_size > HADDR_MAX/2)
         TEST_ERROR;
 
-    if((dset=H5Dcreate(file, dname, H5T_NATIVE_INT, space, H5P_DEFAULT)) < 0)
+    if((dset=H5Dcreate2(file, dname, H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     for(i=0; i<MULTI_SIZE; i++)

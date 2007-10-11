@@ -45,10 +45,9 @@ int main(void)
    /*
     * Initialization of buffer matrix "bm"
     */
-   for(i =0; i<NX; i++) {
-    for(j = 0; j<NY; j++)
+   for(i =0; i < NX; i++)
+    for(j = 0; j < NY; j++)
       bm[i][j] = i + j;
-   }
 
    /*
     * Create first file and a group in it.
@@ -69,7 +68,7 @@ int main(void)
    dims[0] = NX;
    dims[1] = NY;
    sid = H5Screate_simple(RANK, dims, NULL);
-   did = H5Dcreate(fid2, "D", H5T_NATIVE_INT, sid, H5P_DEFAULT);
+   did = H5Dcreate2(fid2, "D", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
    /*
     * Write data to the dataset.

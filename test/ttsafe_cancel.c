@@ -30,7 +30,7 @@
  *   ttsafe_cancel.h5
  *
  * HDF5 APIs exercised in thread:
- * H5Screate_simple, H5Tcopy, H5Tset_order, H5Dcreate, H5Dclose,
+ * H5Screate_simple, H5Tcopy, H5Tset_order, H5Dcreate2, H5Dclose,
  * H5Dwrite, H5Dread, H5Diterate, H5Tclose, H5Sclose.
  *
  * Created: May 15 2000
@@ -130,18 +130,18 @@ void *tts_cancel_thread(void UNUSED *arg)
 
     /* define dataspace for dataset */
     dimsf[0] = 1;
-    dataspace = H5Screate_simple(1,dimsf,NULL);
-    assert(dataspace>=0);
+    dataspace = H5Screate_simple(1, dimsf, NULL);
+    assert(dataspace >= 0);
 
     /* define datatype for the data using native little endian integers */
     datatype = H5Tcopy(H5T_NATIVE_INT);
-    assert(datatype>=0);
-    ret=H5Tset_order(datatype, H5T_ORDER_LE);
-    assert(ret>=0);
+    assert(datatype >= 0);
+    ret = H5Tset_order(datatype, H5T_ORDER_LE);
+    assert(ret >= 0);
 
     /* create a new dataset within the file */
-    dataset = H5Dcreate(cancel_file, DATASETNAME, datatype, dataspace, H5P_DEFAULT);
-    assert(dataset>=0);
+    dataset = H5Dcreate2(cancel_file, DATASETNAME, datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    assert(dataset >= 0);
 
     /* If thread is cancelled, make cleanup call */
     cleanup_structure = (cancel_cleanup_t*)malloc(sizeof(cancel_cleanup_t));

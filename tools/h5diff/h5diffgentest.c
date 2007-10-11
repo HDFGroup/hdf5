@@ -618,14 +618,14 @@ int test_attributes(const char *file,
     herr_t  status;
 
     /* Create a file  */
-    if ((fid  = H5Fcreate(file, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if((fid  = H5Fcreate(file, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         return -1;
 
     /* Create a 1D dataset */
-    sid = H5Screate_simple(1,dims,NULL);
-    did  = H5Dcreate(fid,"dset",H5T_NATIVE_INT,sid,H5P_DEFAULT);
-    status   = H5Sclose(sid);
-    assert(status>=0);
+    sid = H5Screate_simple(1, dims, NULL);
+    did = H5Dcreate2(fid, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    status = H5Sclose(sid);
+    assert(status >= 0);
 
     /* Create groups */
     gid  = H5Gcreate2(fid, "g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -643,15 +643,15 @@ int test_attributes(const char *file,
 
     /* Close */
     status = H5Dclose(did);
-    assert(status>=0);
+    assert(status >= 0);
     status = H5Gclose(gid);
-    assert(status>=0);
+    assert(status >= 0);
     status = H5Gclose(root_id);
-    assert(status>=0);
+    assert(status >= 0);
 
     /* Close file */
     status = H5Fclose(fid);
-    assert(status>=0);
+    assert(status >= 0);
     return status;
 }
 
@@ -678,19 +678,19 @@ int test_datasets(const char *file,
     herr_t  status;
     int     buf[2]={1,2};
 
-    if (make_diffs)
-        memset(buf,0,sizeof buf);
+    if(make_diffs)
+        memset(buf, 0, sizeof buf);
 
     /* Create a file  */
-    if ((fid  = H5Fcreate(file, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if((fid = H5Fcreate(file, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         return -1;
 
     /* Create a 1D dataset */
-    sid = H5Screate_simple(1,dims,NULL);
-    did  = H5Dcreate(fid,"dset",H5T_NATIVE_INT,sid,H5P_DEFAULT);
-    status   = H5Dwrite(did,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf);
-    status   = H5Sclose(sid);
-    assert(status>=0);
+    sid = H5Screate_simple(1, dims, NULL);
+    did  = H5Dcreate2(fid, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    status = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+    status = H5Sclose(sid);
+    assert(status >= 0);
 
     /* Create a group */
     gid  = H5Gcreate2(fid, "g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -704,13 +704,13 @@ int test_datasets(const char *file,
 
     /* Close */
     status = H5Dclose(did);
-    assert(status>=0);
+    assert(status >= 0);
     status = H5Gclose(gid);
-    assert(status>=0);
+    assert(status >= 0);
 
     /* Close file */
     status = H5Fclose(fid);
-    assert(status>=0);
+    assert(status >= 0);
     return status;
 }
 
@@ -1916,20 +1916,19 @@ void write_dset_in(hid_t loc_id,
  ((int *)buf5[1].p)[0]=2;
  ((int *)buf5[1].p)[1]=3;
 
- if (make_diffs)
- {
-  ((int *)buf5[0].p)[0]=0;
-  ((int *)buf5[1].p)[0]=0;
+ if(make_diffs) {
+  ((int *)buf5[0].p)[0] = 0;
+  ((int *)buf5[1].p)[0] = 0;
   ((int *)buf5[1].p)[1]=0;
  }
 
- sid = H5Screate_simple(1,dims,NULL);
+ sid = H5Screate_simple(1, dims, NULL);
  tid = H5Tvlen_create(H5T_NATIVE_INT);
- did = H5Dcreate(loc_id,"vlen",tid,sid,H5P_DEFAULT);
- status = H5Dwrite(did,tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf5);
- assert(status>=0);
- status = H5Dvlen_reclaim(tid,sid,H5P_DEFAULT,buf5);
- assert(status>=0);
+ did = H5Dcreate2(loc_id, "vlen", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ status = H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf5);
+ assert(status >= 0);
+ status = H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf5);
+ assert(status >= 0);
  status = H5Dclose(did);
  status = H5Tclose(tid);
  status = H5Sclose(sid);
@@ -2063,25 +2062,27 @@ void write_dset_in(hid_t loc_id,
  */
 
 /* Allocate and initialize VL dataset to write */
- n=0;
- for (i = 0; i < 3; i++) {
-  for (j = 0; j < 2; j++) {
+ n = 0;
+ for(i = 0; i < 3; i++)
+  for(j = 0; j < 2; j++) {
     int l;
+
     buf52[i][j].p = malloc((i + 1) * sizeof(int));
     buf52[i][j].len = i + 1;
-    for (l = 0; l < i + 1; l++)
-    if (make_diffs)((int *)buf52[i][j].p)[l] = 0;
-    else ((int *)buf52[i][j].p)[l] = n++;
+    for(l = 0; l < i + 1; l++)
+        if (make_diffs)
+            ((int *)buf52[i][j].p)[l] = 0;
+        else
+            ((int *)buf52[i][j].p)[l] = n++;
   }
- }
 
- sid = H5Screate_simple(2,dims2,NULL);
+ sid = H5Screate_simple(2, dims2, NULL);
  tid = H5Tvlen_create(H5T_NATIVE_INT);
- did = H5Dcreate(loc_id,"vlen2D",tid,sid,H5P_DEFAULT);
- status = H5Dwrite(did,tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf52);
- assert(status>=0);
- status = H5Dvlen_reclaim(tid,sid,H5P_DEFAULT,buf52);
- assert(status>=0);
+ did = H5Dcreate2(loc_id, "vlen2D", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ status = H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf52);
+ assert(status >= 0);
+ status = H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf52);
+ assert(status >= 0);
  status = H5Dclose(did);
  status = H5Tclose(tid);
  status = H5Sclose(sid);
@@ -2107,18 +2108,17 @@ void write_dset_in(hid_t loc_id,
  */
 
 
- if (make_diffs)
- {
-  memset(buf72,0,sizeof buf72);
-  memset(buf82,0,sizeof buf82);
+ if (make_diffs) {
+  memset(buf72, 0, sizeof buf72);
+  memset(buf82, 0, sizeof buf82);
  }
 
 
  dcpl = H5Pcreate(H5P_DATASET_CREATE);
  status = H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillvalue);
- sid = H5Screate_simple(2,dims2,NULL);
- did = H5Dcreate(loc_id,"integer2D",H5T_NATIVE_INT,sid,dcpl);
- status = H5Dwrite(did,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf72);
+ sid = H5Screate_simple(2, dims2, NULL);
+ did = H5Dcreate2(loc_id, "integer2D", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+ status = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf72);
  status = H5Pclose(dcpl);
  status = H5Dclose(did);
  status = H5Sclose(sid);
@@ -2243,26 +2243,27 @@ void write_dset_in(hid_t loc_id,
 
  /* Allocate and initialize VL dataset to write */
  n=0;
- for (i = 0; i < 4; i++) {
-  for (j = 0; j < 3; j++) {
-   for (k = 0; k < 2; k++) {
+ for(i = 0; i < 4; i++)
+  for(j = 0; j < 3; j++)
+   for(k = 0; k < 2; k++) {
     int l;
+
     buf53[i][j][k].p = malloc((i + 1) * sizeof(int));
     buf53[i][j][k].len = i + 1;
-    for (l = 0; l < i + 1; l++)
-    if (make_diffs)((int *)buf53[i][j][k].p)[l] = 0;
-    else ((int *)buf53[i][j][k].p)[l] = n++;
+    for(l = 0; l < i + 1; l++)
+        if(make_diffs)
+            ((int *)buf53[i][j][k].p)[l] = 0;
+        else
+            ((int *)buf53[i][j][k].p)[l] = n++;
    }
-  }
- }
 
- sid = H5Screate_simple(3,dims3,NULL);
+ sid = H5Screate_simple(3, dims3, NULL);
  tid = H5Tvlen_create(H5T_NATIVE_INT);
- did = H5Dcreate(loc_id,"vlen3D",tid,sid,H5P_DEFAULT);
- status = H5Dwrite(did,tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf53);
- assert(status>=0);
- status = H5Dvlen_reclaim(tid,sid,H5P_DEFAULT,buf53);
- assert(status>=0);
+ did = H5Dcreate2(loc_id, "vlen3D", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ status = H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf53);
+ assert(status >= 0);
+ status = H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf53);
+ assert(status >= 0);
  status = H5Dclose(did);
  status = H5Tclose(tid);
  status = H5Sclose(sid);
@@ -2339,41 +2340,38 @@ void gen_datareg(hid_t fid,
  int             i;
 
  /* allocate the buffer for write the references */
- rbuf=calloc(2,sizeof(hdset_reg_ref_t));
+ rbuf = calloc(2, sizeof(hdset_reg_ref_t));
 
  /* allocate the buffer for write the data dataset */
- buf=malloc(10*10*sizeof(int));
+ buf = malloc(10 * 10 * sizeof(int));
 
- for (i=0; i<10*10; i++)
- {
-  buf[i]=i;
- }
+ for(i = 0; i < 10 * 10; i++)
+  buf[i] = i;
 
  /* create the data dataset */
- sid1   = H5Screate_simple(2,dims1,NULL);
- did1   = H5Dcreate(fid,"dsetref",H5T_NATIVE_INT,sid1,H5P_DEFAULT);
- status = H5Dwrite(did1,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf);
+ sid1   = H5Screate_simple(2, dims1, NULL);
+ did1   = H5Dcreate2(fid, "dsetref", H5T_NATIVE_INT, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ status = H5Dwrite(did1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
 
  /* create the reference dataset */
- sid2   = H5Screate_simple(1,dims2,NULL);
- did2   = H5Dcreate(fid,"refreg",H5T_STD_REF_DSETREG,sid2,H5P_DEFAULT);
+ sid2   = H5Screate_simple(1, dims2, NULL);
+ did2   = H5Dcreate2(fid, "refreg", H5T_STD_REF_DSETREG, sid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
  /* create the references */
  /* select hyperslab for first reference */
 
- start[0]=2; start[1]=2;
- count[0]=6; count[1]=6;
- if (make_diffs)
- {
-  start[0]=0; start[1]=0;
-  count[0]=3; count[1]=3;
+ start[0] = 2; start[1] = 2;
+ count[0] = 6; count[1] = 6;
+ if(make_diffs) {
+  start[0] = 0; start[1] = 0;
+  count[0] = 3; count[1] = 3;
  }
 
- status = H5Sselect_hyperslab(sid1,H5S_SELECT_SET,start,NULL,count,NULL);
+ status = H5Sselect_hyperslab(sid1, H5S_SELECT_SET, start, NULL, count, NULL);
  H5Sget_select_npoints(sid1);
 
  /* store first dataset region */
- status = H5Rcreate(&rbuf[0],fid,"dsetref",H5R_DATASET_REGION,sid1);
+ status = H5Rcreate(&rbuf[0], fid, "dsetref", H5R_DATASET_REGION, sid1);
 
  /* select sequence of five points for second reference */
  coord[0][0]=6; coord[0][1]=9;
@@ -2437,43 +2435,39 @@ int test_hyperslab(const char *fname,
  char    c;
 
  /* create */ 
- fid = H5Fcreate (fname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
- if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+ fid = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+ if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
   goto out;
- if (H5Pset_fill_value(dcpl, H5T_NATIVE_CHAR, &fillvalue) < 0)
+ if(H5Pset_fill_value(dcpl, H5T_NATIVE_CHAR, &fillvalue) < 0)
   goto out;
  if(H5Pset_chunk(dcpl, 1, chunk_dims) < 0)
   goto out;
- if ((f_sid = H5Screate_simple(1,dims,NULL)) < 0)
+ if((f_sid = H5Screate_simple(1, dims, NULL)) < 0)
   goto out;
- if ((did = H5Dcreate(fid,"big",H5T_NATIVE_CHAR,f_sid,dcpl)) < 0)
+ if((did = H5Dcreate2(fid, "big", H5T_NATIVE_CHAR, f_sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
   goto out;
- if ((m_sid = H5Screate_simple(1, hs_size, hs_size)) < 0) 
+ if((m_sid = H5Screate_simple(1, hs_size, hs_size)) < 0) 
   goto out;
- if ((tid = H5Dget_type(did)) < 0) 
+ if((tid = H5Dget_type(did)) < 0) 
   goto out;
- if ((size = H5Tget_size(tid))<=0)
+ if((size = H5Tget_size(tid)) <= 0)
   goto out;
  
  /* create a evenly divided buffer from 0 to 127  */
- buf=(char *) HDmalloc((unsigned)(nelmts*size));
- s = 1024*1024 / 127;
- for (i=0, j=0, c=0; i<1024*1024; j++, i++) 
- {
-  if ( j==s)
-  {
+ buf = (char *)HDmalloc((unsigned)(nelmts * size));
+ s = 1024 * 1024 / 127;
+ for(i = 0, j = 0, c = 0; i < 1024 * 1024; j++, i++) {
+  if(j == s) {
    c++;
-   j=0;
-  };
+   j = 0;
+  }
 
   /* set the hyperslab values */
   HDmemset(buf, c, nelmts);
 
   /* make a different hyperslab at this position */
-  if (make_diffs && i==512*512)
-  {
+  if(make_diffs && i == 512 * 512)
    HDmemset(buf, 0, nelmts);
-  }
   
   hs_start[0] = i * GBLL/(1024*1024);
   if (H5Sselect_hyperslab (f_sid,H5S_SELECT_SET,hs_start,NULL,hs_size, NULL) < 0) 
@@ -2573,32 +2567,29 @@ int write_dset( hid_t loc_id,
                 hid_t tid,
                 void *buf )
 {
- hid_t   did;
- hid_t   sid;
+    hid_t   did;
+    hid_t   sid;
 
- /* create a space  */
- if (( sid = H5Screate_simple(rank,dims,NULL)) < 0 )
-     goto out;
+    /* create a space  */
+    if((sid = H5Screate_simple(rank, dims, NULL)) < 0)
+        goto out;
 
- /* create the dataset */
- if (( did = H5Dcreate(loc_id,name,tid,sid,H5P_DEFAULT)) < 0 )
-     goto out;
+    /* create the dataset */
+    if((did = H5Dcreate2(loc_id, name, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
 
- /* write */
- if ( buf )
- {
-  if ( H5Dwrite(did,tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0 )
-      goto out;
- }
+    /* write */
+    if(buf)
+        if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+            goto out;
 
- /* close */
- H5Dclose(did);
- H5Sclose(sid);
+    /* close */
+    H5Dclose(did);
+    H5Sclose(sid);
 
- return SUCCEED;
+    return SUCCEED;
 
 out:
- 
- return FAIL;
+    return FAIL;
 }
 

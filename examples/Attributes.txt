@@ -22,7 +22,7 @@ H5Acreate2 example: Show how to create an attribute for a dataset and a group
     dataspace = H5Screate_simple(rank, dimsf, NULL); 
 
     /* Create a dataset */
-    dataset = H5Dcreate(file, "Dataset1", H5T_UINT8, dataspace, H5P_DEFAULT);
+    dataset = H5Dcreate2(file, "Dataset1", H5T_UINT8, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     <Write data to first dataset>
 

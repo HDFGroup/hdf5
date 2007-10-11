@@ -226,16 +226,15 @@ static int sender (void)
    * Create a new dataset within the file using defined dataspace and
    * default dataset creation properties.
    */
-  dataset = H5Dcreate (file, DATASETNAME, H5T_NATIVE_INT, dataspace,
-                       H5P_DEFAULT);
-  if (dataset < 0)
-  {
-    fprintf (stderr, "sender: couldn't create dataset '%s'\n", DATASETNAME);
-    free (data);
-    H5Fclose (file);
-    H5Sclose (dataspace);
-    H5Pclose (fapl);
-    return (-8);
+  dataset = H5Dcreate2(file, DATASETNAME, H5T_NATIVE_INT, dataspace,
+                       H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  if(dataset < 0) {
+    fprintf(stderr, "sender: couldn't create dataset '%s'\n", DATASETNAME);
+    free(data);
+    H5Fclose(file);
+    H5Sclose(dataspace);
+    H5Pclose(fapl);
+    return(-8);
   }
 
   /*

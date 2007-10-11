@@ -134,7 +134,7 @@ mklinks(hid_t fapl, hbool_t new_format)
     if(H5Gclose(grp) < 0) TEST_ERROR
 
     /* Create a dataset */
-    if((d1 = H5Dcreate(file, "d1", H5T_NATIVE_INT, scalar, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((d1 = H5Dcreate2(file, "d1", H5T_NATIVE_INT, scalar, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Dclose(d1) < 0) TEST_ERROR
 
     /* Create a hard link */
@@ -208,8 +208,8 @@ new_links(hid_t fapl, hbool_t new_format)
     if((grp2_b = H5Gcreate2(file_b, "grp2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Create datasets */
-    if((dset1 = H5Dcreate(file_a, "dataset1", H5T_NATIVE_INT, scalar, H5P_DEFAULT)) < 0) TEST_ERROR
-    if((dset2 = H5Dcreate(grp1_a, "dataset2", H5T_NATIVE_INT, scalar, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((dset1 = H5Dcreate2(file_a, "dataset1", H5T_NATIVE_INT, scalar, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((dset2 = H5Dcreate2(grp1_a, "dataset2", H5T_NATIVE_INT, scalar, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Create links within a file.  Both of source and destination use
      * H5L_SAME_LOC.  Both hard and soft links should fail. */
@@ -3411,7 +3411,7 @@ external_link_closing(hid_t fapl, hbool_t new_format)
     /* Test creating each kind of object */
     if((gid = H5Gcreate2(fid1, "elink/elink/elink/group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Tcommit2(fid1, "elink/elink/elink/type1", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
-    if((did = H5Dcreate(fid1, "elink/elink/elink/dataset1", tid2, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid1, "elink/elink/elink/dataset1", tid2, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     /* Close objects */
     if(H5Gclose(gid) < 0) TEST_ERROR
     if(H5Tclose(tid) < 0) TEST_ERROR
@@ -5087,7 +5087,7 @@ lapl_nlinks(hid_t fapl, hbool_t new_format)
     dims[0] = 2;
     dims[1] = 2;
     if((sid = H5Screate_simple(2, dims, NULL)) < 0) TEST_ERROR
-    if((did = H5Dcreate(gid, "dataset", H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(gid, "dataset", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
     /* Close group */
@@ -5199,7 +5199,7 @@ linkinfo(hid_t fapl, hbool_t new_format)
     if(H5Lcreate_soft("group", fid, "softlink", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
     if((sid = H5Screate(H5S_SCALAR)) < 0) TEST_ERROR
-    if((did = H5Dcreate(fid, "dataset", H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid, "dataset", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     if(H5Lcreate_ud(fid, "ud_link", UD_PLIST_TYPE, NULL, (size_t)0, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
     if(H5Lcreate_external("file_name", "obj_path", fid, "ext_link", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR

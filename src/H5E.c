@@ -321,8 +321,13 @@ H5E_get_stack(void)
 
         /* Set the thread-specific info */
         estack->nused = 0;
+#ifdef H5_USE_16_API
+        estack->auto_op.vers = 1;
+        estack->auto_op.u.func1 = (H5E_auto1_t)H5Eprint1;
+#else /* H5_USE_16_API */
         estack->auto_op.vers = 2;
         estack->auto_op.u.func2 = (H5E_auto2_t)H5Eprint2;
+#endif /* H5_USE_16_API */
         estack->auto_data = NULL;
 
         /* (It's not necessary to release this in this API, it is

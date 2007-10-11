@@ -64,7 +64,7 @@ hid_t   ERR_MIN_GETNUM;
 #define ERR_MAJ_API_MSG              "Error in API"
 #define ERR_MIN_SUBROUTINE_MSG       "Error in subroutine"
 #define ERR_MIN_ERRSTACK_MSG         "Error in error stack"
-#define ERR_MIN_CREATE_MSG           "Error in H5Dcreate"
+#define ERR_MIN_CREATE_MSG           "Error in H5Dcreate2"
 #define ERR_MIN_WRITE_MSG            "Error in H5Dwrite"
 #define ERR_MIN_GETNUM_MSG           "Error in H5Eget_num"
 
@@ -114,13 +114,13 @@ test_error(hid_t file)
 
     /* Test H5E_BEGIN_TRY */
     H5E_BEGIN_TRY {
-        dataset = H5Dcreate(FAKE_ID, DSET_NAME, H5T_STD_I32BE, space, H5P_DEFAULT);
+        dataset = H5Dcreate2(FAKE_ID, DSET_NAME, H5T_STD_I32BE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
 
     /* Create the dataset */
-    if((dataset = H5Dcreate(file, DSET_NAME, H5T_STD_I32BE, space, H5P_DEFAULT)) < 0) {
+    if((dataset = H5Dcreate2(file, DSET_NAME, H5T_STD_I32BE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
         H5Epush(H5E_DEFAULT, __FILE__, FUNC_test_error, __LINE__, ERR_CLS, ERR_MAJ_IO, ERR_MIN_CREATE,
-                "H5Dcreate failed");
+                "H5Dcreate2 failed");
         goto error;
     } /* end if */
 

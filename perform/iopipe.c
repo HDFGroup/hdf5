@@ -224,12 +224,13 @@ main (void)
 
     /* Create the dataset */
     file_space = H5Screate_simple (2, size, size);
-    assert (file_space>=0);
-    dset = H5Dcreate (file, "dset", H5T_NATIVE_UCHAR, file_space, H5P_DEFAULT);
-    assert (dset>=0);
-    the_data = malloc ((size_t)(size[0]*size[1]));
-    /*initial fill for lazy malloc*/
-    memset (the_data, 0xAA, (size_t)(size[0]*size[1]));
+    assert(file_space >= 0);
+    dset = H5Dcreate2(file, "dset", H5T_NATIVE_UCHAR, file_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    assert(dset >= 0);
+    the_data = malloc((size_t)(size[0] * size[1]));
+
+    /* initial fill for lazy malloc */
+    memset(the_data, 0xAA, (size_t)(size[0] * size[1]));
 
     /* Fill raw */
     synchronize ();

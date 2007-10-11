@@ -63,7 +63,7 @@ main(void)
         printf("space<0!\n");
 
     /* Create the dataset with compound array fields */
-    dset = H5Dcreate(file, "Dataset1", H5T_NATIVE_INT, space, H5P_DEFAULT);
+    dset = H5Dcreate2(file, "Dataset1", H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if(dset<0)
         printf("dset<0!\n");
 

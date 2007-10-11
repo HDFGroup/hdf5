@@ -54,7 +54,7 @@ static void gen_file(void)
         sprintf(name, "%s%d", GROUP_NAME,i);
         gid = H5Gcreate2(file, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         H5Gclose(gid);
-    }
+    } /* end for */
 
     /* Create a datatype to commit and use */
     type_id = H5Tcopy(H5T_NATIVE_INT);
@@ -63,12 +63,12 @@ static void gen_file(void)
     space_id = H5Screate(H5S_SCALAR);
 
      /* Create dataset */
-    dset_id = H5Dcreate(file, DATASET_NAME, type_id, space_id, H5P_DEFAULT);
+    dset_id = H5Dcreate2(file, DATASET_NAME, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     for(i = 1; i <= NUM_ATTRS; i++) {
         sprintf(attrname, "%s%d", ATTR_NAME,i);
         attr_id = H5Acreate2(dset_id, ".", attrname, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         ret = H5Aclose(attr_id);
-    }
+    } /* end for */
 
     ret = H5Dclose(dset_id);
     ret = H5Sclose(space_id);

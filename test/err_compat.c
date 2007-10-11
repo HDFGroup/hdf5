@@ -81,14 +81,14 @@ test_error(hid_t file)
 
     /* Test H5E_BEGIN_TRY */
     H5E_BEGIN_TRY {
-        dataset = H5Dcreate(FAKE_ID, DSET_NAME, H5T_STD_I32BE, space, H5P_DEFAULT);
+        dataset = H5Dcreate2(FAKE_ID, DSET_NAME, H5T_STD_I32BE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
 
     /* Create the dataset */
-    if ((dataset = H5Dcreate(file, DSET_NAME, H5T_STD_I32BE, space,
-			     H5P_DEFAULT))<0) {
+    if ((dataset = H5Dcreate2(file, DSET_NAME, H5T_STD_I32BE, space,
+			     H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
         H5Epush1(__FILE__, FUNC_test_error, __LINE__, H5E_ERROR, H5E_CANTCREATE,
-                "H5Dcreate failed");
+                "H5Dcreate2 failed");
         goto error;
     }
 

@@ -529,13 +529,12 @@ int do_copy_objects(hid_t fidin,
                              *-------------------------------------------------------------------------
                              */
                             H5E_BEGIN_TRY {
-                                dset_out=H5Dcreate(fidout,travt->objs[i].name,wtype_id,f_space_id,dcpl_out);
+                                dset_out = H5Dcreate2(fidout, travt->objs[i].name, wtype_id, f_space_id, H5P_DEFAULT, dcpl_out, H5P_DEFAULT);
                             } H5E_END_TRY;
-                            if (dset_out==FAIL)
-                            {
-                                if ((dset_out=H5Dcreate(fidout,travt->objs[i].name,wtype_id,f_space_id,dcpl_id)) < 0)
+                            if(dset_out == FAIL) {
+                                if((dset_out = H5Dcreate2(fidout, travt->objs[i].name, wtype_id, f_space_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
                                     goto error;
-                                apply_f=0;
+                                apply_f = 0;
                             }
 
                             /*-------------------------------------------------------------------------

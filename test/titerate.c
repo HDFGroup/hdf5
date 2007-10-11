@@ -157,8 +157,8 @@ test_iter_group(hid_t fapl, hbool_t new_format)
 
     for(i=0; i< NDATASETS; i++) {
         sprintf(name,"Dataset %d",i);
-        dataset = H5Dcreate(file, name, datatype, filespace, H5P_DEFAULT);
-        CHECK(dataset, FAIL, "H5Dcreate");
+        dataset = H5Dcreate2(file, name, datatype, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(dataset, FAIL, "H5Dcreate2");
 
         /* Keep a copy of the dataset names around for later */
         lnames[i] = HDstrdup(name);
@@ -403,8 +403,8 @@ static void test_iter_attr(hid_t fapl, hbool_t new_format)
     filespace = H5Screate(H5S_SCALAR);
     CHECK(filespace, FAIL, "H5Screate");
 
-    dataset = H5Dcreate(file, "Dataset", H5T_NATIVE_INT, filespace, H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(file, "Dataset", H5T_NATIVE_INT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     for(i = 0; i < NATTR; i++) {
         sprintf(name, "Attribute %02d", i);
@@ -624,8 +624,8 @@ test_iter_group_large(hid_t fapl)
     } /* end for */
 
     /* Create a dataset  */
-    dataset = H5Dcreate(file, "Dataset1", H5T_STD_U32LE, sid, H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(file, "Dataset1", H5T_STD_U32LE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Add the name to the list of objects in the root group */
     HDstrcpy(names[ITER_NGROUPS].name, "Dataset1");
@@ -717,13 +717,13 @@ static void test_grp_memb_funcs(hid_t fapl)
     datatype = H5Tcopy(H5T_NATIVE_INT);
     CHECK(datatype, FAIL, "H5Tcopy");
 
-    filespace=H5Screate(H5S_SCALAR);
+    filespace = H5Screate(H5S_SCALAR);
     CHECK(filespace, FAIL, "H5Screate");
 
-    for(i = 0; i< NDATASETS; i++) {
-        sprintf(name,"Dataset %d",i);
-        dataset = H5Dcreate(file, name, datatype, filespace, H5P_DEFAULT);
-        CHECK(dataset, FAIL, "H5Dcreate");
+    for(i = 0; i < NDATASETS; i++) {
+        sprintf(name, "Dataset %d", i);
+        dataset = H5Dcreate2(file, name, datatype, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(dataset, FAIL, "H5Dcreate2");
 
         /* Keep a copy of the dataset names around for later */
         dnames[i] = HDstrdup(name);

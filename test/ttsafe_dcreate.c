@@ -26,7 +26,7 @@
  *   ttsafe_dcreate.h5
  *
  * HDF5 APIs exercised in thread:
- * H5Screate_simple, H5Tcopy, H5Tset_order, H5Dcreate, H5Dwrite, H5Dclose,
+ * H5Screate_simple, H5Tcopy, H5Tset_order, H5Dcreate2, H5Dwrite, H5Dclose,
  * H5Tclose, H5Sclose.
  *
  * Created: Apr 28 2000
@@ -163,39 +163,40 @@ void tts_dcreate(void)
 
 void *tts_dcreate_creator(void *_thread_data)
 {
-	hid_t   dataspace, dataset;
-        herr_t  ret;
-	hsize_t dimsf[1]; /* dataset dimensions */
-	struct thread_info thread_data;
+    hid_t   dataspace, dataset;
+    herr_t  ret;
+    hsize_t dimsf[1]; /* dataset dimensions */
+    struct thread_info thread_data;
 
-	memcpy(&thread_data,_thread_data,sizeof(struct thread_info));
+    memcpy(&thread_data, _thread_data, sizeof(struct thread_info));
 
-	/* define dataspace for dataset */
-	dimsf[0] = 1;
-	dataspace = H5Screate_simple(1,dimsf,NULL);
-        assert(dataspace>=0);
+    /* define dataspace for dataset */
+    dimsf[0] = 1;
+    dataspace = H5Screate_simple(1, dimsf, NULL);
+    assert(dataspace >= 0);
 
-	/* create a new dataset within the file */
-	dataset = H5Dcreate(thread_data.file, thread_data.dsetname,
-			    H5T_NATIVE_INT, dataspace, H5P_DEFAULT);
-        assert(dataset>=0);
+    /* create a new dataset within the file */
+    dataset = H5Dcreate2(thread_data.file, thread_data.dsetname,
+                        H5T_NATIVE_INT, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    assert(dataset >= 0);
 
-	/* initialize data for dataset and write value to dataset */
-	ret=H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-		 H5P_DEFAULT, &thread_data.id);
-        assert(ret>=0);
+    /* initialize data for dataset and write value to dataset */
+    ret = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+             H5P_DEFAULT, &thread_data.id);
+    assert(ret >= 0);
 
-	/* close dataset and dataspace resources */
-	ret=H5Dclose(dataset);
-        assert(ret>=0);
-	ret=H5Sclose(dataspace);
-        assert(ret>=0);
+    /* close dataset and dataspace resources */
+    ret = H5Dclose(dataset);
+    assert(ret >= 0);
+    ret = H5Sclose(dataspace);
+    assert(ret >= 0);
 
-	return NULL;
+    return NULL;
 }
 
 void cleanup_dcreate(void)
 {
-	HDunlink(FILENAME);
+    HDunlink(FILENAME);
 }
 #endif /*H5_HAVE_THREADSAFE*/
+

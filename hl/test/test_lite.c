@@ -418,7 +418,7 @@ static int test_attr(void)
     if((space_id = H5Screate_simple(1, dims, NULL)) < 0) goto out;
 
     /* Create the dataset */
-    if((dataset_id = H5Dcreate(file_id , "dset", H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) goto out;
+    if((dataset_id = H5Dcreate2(file_id , "dset", H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto out;
 
     /* Close */
     H5Dclose(dataset_id);

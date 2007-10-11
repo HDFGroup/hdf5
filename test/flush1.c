@@ -64,7 +64,7 @@ create_file(char* name, hid_t fapl)
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
     if(H5Pset_chunk(dcpl, 2, ch_size) < 0) FAIL_STACK_ERROR
     if((space = H5Screate_simple(2, ds_size, NULL)) < 0) FAIL_STACK_ERROR
-    if((dset = H5Dcreate(file, "dset", H5T_NATIVE_FLOAT, space, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((dset = H5Dcreate2(file, "dset", H5T_NATIVE_FLOAT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Write some data */
     for(i = 0; i < ds_size[0]; i++)
@@ -82,7 +82,7 @@ create_file(char* name, hid_t fapl)
     for(i = 0; i < 100; i++) {
 	sprintf(name, "grp%02u", (unsigned)i);
 	if((grp = H5Gcreate2(groups, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-	if(H5Gclose(grp)<0) FAIL_STACK_ERROR
+	if(H5Gclose(grp) < 0) FAIL_STACK_ERROR
     } /* end for */
 
     return file;
@@ -117,10 +117,10 @@ extend_file(hid_t file)
     size_t	i, j;
 
     /* Create a chunked dataset */
-    if ((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
-    if (H5Pset_chunk(dcpl, 2, ch_size)<0) goto error;
-    if ((space=H5Screate_simple(2, ds_size, NULL))<0) goto error;
-    if ((dset=H5Dcreate(file, "dset2", H5T_NATIVE_FLOAT, space, H5P_DEFAULT))<0)
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
+    if(H5Pset_chunk(dcpl, 2, ch_size) < 0) goto error;
+    if((space = H5Screate_simple(2, ds_size, NULL)) < 0) goto error;
+    if((dset = H5Dcreate2(file, "dset2", H5T_NATIVE_FLOAT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
 	goto error;
 
     /* Write some data */
@@ -135,7 +135,7 @@ extend_file(hid_t file)
 	}
     }
     if (H5Dwrite(dset, H5T_NATIVE_DOUBLE, space, space, H5P_DEFAULT,
-		the_data)<0) goto error;
+		the_data) < 0) goto error;
 
 
     return file;
@@ -185,13 +185,13 @@ main(void)
 	h5_fixname(FILENAME[0], fapl, name, sizeof name);
 	file = create_file(name, fapl);
 	/* Flush and exit without closing the library */
-	if (H5Fflush(file, H5F_SCOPE_GLOBAL)<0) goto error;
+	if (H5Fflush(file, H5F_SCOPE_GLOBAL) < 0) goto error;
 
 	/* Create the file */
 	h5_fixname(FILENAME[2], fapl, name, sizeof name);
 	file = create_file(name, fapl);
 	/* Flush and exit without closing the library */
-	if (H5Fflush(file, H5F_SCOPE_GLOBAL)<0) goto error;
+	if(H5Fflush(file, H5F_SCOPE_GLOBAL) < 0) goto error;
 	/* Add a bit to the file and don't flush the new part */
 	extend_file(file);
 	

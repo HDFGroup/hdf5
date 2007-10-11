@@ -130,22 +130,22 @@ test_vltypes_dataset_create(void)
     CHECK(sid1, FAIL, "H5Screate_simple");
 
     /* Create a datatype to refer to */
-    tid1 = H5Tvlen_create (H5T_NATIVE_UINT);
+    tid1 = H5Tvlen_create(H5T_NATIVE_UINT);
     CHECK(tid1, FAIL, "H5Tvlen_create");
 
     /* Create dataset property list */
-    dcpl=H5Pcreate(H5P_DATASET_CREATE);
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
     CHECK(dcpl, FAIL, "H5Pcreate");
 
     /* Set fill value writting time to be NEVER */
-    ret=H5Pset_fill_time(dcpl, H5D_FILL_TIME_NEVER);
+    ret = H5Pset_fill_time(dcpl, H5D_FILL_TIME_NEVER);
     CHECK(ret, FAIL, "H5Pset_fill_time");
 
     /* Create a dataset, supposed to fail */
     H5E_BEGIN_TRY {
-    	dataset=H5Dcreate(fid1,"Dataset1",tid1,sid1,dcpl);
+    	dataset = H5Dcreate2(fid1, "Dataset1", tid1, sid1, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     } H5E_END_TRY;
-    VERIFY(dataset, FAIL, "H5Dcreate");
+    VERIFY(dataset, FAIL, "H5Dcreate2");
 
     /* Close datatype */
     ret = H5Tclose(tid1);
@@ -277,33 +277,33 @@ test_vltypes_vlen_atomic(void)
     CHECK(tid1, FAIL, "H5Tvlen_create");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",tid1,sid1,H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid1, "Dataset1", tid1, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Read from dataset before writing data */
-    ret=H5Dread(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,rdata);
+    ret = H5Dread(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
     CHECK(ret, FAIL, "H5Dread");
 
     /* Check data read in */
-    for(i=0; i<SPACE1_DIM1; i++)
-        if(rdata[i].len!=0 || rdata[i].p!=NULL)
+    for(i = 0; i < SPACE1_DIM1; i++)
+        if(rdata[i].len != 0 || rdata[i].p != NULL)
             TestErrPrintf("VL doesn't match!, rdata[%d].len=%u, rdata[%d].p=%p\n",(int)i,(unsigned)rdata[i].len,(int)i,rdata[i].p);
 
     /* Write "nil" data to disk */
-    ret=H5Dwrite(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata2);
+    ret = H5Dwrite(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata2);
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Read from dataset with "nil" data */
-    ret=H5Dread(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,rdata);
+    ret = H5Dread(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
     CHECK(ret, FAIL, "H5Dread");
 
     /* Check data read in */
-    for(i=0; i<SPACE1_DIM1; i++)
-        if(rdata[i].len!=0 || rdata[i].p!=NULL)
+    for(i = 0; i < SPACE1_DIM1; i++)
+        if(rdata[i].len != 0 || rdata[i].p != NULL)
             TestErrPrintf("VL doesn't match!, rdata[%d].len=%u, rdata[%d].p=%p\n",(int)i,(unsigned)rdata[i].len,(int)i,rdata[i].p);
 
     /* Write dataset to disk */
-    ret=H5Dwrite(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata);
+    ret = H5Dwrite(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Close Dataset */
@@ -311,42 +311,42 @@ test_vltypes_vlen_atomic(void)
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Create second dataset, with fill value */
-    dcpl_pid=H5Pcreate(H5P_DATASET_CREATE);
+    dcpl_pid = H5Pcreate(H5P_DATASET_CREATE);
     CHECK(dcpl_pid, FAIL, "H5Pcreate");
 
     /* Set the fill value for the second dataset */
-    fill.p=NULL; fill.len=0;
-    ret=H5Pset_fill_value(dcpl_pid, tid1, &fill);
+    fill.p = NULL; fill.len = 0;
+    ret = H5Pset_fill_value(dcpl_pid, tid1, &fill);
     CHECK(ret, FAIL, "H5Pset_fill_value");
 
     /* Create a second dataset */
-    dataset=H5Dcreate(fid1,"Dataset2",tid1,sid1,dcpl_pid);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid1, "Dataset2", tid1, sid1, H5P_DEFAULT, dcpl_pid, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Close dataset creation property list */
     ret = H5Pclose(dcpl_pid);
     CHECK(ret, FAIL, "H5Pclose");
 
     /* Read from dataset before writing data */
-    ret=H5Dread(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,rdata);
+    ret = H5Dread(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
     CHECK(ret, FAIL, "H5Dread");
 
     /* Check data read in */
-    for(i=0; i<SPACE1_DIM1; i++)
-        if(rdata[i].len!=0 || rdata[i].p!=NULL)
+    for(i = 0; i < SPACE1_DIM1; i++)
+        if(rdata[i].len != 0 || rdata[i].p != NULL)
             TestErrPrintf("VL doesn't match!, rdata[%d].len=%u, rdata[%d].p=%p\n",(int)i,(unsigned)rdata[i].len,(int)i,rdata[i].p);
 
     /* Write "nil" data to disk */
-    ret=H5Dwrite(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata2);
+    ret = H5Dwrite(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata2);
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Read from dataset with "nil" data */
-    ret=H5Dread(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,rdata);
+    ret = H5Dread(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
     CHECK(ret, FAIL, "H5Dread");
 
     /* Check data read in */
     for(i=0; i<SPACE1_DIM1; i++)
-        if(rdata[i].len!=0 || rdata[i].p!=NULL)
+        if(rdata[i].len != 0 || rdata[i].p != NULL)
             TestErrPrintf("VL doesn't match!, rdata[%d].len=%u, rdata[%d].p=%p\n",(int)i,(unsigned)rdata[i].len,(int)i,rdata[i].p);
 
     /* Write data to disk */
@@ -753,39 +753,39 @@ test_vltypes_vlen_compound(void)
     CHECK(tid2, FAIL, "H5Tcreate");
 
     /* Insert fields */
-    ret=H5Tinsert(tid2, "i", HOFFSET(s1, i), H5T_NATIVE_INT);
+    ret = H5Tinsert(tid2, "i", HOFFSET(s1, i), H5T_NATIVE_INT);
     CHECK(ret, FAIL, "H5Tinsert");
-    ret=H5Tinsert(tid2, "f", HOFFSET(s1, f), H5T_NATIVE_FLOAT);
+    ret = H5Tinsert(tid2, "f", HOFFSET(s1, f), H5T_NATIVE_FLOAT);
     CHECK(ret, FAIL, "H5Tinsert");
 
     /* Create a datatype to refer to */
-    tid1 = H5Tvlen_create (tid2);
+    tid1 = H5Tvlen_create(tid2);
     CHECK(tid1, FAIL, "H5Tvlen_create");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",tid1,sid1,H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid1, "Dataset1", tid1, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Write dataset to disk */
-    ret=H5Dwrite(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata);
+    ret = H5Dwrite(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Change to the custom memory allocation routines for reading VL data */
-    xfer_pid=H5Pcreate(H5P_DATASET_XFER);
+    xfer_pid = H5Pcreate(H5P_DATASET_XFER);
     CHECK(xfer_pid, FAIL, "H5Pcreate");
 
-    ret=H5Pset_vlen_mem_manager(xfer_pid,test_vltypes_alloc_custom,&mem_used,test_vltypes_free_custom,&mem_used);
+    ret = H5Pset_vlen_mem_manager(xfer_pid, test_vltypes_alloc_custom, &mem_used, test_vltypes_free_custom, &mem_used);
     CHECK(ret, FAIL, "H5Pset_vlen_mem_manager");
 
     /* Make certain the correct amount of memory will be used */
-    ret=H5Dvlen_get_buf_size(dataset,tid1,sid1,&size);
+    ret = H5Dvlen_get_buf_size(dataset, tid1, sid1, &size);
     CHECK(ret, FAIL, "H5Dvlen_get_buf_size");
 
     /* 10 elements allocated = 1 + 2 + 3 + 4 elements for each array position */
-    VERIFY(size,((SPACE1_DIM1*(SPACE1_DIM1+1))/2)*sizeof(s1),"H5Dvlen_get_buf_size");
+    VERIFY(size, ((SPACE1_DIM1 * (SPACE1_DIM1 + 1)) / 2) * sizeof(s1), "H5Dvlen_get_buf_size");
 
     /* Read dataset from disk */
-    ret=H5Dread(dataset,tid1,H5S_ALL,H5S_ALL,xfer_pid,rdata);
+    ret = H5Dread(dataset, tid1, H5S_ALL, H5S_ALL, xfer_pid, rdata);
     CHECK(ret, FAIL, "H5Dread");
 
     /* Make certain the correct amount of memory has been used */
@@ -1063,8 +1063,8 @@ test_vltypes_compound_vlen_vlen(void)
     CHECK(ret, FAIL, "H5Tinsert");
 
     /* Create a dataset */
-    dataset = H5Dcreate(fid1, "Dataset1", tid2, sid1, H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid1, "Dataset1", tid2, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Write dataset to disk */
     ret = H5Dwrite(dataset, tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
@@ -1268,8 +1268,8 @@ test_vltypes_compound_vlstr(void)
     CHECK(ret, FAIL, "H5Pset_chunk");
 
     /* Create a dataset */
-    dataset = H5Dcreate(fid1, "Dataset1", tid2, sid1, cparms);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid1, "Dataset1", tid2, sid1, H5P_DEFAULT, cparms, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Extend the dataset. This call assures that dataset is 4.*/
     ret = H5Dset_extent(dataset, size);
@@ -1508,37 +1508,37 @@ test_vltypes_compound_vlen_atomic(void)
     CHECK(tid2, FAIL, "H5Tcreate");
 
     /* Insert fields */
-    ret=H5Tinsert(tid2, "i", HOFFSET(s1, i), H5T_NATIVE_INT);
+    ret = H5Tinsert(tid2, "i", HOFFSET(s1, i), H5T_NATIVE_INT);
     CHECK(ret, FAIL, "H5Tinsert");
-    ret=H5Tinsert(tid2, "f", HOFFSET(s1, f), H5T_NATIVE_FLOAT);
+    ret = H5Tinsert(tid2, "f", HOFFSET(s1, f), H5T_NATIVE_FLOAT);
     CHECK(ret, FAIL, "H5Tinsert");
-    ret=H5Tinsert(tid2, "v", HOFFSET(s1, v), tid1);
+    ret = H5Tinsert(tid2, "v", HOFFSET(s1, v), tid1);
     CHECK(ret, FAIL, "H5Tinsert");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",tid2,sid1,H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid1, "Dataset1", tid2, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Write dataset to disk */
-    ret=H5Dwrite(dataset,tid2,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata);
+    ret = H5Dwrite(dataset, tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Change to the custom memory allocation routines for reading VL data */
-    xfer_pid=H5Pcreate(H5P_DATASET_XFER);
+    xfer_pid = H5Pcreate(H5P_DATASET_XFER);
     CHECK(xfer_pid, FAIL, "H5Pcreate");
 
-    ret=H5Pset_vlen_mem_manager(xfer_pid,test_vltypes_alloc_custom,&mem_used,test_vltypes_free_custom,&mem_used);
+    ret = H5Pset_vlen_mem_manager(xfer_pid, test_vltypes_alloc_custom, &mem_used, test_vltypes_free_custom, &mem_used);
     CHECK(ret, FAIL, "H5Pset_vlen_mem_manager");
 
     /* Make certain the correct amount of memory will be used */
-    ret=H5Dvlen_get_buf_size(dataset,tid2,sid1,&size);
+    ret = H5Dvlen_get_buf_size(dataset, tid2, sid1, &size);
     CHECK(ret, FAIL, "H5Dvlen_get_buf_size");
 
     /* 10 elements allocated = 1 + 2 + 3 + 4 elements for each array position */
-    VERIFY(size,((SPACE1_DIM1*(SPACE1_DIM1+1))/2)*sizeof(unsigned int),"H5Dvlen_get_buf_size");
+    VERIFY(size, ((SPACE1_DIM1 * (SPACE1_DIM1 + 1)) / 2) * sizeof(unsigned int), "H5Dvlen_get_buf_size");
 
     /* Read dataset from disk */
-    ret=H5Dread(dataset,tid2,H5S_ALL,H5S_ALL,xfer_pid,rdata);
+    ret = H5Dread(dataset, tid2, H5S_ALL, H5S_ALL, xfer_pid, rdata);
     CHECK(ret, FAIL, "H5Dread");
 
     /* Make certain the correct amount of memory has been used */
@@ -1568,52 +1568,52 @@ test_vltypes_compound_vlen_atomic(void)
     } /* end for */
 
     /* Reclaim the VL data */
-    ret=H5Dvlen_reclaim(tid2,sid1,xfer_pid,rdata);
+    ret = H5Dvlen_reclaim(tid2, sid1, xfer_pid, rdata);
     CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
     /* Make certain the VL memory has been freed */
-    VERIFY(mem_used,0,"H5Dvlen_reclaim");
+    VERIFY(mem_used, 0, "H5Dvlen_reclaim");
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Create a second dataset, with a fill value */
-    dcpl_pid=H5Pcreate(H5P_DATASET_CREATE);
+    dcpl_pid = H5Pcreate(H5P_DATASET_CREATE);
     CHECK(dcpl_pid, FAIL, "H5Pcreate");
 
     /* Set the fill value for the second dataset */
-    HDmemset(&fill,0,sizeof(s1));
-    ret=H5Pset_fill_value(dcpl_pid, tid2, &fill);
+    HDmemset(&fill, 0, sizeof(s1));
+    ret = H5Pset_fill_value(dcpl_pid, tid2, &fill);
     CHECK(ret, FAIL, "H5Pset_fill_value");
 
-    dataset=H5Dcreate(fid1,"Dataset2",tid2,sid1,H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid1, "Dataset2", tid2, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Close dataset creation property list */
     ret = H5Pclose(dcpl_pid);
     CHECK(ret, FAIL, "H5Pclose");
 
     /* Read from dataset before writing data */
-    ret=H5Dread(dataset,tid2,H5S_ALL,H5S_ALL,H5P_DEFAULT,rdata);
+    ret = H5Dread(dataset, tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
     CHECK(ret, FAIL, "H5Dread");
 
     /* Check data read in */
-    for(i=0; i<SPACE1_DIM1; i++)
-        if(rdata[i].i!=0 || !FLT_ABS_EQUAL(rdata[i].f,0.0) || rdata[i].v.len!=0 || rdata[i].v.p!=NULL)
+    for(i = 0; i < SPACE1_DIM1; i++)
+        if(rdata[i].i != 0 || !FLT_ABS_EQUAL(rdata[i].f, 0.0) || rdata[i].v.len != 0 || rdata[i].v.p != NULL)
             TestErrPrintf("VL doesn't match!, rdata[%d].i=%d, rdata[%d].f=%f, rdata[%d].v.len=%u, rdata[%d].v.p=%p\n",(int)i,rdata[i].i,(int)i,rdata[i].f,(int)i,(unsigned)rdata[i].v.len,(int)i,rdata[i].v.p);
 
     /* Write dataset to disk */
-    ret=H5Dwrite(dataset,tid2,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata);
+    ret = H5Dwrite(dataset, tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Read dataset from disk */
-    ret=H5Dread(dataset,tid2,H5S_ALL,H5S_ALL,H5P_DEFAULT,rdata);
+    ret = H5Dread(dataset, tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
     CHECK(ret, FAIL, "H5Dread");
 
     /* Compare data read in */
-    for(i=0; i<SPACE1_DIM1; i++) {
-        if(wdata[i].i!=rdata[i].i) {
+    for(i = 0; i < SPACE1_DIM1; i++) {
+        if(wdata[i].i != rdata[i].i) {
             TestErrPrintf("Integer components don't match!, wdata[%d].i=%d, rdata[%d].i=%d\n",(int)i,(int)wdata[i].i,(int)i,(int)rdata[i].i);
             continue;
         } /* end if */
@@ -1905,11 +1905,11 @@ test_vltypes_vlen_vlen_atomic(void)
     CHECK(tid2, FAIL, "H5Tvlen_create");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",tid2,sid1,H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid1, "Dataset1", tid2, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Write dataset to disk */
-    ret=H5Dwrite(dataset,tid2,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata);
+    ret = H5Dwrite(dataset, tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Close Dataset */
@@ -2608,8 +2608,8 @@ test_vltypes_fill_value(void)
             } /* end switch */
 
             /* Create first data set with default setting - no space is allocated */
-            dset_id = H5Dcreate(file_id, dset_name1, dtype1_id, dset_dspace_id, tmp_dcpl_id);
-            CHECK(dset_id, FAIL, "H5Dcreate");
+            dset_id = H5Dcreate2(file_id, dset_name1, dtype1_id, dset_dspace_id, H5P_DEFAULT, tmp_dcpl_id, H5P_DEFAULT);
+            CHECK(dset_id, FAIL, "H5Dcreate2");
 
             ret = H5Dclose(dset_id);
             CHECK(ret, FAIL, "H5Dclose");
@@ -2622,8 +2622,8 @@ test_vltypes_fill_value(void)
             ret = H5Pset_alloc_time(tmp_dcpl_id, H5D_ALLOC_TIME_EARLY);
             CHECK(ret, FAIL, "H5Pset_alloc_time");
 
-            dset_id = H5Dcreate(file_id, dset_name2, dtype1_id, dset_dspace_id, tmp_dcpl_id);
-            CHECK(dset_id, FAIL, "H5Dcreate");
+            dset_id = H5Dcreate2(file_id, dset_name2, dtype1_id, dset_dspace_id, H5P_DEFAULT, tmp_dcpl_id, H5P_DEFAULT);
+            CHECK(dset_id, FAIL, "H5Dcreate2");
 
             ret = H5Dclose(dset_id);
             CHECK(ret, FAIL, "H5Dclose");

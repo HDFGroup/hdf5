@@ -243,12 +243,12 @@ test_h5s_basic(void)
 
     /* This dataset's space has no extent; it should not be created */
     H5E_BEGIN_TRY {
-    dset1 = H5Dcreate(fid1, BASICDATASET, H5T_NATIVE_INT, sid1, H5P_DEFAULT);
+    dset1 = H5Dcreate2(fid1, BASICDATASET, H5T_NATIVE_INT, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY
-    VERIFY(dset1, FAIL, "H5Dcreate");
+    VERIFY(dset1, FAIL, "H5Dcreate2");
 
-    dset1 = H5Dcreate(fid1, BASICDATASET2, H5T_NATIVE_INT, sid2, H5P_DEFAULT);
-    CHECK(dset1, FAIL, "H5Dcreate");
+    dset1 = H5Dcreate2(fid1, BASICDATASET2, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dset1, FAIL, "H5Dcreate2");
 
     /* Try some writes with the bad dataspace (sid1) */
     H5E_BEGIN_TRY {
@@ -383,8 +383,8 @@ test_h5s_null(void)
     VERIFY(ret, FAIL, "H5Sselect_elements");
 
     /* Create first dataset */
-    did = H5Dcreate(fid, NULLDATASET, H5T_NATIVE_UINT, sid, H5P_DEFAULT);
-    CHECK(did, FAIL, "H5Dcreate");
+    did = H5Dcreate2(fid, NULLDATASET, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(did, FAIL, "H5Dcreate2");
 
     /* Write "nothing" to the dataset */
     ret = H5Dwrite(did, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &uval);
@@ -738,8 +738,8 @@ test_h5s_scalar_write(void)
     VERIFY(ext_type, H5S_SCALAR, "H5Sget_simple_extent_type");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UINT,sid1,H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid1, "Dataset1", H5T_NATIVE_UINT, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     ret = H5Dwrite(dataset, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &space3_data);
     CHECK(ret, FAIL, "H5Dwrite");
@@ -882,8 +882,8 @@ test_h5s_compound_scalar_write(void)
     VERIFY(rank, 0, "H5Sget_simple_extent_dims");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",tid1,sid1,H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid1, "Dataset1", tid1, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     ret = H5Dwrite(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, &space4_data);
     CHECK(ret, FAIL, "H5Dwrite");
@@ -996,7 +996,7 @@ test_h5s_chunk(void)
     hsize_t csize[2];
     int i,j;
 
-    fileID = H5Fcreate(DATAFILE,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT);
+    fileID = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fileID, FAIL, "H5Fcreate");
 
     plist_id = H5Pcreate(H5P_DATASET_CREATE);
@@ -1013,24 +1013,24 @@ test_h5s_chunk(void)
     space_id = H5Screate_simple(2, dims, NULL);
     CHECK(space_id, FAIL, "H5Screate_simple");
 
-    dsetID = H5Dcreate(fileID,"coords",H5T_NATIVE_FLOAT,space_id,plist_id);
-    CHECK(dsetID, FAIL, "H5Dcreate");
+    dsetID = H5Dcreate2(fileID, "coords", H5T_NATIVE_FLOAT, space_id, H5P_DEFAULT, plist_id, H5P_DEFAULT);
+    CHECK(dsetID, FAIL, "H5Dcreate2");
 
     /* Initialize float array */
-    for(i=0; i<50000; i++)
-        for(j=0; j<3; j++)
-            chunk_data_flt[i][j]=(float)((i+1)*2.5-j*100.3);
+    for(i = 0; i < 50000; i++)
+        for(j = 0; j < 3; j++)
+            chunk_data_flt[i][j] = (float)((i + 1) * 2.5 - j * 100.3);
 
-    status= H5Dwrite(dsetID,H5T_NATIVE_FLOAT,H5S_ALL,H5S_ALL,H5P_DEFAULT,chunk_data_flt);
+    status = H5Dwrite(dsetID, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, chunk_data_flt);
     CHECK(status, FAIL, "H5Dwrite");
 
-    status=H5Pclose(plist_id);
+    status = H5Pclose(plist_id);
     CHECK(status, FAIL, "H5Pclose");
-    status=H5Sclose(space_id);
+    status = H5Sclose(space_id);
     CHECK(status, FAIL, "H5Sclose");
-    status=H5Dclose(dsetID);
+    status = H5Dclose(dsetID);
     CHECK(status, FAIL, "H5Dclose");
-    status=H5Fclose(fileID);
+    status = H5Fclose(fileID);
     CHECK(status, FAIL, "H5Fclose");
 
     /* Reset/initialize the data arrays to read in */

@@ -229,26 +229,25 @@ test_compound (char *filename, hid_t fapl)
     }
 
     /* Create the memory data type */
-    if ((s1_tid = H5Tcreate (H5T_COMPOUND, sizeof(s1_t))) < 0)
+    if((s1_tid = H5Tcreate(H5T_COMPOUND, sizeof(s1_t))) < 0)
         goto error;
     array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, memb_size, NULL);
-    if (H5Tinsert (s1_tid, "a", HOFFSET(s1_t,a), H5T_NATIVE_INT) < 0 ||
-            H5Tinsert (s1_tid, "b", HOFFSET(s1_t,b), H5T_NATIVE_INT) < 0 ||
-            H5Tinsert (s1_tid, "c", HOFFSET(s1_t,c), array_dt) < 0 ||
-            H5Tinsert (s1_tid, "d", HOFFSET(s1_t,d), H5T_NATIVE_INT) < 0 ||
-            H5Tinsert (s1_tid, "e", HOFFSET(s1_t,e), H5T_NATIVE_INT) < 0)
+    if(H5Tinsert(s1_tid, "a", HOFFSET(s1_t, a), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(s1_tid, "b", HOFFSET(s1_t, b), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(s1_tid, "c", HOFFSET(s1_t, c), array_dt) < 0 ||
+            H5Tinsert(s1_tid, "d", HOFFSET(s1_t, d), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(s1_tid, "e", HOFFSET(s1_t, e), H5T_NATIVE_INT) < 0)
         goto error;
     H5Tclose(array_dt);
 
     /* Create the dataset */
-    if ((dataset = H5Dcreate (file, "s1", s1_tid, space, H5P_DEFAULT)) < 0) {
+    if((dataset = H5Dcreate2(file, "s1", s1_tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
 	goto error;
-    }
 
     /* Write the data */
-    if (H5Dwrite (dataset, s1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s1) < 0) {
+    if(H5Dwrite(dataset, s1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s1) < 0)
 	goto error;
-    }
+
     PASSED();
 
     /*
@@ -1387,7 +1386,7 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
     TESTING("writing data to contiguous and chunked datasets");
 
     /* Create contiguous data set */
-    if((dataset = H5Dcreate(file, DSET_NAME[0], src_tid, space, dcpl)) < 0)
+    if((dataset = H5Dcreate2(file, DSET_NAME[0], src_tid, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         goto error;
 
     /* Write the data to the dataset */
@@ -1402,7 +1401,7 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
         goto error;
 
     /* Create chunked data set */
-    if((dataset = H5Dcreate(file, DSET_NAME[1], src_tid, space, dcpl)) < 0)
+    if((dataset = H5Dcreate2(file, DSET_NAME[1], src_tid, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         goto error;
 
     /* Write the data to the dataset */
@@ -1591,7 +1590,7 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
     TESTING("writing data to contiguous and chunked datasets");
 
     /* Create contiguous data set */
-    if((dataset = H5Dcreate(file, DSET_NAME[2], src_tid, space, dcpl)) < 0)
+    if((dataset = H5Dcreate2(file, DSET_NAME[2], src_tid, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         goto error;
 
     /* Write the data to the dataset */
@@ -1606,7 +1605,7 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
         goto error;
 
     /* Create chunked data set */
-    if((dataset = H5Dcreate(file, DSET_NAME[3], src_tid, space, dcpl)) < 0)
+    if((dataset = H5Dcreate2(file, DSET_NAME[3], src_tid, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         goto error;
 
     /* Write the data to the dataset */

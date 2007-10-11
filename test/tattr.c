@@ -183,8 +183,8 @@ test_attr_basic_write(hid_t fapl)
     CHECK(sid1, FAIL, "H5Screate_simple");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,DSET1_NAME,H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid1, DSET1_NAME, H5T_NATIVE_UCHAR, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Create dataspace for attribute */
     sid2 = H5Screate_simple(ATTR1_RANK, dims2, NULL);
@@ -497,8 +497,8 @@ test_attr_flush(hid_t fapl)
     spc = H5Screate(H5S_SCALAR);
     CHECK(spc, FAIL, "H5Screate");
 
-    set = H5Dcreate(fil, DSET1_NAME, H5T_NATIVE_DOUBLE, spc, H5P_DEFAULT);
-    CHECK(set, FAIL, "H5Dcreate");
+    set = H5Dcreate2(fil, DSET1_NAME, H5T_NATIVE_DOUBLE, spc, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(set, FAIL, "H5Dcreate2");
 
     att = H5Acreate2(set, ".", ATTR1_NAME, H5T_NATIVE_DOUBLE, spc, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(att, FAIL, "H5Acreate2");
@@ -568,8 +568,8 @@ test_attr_plist(hid_t fapl)
     CHECK(sid1, FAIL, "H5Screate_simple");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,DSET1_NAME,H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid1, DSET1_NAME, H5T_NATIVE_UCHAR, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Create dataspace for attribute */
     sid2 = H5Screate_simple(ATTR1_RANK, dims2, NULL);
@@ -681,25 +681,24 @@ test_attr_compound_write(hid_t fapl)
     CHECK(sid1, FAIL, "H5Screate_simple");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,DSET1_NAME,H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid1, DSET1_NAME, H5T_NATIVE_UCHAR, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Close dataset's dataspace */
     ret = H5Sclose(sid1);
     CHECK(ret, FAIL, "H5Sclose");
 
     /* Create the attribute datatype.  */
-    tid1 = H5Tcreate (H5T_COMPOUND, sizeof(struct attr4_struct));
+    tid1 = H5Tcreate(H5T_COMPOUND, sizeof(struct attr4_struct));
     CHECK(tid1, FAIL, "H5Tcreate");
-    attr4_field1_off=HOFFSET(struct attr4_struct, i);
+    attr4_field1_off = HOFFSET(struct attr4_struct, i);
     ret = H5Tinsert(tid1, ATTR4_FIELDNAME1, attr4_field1_off, H5T_NATIVE_INT);
     CHECK(ret, FAIL, "H5Tinsert");
-    attr4_field2_off=HOFFSET(struct attr4_struct, d);
+    attr4_field2_off = HOFFSET(struct attr4_struct, d);
     ret = H5Tinsert(tid1, ATTR4_FIELDNAME2, attr4_field2_off, H5T_NATIVE_DOUBLE);
     CHECK(ret, FAIL, "H5Tinsert");
-    attr4_field3_off=HOFFSET(struct attr4_struct, c);
-    ret = H5Tinsert(tid1, ATTR4_FIELDNAME3, attr4_field3_off,
-		    H5T_NATIVE_SCHAR);
+    attr4_field3_off = HOFFSET(struct attr4_struct, c);
+    ret = H5Tinsert(tid1, ATTR4_FIELDNAME3, attr4_field3_off, H5T_NATIVE_SCHAR);
     CHECK(ret, FAIL, "H5Tinsert");
 
     /* Create dataspace for 1st attribute */
@@ -917,8 +916,8 @@ test_attr_scalar_write(hid_t fapl)
     CHECK(sid1, FAIL, "H5Screate_simple");
 
     /* Create a dataset */
-    dataset = H5Dcreate(fid1, DSET1_NAME, H5T_NATIVE_UCHAR, sid1, H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid1, DSET1_NAME, H5T_NATIVE_UCHAR, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Create dataspace for attribute */
     sid2 = H5Screate_simple(ATTR5_RANK, NULL, NULL);
@@ -1057,8 +1056,8 @@ test_attr_mult_write(hid_t fapl)
     CHECK(sid1, FAIL, "H5Screate_simple");
 
     /* Create a dataset */
-    dataset = H5Dcreate(fid1, DSET1_NAME, H5T_NATIVE_UCHAR, sid1, H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid1, DSET1_NAME, H5T_NATIVE_UCHAR, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Close dataset's dataspace */
     ret = H5Sclose(sid1);
@@ -1435,8 +1434,8 @@ test_attr_iterate(hid_t fapl)
     CHECK(sid, FAIL, "H5Screate");
 
     /* Create a new dataset */
-    dataset = H5Dcreate(file, DSET2_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(file, DSET2_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Close dataspace */
     ret = H5Sclose(sid);
@@ -1660,13 +1659,13 @@ test_attr_dtype_shared(hid_t fapl)
     CHECK(space_id, FAIL, "H5Screate");
 
     /* Create dataset */
-    dset_id = H5Dcreate(file_id, DSET1_NAME, type_id, space_id, H5P_DEFAULT);
-    CHECK(dset_id, FAIL, "H5Dcreate");
+    dset_id = H5Dcreate2(file_id, DSET1_NAME, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dset_id, FAIL, "H5Dcreate2");
 
     /* Check reference count on named datatype */
     ret = H5Oget_info(file_id, TYPE1_NAME, &oinfo, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Oget_info");
-    VERIFY(oinfo.rc, 2, "H5Dcreate");
+    VERIFY(oinfo.rc, 2, "H5Oget_info");
 
     /* Create attribute on dataset */
     attr_id = H5Acreate2(dset_id, ".", ATTR1_NAME, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -1899,8 +1898,8 @@ test_attr_dense_create(hid_t fcpl, hid_t fapl)
     CHECK(dcpl, FAIL, "H5Pcreate");
 
     /* Create a dataset */
-    dataset = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Retrieve limits for compact/dense attribute storage */
     ret = H5Pget_attr_phase_change(dcpl, &max_compact, &min_dense);
@@ -2034,8 +2033,8 @@ test_attr_dense_open(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Pset_attr_creation_order");
 
     /* Create a dataset */
-    dataset = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Retrieve limits for compact/dense attribute storage */
     ret = H5Pget_attr_phase_change(dcpl, &max_compact, &min_dense);
@@ -2174,8 +2173,8 @@ test_attr_dense_delete(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Pset_attr_creation_order");
 
     /* Create a dataset */
-    dataset = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Retrieve limits for compact/dense attribute storage */
     ret = H5Pget_attr_phase_change(dcpl, &max_compact, &min_dense);
@@ -2349,8 +2348,8 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
     CHECK(dcpl, FAIL, "H5Pcreate");
 
     /* Create a dataset */
-    dataset = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Retrieve limits for compact/dense attribute storage */
     ret = H5Pget_attr_phase_change(dcpl, &max_compact, &min_dense);
@@ -2508,8 +2507,8 @@ test_attr_dense_unlink(hid_t fcpl, hid_t fapl)
     CHECK(dcpl, FAIL, "H5Pcreate");
 
     /* Create a dataset */
-    dataset = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Retrieve limits for compact/dense attribute storage */
     ret = H5Pget_attr_phase_change(dcpl, &max_compact, &min_dense);
@@ -2642,8 +2641,8 @@ test_attr_dense_limits(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Pget_attr_phase_change");
 
     /* Create a dataset */
-    dataset = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Retrieve limits for compact/dense attribute storage */
     ret = H5Pget_attr_phase_change(dcpl, &rmax_compact, &rmin_dense);
@@ -2822,8 +2821,8 @@ test_attr_big(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Pget_latest_format");
 
     /* Create a dataset */
-    dataset = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Close property list */
     ret = H5Pclose(dcpl);
@@ -3072,8 +3071,8 @@ test_attr_null_space(hid_t fcpl, hid_t fapl)
     CHECK(null_sid, FAIL, "H5Screate");
 
     /* Create a dataset */
-    dataset = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
 
     /* Add attribute with 'null' dataspace */
@@ -3265,8 +3264,8 @@ test_attr_deprec(hid_t fcpl, hid_t fapl)
     CHECK(sid, FAIL, "H5Screate");
 
     /* Create a dataset */
-    dataset = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
 
     /* Add attribute to dataset */
@@ -3484,8 +3483,8 @@ test_attr_corder_create_basic(hid_t fcpl, hid_t fapl)
     CHECK(sid, FAIL, "H5Screate");
 
     /* Create a dataset */
-    dataset = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Close dataspace */
     ret = H5Sclose(sid);
@@ -3596,12 +3595,12 @@ test_attr_corder_create_compact(hid_t fcpl, hid_t fapl)
     CHECK(sid, FAIL, "H5Screate");
 
     /* Create datasets */
-    dset1 = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-    CHECK(dset1, FAIL, "H5Dcreate");
-    dset2 = H5Dcreate(fid, DSET2_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-    CHECK(dset2, FAIL, "H5Dcreate");
-    dset3 = H5Dcreate(fid, DSET3_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-    CHECK(dset3, FAIL, "H5Dcreate");
+    dset1 = H5Dcreate2(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(dset1, FAIL, "H5Dcreate2");
+    dset2 = H5Dcreate2(fid, DSET2_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(dset2, FAIL, "H5Dcreate2");
+    dset3 = H5Dcreate2(fid, DSET3_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(dset3, FAIL, "H5Dcreate2");
 
     /* Work on all the datasets */
     for(curr_dset = 0; curr_dset < NUM_DSETS; curr_dset++) {
@@ -3796,12 +3795,12 @@ test_attr_corder_create_dense(hid_t fcpl, hid_t fapl)
     CHECK(sid, FAIL, "H5Screate");
 
     /* Create datasets */
-    dset1 = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-    CHECK(dset1, FAIL, "H5Dcreate");
-    dset2 = H5Dcreate(fid, DSET2_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-    CHECK(dset2, FAIL, "H5Dcreate");
-    dset3 = H5Dcreate(fid, DSET3_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-    CHECK(dset3, FAIL, "H5Dcreate");
+    dset1 = H5Dcreate2(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(dset1, FAIL, "H5Dcreate2");
+    dset2 = H5Dcreate2(fid, DSET2_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(dset2, FAIL, "H5Dcreate2");
+    dset3 = H5Dcreate2(fid, DSET3_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(dset3, FAIL, "H5Dcreate2");
 
     /* Work on all the datasets */
     for(curr_dset = 0; curr_dset < NUM_DSETS; curr_dset++) {
@@ -4135,12 +4134,12 @@ test_attr_corder_transition(hid_t fcpl, hid_t fapl)
  *      that size after everything is deleted -QAK
  */
     /* Create datasets */
-    dset1 = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-    CHECK(dset1, FAIL, "H5Dcreate");
-    dset2 = H5Dcreate(fid, DSET2_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-    CHECK(dset2, FAIL, "H5Dcreate");
-    dset3 = H5Dcreate(fid, DSET3_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-    CHECK(dset3, FAIL, "H5Dcreate");
+    dset1 = H5Dcreate2(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(dset1, FAIL, "H5Dcreate2");
+    dset2 = H5Dcreate2(fid, DSET2_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(dset2, FAIL, "H5Dcreate2");
+    dset3 = H5Dcreate2(fid, DSET3_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(dset3, FAIL, "H5Dcreate2");
 
     /* Work on all the datasets */
     for(curr_dset = 0; curr_dset < NUM_DSETS; curr_dset++) {
@@ -4565,12 +4564,12 @@ test_attr_corder_delete(hid_t fcpl, hid_t fapl)
         CHECK(fid, FAIL, "H5Fopen");
 
         /* Create datasets */
-        dset1 = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-        CHECK(dset1, FAIL, "H5Dcreate");
-        dset2 = H5Dcreate(fid, DSET2_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-        CHECK(dset2, FAIL, "H5Dcreate");
-        dset3 = H5Dcreate(fid, DSET3_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-        CHECK(dset3, FAIL, "H5Dcreate");
+        dset1 = H5Dcreate2(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+        CHECK(dset1, FAIL, "H5Dcreate2");
+        dset2 = H5Dcreate2(fid, DSET2_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+        CHECK(dset2, FAIL, "H5Dcreate2");
+        dset3 = H5Dcreate2(fid, DSET3_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+        CHECK(dset3, FAIL, "H5Dcreate2");
 
         /* Work on all the datasets */
         for(curr_dset = 0; curr_dset < NUM_DSETS; curr_dset++) {
@@ -4895,12 +4894,12 @@ test_attr_info_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
         } /* end if */
 
         /* Create datasets */
-        dset1 = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-        CHECK(dset1, FAIL, "H5Dcreate");
-        dset2 = H5Dcreate(fid, DSET2_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-        CHECK(dset2, FAIL, "H5Dcreate");
-        dset3 = H5Dcreate(fid, DSET3_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-        CHECK(dset3, FAIL, "H5Dcreate");
+        dset1 = H5Dcreate2(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+        CHECK(dset1, FAIL, "H5Dcreate2");
+        dset2 = H5Dcreate2(fid, DSET2_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+        CHECK(dset2, FAIL, "H5Dcreate2");
+        dset3 = H5Dcreate2(fid, DSET3_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+        CHECK(dset3, FAIL, "H5Dcreate2");
 
         /* Work on all the datasets */
         for(curr_dset = 0; curr_dset < NUM_DSETS; curr_dset++) {
@@ -5135,12 +5134,12 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                 } /* end if */
 
                 /* Create datasets */
-                dset1 = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-                CHECK(dset1, FAIL, "H5Dcreate");
-                dset2 = H5Dcreate(fid, DSET2_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-                CHECK(dset2, FAIL, "H5Dcreate");
-                dset3 = H5Dcreate(fid, DSET3_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-                CHECK(dset3, FAIL, "H5Dcreate");
+                dset1 = H5Dcreate2(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+                CHECK(dset1, FAIL, "H5Dcreate2");
+                dset2 = H5Dcreate2(fid, DSET2_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+                CHECK(dset2, FAIL, "H5Dcreate2");
+                dset3 = H5Dcreate2(fid, DSET3_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+                CHECK(dset3, FAIL, "H5Dcreate2");
 
                 /* Work on all the datasets */
                 for(curr_dset = 0; curr_dset < NUM_DSETS; curr_dset++) {
@@ -5952,12 +5951,12 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
                 } /* end if */
 
                 /* Create datasets */
-                dset1 = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-                CHECK(dset1, FAIL, "H5Dcreate");
-                dset2 = H5Dcreate(fid, DSET2_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-                CHECK(dset2, FAIL, "H5Dcreate");
-                dset3 = H5Dcreate(fid, DSET3_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-                CHECK(dset3, FAIL, "H5Dcreate");
+                dset1 = H5Dcreate2(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+                CHECK(dset1, FAIL, "H5Dcreate2");
+                dset2 = H5Dcreate2(fid, DSET2_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+                CHECK(dset2, FAIL, "H5Dcreate2");
+                dset3 = H5Dcreate2(fid, DSET3_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+                CHECK(dset3, FAIL, "H5Dcreate2");
 
                 /* Work on all the datasets */
                 for(curr_dset = 0; curr_dset < NUM_DSETS; curr_dset++) {
@@ -6278,12 +6277,12 @@ test_attr_open_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                 } /* end if */
 
                 /* Create datasets */
-                dset1 = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-                CHECK(dset1, FAIL, "H5Dcreate");
-                dset2 = H5Dcreate(fid, DSET2_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-                CHECK(dset2, FAIL, "H5Dcreate");
-                dset3 = H5Dcreate(fid, DSET3_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-                CHECK(dset3, FAIL, "H5Dcreate");
+                dset1 = H5Dcreate2(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+                CHECK(dset1, FAIL, "H5Dcreate2");
+                dset2 = H5Dcreate2(fid, DSET2_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+                CHECK(dset2, FAIL, "H5Dcreate2");
+                dset3 = H5Dcreate2(fid, DSET3_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+                CHECK(dset3, FAIL, "H5Dcreate2");
 
                 /* Work on all the datasets */
                 for(curr_dset = 0; curr_dset < NUM_DSETS; curr_dset++) {
@@ -6562,12 +6561,12 @@ test_attr_open(hbool_t new_format, hid_t fcpl, hid_t fapl)
         } /* end if */
 
         /* Create datasets */
-        dset1 = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-        CHECK(dset1, FAIL, "H5Dcreate");
-        dset2 = H5Dcreate(fid, DSET2_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-        CHECK(dset2, FAIL, "H5Dcreate");
-        dset3 = H5Dcreate(fid, DSET3_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-        CHECK(dset3, FAIL, "H5Dcreate");
+        dset1 = H5Dcreate2(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+        CHECK(dset1, FAIL, "H5Dcreate2");
+        dset2 = H5Dcreate2(fid, DSET2_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+        CHECK(dset2, FAIL, "H5Dcreate2");
+        dset3 = H5Dcreate2(fid, DSET3_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+        CHECK(dset3, FAIL, "H5Dcreate2");
 
         /* Work on all the datasets */
         for(curr_dset = 0; curr_dset < NUM_DSETS; curr_dset++) {
@@ -6845,10 +6844,10 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
         CHECK(dcpl, FAIL, "H5Pcreate");
 
         /* Create datasets */
-        dataset = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-        CHECK(dataset, FAIL, "H5Dcreate");
-        dataset2 = H5Dcreate(fid, DSET2_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-        CHECK(dataset2, FAIL, "H5Dcreate");
+        dataset = H5Dcreate2(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+        CHECK(dataset, FAIL, "H5Dcreate2");
+        dataset2 = H5Dcreate2(fid, DSET2_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+        CHECK(dataset2, FAIL, "H5Dcreate2");
 
         /* Check on dataset's message storage status */
         if(test_shared != 0) {
@@ -7171,10 +7170,10 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
         CHECK(dcpl, FAIL, "H5Pcreate");
 
         /* Create datasets */
-        dataset = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-        CHECK(dataset, FAIL, "H5Dcreate");
-        dataset2 = H5Dcreate(fid, DSET2_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-        CHECK(dataset2, FAIL, "H5Dcreate");
+        dataset = H5Dcreate2(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+        CHECK(dataset, FAIL, "H5Dcreate2");
+        dataset2 = H5Dcreate2(fid, DSET2_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+        CHECK(dataset2, FAIL, "H5Dcreate2");
 
         /* Check on dataset's message storage status */
         if(test_shared != 0) {
@@ -7612,10 +7611,10 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
         CHECK(dcpl, FAIL, "H5Pcreate");
 
         /* Create datasets */
-        dataset = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-        CHECK(dataset, FAIL, "H5Dcreate");
-        dataset2 = H5Dcreate(fid, DSET2_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-        CHECK(dataset2, FAIL, "H5Dcreate");
+        dataset = H5Dcreate2(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+        CHECK(dataset, FAIL, "H5Dcreate2");
+        dataset2 = H5Dcreate2(fid, DSET2_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+        CHECK(dataset2, FAIL, "H5Dcreate2");
 
         /* Check on dataset's message storage status */
         if(test_shared != 0) {
@@ -7976,10 +7975,10 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
         CHECK(dcpl, FAIL, "H5Pcreate");
 
         /* Create datasets */
-        dataset = H5Dcreate(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-        CHECK(dataset, FAIL, "H5Dcreate");
-        dataset2 = H5Dcreate(fid, DSET2_NAME, H5T_NATIVE_UCHAR, sid, dcpl);
-        CHECK(dataset2, FAIL, "H5Dcreate");
+        dataset = H5Dcreate2(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+        CHECK(dataset, FAIL, "H5Dcreate2");
+        dataset2 = H5Dcreate2(fid, DSET2_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+        CHECK(dataset2, FAIL, "H5Dcreate2");
 
         /* Check on dataset's message storage status */
         if(test_shared != 0) {

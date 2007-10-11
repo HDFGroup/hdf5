@@ -81,8 +81,8 @@ main (void)
      * Create a new dataset within the file using cparms
      * creation properties.
      */
-    dataset = H5Dcreate(file, DATASETNAME, H5T_NATIVE_INT, dataspace,
-			cparms);
+    dataset = H5Dcreate2(file, DATASETNAME, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
+			cparms, H5P_DEFAULT);
 
     /*
      * Extend the dataset. This call assures that dataset is at least 3 x 3.

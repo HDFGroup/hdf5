@@ -164,13 +164,13 @@ DataSet CommonFG::createDataSet( const char* name, const DataType& data_type, co
    hid_t space_id = data_space.getId();
    hid_t create_plist_id = create_plist.getId();
 
-   // Call C routine H5Dcreate to create the named dataset
-   hid_t dataset_id = H5Dcreate( getLocId(), name, type_id, space_id, create_plist_id );
+   // Call C routine H5Dcreate2 to create the named dataset
+   hid_t dataset_id = H5Dcreate2( getLocId(), name, type_id, space_id, H5P_DEFAULT, create_plist_id, H5P_DEFAULT );
 
    // If the creation of the dataset failed, throw an exception
    if( dataset_id < 0 )
    {
-      throwException("createDataSet", "H5Dcreate failed");
+      throwException("createDataSet", "H5Dcreate2 failed");
    }
 
    // No failure, create and return the DataSet object

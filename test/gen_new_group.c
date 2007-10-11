@@ -80,11 +80,11 @@ int main(void)
     if((gid = H5Gcreate2(fid, "links", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
 
     /* Create dataset in group */
-    if((did = H5Dcreate(gid, "dset1", H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) goto error;
+    if((did = H5Dcreate2(gid, "dset1", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
     if(H5Dclose(did)<0) goto error;
 
     /* Create second dataset in group */
-    if((did = H5Dcreate(gid, "dset2", H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) goto error;
+    if((did = H5Dcreate2(gid, "dset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
     if(H5Dclose(did)<0) goto error;
 
     /* Close dataspace */

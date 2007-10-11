@@ -90,7 +90,7 @@ main(void)
         printf("H5Pset_deflate() failed!\n");
 
     /* Create the compressed dataset */
-    dset = H5Dcreate(file, "Dataset1", H5T_NATIVE_INT, space, dcpl);
+    dset = H5Dcreate2(file, "Dataset1", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     if(dset<0)
         printf("dset<0!\n");
 

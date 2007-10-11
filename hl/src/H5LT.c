@@ -45,6 +45,61 @@ static herr_t H5LT_get_attribute_mem(hid_t loc_id,
                            void *data);
 
 /*-------------------------------------------------------------------------
+ * Function: H5LT_make_dataset
+ *
+ * Purpose: Creates and writes a dataset of a type tid
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Quincey Koziol, koziol@hdfgroup.org
+ *
+ * Date: October 10, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t
+H5LT_make_dataset_numerical( hid_t loc_id,
+                         const char *dset_name,
+                         int rank,
+                         const hsize_t *dims,
+                         hid_t tid,
+                         const void *data )
+{
+    hid_t   did = -1, sid = -1;
+
+    /* Create the data space for the dataset. */
+    if((sid = H5Screate_simple(rank, dims, NULL)) < 0)
+        return -1;
+
+    /* Create the dataset. */
+    if((did = H5Dcreate2(loc_id, dset_name, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+
+    /* Write the dataset only if there is data to write */
+    if(data)
+        if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
+            goto out;
+
+    /* End access to the dataset and release resources used by it. */
+    if(H5Dclose(did) < 0)
+        return -1;
+
+    /* Terminate access to the data space. */
+    if(H5Sclose(sid) < 0)
+        return -1;
+
+    return 0;
+
+out:
+    H5E_BEGIN_TRY {
+        H5Dclose(did);
+        H5Sclose(sid);
+    } H5E_END_TRY;
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
  *
  * Public functions
  *
@@ -77,39 +132,7 @@ herr_t H5LTmake_dataset( hid_t loc_id,
                          hid_t tid,
                          const void *data )
 {
-
- hid_t   did, sid;
-
- /* Create the data space for the dataset. */
- if ( (sid = H5Screate_simple( rank, dims, NULL )) < 0 )
-  return -1;
-
- /* Create the dataset. */
- if ( (did = H5Dcreate( loc_id, dset_name, tid, sid, H5P_DEFAULT )) < 0 )
-  goto out;
-
- /* Write the dataset only if there is data to write */
-
- if ( data )
- {
-  if ( H5Dwrite( did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, data ) < 0 )
-   goto out;
- }
-
- /* End access to the dataset and release resources used by it. */
- if ( H5Dclose( did ) < 0 )
-  return -1;
-
- /* Terminate access to the data space. */
- if ( H5Sclose( sid ) < 0 )
-  return -1;
-
- return 0;
-
-out:
- H5Dclose( did );
- H5Sclose( sid );
- return -1;
+    return(H5LT_make_dataset_numerical(loc_id, dset_name, rank, dims, tid, data));
 }
 
 /*-------------------------------------------------------------------------
@@ -137,39 +160,7 @@ herr_t H5LTmake_dataset_char( hid_t loc_id,
                               const hsize_t *dims,
                               const char *data )
 {
-
- hid_t   did, sid;
-
- /* Create the data space for the dataset. */
- if ( (sid = H5Screate_simple( rank, dims, NULL )) < 0 )
-  return -1;
-
- /* Create the dataset. */
- if ( (did = H5Dcreate( loc_id, dset_name, H5T_NATIVE_CHAR, sid, H5P_DEFAULT )) < 0 )
-  goto out;
-
- /* Write the dataset only if there is data to write */
-
- if ( data )
- {
-  if ( H5Dwrite( did, H5T_NATIVE_CHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, data ) < 0 )
-   goto out;
- }
-
- /* End access to the dataset and release resources used by it. */
- if ( H5Dclose( did ) < 0 )
-  return -1;
-
- /* Terminate access to the data space. */
- if ( H5Sclose( sid ) < 0 )
-  return -1;
-
- return 0;
-
-out:
- H5Dclose( did );
- H5Sclose( sid );
- return -1;
+    return(H5LT_make_dataset_numerical(loc_id, dset_name, rank, dims, H5T_NATIVE_CHAR, data));
 }
 
 
@@ -199,39 +190,7 @@ herr_t H5LTmake_dataset_short( hid_t loc_id,
                                const hsize_t *dims,
                                const short *data )
 {
-
- hid_t   did, sid;
-
- /* Create the data space for the dataset. */
- if ( (sid = H5Screate_simple( rank, dims, NULL )) < 0 )
-  return -1;
-
- /* Create the dataset. */
- if ( (did = H5Dcreate( loc_id, dset_name, H5T_NATIVE_SHORT, sid, H5P_DEFAULT )) < 0 )
-  goto out;
-
- /* Write the dataset only if there is data to write */
-
- if ( data )
- {
-  if ( H5Dwrite( did, H5T_NATIVE_SHORT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data ) < 0 )
-   goto out;
- }
-
- /* End access to the dataset and release resources used by it. */
- if ( H5Dclose( did ) < 0 )
-  return -1;
-
- /* Terminate access to the data space. */
- if ( H5Sclose( sid ) < 0 )
-  return -1;
-
- return 0;
-
-out:
- H5Dclose( did );
- H5Sclose( sid );
- return -1;
+    return(H5LT_make_dataset_numerical(loc_id, dset_name, rank, dims, H5T_NATIVE_SHORT, data));
 }
 
 /*-------------------------------------------------------------------------
@@ -260,39 +219,7 @@ herr_t H5LTmake_dataset_int( hid_t loc_id,
                              const hsize_t *dims,
                              const int *data )
 {
-
- hid_t   did, sid;
-
- /* Create the data space for the dataset. */
- if ( (sid = H5Screate_simple( rank, dims, NULL )) < 0 )
-  return -1;
-
- /* Create the dataset. */
- if ( (did = H5Dcreate( loc_id, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT )) < 0 )
-  goto out;
-
- /* Write the dataset only if there is data to write */
-
- if ( data )
- {
-  if ( H5Dwrite( did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data ) < 0 )
-   goto out;
- }
-
- /* End access to the dataset and release resources used by it. */
- if ( H5Dclose( did ) < 0 )
-  return -1;
-
- /* Terminate access to the data space. */
- if ( H5Sclose( sid ) < 0 )
-  return -1;
-
- return 0;
-
-out:
- H5Dclose( did );
- H5Sclose( sid );
- return -1;
+    return(H5LT_make_dataset_numerical(loc_id, dset_name, rank, dims, H5T_NATIVE_INT, data));
 }
 
 
@@ -323,39 +250,7 @@ herr_t H5LTmake_dataset_long( hid_t loc_id,
                               const hsize_t *dims,
                               const long *data )
 {
-
- hid_t   did, sid;
-
- /* Create the data space for the dataset. */
- if ( (sid = H5Screate_simple( rank, dims, NULL )) < 0 )
-  return -1;
-
- /* Create the dataset. */
- if ( (did = H5Dcreate( loc_id, dset_name, H5T_NATIVE_LONG, sid, H5P_DEFAULT )) < 0 )
-  goto out;
-
- /* Write the dataset only if there is data to write */
-
- if ( data )
- {
-  if ( H5Dwrite( did, H5T_NATIVE_LONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, data ) < 0 )
-   goto out;
- }
-
- /* End access to the dataset and release resources used by it. */
- if ( H5Dclose( did ) < 0 )
-  return -1;
-
- /* Terminate access to the data space. */
- if ( H5Sclose( sid ) < 0 )
-  return -1;
-
- return 0;
-
-out:
- H5Dclose( did );
- H5Sclose( sid );
- return -1;
+    return(H5LT_make_dataset_numerical(loc_id, dset_name, rank, dims, H5T_NATIVE_LONG, data));
 }
 
 /*-------------------------------------------------------------------------
@@ -384,39 +279,7 @@ herr_t H5LTmake_dataset_float( hid_t loc_id,
                                const hsize_t *dims,
                                const float *data )
 {
-
- hid_t   did, sid;
-
- /* Create the data space for the dataset. */
- if ( (sid = H5Screate_simple( rank, dims, NULL )) < 0 )
-  return -1;
-
- /* Create the dataset. */
- if ( (did = H5Dcreate( loc_id, dset_name, H5T_NATIVE_FLOAT, sid, H5P_DEFAULT )) < 0 )
-  goto out;
-
- /* Write the dataset only if there is data to write */
-
- if ( data )
- {
-  if ( H5Dwrite( did, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data ) < 0 )
-   goto out;
- }
-
- /* End access to the dataset and release resources used by it. */
- if ( H5Dclose( did ) < 0 )
-  return -1;
-
- /* Terminate access to the data space. */
- if ( H5Sclose( sid ) < 0 )
-  return -1;
-
- return 0;
-
-out:
- H5Dclose( did );
- H5Sclose( sid );
- return -1;
+    return(H5LT_make_dataset_numerical(loc_id, dset_name, rank, dims, H5T_NATIVE_FLOAT, data));
 }
 
 
@@ -447,39 +310,7 @@ herr_t H5LTmake_dataset_double( hid_t loc_id,
                                 const hsize_t *dims,
                                 const double *data )
 {
-
- hid_t   did, sid;
-
- /* Create the data space for the dataset. */
- if ( (sid = H5Screate_simple( rank, dims, NULL )) < 0 )
-  return -1;
-
- /* Create the dataset. */
- if ( (did = H5Dcreate( loc_id, dset_name, H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT )) < 0 )
-  goto out;
-
- /* Write the dataset only if there is data to write */
-
- if ( data )
- {
-  if ( H5Dwrite( did, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data ) < 0 )
-   goto out;
- }
-
- /* End access to the dataset and release resources used by it. */
- if ( H5Dclose( did ) < 0 )
-  return -1;
-
- /* Terminate access to the data space. */
- if ( H5Sclose( sid ) < 0 )
-  return -1;
-
- return 0;
-
-out:
- H5Dclose( did );
- H5Sclose( sid );
- return -1;
+    return(H5LT_make_dataset_numerical(loc_id, dset_name, rank, dims, H5T_NATIVE_DOUBLE, data));
 }
 
 
@@ -507,55 +338,53 @@ herr_t H5LTmake_dataset_string(hid_t loc_id,
                                const char *dset_name,
                                const char *buf )
 {
+    hid_t   did = -1;
+    hid_t   sid = -1;
+    hid_t   tid = -1;
+    size_t  size;
 
- hid_t   did=-1;
- hid_t   sid=-1;
- hid_t   tid;
- size_t  size;
+    /* create a string data type */
+    if((tid = H5Tcopy(H5T_C_S1)) < 0 )
+        goto out;
 
- /* create a string data type */
- if ( (tid = H5Tcopy( H5T_C_S1 )) < 0 )
-  goto out;
+    size = strlen(buf) + 1; /* extra null term */
 
- size = strlen(buf) + 1; /* extra null term */
+    if(H5Tset_size(tid, size) < 0)
+        goto out;
 
- if ( H5Tset_size(tid,size) < 0 )
-  goto out;
+    if(H5Tset_strpad(tid, H5T_STR_NULLTERM) < 0)
+        goto out;
 
- if ( H5Tset_strpad(tid,H5T_STR_NULLTERM ) < 0 )
-  goto out;
+    /* Create the data space for the dataset. */
+    if((sid = H5Screate(H5S_SCALAR)) < 0)
+        goto out;
 
- /* Create the data space for the dataset. */
- if ( (sid = H5Screate( H5S_SCALAR )) < 0 )
-  goto out;
+    /* Create the dataset. */
+    if((did = H5Dcreate2(loc_id, dset_name, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
 
- /* Create the dataset. */
- if ( (did = H5Dcreate(loc_id,dset_name,tid,sid,H5P_DEFAULT)) < 0 )
-  goto out;
+    /* Write the dataset only if there is data to write */
+    if(buf)
+        if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+            goto out;
 
- /* Write the dataset only if there is data to write */
+    /* close*/
+    if(H5Dclose(did) < 0)
+        return -1;
+    if(H5Sclose(sid) < 0)
+        return -1;
+    if(H5Tclose(tid) < 0)
+        goto out;
 
- if (buf)
- {
-  if ( H5Dwrite(did,tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0 )
-   goto out;
- }
-
- /* close*/
- if ( H5Dclose(did) < 0 )
-  return -1;
- if ( H5Sclose(sid) < 0 )
-  return -1;
- if ( H5Tclose(tid) < 0 )
-  goto out;
-
- return 0;
+    return 0;
 
 out:
-  H5Dclose(did);
-  H5Tclose(tid);
-  H5Sclose(sid);
- return -1;
+    H5E_BEGIN_TRY {
+        H5Dclose(did);
+        H5Tclose(tid);
+        H5Sclose(sid);
+    } H5E_END_TRY;
+    return -1;
 }
 
 
@@ -574,7 +403,7 @@ out:
  */
 
 static herr_t
-H5LT_read_dataset(hid_t loc_id, const char *dset_name, hid_t tid, void *data)
+H5LT_read_dataset_numerical(hid_t loc_id, const char *dset_name, hid_t tid, void *data)
 {
     hid_t   did;
 
@@ -616,7 +445,7 @@ herr_t H5LTread_dataset(hid_t loc_id,
                         hid_t tid,
                         void *data)
 {
-    return(H5LT_read_dataset(loc_id, dset_name, tid, data));
+    return(H5LT_read_dataset_numerical(loc_id, dset_name, tid, data));
 }
 
 
@@ -638,7 +467,7 @@ herr_t H5LTread_dataset_char( hid_t loc_id,
                               const char *dset_name,
                               char *data )
 {
-    return(H5LTread_dataset(loc_id, dset_name, H5T_NATIVE_CHAR, data));
+    return(H5LT_read_dataset_numerical(loc_id, dset_name, H5T_NATIVE_CHAR, data));
 }
 
 /*-------------------------------------------------------------------------
@@ -659,7 +488,7 @@ herr_t H5LTread_dataset_short( hid_t loc_id,
                                const char *dset_name,
                                short *data )
 {
-    return(H5LTread_dataset(loc_id, dset_name, H5T_NATIVE_SHORT, data));
+    return(H5LT_read_dataset_numerical(loc_id, dset_name, H5T_NATIVE_SHORT, data));
 }
 
 /*-------------------------------------------------------------------------
@@ -680,7 +509,7 @@ herr_t H5LTread_dataset_int( hid_t loc_id,
                              const char *dset_name,
                              int *data )
 {
-    return(H5LTread_dataset(loc_id, dset_name, H5T_NATIVE_INT, data));
+    return(H5LT_read_dataset_numerical(loc_id, dset_name, H5T_NATIVE_INT, data));
 }
 
 /*-------------------------------------------------------------------------
@@ -701,7 +530,7 @@ herr_t H5LTread_dataset_long( hid_t loc_id,
                               const char *dset_name,
                               long *data )
 {
-    return(H5LTread_dataset(loc_id, dset_name, H5T_NATIVE_LONG, data));
+    return(H5LT_read_dataset_numerical(loc_id, dset_name, H5T_NATIVE_LONG, data));
 }
 
 /*-------------------------------------------------------------------------
@@ -722,7 +551,7 @@ herr_t H5LTread_dataset_float( hid_t loc_id,
                                const char *dset_name,
                                float *data )
 {
-    return(H5LTread_dataset(loc_id, dset_name, H5T_NATIVE_FLOAT, data));
+    return(H5LT_read_dataset_numerical(loc_id, dset_name, H5T_NATIVE_FLOAT, data));
 }
 
 
@@ -744,7 +573,7 @@ herr_t H5LTread_dataset_double( hid_t loc_id,
                                 const char *dset_name,
                                 double *data )
 {
-    return(H5LTread_dataset(loc_id, dset_name, H5T_NATIVE_DOUBLE, data));
+    return(H5LT_read_dataset_numerical(loc_id, dset_name, H5T_NATIVE_DOUBLE, data));
 }
 
 

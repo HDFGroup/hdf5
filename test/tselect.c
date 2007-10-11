@@ -283,7 +283,7 @@ test_select_hyper(hid_t xfer_plist)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate2(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write selection to disk */
     ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,xfer_plist,wbuf);
@@ -543,7 +543,7 @@ test_select_point(hid_t xfer_plist)
     HDmemcpy(pi.coord,coord2,sizeof(coord2));
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate2(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write selection to disk */
     ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,xfer_plist,wbuf);
@@ -713,7 +713,7 @@ test_select_all(hid_t xfer_plist)
     VERIFY(ext_type, H5S_SIMPLE, "H5Sget_simple_extent_type");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_INT,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate2(fid1,"Dataset1",H5T_NATIVE_INT,sid1,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write selection to disk */
     ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,H5S_ALL,H5S_ALL,xfer_plist,wbuf);
@@ -812,7 +812,7 @@ test_select_all_hyper(hid_t xfer_plist)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate2(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write selection to disk */
     ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,xfer_plist,wbuf);
@@ -957,7 +957,7 @@ test_select_combo(void)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate2(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write selection to disk */
     ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,wbuf);
@@ -1115,7 +1115,7 @@ test_select_hyper_stride(hid_t xfer_plist)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",H5T_STD_U16LE,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate2(fid1,"Dataset1",H5T_STD_U16LE,sid1,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write selection to disk */
     ret=H5Dwrite(dataset,H5T_NATIVE_USHORT,sid2,sid1,xfer_plist,wbuf);
@@ -1240,7 +1240,7 @@ test_select_hyper_contig(hid_t dset_type, hid_t xfer_plist)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",dset_type,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate2(fid1,"Dataset1",dset_type,sid1,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write selection to disk */
     ret=H5Dwrite(dataset,H5T_NATIVE_USHORT,sid2,sid1,xfer_plist,wbuf);
@@ -1365,7 +1365,7 @@ test_select_hyper_contig2(hid_t dset_type, hid_t xfer_plist)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",dset_type,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate2(fid1,"Dataset1",dset_type,sid1,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write selection to disk */
     ret=H5Dwrite(dataset,H5T_NATIVE_USHORT,sid2,sid1,xfer_plist,wbuf);
@@ -1489,7 +1489,7 @@ test_select_hyper_contig3(hid_t dset_type, hid_t xfer_plist)
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",dset_type,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate2(fid1,"Dataset1",dset_type,sid1,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write selection to disk */
     ret=H5Dwrite(dataset,H5T_NATIVE_USHORT,sid2,sid1,xfer_plist,wbuf);
@@ -1633,7 +1633,7 @@ test_select_hyper_copy(void)
     CHECK(sid3, FAIL, "H5Scopy");
 
     /* Create a dataset */
-    data1=H5Dcreate(fid1,"Dataset1",H5T_STD_U16LE,sid1,H5P_DEFAULT);
+    data1=H5Dcreate2(fid1,"Dataset1",H5T_STD_U16LE,sid1,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write selection to disk */
     ret=H5Dwrite(data1,H5T_STD_U16LE,sid2,sid1,H5P_DEFAULT,wbuf);
@@ -1644,7 +1644,7 @@ test_select_hyper_copy(void)
     CHECK(ret, FAIL, "H5Sclose");
 
     /* Create another dataset */
-    data2=H5Dcreate(fid1,"Dataset2",H5T_STD_U16LE,sid1,H5P_DEFAULT);
+    data2=H5Dcreate2(fid1,"Dataset2",H5T_STD_U16LE,sid1,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write selection to disk */
     ret=H5Dwrite(data2,H5T_STD_U16LE,sid3,sid1,H5P_DEFAULT,wbuf);
@@ -1802,7 +1802,7 @@ test_select_point_copy(void)
     CHECK(sid3, FAIL, "H5Scopy");
 
     /* Create a dataset */
-    data1=H5Dcreate(fid1,"Dataset1",H5T_STD_U16LE,sid1,H5P_DEFAULT);
+    data1=H5Dcreate2(fid1,"Dataset1",H5T_STD_U16LE,sid1,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write selection to disk */
     ret=H5Dwrite(data1,H5T_STD_U16LE,sid2,sid1,H5P_DEFAULT,wbuf);
@@ -1813,7 +1813,7 @@ test_select_point_copy(void)
     CHECK(ret, FAIL, "H5Sclose");
 
     /* Create another dataset */
-    data2=H5Dcreate(fid1,"Dataset2",H5T_STD_U16LE,sid1,H5P_DEFAULT);
+    data2=H5Dcreate2(fid1,"Dataset2",H5T_STD_U16LE,sid1,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write selection to disk */
     ret=H5Dwrite(data2,H5T_STD_U16LE,sid3,sid1,H5P_DEFAULT,wbuf);
@@ -1990,7 +1990,7 @@ test_select_hyper_offset(void)
     VERIFY(valid, TRUE, "H5Sselect_valid");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate2(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write selection to disk */
     ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,wbuf);
@@ -2123,7 +2123,7 @@ test_select_hyper_offset2(void)
     VERIFY(valid, TRUE, "H5Sselect_valid");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate2(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write selection to disk */
     ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,wbuf);
@@ -2273,7 +2273,7 @@ test_select_point_offset(void)
     VERIFY(valid, TRUE, "H5Sselect_valid");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate2(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write selection to disk */
     ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,wbuf);
@@ -2425,7 +2425,7 @@ test_select_hyper_union(void)
     VERIFY(npoints, 15*26, "H5Sget_select_npoints");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate2(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write selection to disk */
     ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,wbuf);
@@ -2518,7 +2518,7 @@ test_select_hyper_union(void)
     VERIFY(npoints, 15*26, "H5Sget_select_npoints");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset2",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate2(fid1,"Dataset2",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write selection to disk */
     ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,wbuf);
@@ -2603,7 +2603,7 @@ test_select_hyper_union(void)
     VERIFY(npoints, 15*26, "H5Sget_select_npoints");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset3",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate2(fid1,"Dataset3",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write selection to disk */
     ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,wbuf);
@@ -2692,8 +2692,8 @@ test_select_hyper_union(void)
     VERIFY(npoints, 15*26, "H5Sget_select_npoints");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset4",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset=H5Dcreate2(fid1,"Dataset4",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     xfer = H5Pcreate (H5P_DATASET_XFER);
     CHECK(xfer, FAIL, "H5Pcreate");
@@ -2789,7 +2789,7 @@ test_select_hyper_union(void)
     VERIFY(npoints, 15*26, "H5Sget_select_npoints");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset5",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate2(fid1,"Dataset5",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write selection to disk */
     ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,wbuf);
@@ -2911,8 +2911,8 @@ test_select_hyper_union_stagger(void)
     CHECK(dataspace, FAIL, "H5Screate_simple");
 
     /* Create File Dataset */
-    dset_id=H5Dcreate(file_id,"IntArray",H5T_NATIVE_INT,dataspace,H5P_DEFAULT);
-    CHECK(dset_id, FAIL, "H5Dcreate");
+    dset_id=H5Dcreate2(file_id,"IntArray",H5T_NATIVE_INT,dataspace,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dset_id, FAIL, "H5Dcreate2");
 
     /* Write File Dataset */
     error=H5Dwrite(dset_id,H5T_NATIVE_INT,dataspace,dataspace,H5P_DEFAULT,data);
@@ -3138,7 +3138,7 @@ test_select_hyper_union_3d(void)
     VERIFY(npoints, 15*26, "H5Sget_select_npoints");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate2(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write selection to disk */
     ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,tmp2_space,sid1,H5P_DEFAULT,wbuf);
@@ -3282,7 +3282,7 @@ test_select_hyper_and_2d(void)
     VERIFY(npoints, 5*5, "H5Sget_select_npoints");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate2(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write selection to disk */
     ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,wbuf);
@@ -3408,7 +3408,7 @@ test_select_hyper_xor_2d(void)
     VERIFY(npoints, 150, "H5Sget_select_npoints");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate2(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write selection to disk */
     ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,wbuf);
@@ -3536,7 +3536,7 @@ test_select_hyper_notb_2d(void)
     VERIFY(npoints, 75, "H5Sget_select_npoints");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate2(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write selection to disk */
     ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,wbuf);
@@ -3663,7 +3663,7 @@ test_select_hyper_nota_2d(void)
     VERIFY(npoints, 75, "H5Sget_select_npoints");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
+    dataset=H5Dcreate2(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write selection to disk */
     ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,H5P_DEFAULT,wbuf);
@@ -3789,8 +3789,8 @@ test_select_hyper_union_random_5d(hid_t read_plist)
     CHECK(sid1, FAIL, "H5Screate_simple");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_INT,sid1,H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset=H5Dcreate2(fid1,"Dataset1",H5T_NATIVE_INT,sid1,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Write entire dataset to disk */
     ret=H5Dwrite(dataset,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,wbuf);
@@ -3997,8 +3997,8 @@ test_select_hyper_chunk(hid_t fapl_plist, hid_t xfer_plist)
     CHECK(plist, FAIL, "H5Pcreate");
     status = H5Pset_chunk (plist, RANK_F, chunk_dimsf);
     CHECK(status, FAIL, "H5Pset_chunk");
-    dataset = H5Dcreate (file, DATASETNAME, H5T_NATIVE_UCHAR, dataspace, plist);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2 (file, DATASETNAME, H5T_NATIVE_UCHAR, dataspace, H5P_DEFAULT, plist, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /*
      * Define hyperslab in the dataset.
@@ -4225,8 +4225,8 @@ test_select_point_chunk(void)
     CHECK(dcpl, FAIL, "H5Pcreate");
     ret = H5Pset_chunk (dcpl, SPACE7_RANK, chunk_dimsf);
     CHECK(ret, FAIL, "H5Pset_chunk");
-    dataset = H5Dcreate (file, DATASETNAME, H5T_NATIVE_UCHAR, dataspace, dcpl);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2 (file, DATASETNAME, H5T_NATIVE_UCHAR, dataspace, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Create 1st point selection */
     pnt1_space = H5Scopy (dataspace);
@@ -4384,8 +4384,8 @@ test_select_scalar_chunk(void)
     sid = H5Screate_simple(1, dims, maxdims);
     CHECK(sid, FAIL, "H5Screate_simple");
 
-    dsid = H5Dcreate(file_id, "dset", H5T_NATIVE_UINT, sid, dcpl);
-    CHECK(dsid, FAIL, "H5Dcreate");
+    dsid = H5Dcreate2(file_id, "dset", H5T_NATIVE_UINT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(dsid, FAIL, "H5Dcreate2");
 
     /* Select scalar area (offset 0, count 1) */
     ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, offset, NULL, count, NULL);
@@ -5468,8 +5468,8 @@ test_select_none(void)
     CHECK(sid2, FAIL, "H5Screate_simple");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset=H5Dcreate2(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Make "none" selection in both disk and memory datasets */
     ret = H5Sselect_none(sid1);
@@ -5571,8 +5571,8 @@ test_scalar_select(void)
     CHECK(sid2, FAIL, "H5Screate_simple");
 
     /* Create a dataset */
-    dataset=H5Dcreate(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset=H5Dcreate2(fid1,"Dataset1",H5T_NATIVE_UCHAR,sid1,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Select one element in memory with a point selection */
     coord1[0]=0; coord1[1]= 2;
@@ -7305,8 +7305,8 @@ test_select_hyper_chunk_offset(void)
     CHECK(sid, FAIL, "H5Screate_simple");
 
     /* Create the dataset */
-    did = H5Dcreate (fid, "fooData", H5T_NATIVE_INT, sid, dcpl);
-    CHECK(did, FAIL, "H5Dcreate");
+    did = H5Dcreate2 (fid, "fooData", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(did, FAIL, "H5Dcreate2");
 
     /* Close the dataspace */
     ret = H5Sclose(sid);
@@ -7500,8 +7500,8 @@ test_select_hyper_chunk_offset2(void)
     CHECK(status, FAIL, "H5Pset_chunk");
 
     /* Create dataset */
-    dataset = H5Dcreate(file, DATASETNAME, H5T_NATIVE_UINT, dataspace, dcpl);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(file, DATASETNAME, H5T_NATIVE_UINT, dataspace, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Close DCPL */
     status = H5Pclose(dcpl);

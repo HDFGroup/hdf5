@@ -148,8 +148,8 @@ test_noconv(hid_t file)
     if(H5Tenum_insert(type, "WHITE", CPTR(val, E1_WHITE)) < 0) FAIL_STACK_ERROR
     if(H5Tenum_insert(type, "BLACK", CPTR(val, E1_BLACK)) < 0) FAIL_STACK_ERROR
 
-    if((space=H5Screate_simple(1, ds_size, NULL)) < 0) FAIL_STACK_ERROR
-    if((dset=H5Dcreate(cwg, "color_table", type, space, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((space = H5Screate_simple(1, ds_size, NULL)) < 0) FAIL_STACK_ERROR
+    if((dset = H5Dcreate2(cwg, "color_table", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if(H5Dwrite(dset, type, space, space, H5P_DEFAULT, data1) < 0) FAIL_STACK_ERROR
     if(H5Dread(dset, type, space, space, H5P_DEFAULT, data2) < 0) FAIL_STACK_ERROR
 
@@ -237,7 +237,7 @@ test_tr1(hid_t file)
 	if(H5Tenum_insert(f_type, "BLACK", CPTR(ival, 101)) < 0) FAIL_STACK_ERROR
 
 	if((space = H5Screate_simple(1, ds_size, NULL)) < 0) FAIL_STACK_ERROR
-	if((dset = H5Dcreate(cwg, "color_table", f_type, space, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+	if((dset = H5Dcreate2(cwg, "color_table", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 	if(H5Dwrite(dset, m_type, space, space, H5P_DEFAULT, data1) < 0) FAIL_STACK_ERROR
 	if(H5Dread(dset, m_type, space, space, H5P_DEFAULT, data2) < 0) FAIL_STACK_ERROR
 
@@ -329,7 +329,7 @@ test_tr2(hid_t file)
 	if(H5Tenum_insert(f_type, "BLACK", CPTR(val2, 1010)) < 0) FAIL_STACK_ERROR
 
 	if((space = H5Screate_simple(1, ds_size, NULL)) < 0) FAIL_STACK_ERROR
-	if((dset = H5Dcreate(cwg, "color_table", f_type, space, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+	if((dset = H5Dcreate2(cwg, "color_table", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 	if(H5Dwrite(dset, m_type, space, space, H5P_DEFAULT, data1) < 0) FAIL_STACK_ERROR
 	if(H5Dread(dset, m_type, space, space, H5P_DEFAULT, data2) < 0) FAIL_STACK_ERROR
 
@@ -350,8 +350,7 @@ test_tr2(hid_t file)
 
 	PASSED();
     }
-    else
-    {
+    else {
         SKIPPED();
         puts("    Test not compatible with current Virtual File Driver");
     }

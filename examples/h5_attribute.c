@@ -95,7 +95,7 @@ main (void)
    /*
     * Create the dataset in the file.
     */
-   dataset = H5Dcreate(file, "Dataset", H5T_NATIVE_INT, fid, H5P_DEFAULT);
+   dataset = H5Dcreate2(file, "Dataset", H5T_NATIVE_INT, fid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
    /*
     * Write data to the dataset.

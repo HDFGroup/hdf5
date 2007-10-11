@@ -77,7 +77,7 @@ main(void)
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
     if((space = H5Screate_simple(1, size, NULL)) < 0) TEST_ERROR;
-    if((dset = H5Dcreate(file, "dset", H5T_NATIVE_SCHAR, space, H5P_DEFAULT)) < 0)
+    if((dset = H5Dcreate2(file, "dset", H5T_NATIVE_SCHAR, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
     now = HDtime(NULL);
     if(H5Dclose(dset) < 0) TEST_ERROR;

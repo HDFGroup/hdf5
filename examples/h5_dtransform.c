@@ -99,7 +99,7 @@ main (void)
      * Create a new dataset within the file using defined dataspace and
      * datatype and default dataset creation properties.
      */
-    dataset = H5Dcreate(file, "data_no_trans", H5T_NATIVE_FLOAT, dataspace, H5P_DEFAULT);
+    dataset = H5Dcreate2(file, "data_no_trans", H5T_NATIVE_FLOAT, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     printf("\nOriginal Data: \n");
 
     PRINT(windchillF);

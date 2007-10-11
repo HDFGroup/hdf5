@@ -1600,25 +1600,25 @@ test_compound_9(void)
         goto error;
     } /* end if */
 
-    if((dset_id = H5Dcreate(file,"Dataset",dup_tid,space_id,H5P_DEFAULT)) < 0) {
+    if((dset_id = H5Dcreate2(file, "Dataset", dup_tid, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
         H5_FAILED(); AT();
         printf("Can't create dataset\n");
         goto error;
     } /* end if */
 
-    if(H5Dwrite(dset_id,dup_tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,&wdata) < 0) {
+    if(H5Dwrite(dset_id, dup_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata) < 0) {
         H5_FAILED(); AT();
         printf("Can't write data\n");
         goto error;
     } /* end if */
 
-    if(H5Dread(dset_id,dup_tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,&rdata) < 0) {
+    if(H5Dread(dset_id, dup_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata) < 0) {
         H5_FAILED(); AT();
         printf("Can't read data\n");
         goto error;
     } /* end if */
 
-    if(rdata.i1!=wdata.i1 || rdata.i2!=wdata.i2 || HDstrcmp(rdata.str, wdata.str)) {
+    if(rdata.i1 != wdata.i1 || rdata.i2 != wdata.i2 || HDstrcmp(rdata.str, wdata.str)) {
         H5_FAILED(); AT();
         printf("incorrect read data\n");
         goto error;
@@ -1810,33 +1810,33 @@ test_compound_10(void)
     } /* end if */
 
     dim1[0] = 1;
-    if((space_id=H5Screate_simple(1,dim1,NULL)) < 0) {
+    if((space_id = H5Screate_simple(1,dim1,NULL)) < 0) {
         H5_FAILED(); AT();
         printf("Can't create space\n");
         goto error;
     } /* end if */
 
-    if((dset_id = H5Dcreate(file,"Dataset",arr_tid,space_id,H5P_DEFAULT)) < 0) {
+    if((dset_id = H5Dcreate2(file, "Dataset", arr_tid, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
         H5_FAILED(); AT();
         printf("Can't create dataset\n");
         goto error;
     } /* end if */
 
-    if(H5Dwrite(dset_id,arr_tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,&wdata) < 0) {
+    if(H5Dwrite(dset_id, arr_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata) < 0) {
         H5_FAILED(); AT();
         printf("Can't write data\n");
         goto error;
     } /* end if */
 
-    if(H5Dread(dset_id,arr_tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,&rdata) < 0) {
+    if(H5Dread(dset_id, arr_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata) < 0) {
         H5_FAILED(); AT();
         printf("Can't read data\n");
         goto error;
     } /* end if */
 
-    for(i=0; i<ARRAY_DIM; i++) {
-        if(rdata[i].i1!=wdata[i].i1 || rdata[i].i2!=wdata[i].i2 ||
-            strcmp(rdata[i].str, wdata[i].str)) {
+    for(i = 0; i < ARRAY_DIM; i++) {
+        if(rdata[i].i1 != wdata[i].i1 || rdata[i].i2 != wdata[i].i2 ||
+            HDstrcmp(rdata[i].str, wdata[i].str)) {
             H5_FAILED(); AT();
             printf("incorrect read data\n");
             goto error;
@@ -2498,7 +2498,7 @@ test_transient (hid_t fapl)
     /* Create a dataset from a transient datatype */
     if(H5Tclose(type) < 0) goto error;
     if((type = H5Tcopy(H5T_NATIVE_INT)) < 0) goto error;
-    if((dset = H5Dcreate(file, "dset1", type, space, H5P_DEFAULT)) < 0)
+    if((dset = H5Dcreate2(file, "dset1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
 	goto error;
 
     /* The type returned from a dataset should not be modifiable */
@@ -2670,7 +2670,7 @@ test_named (hid_t fapl)
     }
 
     /* Create a dataset that uses the named type */
-    if((dset = H5Dcreate(file, "dset1", type, space, H5P_DEFAULT)) < 0)
+    if((dset = H5Dcreate2(file, "dset1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
 	goto error;
 
     /* Get the dataset's datatype and make sure it's a named type */
@@ -2701,7 +2701,7 @@ test_named (hid_t fapl)
      * first dataset.
      */
     if(H5Dclose(dset) < 0) goto error;
-    if((dset = H5Dcreate(file, "dset2", t2, space, H5P_DEFAULT)) < 0) goto error;
+    if((dset = H5Dcreate2(file, "dset2", t2, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
 
     /* Reopen the second dataset and make sure the type is shared */
     if(H5Tclose(t2) < 0) goto error;
@@ -2735,7 +2735,7 @@ test_named (hid_t fapl)
 	HDputs ("    Copied type should not be a named type!");
 	goto error;
     }
-    if((dset = H5Dcreate(file, "dset3", t2, space, H5P_DEFAULT)) < 0) goto error;
+    if((dset = H5Dcreate2(file, "dset3", t2, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
     if((t3 = H5Dget_type(dset)) < 0) goto error;
     if((status = H5Tcommitted(t3)) < 0) goto error;
     if(status) {

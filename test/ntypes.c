@@ -104,8 +104,8 @@ test_atomic_dtype(hid_t file)
 
 	/*------------------- Test data values ------------------------*/
 	/* Create the dataset */
-	if((dataset = H5Dcreate(file, DSET_ATOMIC_NAME_1, H5T_STD_I32BE, space,
-				    H5P_DEFAULT)) < 0) TEST_ERROR;
+	if((dataset = H5Dcreate2(file, DSET_ATOMIC_NAME_1, H5T_STD_I32BE, space,
+				    H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
 	/* Write the data to the dataset */
 	if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, ipoints2) < 0)
@@ -146,16 +146,14 @@ test_atomic_dtype(hid_t file)
 	    TEST_ERROR;
 
 	/* Check that the values read are the same as the values written */
-	for (i = 0; i < DIM0; i++) {
-	    for (j = 0; j < DIM1; j++) {
+	for(i = 0; i < DIM0; i++)
+	    for(j = 0; j < DIM1; j++)
 		if(ipoints2[i][j] != icheck2[i][j]) {
 		    H5_FAILED();
 		    printf("    Read different values than written.\n");
 		    printf("    At index %d,%d\n", i, j);
 		    goto error;
-		}
-	    }
-	}
+		} /* end if */
 
 	if(H5Dclose(dataset) < 0) TEST_ERROR;
 	if(H5Tclose(native_type) < 0) TEST_ERROR;
@@ -164,12 +162,12 @@ test_atomic_dtype(hid_t file)
 	/*------------------ Test different data types ----------------*/
 
 	/* Create the dataset of H5T_STD_I64LE */
-	if((dataset = H5Dcreate(file, DSET_ATOMIC_NAME_2, H5T_STD_I64LE, space,
-				    H5P_DEFAULT)) < 0) TEST_ERROR;
+	if((dataset = H5Dcreate2(file, DSET_ATOMIC_NAME_2, H5T_STD_I64LE, space,
+				    H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
-	if((dtype=H5Dget_type(dataset)) < 0) TEST_ERROR;
+	if((dtype = H5Dget_type(dataset)) < 0) TEST_ERROR;
 
-	if((native_type=H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) < 0)
+	if((native_type = H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) < 0)
 	    TEST_ERROR;
 
 	/* Verify the datatype retrieved and converted */
@@ -186,12 +184,12 @@ test_atomic_dtype(hid_t file)
 
 
 	/* Create the dataset of H5T_STD_I8LE */
-	if((dataset = H5Dcreate(file, DSET_ATOMIC_NAME_3, H5T_STD_I8LE, space,
-				    H5P_DEFAULT)) < 0) TEST_ERROR;
+	if((dataset = H5Dcreate2(file, DSET_ATOMIC_NAME_3, H5T_STD_I8LE, space,
+				    H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
-	if((dtype=H5Dget_type(dataset)) < 0) TEST_ERROR;
+	if((dtype = H5Dget_type(dataset)) < 0) TEST_ERROR;
 
-	if((native_type=H5Tget_native_type(dtype, H5T_DIR_ASCEND)) < 0)
+	if((native_type = H5Tget_native_type(dtype, H5T_DIR_ASCEND)) < 0)
 	    TEST_ERROR;
 
 	/* Verify the datatype retrieved and converted */
@@ -208,12 +206,12 @@ test_atomic_dtype(hid_t file)
 
 
 	/* Create the dataset of H5T_IEEE_F32BE */
-	if((dataset = H5Dcreate(file, DSET_ATOMIC_NAME_4, H5T_IEEE_F32BE, space,
-				    H5P_DEFAULT)) < 0) TEST_ERROR;
+	if((dataset = H5Dcreate2(file, DSET_ATOMIC_NAME_4, H5T_IEEE_F32BE, space,
+				    H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
-	if((dtype=H5Dget_type(dataset)) < 0) TEST_ERROR;
+	if((dtype = H5Dget_type(dataset)) < 0) TEST_ERROR;
 
-	if((native_type=H5Tget_native_type(dtype, H5T_DIR_DESCEND)) < 0)
+	if((native_type = H5Tget_native_type(dtype, H5T_DIR_DESCEND)) < 0)
 	    TEST_ERROR;
 
 	/* Verify the datatype retrieved and converted */
@@ -230,12 +228,12 @@ test_atomic_dtype(hid_t file)
 
 
 	/* Create the dataset of H5T_IEEE_F64BE */
-	if((dataset = H5Dcreate(file, DSET_ATOMIC_NAME_5, H5T_IEEE_F64BE, space,
-				    H5P_DEFAULT)) < 0) TEST_ERROR;
+	if((dataset = H5Dcreate2(file, DSET_ATOMIC_NAME_5, H5T_IEEE_F64BE, space,
+				    H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
-	if((dtype=H5Dget_type(dataset)) < 0) TEST_ERROR;
+	if((dtype = H5Dget_type(dataset)) < 0) TEST_ERROR;
 
-	if((native_type=H5Tget_native_type(dtype, H5T_DIR_DESCEND)) < 0)
+	if((native_type = H5Tget_native_type(dtype, H5T_DIR_DESCEND)) < 0)
 	    TEST_ERROR;
 
 	/* Verify the datatype retrieved and converted */
@@ -243,7 +241,7 @@ test_atomic_dtype(hid_t file)
 	    TEST_ERROR;
 	if(H5Tget_size(native_type) < H5Tget_size(H5T_IEEE_F64BE))
 	    TEST_ERROR;
-	if(H5T_FLOAT!=H5Tget_class(native_type))
+	if(H5T_FLOAT != H5Tget_class(native_type))
 	    TEST_ERROR;
 
 	if(H5Dclose(dataset) < 0) TEST_ERROR;
@@ -343,9 +341,9 @@ test_compound_dtype2(hid_t file)
 
     /* Insert and pack members */
     if(H5Tinsert(tid2, "c2", 0, H5T_STD_I16BE) < 0) TEST_ERROR;
-#if H5_SIZEOF_LONG==4
+#if H5_SIZEOF_LONG == 4
     if(H5Tinsert(tid2, "l2", 2, H5T_STD_I32LE) < 0) TEST_ERROR;
-#elif H5_SIZEOF_LONG==8
+#elif H5_SIZEOF_LONG == 8
     if(H5Tinsert(tid2, "l2", 2, H5T_STD_I64LE) < 0) TEST_ERROR;
 #else
 #error "Unknown 'long' size"
@@ -354,21 +352,21 @@ test_compound_dtype2(hid_t file)
     if(H5Tinsert(tid, "c", 0, H5T_STD_U8LE) < 0) TEST_ERROR;
     if(H5Tinsert(tid, "i", 1, H5T_STD_I32LE) < 0) TEST_ERROR;
     if(H5Tinsert(tid, "st", 5, tid2) < 0) TEST_ERROR;
-#if H5_SIZEOF_LONG==4
+#if H5_SIZEOF_LONG == 4
     if(H5Tinsert(tid, "l", 11, H5T_STD_U64BE) < 0) TEST_ERROR;
-#elif H5_SIZEOF_LONG==8
+#elif H5_SIZEOF_LONG == 8
     if(H5Tinsert(tid, "l", 15, H5T_STD_U64BE) < 0) TEST_ERROR;
 #else
 #error "Unknown 'long' size"
 #endif
 
     /* Create the dataset */
-    if((dataset = H5Dcreate(file, DSET_COMPOUND_NAME_2, tid, space,
-			     H5P_DEFAULT)) < 0) TEST_ERROR;
+    if((dataset = H5Dcreate2(file, DSET_COMPOUND_NAME_2, tid, space,
+			     H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Create compound datatype for memory */
-    if((tid_m2=H5Tcreate(H5T_COMPOUND, sizeof(s2))) < 0) TEST_ERROR;
-    if((tid_m=H5Tcreate(H5T_COMPOUND, sizeof(s1))) < 0) TEST_ERROR;
+    if((tid_m2 = H5Tcreate(H5T_COMPOUND, sizeof(s2))) < 0) TEST_ERROR;
+    if((tid_m = H5Tcreate(H5T_COMPOUND, sizeof(s1))) < 0) TEST_ERROR;
 
     /* Insert members */
     if(H5Tinsert(tid_m2, "c2", HOFFSET(s2, c2), H5T_NATIVE_SHORT) < 0) TEST_ERROR;
@@ -558,17 +556,16 @@ test_compound_dtype(hid_t file)
     /* Allocate space for the points & check arrays */
     if((points=malloc(sizeof(s1)*DIM0*DIM1))==NULL)
         TEST_ERROR;
-    if((check=calloc(sizeof(s1),DIM0*DIM1))==NULL)
+    if((check = calloc(sizeof(s1), DIM0 * DIM1)) == NULL)
         TEST_ERROR;
 
     /* Initialize the dataset */
-    for (i = n = 0, temp_point=points; i < DIM0; i++) {
-	for (j = 0; j < DIM1; j++,temp_point++) {
+    for(i = n = 0, temp_point=points; i < DIM0; i++)
+	for(j = 0; j < DIM1; j++,temp_point++) {
 	    temp_point->c = 't';
 	    temp_point->i = n++;
 	    temp_point->l = (i*10+j*100)*n;
-	}
-    }
+	} /* end for */
 
     /* Create the data space */
     dims[0] = DIM0;
@@ -576,7 +573,7 @@ test_compound_dtype(hid_t file)
     if((space = H5Screate_simple(2, dims, NULL)) < 0) TEST_ERROR;
 
     /* Create compound datatype for disk storage */
-    if((tid=H5Tcreate(H5T_COMPOUND, sizeof(s1))) < 0) TEST_ERROR;
+    if((tid = H5Tcreate(H5T_COMPOUND, sizeof(s1))) < 0) TEST_ERROR;
 
     /* Insert members */
     if(H5Tinsert(tid, "c", 0, H5T_STD_U8LE) < 0) TEST_ERROR;
@@ -584,11 +581,11 @@ test_compound_dtype(hid_t file)
     if(H5Tinsert(tid, "l", 5, H5T_STD_I64BE) < 0) TEST_ERROR;
 
     /* Create the dataset */
-    if((dataset = H5Dcreate(file, DSET_COMPOUND_NAME, tid, space,
-			     H5P_DEFAULT)) < 0) TEST_ERROR;
+    if((dataset = H5Dcreate2(file, DSET_COMPOUND_NAME, tid, space,
+			     H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Create compound datatype for datatype in memory */
-    if((tid2=H5Tcreate(H5T_COMPOUND, sizeof(s1))) < 0) TEST_ERROR;
+    if((tid2 = H5Tcreate(H5T_COMPOUND, sizeof(s1))) < 0) TEST_ERROR;
     if(H5Tinsert(tid2, "c", HOFFSET(s1, c), H5T_NATIVE_UCHAR) < 0) TEST_ERROR;
     if(H5Tinsert(tid2, "i", HOFFSET(s1, i), H5T_NATIVE_UINT) < 0) TEST_ERROR;
     if(H5Tinsert(tid2, "l", HOFFSET(s1, l), H5T_NATIVE_LLONG) < 0) TEST_ERROR;
@@ -736,14 +733,13 @@ test_compound_dtype3(hid_t file)
         TEST_ERROR;
 
     /* Initialize the dataset */
-    for (i = n = 0, temp_point=points; i < DIM0; i++) {
-	for (j = 0; j < DIM1; j++,temp_point++) {
+    for(i = n = 0, temp_point=points; i < DIM0; i++)
+	for(j = 0; j < DIM1; j++,temp_point++) {
 	    temp_point->c = 't';
 	    temp_point->l = (i*10+j*100)*n;
-	    for (k = 0; k < 5; k++)
+	    for(k = 0; k < 5; k++)
 	        (temp_point->a)[k] = n++;
-	}
-    }
+	} /* end for */
 
     /* Create the data space */
     dims[0] = DIM0;
@@ -754,7 +750,7 @@ test_compound_dtype3(hid_t file)
     if((tid2 = H5Tarray_create(H5T_STD_I32LE, 1, array_dims, NULL)) < 0) TEST_ERROR;
 
     /* Create compound datatype for disk storage */
-    if((tid=H5Tcreate(H5T_COMPOUND, 29)) < 0) TEST_ERROR;
+    if((tid = H5Tcreate(H5T_COMPOUND, 29)) < 0) TEST_ERROR;
 
     /* Insert members */
     if(H5Tinsert(tid, "c", 0, H5T_STD_U8LE) < 0) TEST_ERROR;
@@ -762,14 +758,14 @@ test_compound_dtype3(hid_t file)
     if(H5Tinsert(tid, "l", 21, H5T_STD_I64BE) < 0) TEST_ERROR;
 
     /* Create the dataset */
-    if((dataset = H5Dcreate(file, DSET_COMPOUND_NAME_3, tid, space,
-			     H5P_DEFAULT)) < 0) TEST_ERROR;
+    if((dataset = H5Dcreate2(file, DSET_COMPOUND_NAME_3, tid, space,
+			     H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Create array datatype */
     if((tid_m2 = H5Tarray_create(H5T_NATIVE_INT, 1, array_dims, NULL)) < 0) TEST_ERROR;
 
     /* Create compound datatype for datatype in memory */
-    if((tid_m=H5Tcreate(H5T_COMPOUND, sizeof(s1))) < 0) TEST_ERROR;
+    if((tid_m = H5Tcreate(H5T_COMPOUND, sizeof(s1))) < 0) TEST_ERROR;
     if(H5Tinsert(tid_m, "c", HOFFSET(s1, c), H5T_NATIVE_UCHAR) < 0) TEST_ERROR;
     if(H5Tinsert(tid_m, "a", HOFFSET(s1, a), tid_m2) < 0) TEST_ERROR;
     if(H5Tinsert(tid_m, "l", HOFFSET(s1, l), H5T_NATIVE_LLONG) < 0) TEST_ERROR;
@@ -935,14 +931,13 @@ test_compound_opaque(hid_t file)
         TEST_ERROR;
 
     /* Initialize the dataset */
-    for (i = n = 0, temp_point=points; i < DIM0; i++) {
-	for (j = 0; j < DIM1; j++,temp_point++) {
+    for(i = n = 0, temp_point=points; i < DIM0; i++)
+	for(j = 0; j < DIM1; j++,temp_point++) {
 	    temp_point->c = 't';
 	    temp_point->l = (i*10+j*100)*n;
-	    for (k = 0; k < 5; k++)
+	    for(k = 0; k < 5; k++)
 	        (temp_point->o)[k] = n++;
-	}
-    }
+	} /* end for */
 
     /* Create the data space */
     dims[0] = DIM0;
@@ -950,11 +945,11 @@ test_compound_opaque(hid_t file)
     if((space = H5Screate_simple(2, dims, NULL)) < 0) TEST_ERROR;
 
     /* Create opaque datatype */
-    if((tid2=H5Tcreate(H5T_OPAQUE, sizeof(temp_point->o))) < 0) TEST_ERROR;
+    if((tid2 = H5Tcreate(H5T_OPAQUE, sizeof(temp_point->o))) < 0) TEST_ERROR;
     if(H5Tset_tag(tid2, "testing opaque field") < 0) TEST_ERROR;
 
     /* Create compound datatype for disk storage */
-    if((tid=H5Tcreate(H5T_COMPOUND, 14)) < 0) TEST_ERROR;
+    if((tid = H5Tcreate(H5T_COMPOUND, 14)) < 0) TEST_ERROR;
 
     /* Insert members */
     if(H5Tinsert(tid, "c", 0, H5T_STD_U8LE) < 0) TEST_ERROR;
@@ -962,11 +957,11 @@ test_compound_opaque(hid_t file)
     if(H5Tinsert(tid, "l", 6, H5T_STD_I64BE) < 0) TEST_ERROR;
 
     /* Create the dataset */
-    if((dataset = H5Dcreate(file, DSET_COMPOUND_NAME_4, tid, space,
-			     H5P_DEFAULT)) < 0) TEST_ERROR;
+    if((dataset = H5Dcreate2(file, DSET_COMPOUND_NAME_4, tid, space,
+			     H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Create compound datatype for datatype in memory */
-    if((tid_m=H5Tcreate(H5T_COMPOUND, sizeof(s1))) < 0) TEST_ERROR;
+    if((tid_m = H5Tcreate(H5T_COMPOUND, sizeof(s1))) < 0) TEST_ERROR;
     if(H5Tinsert(tid_m, "c", HOFFSET(s1, c), H5T_NATIVE_UCHAR) < 0) TEST_ERROR;
     if(H5Tinsert(tid_m, "o", HOFFSET(s1, o), tid2) < 0) TEST_ERROR;
     if(H5Tinsert(tid_m, "l", HOFFSET(s1, l), H5T_NATIVE_LLONG) < 0) TEST_ERROR;
@@ -1120,10 +1115,9 @@ test_enum_dtype(hid_t file)
     TESTING("enum datatype");
 
     /* Initialize the dataset */
-    for (i = 0; i < DIM0; i++) {
-        for (j=0, n=0; j < DIM1; j++, n++)
+    for(i = 0; i < DIM0; i++)
+        for(j = 0, n = 0; j < DIM1; j++, n++)
 	    spoints2[i][j] = (i*10+j*100+n)%8;
-    }
 
     /* Create the data space */
     dims[0] = DIM0;
@@ -1131,17 +1125,17 @@ test_enum_dtype(hid_t file)
     if((space = H5Screate_simple(2, dims, NULL)) < 0) TEST_ERROR;
 
     /* Construct enum type based on native type */
-    if((tid=H5Tenum_create(H5T_STD_I16LE)) < 0) TEST_ERROR;
+    if((tid = H5Tenum_create(H5T_STD_I16LE)) < 0) TEST_ERROR;
 
-    for (i = 0; i < 8; i++) {
-        sub_colors[i*2]=i;
-        sub_colors[i*2+1]=0;
+    for(i = 0; i < 8; i++) {
+        sub_colors[i * 2] = i;
+        sub_colors[i * 2 + 1] = 0;
         if(H5Tenum_insert(tid, mname[i], &(sub_colors[i*2])) < 0) TEST_ERROR;
-    }
+    } /* end for */
 
     /* Create the dataset */
-    if((dataset = H5Dcreate(file, DSET_ENUM_NAME, tid, space,
-			     H5P_DEFAULT)) < 0) TEST_ERROR;
+    if((dataset = H5Dcreate2(file, DSET_ENUM_NAME, tid, space,
+			     H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Construct enum type based on native type in memory */
     if((tid_m = H5Tenum_create(H5T_NATIVE_SHORT)) < 0) TEST_ERROR;
@@ -1149,7 +1143,7 @@ test_enum_dtype(hid_t file)
     for(i = 0; i < 8; i++) {
         colors[i] = i;
         if(H5Tenum_insert(tid_m, mname[i], &(colors[i])) < 0) TEST_ERROR;
-    }
+    } /* end for */
 
     /* Write the data to the dataset */
     if(H5Dwrite(dataset, tid_m, H5S_ALL, H5S_ALL, H5P_DEFAULT, spoints2) < 0)
@@ -1266,7 +1260,7 @@ test_array_dtype(hid_t file)
     if((space = H5Screate_simple(2, space_dims, NULL)) < 0) TEST_ERROR;
 
     /* Create compound datatype for disk storage */
-    if((tid2=H5Tcreate(H5T_COMPOUND, 13)) < 0) TEST_ERROR;
+    if((tid2 = H5Tcreate(H5T_COMPOUND, 13)) < 0) TEST_ERROR;
 
     /* Insert members */
     if(H5Tinsert(tid2, "c", 0, H5T_STD_U8BE) < 0) TEST_ERROR;
@@ -1277,11 +1271,11 @@ test_array_dtype(hid_t file)
     if((tid = H5Tarray_create(tid2, 1, array_dims, NULL)) < 0) TEST_ERROR;
 
     /* Create the dataset */
-    if((dataset = H5Dcreate(file, DSET_ARRAY_NAME, tid, space,
-			     H5P_DEFAULT)) < 0) TEST_ERROR;
+    if((dataset = H5Dcreate2(file, DSET_ARRAY_NAME, tid, space,
+			     H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Create compound datatype for datatype in memory */
-    if((tid3=H5Tcreate(H5T_COMPOUND, sizeof(s1))) < 0) TEST_ERROR;
+    if((tid3 = H5Tcreate(H5T_COMPOUND, sizeof(s1))) < 0) TEST_ERROR;
     if(H5Tinsert(tid3, "c", HOFFSET(s1, c), H5T_NATIVE_UCHAR) < 0) TEST_ERROR;
     if(H5Tinsert(tid3, "i", HOFFSET(s1, i), H5T_NATIVE_UINT) < 0) TEST_ERROR;
     if(H5Tinsert(tid3, "l", HOFFSET(s1, l), H5T_NATIVE_LLONG) < 0) TEST_ERROR;
@@ -1405,8 +1399,8 @@ test_array_dtype2(hid_t file)
     if((tid = H5Tarray_create(H5T_STD_I32LE, 1, array_dims, NULL)) < 0) TEST_ERROR;
 
     /* Create the dataset */
-    if((dataset = H5Dcreate(file, DSET_ARRAY2_NAME, tid, space,
-			     H5P_DEFAULT)) < 0) TEST_ERROR;
+    if((dataset = H5Dcreate2(file, DSET_ARRAY2_NAME, tid, space,
+			     H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Create array datatype for memory */
     if((tid_m = H5Tarray_create(H5T_NATIVE_INT, 1, array_dims, NULL)) < 0) TEST_ERROR;
@@ -1537,7 +1531,7 @@ test_vl_dtype(hid_t file)
     if((tid = H5Tvlen_create(tid2)) < 0) TEST_ERROR
 
     /* Create a dataset */
-    if((dataset = H5Dcreate(file, DSET_VL_NAME, tid, space, H5P_DEFAULT)) < 0)
+    if((dataset = H5Dcreate2(file, DSET_VL_NAME, tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Create a base VL datatype for memory */
@@ -1682,10 +1676,10 @@ test_vlstr_dtype(hid_t file)
         TEST_ERROR;
 
     /* Create a dataset */
-    if((dataset = H5Dcreate(file,DSET_VLSTR_NAME,tid1,sid1,H5P_DEFAULT)) < 0) TEST_ERROR;
+    if((dataset = H5Dcreate2(file, DSET_VLSTR_NAME, tid1, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Write dataset to disk */
-    if(H5Dwrite(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata) < 0) TEST_ERROR;
+    if(H5Dwrite(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0) TEST_ERROR;
 
     /* Close Dataset */
     if(H5Dclose(dataset) < 0) TEST_ERROR;
@@ -1791,7 +1785,7 @@ test_str_dtype(hid_t file)
     if(H5T_STRING != H5Tget_class(tid1)) TEST_ERROR;
 
     /* Create a dataset */
-    if((dataset = H5Dcreate(file, DSET_STR_NAME, tid1, sid1, H5P_DEFAULT)) < 0) TEST_ERROR;
+    if((dataset = H5Dcreate2(file, DSET_STR_NAME, tid1, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Write dataset to disk */
     if(H5Dwrite(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0) TEST_ERROR;
@@ -1934,7 +1928,7 @@ test_refer_dtype(hid_t file)
 	    TEST_ERROR;
 
 	/* Create a dataset */
-	if((dataset = H5Dcreate(file, "Dataset3", H5T_STD_REF_OBJ, sid1, H5P_DEFAULT)) < 0)
+	if((dataset = H5Dcreate2(file, "Dataset3", H5T_STD_REF_OBJ, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
 	    TEST_ERROR;
 
 	/* Create reference to named datatype */
@@ -2058,22 +2052,22 @@ test_refer_dtype2(hid_t file)
     TESTING("dataset region reference");
 
     /* Allocate write & read buffers */
-    dwbuf=malloc(sizeof(uint8_t)*SPACE2_DIM1*SPACE2_DIM2);
-    drbuf=calloc(sizeof(uint8_t),SPACE2_DIM1*SPACE2_DIM2);
+    dwbuf = malloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
+    drbuf = calloc(sizeof(uint8_t), SPACE2_DIM1 * SPACE2_DIM2);
 
     /* Create dataspace for datasets */
     if((sid2 = H5Screate_simple(SPACE2_RANK, dims2, NULL)) < 0)
         TEST_ERROR;
 
     /* Create a dataset */
-    if((dset2=H5Dcreate(file,"Dataset2",H5T_STD_U8LE,sid2,H5P_DEFAULT)) < 0)
+    if((dset2 = H5Dcreate2(file, "Dataset2", H5T_STD_U8LE, sid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-    for(tu8=dwbuf,i=0; i<SPACE2_DIM1*SPACE2_DIM2; i++)
+    for(tu8 = dwbuf, i = 0; i < SPACE2_DIM1 * SPACE2_DIM2; i++)
         *tu8++=i*3;
 
     /* Write selection to disk */
-    if(H5Dwrite(dset2,H5T_STD_U8LE,H5S_ALL,H5S_ALL,H5P_DEFAULT,dwbuf) < 0)
+    if(H5Dwrite(dset2, H5T_STD_U8LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dwbuf) < 0)
         TEST_ERROR;
 
     /* Close Dataset */
@@ -2086,7 +2080,7 @@ test_refer_dtype2(hid_t file)
         TEST_ERROR;
 
     /* Create a reference dataset */
-    if((dset1 = H5Dcreate(file, "Dataset1", H5T_STD_REF_DSETREG, sid1, H5P_DEFAULT)) < 0)
+    if((dset1 = H5Dcreate2(file, "Dataset1", H5T_STD_REF_DSETREG, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Create references */
@@ -2244,7 +2238,7 @@ test_opaque_dtype(hid_t file)
     if((type = H5Tcreate(H5T_OPAQUE, 1)) < 0 ||
             H5Tset_tag(type, "testing 1-byte opaque type") < 0 ||
             (space = H5Screate_simple(1, &nelmts, NULL)) < 0 ||
-            (dset = H5Dcreate(file, DSET_OPAQUE_NAME, type, space, H5P_DEFAULT)) < 0)
+            (dset = H5Dcreate2(file, DSET_OPAQUE_NAME, type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
 	TEST_ERROR;
 
     for(i = 0; i < sizeof(wbuf); i++)
@@ -2320,7 +2314,7 @@ test_bitfield_dtype(hid_t file)
     nelmts = sizeof(wbuf);
     if((type = H5Tcopy(H5T_STD_B8LE)) < 0 ||
             (space = H5Screate_simple(1, &nelmts, NULL)) < 0 ||
-            (dset = H5Dcreate(file, DSET_BITFIELD_NAME, type, space, H5P_DEFAULT)) < 0)
+            (dset = H5Dcreate2(file, DSET_BITFIELD_NAME, type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
 	TEST_ERROR;
 
     for(i = 0; i < sizeof(wbuf); i++)
@@ -2415,7 +2409,7 @@ test_ninteger(void)
     if((dcpl1 = H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
 
     /* create a dataset */
-    if((did1 = H5Dcreate(fid1, "dset", H5T_NATIVE_INT, sid1, dcpl1)) < 0) goto error;
+    if((did1 = H5Dcreate2(fid1, "dset", H5T_NATIVE_INT, sid1, H5P_DEFAULT, dcpl1, H5P_DEFAULT)) < 0) goto error;
 
     /* write */
     if(H5Dwrite(did1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
@@ -2467,36 +2461,36 @@ test_ninteger(void)
      goto error;
 
     /* create a file using default properties */
-    if((fid2=H5Fcreate("tstint2.h5",H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT)) < 0)
+    if((fid2 = H5Fcreate("tstint2.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
      goto error;
 
     /* create a dataset using the native type */
-    if((did2 = H5Dcreate(fid2,"dset",nid1,sid1,dcpl1)) <0) goto error;
+    if((did2 = H5Dcreate2(fid2, "dset", nid1, sid1, H5P_DEFAULT, dcpl1, H5P_DEFAULT)) < 0) goto error;
 
     /* write */
-    if(H5Dwrite(did2,nid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,chk) < 0)
+    if(H5Dwrite(did2, nid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, chk) < 0)
      goto error;
 
     /* get dcpl */
-    if((dcpl2=H5Dget_create_plist(did2)) < 0)
+    if((dcpl2 = H5Dget_create_plist(did2)) < 0)
      goto error;
 
     /* get file datatype */
-    if((tid2=H5Dget_type (did2)) < 0)
+    if((tid2 = H5Dget_type(did2)) < 0)
      goto error;
 
     /* get native datatype */
-    if((nid2=H5Tget_native_type(tid2,H5T_DIR_DEFAULT)) < 0)
+    if((nid2 = H5Tget_native_type(tid2, H5T_DIR_DEFAULT)) < 0)
      goto error;
 
     /* check */
-    if(H5Tget_precision(nid1)!=H5Tget_precision(nid2)) {
+    if(H5Tget_precision(nid1) != H5Tget_precision(nid2)) {
      printf("    Precision differ.\n");
      goto error;
     }
 
     /* compare dataset creation property lists */
-    if(H5Pequal(dcpl1,dcpl2)<=0) {
+    if(H5Pequal(dcpl1, dcpl2) <= 0) {
      printf("    Property lists differ.\n");
      goto error;
     }

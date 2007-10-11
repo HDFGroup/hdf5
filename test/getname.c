@@ -181,17 +181,17 @@ test_main(hid_t file_id, hid_t fapl)
 
 
     /*-------------------------------------------------------------------------
-    * Test H5Iget_name with H5Dcreate
+    * Test H5Iget_name with H5Dcreate2
     *-------------------------------------------------------------------------
     */
 
-    TESTING("H5Iget_name with H5Dcreate");
+    TESTING("H5Iget_name with H5Dcreate2");
 
     /* Create the dataspace  */
     if((space_id = H5Screate_simple(1, dims, NULL)) < 0) TEST_ERROR
 
     /* Create a new dataset */
-    if((dataset_id = H5Dcreate(file_id , "d1", H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((dataset_id = H5Dcreate2(file_id , "d1", H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Verify */
     if(check_name(dataset_id, "/d1", "/d1") < 0) TEST_ERROR
@@ -203,7 +203,7 @@ test_main(hid_t file_id, hid_t fapl)
     if((group_id = H5Gopen2(file_id, "g1", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Create a new dataset inside "g1" */
-    if((dataset_id = H5Dcreate(group_id , "d1", H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((dataset_id = H5Dcreate2(group_id , "d1", H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Verify */
     if(check_name(dataset_id, "/g1/d1", "/g1/d1") < 0) TEST_ERROR
@@ -265,7 +265,7 @@ test_main(hid_t file_id, hid_t fapl)
 
     /* Create a dataset */
     if((space_id = H5Screate_simple(1, dims, NULL)) < 0) TEST_ERROR
-    if((dataset_id = H5Dcreate(group3_id , "d1", H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((dataset_id = H5Dcreate2(group3_id , "d1", H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Close */
     if(H5Dclose(dataset_id) < 0) FAIL_STACK_ERROR
@@ -646,8 +646,8 @@ test_main(hid_t file_id, hid_t fapl)
 
     /* Create two datasets "g11/d" and "g11/g/d"*/
     if((space_id = H5Screate_simple(1, dims, NULL)) < 0) FAIL_STACK_ERROR
-    if((dataset_id = H5Dcreate(group_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-    if((dataset2_id = H5Dcreate(group2_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((dataset_id = H5Dcreate2(group_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((dataset2_id = H5Dcreate2(group2_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Delete */
     if(H5Ldelete(file_id, "/g11/d", H5P_DEFAULT) < 0) FAIL_STACK_ERROR
@@ -688,7 +688,7 @@ test_main(hid_t file_id, hid_t fapl)
     if((space_id = H5Screate_simple(1, dims, NULL)) < 0) TEST_ERROR
 
     /* Create the dataset */
-    if((dataset_id = H5Dcreate(file1_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((dataset_id = H5Dcreate2(file1_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Close */
     if(H5Dclose(dataset_id) < 0) FAIL_STACK_ERROR
@@ -990,7 +990,7 @@ test_main(hid_t file_id, hid_t fapl)
     if((space_id = H5Screate_simple(1, dims, NULL)) < 0) FAIL_STACK_ERROR
 
     /* Create a new dataset */
-    if((dataset_id = H5Dcreate(group_id , "d", type_id, space_id, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((dataset_id = H5Dcreate2(group_id , "d", type_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Close */
     if(H5Dclose(dataset_id) < 0) FAIL_STACK_ERROR
@@ -1064,10 +1064,10 @@ test_main(hid_t file_id, hid_t fapl)
     if((space_id = H5Screate_simple(1, dims, NULL)) < 0) FAIL_STACK_ERROR
 
     /* Create a new dataset */
-    if((dataset_id = H5Dcreate(file2_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((dataset_id = H5Dcreate2(file2_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Create a new dataset */
-    if((dataset2_id = H5Dcreate(file3_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((dataset2_id = H5Dcreate2(file3_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Delete */
     if(H5Ldelete(file2_id, "/d", H5P_DEFAULT) < 0) FAIL_STACK_ERROR
@@ -1105,10 +1105,10 @@ test_main(hid_t file_id, hid_t fapl)
     if((space_id = H5Screate_simple(1, dims, NULL)) < 0) FAIL_STACK_ERROR
 
     /* Create a new dataset */
-    if((dataset_id = H5Dcreate(file2_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((dataset_id = H5Dcreate2(file2_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Create a new dataset */
-    if((dataset2_id = H5Dcreate(file3_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((dataset2_id = H5Dcreate2(file3_id , "d", H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Delete */
     if(H5Ldelete(file3_id, "/d", H5P_DEFAULT) < 0) FAIL_STACK_ERROR
@@ -1198,7 +1198,7 @@ test_main(hid_t file_id, hid_t fapl)
 }
 
     /* Close */
-    H5Gclose(group_id);
+    if(H5Gclose(group_id) < 0) FAIL_STACK_ERROR
 
     PASSED();
 
@@ -1218,7 +1218,7 @@ test_main(hid_t file_id, hid_t fapl)
     if((type_id = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
 
     /* Create a new dataset */
-    if((dataset_id = H5Dcreate(file_id , "d2", type_id, space_id, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((dataset_id = H5Dcreate2(file_id , "d2", type_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
 {
     char name[NAME_BUF_SIZE];   /* Buffer to hold name and its size */
@@ -1235,9 +1235,9 @@ test_main(hid_t file_id, hid_t fapl)
 }
 
     /* Close */
-    H5Dclose(dataset_id);
-    H5Sclose(space_id);
-    H5Tclose(type_id);
+    if(H5Dclose(dataset_id) < 0) FAIL_STACK_ERROR
+    if(H5Sclose(space_id) < 0) FAIL_STACK_ERROR
+    if(H5Tclose(type_id) < 0) FAIL_STACK_ERROR
 
     PASSED();
 
@@ -1256,7 +1256,7 @@ test_main(hid_t file_id, hid_t fapl)
     /* Also create a dataset and a datatype */
     if((space_id = H5Screate_simple(1, dims, NULL)) < 0) FAIL_STACK_ERROR
     if((type_id = H5Tcopy(H5T_NATIVE_INT)) < 0) FAIL_STACK_ERROR
-    if((dataset_id = H5Dcreate(file_id, "g18/d2", type_id, space_id, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((dataset_id = H5Dcreate2(file_id, "g18/d2", type_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     if(H5Tcommit2(file_id, "g18/t2", type_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 
@@ -2394,13 +2394,13 @@ test_obj_ref(hid_t fapl)
 
     /* Create a single dataset inside the second file, which will be mounted
      * and used to mask objects in the first file */
-    if((dataset = H5Dcreate(fid2, "Dataset1", H5T_STD_U32LE, sid1, H5P_DEFAULT)) < 0)
+    if((dataset = H5Dcreate2(fid2, "Dataset1", H5T_STD_U32LE, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
     if(H5Dclose(dataset) < 0)
         FAIL_STACK_ERROR
     
     /* Create a dataset(inside Group1) */
-    if((dataset = H5Dcreate(group, "Dataset1", H5T_STD_U32LE, sid1, H5P_DEFAULT)) < 0)
+    if((dataset = H5Dcreate2(group, "Dataset1", H5T_STD_U32LE, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
 
     /* Initialize data buffer */
@@ -2416,7 +2416,7 @@ test_obj_ref(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Create another dataset(inside Group1) */
-    if((dataset = H5Dcreate(group, "Dataset2", H5T_NATIVE_UCHAR, sid1, H5P_DEFAULT)) < 0)
+    if((dataset = H5Dcreate2(group, "Dataset2", H5T_NATIVE_UCHAR, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
  
     /* Close Dataset */
@@ -2451,7 +2451,7 @@ test_obj_ref(hid_t fapl)
         FAIL_STACK_ERROR
  
     /* Create dataset in that group */
-    if((dataset = H5Dcreate(group2, "Dataset4", H5T_NATIVE_UCHAR, sid1, H5P_DEFAULT)) < 0)
+    if((dataset = H5Dcreate2(group2, "Dataset4", H5T_NATIVE_UCHAR, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
   
     /* Close Dataset */
@@ -2467,7 +2467,7 @@ test_obj_ref(hid_t fapl)
     /* Open up that hard link and make a new dataset there */
     if((group = H5Gopen2(fid1, "/Group1/Group2/Link", H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
-    if((dataset = H5Dcreate(group, "Dataset5", H5T_NATIVE_UCHAR, sid1, H5P_DEFAULT)) < 0)
+    if((dataset = H5Dcreate2(group, "Dataset5", H5T_NATIVE_UCHAR, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
 
     if(H5Dclose(dataset) < 0)
@@ -2477,7 +2477,7 @@ test_obj_ref(hid_t fapl)
 
 
     /* Create a dataset to store references */
-    if((dataset = H5Dcreate(fid1, "Dataset3", H5T_STD_REF_OBJ, sid1, H5P_DEFAULT)) < 0)
+    if((dataset = H5Dcreate2(fid1, "Dataset3", H5T_STD_REF_OBJ, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
 
     /* Create reference to dataset */
@@ -2674,7 +2674,7 @@ test_reg_ref(hid_t fapl)
 	TEST_ERROR
 
     /* Create integer dataset */
-    if((dsetv_id = H5Dcreate(file_id, REFREG_DSETNAMEV, H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0)
+    if((dsetv_id = H5Dcreate2(file_id, REFREG_DSETNAMEV, H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
 	TEST_ERROR
 
      /* Write data to the dataset */
@@ -2684,7 +2684,7 @@ test_reg_ref(hid_t fapl)
 	TEST_ERROR
 
     /* Dataset with references */
-    if((dsetr_id = H5Dcreate(file_id, REFREG_DSETNAMER, H5T_STD_REF_DSETREG, spacer_id, H5P_DEFAULT)) < 0)
+    if((dsetr_id = H5Dcreate2(file_id, REFREG_DSETNAMER, H5T_STD_REF_DSETREG, spacer_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
 	TEST_ERROR
 
     /*

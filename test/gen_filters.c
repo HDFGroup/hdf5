@@ -57,7 +57,7 @@ test_filters_endianess(void)
     if(H5Pset_fletcher32(dcpl) < 0) goto error;
 
     /* create a dataset */
-    if((dsid = H5Dcreate(fid, "dset", H5T_NATIVE_INT, sid, dcpl)) < 0) goto error;
+    if((dsid = H5Dcreate2(fid, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) goto error;
 
     if(H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) goto error;
 

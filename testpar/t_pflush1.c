@@ -59,13 +59,13 @@ hid_t create_file(char* name, hid_t fapl)
  
 
 
-    if ((file=H5Fcreate(name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0) goto error;
+    if((file=H5Fcreate(name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) goto error;
 
     /* Create a chunked dataset */
-    if ((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
-    if (H5Pset_chunk(dcpl, 2, ch_size)<0) goto error;
-    if ((space=H5Screate_simple(2, ds_size, NULL))<0) goto error;
-    if ((dset=H5Dcreate(file, "dset", H5T_NATIVE_FLOAT, space, H5P_DEFAULT))<0)
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
+    if(H5Pset_chunk(dcpl, 2, ch_size) < 0) goto error;
+    if((space = H5Screate_simple(2, ds_size, NULL)) < 0) goto error;
+    if((dset = H5Dcreate2(file, "dset", H5T_NATIVE_FLOAT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
 	goto error;
 
     plist = H5Pcreate(H5P_DATASET_XFER);
@@ -73,15 +73,14 @@ hid_t create_file(char* name, hid_t fapl)
     
     
     /* Write some data */
-    for (i=0; i<ds_size[0]; i++) {
+    for(i = 0; i < ds_size[0]; i++) {
 	/*
 	 * The extra cast in the following statement is a bug workaround
 	 * for the Win32 version 5.0 compiler.
 	 * 1998-11-06 ptl
 	 */
-	for (j=0; j<ds_size[1]; j++) {
+	for(j = 0; j < ds_size[1]; j++)
 	    the_data[i][j] = (double)(hssize_t)i/(hssize_t)(j+1);
-	}
     }
     if(H5Dwrite(dset, H5T_NATIVE_DOUBLE, space, space, plist, the_data) < 0) goto error;
 
@@ -93,12 +92,10 @@ hid_t create_file(char* name, hid_t fapl)
 	if(H5Gclose(grp) < 0) goto error;
     }
 
-
     return file;
 
 error:
-        HD_exit(1);
-
+    HD_exit(1);
 }
 
 /*-------------------------------------------------------------------------
@@ -142,14 +139,14 @@ main(int argc, char* argv[])
     if(mpi_rank == 0) 
 	TESTING("H5Fflush (part1)");
     envval = HDgetenv("HDF5_DRIVER");
-    if (envval == NULL) 
+    if(envval == NULL) 
         envval = "nomatch";
-    if (HDstrcmp(envval, "split")) {
+    if(HDstrcmp(envval, "split")) {
 	/* Create the file */
 	h5_fixname(FILENAME[0], fapl, name, sizeof name);
 	file1 = create_file(name, fapl);
 	/* Flush and exit without closing the library */
-	if (H5Fflush(file1, H5F_SCOPE_GLOBAL)<0) goto error;
+	if(H5Fflush(file1, H5F_SCOPE_GLOBAL) < 0) goto error;
 
 	/* Create the other file which will not be flushed */
 	h5_fixname(FILENAME[1], fapl, name, sizeof name);
@@ -179,20 +176,20 @@ main(int argc, char* argv[])
      */
      
     /* close file1 */
-    if (H5Fget_vfd_handle(file1, fapl, (void **)&mpifh_p)<0){
+    if(H5Fget_vfd_handle(file1, fapl, (void **)&mpifh_p) < 0){
 	printf("H5Fget_vfd_handle for file1 failed\n");
 	goto error;
     }
-    if (MPI_File_close(mpifh_p)!=MPI_SUCCESS){
+    if(MPI_File_close(mpifh_p)!=MPI_SUCCESS){
 	printf("MPI_File_close for file1 failed\n");
 	goto error;
     }
     /* close file2 */
-    if (H5Fget_vfd_handle(file2, fapl, (void **)&mpifh_p)<0){
+    if(H5Fget_vfd_handle(file2, fapl, (void **)&mpifh_p) < 0){
 	printf("H5Fget_vfd_handle for file2 failed\n");
 	goto error;
     }
-    if (MPI_File_close(mpifh_p)!=MPI_SUCCESS){
+    if(MPI_File_close(mpifh_p)!=MPI_SUCCESS){
 	printf("MPI_File_close for file2 failed\n");
 	goto error;
     }
@@ -208,3 +205,4 @@ error:
     MPI_Finalize();
     HD_exit(1);
 }
+

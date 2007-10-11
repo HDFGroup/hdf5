@@ -116,7 +116,7 @@ int main(void)
      */
     dim[0] = 1;
     spc = H5Screate_simple(1, dim, NULL);
-    set = H5Dcreate(fil, setname, cmp, spc, H5P_DEFAULT);
+    set = H5Dcreate2(fil, setname, cmp, spc, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     H5Dwrite(set, cmp1, spc, H5S_ALL, plist, fok);
     H5Dwrite(set, cmp2, spc, H5S_ALL, plist, string5);

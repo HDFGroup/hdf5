@@ -874,7 +874,7 @@ test_interlink(hid_t fapl)
     if(H5Tcommit2(file1, "/type1", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
     if((space = H5Screate_simple(1, cur_dims, NULL)) < 0) FAIL_STACK_ERROR
     H5E_BEGIN_TRY {
-	dset = H5Dcreate(file1, "/mnt1/file2/dset", type, space, H5P_DEFAULT);
+	dset = H5Dcreate2(file1, "/mnt1/file2/dset", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
     if(dset >= 0) {
 	H5_FAILED();
@@ -1128,7 +1128,7 @@ test_mount_after_close(hid_t fapl)
 
     if((gidX = H5Gcreate2(fid2, "/X", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if((gidXY = H5Gcreate2(gidX, "Y", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-    if((did = H5Dcreate(gidXY, "D", H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((did = H5Dcreate2(gidXY, "D", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     /* Soft link */
     if(H5Lcreate_soft("./Y", gidX, "T", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
 

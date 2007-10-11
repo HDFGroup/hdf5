@@ -150,8 +150,8 @@ test_time_io(void)
     CHECK(sid, FAIL, "H5Screate");
 
     /* Create a dataset with a time datatype */
-    dsid = H5Dcreate(fid, DATASETNAME, H5T_UNIX_D32LE, sid, H5P_DEFAULT);
-    CHECK(dsid, FAIL, "H5Dcreate");
+    dsid = H5Dcreate2(fid, DATASETNAME, H5T_UNIX_D32LE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dsid, FAIL, "H5Dcreate2");
 
     /* Initialize time data value */
     timenow = HDtime(NULL);

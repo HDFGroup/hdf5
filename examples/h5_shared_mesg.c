@@ -290,7 +290,7 @@ create_standard_file(const char *filename, hid_t fcpl_id)
      */
     for(x = 0; x < NUM_DATASETS; ++x) {
        /* Create a dataset */
-       dset_id = H5Dcreate(file_id, DSETNAME[x], type_id, space_id, H5P_DEFAULT);
+       dset_id = H5Dcreate2(file_id, DSETNAME[x], type_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
        if(dset_id < 0) goto error;
 
        /* Create an attribute on the dataset */

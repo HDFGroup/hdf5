@@ -71,8 +71,8 @@ main(void)
     plist     = H5Pcreate(H5P_DATASET_CREATE);
                 H5Pset_chunk(plist, 2, cdims);
                 H5Pset_deflate( plist, 6);
-    dataset = H5Dcreate(file, "/Data/Compressed_Data", H5T_NATIVE_INT,
-                        dataspace, plist);
+    dataset = H5Dcreate2(file, "/Data/Compressed_Data", H5T_NATIVE_INT,
+                        dataspace, H5P_DEFAULT, plist, H5P_DEFAULT);
     /*
      * Close the first dataset .
      */
@@ -85,8 +85,8 @@ main(void)
     dims[0] = 500;
     dims[1] = 20;
     dataspace = H5Screate_simple(RANK, dims, NULL);
-    dataset = H5Dcreate(file, "/Data/Float_Data", H5T_NATIVE_FLOAT,
-			dataspace, H5P_DEFAULT);
+    dataset = H5Dcreate2(file, "/Data/Float_Data", H5T_NATIVE_FLOAT,
+			dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
      *Close the second dataset and file.

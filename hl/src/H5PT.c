@@ -83,8 +83,8 @@ hid_t H5PTcreate_fl ( hid_t loc_id,
   hid_t ret_value;
 
   /* Register the packet table ID type if this is the first table created */
-  if( H5PT_ptable_id_type < 0)
-    if((H5PT_ptable_id_type = H5Iregister_type((size_t)H5PT_HASH_TABLE_SIZE, 0, (H5I_free_t)free)) <0)
+  if(H5PT_ptable_id_type < 0)
+    if((H5PT_ptable_id_type = H5Iregister_type((size_t)H5PT_HASH_TABLE_SIZE, 0, (H5I_free_t)free)) < 0)
       goto out;
 
   /* Get memory for the table identifier */
@@ -94,35 +94,33 @@ hid_t H5PTcreate_fl ( hid_t loc_id,
   dims[0] = 0;
   dims_chunk[0] = chunk_size;
   maxdims[0] = H5S_UNLIMITED;
-  if ( (space_id = H5Screate_simple( 1, dims, maxdims )) < 0 )
+  if((space_id = H5Screate_simple(1, dims, maxdims)) < 0)
     goto out;
 
   /* Modify dataset creation properties to enable chunking  */
-  plist_id = H5Pcreate (H5P_DATASET_CREATE);
-  if ( H5Pset_chunk ( plist_id, 1, dims_chunk ) < 0 )
+  plist_id = H5Pcreate(H5P_DATASET_CREATE);
+  if(H5Pset_chunk(plist_id, 1, dims_chunk) < 0)
     goto out;
   if(compression >= 0 && compression <= 9)
-  {
-    if( H5Pset_deflate(plist_id, (unsigned)compression) < 0)
+    if(H5Pset_deflate(plist_id, (unsigned)compression) < 0)
         goto out;
-  }
 
   /* Create the dataset. */
-  if ( (dset_id=H5Dcreate( loc_id, dset_name, dtype_id, space_id, plist_id))<0 )
+  if((dset_id = H5Dcreate2(loc_id, dset_name, dtype_id, space_id, H5P_DEFAULT, plist_id, H5P_DEFAULT)) < 0)
     goto out;
 
   /* Terminate access to the data space. */
-  if ( H5Sclose( space_id ) < 0 )
+  if(H5Sclose(space_id) < 0)
     goto out;
 
   /* End access to the property list */
-  if ( H5Pclose( plist_id ) < 0 )
+  if(H5Pclose(plist_id) < 0)
     goto out;
 
   /* Create the table identifier */
   table->dset_id = dset_id;
 
-  if((table->type_id = H5Tcopy(dtype_id)) <0)
+  if((table->type_id = H5Tcopy(dtype_id)) < 0)
     goto out;
 
   H5PT_create_index(table);
@@ -131,7 +129,7 @@ hid_t H5PTcreate_fl ( hid_t loc_id,
   /* Get an ID for this table */
   ret_value = H5Iregister(H5PT_ptable_id_type, table);
 
-  if (ret_value != H5I_INVALID_HID)
+  if(ret_value != H5I_INVALID_HID)
     H5PT_ptable_count++;
   else
     H5PT_close(table);
@@ -180,14 +178,14 @@ hid_t H5PTcreate_vl ( hid_t loc_id,
 
   /* Create a variable length type that uses single bytes as its base type */
   vltype = H5Tvlen_create(H5T_NATIVE_UCHAR);
-  if (vltype < 0)
+  if(vltype < 0)
     goto out;
 
-  if((ret_value=H5PTcreate_fl(loc_id, dset_name, vltype, chunk_size, 0)) <0)
+  if((ret_value=H5PTcreate_fl(loc_id, dset_name, vltype, chunk_size, 0)) < 0)
     goto out;
 
   /* close the vltype */
-  if (H5Tclose(vltype) < 0)
+  if(H5Tclose(vltype) < 0)
     goto out;
 
   return ret_value;
@@ -229,7 +227,7 @@ hid_t H5PTopen( hid_t loc_id,
 
   /* Register the packet table ID type if this is the first table created */
   if( H5PT_ptable_id_type < 0)
-    if((H5PT_ptable_id_type = H5Iregister_type((size_t)H5PT_HASH_TABLE_SIZE, 0, (H5I_free_t)free))<0)
+    if((H5PT_ptable_id_type = H5Iregister_type((size_t)H5PT_HASH_TABLE_SIZE, 0, (H5I_free_t)free)) < 0)
       goto out;
 
   table = (htbl_t *)malloc(sizeof(htbl_t));
@@ -237,35 +235,35 @@ hid_t H5PTopen( hid_t loc_id,
   /* Open the dataset */
   if((table->dset_id = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
       goto out;
-  if (table->dset_id < 0)
+  if(table->dset_id < 0)
     goto out;
 
   /* Get the dataset's disk datatype */
-  if ((type_id = H5Dget_type(table->dset_id)) < 0)
+  if((type_id = H5Dget_type(table->dset_id)) < 0)
     goto out;
 
   /* Get the table's native datatype */
-  if ((table->type_id = H5Tget_native_type(type_id, H5T_DIR_ASCEND)) < 0)
+  if((table->type_id = H5Tget_native_type(type_id, H5T_DIR_ASCEND)) < 0)
     goto out;
 
-  if (H5Tclose(type_id) < 0)
+  if(H5Tclose(type_id) < 0)
     goto out;
 
   /* Initialize the current record pointer */
-  if((H5PT_create_index(table)) <0)
+  if((H5PT_create_index(table)) < 0)
     goto out;
 
   /* Get number of records in table */
-  if((space_id=H5Dget_space(table->dset_id)) <0)
+  if((space_id=H5Dget_space(table->dset_id)) < 0)
     goto out;
-  if ( H5Sget_simple_extent_dims( space_id, dims, NULL) < 0 )
+  if( H5Sget_simple_extent_dims( space_id, dims, NULL) < 0)
     goto out;
   table->size = dims[0];
 
   /* Get an ID for this table */
   ret_value = H5Iregister(H5PT_ptable_id_type, table);
 
-  if (ret_value != H5I_INVALID_HID)
+  if(ret_value != H5I_INVALID_HID)
     H5PT_ptable_count++;
   else
     H5PT_close(table);
@@ -311,11 +309,11 @@ herr_t H5PT_close( htbl_t* table)
     goto out;
 
   /* Close the dataset */
-  if (H5Dclose(table->dset_id) < 0)
+  if(H5Dclose(table->dset_id) < 0)
     goto out;
 
   /* Close the memory datatype */
-  if (H5Tclose(table->type_id) < 0)
+  if(H5Tclose(table->type_id) < 0)
     goto out;
 
   free(table);
@@ -370,7 +368,7 @@ herr_t H5PTclose( hid_t table_id )
 
   /* Remove the packet table type ID if no more packet */
   /* tables are open                                   */
-  if (H5PT_ptable_count == 0)
+  if(H5PT_ptable_count == 0)
   {
     H5Idestroy_type(H5PT_ptable_id_type);
     H5PT_ptable_id_type = H5I_UNINIT;
@@ -419,11 +417,11 @@ herr_t H5PTappend( hid_t table_id,
     goto out;
 
   /* If we are asked to write 0 records, just do nothing */
-  if (nrecords == 0)
+  if(nrecords == 0)
     return 0;
 
   if((H5TB_common_append_records(table->dset_id, table->type_id,
-  			nrecords, table->size, data)) <0)
+  			nrecords, table->size, data)) < 0)
     goto out;
 
   /* Update table size */
@@ -473,7 +471,7 @@ herr_t H5PTget_next( hid_t table_id,
     goto out;
 
   /* If nrecords == 0, do nothing */
-  if (nrecords == 0)
+  if(nrecords == 0)
     return 0;
 
   if((H5TB_common_read_records(table->dset_id, table->type_id,
@@ -516,11 +514,11 @@ herr_t H5PTread_packets( hid_t table_id,
 
   /* find the table struct from its ID */
   table = (htbl_t *) H5Iobject_verify(table_id, H5PT_ptable_id_type);
-  if (table == NULL)
+  if(table == NULL)
     goto out;
 
   /* If nrecords == 0, do nothing */
-  if (nrecords == 0)
+  if(nrecords == 0)
     return 0;
 
   if( H5TB_common_read_records(table->dset_id, table->type_id,
@@ -799,7 +797,7 @@ herr_t H5PTfree_vlen_readbuff( hid_t table_id,
   if((table = (htbl_t *) H5Iobject_verify(table_id, H5PT_ptable_id_type)) == NULL)
     goto out;
 
-  if ((space_id = H5Screate_simple(1, &bufflen, NULL)) < 0)
+  if((space_id = H5Screate_simple(1, &bufflen, NULL)) < 0)
     goto out;
 
   /* Free the memory.  If this succeeds, ret_value should be 0. */

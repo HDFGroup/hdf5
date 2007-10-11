@@ -191,22 +191,22 @@ int main(int argc, char **argv)
     }
 
     /* create the parallel file */
-    fid=H5Fcreate(opt_file,H5F_ACC_TRUNC,H5P_DEFAULT,acc_tpl);
+    fid = H5Fcreate(opt_file, H5F_ACC_TRUNC, H5P_DEFAULT, acc_tpl);
     VRFY((fid >= 0), "H5Fcreate succeeded", H5FATAL);
 
     /* define a contiquous dataset of opt_iter*nprocs*opt_block chars */
-    dims[0] = opt_iter*nprocs*opt_block;
-    sid = H5Screate_simple (RANK, dims, NULL);
+    dims[0] = opt_iter * nprocs * opt_block;
+    sid = H5Screate_simple(RANK, dims, NULL);
     VRFY((sid >= 0), "H5Screate_simple succeeded", H5FATAL);
-    dataset = H5Dcreate(fid, "Dataset1", H5T_NATIVE_CHAR, sid,
-			H5P_DEFAULT);
-    VRFY((dataset >= 0), "H5Dcreate succeeded", H5FATAL);
+    dataset = H5Dcreate2(fid, "Dataset1", H5T_NATIVE_CHAR, sid,
+			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    VRFY((dataset >= 0), "H5Dcreate2 succeeded", H5FATAL);
 
     /* create the memory dataspace and the file dataspace */
     dims[0] = opt_block;
-    mem_dataspace = H5Screate_simple (RANK, dims, NULL);
+    mem_dataspace = H5Screate_simple(RANK, dims, NULL);
     VRFY((mem_dataspace >= 0), "", H5FATAL);
-    file_dataspace = H5Dget_space (dataset);
+    file_dataspace = H5Dget_space(dataset);
     VRFY((file_dataspace >= 0), "H5Dget_space succeeded", H5FATAL);
 
     /* now each process writes a block of opt_block chars in round robbin

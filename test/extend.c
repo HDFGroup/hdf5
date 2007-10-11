@@ -61,7 +61,7 @@ write_data(const char *msg, hid_t file, const char *name, hid_t cparms, hid_t me
     TESTING(msg);
 
     /* Create the dataset */
-    if((dataset = H5Dcreate(file, name, H5T_NATIVE_INT, mem_space, cparms)) < 0) TEST_ERROR;
+    if((dataset = H5Dcreate2(file, name, H5T_NATIVE_INT, mem_space, H5P_DEFAULT, cparms, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Write the data */
     for(i = 0; i < 5; i++)
@@ -157,7 +157,7 @@ write_data_deprec(const char *msg, hid_t file, const char *name, hid_t cparms, h
     TESTING(msg);
 
     /* Create the dataset */
-    if((dataset = H5Dcreate(file, name, H5T_NATIVE_INT, mem_space, cparms)) < 0) TEST_ERROR;
+    if((dataset = H5Dcreate2(file, name, H5T_NATIVE_INT, mem_space, H5P_DEFAULT, cparms, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Write the data */
     for(i = 0; i < 5; i++)

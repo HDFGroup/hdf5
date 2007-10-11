@@ -39,10 +39,9 @@ main (void)
     /*
      * Data  and output buffer initialization.
      */
-    for (j = 0; j < NX; j++) {
-	for (i = 0; i < NY; i++)
+    for(j = 0; j < NX; j++)
+	for(i = 0; i < NY; i++)
 	    data[j][i] = i + j;
-    }
     /*
      * 0 1 2 3 4 5
      * 1 2 3 4 5 6
@@ -77,14 +76,13 @@ main (void)
      * Create a new dataset within the file using defined dataspace and
      * datatype and default dataset creation properties.
      */
-    dataset = H5Dcreate(file, DATASETNAME, datatype, dataspace,
-			H5P_DEFAULT);
+    dataset = H5Dcreate2(file, DATASETNAME, datatype, dataspace,
+			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
      * Write the data to the dataset using default transfer properties.
      */
-    status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-		      H5P_DEFAULT, data);
+    status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
 
     /*
      * Close/release resources.
@@ -96,3 +94,4 @@ main (void)
 
     return 0;
 }
+

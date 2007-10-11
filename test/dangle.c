@@ -67,21 +67,21 @@ test_dangle_dataset(H5F_close_degree_t degree)
         TEST_ERROR;
 
     /* Create file access property list */
-    if((fapl=H5Pcreate(H5P_FILE_ACCESS)) < 0)
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
 
     /* Set file close degree */
-    if(H5Pset_fclose_degree(fapl,degree) < 0)
+    if(H5Pset_fclose_degree(fapl, degree) < 0)
         TEST_ERROR;
 
     h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof filename);
-    if((fid = H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
 
-    if((sid = H5Screate (H5S_SCALAR)) < 0)
+    if((sid = H5Screate(H5S_SCALAR)) < 0)
         TEST_ERROR;
 
-    if((dsid = H5Dcreate (fid, DSETNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0)
+    if((dsid = H5Dcreate2(fid, DSETNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     if(H5Dclose(dsid) < 0)
@@ -89,7 +89,7 @@ test_dangle_dataset(H5F_close_degree_t degree)
 
     /* Try creating duplicate dataset */
     H5E_BEGIN_TRY {
-        if((dsid = H5Dcreate(fid, DSETNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT)) >= 0)
+        if((dsid = H5Dcreate2(fid, DSETNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0)
             TEST_ERROR;
     } H5E_END_TRY;
 
@@ -370,7 +370,7 @@ test_dangle_datatype2(H5F_close_degree_t degree)
     /* Create a dataset that uses the named datatype & leave it open */
     if((sid = H5Screate(H5S_SCALAR)) < 0)
         TEST_ERROR;
-    if((did = H5Dcreate(fid, DSETNAME, tid, sid, H5P_DEFAULT)) < 0)
+    if((did = H5Dcreate2(fid, DSETNAME, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
     if(H5Sclose(sid) < 0)
         TEST_ERROR;
@@ -452,7 +452,7 @@ test_dangle_attribute(H5F_close_degree_t degree)
     if((sid = H5Screate(H5S_SCALAR)) < 0)
         TEST_ERROR;
 
-    if((dsid = H5Dcreate(fid, DSETNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0)
+    if((dsid = H5Dcreate2(fid, DSETNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Create an attribute on the dataset */

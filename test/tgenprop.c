@@ -1360,9 +1360,9 @@ test_genprop_list_addprop(void)
 
     /* Insert temporary property into class (with no callbacks) */
 #ifdef H5_WANT_H5_V1_6_COMPAT
-    ret = H5Pinsert(pid,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,NULL,NULL,NULL,NULL,NULL);
+    ret = H5Pinsert(pid, PROP1_NAME, PROP1_SIZE, PROP1_DEF_VALUE, NULL, NULL, NULL, NULL, NULL);
 #else /* H5_WANT_H5_V1_6_COMPAT */
-    ret = H5Pinsert(pid,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);
+    ret = H5Pinsert(pid, PROP1_NAME, PROP1_SIZE, PROP1_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL);
 #endif /* H5_WANT_H5_V1_6_COMPAT */
     CHECK_I(ret, "H5Pinsert");
 
@@ -1376,15 +1376,15 @@ test_genprop_list_addprop(void)
     VERIFY(prop1_value, *PROP1_DEF_VALUE, "H5Pget");
 
     /* Create a dataset */
-    did=H5Dcreate(fid,"Dataset1",H5T_NATIVE_INT,sid,pid);
-    CHECK(did, FAIL, "H5Dcreate");
+    did = H5Dcreate2(fid, "Dataset1", H5T_NATIVE_INT, sid, H5P_DEFAULT, pid, H5P_DEFAULT);
+    CHECK(did, FAIL, "H5Dcreate2");
 
     /* Check existence of added property (after using property list) */
-    ret = H5Pexist(pid,PROP1_NAME);
+    ret = H5Pexist(pid, PROP1_NAME);
     VERIFY(ret, 1, "H5Pexist");
 
     /* Check values of property (set with default value) (after using property list) */
-    ret = H5Pget(pid,PROP1_NAME,&prop1_value);
+    ret = H5Pget(pid, PROP1_NAME, &prop1_value);
     CHECK_I(ret, "H5Pget");
     VERIFY(prop1_value, *PROP1_DEF_VALUE, "H5Pget");
 
@@ -1443,9 +1443,9 @@ test_genprop_class_addprop(void)
 
     /* Insert first property into class (with no callbacks) */
 #ifdef H5_WANT_H5_V1_6_COMPAT
-    ret = H5Pregister(cid,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);
+    ret = H5Pregister(cid, PROP1_NAME, PROP1_SIZE, PROP1_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL);
 #else /* H5_WANT_H5_V1_6_COMPAT */
-    ret = H5Pregister(cid,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+    ret = H5Pregister(cid, PROP1_NAME, PROP1_SIZE, PROP1_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 #endif /* H5_WANT_H5_V1_6_COMPAT */
     CHECK_I(ret, "H5Pregister");
 
@@ -1454,28 +1454,28 @@ test_genprop_class_addprop(void)
     CHECK(pid, FAIL, "H5Pcreate");
 
     /* Check existence of an original property */
-    ret = H5Pexist(pid,H5D_CRT_DATA_PIPELINE_NAME);
+    ret = H5Pexist(pid, H5D_CRT_DATA_PIPELINE_NAME);
     VERIFY(ret, 1, "H5Pexist");
 
     /* Check existence of added property */
-    ret = H5Pexist(pid,PROP1_NAME);
+    ret = H5Pexist(pid, PROP1_NAME);
     VERIFY(ret, 1, "H5Pexist");
 
     /* Check values of property (set with default value) */
-    ret = H5Pget(pid,PROP1_NAME,&prop1_value);
+    ret = H5Pget(pid, PROP1_NAME, &prop1_value);
     CHECK_I(ret, "H5Pget");
     VERIFY(prop1_value, *PROP1_DEF_VALUE, "H5Pget");
 
     /* Create a dataset */
-    did=H5Dcreate(fid,"Dataset1",H5T_NATIVE_INT,sid,pid);
-    CHECK(did, FAIL, "H5Dcreate");
+    did = H5Dcreate2(fid, "Dataset1", H5T_NATIVE_INT, sid, H5P_DEFAULT, pid, H5P_DEFAULT);
+    CHECK(did, FAIL, "H5Dcreate2");
 
     /* Check existence of added property (after using property list) */
-    ret = H5Pexist(pid,PROP1_NAME);
+    ret = H5Pexist(pid, PROP1_NAME);
     VERIFY(ret, 1, "H5Pexist");
 
     /* Check values of property (set with default value) (after using property list) */
-    ret = H5Pget(pid,PROP1_NAME,&prop1_value);
+    ret = H5Pget(pid, PROP1_NAME, &prop1_value);
     CHECK_I(ret, "H5Pget");
     VERIFY(prop1_value, *PROP1_DEF_VALUE, "H5Pget");
 

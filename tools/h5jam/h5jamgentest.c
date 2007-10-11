@@ -228,7 +228,7 @@ gent_ub(const char * filename, size_t ub_size, size_t ub_fill)
   /* dset1.1.1 */
   dims[0] = 10; dims[1] = 10;
   space = H5Screate_simple(2, dims, NULL);
-  dataset = H5Dcreate(group, "dset1.1.1", H5T_STD_I32BE, space, H5P_DEFAULT);
+  dataset = H5Dcreate2(group, "dset1.1.1", H5T_STD_I32BE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   for (i = 0; i < 10; i++)
        for (j = 0; j < 10; j++)
             dset1[i][j] = j*i;
@@ -257,7 +257,7 @@ gent_ub(const char * filename, size_t ub_size, size_t ub_fill)
   /* dset1.1.2 */
   dims[0] = 20;
   space = H5Screate_simple(1, dims, NULL);
-  dataset = H5Dcreate(group, "dset1.1.2", H5T_STD_I32BE, space, H5P_DEFAULT);
+  dataset = H5Dcreate2(group, "dset1.1.2", H5T_STD_I32BE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   for (i = 0; i < 20; i++)
        dset2[i] = i;
   H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2);
@@ -279,7 +279,7 @@ gent_ub(const char * filename, size_t ub_size, size_t ub_fill)
   /* dset2.1 */
   dims[0] = 10;
   space = H5Screate_simple(1, dims, NULL);
-  dataset = H5Dcreate(group, "dset2.1", H5T_IEEE_F32BE, space, H5P_DEFAULT);
+  dataset = H5Dcreate2(group, "dset2.1", H5T_IEEE_F32BE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   for (i = 0; i < 10; i++)
        dset2_1[i] = (float)(i*0.1+1);
   H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2_1);
@@ -289,7 +289,7 @@ gent_ub(const char * filename, size_t ub_size, size_t ub_fill)
   /* dset2.2 */
   dims[0] = 3; dims[1] = 5;
   space = H5Screate_simple(2, dims, NULL);
-  dataset = H5Dcreate(group, "dset2.2", H5T_IEEE_F32BE, space, H5P_DEFAULT);
+  dataset = H5Dcreate2(group, "dset2.2", H5T_IEEE_F32BE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   for (i = 0; i < 3; i++)
        for (j = 0; j < 5; j++)
             dset2_2[i][j] = (float)((i+1)*j*0.1);

@@ -106,9 +106,10 @@ H5D_init_deprec_interface(void)
     FUNC_LEAVE_NOAPI(H5D_init())
 } /* H5D_init_deprec_interface() */
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*-------------------------------------------------------------------------
- * Function:	H5Dcreate
+ * Function:	H5Dcreate1
  *
  * Purpose:	Creates a new dataset named NAME at LOC_ID, opens the
  *		dataset for access, and associates with that dataset constant
@@ -137,7 +138,7 @@ H5D_init_deprec_interface(void)
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Dcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
+H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	  hid_t dcpl_id)
 {
     H5G_loc_t	    loc;                /* Object location to insert dataset into */
@@ -145,7 +146,7 @@ H5Dcreate(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     const H5S_t    *space;              /* Dataspace for dataset */
     hid_t           ret_value;          /* Return value */
 
-    FUNC_ENTER_API(H5Dcreate, FAIL)
+    FUNC_ENTER_API(H5Dcreate1, FAIL)
     H5TRACE5("i", "i*siii", loc_id, name, type_id, space_id, dcpl_id);
 
     /* Check arguments */
@@ -178,9 +179,8 @@ done:
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
 
     FUNC_LEAVE_API(ret_value)
-} /* end H5Dcreate() */
+} /* end H5Dcreate1() */
 
-#ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*-------------------------------------------------------------------------
  * Function:	H5Dopen1

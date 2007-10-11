@@ -49,7 +49,7 @@ static void gent_simple(hid_t loc_id)
     sid = H5Screate_simple(1, dims, NULL);
 
     /* create dataset */
-    did = H5Dcreate(loc_id, DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT);
+    did = H5Dcreate2(loc_id, DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* write */
     H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
@@ -81,7 +81,7 @@ static void gent_chunked(hid_t loc_id)
     H5Pset_chunk(pid, 1, chunk_dims);
 
     /* create dataset */
-    did = H5Dcreate(loc_id, DATASET_CHUNK, H5T_NATIVE_INT, sid, pid);
+    did = H5Dcreate2(loc_id, DATASET_CHUNK, H5T_NATIVE_INT, sid, H5P_DEFAULT, pid, H5P_DEFAULT);
 
     /* write */
     H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
@@ -114,7 +114,7 @@ static void gent_compact(hid_t loc_id)
     H5Pset_layout (pid,H5D_COMPACT);
 
     /* create dataset */
-    did = H5Dcreate(loc_id, DATASET_COMPACT, H5T_NATIVE_INT, sid, pid);
+    did = H5Dcreate2(loc_id, DATASET_COMPACT, H5T_NATIVE_INT, sid, H5P_DEFAULT, pid, H5P_DEFAULT);
 
     /* write */
     H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
@@ -156,7 +156,7 @@ static void gent_compound(hid_t loc_id)
     H5Tinsert(tid_c, "str2", HOFFSET(s_t,str2), tid_s);
 
     /* create dataset */
-    did = H5Dcreate(loc_id, DATASET_COMPOUND, tid_c, sid, H5P_DEFAULT);
+    did = H5Dcreate2(loc_id, DATASET_COMPOUND, tid_c, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* write */
     H5Dwrite(did, tid_c, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
@@ -195,7 +195,7 @@ static void gent_compressed(hid_t loc_id)
 #endif
 
     /* create dataset */
-    did = H5Dcreate(loc_id, DATASET_COMPRESSED, H5T_NATIVE_INT, sid, pid);
+    did = H5Dcreate2(loc_id, DATASET_COMPRESSED, H5T_NATIVE_INT, sid, H5P_DEFAULT, pid, H5P_DEFAULT);
 
     /* write */
     H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
@@ -239,7 +239,7 @@ static void gent_named_vl(hid_t loc_id)
     H5Tcommit2(loc_id, "vl", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* create dataset */
-    did = H5Dcreate(loc_id, DATASET_NAMED_VL, tid, sid, H5P_DEFAULT);
+    did = H5Dcreate2(loc_id, DATASET_NAMED_VL, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* write */
     H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
@@ -292,7 +292,7 @@ static void gent_nested_vl(hid_t loc_id)
     tid2 = H5Tvlen_create(tid1);
 
     /* create dataset */
-    did = H5Dcreate(loc_id, DATASET_NESTED_VL, tid2, sid, H5P_DEFAULT);
+    did = H5Dcreate2(loc_id, DATASET_NESTED_VL, tid2, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* write */
     H5Dwrite(did, tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);

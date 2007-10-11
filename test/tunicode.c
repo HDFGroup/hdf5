@@ -68,7 +68,7 @@ void dump_string(const char * string);
 void test_fl_string(hid_t fid, const char *string)
 {
   hid_t dtype_id, space_id, dset_id;
-  hsize_t dims=1;
+  hsize_t dims = 1;
   char read_buf[MAX_STRING_LENGTH];
   H5T_cset_t cset;
   herr_t ret;
@@ -80,19 +80,20 @@ void test_fl_string(hid_t fid, const char *string)
   CHECK(dtype_id, FAIL, "H5Tcopy");
   ret = H5Tset_size(dtype_id, (size_t)MAX_STRING_LENGTH);
   CHECK(ret, FAIL, "H5Tset_size");
-  cset=H5Tget_cset(dtype_id);
+  cset = H5Tget_cset(dtype_id);
   VERIFY(cset, H5T_CSET_ASCII, "H5Tget_cset");
-  ret=H5Tset_cset(dtype_id, H5T_CSET_UTF8);
+  ret = H5Tset_cset(dtype_id, H5T_CSET_UTF8);
   CHECK(ret, FAIL, "H5Tset_cset");
-  cset=H5Tget_cset(dtype_id);
+  cset = H5Tget_cset(dtype_id);
   VERIFY(cset, H5T_CSET_UTF8, "H5Tget_cset");
 
   /* Create dataspace for a dataset */
   space_id = H5Screate_simple(RANK, &dims, NULL);
   CHECK(space_id, FAIL, "H5Screate_simple");
+
   /* Create a dataset */
-  dset_id=H5Dcreate(fid, DSET1_NAME, dtype_id, space_id, H5P_DEFAULT);
-  CHECK(dset_id, FAIL, "H5Dcreate");
+  dset_id = H5Dcreate2(fid, DSET1_NAME, dtype_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  CHECK(dset_id, FAIL, "H5Dcreate2");
 
   /* Write UTF-8 string to dataset */
   ret = H5Dwrite(dset_id, dtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, string);
@@ -102,15 +103,15 @@ void test_fl_string(hid_t fid, const char *string)
   ret = H5Dread(dset_id, dtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buf);
   CHECK(ret, FAIL, "H5Dread");
 
-  VERIFY(strcmp(string, read_buf), 0, "strcmp");
+  VERIFY(HDstrcmp(string, read_buf), 0, "strcmp");
 
   /* Close all */
-  ret=H5Dclose(dset_id);
+  ret = H5Dclose(dset_id);
   CHECK(ret, FAIL, "H5Dclose");
 
-  ret=H5Tclose(dtype_id);
+  ret = H5Tclose(dtype_id);
   CHECK(ret, FAIL, "H5Tclose");
-  ret=H5Sclose(space_id);
+  ret = H5Sclose(space_id);
   CHECK(ret, FAIL, "H5Sclose");
 }
 
@@ -322,7 +323,7 @@ void test_strpad(hid_t UNUSED fid, const char *string)
 void test_vl_string(hid_t fid, const char *string)
 {
   hid_t type_id, space_id, dset_id;
-  hsize_t dims=1;
+  hsize_t dims = 1;
   hsize_t size;  /* Number of bytes used */
   char *read_buf[1];
   herr_t ret;
@@ -338,27 +339,27 @@ void test_vl_string(hid_t fid, const char *string)
   CHECK(ret, FAIL, "H5Tset_size");
 
   /* Create a dataset */
-  dset_id=H5Dcreate(fid, VL_DSET1_NAME, type_id, space_id, H5P_DEFAULT);
-  CHECK(dset_id, FAIL, "H5Dcreate");
+  dset_id = H5Dcreate2(fid, VL_DSET1_NAME, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  CHECK(dset_id, FAIL, "H5Dcreate2");
 
   /* Write dataset to disk */
-  ret=H5Dwrite(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &string);
+  ret = H5Dwrite(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &string);
   CHECK(ret, FAIL, "H5Dwrite");
 
   /* Make certain the correct amount of memory will be used */
-  ret=H5Dvlen_get_buf_size(dset_id, type_id, space_id, &size);
+  ret = H5Dvlen_get_buf_size(dset_id, type_id, space_id, &size);
   CHECK(ret, FAIL, "H5Dvlen_get_buf_size");
-  VERIFY(size, (hsize_t)strlen(string) + 1, "H5Dvlen_get_buf_size");
+  VERIFY(size, (hsize_t)HDstrlen(string) + 1, "H5Dvlen_get_buf_size");
 
   /* Read dataset from disk */
-  ret=H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buf);
+  ret = H5Dread(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buf);
   CHECK(ret, FAIL, "H5Dread");
 
   /* Compare data read in */
-  VERIFY(strcmp(string, read_buf[0]), 0, "strcmp");
+  VERIFY(HDstrcmp(string, read_buf[0]), 0, "strcmp");
 
   /* Reclaim the read VL data */
-  ret=H5Dvlen_reclaim(type_id, space_id, H5P_DEFAULT, read_buf);
+  ret = H5Dvlen_reclaim(type_id, space_id, H5P_DEFAULT, read_buf);
   CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
   /* Close all */
@@ -405,7 +406,7 @@ void test_objnames(hid_t fid, const char* string)
   ret = H5Gclose(grp_id);
   CHECK(ret, FAIL, "H5Gclose");
 
-  VERIFY(strcmp(string, read_buf), 0, "strcmp");
+  VERIFY(HDstrcmp(string, read_buf), 0, "strcmp");
 
   /* Create a new dataset with a UTF-8 name */
   grp1_id = H5Gcreate2(fid, GROUP1_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -413,8 +414,8 @@ void test_objnames(hid_t fid, const char* string)
 
   space_id = H5Screate_simple(RANK, &dims, NULL);
   CHECK(space_id, FAIL, "H5Screate_simple");
-  dset_id = H5Dcreate(grp1_id, string, H5T_NATIVE_INT, space_id, H5P_DEFAULT);
-  CHECK(dset_id, FAIL, "H5Dcreate");
+  dset_id = H5Dcreate2(grp1_id, string, H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  CHECK(dset_id, FAIL, "H5Dcreate2");
 
   /* Make sure that dataset can be opened again */
   ret = H5Dclose(dset_id);
@@ -450,8 +451,8 @@ void test_objnames(hid_t fid, const char* string)
 
   space_id = H5Screate_simple(RANK, &dims, NULL);
   CHECK(space_id, FAIL, "H5Screate_simple");
-  dset_id=H5Dcreate(grp2_id, DSET3_NAME, H5T_STD_REF_OBJ, space_id, H5P_DEFAULT);
-  CHECK(ret, FAIL, "H5Dcreate");
+  dset_id = H5Dcreate2(grp2_id, DSET3_NAME, H5T_STD_REF_OBJ, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  CHECK(ret, FAIL, "H5Dcreate2");
 
   /* Create reference to named datatype */
   ret = H5Rcreate(&obj_ref, grp2_id, string, H5R_OBJECT, -1);
@@ -599,8 +600,8 @@ void test_compound(hid_t fid, const char * string)
   CHECK(ret, FAIL, "H5Tinsert");
 
   /* Check that the field name was stored correctly */
-  readbuf=H5Tget_member_name(s1_tid, 0);
-  ret = strcmp(readbuf, string);
+  readbuf = H5Tget_member_name(s1_tid, 0);
+  ret = HDstrcmp(readbuf, string);
   VERIFY(ret, 0, "strcmp");
   free(readbuf);
 
@@ -621,8 +622,8 @@ void test_compound(hid_t fid, const char * string)
   /* Create the dataspace and dataset. */
   space_id = H5Screate_simple(1, &dim, NULL);
   CHECK(space_id, FAIL, "H5Screate_simple");
-  dset_id = H5Dcreate(fid, DSET4_NAME, s1_tid, space_id, H5P_DEFAULT);
-  CHECK(dset_id, FAIL, "H5Dcreate");
+  dset_id = H5Dcreate2(fid, DSET4_NAME, s1_tid, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  CHECK(dset_id, FAIL, "H5Dcreate2");
 
   /* Write data to the dataset. */
   ret = H5Dwrite(dset_id, s1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &s1);

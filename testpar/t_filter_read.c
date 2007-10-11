@@ -86,35 +86,33 @@ filter_read_internal(const char *filename, hid_t dcpl,
     VRFY(sid>=0, "H5Screate_simple");
 
     /* Create buffers */
-    points = (int *)HDmalloc(size[0]*size[1]*sizeof(int));
+    points = (int *)HDmalloc(size[0] * size[1] * sizeof(int));
     VRFY(points!=NULL, "HDmalloc");
 
-    check = (int *)HDmalloc(hs_size[0]*hs_size[1]*sizeof(int)); 
+    check = (int *)HDmalloc(hs_size[0] * hs_size[1] * sizeof(int)); 
     VRFY(check!=NULL, "HDmalloc");
 
     /* Initialize writing buffer with random data */
-    for (i=0; i<size[0]; i++) {
-        for (j=0; j<size[1]; j++) {
-            points[i*size[1]+j] = (int)(i+j+7);
-        }
-    }
+    for(i = 0; i < size[0]; i++)
+        for(j = 0; j < size[1]; j++)
+            points[i * size[1]+j] = (int)(i+j+7);
 
     VRFY(H5Pall_filters_avail(dcpl), "Incorrect filter availability");
 
     /* Serial write phase */
-    if (MAINPROCESS){
+    if(MAINPROCESS) {
 
         file = H5Fcreate(h5_rmprefix(filename), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
         VRFY(file>=0, "H5Fcreate");
 
         /* Create the dataset */
-        dataset = H5Dcreate(file, name, H5T_NATIVE_INT, sid, dcpl);
-        VRFY(dataset>=0, "H5Dcreate");
+        dataset = H5Dcreate2(file, name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+        VRFY(dataset>=0, "H5Dcreate2");
 
         hrc = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points);
         VRFY(hrc>=0, "H5Dwrite");
 
-        *dset_size=H5Dget_storage_size(dataset);
+        *dset_size = H5Dget_storage_size(dataset);
         VRFY(*dset_size>0, "H5Dget_storage_size");
 
         hrc = H5Dclose (dataset);
@@ -153,7 +151,7 @@ filter_read_internal(const char *filename, hid_t dcpl,
     /* Check that the values read are the same as the values written */
     for (i=0; i<hs_size[0]; i++) {
         for (j=0; j<hs_size[1]; j++) {
-            if (points[i*size[1]+(size_t)hs_offset[1]+j] !=
+            if(points[i*size[1]+(size_t)hs_offset[1]+j] !=
                       check[i*hs_size[1]+j]) {
 		  fprintf(stderr,"    Read different values than written.\n");
 		  fprintf(stderr,"    At index %lu,%lu\n",
@@ -235,13 +233,13 @@ test_filter_read(void)
     hsize_t     shuffle_size;       /* Size of dataset with shuffle filter */
 #endif /* H5_HAVE_FILTER_SHUFFLE */
 
-#if (defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_SZIP) && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_FLETCHER32
+#if(defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_SZIP) && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_FLETCHER32
     hsize_t     combo_size;     /* Size of dataset with shuffle+deflate filter */
 #endif /* H5_HAVE_FILTER_DEFLATE && H5_HAVE_FILTER_SHUFFLE && H5_HAVE_FILTER_FLETCHER32 */
 
     filename = GetTestParameters();
 
-    if (VERBOSE_MED)
+    if(VERBOSE_MED)
         printf("Parallel reading of dataset written with filters %s\n", filename);
 
     /*----------------------------------------------------------
@@ -312,7 +310,7 @@ test_filter_read(void)
      *----------------------------------------------------------
      */
 #ifdef H5_HAVE_FILTER_SZIP
-    if ( h5_szip_can_encode() == 1) {
+    if(h5_szip_can_encode() == 1) {
         dc = H5Pcreate(H5P_DATASET_CREATE);
         VRFY(dc>=0, "H5Pcreate");
 
@@ -424,7 +422,7 @@ test_filter_read(void)
     VRFY(hrc>=0, "H5Pset_shuffle");
 
     /* Make sure encoding is enabled */
-    if ( h5_szip_can_encode() == 1) {
+    if(h5_szip_can_encode() == 1) {
 	hrc = H5Pset_szip(dc, szip_options_mask, szip_pixels_per_block);
         VRFY(hrc>=0, "H5Pset_szip");
 
@@ -437,7 +435,7 @@ test_filter_read(void)
 
     /* Testing shuffle+szip(with encoder)+checksum filters(checksum last) */ 
     /* Make sure encoding is enabled */
-    if ( h5_szip_can_encode() == 1) {
+    if(h5_szip_can_encode() == 1) {
 	dc = H5Pcreate(H5P_DATASET_CREATE);
         VRFY(dc>=0, "H5Pcreate");
 

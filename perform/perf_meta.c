@@ -324,14 +324,15 @@ create_dsets(hid_t file)
     /*
      * Create a dataset using the default dataset creation properties.
      */
-    for(i=0; i<NUM_DSETS; i++) {
+    for(i = 0; i < NUM_DSETS; i++) {
 	sprintf(dset_name, "dataset %d", i);
-    	if((dataset = H5Dcreate(file, dset_name, H5T_NATIVE_DOUBLE,
-				space, H5P_DEFAULT)) < 0)
-    		goto error;
+    	if((dataset = H5Dcreate2(file, dset_name, H5T_NATIVE_DOUBLE, space,
+                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            goto error;
 
-    	if (H5Dclose(dataset) < 0) goto error;
-    }
+    	if(H5Dclose(dataset) < 0)
+            goto error;
+    } /* end for */
 
     return 0;
 
@@ -472,7 +473,7 @@ create_attrs_2(void)
     char	attr_name[128];
     int		i, j;
     p_time      attr_t  = {0, 0, 0, 1000000, 0, ""};
-    p_time      create_t  = {0, 0, 0, 1000000, 0, "H5Dcreate"};
+    p_time      create_t  = {0, 0, 0, 1000000, 0, "H5Dcreate2"};
     p_time      close_t = {0, 0, 0, 1000000, 0, ""};
 
 #ifdef H5_HAVE_PARALLEL
@@ -493,8 +494,8 @@ create_attrs_2(void)
     for(i = 0; i < NUM_DSETS; i++) {
 	sprintf(dset_name, "dataset %d", i);
         create_t.start = retrieve_time();
-   	if((dataset = H5Dcreate(file, dset_name, H5T_NATIVE_DOUBLE,
-                space, H5P_DEFAULT)) < 0)
+   	if((dataset = H5Dcreate2(file, dset_name, H5T_NATIVE_DOUBLE,
+                space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto error;
 	perf(&create_t, create_t.start, retrieve_time());
 

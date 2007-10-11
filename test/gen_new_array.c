@@ -128,7 +128,7 @@ main(void)
         printf("field 4 insert<0!\n");
 
     /* Create the dataset with compound array fields */
-    dset = H5Dcreate(file, "Dataset1", type, space, H5P_DEFAULT);
+    dset = H5Dcreate2(file, "Dataset1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if(dset<0)
         printf("dset<0!\n");
     H5Dclose(dset);
@@ -142,7 +142,7 @@ main(void)
         printf("type<0!\n");
 
     /* Create the dataset with array datatype */
-    dset = H5Dcreate(file, "Dataset2", type, space, H5P_DEFAULT);
+    dset = H5Dcreate2(file, "Dataset2", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if(dset<0)
         printf("dset<0!\n");
     H5Dclose(dset);

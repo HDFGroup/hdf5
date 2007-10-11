@@ -29,7 +29,7 @@
  *
  * HDF5 APIs exercised in thread:
  *
- *     H5Screate_simple, H5Tcopy, H5Tset_order, H5Dcreate, H5Dclose,
+ *     H5Screate_simple, H5Tcopy, H5Tset_order, H5Dcreate2, H5Dclose,
  *     H5Tclose, H5Sclose.
  *
  * Created: Apr 28 2000
@@ -176,26 +176,26 @@ void *tts_error_thread(void UNUSED *arg)
 
     /* define dataspace for dataset */
     dimsf[0] = 1;
-    dataspace = H5Screate_simple(1,dimsf,NULL);
-    assert(dataspace>=0);
+    dataspace = H5Screate_simple(1, dimsf, NULL);
+    assert(dataspace >= 0);
 
     /* define datatype for the data using native little endian integers */
     datatype = H5Tcopy(H5T_NATIVE_INT);
-    assert(datatype>=0);
+    assert(datatype >= 0);
     H5Tset_order(datatype, H5T_ORDER_LE);
 
     /* create a new dataset within the file */
-    dataset = H5Dcreate(error_file, DATASETNAME, datatype, dataspace, H5P_DEFAULT);
-    if (dataset >= 0) {   /* not an error */
+    dataset = H5Dcreate2(error_file, DATASETNAME, datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if(dataset >= 0) {   /* not an error */
         value = WRITE_NUMBER;
         H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &value);
         H5Dclose(dataset);
-    }
+    } /* end if */
 
-    ret=H5Tclose(datatype);
-    assert(ret>=0);
-    ret=H5Sclose(dataspace);
-    assert(ret>=0);
+    ret = H5Tclose(datatype);
+    assert(ret >= 0);
+    ret = H5Sclose(dataspace);
+    assert(ret >= 0);
 
     /* turn our error stack handler off */
     H5Eset_auto2(H5E_DEFAULT, old_error_cb, old_error_client_data); 

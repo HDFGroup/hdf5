@@ -248,9 +248,9 @@ attach_ref_attr(hid_t file_id, hid_t loc_id)
     /* creates two simple datasets */
     if((sid = H5Screate_simple(2, dims, NULL)) < 0) TEST_ERROR
     if((sid_ref = H5Screate_simple(1, dims_ref, NULL)) < 0) TEST_ERROR
-    if((did1 = H5Dcreate(file_id, dsetname1, H5T_NATIVE_INT, sid,  H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did1 = H5Dcreate2(file_id, dsetname1, H5T_NATIVE_INT, sid,  H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Dwrite(did1, H5T_NATIVE_INT, H5S_ALL , H5S_ALL, H5P_DEFAULT,data1) < 0) TEST_ERROR
-    if((did2 = H5Dcreate(file_id, dsetname2, H5T_NATIVE_INT, sid,  H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did2 = H5Dcreate2(file_id, dsetname2, H5T_NATIVE_INT, sid,  H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Dwrite(did2, H5T_NATIVE_INT, H5S_ALL , H5S_ALL, H5P_DEFAULT,data2) < 0) TEST_ERROR
 
     /* create an attribute with two object references */
@@ -316,7 +316,7 @@ attach_reg_ref_attr(hid_t file_id, hid_t loc_id)
     /* create a 2D dataset */
     if((space_id = H5Screate_simple(rank, dims, NULL)) < 0) TEST_ERROR
     if((spacer_id = H5Screate_simple(rankr, dimsr, NULL)) < 0) TEST_ERROR
-    if((dsetv_id = H5Dcreate(file_id, dsetnamev, H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((dsetv_id = H5Dcreate2(file_id, dsetnamev, H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Dwrite(dsetv_id, H5T_NATIVE_INT, H5S_ALL , H5S_ALL, H5P_DEFAULT,data) < 0) TEST_ERROR
 
     /* create reg_ref of block selection */
@@ -397,9 +397,9 @@ create_reg_ref_dataset(hid_t file_id, hid_t loc_id)
 
     if((space_id = H5Screate_simple(rank, dims, NULL)) < 0) TEST_ERROR
     if((spacer_id = H5Screate_simple(rankr, dimsr, NULL)) < 0) TEST_ERROR
-    if((dsetv_id = H5Dcreate(file_id, dsetnamev, H5T_NATIVE_INT, space_id, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((dsetv_id = H5Dcreate2(file_id, dsetnamev, H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Dwrite(dsetv_id, H5T_NATIVE_INT, H5S_ALL , H5S_ALL, H5P_DEFAULT,data) < 0) TEST_ERROR
-    if((dsetr_id = H5Dcreate(loc_id, dsetnamer, H5T_STD_REF_DSETREG, spacer_id, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((dsetr_id = H5Dcreate2(loc_id, dsetnamer, H5T_STD_REF_DSETREG, spacer_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     start[0] = 0;
     start[1] = 3;
@@ -417,7 +417,7 @@ create_reg_ref_dataset(hid_t file_id, hid_t loc_id)
     if((pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
     if(H5Pset_layout(pid, H5D_COMPACT) < 0) TEST_ERROR
 
-    if((dsetr_id = H5Dcreate(loc_id, dsetnamer1, H5T_STD_REF_DSETREG, spacer_id, pid)) < 0) TEST_ERROR
+    if((dsetr_id = H5Dcreate2(loc_id, dsetnamer1, H5T_STD_REF_DSETREG, spacer_id, H5P_DEFAULT, pid, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Pclose(pid) < 0) TEST_ERROR
     if(H5Dwrite(dsetr_id, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref) < 0) TEST_ERROR
     if(H5Dclose(dsetr_id) < 0) TEST_ERROR
@@ -427,7 +427,7 @@ create_reg_ref_dataset(hid_t file_id, hid_t loc_id)
     if(H5Pset_chunk(pid, 1, &chunk_size) < 0) TEST_ERROR
     if(H5Pset_deflate(pid, 9) < 0) TEST_ERROR
 
-    if((dsetr_id = H5Dcreate(loc_id, dsetnamer2, H5T_STD_REF_DSETREG, spacer_id, pid)) < 0) TEST_ERROR
+    if((dsetr_id = H5Dcreate2(loc_id, dsetnamer2, H5T_STD_REF_DSETREG, spacer_id, H5P_DEFAULT, pid, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Pclose(pid) < 0) TEST_ERROR
     if(H5Dwrite(dsetr_id, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT,ref) < 0) TEST_ERROR
     if(H5Dclose(dsetr_id) < 0) TEST_ERROR
@@ -1165,8 +1165,8 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
 
     /* Check raw data read in against data written out */
     if(wbuf) {
-        if(!compare_data(did, 0, pid, tid, (size_t)nelmts, wbuf, rbuf, did) ) TEST_ERROR
-        if(!compare_data(did2, 0, pid, tid2, (size_t)nelmts, wbuf, rbuf2, did2) ) TEST_ERROR
+        if(!compare_data(did, 0, pid, tid, (size_t)nelmts, wbuf, rbuf, did)) TEST_ERROR
+        if(!compare_data(did2, 0, pid, tid2, (size_t)nelmts, wbuf, rbuf2, did2)) TEST_ERROR
     } /* end if */
     /* Don't have written data, just compare data between the two datasets */
     else
@@ -1712,7 +1712,7 @@ test_copy_dataset_simple(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if((sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
 
     /* create 2D int dataset at SRC file */
-    if((did = H5Dcreate(fid_src, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
     if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
@@ -1822,7 +1822,7 @@ test_copy_dataset_simple_empty(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if((sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
 
     /* create 2D int dataset at SRC file */
-    if((did = H5Dcreate(fid_src, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* close dataspace */
     if(H5Sclose(sid) < 0) TEST_ERROR
@@ -1946,7 +1946,7 @@ test_copy_dataset_compound(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Tinsert(tid, "double_name", HOFFSET(comp_t, d), H5T_NATIVE_DOUBLE) < 0) TEST_ERROR
 
     /* create dataset */
-    if((did = H5Dcreate(fid_src, NAME_DATASET_COMPOUND, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_COMPOUND, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
     if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
@@ -2074,7 +2074,7 @@ test_copy_dataset_chunked(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Pset_chunk(pid, 2, chunk_dim2d) < 0) TEST_ERROR
 
     /* create dataset */
-    if((did = H5Dcreate(fid_src, NAME_DATASET_CHUNKED, H5T_NATIVE_FLOAT, sid, pid)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_CHUNKED, H5T_NATIVE_FLOAT, sid, H5P_DEFAULT, pid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* close chunk plist */
     if(H5Pclose(pid) < 0) TEST_ERROR
@@ -2194,7 +2194,7 @@ test_copy_dataset_chunked_empty(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Pset_chunk(pid, 2, chunk_dim2d) < 0) TEST_ERROR
 
     /* create dataset */
-    if((did = H5Dcreate(fid_src, NAME_DATASET_CHUNKED, H5T_NATIVE_FLOAT, sid, pid)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_CHUNKED, H5T_NATIVE_FLOAT, sid, H5P_DEFAULT, pid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* close chunk plist */
     if(H5Pclose(pid) < 0) TEST_ERROR
@@ -2322,7 +2322,7 @@ test_copy_dataset_chunked_sparse(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Pset_chunk(pid, 2, chunk_dim2d) < 0) TEST_ERROR
 
     /* create dataset */
-    if((did = H5Dcreate(fid_src, NAME_DATASET_CHUNKED, H5T_NATIVE_FLOAT, sid, pid)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_CHUNKED, H5T_NATIVE_FLOAT, sid, H5P_DEFAULT, pid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* close chunk plist */
     if(H5Pclose(pid) < 0) TEST_ERROR
@@ -2462,7 +2462,7 @@ test_copy_dataset_compressed(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Pset_deflate(pid, 9) < 0) TEST_ERROR
 
     /* create dataset */
-    if((did = H5Dcreate(fid_src, NAME_DATASET_CHUNKED, H5T_NATIVE_FLOAT, sid, pid)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_CHUNKED, H5T_NATIVE_FLOAT, sid, H5P_DEFAULT, pid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* close chunk plist */
     if(H5Pclose(pid) < 0) TEST_ERROR
@@ -2590,7 +2590,7 @@ test_copy_dataset_compact(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Pset_layout(pid, H5D_COMPACT) < 0) TEST_ERROR
 
     /* create dataset */
-    if((did = H5Dcreate(fid_src, NAME_DATASET_COMPACT, H5T_NATIVE_FLOAT, sid, pid)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_COMPACT, H5T_NATIVE_FLOAT, sid, H5P_DEFAULT, pid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* close chunk plist */
     if(H5Pclose(pid) < 0) TEST_ERROR
@@ -2720,7 +2720,7 @@ test_copy_dataset_external(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Pset_external(pid, FILE_EXT, (off_t)0, size) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
-    if((did = H5Dcreate(fid_src, NAME_DATASET_EXTERNAL, H5T_NATIVE_INT, sid, pid)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_EXTERNAL, H5T_NATIVE_INT, sid, H5P_DEFAULT, pid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
     if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
@@ -2841,7 +2841,7 @@ test_copy_dataset_named_dtype(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if((H5Tcommit2(fid_src, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
-    if((did = H5Dcreate(fid_src, NAME_DATASET_NAMED_DTYPE, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_NAMED_DTYPE, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* close the datatype */
     if(H5Tclose(tid) < 0) TEST_ERROR
@@ -2966,7 +2966,7 @@ test_copy_dataset_named_dtype_hier(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if((H5Tcommit2(gid, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create first dataset at SRC file */
-    if((did = H5Dcreate(gid, NAME_DATASET_NAMED_DTYPE, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(gid, NAME_DATASET_NAMED_DTYPE, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
     if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
@@ -2975,7 +2975,7 @@ test_copy_dataset_named_dtype_hier(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Dclose(did) < 0) TEST_ERROR
 
     /* create second dataset at SRC file */
-    if((did = H5Dcreate(gid, NAME_DATASET_NAMED_DTYPE2, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(gid, NAME_DATASET_NAMED_DTYPE2, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
     if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
@@ -3105,7 +3105,7 @@ test_copy_dataset_named_dtype_hier_outside(hid_t fcpl_src, hid_t fcpl_dst, hid_t
     if((H5Tcommit2(fid_src, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create first dataset at SRC file */
-    if((did = H5Dcreate(gid, NAME_DATASET_NAMED_DTYPE, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(gid, NAME_DATASET_NAMED_DTYPE, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
     if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
@@ -3114,7 +3114,7 @@ test_copy_dataset_named_dtype_hier_outside(hid_t fcpl_src, hid_t fcpl_dst, hid_t
     if(H5Dclose(did) < 0) TEST_ERROR
 
     /* create second dataset at SRC file */
-    if((did = H5Dcreate(gid, NAME_DATASET_NAMED_DTYPE2, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(gid, NAME_DATASET_NAMED_DTYPE2, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
     if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
@@ -3239,13 +3239,13 @@ test_copy_dataset_multi_ohdr_chunks(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if((sid = H5Screate_simple(1, dim1d, NULL)) < 0) TEST_ERROR
 
     /* create first dataset at SRC file */
-    if((did = H5Dcreate(gid, NAME_DATASET_MULTI_OHDR, H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(gid, NAME_DATASET_MULTI_OHDR, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
     if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* create second dataset at SRC file */
-    if((did2 = H5Dcreate(gid, NAME_DATASET_MULTI_OHDR2, H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did2 = H5Dcreate2(gid, NAME_DATASET_MULTI_OHDR2, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
     if(H5Dwrite(did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
@@ -3377,13 +3377,13 @@ test_copy_dataset_attr_named_dtype(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if((H5Tcommit2(fid_src, NAME_DATATYPE_SIMPLE, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create first dataset at SRC file */
-    if((did = H5Dcreate(gid, NAME_DATASET_MULTI_OHDR, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(gid, NAME_DATASET_MULTI_OHDR, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
     if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* create second dataset at SRC file */
-    if((did2 = H5Dcreate(gid, NAME_DATASET_MULTI_OHDR2, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did2 = H5Dcreate2(gid, NAME_DATASET_MULTI_OHDR2, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
     if(H5Dwrite(did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
@@ -3518,7 +3518,7 @@ test_copy_dataset_contig_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if((tid = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
-    if((did = H5Dcreate(fid_src, NAME_DATASET_VL, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_VL, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
     if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
@@ -3653,7 +3653,7 @@ test_copy_dataset_chunked_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Pset_chunk(pid, 1, chunk_dim1d) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
-    if((did = H5Dcreate(fid_src, NAME_DATASET_VL, tid, sid, pid)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_VL, tid, sid, H5P_DEFAULT, pid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* close chunk plist */
     if(H5Pclose(pid) < 0) TEST_ERROR
@@ -3790,7 +3790,7 @@ test_copy_dataset_compact_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Pset_layout(pid, H5D_COMPACT) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
-    if((did = H5Dcreate(fid_src, NAME_DATASET_VL, tid, sid, pid)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_VL, tid, sid, H5P_DEFAULT, pid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
     if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
@@ -3910,7 +3910,7 @@ test_copy_attribute_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if((sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
 
     /* create 2D int dataset at SRC file */
-    if((did = H5Dcreate(fid_src, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* close dataspace */
     if(H5Sclose(sid) < 0) TEST_ERROR
@@ -4053,7 +4053,7 @@ test_copy_dataset_compressed_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Pset_deflate(pid, 9) < 0) TEST_ERROR
 
     /* create dataset */
-    if((did = H5Dcreate(fid_src, NAME_DATASET_CHUNKED, tid, sid, pid)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_CHUNKED, tid, sid, H5P_DEFAULT, pid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* close chunk plist */
     if(H5Pclose(pid) < 0) TEST_ERROR
@@ -4286,7 +4286,7 @@ test_copy_group(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if((sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
 
     /* add a dataset to the group */
-    if((did = H5Dcreate(fid_src, NAME_GROUP_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT) ) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid_src, NAME_GROUP_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close dataspace */
@@ -4420,7 +4420,7 @@ test_copy_root_group(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if((sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
 
     /* add a dataset to the group */
-    if((did = H5Dcreate(fid_src, NAME_GROUP_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT) ) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid_src, NAME_GROUP_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close dataspace */
@@ -4564,7 +4564,7 @@ test_copy_group_deep(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
                 sprintf(objname, "Dataset #%d", k);
 
                 /* add a dataset to the group */
-                if((did = H5Dcreate(gid_sub2, objname, H5T_NATIVE_INT, sid, H5P_DEFAULT) ) < 0) TEST_ERROR
+                if((did = H5Dcreate2(gid_sub2, objname, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
                 if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
                 if(H5Dclose(did) < 0) TEST_ERROR
             } /* end for */
@@ -4933,7 +4933,7 @@ test_copy_group_links(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if((sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
 
     /* add a dataset to the group */
-    if((did = H5Dcreate(fid_src, NAME_LINK_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT) ) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid_src, NAME_LINK_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close dataspace */
@@ -5068,7 +5068,7 @@ test_copy_soft_link(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if((sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
 
     /* add a dataset to the group */
-    if((did = H5Dcreate(fid_src, NAME_LINK_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT) ) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid_src, NAME_LINK_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close dataspace */
@@ -5195,7 +5195,7 @@ test_copy_ext_link(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if((sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
 
     /* add a dataset to the group */
-    if((did = H5Dcreate(fid_src, NAME_LINK_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT) ) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid_src, NAME_LINK_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close dataspace */
@@ -5322,7 +5322,7 @@ test_copy_exist(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if((sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
 
     /* create 2D int dataset at SRC file */
-    if((did = H5Dcreate(fid_src, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
     if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
@@ -5431,7 +5431,7 @@ test_copy_path(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if((sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
 
     /* create 2D int dataset at SRC file */
-    if((did = H5Dcreate(fid_src, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
     if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
@@ -5739,7 +5739,7 @@ test_copy_dataset_compact_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Pset_layout(pid, H5D_COMPACT) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
-    if((did = H5Dcreate(fid_src, NAME_DATASET_VL, tid, sid, pid)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_VL, tid, sid, H5P_DEFAULT, pid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
     if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
@@ -5882,7 +5882,7 @@ test_copy_dataset_contig_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if((H5Tcommit2(fid_src, NAME_DATATYPE_VL, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
-    if((did = H5Dcreate(fid_src, NAME_DATASET_VL, tid, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_VL, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
     if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
@@ -6027,7 +6027,7 @@ test_copy_dataset_chunked_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Pset_chunk(pid, 1, chunk_dim1d) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
-    if((did = H5Dcreate(fid_src, NAME_DATASET_VL, tid, sid, pid)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_VL, tid, sid, H5P_DEFAULT, pid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
     if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
@@ -6177,7 +6177,7 @@ test_copy_dataset_compressed_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl
     if(H5Pset_deflate(pid, 9) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
-    if((did = H5Dcreate(fid_src, NAME_DATASET_VL, tid, sid, pid)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_VL, tid, sid, H5P_DEFAULT, pid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
     if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
@@ -6336,7 +6336,7 @@ test_copy_dataset_compact_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Pset_layout(pid, H5D_COMPACT) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
-    if((did = H5Dcreate(fid_src, NAME_DATASET_VL_VL, tid2, sid, pid)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_VL_VL, tid2, sid, H5P_DEFAULT, pid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
     if(H5Dwrite(did, tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
@@ -6490,7 +6490,7 @@ test_copy_dataset_contig_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if((pid = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
-    if((did = H5Dcreate(fid_src, NAME_DATASET_VL_VL, tid2, sid, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_VL_VL, tid2, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
     if(H5Dwrite(did, tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
@@ -6645,7 +6645,7 @@ test_copy_dataset_chunked_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Pset_chunk(pid, 1, chunk_dim1d) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
-    if((did = H5Dcreate(fid_src, NAME_DATASET_VL_VL, tid2, sid, pid)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_VL_VL, tid2, sid, H5P_DEFAULT, pid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
     if(H5Dwrite(did, tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
@@ -6802,7 +6802,7 @@ test_copy_dataset_compressed_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     if(H5Pset_deflate(pid, 9) < 0) TEST_ERROR
 
     /* create dataset at SRC file */
-    if((did = H5Dcreate(fid_src, NAME_DATASET_VL_VL, tid2, sid, pid)) < 0) TEST_ERROR
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_VL_VL, tid2, sid, H5P_DEFAULT, pid, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
     if(H5Dwrite(did, tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
@@ -6942,7 +6942,7 @@ test_copy_option(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl, unsigned flag, hboo
     if((sid = H5Screate_simple(2, dim2d, NULL)) < 0) TEST_ERROR
 
     /* add a dataset to the top group */
-    if((did = H5Dcreate(gid, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT) ) < 0) TEST_ERROR
+    if((did = H5Dcreate2(gid, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
@@ -6950,7 +6950,7 @@ test_copy_option(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl, unsigned flag, hboo
     if((gid_sub = H5Gcreate2(fid_src, NAME_GROUP_SUB, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* add a dataset to the sub group */
-    if((did = H5Dcreate(gid_sub, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT) ) < 0) TEST_ERROR
+    if((did = H5Dcreate2(gid_sub, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
 
@@ -6958,7 +6958,7 @@ test_copy_option(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl, unsigned flag, hboo
     if((gid_sub_sub = H5Gcreate2(gid_sub, NAME_GROUP_SUB_SUB2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* add a dataset to the sub sub group */
-    if((did = H5Dcreate(gid_sub_sub, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT) ) < 0) TEST_ERROR
+    if((did = H5Dcreate2(gid_sub_sub, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR
 
     /* close dataset */

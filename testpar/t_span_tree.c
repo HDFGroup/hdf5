@@ -312,8 +312,8 @@ void coll_write_test(int chunk_factor)
   VRFY((ret >= 0),"Fill value creation property list succeeded");
 
   if(chunk_factor != 0) {
-    chunk_dims[0] = fsdim[0]/chunk_factor;
-    chunk_dims[1] = fsdim[1]/chunk_factor;
+    chunk_dims[0] = fsdim[0] / chunk_factor;
+    chunk_dims[1] = fsdim[1] / chunk_factor;
     ret = H5Pset_chunk(dcrt_plist, 2, chunk_dims);
     VRFY((ret >= 0),"chunk creation property list succeeded");
   }
@@ -333,10 +333,10 @@ void coll_write_test(int chunk_factor)
    * Create dataset in the file. Notice that creation
    * property list dcrt_plist is used.
    */
-  datasetc = H5Dcreate(file, "collect_write", H5T_NATIVE_INT, fspaceid, dcrt_plist);
+  datasetc = H5Dcreate2(file, "collect_write", H5T_NATIVE_INT, fspaceid, H5P_DEFAULT, dcrt_plist, H5P_DEFAULT);
   VRFY((datasetc >= 0),"dataset created succeeded");
 
-  dataseti = H5Dcreate(file, "independ_write", H5T_NATIVE_INT, fspaceid, dcrt_plist);
+  dataseti = H5Dcreate2(file, "independ_write", H5T_NATIVE_INT, fspaceid, H5P_DEFAULT, dcrt_plist, H5P_DEFAULT);
   VRFY((dataseti >= 0),"dataset created succeeded");
 
   /* The First selection for FILE
@@ -349,7 +349,7 @@ void coll_write_test(int chunk_factor)
    */
 
   start[0]  = FHSTART0;
-  start[1]  = FHSTART1+mpi_rank*FHSTRIDE1*FHCOUNT1;
+  start[1]  = FHSTART1 + mpi_rank * FHSTRIDE1 * FHCOUNT1;
   stride[0] = FHSTRIDE0;
   stride[1] = FHSTRIDE1;
   count[0]  = FHCOUNT0;

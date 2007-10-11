@@ -612,7 +612,7 @@ test_filespace(hid_t fapl)
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Create a single dataset to remove */
-    if((dataset = H5Dcreate(file, DATASETNAME, H5T_NATIVE_INT, space, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((dataset = H5Dcreate2(file, DATASETNAME, H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if(H5Dclose(dataset) < 0) FAIL_STACK_ERROR
 
     /* Remove the dataset */
@@ -637,7 +637,7 @@ test_filespace(hid_t fapl)
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Create a single dataset to remove */
-    if((dataset = H5Dcreate(file, DATASETNAME, H5T_NATIVE_INT, space, contig_dcpl)) < 0) FAIL_STACK_ERROR
+    if((dataset = H5Dcreate2(file, DATASETNAME, H5T_NATIVE_INT, space, H5P_DEFAULT, contig_dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if(H5Dclose(dataset) < 0) FAIL_STACK_ERROR
 
     /* Remove the dataset */
@@ -662,7 +662,7 @@ test_filespace(hid_t fapl)
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Create a single dataset to remove */
-    if((dataset = H5Dcreate(file, DATASETNAME, H5T_NATIVE_INT, space, late_chunk_dcpl)) < 0) FAIL_STACK_ERROR
+    if((dataset = H5Dcreate2(file, DATASETNAME, H5T_NATIVE_INT, space, H5P_DEFAULT, late_chunk_dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if(H5Dclose(dataset) < 0) FAIL_STACK_ERROR
 
     /* Remove the dataset */
@@ -687,7 +687,7 @@ test_filespace(hid_t fapl)
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Create a single dataset to remove */
-    if((dataset = H5Dcreate(file, DATASETNAME, H5T_NATIVE_INT, space, early_chunk_dcpl)) < 0) FAIL_STACK_ERROR
+    if((dataset = H5Dcreate2(file, DATASETNAME, H5T_NATIVE_INT, space, H5P_DEFAULT, early_chunk_dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if(H5Dclose(dataset) < 0) FAIL_STACK_ERROR
 
     /* Remove the dataset */
@@ -712,7 +712,7 @@ test_filespace(hid_t fapl)
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Create a single dataset to remove */
-    if((dataset = H5Dcreate(file, DATASETNAME, H5T_NATIVE_INT, space, comp_dcpl)) < 0) FAIL_STACK_ERROR
+    if((dataset = H5Dcreate2(file, DATASETNAME, H5T_NATIVE_INT, space, H5P_DEFAULT, comp_dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if(H5Dclose(dataset) < 0) FAIL_STACK_ERROR
 
     /* Remove the dataset */
@@ -740,7 +740,7 @@ test_filespace(hid_t fapl)
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_nocache)) < 0) FAIL_STACK_ERROR
 
     /* Create a single dataset to remove */
-    if((dataset = H5Dcreate(file, DATASETNAME, H5T_NATIVE_INT, space, comp_dcpl)) < 0) FAIL_STACK_ERROR
+    if((dataset = H5Dcreate2(file, DATASETNAME, H5T_NATIVE_INT, space, H5P_DEFAULT, comp_dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Alternate re-writing dataset with compressible & random data */
     for(u = 0; u < FILESPACE_REWRITE; u++) {
@@ -784,7 +784,7 @@ test_filespace(hid_t fapl)
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Create a single dataset to remove */
-    if((dataset = H5Dcreate(file, DATASETNAME, H5T_NATIVE_INT, space, compact_dcpl)) < 0) FAIL_STACK_ERROR
+    if((dataset = H5Dcreate2(file, DATASETNAME, H5T_NATIVE_INT, space, H5P_DEFAULT, compact_dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if(H5Dclose(dataset) < 0) FAIL_STACK_ERROR
 
     /* Remove the dataset */
@@ -812,8 +812,8 @@ test_filespace(hid_t fapl)
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Create datasets to remove */
-    if((dataset = H5Dcreate(file, DATASETNAME, H5T_NATIVE_INT, space, contig_dcpl)) < 0) FAIL_STACK_ERROR
-    if((dataset2 = H5Dcreate(file, DATASET2NAME, H5T_NATIVE_INT, space, contig_dcpl)) < 0) FAIL_STACK_ERROR
+    if((dataset = H5Dcreate2(file, DATASETNAME, H5T_NATIVE_INT, space, H5P_DEFAULT, contig_dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((dataset2 = H5Dcreate2(file, DATASET2NAME, H5T_NATIVE_INT, space, H5P_DEFAULT, contig_dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Create a dataspace for the attributes */
     if((attr_space = H5Screate_simple(FILESPACE_ATTR_NDIMS, attr_dims, NULL)) < 0) FAIL_STACK_ERROR
@@ -1011,7 +1011,7 @@ test_filespace(hid_t fapl)
                 for(w = 0; w < FILESPACE_NDATASETS; w++) {
                     /* Create & close a dataset */
                     sprintf(objname, "%s %u", DATASETNAME, w);
-                    if((dataset = H5Dcreate(group2, objname, H5T_NATIVE_INT, space, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+                    if((dataset = H5Dcreate2(group2, objname, H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
                     if(H5Dclose(dataset) < 0) FAIL_STACK_ERROR
                 } /* end for */
 
@@ -1079,12 +1079,12 @@ test_filespace(hid_t fapl)
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Create a single dataset to remove */
-    if((dataset = H5Dcreate (file, DATASETNAME, H5T_NATIVE_INT, space, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((dataset = H5Dcreate2(file, DATASETNAME, H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if(H5Dclose(dataset) < 0) FAIL_STACK_ERROR
 
     /* Create another dataset with same name */
     H5E_BEGIN_TRY {
-        dataset = H5Dcreate (file, DATASETNAME, H5T_NATIVE_INT, space, H5P_DEFAULT);
+        dataset = H5Dcreate2(file, DATASETNAME, H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
     if(dataset >= 0) {
         H5Dclose(dataset);
@@ -1185,7 +1185,7 @@ test_filespace(hid_t fapl)
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Create datasets to remove */
-    if((dataset = H5Dcreate(file, DATASETNAME, H5T_NATIVE_INT, space, contig_dcpl)) < 0) FAIL_STACK_ERROR
+    if((dataset = H5Dcreate2(file, DATASETNAME, H5T_NATIVE_INT, space, H5P_DEFAULT, contig_dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Create a dataspace for the attributes */
     if((attr_space = H5Screate_simple(FILESPACE_ATTR_NDIMS, attr_dims, NULL)) < 0) FAIL_STACK_ERROR
@@ -1853,7 +1853,7 @@ test_resurrect_dataset(hid_t fapl)
 
     /* Create a dataset in the file */
     if((s = H5Screate(H5S_SCALAR)) < 0) FAIL_STACK_ERROR
-    if((d = H5Dcreate(f, DATASETNAME, H5T_NATIVE_INT, s, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((d = H5Dcreate2(f, DATASETNAME, H5T_NATIVE_INT, s, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if(H5Sclose(s) < 0) FAIL_STACK_ERROR
 
     /* Unlink the dataset while it's open (will mark it for deletion when closed) */
@@ -2065,19 +2065,19 @@ test_unlink_chunked_dataset(hid_t fapl)
     if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Create the dataspace */
-    if((space_id = H5Screate_simple(FILESPACE_NDIMS,dims,max_dims)) < 0) FAIL_STACK_ERROR
+    if((space_id = H5Screate_simple(FILESPACE_NDIMS, dims, max_dims)) < 0) FAIL_STACK_ERROR
 
     /* Create the dataset creation filter */
     if((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
 
     /* Set to chunked storage */
-    if(H5Pset_chunk(dcpl_id,FILESPACE_NDIMS,chunk_dims) < 0) FAIL_STACK_ERROR
+    if(H5Pset_chunk(dcpl_id, FILESPACE_NDIMS, chunk_dims) < 0) FAIL_STACK_ERROR
 
     /* Set to early space allocation */
-    if(H5Pset_alloc_time(dcpl_id,H5D_ALLOC_TIME_EARLY) < 0) FAIL_STACK_ERROR
+    if(H5Pset_alloc_time(dcpl_id, H5D_ALLOC_TIME_EARLY) < 0) FAIL_STACK_ERROR
 
     /* Create the dataset */
-    if((dset_id = H5Dcreate(file_id,DATASETNAME,H5T_NATIVE_INT,space_id,dcpl_id)) < 0) FAIL_STACK_ERROR
+    if((dset_id = H5Dcreate2(file_id, DATASETNAME, H5T_NATIVE_INT, space_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Close the dataspace */
     if(H5Sclose(space_id) < 0) FAIL_STACK_ERROR

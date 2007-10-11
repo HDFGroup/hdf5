@@ -100,13 +100,13 @@ void tts_acreate(void)
     H5Tset_order(datatype, H5T_ORDER_LE);
 
     /* create a new dataset within the file */
-    dataset = H5Dcreate(file, DATASETNAME, datatype, dataspace, H5P_DEFAULT);
-    assert(dataset>=0);
+    dataset = H5Dcreate2(file, DATASETNAME, datatype, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    assert(dataset >= 0);
 
     /* initialize data for dataset and write value to dataset */
     data = NUM_THREADS;
-    ret=H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data);
-    assert(ret>=0);
+    ret = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data);
+    assert(ret >= 0);
 
     /*
      * Simultaneously create a large number of attributes to be associated

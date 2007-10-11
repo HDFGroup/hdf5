@@ -115,8 +115,8 @@ test_reference_obj(void)
     CHECK(ret, FAIL, "H5Oset_comment");
 
     /* Create a dataset (inside Group1) */
-    dataset = H5Dcreate(group, "Dataset1", H5T_NATIVE_UINT, sid1, H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(group, "Dataset1", H5T_NATIVE_UINT, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     for(tu32 = (unsigned *)wbuf, i = 0; i < SPACE1_DIM1; i++)
         *tu32++=i*3;
@@ -130,8 +130,8 @@ test_reference_obj(void)
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Create another dataset (inside Group1) */
-    dataset = H5Dcreate(group, "Dataset2", H5T_NATIVE_UCHAR, sid1, H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(group, "Dataset2", H5T_NATIVE_UCHAR, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -164,8 +164,8 @@ test_reference_obj(void)
     CHECK(ret, FAIL, "H5Gclose");
 
     /* Create a dataset */
-    dataset = H5Dcreate(fid1, "Dataset3", H5T_STD_REF_OBJ, sid1, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid1, "Dataset3", H5T_STD_REF_OBJ, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Dcreate2");
 
     /* Create reference to dataset */
     ret = H5Rcreate(&wbuf[0], fid1, "/Group1/Dataset1", H5R_OBJECT, -1);
@@ -354,8 +354,8 @@ test_reference_region(void)
     CHECK(sid2, FAIL, "H5Screate_simple");
 
     /* Create a dataset */
-    dset2 = H5Dcreate(fid1, "Dataset2", H5T_STD_U8LE, sid2, H5P_DEFAULT);
-    CHECK(dset2, FAIL, "H5Dcreate");
+    dset2 = H5Dcreate2(fid1, "Dataset2", H5T_STD_U8LE, sid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dset2, FAIL, "H5Dcreate2");
 
     for(tu8 = dwbuf, i = 0; i < (SPACE2_DIM1 * SPACE2_DIM2); i++)
         *tu8++ = i * 3;
@@ -373,8 +373,8 @@ test_reference_region(void)
     CHECK(sid1, FAIL, "H5Screate_simple");
 
     /* Create a dataset */
-    dset1 = H5Dcreate(fid1, "Dataset1", H5T_STD_REF_DSETREG, sid1, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Dcreate");
+    dset1 = H5Dcreate2(fid1, "Dataset1", H5T_STD_REF_DSETREG, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Dcreate2");
 
     /* Create references */
 
@@ -626,8 +626,8 @@ test_reference_region_1D(void)
     CHECK(sid3, FAIL, "H5Screate_simple");
 
     /* Create a dataset */
-    dset3 = H5Dcreate(fid1, "Dataset2", H5T_STD_U8LE, sid3, H5P_DEFAULT);
-    CHECK(dset3, FAIL, "H5Dcreate");
+    dset3 = H5Dcreate2(fid1, "Dataset2", H5T_STD_U8LE, sid3, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dset3, FAIL, "H5Dcreate2");
 
     for(tu8 = dwbuf, i = 0; i < SPACE3_DIM1; i++)
         *tu8++ = i * 3;
@@ -645,8 +645,8 @@ test_reference_region_1D(void)
     CHECK(sid1, FAIL, "H5Screate_simple");
 
     /* Create a dataset */
-    dset1 = H5Dcreate(fid1, "Dataset1", H5T_STD_REF_DSETREG, sid1, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Dcreate");
+    dset1 = H5Dcreate2(fid1, "Dataset1", H5T_STD_REF_DSETREG, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Dcreate2");
 
     /* Create references */
 
@@ -877,16 +877,16 @@ test_reference_obj_deleted(void)
     CHECK(sid1, FAIL, "H5Screate_simple");
 
     /* Create a dataset to reference (deleted later) */
-    dataset = H5Dcreate(fid1, "Dataset1", H5T_NATIVE_INT, sid1, H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid1, "Dataset1", H5T_NATIVE_INT, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Create a dataset */
-    dataset = H5Dcreate(fid1, "Dataset2", H5T_STD_REF_OBJ, sid1, H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid1, "Dataset2", H5T_STD_REF_OBJ, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Create reference to dataset */
     ret = H5Rcreate(&oref, fid1, "/Dataset1", H5R_OBJECT, -1);
@@ -1031,7 +1031,7 @@ test_reference_group(void)
     CHECK(ret, FAIL, "H5Gclose");
 
     /* Create bottom dataset */
-    did = H5Dcreate(gid, DSETNAME2, H5T_NATIVE_INT, sid, H5P_DEFAULT);
+    did = H5Dcreate2(gid, DSETNAME2, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     assert(did > 0);
     ret = H5Dclose(did);
     assert(ret >= 0);
@@ -1040,8 +1040,8 @@ test_reference_group(void)
     CHECK(ret, FAIL, "H5Gclose");
 
     /* Create dataset */
-    did = H5Dcreate(fid, DSETNAME, H5T_STD_REF_OBJ, sid, H5P_DEFAULT);
-    CHECK(did, FAIL, "H5Dcreate");
+    did = H5Dcreate2(fid, DSETNAME, H5T_STD_REF_OBJ, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(did, FAIL, "H5Dcreate2");
 
     /* Create reference to group */
     ret = H5Rcreate(&wref, fid, GROUPNAME, H5R_OBJECT, -1);
@@ -1166,16 +1166,16 @@ test_reference_compat(void)
     CHECK(group, FAIL, "H5Gcreate2");
 
     /* Create a dataset (inside Group1) */
-    dataset = H5Dcreate(group, "Dataset1", H5T_NATIVE_UINT, sid2, H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(group, "Dataset1", H5T_NATIVE_UINT, sid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Create another dataset (inside Group1) */
-    dataset = H5Dcreate(group, "Dataset2", H5T_NATIVE_UCHAR, sid2, H5P_DEFAULT);
-    CHECK(dataset, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(group, "Dataset2", H5T_NATIVE_UCHAR, sid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -1209,8 +1209,8 @@ test_reference_compat(void)
 
 
     /* Create a dataset with object reference datatype */
-    dataset = H5Dcreate(fid1, "Dataset3", H5T_STD_REF_OBJ, sid1, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid1, "Dataset3", H5T_STD_REF_OBJ, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Dcreate2");
 
     /* Create reference to dataset */
     ret = H5Rcreate(&wbuf_obj[0], fid1, "/Group1/Dataset1", H5R_OBJECT, -1);
@@ -1238,8 +1238,8 @@ test_reference_compat(void)
 
 
     /* Create a dataset with region reference datatype */
-    dataset = H5Dcreate(fid1, "Dataset4", H5T_STD_REF_DSETREG, sid1, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Dcreate");
+    dataset = H5Dcreate2(fid1, "Dataset4", H5T_STD_REF_DSETREG, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Dcreate2");
 
     /* Select 6x6 hyperslab for first reference */
     start[0] = 2; start[1] = 2;

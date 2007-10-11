@@ -123,24 +123,24 @@ new_object(hid_t f, const char *name, int ndims, hsize_t dims[], hsize_t cdims[]
     hid_t dcpl;         /* Dataset creation property list ID */
 
     /* Create the dataset creation property list */
-    if ((dcpl=H5Pcreate(H5P_DATASET_CREATE))<0) TEST_ERROR;
+    if ((dcpl=H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR;
 
     /* Set the chunk dimensions */
     if(H5Pset_chunk(dcpl, ndims, cdims) < 0) TEST_ERROR;
 
     /* Create the dataspace */
-    if((space = H5Screate_simple(ndims, dims, NULL))<0) TEST_ERROR;
+    if((space = H5Screate_simple(ndims, dims, NULL)) < 0) TEST_ERROR;
 
     /* Create the dataset */
-    if((dataset = H5Dcreate (f, name, TEST_DATATYPE, space, dcpl))<0) TEST_ERROR;
+    if((dataset = H5Dcreate2(f, name, TEST_DATATYPE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Clean up */
 
     /* Close property lists */
-    if(H5Pclose(dcpl)<0) TEST_ERROR;
+    if(H5Pclose(dcpl) < 0) TEST_ERROR;
 
     /* Close dataspace */
-    if(H5Sclose(space)<0) TEST_ERROR;
+    if(H5Sclose(space) < 0) TEST_ERROR;
 
     return dataset;
 
@@ -187,7 +187,7 @@ test_create(hid_t f, const char *prefix)
 	    return FAIL;
 
         /* Close dataset created */
-        if(H5Dclose(dataset)<0)
+        if(H5Dclose(dataset) < 0)
             return FAIL;
     }
 
@@ -268,7 +268,7 @@ test_extend(hid_t f, const char *prefix,
     }
 
     /* Get dataset's dataspace */
-    if((fspace=H5Dget_space(dataset))<0) TEST_ERROR;
+    if((fspace=H5Dget_space(dataset)) < 0) TEST_ERROR;
 
     for (ctr = 0;
 	 H5V_vector_lt_u((unsigned)ndims, max_corner, whole_size);
@@ -316,13 +316,13 @@ test_extend(hid_t f, const char *prefix,
 	HDmemset(buf, (signed)(128+ctr), (size_t)nelmts);
 
         /* Create dataspace for selection in memory */
-        if((mspace=H5Screate_simple(1,&nelmts,NULL))<0) TEST_ERROR;
+        if((mspace=H5Screate_simple(1,&nelmts,NULL)) < 0) TEST_ERROR;
 
         /* Select region in file dataspace */
-        if(H5Sselect_hyperslab(fspace,H5S_SELECT_SET,offset,NULL,size,NULL)<0) TEST_ERROR;
+        if(H5Sselect_hyperslab(fspace,H5S_SELECT_SET,offset,NULL,size,NULL) < 0) TEST_ERROR;
 
 	/* Write to disk */
-	if (H5Dwrite(dataset, TEST_DATATYPE, mspace, fspace, H5P_DEFAULT, buf)<0) {
+	if (H5Dwrite(dataset, TEST_DATATYPE, mspace, fspace, H5P_DEFAULT, buf) < 0) {
 	    H5_FAILED();
 	    fprintf(stderr,"    Write failed: ctr=%lu\n", (unsigned long)ctr);
 	    goto error;
@@ -330,7 +330,7 @@ test_extend(hid_t f, const char *prefix,
 
 	/* Read from disk */
 	HDmemset(check, 0xff, (size_t)nelmts);
-	if (H5Dread(dataset, TEST_DATATYPE, mspace, fspace, H5P_DEFAULT, check)<0) {
+	if (H5Dread(dataset, TEST_DATATYPE, mspace, fspace, H5P_DEFAULT, check) < 0) {
 	    H5_FAILED();
 	    fprintf(stderr,"    Read failed: ctr=%lu\n", (unsigned long)ctr);
 	    goto error;
@@ -348,7 +348,7 @@ test_extend(hid_t f, const char *prefix,
 	}
 
         /* Close memory dataspace */
-        if(H5Sclose(mspace)<0) TEST_ERROR;
+        if(H5Sclose(mspace) < 0) TEST_ERROR;
 
 	/* Write to `whole' buffer for later checking */
 	H5V_hyper_copy((unsigned)ndims, size,
@@ -362,7 +362,7 @@ test_extend(hid_t f, const char *prefix,
 
     /* Now read the entire array back out and check it */
     HDmemset(buf, 0xff, nx * ny * nz);
-    if (H5Dread(dataset, TEST_DATATYPE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf)<0) {
+    if (H5Dread(dataset, TEST_DATATYPE, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) {
 	H5_FAILED();
 	fprintf(stderr,"    Read failed for whole array.\n");
 	goto error;
@@ -390,10 +390,10 @@ test_extend(hid_t f, const char *prefix,
     }
 
     /* Close dataset's dataspace */
-    if(H5Sclose(fspace)<0) TEST_ERROR;
+    if(H5Sclose(fspace) < 0) TEST_ERROR;
 
     /* Close dataset */
-    if(H5Dclose(dataset)<0) TEST_ERROR;
+    if(H5Dclose(dataset) < 0) TEST_ERROR;
 
     /* Free memory used */
     HDfree(buf);
@@ -482,10 +482,10 @@ test_sparse(hid_t f, const char *prefix, size_t nblocks,
     }
 
     /* Get dataset's dataspace */
-    if((fspace=H5Dget_space(dataset))<0) TEST_ERROR;
+    if((fspace=H5Dget_space(dataset)) < 0) TEST_ERROR;
 
     /* Create dataspace for memory buffer */
-    if((mspace=H5Screate_simple(ndims,size,NULL))<0) TEST_ERROR;
+    if((mspace=H5Screate_simple(ndims,size,NULL)) < 0) TEST_ERROR;
 
     for (ctr=0; ctr<nblocks; ctr++) {
 	offset[0] = (hsize_t)(HDrandom() % (TEST_SPARSE_SIZE-nx));
@@ -493,10 +493,10 @@ test_sparse(hid_t f, const char *prefix, size_t nblocks,
 	offset[2] = (hsize_t)(HDrandom() % (TEST_SPARSE_SIZE-nz));
 
         /* Select region in file dataspace */
-        if(H5Sselect_hyperslab(fspace,H5S_SELECT_SET,offset,NULL,size,NULL)<0) TEST_ERROR;
+        if(H5Sselect_hyperslab(fspace,H5S_SELECT_SET,offset,NULL,size,NULL) < 0) TEST_ERROR;
 
 	/* write to disk */
-	if (H5Dwrite(dataset, TEST_DATATYPE, mspace, fspace, H5P_DEFAULT, buf)<0) {
+	if (H5Dwrite(dataset, TEST_DATATYPE, mspace, fspace, H5P_DEFAULT, buf) < 0) {
 	    H5_FAILED();
 	    printf("    Write failed: ctr=%lu\n", (unsigned long)ctr);
 	    printf("    offset=(%lu", (unsigned long) (offset[0]));
@@ -521,13 +521,13 @@ test_sparse(hid_t f, const char *prefix, size_t nblocks,
     }
 
     /* Close memory dataspace */
-    if(H5Sclose(mspace)<0) TEST_ERROR;
+    if(H5Sclose(mspace) < 0) TEST_ERROR;
 
     /* Close dataset's dataspace */
-    if(H5Sclose(fspace)<0) TEST_ERROR;
+    if(H5Sclose(fspace) < 0) TEST_ERROR;
 
     /* Close dataset */
-    if(H5Dclose(dataset)<0) TEST_ERROR;
+    if(H5Dclose(dataset) < 0) TEST_ERROR;
 
     HDfree(buf);
     PASSED();
@@ -613,7 +613,7 @@ main(int argc, char *argv[])
 
 	/* Create the test file */
 	h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-	if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl))<0) {
+	if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0) {
 	    printf("Cannot create file %s; test aborted\n", filename);
 	    exit(1);
 	}
@@ -628,7 +628,7 @@ main(int argc, char *argv[])
 
 	    addr = 8 * ((uint64_t)1<<30);	/*8 GB */
 	    f=H5I_object(file);
-	    if (H5FDset_eoa(f->shared->lf, H5FD_MEM_DEFAULT, addr)<0) {
+	    if (H5FDset_eoa(f->shared->lf, H5FD_MEM_DEFAULT, addr) < 0) {
 		printf("Cannot create large file family\n");
 		exit(1);
 	    }

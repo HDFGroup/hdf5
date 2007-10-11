@@ -1595,8 +1595,8 @@ int make_all_objects(hid_t loc_id)
      * H5G_DATASET
      *-------------------------------------------------------------------------
      */
-    space_id = H5Screate_simple(1,dims,NULL);
-    dset_id  = H5Dcreate(loc_id,"dset_referenced",H5T_NATIVE_INT,space_id,H5P_DEFAULT);
+    space_id = H5Screate_simple(1, dims, NULL);
+    dset_id  = H5Dcreate2(loc_id, "dset_referenced", H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Sclose(space_id);
 
     /*-------------------------------------------------------------------------
@@ -1670,8 +1670,8 @@ int make_attributes(hid_t loc_id)
     *-------------------------------------------------------------------------
     */
 
-    space_id = H5Screate_simple(1,dims,NULL);
-    dset_id  = H5Dcreate(loc_id,"dset",H5T_NATIVE_INT,space_id,H5P_DEFAULT);
+    space_id = H5Screate_simple(1, dims, NULL);
+    dset_id  = H5Dcreate2(loc_id, "dset", H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Sclose(space_id);
 
     /*-------------------------------------------------------------------------
@@ -2065,42 +2065,36 @@ int make_nbit(hid_t loc_id)
   goto out;
  }
 
-#if defined (H5_HAVE_FILTER_NBIT)
+#if defined H5_HAVE_FILTER_NBIT
  /* remove the filters from the dcpl */
- if (H5Premove_filter(dcpl,H5Z_FILTER_ALL) < 0)
+ if(H5Premove_filter(dcpl, H5Z_FILTER_ALL) < 0)
  {
   H5Tclose(dtid);
   goto out;
  }
- if (H5Pset_nbit(dcpl) < 0)
- {
+ if(H5Pset_nbit(dcpl) < 0) {
   H5Tclose(dtid);
   goto out;
  }
- if((dsid = H5Dcreate (loc_id,"dset_nbit",dtid,sid,dcpl)) < 0)
- {
+ if((dsid = H5Dcreate2(loc_id, "dset_nbit", dtid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) {
   H5Tclose(dtid);
   goto out;
  }
- if(H5Dwrite(dsid,dtid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0)
- {
+ if(H5Dwrite(dsid, dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) {
   H5Tclose(dtid);
   goto out;
  }
  H5Dclose(dsid);
 
- if (H5Premove_filter(dcpl,H5Z_FILTER_ALL) < 0)
- {
+ if(H5Premove_filter(dcpl, H5Z_FILTER_ALL) < 0) {
   H5Tclose(dtid);
   goto out;
  }
- if((dsid = H5Dcreate (loc_id,"dset_int31",dtid,sid,dcpl)) < 0)
- {
+ if((dsid = H5Dcreate2(loc_id, "dset_int31", dtid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) {
   H5Tclose(dtid);
   goto out;
  }
- if(H5Dwrite(dsid,dtid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0)
- {
+ if(H5Dwrite(dsid, dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) {
   H5Tclose(dtid);
   goto out;
  }
@@ -2166,34 +2160,28 @@ int make_scaleoffset(hid_t loc_id)
 
 #if defined (H5_HAVE_FILTER_SCALEOFFSET)
  /* remove the filters from the dcpl */
- if (H5Premove_filter(dcpl,H5Z_FILTER_ALL) < 0)
- {
+ if(H5Premove_filter(dcpl, H5Z_FILTER_ALL) < 0) {
   H5Tclose(dtid);
   goto out;
  }
- if (H5Pset_scaleoffset(dcpl,H5Z_SO_INT,31) < 0)
- {
+ if(H5Pset_scaleoffset(dcpl, H5Z_SO_INT, 31) < 0) {
   H5Tclose(dtid);
   goto out;
  }
- if((dsid = H5Dcreate (loc_id,"dset_scaleoffset",dtid,sid,dcpl)) < 0)
- {
+ if((dsid = H5Dcreate2(loc_id, "dset_scaleoffset", dtid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) {
   H5Tclose(dtid);
   goto out;
  }
- if(H5Dwrite(dsid,dtid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0)
- {
+ if(H5Dwrite(dsid, dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) {
   H5Tclose(dtid);
   goto out;
  }
  H5Dclose(dsid);
- if((dsid = H5Dcreate (loc_id,"dset_none",dtid,sid,H5P_DEFAULT)) < 0)
- {
+ if((dsid = H5Dcreate2(loc_id, "dset_none", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
   H5Tclose(dtid);
   goto out;
  }
- if(H5Dwrite(dsid,dtid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0)
- {
+ if(H5Dwrite(dsid, dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) {
   H5Tclose(dtid);
   goto out;
  }
@@ -2369,16 +2357,16 @@ if (szip_can_encode) {
  */
 #if defined (H5_HAVE_FILTER_NBIT)
  /* remove the filters from the dcpl */
- if (H5Premove_filter(dcpl,H5Z_FILTER_ALL) < 0)
+ if(H5Premove_filter(dcpl, H5Z_FILTER_ALL) < 0)
   goto out;
  /* set the shuffle filter */
- if (H5Pset_nbit(dcpl) < 0)
+ if(H5Pset_nbit(dcpl) < 0)
   goto out;
  dtid = H5Tcopy(H5T_NATIVE_INT);
- H5Tset_precision(dtid,(H5Tget_precision(dtid)-1));
- if((dsid = H5Dcreate (loc_id,"dset_nbit",dtid,sid,dcpl)) < 0)
+ H5Tset_precision(dtid, (H5Tget_precision(dtid) - 1));
+ if((dsid = H5Dcreate2(loc_id, "dset_nbit", dtid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
   goto out;
- if(H5Dwrite(dsid,dtid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0)
+ if(H5Dwrite(dsid, dtid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
   goto out;
 
  /* close */
@@ -2446,7 +2434,7 @@ int make_early(void)
     for(i = 0; i < iter; i++) {
         if((fid = H5Fopen(FNAME5, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
             goto out;
-        if((dset_id = H5Dcreate(fid, "early", H5T_NATIVE_DOUBLE, sid, dcpl)) < 0)
+        if((dset_id = H5Dcreate2(fid, "early", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
             goto out;
         if((tid = H5Tcopy(H5T_NATIVE_DOUBLE)) < 0)
             goto out;
@@ -2609,21 +2597,21 @@ int make_fill(hid_t loc_id)
  hid_t   dcpl;
  hsize_t dims[2]={3,2};
  int     buf[3][2]= {{1,1},{1,2},{2,2}};
- int     fillvalue=2;
+ int     fillvalue = 2;
 
 /*-------------------------------------------------------------------------
  * H5T_INTEGER, write a fill value
  *-------------------------------------------------------------------------
  */
- if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+ if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
   goto out;
- if (H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillvalue) < 0)
+ if(H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillvalue) < 0)
   goto out;
- if ((sid = H5Screate_simple(2,dims,NULL)) < 0)
+ if((sid = H5Screate_simple(2,dims,NULL)) < 0)
   goto out;
- if ((did = H5Dcreate(loc_id,"dset_fill",H5T_NATIVE_INT,sid,dcpl)) < 0)
+ if((did = H5Dcreate2(loc_id, "dset_fill", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
   goto out;
- if (H5Dwrite(did,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0)
+ if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
   goto out;
 
  /* close */
@@ -2676,21 +2664,21 @@ int make_big(hid_t loc_id)
  hs_size[0]  = 1024;
 
  /* create */ 
- if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+ if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
   goto out;
- if (H5Pset_fill_value(dcpl, H5T_NATIVE_SCHAR, &fillvalue) < 0)
+ if(H5Pset_fill_value(dcpl, H5T_NATIVE_SCHAR, &fillvalue) < 0)
   goto out;
  if(H5Pset_chunk(dcpl, 1, chunk_dims) < 0)
   goto out;
- if ((f_sid = H5Screate_simple(1,dims,NULL)) < 0)
+ if((f_sid = H5Screate_simple(1,dims,NULL)) < 0)
   goto out;
- if ((did = H5Dcreate(loc_id,"dset",H5T_NATIVE_SCHAR,f_sid,dcpl)) < 0)
+ if((did = H5Dcreate2(loc_id, "dset", H5T_NATIVE_SCHAR, f_sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
   goto out;
- if ((m_sid = H5Screate_simple(1, hs_size, hs_size)) < 0) 
+ if((m_sid = H5Screate_simple(1, hs_size, hs_size)) < 0) 
   goto out;
- if ((tid = H5Dget_type(did)) < 0) 
+ if((tid = H5Dget_type(did)) < 0) 
   goto out;
- if ((size = H5Tget_size(tid))<=0)
+ if((size = H5Tget_size(tid))<=0)
   goto out;
  
  /* initialize buffer to 0  */
@@ -2750,15 +2738,15 @@ int make_external(hid_t loc_id)
  size = max_size[0] * sizeof(int);
  
  /* create */ 
- if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+ if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
   goto out;
- if (H5Pset_external(dcpl, H5REPACK_EXTFILE, (off_t)0, size) < 0) 
+ if(H5Pset_external(dcpl, H5REPACK_EXTFILE, (off_t)0, size) < 0) 
   goto out;
- if ((sid = H5Screate_simple(1,cur_size, max_size)) < 0)
+ if((sid = H5Screate_simple(1,cur_size, max_size)) < 0)
   goto out;
- if ((did = H5Dcreate(loc_id,"external",H5T_NATIVE_INT,sid,dcpl)) < 0)
+ if((did = H5Dcreate2(loc_id, "external", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
   goto out;
- if (H5Dwrite(did,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0)
+ if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
   goto out;
 
  /* close */
@@ -3115,23 +3103,22 @@ void write_dset_in(hid_t loc_id,
  ((int *)buf5[0].p)[0]=1;
  buf5[1].len = 2;
  buf5[1].p = malloc( 2 * sizeof(int));
- ((int *)buf5[1].p)[0]=2;
- ((int *)buf5[1].p)[1]=3;
+ ((int *)buf5[1].p)[0] = 2;
+ ((int *)buf5[1].p)[1] = 3;
 
- if (make_diffs)
- {
-  ((int *)buf5[0].p)[0]=0;
-  ((int *)buf5[1].p)[0]=0;
-  ((int *)buf5[1].p)[1]=0;
+ if(make_diffs) {
+  ((int *)buf5[0].p)[0] = 0;
+  ((int *)buf5[1].p)[0] = 0;
+  ((int *)buf5[1].p)[1] = 0;
  }
 
- space_id = H5Screate_simple(1,dims,NULL);
+ space_id = H5Screate_simple(1, dims, NULL);
  type_id = H5Tvlen_create(H5T_NATIVE_INT);
- dset_id = H5Dcreate(loc_id,"vlen",type_id,space_id,H5P_DEFAULT);
- status = H5Dwrite(dset_id,type_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf5);
- assert(status>=0);
- status = H5Dvlen_reclaim(type_id,space_id,H5P_DEFAULT,buf5);
- assert(status>=0);
+ dset_id = H5Dcreate2(loc_id, "vlen", type_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ status = H5Dwrite(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf5);
+ assert(status >= 0);
+ status = H5Dvlen_reclaim(type_id, space_id, H5P_DEFAULT, buf5);
+ assert(status >= 0);
  status = H5Dclose(dset_id);
  status = H5Tclose(type_id);
  status = H5Sclose(space_id);
@@ -3261,25 +3248,27 @@ void write_dset_in(hid_t loc_id,
  */
 
 /* Allocate and initialize VL dataset to write */
- n=0;
- for (i = 0; i < 3; i++) {
-  for (j = 0; j < 2; j++) {
+ n = 0;
+ for(i = 0; i < 3; i++)
+  for(j = 0; j < 2; j++) {
     int l;
+
     buf52[i][j].p = malloc((i + 1) * sizeof(int));
     buf52[i][j].len = i + 1;
-    for (l = 0; l < i + 1; l++)
-    if (make_diffs)((int *)buf52[i][j].p)[l] = 0;
-    else ((int *)buf52[i][j].p)[l] = n++;
+    for(l = 0; l < i + 1; l++)
+        if(make_diffs)
+            ((int *)buf52[i][j].p)[l] = 0;
+        else
+            ((int *)buf52[i][j].p)[l] = n++;
   }
- }
 
- space_id = H5Screate_simple(2,dims2,NULL);
+ space_id = H5Screate_simple(2, dims2, NULL);
  type_id = H5Tvlen_create(H5T_NATIVE_INT);
- dset_id = H5Dcreate(loc_id,"vlen2D",type_id,space_id,H5P_DEFAULT);
- status = H5Dwrite(dset_id,type_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf52);
- assert(status>=0);
- status = H5Dvlen_reclaim(type_id,space_id,H5P_DEFAULT,buf52);
- assert(status>=0);
+ dset_id = H5Dcreate2(loc_id, "vlen2D", type_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ status = H5Dwrite(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf52);
+ assert(status >= 0);
+ status = H5Dvlen_reclaim(type_id, space_id, H5P_DEFAULT, buf52);
+ assert(status >= 0);
  status = H5Dclose(dset_id);
  status = H5Tclose(type_id);
  status = H5Sclose(space_id);
@@ -3305,17 +3294,16 @@ void write_dset_in(hid_t loc_id,
  */
 
 
- if (make_diffs)
- {
-  memset(buf72,0,sizeof buf72);
-  memset(buf82,0,sizeof buf82);
+ if(make_diffs) {
+  memset(buf72, 0, sizeof buf72);
+  memset(buf82, 0, sizeof buf82);
  }
 
 
  plist_id = H5Pcreate(H5P_DATASET_CREATE);
- space_id = H5Screate_simple(2,dims2,NULL);
- dset_id = H5Dcreate(loc_id,"integer2D",H5T_NATIVE_INT,space_id,plist_id);
- status = H5Dwrite(dset_id,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf72);
+ space_id = H5Screate_simple(2, dims2, NULL);
+ dset_id = H5Dcreate2(loc_id, "integer2D", H5T_NATIVE_INT, space_id, H5P_DEFAULT, plist_id, H5P_DEFAULT);
+ status = H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf72);
  status = H5Pclose(plist_id);
  status = H5Dclose(dset_id);
  status = H5Sclose(space_id);
@@ -3434,27 +3422,28 @@ void write_dset_in(hid_t loc_id,
  */
 
  /* Allocate and initialize VL dataset to write */
- n=0;
- for (i = 0; i < 4; i++) {
-  for (j = 0; j < 3; j++) {
-   for (k = 0; k < 2; k++) {
+ n = 0;
+ for(i = 0; i < 4; i++)
+  for(j = 0; j < 3; j++)
+   for(k = 0; k < 2; k++) {
     int l;
+
     buf53[i][j][k].p = malloc((i + 1) * sizeof(int));
     buf53[i][j][k].len = i + 1;
-    for (l = 0; l < i + 1; l++)
-    if (make_diffs)((int *)buf53[i][j][k].p)[l] = 0;
-    else ((int *)buf53[i][j][k].p)[l] = n++;
+    for(l = 0; l < i + 1; l++)
+        if(make_diffs)
+            ((int *)buf53[i][j][k].p)[l] = 0;
+        else
+            ((int *)buf53[i][j][k].p)[l] = n++;
    }
-  }
- }
 
- space_id = H5Screate_simple(3,dims3,NULL);
+ space_id = H5Screate_simple(3, dims3, NULL);
  type_id = H5Tvlen_create(H5T_NATIVE_INT);
- dset_id = H5Dcreate(loc_id,"vlen3D",type_id,space_id,H5P_DEFAULT);
- status = H5Dwrite(dset_id,type_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf53);
- assert(status>=0);
- status = H5Dvlen_reclaim(type_id,space_id,H5P_DEFAULT,buf53);
- assert(status>=0);
+ dset_id = H5Dcreate2(loc_id, "vlen3D", type_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ status = H5Dwrite(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf53);
+ assert(status >= 0);
+ status = H5Dvlen_reclaim(type_id, space_id, H5P_DEFAULT, buf53);
+ assert(status >= 0);
  status = H5Dclose(dset_id);
  status = H5Tclose(type_id);
  status = H5Sclose(space_id);
@@ -3535,20 +3524,20 @@ void make_dset_reg_ref(hid_t loc_id)
  herr_t          ret;    /* Generic return value  */
 
  /* Allocate write & read buffers */
- wbuf=(hdset_reg_ref_t *)calloc(sizeof(hdset_reg_ref_t), (size_t)SPACE1_DIM1);
- dwbuf=(int *)malloc(sizeof(int)*SPACE2_DIM1*SPACE2_DIM2);
+ wbuf = (hdset_reg_ref_t *)calloc(sizeof(hdset_reg_ref_t), (size_t)SPACE1_DIM1);
+ dwbuf = (int *)malloc(sizeof(int) * SPACE2_DIM1 * SPACE2_DIM2);
 
  /* Create dataspace for datasets */
  sid2 = H5Screate_simple(SPACE2_RANK, dims2, NULL);
 
  /* Create a dataset */
- dset2=H5Dcreate(loc_id,"dsetreg",H5T_NATIVE_UCHAR,sid2,H5P_DEFAULT);
+ dset2 = H5Dcreate2(loc_id, "dsetreg", H5T_NATIVE_UCHAR, sid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
- for(i=0; i<SPACE2_DIM1*SPACE2_DIM2; i++)
-  dwbuf[i]=i*3;
+ for(i = 0; i < SPACE2_DIM1 * SPACE2_DIM2; i++)
+  dwbuf[i] = i * 3;
 
  /* Write selection to disk */
- ret=H5Dwrite(dset2,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,dwbuf);
+ ret = H5Dwrite(dset2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dwbuf);
 
  /* Close Dataset */
  ret = H5Dclose(dset2);
@@ -3557,19 +3546,19 @@ void make_dset_reg_ref(hid_t loc_id)
  sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
 
  /* Create a dataset */
- dset1=H5Dcreate(loc_id,"refreg",H5T_STD_REF_DSETREG,sid1,H5P_DEFAULT);
+ dset1 = H5Dcreate2(loc_id, "refreg", H5T_STD_REF_DSETREG, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
  /* Create references */
 
  /* Select 6x6 hyperslab for first reference */
- start[0]=2; start[1]=2;
- stride[0]=1; stride[1]=1;
- count[0]=6; count[1]=6;
- block[0]=1; block[1]=1;
- ret = H5Sselect_hyperslab(sid2,H5S_SELECT_SET,start,stride,count,block);
+ start[0] = 2; start[1] = 2;
+ stride[0] = 1; stride[1] = 1;
+ count[0] = 6; count[1] = 6;
+ block[0] = 1; block[1] = 1;
+ ret = H5Sselect_hyperslab(sid2, H5S_SELECT_SET, start, stride, count, block);
 
  /* Store dataset region */
- ret = H5Rcreate(&wbuf[0],loc_id,"dsetreg",H5R_DATASET_REGION,sid2);
+ ret = H5Rcreate(&wbuf[0], loc_id, "dsetreg", H5R_DATASET_REGION, sid2);
 
  /* Write selection to disk */
  ret=H5Dwrite(dset1,H5T_STD_REF_DSETREG,H5S_ALL,H5S_ALL,H5P_DEFAULT,wbuf);
@@ -4614,26 +4603,27 @@ int make_dset(hid_t loc_id,
               hid_t dcpl,
               void *buf)
 {
- hid_t   dsid;
+    hid_t   dsid;
 
- /* create the dataset */
- if((dsid = H5Dcreate (loc_id,name,H5T_NATIVE_INT,sid,dcpl)) < 0)
-  return -1;
+    /* create the dataset */
+    if((dsid = H5Dcreate2(loc_id, name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        return -1;
 
- /* write */
- if(H5Dwrite(dsid,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0)
-  goto out;
+    /* write */
+    if(H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+        goto out;
 
- /* close */
- if(H5Dclose(dsid) < 0)
-  return -1;
+    /* close */
+    if(H5Dclose(dsid) < 0)
+        return -1;
 
- return 0;
- out:
- H5E_BEGIN_TRY {
-  H5Dclose(dsid);
- } H5E_END_TRY;
- return -1;
+    return 0;
+
+out:
+    H5E_BEGIN_TRY {
+        H5Dclose(dsid);
+    } H5E_END_TRY;
+    return -1;
 }
 
 
@@ -4656,30 +4646,29 @@ int write_dset( hid_t loc_id,
                 hid_t type_id,
                 void *buf )
 {
- hid_t   dset_id;
- hid_t   space_id;
+    hid_t   dset_id;
+    hid_t   space_id;
 
- /* Create a buf space  */
- if ((space_id = H5Screate_simple(rank,dims,NULL)) < 0)
-  return -1;
+    /* Create a buf space  */
+    if((space_id = H5Screate_simple(rank, dims, NULL)) < 0)
+        return -1;
 
- /* Create a dataset */
- if ((dset_id = H5Dcreate(loc_id,dset_name,type_id,space_id,H5P_DEFAULT)) < 0)
-  return -1;
+    /* Create a dataset */
+    if((dset_id = H5Dcreate2(loc_id, dset_name, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        return -1;
 
- /* Write the buf */
- if ( buf )
-  if (H5Dwrite(dset_id,type_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0)
-   return -1;
+    /* Write the buf */
+    if(buf)
+        if(H5Dwrite(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+            return -1;
 
- /* Close */
- if (H5Dclose(dset_id) < 0)
-  return -1;
- if (H5Sclose(space_id) < 0)
-  return -1;
+    /* Close */
+    if(H5Dclose(dset_id) < 0)
+        return -1;
+    if(H5Sclose(space_id) < 0)
+        return -1;
 
- return 0;
-
+    return 0;
 }
 
 

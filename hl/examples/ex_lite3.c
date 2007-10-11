@@ -30,13 +30,13 @@ int main( void )
  int     i;
 
  /* create a file */
- file_id = H5Fcreate ("ex_lite3.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+ file_id = H5Fcreate("ex_lite3.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
  /* create a data space  */
- space_id = H5Screate_simple(1,dims,NULL);
+ space_id = H5Screate_simple(1, dims, NULL);
 
  /* create a dataset named "dset" */
- dset_id = H5Dcreate(file_id,"dset",H5T_NATIVE_INT,space_id,H5P_DEFAULT);
+ dset_id = H5Dcreate2(file_id, "dset", H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
  /* close */
  status = H5Dclose(dset_id);
@@ -48,7 +48,7 @@ int main( void )
  */
 
  /* create and write the attribute "attr1" on the dataset "dset" */
- status = H5LTset_attribute_int(file_id,"dset","attr1",data,ATTR_SIZE);
+ status = H5LTset_attribute_int(file_id, "dset", "attr1", data, ATTR_SIZE);
 
 /*-------------------------------------------------------------------------
  * example of H5LTget_attribute_int
@@ -56,18 +56,15 @@ int main( void )
  */
 
  /* get the attribute "attr1" from the dataset "dset" */
- status = H5LTget_attribute_int(file_id,"dset","attr1",data);
+ status = H5LTget_attribute_int(file_id, "dset", "attr1", data);
 
- for (i=0; i< ATTR_SIZE; i++ )
- {
-  printf ("  %d", data[i]);
- }
- printf ("\n");
+ for(i = 0; i < ATTR_SIZE; i++ )
+  printf("  %d", data[i]);
+ printf("\n");
 
  /* close file */
  status = H5Fclose(file_id);
 
  return 0;
-
 }
 

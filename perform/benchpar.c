@@ -386,8 +386,8 @@ int main(int argc, char *argv[])
         assert(dcpl>0);
 
         /* Create dataset */
-        dsid=H5Dcreate(fid,DEFAULT_DATASET_NAME,DEFAULT_HDF5_DATATYPE,file_sid,dcpl);
-        assert(dsid>0);
+        dsid = H5Dcreate2(fid, DEFAULT_DATASET_NAME, DEFAULT_HDF5_DATATYPE, file_sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+        assert(dsid > 0);
 
         /* Close dataset creation property list */
         ret=H5Pclose(dcpl);

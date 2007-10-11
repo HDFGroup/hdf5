@@ -871,26 +871,25 @@ processStrData(FILE **strm, struct Input *in, hid_t file_id)
         /*enable error reporting */
     } H5E_END_TRY;
 
-    if (( space_id = H5Screate_simple(1,dims,NULL)) < 0 )
+    if((space_id = H5Screate_simple(1, dims, NULL)) < 0)
         goto out;
 
-    if (( mspace_id = H5Screate(H5S_SCALAR)) < 0 )
+    if((mspace_id = H5Screate(H5S_SCALAR)) < 0)
         goto out;
 
-    if (( dset_id = H5Dcreate(handle, in->path.group[j], type_id, space_id, H5P_DEFAULT)) < 0)
+    if((dset_id = H5Dcreate2(handle, in->path.group[j], type_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
 
     line = 0;
 
-    while ( !feof( *strm ) ) 
-    {
-        c = fgetc( *strm );
+    while(!feof(*strm)) {
+        c = fgetc(*strm);
         
-        str[ i ] = c;
+        str[i] = c;
         
         i++;
         
-        if ( c == 10 ) /* eol */
+        if(c == 10) /* eol */
         {
             char    *str2 = str;
             hid_t   fspace_id;
@@ -2497,21 +2496,16 @@ process(struct Options *opt)
     }
 
     /* create dataspace */
-    if (in->configOptionVector[EXTEND] == 1)
-    {
+    if(in->configOptionVector[EXTEND] == 1)
       dataspace = H5Screate_simple(in->rank, in->sizeOfDimension, in->maxsizeOfDimension);
-    }
     else
-    {
       dataspace = H5Screate_simple(in->rank, in->sizeOfDimension, NULL);
-    }
 
     /* disable error reporting */
     H5E_BEGIN_TRY {
     /* create data set */
-    if ((dataset = H5Dcreate(handle, in->path.group[j], outtype, dataspace, proplist)) < 0)
-    {
-      (void) fprintf(stderr, err5);
+    if((dataset = H5Dcreate2(handle, in->path.group[j], outtype, dataspace, H5P_DEFAULT, proplist, H5P_DEFAULT)) < 0) {
+      (void)fprintf(stderr, err5);
       H5Pclose(proplist);
       H5Sclose(dataspace);
       H5Fclose(file_id);
@@ -2522,8 +2516,7 @@ process(struct Options *opt)
     } H5E_END_TRY;
 
      /* write dataset */
-    if (H5Dwrite(dataset, intype, H5S_ALL, H5S_ALL, H5P_DEFAULT, (VOIDP)in->data) < 0)
-    {
+    if(H5Dwrite(dataset, intype, H5S_ALL, H5S_ALL, H5P_DEFAULT, (VOIDP)in->data) < 0) {
       (void) fprintf(stderr, err6);
       H5Dclose(dataset);
       H5Pclose(proplist);

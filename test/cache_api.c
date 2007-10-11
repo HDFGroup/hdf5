@@ -1578,13 +1578,13 @@ mdc_api_call_smoke_check(void)
             if ( pass ) {
 
                 sprintf(dset_name, "/dset%03d", i);
-                dataset_ids[i] = H5Dcreate(file_id, dset_name, H5T_STD_I32BE,
-                                           dataspace_id, properties);
+                dataset_ids[i] = H5Dcreate2(file_id, dset_name, H5T_STD_I32BE,
+                                           dataspace_id, H5P_DEFAULT, properties, H5P_DEFAULT);
 
                 if ( dataset_ids[i] < 0 ) {
 
                     pass = FALSE;
-                    failure_mssg = "H5Dcreate() failed.";
+                    failure_mssg = "H5Dcreate2() failed.";
                 }
             }
 

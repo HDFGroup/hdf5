@@ -586,7 +586,7 @@ size1_helper(hid_t file, const char* filename, hid_t fapl_id, int test_file_clos
     dim1[0] = 1;
     if((space_id=H5Screate_simple(1,dim1,NULL)) < 0) TEST_ERROR
 
-    if((dset_id = H5Dcreate(file,DSETNAME[0],dtype1_id,space_id,H5P_DEFAULT)) < 0) TEST_ERROR
+    if((dset_id = H5Dcreate2(file,DSETNAME[0],dtype1_id,space_id,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Test writing and reading */
     if(H5Dwrite(dset_id,dtype1_id,H5S_ALL,H5S_ALL,H5P_DEFAULT,&wdata) < 0) TEST_ERROR
@@ -606,7 +606,7 @@ size1_helper(hid_t file, const char* filename, hid_t fapl_id, int test_file_clos
     }
 
     /* Create more datasets with the same datatype */
-    if((dset_id = H5Dcreate(file,DSETNAME[1],dtype1_id,space_id,H5P_DEFAULT)) < 0) TEST_ERROR
+    if((dset_id = H5Dcreate2(file,DSETNAME[1],dtype1_id,space_id,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Dclose(dset_id) < 0) TEST_ERROR
 
     /* Close and re-open the file if requested*/
@@ -614,7 +614,7 @@ size1_helper(hid_t file, const char* filename, hid_t fapl_id, int test_file_clos
         if((file = close_reopen_file(file, filename, fapl_id)) < 0) TEST_ERROR
     }
 
-    if((dset_id = H5Dcreate(file,DSETNAME[2],dtype1_id,space_id,H5P_DEFAULT)) < 0) TEST_ERROR
+    if((dset_id = H5Dcreate2(file,DSETNAME[2],dtype1_id,space_id,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if(H5Dclose(dset_id) < 0) TEST_ERROR
 
     /* Close and re-open the file if requested*/
@@ -622,7 +622,7 @@ size1_helper(hid_t file, const char* filename, hid_t fapl_id, int test_file_clos
         if((file = close_reopen_file(file, filename, fapl_id)) < 0) TEST_ERROR
     }
 
-    if((dset_id = H5Dcreate(file,DSETNAME[3],dtype1_id,space_id,H5P_DEFAULT)) < 0) TEST_ERROR
+    if((dset_id = H5Dcreate2(file,DSETNAME[3],dtype1_id,space_id,H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Write data to dataset 3 for later */
     if(H5Dwrite(dset_id, dtype1_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata) < 0) TEST_ERROR
@@ -658,7 +658,7 @@ size1_helper(hid_t file, const char* filename, hid_t fapl_id, int test_file_clos
 
     /* Create several copies of the dataset (this increases the amount of space saved by sharing the datatype message) */
     for(x = 0; x < SOHM_HELPER_NUM_EX_DSETS; x++) {
-        if((dset_id = H5Dcreate(file, EXTRA_DSETNAME[x], dtype1_id, space_id, H5P_DEFAULT)) < 0) TEST_ERROR
+        if((dset_id = H5Dcreate2(file, EXTRA_DSETNAME[x], dtype1_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
         if(H5Dclose(dset_id) < 0) TEST_ERROR
 
         /* Close and re-open the file if requested*/
@@ -1477,8 +1477,8 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
      * and filter pipeline.
      */
     for(x = 0; x < NUM_DATASETS; ++x) {
-        dset_id = H5Dcreate(file_id, DSETNAME[x], dtype1_id, dspace1_id, dcpl1_id);
-        CHECK_I(dset_id, "H5Dcreate");
+        dset_id = H5Dcreate2(file_id, DSETNAME[x], dtype1_id, dspace1_id, H5P_DEFAULT, dcpl1_id, H5P_DEFAULT);
+        CHECK_I(dset_id, "H5Dcreate2");
 
         attr_id = H5Acreate2(dset_id, ".", "attr_name", attr_type_id, attr_space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         CHECK_I(attr_id, "H5Acreate2");
@@ -1526,8 +1526,8 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
     /* Create NUM_DATASETS datasets in the new group */
     for(x=0; x<NUM_DATASETS; ++x)
     {
-        dset_id = H5Dcreate(group_id, DSETNAME[x], dtype2_id, dspace2_id, dcpl2_id);
-        CHECK_I(dset_id, "H5Dcreate");
+        dset_id = H5Dcreate2(group_id, DSETNAME[x], dtype2_id, dspace2_id, H5P_DEFAULT, dcpl2_id, H5P_DEFAULT);
+        CHECK_I(dset_id, "H5Dcreate2");
 
         attr_id = H5Acreate2(dset_id, ".", "attr_name", attr_type_id, attr_space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         CHECK_I(attr_id, "H5Acreate2");
@@ -1567,8 +1567,8 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
     /* Create NUM_DATASETS datasets in the new group */
     for(x=0; x<NUM_DATASETS; x+=2)
     {
-        dset_id = H5Dcreate(group_id, DSETNAME[x], dtype1_id, dspace1_id, dcpl1_id);
-        CHECK_I(dset_id, "H5Dcreate");
+        dset_id = H5Dcreate2(group_id, DSETNAME[x], dtype1_id, dspace1_id, H5P_DEFAULT, dcpl1_id, H5P_DEFAULT);
+        CHECK_I(dset_id, "H5Dcreate2");
 
         attr_id = H5Acreate2(dset_id, ".", "attr_name", attr_type_id, attr_space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         CHECK_I(attr_id, "H5Acreate2");
@@ -1580,8 +1580,8 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
         ret = H5Aclose(attr_id);
         CHECK_I(ret, "H5Aclose");
 
-        dset_id = H5Dcreate(group_id, DSETNAME[x+1], dtype2_id, dspace2_id, dcpl2_id);
-        CHECK_I(dset_id, "H5Dcreate");
+        dset_id = H5Dcreate2(group_id, DSETNAME[x+1], dtype2_id, dspace2_id, H5P_DEFAULT, dcpl2_id, H5P_DEFAULT);
+        CHECK_I(dset_id, "H5Dcreate2");
 
         attr_id = H5Acreate2(dset_id, ".", "attr_name", attr_type_id, attr_space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         CHECK_I(attr_id, "H5Acreate2");
@@ -2559,8 +2559,8 @@ static void delete_helper_write(hid_t file_id, hid_t *dspace_id, hid_t *dcpl_id,
     herr_t ret;
 
     /* Create dataset */
-    dset_id = H5Dcreate(file_id, DSETNAME[x], H5T_NATIVE_CHAR, dspace_id[x], dcpl_id[x]);
-    CHECK_I(dset_id, "H5Dcreate");
+    dset_id = H5Dcreate2(file_id, DSETNAME[x], H5T_NATIVE_CHAR, dspace_id[x], H5P_DEFAULT, dcpl_id[x], H5P_DEFAULT);
+    CHECK_I(dset_id, "H5Dcreate2");
 
     /* Write data to dataset */
     wdata = x + 'a';
@@ -2910,8 +2910,8 @@ test_sohm_delete_revert_helper(hid_t fcpl_id)
     file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
     CHECK_I(file_id, "H5Fcreate");
 
-    dset_id = H5Dcreate(file_id, "dset", H5T_NATIVE_SHORT, dspace_id, H5P_DEFAULT);
-    CHECK_I(dset_id, "H5Dcreate");
+    dset_id = H5Dcreate2(file_id, "dset", H5T_NATIVE_SHORT, dspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK_I(dset_id, "H5Dcreate2");
 
     /* Close the dataset and delete it */
     ret = H5Dclose(dset_id);
@@ -2932,14 +2932,14 @@ test_sohm_delete_revert_helper(hid_t fcpl_id)
     CHECK_I(file_id, "H5Fcreate");
 
     /* Create and close the first dataset */
-    dset_id = H5Dcreate(file_id, "dset", H5T_NATIVE_SHORT, dspace_id, H5P_DEFAULT);
-    CHECK_I(dset_id, "H5Dcreate");
+    dset_id = H5Dcreate2(file_id, "dset", H5T_NATIVE_SHORT, dspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK_I(dset_id, "H5Dcreate2");
     ret = H5Dclose(dset_id);
     CHECK_I(ret, "H5Dclose");
 
     /* Create and close the second.  These messages should be shared */
-    dset_id = H5Dcreate(file_id, "dset2", H5T_NATIVE_SHORT, dspace_id, H5P_DEFAULT);
-    CHECK_I(dset_id, "H5Dcreate");
+    dset_id = H5Dcreate2(file_id, "dset2", H5T_NATIVE_SHORT, dspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK_I(dset_id, "H5Dcreate2");
     ret = H5Dclose(dset_id);
     CHECK_I(ret, "H5Dclose");
 
@@ -3084,8 +3084,8 @@ static void test_sohm_extlink_helper(hid_t src_fcpl_id, hid_t dst_fcpl_id)
     /* Create a dataset through the external link */
     space_id = H5Screate_simple(2, dims, dims);
     CHECK_I(space_id, "H5Screate_simple");
-    dset_id = H5Dcreate(src_file_id, "ext_link/dataset", H5T_NATIVE_FLOAT, space_id, H5P_DEFAULT);
-    CHECK_I(dset_id, "H5Dcreate");
+    dset_id = H5Dcreate2(src_file_id, "ext_link/dataset", H5T_NATIVE_FLOAT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK_I(dset_id, "H5Dcreate2");
 
     /* Close the dataset and both files to make sure everything gets flushed 
      * out of memory
@@ -3199,8 +3199,8 @@ test_sohm_extend_dset_helper(hid_t fcpl_id, hbool_t close_reopen)
     /* Create a dataspace and a dataset*/
     orig_space_id = H5Screate_simple(EXTEND_NDIMS, dims1, max_dims);
     CHECK_I(orig_space_id, "H5Screate_simple");
-    dset1_id = H5Dcreate(file_id, "dataset", H5T_NATIVE_LONG, orig_space_id, dcpl_id);
-    CHECK_I(dset1_id, "H5Dcreate");
+    dset1_id = H5Dcreate2(file_id, "dataset", H5T_NATIVE_LONG, orig_space_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
+    CHECK_I(dset1_id, "H5Dcreate2");
 
     if(close_reopen) {
         /* If requested, close all open IDs and reopen them */
@@ -3216,8 +3216,8 @@ test_sohm_extend_dset_helper(hid_t fcpl_id, hbool_t close_reopen)
     }
 
     /* Create another dataset starting with the same dataspace */
-    dset2_id = H5Dcreate(file_id, "dataset2", H5T_NATIVE_LONG, orig_space_id, dcpl_id);
-    CHECK_I(dset2_id, "H5Dcreate");
+    dset2_id = H5Dcreate2(file_id, "dataset2", H5T_NATIVE_LONG, orig_space_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
+    CHECK_I(dset2_id, "H5Dcreate2");
 
     if(close_reopen) {
         /* If requested, close all open IDs and reopen them */
@@ -3237,8 +3237,8 @@ test_sohm_extend_dset_helper(hid_t fcpl_id, hbool_t close_reopen)
     }
 
     /* Create a third dataset with the same dataspace */
-    dset3_id = H5Dcreate(file_id, "dataset3", H5T_NATIVE_LONG, orig_space_id, dcpl_id);
-    CHECK_I(dset3_id, "H5Dcreate");
+    dset3_id = H5Dcreate2(file_id, "dataset3", H5T_NATIVE_LONG, orig_space_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
+    CHECK_I(dset3_id, "H5Dcreate2");
 
     if(close_reopen) {
         /* If requested, close all open IDs and reopen them */
@@ -3465,8 +3465,8 @@ test_sohm_extend_dset_helper(hid_t fcpl_id, hbool_t close_reopen)
      */
     file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
     CHECK_I(file_id, "H5Fcreate");
-    dset1_id = H5Dcreate(file_id, "dataset", H5T_NATIVE_LONG, orig_space_id, dcpl_id);
-    CHECK_I(dset1_id, "H5Dcreate");
+    dset1_id = H5Dcreate2(file_id, "dataset", H5T_NATIVE_LONG, orig_space_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
+    CHECK_I(dset1_id, "H5Dcreate2");
     if(close_reopen) {
         /* If requested, close all open IDs and reopen them */
         ret = H5Dclose(dset1_id);
@@ -3499,8 +3499,8 @@ test_sohm_extend_dset_helper(hid_t fcpl_id, hbool_t close_reopen)
     /* Create the second dataset.  Its dataspace will be unshared and then
      * become shared when extended.
      */
-    dset2_id = H5Dcreate(file_id, "dataset2", H5T_NATIVE_LONG, orig_space_id, dcpl_id);
-    CHECK_I(dset2_id, "H5Dcreate");
+    dset2_id = H5Dcreate2(file_id, "dataset2", H5T_NATIVE_LONG, orig_space_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
+    CHECK_I(dset2_id, "H5Dcreate2");
     if(close_reopen) {
         /* If requested, close all open IDs and reopen them */
         ret = H5Dclose(dset1_id);
@@ -3541,8 +3541,8 @@ test_sohm_extend_dset_helper(hid_t fcpl_id, hbool_t close_reopen)
     /* Create the third dataset.  Its dataspace will be unshared and then
      * become shared when extended.
      */
-    dset3_id = H5Dcreate(file_id, "dataset3", H5T_NATIVE_LONG, orig_space_id, dcpl_id);
-    CHECK_I(dset3_id, "H5Dcreate");
+    dset3_id = H5Dcreate2(file_id, "dataset3", H5T_NATIVE_LONG, orig_space_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
+    CHECK_I(dset3_id, "H5Dcreate2");
     if(close_reopen) {
         /* If requested, close all open IDs and reopen them */
         ret = H5Dclose(dset1_id);

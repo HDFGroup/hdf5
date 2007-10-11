@@ -156,8 +156,9 @@ About the Fortran APIs
    For example, the C function to create a dataset has the following 
    prototype:
 
-       hid_t H5Dcreate(hid_it loc_id, char *name, hid_t type_id, 
-             hid_t space_id, hid_t creation_prp);
+       hid_t H5Dcreate2(hid_it loc_id, char *name, hid_t type_id, 
+             hid_t space_id, hid_t link_creation_prp, hid_t dset_creation_prp,
+             hid_t dset_access_prop);
    
    The corresponding Fortran subroutine has the following form:
    
@@ -172,6 +173,7 @@ About the Fortran APIs
    in the Reference Manual.)  The seventh input parameter creation_prp 
    is optional, and may be omitted when the default creation property 
    list is used.
+   (XXX: Update this! - QAK)
 
 *  Parameters to the Fortran subroutines have one of the following 
    predefined datatypes (see the file H5fortran_types.f90 for KIND 

@@ -848,17 +848,17 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
 		}/* end else */
 
 		sprintf(dname, "Dataset_%ld", ndset);
-		h5ds_id = H5Dcreate(fd->h5fd, dname, ELMT_H5_TYPE,
-			h5dset_space_id, h5dcpl);
+		h5ds_id = H5Dcreate2(fd->h5fd, dname, ELMT_H5_TYPE,
+			h5dset_space_id, H5P_DEFAULT, h5dcpl, H5P_DEFAULT);
 
-		if (h5ds_id < 0) {
+		if(h5ds_id < 0) {
 		    fprintf(stderr, "HDF5 Dataset Create failed\n");
 		    GOTOERROR(FAIL);
 		}
 
 		hrc = H5Pclose(h5dcpl);
 		/* verifying the close of the dcpl */
-		if (hrc < 0) {
+		if(hrc < 0) {
 		    fprintf(stderr, "HDF5 Property List Close failed\n");
 		    GOTOERROR(FAIL);
 		}
