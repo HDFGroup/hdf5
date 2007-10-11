@@ -154,11 +154,29 @@ H5_DLL H5P_genclass_t *H5P_create_class(H5P_genclass_t *par_class,
     H5P_cls_create_func_t cls_create, void *create_data,
     H5P_cls_copy_func_t cls_copy, void *copy_data,
     H5P_cls_close_func_t cls_close, void *close_data);
+H5_DLL H5P_genclass_t *H5P_copy_pclass(H5P_genclass_t *pclass);
 H5_DLL herr_t H5P_add_prop(H5SL_t *props, H5P_genprop_t *prop);
 H5_DLL herr_t H5P_access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod);
+H5_DLL htri_t H5P_exist_pclass(H5P_genclass_t *pclass, const char *name);
+H5_DLL herr_t H5P_get_size_plist(H5P_genplist_t *plist, const char *name,
+    size_t *size);
+H5_DLL herr_t H5P_get_size_pclass(H5P_genclass_t *pclass, const char *name,
+    size_t *size);
+H5_DLL H5P_genclass_t *H5P_get_class(const H5P_genplist_t *plist);
+H5_DLL herr_t H5P_get_nprops_plist(const H5P_genplist_t *plist, size_t *nprops);
+H5_DLL int H5P_cmp_class(const H5P_genclass_t *pclass1, const H5P_genclass_t *pclass2);
+H5_DLL int H5P_cmp_plist(const H5P_genplist_t *plist1, const H5P_genplist_t *plist2);
+H5_DLL int H5P_iterate_plist(hid_t plist_id, int *idx, H5P_iterate_t iter_func,
+    void *iter_data);
+H5_DLL int H5P_iterate_pclass(hid_t pclass_id, int *idx, H5P_iterate_t iter_func,
+    void *iter_data);
+H5_DLL herr_t H5P_copy_prop_plist(hid_t dst_id, hid_t src_id, const char *name);
+H5_DLL herr_t H5P_copy_prop_pclass(H5P_genclass_t *dst_pclass, H5P_genclass_t *src_pclass,
+    const char *name);
+H5_DLL herr_t H5P_unregister(H5P_genclass_t *pclass, const char *name);
 H5_DLL char *H5P_get_class_path(H5P_genclass_t *pclass);
 H5_DLL H5P_genclass_t *H5P_open_class_path(const char *path);
-H5_DLL int H5P_tbbt_strcmp(const void *k1, const void *k2, int cmparg);
+H5_DLL H5P_genclass_t *H5P_get_class_parent(const H5P_genclass_t *pclass);
 H5_DLL herr_t H5P_close_class(void *_pclass);
 
 /* Testing functions */

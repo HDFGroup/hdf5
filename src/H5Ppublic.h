@@ -169,31 +169,23 @@ H5_DLLVAR hid_t H5P_LST_LINK_ACCESS_g;
 
 /* Generic property list routines */
 H5_DLL hid_t H5Pcreate_class(hid_t parent, const char *name,
-            H5P_cls_create_func_t cls_create, void *create_data,
-            H5P_cls_copy_func_t cls_copy, void *copy_data,
-            H5P_cls_close_func_t cls_close, void *close_data);
+    H5P_cls_create_func_t cls_create, void *create_data,
+    H5P_cls_copy_func_t cls_copy, void *copy_data,
+    H5P_cls_close_func_t cls_close, void *close_data);
 H5_DLL char *H5Pget_class_name(hid_t pclass_id);
 H5_DLL hid_t H5Pcreate(hid_t cls_id);
+H5_DLL herr_t H5Pregister2(hid_t cls_id, const char *name, size_t size,
+    void *def_value, H5P_prp_create_func_t prp_create,
+    H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
+    H5P_prp_delete_func_t prp_del, H5P_prp_copy_func_t prp_copy,
+    H5P_prp_compare_func_t prp_cmp, H5P_prp_close_func_t prp_close);
 #ifdef H5_WANT_H5_V1_6_COMPAT
-H5_DLL herr_t H5Pregister(hid_t cls_id, const char *name, size_t size,
-            void *def_value, H5P_prp_create_func_t prp_create,
-            H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
-            H5P_prp_delete_func_t prp_del,
-            H5P_prp_copy_func_t prp_copy,
-            H5P_prp_close_func_t prp_close);
 H5_DLL herr_t H5Pinsert(hid_t plist_id, const char *name, size_t size,
             void *value, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
             H5P_prp_delete_func_t prp_delete,
             H5P_prp_copy_func_t prp_copy,
             H5P_prp_close_func_t prp_close);
 #else /* H5_WANT_H5_V1_6_COMPAT */
-H5_DLL herr_t H5Pregister(hid_t cls_id, const char *name, size_t size,
-            void *def_value, H5P_prp_create_func_t prp_create,
-            H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
-            H5P_prp_delete_func_t prp_del,
-            H5P_prp_copy_func_t prp_copy,
-            H5P_prp_compare_func_t prp_cmp,
-            H5P_prp_close_func_t prp_close);
 H5_DLL herr_t H5Pinsert(hid_t plist_id, const char *name, size_t size,
             void *value, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
             H5P_prp_delete_func_t prp_delete,
@@ -412,6 +404,30 @@ H5_DLL ssize_t H5Pget_elink_prefix(hid_t plist_id, char *prefix, size_t size);
 /* Object copy property list (OCPYPL) routines */
 H5_DLL herr_t H5Pset_copy_object(hid_t plist_id, unsigned crt_intmd);
 H5_DLL herr_t H5Pget_copy_object(hid_t plist_id, unsigned *crt_intmd /*out*/);
+
+/* Symbols defined for compatibility with previous versions of the HDF5 API.
+ * 
+ * Use of these symbols is deprecated.
+ */
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+
+/* Macros */
+
+/* We renamed the "root" of the property list class hierarchy */
+#define H5P_NO_CLASS            H5P_ROOT
+
+
+/* Typedefs */
+
+
+/* Function prototypes */
+H5_DLL herr_t H5Pregister1(hid_t cls_id, const char *name, size_t size,
+    void *def_value, H5P_prp_create_func_t prp_create,
+    H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
+    H5P_prp_delete_func_t prp_del, H5P_prp_copy_func_t prp_copy,
+    H5P_prp_close_func_t prp_close);
+
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 #ifdef __cplusplus
 }

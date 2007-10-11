@@ -628,11 +628,13 @@
 ./src/H5P.c
 ./src/H5Pacpl.c
 ./src/H5Pdcpl.c
+./src/H5Pdeprec.c
 ./src/H5Pdxpl.c
 ./src/H5Pfapl.c
 ./src/H5Pfcpl.c
 ./src/H5Pfmpl.c
 ./src/H5Pgcpl.c
+./src/H5Pint.c
 ./src/H5Plapl.c
 ./src/H5Plcpl.c
 ./src/H5Pocpl.c
