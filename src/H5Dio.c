@@ -1345,7 +1345,7 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
     size_t	request_nelmts;		/*requested strip mine	*/
     hsize_t     smine_start;            /*strip mine start loc  */
     size_t      n, smine_nelmts;        /*elements per strip    */
-    size_t      accessed_bytes;         /*total accessed size in a chunk */
+    size_t      accessed_bytes = 0;     /*total accessed size in a chunk */
     H5S_sel_iter_t mem_iter;            /*memory selection iteration info*/
     hbool_t	mem_iter_init = FALSE;	/*memory selection iteration info has been initialized */
     H5S_sel_iter_t bkg_iter;            /*background iteration info*/
@@ -2163,7 +2163,7 @@ H5D_compound_opt_read(size_t nelmts, const H5S_t *space,
     size_t     i;
 
     H5T_t      *src, *dst;
-    size_t     src_stride, dst_stride, type_size;
+    size_t     src_stride, dst_stride, type_size = 0;
     size_t     elmtno;			/*element counter		*/
 
     herr_t     ret_value = SUCCEED;	       /*return value		*/

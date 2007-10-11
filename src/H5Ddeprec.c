@@ -327,30 +327,9 @@ H5D_extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id)
     HDassert(dataset);
     HDassert(size);
 
-    /* Check if the filters in the DCPL will need to encode, and if so, can they?
-     * Filters need encoding if fill value is defined and a fill policy is set that requires
-     * writing on an extend.
-     */
-    fill = &dataset->shared->dcpl_cache.fill;
-    if(!dataset->shared->checked_filters) {
-        H5D_fill_value_t fill_status;       /* Whether the fill value is defined */
-
-        /* Retrieve the "defined" status of the fill value */
-        if(H5P_is_fill_value_defined(fill, &fill_status) < 0)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Couldn't retrieve fill value from dataset.")
-
-        /* See if we can check the filter status */
-        if(fill_status == H5D_FILL_VALUE_DEFAULT || fill_status == H5D_FILL_VALUE_USER_DEFINED) {
-            if(fill->fill_time == H5D_FILL_TIME_ALLOC ||
-                    (fill->fill_time == H5D_FILL_TIME_IFSET && fill_status == H5D_FILL_VALUE_USER_DEFINED)) {
-                /* Filters must have encoding enabled. Ensure that all filters can be applied */
-                if(H5Z_can_apply(dataset->shared->dcpl_id, dataset->shared->type_id) < 0)
-                    HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "can't apply filters")
-
-                dataset->shared->checked_filters = TRUE;
-            } /* end if */
-        } /* end if */
-    } /* end if */
+    /* Check if the filters in the DCPL will need to encode, and if so, can they? */
+    if(H5D_check_filters(dataset) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't apply filters")
 
     /*
      * NOTE: Restrictions on extensions were checked when the dataset was
@@ -375,6 +354,7 @@ H5D_extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update cached chunk indices")
 
 	/* Allocate space for the new parts of the dataset, if appropriate */
+        fill = &dataset->shared->dcpl_cache.fill;
         if(fill->alloc_time == H5D_ALLOC_TIME_EARLY)
             if(H5D_alloc_storage(dataset->oloc.file, dxpl_id, dataset, H5D_ALLOC_EXTEND, TRUE, FALSE) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset with fill value")

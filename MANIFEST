@@ -452,9 +452,11 @@
 ./src/H5D.c
 ./src/H5Dcompact.c
 ./src/H5Dcontig.c
+./src/H5Ddbg.c
 ./src/H5Ddeprec.c
 ./src/H5Defl.c
 ./src/H5Dfill.c
+./src/H5Dint.c
 ./src/H5Dio.c
 ./src/H5Distore.c
 ./src/H5Dmpio.c

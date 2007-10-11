@@ -291,6 +291,18 @@ typedef struct H5D_istore_ud1_t {
     haddr_t		addr;			/*file address of chunk */
 } H5D_istore_ud1_t; 
 
+/* Internal data structure for computing variable-length dataset's total size */
+typedef struct {
+    hid_t dataset_id;   /* ID of the dataset we are working on */
+    hid_t fspace_id;    /* ID of the file dataset's dataspace we are working on */
+    hid_t mspace_id;    /* ID of the memory dataset's dataspace we are working on */
+    void *fl_tbuf;      /* Ptr to the temporary buffer we are using for fixed-length data */
+    void *vl_tbuf;      /* Ptr to the temporary buffer we are using for VL data */
+    hid_t xfer_pid;     /* ID of the dataset xfer property list */
+    hsize_t size;       /* Accumulated number of bytes for the selection */
+} H5D_vlen_bufsize_t;
+
+
 /*****************************/
 /* Package Private Variables */
 /*****************************/
@@ -306,20 +318,31 @@ H5_DLL H5D_t *H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space,
 H5_DLL H5D_t *H5D_create_named(const H5G_loc_t *loc, const char *name,
     hid_t type_id, const H5S_t *space, hid_t lcpl_id, hid_t dcpl_id,
     hid_t dapl_id, hid_t dxpl_id);
+H5_DLL herr_t H5D_get_space_status(H5D_t *dset, H5D_space_status_t *allocation,
+    hid_t dxpl_id);
 H5_DLL herr_t H5D_alloc_storage(H5F_t *f, hid_t dxpl_id, H5D_t *dset, H5D_time_alloc_t time_alloc,
     hbool_t update_time, hbool_t full_overwrite);
+H5_DLL hsize_t H5D_get_storage_size(H5D_t *dset, hid_t dxpl_id);
+H5_DLL haddr_t H5D_get_offset(const H5D_t *dset);
+H5_DLL herr_t H5D_iterate(void *buf, hid_t type_id, const H5S_t *space,
+    H5D_operator_t op, void *operator_data);
+H5_DLL void * H5D_vlen_get_buf_size_alloc(size_t size, void *info);
+H5_DLL herr_t H5D_vlen_get_buf_size(void *elem, hid_t type_id, unsigned ndim,
+    const hsize_t *point, void *op_data);
+H5_DLL herr_t H5D_check_filters(H5D_t *dataset);
+H5_DLL herr_t H5D_set_extent(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
 
 /* Functions that perform serial I/O operations */
-H5_DLL herr_t H5D_select_fscat (H5D_io_info_t *io_info,
+H5_DLL herr_t H5D_select_fscat(H5D_io_info_t *io_info,
     const H5S_t *file_space, H5S_sel_iter_t *file_iter, size_t nelmts,
     haddr_t chunk_addr, void *chunk, const void *_buf);
-H5_DLL size_t H5D_select_fgath (H5D_io_info_t *io_info,
+H5_DLL size_t H5D_select_fgath(H5D_io_info_t *io_info,
     const H5S_t *file_space, H5S_sel_iter_t *file_iter, size_t nelmts,
     haddr_t chunk_addr, void *chunk, void *buf);
-H5_DLL herr_t H5D_select_mscat (const void *_tscat_buf,
+H5_DLL herr_t H5D_select_mscat(const void *_tscat_buf,
     const H5S_t *space, H5S_sel_iter_t *iter, size_t nelmts,
     const H5D_dxpl_cache_t *dxpl_cache, void *_buf/*out*/);
-H5_DLL size_t H5D_select_mgath (const void *_buf,
+H5_DLL size_t H5D_select_mgath(const void *_buf,
     const H5S_t *space, H5S_sel_iter_t *iter, size_t nelmts,
     const H5D_dxpl_cache_t *dxpl_cache, void *_tgath_buf/*out*/);
 H5_DLL herr_t H5D_select_read(H5D_io_info_t *io_info,

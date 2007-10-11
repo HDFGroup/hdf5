@@ -290,7 +290,7 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf,
             /* Convert disk buffer into memory buffer */
             if(!H5T_path_noop(tpath)) {
                 void *elem_ptr;         /* Pointer to element to use for fill value */
-                void *bkg_ptr;          /* Pointer to background element to use for fill value */
+                void *bkg_ptr = NULL;   /* Pointer to background element to use for fill value */
 
                 /* Wrap the local buffer for elements */
                 if(NULL == (elem_wb = H5WB_wrap(elem_buf, sizeof(elem_buf))))
