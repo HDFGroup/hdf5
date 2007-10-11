@@ -178,6 +178,15 @@ TOOLTEST tempty-dtd-uri.h5.xml --xml --use-dtd --xml-dtd="http://somewhere.net" 
 TOOLTEST tall-2A.h5.xml --xml -A tall.h5
 
 
+# tests for attribute order
+TOOLTEST torderattr1.h5.xml --xml -H --sort_by=name --sort_order=ascending torderattr.h5
+TOOLTEST torderattr2.h5.xml --xml -H --sort_by=name --sort_order=descending torderattr.h5
+TOOLTEST torderattr3.h5.xml --xml -H --sort_by=creation_order --sort_order=ascending torderattr.h5
+TOOLTEST torderattr4.h5.xml --xml -H --sort_by=creation_order --sort_order=descending torderattr.h5
+
+
+
+
 if test $nerrors -eq 0 ; then
    echo "All $DUMPER tests passed."
 fi

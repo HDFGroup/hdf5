@@ -1317,6 +1317,10 @@
 ./tools/testfiles/tempty-nons-2.h5.xml
 ./tools/testfiles/tempty-ns-2.h5.xml
 ./tools/testfiles/tall-2A.h5.xml
+./tools/testfiles/torderattr4.h5.xml
+./tools/testfiles/torderattr2.h5.xml
+./tools/testfiles/torderattr3.h5.xml
+./tools/testfiles/torderattr1.h5.xml
 
 
 
