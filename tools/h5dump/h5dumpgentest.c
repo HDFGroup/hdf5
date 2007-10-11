@@ -5950,16 +5950,41 @@ gent_attr_creation_order(void)
         goto out;
 
 /*-------------------------------------------------------------------------
- * create a dataset and atributes in it
+ * create a dataset with creation order tracked for attributes and atributes in it
  *-------------------------------------------------------------------------
  */
   
     /* create a dataset */
-    if((did = H5Dcreate2(fid, "dset", H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0) 
+    if((did = H5Dcreate2(fid, "dt", H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0) 
         goto out;
 
     /* add attributes */
-    for(i = 0; i < 3; i++) {
+    for(i = 0; i < 3; i++) 
+    {
+        if((aid = H5Acreate2(did, ".", attr_name[i], H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+            goto out;
+        
+        /* close attribute */
+        if(H5Aclose(aid) < 0) 
+            goto out;
+    } /* end for */
+    
+    if(H5Dclose(did) < 0) 
+        goto out;
+    
+
+/*-------------------------------------------------------------------------
+ * create a dataset without creation order tracked for attributes and atributes in it
+ *-------------------------------------------------------------------------
+ */
+  
+    /* create a dataset */
+    if((did = H5Dcreate2(fid, "d", H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+        goto out;
+
+    /* add attributes */
+    for(i = 0; i < 3; i++) 
+    {
         if((aid = H5Acreate2(did, ".", attr_name[i], H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
             goto out;
         
@@ -5974,11 +5999,11 @@ gent_attr_creation_order(void)
 
 
 /*-------------------------------------------------------------------------
- * create a group and atributes in it
+ * create a group with creation order tracked for attributes and atributes in it
  *-------------------------------------------------------------------------
  */
 
-    if((gid = H5Gcreate2(fid, "g", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) 
+    if((gid = H5Gcreate2(fid, "gt", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) 
         goto out;
     
     /* add attributes */
@@ -5997,14 +6022,38 @@ gent_attr_creation_order(void)
         goto out;
 
 /*-------------------------------------------------------------------------
- * create a named datatype and atributes in it
+ * create a group without creation order tracked for attributes and atributes in it
+ *-------------------------------------------------------------------------
+ */
+
+    if((gid = H5Gcreate2(fid, "g", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+        goto out;
+    
+    /* add attributes */
+    for(i = 0; i < 3; i++) 
+    {
+        if((aid = H5Acreate2(gid, ".", attr_name[i], H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+            goto out;
+        
+        /* close attribute */
+        if(H5Aclose(aid) < 0) 
+            goto out;
+        
+    } /* end for */
+    
+    if(H5Gclose(gid) < 0) 
+        goto out;
+
+
+/*-------------------------------------------------------------------------
+ * create a named datatype with creation order tracked for attributes and atributes in it
  *-------------------------------------------------------------------------
  */
 
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) 
         goto out;
     
-    if((H5Tcommit2(fid, "t", tid, H5P_DEFAULT, tcpl_id, H5P_DEFAULT)) < 0)
+    if((H5Tcommit2(fid, "tt", tid, H5P_DEFAULT, tcpl_id, H5P_DEFAULT)) < 0)
         goto out;
     
     /* add attributes */
@@ -6021,6 +6070,33 @@ gent_attr_creation_order(void)
     
     if(H5Tclose(tid) < 0) 
         goto out;
+
+/*-------------------------------------------------------------------------
+ * create a named datatype without creation order tracked for attributes and atributes in it
+ *-------------------------------------------------------------------------
+ */
+
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) 
+        goto out;
+    
+    if((H5Tcommit2(fid, "t", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    
+    /* add attributes */
+    for(i = 0; i < 3; i++) 
+    {
+        if((aid = H5Acreate2(tid, ".", attr_name[i], H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+            goto out;
+        
+        /* close attribute */
+        if(H5Aclose(aid) < 0) 
+            goto out;
+        
+    } /* end for */
+    
+    if(H5Tclose(tid) < 0) 
+        goto out;
+
 /*-------------------------------------------------------------------------
  * add some attributes to the root group
  *-------------------------------------------------------------------------
