@@ -2205,7 +2205,7 @@ compress_readAll(void)
         VRFY((ret >= 0), "H5Dwrite succeeded");
 
         /* Close objects */
-        re = =H5Pclose(dcpl);
+        ret = H5Pclose(dcpl);
         VRFY((ret >= 0), "H5Pclose succeeded");
         ret = H5Sclose(dataspace);
         VRFY((ret >= 0), "H5Sclose succeeded");
