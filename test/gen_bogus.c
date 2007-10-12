@@ -53,7 +53,7 @@ int main(void)
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
 
     /* Add property for bogus message flags */
-    if(H5Pinsert(dcpl, H5O_BOGUS_MSG_FLAGS_NAME, H5O_BOGUS_MSG_FLAGS_SIZE, &bogus_flags, NULL, NULL, NULL, NULL, NULL, NULL) < 0) goto error;
+    if(H5Pinsert2(dcpl, H5O_BOGUS_MSG_FLAGS_NAME, H5O_BOGUS_MSG_FLAGS_SIZE, &bogus_flags, NULL, NULL, NULL, NULL, NULL, NULL) < 0) goto error;
 
     /* Create dataset with "bogus" message, but no message flags */
     if((did = H5Dcreate2(fid, "/Dataset1", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) goto error;

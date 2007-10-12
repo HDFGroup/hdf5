@@ -439,7 +439,7 @@ H5O_sdspace_free(void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_sdspace_pre_copy_file(H5F_t *file_src, const void *mesg_src,
+H5O_sdspace_pre_copy_file(H5F_t UNUSED *file_src, const void *mesg_src,
     hbool_t UNUSED *deleted, const H5O_copy_t UNUSED *cpy_info, void *_udata)
 {
     const H5S_extent_t *src_space_extent = (const H5S_extent_t *)mesg_src;  /* Source dataspace extent */

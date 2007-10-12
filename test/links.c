@@ -4550,11 +4550,7 @@ lapl_udata(hid_t fapl, hbool_t new_format)
     /* Create a non-default lapl with a new property pointing to group a*/
     if((plist_id = H5Pcreate(H5P_LINK_ACCESS)) < 0) TEST_ERROR
     HDstrcpy(group_a_name, "group_a");
-#ifdef H5_WANT_H5_V1_6_COMPAT
-    if(H5Pinsert(plist_id, DEST_PROP_NAME, (size_t)NAME_BUF_SIZE, group_a_name, NULL, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-#else /* H5_WANT_H5_V1_6_COMPAT */
-    if(H5Pinsert(plist_id, DEST_PROP_NAME, (size_t)NAME_BUF_SIZE, group_a_name, NULL, NULL, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+    if(H5Pinsert2(plist_id, DEST_PROP_NAME, (size_t)NAME_BUF_SIZE, group_a_name, NULL, NULL, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
 
     /* Try opening group through UD link */
     if((gid = H5Oopen(fid, "ud_link", plist_id)) < 0) TEST_ERROR

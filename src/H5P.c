@@ -463,11 +463,11 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5Pinsert
+    H5Pinsert2
  PURPOSE
     Routine to insert a new property in a property list.
  USAGE
-    herr_t H5Pinsert(plist, name, size, value, prp_set, prp_get, prp_close)
+    herr_t H5Pinsert2(plist, name, size, value, prp_set, prp_get, prp_close)
         hid_t plist;            IN: Property list to add property to
         const char *name;       IN: Name of property to add
         size_t size;            IN: Size of property in bytes
@@ -600,52 +600,34 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-#ifdef H5_WANT_H5_V1_6_COMPAT
 herr_t
-H5Pinsert(hid_t plist_id, const char *name, size_t size, void *value,
-    H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
-    H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy,
-    H5P_prp_close_func_t prp_close)
-#else /* H5_WANT_H5_V1_6_COMPAT */
-herr_t
-H5Pinsert(hid_t plist_id, const char *name, size_t size, void *value,
+H5Pinsert2(hid_t plist_id, const char *name, size_t size, void *value,
     H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
     H5P_prp_delete_func_t prp_delete, H5P_prp_copy_func_t prp_copy,
     H5P_prp_compare_func_t prp_cmp, H5P_prp_close_func_t prp_close)
-#endif /* H5_WANT_H5_V1_6_COMPAT */
 {
     H5P_genplist_t	*plist;    /* Property list to modify */
     herr_t ret_value;           /* return value */
 
-    FUNC_ENTER_API(H5Pinsert, FAIL);
-#ifdef H5_WANT_H5_V1_6_COMPAT
-    H5TRACE9("e","iszxxxxxx",plist_id,name,size,value,prp_set,prp_get,
-             prp_delete,prp_copy,prp_close);
-#else /* H5_WANT_H5_V1_6_COMPAT */
+    FUNC_ENTER_API(H5Pinsert2, FAIL);
     H5TRACE10("e","iszxxxxxxx",plist_id,name,size,value,prp_set,prp_get,
              prp_delete,prp_copy,prp_cmp,prp_close);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
 
     /* Check arguments. */
     if(NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
     if(!name || !*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property name");
-    if(size>0 && value==NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "properties >0 size must have default");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property name")
+    if(size > 0 && value == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "properties >0 size must have default")
 
     /* Create the new property list class */
-#ifdef H5_WANT_H5_V1_6_COMPAT
-    if((ret_value = H5P_insert(plist,name,size,value,prp_set,prp_get,prp_delete,prp_copy,NULL,prp_close)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to register property in plist");
-#else /* H5_WANT_H5_V1_6_COMPAT */
-    if((ret_value = H5P_insert(plist,name,size,value,prp_set,prp_get,prp_delete,prp_copy,prp_cmp,prp_close)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to register property in plist");
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+    if((ret_value = H5P_insert(plist, name, size, value, prp_set, prp_get, prp_delete, prp_copy, prp_cmp, prp_close)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to register property in plist")
 
 done:
     FUNC_LEAVE_API(ret_value);
-}   /* H5Pinsert() */
+}   /* H5Pinsert2() */
 
 
 /*--------------------------------------------------------------------------
@@ -1201,7 +1183,7 @@ done:
         Removes a property from a property list.  Both properties which were
     in existance when the property list was created (i.e. properties registered
     with H5Pregister2) and properties added to the list after it was created
-    (i.e. added with H5Pinsert) may be removed from a property list.
+    (i.e. added with H5Pinsert2) may be removed from a property list.
     Properties do not need to be removed a property list before the list itself
     is closed, they will be released automatically when H5Pclose is called.
     The 'close' callback for this property is called before the property is
@@ -1264,7 +1246,7 @@ done:
     'copy' callback for the property, if one exists).
 
     If the property does not exist in the destination class or list, this call
-    is equivalent to calling H5Pregister2 or H5Pinsert (for a class or list, as
+    is equivalent to calling H5Pregister2 or H5Pinsert2 (for a class or list, as
     appropriate) and the 'create' callback will be called in the case of the
     property being copied into a list (if such a callback exists for the
     property).

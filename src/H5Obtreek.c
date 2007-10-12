@@ -78,7 +78,7 @@ const H5O_msg_class_t H5O_MSG_BTREEK[1] = {{
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_btreek_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
+H5O_btreek_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
     const uint8_t *p)
 {
     H5O_btreek_t	*mesg;          /* Native message */
@@ -124,7 +124,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_btreek_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O_btreek_encode(H5F_t UNUSED *f, hbool_t UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_btreek_t *mesg = (const H5O_btreek_t *)_mesg;
 
@@ -200,7 +200,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_btreek_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void UNUSED *_mesg)
+H5O_btreek_size(const H5F_t UNUSED *f, hbool_t UNUSED disable_shared, const void UNUSED *_mesg)
 {
     size_t                   ret_value;
 

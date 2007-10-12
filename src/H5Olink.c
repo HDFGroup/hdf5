@@ -119,7 +119,7 @@ H5O_link_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
     const uint8_t *p)
 {
     H5O_link_t          *lnk = NULL;    /* Pointer to link message */
-    size_t              len;            /* Length of a string in the message */
+    size_t              len = 0;        /* Length of a string in the message */
     unsigned char       link_flags;     /* Flags for encoding link info */
     void                *ret_value;     /* Return value */
 

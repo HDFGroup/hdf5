@@ -583,7 +583,7 @@ static void plist_link_example(void)
     /* There is no HDF5 API for setting the property that controls these
      * links, so we have to add the property manually
      */
-    H5Pinsert(gapl_id, PLIST_LINK_PROP, sizeof(const char *), &(path), NULL, NULL, NULL, NULL, NULL, NULL);
+    H5Pinsert2(gapl_id, PLIST_LINK_PROP, sizeof(const char *), &(path), NULL, NULL, NULL, NULL, NULL, NULL);
 
     /* Set the property to point to the first group. */
     path = "group_1";

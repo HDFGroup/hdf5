@@ -724,7 +724,7 @@ H5O_alloc_new_chunk(H5F_t *f,
             uint8_t *end_msg = curr_msg->raw + curr_msg->raw_size;  /* End of current message */
             size_t gap_size = 0;            /* Size of gap after current message */
             size_t null_size = 0;           /* Size of NULL message after current message */
-            unsigned null_msgno;            /* Index of NULL message after current message */
+            unsigned null_msgno = 0;        /* Index of NULL message after current message */
             size_t total_size;              /* Total size of available space "around" current message */
 
             /* Check if the message is the last one in the chunk */

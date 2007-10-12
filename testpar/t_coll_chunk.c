@@ -680,48 +680,51 @@ coll_chunktest(const char* filename,
    
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
   if(facc_type == FACC_MPIO) {
-      switch(api_option){
+      switch(api_option) {
             case API_LINK_HARD:
                prop_value = H5D_XFER_COLL_CHUNK_DEF;
-               status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_LINK_HARD_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
-                           NULL,NULL,NULL,NULL,NULL,NULL);
+               status = H5Pinsert2(xfer_plist, H5D_XFER_COLL_CHUNK_LINK_HARD_NAME, H5D_XFER_COLL_CHUNK_SIZE, &prop_value,
+                           NULL, NULL, NULL, NULL, NULL, NULL);
                VRFY((status >= 0),"testing property list inserted succeeded");
             break;
+
             case API_MULTI_HARD:
                prop_value = H5D_XFER_COLL_CHUNK_DEF;   
-               status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
-                           NULL,NULL,NULL,NULL,NULL,NULL);
+               status = H5Pinsert2(xfer_plist, H5D_XFER_COLL_CHUNK_MULTI_HARD_NAME, H5D_XFER_COLL_CHUNK_SIZE, &prop_value,
+                           NULL, NULL, NULL, NULL, NULL, NULL);
                VRFY((status >= 0),"testing property list inserted succeeded");
             break;
+
             case API_LINK_TRUE:
                prop_value = H5D_XFER_COLL_CHUNK_DEF;   
-               status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
-                           NULL,NULL,NULL,NULL,NULL,NULL);
+               status = H5Pinsert2(xfer_plist, H5D_XFER_COLL_CHUNK_LINK_NUM_TRUE_NAME, H5D_XFER_COLL_CHUNK_SIZE, &prop_value,
+                           NULL, NULL, NULL, NULL, NULL, NULL);
                VRFY((status >= 0),"testing property list inserted succeeded");
             break;
+
             case API_LINK_FALSE:
                prop_value = H5D_XFER_COLL_CHUNK_DEF;   
-               status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
-                           NULL,NULL,NULL,NULL,NULL,NULL);
+               status = H5Pinsert2(xfer_plist, H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME, H5D_XFER_COLL_CHUNK_SIZE, &prop_value,
+                           NULL, NULL, NULL, NULL, NULL, NULL);
                VRFY((status >= 0),"testing property list inserted succeeded");
-            
             break;
+
             case API_MULTI_COLL:
                prop_value = H5D_XFER_COLL_CHUNK_DEF;   
-               status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
-                           NULL,NULL,NULL,NULL,NULL,NULL);
+               status = H5Pinsert2(xfer_plist, H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME, H5D_XFER_COLL_CHUNK_SIZE, &prop_value,
+                           NULL, NULL, NULL, NULL, NULL, NULL);
                VRFY((status >= 0),"testing property list inserted succeeded");
-            
             break;
+
             case API_MULTI_IND:
                prop_value = H5D_XFER_COLL_CHUNK_DEF;   
-               status = H5Pinsert(xfer_plist,H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME,H5D_XFER_COLL_CHUNK_SIZE,&prop_value,
-                           NULL,NULL,NULL,NULL,NULL,NULL);
+               status = H5Pinsert2(xfer_plist, H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME, H5D_XFER_COLL_CHUNK_SIZE, &prop_value,
+                           NULL, NULL, NULL, NULL, NULL, NULL);
                VRFY((status >= 0),"testing property list inserted succeeded");
-            
             break;
+
             default:
-            ;
+                ;
        } 
    }
 #endif

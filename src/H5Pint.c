@@ -3690,7 +3690,7 @@ done:
         Removes a property from a property list.  Both properties which were
     in existance when the property list was created (i.e. properties registered
     with H5Pregister2) and properties added to the list after it was created
-    (i.e. added with H5Pinsert) may be removed from a property list.
+    (i.e. added with H5Pinsert2) may be removed from a property list.
     Properties do not need to be removed a property list before the list itself
     is closed, they will be released automatically when H5Pclose is called.
     The 'close' callback for this property is called before the property is
@@ -3829,7 +3829,7 @@ done:
     'copy' callback for the property, if one exists).
 
     If the property does not exist in the destination list, this call is
-    equivalent to calling H5Pinsert and the 'create' callback will be called
+    equivalent to calling H5Pinsert2 and the 'create' callback will be called
     (if such a callback exists for the property).
 
  GLOBAL VARIABLES
@@ -3880,7 +3880,7 @@ H5P_copy_prop_plist(hid_t dst_id, hid_t src_id, const char *name)
         /* Increment the number of properties in list */
         dst_plist->nprops++;
     } /* end if */
-    /* If not, get the information required to do an H5Pinsert with the property into the destination list */
+    /* If not, get the information required to do an H5Pinsert2 with the property into the destination list */
     else {
         /* Get the pointer to the source property */
         prop=H5P_find_prop_plist(src_plist,name);

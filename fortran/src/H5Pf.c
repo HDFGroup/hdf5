@@ -2365,7 +2365,7 @@ nh5pinsertc_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size, _fcd v
 
 /*----------------------------------------------------------------------------
  * Name:        h5pinsert_c
- * Purpose:     Call H5Pinsert to iinsert a temporary property
+ * Purpose:     Call H5Pinsert2 to iinsert a temporary property
  * Inputs:      plist - property list class identifier
  *              name   - name of the new property
  *              name_len - length of the "name" buffer
@@ -2379,24 +2379,22 @@ nh5pinsertc_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size, _fcd v
 int_f
 nh5pinsert_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size, void UNUSED *value)
 {
+     char* c_name = NULL;
      int_f ret_value = -1;
-     hid_t c_plist;
-     char* c_name;
-     size_t c_size;
 
-     c_name = (char *)HD5f2cstring(name, (size_t)*name_len);
-     if (c_name == NULL) goto DONE;
-     c_size = (size_t)*size;
-     c_plist = (hid_t)*plist;
+     if(NULL == ( c_name = (char *)HD5f2cstring(name, (size_t)*name_len)))
+         goto DONE;
 
      /*
-      * Call H5Pinsert function.
+      * Call H5Pinsert2 function.
       */
-     if( H5Pinsert(c_plist, c_name, c_size, value, NULL,NULL,NULL,NULL,NULL,NULL) <0) goto DONE;
+     if(H5Pinsert2((hid_t)*plist, c_name, (size_t)*size, value, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+         goto DONE;
      ret_value = 0;
 
 DONE:
-     if(c_name != NULL) HDfree(c_name);
+     if(c_name)
+         HDfree(c_name);
      return ret_value;
 }
 

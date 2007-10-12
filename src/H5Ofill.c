@@ -355,7 +355,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_fill_new_encode(H5F_t *f, uint8_t *p, const void *_fill)
+H5O_fill_new_encode(H5F_t UNUSED *f, uint8_t *p, const void *_fill)
 {
     const H5O_fill_t	*fill = (const H5O_fill_t *)_fill;
 
@@ -604,7 +604,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_fill_new_size(const H5F_t *f, const void *_fill)
+H5O_fill_new_size(const H5F_t UNUSED *f, const void *_fill)
 {
     const H5O_fill_t	*fill = (const H5O_fill_t *)_fill;
     size_t		ret_value;

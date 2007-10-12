@@ -59,6 +59,7 @@ FUNCTION: H5Eset_auto; ; v10, v18
 FUNCTION: H5Ewalk; H5E_walk, H5E_error; v10, v18
 FUNCTION: H5Gcreate; ; v10, v18
 FUNCTION: H5Gopen; ; v10, v18
+FUNCTION: H5Pinsert; ; v14, v18
 FUNCTION: H5Pregister; ; v14, v18
 FUNCTION: H5Rget_obj_type; ; v16, v18
 FUNCTION: H5Tcommit; ; v10, v18

@@ -650,20 +650,12 @@ test_genprop_basic_list_prop(void)
     /* Add temporary properties */
 
     /* Insert first temporary property into class (with no callbacks) */
-#ifdef H5_WANT_H5_V1_6_COMPAT
-    ret = H5Pinsert(lid1, PROP3_NAME, PROP3_SIZE, PROP3_DEF_VALUE, NULL, NULL, NULL, NULL, NULL);
-#else /* H5_WANT_H5_V1_6_COMPAT */
-    ret = H5Pinsert(lid1, PROP3_NAME, PROP3_SIZE, PROP3_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
-    CHECK_I(ret, "H5Pinsert");
+    ret = H5Pinsert2(lid1, PROP3_NAME, PROP3_SIZE, PROP3_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL);
+    CHECK_I(ret, "H5Pinsert2");
 
     /* Insert second temporary property into class (with no callbacks) */
-#ifdef H5_WANT_H5_V1_6_COMPAT
-    ret = H5Pinsert(lid1, PROP4_NAME, PROP4_SIZE, PROP4_DEF_VALUE, NULL, NULL, NULL, NULL, NULL);
-#else /* H5_WANT_H5_V1_6_COMPAT */
-    ret = H5Pinsert(lid1, PROP4_NAME, PROP4_SIZE, PROP4_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
-    CHECK_I(ret, "H5Pinsert");
+    ret = H5Pinsert2(lid1, PROP4_NAME, PROP4_SIZE, PROP4_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL);
+    CHECK_I(ret, "H5Pinsert2");
 
     /* Check the number of properties in list */
     ret = H5Pget_nprops(lid1,&nprops);
@@ -824,20 +816,12 @@ test_genprop_list_iter(void)
     /* Add temporary properties */
 
     /* Insert first temporary property into class (with no callbacks) */
-#ifdef H5_WANT_H5_V1_6_COMPAT
-    ret = H5Pinsert(lid1, PROP3_NAME, PROP3_SIZE, PROP3_DEF_VALUE, NULL, NULL, NULL, NULL, NULL);
-#else /* H5_WANT_H5_V1_6_COMPAT */
-    ret = H5Pinsert(lid1, PROP3_NAME, PROP3_SIZE, PROP3_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
-    CHECK_I(ret, "H5Pinsert");
+    ret = H5Pinsert2(lid1, PROP3_NAME, PROP3_SIZE, PROP3_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL);
+    CHECK_I(ret, "H5Pinsert2");
 
     /* Insert second temporary property into class (with no callbacks) */
-#ifdef H5_WANT_H5_V1_6_COMPAT
-    ret = H5Pinsert(lid1, PROP4_NAME, PROP4_SIZE, PROP4_DEF_VALUE, NULL, NULL, NULL, NULL, NULL);
-#else /* H5_WANT_H5_V1_6_COMPAT */
-    ret = H5Pinsert(lid1, PROP4_NAME, PROP4_SIZE, PROP4_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
-    CHECK_I(ret, "H5Pinsert");
+    ret = H5Pinsert2(lid1, PROP4_NAME, PROP4_SIZE, PROP4_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL);
+    CHECK_I(ret, "H5Pinsert2");
 
     /* Check the number of properties in list */
     ret = H5Pget_nprops(lid1,&nprops);
@@ -984,7 +968,6 @@ test_genprop_prop_cop_cb1(const char *name, size_t size, void *value)
     return(SUCCEED);
 }
 
-#ifndef H5_WANT_H5_V1_6_COMPAT
 /****************************************************************
 **
 **  test_genprop_prop_cmp_cb1(): Property comparison callback for test_genprop_list_callback
@@ -998,7 +981,6 @@ test_genprop_prop_cmp_cb1(const void UNUSED *value1, const void UNUSED *value2, 
 
     return(0);
 }
-#endif /* H5_WANT_H5_V1_6_COMPAT */
 
 /****************************************************************
 **
@@ -1191,14 +1173,12 @@ test_genprop_list_callback(void)
     VERIFY(cop_cb_struct.count, 1, "H5Pcopy");
     VERIFY(cop_cb_struct.id, lid2, "H5Pcopy");
 
-#ifndef H5_WANT_H5_V1_6_COMPAT
     /* Compare the two lists */
     ret = H5Pequal(lid1,lid2);
     VERIFY(ret, 1, "H5Pequal");
 
     /* Verify compare callback information for properties tracked */
     VERIFY(prop1_cb_info.cmp_count, 1, "H5Pequal");
-#endif /* H5_WANT_H5_V1_6_COMPAT */
 
     /* Close first list */
     ret = H5Pclose(lid1);
@@ -1267,12 +1247,8 @@ test_genprop_list_addprop(void)
     CHECK(pid, FAIL, "H5Pcreate");
 
     /* Insert temporary property into class (with no callbacks) */
-#ifdef H5_WANT_H5_V1_6_COMPAT
-    ret = H5Pinsert(pid, PROP1_NAME, PROP1_SIZE, PROP1_DEF_VALUE, NULL, NULL, NULL, NULL, NULL);
-#else /* H5_WANT_H5_V1_6_COMPAT */
-    ret = H5Pinsert(pid, PROP1_NAME, PROP1_SIZE, PROP1_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
-    CHECK_I(ret, "H5Pinsert");
+    ret = H5Pinsert2(pid, PROP1_NAME, PROP1_SIZE, PROP1_DEF_VALUE, NULL, NULL, NULL, NULL, NULL, NULL);
+    CHECK_I(ret, "H5Pinsert2");
 
     /* Check existence of added property */
     ret = H5Pexist(pid, PROP1_NAME);
@@ -1599,12 +1575,12 @@ test_genprop_refcount(void)
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 /****************************************************************
 **
-**  test_genprop_deprec(): Test basic generic property list code.
-**      Tests deprecated API routines.
+**  test_genprop_deprec_class(): Test basic generic property list code.
+**      Tests deprecated property class API routines.
 **
 ****************************************************************/
 static void
-test_genprop_deprec(void)
+test_genprop_deprec_class(void)
 {
     hid_t		cid1;		/* Generic Property class ID */
     size_t		size;		/* Size of property */
@@ -1723,7 +1699,78 @@ test_genprop_deprec(void)
     /* Close class */
     ret = H5Pclose_class(cid1);
     CHECK_I(ret, "H5Pclose_class");
-} /* end test_genprop_deprec() */
+} /* end test_genprop_deprec_class() */
+
+/****************************************************************
+**
+**  test_genprop_deprec2(): Test basic generic property list code.
+**      Tests deprecated property list API routines.
+**
+****************************************************************/
+static void
+test_genprop_deprec_list(void)
+{
+    hid_t fid;          /* File ID */
+    hid_t did;          /* Dataset ID */
+    hid_t sid;          /* Dataspace ID */
+    hid_t pid;          /* Property List ID */
+    int   prop1_value;  /* Value for property #1 */
+    herr_t ret;		/* Generic return value	*/
+
+    /* Create file */
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create scalar dataspace for dataset */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Create a dataset creation property list */
+    pid = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(pid, FAIL, "H5Pcreate");
+
+    /* Insert temporary property into class (with no callbacks) */
+    ret = H5Pinsert1(pid, PROP1_NAME, PROP1_SIZE, PROP1_DEF_VALUE, NULL, NULL, NULL, NULL, NULL);
+    CHECK_I(ret, "H5Pinsert1");
+
+    /* Check existence of added property */
+    ret = H5Pexist(pid, PROP1_NAME);
+    VERIFY(ret, 1, "H5Pexist");
+
+    /* Check values of property (set with default value) */
+    ret = H5Pget(pid, PROP1_NAME,&prop1_value);
+    CHECK_I(ret, "H5Pget");
+    VERIFY(prop1_value, *PROP1_DEF_VALUE, "H5Pget");
+
+    /* Create a dataset */
+    did = H5Dcreate2(fid, "Dataset1", H5T_NATIVE_INT, sid, H5P_DEFAULT, pid, H5P_DEFAULT);
+    CHECK(did, FAIL, "H5Dcreate2");
+
+    /* Check existence of added property (after using property list) */
+    ret = H5Pexist(pid, PROP1_NAME);
+    VERIFY(ret, 1, "H5Pexist");
+
+    /* Check values of property (set with default value) (after using property list) */
+    ret = H5Pget(pid, PROP1_NAME, &prop1_value);
+    CHECK_I(ret, "H5Pget");
+    VERIFY(prop1_value, *PROP1_DEF_VALUE, "H5Pget");
+
+    /* Close property list */
+    ret = H5Pclose(pid);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Close disk dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close Dataset */
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+} /* end test_genprop_deprec_list() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 /****************************************************************
@@ -1756,7 +1803,8 @@ test_genprop(void)
     test_genprop_refcount();    /* Tests for class reference counting */
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-    test_genprop_deprec();      /* Tests for deprecated routines */
+    test_genprop_deprec_class();        /* Tests for deprecated routines */
+    test_genprop_deprec_list();         /* Tests for deprecated routines */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 }   /* test_genprop() */
