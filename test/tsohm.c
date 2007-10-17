@@ -1199,25 +1199,25 @@ static void size2_verify_plist1(hid_t plist)
     /* Hardcoded to correspond to dcpl1_id created in size2_helper */
     /* Check filters */
     cd_nelmts = 1;
-    filter = H5Pget_filter(plist, 0, NULL, &cd_nelmts, &cd_value, NAME_BUF_SIZE, name, NULL);
-    CHECK_I(filter, "H5Pget_filter");
-    VERIFY(filter, H5Z_FILTER_SHUFFLE, "H5Pget_filter");
+    filter = H5Pget_filter2(plist, 0, NULL, &cd_nelmts, &cd_value, NAME_BUF_SIZE, name, NULL);
+    CHECK_I(filter, "H5Pget_filter2");
+    VERIFY(filter, H5Z_FILTER_SHUFFLE, "H5Pget_filter2");
 
     cd_nelmts = 1;
-    filter = H5Pget_filter(plist, 1, NULL, &cd_nelmts, &cd_value, NAME_BUF_SIZE, name, NULL);
-    CHECK_I(filter, "H5Pget_filter");
-    VERIFY(filter, H5Z_FILTER_DEFLATE, "H5Pget_filter");
-    VERIFY(cd_value, 1, "H5Pget_filter");
+    filter = H5Pget_filter2(plist, 1, NULL, &cd_nelmts, &cd_value, NAME_BUF_SIZE, name, NULL);
+    CHECK_I(filter, "H5Pget_filter2");
+    VERIFY(filter, H5Z_FILTER_DEFLATE, "H5Pget_filter2");
+    VERIFY(cd_value, 1, "H5Pget_filter2");
 
     cd_nelmts = 1;
-    filter = H5Pget_filter(plist, 2, NULL, &cd_nelmts, &cd_value, NAME_BUF_SIZE, name, NULL);
-    CHECK_I(filter, "H5Pget_filter");
-    VERIFY(filter, H5Z_FILTER_SHUFFLE, "H5Pget_filter");
+    filter = H5Pget_filter2(plist, 2, NULL, &cd_nelmts, &cd_value, NAME_BUF_SIZE, name, NULL);
+    CHECK_I(filter, "H5Pget_filter2");
+    VERIFY(filter, H5Z_FILTER_SHUFFLE, "H5Pget_filter2");
 
     cd_nelmts = 1;
-    filter = H5Pget_filter(plist, 3, NULL, &cd_nelmts, &cd_value, NAME_BUF_SIZE, name, NULL);
-    CHECK_I(filter, "H5Pget_filter");
-    VERIFY(filter, H5Z_FILTER_FLETCHER32, "H5Pget_filter");
+    filter = H5Pget_filter2(plist, 3, NULL, &cd_nelmts, &cd_value, NAME_BUF_SIZE, name, NULL);
+    CHECK_I(filter, "H5Pget_filter2");
+    VERIFY(filter, H5Z_FILTER_FLETCHER32, "H5Pget_filter2");
 
 
     /* Check fill value */
@@ -1258,34 +1258,34 @@ static void size2_verify_plist2(hid_t plist)
     /* Hardcoded to correspond to dcpl1_id created in size2_helper */
     /* Check filters */
     cd_nelmts = 1;
-    filter = H5Pget_filter(plist, 0, NULL, &cd_nelmts, &cd_value, NAME_BUF_SIZE, name, NULL);
-    CHECK_I(filter, "H5Pget_filter");
-    VERIFY(filter, H5Z_FILTER_DEFLATE, "H5Pget_filter");
-    VERIFY(cd_value, 1, "H5Pget_filter");
+    filter = H5Pget_filter2(plist, 0, NULL, &cd_nelmts, &cd_value, NAME_BUF_SIZE, name, NULL);
+    CHECK_I(filter, "H5Pget_filter2");
+    VERIFY(filter, H5Z_FILTER_DEFLATE, "H5Pget_filter2");
+    VERIFY(cd_value, 1, "H5Pget_filter2");
 
     cd_nelmts = 1;
-    filter = H5Pget_filter(plist, 1, NULL, &cd_nelmts, &cd_value, NAME_BUF_SIZE, name, NULL);
-    CHECK_I(filter, "H5Pget_filter");
-    VERIFY(filter, H5Z_FILTER_DEFLATE, "H5Pget_filter");
-    VERIFY(cd_value, 2, "H5Pget_filter");
+    filter = H5Pget_filter2(plist, 1, NULL, &cd_nelmts, &cd_value, NAME_BUF_SIZE, name, NULL);
+    CHECK_I(filter, "H5Pget_filter2");
+    VERIFY(filter, H5Z_FILTER_DEFLATE, "H5Pget_filter2");
+    VERIFY(cd_value, 2, "H5Pget_filter2");
 
     cd_nelmts = 1;
-    filter = H5Pget_filter(plist, 2, NULL, &cd_nelmts, &cd_value, NAME_BUF_SIZE, name, NULL);
-    CHECK_I(filter, "H5Pget_filter");
-    VERIFY(filter, H5Z_FILTER_DEFLATE, "H5Pget_filter");
-    VERIFY(cd_value, 2, "H5Pget_filter");
+    filter = H5Pget_filter2(plist, 2, NULL, &cd_nelmts, &cd_value, NAME_BUF_SIZE, name, NULL);
+    CHECK_I(filter, "H5Pget_filter2");
+    VERIFY(filter, H5Z_FILTER_DEFLATE, "H5Pget_filter2");
+    VERIFY(cd_value, 2, "H5Pget_filter2");
 
     cd_nelmts = 1;
-    filter = H5Pget_filter(plist, 3, NULL, &cd_nelmts, &cd_value, NAME_BUF_SIZE, name, NULL);
-    CHECK_I(filter, "H5Pget_filter");
-    VERIFY(filter, H5Z_FILTER_DEFLATE, "H5Pget_filter");
-    VERIFY(cd_value, 1, "H5Pget_filter");
+    filter = H5Pget_filter2(plist, 3, NULL, &cd_nelmts, &cd_value, NAME_BUF_SIZE, name, NULL);
+    CHECK_I(filter, "H5Pget_filter2");
+    VERIFY(filter, H5Z_FILTER_DEFLATE, "H5Pget_filter2");
+    VERIFY(cd_value, 1, "H5Pget_filter2");
 
     cd_nelmts = 1;
-    filter = H5Pget_filter(plist, 4, NULL, &cd_nelmts, &cd_value, NAME_BUF_SIZE, name, NULL);
-    CHECK_I(filter, "H5Pget_filter");
-    VERIFY(filter, H5Z_FILTER_DEFLATE, "H5Pget_filter");
-    VERIFY(cd_value, 5, "H5Pget_filter");
+    filter = H5Pget_filter2(plist, 4, NULL, &cd_nelmts, &cd_value, NAME_BUF_SIZE, name, NULL);
+    CHECK_I(filter, "H5Pget_filter2");
+    VERIFY(filter, H5Z_FILTER_DEFLATE, "H5Pget_filter2");
+    VERIFY(cd_value, 5, "H5Pget_filter2");
 
 
     /* Check fill value */

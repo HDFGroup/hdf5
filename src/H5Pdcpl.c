@@ -1340,7 +1340,7 @@ H5P_get_filter(const H5Z_filter_info_t *filter, unsigned int *flags/*out*/,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_filter
+ * Function:	H5Pget_filter2
  *
  * Purpose:	This is the query counterpart of H5Pset_filter() and returns
  *		information about a particular filter number in a permanent
@@ -1363,41 +1363,23 @@ H5P_get_filter(const H5Z_filter_info_t *filter, unsigned int *flags/*out*/,
  *
  *-------------------------------------------------------------------------
  */
-#ifdef H5_WANT_H5_V1_6_COMPAT
 H5Z_filter_t
-H5Pget_filter(hid_t plist_id, unsigned idx, unsigned int *flags/*out*/,
-	       size_t *cd_nelmts/*in_out*/, unsigned cd_values[]/*out*/,
-	       size_t namelen, char name[]/*out*/)
-#else /* H5_WANT_H5_V1_6_COMPAT */
-H5Z_filter_t
-H5Pget_filter(hid_t plist_id, unsigned idx, unsigned int *flags/*out*/,
+H5Pget_filter2(hid_t plist_id, unsigned idx, unsigned int *flags/*out*/,
 	       size_t *cd_nelmts/*in_out*/, unsigned cd_values[]/*out*/,
 	       size_t namelen, char name[]/*out*/,
-               unsigned *_filter_config /*out*/)
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+               unsigned *filter_config /*out*/)
 {
     H5O_pline_t         pline;  /* Filter pipeline */
     const H5Z_filter_info_t *filter;  /* Pointer to filter information */
     H5P_genplist_t *plist;      /* Property list pointer */
-#ifdef H5_WANT_H5_V1_6_COMPAT
-   unsigned *filter_config = NULL;     /* Filter configuration */
-#else /* H5_WANT_H5_V1_6_COMPAT */
-   unsigned *filter_config = _filter_config;    /* Filter configuration */
-#endif /* H5_WANT_H5_V1_6_COMPAT */
     H5Z_filter_t ret_value;     /* return value */
 
-    FUNC_ENTER_API(H5Pget_filter, H5Z_FILTER_ERROR)
-#ifdef H5_WANT_H5_V1_6_COMPAT
-    H5TRACE7("Zf","iIux*zxzx",plist_id,idx,flags,cd_nelmts,cd_values,namelen,
-             name);
-#else /* H5_WANT_H5_V1_6_COMPAT */
+    FUNC_ENTER_API(H5Pget_filter2, H5Z_FILTER_ERROR)
     H5TRACE8("Zf","iIux*zxzx*Iu",plist_id,idx,flags,cd_nelmts,cd_values,namelen,
-             name,_filter_config);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+             name,filter_config);
 
     /* Check args */
-    if(cd_nelmts || cd_values)
-{
+    if(cd_nelmts || cd_values) {
         /*
          * It's likely that users forget to initialize this on input, so
          * we'll check that it has a reasonable value.  The actual number
@@ -1441,7 +1423,7 @@ H5Pget_filter(hid_t plist_id, unsigned idx, unsigned int *flags/*out*/,
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Pget_filter() */
+} /* end H5Pget_filter2() */
 
 
 /*-------------------------------------------------------------------------
@@ -2484,3 +2466,90 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_fill_time() */
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_filter1
+ *
+ * Purpose:	This is the query counterpart of H5Pset_filter() and returns
+ *		information about a particular filter number in a permanent
+ *		or transient pipeline depending on whether PLIST_ID is a
+ *		dataset creation or transfer property list.  On input,
+ *		CD_NELMTS indicates the number of entries in the CD_VALUES
+ *		array allocated by the caller while on exit it contains the
+ *		number of values defined by the filter.  The IDX
+ *      should be a value between zero and N-1 as described for
+ *      H5Pget_nfilters() and the function will return failure if the
+ *      filter number is out of range.
+ *
+ * Return:	Success:	Filter identification number.
+ *
+ *		Failure:	H5Z_FILTER_ERROR (Negative)
+ *
+ * Programmer:	Robb Matzke
+ *              Wednesday, April 15, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+H5Z_filter_t
+H5Pget_filter1(hid_t plist_id, unsigned idx, unsigned int *flags/*out*/,
+	       size_t *cd_nelmts/*in_out*/, unsigned cd_values[]/*out*/,
+	       size_t namelen, char name[]/*out*/)
+{
+    H5O_pline_t         pline;  /* Filter pipeline */
+    const H5Z_filter_info_t *filter;  /* Pointer to filter information */
+    H5P_genplist_t *plist;      /* Property list pointer */
+    H5Z_filter_t ret_value;     /* return value */
+
+    FUNC_ENTER_API(H5Pget_filter1, H5Z_FILTER_ERROR)
+    H5TRACE7("Zf","iIux*zxzx",plist_id,idx,flags,cd_nelmts,cd_values,namelen,
+             name);
+
+    /* Check args */
+    if(cd_nelmts || cd_values) {
+        /*
+         * It's likely that users forget to initialize this on input, so
+         * we'll check that it has a reasonable value.  The actual number
+         * is unimportant because the H5O layer will detect when a message
+         * is too large.
+         */
+        if(cd_nelmts && *cd_nelmts > 256)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR, "probable uninitialized *cd_nelmts argument")
+        if(cd_nelmts && *cd_nelmts > 0 && !cd_values)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR, "client data values not supplied")
+
+        /*
+         * If cd_nelmts is null but cd_values is non-null then just ignore
+         * cd_values
+         */
+        if(!cd_nelmts)
+            cd_values = NULL;
+    } /* end if */
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, H5Z_FILTER_ERROR, "can't find object for ID")
+
+    /* Get pipeline info */
+    if(H5P_get(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5Z_FILTER_ERROR, "can't get pipeline")
+
+    /* Check more args */
+    if(idx >= pline.nused)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5Z_FILTER_ERROR, "filter number is invalid")
+
+    /* Set pointer to particular filter to query */
+    filter = &pline.filter[idx];
+
+    /* Get filter information */
+    if(H5P_get_filter(filter, flags, cd_nelmts, cd_values, namelen, name, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, H5Z_FILTER_ERROR, "can't get filter info")
+
+    /* Set return value */
+    ret_value = filter->id;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_filter1() */
+
+#endif /* H5_NO_DEPRECATED_SYMBOLS */

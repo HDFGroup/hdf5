@@ -37,53 +37,34 @@ extern char  *progname;
 static int
 has_filter(hid_t dcpl_id, H5Z_filter_t filtnin)
 {
-
  int          nfilters;       /* number of filters */
  unsigned     filt_flags;     /* filter flags */
  H5Z_filter_t filtn;          /* filter identification number */
  unsigned     cd_values[20];  /* filter client data values */
  size_t       cd_nelmts;      /* filter client number of values */
  char         f_name[256];    /* filter name */
- int          have=0;         /* flag, filter is present */
+ int          have = 0;         /* flag, filter is present */
  int          i;              /* index */
 
  /* if no information about the input filter is requested return exit */
- if (filtnin==-1)
+ if(filtnin == -1)
   return 1;
 
  /* get information about filters */
- if ((nfilters = H5Pget_nfilters(dcpl_id)) < 0)
+ if((nfilters = H5Pget_nfilters(dcpl_id)) < 0)
   return -1;
 
  /* if we do not have filters and the requested filter is NONE, return 1 */
- if (!nfilters && filtnin==H5Z_FILTER_NONE)
+ if(!nfilters && filtnin == H5Z_FILTER_NONE)
   return 1;
 
- for (i=0; i<nfilters; i++)
- {
+ for(i = 0; i < nfilters; i++) {
   cd_nelmts = NELMTS(cd_values);
-#ifdef H5_WANT_H5_V1_6_COMPAT
-  filtn = H5Pget_filter(dcpl_id,
-   (unsigned)i,
-   &filt_flags,
-   &cd_nelmts,
-   cd_values,
-   sizeof(f_name),
-   f_name);
-#else
-  filtn = H5Pget_filter(dcpl_id,
-   (unsigned)i,
-   &filt_flags,
-   &cd_nelmts,
-   cd_values,
-   sizeof(f_name),
-   f_name,
-   NULL);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+  filtn = H5Pget_filter2(dcpl_id, (unsigned)i, &filt_flags, &cd_nelmts,
+   cd_values, sizeof(f_name), f_name, NULL);
 
-  if (filtnin==filtn)
-   have=1;
-
+  if(filtnin == filtn)
+   have = 1;
  }
 
  return have;

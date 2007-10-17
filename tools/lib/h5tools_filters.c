@@ -85,24 +85,20 @@ int h5tools_canreadf(const char* name, /* object name, serves also as boolean pr
   return 1;
 
  /* check availability of filters */
- for (i=0; i<nfilters; i++)
+ for(i = 0; i < nfilters; i++)
  {
-#ifdef H5_WANT_H5_V1_6_COMPAT
-  if ((filtn = H5Pget_filter(dcpl_id,(unsigned)i,0,0,0,0,0))<0)
-#else
-  if ((filtn = H5Pget_filter(dcpl_id,(unsigned)i,0,0,0,0,0,NULL))<0)
-#endif
+  if((filtn = H5Pget_filter2(dcpl_id, (unsigned)i, 0, 0, 0, 0, 0, NULL)) < 0)
    return -1;
 
-  switch (filtn)
+  switch(filtn)
   {
 /*-------------------------------------------------------------------------
  * user defined filter
  *-------------------------------------------------------------------------
  */
   default:
-    if (name)
-     print_warning(name,"user defined");
+    if(name)
+     print_warning(name, "user defined");
     return 0;
 
 /*-------------------------------------------------------------------------

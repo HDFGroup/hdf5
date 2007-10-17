@@ -5545,11 +5545,7 @@ test_filter_delete(hid_t file)
 
     /* check if filter was deleted */
     for(i=0; i<nfilters; i++) {
-#ifdef H5_WANT_H5_V1_6_COMPAT
-        filtn = H5Pget_filter(dcpl1, (unsigned)i, NULL, NULL, NULL, (size_t)0, NULL);
-#else
-        filtn = H5Pget_filter(dcpl1, (unsigned)i, NULL, NULL, NULL, (size_t)0, NULL, NULL);
-#endif
+        filtn = H5Pget_filter2(dcpl1, (unsigned)i, NULL, NULL, NULL, (size_t)0, NULL, NULL);
         if(H5Z_FILTER_DEFLATE==filtn)
             goto error;
     }
@@ -6280,6 +6276,20 @@ test_deprec(hid_t file)
      */
     create_parms = H5Pcreate(H5P_DATASET_CREATE);
     assert(create_parms >= 0);
+
+    /* Add the deflate filter, if available */
+#if defined H5_HAVE_FILTER_DEFLATE
+{
+    H5Z_filter_t filtn;                 /* filter identification number */
+
+    if(H5Pset_deflate(create_parms, 6) < 0) goto error;
+
+    /* Check for the deflate filter */
+    filtn = H5Pget_filter1(create_parms, (unsigned)0, NULL, NULL, NULL, (size_t)0, NULL);
+    if(H5Z_FILTER_DEFLATE!=filtn)
+        goto error;
+}
+#endif /* H5_HAVE_FILTER_DEFLATE */
 
     /* Attempt to create a dataset with invalid chunk sizes */
     csize[0] = dims[0]*2;

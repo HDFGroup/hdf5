@@ -412,8 +412,6 @@ int apply_filters(const char* name,    /* object name from traverse list */
  return 0;
 }
 
-
-
 /*-------------------------------------------------------------------------
  * Function: print_filters
  *
@@ -437,47 +435,25 @@ int print_filters(hid_t dcpl_id)
  int          i;
 
  /* get information about filters */
- if ((nfilters = H5Pget_nfilters(dcpl_id))<0)
+ if((nfilters = H5Pget_nfilters(dcpl_id)) < 0)
   return -1;
 
- for (i=0; i<nfilters; i++)
- {
+ for(i = 0; i < nfilters; i++) {
   cd_nelmts = NELMTS(cd_values);
-#ifdef H5_WANT_H5_V1_6_COMPAT
-  filtn = H5Pget_filter(dcpl_id,
-   (unsigned)i,
-   &filt_flags,
-   &cd_nelmts,
-   cd_values,
-   sizeof(f_name),
-   f_name);
-#else
-  filtn = H5Pget_filter(dcpl_id,
-   (unsigned)i,
-   &filt_flags,
-   &cd_nelmts,
-   cd_values,
-   sizeof(f_name),
-   f_name,
-   NULL);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+  filtn = H5Pget_filter2(dcpl_id, (unsigned)i, &filt_flags, &cd_nelmts,
+   cd_values, sizeof(f_name), f_name, NULL);
 
   f_name[sizeof(f_name)-1] = '\0';
   sprintf(s, "Filter-%d:", i);
   printf("    %-10s %s-%u %s {", s,
-   f_name[0]?f_name:"method",
+   f_name[0] ? f_name : "method",
    (unsigned)filtn,
    filt_flags & H5Z_FLAG_OPTIONAL?"OPT":"");
-  for (cd_num=0; cd_num<cd_nelmts; cd_num++) {
+  for(cd_num = 0; cd_num < cd_nelmts; cd_num++)
    printf("%s%u", cd_num?", ":"", cd_values[cd_num]);
-  }
   printf("}\n");
  }
 
  return 0;
-
-
 }
-
-
 

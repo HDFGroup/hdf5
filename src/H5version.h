@@ -94,6 +94,10 @@
 #define H5Gopen_vers 1
 #endif /* !defined(H5Gopen_vers) */
 
+#if !defined(H5Pget_filter_vers)
+#define H5Pget_filter_vers 1
+#endif /* !defined(H5Pget_filter_vers) */
+
 #if !defined(H5Pinsert_vers)
 #define H5Pinsert_vers 1
 #endif /* !defined(H5Pinsert_vers) */
@@ -294,6 +298,17 @@
 #else /* H5Gopen_vers */
 #error "H5Gopen_vers set to invalid value"
 #endif /* H5Gopen_vers */
+
+#if !defined(H5Pget_filter_vers) || H5Pget_filter_vers == 2
+#ifndef H5Pget_filter_vers
+#define H5Pget_filter_vers 2
+#endif /* H5Pget_filter_vers */
+#define H5Pget_filter H5Pget_filter2
+#elif H5Pget_filter_vers == 1
+#define H5Pget_filter H5Pget_filter1
+#else /* H5Pget_filter_vers */
+#error "H5Pget_filter_vers set to invalid value"
+#endif /* H5Pget_filter_vers */
 
 #if !defined(H5Pinsert_vers) || H5Pinsert_vers == 2
 #ifndef H5Pinsert_vers

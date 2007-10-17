@@ -1053,36 +1053,19 @@ static void print_dataset_info(hid_t dcpl_id,
  strcpy(strfilter,"\0");
 
  /* get information about input filters */
- if ((nfilters = H5Pget_nfilters(dcpl_id)) < 0)
+ if((nfilters = H5Pget_nfilters(dcpl_id)) < 0)
   return;
 
- for ( i=0; i<nfilters; i++)
- {
+ for(i = 0; i < nfilters; i++) {
   cd_nelmts = NELMTS(cd_values);
 
-#ifdef H5_WANT_H5_V1_6_COMPAT
-  filtn = H5Pget_filter(dcpl_id,
-   (unsigned)i,
-   &filt_flags,
-   &cd_nelmts,
-   cd_values,
-   sizeof(f_objname),
-   f_objname);
-#else
-  filtn = H5Pget_filter(dcpl_id,
-   (unsigned)i,
-   &filt_flags,
-   &cd_nelmts,
-   cd_values,
-   sizeof(f_objname),
-   f_objname,
-   NULL);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+  filtn = H5Pget_filter2(dcpl_id, (unsigned)i, &filt_flags, &cd_nelmts,
+   cd_values, sizeof(f_objname), f_objname, NULL);
 
-  switch (filtn)
-  {
+  switch(filtn) {
   default:
    break;
+
   case H5Z_FILTER_DEFLATE:
    strcat(strfilter,"GZIP ");
 
@@ -1093,8 +1076,8 @@ static void print_dataset_info(hid_t dcpl_id,
     strcat(strfilter,temp);
    }
 #endif
-
    break;
+
   case H5Z_FILTER_SZIP:
    strcat(strfilter,"SZIP ");
 
@@ -1114,15 +1097,19 @@ static void print_dataset_info(hid_t dcpl_id,
 #endif
 
    break;
+
   case H5Z_FILTER_SHUFFLE:
    strcat(strfilter,"SHUF ");
    break;
+
   case H5Z_FILTER_FLETCHER32:
    strcat(strfilter,"FLET ");
    break;
+
   case H5Z_FILTER_NBIT:
    strcat(strfilter,"NBIT ");
    break;
+
   case H5Z_FILTER_SCALEOFFSET:
    strcat(strfilter,"SCALEOFFSET ");
    break;

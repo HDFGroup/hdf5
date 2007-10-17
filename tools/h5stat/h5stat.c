@@ -691,11 +691,7 @@ dataset_stats(hid_t group, const char *name, const H5O_info_t *oi, iter_t *iter)
        if(nfltr == 0)
            iter->dset_comptype[0]++;
         for(u = 0; u < (unsigned)nfltr; u++) {
-#ifdef H5_WANT_H5_V1_6_COMPAT
-            fltr = H5Pget_filter(dcpl, u, 0, 0, 0, 0, 0);
-#else /* H5_WANT_H5_V1_6_COMPAT */
-            fltr = H5Pget_filter(dcpl, u, 0, 0, 0, 0, 0, NULL);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+            fltr = H5Pget_filter2(dcpl, u, 0, 0, 0, 0, 0, NULL);
             if(fltr < (H5_NFILTERS_IMPL - 1))
                 iter->dset_comptype[fltr]++;
             else

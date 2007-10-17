@@ -1530,7 +1530,7 @@ dataset_list2(hid_t dset, const char UNUSED *name)
     double      utilization;    /* percent utilization of storage */
     int   i;
 
-    if (verbose_g>0) {
+    if(verbose_g > 0) {
         dcpl = H5Dget_create_plist(dset);
         space = H5Dget_space(dset);
         type = H5Dget_type(dset);
@@ -1565,12 +1565,12 @@ dataset_list2(hid_t dset, const char UNUSED *name)
         putchar('\n');
 
         /* Print information about external strorage */
-        if ((nf = H5Pget_external_count(dcpl))>0) {
-            for (i=0, max_len=0; i<nf; i++) {
+        if((nf = H5Pget_external_count(dcpl)) > 0) {
+            for(i = 0, max_len = 0; i < nf; i++) {
                 H5Pget_external(dcpl, (unsigned)i, sizeof(f_name), f_name, NULL, NULL);
                 n = display_string(NULL, f_name, TRUE);
                 max_len = MAX(max_len, n);
-            }
+            } /* end for */
             printf("    %-10s %d external file%s\n",
                     "Extern:", nf, 1==nf?"":"s");
             printf("        %4s %10s %10s %10s %s\n",
@@ -1599,32 +1599,28 @@ dataset_list2(hid_t dset, const char UNUSED *name)
             }
             printf("        %4s %10s %10s %10s ",
                     "----", "----------", "----------", "----------");
-            for (i=0; i<max_len; i++) putchar('-');
+            for (i=0; i<max_len; i++)
+                putchar('-');
             putchar('\n');
-        }
+        } /* end if */
 
         /* Print information about raw data filters */
-        if ((nf = H5Pget_nfilters(dcpl))>0) {
-            for (i=0; i<nf; i++) {
+        if((nf = H5Pget_nfilters(dcpl)) > 0) {
+            for(i = 0; i < nf; i++) {
                 cd_nelmts = NELMTS(cd_values);
-#ifdef H5_WANT_H5_V1_6_COMPAT
-                filt_id = H5Pget_filter(dcpl, (unsigned)i, &filt_flags, &cd_nelmts,
-                        cd_values, sizeof(f_name), f_name);
-#else
-                filt_id = H5Pget_filter(dcpl, (unsigned)i, &filt_flags, &cd_nelmts,
+                filt_id = H5Pget_filter2(dcpl, (unsigned)i, &filt_flags, &cd_nelmts,
                         cd_values, sizeof(f_name), f_name, NULL);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
-                f_name[sizeof(f_name)-1] = '\0';
+                f_name[sizeof(f_name) - 1] = '\0';
                 sprintf(s, "Filter-%d:", i);
                 printf("    %-10s %s-%u %s {", s,
-                        f_name[0]?f_name:"method",
+                        (f_name[0] ? f_name : "method"),
                         (unsigned)filt_id,
-                        filt_flags & H5Z_FLAG_OPTIONAL?"OPT":"");
-                for (cd_num=0; cd_num<cd_nelmts; cd_num++)
-                    printf("%s%u", cd_num?", ":"", cd_values[cd_num]);
+                        ((filt_flags & H5Z_FLAG_OPTIONAL) ? "OPT" : ""));
+                for(cd_num = 0; cd_num < cd_nelmts; cd_num++)
+                    printf("%s%u", (cd_num ? ", " : ""), cd_values[cd_num]);
                 printf("}\n");
-            }
-        }
+            } /* end for */
+        } /* end if */
 
         /* Print data type */
         printf("    %-10s ", "Type:");
@@ -1632,17 +1628,20 @@ dataset_list2(hid_t dset, const char UNUSED *name)
         printf("\n");
 
         /* Print address information */
-        if (address_g) H5Ddebug(dset);
+        if(address_g)
+            H5Ddebug(dset);
 
         /* Close stuff */
         H5Tclose(type);
         H5Sclose(space);
         H5Pclose(dcpl);
-    }
+    } /* end if */
 
-    if (data_g) dump_dataset_values(dset);
+    if(data_g)
+        dump_dataset_values(dset);
+
     return 0;
-}
+} /* end dataset_list2() */
 
 
 /*-------------------------------------------------------------------------

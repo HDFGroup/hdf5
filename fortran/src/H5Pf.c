@@ -1520,7 +1520,7 @@ nh5pget_nfilters_c (hid_t_f *prp_id, int_f* nfilters)
 
 /*----------------------------------------------------------------------------
  * Name:        h5pget_filter_c
- * Purpose:     Call H5Pget_filter to get information about a filter
+ * Purpose:     Call H5Pget_filter2 to get information about a filter
  *              in a pipeline
  * Inputs:      prp_id - property list identifier
  *              filter_number - Sequence number within the filter
@@ -1541,51 +1541,43 @@ nh5pget_nfilters_c (hid_t_f *prp_id, int_f* nfilters)
 int_f
 nh5pget_filter_c(hid_t_f *prp_id, int_f* filter_number, int_f* flags, size_t_f* cd_nelmts, int_f* cd_values, size_t_f *namelen, _fcd name, int_f* filter_id)
 {
-     int ret_value = -1;
-     hid_t c_prp_id;
-     unsigned c_filter_number;
-     unsigned int  c_flags;
-     size_t c_cd_nelmts, c_namelen;
-     size_t c_cd_nelmts_in;
-     H5Z_filter_t c_filter;
-     unsigned int * c_cd_values;
-     char* c_name;
-     unsigned i;
+    unsigned int  c_flags;
+    size_t c_cd_nelmts;
+    size_t c_cd_nelmts_in = (size_t)*cd_nelmts;
+    H5Z_filter_t c_filter;
+    unsigned int *c_cd_values = NULL;
+    char *c_name = NULL;
+    unsigned i;
+    int ret_value = -1;
 
-     c_cd_nelmts_in = (size_t)*cd_nelmts;
-     c_namelen = (size_t)*namelen;
-     c_name = (char*)malloc(sizeof(char)*c_namelen);
-     if (!c_name) return ret_value;
+    if(NULL == (c_name = (char *)malloc((size_t)*namelen)))
+        goto DONE;
 
-     c_cd_values = (unsigned int*)malloc(sizeof(unsigned int)*((int)c_cd_nelmts_in));
-     if (!c_cd_values) {HDfree(c_name);
-                        return ret_value;
-                       }
+    if(NULL == (c_cd_values = (unsigned int *)malloc(sizeof(unsigned int) * c_cd_nelmts_in)))
+        goto DONE;
 
+    /*
+     * Call H5Pget_filter2 function.
+     */
+    if((c_filter = H5Pget_filter2((hid_t)*prp_id, (unsigned)*filter_number, &c_flags, &c_cd_nelmts, c_cd_values, (size_t)*namelen, c_name, NULL)) < 0)
+        goto DONE;
 
-     /*
-      * Call H5Pget_filter function.
-      */
-     c_prp_id = (hid_t)*prp_id;
-     c_filter_number = (unsigned)*filter_number;
-     c_filter = H5Pget_filter(c_prp_id, c_filter_number, &c_flags, &c_cd_nelmts, c_cd_values, c_namelen, c_name, NULL);
+    *filter_id = (int_f)c_filter;
+    *cd_nelmts = (size_t_f)c_cd_nelmts;
+    *flags = (int_f)c_flags;
+    HD5packFstring(c_name, _fcdtocp(name), strlen(c_name));
 
-     if (c_filter < 0) goto DONE;
+    for(i = 0; i < c_cd_nelmts_in; i++)
+         cd_values[i] = (int_f)c_cd_values[i];
 
-     *filter_id = (int_f)c_filter;
-     *cd_nelmts = (size_t_f)c_cd_nelmts;
-     *flags = (int_f)c_flags;
-     HD5packFstring(c_name, _fcdtocp(name), strlen(c_name));
-
-     for (i = 0; i < c_cd_nelmts_in; i++)
-          cd_values[i] = (int_f)c_cd_values[i];
-
-     ret_value = 0;
+    ret_value = 0;
 
 DONE:
-     HDfree(c_name);
-     HDfree(c_cd_values);
-     return ret_value;
+    if(c_name)
+        HDfree(c_name);
+    if(c_cd_values)
+        HDfree(c_cd_values);
+    return ret_value;
 }
 
 /*----------------------------------------------------------------------------
@@ -3328,7 +3320,7 @@ nh5pget_filter_by_id_c(hid_t_f *prp_id, int_f* filter_id, int_f* flags, size_t_f
 
 
      /*
-      * Call H5Pget_filter function.
+      * Call H5Pget_filter_by_id function.
       */
      c_prp_id = (hid_t)*prp_id;
      c_filter_id = (H5Z_filter_t)*filter_id;
