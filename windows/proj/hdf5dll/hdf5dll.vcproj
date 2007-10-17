@@ -1343,6 +1343,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5Ddbg.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5Ddeprec.c"
 				>
 				<FileConfiguration
@@ -1432,6 +1436,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\src\H5Dfill.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5Dint.c"
 				>
 			</File>
 			<File
@@ -6299,6 +6307,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5Pdeprec.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5Pdxpl.c"
 				>
 				<FileConfiguration
@@ -6521,6 +6533,10 @@
 						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5Pint.c"
+				>
 			</File>
 			<File
 				RelativePath="..\..\..\src\H5Plapl.c"

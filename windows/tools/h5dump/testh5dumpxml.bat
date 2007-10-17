@@ -198,6 +198,14 @@ rem ############################################################################
     call :tooltest tall-2A.h5.xml --xml -A tall.h5
 
     
+    rem tests for attribute order
+    call :tooltest torderattr1.h5.xml --xml -H --sort_by=name --sort_order=ascending torderattr.h5
+    call :tooltest torderattr2.h5.xml --xml -H --sort_by=name --sort_order=descending torderattr.h5
+    call :tooltest torderattr3.h5.xml --xml -H --sort_by=creation_order --sort_order=ascending torderattr.h5
+    call :tooltest torderattr4.h5.xml --xml -H --sort_by=creation_order --sort_order=descending torderattr.h5    
+    
+    
+    
     if %nerrors% equ 0 (
         echo.All %dumper% tests passed.
     )
