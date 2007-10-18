@@ -57,9 +57,8 @@ const char *FILENAME[] = {
  *
  * Purpose:     Tests the file handle interface for SEC2 driver
  *
- * Return:      Success:        exit(0)
- *
- *              Failure:        exit(1)
+ * Return:      Success:        0
+ *              Failure:        -1
  *
  * Programmer:  Raymond Lu
  *              Tuesday, Sept 24, 2002
@@ -135,14 +134,11 @@ error:
  *
  * Purpose:     Tests the file handle interface for DIRECT I/O driver
  *
- * Return:      Success:        exit(0)
- *
- *              Failure:        exit(1)
+ * Return:      Success:        0
+ *              Failure:        -1
  *
  * Programmer:  Raymond Lu
  *              Wednesday, 20 September 2006
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -342,9 +338,8 @@ error:
  *
  * Purpose:     Tests the file handle interface for CORE driver
  *
- * Return:      Success:        exit(0)
- *
- *              Failure:        exit(1)
+ * Return:      Success:        0
+ *              Failure:        -1
  *
  * Programmer:  Raymond Lu
  *              Tuesday, Sept 24, 2002
@@ -557,14 +552,12 @@ error:
  * Purpose:     Private function for test_family() to tests wrong ways of
  *              reopening family file.
  *
- * Return:      Success:        exit(0)
- *
- *              Failure:        exit(1)
+ * Return:      Success:        0
+ *              Failure:        -1
  *
  * Programmer:  Raymond Lu
  *              Thursday, May 19, 2005
  *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -626,9 +619,8 @@ error:
  *
  * Purpose:     Tests the file handle interface for FAMILY driver
  *
- * Return:      Success:        exit(0)
- *
- *              Failure:        exit(1)
+ * Return:      Success:        0
+ *              Failure:        -1
  *
  * Programmer:  Raymond Lu
  *              Tuesday, Sept 24, 2002
@@ -797,32 +789,23 @@ error:
  *              used to concantenated.  The command was "h5repart -m 5k
  *              family_file%05d.h5 family_v1.6_%05d.h5".
  *
- * Return:      Success:        exit(0)
- *
- *              Failure:        exit(1)
+ * Return:      Success:        0
+ *              Failure:        -1
  *
  * Programmer:  Raymond Lu
  *              June 3, 2005
  *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 static herr_t
 test_family_compat(void)
 {
-#ifdef H5_WANT_H5_V1_6_COMPAT
-    hid_t       file=(-1), fapl;
+    hid_t       file = (-1), fapl;
     char        filename[1024];
     char        pathname[1024];
     char       *srcdir = getenv("srcdir"); /*where the src code is located*/
-#endif /*H5_WANT_H5_V1_6_COMPAT*/
 
     TESTING("FAMILY file driver backward compatibility");
-
-#ifndef H5_WANT_H5_V1_6_COMPAT
-    SKIPPED();
-    return 0;
-#else /*H5_WANT_H5_V1_6_COMPAT*/
 
     /* Set property list and file name for FAMILY driver */
     fapl = h5_fileaccess();
@@ -834,13 +817,13 @@ test_family_compat(void)
 
     pathname[0] = '\0';
     /* Generate correct name for test file by prepending the source path */
-    if(srcdir && ((strlen(srcdir) + strlen(filename) + 1) < sizeof(pathname))) {
-        strcpy(pathname, srcdir);
-        strcat(pathname, "/");
+    if(srcdir && ((HDstrlen(srcdir) + HDstrlen(filename) + 1) < sizeof(pathname))) {
+        HDstrcpy(pathname, srcdir);
+        HDstrcat(pathname, "/");
     }
-    strcat(pathname, filename);
+    HDstrcat(pathname, filename);
 
-    if((file=H5Fopen(pathname, H5F_ACC_RDONLY, fapl)) < 0)
+    if((file = H5Fopen(pathname, H5F_ACC_RDONLY, fapl)) < 0)
         TEST_ERROR;
 
     if(H5Fclose(file) < 0)
@@ -850,15 +833,16 @@ test_family_compat(void)
         TEST_ERROR;
 
     PASSED();
+
     return 0;
 
 error:
     H5E_BEGIN_TRY {
         H5Fclose(file);
     } H5E_END_TRY;
+
     return -1;
-#endif /*H5_WANT_H5_V1_6_COMPAT*/
-}
+} /* end test_family_compat() */
 
 
 /*-------------------------------------------------------------------------
@@ -867,14 +851,12 @@ error:
  * Purpose:     Private function for test_multi() to tests wrong ways of
  *              reopening multi file.
  *
- * Return:      Success:        exit(0)
- *
- *              Failure:        exit(1)
+ * Return:      Success:        0
+ *              Failure:        1
  *
  * Programmer:  Raymond Lu
  *              Thursday, May 19, 2005
  *
- * Modifications:
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -901,9 +883,8 @@ test_multi_opens(char *fname)
  *
  * Purpose:     Tests the file handle interface for MUTLI driver
  *
- * Return:      Success:        exit(0)
- *
- *              Failure:        exit(1)
+ * Return:      Success:        0
+ *              Failure:        -1
  *
  * Programmer:  Raymond Lu
  *              Tuesday, Sept 24, 2002
@@ -1114,13 +1095,10 @@ error:
  * Purpose:     Tests the basic features of Virtual File Drivers
  *
  * Return:      Success:        exit(0)
- *
  *              Failure:        exit(1)
  *
  * Programmer:  Raymond Lu
  *              Tuesday, Sept 24, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
