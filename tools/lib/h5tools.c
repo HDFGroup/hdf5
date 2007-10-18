@@ -1772,7 +1772,7 @@ int render_bin_output(FILE *stream, hid_t tid, void *_mem)
   memb = H5Tget_super(tid);
   size = H5Tget_size(memb);
   ndims = H5Tget_array_ndims(tid);
-  H5Tget_array_dims(tid, dims, NULL);
+  H5Tget_array_dims2(tid, dims);
   assert(ndims >= 1 && ndims <= H5S_MAX_RANK);
 
   /* calculate the number of array elements */

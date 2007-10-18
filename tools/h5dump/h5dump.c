@@ -1075,7 +1075,7 @@ print_datatype(hid_t type,unsigned in_group)
 
                 /* Get array information */
                 ndims = H5Tget_array_ndims(type);
-                H5Tget_array_dims(type, dims, NULL);
+                H5Tget_array_dims2(type, dims);
 
                 /* Print array dimensions */
                 for (i = 0; i < ndims; i++)
@@ -4790,7 +4790,7 @@ xml_print_datatype(hid_t type, unsigned in_group)
                 printf("%u\">\n", ndims);
 
                 /* Get array information */
-                H5Tget_array_dims(type, dims, NULL);
+                H5Tget_array_dims2(type, dims);
 
                 /* list of dimensions */
                 indent += COL;

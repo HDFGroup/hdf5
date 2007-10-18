@@ -64,7 +64,9 @@ FUNCTION: H5Pget_filter_by_id; ; v16, v18
 FUNCTION: H5Pinsert; ; v14, v18
 FUNCTION: H5Pregister; ; v14, v18
 FUNCTION: H5Rget_obj_type; ; v16, v18
+FUNCTION: H5Tarray_create; ; v14, v18
 FUNCTION: H5Tcommit; ; v10, v18
+FUNCTION: H5Tget_array_dims; ; v14, v18
 FUNCTION: H5Topen; ; v10, v18
 
 # API typedefs

@@ -231,7 +231,7 @@ test_compound (char *filename, hid_t fapl)
     /* Create the memory data type */
     if((s1_tid = H5Tcreate(H5T_COMPOUND, sizeof(s1_t))) < 0)
         goto error;
-    array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, memb_size, NULL);
+    array_dt = H5Tarray_create2(H5T_NATIVE_INT, 1, memb_size);
     if(H5Tinsert(s1_tid, "a", HOFFSET(s1_t, a), H5T_NATIVE_INT) < 0 ||
             H5Tinsert(s1_tid, "b", HOFFSET(s1_t, b), H5T_NATIVE_INT) < 0 ||
             H5Tinsert(s1_tid, "c", HOFFSET(s1_t, c), array_dt) < 0 ||
@@ -261,7 +261,7 @@ test_compound (char *filename, hid_t fapl)
     /* Create a data type for s2 */
     if ((s2_tid = H5Tcreate (H5T_COMPOUND, sizeof(s2_t))) < 0)
         goto error;
-    array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, memb_size, NULL);
+    array_dt = H5Tarray_create2(H5T_NATIVE_INT, 1, memb_size);
     if (H5Tinsert (s2_tid, "a", HOFFSET(s2_t,a), H5T_NATIVE_INT) < 0 ||
             H5Tinsert (s2_tid, "b", HOFFSET(s2_t,b), H5T_NATIVE_INT) < 0 ||
             H5Tinsert (s2_tid, "c", HOFFSET(s2_t,c), array_dt) < 0 ||
@@ -303,7 +303,7 @@ test_compound (char *filename, hid_t fapl)
     /* Create a data type for s3 */
     if ((s3_tid = H5Tcreate (H5T_COMPOUND, sizeof(s3_t))) < 0)
         goto error;
-    array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, memb_size, NULL);
+    array_dt = H5Tarray_create2(H5T_NATIVE_INT, 1, memb_size);
     if (H5Tinsert (s3_tid, "a", HOFFSET(s3_t,a), H5T_NATIVE_INT) < 0 ||
             H5Tinsert (s3_tid, "b", HOFFSET(s3_t,b), H5T_NATIVE_INT) < 0 ||
             H5Tinsert (s3_tid, "c", HOFFSET(s3_t,c), array_dt) < 0 ||
@@ -380,7 +380,7 @@ test_compound (char *filename, hid_t fapl)
     /* Create a data type for s5 */
     if ((s5_tid = H5Tcreate (H5T_COMPOUND, sizeof(s5_t))) < 0)
         goto error;
-    array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, memb_size, NULL);
+    array_dt = H5Tarray_create2(H5T_NATIVE_INT, 1, memb_size);
     if (H5Tinsert (s5_tid, "a", HOFFSET(s5_t,a), H5T_NATIVE_INT) < 0 ||
             H5Tinsert (s5_tid, "b", HOFFSET(s5_t,b), H5T_NATIVE_INT) < 0 ||
             H5Tinsert (s5_tid, "c", HOFFSET(s5_t,c), array_dt) < 0 ||
@@ -452,7 +452,7 @@ test_compound (char *filename, hid_t fapl)
     /* Create a data type for s6 */
     if ((s6_tid = H5Tcreate (H5T_COMPOUND, sizeof(s6_t))) < 0)
         goto error;
-    array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, memb_size, NULL);
+    array_dt = H5Tarray_create2(H5T_NATIVE_INT, 1, memb_size);
     if (H5Tinsert (s6_tid, "a", HOFFSET(s6_t,a), H5T_NATIVE_INT) < 0 ||
             H5Tinsert (s6_tid, "b", HOFFSET(s6_t,b), H5T_NATIVE_INT) < 0 ||
             H5Tinsert (s6_tid, "c", HOFFSET(s6_t,c), array_dt) < 0 ||
@@ -1034,12 +1034,12 @@ create_stype1(void)
     const hsize_t	eight = 8, sixteen = 16;
 
     /* Build hdf5 datatypes */
-    if((array_dt1 = H5Tarray_create(H5T_NATIVE_INT,1, &eight, NULL)) < 0)
+    if((array_dt1 = H5Tarray_create2(H5T_NATIVE_INT,1, &eight)) < 0)
         goto error;
-    if((array_dt2 = H5Tarray_create(H5T_NATIVE_FLOAT,1, &sixteen, NULL)) < 0)
+    if((array_dt2 = H5Tarray_create2(H5T_NATIVE_FLOAT,1, &sixteen)) < 0)
         goto error;
 
-    if ((tid=H5Tcreate(H5T_COMPOUND, sizeof(stype1))) < 0 ||
+    if((tid = H5Tcreate(H5T_COMPOUND, sizeof(stype1))) < 0 ||
             H5Tinsert(tid, "a", HOFFSET(stype1, a), H5T_NATIVE_INT) < 0 ||
             H5Tinsert(tid, "b", HOFFSET(stype1, b), H5T_NATIVE_INT) < 0 ||
             H5Tinsert(tid, "c", HOFFSET(stype1, c), array_dt1) < 0 ||
@@ -1090,12 +1090,12 @@ create_stype2(void)
     const hsize_t	eight = 8, sixteen = 16;
 
     /* Build hdf5 datatypes */
-    if((array_dt1 = H5Tarray_create(H5T_NATIVE_INT,1, &eight, NULL)) < 0)
+    if((array_dt1 = H5Tarray_create2(H5T_NATIVE_INT,1, &eight)) < 0)
         goto error;
-    if((array_dt2 = H5Tarray_create(H5T_NATIVE_FLOAT,1, &sixteen, NULL)) < 0)
+    if((array_dt2 = H5Tarray_create2(H5T_NATIVE_FLOAT,1, &sixteen)) < 0)
         goto error;
 
-    if ((tid=H5Tcreate(H5T_COMPOUND, sizeof(stype2))) < 0 ||
+    if((tid = H5Tcreate(H5T_COMPOUND, sizeof(stype2))) < 0 ||
             H5Tinsert(tid, "a", HOFFSET(stype2, a), H5T_NATIVE_INT) < 0 ||
             H5Tinsert(tid, "b", HOFFSET(stype2, b), H5T_NATIVE_INT) < 0 ||
             H5Tinsert(tid, "c", HOFFSET(stype2, c), array_dt1) < 0 ||
@@ -1149,10 +1149,10 @@ create_stype3(void)
     const hsize_t	eight = 8;
 
     /* Build hdf5 datatypes */
-    if((array_dt1 = H5Tarray_create(H5T_NATIVE_INT,1, &eight, NULL)) < 0)
+    if((array_dt1 = H5Tarray_create2(H5T_NATIVE_INT,1, &eight)) < 0)
         goto error;
 
-    if ((tid=H5Tcreate(H5T_COMPOUND, sizeof(stype3))) < 0 ||
+    if((tid = H5Tcreate(H5T_COMPOUND, sizeof(stype3))) < 0 ||
             H5Tinsert(tid, "a", HOFFSET(stype3, a), H5T_NATIVE_INT) < 0 ||
             H5Tinsert(tid, "b", HOFFSET(stype3, b), H5T_NATIVE_INT) < 0 ||
             H5Tinsert(tid, "c", HOFFSET(stype3, c), array_dt1) < 0 ||
@@ -1192,12 +1192,12 @@ create_stype4(void)
     const hsize_t	eight = 8, sixteen = 16;
 
     /* Build hdf5 datatypes */
-    if((array_dt1 = H5Tarray_create(H5T_NATIVE_INT,1, &eight, NULL)) < 0)
+    if((array_dt1 = H5Tarray_create2(H5T_NATIVE_INT,1, &eight)) < 0)
         goto error;
-    if((array_dt2 = H5Tarray_create(H5T_NATIVE_FLOAT,1, &sixteen, NULL)) < 0)
+    if((array_dt2 = H5Tarray_create2(H5T_NATIVE_FLOAT,1, &sixteen)) < 0)
         goto error;
 
-    if ((tid=H5Tcreate(H5T_COMPOUND, sizeof(stype4))) < 0 ||
+    if((tid = H5Tcreate(H5T_COMPOUND, sizeof(stype4))) < 0 ||
             H5Tinsert(tid, "a", HOFFSET(stype4, a), H5T_NATIVE_INT) < 0 ||
             H5Tinsert(tid, "b", HOFFSET(stype4, b), H5T_NATIVE_INT) < 0 ||
             H5Tinsert(tid, "c", HOFFSET(stype4, c), array_dt1) < 0 ||

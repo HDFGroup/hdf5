@@ -643,7 +643,7 @@ hsize_t diff_datum(void       *_mem1,
          memb_type = H5Tget_super(m_type);
          size      = H5Tget_size(memb_type);
          ndims     = H5Tget_array_ndims(m_type);
-         H5Tget_array_dims(m_type, adims, NULL);
+         H5Tget_array_dims2(m_type, adims);
          assert(ndims >= 1 && ndims <= H5S_MAX_RANK);
          
          /* calculate the number of array elements */

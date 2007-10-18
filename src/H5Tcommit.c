@@ -139,7 +139,7 @@ H5T_commit_named(const H5G_loc_t *loc, const char *name, H5T_t *dt,
 {
     H5O_obj_create_t ocrt_info;             /* Information for object creation */
     H5T_obj_create_t tcrt_info;             /* Information for named datatype creation */
-    H5T_state_t old_state;                  /* The state of the datatype before H5T_commit. */
+    H5T_state_t old_state = H5T_STATE_TRANSIENT;        /* The state of the datatype before H5T_commit. */
     herr_t      ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_NOAPI(H5T_commit_named, FAIL)

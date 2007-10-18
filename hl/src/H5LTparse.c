@@ -888,7 +888,7 @@ break;
 case 57:
 #line 213 "H5LTparse.y"
 { 
-                          yyval.ival = H5Tarray_create(yyvsp[-1].ival, arr_stack[asindex].ndims, arr_stack[asindex].dims, NULL);
+                          yyval.ival = H5Tarray_create2(yyvsp[-1].ival, arr_stack[asindex].ndims, arr_stack[asindex].dims);
                           arr_stack[asindex].ndims = 0;
                           asindex--;
                           H5Tclose(yyvsp[-1].ival);

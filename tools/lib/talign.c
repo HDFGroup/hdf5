@@ -79,12 +79,12 @@ int main(void)
     H5Tinsert(cmp, "Awkward length", 0, cs6);
 
     cdim[0] = sizeof(fok) / sizeof(float);
-    array_dt = H5Tarray_create(H5T_NATIVE_FLOAT, 1, cdim, NULL);
+    array_dt = H5Tarray_create2(H5T_NATIVE_FLOAT, 1, cdim);
     H5Tinsert(cmp, "Ok", sizeof(string5), array_dt);
     H5Tclose(array_dt);
 
     cdim[0] = sizeof(fnok) / sizeof(float);
-    array_dt = H5Tarray_create(H5T_NATIVE_FLOAT, 1, cdim, NULL);
+    array_dt = H5Tarray_create2(H5T_NATIVE_FLOAT, 1, cdim);
     H5Tinsert(cmp, "Not Ok", sizeof(fok) + sizeof(string5), array_dt);
     H5Tclose(array_dt);
 
@@ -93,7 +93,7 @@ int main(void)
     cmp1 = H5Tcreate(H5T_COMPOUND, sizeof(fok));
 
     cdim[0] = sizeof(fok) / sizeof(float);
-    array_dt = H5Tarray_create(H5T_NATIVE_FLOAT, 1, cdim, NULL);
+    array_dt = H5Tarray_create2(H5T_NATIVE_FLOAT, 1, cdim);
     H5Tinsert(cmp1, "Ok", 0, array_dt);
     H5Tclose(array_dt);
 
@@ -103,7 +103,7 @@ int main(void)
     cmp3 = H5Tcreate(H5T_COMPOUND, sizeof(fnok));
 
     cdim[0] = sizeof(fnok) / sizeof(float);
-    array_dt = H5Tarray_create(H5T_NATIVE_FLOAT, 1, cdim, NULL);
+    array_dt = H5Tarray_create2(H5T_NATIVE_FLOAT, 1, cdim);
     H5Tinsert(cmp3, "Not Ok", 0, array_dt);
     H5Tclose(array_dt);
 

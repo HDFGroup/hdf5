@@ -1067,7 +1067,7 @@ display_array_type(hid_t type, int ind)
     ndims = H5Tget_array_ndims(type);
     if (ndims) {
         dims = malloc(ndims*sizeof(dims[0]));
-        H5Tget_array_dims(type, dims, NULL);
+        H5Tget_array_dims2(type, dims);
 
         /* Print dimensions */
         for (i=0; i<ndims; i++)

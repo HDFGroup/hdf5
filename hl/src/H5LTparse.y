@@ -211,7 +211,7 @@ offset          :       NUMBER
 array_type      :       H5T_ARRAY_TOKEN { asindex++; /*pushd onto the stack*/ }
                         '{' dim_list ddl_type '}'
                         { 
-                          $<ival>$ = H5Tarray_create($<ival>5, arr_stack[asindex].ndims, arr_stack[asindex].dims, NULL);
+                          $<ival>$ = H5Tarray_create2($<ival>5, arr_stack[asindex].ndims, arr_stack[asindex].dims);
                           arr_stack[asindex].ndims = 0;
                           asindex--;
                           H5Tclose($<ival>5);

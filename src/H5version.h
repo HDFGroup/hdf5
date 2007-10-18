@@ -114,9 +114,17 @@
 #define H5Rget_obj_type_vers 1
 #endif /* !defined(H5Rget_obj_type_vers) */
 
+#if !defined(H5Tarray_create_vers)
+#define H5Tarray_create_vers 1
+#endif /* !defined(H5Tarray_create_vers) */
+
 #if !defined(H5Tcommit_vers)
 #define H5Tcommit_vers 1
 #endif /* !defined(H5Tcommit_vers) */
+
+#if !defined(H5Tget_array_dims_vers)
+#define H5Tget_array_dims_vers 1
+#endif /* !defined(H5Tget_array_dims_vers) */
 
 #if !defined(H5Topen_vers)
 #define H5Topen_vers 1
@@ -358,6 +366,17 @@
 #error "H5Rget_obj_type_vers set to invalid value"
 #endif /* H5Rget_obj_type_vers */
 
+#if !defined(H5Tarray_create_vers) || H5Tarray_create_vers == 2
+#ifndef H5Tarray_create_vers
+#define H5Tarray_create_vers 2
+#endif /* H5Tarray_create_vers */
+#define H5Tarray_create H5Tarray_create2
+#elif H5Tarray_create_vers == 1
+#define H5Tarray_create H5Tarray_create1
+#else /* H5Tarray_create_vers */
+#error "H5Tarray_create_vers set to invalid value"
+#endif /* H5Tarray_create_vers */
+
 #if !defined(H5Tcommit_vers) || H5Tcommit_vers == 2
 #ifndef H5Tcommit_vers
 #define H5Tcommit_vers 2
@@ -368,6 +387,17 @@
 #else /* H5Tcommit_vers */
 #error "H5Tcommit_vers set to invalid value"
 #endif /* H5Tcommit_vers */
+
+#if !defined(H5Tget_array_dims_vers) || H5Tget_array_dims_vers == 2
+#ifndef H5Tget_array_dims_vers
+#define H5Tget_array_dims_vers 2
+#endif /* H5Tget_array_dims_vers */
+#define H5Tget_array_dims H5Tget_array_dims2
+#elif H5Tget_array_dims_vers == 1
+#define H5Tget_array_dims H5Tget_array_dims1
+#else /* H5Tget_array_dims_vers */
+#error "H5Tget_array_dims_vers set to invalid value"
+#endif /* H5Tget_array_dims_vers */
 
 #if !defined(H5Topen_vers) || H5Topen_vers == 2
 #ifndef H5Topen_vers

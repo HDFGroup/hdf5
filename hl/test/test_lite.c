@@ -1420,7 +1420,7 @@ static int test_arrays(void)
     if(ndims != 3)
         goto out;
 
-    if(H5Tget_array_dims(dtype, dims, NULL) < 0)
+    if(H5Tget_array_dims2(dtype, dims) < 0)
         goto out;
     if(dims[0] != 5 || dims[1] != 7 || dims[2] != 13)
         goto out;

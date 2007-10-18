@@ -487,10 +487,10 @@ make_dtype_2(void)
     }
 
     /* Create arrays of arrays of arrays of enums */
-    if((dtype2_id = H5Tarray_create(enum_id, 3, dims, NULL)) < 0) TEST_ERROR
-    if((dtype2_id = H5Tarray_create(dtype2_id, 4, dims, NULL)) < 0) TEST_ERROR
-    if((dtype2_id = H5Tarray_create(dtype2_id, 2, dims, NULL)) < 0) TEST_ERROR
-    if((dtype2_id = H5Tarray_create(dtype2_id, 1, dims, NULL)) < 0) TEST_ERROR
+    if((dtype2_id = H5Tarray_create2(enum_id, 3, dims)) < 0) TEST_ERROR
+    if((dtype2_id = H5Tarray_create2(dtype2_id, 4, dims)) < 0) TEST_ERROR
+    if((dtype2_id = H5Tarray_create2(dtype2_id, 2, dims)) < 0) TEST_ERROR
+    if((dtype2_id = H5Tarray_create2(dtype2_id, 1, dims)) < 0) TEST_ERROR
 
     if(H5Tclose(enum_id) < 0) TEST_ERROR
     if(H5Tclose(int_id) < 0) TEST_ERROR

@@ -60,11 +60,9 @@ ArrayType::ArrayType( const hid_t existing_id ) : DataType( existing_id )
    // Get the dimensions of the existing array and store it in this array
    dimensions = new hsize_t[rank];
    //hsize_t rdims2[H5S_MAX_RANK];
-   int ret_value = H5Tget_array_dims(id, dimensions, NULL);
+   int ret_value = H5Tget_array_dims2(id, dimensions);
    if (ret_value < 0)
-   {
-      throw DataTypeIException("ArrayType::getArrayDims", "H5Tget_array_dims failed");
-   }
+      throw DataTypeIException("ArrayType::getArrayDims", "H5Tget_array_dims2 failed");
 }
 
 //--------------------------------------------------------------------------
@@ -92,11 +90,9 @@ ArrayType::ArrayType( const ArrayType& original ) : DataType( original )
 //--------------------------------------------------------------------------
 ArrayType::ArrayType(const DataType& base_type, int ndims, const hsize_t* dims) : DataType()
 {
-   hid_t new_type_id = H5Tarray_create(base_type.getId(), ndims, dims, NULL);
+   hid_t new_type_id = H5Tarray_create2(base_type.getId(), ndims, dims);
    if (new_type_id < 0)
-   {
-      throw DataTypeIException("ArrayType constructor", "H5Tarray_create failed");
-   }
+      throw DataTypeIException("ArrayType constructor", "H5Tarray_create2 failed");
    id = new_type_id;
    rank = ndims;
    dimensions = new hsize_t[rank];
@@ -139,11 +135,9 @@ int ArrayType::getArrayDims(hsize_t* dims)
    // if the array's dimensions have not been stored, retrieve them via C API
    if (dimensions == NULL)
    {
-      int ndims = H5Tget_array_dims(id, dims, NULL);
+      int ndims = H5Tget_array_dims2(id, dims);
       if (ndims < 0)
-      {
-         throw DataTypeIException("ArrayType::getArrayDims", "H5Tget_array_dims failed");
-      }
+         throw DataTypeIException("ArrayType::getArrayDims", "H5Tget_array_dims2 failed");
       // store the array's info in memory
       rank = ndims;
       dimensions = new hsize_t[rank];

@@ -2173,7 +2173,7 @@ next:
             /* Get array information */
             if((ndims = H5Tget_array_ndims(dtype)) < 0)
                 goto out;
-            if(H5Tget_array_dims(dtype, dims, NULL) < 0)
+            if(H5Tget_array_dims2(dtype, dims) < 0)
                 goto out;
 
             /* Print array dimensions */

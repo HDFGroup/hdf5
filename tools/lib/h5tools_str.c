@@ -916,7 +916,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
         memb = H5Tget_super(type);
         size = H5Tget_size(memb);
         ndims = H5Tget_array_ndims(type);
-        H5Tget_array_dims(type, dims, NULL);
+        H5Tget_array_dims2(type, dims);
         assert(ndims >= 1 && ndims <= H5S_MAX_RANK);
 
         /* Calculate the number of array elements */

@@ -93,8 +93,8 @@ main(void)
         printf("field 1 insert<0!\n");
 
     /* Creat the array datatype */
-    arr_type=H5Tarray_create(H5T_NATIVE_FLOAT,ARRAY1_RANK,tdims1,NULL);
-    if(arr_type<0)
+    arr_type = H5Tarray_create2(H5T_NATIVE_FLOAT, ARRAY1_RANK, tdims1);
+    if(arr_type < 0)
         printf("arr_type<0!\n");
 
     /* Insert float array field */
@@ -108,8 +108,8 @@ main(void)
         printf("field 3 array close<0!\n");
 
     /* Creat the array datatype */
-    arr_type=H5Tarray_create(H5T_NATIVE_LONG,ARRAY1_RANK,tdims1,NULL);
-    if(arr_type<0)
+    arr_type = H5Tarray_create2(H5T_NATIVE_LONG, ARRAY1_RANK, tdims1);
+    if(arr_type < 0)
         printf("arr_type<0!\n");
 
     /* Insert long array field */
@@ -137,8 +137,8 @@ main(void)
     H5Tclose(type);
 
     /* Create the compound datatype with array fields */
-    type = H5Tarray_create(H5T_NATIVE_INT, ARRAY1_RANK, tdims1, NULL);
-    if(type<0)
+    type = H5Tarray_create2(H5T_NATIVE_INT, ARRAY1_RANK, tdims1);
+    if(type < 0)
         printf("type<0!\n");
 
     /* Create the dataset with array datatype */

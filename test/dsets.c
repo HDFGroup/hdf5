@@ -830,9 +830,9 @@ test_conv_buffer(hid_t fid)
   /* Create the memory data type */
   if((ctype1 = H5Tcreate(H5T_COMPOUND, sizeof (CmpField))) < 0) goto error;
 
-  if((arr_type1 = H5Tarray_create(H5T_NATIVE_INT, 3, dimsa, NULL)) < 0) goto error;
-  if((arr_type2 = H5Tarray_create(H5T_NATIVE_FLOAT, 1, dimsb, NULL)) < 0) goto error;
-  if((arr_type3 = H5Tarray_create(H5T_NATIVE_DOUBLE, 1, dimsc, NULL)) < 0) goto error;
+  if((arr_type1 = H5Tarray_create2(H5T_NATIVE_INT, 3, dimsa)) < 0) goto error;
+  if((arr_type2 = H5Tarray_create2(H5T_NATIVE_FLOAT, 1, dimsb)) < 0) goto error;
+  if((arr_type3 = H5Tarray_create2(H5T_NATIVE_DOUBLE, 1, dimsc)) < 0) goto error;
 
   if(H5Tinsert(ctype1, "A", HOFFSET(CmpField, a), arr_type1) < 0) goto error;
   if(H5Tinsert (ctype1, "B", HOFFSET(CmpField, b), arr_type2) < 0) goto error;
@@ -844,8 +844,8 @@ test_conv_buffer(hid_t fid)
 
   if((ctype2 = H5Tcreate(H5T_COMPOUND, sizeof (CmpFieldR))) < 0) goto error;
 
-  if((arr_type4 = H5Tarray_create(H5T_NATIVE_FLOAT, 1, dimsb, NULL)) < 0) goto error;
-  if((arr_type5 = H5Tarray_create(H5T_NATIVE_DOUBLE, 1, dimsc, NULL)) < 0) goto error;
+  if((arr_type4 = H5Tarray_create2(H5T_NATIVE_FLOAT, 1, dimsb)) < 0) goto error;
+  if((arr_type5 = H5Tarray_create2(H5T_NATIVE_DOUBLE, 1, dimsc)) < 0) goto error;
 
   if(H5Tinsert (ctype2, "B", HOFFSET(CmpFieldR, b), arr_type4) < 0) goto error;
   if(H5Tinsert (ctype2, "C", HOFFSET(CmpFieldR, c), arr_type5) < 0) goto error;
@@ -2959,10 +2959,10 @@ test_nbit_array(hid_t file)
     if(H5Tset_order(base_datatype, H5T_ORDER_BE) < 0) goto error;
 
     /* Create dataset array datatype */
-    array_datatype = H5Tarray_create(base_datatype, 2, adims, NULL);
+    array_datatype = H5Tarray_create2(base_datatype, 2, adims);
 
     /* Create memory array datatype */
-    mem_array_datatype = H5Tarray_create(mem_base_datatype, 2, adims, NULL);
+    mem_array_datatype = H5Tarray_create2(mem_base_datatype, 2, adims);
 
     /* Create the data space */
     if((space = H5Screate_simple(2, size, NULL)) < 0) goto error;
@@ -3370,11 +3370,11 @@ test_nbit_compound_2(hid_t file)
     base_tid = H5Tcopy(H5T_NATIVE_CHAR);
     if(H5Tset_precision(base_tid,precision[4]) < 0) goto error;
     if(H5Tset_offset(base_tid,offset[4]) < 0) goto error;
-    array_tid = H5Tarray_create(base_tid, 2, array_dims, NULL);
+    array_tid = H5Tarray_create2(base_tid, 2, array_dims);
 
     /* Create the complex memory and dataset array datatype */
-    array_cmplx_tid = H5Tarray_create(cmpd_tid1, 2, array_dims, NULL);
-    mem_array_cmplx_tid = H5Tarray_create(mem_cmpd_tid1, 2, array_dims, NULL);
+    array_cmplx_tid = H5Tarray_create2(cmpd_tid1, 2, array_dims);
+    mem_array_cmplx_tid = H5Tarray_create2(mem_cmpd_tid1, 2, array_dims);
 
     /* Create a memory complex compound datatype before setting the order */
     mem_cmpd_tid2 = H5Tcreate(H5T_COMPOUND, sizeof(complex));

@@ -3017,7 +3017,7 @@ H5T_create(H5T_class_t type, size_t size)
             HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, NULL, "base type required - use H5Tvlen_create()");
 
         case H5T_ARRAY:  /* Array datatype */
-            HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, NULL, "base type required - use H5Tarray_create()");
+            HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, NULL, "base type required - use H5Tarray_create2()");
 
         default:
             HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, NULL, "unknown data type class");
@@ -4712,7 +4712,7 @@ done:
 H5O_loc_t *
 H5T_oloc(H5T_t *dt)
 {
-    H5O_loc_t *ret_value;
+    H5O_loc_t *ret_value = NULL;
 
     FUNC_ENTER_NOAPI(H5T_oloc, NULL)
 
@@ -4751,7 +4751,7 @@ done:
 H5G_name_t *
 H5T_nameof(H5T_t *dt)
 {
-    H5G_name_t *ret_value;
+    H5G_name_t *ret_value = NULL;
 
     FUNC_ENTER_NOAPI(H5T_nameof, NULL)
 

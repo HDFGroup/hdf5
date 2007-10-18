@@ -327,10 +327,10 @@ test_detect(void)
     hid_t atom_arr_id;  /* Atomic Array datatype */
     hid_t atom_vlf_id;  /* Atomic VL datatype of float */
     hid_t atom_vlc_id;  /* Atomic VL datatype of char */
-    hid_t atom_vls_id;       /* Atomic VL string datatype */
+    hid_t atom_vls_id;  /* Atomic VL string datatype */
     hid_t cplx_cmpd_id; /* Complex Compound datatype */
-    unsigned rank = 2;         /* Rank for array datatype */
-    hsize_t dims[2]={3,3};      /* Dimensions for array datatype */
+    unsigned rank = 2;  /* Rank for array datatype */
+    hsize_t dims[2] = {3,3};    /* Dimensions for array datatype */
 
     TESTING("H5Tdetect_class()");
 
@@ -367,20 +367,8 @@ test_detect(void)
     /*--------------------------------------------------------------------------------
      *  Test class of some complex types.
      *------------------------------------------------------------------------------*/
-    /* Try to create array datatype with a dimension permutation (should fail) */
-    H5E_BEGIN_TRY {
-        int perm[2]={0,1};      /* Dimensions permutations for array datatype */
-
-        atom_arr_id = H5Tarray_create(H5T_STD_REF_OBJ, rank, dims, perm);
-    } H5E_END_TRY;
-    if(atom_arr_id>=0) {
-        H5_FAILED();
-        printf("Dimension permutation accepted?\n");
-        goto error;
-    } /* end if */
-
     /* Create an array datatype with an atomic base type */
-    if((atom_arr_id = H5Tarray_create(H5T_STD_REF_OBJ, rank, dims, NULL)) < 0) TEST_ERROR
+    if((atom_arr_id = H5Tarray_create2(H5T_STD_REF_OBJ, rank, dims)) < 0) TEST_ERROR
 
     /* Make certain that the correct classes can be detected */
     if(H5Tdetect_class(atom_arr_id,H5T_ARRAY)!=TRUE) TEST_ERROR
@@ -699,8 +687,8 @@ test_compound_2(void)
     HDmemcpy(buf, orig, nelmts*sizeof(struct st));
 
     /* Build hdf5 datatypes */
-    array_dt = H5Tarray_create(H5T_NATIVE_INT,1, &four, NULL);
-    if ((st=H5Tcreate(H5T_COMPOUND, sizeof(struct st))) < 0 ||
+    array_dt = H5Tarray_create2(H5T_NATIVE_INT,1, &four);
+    if((st = H5Tcreate(H5T_COMPOUND, sizeof(struct st))) < 0 ||
             H5Tinsert(st, "a", HOFFSET(struct st, a), H5T_NATIVE_INT) < 0 ||
             H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_INT) < 0 ||
             H5Tinsert(st, "c", HOFFSET(struct st, c), array_dt) < 0 ||
@@ -709,8 +697,8 @@ test_compound_2(void)
         goto error;
     H5Tclose(array_dt);
 
-    array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
-    if ((dt=H5Tcreate(H5T_COMPOUND, sizeof(struct dt))) < 0 ||
+    array_dt = H5Tarray_create2(H5T_NATIVE_INT, 1, &four);
+    if((dt = H5Tcreate(H5T_COMPOUND, sizeof(struct dt))) < 0 ||
             H5Tinsert(dt, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT) < 0 ||
             H5Tinsert(dt, "b", HOFFSET(struct dt, b), H5T_NATIVE_INT) < 0 ||
             H5Tinsert(dt, "c", HOFFSET(struct dt, c), array_dt) < 0 ||
@@ -816,8 +804,8 @@ test_compound_3(void)
     HDmemcpy(buf, orig, nelmts*sizeof(struct st));
 
     /* Build hdf5 datatypes */
-    array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
-    if ((st=H5Tcreate(H5T_COMPOUND, sizeof(struct st))) < 0 ||
+    array_dt = H5Tarray_create2(H5T_NATIVE_INT, 1, &four);
+    if((st = H5Tcreate(H5T_COMPOUND, sizeof(struct st))) < 0 ||
             H5Tinsert(st, "a", HOFFSET(struct st, a), H5T_NATIVE_INT) < 0 ||
             H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_INT) < 0 ||
             H5Tinsert(st, "c", HOFFSET(struct st, c), array_dt) < 0 ||
@@ -826,8 +814,8 @@ test_compound_3(void)
         goto error;
     H5Tclose(array_dt);
 
-    array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
-    if ((dt=H5Tcreate(H5T_COMPOUND, sizeof(struct dt))) < 0 ||
+    array_dt = H5Tarray_create2(H5T_NATIVE_INT, 1, &four);
+    if((dt = H5Tcreate(H5T_COMPOUND, sizeof(struct dt))) < 0 ||
             H5Tinsert(dt, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT) < 0 ||
             H5Tinsert(dt, "c", HOFFSET(struct dt, c), array_dt) < 0 ||
             H5Tinsert(dt, "e", HOFFSET(struct dt, e), H5T_NATIVE_INT) < 0)
@@ -934,8 +922,8 @@ test_compound_4(void)
     HDmemcpy(buf, orig, nelmts*sizeof(struct st));
 
     /* Build hdf5 datatypes */
-    array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
-    if ((st=H5Tcreate(H5T_COMPOUND, sizeof(struct st))) < 0 ||
+    array_dt = H5Tarray_create2(H5T_NATIVE_INT, 1, &four);
+    if((st = H5Tcreate(H5T_COMPOUND, sizeof(struct st))) < 0 ||
             H5Tinsert(st, "a", HOFFSET(struct st, a), H5T_NATIVE_INT) < 0 ||
             H5Tinsert(st, "b", HOFFSET(struct st, b), H5T_NATIVE_INT) < 0 ||
             H5Tinsert(st, "c", HOFFSET(struct st, c), array_dt) < 0 ||
@@ -944,8 +932,8 @@ test_compound_4(void)
         goto error;
     H5Tclose(array_dt);
 
-    array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, &four, NULL);
-    if ((dt=H5Tcreate(H5T_COMPOUND, sizeof(struct dt))) < 0 ||
+    array_dt = H5Tarray_create2(H5T_NATIVE_INT, 1, &four);
+    if((dt = H5Tcreate(H5T_COMPOUND, sizeof(struct dt))) < 0 ||
             H5Tinsert(dt, "a", HOFFSET(struct dt, a), H5T_NATIVE_INT) < 0 ||
             H5Tinsert(dt, "b", HOFFSET(struct dt, b), H5T_NATIVE_SHORT) < 0 ||
             H5Tinsert(dt, "c", HOFFSET(struct dt, c), array_dt) < 0 ||
@@ -1052,12 +1040,12 @@ test_compound_5(void)
 
     /* Build datatypes */
     short_array = H5Tcreate(H5T_COMPOUND, 4*sizeof(short));
-    array_dt = H5Tarray_create(H5T_NATIVE_SHORT, 1, dims, NULL);
+    array_dt = H5Tarray_create2(H5T_NATIVE_SHORT, 1, dims);
     H5Tinsert(short_array, "_", 0, array_dt);
     H5Tclose(array_dt);
 
     int_array   = H5Tcreate(H5T_COMPOUND, 4*sizeof(int));
-    array_dt = H5Tarray_create(H5T_NATIVE_INT, 1, dims, NULL);
+    array_dt = H5Tarray_create2(H5T_NATIVE_INT, 1, dims);
     H5Tinsert(int_array, "_", 0, array_dt);
     H5Tclose(array_dt);
 
@@ -1803,7 +1791,7 @@ test_compound_10(void)
     } /* end if */
 
     /* Create the array datatype for c_string data */
-    if((arr_tid = H5Tarray_create(cmpd_tid, 1, arr_dim, NULL)) < 0) {
+    if((arr_tid = H5Tarray_create2(cmpd_tid, 1, arr_dim)) < 0) {
         H5_FAILED(); AT();
         printf("Can't create array type\n");
         goto error;
@@ -4683,7 +4671,7 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_compat
+ * Function:	test_deprec
  *
  * Purpose:	Tests deprecated API routines for datatypes.
  *
@@ -4697,14 +4685,62 @@ error:
  */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 static int
-test_compat(hid_t fapl)
+test_deprec(hid_t fapl)
 {
     hid_t		file = -1;              /* File ID */
     hid_t		type = -1;              /* Datatype ID */
+    unsigned            rank = 2;               /* Rank for array datatype */
+    hsize_t             dims[2] = {3, 3};       /* Dimensions for array datatype */
+    int                 perm[2] = {0, 1};       /* Dimensions permutations for array datatype */
+    hsize_t             rdims[2]= {0, 0};       /* Dimensions for querying array datatype */
+    int                 rperm[2] = {-2, -2};    /* Dimensions permutations for array datatype */
+    hbool_t             dim_mismatch;           /* Whether any dimensions didn't match */
     char		filename[1024];
+    unsigned            u;                      /* Local index variable */
     herr_t		status;                 /* Generic routine value */
 
     TESTING("deprected API routines for datatypes");
+
+    /* Create an array datatype with an atomic base type */
+    /* (dimension permutations allowed, but not stored) */
+    if((type = H5Tarray_create1(H5T_NATIVE_INT, rank, dims, perm)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Make certain that the correct classes can be detected */
+    if(H5Tdetect_class(type, H5T_ARRAY) != TRUE)
+        FAIL_STACK_ERROR
+    if(H5Tdetect_class(type, H5T_INTEGER) != TRUE)
+        FAIL_STACK_ERROR
+
+    /* Get the array dimensions */
+    /* (Query the dimension permutations, which is allowed, but ignored) */
+    if(H5Tget_array_dims1(type, rdims, rperm) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check the array dimensions */
+    dim_mismatch = FALSE;
+    for(u = 0; u < rank; u++)
+        if(rdims[u] != dims[u]) {
+            TestErrPrintf("Array dimension information doesn't match!, rdims1[%u]=%d, tdims1[%u]=%d\n", u, (int)rdims[u], u, (int)dims[u]);
+            dim_mismatch = TRUE;
+        } /* end if */
+    if(dim_mismatch)
+	FAIL_PUTS_ERROR("    Dimensions didn't match!")
+
+    /* Check the array dimension permutations */
+    dim_mismatch = FALSE;
+    for(u = 0; u < rank; u++)
+        if(rperm[u] != -2) {
+            TestErrPrintf("Array dimension permutation information was modified!, rdims1[%u]=%d, tdims1[%u]=%d\n", u, rperm[u], u, perm[u]);
+            dim_mismatch = TRUE;
+        } /* end if */
+    if(dim_mismatch)
+	FAIL_PUTS_ERROR("    Dimension permutations modified!")
+
+    /* Close the datatype */
+    if(H5Tclose(type) < 0)
+        FAIL_STACK_ERROR
+
 
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
@@ -4760,7 +4796,7 @@ error:
 	H5Fclose(file);
     } H5E_END_TRY;
     return 1;
-} /* end test_compat() */
+} /* end test_deprec() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
@@ -4807,7 +4843,7 @@ main(void)
     nerrors += test_latest();
     nerrors += test_int_float_except();
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-    nerrors += test_compat(fapl);
+    nerrors += test_deprec(fapl);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
     h5_cleanup(FILENAME, fapl); /*must happen before first reset*/
     reset_hdf5();

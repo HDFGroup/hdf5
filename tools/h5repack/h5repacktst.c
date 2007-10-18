@@ -3137,8 +3137,8 @@ void write_dset_in(hid_t loc_id,
    }
  }
 
- type_id = H5Tarray_create(H5T_NATIVE_INT, 1, dimarray, NULL);
- write_dset(loc_id,1,dims,"array",type_id,buf6);
+ type_id = H5Tarray_create2(H5T_NATIVE_INT, 1, dimarray);
+ write_dset(loc_id, 1, dims, "array", type_id, buf6);
  status = H5Tclose(type_id);
 
 /*-------------------------------------------------------------------------
@@ -3284,8 +3284,8 @@ void write_dset_in(hid_t loc_id,
  }
 
 
- type_id = H5Tarray_create(H5T_NATIVE_INT, 1, dimarray, NULL);
- write_dset(loc_id,2,dims2,"array2D",type_id,buf62);
+ type_id = H5Tarray_create2(H5T_NATIVE_INT, 1, dimarray);
+ write_dset(loc_id, 2, dims2, "array2D", type_id, buf62);
  status = H5Tclose(type_id);
 
 /*-------------------------------------------------------------------------
@@ -3454,16 +3454,16 @@ void write_dset_in(hid_t loc_id,
  */
 
 
- n=1;
- for (i = 0; i < 24; i++) {
-  for (j = 0; j < (int)dimarray[0]; j++) {
-    if (make_diffs) buf63[i][j]=0;
-    else buf63[i][j]=n++;
-  }
- }
+ n = 1;
+ for(i = 0; i < 24; i++)
+  for(j = 0; j < (int)dimarray[0]; j++)
+    if(make_diffs)
+        buf63[i][j] = 0;
+    else
+        buf63[i][j] = n++;
 
- type_id = H5Tarray_create(H5T_NATIVE_INT, 1, dimarray, NULL);
- write_dset(loc_id,3,dims3,"array3D",type_id,buf63);
+ type_id = H5Tarray_create2(H5T_NATIVE_INT, 1, dimarray);
+ write_dset(loc_id, 3, dims3, "array3D", type_id, buf63);
  status = H5Tclose(type_id);
 
 /*-------------------------------------------------------------------------
@@ -3874,8 +3874,8 @@ position        array of </g1>  array of </g1>  difference
 [ 1 ]          5               0               5
 [ 1 ]          6               0               6
  */
- type_id = H5Tarray_create(H5T_NATIVE_INT, 1, dimarray, NULL);
- make_attr(loc_id,1,dims,"array",type_id,buf6);
+ type_id = H5Tarray_create2(H5T_NATIVE_INT, 1, dimarray);
+ make_attr(loc_id, 1, dims, "array", type_id, buf6);
  status = H5Tclose(type_id);
 
 /*-------------------------------------------------------------------------
@@ -3883,14 +3883,12 @@ position        array of </g1>  array of </g1>  difference
  *-------------------------------------------------------------------------
  */
 
- if (make_diffs)
- {
-  for (i=0; i<2; i++)
-  {
+ if(make_diffs)
+  for(i = 0; i < 2; i++) {
    buf7[i]=0;
    buf8[i]=0;
   }
- }
+
  /*
  buf7[2]= {1,2};
  buf8[2]= {1,2};
@@ -4153,8 +4151,8 @@ position        array2D of </g1> array2D of </g1> difference
 [ 2 1 ]          17              0               17
 [ 2 1 ]          18              0               18
  */
- type_id = H5Tarray_create(H5T_NATIVE_INT, 1, dimarray, NULL);
- make_attr(loc_id,2,dims2,"array2D",type_id,buf62);
+ type_id = H5Tarray_create2(H5T_NATIVE_INT, 1, dimarray);
+ make_attr(loc_id, 2, dims2, "array2D", type_id, buf62);
  status = H5Tclose(type_id);
 
 /*-------------------------------------------------------------------------
@@ -4162,10 +4160,9 @@ position        array2D of </g1> array2D of </g1> difference
  *-------------------------------------------------------------------------
  */
 
- if (make_diffs)
- {
-  memset(buf72,0,sizeof buf72);
-  memset(buf82,0,sizeof buf82);
+ if(make_diffs) {
+  HDmemset(buf72, 0, sizeof buf72);
+  HDmemset(buf82, 0, sizeof buf82);
  }
 /*
 Attribute:   <integer2D> and <integer2D>
@@ -4541,29 +4538,26 @@ etc
 etc
 */
 
- type_id = H5Tarray_create(H5T_NATIVE_INT, 1, dimarray, NULL);
- make_attr(loc_id,3,dims3,"array3D",type_id,buf63);
+ type_id = H5Tarray_create2(H5T_NATIVE_INT, 1, dimarray);
+ make_attr(loc_id, 3, dims3, "array3D", type_id, buf63);
  status = H5Tclose(type_id);
 
 /*-------------------------------------------------------------------------
  * H5T_INTEGER and H5T_FLOAT
  *-------------------------------------------------------------------------
  */
- n=1; f=1;
- for (i = 0; i < 4; i++) {
-  for (j = 0; j < 3; j++) {
-   for (k = 0; k < 2; k++) {
-    if (make_diffs) {
-     buf73[i][j][k]=0;
-     buf83[i][j][k]=0;
+ n = 1; f = 1;
+ for(i = 0; i < 4; i++)
+  for(j = 0; j < 3; j++)
+   for(k = 0; k < 2; k++)
+    if(make_diffs) {
+     buf73[i][j][k] = 0;
+     buf83[i][j][k] = 0;
     }
     else {
-     buf73[i][j][k]=n++;
-     buf83[i][j][k]=f++;
+     buf73[i][j][k] = n++;
+     buf83[i][j][k] = f++;
     }
-   }
-  }
- }
 
  /*
  position        integer3D of </g1> integer3D of </g1> difference

@@ -1070,7 +1070,7 @@ nh5tget_member_offset_c ( hid_t_f *type_id ,int_f* member_no, size_t_f * offset)
 
 /*----------------------------------------------------------------------------
  * Name:        h5tget_array_dims_c
- * Purpose:     Call H5Tget_array_dims to get
+ * Purpose:     Call H5Tget_array_dims2 to get
  *              dimensions of array datatype
  * Inputs:      type_id - identifier of the array datatype
  * Outputs:     dims -  dimensions(sizes of dimensions) of the array
@@ -1083,33 +1083,23 @@ nh5tget_member_offset_c ( hid_t_f *type_id ,int_f* member_no, size_t_f * offset)
 int_f
 nh5tget_array_dims_c ( hid_t_f *type_id , hsize_t_f * dims)
 {
-  int ret_value = -1;
-  hid_t c_type_id;
-  hsize_t * c_dims;
-  int rank, i;
-  herr_t status;
+    hsize_t c_dims[H5S_MAX_RANK];
+    int rank, i;
+    int ret_value = -1;
 
-  rank = H5Tget_array_ndims((hid_t)*type_id);
-  if (rank < 0) return ret_value;
-  c_dims = (hsize_t*)malloc(sizeof(hsize_t)*rank);
-  if(!c_dims) return ret_value;
+    if((rank = H5Tget_array_ndims((hid_t)*type_id)) < 0)
+        goto DONE;
 
-  c_type_id = (hid_t)*type_id;
-  status = H5Tget_array_dims(c_type_id, c_dims, NULL);
-  if (status < 0) {
-             HDfree(c_dims);
-             return ret_value;
-  }
+    if(H5Tget_array_dims2((hid_t)*type_id, c_dims) < 0)
+        goto DONE;
 
-  for(i =0; i < rank; i++)
-  {
-      dims[rank-i-1] = (hsize_t_f)c_dims[i];
-  }
+    for(i = 0; i < rank; i++)
+        dims[(rank - i) - 1] = (hsize_t_f)c_dims[i];
 
-  ret_value = 0;
-  HDfree(c_dims);
+    ret_value = 0;
 
-  return ret_value;
+DONE:
+    return ret_value;
 }
 
 /*----------------------------------------------------------------------------
@@ -1296,7 +1286,7 @@ nh5tpack_c(hid_t_f * type_id)
 
 /*----------------------------------------------------------------------------
  * Name:        h5tarray_create_c
- * Purpose:     Call H5Tarray_create to create array datatype
+ * Purpose:     Call H5Tarray_create2 to create array datatype
  * Inputs:      base_id - identifier of array base datatype
  *              rank - array's rank
  *              dims - Size of new member array
@@ -1309,38 +1299,26 @@ nh5tpack_c(hid_t_f * type_id)
 int_f
 nh5tarray_create_c(hid_t_f * base_id, int_f *rank, hsize_t_f* dims, hid_t_f* type_id)
 {
-  int ret_value = -1;
-  hid_t c_base_id;
-  hid_t c_type_id;
-  int c_rank;
-  hsize_t *c_dims;
-  int i;
-
-  c_dims = (hsize_t*)malloc(sizeof(hsize_t)*(*rank));
-  if(!c_dims) return ret_value;
+    hsize_t c_dims[H5S_MAX_RANK];
+    hid_t c_type_id;
+    unsigned u;                 /* Local index variable */
+    int ret_value = -1;
 
 
-  /*
-   * Transpose dimension arrays because of C-FORTRAN storage order
-   */
-  for (i = 0; i < *rank ; i++) {
-     c_dims[i] =  (hsize_t)dims[*rank - i - 1];
-  }
+    /*
+     * Transpose dimension arrays because of C-FORTRAN storage order
+     */
+    for(u = 0; u < (unsigned)*rank ; u++)
+        c_dims[u] =  (hsize_t)dims[(*rank - u) - 1];
 
-  c_base_id = (hid_t)*base_id;
-  c_rank = (int)*rank;
-  c_type_id = H5Tarray_create(c_base_id, c_rank, c_dims, NULL);
+    if((c_type_id = H5Tarray_create2((hid_t)*base_id, (unsigned)*rank, c_dims)) < 0)
+        goto DONE;
 
-  if(c_type_id < 0) {
-          HDfree(c_dims);
-          return ret_value;
-  }
+    *type_id = (hid_t_f)c_type_id;
+    ret_value = 0;
 
-  *type_id = (hid_t_f)c_type_id;
-  ret_value = 0;
-  HDfree(c_dims);
-  return ret_value;
-
+DONE:
+    return ret_value;
 }
 
 
