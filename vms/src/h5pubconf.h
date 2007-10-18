@@ -557,9 +557,6 @@
    don't fit into size allowed */
 #define H5_VSNPRINTF_WORKS 1
 
-/* Define if the HDF5 v1.6 compatibility functions are to be compiled in */
-/* #undef H5_WANT_H5_V1_6_COMPAT */
-
 /* Define to 1 if your processor stores words with the most significant byte
    first (like Motorola and SPARC, unlike Intel and VAX). */
 /* #undef H5_WORDS_BIGENDIAN */

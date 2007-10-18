@@ -1261,6 +1261,7 @@ H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags)
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(H5Zget_filter_info, FAIL)
+    H5TRACE2("e", "Zf*Iu", filter, filter_config_flags);
 
     /* Look up the filter class info */
     if(NULL == (fclass = H5Z_find(filter)))

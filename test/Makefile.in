@@ -81,13 +81,13 @@ am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 	getname$(EXEEXT) vfd$(EXEEXT) ntypes$(EXEEXT) dangle$(EXEEXT) \
 	dtransform$(EXEEXT) reserved$(EXEEXT) cross_read$(EXEEXT) \
 	btree2$(EXEEXT) fheap$(EXEEXT)
-am__EXEEXT_2 = gen_bogus$(EXEEXT) gen_deflate$(EXEEXT) \
-	gen_filters$(EXEEXT) gen_new_array$(EXEEXT) \
-	gen_new_fill$(EXEEXT) gen_new_group$(EXEEXT) \
-	gen_new_mtime$(EXEEXT) gen_new_super$(EXEEXT) \
-	gen_noencoder$(EXEEXT) gen_nullspace$(EXEEXT) \
-	space_overflow$(EXEEXT) gen_cross$(EXEEXT) \
-	gen_udlinks$(EXEEXT)
+am__EXEEXT_2 = gen_bogus$(EXEEXT) gen_cross$(EXEEXT) \
+	gen_deflate$(EXEEXT) gen_filters$(EXEEXT) \
+	gen_new_array$(EXEEXT) gen_new_fill$(EXEEXT) \
+	gen_new_group$(EXEEXT) gen_new_mtime$(EXEEXT) \
+	gen_new_super$(EXEEXT) gen_noencoder$(EXEEXT) \
+	gen_nullspace$(EXEEXT) gen_udlinks$(EXEEXT) \
+	space_overflow$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 big_SOURCES = big.c
 big_OBJECTS = big.$(OBJEXT)
@@ -294,10 +294,10 @@ am_testhdf5_OBJECTS = testhdf5.$(OBJEXT) tarray.$(OBJEXT) \
 	tfile.$(OBJEXT) tgenprop.$(OBJEXT) th5o.$(OBJEXT) \
 	th5s.$(OBJEXT) theap.$(OBJEXT) tid.$(OBJEXT) \
 	titerate.$(OBJEXT) tmeta.$(OBJEXT) tmisc.$(OBJEXT) \
-	ttime.$(OBJEXT) trefer.$(OBJEXT) trefstr.$(OBJEXT) \
-	tselect.$(OBJEXT) tsohm.$(OBJEXT) tskiplist.$(OBJEXT) \
-	ttst.$(OBJEXT) tunicode.$(OBJEXT) tvltypes.$(OBJEXT) \
-	tvlstr.$(OBJEXT)
+	trefer.$(OBJEXT) trefstr.$(OBJEXT) tselect.$(OBJEXT) \
+	tskiplist.$(OBJEXT) tsohm.$(OBJEXT) ttime.$(OBJEXT) \
+	ttst.$(OBJEXT) tunicode.$(OBJEXT) tvlstr.$(OBJEXT) \
+	tvltypes.$(OBJEXT)
 testhdf5_OBJECTS = $(am_testhdf5_OBJECTS)
 testhdf5_LDADD = $(LDADD)
 testhdf5_DEPENDENCIES = libh5test.la $(LIBHDF5)
@@ -637,9 +637,9 @@ TEST_PROG = testhdf5 lheap ohdr stab gheap cache cache_api \
 # --enable-build-all at configure time.
 # The gen_old_* files can only be compiled with older versions of the library
 # so do not appear in this list.
-BUILD_ALL_PROGS = gen_bogus gen_deflate gen_filters gen_new_array gen_new_fill \
-                gen_new_group gen_new_mtime gen_new_super gen_noencoder \
-                gen_nullspace space_overflow gen_cross gen_udlinks
+BUILD_ALL_PROGS = gen_bogus gen_cross gen_deflate gen_filters gen_new_array \
+    gen_new_fill gen_new_group gen_new_mtime gen_new_super gen_noencoder \
+    gen_nullspace gen_udlinks space_overflow
 
 
 # The libh5test library provides common support code for the tests.
@@ -658,9 +658,9 @@ ttsafe_SOURCES = ttsafe.c ttsafe_dcreate.c ttsafe_error.c ttsafe_cancel.c       
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES = testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
-    tgenprop.c th5o.c th5s.c theap.c tid.c titerate.c tmeta.c tmisc.c ttime.c \
-    trefer.c trefstr.c tselect.c tsohm.c tskiplist.c ttst.c tunicode.c tvltypes.c \
-    tvlstr.c
+    tgenprop.c th5o.c th5s.c theap.c tid.c titerate.c tmeta.c tmisc.c \
+    trefer.c trefstr.c tselect.c tskiplist.c tsohm.c ttime.c ttst.c tunicode.c \
+    tvlstr.c tvltypes.c
 
 
 # Temporary files.

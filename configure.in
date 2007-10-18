@@ -1702,25 +1702,6 @@ if test "X$THREADSAFE" = "Xyes"; then
 fi
 
 dnl ----------------------------------------------------------------------
-dnl Check if they would like the HDF5 v1.6 compatibility functions
-dnl compiled in
-dnl
-AC_MSG_CHECKING([whether HDF5 v1.6 compatibility functions enabled])
-AC_ARG_ENABLE([hdf5v1_6],
-              [AC_HELP_STRING([--enable-hdf5v1_6],
-                              [Compile the HDF5 v1.6 compatibility
-                               interface [default=no]])],
-              [HDF5_V1_6_COMPAT=$enableval])
-
-if test "$HDF5_V1_6_COMPAT" = "yes"; then
-  AC_MSG_RESULT([yes])
-  AC_DEFINE([WANT_H5_V1_6_COMPAT], [1],
-            [Define if the HDF5 v1.6 compatibility functions are to be compiled in])
-else
-  AC_MSG_RESULT([no])
-fi
-
-dnl ----------------------------------------------------------------------
 dnl How does one figure out the local time zone?  Anyone know of a
 dnl Posix way to do this?
 dnl
@@ -4038,8 +4019,8 @@ IF_ENABLED_DISABLED "$CODESTACK"
 PRINT_N "                           GPFS"
 IF_YES_NO "$GPFS"
 
-PRINT_N "        HDF5 v1.6 Compatibility"
-IF_YES_NO "$HDF5_V1_6_COMPAT"
+PRINT_N "            Default API Mapping"
+PRINT "$DEFAULT_API_VERSION"
 
 PRINT_N "                        hsize_t"
 case "$HSIZET" in

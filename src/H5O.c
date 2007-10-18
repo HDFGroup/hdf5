@@ -588,6 +588,7 @@ H5Oset_comment(hid_t loc_id, const char *name, const char *comment,
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(H5Oset_comment, FAIL)
+    H5TRACE4("e", "i*s*si", loc_id, name, comment, lapl_id);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -633,6 +634,7 @@ H5Oget_comment(hid_t loc_id, const char *name, char *comment, size_t bufsize,
     ssize_t     ret_value;              /* Return value */
 
     FUNC_ENTER_API(H5Oget_comment, FAIL)
+    H5TRACE5("Zs", "i*s*szi", loc_id, name, comment, bufsize, lapl_id);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)

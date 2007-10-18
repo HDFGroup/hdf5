@@ -253,8 +253,8 @@ H5Pregister1(hid_t cls_id, const char *name, size_t size, void *def_value,
     herr_t ret_value;     /* return value */
 
     FUNC_ENTER_API(H5Pregister1, FAIL);
-    H5TRACE10("e","iszxxxxxxx",cls_id,name,size,def_value,prp_create,prp_set,
-             prp_get,prp_delete,prp_copy,prp_close);
+    H5TRACE10("e", "i*sz*xxxxxxx", cls_id, name, size, def_value, prp_create,
+             prp_set, prp_get, prp_delete, prp_copy, prp_close);
 
     /* Check arguments. */
     if(NULL == (pclass = H5I_object_verify(cls_id, H5I_GENPROP_CLS)))
@@ -422,8 +422,8 @@ H5Pinsert1(hid_t plist_id, const char *name, size_t size, void *value,
     herr_t ret_value;           /* return value */
 
     FUNC_ENTER_API(H5Pinsert1, FAIL);
-    H5TRACE9("e","iszxxxxxx",plist_id,name,size,value,prp_set,prp_get,
-             prp_delete,prp_copy,prp_close);
+    H5TRACE9("e", "i*sz*xxxxxx", plist_id, name, size, value, prp_set, prp_get,
+             prp_delete, prp_copy, prp_close);
 
     /* Check arguments. */
     if(NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))

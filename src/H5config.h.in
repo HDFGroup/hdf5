@@ -628,9 +628,6 @@
 /* Check exception handling functions during data conversions */
 #undef WANT_DCONV_EXCEPTION
 
-/* Define if the HDF5 v1.6 compatibility functions are to be compiled in */
-#undef WANT_H5_V1_6_COMPAT
-
 /* Define to 1 if your processor stores words with the most significant byte
    first (like Motorola and SPARC, unlike Intel and VAX). */
 #undef WORDS_BIGENDIAN

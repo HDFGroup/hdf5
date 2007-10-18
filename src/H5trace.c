@@ -1254,6 +1254,40 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 	    }
 	    break;
 
+	case 'O':
+	    switch(type[1]) {
+                case 't':
+                    if(ptr) {
+                        if(vp)
+                            fprintf(out, "0x%lx", (unsigned long)vp);
+                        else
+                            fprintf(out, "NULL");
+                    } /* end if */
+                    else {
+                        H5O_type_t objtype = va_arg(ap, H5O_type_t); /*lint !e64 Type mismatch not really occuring */
+                        switch(objtype) {
+                            case H5O_TYPE_GROUP:
+                                fprintf(out, "H5O_TYPE_GROUP");
+                                break;
+                            case H5O_TYPE_DATASET:
+                                fprintf(out, "H5O_TYPE_DATASET");
+                                break;
+                            case H5O_TYPE_NAMED_DATATYPE:
+                                fprintf(out, "H5O_TYPE_NAMED_DATATYPE");
+                                break;
+                            default:
+                                fprintf(out, "BADTYPE(%ld)", (long)objtype);
+                                break;
+                        } /* end switch */
+                    } /* end else */
+                    break;
+
+                default:
+                    fprintf(out, "BADTYPE(S%c)", type[1]);
+                    goto error;
+	    } /* end switch */
+	    break;
+
 	case 'p':
 	    if (ptr) {
 		if (vp) {

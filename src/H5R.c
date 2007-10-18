@@ -777,6 +777,7 @@ H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *ref,
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(H5Rget_obj_type2, FAIL)
+    H5TRACE4("e", "iRt*x*Ot", id, ref_type, ref, obj_type);
 
     /* Check args */
     if(H5G_loc(id, &loc) < 0)
