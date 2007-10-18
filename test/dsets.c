@@ -1071,13 +1071,7 @@ set_local_bogus2(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id)
         add_on=(unsigned)H5Tget_size(type_id);
 
     /* Get the filter's current parameters */
-#ifdef H5_WANT_H5_V1_6_COMPAT
-    if(H5Pget_filter_by_id(dcpl_id, H5Z_FILTER_BOGUS2, &flags, &cd_nelmts,
-            cd_values, (size_t)0, NULL) < 0)
-#else
-    if(H5Pget_filter_by_id(dcpl_id, H5Z_FILTER_BOGUS2, &flags, &cd_nelmts,
-            cd_values, (size_t)0, NULL, NULL) < 0)
-#endif
+    if(H5Pget_filter_by_id2(dcpl_id, H5Z_FILTER_BOGUS2, &flags, &cd_nelmts, cd_values, (size_t)0, NULL, NULL) < 0)
         return(FAIL);
 
     /* Check that the parameter values were passed along correctly */
@@ -6281,12 +6275,25 @@ test_deprec(hid_t file)
 #if defined H5_HAVE_FILTER_DEFLATE
 {
     H5Z_filter_t filtn;                 /* filter identification number */
+    size_t cd_nelmts = 1;               /* Number of filter parameters */
+    unsigned cd_value;                  /* Filter parameter */
 
     if(H5Pset_deflate(create_parms, 6) < 0) goto error;
 
     /* Check for the deflate filter */
-    filtn = H5Pget_filter1(create_parms, (unsigned)0, NULL, NULL, NULL, (size_t)0, NULL);
-    if(H5Z_FILTER_DEFLATE!=filtn)
+    filtn = H5Pget_filter1(create_parms, (unsigned)0, NULL, &cd_nelmts, &cd_value, (size_t)0, NULL);
+    if(H5Z_FILTER_DEFLATE != filtn)
+        goto error;
+    if(1 != cd_nelmts)
+        goto error;
+    if(6 != cd_value)
+        goto error;
+
+    /* Check for the deflate filter */
+    if(H5Pget_filter_by_id1(create_parms, H5Z_FILTER_DEFLATE, NULL, &cd_nelmts, &cd_value, (size_t)0, NULL) < 0) goto error;
+    if(1 != cd_nelmts)
+        goto error;
+    if(6 != cd_value)
         goto error;
 }
 #endif /* H5_HAVE_FILTER_DEFLATE */

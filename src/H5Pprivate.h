@@ -97,5 +97,17 @@ H5_DLL hid_t H5P_peek_hid_t(H5P_genplist_t *plist, const char *name);
 H5_DLL void *H5P_peek_voidp(H5P_genplist_t *plist, const char *name);
 H5_DLL size_t H5P_peek_size_t(H5P_genplist_t *plist, const char *name);
 
+/* Private DCPL routines */
+H5_DLL herr_t H5P_modify_filter(H5P_genplist_t *plist, H5Z_filter_t filter,
+    unsigned flags, size_t cd_nelmts, const unsigned cd_values[/*cd_nelmts*/]);
+H5_DLL herr_t H5P_get_filter_by_id(H5P_genplist_t *plist, H5Z_filter_t id,
+    unsigned int *flags/*out*/, size_t *cd_nelmts/*in_out*/,
+    unsigned cd_values[]/*out*/, size_t namelen, char name[]/*out*/,
+    unsigned *filter_config);
+H5_DLL herr_t H5P_fill_value_defined(H5P_genplist_t *plist,
+    H5D_fill_value_t *status);
+H5_DLL herr_t H5P_get_fill_value(H5P_genplist_t *plist, const H5T_t *type,
+    void *value, hid_t dxpl_id);
+
 #endif /* _H5Pprivate_H */
 

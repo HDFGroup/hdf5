@@ -503,7 +503,6 @@ H5_DLL H5T_t *H5T_alloc(void);
 H5_DLL herr_t H5T_free(H5T_t *dt);
 H5_DLL herr_t H5T_visit(H5T_t *dt, unsigned visit_flags, H5T_operator_t op,
     void *op_value);
-H5_DLL H5T_t *H5T_get_super(H5T_t *dt);
 H5_DLL herr_t H5T_set_size(H5T_t *dt, size_t size);
 H5_DLL herr_t H5T_upgrade_version(H5T_t *dt, unsigned new_version);
 
@@ -1360,9 +1359,6 @@ H5_DLL htri_t H5T_bit_inc(uint8_t *buf, size_t start, size_t size);
 H5_DLL htri_t H5T_bit_dec(uint8_t *buf, size_t start, size_t size);
 H5_DLL void H5T_bit_neg(uint8_t *buf, size_t start, size_t size);
 
-/* Fixed-point functions */
-H5_DLL H5T_sign_t H5T_get_sign(H5T_t const *dt);
-
 /* VL functions */
 H5_DLL H5T_t * H5T_vlen_create(const H5T_t *base);
 H5_DLL htri_t H5T_vlen_set_loc(const H5T_t *dt, H5F_t *f, H5T_loc_t loc);
@@ -1376,8 +1372,6 @@ H5_DLL int    H5T_get_array_dims(const H5T_t *dt, hsize_t dims[]);
 /* Compound functions */
 H5_DLL herr_t H5T_insert(H5T_t *parent, const char *name, size_t offset,
         const H5T_t *member);
-H5_DLL H5T_t *H5T_get_member_type(const H5T_t *dt, unsigned membno);
-H5_DLL size_t H5T_get_member_offset(const H5T_t *dt, unsigned membno);
 H5_DLL size_t H5T_get_member_size(const H5T_t *dt, unsigned membno);
 H5_DLL htri_t H5T_is_packed(const H5T_t *dt);
 H5_DLL H5T_subset_t H5T_conv_struct_subset(const H5T_cdata_t *cdata);
@@ -1389,7 +1383,6 @@ H5_DLL herr_t H5T_get_member_value(const H5T_t *dt, unsigned membno, void *value
 
 /* Field functions (for both compound & enumerated types) */
 H5_DLL char  *H5T_get_member_name(H5T_t const *dt, unsigned membno);
-H5_DLL int H5T_get_nmembers(const H5T_t *dt);
 H5_DLL herr_t H5T_sort_value(const H5T_t *dt, int *map);
 H5_DLL herr_t H5T_sort_name(const H5T_t *dt, int *map);
 

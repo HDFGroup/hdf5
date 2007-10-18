@@ -18,9 +18,10 @@
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Ppublic.h"		/* Property lists			*/
-#include "H5Tpublic.h"		/* Datatype functions			*/
+#include "H5Pprivate.h"         /* Property lists                       */
+#include "H5Tprivate.h"		/* Datatypes         			*/
 #include "H5Zpkg.h"		/* Data filters				*/
 
 #ifdef H5_HAVE_FILTER_SHUFFLE
@@ -68,27 +69,33 @@ const H5Z_class_t H5Z_SHUFFLE[1] = {{
 static herr_t
 H5Z_set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id)
 {
-    unsigned flags;         /* Filter flags */
-    size_t cd_nelmts=H5Z_SHUFFLE_USER_NPARMS;     /* Number of filter parameters */
+    H5P_genplist_t *dcpl_plist;     /* Property list pointer */
+    const H5T_t	*type;                  /* Datatype */
+    unsigned flags;                     /* Filter flags */
+    size_t cd_nelmts = H5Z_SHUFFLE_USER_NPARMS;     /* Number of filter parameters */
     unsigned cd_values[H5Z_SHUFFLE_TOTAL_NPARMS];  /* Filter parameters */
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5Z_set_local_shuffle, FAIL)
 
+    /* Get the plist structure */
+    if(NULL == (dcpl_plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Get datatype */
+    if(NULL == (type = H5I_object_verify(type_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+
     /* Get the filter's current parameters */
-#ifdef H5_WANT_H5_V1_6_COMPAT
-    if(H5Pget_filter_by_id(dcpl_id,H5Z_FILTER_SHUFFLE,&flags,&cd_nelmts, cd_values,0,NULL)<0)
-#else
-    if(H5Pget_filter_by_id(dcpl_id,H5Z_FILTER_SHUFFLE,&flags,&cd_nelmts, cd_values,(size_t)0,NULL,NULL)<0)
-#endif
+    if(H5P_get_filter_by_id(dcpl_plist, H5Z_FILTER_SHUFFLE, &flags, &cd_nelmts, cd_values, (size_t)0, NULL, NULL) < 0)
 	HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get shuffle parameters")
 
     /* Set "local" parameter for this dataset */
-    if((cd_values[H5Z_SHUFFLE_PARM_SIZE]=(unsigned)H5Tget_size(type_id))==0)
+    if((cd_values[H5Z_SHUFFLE_PARM_SIZE] = (unsigned)H5T_get_size(type)) == 0)
 	HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad datatype size")
 
     /* Modify the filter's parameters for this dataset */
-    if(H5Pmodify_filter(dcpl_id, H5Z_FILTER_SHUFFLE, flags, (size_t)H5Z_SHUFFLE_TOTAL_NPARMS, cd_values)<0)
+    if(H5P_modify_filter(dcpl_plist, H5Z_FILTER_SHUFFLE, flags, (size_t)H5Z_SHUFFLE_TOTAL_NPARMS, cd_values) < 0)
 	HGOTO_ERROR(H5E_PLINE, H5E_CANTSET, FAIL, "can't set local shuffle parameters")
 
 done:

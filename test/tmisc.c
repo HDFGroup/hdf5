@@ -3722,9 +3722,9 @@ test_misc22(void)
                 dcpl2 = H5Dget_create_plist(dsid);
                 CHECK(dcpl2, FAIL, "H5Dget_create_plist");
 
-                ret = H5Pget_filter_by_id(dcpl2, H5Z_FILTER_SZIP, &flags,
+                ret = H5Pget_filter_by_id2(dcpl2, H5Z_FILTER_SZIP, &flags,
                       &cd_nelmts, cd_values, 0, NULL , NULL);
-                CHECK(ret, FAIL, "H5Pget_filter_by_id");
+                CHECK(ret, FAIL, "H5Pget_filter_by_id2");
 
                 VERIFY(cd_values[2], correct, "SZIP filter returned value for precision");
 

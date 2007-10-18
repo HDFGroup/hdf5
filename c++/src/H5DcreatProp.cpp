@@ -390,13 +390,11 @@ void DSetCreatPropList::getFilterById(H5Z_filter_t filter_id,
 	unsigned int &flags, size_t &cd_nelmts, unsigned int* cd_values,
 	size_t namelen, char name[], unsigned int &filter_config) const
 {
-   herr_t ret_value = H5Pget_filter_by_id(id, filter_id, &flags, &cd_nelmts,
-				cd_values, namelen, name, &filter_config );
+   herr_t ret_value = H5Pget_filter_by_id2(id, filter_id, &flags, &cd_nelmts,
+				cd_values, namelen, name, &filter_config);
    if (ret_value < 0)
-   {
       throw PropListIException("DSetCreatPropList::getFilterById",
-                "H5Pget_filter_by_id failed");
-   }
+                "H5Pget_filter_by_id2 failed");
 }
 
 //--------------------------------------------------------------------------

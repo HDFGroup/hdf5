@@ -91,6 +91,7 @@ H5_DLL herr_t H5T_init(void);
 H5_DLL H5T_t *H5T_copy(const H5T_t *old_dt, H5T_copy_t method);
 H5_DLL herr_t H5T_lock(H5T_t *dt, hbool_t immutable);
 H5_DLL herr_t H5T_close(H5T_t *dt);
+H5_DLL H5T_t *H5T_get_super(const H5T_t *dt);
 H5_DLL H5T_class_t H5T_get_class(const H5T_t *dt, htri_t internal);
 H5_DLL htri_t H5T_detect_class(const H5T_t *dt, H5T_class_t cls);
 H5_DLL size_t H5T_get_size(const H5T_t *dt);
@@ -115,6 +116,7 @@ H5_DLL htri_t H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc);
 H5_DLL htri_t H5T_is_sensible(const H5T_t *dt);
 H5_DLL uint32_t H5T_hash(H5F_t * file, const H5T_t *dt);
 H5_DLL herr_t H5T_set_latest_version(H5T_t *dt);
+H5_DLL htri_t H5T_is_variable_str(const H5T_t *dt);
 
 /* Reference specific functions */
 H5_DLL H5R_type_t H5T_get_ref_type(const H5T_t *dt);
@@ -124,6 +126,19 @@ H5_DLL H5T_t *H5T_open(const H5G_loc_t *loc, hid_t dxpl_id);
 H5_DLL htri_t H5T_committed(const H5T_t *type);
 H5_DLL int H5T_link(const H5T_t *type, int adjust, hid_t dxpl_id);
 H5_DLL herr_t H5T_update_shared(H5T_t *type);
+
+/* Field functions (for both compound & enumerated types) */
+H5_DLL int H5T_get_nmembers(const H5T_t *dt);
+H5_DLL H5T_t *H5T_get_member_type(const H5T_t *dt, unsigned membno);
+H5_DLL size_t H5T_get_member_offset(const H5T_t *dt, unsigned membno);
+
+/* Atomic functions */
+H5_DLL H5T_order_t H5T_get_order(const H5T_t *dt);
+H5_DLL size_t H5T_get_precision(const H5T_t *dt);
+H5_DLL int H5T_get_offset(const H5T_t *dt);
+
+/* Fixed-point functions */
+H5_DLL H5T_sign_t H5T_get_sign(H5T_t const *dt);
 
 #endif /* _H5Tprivate_H */
 

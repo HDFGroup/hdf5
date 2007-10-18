@@ -80,7 +80,7 @@ H5T_init_precis_interface(void)
 size_t
 H5Tget_precision(hid_t type_id)
 {
-    H5T_t	*dt = NULL;
+    H5T_t	*dt;
     size_t	ret_value;
 
     FUNC_ENTER_API(H5Tget_precision, 0)
@@ -89,17 +89,52 @@ H5Tget_precision(hid_t type_id)
     /* Check args */
     if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype")
-    while (dt->shared->parent)
-        dt = dt->shared->parent;	/*defer to parent*/
-    if (!H5T_IS_ATOMIC(dt->shared))
+
+    /* Get precision */
+    if((ret_value = H5T_get_precision(dt)) == 0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, 0, "cant't get precision for specified datatype")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Tget_precision() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_get_precision
+ *
+ * Purpose:	Gets the precision of a datatype.  The precision is
+ *		the number of significant bits which, unless padding is
+ *		present, is 8 times larger than the value returned by
+ *		H5Tget_size().
+ *
+ * Return:	Success:	Number of significant bits
+ *		Failure:	0 (all atomic types have at least one
+ *				significant bit)
+ *
+ * Programmer:	Quincey Koziol
+ *		Wednesday, October 17, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+size_t
+H5T_get_precision(const H5T_t *dt)
+{
+    size_t	ret_value;
+
+    FUNC_ENTER_NOAPI(H5T_get_precision, 0)
+
+    /* Defer to parent*/
+    while(dt->shared->parent)
+        dt = dt->shared->parent;
+    if(!H5T_IS_ATOMIC(dt->shared))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, 0, "operation not defined for specified datatype")
 
     /* Precision */
     ret_value = dt->shared->u.atomic.prec;
 
 done:
-    FUNC_LEAVE_API(ret_value)
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_get_precision() */
 
 
 /*-------------------------------------------------------------------------

@@ -4956,22 +4956,18 @@ myfilter(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
 static herr_t
 set_local_myfilter(hid_t dcpl_id, hid_t UNUSED tid, hid_t UNUSED sid)
 {
- unsigned flags;                /* Filter flags */
- size_t   cd_nelmts=0;          /* Number of filter parameters */
- unsigned cd_values[2]={5,6};   /* Filter parameters */
+ unsigned flags;                        /* Filter flags */
+ size_t   cd_nelmts = 0;                /* Number of filter parameters */
+ unsigned cd_values[2] = {5, 6};        /* Filter parameters */
 
  /* Get the filter's current parameters */
-#ifdef H5_WANT_H5_V1_6_COMPAT
- if(H5Pget_filter_by_id(dcpl_id,MYFILTER_ID,&flags,&cd_nelmts,cd_values,0,NULL) < 0)
-#else
- if(H5Pget_filter_by_id(dcpl_id,MYFILTER_ID,&flags,&cd_nelmts,cd_values,0,NULL,NULL) < 0)
-#endif /* H5_WANT_H5_V1_6_COMPAT */
+ if(H5Pget_filter_by_id2(dcpl_id, MYFILTER_ID, &flags, &cd_nelmts, cd_values, 0, NULL, NULL) < 0)
   return(FAIL);
 
- cd_nelmts=2;
+ cd_nelmts = 2;
 
  /* Modify the filter's parameters for this dataset */
- if(H5Pmodify_filter(dcpl_id,MYFILTER_ID,flags, cd_nelmts,cd_values) < 0)
+ if(H5Pmodify_filter(dcpl_id, MYFILTER_ID, flags, cd_nelmts, cd_values) < 0)
   return(FAIL);
 
  return(SUCCEED);

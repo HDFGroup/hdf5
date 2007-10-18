@@ -292,20 +292,10 @@ H5_DLL H5Z_filter_t H5Pget_filter2(hid_t plist_id, unsigned filter,
        unsigned cd_values[]/*out*/,
        size_t namelen, char name[],
        unsigned *filter_config /*out*/);
-#ifdef H5_WANT_H5_V1_6_COMPAT
-H5_DLL H5Z_filter_t H5Pget_filter_by_id(hid_t plist_id, H5Z_filter_t id,
-       unsigned int *flags/*out*/,
-       size_t *cd_nelmts/*out*/,
-       unsigned cd_values[]/*out*/,
-       size_t namelen, char name[]/*out*/);
-#else /* H5_WANT_H5_V1_6_COMPAT */
-H5_DLL H5Z_filter_t H5Pget_filter_by_id(hid_t plist_id, H5Z_filter_t id,
-       unsigned int *flags/*out*/,
-       size_t *cd_nelmts/*out*/,
-       unsigned cd_values[]/*out*/,
-       size_t namelen, char name[]/*out*/,
+H5_DLL H5Z_filter_t H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t id,
+       unsigned int *flags/*out*/, size_t *cd_nelmts/*out*/,
+       unsigned cd_values[]/*out*/, size_t namelen, char name[]/*out*/,
        unsigned *filter_config/*out*/);
-#endif /* H5_WANT_H5_V1_6_COMPAT */
 H5_DLL htri_t H5Pall_filters_avail(hid_t plist_id);
 H5_DLL herr_t H5Premove_filter(hid_t plist_id, H5Z_filter_t filter);
 H5_DLL herr_t H5Pset_deflate(hid_t plist_id, unsigned aggression);
@@ -415,6 +405,9 @@ H5_DLL herr_t H5Pinsert1(hid_t plist_id, const char *name, size_t size,
 H5_DLL H5Z_filter_t H5Pget_filter1(hid_t plist_id, unsigned filter,
     unsigned int *flags/*out*/, size_t *cd_nelmts/*out*/,
     unsigned cd_values[]/*out*/, size_t namelen, char name[]);
+H5_DLL H5Z_filter_t H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id,
+    unsigned int *flags/*out*/, size_t *cd_nelmts/*out*/,
+    unsigned cd_values[]/*out*/, size_t namelen, char name[]/*out*/);
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 

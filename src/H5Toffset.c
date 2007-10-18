@@ -77,41 +77,83 @@ H5T_init_offset_interface(void)
  *		3:  [0x22]   [ pad]    [ pad]	[0x11]
  *
  * Return:	Success:	The offset (non-negative)
- *
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
- *
- * Modifications:
- * 	Robb Matzke, 22 Dec 1998
- *	Also works for derived data types.
  *
  *-------------------------------------------------------------------------
  */
 int
 H5Tget_offset(hid_t type_id)
 {
-    H5T_t	*dt = NULL;
+    H5T_t	*dt;
     int	ret_value;
 
     FUNC_ENTER_API(H5Tget_offset, -1)
     H5TRACE1("Is", "i", type_id);
 
     /* Check args */
-    if (NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
+    if(NULL == (dt = H5I_object_verify(type_id,H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an atomic data type")
-    while (dt->shared->parent)
-        dt = dt->shared->parent; /*defer to parent*/
-    if (!H5T_IS_ATOMIC(dt->shared))
+
+    /* Get offset */
+    if((ret_value = H5T_get_offset(dt)) < 0)
+	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "cant't get offset for specified datatype")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Tget_offset() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_get_offset
+ *
+ * Purpose:	Retrieves the bit offset of the first significant bit.	The
+ *		signficant bits of an atomic datum can be offset from the
+ *		beginning of the memory for that datum by an amount of
+ *		padding. The `offset' property specifies the number of bits
+ *		of padding that appear to the "right of" the value.  That is,
+ *		if we have a 32-bit datum with 16-bits of precision having
+ *		the value 0x1122 then it will be layed out in memory as (from
+ *		small byte address toward larger byte addresses):
+ *
+ *		    Big	     Big       Little	Little
+ *		    Endian   Endian    Endian	Endian
+ *		    offset=0 offset=16 offset=0 offset=16
+ *
+ *		0:  [ pad]   [0x11]    [0x22]	[ pad]
+ *		1:  [ pad]   [0x22]    [0x11]	[ pad]
+ *		2:  [0x11]   [ pad]    [ pad]	[0x22]
+ *		3:  [0x22]   [ pad]    [ pad]	[0x11]
+ *
+ * Return:	Success:	The offset (non-negative)
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		Wednesday, October 17, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5T_get_offset(const H5T_t *dt)
+{
+    int	ret_value;
+
+    FUNC_ENTER_NOAPI(H5T_get_offset, -1)
+
+    /* Defer to parent*/
+    while(dt->shared->parent)
+        dt = dt->shared->parent;
+    if(!H5T_IS_ATOMIC(dt->shared))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for specified data type")
 
     /* Offset */
     ret_value = (int)dt->shared->u.atomic.offset;
 
 done:
-    FUNC_LEAVE_API(ret_value)
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_get_offset() */
 
 
 /*-------------------------------------------------------------------------
