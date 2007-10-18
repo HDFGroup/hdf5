@@ -1822,15 +1822,10 @@ test_get_filter_info(void)
 
   /* Verify that get_filter_info throws an error when given a bad filter */
   /* (Depends on 1.6 compatibility flag) */
-#ifdef H5_WANT_H5_V1_6_COMPAT
-  if(H5Zget_filter_info(-1, &flags) < 0) TEST_ERROR
-  if(flags != 0) TEST_ERROR
-#else /* H5_WANT_H5_V1_6_COMPAT */
   H5E_BEGIN_TRY {
     err = H5Zget_filter_info(-1, &flags);
   } H5E_END_TRY;
   if(err >= 0) TEST_ERROR
-#endif /* H5_WANT_H5_V1_6_COMPAT */
 
   PASSED();
   return 0;
