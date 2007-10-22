@@ -10,6 +10,7 @@ file2             File name of the second HDF5 file
 [obj2]            Name of an HDF5 object, in absolute path
 [OPTIONS] are:
 [-h]              Print out this information
+[-V]              Print HDF5 library version number and exit
 [-r]              Report mode. Print differences
 [-v]              Verbose mode. Print differences, list of objects, warnings
 [-q]              Quiet mode. Do not do output

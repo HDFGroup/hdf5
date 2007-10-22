@@ -17,6 +17,8 @@
 #include <string.h>
 #include "h5diff.h"
 #include "h5diff_common.h"
+#include "h5tools_utils.h"
+
 
 /*-------------------------------------------------------------------------
  * Function: parse_input
@@ -44,6 +46,13 @@ void parse_input(int argc,
  * initial check of command line options
  *-------------------------------------------------------------------------
  */
+
+ if ( (strcmp("-V",argv[1])==0) )
+ {
+     print_version("h5diff");
+     h5diff_exit(EXIT_SUCCESS);
+     
+ }
 
  if ( argc==2 && (strcmp("-h",argv[1])==0) )
   usage();
@@ -81,6 +90,9 @@ void parse_input(int argc,
     case 'h':
      usage();
      break;
+    case 'V':
+            print_version("h5diff");
+            h5diff_exit(EXIT_SUCCESS);
     case 'v':
      options->m_verbose = 1;
      break;
@@ -298,6 +310,7 @@ void usage(void)
  printf("[obj2]            Name of an HDF5 object, in absolute path\n");
  printf("[OPTIONS] are:\n");
  printf("[-h]              Print out this information\n");
+ printf("[-V]              Print HDF5 library version number and exit\n");
  printf("[-r]              Report mode. Print differences\n");
  printf("[-v]              Verbose mode. Print differences, list of objects, warnings\n");
  printf("[-q]              Quiet mode. Do not do output\n");
