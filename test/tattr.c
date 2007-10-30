@@ -258,8 +258,8 @@ test_attr_basic_write(hid_t fapl)
     CHECK(ret, FAIL, "H5Aclose");
 
     /* change attribute name */
-    ret = H5Arename2(dataset, ".", ATTR1_NAME, ATTR_TMP_NAME, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Arename2");
+    ret = H5Arename(dataset, ATTR1_NAME, ATTR_TMP_NAME);
+    CHECK(ret, FAIL, "H5Arename");
 
     /* Open attribute again */
     attr = H5Aopen(dataset, ATTR_TMP_NAME, H5P_DEFAULT);
@@ -2382,8 +2382,8 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
         sprintf(new_attrname, "new attr %02u", u);
 
         /* Rename attribute */
-        ret = H5Arename2(fid, DSET1_NAME, attrname, new_attrname, H5P_DEFAULT);
-        CHECK(ret, FAIL, "H5Arename2");
+        ret = H5Arename_by_name(fid, DSET1_NAME, attrname, new_attrname, H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Arename_by_name");
 
         /* Check # of attributes */
         ret = H5Oget_info(dataset, ".", &oinfo, H5P_DEFAULT);
@@ -3323,12 +3323,8 @@ test_attr_deprec(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Aclose");
 
 
-    /* Rename attribute */
-    ret = H5Arename1(dataset, "attr", "attr2");
-    CHECK(ret, FAIL, "H5Arename1");
-
     /* Delete attribute */
-    ret = H5Adelete1(dataset, "attr2");
+    ret = H5Adelete1(dataset, "attr");
     CHECK(ret, FAIL, "H5Adelete1");
 
 
@@ -7596,8 +7592,8 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
             sprintf(attrname2, "new attr %02u", u);
 
             /* Change second dataset's attribute's name */
-            ret = H5Arename2(fid, DSET2_NAME, attrname, attrname2, H5P_DEFAULT);
-            CHECK(ret, FAIL, "H5Arename2");
+            ret = H5Arename_by_name(fid, DSET2_NAME, attrname, attrname2, H5P_DEFAULT);
+            CHECK(ret, FAIL, "H5Arename_by_name");
 
 
             /* Check refcount on attributes now */
@@ -7652,8 +7648,8 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
 
 
             /* Change second dataset's attribute's name back to original */
-            ret = H5Arename2(fid, DSET2_NAME, attrname2, attrname, H5P_DEFAULT);
-            CHECK(ret, FAIL, "H5Arename2");
+            ret = H5Arename_by_name(fid, DSET2_NAME, attrname2, attrname, H5P_DEFAULT);
+            CHECK(ret, FAIL, "H5Arename_by_name");
 
 
             /* Check refcount on attributes now */

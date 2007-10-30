@@ -345,49 +345,6 @@ done:
 } /* H5Aget_num_attrs() */
 
 
-/*-------------------------------------------------------------------------
- * Function:	H5Arename1
- *
- * Purpose:     Rename an attribute
- *
- * Note:	Deprecated in favor of H5Arename2
- *
- * Return:	Success:             Non-negative
- *		Failure:             Negative
- *
- * Programmer:	Raymond Lu
- *              October 23, 2002
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Arename1(hid_t loc_id, const char *old_name, const char *new_name)
-{
-    H5G_loc_t	loc;	                /* Object location */
-    herr_t	ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_API(H5Arename1, FAIL)
-    H5TRACE3("e", "i*s*s", loc_id, old_name, new_name);
-
-    /* check arguments */
-    if(!old_name || !new_name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "name is nil")
-    if(H5I_ATTR == H5I_get_type(loc_id))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
-    if(H5G_loc(loc_id, & loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-
-    /* Avoid thrashing things if the names are the same */
-    if(HDstrcmp(old_name, new_name))
-        /* Call attribute rename routine */
-        if(H5O_attr_rename(loc.oloc, H5AC_dxpl_id, old_name, new_name) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* H5Arename1() */
-
-
 /*--------------------------------------------------------------------------
  NAME
     H5Aiterate1

@@ -1707,7 +1707,48 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Arename2
+ * Function:	H5Arename
+ *
+ * Purpose:     Rename an attribute
+ *
+ * Return:	Success:             Non-negative
+ *		Failure:             Negative
+ *
+ * Programmer:	Raymond Lu
+ *              October 23, 2002
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
+{
+    H5G_loc_t	loc;	                /* Object location */
+    herr_t	ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(H5Arename, FAIL)
+    H5TRACE3("e", "i*s*s", loc_id, old_name, new_name);
+
+    /* check arguments */
+    if(!old_name || !new_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "name is nil")
+    if(H5I_ATTR == H5I_get_type(loc_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+    if(H5G_loc(loc_id, & loc) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+
+    /* Avoid thrashing things if the names are the same */
+    if(HDstrcmp(old_name, new_name))
+        /* Call attribute rename routine */
+        if(H5O_attr_rename(loc.oloc, H5AC_dxpl_id, old_name, new_name) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Arename() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Arename_by_name
  *
  * Purpose:     Rename an attribute
  *
@@ -1720,7 +1761,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Arename2(hid_t loc_id, const char *obj_name, const char *old_attr_name,
+H5Arename_by_name(hid_t loc_id, const char *obj_name, const char *old_attr_name,
     const char *new_attr_name, hid_t lapl_id)
 {
     H5G_loc_t	loc;	                /* Object location */
@@ -1730,7 +1771,7 @@ H5Arename2(hid_t loc_id, const char *obj_name, const char *old_attr_name,
     hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Arename2, FAIL)
+    FUNC_ENTER_API(H5Arename_by_name, FAIL)
     H5TRACE5("e", "i*s*s*si", loc_id, obj_name, old_attr_name, new_attr_name,
              lapl_id);
 
@@ -1774,7 +1815,7 @@ done:
         HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location")
 
     FUNC_LEAVE_API(ret_value)
-} /* H5Arename2() */
+} /* H5Arename_by_name() */
 
 
 /*--------------------------------------------------------------------------

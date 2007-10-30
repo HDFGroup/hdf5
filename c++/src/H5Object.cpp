@@ -277,9 +277,9 @@ void H5Object::removeAttr( const H5std_string& name ) const
 //--------------------------------------------------------------------------
 void H5Object::renameAttr(const char* oldname, const char* newname) const
 {
-   herr_t ret_value = H5Arename2(id, ".", oldname, newname, H5P_DEFAULT);
+   herr_t ret_value = H5Arename(id, oldname, newname);
    if (ret_value < 0)
-      throw AttributeIException(inMemFunc("renameAttr"), "H5Arename2 failed");
+      throw AttributeIException(inMemFunc("renameAttr"), "H5Arename failed");
 }
 
 //--------------------------------------------------------------------------
