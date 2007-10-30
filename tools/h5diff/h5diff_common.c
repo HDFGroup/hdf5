@@ -47,7 +47,7 @@ void parse_input(int argc,
  *-------------------------------------------------------------------------
  */
 
- if ( (strcmp("-V",argv[1])==0) )
+ if ( argv[1] && (strcmp("-V",argv[1])==0) )
  {
      print_version("h5diff");
      h5diff_exit(EXIT_SUCCESS);
