@@ -1456,7 +1456,7 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:    test_compat
+ * Function:    test_deprec
  *
  * Purpose:     Tests deprecated functions for backward compatibility.
  *
@@ -1472,7 +1472,7 @@ error:
  */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 static int
-test_compat(hid_t fapl, hbool_t new_format)
+test_deprec(hid_t fapl, hbool_t new_format)
 {
     hid_t file_id = -1;
     hid_t group1_id = -1;
@@ -1592,7 +1592,7 @@ error:
         H5Fclose(file_id);
     } H5E_END_TRY;
     return 1;
-} /* end test_compat() */
+} /* end test_deprec() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 
@@ -8990,13 +8990,31 @@ group_info(hid_t fapl)
                     /* Create hard link, with group object */
                     if((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
 
+
                     /* Retrieve group's information */
-                    if(H5Gget_info(group_id2, ".", &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
+                    if(H5Gget_info(group_id2, &grp_info) < 0) TEST_ERROR
 
                     /* Check (new/empty) group's information */
                     if(grp_info.storage_type != H5G_STORAGE_TYPE_COMPACT) TEST_ERROR
                     if(grp_info.max_corder != 0) TEST_ERROR
                     if(grp_info.nlinks != 0) TEST_ERROR
+
+                    /* Retrieve group's information */
+                    if(H5Gget_info_by_name(group_id, objname, &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
+
+                    /* Check (new/empty) group's information */
+                    if(grp_info.storage_type != H5G_STORAGE_TYPE_COMPACT) TEST_ERROR
+                    if(grp_info.max_corder != 0) TEST_ERROR
+                    if(grp_info.nlinks != 0) TEST_ERROR
+
+                    /* Retrieve group's information */
+                    if(H5Gget_info_by_name(group_id2, ".", &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
+
+                    /* Check (new/empty) group's information */
+                    if(grp_info.storage_type != H5G_STORAGE_TYPE_COMPACT) TEST_ERROR
+                    if(grp_info.max_corder != 0) TEST_ERROR
+                    if(grp_info.nlinks != 0) TEST_ERROR
+
 
                     /* Create objects in new group created */
                     for(v = 0; v <= u; v++) {
@@ -9010,13 +9028,31 @@ group_info(hid_t fapl)
                         if(H5Gclose(group_id3) < 0) TEST_ERROR
                     } /* end for */
 
+
                     /* Retrieve group's information */
-                    if(H5Gget_info(group_id2, ".", &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
+                    if(H5Gget_info(group_id2, &grp_info) < 0) TEST_ERROR
 
                     /* Check (new) group's information */
                     if(grp_info.storage_type != H5G_STORAGE_TYPE_COMPACT) TEST_ERROR
                     if(grp_info.max_corder != (int64_t)(u + 1)) TEST_ERROR
                     if(grp_info.nlinks != (hsize_t)(u + 1)) TEST_ERROR
+
+                    /* Retrieve group's information */
+                    if(H5Gget_info_by_name(group_id, objname, &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
+
+                    /* Check (new) group's information */
+                    if(grp_info.storage_type != H5G_STORAGE_TYPE_COMPACT) TEST_ERROR
+                    if(grp_info.max_corder != (int64_t)(u + 1)) TEST_ERROR
+                    if(grp_info.nlinks != (hsize_t)(u + 1)) TEST_ERROR
+
+                    /* Retrieve group's information */
+                    if(H5Gget_info_by_name(group_id2, ".", &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
+
+                    /* Check (new) group's information */
+                    if(grp_info.storage_type != H5G_STORAGE_TYPE_COMPACT) TEST_ERROR
+                    if(grp_info.max_corder != (int64_t)(u + 1)) TEST_ERROR
+                    if(grp_info.nlinks != (hsize_t)(u + 1)) TEST_ERROR
+
 
                     /* Retrieve group's information */
                     if(order != H5_ITER_NATIVE) {
@@ -9037,8 +9073,24 @@ group_info(hid_t fapl)
                     if(H5Gclose(group_id2) < 0) TEST_ERROR
 
 
+                    /* Retrieve main group's information */
+                    if(H5Gget_info(group_id, &grp_info) < 0) TEST_ERROR
+
+                    /* Check main group's information */
+                    if(grp_info.storage_type != H5G_STORAGE_TYPE_COMPACT) TEST_ERROR
+                    if(grp_info.max_corder != (int64_t)(u + 1)) TEST_ERROR
+                    if(grp_info.nlinks != (hsize_t)(u + 1)) TEST_ERROR
+
                     /* Retrieve main group's information, by name */
-                    if(H5Gget_info(group_id, ".", &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
+                    if(H5Gget_info_by_name(file_id, CORDER_GROUP_NAME, &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
+
+                    /* Check main group's information */
+                    if(grp_info.storage_type != H5G_STORAGE_TYPE_COMPACT) TEST_ERROR
+                    if(grp_info.max_corder != (int64_t)(u + 1)) TEST_ERROR
+                    if(grp_info.nlinks != (hsize_t)(u + 1)) TEST_ERROR
+
+                    /* Retrieve main group's information, by name */
+                    if(H5Gget_info_by_name(group_id, ".", &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
 
                     /* Check main group's information */
                     if(grp_info.storage_type != H5G_STORAGE_TYPE_COMPACT) TEST_ERROR
@@ -9051,7 +9103,7 @@ group_info(hid_t fapl)
                     if(H5Lcreate_soft(valname, soft_group_id, objname, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
                     /* Retrieve soft link group's information, by name */
-                    if(H5Gget_info(soft_group_id, ".", &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
+                    if(H5Gget_info(soft_group_id, &grp_info) < 0) TEST_ERROR
 
                     /* Check soft link group's information */
                     if(grp_info.storage_type != H5G_STORAGE_TYPE_COMPACT) TEST_ERROR
@@ -9079,13 +9131,31 @@ group_info(hid_t fapl)
                     /* Create hard link, with group object */
                     if((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) TEST_ERROR
 
+
                     /* Retrieve group's information */
-                    if(H5Gget_info(group_id2, ".", &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
+                    if(H5Gget_info(group_id2, &grp_info) < 0) TEST_ERROR
 
                     /* Check (new/empty) group's information */
                     if(grp_info.storage_type != H5G_STORAGE_TYPE_COMPACT) TEST_ERROR
                     if(grp_info.max_corder != 0) TEST_ERROR
                     if(grp_info.nlinks != 0) TEST_ERROR
+
+                    /* Retrieve group's information, by name */
+                    if(H5Gget_info_by_name(group_id, objname, &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
+
+                    /* Check (new/empty) group's information */
+                    if(grp_info.storage_type != H5G_STORAGE_TYPE_COMPACT) TEST_ERROR
+                    if(grp_info.max_corder != 0) TEST_ERROR
+                    if(grp_info.nlinks != 0) TEST_ERROR
+
+                    /* Retrieve group's information, by name */
+                    if(H5Gget_info_by_name(group_id2, ".", &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
+
+                    /* Check (new/empty) group's information */
+                    if(grp_info.storage_type != H5G_STORAGE_TYPE_COMPACT) TEST_ERROR
+                    if(grp_info.max_corder != 0) TEST_ERROR
+                    if(grp_info.nlinks != 0) TEST_ERROR
+
 
                     /* Create objects in new group created */
                     for(v = 0; v <= u; v++) {
@@ -9099,13 +9169,31 @@ group_info(hid_t fapl)
                         if(H5Gclose(group_id3) < 0) TEST_ERROR
                     } /* end for */
 
+
                     /* Retrieve group's information */
-                    if(H5Gget_info(group_id2, ".", &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
+                    if(H5Gget_info(group_id2, &grp_info) < 0) TEST_ERROR
 
                     /* Check (new) group's information */
                     if(grp_info.storage_type != H5G_STORAGE_TYPE_DENSE) TEST_ERROR
                     if(grp_info.max_corder != (int64_t)(u + 1)) TEST_ERROR
                     if(grp_info.nlinks != (hsize_t)(u + 1)) TEST_ERROR
+
+                    /* Retrieve group's information, by name */
+                    if(H5Gget_info_by_name(group_id, objname, &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
+
+                    /* Check (new) group's information */
+                    if(grp_info.storage_type != H5G_STORAGE_TYPE_DENSE) TEST_ERROR
+                    if(grp_info.max_corder != (int64_t)(u + 1)) TEST_ERROR
+                    if(grp_info.nlinks != (hsize_t)(u + 1)) TEST_ERROR
+
+                    /* Retrieve group's information, by name */
+                    if(H5Gget_info_by_name(group_id2, ".", &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
+
+                    /* Check (new) group's information */
+                    if(grp_info.storage_type != H5G_STORAGE_TYPE_DENSE) TEST_ERROR
+                    if(grp_info.max_corder != (int64_t)(u + 1)) TEST_ERROR
+                    if(grp_info.nlinks != (hsize_t)(u + 1)) TEST_ERROR
+
 
                     /* Retrieve group's information */
                     if(order != H5_ITER_NATIVE) {
@@ -9126,8 +9214,24 @@ group_info(hid_t fapl)
                     if(H5Gclose(group_id2) < 0) TEST_ERROR
 
 
+                    /* Retrieve main group's information */
+                    if(H5Gget_info(group_id, &grp_info) < 0) TEST_ERROR
+
+                    /* Check main group's information */
+                    if(grp_info.storage_type != H5G_STORAGE_TYPE_DENSE) TEST_ERROR
+                    if(grp_info.max_corder != (int64_t)(u + 1)) TEST_ERROR
+                    if(grp_info.nlinks != (hsize_t)(u + 1)) TEST_ERROR
+
                     /* Retrieve main group's information, by name */
-                    if(H5Gget_info(group_id, ".", &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
+                    if(H5Gget_info_by_name(file_id, CORDER_GROUP_NAME, &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
+
+                    /* Check main group's information */
+                    if(grp_info.storage_type != H5G_STORAGE_TYPE_DENSE) TEST_ERROR
+                    if(grp_info.max_corder != (int64_t)(u + 1)) TEST_ERROR
+                    if(grp_info.nlinks != (hsize_t)(u + 1)) TEST_ERROR
+
+                    /* Retrieve main group's information, by name */
+                    if(H5Gget_info_by_name(group_id, ".", &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
 
                     /* Check main group's information */
                     if(grp_info.storage_type != H5G_STORAGE_TYPE_DENSE) TEST_ERROR
@@ -9140,7 +9244,7 @@ group_info(hid_t fapl)
                     if(H5Lcreate_soft(valname, soft_group_id, objname, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
                     /* Retrieve soft link group's information, by name */
-                    if(H5Gget_info(soft_group_id, ".", &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
+                    if(H5Gget_info(soft_group_id, &grp_info) < 0) TEST_ERROR
 
                     /* Check soft link group's information */
                     if(grp_info.storage_type != H5G_STORAGE_TYPE_DENSE) TEST_ERROR
@@ -9257,13 +9361,31 @@ group_info_old(hid_t fapl)
             /* Create hard link, with group object */
             if((group_id2 = H5Gcreate2(group_id, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
+
             /* Retrieve group's information */
-            if(H5Gget_info(group_id2, ".", &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
+            if(H5Gget_info(group_id2, &grp_info) < 0) TEST_ERROR
 
             /* Check (new/empty) group's information */
             if(grp_info.storage_type != H5G_STORAGE_TYPE_SYMBOL_TABLE) TEST_ERROR
             if(grp_info.max_corder != 0) TEST_ERROR
             if(grp_info.nlinks != 0) TEST_ERROR
+
+            /* Retrieve group's information, by name */
+            if(H5Gget_info_by_name(group_id, objname, &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
+
+            /* Check (new/empty) group's information */
+            if(grp_info.storage_type != H5G_STORAGE_TYPE_SYMBOL_TABLE) TEST_ERROR
+            if(grp_info.max_corder != 0) TEST_ERROR
+            if(grp_info.nlinks != 0) TEST_ERROR
+
+            /* Retrieve group's information, by name */
+            if(H5Gget_info_by_name(group_id2, ".", &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
+
+            /* Check (new/empty) group's information */
+            if(grp_info.storage_type != H5G_STORAGE_TYPE_SYMBOL_TABLE) TEST_ERROR
+            if(grp_info.max_corder != 0) TEST_ERROR
+            if(grp_info.nlinks != 0) TEST_ERROR
+
 
             /* Create objects in new group created */
             for(v = 0; v <= u; v++) {
@@ -9277,13 +9399,31 @@ group_info_old(hid_t fapl)
                 if(H5Gclose(group_id3) < 0) TEST_ERROR
             } /* end for */
 
+
             /* Retrieve group's information */
-            if(H5Gget_info(group_id2, ".", &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
+            if(H5Gget_info(group_id2, &grp_info) < 0) TEST_ERROR
 
             /* Check (new) group's information */
             if(grp_info.storage_type != H5G_STORAGE_TYPE_SYMBOL_TABLE) TEST_ERROR
             if(grp_info.max_corder != 0) TEST_ERROR
             if(grp_info.nlinks != (hsize_t)(u + 1)) TEST_ERROR
+
+            /* Retrieve group's information, by name */
+            if(H5Gget_info_by_name(group_id, objname, &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
+
+            /* Check (new) group's information */
+            if(grp_info.storage_type != H5G_STORAGE_TYPE_SYMBOL_TABLE) TEST_ERROR
+            if(grp_info.max_corder != 0) TEST_ERROR
+            if(grp_info.nlinks != (hsize_t)(u + 1)) TEST_ERROR
+
+            /* Retrieve group's information, by name */
+            if(H5Gget_info_by_name(group_id2, ".", &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
+
+            /* Check (new) group's information */
+            if(grp_info.storage_type != H5G_STORAGE_TYPE_SYMBOL_TABLE) TEST_ERROR
+            if(grp_info.max_corder != 0) TEST_ERROR
+            if(grp_info.nlinks != (hsize_t)(u + 1)) TEST_ERROR
+
 
             /* Retrieve group's information */
             if(order != H5_ITER_NATIVE) {
@@ -9304,8 +9444,24 @@ group_info_old(hid_t fapl)
             if(H5Gclose(group_id2) < 0) TEST_ERROR
 
 
+            /* Retrieve main group's information */
+            if(H5Gget_info(group_id, &grp_info) < 0) TEST_ERROR
+
+            /* Check main group's information */
+            if(grp_info.storage_type != H5G_STORAGE_TYPE_SYMBOL_TABLE) TEST_ERROR
+            if(grp_info.max_corder != 0) TEST_ERROR
+            if(grp_info.nlinks != (hsize_t)(u + 1)) TEST_ERROR
+
             /* Retrieve main group's information, by name */
-            if(H5Gget_info(group_id, ".", &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
+            if(H5Gget_info_by_name(file_id, CORDER_GROUP_NAME, &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
+
+            /* Check main group's information */
+            if(grp_info.storage_type != H5G_STORAGE_TYPE_SYMBOL_TABLE) TEST_ERROR
+            if(grp_info.max_corder != 0) TEST_ERROR
+            if(grp_info.nlinks != (hsize_t)(u + 1)) TEST_ERROR
+
+            /* Retrieve main group's information, by name */
+            if(H5Gget_info_by_name(group_id, ".", &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
 
             /* Check main group's information */
             if(grp_info.storage_type != H5G_STORAGE_TYPE_SYMBOL_TABLE) TEST_ERROR
@@ -9318,7 +9474,7 @@ group_info_old(hid_t fapl)
             if(H5Lcreate_soft(valname, soft_group_id, objname, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
             /* Retrieve soft link group's information, by name */
-            if(H5Gget_info(soft_group_id, ".", &grp_info, H5P_DEFAULT) < 0) TEST_ERROR
+            if(H5Gget_info(soft_group_id, &grp_info) < 0) TEST_ERROR
 
             /* Check soft link group's information */
             if(grp_info.storage_type != H5G_STORAGE_TYPE_SYMBOL_TABLE) TEST_ERROR
@@ -9582,7 +9738,7 @@ main(void)
             nerrors += test_copy((new_format ? fapl2 : fapl), new_format);
             nerrors += test_move_preserves((new_format ? fapl2 : fapl), new_format);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-            nerrors += test_compat((new_format ? fapl2 : fapl), new_format);
+            nerrors += test_deprec((new_format ? fapl2 : fapl), new_format);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 #ifndef H5_CANNOT_OPEN_TWICE
             nerrors += external_link_root((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;

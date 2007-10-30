@@ -975,7 +975,7 @@ hsize_t CommonFG::getNumObjs() const
 {
    H5G_info_t 		ginfo;                  /* Group information */
 
-   herr_t ret_value = H5Gget_info(getLocId(), ".", &ginfo, H5P_DEFAULT);
+   herr_t ret_value = H5Gget_info(getLocId(), &ginfo);
    if(ret_value < 0)
    {
       throwException("getNumObjs", "H5Gget_info failed");

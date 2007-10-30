@@ -102,7 +102,7 @@ test_h5o_open(void)
     VERIFY(id_type, H5I_DATASET, "H5Iget_type for dataset ID");
 
     /* Do something more complex with each of the IDs to make sure they "work" */
-    ret = H5Gget_info(grp, ".", &ginfo, H5P_DEFAULT);
+    ret = H5Gget_info(grp, &ginfo);
     CHECK(ret, FAIL, "H5Gget_info");
     VERIFY(ginfo.nlinks, 1, "H5Gget_info"); /* There should be one object, the datatype */
 
@@ -315,7 +315,7 @@ test_h5o_open_by_addr(void)
     VERIFY(id_type, H5I_DATASET, "H5Iget_type for dataset ID");
 
     /* Do something more complex with each of the IDs to make sure they "work" */
-    ret = H5Gget_info(grp, ".", &ginfo, H5P_DEFAULT);
+    ret = H5Gget_info(grp, &ginfo);
     CHECK(ret, FAIL, "H5Gget_info");
     VERIFY(ginfo.nlinks, 1, "H5Gget_info"); /* There should be one object, the datatype */
 

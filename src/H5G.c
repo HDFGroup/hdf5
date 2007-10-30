@@ -483,7 +483,51 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Gget_info(hid_t loc_id, const char *name, H5G_info_t *grp_info, hid_t lapl_id)
+H5Gget_info(hid_t grp_id, H5G_info_t *grp_info)
+{
+    H5I_type_t  id_type;                /* Type of ID */
+    H5G_loc_t	loc;                    /* Location of group */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(H5Gget_info, FAIL)
+    H5TRACE2("e", "i*x", grp_id, grp_info);
+
+    /* Check args */
+    id_type = H5I_get_type(grp_id);
+    if(!(H5I_GROUP == id_type || H5I_FILE == id_type))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
+    if(!grp_info)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
+
+    /* Get group location */
+    if(H5G_loc(grp_id, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+
+    /* Retrieve the group's information */
+    if(H5G_obj_info(loc.oloc, grp_info/*out*/, H5AC_ind_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Gget_info() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Gget_info_by_name
+ *
+ * Purpose:	Retrieve information about a group.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		November 27 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Gget_info_by_name(hid_t loc_id, const char *name, H5G_info_t *grp_info,
+    hid_t lapl_id)
 {
     H5G_loc_t	loc;                    /* Location of group */
     H5G_loc_t   grp_loc;                /* Location used to open group */
@@ -492,7 +536,7 @@ H5Gget_info(hid_t loc_id, const char *name, H5G_info_t *grp_info, hid_t lapl_id)
     hbool_t     loc_found = FALSE;      /* Location at 'name' found */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Gget_info, FAIL)
+    FUNC_ENTER_API(H5Gget_info_by_name, FAIL)
     H5TRACE4("e", "i*s*xi", loc_id, name, grp_info, lapl_id);
 
     /* Check args */
@@ -527,7 +571,7 @@ done:
         HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't free location")
 
     FUNC_LEAVE_API(ret_value)
-} /* end H5Gget_info() */
+} /* end H5Gget_info_by_name() */
 
 
 /*-------------------------------------------------------------------------

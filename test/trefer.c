@@ -1081,7 +1081,7 @@ test_reference_group(void)
     CHECK(ret, FAIL, "H5Literate");
 
     /* Various queries on the group opened */
-    ret = H5Gget_info(gid, ".", &ginfo, H5P_DEFAULT);
+    ret = H5Gget_info(gid, &ginfo);
     CHECK(ret, FAIL, "H5Gget_info");
     VERIFY(ginfo.nlinks, 3, "H5Gget_info");
 

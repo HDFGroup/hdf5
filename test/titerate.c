@@ -208,7 +208,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     root_group = H5Gopen2(file, "/", H5P_DEFAULT);
     CHECK(root_group, FAIL, "H5Gopen2");
 
-    ret = H5Gget_info(root_group, ".", &ginfo, H5P_DEFAULT);
+    ret = H5Gget_info(root_group, &ginfo);
     CHECK(ret, FAIL, "H5Gget_info");
     VERIFY(ginfo.nlinks, (NDATASETS + 2), "H5Gget_info");
 
@@ -234,7 +234,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
      * iterate through B-tree for group members in internal library design.
      *  (Same as test above, but with the file ID instead of opening the root group)
      */
-    ret = H5Gget_info(file, ".", &ginfo, H5P_DEFAULT);
+    ret = H5Gget_info(file, &ginfo);
     CHECK(ret, FAIL, "H5Gget_info");
     VERIFY(ginfo.nlinks, NDATASETS + 2, "H5Gget_info");
 
@@ -772,7 +772,7 @@ static void test_grp_memb_funcs(hid_t fapl)
     root_group = H5Gopen2(file, "/", H5P_DEFAULT);
     CHECK(root_group, FAIL, "H5Gopen2");
 
-    ret = H5Gget_info(root_group, ".", &ginfo, H5P_DEFAULT);
+    ret = H5Gget_info(root_group, &ginfo);
     CHECK(ret, FAIL, "H5Gget_info");
     VERIFY(ginfo.nlinks, (NDATASETS + 2), "H5Gget_info");
 
@@ -868,7 +868,7 @@ static void test_links(hid_t fapl)
     ret = H5Lcreate_hard(gid, "/g1", H5L_SAME_LOC, "hardlink", H5P_DEFAULT, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Lcreate_hard");
 
-    ret = H5Gget_info(gid, ".", &ginfo, H5P_DEFAULT);
+    ret = H5Gget_info(gid, &ginfo);
     CHECK(ret, FAIL, "H5Gget_info");
     VERIFY(ginfo.nlinks, 3, "H5Gget_info");
 

@@ -199,7 +199,7 @@ DONE:
 
 /*----------------------------------------------------------------------------
  * Name:        h5gn_members_c
- * Purpose:     Call H5Gget_num_objs to find number of objects in the group
+ * Purpose:     Call H5Gget_info_by_name to find number of objects in the group
  * Inputs:      loc_id - file or group identifier
  *              name - name of the group
  *              namelen - name length
@@ -222,8 +222,8 @@ nh5gn_members_c(hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *nmembers)
     if(NULL == (c_name = (char *)HD5f2cstring(name, (size_t)*namelen)))
         goto DONE;
 
-    /* Call H5Gget_info() for the number of objects in the group */
-    if(H5Gget_info((hid_t)*loc_id, c_name, &ginfo, H5P_DEFAULT) < 0)
+    /* Call H5Gget_info_by_name() for the number of objects in the group */
+    if(H5Gget_info_by_name((hid_t)*loc_id, c_name, &ginfo, H5P_DEFAULT) < 0)
         goto DONE;
 
     *nmembers = (int_f)ginfo.nlinks;

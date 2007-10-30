@@ -471,7 +471,7 @@ group_stats(hid_t group, const char *name, const char *fullname,
     iter->group_ohdr_info.free_size += oi->hdr.space.free;
 
     /* Get group information */
-    ret = H5Gget_info(group, name, &ginfo, H5P_DEFAULT);
+    ret = H5Gget_info_by_name(group, name, &ginfo, H5P_DEFAULT);
     assert(ret >= 0);
 
     /* Update link stats */

@@ -91,7 +91,7 @@ main(void)
     if (H5Lexists(file, "/G1/G2", H5P_DEFAULT)) { 
 
     	g2_id = H5Gopen2(file, "/G1/G2", H5P_DEFAULT);
-    	status = H5Gget_info(g2_id, ".", &g2_info, H5P_DEFAULT);
+    	status = H5Gget_info(g2_id, &g2_info);
     	printf("Group /G1/G2 has %d member(s)\n", (int)g2_info.nlinks);
 
     	for (i=0; i < (int)g2_info.nlinks; i++) {

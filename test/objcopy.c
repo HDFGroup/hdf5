@@ -1247,8 +1247,8 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
         cpy_flags = 0;
 
     /* Check if both groups have the same # of objects */
-    if(H5Gget_info(gid, ".", &ginfo, H5P_DEFAULT) < 0) TEST_ERROR
-    if(H5Gget_info(gid2, ".", &ginfo2, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Gget_info(gid, &ginfo) < 0) TEST_ERROR
+    if(H5Gget_info(gid2, &ginfo2) < 0) TEST_ERROR
     if((cpy_flags & H5O_COPY_SHALLOW_HIERARCHY_FLAG) && depth == 0) {
         if(ginfo2.nlinks != 0) TEST_ERROR
     } /* end if */
