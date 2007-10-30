@@ -949,7 +949,7 @@ test_get_file_id(void)
     /* Create an attribute for the dataset.  Make a duplicated file ID from
      * this attribute.  And close it.
      */
-    attr_id = H5Acreate2(dataset_id, ".", ATTR_NAME, H5T_NATIVE_INT, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    attr_id = H5Acreate2(dataset_id, ATTR_NAME, H5T_NATIVE_INT, dataspace_id, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Acreate2");
 
     /* Test H5Iget_file_id() */
@@ -1619,7 +1619,7 @@ test_file_getname(void)
     VERIFY_STR(name, FILE1, "H5Fget_name");
 
     /* Create an attribute for the dataset */
-    attr_id = H5Acreate2(dataset_id, ".", TESTA_ATTRNAME, H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    attr_id = H5Acreate2(dataset_id, TESTA_ATTRNAME, H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr_id, FAIL, "H5Acreate2");
 
     /* Get and verify file name */

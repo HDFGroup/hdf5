@@ -207,7 +207,7 @@ gent_ub(const char * filename, size_t ub_size, size_t ub_fill)
 
   dims[0] = 10;
   space = H5Screate_simple(1, dims, NULL);
-  attr = H5Acreate2(group, ".", "attr1", H5T_STD_I8BE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  attr = H5Acreate2(group, "attr1", H5T_STD_I8BE, space, H5P_DEFAULT, H5P_DEFAULT);
   sprintf(buf, "abcdefghi");
   H5Awrite(attr, H5T_NATIVE_SCHAR, buf);
   H5Sclose(space);
@@ -215,7 +215,7 @@ gent_ub(const char * filename, size_t ub_size, size_t ub_fill)
 
   dims[0] = 2; dims[1] = 2;
   space = H5Screate_simple(2, dims, NULL);
-  attr = H5Acreate2(group, ".", "attr2", H5T_STD_I32BE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  attr = H5Acreate2(group, "attr2", H5T_STD_I32BE, space, H5P_DEFAULT, H5P_DEFAULT);
   data[0][0] = 0; data[0][1] = 1; data[1][0] = 2; data[1][1] = 3;
   H5Awrite(attr, H5T_NATIVE_INT, data);
   H5Sclose(space);
@@ -238,7 +238,7 @@ gent_ub(const char * filename, size_t ub_size, size_t ub_fill)
   /* attributes of dset1.1.1 */
   dims[0] = 27;
   space = H5Screate_simple(1, dims, NULL);
-  attr = H5Acreate2(dataset, ".", "attr1", H5T_STD_I8BE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  attr = H5Acreate2(dataset, "attr1", H5T_STD_I8BE, space, H5P_DEFAULT, H5P_DEFAULT);
   sprintf(buf, "1st attribute of dset1.1.1");
   H5Awrite(attr, H5T_NATIVE_SCHAR, buf);
   H5Sclose(space);
@@ -246,7 +246,7 @@ gent_ub(const char * filename, size_t ub_size, size_t ub_fill)
 
   dims[0] = 27;
   space = H5Screate_simple(1, dims, NULL);
-  attr = H5Acreate2(dataset, ".", "attr2", H5T_STD_I8BE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  attr = H5Acreate2(dataset, "attr2", H5T_STD_I8BE, space, H5P_DEFAULT, H5P_DEFAULT);
   sprintf(buf, "2nd attribute of dset1.1.1");
   H5Awrite(attr, H5T_NATIVE_SCHAR, buf);
   H5Sclose(space);

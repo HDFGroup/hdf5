@@ -103,7 +103,7 @@ Attribute H5Object::createAttribute( const char* name, const DataType& data_type
    hid_t type_id = data_type.getId();
    hid_t space_id = data_space.getId();
    hid_t plist_id = create_plist.getId();
-   hid_t attr_id = H5Acreate2(id, ".", name, type_id, space_id, plist_id, H5P_DEFAULT, H5P_DEFAULT );
+   hid_t attr_id = H5Acreate2(id, name, type_id, space_id, plist_id, H5P_DEFAULT );
 
    // If the attribute id is valid, create and return the Attribute object
    if( attr_id > 0 )

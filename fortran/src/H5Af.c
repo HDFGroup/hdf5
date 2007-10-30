@@ -49,7 +49,7 @@ nh5acreate_c(hid_t_f *obj_id, _fcd name, size_t_f *namelen, hid_t_f *type_id,
      /*
       * Call H5Acreate2 function.
       */
-    if((*attr_id = (hid_t_f)H5Acreate2((hid_t)*obj_id, ".", c_name, (hid_t)*type_id, (hid_t)*space_id, (hid_t)*crt_prp, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if((*attr_id = (hid_t_f)H5Acreate2((hid_t)*obj_id, c_name, (hid_t)*type_id, (hid_t)*space_id, (hid_t)*crt_prp, H5P_DEFAULT)) < 0)
         HGOTO_DONE(FAIL);
 
 done:

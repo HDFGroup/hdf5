@@ -408,7 +408,7 @@ static void test_iter_attr(hid_t fapl, hbool_t new_format)
 
     for(i = 0; i < NATTR; i++) {
         sprintf(name, "Attribute %02d", i);
-        attribute = H5Acreate2(dataset, ".", name, H5T_NATIVE_INT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        attribute = H5Acreate2(dataset, name, H5T_NATIVE_INT, filespace, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(attribute, FAIL, "H5Acreate2");
 
         /* Keep a copy of the attribute names around for later */

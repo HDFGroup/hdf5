@@ -399,8 +399,8 @@ create_attrs_1(void)
 	for(j = 0; j < NUM_ATTRS; j++) {
             sprintf(attr_name, "all attrs for each dset %d", j);
             attr_t.start = retrieve_time();
-            if((attr = H5Acreate2(dataset, ".", attr_name, H5T_NATIVE_DOUBLE,
-                    small_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            if((attr = H5Acreate2(dataset, attr_name, H5T_NATIVE_DOUBLE,
+                    small_space, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                 goto error;
             if(H5Aclose(attr) < 0)
                 goto error;
@@ -502,8 +502,8 @@ create_attrs_2(void)
 	for(j = 0; j < NUM_ATTRS; j++) {
             sprintf(attr_name, "all attrs for each dset %d", j);
             attr_t.start = retrieve_time();
-            if((attr = H5Acreate2(dataset, ".", attr_name, H5T_NATIVE_DOUBLE,
-                    small_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            if((attr = H5Acreate2(dataset, attr_name, H5T_NATIVE_DOUBLE,
+                    small_space, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                 goto error;
             if(H5Aclose(attr) < 0)
                 goto error;
@@ -615,8 +615,8 @@ create_attrs_3(void)
             for(k = 0; k < BATCH_ATTRS; k++) {
                 sprintf(attr_name, "some attrs for each dset %d %d", i, k);
                 attr_t.start = retrieve_time();
-                if((attr = H5Acreate2(dataset, ".", attr_name, H5T_NATIVE_DOUBLE,
-                        small_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                if((attr = H5Acreate2(dataset, attr_name, H5T_NATIVE_DOUBLE,
+                        small_space, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                     goto error;
                 if(H5Aclose(attr) < 0)
                     goto error;

@@ -824,7 +824,7 @@ test_filespace(hid_t fapl)
         sprintf(objname,"%s %u",ATTRNAME,u);
 
         /* Create an attribute on the first dataset */
-        if((attr = H5Acreate2(dataset, ".", objname, H5T_NATIVE_INT, attr_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+        if((attr = H5Acreate2(dataset, objname, H5T_NATIVE_INT, attr_space, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
         /* Don't worry about writing the attribute - it will have a fill value */
 
@@ -832,7 +832,7 @@ test_filespace(hid_t fapl)
         if(H5Aclose(attr) < 0) FAIL_STACK_ERROR
 
         /* Create an attribute on the second dataset */
-        if((attr = H5Acreate2(dataset2, ".", objname, H5T_NATIVE_INT, attr_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+        if((attr = H5Acreate2(dataset2, objname, H5T_NATIVE_INT, attr_space, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
         /* Don't worry about writing the attribute - it will have a fill value */
 
@@ -1191,7 +1191,7 @@ test_filespace(hid_t fapl)
     if((attr_space = H5Screate_simple(FILESPACE_ATTR_NDIMS, attr_dims, NULL)) < 0) FAIL_STACK_ERROR
 
     /* Create an attribute on the dataset */
-    if((attr = H5Acreate2(dataset, ".", ATTRNAME, H5T_NATIVE_INT, attr_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((attr = H5Acreate2(dataset, ATTRNAME, H5T_NATIVE_INT, attr_space, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Don't worry about writing the attribute - it will have a fill value */
 
@@ -1200,7 +1200,7 @@ test_filespace(hid_t fapl)
 
     /* Create another attribute with same name */
     H5E_BEGIN_TRY {
-        attr = H5Acreate2(dataset, ".", ATTRNAME, H5T_NATIVE_INT, attr_space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        attr = H5Acreate2(dataset, ATTRNAME, H5T_NATIVE_INT, attr_space, H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
     if(attr >= 0) {
         H5Aclose(attr);

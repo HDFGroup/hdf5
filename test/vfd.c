@@ -1055,7 +1055,7 @@ test_multi(void)
     if((aspace = H5Screate_simple(1, adims, NULL)) < 0)
         TEST_ERROR;
 
-    if((attr = H5Acreate2(root, ".", "Metadata", atype, aspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if((attr = H5Acreate2(root, "Metadata", atype, aspace, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     if(H5Awrite(attr, atype, meta) < 0)

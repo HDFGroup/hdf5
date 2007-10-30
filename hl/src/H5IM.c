@@ -547,7 +547,7 @@ herr_t H5IMlink_palette( hid_t loc_id,
    goto out;
 
   /* Create the attribute "PALETTE" to be attached to the image*/
-  if((attr_id = H5Acreate2(image_id, ".", "PALETTE", attr_type, attr_space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+  if((attr_id = H5Acreate2(image_id, "PALETTE", attr_type, attr_space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0)
    goto out;
 
   /* Create a reference. The reference is created on the local id.  */
@@ -617,7 +617,7 @@ herr_t H5IMlink_palette( hid_t loc_id,
   if(H5Aclose(attr_id) < 0)
    goto out;
 
-  if((attr_id = H5Acreate2(image_id, ".", "PALETTE", attr_type, attr_space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+  if((attr_id = H5Acreate2(image_id, "PALETTE", attr_type, attr_space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0)
    goto out;
   
   /* Write the attribute with the new references */

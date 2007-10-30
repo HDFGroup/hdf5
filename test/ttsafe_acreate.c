@@ -167,9 +167,9 @@ void *tts_acreate_thread(void *client_data)
 
     /* Create attribute */
     attribute_name = gen_name(attrib_data->current_index);
-    attribute = H5Acreate2(attrib_data->dataset, ".", attribute_name,
+    attribute = H5Acreate2(attrib_data->dataset, attribute_name,
                           attrib_data->datatype, attrib_data->dataspace,
-                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+                          H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write data to the attribute */
     attribute_data = malloc(sizeof(int));

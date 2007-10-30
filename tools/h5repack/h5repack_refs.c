@@ -522,7 +522,7 @@ static int copy_refs_attr(hid_t loc_in,
             * copy
             *-------------------------------------------------------------------------
             */
-            if((attr_out = H5Acreate2(loc_out, ".", name, ftype_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            if((attr_out = H5Acreate2(loc_out, name, ftype_id, space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                 goto error;
             if(nelmts)
                 if(H5Awrite(attr_out, mtype_id, refbuf) < 0)
@@ -602,7 +602,7 @@ static int copy_refs_attr(hid_t loc_in,
             * copy
             *-------------------------------------------------------------------------
             */
-            if((attr_out = H5Acreate2(loc_out, ".", name, ftype_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            if((attr_out = H5Acreate2(loc_out, name, ftype_id, space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                 goto error;
             if(nelmts)
                 if(H5Awrite(attr_out, mtype_id, refbuf) < 0)

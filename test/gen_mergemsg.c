@@ -91,7 +91,7 @@ int main()
     assert(ret >= 0);
 
     /* Add 1st attribute on first group */
-    aid = H5Acreate2(gid, ".", ATTR1, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    aid = H5Acreate2(gid, ATTR1, tid, sid, H5P_DEFAULT, H5P_DEFAULT);
     assert(aid > 0);
 
     /* Close dataspace */
@@ -117,7 +117,7 @@ int main()
     assert(ret >= 0);
 
     /* Add 2nd attribute on first group */
-    aid = H5Acreate2(gid, ".", ATTR2, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    aid = H5Acreate2(gid, ATTR2, tid, sid, H5P_DEFAULT, H5P_DEFAULT);
     assert(aid > 0);
 
     /* Close dataspace */
@@ -191,7 +191,7 @@ int main()
     assert(ret >= 0);
 
     /* Add 3rd attribute on first group (smaller than 2nd attribute) */
-    aid = H5Acreate2(gid, ".", ATTR3, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    aid = H5Acreate2(gid, ATTR3, tid, sid, H5P_DEFAULT, H5P_DEFAULT);
     assert(aid > 0);
 
     /* Close dataspace */
@@ -239,7 +239,7 @@ int main()
     assert(ret >= 0);
 
     /* Re-create 2nd attribute on first group */
-    aid = H5Acreate2(gid, ".", ATTR2, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    aid = H5Acreate2(gid, ATTR2, tid, sid, H5P_DEFAULT, H5P_DEFAULT);
     assert(aid > 0);
 
     /* Close dataspace */
@@ -303,7 +303,7 @@ int main()
     assert(ret >= 0);
 
     /* Re-create 2nd attribute on first group */
-    aid = H5Acreate2(gid, ".", ATTR2, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    aid = H5Acreate2(gid, ATTR2, tid, sid, H5P_DEFAULT, H5P_DEFAULT);
     assert(aid > 0);
 
     /* Close dataspace */

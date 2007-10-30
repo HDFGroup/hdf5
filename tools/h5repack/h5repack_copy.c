@@ -977,7 +977,7 @@ int copy_attr(hid_t loc_in,
     *-------------------------------------------------------------------------
     */
 
-   if((attr_out = H5Acreate2(loc_out, ".", name, ftype_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+   if((attr_out = H5Acreate2(loc_out, name, ftype_id, space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0)
     goto error;
    if(H5Awrite(attr_out, wtype_id, buf) < 0)
     goto error;

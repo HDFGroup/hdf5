@@ -994,7 +994,7 @@ static void sohm_attr_helper(hid_t fcpl_id)
     /* Create and verify an attribute on a group */
     group_id = H5Gcreate2(file_id, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK_I(group_id, "H5Gcreate2");
-    attr_id = H5Acreate2(group_id, ".", "attribute", type_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    attr_id = H5Acreate2(group_id, "attribute", type_id, space_id, H5P_DEFAULT, H5P_DEFAULT);
     CHECK_I(attr_id, "H5Acreate2");
     ret = H5Awrite(attr_id, H5T_NATIVE_INT, wdata);
     CHECK_I(ret, "H5Awrite");
@@ -1030,7 +1030,7 @@ static void sohm_attr_helper(hid_t fcpl_id)
     /* Create and verify an attribute */
     group_id = H5Gcreate2(file_id, "another_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK_I(group_id, "H5Gcreate2");
-    attr_id = H5Acreate2(group_id, ".", "attribute", type_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    attr_id = H5Acreate2(group_id, "attribute", type_id, space_id, H5P_DEFAULT, H5P_DEFAULT);
     CHECK_I(attr_id, "H5Acreate2");
     ret = H5Awrite(attr_id, H5T_NATIVE_INT, wdata);
     CHECK_I(ret, "H5Awrite");
@@ -1480,7 +1480,7 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
         dset_id = H5Dcreate2(file_id, DSETNAME[x], dtype1_id, dspace1_id, H5P_DEFAULT, dcpl1_id, H5P_DEFAULT);
         CHECK_I(dset_id, "H5Dcreate2");
 
-        attr_id = H5Acreate2(dset_id, ".", "attr_name", attr_type_id, attr_space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        attr_id = H5Acreate2(dset_id, "attr_name", attr_type_id, attr_space_id, H5P_DEFAULT, H5P_DEFAULT);
         CHECK_I(attr_id, "H5Acreate2");
         ret = H5Awrite(attr_id, attr_type_id, attr_string1);
         CHECK_I(ret, "H5Awrite");
@@ -1529,7 +1529,7 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
         dset_id = H5Dcreate2(group_id, DSETNAME[x], dtype2_id, dspace2_id, H5P_DEFAULT, dcpl2_id, H5P_DEFAULT);
         CHECK_I(dset_id, "H5Dcreate2");
 
-        attr_id = H5Acreate2(dset_id, ".", "attr_name", attr_type_id, attr_space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        attr_id = H5Acreate2(dset_id, "attr_name", attr_type_id, attr_space_id, H5P_DEFAULT, H5P_DEFAULT);
         CHECK_I(attr_id, "H5Acreate2");
         ret = H5Awrite(attr_id, attr_type_id, attr_string2);
         CHECK_I(ret, "H5Awrite");
@@ -1570,7 +1570,7 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
         dset_id = H5Dcreate2(group_id, DSETNAME[x], dtype1_id, dspace1_id, H5P_DEFAULT, dcpl1_id, H5P_DEFAULT);
         CHECK_I(dset_id, "H5Dcreate2");
 
-        attr_id = H5Acreate2(dset_id, ".", "attr_name", attr_type_id, attr_space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        attr_id = H5Acreate2(dset_id, "attr_name", attr_type_id, attr_space_id, H5P_DEFAULT, H5P_DEFAULT);
         CHECK_I(attr_id, "H5Acreate2");
         ret = H5Awrite(attr_id, attr_type_id, attr_string1);
         CHECK_I(ret, "H5Awrite");
@@ -1583,7 +1583,7 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
         dset_id = H5Dcreate2(group_id, DSETNAME[x+1], dtype2_id, dspace2_id, H5P_DEFAULT, dcpl2_id, H5P_DEFAULT);
         CHECK_I(dset_id, "H5Dcreate2");
 
-        attr_id = H5Acreate2(dset_id, ".", "attr_name", attr_type_id, attr_space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        attr_id = H5Acreate2(dset_id, "attr_name", attr_type_id, attr_space_id, H5P_DEFAULT, H5P_DEFAULT);
         CHECK_I(attr_id, "H5Acreate2");
         ret = H5Awrite(attr_id, attr_type_id, attr_string2);
         CHECK_I(ret, "H5Awrite");
@@ -1628,7 +1628,7 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
         attr_string1[1] = attr_name[1] = (x % 10) + '0';
 
         /* Create an attribute on the group */
-        attr_id = H5Acreate2(group_id, ".", attr_name, attr_type_id, attr_space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        attr_id = H5Acreate2(group_id, attr_name, attr_type_id, attr_space_id, H5P_DEFAULT, H5P_DEFAULT);
         CHECK_I(attr_id, "H5Acreate2");
         ret = H5Awrite(attr_id, attr_type_id, attr_string1);
         CHECK_I(ret, "H5Awrite");
@@ -1668,7 +1668,7 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
         attr_string1[1] = attr_name[1] = (x % 10) + '0';
 
         /* Create an attribute on the group */
-        attr_id = H5Acreate2(group_id, ".", attr_name, attr_type_id, attr_space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        attr_id = H5Acreate2(group_id, attr_name, attr_type_id, attr_space_id, H5P_DEFAULT, H5P_DEFAULT);
         CHECK_I(attr_id, "H5Acreate2");
         ret = H5Awrite(attr_id, attr_type_id, attr_string1);
         CHECK_I(ret, "H5Awrite");
@@ -2568,7 +2568,7 @@ static void delete_helper_write(hid_t file_id, hid_t *dspace_id, hid_t *dcpl_id,
     CHECK_I(ret, "H5Dwrite");
 
     /* Create an attribute on the dataset. */
-    attr_id = H5Acreate2(dset_id, ".", "attr_name", H5T_NATIVE_CHAR, dspace_id[x], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    attr_id = H5Acreate2(dset_id, "attr_name", H5T_NATIVE_CHAR, dspace_id[x], H5P_DEFAULT, H5P_DEFAULT);
     CHECK_I(attr_id, "H5Acreate2");
 
     /* Write to attribute */

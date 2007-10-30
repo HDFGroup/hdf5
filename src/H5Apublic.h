@@ -41,7 +41,9 @@ typedef herr_t (*H5A_operator2_t)(hid_t location_id/*in*/,
     const char *attr_name/*in*/, const H5A_info_t *ainfo/*in*/, void *op_data/*in,out*/);
 
 /* Public function prototypes */
-H5_DLL hid_t   H5Acreate2(hid_t loc_id, const char *obj_name, const char *attr_name,
+H5_DLL hid_t   H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id,
+    hid_t space_id, hid_t acpl_id, hid_t aapl_id);
+H5_DLL hid_t   H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t lapl_id);
 H5_DLL hid_t   H5Aopen(hid_t loc_id, const char *attr_name, hid_t aapl_id);
 H5_DLL hid_t   H5Aopen_by_name(hid_t loc_id, const char *obj_name,
@@ -94,7 +96,7 @@ typedef herr_t (*H5A_operator1_t)(hid_t location_id/*in*/,
 
 /* Function prototypes */
 H5_DLL hid_t   H5Acreate1(hid_t loc_id, const char *name, hid_t type_id,
-    hid_t space_id, hid_t plist_id);
+    hid_t space_id, hid_t acpl_id);
 H5_DLL hid_t   H5Aopen_name(hid_t loc_id, const char *name);
 H5_DLL hid_t   H5Aopen_idx(hid_t loc_id, unsigned idx);
 H5_DLL int     H5Aget_num_attrs(hid_t loc_id);

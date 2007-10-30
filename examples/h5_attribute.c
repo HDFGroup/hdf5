@@ -111,7 +111,7 @@ main (void)
    /*
     * Create array attribute.
     */
-   attr1 = H5Acreate2(dataset, ".", ANAME, H5T_NATIVE_FLOAT, aid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+   attr1 = H5Acreate2(dataset, ANAME, H5T_NATIVE_FLOAT, aid1, H5P_DEFAULT, H5P_DEFAULT);
 
    /*
     * Write array attribute.
@@ -122,8 +122,8 @@ main (void)
     * Create scalar attribute.
     */
    aid2  = H5Screate(H5S_SCALAR);
-   attr2 = H5Acreate2(dataset, ".", "Integer attribute", H5T_NATIVE_INT, aid2,
-                     H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+   attr2 = H5Acreate2(dataset, "Integer attribute", H5T_NATIVE_INT, aid2,
+                     H5P_DEFAULT, H5P_DEFAULT);
 
    /*
     * Write scalar attribute.
@@ -137,7 +137,7 @@ main (void)
    atype = H5Tcopy(H5T_C_S1);
            H5Tset_size(atype, 5);
            H5Tset_strpad(atype,H5T_STR_NULLTERM);
-   attr3 = H5Acreate2(dataset, ".", ANAMES, atype, aid3, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+   attr3 = H5Acreate2(dataset, ANAMES, atype, aid3, H5P_DEFAULT, H5P_DEFAULT);
 
    /*
     * Write string attribute.

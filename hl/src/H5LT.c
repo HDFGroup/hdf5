@@ -888,7 +888,7 @@ herr_t H5LTset_attribute_string( hid_t loc_id,
 
  /* Create and write the attribute */
 
- if((attr_id = H5Acreate2(obj_id, ".", attr_name, attr_type, attr_space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+ if((attr_id = H5Acreate2(obj_id, attr_name, attr_type, attr_space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0)
   goto out;
 
  if(H5Awrite(attr_id, attr_type, attr_data) < 0)
@@ -965,7 +965,7 @@ herr_t H5LT_set_attribute_numerical( hid_t loc_id,
      goto out;
 
  /* Create the attribute. */
- if((attr_id = H5Acreate2(obj_id, ".", attr_name, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+ if((attr_id = H5Acreate2(obj_id, attr_name, tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
   goto out;
 
  /* Write the attribute data. */
@@ -2866,7 +2866,7 @@ herr_t H5LT_set_attribute_string(hid_t dset_id,
  * create and write the attribute
  *-------------------------------------------------------------------------
  */
- if((aid = H5Acreate2(dset_id, ".", name, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+ if((aid = H5Acreate2(dset_id, name, tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
   goto out;
 
  if(H5Awrite(aid, tid, buf) < 0)

@@ -2475,7 +2475,7 @@ test_transient (hid_t fapl)
 
     /* It should not be possible to create an attribute for a transient type */
     H5E_BEGIN_TRY {
-	status = H5Acreate2(type, ".", "attr1", H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+	status = H5Acreate2(type, "attr1", H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT);
     } H5E_END_TRY;
     if (status>=0) {
 	H5_FAILED();
@@ -2622,8 +2622,8 @@ test_named (hid_t fapl)
     }
 
     /* It should be possible to define an attribute for the named type */
-    if((attr1 = H5Acreate2(type, ".", "attr1", H5T_NATIVE_UCHAR, space,
-			  H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
+    if((attr1 = H5Acreate2(type, "attr1", H5T_NATIVE_UCHAR, space,
+			  H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
     for(i = 0; i < (size_t)ds_size[0]; i++)
         for(j = 0; j < (size_t)ds_size[1]; j++)
             attr_data[i][j] = (int)(i * ds_size[1] + j);

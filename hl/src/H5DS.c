@@ -249,7 +249,7 @@ herr_t H5DSattach_scale(hid_t did,
    goto out;
 
   /* create the attribute */
-  if((aid = H5Acreate2(did, ".", DIMENSION_LIST, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+  if((aid = H5Acreate2(did, DIMENSION_LIST, tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
    goto out;
 
   /* allocate and initialize the VL */
@@ -421,7 +421,7 @@ herr_t H5DSattach_scale(hid_t did,
    goto out;
 
   /* create the attribute */
-  if((aid = H5Acreate2(dsid, ".", REFERENCE_LIST, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+  if((aid = H5Acreate2(dsid, REFERENCE_LIST, tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
    goto out;
 
   /* store the IDX information */
@@ -505,7 +505,7 @@ herr_t H5DSattach_scale(hid_t did,
    free(dims);
 
   /* create the attribute again with the changes of space */
-  if((aid = H5Acreate2(dsid, ".", REFERENCE_LIST, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+  if((aid = H5Acreate2(dsid, REFERENCE_LIST, tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
    goto out;
 
   /* write the attribute with the new references */
@@ -859,7 +859,7 @@ herr_t H5DSdetach_scale(hid_t did,
    goto out;
 
   /* create the attribute again with the changes of space */
-  if((aid = H5Acreate2(dsid, ".", REFERENCE_LIST, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+  if((aid = H5Acreate2(dsid, REFERENCE_LIST, tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
    goto out;
 
   /* write the new attribute with the new references */
@@ -1451,7 +1451,7 @@ herr_t H5DSset_label(hid_t did,
    goto out;
 
   /* create the attribute */
-  if((aid = H5Acreate2(did, ".", DIMENSION_LABELS, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+  if((aid = H5Acreate2(did, DIMENSION_LABELS, tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
    goto out;
 
   /* allocate and initialize */

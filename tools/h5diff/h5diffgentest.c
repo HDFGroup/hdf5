@@ -974,7 +974,7 @@ void write_attr_in(hid_t loc_id,
 
  sid = H5Screate_simple(1, dims, NULL);
  tid = H5Tvlen_create(H5T_NATIVE_INT);
- aid = H5Acreate2(loc_id, ".", "vlen", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ aid = H5Acreate2(loc_id, "vlen", tid, sid, H5P_DEFAULT, H5P_DEFAULT);
  status = H5Awrite(aid, tid, buf5);
  assert(status >= 0);
  status = H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf5);
@@ -1245,7 +1245,7 @@ position        enum2D of </g1> enum2D of </g1> difference
 
  sid = H5Screate_simple(2, dims2, NULL);
  tid = H5Tvlen_create(H5T_NATIVE_INT);
- aid = H5Acreate2(loc_id, ".", "vlen2D", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ aid = H5Acreate2(loc_id, "vlen2D", tid, sid, H5P_DEFAULT, H5P_DEFAULT);
  status = H5Awrite(aid, tid, buf52);
  assert(status >= 0);
  status = H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf52);
@@ -1642,7 +1642,7 @@ etc
 */
  sid = H5Screate_simple(3, dims3, NULL);
  tid = H5Tvlen_create(H5T_NATIVE_INT);
- aid = H5Acreate2(loc_id, ".", "vlen3D", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ aid = H5Acreate2(loc_id, "vlen3D", tid, sid, H5P_DEFAULT, H5P_DEFAULT);
  status = H5Awrite(aid, tid, buf53);
  assert(status >= 0);
  status = H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf53);
@@ -2533,7 +2533,7 @@ int write_attr(hid_t loc_id,
      goto out;
 
  /* create the attribute */
- if((aid = H5Acreate2(loc_id, ".", name, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+ if((aid = H5Acreate2(loc_id, name, tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
      goto out;
 
  /* write */

@@ -190,7 +190,72 @@ H5A_term_interface(void)
  PURPOSE
     Creates an attribute on an object
  USAGE
-    hid_t H5Acreate2(loc_id, obj_name, attr_name, type_id, space_id, acpl_id,
+    hid_t H5Acreate2(loc_id, attr_name, type_id, space_id, acpl_id,
+            aapl_id)
+        hid_t loc_id;       IN: Object (dataset or group) to be attached to
+        const char *attr_name;  IN: Name of attribute to locate and open
+        hid_t type_id;          IN: ID of datatype for attribute
+        hid_t space_id;         IN: ID of dataspace for attribute
+        hid_t acpl_id;          IN: ID of creation property list (currently not used)
+        hid_t aapl_id;          IN: Attribute access property list
+ RETURNS
+    Non-negative on success/Negative on failure
+
+ DESCRIPTION
+        This function creates an attribute which is attached to the object
+    specified with 'loc_id'.  The name specified with 'attr_name' for
+    each attribute for an object must be unique for that object.  The 'type_id'
+    and 'space_id' are created with the H5T and H5S interfaces respectively.
+    The 'aapl_id' property list is currently unused, but will be used in the
+    future for optional attribute access properties.  The attribute ID returned
+    from this function must be released with H5Aclose or resource leaks will
+    develop.
+
+--------------------------------------------------------------------------*/
+/* ARGSUSED */
+hid_t
+H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
+    hid_t acpl_id, hid_t UNUSED aapl_id)
+{
+    H5G_loc_t           loc;                    /* Object location */
+    H5T_t		*type;                  /* Datatype to use for attribute */
+    H5S_t		*space;                 /* Dataspace to use for attribute */
+    hid_t		ret_value;              /* Return value */
+
+    FUNC_ENTER_API(H5Acreate2, FAIL)
+    H5TRACE6("i", "i*siiii", loc_id, attr_name, type_id, space_id,
+             acpl_id, aapl_id);
+
+    /* check arguments */
+    if(H5I_ATTR == H5I_get_type(loc_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+    if(H5G_loc(loc_id, &loc) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(0 == (H5F_INTENT(loc.oloc->file) & H5F_ACC_RDWR))
+	HGOTO_ERROR(H5E_ARGS, H5E_WRITEERROR, FAIL, "no write intent on file")
+    if(!attr_name || !*attr_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
+    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a type")
+    if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+
+    /* Go do the real work for attaching the attribute to the dataset */
+    if((ret_value = H5A_create(&loc, attr_name, type, space, acpl_id, H5AC_dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to create attribute")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Acreate2() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Acreate_by_name
+ PURPOSE
+    Creates an attribute on an object
+ USAGE
+    hid_t H5Acreate_by_name(loc_id, obj_name, attr_name, type_id, space_id, acpl_id,
             aapl_id, lapl_id)
         hid_t loc_id;       IN: Object (dataset or group) to be attached to
         const char *obj_name;   IN: Name of object relative to location
@@ -216,7 +281,7 @@ H5A_term_interface(void)
 --------------------------------------------------------------------------*/
 /* ARGSUSED */
 hid_t
-H5Acreate2(hid_t loc_id, const char *obj_name, const char *attr_name,
+H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t UNUSED aapl_id,
     hid_t lapl_id)
 {
@@ -229,7 +294,7 @@ H5Acreate2(hid_t loc_id, const char *obj_name, const char *attr_name,
     H5S_t		*space;                 /* Dataspace to use for attribute */
     hid_t		ret_value;              /* Return value */
 
-    FUNC_ENTER_API(H5Acreate2, FAIL)
+    FUNC_ENTER_API(H5Acreate_by_name, FAIL)
     H5TRACE8("i", "i*s*siiiii", loc_id, obj_name, attr_name, type_id, space_id,
              acpl_id, aapl_id, lapl_id);
 
@@ -269,7 +334,7 @@ done:
         HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location")
 
     FUNC_LEAVE_API(ret_value)
-} /* H5Acreate2() */
+} /* H5Acreate_by_name() */
 
 
 /*-------------------------------------------------------------------------
