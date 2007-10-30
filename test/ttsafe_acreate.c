@@ -130,7 +130,7 @@ void tts_acreate(void)
 
     /* verify the correctness of the test */
     for(i = 0; i < NUM_THREADS; i++) {
-        attribute = H5Aopen(dataset, ".", gen_name(i), H5P_DEFAULT, H5P_DEFAULT);
+        attribute = H5Aopen(dataset, gen_name(i), H5P_DEFAULT);
 
         if(attribute < 0)
             TestErrPrintf("unable to open appropriate attribute.  Test failed!\n");

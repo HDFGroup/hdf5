@@ -439,7 +439,67 @@ done:
  PURPOSE
     Opens an attribute for an object by looking up the attribute name
  USAGE
-    hid_t H5Aopen(loc_id, obj_name, attr_name, aapl_id, lapl_id)
+    hid_t H5Aopen(loc_id, attr_name, aapl_id)
+        hid_t loc_id;           IN: Object that attribute is attached to
+        const char *attr_name;  IN: Name of attribute to locate and open
+        hid_t aapl_id;          IN: Attribute access property list
+ RETURNS
+    ID of attribute on success, negative on failure
+
+ DESCRIPTION
+        This function opens an existing attribute for access.  The attribute
+    name specified is used to look up the corresponding attribute for the
+    object.  The attribute ID returned from this function must be released with
+    H5Aclose or resource leaks will develop.
+--------------------------------------------------------------------------*/
+hid_t
+H5Aopen(hid_t loc_id, const char *attr_name, hid_t UNUSED aapl_id)
+{
+    H5G_loc_t    	loc;            /* Object location */
+    H5A_t               *attr = NULL;   /* Attribute opened */
+    hid_t		ret_value;
+
+    FUNC_ENTER_API(H5Aopen, FAIL)
+    H5TRACE3("i", "i*si", loc_id, attr_name, aapl_id);
+
+    /* check arguments */
+    if(H5I_ATTR == H5I_get_type(loc_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+    if(H5G_loc(loc_id, &loc) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(!attr_name || !*attr_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
+
+    /* Read in attribute from object header */
+    if(NULL == (attr = H5O_attr_open_by_name(loc.oloc, attr_name, H5AC_ind_dxpl_id)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to load attribute info from object header")
+    attr->initialized = TRUE;
+
+    /* Finish initializing attribute */
+    if(H5A_open_common(&loc, attr) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to initialize attribute")
+
+    /* Register the attribute and get an ID for it */
+    if((ret_value = H5I_register(H5I_ATTR, attr)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register attribute for ID")
+
+done:
+    /* Cleanup on failure */
+    if(ret_value < 0)
+        if(attr && H5A_close(attr) < 0)
+            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute")
+
+    FUNC_LEAVE_API(ret_value)
+} /* H5Aopen() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Aopen_by_name
+ PURPOSE
+    Opens an attribute for an object by looking up the attribute name
+ USAGE
+    hid_t H5Aopen_by_name(loc_id, obj_name, attr_name, aapl_id, lapl_id)
         hid_t loc_id;           IN: Object that attribute is attached to
         const char *obj_name;   IN: Name of object relative to location
         const char *attr_name;  IN: Name of attribute to locate and open
@@ -455,14 +515,14 @@ done:
     H5Aclose or resource leaks will develop.
 --------------------------------------------------------------------------*/
 hid_t
-H5Aopen(hid_t loc_id, const char *obj_name, const char *attr_name,
+H5Aopen_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     hid_t UNUSED aapl_id, hid_t lapl_id)
 {
     H5G_loc_t    	loc;            /* Object location */
     H5A_t               *attr = NULL;   /* Attribute opened */
     hid_t		ret_value;
 
-    FUNC_ENTER_API(H5Aopen, FAIL)
+    FUNC_ENTER_API(H5Aopen_by_name, FAIL)
     H5TRACE5("i", "i*s*sii", loc_id, obj_name, attr_name, aapl_id, lapl_id);
 
     /* check arguments */
@@ -495,7 +555,7 @@ done:
             HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "can't close attribute")
 
     FUNC_LEAVE_API(ret_value)
-} /* H5Aopen() */
+} /* H5Aopen_by_name() */
 
 
 /*--------------------------------------------------------------------------

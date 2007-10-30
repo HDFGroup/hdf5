@@ -792,7 +792,7 @@ compare_std_attributes(hid_t oid, hid_t oid2, hid_t pid)
             if((aid = H5Aopen_by_idx(oid, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)i, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
             if(H5Aget_name(aid, ATTR_NAME_LEN, attr_name) < 0) TEST_ERROR
 
-            if((aid2 = H5Aopen(oid2, ".", attr_name, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+            if((aid2 = H5Aopen(oid2, attr_name, H5P_DEFAULT)) < 0) TEST_ERROR
 
             /* Check the attributes are equal */
             if(!compare_attribute(aid, aid2, pid, NULL, oid)) TEST_ERROR

@@ -1237,7 +1237,7 @@ dump_attr_cb(hid_t oid, const char *attr_name, const H5A_info_t UNUSED *info, vo
     begin_obj(dump_header_format->attributebegin, attr_name,
           dump_header_format->attributeblockbegin);
 
-    if((attr_id = H5Aopen(oid, ".", attr_name, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+    if((attr_id = H5Aopen(oid, attr_name, H5P_DEFAULT)) < 0) {
         indentation(indent + COL);
         error_msg(progname, "unable to open attribute \"%s\"\n", attr_name);
         indentation(indent);
@@ -1321,7 +1321,7 @@ dump_selected_attr(hid_t loc_id, const char *name)
         return FAIL;
     } /* end if */
 
-    if((attr_id = H5Aopen(oid, ".", attr_name, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+    if((attr_id = H5Aopen(oid, attr_name, H5P_DEFAULT)) >= 0) {
         hid_t type, space;
 
         type = H5Aget_type(attr_id);
@@ -5099,7 +5099,7 @@ xml_dump_attr(hid_t attr, const char *attr_name, const H5A_info_t UNUSED *info,
     printf("<%sAttribute Name=\"%s\">\n",xmlnsprefix, t_aname);
     free(t_aname);
 
-    if ((attr_id = H5Aopen(attr, ".", attr_name, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+    if ((attr_id = H5Aopen(attr, attr_name, H5P_DEFAULT)) >= 0) {
         type = H5Aget_type(attr_id);
         space = H5Aget_space(attr_id);
         space_type = H5Sget_simple_extent_type(space);

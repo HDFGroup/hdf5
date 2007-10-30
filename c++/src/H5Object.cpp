@@ -137,7 +137,7 @@ Attribute H5Object::createAttribute( const H5std_string& name, const DataType& d
 //--------------------------------------------------------------------------
 Attribute H5Object::openAttribute( const char* name ) const
 {
-   hid_t attr_id = H5Aopen( id, ".", name, H5P_DEFAULT, H5P_DEFAULT );
+   hid_t attr_id = H5Aopen( id, name, H5P_DEFAULT );
    if( attr_id > 0 )
    {
       Attribute attr( attr_id );

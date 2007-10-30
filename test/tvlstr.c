@@ -680,7 +680,7 @@ static void test_read_vl_string_attribute(void)
     CHECK(root, FAIL, "H5Gopen2");
 
     /* Test reading "normal" sized string attribute */
-    att = H5Aopen(root, ".", "test_scalar", H5P_DEFAULT, H5P_DEFAULT);
+    att = H5Aopen(root, "test_scalar", H5P_DEFAULT);
     CHECK(att, FAIL, "H5Aopen");
 
     ret = H5Aread(att, type, &string_att_check);
@@ -695,7 +695,7 @@ static void test_read_vl_string_attribute(void)
     CHECK(ret, FAIL, "HAclose");
 
     /* Test reading "large" sized string attribute */
-    att = H5Aopen(root, ".", "test_scalar_large", H5P_DEFAULT, H5P_DEFAULT);
+    att = H5Aopen(root, "test_scalar_large", H5P_DEFAULT);
     CHECK(att, FAIL, "H5Aopen");
 
     ret = H5Aread(att, type, &string_att_check);

@@ -43,8 +43,9 @@ typedef herr_t (*H5A_operator2_t)(hid_t location_id/*in*/,
 /* Public function prototypes */
 H5_DLL hid_t   H5Acreate2(hid_t loc_id, const char *obj_name, const char *attr_name,
     hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t lapl_id);
-H5_DLL hid_t   H5Aopen(hid_t loc_id, const char *obj_name, const char *attr_name,
-    hid_t aapl_id, hid_t lapl_id);
+H5_DLL hid_t   H5Aopen(hid_t loc_id, const char *attr_name, hid_t aapl_id);
+H5_DLL hid_t   H5Aopen_by_name(hid_t loc_id, const char *obj_name,
+    const char *attr_name, hid_t aapl_id, hid_t lapl_id);
 H5_DLL hid_t   H5Aopen_by_idx(hid_t loc_id, const char *obj_name, 
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t aapl_id,
     hid_t lapl_id);

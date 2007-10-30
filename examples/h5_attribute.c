@@ -184,7 +184,7 @@ main (void)
     * Attach to the scalar attribute using attribute name, then read and
     * display its value.
     */
-   attr = H5Aopen(dataset, ".", "Integer attribute", H5P_DEFAULT, H5P_DEFAULT);
+   attr = H5Aopen(dataset, "Integer attribute", H5P_DEFAULT);
    ret  = H5Aread(attr, H5T_NATIVE_INT, &point_out);
    printf("The value of the attribute \"Integer attribute\" is %d \n", point_out);
    ret =  H5Aclose(attr);
@@ -241,7 +241,7 @@ attr_info(hid_t loc_id, const char *name, const H5A_info_t *ainfo, void *opdata)
     /*
      * Open the attribute using its name.
      */
-    attr = H5Aopen(loc_id, ".", name, H5P_DEFAULT, H5P_DEFAULT);
+    attr = H5Aopen(loc_id, name, H5P_DEFAULT);
 
     /*
      * Display attribute name.

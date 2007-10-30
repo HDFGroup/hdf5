@@ -1886,9 +1886,9 @@ static void size2_verify(void)
         attr_correct_string[0] = attr_name[0] = (x / 10) + '0';
         attr_correct_string[1] = attr_name[1] = (x % 10) + '0';
 
-        attr1_id = H5Aopen(group1_id, ".", attr_name, H5P_DEFAULT, H5P_DEFAULT);
+        attr1_id = H5Aopen(group1_id, attr_name, H5P_DEFAULT);
         CHECK_I(attr1_id, "H5Aopen");
-        attr2_id = H5Aopen(group2_id, ".", attr_name, H5P_DEFAULT, H5P_DEFAULT);
+        attr2_id = H5Aopen(group2_id, attr_name, H5P_DEFAULT);
         CHECK_I(attr2_id, "H5Aopen");
 
         ret = H5Aread(attr1_id, attr_type_id, attr_string);
@@ -2613,7 +2613,7 @@ static void delete_helper_read(hid_t file_id, hid_t *dspace_id, int x)
     VERIFY(rdata, (x + 'a'), "H5Dread");
 
     /* Open attribute */
-    attr_id = H5Aopen(dset_id, ".", "attr_name", H5P_DEFAULT, H5P_DEFAULT);
+    attr_id = H5Aopen(dset_id, "attr_name", H5P_DEFAULT);
     CHECK_I(attr_id, "H5Aopen");
 
     /* Read */

@@ -1338,7 +1338,7 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t UNUSED *ainfo,
     n = display_string(stdout, attr_name, TRUE);
     printf("%*s", MAX(0, (9 - n)), "");
 
-    if((attr = H5Aopen(obj, ".", attr_name, H5P_DEFAULT, H5P_DEFAULT))) {
+    if((attr = H5Aopen(obj, attr_name, H5P_DEFAULT))) {
         space = H5Aget_space(attr);
         type = H5Aget_type(attr);
 

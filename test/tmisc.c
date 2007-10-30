@@ -497,7 +497,7 @@ static void test_misc2_read_attribute(const char *filename, const char *att_name
     root = H5Gopen2(file, "/", H5P_DEFAULT);
     CHECK(root, FAIL, "H5Gopen2");
 
-    att = H5Aopen(root, ".", att_name, H5P_DEFAULT, H5P_DEFAULT);
+    att = H5Aopen(root, att_name, H5P_DEFAULT);
     CHECK(att, FAIL, "H5Aopen");
 
     ret = H5Aread(att, type, &data_check);

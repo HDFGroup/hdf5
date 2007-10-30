@@ -476,7 +476,7 @@ test_dangle_attribute(H5F_close_degree_t degree)
 
     /* Leave open a _lot_ of objects */
     for(u = 0; u < MAX_DANGLE; u++)
-        if((aid = H5Aopen(dsid, ".", ATTRNAME, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        if((aid = H5Aopen(dsid, ATTRNAME, H5P_DEFAULT)) < 0)
             TEST_ERROR
 
     if(H5Dclose(dsid) < 0)

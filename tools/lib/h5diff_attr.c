@@ -95,7 +95,7 @@ hsize_t diff_attr(hid_t loc1_id,
   /* use the name on the first file to open the second file */
   H5E_BEGIN_TRY 
   {
-   if((attr2_id = H5Aopen(loc2_id, ".", name1, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+   if((attr2_id = H5Aopen(loc2_id, name1, H5P_DEFAULT)) < 0)
     goto error;
   } H5E_END_TRY;
 

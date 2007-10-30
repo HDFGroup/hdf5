@@ -297,7 +297,7 @@ herr_t H5DSattach_scale(hid_t did,
 
  else if ( has_dimlist == 1 )
  {
-  if((aid = H5Aopen(did, ".", DIMENSION_LIST, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+  if((aid = H5Aopen(did, DIMENSION_LIST, H5P_DEFAULT)) < 0)
    goto out;
 
   if((tid = H5Aget_type(aid)) < 0)
@@ -450,7 +450,7 @@ herr_t H5DSattach_scale(hid_t did,
 
  else if(has_reflist ==  1)
  {
-  if((aid = H5Aopen(dsid, ".", REFERENCE_LIST, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+  if((aid = H5Aopen(dsid, REFERENCE_LIST, H5P_DEFAULT)) < 0)
    goto out;
 
   if((tid = H5Aget_type(aid)) < 0)
@@ -674,7 +674,7 @@ herr_t H5DSdetach_scale(hid_t did,
  *-------------------------------------------------------------------------
  */
 
- if((aid = H5Aopen(did, ".", DIMENSION_LIST, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+ if((aid = H5Aopen(did, DIMENSION_LIST, H5P_DEFAULT)) < 0)
   return FAIL;
 
  if((tid = H5Aget_type(aid)) < 0)
@@ -758,7 +758,7 @@ herr_t H5DSdetach_scale(hid_t did,
  *-------------------------------------------------------------------------
  */
 
- if((aid = H5Aopen(dsid, ".", REFERENCE_LIST, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+ if((aid = H5Aopen(dsid, REFERENCE_LIST, H5P_DEFAULT)) < 0)
   goto out;
 
  if((tid = H5Aget_type(aid)) < 0)
@@ -1019,7 +1019,7 @@ htri_t H5DSis_attached(hid_t did,
 
  if(has_dimlist == 1)
  {
-  if((aid = H5Aopen(did, ".", DIMENSION_LIST, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+  if((aid = H5Aopen(did, DIMENSION_LIST, H5P_DEFAULT)) < 0)
    goto out;
 
   if((tid = H5Aget_type(aid)) < 0)
@@ -1096,7 +1096,7 @@ htri_t H5DSis_attached(hid_t did,
 
  if(has_reflist ==  1)
  {
-  if((aid = H5Aopen(dsid, ".", REFERENCE_LIST, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+  if((aid = H5Aopen(dsid, REFERENCE_LIST, H5P_DEFAULT)) < 0)
    goto out;
 
   if((tid = H5Aget_type(aid)) < 0)
@@ -1278,7 +1278,7 @@ herr_t H5DSiterate_scales(hid_t did,
 
  else if(has_dimlist == 1)
  {
-  if((aid = H5Aopen(did, ".", DIMENSION_LIST, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+  if((aid = H5Aopen(did, DIMENSION_LIST, H5P_DEFAULT)) < 0)
    goto out;
   if((tid = H5Aget_type(aid)) < 0)
    goto out;
@@ -1488,7 +1488,7 @@ herr_t H5DSset_label(hid_t did,
 
  else
  {
-  if((aid = H5Aopen(did, ".", DIMENSION_LABELS, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+  if((aid = H5Aopen(did, DIMENSION_LABELS, H5P_DEFAULT)) < 0)
    goto out;
 
   if((tid = H5Aget_type(aid)) < 0)
@@ -1614,7 +1614,7 @@ ssize_t H5DSget_label(hid_t did,
  */
 
  assert (has_labels == 1);
-  if((aid = H5Aopen(did, ".", DIMENSION_LABELS, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+  if((aid = H5Aopen(did, DIMENSION_LABELS, H5P_DEFAULT)) < 0)
    goto out;
 
   if((tid = H5Aget_type(aid)) < 0)
@@ -1730,7 +1730,7 @@ ssize_t H5DSget_scale_name(hid_t did,
  *-------------------------------------------------------------------------
  */
 
- if((aid = H5Aopen(did, ".", "NAME", H5P_DEFAULT, H5P_DEFAULT)) < 0)
+ if((aid = H5Aopen(did, "NAME", H5P_DEFAULT)) < 0)
   return FAIL;
 
  /* get space */
@@ -1839,7 +1839,7 @@ htri_t H5DSis_scale(hid_t did)
 
  else
  {
-  if((aid = H5Aopen(did, ".", "CLASS", H5P_DEFAULT, H5P_DEFAULT)) < 0)
+  if((aid = H5Aopen(did, "CLASS", H5P_DEFAULT)) < 0)
    goto out;
 
   if((tid = H5Aget_type(aid)) < 0)
@@ -1950,7 +1950,7 @@ int H5DSget_num_scales(hid_t did,
 
  else
  {
-  if((aid = H5Aopen(did, ".", DIMENSION_LIST, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+  if((aid = H5Aopen(did, DIMENSION_LIST, H5P_DEFAULT)) < 0)
    goto out;
   if((tid = H5Aget_type(aid)) < 0)
    goto out;
@@ -2029,7 +2029,7 @@ herr_t H5DS_is_reserved(hid_t did)
   return 0;
 
  assert(has_class ==  1);
-  if((aid = H5Aopen(did, ".", "CLASS", H5P_DEFAULT, H5P_DEFAULT)) < 0)
+  if((aid = H5Aopen(did, "CLASS", H5P_DEFAULT)) < 0)
    goto out;
 
   if((tid = H5Aget_type(aid)) < 0)

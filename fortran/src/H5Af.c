@@ -85,7 +85,7 @@ nh5aopen_name_c (hid_t_f *obj_id, _fcd name, size_t_f *namelen, hid_t_f *attr_id
      /*
       * Call H5Aopen function.
       */
-     if((*attr_id = (hid_t_f)H5Aopen((hid_t)*obj_id, ".", c_name, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+     if((*attr_id = (hid_t_f)H5Aopen((hid_t)*obj_id, c_name, H5P_DEFAULT)) < 0)
          HGOTO_DONE(FAIL);
 
 done:

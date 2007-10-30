@@ -263,7 +263,7 @@ herr_t H5IMget_image_info( hid_t loc_id,
  if(has_attr == 1)
  {
 
-  if((attr_id = H5Aopen(did, ".", "INTERLACE_MODE", H5P_DEFAULT, H5P_DEFAULT)) < 0)
+  if((attr_id = H5Aopen(did, "INTERLACE_MODE", H5P_DEFAULT)) < 0)
    goto out;
 
   if((attr_type = H5Aget_type(attr_id)) < 0)
@@ -332,7 +332,7 @@ herr_t H5IMget_image_info( hid_t loc_id,
  if(has_pal ==  1)
  {
 
-  if((attr_id = H5Aopen(did, ".", "PALETTE", H5P_DEFAULT, H5P_DEFAULT)) < 0)
+  if((attr_id = H5Aopen(did, "PALETTE", H5P_DEFAULT)) < 0)
    goto out;
 
   if((attr_type = H5Aget_type(attr_id)) < 0)
@@ -574,7 +574,7 @@ herr_t H5IMlink_palette( hid_t loc_id,
  */
  else if(ok_pal ==  1)
  {
-  if((attr_id = H5Aopen(image_id, ".", "PALETTE", H5P_DEFAULT, H5P_DEFAULT)) < 0)
+  if((attr_id = H5Aopen(image_id, "PALETTE", H5P_DEFAULT)) < 0)
    goto out;
   
   if((attr_type = H5Aget_type(attr_id)) < 0)
@@ -707,7 +707,7 @@ herr_t H5IMunlink_palette( hid_t loc_id,
  /* The attribute exists, open it */
  else if(ok_pal ==  1)
  {
-  if((attr_id = H5Aopen(image_id, ".", "PALETTE", H5P_DEFAULT, H5P_DEFAULT)) < 0)
+  if((attr_id = H5Aopen(image_id, "PALETTE", H5P_DEFAULT)) < 0)
    goto out;
 
   if((attr_type = H5Aget_type(attr_id)) < 0)
@@ -789,7 +789,7 @@ herr_t H5IMget_npalettes( hid_t loc_id,
  if(has_pal ==  1 )
  {
 
-  if((attr_id = H5Aopen(image_id, ".", "PALETTE", H5P_DEFAULT, H5P_DEFAULT)) < 0)
+  if((attr_id = H5Aopen(image_id, "PALETTE", H5P_DEFAULT)) < 0)
    goto out;
 
   if((attr_type = H5Aget_type(attr_id)) < 0)
@@ -881,7 +881,7 @@ herr_t H5IMget_palette_info( hid_t loc_id,
  
  if(has_pal ==  1)
  {
-  if((attr_id = H5Aopen(image_id, ".", "PALETTE", H5P_DEFAULT, H5P_DEFAULT)) < 0)
+  if((attr_id = H5Aopen(image_id, "PALETTE", H5P_DEFAULT)) < 0)
    goto out;
   
   if((attr_type = H5Aget_type(attr_id)) < 0)
@@ -993,7 +993,7 @@ herr_t H5IMget_palette( hid_t loc_id,
 
  if(has_pal ==  1 )
  {
-  if((attr_id = H5Aopen(image_id, ".", "PALETTE", H5P_DEFAULT, H5P_DEFAULT)) < 0)
+  if((attr_id = H5Aopen(image_id, "PALETTE", H5P_DEFAULT)) < 0)
    goto out;
   
   if((attr_type = H5Aget_type(attr_id)) < 0)
@@ -1098,7 +1098,7 @@ herr_t H5IMis_image( hid_t loc_id,
  else if(has_class ==  1)
  {
 
-  if((attr_id = H5Aopen(did, ".", "CLASS", H5P_DEFAULT, H5P_DEFAULT)) < 0)
+  if((attr_id = H5Aopen(did, "CLASS", H5P_DEFAULT)) < 0)
    goto out;
 
   if((attr_type = H5Aget_type(attr_id)) < 0)
@@ -1183,7 +1183,7 @@ herr_t H5IMis_palette( hid_t loc_id,
  else if(has_class ==  1)
  {
 
-  if((attr_id = H5Aopen(did, ".", "CLASS", H5P_DEFAULT, H5P_DEFAULT)) < 0)
+  if((attr_id = H5Aopen(did, "CLASS", H5P_DEFAULT)) < 0)
    goto out;
 
   if((attr_type = H5Aget_type(attr_id)) < 0)
