@@ -443,28 +443,28 @@ static void test_iter_attr(hid_t fapl, hbool_t new_format)
     /* Test skipping exactly as many attributes as there are */
     idx = NATTR;
     H5E_BEGIN_TRY {
-        ret = H5Aiterate2(dataset, ".", H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info, H5P_DEFAULT);
+        ret = H5Aiterate2(dataset, H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info);
     } H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Aiterate2");
 
     /* Test skipping more attributes than there are */
     idx = NATTR + 1;
     H5E_BEGIN_TRY {
-        ret = H5Aiterate2(dataset, ".", H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info, H5P_DEFAULT);
+        ret = H5Aiterate2(dataset, H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info);
     } H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Aiterate2");
 
     /* Test all attributes on dataset, when callback always returns 0 */
     info.command = RET_ZERO;
     idx = 0;
-    if((ret = H5Aiterate2(dataset, ".", H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info, H5P_DEFAULT)) > 0)
+    if((ret = H5Aiterate2(dataset, H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info)) > 0)
         TestErrPrintf("Attribute iteration function didn't return zero correctly!\n");
 
     /* Test all attributes on dataset, when callback always returns 1 */
     /* This also tests the "restarting" ability, because the index changes */
     info.command = RET_TWO;
     idx = i = 0;
-    while((ret = H5Aiterate2(dataset, ".", H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info, H5P_DEFAULT)) > 0) {
+    while((ret = H5Aiterate2(dataset, H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info)) > 0) {
         /* Verify return value from iterator gets propagated correctly */
         VERIFY(ret, 2, "H5Aiterate2");
 
@@ -490,7 +490,7 @@ static void test_iter_attr(hid_t fapl, hbool_t new_format)
     /* This also tests the "restarting" ability, because the index changes */
     info.command = new_format ? RET_CHANGE2 : RET_CHANGE;
     idx = i = 0;
-    while((ret = H5Aiterate2(dataset, ".", H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info, H5P_DEFAULT)) > 0) {
+    while((ret = H5Aiterate2(dataset, H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info)) > 0) {
         /* Verify return value from iterator gets propagated correctly */
         VERIFY(ret, 1, "H5Aiterate2");
 

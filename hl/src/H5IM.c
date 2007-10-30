@@ -207,7 +207,7 @@ find_palette(hid_t loc_id, const char *name, const H5A_info_t *ainfo,
 
 herr_t H5IM_find_palette( hid_t loc_id )
 {
-    return H5Aiterate2(loc_id, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, find_palette, NULL, H5P_DEFAULT);
+    return H5Aiterate2(loc_id, H5_INDEX_NAME, H5_ITER_INC, NULL, find_palette, NULL);
 }
 
 

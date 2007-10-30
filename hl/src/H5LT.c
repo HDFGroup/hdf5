@@ -1423,7 +1423,7 @@ herr_t H5LTfind_attribute( hid_t loc_id, const char* attr_name )
 herr_t
 H5LT_find_attribute( hid_t loc_id, const char* attr_name )
 {
-    return H5Aiterate2(loc_id, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, find_attr, (void *)attr_name, H5P_DEFAULT);
+    return H5Aiterate2(loc_id, H5_INDEX_NAME, H5_ITER_INC, NULL, find_attr, (void *)attr_name);
 }
 
 

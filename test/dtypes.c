@@ -94,11 +94,11 @@ typedef enum dtype_t {
 static int num_opaque_conversions_g = 0;
 
 static int opaque_check(int tag_it);
-static herr_t convert_opaque(hid_t UNUSED st, hid_t UNUSED dt,
+static herr_t convert_opaque(hid_t st, hid_t dt,
                H5T_cdata_t *cdata,
-	       size_t UNUSED nelmts, size_t UNUSED buf_stride,
-               size_t UNUSED bkg_stride, void UNUSED *_buf,
-	       void UNUSED *bkg, hid_t UNUSED dset_xfer_plid);
+	       size_t nelmts, size_t buf_stride,
+               size_t bkg_stride, void *_buf,
+	       void *bkg, hid_t dset_xfer_plid);
 static int opaque_long(void);
 static int opaque_funcs(void);
 

@@ -210,7 +210,7 @@ main (void)
    /*
     * Get attribute info using iteration function.
     */
-    ret = H5Aiterate2(dataset, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, attr_info, NULL, H5P_DEFAULT);
+    ret = H5Aiterate2(dataset, H5_INDEX_NAME, H5_ITER_INC, NULL, attr_info, NULL);
 
    /*
     * Close the dataset and the file.

@@ -486,8 +486,8 @@ extern const char * entry_type_names[NUMBER_OF_ENTRY_TYPES];
 
 /* call back function declarations: */
 
-herr_t check_write_permitted(const H5F_t UNUSED * f,
-                             hid_t UNUSED dxpl_id,
+herr_t check_write_permitted(const H5F_t * f,
+                             hid_t dxpl_id,
                              hbool_t * write_permitted_ptr);
 
 herr_t pico_clear(H5F_t * f, void *  thing, hbool_t dest);

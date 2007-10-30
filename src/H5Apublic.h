@@ -71,7 +71,9 @@ H5_DLL herr_t  H5Aget_info_by_idx(hid_t loc_id, const char *obj_name,
 H5_DLL herr_t  H5Arename(hid_t loc_id, const char *old_name, const char *new_name);
 H5_DLL herr_t  H5Arename_by_name(hid_t loc_id, const char *obj_name,
     const char *old_attr_name, const char *new_attr_name, hid_t lapl_id);
-H5_DLL herr_t  H5Aiterate2(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
+H5_DLL herr_t  H5Aiterate2(hid_t loc_id, H5_index_t idx_type,
+    H5_iter_order_t order, hsize_t *idx, H5A_operator2_t op, void *op_data);
+H5_DLL herr_t  H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t *idx, H5A_operator2_t op, void *op_data,
     hid_t lapd_id);
 H5_DLL herr_t  H5Adelete2(hid_t loc_id, const char *obj_name,

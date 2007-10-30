@@ -1787,7 +1787,7 @@ list(hid_t group, const char *name, const H5L_info_t *linfo, void *_iter)
 
             /* Display attributes */
             if(oi.type >= 0)
-                H5Aiterate2(obj, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, list_attr, NULL, H5P_DEFAULT);
+                H5Aiterate2(obj, H5_INDEX_NAME, H5_ITER_INC, NULL, list_attr, NULL);
 
             /* Object location & reference count */
             printf("    %-10s %lu:"H5_PRINTF_HADDR_FMT"\n", "Location:", oi.fileno, oi.addr);
@@ -2315,7 +2315,7 @@ main(int argc, const char *argv[])
             if(verbose_g > 0) {
                 if((root = H5Gopen2(file, "/", H5P_DEFAULT)) < 0)
                     leave(1);
-                H5Aiterate2(root, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, list_attr, NULL, H5P_DEFAULT);
+                H5Aiterate2(root, H5_INDEX_NAME, H5_ITER_INC, NULL, list_attr, NULL);
                 if(H5Gclose(root) < 0)
                     leave(1);
             } /* end if */

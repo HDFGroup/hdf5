@@ -209,7 +209,7 @@ int H5Object::iterateAttrs( attr_operator_t user_op, unsigned *_idx, void *op_da
 
    // call the C library routine H5Aiterate2 to iterate the attributes
    hsize_t idx = (hsize_t)*_idx;
-   int ret_value = H5Aiterate2(id, ".", H5_INDEX_NAME, H5_ITER_INC, &idx, userAttrOpWrpr, (void *) userData, H5P_DEFAULT);
+   int ret_value = H5Aiterate2(id, H5_INDEX_NAME, H5_ITER_INC, &idx, userAttrOpWrpr, (void *) userData);
 
    // release memory
    delete userData;
