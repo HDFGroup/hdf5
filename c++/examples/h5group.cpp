@@ -167,7 +167,7 @@ int main(void)
 	 * root directory.
 	 */
 	cout << endl << "Iterating over elements in the file" << endl;
-	herr_t idx = H5Literate(file->getId(), "/", H5_INDEX_NAME, H5_ITER_INC, NULL, file_info, NULL, H5P_DEFAULT);
+	herr_t idx = H5Literate(file->getId(), H5_INDEX_NAME, H5_ITER_INC, NULL, file_info, NULL);
 	cout << endl;
 
 	/*
@@ -185,7 +185,7 @@ int main(void)
 	cout << "\"Data\" is unlinked" << endl;
 
 	cout << endl << "Iterating over elements in the file again" << endl;
-	idx = H5Literate(file->getId(), "/", H5_INDEX_NAME, H5_ITER_INC, NULL, file_info, NULL, H5P_DEFAULT);
+	idx = H5Literate(file->getId(), H5_INDEX_NAME, H5_ITER_INC, NULL, file_info, NULL);
 	cout << endl;
 
 	/*

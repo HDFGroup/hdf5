@@ -506,7 +506,7 @@ find_objs_cb(hid_t group, const char *name, const H5L_info_t UNUSED *linfo, void
                     info->prefix = HDmalloc(tmp_len+1);
                     HDstrcpy(info->prefix, tmp);
 
-                    if(H5Literate(group, name, H5_INDEX_NAME, H5_ITER_INC, NULL, find_objs_cb, (void *)info, H5P_DEFAULT) < 0)
+                    if(H5Literate_by_name(group, name, H5_INDEX_NAME, H5_ITER_INC, NULL, find_objs_cb, (void *)info, H5P_DEFAULT) < 0)
                         ret_value = FAIL;
 
                     info->prefix = old_prefix;
@@ -613,7 +613,7 @@ init_objs(hid_t fid, find_objs_t *info, table_t **group_table,
     } /* end else */
 
     /* Find all shared objects */
-    return(H5Literate(fid, "/", H5_INDEX_NAME, H5_ITER_INC, NULL, find_objs_cb, (void *)info, H5P_DEFAULT));
+    return(H5Literate(fid, H5_INDEX_NAME, H5_ITER_INC, NULL, find_objs_cb, (void *)info));
 }
 
 

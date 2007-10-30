@@ -137,7 +137,7 @@ main(void)
     /*
      * Use iterator to see the names of the objects in the root group.
      */
-    idx_f = H5Literate(file, "/", H5_INDEX_NAME, H5_ITER_INC, NULL, file_info, NULL, H5P_DEFAULT);
+    idx_f = H5Literate(file, H5_INDEX_NAME, H5_ITER_INC, NULL, file_info, NULL);
 
     /*
      * Unlink  name "Data" and use iterator to see the names
@@ -148,13 +148,13 @@ main(void)
     else
       printf("\"Data\" is unlinked \n");
 
-    idx_f = H5Literate(file, "/", H5_INDEX_NAME, H5_ITER_INC, NULL, file_info, NULL, H5P_DEFAULT);
+    idx_f = H5Literate(file, H5_INDEX_NAME, H5_ITER_INC, NULL, file_info, NULL);
 
     /*
      * Use iterator to see the names of the objects in the group
      * /Data_new.
      */
-    idx_g = H5Literate(grp, "/Data_new", H5_INDEX_NAME, H5_ITER_INC, NULL, group_info, NULL, H5P_DEFAULT);
+    idx_g = H5Literate_by_name(grp, "/Data_new", H5_INDEX_NAME, H5_ITER_INC, NULL, group_info, NULL, H5P_DEFAULT);
 
     /*
      * Close the file.

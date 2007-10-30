@@ -53,6 +53,7 @@ typedef struct H5G_names_t {
 typedef struct H5G_ref_path_iter_t {
     /* In */
     hid_t file; 		/* File id where it came from */
+    hid_t lapl_id; 		/* LAPL for operations */
     hid_t dxpl_id; 		/* DXPL for operations */
     hbool_t is_root_group; 	/* Flag to indicate that the root group is being looked at */
     const H5O_loc_t *loc; 	/* The location of the object we're looking for */
@@ -437,7 +438,8 @@ H5G_name_copy(H5G_name_t *dst, const H5G_name_t *src, H5_copy_depth_t depth)
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5G_get_name(hid_t id, char *name/*out*/, size_t size, hid_t dxpl_id)
+H5G_get_name(hid_t id, char *name/*out*/, size_t size, hid_t lapl_id,
+    hid_t dxpl_id)
 {
     H5G_loc_t     loc;          /* Object location */
     ssize_t       ret_value = FAIL;
@@ -466,7 +468,7 @@ H5G_get_name(hid_t id, char *name/*out*/, size_t size, hid_t dxpl_id)
 		HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve file ID")
 
             /* Search for name of object */
-	    if((len = H5G_get_refobj_name(file, dxpl_id, loc.oloc, name, size)) < 0) {
+	    if((len = H5G_get_refobj_name(file, lapl_id, dxpl_id, loc.oloc, name, size)) < 0) {
                 H5I_dec_ref(file);
 		HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't determine name")
             } /* end if */
@@ -1149,7 +1151,7 @@ H5G_refname_iterator(hid_t group, const char *name, const H5L_info_t *link_info,
                 lnk_op.op_type = H5G_LINK_OP_APP;
                 lnk_op.u.app_op = H5G_refname_iterator;
 
-                ret_value = H5G_obj_iterate(udata->file, udata->container, H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)0, &last_obj, &lnk_op, udata, udata->dxpl_id);
+                ret_value = H5G_obj_iterate(udata->file, udata->container, H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)0, &last_obj, &lnk_op, udata, udata->lapl_id, udata->dxpl_id);
                 
                 /* If we didn't find the object, truncate the name to not include group name anymore */
                 if(!ret_value)
@@ -1211,7 +1213,7 @@ H5G_free_ref_path_node(void *item, void UNUSED *key, void UNUSED *operator_data/
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5G_get_refobj_name(hid_t file, hid_t dxpl_id, const H5O_loc_t *loc,
+H5G_get_refobj_name(hid_t file, hid_t lapl_id, hid_t dxpl_id, const H5O_loc_t *loc,
     char *name, size_t size)
 {
     H5G_ref_path_iter_t udata;  /* User data for iteration */
@@ -1231,6 +1233,7 @@ H5G_get_refobj_name(hid_t file, hid_t dxpl_id, const H5O_loc_t *loc,
 
     /* Set up user data for iterator */
     udata.file = file;
+    udata.lapl_id = lapl_id;
     udata.dxpl_id = dxpl_id;
     udata.is_root_group = TRUE;
     if(NULL == (udata.container = H5MM_strdup("")))

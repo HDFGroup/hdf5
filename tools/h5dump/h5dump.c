@@ -1937,9 +1937,9 @@ dump_group(hid_t gid, const char *name)
                in the group, then, sort by creation order, otherwise by name */
             
             if((sort_by == H5_INDEX_CRT_ORDER) && (crt_order_flags & H5P_CRT_ORDER_TRACKED))
-                H5Literate(gid, ".", sort_by, sort_order, NULL, dump_all_cb, NULL, H5P_DEFAULT);
+                H5Literate(gid, sort_by, sort_order, NULL, dump_all_cb, NULL);
             else
-                H5Literate(gid, ".", H5_INDEX_NAME, sort_order, NULL, dump_all_cb, NULL, H5P_DEFAULT);
+                H5Literate(gid, H5_INDEX_NAME, sort_order, NULL, dump_all_cb, NULL);
 
         }
     } 
@@ -1960,9 +1960,9 @@ dump_group(hid_t gid, const char *name)
             in the group, then, sort by creation order, otherwise by name */
 
         if((sort_by == H5_INDEX_CRT_ORDER) && (crt_order_flags & H5P_CRT_ORDER_TRACKED))
-            H5Literate(gid, ".", sort_by, sort_order, NULL, dump_all_cb, NULL, H5P_DEFAULT);
+            H5Literate(gid, sort_by, sort_order, NULL, dump_all_cb, NULL);
         else
-            H5Literate(gid, ".", H5_INDEX_NAME, sort_order, NULL, dump_all_cb, NULL, H5P_DEFAULT); 
+            H5Literate(gid, H5_INDEX_NAME, sort_order, NULL, dump_all_cb, NULL); 
 
         
     }
@@ -5455,9 +5455,9 @@ xml_dump_group(hid_t gid, const char *name)
                 /* iterate through all the links */
 
                 if( (sort_by == H5_INDEX_CRT_ORDER) && (crt_order_flags & H5P_CRT_ORDER_TRACKED))
-                    H5Literate(gid, ".", sort_by, sort_order, NULL, dump_all_cb, NULL, H5P_DEFAULT);
+                    H5Literate(gid, sort_by, sort_order, NULL, dump_all_cb, NULL);
                 else
-                    H5Literate(gid, ".", H5_INDEX_NAME, sort_order, NULL, dump_all_cb, NULL, H5P_DEFAULT);
+                    H5Literate(gid, H5_INDEX_NAME, sort_order, NULL, dump_all_cb, NULL);
 
 
             }
@@ -5520,9 +5520,9 @@ xml_dump_group(hid_t gid, const char *name)
         /* iterate through all the links */
 
         if( (sort_by == H5_INDEX_CRT_ORDER) && (crt_order_flags & H5P_CRT_ORDER_TRACKED))
-            H5Literate(gid, ".", sort_by, sort_order, NULL, dump_all_cb, NULL, H5P_DEFAULT);
+            H5Literate(gid, sort_by, sort_order, NULL, dump_all_cb, NULL);
         else
-            H5Literate(gid, ".", H5_INDEX_NAME, sort_order, NULL, dump_all_cb, NULL, H5P_DEFAULT);
+            H5Literate(gid, H5_INDEX_NAME, sort_order, NULL, dump_all_cb, NULL);
     }
 
     indent -= COL;

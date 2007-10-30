@@ -1077,7 +1077,7 @@ test_reference_group(void)
     CHECK(gid, FAIL, "H5Rdereference");
 
     /* Iterate through objects in dereferenced group */
-    ret = H5Literate(gid, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, test_deref_iter_op, &count, H5P_DEFAULT);
+    ret = H5Literate(gid, H5_INDEX_NAME, H5_ITER_INC, NULL, test_deref_iter_op, &count);
     CHECK(ret, FAIL, "H5Literate");
 
     /* Various queries on the group opened */

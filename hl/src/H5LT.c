@@ -816,7 +816,7 @@ find_dataset(hid_t loc_id, const char *name, const H5L_info_t *linfo, void *op_d
 herr_t
 H5LTfind_dataset( hid_t loc_id, const char *dset_name )
 {
-    return H5Literate(loc_id, ".", H5_INDEX_NAME, H5_ITER_INC, 0, find_dataset, (void *)dset_name, H5P_DEFAULT );
+    return H5Literate(loc_id, H5_INDEX_NAME, H5_ITER_INC, 0, find_dataset, (void *)dset_name);
 }
 
 

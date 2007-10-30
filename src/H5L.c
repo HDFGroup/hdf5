@@ -1197,7 +1197,75 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Literate(hid_t loc_id, const char *group_name,
+H5Literate(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
+    hsize_t *idx_p, H5L_iterate_t op, void *op_data)
+{
+    H5I_type_t  id_type;        /* Type of ID */
+    H5G_link_iterate_t lnk_op;  /* Link operator */
+    hsize_t     last_lnk;       /* Index of last object looked at */
+    hsize_t	idx;            /* Internal location to hold index */
+    herr_t ret_value;           /* Return value */
+
+    FUNC_ENTER_API(H5Literate, FAIL)
+    H5TRACE6("e", "iIiIo*hx*x", grp_id, idx_type, order, idx_p, op,
+             op_data);
+
+    /* Check arguments */
+    id_type = H5I_get_type(grp_id);
+    if(!(H5I_GROUP == id_type || H5I_FILE == id_type))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
+    if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+    if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+    if(!op)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified")
+
+    /* Set up iteration beginning/end info */
+    idx = (idx_p == NULL ? 0 : *idx_p);
+    last_lnk = 0;
+
+    /* Build link operator info */
+    lnk_op.op_type = H5G_LINK_OP_APP;
+    lnk_op.u.app_op = op;
+
+    /* Iterate over the links */
+    if((ret_value = H5G_obj_iterate(grp_id, ".", idx_type, order, idx, &last_lnk, &lnk_op, op_data, H5P_DEFAULT, H5AC_ind_dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
+
+    /* Set the index we stopped at */
+    if(idx_p)
+        *idx_p = last_lnk;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Literate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Literate_by_name
+ *
+ * Purpose:	Iterates over links in a group, with user callback routine,
+ *              according to the order within an index.
+ *
+ *              Same pattern of behavior as H5Giterate.
+ *
+ * Return:	Success:	The return value of the first operator that
+ *				returns non-zero, or zero if all members were
+ *				processed with no operator returning non-zero.
+ *
+ *		Failure:	Negative if something goes wrong within the
+ *				library, or the negative value returned by one
+ *				of the operators.
+ *
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, November 16, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Literate_by_name(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx_p,
     H5L_iterate_t op, void *op_data, hid_t lapl_id)
 {
@@ -1206,7 +1274,7 @@ H5Literate(hid_t loc_id, const char *group_name,
     hsize_t	idx;            /* Internal location to hold index */
     herr_t ret_value;           /* Return value */
 
-    FUNC_ENTER_API(H5Literate, FAIL)
+    FUNC_ENTER_API(H5Literate_by_name, FAIL)
     H5TRACE8("e", "i*sIiIo*hx*xi", loc_id, group_name, idx_type, order, idx_p, op,
              op_data, lapl_id);
 
@@ -1234,7 +1302,7 @@ H5Literate(hid_t loc_id, const char *group_name,
     lnk_op.u.app_op = op;
 
     /* Iterate over the links */
-    if((ret_value = H5G_obj_iterate(loc_id, group_name, idx_type, order, idx, &last_lnk, &lnk_op, op_data, H5AC_ind_dxpl_id)) < 0)
+    if((ret_value = H5G_obj_iterate(loc_id, group_name, idx_type, order, idx, &last_lnk, &lnk_op, op_data, lapl_id, H5AC_ind_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
 
     /* Set the index we stopped at */
@@ -1243,7 +1311,7 @@ H5Literate(hid_t loc_id, const char *group_name,
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Literate() */
+} /* end H5Literate_by_name() */
 
 /*
  *-------------------------------------------------------------------------

@@ -188,7 +188,7 @@ traverse_cb(hid_t loc_id, const char *link_name, const H5L_info_t *linfo,
         udata->curr_path = link_path;
 
         /* Iterate over all links in group object */
-        if(H5Literate(loc_id, link_name, H5_INDEX_NAME, H5_ITER_INC, NULL, traverse_cb, udata, H5P_DEFAULT) < 0)
+        if(H5Literate_by_name(loc_id, link_name, H5_INDEX_NAME, H5_ITER_INC, NULL, traverse_cb, udata, H5P_DEFAULT) < 0)
             return(H5_ITER_ERROR);
 
         /* Restore path in udata */
@@ -244,7 +244,7 @@ traverse(hid_t file_id, const trav_visitor_t *visitor)
     udata.visitor = visitor;
 
     /* Iterate over all links in root group */
-    if(H5Literate(file_id, "/", H5_INDEX_NAME, H5_ITER_INC, NULL, traverse_cb, &udata, H5P_DEFAULT) < 0)
+    if(H5Literate(file_id, H5_INDEX_NAME, H5_ITER_INC, NULL, traverse_cb, &udata) < 0)
         return -1;
 
     /* Free visited addresses table */

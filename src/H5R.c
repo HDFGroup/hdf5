@@ -39,7 +39,7 @@ static herr_t H5R_create(void *ref, H5G_loc_t *loc, const char *name,
         H5R_type_t ref_type, H5S_t *space, hid_t dxpl_id);
 static hid_t H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_ref);
 static H5S_t * H5R_get_region(H5F_t *file, hid_t dxpl_id, const void *_ref);
-static ssize_t H5R_get_name(H5F_t *file, hid_t dxpl_id, hid_t id,
+static ssize_t H5R_get_name(H5F_t *file, hid_t lapl_id, hid_t dxpl_id, hid_t id,
     H5R_type_t ref_type, const void *_ref, char *name, size_t size);
 
 
@@ -805,6 +805,7 @@ done:
     ssize_t H5R_get_name(f, dxpl_id, ref_type, ref, name, size)
         H5F_t *f;       IN: Pointer to the file that the reference is pointing
                             into
+        hid_t lapl_id;  IN: LAPL to use for operation
         hid_t dxpl_id;  IN: DXPL to use for operation
         hid_t id;       IN: Location ID given for reference
         H5R_type_t ref_type;    IN: Type of reference
@@ -824,7 +825,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 ssize_t
-H5R_get_name(H5F_t *f, hid_t dxpl_id, hid_t id, H5R_type_t ref_type,
+H5R_get_name(H5F_t *f, hid_t lapl_id, hid_t dxpl_id, hid_t id, H5R_type_t ref_type,
     const void *_ref, char *name, size_t size)
 {
     hid_t file_id = (-1);       /* ID for file that the reference is in */
@@ -884,7 +885,7 @@ H5R_get_name(H5F_t *f, hid_t dxpl_id, hid_t id, H5R_type_t ref_type,
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't retrieve file ID")
 
     /* Get name, length, etc. */
-    if((ret_value = H5G_get_refobj_name(file_id, dxpl_id, &oloc, name, size)) < 0)
+    if((ret_value = H5G_get_refobj_name(file_id, lapl_id, dxpl_id, &oloc, name, size)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't determine name")
 
 done:
@@ -945,7 +946,7 @@ H5Rget_name(hid_t id, H5R_type_t ref_type, const void *_ref, char *name,
     file = loc.oloc->file;
 
     /* Get name */
-    if((ret_value = H5R_get_name(file, H5AC_dxpl_id, id, ref_type, _ref, name, size)) < 0)
+    if((ret_value = H5R_get_name(file, H5P_DEFAULT, H5AC_dxpl_id, id, ref_type, _ref, name, size)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to determine object path")
 
 done:

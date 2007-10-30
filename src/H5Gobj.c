@@ -638,7 +638,7 @@ done:
 herr_t
 H5G_obj_iterate(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t skip, hsize_t *last_lnk,
-    H5G_link_iterate_t *lnk_op, void *op_data, hid_t dxpl_id)
+    H5G_link_iterate_t *lnk_op, void *op_data, hid_t lapl_id, hid_t dxpl_id)
 {
     H5G_loc_t	loc;            /* Location of parent for group */
     H5O_linfo_t	linfo;		/* Link info message */
@@ -659,7 +659,7 @@ H5G_obj_iterate(hid_t loc_id, const char *group_name,
      */
     if(H5G_loc(loc_id, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(NULL == (grp = H5G_open_name(&loc, group_name, H5P_DEFAULT, dxpl_id)))
+    if(NULL == (grp = H5G_open_name(&loc, group_name, lapl_id, dxpl_id)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
     if((gid = H5I_register(H5I_GROUP, grp)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")

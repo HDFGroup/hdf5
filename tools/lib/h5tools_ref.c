@@ -327,7 +327,7 @@ fill_ref_path_table_cb(hid_t group, const char *obj_name, const H5L_info_t *linf
                 /* Iterate over objects in this group, using this group's
                  * name as their prefix
                  */
-                if(H5Literate(group, obj_name, H5_INDEX_NAME, H5_ITER_INC, NULL, fill_ref_path_table_cb, thepath, H5P_DEFAULT) < 0) {
+                if(H5Literate_by_name(group, obj_name, H5_INDEX_NAME, H5_ITER_INC, NULL, fill_ref_path_table_cb, thepath, H5P_DEFAULT) < 0) {
                     error_msg(progname, "unable to dump group \"%s\"\n", thepath);
                     d_status = EXIT_FAILURE;
                 } /* end if */
@@ -375,7 +375,7 @@ fill_ref_path_table(hid_t fid)
     ref_path_table_put(root_path, oinfo.addr);
 
     /* Iterate over objects in this file */
-    if(H5Literate(fid, root_path, H5_INDEX_NAME, H5_ITER_INC, NULL, fill_ref_path_table_cb, (void *)"", H5P_DEFAULT) < 0) {
+    if(H5Literate(fid, H5_INDEX_NAME, H5_ITER_INC, NULL, fill_ref_path_table_cb, (void *)"") < 0) {
         error_msg(progname, "unable to dump root group\n");
         d_status = EXIT_FAILURE;
     } /* end if */

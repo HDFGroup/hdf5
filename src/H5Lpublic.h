@@ -127,7 +127,7 @@ typedef struct {
     H5L_query_func_t query_func;    /* Callback for queries                 */
 } H5L_class_t;
 
-/* Prototype for H5Literate() operator */
+/* Prototype for H5Literate/H5Literate_by_name() operator */
 typedef herr_t (*H5L_iterate_t)(hid_t group, const char *name, const H5L_info_t *info,
     void *op_data);
 
@@ -167,7 +167,9 @@ H5_DLL herr_t H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
 H5_DLL ssize_t H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     char *name /*out*/, size_t size, hid_t lapl_id);
-H5_DLL herr_t H5Literate(hid_t loc_id, const char *group_name,
+H5_DLL herr_t H5Literate(hid_t grp_id, H5_index_t idx_type,
+    H5_iter_order_t order, hsize_t *idx, H5L_iterate_t op, void *op_data);
+H5_DLL herr_t H5Literate_by_name(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx,
     H5L_iterate_t op, void *op_data, hid_t lapl_id);
 

@@ -1668,7 +1668,7 @@ group_list2(hid_t grp, const char *name)
 
     if (recursive_g) {
         iter.container = name;
-        H5Literate(grp, ".", H5_INDEX_NAME, H5_ITER_INC, NULL, list, &iter, H5P_DEFAULT);
+        H5Literate(grp, H5_INDEX_NAME, H5_ITER_INC, NULL, list, &iter);
     }
     return 0;
 }
@@ -2321,7 +2321,7 @@ main(int argc, const char *argv[])
             } /* end if */
 
             /* list */
-            H5Literate(file, oname, H5_INDEX_NAME, H5_ITER_INC, NULL, list, &iter, H5P_DEFAULT);
+            H5Literate_by_name(file, oname, H5_INDEX_NAME, H5_ITER_INC, NULL, list, &iter, H5P_DEFAULT);
             free(container);
         } else if((root = H5Gopen2(file, "/", H5P_DEFAULT)) < 0) {
             leave(1); /*major problem!*/

@@ -146,7 +146,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     /* Test iterating over empty group */
     info.command = RET_ZERO;
     idx = 0;
-    ret = H5Literate(file, "/", H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info, H5P_DEFAULT);
+    ret = H5Literate(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info);
     VERIFY(ret, SUCCEED, "H5Literate");
 
     datatype = H5Tcopy(H5T_NATIVE_INT);
@@ -257,35 +257,35 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     info.command = RET_ZERO;
     idx = (hsize_t)-1;
     H5E_BEGIN_TRY {
-        ret = H5Literate(file, "/", H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info, H5P_DEFAULT);
+        ret = H5Literate(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info);
     } H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Literate");
 
     /* Test skipping exactly as many entries as in the group */
     idx = NDATASETS + 2;
     H5E_BEGIN_TRY {
-        ret = H5Literate(file, "/", H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info, H5P_DEFAULT);
+        ret = H5Literate(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info);
     } H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Literate");
 
     /* Test skipping more entries than are in the group */
     idx = NDATASETS + 3;
     H5E_BEGIN_TRY {
-        ret = H5Literate(file, "/", H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info, H5P_DEFAULT);
+        ret = H5Literate(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info);
     } H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Literate");
 
     /* Test all objects in group, when callback always returns 0 */
     info.command = RET_ZERO;
     idx = 0;
-    if((ret = H5Literate(file, "/", H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info, H5P_DEFAULT)) > 0)
+    if((ret = H5Literate(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info)) > 0)
         TestErrPrintf("Group iteration function didn't return zero correctly!\n");
 
     /* Test all objects in group, when callback always returns 1 */
     /* This also tests the "restarting" ability, because the index changes */
     info.command = RET_TWO;
     idx = i = 0;
-    while((ret = H5Literate(file, "/", H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info, H5P_DEFAULT)) > 0) {
+    while((ret = H5Literate(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info)) > 0) {
         /* Verify return value from iterator gets propagated correctly */
         VERIFY(ret, 2, "H5Literate");
 
@@ -310,7 +310,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     /* This also tests the "restarting" ability, because the index changes */
     info.command = new_format ? RET_CHANGE2 : RET_CHANGE;
     idx = i = 0;
-    while((ret = H5Literate(file, "/", H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info, H5P_DEFAULT)) >= 0) {
+    while((ret = H5Literate(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info)) >= 0) {
         /* Verify return value from iterator gets propagated correctly */
         VERIFY(ret, 1, "H5Literate");
 
@@ -670,13 +670,13 @@ test_iter_group_large(hid_t fapl)
 
     /* Iterate through the file to see members of the root group */
     curr_name = &names[0];
-    ret = H5Literate(file, "/", H5_INDEX_NAME, H5_ITER_INC, NULL, liter_cb2, curr_name, H5P_DEFAULT);
+    ret = H5Literate(file, H5_INDEX_NAME, H5_ITER_INC, NULL, liter_cb2, curr_name);
     CHECK(ret, FAIL, "H5Literate");
     for(i = 1; i < 100; i++) {
         hsize_t idx = i;
 
         curr_name = &names[i];
-        ret = H5Literate(file, "/", H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb2, curr_name, H5P_DEFAULT);
+        ret = H5Literate(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb2, curr_name);
         CHECK(ret, FAIL, "H5Literate");
     } /* end for */
 

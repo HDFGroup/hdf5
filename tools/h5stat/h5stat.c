@@ -512,7 +512,7 @@ group_stats(hid_t group, const char *name, const char *fullname,
     iter->curr_depth++;
 
     /* Recursively descend into current group's objects */
-    H5Literate(group, name, H5_INDEX_NAME, H5_ITER_INC, NULL, walk, iter, H5P_DEFAULT);
+    H5Literate_by_name(group, name, H5_INDEX_NAME, H5_ITER_INC, NULL, walk, iter, H5P_DEFAULT);
 
     /* Revert current container info */
     iter->container = last_container;

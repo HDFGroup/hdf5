@@ -7220,7 +7220,7 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
     iter_info->ncalled = 0;
     iter_info->curr = order != H5_ITER_DEC ? 0 : (max_links - 1);
     HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
-    if(H5Literate(group_id, ".", idx_type, order, &skip, link_iterate_cb, iter_info, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Literate(group_id, idx_type, order, &skip, link_iterate_cb, iter_info) < 0) TEST_ERROR
 
     /* Verify that we visited all the links */
     if(skip != max_links) TEST_ERROR
@@ -7252,7 +7252,7 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
     iter_info->ncalled = 0;
     iter_info->curr = order != H5_ITER_DEC ? skip : ((max_links - 1) - skip);
     HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
-    if(H5Literate(group_id, ".", idx_type, order, &skip, link_iterate_cb, iter_info, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Literate(group_id, idx_type, order, &skip, link_iterate_cb, iter_info) < 0) TEST_ERROR
 
     /* Verify that we visited all the links */
     if(skip != max_links) TEST_ERROR
@@ -7316,7 +7316,7 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
     iter_info->ncalled = 0;
     iter_info->curr = order != H5_ITER_DEC ? 0 : (max_links - 1);
     HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
-    if((ret = H5Literate(group_id, ".", idx_type, order, &skip, link_iterate_cb, iter_info, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((ret = H5Literate(group_id, idx_type, order, &skip, link_iterate_cb, iter_info)) < 0) TEST_ERROR
     if(ret != CORDER_ITER_STOP) TEST_ERROR
     if(iter_info->ncalled != 3) TEST_ERROR
 
@@ -7338,7 +7338,7 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
     /* Check for iteration routine indicating failure */
     skip = 0;
     H5E_BEGIN_TRY {
-        ret = H5Literate(group_id, ".", idx_type, order, &skip, link_iterate_fail_cb, NULL, H5P_DEFAULT);
+        ret = H5Literate(group_id, idx_type, order, &skip, link_iterate_fail_cb, NULL);
     } H5E_END_TRY;
     if(ret >= 0) TEST_ERROR
 
@@ -7457,7 +7457,7 @@ link_iterate(hid_t fapl)
 
                 /* Check for iteration on empty group */
                 /* (should be OK) */
-                if(H5Literate(group_id, ".", idx_type, order, NULL, link_iterate_cb, NULL, H5P_DEFAULT) < 0) TEST_ERROR
+                if(H5Literate(group_id, idx_type, order, NULL, link_iterate_cb, NULL) < 0) TEST_ERROR
 
                 /* Create several links, up to limit of compact form */
                 for(u = 0; u < max_compact; u++) {
@@ -7477,7 +7477,7 @@ link_iterate(hid_t fapl)
                 /* Check for out of bound iteration on compact group */
                 skip = (hsize_t)u;
                 H5E_BEGIN_TRY {
-                    ret = H5Literate(group_id, ".", idx_type, order, &skip, link_iterate_cb, NULL, H5P_DEFAULT);
+                    ret = H5Literate(group_id, idx_type, order, &skip, link_iterate_cb, NULL);
                 } H5E_END_TRY;
                 if(ret >= 0) TEST_ERROR
 
@@ -7503,7 +7503,7 @@ link_iterate(hid_t fapl)
                 /* Check for out of bound iteration on dense group */
                 skip = (hsize_t)u;
                 H5E_BEGIN_TRY {
-                    ret = H5Literate(group_id, ".", idx_type, order, &skip, link_iterate_cb, NULL, H5P_DEFAULT);
+                    ret = H5Literate(group_id, idx_type, order, &skip, link_iterate_cb, NULL);
                 } H5E_END_TRY;
                 if(ret >= 0) TEST_ERROR
 
@@ -7677,7 +7677,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order,
     iter_info->ncalled = 0;
     iter_info->curr = order != H5_ITER_DEC ? 0 : (max_links - 1);
     HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
-    if(H5Literate(group_id, ".", H5_INDEX_NAME, order, &skip, link_iterate_old_cb, iter_info, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Literate(group_id, H5_INDEX_NAME, order, &skip, link_iterate_old_cb, iter_info) < 0) TEST_ERROR
 
     /* Verify that we visited all the links */
     if(skip != max_links) TEST_ERROR
@@ -7709,7 +7709,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order,
     iter_info->ncalled = 0;
     iter_info->curr = order != H5_ITER_DEC ? skip : ((max_links - 1) - skip);
     HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
-    if(H5Literate(group_id, ".", H5_INDEX_NAME, order, &skip, link_iterate_old_cb, iter_info, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Literate(group_id, H5_INDEX_NAME, order, &skip, link_iterate_old_cb, iter_info) < 0) TEST_ERROR
 
     /* Verify that we visited all the links */
     if(skip != max_links) TEST_ERROR
@@ -7773,7 +7773,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order,
     iter_info->ncalled = 0;
     iter_info->curr = order != H5_ITER_DEC ? 0 : (max_links - 1);
     HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
-    if((ret = H5Literate(group_id, ".", H5_INDEX_NAME, order, &skip, link_iterate_old_cb, iter_info, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((ret = H5Literate(group_id, H5_INDEX_NAME, order, &skip, link_iterate_old_cb, iter_info)) < 0) TEST_ERROR
     if(ret != CORDER_ITER_STOP) TEST_ERROR
     if(iter_info->ncalled != 3) TEST_ERROR
 
@@ -7795,7 +7795,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order,
     /* Check for iteration routine indicating failure */
     skip = 0;
     H5E_BEGIN_TRY {
-        ret = H5Literate(group_id, ".", H5_INDEX_NAME, order, &skip, link_iterate_fail_cb, NULL, H5P_DEFAULT);
+        ret = H5Literate(group_id, H5_INDEX_NAME, order, &skip, link_iterate_fail_cb, NULL);
     } H5E_END_TRY;
     if(ret >= 0) TEST_ERROR
 
@@ -7863,7 +7863,7 @@ link_iterate_old(hid_t fapl)
 
         /* Check for iteration on empty group */
         /* (should be OK) */
-        if(H5Literate(group_id, ".", H5_INDEX_NAME, order, NULL, link_iterate_old_cb, NULL, H5P_DEFAULT) < 0) TEST_ERROR
+        if(H5Literate(group_id, H5_INDEX_NAME, order, NULL, link_iterate_old_cb, NULL) < 0) TEST_ERROR
 
         /* Create several links */
         for(u = 0; u < CORDER_NLINKS; u++) {
@@ -7883,7 +7883,7 @@ link_iterate_old(hid_t fapl)
         /* Check for out of bound iteration on old-style group */
         skip = (hsize_t)u;
         H5E_BEGIN_TRY {
-            ret = H5Literate(group_id, ".", H5_INDEX_NAME, order, &skip, link_iterate_old_cb, NULL, H5P_DEFAULT);
+            ret = H5Literate(group_id, H5_INDEX_NAME, order, &skip, link_iterate_old_cb, NULL);
         } H5E_END_TRY;
         if(ret >= 0) TEST_ERROR
 
@@ -7891,7 +7891,7 @@ link_iterate_old(hid_t fapl)
         /* (should fail) */
         skip = (hsize_t)0;
         H5E_BEGIN_TRY {
-            ret = H5Literate(group_id, ".", H5_INDEX_CRT_ORDER, order, &skip, link_iterate_old_cb, NULL, H5P_DEFAULT);
+            ret = H5Literate(group_id, H5_INDEX_CRT_ORDER, order, &skip, link_iterate_old_cb, NULL);
         } H5E_END_TRY;
         if(ret >= 0) TEST_ERROR
 
