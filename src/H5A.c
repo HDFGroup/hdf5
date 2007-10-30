@@ -2020,11 +2020,51 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
-    H5Adelete2
+    H5Adelete
  PURPOSE
     Deletes an attribute from a location
  USAGE
-    herr_t H5Adelete2(loc_id, obj_name, attr_name, lapl_id)
+    herr_t H5Adelete(loc_id, name)
+        hid_t loc_id;       IN: Object (dataset or group) to have attribute deleted from
+        const char *name;   IN: Name of attribute to delete
+ RETURNS
+    Non-negative on success/Negative on failure
+ DESCRIPTION
+    This function removes the named attribute from a dataset or group.
+--------------------------------------------------------------------------*/
+herr_t
+H5Adelete(hid_t loc_id, const char *name)
+{
+    H5G_loc_t	loc;		        /* Object location */
+    herr_t	ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(H5Adelete, FAIL)
+    H5TRACE2("e", "i*s", loc_id, name);
+
+    /* check arguments */
+    if(H5I_ATTR == H5I_get_type(loc_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+    if(H5G_loc(loc_id, &loc) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(!name || !*name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+
+    /* Delete the attribute from the location */
+    if(H5O_attr_remove(loc.oloc, name, H5AC_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Adelete() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5Adelete_by_name
+ PURPOSE
+    Deletes an attribute from a location
+ USAGE
+    herr_t H5Adelete_by_name(loc_id, obj_name, attr_name, lapl_id)
         hid_t loc_id;           IN: Base location for object
         const char *obj_name;   IN: Name of object relative to location
         const char *attr_name;  IN: Name of attribute to delete
@@ -2035,7 +2075,7 @@ done:
     This function removes the named attribute from an object.
 --------------------------------------------------------------------------*/
 herr_t
-H5Adelete2(hid_t loc_id, const char *obj_name, const char *attr_name,
+H5Adelete_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     hid_t lapl_id)
 {
     H5G_loc_t	loc;		        /* Object location */
@@ -2045,7 +2085,7 @@ H5Adelete2(hid_t loc_id, const char *obj_name, const char *attr_name,
     hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Adelete2, FAIL)
+    FUNC_ENTER_API(H5Adelete_by_name, FAIL)
     H5TRACE4("e", "i*s*si", loc_id, obj_name, attr_name, lapl_id);
 
     /* check arguments */
@@ -2083,7 +2123,7 @@ done:
         HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location")
 
     FUNC_LEAVE_API(ret_value)
-} /* H5Adelete2() */
+} /* H5Adelete_by_name() */
 
 
 /*--------------------------------------------------------------------------

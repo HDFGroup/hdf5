@@ -413,47 +413,5 @@ H5Aiterate1(hid_t loc_id, unsigned *attr_num, H5A_operator1_t op, void *op_data)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Aiterate1() */
-
-
-/*--------------------------------------------------------------------------
- NAME
-    H5Adelete1
- PURPOSE
-    Deletes an attribute from a location
- USAGE
-    herr_t H5Adelete1(loc_id, name)
-        hid_t loc_id;       IN: Object (dataset or group) to have attribute deleted from
-        const char *name;   IN: Name of attribute to delete
- RETURNS
-    Non-negative on success/Negative on failure
- DESCRIPTION
-    This function removes the named attribute from a dataset or group.
- NOTE
-    Deprecated in favor of H5Adelete2
---------------------------------------------------------------------------*/
-herr_t
-H5Adelete1(hid_t loc_id, const char *name)
-{
-    H5G_loc_t	loc;		        /* Object location */
-    herr_t	ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_API(H5Adelete1, FAIL)
-    H5TRACE2("e", "i*s", loc_id, name);
-
-    /* check arguments */
-    if(H5I_ATTR == H5I_get_type(loc_id))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
-    if(H5G_loc(loc_id, &loc) < 0)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(!name || !*name)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
-
-    /* Delete the attribute from the location */
-    if(H5O_attr_remove(loc.oloc, name, H5AC_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* H5Adelete1() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 

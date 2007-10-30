@@ -250,9 +250,9 @@ int H5Object::getNumAttrs() const
 //--------------------------------------------------------------------------
 void H5Object::removeAttr( const char* name ) const
 {
-   herr_t ret_value = H5Adelete2(id, ".", name, H5P_DEFAULT);
+   herr_t ret_value = H5Adelete(id, name);
    if( ret_value < 0 )
-      throw AttributeIException(inMemFunc("removeAttr"), "H5Adelete2 failed");
+      throw AttributeIException(inMemFunc("removeAttr"), "H5Adelete failed");
 }
 
 //--------------------------------------------------------------------------

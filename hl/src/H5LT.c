@@ -883,7 +883,7 @@ herr_t H5LTset_attribute_string( hid_t loc_id,
 
  /* The attribute already exists, delete it */
  if(has_attr == 1)
-   if(H5Adelete2(obj_id, ".", attr_name, H5P_DEFAULT) < 0)
+   if(H5Adelete(obj_id, attr_name) < 0)
      goto out;
 
  /* Create and write the attribute */
@@ -961,7 +961,7 @@ herr_t H5LT_set_attribute_numerical( hid_t loc_id,
 
  /* The attribute already exists, delete it */
  if(has_attr == 1)
-   if(H5Adelete2(obj_id, ".", attr_name, H5P_DEFAULT) < 0)
+   if(H5Adelete(obj_id, attr_name) < 0)
      goto out;
 
  /* Create the attribute. */
@@ -2837,22 +2837,20 @@ herr_t H5LT_set_attribute_string(hid_t dset_id,
  has_attr = H5LT_find_attribute(dset_id,name);
 
  /* the attribute already exists, delete it */
- if ( has_attr == 1 )
- {
-  if(H5Adelete2(dset_id, ".", name, H5P_DEFAULT) < 0)
+ if(has_attr == 1)
+  if(H5Adelete(dset_id, name) < 0)
     return FAIL;
- }
 
 /*-------------------------------------------------------------------------
  * create the attribute type
  *-------------------------------------------------------------------------
  */
- if ((tid = H5Tcopy(H5T_C_S1)) < 0)
+ if((tid = H5Tcopy(H5T_C_S1)) < 0)
   return FAIL;
 
  size = strlen(buf) + 1; /* extra null term */
 
- if (H5Tset_size(tid,(size_t)size) < 0)
+ if(H5Tset_size(tid,(size_t)size) < 0)
   goto out;
 
  if(H5Tset_strpad(tid, H5T_STR_NULLTERM) < 0)

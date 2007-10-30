@@ -158,7 +158,7 @@ int main()
     assert(gid > 0);
 
     /* Delete 2nd attribute */
-    ret = H5Adelete2(gid, ".", ATTR2, H5P_DEFAULT);
+    ret = H5Adelete(gid, ATTR2);
     assert(ret >= 0);
 
     /* Close first group */
@@ -225,7 +225,7 @@ int main()
     assert(gid > 0);
 
     /* Delete 3rd attribute */
-    ret = H5Adelete2(gid, ".", ATTR3, H5P_DEFAULT);
+    ret = H5Adelete(gid, ATTR3);
     assert(ret >= 0);
 
     /* Create dataspace for 3rd attribute */
@@ -272,7 +272,7 @@ int main()
     assert(gid > 0);
 
     /* Delete 2nd attribute */
-    ret = H5Adelete2(gid, ".", ATTR2, H5P_DEFAULT);
+    ret = H5Adelete(gid, ATTR2);
     assert(ret >= 0);
 
     /* Close first group */

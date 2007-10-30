@@ -4365,8 +4365,8 @@ test_misc25a(void)
     CHECK(gid, FAIL, "H5Gopen2");
 
     /* Delete 2nd attribute */
-    ret = H5Adelete2(gid, ".", MISC25A_ATTR2_NAME, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Adelete2");
+    ret = H5Adelete(gid, MISC25A_ATTR2_NAME);
+    CHECK(ret, FAIL, "H5Adelete");
 
     /* Close first group */
     ret = H5Gclose(gid);
@@ -4431,8 +4431,8 @@ test_misc25a(void)
     CHECK(gid, FAIL, "H5Gopen2");
 
     /* Delete 3rd attribute */
-    ret = H5Adelete2(gid, ".", MISC25A_ATTR3_NAME, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Adelete2");
+    ret = H5Adelete(gid, MISC25A_ATTR3_NAME);
+    CHECK(ret, FAIL, "H5Adelete");
 
     /* Create dataspace for 3rd attribute */
     sid = H5Screate(H5S_SCALAR);
@@ -4478,8 +4478,8 @@ test_misc25a(void)
     CHECK(gid, FAIL, "H5Gopen2");
 
     /* Delete 2nd attribute */
-    ret = H5Adelete2(gid, ".", MISC25A_ATTR2_NAME, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Adelete2");
+    ret = H5Adelete(gid, MISC25A_ATTR2_NAME);
+    CHECK(ret, FAIL, "H5Adelete");
 
     /* Close first group */
     ret = H5Gclose(gid);
@@ -4698,8 +4698,8 @@ test_misc25c(void)
     CHECK(ret, FAIL, "H5Lmove");
 
     /* Delete the first attribute */
-    ret = H5Adelete2(gid, ".", MISC25C_ATTRNAME, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Adelete2");
+    ret = H5Adelete(gid, MISC25C_ATTRNAME);
+    CHECK(ret, FAIL, "H5Adelete");
 
     /* Close the dataset group */
     ret = H5Gclose(gid);

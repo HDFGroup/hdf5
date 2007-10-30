@@ -485,7 +485,7 @@ herr_t H5DSattach_scale(hid_t did,
  */
 
   /* the attribute must be deleted, in order to the new one can reflect the changes*/
-  if (H5Adelete2(dsid, ".", REFERENCE_LIST, H5P_DEFAULT) < 0)
+  if(H5Adelete(dsid, REFERENCE_LIST) < 0)
    goto out;
 
   /* store the IDX information (index of the dataset that has the DS) */
@@ -835,7 +835,7 @@ herr_t H5DSdetach_scale(hid_t did,
  */
 
  /* the attribute must be deleted, in order to the new one can reflect the changes*/
- if (H5Adelete2(dsid, ".", REFERENCE_LIST, H5P_DEFAULT) < 0)
+ if(H5Adelete(dsid, REFERENCE_LIST) < 0)
   goto out;
 
  /* don't do anything for an empty array */

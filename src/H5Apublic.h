@@ -76,7 +76,8 @@ H5_DLL herr_t  H5Aiterate2(hid_t loc_id, H5_index_t idx_type,
 H5_DLL herr_t  H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t *idx, H5A_operator2_t op, void *op_data,
     hid_t lapd_id);
-H5_DLL herr_t  H5Adelete2(hid_t loc_id, const char *obj_name,
+H5_DLL herr_t  H5Adelete(hid_t loc_id, const char *name);
+H5_DLL herr_t  H5Adelete_by_name(hid_t loc_id, const char *obj_name,
     const char *attr_name, hid_t lapl_id);
 H5_DLL herr_t  H5Adelete_by_idx(hid_t loc_id, const char *obj_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id);
@@ -103,7 +104,6 @@ H5_DLL hid_t   H5Acreate1(hid_t loc_id, const char *name, hid_t type_id,
 H5_DLL hid_t   H5Aopen_name(hid_t loc_id, const char *name);
 H5_DLL hid_t   H5Aopen_idx(hid_t loc_id, unsigned idx);
 H5_DLL int     H5Aget_num_attrs(hid_t loc_id);
-H5_DLL herr_t  H5Adelete1(hid_t loc_id, const char *name);
 H5_DLL herr_t  H5Aiterate1(hid_t loc_id, unsigned *attr_num, H5A_operator1_t op,
     void *op_data);
 
