@@ -20,6 +20,8 @@
 #include <string.h>
 #include <ctype.h>
 #include "h5import.h"
+#include "h5tools_utils.h"
+
 
 int main(int argc, char *argv[])
 {
@@ -46,6 +48,13 @@ int main(int argc, char *argv[])
 #if defined __MWERKS__
     argc = ccommand(&argv);
 #endif
+
+    if ( argv[1] && (strcmp("-V",argv[1])==0) )
+    {
+        print_version("h5import");
+        exit(EXIT_SUCCESS);
+        
+    }
 
  /*
   * validate the number of command line arguments
