@@ -42,6 +42,7 @@ void usage(void)
  printf("-o output      Output HDF5 File\n");
  printf("[-h]           Print this message\n");
  printf("[-v]           Verbose mode\n");
+ printf("[-V]           Print HDF5 version number and exit\n");
  printf("[-n]           Use a native HDF5 type when repacking. Default is the file type\n");
  printf("[-L, --latest]      Use latest version of file format to create groups, datasets and datatypes\n");
  printf("[-compact=<size>]      Set the maximum number of links to store as header messages in a group\n");
@@ -160,8 +161,11 @@ int main(int argc, char **argv)
     usage();
     exit(0);
   }
-
-  if (strcmp(argv[i], "-i") == 0) {
+  else if (strcmp(argv[i], "-V") == 0) {
+   print_version(progname);
+   exit(0);
+  }
+  else if (strcmp(argv[i], "-i") == 0) {
    infile = argv[++i];
   }
   else if (strcmp(argv[i], "-o") == 0) {
