@@ -638,15 +638,15 @@ test_misc4(void)
     CHECK(group3, FAIL, "H5Gcreate2");
 
     /* Get the stat information for each group */
-    ret = H5Oget_info(file1, MISC4_GROUP_1, &oinfo1, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_info");
-    ret = H5Oget_info(file1, MISC4_GROUP_2, &oinfo2, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_info");
-    ret = H5Oget_info(file2, MISC4_GROUP_1, &oinfo3, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_info");
+    ret = H5Oget_info_by_name(file1, MISC4_GROUP_1, &oinfo1, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info_by_name");
+    ret = H5Oget_info_by_name(file1, MISC4_GROUP_2, &oinfo2, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info_by_name");
+    ret = H5Oget_info_by_name(file2, MISC4_GROUP_1, &oinfo3, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info_by_name");
 
     /* Verify that the fileno values are the same for groups from file1 */
-    VERIFY(oinfo1.fileno, oinfo2.fileno, "H5Oget_info");
+    VERIFY(oinfo1.fileno, oinfo2.fileno, "H5Oget_info_by_name");
 
     /* Verify that the fileno values are not the same between file1 & file2 */
     if(oinfo1.fileno == oinfo3.fileno)
@@ -2855,26 +2855,26 @@ test_misc18(void)
     CHECK(did1, FAIL, "H5Dcreate2");
 
     /* Get object information */
-    ret = H5Oget_info(fid, MISC18_DSET1_NAME, &oinfo, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_info");
-    VERIFY(oinfo.hdr.nmesgs, 6, "H5Oget_info");
-    VERIFY(oinfo.hdr.nchunks, 1, "H5Oget_info");
-    VERIFY(oinfo.hdr.space.total, 272, "H5Oget_info");
-    VERIFY(oinfo.hdr.space.free, 152, "H5Oget_info");
-    VERIFY(oinfo.num_attrs, 0, "H5Oget_info");
+    ret = H5Oget_info_by_name(fid, MISC18_DSET1_NAME, &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info_by_name");
+    VERIFY(oinfo.hdr.nmesgs, 6, "H5Oget_info_by_name");
+    VERIFY(oinfo.hdr.nchunks, 1, "H5Oget_info_by_name");
+    VERIFY(oinfo.hdr.space.total, 272, "H5Oget_info_by_name");
+    VERIFY(oinfo.hdr.space.free, 152, "H5Oget_info_by_name");
+    VERIFY(oinfo.num_attrs, 0, "H5Oget_info_by_name");
 
     /* Create second dataset */
     did2 = H5Dcreate2(fid, MISC18_DSET2_NAME, H5T_STD_U32LE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(did2, FAIL, "H5Dcreate2");
 
     /* Get object information */
-    ret = H5Oget_info(fid, MISC18_DSET2_NAME, &oinfo, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_info");
-    VERIFY(oinfo.hdr.nmesgs, 6, "H5Oget_info");
-    VERIFY(oinfo.hdr.nchunks, 1, "H5Oget_info");
-    VERIFY(oinfo.hdr.space.total, 272, "H5Oget_info");
-    VERIFY(oinfo.hdr.space.free, 152, "H5Oget_info");
-    VERIFY(oinfo.num_attrs, 0, "H5Oget_info");
+    ret = H5Oget_info_by_name(fid, MISC18_DSET2_NAME, &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info_by_name");
+    VERIFY(oinfo.hdr.nmesgs, 6, "H5Oget_info_by_name");
+    VERIFY(oinfo.hdr.nchunks, 1, "H5Oget_info_by_name");
+    VERIFY(oinfo.hdr.space.total, 272, "H5Oget_info_by_name");
+    VERIFY(oinfo.hdr.space.free, 152, "H5Oget_info_by_name");
+    VERIFY(oinfo.num_attrs, 0, "H5Oget_info_by_name");
 
     /* Loop creating attributes on each dataset, flushing them to the file each time */
     for(u = 0; u < 10; u++) {
@@ -2901,22 +2901,22 @@ test_misc18(void)
     } /* end for */
 
     /* Get object information for dataset #1 now */
-    ret = H5Oget_info(fid, MISC18_DSET1_NAME, &oinfo, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_info");
-    VERIFY(oinfo.hdr.nmesgs, 24, "H5Oget_info");
-    VERIFY(oinfo.hdr.nchunks, 9, "H5Oget_info");
-    VERIFY(oinfo.hdr.space.total, 888, "H5Oget_info");
-    VERIFY(oinfo.hdr.space.free, 16, "H5Oget_info");
-    VERIFY(oinfo.num_attrs, 10, "H5Oget_info");
+    ret = H5Oget_info_by_name(fid, MISC18_DSET1_NAME, &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info_by_name");
+    VERIFY(oinfo.hdr.nmesgs, 24, "H5Oget_info_by_name");
+    VERIFY(oinfo.hdr.nchunks, 9, "H5Oget_info_by_name");
+    VERIFY(oinfo.hdr.space.total, 888, "H5Oget_info_by_name");
+    VERIFY(oinfo.hdr.space.free, 16, "H5Oget_info_by_name");
+    VERIFY(oinfo.num_attrs, 10, "H5Oget_info_by_name");
 
     /* Get object information for dataset #2 now */
-    ret = H5Oget_info(fid, MISC18_DSET2_NAME, &oinfo, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_info");
-    VERIFY(oinfo.hdr.nmesgs, 24, "H5Oget_info");
-    VERIFY(oinfo.hdr.nchunks, 9, "H5Oget_info");
-    VERIFY(oinfo.hdr.space.total, 888, "H5Oget_info");
-    VERIFY(oinfo.hdr.space.free, 16, "H5Oget_info");
-    VERIFY(oinfo.num_attrs, 10, "H5Oget_info");
+    ret = H5Oget_info_by_name(fid, MISC18_DSET2_NAME, &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info_by_name");
+    VERIFY(oinfo.hdr.nmesgs, 24, "H5Oget_info_by_name");
+    VERIFY(oinfo.hdr.nchunks, 9, "H5Oget_info_by_name");
+    VERIFY(oinfo.hdr.space.total, 888, "H5Oget_info_by_name");
+    VERIFY(oinfo.hdr.space.free, 16, "H5Oget_info_by_name");
+    VERIFY(oinfo.num_attrs, 10, "H5Oget_info_by_name");
 
     /* Close second dataset */
     ret = H5Dclose(did2);
@@ -3849,7 +3849,7 @@ test_misc23(void)
     tmp_id = H5Gopen2(file_id, "/A/B01", H5P_DEFAULT);
     CHECK(tmp_id, FAIL, "H5Gopen2");
 
-    status = H5Oget_info(tmp_id, ".", &oinfo, H5P_DEFAULT);
+    status = H5Oget_info(tmp_id, &oinfo);
     CHECK(status, FAIL, "H5Oget_info");
     VERIFY(oinfo.rc, 1, "H5Oget_info");
 

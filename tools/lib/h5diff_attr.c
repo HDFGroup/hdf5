@@ -71,9 +71,9 @@ hsize_t diff_attr(hid_t loc1_id,
  hsize_t    nfound_total = 0;
  int        cmp=1;
 
- if(H5Oget_info(loc1_id, ".", &oinfo1, H5P_DEFAULT) < 0)
+ if(H5Oget_info(loc1_id, &oinfo1) < 0)
   goto error;
- if(H5Oget_info(loc2_id, ".", &oinfo2, H5P_DEFAULT) < 0)
+ if(H5Oget_info(loc2_id, &oinfo2) < 0)
   goto error;
 
  if(oinfo1.num_attrs != oinfo2.num_attrs)

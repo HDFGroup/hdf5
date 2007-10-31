@@ -722,7 +722,7 @@ print_datatype(hid_t type,unsigned in_group)
         H5O_info_t  oinfo;
         obj_t  *obj;    /* Found object */
 
-        H5Oget_info(type, ".", &oinfo, H5P_DEFAULT);
+        H5Oget_info(type, &oinfo);
         obj = search_obj(type_table, oinfo.addr);
 
         if(obj) {
@@ -1393,7 +1393,7 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED 
         H5O_info_t  oinfo;
 
         /* Stat the object */
-        if(H5Oget_info(group, name, &oinfo, H5P_DEFAULT) < 0) {
+        if(H5Oget_info_by_name(group, name, &oinfo, H5P_DEFAULT) < 0) {
             error_msg(progname, "unable to get object information for \"%s\"\n", name);
             d_status = EXIT_FAILURE;
             ret = FAIL;
@@ -1906,7 +1906,7 @@ dump_group(hid_t gid, const char *name)
             }
     } /* end if */
 
-    H5Oget_info(gid, ".", &oinfo, H5P_DEFAULT);
+    H5Oget_info(gid, &oinfo);
 
     if(oinfo.rc > 1) {
         obj_t  *found_obj;    /* Found object */
@@ -3252,7 +3252,7 @@ handle_datasets(hid_t fid, char *dset, void *data)
         }
     }
 
-    H5Oget_info(dsetid, ".", &oinfo, H5P_DEFAULT);
+    H5Oget_info(dsetid, &oinfo);
     if(oinfo.rc > 1) {
         obj_t  *found_obj;    /* Found object */
 
@@ -4489,7 +4489,7 @@ xml_print_datatype(hid_t type, unsigned in_group)
         obj_t  *found_obj;    /* Found object */
 
         /* detect a shared datatype, output only once */
-        H5Oget_info(type, ".", &oinfo, H5P_DEFAULT);
+        H5Oget_info(type, &oinfo);
         found_obj = search_obj(type_table, oinfo.addr);
 
         if(found_obj) {
@@ -4850,7 +4850,7 @@ xml_dump_datatype(hid_t type)
         obj_t  *found_obj;    /* Found object */
 
         /* Datatype is a shared or named datatype */
-        H5Oget_info(type, ".", &oinfo, H5P_DEFAULT);
+        H5Oget_info(type, &oinfo);
         found_obj = search_obj(type_table, oinfo.addr);
 
         if(found_obj) {
@@ -5359,7 +5359,7 @@ xml_dump_group(hid_t gid, const char *name)
     indentation(indent);
     indent += COL;
 
-    H5Oget_info(gid, ".", &oinfo, H5P_DEFAULT);
+    H5Oget_info(gid, &oinfo);
     if(oinfo.rc > 1) {
         obj_t  *found_obj;    /* Found object */
 

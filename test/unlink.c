@@ -451,9 +451,9 @@ check_new_move(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get hard link info */
-    if(H5Oget_info(file, "/group2/group_new_name", &oi_hard1, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_name(file, "/group2/group_new_name", &oi_hard1, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
-    if(H5Oget_info(file, "/group1/hard", &oi_hard2, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_name(file, "/group1/hard", &oi_hard2, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
 
     /* Check hard links */
@@ -2204,7 +2204,7 @@ test_full_group_compact(hid_t fapl)
     /* Check reference count on objects to keep */
     for(u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
         sprintf(objname, "/keep/keep %u\n", u);
-        if(H5Oget_info(file_id, objname, &oi, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+        if(H5Oget_info_by_name(file_id, objname, &oi, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
         if(oi.rc != 2) TEST_ERROR
     } /* end for */
 
@@ -2221,7 +2221,7 @@ test_full_group_compact(hid_t fapl)
     /* Check reference count on objects to keep */
     for(u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
         sprintf(objname, "/keep/keep %u\n", u);
-        if(H5Oget_info(file_id, objname, &oi, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+        if(H5Oget_info_by_name(file_id, objname, &oi, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
         if(oi.rc != 1) TEST_ERROR
     } /* end for */
 
@@ -2350,7 +2350,7 @@ test_full_group_dense(hid_t fapl)
     /* Check reference count on objects to keep */
     for(u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
         sprintf(objname, "/keep/keep %u\n", u);
-        if(H5Oget_info(file_id, objname, &oi, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+        if(H5Oget_info_by_name(file_id, objname, &oi, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
         if(oi.rc != 2) TEST_ERROR
     } /* end for */
 
@@ -2367,7 +2367,7 @@ test_full_group_dense(hid_t fapl)
     /* Check reference count on objects to keep */
     for(u = 0; u < FULL_GROUP_NUM_KEEP; u++) {
         sprintf(objname, "/keep/keep %u\n", u);
-        if(H5Oget_info(file_id, objname, &oi, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+        if(H5Oget_info_by_name(file_id, objname, &oi, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
         if(oi.rc != 1) TEST_ERROR
     } /* end for */
 

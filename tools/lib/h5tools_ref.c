@@ -134,7 +134,7 @@ ref_path_table_lookup(const char *thepath)
 
     /* Get the object info now */
     /* (returns failure for dangling soft links) */
-    if(H5Oget_info(thefile, thepath, &oi, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_name(thefile, thepath, &oi, H5P_DEFAULT) < 0)
         return HADDR_UNDEF;
 
     /* All existing objects in the file had better be in the table */
@@ -300,7 +300,7 @@ fill_ref_path_table_cb(hid_t group, const char *obj_name, const H5L_info_t *linf
     if(linfo->type == H5L_TYPE_HARD) {
         H5O_info_t              oinfo;
 
-        H5Oget_info(group, obj_name, &oinfo, H5P_DEFAULT);
+        H5Oget_info_by_name(group, obj_name, &oinfo, H5P_DEFAULT);
 
         /* Check if the object is already in the path table */
         if(!ref_path_table_find(oinfo.addr)) {
@@ -369,7 +369,7 @@ fill_ref_path_table(hid_t fid)
     root_path = HDstrdup("/");
 
     /* Get info for root group */
-    H5Oget_info(fid, root_path, &oinfo, H5P_DEFAULT);
+    H5Oget_info_by_name(fid, root_path, &oinfo, H5P_DEFAULT);
 
     /* Insert the root group into the path table (takes ownership of path) */
     ref_path_table_put(root_path, oinfo.addr);

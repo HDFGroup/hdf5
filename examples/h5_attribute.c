@@ -192,7 +192,7 @@ main (void)
    /*
     * Find string attribute by iterating through all attributes
     */
-   ret = H5Oget_info(dataset, ".", &oinfo, H5P_DEFAULT);
+   ret = H5Oget_info(dataset, &oinfo);
    for(i = 0; i < (unsigned)oinfo.num_attrs; i++) {
       attr = H5Aopen_by_idx(dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)i, H5P_DEFAULT, H5P_DEFAULT);
       atype = H5Aget_type(attr);

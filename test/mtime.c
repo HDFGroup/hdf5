@@ -91,9 +91,9 @@ main(void)
      */
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR;
-    if(H5Oget_info(file, "dset", &oi1, H5P_DEFAULT) < 0) TEST_ERROR;
+    if(H5Oget_info_by_name(file, "dset", &oi1, H5P_DEFAULT) < 0) TEST_ERROR;
     if((dset = H5Dopen2(file, "dset", H5P_DEFAULT)) < 0) TEST_ERROR;
-    if(H5Oget_info(dset, ".", &oi2, H5P_DEFAULT) < 0) TEST_ERROR;
+    if(H5Oget_info(dset, &oi2) < 0) TEST_ERROR;
     if(H5Dclose(dset) < 0) TEST_ERROR;
     if(H5Fclose(file) < 0) TEST_ERROR;
 
@@ -141,7 +141,7 @@ main(void)
         HDstrcat(testfile, TESTFILE1);
         file = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
         if(file >= 0){
-            if(H5Oget_info(file, "/Dataset1", &oi1, H5P_DEFAULT) < 0)
+            if(H5Oget_info_by_name(file, "/Dataset1", &oi1, H5P_DEFAULT) < 0)
                 TEST_ERROR;
             if(oi1.mtime != MTIME1) {
                 H5_FAILED();
@@ -177,7 +177,7 @@ main(void)
         HDstrcat(testfile, TESTFILE2);
         file = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
         if(file >= 0){
-            if(H5Oget_info(file, "/Dataset1", &oi2, H5P_DEFAULT) < 0)
+            if(H5Oget_info_by_name(file, "/Dataset1", &oi2, H5P_DEFAULT) < 0)
                 TEST_ERROR;
             if(oi2.mtime != MTIME2) {
                H5_FAILED();

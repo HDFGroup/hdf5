@@ -464,12 +464,49 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Oget_info(hid_t loc_id, const char *name, H5O_info_t *oinfo, hid_t lapl_id)
+H5Oget_info(hid_t loc_id, H5O_info_t *oinfo)
 {
     H5G_loc_t	loc;                    /* Location of group */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(H5Oget_info, FAIL)
+    H5TRACE2("e", "i*x", loc_id, oinfo);
+
+    /* Check args */
+    if(H5G_loc(loc_id, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(!oinfo)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
+
+    /* Retrieve the object's information */
+    if(H5G_loc_info(&loc, ".", TRUE, oinfo/*out*/, H5P_LINK_ACCESS_DEFAULT, H5AC_ind_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Oget_info() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Oget_info_by_name
+ *
+ * Purpose:	Retrieve information about an object.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		November 21 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Oget_info_by_name(hid_t loc_id, const char *name, H5O_info_t *oinfo, hid_t lapl_id)
+{
+    H5G_loc_t	loc;                    /* Location of group */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(H5Oget_info_by_name, FAIL)
     H5TRACE4("e", "i*s*xi", loc_id, name, oinfo, lapl_id);
 
     /* Check args */
@@ -491,7 +528,7 @@ H5Oget_info(hid_t loc_id, const char *name, H5O_info_t *oinfo, hid_t lapl_id)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Oget_info() */
+} /* end H5Oget_info_by_name() */
 
 
 /*-------------------------------------------------------------------------

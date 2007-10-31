@@ -772,8 +772,8 @@ static void test_sohm_size1(void)
     CHECK_I(file, "size1_helper");
 
     /* Get the size of a dataset object header */
-    ret = H5Oget_info(file, DSETNAME[0], &oinfo, H5P_DEFAULT);
-    CHECK_I(ret, "H5Oget_info");
+    ret = H5Oget_info_by_name(file, DSETNAME[0], &oinfo, H5P_DEFAULT);
+    CHECK_I(ret, "H5Oget_info_by_name");
     ret = H5Fclose(file);
     CHECK_I(ret, "H5Fclose");
     norm_oh_size = oinfo.hdr.space.total;
@@ -828,8 +828,8 @@ static void test_sohm_size1(void)
     CHECK_I(file, "size1_helper");
 
     /* Get the size of a dataset object header */
-    ret = H5Oget_info(file, DSETNAME[0], &oinfo, H5P_DEFAULT);
-    CHECK_I(ret, "H5Oget_info");
+    ret = H5Oget_info_by_name(file, DSETNAME[0], &oinfo, H5P_DEFAULT);
+    CHECK_I(ret, "H5Oget_info_by_name");
     ret = H5Fclose(file);
     CHECK_I(ret, "H5Fclose");
     sohm_oh_size = oinfo.hdr.space.total;
@@ -883,8 +883,8 @@ static void test_sohm_size1(void)
     CHECK_I(file, "size1_helper");
 
     /* Get the size of a dataset object header */
-    ret = H5Oget_info(file, DSETNAME[0], &oinfo, H5P_DEFAULT);
-    CHECK_I(ret, "H5Oget_info");
+    ret = H5Oget_info_by_name(file, DSETNAME[0], &oinfo, H5P_DEFAULT);
+    CHECK_I(ret, "H5Oget_info_by_name");
     ret = H5Fclose(file);
     CHECK_I(ret, "H5Fclose");
     sohm_btree_oh_size = oinfo.hdr.space.total;
@@ -920,10 +920,10 @@ static void test_sohm_size1(void)
      * continuation message and a NULL message.
 
     if(sohm_oh_size >= norm_oh_size)
-        VERIFY(sohm_oh_size, 1, "H5Oget_info");
+        VERIFY(sohm_oh_size, 1, "H5Oget_info_by_name");
     */
     if(sohm_oh_size != sohm_btree_oh_size)
-        VERIFY(sohm_btree_oh_size, 1, "H5Oget_info");
+        VERIFY(sohm_btree_oh_size, 1, "H5Oget_info_by_name");
 
     /* Both sohm files should be bigger than a normal file when empty.
      * It's hard to say whether a B-tree with no nodes allocated should be

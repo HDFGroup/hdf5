@@ -736,7 +736,7 @@ walk(hid_t group, const char *name, const H5L_info_t *linfo, void *_iter)
         char *s;
 
         /* Get object information */
-        ret = H5Oget_info(group, name, &oi, H5P_DEFAULT);
+        ret = H5Oget_info_by_name(group, name, &oi, H5P_DEFAULT);
         assert(ret >= 0);
 
         /* If the object has already been printed then just show the object ID

@@ -554,8 +554,8 @@ liter_cb2(hid_t loc_id, const char *name, const H5L_info_t UNUSED *link_info,
     /*
      * Get type of the object and check it.
      */
-    ret = H5Oget_info(loc_id, name, &oinfo, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_info");
+    ret = H5Oget_info_by_name(loc_id, name, &oinfo, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Oget_info_by_name");
 
     if(test_info->type != oinfo.type) {
         TestErrPrintf("test_info->type = %d, oinfo.type = %d\n", test_info->type, (int)oinfo.type);

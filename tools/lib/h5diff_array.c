@@ -2215,8 +2215,8 @@ hsize_t diff_region(hid_t obj1_id,
         if (nfound_b && options->m_verbose) {
             H5O_info_t oi1, oi2;
 
-            H5Oget_info(obj1_id, ".", &oi1, H5P_DEFAULT);
-            H5Oget_info(obj2_id, ".", &oi2, H5P_DEFAULT);
+            H5Oget_info(obj1_id, &oi1);
+            H5Oget_info(obj2_id, &oi2);
 
             parallel_print("Referenced dataset      %lu            %lu\n",
                     (unsigned long)oi1.addr, (unsigned long)oi2.addr);

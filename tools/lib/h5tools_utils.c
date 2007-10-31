@@ -487,7 +487,7 @@ find_objs_cb(hid_t group, const char *name, const H5L_info_t UNUSED *linfo, void
     find_objs_t *info = (find_objs_t*)op_data;
     herr_t ret_value = 0;
 
-    if(H5Oget_info(group, name, &oinfo, H5P_DEFAULT) < 0)
+    if(H5Oget_info_by_name(group, name, &oinfo, H5P_DEFAULT) < 0)
         ;     /* keep going */
     else {
         switch(oinfo.type) {
@@ -526,7 +526,7 @@ find_objs_cb(hid_t group, const char *name, const H5L_info_t UNUSED *linfo, void
                         type = H5Dget_type(dset);
 
                         if(H5Tcommitted(type) > 0) {
-                            H5Oget_info(type, ".", &oinfo, H5P_DEFAULT);
+                            H5Oget_info(type, &oinfo);
                             if(search_obj(info->type_table, oinfo.addr) == NULL) {
                                 char *type_name = HDstrdup(tmp);
 
@@ -603,7 +603,7 @@ init_objs(hid_t fid, find_objs_t *info, table_t **group_table,
     info->dset_table = *dset_table;
 
     /* add the root group as an object, it may have hard links to it */
-    if(H5Oget_info(fid, "/", &oinfo, H5P_DEFAULT) < 0)
+    if(H5Oget_info(fid, &oinfo) < 0)
         return FAIL;
     else {
         /* call with an empty string, it appends '/' group separator */

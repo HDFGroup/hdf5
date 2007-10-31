@@ -945,7 +945,7 @@ nh5aget_num_attrs_c (hid_t_f *obj_id, int_f *attr_num)
     /*
      * Call H5Oget_info function.
      */
-    if(H5Oget_info((hid_t)*obj_id, ".", &oinfo, H5P_DEFAULT) < 0)
+    if(H5Oget_info((hid_t)*obj_id, &oinfo) < 0)
         HGOTO_DONE(FAIL);
 
     /* Set number of attributes */

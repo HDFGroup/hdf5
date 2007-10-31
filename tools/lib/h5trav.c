@@ -155,7 +155,7 @@ traverse_cb(hid_t loc_id, const char *link_name, const H5L_info_t *linfo,
         H5O_info_t oinfo;
 
         /* Get information about the object */
-        if(H5Oget_info(loc_id, link_name, &oinfo, H5P_DEFAULT) < 0)
+        if(H5Oget_info_by_name(loc_id, link_name, &oinfo, H5P_DEFAULT) < 0)
             return(H5_ITER_ERROR);
 
         /* If the object has multiple links, add it to the list of addresses
@@ -224,7 +224,7 @@ traverse(hid_t file_id, const trav_visitor_t *visitor)
     trav_ud_traverse_t udata;   /* User data for iteration callback */
 
     /* Get info for root group */
-    if(H5Oget_info(file_id, "/", &oinfo, H5P_DEFAULT) < 0)
+    if(H5Oget_info(file_id, &oinfo) < 0)
         return -1;
 
     /* Visit the root group of the file */

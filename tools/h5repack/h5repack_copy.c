@@ -900,7 +900,7 @@ int copy_attr(hid_t loc_in,
  int        j;
  unsigned   u;
 
- if(H5Oget_info(loc_in, ".", &oinfo, H5P_DEFAULT) < 0)
+ if(H5Oget_info(loc_in, &oinfo) < 0)
   goto error;
 
 /*-------------------------------------------------------------------------

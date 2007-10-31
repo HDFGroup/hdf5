@@ -1171,7 +1171,7 @@ display_type(hid_t type, int ind)
     if(H5Tcommitted(type)) {
         H5O_info_t  oi;
 
-        if(H5Oget_info(type, ".", &oi, H5P_DEFAULT) >= 0)
+        if(H5Oget_info(type, &oi) >= 0)
             printf("shared-%lu:"H5_PRINTF_HADDR_FMT" ",
                     oi.fileno, oi.addr);
         else
@@ -1744,7 +1744,7 @@ list(hid_t group, const char *name, const H5L_info_t *linfo, void *_iter)
         hid_t obj;
 
         /* Get object information */
-        if(H5Oget_info(group, name, &oi, H5P_DEFAULT) < 0) {
+        if(H5Oget_info_by_name(group, name, &oi, H5P_DEFAULT) < 0) {
             puts("**NOT FOUND**");
             return 0;
         } else if(oi.type < 0 || oi.type >= H5O_TYPE_NTYPES) {
@@ -2306,7 +2306,7 @@ main(int argc, const char *argv[])
             li.type = H5L_TYPE_HARD;
 
         /* Open the object and display it's information */
-        if(li.type == H5L_TYPE_HARD && H5Oget_info(file, oname, &oi, H5P_DEFAULT) >= 0 && H5O_TYPE_GROUP == oi.type && !grp_literal_g) {
+        if(li.type == H5L_TYPE_HARD && H5Oget_info_by_name(file, oname, &oi, H5P_DEFAULT) >= 0 && H5O_TYPE_GROUP == oi.type && !grp_literal_g) {
             /* Specified name is a group. List the complete contents of the group. */
             sym_insert(&oi, oname);
             iter.container = container = fix_name((show_file_name_g ? fname : ""), oname);

@@ -235,7 +235,7 @@ int H5Object::getNumAttrs() const
 {
    H5O_info_t oinfo;    /* Object info */
 
-   if(H5Oget_info(id, ".", &oinfo, H5P_DEFAULT) < 0)
+   if(H5Oget_info(id, &oinfo) < 0)
       throw AttributeIException(inMemFunc("getNumAttrs"), "H5Oget_info failed");
    else
       return( (int)oinfo.num_attrs );

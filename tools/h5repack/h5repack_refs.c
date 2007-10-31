@@ -422,7 +422,7 @@ static int copy_refs_attr(hid_t loc_in,
     int        j;
     unsigned   u;
 
-    if(H5Oget_info(loc_in, ".", &oinfo, H5P_DEFAULT) < 0)
+    if(H5Oget_info(loc_in, &oinfo) < 0)
         goto error;
 
     for(u = 0; u < (unsigned)oinfo.num_attrs; u++) {
@@ -664,7 +664,7 @@ static const char* MapIdToName(hid_t refobj_id,
             H5O_info_t   ref_oinfo;     /* Stat for the refobj id */
 
             /* obtain information to identify the referenced object uniquely */
-            if(H5Oget_info(refobj_id, ".", &ref_oinfo, H5P_DEFAULT) < 0)
+            if(H5Oget_info(refobj_id, &ref_oinfo) < 0)
                 return NULL;
 
             if(ref_oinfo.addr == travt->objs[i].objno)

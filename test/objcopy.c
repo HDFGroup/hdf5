@@ -771,10 +771,10 @@ compare_std_attributes(hid_t oid, hid_t oid2, hid_t pid)
         cpy_flags = 0;
 
     /* Check the number of attributes on source dataset */
-    if(H5Oget_info(oid, ".", &oinfo1, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Oget_info(oid, &oinfo1) < 0) TEST_ERROR
 
     /* Check the number of attributes on destination dataset */
-    if(H5Oget_info(oid2, ".", &oinfo2, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Oget_info(oid2, &oinfo2) < 0) TEST_ERROR
 
     if(cpy_flags & H5O_COPY_WITHOUT_ATTR_FLAG) {
         /* Check that the destination has no attributes */
@@ -891,8 +891,8 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
                 if(obj_owner > 0) {
                     H5O_info_t oinfo1, oinfo2;
 
-                    if(H5Oget_info(obj_owner, ".", &oinfo1, H5P_DEFAULT) < 0) TEST_ERROR
-                    if(H5Oget_info(obj1_id, ".", &oinfo2, H5P_DEFAULT) < 0) TEST_ERROR
+                    if(H5Oget_info(obj_owner, &oinfo1) < 0) TEST_ERROR
+                    if(H5Oget_info(obj1_id, &oinfo2) < 0) TEST_ERROR
                     if(H5F_addr_eq(oinfo1.addr, oinfo2.addr)) {
                         if(H5Oclose(obj1_id) < 0) TEST_ERROR
                         if(H5Oclose(obj2_id) < 0) TEST_ERROR
@@ -948,8 +948,8 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
                 if(obj_owner > 0) {
                     H5O_info_t oinfo1, oinfo2;
 
-                    if(H5Oget_info(obj_owner, ".", &oinfo1, H5P_DEFAULT) < 0) TEST_ERROR
-                    if(H5Oget_info(obj1_id, ".", &oinfo2, H5P_DEFAULT) < 0) TEST_ERROR
+                    if(H5Oget_info(obj_owner, &oinfo1) < 0) TEST_ERROR
+                    if(H5Oget_info(obj1_id, &oinfo2) < 0) TEST_ERROR
                     if(H5F_addr_eq(oinfo1.addr, oinfo2.addr)) {
                         if(H5Oclose(obj1_id) < 0) TEST_ERROR
                         if(H5Oclose(obj2_id) < 0) TEST_ERROR
@@ -1281,8 +1281,8 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
                 H5O_info_t oinfo, oinfo2;       /* Object info */
 
                 /* Compare some pieces of the object info */
-                if(H5Oget_info(gid, objname, &oinfo, H5P_DEFAULT) < 0) TEST_ERROR
-                if(H5Oget_info(gid2, objname2, &oinfo2, H5P_DEFAULT) < 0) TEST_ERROR
+                if(H5Oget_info_by_name(gid, objname, &oinfo, H5P_DEFAULT) < 0) TEST_ERROR
+                if(H5Oget_info_by_name(gid2, objname2, &oinfo2, H5P_DEFAULT) < 0) TEST_ERROR
 
                 if(oinfo.type != oinfo2.type) TEST_ERROR
                 if(oinfo.rc != oinfo2.rc) TEST_ERROR
