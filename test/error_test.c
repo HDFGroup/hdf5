@@ -17,7 +17,7 @@
  * Programmer:	Raymond Lu
  *              October 14, 2001
  *
- * Purpose:	Tests the H5Tget_native_type function.
+ * Purpose:	Tests the error API routines.
  */
 #include "h5test.h"
 
@@ -454,6 +454,58 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_create
+ *
+ * Purpose:	Test creating an empty error stack
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:	Quincey Koziol
+ *		November 1, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_create(void)
+{
+    const char *err_func = "test_create";      /* Function name for pushing error */
+    const char *err_msg = "Error message";     /* Error message for pushing error */
+    int         err_num;        /* Number of errors on stack */
+    hid_t       estack_id;      /* Error stack ID */
+
+    /* Create an empty error stack */
+    if((estack_id = H5Ecreate_stack()) < 0) TEST_ERROR
+
+    /* Check the number of errors on stack */
+    err_num = H5Eget_num(estack_id);
+    if(err_num != 0) TEST_ERROR
+
+    /* Push an error with a long description */
+    if(H5Epush(estack_id, __FILE__, err_func, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, err_msg) < 0) TEST_ERROR;
+
+    /* Check the number of errors on stack */
+    err_num = H5Eget_num(estack_id);
+    if(err_num != 1) TEST_ERROR
+
+    /* Clear the error stack */
+    if(H5Eclear2(estack_id) < 0) TEST_ERROR
+
+    /* Check the number of errors on stack */
+    err_num = H5Eget_num(estack_id);
+    if(err_num != 0) TEST_ERROR
+
+    /* Close error stack */
+    if(H5Eclose_stack(estack_id) < 0) TEST_ERROR
+
+    return(0);
+
+error:
+    return(-1);
+} /* end test_create() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	close_error
  *
  * Purpose:	Closes error information.
@@ -550,6 +602,9 @@ main(void)
 
     /* Test pushing a very long error description */
     if(test_long_desc() < 0) TEST_ERROR;
+
+    /* Test creating a new error stack */
+    if(test_create() < 0) TEST_ERROR;
 
     if(H5Fclose(file) < 0) TEST_ERROR;
     h5_cleanup(FILENAME, fapl);

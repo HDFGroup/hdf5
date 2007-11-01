@@ -153,6 +153,37 @@ done:
 
 
 /*--------------------------------------------------------------------------
+ * Function:    H5E_set_default_auto
+ *
+ * Purpose:     Initialize "automatic" error stack reporting info to library
+ *              default
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Thursday, November 1, 2007
+ *
+ *--------------------------------------------------------------------------
+ */
+static herr_t
+H5E_set_default_auto(H5E_t *stk)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_set_default_auto)
+
+#ifdef H5_USE_16_API
+    stk->auto_op.vers = 1;
+    stk->auto_op.u.func1 = (H5E_auto1_t)H5Eprint1;
+#else /* H5_USE_16_API */
+    stk->auto_op.vers = 2;
+    stk->auto_op.u.func2 = (H5E_auto2_t)H5Eprint2;
+#endif /* H5_USE_16_API */
+    stk->auto_data = NULL;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5E_set_default_auto() */
+
+
+/*--------------------------------------------------------------------------
  * Function:    H5E_init_interface
  *
  * Purpose:     Initialize interface-specific information
@@ -191,14 +222,7 @@ H5E_init_interface(void)
 
 #ifndef H5_HAVE_THREADSAFE
     H5E_stack_g[0].nused = 0;
-#ifdef H5_USE_16_API
-    H5E_stack_g[0].auto_op.vers = 1;
-    H5E_stack_g[0].auto_op.u.func1 = (H5E_auto1_t)H5Eprint1;
-#else /* H5_USE_16_API */
-    H5E_stack_g[0].auto_op.vers = 2;
-    H5E_stack_g[0].auto_op.u.func2 = (H5E_auto2_t)H5Eprint2;
-#endif /* H5_USE_16_API */
-    H5E_stack_g[0].auto_data = NULL;
+    H5E_set_default_auto(H5E_stack_g);
 #endif /* H5_HAVE_THREADSAFE */
 
     /* Allocate the HDF5 error class */
@@ -321,14 +345,7 @@ H5E_get_stack(void)
 
         /* Set the thread-specific info */
         estack->nused = 0;
-#ifdef H5_USE_16_API
-        estack->auto_op.vers = 1;
-        estack->auto_op.u.func1 = (H5E_auto1_t)H5Eprint1;
-#else /* H5_USE_16_API */
-        estack->auto_op.vers = 2;
-        estack->auto_op.u.func2 = (H5E_auto2_t)H5Eprint2;
-#endif /* H5_USE_16_API */
-        estack->auto_data = NULL;
+        H5E_set_default_auto(estack);
 
         /* (It's not necessary to release this in this API, it is
          *      released by the "key destructor" set up in the H5TS
@@ -793,6 +810,43 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Ecreate_stack
+ *
+ * Purpose:	Creates a new, empty, error stack.
+ *
+ * Return:	Non-negative value as stack ID on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, November 1, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Ecreate_stack(void)
+{
+    H5E_t	*stk;           /* Error stack */
+    hid_t       ret_value;      /* Return value */
+
+    FUNC_ENTER_API(H5Ecreate_stack, FAIL)
+    H5TRACE0("i","");
+
+    /* Allocate a new error stack */
+    if(NULL == (stk = H5FL_CALLOC(H5E_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+    /* Set the "automatic" error reporting info to the library default */
+    H5E_set_default_auto(stk);
+
+    /* Register the stack */
+    if((ret_value = H5I_register(H5I_ERROR_STACK, stk)) < 0)
+	HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't create error stack")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Ecreate_stack() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Eget_current_stack
  *
  * Purpose:	Registers current error stack, returns object handle for it,
@@ -855,7 +909,7 @@ H5E_get_current_stack(void)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get current error stack")
 
     /* Allocate a new error stack */
-    if(NULL == (estack_copy = H5FL_MALLOC(H5E_t)))
+    if(NULL == (estack_copy = H5FL_CALLOC(H5E_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Make a copy of current error stack */
@@ -885,6 +939,10 @@ H5E_get_current_stack(void)
         if(NULL == (new_error->desc = H5MM_xstrdup(current_error->desc)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     } /* end for */
+
+    /* Copy the "automatic" error reporting information */
+    estack_copy->auto_op = current_stack->auto_op;
+    estack_copy->auto_data = current_stack->auto_data;
 
     /* Empty current error stack */
     H5E_clear_stack(current_stack);

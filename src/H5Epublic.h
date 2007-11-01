@@ -159,6 +159,7 @@ H5_DLL hid_t  H5Eregister_class(const char *cls_name, const char *lib_name,
 H5_DLL herr_t H5Eunregister_class(hid_t class_id);
 H5_DLL herr_t H5Eclose_msg(hid_t err_id);
 H5_DLL hid_t  H5Ecreate_msg(hid_t cls, H5E_type_t msg_type, const char *msg);
+H5_DLL hid_t  H5Ecreate_stack(void);
 H5_DLL hid_t  H5Eget_current_stack(void);
 H5_DLL herr_t H5Eclose_stack(hid_t stack_id);
 H5_DLL ssize_t H5Eget_class_name(hid_t class_id, char *name, size_t size);
