@@ -252,10 +252,10 @@ done:
  *              property list GAPL_ID.
  *
  *              The resulting ID should be linked into the file with
- *              H5Llink or it will be deleted when closed.
+ *              H5Olink or it will be deleted when closed.
  *
  *              Given the default setting, H5Gcreate_anon() followed by
- *              H5Llink() will have the same function as H5Gcreate2().
+ *              H5Olink() will have the same function as H5Gcreate2().
  *
  * Usage:       H5Gcreate_anon(loc_id, char *name, gcpl_id, gapl_id)
  *                  hid_t loc_id;	  IN: File or group identifier

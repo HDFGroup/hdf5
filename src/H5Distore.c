@@ -2101,10 +2101,8 @@ H5D_istore_readvv(const H5D_io_info_t *io_info,
     haddr_t chunk_addr, void *chunk, void *buf)
 {
     H5D_t *dset=io_info->dset;          /* Local pointer to the dataset info */
-    H5D_istore_ud1_t udata;		/*B-tree pass-through	*/
     size_t		u;              /* Local index variables */
     ssize_t             ret_value;      /* Return value */
-        ssize_t         naccessed;      /* Number of bytes accessed in chunk */
 
     FUNC_ENTER_NOAPI(H5D_istore_readvv, FAIL)
 
@@ -2285,8 +2283,6 @@ H5D_istore_writevv(const H5D_io_info_t *io_info,
     haddr_t chunk_addr, void *chunk, const void *buf)
 {
     H5D_t *dset = io_info->dset;          /* Local pointer to the dataset info */
-    H5D_istore_ud1_t udata;		/*B-tree pass-through	*/
-    size_t		u;              /* Local index variables */
     ssize_t             ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5D_istore_writevv, FAIL)
@@ -2304,6 +2300,9 @@ H5D_istore_writevv(const H5D_io_info_t *io_info,
     HDassert(buf);
 
 #ifdef QAK
+{
+size_t		u;              /* Local index variables */
+
 HDfprintf(stderr,"%s: io_info->store->chunk.offset={",FUNC);
 for(u=0; u<dset->shared->layout.u.chunk.ndims; u++)
     HDfprintf(stderr,"%Hd%s",io_info->store->chunk.offset[u],(u<(dset->shared->layout.u.chunk.ndims-1) ? ", " : "}\n"));
@@ -2313,6 +2312,7 @@ HDfprintf(stderr,"%s: chunk_len_arr[%Zu]=%Zu\n",FUNC,*chunk_curr_seq,chunk_len_a
 HDfprintf(stderr,"%s: chunk_offset_arr[%Zu]=%Hu\n",FUNC,*chunk_curr_seq,chunk_offset_arr[*chunk_curr_seq]);
 HDfprintf(stderr,"%s: mem_len_arr[%Zu]=%Zu\n",FUNC,*mem_curr_seq,mem_len_arr[*mem_curr_seq]);
 HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_arr[*mem_curr_seq]);
+}
 #endif /* QAK */
 
     /*

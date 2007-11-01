@@ -209,7 +209,7 @@ done:
  *		into a "named", immutable type.
  *
  *              The resulting ID should be linked into the file with
- *              H5Llink or it will be deleted when closed.
+ *              H5Olink or it will be deleted when closed.
  *
  * Note:	Datatype access property list is unused currently, but is
  *		checked for sanity anyway.

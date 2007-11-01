@@ -140,8 +140,6 @@ typedef herr_t (*H5L_iterate_t)(hid_t group, const char *name, const H5L_info_t 
 /*********************/
 /* Public Prototypes */
 /*********************/
-H5_DLL herr_t H5Llink(hid_t cur_loc_id, const char *cur_name,
-    hid_t obj_id, hid_t lcpl_id, hid_t lapl_id);
 H5_DLL herr_t H5Lmove(hid_t src_loc, const char *src_name, hid_t dst_loc,
     const char *dst_name, hid_t lcpl_id, hid_t lapl_id);
 H5_DLL herr_t H5Lcopy(hid_t src_loc, const char *src_name, hid_t dst_loc,

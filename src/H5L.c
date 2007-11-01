@@ -409,61 +409,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Llink
- *
- * Purpose:	Creates a hard link from NEW_NAME to the object specified
- *		by OBJ_ID using properties defined in the Link Creation
- *              Property List LCPL.
- *
- *		This function should be used to link objects that have just
- *              been created.
- *
- *		CUR_NAME and NEW_NAME are interpreted relative to
- *		CUR_LOC_ID and NEW_LOC_ID, which is either a file ID or a
- *		group ID.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	James Laird
- *              Tuesday, December 13, 2005
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Llink(hid_t new_loc_id, const char *new_name, hid_t obj_id, hid_t lcpl_id,
-    hid_t lapl_id)
-{
-    H5G_loc_t	new_loc;
-    H5G_loc_t	obj_loc;
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_API(H5Llink, FAIL)
-    H5TRACE5("e", "i*siii", new_loc_id, new_name, obj_id, lcpl_id, lapl_id);
-
-    /* Check arguments */
-    if(new_loc_id == H5L_SAME_LOC)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "cannot use H5L_SAME_LOC when only one location is specified")
-    if(H5G_loc(new_loc_id, &new_loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(H5G_loc(obj_id, &obj_loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(!new_name || !*new_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
-    if(HDstrlen(new_name) > H5L_MAX_LINK_NAME_LEN)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "name too long")
-    if(lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list")
-
-    /* Link to the object */
-    if(H5L_link(&new_loc, new_name, &obj_loc, lcpl_id, lapl_id, H5AC_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Llink() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5Lcreate_soft
  *
  * Purpose:	Creates a soft link from LINK_NAME to LINK_TARGET.
@@ -1488,7 +1433,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5L_link
  *
- * Purpose:	Creates a link from OBJ_ID to CUR_NAME.  See H5Llink() for
+ * Purpose:	Creates a link from OBJ_ID to CUR_NAME.  See H5Olink() for
  *		full documentation.
  *
  * Return:	Non-negative on success/Negative on failure

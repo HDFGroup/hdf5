@@ -690,134 +690,6 @@ toomany(hid_t fapl, hbool_t new_format)
 
 
 /*-------------------------------------------------------------------------
- * Function:    test_h5l_create
- *
- * Purpose:     Tests H5Lcreate
- *
- * Return:      Success:        0
- *              Failure:        number of errors
- *
- * Programmer:  James Laird
- *              Monday, January 30, 2006
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static int
-test_h5l_create(hid_t fapl, hbool_t new_format)
-{
-    hid_t file_id=-1;
-    hid_t group_id=-1;
-    hid_t space_id=-1;
-    hid_t dset_id=-1;
-    hid_t type_id=-1;
-    hid_t lcpl_id=-1;
-    char filename[1024];
-    hsize_t dims[2];
-    int i, n, j;
-    int wdata[H5L_DIM1][H5L_DIM2];
-    int rdata[H5L_DIM1][H5L_DIM2];
-
-    if(new_format)
-        TESTING("H5Llink (w/new group format)")
-    else
-        TESTING("H5Llink")
-
-    /* Create file */
-    h5_fixname(FILENAME[3], fapl, filename, sizeof filename);
-
-    if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
-
-    /* Create and commit a datatype with no name */
-    if((type_id = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
-    if(H5Tcommit_anon(file_id, type_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
-    if(!H5Tcommitted(type_id)) TEST_ERROR
-
-    /* Create the dataspace */
-    dims[0] = H5L_DIM1;
-    dims[1] = H5L_DIM2;
-    if((space_id = H5Screate_simple(2 ,dims, NULL)) < 0) TEST_ERROR
-
-    /* Create a dataset with no name using the committed datatype*/
-    if ((dset_id = H5Dcreate_anon(file_id, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-
-    /* Verify that we can write to and read from the dataset */
-    /* Initialize the dataset */
-    for (i = n = 0; i < H5L_DIM1; i++)
-        for (j = 0; j < H5L_DIM2; j++)
-          wdata[i][j] = n++;
-
-    /* Write the data to the dataset */
-    if (H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0) TEST_ERROR
-
-    /* Read the data back */
-    if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0) TEST_ERROR
-    
-    /* Verify the data */
-    for (i = 0; i < H5L_DIM1; i++)
-	for (j = 0; j < H5L_DIM2; j++)
-	    if (wdata[i][j] != rdata[i][j])
-                TEST_ERROR
-
-    /* Create a group with no name*/
-    if((group_id = H5Gcreate_anon(file_id, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-
-    /* Link nameless datatype into nameless group */
-    if(H5Llink(group_id, "datatype", type_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
-
-    /* Create LCPL with intermediate group creation flag set */
-    if((lcpl_id = H5Pcreate(H5P_LINK_CREATE)) < 0) TEST_ERROR
-    if(H5Pset_create_intermediate_group(lcpl_id, TRUE) < 0) TEST_ERROR
-
-    /* Link nameless dataset into nameless group with intermediate group */
-    if(H5Llink(group_id, "inter_group/dataset", dset_id, lcpl_id, H5P_DEFAULT) < 0) TEST_ERROR
-
-    /* Close IDs for dataset and datatype */
-    if(H5Dclose(dset_id) < 0) TEST_ERROR
-    if(H5Tclose(type_id) < 0) TEST_ERROR
-
-    /* Re-open datatype using new link */
-    if((type_id = H5Topen2(group_id, "datatype", H5P_DEFAULT)) < 0) TEST_ERROR
-
-    /* Link nameless group to root group and close the group ID*/
-    if(H5Llink(file_id, "/group", group_id, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
-    if(H5Gclose(group_id) < 0) TEST_ERROR
-
-    /* Open dataset through root group and verify its data */
-    if((dset_id = H5Dopen2(file_id, "/group/inter_group/dataset", H5P_DEFAULT)) < 0) TEST_ERROR
-
-    /* Read data from dataset */
-    if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0) TEST_ERROR
-    for (i = 0; i < H5L_DIM1; i++)
-        for (j = 0; j < H5L_DIM2; j++)
-            if (wdata[i][j] != rdata[i][j])
-                TEST_ERROR
-        
-    /* Close open IDs */
-    if(H5Dclose(dset_id) < 0) TEST_ERROR
-    if(H5Tclose(type_id) < 0) TEST_ERROR
-    if(H5Pclose(lcpl_id) < 0) TEST_ERROR
-    if(H5Sclose(space_id) < 0) TEST_ERROR
-    if(H5Fclose(file_id) < 0) TEST_ERROR
-
-    PASSED();
-    return 0;
-
-error:
-    H5E_BEGIN_TRY {
-        H5Gclose(group_id);
-        H5Dclose(dset_id);
-        H5Tclose(type_id);
-        H5Pclose(lcpl_id);
-        H5Sclose(space_id);
-        H5Fclose(file_id);
-    } H5E_END_TRY;
-    return 1;
-} /* end test_h5l_create() */
-
-
-/*-------------------------------------------------------------------------
  * Function:    test_lcpl
  *
  * Purpose:     Tests Link Creation Property Lists
@@ -5052,8 +4924,8 @@ lapl_nlinks(hid_t fapl, hbool_t new_format)
     if(H5Lcopy(fid, "soft17", fid, "soft17/newer_soft", H5P_DEFAULT, plist) < 0) TEST_ERROR
     if(H5Lmove(fid, "soft17/newer_soft", fid, "soft17/newest_soft", H5P_DEFAULT, plist) < 0) TEST_ERROR
 
-    /* H5Llink */
-    if(H5Llink(fid, "soft17/link_to_group", gid, H5P_DEFAULT, plist) < 0) TEST_ERROR
+    /* H5Olink */
+    if(H5Olink(gid, fid, "soft17/link_to_group", H5P_DEFAULT, plist) < 0) TEST_ERROR
 
     /* H5Lcreate_hard  and H5Lcreate_soft */
     if(H5Lcreate_hard(fid, "soft17", fid, "soft17/link2_to_group", H5P_DEFAULT, plist) < 0) TEST_ERROR
@@ -9732,7 +9604,6 @@ main(void)
             nerrors += toomany((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
 
             /* Test new H5L link creation routine */
-            nerrors += test_h5l_create((new_format ? fapl2 : fapl), new_format);
             nerrors += test_lcpl((new_format ? fapl2 : fapl), new_format);
             nerrors += test_move((new_format ? fapl2 : fapl), new_format);
             nerrors += test_copy((new_format ? fapl2 : fapl), new_format);
