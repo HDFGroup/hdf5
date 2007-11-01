@@ -61,8 +61,6 @@ typedef struct {
 /* User data for iteration when opening an attribute */
 typedef struct {
     /* down */
-    H5F_t *f;                   /* Pointer to file attribute is in */
-    hid_t dxpl_id;              /* DXPL for operation */
     const char *name;           /* Name of attribute to open */
 
     /* up */
@@ -116,6 +114,15 @@ typedef struct {
     /* up */
     hbool_t found;              /* Found attribute to delete */
 } H5O_iter_rm_t;
+
+/* User data for iteration when checking if an attribute exists */
+typedef struct {
+    /* down */
+    const char *name;           /* Name of attribute to open */
+
+    /* up */
+    hbool_t found;              /* Found attribute */
+} H5O_iter_xst_t;
 
 
 /********************/
@@ -483,8 +490,6 @@ H5O_attr_open_by_name(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
         H5O_mesg_operator_t op;         /* Wrapper for operator */
 
         /* Set up user data for callback */
-        udata.f = loc->file;
-        udata.dxpl_id = dxpl_id;
         udata.name = name;
         udata.attr = NULL;
 

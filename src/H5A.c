@@ -2486,3 +2486,108 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_nameof() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Aexists
+ *
+ * Purpose:	Checks if an attribute with a given name exists on an opened
+ *              object.
+ *
+ * Return:	Success:	TRUE/FALSE
+ * 		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, November 1, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5Aexists(hid_t obj_id, const char *attr_name)
+{
+    H5G_loc_t   loc;                    /* Object location */
+    htri_t	ret_value;              /* Return value */
+
+    FUNC_ENTER_API(H5Aexists, FAIL)
+    H5TRACE2("t", "i*s", obj_id, attr_name);
+
+    /* check arguments */
+    if(H5I_ATTR == H5I_get_type(obj_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+    if(H5G_loc(obj_id, &loc) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(!attr_name || !*attr_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
+
+    /* Check if the attribute exists */
+    if((ret_value = H5O_attr_exists(loc.oloc, attr_name, H5AC_ind_dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Aexists() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Aexists_by_name
+ *
+ * Purpose:	Checks if an attribute with a given name exists on an object.
+ *
+ * Return:	Success:	TRUE/FALSE
+ * 		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, November 1, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5Aexists_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
+    hid_t lapl_id)
+{
+    H5G_loc_t   loc;                    /* Object location */
+    H5G_loc_t   obj_loc;                /* Location used to open group */
+    H5G_name_t  obj_path;            	/* Opened object group hier. path */
+    H5O_loc_t   obj_oloc;            	/* Opened object object location */
+    hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
+    htri_t	ret_value;              /* Return value */
+
+    FUNC_ENTER_API(H5Aexists_by_name, FAIL)
+    H5TRACE4("t", "i*s*si", loc_id, obj_name, attr_name, lapl_id);
+
+    /* check arguments */
+    if(H5I_ATTR == H5I_get_type(loc_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+    if(H5G_loc(loc_id, &loc) < 0)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(!obj_name || !*obj_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name")
+    if(!attr_name || !*attr_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
+    if(H5P_DEFAULT == lapl_id)
+        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Set up opened group location to fill in */
+    obj_loc.oloc = &obj_oloc;
+    obj_loc.path = &obj_path;
+    H5G_loc_reset(&obj_loc);
+
+    /* Find the object's location */
+    if(H5G_loc_find(&loc, obj_name, &obj_loc/*out*/, lapl_id, H5AC_ind_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "object not found")
+    loc_found = TRUE;
+
+    /* Check if the attribute exists */
+    if((ret_value = H5O_attr_exists(obj_loc.oloc, attr_name, H5AC_ind_dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
+
+done:
+    /* Release resources */
+    if(loc_found && H5G_loc_free(&obj_loc) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location")
+
+    FUNC_LEAVE_API(ret_value)
+} /* H5Aexists_by_name() */
+

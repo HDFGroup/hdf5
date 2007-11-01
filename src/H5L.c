@@ -794,14 +794,14 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+htri_t
 H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id)
 {
     H5G_loc_t	loc;
-    herr_t ret_value = SUCCEED;
+    htri_t ret_value;
 
     FUNC_ENTER_API(H5Lexists, FAIL)
-    H5TRACE3("e", "i*si", loc_id, name, lapl_id);
+    H5TRACE3("t", "i*si", loc_id, name, lapl_id);
 
     /* Check arguments */
     if(H5G_loc(loc_id, &loc))

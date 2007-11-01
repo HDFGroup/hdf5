@@ -129,7 +129,8 @@ float attr_data5=(float)-5.123;        /* Test data for 5th attribute */
 #define ATTR7_NAME      "attr 1 - 000000"
 #define ATTR8_NAME      "attr 2"
 
-#define NATTR_MANY      35000
+#define NATTR_MANY_OLD  350
+#define NATTR_MANY_NEW  35000
 
 /* Attribute iteration struct */
 typedef struct {
@@ -3348,12 +3349,15 @@ test_attr_deprec(hid_t fcpl, hid_t fapl)
 **
 ****************************************************************/
 static void
-test_attr_many(hid_t fcpl, hid_t fapl)
+test_attr_many(hbool_t new_format, hid_t fcpl, hid_t fapl)
 {
     hid_t	fid;		/* HDF5 File ID			*/
+    hid_t	gid;	        /* Group ID			*/
     hid_t	sid;	        /* Dataspace ID			*/
     hid_t	aid;	        /* Attribute ID			*/
     char	attrname[NAME_BUF_SIZE];        /* Name of attribute */
+    unsigned    nattr = (new_format ? NATTR_MANY_NEW : NATTR_MANY_OLD); /* Number of attributes */
+    htri_t      exists;         /* Whether the attribute exists or not */
     unsigned    u;              /* Local index variable */
     herr_t	ret;		/* Generic return value		*/
 
@@ -3368,19 +3372,45 @@ test_attr_many(hid_t fcpl, hid_t fapl)
     sid = H5Screate(H5S_SCALAR);
     CHECK(sid, FAIL, "H5Screate");
 
-    /* Create many attributes (on root group) */
-    for(u = 0; u < NATTR_MANY; u++) {
+    /* Create group for attributes */
+    gid = H5Gcreate2(fid, GROUP1_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gcreate2");
+
+    /* Create many attributes */
+    for(u = 0; u < nattr; u++) {
         sprintf(attrname, "a-%06u", u);
 
-        aid = H5Acreate2(fid, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
+        exists = H5Aexists(gid, attrname);
+        VERIFY(exists, FALSE, "H5Aexists");
+
+        exists = H5Aexists_by_name(fid, GROUP1_NAME, attrname, H5P_DEFAULT);
+        VERIFY(exists, FALSE, "H5Aexists_by_name");
+
+        aid = H5Acreate2(gid, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(aid, FAIL, "H5Acreate2");
+
+        exists = H5Aexists(gid, attrname);
+        VERIFY(exists, TRUE, "H5Aexists");
+
+        exists = H5Aexists_by_name(fid, GROUP1_NAME, attrname, H5P_DEFAULT);
+        VERIFY(exists, TRUE, "H5Aexists_by_name");
 
         ret = H5Awrite(aid, H5T_NATIVE_UINT, &u);
         CHECK(ret, FAIL, "H5Awrite");
 
         ret = H5Aclose(aid);
         CHECK(ret, FAIL, "H5Aclose");
+
+        exists = H5Aexists(gid, attrname);
+        VERIFY(exists, TRUE, "H5Aexists");
+
+        exists = H5Aexists_by_name(fid, GROUP1_NAME, attrname, H5P_DEFAULT);
+        VERIFY(exists, TRUE, "H5Aexists_by_name");
     } /* end for */
+
+    /* Close group */
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
 
     /* Close file */
     ret = H5Fclose(fid);
@@ -3393,14 +3423,30 @@ test_attr_many(hid_t fcpl, hid_t fapl)
     fid = H5Fopen(FILENAME, H5F_ACC_RDONLY, fapl);
     CHECK(fid, FAIL, "H5Fopen");
 
+    /* Re-open group */
+    gid = H5Gopen2(fid, GROUP1_NAME, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gopen2");
+
     /* Verify attributes */
-    for(u = 0; u < NATTR_MANY; u++) {
+    for(u = 0; u < nattr; u++) {
         unsigned    value;          /* Attribute value */
 
         sprintf(attrname, "a-%06u", u);
 
-        aid = H5Aopen(fid, attrname, H5P_DEFAULT);
+        exists = H5Aexists(gid, attrname);
+        VERIFY(exists, TRUE, "H5Aexists");
+
+        exists = H5Aexists_by_name(fid, GROUP1_NAME, attrname, H5P_DEFAULT);
+        VERIFY(exists, TRUE, "H5Aexists_by_name");
+
+        aid = H5Aopen(gid, attrname, H5P_DEFAULT);
         CHECK(aid, FAIL, "H5Aopen");
+
+        exists = H5Aexists(gid, attrname);
+        VERIFY(exists, TRUE, "H5Aexists");
+
+        exists = H5Aexists_by_name(fid, GROUP1_NAME, attrname, H5P_DEFAULT);
+        VERIFY(exists, TRUE, "H5Aexists_by_name");
 
         ret = H5Aread(aid, H5T_NATIVE_UINT, &value);
         CHECK(ret, FAIL, "H5Aread");
@@ -3409,6 +3455,10 @@ test_attr_many(hid_t fcpl, hid_t fapl)
         ret = H5Aclose(aid);
         CHECK(ret, FAIL, "H5Aclose");
     } /* end for */
+
+    /* Close group */
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
 
     /* Close file */
     ret = H5Fclose(fid);
@@ -8897,7 +8947,7 @@ test_attr(void)
                 test_attr_big(my_fcpl, my_fapl);                /* Test storing big attribute */
                 test_attr_null_space(my_fcpl, my_fapl);         /* Test storing attribute with NULL dataspace */
                 test_attr_deprec(fcpl, my_fapl);                /* Test deprecated API routines */
-                test_attr_many(my_fcpl, my_fapl);               /* Test storing lots of attributes */
+                test_attr_many(new_format, my_fcpl, my_fapl);               /* Test storing lots of attributes */
 
                 /* Attribute creation order tests */
                 test_attr_corder_create_basic(my_fcpl, my_fapl);/* Test creating an object w/attribute creation order info */
@@ -8932,6 +8982,7 @@ test_attr(void)
             test_attr_big(fcpl, my_fapl);                       /* Test storing big attribute */
             test_attr_null_space(fcpl, my_fapl);                /* Test storing attribute with NULL dataspace */
             test_attr_deprec(fcpl, my_fapl);                    /* Test deprecated API routines */
+            test_attr_many(new_format, fcpl, my_fapl);               /* Test storing lots of attributes */
 
             /* New attribute API routine tests, on old-format storage */
             test_attr_info_by_idx(new_format, fcpl, my_fapl);   /* Test querying attribute info by index */
