@@ -87,6 +87,9 @@ usage (const char *prog)
   fprintf (stdout, "\n");
   fprintf (stdout, "       %s -h \n", prog);
   fprintf (stdout, "           Print a usage message and exit\n");
+  fprintf (stdout, "       %s -V \n", prog);
+  fprintf (stdout, "           Print HDF5 library version and exit\n");
+
 }
 
 /*-------------------------------------------------------------------------
