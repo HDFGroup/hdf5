@@ -130,6 +130,9 @@ parse_command_line (int argc, const char *argv[])
 	case 'h':
 	  usage (progname);
 	  exit (EXIT_SUCCESS);
+    case 'V':
+	  print_version (progname);
+	  exit (EXIT_SUCCESS);
 	case '?':
 	default:
 	  usage (progname);
