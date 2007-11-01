@@ -1810,7 +1810,7 @@ list(hid_t group, const char *name, const H5L_info_t *linfo, void *_iter)
 
             /* Object comment */
             comment[0] = '\0';
-            H5Oget_comment(group, name, comment, sizeof(comment), H5P_DEFAULT);
+            H5Oget_comment_by_name(group, name, comment, sizeof(comment), H5P_DEFAULT);
             HDstrcpy(comment + sizeof(comment) - 4, "...");
             if(comment[0]) {
                 printf("    %-10s \"", "Comment:");

@@ -639,7 +639,7 @@ done:
  *		one comment at a time.  Passing NULL for the COMMENT argument
  *		will remove the comment property from the object.
  *
- * Note:	Deprecated in favor of H5Oset_comment
+ * Note:	Deprecated in favor of H5Oset_comment/H5Oset_comment_by_name
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -680,7 +680,7 @@ done:
  *		have a comment value then no bytes are copied to the BUF
  *		buffer.
  *
- * Note:	Deprecated in favor of H5Oget_comment
+ * Note:	Deprecated in favor of H5Oget_comment/H5Oget_comment_by_name
  *
  * Return:	Success:	Number of characters in the comment counting
  *				the null terminator.  The value returned may

@@ -2379,7 +2379,7 @@ dump_comment(hid_t obj_id)
     char comment[50];
 
     comment[0] = '\0';
-    H5Oget_comment(obj_id, ".", comment, sizeof(comment), H5P_DEFAULT);
+    H5Oget_comment(obj_id, comment, sizeof(comment));
 
     if(comment[0]) {
         indentation(indent);

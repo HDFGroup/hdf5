@@ -214,7 +214,7 @@ test_create(hid_t file)
     if(H5Dclose(dataset) < 0) goto error;
 
     /* Add a comment to the dataset */
-    status = H5Oset_comment(file, DSET_DEFAULT_NAME, "This is a dataset", H5P_DEFAULT);
+    status = H5Oset_comment_by_name(file, DSET_DEFAULT_NAME, "This is a dataset", H5P_DEFAULT);
     if(status < 0) goto error;
 
     /*
@@ -6437,7 +6437,7 @@ main(void)
             /* Cause the library to emit initial messages */
             if((grp = H5Gcreate2(file, "emit diagnostics", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                 goto error;
-            if(H5Oset_comment(grp, ".", "Causes diagnostic messages to be emitted", H5P_DEFAULT) < 0)
+            if(H5Oset_comment(grp, "Causes diagnostic messages to be emitted") < 0)
                 goto error;
             if(H5Gclose(grp) < 0)
                 goto error;

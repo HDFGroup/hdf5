@@ -560,7 +560,7 @@ DONE:
 
 /*----------------------------------------------------------------------------
  * Name:        h5gset_comment_c
- * Purpose:     Call H5Gset_comment to set comments for the specified object
+ * Purpose:     Call H5Oset_comment_by_name to set comments for the specified object
  * Inputs:      loc_id - identifier of file or group
  *              name - name of object whose comment is to be set or reset
  *              namelen - the name lenghth
@@ -588,9 +588,9 @@ nh5gset_comment_c(hid_t_f *loc_id, _fcd name, int_f *namelen, _fcd comment,
         goto DONE;
 
     /*
-     *  Call H5Gset_comment function
+     *  Call H5Oset_comment_by_name function
      */
-    if(H5Oset_comment((hid_t)*loc_id, c_name, c_comment, H5P_DEFAULT) < 0)
+    if(H5Oset_comment_by_name((hid_t)*loc_id, c_name, c_comment, H5P_DEFAULT) < 0)
         goto DONE;
     ret_value = 0;
 
@@ -604,7 +604,7 @@ DONE:
 
 /*----------------------------------------------------------------------------
  * Name:        h5gget_comment_c
- * Purpose:     Call H5Gget_comment to retrieve comments for the specified object
+ * Purpose:     Call H5Oget_comment_by_name to retrieve comments for the specified object
  * Inputs:      loc_id - identifier of file or group
  *              name - name of object whose comment is to be set or reset
  *              namelen - the name lenghth
@@ -640,9 +640,9 @@ nh5gget_comment_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *bufsize,
     } /* end if */
 
     /*
-     *  Call H5Gget_comment function
+     *  Call H5Oget_comment_by_name function
      */
-    if(H5Oget_comment((hid_t)*loc_id, c_name, c_comment, c_bufsize, H5P_DEFAULT) < 0)
+    if(H5Oget_comment_by_name((hid_t)*loc_id, c_name, c_comment, c_bufsize, H5P_DEFAULT) < 0)
         goto DONE;
 
     /*

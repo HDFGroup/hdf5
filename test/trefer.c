@@ -111,7 +111,7 @@ test_reference_obj(void)
     CHECK(group, FAIL, "H5Gcreate2");
 
     /* Set group's comment */
-    ret = H5Oset_comment(group, ".", write_comment, H5P_DEFAULT);
+    ret = H5Oset_comment(group, write_comment);
     CHECK(ret, FAIL, "H5Oset_comment");
 
     /* Create a dataset (inside Group1) */
@@ -250,7 +250,7 @@ test_reference_obj(void)
     CHECK(group, FAIL, "H5Rdereference");
 
     /* Get group's comment */
-    ret = H5Oget_comment(group, ".", read_comment, (size_t)10, H5P_DEFAULT);
+    ret = H5Oget_comment(group, read_comment, (size_t)10);
     CHECK(ret, FAIL, "H5Oget_comment");
 
     /* Check for correct comment value */

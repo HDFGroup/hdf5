@@ -153,10 +153,12 @@ H5_DLL herr_t H5Oincr_refcount(hid_t object_id);
 H5_DLL herr_t H5Odecr_refcount(hid_t object_id);
 H5_DLL herr_t H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id);
-H5_DLL herr_t H5Oset_comment(hid_t loc_id, const char *name,
+H5_DLL herr_t H5Oset_comment(hid_t obj_id, const char *comment);
+H5_DLL herr_t H5Oset_comment_by_name(hid_t loc_id, const char *name,
     const char *comment, hid_t lapl_id);
-H5_DLL ssize_t H5Oget_comment(hid_t loc_id, const char *name, char *comment,
-    size_t bufsize, hid_t lapl_id);
+H5_DLL ssize_t H5Oget_comment(hid_t obj_id, char *comment, size_t bufsize);
+H5_DLL ssize_t H5Oget_comment_by_name(hid_t loc_id, const char *name,
+    char *comment, size_t bufsize, hid_t lapl_id);
 H5_DLL herr_t H5Oclose(hid_t object_id);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.

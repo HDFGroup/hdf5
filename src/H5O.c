@@ -42,6 +42,7 @@
 #include "H5Fpkg.h"		/* File access				*/
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5Lprivate.h"		/* Links				*/
 #include "H5MFprivate.h"	/* File memory management		*/
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5SMprivate.h"        /* Shared object header messages        */
@@ -673,13 +674,52 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Oset_comment(hid_t loc_id, const char *name, const char *comment,
-    hid_t lapl_id)
+H5Oset_comment(hid_t obj_id, const char *comment)
 {
     H5G_loc_t	loc;                    /* Location of group */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(H5Oset_comment, FAIL)
+    H5TRACE2("e", "i*s", obj_id, comment);
+
+    /* Check args */
+    if(H5G_loc(obj_id, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+
+    /* (Re)set the object's comment */
+    if(H5G_loc_set_comment(&loc, ".", comment, H5P_LINK_ACCESS_DEFAULT, H5AC_ind_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Oset_comment() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Oset_comment_by_name
+ *
+ * Purpose:     Gives the specified object a comment.  The COMMENT string
+ *		should be a null terminated string.  An object can have only
+ *		one comment at a time.  Passing NULL for the COMMENT argument
+ *		will remove the comment property from the object.
+ *
+ * Note:	Deprecated in favor of using attributes on objects
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		August 30 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Oset_comment_by_name(hid_t loc_id, const char *name, const char *comment,
+    hid_t lapl_id)
+{
+    H5G_loc_t	loc;                    /* Location of group */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(H5Oset_comment_by_name, FAIL)
     H5TRACE4("e", "i*s*si", loc_id, name, comment, lapl_id);
 
     /* Check args */
@@ -699,7 +739,7 @@ H5Oset_comment(hid_t loc_id, const char *name, const char *comment,
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Oset_comment() */
+} /* end H5Oset_comment_by_name() */
 
 
 /*-------------------------------------------------------------------------
@@ -719,13 +759,51 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5Oget_comment(hid_t loc_id, const char *name, char *comment, size_t bufsize,
-    hid_t lapl_id)
+H5Oget_comment(hid_t obj_id, char *comment, size_t bufsize)
 {
     H5G_loc_t	loc;                    /* Location of group */
     ssize_t     ret_value;              /* Return value */
 
     FUNC_ENTER_API(H5Oget_comment, FAIL)
+    H5TRACE3("Zs", "i*sz", obj_id, comment, bufsize);
+
+    /* Check args */
+    if(H5G_loc(obj_id, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+
+    /* Retrieve the object's comment */
+    if((ret_value = H5G_loc_get_comment(&loc, ".", comment/*out*/, bufsize, H5P_LINK_ACCESS_DEFAULT, H5AC_ind_dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Oget_comment() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Oget_comment_by_name
+ *
+ * Purpose:	Retrieve comment for an object.
+ *
+ * Return:	Success:	Number of bytes in the comment including the
+ *				null terminator.  Zero if the object has no
+ *				comment.
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		August 30 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+ssize_t
+H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comment, size_t bufsize,
+    hid_t lapl_id)
+{
+    H5G_loc_t	loc;                    /* Location of group */
+    ssize_t     ret_value;              /* Return value */
+
+    FUNC_ENTER_API(H5Oget_comment_by_name, FAIL)
     H5TRACE5("Zs", "i*s*szi", loc_id, name, comment, bufsize, lapl_id);
 
     /* Check args */
@@ -745,7 +823,7 @@ H5Oget_comment(hid_t loc_id, const char *name, char *comment, size_t bufsize,
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Oget_comment() */
+} /* end H5Oget_comment_by_name() */
 
 
 /*-------------------------------------------------------------------------
