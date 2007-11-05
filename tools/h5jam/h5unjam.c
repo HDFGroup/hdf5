@@ -45,7 +45,7 @@ char *ub_file = NULL;
  * parameters. The long-named ones can be partially spelled. When
  * adding more, make sure that they don't clash with each other.
  */
-static const char *s_opts = "hu:i:o:d";
+static const char *s_opts = "hu:i:o:d:V";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
@@ -83,6 +83,8 @@ usage(const char *prog)
 
     fprintf(stdout, "       %s -h\n",prog);
     fprintf(stdout, "           Print a usage message and exit\n");
+    fprintf(stdout, "       %s -V \n", prog);
+    fprintf(stdout, "           Print HDF5 library version and exit\n");
 }
 
 /*-------------------------------------------------------------------------
@@ -121,13 +123,16 @@ parse_command_line(int argc, const char *argv[])
 	case 'd':
 	  do_delete = TRUE;
 	  break;
-        case 'h':
-            usage(progname);
-            exit(EXIT_SUCCESS);
-        case '?':
-        default:
-            usage(progname);
-            exit(EXIT_FAILURE);
+    case 'h':
+        usage(progname);
+        exit(EXIT_SUCCESS);
+    case 'V':
+        print_version (progname);
+        exit (EXIT_SUCCESS);
+    case '?':
+    default:
+        usage(progname);
+        exit(EXIT_FAILURE);
         }
     }
 
