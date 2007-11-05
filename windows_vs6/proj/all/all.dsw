@@ -1011,42 +1011,6 @@ Package=<4>
 
 ###############################################################################
 
-Project: "error_test"="..\..\test\error_test\error_test.dsp" - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name hdf5
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libtest
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "error_testdll"="..\..\test\error_testdll\error_testdll.dsp" - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name hdf5dll
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libtestD
-    End Project Dependency
-}}}
-
-###############################################################################
-
 Project: "err_compat"="..\..\test\err_compat\err_compat.dsp" - Package Owner=<4>
 
 Package=<5>
@@ -1066,6 +1030,42 @@ Package=<4>
 ###############################################################################
 
 Project: "err_compatdll"="..\..\test\err_compatdll\err_compatdll.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5dll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtestD
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "error_test"="..\..\test\error_test\error_test.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name hdf5
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libtest
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "error_testdll"="..\..\test\error_testdll\error_testdll.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -1751,6 +1751,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name hdf5
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name toolslib
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -1765,6 +1768,9 @@ Package=<4>
 {{{
     Begin Project Dependency
     Project_Dep_Name hdf5dll
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name toolslibD
     End Project Dependency
 }}}
 
