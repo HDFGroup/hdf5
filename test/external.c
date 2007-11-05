@@ -21,10 +21,13 @@
  */
 #include "h5test.h"
 
+#define LINKED_FILE  "extlink_file.h5"
+
 const char *FILENAME[] = {
     "extern_1",
     "extern_2",
     "extern_3",
+    "extern_4",
     NULL
 };
 
@@ -814,6 +817,95 @@ test_3 (hid_t fapl)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_4
+ *
+ * Purpose:	Tests opening an external link twice.  It exposed a bug
+ *              in the library.  This function tests the fix.
+ *
+ * Return:	Success:	0
+ *
+ * 		Failure:	number of errors
+ *
+ * Programmer:	Raymond Lu
+ *              5 November 2007
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_4 (hid_t fapl)
+{
+    hid_t       fid, gid, xid, xid2;
+    char	filename[1024];		/*file name			*/
+    char        pathname[1024];
+    char        linked_pathname[1024];
+    char       *srcdir = getenv("srcdir"); /*where the src code is located*/
+
+    TESTING("opening external link twice");
+
+    h5_fixname(FILENAME[3], fapl, filename, sizeof filename);
+
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+	goto error;
+
+    if((gid = H5Gopen(fid, "/", H5P_DEFAULT)) < 0)
+	goto error;
+
+    pathname[0] = '\0';
+    /* Generate correct name for test file by prepending the source path */
+    if(srcdir && ((HDstrlen(srcdir) + HDstrlen(LINKED_FILE) + 1) < sizeof(pathname))) {
+        HDstrcpy(pathname, srcdir);
+        HDstrcat(pathname, "/");
+    }
+    HDstrcat(pathname, LINKED_FILE);
+
+    /* Create an external link to an existing file*/
+    if(H5Lcreate_external(pathname, "/group", gid, " link", H5P_DEFAULT, H5P_DEFAULT) < 0)
+	goto error;
+
+    if(H5Gclose(gid) < 0)
+	goto error;
+
+    if(H5Fclose(fid) < 0)
+	goto error;
+
+    /* Reopen the file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+	goto error;
+
+    /* Open the external link */
+    if((xid = H5Gopen(fid, "/ link", H5P_DEFAULT)) < 0)
+	goto error;
+
+    /* Open the external link twice */
+    if((xid2 = H5Gopen(xid, ".", H5P_DEFAULT)) < 0)
+	goto error;
+
+    if(H5Gclose(xid2) < 0)
+	goto error;
+
+    if(H5Gclose(xid) < 0)
+	goto error;
+
+    if(H5Fclose(fid) < 0)
+	goto error;
+
+    PASSED();
+    return 0;
+
+ error:
+    H5E_BEGIN_TRY {
+        H5Gclose(gid);
+        H5Gclose(xid);
+        H5Gclose(xid2);
+	H5Fclose(fid);
+    } H5E_END_TRY;
+    return 1;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Runs external dataset tests.
@@ -861,6 +953,7 @@ main (void)
 	nerrors += test_1h();
 	nerrors += test_2(fapl);
 	nerrors += test_3(fapl);
+	nerrors += test_4(fapl);
 	if (nerrors>0) goto error;
 
 	if (H5Fclose(file) < 0) goto error;

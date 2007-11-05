@@ -1152,8 +1152,7 @@ H5Literate(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_API(H5Literate, FAIL)
-    H5TRACE6("e", "iIiIo*hx*x", grp_id, idx_type, order, idx_p, op,
-             op_data);
+    H5TRACE6("e", "iIiIo*hx*x", grp_id, idx_type, order, idx_p, op, op_data);
 
     /* Check arguments */
     id_type = H5I_get_type(grp_id);

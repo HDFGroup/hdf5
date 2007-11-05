@@ -223,8 +223,7 @@ H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
     hid_t		ret_value;              /* Return value */
 
     FUNC_ENTER_API(H5Acreate2, FAIL)
-    H5TRACE6("i", "i*siiii", loc_id, attr_name, type_id, space_id,
-             acpl_id, aapl_id);
+    H5TRACE6("i", "i*siiii", loc_id, attr_name, type_id, space_id, acpl_id, aapl_id);
 
     /* check arguments */
     if(H5I_ATTR == H5I_get_type(loc_id))
@@ -1869,8 +1868,7 @@ H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order,
     herr_t	ret_value;      /* Return value */
 
     FUNC_ENTER_API(H5Aiterate2, FAIL)
-    H5TRACE6("e", "iIiIo*hx*x", loc_id, idx_type, order, idx, op,
-             op_data);
+    H5TRACE6("e", "iIiIo*hx*x", loc_id, idx_type, order, idx, op, op_data);
 
     /* check arguments */
     if(H5I_ATTR == H5I_get_type(loc_id))

@@ -1051,10 +1051,15 @@ done:
  * Programmer:	Robb Matzke
  *		Monday, January	 5, 1998
  *
+ * Modification:
+ *              Raymond Lu
+ *              5 November 2007
+ *              Turn off the holding file variable if it's on.  When it's 
+ *              needed, the caller will turn it on again.
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_open(const H5O_loc_t *loc)
+H5O_open(H5O_loc_t *loc)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -1069,8 +1074,11 @@ H5O_open(const H5O_loc_t *loc)
 	HDfprintf(H5DEBUG(O), "> %a\n", loc->addr);
 #endif
 
-    /* Increment open-lock counters */
-    loc->file->nopen_objs++;
+    /* Turn off the variable for holding file or increment open-lock counters */
+    if(loc->holding_file)
+     	loc->holding_file = FALSE;
+    else
+        loc->file->nopen_objs++;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
