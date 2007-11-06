@@ -849,7 +849,7 @@ test_4 (hid_t fapl)
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
 	goto error;
 
-    if((gid = H5Gopen(fid, "/", H5P_DEFAULT)) < 0)
+    if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
 	goto error;
 
     pathname[0] = '\0';
@@ -875,11 +875,11 @@ test_4 (hid_t fapl)
 	goto error;
 
     /* Open the external link */
-    if((xid = H5Gopen(fid, "/ link", H5P_DEFAULT)) < 0)
+    if((xid = H5Gopen2(fid, "/ link", H5P_DEFAULT)) < 0)
 	goto error;
 
     /* Open the external link twice */
-    if((xid2 = H5Gopen(xid, ".", H5P_DEFAULT)) < 0)
+    if((xid2 = H5Gopen2(xid, ".", H5P_DEFAULT)) < 0)
 	goto error;
 
     if(H5Gclose(xid2) < 0)
