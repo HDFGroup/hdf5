@@ -21,7 +21,8 @@
  */
 #include "h5test.h"
 
-#define LINKED_FILE  "extlink_file.h5"
+/* File for external link test.  Created with gen_udlinks.c */
+#define LINKED_FILE  "be_extlink2.h5"
 
 const char *FILENAME[] = {
     "extern_1",
