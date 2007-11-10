@@ -2037,15 +2037,7 @@ done:
  * Function:	H5D_istore_if_load
  *
  * Purpose:	A small internal function to if it's necessary to load the
- *              chunk into cache.  If the chunk is too large to load into 
- *              the cache and it has no filters in the pipeline (i.e. not 
- *              compressed) and if the address for the chunk has been 
- *              defined, then don't load the chunk into the cache, just 
- *              read the data from it directly. If MPI based VFD is used, 
- *              must bypass the chunk-cache scheme because other MPI 
- *              processes could be writing to other elements in the same 
- *              chunk.  Do a direct read-through of only the elements 
- *              requested.
+ *              chunk into cache.
  *
  * Return:	TRUE or FALSE
  *
@@ -2055,18 +2047,33 @@ done:
  *-------------------------------------------------------------------------
  */
 hbool_t 
-H5D_istore_if_load(H5D_t *dataset, haddr_t caddr)
+H5D_istore_if_load(const H5D_io_info_t *io_info, haddr_t caddr)
 {
+    const H5D_t *dataset = io_info->dset;
     hbool_t ret_value;
  
-    FUNC_ENTER_NOAPI_NOINIT(H5D_istore_if_load)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_if_load)
 
-    assert(dataset);
+    HDassert(io_info);
+    HDassert(dataset);
 
-    if (dataset->shared->dcpl_cache.pline.nused==0 && ((dataset->shared->layout.u.chunk.size > 
-            dataset->shared->cache.chunk.nbytes && caddr!=HADDR_UNDEF)
-            || (IS_H5FD_MPI(dataset->oloc.file) && (H5F_ACC_RDWR & 
-            H5F_get_intent(dataset->oloc.file))))) {
+    /*
+     * If the chunk is too large to load into the cache and it has no
+     * filters in the pipeline (i.e. not compressed) and if the address
+     * for the chunk has been defined, then don't load the chunk into the
+     * cache, just write the data to it directly.
+     *
+     * If MPI based VFD is used, must bypass the
+     * chunk-cache scheme because other MPI processes could be
+     * writing to other elements in the same chunk.  Do a direct
+     * write-through of only the elements requested.
+     */
+    if(dataset->shared->dcpl_cache.pline.nused==0 &&
+            ((dataset->shared->layout.u.chunk.size > dataset->shared->cache.chunk.nbytes && caddr != HADDR_UNDEF)
+#ifdef H5_HAVE_PARALLEL
+            || (io_info->using_mpi_vfd && (H5F_ACC_RDWR & H5F_get_intent(dataset->oloc.file)))
+#endif /* H5_HAVE_PARALLEL */
+            )) {
         ret_value = FALSE;
     } else
         ret_value = TRUE;
@@ -2143,7 +2150,7 @@ HDfprintf(stderr,"%s: buf=%p\n",FUNC,buf);
      * writing to other elements in the same chunk.  Do a direct
      * read-through of only the elements requested.
      */
-    if (!H5D_istore_if_load(dset, chunk_addr)) {
+    if(!H5D_istore_if_load(io_info, chunk_addr)) {
         H5D_io_info_t chk_io_info;      /* Temporary I/O info object */
         H5D_storage_t chk_store;        /* Chunk storage information */
 
@@ -2326,7 +2333,7 @@ HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_a
      * writing to other elements in the same chunk.  Do a direct
      * write-through of only the elements requested.
      */
-    if (!H5D_istore_if_load(dset, chunk_addr)) {
+    if(!H5D_istore_if_load(io_info, chunk_addr)) {
         H5D_io_info_t chk_io_info;      /* Temporary I/O info object */
         H5D_storage_t chk_store;        /* Chunk storage information */
 

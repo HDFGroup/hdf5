@@ -110,6 +110,7 @@ typedef struct H5D_io_info_t {
     MPI_Comm comm;              /* MPI communicator for file */
     hbool_t xfer_mode_changed;  /* Whether the transfer mode was changed */
     hbool_t xfer_opt_mode_changed;
+    hbool_t using_mpi_vfd;      /* Whether the file is using an MPI-based VFD */
 #endif /* H5_HAVE_PARALLEL */
     const H5D_storage_t *store; /* Dataset storage info */
     H5D_io_ops_t ops;           /* I/O operation function pointers */
@@ -198,7 +199,7 @@ typedef struct H5D_chunk_info_t {
 } H5D_chunk_info_t;
 
 /* Main structure holding the mapping between file chunks and memory */
-typedef struct fm_map {
+typedef struct H5D_chunk_map_t {
     H5SL_t *fsel;               /* Skip list containing file dataspaces for all chunks */
     hsize_t last_index;         /* Index of last chunk operated on */
     H5D_chunk_info_t *last_chunk_info;  /* Pointer to last chunk's info */
@@ -214,9 +215,11 @@ typedef struct fm_map {
     hsize_t down_chunks[H5O_LAYOUT_NDIMS];   /* "down" size of number of chunks in each dimension */
     H5O_layout_t *layout;       /* Dataset layout information*/
     H5S_sel_type msel_type;     /* Selection type in memory */
+#ifdef H5_HAVE_PARALLEL
     hsize_t total_chunks;       /* Number of total chunks */
     hbool_t *select_chunk;         /* store the information about whether this chunk is selected or not */
-} fm_map;
+#endif /* H5_HAVE_PARALLEL */
+} H5D_chunk_map_t;
 
 /* Typedef for dataset creation operation */
 typedef struct {
@@ -422,7 +425,7 @@ H5_DLL void * H5D_istore_lock(const H5D_io_info_t *io_info, H5D_istore_ud1_t *ud
     hbool_t relax, unsigned *idx_hint/*in,out*/);
 H5_DLL herr_t H5D_istore_unlock(const H5D_io_info_t *io_info,
     hbool_t dirty, unsigned idx_hint, void *chunk, size_t naccessed);
-H5_DLL hbool_t H5D_istore_if_load(H5D_t *dataset, haddr_t caddr);
+H5_DLL hbool_t H5D_istore_if_load(const H5D_io_info_t *io_info, haddr_t caddr);
 
 /* Functions that operate on external file list (efl) storage */
 H5_DLL ssize_t H5D_efl_readvv(const H5D_io_info_t *io_info,
@@ -475,7 +478,7 @@ H5D_contig_collective_io(H5D_io_info_t *io_info,
 
 /* MPI-IO function to handle chunked collective IO */
 H5_DLL herr_t
-H5D_chunk_collective_io(H5D_io_info_t * io_info,fm_map *fm, const void*buf,
+H5D_chunk_collective_io(H5D_io_info_t * io_info, H5D_chunk_map_t *fm, const void*buf,
 			hbool_t do_write);
 /* MPI-IO function to check if a direct I/O transfer is possible between
  * memory and the file */
@@ -483,7 +486,7 @@ H5_DLL htri_t H5D_mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *m
     const H5S_t *file_space, const H5T_path_t *tpath);
 
 #ifndef H5_MPI_SPECIAL_COLLECTIVE_IO_WORKS
-H5_DLL herr_t  H5D_mpio_chunk_adjust_iomode(H5D_io_info_t *io_info,const fm_map *fm);
+H5_DLL herr_t  H5D_mpio_chunk_adjust_iomode(H5D_io_info_t *io_info, const H5D_chunk_map_t *fm);
 #endif /* H5_MPI_SPECIAL_COLLECTIVE_IO_WORKS */
 
 #endif /* H5_HAVE_PARALLEL */

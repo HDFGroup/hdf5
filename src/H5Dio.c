@@ -92,12 +92,13 @@ static herr_t H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
     H5T_path_t *tpath, H5D_io_info_t *io_info);
 
 /* Chunk operations */
-static herr_t H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type,
-        const H5S_t *file_space, const H5S_t *mem_space, fm_map *fm);
-static herr_t H5D_destroy_chunk_map(const fm_map *fm);
+static herr_t H5D_create_chunk_map(H5D_chunk_map_t *fm, const H5D_io_info_t *io_info,
+    const H5T_t *mem_type, const H5S_t *file_space, const H5S_t *mem_space);
+static herr_t H5D_destroy_chunk_map(const H5D_chunk_map_t *fm);
 static herr_t H5D_free_chunk_info(void *item, void *key, void *opdata);
-static herr_t H5D_create_chunk_file_map_hyper(fm_map *fm, const H5D_t *dset);
-static herr_t H5D_create_chunk_mem_map_hyper(const fm_map *fm);
+static herr_t H5D_create_chunk_file_map_hyper(H5D_chunk_map_t *fm,
+    const H5D_io_info_t *io_info);
+static herr_t H5D_create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm);
 static herr_t H5D_chunk_file_cb(void *elem, hid_t type_id, unsigned ndims,
     const hsize_t *coords, void *fm);
 static herr_t H5D_chunk_mem_cb(void *elem, hid_t type_id, unsigned ndims,
@@ -632,6 +633,7 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
 
     /* Various MPI based checks */
+#ifdef H5_HAVE_PARALLEL
     if(IS_H5FD_MPI(dataset->oloc.file)) {
         /* If MPI based VFD is used, no VL datatype support yet. */
         /* This is because they use the global heap in the file and we don't */
@@ -649,7 +651,6 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
                 H5T_get_ref_type(mem_type)==H5R_DATASET_REGION)
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Parallel IO does not support writing region reference datatypes yet")
     } /* end if */
-#ifdef H5_HAVE_PARALLEL
     else {
         /* Collective access is not permissible without a MPI based VFD */
         if (dxpl_cache->xfer_mode==H5FD_MPIO_COLLECTIVE)
@@ -1332,7 +1333,7 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
 {
     H5D_t *dataset=io_info->dset;       /* Local pointer to dataset info */
     const H5D_dxpl_cache_t *dxpl_cache=io_info->dxpl_cache;     /* Local pointer to dataset transfer info */
-    fm_map      fm;                     /* File<->memory mapping */
+    H5D_chunk_map_t      fm;            /* File<->memory mapping */
     H5SL_node_t *chunk_node;            /* Current node in chunk skip list */
     herr_t      status;                 /*function return status*/
 #ifdef H5S_DEBUG
@@ -1367,7 +1368,7 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
     assert (buf);
 
     /* Map elements between file and memory for each chunk*/
-    if(H5D_create_chunk_map(dataset, mem_type, file_space, mem_space, &fm) < 0)
+    if(H5D_create_chunk_map(&fm, io_info, mem_type, file_space, mem_space) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't build chunk mapping")
 
     /* Set dataset storage for I/O info */
@@ -1417,8 +1418,7 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
 
                 /* Load the chunk into cache and lock it. */
 		chunk_addr = H5D_istore_get_addr(io_info, &udata);
-
-                if (H5D_istore_if_load(dataset, chunk_addr)) {
+                if(H5D_istore_if_load(io_info, chunk_addr)) {
 		    if(NULL == (chunk = H5D_istore_lock(io_info, &udata, FALSE, &idx_hint)))
 			HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk")
 		} else
@@ -1431,11 +1431,11 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, " chunked read failed")
   
                 /* Release the cache lock on the chunk. */
-                if (H5D_istore_if_load(dataset, chunk_addr)) {
+                if(chunk) {
                     accessed_bytes = chunk_info->chunk_points * H5T_get_size(dataset->shared->type);
 		    if(H5D_istore_unlock(io_info, FALSE, idx_hint, chunk, accessed_bytes) < 0)
 			HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to unlock raw data chunk")
-		}
+		} /* end if */
 
                 /* Advance to next chunk in list */
                 chunk_node = H5SL_next(chunk_node);
@@ -1543,13 +1543,13 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
         /* Load the chunk into cache and lock it. */
         chunk_addr = H5D_istore_get_addr(io_info, &udata);
 
-        if (H5D_istore_if_load(dataset, chunk_addr)) {
+        if(H5D_istore_if_load(io_info, chunk_addr)) {
             if(NULL == (chunk = H5D_istore_lock(io_info, &udata, FALSE, &idx_hint)))
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk")
         } else
             chunk = NULL;
 
-        for (smine_start=0; smine_start<chunk_info->chunk_points; smine_start+=smine_nelmts) {
+        for(smine_start=0; smine_start<chunk_info->chunk_points; smine_start+=smine_nelmts) {
             /* Go figure out how many elements to read from the file */
             assert(H5S_SELECT_ITER_NELMTS(&file_iter)==(chunk_info->chunk_points-smine_start));
             smine_nelmts = (size_t)MIN(request_nelmts, (chunk_info->chunk_points-smine_start));
@@ -1642,11 +1642,11 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
         } /* end for */
 
         /* Release the cache lock on the chunk. */
-        if (H5D_istore_if_load(dataset, chunk_addr)) {
+        if(chunk) {
             accessed_bytes = chunk_info->chunk_points * H5T_get_size(dataset->shared->type);
             if(H5D_istore_unlock(io_info, FALSE, idx_hint, chunk, accessed_bytes) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to unlock raw data chunk")
-        }
+        } /* end if */
 
         /* Release selection iterators */
         if(file_iter_init) {
@@ -1723,7 +1723,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
 {
     H5D_t *dataset=io_info->dset;       /* Local pointer to dataset info */
     const H5D_dxpl_cache_t *dxpl_cache=io_info->dxpl_cache;     /* Local pointer to dataset transfer info */
-    fm_map      fm;                     /* File<->memory mapping */
+    H5D_chunk_map_t      fm;            /* File<->memory mapping */
     H5SL_node_t *chunk_node;            /* Current node in chunk skip list */
     herr_t      status;                 /*function return status*/
 #ifdef H5S_DEBUG
@@ -1759,7 +1759,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
     assert (buf);
 
     /* Map elements between file and memory for each chunk*/
-    if(H5D_create_chunk_map(dataset, mem_type, file_space, mem_space, &fm) < 0)
+    if(H5D_create_chunk_map(&fm, io_info, mem_type, file_space, mem_space) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't build chunk mapping")
 
     /* Set dataset storage for I/O info */
@@ -1767,7 +1767,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
 
 #ifdef H5_HAVE_PARALLEL
     /* Additional sanity checks when operating in parallel */
-    if(IS_H5FD_MPI(dataset->oloc.file)) {
+    if(io_info->using_mpi_vfd) {
         if (chunk_addr==HADDR_UNDEF)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to locate raw data chunk")
         if (dataset->shared->dcpl_cache.pline.nused>0)
@@ -1816,10 +1816,10 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
                  * simply allocate space instead of load the chunk. */
                 chunk_addr = H5D_istore_get_addr(io_info, &udata);
 
-                if (H5D_istore_if_load(dataset, chunk_addr)) {
+                if(H5D_istore_if_load(io_info, chunk_addr)) {
                     accessed_bytes = chunk_info->chunk_points * H5T_get_size(dataset->shared->type);
                     if(accessed_bytes != dataset->shared->layout.u.chunk.size)
-                        relax=FALSE;
+                        relax = FALSE;
 
 		    if(NULL == (chunk = H5D_istore_lock(io_info, &udata, relax, &idx_hint)))
 			HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk")
@@ -1833,11 +1833,11 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, " chunked write failed")
 
                 /* Release the cache lock on the chunk. */
-                if (H5D_istore_if_load(dataset, chunk_addr)) {
+                if(chunk) {
 		    if(H5D_istore_unlock(io_info, TRUE, idx_hint, chunk, accessed_bytes) < 0)
 			HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to unlock raw data chunk")
-		}
-                relax=TRUE;
+		} /* end if */
+                relax = TRUE;
 
                 /* Advance to next chunk in list */
                 chunk_node = H5SL_next(chunk_node);
@@ -1949,7 +1949,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
          * simply allocate space instead of load the chunk. */
         chunk_addr = H5D_istore_get_addr(io_info, &udata);
 
-        if (H5D_istore_if_load(dataset, chunk_addr)) {
+        if(H5D_istore_if_load(io_info, chunk_addr)) {
             accessed_bytes = chunk_info->chunk_points * H5T_get_size(dataset->shared->type);
             if(accessed_bytes != dataset->shared->layout.u.chunk.size)
                 relax=FALSE;
@@ -1964,7 +1964,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
 	} else
 	    chunk = NULL;
 
-        for (smine_start=0; smine_start<chunk_info->chunk_points; smine_start+=smine_nelmts) {
+        for(smine_start=0; smine_start<chunk_info->chunk_points; smine_start+=smine_nelmts) {
             /* Go figure out how many elements to read from the file */
             assert(H5S_SELECT_ITER_NELMTS(&file_iter)==(chunk_info->chunk_points-smine_start));
             smine_nelmts = (size_t)MIN(request_nelmts, (chunk_info->chunk_points-smine_start));
@@ -2051,12 +2051,12 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
         } /* end for */
 
         /* Release the cache lock on the chunk. */
-        if (H5D_istore_if_load(dataset, chunk_addr)) {
+        if(chunk) {
             accessed_bytes = chunk_info->chunk_points * H5T_get_size(dataset->shared->type);
 	    if(H5D_istore_unlock(io_info, TRUE, idx_hint, chunk, accessed_bytes) < 0)
 		HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to unlock raw data chunk")
-	}
-        relax=TRUE;
+	} /* end if */
+        relax = TRUE;
 
         /* Release selection iterators */
         if(file_iter_init) {
@@ -2333,9 +2333,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type, const H5S_t *file_space,
-            const H5S_t *mem_space, fm_map *fm)
+H5D_create_chunk_map(H5D_chunk_map_t *fm, const H5D_io_info_t *io_info,
+    const H5T_t *mem_type, const H5S_t *file_space, const H5S_t *mem_space)
 {
+    H5D_t *dataset=io_info->dset;       /* Local pointer to dataset info */
     H5S_t *tmp_mspace = NULL;     /* Temporary memory dataspace */
     hssize_t old_offset[H5O_LAYOUT_NDIMS];  /* Old selection offset */
     hbool_t file_space_normalized = FALSE;  /* File dataspace was normalized */
@@ -2391,18 +2392,18 @@ H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type, const H5S_t *f
     if(H5V_array_down(f_ndims,fm->chunks,fm->down_chunks) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "can't compute 'down' sizes")
 
-    /* calculate total chunk in file map*/
+#ifdef H5_HAVE_PARALLEL
+    /* Calculate total chunk in file map*/
     fm->select_chunk = NULL;
     fm->total_chunks = 1;
-    for(u=0; u<fm->f_ndims; u++)
-       fm->total_chunks= fm->total_chunks*fm->chunks[u];
-    if(IS_H5FD_MPI(dataset->oloc.file)) {
+    for(u = 0; u < fm->f_ndims; u++)
+       fm->total_chunks = fm->total_chunks * fm->chunks[u];
+    if(io_info->using_mpi_vfd) {
         H5_CHECK_OVERFLOW(fm->total_chunks, hsize_t, size_t);
-        if(NULL == (fm->select_chunk = (hbool_t *) H5MM_calloc((size_t)fm->total_chunks * sizeof(hbool_t))))
+        if(NULL == (fm->select_chunk = (hbool_t *)H5MM_calloc((size_t)fm->total_chunks * sizeof(hbool_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate chunk info")
-    }
-
-
+    } /* end if */
+#endif /* H5_HAVE_PARALLEL */
 
 
     /* Initialize skip list for chunk selections */
@@ -2432,7 +2433,7 @@ H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type, const H5S_t *f
     /* Check if file selection is a not a hyperslab selection */
     if(sel_hyper_flag) {
         /* Build the file selection for each chunk */
-        if(H5D_create_chunk_file_map_hyper(fm,dataset) < 0)
+        if(H5D_create_chunk_file_map_hyper(fm, io_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create file chunk selections")
 
         /* Clean file chunks' hyperslab span "scratch" information */
@@ -2615,7 +2616,7 @@ H5D_free_chunk_info(void *item, void UNUSED *key, void UNUSED *opdata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_destroy_chunk_map(const fm_map *fm)
+H5D_destroy_chunk_map(const H5D_chunk_map_t *fm)
 {
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
@@ -2634,7 +2635,11 @@ H5D_destroy_chunk_map(const fm_map *fm)
     if(fm->mchunk_tmpl)
         if(H5S_close(fm->mchunk_tmpl) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release memory chunk dataspace template")
-    if(fm->select_chunk) H5MM_xfree(fm->select_chunk);
+#ifdef H5_HAVE_PARALLEL
+    if(fm->select_chunk)
+        H5MM_xfree(fm->select_chunk);
+#endif /* H5_HAVE_PARALLEL */
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_destroy_chunk_map() */
@@ -2653,7 +2658,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_create_chunk_file_map_hyper(fm_map *fm,const H5D_t *dset)
+H5D_create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t *io_info)
 {
     hssize_t    ssel_points;                /* Number of elements in file selection */
     hsize_t     sel_points;                 /* Number of elements in file selection */
@@ -2744,9 +2749,11 @@ H5D_create_chunk_file_map_hyper(fm_map *fm,const H5D_t *dset)
             /* Set the chunk index */
             new_chunk_info->index=chunk_index;
 
+#ifdef H5_HAVE_PARALLEL
             /* store chunk selection information */
-	  if(IS_H5FD_MPI(dset->oloc.file))
-               fm->select_chunk[chunk_index] = TRUE;
+            if(io_info->using_mpi_vfd)
+                fm->select_chunk[chunk_index] = TRUE;
+#endif /* H5_HAVE_PARALLEL */
 
             /* Set the file chunk dataspace */
             new_chunk_info->fspace=tmp_fchunk;
@@ -2834,7 +2841,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_create_chunk_mem_map_hyper(const fm_map *fm)
+H5D_create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm)
 {
     H5SL_node_t *curr_node;                 /* Current node in skip list */
     hsize_t    file_sel_start[H5O_LAYOUT_NDIMS];    /* Offset of low bound of file selection */
@@ -2945,7 +2952,7 @@ done:
 static herr_t
 H5D_chunk_file_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, const hsize_t *coords, void *_fm)
 {
-    fm_map      *fm = (fm_map*)_fm;             /* File<->memory chunk mapping info */
+    H5D_chunk_map_t      *fm = (H5D_chunk_map_t *)_fm;  /* File<->memory chunk mapping info */
     H5D_chunk_info_t *chunk_info;               /* Chunk information for current chunk */
     hsize_t    coords_in_chunk[H5O_LAYOUT_NDIMS];        /* Coordinates of element in chunk */
     hsize_t     chunk_index;                    /* Chunk index */
@@ -3057,7 +3064,7 @@ done:
 static herr_t
 H5D_chunk_mem_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, const hsize_t *coords, void *_fm)
 {
-    fm_map      *fm = (fm_map*)_fm;             /* File<->memory chunk mapping info */
+    H5D_chunk_map_t      *fm = (H5D_chunk_map_t *)_fm;  /* File<->memory chunk mapping info */
     H5D_chunk_info_t *chunk_info;               /* Chunk information for current chunk */
     hsize_t    coords_in_mem[H5O_LAYOUT_NDIMS];        /* Coordinates of element in memory */
     hsize_t     chunk_index;                    /* Chunk index */
@@ -3177,8 +3184,9 @@ H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
 #ifdef H5_HAVE_PARALLEL
     /* Start in the "not modified" xfer_mode state */
     io_info->xfer_mode_changed = FALSE;
+    io_info->using_mpi_vfd = IS_H5FD_MPI(dset->oloc.file);
 
-    if(IS_H5FD_MPI(dset->oloc.file)) {
+    if(io_info->using_mpi_vfd) {
         htri_t opt;         /* Flag whether a selection is optimizable */
 
         /* Get MPI communicator */
