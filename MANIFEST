@@ -749,7 +749,6 @@
 ./test/enum.c
 ./test/extend.c
 ./test/external.c
-./test/extlink_file.h5
 ./test/error_test.c
 ./test/err_compat.c
 ./test/family_v1.6_00000.h5

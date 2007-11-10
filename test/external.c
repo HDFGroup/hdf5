@@ -21,7 +21,8 @@
  */
 #include "h5test.h"
 
-#define LINKED_FILE  "extlink_file.h5"
+/* File for external link test.  Created with gen_udlinks.c */
+#define LINKED_FILE  "be_extlink2.h5"
 
 const char *FILENAME[] = {
     "extern_1",
@@ -820,7 +821,8 @@ test_3 (hid_t fapl)
  * Function:	test_4
  *
  * Purpose:	Tests opening an external link twice.  It exposed a bug
- *              in the library.  This function tests the fix.
+ *              in the library.  This function tests the fix.  This test
+ *              doesn't work with MULTI driver.
  *
  * Return:	Success:	0
  *
@@ -841,57 +843,66 @@ test_4 (hid_t fapl)
     char        pathname[1024];
     char        linked_pathname[1024];
     char       *srcdir = getenv("srcdir"); /*where the src code is located*/
+    const char *envval = NULL;
 
     TESTING("opening external link twice");
 
-    h5_fixname(FILENAME[3], fapl, filename, sizeof filename);
+    /* Don't run this test using the multi file driver */
+    envval = HDgetenv("HDF5_DRIVER");
+    if (envval == NULL)
+        envval = "nomatch";
+    if (HDstrcmp(envval, "multi")) {
+        h5_fixname(FILENAME[3], fapl, filename, sizeof filename);
 
-    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-	goto error;
+        if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+	    goto error;
 
-    if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
-	goto error;
+        if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
+	    goto error;
 
-    pathname[0] = '\0';
-    /* Generate correct name for test file by prepending the source path */
-    if(srcdir && ((HDstrlen(srcdir) + HDstrlen(LINKED_FILE) + 1) < sizeof(pathname))) {
-        HDstrcpy(pathname, srcdir);
-        HDstrcat(pathname, "/");
-    }
-    HDstrcat(pathname, LINKED_FILE);
+        pathname[0] = '\0';
+        /* Generate correct name for test file by prepending the source path */
+        if(srcdir && ((HDstrlen(srcdir) + HDstrlen(LINKED_FILE) + 1) < sizeof(pathname))) {
+            HDstrcpy(pathname, srcdir);
+            HDstrcat(pathname, "/");
+        }
+        HDstrcat(pathname, LINKED_FILE);
 
-    /* Create an external link to an existing file*/
-    if(H5Lcreate_external(pathname, "/group", gid, " link", H5P_DEFAULT, H5P_DEFAULT) < 0)
-	goto error;
+        /* Create an external link to an existing file*/
+        if(H5Lcreate_external(pathname, "/group", gid, " link", H5P_DEFAULT, H5P_DEFAULT) < 0)
+	    goto error;
 
-    if(H5Gclose(gid) < 0)
-	goto error;
+        if(H5Gclose(gid) < 0)
+	    goto error;
 
-    if(H5Fclose(fid) < 0)
-	goto error;
+        if(H5Fclose(fid) < 0)
+	    goto error;
 
-    /* Reopen the file */
-    if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-	goto error;
+        /* Reopen the file */
+        if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+	    goto error;
 
-    /* Open the external link */
-    if((xid = H5Gopen2(fid, "/ link", H5P_DEFAULT)) < 0)
-	goto error;
+        /* Open the external link */
+        if((xid = H5Gopen2(fid, "/ link", H5P_DEFAULT)) < 0)
+	    goto error;
 
-    /* Open the external link twice */
-    if((xid2 = H5Gopen2(xid, ".", H5P_DEFAULT)) < 0)
-	goto error;
+        /* Open the external link twice */
+        if((xid2 = H5Gopen2(xid, ".", H5P_DEFAULT)) < 0)
+	    goto error;
 
-    if(H5Gclose(xid2) < 0)
-	goto error;
+        if(H5Gclose(xid2) < 0)
+	    goto error;
 
-    if(H5Gclose(xid) < 0)
-	goto error;
+        if(H5Gclose(xid) < 0)
+	    goto error;
 
-    if(H5Fclose(fid) < 0)
-	goto error;
+        if(H5Fclose(fid) < 0)
+	    goto error;
 
-    PASSED();
+        PASSED();
+    } else 
+        SKIPPED();
+
     return 0;
 
  error:
