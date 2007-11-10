@@ -204,7 +204,6 @@ typedef struct fm_map {
     H5D_chunk_info_t *last_chunk_info;  /* Pointer to last chunk's info */
     const H5S_t *file_space;    /* Pointer to the file dataspace */
     const H5S_t *mem_space;     /* Pointer to the memory dataspace */
-    unsigned mem_space_copy;    /* Flag to indicate that the memory dataspace must be copied */
     hsize_t f_dims[H5O_LAYOUT_NDIMS];   /* File dataspace dimensions */
     H5S_t *mchunk_tmpl;         /* Dataspace template for new memory chunks */
     unsigned f_ndims;           /* Number of dimensions for file dataspace */

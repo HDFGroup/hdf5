@@ -1261,137 +1261,145 @@ H5S_get_select_type(const H5S_t *space)
 htri_t
 H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
 {
-    H5S_sel_iter_t iter1;                       /* Selection #1 iteration info */
-    H5S_sel_iter_t iter2;                       /* Selection #2 iteration info */
-    hbool_t iter1_init=0;                       /* Selection #1 iteration info has been initialized */
-    hbool_t iter2_init=0;                       /* Selection #2 iteration info has been initialized */
-    unsigned	u;                              /* Index variable */
-    htri_t ret_value=TRUE;  /* return value */
+    H5S_sel_iter_t iter1;               /* Selection #1 iteration info */
+    H5S_sel_iter_t iter2;               /* Selection #2 iteration info */
+    hbool_t iter1_init = 0;             /* Selection #1 iteration info has been initialized */
+    hbool_t iter2_init = 0;             /* Selection #2 iteration info has been initialized */
+    unsigned u;                         /* Index variable */
+    htri_t ret_value = TRUE;            /* Return value */
 
-    FUNC_ENTER_NOAPI(H5S_select_shape_same, FAIL);
+    FUNC_ENTER_NOAPI(H5S_select_shape_same, FAIL)
 
     /* Check args */
-    assert(space1);
-    assert(space2);
+    HDassert(space1);
+    HDassert(space2);
 
-    /* Check for different dimensionality */
-    if (space1->extent.rank!=space2->extent.rank)
-        HGOTO_DONE(FALSE);
-
-    /* Check for different number of elements selected */
-    if(H5S_GET_SELECT_NPOINTS(space1)!=H5S_GET_SELECT_NPOINTS(space2))
-        HGOTO_DONE(FALSE);
-
-    /* Check for "easy" cases before getting into generalized block iteration code */
-    if(H5S_GET_SELECT_TYPE(space1)==H5S_SEL_ALL && H5S_GET_SELECT_TYPE(space2)==H5S_SEL_ALL) {
-        hsize_t dims1[H5O_LAYOUT_NDIMS];             /* End point of selection block in dataspace #1 */
-        hsize_t dims2[H5O_LAYOUT_NDIMS];             /* End point of selection block in dataspace #2 */
-
-        if(H5S_get_simple_extent_dims(space1, dims1, NULL)<0)
-            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimensionality");
-        if(H5S_get_simple_extent_dims(space2, dims2, NULL)<0)
-            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimensionality");
-
-        /* Check that the sizes are the same */
-        for (u=0; u<space1->extent.rank; u++)
-            if(dims1[u]!=dims2[u])
-                HGOTO_DONE(FALSE);
+    /* Special case for one or both dataspaces being scalar */
+    if(space1->extent.rank == 0 || space2->extent.rank == 0) {
+        /* Check for different number of elements selected */
+        if(H5S_GET_SELECT_NPOINTS(space1) != H5S_GET_SELECT_NPOINTS(space2))
+            HGOTO_DONE(FALSE)
     } /* end if */
-    else if(H5S_GET_SELECT_TYPE(space1)==H5S_SEL_NONE || H5S_GET_SELECT_TYPE(space2)==H5S_SEL_NONE) {
-        HGOTO_DONE(TRUE);
-    } /* end if */
-    else if((H5S_GET_SELECT_TYPE(space1)==H5S_SEL_HYPERSLABS && space1->select.sel_info.hslab->diminfo_valid)
-            && (H5S_GET_SELECT_TYPE(space2)==H5S_SEL_HYPERSLABS && space2->select.sel_info.hslab->diminfo_valid)) {
-
-        /* Check that the shapes are the same */
-        for (u=0; u<space1->extent.rank; u++) {
-            if(space1->select.sel_info.hslab->opt_diminfo[u].stride!=space2->select.sel_info.hslab->opt_diminfo[u].stride)
-                HGOTO_DONE(FALSE);
-            if(space1->select.sel_info.hslab->opt_diminfo[u].count!=space2->select.sel_info.hslab->opt_diminfo[u].count)
-                HGOTO_DONE(FALSE);
-            if(space1->select.sel_info.hslab->opt_diminfo[u].block!=space2->select.sel_info.hslab->opt_diminfo[u].block)
-                HGOTO_DONE(FALSE);
-        } /* end for */
-    } /* end if */
-    /* Iterate through all the blocks in the selection */
     else {
-        hsize_t start1[H5O_LAYOUT_NDIMS];      /* Start point of selection block in dataspace #1 */
-        hsize_t start2[H5O_LAYOUT_NDIMS];      /* Start point of selection block in dataspace #2 */
-        hsize_t end1[H5O_LAYOUT_NDIMS];        /* End point of selection block in dataspace #1 */
-        hsize_t end2[H5O_LAYOUT_NDIMS];        /* End point of selection block in dataspace #2 */
-        hsize_t off1[H5O_LAYOUT_NDIMS];        /* Offset of selection #1 blocks */
-        hsize_t off2[H5O_LAYOUT_NDIMS];        /* Offset of selection #2 blocks */
-        htri_t status1,status2;         /* Status from next block checks */
-        unsigned first_block=1;         /* Flag to indicate the first block */
+        /* Check for different dimensionality */
+        if(space1->extent.rank != space2->extent.rank)
+            HGOTO_DONE(FALSE)
 
-        /* Initialize iterator for each dataspace selection
-         * Use '0' for element size instead of actual element size to indicate
-         * that the selection iterator shouldn't be "flattened", since we
-         * aren't actually going to be doing I/O with the iterators.
-         */
-        if(H5S_select_iter_init(&iter1, space1, (size_t)0) < 0)
-            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
-        iter1_init = 1;
-        if(H5S_select_iter_init(&iter2, space2, (size_t)0) < 0)
-            HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
-        iter2_init = 1;
+        /* Check for different number of elements selected */
+        if(H5S_GET_SELECT_NPOINTS(space1) != H5S_GET_SELECT_NPOINTS(space2))
+            HGOTO_DONE(FALSE)
 
-        /* Iterate over all the blocks in each selection */
-        while(1) {
-            /* Get the current block for each selection iterator */
-            if(H5S_SELECT_ITER_BLOCK(&iter1,start1,end1)<0)
-                HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get iterator block");
-            if(H5S_SELECT_ITER_BLOCK(&iter2,start2,end2)<0)
-                HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get iterator block");
+        /* Check for "easy" cases before getting into generalized block iteration code */
+        if(H5S_GET_SELECT_TYPE(space1)==H5S_SEL_ALL && H5S_GET_SELECT_TYPE(space2)==H5S_SEL_ALL) {
+            hsize_t dims1[H5O_LAYOUT_NDIMS];             /* End point of selection block in dataspace #1 */
+            hsize_t dims2[H5O_LAYOUT_NDIMS];             /* End point of selection block in dataspace #2 */
 
-            /* The first block only compares the sizes and sets the relative offsets for later blocks */
-            if(first_block) {
-                /* If the block sizes from each selection doesn't match, get out */
-                for (u=0; u<space1->extent.rank; u++) {
-                    if((end1[u]-start1[u])!=(end2[u]-start2[u]))
-                        HGOTO_DONE(FALSE);
+            if(H5S_get_simple_extent_dims(space1, dims1, NULL)<0)
+                HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimensionality");
+            if(H5S_get_simple_extent_dims(space2, dims2, NULL)<0)
+                HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimensionality");
 
-                    /* Set the relative locations of the selections */
-                    off1[u]=start1[u];
-                    off2[u]=start2[u];
-                } /* end for */
+            /* Check that the sizes are the same */
+            for (u=0; u<space1->extent.rank; u++)
+                if(dims1[u]!=dims2[u])
+                    HGOTO_DONE(FALSE);
+        } /* end if */
+        else if(H5S_GET_SELECT_TYPE(space1)==H5S_SEL_NONE || H5S_GET_SELECT_TYPE(space2)==H5S_SEL_NONE) {
+            HGOTO_DONE(TRUE);
+        } /* end if */
+        else if((H5S_GET_SELECT_TYPE(space1)==H5S_SEL_HYPERSLABS && space1->select.sel_info.hslab->diminfo_valid)
+                && (H5S_GET_SELECT_TYPE(space2)==H5S_SEL_HYPERSLABS && space2->select.sel_info.hslab->diminfo_valid)) {
 
-                /* Reset "first block" flag */
-                first_block=0;
-            } /* end if */
-            else {
-                /* Check over the blocks for each selection */
-                for (u=0; u<space1->extent.rank; u++) {
-                    /* Check if the blocks are in the same relative location */
-                    if((start1[u]-off1[u])!=(start2[u]-off2[u]))
-                        HGOTO_DONE(FALSE);
+            /* Check that the shapes are the same */
+            for (u=0; u<space1->extent.rank; u++) {
+                if(space1->select.sel_info.hslab->opt_diminfo[u].stride!=space2->select.sel_info.hslab->opt_diminfo[u].stride)
+                    HGOTO_DONE(FALSE);
+                if(space1->select.sel_info.hslab->opt_diminfo[u].count!=space2->select.sel_info.hslab->opt_diminfo[u].count)
+                    HGOTO_DONE(FALSE);
+                if(space1->select.sel_info.hslab->opt_diminfo[u].block!=space2->select.sel_info.hslab->opt_diminfo[u].block)
+                    HGOTO_DONE(FALSE);
+            } /* end for */
+        } /* end if */
+        /* Iterate through all the blocks in the selection */
+        else {
+            hsize_t start1[H5O_LAYOUT_NDIMS];      /* Start point of selection block in dataspace #1 */
+            hsize_t start2[H5O_LAYOUT_NDIMS];      /* Start point of selection block in dataspace #2 */
+            hsize_t end1[H5O_LAYOUT_NDIMS];        /* End point of selection block in dataspace #1 */
+            hsize_t end2[H5O_LAYOUT_NDIMS];        /* End point of selection block in dataspace #2 */
+            hsize_t off1[H5O_LAYOUT_NDIMS];        /* Offset of selection #1 blocks */
+            hsize_t off2[H5O_LAYOUT_NDIMS];        /* Offset of selection #2 blocks */
+            htri_t status1,status2;         /* Status from next block checks */
+            unsigned first_block=1;         /* Flag to indicate the first block */
 
+            /* Initialize iterator for each dataspace selection
+             * Use '0' for element size instead of actual element size to indicate
+             * that the selection iterator shouldn't be "flattened", since we
+             * aren't actually going to be doing I/O with the iterators.
+             */
+            if(H5S_select_iter_init(&iter1, space1, (size_t)0) < 0)
+                HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
+            iter1_init = 1;
+            if(H5S_select_iter_init(&iter2, space2, (size_t)0) < 0)
+                HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
+            iter2_init = 1;
+
+            /* Iterate over all the blocks in each selection */
+            while(1) {
+                /* Get the current block for each selection iterator */
+                if(H5S_SELECT_ITER_BLOCK(&iter1,start1,end1)<0)
+                    HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get iterator block");
+                if(H5S_SELECT_ITER_BLOCK(&iter2,start2,end2)<0)
+                    HGOTO_ERROR (H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get iterator block");
+
+                /* The first block only compares the sizes and sets the relative offsets for later blocks */
+                if(first_block) {
                     /* If the block sizes from each selection doesn't match, get out */
-                    if((end1[u]-start1[u])!=(end2[u]-start2[u]))
-                        HGOTO_DONE(FALSE);
-                } /* end for */
-            } /* end else */
+                    for (u=0; u<space1->extent.rank; u++) {
+                        if((end1[u]-start1[u])!=(end2[u]-start2[u]))
+                            HGOTO_DONE(FALSE);
 
-            /* Check if we are able to advance to the next selection block */
-            if((status1=H5S_SELECT_ITER_HAS_NEXT_BLOCK(&iter1))<0)
-                HGOTO_ERROR (H5E_DATASPACE, H5E_CANTNEXT, FAIL, "unable to check iterator block");
-            if((status2=H5S_SELECT_ITER_HAS_NEXT_BLOCK(&iter2))<0)
-                HGOTO_ERROR (H5E_DATASPACE, H5E_CANTNEXT, FAIL, "unable to check iterator block");
+                        /* Set the relative locations of the selections */
+                        off1[u]=start1[u];
+                        off2[u]=start2[u];
+                    } /* end for */
 
-            /* Did we run out of blocks at the same time? */
-            if(status1==FALSE && status2==FALSE)
-                break;
-            else if(status1!=status2) {
-                HGOTO_DONE(FALSE);
-            } /* end if */
-            else {
-                /* Advance to next block in selection iterators */
-                if(H5S_SELECT_ITER_NEXT_BLOCK(&iter1)<0)
-                    HGOTO_ERROR (H5E_DATASPACE, H5E_CANTNEXT, FAIL, "unable to advance to next iterator block");
-                if(H5S_SELECT_ITER_NEXT_BLOCK(&iter2)<0)
-                    HGOTO_ERROR (H5E_DATASPACE, H5E_CANTNEXT, FAIL, "unable to advance to next iterator block");
-            } /* end else */
-        } /* end while */
+                    /* Reset "first block" flag */
+                    first_block=0;
+                } /* end if */
+                else {
+                    /* Check over the blocks for each selection */
+                    for (u=0; u<space1->extent.rank; u++) {
+                        /* Check if the blocks are in the same relative location */
+                        if((start1[u]-off1[u])!=(start2[u]-off2[u]))
+                            HGOTO_DONE(FALSE);
+
+                        /* If the block sizes from each selection doesn't match, get out */
+                        if((end1[u]-start1[u])!=(end2[u]-start2[u]))
+                            HGOTO_DONE(FALSE);
+                    } /* end for */
+                } /* end else */
+
+                /* Check if we are able to advance to the next selection block */
+                if((status1=H5S_SELECT_ITER_HAS_NEXT_BLOCK(&iter1))<0)
+                    HGOTO_ERROR (H5E_DATASPACE, H5E_CANTNEXT, FAIL, "unable to check iterator block");
+                if((status2=H5S_SELECT_ITER_HAS_NEXT_BLOCK(&iter2))<0)
+                    HGOTO_ERROR (H5E_DATASPACE, H5E_CANTNEXT, FAIL, "unable to check iterator block");
+
+                /* Did we run out of blocks at the same time? */
+                if(status1==FALSE && status2==FALSE)
+                    break;
+                else if(status1!=status2) {
+                    HGOTO_DONE(FALSE);
+                } /* end if */
+                else {
+                    /* Advance to next block in selection iterators */
+                    if(H5S_SELECT_ITER_NEXT_BLOCK(&iter1)<0)
+                        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTNEXT, FAIL, "unable to advance to next iterator block");
+                    if(H5S_SELECT_ITER_NEXT_BLOCK(&iter2)<0)
+                        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTNEXT, FAIL, "unable to advance to next iterator block");
+                } /* end else */
+            } /* end while */
+        } /* end else */
     } /* end else */
 
 done:
@@ -1404,7 +1412,7 @@ done:
             HDONE_ERROR (H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator");
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_select_shape_same() */
 
 

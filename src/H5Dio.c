@@ -2337,8 +2337,6 @@ H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type, const H5S_t *f
             const H5S_t *mem_space, fm_map *fm)
 {
     H5S_t *tmp_mspace = NULL;     /* Temporary memory dataspace */
-    H5S_t *equiv_mspace = NULL;   /* Equivalent memory dataspace */
-    hbool_t equiv_mspace_init = FALSE;/* Equivalent memory dataspace was created */
     hssize_t old_offset[H5O_LAYOUT_NDIMS];  /* Old selection offset */
     hbool_t file_space_normalized = FALSE;  /* File dataspace was normalized */
     hid_t f_tid = (-1);           /* Temporary copy of file datatype for iteration */
@@ -2361,27 +2359,8 @@ H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type, const H5S_t *f
     /* Check if the memory space is scalar & make equivalent memory space */
     if((sm_ndims = H5S_GET_EXTENT_NDIMS(mem_space)) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimension number")
-    if(sm_ndims==0) {
-        hsize_t dims[H5O_LAYOUT_NDIMS];    /* Temporary dimension information */
-
-        /* Set up "equivalent" n-dimensional dataspace with size '1' in each dimension */
-        for(u=0; u<dataset->shared->layout.u.chunk.ndims-1; u++)
-            dims[u]=1;
-        if((equiv_mspace = H5S_create_simple(dataset->shared->layout.u.chunk.ndims-1,dims,NULL))==NULL)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "unable to create equivalent dataspace for scalar space")
-
-        /* Indicate that this space needs to be released */
-        equiv_mspace_init = TRUE;
-
-        /* Set the number of dimensions for the memory dataspace */
-        fm->m_ndims = dataset->shared->layout.u.chunk.ndims - 1;
-    } /* end else */
-    else {
-        equiv_mspace = (H5S_t *)mem_space; /* Casting away 'const' OK... */
-
-        /* Set the number of dimensions for the memory dataspace */
-        H5_ASSIGN_OVERFLOW(fm->m_ndims, sm_ndims, int, unsigned);
-    } /* end else */
+    /* Set the number of dimensions for the memory dataspace */
+    H5_ASSIGN_OVERFLOW(fm->m_ndims, sm_ndims, int, unsigned);
 
     /* Get dim number and dimensionality for each dataspace */
     fm->f_ndims = f_ndims = dataset->shared->layout.u.chunk.ndims - 1;
@@ -2436,13 +2415,12 @@ H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type, const H5S_t *f
 
     /* Point at the dataspaces */
     fm->file_space = file_space;
-    fm->mem_space = equiv_mspace;
-    fm->mem_space_copy = equiv_mspace_init;       /* Make certain to copy memory dataspace if necessary */
+    fm->mem_space = mem_space;
 
     /* Get type of selection on disk & in memory */
     if((fsel_type = H5S_GET_SELECT_TYPE(file_space)) < H5S_SEL_NONE)
         HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to convert from file to memory data space")
-    if((fm->msel_type = H5S_GET_SELECT_TYPE(equiv_mspace)) < H5S_SEL_NONE)
+    if((fm->msel_type = H5S_GET_SELECT_TYPE(mem_space)) < H5S_SEL_NONE)
         HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to convert from file to memory data space")
 
     /* If the selection is NONE or POINTS, set the flag to FALSE */
@@ -2451,21 +2429,8 @@ H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type, const H5S_t *f
     else
         sel_hyper_flag = TRUE;
 
-    /* Check if file selection is a point selection */
-    if(!sel_hyper_flag) {
-        /* Create temporary datatypes for selection iteration */
-        if((f_tid = H5I_register(H5I_DATATYPE, H5T_copy(dataset->shared->type, H5T_COPY_ALL))) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register file datatype")
-
-        /* Spaces aren't the same shape, iterate over the memory selection directly */
-        if(H5S_select_iterate(&bogus, f_tid, file_space,  H5D_chunk_file_cb, fm) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create file chunk selections")
-
-        /* Reset "last chunk" info */
-        fm->last_index=(hsize_t)-1;
-        fm->last_chunk_info=NULL;
-    } /* end if */
-    else {
+    /* Check if file selection is a not a hyperslab selection */
+    if(sel_hyper_flag) {
         /* Build the file selection for each chunk */
         if(H5D_create_chunk_file_map_hyper(fm,dataset) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create file chunk selections")
@@ -2486,12 +2451,25 @@ H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type, const H5S_t *f
             /* Get the next chunk node in the skip list */
             curr_node=H5SL_next(curr_node);
         } /* end while */
+    } /* end if */
+    else {
+        /* Create temporary datatypes for selection iteration */
+        if((f_tid = H5I_register(H5I_DATATYPE, H5T_copy(dataset->shared->type, H5T_COPY_ALL))) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register file datatype")
+
+        /* Spaces might not be the same shape, iterate over the file selection directly */
+        if(H5S_select_iterate(&bogus, f_tid, file_space,  H5D_chunk_file_cb, fm) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create file chunk selections")
+
+        /* Reset "last chunk" info */
+        fm->last_index=(hsize_t)-1;
+        fm->last_chunk_info=NULL;
     } /* end else */
 
     /* Build the memory selection for each chunk */
-    if(sel_hyper_flag && H5S_select_shape_same(file_space,equiv_mspace)==TRUE) {
+    if(sel_hyper_flag && H5S_select_shape_same(file_space, mem_space) == TRUE) {
         /* Reset chunk template information */
-        fm->mchunk_tmpl=NULL;
+        fm->mchunk_tmpl = NULL;
 
         /* If the selections are the same shape, use the file chunk information
          * to generate the memory chunk information quickly.
@@ -2503,7 +2481,7 @@ H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type, const H5S_t *f
         size_t elmt_size;           /* Memory datatype size */
 
         /* Make a copy of equivalent memory space */
-        if((tmp_mspace = H5S_copy(equiv_mspace,TRUE))==NULL)
+        if((tmp_mspace = H5S_copy(mem_space, TRUE)) == NULL)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
 
         /* De-select the mem space copy */
@@ -2522,7 +2500,7 @@ H5D_create_chunk_map(const H5D_t *dataset, const H5T_t *mem_type, const H5S_t *f
         /* Create selection iterator for memory selection */
         if((elmt_size=H5T_get_size(mem_type))==0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_BADSIZE, FAIL, "datatype size invalid")
-        if (H5S_select_iter_init(&(fm->mem_iter), equiv_mspace, elmt_size) < 0)
+        if(H5S_select_iter_init(&(fm->mem_iter), mem_space, elmt_size) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
         iter_init = TRUE;	/* Selection iteration info has been initialized */
 
@@ -2567,10 +2545,6 @@ done:
     fm->file_space = NULL;
     fm->mem_space = NULL;
 
-    if(equiv_mspace_init && equiv_mspace) {
-        if(H5S_close(equiv_mspace) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "can't release memory chunk dataspace template")
-    } /* end if */
     if(iter_init) {
         if(H5S_SELECT_ITER_RELEASE(&(fm->mem_iter)) < 0)
             HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
@@ -2888,20 +2862,12 @@ H5D_create_chunk_mem_map_hyper(const fm_map *fm)
         chunk_info=H5SL_item(curr_node);
         assert(chunk_info);
 
-        /* Check if it's OK to share dataspace */
-        if(fm->mem_space_copy) {
-            /* Copy the memory dataspace & selection to be the chunk's dataspace & selection */
-            if((chunk_info->mspace = H5S_copy(fm->mem_space,FALSE))==NULL)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
-        } /* end if */
-        else {
-            /* Just point at the memory dataspace & selection */
-            /* (Casting away const OK -QAK) */
-            chunk_info->mspace=(H5S_t *)fm->mem_space;
+        /* Just point at the memory dataspace & selection */
+        /* (Casting away const OK -QAK) */
+        chunk_info->mspace=(H5S_t *)fm->mem_space;
 
-            /* Indicate that the chunk's memory space is shared */
-            chunk_info->mspace_shared=1;
-        } /* end else */
+        /* Indicate that the chunk's memory space is shared */
+        chunk_info->mspace_shared=1;
     } /* end if */
     else {
         /* Get bounding box for file selection */
