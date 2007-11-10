@@ -154,6 +154,7 @@ typedef struct H5D_shared_t {
     hid_t               type_id;        /* ID for dataset's datatype    */
     H5T_t              *type;           /* datatype of this dataset     */
     H5S_t              *space;          /* dataspace of this dataset    */
+    hbool_t             space_dirty;    /* Whether the dataspace info needs to be flushed to the file */
     hid_t               dcpl_id;        /* dataset creation property id */
     H5D_dcpl_cache_t    dcpl_cache;     /* Cached DCPL values */
     H5D_io_ops_t        io_ops;         /* I/O operations */
