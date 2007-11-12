@@ -851,7 +851,7 @@ test_4 (hid_t fapl)
     envval = HDgetenv("HDF5_DRIVER");
     if (envval == NULL)
         envval = "nomatch";
-    if (HDstrcmp(envval, "multi")) {
+    if (HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
         h5_fixname(FILENAME[3], fapl, filename, sizeof filename);
 
         if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
