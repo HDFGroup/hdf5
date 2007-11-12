@@ -2265,6 +2265,10 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
     HDassert(dset);
     HDassert(size);
 
+    /* Check if we are allowed to modify this file */
+    if(0 == (H5F_get_intent(dset->oloc.file) & H5F_ACC_RDWR))
+	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "no write intent on file")
+
     /* Check if the filters in the DCPL will need to encode, and if so, can they? */
     if(H5D_check_filters(dset) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't apply filters")
@@ -2298,9 +2302,6 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
          * Modify the dataset storage
          *-------------------------------------------------------------------------
          */
-        /* Mark the dataspace as dirty, for later writing to the file */
-        dset->shared->space_dirty = TRUE;
-
         /* Update the index values for the cached chunks for this dataset */
         if(H5D_CHUNKED == dset->shared->layout.type)
             if(H5D_istore_update_cache(dset, dxpl_id) < 0)
@@ -2337,6 +2338,9 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
             if(H5D_istore_initialize_by_extent(&io_info) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to initialize chunks ")
         } /* end if */
+
+        /* Mark the dataspace as dirty, for later writing to the file */
+        dset->shared->space_dirty = TRUE;
     } /* end if */
 
 done:
