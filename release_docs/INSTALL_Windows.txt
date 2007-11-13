@@ -22,8 +22,7 @@ Contents:
    Section VII   :  How to build Multi-threaded version of HDF5 library
    Section VIII  :  How to build HDF5 with Thread-Safe Feature
    Section IX    :  How to build HDF5 for 64-bit Windows
-   Section X     :  How to generate H5tinit.c
-   Section XI    :  Misc.
+   Section X     :  Misc.
 
 
 ========================================================================
@@ -238,14 +237,7 @@ STEP 1: Building HDF5 Libraries and Tools
       text files saved under c:\MyHDFstuff\hdf5\windows directory to the 
       corresponding directories under hdf5.
 
-   2. (Optional) Generate H5tinit.c
-   
-        HDF5 uses source file H5tinit.c to outline the specifics of internal
-        datatypes.  We provide a generic version of this file for common 
-        platforms.  It may be generated dynamically for non-standard 
-        configurations.  To generate H5tinit.c, please see read Section X.
-        
-   3. Open the HDF5 library project in Visual Studio
+   2. Open the HDF5 library project in Visual Studio
 
       Invoke Microsoft Visual Studio.  From the main menu, go to "File" and 
       select the "Open Solution" option. Then open the
@@ -254,12 +246,12 @@ STEP 1: Building HDF5 Libraries and Tools
       You should find Windows project files listed as "all", "big", etc. on the
       left.
 
-   4. (Optional) Disable HDF5 C++ and High level C++
+   3. (Optional) Disable HDF5 C++ and High level C++
    
       In HDF5 1.8, C++ and HL C++ libraries are built by default.  To opt-out,
       you must explicitly disable them.
 
-      4.1 Skip this step if you do want to build HDF5 High-Level C++ libraries
+      3.1 Skip this step if you do want to build HDF5 High-Level C++ libraries
 
           Go to "Project" and select "Project Dependencies".  Select "all", and 
           disable all of the following projects:
@@ -269,7 +261,7 @@ STEP 1: Building HDF5 Libraries and Tools
             hl_test_table_cpp
             hl_test_table_cppdll
       
-      4.2 Skip this step if you do want to build HDF5 High-Level libraries
+      3.2 Skip this step if you do want to build HDF5 High-Level libraries
 
           Go to "Project" and select "Project Dependencies".  Select "all", and 
           disable all of the project files listed in the previous step, as well
@@ -289,15 +281,15 @@ STEP 1: Building HDF5 Libraries and Tools
              hl_test_packetdll
 
 
-   5. Select "Build", then Select "Configuration Manager".
+   4. Select "Build", then Select "Configuration Manager".
 
-      5.1 To build debug static libraries, debug multithreaded DLLs, and tests:
+      4.1 To build debug static libraries, debug multithreaded DLLs, and tests:
 
       In "Active Solution Configuration", select "Debug". Select "Close". 
       Select "Build" -> "Build Solution" or "Rebuild Solution" to build debug 
       version of project "all".
 
-      5.2 To build release static libraries, multithreaded DLLs and tests:
+      4.2 To build release static libraries, multithreaded DLLs and tests:
 
       In "Active Solution Configuration", select "Release". Select "Close". 
       Select "Build" -> "Build Solution" or "Rebuild Solution" to build release 
@@ -1625,21 +1617,17 @@ Building:
     Therefore, you may follow the instructions in Section II with the following
     modifications.
     
-        1. It is very important that you generate H5tinit.c before building
-           HDF5.  The version we provide is for 32-bit versions of Windows,
-           and are not valid for x64.
-           
-        2. The x64 platform must be selected in the build configuration for
+        1. The x64 platform must be selected in the build configuration for
            debug and release versions.  Before building, go to "Build", 
            "Configuration Manager".  In the "Active solution platform" box, 
            select "x64", and press "Close".
            
-        3. If building Fortran libraries, the 64-bit Intel Fortran compiler
+        2. If building Fortran libraries, the 64-bit Intel Fortran compiler
            must be selected.  In Visual Studio, go to "Tools", "Options".  In
            the right pane, select "Intel(R) Fortran", "General".  In the 
            "Target Platform" box, select "x64".
            
-        4. 64-bit HDF5 must be built with 64-bit external libraries, unless
+        3. 64-bit HDF5 must be built with 64-bit external libraries, unless
            external library support is disabled.  You must add the include and
            library paths for x64 configurations as you have in the 
            "Prerequisites" section.  This is also true for Intel Fortran if
@@ -1663,36 +1651,7 @@ Installing:
  
  
 ========================================================================
-                  Section X: How to generate H5tinit.c
-========================================================================
-
-In HDF5, H5tinit.c is used to to describe the byte-order and floating point
-format of the current machine.  On Linux, this is automatically generated.
-On Windows, we provide it pre-genearated, although users may generate their own.
-
-It is recommended to generate H5tinit.c on your own if you are using any
-advanced configuration.  This might include:
-
-    - 64-bit Windows
-    - File systems other than NTFS
-    - Versions of Windows other than Windows XP
-    - Run-time libraries other than those distributed with Visual Studio
-    
-To generate your own H5tinit.c, follow the steps below.
-        
-    1. Open the solution typegen.sln from the folder .\windows\misc\typgen.  If
-       you plan on building Fortran libraries, open typegen_fortran.sln instead.
-        
-    2. Build solution
-    
-        You may build release or debug versions of the project, but make sure
-        the active platform configuration matches that of your system.  Go to
-        "Build", "Build soltuion".  This will generate and run the neccessary
-        scripts to produce H5tinit.c, and other configuration files for Fortran.
-        
- 
-========================================================================
-                            Section XI: Misc.
+                            Section X: Misc.
 ========================================================================
 
 1. Helpful Pointers

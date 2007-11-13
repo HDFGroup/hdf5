@@ -1818,8 +1818,6 @@
 ./windows/hl/tools/gifconvdll/h52gifdll.vcproj
 
 # Misc. Projects
-./windows/misc/typegen/typegen.sln
-./windows/misc/typegen/typegen_fortran.sln
 ./windows/misc/typegen/h5fort_type_defines/h5fort_type_defines.vfproj
 ./windows/misc/typegen/h5fortran_detect/h5fortran_detect.vfproj
 ./windows/misc/typegen/h5match_types/h5match_types.vcproj
@@ -2122,7 +2120,6 @@
 ./windows_vs6/misc/H5fortran_detect_gen/H5fortran_detect_gen.dsw
 ./windows_vs6/misc/matchtypegen/H5match_types.dsp
 ./windows_vs6/misc/matchtypegen/matchtypegen.dsw
-./windows_vs6/misc/typegen/typegen.dsw
 ./windows_vs6/misc/typegen/h5tinit/h5tinit.dsp
 ./windows_vs6/proj/all/all.dsp
 ./windows_vs6/proj/all/all.dsw

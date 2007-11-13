@@ -2031,6 +2031,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "h5tinit"="..\..\misc\typegen\h5tinit\h5tinit.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "h5unjam"="..\..\TOOLS\h5unjam\h5unjam.dsp" - Package Owner=<4>
 
 Package=<5>
@@ -2057,6 +2069,9 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name h5tinit
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -2291,6 +2306,9 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name h5tinit
+    End Project Dependency
 }}}
 
 ###############################################################################
