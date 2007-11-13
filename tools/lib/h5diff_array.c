@@ -18,6 +18,10 @@
 #include "ph5diff.h"
 #include "H5private.h"
 
+#include <sys/timeb.h>
+#include <time.h>
+
+
 /*-------------------------------------------------------------------------
  * printf formatting
  *-------------------------------------------------------------------------
@@ -123,6 +127,16 @@ static int     ull2float(unsigned long_long ull_value, float *f_value);
 static hsize_t character_compare(unsigned char *mem1,unsigned char *mem2,hsize_t i,int rank,hsize_t *dims,hsize_t *acc,hsize_t *pos,diff_opt_t *options,const char *obj1,const char *obj2,int *ph);
 static hsize_t character_compare_opt(unsigned char *mem1,unsigned char *mem2,hsize_t i,int rank,hsize_t *dims,hsize_t *acc,hsize_t *pos,diff_opt_t *options,const char *obj1,const char *obj2,int *ph);
 
+
+typedef enum dtype_t 
+{
+    FLT_FLOAT, FLT_DOUBLE,
+#if H5_SIZEOF_LONG_DOUBLE !=0
+    FLT_LDOUBLE,
+#endif
+} dtype_t;
+
+static int my_isnan(dtype_t type, void *val);
 
 /*-------------------------------------------------------------------------
  *
@@ -251,6 +265,7 @@ hsize_t diff_array( void *_mem1,
  hsize_t       i;
  int           j;
 
+
  /* get the size. */
  size = H5Tget_size( m_type );
 
@@ -298,8 +313,43 @@ hsize_t diff_array( void *_mem1,
  
   case H5T_FLOAT:
 
-   if (H5Tequal(m_type, H5T_NATIVE_FLOAT))
-    nfound=diff_float(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
+      if (H5Tequal(m_type, H5T_NATIVE_FLOAT))
+      {
+
+#if defined (H5DIFF_DO_TIME)
+          int time;
+
+     #if defined (WIN32)
+          struct _timeb *tbstart = malloc(sizeof(struct _timeb));
+	      struct _timeb *tbstop = malloc(sizeof(struct _timeb));
+          _ftime( tbstart);
+     #else
+          struct timeb *tbstart = malloc(sizeof(struct timeb));
+	      struct timeb *tbstop = malloc(sizeof(struct timeb));
+          ftime( tbstart);
+     #endif
+
+#endif
+          
+         
+          
+          nfound=diff_float(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
+
+
+#if defined (H5DIFF_DO_TIME)
+
+      #if defined (WIN32)
+          _ftime( tbstop );
+      #else
+          ftime( tbstop );
+      #endif
+
+          time = tbstop->time - tbstart->time;
+          printf(" TIME = %d\n", time );
+
+#endif
+          
+      }
    else if (H5Tequal(m_type, H5T_NATIVE_DOUBLE))
     nfound=diff_double(mem1,mem2,nelmts,hyper_start,rank,dims,acc,pos,options,name1,name2,&ph);
    break;
@@ -2598,6 +2648,7 @@ hsize_t diff_float(unsigned char *mem1,
         {
             memcpy(&temp1_float, mem1, sizeof(float));
             memcpy(&temp2_float, mem2, sizeof(float));
+
             
             if (equal_float(temp1_float,temp2_float)==FALSE)
             {
@@ -4691,12 +4742,59 @@ hbool_t equal_double(double value, double expected)
 }
 
 
+
+/*-------------------------------------------------------------------------
+ * Function:    equal_float
+ *
+ * Purpose:     use a relative error formula to deal with floating point 
+ *              uncertainty 
+ *
+ * Programmer:  pvn
+ *              October 24, 2006
+ *
+ * Modifications:
+ *  8/1/2007. handle NaNs
+ *
+ *-------------------------------------------------------------------------
+ */
 static 
 hbool_t equal_float(float value, float expected)                               
 {
     int both_zero;
     int is_zero;
 
+/*-------------------------------------------------------------------------
+ * detect NaNs
+ *-------------------------------------------------------------------------
+ */
+    int isnan1 = my_isnan(FLT_FLOAT,&value);
+    int isnan2 = my_isnan(FLT_FLOAT,&expected);
+
+ 
+
+   /*-------------------------------------------------------------------------
+    * we consider NaN == NaN to be true 
+    *-------------------------------------------------------------------------
+    */
+    if ( isnan1 && isnan2 )
+    {
+        return TRUE;
+    }
+
+   /*-------------------------------------------------------------------------
+    * one is a NaN, do not compare but assume difference
+    *-------------------------------------------------------------------------
+    */
+    if ( (isnan1 && !isnan2) || ( !isnan1 && isnan2 ) )
+    {
+        return FALSE;
+    }
+
+   /*-------------------------------------------------------------------------
+    * both are not NaNs, compare
+    *-------------------------------------------------------------------------
+    */
+    
     BOTH_ZERO(value,expected)
     if (both_zero)
         return TRUE;
@@ -4713,3 +4811,131 @@ hbool_t equal_float(float value, float expected)
 }
 
 
+
+/*-------------------------------------------------------------------------
+ * Function:	my_isnan
+ *
+ * Purpose:	Determines whether VAL points to NaN.
+ *
+ * Return:	TRUE or FALSE
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, July  6, 1998
+ *
+ * Modifications:
+ *  Pedro Vicente, 12 October 2007.
+ *  Add a string detection type for WIN32
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+my_isnan(dtype_t type, void *val)
+{
+    int retval = 0;
+    char s[256];
+    
+    if (FLT_FLOAT==type) 
+    {
+        float x;
+        HDmemcpy(&x, val, sizeof(float));
+        retval = (x!=x);
+
+
+ 
+    } 
+    else if (FLT_DOUBLE==type) 
+    {
+        double x;
+        HDmemcpy(&x, val, sizeof(double));
+        retval = (x!=x);
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE && H5_SIZEOF_LONG_DOUBLE!=0
+    } 
+    else if (FLT_LDOUBLE==type) 
+    {
+        long double x;
+        HDmemcpy(&x, val, sizeof(long double));
+        retval = (x!=x);
+#endif
+    } 
+    else 
+    {
+        return 0;
+    }
+    
+   /*
+    * Sometimes NaN==NaN (e.g., DEC Alpha) so we try to print it and see if
+    * the result contains a NaN string.
+    */
+    if (!retval) 
+    {
+        if (FLT_FLOAT==type) 
+        {
+            float x;
+            HDmemcpy(&x, val, sizeof(float));
+            sprintf(s, "%g", x);
+
+
+        } 
+        else if (FLT_DOUBLE==type) 
+        {
+            double x;
+            HDmemcpy(&x, val, sizeof(double));
+            sprintf(s, "%g", x);
+#if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE && H5_SIZEOF_LONG_DOUBLE!=0
+        } 
+        else if (FLT_LDOUBLE==type) 
+        {
+            long double x;
+            HDmemcpy(&x, val, sizeof(long double));
+            sprintf(s, "%Lg", x);
+#endif
+        } 
+        else 
+        {
+            return 0;
+        }
+     
+
+        if ( HDstrstr(s, "NaN") || 
+             HDstrstr(s, "NAN") || 
+             HDstrstr(s, "nan") || 
+             HDstrstr(s, "-1.#IND") /* WIN32 */ 
+           )
+        {
+
+            retval = 1;
+        }
+
+
+
+
+    }
+    
+#ifdef H5_VMS
+    /* For "float" and "double" on OpenVMS/Alpha, NaN is
+    * actually a valid value of maximal value.*/
+    if(!retval) 
+    {
+        if (FLT_FLOAT==type) 
+        {
+            float x;
+            HDmemcpy(&x, val, sizeof(float));
+            retval = (x==FLT_MAX || x==-FLT_MAX);
+        } else if (FLT_DOUBLE==type) {
+            double x;
+            HDmemcpy(&x, val, sizeof(double));
+            retval = (x==DBL_MAX || x==-DBL_MAX);
+        } else 
+        {
+            return 0;
+        }
+    }
+#endif /*H5_VMS*/
+    
+    return retval;
+}
+
+
+
+
+ 
