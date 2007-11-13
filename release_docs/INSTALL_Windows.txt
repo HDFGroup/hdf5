@@ -74,14 +74,14 @@ Preconditions:
       6.1 HDF5 uses Zlib version 1.2.3 for compression and Zlib is NOT
           distributed with HDF5 library in 1.8.x release. To use Zlib library, 
           you have to install your own Zlib DLL library or go to 
-          ftp://ftp.hdfgroup.org/lib-external/zlib/1.2/bin/zlib123-windows.zip
+          ftp://ftp.hdfgroup.org/lib-external/zlib/1.2/bin/windows
           to download the Zlib library.
 
 
       6.2 HDF5 uses Szip version 2.0 for compression and Szip compression 
           software is provided with HDF5 products in 1.8.0 release.  To use 
           Szip 2.0 library, you can download Szip source codes and binaries from
-          ftp://ftp.hdfgroup.org/lib-external/szip/2.0/bin/windows
+          ftp://ftp.hdfgroup.org/lib-external/szip/2.1/bin/windows
 
           Please note that Szip is not a totally open-source free software.  
           For licensing issue of Szip, please check "Licensing terms" at
@@ -1087,8 +1087,8 @@ Warning: When you modify the H5pubconf.h file as described below, DO NOT just
       3.1 Download Szip library without encoder
 
           Szip library is different if you want to disable Szip encoder.  
-          Download szip_noencoder binaries from
-          ftp://ftp.hdfgroup.org/lib-external/szip/2.0/bin/windows.  The Szip 
+          Download szip-noenc binaries from
+          ftp://ftp.hdfgroup.org/lib-external/szip/2.1/bin/windows.  The Szip 
           library and header path should also be set up accordingly (refer to 
           precondition 6).
 
@@ -1118,7 +1118,7 @@ Notes:  1. For Intel Compiler users, Intel fortran Compiler 9.1 is currently
      Szip source codes or binaries for Intel compiler can be downloaded
      from the following address:
 
-     ftp://ftp.hdfgroup.org/lib-external/szip/2.0/bin/windows.
+     ftp://ftp.hdfgroup.org/lib-external/szip/2.1/bin/windows.
 
      b. Set up path for external libraries and headers
 
@@ -1607,13 +1607,7 @@ Visual Studio 2005 for 64-bit builds.
 
 Notes:
   
-    1. 32-bit binaries cannot be linked with 64-bit binaries, and therefore
-       external libraries (szip and zlib) and currently not supported.  In the
-       future we plan to build these libraries natively and offer support.
-       
-    2. Fortran libraries are currently untested and unsupported.
-    
-    3. Building 64-bit HDF5 from a 32-bit machine is also unsupported.  Because 
+    1. Building 64-bit HDF5 from a 32-bit machine is also unsupported.  Because 
        we generate H5tinit.c from a generated 64-bit executable, this must be
        done on a 64-bit machine.
     
