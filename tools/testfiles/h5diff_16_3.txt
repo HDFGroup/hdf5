@@ -1,5 +1,5 @@
 #############################
-Expected output for 'h5diff h5diff_basic1.h5 h5diff_basic1.h5 -v -p 0.02 g1/dset9 g1/dset10'
+Expected output for 'h5diff -v -p 0.02 h5diff_basic1.h5 h5diff_basic1.h5 g1/dset9 g1/dset10'
 #############################
 dataset: </g1/dset9> and </g1/dset10>
 size:           [3x2]           [3x2]

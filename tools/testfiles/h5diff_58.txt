@@ -1,5 +1,5 @@
 #############################
-Expected output for 'h5diff h5diff_dset1.h5 h5diff_dset2.h5 -v refreg'
+Expected output for 'h5diff -v h5diff_dset1.h5 h5diff_dset2.h5 refreg'
 #############################
 dataset: </refreg> and </refreg>
 Referenced dataset      5904            5904

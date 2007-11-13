@@ -1,5 +1,5 @@
 #############################
-Expected output for 'h5diff h5diff_dtypes.h5 h5diff_dtypes.h5 -v dset6a dset6b'
+Expected output for 'h5diff -v h5diff_dtypes.h5 h5diff_dtypes.h5 dset6a dset6b'
 #############################
 dataset: </dset6a> and </dset6b>
 size:           [3x2]           [3x2]

@@ -1,5 +1,5 @@
 #############################
-Expected output for 'h5diff h5diff_types.h5 h5diff_types.h5 -v t1 t2'
+Expected output for 'h5diff -v h5diff_types.h5 h5diff_types.h5 t1 t2'
 #############################
 datatype: </t1> and </t2>
 1 differences found

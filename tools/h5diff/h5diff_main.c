@@ -66,14 +66,14 @@
 int main(int argc, const char *argv[])
 {
     int        ret;
-    const char *fname1 = NULL;
-    const char *fname2 = NULL;
-    const char *objname1  = NULL;
-    const char *objname2  = NULL;
+    char       *fname1 = NULL;
+    char       *fname2 = NULL;
+    char       *objname1  = NULL;
+    char       *objname2  = NULL;
     hsize_t    nfound=0;
     diff_opt_t options;
 
-    parse_input(argc, argv, &fname1, &fname2, &objname1, &objname2, &options);
+    parse_command_line(argc, argv, &fname1, &fname2, &objname1, &objname2, &options);
 
     nfound = h5diff(fname1,fname2,objname1,objname2,&options);
 

@@ -1,7 +1,7 @@
 #############################
 Expected output for 'h5diff h5diff_basic1.h5'
 #############################
-usage: h5diff file1 file2 [OPTIONS] [obj1[obj2]] 
+usage: h5diff [OPTIONS] file1 file2 [obj1[obj2]] 
 
 file1             File name of the first HDF5 file
 file2             File name of the second HDF5 file
@@ -51,3 +51,4 @@ Note)  file1 and file2 can be the same file. Use
    to compare '/g1/dset1' and '/g1/dset2' in the same file
 
 If no objects are specified, h5diff only compares objects with the same absolute path in both files. The compare criteria is: 1) datasets: numerical array differences 2) groups: name string difference 3) datatypes: the return value of H5Tequal 2) links: name string difference of the linked value
+h5diff error: missing file names

@@ -19,16 +19,46 @@
 #include "h5diff_common.h"
 #include "h5tools_utils.h"
 
+int check_n_input( const char* );
+int check_p_input( const char* );
+int check_d_input( const char* );
+
+
+/* module-scoped variables */
+const char  *progname = "h5diff";
+
+/*
+ * Command-line options: The user can specify short or long-named
+ * parameters.
+ */
+static const char *s_opts = "hVrvqn:d:p:";
+static struct long_options l_opts[] = {
+    { "help", no_arg, 'h' },
+    { "version", no_arg, 'V' },
+    { "report", no_arg, 'r' },
+    { "verbose", no_arg, 'v' },
+    { "quiet", no_arg, 'q' },
+    { "count", require_arg, 'n' },
+    { "delta", require_arg, 'd' },
+    { "relative", require_arg, 'p' },
+    { NULL, 0, '\0' }
+};
+
 
 /*-------------------------------------------------------------------------
- * Function: parse_input
+ * Function: parse_command_line
  *
  * Purpose: parse command line input
  *
  *-------------------------------------------------------------------------
  */
+#if 0
+#define OLD
+#endif
 
-void parse_input(int argc, 
+#if defined (OLD)
+
+void parse_command_line(int argc, 
                  const char* argv[], 
                  const char** fname1, 
                  const char** fname2,
@@ -108,7 +138,7 @@ void parse_input(int argc,
      if ( i<argc-1 &&'-' != argv[i+1][0] )
      {
       options->d=1;
-      if ( check_f_input(argv[i+1])==-1)
+      if ( check_p_input(argv[i+1])==-1)
       {
        printf("<-d %s> is not a valid option\n", argv[i+1] );
        usage();
@@ -126,7 +156,7 @@ void parse_input(int argc,
      if ( i<argc-1 &&'-' !=argv[i+1][0] )
      {
       options->p=1;
-      if ( check_f_input(argv[i+1])==-1)
+      if ( check_p_input(argv[i+1])==-1)
       {
        printf("<-p %s> is not a valid option\n", argv[i+1] );
        usage();
@@ -189,6 +219,118 @@ void parse_input(int argc,
 
  }/*for*/
 }
+
+#else
+
+void parse_command_line(int argc, 
+                        const char* argv[], 
+                        const char** fname1, 
+                        const char** fname2,
+                        const char** objname1, 
+                        const char** objname2, 
+                        diff_opt_t* options)
+{
+    
+    int opt;
+
+    /* process the command-line */
+    memset(options, 0, sizeof (diff_opt_t));
+    
+    /* parse command line options */
+    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) 
+    {
+        switch ((char)opt) 
+        {
+        default:
+            usage();
+            h5diff_exit(EXIT_FAILURE);
+        case 'h':
+            usage();
+            h5diff_exit(EXIT_SUCCESS);
+        case 'V':
+            print_version(progname);
+            h5diff_exit(EXIT_SUCCESS);
+        case 'v':
+            options->m_verbose = 1;
+            break;
+        case 'q':
+            /* use quiet mode; supress the message "0 differences found" */
+            options->m_quiet = 1;
+            break;
+        case 'r':
+            options->m_report = 1;
+            break;
+        case 'd':
+            options->d=1;
+            
+            if ( check_d_input( opt_arg )==-1)
+            {
+                printf("<-d %s> is not a valid option\n", opt_arg );
+                usage();
+                h5diff_exit(EXIT_FAILURE);
+            }
+            options->delta = atof( opt_arg );
+            break;
+
+        case 'p':
+            
+            options->p=1;
+            if ( check_p_input( opt_arg )==-1)
+            {
+                printf("<-p %s> is not a valid option\n", opt_arg );
+                usage();
+                h5diff_exit(EXIT_FAILURE);
+            }
+            options->percent = atof( opt_arg );
+            break;
+
+        case 'n':
+            
+            options->n=1;
+            if ( check_n_input( opt_arg )==-1)
+            {
+                printf("<-n %s> is not a valid option\n", opt_arg );
+                usage();
+                h5diff_exit(EXIT_FAILURE);
+            }
+            options->count = atol( opt_arg );
+            
+            break;
+        }
+    }
+    
+    /* check for file names to be processed */
+    if (argc <= opt_ind || argv[ opt_ind + 1 ] == NULL) 
+    {
+        error_msg(progname, "missing file names\n");
+        usage();
+        h5diff_exit(EXIT_FAILURE);
+    }
+
+    *fname1 = argv[ opt_ind ];
+    *fname2 = argv[ opt_ind + 1 ];
+    *objname1 = argv[ opt_ind + 2 ];
+
+    if ( *objname1 == NULL )
+    {
+        *objname2 = NULL;
+        return;
+    }
+
+    if ( argv[ opt_ind + 3 ] != NULL) 
+    {
+        *objname2 = argv[ opt_ind + 3 ];
+    }
+    else
+    {
+        *objname2 = *objname1;
+    }
+
+   
+}
+
+
+#endif
 
 /*-------------------------------------------------------------------------
  * Function: print_info
@@ -259,9 +401,9 @@ int check_n_input( const char *str )
 }
 
 /*-------------------------------------------------------------------------
- * Function: check_f_input
+ * Function: check_p_input
  *
- * Purpose: check for a valid floating point input
+ * Purpose: check for a valid p option input
  *
  * Return: 1 for ok, -1 for fail
  *
@@ -273,7 +415,7 @@ int check_n_input( const char *str )
  *
  *-------------------------------------------------------------------------
  */
-int check_f_input( const char *str )
+int check_p_input( const char *str )
 {
  double x;
 
@@ -285,7 +427,40 @@ int check_f_input( const char *str )
   return -1;
 
  x=atof(str);
- if (x==0)
+ if (x<=0)
+  return -1;
+
+ return 1;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: check_d_input
+ *
+ * Purpose: check for a valid d option input
+ *
+ * Return: 1 for ok, -1 for fail
+ *
+ * Date: November 11, 2007
+ *
+ * Comments:
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int check_d_input( const char *str )
+{
+ double x;
+
+ /*
+ the atof return value on a hexadecimal input is different
+ on some systems; we do a character check for this
+ */
+ if (strlen(str)>2 && str[0]=='0' && str[1]=='x')
+  return -1;
+
+ x=atof(str);
+ if (x <=0)
   return -1;
 
  return 1;
@@ -302,7 +477,7 @@ int check_f_input( const char *str )
  */
 void usage(void)
 {
- printf("usage: h5diff file1 file2 [OPTIONS] [obj1[obj2]] \n");
+ printf("usage: h5diff [OPTIONS] file1 file2 [obj1[obj2]] \n");
  printf("\n");
  printf("file1             File name of the first HDF5 file\n");
  printf("file2             File name of the second HDF5 file\n");
@@ -356,12 +531,6 @@ void usage(void)
  printf("1) datasets: numerical array differences 2) groups: name string difference ");
  printf("3) datatypes: the return value of H5Tequal 2) links: name string difference of the linked value\n");
 
- #ifdef H5_HAVE_PARALLEL
- if(g_Parallel)
-  h5diff_exit(0);
- else
-#endif
-  exit(0);
 }
 
 /*-------------------------------------------------------------------------
