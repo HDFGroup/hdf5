@@ -54,14 +54,14 @@ Preconditions
       4.1 HDF5 uses Zlib version 1.2.3 for compression and Zlib is NOT
           distributed with HDF5 library in 1.6.x release. To use Zlib
           library, you have to install your own Zlib DLL library or go
-          to ftp://ftp.hdfgroup.org/lib-external/zlib/1.2/bin 
+          to ftp://ftp.hdfgroup.org/lib-external/zlib/1.2/bin/windows 
           to download the Zlib library.
       
       4.2 HDF5 uses Szip version 2.0 for compression and Szip
           compression software is provided with HDF5 products starting
           from 1.6.0 release.  To use Szip 2.0 library, you can
           download Szip source codes and binaries from
-          ftp://ftp.hdfgroup.org/lib-external/szip/2.0/bin/windows
+          ftp://ftp.hdfgroup.org/lib-external/szip/2.1/bin/windows
 
           Please note that Szip is not a totally open-source free
           software.  For licensing issue of Szip, please check 
@@ -1052,7 +1052,7 @@ Section V: How to disable Gzip(Zlib)/Szip compression
 
           Szip library is different if you want to disable Szip 
           encoder. Download szip_noencoder binaries from
-          ftp://ftp.hdfgroup.org/lib-external/szip/2.0/bin/windows.
+          ftp://ftp.hdfgroup.org/lib-external/szip/2.1/bin/windows.
           The Szip library and header path should also be set up
           accordingly (refer to precondition 6).
    
@@ -1121,7 +1121,7 @@ Section VII: Building with Intel Fortran 9.1
      Szip source codes or binaries for Intel compiler can be downloaded
      from the following address:
 
-     ftp://ftp.hdfgroup.org/lib-external/szip/2.0/bin/windows.
+     ftp://ftp.hdfgroup.org/lib-external/szip/2.1/bin/windows.
 
      b. Set up path for external libraries and headers
 
