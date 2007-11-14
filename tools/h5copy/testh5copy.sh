@@ -125,9 +125,9 @@ H5DIFFTEST()
 {
     VERIFY  $@
     if [ "`uname -s`" = "TFLOPS O/S" ]; then
-        $RUNSERIAL $H5DIFF_BIN $@ -q
+        $RUNSERIAL $H5DIFF_BIN -q $@ 
     else
-        $RUNSERIAL $H5DIFF_BIN "$@" -q
+        $RUNSERIAL $H5DIFF_BIN -q "$@" 
     fi
     RET=$?
     if [ $RET != 0 ] ; then
