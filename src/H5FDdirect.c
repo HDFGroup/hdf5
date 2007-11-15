@@ -976,7 +976,7 @@ H5FD_direct_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, ha
 	     * copy buffer size. Make a bigger buffer for aligned I/O if size is 
 	     * smaller than maximal copy buffer. */
 	    if(size < _cbsize)
-	    	alloc_size = (size / _fbsize + 1) * _fbsize + _fbsize;
+	    	alloc_size = ((size / _fbsize) * _fbsize) + _fbsize;
 	    else
 	    	alloc_size = _cbsize;
 	    if (HDposix_memalign(&copy_buf, _boundary, alloc_size) != 0)
@@ -1141,7 +1141,7 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
 	     * smaller than maximal copy buffer.
 	     */
 	    if(size < _cbsize) 
-	    	alloc_size = (size / _fbsize + 1) * _fbsize + _fbsize;
+	    	alloc_size = ((size / _fbsize) * _fbsize) + _fbsize;
 	    else
 		alloc_size = _cbsize;
 
