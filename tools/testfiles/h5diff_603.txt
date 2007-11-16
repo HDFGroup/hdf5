@@ -3,27 +3,23 @@ Expected output for 'h5diff -d -4 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/
 #############################
 <-d -4> is not a valid option
 usage: h5diff [OPTIONS] file1 file2 [obj1[obj2]] 
+  file1                    File name of the first HDF5 file
+  file2                    File name of the second HDF5 file
+  [obj1]                   Name of an HDF5 object, in absolute path
+  [obj2]                   Name of an HDF5 object, in absolute path
+  OPTIONS
+   -h, --help              Print a usage message and exit
+   -V, --version           Print version number and exit
+   -r, --report            Report mode. Print differences
+   -v, --verbose           Verbose mode. Print differences, list of objects
+   -q, --quiet             Quiet mode. Do not do output
+   -n C, --count=C         Print differences up to C number
+   -d D, --delta=D         Print difference when greater than limit D
+   -p R, --relative=R      Print difference when greater than relative limit R
 
-file1             File name of the first HDF5 file
-file2             File name of the second HDF5 file
-[obj1]            Name of an HDF5 object, in absolute path
-[obj2]            Name of an HDF5 object, in absolute path
-[OPTIONS] are:
-[-h]              Print out this information
-[-V]              Print HDF5 library version number and exit
-[-r]              Report mode. Print differences
-[-v]              Verbose mode. Print differences, list of objects, warnings
-[-q]              Quiet mode. Do not do output
-[-n count]        Print difference up to count number
-[-d delta]        Print difference when it is greater than limit delta
-[-p relative]     Print difference when it is greater than a relative limit
-
-Items in [] are optional
-[obj1] and [obj2] are HDF5 objects (datasets, groups, datatypes or links)
-The 'count' value must be a positive integer
-The 'delta' and 'relative' values must be positive numbers
-The -d compare criteria is |a - b| > delta
-The -p compare criteria is |(b-a)/a| > relative
+  C - is a positive integer
+  D - is a positive number. Compare criteria is |a - b| > D
+  R - is a positive number. Compare criteria is |(b-a)/a| > R
 
 h5diff has four modes of output:
  Normal mode: print the number of differences found and where they occured

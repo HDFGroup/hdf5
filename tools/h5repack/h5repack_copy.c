@@ -437,6 +437,9 @@ int do_copy_objects(hid_t fidin,
              */
             case H5TRAV_TYPE_DATASET:
 
+                if (options->verbose)
+                    printf(FORMAT_OBJ,"dset",travt->objs[i].name );
+
                 has_filter = 0;
 
                 /* early detection of references */
@@ -777,6 +780,9 @@ int do_copy_objects(hid_t fidin,
              */
             case H5TRAV_TYPE_NAMED_DATATYPE:
 
+                if(options->verbose)
+                    printf(FORMAT_OBJ, "type", travt->objs[i].name);
+
                 if((type_in = H5Topen2(fidin, travt->objs[i].name, H5P_DEFAULT)) < 0)
                     goto error;
 
@@ -798,8 +804,7 @@ int do_copy_objects(hid_t fidin,
                 if(H5Tclose(type_out) < 0)
                     goto error;
 
-                if(options->verbose)
-                    printf(FORMAT_OBJ, "type", travt->objs[i].name);
+              
 
                 break;
 
@@ -816,6 +821,10 @@ int do_copy_objects(hid_t fidin,
             case H5TRAV_TYPE_LINK:
             case H5TRAV_TYPE_UDLINK:
             {
+
+                if(options->verbose)
+                    printf(FORMAT_OBJ, "link", travt->objs[i].name);
+
                 if(H5Lcopy(fidin, travt->objs[i].name,fidout, travt->objs[i].name, H5P_DEFAULT, H5P_DEFAULT) < 0)
                     goto error;
 

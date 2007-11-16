@@ -122,9 +122,9 @@ TOOLTEST()
     outfile=$path/out.$1
     shift
     if [ "`uname -s`" = "TFLOPS O/S" ]; then
-     $RUNSERIAL $H5REPACK_BIN -i $infile -o $outfile $@
+     $RUNSERIAL $H5REPACK_BIN $@ $infile $outfile
     else
-     $RUNSERIAL $H5REPACK_BIN -i $infile -o $outfile "$@"
+     $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
     fi
 
     RET=$?
