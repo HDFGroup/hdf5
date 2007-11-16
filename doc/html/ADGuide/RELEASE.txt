@@ -1,11 +1,11 @@
-HDF5 version 1.6.6 released on Thu Aug 16 11:17:10 CDT 2007
+HDF5 version 1.6.6-post0 released on Thu Nov 15 21:35:09 CST 2007
 ================================================================================
 
 INTRODUCTION
 ============
-This document describes the differences between HDF5-1.6.5 and
-HDF5-1.6.6  It contains information on the platforms tested and
-known problems in HDF5-1.6.6. For more details, check the HISTORY.txt
+This document describes the differences between HDF5-1.6.6 and
+HDF5-1.6.6-*  It contains information on the platforms tested and
+known problems in HDF5-1.6.6-*. For more details, check the HISTORY.txt
 file in the HDF5 source.
 
 HDF5 documentation can be found in the distributed release source 
@@ -31,7 +31,7 @@ CONTENTS
 ========
 - New Features
 - Support for New Platforms, Languages and Compilers
-- Bug Fixes since HDF5-1.6.5
+- Bug Fixes since HDF5-1.6.6
 - Documentation
 - Platforms Tested
 - Supported Configuration Features Summary
@@ -42,178 +42,62 @@ New Features
 ============
     Configuration:
     -------------------------
-        - HDF5 now uses autoconf 2.61 to generate configure. MAM - 2007/7/25.
 
     Source code distribution
     ========================
     Library:
     --------
-        - None
 
     Parallel Library:
     -----------------
-        - None
       
     Tools:
     ------
-        - h52gif and gif2h5: Both these tools were revised to include High
-            Level Image API support.  Tests were added to /hl/tools/gif2h5.
-            PVN - 2007/04/13
-        - h5dump: Added support for double long type H5T_NATIVE_LDOUBLE. 
-            PVN - 2007/03/13
-        - h5dump: Added support for binary output; see usage. PVN 2007/03/13
-        - h5repack: Added support for reading and writing by hyperslabs for
-            large files. PVN - 2007/03/01
-        - h5repack: A new option allows the copy to use the source file type
-            (default) instead of the previous conversion to native type. 
-            PVN - 2007/03/01
-        - h5repack: Added output of the percentage of compression achieved. 
-            PVN - 2007/03/01
-        - h5diff: Added support for comparing dataset regions. PVN - 2007/02/20
-        - h5diff: Added support for reading and comparing by hyperslabs for 
-            large files.  PVN - 2007/02/20
-        - h5diff: Added printing of dataset dimensions along with dataset name. 
-            PVN - 2007/02/19
 
     F90 API:
     --------
-        - None
 
     C++ API:
     --------
-        - Added support for Szip: DSetCreatPropList::setSzip - BMR 2007/01/24
 
 
 Support for New Platforms, Languages and Compilers
 ==================================================
-        - Added support for MAC Intel (Darwin 8.8.2)  (gcc 4.0.1 and g95 0.91)
-                                EIP - 2007/02/13
-        - Added support for GNU C compiler version 4.2.1 for FreeBSD 6.2 
-          (32- and 64-bit)
 
 
-Bug Fixes since HDF5-1.6.5 Release
+Bug Fixes since HDF5-1.6.6 Release
 ==================================
 
     Library
     -------
-        - Fixed several bugs with writing fill values for datasets that have
-            a variable-length datatype or component datatype.  QAK - 2007/06/19
-        - STDIO driver didn't support files bigger than 2GB because the OFFSET
-            parameter of fseek is of type LONG INT, not big enough for big 
-            files.  Use fseeko instead for big files if it's available on the 
-            system.  SLU - 2007/4/5
-        - Relaxed restrictions on attribute operations to allow a file ID to
-            be used as the "location ID".  If a file ID is used, the attribute
-            operation will occur on the root group of the file.
-            QAK - 2007/02/09
-        - Fixed a bug in H5Sselect_valid() that caused an incorrect value to
-            be returned (0) instead of FAIL on error conditions such as the
-            selection or extent not being defined. CMC - 2007/01/05
-        - Fixed potential file corruption bug which could overwrite a portion
-            of an object's header when an attribute was renamed.  If the new
-            name for the attribute was longer than the old name, it was possible
-            that the attribute would grow enough to overwrite another message
-            in the object's header.  QAK - 2007/01/02
-        - Fixed file corruption bug which could write an incorrect number of
-            messages to an object's header under certain circumstances.
-            Generally, the sequence of actions to generate this bug looks
-            like this:
-                - Create an object.
-                - Close the file.
-                - Re-open the file.
-                - Add 2 (or more) attributes to the object.
-                - Close the file.
-                - Re-open the file.
-                - Delete one of the attributes on the object.
-                - Add a smaller attribute to the object.
-                - Delete the smaller atttribute on the object.
-                - Add a larger attribute on the object.
+        - Fixed bug in H5Epush() which was clearing the error stack before
+            pushing new error value.  QAK - 2007/08/23
+        - Fixed bug in H5Ewalk() which was not passing back the return value
+            from error stack walking callback.  QAK - 2007/08/23
 
-            After this, the number of header messages stored for the object
-            will be off by one.  Other sequences of modifying attributes on an
-            object could also trigger this bug.  If you are opening an
-            object and the bottom few messages of the HDF5 error stack
-            resembles the following, the object has been affected by this bug:
-
-              #007: ../../hdf5_v1.6/src/H5C.c line 3887 in H5C_load_entry(): unable to load entry
-                major(08): Meta data cache layer
-                minor(40): Unable to load metadata into cache
-              #008: ../../hdf5_v1.6/src/H5Ocache.c line 332 in H5O_load(): corrupt object header - too few messages
-                major(12): Object header layer
-                minor(40): Unable to load metadata into cache
-
-            Specifically, "corrupt object header" is the best string to search
-            for in the HDF5 error stack output.
-
-            If your files have been affected by this bug, or you are concerned
-            that your files might have been, please contact the HDF Helpdesk
-            at help@hdfgroup.org for a tool to detect and repair files
-            affected by this problem.  QAK - 2006/6/16
-
-        - Fixed various problems with retrieving names of objects, especially
-            with mounted files.  QAK - 2005/12/25
 
     Configuration
     -------------
-        - Changed to default to --disable-shared if parallel is enabled. 
-            AKC - 2007/5/12
-        - Corrected a coding error in configure when it tries to locate the
-          needed MPI and MPI-IO library for the fortran interface. 
-            AKC - 007/5/9.
-        - Changed default fortran compiler to g95 when gcc is used. 
-            AKC - 007/2/17.
-        - Configure can now use any tr command.  No more need for
-            defining the variable TR, nor is it supported.  AKC - 2006/05/20
+
 
     Performance
     -------------
-        - None
    
+
     Tools
     -----
-        - Fixed a bug in h5dump regarding the display of named datatypes
-            attributes. PVN - 2007/03/13
-        - Fixed a bug in h5dump regarding the display of group comments. 
-            PVN - 2007/03/13
-        - Fixed a bug in h5dump regarding the display of hardlinks pointing 
-            to the root group.  PVN - 2007/03/13
-        - Fixed a bug in the h5diff percentage option -p.  PVN - 2007/03/05
-        - Fixed a bug in h5dump that caused array indices greater than 2^32-1
-            not to be printed correctly.  PVN - 2007/2/19
+
 
     Documentation 
     ------------- 
-        - Corrected errors and extended the descriptions in Reference Manual 
-            entries for several functions.  
+
 
     F90 API
     -------
-        - None
+
                                 
     C++ API
     -------
-          - Changed
-                  StrType::StrType(const size_t& size);
-            to
-                  StrType::StrType(const int dummy, const size_t& size);
-            because the first one clashed with
-                  StrType::StrType(const hid_t existing_id); - BMR 2007/05/03
-          - Wrappers of H5Rcreate had incorrect prototypes.  Added these
-            overloaded functions:
-                  IdComponent::reference(void* ref, const char* name, DataSpace&
-                          dataspace, H5R_type_t ref_type = H5R_DATASET_REGION)
-                  IdComponent::void reference(void* ref, const char* name)
-                  IdComponent::reference(void* ref, const H5std_string& name)
-            and will remove these incorrect member functions:
-                  DataSet::Reference
-                  DataType::Reference
-                  Group::Reference
-                  H5File::Reference
-          - Added wrappers for H5Rdereference as constructors:
-                  DataSet(IdComponent& obj, void* ref);
-                  Group(IdComponent& obj, void* ref);
-                  DataType(IdComponent& obj, void* ref);
 
 
 Documentation
@@ -410,6 +294,28 @@ Footnotes:
 
 Known Problems
 ==============
+* We discovered two problems when running collective IO parallel HDF5 tests
+  with chunking storage on  ChaMPIon MPI compiler on tungsten, a linux
+  cluster at NCSA.
+  Under some complex selection cases, 
+  1) MPI_Get_element returns the wrong value.
+  2) MPI_Type_struct also generates wrong derived data type and corrupt data
+     may be generated.
+  This only happens when turning on collective IO with chunking storage
+  with some complex selections. We haven't found these problems on other MPI-IO
+  compilers. If you encounter these problems, you may use Independent IO
+  instead.
+
+  Change the following line in your code:
+  H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
+
+  to
+  H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_INDEPENDENT);
+ 
+  KY - 2007/08/24
+
+
+
 * QSC (an HP alpha-based OSF1 cluster) does not create h5pfc correctly. It
   does not include the -lmpi properly.  This will be fixed in the next
   release.  AKC - 2007/08/07.
