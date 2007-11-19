@@ -599,7 +599,7 @@ static void usage(const char *prog)
  printf("   Chunked layout, with a layout size of 20x10, to objects A and B\n");
  printf("   and remove filters to objects C, D, F\n");
  printf("\n");
- printf("4) h5repack -L -c=10 -s=20:dtype file1 file2 \n");
+ printf("4) h5repack -L -c 10 -s 20:dtype file1 file2 \n");
  printf("\n");
  printf("   Using latest file format with maximum compact group size of 10 and\n");
  printf("   and minimum shared datatype size of 20\n");
