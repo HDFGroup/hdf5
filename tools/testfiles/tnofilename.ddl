@@ -73,7 +73,8 @@ usage: h5dump [OPTIONS] file
 
       h5dump -d /foo -s "0,1" -S "1,1" -c "2,3" -k "2,2" quux.h5
 
-  3) Saving dataset 'dset' in file quux.h5 to binary file 'out.bin' using a little-endian type 
+  3) Saving dataset 'dset' in file quux.h5 to binary file 'out.bin'
+        using a little-endian type
 
       h5dump -d /dset -b LE -o out.bin quux.h5
 
