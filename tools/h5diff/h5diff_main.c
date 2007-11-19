@@ -58,6 +58,9 @@
  *  Inclusion of a relative error formula to compare floating
  *   point numbers in order to deal with floating point uncertainty. 
  *  Printing of dataset dimensions along with dataset name
+ *   
+ *  November 19, 2007
+ *    adopted the syntax h5diff  [OPTIONS]  file1 file2  [obj1[obj2]]
  *
  *-------------------------------------------------------------------------
  */

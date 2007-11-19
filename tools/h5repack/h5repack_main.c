@@ -366,7 +366,9 @@ void parse_command_line(int argc,
  *
  * Modification:
  *   Peter Cao, June 13, 2007
- *   Add "-L, --latest" option to pack a file with the latest file format
+ *    Add "-L, --latest" option to pack a file with the latest file format
+ *   PVN, November 19, 2007
+ *    adopted the syntax h5repack [OPTIONS]  file1 file2
  *-------------------------------------------------------------------------
  */
 int main(int argc, char **argv)
@@ -523,9 +525,9 @@ static void usage(const char *prog)
  printf("   -V, --version           Print version number and exit\n");
  printf("   -n, --native            Use a native HDF5 type when repacking\n");
  printf("   -L, --latest            Use latest version of file format\n");
- printf("   -c <L1>, --compact=<L1> Maximum number of links in header messages\n");
- printf("   -i <L2>, --indexed=<L2> Minimum number of links in the indexed format\n");
- printf("   -s <S:F>, --ssize=<S:F> Set the shared object header message minimum size\n");
+ printf("   -c L1, --compact=L1     Maximum number of links in header messages\n");
+ printf("   -i L2, --indexed=L2     Minimum number of links in the indexed format\n");
+ printf("   -s S[:F], --ssize=S[:F] Shared object header message minimum size\n");
  printf("   -m T, --threshold=T     Do not apply the filter to objects smaller than T\n");
  printf("   -e M, --file=M          Name of file M with the -f and -l options\n");
  printf("   -f FILT, --filter=FILT  Filter type\n");
