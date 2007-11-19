@@ -20,31 +20,40 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[obj2]]
   D - is a positive number. Compare criteria is |a - b| > D
   R - is a positive number. Compare criteria is |(b-a)/a| > R
 
-h5diff has four modes of output:
- Normal mode: print the number of differences found and where they occured
- Report mode: print the above plus the differences
- Verbose mode: print the above plus a list of objects and warnings
- Quiet mode: do not print output (h5diff always returns an exit code of 1 when differences are found)
+ Modes of output:
 
-Examples of use:
+  Default mode: print the number of differences found and where they occured
+  -r Report mode: print the above plus the differences
+  -v Verbose mode: print the above plus a list of objects and warnings
+  -q Quiet mode: do not print output
 
-1) h5diff file1 file2 /g1/dset1 /g1/dset2
+ Return exit code:
 
-   Compares object '/g1/dset1' in file1 with '/g1/dset2' in file2
+  1 if differences found, 0 if no differences, -1 if error
 
-2) h5diff file1 file2 /g1/dset1
+ Examples of use:
 
-   Compares object '/g1/dset1' in both files
+ 1) h5diff file1 file2 /g1/dset1 /g1/dset2
 
-3) h5diff file1 file2
+    Compares object '/g1/dset1' in file1 with '/g1/dset2' in file2
 
-   Compares all objects in both files
+ 2) h5diff file1 file2 /g1/dset1
 
-Note)  file1 and file2 can be the same file. Use
+    Compares object '/g1/dset1' in both files
 
-   h5diff file1 file1 /g1/dset1 /g1/dset2
+ 3) h5diff file1 file2
 
-   to compare '/g1/dset1' and '/g1/dset2' in the same file
+    Compares all objects in both files
 
-If no objects are specified, h5diff only compares objects with the same absolute path in both files. The compare criteria is: 1) datasets: numerical array differences 2) groups: name string difference 3) datatypes: the return value of H5Tequal 2) links: name string difference of the linked value
+ Note)  file1 and file2 can be the same file. Use
+
+    h5diff file1 file1 /g1/dset1 /g1/dset2
+
+    to compare '/g1/dset1' and '/g1/dset2' in the same file
+
+ If no objects [obj1[obj2]] are specified, h5diff only compares objects
+   with the same absolute path in both files. The compare criteria is:
+   1) datasets: numerical array differences 2) groups: name string difference
+   3) datatypes: the return value of H5Tequal 2) links: name string difference
+   of the linked value
 h5diff error: missing file names

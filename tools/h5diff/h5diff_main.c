@@ -79,9 +79,9 @@ int main(int argc, const char *argv[])
 
     print_info(&options);
 
-    /*-------------------------------------------------------------------------
+   /*-------------------------------------------------------------------------
     * exit code
-    *   >0 if differences, 0 if no differences, <0 if error
+    *   1 if differences, 0 if no differences, -1 if error
     *-------------------------------------------------------------------------
     */
 
