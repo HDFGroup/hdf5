@@ -157,7 +157,7 @@ rem $* everything else arguments for h5copy.
 rem Call the h5diff tool
 rem
 :h5difftest
-    %h5diff_bin% %* -q
+    %h5diff_bin% -q %*
     if %errorlevel% neq 0 (
         call :verify *FAILED* %*
         set /a nerrors=!nerrors!+1

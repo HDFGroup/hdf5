@@ -117,7 +117,7 @@ rem was unavailable)
 rem Call the h5diff tool
 rem
 :difftest
-    %h5diff_bin% %* -q
+    %h5diff_bin% -q %*
     if %errorlevel% neq 0 (
         call :verify *FAILED* %*
         set /a nerrors=!nerrors!+1
@@ -142,9 +142,13 @@ rem
     
     rem We define %params% here because Windows `shift` command doesn't affect
     rem the %* variable.  --SJW 8/28/07
-    set params=%*
-    set params=%params: *=%
-    %h5repack_bin% -i %infile% -o %outfile% %params%
+    if "%2"=="" (
+        set params=
+    ) else (
+        set params=%*
+        set params=!params:* =!
+    )
+    %h5repack_bin% %params% %infile% %outfile%
     
     if %errorlevel% neq 0 (
         call :testing *FAILED* %*
