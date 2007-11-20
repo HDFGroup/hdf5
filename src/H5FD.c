@@ -46,7 +46,6 @@
 #ifdef H5_HAVE_WINDOWS
 #include "H5FDwindows.h"        /* Windows buffered I/O     */
 #endif
-#include "H5FDstream.h"     	/* In-memory files streamed via sockets */
 #include "H5FDdirect.h"		/* Direct file I/O			*/
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
@@ -182,9 +181,6 @@ H5FD_term_interface(void)
                 H5FD_mpio_term();
                 H5FD_mpiposix_term();
 #endif /* H5_HAVE_PARALLEL */
-#ifdef H5_HAVE_STREAM
-                H5FD_stream_term();
-#endif
             } /* end if */
 	} else {
 	    H5I_dec_type_ref(H5I_VFL);

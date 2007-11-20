@@ -40,7 +40,7 @@ TEST_PROG=testhdf5 lheap ohdr stab gheap cache cache_api \
            pool hyperslab istore bittests dt_arith \
            dtypes dsets cmpd_dset extend external objcopy links unlink big mtime     \
            fillval mount flush1 flush2 enum \
-           set_extent ttsafe stream_test \
+           set_extent ttsafe \
            getname vfd ntypes dangle dtransform reserved cross_read \
 	   btree2 fheap
 

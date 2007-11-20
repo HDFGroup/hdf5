@@ -50,7 +50,6 @@
 #ifdef H5_HAVE_WINDOWS
 #include "H5FDwindows.h"        /* Windows buffered I/O     */
 #endif
-#include "H5FDstream.h"     	/* In-memory files streamed via sockets */
 #include "H5FDdirect.h"     	/* Linux direct I/O			*/
 
 #endif

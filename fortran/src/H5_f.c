@@ -292,7 +292,6 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5f_flags,
       h5fd_hid_flags[4] = H5FD_MULTI;
       h5fd_hid_flags[5] = H5FD_SEC2;
       h5fd_hid_flags[6] = H5FD_STDIO;
-      h5fd_hid_flags[7] = H5FD_STREAM;
 
 /*
  *  H5G flags

@@ -77,8 +77,8 @@ am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 	external$(EXEEXT) objcopy$(EXEEXT) links$(EXEEXT) \
 	unlink$(EXEEXT) big$(EXEEXT) mtime$(EXEEXT) fillval$(EXEEXT) \
 	mount$(EXEEXT) flush1$(EXEEXT) flush2$(EXEEXT) enum$(EXEEXT) \
-	set_extent$(EXEEXT) ttsafe$(EXEEXT) stream_test$(EXEEXT) \
-	getname$(EXEEXT) vfd$(EXEEXT) ntypes$(EXEEXT) dangle$(EXEEXT) \
+	set_extent$(EXEEXT) ttsafe$(EXEEXT) getname$(EXEEXT) \
+	vfd$(EXEEXT) ntypes$(EXEEXT) dangle$(EXEEXT) \
 	dtransform$(EXEEXT) reserved$(EXEEXT) cross_read$(EXEEXT) \
 	btree2$(EXEEXT) fheap$(EXEEXT)
 am__EXEEXT_2 = gen_bogus$(EXEEXT) gen_cross$(EXEEXT) \
@@ -285,10 +285,6 @@ stab_SOURCES = stab.c
 stab_OBJECTS = stab.$(OBJEXT)
 stab_LDADD = $(LDADD)
 stab_DEPENDENCIES = libh5test.la $(LIBHDF5)
-stream_test_SOURCES = stream_test.c
-stream_test_OBJECTS = stream_test.$(OBJEXT)
-stream_test_LDADD = $(LDADD)
-stream_test_DEPENDENCIES = libh5test.la $(LIBHDF5)
 am_testhdf5_OBJECTS = testhdf5.$(OBJEXT) tarray.$(OBJEXT) \
 	tattr.$(OBJEXT) tchecksum.$(OBJEXT) tconfig.$(OBJEXT) \
 	tfile.$(OBJEXT) tgenprop.$(OBJEXT) th5o.$(OBJEXT) \
@@ -340,9 +336,8 @@ SOURCES = $(libh5test_la_SOURCES) big.c bittests.c btree2.c cache.c \
 	gen_new_super.c gen_noencoder.c gen_nullspace.c gen_udlinks.c \
 	getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c \
 	mtime.c ntypes.c objcopy.c ohdr.c pool.c reserved.c \
-	set_extent.c space_overflow.c stab.c stream_test.c \
-	$(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c \
-	vfd.c
+	set_extent.c space_overflow.c stab.c $(testhdf5_SOURCES) \
+	testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
 DIST_SOURCES = $(libh5test_la_SOURCES) big.c bittests.c btree2.c \
 	cache.c cache_api.c cmpd_dset.c cross_read.c dangle.c dsets.c \
 	dt_arith.c dtransform.c dtypes.c enum.c err_compat.c \
@@ -352,9 +347,8 @@ DIST_SOURCES = $(libh5test_la_SOURCES) big.c bittests.c btree2.c \
 	gen_new_super.c gen_noencoder.c gen_nullspace.c gen_udlinks.c \
 	getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c \
 	mtime.c ntypes.c objcopy.c ohdr.c pool.c reserved.c \
-	set_extent.c space_overflow.c stab.c stream_test.c \
-	$(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c \
-	vfd.c
+	set_extent.c space_overflow.c stab.c $(testhdf5_SOURCES) \
+	testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -625,7 +619,7 @@ TEST_PROG = testhdf5 lheap ohdr stab gheap cache cache_api \
            pool hyperslab istore bittests dt_arith \
            dtypes dsets cmpd_dset extend external objcopy links unlink big mtime     \
            fillval mount flush1 flush2 enum \
-           set_extent ttsafe stream_test \
+           set_extent ttsafe \
            getname vfd ntypes dangle dtransform reserved cross_read \
 	   btree2 fheap
 
@@ -888,9 +882,6 @@ space_overflow$(EXEEXT): $(space_overflow_OBJECTS) $(space_overflow_DEPENDENCIES
 stab$(EXEEXT): $(stab_OBJECTS) $(stab_DEPENDENCIES) 
 	@rm -f stab$(EXEEXT)
 	$(LINK) $(stab_OBJECTS) $(stab_LDADD) $(LIBS)
-stream_test$(EXEEXT): $(stream_test_OBJECTS) $(stream_test_DEPENDENCIES) 
-	@rm -f stream_test$(EXEEXT)
-	$(LINK) $(stream_test_OBJECTS) $(stream_test_LDADD) $(LIBS)
 testhdf5$(EXEEXT): $(testhdf5_OBJECTS) $(testhdf5_DEPENDENCIES) 
 	@rm -f testhdf5$(EXEEXT)
 	$(LINK) $(testhdf5_OBJECTS) $(testhdf5_LDADD) $(LIBS)
@@ -964,7 +955,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/set_extent.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/space_overflow.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stab.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stream_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tarray.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tattr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tchecksum.Po@am__quote@

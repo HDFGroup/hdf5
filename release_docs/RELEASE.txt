@@ -51,6 +51,7 @@ New Features
 
     Configuration:
     --------------
+        - Removed stream-vfd from the HDF5 library. - AKC 2007/11/19.
         - Updated versions of autotools. HDF5 now uses automake 1.10.0, 
           autoconf 2.61, and libtool 1.5.22. MAM - 2007/7/25.
         - Changed default fortran compiler to g95 when gcc is used. - AKC

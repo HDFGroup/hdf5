@@ -45,7 +45,6 @@
 #ifdef H5_HAVE_WINDOWS 
 #include "H5FDwindows.h"        /* Windows buffered I/O     */
 #endif
-#include "H5FDstream.h"         /*in-memory files streamed via sockets  */
 #include "H5FDdirect.h"         /*Linux direct I/O			*/
 
 /* Struct only used by functions H5F_get_objects and H5F_get_objects_cb */

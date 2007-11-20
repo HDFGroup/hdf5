@@ -55,7 +55,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5FD.c H5FDcore.c  \
         H5FDdirect.c H5FDfamily.c H5FDlog.c H5FDmpi.c H5FDmpio.c   \
         H5FDmpiposix.c H5FDmulti.c H5FDsec2.c H5FDstdio.c           \
-        H5FDstream.c H5FL.c H5FO.c H5FS.c H5FScache.c H5FSdbg.c H5FSsection.c \
+        H5FL.c H5FO.c H5FS.c H5FScache.c H5FSdbg.c H5FSsection.c \
         H5G.c H5Gbtree2.c H5Gcompact.c H5Gdense.c H5Gdeprec.c H5Gent.c \
         H5Gint.c H5Glink.c \
         H5Gloc.c H5Gname.c H5Gnode.c H5Gobj.c H5Goh.c H5Gstab.c H5Gtest.c \
@@ -101,7 +101,7 @@ include_HEADERS = hdf5.h H5api_adpt.h H5pubconf.h H5public.h H5version.h \
         H5Cpublic.h H5Dpublic.h \
         H5Epubgen.h H5Epublic.h H5Fpublic.h H5FDpublic.h H5FDcore.h H5FDdirect.h \
 	H5FDfamily.h H5FDlog.h H5FDmpi.h H5FDmpio.h H5FDmpiposix.h              \
-        H5FDmulti.h H5FDsec2.h  H5FDstdio.h H5FDstream.h \
+        H5FDmulti.h H5FDsec2.h  H5FDstdio.h \
         H5Gpublic.h  H5Ipublic.h H5Lpublic.h \
         H5MMpublic.h H5Opublic.h H5Ppublic.h H5Rpublic.h H5Spublic.h \
         H5Tpublic.h H5Zpublic.h

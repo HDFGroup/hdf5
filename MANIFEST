@@ -509,8 +509,8 @@
 ./src/H5FDsec2.h
 ./src/H5FDstdio.c
 ./src/H5FDstdio.h
-./src/H5FDstream.c
-./src/H5FDstream.h
+./src/H5FDstream.c			_DO_NOT_DISTRIBUTE_
+./src/H5FDstream.h			_DO_NOT_DISTRIBUTE_
 ./src/H5FDwindows.c
 ./src/H5FDwindows.h
 ./src/H5FL.c
@@ -800,7 +800,7 @@
 ./test/set_extent.c
 ./test/space_overflow.c			_DO_NOT_DISTRIBUTE_
 ./test/stab.c
-./test/stream_test.c
+./test/stream_test.c			_DO_NOT_DISTRIBUTE_
 ./test/tarray.c
 ./test/tarrold.h5
 ./test/tattr.c

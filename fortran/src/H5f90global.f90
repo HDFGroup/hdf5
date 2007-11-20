@@ -315,7 +315,7 @@
 !
 ! H5FD file drivers flags declaration
 !
-      INTEGER, PARAMETER :: H5FD_HID_FLAGS_LEN = 8
+      INTEGER, PARAMETER :: H5FD_HID_FLAGS_LEN = 7
       INTEGER(HID_T) H5FD_hid_flags(H5FD_HID_FLAGS_LEN)
 !DEC$if defined(BUILD_HDF5_DLL)
 !DEC$ ATTRIBUTES DLLEXPORT :: /H5FD_HID_FLAGS/
@@ -329,7 +329,6 @@
       INTEGER(HID_T) :: H5FD_MULTI_F
       INTEGER(HID_T) :: H5FD_SEC2_F
       INTEGER(HID_T) :: H5FD_STDIO_F
-      INTEGER(HID_T) :: H5FD_STREAM_F
 
       EQUIVALENCE(H5FD_hid_flags(1), H5FD_CORE_F)
       EQUIVALENCE(H5FD_hid_flags(2), H5FD_FAMILY_F)
@@ -338,7 +337,6 @@
       EQUIVALENCE(H5FD_hid_flags(5), H5FD_MULTI_F)
       EQUIVALENCE(H5FD_hid_flags(6), H5FD_SEC2_F)
       EQUIVALENCE(H5FD_hid_flags(7), H5FD_STDIO_F)
-      EQUIVALENCE(H5FD_hid_flags(8), H5FD_STREAM_F)
 
       
 
