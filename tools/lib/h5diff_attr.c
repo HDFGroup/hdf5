@@ -168,7 +168,18 @@ hsize_t diff_attr(hid_t loc1_id,
    if ((msize2=H5Tget_size(mtype2_id))==0)
     goto error;
 
-   assert(msize1==msize2);
+   /*assert(msize1==msize2);*/
+
+   if ( msize1 != msize2)
+   {
+
+       if (options->m_verbose)
+            printf("Comparison not possible: different string sizes for attribute <%s>\n",
+             name1);
+       continue;
+
+
+   }
 
    buf1=(void *) HDmalloc((unsigned)(nelmts1*msize1));
    buf2=(void *) HDmalloc((unsigned)(nelmts1*msize2));
