@@ -284,13 +284,13 @@ TOOLTEST h5diff_13.txt -r $FILE1 $FILE2
 TOOLTEST h5diff_14.txt  -r $FILE1 $FILE2 g1/dset1 g1/dset2
 
 # 1.5 with -d
-TOOLTEST h5diff_15.txt -r -d 5 $FILE1 $FILE2 g1/dset3 g1/dset4
+TOOLTEST h5diff_15.txt --report --delta=5 $FILE1 $FILE2 g1/dset3 g1/dset4
 
 # 1.6.1 with -p (int)
 TOOLTEST h5diff_16_1.txt -v -p 0.02 $FILE1 $FILE1 g1/dset5 g1/dset6
 
 # 1.6.2 with -p (unsigned long_long)
-TOOLTEST h5diff_16_2.txt -v -p 0.02 $FILE1 $FILE1 g1/dset7 g1/dset8
+TOOLTEST h5diff_16_2.txt --verbose --relative=0.02 $FILE1 $FILE1 g1/dset7 g1/dset8
 
 # 1.6.3 with -p (double)
 TOOLTEST h5diff_16_3.txt -v -p 0.02 $FILE1 $FILE1 g1/dset9 g1/dset10
@@ -473,7 +473,7 @@ TOOLTEST h5diff_625.txt -n "2" $FILE1 $FILE2  g1/dset3 g1/dset4
 TOOLTEST h5diff_626.txt -n 2 -n 3 $FILE1 $FILE2 g1/dset3 g1/dset4
 
 # 6.27: number larger than biggest difference
-TOOLTEST h5diff_627.txt -n 200 $FILE1 $FILE2 g1/dset3 g1/dset4
+TOOLTEST h5diff_627.txt --count=200 $FILE1 $FILE2 g1/dset3 g1/dset4
 
 # 6.28: number smaller than smallest difference
 TOOLTEST h5diff_628.txt -n 1 $FILE1 $FILE2 g1/dset3 g1/dset4
