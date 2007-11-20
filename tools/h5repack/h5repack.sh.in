@@ -254,7 +254,7 @@ else
 fi
   
 # szip remove
-arg="$FILE7 -f dset_szip:NONE"
+arg="$FILE7 --filter=dset_szip:NONE"
 if test $USE_FILTER_SZIP_ENCODER != "yes" -o $USE_FILTER_SZIP != "yes" ; then
  SKIP $arg
 else
@@ -403,7 +403,7 @@ fi
 # layout options (these files have no filters)
 #########################################################
 
-TOOLTEST $FILE4 -l dset2:CHUNK=20x10
+TOOLTEST $FILE4 --layout=dset2:CHUNK=20x10
 TOOLTEST $FILE4 -l CHUNK=20x10
 TOOLTEST $FILE4 -l dset2:CONTI
 TOOLTEST $FILE4 -l CONTI
