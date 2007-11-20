@@ -542,7 +542,7 @@ H5Scopy(hid_t space_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
     /* Copy */
-    if (NULL==(dst=H5S_copy (src, FALSE)))
+    if (NULL == (dst = H5S_copy(src, FALSE, TRUE)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to copy data space")
 
     /* Atomize */
@@ -580,22 +580,22 @@ H5Sextent_copy(hid_t dst_id,hid_t src_id)
     H5S_t	*dst;
     hid_t	ret_value = SUCCEED;
 
-    FUNC_ENTER_API(H5Sextent_copy, FAIL);
+    FUNC_ENTER_API(H5Sextent_copy, FAIL)
     H5TRACE2("e", "ii", dst_id, src_id);
 
     /* Check args */
-    if (NULL==(src=(H5S_t *)H5I_object_verify(src_id, H5I_DATASPACE)))
+    if(NULL == (src = (H5S_t *)H5I_object_verify(src_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
-    if (NULL==(dst=(H5S_t *)H5I_object_verify(dst_id, H5I_DATASPACE)))
+    if(NULL == (dst = (H5S_t *)H5I_object_verify(dst_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
     /* Copy */
-    if (H5S_extent_copy(&(dst->extent),&(src->extent))<0)
+    if(H5S_extent_copy(&(dst->extent), &(src->extent), TRUE) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "can't copy extent")
 
 done:
-    FUNC_LEAVE_API(ret_value);
-}
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Sextent_copy() */
 
 
 /*-------------------------------------------------------------------------
@@ -613,7 +613,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src)
+H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src, hbool_t copy_max)
 {
     unsigned u;
     herr_t ret_value = SUCCEED;   /* Return value */
@@ -641,13 +641,13 @@ H5S_extent_copy(H5S_extent_t *dst, const H5S_extent_t *src)
             } /* end if */
             else
                 dst->size = NULL;
-            if(src->max) {
+            if(copy_max && src->max) {
                 dst->max = (hsize_t *)H5FL_ARR_MALLOC(hsize_t, (size_t)src->rank);
                 for(u = 0; u < src->rank; u++)
                     dst->max[u] = src->max[u];
             } /* end if */
             else
-                dst->max=NULL;
+                dst->max = NULL;
             break;
 
         default:
@@ -686,7 +686,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5S_t *
-H5S_copy(const H5S_t *src, hbool_t share_selection)
+H5S_copy(const H5S_t *src, hbool_t share_selection, hbool_t copy_max)
 {
     H5S_t		   *dst = NULL;
     H5S_t		   *ret_value;   /* Return value */
@@ -697,7 +697,7 @@ H5S_copy(const H5S_t *src, hbool_t share_selection)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Copy the source dataspace's extent */
-    if(H5S_extent_copy(&(dst->extent), &(src->extent)) < 0)
+    if(H5S_extent_copy(&(dst->extent), &(src->extent), copy_max) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, NULL, "can't copy extent")
 
     /* Copy the source dataspace's selection */

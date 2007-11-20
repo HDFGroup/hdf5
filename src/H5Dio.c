@@ -2482,7 +2482,7 @@ H5D_create_chunk_map(H5D_chunk_map_t *fm, const H5D_io_info_t *io_info,
         size_t elmt_size;           /* Memory datatype size */
 
         /* Make a copy of equivalent memory space */
-        if((tmp_mspace = H5S_copy(mem_space, TRUE)) == NULL)
+        if((tmp_mspace = H5S_copy(mem_space, TRUE, FALSE)) == NULL)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
 
         /* De-select the mem space copy */
@@ -2709,7 +2709,7 @@ H5D_create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t *io_inf
             hssize_t    schunk_points;          /* Number of elements in chunk selection */
 
             /* Create "temporary" chunk for selection operations (copy file space) */
-            if((tmp_fchunk = H5S_copy(fm->file_space,TRUE))==NULL)
+            if((tmp_fchunk = H5S_copy(fm->file_space, TRUE, FALSE)) == NULL)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
 
             /* Make certain selections are stored in span tree form (not "optimized hyperslab" or "all") */
@@ -2905,7 +2905,7 @@ H5D_create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm)
             /* Copy the information */
 
             /* Copy the memory dataspace */
-            if((chunk_info->mspace = H5S_copy(fm->mem_space,TRUE))==NULL)
+            if((chunk_info->mspace = H5S_copy(fm->mem_space, TRUE, FALSE)) == NULL)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
 
             /* Release the current selection */
@@ -3094,7 +3094,7 @@ H5D_chunk_mem_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, const 
         /* Check if the chunk already has a memory space */
         if(chunk_info->mspace==NULL) {
             /* Copy the template memory chunk dataspace */
-            if((chunk_info->mspace = H5S_copy(fm->mchunk_tmpl,FALSE))==NULL)
+            if((chunk_info->mspace = H5S_copy(fm->mchunk_tmpl, FALSE, FALSE)) == NULL)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy file space")
         } /* end else */
 

@@ -191,7 +191,7 @@ typedef struct H5S_iostats_t {
 
 
 /* Operations on dataspaces */
-H5_DLL H5S_t *H5S_copy(const H5S_t *src, hbool_t share_selection);
+H5_DLL H5S_t *H5S_copy(const H5S_t *src, hbool_t share_selection, hbool_t copy_max);
 H5_DLL herr_t H5S_close(H5S_t *ds);
 #ifdef H5S_DEBUG
 H5_DLL H5S_iostats_t *H5S_find(const H5S_t *mem_space, const H5S_t *file_space);

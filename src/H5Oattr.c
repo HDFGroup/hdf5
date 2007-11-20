@@ -700,7 +700,7 @@ H5O_attr_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t UNUSED *mesg_ty
     } /* end else */
 
     /* Copy the dataspace for the attribute */
-    attr_dst->ds = H5S_copy(attr_src->ds, FALSE);
+    attr_dst->ds = H5S_copy(attr_src->ds, FALSE, FALSE);
     HDassert(attr_dst->ds);
 
     /* Reset the dataspace's sharing in the source file before trying to share

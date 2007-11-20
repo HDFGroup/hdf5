@@ -6791,7 +6791,7 @@ H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_t start[],
         HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
 
     /* Copy the first dataspace */
-    if (NULL==(new_space=H5S_copy (space, TRUE)))
+    if (NULL == (new_space = H5S_copy (space, TRUE, TRUE)))
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, NULL, "unable to copy data space");
 
     /* Go modify the selection in the new dataspace */
@@ -6847,7 +6847,7 @@ H5S_combine_select (H5S_t *space1, H5S_seloper_t op, H5S_t *space2)
             HGOTO_ERROR(H5E_DATASPACE, H5E_UNINITIALIZED, NULL, "dataspace does not have span tree");
 
     /* Copy the first dataspace */
-    if (NULL==(new_space=H5S_copy (space1, TRUE)))
+    if (NULL == (new_space = H5S_copy (space1, TRUE, TRUE)))
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, NULL, "unable to copy data space");
 
     /* Free the current selection for the new dataspace */

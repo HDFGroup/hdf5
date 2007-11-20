@@ -420,7 +420,7 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set latest version of datatype")
 
     /* Copy the dataspace for the attribute */
-    attr->ds = H5S_copy(space, FALSE);
+    attr->ds = H5S_copy(space, FALSE, TRUE);
 
     /* Set the latest format for dataspace, if requested */
     if(H5F_USE_LATEST_FORMAT(loc->oloc->file))
@@ -1214,7 +1214,7 @@ H5Aget_space(hid_t attr_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
 
     /* Copy the attribute's dataspace */
-    if(NULL == (ds = H5S_copy (attr->ds, FALSE)))
+    if(NULL == (ds = H5S_copy(attr->ds, FALSE, TRUE)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to copy dataspace")
 
     /* Atomize */
@@ -2284,7 +2284,7 @@ H5A_copy(H5A_t *_new_attr, const H5A_t *old_attr)
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "unable to copy attribute name")
     if(NULL == (new_attr->dt = H5T_copy(old_attr->dt, H5T_COPY_ALL)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "unable to copy attribute datatype")
-    if(NULL == (new_attr->ds = H5S_copy(old_attr->ds, FALSE)))
+    if(NULL == (new_attr->ds = H5S_copy(old_attr->ds, FALSE, TRUE)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "unable to copy attribute dataspace")
 
 #if defined(H5_USING_MEMCHECKER) || !defined(NDEBUG)
