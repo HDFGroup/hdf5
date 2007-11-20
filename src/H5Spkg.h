@@ -141,6 +141,8 @@ typedef htri_t (*H5S_sel_is_contiguous_func_t)(const H5S_t *space);
 typedef htri_t (*H5S_sel_is_single_func_t)(const H5S_t *space);
 /* Method to determine if current selection is "regular" */
 typedef htri_t (*H5S_sel_is_regular_func_t)(const H5S_t *space);
+/* Method to adjust a selection by an offset */
+typedef herr_t (*H5S_sel_adjust_u_func_t)(H5S_t *space, const hsize_t *offset);
 /* Method to initialize iterator for current selection */
 typedef herr_t (*H5S_sel_iter_init_func_t)(H5S_sel_iter_t *sel_iter, const H5S_t *space);
 
@@ -160,6 +162,7 @@ typedef struct {
     H5S_sel_is_contiguous_func_t is_contiguous; /* Method to determine if current selection is contiguous */
     H5S_sel_is_single_func_t is_single;         /* Method to determine if current selection is a single block */
     H5S_sel_is_regular_func_t is_regular;       /* Method to determine if current selection is "regular" */
+    H5S_sel_adjust_u_func_t adjust_u;           /* Method to adjust a selection by an offset */
     H5S_sel_iter_init_func_t iter_init;         /* Method to initialize iterator for current selection */
 } H5S_select_class_t;
 

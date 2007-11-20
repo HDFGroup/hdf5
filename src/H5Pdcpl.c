@@ -2722,8 +2722,6 @@ H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsigned int *flags/*out*/
     size_t *cd_nelmts/*in_out*/, unsigned cd_values[]/*out*/,
     size_t namelen, char name[]/*out*/)
 {
-    H5O_pline_t         pline;  /* Filter pipeline */
-    H5Z_filter_info_t *filter;  /* Pointer to filter information */
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED;   /* Return value */
 

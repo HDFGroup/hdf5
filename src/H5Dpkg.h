@@ -200,21 +200,26 @@ typedef struct H5D_chunk_info_t {
 
 /* Main structure holding the mapping between file chunks and memory */
 typedef struct H5D_chunk_map_t {
+    H5O_layout_t *layout;       /* Dataset layout information*/
+    hsize_t nelmts;             /* Number of elements selected in file & memory dataspaces */
+
+    const H5S_t *file_space;    /* Pointer to the file dataspace */
+    unsigned f_ndims;           /* Number of dimensions for file dataspace */
+    hsize_t f_dims[H5O_LAYOUT_NDIMS];   /* File dataspace dimensions */
+
+    const H5S_t *mem_space;     /* Pointer to the memory dataspace */
+    H5S_t *mchunk_tmpl;         /* Dataspace template for new memory chunks */
+    H5S_sel_iter_t mem_iter;    /* Iterator for elements in memory selection */
+    unsigned m_ndims;           /* Number of dimensions for memory dataspace */
+    H5S_sel_type msel_type;     /* Selection type in memory */
+
     H5SL_t *fsel;               /* Skip list containing file dataspaces for all chunks */
     hsize_t last_index;         /* Index of last chunk operated on */
     H5D_chunk_info_t *last_chunk_info;  /* Pointer to last chunk's info */
-    const H5S_t *file_space;    /* Pointer to the file dataspace */
-    const H5S_t *mem_space;     /* Pointer to the memory dataspace */
-    hsize_t f_dims[H5O_LAYOUT_NDIMS];   /* File dataspace dimensions */
-    H5S_t *mchunk_tmpl;         /* Dataspace template for new memory chunks */
-    unsigned f_ndims;           /* Number of dimensions for file dataspace */
-    H5S_sel_iter_t mem_iter;    /* Iterator for elements in memory selection */
-    unsigned m_ndims;           /* Number of dimensions for memory dataspace */
     hsize_t chunks[H5O_LAYOUT_NDIMS];   /* Number of chunks in each dimension */
     hsize_t chunk_dim[H5O_LAYOUT_NDIMS];    /* Size of chunk in each dimension */
     hsize_t down_chunks[H5O_LAYOUT_NDIMS];   /* "down" size of number of chunks in each dimension */
-    H5O_layout_t *layout;       /* Dataset layout information*/
-    H5S_sel_type msel_type;     /* Selection type in memory */
+
 #ifdef H5_HAVE_PARALLEL
     hsize_t total_chunks;       /* Number of total chunks */
     hbool_t *select_chunk;         /* store the information about whether this chunk is selected or not */

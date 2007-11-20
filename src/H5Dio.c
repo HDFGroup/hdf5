@@ -93,9 +93,12 @@ static herr_t H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
 
 /* Chunk operations */
 static herr_t H5D_create_chunk_map(H5D_chunk_map_t *fm, const H5D_io_info_t *io_info,
-    const H5T_t *mem_type, const H5S_t *file_space, const H5S_t *mem_space);
+    hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
+    const H5T_t *mem_type);
 static herr_t H5D_destroy_chunk_map(const H5D_chunk_map_t *fm);
 static herr_t H5D_free_chunk_info(void *item, void *key, void *opdata);
+static herr_t H5D_create_chunk_map_single(H5D_chunk_map_t *fm,
+    const H5D_io_info_t *io_info);
 static herr_t H5D_create_chunk_file_map_hyper(H5D_chunk_map_t *fm,
     const H5D_io_info_t *io_info);
 static herr_t H5D_create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm);
@@ -1368,7 +1371,7 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
     assert (buf);
 
     /* Map elements between file and memory for each chunk*/
-    if(H5D_create_chunk_map(&fm, io_info, mem_type, file_space, mem_space) < 0)
+    if(H5D_create_chunk_map(&fm, io_info, nelmts, file_space, mem_space, mem_type) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't build chunk mapping")
 
     /* Set dataset storage for I/O info */
@@ -1759,7 +1762,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
     assert (buf);
 
     /* Map elements between file and memory for each chunk*/
-    if(H5D_create_chunk_map(&fm, io_info, mem_type, file_space, mem_space) < 0)
+    if(H5D_create_chunk_map(&fm, io_info, nelmts, file_space, mem_space, mem_type) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't build chunk mapping")
 
     /* Set dataset storage for I/O info */
@@ -2334,7 +2337,8 @@ done:
  */
 static herr_t
 H5D_create_chunk_map(H5D_chunk_map_t *fm, const H5D_io_info_t *io_info,
-    const H5T_t *mem_type, const H5S_t *file_space, const H5S_t *mem_space)
+    hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
+    const H5T_t *mem_type)
 {
     H5D_t *dataset=io_info->dset;       /* Local pointer to dataset info */
     H5S_t *tmp_mspace = NULL;     /* Temporary memory dataspace */
@@ -2355,7 +2359,7 @@ H5D_create_chunk_map(H5D_chunk_map_t *fm, const H5D_io_info_t *io_info,
 
     /* Get layout for dataset */
     fm->layout = &(dataset->shared->layout);
-
+    fm->nelmts = nelmts;
 
     /* Check if the memory space is scalar & make equivalent memory space */
     if((sm_ndims = H5S_GET_EXTENT_NDIMS(mem_space)) < 0)
@@ -2365,7 +2369,6 @@ H5D_create_chunk_map(H5D_chunk_map_t *fm, const H5D_io_info_t *io_info,
 
     /* Get dim number and dimensionality for each dataspace */
     fm->f_ndims = f_ndims = dataset->shared->layout.u.chunk.ndims - 1;
-
     if(H5S_get_simple_extent_dims(file_space, fm->f_dims, NULL) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimensionality")
 
@@ -2411,107 +2414,43 @@ H5D_create_chunk_map(H5D_chunk_map_t *fm, const H5D_io_info_t *io_info,
         HGOTO_ERROR(H5E_DATASET,H5E_CANTCREATE,FAIL,"can't create skip list for chunk selections")
 
     /* Initialize "last chunk" information */
-    fm->last_index=(hsize_t)-1;
-    fm->last_chunk_info=NULL;
+    fm->last_index = (hsize_t)-1;
+    fm->last_chunk_info = NULL;
 
     /* Point at the dataspaces */
     fm->file_space = file_space;
     fm->mem_space = mem_space;
 
-    /* Get type of selection on disk & in memory */
-    if((fsel_type = H5S_GET_SELECT_TYPE(file_space)) < H5S_SEL_NONE)
-        HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to convert from file to memory data space")
-    if((fm->msel_type = H5S_GET_SELECT_TYPE(mem_space)) < H5S_SEL_NONE)
-        HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to convert from file to memory data space")
-
-    /* If the selection is NONE or POINTS, set the flag to FALSE */
-    if(fsel_type == H5S_SEL_POINTS || fsel_type == H5S_SEL_NONE)
-        sel_hyper_flag = FALSE;
-    else
-        sel_hyper_flag = TRUE;
-
-    /* Check if file selection is a not a hyperslab selection */
-    if(sel_hyper_flag) {
-        /* Build the file selection for each chunk */
-        if(H5D_create_chunk_file_map_hyper(fm, io_info) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create file chunk selections")
-
-        /* Clean file chunks' hyperslab span "scratch" information */
-        curr_node=H5SL_first(fm->fsel);
-        while(curr_node) {
-            H5D_chunk_info_t *chunk_info;   /* Pointer chunk information */
-
-            /* Get pointer to chunk's information */
-            chunk_info=H5SL_item(curr_node);
-            assert(chunk_info);
-
-            /* Clean hyperslab span's "scratch" information */
-            if(H5S_hyper_reset_scratch(chunk_info->fspace) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset span scratch info")
-
-            /* Get the next chunk node in the skip list */
-            curr_node=H5SL_next(curr_node);
-        } /* end while */
-    } /* end if */
-    else {
-        /* Create temporary datatypes for selection iteration */
-        if((f_tid = H5I_register(H5I_DATATYPE, H5T_copy(dataset->shared->type, H5T_COPY_ALL))) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register file datatype")
-
-        /* Spaces might not be the same shape, iterate over the file selection directly */
-        if(H5S_select_iterate(&bogus, f_tid, file_space,  H5D_chunk_file_cb, fm) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create file chunk selections")
-
-        /* Reset "last chunk" info */
-        fm->last_index=(hsize_t)-1;
-        fm->last_chunk_info=NULL;
-    } /* end else */
-
-    /* Build the memory selection for each chunk */
-    if(sel_hyper_flag && H5S_select_shape_same(file_space, mem_space) == TRUE) {
+    /* Special case for only one element in selection */
+    /* (usually appending a record) */
+    if(nelmts == 1) {
         /* Reset chunk template information */
         fm->mchunk_tmpl = NULL;
 
-        /* If the selections are the same shape, use the file chunk information
-         * to generate the memory chunk information quickly.
-         */
-        if(H5D_create_chunk_mem_map_hyper(fm) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create memory chunk selections")
+        /* Set up chunk mapping for single element */
+        if(H5D_create_chunk_map_single(fm, io_info) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create chunk selections for single element")
     } /* end if */
     else {
-        size_t elmt_size;           /* Memory datatype size */
+        /* Get type of selection on disk & in memory */
+        if((fsel_type = H5S_GET_SELECT_TYPE(file_space)) < H5S_SEL_NONE)
+            HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to get type of selection")
+        if((fm->msel_type = H5S_GET_SELECT_TYPE(mem_space)) < H5S_SEL_NONE)
+            HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to get type of selection")
 
-        /* Make a copy of equivalent memory space */
-        if((tmp_mspace = H5S_copy(mem_space, TRUE, FALSE)) == NULL)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
+        /* If the selection is NONE or POINTS, set the flag to FALSE */
+        if(fsel_type == H5S_SEL_POINTS || fsel_type == H5S_SEL_NONE)
+            sel_hyper_flag = FALSE;
+        else
+            sel_hyper_flag = TRUE;
 
-        /* De-select the mem space copy */
-        if(H5S_select_none(tmp_mspace) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to de-select memory space")
+        /* Check if file selection is a not a hyperslab selection */
+        if(sel_hyper_flag) {
+            /* Build the file selection for each chunk */
+            if(H5D_create_chunk_file_map_hyper(fm, io_info) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create file chunk selections")
 
-        /* Save chunk template information */
-        fm->mchunk_tmpl=tmp_mspace;
-
-        /* Create temporary datatypes for selection iteration */
-        if(f_tid<0) {
-            if((f_tid = H5I_register(H5I_DATATYPE, H5T_copy(dataset->shared->type, H5T_COPY_ALL))) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register file datatype")
-        } /* end if */
-
-        /* Create selection iterator for memory selection */
-        if((elmt_size=H5T_get_size(mem_type))==0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_BADSIZE, FAIL, "datatype size invalid")
-        if(H5S_select_iter_init(&(fm->mem_iter), mem_space, elmt_size) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
-        iter_init = TRUE;	/* Selection iteration info has been initialized */
-
-        /* Spaces aren't the same shape, iterate over the memory selection directly */
-        if(H5S_select_iterate(&bogus, f_tid, file_space,  H5D_chunk_mem_cb, fm) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create memory chunk selections")
-
-        /* Clean up hyperslab stuff, if necessary */
-        if(fm->msel_type != H5S_SEL_POINTS) {
-            /* Clean memory chunks' hyperslab span "scratch" information */
+            /* Clean file chunks' hyperslab span "scratch" information */
             curr_node=H5SL_first(fm->fsel);
             while(curr_node) {
                 H5D_chunk_info_t *chunk_info;   /* Pointer chunk information */
@@ -2521,13 +2460,89 @@ H5D_create_chunk_map(H5D_chunk_map_t *fm, const H5D_io_info_t *io_info,
                 assert(chunk_info);
 
                 /* Clean hyperslab span's "scratch" information */
-                if(H5S_hyper_reset_scratch(chunk_info->mspace) < 0)
+                if(H5S_hyper_reset_scratch(chunk_info->fspace) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset span scratch info")
 
                 /* Get the next chunk node in the skip list */
                 curr_node=H5SL_next(curr_node);
             } /* end while */
         } /* end if */
+        else {
+            /* Create temporary datatypes for selection iteration */
+            if((f_tid = H5I_register(H5I_DATATYPE, H5T_copy(dataset->shared->type, H5T_COPY_ALL))) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register file datatype")
+
+            /* Spaces might not be the same shape, iterate over the file selection directly */
+            if(H5S_select_iterate(&bogus, f_tid, file_space,  H5D_chunk_file_cb, fm) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create file chunk selections")
+
+            /* Reset "last chunk" info */
+            fm->last_index=(hsize_t)-1;
+            fm->last_chunk_info=NULL;
+        } /* end else */
+
+        /* Build the memory selection for each chunk */
+        if(sel_hyper_flag && H5S_select_shape_same(file_space, mem_space) == TRUE) {
+            /* Reset chunk template information */
+            fm->mchunk_tmpl = NULL;
+
+            /* If the selections are the same shape, use the file chunk information
+             * to generate the memory chunk information quickly.
+             */
+            if(H5D_create_chunk_mem_map_hyper(fm) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create memory chunk selections")
+        } /* end if */
+        else {
+            size_t elmt_size;           /* Memory datatype size */
+
+            /* Make a copy of equivalent memory space */
+            if((tmp_mspace = H5S_copy(mem_space, TRUE, FALSE)) == NULL)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
+
+            /* De-select the mem space copy */
+            if(H5S_select_none(tmp_mspace) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to de-select memory space")
+
+            /* Save chunk template information */
+            fm->mchunk_tmpl=tmp_mspace;
+
+            /* Create temporary datatypes for selection iteration */
+            if(f_tid<0) {
+                if((f_tid = H5I_register(H5I_DATATYPE, H5T_copy(dataset->shared->type, H5T_COPY_ALL))) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register file datatype")
+            } /* end if */
+
+            /* Create selection iterator for memory selection */
+            if((elmt_size=H5T_get_size(mem_type))==0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADSIZE, FAIL, "datatype size invalid")
+            if(H5S_select_iter_init(&(fm->mem_iter), mem_space, elmt_size) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
+            iter_init = TRUE;	/* Selection iteration info has been initialized */
+
+            /* Spaces aren't the same shape, iterate over the memory selection directly */
+            if(H5S_select_iterate(&bogus, f_tid, file_space,  H5D_chunk_mem_cb, fm) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create memory chunk selections")
+
+            /* Clean up hyperslab stuff, if necessary */
+            if(fm->msel_type != H5S_SEL_POINTS) {
+                /* Clean memory chunks' hyperslab span "scratch" information */
+                curr_node=H5SL_first(fm->fsel);
+                while(curr_node) {
+                    H5D_chunk_info_t *chunk_info;   /* Pointer chunk information */
+
+                    /* Get pointer to chunk's information */
+                    chunk_info=H5SL_item(curr_node);
+                    assert(chunk_info);
+
+                    /* Clean hyperslab span's "scratch" information */
+                    if(H5S_hyper_reset_scratch(chunk_info->mspace) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset span scratch info")
+
+                    /* Get the next chunk node in the skip list */
+                    curr_node=H5SL_next(curr_node);
+                } /* end while */
+            } /* end if */
+        } /* end else */
     } /* end else */
 
 done:
@@ -2646,6 +2661,101 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5D_create_chunk_map_single
+ *
+ * Purpose:	Create chunk selections when appending a single record
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, November 20, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_create_chunk_map_single(H5D_chunk_map_t *fm, const H5D_io_info_t
+#ifndef H5_HAVE_PARALLEL
+    UNUSED
+#endif /* H5_HAVE_PARALLEL */
+    *io_info)
+{
+    H5S_t *tmp_fchunk = NULL;               /* Temporary file dataspace */
+    H5D_chunk_info_t *new_chunk_info = NULL; /* chunk information to insert into skip list */
+    hsize_t     sel_start[H5O_LAYOUT_NDIMS]; /* Offset of low bound of file selection */
+    hsize_t     sel_end[H5O_LAYOUT_NDIMS];  /* Offset of high bound of file selection */
+    unsigned    u;                          /* Local index variable */
+    herr_t	ret_value = SUCCEED;        /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_create_chunk_map_single)
+
+    /* Sanity check */
+    HDassert(fm->f_ndims > 0);
+
+    /* Get coordinate for selection */
+    if(H5S_SELECT_BOUNDS(fm->file_space, sel_start, sel_end) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection bound info")
+
+    /* Allocate the file & memory chunk information */
+    if(NULL == (new_chunk_info = H5FL_MALLOC(H5D_chunk_info_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate chunk info")
+    new_chunk_info->chunk_points = 1;
+
+    /* Set chunk location & hyperslab size */
+    for(u = 0; u < fm->f_ndims; u++) {
+        HDassert(sel_start[u] == sel_end[u]);
+        new_chunk_info->coords[u] = (sel_start[u] / fm->layout->u.chunk.dim[u]) * fm->layout->u.chunk.dim[u];
+    } /* end for */
+    new_chunk_info->coords[fm->f_ndims] = 0;
+
+    /* Calculate the index of this chunk */
+    if(H5V_chunk_index(fm->f_ndims, new_chunk_info->coords, fm->layout->u.chunk.dim, fm->down_chunks, &new_chunk_info->index) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
+
+    /* Create chunk dataspace for selection operations (copy file space) */
+    if((tmp_fchunk = H5S_copy(fm->file_space, FALSE, FALSE)) == NULL)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
+
+    /* Resize chunk's dataspace dimensions to size of chunk */
+    if(H5S_set_extent_real(tmp_fchunk, fm->chunk_dim) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't adjust chunk dimensions")
+
+    /* Move selection back to have correct offset in chunk */
+    if(H5S_SELECT_ADJUST_U(tmp_fchunk, new_chunk_info->coords) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't adjust chunk selection")
+
+#ifdef H5_HAVE_PARALLEL
+    /* store chunk selection information */
+    if(io_info->using_mpi_vfd)
+        fm->select_chunk[new_chunk_info->index] = TRUE;
+#endif /* H5_HAVE_PARALLEL */
+
+    /* Set the file chunk dataspace */
+    new_chunk_info->fspace = tmp_fchunk;
+
+    /* Just point at the memory dataspace & selection */
+    /* (Casting away const OK -QAK) */
+    new_chunk_info->mspace = (H5S_t *)fm->mem_space;
+
+    /* Indicate that the chunk's memory space is shared */
+    new_chunk_info->mspace_shared = 1;
+
+    /* Insert the new chunk into the skip list */
+    if(H5SL_insert(fm->fsel, new_chunk_info, &new_chunk_info->index) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert chunk into skip list")
+
+done:
+    if(ret_value < 0) {
+        if(new_chunk_info)
+            (void)H5D_free_chunk_info(new_chunk_info, NULL, NULL);
+        if(tmp_fchunk)
+            (void)H5S_close(tmp_fchunk);
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_create_chunk_map_single() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D_create_chunk_file_map_hyper
  *
  * Purpose:	Create all chunk selections in file.
@@ -2658,15 +2768,18 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t *io_info)
+H5D_create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
+#ifndef H5_HAVE_PARALLEL
+    UNUSED
+#endif /* H5_HAVE_PARALLEL */
+    *io_info)
 {
-    hssize_t    ssel_points;                /* Number of elements in file selection */
+    hsize_t     sel_start[H5O_LAYOUT_NDIMS];   /* Offset of low bound of file selection */
+    hsize_t     sel_end[H5O_LAYOUT_NDIMS];   /* Offset of high bound of file selection */
     hsize_t     sel_points;                 /* Number of elements in file selection */
-    hsize_t    sel_start[H5O_LAYOUT_NDIMS];   /* Offset of low bound of file selection */
-    hsize_t    sel_end[H5O_LAYOUT_NDIMS];   /* Offset of high bound of file selection */
-    hsize_t    start_coords[H5O_LAYOUT_NDIMS];   /* Starting coordinates of selection */
-    hsize_t    coords[H5O_LAYOUT_NDIMS];   /* Current coordinates of chunk */
-    hsize_t    end[H5O_LAYOUT_NDIMS];      /* Current coordinates of chunk */
+    hsize_t     start_coords[H5O_LAYOUT_NDIMS];   /* Starting coordinates of selection */
+    hsize_t     coords[H5O_LAYOUT_NDIMS];   /* Current coordinates of chunk */
+    hsize_t     end[H5O_LAYOUT_NDIMS];      /* Current coordinates of chunk */
     hsize_t     chunk_index;                /* Index of chunk */
     int         curr_dim;                   /* Current dimension to increment */
     unsigned    u;                          /* Local index variable */
@@ -2678,9 +2791,7 @@ H5D_create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t *io_inf
     assert(fm->f_ndims>0);
 
     /* Get number of elements selected in file */
-    if((ssel_points=H5S_GET_SELECT_NPOINTS(fm->file_space)) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't get file selection # of elements")
-    H5_ASSIGN_OVERFLOW(sel_points,ssel_points,hssize_t,hsize_t);
+    sel_points = fm->nelmts;
 
     /* Get bounding box for selection (to reduce the number of chunks to iterate over) */
     if(H5S_SELECT_BOUNDS(fm->file_space, sel_start, sel_end) < 0)
@@ -2731,7 +2842,7 @@ H5D_create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t *io_inf
             } /* end if */
 
             /* Move selection back to have correct offset in chunk */
-            if(H5S_hyper_adjust_u(tmp_fchunk,coords) < 0) {
+            if(H5S_SELECT_ADJUST_U(tmp_fchunk, coords) < 0) {
                 (void)H5S_close(tmp_fchunk);
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't adjust chunk selection")
             } /* end if */

@@ -690,6 +690,43 @@ H5S_select_is_regular(const H5S_t *space)
 
 /*--------------------------------------------------------------------------
  NAME
+    H5S_select_adjust_u
+ PURPOSE
+    Adjust a selection by subtracting an offset
+ USAGE
+    herr_t H5S_select_adjust_u(space, offset)
+        H5S_t *space;           IN/OUT: Pointer to dataspace to adjust
+        const hsize_t *offset; IN: Offset to subtract
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Moves a selection by subtracting an offset from it.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    This routine participates in the "Inlining C function pointers"
+        pattern, don't call it directly, use the appropriate macro
+        defined in H5Sprivate.h.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_select_adjust_u(H5S_t *space, const hsize_t *offset)
+{
+    herr_t ret_value;        /* return value */
+
+    FUNC_ENTER_NOAPI_NOFUNC(H5S_select_adjust_u)
+
+    /* Check args */
+    HDassert(space);
+
+    ret_value = (*space->select.type->adjust_u)(space, offset);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* H5S_select_adjust_u() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5S_select_iter_init
  PURPOSE
     Initializes iteration information for a selection.

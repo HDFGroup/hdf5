@@ -46,6 +46,7 @@ static herr_t H5S_none_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
 static htri_t H5S_none_is_contiguous(const H5S_t *space);
 static htri_t H5S_none_is_single(const H5S_t *space);
 static htri_t H5S_none_is_regular(const H5S_t *space);
+static herr_t H5S_none_adjust_u(H5S_t *space, const hsize_t *offset);
 static herr_t H5S_none_iter_init(H5S_sel_iter_t *iter, const H5S_t *space);
 
 /* Selection iteration callbacks */
@@ -73,6 +74,7 @@ const H5S_select_class_t H5S_sel_none[1] = {{
     H5S_none_is_contiguous,
     H5S_none_is_single,
     H5S_none_is_regular,
+    H5S_none_adjust_u,
     H5S_none_iter_init,
 }};
 
@@ -648,6 +650,37 @@ H5S_none_is_regular(const H5S_t UNUSED *space)
 
     FUNC_LEAVE_NOAPI(TRUE);
 }   /* H5S_none_is_regular() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_none_adjust_u
+ PURPOSE
+    Adjust an "none" selection by subtracting an offset
+ USAGE
+    herr_t H5S_none_adjust_u(space, offset)
+        H5S_t *space;           IN/OUT: Pointer to dataspace to adjust
+        const hsize_t *offset; IN: Offset to subtract
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Moves selection by subtracting an offset from it.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_none_adjust_u(H5S_t UNUSED *space, const hsize_t UNUSED *offset)
+{
+    FUNC_ENTER_NOAPI_NOFUNC(H5S_none_adjust_u)
+
+    /* Check args */
+    HDassert(space);
+    HDassert(offset);
+
+    FUNC_LEAVE_NOAPI(FAIL)
+}   /* H5S_none_adjust_u() */
 
 
 /*--------------------------------------------------------------------------

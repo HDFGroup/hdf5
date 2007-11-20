@@ -60,6 +60,7 @@ static herr_t H5S_hyper_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
 static htri_t H5S_hyper_is_contiguous(const H5S_t *space);
 static htri_t H5S_hyper_is_single(const H5S_t *space);
 static htri_t H5S_hyper_is_regular(const H5S_t *space);
+static herr_t H5S_hyper_adjust_u(H5S_t *space, const hsize_t *offset);
 static herr_t H5S_hyper_iter_init(H5S_sel_iter_t *iter, const H5S_t *space);
 
 /* Selection iteration callbacks */
@@ -92,6 +93,7 @@ const H5S_select_class_t H5S_sel_hyper[1] = {{
     H5S_hyper_is_contiguous,
     H5S_hyper_is_single,
     H5S_hyper_is_regular,
+    H5S_hyper_adjust_u,
     H5S_hyper_iter_init,
 }};
 

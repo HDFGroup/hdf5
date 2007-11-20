@@ -47,6 +47,7 @@ static herr_t H5S_point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
 static htri_t H5S_point_is_contiguous(const H5S_t *space);
 static htri_t H5S_point_is_single(const H5S_t *space);
 static htri_t H5S_point_is_regular(const H5S_t *space);
+static herr_t H5S_point_adjust_u(H5S_t *space, const hsize_t *offset);
 static herr_t H5S_point_iter_init(H5S_sel_iter_t *iter, const H5S_t *space);
 
 /* Selection iteration callbacks */
@@ -74,6 +75,7 @@ const H5S_select_class_t H5S_sel_point[1] = {{
     H5S_point_is_contiguous,
     H5S_point_is_single,
     H5S_point_is_regular,
+    H5S_point_adjust_u,
     H5S_point_iter_init,
 }};
 
@@ -1192,6 +1194,58 @@ H5S_point_is_regular(const H5S_t *space)
 
     FUNC_LEAVE_NOAPI(ret_value);
 }   /* H5S_point_is_regular() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_point_adjust_u
+ PURPOSE
+    Adjust a "point" selection by subtracting an offset
+ USAGE
+    herr_t H5S_point_adjust_u(space, offset)
+        H5S_t *space;           IN/OUT: Pointer to dataspace to adjust
+        const hsize_t *offset; IN: Offset to subtract
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Moves a point selection by subtracting an offset from it.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_point_adjust_u(H5S_t *space, const hsize_t *offset)
+{
+    H5S_pnt_node_t *node;               /* Point node */
+    unsigned rank;                      /* Dataspace rank */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_point_adjust_u)
+
+    HDassert(space);
+    HDassert(offset);
+
+    /* Iterate through the nodes, checking the bounds on each element */
+    node = space->select.sel_info.pnt_lst->head;
+    rank = space->extent.rank;
+    while(node) {
+        unsigned u;                         /* Local index variable */
+
+        /* Adjust each coordinate for point node */
+        for(u = 0; u < rank; u++) {
+            /* Check for offset moving selection negative */
+            HDassert(node->pnt[u] >= offset[u]);
+
+            /* Adjust node's coordinate location */
+            node->pnt[u] -= offset[u];
+        } /* end for */
+
+        /* Advance to next point node in selection */
+        node = node->next;
+    } /* end while */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+}   /* H5S_point_adjust_u() */
 
 
 /*--------------------------------------------------------------------------
