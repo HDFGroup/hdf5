@@ -534,7 +534,7 @@ H5D_init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space)
     use_latest_format = H5F_USE_LATEST_FORMAT(file);
 
     /* Copy dataspace for dataset */
-    if(NULL == (dset->shared->space = H5S_copy(space, FALSE)))
+    if(NULL == (dset->shared->space = H5S_copy(space, FALSE, TRUE)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy dataspace")
 
     /* Set the latest format, if requested */
