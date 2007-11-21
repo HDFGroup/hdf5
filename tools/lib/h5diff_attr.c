@@ -176,6 +176,8 @@ hsize_t diff_attr(hid_t loc1_id,
        if (options->m_verbose)
             printf("Comparison not possible: different string sizes for attribute <%s>\n",
              name1);
+
+       options->not_cmp=1;
        continue;
 
 
