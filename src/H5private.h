@@ -1050,7 +1050,34 @@ H5_DLL double H5_trace(const double *calltime, const char *func, const char *typ
 
 /* `S' is the name of a function which is being tested to check if its */
 /*      an API function */
+#if 0
 #define H5_IS_API(S) ('_'!=S[2] && '_'!=S[3] && (!S[4] || '_'!=S[4]))
+#else
+/*
+#define H5_IS_API(S) ('_'!=S[2] && '_'!=S[3] && (!S[4] || '_'!=S[4]) && \
+	(!S[5] || ('_'!=S[5] && (S[4]>='a' && S[4]<='z'))))
+*/
+#define H5_IS_API(S) ( ( 'H' == S[0] )                                 \
+		       &&                                              \
+                       ( '5' == S[1] )                                 \
+		       &&                                              \
+		       ( ( islower(S[2]) )                             \
+			 ||                                            \
+			 ( ( ( isupper(S[2]) ) || ( isdigit(S[2]) ) )  \
+			   &&                                          \
+			   ( islower(S[3]) )                           \
+			 )                                             \
+			 ||                                            \
+			 ( ( ( isupper(S[2]) ) || ( isdigit(S[2]) ) )  \
+			   &&                                          \
+			   ( ( isupper(S[3]) ) || ( isdigit(S[3]) ) )  \
+			   &&                                          \
+			   ( islower(S[4]) )                           \
+			 )                                             \
+		       )                                               \
+		     )
+
+#endif
 
 /* global library version information string */
 extern char	H5_lib_vers_info_g[];
@@ -1391,6 +1418,7 @@ H5_DLL void H5_term_library(void);
 /* Functions to terminate interfaces */
 H5_DLL int H5A_term_interface(void);
 H5_DLL int H5AC_term_interface(void);
+H5_DLL int H5AC2_term_interface(void);
 H5_DLL int H5D_term_interface(void);
 H5_DLL int H5E_term_interface(void);
 H5_DLL int H5F_term_interface(void);

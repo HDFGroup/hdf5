@@ -41,6 +41,7 @@
 #include "H5Gprivate.h"		/* Groups 			  	*/
 #include "H5Oprivate.h"         /* Object header messages               */
 #include "H5RCprivate.h"	/* Reference counted object functions	*/
+#include "H5AC2private.h"	/* cache                                */
 
 /*
  * Feature: Define this constant on the compiler command-line if you want to
@@ -90,6 +91,7 @@ typedef struct H5F_file_t {
     hbool_t     fam_to_sec2;    /* Is h5repart changing driver from family to sec2 */
 
     H5AC_t      *cache;		/* The object cache			*/
+    H5AC2_t     *cache2;	/* test cache		 		*/
     H5AC_cache_config_t
 		mdc_initCacheCfg; /* initial configuration for the      */
                                 /* metadata cache.  This structure is   */

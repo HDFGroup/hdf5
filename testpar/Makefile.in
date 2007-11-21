@@ -62,12 +62,16 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES = testph5.sh
 am__EXEEXT_1 = t_mpi$(EXEEXT) t_posix_compliant$(EXEEXT) \
-	testphdf5$(EXEEXT) t_cache$(EXEEXT) t_pflush1$(EXEEXT) \
-	t_pflush2$(EXEEXT)
+	testphdf5$(EXEEXT) t_cache$(EXEEXT) t_cache2$(EXEEXT) \
+	t_pflush1$(EXEEXT) t_pflush2$(EXEEXT)
 t_cache_SOURCES = t_cache.c
 t_cache_OBJECTS = t_cache.$(OBJEXT)
 t_cache_LDADD = $(LDADD)
 t_cache_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
+t_cache2_SOURCES = t_cache2.c
+t_cache2_OBJECTS = t_cache2.$(OBJEXT)
+t_cache2_LDADD = $(LDADD)
+t_cache2_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
 t_mpi_SOURCES = t_mpi.c
 t_mpi_OBJECTS = t_mpi.$(OBJEXT)
 t_mpi_LDADD = $(LDADD)
@@ -103,9 +107,9 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = t_cache.c t_mpi.c t_pflush1.c t_pflush2.c \
+SOURCES = t_cache.c t_cache2.c t_mpi.c t_pflush1.c t_pflush2.c \
 	t_posix_compliant.c $(testphdf5_SOURCES)
-DIST_SOURCES = t_cache.c t_mpi.c t_pflush1.c t_pflush2.c \
+DIST_SOURCES = t_cache.c t_cache2.c t_mpi.c t_pflush1.c t_pflush2.c \
 	t_posix_compliant.c $(testphdf5_SOURCES)
 ETAGS = etags
 CTAGS = ctags
@@ -346,7 +350,9 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/test
 
 # Test programs and scripts.  These are our main targets.
 #
-TEST_PROG_PARA = t_mpi t_posix_compliant testphdf5 t_cache t_pflush1 t_pflush2
+TEST_PROG_PARA = t_mpi t_posix_compliant testphdf5 t_cache t_cache2 \
+		t_pflush1 t_pflush2
+
 TEST_SCRIPT_PARA = testph5.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 testphdf5_SOURCES = testphdf5.c t_dset.c t_file.c t_mdset.c t_ph5basic.c \
@@ -417,6 +423,9 @@ clean-checkPROGRAMS:
 t_cache$(EXEEXT): $(t_cache_OBJECTS) $(t_cache_DEPENDENCIES) 
 	@rm -f t_cache$(EXEEXT)
 	$(LINK) $(t_cache_OBJECTS) $(t_cache_LDADD) $(LIBS)
+t_cache2$(EXEEXT): $(t_cache2_OBJECTS) $(t_cache2_DEPENDENCIES) 
+	@rm -f t_cache2$(EXEEXT)
+	$(LINK) $(t_cache2_OBJECTS) $(t_cache2_LDADD) $(LIBS)
 t_mpi$(EXEEXT): $(t_mpi_OBJECTS) $(t_mpi_DEPENDENCIES) 
 	@rm -f t_mpi$(EXEEXT)
 	$(LINK) $(t_mpi_OBJECTS) $(t_mpi_LDADD) $(LIBS)
@@ -440,6 +449,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_cache.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_cache2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_chunk_alloc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_coll_chunk.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t_dset.Po@am__quote@

@@ -23,6 +23,9 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Aprivate.h"		/* Attributes				*/
 #include "H5ACprivate.h"	/* Metadata cache			*/
+#if 1 /* JRM */
+#include "H5AC2private.h"	/* Metadata cache2			*/
+#endif /* JRM */
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
@@ -930,7 +933,15 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 	 */
 	if(SUCCEED != H5AC_create(f, &(f->shared->mdc_initCacheCfg)))
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create meta data cache")
-
+#if 1 /* JRM */
+	/* create a metadata cache with modified API along side the regular
+	 * version.  For now, this is just for testing.  Once we get it 
+	 * fully in use, we will delete the old version.
+	 */
+	if(SUCCEED != H5AC2_create(f, 
+			(H5AC2_cache_config_t *)&(f->shared->mdc_initCacheCfg)))
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create meta data cache2")
+#endif /* JRM */
         /* Create the file's "open object" information */
         if(H5FO_create(f) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create open object data structure")
@@ -1029,6 +1040,12 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
         if(H5AC_dest(f, dxpl_id))
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
+#if 1 /* JRM */
+	/* also destroy the modified cache */
+        if(H5AC2_dest(f, dxpl_id))
+            /* Push error, but keep going*/
+            HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
+#endif /* JRM */
         if(H5FO_dest(f) < 0)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
@@ -1703,6 +1720,11 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
         H5AC_flags |= H5AC__FLUSH_INVALIDATE_FLAG;
     if(H5AC_flush(f, dxpl_id, H5AC_flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush meta data cache")
+#if 1 /* JRM */
+    if(H5AC2_flush(f, dxpl_id, H5AC_flags) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
+                    "unable to flush meta data cache2")
+#endif /* JRM */
 
     /*
      * If we are invalidating everything (which only happens just before
@@ -3329,7 +3351,17 @@ H5Fset_mdc_config(hid_t file_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
                     "H5AC_set_cache_auto_resize_config() failed.");
     }
+#if 1 /* JRM */
+    /* pass the resize configuration to the modified cache as well. */
+    result = H5AC2_set_cache_auto_resize_config(file->shared->cache2, 
+		                            (H5AC2_cache_config_t *)config_ptr);
 
+    if ( result != SUCCEED ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                    "H5AC2_set_cache_auto_resize_config() failed.");
+    }
+#endif /* JRM */
 done:
 
     FUNC_LEAVE_API(ret_value)

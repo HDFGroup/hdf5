@@ -429,6 +429,10 @@
 ./src/H5ACpkg.h
 ./src/H5ACprivate.h
 ./src/H5ACpublic.h
+./src/H5AC2.c
+./src/H5AC2pkg.h
+./src/H5AC2private.h
+./src/H5AC2public.h
 ./src/H5B.c
 ./src/H5Bcache.c
 ./src/H5Bpkg.h
@@ -447,6 +451,10 @@
 ./src/H5Cpkg.h
 ./src/H5Cprivate.h
 ./src/H5Cpublic.h
+./src/H5C2.c
+./src/H5C2pkg.h
+./src/H5C2private.h
+./src/H5C2public.h
 ./src/H5CS.c
 ./src/H5CSprivate.h
 ./src/H5D.c
@@ -733,9 +741,13 @@
 ./test/bittests.c
 ./test/btree2.c
 ./test/cache.c
+./test/cache2.c
 ./test/cache_api.c
+./test/cache2_api.c
 ./test/cache_common.c
+./test/cache2_common.c
 ./test/cache_common.h
+./test/cache2_common.h
 ./test/cmpd_dset.c
 ./test/cross_read.c
 ./test/dangle.c
@@ -854,6 +866,7 @@
 ./testpar/Makefile.am
 ./testpar/Makefile.in
 ./testpar/t_cache.c
+./testpar/t_cache2.c
 ./testpar/t_dset.c
 ./testpar/t_file.c
 ./testpar/t_mdset.c
