@@ -1259,6 +1259,64 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Lvisit
+ *
+ * Purpose:	Recursively visit all the links in a group and all
+ *              the groups that are linked to from that group.  Links within
+ *              each group are visited according to the order within the
+ *              specified index (unless the specified index does not exist for
+ *              a particular group, then the "name" index is used).
+ *
+ *              NOTE: Each _link_ reachable from the initial group will only be
+ *              visited once.  However, because an object may be reached from
+ *              more than one link, the visitation may call the application's
+ *              callback with more than one link that points to a particular
+ *              _object_.
+ *
+ * Return:	Success:	The return value of the first operator that
+ *				returns non-zero, or zero if all members were
+ *				processed with no operator returning non-zero.
+ *
+ *		Failure:	Negative if something goes wrong within the
+ *				library, or the negative value returned by one
+ *				of the operators.
+ *
+ * Programmer:	Quincey Koziol
+ *		November 24 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Lvisit(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
+    H5L_iterate_t op, void *op_data)
+{
+    H5I_type_t  id_type;                /* Type of ID */
+    herr_t      ret_value;              /* Return value */
+
+    FUNC_ENTER_API(H5Lvisit, FAIL)
+    H5TRACE5("e", "iIiIox*x", grp_id, idx_type, order, op, op_data);
+
+    /* Check args */
+    id_type = H5I_get_type(grp_id);
+    if(!(H5I_GROUP == id_type || H5I_FILE == id_type))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid argument")
+    if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+    if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+    if(!op)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no callback operator specified")
+
+    /* Call internal group visitation routine */
+    if((ret_value = H5G_visit(grp_id, ".", idx_type, order, op, op_data, H5P_DEFAULT, H5AC_ind_dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link visitation failed")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Lvisit() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Lvisit_by_name
  *
  * Purpose:	Recursively visit all the links in a group and all

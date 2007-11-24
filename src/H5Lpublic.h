@@ -170,6 +170,8 @@ H5_DLL herr_t H5Literate(hid_t grp_id, H5_index_t idx_type,
 H5_DLL herr_t H5Literate_by_name(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx,
     H5L_iterate_t op, void *op_data, hid_t lapl_id);
+H5_DLL herr_t H5Lvisit(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
+    H5L_iterate_t op, void *op_data);
 H5_DLL herr_t H5Lvisit_by_name(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, H5L_iterate_t op,
     void *op_data, hid_t lapl_id);
