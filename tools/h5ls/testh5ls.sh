@@ -112,6 +112,7 @@ TOOLTEST tgroup.ls -w80 tgroup.h5
 
 # test for displaying groups
 TOOLTEST tgroup-1.ls -w80 -r -g tgroup.h5
+TOOLTEST tgroup-2.ls -w80 -g tgroup.h5/g1
 
 # test for displaying simple space datasets
 TOOLTEST tdset-1.ls -w80 -r -d tdset.h5

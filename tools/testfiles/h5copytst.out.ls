@@ -2,6 +2,9 @@
 Expected output for 'h5ls ../testfiles/h5copytst.out.h5'
 #############################
 Opened "../testfiles/h5copytst.out.h5" with sec2 driver.
+/                        Group
+    Location:  1:96
+    Links:     1
 /A                       Group
     Location:  1:90344
     Links:     1

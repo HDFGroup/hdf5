@@ -1431,51 +1431,23 @@ H5G_node_iterate(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t ad
         if(udata->skip > 0)
             --udata->skip;
         else {
-            const char		*name;  /* Pointer to link name in heap */
+            H5O_link_t lnk;     /* Link for entry */
+            const char *name;   /* Pointer to link name in heap */
 
             /* Get the pointer to the name of the link in the heap */
             name = H5HL_offset_into(f, udata->heap, ents[u].name_off);
             HDassert(name);
 
-            /* Check which type of callback to make */
-            switch(udata->lnk_op->op_type) {
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-                case H5G_LINK_OP_OLD:
-                    /* Make the old-type application callback */
-                    ret_value = (udata->lnk_op->u.old_op)(udata->group_id, name, udata->op_data);
-                    break;
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
+            /* Convert the entry to a link */
+            if(H5G_ent_to_link(f, &lnk, udata->heap, &ents[u], name) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTCONVERT, H5_ITER_ERROR, "unable to convert symbol table entry to link")
 
-                case H5G_LINK_OP_APP:
-                    {
-                        H5L_info_t info;        /* Link info for entry */
+            /* Make the callback */
+            ret_value = (udata->op)(&lnk, udata->op_data);
 
-                        /* Make a link info for an entry */
-                        if(H5G_ent_to_info(f, &info, udata->heap, &ents[u]) < 0)
-                            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5_ITER_ERROR, "unable to get info for symbol table entry")
-
-                        /* Make the application callback */
-                        ret_value = (udata->lnk_op->u.app_op)(udata->group_id, name, &info, udata->op_data);
-                    }
-                    break;
-
-                case H5G_LINK_OP_LIB:
-                    /* Call the library's callback */
-                    {
-                        H5O_link_t lnk;         /* Link for entry */
-
-                        /* Convert the entry to a link */
-                        if(H5G_ent_to_link(f, &lnk, udata->heap, &ents[u], name) < 0)
-                            HGOTO_ERROR(H5E_SYM, H5E_CANTCONVERT, H5_ITER_ERROR, "unable to convert symbol table entry to link")
-
-                        /* Call the library's callback */
-                        ret_value = (udata->lnk_op->u.lib_op)(&lnk, udata->op_data);
-
-                        /* Release memory for link object */
-                        if(H5O_msg_reset(H5O_LINK_ID, &lnk) < 0)
-                            HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, H5_ITER_ERROR, "unable to release link message")
-                    }
-            } /* end switch */
+            /* Release memory for link object */
+            if(H5O_msg_reset(H5O_LINK_ID, &lnk) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, H5_ITER_ERROR, "unable to release link message")
         } /* end else */
 
         /* Increment the number of entries passed through */

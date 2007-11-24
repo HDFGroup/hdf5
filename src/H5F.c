@@ -2444,8 +2444,6 @@ H5F_get_driver_id(const H5F_t *f)
  * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
  *		March 27, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2455,13 +2453,13 @@ H5F_get_fileno(const H5F_t *f, unsigned long *filenum)
 
     FUNC_ENTER_NOAPI(H5F_get_fileno, FAIL)
 
-    assert(f);
-    assert(f->shared);
-    assert(f->shared->lf);
-    assert(filenum);
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->lf);
+    HDassert(filenum);
 
     /* Retrieve the file's serial number */
-    if(H5FD_get_fileno(f->shared->lf,filenum) < 0)
+    if(H5FD_get_fileno(f->shared->lf, filenum) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, FAIL, "can't retrieve fileno")
 
 done:

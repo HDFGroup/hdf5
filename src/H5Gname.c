@@ -50,21 +50,15 @@ typedef struct H5G_names_t {
 } H5G_names_t;
 
 /* Info to pass to the iteration function when building name */
-typedef struct H5G_ref_path_iter_t {
+typedef struct H5G_gnba_iter_t {
     /* In */
-    hid_t file; 		/* File id where it came from */
+    const H5O_loc_t *loc; 	/* The location of the object we're looking for */
     hid_t lapl_id; 		/* LAPL for operations */
     hid_t dxpl_id; 		/* DXPL for operations */
-    hbool_t is_root_group; 	/* Flag to indicate that the root group is being looked at */
-    const H5O_loc_t *loc; 	/* The location of the object we're looking for */
-
-    /* In/Out */
-    H5SL_t *ref_path_table;     /* Skip list for tracking visited nodes */
-    size_t max_container_len;   /* Maximum size of container */
 
     /* Out */
-    char *container;            /* full name of the container object */
-} H5G_ref_path_iter_t;
+    char *path;                 /* Name of the object */
+} H5G_gnba_iter_t;
 
 /* Private macros */
 
@@ -85,9 +79,6 @@ static H5RS_str_t *H5G_build_fullpath_refstr_refstr(const H5RS_str_t *prefix_r, 
 static herr_t H5G_name_move_path(H5RS_str_t **path_r_ptr,
     const char *full_suffix, const char *src_path, const char *dst_path);
 static int H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key);
-static herr_t H5G_refname_iterator(hid_t group, const char *name,
-    const H5L_info_t *link_info, void *_udata);
-static herr_t H5G_free_ref_path_node(void *item, void *key, void *operator_data/*in,out*/);
 
 
 /*-------------------------------------------------------------------------
@@ -468,7 +459,7 @@ H5G_get_name(hid_t id, char *name/*out*/, size_t size, hid_t lapl_id,
 		HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve file ID")
 
             /* Search for name of object */
-	    if((len = H5G_get_refobj_name(file, lapl_id, dxpl_id, loc.oloc, name, size)) < 0) {
+	    if((len = H5G_get_name_by_addr(file, lapl_id, dxpl_id, loc.oloc, name, size)) < 0) {
                 H5I_dec_ref(file);
 		HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't determine name")
             } /* end if */
@@ -1039,222 +1030,139 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5G_refname_iterator
+ * Function:    H5G_get_name_by_addr_cb
  *
- * Purpose:     The iterator which traverses all objects in a file looking for
- * 		one that matches the object that is being looked for.
+ * Purpose:     Callback for retrieving object's name by address
  *
- * Return:      1 on success, 0 to continue searching, negative on failure.
+ * Return:      Positive if path is for object desired
+ * 		0 if not correct object
+ * 		negative on failure.
  *
- * Programmer:  Leon Arber, Nov 1, 2006.
- *
- * Modifications:
- * 		Quincey Koziol, Nov. 3, 2006
- * 		Cleaned up code.
+ * Programmer:	Quincey Koziol
+ *		November 4 2007
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_refname_iterator(hid_t group, const char *name, const H5L_info_t *link_info,
+H5G_get_name_by_addr_cb(hid_t gid, const char *path, const H5L_info_t *linfo,
     void *_udata)
 {
-    H5G_ref_path_iter_t *udata = (H5G_ref_path_iter_t*)_udata;
-    herr_t ret_value = H5_ITER_CONT;       /* Return value */
-    
-    FUNC_ENTER_NOAPI_NOINIT(H5G_refname_iterator)
-    
-    /* We only care about hard links */
-    if(link_info->type == H5L_TYPE_HARD) {
-        H5G_loc_t loc;              /* Group location of parent */
+    H5G_gnba_iter_t *udata = (H5G_gnba_iter_t *)_udata; /* User data for iteration */
+    H5G_loc_t   obj_loc;                /* Location of object */
+    H5G_name_t  obj_path;            	/* Object's group hier. path */
+    H5O_loc_t   obj_oloc;            	/* Object's object location */
+    hbool_t     obj_found = FALSE;      /* Object at 'path' found */
+    herr_t ret_value = H5_ITER_CONT;    /* Return value */
 
-        /* Look up group's location */
-        if(H5G_loc(group, &loc) < 0)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5_ITER_ERROR, "not a location")
+    FUNC_ENTER_NOAPI_NOINIT(H5G_get_name_by_addr_cb)
 
-        /* Check for finding the object */
-        /* (checks against the file in the location as well, to make certain that
-         *  the correct object is found in a mounted file hierarchy)
-         */
-        if(udata->loc->addr == link_info->u.address && udata->loc->file == loc.oloc->file) {
-            size_t len_needed;              /* Length of container string needed */
+    /* Sanity check */
+    HDassert(path);
+    HDassert(linfo);
+    HDassert(udata->loc);
+    HDassert(udata->path == NULL);
 
-            /* Build the object's full name */
-            len_needed = HDstrlen(udata->container) + HDstrlen(name) + 2;
-            if(len_needed > udata->max_container_len) {
-                void *new_container;    /* Pointer to new container */
+    /* Check for hard link with correct address */
+    if(linfo->type == H5L_TYPE_HARD && udata->loc->addr == linfo->u.address) {
+        H5G_loc_t	grp_loc;                /* Location of group */
 
-                if(NULL == (new_container = H5MM_realloc(udata->container, len_needed)))
-                    HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, H5_ITER_ERROR, "can't allocate path string")
-                udata->container = new_container;
-                udata->max_container_len = len_needed;
-            } /* end if */
-            HDstrcat(udata->container, name); 
+        /* Get group's location */
+        if(H5G_loc(gid, &grp_loc) < 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5_ITER_ERROR, "bad group location")
+
+        /* Set up opened object location to fill in */
+        obj_loc.oloc = &obj_oloc;
+        obj_loc.path = &obj_path;
+        H5G_loc_reset(&obj_loc);
+
+        /* Find the object */
+        if(H5G_loc_find(&grp_loc, path, &obj_loc/*out*/, udata->lapl_id, udata->dxpl_id) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5_ITER_ERROR, "object not found")
+        obj_found = TRUE;
+
+        /* Check for object in same file (handles mounted files) */
+        /* (re-verify address, in case we traversed a file mount) */
+        if(udata->loc->addr == obj_loc.oloc->addr && udata->loc->file == obj_loc.oloc->file) {
+            udata->path = H5MM_strdup(path);
 
             /* We found a match so we return immediately */
             HGOTO_DONE(H5_ITER_STOP)
         } /* end if */
-        else {
-            H5O_info_t oinfo;   /* Object information */
-            H5O_loc_t tmp_oloc; /* Temporary object location */
-
-            /* Check if we've seen this object before */
-            if(H5SL_search(udata->ref_path_table, &link_info->u.address))
-                HGOTO_DONE(H5_ITER_CONT)
-
-            /* Go retrieve the object information */
-            tmp_oloc.file = loc.oloc->file;
-            tmp_oloc.addr = link_info->u.address;
-            if(H5O_get_info(&tmp_oloc, udata->dxpl_id, FALSE, &oinfo) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5_ITER_ERROR, "unable to get object info")
-
-            /* If its ref count is > 1, we add it to the list of visited objects */
-            if(oinfo.rc > 1) {
-                haddr_t *new_node;                  /* New path node for table */
-
-                /* Allocate new path node */
-                if((new_node = H5FL_MALLOC(haddr_t)) == NULL)
-                    HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, H5_ITER_ERROR, "can't allocate path node")
-
-                /* Set node information */
-                *new_node = link_info->u.address;
-
-                /* Insert into skip list */
-                if(H5SL_insert(udata->ref_path_table, new_node, new_node) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, H5_ITER_ERROR, "can't insert path node into table")
-            } /* end if */
-
-            /* If it's a group, we recurse into it */
-            if(oinfo.type == H5O_TYPE_GROUP) {
-                H5G_link_iterate_t lnk_op;          /* Link operator */
-                hsize_t last_obj;
-                size_t len_needed;                  /* Length of container string needed */
-                size_t len;
-
-                /* Build full path name of group to recurse into */
-                len = HDstrlen(udata->container);
-                len_needed = len + HDstrlen(name) + 2;
-                if(len_needed > udata->max_container_len) {
-                    void *new_container;    /* Pointer to new container */
-
-                    if(NULL == (new_container = H5MM_realloc(udata->container, len_needed)))
-                        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, H5_ITER_ERROR, "can't allocate path string")
-                    udata->container = new_container;
-                    udata->max_container_len = len_needed;
-                } /* end if */
-                if(!udata->is_root_group)
-                    HDstrcat(udata->container, name); 
-                else
-                    udata->is_root_group = FALSE;
-                HDstrcat(udata->container, "/"); 
-                    
-                /* Build iterator operator */
-                lnk_op.op_type = H5G_LINK_OP_APP;
-                lnk_op.u.app_op = H5G_refname_iterator;
-
-                ret_value = H5G_obj_iterate(udata->file, udata->container, H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)0, &last_obj, &lnk_op, udata, udata->lapl_id, udata->dxpl_id);
-                
-                /* If we didn't find the object, truncate the name to not include group name anymore */
-                if(!ret_value)
-                    udata->container[len] = '\0'; 
-            } /* end if */
-        } /* end else */
     } /* end if */
+   
+done:    
+    if(obj_found && H5G_loc_free(&obj_loc) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, H5_ITER_ERROR, "can't free location")
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_refname_iterator() */
+} /* end H5G_get_name_by_addr_cb() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5G_free_ref_path_node
+ * Function:    H5G_get_name_by_addr
  *
- * Purpose:     Free the key for a reference path table node
- *
- * Return:      Non-negative on success, negative on failure
- *
- * Programmer:  Quincey Koziol
- *
- * Modifications:
- * 		Leon Arber, Oct. 25, 2006.  Moved into H5G from h5ls
- * 		tools lib for looking up path to reference.
- *
- * 		Quincey Koziol, Nov. 3, 2006
- * 		Cleaned up code.
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5G_free_ref_path_node(void *item, void UNUSED *key, void UNUSED *operator_data/*in,out*/)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_free_ref_path_node)
-
-    H5FL_FREE(haddr_t, item);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5G_free_ref_path_node() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5G_get_refobj_name
- *
- * Purpose:     Tries to figure out the path to a reference.
+ * Purpose:     Tries to figure out the path to an object from it's address
  *
  * Return:      returns size of path name, and copies it into buffer
  * 		pointed to by name if that buffer is big enough.
  * 		0 if it cannot find the path
  * 		negative on failure.
  *
- * Programmer:  Leon Arber, Nov 1, 2006.
- *
- * Modifications:
- * 		Quincey Koziol, Nov. 3, 2006
- * 		Cleaned up code.
+ * Programmer:	Quincey Koziol
+ *		November 4 2007
  *
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5G_get_refobj_name(hid_t file, hid_t lapl_id, hid_t dxpl_id, const H5O_loc_t *loc,
+H5G_get_name_by_addr(hid_t file, hid_t lapl_id, hid_t dxpl_id, const H5O_loc_t *loc,
     char *name, size_t size)
 {
-    H5G_ref_path_iter_t udata;  /* User data for iteration */
-    H5G_loc_t root_loc;         /* Root location */
-    H5L_info_t root_info;       /* Link info for root group */
+    H5G_gnba_iter_t udata;      /* User data for iteration */
+    H5G_loc_t root_loc;         /* Root group's location */
+    hbool_t found_obj = FALSE;  /* If we found the object */
     herr_t status;              /* Status from iteration */
     ssize_t ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_get_refobj_name, FAIL)
+    FUNC_ENTER_NOAPI(H5G_get_name_by_addr, FAIL)
 
-    /* Construct the link info for the root group */
+    /* Construct the link info for the file's root group */
     if(H5G_loc(file, &root_loc) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get root group's location")
-    HDmemset(&root_info, 0, sizeof(root_info));
-    root_info.type = H5L_TYPE_HARD;
-    root_info.u.address = root_loc.oloc->addr;
 
-    /* Set up user data for iterator */
-    udata.file = file;
-    udata.lapl_id = lapl_id;
-    udata.dxpl_id = dxpl_id;
-    udata.is_root_group = TRUE;
-    if(NULL == (udata.container = H5MM_strdup("")))
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate root group name")
-    udata.max_container_len = 1;
-    udata.loc = loc;
-    
-    /* Create skip list to store reference path information */
-    if((udata.ref_path_table = H5SL_create(H5SL_TYPE_HADDR, 0.5, (size_t)16)) == NULL)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "can't create skip list for path nodes")
+    /* Check for root group being the object looked for */
+    if(root_loc.oloc->addr == loc->addr && root_loc.oloc->file == loc->file) {
+        udata.path = H5MM_strdup("");
+        found_obj = TRUE;
+    } /* end if */
+    else {
+        /* Set up user data for iterator */
+        udata.loc = loc;
+        udata.lapl_id = lapl_id;
+        udata.dxpl_id = dxpl_id;
+        udata.path = NULL;
+        
+        /* Visit all the links in the file */
+        if((status = H5G_visit(file, "/", H5_INDEX_NAME, H5_ITER_NATIVE, H5G_get_name_by_addr_cb, &udata, lapl_id, dxpl_id)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "group traversal failed while looking for object name")
+        else if(status > 0)
+            found_obj = TRUE;
+    } /* end else */
 
-    /* Iterate over all the objects in the file */
-    if((status = H5G_refname_iterator(file, "/", &root_info, &udata)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "group iteration failed while looking for object name")
-    else if(status > 0) {
+    /* Check for finding the object */
+    if(found_obj) {
+        size_t full_path_len = HDstrlen(udata.path) + 1;        /* Length of path + 1 (for "/") */
+
         /* Set the length of the full path */
-        ret_value = HDstrlen(udata.container);
+        ret_value = full_path_len;
 
         /* If there's a buffer provided, copy into it, up to the limit of its size */
         if(name) {
-            HDstrncpy(name, udata.container, size);
+            /* Copy the initial path separator */
+            HDstrcpy(name, "/");
+
+            /* Append the rest of the path */
+            /* (less one character, for the initial path separator) */
+            HDstrncat(name, udata.path, (size - 1));
             if((size_t)ret_value >= size)
                 name[size - 1] = '\0';
         } /* end if */
@@ -1264,10 +1172,8 @@ H5G_get_refobj_name(hid_t file, hid_t lapl_id, hid_t dxpl_id, const H5O_loc_t *l
    
 done:    
     /* Release resources */
-    H5MM_xfree(udata.container);
-    if(udata.ref_path_table)
-        H5SL_destroy(udata.ref_path_table, H5G_free_ref_path_node, NULL);
+    H5MM_xfree(udata.path);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_get_refobj_name() */
+} /* end H5G_get_name_by_addr() */
 

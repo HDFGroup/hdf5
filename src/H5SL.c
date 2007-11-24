@@ -99,19 +99,27 @@
 
 /* Define a code template for comparing scalar keys for the "CMP" in the H5SL_LOCATE macro */
 #define H5SL_LOCATE_SCALAR_CMP(TYPE,PKEY1,PKEY2)                        \
-        (*(TYPE *)PKEY1<*(TYPE *)PKEY2)
+        (*(TYPE *)PKEY1 < *(TYPE *)PKEY2)
 
 /* Define a code template for comparing string keys for the "CMP" in the H5SL_LOCATE macro */
 #define H5SL_LOCATE_STRING_CMP(TYPE,PKEY1,PKEY2)                        \
-        (HDstrcmp(PKEY1,PKEY2)<0)
+        (HDstrcmp(PKEY1, PKEY2) < 0)
+
+/* Define a code template for comparing H5_obj_t keys for the "CMP" in the H5SL_LOCATE macro */
+#define H5SL_LOCATE_OBJ_CMP(TYPE,PKEY1,PKEY2)                           \
+        ((((TYPE *)PKEY1)->fileno < ((TYPE *)PKEY2)->fileno) ? TRUE : (((TYPE *)PKEY1)->addr < ((TYPE *)PKEY2)->addr))
 
 /* Define a code template for comparing scalar keys for the "EQ" in the H5SL_LOCATE macro */
 #define H5SL_LOCATE_SCALAR_EQ(TYPE,PKEY1,PKEY2)                         \
-        (*(TYPE *)PKEY1==*(TYPE *)PKEY2)
+        (*(TYPE *)PKEY1 == *(TYPE *)PKEY2)
 
 /* Define a code template for comparing string keys for the "EQ" in the H5SL_LOCATE macro */
 #define H5SL_LOCATE_STRING_EQ(TYPE,PKEY1,PKEY2)                         \
-        (HDstrcmp(PKEY1,PKEY2)==0)
+        (HDstrcmp(PKEY1, PKEY2) == 0)
+
+/* Define a code template for comparing H5_obj_ keys for the "EQ" in the H5SL_LOCATE macro */
+#define H5SL_LOCATE_OBJ_EQ(TYPE,PKEY1,PKEY2)                            \
+        ((((TYPE *)PKEY1)->fileno == ((TYPE *)PKEY2)->fileno) && (((TYPE *)PKEY1)->addr == ((TYPE *)PKEY2)->addr))
 
 /* Macro used to find node for operation */
 #define H5SL_LOCATE(OP,DOUPDATE,CMP,SLIST,X,UPDATE,I,TYPE,KEY,CHECKED)  \
@@ -378,6 +386,10 @@ H5SL_insert_common(H5SL_t *slist, void *item, const void *key)
         case H5SL_TYPE_SIZE:
             H5SL_INSERT(SCALAR, slist, x, update, i, const size_t, key, checked)
             break;
+
+        case H5SL_TYPE_OBJ:
+            H5SL_INSERT(OBJ, slist, x, update, i, const H5_obj_t, key, checked)
+            break;
     } /* end switch */
 
     /* 'key' must not have been found in existing list, if we get here */
@@ -571,7 +583,7 @@ H5SL_create(H5SL_type_t type, double p, size_t max_level)
     /* Check args */
     HDassert(p>0.0 && p<1.0);
     HDassert(max_level>0 && max_level<=H5SL_LEVEL_MAX);
-    HDassert(type>=H5SL_TYPE_INT && type<=H5SL_TYPE_SIZE);
+    HDassert(type>=H5SL_TYPE_INT && type<=H5SL_TYPE_OBJ);
 
     /* Allocate skip list structure */
     if((new_slist=H5FL_MALLOC(H5SL_t))==NULL)
@@ -808,6 +820,10 @@ H5SL_remove(H5SL_t *slist, const void *key)
         case H5SL_TYPE_SIZE:
             H5SL_REMOVE(SCALAR, slist, x, update, i, const size_t, key, checked)
             break;
+
+        case H5SL_TYPE_OBJ:
+            H5SL_REMOVE(OBJ, slist, x, update, i, const H5_obj_t, key, checked)
+            break;
     } /* end switch */
 
 done:
@@ -955,6 +971,10 @@ H5SL_search(H5SL_t *slist, const void *key)
         case H5SL_TYPE_SIZE:
             H5SL_SEARCH(SCALAR, slist, x, -, i, const size_t, key, checked)
             break;
+
+        case H5SL_TYPE_OBJ:
+            H5SL_SEARCH(OBJ, slist, x, -, i, const H5_obj_t, key, checked)
+            break;
     } /* end switch */
 
     /* 'key' must not have been found in list, if we get here */
@@ -1033,6 +1053,10 @@ H5SL_less(H5SL_t *slist, const void *key)
 
         case H5SL_TYPE_SIZE:
             H5SL_SEARCH(SCALAR, slist, x, -, i, const size_t, key, checked)
+            break;
+
+        case H5SL_TYPE_OBJ:
+            H5SL_SEARCH(OBJ, slist, x, -, i, const H5_obj_t, key, checked)
             break;
     } /* end switch */
 
@@ -1126,6 +1150,10 @@ H5SL_greater(H5SL_t *slist, const void *key)
         case H5SL_TYPE_SIZE:
             H5SL_SEARCH(SCALAR, slist, x, -, i, const size_t, key, checked)
             break;
+
+        case H5SL_TYPE_OBJ:
+            H5SL_SEARCH(OBJ, slist, x, -, i, const H5_obj_t, key, checked)
+            break;
     } /* end switch */
 
     /* An exact match for 'key' must not have been found in list, if we get here */
@@ -1207,6 +1235,10 @@ H5SL_find(H5SL_t *slist, const void *key)
 
         case H5SL_TYPE_SIZE:
             H5SL_FIND(SCALAR, slist, x, -, i, const size_t, key, checked)
+            break;
+
+        case H5SL_TYPE_OBJ:
+            H5SL_FIND(OBJ, slist, x, -, i, const H5_obj_t, key, checked)
             break;
     } /* end switch */
 

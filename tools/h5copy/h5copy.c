@@ -199,8 +199,8 @@ main (int argc, const char *argv[])
  unsigned     flag=0;
  unsigned     verbose=0;
  unsigned     parents=0;
- hid_t        ocpl_id;          /* Object copy property list */
- hid_t        lcpl_id;          /* Link creation property list */
+ hid_t        ocpl_id = (-1);          /* Object copy property list */
+ hid_t        lcpl_id = (-1);          /* Link creation property list */
  char         str_flag[20];
  int          opt;
 

@@ -533,7 +533,6 @@ H5G_obj_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
             H5O_linfo_t new_linfo = H5G_CRT_LINK_INFO_DEF;  /* Link information */
             H5O_ginfo_t new_ginfo = H5G_CRT_GROUP_INFO_DEF; /* Group information */
             H5G_obj_stab_it_ud1_t udata;        /* User data for iteration */
-            H5G_link_iterate_t lnk_op;          /* Link operator */
 
             /* Convert group to "new format" group, in order to hold the information */
 
@@ -549,12 +548,8 @@ H5G_obj_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
             udata.grp_oloc = grp_oloc;
             udata.dxpl_id = dxpl_id;
 
-            /* Build iterator operator */
-            lnk_op.op_type = H5G_LINK_OP_LIB;
-            lnk_op.u.lib_op = H5G_obj_stab_to_new_cb;
-
             /* Iterate through all links in "old format" group and insert them into new format */
-            if(H5G_stab_iterate(grp_oloc, dxpl_id, H5_ITER_NATIVE, (hsize_t)0, NULL, (hid_t)0, &lnk_op, &udata) < 0)
+            if(H5G_stab_iterate(grp_oloc, dxpl_id, H5_ITER_NATIVE, (hsize_t)0, NULL, H5G_obj_stab_to_new_cb, &udata) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over old format links")
 
             /* Remove the symbol table message from the group */
@@ -636,36 +631,21 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_obj_iterate(hid_t loc_id, const char *group_name,
+H5G_obj_iterate(const H5O_loc_t *grp_oloc,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t skip, hsize_t *last_lnk,
-    H5G_link_iterate_t *lnk_op, void *op_data, hid_t lapl_id, hid_t dxpl_id)
+    H5G_lib_iterate_t op, void *op_data, hid_t dxpl_id)
 {
-    H5G_loc_t	loc;            /* Location of parent for group */
     H5O_linfo_t	linfo;		/* Link info message */
-    hid_t gid = -1;             /* ID of group to iterate over */
-    H5G_t *grp;                 /* Pointer to group data structure to iterate over */
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_obj_iterate, FAIL)
 
     /* Sanity check */
-    HDassert(group_name);
-    HDassert(last_lnk);
-    HDassert(lnk_op && lnk_op->u.lib_op);
-
-    /*
-     * Open the group on which to operate.  We also create a group ID which
-     * we can pass to the application-defined operator.
-     */
-    if(H5G_loc(loc_id, &loc) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(NULL == (grp = H5G_open_name(&loc, group_name, lapl_id, dxpl_id)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
-    if((gid = H5I_register(H5I_GROUP, grp)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
+    HDassert(grp_oloc);
+    HDassert(op);
 
     /* Attempt to get the link info for this group */
-    if(H5G_obj_get_linfo(&(grp->oloc), &linfo, dxpl_id)) {
+    if(H5G_obj_get_linfo(grp_oloc, &linfo, dxpl_id)) {
         /* Check for going out of bounds */
         if(skip > 0 && (size_t)skip >= linfo.nlinks)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "index out of bound")
@@ -679,13 +659,13 @@ H5G_obj_iterate(hid_t loc_id, const char *group_name,
 
         if(H5F_addr_defined(linfo.fheap_addr)) {
             /* Iterate over the links in the group, building a table of the link messages */
-            if((ret_value = H5G_dense_iterate(grp->oloc.file, dxpl_id, &linfo, idx_type, order, skip, last_lnk, gid, lnk_op, op_data)) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over links")
+            if((ret_value = H5G_dense_iterate(grp_oloc->file, dxpl_id, &linfo, idx_type, order, skip, last_lnk, op, op_data)) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over dense links")
         } /* end if */
         else {
             /* Get the object's name from the link messages */
-            if((ret_value = H5G_compact_iterate(&(grp->oloc), dxpl_id, &linfo, idx_type, order, skip, last_lnk, gid, lnk_op, op_data)) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over links")
+            if((ret_value = H5G_compact_iterate(grp_oloc, dxpl_id, &linfo, idx_type, order, skip, last_lnk, op, op_data)) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over compact links")
         } /* end else */
     } /* end if */
     else {
@@ -697,14 +677,11 @@ H5G_obj_iterate(hid_t loc_id, const char *group_name,
             HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "no creation order index to query")
 
         /* Iterate over symbol table */
-        if((ret_value = H5G_stab_iterate(&(grp->oloc), dxpl_id, order, skip, last_lnk, gid, lnk_op, op_data)) < 0)
+        if((ret_value = H5G_stab_iterate(grp_oloc, dxpl_id, order, skip, last_lnk, op, op_data)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't iterate over symbol table")
     } /* end else */
 
 done:
-    if(gid > 0)
-        H5I_dec_ref(gid); /*also closes 'grp'*/
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_obj_iterate() */
 

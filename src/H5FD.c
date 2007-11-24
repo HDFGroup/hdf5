@@ -3795,22 +3795,20 @@ done:
  * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
  *		March 27, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5FD_get_fileno(const H5FD_t *file, unsigned long *filenum)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_get_fileno, FAIL)
 
-    assert(file);
-    assert(filenum);
+    HDassert(file);
+    HDassert(filenum);
 
     /* Retrieve the file's serial number */
-    HDmemcpy(filenum,&file->fileno,sizeof(file->fileno));
+    *filenum = file->fileno;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

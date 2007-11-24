@@ -3952,7 +3952,7 @@ main(int argc, const char *argv[])
     /* allocate and initialize internal data structure */
     init_prefix(&prefix, prefix_len);
 
-    /* find all objects that might be targets of a reference */
+    /* Prepare to find objects that might be targets of a reference */
     fill_ref_path_table(fid);
 
     if(doxml) {
@@ -4094,7 +4094,6 @@ done:
     free_table(type_table);
 
     HDfree(prefix);
-    HDfree(info.prefix);
     HDfree(fname);
 
     /* To Do:  clean up XML table */
@@ -5342,8 +5341,7 @@ xml_dump_group(hid_t gid, const char *name)
 
     if(HDstrcmp(name, "/") == 0) {
         isRoot = 1;
-        tmp = HDmalloc(2);
-        HDstrcpy(tmp, "/");
+        tmp = HDstrdup("/");
     } else {
         tmp = HDmalloc(HDstrlen(prefix) + HDstrlen(name) + 2);
         HDstrcpy(tmp, prefix);
@@ -5401,8 +5399,8 @@ xml_dump_group(hid_t gid, const char *name)
                 ptrstr = malloc(100);
                 t_objname = xml_escape_the_name(found_obj->objname);
                 par_name = xml_escape_the_name(par);
-                xml_name_to_XID(par,parentxid,100,1);
-                xml_name_to_XID(found_obj->objname,ptrstr,100,1);
+                xml_name_to_XID(found_obj->objname, ptrstr, 100, 1);
+                xml_name_to_XID(par, parentxid, 100, 1);
                 printf("<%sGroupPtr OBJ-XID=\"%s\" H5Path=\"%s\" "
                             "Parents=\"%s\" H5ParentPaths=\"%s\" />\n",
                             xmlnsprefix,

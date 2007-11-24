@@ -1170,11 +1170,11 @@ H5Literate(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
     last_lnk = 0;
 
     /* Build link operator info */
-    lnk_op.op_type = H5G_LINK_OP_APP;
-    lnk_op.u.app_op = op;
+    lnk_op.op_type = H5G_LINK_OP_NEW;
+    lnk_op.op_func.op_new = op;
 
     /* Iterate over the links */
-    if((ret_value = H5G_obj_iterate(grp_id, ".", idx_type, order, idx, &last_lnk, &lnk_op, op_data, H5P_DEFAULT, H5AC_ind_dxpl_id)) < 0)
+    if((ret_value = H5G_iterate(grp_id, ".", idx_type, order, idx, &last_lnk, &lnk_op, op_data, H5P_DEFAULT, H5AC_ind_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
 
     /* Set the index we stopped at */
@@ -1242,11 +1242,11 @@ H5Literate_by_name(hid_t loc_id, const char *group_name,
     last_lnk = 0;
 
     /* Build link operator info */
-    lnk_op.op_type = H5G_LINK_OP_APP;
-    lnk_op.u.app_op = op;
+    lnk_op.op_type = H5G_LINK_OP_NEW;
+    lnk_op.op_func.op_new = op;
 
     /* Iterate over the links */
-    if((ret_value = H5G_obj_iterate(loc_id, group_name, idx_type, order, idx, &last_lnk, &lnk_op, op_data, lapl_id, H5AC_ind_dxpl_id)) < 0)
+    if((ret_value = H5G_iterate(loc_id, group_name, idx_type, order, idx, &last_lnk, &lnk_op, op_data, lapl_id, H5AC_ind_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
 
     /* Set the index we stopped at */
@@ -1256,6 +1256,66 @@ H5Literate_by_name(hid_t loc_id, const char *group_name,
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Literate_by_name() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Lvisit_by_name
+ *
+ * Purpose:	Recursively visit all the links in a group and all
+ *              the groups that are linked to from that group.  Links within
+ *              each group are visited according to the order within the
+ *              specified index (unless the specified index does not exist for
+ *              a particular group, then the "name" index is used).
+ *
+ *              NOTE: Each _link_ reachable from the initial group will only be
+ *              visited once.  However, because an object may be reached from
+ *              more than one link, the visitation may call the application's
+ *              callback with more than one link that points to a particular
+ *              _object_.
+ *
+ * Return:	Success:	The return value of the first operator that
+ *				returns non-zero, or zero if all members were
+ *				processed with no operator returning non-zero.
+ *
+ *		Failure:	Negative if something goes wrong within the
+ *				library, or the negative value returned by one
+ *				of the operators.
+ *
+ * Programmer:	Quincey Koziol
+ *		November 3 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Lvisit_by_name(hid_t loc_id, const char *group_name, H5_index_t idx_type,
+    H5_iter_order_t order, H5L_iterate_t op, void *op_data, hid_t lapl_id)
+{
+    herr_t      ret_value;              /* Return value */
+
+    FUNC_ENTER_API(H5Lvisit_by_name, FAIL)
+
+    /* Check args */
+    if(!group_name || !*group_name)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+    if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+    if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
+    if(!op)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no callback operator specified")
+    if(H5P_DEFAULT == lapl_id)
+        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Call internal group visitation routine */
+    if((ret_value = H5G_visit(loc_id, group_name, idx_type, order, op, op_data, lapl_id, H5AC_ind_dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link visitation failed")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Lvisit_by_name() */
 
 /*
  *-------------------------------------------------------------------------

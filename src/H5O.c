@@ -2121,8 +2121,7 @@ H5O_get_info(H5O_loc_t *oloc, hid_t dxpl_id, hbool_t want_ih_info, H5O_info_t *o
     HDmemset(oinfo, 0, sizeof(*oinfo));
 
     /* Retrieve the file's fileno */
-    if(H5F_get_fileno(oloc->file, &oinfo->fileno) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "unable to read fileno")
+    H5F_GET_FILENO(oloc->file, oinfo->fileno);
 
     /* Set the object's address */
     oinfo->addr = oloc->addr;
@@ -2411,4 +2410,49 @@ H5O_get_oh_addr(const H5O_t *oh)
 
     FUNC_LEAVE_NOAPI(oh->chunk[0].addr)
 } /* end H5O_get_oh_addr() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_get_rc_and_type
+ *
+ * Purpose:	Retrieve an object's reference count and type
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		November  4 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_get_rc_and_type(const H5O_loc_t *oloc, hid_t dxpl_id, unsigned *rc, H5O_type_t *otype)
+{
+    H5O_t *oh = NULL;                   /* Object header */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_get_rc_and_type, FAIL)
+
+    /* Check args */
+    HDassert(oloc);
+    HDassert(rc);
+    HDassert(otype);
+
+    /* Get the object header */
+    if(NULL == (oh = H5AC_protect(oloc->file, dxpl_id, H5AC_OHDR, oloc->addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+
+    /* Set the object's reference count */
+    *rc = oh->nlink;
+
+    /* Retrieve the type of the object */
+    if(H5O_obj_type_real(oh, otype) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to determine object type")
+
+done:
+    if(oh && H5AC_unprotect(oloc->file, dxpl_id, H5AC_OHDR, oloc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
+	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_get_rc_and_type() */
 

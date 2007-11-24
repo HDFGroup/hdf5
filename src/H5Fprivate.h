@@ -267,6 +267,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_INTENT(F)           ((F)->intent)
 #define H5F_GET_FC_DEGREE(F)    ((F)->shared->fc_degree)
 #define H5F_STORE_MSG_CRT_IDX(F)    ((F)->shared->store_msg_crt_idx)
+#define H5F_GET_FILENO(F,FILENUM) ((FILENUM) = (F)->shared->lf->fileno)
 #else /* H5F_PACKAGE */
 #define H5F_FCPL(F)             (H5F_get_fcpl(F))
 #define H5F_SIZEOF_ADDR(F)      (H5F_sizeof_addr(F))
@@ -285,6 +286,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_INTENT(F)           (H5F_get_intent(F))
 #define H5F_GET_FC_DEGREE(F)    (H5F_get_fc_degree(F))
 #define H5F_STORE_MSG_CRT_IDX(F)    (H5F_store_msg_crt_idx(F))
+#define H5F_GET_FILENO(F,FILENUM) (H5F_get_filenum((F), &(FILENUM)))
 #endif /* H5F_PACKAGE */
 
 

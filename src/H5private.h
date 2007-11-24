@@ -485,6 +485,12 @@ typedef enum {
     H5_COPY_DEEP        /* Deep copy from source to destination, including duplicating fields pointed to */
 } H5_copy_depth_t;
 
+/* Unique object "position" */
+typedef struct {
+    unsigned long fileno;       /* The unique identifier for the file of the object */
+    haddr_t addr;               /* The unique address of the object's header in that file */
+} H5_obj_t;
+
 /*
  * Redefine all the POSIX functions.  We should never see a POSIX
  * function (or any other non-HDF5 function) in the source!
