@@ -342,9 +342,6 @@ H5_DLL H5G_t *H5G_open_name(const H5G_loc_t *loc, const char *name,
 H5_DLL herr_t H5G_iterate(hid_t loc_id, const char *group_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t skip, hsize_t *last_lnk,
     const H5G_link_iterate_t *lnk_op, void *op_data, hid_t lapl_id, hid_t dxpl_id);
-H5_DLL herr_t H5G_visit(hid_t loc_id, const char *group_name,
-    H5_index_t idx_type, H5_iter_order_t order, H5L_iterate_t op, void *op_data,
-    hid_t lapl_id, hid_t dxpl_id);
 
 /*
  * Group hierarchy traversal routines

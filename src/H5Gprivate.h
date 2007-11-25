@@ -162,6 +162,9 @@ H5_DLL herr_t H5G_unmount(H5G_t *grp);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 H5_DLL H5G_obj_t H5G_map_obj_type(H5O_type_t obj_type);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
+H5_DLL herr_t H5G_visit(hid_t loc_id, const char *group_name,
+    H5_index_t idx_type, H5_iter_order_t order, H5L_iterate_t op, void *op_data,
+    hid_t lapl_id, hid_t dxpl_id);
 
 /*
  * These functions operate on symbol table nodes.

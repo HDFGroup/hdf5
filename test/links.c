@@ -165,11 +165,89 @@ static const link_visit_t lvisit2[] = {
     {"hard_zero/soft_two", 1}
 };
 
+typedef struct {
+    unsigned idx;               /* Index in link visit structure */
+    const link_visit_t *info;   /* Pointer to the link visit structure to use */
+} lvisit_ud_t;
+
+
+/* Object visit structs */
+typedef struct {
+    const char *path;           /* Path to object */
+    H5O_type_t type;            /* Type of object */
+} obj_visit_t;
+static const obj_visit_t ovisit0_old[] = {
+    {".", 0},
+    {"Dataset_zero", 1},
+    {"Group1", 0},
+    {"Group1/Dataset_one", 1},
+    {"Group1/Group2", 0},
+    {"Group1/Group2/Dataset_two", 1},
+    {"Group1/Group2/Type_two", 2},
+    {"Group1/Type_one", 2},
+    {"Type_zero", 2}
+};
+static const obj_visit_t ovisit0_new[] = {
+    {".", 0},
+    {"Dataset_zero", 1},
+    {"Group1", 0},
+    {"Group1/Dataset_one", 1},
+    {"Group1/Group2", 0},
+    {"Group1/Group2/Dataset_two", 1},
+    {"Group1/Group2/Type_two", 2},
+    {"Group1/Type_one", 2},
+    {"Type_zero", 2}
+};
+static const obj_visit_t ovisit1_old[] = {
+    {".", 0},
+    {"Dataset_one", 1},
+    {"Group2", 0},
+    {"Group2/Dataset_two", 1},
+    {"Group2/Type_two", 2},
+    {"Group2/hard_zero", 0},
+    {"Group2/hard_zero/Dataset_zero", 1},
+    {"Group2/hard_zero/Type_zero", 2},
+    {"Type_one", 2}
+};
+static const obj_visit_t ovisit1_new[] = {
+    {".", 0},
+    {"Dataset_one", 1},
+    {"Group2", 0},
+    {"Group2/Dataset_two", 1},
+    {"Group2/Type_two", 2},
+    {"Group2/hard_zero", 0},
+    {"Group2/hard_zero/Dataset_zero", 1},
+    {"Group2/hard_zero/Type_zero", 2},
+    {"Type_one", 2}
+};
+static const obj_visit_t ovisit2_old[] = {
+    {".", 0},
+    {"Dataset_two", 1},
+    {"Type_two", 2},
+    {"hard_zero", 0},
+    {"hard_zero/Dataset_zero", 1},
+    {"hard_zero/Group1", 0},
+    {"hard_zero/Group1/Dataset_one", 1},
+    {"hard_zero/Group1/Type_one", 2},
+    {"hard_zero/Type_zero", 2}
+};
+static const obj_visit_t ovisit2_new[] = {
+    {".", 0},
+    {"Dataset_two", 1},
+    {"Type_two", 2},
+    {"hard_zero", 0},
+    {"hard_zero/Dataset_zero", 1},
+    {"hard_zero/Group1", 0},
+    {"hard_zero/Group1/Dataset_one", 1},
+    {"hard_zero/Group1/Type_one", 2},
+    {"hard_zero/Type_zero", 2}
+};
 
 typedef struct {
-    unsigned idx;               /* Index in visit structure */
-    const link_visit_t *info;   /* Pointer to the visit structure to use */
-} lvisit_ud_t;
+    unsigned idx;               /* Index in object visit structure */
+    const obj_visit_t *info;    /* Pointer to the object visit structure to use */
+} ovisit_ud_t;
+
 
 
 /*-------------------------------------------------------------------------
@@ -5530,6 +5608,185 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    visit_obj_cb
+ *
+ * Purpose:     Callback routine for visiting objects in a file
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Sunday, November 25, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+visit_obj_cb(hid_t UNUSED group_id, const char *name, const H5O_info_t *oinfo,
+    void *_op_data)
+{
+    ovisit_ud_t *op_data = (ovisit_ud_t *)_op_data;
+
+    /* Check for correct object information */
+    if(HDstrcmp(op_data->info[op_data->idx].path, name)) return(H5_ITER_ERROR);
+    if(op_data->info[op_data->idx].type != oinfo->type) return(H5_ITER_ERROR);
+
+    /* Advance to next location in expected output */
+    op_data->idx++;
+
+    return(H5_ITER_CONT);
+} /* end visit_link_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    obj_visit
+ *
+ * Purpose:     Test the object visiting routine
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Sunday, November 25, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+obj_visit(hid_t fapl, hbool_t new_format)
+{
+    ovisit_ud_t udata;          /* User-data for visiting */
+    hid_t fid = -1;
+    hid_t gid = -1;             /* Group ID */
+
+    if(new_format)
+        TESTING("object visiting (w/new group format)")
+    else
+        TESTING("object visiting")
+
+    /* Construct "interesting" file to visit */
+    if((fid = build_visit_file(fapl)) < 0) TEST_ERROR
+
+    /* Visit all the objects reachable from the root group (with file ID) */
+    udata.idx = 0;
+    udata.info = new_format ? ovisit0_new : ovisit0_old;
+    if(H5Ovisit(fid, H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata) < 0) FAIL_STACK_ERROR
+
+    /* Visit all the objects reachable from the root group (with group ID) */
+    if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    udata.idx = 0;
+    udata.info = new_format ? ovisit0_new : ovisit0_old;
+    if(H5Ovisit(gid, H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
+
+
+    /* Visit all the objects reachable from each internal group */
+    if((gid = H5Gopen2(fid, "/Group1", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    udata.idx = 0;
+    udata.info = new_format ? ovisit1_new : ovisit1_old;
+    if(H5Ovisit(gid, H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
+
+    if((gid = H5Gopen2(fid, "/Group1/Group2", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    udata.idx = 0;
+    udata.info = new_format ? ovisit2_new : ovisit2_old;
+    if(H5Ovisit(gid, H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
+
+
+    /* Close file created */
+    if(H5Fclose(fid) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(gid);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+} /* end obj_visit() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    obj_visit_by_name
+ *
+ * Purpose:     Test the object visiting "by name" routine
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Sunday, November 25, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+obj_visit_by_name(hid_t fapl, hbool_t new_format)
+{
+    ovisit_ud_t udata;          /* User-data for visiting */
+    hid_t fid = -1;
+    hid_t gid = -1;             /* Group ID */
+
+    if(new_format)
+        TESTING("object visiting by name (w/new group format)")
+    else
+        TESTING("object visiting by name")
+
+    /* Construct "interesting" file to visit */
+    if((fid = build_visit_file(fapl)) < 0) TEST_ERROR
+
+    /* Visit all the objects reachable from the root group (with file ID) */
+    udata.idx = 0;
+    udata.info = new_format ? ovisit0_new : ovisit0_old;
+    if(H5Ovisit_by_name(fid, "/", H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+
+    /* Visit all the objects reachable from the root group (with group ID) */
+    if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    udata.idx = 0;
+    udata.info = new_format ? ovisit0_new : ovisit0_old;
+    if(H5Ovisit_by_name(gid, ".", H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
+
+
+    /* Visit all the objects reachable from each internal group */
+    udata.idx = 0;
+    udata.info = new_format ? ovisit1_new : ovisit1_old;
+    if(H5Ovisit_by_name(fid, "/Group1", H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+
+    if((gid = H5Gopen2(fid, "/Group1", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    udata.idx = 0;
+    udata.info = new_format ? ovisit1_new : ovisit1_old;
+    if(H5Ovisit_by_name(gid, ".", H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
+
+
+    udata.idx = 0;
+    udata.info = new_format ? ovisit2_new : ovisit2_old;
+    if(H5Ovisit_by_name(fid, "/Group1/Group2", H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+
+    if((gid = H5Gopen2(fid, "/Group1/Group2", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    udata.idx = 0;
+    udata.info = new_format ? ovisit2_new : ovisit2_old;
+    if(H5Ovisit_by_name(gid, ".", H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
+
+
+    /* Close file created */
+    if(H5Fclose(fid) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(gid);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+} /* end obj_visit_by_name() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    corder_create_empty
  *
  * Purpose:     Create an empty group with creation order indices
@@ -10023,6 +10280,8 @@ main(void)
             /* Misc. extra tests, useful for both new & old format files */
             nerrors += link_visit(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += link_visit_by_name(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += obj_visit(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += obj_visit_by_name(my_fapl, new_format) < 0 ? 1 : 0;
 
             /* Keep this test last, it's testing files that are used above */
             nerrors += check_all_closed(my_fapl, new_format) < 0 ? 1 : 0;

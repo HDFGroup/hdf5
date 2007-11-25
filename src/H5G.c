@@ -135,7 +135,7 @@ H5FL_DEFINE(H5G_t);
 H5FL_DEFINE(H5G_shared_t);
 
 /* Declare the free list to manage H5_obj_t's */
-H5FL_DEFINE_STATIC(H5_obj_t);
+H5FL_DEFINE(H5_obj_t);
 
 
 /* Private prototypes */
@@ -1933,7 +1933,7 @@ H5G_visit(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     udata.path_buf_size = 1;
     udata.curr_path_len = 0;
 
-    /* Create skip list to store reference path information */
+    /* Create skip list to store visited object information */
     if((udata.visited = H5SL_create(H5SL_TYPE_OBJ, 0.5, (size_t)16)) == NULL)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "can't create skip list for visited objects")
 

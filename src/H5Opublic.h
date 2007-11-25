@@ -124,6 +124,10 @@ typedef struct H5O_info_t {
 /* Typedef for message creation indexes */
 typedef uint32_t H5O_msg_crt_idx_t;
 
+/* Prototype for H5Ovisit/H5Ovisit_by_name() operator */
+typedef herr_t (*H5O_iterate_t)(hid_t obj, const char *name, const H5O_info_t *info,
+    void *op_data);
+
 
 /********************/
 /* Public Variables */
@@ -159,6 +163,11 @@ H5_DLL herr_t H5Oset_comment_by_name(hid_t loc_id, const char *name,
 H5_DLL ssize_t H5Oget_comment(hid_t obj_id, char *comment, size_t bufsize);
 H5_DLL ssize_t H5Oget_comment_by_name(hid_t loc_id, const char *name,
     char *comment, size_t bufsize, hid_t lapl_id);
+H5_DLL herr_t H5Ovisit(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
+    H5O_iterate_t op, void *op_data);
+H5_DLL herr_t H5Ovisit_by_name(hid_t loc_id, const char *obj_name,
+    H5_index_t idx_type, H5_iter_order_t order, H5O_iterate_t op,
+    void *op_data, hid_t lapl_id);
 H5_DLL herr_t H5Oclose(hid_t object_id);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
