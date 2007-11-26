@@ -537,8 +537,8 @@ static void usage(const char *prog)
 
  printf("  T - is an integer greater than 1, size of dataset in bytes \n");
  printf("  M - is a filename.\n");
- printf("  F - is the shared object header message type, any of\n");
- printf("        <dspace|dtype|fill|pline|attr>\n");
+ printf("  F - is the shared object header message type, any of <dspace|dtype|fill|\n");
+ printf("        pline|attr>. If F is not specified, S applies to all messages\n");
 
  printf("\n");
 
