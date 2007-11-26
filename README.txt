@@ -1,4 +1,4 @@
-HDF5 version 1.8.0-beta4post1 released on Mon Nov 19 22:20:37 CST 2007
+HDF5 version 1.8.0-beta5 released on Mon Nov 26 11:27:00 CST 2007
 Please refer to the release_docs/INSTALL file for installation instructions.
 ------------------------------------------------------------------------------
 

@@ -1351,6 +1351,8 @@ H5Lvisit_by_name(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     herr_t      ret_value;              /* Return value */
 
     FUNC_ENTER_API(H5Lvisit_by_name, FAIL)
+    H5TRACE7("e", "i*sIiIox*xi", loc_id, group_name, idx_type, order, op, op_data,
+             lapl_id);
 
     /* Check args */
     if(!group_name || !*group_name)
