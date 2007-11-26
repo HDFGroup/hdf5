@@ -1,16 +1,16 @@
-HDF5 version 1.8.0-beta5 released on Mon Nov 26 11:27:00 CST 2007
+HDF5 version 1.8.0-rc1 currently under development
 ================================================================================
 
 
 INTRODUCTION
 
 This document describes the differences between HDF5-1.6.* and
-HDF5-1.8.0-beta5, and contains information on the platforms tested and
-known problems in HDF5-1.8.0-beta5. For more details check the HISTORY.txt
-file in the HDF5 source.
+Hdf5 1.8.0 release candidate "HDF5-1.8.0-rc*", and contains information 
+on the platforms tested and known problems in HDF5-1.8.0-rc*. 
+For more details check the HISTORY.txt file in the HDF5 source.
 
 
-Links to HDF5 1.8.0-beta* source code, documentation, and additional materials
+Links to HDF5 1.8.0-rc* source code, documentation, and additional materials
 can be found on THG's development server (www.hdfgroup.uiuc.edu) at the
 following location:
      http://www.hdfgroup.uiuc.edu/HDF5/release/beta/obtain518.html
@@ -575,7 +575,7 @@ New Features
         - The documentation for this release is largely complete, but 
             trails the source code.  A few of the newer functions are 
             not yet documented.                       FMB - 2007/04/18
-        - The user documents for this beta can be accessed directly at
+        - The user documents for this release can be accessed directly at
             this location:
                http://www.hdfgroup.uiuc.edu/HDF5/doc_1.8pre/doc/
             The most recent document versions (updated daily) in the 
@@ -979,7 +979,7 @@ Bug Fixes since HDF5-1.6.0 release
 
 Platforms Tested
 ================
-Platforms marked with * were not tested for hdf5-1.8.0-beta5 release
+Platforms marked with * were not tested for hdf5-1.8.0-rc* release
 (This information is somewhat out of date and may be inaccurate.  It will be
     updated for a later release)
 
@@ -1055,7 +1055,7 @@ Platforms marked with * were not tested for hdf5-1.8.0-beta5 release
 
 
 Supported Configuration Features Summary
-(This table was not modified for 1.8.0-beta5 release; for information contact help@hdfgroup.org)
+(This table was not modified for 1.8.0-rc* release; for information contact help@hdfgroup.org)
 ========================================
 
     In the tables below
