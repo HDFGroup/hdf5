@@ -528,14 +528,14 @@ static void usage(const char *prog)
  printf("   -c L1, --compact=L1     Maximum number of links in header messages\n");
  printf("   -i L2, --indexed=L2     Minimum number of links in the indexed format\n");
  printf("   -s S[:F], --ssize=S[:F] Shared object header message minimum size\n");
- printf("   -m T, --threshold=T     Do not apply the filter to objects smaller than T\n");
+ printf("   -m T, --threshold=T     Do not apply the filter to datasets smaller than T\n");
  printf("   -e M, --file=M          Name of file M with the -f and -l options\n");
  printf("   -f FILT, --filter=FILT  Filter type\n");
  printf("   -l LAYT, --layout=LAYT  Layout type\n");
  
  printf("\n");
 
- printf("  T - is an integer greater than 1\n");
+ printf("  T - is an integer greater than 1, size of dataset in bytes \n");
  printf("  M - is a filename.\n");
  printf("  F - is the shared object header message type, any of\n");
  printf("        <dspace|dtype|fill|pline|attr>\n");
