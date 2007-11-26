@@ -5,8 +5,8 @@ HDF5 version 1.8.0-beta4post1 currently under development
 INTRODUCTION
 
 This document describes the differences between HDF5-1.6.* and
-HDF5-1.8.0-beta3, and contains information on the platforms tested and
-known problems in HDF5-1.8.0-beta3. For more details check the HISTORY.txt
+HDF5-1.8.0-beta5, and contains information on the platforms tested and
+known problems in HDF5-1.8.0-beta5. For more details check the HISTORY.txt
 file in the HDF5 source.
 
 
@@ -979,16 +979,16 @@ Bug Fixes since HDF5-1.6.0 release
 
 Platforms Tested
 ================
-Platforms marked with * were not tested for hdf5-1.8.0-beta3 release
+Platforms marked with * were not tested for hdf5-1.8.0-beta5 release
 (This information is somewhat out of date and may be inaccurate.  It will be
     updated for a later release)
 
-    AIX 5.2 (32/64 bit)           xlc 8.0.0.11
+*   AIX 5.2 (32/64 bit)           xlc 8.0.0.11
                                   xlC 8.0
                                   xlf 10.01.0000.0 
                                   mpcc_r 6.0.0.8
                                   mpxlf_r 8.1.1.7
-    AIX 5.3 (32/64 bit)           xlc 7.0.0.8
+*    AIX 5.3 (32/64 bit)           xlc 7.0.0.8
                                   xlC 7.0.0.8
                                   xlf  09.01.0000.0007
 *   Cray X1 water 3.0.35          Cray Standard C Version 5.4.0.7.4
@@ -1005,14 +1005,14 @@ Platforms marked with * were not tested for hdf5-1.8.0-beta3 release
                                   g++ 4.2.1 20070620
                                   gfortran 4.2.1 20070620
 
-    HP-UX B.11.23                 HP aC++/ANSI C B3910B A.06.00
+*   HP-UX B.11.23                 HP aC++/ANSI C B3910B A.06.00
                                   HP F90 v2.9.2
                                   HP aC++/ANSI C B3910B A.06.00
-*    IRIX64 6.5 (64 & n32)         MIPSpro cc 7.4.4m
+*   IRIX64 6.5 (64 & n32)         MIPSpro cc 7.4.4m
                                   F90 MIPSpro 7.4.4m 
                                   C++ MIPSpro cc 7.4.4m
 				  mpt 1.6
-    Linux 2.6.9 (RHEL4)           Intel 10.0 compilers
+*   Linux 2.6.9 (RHEL4)           Intel 10.0 compilers
     (abe.ncsa.uiuc.edu)
     Linux 2.4.21-40               gcc 3.2.3
     (osage)
@@ -1026,14 +1026,10 @@ Platforms marked with * were not tested for hdf5-1.8.0-beta3 release
           SMP ia64                Intel(R) C++ Version 9.0
     (cobalt)                      Intel(R) Fortran Itanium(R) Version 9.0 
                                   SGI MPI
-    OSF1 V5.1 (QSC)               Compaq C V6.5-011 
-                                  HP Fortran V5.5A-3548
-				  Compaq C++ V6.5-036  
-				  MPIX200_64_r13.4
     SunOS 5.8 32,46               Sun WorkShop 6 update 2 C 5.3
      (Solaris 2.8)                Sun WorkShop 6 update 2 Fortran 90
                                   Sun WorkShop 6 update 2 C++ 5.3
-*    SunOS 5.10 i86pc              Sun C 5.7
+*   SunOS 5.10 i86pc              Sun C 5.7
                                   Sun Fortran 95 8.1
                                   Sun C++ 5.7
     SunOS 5.10                    cc: Sun C 5.8 
@@ -1059,7 +1055,7 @@ Platforms marked with * were not tested for hdf5-1.8.0-beta3 release
 
 
 Supported Configuration Features Summary
-(This table was not modified for 1.8.0-beta3 release; for information contact help@hdfgroup.org)
+(This table was not modified for 1.8.0-beta5 release; for information contact help@hdfgroup.org)
 ========================================
 
     In the tables below
@@ -1081,7 +1077,6 @@ IRIX64_6.5 32-bit        y(2)     n      n        n     y     y
 HPUX11.00                y(1)     y      y        y     y     y
 HPUX11.23-32bit          n        y      n        y     y     y
 HPUX11.23-64bit          n        y      n        y     y     y
-OSF1 v5.1                y        y      y        y     y     y
 Cray X1                  y        y      y        y     y     n
 Cray XT3           (16)  n        y      n        y     y     n
 AIX-5.2 & 5.3 32-bit     y        y      y        y     y     y
@@ -1118,7 +1113,6 @@ IRIX64_6.5 32-bit        y       dna       y         y        y        y
 HPUX11.00                y       n         y         x        n        y
 HPUX11.23-32bit          y       n         n         y        n        y
 HPUX11.23-64bit          y       dna       n         y        n        y
-OSF1 v5.1                y                           y        n        y
 Cray X1                  n                           y        n        y
 Cray XT3           (16)  n                           y        n        y
 AIX-5.2 & 5.3 32-bit     n       n         n         y        n        y
