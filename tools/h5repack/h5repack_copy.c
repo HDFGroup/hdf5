@@ -437,9 +437,6 @@ int do_copy_objects(hid_t fidin,
              */
             case H5TRAV_TYPE_DATASET:
 
-                if (options->verbose)
-                    printf(FORMAT_OBJ,"dset",travt->objs[i].name );
-
                 has_filter = 0;
 
                 /* early detection of references */
@@ -769,6 +766,11 @@ int do_copy_objects(hid_t fidin,
                     if(H5Dclose(dset_out) < 0)
                         goto error;
 
+
+                    if (options->verbose)
+                        printf(FORMAT_OBJ,"dset",travt->objs[i].name );
+                    
+
                 } /* end do we have request for filter/chunking */
 
 
@@ -1058,6 +1060,7 @@ static void print_dataset_info(hid_t dcpl_id,
  size_t       cd_nelmts;      /* filter client number of values */
  char         f_objname[256];    /* filter objname */
  int          i;
+
 
  strcpy(strfilter,"\0");
 
