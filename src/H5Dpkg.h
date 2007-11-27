@@ -119,6 +119,15 @@ typedef struct H5D_io_info_t {
 #endif /* H5S_DEBUG */
 } H5D_io_info_t;
 
+/* Cached information about a particular chunk */
+typedef struct {
+    hbool_t     valid;                          /*whether cache info is valid*/
+    hsize_t	offset[H5O_LAYOUT_NDIMS];	/*logical offset to start*/
+    size_t	nbytes;				/*size of stored data	*/
+    unsigned	filter_mask;			/*excluded filters	*/
+    haddr_t	addr;				/*file address of chunk */
+} H5D_chunk_cached_t;
+
 /* The raw data chunk cache */
 typedef struct H5D_rdcc_t {
 #ifdef H5D_ISTORE_DEBUG
@@ -132,6 +141,7 @@ typedef struct H5D_rdcc_t {
     struct H5D_rdcc_ent_t *head; /* Head of doubly linked list		*/
     struct H5D_rdcc_ent_t *tail; /* Tail of doubly linked list		*/
     int		nused;	/* Number of chunk slots in use		*/
+    H5D_chunk_cached_t last;    /* Cached copy of last chunk information */
     struct H5D_rdcc_ent_t **slot; /* Chunk slots, each points to a chunk*/
 } H5D_rdcc_t;
 
@@ -289,14 +299,18 @@ typedef struct H5D_istore_key_t {
  */
 typedef struct H5D_istore_bt_ud_common_t {
     /* downward */
-    H5D_istore_key_t	key;	                /*key values		*/
-    const H5O_layout_t	*mesg;		        /*layout message	*/
+    const H5O_layout_t *mesg;		        /*layout message	*/
+    const hsize_t *offset;	                /*logical offset of chunk*/
 } H5D_istore_bt_ud_common_t;
 
 /* B-tree callback info for various operations */
 typedef struct H5D_istore_ud1_t {
     H5D_istore_bt_ud_common_t common;           /* Common info for B-tree user data (must be first) */
-    haddr_t		addr;			/*file address of chunk */
+
+    /* Upward */
+    size_t	nbytes;				/*size of stored data	*/
+    unsigned	filter_mask;			/*excluded filters	*/
+    haddr_t	addr;				/*file address of chunk */
 } H5D_istore_ud1_t; 
 
 /* Internal data structure for computing variable-length dataset's total size */

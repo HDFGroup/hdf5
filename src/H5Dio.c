@@ -1377,6 +1377,11 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
     /* Set dataset storage for I/O info */
     io_info->store=&store;
 
+    /* Compute element sizes */
+    src_type_size = H5T_get_size(dataset->shared->type);
+    dst_type_size = H5T_get_size(mem_type);
+    max_type_size = MAX(src_type_size, dst_type_size);
+
     /*
      * If there is no type conversion then read directly into the
      * application's buffer.  This saves at least one mem-to-mem copy.
@@ -1429,13 +1434,13 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
 
                 /* Perform the actual read operation */
                 if((io_info->ops.read)(io_info, chunk_info->chunk_points,
-                        H5T_get_size(dataset->shared->type), chunk_info->fspace,
+                        src_type_size, chunk_info->fspace,
                         chunk_info->mspace, chunk_addr, chunk, buf) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, " chunked read failed")
   
                 /* Release the cache lock on the chunk. */
                 if(chunk) {
-                    accessed_bytes = chunk_info->chunk_points * H5T_get_size(dataset->shared->type);
+                    accessed_bytes = chunk_info->chunk_points * src_type_size;
 		    if(H5D_istore_unlock(io_info, FALSE, idx_hint, chunk, accessed_bytes) < 0)
 			HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to unlock raw data chunk")
 		} /* end if */
@@ -1450,7 +1455,7 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
 
 #ifdef H5S_DEBUG
         H5_timer_end(&(io_info->stats->stats[1].read_timer), &timer);
-        io_info->stats->stats[1].read_nbytes += nelmts * H5T_get_size(dataset->shared->type);
+        io_info->stats->stats[1].read_nbytes += nelmts * src_type_size;
         io_info->stats->stats[1].read_ncalls++;
 #endif
 
@@ -1464,10 +1469,7 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
     if(nelmts==0)
         HGOTO_DONE(SUCCEED)
 
-    /* Compute element sizes and other parameters */
-    src_type_size = H5T_get_size(dataset->shared->type);
-    dst_type_size = H5T_get_size(mem_type);
-    max_type_size = MAX(src_type_size, dst_type_size);
+    /* Compute buffer  sizes and other parameters */
     target_size = dxpl_cache->max_temp_buf;
     /* XXX: This could cause a problem if the user sets their buffer size
      * to the same size as the default, and then the dataset elements are
@@ -1646,7 +1648,7 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
 
         /* Release the cache lock on the chunk. */
         if(chunk) {
-            accessed_bytes = chunk_info->chunk_points * H5T_get_size(dataset->shared->type);
+            accessed_bytes = chunk_info->chunk_points * src_type_size;
             if(H5D_istore_unlock(io_info, FALSE, idx_hint, chunk, accessed_bytes) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to unlock raw data chunk")
         } /* end if */
@@ -1778,6 +1780,11 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
     } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
+    /* Compute element sizes and other parameters */
+    src_type_size = H5T_get_size(mem_type);
+    dst_type_size = H5T_get_size(dataset->shared->type);
+    max_type_size = MAX(src_type_size, dst_type_size);
+
     /*
      * If there is no type conversion then write directly from the
      * application's buffer.  This saves at least one mem-to-mem copy.
@@ -1820,7 +1827,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
                 chunk_addr = H5D_istore_get_addr(io_info, &udata);
 
                 if(H5D_istore_if_load(io_info, chunk_addr)) {
-                    accessed_bytes = chunk_info->chunk_points * H5T_get_size(dataset->shared->type);
+                    accessed_bytes = chunk_info->chunk_points * dst_type_size;
                     if(accessed_bytes != dataset->shared->layout.u.chunk.size)
                         relax = FALSE;
 
@@ -1831,7 +1838,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
 
                 /* Perform the actual read operation */
                 if((io_info->ops.write)(io_info, chunk_info->chunk_points,
-                        H5T_get_size(dataset->shared->type), chunk_info->fspace,
+                        dst_type_size, chunk_info->fspace,
                         chunk_info->mspace, chunk_addr, chunk, buf) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, " chunked write failed")
 
@@ -1851,7 +1858,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
 
 #ifdef H5S_DEBUG
 	H5_timer_end(&(io_info->stats->stats[0].write_timer), &timer);
-	io_info->stats->stats[0].write_nbytes += nelmts * H5T_get_size(mem_type);
+	io_info->stats->stats[0].write_nbytes += nelmts * src_type_size;
 	io_info->stats->stats[0].write_ncalls++;
 #endif
 
@@ -1865,10 +1872,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
     if(nelmts==0)
         HGOTO_DONE(SUCCEED)
 
-    /* Compute element sizes and other parameters */
-    src_type_size = H5T_get_size(mem_type);
-    dst_type_size = H5T_get_size(dataset->shared->type);
-    max_type_size = MAX(src_type_size, dst_type_size);
+    /* Compute buffer sizes and other parameters */
     target_size = dxpl_cache->max_temp_buf;
     /* XXX: This could cause a problem if the user sets their buffer size
      * to the same size as the default, and then the dataset elements are
@@ -1953,11 +1957,11 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
         chunk_addr = H5D_istore_get_addr(io_info, &udata);
 
         if(H5D_istore_if_load(io_info, chunk_addr)) {
-            accessed_bytes = chunk_info->chunk_points * H5T_get_size(dataset->shared->type);
+            accessed_bytes = chunk_info->chunk_points * dst_type_size;
             if(accessed_bytes != dataset->shared->layout.u.chunk.size)
                 relax=FALSE;
             if(relax) {
-                accessed_bytes = H5S_GET_SELECT_NPOINTS(chunk_info->mspace)*H5T_get_size(mem_type);
+                accessed_bytes = H5S_GET_SELECT_NPOINTS(chunk_info->mspace) * src_type_size;
                 if(accessed_bytes != dataset->shared->layout.u.chunk.size)
                     relax = FALSE;
             }
@@ -2055,7 +2059,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
 
         /* Release the cache lock on the chunk. */
         if(chunk) {
-            accessed_bytes = chunk_info->chunk_points * H5T_get_size(dataset->shared->type);
+            accessed_bytes = chunk_info->chunk_points * dst_type_size;
 	    if(H5D_istore_unlock(io_info, TRUE, idx_hint, chunk, accessed_bytes) < 0)
 		HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to unlock raw data chunk")
 	} /* end if */
