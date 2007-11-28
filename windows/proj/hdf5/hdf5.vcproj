@@ -2311,52 +2311,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\src\H5FDstream.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						PreprocessorDefinitions=""
-						ObjectFile="..\..\..\proj\hdf5\Debug/"
-						ProgramDataBaseFileName="..\..\..\proj\hdf5\Debug/"
-						BrowseInformation="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						PreprocessorDefinitions=""
-						ObjectFile="..\..\..\proj\hdf5\Debug/"
-						ProgramDataBaseFileName="..\..\..\proj\hdf5\Debug/"
-						BrowseInformation="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="..\..\..\src\H5FDwindows.c"
 				>
 				<FileConfiguration

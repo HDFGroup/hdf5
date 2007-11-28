@@ -990,25 +990,6 @@ SOURCE=..\..\..\src\H5FDstdio.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\H5FDstream.c
-
-!IF  "$(CFG)" == "hdf5dll - Win32 Release"
-
-# PROP Intermediate_Dir "../../../proj/hdf5dll/Release"
-
-!ELSEIF  "$(CFG)" == "hdf5dll - Win32 Debug"
-
-# PROP Intermediate_Dir "../../../proj/hdf5dll/Debug"
-
-!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaDbg"
-
-!ELSEIF  "$(CFG)" == "hdf5dll - Win32 AlphaRel"
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\src\H5FDwindows.c
 
 !IF  "$(CFG)" == "hdf5dll - Win32 Release"
