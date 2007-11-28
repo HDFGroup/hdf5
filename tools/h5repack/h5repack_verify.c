@@ -243,8 +243,15 @@ int h5repack_verify(const char *fname,
   *-------------------------------------------------------------------------
   */
     if(options->all_filter == 1)
-     if(has_filter(dcpl_id, options->filter_g.filtn) == 0)
-      ret = 0;
+    {
+        int k;
+        
+        for (k = 0; k < options->n_filter_g; k++ )
+        {
+            if (has_filter(dcpl_id, options->filter_g[k].filtn) == 0)
+                ret = 0;
+        }
+    }
 
  /*-------------------------------------------------------------------------
   * layout check

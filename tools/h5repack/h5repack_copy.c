@@ -903,143 +903,143 @@ int copy_attr(hid_t loc_in,
               pack_opt_t *options
               )
 {
- hid_t      attr_id=-1;      /* attr ID */
- hid_t      attr_out=-1;     /* attr ID */
- hid_t      space_id=-1;     /* space ID */
- hid_t      ftype_id=-1;     /* file type ID */
- hid_t      wtype_id=-1;     /* read/write type ID */
- size_t     msize;        /* size of type */
- void       *buf=NULL;    /* data buffer */
- hsize_t    nelmts;       /* number of elements in dataset */
- int        rank;         /* rank of dataset */
- hsize_t    dims[H5S_MAX_RANK];/* dimensions of dataset */
- char       name[255];
- H5O_info_t oinfo;              /* Object info */
- int        j;
- unsigned   u;
-
- if(H5Oget_info(loc_in, &oinfo) < 0)
-  goto error;
-
-/*-------------------------------------------------------------------------
- * copy all attributes
- *-------------------------------------------------------------------------
- */
-
- for ( u = 0; u < (unsigned)oinfo.num_attrs; u++)
- {
-
-   buf=NULL;
-
-  /* open attribute */
-  if((attr_id = H5Aopen_by_idx(loc_in, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-   goto error;
-
-  /* get name */
-  if (H5Aget_name( attr_id, (size_t)255, name ) < 0)
-   goto error;
-
-  /* get the file datatype  */
-  if ((ftype_id = H5Aget_type( attr_id )) < 0 )
-   goto error;
-
-  /* get the dataspace handle  */
-  if ((space_id = H5Aget_space( attr_id )) < 0 )
-   goto error;
-
-  /* get dimensions  */
-  if ( (rank = H5Sget_simple_extent_dims(space_id, dims, NULL)) < 0 )
-   goto error;
-
-  nelmts=1;
-  for (j=0; j<rank; j++)
-   nelmts*=dims[j];
-
-  if (options->use_native==1)
-   wtype_id = h5tools_get_native_type(ftype_id);
-  else
-   wtype_id = H5Tcopy(ftype_id); 
-
-  if ((msize=H5Tget_size(wtype_id))==0)
-   goto error;
-
-/*-------------------------------------------------------------------------
- * object references are a special case
- * we cannot just copy the buffers, but instead we recreate the reference
- * this is done on a second sweep of the file that just copies
- * the referenced objects
- *-------------------------------------------------------------------------
- */
-
-  if (H5T_REFERENCE==H5Tget_class(wtype_id))
-  {
-      ;
-  }
-  else 
-  {
- /*-------------------------------------------------------------------------
-  * read to memory
-  *-------------------------------------------------------------------------
-  */
-
-   buf = (void *)HDmalloc((size_t)(nelmts * msize));
-   if(buf == NULL) {
-    error_msg(progname, "cannot read into memory\n" );
-    goto error;
-   }
-   if(H5Aread(attr_id, wtype_id, buf) < 0)
-    goto error;
-
+    hid_t      attr_id=-1;        /* attr ID */
+    hid_t      attr_out=-1;       /* attr ID */
+    hid_t      space_id=-1;       /* space ID */
+    hid_t      ftype_id=-1;       /* file type ID */
+    hid_t      wtype_id=-1;       /* read/write type ID */
+    size_t     msize;             /* size of type */
+    void       *buf=NULL;         /* data buffer */
+    hsize_t    nelmts;            /* number of elements in dataset */
+    int        rank;              /* rank of dataset */
+    hsize_t    dims[H5S_MAX_RANK];/* dimensions of dataset */
+    char       name[255];
+    H5O_info_t oinfo;             /* object info */
+    int        j;
+    unsigned   u;
+    
+    if(H5Oget_info(loc_in, &oinfo) < 0)
+        goto error;
+    
    /*-------------------------------------------------------------------------
-    * copy
+    * copy all attributes
     *-------------------------------------------------------------------------
     */
-
-   if((attr_out = H5Acreate2(loc_out, name, ftype_id, space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-    goto error;
-   if(H5Awrite(attr_out, wtype_id, buf) < 0)
-    goto error;
-
-   /*close*/
-   if(H5Aclose(attr_out) < 0)
-    goto error;
-
-
-   if(buf)
-    free(buf);
-
-  } /*H5T_REFERENCE*/
-
-
-  if(options->verbose)
-   printf(FORMAT_OBJ_ATTR, "attr", name);
-
-/*-------------------------------------------------------------------------
- * close
- *-------------------------------------------------------------------------
- */
-
-  if (H5Tclose(ftype_id) < 0) goto error;
-  if (H5Tclose(wtype_id) < 0) goto error;
-  if (H5Sclose(space_id) < 0) goto error;
-  if (H5Aclose(attr_id) < 0) goto error;
-
- } /* u */
-
-
-  return 0;
-
+    
+    for ( u = 0; u < (unsigned)oinfo.num_attrs; u++)
+    {
+        
+        buf=NULL;
+        
+        /* open attribute */
+        if((attr_id = H5Aopen_by_idx(loc_in, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            goto error;
+        
+        /* get name */
+        if (H5Aget_name( attr_id, (size_t)255, name ) < 0)
+            goto error;
+        
+        /* get the file datatype  */
+        if ((ftype_id = H5Aget_type( attr_id )) < 0 )
+            goto error;
+        
+        /* get the dataspace handle  */
+        if ((space_id = H5Aget_space( attr_id )) < 0 )
+            goto error;
+        
+        /* get dimensions  */
+        if ( (rank = H5Sget_simple_extent_dims(space_id, dims, NULL)) < 0 )
+            goto error;
+        
+        nelmts=1;
+        for (j=0; j<rank; j++)
+            nelmts*=dims[j];
+        
+        if (options->use_native==1)
+            wtype_id = h5tools_get_native_type(ftype_id);
+        else
+            wtype_id = H5Tcopy(ftype_id); 
+        
+        if ((msize=H5Tget_size(wtype_id))==0)
+            goto error;
+        
+       /*-------------------------------------------------------------------------
+        * object references are a special case
+        * we cannot just copy the buffers, but instead we recreate the reference
+        * this is done on a second sweep of the file that just copies
+        * the referenced objects
+        *-------------------------------------------------------------------------
+        */
+        
+        if (H5T_REFERENCE==H5Tget_class(wtype_id))
+        {
+            ;
+        }
+        else 
+        {
+          /*-------------------------------------------------------------------------
+           * read to memory
+           *-------------------------------------------------------------------------
+           */
+            
+            buf = (void *)HDmalloc((size_t)(nelmts * msize));
+            if(buf == NULL) {
+                error_msg(progname, "cannot read into memory\n" );
+                goto error;
+            }
+            if(H5Aread(attr_id, wtype_id, buf) < 0)
+                goto error;
+            
+           /*-------------------------------------------------------------------------
+            * copy
+            *-------------------------------------------------------------------------
+            */
+            
+            if((attr_out = H5Acreate2(loc_out, name, ftype_id, space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                goto error;
+            if(H5Awrite(attr_out, wtype_id, buf) < 0)
+                goto error;
+            
+            /*close*/
+            if(H5Aclose(attr_out) < 0)
+                goto error;
+            
+            
+            if(buf)
+                free(buf);
+            
+        } /*H5T_REFERENCE*/
+        
+        
+        if(options->verbose)
+            printf(FORMAT_OBJ_ATTR, "attr", name);
+        
+        /*-------------------------------------------------------------------------
+         * close
+         *-------------------------------------------------------------------------
+         */
+        
+        if (H5Tclose(ftype_id) < 0) goto error;
+        if (H5Tclose(wtype_id) < 0) goto error;
+        if (H5Sclose(space_id) < 0) goto error;
+        if (H5Aclose(attr_id) < 0) goto error;
+        
+    } /* u */
+    
+    
+    return 0;
+    
 error:
- H5E_BEGIN_TRY {
-  H5Tclose(ftype_id);
-  H5Tclose(wtype_id);
-  H5Sclose(space_id);
-  H5Aclose(attr_id);
-  H5Aclose(attr_out);
-  if (buf)
-    free(buf);
- } H5E_END_TRY;
- return -1;
+    H5E_BEGIN_TRY {
+        H5Tclose(ftype_id);
+        H5Tclose(wtype_id);
+        H5Sclose(space_id);
+        H5Aclose(attr_id);
+        H5Aclose(attr_out);
+        if (buf)
+            free(buf);
+    } H5E_END_TRY;
+    return -1;
 }
 
 
@@ -1056,96 +1056,96 @@ static void print_dataset_info(hid_t dcpl_id,
                                char *objname,
                                double per)
 {
- char         strfilter[255];
+    char         strfilter[255];
 #if defined (PRINT_DEBUG )
- char         temp[255];
+    char         temp[255];
 #endif
- int          nfilters;       /* number of filters */
- unsigned     filt_flags;     /* filter flags */
- H5Z_filter_t filtn;          /* filter identification number */
- unsigned     cd_values[20];  /* filter client data values */
- size_t       cd_nelmts;      /* filter client number of values */
- char         f_objname[256];    /* filter objname */
- int          i;
-
-
- strcpy(strfilter,"\0");
-
- /* get information about input filters */
- if((nfilters = H5Pget_nfilters(dcpl_id)) < 0)
-  return;
-
- for(i = 0; i < nfilters; i++) {
-  cd_nelmts = NELMTS(cd_values);
-
-  filtn = H5Pget_filter2(dcpl_id, (unsigned)i, &filt_flags, &cd_nelmts,
-   cd_values, sizeof(f_objname), f_objname, NULL);
-
-  switch(filtn) {
-  default:
-   break;
-
-  case H5Z_FILTER_DEFLATE:
-   strcat(strfilter,"GZIP ");
-
+    int          nfilters;       /* number of filters */
+    unsigned     filt_flags;     /* filter flags */
+    H5Z_filter_t filtn;          /* filter identification number */
+    unsigned     cd_values[20];  /* filter client data values */
+    size_t       cd_nelmts;      /* filter client number of values */
+    char         f_objname[256];    /* filter objname */
+    int          i;
+    
+    
+    strcpy(strfilter,"\0");
+    
+    /* get information about input filters */
+    if((nfilters = H5Pget_nfilters(dcpl_id)) < 0)
+        return;
+    
+    for(i = 0; i < nfilters; i++) {
+        cd_nelmts = NELMTS(cd_values);
+        
+        filtn = H5Pget_filter2(dcpl_id, (unsigned)i, &filt_flags, &cd_nelmts,
+            cd_values, sizeof(f_objname), f_objname, NULL);
+        
+        switch(filtn) {
+        default:
+            break;
+            
+        case H5Z_FILTER_DEFLATE:
+            strcat(strfilter,"GZIP ");
+            
 #if defined (PRINT_DEBUG)
-   {
-    unsigned level=cd_values[0];
-    sprintf(temp,"(%d)",level);
-    strcat(strfilter,temp);
-   }
+            {
+                unsigned level=cd_values[0];
+                sprintf(temp,"(%d)",level);
+                strcat(strfilter,temp);
+            }
 #endif
-   break;
-
-  case H5Z_FILTER_SZIP:
-   strcat(strfilter,"SZIP ");
-
+            break;
+            
+        case H5Z_FILTER_SZIP:
+            strcat(strfilter,"SZIP ");
+            
 #if defined (PRINT_DEBUG)
-   {
-    unsigned options_mask=cd_values[0]; /* from dcpl, not filt*/
-    unsigned ppb=cd_values[1];
-    sprintf(temp,"(%d,",ppb);
-    strcat(strfilter,temp);
-    if (options_mask & H5_SZIP_EC_OPTION_MASK)
-     strcpy(temp,"EC) ");
-    else if (options_mask & H5_SZIP_NN_OPTION_MASK)
-     strcpy(temp,"NN) ");
-   }
-   strcat(strfilter,temp);
-
+            {
+                unsigned options_mask=cd_values[0]; /* from dcpl, not filt*/
+                unsigned ppb=cd_values[1];
+                sprintf(temp,"(%d,",ppb);
+                strcat(strfilter,temp);
+                if (options_mask & H5_SZIP_EC_OPTION_MASK)
+                    strcpy(temp,"EC) ");
+                else if (options_mask & H5_SZIP_NN_OPTION_MASK)
+                    strcpy(temp,"NN) ");
+            }
+            strcat(strfilter,temp);
+            
 #endif
-
-   break;
-
-  case H5Z_FILTER_SHUFFLE:
-   strcat(strfilter,"SHUF ");
-   break;
-
-  case H5Z_FILTER_FLETCHER32:
-   strcat(strfilter,"FLET ");
-   break;
-
-  case H5Z_FILTER_NBIT:
-   strcat(strfilter,"NBIT ");
-   break;
-
-  case H5Z_FILTER_SCALEOFFSET:
-   strcat(strfilter,"SCALEOFFSET ");
-   break;
-  } /* switch */
- }/*i*/
-
- if(*strfilter == '\0')
-  printf(FORMAT_OBJ,"dset",objname );
- else
- {
-  char str[255], temp[20];
-  strcpy(str,"dset     ");
-  strcat(str,strfilter);
-  sprintf(temp,"  (%.1f%%)",per);
-  strcat(str,temp);
-  printf(FORMAT_OBJ,str,objname);
- }
+            
+            break;
+            
+        case H5Z_FILTER_SHUFFLE:
+            strcat(strfilter,"SHUF ");
+            break;
+            
+        case H5Z_FILTER_FLETCHER32:
+            strcat(strfilter,"FLET ");
+            break;
+            
+        case H5Z_FILTER_NBIT:
+            strcat(strfilter,"NBIT ");
+            break;
+            
+        case H5Z_FILTER_SCALEOFFSET:
+            strcat(strfilter,"SCALEOFFSET ");
+            break;
+        } /* switch */
+    }/*i*/
+    
+    if(*strfilter == '\0')
+        printf(FORMAT_OBJ,"dset",objname );
+    else
+    {
+        char str[255], temp[20];
+        strcpy(str,"dset     ");
+        strcat(str,strfilter);
+        sprintf(temp,"  (%.1f%%)",per);
+        strcat(str,temp);
+        printf(FORMAT_OBJ,str,objname);
+    }
 }
 
 /*-------------------------------------------------------------------------

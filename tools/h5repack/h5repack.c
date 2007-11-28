@@ -15,8 +15,13 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
+
+#include "H5private.h"
 #include "h5repack.h"
+#include "h5tools.h"
 #include "h5tools_utils.h"
+
 
 extern char  *progname;
 
@@ -28,24 +33,10 @@ extern char  *progname;
  */
 
 static int check_options(pack_opt_t *options);
+static int check_objects(const char* fname, pack_opt_t *options);
+static const char* get_sfilter (H5Z_filter_t filtn);
+static int have_request(pack_opt_t *options);
 
-
-/*-------------------------------------------------------------------------
- * Function: aux_initglb_filter
- *
- * Purpose: auxiliary function, initialize the options global filter
- *
- * Return: void
- *
- *-------------------------------------------------------------------------
- */
-static void aux_initglb_filter(pack_opt_t *options)
-{
- int k;
- options->filter_g.filtn  = -1;
- for ( k=0; k<CDVALUES; k++)
-  options->filter_g.cd_values[k] = -1;
-}
 
 
 /*-------------------------------------------------------------------------
@@ -71,20 +62,20 @@ int h5repack(const char* infile,
              const char* outfile,
              pack_opt_t *options)
 {
- /* check input */
- if (check_options(options)<0)
-  return -1;
-
- /* check for objects in input that are in the file */
- if (check_objects(infile,options) < 0)
-  return -1;
-
- /* copy the objects  */
- if (copy_objects(infile,outfile,options) < 0)
-  return -1;
-
-
- return 0;
+    /* check input */
+    if (check_options(options)<0)
+        return -1;
+    
+    /* check for objects in input that are in the file */
+    if (check_objects(infile,options) < 0)
+        return -1;
+    
+    /* copy the objects  */
+    if (copy_objects(infile,outfile,options) < 0)
+        return -1;
+    
+    
+    return 0;
 }
 
 
@@ -102,10 +93,19 @@ int h5repack(const char* infile,
 int h5repack_init (pack_opt_t *options,
                    int verbose)
 {
- memset(options,0,sizeof(pack_opt_t));
- options->threshold = 1024;
- options->verbose   = verbose;
- return (options_table_init(&(options->op_tbl)));
+    int k, n;
+    memset(options,0,sizeof(pack_opt_t));
+    options->threshold = 1024;
+    options->verbose   = verbose;
+        
+    for ( n = 0; n < H5_REPACK_MAX_NFILTERS; n++)
+    {
+        options->filter_g[n].filtn  = -1;
+        for ( k = 0; k < CDVALUES; k++)
+            options->filter_g[n].cd_values[k] = -1;
+    }
+     
+    return (options_table_init(&(options->op_tbl)));
 }
 
 /*-------------------------------------------------------------------------
@@ -118,7 +118,7 @@ int h5repack_init (pack_opt_t *options,
 
 int h5repack_end  (pack_opt_t *options)
 {
- return options_table_free(options->op_tbl);
+    return options_table_free(options->op_tbl);
 }
 
 /*-------------------------------------------------------------------------
@@ -135,35 +135,43 @@ int h5repack_end  (pack_opt_t *options)
 int h5repack_addfilter(const char* str,
                        pack_opt_t *options)
 {
- obj_list_t      *obj_list=NULL; /*one object list for the -f and -c option entry */
- filter_info_t   filt;           /*filter info for the current -f option entry */
- int             n_objs;         /*number of objects in the current -f or -c option entry */
+    obj_list_t      *obj_list=NULL; /* one object list for the -f and -l option entry */
+    filter_info_t   filter;         /* filter info for the current -f option entry */
+    int             n_objs;         /* number of objects in the current -f or -l option entry */
+    int             is_glb;         /* is the filter global */
 
- if (options->all_filter==1){
-  error_msg(progname, "invalid compression input: 'all' option is present \
-   with other objects <%s>\n",str);
-  return -1;
- }
+    
+     
+    /* parse the -f option */
+    obj_list=parse_filter(str,&n_objs,&filter,options,&is_glb);
+    if (obj_list==NULL)
+    {
+        return -1;
+    }
+    
+    /* if it applies to all objects */
+    if (is_glb)
+    {
+        
+        int n;
+        
+        n = options->n_filter_g++; /* increase # of global filters */
 
- /* parse the -f option */
- obj_list=parse_filter(str,&n_objs,&filt,options);
- if (obj_list==NULL)
- {
-  return -1;
- }
-
- if (options->all_filter==1)
- {
-  /* if we are compressing all set the global filter type */
-  aux_initglb_filter(options);
-  options->filter_g=filt;
- }
-
- if (options->all_filter==0)
-  options_add_filter(obj_list,n_objs,filt,options->op_tbl);
-
- free(obj_list);
- return 0;
+        if (options->n_filter_g > H5_REPACK_MAX_NFILTERS)
+        {
+            error_msg(progname, "maximum number of filters exceeded for <%s>\n",str);
+            return -1;
+            
+        }
+                
+        options->filter_g[n] = filter;
+    }
+    
+    else
+        options_add_filter(obj_list,n_objs,filter,options->op_tbl);
+    
+    free(obj_list);
+    return 0;
 }
 
 
@@ -181,55 +189,55 @@ int h5repack_addfilter(const char* str,
 int h5repack_addlayout(const char* str,
                        pack_opt_t *options)
 {
-
- obj_list_t  *obj_list=NULL;     /*one object list for the -t and -c option entry */
- int         n_objs;             /*number of objects in the current -t or -c option entry */
- pack_info_t pack;               /*info about layout to extract from parse */
- int         j;
-
- init_packobject(&pack);
-
- if (options->all_layout==1){
-  error_msg(progname, "invalid layout input: 'all' option \
-   is present with other objects <%s>\n",str);
-  return -1;
- }
-
- /* parse the layout option */
- obj_list=parse_layout(str,&n_objs,&pack,options);
- if (obj_list==NULL)
-  return -1;
-
- /* set global layout option */
- if (options->all_layout==1 )
- {
-  options->layout_g=pack.layout;
-  if (pack.layout==H5D_CHUNKED)
-  {
-   /* -2 means the NONE option, remove chunking
-      and set the global layout to contiguous */
-   if (pack.chunk.rank==-2)
-   {
-    options->layout_g = H5D_CONTIGUOUS;
-   }
-   /* otherwise set the global chunking type */
-   else
-   {
-    options->chunk_g.rank=pack.chunk.rank;
-    for (j = 0; j < pack.chunk.rank; j++)
-     options->chunk_g.chunk_lengths[j] = pack.chunk.chunk_lengths[j];
-   }
-  }
- }
-
- if (options->all_layout==0)
-  options_add_layout(obj_list,
-   n_objs,
-   &pack,
-   options->op_tbl);
-
- free(obj_list);
- return 0;
+    
+    obj_list_t  *obj_list=NULL;     /*one object list for the -t and -c option entry */
+    int         n_objs;             /*number of objects in the current -t or -c option entry */
+    pack_info_t pack;               /*info about layout to extract from parse */
+    int         j;
+    
+    init_packobject(&pack);
+    
+    if (options->all_layout==1){
+    error_msg(progname, "invalid layout input: 'all' option \
+        is present with other objects <%s>\n",str);
+    return -1;
+    }
+    
+    /* parse the layout option */
+    obj_list=parse_layout(str,&n_objs,&pack,options);
+    if (obj_list==NULL)
+        return -1;
+    
+    /* set global layout option */
+    if (options->all_layout==1 )
+    {
+        options->layout_g=pack.layout;
+        if (pack.layout==H5D_CHUNKED)
+        {
+        /* -2 means the NONE option, remove chunking
+            and set the global layout to contiguous */
+            if (pack.chunk.rank==-2)
+            {
+                options->layout_g = H5D_CONTIGUOUS;
+            }
+            /* otherwise set the global chunking type */
+            else
+            {
+                options->chunk_g.rank=pack.chunk.rank;
+                for (j = 0; j < pack.chunk.rank; j++)
+                    options->chunk_g.chunk_lengths[j] = pack.chunk.chunk_lengths[j];
+            }
+        }
+    }
+    
+    if (options->all_layout==0)
+        options_add_layout(obj_list,
+        n_objs,
+        &pack,
+        options->op_tbl);
+    
+    free(obj_list);
+    return 0;
 }
 
 
@@ -252,148 +260,282 @@ int h5repack_addlayout(const char* str,
  */
 static int check_options(pack_opt_t *options)
 {
- unsigned int   i;
- int            k, j, has_cp=0, has_ck=0;
- char           slayout[30];
-
-/*-------------------------------------------------------------------------
- * objects to layout
- *-------------------------------------------------------------------------
- */
- if (options->verbose && have_request(options) /* only print if requested */)
- {
-  printf("Objects to modify layout are...\n");
-  if (options->all_layout==1)  {
-   switch (options->layout_g)
-   {
-   case H5D_COMPACT:
-    strcpy(slayout,"compact");
-    break;
-   case H5D_CONTIGUOUS:
-    strcpy(slayout,"contiguous");
-    break;
-   case H5D_CHUNKED:
-    strcpy(slayout,"chunked");
-    break;
-   default:
-    strcpy(slayout,"unknown");
-    break;
-   }
-   printf(" Apply %s layout to all\n", slayout);
-   if (H5D_CHUNKED==options->layout_g) {
-    printf("with dimension [");
-    for ( j = 0; j < options->chunk_g.rank; j++)
-     printf("%d ",(int)options->chunk_g.chunk_lengths[j]);
-    printf("]\n");
-   }
-  }
- }/* verbose */
-
- for ( i = 0; i < options->op_tbl->nelems; i++)
- {
-  char* name=options->op_tbl->objs[i].path;
-
-  if (options->op_tbl->objs[i].chunk.rank>0)
-  {
-   if (options->verbose){
-    printf(" <%s> with chunk size ",name);
-    for ( k = 0; k < options->op_tbl->objs[i].chunk.rank; k++)
-     printf("%d ",(int)options->op_tbl->objs[i].chunk.chunk_lengths[k]);
-    printf("\n");
-   }
-   has_ck=1;
-  }
-  else if (options->op_tbl->objs[i].chunk.rank==-2)
-  {
-   if (options->verbose)
-    printf(" <%s> %s\n",name,"NONE (contigous)");
-   has_ck=1;
-  }
- }
-
- if (options->all_layout==1 && has_ck){
-  error_msg(progname, "invalid chunking input: 'all' option\
-   is present with other objects\n");
-  return -1;
- }
-
-/*-------------------------------------------------------------------------
- * objects to filter
- *-------------------------------------------------------------------------
- */
-
- if (options->verbose && have_request(options) /* only print if requested */)
- {
-  printf("Objects to apply filter are...\n");
-  if (options->all_filter==1)
-  {
-   H5Z_filter_t filtn=options->filter_g.filtn;
-   switch (filtn)
-   {
-   case H5Z_FILTER_NONE:
-     printf(" Uncompress all\n");
-    break;
-   case H5Z_FILTER_SHUFFLE:
-   case H5Z_FILTER_FLETCHER32:
-     printf(" All with %s\n",get_sfilter(filtn));
-    break;
-   case H5Z_FILTER_SZIP:
-   case H5Z_FILTER_DEFLATE:
-     printf(" All with %s, parameter %d\n",
-      get_sfilter(filtn),
-      options->filter_g.cd_values[0]);
-    break;
-   };
-  }
- } /* verbose */
-
- for ( i = 0; i < options->op_tbl->nelems; i++)
- {
-  pack_info_t pack  = options->op_tbl->objs[i];
-  char*       name  = pack.path;
-
-  for ( j=0; j<pack.nfilters; j++)
-  {
-   if (options->verbose)
-   {
-    printf(" <%s> with %s filter\n",
-     name,
-     get_sfilter(pack.filter[j].filtn));
-   }
-
-   has_cp=1;
-
-  } /* j */
- } /* i */
-
- if (options->all_filter==1 && has_cp){
-  error_msg(progname, "invalid compression input: 'all' option\
-   is present with other objects\n");
-  return -1;
- }
-
- /* check options for the latest format */
- if (options->grp_compact < 0) {
-  error_msg(progname, "invalid maximum number of links to store as header messages\n");
-  return -1;
- }
- if (options->grp_indexed < 0) {
-  error_msg(progname, "invalid minimum number of links to store in the indexed format\n");
-  return -1;
- }
- if (options->grp_indexed > options->grp_compact) {
-  error_msg(progname, "minimum indexed size is greater than the maximum compact size\n");
-  return -1;
- }
- for (i=0; i<8; i++) {
-  if (options->msg_size[i]<0) {
-   error_msg(progname, "invalid shared message size\n");
-   return -1;
-  }
- }
-
- return 0;
+    unsigned int   i;
+    int            k, j, has_cp=0, has_ck=0;
+    char           slayout[30];
+    
+    /*-------------------------------------------------------------------------
+    * objects to layout
+    *-------------------------------------------------------------------------
+    */
+    if (options->verbose && have_request(options) /* only print if requested */)
+    {
+        printf("Objects to modify layout are...\n");
+        if (options->all_layout==1)  {
+            switch (options->layout_g)
+            {
+            case H5D_COMPACT:
+                strcpy(slayout,"compact");
+                break;
+            case H5D_CONTIGUOUS:
+                strcpy(slayout,"contiguous");
+                break;
+            case H5D_CHUNKED:
+                strcpy(slayout,"chunked");
+                break;
+            default:
+                strcpy(slayout,"unknown");
+                break;
+            }
+            printf(" Apply %s layout to all\n", slayout);
+            if (H5D_CHUNKED==options->layout_g) {
+                printf("with dimension [");
+                for ( j = 0; j < options->chunk_g.rank; j++)
+                    printf("%d ",(int)options->chunk_g.chunk_lengths[j]);
+                printf("]\n");
+            }
+        }
+    }/* verbose */
+    
+    for ( i = 0; i < options->op_tbl->nelems; i++)
+    {
+        char* name=options->op_tbl->objs[i].path;
+        
+        if (options->op_tbl->objs[i].chunk.rank>0)
+        {
+            if (options->verbose){
+                printf(" <%s> with chunk size ",name);
+                for ( k = 0; k < options->op_tbl->objs[i].chunk.rank; k++)
+                    printf("%d ",(int)options->op_tbl->objs[i].chunk.chunk_lengths[k]);
+                printf("\n");
+            }
+            has_ck=1;
+        }
+        else if (options->op_tbl->objs[i].chunk.rank==-2)
+        {
+            if (options->verbose)
+                printf(" <%s> %s\n",name,"NONE (contigous)");
+            has_ck=1;
+        }
+    }
+    
+    if (options->all_layout==1 && has_ck){
+    error_msg(progname, "invalid chunking input: 'all' option\
+        is present with other objects\n");
+    return -1;
+    }
+    
+    /*-------------------------------------------------------------------------
+    * objects to filter
+    *-------------------------------------------------------------------------
+    */
+    
+    if (options->verbose && have_request(options) /* only print if requested */)
+    {
+        printf("Objects to apply filter are...\n");
+        if (options->all_filter==1)
+        {
+            
+            for (k = 0; k < options->n_filter_g; k++ )
+            {
+                H5Z_filter_t filtn=options->filter_g[k].filtn;
+                switch (filtn)
+                {
+                case H5Z_FILTER_NONE:
+                    printf(" Uncompress all\n");
+                    break;
+                case H5Z_FILTER_SHUFFLE:
+                case H5Z_FILTER_FLETCHER32:
+                    printf(" All with %s\n",get_sfilter(filtn));
+                    break;
+                case H5Z_FILTER_SZIP:
+                case H5Z_FILTER_DEFLATE:
+                    printf(" All with %s, parameter %d\n",
+                        get_sfilter(filtn),
+                        options->filter_g[k].cd_values[0]);
+                    break;
+                } /* k */
+            };
+        }
+    } /* verbose */
+    
+    for ( i = 0; i < options->op_tbl->nelems; i++)
+    {
+        pack_info_t pack  = options->op_tbl->objs[i];
+        char*       name  = pack.path;
+        
+        for ( j=0; j<pack.nfilters; j++)
+        {
+            if (options->verbose)
+            {
+                printf(" <%s> with %s filter\n",
+                    name,
+                    get_sfilter(pack.filter[j].filtn));
+            }
+            
+            has_cp=1;
+            
+        } /* j */
+    } /* i */
+    
+    if (options->all_filter==1 && has_cp){
+    error_msg(progname, "invalid compression input: 'all' option\
+        is present with other objects\n");
+    return -1;
+    }
+    
+    /* check options for the latest format */
+    if (options->grp_compact < 0) {
+        error_msg(progname, "invalid maximum number of links to store as header messages\n");
+        return -1;
+    }
+    if (options->grp_indexed < 0) {
+        error_msg(progname, "invalid minimum number of links to store in the indexed format\n");
+        return -1;
+    }
+    if (options->grp_indexed > options->grp_compact) {
+        error_msg(progname, "minimum indexed size is greater than the maximum compact size\n");
+        return -1;
+    }
+    for (i=0; i<8; i++) {
+        if (options->msg_size[i]<0) {
+            error_msg(progname, "invalid shared message size\n");
+            return -1;
+        }
+    }
+    
+    return 0;
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function: check_objects
+ *
+ * Purpose: locate all HDF5 objects in the file and compare with user
+ *  supplied list
+ *
+ * Return: 0, ok, -1 no
+ *
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ *
+ * Date: September, 23, 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+static int check_objects(const char* fname,
+                         pack_opt_t *options)
+{
+    hid_t         fid;
+    unsigned int  i;
+    trav_table_t  *travt = NULL;
+    
+    /* nothing to do */
+    if(options->op_tbl->nelems == 0)
+        return 0;
+    
+    /*-------------------------------------------------------------------------
+     * open the file
+     *-------------------------------------------------------------------------
+     */
+    if((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, 0)) < 0){
+        printf("<%s>: %s\n", fname, H5FOPENERROR );
+        return -1;
+    }
+    
+    /*-------------------------------------------------------------------------
+     * get the list of objects in the file
+     *-------------------------------------------------------------------------
+     */
+    
+    /* init table */
+    trav_table_init(&travt);
+    
+    /* get the list of objects in the file */
+    if(h5trav_gettable(fid, travt) < 0)
+        goto out;
+    
+    /*-------------------------------------------------------------------------
+     * compare with user supplied list
+     *-------------------------------------------------------------------------
+     */
+    
+    if(options->verbose)
+        printf("Opening file <%s>. Searching for objects to modify...\n", fname);
+    
+    for(i = 0; i < options->op_tbl->nelems; i++) {
+        char* name=options->op_tbl->objs[i].path;
+        if(options->verbose)
+            printf(" <%s>",name);
+        
+        /* the input object names are present in the file and are valid */
+        if(h5trav_getindext(name, travt) < 0) {
+            error_msg(progname, "%s Could not find <%s> in file <%s>. Exiting...\n",
+                (options->verbose?"\n":""),name,fname);
+            goto out;
+        }
+        if(options->verbose)
+            printf("...Found\n");
+
+        /* check for extra filter conditions */
+        switch(options->op_tbl->objs[i].filter->filtn) {
+            /* chunk size must be smaller than pixels per block */
+            case H5Z_FILTER_SZIP:
+            {
+                int     j;
+                int     csize = 1;
+                int     ppb = options->op_tbl->objs[i].filter->cd_values[0];
+                hsize_t dims[H5S_MAX_RANK];
+                int     rank;
+                hid_t   did;
+                hid_t   sid;
+                
+                if(options->op_tbl->objs[i].chunk.rank > 0) {
+                    rank = options->op_tbl->objs[i].chunk.rank;
+                    for(j = 0; j < rank; j++)
+                        csize *= (int)options->op_tbl->objs[i].chunk.chunk_lengths[j];
+                }
+                else {
+                    if((did = H5Dopen2(fid, name, H5P_DEFAULT)) < 0)
+                        goto out;
+                    if((sid = H5Dget_space(did)) < 0)
+                        goto out;
+                    if((rank = H5Sget_simple_extent_ndims(sid)) < 0)
+                        goto out;
+                    HDmemset(dims, 0, sizeof dims);
+                    if(H5Sget_simple_extent_dims(sid, dims, NULL) < 0)
+                        goto out;
+                    for(j = 0; j < rank; j++)
+                        csize *= (int)dims[j];
+                    if(H5Sclose(sid) < 0)
+                        goto out;
+                    if(H5Dclose(did) < 0)
+                        goto out;
+                }
+                
+                if (csize < ppb ) {
+                    printf(" <warning: SZIP settins, chunk size is smaller than pixels per block>\n");
+                    goto out;
+                }
+            }
+            break;
+        }
+    } /* i */
+      
+   /*-------------------------------------------------------------------------
+    * close
+    *-------------------------------------------------------------------------
+    */
+    H5Fclose(fid);
+    trav_table_free(travt);
+    return 0;
+    
+out:
+    H5Fclose(fid);
+    trav_table_free(travt);
+    return -1;
+}
+
+
 
 /*-------------------------------------------------------------------------
  * Function: read_info
@@ -412,107 +554,107 @@ static int check_options(pack_opt_t *options)
 void read_info(const char *filename,
                pack_opt_t *options)
 {
-
- char stype[10];
- char comp_info[1024];
- FILE *fp;
- char c;
- int  i, rc=1;
- char  *srcdir = getenv("srcdir"); /* the source directory */
- char  data_file[512]="";          /* buffer to hold name of existing file */
-
- /* compose the name of the file to open, using the srcdir, if appropriate */
- if (srcdir){
-  strcpy(data_file,srcdir);
-  strcat(data_file,"/");
- }
- strcat(data_file,filename);
-
-
- if ((fp = fopen(data_file, "r")) == (FILE *)NULL) {
-  error_msg(progname, "cannot open options file %s\n", filename);
-  exit(1);
- }
-
- /* cycle until end of file reached */
- while( 1 )
- {
-  rc=fscanf(fp, "%s", stype);
-  if (rc==-1)
-   break;
-
- /*-------------------------------------------------------------------------
-  * filter
-  *-------------------------------------------------------------------------
-  */
-  if (strcmp(stype,"-f") == 0) {
-
-   /* find begining of info */
-   i=0; c='0';
-   while( c!=' ' )
-   {
-    fscanf(fp, "%c", &c);
-    if (feof(fp)) break;
-   }
-   c='0';
-   /* go until end */
-   while( c!=' ' )
-   {
-    fscanf(fp, "%c", &c);
-    comp_info[i]=c;
-    i++;
-    if (feof(fp)) break;
-    if (c==10 /*eol*/) break;
-   }
-   comp_info[i-1]='\0'; /*cut the last " */
-
-   if (h5repack_addfilter(comp_info,options)==-1){
-    error_msg(progname, "could not add compression option\n");
-    exit(1);
-   }
-  }
- /*-------------------------------------------------------------------------
-  * layout
-  *-------------------------------------------------------------------------
-  */
-  else if (strcmp(stype,"-l") == 0) {
-
-   /* find begining of info */
-   i=0; c='0';
-   while( c!=' ' )
-   {
-    fscanf(fp, "%c", &c);
-    if (feof(fp)) break;
-   }
-   c='0';
-   /* go until end */
-   while( c!=' ' )
-   {
-    fscanf(fp, "%c", &c);
-    comp_info[i]=c;
-    i++;
-    if (feof(fp)) break;
-    if (c==10 /*eol*/) break;
-   }
-   comp_info[i-1]='\0'; /*cut the last " */
-
-   if (h5repack_addlayout(comp_info,options)==-1){
-    error_msg(progname, "could not add chunck option\n");
-    exit(1);
-   }
-  }
- /*-------------------------------------------------------------------------
-  * not valid
-  *-------------------------------------------------------------------------
-  */
-  else {
-   error_msg(progname, "bad file format for %s", filename);
-   exit(1);
-  }
- }
-
- fclose(fp);
- return;
+    
+    char stype[10];
+    char comp_info[1024];
+    FILE *fp;
+    char c;
+    int  i, rc=1;
+    char  *srcdir = getenv("srcdir"); /* the source directory */
+    char  data_file[512]="";          /* buffer to hold name of existing file */
+    
+    /* compose the name of the file to open, using the srcdir, if appropriate */
+    if (srcdir){
+        strcpy(data_file,srcdir);
+        strcat(data_file,"/");
+    }
+    strcat(data_file,filename);
+    
+    
+    if ((fp = fopen(data_file, "r")) == (FILE *)NULL) {
+        error_msg(progname, "cannot open options file %s\n", filename);
+        exit(1);
+    }
+    
+    /* cycle until end of file reached */
+    while( 1 )
+    {
+        rc=fscanf(fp, "%s", stype);
+        if (rc==-1)
+            break;
+        
+            /*-------------------------------------------------------------------------
+            * filter
+            *-------------------------------------------------------------------------
+        */
+        if (strcmp(stype,"-f") == 0) {
+            
+            /* find begining of info */
+            i=0; c='0';
+            while( c!=' ' )
+            {
+                fscanf(fp, "%c", &c);
+                if (feof(fp)) break;
+            }
+            c='0';
+            /* go until end */
+            while( c!=' ' )
+            {
+                fscanf(fp, "%c", &c);
+                comp_info[i]=c;
+                i++;
+                if (feof(fp)) break;
+                if (c==10 /*eol*/) break;
+            }
+            comp_info[i-1]='\0'; /*cut the last " */
+            
+            if (h5repack_addfilter(comp_info,options)==-1){
+                error_msg(progname, "could not add compression option\n");
+                exit(1);
+            }
+        }
+        /*-------------------------------------------------------------------------
+        * layout
+        *-------------------------------------------------------------------------
+        */
+        else if (strcmp(stype,"-l") == 0) {
+            
+            /* find begining of info */
+            i=0; c='0';
+            while( c!=' ' )
+            {
+                fscanf(fp, "%c", &c);
+                if (feof(fp)) break;
+            }
+            c='0';
+            /* go until end */
+            while( c!=' ' )
+            {
+                fscanf(fp, "%c", &c);
+                comp_info[i]=c;
+                i++;
+                if (feof(fp)) break;
+                if (c==10 /*eol*/) break;
+            }
+            comp_info[i-1]='\0'; /*cut the last " */
+            
+            if (h5repack_addlayout(comp_info,options)==-1){
+                error_msg(progname, "could not add chunck option\n");
+                exit(1);
+            }
+        }
+        /*-------------------------------------------------------------------------
+        * not valid
+        *-------------------------------------------------------------------------
+        */
+        else {
+            error_msg(progname, "bad file format for %s", filename);
+            exit(1);
+        }
+    }
+    
+    fclose(fp);
+    return;
 }
 
 
@@ -527,7 +669,7 @@ void read_info(const char *filename,
  *
  *-------------------------------------------------------------------------
  */
-int have_request(pack_opt_t *options)
+static int have_request(pack_opt_t *options)
 {
 
     if (options->all_filter || options->all_layout || options->op_tbl->nelems)
@@ -536,3 +678,38 @@ int have_request(pack_opt_t *options)
     return 0;
 
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function: get_sfilter
+ *
+ * Purpose: return the filter as a string name
+ *
+ * Return: name of filter, exit on error
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static const char* get_sfilter(H5Z_filter_t filtn)
+{
+    if (filtn==H5Z_FILTER_NONE)
+        return "NONE";
+    else if (filtn==H5Z_FILTER_DEFLATE)
+        return "GZIP";
+    else if (filtn==H5Z_FILTER_SZIP)
+        return "SZIP";
+    else if (filtn==H5Z_FILTER_SHUFFLE)
+        return "SHUFFLE";
+    else if (filtn==H5Z_FILTER_FLETCHER32)
+        return "FLETCHER32";
+    else if (filtn==H5Z_FILTER_NBIT)
+        return "NBIT";
+    else if (filtn==H5Z_FILTER_SCALEOFFSET)
+        return "SOFF";
+    else {
+        error_msg(progname, "input error in filter type\n");
+        exit(1);
+    }
+    return NULL;
+}
+

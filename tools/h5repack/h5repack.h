@@ -96,9 +96,23 @@ typedef struct {
  pack_opttbl_t   *op_tbl;     /*table with all -c and -f options */
  int             all_layout;  /*apply the layout to all objects */
  int             all_filter;  /*apply the filter to all objects */
+
+#if defined (NOT_ALL)
+
  filter_info_t   filter_g;    /*global filter INFO for the ALL case */
+ 
+
+#else
+
+ filter_info_t    filter_g[H5_REPACK_MAX_NFILTERS];    /*global filter array for the ALL case */
+ int              n_filter_g;  /*number of global filters */
+ 
+#endif
+
  chunk_info_t    chunk_g;     /*global chunk INFO for the ALL case */
  H5D_layout_t    layout_g;    /*global layout information for the ALL case */
+
+
  int             verbose;     /*verbose mode */
  hsize_t         threshold;   /*minimum size to compress, in bytes */
  int             use_native;  /*use a native type in write */  
@@ -142,9 +156,6 @@ int h5repack_cmpdcpl   (const char *fname1,
  */
 
 
-int check_objects(const char* fname,
-                  pack_opt_t *options);
-
 int copy_objects(const char* fnamein,
                  const char* fnameout,
                  pack_opt_t *options);
@@ -158,7 +169,6 @@ int do_copy_refobjs(hid_t fidin,
 void read_info(const char *filename,pack_opt_t *options);
 void init_packobject(pack_info_t *obj);
 int print_filters(hid_t dcpl_id);
-int have_request(pack_opt_t *options);
 
 
 
@@ -221,15 +231,14 @@ pack_info_t* options_get_object( const char *path,
 obj_list_t* parse_filter(const char *str,
                          int *n_objs,
                          filter_info_t *filt,
-                         pack_opt_t *options);
+                         pack_opt_t *options,
+                         int *is_glb);
 
 obj_list_t* parse_layout(const char *str,
                          int *n_objs,
                          pack_info_t *pack,    /* info about object */
                          pack_opt_t *options);
 
-const char* get_sfilter (H5Z_filter_t filtn);
-int         parse_number(char *str);
 
 
 

@@ -1355,6 +1355,36 @@ if (szip_can_encode) {
 
 
 /*-------------------------------------------------------------------------
+ * test several global filters
+ *-------------------------------------------------------------------------
+ */
+
+  TESTING("    several global filters");
+
+#if defined (H5_HAVE_FILTER_DEFLATE) && defined (H5_HAVE_FILTER_SHUFFLE) 
+
+ if (h5repack_init (&pack_options, 0) < 0)
+  GOERROR;
+ if (h5repack_addfilter("GZIP=1",&pack_options) < 0)
+  GOERROR;
+ if (h5repack_addfilter("SHUF",&pack_options) < 0)
+  GOERROR;
+ if (h5repack(FNAME11,FNAME11OUT,&pack_options) < 0)
+  GOERROR;
+ if (h5diff(FNAME11,FNAME11OUT,NULL,NULL,&diff_options) >0)
+  GOERROR;
+ if (h5repack_verify(FNAME11OUT,&pack_options)<=0)
+  GOERROR;
+ if (h5repack_end (&pack_options) < 0)
+  GOERROR;
+
+ PASSED();
+#else
+ SKIPPED();
+#endif
+
+
+/*-------------------------------------------------------------------------
  * clean temporary test files
  *-------------------------------------------------------------------------
  */

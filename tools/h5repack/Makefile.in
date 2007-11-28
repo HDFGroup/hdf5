@@ -69,9 +69,9 @@ binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 am__EXEEXT_1 = h5repacktst$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am__objects_1 = h5repack.$(OBJEXT) h5repack_copy.$(OBJEXT) \
-	h5repack_filters.$(OBJEXT) h5repack_list.$(OBJEXT) \
-	h5repack_opttable.$(OBJEXT) h5repack_parse.$(OBJEXT) \
-	h5repack_refs.$(OBJEXT) h5repack_verify.$(OBJEXT)
+	h5repack_filters.$(OBJEXT) h5repack_opttable.$(OBJEXT) \
+	h5repack_parse.$(OBJEXT) h5repack_refs.$(OBJEXT) \
+	h5repack_verify.$(OBJEXT)
 am_h5repack_OBJECTS = $(am__objects_1) h5repack_main.$(OBJEXT)
 h5repack_OBJECTS = $(am_h5repack_OBJECTS)
 h5repack_LDADD = $(LDADD)
@@ -351,8 +351,8 @@ LDADD = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
 
 # Source files
 COMMON_SOURCES = h5repack.c h5repack_copy.c h5repack_filters.c \
-        h5repack_list.c h5repack_opttable.c h5repack_parse.c h5repack_refs.c \
-        h5repack_verify.c
+               h5repack_opttable.c h5repack_parse.c h5repack_refs.c \
+               h5repack_verify.c
 
 h5repack_SOURCES = $(COMMON_SOURCES) h5repack_main.c
 h5repacktst_SOURCES = $(COMMON_SOURCES) h5repacktst.c 
@@ -470,7 +470,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repack.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repack_copy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repack_filters.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repack_list.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repack_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repack_opttable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repack_parse.Po@am__quote@
