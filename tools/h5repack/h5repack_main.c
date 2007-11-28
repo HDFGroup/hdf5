@@ -218,6 +218,10 @@ static void usage(const char *prog)
  printf("   Using latest file format with maximum compact group size of 10 and\n");
  printf("   and minimum shared datatype size of 20\n");
  printf("\n");
+ printf("5) h5repack -f GZIP=1 -f SHUF file1 file2 \n");
+ printf("\n");
+ printf("   Add both filters GZIP and SHUF to all datasets\n");
+ printf("\n");
 }
 
 
