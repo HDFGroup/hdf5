@@ -364,7 +364,7 @@ int do_copy_objects(hid_t fidin,
 
     if (options->verbose) {
         printf("-----------------------------------------\n");
-        printf(" Type     Filter (Ratio)     Name\n");
+        printf(" Type     Filter (%%Savings)     Name\n");
         printf("-----------------------------------------\n");
     }
 
@@ -666,10 +666,8 @@ int do_copy_objects(hid_t fidin,
                                     a = dsize_in; b = dsize_out;
                                     if (a!=0)
                                         per = (double) (b-a)/a;
-                                    if (per>0)
-                                        per+=1;
-                                    else
-                                        per=fabs(per);
+                                   
+                                    per = -per;
                                     per *=100;
 
                                     print_dataset_info(dcpl_out,travt->objs[i].name,per);
