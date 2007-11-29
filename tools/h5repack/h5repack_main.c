@@ -97,6 +97,14 @@ int main(int argc, char **argv)
     {
         infile = argv[ opt_ind ];
         outfile = argv[ opt_ind + 1 ];
+
+        if ( strcmp( infile, outfile ) == 0 )
+        {
+            error_msg(progname, "file names cannot be the same\n");
+            usage(progname);
+            exit(EXIT_FAILURE);
+            
+        }
     }
     
     else
