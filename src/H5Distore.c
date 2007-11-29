@@ -363,19 +363,19 @@ H5D_istore_decode_key(const H5F_t UNUSED *f, const H5B_t *bt, const uint8_t *raw
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_decode_key)
 
     /* check args */
-    assert(f);
-    assert(bt);
-    shared=H5RC_GET_OBJ(bt->rc_shared);
+    HDassert(f);
+    HDassert(bt);
+    shared = (H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
     HDassert(shared);
-    assert(raw);
-    assert(key);
+    HDassert(raw);
+    HDassert(key);
     ndims = H5D_ISTORE_NDIMS(shared);
-    assert(ndims<=H5O_LAYOUT_NDIMS);
+    HDassert(ndims <= H5O_LAYOUT_NDIMS);
 
     /* decode */
     UINT32DECODE(raw, key->nbytes);
     UINT32DECODE(raw, key->filter_mask);
-    for (u=0; u<ndims; u++)
+    for(u = 0; u < ndims; u++)
 	UINT64DECODE(raw, key->offset[u]);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -405,19 +405,19 @@ H5D_istore_encode_key(const H5F_t UNUSED *f, const H5B_t *bt, uint8_t *raw, void
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_encode_key)
 
     /* check args */
-    assert(f);
-    assert(bt);
-    shared=H5RC_GET_OBJ(bt->rc_shared);
+    HDassert(f);
+    HDassert(bt);
+    shared = (H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
     HDassert(shared);
-    assert(raw);
-    assert(key);
+    HDassert(raw);
+    HDassert(key);
     ndims = H5D_ISTORE_NDIMS(shared);
-    assert(ndims<=H5O_LAYOUT_NDIMS);
+    HDassert(ndims <= H5O_LAYOUT_NDIMS);
 
     /* encode */
     UINT32ENCODE(raw, key->nbytes);
     UINT32ENCODE(raw, key->filter_mask);
-    for (u=0; u<ndims; u++)
+    for(u = 0; u < ndims; u++)
 	UINT64ENCODE(raw, key->offset[u]);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -1374,7 +1374,7 @@ H5D_istore_flush_entry(const H5D_io_info_t *io_info, H5D_rdcc_ent_t *ent, hbool_
         if(buf == ent->chunk)
             buf = NULL;
         if(ent->chunk != NULL)
-            ent->chunk = H5D_istore_chunk_xfree(ent->chunk,&(io_info->dset->shared->dcpl_cache.pline));
+            ent->chunk = (uint8_t *)H5D_istore_chunk_xfree(ent->chunk, &(io_info->dset->shared->dcpl_cache.pline));
     } /* end if */
 
 done:
@@ -1390,7 +1390,7 @@ done:
      */
     if(ret_value < 0 && point_of_no_return) {
         if(ent->chunk)
-            ent->chunk = H5D_istore_chunk_xfree(ent->chunk, &(io_info->dset->shared->dcpl_cache.pline));
+            ent->chunk = (uint8_t *)H5D_istore_chunk_xfree(ent->chunk, &(io_info->dset->shared->dcpl_cache.pline));
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1427,12 +1427,12 @@ H5D_istore_preempt(const H5D_io_info_t *io_info, H5D_rdcc_ent_t * ent, hbool_t f
 	/* Flush */
 	if(H5D_istore_flush_entry(io_info, ent, TRUE) < 0)
 	    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot flush indexed storage buffer")
-    }
+    } /* end if */
     else {
         /* Don't flush, just free chunk */
 	if(ent->chunk != NULL)
-	    ent->chunk = H5D_istore_chunk_xfree(ent->chunk,&(io_info->dset->shared->dcpl_cache.pline));
-    }
+	    ent->chunk = (uint8_t *)H5D_istore_chunk_xfree(ent->chunk, &(io_info->dset->shared->dcpl_cache.pline));
+    } /* end else */
 
     /* Unlink from list */
     if(ent->prev)
@@ -1649,13 +1649,13 @@ H5D_istore_shared_free (void *_shared)
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_shared_free)
 
     /* Free the raw B-tree node buffer */
-    H5FL_BLK_FREE(chunk_page,shared->page);
+    (void)H5FL_BLK_FREE(chunk_page, shared->page);
 
     /* Free the B-tree native key offsets buffer */
-    H5FL_SEQ_FREE(size_t,shared->nkey);
+    H5FL_SEQ_FREE(size_t, shared->nkey);
 
     /* Free the shared B-tree info */
-    H5FL_FREE(H5B_shared_t,shared);
+    H5FL_FREE(H5B_shared_t, shared);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D_istore_shared_free() */
@@ -2465,7 +2465,7 @@ HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_a
         H5D_BUILD_IO_INFO(&chk_io_info,dset,io_info->dxpl_cache,io_info->dxpl_id,&chk_store);
 
         /* Do I/O directly on chunk without reading it into the cache */
-        if ((ret_value=H5D_contig_writevv(&chk_io_info, chunk_max_nseq, chunk_curr_seq, chunk_len_arr, chunk_offset_arr, mem_max_nseq, mem_curr_seq, mem_len_arr, mem_offset_arr, (haddr_t)0, NULL, buf))<0)
+        if((ret_value = H5D_contig_writevv(&chk_io_info, chunk_max_nseq, chunk_curr_seq, chunk_len_arr, chunk_offset_arr, mem_max_nseq, mem_curr_seq, mem_len_arr, mem_offset_arr, (haddr_t)0, NULL, buf)) < 0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file")
     } /* end if */
     else {
@@ -2763,7 +2763,7 @@ H5D_istore_chunk_xfree(void *chk, const H5O_pline_t *pline)
         if(pline->nused > 0)
             H5MM_xfree(chk);
         else
-            H5FL_BLK_FREE(chunk, chk);
+            (void)H5FL_BLK_FREE(chunk, chk);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(NULL)
@@ -3039,6 +3039,9 @@ H5D_istore_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
             HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
     } /* end if */
 #endif /* H5_HAVE_PARALLEL */
+
+    /* Reset any cached chunk info for this dataset */
+    H5D_istore_cinfo_cache_reset(&dset->shared->cache.chunk.last);
 
 done:
     /* Release the fill buffer info, if it's been initialized */
@@ -3546,7 +3549,7 @@ H5D_istore_initialize_by_extent(H5D_io_info_t *io_info)
 
             /* Lock the chunk into the cache, to get a pointer to the chunk buffer */
             store.chunk.offset = chunk_offset;
-	    if(NULL == (chunk = H5D_istore_lock(io_info, NULL, FALSE, &idx_hint)))
+	    if(NULL == (chunk = (uint8_t *)H5D_istore_lock(io_info, NULL, FALSE, &idx_hint)))
 		HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to read raw data chunk")
 
 

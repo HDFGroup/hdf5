@@ -1771,7 +1771,7 @@ H5D_alloc_storage(H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_alloc
                  */
 		if(dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_EARLY
                         && time_alloc == H5D_ALLOC_EXTEND)
-		    must_init_space = 1;
+		    must_init_space = TRUE;
                 break;
 
             case H5D_COMPACT:
