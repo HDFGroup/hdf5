@@ -77,6 +77,8 @@ static struct long_options l_opts[] = {
  *    Add "-L, --latest" option to pack a file with the latest file format
  *   PVN, November 19, 2007
  *    adopted the syntax h5repack [OPTIONS]  file1 file2
+ *   PVN, November 28, 2007
+ *    added support for multiple global filters
  *-------------------------------------------------------------------------
  */
 int main(int argc, char **argv)
