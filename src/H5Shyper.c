@@ -57,6 +57,7 @@ static hssize_t H5S_hyper_serial_size(const H5S_t *space);
 static herr_t H5S_hyper_serialize(const H5S_t *space, uint8_t *buf);
 static herr_t H5S_hyper_deserialize(H5S_t *space, const uint8_t *buf);
 static herr_t H5S_hyper_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
+static herr_t H5S_hyper_offset(const H5S_t *space, hsize_t *offset);
 static htri_t H5S_hyper_is_contiguous(const H5S_t *space);
 static htri_t H5S_hyper_is_single(const H5S_t *space);
 static htri_t H5S_hyper_is_regular(const H5S_t *space);
@@ -90,6 +91,7 @@ const H5S_select_class_t H5S_sel_hyper[1] = {{
     H5S_hyper_serialize,
     H5S_hyper_deserialize,
     H5S_hyper_bounds,
+    H5S_hyper_offset,
     H5S_hyper_is_contiguous,
     H5S_hyper_is_single,
     H5S_hyper_is_regular,
@@ -2708,6 +2710,114 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
+    H5S_hyper_offset
+ PURPOSE
+    Gets the linear offset of the first element for the selection.
+ USAGE
+    herr_t H5S_hyper_offset(space, offset)
+        const H5S_t *space;     IN: Dataspace pointer of selection to query
+        hsize_t *offset;        OUT: Linear offset of first element in selection
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Retrieves the linear offset (in "units" of elements) of the first element
+    selected within the dataspace.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    Calling this function on a "none" selection returns fail.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_hyper_offset(const H5S_t *space, hsize_t *offset)
+{
+    const hssize_t *sel_offset; /* Pointer to the selection's offset */
+    const hsize_t *dim_size;    /* Pointer to a dataspace's extent */
+    hsize_t accum;              /* Accumulator for dimension sizes */
+    int rank;                   /* Dataspace rank */
+    int i;                      /* index variable */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(H5S_hyper_offset, FAIL)
+
+    HDassert(space);
+    HDassert(offset);
+
+    /* Start at linear offset 0 */
+    *offset = 0;
+
+    /* Set up pointers to arrays of values */
+    rank = space->extent.rank;
+    sel_offset = space->select.offset;
+    dim_size = space->extent.size;
+
+    /* Check for a "regular" hyperslab selection */
+    if(space->select.sel_info.hslab->diminfo_valid) {
+        const H5S_hyper_dim_t *diminfo = space->select.sel_info.hslab->opt_diminfo; /* Local alias for diminfo */
+
+        /* Loop through starting coordinates, calculating the linear offset */
+        accum = 1;
+        for(i = (rank - 1); i >= 0; i--) {
+            hssize_t hyp_offset = (hssize_t)diminfo[i].start + sel_offset[i]; /* Hyperslab's offset in this dimension */
+
+            /* Check for offset moving selection out of the dataspace */
+            if(hyp_offset < 0 || (hsize_t)hyp_offset >= dim_size[i])
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "offset moves selection out of bounds")
+
+            /* Add the hyperslab's offset in this dimension to the total linear offset */
+            *offset += hyp_offset * accum;
+
+            /* Increase the accumulator */
+            accum *= dim_size[i];
+        } /* end for */
+    } /* end if */
+    else {
+        const H5S_hyper_span_t *span;           /* Hyperslab span node */
+        hsize_t dim_accum[H5S_MAX_RANK];        /* Accumulators, for each dimension */
+
+        /* Calculate the accumulator for each dimension */
+        accum = 1;
+        for(i = (rank - 1); i >= 0; i--) {
+            /* Set the accumulator for this dimension */
+            dim_accum[i] = accum;
+
+            /* Increase the accumulator */
+            accum *= dim_size[i];
+        } /* end for */
+
+        /* Get information for the first span, in the slowest changing dimension */
+        span = space->select.sel_info.hslab->span_lst->head;
+
+        /* Work down the spans, computing the linear offset */
+        i = 0;
+        while(span) {
+            hssize_t hyp_offset = (hssize_t)span->low + sel_offset[i]; /* Hyperslab's offset in this dimension */
+
+            /* Check for offset moving selection out of the dataspace */
+            if(hyp_offset < 0 || (hsize_t)hyp_offset >= dim_size[i])
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "offset moves selection out of bounds")
+
+            /* Add the hyperslab's offset in this dimension to the total linear offset */
+            *offset += hyp_offset * dim_accum[i];
+
+            /* Advance to first span in "down" dimension */
+            if(span->down) {
+                HDassert(span->down->head);
+                span = span->down->head;
+            } /* end if */
+            else
+                span = NULL;
+            i++;
+        } /* end while */
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* H5S_hyper_offset() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5S_hyper_is_contiguous
  PURPOSE
     Check if a hyperslab selection is contiguous within the dataspace extent.
@@ -2727,12 +2837,10 @@ done:
 htri_t
 H5S_hyper_is_contiguous(const H5S_t *space)
 {
-    H5S_hyper_span_info_t *spans;   /* Hyperslab span info node */
-    H5S_hyper_span_t *span;         /* Hyperslab span node */
-    unsigned u;                     /* index variable */
     unsigned small_contiguous,      /* Flag for small contiguous block */
         large_contiguous;           /* Flag for large contiguous block */
-    htri_t ret_value=FALSE;         /* return value */
+    unsigned u;                     /* index variable */
+    htri_t ret_value = FALSE;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOFUNC(H5S_hyper_is_contiguous);
 
@@ -2791,6 +2899,9 @@ H5S_hyper_is_contiguous(const H5S_t *space)
             ret_value=TRUE;
     } /* end if */
     else {
+        H5S_hyper_span_info_t *spans;   /* Hyperslab span info node */
+        H5S_hyper_span_t *span;         /* Hyperslab span node */
+
         /*
          * For a hyperslab to be contiguous, it must have only one block and
          * (either it's size must be the same as the dataspace extent's in all

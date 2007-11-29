@@ -44,6 +44,7 @@ static hssize_t H5S_point_serial_size(const H5S_t *space);
 static herr_t H5S_point_serialize(const H5S_t *space, uint8_t *buf);
 static herr_t H5S_point_deserialize(H5S_t *space, const uint8_t *buf);
 static herr_t H5S_point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
+static herr_t H5S_point_offset(const H5S_t *space, hsize_t *off);
 static htri_t H5S_point_is_contiguous(const H5S_t *space);
 static htri_t H5S_point_is_single(const H5S_t *space);
 static htri_t H5S_point_is_regular(const H5S_t *space);
@@ -72,6 +73,7 @@ const H5S_select_class_t H5S_sel_point[1] = {{
     H5S_point_serialize,
     H5S_point_deserialize,
     H5S_point_bounds,
+    H5S_point_offset,
     H5S_point_is_contiguous,
     H5S_point_is_single,
     H5S_point_is_regular,
@@ -1038,44 +1040,110 @@ static herr_t
 H5S_point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
 {
     H5S_pnt_node_t *node;       /* Point node */
-    int rank;                   /* Dataspace rank */
-    int i;                      /* index variable */
-    herr_t ret_value=SUCCEED;   /* Return value */
+    unsigned rank;              /* Dataspace rank */
+    unsigned u;                 /* index variable */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5S_point_bounds);
+    FUNC_ENTER_NOAPI_NOINIT(H5S_point_bounds)
 
-    assert(space);
-    assert(start);
-    assert(end);
+    HDassert(space);
+    HDassert(start);
+    HDassert(end);
 
     /* Get the dataspace extent rank */
-    rank=space->extent.rank;
+    rank = space->extent.rank;
 
     /* Set the start and end arrays up */
-    for(i=0; i<rank; i++) {
-        start[i]=HSIZET_MAX;
-        end[i]=0;
+    for(u = 0; u < rank; u++) {
+        start[u] = HSIZET_MAX;
+        end[u] = 0;
     } /* end for */
 
     /* Iterate through the node, checking the bounds on each element */
-    node=space->select.sel_info.pnt_lst->head;
-    while(node!=NULL) {
-        for(i=0; i<rank; i++) {
+    node = space->select.sel_info.pnt_lst->head;
+    while(node != NULL) {
+        for(u = 0; u < rank; u++) {
             /* Check for offset moving selection negative */
-            if(((hssize_t)node->pnt[i]+space->select.offset[i])<0)
+            if(((hssize_t)node->pnt[u] + space->select.offset[u]) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "offset moves selection out of bounds")
 
-            if(start[i]>(node->pnt[i]+space->select.offset[i]))
-                start[i]=node->pnt[i]+space->select.offset[i];
-            if(end[i]<(node->pnt[i]+space->select.offset[i]))
-                end[i]=node->pnt[i]+space->select.offset[i];
+            if(start[u] > (node->pnt[u] + space->select.offset[u]))
+                start[u] = node->pnt[u] + space->select.offset[u];
+            if(end[u] < (node->pnt[u] + space->select.offset[u]))
+                end[u] = node->pnt[u] + space->select.offset[u];
         } /* end for */
-        node=node->next;
+        node = node->next;
       } /* end while */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_point_bounds() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_point_offset
+ PURPOSE
+    Gets the linear offset of the first element for the selection.
+ USAGE
+    herr_t H5S_point_offset(space, offset)
+        const H5S_t *space;     IN: Dataspace pointer of selection to query
+        hsize_t *offset;        OUT: Linear offset of first element in selection
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Retrieves the linear offset (in "units" of elements) of the first element
+    selected within the dataspace.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    Calling this function on a "none" selection returns fail.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_point_offset(const H5S_t *space, hsize_t *offset)
+{
+    const hsize_t *pnt;         /* Pointer to a selected point's coordinates */
+    const hssize_t *sel_offset; /* Pointer to the selection's offset */
+    const hsize_t *dim_size;    /* Pointer to a dataspace's extent */
+    hsize_t accum;              /* Accumulator for dimension sizes */
+    int rank;                   /* Dataspace rank */
+    int i;                      /* index variable */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(H5S_point_offset, FAIL)
+
+    HDassert(space);
+    HDassert(offset);
+
+    /* Start at linear offset 0 */
+    *offset = 0;
+
+    /* Set up pointers to arrays of values */
+    pnt = space->select.sel_info.pnt_lst->head->pnt;
+    sel_offset = space->select.offset;
+    dim_size = space->extent.size;
+
+    /* Loop through coordinates, calculating the linear offset */
+    rank = space->extent.rank;
+    accum = 1;
+    for(i = (rank - 1); i >= 0; i--) {
+        hssize_t pnt_offset = (hssize_t)pnt[i] + sel_offset[i]; /* Point's offset in this dimension */
+
+        /* Check for offset moving selection out of the dataspace */
+        if(pnt_offset < 0 || (hsize_t)pnt_offset >= dim_size[i])
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "offset moves selection out of bounds")
+
+        /* Add the point's offset in this dimension to the total linear offset */
+        *offset += pnt_offset * accum;
+
+        /* Increase the accumulator */
+        accum *= dim_size[i];
+    } /* end for */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* H5S_point_offset() */
 
 
 /*--------------------------------------------------------------------------

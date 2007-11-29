@@ -6059,7 +6059,8 @@ test_random_chunks(void)
     for(i = 0; i < NPOINTS; i++)
         if(rbuf[i] != wbuf[i]){
             printf("    Line %d: Incorrect value, wbuf[%u]=%d, rbuf[%u]=%d\n",__LINE__,(unsigned)i,wbuf[i],(unsigned)i,rbuf[i]);
-                TEST_ERROR;
+            printf("             coord[%u] = {%lu, %lu}\n", (unsigned)i, (unsigned long)coord[i][0], (unsigned long)coord[i][1]);
+            TEST_ERROR;
         } /* end if */
 
     /* Close resources */

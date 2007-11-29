@@ -579,6 +579,46 @@ H5S_get_select_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
 
 /*--------------------------------------------------------------------------
  NAME
+    H5S_get_select_offset
+ PURPOSE
+    Gets the linear offset of the first element for the selection.
+ USAGE
+    herr_t H5S_get_select_offset(space, offset)
+        const H5S_t *space;     IN: Dataspace pointer of selection to query
+        hsize_t *offset;        OUT: Linear offset of first element in selection
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Retrieves the linear offset (in "units" of elements) of the first element
+    selected within the dataspace.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+        The offset calculation _does_ include the current offset of the
+    selection within the dataspace extent.
+
+        Calling this function on a "none" selection returns fail.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_get_select_offset(const H5S_t *space, hsize_t *offset)
+{
+    herr_t ret_value;        /* return value */
+
+    FUNC_ENTER_NOAPI_NOFUNC(H5S_get_select_offset)
+
+    /* Check args */
+    HDassert(space);
+    HDassert(offset);
+
+    ret_value = (*space->select.type->offset)(space, offset);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* H5S_get_select_offset() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5S_select_is_contiguous
  PURPOSE
     Determines if a selection is contiguous in the dataspace
