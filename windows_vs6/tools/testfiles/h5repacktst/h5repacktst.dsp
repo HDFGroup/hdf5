@@ -105,10 +105,6 @@ SOURCE=..\..\..\..\tools\h5repack\h5repack_filters.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\..\tools\h5repack\h5repack_list.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\..\tools\h5repack\h5repack_opttable.c
 # End Source File
 # Begin Source File
