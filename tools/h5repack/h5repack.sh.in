@@ -36,7 +36,6 @@ H5DIFF_BIN=`pwd`/$H5DIFF        # The path of the h5diff  tool binary
 H5DETECTSZIP=testh5repack_detect_szip               # The tool name
 H5DETECTSZIP_BIN=`pwd`/$H5DETECTSZIP    # The path of the tool binary
 
-
 INFO_FILE=../testfiles/info.h5repack
 
 FILE0=h5repack_fill.h5
@@ -427,6 +426,15 @@ TOOLTEST $FILE4 -l dset_chunk:CHUNK=18x13
 
 # Native option
 TOOLTEST $FILE1 -n
+
+
+################################################################
+# long swtiches. use FILE4=h5repack_layout.h5 (no filters)
+###############################################################
+
+TOOLTEST $FILE4 --layout CHUNK=20x10 --filter GZIP=1 --threshold=10 --native --latest --compact=8 --indexed=6 --ssize=8[:dtype]
+ 
+
 
 if test $nerrors -eq 0 ; then
    echo "All $H5REPACK tests passed."
