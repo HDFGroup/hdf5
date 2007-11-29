@@ -195,13 +195,13 @@ rem ############################################################################
     call :tooltest h5diff_14.txt -r %file1% %file2% g1/dset1 g1/dset2
 
     rem 1.5 with -d
-    call :tooltest h5diff_15.txt -r -d 5 %file1% %file2% g1/dset3 g1/dset4
+    call :tooltest h5diff_15.txt --report --delta=5 %file1% %file2% g1/dset3 g1/dset4
 
     rem 1.6.1 with -p (int)
     call :tooltest h5diff_16_1.txt -v -p 0.02 %file1% %file1% g1/dset5 g1/dset6
 
     rem 1.6.2 with -p (unsigned long_long)
-    call :tooltest h5diff_16_2.txt -v -p 0.02 %file1% %file1% g1/dset7 g1/dset8
+    call :tooltest h5diff_16_2.txt --verbose --relative=0.02 %file1% %file1% g1/dset7 g1/dset8
 
     rem 1.6.3 with -p (double)
     call :tooltest h5diff_16_3.txt -v -p 0.02 %file1% %file1% g1/dset9 g1/dset10
@@ -389,7 +389,7 @@ rem ############################################################################
     call :tooltest h5diff_626.txt -n 2 -n 3 %file1% %file2% g1/dset3 g1/dset4
 
     rem 6.27: number larger than biggest difference
-    call :tooltest h5diff_627.txt -n 200 %file1% %file2% g1/dset3 g1/dset4
+    call :tooltest h5diff_627.txt --count=200 %file1% %file2% g1/dset3 g1/dset4
 
     rem 6.28: number smaller than smallest difference
     call :tooltest h5diff_628.txt -n 1 %file1% %file2% g1/dset3 g1/dset4

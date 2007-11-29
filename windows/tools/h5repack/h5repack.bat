@@ -312,7 +312,7 @@ rem
     )
       
     rem szip remove
-    set arg=%file7% -f dset_szip:NONE
+    set arg=%file7% --filter=dset_szip:NONE
     if not "%use_filter_szip_encoder%"=="yes" (
         call :skip %arg%
     ) else if not "%use_filter_szip%"=="yes" (
@@ -483,7 +483,7 @@ rem
     rem  layout options (these files have no filters)
     rem ########################################################
 
-    call :tooltest %file4% -l dset2:CHUNK=20x10
+    call :tooltest %file4% --layout=dset2:CHUNK=20x10
     call :tooltest %file4% -l CHUNK=20x10
     call :tooltest %file4% -l dset2:CONTI
     call :tooltest %file4% -l CONTI
