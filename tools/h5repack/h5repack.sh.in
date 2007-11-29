@@ -428,12 +428,23 @@ TOOLTEST $FILE4 -l dset_chunk:CHUNK=18x13
 TOOLTEST $FILE1 -n
 
 
-################################################################
 # long swtiches. use FILE4=h5repack_layout.h5 (no filters)
-###############################################################
 
-TOOLTEST $FILE4 --layout CHUNK=20x10 --filter GZIP=1 --threshold=10 --native --latest --compact=8 --indexed=6 --ssize=8[:dtype]
- 
+arg="$FILE4 --layout CHUNK=20x10 --filter GZIP=1 --threshold=10 --native --latest --compact=8 --indexed=6 --ssize=8[:dtype]"
+if test $USE_FILTER_DEFLATE != "yes" ; then
+ SKIP $arg
+else
+ TOOLTEST $arg
+fi
+
+# several global filters
+
+arg="$FILE4 --filter GZIP=1 --filter SHUF"
+if test $USE_FILTER_DEFLATE != "yes" -o $USE_FILTER_SHUFFLE != "yes" ; then
+ SKIP $arg
+else
+ TOOLTEST $arg
+fi
 
 
 if test $nerrors -eq 0 ; then
