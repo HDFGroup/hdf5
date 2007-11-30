@@ -26718,7 +26718,7 @@ main(void)
     run_full_test2 = TRUE;
 #endif
 
-#if 0
+#if 1
     smoke_check_1();
     smoke_check_2();
     smoke_check_3();
@@ -26730,7 +26730,7 @@ main(void)
     smoke_check_9();
     smoke_check_10();
 #endif
-#if 0
+#if 1
     write_permitted_check();
 #endif
     check_insert_entry();

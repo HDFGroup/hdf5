@@ -27,11 +27,13 @@
 #include "H5MMprivate.h"
 #include "cache2_common.h"
 
+#define USE_CORE_DRIVER	FALSE
+
 /* global variable declarations: */
 
 const char *FILENAME[] = {
-	"cache_test",
-	"cache_api_test",
+	"cache2_test",
+	"cache2_api_test",
 	NULL
 };
 
@@ -2513,6 +2515,7 @@ setup_cache2(size_t max_cache_size,
     H5C2_t * cache_ptr = NULL;
     H5C2_t * ret_val = NULL;
     haddr_t actual_base_addr;
+    hid_t fapl_id = H5P_DEFAULT;
 
     if ( show_progress ) /* 1 */
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
@@ -2562,9 +2565,29 @@ setup_cache2(size_t max_cache_size,
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
                   fcn_name, mile_stone++, (int)pass2);
 
+#if USE_CORE_DRIVER
     if ( pass2 ) {
 
-        fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+	if ( (fapl_id = H5Pcreate(H5P_FILE_ACCESS)) == FAIL ) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5Pcreate(H5P_FILE_ACCESS) failed.\n";
+        }
+	else if ( H5Pset_fapl_core(fapl_id, 64 * 1024 * 1024, FALSE) < 0 ) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5P_set_fapl_core() failed.\n";
+        }
+    }
+#endif /* USE_CORE_DRIVER */
+
+    if ( show_progress ) /* 3 */
+        HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
+                  fcn_name, mile_stone++, (int)pass2);
+
+    if ( pass2 ) {
+
+        fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
 
         if ( fid < 0 ) {
 
@@ -2601,7 +2624,7 @@ setup_cache2(size_t max_cache_size,
         }
     }
 
-    if ( show_progress ) /* 3 */
+    if ( show_progress ) /* 4 */
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
                   fcn_name, mile_stone++, (int)pass2);
 
@@ -2618,7 +2641,7 @@ setup_cache2(size_t max_cache_size,
                                 NULL);
     }
 
-    if ( show_progress ) /* 4 */
+    if ( show_progress ) /* 5 */
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
                   fcn_name, mile_stone++, (int)pass2);
 
@@ -2644,7 +2667,7 @@ setup_cache2(size_t max_cache_size,
 	}
     }
 
-    if ( show_progress ) /* 5 */
+    if ( show_progress ) /* 6 */
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
                   fcn_name, mile_stone++, (int)pass2);
 
@@ -2678,7 +2701,7 @@ setup_cache2(size_t max_cache_size,
         }
     }
 
-    if ( show_progress ) /* 6 */
+    if ( show_progress ) /* 7 */
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
                   fcn_name, mile_stone++, (int)pass2);
 
@@ -2688,7 +2711,7 @@ setup_cache2(size_t max_cache_size,
         ret_val = cache_ptr;
     }
 
-    if ( show_progress ) /* 7 */
+    if ( show_progress ) /* 8 */
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
                   fcn_name, mile_stone++, (int)pass2);
 
@@ -2748,7 +2771,7 @@ takedown_cache2(H5C2_t * cache_ptr,
 	    saved_fid = -1;
 
         }
-
+#if ! USE_CORE_DRIVER
         if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
@@ -2762,6 +2785,7 @@ takedown_cache2(H5C2_t * cache_ptr,
 	    failure_mssg2 = "couldn't delete test file.";
 
 	}
+#endif /* USE_CORE_CRIVER */
     }
 
     return;
