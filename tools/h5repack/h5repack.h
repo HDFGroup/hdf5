@@ -194,8 +194,6 @@ int can_read(const char* name,    /* object name from traverse list */
  *-------------------------------------------------------------------------
  */
 
-int has_layout(hid_t dcpl_id,
-               pack_info_t *obj);
 
 int layout_this(hid_t dcpl_id,             /* DCPL from input object */
                 const char* name,          /* object name from traverse list */
