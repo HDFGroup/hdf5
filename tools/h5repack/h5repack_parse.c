@@ -74,7 +74,7 @@ obj_list_t* parse_filter(const char *str,
     *is_glb = 0;
     
     /* check for the end of object list and number of objects */
-    for ( i=0, n=0; i<len; i++)
+    for ( i = 0, n = 0; i < len; i++)
     {
         c = str[i];
         if ( c==':' )
@@ -87,14 +87,15 @@ obj_list_t* parse_filter(const char *str,
         }
     }
     
-    if (end_obj==-1) { /* missing : */
+    if (end_obj==-1) /* missing : */
+    { 
         /* apply to all objects */
         options->all_filter=1;
         *is_glb = 1;
     }
     
     n++;
-    obj_list=malloc(n*sizeof(obj_list_t));
+    obj_list = malloc(n*sizeof(obj_list_t));
     if (obj_list==NULL)
     {
         error_msg(progname, "could not allocate object list\n");
@@ -103,10 +104,10 @@ obj_list_t* parse_filter(const char *str,
     *n_objs=n;
     
     /* get object list */
-    for ( j=0, k=0, n=0; j<end_obj; j++,k++)
+    for ( j = 0, k = 0, n = 0; j < end_obj; j++, k++)
     {
         c = str[j];
-        sobj[k]=c;
+        sobj[k] = c;
         if ( c==',' || j==end_obj-1)
         {
             if ( c==',') sobj[k]='\0'; else sobj[k+1]='\0';
@@ -181,6 +182,7 @@ obj_list_t* parse_filter(const char *str,
                                     error_msg(progname, "szip mask must be 'NN' or 'EC' \n");
                                     exit(1);
                                 }
+                                
                                 
                             }
                         }
@@ -280,36 +282,48 @@ obj_list_t* parse_filter(const char *str,
        scomp[k+1]='\0';
        no_param=1;
    }
+
+  /*-------------------------------------------------------------------------
+   * translate from string to filter symbol
+   *-------------------------------------------------------------------------
+   */
    
-   /*-------------------------------------------------------------------------
+  /*-------------------------------------------------------------------------
    * H5Z_FILTER_NONE
    *-------------------------------------------------------------------------
    */
    if (strcmp(scomp,"NONE")==0)
+   {
        filt->filtn=H5Z_FILTER_NONE;
+       filt->cd_nelmts = 0;
+   }
    
-       /*-------------------------------------------------------------------------
-       * H5Z_FILTER_DEFLATE
-       *-------------------------------------------------------------------------
+  /*-------------------------------------------------------------------------
+   * H5Z_FILTER_DEFLATE
+   *-------------------------------------------------------------------------
    */
    else if (strcmp(scomp,"GZIP")==0)
    {
        filt->filtn=H5Z_FILTER_DEFLATE;
-       if (no_param) { /*no more parameters, GZIP must have parameter */
+       filt->cd_nelmts = 1;
+       if (no_param) 
+       { /*no more parameters, GZIP must have parameter */
            if (obj_list) free(obj_list);
            error_msg(progname, "missing compression parameter in <%s>\n",str);
            exit(1);
        }
    }
    
-   /*-------------------------------------------------------------------------
+  /*-------------------------------------------------------------------------
    * H5Z_FILTER_SZIP
    *-------------------------------------------------------------------------
    */
    else if (strcmp(scomp,"SZIP")==0)
    {
        filt->filtn=H5Z_FILTER_SZIP;
-       if (no_param) { /*no more parameters, SZIP must have parameter */
+       filt->cd_nelmts = 2;
+       if (no_param) 
+       { /*no more parameters, SZIP must have parameter */
            if (obj_list) free(obj_list);
            error_msg(progname, "missing compression parameter in <%s>\n",str);
            exit(1);
@@ -323,46 +337,54 @@ obj_list_t* parse_filter(const char *str,
    else if (strcmp(scomp,"SHUF")==0)
    {
        filt->filtn=H5Z_FILTER_SHUFFLE;
-       if (m>0){ /*shuffle does not have parameter */
+       filt->cd_nelmts = 0;
+       if (m>0)
+       { /*shuffle does not have parameter */
            if (obj_list) free(obj_list);
            error_msg(progname, "extra parameter in SHUF <%s>\n",str);
            exit(1);
        }
    }
-   /*-------------------------------------------------------------------------
+  /*-------------------------------------------------------------------------
    * H5Z_FILTER_FLETCHER32
    *-------------------------------------------------------------------------
    */
    else if (strcmp(scomp,"FLET")==0)
    {
        filt->filtn=H5Z_FILTER_FLETCHER32;
-       if (m>0){ /*shuffle does not have parameter */
+       filt->cd_nelmts = 0;
+       if (m>0)
+       { /*shuffle does not have parameter */
            if (obj_list) free(obj_list);
            error_msg(progname, "extra parameter in FLET <%s>\n",str);
            exit(1);
        }
    }
-   /*-------------------------------------------------------------------------
+  /*-------------------------------------------------------------------------
    * H5Z_FILTER_NBIT
    *-------------------------------------------------------------------------
    */
    else if (strcmp(scomp,"NBIT")==0)
    {
        filt->filtn=H5Z_FILTER_NBIT;
-       if (m>0){ /*nbit does not have parameter */
+       filt->cd_nelmts = 0;
+       if (m>0)
+       { /*nbit does not have parameter */
            if (obj_list) free(obj_list);
            error_msg(progname, "extra parameter in NBIT <%s>\n",str);
            exit(1);
        }
    }
-   /*-------------------------------------------------------------------------
+  /*-------------------------------------------------------------------------
    * H5Z_FILTER_SCALEOFFSET
    *-------------------------------------------------------------------------
    */
    else if (strcmp(scomp,"SOFF")==0)
    {
        filt->filtn=H5Z_FILTER_SCALEOFFSET;
-       if (no_param) { /*no more parameters, SOFF must have parameter */
+       filt->cd_nelmts = 2;
+       if (no_param) 
+       { /*no more parameters, SOFF must have parameter */
            if (obj_list) free(obj_list);
            error_msg(progname, "missing compression parameter in <%s>\n",str);
            exit(1);
@@ -376,43 +398,63 @@ obj_list_t* parse_filter(const char *str,
   }
  } /*i*/
  
-   /*-------------------------------------------------------------------------
+  /*-------------------------------------------------------------------------
    * check valid parameters
    *-------------------------------------------------------------------------
    */
    
    switch (filt->filtn)
    {
+
+  /*-------------------------------------------------------------------------
+   * H5Z_FILTER_DEFLATE
+   *-------------------------------------------------------------------------
+   */
        
    case H5Z_FILTER_DEFLATE:
-       if (filt->cd_values[0]<0 || filt->cd_values[0]>9 ){
+       if (filt->cd_values[0]<0 || filt->cd_values[0]>9 )
+       {
            if (obj_list) free(obj_list);
            error_msg(progname, "invalid compression parameter in <%s>\n",str);
            exit(1);
        }
        break;
        
+  /*-------------------------------------------------------------------------
+   * H5Z_FILTER_SZIP
+   *-------------------------------------------------------------------------
+   */
        
    case H5Z_FILTER_SZIP:
        pixels_per_block=filt->cd_values[0];
-       if ((pixels_per_block%2)==1) {
+       if ((pixels_per_block%2)==1) 
+       {
            if (obj_list) free(obj_list);
            error_msg(progname, "pixels_per_block is not even in <%s>\n",str);
            exit(1);
        }
-       if (pixels_per_block>H5_SZIP_MAX_PIXELS_PER_BLOCK) {
+       if (pixels_per_block>H5_SZIP_MAX_PIXELS_PER_BLOCK) 
+       {
            if (obj_list) free(obj_list);
            error_msg(progname, "pixels_per_block is too large in <%s>\n",str);
            exit(1);
        }
-       if ( (strcmp(smask,"NN")!=0) && (strcmp(smask,"EC")!=0) ) {
+       if ( (strcmp(smask,"NN")!=0) && (strcmp(smask,"EC")!=0) ) 
+       {
            if (obj_list) free(obj_list);
            error_msg(progname, "szip mask must be 'NN' or 'EC' \n");
            exit(1);
        }
        break;
+
+  /*-------------------------------------------------------------------------
+   * H5Z_FILTER_SCALEOFFSET
+   *-------------------------------------------------------------------------
+   */
+
    case H5Z_FILTER_SCALEOFFSET:
-       if (filt->cd_values[0]<0 ){
+       if (filt->cd_values[0]<0 )
+       {
            if (obj_list) free(obj_list);
            error_msg(progname, "invalid compression parameter in <%s>\n",str);
            exit(1);

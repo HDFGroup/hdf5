@@ -265,12 +265,12 @@ int apply_filters(const char* name,    /* object name from traverse list */
     /*-------------------------------------------------------------------------
     * the type of filter and additional parameter
     * type can be one of the filters
-    * H5Z_FILTER_NONE       0,  uncompress if compressed
-    * H5Z_FILTER_DEFLATE      1 , deflation like gzip
-    * H5Z_FILTER_SHUFFLE    2 , shuffle the data
-    * H5Z_FILTER_FLETCHER32 3 , fletcher32 checksum of EDC
-    * H5Z_FILTER_SZIP       4 , szip compression
-    * H5Z_FILTER_NBIT       5 , nbit compression
+    * H5Z_FILTER_NONE        0 , uncompress if compressed
+    * H5Z_FILTER_DEFLATE     1 , deflation like gzip
+    * H5Z_FILTER_SHUFFLE     2 , shuffle the data
+    * H5Z_FILTER_FLETCHER32  3 , fletcher32 checksum of EDC
+    * H5Z_FILTER_SZIP        4 , szip compression
+    * H5Z_FILTER_NBIT        5 , nbit compression
     * H5Z_FILTER_SCALEOFFSET 6 , scaleoffset compression
     *-------------------------------------------------------------------------
     */
@@ -278,10 +278,10 @@ int apply_filters(const char* name,    /* object name from traverse list */
     if (obj.nfilters)
     {
         
-    /*-------------------------------------------------------------------------
+   /*-------------------------------------------------------------------------
     * filters require CHUNK layout; if we do not have one define a default
     *-------------------------------------------------------------------------
-        */
+    */
         if (obj.layout==-1)
         {
             obj.chunk.rank=rank;

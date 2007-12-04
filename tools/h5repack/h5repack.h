@@ -51,11 +51,12 @@ typedef struct {
  H5Z_FILTER_SCALEOFFSET 6 , scaleoffset compression
 */
 
-#define CDVALUES 2
+#define CDVALUES 4 /* SZIP returns 4 values */
 
 typedef struct {
  H5Z_filter_t filtn;               /* filter identification number */
  int          cd_values[CDVALUES]; /* filter client data values */
+ size_t       cd_nelmts;           /* filter client number of values */
 } filter_info_t;
 
 /* chunk lengths along each dimension and rank */
@@ -96,23 +97,10 @@ typedef struct {
  pack_opttbl_t   *op_tbl;     /*table with all -c and -f options */
  int             all_layout;  /*apply the layout to all objects */
  int             all_filter;  /*apply the filter to all objects */
-
-#if defined (NOT_ALL)
-
- filter_info_t   filter_g;    /*global filter INFO for the ALL case */
- 
-
-#else
-
- filter_info_t    filter_g[H5_REPACK_MAX_NFILTERS];    /*global filter array for the ALL case */
- int              n_filter_g;  /*number of global filters */
- 
-#endif
-
+ filter_info_t   filter_g[H5_REPACK_MAX_NFILTERS];    /*global filter array for the ALL case */
+ int             n_filter_g;  /*number of global filters */
  chunk_info_t    chunk_g;     /*global chunk INFO for the ALL case */
  H5D_layout_t    layout_g;    /*global layout information for the ALL case */
-
-
  int             verbose;     /*verbose mode */
  hsize_t         threshold;   /*minimum size to compress, in bytes */
  int             use_native;  /*use a native type in write */  
