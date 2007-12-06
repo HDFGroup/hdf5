@@ -1388,6 +1388,7 @@
 ./test/srb_read.c
 ./test/srb_write.c
 ./test/stab.c
+./test/tarray.c
 ./test/tarrold.h5
 ./test/tattr.c
 ./test/tbogus.h5
