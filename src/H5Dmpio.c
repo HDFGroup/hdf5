@@ -550,7 +550,7 @@ H5D_mpio_get_min_chunk(const H5D_io_info_t *io_info,
     FUNC_ENTER_NOAPI_NOINIT(H5D_mpio_get_min_chunk);
 
     /* Get the number of chunks to perform I/O on */
-    num_chunkf = H5SL_count(fm->fsel);
+    num_chunkf = H5SL_count(fm->sel_chunks);
 
     /* Determine the minimum # of chunks for all processes */
     if (MPI_SUCCESS != (mpi_code = MPI_Allreduce(&num_chunkf, min_chunkf, 1, MPI_INT, MPI_MIN, io_info->comm)))
@@ -586,7 +586,7 @@ H5D_mpio_get_sum_chunk(const H5D_io_info_t *io_info,
 
     /* Get the number of chunks to perform I/O on */
     num_chunkf = 0;
-    ori_num_chunkf = H5SL_count(fm->fsel);
+    ori_num_chunkf = H5SL_count(fm->sel_chunks);
     H5_ASSIGN_OVERFLOW(num_chunkf,ori_num_chunkf,size_t,int);
 
     /* Determine the summation of number of chunks for all processes */
@@ -856,7 +856,7 @@ H5D_link_chunk_collective_io(H5D_io_info_t *io_info,H5D_chunk_map_t *fm,const vo
         H5D_chunk_info_t *chunk_info;
         H5D_storage_t  store;
  
-        chunk_node = H5SL_first(fm->fsel);
+        chunk_node = H5SL_first(fm->sel_chunks);
 	if(chunk_node == NULL) {
             if(H5D_istore_chunkmap(io_info, &chunk_base_addr, fm->down_chunks) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk address");
@@ -884,7 +884,7 @@ H5D_link_chunk_collective_io(H5D_io_info_t *io_info,H5D_chunk_map_t *fm,const vo
       }
 
       /* Allocate chunking information */
-      ori_num_chunk        = H5SL_count(fm->fsel);
+      ori_num_chunk        = H5SL_count(fm->sel_chunks);
       H5_ASSIGN_OVERFLOW(num_chunk,ori_num_chunk,size_t,int);
 
 #ifdef H5D_DEBUG
@@ -1114,7 +1114,7 @@ H5D_multi_chunk_collective_io(H5D_io_info_t *io_info,H5D_chunk_map_t *fm,const v
 #endif
 	select_chunk = fm->select_chunk[i];
 	if(select_chunk == 1){/* Have selection elements in this chunk. Find the chunk info. */
-	   if(NULL ==(chunk_node = H5SL_first(fm->fsel)))
+	   if(NULL ==(chunk_node = H5SL_first(fm->sel_chunks)))
 	    HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL,"couldn't get chunk node from skipped list");
 
 	    while(chunk_node){
@@ -1313,7 +1313,7 @@ H5D_multi_chunk_collective_io_no_opt(H5D_io_info_t *io_info,H5D_chunk_map_t *fm,
       count_chunk = 0;
   
       /* Get first node in chunk skip list */
-      chunk_node=H5SL_first(fm->fsel);
+      chunk_node=H5SL_first(fm->sel_chunks);
  
        /* Iterate through chunks to be operated on */
       while(chunk_node) {
@@ -1618,7 +1618,7 @@ H5D_sort_chunk(H5D_io_info_t * io_info,
   
     FUNC_ENTER_NOAPI_NOINIT(H5D_sort_chunk)
 
-    num_chunks =  H5SL_count(fm->fsel);
+    num_chunks =  H5SL_count(fm->sel_chunks);
 #ifdef H5D_DEBUG
   if(H5DEBUG(D)) 
     HDfprintf(H5DEBUG(D),"many_chunk_opt= %d\n",many_chunk_opt);
@@ -1657,7 +1657,7 @@ H5D_sort_chunk(H5D_io_info_t * io_info,
     } /* end if */
 
     /* Get first node in chunk skip list */
-    if(NULL ==(chunk_node = H5SL_first(fm->fsel)))
+    if(NULL ==(chunk_node = H5SL_first(fm->sel_chunks)))
 	  HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL,"couldn't get chunk node from skipped list");
     /* Set dataset storage for I/O info */
     io_info->store = &store;
@@ -1843,7 +1843,7 @@ H5D_obtain_mpio_mode(H5D_io_info_t* io_info,
   
   mem_cleanup       = 1;
 
-  chunk_node        = H5SL_first(fm->fsel);
+  chunk_node        = H5SL_first(fm->sel_chunks);
 
   /*Obtain the regularity and selection information for all chunks in this process. */
   while(chunk_node){

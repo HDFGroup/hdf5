@@ -4238,35 +4238,37 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t
+htri_t
 H5S_hyper_normalize_offset(H5S_t *space, hssize_t *old_offset)
 {
     unsigned u;                         /* Local index variable */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t ret_value = FALSE;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5S_hyper_normalize_offset);
+    FUNC_ENTER_NOAPI_NOINIT(H5S_hyper_normalize_offset)
 
-    assert(space);
+    HDassert(space);
 
-    /* Check for 'all' selection, instead of a hyperslab selection */
-    /* (Technically, this check shouldn't be in the "hyperslab" routines...) */
-    if(H5S_GET_SELECT_TYPE(space)==H5S_SEL_HYPERSLABS) {
+    /* Check for hyperslab selection & offset changed */
+    if(H5S_GET_SELECT_TYPE(space) == H5S_SEL_HYPERSLABS && space->select.offset_changed) {
         /* Copy & invert the selection offset */
-        for(u=0; u<space->extent.rank; u++) {
+        for(u = 0; u<space->extent.rank; u++) {
             old_offset[u] = space->select.offset[u];
             space->select.offset[u] = -space->select.offset[u];
         } /* end for */
 
         /* Call the existing 'adjust' routine */
-        if(H5S_hyper_adjust_s(space, space->select.offset)<0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADSELECT, FAIL, "can't perform hyperslab normalization");
+        if(H5S_hyper_adjust_s(space, space->select.offset) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADSELECT, FAIL, "can't perform hyperslab normalization")
 
         /* Zero out the selection offset */
         HDmemset(space->select.offset, 0, sizeof(hssize_t) * space->extent.rank);
+
+        /* Indicate that the offset was normalized */
+        ret_value = TRUE;
     } /* end if */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_hyper_normalize_offset() */
 
 
@@ -4294,25 +4296,22 @@ done:
 herr_t
 H5S_hyper_denormalize_offset(H5S_t *space, const hssize_t *old_offset)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5S_hyper_denormalize_offset);
+    FUNC_ENTER_NOAPI_NOINIT(H5S_hyper_denormalize_offset)
 
-    assert(space);
+    HDassert(space);
+    HDassert(H5S_GET_SELECT_TYPE(space) == H5S_SEL_HYPERSLABS);
 
-    /* Check for 'all' selection, instead of a hyperslab selection */
-    /* (Technically, this check shouldn't be in the "hyperslab" routines...) */
-    if(H5S_GET_SELECT_TYPE(space)==H5S_SEL_HYPERSLABS) {
-        /* Call the existing 'adjust' routine */
-        if(H5S_hyper_adjust_s(space, old_offset)<0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADSELECT, FAIL, "can't perform hyperslab normalization");
+    /* Call the existing 'adjust' routine */
+    if(H5S_hyper_adjust_s(space, old_offset) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADSELECT, FAIL, "can't perform hyperslab normalization")
 
-        /* Copy the selection offset over */
-        HDmemcpy(space->select.offset, old_offset, sizeof(hssize_t) * space->extent.rank);
-    } /* end if */
+    /* Copy the selection offset over */
+    HDmemcpy(space->select.offset, old_offset, sizeof(hssize_t) * space->extent.rank);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_hyper_denormalize_offset() */
 
 

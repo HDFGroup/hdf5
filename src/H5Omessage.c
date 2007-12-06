@@ -136,7 +136,7 @@ H5O_msg_create(const H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags,
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
     /* Go append message to object header */
-    if(H5O_msg_append(loc->file, dxpl_id, oh, type_id, mesg_flags, update_flags, mesg) < 0)
+    if(H5O_msg_append_oh(loc->file, dxpl_id, oh, type_id, mesg_flags, update_flags, mesg) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to append to object header")
 
 done:
@@ -148,7 +148,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_msg_append
+ * Function:	H5O_msg_append_oh
  *
  * Purpose:	Simplified version of H5O_msg_create, used when creating a new
  *              object header message (usually during object creation) and
@@ -165,13 +165,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_msg_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
+H5O_msg_append_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
     unsigned mesg_flags, unsigned update_flags, void *mesg)
 {
     const H5O_msg_class_t *type;        /* Original H5O class type for the ID */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_msg_append, FAIL)
+    FUNC_ENTER_NOAPI(H5O_msg_append_oh, FAIL)
 
     /* check args */
     HDassert(f);
@@ -189,7 +189,7 @@ H5O_msg_append(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_msg_append() */
+} /* end H5O_msg_append_oh() */
 
 
 /*-------------------------------------------------------------------------
@@ -298,6 +298,53 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_msg_write() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_msg_write_oh
+ *
+ * Purpose:	Modifies an existing message or creates a new message.
+ *
+ *              The UPDATE_FLAGS argument are flags that allow the caller
+ *              to skip updating the modification time or reseting the message
+ *              data.  This is useful when several calls to H5O_msg_write will be
+ *              made in a sequence.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Dec  6 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_msg_write_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
+    unsigned mesg_flags, unsigned update_flags, void *mesg)
+{
+    const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_msg_write_oh, FAIL)
+
+    /* check args */
+    HDassert(f);
+    HDassert(oh);
+    HDassert(H5O_ATTR_ID != type_id);   /* Attributes are modified in another routine */
+    HDassert(type_id < NELMTS(H5O_msg_class_g));
+    type = H5O_msg_class_g[type_id];    /* map the type ID to the actual type object */
+    HDassert(type);
+    HDassert(mesg);
+    HDassert(0 == (mesg_flags & ~H5O_MSG_FLAG_BITS));
+
+    /* Call the "real" modify routine */
+    if(H5O_msg_write_real(f, dxpl_id, oh, type, mesg_flags, update_flags, mesg) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, FAIL, "unable to write object header message")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_msg_write_oh() */
 
 
 /*-------------------------------------------------------------------------

@@ -62,17 +62,20 @@ static herr_t H5S_select_iter_next_block(H5S_sel_iter_t *iter);
 herr_t
 H5S_select_offset(H5S_t *space, const hssize_t *offset)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5S_select_offset);
+    FUNC_ENTER_NOAPI_NOFUNC(H5S_select_offset)
 
     /* Check args */
-    assert(space);
-    assert(space->extent.rank);
-    assert(offset);
+    HDassert(space);
+    HDassert(space->extent.rank);
+    HDassert(offset);
 
     /* Copy the offset over */
-    HDmemcpy(space->select.offset,offset,sizeof(hssize_t)*space->extent.rank);
+    HDmemcpy(space->select.offset, offset, sizeof(hssize_t)*space->extent.rank);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    /* Indicate that the offset was changed */
+    space->select.offset_changed = TRUE;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
 }   /* H5S_select_offset() */
 
 

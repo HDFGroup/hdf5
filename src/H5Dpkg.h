@@ -143,6 +143,7 @@ typedef struct H5D_rdcc_t {
     int		nused;	/* Number of chunk slots in use		*/
     H5D_chunk_cached_t last;    /* Cached copy of last chunk information */
     struct H5D_rdcc_ent_t **slot; /* Chunk slots, each points to a chunk*/
+    H5SL_t *sel_chunks;         /* Skip list containing information for each chunk selected */
 } H5D_rdcc_t;
 
 /* The raw data contiguous data cache */
@@ -166,6 +167,7 @@ typedef struct H5D_shared_t {
     H5T_t              *type;           /* datatype of this dataset     */
     H5S_t              *space;          /* dataspace of this dataset    */
     hbool_t             space_dirty;    /* Whether the dataspace info needs to be flushed to the file */
+    hbool_t             layout_dirty;   /* Whether the layout info needs to be flushed to the file */
     hid_t               dcpl_id;        /* dataset creation property id */
     H5D_dcpl_cache_t    dcpl_cache;     /* Cached DCPL values */
     H5D_io_ops_t        io_ops;         /* I/O operations */
@@ -223,7 +225,7 @@ typedef struct H5D_chunk_map_t {
     unsigned m_ndims;           /* Number of dimensions for memory dataspace */
     H5S_sel_type msel_type;     /* Selection type in memory */
 
-    H5SL_t *fsel;               /* Skip list containing file dataspaces for all chunks */
+    H5SL_t *sel_chunks;         /* Skip list containing information for each chunk selected */
     hsize_t last_index;         /* Index of last chunk operated on */
     H5D_chunk_info_t *last_chunk_info;  /* Pointer to last chunk's info */
     hsize_t chunks[H5O_LAYOUT_NDIMS];   /* Number of chunks in each dimension */
@@ -343,7 +345,7 @@ H5_DLL H5D_t *H5D_create_named(const H5G_loc_t *loc, const char *name,
 H5_DLL herr_t H5D_get_space_status(H5D_t *dset, H5D_space_status_t *allocation,
     hid_t dxpl_id);
 H5_DLL herr_t H5D_alloc_storage(H5F_t *f, hid_t dxpl_id, H5D_t *dset, H5D_time_alloc_t time_alloc,
-    hbool_t update_time, hbool_t full_overwrite);
+    hbool_t full_overwrite);
 H5_DLL hsize_t H5D_get_storage_size(H5D_t *dset, hid_t dxpl_id);
 H5_DLL haddr_t H5D_get_offset(const H5D_t *dset);
 H5_DLL herr_t H5D_iterate(void *buf, hid_t type_id, const H5S_t *space,
