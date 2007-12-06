@@ -45,7 +45,6 @@
 #include "H5FDsec2.h"		/* POSIX unbuffered file I/O		*/
 #include "H5FDsrb.h"        	/* Remote access using SRB              */
 #include "H5FDstdio.h"		/* Standard C buffered I/O		*/
-#include "H5FDstream.h"     	/* In-memory files streamed via sockets */
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
@@ -176,9 +175,6 @@ H5FD_term_interface(void)
                 H5FD_mpio_term();
                 H5FD_mpiposix_term();
 #endif /* H5_HAVE_PARALLEL */
-#ifdef H5_HAVE_STREAM
-                H5FD_stream_term();
-#endif
             } /* end if */
 	} else {
 	    H5I_destroy_group(H5I_VFL);

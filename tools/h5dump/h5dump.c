@@ -633,7 +633,7 @@ usage(const char *prog)
     fprintf(stdout, "      -k L, --block=L     Size of block in hyperslab\n");
     fprintf(stdout, "\n");
     fprintf(stdout, "  D - is the file driver to use in opening the file. Acceptable values\n");
-    fprintf(stdout, "        are \"sec2\", \"family\", \"split\", \"multi\", and \"stream\". Without\n");
+    fprintf(stdout, "        are \"sec2\", \"family\", \"split\", and \"multi\". Without\n");
     fprintf(stdout, "        the file driver flag, the file will be opened with each driver in\n");
     fprintf(stdout, "        turn and in the order specified above until one driver succeeds\n");
     fprintf(stdout, "        in opening the file.\n");
@@ -2614,10 +2614,6 @@ dump_fcpl(hid_t fid)
         HDstrcpy(dname,"H5FD_SEC2");
     else if (H5FD_STDIO==fdriver)
         HDstrcpy(dname,"H5FD_STDIO");
-#ifdef H5_HAVE_STREAM
-    else if (H5FD_STREAM==fdriver)
-        HDstrcpy(dname,"H5FD_STREAM");
-#endif
 
     indentation(indent + COL);
     printf("%s %s\n","FILE_DRIVER", dname);

@@ -28,7 +28,7 @@ CPPFLAGS=-I. -I$(srcdir) -I../src -I$(top_srcdir)/src @CPPFLAGS@
 TEST_PROGS=testhdf5 lheap ohdr stab gheap cache hyperslab istore bittests    \
     dtypes dsets cmpd_dset extend external links unlink big mtime fillval    \
     mount flush1 flush2 enum gass_write gass_read gass_append set_extent     \
-    srb_write srb_append srb_read ttsafe stream_test getname file_handle     \
+    srb_write srb_append srb_read ttsafe getname file_handle     \
     ntypes dangle reserved
 
 TIMINGS=testmeta
@@ -79,7 +79,7 @@ TEST_SRC=big.c bittests.c cache.c cmpd_dset.c dsets.c dtypes.c extend.c      \
     tselect.c tskiplist.c ttime.c ttst.c tvltypes.c tvlstr.c                 \
     unlink.c enum.c ttsafe.c ttsafe_dcreate.c ttsafe_error.c                 \
     ttsafe_cancel.c ttsafe_acreate.c gass_write.c gass_read.c                \
-    gass_append.c srb_read.c srb_write.c srb_append.c stream_test.c          \
+    gass_append.c srb_read.c srb_write.c srb_append.c \
     set_extent.c getname.c file_handle.c ntypes.c dangle.c reserved.c
 
 TEST_OBJ=$(TEST_SRC:.c=.lo)
@@ -206,9 +206,6 @@ srb_write: srb_write.lo
 
 srb_append: srb_append.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ srb_append.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
-
-stream_test: stream_test.lo
-	@$(LT_LINK_EXE) $(CFLAGS) -o $@ stream_test.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
 testmeta: testmeta.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ testmeta.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)

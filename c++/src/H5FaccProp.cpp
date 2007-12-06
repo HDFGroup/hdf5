@@ -292,48 +292,6 @@ void FileAccPropList::setSplit( FileAccPropList& meta_plist, FileAccPropList& ra
    setSplit( meta_plist, raw_plist, meta_ext.c_str(), raw_ext.c_str() );
 }
 
-#ifdef H5_HAVE_STREAM // for Stream Virtual File Driver
-//--------------------------------------------------------------------------
-// Function:	FileAccPropList::getStream
-///\brief	Retrieves the streaming I/O driver settings
-///\return	The streaming I/O file access property list structure
-///		For detail on this structure, please refer to
-/// <A HREF="../RM_H5P.html#Property-SetFaplStream">../RM_H5P.html#Property-SetFaplStream</A>
-///\exception	H5::PropListIException
-// Programmer:  Binh-Minh Ribler - April, 2004
-//--------------------------------------------------------------------------
-H5FD_stream_fapl_t FileAccPropList::getStream() const
-{
-   H5FD_stream_fapl_t fapl;
-   herr_t ret_value = H5Pget_fapl_stream(id, &fapl);
-   if( ret_value < 0 )
-   {
-      throw PropListIException("FileAccPropList::getStream", "H5Pget_fapl_stream failed");
-   }
-   return(fapl);
-}
-
-//--------------------------------------------------------------------------
-// Function:	FileAccPropList::setStream
-///\brief	Modifies this file access property list to use the Stream
-///		driver.
-///\param	fapl - IN: The streaming I/O file access property list
-///\exception	H5::PropListIException
-///\par Description
-///		For detail on \a fapl, please refer to
-/// <A HREF="../RM_H5P.html#Property-SetFaplStream">../RM_H5P.html#Property-SetFaplStream</A>
-// Programmer:  Binh-Minh Ribler - April, 2004
-//--------------------------------------------------------------------------
-void FileAccPropList::setStream(H5FD_stream_fapl_t &fapl) const
-{
-   herr_t ret_value = H5Pset_fapl_stream (id, &fapl);
-   if( ret_value < 0 )
-   {
-      throw PropListIException("FileAccPropList::setStream", "H5Pset_fapl_stream failed");
-   }
-}
-#endif // Stream Virtual File Driver
-
 //--------------------------------------------------------------------------
 // Function:	FileAccPropList::getSieveBufSize
 ///\brief	Returns the current settings for the data sieve buffer size

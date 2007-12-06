@@ -57,9 +57,6 @@ static const char *drivernames[]={
     "family",
     "split",
     "multi",
-#ifdef H5_HAVE_STREAM
-    "stream",
-#endif  /* H5_HAVE_STREAM */
 #ifdef H5_HAVE_PARALLEL
     "mpio",
     "mpiposix"
@@ -73,9 +70,6 @@ enum {
    ,FAMILY_IDX
    ,SPLIT_IDX
    ,MULTI_IDX
-#ifdef H5_HAVE_STREAM
-   ,STREAM_IDX
-#endif  /* H5_HAVE_STREAM */
 #ifdef H5_HAVE_PARALLEL
    ,MPIO_IDX
    ,MPIPOSIX_IDX
@@ -196,16 +190,6 @@ h5tools_get_fapl(const char *driver, unsigned *drivernum)
             if(drivernum)
                 *drivernum = MULTI_IDX;
         } /* end if */
-#ifdef H5_HAVE_STREAM
-    } else if (!strcmp(driver, drivernames[STREAM_IDX])) {
-        /* STREAM Driver */
-        if((fapl = H5Pcreate(H5P_FILE_ACCESS))>=0) {
-            H5Pset_fapl_stream(fapl, NULL);
-
-            if(drivernum)
-                *drivernum = STREAM_IDX;
-        } /* end if */
-#endif  /* H5_HAVE_STREAM */
 #ifdef H5_HAVE_PARALLEL
     } else if (!strcmp(driver, drivernames[MPIO_IDX])) {
         /* MPI-I/O Driver */
@@ -256,8 +240,7 @@ error:
  *      Loop through the various types of VFL drivers trying to open FNAME.
  *      If the HDF5 library is version 1.2 or less, then we have only the SEC2
  *      driver to try out. If the HDF5 library is greater than version 1.2,
- *      then we have the FAMILY, SPLIT, and MULTI drivers to play with (and
- *      the STREAM driver if H5_HAVE_STREAM is defined, that is).
+ *      then we have the FAMILY, SPLIT, and MULTI drivers to play with.
  *
  *      If DRIVER is non-NULL, then it will try to open the file with that
  *      driver first. We assume that the user knows what they are doing so, if

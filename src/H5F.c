@@ -44,7 +44,6 @@
 #include "H5FDsec2.h"		/*Posix unbuffered I/O			*/
 #include "H5FDsrb.h"            /*SRB I/O                               */
 #include "H5FDstdio.h"		/* Standard C buffered I/O		*/
-#include "H5FDstream.h"         /*in-memory files streamed via sockets  */
 
 /* Struct only used by functions H5F_get_objects and H5F_get_objects_cb */
 typedef struct H5F_olist_t {

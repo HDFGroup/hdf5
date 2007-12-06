@@ -222,12 +222,6 @@
 /* Define if MPI_File_get_size works correctly */
 #undef HAVE_MPI_GET_SIZE
 
-/* Define to 1 if you have the <netinet/in.h> header file. */
-#undef HAVE_NETINET_IN_H
-
-/* Define to 1 if you have the <netinet/tcp.h> header file. */
-#undef HAVE_NETINET_TCP_H
-
 /* Define if we have parallel support */
 #undef HAVE_PARALLEL
 
@@ -248,9 +242,6 @@
 
 /* Define to 1 if you have the `snprintf' function. */
 #undef HAVE_SNPRINTF
-
-/* Define if `socklen_t' is defined */
-#undef HAVE_SOCKLEN_T
 
 /* Define if the SRB is defined */
 #undef HAVE_SRB
@@ -273,9 +264,6 @@
 /* Define to 1 if you have the `strdup' function. */
 #undef HAVE_STRDUP
 
-/* Define if the stream virtual file driver should be compiled */
-#undef HAVE_STREAM
-
 /* Define to 1 if you have the <strings.h> header file. */
 #undef HAVE_STRINGS_H
 
@@ -296,9 +284,6 @@
 
 /* Define to 1 if you have the `system' function. */
 #undef HAVE_SYSTEM
-
-/* Define to 1 if you have the <sys/filio.h> header file. */
-#undef HAVE_SYS_FILIO_H
 
 /* Define to 1 if you have the <sys/fpu.h> header file. */
 #undef HAVE_SYS_FPU_H

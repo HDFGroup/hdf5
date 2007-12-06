@@ -51,6 +51,5 @@
 #include "H5FDsec2.h"		/* POSIX unbuffered file I/O		*/
 #include "H5FDsrb.h"        	/* Remote access using SRB              */
 #include "H5FDstdio.h"		/* Standard C buffered I/O		*/
-#include "H5FDstream.h"     	/* In-memory files streamed via sockets */
 
 #endif
