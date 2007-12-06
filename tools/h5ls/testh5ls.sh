@@ -49,6 +49,7 @@ TESTING() {
 TOOLTEST() {
     expect="$srcdir/../testfiles/$1"
     actual="../testfiles/`basename $1 .ls`.out"
+    actual_err="../testfiles/`basename $1 .ls`.err"
     shift
     retvalexpect=$1
     shift
@@ -63,10 +64,10 @@ TOOLTEST() {
 	echo "#############################"
 	cd $srcdir/../testfiles
         $RUNSERIAL $H5LS_BIN "$@"
-    ) >$actual 2>&1
+    ) >$actual 2>$actual_err 
     
     exitcode=$?
-    sed 's/Modified:.*/Modified:  XXXX-XX-XX XX:XX:XX XXX/' $actual
+    cat $actual_err >> $actual
     if [ $exitcode -ne $retvalexpect ]; then
 	echo "*FAILED*"
 	nerrors="`expr $nerrors + 1`"
@@ -92,7 +93,7 @@ TOOLTEST() {
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-	rm -f $actual
+	rm -f $actual $actual_err
     fi
 }
 
