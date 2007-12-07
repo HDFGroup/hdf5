@@ -1,7 +1,7 @@
-##
-## This file is machine generated on GNU systems.
-## Only temporary changes may be made here.
-##
+#
+# This file is machine generated on GNU systems.
+# Only temporary changes may be made here.
+#
 # Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
@@ -50,8 +50,7 @@ test_lite.lo: \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5FDsec2.h \
    $(top_srcdir)/src/H5FDsrb.h \
-   $(top_srcdir)/src/H5FDstdio.h \
-   $(top_srcdir)/src/H5FDstream.h
+   $(top_srcdir)/src/H5FDstdio.h
 test_image.lo: \
    $(srcdir)/test_image.c \
    $(top_srcdir)/hl/src/H5IM.h \
@@ -88,8 +87,7 @@ test_image.lo: \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5FDsec2.h \
    $(top_srcdir)/src/H5FDsrb.h \
-   $(top_srcdir)/src/H5FDstdio.h \
-   $(top_srcdir)/src/H5FDstream.h
+   $(top_srcdir)/src/H5FDstdio.h
 test_table.lo: \
    $(srcdir)/test_table.c \
    $(top_srcdir)/hl/src/H5TA.h \
@@ -126,5 +124,4 @@ test_table.lo: \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5FDsec2.h \
    $(top_srcdir)/src/H5FDsrb.h \
-   $(top_srcdir)/src/H5FDstdio.h \
-   $(top_srcdir)/src/H5FDstream.h
+   $(top_srcdir)/src/H5FDstdio.h

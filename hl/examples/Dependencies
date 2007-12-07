@@ -1,7 +1,7 @@
-##
-## This file is machine generated on GNU systems.
-## Only temporary changes may be made here.
-##
+#
+# This file is machine generated on GNU systems.
+# Only temporary changes may be made here.
+#
 # Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
@@ -24,3 +24,45 @@ ex_lite2.lo: \
 ex_lite3.lo: \
    $(srcdir)/ex_lite3.c \
    H5LT.h
+ex_image1.lo: \
+   $(srcdir)/ex_image1.c \
+   H5IM.h
+ex_image2.lo: \
+   $(srcdir)/ex_image2.c \
+   H5IM.h
+ex_table_01.lo: \
+   $(srcdir)/ex_table_01.c \
+   H5TA.h
+ex_table_02.lo: \
+   $(srcdir)/ex_table_02.c \
+   H5TA.h
+ex_table_03.lo: \
+   $(srcdir)/ex_table_03.c \
+   H5TA.h
+ex_table_04.lo: \
+   $(srcdir)/ex_table_04.c \
+   H5TA.h
+ex_table_05.lo: \
+   $(srcdir)/ex_table_05.c \
+   H5TA.h
+ex_table_06.lo: \
+   $(srcdir)/ex_table_06.c \
+   H5TA.h
+ex_table_07.lo: \
+   $(srcdir)/ex_table_07.c \
+   H5TA.h
+ex_table_08.lo: \
+   $(srcdir)/ex_table_08.c \
+   H5TA.h
+ex_table_09.lo: \
+   $(srcdir)/ex_table_09.c \
+   H5TA.h
+ex_table_10.lo: \
+   $(srcdir)/ex_table_10.c \
+   H5TA.h
+ex_table_11.lo: \
+   $(srcdir)/ex_table_11.c \
+   H5TA.h
+ex_table_12.lo: \
+   $(srcdir)/ex_table_12.c \
+   H5TA.h

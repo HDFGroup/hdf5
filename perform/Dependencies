@@ -1,7 +1,7 @@
-##
-## This file is machine generated on GNU systems.
-## Only temporary changes may be made here.
-##
+#
+# This file is machine generated on GNU systems.
+# Only temporary changes may be made here.
+#
 # Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
@@ -50,7 +50,6 @@ iopipe.lo: \
    $(top_srcdir)/src/H5FDsec2.h \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h \
-   $(top_srcdir)/src/H5FDstream.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5MPprivate.h
 chunk.lo: \
@@ -87,8 +86,7 @@ chunk.lo: \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5FDsec2.h \
    $(top_srcdir)/src/H5FDsrb.h \
-   $(top_srcdir)/src/H5FDstdio.h \
-   $(top_srcdir)/src/H5FDstream.h
+   $(top_srcdir)/src/H5FDstdio.h
 overhead.lo: \
    $(srcdir)/overhead.c \
    $(top_srcdir)/src/hdf5.h \
@@ -124,7 +122,6 @@ overhead.lo: \
    $(top_srcdir)/src/H5FDsec2.h \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h \
-   $(top_srcdir)/src/H5FDstream.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5MPprivate.h
 zip_perf.lo: \
@@ -162,10 +159,10 @@ zip_perf.lo: \
    $(top_srcdir)/src/H5FDsec2.h \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h \
-   $(top_srcdir)/src/H5FDstream.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5MPprivate.h \
-   $(top_srcdir)/tools/lib/h5tools_utils.h
+   $(top_srcdir)/tools/lib/h5tools_utils.h \
+   $(top_srcdir)/src/hdf5.h
 perf_meta.lo: \
    $(srcdir)/perf_meta.c \
    $(top_srcdir)/test/h5test.h \
@@ -202,7 +199,6 @@ perf_meta.lo: \
    $(top_srcdir)/src/H5FDsec2.h \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h \
-   $(top_srcdir)/src/H5FDstream.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5MPprivate.h
 pio_perf.lo: \
@@ -240,7 +236,15 @@ pio_perf.lo: \
    $(top_srcdir)/src/H5FDsec2.h \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h \
-   $(top_srcdir)/src/H5FDstream.h
+   $(top_srcdir)/tools/lib/h5tools_utils.h \
+   $(top_srcdir)/src/hdf5.h \
+   $(srcdir)/pio_perf.h \
+   $(srcdir)/pio_timer.h \
+   $(top_srcdir)/src/H5private.h \
+   $(top_srcdir)/src/H5MPprivate.h \
+   $(top_srcdir)/test/h5test.h \
+   $(top_srcdir)/src/hdf5.h \
+   $(top_srcdir)/src/H5private.h
 pio_engine.lo: \
    $(srcdir)/pio_engine.c \
    $(top_srcdir)/src/hdf5.h \
@@ -276,7 +280,13 @@ pio_engine.lo: \
    $(top_srcdir)/src/H5FDsec2.h \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h \
-   $(top_srcdir)/src/H5FDstream.h
+   $(srcdir)/pio_perf.h \
+   $(srcdir)/pio_timer.h \
+   $(top_srcdir)/src/H5private.h \
+   $(top_srcdir)/src/H5MPprivate.h \
+   $(top_srcdir)/test/h5test.h \
+   $(top_srcdir)/src/hdf5.h \
+   $(top_srcdir)/src/H5private.h
 pio_timer.lo: \
    $(srcdir)/pio_timer.c \
    $(srcdir)/pio_timer.h \
@@ -313,4 +323,9 @@ pio_timer.lo: \
    $(top_srcdir)/src/H5FDsec2.h \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h \
-   $(top_srcdir)/src/H5FDstream.h
+   $(srcdir)/pio_perf.h \
+   $(top_srcdir)/src/H5private.h \
+   $(top_srcdir)/src/H5MPprivate.h \
+   $(top_srcdir)/test/h5test.h \
+   $(top_srcdir)/src/hdf5.h \
+   $(top_srcdir)/src/H5private.h

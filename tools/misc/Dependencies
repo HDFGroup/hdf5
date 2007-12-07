@@ -1,7 +1,7 @@
-##
-## This file is machine generated on GNU systems.
-## Only temporary changes may be made here.
-##
+#
+# This file is machine generated on GNU systems.
+# Only temporary changes may be made here.
+#
 # Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
@@ -24,6 +24,7 @@ h5debug.lo: \
    $(top_srcdir)/src/H5MPprivate.h \
    $(top_srcdir)/src/H5Bprivate.h \
    $(top_srcdir)/src/H5Bpublic.h \
+   $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5ACprivate.h \
    $(top_srcdir)/src/H5ACpublic.h \
    $(top_srcdir)/src/H5Fprivate.h \
@@ -48,14 +49,19 @@ h5debug.lo: \
    $(top_srcdir)/src/H5MMpublic.h \
    $(top_srcdir)/src/H5Gprivate.h \
    $(top_srcdir)/src/H5Gpublic.h \
+   $(top_srcdir)/src/H5Bprivate.h \
    $(top_srcdir)/src/H5RSprivate.h \
    $(top_srcdir)/src/H5Rprivate.h \
    $(top_srcdir)/src/H5Rpublic.h \
    $(top_srcdir)/src/H5Zprivate.h \
    $(top_srcdir)/src/H5Zpublic.h \
+   $(top_srcdir)/src/H5Sprivate.h \
+   $(top_srcdir)/src/H5Pprivate.h \
+   $(top_srcdir)/src/H5Ppublic.h \
    $(top_srcdir)/src/H5Fpkg.h \
    $(top_srcdir)/src/H5FOprivate.h \
    $(top_srcdir)/src/H5SLprivate.h \
+   $(top_srcdir)/src/H5Gprivate.h \
    $(top_srcdir)/src/H5HGprivate.h \
    $(top_srcdir)/src/H5HGpublic.h \
    $(top_srcdir)/src/H5HLprivate.h \
@@ -63,7 +69,6 @@ h5debug.lo: \
    $(top_srcdir)/src/H5Iprivate.h \
    $(top_srcdir)/src/H5Opkg.h \
    $(top_srcdir)/src/H5Pprivate.h \
-   $(top_srcdir)/src/H5Ppublic.h \
    $(top_srcdir)/src/H5FDfamily.h
 h5repart.lo: \
    $(srcdir)/h5repart.c \
@@ -100,6 +105,5 @@ h5repart.lo: \
    $(top_srcdir)/src/H5FDsec2.h \
    $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h \
-   $(top_srcdir)/src/H5FDstream.h \
    $(top_srcdir)/src/H5private.h \
    $(top_srcdir)/src/H5MPprivate.h
