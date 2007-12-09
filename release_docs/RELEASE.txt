@@ -1,4 +1,4 @@
-HDF5 version 1.6.6-post2 currently under development
+HDF5 version 1.6.6-post3 currently under development
 ================================================================================
 
 INTRODUCTION
