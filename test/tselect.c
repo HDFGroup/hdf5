@@ -7629,35 +7629,35 @@ test_select_hyper_chunk_offset(void)
         wbuf[i]=i;
 
     /* Create file */
-    fid = H5Fcreate (FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Create a dataset creation property list */
-    dcpl = H5Pcreate (H5P_DATASET_CREATE);
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
     CHECK(dcpl, FAIL, "H5Pcreate");
 
     /* Set to chunked storage layout */
-    ret=H5Pset_layout (dcpl, H5D_CHUNKED);
+    ret = H5Pset_layout(dcpl, H5D_CHUNKED);
     CHECK(ret, FAIL, "H5Pset_layout");
 
     /* Set the chunk size */
-    ret=H5Pset_chunk (dcpl, 1, chunks);
+    ret = H5Pset_chunk(dcpl, 1, chunks);
     CHECK(ret, FAIL, "H5Pset_chunk");
 
     /* Create dataspace for memory */
-    msid = H5Screate_simple (1, mem_dims, NULL);
+    msid = H5Screate_simple(1, mem_dims, NULL);
     CHECK(msid, FAIL, "H5Screate_simple");
 
     /* Select the correct chunk in the memory dataspace */
-    ret=H5Sselect_hyperslab (msid, H5S_SELECT_SET, start, NULL, count, NULL);
+    ret = H5Sselect_hyperslab(msid, H5S_SELECT_SET, start, NULL, count, NULL);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* Create dataspace for dataset */
-    sid = H5Screate_simple (1, dims, maxdims);
+    sid = H5Screate_simple(1, dims, maxdims);
     CHECK(sid, FAIL, "H5Screate_simple");
 
     /* Create the dataset */
-    did = H5Dcreate2 (fid, "fooData", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    did = H5Dcreate2(fid, "fooData", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
     CHECK(did, FAIL, "H5Dcreate2");
 
     /* Close the dataspace */
@@ -7684,7 +7684,7 @@ test_select_hyper_chunk_offset(void)
         CHECK(fsid, FAIL, "H5Dget_space");
 
         /* Select the correct chunk in the dataset */
-        ret = H5Sselect_hyperslab (fsid, H5S_SELECT_SET, start, NULL, count, NULL);
+        ret = H5Sselect_hyperslab(fsid, H5S_SELECT_SET, start, NULL, count, NULL);
         CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
         /* Set the selection offset for the file dataspace */
@@ -7693,13 +7693,13 @@ test_select_hyper_chunk_offset(void)
         CHECK(ret, FAIL, "H5Soffset_simple");
 
         /* Set the selection offset for the memory dataspace */
-        offset[0] = SPACE10_DIM1-i;
+        offset[0] = SPACE10_DIM1 - i;
         ret = H5Soffset_simple(msid, offset);
         CHECK(ret, FAIL, "H5Soffset_simple");
 
         /* Write the data to the chunk */
         ret = H5Dwrite(did, H5T_NATIVE_INT, msid, fsid, H5P_DEFAULT, wbuf);
-        CHECK(ret, FAIL, "H5Soffset_simple");
+        CHECK(ret, FAIL, "H5Dwrite");
 
         /* Close the file dataspace copy */
         ret = H5Sclose(fsid);
@@ -7707,8 +7707,8 @@ test_select_hyper_chunk_offset(void)
     }
 
     /* Read the data back in */
-    ret=H5Dread (did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
-    CHECK(ret, FAIL, "H5Soffset_simple");
+    ret = H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
+    CHECK(ret, FAIL, "H5Dread");
 
     /* Verify the information read in */
     for(i=0; i<SPACE10_DIM1; i+=SPACE10_CHUNK_SIZE)

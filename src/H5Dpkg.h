@@ -119,6 +119,17 @@ typedef struct H5D_io_info_t {
 #endif /* H5S_DEBUG */
 } H5D_io_info_t;
 
+/* Structure holding information about a chunk's selection for mapping */
+typedef struct H5D_chunk_info_t {
+    hsize_t index;              /* "Index" of chunk in dataset */
+    size_t chunk_points;        /* Number of elements selected in chunk */
+    hsize_t coords[H5O_LAYOUT_NDIMS];   /* Coordinates of chunk in file dataset's dataspace */
+    H5S_t *fspace;              /* Dataspace describing chunk & selection in it */
+    unsigned fspace_shared;     /* Indicate that the file space for a chunk is shared and shouldn't be freed */
+    H5S_t *mspace;              /* Dataspace describing selection in memory corresponding to this chunk */
+    unsigned mspace_shared;     /* Indicate that the memory space for a chunk is shared and shouldn't be freed */
+} H5D_chunk_info_t;
+
 /* Cached information about a particular chunk */
 typedef struct {
     hbool_t     valid;                          /*whether cache info is valid*/
@@ -143,7 +154,9 @@ typedef struct H5D_rdcc_t {
     int		nused;	/* Number of chunk slots in use		*/
     H5D_chunk_cached_t last;    /* Cached copy of last chunk information */
     struct H5D_rdcc_ent_t **slot; /* Chunk slots, each points to a chunk*/
-    H5SL_t *sel_chunks;         /* Skip list containing information for each chunk selected */
+    H5SL_t *sel_chunks;     /* Skip list containing information for each chunk selected */
+    H5S_t  *single_space;    /* Dataspace for single element I/O on chunks */
+    H5D_chunk_info_t *single_chunk_info;  /* Pointer to single chunk's info */
 } H5D_rdcc_t;
 
 /* The raw data contiguous data cache */
@@ -200,16 +213,6 @@ typedef enum {
 } H5D_time_alloc_t;
 
 
-/* Structure holding information about a chunk's selection for mapping */
-typedef struct H5D_chunk_info_t {
-    hsize_t index;              /* "Index" of chunk in dataset */
-    size_t chunk_points;        /* Number of elements selected in chunk */
-    H5S_t *fspace;              /* Dataspace describing chunk & selection in it */
-    hsize_t coords[H5O_LAYOUT_NDIMS];   /* Coordinates of chunk in file dataset's dataspace */
-    H5S_t *mspace;              /* Dataspace describing selection in memory corresponding to this chunk */
-    unsigned mspace_shared;     /* Indicate that the memory space for a chunk is shared and shouldn't be freed */
-} H5D_chunk_info_t;
-
 /* Main structure holding the mapping between file chunks and memory */
 typedef struct H5D_chunk_map_t {
     H5O_layout_t *layout;       /* Dataset layout information*/
@@ -226,6 +229,9 @@ typedef struct H5D_chunk_map_t {
     H5S_sel_type msel_type;     /* Selection type in memory */
 
     H5SL_t *sel_chunks;         /* Skip list containing information for each chunk selected */
+    H5S_t  *single_space;       /* Dataspace for single chunk */
+    H5D_chunk_info_t *single_chunk_info;  /* Pointer to single chunk's info */
+    hbool_t use_single;         /* Whether I/O is on a single element */
     hsize_t last_index;         /* Index of last chunk operated on */
     H5D_chunk_info_t *last_chunk_info;  /* Pointer to last chunk's info */
     hsize_t chunks[H5O_LAYOUT_NDIMS];   /* Number of chunks in each dimension */

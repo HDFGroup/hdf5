@@ -3689,39 +3689,46 @@ H5D_istore_update_cache(H5D_t *dset, hid_t dxpl_id)
     H5D_rdcc_ent_t     *ent, *next;	/*cache entry  */
     H5D_rdcc_ent_t     *old_ent;	/* Old cache entry  */
     H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
-    H5D_dxpl_cache_t *dxpl_cache=&_dxpl_cache;   /* Data transfer property cache */
-    unsigned            rank;	/*current # of dimensions */
+    H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
+    unsigned            rank;	        /*current # of dimensions */
     hsize_t             curr_dims[H5O_LAYOUT_NDIMS];	/*current dataspace dimensions */
     hsize_t             chunks[H5O_LAYOUT_NDIMS];	        /*current number of chunks in each dimension */
     hsize_t             down_chunks[H5O_LAYOUT_NDIMS];   /* "down" size of number of elements in each dimension */
-    unsigned            u;	/*counters  */
-    herr_t      ret_value=SUCCEED;      /* Return value */
+    unsigned            u;	        /*counters  */
+    herr_t              ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5D_istore_update_cache, FAIL)
 
     /* Check args */
-    assert(dset && H5D_CHUNKED == dset->shared->layout.type);
-    assert(dset->shared->layout.u.chunk.ndims > 0 && dset->shared->layout.u.chunk.ndims <= H5O_LAYOUT_NDIMS);
+    HDassert(dset && H5D_CHUNKED == dset->shared->layout.type);
+    HDassert(dset->shared->layout.u.chunk.ndims > 0 && dset->shared->layout.u.chunk.ndims <= H5O_LAYOUT_NDIMS);
 
-    /* Go get the rank & dimensions */
+    /* Get the rank */
     rank = dset->shared->layout.u.chunk.ndims-1;
+    HDassert(rank > 0);
+
+    /* 1-D dataset's chunks can't have their index change */
+    if(rank == 1)
+        HGOTO_DONE(SUCCEED)
+
+    /* Go get the dimensions */
     if(H5S_get_simple_extent_dims(dset->shared->space, curr_dims, NULL) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions")
 
     /* Round up to the next integer # of chunks, to accomodate partial chunks */
     for(u = 0; u < rank; u++)
-        chunks[u] = ((curr_dims[u]+dset->shared->layout.u.chunk.dim[u])-1) / dset->shared->layout.u.chunk.dim[u];
+        chunks[u] = ((curr_dims[u] + dset->shared->layout.u.chunk.dim[u]) - 1) / dset->shared->layout.u.chunk.dim[u];
 
     /* Get the "down" sizes for each dimension */
-    if(H5V_array_down(rank,chunks,down_chunks) < 0)
+    if(H5V_array_down(rank, chunks, down_chunks) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "can't compute 'down' sizes")
 
     /* Fill the DXPL cache values for later use */
-    if (H5D_get_dxpl_cache(dxpl_id,&dxpl_cache) < 0)
+    if(H5D_get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
 
     /* Construct dataset I/O info */
-    H5D_BUILD_IO_INFO(&io_info,dset,dxpl_cache,dxpl_id,NULL);
+    H5D_BUILD_IO_INFO(&io_info, dset, dxpl_cache, dxpl_id, NULL);
 
     /* Recompute the index for each cached chunk that is in a dataset */
     for(ent = rdcc->head; ent; ent = next) {
@@ -3739,26 +3746,26 @@ H5D_istore_update_cache(H5D_t *dset, hid_t dxpl_id)
         old_idx=ent->idx;   /* Save for later */
         ent->idx=H5D_HASH(dset->shared,idx);
 
-        if(old_idx!=ent->idx) {
+        if(old_idx != ent->idx) {
             /* Check if there is already a chunk at this chunk's new location */
             old_ent = rdcc->slot[ent->idx];
-            if(old_ent!=NULL) {
-                assert(old_ent->locked==0);
+            if(old_ent != NULL) {
+                HDassert(old_ent->locked == 0);
 
                 /* Check if we are removing the entry we would walk to next */
-                if(old_ent==next)
-                    next=old_ent->next;
+                if(old_ent == next)
+                    next = old_ent->next;
 
                 /* Remove the old entry from the cache */
-                if (H5D_istore_preempt(&io_info, old_ent, TRUE )<0)
+                if(H5D_istore_preempt(&io_info, old_ent, TRUE) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush one or more raw data chunks")
             } /* end if */
 
             /* Insert this chunk into correct location in hash table */
-            rdcc->slot[ent->idx]=ent;
+            rdcc->slot[ent->idx] = ent;
 
             /* Null out previous location */
-            rdcc->slot[old_idx]=NULL;
+            rdcc->slot[old_idx] = NULL;
         } /* end if */
     } /* end for */
 

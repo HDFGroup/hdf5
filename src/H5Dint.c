@@ -98,6 +98,9 @@ H5FL_DEFINE_STATIC(H5D_shared_t);
 /* Declare the external PQ free list for the sieve buffer information */
 H5FL_BLK_EXTERN(sieve_buf);
 
+/* Declare the external free list to manage the H5D_chunk_info_t struct */
+H5FL_EXTERN(H5D_chunk_info_t);
+
 /* Define a static "default" dataset structure to use to initialize new datasets */
 static H5D_shared_t H5D_def_dset;
 
@@ -1515,6 +1518,18 @@ H5D_close(H5D_t *dataset)
                     HDassert(H5SL_count(dataset->shared->cache.chunk.sel_chunks) == 0);
                     H5SL_close(dataset->shared->cache.chunk.sel_chunks);
                     dataset->shared->cache.chunk.sel_chunks = NULL;
+                } /* end if */
+
+                /* Check for cached single chunk dataspace */
+                if(dataset->shared->cache.chunk.single_space) {
+                    (void)H5S_close(dataset->shared->cache.chunk.single_space);
+                    dataset->shared->cache.chunk.single_space = NULL;
+                } /* end if */
+
+                /* Check for cached single element chunk info */
+                if(dataset->shared->cache.chunk.single_chunk_info) {
+                    (void)H5FL_FREE(H5D_chunk_info_t, dataset->shared->cache.chunk.single_chunk_info);
+                    dataset->shared->cache.chunk.single_chunk_info = NULL;
                 } /* end if */
 
                 /* Flush and destroy chunks in the cache */
