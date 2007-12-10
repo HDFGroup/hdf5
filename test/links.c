@@ -5634,7 +5634,7 @@ visit_obj_cb(hid_t UNUSED group_id, const char *name, const H5O_info_t *oinfo,
     op_data->idx++;
 
     return(H5_ITER_CONT);
-} /* end visit_link_cb() */
+} /* end visit_obj_cb() */
 
 
 /*-------------------------------------------------------------------------
