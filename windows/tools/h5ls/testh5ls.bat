@@ -67,9 +67,8 @@ rem %1 -- actual output filename to use
 rem %2 and on -- argument for the h5ls tool
 :tooltest
     set expect=%CD%\..\testfiles\%1
-    set expect_parsed=%expect%.parsed
     set actual=%CD%\..\testfiles\%~n1.out
-    set actual_parsed=%actual%.parsed
+    set actual_err=%CD%\..\testfiles\%~n1.err
     
     rem We define %params% here because Windows `shift` command doesn't affect
     rem the %* variable.  --SJW 8/23/07
@@ -96,19 +95,10 @@ rem %2 and on -- argument for the h5ls tool
         pushd %CD%\..\testfiles
         %h5ls_bin% %params%
         popd
-    ) >%actual% 2>&1
+    ) >%actual% 2>%actual_err%
     
     set exitcode=%errorlevel%
-        
-    rem Windows doesn't have "sed" command, and parsing the files line-by-line
-    rem to emulate Unix takes a very long time.  Instead, we simply remove lines
-    rem with "Modified".  Do this for actual and expected otput.  If there is a 
-    rem better alternative in the future, we should use it instead. --SJW 8/22/07
-    for %%a in (expect actual) do (
-        findstr /v /c:"    Modified:" !%%a! > tmp.txt
-        move /y tmp.txt !%%a_parsed! > nul
-    )
-
+    type %actual_err% >> %actual%
     if "%exitcode%" neq "%retvalexpect%" (
         call :testing *FAILED* %params%
         set /a nerrors=!nerrors!+1
@@ -134,20 +124,20 @@ rem %2 and on -- argument for the h5ls tool
     rem     call :testing CREATED %params%
     rem     copy %actual% %expect% > nul
     ) else (
-        fc /w %expect_parsed% %actual_parsed% | find "FC: no diff" > nul
+        fc /w %expect% %actual% | find "FC: no diff" > nul
         if !errorlevel! equ 0 (
             call :testing PASSED %params%
         ) else (
             call :testing *FAILED* %params%
             echo.    Expected result differs from actual result
             set nerrors=!nerrors!+1
-            if "yes"=="%verbose%" fc %expect_parsed% %actual_parsed%
+            if "yes"=="%verbose%" fc %expect% %actual%
         )
     )
     
     rem Clean up output file
     if not defined hdf5_nocleanup (
-        del /f %actual% %actual_parsed% %expected_parsed%
+        del /f %actual% %actual_err%
     )
     
     exit /b
