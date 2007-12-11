@@ -23,7 +23,6 @@ $!
 $ hdf5top      = F$DIRECTORY()
 $ len          = F$LENGTH(hdf5top)
 $ hdf5top_dir  = F$EXTRACT(0, len-4, hdf5top)
-$ hdf5top_dir1 = F$EXTRACT(0, len-5, hdf5top)
 $!
 $ hdf5src               = hdf5top_dir + "SRC]"
 $ hdf5examples          = hdf5top_dir + "EXAMPLES]"
@@ -48,12 +47,11 @@ $ hdf5install_examples_cxx       = hdf5top_dir + "HDF5.EXAMPLES.CXX]"
 $ hdf5install_lib        = hdf5top_dir + "HDF5.LIB]"
 $ hdf5install_bin        = hdf5top_dir + "HDF5.BIN]"
 $
-$ install_dir = hdf5top_dir1 + "]HDF5.DIR"
-$ if F$SEARCH(install_dir) .NES. ""
-$    then write sys$output "''install_dir' directory exists, will not create"
+$ if F$SEARCH(hdf5install) .NES. ""
+$    then write sys$output "''hdf5install' directory exists, will not create"
 $ else
-$    write sys$output "Creating ''instal_dir'..."
-$    create/dir 'install_dir'
+$    write sys$output "Creating ''hdf5install'..."
+$    create/dir 'hdf5install'
 $ endif
 $
 $ if F$SEARCH(hdf5install_include) .NES. ""
@@ -115,7 +113,6 @@ $ write sys$output "Installing C++ library and header files"
 $ set def 'hdf5cxx_src'
 $ copy HDF5_CPLUS.olb 'hdf5install_lib'
 $ copy *.h      'hdf5install_include'
-$ del 'hdf5install_include'*private*.h;*
 $!
 $ write sys$output "Installing utilties"
 $ set def 'hdf5tools_h5copy'
@@ -148,8 +145,8 @@ $ set def 'hdf5fortran_examples'
 $ copy *.f90 'hdf5install_examples_f90'
 $!
 $ set def 'hdf5cxx_examples'
-$ rename *.cpp *.cxx
-$ copy *.cxx 'hdf5install_examples_cxx'
+$ copy *.cpp 'hdf5install_examples_cxx'
+$ rename 'hdf5install_examples_cxx'*.cpp 'hdf5install_examples_cxx'*.cxx
 $
 $ 
 $!
