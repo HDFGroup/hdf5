@@ -216,7 +216,7 @@ static void soft_link_example(void)
 {
     hid_t file_id;
     hid_t group_id;
-    /* Define the link class that we'll use to register "user-defined hard
+    /* Define the link class that we'll use to register "user-defined soft
      * links" using the callbacks we defined above.
      * A link class can have NULL for any callback except its traverse
      * callback.
