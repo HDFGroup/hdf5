@@ -17,16 +17,13 @@ $!
 $! This file copies all make files from the VMS directory to the 
 $! source directories and builds libraries, tests, and utilties
 $!
-$ copy [.c__.examples]*.com     [-.c__.examples]
 $ copy [.c__.src]make.com       [-.c__.src]
 $ copy [.c__.test]*.com         [-.c__.test]
-$ copy [.fortran.examples]*.com [-.fortran.examples]
 $ copy [.fortran.src]make.com   [-.fortran.src]
 $ copy [.fortran.test]*.com     [-.fortran.test]
 $ copy [.src]make.com           [-.src]
 $ copy [.src]h5pubconf.h        [-.src]
 $ copy [.test]*.com             [-.test]
-$ copy [.examples]*.com         [-.examples]
 $ copy [.tools.h5copy]*.com     [-.tools.h5copy]
 $ copy [.tools.h5dump]*.com     [-.tools.h5dump]
 $ copy [.tools.h5ls]*.com       [-.tools.h5ls]
@@ -128,19 +125,6 @@ $ @make.com
 $!
 $ write sys$output "Building C++ library tests"
 $ set def 'hdf5cxx_test'
-$ rename *.cpp *.cxx
-$ @make.com
-$!
-$ write sys$output "Building C examples"
-$ set def 'hdf5examples'
-$ @make.com
-$!
-$ write sys$output "Building Fortran examples"
-$ set def 'hdf5fortran_examples'
-$ @make.com
-$!
-$ write sys$output "Building C++ examples"
-$ set def 'hdf5cxx_examples'
 $ rename *.cpp *.cxx
 $ @make.com
 $!

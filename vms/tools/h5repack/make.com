@@ -44,7 +44,7 @@ $ type sys$input
 $ link/exe=h5repacktst.exe -
            h5repacktst,  -
            h5repack, h5repack_copy, h5repack_refs, h5repack_filters, -
-           h5repack_list, h5repack_opttable, h5repack_parse, -
+           h5repack_opttable, h5repack_parse, -
            h5repack_verify, -
            [-.lib]libh5tools.olb/lib,[-.-.test]libh5test.olb/lib, -
            [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
