@@ -1623,6 +1623,7 @@
 ./vms/test/check.com
 ./vms/test/make.com
 
+./vms/install.com
 ./vms/make.com
 ./vms/tools/h5copy/make.com
 ./vms/tools/h5copy/check_h5copy.com
