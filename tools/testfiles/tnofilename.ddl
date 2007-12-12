@@ -15,7 +15,7 @@ usage: h5dump [OPTIONS] file
      -a P, --attribute=P  Print the specified attribute
      -d P, --dataset=P    Print the specified dataset
      -y, --noindex        Do not print array indices with the data
-     -p,   --properties   Print dataset filters, storage layout and fill value
+     -p, --properties     Print dataset filters, storage layout and fill value
      -f D, --filedriver=D Specify which driver to open the file with
      -g P, --group=P      Print the specified group and all members
      -l P, --soft-link=P  Print the value(s) of the specified soft link

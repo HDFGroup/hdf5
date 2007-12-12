@@ -620,7 +620,7 @@ usage(const char *prog)
     fprintf(stdout, "     -a P, --attribute=P  Print the specified attribute\n");
     fprintf(stdout, "     -d P, --dataset=P    Print the specified dataset\n");
     fprintf(stdout, "     -y, --noindex        Do not print array indices with the data\n");
-    fprintf(stdout, "     -p,   --properties   Print dataset filters, storage layout and fill value\n");
+    fprintf(stdout, "     -p, --properties     Print dataset filters, storage layout and fill value\n");
     fprintf(stdout, "     -f D, --filedriver=D Specify which driver to open the file with\n");
     fprintf(stdout, "     -g P, --group=P      Print the specified group and all members\n");
     fprintf(stdout, "     -l P, --soft-link=P  Print the value(s) of the specified soft link\n");
