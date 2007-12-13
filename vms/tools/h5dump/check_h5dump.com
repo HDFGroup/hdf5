@@ -30,6 +30,7 @@ $ ! Define output for diff command that compares expected and actual
 $ ! outputs of h5dump
 $ !
 $ create h5dump.log
+$ create h5dump_output.txt
 $ !
 $ ! h5dump tests
 $ !
@@ -71,7 +72,7 @@ $ CALL TOOLTEST tcomp-1.ddl "tcompound.h5"
 $ ! test for named data types
 $ CALL TOOLTEST tcomp-2.ddl "-t /type1 --datatype /type2 --datatype=/group1/type3 tcompound.h5"
 $ ! Test for unamed type 
-$ CALL TOOLTEST tcomp-3.ddl "-t /#6632:0 -g /group2 tcompound.h5"
+$ CALL TOOLTEST tcomp-3.ddl "-t /#6632 -g /group2 tcompound.h5"
 $ ! Test complicated compound datatype
 $ CALL TOOLTEST tcomp-4.ddl "tcompound_complex.h5"
 $
@@ -136,7 +137,7 @@ $ ! Test Subsetting
 $ CALL TOOLTEST tall-4s.ddl "--dataset=/g1/g1.1/dset1.1.1 --start=1,1 --stride=2,3 --count=3,2 --block=1,1 tall.h5"
 $ CALL TOOLTEST tall-5s.ddl "-d """/"g"1/"g"1.1/"dset"1.1.2[0;2;10;]""" tall.h5"
 $ CALL TOOLTEST tdset-3s.ddl "-d """/"dset"1[1,1;;;]""" tdset.h5"
-$ CALL TOOLTEST tdset2-1s.ddl "-d """/"dset"1[;3,2;4,4;1,4]""" tdset2.h5"
+$ CALL TOOLTEST tdset-3s.ddl "-d """/"dset"1[;3,2;4,4;1,4]""" tdset2.h5"
 $
 $ ! Test printing characters in ASCII instead of decimal
 $ CALL TOOLTEST tchar1.ddl "-r tchar.h5"
@@ -241,7 +242,7 @@ $ ! Test for displaying dataset and attribute of null space
 $ CALL TOOLTEST tnullspace.ddl "tnullspace.h5"
 $
 $ ! Test for displaying objects with very long names
-$ CALL TOOLTEST tlonglinks.ddl "tlonglinks.h5"
+$ !CALL TOOLTEST tlonglinks.ddl "tlonglinks.h5"
 $
 $ ! Test for long double (some systems do not have long double)
 $ ! CALL TOOLTEST tldouble.ddl "tldouble.h5"
@@ -250,7 +251,25 @@ $ ! Test for vms
 $ CALL TOOLTEST tvms.ddl "tvms.h5"
 $
 $ !test for binary output
-$ CALL TOOLTEST tbin.ddl "-d integer -b out.bin test1.h5"
+$ CALL TOOLTEST1 tbin1.ddl "-d integer -o out1.bin -b """LE""" tbinary.h5"
+$ CALL TOOLTEST1 tbin2.ddl "-d float   -o out2.bin -b """BE""" tbinary.h5"
+$ CALL TOOLTEST1 tbin4.ddl "-d double   -o out4.bin -b """FILE""" tbinary.h5"
+$
+$ ! Test for dataset region references
+$ CALL TOOLTEST tdatareg.ddl "tdatareg.h5"
+$
+$ ! tests for group creation order "1" tracked, "2" name, root tracked
+$ CALL TOOLTEST tordergr1.ddl "--group=1 --sort_by=creation_order --sort_order=ascending tordergr.h5"
+$ CALL TOOLTEST tordergr2.ddl "--group=1 --sort_by=creation_order --sort_order=descending tordergr.h5"
+$ CALL TOOLTEST tordergr3.ddl "-g 2 -q name -z ascending tordergr.h5"
+$ CALL TOOLTEST tordergr4.ddl "-g 2 -q name -z descending tordergr.h5"
+$ CALL TOOLTEST tordergr5.ddl "-q creation_order tordergr.h5"
+$
+$ ! Tests for attribute order
+$ CALL TOOLTEST torderattr1.ddl "-"""H""" --sort_by=name --sort_order=ascending torderattr.h5"
+$ CALL TOOLTEST torderattr2.ddl "-"""H""" --sort_by=name --sort_order=descending torderattr.h5"
+$ CALL TOOLTEST torderattr3.ddl "-"""H""" --sort_by=creation_order --sort_order=ascending torderattr.h5"
+$ CALL TOOLTEST torderattr4.ddl "-"""H""" --sort_by=creation_order --sort_order=descending torderattr.h5"
 $ !
 $TOOLTEST: SUBROUTINE
 $
@@ -306,11 +325,72 @@ $ !
 $ ! Append the result to the log file 
 $ !
 $ append h5dump_temp.dif h5dump.log
+$ append 'actual'        h5dump_output.txt
 $ !
 $ ! Delete temporary files
 $ !
-$! del *.out;*
-$! del *.dif;*
+$ del *.out;*
+$ del *.dif;*
+$ !
+$ENDSUBROUTINE
+$
+$TOOLTEST1: SUBROUTINE
+$
+$ len =  F$LENGTH(P1)
+$ base = F$EXTRACT(0,len-3,P1)
+$ actual = base + "out"
+$ actual_err = base + "err"
+$
+$ begin = "Testing h5dump "
+$ !
+$ ! Run the test and save output in the 'actual' file
+$ !
+$ define/nolog sys$output 'actual'
+$ define/nolog sys$error  'actual_err'
+$ ON ERROR THEN CONTINUE
+$ h5dump 'P2
+$ deassign sys$output
+$ deassign sys$error
+$ if F$SEARCH(actual_err) .NES. ""
+$ then
+$ set message/notext/nofacility/noidentification/noseverity
+$    append 'actual_err' 'actual'
+$ set message/ntext/facility/identification/severity
+$ endif
+$ !
+$ ! Compare the results
+$ !
+$ diff/output=h5dump_temp/ignore=(spacing,trailing_spaces,blank_lines) 'actual' 'P1'
+$ open/read temp_out h5dump_temp.dif
+$ read temp_out record1
+$ close temp_out
+$ !
+$ ! Extract error code and format output line
+$ !
+$ len = F$LENGTH(record1)
+$ err_code = F$EXTRACT(len-1,1,record1)
+$ if err_code .eqs. "0" 
+$  then
+$    result = "PASSED"
+$    line = F$FAO("!15AS !50AS !70AS", begin, P2, result) 
+$  else
+$    result = "*FAILED*"
+$    line = F$FAO("!15AS !49AS !69AS", begin, P2, result) 
+$ endif
+$ !
+$ ! Print test result
+$ ! 
+$  write sys$output line
+$ ! 
+$ ! Append the result to the log file 
+$ !
+$ append h5dump_temp.dif h5dump.log
+$ append 'actual'        h5dump_output.txt
+$ !
+$ ! Delete temporary files
+$ !
+$ del *.out;*
+$ del *.dif;*
 $ !
 $ENDSUBROUTINE
 
