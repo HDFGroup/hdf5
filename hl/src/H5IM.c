@@ -49,7 +49,6 @@ herr_t H5IMmake_image_8bit( hid_t loc_id,
   /* Initialize the image dimensions */
  dims[0] = height;
  dims[1] = width;
- dims[2] = 1;
 
  /* Make the dataset */
  if ( H5LTmake_dataset( loc_id, dset_name, IMAGE8_RANK, dims, H5T_NATIVE_UCHAR, buffer ) < 0)
