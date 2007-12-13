@@ -120,12 +120,12 @@ $ @make.com
 $!
 $ write sys$output "Building C++ library"
 $ set def 'hdf5cxx_src'
-$ rename *.cpp *.cxx
+$ copy *.cpp *.cxx
 $ @make.com
 $!
 $ write sys$output "Building C++ library tests"
 $ set def 'hdf5cxx_test'
-$ rename *.cpp *.cxx
+$ copy *.cpp *.cxx
 $ @make.com
 $!
 $ set def 'hdf5top'
