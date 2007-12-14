@@ -19,6 +19,8 @@
 
 #include "hdf5.h"
 #include "h5trav.h"
+#include "H5Zprivate.h"	/* H5Z_COMMON_CD_VALUES */	
+
 
 
 #define H5FOPENERROR "unable to open file"
@@ -51,12 +53,12 @@ typedef struct {
  H5Z_FILTER_SCALEOFFSET 6 , scaleoffset compression
 */
 
-#define CDVALUES 4 /* SZIP returns 4 values */
+
 
 typedef struct {
- H5Z_filter_t filtn;               /* filter identification number */
- int          cd_values[CDVALUES]; /* filter client data values */
- size_t       cd_nelmts;           /* filter client number of values */
+ H5Z_filter_t filtn;                           /* filter identification number */
+ int          cd_values[H5Z_COMMON_CD_VALUES]; /* filter client data values */
+ size_t       cd_nelmts;                       /* filter client number of values */
 } filter_info_t;
 
 /* chunk lengths along each dimension and rank */
