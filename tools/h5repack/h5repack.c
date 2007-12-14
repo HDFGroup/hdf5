@@ -102,7 +102,7 @@ int h5repack_init (pack_opt_t *options,
     {
         options->filter_g[n].filtn  = -1;
         options->filter_g[n].cd_nelmts  = -1;
-        for ( k = 0; k < H5Z_COMMON_CD_VALUES; k++)
+        for ( k = 0; k < CD_VALUES; k++)
             options->filter_g[n].cd_values[k] = -1;
     }
      

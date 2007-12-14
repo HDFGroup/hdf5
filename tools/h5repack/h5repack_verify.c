@@ -20,7 +20,8 @@
 extern char  *progname;
 static int has_filter(hid_t dcpl_id, H5Z_filter_t filtnin);
 static int has_layout(hid_t dcpl_id,pack_info_t *obj);
-static int has_filters(hid_t dcpl_id, pack_opt_t *options);
+static int has_filters_glb(hid_t dcpl_id, pack_opt_t *options);
+static int has_filters_obj(hid_t dcpl_id, pack_info_t *obj);
 static int filtcmp( filter_info_t f1, filter_info_t f2);
 
 
@@ -48,7 +49,6 @@ int h5repack_verify(const char *fname,
     hid_t        dcpl_id = -1;  /* dataset creation property list ID */
     hid_t        space_id = -1; /* space ID */
     unsigned int i;
-    int          j;
     trav_table_t *travt = NULL;
     int          ok = 1;
     
@@ -76,13 +76,9 @@ int h5repack_verify(const char *fname,
         * filter check
         *-------------------------------------------------------------------------
         */
-        for(j = 0; j < obj->nfilters; j++) 
-        {
-            if(has_filter(dcpl_id, obj->filter[j].filtn) == 0)
-                ok = 0;
 
-                        
-        }
+        if(has_filters_obj(dcpl_id, obj) == 0)
+                ok = 0;
         
        /*-------------------------------------------------------------------------
         * layout check
@@ -144,7 +140,7 @@ int h5repack_verify(const char *fname,
                 */
                 if(options->all_filter == 1)
                 {
-                    if (has_filters(dcpl_id, options) == 0)
+                    if (has_filters_glb(dcpl_id, options) == 0)
                         ok = 0;
                 }
                 
@@ -467,9 +463,9 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function: has_filters
+ * Function: has_filters_glb
  *
- * Purpose: verify if all requested filters are present in the 
+ * Purpose: verify if all requested filters for global filters are present in the 
  *  property list DCPL_ID
  *
  * Return: 1 has, 0 does not, -1 error
@@ -481,7 +477,7 @@ error:
  *-------------------------------------------------------------------------
  */
 
-static int has_filters(hid_t dcpl_id, pack_opt_t *options)
+static int has_filters_glb(hid_t dcpl_id, pack_opt_t *options)
 {
     unsigned      nfilters_dcpl;  /* number of filters in DCPL*/
     unsigned      nfilters_opt;   /* number of filters in OPTIONS*/
@@ -530,9 +526,9 @@ static int has_filters(hid_t dcpl_id, pack_opt_t *options)
      * build a list with options filters
      *-------------------------------------------------------------------------
      */
-  
-    nfilters_opt = options->n_filter_g;
 
+    nfilters_opt = options->n_filter_g;
+   
     for( i = 0; i < nfilters_opt; i++) 
     {
                
@@ -569,6 +565,114 @@ static int has_filters(hid_t dcpl_id, pack_opt_t *options)
  
     return 1;
 }
+
+
+
+/*-------------------------------------------------------------------------
+ * Function: has_filters_obj
+ *
+ * Purpose: verify if all requested filters for OBJ are present in the 
+ *  property list DCPL_ID
+ *
+ * Return: 1 has, 0 does not, -1 error
+ *
+ * Programmer: Pedro Vicente, pvn@hdfgroup.org
+ *
+ * Date: December 3, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static int has_filters_obj(hid_t dcpl_id, pack_info_t *obj)
+{
+    unsigned      nfilters_dcpl;  /* number of filters in DCPL*/
+    unsigned      nfilters_opt;   /* number of filters in OPTIONS*/
+    unsigned      filt_flags;     /* filter flags */
+    H5Z_filter_t  filtn;          /* filter identification number */
+    unsigned      cd_values[20];  /* filter client data values */
+    size_t        cd_nelmts;      /* filter client number of values */
+    char          f_name[256];    /* filter name */
+    int           have = 0;       /* flag, filter is present */
+    unsigned      i, j;           /* index */
+    filter_info_t filter_dcpl[H5_REPACK_MAX_NFILTERS];  /* filter array in the DCPL*/
+    filter_info_t filter_opt[H5_REPACK_MAX_NFILTERS];   /* filter array in options */
+  
+    /* get information about filters */
+    if((nfilters_dcpl = H5Pget_nfilters(dcpl_id)) < 0)
+        return -1;
+    
+    /* if we do not have filters and the requested filter is NONE, return 1 */
+    if(!nfilters_dcpl && 
+        obj->nfilters == 1 && 
+        obj->filter[0].filtn == H5Z_FILTER_NONE )
+        return 1;
+
+    /*-------------------------------------------------------------------------
+     * build a list with DCPL filters
+     *-------------------------------------------------------------------------
+     */
+
+    for( i = 0; i < nfilters_dcpl; i++) 
+    {
+        cd_nelmts = NELMTS(cd_values);
+        filtn = H5Pget_filter2(dcpl_id, i, &filt_flags, &cd_nelmts,
+            cd_values, sizeof(f_name), f_name, NULL);
+        
+        filter_dcpl[i].filtn = filtn;
+        filter_dcpl[i].cd_nelmts = cd_nelmts;
+        for( j = 0; j < cd_nelmts; j++) 
+        {
+            filter_dcpl[i].cd_values[j] = cd_values[j];
+
+        }
+
+    }
+
+    /*-------------------------------------------------------------------------
+     * build a list with OBJ filters
+     *-------------------------------------------------------------------------
+     */
+
+    nfilters_opt = obj->nfilters;
+  
+    for( i = 0; i < obj->nfilters; i++) 
+    {
+        
+        filter_opt[i].filtn = obj->filter[i].filtn;
+        filter_opt[i].cd_nelmts = obj->filter[i].cd_nelmts;
+        for( j = 0; j < obj->filter[i].cd_nelmts; j++) 
+        {
+            filter_opt[i].cd_values[j] = obj->filter[i].cd_values[j];
+            
+        }
+        
+    }
+    
+
+    /*-------------------------------------------------------------------------
+     * match the 2 lists
+     *-------------------------------------------------------------------------
+     */
+
+
+    if (nfilters_dcpl != nfilters_opt)
+        return 0;
+
+    for( i = 0; i < nfilters_opt; i++) 
+    {
+
+        /* criteria is filter compare, returns same as strcmp */
+        if ( filtcmp( filter_dcpl[i], filter_opt[i] ) != 0 )
+            return 0;
+
+
+    }
+
+
+ 
+    return 1;
+}
+
 
 
 
