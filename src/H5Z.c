@@ -46,8 +46,9 @@ typedef struct H5Z_stats_t {
 
 /* Enumerated type for dataset creation prelude callbacks */
 typedef enum {
-    H5Z_PRELUDE_CAN_APPLY,      /* Call "can apply" callback */
-    H5Z_PRELUDE_SET_LOCAL       /* Call "set local" callback */
+    H5Z_PRELUDE_CAN_APPLY,      /* Call "can apply" callback   */
+    H5Z_PRELUDE_SET_LOCAL,      /* Call "set local" callback   */
+    H5Z_PRELUDE_RESET_LOCAL     /* Call "reset local" callback */
 } H5Z_prelude_type_t;
 
 /* Local variables */
@@ -110,10 +111,14 @@ H5Z_init_interface (void)
     if (H5Z_register (H5Z_SCALEOFFSET)<0)
         HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register scaleoffset filter")
 #endif /* H5_HAVE_FILTER_SCALEOFFSET */
+#ifdef H5_HAVE_FILTER_DTYPE_MODIFY
+    if (H5Z_register (H5Z_DTYPE_MODIFY)<0)
+        HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register dtype modify filter")
+#endif /* H5_HAVE_FILTER_DTYPE_MODIFY */
 
-#if (defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_FLETCHER32 | defined H5_HAVE_FILTER_SHUFFLE | defined H5_HAVE_FILTER_SZIP | defined H5_HAVE_FILTER_NBIT | defined H5_HAVE_FILTER_SCALEOFFSET)
+#if (defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_FLETCHER32 | defined H5_HAVE_FILTER_SHUFFLE | defined H5_HAVE_FILTER_SZIP | defined H5_HAVE_FILTER_NBIT | defined H5_HAVE_FILTER_SCALEOFFSET | defined H5_HAVE_FILTER_DTYPE_MODIFY)
 done:
-#endif /* (defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_FLETCHER32 | defined H5_HAVE_FILTER_SHUFFLE | defined H5_HAVE_FILTER_SZIP | defined H5_HAVE_FILTER_NBIT | defined H5_HAVE_FILTER_SCALEOFFSET) */
+#endif /* (defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_FLETCHER32 | defined H5_HAVE_FILTER_SHUFFLE | defined H5_HAVE_FILTER_SZIP | defined H5_HAVE_FILTER_NBIT | defined H5_HAVE_FILTER_SCALEOFFSET | defined H5_HAVE_FILTER_DTYPE_MODIFY) */
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -466,7 +471,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5Z_prelude_callback(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type_t prelude_type)
+H5Z_prelude_callback(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type_t prelude_type, 
+    hid_t file_id)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
@@ -547,7 +553,7 @@ H5Z_prelude_callback(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type_t prelude_ty
                                 /* Check if there is a "can apply" callback */
                                 if(fclass->can_apply) {
                                     /* Make callback to filter's "can apply" function */
-                                    herr_t status=(fclass->can_apply)(dcpl_id, type_id, space_id);
+                                    herr_t status=(fclass->can_apply)(dcpl_id, type_id, space_id, file_id);
 
                                     /* Check return value */
                                     if(status<=0) {
@@ -571,7 +577,22 @@ H5Z_prelude_callback(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type_t prelude_ty
                                 /* Check if there is a "set local" callback */
                                 if(fclass->set_local) {
                                     /* Make callback to filter's "set local" function */
-                                    if((fclass->set_local)(dcpl_id, type_id, space_id)<0) {
+                                    if((fclass->set_local)(dcpl_id, type_id, space_id, file_id)<0) {
+                                        /* We're leaving, so close dataspace */
+                                        if(H5I_dec_ref(space_id)<0)
+                                            HGOTO_ERROR (H5E_PLINE, H5E_CANTRELEASE, FAIL, "unable to close dataspace")
+
+                                        /* Indicate error during filter callback */
+                                        HGOTO_ERROR(H5E_PLINE, H5E_SETLOCAL, FAIL, "error during user callback")
+                                    } /* end if */
+                                } /* end if */
+                                break;
+
+                            case H5Z_PRELUDE_RESET_LOCAL:
+                                /* Check if there is a "reset local" callback */
+                                if(fclass->reset_local) {
+                                    /* Make callback to filter's "set local" function */
+                                    if((fclass->reset_local)(dcpl_id, type_id, space_id, file_id)<0) {
                                         /* We're leaving, so close dataspace */
                                         if(H5I_dec_ref(space_id)<0)
                                             HGOTO_ERROR (H5E_PLINE, H5E_CANTRELEASE, FAIL, "unable to close dataspace")
@@ -622,7 +643,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Z_can_apply (hid_t dcpl_id, hid_t type_id)
+H5Z_can_apply (hid_t dcpl_id, hid_t type_id, hid_t file_id)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
@@ -632,7 +653,7 @@ H5Z_can_apply (hid_t dcpl_id, hid_t type_id)
     assert (H5I_DATATYPE==H5I_get_type(type_id));
 
     /* Make "can apply" callbacks for filters in pipeline */
-    if(H5Z_prelude_callback(dcpl_id, type_id, H5Z_PRELUDE_CAN_APPLY)<0)
+    if(H5Z_prelude_callback(dcpl_id, type_id, H5Z_PRELUDE_CAN_APPLY, file_id)<0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "unable to apply filter")
 
 done:
@@ -662,7 +683,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Z_set_local (hid_t dcpl_id, hid_t type_id)
+H5Z_set_local (hid_t dcpl_id, hid_t type_id, hid_t file_id)
 {
     herr_t ret_value=SUCCEED;   /* Return value */
 
@@ -672,12 +693,52 @@ H5Z_set_local (hid_t dcpl_id, hid_t type_id)
     assert (H5I_DATATYPE==H5I_get_type(type_id));
 
     /* Make "set local" callbacks for filters in pipeline */
-    if(H5Z_prelude_callback(dcpl_id, type_id, H5Z_PRELUDE_SET_LOCAL)<0)
+    if(H5Z_prelude_callback(dcpl_id, type_id, H5Z_PRELUDE_SET_LOCAL, file_id)<0)
         HGOTO_ERROR(H5E_PLINE, H5E_SETLOCAL, FAIL, "local filter parameters not set")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z_set_local() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Z_reset_local
+ *
+ * Purpose:	Makes callbacks to modify dataset creation list property
+ *              settings for filters on an existing dataset, based on the
+ *              datatype and dataspace of that dataset (chunk) and the file.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *              16 Sept 2007
+ *
+ * Notes:
+ *              The chunk dimensions are used to create a dataspace, instead
+ *              of passing in the dataset's dataspace, since the chunk
+ *              dimensions are what the I/O filter will actually see
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Z_reset_local (hid_t dcpl_id, hid_t type_id, hid_t file_id)
+{
+    herr_t ret_value=SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI(H5Z_reset_local,FAIL)
+
+    assert (H5I_GENPROP_LST==H5I_get_type(dcpl_id));
+    assert (H5I_DATATYPE==H5I_get_type(type_id));
+
+    /* Make "reset local" callbacks for filters in pipeline */
+    if(H5Z_prelude_callback(dcpl_id, type_id, H5Z_PRELUDE_RESET_LOCAL, file_id)<0)
+        HGOTO_ERROR(H5E_PLINE, H5E_SETLOCAL, FAIL, "local filter parameters not set")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Z_reset_local() */
 
 
 /*-------------------------------------------------------------------------

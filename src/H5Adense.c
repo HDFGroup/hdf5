@@ -803,7 +803,7 @@ H5A_dense_copy_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
      *  HDF5 routine, it could attempt to re-protect that direct block for the
      *  heap, causing the HDF5 routine called to fail)
      */
-    if(NULL == (udata->attr = (H5A_t *)H5O_msg_decode(udata->f, udata->dxpl_id, H5O_ATTR_ID, (const unsigned char *)obj)))
+    if(NULL == (udata->attr = (H5A_t *)H5O_msg_decode(udata->f, udata->dxpl_id, H5O_ATTR_ID, (const unsigned char *)obj, H5O_MSG_FLAG_WAS_UNKNOWN)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, FAIL, "can't decode attribute")
 
     /* Set the creation order index for the attribute */

@@ -27,6 +27,7 @@
 #include "H5private.h"		/*generic functions			  */
 #include "H5Eprivate.h"		/*error handling			  */
 #include "H5Iprivate.h"		/*ID functions		   		  */
+#include "H5Dprivate.h"		/*dataset       			  */
 #include "H5MMprivate.h"	/*memory management			  */
 #include "H5Tpkg.h"		/*data-type functions			  */
 
@@ -614,4 +615,3 @@ H5T_is_packed(const H5T_t *dt)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_is_packed() */
-

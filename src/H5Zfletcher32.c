@@ -42,6 +42,7 @@ const H5Z_class_t H5Z_FLETCHER32[1] = {{
     "fletcher32",		/* Filter name for debugging	*/
     NULL,                       /* The "can apply" callback     */
     NULL,                       /* The "set local" callback     */
+    NULL,                       /* The "reset local" callback   */
     H5Z_filter_fletcher32,	/* The actual filter function	*/
 }};
 

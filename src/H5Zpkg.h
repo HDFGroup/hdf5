@@ -22,7 +22,9 @@
 
 /* Include private header file */
 #include "H5Zprivate.h"          /* Filter functions                */
-
+#include "H5Oprivate.h"          /* Object headers                  */
+#include "H5Iprivate.h"          /* IDs                             */
+#include "H5Sprivate.h"          /* Space                           */
 
 /* The initial version of the format */
 #define H5O_PLINE_VERSION_1	1
@@ -79,6 +81,13 @@ H5_DLLVAR H5Z_class_t H5Z_NBIT[1];
  */
 H5_DLLVAR H5Z_class_t H5Z_SCALEOFFSET[1];
 #endif /* H5_HAVE_FILTER_SCALEOFFSET */
+
+#ifdef H5_HAVE_FILTER_DTYPE_MODIFY
+/*
+ * datatype modification filter
+ */
+H5_DLLVAR H5Z_class_t H5Z_DTYPE_MODIFY[1];
+#endif /* H5_HAVE_FILTER_DTYPE_MODIFY */
 
 /* Package-local function prototypes */
 H5_DLL void H5Z_update_class_vers(H5Z_class_t * old_vers, H5Z_class_t * curr_vers);

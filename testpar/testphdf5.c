@@ -138,8 +138,10 @@ parse_options(int argc, char **argv)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     /* setup default chunk-size. Make sure sizes are > 0 */
-    chunkdim0 = (dim0+9)/10;
-    chunkdim1 = (dim1+9)/10;
+    chunkdim0 = dim0/3;
+    chunkdim1 = dim1/3;
+    /*chunkdim0 = (dim0+9)/10;
+    chunkdim1 = (dim1+9)/10;*/
 
     while (--argc){
 	if (**(++argv) != '-'){
@@ -188,8 +190,10 @@ parse_options(int argc, char **argv)
 			    argc--;
 			    dim1 = atoi(*(++argv));
 			    /* set default chunkdim sizes too */
-			    chunkdim0 = (dim0+9)/10;
-			    chunkdim1 = (dim1+9)/10;
+			    chunkdim0 = dim0/3;
+			    chunkdim1 = dim1/3;
+			    /*chunkdim0 = (dim0+9)/10;
+			    chunkdim1 = (dim1+9)/10;*/
 			    break;
 		case 'c':   /* chunk dimensions */
 			    if (--argc < 2){

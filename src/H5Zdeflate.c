@@ -45,6 +45,7 @@ const H5Z_class_t H5Z_DEFLATE[1] = {{
     "deflate",			/* Filter name for debugging	*/
     NULL,                       /* The "can apply" callback     */
     NULL,                       /* The "set local" callback     */
+    NULL,                       /* The "reset local" callback   */
     H5Z_filter_deflate,         /* The actual filter function	*/
 }};
 

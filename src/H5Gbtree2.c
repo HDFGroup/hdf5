@@ -164,7 +164,7 @@ H5G_dense_fh_name_cmp(const void *obj, size_t UNUSED obj_len, void *_udata)
     FUNC_ENTER_NOAPI_NOINIT(H5G_dense_fh_name_cmp)
 
     /* Decode link information */
-    if(NULL == (lnk = H5O_msg_decode(udata->f, udata->dxpl_id, H5O_LINK_ID, obj)))
+    if(NULL == (lnk = H5O_msg_decode(udata->f, udata->dxpl_id, H5O_LINK_ID, obj, H5O_MSG_FLAG_WAS_UNKNOWN)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link")
 
     /* Compare the string values */

@@ -1398,7 +1398,7 @@ H5SM_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, H5O_shared_t *sh_mesg)
      * master table needs to be unprotected when we do this.
      */
     if(mesg_buf) {
-        if(NULL == (native_mesg = H5O_msg_decode(f, dxpl_id, type_id, (const unsigned char *)mesg_buf)))
+        if(NULL == (native_mesg = H5O_msg_decode(f, dxpl_id, type_id, (const unsigned char *)mesg_buf, H5O_MSG_FLAG_WAS_UNKNOWN)))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "can't decode shared message.")
 
         if(H5O_msg_delete(f, dxpl_id, open_oh, type_id, native_mesg) < 0)

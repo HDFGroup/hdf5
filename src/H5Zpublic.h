@@ -41,6 +41,7 @@ typedef int H5Z_filter_t;
 #define H5Z_FILTER_SZIP         4       /*szip compression              */
 #define H5Z_FILTER_NBIT         5       /*nbit compression              */
 #define H5Z_FILTER_SCALEOFFSET  6       /*scale+offset compression      */
+#define H5Z_FILTER_DTYPE_MODIFY 7       /*modification of dataset's datatype*/
 #define H5Z_FILTER_RESERVED     256	/*filter ids below this value are reserved for library use */
 #define H5Z_FILTER_MAX		65535	/*maximum filter id		*/
 
@@ -122,13 +123,13 @@ extern "C" {
 /*
  * Before a dataset gets created, the "can_apply" callbacks for any filters used
  * in the dataset creation property list are called
- * with the dataset's dataset creation property list, the dataset's datatype and
- * a dataspace describing a chunk (for chunked dataset storage).
+ * with the dataset's dataset creation property list, the dataset's datatype,
+ * a dataspace describing a chunk (for chunked dataset storage), and a file ID.
  *
  * The "can_apply" callback must determine if the combination of the dataset
- * creation property list setting, the datatype and the dataspace represent a
- * valid combination to apply this filter to.  For example, some cases of
- * invalid combinations may involve the filter not operating correctly on
+ * creation property list setting, the datatype, the dataspace, and the file
+ * represents a valid combination to apply this filter to.  For example, some cases
+ * of invalid combinations may involve the filter not operating correctly on
  * certain datatypes (or certain datatype sizes), or certain sizes of the chunk
  * dataspace.
  *
@@ -139,7 +140,8 @@ extern "C" {
  * The "can_apply" callback returns positive a valid combination, zero for an
  * invalid combination and negative for an error.
  */
-typedef herr_t (*H5Z_can_apply_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space_id);
+typedef herr_t (*H5Z_can_apply_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space_id, 
+    hid_t file_id);
 
 /*
  * After the "can_apply" callbacks are checked for new datasets, the "set_local"
@@ -147,8 +149,10 @@ typedef herr_t (*H5Z_can_apply_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space
  * called.  These callbacks receive the dataset's private copy of the dataset
  * creation property list passed in to H5Dcreate (i.e. not the actual property
  * list passed in to H5Dcreate) and the datatype ID passed in to H5Dcreate
- * (which is not copied and should not be modified) and a dataspace describing
- * the chunk (for chunked dataset storage) (which should also not be modified).
+ * (which is not copied and should not be modified), a dataspace describing
+ * the chunk (for chunked dataset storage) (which should also not be modified),
+ * and an identity for the file which should be registered and closed by the 
+ * caller function.
  *
  * The "set_local" callback must set any parameters that are specific to this
  * dataset, based on the combination of the dataset creation property list
@@ -161,8 +165,13 @@ typedef herr_t (*H5Z_can_apply_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space
  *
  * The "set_local" callback must return non-negative on success and negative
  * for an error.
+ *
+ * After the dataset is created and reopened, some filters may need these info
+ * again.  The function prototype of "reset_local" callback is identical to 
+ * the "set_local".
  */
-typedef herr_t (*H5Z_set_local_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space_id);
+typedef herr_t (*H5Z_set_local_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space_id,
+    hid_t file_id);
 
 /*
  * A filter gets definition flags and invocation flags (defined above), the
@@ -195,6 +204,7 @@ typedef struct H5Z_class_t {
     const char	*name;		/* Comment for debugging		     */
     H5Z_can_apply_func_t can_apply; /* The "can apply" callback for a filter */
     H5Z_set_local_func_t set_local; /* The "set local" callback for a filter */
+    H5Z_set_local_func_t reset_local; /* The "reset local" callback for a filter */
     H5Z_func_t filter;		/* The actual filter function		     */
 } H5Z_class_t;
 

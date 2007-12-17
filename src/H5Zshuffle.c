@@ -40,6 +40,7 @@ const H5Z_class_t H5Z_SHUFFLE[1] = {{
     "shuffle",			/* Filter name for debugging	*/
     NULL,                       /* The "can apply" callback     */
     H5Z_set_local_shuffle,      /* The "set local" callback     */
+    NULL,                       /* The "reset local" callback   */
     H5Z_filter_shuffle,		/* The actual filter function	*/
 }};
 

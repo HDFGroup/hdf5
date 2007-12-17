@@ -380,3 +380,126 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_compact_copy() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D_compact_copy_conv
+ *
+ * Purpose:	Copies compact data from SRC dataset to DST dataset
+ *              and does data conversion.  This function is similar to
+ *              H5D_compact_copy and is mainly used by H5Dmodify_dtype.  
+ *
+ * Return:	Non-negative on success. 
+ *		Negative on failure.
+ *
+ * Programmer:  Raymond Lu
+ *	        8 October 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_compact_copy_conv(const H5D_t *dset_src, const H5D_t *dset_dst, 
+    H5O_copy_t UNUSED *cpy_info, hid_t dxpl_id)
+{
+    H5P_genplist_t *plist;              /* Property list pointer */
+    H5T_path_t  *tpath = NULL;          /* Datatype conversion paths */
+    H5T_t       *dt_src = NULL;         /* Source datatype */
+    H5T_t       *dt_dst = NULL;         /* Destination datatype */
+    hid_t       tid_src = -1;           /* Datatype ID for source datatype */
+    hid_t       tid_dst = -1;           /* Datatype ID for destination datatype */
+    size_t      src_dt_size = 0;        /* Source datatype size */
+    size_t      dst_dt_size = 0;        /* Destination datatype size */
+    size_t      max_dt_size;            /* Max. datatype size */
+    hsize_t     nelmts = 0;             /* Number of elements in buffer */
+    hssize_t    snelmts = 0;            /* Number of elements in buffer */
+    hsize_t     total_nbytes;           /* Total number of bytes to copy */
+    hsize_t     total_src_nbytes;       /* Total number of bytes of the source */
+    hsize_t     total_dst_nbytes;       /* Total number of bytes of the destination */
+    void       *buf = NULL;             /* Buffer for copying data */
+    void       *bkg = NULL;             /* Temporary buffer for copying data */
+    hbool_t     is_vlen = FALSE;        /* Flag to indicate VL type */
+    hbool_t     vlen_conv = TRUE;       /* Transfer property to indicate no conversion for vlen */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5D_compact_copy_conv, FAIL)
+
+    /* Check args */
+    HDassert(dset_src && H5D_COMPACT == dset_src->shared->layout.type);
+    HDassert(dset_dst && H5D_COMPACT == dset_dst->shared->layout.type);
+
+    /* dataset pointers and IDs */
+    dt_src = dset_src->shared->type;
+    dt_dst = dset_dst->shared->type;
+    tid_src = dset_src->shared->type_id;
+    tid_dst = dset_dst->shared->type_id;
+
+    /* Set up number of bytes to copy, and initial buffer size */
+    if((snelmts = H5S_GET_EXTENT_NPOINTS(dset_src->shared->space)) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src dataspace has invalid selection")
+    H5_ASSIGN_OVERFLOW(nelmts,snelmts,hssize_t,hsize_t);
+
+    if(nelmts==0)
+        HGOTO_DONE(SUCCEED)
+
+    /* Compute element sizes and other parameters */
+    src_dt_size = H5T_get_size(dt_src);
+    dst_dt_size = H5T_get_size(dt_dst);
+    max_dt_size = MAX(src_dt_size, dst_dt_size);
+
+    total_src_nbytes = nelmts*src_dt_size;
+    total_dst_nbytes = nelmts*dst_dt_size;
+    total_nbytes = MAX(total_src_nbytes, total_dst_nbytes);
+
+    /* If the datatype is or contains vlen, set the property to indicate no conversion 
+     * is needed. */
+    if((is_vlen = H5T_detect_class(dt_src, H5T_VLEN)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to detect dtatypes")
+
+    if(is_vlen ) {
+        vlen_conv = FALSE;
+        if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADATOM, FAIL, "can't find object for ID")
+
+        if(H5P_set(plist, H5D_XFER_VLEN_CONV_NAME, &vlen_conv) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "Error setting vlen conv flag")
+    }
+
+    /* Set up the conversion functions */
+    if(NULL == (tpath = H5T_path_find(dt_src, dt_dst, NULL, NULL, dxpl_id, FALSE)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between src and mem datatypes")
+
+    /* Allocate memory for copying the chunk */
+    if(NULL == (buf = H5FL_BLK_MALLOC(type_conv, (size_t)total_nbytes)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+    /* allocate temporary bkg buff for data conversion */
+    if(NULL == (bkg = H5FL_BLK_CALLOC(type_conv, (size_t)total_nbytes)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+    /* Copy the data into the conversion buffer */
+    HDmemcpy(buf, dset_src->shared->layout.u.compact.buf, (size_t)total_src_nbytes);
+
+    /* Convert from source file to destination file */
+    if(H5T_convert(tpath, tid_src, tid_dst, (size_t)nelmts, (size_t)0, (size_t)0, buf, bkg, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype conversion failed")
+
+    /* Set the property of vlen conversion back to normal */
+    if(is_vlen ) {
+        vlen_conv = TRUE;
+
+        if(H5P_set(plist, H5D_XFER_VLEN_CONV_NAME, &vlen_conv) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "Error setting vlen conv flag")
+    }
+
+    /* Copy the data from the conversion buffer to the destination */
+    dset_dst->shared->layout.u.compact.size = total_dst_nbytes;
+    dset_dst->shared->layout.u.compact.buf = (void*)H5MM_malloc((size_t)total_dst_nbytes);
+    HDmemcpy(dset_dst->shared->layout.u.compact.buf, buf, (size_t)total_dst_nbytes);
+
+done:
+    if(buf)
+        H5FL_BLK_FREE(type_conv, buf);
+    if(bkg)
+        H5FL_BLK_FREE(type_conv, bkg);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_compact_copy_conv() */

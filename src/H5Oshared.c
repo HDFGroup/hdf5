@@ -323,7 +323,9 @@ H5O_shared_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *buf, const H5O_msg_cla
          * Otherwise, it is a named datatype, so copy an H5O_loc_t.
          */
         if(sh_mesg.type == H5O_SHARE_TYPE_SOHM) {
-            HDassert(version >= H5O_SHARED_VERSION_3);
+            if(version < H5O_SHARED_VERSION_3)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for shared object message")
+
             HDmemcpy(&sh_mesg.u.heap_id, buf, sizeof(sh_mesg.u.heap_id));
         } /* end if */
         else {

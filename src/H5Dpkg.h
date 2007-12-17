@@ -361,6 +361,8 @@ H5_DLL herr_t H5D_vlen_get_buf_size(void *elem, hid_t type_id, unsigned ndim,
     const hsize_t *point, void *op_data);
 H5_DLL herr_t H5D_check_filters(H5D_t *dataset);
 H5_DLL herr_t H5D_set_extent(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
+H5_DLL herr_t H5D_init_type(H5F_t *file, const H5D_t *dset, hid_t type_id,
+    const H5T_t *type);
 
 /* Functions that perform serial I/O operations */
 H5_DLL herr_t H5D_select_fscat(H5D_io_info_t *io_info,
@@ -398,6 +400,8 @@ H5_DLL ssize_t H5D_contig_writevv(const H5D_io_info_t *io_info,
     haddr_t UNUSED address, void UNUSED *pointer, const void *buf);
 H5_DLL herr_t H5D_contig_copy(H5F_t *f_src, const H5O_layout_t *layout_src, H5F_t *f_dst, 
     H5O_layout_t *layout_dst, H5T_t *src_dtype, H5O_copy_t *cpy_info, hid_t dxpl_id);
+H5_DLL herr_t H5D_contig_copy_conv(H5F_t *file, const H5D_t *dset_src, const H5D_t *dset_dst,
+    H5O_copy_t UNUSED *cpy_info, hid_t dxpl_id);
 
 /* Functions that operate on compact dataset storage */
 H5_DLL herr_t H5D_compact_fill(H5D_t *dset, hid_t dxpl_id);
@@ -411,6 +415,8 @@ H5_DLL ssize_t H5D_compact_writevv(const H5D_io_info_t *io_info,
     haddr_t UNUSED addr, void UNUSED *pointer/*in*/, const void *buf);
 H5_DLL herr_t H5D_compact_copy(H5F_t *f_src, H5O_layout_t *layout_src,
     H5F_t *f_dst, H5O_layout_t *layout_dst, H5T_t *src_dtype, H5O_copy_t *cpy_info, hid_t dxpl_id);
+H5_DLL herr_t H5D_compact_copy_conv(const H5D_t *dset_src, const H5D_t *dset_dst, 
+    H5O_copy_t UNUSED *cpy_info, hid_t dxpl_id);
 
 /* Functions that operate on indexed storage */
 /* forward reference for collective-chunk IO use */
@@ -448,6 +454,8 @@ H5_DLL haddr_t H5D_istore_get_addr(const H5D_io_info_t *io_info,
 H5_DLL herr_t H5D_istore_copy(H5F_t *f_src, H5O_layout_t *layout_src,
     H5F_t *f_dst, H5O_layout_t *layout_dst, H5T_t *src_dtype,
     H5O_copy_t *cpy_info, H5O_pline_t *pline, hid_t dxpl_id);
+H5_DLL herr_t H5D_istore_copy_conv(H5F_t *file, const H5D_t *dset_src, const H5D_t *dset_dst,
+    H5O_copy_t UNUSED *cpy_info, hid_t dxpl_id);
 H5_DLL void * H5D_istore_lock(const H5D_io_info_t *io_info, H5D_istore_ud1_t *udata,
     hbool_t relax, unsigned *idx_hint/*in,out*/);
 H5_DLL herr_t H5D_istore_unlock(const H5D_io_info_t *io_info,

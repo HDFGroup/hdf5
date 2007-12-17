@@ -36,7 +36,7 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT)
 # These tests (fheap, btree2) are under development and are not used by
 # the library yet. Move them to the end so that their failure do not block
 # other current library code tests.
-TEST_PROG=testhdf5 lheap ohdr stab gheap cache cache_api \
+TEST_PROG=testhdf5 lheap ohdr stab gheap cache cache_api change_dtypes \
            pool hyperslab istore bittests dt_arith \
            dtypes dsets cmpd_dset extend external objcopy links unlink big mtime     \
            fillval mount flush1 flush2 enum \
@@ -116,7 +116,7 @@ CHECK_CLEANFILES+=cmpd_dset.h5 compact_dataset.h5 dataset.h5 extend.h5 istore.h5
             family_file000[0-3][0-9].h5 multi_file-[rs].h5 core_file         \
             new_move_[ab].h5 ntypes.h5 dangle.h5 error_test.h5 err_compat.h5 \
             dtransform.h5 test_filters.h5 get_file_name.h5 tstint[1-2].h5    \
-            unlink_chunked.h5 btree2.h5 \
+            unlink_chunked.h5 btree2.h5 modify_types.h5 \
             objcopy_src.h5 objcopy_dst.h5 objcopy_ext.dat trefer1.h5 trefer2.h5
 
 # Sources for testhdf5 executable

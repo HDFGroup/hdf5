@@ -63,6 +63,8 @@ const char *FILENAME[] = {
 #define DSET_FLETCHER32_NAME	"fletcher32"
 #define DSET_FLETCHER32_NAME_2	"fletcher32_2"
 #define DSET_FLETCHER32_NAME_3	"fletcher32_3"
+#define DSET_DTYPE_MODIFY_NAME  "dtype_modify"
+#define DSET_SHUF_DEF_DTMOD_NAME	"dtype_modify+shuffle+deflate"
 #define DSET_SHUF_DEF_FLET_NAME	"shuffle+deflate+fletcher32"
 #define DSET_SHUF_DEF_FLET_NAME_2	"shuffle+deflate+fletcher32_2"
 #define DSET_SHUF_SZIP_FLET_NAME	"shuffle+szip+fletcher32"
@@ -101,12 +103,15 @@ const char *FILENAME[] = {
 #define H5Z_FILTER_BOGUS	305
 #define H5Z_FILTER_CORRUPT	306
 #define H5Z_FILTER_BOGUS2	307
+#define H5Z_FILTER_BOGUS3	308
 
 /* Flags for testing filters */
 #define DISABLE_FLETCHER32      0
 #define ENABLE_FLETCHER32       1
 #define DATA_CORRUPTED          1
 #define DATA_NOT_CORRUPTED      0
+#define CHANGE_DTYPE            1
+#define DONT_CHANGE_DTYPE       0
 
 /* Parameters for the "set local" test */
 #define BOGUS2_PERM_NPARMS      2       /* Number of "permanent" parameters */
@@ -122,10 +127,15 @@ const char *FILENAME[] = {
 /* Parameters for internal filter test */
 #define FILTER_CHUNK_DIM1       2
 #define FILTER_CHUNK_DIM2       25
-#define FILTER_HS_OFFSET1       7
+/*#define FILTER_HS_OFFSET1       7
 #define FILTER_HS_OFFSET2       30
 #define FILTER_HS_SIZE1         4
-#define FILTER_HS_SIZE2         50
+#define FILTER_HS_SIZE2         50*/
+#define FILTER_HS_OFFSET1       1
+#define FILTER_HS_OFFSET2       12
+#define FILTER_HS_SIZE1         1
+#define FILTER_HS_SIZE2         38
+ 
 
 /* Names for noencoder test */
 #define NOENCODER_FILENAME "noencoder.h5"
@@ -145,16 +155,18 @@ const char *FILENAME[] = {
 #define RC_FILENAME "random_chunks.h5"
 
 /* Shared global arrays */
-#define DSET_DIM1       100
-#define DSET_DIM2       200
+#define DSET_DIM1       4
+#define DSET_DIM2       50
 int	points[DSET_DIM1][DSET_DIM2], check[DSET_DIM1][DSET_DIM2];
 double	points_dbl[DSET_DIM1][DSET_DIM2], check_dbl[DSET_DIM1][DSET_DIM2];
 
 /* Local prototypes for filter functions */
 static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
     const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
-static herr_t can_apply_bogus(hid_t dcpl_id, hid_t type_id, hid_t space_id);
-static herr_t set_local_bogus2(hid_t dcpl_id, hid_t type_id, hid_t space_id);
+static herr_t can_apply_bogus(hid_t dcpl_id, hid_t type_id, hid_t space_id, 
+    hid_t file_id);
+static herr_t set_local_bogus2(hid_t dcpl_id, hid_t type_id, hid_t space_id, 
+    hid_t file_id);
 static size_t filter_bogus2(unsigned int flags, size_t cd_nelmts,
     const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
 static size_t filter_corrupt(unsigned int flags, size_t cd_nelmts,
@@ -986,6 +998,7 @@ const H5Z_class_t H5Z_BOGUS[1] = {{
     "bogus",			/* Filter name for debugging	*/
     NULL,                       /* The "can apply" callback     */
     NULL,                       /* The "set local" callback     */
+    NULL,                       /* The "reset local" callback   */
     filter_bogus,		/* The actual filter function	*/
 }};
 
@@ -1007,7 +1020,8 @@ const H5Z_class_t H5Z_BOGUS[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-can_apply_bogus(hid_t UNUSED dcpl_id, hid_t type_id, hid_t UNUSED space_id)
+can_apply_bogus(hid_t UNUSED dcpl_id, hid_t type_id, hid_t UNUSED space_id, 
+        hid_t UNUSED file_id)
 {
     if(H5Tequal(type_id,H5T_NATIVE_DOUBLE))
         return 0;
@@ -1059,7 +1073,8 @@ filter_bogus(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
  *-------------------------------------------------------------------------
  */
 static herr_t
-set_local_bogus2(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id)
+set_local_bogus2(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id, 
+        hid_t UNUSED file_id)
 {
     unsigned add_on=0;      /* Value to add to data going through */
     unsigned flags;         /* Filter flags */
@@ -1160,6 +1175,7 @@ const H5Z_class_t H5Z_CORRUPT[1] = {{
     "corrupt",			/* Filter name for debugging	*/
     NULL,                       /* The "can apply" callback     */
     NULL,                       /* The "set local" callback     */
+    NULL,                       /* The "reset local" callback   */
     filter_corrupt,		/* The actual filter function	*/
 }};
 
@@ -1296,7 +1312,7 @@ filter_cb_fail(H5Z_filter_t filter, void UNUSED *buf, size_t UNUSED buf_size,
  */
 static herr_t
 test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
-                     int corrupted, hsize_t *dset_size)
+                     int corrupted, int change_dtype, hsize_t *dset_size)
 {
     hid_t		dataset;        /* Dataset ID */
     hid_t		dxpl;           /* Dataset xfer property list ID */
@@ -1442,50 +1458,87 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
      */
     TESTING("    filters (modify)");
 
-    for(i=0; i<size[0]; i++) {
-	for(j=0; j<size[1]/2; j++) {
-	    points[i][j] = (int)HDrandom ();
-	}
-    }
-    if(H5Dwrite (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, points) < 0)
-	TEST_ERROR;
+    /* If the datatype modification filter is used, change the data type of 
+     * the dataset and rewrite some data of a different type.
+     */
+    if(change_dtype) {
+        if(H5Dmodify_dtype(dataset, H5T_NATIVE_DOUBLE)<0) 
+	    TEST_ERROR;
 
-    if(corrupted) {
-        /* Default behavior is failure when data is corrupted. */
-        /* (Use the "write" DXPL in order to make certain corruption is seen) */
-        H5E_BEGIN_TRY {
-            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
-        } H5E_END_TRY;
-        if(status>=0) TEST_ERROR;
+        for (i=0; i<size[0]; i++) {
+	    for (j=0; j<size[1]; j++) {
+	        points_dbl[i][j] = (double)(i+j+1)/1.7;
+	    }
+        }
 
-        /* Callback decides to continue inspite data is corrupted. */
-        if(H5Pset_filter_callback(dxpl, filter_cb_cont, NULL) < 0) TEST_ERROR;
-        if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check) < 0)
-            TEST_ERROR;
+        if (H5Dwrite (dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, write_dxpl, points_dbl)<0)
+	    TEST_ERROR;
 
-        /* Callback decides to fail when data is corrupted. */
-        if(H5Pset_filter_callback(write_dxpl, filter_cb_fail, NULL) < 0) TEST_ERROR;
-        /* (Use the "write" DXPL in order to make certain corruption is seen) */
-        H5E_BEGIN_TRY {
-            status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
-        } H5E_END_TRY;
-        if(status>=0) TEST_ERROR;
-    } else {
         /* Read the dataset back and check it */
-        if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check) < 0)
+        if (H5Dread(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, dxpl, check_dbl)<0)
 	   TEST_ERROR;
 
         /* Check that the values read are the same as the values written */
-        for(i=0; i<size[0]; i++) {
-	   for(j=0; j<size[1]; j++) {
-	       if(points[i][j] != check[i][j]) {
-		  H5_FAILED();
-		  printf("    Read different values than written.\n");
-		  printf("    At index %lu,%lu\n",
-		           (unsigned long)i, (unsigned long)j);
-		  goto error;
+        for (i=0; i<size[0]; i++) {
+	   for (j=0; j<size[1]; j++) {
+	       /* If the difference between two values is greater than 0.001%, they're 
+                * considered not equal. */
+               if(!DBL_REL_EQUAL(points_dbl[i][j],check_dbl[i][j],0.00001)) {
+		   H5_FAILED();
+		   printf("    Read different values than written.\n");
+		   printf("    At index %lu,%lu: points_dbl=%f,check_dbl=%f\n",
+		           (unsigned long)i, (unsigned long)j, points_dbl[i][j],check_dbl[i][j]);
+		   /*goto error;*/
 	       }
 	   }
+        }
+    } else {
+        for (i=0; i<size[0]; i++) {
+	    for (j=0; j<size[1]/2; j++) {
+	        points[i][j] = (int)HDrandom ();
+	    }
+        }
+
+        if (H5Dwrite (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, points)<0)
+	    TEST_ERROR;
+
+        if(corrupted) {
+            /* Default behavior is failure when data is corrupted. */
+            /* (Use the "write" DXPL in order to make certain corruption is seen) */
+            H5E_BEGIN_TRY {
+                status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
+            } H5E_END_TRY;
+            if(status>=0) TEST_ERROR;
+
+            /* Callback decides to continue inspite data is corrupted. */
+            if(H5Pset_filter_callback(dxpl, filter_cb_cont, NULL)<0) TEST_ERROR;
+            if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check)<0)
+                TEST_ERROR;
+
+            /* Callback decides to fail when data is corrupted. */
+            if(H5Pset_filter_callback(write_dxpl, filter_cb_fail, NULL)<0) TEST_ERROR;
+            /* (Use the "write" DXPL in order to make certain corruption is seen) */
+            H5E_BEGIN_TRY {
+                status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
+            } H5E_END_TRY;
+            if(status>=0) TEST_ERROR;
+        } else {
+            /* Read the dataset back and check it */
+            if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check)<0)
+	       TEST_ERROR;
+
+            /* Check that the values read are the same as the values written */
+            for (i=0; i<size[0]; i++) {
+	        for (j=0; j<size[1]; j++) {
+	            if (points[i][j] != check[i][j]) {
+		        H5_FAILED();
+		        printf("    Read different values than written.\n");
+		        printf("    At index %lu,%lu\n",
+		           (unsigned long)i, (unsigned long)j);
+		        goto error;
+	            }
+	        }
+            }
         }
     }
 
@@ -1503,46 +1556,64 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     if(H5Dclose(dataset) < 0) TEST_ERROR;
     if((dataset = H5Dopen2(fid, name, H5P_DEFAULT)) < 0) TEST_ERROR;
 
-    if(corrupted) {
-        /* Default behavior is failure when data is corrupted. */
-        /* (Use the "write" DXPL in order to make certain corruption is seen) */
-        H5E_BEGIN_TRY {
-            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
-        } H5E_END_TRY;
-        if(status >= 0) TEST_ERROR;
-
-        /* Callback decides to continue inspite data is corrupted. */
-        if(H5Pset_filter_callback(dxpl, filter_cb_cont, NULL) < 0) TEST_ERROR;
-        if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check) < 0)
-            TEST_ERROR;
-
-        /* Callback decides to fail when data is corrupted. */
-        if(H5Pset_filter_callback(write_dxpl, filter_cb_fail, NULL) < 0) TEST_ERROR;
-
-        /* (Use the "write" DXPL in order to make certain corruption is seen) */
-        H5E_BEGIN_TRY {
-            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
-        } H5E_END_TRY;
-        if(status >= 0) TEST_ERROR;
-    } /* end if */
-    else {
-        if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check) < 0)
-            TEST_ERROR;
+    if(change_dtype) {
+        if (H5Dread(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, dxpl, check_dbl)<0)
+	   TEST_ERROR;
 
         /* Check that the values read are the same as the values written */
-        for(i = 0; i < size[0]; i++)
-	   for(j = 0; j < size[1]; j++)
-	       if(points[i][j] != check[i][j]) {
+        for (i=0; i<size[0]; i++) {
+	   for (j=0; j<size[1]; j++) {
+	       /* If the difference between two values is greater than 0.001%, they're 
+                * considered not equal. */
+               if(!DBL_REL_EQUAL(points_dbl[i][j],check_dbl[i][j],0.00001)) {
 		  H5_FAILED();
 		  printf("    Read different values than written.\n");
 		  printf("    At index %lu,%lu\n",
 		        (unsigned long)i, (unsigned long)j);
 		  goto error;
-	       } /* end if */
-    } /* end else */
+	       }
+	   }
+        }
+    } else {
+        if(corrupted) {
+            /* Default behavior is failure when data is corrupted. */
+            /* (Use the "write" DXPL in order to make certain corruption is seen) */
+            H5E_BEGIN_TRY {
+                status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
+            } H5E_END_TRY;
+            if(status>=0) TEST_ERROR;
 
+            /* Callback decides to continue inspite data is corrupted. */
+            if(H5Pset_filter_callback(dxpl, filter_cb_cont, NULL)<0) TEST_ERROR;
+            if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check)<0)
+                TEST_ERROR;
+
+            /* Callback decides to fail when data is corrupted. */
+            if(H5Pset_filter_callback(write_dxpl, filter_cb_fail, NULL)<0) TEST_ERROR;
+            /* (Use the "write" DXPL in order to make certain corruption is seen) */
+            H5E_BEGIN_TRY {
+                status=H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
+            } H5E_END_TRY;
+            if(status>=0) TEST_ERROR;
+        } else {
+            if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check)<0)
+	       TEST_ERROR;
+
+            /* Check that the values read are the same as the values written */
+            for (i=0; i<size[0]; i++) {
+	        for (j=0; j<size[1]; j++) {
+	            if (points[i][j] != check[i][j]) {
+		        H5_FAILED();
+		        printf("    Read different values than written.\n");
+		        printf("    At index %lu,%lu\n",
+		             (unsigned long)i, (unsigned long)j);
+		        goto error;
+	            }
+	        }
+            }
+        }
+    }
     PASSED();
-
 
     /*----------------------------------------------------------------------
      * STEP 6: Test partial I/O by writing to and then reading from a
@@ -1611,6 +1682,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
 
     /* Get the storage size of the dataset */
     if((*dset_size=H5Dget_storage_size(dataset))==0) goto error;
+
     /* Clean up objects used for this test */
     if(H5Dclose (dataset) < 0) goto error;
     if(H5Sclose (sid) < 0) goto error;
@@ -1885,7 +1957,11 @@ UNUSED
     hsize_t     shuffle_size;       /* Size of dataset with shuffle filter */
 #endif /* H5_HAVE_FILTER_SHUFFLE */
 
-#if(defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_SZIP) && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_FLETCHER32
+#ifdef H5_HAVE_FILTER_DTYPE_MODIFY
+    hsize_t     dtype_modify_size;  /* Size of dataset with datatype modification filter */
+#endif /* H5_HAVE_FILTER_DTYPE_MODIFY */
+
+#if (defined H5_HAVE_FILTER_DEFLATE | defined H5_HAVE_FILTER_SZIP) && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_FLETCHER32
     hsize_t     combo_size;     /* Size of dataset with shuffle+deflate filter */
 #endif /* H5_HAVE_FILTER_DEFLATE && H5_HAVE_FILTER_SHUFFLE && H5_HAVE_FILTER_FLETCHER32 */
 
@@ -1900,9 +1976,9 @@ UNUSED
     if((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
     if(H5Pset_chunk (dc, 2, chunk_size) < 0) goto error;
     if(H5Zregister (H5Z_BOGUS) < 0) goto error;
-    if(H5Pset_filter(dc, H5Z_FILTER_BOGUS, 0, (size_t)0, NULL) < 0) goto error;
+    if(H5Pset_filter(dc, H5Z_FILTER_BOGUS, H5Z_FLAG_MANDATORY, (size_t)0, NULL) < 0) goto error;
 
-    if(test_filter_internal(file,DSET_BOGUS_NAME,dc,DISABLE_FLETCHER32,DATA_NOT_CORRUPTED,&null_size) < 0) goto error;
+    if(test_filter_internal(file,DSET_BOGUS_NAME,dc,DISABLE_FLETCHER32,DATA_NOT_CORRUPTED,DONT_CHANGE_DTYPE,&null_size)<0) goto error;
 
     /* Clean up objects used for this test */
     if(H5Pclose (dc) < 0) goto error;
@@ -1918,7 +1994,8 @@ UNUSED
     if(H5Pset_filter(dc, H5Z_FILTER_FLETCHER32, 0, (size_t)0, NULL) < 0) goto error;
 
     /* Enable checksum during read */
-    if(test_filter_internal(file,DSET_FLETCHER32_NAME,dc,ENABLE_FLETCHER32,DATA_NOT_CORRUPTED,&fletcher32_size) < 0) goto error;
+    if(test_filter_internal(file,DSET_FLETCHER32_NAME,dc,ENABLE_FLETCHER32,DATA_NOT_CORRUPTED,DONT_CHANGE_DTYPE,&fletcher32_size)<0) goto error;
+
     if(fletcher32_size<=null_size) {
         H5_FAILED();
         puts("    Size after checksumming is incorrect.");
@@ -1927,7 +2004,8 @@ UNUSED
 
     /* Disable checksum during read */
     puts("Testing Fletcher32 checksum(disabled for read)");
-    if(test_filter_internal(file,DSET_FLETCHER32_NAME_2,dc,DISABLE_FLETCHER32,DATA_NOT_CORRUPTED,&fletcher32_size) < 0) goto error;
+    if(test_filter_internal(file,DSET_FLETCHER32_NAME_2,dc,DISABLE_FLETCHER32,DATA_NOT_CORRUPTED,DONT_CHANGE_DTYPE,&fletcher32_size)<0) goto error;
+
     if(fletcher32_size<=null_size) {
         H5_FAILED();
         puts("    Size after checksumming is incorrect.");
@@ -1944,7 +2022,9 @@ UNUSED
      * the way this test is conducted. -slu 2007/7/20 */
     if(H5Zregister (H5Z_CORRUPT) < 0) goto error;
     if(H5Pset_filter(dc, H5Z_FILTER_CORRUPT, 0, (size_t)3, data_corrupt) < 0) goto error;
-    if(test_filter_internal(file,DSET_FLETCHER32_NAME_3,dc,DISABLE_FLETCHER32,DATA_CORRUPTED,&fletcher32_size) < 0) goto error;
+
+    if(test_filter_internal(file,DSET_FLETCHER32_NAME_3,dc,DISABLE_FLETCHER32,DATA_CORRUPTED,DONT_CHANGE_DTYPE,&fletcher32_size)<0) goto error;
+
     if(fletcher32_size<=null_size) {
         H5_FAILED();
         puts("    Size after checksumming is incorrect.");
@@ -1970,7 +2050,8 @@ UNUSED
     if(H5Pset_chunk (dc, 2, chunk_size) < 0) goto error;
     if(H5Pset_deflate (dc, 6) < 0) goto error;
 
-    if(test_filter_internal(file,DSET_DEFLATE_NAME,dc,DISABLE_FLETCHER32,DATA_NOT_CORRUPTED,&deflate_size) < 0) goto error;
+    if(test_filter_internal(file,DSET_DEFLATE_NAME,dc,DISABLE_FLETCHER32,DATA_NOT_CORRUPTED,DONT_CHANGE_DTYPE,&deflate_size)<0) goto error;
+
     /* Clean up objects used for this test */
     if(H5Pclose (dc) < 0) goto error;
 #else /* H5_HAVE_FILTER_DEFLATE */
@@ -1990,9 +2071,10 @@ UNUSED
         if(H5Pset_chunk (dc, 2, chunk_size) < 0) goto error;
 
 	puts("");
-	if(H5Pset_szip(dc, szip_options_mask, szip_pixels_per_block) < 0) goto error;
-	if(test_filter_internal(file,DSET_SZIP_NAME,dc,DISABLE_FLETCHER32,DATA_NOT_CORRUPTED,&szip_size) < 0) goto error;
-        if(H5Pclose (dc) < 0) goto error;
+
+	if (H5Pset_szip(dc, szip_options_mask, szip_pixels_per_block)<0) goto error;
+	if(test_filter_internal(file,DSET_SZIP_NAME,dc,DISABLE_FLETCHER32,DATA_NOT_CORRUPTED,DONT_CHANGE_DTYPE,&szip_size)<0) goto error;
+        if (H5Pclose (dc)<0) goto error;
     } else {
 	SKIPPED();
     }
@@ -2022,7 +2104,8 @@ UNUSED
     if(H5Pset_chunk (dc, 2, chunk_size) < 0) goto error;
     if(H5Pset_shuffle (dc) < 0) goto error;
 
-    if(test_filter_internal(file,DSET_SHUFFLE_NAME,dc,DISABLE_FLETCHER32,DATA_NOT_CORRUPTED,&shuffle_size) < 0) goto error;
+    if(test_filter_internal(file,DSET_SHUFFLE_NAME,dc,DISABLE_FLETCHER32,DATA_NOT_CORRUPTED,DONT_CHANGE_DTYPE,&shuffle_size)<0) goto error;
+
     if(shuffle_size!=null_size) {
         H5_FAILED();
         puts("    Shuffled size not the same as uncompressed size.");
@@ -2038,7 +2121,49 @@ UNUSED
 #endif /* H5_HAVE_FILTER_SHUFFLE */
 
     /*----------------------------------------------------------
-     * STEP 5: Test shuffle + deflate + checksum in any order.
+     * STEP 5: Test datatype modification by itself.
+     *----------------------------------------------------------
+     */
+#ifdef H5_HAVE_FILTER_DTYPE_MODIFY
+    puts("Testing datatype modification filter");
+    if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+    if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
+    if (H5Pset_dtype_modifiable (dc)<0) goto error;
+
+    if(test_filter_internal(file,DSET_DTYPE_MODIFY_NAME,dc,DISABLE_FLETCHER32,DATA_NOT_CORRUPTED,CHANGE_DTYPE,&dtype_modify_size)<0) goto error;
+
+    /* Clean up objects used for this test */
+    if (H5Pclose (dc)<0) goto error;
+#else /* H5_HAVE_FILTER_DTYPE_MODIFY */
+    TESTING("datatype modification filter");
+    SKIPPED();
+    puts("    Datatype modification filter not enabled");
+#endif /* H5_HAVE_FILTER_DTYPE_MODIFY */
+
+    /*----------------------------------------------------------
+     * STEP 6: Test shuffle + deflate + dtype modification.
+     *----------------------------------------------------------
+     */
+#if defined H5_HAVE_FILTER_DEFLATE && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_DTYPE_MODIFY
+    puts("Testing dtype modify+shuffle+deflate filters(dtype modify first)");
+    if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
+    if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
+    if (H5Pset_dtype_modifiable (dc)<0) goto error;
+    if (H5Pset_shuffle (dc)<0) goto error;
+    if (H5Pset_deflate (dc, 6)<0) goto error;
+
+    if(test_filter_internal(file,DSET_SHUF_DEF_DTMOD_NAME,dc,ENABLE_FLETCHER32,DATA_NOT_CORRUPTED,CHANGE_DTYPE,&combo_size)<0) goto error;
+
+    /* Clean up objects used for this test */
+    if (H5Pclose (dc)<0) goto error;
+#else /* H5_HAVE_FILTER_DEFLATE && H5_HAVE_FILTER_SHUFFLE && H5_HAVE_FILTER_DTYPE_MODIFY */
+    TESTING("dtype modify+shuffle+deflate filters");
+    SKIPPED();
+    puts("    Deflate, shuffle, or dtype modify checksum filter not enabled");
+#endif /* H5_HAVE_FILTER_DEFLATE && H5_HAVE_FILTER_SHUFFLE && H5_HAVE_FILTER_DTYPE_MODIFY */
+
+    /*----------------------------------------------------------
+     * STEP 7: Test shuffle + deflate + checksum in any order.
      *----------------------------------------------------------
      */
 #if defined H5_HAVE_FILTER_DEFLATE && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_FLETCHER32
@@ -2049,7 +2174,7 @@ UNUSED
     if(H5Pset_shuffle (dc) < 0) goto error;
     if(H5Pset_deflate (dc, 6) < 0) goto error;
 
-    if(test_filter_internal(file,DSET_SHUF_DEF_FLET_NAME,dc,ENABLE_FLETCHER32,DATA_NOT_CORRUPTED,&combo_size) < 0) goto error;
+    if(test_filter_internal(file,DSET_SHUF_DEF_FLET_NAME,dc,ENABLE_FLETCHER32,DATA_NOT_CORRUPTED,DONT_CHANGE_DTYPE,&combo_size)<0) goto error;
 
     /* Clean up objects used for this test */
     if(H5Pclose (dc) < 0) goto error;
@@ -2061,7 +2186,7 @@ UNUSED
     if(H5Pset_deflate (dc, 6) < 0) goto error;
     if(H5Pset_fletcher32 (dc) < 0) goto error;
 
-    if(test_filter_internal(file,DSET_SHUF_DEF_FLET_NAME_2,dc,ENABLE_FLETCHER32,DATA_NOT_CORRUPTED,&combo_size) < 0) goto error;
+    if(test_filter_internal(file,DSET_SHUF_DEF_FLET_NAME_2,dc,ENABLE_FLETCHER32,DATA_NOT_CORRUPTED,DONT_CHANGE_DTYPE,&combo_size)<0) goto error;
 
     /* Clean up objects used for this test */
     if(H5Pclose (dc) < 0) goto error;
@@ -2072,7 +2197,7 @@ UNUSED
 #endif /* H5_HAVE_FILTER_DEFLATE && H5_HAVE_FILTER_SHUFFLE && H5_HAVE_FILTER_FLETCHER32 */
 
     /*----------------------------------------------------------
-     * STEP 6: Test shuffle + szip + checksum in any order.
+     * STEP 8: Test shuffle + szip + checksum in any order.
      *----------------------------------------------------------
      */
 #if defined H5_HAVE_FILTER_SZIP && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_FLETCHER32
@@ -2086,8 +2211,9 @@ UNUSED
 	/* Make sure encoding is enabled */
     if( h5_szip_can_encode() == 1) {
 	puts("");
-	if(H5Pset_szip(dc, szip_options_mask, szip_pixels_per_block) < 0) goto error;
-	if(test_filter_internal(file,DSET_SHUF_SZIP_FLET_NAME,dc,ENABLE_FLETCHER32,DATA_NOT_CORRUPTED,&combo_size) < 0) goto error;
+
+	if (H5Pset_szip(dc, szip_options_mask, szip_pixels_per_block)<0) goto error;
+	if(test_filter_internal(file,DSET_SHUF_SZIP_FLET_NAME,dc,ENABLE_FLETCHER32,DATA_NOT_CORRUPTED,DONT_CHANGE_DTYPE,&combo_size)<0) goto error;
     } else {
 		SKIPPED();
     }
@@ -2115,7 +2241,7 @@ UNUSED
 	if(H5Pset_szip(dc, szip_options_mask, szip_pixels_per_block) < 0) goto error;
 	if(H5Pset_fletcher32 (dc) < 0) goto error;
 
-	if(test_filter_internal(file,DSET_SHUF_SZIP_FLET_NAME_2,dc,ENABLE_FLETCHER32,DATA_NOT_CORRUPTED,&combo_size) < 0) goto error;
+	if(test_filter_internal(file,DSET_SHUF_SZIP_FLET_NAME_2,dc,ENABLE_FLETCHER32,DATA_NOT_CORRUPTED,DONT_CHANGE_DTYPE,&combo_size)<0) goto error;
 
 	/* Clean up objects used for this test */
 	if(H5Pclose (dc) < 0) goto error;
@@ -2129,6 +2255,7 @@ UNUSED
     SKIPPED();
     puts("    Szip, shuffle, or fletcher32 checksum filter not enabled");
 #endif /* H5_HAVE_FILTER_SZIP && H5_HAVE_FILTER_SHUFFLE && H5_HAVE_FILTER_FLETCHER32 */
+
     return 0;
 
 error:
@@ -4754,11 +4881,12 @@ test_types(hid_t file)
 /* This message derives from H5Z */
 const H5Z_class_t H5Z_CAN_APPLY_TEST[1] = {{
 	H5Z_CLASS_T_VERS,
-    H5Z_FILTER_BOGUS,		/* Filter id number		*/
+    H5Z_FILTER_BOGUS3,		/* Filter id number		*/
 	1, 1,
     "bogus",			/* Filter name for debugging	*/
     can_apply_bogus,            /* The "can apply" callback     */
     NULL,                       /* The "set local" callback     */
+    NULL,                       /* The "reset local" callback   */
     filter_bogus,		/* The actual filter function	*/
 }};
 
@@ -4806,7 +4934,7 @@ test_can_apply(hid_t file)
         printf("    Line %d: Can't register 'can apply' filter\n",__LINE__);
         goto error;
     }
-    if(H5Pset_filter(dcpl, H5Z_FILTER_BOGUS, 0, (size_t)0, NULL) < 0) {
+    if(H5Pset_filter(dcpl, H5Z_FILTER_BOGUS3, 0, (size_t)0, NULL) < 0) {
         H5_FAILED();
         printf("    Line %d: Can't set bogus filter\n",__LINE__);
         goto error;
@@ -5119,6 +5247,7 @@ const H5Z_class_t H5Z_SET_LOCAL_TEST[1] = {{
     "bogus2",			/* Filter name for debugging	*/
     NULL,                       /* The "can apply" callback     */
     set_local_bogus2,           /* The "set local" callback     */
+    NULL,                       /* The "reset local" callback   */
     filter_bogus2,		/* The actual filter function	*/
 }};
 
@@ -6480,10 +6609,10 @@ main(void)
 #ifndef H5_NO_DEPRECATED_SYMBOLS
             nerrors += (test_deprec(file) < 0			? 1 : 0);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-            
+
             if(H5Fclose(file) < 0)
                 goto error;
-        } /* end for */
+       } /* end for */
 
         /* Close 2nd FAPL */
 	H5Pclose(fapl2);
@@ -6495,6 +6624,8 @@ main(void)
     } /* end if */
     else
 	puts("All dataset tests skipped - Incompatible with current Virtual File Driver");
+
+    H5close();
 
     return 0;
 

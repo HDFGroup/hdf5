@@ -736,6 +736,7 @@
 ./test/cache_api.c
 ./test/cache_common.c
 ./test/cache_common.h
+./test/change_dtypes.c
 ./test/cmpd_dset.c
 ./test/cross_read.c
 ./test/dangle.c

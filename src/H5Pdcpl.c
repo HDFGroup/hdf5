@@ -75,7 +75,6 @@
 #define H5D_CRT_DATA_PIPELINE_DEF  {{0, NULL, H5O_NULL_ID, {{0, HADDR_UNDEF}}}, H5O_PLINE_VERSION_1, 0, 0, NULL}
 #define H5D_CRT_DATA_PIPELINE_CMP  H5P_dcrt_data_pipeline_cmp
 
-
 /******************/
 /* Local Typedefs */
 /******************/
@@ -2028,13 +2027,64 @@ H5Pset_fletcher32(hid_t plist_id)
     if(H5P_get(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
     if(H5Z_append(&pline, H5Z_FILTER_FLETCHER32, H5Z_FLAG_MANDATORY, (size_t)0, NULL) < 0)
-        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add deflate filter to pipeline")
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add fletcher32 filter to pipeline")
     if(H5P_set(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to set pipeline")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_fletcher32() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_dtype_modifiable
+ *
+ * Purpose:	Sets the property to enable the modification of the 
+ *              dataset's datatype for a dataset creation property list.
+ *              After the function H5Dmodify_dtype is called,
+ *              if the dataset is chunked, the conversion of the data only 
+ *              happens when the chunks are accessed during either reading 
+ *              or writing.  This design will save the time from converting
+ *              unused data.  If the dataset is contiguous or compact, 
+ *              the data is converted immediately.  This property has no 
+ *              effect for the contiguous and compact datasets.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *              Aug 27, 2007
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_dtype_modifiable(hid_t plist_id)
+{
+    H5O_pline_t         pline;
+    H5P_genplist_t      *plist;              /* Property list pointer */
+    size_t              cd_nelmts=3;         /* Number of filter parameters */
+    unsigned            cd_values[3]={0,0};  /* Filter parameters */
+    herr_t              ret_value=SUCCEED;   /* return value */
+
+    FUNC_ENTER_API(H5Pset_dtype_modifiable, FAIL)
+    H5TRACE1("e", "i", plist_id);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Add the datatype modification as a filter */
+    if(H5P_get(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get pipeline")
+    if(H5Z_append(&pline, H5Z_FILTER_DTYPE_MODIFY, H5Z_FLAG_MANDATORY, cd_nelmts, cd_values) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to add dtype modify filter to pipeline")
+    if(H5P_set(plist, H5D_CRT_DATA_PIPELINE_NAME, &pline) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to set pipeline")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_dtype_modifiable() */
 
 
 /*-------------------------------------------------------------------------

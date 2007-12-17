@@ -75,6 +75,8 @@ H5T_init_precis_interface(void)
  * 	Robb Matzke, 22 Dec 1998
  *	Also works for derived datatypes.
  *
+ *      Raymond Lu, 26 Sept 2007
+ *      Split a private function from this API function.
  *-------------------------------------------------------------------------
  */
 size_t

@@ -566,7 +566,7 @@ H5G_dense_lookup_by_idx_fh_cb(const void *obj, size_t UNUSED obj_len, void *_uda
     FUNC_ENTER_NOAPI_NOINIT(H5G_dense_lookup_by_idx_fh_cb)
 
     /* Decode link information & keep a copy */
-    if(NULL == (tmp_lnk = H5O_msg_decode(udata->f, udata->dxpl_id, H5O_LINK_ID, obj)))
+    if(NULL == (tmp_lnk = H5O_msg_decode(udata->f, udata->dxpl_id, H5O_LINK_ID, obj, H5O_MSG_FLAG_WAS_UNKNOWN)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link")
 
     /* Copy link information */
@@ -852,7 +852,7 @@ H5G_dense_iterate_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
      *  HDF5 routine, it could attempt to re-protect that direct block for the
      *  heap, causing the HDF5 routine called to fail - QAK)
      */
-    if(NULL == (udata->lnk = H5O_msg_decode(udata->f, udata->dxpl_id, H5O_LINK_ID, obj)))
+    if(NULL == (udata->lnk = H5O_msg_decode(udata->f, udata->dxpl_id, H5O_LINK_ID, obj, H5O_MSG_FLAG_WAS_UNKNOWN)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link")
 
 done:
@@ -1047,7 +1047,7 @@ H5G_dense_get_name_by_idx_fh_cb(const void *obj, size_t UNUSED obj_len, void *_u
     FUNC_ENTER_NOAPI_NOINIT(H5G_dense_get_name_by_idx_fh_cb)
 
     /* Decode link information */
-    if(NULL == (lnk = H5O_msg_decode(udata->f, udata->dxpl_id, H5O_LINK_ID, obj)))
+    if(NULL == (lnk = H5O_msg_decode(udata->f, udata->dxpl_id, H5O_LINK_ID, obj, H5O_MSG_FLAG_WAS_UNKNOWN)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link")
 
     /* Get the length of the name */
@@ -1245,7 +1245,7 @@ H5G_dense_remove_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
     FUNC_ENTER_NOAPI_NOINIT(H5G_dense_remove_fh_cb)
 
     /* Decode link information */
-    if(NULL == (lnk = H5O_msg_decode(udata->f, udata->dxpl_id, H5O_LINK_ID, obj)))
+    if(NULL == (lnk = H5O_msg_decode(udata->f, udata->dxpl_id, H5O_LINK_ID, obj, H5O_MSG_FLAG_WAS_UNKNOWN)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode link")
 
     /* Check for removing the link from the creation order index */
@@ -1408,7 +1408,7 @@ H5G_dense_remove_by_idx_fh_cb(const void *obj, size_t UNUSED obj_len, void *_uda
     FUNC_ENTER_NOAPI_NOINIT(H5G_dense_remove_by_idx_fh_cb)
 
     /* Decode link information */
-    if(NULL == (udata->lnk = H5O_msg_decode(udata->f, udata->dxpl_id, H5O_LINK_ID, obj)))
+    if(NULL == (udata->lnk = H5O_msg_decode(udata->f, udata->dxpl_id, H5O_LINK_ID, obj, H5O_MSG_FLAG_WAS_UNKNOWN)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, H5_ITER_ERROR, "can't decode link")
 
     /* Can't operate on link here because the fractal heap block is locked */

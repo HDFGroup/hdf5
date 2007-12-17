@@ -265,6 +265,7 @@ static herr_t H5T_unregister(H5T_pers_t pers, const char *name, H5T_t *src,
 static herr_t H5T_register(H5T_pers_t pers, const char *name, H5T_t *src,
         H5T_t *dst, H5T_conv_t func, hid_t dxpl_id, hbool_t api_call);
 static htri_t H5T_compiler_conv(H5T_t *src, H5T_t *dst);
+static htri_t H5T_path_is_noop(const H5T_t *src_type, const H5T_t *dst_type, hid_t dxpl_id);
 static herr_t H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc);
 static H5T_t *H5T_decode(const unsigned char *buf);
 
@@ -2931,7 +2932,7 @@ H5T_decode(const unsigned char *buf)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_VERSION, NULL, "unknown version of encoded datatype")
 
     /* Decode the serialized datatype message */
-    if((ret_value = H5O_msg_decode(f, H5AC_dxpl_id, H5O_DTYPE_ID, buf)) == NULL)
+    if((ret_value = H5O_msg_decode(f, H5AC_dxpl_id, H5O_DTYPE_ID, buf, H5O_MSG_FLAG_WAS_UNKNOWN)) == NULL)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode object")
 
 done:
@@ -4207,6 +4208,76 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5T_path_is_noop
+ *
+ * Purpose:	Private function for H5T_path_find to decide whether a 
+ *              conversion path exists between the source and destination
+ *              types.
+ *
+ * Return:	TRUE:           no conversion.
+ *		FALSE:          has conversion
+ *		FAIL:           function failed.
+ *
+ * Programmer:	Raymond Lu
+ *		24 October 2007
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+H5T_path_is_noop(const H5T_t *src_type, const H5T_t *dst_type, hid_t dxpl_id)
+{
+    H5T_class_t src_class, dst_class;
+    H5P_genplist_t *plist;              /* Property list pointer */
+    htri_t ret_value = FALSE;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5T_path_is_noop)
+
+    if((src_class = H5T_get_class(src_type, FALSE)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to get type class");
+
+    if((dst_class = H5T_get_class(dst_type, FALSE)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to get type class");
+
+#ifdef TMP
+    if(H5T_VLEN == src_class && H5T_VLEN == dst_class && 
+        H5T_LOC_DISK == src_type->shared->u.vlen.loc  &&
+        H5T_LOC_DISK == dst_type->shared->u.vlen.loc  &&
+        0==H5T_cmp(src_type, dst_type, TRUE))
+        ret_value = TRUE;
+#else
+    /* If the library indicates that no conversion through transfer property,
+     * don't convert.  This case is primarily for the filter of modifying 
+     * dataset's datatype.
+     */
+    if(H5T_VLEN == src_class && H5T_VLEN == dst_class) {
+        hbool_t vlen_conv;
+
+        if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADATOM, FAIL, "can't find object for ID")
+
+        if(H5P_get(plist, H5D_XFER_VLEN_CONV_NAME, &vlen_conv) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "Error getting vlen conv flag")
+
+        if(!vlen_conv)
+            ret_value = TRUE;
+    }
+#endif
+
+    /* Quincey Koziol, 2 July, 1999
+     * Allow the no-op conversion to occur if no "force conversion" flags are set
+     */
+    if(src_type->shared->force_conv==FALSE && dst_type->shared->force_conv==FALSE 
+        && 0==H5T_cmp(src_type, dst_type, TRUE))
+        ret_value = TRUE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /*H5T_path_is_noop*/
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5T_path_find
  *
  * Purpose:	Finds the path which converts type SRC_ID to type DST_ID,
@@ -4257,7 +4328,8 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
     hid_t	src_id=-1, dst_id=-1;	/*src and dst type identifiers	*/
     int	i;			/*counter			*/
     int	nprint=0;		/*lines of output printed	*/
-
+    htri_t is_noop = FALSE;     /*flag for noop                 */
+ 
     FUNC_ENTER_NOAPI(H5T_path_find, NULL);
 
     assert((!src && !dst) || (src && dst));
@@ -4292,12 +4364,11 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
      * Find the conversion path.  If source and destination types are equal
      * then use entry[0], otherwise do a binary search over the
      * remaining entries.
-     *
-     * Quincey Koziol, 2 July, 1999
-     * Only allow the no-op conversion to occur if no "force conversion" flags
-     * are set
      */
-    if (src->shared->force_conv==FALSE && dst->shared->force_conv==FALSE && 0==H5T_cmp(src, dst, TRUE)) {
+    if((is_noop = H5T_path_is_noop(src, dst, dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to find noop condition");
+
+    if(is_noop) {
 	table = H5T_g.path[0];
 	cmp = 0;
 	md = 0;
@@ -5220,3 +5291,329 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_set_latest_version() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_dtype_is_valid
+ *
+ * Purpose:	Private function to facilitate H5Dmodify_dtype.  It 
+ *              verifies whether the new type is valid.
+ *
+ * Return:	TRUE:	        Positive
+ *
+ *              FALSE:          Zero
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Raymond Lu
+ *		Tuesday, 25 Sept. 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5T_dtype_is_valid(H5T_t *dtype, H5T_t *new_type)
+{
+    H5T_class_t cur_class, new_class;
+    htri_t	ret_value = TRUE;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5T_dtype_is_valid)
+
+    /* Check if the datatype is "sensible" for use in a dataset */
+    if(H5T_is_sensible(new_type) != TRUE)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "datatype is not sensible")
+
+    cur_class = H5T_get_class(dtype, FALSE);
+    new_class = H5T_get_class(new_type, FALSE);
+
+    switch(cur_class) {
+        case H5T_INTEGER:
+        {
+            size_t dtype_prec;
+
+            if(new_class != H5T_INTEGER && new_class != H5T_FLOAT) 
+	        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "new type must be integer or float number")
+
+            if((dtype_prec = H5T_get_precision(dtype)) == 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "can't get integer precision")
+
+            /* Verify if the new type is a valid integer */
+            if(H5T_INTEGER == new_class) {
+                size_t new_type_prec;
+                H5T_sign_t new_type_sign, dtype_sign;
+
+                if((new_type_prec = H5T_get_precision(new_type)) == 0)
+	            HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "can't get integer precision")
+
+                if((new_type_sign = H5T_get_sign(new_type)) < 0)
+	            HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "can't get integer sign")
+
+                if((dtype_sign = H5T_get_sign(dtype)) < 0)
+	            HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "can't get integer sign")
+
+                if(H5T_SGN_2 == dtype_sign && H5T_SGN_NONE == new_type_sign)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "can't change signed integer to unsigned")
+
+               if((new_type_prec - (dtype_sign != new_type_sign) < dtype_prec))
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "can't change to a smaller integer")
+
+            } else if(H5T_FLOAT == new_class) {
+                size_t new_msize;
+
+                if (H5T_get_fields(new_type, NULL, NULL, NULL, NULL, &new_msize) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get fields")
+
+                if (new_msize < dtype_prec)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "can't change a float with smaller precision")
+            }
+        }
+            break;
+        case H5T_FLOAT:
+        {
+            size_t cur_esize, cur_msize;
+
+            if(new_class != H5T_INTEGER && new_class != H5T_FLOAT) 
+	        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "new type must be integer or float number")
+
+            if (H5T_get_fields(dtype, NULL, NULL, &cur_esize, NULL, &cur_msize) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get fields")
+
+            if(H5T_INTEGER == new_class) {
+                size_t new_type_prec;
+                H5T_sign_t new_type_sign;
+
+                if((new_type_sign = H5T_get_sign(new_type)) < 0)
+	            HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "can't get integer sign")
+
+                if(H5T_SGN_NONE == new_type_sign)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "can't change to an unsigned integer")
+
+                if((new_type_prec = H5T_get_precision(new_type)) == 0)
+	            HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "can't get integer precision")
+
+                if(new_type_prec < cur_msize)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "new type has smaller precision")
+
+            } else if(H5T_FLOAT == new_class) {
+                size_t new_esize, new_msize;
+
+                if (H5T_get_fields(new_type, NULL, NULL, &new_esize, NULL, &new_msize) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get fields")
+
+                if (new_msize < cur_msize || new_esize < cur_esize)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "new type has smaller mantissa or exponent")
+
+            }
+        }  
+            break;
+        case H5T_STRING:
+            if(new_class != H5T_STRING)
+	        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "new type must be a string type")
+
+            if((TRUE != H5T_is_variable_str(dtype)) && (TRUE != H5T_is_variable_str(new_type))) {
+                size_t dtype_size, new_size;
+
+                if((dtype_size = H5T_get_size(dtype)) == 0) 
+	            HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "can't get string size")
+
+                if((new_size = H5T_get_size(new_type)) == 0) 
+	            HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "can't get string size")
+
+                if(new_size < dtype_size)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "new type has smaller size")
+            }     
+           
+            if(H5T_is_variable_str(dtype) != H5T_is_variable_str(new_type))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "can't change from/to a VL string")
+
+            break;
+        case H5T_BITFIELD:
+        {
+            size_t dtype_prec, new_type_prec;
+
+            if(new_class != H5T_BITFIELD)
+	        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "new type must be a bitfield type")
+
+            if((dtype_prec = H5T_get_precision(dtype)) == 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "can't get bitfield precision")
+
+            if((new_type_prec = H5T_get_precision(new_type)) == 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "can't get bitfield precision")
+
+            if(new_type_prec < dtype_prec)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "new bitfield has smaller precision")
+        }
+
+            break;
+        case H5T_OPAQUE:
+        {
+            size_t dtype_size, new_type_size;
+
+            if(new_class != H5T_OPAQUE)
+	        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "new type must be an opaque type")
+         
+            if((dtype_size = H5T_get_size(dtype)) == 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "can't get opaque size")
+
+            if((new_type_size = H5T_get_size(new_type)) == 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "can't get opaque size")
+
+            if(new_type_size < dtype_size)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "new opaque has smaller size")
+        }
+ 
+            break;                
+        case H5T_COMPOUND:
+        {
+            int        dtype_nmembs, new_type_nmembs;
+            int        *src2dst = NULL;
+            int        i, j;
+
+            if(new_class != H5T_COMPOUND)
+	        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "new type must be a compound type")
+
+            if((dtype_nmembs = H5T_get_nmembers(dtype)) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "can't get number of members")
+
+            if((new_type_nmembs = H5T_get_nmembers(new_type)) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "can't get number of members")
+
+            if(new_type_nmembs < dtype_nmembs)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "no compound field should be deleted")
+
+            H5T_sort_name(dtype, NULL);
+            H5T_sort_name(new_type, NULL);
+
+            /*
+             * Build a mapping from source member number to destination member
+             * number. If some source member is not a destination member then that
+             * mapping element will be negative.  Also verify if each member is valid. 
+            */
+            src2dst=H5MM_malloc(dtype_nmembs * sizeof(int));
+
+            for (i=0; i<dtype_nmembs; i++) {
+                src2dst[i] = -1;
+                for (j=0; j<new_type_nmembs; j++) {
+                    if (!HDstrcmp(dtype->shared->u.compnd.memb[i].name,
+                           new_type->shared->u.compnd.memb[j].name)) {
+                        src2dst[i] = j;
+                        break;
+                    }
+                }
+                
+                if(src2dst[i] < 0)
+	            HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "no compound field should be deleted")
+                else {
+                    if(TRUE != H5T_dtype_is_valid(dtype->shared->u.compnd.memb[i].type,
+                            new_type->shared->u.compnd.memb[src2dst[i]].type)) 
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "new compound field isn't valid")
+                }
+            }
+        } 
+            break;          
+        case H5T_REFERENCE:
+            if(new_class != H5T_REFERENCE)
+	        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "new type must be a compound type")
+                
+            break;
+        case H5T_ENUM: 
+        {
+            int cur_nmemb, new_nmemb;
+
+            if(new_class != H5T_ENUM)
+	        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "new type must be an enum type")
+
+            if((cur_nmemb = H5T_get_nmembers(dtype)) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "can't get number of members")
+
+            if((new_nmemb = H5T_get_nmembers(new_type)) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "can't get number of members")
+
+            if(new_nmemb < cur_nmemb)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "new enum's members can't be less than current enum")
+        }
+                
+            break;                
+        case H5T_VLEN:
+        {
+            H5T_t *cur_base, *new_base;
+
+            if(new_class != H5T_VLEN)
+	        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "new type must be a vlen type")
+
+            if((cur_base = H5T_get_super(dtype)) == NULL)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "can't get the base type")
+
+            if((new_base = H5T_get_super(new_type)) == NULL)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "can't get the base type")
+
+            if(H5T_cmp(cur_base, new_base, FALSE))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "the base type of VL type can't be changed")
+
+            if(H5T_close(cur_base) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "can't close the base type")
+
+            if(H5T_close(new_base) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "can't close the base type")
+        }        
+            break;
+        case H5T_ARRAY:
+        {
+            H5T_t   *cur_base, *new_base;
+            int     cur_ndims, new_ndims;
+            hsize_t *cur_dims, *new_dims;
+            int     i;
+
+            if(new_class != H5T_ARRAY)
+	        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "new type must be an array type")
+        
+            if((cur_base = H5T_get_super(dtype)) == NULL)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "can't get the base type")
+
+            if((new_base = H5T_get_super(new_type)) == NULL)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "can't get the base type")
+
+            if(TRUE != H5T_dtype_is_valid(cur_base, new_base))
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "the base type of the new type isn't valid")
+            if(H5T_close(cur_base) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "can't close the base type")
+
+            if(H5T_close(new_base) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "can't close the base type")
+
+            if((cur_ndims = H5T_get_array_ndims(dtype)) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get number of dimension")
+
+            if((new_ndims = H5T_get_array_ndims(new_type)) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get number of dimensions")
+
+            if(new_ndims != cur_ndims)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "the number of dimensions can't be changed")
+          
+            HDassert(cur_ndims);
+            cur_dims = (hsize_t*)H5MM_malloc(cur_ndims*sizeof(hsize_t)); 
+            new_dims = (hsize_t*)H5MM_malloc(new_ndims*sizeof(hsize_t)); 
+
+            if(H5T_get_array_dims(dtype, cur_dims) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get dimension info")
+
+            if(H5T_get_array_dims(new_type, new_dims) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get dimension info")
+
+            for(i=0; i<cur_ndims; i++) {
+                if(new_dims[i] != cur_dims[i])
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "the dimension can't be changed")
+            }
+
+            if(cur_dims)
+                H5MM_free(cur_dims);
+            if(new_dims)
+                H5MM_free(new_dims);
+        } 
+        
+            break;     
+        default:
+	    HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "current type isn't recognizable")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}

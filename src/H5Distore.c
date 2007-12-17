@@ -174,6 +174,7 @@ typedef struct H5D_istore_it_ud4_t {
     hid_t               tid_dst;                /* Datatype ID for destination datatype */
     hid_t               tid_mem;                /* Datatype ID for memory datatype */
     H5T_t               *dt_src;                /* Source datatype */
+    H5T_t               *dt_dst;                /* Destination datatype */
     H5T_path_t          *tpath_src_mem;         /* Datatype conversion path from source file to memory */
     H5T_path_t          *tpath_mem_dst;         /* Datatype conversion path from memory to dest. file */
     void                *reclaim_buf;           /* Buffer for reclaiming data */
@@ -228,6 +229,8 @@ static int H5D_istore_iter_dump(H5F_t *f, hid_t dxpl_id, const void *left_key, h
 static int H5D_istore_prune_check(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
         const void *_rt_key, void *_udata);
 static int H5D_istore_iter_copy(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
+                                 const void *_rt_key, void *_udata);
+static int H5D_istore_iter_copy_conv(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
                                  const void *_rt_key, void *_udata);
 
 /* B-tree callbacks */
@@ -965,6 +968,7 @@ H5D_istore_iter_dump (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_lt_key
  * Programmer:  Peter Cao
  *              August 20, 2005
  *
+ * Modification:
  *-------------------------------------------------------------------------
  */
 static int
@@ -1115,6 +1119,145 @@ H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
     /* Write chunk data to destination file */
     HDassert(H5F_addr_defined(udata_dst.addr));
     if(H5F_block_write(udata->file_dst, H5FD_MEM_DRAW, udata_dst.addr, nbytes, dxpl_id, buf) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, H5_ITER_ERROR, "unable to write raw data to file")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_istore_iter_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D_istore_iter_copy_conv
+ *
+ * Purpose:     copy chunked raw data from source file and insert to the
+ *              B-tree node in the destination file.  The data conversion
+ *              is for H5D_istore_copy_conv that is used by H5Dmodify_dtype.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Raymond Lu
+ *              8 October 2007
+ *
+ * Modification:
+ *-------------------------------------------------------------------------
+ */
+static int
+H5D_istore_iter_copy_conv(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
+    haddr_t addr_src, const void UNUSED *_rt_key, void *_udata)
+{
+    H5D_istore_it_ud4_t     *udata = (H5D_istore_it_ud4_t *)_udata;
+    const H5D_istore_key_t  *lt_key = (const H5D_istore_key_t *)_lt_key;
+    H5D_istore_ud1_t        udata_dst;                  /* User data about new destination chunk */
+    hbool_t                 is_vlen = FALSE;
+    hbool_t                 fix_ref = FALSE;
+    hbool_t                 other_conversion = FALSE;
+
+    /* General information about chunk copy */
+    void                    *bkg = udata->bkg;
+    void                    *buf = udata->buf;
+    size_t                  buf_size = udata->buf_size;
+    H5O_pline_t             *pline = udata->pline;
+
+    /* needed for commpressed variable length data */
+    hbool_t                 is_compressed = FALSE;
+    H5Z_EDC_t               edc_read = H5Z_NO_EDC;
+    size_t                  nbytes = lt_key->nbytes;
+    size_t                  src_nbytes, dst_nbytes;
+    H5Z_cb_t                cb_struct;
+
+    H5T_path_t              *tpath = udata->tpath_src_mem;
+    H5S_t                   *buf_space = udata->buf_space;
+    hid_t                   tid_src = udata->tid_src;
+    hid_t                   tid_dst = udata->tid_dst;
+    size_t                  nelmts = udata->nelmts;
+
+    int                     ret_value = H5_ITER_CONT; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_istore_iter_copy_conv)
+
+    /* Check parameter for type conversion */
+    if(H5T_detect_class(udata->dt_src, H5T_VLEN) > 0)
+        is_vlen = TRUE;
+
+    /* Check for filtered chunks */
+    if(pline && pline->nused) {
+        is_compressed = TRUE;
+        cb_struct.func = NULL; /* no callback function when failed */
+    } /* end if */
+
+    /* Resize the buf if it is too small to hold the data */
+    if(nbytes > buf_size) {
+        void *new_buf;          /* New buffer for data */
+
+        /* Re-allocate memory for copying the chunk */
+        if(NULL == (new_buf = H5MM_realloc(udata->buf, nbytes)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR, "memory allocation failed for raw data chunk")
+        udata->buf = new_buf;
+        if(udata->bkg) {
+            if(NULL == (new_buf = H5MM_realloc(udata->bkg, nbytes)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR, "memory allocation failed for raw data chunk")
+            udata->bkg = new_buf;
+            if(!udata->cpy_info->expand_ref)
+                HDmemset((uint8_t *)udata->bkg + buf_size, 0, (size_t)(nbytes - buf_size));
+
+            bkg = udata->bkg;
+        } /* end if */
+
+        buf = udata->buf;
+        udata->buf_size = buf_size = nbytes;
+    } /* end if */
+
+    /* read chunk data from the source file.  Make sure to use
+     * the source size. */ 
+    src_nbytes = udata->nelmts * H5T_get_size(udata->dt_src);
+    if(H5F_block_read(f_src, H5FD_MEM_DRAW, addr_src, src_nbytes, dxpl_id, buf) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_READERROR, H5_ITER_ERROR, "unable to read raw data chunk")
+
+    /* Need to uncompress data elements */
+    if(is_compressed) {
+        unsigned filter_mask = lt_key->filter_mask;
+
+        if(H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &filter_mask, edc_read, cb_struct, &src_nbytes, &buf_size, &buf) < 0)
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, H5_ITER_ERROR, "data pipeline read failed")
+    } /* end if */
+
+    /* Set background buffer to all zeros */
+    HDmemset(bkg, 0, buf_size);
+
+    /* Convert from memory to destination file */
+    if(H5T_convert(tpath, tid_src, tid_dst, nelmts, (size_t)0, (size_t)0, buf, bkg, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5_ITER_ERROR, "datatype conversion failed")
+
+    /* Copy source chunk callback information for insertion */
+    HDmemset(&udata_dst, 0, sizeof(udata_dst));
+    /*HDmemcpy(&(udata_dst.common.key), lt_key, sizeof(H5D_istore_key_t));*/
+
+    udata_dst.common.mesg = udata->common.mesg;     /* Share this pointer for a short while */
+    udata_dst.common.offset = lt_key->offset;
+    dst_nbytes = udata->nelmts * H5T_get_size(udata->dt_dst);
+    udata_dst.nbytes = dst_nbytes;
+    udata_dst.filter_mask = lt_key->filter_mask;
+    udata_dst.addr = HADDR_UNDEF;
+ 
+    /* Need to compress variable-length & reference data elements before writing to file */
+    if(is_compressed) {
+        if(H5Z_pipeline(pline, 0, &(udata_dst.filter_mask), edc_read,
+                cb_struct, &dst_nbytes, &buf_size, &buf) < 0)
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, H5_ITER_ERROR, "output pipeline failed")
+	udata->buf = buf;
+	udata->buf_size = buf_size;
+    }
+ 
+    /* Insert chunk into the destination Btree */
+    if(H5B_insert(udata->file_dst, dxpl_id, H5B_ISTORE, udata->addr_dst, &udata_dst) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, H5_ITER_ERROR, "unable to allocate chunk")
+
+    /* Write chunk data to destination file */
+    HDassert(H5F_addr_defined(udata_dst.addr));
+
+    /* For H5D_istore_copy_conv that is used by H5Dmodify_dtype.  Make sure to use
+     * the destination size. */ 
+    if(H5F_block_write(udata->file_dst, H5FD_MEM_DRAW, udata_dst.addr, dst_nbytes, dxpl_id, buf) < 0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, H5_ITER_ERROR, "unable to write raw data to file")
 
 done:
@@ -1814,7 +1957,7 @@ H5D_istore_lock(const H5D_io_info_t *io_info, H5D_istore_ud1_t *udata,
     hbool_t             fb_info_init = FALSE;   /* Whether the fill value buffer has been initialized */
     H5D_rdcc_t		*rdcc = &(dset->shared->cache.chunk);   /*raw data chunk cache*/
     H5D_rdcc_ent_t	*ent = NULL;		/*cache entry		*/
-    unsigned		idx = 0;		/*hash index number	*/
+    unsigned		idx = UINT_MAX;		/*hash index number	*/
     hbool_t		found = FALSE;		/*already in cache?	*/
     size_t		chunk_size;		/*size of a chunk	*/
     void		*chunk = NULL;		/*the file chunk	*/
@@ -3785,6 +3928,13 @@ done:
  * Programmer:  Peter Cao
  *	        August 20, 2005
  *
+ * Modification:
+ *              Raymond Lu
+ *              8 October 2007
+ *              Originally the function set up type conversion information
+ *              if there's a VLEN source datatype.  But for the case of no 
+ *              conversion, still initialize these variables for the now 
+ *              more generalized H5D_istore_iter_copy.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3804,6 +3954,12 @@ H5D_istore_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
     H5S_t      *buf_space = NULL;       /* Dataspace describing buffer */
     hid_t       sid_buf = -1;           /* ID for buffer dataspace */
     size_t      nelmts = 0;             /* Number of elements in buffer */
+    H5T_t      *dt_dst;                 /* Destination datatype */
+    H5T_t      *dt_mem;                 /* Memory datatype */
+    size_t      mem_dt_size;            /* Memory datatype size */
+    size_t      tmp_dt_size;            /* Temp. datatype size */
+    size_t      max_dt_size;            /* Max atatype size */
+    unsigned    u;
     hbool_t     do_convert = FALSE;     /* Indicate that type conversions should be performed */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -3833,51 +3989,49 @@ H5D_istore_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
             HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to initialize chunked storage")
     } /* end if */
 
-    /* If there's a VLEN source datatype, set up type conversion information */
+    /* 
+     * Set up type conversion information if there's a VLEN source datatype.  But for the
+     * case of no conversion, still initialize these variables for the now more generalized
+     * H5D_istore_iter_copy. 
+     */
+
+    /* create a memory copy of the variable-length datatype */
+    if(NULL == (dt_mem = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")
+    if((tid_mem = H5I_register(H5I_DATATYPE, dt_mem)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register memory datatype")
+
+    /* create variable-length datatype at the destinaton file */
+    if(NULL == (dt_dst = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")
+    if(H5T_set_loc(dt_dst, f_dst, H5T_LOC_DISK) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "cannot mark datatype on disk")
+    if((tid_dst = H5I_register(H5I_DATATYPE, dt_dst)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register destination file datatype")
+
+    /* Set up the conversion functions */
+    if(NULL == (tpath_src_mem = H5T_path_find(dt_src, dt_mem, NULL, NULL, dxpl_id, FALSE)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between src and mem datatypes")
+    if(NULL == (tpath_mem_dst = H5T_path_find(dt_mem, dt_dst, NULL, NULL, dxpl_id, FALSE)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between mem and dst datatypes")
+
+    /* Determine largest datatype size */
+    if(0 == (max_dt_size = H5T_get_size(dt_src)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size")
+    if(0 == (mem_dt_size = H5T_get_size(dt_mem)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size")
+    max_dt_size = MAX(max_dt_size, mem_dt_size);
+    if(0 == (tmp_dt_size = H5T_get_size(dt_dst)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size")
+    max_dt_size = MAX(max_dt_size, tmp_dt_size);
+
+    /* Compute the number of elements per chunk */
+    nelmts = 1;
+    for(u = 0;  u < (layout_src->u.chunk.ndims - 1); u++)
+        nelmts *= layout_src->u.chunk.dim[u];
+
     if(H5T_detect_class(dt_src, H5T_VLEN) > 0) {
-        H5T_t *dt_dst;              /* Destination datatype */
-        H5T_t *dt_mem;              /* Memory datatype */
-        size_t mem_dt_size;         /* Memory datatype size */
-        size_t tmp_dt_size;         /* Temp. datatype size */
-        size_t max_dt_size;         /* Max atatype size */
         hsize_t buf_dim;            /* Dimension for buffer */
-        unsigned u;
-
-        /* create a memory copy of the variable-length datatype */
-        if(NULL == (dt_mem = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")
-        if((tid_mem = H5I_register(H5I_DATATYPE, dt_mem)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register memory datatype")
-
-        /* create variable-length datatype at the destinaton file */
-        if(NULL == (dt_dst = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")
-        if(H5T_set_loc(dt_dst, f_dst, H5T_LOC_DISK) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "cannot mark datatype on disk")
-        if((tid_dst = H5I_register(H5I_DATATYPE, dt_dst)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register destination file datatype")
-
-        /* Set up the conversion functions */
-        if(NULL == (tpath_src_mem = H5T_path_find(dt_src, dt_mem, NULL, NULL, dxpl_id, FALSE)))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between src and mem datatypes")
-        if(NULL == (tpath_mem_dst = H5T_path_find(dt_mem, dt_dst, NULL, NULL, dxpl_id, FALSE)))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between mem and dst datatypes")
-
-        /* Determine largest datatype size */
-        if(0 == (max_dt_size = H5T_get_size(dt_src)))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size")
-        if(0 == (mem_dt_size = H5T_get_size(dt_mem)))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size")
-        max_dt_size = MAX(max_dt_size, mem_dt_size);
-        if(0 == (tmp_dt_size = H5T_get_size(dt_dst)))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to determine datatype size")
-        max_dt_size = MAX(max_dt_size, tmp_dt_size);
-
-        /* Compute the number of elements per chunk */
-        nelmts = 1;
-        for(u = 0;  u < (layout_src->u.chunk.ndims - 1); u++)
-            nelmts *= layout_src->u.chunk.dim[u];
-
         /* Create the space and set the initial extent */
         buf_dim = nelmts;
         if(NULL == (buf_space = H5S_create_simple((unsigned)1, &buf_dim, NULL)))
@@ -3939,6 +4093,7 @@ H5D_istore_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
     udata.tid_mem = tid_mem;
     udata.tid_dst = tid_dst;
     udata.dt_src = dt_src;
+    udata.dt_dst = dt_src;
     udata.do_convert = do_convert;
     udata.tpath_src_mem = tpath_src_mem;
     udata.tpath_mem_dst = tpath_mem_dst;
@@ -3986,6 +4141,162 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_istore_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_istore_copy_conv
+ *
+ * Purpose:	Copies an indexed storage B-tree from SRC file to DST file
+ *              and does data conversion.  This function is similar to
+ *              H5D_istore_copy and is mainly used by H5Dmodify_dtype.  
+ *
+ * Return:	Non-negative on success (with the ISTORE argument initialized
+ *		and ready to write to an object header). Negative on failure.
+ *
+ * Programmer:  Raymond Lu
+ *	        8 October 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_istore_copy_conv(H5F_t *file, const H5D_t *dset_src, const H5D_t *dset_dst, 
+        H5O_copy_t UNUSED *cpy_info, hid_t dxpl_id) 
+{
+    H5P_genplist_t *plist;              /* Property list pointer */
+    H5D_istore_it_ud4_t    udata;
+    H5T_path_t  *tpath = NULL;          /* Datatype conversion paths */
+    H5T_t       *dt_src = NULL;         /* Source datatype */
+    H5T_t       *dt_dst = NULL;         /* Destination datatype */
+    hid_t       tid_src = -1;           /* Datatype ID for source datatype */
+    hid_t       tid_dst = -1;           /* Datatype ID for destination datatype */
+    size_t      src_dt_size = 0;        /* Source datatype size */
+    size_t      dst_dt_size = 0;        /* Destination datatype size */
+    size_t      max_dt_size;            /* Max. datatype size */
+    hsize_t     nelmts = 0;             /* Number of elements in buffer */
+    size_t      buf_size;               /* Size of copy buffer */
+    void       *buf = NULL;             /* Buffer for copying data */
+    void       *bkg = NULL;             /* Buffer for background during type conversion */
+    H5S_t      *buf_space = NULL;       /* Dataspace describing buffer */
+    hsize_t     buf_dim;                /* Dimension for buffer */
+    hbool_t     is_vlen = FALSE;        /* Flag to indicate VL type */
+    hbool_t     vlen_conv = TRUE;       /* Transfer property to indicate no conversion for vlen */
+    unsigned    u;
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5D_istore_copy_conv, FAIL)
+
+    /* Check args */
+    HDassert(file);
+    HDassert(dset_src && H5D_CHUNKED == dset_src->shared->layout.type);
+    HDassert(dset_dst && H5D_CHUNKED == dset_dst->shared->layout.type);
+
+    dt_src = dset_src->shared->type;
+    dt_dst = dset_dst->shared->type;
+    tid_src = dset_src->shared->type_id;
+    tid_dst = dset_dst->shared->type_id;
+
+    /* Compute the number of elements per chunk */
+    nelmts = 1;
+    for(u = 0;  u < (dset_src->shared->layout.u.chunk.ndims - 1); u++)
+        nelmts *= dset_src->shared->layout.u.chunk.dim[u];
+
+    /* Compute element sizes and other parameters */
+    src_dt_size = H5T_get_size(dt_src);
+    dst_dt_size = H5T_get_size(dt_dst);
+    max_dt_size = MAX(src_dt_size, dst_dt_size);
+
+    /* Check if we need to create the B-tree in the dest. file */
+    if(dset_dst->shared->layout.u.chunk.addr == HADDR_UNDEF) {
+        /* Create the root of the B-tree that describes chunked storage */
+        if(H5D_istore_create(file, dxpl_id, &(dset_dst->shared->layout)) < 0)
+            HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to initialize chunked storage")
+    } /* end if */
+
+    /* If the datatype is or contains vlen, set the property to indicate no conversion 
+     * is needed. */
+    if((is_vlen = H5T_detect_class(dt_src, H5T_VLEN)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to detect dtatypes")
+
+    if(is_vlen ) {
+        vlen_conv = FALSE;
+        if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADATOM, FAIL, "can't find object for ID")
+
+        if(H5P_set(plist, H5D_XFER_VLEN_CONV_NAME, &vlen_conv) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "Error setting vlen conv flag")
+        /*if(H5P_get(plist, H5D_XFER_VLEN_CONV_NAME, &vlen_conv) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "Error getting vlen conv flag")*/
+    }
+
+    /* Set up the conversion functions */
+    if(NULL == (tpath = H5T_path_find(dt_src, dt_dst, NULL, NULL, dxpl_id, FALSE)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between src and mem datatypes")
+
+    /* Create the space and set the initial extent */
+    buf_dim = nelmts;
+    if(NULL == (buf_space = H5S_create_simple((unsigned)1, &buf_dim, NULL)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace")
+
+    /* Set initial buffer sizes */
+    buf_size = nelmts * max_dt_size;
+
+    /* Allocate background memory for converting the chunk */
+    if(NULL == (bkg = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for raw data chunk")
+
+    HDmemset(bkg, 0, buf_size);
+
+    /* Allocate memory for copying the chunk */
+    if(NULL == (buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for raw data chunk")
+
+    /* Initialize the callback structure for the source */
+    HDmemset(&udata, 0, sizeof udata);
+    udata.common.mesg = &(dset_src->shared->layout);
+    udata.file_src = file;
+    udata.addr_dst = dset_dst->shared->layout.u.chunk.addr;
+    udata.buf = buf;
+    udata.bkg = bkg;
+    udata.buf_size = buf_size;
+    udata.tid_src = tid_src;
+    udata.tid_dst = tid_dst;
+    udata.dt_src = dt_src;
+    udata.dt_dst = dt_dst;
+    udata.do_convert = TRUE;
+    udata.tpath_src_mem = tpath;
+    udata.buf_space = buf_space;
+    udata.nelmts = nelmts;
+    udata.pline = &(dset_src->shared->dcpl_cache.pline);
+    udata.file_dst = file;
+    udata.cpy_info = cpy_info;
+
+    /* copy the chunked data by iteration */
+    if(H5B_iterate(file, dxpl_id, H5B_ISTORE, H5D_istore_iter_copy_conv, dset_src->shared->layout.u.chunk.addr, &udata) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to iterate over chunk B-tree")
+
+    /* I/O buffers may have been re-allocated */
+    buf = udata.buf;
+    bkg = udata.bkg;
+
+    /* Set the property of vlen conversion back to normal */
+    if(is_vlen ) {
+        vlen_conv = TRUE;
+
+        if(H5P_set(plist, H5D_XFER_VLEN_CONV_NAME, &vlen_conv) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "Error setting vlen conv flag")
+    }
+
+done:
+    if(buf)
+        H5MM_xfree(buf);
+    if(bkg)
+        H5MM_xfree(bkg);
+
+    if(buf_space && H5S_close(buf_space) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't free data space")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_istore_copy_conv() */
 
 
 /*-------------------------------------------------------------------------

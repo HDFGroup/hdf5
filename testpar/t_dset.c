@@ -1842,7 +1842,7 @@ extend_writeAll(void)
     H5Sclose(mem_dataspace);
     H5Pclose(xfer_plist);
 
-
+#ifdef TMP
     /* -------------------------
      * Test writing to dataset2
      * -------------------------*/
@@ -1916,7 +1916,7 @@ extend_writeAll(void)
     VRFY((ret >= 0), "H5Sclose succeeded");
     ret = H5Pclose(xfer_plist);
     VRFY((ret >= 0), "H5Pclose succeeded");
-
+#endif /*TMP*/
 
     /* close dataset collectively */
     ret = H5Dclose(dataset1);

@@ -544,6 +544,7 @@ test_vltypes_vlen_atomic(void)
 
 } /* end test_vltypes_vlen_atomic() */
 
+
 /****************************************************************
 **
 **  rewrite_vltypes_vlen_atomic(): check memory leak for basic VL datatype.
@@ -699,7 +700,289 @@ rewrite_vltypes_vlen_atomic(void)
 
 } /* end rewrite_vltypes_vlen_atomic() */
 
+/****************************************************************
+**
+**  test_vltypes_modify_type(): Test H5Dmodify_dtype
+**      Tests for VL datatypes of atomic datatypes
+**      This test is disabled now because the library doesn't
+**      support changing the base type of VL.
+**
+****************************************************************/
+#ifdef TMP
+static void
+test_vltypes_modify_type(void)
+{
+    hvl_t wdata[SPACE1_DIM1];   /* Information to write */
+    hvl_t wdata2[SPACE1_DIM1];  /* Information to write */
+    hvl_t rdata[SPACE1_DIM1];   /* Information read in */
+    hvl_t fill;                 /* Fill value */
+    hid_t fid1;		/* HDF5 File IDs		*/
+    hid_t dataset;	/* Dataset ID			*/
+    hid_t sid1;         /* Dataspace ID			*/
+    hid_t sid2;         /* ID of bad dataspace (no extent set) */
+    hid_t tid1, tid2;   /* Datatype ID			*/
+    hid_t dcpl_pid;     /* Dataset creation property list ID */
+    hid_t xfer_pid;     /* Dataset transfer property list ID */
+    hsize_t dims1[] = {SPACE1_DIM1};
+    hsize_t chunk_dims1[] = {SPACE1_DIM1/4};
+    hsize_t size;       /* Number of bytes which will be used */
+    unsigned i,j;       /* counting variables */
+    size_t mem_used=0;  /* Memory used during allocation */
+    herr_t ret;		/* Generic return value		*/
 
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing the H5Dmodify_dtype Functionality of Atomic VL Datatype\n"));
+
+    /* Allocate and initialize VL data to write */
+    for(i=0; i<SPACE1_DIM1; i++) {
+        wdata[i].p=HDmalloc((i+1)*sizeof(unsigned int));
+        wdata[i].len=i+1;
+        for(j=0; j<(i+1); j++)
+            ((unsigned int *)wdata[i].p)[j]=i*10+j;
+
+        wdata2[i].p=NULL;
+        wdata2[i].len=0;
+    } /* end for */
+
+    /* Create file */
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+    /* Create dataspace for datasets */
+    sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
+    CHECK(sid1, FAIL, "H5Screate_simple");
+
+    /* Create a datatype to refer to */
+    tid1 = H5Tvlen_create (H5T_NATIVE_UINT);
+    CHECK(tid1, FAIL, "H5Tvlen_create");
+
+    /* Create a contiguous dataset */
+    dataset = H5Dcreate2(fid1, "Dataset1", tid1, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate");
+
+    /* Write dataset to disk */
+    ret=H5Dwrite(dataset,tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,wdata);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Create second dataset, with fill value */
+    dcpl_pid=H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(dcpl_pid, FAIL, "H5Pcreate");
+
+    /* Set chunking */
+    ret = H5Pset_layout(dcpl_pid, H5D_CHUNKED);
+    CHECK(ret, FAIL, "H5Pset_layout");
+
+    ret = H5Pset_chunk(dcpl_pid, 1, chunk_dims1);
+    CHECK(ret, FAIL, "H5Pset_chunk");
+
+    /* Create a chunked dataset */
+    dataset = H5Dcreate2(fid1, "Dataset2", tid1, sid1, H5P_DEFAULT, dcpl_pid, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate");
+
+    /* Close dataset creation property list */
+    ret = H5Pclose(dcpl_pid);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Write data to disk */
+    ret = H5Dwrite(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close datatype */
+    ret = H5Tclose(tid1);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close disk dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close file */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+
+    /* Open the file for data checking */
+    fid1 = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fopen");
+
+    /* Create a new datatype to which the dataset will be changed */
+    tid2 = H5Tvlen_create (H5T_NATIVE_LLONG);
+    CHECK(tid2, FAIL, "H5Tvlen_create");
+
+    /* Open the contiguous dataset */
+    dataset = H5Dopen2(fid1, "Dataset1", H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
+
+    /* Modify the datatype of the contiguous dataset now.  It should
+     * immediately change the dataset's datatype and the data. */
+    ret = H5Dmodify_dtype(dataset, tid2);
+    CHECK(ret, FAIL, "H5Dmodify_dtype");
+
+    /* Get dataspace for datasets */
+    sid1 = H5Dget_space(dataset);
+    CHECK(sid1, FAIL, "H5Dget_space");
+
+    /* Get datatype for dataset */
+    tid1 = H5Dget_type(dataset);
+    CHECK(tid1, FAIL, "H5Dget_type");
+
+    /* Change to the custom memory allocation routines for reading VL data */
+    xfer_pid = H5Pcreate(H5P_DATASET_XFER);
+    CHECK(xfer_pid, FAIL, "H5Pcreate");
+
+    ret = H5Pset_vlen_mem_manager(xfer_pid, test_vltypes_alloc_custom, &mem_used, test_vltypes_free_custom, &mem_used);
+    CHECK(ret, FAIL, "H5Pset_vlen_mem_manager");
+
+    /* Make certain the correct amount of memory will be used */
+    ret = H5Dvlen_get_buf_size(dataset, tid1, sid1, &size);
+    CHECK(ret, FAIL, "H5Dvlen_get_buf_size");
+
+    /* 10 elements allocated = 1 + 2 + 3 + 4 elements for each array position */
+    VERIFY(size,((SPACE1_DIM1 * (SPACE1_DIM1 + 1)) / 2) * sizeof(long_long), "H5Dvlen_get_buf_size");
+
+    /* Read dataset from disk */
+    ret = H5Dread(dataset, tid1, H5S_ALL, H5S_ALL, xfer_pid, rdata);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Make certain the correct amount of memory has been used */
+    /* 10 elements allocated = 1 + 2 + 3 + 4 elements for each array position */
+    VERIFY(mem_used,((SPACE1_DIM1*(SPACE1_DIM1+1))/2)*sizeof(long_long),"H5Dread");
+
+    /* Compare data read in */
+    for(i=0; i<SPACE1_DIM1; i++) {
+        if(wdata[i].len!=rdata[i].len) {
+            TestErrPrintf("%d: VL data lengths don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",__LINE__,(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
+            continue;
+        } /* end if */
+        for(j=0; j<rdata[i].len; j++) {
+            if( ((unsigned int *)wdata[i].p)[j] != ((long_long *)rdata[i].p)[j] ) {
+                TestErrPrintf("VL data values don't match!, wdata[%d].p[%d]=%d, rdata[%d].p[%d]=%d\n",(int)i,(int)j, (int)((unsigned int *)wdata[i].p)[j], (int)i,(int)j, (int)((long_long *)rdata[i].p)[j]);
+                continue;
+            } /* end if */
+        } /* end for */
+    } /* end for */
+
+    /* Reclaim the read VL data */
+    ret = H5Dvlen_reclaim(tid1, sid1, xfer_pid, rdata);
+    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+
+    /* Make certain the VL memory has been freed */
+    VERIFY(mem_used, 0, "H5Dvlen_reclaim");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close datatype */
+    ret = H5Tclose(tid1);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close disk dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close dataset transfer property list */
+    ret = H5Pclose(xfer_pid);
+    CHECK(ret, FAIL, "H5Pclose");
+
+
+    /* Open the chunked dataset */
+    dataset = H5Dopen2(fid1, "Dataset2", H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
+
+    /* Modify the datatype of the chunked dataset now.  It should
+     * immediately change the dataset's datatype and the data. */
+    ret = H5Dmodify_dtype(dataset, tid2);
+    CHECK(ret, FAIL, "H5Dmodify_dtype");
+
+    /* Get dataspace for datasets */
+    sid1 = H5Dget_space(dataset);
+    CHECK(sid1, FAIL, "H5Dget_space");
+
+    /* Get datatype for dataset */
+    tid1 = H5Dget_type(dataset);
+    CHECK(tid1, FAIL, "H5Dget_type");
+
+    /* Change to the custom memory allocation routines for reading VL data */
+    xfer_pid = H5Pcreate(H5P_DATASET_XFER);
+    CHECK(xfer_pid, FAIL, "H5Pcreate");
+
+    ret = H5Pset_vlen_mem_manager(xfer_pid, test_vltypes_alloc_custom, &mem_used, test_vltypes_free_custom, &mem_used);
+    CHECK(ret, FAIL, "H5Pset_vlen_mem_manager");
+
+    /* Make certain the correct amount of memory will be used */
+    ret = H5Dvlen_get_buf_size(dataset, tid1, sid1, &size);
+    CHECK(ret, FAIL, "H5Dvlen_get_buf_size");
+
+    /* 10 elements allocated = 1 + 2 + 3 + 4 elements for each array position */
+    VERIFY(size,((SPACE1_DIM1*(SPACE1_DIM1+1))/2)*sizeof(long_long),"H5Dvlen_get_buf_size");
+
+    /* Read dataset from disk */
+    ret=H5Dread(dataset,tid1,H5S_ALL,H5S_ALL,xfer_pid,rdata);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Make certain the correct amount of memory has been used */
+    /* 10 elements allocated = 1 + 2 + 3 + 4 elements for each array position */
+    VERIFY(mem_used,((SPACE1_DIM1*(SPACE1_DIM1+1))/2)*sizeof(long_long),"H5Dread");
+
+    /* Compare data read in */
+    for(i=0; i<SPACE1_DIM1; i++) {
+        if(wdata[i].len!=rdata[i].len) {
+            TestErrPrintf("%d: VL data lengths don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",__LINE__,(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
+            continue;
+        } /* end if */
+        for(j=0; j<rdata[i].len; j++) {
+            if( ((unsigned int *)wdata[i].p)[j] != ((long_long *)rdata[i].p)[j] ) {
+                TestErrPrintf("VL data values don't match!, wdata[%d].p[%d]=%d, rdata[%d].p[%d]=%d\n",(int)i,(int)j, (int)((unsigned int *)wdata[i].p)[j], (int)i,(int)j, (int)((long_long *)rdata[i].p)[j]);
+                continue;
+            } /* end if */
+        } /* end for */
+    } /* end for */
+
+    /* Reclaim the read VL data */
+    ret=H5Dvlen_reclaim(tid1,sid1,xfer_pid,rdata);
+    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+
+    /* Make certain the VL memory has been freed */
+    VERIFY(mem_used,0,"H5Dvlen_reclaim");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Reclaim the write VL data */
+    ret=H5Dvlen_reclaim(tid1,sid1,H5P_DEFAULT,wdata);
+    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+
+    /* Close datatype */
+    ret = H5Tclose(tid1);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close datatype */
+    ret = H5Tclose(tid2);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close disk dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close dataset transfer property list */
+    ret = H5Pclose(xfer_pid);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Close file */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+} /* end test_vltypes_modify_type() */
+#endif /* TMP */
 
 /****************************************************************
 **
@@ -3166,6 +3449,8 @@ test_vltypes(void)
     test_vltypes_compound_vlen_vlen();/* Test compound datatypes with VL atomic components */
     test_vltypes_compound_vlstr();    /* Test data rewritten of nested VL data */
     test_vltypes_fill_value();        /* Test fill value for VL data */
+    /* Disable this test because the library doesn't support changing the base type of VL */
+    /*test_vltypes_modify_type();*/   /* Test H5Dmodify_dtype with VL atomic datatypes */
 }   /* test_vltypes() */
 
 

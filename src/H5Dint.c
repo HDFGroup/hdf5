@@ -60,8 +60,6 @@ typedef struct {
 /* General stuff */
 static herr_t H5D_init_storage(H5D_t *dataset, hbool_t full_overwrite, hid_t dxpl_id);
 static H5D_shared_t *H5D_new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type);
-static herr_t H5D_init_type(H5F_t *file, const H5D_t *dset, hid_t type_id,
-    const H5T_t *type);
 static herr_t H5D_init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space);
 static herr_t H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset);
 static herr_t H5D_open_oid(H5D_t *dataset, hid_t dxpl_id);
@@ -447,7 +445,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5D_init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type)
 {
     htri_t relocatable;                 /* Flag whether the type is relocatable */
@@ -829,6 +827,7 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     hbool_t             has_vl_type = FALSE;    /* Flag to indicate a VL-type for dataset */
     hbool_t             chunk_init = FALSE;     /* Flag to indicate that chunk information was initialized */
     H5G_loc_t           dset_loc;               /* Dataset location */
+    hid_t               fid = -1;               /* File ID used by filter callbacks */
     unsigned		u;                      /* Local index variable */
     H5D_t		*ret_value;             /* Return value */
 
@@ -887,13 +886,23 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
         H5O_pline_t     *pline;         /* Dataset's I/O pipeline information */
         H5O_fill_t      *fill;          /* Dataset's fill value info */
 
+        /* Get a file ID for the file */
+        if((fid = H5F_get_id(file)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get file ID")
+
         /* Check if the filters in the DCPL can be applied to this dataset */
-        if(H5Z_can_apply(new_dset->shared->dcpl_id, new_dset->shared->type_id) < 0)
+        if(H5Z_can_apply(new_dset->shared->dcpl_id, new_dset->shared->type_id, fid) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "I/O filters can't operate on this dataset")
 
         /* Make the "set local" filter callbacks for this dataset */
-        if(H5Z_set_local(new_dset->shared->dcpl_id, new_dset->shared->type_id) < 0)
+        if(H5Z_set_local(new_dset->shared->dcpl_id, new_dset->shared->type_id, fid) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to set local filter parameters")
+
+        /* Release the file ID */
+        if(H5I_dec_ref(fid) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEFILE, NULL, "can't close file")
+
+        fid = -1;
 
         /* Get new dataset's property list object */
         if(NULL == (dc_plist = (H5P_genplist_t *)H5I_object(new_dset->shared->dcpl_id)))
@@ -1130,6 +1139,10 @@ done:
         } /* end if */
         new_dset->oloc.file = NULL;
         H5FL_FREE(H5D_t, new_dset);
+
+        /* Release the file ID */
+        if(fid>=0 && H5I_dec_ref(fid) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "can't close file ID")
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1156,6 +1169,7 @@ H5D_open(const H5G_loc_t *loc, hid_t dxpl_id)
 {
     H5D_shared_t    *shared_fo = NULL;
     H5D_t           *dataset = NULL;
+    hid_t           fid = -1;                /* File ID for filters */
     H5D_t           *ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI(H5D_open, NULL)
@@ -1214,6 +1228,27 @@ H5D_open(const H5G_loc_t *loc, hid_t dxpl_id)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINC, NULL, "can't increment object count")
     } /* end else */
 
+    /* Get a file ID for the file */
+    if((fid = H5F_get_id(dataset->oloc.file)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "unable to get file ID")
+
+    /*
+     * Make the "reset local" filter callbacks for this dataset.  It's mainly for some filters
+     * like datatype modification which need some info after the dataset is reopened.
+     * If the library has been closed and reopened, the user-defined filters aren't 
+     * registered in the library anymore.  This function for those filters can't be 
+     * found and may fail.  Therefore ignore the error if it's this case.
+     */
+    H5E_BEGIN_TRY {
+        H5Z_reset_local(dataset->shared->dcpl_id, dataset->shared->type_id, fid);
+    } H5E_END_TRY;
+
+    /* Release the file ID */
+    if(H5I_dec_ref(fid) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEFILE, NULL, "can't close file")
+
+    fid = -1;
+
     ret_value = dataset;
 
 done:
@@ -1231,6 +1266,10 @@ done:
         if(shared_fo)
             shared_fo->fo_count--;
     } /* end if */
+
+    /* Release the file ID */
+    if(fid>=0 && H5I_dec_ref(fid) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "can't close file ID")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_open() */
@@ -1539,7 +1578,7 @@ H5D_close(H5D_t *dataset)
 
             case H5D_COMPACT:
                 /* Free the buffer for the raw data for compact datasets */
-                dataset->shared->layout.u.compact.buf = H5MM_xfree(dataset->shared->layout.u.compact.buf);
+	        dataset->shared->layout.u.compact.buf = H5MM_xfree(dataset->shared->layout.u.compact.buf);
                 break;
 
             default:
@@ -2205,6 +2244,7 @@ herr_t
 H5D_check_filters(H5D_t *dataset)
 {
     H5O_fill_t *fill;                   /* Dataset's fill value */
+    hid_t               fid = -1;       /* File ID used by filter callbacks */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_check_filters)
@@ -2229,16 +2269,30 @@ H5D_check_filters(H5D_t *dataset)
         if(fill_status == H5D_FILL_VALUE_DEFAULT || fill_status == H5D_FILL_VALUE_USER_DEFINED) {
             if(fill->fill_time == H5D_FILL_TIME_ALLOC ||
                     (fill->fill_time == H5D_FILL_TIME_IFSET && fill_status == H5D_FILL_VALUE_USER_DEFINED)) {
+                /* Get a file ID for the file */
+                if((fid = H5F_get_id(dataset->oloc.file)) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get file ID")
+
                 /* Filters must have encoding enabled. Ensure that all filters can be applied */
-                if(H5Z_can_apply(dataset->shared->dcpl_id, dataset->shared->type_id) < 0)
+                if(H5Z_can_apply(dataset->shared->dcpl_id, dataset->shared->type_id, fid) < 0)
                     HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "can't apply filters")
 
                 dataset->shared->checked_filters = TRUE;
+
+                /* Release the file ID */
+                if(H5I_dec_ref(fid) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEFILE, NULL, "can't close file")
+
+                fid = -1;
             } /* end if */
         } /* end if */
     } /* end if */
 
 done:
+    /* Release the file ID */
+    if(fid>=0 && H5I_dec_ref(fid) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "can't close file ID")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_check_filters() */
 

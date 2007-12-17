@@ -117,8 +117,9 @@ am_libhdf5_la_OBJECTS = H5.lo H5checksum.lo H5dbg.lo H5system.lo \
 	H5Tfixed.lo H5Tfloat.lo H5Tinit.lo H5Tnative.lo H5Toffset.lo \
 	H5Toh.lo H5Topaque.lo H5Torder.lo H5Tpad.lo H5Tprecis.lo \
 	H5Tstrpad.lo H5Tvisit.lo H5Tvlen.lo H5TS.lo H5V.lo H5WB.lo \
-	H5Z.lo H5Zdeflate.lo H5Zfletcher32.lo H5Znbit.lo H5Zshuffle.lo \
-	H5Zszip.lo H5Zscaleoffset.lo H5Ztrans.lo
+	H5Z.lo H5Zdeflate.lo H5Zdtype_modify.lo H5Zfletcher32.lo \
+	H5Znbit.lo H5Zshuffle.lo H5Zszip.lo H5Zscaleoffset.lo \
+	H5Ztrans.lo
 libhdf5_la_OBJECTS = $(am_libhdf5_la_OBJECTS)
 libhdf5_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -275,6 +276,7 @@ TIME = @TIME@
 TR = @TR@
 TRACE_API = @TRACE_API@
 USE_FILTER_DEFLATE = @USE_FILTER_DEFLATE@
+USE_FILTER_DTYPE_MODIFY = @USE_FILTER_DTYPE_MODIFY@
 USE_FILTER_FLETCHER32 = @USE_FILTER_FLETCHER32@
 USE_FILTER_NBIT = @USE_FILTER_NBIT@
 USE_FILTER_SCALEOFFSET = @USE_FILTER_SCALEOFFSET@
@@ -448,7 +450,7 @@ libhdf5_la_SOURCES = H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Topaque.c \
         H5Torder.c \
         H5Tpad.c H5Tprecis.c H5Tstrpad.c H5Tvisit.c H5Tvlen.c H5TS.c H5V.c H5WB.c H5Z.c  \
-        H5Zdeflate.c H5Zfletcher32.c H5Znbit.c H5Zshuffle.c H5Zszip.c  \
+        H5Zdeflate.c H5Zdtype_modify.c H5Zfletcher32.c H5Znbit.c H5Zshuffle.c H5Zszip.c  \
         H5Zscaleoffset.c H5Ztrans.c
 
 
@@ -780,6 +782,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5WB.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Z.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Zdeflate.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Zdtype_modify.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Zfletcher32.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Znbit.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Zscaleoffset.Plo@am__quote@

@@ -75,6 +75,9 @@
 /* Definitions for vlen free info property */
 #define H5D_XFER_VLEN_FREE_INFO_SIZE       sizeof(void *)
 #define H5D_XFER_VLEN_FREE_INFO_DEF  H5D_VLEN_FREE_INFO
+/* Definitions for data conversion of vlen type */
+#define H5D_XFER_VLEN_CONV_SIZE     sizeof(hbool_t)
+#define H5D_XFER_VLEN_CONV_DEF      TRUE
 /* Definitions for file driver ID property */
 #define H5D_XFER_VFL_ID_SIZE       sizeof(hid_t)
 #define H5D_XFER_VFL_ID_DEF  H5FD_VFD_DEFAULT
@@ -194,6 +197,7 @@ H5P_dxfr_reg_prop(H5P_genclass_t *pclass)
     void *def_vlen_alloc_info = H5D_XFER_VLEN_ALLOC_INFO_DEF;   /* Default value for vlen allocation information */
     H5MM_free_t def_vlen_free = H5D_XFER_VLEN_FREE_DEF;         /* Default value for vlen free function */
     void *def_vlen_free_info = H5D_XFER_VLEN_FREE_INFO_DEF;     /* Default value for vlen free information */
+    void *def_vlen_conv = H5D_XFER_VLEN_CONV_DEF;               /* Default value for vlen free information */
     hid_t def_vfl_id = H5D_XFER_VFL_ID_DEF;                     /* Default value for file driver ID */
     void *def_vfl_info = H5D_XFER_VFL_INFO_DEF;                 /* Default value for file driver info */
     size_t def_hyp_vec_size = H5D_XFER_HYPER_VECTOR_SIZE_DEF;   /* Default value for vector size */
@@ -247,6 +251,10 @@ H5P_dxfr_reg_prop(H5P_genclass_t *pclass)
 
     /* Register the vlen free information property */
     if(H5P_register(pclass, H5D_XFER_VLEN_FREE_INFO_NAME, H5D_XFER_VLEN_FREE_INFO_SIZE, &def_vlen_free_info, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the vlen free information property */
+    if(H5P_register(pclass, H5D_XFER_VLEN_CONV_NAME, H5D_XFER_VLEN_CONV_SIZE, &def_vlen_conv, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the file driver ID property */

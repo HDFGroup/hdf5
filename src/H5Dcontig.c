@@ -1212,3 +1212,189 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_contig_copy() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_contig_copy_conv
+ *
+ * Purpose:	Copies contiguous data from SRC file to DST file
+ *              and does data conversion.  This function is similar to
+ *              H5D_contig_copy and is mainly used by H5Dmodify_dtype.  
+ *
+ * Return:	Non-negative on success. 
+ *		Negative on failure.
+ *
+ * Programmer:  Raymond Lu
+ *	        8 October 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_contig_copy_conv(H5F_t *file, const H5D_t *dset_src, const H5D_t *dset_dst, 
+    H5O_copy_t UNUSED *cpy_info, hid_t dxpl_id)
+{
+    H5P_genplist_t *plist;              /* Property list pointer */
+    haddr_t     addr_src;               /* File offset in source dataset */
+    haddr_t     addr_dst;               /* File offset in destination dataset */
+    H5T_path_t  *tpath = NULL;          /* Datatype conversion paths */
+    H5T_t       *dt_src = NULL;         /* Source datatype */
+    H5T_t       *dt_dst = NULL;         /* Destination datatype */
+    hid_t       tid_src = -1;           /* Datatype ID for source datatype */
+    hid_t       tid_dst = -1;           /* Datatype ID for destination datatype */
+    size_t      src_dt_size = 0;        /* Source datatype size */
+    size_t      dst_dt_size = 0;        /* Destination datatype size */
+    size_t      max_dt_size;            /* Max. datatype size */
+    hsize_t     nelmts = 0;             /* Number of elements in buffer */
+    hssize_t    snelmts = 0;            /* Number of elements in buffer */
+    size_t      request_nelmts;         /* requested strip mine  */
+    size_t      src_nbytes;             /* Number of bytes to read from source */
+    size_t      dst_nbytes;             /* Number of bytes to write to destination */
+    size_t      src_start, dst_start;
+    size_t      elmts_start;
+    hsize_t     total_nbytes;           /* Total number of bytes to copy */
+    hsize_t     total_src_nbytes;       /* Total number of bytes of the source */
+    hsize_t     total_dst_nbytes;       /* Total number of bytes of the destination */
+    size_t	target_size;		/* Desired buffer size	*/
+    void       *buf = NULL;             /* Buffer for copying data */
+    void       *bkg = NULL;             /* Temporary buffer for copying data */
+    void       *reclaim_buf = NULL;     /* Buffer for reclaiming data */
+    H5S_t      *buf_space = NULL;       /* Dataspace describing buffer */
+    hsize_t     buf_dim;                /* Dimension for buffer */
+    hbool_t     is_vlen = FALSE;        /* Flag to indicate VL type */
+    hbool_t     vlen_conv = TRUE;       /* Transfer property to indicate no conversion for vlen */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5D_contig_copy_conv, FAIL)
+
+    /* Check args */
+    HDassert(file);
+    HDassert(dset_src && H5D_CONTIGUOUS == dset_src->shared->layout.type);
+    HDassert(dset_dst && H5D_CONTIGUOUS == dset_dst->shared->layout.type);
+
+    /* dataset pointers and IDs */
+    dt_src = dset_src->shared->type;
+    dt_dst = dset_dst->shared->type;
+    tid_src = dset_src->shared->type_id;
+    tid_dst = dset_dst->shared->type_id;
+
+    /* Set up number of bytes to copy, and initial buffer size */
+    if((snelmts = H5S_GET_EXTENT_NPOINTS(dset_src->shared->space)) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "src dataspace has invalid selection")
+    H5_ASSIGN_OVERFLOW(nelmts,snelmts,hssize_t,hsize_t);
+
+    if(nelmts==0)
+        HGOTO_DONE(SUCCEED)
+
+    /* Compute element sizes and other parameters */
+    src_dt_size = H5T_get_size(dt_src);
+    dst_dt_size = H5T_get_size(dt_dst);
+    max_dt_size = MAX(src_dt_size, dst_dt_size);
+
+    total_src_nbytes = nelmts*src_dt_size;
+    total_dst_nbytes = nelmts*dst_dt_size;
+    total_nbytes = MAX(total_src_nbytes, total_dst_nbytes);
+    target_size = MIN(H5D_TEMP_BUF_SIZE, (size_t)total_nbytes);
+
+    /* XXX: This could cause a problem if the user sets their buffer size
+     * to the same size as the default, and then the dataset elements are
+     * too large for the buffer... - QAK
+     */
+    if(target_size == H5D_TEMP_BUF_SIZE) {
+        /* If the buffer is too small to hold even one element, make it bigger */
+        if(target_size<max_dt_size)
+            target_size = max_dt_size;
+        /* If the buffer is too large to hold all the elements, make it smaller */
+        else if(target_size>(nelmts*max_dt_size))
+            target_size=(size_t)(nelmts*max_dt_size);
+    } /* end if */
+    request_nelmts = target_size / max_dt_size;
+
+    /* Sanity check elements in temporary buffer */
+    if (request_nelmts==0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "temporary buffer max size is too small")
+
+    /* If the datatype is or contains vlen, set the property to indicate no conversion 
+     * is needed. */
+    if((is_vlen = H5T_detect_class(dt_src, H5T_VLEN)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to detect dtatypes")
+
+    if(is_vlen ) {
+        vlen_conv = FALSE;
+        if(NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADATOM, FAIL, "can't find object for ID")
+
+        if(H5P_set(plist, H5D_XFER_VLEN_CONV_NAME, &vlen_conv) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "Error setting vlen conv flag")
+    }
+
+    /* Set up the conversion functions */
+    if(NULL == (tpath = H5T_path_find(dt_src, dt_dst, NULL, NULL, dxpl_id, FALSE)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between src and mem datatypes")
+
+    /* Set the number of bytes to transfer */
+    src_nbytes = request_nelmts * src_dt_size;
+    dst_nbytes = request_nelmts * dst_dt_size;
+
+    /* Allocate space for copy buffer */
+    HDassert(target_size);
+    if(NULL == (buf = H5FL_BLK_MALLOC(type_conv, target_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for copy buffer")
+
+    /* allocate temporary bkg buff for data conversion */
+    if(NULL == (bkg = H5FL_BLK_MALLOC(type_conv, target_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for copy buffer")
+
+    /* Allocate space for destination raw data */
+    if(H5D_contig_create(file, dxpl_id, &(dset_dst->shared->layout)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "unable to allocate contiguous storage")
+
+    /* Loop over copying data */
+    addr_src = dset_src->shared->layout.u.contig.addr;
+    addr_dst = dset_dst->shared->layout.u.contig.addr;
+
+    for (src_start=0, dst_start=0, elmts_start=0; src_start<total_src_nbytes; src_start+=src_nbytes, dst_start+=dst_nbytes, elmts_start+=request_nelmts) {
+        src_nbytes = MIN(src_nbytes, (total_src_nbytes-src_start));
+        dst_nbytes = MIN(dst_nbytes, (total_dst_nbytes-dst_start));
+        request_nelmts = MIN(request_nelmts, (nelmts-elmts_start));
+
+        /* Read raw data from source file */
+        if(H5F_block_read(file, H5FD_MEM_DRAW, addr_src, src_nbytes, H5P_DATASET_XFER_DEFAULT, buf) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to read raw data")
+
+        /* Set background buffer to all zeros */
+        HDmemset(bkg, 0, target_size);
+
+        /* Convert from memory to destination file */
+	if(H5T_convert(tpath, tid_src, tid_dst, request_nelmts, (size_t)0, (size_t)0, buf, bkg, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype conversion failed")
+
+        /* Write raw data to destination file */
+        if(H5F_block_write(file, H5FD_MEM_DRAW, addr_dst, dst_nbytes, H5P_DATASET_XFER_DEFAULT, buf) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write raw data")
+
+        /* Adjust loop variables */
+        addr_src += src_nbytes;
+        addr_dst += dst_nbytes;
+    } /* end while */
+
+    /* Set the property of vlen conversion back to normal */
+    if(is_vlen ) {
+        vlen_conv = TRUE;
+
+        if(H5P_set(plist, H5D_XFER_VLEN_CONV_NAME, &vlen_conv) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "Error setting vlen conv flag")
+    }
+
+done:
+    if(buf)
+        H5FL_BLK_FREE(type_conv, buf);
+    if(reclaim_buf)
+        H5FL_BLK_FREE(type_conv, reclaim_buf);
+    if(bkg)
+        H5FL_BLK_FREE(type_conv, bkg);
+    if(is_vlen && buf_space) {
+        if(H5S_close(buf_space) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't free data space")
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_contig_copy_conv() */

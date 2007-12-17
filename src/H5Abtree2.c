@@ -168,7 +168,7 @@ H5A_dense_fh_name_cmp(const void *obj, size_t UNUSED obj_len, void *_udata)
     FUNC_ENTER_NOAPI_NOINIT(H5A_dense_fh_name_cmp)
 
     /* Decode attribute information */
-    if(NULL == (attr = (H5A_t *)H5O_msg_decode(udata->f, udata->dxpl_id, H5O_ATTR_ID, (const unsigned char *)obj)))
+    if(NULL == (attr = (H5A_t *)H5O_msg_decode(udata->f, udata->dxpl_id, H5O_ATTR_ID, (const unsigned char *)obj, H5O_MSG_FLAG_WAS_UNKNOWN)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "can't decode attribute")
 
     /* Compare the string values */

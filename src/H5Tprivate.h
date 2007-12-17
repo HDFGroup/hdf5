@@ -116,7 +116,13 @@ H5_DLL htri_t H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc);
 H5_DLL htri_t H5T_is_sensible(const H5T_t *dt);
 H5_DLL uint32_t H5T_hash(H5F_t * file, const H5T_t *dt);
 H5_DLL herr_t H5T_set_latest_version(H5T_t *dt);
+H5_DLL htri_t H5T_dtype_is_valid(H5T_t *dtype, H5T_t *new_type);
 H5_DLL htri_t H5T_is_variable_str(const H5T_t *dt);
+
+/* Flowing-point type */
+H5_DLL herr_t H5T_get_fields(H5T_t *dt, size_t *spos/*out*/,
+	      size_t *epos/*out*/, size_t *esize/*out*/,
+	      size_t *mpos/*out*/, size_t *msize/*out*/);
 
 /* Reference specific functions */
 H5_DLL H5R_type_t H5T_get_ref_type(const H5T_t *dt);

@@ -110,7 +110,7 @@ myfilter(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
 
 /* a "set local" callback     */
 static herr_t
-set_local_myfilter(hid_t dcpl_id, hid_t tid, hid_t UNUSED sid);
+set_local_myfilter(hid_t dcpl_id, hid_t tid, hid_t UNUSED sid, hid_t UNUSED file_id);
 
 #define MYFILTER_ID 405
 
@@ -122,6 +122,7 @@ const H5Z_class_t H5Z_MYFILTER[1] = {{
     "myfilter",                /* Filter name for debugging */
     NULL,                /* The "can apply" callback     */
     set_local_myfilter,  /* The "set local" callback     */
+    NULL,                /* The "reset local" callback   */
     myfilter,            /* The actual filter function */
 }};
 
@@ -4727,7 +4728,6 @@ static void gent_filters(void)
  assert(ret >= 0);
 #endif
 
-
 /*-------------------------------------------------------------------------
  * shuffle
  *-------------------------------------------------------------------------
@@ -4744,7 +4744,6 @@ static void gent_filters(void)
  ret=make_dset(fid,"shuffle",sid,H5T_NATIVE_INT,dcpl,buf1);
  assert(ret >= 0);
 #endif
-
 
 /*-------------------------------------------------------------------------
  * checksum
@@ -4842,7 +4841,6 @@ static void gent_filters(void)
 
  ret=make_dset(fid,"all",sid,H5T_NATIVE_INT,dcpl,buf1);
  assert(ret >= 0);
-
 
 /*-------------------------------------------------------------------------
  * user defined filter
@@ -4952,7 +4950,7 @@ myfilter(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
  */
 
 static herr_t
-set_local_myfilter(hid_t dcpl_id, hid_t UNUSED tid, hid_t UNUSED sid)
+set_local_myfilter(hid_t dcpl_id, hid_t UNUSED tid, hid_t UNUSED sid, hid_t UNUSED file_id)
 {
  unsigned flags;                        /* Filter flags */
  size_t   cd_nelmts = 0;                /* Number of filter parameters */

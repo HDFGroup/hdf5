@@ -384,7 +384,7 @@ HDfprintf(stderr, "%s: Load heap header, addr = %a\n", FUNC, addr);
         UINT32DECODE(p, hdr->pline_root_direct_filter_mask);
 
         /* Decode I/O filter information */
-        if(NULL == (pline = (H5O_pline_t *)H5O_msg_decode(hdr->f, dxpl_id, H5O_PLINE_ID, p)))
+        if(NULL == (pline = (H5O_pline_t *)H5O_msg_decode(hdr->f, dxpl_id, H5O_PLINE_ID, p, H5O_MSG_FLAG_WAS_UNKNOWN)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDECODE, NULL, "can't decode I/O pipeline filters")
         p += hdr->filter_len;
 

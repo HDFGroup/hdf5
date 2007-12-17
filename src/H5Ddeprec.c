@@ -320,6 +320,7 @@ H5D_extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id)
     H5S_t *space;                       /* Dataset's dataspace */
     H5O_fill_t *fill;                   /* Dataset's fill value */
     herr_t ret_value = SUCCEED;         /* Return value */
+    hid_t fid = -1;
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_extend)
 
@@ -360,6 +361,10 @@ H5D_extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id)
     } /* end if */
 
 done:
+    /* Release the file ID */
+    if(fid>=0 && H5I_dec_ref(fid) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't close file ID")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_extend() */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */

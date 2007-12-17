@@ -354,12 +354,16 @@ H5O_layout_copy(const void *_mesg, void *_dest)
 
     /* Deep copy the buffer for compact datasets also */
     if(mesg->type == H5D_COMPACT) {
-        /* Allocate memory for the raw data */
-        if(NULL == (dest->u.compact.buf = H5MM_malloc(dest->u.compact.size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for compact dataset")
+        if(dest->u.compact.size) {
+            /* Allocate memory for the raw data */
+            if(NULL == (dest->u.compact.buf = H5MM_malloc(dest->u.compact.size)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for compact dataset")
 
-        /* Copy over the raw data */
-        HDmemcpy(dest->u.compact.buf, mesg->u.compact.buf, dest->u.compact.size);
+            /* Copy over the raw data */
+            HDmemcpy(dest->u.compact.buf, mesg->u.compact.buf, dest->u.compact.size);
+        } else {
+            dest->u.compact.buf = NULL;
+        }
     } /* end if */
 
     /* Set return value */

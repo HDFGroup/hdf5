@@ -2596,17 +2596,18 @@ AC_SUBST(USE_FILTER_SHUFFLE) USE_FILTER_SHUFFLE="no"
 AC_SUBST(USE_FILTER_FLETCHER32) USE_FILTER_FLETCHER32="no"
 AC_SUBST(USE_FILTER_NBIT) USE_FILTER_NBIT="no"
 AC_SUBST(USE_FILTER_SCALEOFFSET) USE_FILTER_SCALEOFFSET="no"
+AC_SUBST(USE_FILTER_DTYPE_MODIFY) USE_FILTER_DTYPE_MODIFY="no"
 AC_MSG_CHECKING([for I/O filters])
 AC_ARG_ENABLE([filters],
               [AC_HELP_STRING([--enable-filters=all],
                               [Turn on all internal I/O filters. One may
                                also specify a comma-separated list of filters
-                               or the word no.  The default is all internal
+                               or the word no.  The default is with all internal
                                I/O filters.])],
               [FILTERS=$enableval])
 
 dnl Eventually: all_filters="shuffle,foo,bar,baz"
-all_filters="shuffle,fletcher32,nbit,scaleoffset"
+all_filters="shuffle,fletcher32,nbit,scaleoffset,dtype_modify"
 case "X-$FILTERS" in
   X-|X-all)
     FILTERS=$all_filters
@@ -2646,6 +2647,11 @@ if test -n "$FILTERS"; then
       AC_DEFINE([HAVE_FILTER_SCALEOFFSET], [1],
                 [Define if support for scaleoffset filter is enabled])
       USE_FILTER_SCALEOFFSET="yes"
+    fi
+    if test $filter = "DTYPE_MODIFY"; then
+      AC_DEFINE([HAVE_FILTER_DTYPE_MODIFY], [1],
+                [Define if support for datatype modification filter is enabled])
+      USE_FILTER_DTYPE_MODIFY="yes"
     fi
   done
 fi

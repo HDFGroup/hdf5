@@ -91,7 +91,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Topaque.c \
         H5Torder.c \
         H5Tpad.c H5Tprecis.c H5Tstrpad.c H5Tvisit.c H5Tvlen.c H5TS.c H5V.c H5WB.c H5Z.c  \
-        H5Zdeflate.c H5Zfletcher32.c H5Znbit.c H5Zshuffle.c H5Zszip.c  \
+        H5Zdeflate.c H5Zdtype_modify.c H5Zfletcher32.c H5Znbit.c H5Zshuffle.c H5Zszip.c  \
         H5Zscaleoffset.c H5Ztrans.c
 
 

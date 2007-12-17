@@ -31,6 +31,8 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Sprivate.h"		/* Dataspace functions			*/
 #include "H5SLprivate.h"	/* Skip lists				*/
+#include "H5SMprivate.h"	/* Shared Object Header Messages	*/
+#include "H5Tprivate.h"	        /* Datatype                             */
 #include "H5Vprivate.h"		/* Vector and array functions		*/
 
 #ifdef H5_HAVE_PARALLEL
@@ -87,6 +89,12 @@ static herr_t H5D_compound_opt_read(size_t nelmts, const H5S_t *mem_space,
             void *user_buf/*out*/);
 static herr_t H5D_compound_opt_write(size_t nelmts, hid_t src_id, hid_t dst_id, 
             void *data_buf);
+static herr_t H5D_modify_dtype_with_filter(H5F_t *file, H5D_t *dataset, 
+            hid_t type_id, H5T_t *type, hid_t dxpl_id);
+static herr_t H5D_modify_dtype_without_filter(H5F_t *file, H5D_t *dataset, 
+            hid_t type_id, H5T_t *type, hid_t dxpl_id);
+static herr_t H5D_modify_dtype_update_fill(H5F_t *file, H5D_t *dataset, struct H5O_t *oh,
+            hid_t dxpl_id);
 
 #ifdef H5_HAVE_PARALLEL
 static herr_t H5D_ioinfo_term(H5D_io_info_t *io_info);
@@ -614,6 +622,7 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 #endif /*H5_HAVE_PARALLEL*/
     H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
     H5D_dxpl_cache_t *dxpl_cache=&_dxpl_cache;   /* Data transfer property cache */
+    hid_t fid = -1;                     /* File ID for filters */
     herr_t	ret_value = SUCCEED;	/* Return value	*/
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_write)
@@ -627,8 +636,18 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 
     /* All filters in the DCPL must have encoding enabled. */
     if(!dataset->shared->checked_filters) {
-        if(H5Z_can_apply(dataset->shared->dcpl_id, dataset->shared->type_id) <0)
+        /* Get a file ID for the file */
+        if((fid = H5F_get_id(dataset->oloc.file)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get file ID")
+
+        if(H5Z_can_apply(dataset->shared->dcpl_id, dataset->shared->type_id, fid) <0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "can't apply filters")
+
+        /* Release the file ID */
+        if(H5I_dec_ref(fid) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEFILE, FAIL, "can't close file")
+ 
+        fid = -1;
 
         dataset->shared->checked_filters = TRUE;
     } /* end if */
@@ -762,6 +781,10 @@ done:
         if(H5D_ioinfo_term(&io_info) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't shut down io_info")
 #endif /*H5_HAVE_PARALLEL*/
+
+    /* Release the file ID */
+    if(fid>=0 && H5I_dec_ref(fid) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't close file ID")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_write() */
@@ -1369,7 +1392,7 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
     void        *chunk = NULL;
     haddr_t	chunk_addr;             /* Chunk address on disk */
     H5D_istore_ud1_t udata;		/*B-tree pass-through	*/
-    unsigned    idx_hint=0;             /* Cache index hint      */
+    unsigned    idx_hint = 0;      	/* Cache index hint      */
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_read)
@@ -1761,7 +1784,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
     void     *chunk = NULL;
     haddr_t	chunk_addr;             /* Chunk address on disk */
     H5D_istore_ud1_t udata;		/*B-tree pass-through	*/
-    unsigned    idx_hint=0;             /* Cache index hint      */
+    unsigned    idx_hint = 0;   	/* Cache index hint      */
     hbool_t     relax=TRUE;             /* Whether whole chunk is selected */
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
@@ -2330,6 +2353,563 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_compound_opt_write() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Dmodify_dtype
+ *
+ * Purpose:	Modifies the data type of the dataset and converts the data
+ *              according to the new data type.  If the dataset is chunked 
+ *              and the creation property is set through 
+ *              H5Pset_dtype_modifiable, the conversion of the data only 
+ *              happens when the chunks are accessed during either reading 
+ *              or writing.  This design will save the time from converting 
+ *              unused data.  If the dataset is chunked but the creation 
+ *              property is NOT set through H5Pset_dtype_modifiable, the 
+ *              data is converted immediately after this function is called.  
+ *              If the dataset is contiguous or compact, the data is also 
+ *              converted immediately.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Raymond Lu
+ *		Tuesday, 25 Sept. 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dmodify_dtype(hid_t dset_id, hid_t new_type_id)
+{
+
+    H5D_t	*dset = NULL;
+    H5T_t	*new_type = NULL;
+    herr_t	ret_value;
+
+    FUNC_ENTER_API(H5Dmodify_dtype, FAIL)
+    H5TRACE2("e", "ii", dset_id, new_type_id);
+
+    /* Check args */
+    if(NULL==(dset=(H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+
+    if(NULL==(new_type=(H5T_t *)H5I_object_verify(new_type_id, H5I_DATATYPE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+
+    /* Check if we are allowed to write to this file */
+    if(0==(H5F_get_intent(dset->oloc.file) & H5F_ACC_RDWR))
+	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "no write intent on file")
+
+    /* If the new type is the same as the current, simply finish it */
+    if(0 == H5T_cmp(dset->shared->type, new_type, FALSE))
+        HGOTO_DONE(SUCCEED)
+	/*HGOTO_ERROR(H5E_DATASET, H5E_CANTMODIFY, FAIL, "new datatype is the same as the datatype of the dataset")*/
+
+    /* Check if the datatype is valid for this operation */
+    if(TRUE != H5T_dtype_is_valid(dset->shared->type, new_type))
+        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "datatype is not valid")
+
+    /* Modify the data type */
+    if(H5D_modify_dtype(dset->oloc.file, dset, new_type_id, new_type, H5AC_dxpl_id)<0)
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't modify datatype")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_modify_dtype
+ *
+ * Purpose:	Private function for H5Dmodify_dtype.  It handles the 
+ *              dataset differently depending on the situation.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Raymond Lu
+ *		Tuesday, 25 Sept. 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_modify_dtype(H5F_t *file, H5D_t *dataset, hid_t type_id, H5T_t *type, hid_t dxpl_id)
+{
+    hbool_t             filter_enabled = FALSE; /* Flag for the datatype modification filter */
+    H5P_genplist_t      *plist;                 /* Property list pointer */
+    herr_t		ret_value = SUCCEED;    /* Return value */
+    herr_t		ret = SUCCEED;          /* Return value */
+
+    FUNC_ENTER_NOAPI(H5D_modify_dtype, FAIL)
+
+    /* check args */
+    HDassert(file);
+    HDassert(dataset);
+    HDassert(type);
+
+    /* Check if the dataset has a non-default DCPL & check the filter if so */
+    if(dataset->shared->dcpl_id != H5P_DATASET_CREATE_DEFAULT
+        && H5D_CHUNKED == dataset->shared->layout.type) {
+        /* Get the plist structure */
+        if(NULL == (plist = H5P_object_verify(dataset->shared->dcpl_id, H5P_DATASET_CREATE)))
+            HGOTO_ERROR(H5E_DATASET, H5E_BADATOM, FAIL, "can't find object for ID")
+
+        H5E_BEGIN_TRY {
+            /*ret = H5Pget_filter_by_id(dataset->shared->dcpl_id, H5Z_FILTER_DTYPE_MODIFY,                      NULL, NULL, NULL, (size_t)0, NULL, NULL);*/
+            ret = H5P_get_filter_by_id(plist, H5Z_FILTER_DTYPE_MODIFY, NULL, NULL, NULL, (size_t)0, NULL, NULL);
+        } H5E_END_TRY;
+        
+        if(ret >= 0)
+	    filter_enabled = TRUE;
+    } /* end if */
+
+    if(filter_enabled) {
+        /* For chunked dataset when the filter of datatype modification is enabled */
+        if(H5D_modify_dtype_with_filter(file, dataset, type_id, type, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't modify datatype")
+    } else {
+        /* For chunked dataset when the filter is NOT enabled or for contiguous or
+         * compact dataset */
+        if(H5D_modify_dtype_without_filter(file, dataset, type_id, type, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't modify datatype")
+    }
+
+done:
+ 
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_modify_dtype() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_modify_dtype_without_filter
+ *
+ * Purpose:	For chunked dataset with the filter of dtype modification 
+ *              disabled or contiguous or compact dataset, this function
+ *              modifies the data type of the dataset and converts the 
+ *              data according to the new data type.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Raymond Lu
+ *		Tuesday, 25 Sept. 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_modify_dtype_without_filter(H5F_t *file, H5D_t *dataset, hid_t type_id, H5T_t *type,
+        hid_t dxpl_id)
+{
+    H5D_t              *new_dset;
+    H5O_fill_t         *fill_prop;              /* Fill value property */
+    H5O_copy_t          cp_info;
+    struct H5O_t       *oh = NULL;              /* Pointer to dataset's object header */
+    hbool_t             has_data = TRUE;        /* The flag to indicate data exists in dset */ 
+    herr_t		ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5D_modify_dtype_without_filter, FAIL)
+
+    /* If space hasn't been allocated and not using external storage,
+     * set the flag HAS_DATA to FALSE.  If the dataset is compact, 
+     * the flag is always TRUE.
+     */
+    if(dataset->shared->dcpl_cache.efl.nused == 0 &&
+            ((dataset->shared->layout.type == H5D_CONTIGUOUS && !H5F_addr_defined(dataset->shared->layout.u.contig.addr))
+                || (dataset->shared->layout.type == H5D_CHUNKED && !H5F_addr_defined(dataset->shared->layout.u.chunk.addr))))
+        has_data = FALSE;
+
+    if(has_data) {
+        /*
+         * Create a bogus dataset with the same properties as the current one, to read, 
+         * convert the data, and write it in this bogus dataset.  Then assign the ownership
+         * of this data to the current dataset.  The metadata of this bogus will be 
+         * deleted as it's closed.
+         */
+        if(NULL == (new_dset = H5D_create(file, type_id, dataset->shared->space, dataset->shared->dcpl_id, dxpl_id)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "unable to create a new dset")
+
+        /* Copy and convert the data piece by piece in case that the dataset is too big
+         * for the memory.
+         */
+        switch(dataset->shared->layout.type) {
+            case H5D_COMPACT:
+                if(H5D_compact_copy_conv(dataset, new_dset, &cp_info, dxpl_id) < 0)
+	            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
+
+                break;
+            case H5D_CONTIGUOUS:
+                if(H5D_contig_copy_conv(file, dataset, new_dset, &cp_info, dxpl_id) < 0)
+	            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
+
+                /* Flush the raw data buffer, if we have a dirty one */
+                if(dataset->shared->cache.contig.sieve_buf && dataset->shared->cache.contig.sieve_dirty) {
+                    /* Write dirty data sieve buffer to file */
+                    if(H5F_block_write(file, H5FD_MEM_DRAW, dataset->shared->cache.contig.sieve_loc,
+                            dataset->shared->cache.contig.sieve_size, dxpl_id, dataset->shared->cache.contig.sieve_buf) < 0)
+                        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed")
+
+                    /* Reset sieve buffer dirty flag */
+                    dataset->shared->cache.contig.sieve_dirty = FALSE;
+                } /* end if */
+
+                break;
+            case H5D_CHUNKED:
+                if(H5D_istore_copy_conv(file, dataset, new_dset, &cp_info, dxpl_id) < 0)
+	            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
+           
+                H5D_istore_flush(new_dset, dxpl_id, H5F_FLUSH_INVALIDATE);
+
+                break;
+            default:
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "dataset should be contiguous or chunked")
+        }
+    }
+
+    /* Copy & initialize datatype for the dataset struct */
+    if(H5D_init_type(file, dataset, type_id, type) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't copy datatype")
+
+    /* Check if the datatype should be (or are already) shared in the SOHM table */
+    if(H5SM_try_share(file, dxpl_id, NULL, H5O_DTYPE_ID, dataset->shared->type, NULL) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADMESG, FAIL, "trying to share datatype failed")
+
+    /* 
+     * Check whether datatype is committed & increment ref count. (to maintain 
+     * ref. count incr/decr similarity with "shared message" type of datatype sharing)
+     */
+    if(H5T_committed(dataset->shared->type)) {
+        /* Increment the reference count on the shared datatype */
+        if(H5T_link(dataset->shared->type, 1, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_LINKCOUNT, FAIL, "unable to adjust shared datatype link count")
+    } /* end if */
+
+    /* Open the object header of the original dataset for updating datatype and layout */
+    if(H5O_open(&(dataset->oloc)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to open dataset object header")
+
+    /* Get a pointer to the object header itself */
+    if((oh = H5O_protect(&(dataset->oloc), dxpl_id)) == NULL)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to protect dataset object header")
+
+    /* Delete the old datatype message */
+    if(H5O_msg_remove(&(dataset->oloc), H5O_DTYPE_ID, 0, FALSE, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "unable to delete old dtype message")
+  
+    /* Add the new datatype message */
+    if(H5O_msg_append_oh(file, dxpl_id, oh, H5O_DTYPE_ID, H5O_MSG_FLAG_CONSTANT, 0, dataset->shared->type) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update datatype header message")
+
+    /* Delete the old layout message.  If it's contiguous dataset, link the adjacent space. */
+    if(H5O_msg_remove(&(dataset->oloc), H5O_LAYOUT_ID, 0, TRUE, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "unable to delete old dtype message")
+
+    if(has_data) {
+        /* Assign the ownership of the new data to the original dataset */
+        if(H5D_CONTIGUOUS == dataset->shared->layout.type) {
+            dataset->shared->layout.u.contig.addr = new_dset->shared->layout.u.contig.addr;
+            dataset->shared->layout.u.contig.size = new_dset->shared->layout.u.contig.size;
+        } else if (H5D_COMPACT == dataset->shared->layout.type) {
+            H5MM_free(dataset->shared->layout.u.compact.buf);
+ 
+            dataset->shared->layout.u.compact.buf = new_dset->shared->layout.u.compact.buf; 
+            dataset->shared->layout.u.compact.size = new_dset->shared->layout.u.compact.size; 
+        } else {
+            dataset->shared->layout.u.chunk.addr = new_dset->shared->layout.u.chunk.addr;
+            dataset->shared->layout.u.chunk.size = new_dset->shared->layout.u.chunk.size;
+        }
+    }
+
+    /* 
+     * Create a new layout message.  (Don't make layout message constant unless 
+     * allocation time is early, since space may not be allocated)
+     */
+    fill_prop = &(dataset->shared->dcpl_cache.fill);
+    if(H5O_msg_append_oh(file, dxpl_id, oh, H5O_LAYOUT_ID, ((fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY && H5D_COMPACT != dataset->shared->layout.type) ? H5O_MSG_FLAG_CONSTANT : 0), 0, &(dataset->shared->layout)) < 0)
+         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout")
+
+    /*
+     * Create a new fill value message if it's defined.
+     */
+    if(H5D_modify_dtype_update_fill(file, dataset, oh, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update fill value message")
+
+    /* Add a modification time message. */
+    if(H5O_touch_oh(file, dxpl_id, oh, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update modification time message")
+
+    /* Release pointer to object header itself */
+    if(H5O_unprotect(&(dataset->oloc), oh) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to unprotect dataset object header")
+
+    /* Close the object header for the dataset */
+    if(H5O_close(&(dataset->oloc)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close dataset object header")
+
+    if(has_data) {
+        /* Update and delete the object header of the new dataset */
+        if(H5O_open(&(new_dset->oloc)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to open dataset object header")
+
+        /* Get a pointer to the object header itself */
+        if((oh = H5O_protect(&(new_dset->oloc), dxpl_id)) == NULL)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to protect dataset object header")
+
+        /* Disconnect the new data from the bogus dataset by updating the layout */
+        if(H5O_msg_remove(&(new_dset->oloc), H5O_LAYOUT_ID, 0, FALSE, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "unable to delete old dtype message")
+
+        if(H5D_CONTIGUOUS == new_dset->shared->layout.type) {
+            new_dset->shared->layout.u.contig.addr = HADDR_UNDEF;
+            new_dset->shared->layout.u.contig.size = 0;
+        } else if (H5D_COMPACT == new_dset->shared->layout.type) {
+            new_dset->shared->layout.u.compact.buf = NULL;
+            new_dset->shared->layout.u.compact.size = 0;
+        } else {
+            new_dset->shared->layout.u.chunk.addr = HADDR_UNDEF;
+            new_dset->shared->layout.u.chunk.size = 0;
+        }
+
+        if(H5O_msg_append_oh(file, dxpl_id, oh, H5O_LAYOUT_ID, /*H5O_MSG_FLAG_CONSTANT*/ 0, 0, &(new_dset->shared->layout)) < 0)
+             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout")
+
+        /* Release pointer to object header itself */
+        if(H5O_unprotect(&(new_dset->oloc), oh) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to unprotect dataset object header")
+
+        if(H5O_close(&(new_dset->oloc)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release object header")
+
+        /* Close the bogus dataset.  It'll be removed, too, because it's unnamed. */
+        if(H5D_close(new_dset) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close dataset")
+    }
+ 
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_modify_dtype_without_filter() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_modify_dtype_with_filter
+ *
+ * Purpose:	For chunked dataset with the filter of dtype modification
+ *              enabled.  It only modifies the data type of the dataset.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Raymond Lu
+ *		Tuesday, 25 Sept. 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_modify_dtype_with_filter(H5F_t *file, H5D_t *dataset, hid_t type_id, H5T_t *type,
+        hid_t dxpl_id)
+{
+    hid_t               fid = -1;               /* File ID for filters */
+    H5O_fill_t         *fill;
+    struct H5O_t       *oh = NULL;              /* Pointer to dataset's object header */
+    unsigned		u;                      /* Local index variable */
+    herr_t		ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5D_modify_dtype_with_filter, FAIL)
+
+    /* Get a file ID for the file */
+    if((fid = H5F_get_id(file)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get file ID")
+
+    /* Copy & initialize datatype for the dataset struct */
+    if(H5D_init_type(file, dataset, type_id, type) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't copy datatype")
+
+    /* Check if the datatype should be (or are already) shared in the SOHM table */
+    if(H5SM_try_share(file, dxpl_id, NULL, H5O_DTYPE_ID, dataset->shared->type, NULL) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADMESG, FAIL, "trying to share datatype failed")
+
+    /* 
+     * Check whether datatype is committed & increment ref count. (to maintain 
+     * ref. count incr/decr similarity with "shared message" type of datatype sharing)
+     */
+    if(H5T_committed(dataset->shared->type)) {
+        /* Increment the reference count on the shared datatype */
+        if(H5T_link(dataset->shared->type, 1, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_LINKCOUNT, FAIL, "unable to adjust shared datatype link count")
+    } /* end if */
+
+    /* Update the layout info */
+    dataset->shared->layout.u.chunk.dim[dataset->shared->layout.u.chunk.ndims-1] = H5T_get_size(dataset->shared->type);
+
+    /* Compute the new total size of chunk */
+    for(u = 1, dataset->shared->layout.u.chunk.size = dataset->shared->layout.u.chunk.dim[0]; u < dataset->shared->layout.u.chunk.ndims; u++)
+        dataset->shared->layout.u.chunk.size *= dataset->shared->layout.u.chunk.dim[u];
+
+    /* Open the object header of the dataset for updating datatype and layout */
+    if(H5O_open(&(dataset->oloc)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to open dataset object header")
+
+    /* Get a pointer to the object header itself */
+    if((oh = H5O_protect(&(dataset->oloc), dxpl_id)) == NULL)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to protect dataset object header")
+
+    /* Delete the old datatype message */
+    if(H5O_msg_remove(&(dataset->oloc), H5O_DTYPE_ID, 0, FALSE, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "unable to delete old dtype message")
+  
+    /* Add the new datatype message */
+    if(H5O_msg_append_oh(file, dxpl_id, oh, H5O_DTYPE_ID, H5O_MSG_FLAG_CONSTANT, 0, dataset->shared->type) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update datatype header message")
+
+    /* Delete the old layout message */
+    if(H5O_msg_remove(&(dataset->oloc), H5O_LAYOUT_ID, 0, FALSE, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "unable to delete old dtype message")
+
+    /* 
+     * Create a new layout message.  (Don't make layout message constant unless 
+     * allocation time is early, since space may not be allocated)
+     */
+    fill = &(dataset->shared->dcpl_cache.fill);
+    if(H5O_msg_append_oh(file, dxpl_id, oh, H5O_LAYOUT_ID, ((fill->alloc_time == H5D_ALLOC_TIME_EARLY && H5D_COMPACT != dataset->shared->layout.type) ? H5O_MSG_FLAG_CONSTANT : 0), 0, &(dataset->shared->layout)) < 0)
+         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout")
+
+    /*
+     * Create a new fill value message if it's defined.
+     */
+/*    if(H5D_modify_dtype_update_fill(file, dataset, oh, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update fill value message")*/
+
+    /* Add a modification time message. */
+    if(H5O_touch_oh(file, dxpl_id, oh, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update modification time message")
+
+    /* Release pointer to object header itself */
+    if(H5O_unprotect(&(dataset->oloc), oh) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to unprotect dataset object header")
+
+    /* Close the object header for the dataset */
+    if(H5O_close(&(dataset->oloc)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close dataset object header")
+
+    /* Make the "reset local" filter callbacks for this dataset */
+    if(H5Z_reset_local(dataset->shared->dcpl_id, dataset->shared->type_id, fid) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set local filter parameters")
+
+    /* Release the file ID */
+    if(H5I_dec_ref(fid) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEFILE, FAIL, "can't close file")
+  
+    fid = -1;
+
+done:
+    /* Release the file ID */
+    if(fid>=0 && H5I_dec_ref(fid) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't close file ID")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_modify_dtype_with_filter() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_modify_dtype_update_fill
+ *
+ * Purpose:	A private function to facilitate H5D_modify_dtype_with_filter
+ *              and H5D_modify_dtype_without_filter to update the header 
+ *              message for fill value.
+ *
+ * Return:	Success:	Non-negative
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Raymond Lu
+ *		Tuesday, 20 Nov. 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_modify_dtype_update_fill(H5F_t *file, H5D_t *dataset, struct H5O_t *oh, 
+        hid_t dxpl_id)
+{
+    H5O_fill_t         *fill_prop;              /* Fill value property */
+    H5D_fill_value_t	fill_status;            /* Fill value status */
+    hbool_t             fill_changed = FALSE;   /* Flag indicating the fill value was changed */
+    hbool_t             use_latest_format;      /* Flag indicating the newest file format should be used */
+    herr_t		ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5D_modify_dtype_update_fill, FAIL)
+
+    fill_prop = &(dataset->shared->dcpl_cache.fill);
+
+    /*
+     * Create a new fill value message if it's defined.
+     */
+    /* Retrieve "defined" status of fill value */
+    if(H5P_is_fill_value_defined(fill_prop, &fill_status) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't tell if fill value defined")
+
+    /* Determine whether fill value is defined or not */
+    if(fill_status == H5D_FILL_VALUE_DEFAULT || fill_status == H5D_FILL_VALUE_USER_DEFINED) {
+        /* Convert fill value buffer to dataset's new datatype */
+        if(fill_prop->buf && fill_prop->size > 0 && H5O_fill_convert(fill_prop, dataset->shared->type, &fill_changed, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to convert fill value to new type")
+
+	fill_prop->fill_defined = TRUE;
+    } else if(fill_status == H5D_FILL_VALUE_UNDEFINED) {
+ 	fill_prop->fill_defined = FALSE;
+    } else
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to determine if fill value is defined")
+
+    if(fill_changed) {
+        H5P_genplist_t     *dc_plist;               /* Dataset's creation property list */
+
+        /* Get dataset's property list object */
+        HDassert(dataset->shared->dcpl_id != H5P_DATASET_CREATE_DEFAULT);
+        if(NULL == (dc_plist = (H5P_genplist_t *)H5I_object(dataset->shared->dcpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get dataset creation property list")
+
+        /* Update dataset creation property */
+        if(H5P_set(dc_plist, H5D_CRT_FILL_VALUE_NAME, fill_prop) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set fill value info")
+    } /* end if */
+
+    /* Delete the old fill value message */
+    if(H5O_msg_remove(&(dataset->oloc), H5O_FILL_NEW_ID, 0, FALSE, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "unable to delete old fill value message")
+
+    /* Write new fill value message */
+    if(H5O_msg_append_oh(file, dxpl_id, oh, H5O_FILL_NEW_ID, H5O_MSG_FLAG_CONSTANT, 0, fill_prop) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update new fill value header message")
+
+    /* Get the file's 'use the latest version of the format' flag */
+    use_latest_format = H5F_USE_LATEST_FORMAT(file);
+
+    /* If there is valid information for the old fill value struct, add it */
+    /* (only if we aren't trying to write the latest version of the file format) */
+    if(fill_prop->buf && !use_latest_format) {
+        H5O_fill_t old_fill_prop;       /* Copy of fill value property, for writing as "old" fill value */
+
+        /* Shallow copy the fill value property */
+        /* (we only want to make certain that the shared component isnt' modified) */
+        HDmemcpy(&old_fill_prop, fill_prop, sizeof(old_fill_prop));
+
+        /* Reset shared component info */
+        H5O_msg_reset_share(H5O_FILL_ID, &old_fill_prop);
+
+        /* Delete the old fill value message */
+        if(H5O_msg_remove(&(dataset->oloc), H5O_FILL_ID, 0, FALSE, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "unable to delete old fill value message")
+
+        /* Write old fill value */
+        if(H5O_msg_append_oh(file, dxpl_id, oh, H5O_FILL_ID, H5O_MSG_FLAG_CONSTANT, 0, &old_fill_prop) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update old fill value header message")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_modify_dtype_update_fill() */
 
 
 /*-------------------------------------------------------------------------

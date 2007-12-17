@@ -928,6 +928,7 @@ USE_FILTER_SHUFFLE
 USE_FILTER_FLETCHER32
 USE_FILTER_NBIT
 USE_FILTER_SCALEOFFSET
+USE_FILTER_DTYPE_MODIFY
 DIRECT_VFD_CONDITIONAL_TRUE
 DIRECT_VFD_CONDITIONAL_FALSE
 H5_VERSION
@@ -1603,7 +1604,8 @@ Optional Features:
                           [default=yes]
   --enable-filters=all    Turn on all internal I/O filters. One may also
                           specify a comma-separated list of filters or the
-                          word no. The default is all internal I/O filters.
+                          word no. The default is with all internal I/O
+                          filters.
   --enable-direct-vfd     Build the Direct I/O Virtual File Driver
                           [default=yes]
   --enable-dconv-exception
@@ -7923,7 +7925,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 7926 "configure"' > conftest.$ac_ext
+  echo '#line 7928 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -10197,11 +10199,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10200: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10202: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10204: \$? = $ac_status" >&5
+   echo "$as_me:10206: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -10465,11 +10467,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10468: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10470: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10472: \$? = $ac_status" >&5
+   echo "$as_me:10474: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -10569,11 +10571,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10572: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10574: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:10576: \$? = $ac_status" >&5
+   echo "$as_me:10578: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12949,7 +12951,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 12952 "configure"
+#line 12954 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13049,7 +13051,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 13052 "configure"
+#line 13054 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15401,11 +15403,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15404: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15406: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:15408: \$? = $ac_status" >&5
+   echo "$as_me:15410: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -15505,11 +15507,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15508: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15510: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:15512: \$? = $ac_status" >&5
+   echo "$as_me:15514: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -17075,11 +17077,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17078: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17080: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:17082: \$? = $ac_status" >&5
+   echo "$as_me:17084: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -17179,11 +17181,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17182: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17184: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:17186: \$? = $ac_status" >&5
+   echo "$as_me:17188: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -19377,11 +19379,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:19380: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:19382: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:19384: \$? = $ac_status" >&5
+   echo "$as_me:19386: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -19645,11 +19647,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:19648: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:19650: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:19652: \$? = $ac_status" >&5
+   echo "$as_me:19654: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -19749,11 +19751,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:19752: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:19754: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:19756: \$? = $ac_status" >&5
+   echo "$as_me:19758: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -50436,6 +50438,7 @@ fi
  USE_FILTER_FLETCHER32="no"
  USE_FILTER_NBIT="no"
  USE_FILTER_SCALEOFFSET="no"
+ USE_FILTER_DTYPE_MODIFY="no"
 { echo "$as_me:$LINENO: checking for I/O filters" >&5
 echo $ECHO_N "checking for I/O filters... $ECHO_C" >&6; }
 # Check whether --enable-filters was given.
@@ -50444,7 +50447,7 @@ if test "${enable_filters+set}" = set; then
 fi
 
 
-all_filters="shuffle,fletcher32,nbit,scaleoffset"
+all_filters="shuffle,fletcher32,nbit,scaleoffset,dtype_modify"
 case "X-$FILTERS" in
   X-|X-all)
     FILTERS=$all_filters
@@ -50495,6 +50498,14 @@ cat >>confdefs.h <<\_ACEOF
 _ACEOF
 
       USE_FILTER_SCALEOFFSET="yes"
+    fi
+    if test $filter = "DTYPE_MODIFY"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_FILTER_DTYPE_MODIFY 1
+_ACEOF
+
+      USE_FILTER_DTYPE_MODIFY="yes"
     fi
   done
 fi
@@ -53126,6 +53137,7 @@ USE_FILTER_SHUFFLE!$USE_FILTER_SHUFFLE$ac_delim
 USE_FILTER_FLETCHER32!$USE_FILTER_FLETCHER32$ac_delim
 USE_FILTER_NBIT!$USE_FILTER_NBIT$ac_delim
 USE_FILTER_SCALEOFFSET!$USE_FILTER_SCALEOFFSET$ac_delim
+USE_FILTER_DTYPE_MODIFY!$USE_FILTER_DTYPE_MODIFY$ac_delim
 DIRECT_VFD_CONDITIONAL_TRUE!$DIRECT_VFD_CONDITIONAL_TRUE$ac_delim
 DIRECT_VFD_CONDITIONAL_FALSE!$DIRECT_VFD_CONDITIONAL_FALSE$ac_delim
 H5_VERSION!$H5_VERSION$ac_delim
@@ -53157,7 +53169,7 @@ LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 89; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 90; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

@@ -480,8 +480,10 @@ H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, void *mesg,
     /* check args */
     HDassert(loc);
     HDassert(loc->file);
-    HDassert(H5F_addr_defined(loc->addr));
     HDassert(type_id < NELMTS(H5O_msg_class_g));
+
+    if(!H5F_addr_defined(loc->addr))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "address isn't defined")
 
     /* Get the object header */
     if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
@@ -1807,7 +1809,8 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5O_msg_decode(H5F_t *f, hid_t dxpl_id, unsigned type_id, const unsigned char *buf)
+H5O_msg_decode(H5F_t *f, hid_t dxpl_id, unsigned type_id, const unsigned char *buf,
+        unsigned mesg_flag)
 {
     const H5O_msg_class_t   *type;      /* Actual H5O class type for the ID */
     void *ret_value;                    /* Return value */
@@ -1821,7 +1824,7 @@ H5O_msg_decode(H5F_t *f, hid_t dxpl_id, unsigned type_id, const unsigned char *b
     HDassert(type);
 
     /* decode */
-    if((ret_value = (type->decode)(f, dxpl_id, 0, buf)) == NULL)
+    if((ret_value = (type->decode)(f, dxpl_id, mesg_flag, buf)) == NULL)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode message")
 
 done:

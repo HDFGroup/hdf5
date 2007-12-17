@@ -60,6 +60,7 @@
 #define H5D_XFER_VLEN_ALLOC_INFO_NAME   "vlen_alloc_info" /* Vlen allocation info */
 #define H5D_XFER_VLEN_FREE_NAME         "vlen_free"     /* Vlen free function */
 #define H5D_XFER_VLEN_FREE_INFO_NAME    "vlen_free_info" /* Vlen free info */
+#define H5D_XFER_VLEN_CONV_NAME         "vlen_conv"     /* whether vlen conversion is needed */ 
 #define H5D_XFER_VFL_ID_NAME            "vfl_id"        /* File driver ID */
 #define H5D_XFER_VFL_INFO_NAME          "vfl_info"      /* File driver info */
 #define H5D_XFER_HYPER_VECTOR_SIZE_NAME "vec_size"      /* Hyperslab vector size */
@@ -165,6 +166,11 @@ H5_DLL H5T_t *H5D_typeof(const H5D_t *dset);
 H5_DLL herr_t H5D_flush(const H5F_t *f, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5D_get_dxpl_cache(hid_t dxpl_id, H5D_dxpl_cache_t **cache);
 H5_DLL herr_t H5D_get_dxpl_cache_real(hid_t dxpl_id, H5D_dxpl_cache_t *cache);
+/*H5_DLL herr_t H5D_init_type(H5F_t *file, const H5D_t *dset, hid_t type_id,
+    const H5T_t *type);
+H5_DLL hsize_t H5D_get_storage_size(H5D_t *dset, hid_t dxpl_id);*/
+H5_DLL herr_t H5D_modify_dtype(H5F_t *file, H5D_t *dataset, hid_t type_id, H5T_t *type, 
+    hid_t dxpl_id);
 
 /* Functions that operate on vlen data */
 H5_DLL herr_t H5D_vlen_reclaim(hid_t type_id, H5S_t *space, hid_t plist_id,

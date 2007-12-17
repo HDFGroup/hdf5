@@ -304,6 +304,7 @@ H5_DLL herr_t H5Pset_shuffle(hid_t plist_id);
 H5_DLL herr_t H5Pset_nbit(hid_t plist_id);
 H5_DLL herr_t H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type, int scale_factor);
 H5_DLL herr_t H5Pset_fletcher32(hid_t plist_id);
+H5_DLL herr_t H5Pset_dtype_modifiable(hid_t plist_id);
 H5_DLL herr_t H5Pset_fill_value(hid_t plist_id, hid_t type_id,
      const void *value);
 H5_DLL herr_t H5Pget_fill_value(hid_t plist_id, hid_t type_id,

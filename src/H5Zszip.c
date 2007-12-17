@@ -34,8 +34,10 @@
 #endif
 
 /* Local function prototypes */
-static herr_t H5Z_can_apply_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id);
-static herr_t H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id);
+static herr_t H5Z_can_apply_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id, 
+    hid_t UNUSED file_id); 
+static herr_t H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id,
+    hid_t UNUSED file_id);
 static size_t H5Z_filter_szip (unsigned flags, size_t cd_nelmts,
     const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf);
 
@@ -48,6 +50,7 @@ H5Z_class_t H5Z_SZIP[1] = {{
     "szip",			    /* Filter name for debugging	*/
     H5Z_can_apply_szip,		/* The "can apply" callback     */
     H5Z_set_local_szip,         /* The "set local" callback     */
+    NULL,                       /* The "reset local" callback   */
     H5Z_filter_szip,		/* The actual filter function	*/
 }};
 
@@ -84,7 +87,8 @@ H5Z_class_t H5Z_SZIP[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5Z_can_apply_szip(hid_t UNUSED dcpl_id, hid_t type_id, hid_t UNUSED space_id)
+H5Z_can_apply_szip(hid_t UNUSED dcpl_id, hid_t type_id, hid_t UNUSED space_id, 
+    hid_t UNUSED file_id)
 {
     const H5T_t	*type;                  /* Datatype */
     unsigned dtype_size;                /* Datatype's size (in bits) */
@@ -141,7 +145,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
+H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id, hid_t UNUSED file_id)
 {
     H5P_genplist_t *dcpl_plist; /* Property list pointer */
     const H5T_t	*type;          /* Datatype */

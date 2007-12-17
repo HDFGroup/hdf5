@@ -94,6 +94,48 @@ H5Tget_fields(hid_t type_id, size_t *spos/*out*/,
     if (H5T_FLOAT != dt->shared->type)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not defined for datatype class")
 
+    if (H5T_get_fields(dt, spos, epos, esize, mpos, msize) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't get fields")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5T_get_fields
+ *
+ * Purpose:	Returns information about the locations of the various bit
+ *		fields of a floating point datatype.  The field positions
+ *		are bit positions in the significant region of the datatype.
+ *		Bits are numbered with the least significant bit number zero.
+ *
+ *		Any (or even all) of the arguments can be null pointers.
+ *
+ * Return:	Success:	Non-negative, field locations and sizes are
+ *				returned through the arguments.
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Robb Matzke
+ *		Wednesday, January  7, 1998
+ *
+ * Modifications:
+ *	Robb Matzke, 22 Dec 1998
+ *	Also works with derived datatypes.
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_get_fields(H5T_t *dt, size_t *spos/*out*/,
+	      size_t *epos/*out*/, size_t *esize/*out*/,
+	      size_t *mpos/*out*/, size_t *msize/*out*/)
+{
+    herr_t      ret_value=SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5T_get_fields, FAIL)
+
+    HDassert(dt);
+
     /* Get values */
     if (spos) *spos = dt->shared->u.atomic.u.f.sign;
     if (epos) *epos = dt->shared->u.atomic.u.f.epos;
@@ -102,7 +144,7 @@ H5Tget_fields(hid_t type_id, size_t *spos/*out*/,
     if (msize) *msize = dt->shared->u.atomic.u.f.msize;
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 }
 
 

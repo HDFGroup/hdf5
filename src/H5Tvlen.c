@@ -230,6 +230,9 @@ H5T_vlen_set_loc(const H5T_t *dt, H5F_t *f, H5T_loc_t loc)
                 /* Mark this type as being stored in memory */
                 dt->shared->u.vlen.loc=H5T_LOC_MEMORY;
 
+                /* Turn on the force conversion */
+                /*dt->shared->force_conv = TRUE;*/
+
                 if(dt->shared->u.vlen.type==H5T_VLEN_SEQUENCE) {
                     /* size in memory, disk size is different */
                     dt->shared->size = sizeof(hvl_t);
@@ -265,6 +268,11 @@ H5T_vlen_set_loc(const H5T_t *dt, H5F_t *f, H5T_loc_t loc)
 
                 /* Mark this type as being stored on disk */
                 dt->shared->u.vlen.loc=H5T_LOC_DISK;
+
+                /* Turn off force conversion for the case of disk to disk copying.
+                 * Simply copy VL data without conversion.  It's mainly used by 
+                 * H5Dmodify_dtype function. */
+                /*dt->shared->force_conv = FALSE;*/
 
                 /*
                  * Size of element on disk is 4 bytes for the length, plus the size

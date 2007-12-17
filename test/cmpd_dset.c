@@ -30,6 +30,10 @@ const char *FILENAME[] = {
     "cmpd_dset",
     "src_subset",
     "dst_subset",
+    "modify_chunked_type",
+    "modify_chunked_type_no_filter",
+    "modify_contiguous_type",
+    "modify_compact_type",
     NULL
 };
 
@@ -38,6 +42,7 @@ const char *DSET_NAME[] = {
     "chunk_src_subset",
     "contig_dst_subset",
     "chunk_dst_subset",
+    "compact_dst_subset",
     NULL
 };
 
@@ -106,6 +111,7 @@ typedef struct {
     float f, g, h[16], i, j;
     double k, l, m, n;
     long o, p, q;
+    hvl_t r;
 } stype2;
 typedef struct {
     int a, b, c[8], d, e;
@@ -115,11 +121,34 @@ typedef struct {
     float f, g, h[16], i, j;
     double k, l, m, n;
     long o, p, q;
-    long_long r, s, t;
+    hvl_t r;
+    long_long s, t, u;
 } stype4;
 
+/*#define NX	10u
+#define NY	20u*/
 #define NX	100u
-#define NY	2000u
+#define NY	200u
+#define COMP_NX	8u
+#define COMP_NY	10u
+
+/* Non-default SOHM values for testing the filter of datatype modification */
+#define TEST_NUM_INDEXES 4
+const unsigned test_type_flags[H5O_SHMESG_MAX_NINDEXES] =
+                {H5O_MESG_FILL_FLAG,
+                 H5O_MESG_DTYPE_FLAG | H5O_MESG_ATTR_FLAG,
+                 H5O_MESG_SDSPACE_FLAG,
+                 H5O_MESG_PLINE_FLAG,
+                 0, 0};
+#ifndef TMP
+const unsigned test_minsizes[H5O_SHMESG_MAX_NINDEXES] = {0, 2, 40, 100, 3, 1000};
+#define TEST_L2B 65
+#define TEST_B2L 64
+#else
+const unsigned test_minsizes[H5O_SHMESG_MAX_NINDEXES] = {250,250,250,250,250,250};
+#define TEST_L2B 50
+#define TEST_B2L 40
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -854,7 +883,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static void
-initialize_stype1(unsigned char *buf, const size_t num)
+initialize_stype1(void *buf, const size_t num)
 {
     int	  i, j;
     stype1 *s_ptr;
@@ -897,7 +926,7 @@ initialize_stype1(unsigned char *buf, const size_t num)
  *-------------------------------------------------------------------------
  */
 static void
-initialize_stype2(unsigned char *buf, const size_t num)
+initialize_stype2(void *buf, const size_t num)
 {
     size_t i, j;
     stype2 *s_ptr;
@@ -926,6 +955,11 @@ initialize_stype2(unsigned char *buf, const size_t num)
         s_ptr->o    = i*3+0;
         s_ptr->p    = i*3+1;
         s_ptr->q    = i*3+2;
+
+        s_ptr->r.p=HDmalloc(4*sizeof(unsigned int));
+        s_ptr->r.len=4;
+        for(j=0; j<4; j++)
+            ((unsigned int *)s_ptr->r.p)[j]=i*10+j;
     }
 }
 
@@ -944,7 +978,7 @@ initialize_stype2(unsigned char *buf, const size_t num)
  *-------------------------------------------------------------------------
  */
 static void
-initialize_stype3(unsigned char *buf, const size_t num)
+initialize_stype3(void *buf, const size_t num)
 {
     int	  i, j;
     stype3 *s_ptr;
@@ -975,7 +1009,7 @@ initialize_stype3(unsigned char *buf, const size_t num)
  *-------------------------------------------------------------------------
  */
 static void
-initialize_stype4(unsigned char *buf, const size_t num)
+initialize_stype4(void *buf, const size_t num)
 {
     size_t i, j;
     stype4 *s_ptr;
@@ -1005,9 +1039,14 @@ initialize_stype4(unsigned char *buf, const size_t num)
         s_ptr->p    = i*3+1;
         s_ptr->q    = i*3+2;
 
-        s_ptr->r    = i*5+1;
-        s_ptr->s    = i*5+2;
-        s_ptr->t    = i*5+3;
+        s_ptr->r.p=HDmalloc(4*sizeof(unsigned int));
+        s_ptr->r.len=4;
+        for(j=0; j<4; j++)
+            ((unsigned int *)s_ptr->r.p)[j]=i*10+j;
+
+        s_ptr->s    = i*5+1;
+        s_ptr->t    = i*5+2;
+        s_ptr->u    = i*5+3;
     }
 }
 
@@ -1086,13 +1125,15 @@ error:
 static hid_t
 create_stype2(void)
 {
-    hid_t   array_dt1, array_dt2, tid;
+    hid_t   array_dt1, array_dt2, vl_tid, tid;
     const hsize_t	eight = 8, sixteen = 16;
 
     /* Build hdf5 datatypes */
     if((array_dt1 = H5Tarray_create2(H5T_NATIVE_INT,1, &eight)) < 0)
         goto error;
     if((array_dt2 = H5Tarray_create2(H5T_NATIVE_FLOAT,1, &sixteen)) < 0)
+        goto error;
+    if((vl_tid = H5Tvlen_create (H5T_NATIVE_UINT)) < 0)
         goto error;
 
     if((tid = H5Tcreate(H5T_COMPOUND, sizeof(stype2))) < 0 ||
@@ -1112,12 +1153,15 @@ create_stype2(void)
             H5Tinsert(tid, "n", HOFFSET(stype2, n), H5T_NATIVE_DOUBLE) < 0 ||
             H5Tinsert(tid, "o", HOFFSET(stype2, o), H5T_NATIVE_LONG) < 0 ||
             H5Tinsert(tid, "p", HOFFSET(stype2, p), H5T_NATIVE_LONG) < 0 ||
-            H5Tinsert(tid, "q", HOFFSET(stype2, q), H5T_NATIVE_LONG) < 0)
+            H5Tinsert(tid, "q", HOFFSET(stype2, q), H5T_NATIVE_LONG) < 0 ||
+            H5Tinsert(tid, "r", HOFFSET(stype2, r), vl_tid) < 0)
         goto error;
 
     if(H5Tclose(array_dt1) < 0)
         goto error;
     if(H5Tclose(array_dt2) < 0)
+        goto error;
+    if(H5Tclose(vl_tid) < 0)
         goto error;
 
     return tid;
@@ -1188,13 +1232,15 @@ error:
 static hid_t
 create_stype4(void)
 {
-    hid_t   array_dt1, array_dt2, tid;
+    hid_t   array_dt1, array_dt2, vl_tid, tid;
     const hsize_t	eight = 8, sixteen = 16;
 
     /* Build hdf5 datatypes */
     if((array_dt1 = H5Tarray_create2(H5T_NATIVE_INT,1, &eight)) < 0)
         goto error;
     if((array_dt2 = H5Tarray_create2(H5T_NATIVE_FLOAT,1, &sixteen)) < 0)
+        goto error;
+    if((vl_tid = H5Tvlen_create (H5T_NATIVE_UINT)) < 0)
         goto error;
 
     if((tid = H5Tcreate(H5T_COMPOUND, sizeof(stype4))) < 0 ||
@@ -1215,14 +1261,17 @@ create_stype4(void)
             H5Tinsert(tid, "o", HOFFSET(stype4, o), H5T_NATIVE_LONG) < 0 ||
             H5Tinsert(tid, "p", HOFFSET(stype4, p), H5T_NATIVE_LONG) < 0 ||
             H5Tinsert(tid, "q", HOFFSET(stype4, q), H5T_NATIVE_LONG) < 0 ||
-            H5Tinsert(tid, "r", HOFFSET(stype4, r), H5T_NATIVE_LLONG) < 0 ||
+            H5Tinsert(tid, "r", HOFFSET(stype4, r), vl_tid) < 0 ||
             H5Tinsert(tid, "s", HOFFSET(stype4, s), H5T_NATIVE_LLONG) < 0 ||
-            H5Tinsert(tid, "t", HOFFSET(stype4, t), H5T_NATIVE_LLONG) < 0)
+            H5Tinsert(tid, "t", HOFFSET(stype4, t), H5T_NATIVE_LLONG) < 0 ||
+            H5Tinsert(tid, "u", HOFFSET(stype4, u), H5T_NATIVE_LLONG) < 0)
         goto error;
 
     if(H5Tclose(array_dt1) < 0)
         goto error;
     if(H5Tclose(array_dt2) < 0)
+        goto error;
+    if(H5Tclose(vl_tid) < 0)
         goto error;
 
     return tid;
@@ -1311,6 +1360,193 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	compare_stype2_data
+ *
+ * Purpose:	Compare data of stype2.
+ *
+ * Return:	Success:        0
+ *
+ *              Failure:        negative	
+ *
+ * Programmer:  Raymond Lu
+ *              Friday, 14 September 2007
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static int
+compare_stype2_data(void *src_data, void *dst_data, size_t nelmts)
+{
+    stype2  *s_ptr;
+    stype2  *d_ptr;
+    size_t  i, j;
+
+    for(i = 0; i < nelmts; i++) {
+	s_ptr = ((stype2*)src_data) + i;
+	d_ptr = ((stype2*)dst_data) + i;
+
+	if (s_ptr->a    != d_ptr->a    ||
+	    s_ptr->b    != d_ptr->b    ||
+	    s_ptr->c[0] != d_ptr->c[0] ||
+	    s_ptr->c[1] != d_ptr->c[1] ||
+	    s_ptr->c[2] != d_ptr->c[2] ||
+	    s_ptr->c[3] != d_ptr->c[3] ||
+	    s_ptr->d    != d_ptr->d    ||
+	    s_ptr->e    != d_ptr->e    ||
+            !FLT_ABS_EQUAL(s_ptr->f, d_ptr->f) ||
+            !FLT_ABS_EQUAL(s_ptr->g, d_ptr->g) ||
+            !FLT_ABS_EQUAL(s_ptr->h[0], d_ptr->h[0]) ||
+            !FLT_ABS_EQUAL(s_ptr->h[1], d_ptr->h[1]) ||
+            !FLT_ABS_EQUAL(s_ptr->i, d_ptr->i) ||
+            !FLT_ABS_EQUAL(s_ptr->j, d_ptr->j) ||
+            !DBL_ABS_EQUAL(s_ptr->k, d_ptr->k) ||
+            !DBL_ABS_EQUAL(s_ptr->l, d_ptr->l) ||
+            !DBL_ABS_EQUAL(s_ptr->m, d_ptr->m) ||
+            !DBL_ABS_EQUAL(s_ptr->n, d_ptr->n) ||
+	    s_ptr->o    != d_ptr->o    ||
+	    s_ptr->p    != d_ptr->p    ||
+	    s_ptr->q    != d_ptr->q ) {
+
+	    H5_FAILED();
+	    printf("    i=%d\n", i);
+	    printf("    src={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f, o=%d, p=%d, q=%d}\n",
+		   s_ptr->a, s_ptr->b, s_ptr->c[0], s_ptr->c[1], s_ptr->c[2],
+		   s_ptr->c[3], s_ptr->c[4], s_ptr->c[5], s_ptr->c[6], s_ptr->c[7], 
+                   s_ptr->d, s_ptr->e, s_ptr->f, s_ptr->g,s_ptr->h[0],s_ptr->h[1],s_ptr->h[2],
+                   s_ptr->h[3],s_ptr->h[4],s_ptr->h[5],s_ptr->h[6],s_ptr->h[7],s_ptr->h[8],
+                   s_ptr->h[9],s_ptr->h[10],s_ptr->h[11],s_ptr->h[12],s_ptr->h[13],s_ptr->h[14],
+                   s_ptr->h[15], s_ptr->i,s_ptr->j,s_ptr->k,s_ptr->l,s_ptr->m,s_ptr->n, 
+                   s_ptr->o, s_ptr->p, s_ptr->q);
+	    printf("    dst={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f, o=%d, p=%d, q=%d}\n",
+		   d_ptr->a, d_ptr->b, d_ptr->c[0], d_ptr->c[1], d_ptr->c[2],
+		   d_ptr->c[3], d_ptr->c[4], d_ptr->c[5], d_ptr->c[6], d_ptr->c[7], 
+                   d_ptr->d, d_ptr->e, d_ptr->f, d_ptr->g,d_ptr->h[0],d_ptr->h[1],d_ptr->h[2],
+                   d_ptr->h[3],d_ptr->h[4],d_ptr->h[5],d_ptr->h[6],d_ptr->h[7],d_ptr->h[8],
+                   d_ptr->h[9],d_ptr->h[10],d_ptr->h[11],d_ptr->h[12],d_ptr->h[13],
+                   d_ptr->h[14], d_ptr->h[15], d_ptr->i,d_ptr->j,d_ptr->k,d_ptr->l,
+                   d_ptr->m,d_ptr->n, d_ptr->o, d_ptr->p, d_ptr->q);
+	    goto error;
+	}
+
+        if(s_ptr->r.len!=d_ptr->r.len) {
+	    H5_FAILED();
+	    printf("    i=%d\n", i);
+            printf("VL data lengths don't match!, src len=%d, dst len=%d\n",(int)s_ptr->r.len,(int)d_ptr->r.len);
+	    goto error;
+        } /* end if */
+        for(j=0; j<s_ptr->r.len; j++) {
+            if( ((unsigned int *)s_ptr->r.p)[j] != ((unsigned int *)d_ptr->r.p)[j] ) {
+	        H5_FAILED();
+	        printf("    i=%d\n", i);
+                printf("VL data values don't match!, src r.p[%d]=%u, dst r.p[%d]=%u\n",(int)j, ((unsigned int *)s_ptr->r.p)[j], (int)j, ((unsigned int *)d_ptr->r.p)[j]);
+	        goto error;
+            }
+        }
+    }
+
+    return SUCCEED;
+
+error:
+    return FAIL;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	compare_stype4_data
+ *
+ * Purpose:	Compare data of stype4.
+ *
+ * Return:	Success:        0
+ *
+ *              Failure:        negative	
+ *
+ * Programmer:  Raymond Lu
+ *              Friday, 14 September 2007
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static int
+compare_stype4_data(void *src_data, void *dst_data, size_t nelmts)
+{
+    stype4  *s_ptr;
+    stype4  *d_ptr;
+    size_t  i, j;
+
+    for(i = 0; i < nelmts; i++) {
+	s_ptr = ((stype4*)src_data) + i;
+	d_ptr = ((stype4*)dst_data) + i;
+
+	if (s_ptr->a    != d_ptr->a    ||
+	    s_ptr->b    != d_ptr->b    ||
+	    s_ptr->c[0] != d_ptr->c[0] ||
+	    s_ptr->c[1] != d_ptr->c[1] ||
+	    s_ptr->c[2] != d_ptr->c[2] ||
+	    s_ptr->c[3] != d_ptr->c[3] ||
+	    s_ptr->d    != d_ptr->d    ||
+	    s_ptr->e    != d_ptr->e    ||
+            !FLT_ABS_EQUAL(s_ptr->f, d_ptr->f) ||
+            !FLT_ABS_EQUAL(s_ptr->g, d_ptr->g) ||
+            !FLT_ABS_EQUAL(s_ptr->h[0], d_ptr->h[0]) ||
+            !FLT_ABS_EQUAL(s_ptr->h[1], d_ptr->h[1]) ||
+            !FLT_ABS_EQUAL(s_ptr->i, d_ptr->i) ||
+            !FLT_ABS_EQUAL(s_ptr->j, d_ptr->j) ||
+            !DBL_ABS_EQUAL(s_ptr->k, d_ptr->k) ||
+            !DBL_ABS_EQUAL(s_ptr->l, d_ptr->l) ||
+            !DBL_ABS_EQUAL(s_ptr->m, d_ptr->m) ||
+            !DBL_ABS_EQUAL(s_ptr->n, d_ptr->n) ||
+	    s_ptr->o    != d_ptr->o    ||
+	    s_ptr->p    != d_ptr->p    ||
+	    s_ptr->q    != d_ptr->q    ||
+	    s_ptr->s    != d_ptr->s    ||
+	    s_ptr->t    != d_ptr->t    ||
+	    s_ptr->u    != d_ptr->u ) {
+
+	    H5_FAILED();
+	    printf("    i=%d\n", i);
+	    printf("    src={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f, o=%d, p=%d, q=%d, s=%ld, t=%ld, u=%ld}\n",
+		   s_ptr->a, s_ptr->b, s_ptr->c[0], s_ptr->c[1], s_ptr->c[2],
+		   s_ptr->c[3], s_ptr->c[4], s_ptr->c[5], s_ptr->c[6], s_ptr->c[7], 
+                   s_ptr->d, s_ptr->e, s_ptr->f, s_ptr->g,s_ptr->h[0],s_ptr->h[1],s_ptr->h[2],
+                   s_ptr->h[3],s_ptr->h[4],s_ptr->h[5],s_ptr->h[6],s_ptr->h[7],s_ptr->h[8],
+                   s_ptr->h[9],s_ptr->h[10],s_ptr->h[11],s_ptr->h[12],s_ptr->h[13],s_ptr->h[14],
+                   s_ptr->h[15], s_ptr->i,s_ptr->j,s_ptr->k,s_ptr->l,s_ptr->m,s_ptr->n, 
+                   s_ptr->o, s_ptr->p, s_ptr->q, s_ptr->s, s_ptr->t, s_ptr->u);
+	    printf("    dst={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f, o=%d, p=%d, q=%d, s=%ld, t=%ld, u=%ld}\n",
+		   d_ptr->a, d_ptr->b, d_ptr->c[0], d_ptr->c[1], d_ptr->c[2],
+		   d_ptr->c[3], d_ptr->c[4], d_ptr->c[5], d_ptr->c[6], d_ptr->c[7], 
+                   d_ptr->d, d_ptr->e, d_ptr->f, d_ptr->g,d_ptr->h[0],d_ptr->h[1],d_ptr->h[2],
+                   d_ptr->h[3],d_ptr->h[4],d_ptr->h[5],d_ptr->h[6],d_ptr->h[7],d_ptr->h[8],
+                   d_ptr->h[9],d_ptr->h[10],d_ptr->h[11],d_ptr->h[12],d_ptr->h[13],
+                   d_ptr->h[14], d_ptr->h[15], d_ptr->i,d_ptr->j,d_ptr->k,d_ptr->l,
+                   d_ptr->m,d_ptr->n, d_ptr->o, d_ptr->p, d_ptr->q, d_ptr->s, d_ptr->t, d_ptr->u);
+	    goto error;
+	}
+
+        if(s_ptr->r.len!=d_ptr->r.len) {
+	    H5_FAILED();
+	    printf("    i=%d\n", i);
+            printf("VL data lengths don't match!, src len=%d, dst len=%d\n",(int)s_ptr->r.len,(int)d_ptr->r.len);
+	    goto error;
+        } /* end if */
+        for(j=0; j<s_ptr->r.len; j++) {
+            if( ((unsigned int *)s_ptr->r.p)[j] != ((unsigned int *)d_ptr->r.p)[j] ) {
+	        H5_FAILED();
+	        printf("    i=%d\n", i);
+                printf("VL data values don't match!, src r.p[%d]=%u, dst r.p[%d]=%u\n",(int)j, ((unsigned int *)s_ptr->r.p)[j], (int)j, ((unsigned int *)d_ptr->r.p)[j]);
+	        goto error;
+            }
+        }
+    }
+
+    return SUCCEED;
+
+error:
+    return FAIL;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	test_hdf5_src_subset
  *
  * Purpose:	Test the optimization of compound data writing, rewriting,
@@ -1345,7 +1581,7 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
     hid_t   dcpl, dxpl;
     hsize_t dims[2] = {NX, NY};
     hsize_t chunk_dims[2] = {NX/10, NY/10};
-    unsigned char *orig=NULL, *rew_buf=NULL, *rbuf=NULL;
+    void *orig=NULL, *rew_buf=NULL, *rbuf=NULL;
 
     /* Create the file for this test */
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
@@ -1366,12 +1602,12 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
 	goto error;
 
     /* Allocate space and initialize data */
-    orig = (unsigned char*)malloc(NX * NY * sizeof(stype1));
+    orig = (void*)malloc(NX * NY * sizeof(stype1));
     initialize_stype1(orig, (size_t)NX*NY);
 
-    rbuf = (unsigned char*)malloc(NX * NY * sizeof(stype2));
+    rbuf = (void*)malloc(NX * NY * sizeof(stype2));
 
-    rew_buf = (unsigned char*)malloc(NX * NY * sizeof(stype3));
+    rew_buf = (void*)malloc(NX * NY * sizeof(stype3));
     initialize_stype3(rew_buf, (size_t)NX*NY);
 
 
@@ -1550,7 +1786,7 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
     hid_t   dcpl, dxpl;
     hsize_t dims[2] = {NX, NY};
     hsize_t chunk_dims[2] = {NX/10, NY/10};
-    unsigned char *orig=NULL, *rew_buf=NULL, *rbuf=NULL;
+    void *orig=NULL, *rew_buf=NULL, *rbuf=NULL;
 
     /* Create the file for this test */
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
@@ -1571,12 +1807,12 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
 	goto error;
 
     /* Allocate space and initialize data */
-    orig = (unsigned char*)malloc(NX * NY * sizeof(stype2));
+    orig = (void*)malloc(NX * NY * sizeof(stype2));
     initialize_stype2(orig, (size_t)NX*NY);
 
-    rbuf = (unsigned char*)malloc(NX * NY * sizeof(stype1));
+    rbuf = (void*)malloc(NX * NY * sizeof(stype1));
 
-    rew_buf = (unsigned char*)malloc(NX * NY * sizeof(stype4));
+    rew_buf = (void*)malloc(NX * NY * sizeof(stype4));
     initialize_stype4(rew_buf, (size_t)NX*NY);
 
     /* Create dataset creation property list */
@@ -1719,6 +1955,691 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_hdf5_change_dtype_chunked
+ *
+ * Purpose:	Test the filter of modifying the datatype of chunked 
+ *              dataset.   
+ *              
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Raymond Lu
+ *              20 Sept 2007
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+#ifdef H5_HAVE_FILTER_DTYPE_MODIFY
+static int
+test_hdf5_change_dtype_chunked(char *filename, hid_t fapl)
+{
+    hid_t   file;     
+    hid_t   rew_tid, src_tid, dst_tid;
+    hid_t   dataset;
+    hid_t   space, space2, mspace;
+    hid_t   fcpl, dcpl, dxpl;
+    hsize_t dims[2] = {NX, NY};
+    hsize_t chunk_dims[2] = {NX/10, NY/10};
+    hsize_t mem_dims[2] = {NX/2, NY};
+    void *orig=NULL, *rew_buf=NULL, *rbuf=NULL;
+    void *rew_half_buf=NULL, *new_rbuf_half=NULL, *orig_rbuf_half=NULL;
+    hsize_t hs_offset[2] = {0,0}; /* Hyperslab offset */
+    const hsize_t hs_size[2] = {NX/2, NY};   /* Hyperslab size */
+    const hsize_t hs_stride[2] = {1,1}; /* Hyperslab stride */
+    const hsize_t hs_count[2] = {1,1}; /* Hyperslab count */
+    unsigned num_indexes;
+    unsigned x;
+
+    if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+	goto error;
+
+    /* Set up index values for sohm */
+    if(H5Pset_shared_mesg_nindexes(fcpl, TEST_NUM_INDEXES) < 0)
+	goto error;
+
+    for(x=0; x<TEST_NUM_INDEXES; ++x)
+    {
+        if(H5Pset_shared_mesg_index(fcpl, x, test_type_flags[x], test_minsizes[x]) < 0)
+	    goto error;
+    }
+
+    if(H5Pset_shared_mesg_phase_change(fcpl, TEST_L2B, TEST_B2L) < 0)
+	goto error;
+
+    /* Create the file for this test */
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
+	goto error;
+
+    /* Build hdf5 datatypes */
+    if ((src_tid=create_stype2())<0)
+        goto error;
+
+    if ((dst_tid=create_stype1())<0)
+        goto error;
+
+    if ((rew_tid=create_stype4())<0)
+        goto error;
+
+    /* Create the data space */
+    if((space = H5Screate_simple(2, dims, NULL))<0)
+	goto error;
+  
+    if((space2 = H5Scopy(space))<0)
+	goto error;
+
+    /* Allocate space and initialize data */
+    orig = (void*)malloc(NX * NY * sizeof(stype2));
+    initialize_stype2(orig, (size_t)NX*NY);
+
+    rbuf = (void*)malloc(NX * NY * sizeof(stype1));
+
+    orig_rbuf_half = (void*)malloc(NX/2 * NY * sizeof(stype2));
+    new_rbuf_half = (void*)malloc(NX/2 * NY * sizeof(stype4));
+
+    rew_half_buf = (void*)malloc((NX/2) * NY * sizeof(stype4));
+    initialize_stype4(rew_half_buf, (size_t)(NX/2)*NY);
+
+    rew_buf = (void*)malloc(NX * NY * sizeof(stype4));
+    initialize_stype4(rew_buf, (size_t)NX*NY);
+
+    /* Create dataset creation property list */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+        goto error;
+
+    /*
+     *######################################################################
+     * STEP 1. Write data to a chunked dataset.
+     */
+    TESTING("writing data to a chunked dataset");
+
+    if(H5Pset_dtype_modifiable(dcpl)<0) 
+        goto error;
+
+    /* Set chunking */
+    if(H5Pset_chunk(dcpl, 2, chunk_dims)<0)
+        goto error;
+
+    /* Create chunked data set */
+    if((dataset = H5Dcreate2(file, DSET_NAME[3], src_tid, space, H5P_DEFAULT, dcpl, H5P_DEFAULT))<0)
+        goto error;
+
+    /* Write the data to the dataset */
+    if(H5Dwrite(dataset, src_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig)<0)
+	goto error;
+
+    if(H5Dclose(dataset) < 0)
+        goto error;
+
+    PASSED();
+
+    /*
+     *######################################################################
+     * STEP 2. Overwrite a half part of the dataset with the new datatype. 
+     */
+    TESTING("overwriting half of the data with the new data type");
+
+    /* Create xfer properties to preserve initialized data */
+    if ((dxpl = H5Pcreate (H5P_DATASET_XFER))<0)
+       goto error;
+
+    /* Rewrite chunked data set */
+    if((dataset = H5Dopen2(file, DSET_NAME[3], H5P_DEFAULT))<0)
+        goto error;
+
+    /* Modify the datatype of the chunked dataset now.  It should only change 
+     * the dataset's datatype, not the actual data. */
+    if(H5Dmodify_dtype(dataset, rew_tid)<0) 
+        goto error;
+
+    if(H5Dclose(dataset) < 0)
+        goto error;
+
+    /* Rewrite chunked data set */
+    if((dataset = H5Dopen2(file, DSET_NAME[3], H5P_DEFAULT))<0)
+        goto error;
+
+    if (H5Sselect_hyperslab(space, H5S_SELECT_SET, hs_offset, hs_stride, hs_count, hs_size)<0)
+        goto error;
+
+    /* Write the data to the dataset */
+    if(H5Dwrite(dataset, rew_tid, H5S_ALL, space, dxpl, rew_half_buf)<0)
+	goto error;
+
+    if(H5Dclose(dataset) < 0)
+        goto error;
+
+    PASSED();
+
+    /*
+     *######################################################################
+     * STEP 3. Read the original half data and the half data just being
+     *         rewritten.
+     */
+    TESTING("reading the half data just being rewritten");
+
+    /* Read the half data just being rewritten */
+    if((dataset = H5Dopen2(file, DSET_NAME[3], H5P_DEFAULT))<0)
+        goto error;
+
+    if(H5Dread(dataset, rew_tid, H5S_ALL, space, dxpl, new_rbuf_half)<0)
+        goto error;
+
+    if(compare_stype4_data(rew_half_buf, new_rbuf_half, (size_t)(NX/2) * NY) < 0) 
+        goto error;
+
+    /* Read the original half data */
+    hs_offset[0] = NX / 2;
+
+    if (H5Sselect_hyperslab(space2, H5S_SELECT_SET, hs_offset, hs_stride, hs_count, hs_size)<0)
+        goto error;
+
+    /* Create the data space */
+    if((mspace = H5Screate_simple(2, mem_dims, NULL))<0)
+	goto error;
+
+    if(H5Dread(dataset, src_tid, mspace, space2, dxpl, orig_rbuf_half)<0)
+        goto error;
+
+    if(H5Sclose(mspace) < 0)
+        goto error;
+
+    if(H5Sclose(space2) < 0)
+        goto error;
+
+    if(compare_stype2_data((stype2*)orig + (NX/2)*NY, orig_rbuf_half, (size_t)(NX/2) * NY) < 0) 
+        goto error;
+
+    if(H5Dclose(dataset) < 0)
+        goto error;
+
+    PASSED();
+
+    /*
+     *######################################################################
+     * STEP 4. Rewrite the whole data.
+     */
+    TESTING("rewriting data with a subset of original data type");
+
+    /* Create xfer properties to preserve initialized data */
+    if ((dxpl = H5Pcreate (H5P_DATASET_XFER))<0)
+       goto error;
+
+    /* Rewrite chunked data set */
+    if((dataset = H5Dopen2(file, DSET_NAME[3], H5P_DEFAULT))<0)
+        goto error;
+
+    /* Write the data to the dataset */
+    if(H5Dwrite(dataset, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf)<0)
+	goto error;
+
+    if(H5Dclose(dataset) < 0)
+        goto error;
+
+    PASSED();
+
+    /*
+     *######################################################################
+     * STEP 5. Read the whole data.
+     */
+    TESTING("reading data with a subset of original data type");
+
+    /* Check chunked data set */
+    if((dataset = H5Dopen2(file, DSET_NAME[3], H5P_DEFAULT))<0)
+        goto error;
+
+    if(H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf)<0)
+        goto error;
+
+    if(compare_data(orig, rbuf, FALSE) < 0) 
+        goto error;
+
+    if(H5Dclose(dataset) < 0)
+        goto error;
+
+    /* Finishing test and release resources */
+    if(H5Sclose(space) < 0)
+        goto error;
+
+    if(H5Pclose(fcpl) < 0)
+        goto error;
+
+    if(H5Pclose(dcpl) < 0)
+        goto error;
+
+    if(H5Pclose(dxpl) < 0)
+        goto error;
+
+    if(H5Tclose(src_tid)<0)
+        goto error;
+    if(H5Tclose(dst_tid)<0)
+        goto error;
+    if(H5Tclose(rew_tid)<0)
+        goto error;
+    if(H5Fclose(file) < 0)
+        goto error;
+
+    free(orig);
+    free(rbuf);
+    free(new_rbuf_half);
+    free(orig_rbuf_half);
+    free(rew_buf);
+    free(rew_half_buf);
+
+    PASSED();
+    return 0;
+
+error:
+    puts("*** DATASET TESTS FAILED ***");
+    return 1;
+}
+#else /* H5_HAVE_FILTER_DTYPE_MODIFY */
+static int
+test_hdf5_change_dtype(char *filename, hid_t fapl)
+{
+    SKIPPED();
+    puts("    Datatype modification filter not enabled");
+}
+#endif /* H5_HAVE_FILTER_DTYPE_MODIFY */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_hdf5_change_dtype_no_filter
+ *
+ * Purpose:	Test the function H5Dmodify_dtype for contiguous dataset
+ *              or chunked dataset without the filter.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Raymond Lu
+ *              20 Sept 2007
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static int
+test_hdf5_change_dtype_no_filter(char *filename, hid_t fapl, htri_t is_contig)
+{
+    hid_t   file;     
+    hid_t   rew_tid, src_tid, dst_tid;
+    hid_t   dataset;
+    hid_t   space;
+    hid_t   dcpl, dxpl;
+    hsize_t dims[2] = {NX, NY};
+    hsize_t chunk_dims[2] = {NX/10, NY/10};
+    /*hsize_t chunk_dims[2] = {NX, NY};*/
+    void *orig=NULL, *rew_buf=NULL, *rbuf1=NULL, *rbuf2=NULL;
+    unsigned num_indexes;
+    unsigned x;
+
+    /* Create the file for this test */
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+	goto error;
+
+    /* Build hdf5 datatypes */
+    if ((src_tid=create_stype2())<0)
+        goto error;
+
+    if ((rew_tid=create_stype4())<0)
+        goto error;
+
+    /* Create the data space */
+    if((space = H5Screate_simple(2, dims, NULL))<0)
+	goto error;
+
+    /* Allocate space and initialize data */
+    orig = (void*)malloc(NX * NY * sizeof(stype2));
+    initialize_stype2(orig, (size_t)NX*NY);
+
+    rbuf1 = (void*)malloc(NX * NY * sizeof(stype2));
+
+    rew_buf = (void*)malloc(NX * NY * sizeof(stype4));
+    initialize_stype4(rew_buf, (size_t)NX*NY);
+
+    rbuf2 = (void*)malloc(NX * NY * sizeof(stype4));
+
+    /* Create dataset creation property list */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+        goto error;
+
+    /*
+     *######################################################################
+     * STEP 1. Write data to a dataset.
+     */
+    TESTING("writing data to a dataset");
+
+    /* Set chunking if testing chunked dataset */
+    if(!is_contig && H5Pset_chunk(dcpl, 2, chunk_dims)<0)
+        goto error;
+
+    /* Create data set */
+    if((dataset = H5Dcreate2(file, DSET_NAME[2], src_tid, space, H5P_DEFAULT, dcpl, H5P_DEFAULT))<0)
+        goto error;
+
+    /* Write the data to the dataset */
+    if(H5Dwrite(dataset, src_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig)<0)
+	goto error;
+
+    if(H5Dclose(dataset) < 0)
+        goto error;
+
+    PASSED();
+
+    /*
+     *######################################################################
+     * STEP 2. Change original data type of the dataset.
+     */
+    TESTING("changing original data type of the dataset");
+
+    /* Rewrite data set */
+    if((dataset = H5Dopen2(file, DSET_NAME[2], H5P_DEFAULT))<0)
+        goto error;
+
+    /* Modify the datatype of the dataset now.  It should immediately 
+     * change the dataset's datatype and the data. */
+    if(H5Dmodify_dtype(dataset, rew_tid)<0) 
+        goto error;
+
+    if(H5Dclose(dataset) < 0)
+        goto error;
+
+    PASSED();
+
+    /*
+     *######################################################################
+     * STEP 3. Read the data into a subset of the original compound type.
+     */
+    TESTING("reading the data of the original data type");
+
+    /* Create xfer properties to preserve initialized data */
+    if ((dxpl = H5Pcreate (H5P_DATASET_XFER))<0)
+       goto error;
+
+    /* Check data set */
+    if((dataset = H5Dopen2(file, DSET_NAME[2], H5P_DEFAULT))<0)
+        goto error;
+
+    if(H5Dread(dataset, src_tid, H5S_ALL, H5S_ALL, dxpl, rbuf1)<0)
+        goto error;
+
+    if(compare_stype2_data(orig, rbuf1, (size_t)NX * NY) < 0) 
+        goto error;
+
+    if(H5Dclose(dataset) < 0)
+        goto error;
+
+    PASSED();
+
+    /*
+     *######################################################################
+     * STEP 4. Write the data of the changed data type. 
+     */
+    TESTING("writing the data of the changed data type");
+
+    /* Rewrite data set */
+    if((dataset = H5Dopen2(file, DSET_NAME[2], H5P_DEFAULT))<0)
+        goto error;
+
+    /* Write the data to the dataset */
+    if(H5Dwrite(dataset, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf)<0)
+	goto error;
+
+    if(H5Dclose(dataset) < 0)
+        goto error;
+
+    PASSED();
+
+    /*
+     *######################################################################
+     * STEP 5. Read the data of the changed data type.
+     */
+    TESTING("reading the data of the changed data type");
+
+    /* Check data set */
+    if((dataset = H5Dopen2(file, DSET_NAME[2], H5P_DEFAULT))<0)
+        goto error;
+
+    if(H5Dread(dataset, rew_tid, H5S_ALL, H5S_ALL, dxpl, rbuf2)<0)
+        goto error;
+
+    if(compare_stype4_data(rew_buf, rbuf2, (size_t)NX * NY) < 0) 
+        goto error;
+
+    if(H5Dclose(dataset) < 0)
+        goto error;
+
+    /* Finishing test and release resources */
+    if(H5Sclose(space) < 0)
+        goto error;
+
+    if(H5Pclose(dcpl) < 0)
+        goto error;
+
+    if(H5Pclose(dxpl) < 0)
+        goto error;
+
+    if(H5Tclose(src_tid)<0)
+        goto error;
+    if(H5Tclose(rew_tid)<0)
+        goto error;
+    if(H5Fclose(file) < 0)
+        goto error;
+
+    free(orig);
+    free(rbuf1);
+    free(rbuf2);
+    free(rew_buf);
+
+    PASSED();
+    return 0;
+
+error:
+    puts("*** DATASET TESTS FAILED ***");
+    return 1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_hdf5_change_dtype_compact
+ *
+ * Purpose:	Test the function H5Dmodify_dtype for compact dataset.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Raymond Lu
+ *              20 Sept 2007
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static int
+test_hdf5_change_dtype_compact(char *filename, hid_t fapl)
+{
+    hid_t   file;     
+    hid_t   rew_tid, src_tid, dst_tid;
+    hid_t   dataset;
+    hid_t   space;
+    hid_t   dcpl, dxpl;
+    hsize_t dims[2] = {COMP_NX, COMP_NY};
+    void *orig=NULL, *rew_buf=NULL, *rbuf1=NULL, *rbuf2=NULL;
+    unsigned num_indexes;
+    unsigned x;
+
+    /* Create the file for this test */
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+	goto error;
+
+    /* Build hdf5 datatypes */
+    if ((src_tid=create_stype2())<0)
+        goto error;
+
+    if ((rew_tid=create_stype4())<0)
+        goto error;
+
+    /* Create the data space */
+    if((space = H5Screate_simple(2, dims, NULL))<0)
+	goto error;
+
+    /* Allocate space and initialize data */
+    orig = (void*)malloc(COMP_NX * COMP_NY * sizeof(stype2));
+    initialize_stype2(orig, (size_t)COMP_NX*COMP_NY);
+
+    rbuf1 = (void*)malloc(COMP_NX * COMP_NY * sizeof(stype2));
+
+    rew_buf = (void*)malloc(COMP_NX * COMP_NY * sizeof(stype4));
+    initialize_stype4(rew_buf, (size_t)COMP_NX*COMP_NY);
+
+    rbuf2 = (void*)malloc(COMP_NX * COMP_NY * sizeof(stype4));
+
+    /* Create property list for compact dataset creation */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+        goto error;
+
+    if(H5Pset_layout(dcpl, H5D_COMPACT) < 0)
+        goto error;
+
+    if(H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0)
+        goto error;
+
+    /*
+     *######################################################################
+     * STEP 1. Write data to a compact dataset.
+     */
+    TESTING("writing data to a compact dataset");
+
+    /* Create compact data set */
+    if((dataset = H5Dcreate2(file, DSET_NAME[4], src_tid, space, H5P_DEFAULT, dcpl, H5P_DEFAULT))<0)
+        goto error;
+
+    /* Write the data to the dataset */
+    if(H5Dwrite(dataset, src_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig)<0)
+	goto error;
+
+    if(H5Dclose(dataset) < 0)
+        goto error;
+
+    PASSED();
+
+    /*
+     *######################################################################
+     * STEP 2. Change original data type of the dataset.
+     */
+    TESTING("changing original data type of the dataset");
+
+    /* Rewrite compact data set */
+    if((dataset = H5Dopen2(file, DSET_NAME[4], H5P_DEFAULT))<0)
+        goto error;
+
+    /* Modify the datatype of the compact dataset now.  It should immediately 
+     * change the dataset's datatype and the data. */
+    if(H5Dmodify_dtype(dataset, rew_tid)<0) 
+        goto error;
+
+    if(H5Dclose(dataset) < 0)
+        goto error;
+
+    PASSED();
+
+    /*
+     *######################################################################
+     * STEP 3. Read the data into a subset of the original compound type.
+     */
+    TESTING("reading the data of the original data type");
+
+    /* Create xfer properties */
+    if ((dxpl = H5Pcreate (H5P_DATASET_XFER))<0)
+       goto error;
+
+    /* Check compact data set */
+    if((dataset = H5Dopen2(file, DSET_NAME[4], H5P_DEFAULT))<0)
+        goto error;
+
+    if(H5Dread(dataset, src_tid, H5S_ALL, H5S_ALL, dxpl, rbuf1)<0)
+        goto error;
+
+    if(compare_stype2_data(orig, rbuf1, (size_t)COMP_NX * COMP_NY) < 0) 
+        goto error;
+
+    if(H5Dclose(dataset) < 0)
+        goto error;
+
+    PASSED();
+
+    /*
+     *######################################################################
+     * STEP 4. Write the data of the changed data type. 
+     */
+    TESTING("writing the data of the changed data type");
+
+    /* Rewrite compact data set */
+    if((dataset = H5Dopen2(file, DSET_NAME[4], H5P_DEFAULT))<0)
+        goto error;
+
+    /* Write the data to the dataset */
+    if(H5Dwrite(dataset, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf)<0)
+	goto error;
+
+    if(H5Dclose(dataset) < 0)
+        goto error;
+
+    PASSED();
+
+    /*
+     *######################################################################
+     * STEP 5. Read the data of the changed data type.
+     */
+    TESTING("reading the data of the changed data type");
+
+    /* Check compact data set */
+    if((dataset = H5Dopen2(file, DSET_NAME[4], H5P_DEFAULT))<0)
+        goto error;
+
+    if(H5Dread(dataset, rew_tid, H5S_ALL, H5S_ALL, dxpl, rbuf2)<0)
+        goto error;
+
+    if(compare_stype4_data(rew_buf, rbuf2, (size_t)COMP_NX * COMP_NY) < 0) 
+        goto error;
+
+    if(H5Dclose(dataset) < 0)
+        goto error;
+
+    /* Finishing test and release resources */
+    if(H5Sclose(space) < 0)
+        goto error;
+
+    if(H5Pclose(dcpl) < 0)
+        goto error;
+
+    if(H5Pclose(dxpl) < 0)
+        goto error;
+
+    if(H5Tclose(src_tid)<0)
+        goto error;
+    if(H5Tclose(rew_tid)<0)
+        goto error;
+    if(H5Fclose(file) < 0)
+        goto error;
+
+    free(orig);
+    free(rbuf1);
+    free(rbuf2);
+    free(rew_buf);
+
+    PASSED();
+    return 0;
+
+error:
+    puts("*** DATASET TESTS FAILED ***");
+    return 1;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Test different cases of I/O for compound data and the 
@@ -1732,6 +2653,12 @@ error:
  *              Friday, 15 June 2007
  *
  * Modifications:
+ *              Raymond Lu
+ *              20 Sept 2007
+ *              Added the tests for the filter of datatype modification
+ *              and H5Dmodify_dtype, for chunked, contiguous, and compact
+ *              datasets.
+ *
  *-------------------------------------------------------------------------
  */
 int
@@ -1755,9 +2682,8 @@ main (int argc, char *argv[])
     /* Create the file */
     fapl_id = h5_fileaccess();
 
-    h5_fixname(FILENAME[0], fapl_id, fname, sizeof(fname));
-
     puts("Testing compound dataset:");
+    h5_fixname(FILENAME[0], fapl_id, fname, sizeof(fname));
     nerrors += test_compound(fname, fapl_id);
 
     puts("Testing the optimization of when the source type is a subset of the dest:");
@@ -1767,6 +2693,22 @@ main (int argc, char *argv[])
     puts("Testing the optimization of when the dest type is a subset of the source:");
     h5_fixname(FILENAME[2], fapl_id, fname, sizeof(fname));
     nerrors += test_hdf5_dst_subset(fname, fapl_id);
+
+    puts("Testing the filter for modifying datatype of chunked dataset:");
+    h5_fixname(FILENAME[3], fapl_id, fname, sizeof(fname));
+    nerrors += test_hdf5_change_dtype_chunked(fname, fapl_id);
+
+    puts("Testing modifying datatype of chunked dataset with no filter:");
+    h5_fixname(FILENAME[4], fapl_id, fname, sizeof(fname));
+    nerrors += test_hdf5_change_dtype_no_filter(fname, fapl_id, FALSE);
+
+    puts("Testing modifying datatype of contiguous dataset:");
+    h5_fixname(FILENAME[5], fapl_id, fname, sizeof(fname));
+    nerrors += test_hdf5_change_dtype_no_filter(fname, fapl_id, TRUE);
+
+    puts("Testing modifying datatype of compact dataset:");
+    h5_fixname(FILENAME[6], fapl_id, fname, sizeof(fname));
+    nerrors += test_hdf5_change_dtype_compact(fname, fapl_id);
 
     if (nerrors) {
         printf("***** %u FAILURE%s! *****\n",

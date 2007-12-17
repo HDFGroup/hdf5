@@ -40,13 +40,15 @@ enum H5Z_scaleoffset_type {t_bad=0, t_uchar=1, t_ushort, t_uint, t_ulong, t_ulon
 
 /* Local function prototypes */
 static double H5Z_scaleoffset_rnd(double val);
-static herr_t H5Z_can_apply_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id);
+static herr_t H5Z_can_apply_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id, 
+    hid_t UNUSED file_id);
 static enum H5Z_scaleoffset_type H5Z_scaleoffset_get_type(unsigned dtype_class,
     unsigned dtype_size, unsigned dtype_sign);
 static herr_t H5Z_scaleoffset_set_parms_fillval(H5P_genplist_t *dcpl_plist,
     const H5T_t *type, enum H5Z_scaleoffset_type scale_type, unsigned cd_values[],
     int need_convert, hid_t dxpl_id);
-static herr_t H5Z_set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id);
+static herr_t H5Z_set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id,
+    hid_t UNUSED file_id);
 static size_t H5Z_filter_scaleoffset(unsigned flags, size_t cd_nelmts,
     const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf);
 static void H5Z_scaleoffset_convert(void *buf, unsigned d_nelmts, size_t dtype_size);
@@ -88,6 +90,7 @@ H5Z_class_t H5Z_SCALEOFFSET[1] = {{
     "scaleoffset",		/* Filter name for debugging	*/
     H5Z_can_apply_scaleoffset,	/* The "can apply" callback     */
     H5Z_set_local_scaleoffset,  /* The "set local" callback     */
+    NULL,                       /* The "reset local" callback   */
     H5Z_filter_scaleoffset,	/* The actual filter function	*/
 }};
 
@@ -585,7 +588,8 @@ H5Z_class_t H5Z_SCALEOFFSET[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5Z_can_apply_scaleoffset(hid_t UNUSED dcpl_id, hid_t type_id, hid_t UNUSED space_id)
+H5Z_can_apply_scaleoffset(hid_t UNUSED dcpl_id, hid_t type_id, hid_t UNUSED space_id, 
+    hid_t UNUSED file_id)
 {
     const H5T_t	*type;                  /* Datatype */
     H5T_class_t dtype_class;            /* Datatype's class */
@@ -752,7 +756,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5Z_set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
+H5Z_set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id, hid_t UNUSED file_id)
 {
     H5P_genplist_t *dcpl_plist;     /* Property list pointer */
     const H5T_t	*type;              /* Datatype */
@@ -904,7 +908,6 @@ done:
  *              Monday, February 7, 2005
  *
  * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static size_t

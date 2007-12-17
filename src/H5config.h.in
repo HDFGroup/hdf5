@@ -83,6 +83,9 @@
 /* Define if support for deflate (zlib) filter is enabled */
 #undef HAVE_FILTER_DEFLATE
 
+/* Define if support for datatype modification filter is enabled */
+#undef HAVE_FILTER_DTYPE_MODIFY
+
 /* Define if support for Fletcher32 checksum is enabled */
 #undef HAVE_FILTER_FLETCHER32
 
