@@ -200,7 +200,7 @@ $!# 6.15: hexadecimal
 $ CALL TOOLTEST h5diff_615.txt "-p 0x1 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# 6.16: string
-$ CALL TOOLTEST h5diff_616.txt "-p """0.21""" h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
+$! CALL TOOLTEST h5diff_616.txt "-p """0.21""" h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# 6.17: repeated option
 $ CALL TOOLTEST h5diff_617.txt "-p 0.21 -p 0.22 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"

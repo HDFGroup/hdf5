@@ -24,11 +24,22 @@ $ hdf5vms     = tmp + ".VMS]"
 $ hdf5ctest   = tmp + ".TEST]"
 $ hdf5f90test = tmp + ".FORTRAN.TEST]"
 $ hdf5cxxtest = tmp  + ".C__.TEST]"
+$ hdf5toolstest = tmp  + ".TOOLS.TESTFILES]]"
 $ set def 'hdf5vms'
 $@make
 $ set def 'hdf5ctest'
-@check
+$@check
 $ set def 'hdf5f90test'
-@check
+$@check
 $ set def 'hdf5cxxtest'
-@check
+$@check
+$ set def 'hdf5toolstest'
+$ copy [-.h5dump]check_h5dump.com     check_h5dump.com 
+$ copy [-.h5ls]check_h5ls.com         check_h5ls.com
+$ copy [-.h5diff]check_h5diff.com     check_h5diff.com
+$ copy [-.h5repack]check_h5repack.com check_h5repack.com
+$@check_h5dump.com
+$@check_h5ls.com
+$@check_h5diff.com
+$@check_h5repack.com
+$!

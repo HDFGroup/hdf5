@@ -35,76 +35,78 @@ $ !
 $
 
 $!# copy files (these files have no filters) 
-$ CALL TOOLTEST h5repack_fill.h5
-$ CALL TOOLTEST h5repack_objs.h5
-$ CALL TOOLTEST h5repack_attr.h5
-$ CALL TOOLTEST h5repack_hlink.h5
-$ CALL TOOLTEST h5repack_layout.h5
-$ CALL TOOLTEST h5repack_early.h5
+$ CALL TOOLTEST "" h5repack_fill.h5
+$ CALL TOOLTEST "" h5repack_objs.h5
+$ CALL TOOLTEST "" h5repack_attr.h5
+$ CALL TOOLTEST "" h5repack_hlink.h5
+$ CALL TOOLTEST "" h5repack_layout.h5
+$ CALL TOOLTEST "" h5repack_early.h5
 $ 
 $! # use h5repack_layout.h5 to write some filters  (this file has  no filters)
 $ 
 $! # gzip with individual object
-$ CALL TOOLTEST h5repack_layout.h5 "-f dset1:""GZIP""=1  -l dset1:""CHUNK""=20x10"
+$ CALL TOOLTEST "-f dset1:"""GZIP"""=1  -l dset1:"""CHUNK"""=20x10" h5repack_layout.h5
 $!   
+$
 $! # gzip for all 
-$ CALL TOOLTEST h5repack_layout.h5 "-f ""GZIP""=1"
+$ CALL TOOLTEST "-f """GZIP"""=1" h5repack_layout.h5
 $! 
 $! # shuffle with individual object
-$ CALL TOOLTEST h5repack_layout.h5 "-f dset2:""SHUF""  -l dset2:""CHUNK""=20x10"
+$ CALL TOOLTEST "-f dset2:"""SHUF"""  -l dset2:"""CHUNK"""=20x10" h5repack_layout.h5
+$ 
 $!   
 $! 
 $! # shuffle for all
-$ CALL TOOLTEST h5repack_layout.h5 "-f ""SHUF"""
+$ CALL TOOLTEST "-f """SHUF"""" h5repack_layout.h5
 $!   
 $! # fletcher32  with individual object
-$ CALL TOOLTEST h5repack_layout.h5 "-f dset2:""FLET""  -l dset2:""CHUNK""=20x10"
+$ CALL TOOLTEST "-f dset2:"""FLET"""  -l dset2:"""CHUNK"""=20x10" h5repack_layout.h5
 $! 
 $! # fletcher32 for all
-$ CALL TOOLTEST h5repack_layout.h5 "-f ""FLET"""
+$ CALL TOOLTEST "-f """FLET"""" h5repack_layout.h5
 $ 
 $! ###########################################################
 $! # the following tests assume the input files have filters
 $! ###########################################################
 $! 
 $! # deflate copy
-$ CALL TOOLTEST h5repack_deflate.h5
+$ CALL TOOLTEST "" h5repack_deflate.h5
 $! 
 $! # deflate remove
-$ CALL TOOLTEST h5repack_deflate.h5 "-f dset_deflate:""NONE"""
+$ CALL TOOLTEST "-f dset_deflate:"""NONE"""" h5repack_deflate.h5
 $!     
 $! # shuffle copy
-$ CALL TOOLTEST h5repack_shuffle.h5
+$ CALL TOOLTEST "" h5repack_shuffle.h5
 $! 
 $! # shuffle remove
-$ CALL TOOLTEST h5repack_shuffle.h5 "-f dset_shuffle:""NONE"""
+$ CALL TOOLTEST "-f dset_shuffle:"""NONE"""" h5repack_shuffle.h5
 $! 
 $! # fletcher32 copy
-$ CALL TOOLTEST h5repack_fletcher.h5
+$ CALL TOOLTEST "" h5repack_fletcher.h5
 $! 
 $! # fletcher32 remove
-$ CALL TOOLTEST h5repack_fletcher.h5 "-f dset_fletcher32:""NONE"""
+$ CALL TOOLTEST "-f dset_fletcher32:"""NONE"""" h5repack_fletcher.h5
 $! 
 $! # nbit copy
-$ CALL TOOLTEST h5repack_nbit.h5
+$ CALL TOOLTEST "" h5repack_nbit.h5
 $! 
 $! # nbit remove
-$ CALL TOOLTEST h5repack_nbit.h5 "-f dset_nbit:""NONE"""
+$ CALL TOOLTEST "-f dset_nbit:"""NONE"""" h5repack_nbit.h5
 $! 
 $! # nbit add
-$ CALL TOOLTEST h5repack_nbit.h5 "-f dset_int31:""NBIT"""
+$ CALL TOOLTEST "-f dset_int31:"""NBIT"""" h5repack_nbit.h5
 $! 
 $! # scaleoffset add
-$! CALL TOOLTEST h5repack_scaleoffset.h5 "-f dset_none:""S+O""=31"
+$! CALL TOOLTEST "-f dset_none:"""S+O"""=31" h5repack_scaleoffset.h5
 $! 
 $! # scaleoffset copy
-$! CALL TOOLTEST h5repack_scaleoffset.h5
+$! CALL TOOLTEST "" h5repack_scaleoffset.h5
 $! 
 $! # scaleoffset remove
-$! CALL TOOLTEST h5repack_scaleoffset.h5 "-f dset_scaleoffset:""NONE"""
+$! CALL TOOLTEST "-f dset_scaleoffset:"""NONE"""" h5repack_scaleoffset.h5
 $! 
 $! #limit
-$ CALL TOOLTEST h5repack_layout.h5 "-f ""GZIP""=1 -m 1024"
+$ CALL TOOLTEST "-f """GZIP"""=1 -m 1024" h5repack_layout.h5
 $! 
 $! 
 $! 
@@ -112,37 +114,37 @@ $! #########################################################
 $! # layout options (these files have no filters)
 $! #########################################################
 $!
-$ CALL TOOLTEST h5repack_layout.h5 "-l dset2:""CHUNK""=20x10"
-$ CALL TOOLTEST h5repack_layout.h5 "-l ""CHUNK""=20x10"
-$ CALL TOOLTEST h5repack_layout.h5 "-l dset2:""CONTI"""
-$ CALL TOOLTEST h5repack_layout.h5 "-l ""CONTI"""
-$ CALL TOOLTEST h5repack_layout.h5 "-l dset2:""COMPA"""
-$ CALL TOOLTEST h5repack_layout.h5 "-l ""COMPA"""
+$ CALL TOOLTEST "-l dset2:"""CHUNK"""=20x10" h5repack_layout.h5
+$ CALL TOOLTEST "-l """CHUNK"""=20x10" h5repack_layout.h5
+$ CALL TOOLTEST "-l dset2:"""CONTI"""" h5repack_layout.h5
+$ CALL TOOLTEST "-l """CONTI"""" h5repack_layout.h5
+$ CALL TOOLTEST "-l dset2:"""COMPA"""" h5repack_layout.h5
+$ CALL TOOLTEST "-l """COMPA"""" h5repack_layout.h5
 $! 
 $! 
 $! ################################################################
 $! # layout conversions (file has no filters)
 $! ###############################################################
 $! 
-$ CALL TOOLTEST h5repack_layout.h5 "-l dset_compact:""CONTI"""
-$ CALL TOOLTEST h5repack_layout.h5 "-l dset_compact:""CHUNK""=2x5" 
-$ CALL TOOLTEST h5repack_layout.h5 "-l dset_compact:""COMPA"""
-$ CALL TOOLTEST h5repack_layout.h5 "-l dset_contiguous:""COMPA"""
-$ CALL TOOLTEST h5repack_layout.h5 "-l dset_contiguous:""CHUNK""=3x6"
-$ CALL TOOLTEST h5repack_layout.h5 "-l dset_contiguous:""CONTI"""
-$ CALL TOOLTEST h5repack_layout.h5 "-l dset_chunk:""COMPA"""
-$ CALL TOOLTEST h5repack_layout.h5 "-l dset_chunk:""CONTI"""
-$ CALL TOOLTEST h5repack_layout.h5 "-l dset_chunk:""CHUNK""=18x13"
+$ CALL TOOLTEST "-l dset_compact:"""CONTI"""" h5repack_layout.h5
+$ CALL TOOLTEST "-l dset_compact:"""CHUNK"""=2x5" h5repack_layout.h5 
+$ CALL TOOLTEST "-l dset_compact:"""COMPA"""" h5repack_layout.h5
+$ CALL TOOLTEST "-l dset_contiguous:"""COMPA"""" h5repack_layout.h5
+$ CALL TOOLTEST "-l dset_contiguous:"""CHUNK"""=3x6" h5repack_layout.h5
+$ CALL TOOLTEST "-l dset_contiguous:"""CONTI"""" h5repack_layout.h5
+$ CALL TOOLTEST "-l dset_chunk:"""COMPA"""" h5repack_layout.h5
+$ CALL TOOLTEST "-l dset_chunk:"""CONTI"""" h5repack_layout.h5
+$ CALL TOOLTEST "-l dset_chunk:"""CHUNK"""=18x13" h5repack_layout.h5
 $!
 $!
-$! del *out.h5;*
-$! del *.out;*
+$ del *_out.h5;*
+$ del *.out;*
 $! del *.err;*
 $TOOLTEST: SUBROUTINE
 
-$ len =  F$LENGTH(P1)
-$ base = F$EXTRACT(0,len-3,P1)
-$ output_file = base + "out.h5"
+$ len =  F$LENGTH(P2)
+$ base = F$EXTRACT(0,len-3,P2)
+$ output_file = base + "_out.h5"
 $ output_err = base + ".err"
 $ output_out = base + ".out"
 $
@@ -150,20 +152,21 @@ $ begin = "Testing h5repack"
 $ !
 $ ! Run the test and save output in the 'actual' file
 $ !
-$! define/nolog sys$error  'output_err'
-$! define/nolog sys$output 'output_out'
+$ define/nolog sys$error  'output_err'
+$ define/nolog sys$output 'output_out'
+$
 $ ON ERROR THEN CONTINUE
-$ h5repack -i 'P1 -o 'output_file' 'P2
-$ h5diff 'P1 'output_file'
+$ h5repack 'P1 'P2 'output_file'
+$ h5diff 'P2 'output_file'
 $ deassign sys$error
 $ deassign sys$output
 $ if F$SEARCH(output_err) .EQS. "" 
 $ then
 $    result = "PASSED"
-$    line = F$FAO("!16AS !20AS !43AS !70AS", begin, P1, P2, result) 
+$    line = F$FAO("!16AS !40AS !22AS !67AS", begin, P1, P2, result) 
 $  else
 $    result = "*FAILED*"
-$    line = F$FAO("!16AS !20AS !42AS !69AS", begin, P1, P2, result) 
+$    line = F$FAO("!16AS !40AS !22AS !66AS", begin, P1, P2, result) 
 $ endif
 
 $ !
@@ -173,4 +176,5 @@ $  write sys$output line
 $ ! 
 $ !
 $ENDSUBROUTINE
+
 
