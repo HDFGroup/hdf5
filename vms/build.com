@@ -24,7 +24,7 @@ $ hdf5vms     = tmp + ".VMS]"
 $ hdf5ctest   = tmp + ".TEST]"
 $ hdf5f90test = tmp + ".FORTRAN.TEST]"
 $ hdf5cxxtest = tmp  + ".C__.TEST]"
-$ hdf5toolstest = tmp  + ".TOOLS.TESTFILES]]"
+$ hdf5toolstest = tmp  + ".TOOLS.TESTFILES]"
 $ set def 'hdf5vms'
 $@make
 $ set def 'hdf5ctest'
