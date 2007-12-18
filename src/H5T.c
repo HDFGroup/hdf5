@@ -5483,8 +5483,8 @@ H5T_dtype_is_valid(H5T_t *dtype, H5T_t *new_type)
             H5T_sort_name(new_type, NULL);
 
             /*
-             * Build a mapping from source member number to destination member
-             * number. If some source member is not a destination member then that
+             * Build a mapping from current type member number to new type member
+             * number. If some current type member is not a new type member then that
              * mapping element will be negative.  Also verify if each member is valid. 
             */
             src2dst=H5MM_malloc(dtype_nmembs * sizeof(int));
@@ -5517,6 +5517,8 @@ H5T_dtype_is_valid(H5T_t *dtype, H5T_t *new_type)
         case H5T_ENUM: 
         {
             int cur_nmemb, new_nmemb;
+            int        *src2dst = NULL;
+            int        i, j;
 
             if(new_class != H5T_ENUM)
 	        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "new type must be an enum type")
@@ -5529,6 +5531,30 @@ H5T_dtype_is_valid(H5T_t *dtype, H5T_t *new_type)
 
             if(new_nmemb < cur_nmemb)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "new enum's members can't be less than current enum")
+
+            H5T_sort_name(dtype, NULL);
+            H5T_sort_name(new_type, NULL);
+
+            /*
+             * Build a mapping from current type member number to new type member
+             * number. If some current type member is not a new type member then that
+             * mapping element will be negative.  Also verify if each member is valid. 
+            */
+            src2dst=H5MM_malloc(cur_nmemb * sizeof(int));
+
+            for (i=0; i<cur_nmemb; i++) {
+                src2dst[i] = -1;
+                for (j=0; j<new_nmemb; j++) {
+                    if (!HDstrcmp(dtype->shared->u.enumer.name[i],
+                           new_type->shared->u.enumer.name[j])) {
+                        src2dst[i] = j;
+                        break;
+                    }
+                }
+
+                if(src2dst[i] < 0)
+	            HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "no enum member should be deleted")
+            }
         }
                 
             break;                

@@ -1256,7 +1256,6 @@ H5D_contig_copy_conv(H5F_t *file, const H5D_t *dset_src, const H5D_t *dset_dst,
     size_t	target_size;		/* Desired buffer size	*/
     void       *buf = NULL;             /* Buffer for copying data */
     void       *bkg = NULL;             /* Temporary buffer for copying data */
-    void       *reclaim_buf = NULL;     /* Buffer for reclaiming data */
     H5S_t      *buf_space = NULL;       /* Dataspace describing buffer */
     hsize_t     buf_dim;                /* Dimension for buffer */
     hbool_t     is_vlen = FALSE;        /* Flag to indicate VL type */
@@ -1387,8 +1386,6 @@ H5D_contig_copy_conv(H5F_t *file, const H5D_t *dset_src, const H5D_t *dset_dst,
 done:
     if(buf)
         H5FL_BLK_FREE(type_conv, buf);
-    if(reclaim_buf)
-        H5FL_BLK_FREE(type_conv, reclaim_buf);
     if(bkg)
         H5FL_BLK_FREE(type_conv, bkg);
     if(is_vlen && buf_space) {

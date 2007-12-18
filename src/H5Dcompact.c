@@ -492,6 +492,7 @@ H5D_compact_copy_conv(const H5D_t *dset_src, const H5D_t *dset_dst,
 
     /* Copy the data from the conversion buffer to the destination */
     dset_dst->shared->layout.u.compact.size = total_dst_nbytes;
+    H5MM_xfree(dset_dst->shared->layout.u.compact.buf);
     dset_dst->shared->layout.u.compact.buf = (void*)H5MM_malloc((size_t)total_dst_nbytes);
     HDmemcpy(dset_dst->shared->layout.u.compact.buf, buf, (size_t)total_dst_nbytes);
 

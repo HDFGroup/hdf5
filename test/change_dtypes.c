@@ -574,9 +574,9 @@ test_enum(hid_t file)
     /* Create an enum type with more members type and try to change the type to it.
      * It should succeed. */
     if ((new_type = H5Tcreate(H5T_ENUM, sizeof(short)))<0)  TEST_ERROR;
-    if (H5Tenum_insert(new_type, "RED",   CPTR(val3,  107))<0) TEST_ERROR;
+    if (H5Tenum_insert(new_type, "BLUE",  CPTR(val3,  107))<0) TEST_ERROR;
     if (H5Tenum_insert(new_type, "GREEN", CPTR(val3,  106))<0) TEST_ERROR;
-    if (H5Tenum_insert(new_type, "BLUE",  CPTR(val3,  105))<0) TEST_ERROR;
+    if (H5Tenum_insert(new_type, "RED",   CPTR(val3,  105))<0) TEST_ERROR;
     if (H5Tenum_insert(new_type, "WHITE", CPTR(val3,  104))<0) TEST_ERROR;
     if (H5Tenum_insert(new_type, "BLACK", CPTR(val3,  103))<0) TEST_ERROR;
     if (H5Tenum_insert(new_type, "YELLOW", CPTR(val3, 102))<0) TEST_ERROR;

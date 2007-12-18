@@ -168,6 +168,7 @@ typedef struct H5D_istore_it_ud4_t {
     void                *bkg;                   /* Buffer for background information during type conversion */
     size_t              buf_size;               /* Buffer size */
     hbool_t             do_convert;             /* Whether to perform type conversions */
+    hbool_t             is_compressed;          /* Whether the filters are enabled */
 
     /* needed for converting variable-length data */
     hid_t               tid_src;                /* Datatype ID for source datatype */
@@ -1008,10 +1009,8 @@ H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
     } /* end if */
 
     /* Check for filtered chunks */
-    if(pline && pline->nused) {
-        is_compressed = TRUE;
-        cb_struct.func = NULL; /* no callback function when failed */
-    } /* end if */
+    is_compressed = udata->is_compressed;
+    cb_struct.func = NULL; /* no callback function when failed */
 
     /* Resize the buf if it is too small to hold the data */
     if(nbytes > buf_size) {
@@ -1148,9 +1147,6 @@ H5D_istore_iter_copy_conv(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
     H5D_istore_it_ud4_t     *udata = (H5D_istore_it_ud4_t *)_udata;
     const H5D_istore_key_t  *lt_key = (const H5D_istore_key_t *)_lt_key;
     H5D_istore_ud1_t        udata_dst;                  /* User data about new destination chunk */
-    hbool_t                 is_vlen = FALSE;
-    hbool_t                 fix_ref = FALSE;
-    hbool_t                 other_conversion = FALSE;
 
     /* General information about chunk copy */
     void                    *bkg = udata->bkg;
@@ -1166,7 +1162,6 @@ H5D_istore_iter_copy_conv(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
     H5Z_cb_t                cb_struct;
 
     H5T_path_t              *tpath = udata->tpath_src_mem;
-    H5S_t                   *buf_space = udata->buf_space;
     hid_t                   tid_src = udata->tid_src;
     hid_t                   tid_dst = udata->tid_dst;
     size_t                  nelmts = udata->nelmts;
@@ -1175,15 +1170,9 @@ H5D_istore_iter_copy_conv(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_istore_iter_copy_conv)
 
-    /* Check parameter for type conversion */
-    if(H5T_detect_class(udata->dt_src, H5T_VLEN) > 0)
-        is_vlen = TRUE;
-
     /* Check for filtered chunks */
-    if(pline && pline->nused) {
-        is_compressed = TRUE;
-        cb_struct.func = NULL; /* no callback function when failed */
-    } /* end if */
+    is_compressed = udata->is_compressed;
+    cb_struct.func = NULL; /* no callback function when failed */
 
     /* Resize the buf if it is too small to hold the data */
     if(nbytes > buf_size) {
@@ -4102,6 +4091,10 @@ H5D_istore_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
     udata.buf_space = buf_space;
     udata.nelmts = nelmts;
     udata.pline = pline;
+    if(udata.pline && udata.pline->nused) {
+        udata.is_compressed = TRUE;
+    } else
+        udata.is_compressed = FALSE;
     udata.file_dst = f_dst;
     udata.cpy_info = cpy_info;
 
@@ -4178,7 +4171,7 @@ H5D_istore_copy_conv(H5F_t *file, const H5D_t *dset_src, const H5D_t *dset_dst,
     void       *bkg = NULL;             /* Buffer for background during type conversion */
     H5S_t      *buf_space = NULL;       /* Dataspace describing buffer */
     hsize_t     buf_dim;                /* Dimension for buffer */
-    hbool_t     is_vlen = FALSE;        /* Flag to indicate VL type */
+    htri_t      is_vlen = FALSE;        /* Flag to indicate VL type */
     hbool_t     vlen_conv = TRUE;       /* Transfer property to indicate no conversion for vlen */
     unsigned    u;
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -4267,6 +4260,10 @@ H5D_istore_copy_conv(H5F_t *file, const H5D_t *dset_src, const H5D_t *dset_dst,
     udata.buf_space = buf_space;
     udata.nelmts = nelmts;
     udata.pline = &(dset_src->shared->dcpl_cache.pline);
+    if(udata.pline && udata.pline->nused) {
+        udata.is_compressed = TRUE;
+    } else
+        udata.is_compressed = FALSE;
     udata.file_dst = file;
     udata.cpy_info = cpy_info;
 
