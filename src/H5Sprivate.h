@@ -78,8 +78,9 @@ typedef struct {
 
     /* "Flattened" regular hyperslab selection fields */
     H5S_hyper_dim_t diminfo[H5S_MAX_RANK];   /* "Flattened" regular selection information */
-    hsize_t size[H5S_MAX_RANK];          /* "Flattened" dataspace extent information */
-    hssize_t sel_off[H5S_MAX_RANK];      /* "Flattened" selection offset information */
+    hsize_t size[H5S_MAX_RANK];         /* "Flattened" dataspace extent information */
+    hssize_t sel_off[H5S_MAX_RANK];     /* "Flattened" selection offset information */
+    hbool_t flattened[H5S_MAX_RANK];    /* Whether this dimension has been flattened */
 
     /* Irregular hyperslab selection fields */
     H5S_hyper_span_info_t *spans;  /* Pointer to copy of the span tree */
@@ -103,7 +104,6 @@ typedef struct H5S_sel_iter_t {
     /* Information common to all iterators */
     unsigned rank;              /* Rank of dataspace the selection iterator is operating on */
     hsize_t *dims;              /* Dimensions of dataspace the selection is operating on */
-    hbool_t *dims_flatten;
     hsize_t elmt_left;          /* Number of elements left to iterate over */
     size_t elmt_size;           /* Size of elements to iterate over */
 

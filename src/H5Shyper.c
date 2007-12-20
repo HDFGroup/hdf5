@@ -277,14 +277,17 @@ H5S_hyper_iter_init(H5S_sel_iter_t *iter, const H5S_t *space)
         /* Don't flatten adjacent elements into contiguous block if the
          * element size is 0.  This is for the H5S_select_shape_same() code.
          */
-        if(iter->elmt_size>0) {
+        if(iter->elmt_size > 0) {
             /* Check for any "contiguous" blocks that can be flattened */
-            for(u=rank-1; u>0; u--) {
-                if(tdiminfo[u].count==1 && tdiminfo[u].block==mem_size[u]) {
+            for(u = (rank - 1); u > 0; u--) {
+                if(tdiminfo[u].count == 1 && tdiminfo[u].block == mem_size[u]) {
                     cont_dim++;
-                    iter->dims_flatten[u] = TRUE;
-                }
+                    iter->u.hyp.flattened[u] = TRUE;
+                } /* end if */
+                else
+                    iter->u.hyp.flattened[u] = FALSE;
             } /* end for */
+            iter->u.hyp.flattened[0] = FALSE;
         } /* end if */
 
         /* Check if the regular selection can be "flattened" */
@@ -420,7 +423,6 @@ H5S_hyper_iter_init(H5S_sel_iter_t *iter, const H5S_t *space)
  *
  *-------------------------------------------------------------------------
  */
-#ifdef TMP
 static herr_t
 H5S_hyper_iter_coords (const H5S_sel_iter_t *iter, hsize_t *coords)
 {
@@ -435,79 +437,62 @@ H5S_hyper_iter_coords (const H5S_sel_iter_t *iter, hsize_t *coords)
     /* Check for a single "regular" hyperslab */
     if(iter->u.hyp.diminfo_valid) {
         /* Check if this is a "flattened" regular hyperslab selection */
-        if(iter->u.hyp.iter_rank!=0 && iter->u.hyp.iter_rank<iter->rank) {
-            unsigned flat_dim;  /* The rank of the flattened dimension */
-            unsigned dim = iter->rank - iter->u.hyp.iter_rank;
+        if(iter->u.hyp.iter_rank != 0 && iter->u.hyp.iter_rank < iter->rank) {
+            int u, v;           /* Dimension indices */
 
-            /* Get the rank of the flattened dimension */
-            flat_dim=iter->u.hyp.iter_rank-1;
+            /* Set the starting rank of both the "natural" & "flattened" dimensions */
+            u = iter->rank - 1;
+            v = iter->u.hyp.iter_rank - 1;
 
-            /* Copy the coordinates up to where things got flattened */
-#ifdef TMP
-            HDmemcpy(coords,iter->u.hyp.off,sizeof(hsize_t)*flat_dim);
+            /* Construct the "natural" dimensions from a set of flattened coordinates */
+            while(u >= 0) {
+                if(iter->u.hyp.flattened[u]) {
+                    int begin = u;      /* The rank of the first flattened dimension */
 
-            /* Compute the coordinates for the flattened dimensions */
-            H5V_array_calc(iter->u.hyp.off[flat_dim],iter->rank-flat_dim,&(iter->dims[flat_dim]),&(coords[flat_dim]));
-#else
-            /* Compute the coords for the flattened dimensions */
-            H5V_array_calc(iter->u.hyp.off[0],dim+1,iter->dims,coords);
-            
-            /* Copy the coords for the unflattened dimensions */
-            if(dim+1 < iter->rank)
-            HDmemcpy(&(coords[dim+1]),&(iter->u.hyp.off[1]),sizeof(hsize_t)*(iter->u.hyp.iter_rank -1));
-#endif
-        } /* end if */
-        else
-            HDmemcpy(coords,iter->u.hyp.off,sizeof(hsize_t)*iter->rank);
-    } /* end if */
-    else
-        HDmemcpy(coords,iter->u.hyp.off,sizeof(hsize_t)*iter->rank);
+                    /* Walk up through as many flattened dimensions as possible */
+                    do {
+                        u--;
+                    } while(u >= 0 && iter->u.hyp.flattened[u]);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
-}   /* H5S_hyper_iter_coords() */
-#else
-static herr_t
-H5S_hyper_iter_coords (const H5S_sel_iter_t *iter, hsize_t *coords)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_hyper_iter_coords);
+                    /* Compensate for possibly overshooting dim 0 */
+                    if(u < 0)
+                        u = 0;
 
-    /* Check args */
-    assert (iter);
-    assert (coords);
+                    /* Sanity check */
+                    HDassert(v >= 0);
 
-    /* Copy the offset of the current point */
+                    /* Compute the coords for the flattened dimensions */
+                    H5V_array_calc(iter->u.hyp.off[v], (unsigned)((begin - u) + 1), &(iter->dims[u]), &(coords[u]));
 
-    /* Check for a single "regular" hyperslab */
-    if(iter->u.hyp.diminfo_valid) {
-        /* Check if this is a "flattened" regular hyperslab selection */
-        if(iter->u.hyp.iter_rank!=0 && iter->u.hyp.iter_rank<iter->rank) {
-            unsigned dim = iter->rank - iter->u.hyp.iter_rank;
-            int u, v;
-            int begin = -1;
-
-            for(u=iter->rank-1, v=iter->u.hyp.iter_rank-1; u>=0, v>=0; u--) {
-                if(!iter->dims_flatten[u]) {
-                    if(begin > 0) {
-                        /* Compute the coords for the flattened dimensions */
-                        H5V_array_calc(iter->u.hyp.off[v],begin-u+1,&(iter->dims[u]),&(coords[u]));
-                        begin = -1;
-                    } else
-                        HDmemcpy(&(coords[u]), &(iter->u.hyp.off[v]), sizeof(hsize_t));
+                    /* Continue to faster dimension in both indices */
+                    u--;
                     v--;
-                }
-                else if(iter->dims_flatten[u] && (begin == -1)) 
-                        begin = u;
-            }
+                } /* end if */
+                else {
+                    /* Walk up through as many non-flattened dimensions as possible */
+                    while(u >= 0 && !iter->u.hyp.flattened[u]) {
+                        /* Sanity check */
+                        HDassert(v >= 0);
+
+                        /* Copy the coordinate */
+                        coords[u] = iter->u.hyp.off[v];
+
+                        /* Continue to faster dimension in both indices */
+                        u--;
+                        v--;
+                    } /* end while */
+                } /* end else */
+            } /* end while */
+            HDassert(v < 0);
         } /* end if */
         else
-            HDmemcpy(coords,iter->u.hyp.off,sizeof(hsize_t)*iter->rank);
+            HDmemcpy(coords, iter->u.hyp.off, sizeof(hsize_t) * iter->rank);
     } /* end if */
     else
-        HDmemcpy(coords,iter->u.hyp.off,sizeof(hsize_t)*iter->rank);
+        HDmemcpy(coords, iter->u.hyp.off, sizeof(hsize_t) * iter->rank);
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 }   /* H5S_hyper_iter_coords() */
-#endif
 
 
 /*-------------------------------------------------------------------------
