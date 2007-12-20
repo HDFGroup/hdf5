@@ -74,5 +74,7 @@ H5_DLL htri_t H5FD_can_extend(const H5FD_t *file, H5FD_mem_t type, haddr_t addr,
     hsize_t size, hsize_t extra_requested);
 H5_DLL herr_t H5FD_extend(H5FD_t *file, H5FD_mem_t type, haddr_t addr,
     hsize_t size, hsize_t extra_requested);
+H5_DLL herr_t H5FD_aggr_reset(H5FD_t *file, H5FD_blk_aggr_t *aggr, hid_t dxpl_id);
 
 #endif /* !_H5FDprivate_H */
+

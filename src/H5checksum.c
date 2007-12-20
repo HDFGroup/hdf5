@@ -459,3 +459,36 @@ H5_checksum_metadata(const void *data, size_t len, uint32_t initval)
     FUNC_LEAVE_NOAPI(H5_checksum_lookup3(data, len, initval))
 } /* end H5_checksum_metadata() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5_hash_string
+ *
+ * Purpose:	Provide a simple & fast routine for hashing strings
+ *
+ * Note:        This algorithm is the 'djb2' algorithm described on this page:
+ *              http://www.cse.yorku.ca/~oz/hash.html
+ *
+ * Return:	hash of input string (can't fail)
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, December 11, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+uint32_t
+H5_hash_string(const char *str)
+{
+    uint32_t hash = 5381;
+    int c;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5_hash_string)
+
+    /* Sanity check */
+    HDassert(str);
+
+    while(c = *str++)
+        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+
+    FUNC_LEAVE_NOAPI(hash)
+} /* end H5_hash_string() */
+

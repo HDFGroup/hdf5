@@ -210,12 +210,23 @@ h5_cleanup(const char *base_name[], hid_t fapl)
 void
 h5_reset(void)
 {
-    char	filename[1024];
-
     HDfflush(stdout);
     HDfflush(stderr);
     H5close();
     H5Eset_auto2(H5E_DEFAULT, h5_errors, NULL);
+
+/*
+ * I commented this chunk of code out because it's not clear what diagnostics
+ *      were being output and under what circumstances, and creating this file
+ *      is throwing off debugging some of the tests.  I can't see any _direct_
+ *      harm in keeping this section of code, but I can't see any _direct_
+ *      benefit right now either.  If we figure out under which circumstances
+ *      diagnostics are being output, we should enable this behavior based on
+ *      appropriate configure flags/macros.  QAK - 2007/12/20
+ */
+#ifdef OLD_WAY
+{
+    char	filename[1024];
 
     /*
      * Cause the library to emit some diagnostics early so they don't
@@ -230,6 +241,8 @@ h5_reset(void)
 	H5Fclose(file);
 	HDunlink(filename);
     } H5E_END_TRY;
+}
+#endif /* OLD_WAY */
 }
 
 

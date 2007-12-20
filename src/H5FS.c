@@ -101,6 +101,9 @@ H5FS_create(H5F_t *f, hid_t dxpl_id, haddr_t *fs_addr, const H5FS_create_t *fs_c
     H5FS_t *ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI(H5FS_create, NULL)
+#ifdef QAK
+HDfprintf(stderr, "%s: Creating free space manager, nclasses = %Zu\n", FUNC, nclasses);
+#endif /* QAK */
 
     /* Check arguments. */
     HDassert(fs_addr);
@@ -373,13 +376,13 @@ HDfprintf(stderr, "%s: fspace->tot_sect_count = %Hu\n", FUNC, fspace->tot_sect_c
     else {
         unsigned sect_status = 0;       /* Free space section's status in the metadata cache */
 
-        /* Check the free space section's status in the metadata cache */
-        if(H5AC_get_entry_status(f, fspace->sect_addr, &sect_status) < 0)
+        /* Check if we've allocated any section info in the file & if it's still in the cache */
+        if(H5F_addr_defined(fspace->sect_addr) && H5AC_get_entry_status(f, fspace->sect_addr, &sect_status) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "unable to check metadata cache status for free space header")
 
-        /* If this free list header's section info is still in the cache, don't
-         *      unpin the header - let the section info do it, when the section
-         *      into is evicted from the cache. -QAK
+        /* If this free list header's section info exists and is still in the
+         *      cache, don't unpin the header - let the section info do it,
+         *      when the section info is evicted from the cache. -QAK
          */
         if(!(sect_status & H5AC_ES__IN_CACHE)) {
             /* Unpin the free space header in the cache */
