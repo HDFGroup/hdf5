@@ -804,6 +804,7 @@
 ./test/tbogus.h5
 ./test/tchecksum.c
 ./test/tconfig.c
+./test/tcoords.c
 ./test/testerror.sh.in
 ./test/testframe.c
 ./test/testhdf5.c

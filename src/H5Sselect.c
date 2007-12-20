@@ -804,6 +804,9 @@ H5S_select_iter_init(H5S_sel_iter_t *sel_iter, const H5S_t *space, size_t elmt_s
     if(sel_iter->rank>0) {
         /* Point to the dataspace dimensions */
         sel_iter->dims=space->extent.size;
+
+        /* Allocate space for the flags whether the dimension is flattened */
+        sel_iter->dims_flatten = (hbool_t*)H5MM_calloc(sel_iter->rank*sizeof(hbool_t));
     } /* end if */
     else
         sel_iter->dims = NULL;

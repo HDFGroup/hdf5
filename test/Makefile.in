@@ -288,7 +288,7 @@ stab_DEPENDENCIES = libh5test.la $(LIBHDF5)
 am_testhdf5_OBJECTS = testhdf5.$(OBJEXT) tarray.$(OBJEXT) \
 	tattr.$(OBJEXT) tchecksum.$(OBJEXT) tconfig.$(OBJEXT) \
 	tfile.$(OBJEXT) tgenprop.$(OBJEXT) th5o.$(OBJEXT) \
-	th5s.$(OBJEXT) theap.$(OBJEXT) tid.$(OBJEXT) \
+	th5s.$(OBJEXT) tcoords.$(OBJEXT) theap.$(OBJEXT) tid.$(OBJEXT) \
 	titerate.$(OBJEXT) tmeta.$(OBJEXT) tmisc.$(OBJEXT) \
 	trefer.$(OBJEXT) trefstr.$(OBJEXT) tselect.$(OBJEXT) \
 	tskiplist.$(OBJEXT) tsohm.$(OBJEXT) ttime.$(OBJEXT) \
@@ -652,7 +652,7 @@ ttsafe_SOURCES = ttsafe.c ttsafe_dcreate.c ttsafe_error.c ttsafe_cancel.c       
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES = testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
-    tgenprop.c th5o.c th5s.c theap.c tid.c titerate.c tmeta.c tmisc.c \
+    tgenprop.c th5o.c th5s.c tcoords.c theap.c tid.c titerate.c tmeta.c tmisc.c \
     trefer.c trefstr.c tselect.c tskiplist.c tsohm.c ttime.c ttst.c tunicode.c \
     tvlstr.c tvltypes.c
 
@@ -959,6 +959,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tattr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tchecksum.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tconfig.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tcoords.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testframe.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testhdf5.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testmeta.Po@am__quote@

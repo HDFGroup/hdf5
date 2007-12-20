@@ -103,6 +103,7 @@ typedef struct H5S_sel_iter_t {
     /* Information common to all iterators */
     unsigned rank;              /* Rank of dataspace the selection iterator is operating on */
     hsize_t *dims;              /* Dimensions of dataspace the selection is operating on */
+    hbool_t *dims_flatten;
     hsize_t elmt_left;          /* Number of elements left to iterate over */
     size_t elmt_size;           /* Size of elements to iterate over */
 
