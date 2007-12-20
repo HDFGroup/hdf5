@@ -29,14 +29,21 @@ static int filtcmp( filter_info_t f1, filter_info_t f2);
 /*-------------------------------------------------------------------------
  * Function: h5repack_verify
  *
- * Purpose: verify if the filters and layout specified in the options list are
- *  present on the OUTPUT file
+ * Purpose: verify if filters and layout in the input file match the output file
  *
- * Return: 1=present, 0=not present, -1=error
+ * Return: 
+ *  1 match
+ *  0 do not match
+ * -1 error
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente, pvn@hdfgroup.org
  *
  * Date: December 19, 2003
+ *  Modified: December, 19, 2007 (exactly 4 years later :-) )
+ *  Separate into 3 cases
+ *  1) no filter input, get all datasets and compare DCPLs. TO DO
+ *  2) filter input on selected datasets, get each one trough OBJ and match
+ *  3) filter input on all datasets, get all objects and match 
  *
  *-------------------------------------------------------------------------
  */
@@ -696,61 +703,13 @@ static int filtcmp( filter_info_t f1 /*DCPL*/, filter_info_t f2 /*OPT*/)
 {
     unsigned i;
 
-    /*-------------------------------------------------------------------------
-     * compare cd_nelmts and cd_values
-     *-------------------------------------------------------------------------
-     */
-    
-    if ( f1.filtn == 4 ) /* SZIP special case */
-    {
-        
-        if ( f1.cd_nelmts != 4 && f2.cd_nelmts != 2 )
-            return -1;
-        
-        if ( f2.cd_values[0] != f1.cd_values[2] &&
-             f2.cd_values[1] != f1.cd_values[1] )
-            return -1;
-        
-    }
-
-    else if ( f1.filtn == 2 ) /* SHUFFLE returns 1 cd_nelmts */
-    {
-
-         if ( f1.cd_nelmts != 1 && f2.cd_nelmts != 0 )
-            return -1;
-
-    }
-    
-    else 
-        
-    {
-        
-        if ( f1.cd_nelmts != f2.cd_nelmts )
-            return -1;
-        
-        /* consider different filter values as "less" */
-        for( i = 0; i < f1.cd_nelmts; i++) 
-        {
-            if (f1.cd_values[i] != f2.cd_values[i])
-            {
-                return -1; 
-            }
-            
-        }
-       
-    }
 
     /*-------------------------------------------------------------------------
-     * compare the filter type
+     * compare first the filter type
      *-------------------------------------------------------------------------
      */
 
-
-    if (f1.filtn == f2.filtn)
-    {
-        return 0;
-    }
-    else if (f1.filtn < f2.filtn)
+    if (f1.filtn < f2.filtn)
     {
         return -1;
     }
@@ -758,6 +717,86 @@ static int filtcmp( filter_info_t f1 /*DCPL*/, filter_info_t f2 /*OPT*/)
     {
         return 1;
     }
+    else if (f1.filtn == f2.filtn)
+    {
+
+        switch (f1.filtn)
+        {
+            
+        case H5Z_FILTER_SHUFFLE:
+            
+            /* 1 private client value is returned by DCPL */
+            if ( f1.cd_nelmts != 1 && f2.cd_nelmts != 0 )
+                return -1;
+
+            return 0;
+            
+            
+            break;
+
+        case H5Z_FILTER_SZIP:
+
+            /* 4 private client values are returned by DCPL */
+            if ( f1.cd_nelmts != 4 && f2.cd_nelmts != 2 )
+                return -1;
+            
+            if ( f2.cd_values[0] != f1.cd_values[2] &&
+                 f2.cd_values[1] != f1.cd_values[1] )
+                return -1;
+
+            return 0;
+            
+            
+            break;
+            
+        case H5Z_FILTER_NBIT:
+
+            /* TO DO */
+
+            return 0;
+            
+            
+            break;
+            
+        case H5Z_FILTER_SCALEOFFSET:
+
+            /* TO DO */
+
+            return 0;
+            
+            
+            break;
+            
+        case H5Z_FILTER_FLETCHER32:
+        case H5Z_FILTER_DEFLATE:
+
+            if ( f1.cd_nelmts != f2.cd_nelmts )
+                return -1;
+            
+            /* consider different filter values as "less" */
+            for( i = 0; i < f1.cd_nelmts; i++) 
+            {
+                if (f1.cd_values[i] != f2.cd_values[i])
+                {
+                    return -1; 
+                }
+                
+            }
+
+            return 0;
+            
+            
+            break;
+            
+            
+            
+        } /* switch */
+     
+
+    } /* f1.filtn == f2.filtn */
+
+
+
     
     assert(0);
     return -1; 

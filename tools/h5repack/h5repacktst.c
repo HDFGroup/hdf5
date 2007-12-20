@@ -896,6 +896,8 @@ if (szip_can_encode) {
   GOERROR;
  if (h5repack_verify(FNAME7OUT,&pack_options)<=0)
   GOERROR;
+ if (h5repack_cmpdcpl(FNAME7,FNAME7OUT)<=0)
+  GOERROR;
  if (h5repack_end (&pack_options) < 0)
   GOERROR;
 
@@ -1097,8 +1099,6 @@ if (szip_can_encode) {
  SKIPPED();
 #endif
 
-#if 0
- /* solve bug in Nbit filter return value of cd_nelmts */
 
   TESTING("    adding nbit filter");
 
@@ -1121,7 +1121,6 @@ if (szip_can_encode) {
  SKIPPED();
 #endif
 
-#endif
 
  TESTING("    copy of scaleoffset filter");
 
@@ -1163,8 +1162,6 @@ if (szip_can_encode) {
  SKIPPED();
 #endif
 
-#if 0
- /* solve bug in scaleoffset filter return value of cd_nelmts */
 
   TESTING("    adding scaleoffset filter");
 
@@ -1188,7 +1185,6 @@ if (szip_can_encode) {
 #endif
 
 
-#endif
 
 /*-------------------------------------------------------------------------
  * file with all filters
