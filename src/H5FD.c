@@ -1203,10 +1203,10 @@ static herr_t
 H5FD_free_freelist(H5FD_t *file)
 {
     H5FD_mem_t  i;
-#ifdef H5F_DEBUG
+#ifdef H5FD_ALLOC_DEBUG
     unsigned    nblocks = 0;
     hsize_t     nbytes = 0;
-#endif  /* H5F_DEBUG */
+#endif  /* H5FD_ALLOC_DEBUG */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_free_freelist)
 
@@ -1222,10 +1222,10 @@ H5FD_free_freelist(H5FD_t *file)
         H5FD_free_t *cur, *next;
 
         for( cur = file->fl[i]; cur; cur = next) {
-#ifdef H5F_DEBUG
+#ifdef H5FD_ALLOC_DEBUG
             ++nblocks;
             nbytes += cur->size;
-#endif  /* H5F_DEBUG */
+#endif  /* H5FD_ALLOC_DEBUG */
             next = cur->next;
             H5FL_FREE(H5FD_free_t, cur);
         } /* end for */
@@ -1233,12 +1233,11 @@ H5FD_free_freelist(H5FD_t *file)
         file->fl[i] = NULL;
     } /* end for */
 
-#ifdef H5F_DEBUG
-    if(nblocks && H5DEBUG(F))
-        HDfprintf(H5DEBUG(F),
-                  "H5F: leaked %Hu bytes of file memory in %u blocks\n",
-                  nbytes, nblocks);
-#endif  /* H5F_DEBUG */
+#ifdef H5FD_ALLOC_DEBUG
+    if(nblocks)
+        HDfprintf(stderr, "%s: leaked %Hu bytes of file memory in %u blocks\n",
+                  "H5FD_free_freelist", nbytes, nblocks);
+#endif  /* H5FD_ALLOC_DEBUG */
 
     /* Check if we need to reset the metadata accumulator information */
     if(file->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA) {

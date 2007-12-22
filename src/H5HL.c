@@ -963,6 +963,41 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t buf_size, const void *
             need_more = need_size;
 
 	new_heap_alloc = heap->heap_alloc + need_more;
+/*
+ * XXX: This is a _total_ hack, a real kludge. :-/  The metadata cache currently
+ *      responds very poorly when an object is inserted into the cache (or
+ *      resized) that is larger than the current cache size.  It waits through
+ *      an entire 'epoch' of cache operations to resize the cache larger (getting
+ *      _very_ poor performance), instead of immediately accommodating the large
+ *      object by increasing the cache size.
+ *
+ *      So, what we are doing here is to look at the current cache size, check
+ *      if the new local heap will overwhelm the cache and, if so, resize the
+ *      cache to be large enough to hold the new local heap block along with
+ *      leaving room for other objects in the cache.
+ *
+ *      John will be working on a fix inside the cache itself, so this special
+ *      case code here can be removed when he's finished.  - QAK, 2007/12/21
+ */
+{
+	H5AC_cache_config_t mdc_config;
+
+        /* Retrieve the current cache information */
+	mdc_config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
+	if(H5AC_get_cache_auto_resize_config(f->shared->cache, &mdc_config) < 0)
+	    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (size_t)-1, "H5AC_get_cache_auto_resize_config() failed.")
+
+        /* Check if the current cache will get blown out by adding this heap
+         * block and resize it if so.
+         */
+	if((2 * new_heap_alloc) >= mdc_config.initial_size) {
+	    mdc_config.set_initial_size = TRUE;
+	    mdc_config.initial_size = 2 * new_heap_alloc;
+
+	    if(H5AC_set_cache_auto_resize_config(f->shared->cache, &mdc_config) < 0)
+	        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (size_t)-1, "H5AC_set_cache_auto_resize_config() failed.")
+        } /* end if */
+}
 	HDassert(heap->heap_alloc < new_heap_alloc);
 	H5_CHECK_OVERFLOW(heap->heap_alloc, size_t, hsize_t);
 	H5_CHECK_OVERFLOW(new_heap_alloc, size_t, hsize_t);
