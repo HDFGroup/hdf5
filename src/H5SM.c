@@ -220,7 +220,7 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, const H5O_loc_t *ext_loc, hid_t d
     /* Check for sharing attributes in this file, which means that creation
      *  indices must be tracked on object header message in the file.
      */
-    if(type_flags_used & H5O_MESG_ATTR_FLAG)
+    if(type_flags_used & H5O_SHMESG_ATTR_FLAG)
         f->shared->store_msg_crt_idx = TRUE;
 
     /* Write shared message information to the superblock extension */
@@ -263,22 +263,18 @@ H5SM_type_to_flag(unsigned type_id, unsigned *type_flag)
 
     /* Translate the H5O type_id into an H5SM type flag */
     switch(type_id) {
-        case H5O_SDSPACE_ID:
-            *type_flag = H5O_MESG_SDSPACE_FLAG;
-            break;
-        case H5O_DTYPE_ID:
-            *type_flag = H5O_MESG_DTYPE_FLAG;
-            break;
         case H5O_FILL_ID:
+            type_id = H5O_FILL_NEW_ID;
+            /* Fall through... */
+
+        case H5O_SDSPACE_ID:
+        case H5O_DTYPE_ID:
         case H5O_FILL_NEW_ID:
-            *type_flag = H5O_MESG_FILL_FLAG;
-            break;
         case H5O_PLINE_ID:
-            *type_flag = H5O_MESG_PLINE_FLAG;
-            break;
         case H5O_ATTR_ID:
-            *type_flag = H5O_MESG_ATTR_FLAG;
+            *type_flag = (unsigned)1 << type_id;
             break;
+
         default:
             HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, FAIL, "unknown message type ID")
     } /* end switch */
@@ -307,7 +303,7 @@ done:
 ssize_t
 H5SM_get_index(const H5SM_master_table_t *table, unsigned type_id)
 {
-    ssize_t x;
+    size_t x;
     unsigned type_flag;
     ssize_t ret_value = FAIL;
 
@@ -322,7 +318,7 @@ H5SM_get_index(const H5SM_master_table_t *table, unsigned type_id)
      */
     for(x = 0; x < table->num_indexes; ++x)
         if(table->indexes[x].mesg_types & type_flag)
-            HGOTO_DONE(x)
+            HGOTO_DONE((ssize_t)x)
 
     /* At this point, ret_value is either the location of the correct
      * index or it's still FAIL because we didn't find an index.
@@ -1828,7 +1824,7 @@ H5SM_get_info(const H5O_loc_t *ext_loc, H5P_genplist_t *fc_plist, hid_t dxpl_id)
             /* Check for sharing attributes in this file, which means that creation
              *  indices must be tracked on object header message in the file.
              */
-            if(index_flags[u] & H5O_MESG_ATTR_FLAG)
+            if(index_flags[u] & H5O_SHMESG_ATTR_FLAG)
                 shared->store_msg_crt_idx = TRUE;
         } /* end for */
 

@@ -7274,7 +7274,7 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
             /* Make attributes > 500 bytes shared */
             ret = H5Pset_shared_mesg_nindexes(my_fcpl, (unsigned)1);
             CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
-            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)0, H5O_MESG_ATTR_FLAG, (unsigned)500);
+            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)0, H5O_SHMESG_ATTR_FLAG, (unsigned)500);
             CHECK_I(ret, "H5Pset_shared_mesg_index");
         } /* end if */
         else {
@@ -7284,13 +7284,13 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
             CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
 
             /* Make attributes > 500 bytes shared */
-            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)0, H5O_MESG_ATTR_FLAG, (unsigned)500);
+            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)0, H5O_SHMESG_ATTR_FLAG, (unsigned)500);
             CHECK_I(ret, "H5Pset_shared_mesg_index");
 
             /* Make datatypes & dataspaces > 1 byte shared (i.e. all of them :-) */
-            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)1, H5O_MESG_DTYPE_FLAG, (unsigned)1);
+            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)1, H5O_SHMESG_DTYPE_FLAG, (unsigned)1);
             CHECK_I(ret, "H5Pset_shared_mesg_index");
-            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)2, H5O_MESG_SDSPACE_FLAG, (unsigned)1);
+            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)2, H5O_SHMESG_SDSPACE_FLAG, (unsigned)1);
             CHECK_I(ret, "H5Pset_shared_mesg_index");
         } /* end else */
 
@@ -7600,7 +7600,7 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
             /* Make attributes > 500 bytes shared */
             ret = H5Pset_shared_mesg_nindexes(my_fcpl, (unsigned)1);
             CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
-            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)0, H5O_MESG_ATTR_FLAG, (unsigned)500);
+            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)0, H5O_SHMESG_ATTR_FLAG, (unsigned)500);
             CHECK_I(ret, "H5Pset_shared_mesg_index");
         } /* end if */
         else {
@@ -7610,13 +7610,13 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
             CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
 
             /* Make attributes > 500 bytes shared */
-            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)0, H5O_MESG_ATTR_FLAG, (unsigned)500);
+            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)0, H5O_SHMESG_ATTR_FLAG, (unsigned)500);
             CHECK_I(ret, "H5Pset_shared_mesg_index");
 
             /* Make datatypes & dataspaces > 1 byte shared (i.e. all of them :-) */
-            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)1, H5O_MESG_DTYPE_FLAG, (unsigned)1);
+            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)1, H5O_SHMESG_DTYPE_FLAG, (unsigned)1);
             CHECK_I(ret, "H5Pset_shared_mesg_index");
-            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)2, H5O_MESG_SDSPACE_FLAG, (unsigned)1);
+            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)2, H5O_SHMESG_SDSPACE_FLAG, (unsigned)1);
             CHECK_I(ret, "H5Pset_shared_mesg_index");
         } /* end else */
 
@@ -8041,7 +8041,7 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
             /* Make attributes > 500 bytes shared */
             ret = H5Pset_shared_mesg_nindexes(my_fcpl, (unsigned)1);
             CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
-            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)0, H5O_MESG_ATTR_FLAG, (unsigned)500);
+            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)0, H5O_SHMESG_ATTR_FLAG, (unsigned)500);
             CHECK_I(ret, "H5Pset_shared_mesg_index");
         } /* end if */
         else {
@@ -8051,13 +8051,13 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
             CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
 
             /* Make attributes > 500 bytes shared */
-            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)0, H5O_MESG_ATTR_FLAG, (unsigned)500);
+            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)0, H5O_SHMESG_ATTR_FLAG, (unsigned)500);
             CHECK_I(ret, "H5Pset_shared_mesg_index");
 
             /* Make datatypes & dataspaces > 1 byte shared (i.e. all of them :-) */
-            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)1, H5O_MESG_DTYPE_FLAG, (unsigned)1);
+            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)1, H5O_SHMESG_DTYPE_FLAG, (unsigned)1);
             CHECK_I(ret, "H5Pset_shared_mesg_index");
-            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)2, H5O_MESG_SDSPACE_FLAG, (unsigned)1);
+            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)2, H5O_SHMESG_SDSPACE_FLAG, (unsigned)1);
             CHECK_I(ret, "H5Pset_shared_mesg_index");
         } /* end else */
 
@@ -8405,7 +8405,7 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
             /* Make attributes > 500 bytes shared */
             ret = H5Pset_shared_mesg_nindexes(my_fcpl, (unsigned)1);
             CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
-            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)0, H5O_MESG_ATTR_FLAG, (unsigned)500);
+            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)0, H5O_SHMESG_ATTR_FLAG, (unsigned)500);
             CHECK_I(ret, "H5Pset_shared_mesg_index");
         } /* end if */
         else {
@@ -8415,13 +8415,13 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
             CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
 
             /* Make attributes > 500 bytes shared */
-            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)0, H5O_MESG_ATTR_FLAG, (unsigned)500);
+            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)0, H5O_SHMESG_ATTR_FLAG, (unsigned)500);
             CHECK_I(ret, "H5Pset_shared_mesg_index");
 
             /* Make datatypes & dataspaces > 1 byte shared (i.e. all of them :-) */
-            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)1, H5O_MESG_DTYPE_FLAG, (unsigned)1);
+            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)1, H5O_SHMESG_DTYPE_FLAG, (unsigned)1);
             CHECK_I(ret, "H5Pset_shared_mesg_index");
-            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)2, H5O_MESG_SDSPACE_FLAG, (unsigned)1);
+            ret = H5Pset_shared_mesg_index(my_fcpl, (unsigned)2, H5O_SHMESG_SDSPACE_FLAG, (unsigned)1);
             CHECK_I(ret, "H5Pset_shared_mesg_index");
         } /* end else */
 
@@ -8879,7 +8879,7 @@ test_attr(void)
     /* Make attributes > 1 byte shared (i.e. all of them :-) */
     ret = H5Pset_shared_mesg_nindexes(fcpl2, (unsigned)1);
     CHECK_I(ret, "H5Pset_shared_mesg_nindexes");
-    ret = H5Pset_shared_mesg_index(fcpl2, (unsigned)0, H5O_MESG_ATTR_FLAG, (unsigned)1);
+    ret = H5Pset_shared_mesg_index(fcpl2, (unsigned)0, H5O_SHMESG_ATTR_FLAG, (unsigned)1);
     CHECK_I(ret, "H5Pset_shared_mesg_index");
 
     /* Loop over using new group format */

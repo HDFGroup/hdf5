@@ -130,23 +130,23 @@ int copy_objects(const char* fnamein,
                 if(options->msg_size[i] > 0) {
                     switch(i) {
                         case 0:
-                            mesg_type_flags[nindex] = H5O_MESG_SDSPACE_FLAG;
+                            mesg_type_flags[nindex] = H5O_SHMESG_SDSPACE_FLAG;
                             break;
 
                         case 1:
-                            mesg_type_flags[nindex] = H5O_MESG_DTYPE_FLAG;
+                            mesg_type_flags[nindex] = H5O_SHMESG_DTYPE_FLAG;
                             break;
 
                         case 2:
-                            mesg_type_flags[nindex] = H5O_MESG_FILL_FLAG;
+                            mesg_type_flags[nindex] = H5O_SHMESG_FILL_FLAG;
                             break;
 
                         case 3:
-                            mesg_type_flags[nindex] = H5O_MESG_PLINE_FLAG;
+                            mesg_type_flags[nindex] = H5O_SHMESG_PLINE_FLAG;
                             break;
 
                         case 4:
-                            mesg_type_flags[nindex] = H5O_MESG_ATTR_FLAG;
+                            mesg_type_flags[nindex] = H5O_SHMESG_ATTR_FLAG;
                             break;
                     } /* end switch */
                     min_mesg_sizes[nindex] = (unsigned)options->msg_size[i];

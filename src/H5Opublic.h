@@ -52,13 +52,13 @@
  * but we need to assign each kind of message to a different bit so that
  * one index can hold multiple types.)
  */
-#define H5O_MESG_NONE_FLAG     0x0000          /* No shared messages */
-#define H5O_MESG_SDSPACE_FLAG  0x0001          /* Simple Dataspace Message.  */
-#define H5O_MESG_DTYPE_FLAG    0x0002          /* Datatype Message.  */
-#define H5O_MESG_FILL_FLAG     0x0004          /* Fill Value Message. */
-#define H5O_MESG_PLINE_FLAG    0x0008          /* Filter pipeline message.  */
-#define H5O_MESG_ATTR_FLAG     0x0010          /* Attribute Message.  */
-#define H5O_MESG_ALL_FLAG      (H5O_MESG_SDSPACE_FLAG | H5O_MESG_DTYPE_FLAG | H5O_MESG_FILL_FLAG | H5O_MESG_PLINE_FLAG | H5O_MESG_ATTR_FLAG)
+#define H5O_SHMESG_NONE_FLAG    0x0000          /* No shared messages */
+#define H5O_SHMESG_SDSPACE_FLAG ((unsigned)1 << 0x0001) /* Simple Dataspace Message.  */
+#define H5O_SHMESG_DTYPE_FLAG   ((unsigned)1 << 0x0003) /* Datatype Message.  */
+#define H5O_SHMESG_FILL_FLAG    ((unsigned)1 << 0x0005) /* Fill Value Message. */
+#define H5O_SHMESG_PLINE_FLAG   ((unsigned)1 << 0x000b) /* Filter pipeline message.  */
+#define H5O_SHMESG_ATTR_FLAG    ((unsigned)1 << 0x000c) /* Attribute Message.  */
+#define H5O_SHMESG_ALL_FLAG     (H5O_SHMESG_SDSPACE_FLAG | H5O_SHMESG_DTYPE_FLAG | H5O_SHMESG_FILL_FLAG | H5O_SHMESG_PLINE_FLAG | H5O_SHMESG_ATTR_FLAG)
 
 /* Object header status flag definitions */
 #define H5O_HDR_CHUNK0_SIZE             0x03    /* 2-bit field indicating # of bytes to store the size of chunk 0's data */
