@@ -112,7 +112,7 @@ int main(void)
      * it holds.  For the simple case, we'll put every message that could be
      * shared in this single index.
      */
-    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_ALL_FLAG, 40);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_SHMESG_ALL_FLAG, 40);
     if(ret < 0) goto error;
 
     /* The other property that can be set for shared messages is the
@@ -148,7 +148,7 @@ int main(void)
      * will be about the same size as a normal file (with just a little extra
      * overhead).
      */
-    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_ALL_FLAG, 1000);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_SHMESG_ALL_FLAG, 1000);
     if(ret < 0) goto error;
 
     ret = create_standard_file("only_huge_mesgs_file.h5", fcpl_id);
@@ -159,7 +159,7 @@ int main(void)
      * attributes (which might make sense if we were going to use committed
      * datatypes).  We could change the flags on the index:
      */
-    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_SDSPACE_FLAG | H5O_MESG_ATTR_FLAG, 40);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_SHMESG_SDSPACE_FLAG | H5O_SHMESG_ATTR_FLAG, 40);
     if(ret < 0) goto error;
 
     ret = create_standard_file("only_dspaces_and_attrs_file.h5", fcpl_id);
@@ -172,9 +172,9 @@ int main(void)
      */
     ret = H5Pset_shared_mesg_nindexes(fcpl_id, 2);
     if(ret < 0) goto error;
-    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_DTYPE_FLAG | H5O_MESG_SDSPACE_FLAG, 40);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_SHMESG_DTYPE_FLAG | H5O_SHMESG_SDSPACE_FLAG, 40);
     if(ret < 0) goto error;
-    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_MESG_ATTR_FLAG, 40);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 1, H5O_SHMESG_ATTR_FLAG, 40);
     if(ret < 0) goto error;
     
     ret = create_standard_file("separate_indexes_file.h5", fcpl_id);
@@ -187,7 +187,7 @@ int main(void)
      */
     ret = H5Pset_shared_mesg_nindexes(fcpl_id, 1);
     if(ret < 0) goto error;
-    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_MESG_ALL_FLAG, 40);
+    ret = H5Pset_shared_mesg_index(fcpl_id, 0, H5O_SHMESG_ALL_FLAG, 40);
     if(ret < 0) goto error;
 
     ret = H5Pset_shared_mesg_phase_change(fcpl_id, 5, 0);

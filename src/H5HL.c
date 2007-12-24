@@ -1159,7 +1159,7 @@ H5HL_remove(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t offset, size_t size)
      *  if an error occurs -QAK)
      */
     if(H5AC_mark_pinned_or_protected_entry_dirty(f, heap) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTMARKDIRTY, (size_t)(-1), "unable to mark heap as dirty")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTMARKDIRTY, FAIL, "unable to mark heap as dirty")
 
     /*
      * Check if this chunk can be prepended or appended to an already
