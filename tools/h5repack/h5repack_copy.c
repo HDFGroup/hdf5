@@ -526,7 +526,13 @@ int do_copy_objects(hid_t fidin,
                             H5E_BEGIN_TRY {
                                 dset_out = H5Dcreate2(fidout, travt->objs[i].name, wtype_id, f_space_id, H5P_DEFAULT, dcpl_out, H5P_DEFAULT);
                             } H5E_END_TRY;
-                            if(dset_out == FAIL) {
+
+                            if(dset_out == FAIL) 
+                            {
+                                if(options->verbose)
+                                     printf(" warning: could not create dataset <%s>. Applying original settings\n",
+                                            travt->objs[i].name);
+
                                 if((dset_out = H5Dcreate2(fidout, travt->objs[i].name, wtype_id, f_space_id, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
                                     goto error;
                                 apply_f = 0;
