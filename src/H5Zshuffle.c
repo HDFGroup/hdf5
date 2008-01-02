@@ -45,7 +45,6 @@ const H5Z_class_t H5Z_SHUFFLE[1] = {{
 
 /* Local macros */
 #define H5Z_SHUFFLE_USER_NPARMS    0       /* Number of parameters that users can set */
-#define H5Z_SHUFFLE_TOTAL_NPARMS   1       /* Total number of parameters for filter */
 #define H5Z_SHUFFLE_PARM_SIZE      0       /* "Local" parameter for shuffling size */
 
 

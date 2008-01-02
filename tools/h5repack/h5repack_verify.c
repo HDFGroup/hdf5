@@ -18,12 +18,8 @@
 #include "h5tools_utils.h"
 
 extern char  *progname;
-static int has_filter(hid_t dcpl_id, H5Z_filter_t filtnin);
-static int has_layout(hid_t dcpl_id,pack_info_t *obj);
-static int has_filters_glb(hid_t dcpl_id, pack_opt_t *options);
-static int has_filters_obj(hid_t dcpl_id, pack_info_t *obj);
-static int filtcmp( filter_info_t f1, filter_info_t f2);
-
+static int has_layout(hid_t pid, pack_info_t *obj);
+static int has_filters(hid_t pid, hid_t tid, unsigned nfilters, filter_info_t *filter);
 
 
 /*-------------------------------------------------------------------------
@@ -51,10 +47,11 @@ static int filtcmp( filter_info_t f1, filter_info_t f2);
 int h5repack_verify(const char *fname,
                     pack_opt_t *options)
 {
-    hid_t        fid;           /* file ID */
-    hid_t        dset_id = -1;  /* dataset ID */
-    hid_t        dcpl_id = -1;  /* dataset creation property list ID */
-    hid_t        space_id = -1; /* space ID */
+    hid_t        fid;  /* file ID */
+    hid_t        did;  /* dataset ID */
+    hid_t        pid;  /* dataset creation property list ID */
+    hid_t        sid;  /* space ID */
+    hid_t        tid;  /* type ID */
     unsigned int i;
     trav_table_t *travt = NULL;
     int          ok = 1;
@@ -72,37 +69,41 @@ int h5repack_verify(const char *fname,
         * open
         *-------------------------------------------------------------------------
         */
-        if((dset_id = H5Dopen2(fid, name, H5P_DEFAULT)) < 0)
+        if((did = H5Dopen2(fid, name, H5P_DEFAULT)) < 0)
             goto error;
-        if((space_id = H5Dget_space(dset_id)) < 0)
+        if((sid = H5Dget_space(did)) < 0)
             goto error;
-        if((dcpl_id = H5Dget_create_plist(dset_id)) < 0)
+        if((pid = H5Dget_create_plist(did)) < 0)
             goto error;
-        
+        if((tid = H5Dget_type(did)) < 0)
+            goto error;
+       
        /*-------------------------------------------------------------------------
         * filter check
         *-------------------------------------------------------------------------
         */
-
-        if(has_filters_obj(dcpl_id, obj) == 0)
+        if(has_filters(pid, tid, obj->nfilters, obj->filter) <= 0)
                 ok = 0;
-        
+
+       
        /*-------------------------------------------------------------------------
         * layout check
         *-------------------------------------------------------------------------
         */
-        if((obj->layout != -1) && (has_layout(dcpl_id, obj) == 0))
+        if((obj->layout != -1) && (has_layout(pid, obj) == 0))
             ok = 0;
         
        /*-------------------------------------------------------------------------
         * close
         *-------------------------------------------------------------------------
         */
-        if(H5Pclose(dcpl_id) < 0)
+        if(H5Pclose(pid) < 0)
             goto error;
-        if (H5Sclose(space_id) < 0)
+        if (H5Sclose(sid) < 0)
             goto error;
-        if (H5Dclose(dset_id) < 0)
+        if (H5Dclose(did) < 0)
+            goto error;
+        if (H5Tclose(tid) < 0)
             goto error;
         
     }
@@ -134,11 +135,13 @@ int h5repack_verify(const char *fname,
                 * open
                 *-------------------------------------------------------------------------
                 */
-                if((dset_id = H5Dopen2(fid, name, H5P_DEFAULT)) < 0)
+                if((did = H5Dopen2(fid, name, H5P_DEFAULT)) < 0)
                     goto error;
-                if((space_id = H5Dget_space(dset_id)) < 0)
+                if((sid = H5Dget_space(did)) < 0)
                     goto error;
-                if((dcpl_id = H5Dget_create_plist(dset_id)) < 0)
+                if((pid = H5Dget_create_plist(did)) < 0)
+                    goto error;
+                if((tid = H5Dget_type(did)) < 0)
                     goto error;
                 
                /*-------------------------------------------------------------------------
@@ -147,7 +150,8 @@ int h5repack_verify(const char *fname,
                 */
                 if(options->all_filter == 1)
                 {
-                    if (has_filters_glb(dcpl_id, options) == 0)
+                    
+                    if(has_filters(pid, tid, options->n_filter_g, options->filter_g) <= 0)
                         ok = 0;
                 }
                 
@@ -161,7 +165,7 @@ int h5repack_verify(const char *fname,
                     init_packobject(&pack);
                     pack.layout = options->layout_g;
                     pack.chunk = options->chunk_g;
-                    if(has_layout(dcpl_id, &pack) == 0)
+                    if(has_layout(pid, &pack) == 0)
                         ok = 0;
                 }
                 
@@ -170,11 +174,13 @@ int h5repack_verify(const char *fname,
                 * close
                 *-------------------------------------------------------------------------
                 */
-                if (H5Pclose(dcpl_id) < 0)
+                if (H5Pclose(pid) < 0)
                     goto error;
-                if (H5Sclose(space_id) < 0)
+                if (H5Sclose(sid) < 0)
                     goto error;
-                if (H5Dclose(dset_id) < 0)
+                if (H5Dclose(did) < 0)
+                    goto error;
+                if (H5Tclose(tid) < 0)
                     goto error;
             } /* if */
             
@@ -196,9 +202,9 @@ int h5repack_verify(const char *fname,
     
 error:
     H5E_BEGIN_TRY {
-        H5Pclose(dcpl_id);
-        H5Sclose(space_id);
-        H5Dclose(dset_id);
+        H5Pclose(pid);
+        H5Sclose(sid);
+        H5Dclose(did);
         H5Fclose(fid);
         if (travt)
             trav_table_free(travt);
@@ -206,58 +212,6 @@ error:
     return -1;
 }
 
-
-
-
-/*-------------------------------------------------------------------------
- * Function: has_filter
- *
- * Purpose: verify if a filter is present in the property list DCPL_ID
- *
- * Return: 1 has, 0 does not, -1 error
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: December 19, 2003
- *
- *-------------------------------------------------------------------------
- */
-
-static int has_filter(hid_t dcpl_id, H5Z_filter_t filtnin)
-{
-    unsigned     nfilters;       /* number of filters */
-    unsigned     filt_flags;     /* filter flags */
-    H5Z_filter_t filtn;          /* filter identification number */
-    unsigned     cd_values[20];  /* filter client data values */
-    size_t       cd_nelmts;      /* filter client number of values */
-    char         f_name[256];    /* filter name */
-    int          have = 0;       /* flag, filter is present */
-    unsigned     i;              /* index */
-    
-    /* if no information about the input filter is requested return exit */
-    if(filtnin == -1)
-        return 1;
-    
-    /* get information about filters */
-    if((nfilters = H5Pget_nfilters(dcpl_id)) < 0)
-        return -1;
-    
-    /* if we do not have filters and the requested filter is NONE, return 1 */
-    if(!nfilters && filtnin == H5Z_FILTER_NONE)
-        return 1;
-    
-    for(i = 0; i < nfilters; i++) 
-    {
-        cd_nelmts = NELMTS(cd_values);
-        filtn = H5Pget_filter2(dcpl_id, i, &filt_flags, &cd_nelmts,
-            cd_values, sizeof(f_name), f_name, NULL);
-        
-        if(filtnin == filtn)
-            have = 1;
-    }
-    
-    return have;
-}
 
 
 /*-------------------------------------------------------------------------
@@ -278,7 +232,7 @@ static int has_filter(hid_t dcpl_id, H5Z_filter_t filtnin)
  *-------------------------------------------------------------------------
  */
 
-int has_layout(hid_t dcpl_id,
+int has_layout(hid_t pid,
                pack_info_t *obj)
 {
     hsize_t      chsize[64];     /* chunk size in elements */
@@ -292,7 +246,7 @@ int has_layout(hid_t dcpl_id,
         return 1;
     
     /* check if we have filters in the input object */
-    if ((nfilters = H5Pget_nfilters(dcpl_id)) < 0)
+    if ((nfilters = H5Pget_nfilters(pid)) < 0)
         return -1;
     
     /* a non chunked layout was requested on a filtered object; avoid the test */
@@ -300,7 +254,7 @@ int has_layout(hid_t dcpl_id,
         return 1;
     
     /* get layout */
-    if ((layout = H5Pget_layout(dcpl_id)) < 0)
+    if ((layout = H5Pget_layout(pid)) < 0)
         return -1;
     
     if (obj->layout != layout)
@@ -308,7 +262,7 @@ int has_layout(hid_t dcpl_id,
     
     if (layout==H5D_CHUNKED)
     {
-        if ((rank = H5Pget_chunk(dcpl_id,NELMTS(chsize),chsize/*out*/)) < 0)
+        if ((rank = H5Pget_chunk(pid,NELMTS(chsize),chsize/*out*/)) < 0)
             return -1;
         if (obj->chunk.rank != rank)
             return 0;
@@ -469,44 +423,52 @@ error:
 }
 
 
+
+
+
 /*-------------------------------------------------------------------------
- * Function: has_filters_glb
+ * Function: has_filters
  *
- * Purpose: verify if all requested filters for global filters are present in the 
- *  property list DCPL_ID
+ * Purpose: verify if all requested filters in the array FILTER obtained
+ *  from user input are present in the property list PID obtained from
+ *  the output file
  *
- * Return: 1 has, 0 does not, -1 error
+ * Return: 
+ *  1 match
+ *  0 do not match
+ * -1 error
  *
  * Programmer: Pedro Vicente, pvn@hdfgroup.org
  *
- * Date: December 3, 2007
+ * Date: December 21, 2007
  *
  *-------------------------------------------------------------------------
  */
 
-static int has_filters_glb(hid_t dcpl_id, pack_opt_t *options)
+static int has_filters(hid_t pid, hid_t tid, unsigned nfilters, filter_info_t *filter)
 {
     unsigned      nfilters_dcpl;  /* number of filters in DCPL*/
-    unsigned      nfilters_opt;   /* number of filters in OPTIONS*/
     unsigned      filt_flags;     /* filter flags */
     H5Z_filter_t  filtn;          /* filter identification number */
     unsigned      cd_values[20];  /* filter client data values */
     size_t        cd_nelmts;      /* filter client number of values */
     char          f_name[256];    /* filter name */
-    int           have = 0;       /* flag, filter is present */
+    size_t        size;           /* type size */
     unsigned      i, j;           /* index */
-    filter_info_t filter_dcpl[H5_REPACK_MAX_NFILTERS];  /* filter array in the DCPL*/
-    filter_info_t filter_opt[H5_REPACK_MAX_NFILTERS];   /* filter array in options */
   
     /* get information about filters */
-    if((nfilters_dcpl = H5Pget_nfilters(dcpl_id)) < 0)
+    if((nfilters_dcpl = H5Pget_nfilters(pid)) < 0)
         return -1;
-    
+  
     /* if we do not have filters and the requested filter is NONE, return 1 */
     if(!nfilters_dcpl && 
-        options->n_filter_g==1 && 
-        options->filter_g[0].filtn == H5Z_FILTER_NONE )
+        nfilters == 1 && 
+        filter[0].filtn == H5Z_FILTER_NONE )
         return 1;
+
+    /* else the numbers of filters must match */
+    if (nfilters_dcpl != nfilters )
+        return 0;
 
     /*-------------------------------------------------------------------------
      * build a list with DCPL filters
@@ -516,274 +478,82 @@ static int has_filters_glb(hid_t dcpl_id, pack_opt_t *options)
     for( i = 0; i < nfilters_dcpl; i++) 
     {
         cd_nelmts = NELMTS(cd_values);
-        filtn = H5Pget_filter2(dcpl_id, i, &filt_flags, &cd_nelmts,
+        filtn = H5Pget_filter2(pid, i, &filt_flags, &cd_nelmts,
             cd_values, sizeof(f_name), f_name, NULL);
-        
-        filter_dcpl[i].filtn = filtn;
-        filter_dcpl[i].cd_nelmts = cd_nelmts;
-        for( j = 0; j < cd_nelmts; j++) 
-        {
-            filter_dcpl[i].cd_values[j] = cd_values[j];
-
-        }
-
-    }
-
-    /*-------------------------------------------------------------------------
-     * build a list with options filters
-     *-------------------------------------------------------------------------
-     */
-
-    nfilters_opt = options->n_filter_g;
-   
-    for( i = 0; i < nfilters_opt; i++) 
-    {
-               
-        filter_opt[i].filtn = options->filter_g[i].filtn;
-        filter_opt[i].cd_nelmts = options->filter_g[i].cd_nelmts;
-        for( j = 0; j < options->filter_g[i].cd_nelmts; j++) 
-        {
-            filter_opt[i].cd_values[j] = options->filter_g[i].cd_values[j];
-
-        }
-
-    }
-
-    /*-------------------------------------------------------------------------
-     * match the 2 lists
-     *-------------------------------------------------------------------------
-     */
-
-
-    if (nfilters_dcpl != nfilters_opt)
-        return 0;
-
-    for( i = 0; i < nfilters_opt; i++) 
-    {
-
-        /* criteria is filter compare, returns same as strcmp */
-        if ( filtcmp( filter_dcpl[i], filter_opt[i] ) != 0 )
+      
+        /* filter ID */
+        if (filtn != filter[i].filtn)
             return 0;
 
-
-    }
-
-
- 
-    return 1;
-}
-
-
-
-/*-------------------------------------------------------------------------
- * Function: has_filters_obj
- *
- * Purpose: verify if all requested filters for OBJ are present in the 
- *  property list DCPL_ID
- *
- * Return: 1 has, 0 does not, -1 error
- *
- * Programmer: Pedro Vicente, pvn@hdfgroup.org
- *
- * Date: December 3, 2007
- *
- *-------------------------------------------------------------------------
- */
-
-static int has_filters_obj(hid_t dcpl_id, pack_info_t *obj)
-{
-    unsigned      nfilters_dcpl;  /* number of filters in DCPL*/
-    unsigned      nfilters_opt;   /* number of filters in OPTIONS*/
-    unsigned      filt_flags;     /* filter flags */
-    H5Z_filter_t  filtn;          /* filter identification number */
-    unsigned      cd_values[20];  /* filter client data values */
-    size_t        cd_nelmts;      /* filter client number of values */
-    char          f_name[256];    /* filter name */
-    int           have = 0;       /* flag, filter is present */
-    unsigned      i, j;           /* index */
-    filter_info_t filter_dcpl[H5_REPACK_MAX_NFILTERS];  /* filter array in the DCPL*/
-    filter_info_t filter_opt[H5_REPACK_MAX_NFILTERS];   /* filter array in options */
-  
-    /* get information about filters */
-    if((nfilters_dcpl = H5Pget_nfilters(dcpl_id)) < 0)
-        return -1;
-    
-    /* if we do not have filters and the requested filter is NONE, return 1 */
-    if(!nfilters_dcpl && 
-        obj->nfilters == 1 && 
-        obj->filter[0].filtn == H5Z_FILTER_NONE )
-        return 1;
-
-    /*-------------------------------------------------------------------------
-     * build a list with DCPL filters
-     *-------------------------------------------------------------------------
-     */
-
-    for( i = 0; i < nfilters_dcpl; i++) 
-    {
-        cd_nelmts = NELMTS(cd_values);
-        filtn = H5Pget_filter2(dcpl_id, i, &filt_flags, &cd_nelmts,
-            cd_values, sizeof(f_name), f_name, NULL);
-        
-        filter_dcpl[i].filtn = filtn;
-        filter_dcpl[i].cd_nelmts = cd_nelmts;
-        for( j = 0; j < cd_nelmts; j++) 
-        {
-            filter_dcpl[i].cd_values[j] = cd_values[j];
-
-        }
-
-    }
-
-    /*-------------------------------------------------------------------------
-     * build a list with OBJ filters
-     *-------------------------------------------------------------------------
-     */
-
-    nfilters_opt = obj->nfilters;
-  
-    for( i = 0; i < obj->nfilters; i++) 
-    {
-        
-        filter_opt[i].filtn = obj->filter[i].filtn;
-        filter_opt[i].cd_nelmts = obj->filter[i].cd_nelmts;
-        for( j = 0; j < obj->filter[i].cd_nelmts; j++) 
-        {
-            filter_opt[i].cd_values[j] = obj->filter[i].cd_values[j];
-            
-        }
-        
-    }
-    
-
-    /*-------------------------------------------------------------------------
-     * match the 2 lists
-     *-------------------------------------------------------------------------
-     */
-
-
-    if (nfilters_dcpl != nfilters_opt)
-        return 0;
-
-    for( i = 0; i < nfilters_opt; i++) 
-    {
-
-        /* criteria is filter compare, returns same as strcmp */
-        if ( filtcmp( filter_dcpl[i], filter_opt[i] ) != 0 )
-            return 0;
-
-
-    }
-
-
- 
-    return 1;
-}
-
-
-
-
-/*-------------------------------------------------------------------------
- * Function: filtcmp
- *
- * Purpose: compare 2 filters
- *
- * Return: same as strcmp:
- *  < 0 F1 "less" than F2 
- *    0 F1 identical to F2 
- *  > 0 F1 "greater" than F2 
- *
- * Programmer: Pedro Vicente, pvn@hdfgroup.org
- *
- * Date: December 3, 2007
- *
- *-------------------------------------------------------------------------
- */
-static int filtcmp( filter_info_t f1 /*DCPL*/, filter_info_t f2 /*OPT*/)
-{
-    unsigned i;
-
-
-    /*-------------------------------------------------------------------------
-     * compare first the filter type
-     *-------------------------------------------------------------------------
-     */
-
-    if (f1.filtn < f2.filtn)
-    {
-        return -1;
-    }
-    else if (f1.filtn > f2.filtn)
-    {
-        return 1;
-    }
-    else if (f1.filtn == f2.filtn)
-    {
-
-        switch (f1.filtn)
+        /* compare client data values. some filters do return local values */
+        switch (filtn)
         {
             
         case H5Z_FILTER_SHUFFLE:
             
             /* 1 private client value is returned by DCPL */
-            if ( f1.cd_nelmts != 1 && f2.cd_nelmts != 0 )
-                return -1;
-
-            return 0;
+            if ( cd_nelmts != H5Z_SHUFFLE_TOTAL_NPARMS && filter[i].cd_nelmts != 0 )
+                return 0;
             
+            /* get dataset's type size */
+            if((size = H5Tget_size(tid)) <= 0)
+                return -1;
+            
+            /* the private client value holds the dataset's type size */
+            if ( size != cd_values[0] )
+                return 0;
+                        
             
             break;
-
+            
         case H5Z_FILTER_SZIP:
+            
 
+#if 0
             /* 4 private client values are returned by DCPL */
             if ( f1.cd_nelmts != 4 && f2.cd_nelmts != 2 )
                 return -1;
             
             if ( f2.cd_values[0] != f1.cd_values[2] &&
-                 f2.cd_values[1] != f1.cd_values[1] )
+                f2.cd_values[1] != f1.cd_values[1] )
                 return -1;
-
-            return 0;
+#endif          
             
             
             break;
             
         case H5Z_FILTER_NBIT:
-
+            
             /* TO DO */
-
-            return 0;
+          
             
             
             break;
             
         case H5Z_FILTER_SCALEOFFSET:
-
+            
             /* TO DO */
-
-            return 0;
+            
             
             
             break;
             
+        /* for these filters values must match, no local values set in DCPL */
         case H5Z_FILTER_FLETCHER32:
         case H5Z_FILTER_DEFLATE:
-
-            if ( f1.cd_nelmts != f2.cd_nelmts )
-                return -1;
             
-            /* consider different filter values as "less" */
-            for( i = 0; i < f1.cd_nelmts; i++) 
+            if ( cd_nelmts != filter[i].cd_nelmts)
+                return 0;
+            
+            for( j = 0; j < cd_nelmts; j++) 
             {
-                if (f1.cd_values[i] != f2.cd_values[i])
+                if (cd_values[j] != filter[i].cd_values[j])
                 {
-                    return -1; 
+                    return 0; 
                 }
                 
             }
-
-            return 0;
+            
             
             
             break;
@@ -791,16 +561,11 @@ static int filtcmp( filter_info_t f1 /*DCPL*/, filter_info_t f2 /*OPT*/)
             
             
         } /* switch */
-     
 
-    } /* f1.filtn == f2.filtn */
-
-
-
-    
-    assert(0);
-    return -1; 
-    
+    }
+ 
+    return 1;
 }
+
 
 
