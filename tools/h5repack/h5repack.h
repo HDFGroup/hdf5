@@ -147,52 +147,38 @@ int h5repack_cmpdcpl   (const char *fname1,
  */
 
 
-int copy_objects(const char* fnamein,
-                 const char* fnameout,
-                 pack_opt_t *options);
+/*-------------------------------------------------------------------------
+ * copy module
+ *-------------------------------------------------------------------------
+ */
+
+int copy_objects   (const char* fnamein,
+                    const char* fnameout,
+                    pack_opt_t *options);
 
 int do_copy_refobjs(hid_t fidin,
                     hid_t fidout,
                     trav_table_t *travt,
-                    pack_opt_t *options); /* repack options */
+                    pack_opt_t *options); 
 
-
-void read_info(const char *filename,pack_opt_t *options);
+/*-------------------------------------------------------------------------
+ * filters and verify module
+ *-------------------------------------------------------------------------
+ */
 void init_packobject(pack_info_t *obj);
-int print_filters(hid_t dcpl_id);
-
 
 
 /*-------------------------------------------------------------------------
- * filters
+ * filters and copy module
  *-------------------------------------------------------------------------
  */
 
 int apply_filters(const char* name,    /* object name from traverse list */
                   int rank,            /* rank of dataset */
                   hsize_t *dims,       /* dimensions of dataset */
-                  hid_t dcpl_id,       /* (IN,OUT) dataset creation property list */
+                  hid_t dcpl_id,       /* dataset creation property list */
                   pack_opt_t *options, /* repack options */
-                  int *has_filter);     /* (OUT) object NAME has a filter */
-
-int can_read(const char* name,    /* object name from traverse list */
-             hid_t dcpl_id,       /* dataset creation property list */
-             pack_opt_t *options); /* repack options */
-
-
-/*-------------------------------------------------------------------------
- * layout functions
- *-------------------------------------------------------------------------
- */
-
-
-int layout_this(hid_t dcpl_id,             /* DCPL from input object */
-                const char* name,          /* object name from traverse list */
-                pack_opt_t *options,       /* repack options */
-                pack_info_t *pack /*OUT*/) /* object to apply layout */;
-
-int apply_layout(hid_t dcpl_id,
-                 pack_info_t *pack);  /* info about object  */
+                  int *has_filter);    /* (OUT) object NAME has a filter */
 
 
 /*-------------------------------------------------------------------------

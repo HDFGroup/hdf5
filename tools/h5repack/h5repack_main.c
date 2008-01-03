@@ -22,8 +22,9 @@
 
 
 static void usage(const char *prog);
-static int parse_number(char *str);
+static int  parse_number(char *str);
 static void parse_command_line(int argc, const char* argv[], pack_opt_t* options);
+static void read_info(const char *filename,pack_opt_t *options);
 
 
 /* module-scoped variables */
@@ -411,3 +412,124 @@ int parse_number(char *str)
     return n;
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function: read_info
+ *
+ * Purpose: read comp and chunk options from a file
+ *
+ * Return: void, exit on error
+ *
+ * Programmer: pvn@ncsa.uiuc.edu
+ *
+ * Date: September, 22, 2003
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static
+void read_info(const char *filename,
+               pack_opt_t *options)
+{
+    
+    char stype[10];
+    char comp_info[1024];
+    FILE *fp;
+    char c;
+    int  i, rc=1;
+    char  *srcdir = getenv("srcdir"); /* the source directory */
+    char  data_file[512]="";          /* buffer to hold name of existing file */
+    
+    /* compose the name of the file to open, using the srcdir, if appropriate */
+    if (srcdir){
+        strcpy(data_file,srcdir);
+        strcat(data_file,"/");
+    }
+    strcat(data_file,filename);
+    
+    
+    if ((fp = fopen(data_file, "r")) == (FILE *)NULL) {
+        error_msg(progname, "cannot open options file %s\n", filename);
+        exit(1);
+    }
+    
+    /* cycle until end of file reached */
+    while( 1 )
+    {
+        rc=fscanf(fp, "%s", stype);
+        if (rc==-1)
+            break;
+        
+       /*-------------------------------------------------------------------------
+        * filter
+        *-------------------------------------------------------------------------
+        */
+        if (strcmp(stype,"-f") == 0) {
+            
+            /* find begining of info */
+            i=0; c='0';
+            while( c!=' ' )
+            {
+                fscanf(fp, "%c", &c);
+                if (feof(fp)) break;
+            }
+            c='0';
+            /* go until end */
+            while( c!=' ' )
+            {
+                fscanf(fp, "%c", &c);
+                comp_info[i]=c;
+                i++;
+                if (feof(fp)) break;
+                if (c==10 /*eol*/) break;
+            }
+            comp_info[i-1]='\0'; /*cut the last " */
+            
+            if (h5repack_addfilter(comp_info,options)==-1){
+                error_msg(progname, "could not add compression option\n");
+                exit(1);
+            }
+        }
+        /*-------------------------------------------------------------------------
+        * layout
+        *-------------------------------------------------------------------------
+        */
+        else if (strcmp(stype,"-l") == 0) {
+            
+            /* find begining of info */
+            i=0; c='0';
+            while( c!=' ' )
+            {
+                fscanf(fp, "%c", &c);
+                if (feof(fp)) break;
+            }
+            c='0';
+            /* go until end */
+            while( c!=' ' )
+            {
+                fscanf(fp, "%c", &c);
+                comp_info[i]=c;
+                i++;
+                if (feof(fp)) break;
+                if (c==10 /*eol*/) break;
+            }
+            comp_info[i-1]='\0'; /*cut the last " */
+            
+            if (h5repack_addlayout(comp_info,options)==-1){
+                error_msg(progname, "could not add chunck option\n");
+                exit(1);
+            }
+        }
+        /*-------------------------------------------------------------------------
+        * not valid
+        *-------------------------------------------------------------------------
+        */
+        else {
+            error_msg(progname, "bad file format for %s", filename);
+            exit(1);
+        }
+    }
+    
+    fclose(fp);
+    return;
+}
