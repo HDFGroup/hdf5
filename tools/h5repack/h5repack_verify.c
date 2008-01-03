@@ -423,9 +423,6 @@ error:
 }
 
 
-
-
-
 /*-------------------------------------------------------------------------
  * Function: has_filters
  *
@@ -508,7 +505,7 @@ static int has_filters(hid_t pid, hid_t tid, unsigned nfilters, filter_info_t *f
             
         case H5Z_FILTER_SZIP:
 
-            /* 4 private client value is returned by DCPL */
+            /* 4 private client values are returned by DCPL */
             if ( cd_nelmts != H5Z_SZIP_TOTAL_NPARMS && filter[i].cd_nelmts != H5Z_SZIP_USER_NPARMS )
                 return 0;
 
@@ -563,6 +560,4 @@ static int has_filters(hid_t pid, hid_t tid, unsigned nfilters, filter_info_t *f
  
     return 1;
 }
-
-
 
