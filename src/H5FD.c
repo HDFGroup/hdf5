@@ -1806,6 +1806,36 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5FD_get_maxaddr
+ *
+ * Purpose:	Private version of H5FDget_eof()
+ *
+ * Return:	Success:	The maximum address allowed in the file.
+ *		Failure:	HADDR_UNDEF
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, January  3, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+haddr_t
+H5FD_get_maxaddr(const H5FD_t *file)
+{
+    haddr_t ret_value;          /* Return value */
+
+    FUNC_ENTER_NOAPI(H5FD_get_maxaddr, HADDR_UNDEF)
+
+    HDassert(file);
+
+    /* Set return value */
+    ret_value = file->maxaddr;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_get_maxaddr() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5FDread
  *
  * Purpose:	Reads SIZE bytes from FILE beginning at address ADDR

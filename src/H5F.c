@@ -900,6 +900,11 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
         if(H5P_get(plist, H5F_ACS_LATEST_FORMAT_NAME, &(f->shared->latest_format)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get 'latest format' flag")
 
+        /* Get the VFD values to cache */
+        f->shared->maxaddr = H5FD_get_maxaddr(lf);
+        if(!H5F_addr_defined(f->shared->maxaddr))
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "bad maximum address from VFD")
+
         /* Bump superblock version if we are to use the latest version of the format */
         if(f->shared->latest_format)
             super_vers = HDF5_SUPERBLOCK_VERSION_LATEST;

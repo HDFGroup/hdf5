@@ -62,6 +62,7 @@ H5_DLL haddr_t H5FD_realloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_
 H5_DLL haddr_t H5FD_get_eoa(const H5FD_t *file, H5FD_mem_t type);
 H5_DLL herr_t H5FD_set_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t addr);
 H5_DLL haddr_t H5FD_get_eof(const H5FD_t *file);
+H5_DLL haddr_t H5FD_get_maxaddr(const H5FD_t *file);
 H5_DLL herr_t H5FD_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
 		 void *buf/*out*/);
 H5_DLL herr_t H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
