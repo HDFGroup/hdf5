@@ -503,10 +503,12 @@
 ./src/H5FDmpiposix.h
 ./src/H5FDmulti.c
 ./src/H5FDmulti.h
+./src/H5FDpkg.h
 ./src/H5FDprivate.h
 ./src/H5FDpublic.h
 ./src/H5FDsec2.c
 ./src/H5FDsec2.h
+./src/H5FDspace.c
 ./src/H5FDstdio.c
 ./src/H5FDstdio.h
 ./src/H5FDwindows.c
