@@ -2769,7 +2769,7 @@ test_attr_big(hid_t fcpl, hid_t fapl)
     unsigned    max_compact;    /* Maximum # of attributes to store compactly */
     unsigned    min_dense;      /* Minimum # of attributes to store "densely" */
     unsigned    nshared_indices;        /* # of shared message indices */
-    hbool_t     latest_format;  /* Whether we're using the latest version of the format or not */
+    H5F_format_version_t low, high;     /* File format bounds */
     htri_t	is_empty;	/* Are there any attributes? */
     htri_t	is_dense;	/* Are attributes stored densely? */
     unsigned    u;              /* Local index variable */
@@ -2817,9 +2817,9 @@ test_attr_big(hid_t fcpl, hid_t fapl)
     ret = H5Pget_shared_mesg_nindexes(fcpl, &nshared_indices);
     CHECK(ret, FAIL, "H5Pget_shared_mesg_nindexes");
 
-    /* Retrieve the "use the latest version of the format" flag for creating objects in the file */
-    ret = H5Pget_latest_format(fapl, &latest_format);
-    CHECK(ret, FAIL, "H5Pget_latest_format");
+    /* Retrieve the format bounds for creating objects in the file */
+    ret = H5Pget_format_bounds(fapl, &low, &high);
+    CHECK(ret, FAIL, "H5Pget_format_bounds");
 
     /* Create a dataset */
     dataset = H5Dcreate2(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
@@ -2881,7 +2881,7 @@ test_attr_big(hid_t fcpl, hid_t fapl)
     u = 2;
     sprintf(attrname, "attr %02u", u);
     attr = H5Acreate2(dataset, attrname, H5T_NATIVE_UINT, big_sid, H5P_DEFAULT, H5P_DEFAULT);
-    if(latest_format) {
+    if(low == H5F_FORMAT_LATEST) {
         CHECK(attr, FAIL, "H5Acreate2");
 
         /* Close attribute */
@@ -8864,9 +8864,9 @@ test_attr(void)
     fapl2 = H5Pcopy(fapl);
     CHECK(fapl2, FAIL, "H5Pcopy");
 
-    /* Set the "use the latest version of the format" flag for creating objects in the file */
-    ret = H5Pset_latest_format(fapl2, TRUE);
-    CHECK(ret, FAIL, "H5Pset_latest_format");
+    /* Set the "use the latest version of the format" bounds for creating objects in the file */
+    ret = H5Pset_format_bounds(fapl2, H5F_FORMAT_LATEST, H5F_FORMAT_LATEST);
+    CHECK(ret, FAIL, "H5Pset_format_bounds");
 
     /* Create a default file creation property list */
     fcpl = H5Pcreate(H5P_FILE_CREATE);

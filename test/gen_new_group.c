@@ -57,8 +57,8 @@ int main(void)
     /* Copy the file access property list */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) goto error;
 
-    /* Set the "use the latest version of the format" flag for creating objects in the file */
-    if(H5Pset_latest_format(fapl, TRUE) < 0) goto error;
+    /* Set the "use the latest version of the format" bounds for creating objects in the file */
+    if(H5Pset_format_bounds(fapl, H5F_FORMAT_LATEST, H5F_FORMAT_LATEST) < 0) goto error;
 
     /* Create file for test groups */
     if((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl)) <0) goto error;

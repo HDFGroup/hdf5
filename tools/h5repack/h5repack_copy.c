@@ -176,7 +176,7 @@ int copy_objects(const char* fnamein,
                 goto out;
             } /* end if */
 
-            if(H5Pset_latest_format(fapl, TRUE) < 0) {
+            if(H5Pset_format_bounds(fapl, H5F_FORMAT_LATEST, H5F_FORMAT_LATEST) < 0) {
                 error_msg(progname, "Could not set property for using latest version of the format\n");
                 goto out;
             } /* end if */

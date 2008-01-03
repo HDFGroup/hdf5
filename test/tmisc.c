@@ -4601,8 +4601,8 @@ test_misc25c(void)
     /* Compose file access property list */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(fapl, FAIL, "H5Pcreate");
-    ret = H5Pset_latest_format(fapl, 1);
-    CHECK(ret, FAIL, "H5Pset_latest_format");
+    ret = H5Pset_format_bounds(fapl, H5F_FORMAT_LATEST, H5F_FORMAT_LATEST);
+    CHECK(ret, FAIL, "H5Pset_format_bounds");
 
     /* Create the file */
     fid = H5Fcreate(MISC25C_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);

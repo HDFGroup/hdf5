@@ -581,9 +581,9 @@ test_h5o_plist(void)
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(fapl, FAIL, "H5Pcreate");
 
-    /* Set the "use the latest version of the format" flag for creating objects in the file */
-    ret = H5Pset_latest_format(fapl, TRUE);
-    CHECK(ret, FAIL, "H5Pset_latest_format");
+    /* Set the "use the latest version of the format" bounds for creating objects in the file */
+    ret = H5Pset_format_bounds(fapl, H5F_FORMAT_LATEST, H5F_FORMAT_LATEST);
+    CHECK(ret, FAIL, "H5Pset_format_bounds");
 
     /* Create a new HDF5 file */
     fid = H5Fcreate(TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
@@ -796,13 +796,13 @@ test_h5o_link(void)
     /* Loop over using new group format */
     for(new_format = FALSE; new_format <= TRUE; new_format++) {
 
-        /* Make a FAPL that uses the "use the latest version of the format" flag */
+        /* Make a FAPL that uses the "use the latest version of the format" bounds */
         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
         CHECK(fapl_id, FAIL, "H5Pcreate");
 
-        /* Set the "use the latest version of the format" flag for creating objects in the file */
-        ret = H5Pset_latest_format(fapl_id, new_format);
-        CHECK(ret, FAIL, "H5Pset_latest_format");
+        /* Set the "use the latest version of the format" bounds for creating objects in the file */
+        ret = H5Pset_format_bounds(fapl_id, (new_format ? H5F_FORMAT_LATEST : H5F_FORMAT_EARLIEST), H5F_FORMAT_LATEST);
+        CHECK(ret, FAIL, "H5Pset_format_bounds");
 
         /* Create a new HDF5 file */
         file_id = H5Fcreate(TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);

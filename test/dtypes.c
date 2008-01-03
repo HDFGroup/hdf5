@@ -4410,10 +4410,10 @@ test_latest(void)
         FAIL_STACK_ERROR
 
 
-    /* Set the 'use the latest format' flag in the FAPL */
+    /* Set the 'use the latest format' bounds in the FAPL */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         FAIL_STACK_ERROR
-    if(H5Pset_latest_format(fapl, TRUE) < 0)
+    if(H5Pset_format_bounds(fapl, H5F_FORMAT_LATEST, H5F_FORMAT_LATEST) < 0)
         FAIL_STACK_ERROR
 
     /* Create file using default FAPL */

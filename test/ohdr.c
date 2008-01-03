@@ -89,7 +89,7 @@ main(void)
             HDputs("Using default file format:");
 
         /* Set the format to use for the file */
-        if (H5Pset_latest_format(fapl, b) < 0) FAIL_STACK_ERROR
+        if (H5Pset_format_bounds(fapl, (b ? H5F_FORMAT_LATEST : H5F_FORMAT_EARLIEST), H5F_FORMAT_LATEST) < 0) FAIL_STACK_ERROR
 
         /* Create the file to operate on */
         if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR

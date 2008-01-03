@@ -1876,76 +1876,161 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pset_latest_format
+ * Function:	H5Pset_format_bounds
  *
- * Purpose:	Indicates that the library should always use the latest version
- *      of the file format when creating objects.  If this flag is not set,
- *      the library will always use the most backwardly compatibly format
- *      possible that can store the information about an object.
+ * Purpose:	Indicates which versions of the file format the library should
+ *      use when creating objects.  LOW is the earliest version of the HDF5
+ *      library that is guaranteed to be able to access the objects created
+ *      (the format of some objects in an HDF5 file may not have changed between
+ *      versions of the HDF5 library, possibly allowing earlier versions of the
+ *      HDF5 library to access those objects) and HIGH is the latest version
+ *      of the library required to access the objects created (later versions
+ *      of the HDF5 library will also be able to access those objects).
  *
- *	The default value is set to FALSE (creating backwardly compatible files)
+ *      LOW is used to require that objects use a more modern format and HIGH
+ *      is used to restrict objects from using a more modern format.
+ *
+ *      The special values of H5F_FORMAT_EARLIEST and H5F_FORMAT_LATEST can be
+ *      used in the following manner:  Setting LOW and HIGH to H5F_FORMAT_LATEST
+ *      will produce files whose objects use the latest version of the file
+ *      format available in the current HDF5 library for each object created.
+ *      Setting LOW and HIGH to H5F_FORMAT_EARLIEST will produce files that that
+ *      always require the use of the earliest version of the file format for
+ *      each object created. [NOTE!  LOW=HIGH=H5F_FORMAT_EARLIEST is not
+ *      implemented as of version 1.8.0 and setting LOW and HIGH to
+ *      H5F_FORMAT_EARLIEST will produce an error currently].
+ *
+ *      Currently, the only two valid combinations for this routine are:
+ *      LOW = H5F_FORMAT_EARLIEST and HIGH = H5F_FORMAT_LATEST (the default
+ *      setting, which creates objects with the ealiest version possible for
+ *      each object, but no upper limit on the version allowed to be created if
+ *      a newer version of an object's format is required to support a feature
+ *      requested with an HDF5 library API routine), and LOW = H5F_FORMAT_LATEST
+ *      and HIGH = H5F_FORMAT_LATEST (which is described above).
+ *
+ *      The LOW and HIGH values set with this routine at imposed with each
+ *      HDF5 library API call that creates objects in the file.  API calls that
+ *      would violate the LOW or HIGH format bound will fail.
+ *
+ *      Setting the LOW and HIGH values will not affect reading/writing existing
+ *      objects, only the creation of new objects.
+ *
+ * Note: Eventually we want to add more values to the H5F_format_version_t
+ *      enumerated type that indicate library release values where the file
+ *      format was changed (like "H5F_FORMAT_1_2_0" for the file format changes
+ *      in the 1.2.x release branch and possily even "H5F_FORMAT_1_4_2" for
+ *      a change mid-way through the 1.4.x release branch, etc).
+ *
+ *      Adding more values will allow applications to make settings like the
+ *      following:
+ *          LOW = H5F_FORMAT_EARLIEST, HIGH = H5F_FORMAT_1_2_0 => Create objects
+ *              with the earliest possible format and don't allow any objects
+ *              to be created that require a library version greater than 1.2.x
+ *              (This is the "make certain that <application> linked with v1.2.x
+ *              of the library can read the file produced" use case)
+ *
+ *          LOW = H5F_FORMAT_1_4_2, HIGH = H5F_FORMAT_LATEST => create objects
+ *              with at least the version of their format that the 1.4.2 library
+ *              uses and allow any later version of the object's format
+ *              necessary to represent features used.
+ *              (This is the "make certain to take advantage of <new feature>
+ *              in the file format" use case (maybe <new feature> is smaller
+ *              or scales better than an ealier version, which would otherwise
+ *              be used))
+ *
+ *         LOW = H5F_FORMAT_1_2_0, HIGH = H5F_FORMAT_1_6_0 => creates objects
+ *              with at least the version of their format that the 1.2.x library
+ *              uses and don't allow any objects to be created that require a
+ *              library version greater than 1.6.x.
+ *              (Not certain of a particular use case for these settings,
+ *              although its probably just the logical combination of the
+ *              previous two; it just falls out as possible/logical (if it turns
+ *              out to be hard to implement in some way, we can always disallow
+ *              it))
+ *
+ * Note #2:     We talked about whether to include enum values for only library
+ *      versions where the format changed and decided it would be less confusing
+ *      for application developers if we include enum values for _all_ library
+ *      releases and then map down to the previous actual library release which
+ *      had a format change.
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              Friday, September 9, 2006
+ *              Sunday, December 30, 2007
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_latest_format(hid_t plist_id, hbool_t latest)
+H5Pset_format_bounds(hid_t plist_id, H5F_format_version_t low,
+    H5F_format_version_t high)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
+    hbool_t latest;             /* Whether to use the latest version or not */
     herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pset_latest_format, FAIL)
-    H5TRACE2("e", "ib", plist_id, latest);
+    FUNC_ENTER_API(H5Pset_format_bounds, FAIL)
+
+    /* Check args */
+    /* (Note that this is _really_ restricted right now, we'll want to loosen
+     *  this up more as we add features - QAK)
+     */
+    if(high != H5F_FORMAT_LATEST)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid high format bound")
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set values */
+    latest = (low == H5F_FORMAT_LATEST) ? TRUE : FALSE;
     if(H5P_set(plist, H5F_ACS_LATEST_FORMAT_NAME, &latest) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'latest format' flag")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set format bounds")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Pset_latest_format() */
+} /* end H5Pset_format_bounds() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_latest_format
+ * Function:	H5Pget_format_bounds
  *
- * Purpose:	Returns the current settings for the 'latest format' flag
+ * Purpose:	Returns the current settings for the file format bounds
  *      from a file access property list.
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              Friday, September 9, 2006
+ *              Thursday, January 3, 2008
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_latest_format(hid_t plist_id, hbool_t *latest/*out*/)
+H5Pget_format_bounds(hid_t plist_id, H5F_format_version_t *low/*out*/,
+    H5F_format_version_t *high/*out*/)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
+    hbool_t latest;             /* Whether to use the latest version or not */
     herr_t ret_value = SUCCEED; /* return value */
 
-    FUNC_ENTER_API(H5Pget_latest_format, FAIL)
-    H5TRACE2("e", "ix", plist_id, latest);
+    FUNC_ENTER_API(H5Pget_format_bounds, FAIL)
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get value */
-    if(latest)
-        if(H5P_get(plist, H5F_ACS_LATEST_FORMAT_NAME, latest) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get 'latest format' flag")
+    if(H5P_get(plist, H5F_ACS_LATEST_FORMAT_NAME, &latest) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get format bounds")
+
+    /* Check for setting values to return */
+    /* (Again, this is restricted now, we'll need to open it up later -QAK) */
+    if(low)
+        *low = latest ?  H5F_FORMAT_LATEST : H5F_FORMAT_EARLIEST;
+    if(high)
+               *high = H5F_FORMAT_LATEST;
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Pget_latest_format() */
+} /* end H5Pget_format_bounds() */
 
