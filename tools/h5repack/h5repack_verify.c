@@ -507,18 +507,15 @@ static int has_filters(hid_t pid, hid_t tid, unsigned nfilters, filter_info_t *f
             break;
             
         case H5Z_FILTER_SZIP:
-            
 
-#if 0
-            /* 4 private client values are returned by DCPL */
-            if ( f1.cd_nelmts != 4 && f2.cd_nelmts != 2 )
-                return -1;
-            
-            if ( f2.cd_values[0] != f1.cd_values[2] &&
-                f2.cd_values[1] != f1.cd_values[1] )
-                return -1;
-#endif          
-            
+            /* 4 private client value is returned by DCPL */
+            if ( cd_nelmts != H5Z_SZIP_TOTAL_NPARMS && filter[i].cd_nelmts != H5Z_SZIP_USER_NPARMS )
+                return 0;
+
+            /* "User" parameter for pixels-per-block (index 1) */
+            if ( cd_values[H5Z_SZIP_PARM_PPB] != filter[i].cd_values[H5Z_SZIP_PARM_PPB] )
+                return 0;
+           
             
             break;
             
