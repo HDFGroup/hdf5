@@ -37,52 +37,65 @@ $ ! h5import tests
 $ !
 $ ! Run h5importtest to create input files
 $ !
-$ h5importtest
-$ type sys$input ASCII I32 rank 3 - Output BE 
+$ run [.-]h5importtest
+$ type sys$input 
+                 ASCII I32 rank 3 - Output BE 
 $ CALL TOOLTEST "txtin32 -c textin32 -o" test1.h5
 $ !
-$ type sys$input "ASCII I16 rank 3 - Output LE - CHUNKED - extended"
+$ type sys$input 
+                ASCII I16 rank 3 - Output LE - CHUNKED - extended
 $ CALL TOOLTEST  "txtin16 -c textin16 -o" test2.h5
 $ !
-$ type sys$input ASCII I8 - rank 3 - Output I16 LE-Chunked+Extended+Compressed 
+$ type sys$input 
+                ASCII I8 - rank 3 - Output I16 LE-Chunked+Extended+Compressed 
 $ CALL TOOLTEST  "txtin16 -c textin8  -o" test3.h5
 $ !
-$ type sys$input ASCII UI32 - rank 3 - Output BE 
+$ type sys$input 
+               ASCII UI32 - rank 3 - Output BE 
 $ CALL TOOLTEST  "in1 -c textuin32 -o" test4.h5
 $ !
-$ type sys$input ASCII UI16 - rank 2 - Output LE+Chunked+Compressed 
+$ type sys$input 
+               ASCII UI16 - rank 2 - Output LE+Chunked+Compressed 
 $ CALL TOOLTEST  "in1 -c textuin16 -o" test5.h5
 $ !
-$ type sys$input ASCII F32 - rank 3 - Output LE 
+$ type sys$input 
+               ASCII F32 - rank 3 - Output LE 
 $ CALL TOOLTEST  "fp1 -c textfp32 -o" test6.h5
 $ !
-$ type sys$input ASCII F64 - rank 3 - Output BE + CHUNKED+Extended+Compressed 
+$ type sys$input 
+               ASCII F64 - rank 3 - Output BE + CHUNKED+Extended+Compressed 
 $ CALL TOOLTEST  "fp2 -c textfp64 -o" test7.h5
 $ !
-$ type sys$input BINARY F64 - rank 3 - Output LE+CHUNKED+Extended+Compressed 
+$ type sys$input 
+               BINARY F64 - rank 3 - Output LE+CHUNKED+Extended+Compressed 
 $ CALL TOOLTEST  "bfp64 -c conbfp64 -o" test8.h5
 $ !
-$ type sys$input BINARY I16 - rank 3 - Output order LE + CHUNKED + extended 
+$ type sys$input 
+              BINARY I16 - rank 3 - Output order LE + CHUNKED + extended 
 $ CALL TOOLTEST  "bin16 -c conbin16 -o" test9.h5
 $ !
-$ type sys$input BINARY I8 - rank 3 - Output I16LE + Chunked+Extended+Compressed 
+$ type sys$input 
+              BINARY I8 - rank 3 - Output I16LE + Chunked+Extended+Compressed 
 $ CALL TOOLTEST  "bin8 -c conbin8  -o" test10.h5
 $ !
-$ type sys$input BINARY I32 - rank 3 - Output BE + CHUNKED 
+$ type sys$input 
+              BINARY I32 - rank 3 - Output BE + CHUNKED 
 $ CALL TOOLTEST  "bin32 -c conbin32 -o" test11.h5
 $ !
-$ type sys$input BINARY UI16 - rank 3 - Output byte BE + CHUNKED 
+$ type sys$input 
+              BINARY UI16 - rank 3 - Output byte BE + CHUNKED 
 $ CALL TOOLTEST  "buin16 -c conbuin16 -o" test12.h5
 $ !
-$ type sys$input BINARY UI32 - rank 3 - Output LE + CHUNKED 
+$ type sys$input 
+              BINARY UI32 - rank 3 - Output LE + CHUNKED 
 $ CALL TOOLTEST  "buin32 -c conbuin32 -o" test13.h5
 $
 $
 $ 
 $TOOLTEST: SUBROUTINE
 $
-$ len =  F$LENGTH(P3)
-$ base = F$EXTRACT(0,len-3,P3)
+$ len =  F$LENGTH(P2)
+$ base = F$EXTRACT(0,len-3,P2)
 $ actual = base + "out.h5"
 $ actual_dump = base + "out.txt"
 $ actual_dump_err = base + "out.err"
@@ -94,7 +107,7 @@ $ !
 $ ! Run h5import with output in the 'actual' file
 $ !
 $ ON ERROR THEN CONTINUE
-$ h5import 'P2 'actual'
+$ h5import 'P1 'actual'
 $ define/nolog sys$output 'actual_dump'
 $ define/nolog sys$error  'actual_dump_err'
 $ !
@@ -107,11 +120,11 @@ $ if F$SEARCH(actual_dump_err) .NES. ""
 $ then
 $ set message/notext/nofacility/noidentification/noseverity
 $    append 'actual_dump_err' 'actual_dump'
-$ set message/ntext/facility/identification/severity
+$ set message/text/facility/identification/severity
 $ endif
 $ define/nolog sys$output 'expected_dump'
 $ define/nolog sys$error  'expected_dump_err'
-$ h5dump 'P3
+$ h5dump 'P2
 $ deassign sys$output
 $ deassign sys$error
 $ if F$SEARCH(expected_dump_err) .NES. ""
