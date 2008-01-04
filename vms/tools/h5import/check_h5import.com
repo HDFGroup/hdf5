@@ -41,55 +41,55 @@ $ run [.-]h5importtest
 $ !
 $ type sys$input 
                  Testing ASCII I32 rank 3 - Output BE 
-$ CALL TOOLTEST "txtin32 -c textin32 -o" test1.h5
+$ CALL TOOLTEST "txtin32. -c textin32. -o" test1.h5
 $ !
 $ type sys$input 
                 Testing ASCII I16 rank 3 - Output LE - CHUNKED - extended
-$ CALL TOOLTEST  "txtin16 -c textin16 -o" test2.h5
+$ CALL TOOLTEST  "txtin16. -c textin16. -o" test2.h5
 $ !
 $ type sys$input 
                 Testing ASCII I8 - rank 3 - Output I16 LE-Chunked+Extended+Compressed 
-$ CALL TOOLTEST  "txtin16 -c textin8  -o" test3.h5
+$ CALL TOOLTEST  "txtin16. -c textin8.  -o" test3.h5
 $ !
 $ type sys$input 
                Testing ASCII UI32 - rank 3 - Output BE 
-$ CALL TOOLTEST  "in1 -c textuin32 -o" test4.h5
+$ CALL TOOLTEST  "in1. -c textuin32. -o" test4.h5
 $ !
 $ type sys$input 
                Testing ASCII UI16 - rank 2 - Output LE+Chunked+Compressed 
-$ CALL TOOLTEST  "in1 -c textuin16 -o" test5.h5
+$ CALL TOOLTEST  "in1. -c textuin16. -o" test5.h5
 $ !
 $ type sys$input 
                Testing ASCII F32 - rank 3 - Output LE 
-$ CALL TOOLTEST  "fp1 -c textfp32 -o" test6.h5
+$ CALL TOOLTEST  "fp1. -c textfp32. -o" test6.h5
 $ !
 $ type sys$input 
                Testing ASCII F64 - rank 3 - Output BE + CHUNKED+Extended+Compressed 
-$ CALL TOOLTEST  "fp2 -c textfp64 -o" test7.h5
+$ CALL TOOLTEST  "fp2. -c textfp64. -o" test7.h5
 $ !
 $ type sys$input 
                Testing BINARY F64 - rank 3 - Output LE+CHUNKED+Extended+Compressed 
-$ CALL TOOLTEST  "bfp64 -c conbfp64 -o" test8.h5
+$ CALL TOOLTEST  "bfp64. -c conbfp64. -o" test8.h5
 $ !
 $ type sys$input 
                Testing BINARY I16 - rank 3 - Output order LE + CHUNKED + extended 
-$ CALL TOOLTEST  "bin16 -c conbin16 -o" test9.h5
+$ CALL TOOLTEST  "bin16. -c conbin16. -o" test9.h5
 $ !
 $ type sys$input 
                Testing BINARY I8 - rank 3 - Output I16LE + Chunked+Extended+Compressed 
-$ CALL TOOLTEST  "bin8 -c conbin8  -o" test10.h5
+$ CALL TOOLTEST  "bin8. -c conbin8.  -o" test10.h5
 $ !
 $ type sys$input 
                Testing BINARY I32 - rank 3 - Output BE + CHUNKED 
-$ CALL TOOLTEST  "bin32 -c conbin32 -o" test11.h5
+$ CALL TOOLTEST  "bin32. -c conbin32. -o" test11.h5
 $ !
 $ type sys$input 
                Testing BINARY UI16 - rank 3 - Output byte BE + CHUNKED 
-$ CALL TOOLTEST  "buin16 -c conbuin16 -o" test12.h5
+$ CALL TOOLTEST  "buin16. -c conbuin16. -o" test12.h5
 $ !
 $ type sys$input 
                Testing BINARY UI32 - rank 3 - Output LE + CHUNKED 
-$ CALL TOOLTEST  "buin32 -c conbuin32 -o" test13.h5
+$ CALL TOOLTEST  "buin32. -c conbuin32. -o" test13.h5
 $
 $
 $ 
