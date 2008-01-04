@@ -647,6 +647,26 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                     }
                     break;
 
+                case 'v':
+                    if(ptr) {
+                        if(vp)
+                            fprintf(out, "0x%lx", (unsigned long)vp);
+                        else
+                            fprintf(out, "NULL");
+                    } else {
+                        H5F_format_version_t format_vers = va_arg(ap, H5F_format_version_t); /*lint !e64 Type mismatch not really occuring */
+
+                        switch(format_vers) {
+                            case H5F_FORMAT_EARLIEST:
+                                fprintf(out, "H5F_FORMAT_EARLIEST");
+                                break;
+                            case H5F_FORMAT_LATEST:
+                                fprintf(out, "H5F_FORMAT_LATEST");
+                                break;
+                        }
+                    }
+                    break;
+
                 default:
                     fprintf(out, "BADTYPE(F%c)", type[1]);
                     goto error;

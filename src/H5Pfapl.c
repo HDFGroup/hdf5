@@ -1970,6 +1970,7 @@ H5Pset_format_bounds(hid_t plist_id, H5F_format_version_t low,
     herr_t ret_value = SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pset_format_bounds, FAIL)
+    H5TRACE3("e", "iFvFv", plist_id, low, high);
 
     /* Check args */
     /* (Note that this is _really_ restricted right now, we'll want to loosen
@@ -2014,6 +2015,7 @@ H5Pget_format_bounds(hid_t plist_id, H5F_format_version_t *low/*out*/,
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(H5Pget_format_bounds, FAIL)
+    H5TRACE3("e", "ixx", plist_id, low, high);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
