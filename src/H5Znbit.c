@@ -1409,4 +1409,4 @@ static void H5Z_nbit_compress(unsigned char *data, unsigned d_nelmts, unsigned c
 
    *buffer_size = j + 1; /* sometimes is catually j, but to be safe */
 }
-#endif /* H5_HAVE_FILTER_NZIP */
+#endif /* H5_HAVE_FILTER_NBIT */

@@ -489,7 +489,7 @@ static int has_filters(hid_t pid, hid_t tid, unsigned nfilters, filter_info_t *f
         case H5Z_FILTER_SHUFFLE:
             
             /* 1 private client value is returned by DCPL */
-            if ( cd_nelmts != H5Z_SHUFFLE_TOTAL_NPARMS && filter[i].cd_nelmts != 0 )
+            if ( cd_nelmts != H5Z_SHUFFLE_TOTAL_NPARMS && filter[i].cd_nelmts != H5Z_SHUFFLE_USER_NPARMS )
                 return 0;
             
             /* get dataset's type size */
@@ -519,6 +519,8 @@ static int has_filters(hid_t pid, hid_t tid, unsigned nfilters, filter_info_t *f
         case H5Z_FILTER_NBIT:
             
             /* TO DO */
+
+            ;
           
             
             
@@ -527,6 +529,8 @@ static int has_filters(hid_t pid, hid_t tid, unsigned nfilters, filter_info_t *f
         case H5Z_FILTER_SCALEOFFSET:
             
             /* TO DO */
+
+            ;
             
             
             

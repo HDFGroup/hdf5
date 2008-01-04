@@ -74,9 +74,10 @@ typedef int H5Z_filter_t;
 #define H5_SZIP_NN_OPTION_MASK          32
 #define H5_SZIP_MAX_PIXELS_PER_BLOCK    32
 
-/* Total number of parameters for the shuffle filter */
-#define H5Z_SHUFFLE_TOTAL_NPARMS   1    
-
+/* Macros for the shuffle filter */
+#define H5Z_SHUFFLE_USER_NPARMS    0    /* Number of parameters that users can set */
+#define H5Z_SHUFFLE_TOTAL_NPARMS   1    /* Total number of parameters for filter */
+ 
 /* Macros for the szip filter */
 #define H5Z_SZIP_USER_NPARMS    2       /* Number of parameters that users can set */
 #define H5Z_SZIP_TOTAL_NPARMS   4       /* Total number of parameters for filter */
