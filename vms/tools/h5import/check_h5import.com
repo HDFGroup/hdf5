@@ -189,6 +189,10 @@ $ ! Delete temporary files
 $ if F$SEARCH("*out.h5;*") then del *out.h5;*
 $ if F$SEARCH("*.dif;*")   then del *.dif;*
 $ if F$SEARCH("*.err;*")   then del *.err;*
+$ if F$SEARCH("b*.;*")     then del b*.;*
+$ if F$SEARCH("txti*.;*")    then del txti*.;*
+$ if F$SEARCH("txtu*.;*")    then del txtu*.;*
+$ if F$SEARCH("*.dat;*")   then del *.dat;*
 $ !
 $ !
 $ENDSUBROUTINE
