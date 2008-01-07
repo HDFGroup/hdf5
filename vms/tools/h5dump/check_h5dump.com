@@ -40,17 +40,23 @@ $
 $ ! Test for displaying groups
 $ CALL TOOLTEST tgroup-1.ddl "tgroup.h5"
 $ ! Test for displaying the selected groups
+$ type sys$input
+                This test reports false negative; check h5dump_output.txt file
 $ CALL TOOLTEST tgroup-2.ddl "--group=/g2 --group / -g /y tgroup.h5"
 $
 $ ! Test for displaying simple space datasets
 $ CALL TOOLTEST tdset-1.ddl "tdset.h5"
 $ ! Test for displaying selected datasets
+$ type sys$input
+                This test reports false negative; check h5dump_output.txt file
 $ CALL TOOLTEST tdset-2.ddl "-"""H""" -d dset1 -d /dset2 --dataset=dset3 tdset.h5"
 $ ! Test for displaying attributes
 $ CALL TOOLTEST tattr-1.ddl "tattr.h5"
 $ ! Test for displaying the selected attributes of string type and scalar space
 $ CALL TOOLTEST tattr-2.ddl "-a /attr1 --attribute /attr4 --attribute=/attr5 tattr.h5"
 $ ! Test for header and error messages
+$ type sys$input
+                This test reports false negative; check h5dump_output.txt file
 $ CALL TOOLTEST tattr-3.ddl "--header -a /attr2 --attribute=/attr tattr.h5"
 $ ! Test for displaying attributes in shared datatype (also in group and dataset)
 $ CALL TOOLTEST tnamed_dtype_attr.ddl "tnamed_dtype_attr.h5"
@@ -135,9 +141,9 @@ $ CALL TOOLTEST tall-2B.ddl "-"""A""" -r tall.h5"
 $
 $ ! Test Subsetting
 $ CALL TOOLTEST tall-4s.ddl "--dataset=/g1/g1.1/dset1.1.1 --start=1,1 --stride=2,3 --count=3,2 --block=1,1 tall.h5"
-$ CALL TOOLTEST tall-5s.ddl "-d """/"g"1/"g"1.1/"dset"1.1.2[0;2;10;]""" tall.h5"
-$ CALL TOOLTEST tdset-3s.ddl "-d """/"dset"1[1,1;;;]""" tdset.h5"
-$ CALL TOOLTEST tdset-3s.ddl "-d """/"dset"1[;3,2;4,4;1,4]""" tdset2.h5"
+$ CALL TOOLTEST tall-5s.ddl "-d /g1/g1.1/dset1.1.2[0;2;10;] tall.h5"
+$ CALL TOOLTEST tdset-3s.ddl "-d /dset1[1,1;;;] tdset.h5"
+$! CALL TOOLTEST tdset-3s.ddl "-d """/"dset"1[;3,2;4,4;1,4]""" tdset2.h5"
 $
 $ ! Test printing characters in ASCII instead of decimal
 $ CALL TOOLTEST tchar1.ddl "-r tchar.h5"
@@ -153,6 +159,8 @@ $ CALL TOOLTEST tboot1.ddl "-"""H""" -"""B""" -d dset tfcontents1.h5"
 $ CALL TOOLTEST tboot2.ddl "-"""B""" tfcontents2.h5"
 $
 $ ! Test -p with a non existing dataset
+$ type sys$input
+                This test reports false negative; check h5dump_output.txt file
 $ CALL TOOLTEST tperror.ddl "-p -d bogus tfcontents1.h5"
 $
 $ ! Test for file contents
