@@ -517,22 +517,27 @@ static int has_filters(hid_t pid, hid_t tid, unsigned nfilters, filter_info_t *f
             break;
             
         case H5Z_FILTER_NBIT:
-            
-            /* TO DO */
-
-            ;
-          
+           
+            /* only client data values number of values checked */
+            if ( H5Z_NBIT_USER_NPARMS != filter[i].cd_nelmts)
+                return 0;
+           
             
             
             break;
             
         case H5Z_FILTER_SCALEOFFSET:
-            
-            /* TO DO */
 
-            ;
-            
-            
+            /* only client data values checked */
+            for( j = 0; j < H5Z_SCALEOFFSET_USER_NPARMS; j++) 
+            {
+                if (cd_values[j] != filter[i].cd_values[j])
+                {
+                    return 0; 
+                }
+                
+            }
+                
             
             break;
             

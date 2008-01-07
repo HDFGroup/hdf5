@@ -86,6 +86,11 @@ typedef int H5Z_filter_t;
 #define H5Z_SZIP_PARM_BPP       2       /* "Local" parameter for bits-per-pixel */
 #define H5Z_SZIP_PARM_PPS       3       /* "Local" parameter for pixels-per-scanline */
    
+/* Macros for the nbit filter */
+#define H5Z_NBIT_USER_NPARMS     0     /* Number of parameters that users can set */
+
+/* Macros for the scale offset filter */
+#define H5Z_SCALEOFFSET_USER_NPARMS      2    /* Number of parameters that users can set */
 
 
 /* Special parameters for ScaleOffset filter*/
