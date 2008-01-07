@@ -810,7 +810,7 @@ hsize_t diff(hid_t file1_id,
            /*-------------------------------------------------------------------------
             * non verbose, check first if we have differences by enabling quiet mode
             * so that printing is off, and compare again if differences found,
-            * disabling quite mode
+            * disabling quiet mode
             *-------------------------------------------------------------------------
             */
             else {
