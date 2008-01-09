@@ -52,6 +52,7 @@ main(int argc, char *argv[])
     AddTest("refstr", test_refstr, NULL,  "Reference Counted Strings", NULL);
     AddTest("file", test_file, cleanup_file, "Low-Level File I/O", NULL);
     AddTest("h5s",  test_h5s,  cleanup_h5s,  "Dataspaces", NULL);
+    AddTest("coords",  test_coords,  cleanup_coords,  "Dataspace coordinates", NULL);
     AddTest("attr", test_attr, cleanup_attr,  "Attributes", NULL);
     AddTest("select", test_select, cleanup_select,  "Selections", NULL);
     AddTest("time", test_time, cleanup_time,  "Time Datatypes", NULL);

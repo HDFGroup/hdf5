@@ -78,6 +78,7 @@ typedef struct {
     H5S_hyper_dim_t diminfo[H5S_MAX_RANK];   /* "Flattened" regular selection information */
     hsize_t size[H5S_MAX_RANK];          /* "Flattened" dataspace extent information */
     hssize_t sel_off[H5S_MAX_RANK];      /* "Flattened" selection offset information */
+    hbool_t flattened[H5S_MAX_RANK];    /* Whether this dimension has been flattened */
 
     /* Irregular hyperslab selection fields */
     H5S_hyper_span_info_t *spans;  /* Pointer to copy of the span tree */
