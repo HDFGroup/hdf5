@@ -16,6 +16,13 @@ $ !
 $ ! This command file tests h5dump utility. The command file has to
 $ ! run in the [hdf5-top.tools.testfiles] directory.
 $ !
+$ type sys$input
+
+===================================
+       Testing h5dump utiltity
+===================================
+
+$
 $ !
 $ ! Define h5dump symbol
 $ !
@@ -40,23 +47,17 @@ $
 $ ! Test for displaying groups
 $ CALL TOOLTEST tgroup-1.ddl "tgroup.h5"
 $ ! Test for displaying the selected groups
-$ type sys$input
-                This test reports false negative; check h5dump_output.txt file
 $ CALL TOOLTEST tgroup-2.ddl "--group=/g2 --group / -g /y tgroup.h5"
 $
 $ ! Test for displaying simple space datasets
 $ CALL TOOLTEST tdset-1.ddl "tdset.h5"
 $ ! Test for displaying selected datasets
-$ type sys$input
-                This test reports false negative; check h5dump_output.txt file
 $ CALL TOOLTEST tdset-2.ddl "-"""H""" -d dset1 -d /dset2 --dataset=dset3 tdset.h5"
 $ ! Test for displaying attributes
 $ CALL TOOLTEST tattr-1.ddl "tattr.h5"
 $ ! Test for displaying the selected attributes of string type and scalar space
 $ CALL TOOLTEST tattr-2.ddl "-a /attr1 --attribute /attr4 --attribute=/attr5 tattr.h5"
 $ ! Test for header and error messages
-$ type sys$input
-                This test reports false negative; check h5dump_output.txt file
 $ CALL TOOLTEST tattr-3.ddl "--header -a /attr2 --attribute=/attr tattr.h5"
 $ ! Test for displaying attributes in shared datatype (also in group and dataset)
 $ CALL TOOLTEST tnamed_dtype_attr.ddl "tnamed_dtype_attr.h5"
@@ -159,8 +160,6 @@ $ CALL TOOLTEST tboot1.ddl "-"""H""" -"""B""" -d dset tfcontents1.h5"
 $ CALL TOOLTEST tboot2.ddl "-"""B""" tfcontents2.h5"
 $
 $ ! Test -p with a non existing dataset
-$ type sys$input
-                This test reports false negative; check h5dump_output.txt file
 $ CALL TOOLTEST tperror.ddl "-p -d bogus tfcontents1.h5"
 $
 $ ! Test for file contents
@@ -191,58 +190,6 @@ $
 $ ! Array indices print/not print
 $ CALL TOOLTEST tindicesyes.ddl "taindices.h5"
 $ CALL TOOLTEST tindicesno.ddl "-y taindices.h5"
-$
-$
-$ ! tests for filters
-$ ! SZIP
-$ !option="-H -p -d szip tfilters.h5"
-$ !if test $USE_FILTER_SZIP != "yes"; then
-$  !SKIP $option
-$ !else
-$  !CALL TOOLTEST tszip.ddl $option
-$ !fi
-$ !# deflate
-$ !option="-H -p -d deflate tfilters.h5"
-$ !if test $USE_FILTER_DEFLATE != "yes"; then
-$ ! SKIP $option
-$ !else
-$ ! CALL  TOOLTEST tdeflate.ddl $option
-$ !fi
-$ !# shuffle
-$ !option="-H -p -d shuffle tfilters.h5"
-$ !if test $USE_FILTER_SHUFFLE != "yes"; then
-$ ! SKIP $option
-$ !else
-$ ! CALL  TOOLTEST tshuffle.ddl $option
-$ !fi
-$ !# fletcher32
-$ !option="-H -p -d fletcher32  tfilters.h5"
-$ !if test $USE_FILTER_FLETCHER32 != "yes"; then
-$ ! SKIP $option
-$ !else
-$ ! CALL  TOOLTEST tfletcher32.ddl $option
-$ !fi
-$ !# nbit
-$ !option="-H -p -d nbit  tfilters.h5"
-$ !if test $USE_FILTER_NBIT != "yes"; then
-$ ! SKIP $option
-$ !else
-$ ! CALL  TOOLTEST tnbit.ddl $option
-$ !fi
-$ !# scaleoffset
-$ !option="-H -p -d scaleoffset  tfilters.h5"
-$ !if test $USE_FILTER_SCALEOFFSET != "yes"; then
-$ ! SKIP $option
-$ !else
-$ ! CALL  TOOLTEST tscaleoffset.ddl $option
-$ !fi
-$ !# all
-$ !option="-H -p -d all  tfilters.h5"
-$ !if test $USE_FILTER_FLETCHER32 != "yes" -o  $USE_FILTER_SZIP != "yes" -o  $USE_FILTER_DEFLATE != "yes" -o  $USE_FILTER_SHUFFLE != "yes" -o $USE_FILTER_NBIT != "yes" -o  $USE_FILTER_SCALEOFFSET != "yes"; then
-$ ! SKIP $option
-$ !else
-$ ! CALL  TOOLTEST tallfilters.ddl $option
-$ !fi
 $ ! User defined
 $ CALL TOOLTEST tuserfilter.ddl "-"""H"""  -p -d myfilter  tfilters.h5"
 $    
@@ -283,8 +230,8 @@ $TOOLTEST: SUBROUTINE
 $
 $ len =  F$LENGTH(P1)
 $ base = F$EXTRACT(0,len-3,P1)
-$ actual = base + "out"
-$ actual_err = base + "err"
+$ actual = base + "h5dumpout"
+$ actual_err = base + "h5dumperr"
 $
 $ begin = "Testing h5dump "
 $ !
@@ -303,7 +250,7 @@ $ if F$SEARCH(actual_err) .NES. ""
 $ then
 $ set message/notext/nofacility/noidentification/noseverity
 $    append 'actual_err' 'actual'
-$ set message/ntext/facility/identification/severity
+$ set message/text/facility/identification/severity
 $ endif
 $ !
 $ ! Compare the results
@@ -337,8 +284,9 @@ $ append 'actual'        h5dump_output.txt
 $ !
 $ ! Delete temporary files
 $ !
-$ del *.out;*
-$ del *.dif;*
+$ if F$SEARCH("*.h5dumpout;*")   then del *.h5dumpout;*
+$ if F$SEARCH("*.h5dumperr;*")   then del *.h5dumperr;*
+$ if F$SEARCH("*.dif;*")   then del *.dif;*
 $ !
 $ENDSUBROUTINE
 $
@@ -346,8 +294,8 @@ $TOOLTEST1: SUBROUTINE
 $
 $ len =  F$LENGTH(P1)
 $ base = F$EXTRACT(0,len-3,P1)
-$ actual = base + "out"
-$ actual_err = base + "err"
+$ actual = base + "h5dumpout"
+$ actual_err = base + "h5dumperr"
 $
 $ begin = "Testing h5dump "
 $ !
@@ -363,7 +311,7 @@ $ if F$SEARCH(actual_err) .NES. ""
 $ then
 $ set message/notext/nofacility/noidentification/noseverity
 $    append 'actual_err' 'actual'
-$ set message/ntext/facility/identification/severity
+$ set message/text/facility/identification/severity
 $ endif
 $ !
 $ ! Compare the results
@@ -397,8 +345,9 @@ $ append 'actual'        h5dump_output.txt
 $ !
 $ ! Delete temporary files
 $ !
-$ del *.out;*
-$ del *.dif;*
+$ if F$SEARCH("*.h5dumpout;*")   then del *.h5dumpout;*
+$ if F$SEARCH("*.h5dumperr;*")   then del *.h5dumperr;*
+$ if F$SEARCH("*.dif;*")   then del *.dif;*
 $ !
 $ENDSUBROUTINE
 

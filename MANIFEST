@@ -1645,6 +1645,10 @@
 ./vms/tools/h5repack/check_h5repack.com
 ./vms/tools/h5repack/make.com
 ./vms/tools/lib/make.com
+./vms/tools/testfiles/tattr-3.ddl
+./vms/tools/testfiles/tdset-2.ddl
+./vms/tools/testfiles/tgroup-2.ddl
+./vms/tools/testfiles/tperror.ddl
 
 # Windows-specific Files.
 # Batch scripts

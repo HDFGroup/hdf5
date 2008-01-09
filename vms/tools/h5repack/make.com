@@ -20,7 +20,7 @@ $! ccopt = "/float=ieee_float"
 $
 $ ccc := cc 'ccopt /include=([-.-.src], [-.lib], [-.-.test])
 $ type sys$input
-	Creating h5repack
+       Creating h5repack ...
 $!
 $ cobj= " h5repack_main, h5repack, h5repack_copy, h5repack_refs," +-
         "h5repack_filters, h5repack_opttable, h5repack_parse, " +-
@@ -28,8 +28,6 @@ $ cobj= " h5repack_main, h5repack, h5repack_copy, h5repack_refs," +-
 
 $!                               
 $ ccc 'cobj 
-$ type sys$input
-       Creating h5repack
 $ link/exe=h5repack.exe -
            h5repack_main, h5repack, h5repack_copy, h5repack_refs, h5repack_filters, -
            h5repack_opttable, h5repack_parse, -
@@ -37,10 +35,11 @@ $ link/exe=h5repack.exe -
            [-.lib]libh5tools.olb/lib, -
            [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib 
 $ type sys$input
-	Created  h5repack
+       Finished  h5repack
+
 $
 $ type sys$input
-       Creating h5repacktst
+       Creating h5repacktst ...
 $ link/exe=h5repacktst.exe -
            h5repacktst,  -
            h5repack, h5repack_copy, h5repack_refs, h5repack_filters, -
@@ -50,6 +49,6 @@ $ link/exe=h5repacktst.exe -
            [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $
 $ type sys$input
-	Created  h5repacktst
+       Finished  h5repacktst
 $!
 $ exit

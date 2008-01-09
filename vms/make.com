@@ -32,6 +32,7 @@ $ copy [.tools.h5repack]*.com   [-.tools.h5repack]
 $ copy [.tools.h5import]*.com   [-.tools.h5import]
 $ copy [.tools.h5jam]*.com      [-.tools.h5jam]
 $ copy [.tools.lib]make.com     [-.tools.lib]
+$ copy [.tools.testfiles]*.ddl  [-.tools.testfiles]
 $!
 $! Define location of ZLIB library. If you do not have it on your system, download
 $! source code from http://www.zlib.net/, build and install on your system

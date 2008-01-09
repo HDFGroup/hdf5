@@ -18,6 +18,12 @@ $ ! This command file tests h5diff utility. The command file has to
 $ ! run in the [hdf5-top.tools.testfiles] directory.
 $ !
 $ !
+$ type sys$input
+
+===================================
+       Testing h5diff utiltity
+===================================
+
 $ ! Define h5diff symbol
 $ !
 $! set message/notext/nofacility/noidentification/noseverity
@@ -280,8 +286,8 @@ $TOOLTEST: SUBROUTINE
 $
 $ len =  F$LENGTH(P1)
 $ base = F$EXTRACT(0,len-2,P1)
-$ actual = base + "out"
-$ actual_err = base + "err"
+$ actual = base + "h5diffout"
+$ actual_err = base + "h5differr"
 $
 $ begin = "Testing h5diff "
 $ !
@@ -300,7 +306,7 @@ $ if F$SEARCH(actual_err) .NES. ""
 $ then
 $ set message/notext/nofacility/noidentification/noseverity
 $    append 'actual_err' 'actual'
-$ set message/ntext/facility/identification/severity
+$ set message/text/facility/identification/severity
 $ endif
 $ !
 $ ! Compare the results
@@ -334,8 +340,10 @@ $ append 'actual'        h5diff_output.txt
 $ !
 $ ! Delete temporary files
 $ !
-$! del *.out;*
-$! del *.dif;*
+$ if F$SEARCH("*.h5differr;*")   then del *.h5diffterr;*
+$ if F$SEARCH("*.h5diffout;*")   then del *.h5difftout;*
+$ if F$SEARCH("*.dif;*")   then del *.dif;*
+$ del *.dif;*
 $ !
 $ENDSUBROUTINE
 

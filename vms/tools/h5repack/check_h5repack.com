@@ -18,6 +18,12 @@ $ ! This command file tests h5repack utility. The command file has to
 $ ! run in the [hdf5-top.tools.testfiles] directory.
 $ !
 $ !
+$ type sys$input
+
+===================================
+       Testing h5repack utiltity
+===================================
+
 $ ! Define h5repack and h5diff symbols
 $ !
 $! set message/notext/nofacility/noidentification/noseverity
@@ -137,16 +143,17 @@ $ CALL TOOLTEST "-l dset_chunk:"""CONTI"""" h5repack_layout.h5
 $ CALL TOOLTEST "-l dset_chunk:"""CHUNK"""=18x13" h5repack_layout.h5
 $!
 $!
-$ del *_out.h5;*
-$ del *.out;*
-$! del *.err;*
+$ if F$SEARCH("*.h5repackerr;*")   then del *.h5repackerr;*
+$ if F$SEARCH("*.h5repackout;*")   then del *.h5repackout;*
+$ if F$SEARCH("*_out.h5;*")   then del *_out.h5;*
+$!
 $TOOLTEST: SUBROUTINE
 
 $ len =  F$LENGTH(P2)
 $ base = F$EXTRACT(0,len-3,P2)
 $ output_file = base + "_out.h5"
-$ output_err = base + ".err"
-$ output_out = base + ".out"
+$ output_err = base + ".h5repackerr"
+$ output_out = base + ".h5repackout"
 $
 $ begin = "Testing h5repack"
 $ !

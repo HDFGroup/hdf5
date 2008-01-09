@@ -17,6 +17,12 @@ $ ! This command file tests h5import utility. The command file has to
 $ ! run in the [hdf5-top.tools.h5import.testfiles] directory.
 $ !
 $ !
+$ type sys$input
+
+===================================
+       Testing h5import utiltity
+===================================
+
 $ ! Define symbols
 $ !
 $ current_dir = F$DIRECTRY()
@@ -98,10 +104,10 @@ $
 $ len =  F$LENGTH(P2)
 $ base = F$EXTRACT(0,len-3,P2)
 $ actual = base + "out.h5"
-$ actual_dump = base + "out.txt"
-$ actual_dump_err = base + "out.err"
-$ expected_dump = base + ".txt"
-$ expected_dump_err = base + ".err"
+$ actual_dump = base + "out.h5importtxt"
+$ actual_dump_err = base + "out.h5importerr"
+$ expected_dump = base + ".h5importtxt"
+$ expected_dump_err = base + ".h5importerr"
 $
 $ begin = "Testing"
 $ !
@@ -188,7 +194,8 @@ $ !
 $ ! Delete temporary files
 $ if F$SEARCH("*out.h5;*") then del *out.h5;*
 $ if F$SEARCH("*.dif;*")   then del *.dif;*
-$ if F$SEARCH("*.err;*")   then del *.err;*
+$ if F$SEARCH("*.h5importerr;*")   then del *.h5importerr;*
+$ if F$SEARCH("*.h5importtxt;*")   then del *.h5importtxt;*
 $ if F$SEARCH("b*.;*")     then del b*.;*
 $ if F$SEARCH("txti*.;*")    then del txti*.;*
 $ if F$SEARCH("txtu*.;*")    then del txtu*.;*
