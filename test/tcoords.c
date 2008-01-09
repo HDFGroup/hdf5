@@ -45,18 +45,35 @@ static void test_single_end(hid_t file)
     /* For testing the full selection in the fastest-growing end */
     int mem1_buffer[1][1][6][2];
     hsize_t mem1_dims[4] = { 1, 1, 6, 2 };
+#ifdef TMP
     hsize_t mem1_start[4] = { 0, 0, 0, 0 };
     hsize_t mem1_count[4] = { 1, 1, 1, 1 };
     hsize_t mem1_stride[4] = { 1, 1, 1, 1 };
     hsize_t mem1_block[4] = { 1, 1, 6, 2 };
+#else
+    hsize_t da_elmts1[12][4] = { {0, 0, 0, 0},
+                                 {0, 0, 0, 1},
+                                 {0, 0, 1, 0},
+                                 {0, 0, 1, 1},
+                                 {0, 0, 2, 0},
+                                 {0, 0, 2, 1},
+                                 {0, 0, 3, 0},
+                                 {0, 0, 3, 1},
+                                 {0, 0, 4, 0},
+                                 {0, 0, 4, 1},
+                                 {0, 0, 5, 0},
+                                 {0, 0, 5, 1} };
+#endif
 
     /* For testing the full selection in the slowest-growing end */
     int mem2_buffer[2][3][1][1];
     hsize_t mem2_dims[4] = { 2, 3, 1, 1 };
-    hsize_t mem2_start[4] = { 0, 0, 0, 0 };
-    hsize_t mem2_count[4] = { 1, 1, 1, 1 };
-    hsize_t mem2_stride[4] = { 1, 1, 1, 1 };
-    hsize_t mem2_block[4] = { 2, 3, 1, 1 };
+    hsize_t da_elmts2[6][4] = { {0, 0, 0, 0},
+                                {0, 1, 0, 0},
+                                {0, 2, 0, 0},
+                                {1, 0, 0, 0},
+                                {1, 1, 0, 0},
+                                {1, 2, 0, 0} };
 
     /* For testing the full selection in the middle dimensions */
     int mem3_buffer[1][3][6][1];
@@ -101,8 +118,13 @@ static void test_single_end(hid_t file)
     CHECK(did, FAIL, "H5Dopen");
 
     /* Select the elements in the dataset */
+#ifdef TMP
     ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, mem1_start, mem1_stride, mem1_count, mem1_block);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
+#else
+    ret = H5Sselect_elements(sid, H5S_SELECT_SET, (const size_t)12, (const hsize_t**)da_elmts1);
+    CHECK(ret, FAIL, "H5Sselect_elements");
+#endif
 
     msid = H5Screate_simple(4, mem1_dims, mem1_dims);
     CHECK(msid, FAIL, "H5Screate_simple");
@@ -131,8 +153,8 @@ static void test_single_end(hid_t file)
     CHECK(did, FAIL, "H5Dopen");
 
     /* Select the elements in the dataset */
-    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, mem2_start, mem2_stride, mem2_count, mem2_block);
-    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+    ret = H5Sselect_elements(sid, H5S_SELECT_SET, (const size_t)6, (const hsize_t**)da_elmts2);
+    CHECK(ret, FAIL, "H5Sselect_elements");
 
     msid = H5Screate_simple(4, mem2_dims, mem2_dims);
     CHECK(msid, FAIL, "H5Screate_simple");
