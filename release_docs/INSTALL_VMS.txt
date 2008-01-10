@@ -1,7 +1,6 @@
 		Building and installation instructions for Alpha Open VMS
-			This file is under construction
-				EIP June 1, 2006
-
+                                  HDF5 1.8.0 release
+                                     January 2008
    
 
 
@@ -9,83 +8,68 @@
 		--------
                 
 		1. Obtaining HDF5
-		2. Building C, Fortran and C++ libraries
-		3. Testing HDF5 libraries and tools
-		4. Installing HDF5 libraries
-		5. Known problems
+		2. Building and testing HDF5 C, Fortran and C++ libraries,
+                   and utilties
+		3. Installing HDF5 libraries
+		4. Known problems
 
 
 	1.Obtaining HDF5
+
 	  Please see INSTALL file in this directory for downloading instructions.
 
-	2. Building C, Fortran and C++ libraries
+	2. Building and testing HDF5 C, Fortran and C++ libraries and utilties.
 
-           IMPORTANT: This version REQUIRES GNU ZLIB librarary to be installed
+           IMPORTANT: This version REQUIRES GNU ZLIB library to be installed
                       on a system. You may download the source code from
                       http://www.zlib.net/
 
 	 -  Use tar command to untar HDF5 source ball
 
-		tar -xvf hdf5-1.8.0-<pre>.tar
+		tar -xvf hdf5-1.8.0.tar
 
-	 -  Change default directory to [.hdf5-1.8.0-<pre>.vms]
-         -  Modify make.com file to point to the installed ZLIB library.
-         -  Run 
-		@make
-           command. This command file will build 
+	 -  Change default directory to [.hdf5-1.8.0.vms]
+         -  Edit make.com:
+         	specify path to ZLIB library
+        	if necessary, modify compilation flags 
+	    Do NOT REMOVE /define=H5_VMS and /standard=strict_ansi qualifiers.
+         -  Run build.com command file 
+		@build
+            We recommend to use batch queue to build and test this distribution. 
+            The command file runs make.com and builds 
 			C library, tests, and utilities	
 			Fortran library and tests
 			C++ library and tests
-			C, Fortran and C++ examples
+            It also runs test scripts to test C, Fortran and C++ libraries, and
+	    h5dump, h5diff, h5ls, h5repack and h5import utilties.
 
-	   IMPORTANT: Compilations flags are defined in the [.vms]make.com file of the
-	   source tree. It is set up to use /float=float_ieee qualifier for C, Fortran 
-	   and C++ compilersi, and debug mode. If desired, those flags can be removed.
-	   Do NOT REMOVE /define=H5_VMS and /standard=strict_ansi qualifiers.
-	   If you have to use make.com file in a particular directory, make sure that
-	   you modify the compilation flags in this file appropriately.
+	3. Installing HDF5 libraries
 
-	   If  make.com succeeds, the following libraries and utilties will be built:
+	   Modify install.com file to specify installation directory and run
+	       @install
+           to install HDF5 C, Fortran, and C++ libraries, and utilities.
+           The script will create the directories shown below in the
+           installation directory:
 
-	   [.src]hdf5.olb
-	   [.fortran.src]hdf5_fortran.olb
-	   [.c__.src]hdf5_cplus.olb
-	   [.tools.h5diff]h5diff.exe
-	   [.tools.h5dump]h5dump.exe
-	   [.tools.h5import]h5import.exe
-	   [.tools.h5jam]h5jam.exe
-	   [.tools.h5jam]h5unjam.exe
-	   [.tools.h5ls]h5ls.exe
-	   [.tools.h5repack]h5repack.exe
+           [.HDF5]...
+           [.HDF5.INCLUDE]
+           [.HDF5.LIB]
+           [.HDF5.BIN]
+           [.HDF5.EXAMPLES]
+           [.HDF5.EXAMPLES.C]
+           [.HDF5.EXAMPLES.F90]
+           [.HDF5.EXAMPLES.CXX]
 
-	3. Testing HDF5 libraries and tools
-	   You may try to run check.com files in the following directories
+           [.HDF5.EXAMPLES.*] directories contain make.com and check.com files 
+           to build examples against the installed libraries and to verify 
+           the installation.
 
-	   [.test]
-	   [.fortran.test]
-	   [.c__.test]
-	   [.examples]
-	   [.fortran.examples]
-	   [.c__.examples]
-
-	4. Installing HDF5 libraries
-	   Currently one has to manually copy *.olb, public *.h (all header
-           files that do not have "private" in file name) iheader files and 
-           Fortran modules files from 
-           [.src], [.fortran.src] and [.c__.src] directories
-
-	5. Known problems
+	3. Known problems
 
 	   - dsets test fails for test_scleoffset_double and
 	     test_scleoffset_double_2 tests when G_FLOAT double is used
-                                                          06/01/2006 EIP 
            - There is no support for szip compression filter.
-	   - There are few C and Fortran tests that fail (C mtime,  Fortran file_close and
-              multifile driver tests, probably more; all major tests succeed).
-	   - Mulitifile driver has not been tested yet.
-	   - Test scripts for some tools are missing; existing tools test scripts
-	      do not compare output with the expected output.
-           - Probably more :-)
+	   - Fortran multifile driver test fails; similar C test passes.
 
 
-	For help contact hdfhelp@hdf.ncsa.uiuc.edu or help@hdfgroup.org
+	For help contact help@hdfgroup.org
