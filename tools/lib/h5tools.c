@@ -30,6 +30,7 @@
 #include "h5tools_utils.h"
 #include "H5private.h"
 
+#define SANITY_CHECK
 
 #define ALIGN(A,Z)  ((((A) + (Z) - 1) / (Z)) * (Z))
 
@@ -760,8 +761,14 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
     hsize_t           temp_start[H5S_MAX_RANK];/* temporary start inside offset count loop */
     hsize_t           max_start[H5S_MAX_RANK]; /* maximum start inside offset count loop */
     hsize_t           temp_count[H5S_MAX_RANK];/* temporary count inside offset count loop  */
+    hsize_t           temp_block[H5S_MAX_RANK];/* temporary block size used in loop  */
+    int               reset_dim;
 
-    int reset_dim;
+#if defined (SANITY_CHECK)
+    hsize_t total_points = 1; /* to print */
+    hsize_t printed_points = 0; /* printed */
+#endif
+    
 
     ret = FAIL;     /* be pessimistic */
     f_space = H5Dget_space(dset);
@@ -804,12 +811,22 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
     if(ctx.ndims>0)
         init_acc_pos(&ctx,total_size);
 
+    /* calculate total number of points to print */
+#if defined (SANITY_CHECK)
+    for (i = 0; i < (size_t)ctx.ndims; i++)
+    {
+        total_points *= sset->count[ i ] * sset->block[ i ];;
+    }
+#endif
+    
+
 
     /* initialize temporary start, count and maximum start */
     for (i = 0; i < (size_t)ctx.ndims; i++)
     {
         temp_start[ i ] = sset->start[ i ];
         temp_count[ i ] = sset->count[ i ];
+        temp_block[ i ] = 1; /* block size is considered in temp_count later */
         max_start[ i ] = 0;
 
     }
@@ -831,8 +848,24 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
         /* number of read iterations in inner loop, read by rows, to match 2D display */
         if (ctx.ndims > 1)
         {
+
+#if 0
             count = sset->count[ row_dim ];
-            temp_count[ row_dim ] = 1;
+            temp_count[ row_dim ] = 1; 
+#else
+
+          
+            /* count is the number of iterations to display all the rows 
+               consider how many blocks */
+            count = sset->count[ row_dim ] * sset->block[ row_dim ];
+
+            temp_count[ row_dim ] = 1; /* always 1 row at a time */ 
+            /* but consider the block size in temp_count */
+            temp_count[ row_dim + 1 ] = sset->count[ row_dim + 1 ] 
+                                        * sset->block[ row_dim + 1 ]; 
+
+
+#endif
         }
         /* for the 1D case */
         else
@@ -850,7 +883,8 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
                 temp_start,
                 sset->stride,
                 temp_count,
-                sset->block);
+                /*sset->block);*/
+                temp_block);
             sm_nelmts = H5Sget_select_npoints(f_space);
              
             if (sm_nelmts == 0) {
@@ -920,6 +954,13 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
                 ctx.need_prefix = 1;
                 
                 ctx.continuation++;
+                
+                
+#if defined (SANITY_CHECK)
+                printed_points += sm_nelmts;
+#endif
+
+
         } /* count */
 
         if (ctx.ndims > 2)
@@ -950,6 +991,11 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
         } /* ctx.ndims > 1 */
         
     } /* outer_count */
+
+#if defined (SANITY_CHECK)
+    assert( printed_points == total_points );
+#endif
+
 
     /* Terminate the output */
     if (ctx.cur_column) {
