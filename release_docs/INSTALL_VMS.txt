@@ -26,9 +26,9 @@
 
 	 -  Use tar command to untar HDF5 source ball
 
-		tar -xvf hdf5-1.8.0.tar
+		tar -xvf <source>.tar
 
-	 -  Change default directory to [.hdf5-1.8.0.vms]
+	 -  Change default directory to [.<source>.vms]
          -  Edit make.com:
          	specify path to ZLIB library
         	if necessary, modify compilation flags 
