@@ -27,6 +27,8 @@
 
 #include "testhdf5.h"
 
+#define FILENAME   "coord.h5"
+
 /***********************************************************
 **
 ** test_single_end(): Test full hyperslab selection of only 
@@ -473,7 +475,7 @@ void test_coords(void)
     hid_t fid;
     herr_t ret;                 /* Generic error return */
 
-    fid = H5Fcreate("coord.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
 
     test_single_end(fid);
@@ -501,5 +503,5 @@ void test_coords(void)
 void
 cleanup_coords(void)
 {
-    remove("coord.h5");
+    remove(FILENAME);
 }
