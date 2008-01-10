@@ -1393,6 +1393,7 @@
 ./test/tattr.c
 ./test/tbogus.h5
 ./test/tconfig.c
+./test/tcoords.c
 ./test/testframe.c
 ./test/testhdf5.c
 ./test/testhdf5.h
