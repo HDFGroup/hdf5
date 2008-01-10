@@ -33,16 +33,11 @@ $ temp = F$EXTRACT(0, len-10, current_dir)
 $ h5diff_dir = temp + "H5DIFF]"
 $ h5diff :== $sys$disk:'h5diff_dir'h5diff.exe
 $ !
-$ ! Define output for diff command that compares expected and actual
-$ ! outputs of h5diff
-$ !
-$ create h5diff.log
-$ create h5diff_output.txt
+
 $ !
 $ ! h5diff tests
 $ !
 $
-
 $!# 1.0
 $ CALL TOOLTEST h5diff_10.txt "-h"
 $!
@@ -142,7 +137,7 @@ $!
 $!# 5.7
 $ CALL TOOLTEST h5diff_57.txt "-v h5diff_dtypes.h5 h5diff_dtypes.h5 dset7a dset7b"
 $!
-$#! 5.8 (region reference)
+$!# 5.8 (region reference)
 $ CALL TOOLTEST h5diff_58.txt "-v h5diff_dset1.h5 h5diff_dset2.h5 refreg"
 $!
 $!# ##############################################################################
@@ -285,7 +280,7 @@ $!
 $TOOLTEST: SUBROUTINE
 $
 $ len =  F$LENGTH(P1)
-$ base = F$EXTRACT(0,len-2,P1)
+$ base = F$EXTRACT(0,len-3,P1)
 $ actual = base + "h5diffout"
 $ actual_err = base + "h5differr"
 $
@@ -335,15 +330,17 @@ $  write sys$output line
 $ ! 
 $ ! Append the result to the log file 
 $ !
-$ append h5diff_temp.dif h5diff.log
-$ append 'actual'        h5diff_output.txt
+$ append/new_version h5diff_temp.dif h5diff.log
+$ append/new_version 'actual'        h5diff_output.txt
 $ !
 $ ! Delete temporary files
 $ !
-$ if F$SEARCH("*.h5differr;*")   then del *.h5diffterr;*
-$ if F$SEARCH("*.h5diffout;*")   then del *.h5difftout;*
-$ if F$SEARCH("*.dif;*")   then del *.dif;*
-$ del *.dif;*
+$ if F$SEARCH(actual_err)  .NES. ""
+$ then
+$  del *.h5differr;*
+$ endif
+$  del *.h5diffout;*
+$  del h5diff_temp.dif;*
 $ !
 $ENDSUBROUTINE
 

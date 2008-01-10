@@ -33,12 +33,6 @@ $ temp = F$EXTRACT(0, len-10, current_dir)
 $ h5dump_dir = temp + "H5DUMP]"
 $ h5dump :== $sys$disk:'h5dump_dir'h5dump.exe
 $ !
-$ ! Define output for diff command that compares expected and actual
-$ ! outputs of h5dump
-$ !
-$ create h5dump.log
-$ create h5dump_output.txt
-$ !
 $ ! h5dump tests
 $ !
 $
@@ -48,7 +42,6 @@ $ ! Test for displaying groups
 $ CALL TOOLTEST tgroup-1.ddl "tgroup.h5"
 $ ! Test for displaying the selected groups
 $ CALL TOOLTEST tgroup-2.ddl "--group=/g2 --group / -g /y tgroup.h5"
-$
 $ ! Test for displaying simple space datasets
 $ CALL TOOLTEST tdset-1.ddl "tdset.h5"
 $ ! Test for displaying selected datasets
@@ -237,6 +230,7 @@ $ begin = "Testing h5dump "
 $ !
 $ ! Run the test and save output in the 'actual' file
 $ !
+$ 
 $ define/nolog sys$output 'actual'
 $ define/nolog sys$error  'actual_err'
 $ write  sys$output "#############################"
@@ -279,14 +273,17 @@ $  write sys$output line
 $ ! 
 $ ! Append the result to the log file 
 $ !
-$ append h5dump_temp.dif h5dump.log
-$ append 'actual'        h5dump_output.txt
+$ append/new_version h5dump_temp.dif h5dump.log
+$ append/new_version 'actual'        h5dump_output.txt
 $ !
 $ ! Delete temporary files
 $ !
-$ if F$SEARCH("*.h5dumpout;*")   then del *.h5dumpout;*
-$ if F$SEARCH("*.h5dumperr;*")   then del *.h5dumperr;*
-$ if F$SEARCH("*.dif;*")   then del *.dif;*
+$ if F$SEARCH(actual_err) .NES. ""
+$ then
+$  del *.h5dumperr;*
+$ endif
+$  del *.h5dumpout;*
+$  del h5dump_temp.dif;*
 $ !
 $ENDSUBROUTINE
 $
@@ -340,14 +337,17 @@ $  write sys$output line
 $ ! 
 $ ! Append the result to the log file 
 $ !
-$ append h5dump_temp.dif h5dump.log
-$ append 'actual'        h5dump_output.txt
+$ append/new_version h5dump_temp.dif h5dump.log
+$ append/new_version 'actual'        h5dump_output.txt
 $ !
 $ ! Delete temporary files
 $ !
-$ if F$SEARCH("*.h5dumpout;*")   then del *.h5dumpout;*
-$ if F$SEARCH("*.h5dumperr;*")   then del *.h5dumperr;*
-$ if F$SEARCH("*.dif;*")   then del *.dif;*
+$ if F$SEARCH(actual_err) .NES. ""
+$ then
+$  del *.h5dumperr;*
+$ endif
+$  del *.h5dumpout;*
+$  del h5dump_temp.dif;*
 $ !
 $ENDSUBROUTINE
 

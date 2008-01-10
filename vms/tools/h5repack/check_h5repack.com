@@ -143,9 +143,6 @@ $ CALL TOOLTEST "-l dset_chunk:"""CONTI"""" h5repack_layout.h5
 $ CALL TOOLTEST "-l dset_chunk:"""CHUNK"""=18x13" h5repack_layout.h5
 $!
 $!
-$ if F$SEARCH("*.h5repackerr;*")   then del *.h5repackerr;*
-$ if F$SEARCH("*.h5repackout;*")   then del *.h5repackout;*
-$ if F$SEARCH("*_out.h5;*")   then del *_out.h5;*
 $!
 $TOOLTEST: SUBROUTINE
 
@@ -182,6 +179,15 @@ $ !
 $  write sys$output line
 $ ! 
 $ !
+$ !
+$ ! Cleanup temporary files
+$ !
+$ if F$SEARCH(output_err) .NES. ""
+$ then 
+$  del *.h5repackerr;*
+$ endif 
+$  del *.h5repackout;*
+$  del  *_out.h5;*
 $ENDSUBROUTINE
 
 

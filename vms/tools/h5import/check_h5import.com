@@ -25,6 +25,7 @@ $ type sys$input
 
 $ ! Define symbols
 $ !
+$ 
 $ current_dir = F$DIRECTRY()
 $ len = F$LENGTH(current_dir)
 $ temp = F$EXTRACT(0, len-19, current_dir)
@@ -71,7 +72,7 @@ $ CALL TOOLTEST  "fp1. -c textfp32. -o" test6.h5
 $ !
 $ type sys$input 
                Testing ASCII F64 - rank 3 - Output BE + CHUNKED+Extended+Compressed 
-$ CALL TOOLTEST  "fp2. -c textfp64. -o" test7.h5
+$ CALL TOOLTEST  "fp2. -c textfp64. -o" tes7.h5
 $ !
 $ type sys$input 
                Testing BINARY F64 - rank 3 - Output LE+CHUNKED+Extended+Compressed 
@@ -86,7 +87,8 @@ $ type sys$input
 $ CALL TOOLTEST  "bin8. -c conbin8.  -o" test10.h5
 $ !
 $ type sys$input 
-               Testing BINARY I32 - rank 3 - Output BE + CHUNKED 
+           
+   Testing BINARY I32 - rank 3 - Output BE + CHUNKED 
 $ CALL TOOLTEST  "bin32. -c conbin32. -o" test11.h5
 $ !
 $ type sys$input 
@@ -98,12 +100,19 @@ $ type sys$input
 $ CALL TOOLTEST  "buin32. -c conbuin32. -o" test13.h5
 $
 $
+$ ! Delete temporary files
+$ del *_out.h5;*
+$ del *.h5importtxt;*
+$ del b*.;*
+$ del txti*.;*
+$ del *.dif;*
+$ !
 $ 
 $TOOLTEST: SUBROUTINE
 $
 $ len =  F$LENGTH(P2)
 $ base = F$EXTRACT(0,len-3,P2)
-$ actual = base + "out.h5"
+$ actual = base + "_out.h5"
 $ actual_dump = base + "out.h5importtxt"
 $ actual_dump_err = base + "out.h5importerr"
 $ expected_dump = base + ".h5importtxt"
@@ -118,7 +127,7 @@ $ h5import 'P1 'actual'
 $ define/nolog sys$output 'actual_dump'
 $ define/nolog sys$error  'actual_dump_err'
 $ !
-$ ! Dump the actual and expected files
+$ ! Dump the atual and expected files
 $ !
 $ h5dump 'actual'
 $ deassign sys$output
@@ -136,7 +145,7 @@ $ deassign sys$output
 $ deassign sys$error
 $ if F$SEARCH(expected_dump_err) .NES. ""
 $ then
-$ set message/notext/nofacility/noidentification/noseverity
+$ set message/notex/nofacility/noidentification/noseverity
 $    append 'expected_dump_err' 'expected_dump'
 $ set message/ntext/facility/identification/severity
 $ endif
@@ -191,16 +200,16 @@ $ ! Append the result to the log file
 $ !
 $ append h5dump_temp.dif h5import.log
 $ !
+$ !
+$ !
 $ ! Delete temporary files
-$ if F$SEARCH("*out.h5;*") then del *out.h5;*
-$ if F$SEARCH("*.dif;*")   then del *.dif;*
-$ if F$SEARCH("*.h5importerr;*")   then del *.h5importerr;*
-$ if F$SEARCH("*.h5importtxt;*")   then del *.h5importtxt;*
-$ if F$SEARCH("b*.;*")     then del b*.;*
-$ if F$SEARCH("txti*.;*")    then del txti*.;*
-$ if F$SEARCH("txtu*.;*")    then del txtu*.;*
-$ if F$SEARCH("*.dat;*")   then del *.dat;*
 $ !
-$ !
+$ if F$SEARCH(actual_dump_err) .NES. ""
+$ then
+$  del *out.h5importerr;*
+$ endif
+$ if F$SEARCH(expected_dump_err) .NES. ""
+$ then
+$  del *.h5importerr;*
+$ endif
 $ENDSUBROUTINE
-
