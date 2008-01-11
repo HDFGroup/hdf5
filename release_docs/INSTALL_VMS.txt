@@ -9,7 +9,7 @@
                 
 		1. Obtaining HDF5
 		2. Building and testing HDF5 C, Fortran and C++ libraries,
-                   and utilties
+                   and utilities
 		3. Installing HDF5 libraries
 		4. Known problems
 
@@ -18,7 +18,7 @@
 
 	  Please see INSTALL file in this directory for downloading instructions.
 
-	2. Building and testing HDF5 C, Fortran and C++ libraries and utilties.
+	2. Building and testing HDF5 C, Fortran and C++ libraries and utilities.
 
            IMPORTANT: This version REQUIRES GNU ZLIB library to be installed
                       on a system. You may download the source code from
@@ -29,20 +29,20 @@
 		tar -xvf <source>.tar
 
 	 -  Change default directory to [.<source>.vms]
-         -  Secify HDF5 source top directory in the build.com file
+         -  Specify top HDF5 source directory in the build.com file
          -  Edit make.com:
          	specify path to ZLIB library
         	if necessary, modify compilation flags 
 	    Do NOT REMOVE /define=H5_VMS and /standard=strict_ansi qualifiers.
          -  Run build.com command file 
 		@build
-            We recommend to use batch queue to build and test this distribution. 
+            We recommend using batch queue to build and test this distribution. 
             The command file runs make.com and builds 
 			C library, tests, and utilities	
 			Fortran library and tests
 			C++ library and tests
             It also runs test scripts to test C, Fortran and C++ libraries, and
-	    h5dump, h5diff, h5ls, h5repack and h5import utilties.
+	    h5dump, h5diff, h5ls, h5repack and h5import utilities.
 
 	3. Installing HDF5 libraries
 
@@ -74,3 +74,4 @@
 
 
 	For help contact help@hdfgroup.org
+
