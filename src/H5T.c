@@ -5510,9 +5510,16 @@ H5T_dtype_is_valid(H5T_t *dtype, H5T_t *new_type)
         } 
             break;          
         case H5T_REFERENCE:
+        {
+            H5T_t *type_ref, *region_ref;
+
             if(new_class != H5T_REFERENCE)
-	        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "new type must be a compound type")
-                
+	        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "new type must be a reference type")
+
+            if(dtype->shared->u.atomic.u.r.rtype != new_type->shared->u.atomic.u.r.rtype)
+	        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "new type must be the same reference type as the original one")
+        }
+    
             break;
         case H5T_ENUM: 
         {

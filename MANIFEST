@@ -709,6 +709,7 @@
 ./src/H5WBprivate.h
 ./src/H5Z.c
 ./src/H5Zdeflate.c
+./src/H5Zdtype_modify.c
 ./src/H5Zfletcher32.c
 ./src/H5Znbit.c
 ./src/H5Zpkg.h

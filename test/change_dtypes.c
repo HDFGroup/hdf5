@@ -42,6 +42,7 @@ const char *DSET_NAME[] = {
     "opaque",
     "enum",
     "array",
+    "reference",
     NULL
 };
 
@@ -698,6 +699,59 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_reference
+ *
+ * Purpose:	Creates a simple dataset of a reference type and tries to 
+ *              change the datatype.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Raymond Lu
+ *              19 November 2007 
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_reference(hid_t file)
+{
+    hid_t               dset;
+    hid_t               space;
+    /*hid_t               type;*/
+    hsize_t             dims[1] = {1};
+    herr_t              ret;
+
+    if((space=H5Screate_simple(1, dims, NULL)) < 0)
+        TEST_ERROR;
+
+    if((dset=H5Dcreate2(file, DSET_NAME[9], H5T_STD_REF_OBJ, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    H5E_BEGIN_TRY {
+        ret = H5Dmodify_dtype(dset, H5T_STD_REF_DSETREG);
+    } H5E_END_TRY;
+
+    if(ret > 0)
+        TEST_ERROR;
+
+    if(H5Dclose(dset) < 0)
+        TEST_ERROR;
+  
+    PASSED();
+    return 0;
+
+error:
+    H5_FAILED();
+    H5E_BEGIN_TRY {
+        H5Sclose(space);
+        H5Dclose(dset);
+    } H5E_END_TRY;
+    return 1;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Test H5Dmodify_dtype for different kinds of datatypes.
@@ -747,6 +801,9 @@ int main(void)
 
     TESTING("dataset of array type:");
     nerrors += test_array(fid);
+
+    TESTING("dataset of reference type:");
+    nerrors += test_reference(fid);
 
     if(H5Fclose(fid) < 0)
 	nerrors++;
