@@ -74,7 +74,7 @@ CLEAN=$(TIMINGS)
 TEST_SRC=big.c bittests.c cache.c cmpd_dset.c dsets.c dtypes.c extend.c      \
     external.c fillval.c flush1.c flush2.c gheap.c h5test.c hyperslab.c      \
     istore.c lheap.c links.c mount.c mtime.c ohdr.c stab.c tarray.c          \
-    tattr.c tconfig.c testhdf5.c testmeta.c tfile.c                          \
+    tattr.c tconfig.c tcoords.c testhdf5.c testmeta.c tfile.c                \
     tgenprop.c th5s.c theap.c titerate.c tmeta.c tmisc.c trefer.c trefstr.c  \
     tselect.c tskiplist.c ttime.c ttst.c tvltypes.c tvlstr.c                 \
     unlink.c enum.c ttsafe.c ttsafe_dcreate.c ttsafe_error.c                 \

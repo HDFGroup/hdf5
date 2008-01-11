@@ -100,7 +100,7 @@ static void test_single_end(hid_t file)
         }
     }
 
-    ret = H5Dwrite(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, da_buffer);
+    ret = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, da_buffer);
     CHECK(ret, FAIL, "H5Dwrite");
 
     ret = H5Dclose(did);
@@ -286,7 +286,7 @@ static void test_multiple_ends(hid_t file)
                                 da_buffer[i][j][k][l][m][n][p][1] = i*1000000 + j*100000 + k*10000 + l*1000 + m*100 + n*10 + p + 1;
                             }
 
-    ret = H5Dwrite(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, da_buffer);
+    ret = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, da_buffer);
     CHECK(ret, FAIL, "H5Dwrite");
 
     ret = H5Dclose(did);
