@@ -29,6 +29,7 @@
 		tar -xvf <source>.tar
 
 	 -  Change default directory to [.<source>.vms]
+         -  Secify HDF5 source top directory in the build.com file
          -  Edit make.com:
          	specify path to ZLIB library
         	if necessary, modify compilation flags 
