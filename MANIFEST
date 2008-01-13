@@ -1391,6 +1391,7 @@
 ./test/tarray.c
 ./test/tarrold.h5
 ./test/tattr.c
+./test/tbad_msg_count.h5
 ./test/tbogus.h5
 ./test/tconfig.c
 ./test/tcoords.c

@@ -505,6 +505,9 @@
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
+/* Define if strict file format checks are enabled */
+#undef STRICT_FORMAT_CHECKS
+
 /* Define if your system supports pthread_attr_setscope(&attribute,
    PTHREAD_SCOPE_SYSTEM) call. */
 #undef SYSTEM_SCOPE_THREADS

@@ -2175,7 +2175,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5O_alloc_msgs(H5O_t *oh, size_t min_alloc)
 {
     size_t old_alloc;                   /* Old number of messages allocated */
@@ -2183,7 +2183,7 @@ H5O_alloc_msgs(H5O_t *oh, size_t min_alloc)
     H5O_mesg_t *new_mesg;               /* Pointer to new message array */
     herr_t ret_value = SUCCEED; 	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_alloc_msgs)
+    FUNC_ENTER_NOAPI(H5O_alloc_msgs, FAIL)
         
     /* check args */
     HDassert(oh);

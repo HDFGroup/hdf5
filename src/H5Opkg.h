@@ -204,6 +204,7 @@ H5_DLL herr_t H5O_free_mesg(H5O_mesg_t *mesg);
 H5_DLL void * H5O_read_real(const H5G_entry_t *ent, const H5O_msg_class_t *type,
         int sequence, void *mesg, hid_t dxpl_id);
 H5_DLL void * H5O_free_real(const H5O_msg_class_t *type, void *mesg);
+H5_DLL herr_t H5O_alloc_msgs(H5O_t *oh, size_t min_alloc);
 
 /* Shared object operators */
 H5_DLL void * H5O_shared_read(H5F_t *f, hid_t dxpl_id, H5O_shared_t *shared,
