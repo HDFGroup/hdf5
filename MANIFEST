@@ -760,6 +760,7 @@
 ./test/fillval.c
 ./test/flush1.c
 ./test/flush2.c
+./test/gen_bad_ohdr.c                   _DO_NOT_DISTRIBUTE_
 ./test/gen_bogus.c                      _DO_NOT_DISTRIBUTE_
 ./test/gen_cross.c                      _DO_NOT_DISTRIBUTE_
 ./test/gen_deflate.c			_DO_NOT_DISTRIBUTE_
@@ -803,6 +804,7 @@
 ./test/tarray.c
 ./test/tarrold.h5
 ./test/tattr.c
+./test/tbad_msg_count.h5
 ./test/tbogus.h5
 ./test/tchecksum.c
 ./test/tconfig.c

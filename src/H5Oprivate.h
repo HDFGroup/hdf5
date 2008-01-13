@@ -91,6 +91,10 @@ typedef struct H5O_t H5O_t;
 #define H5O_BOGUS_MSG_FLAGS_NAME        "bogus msg flags"       /* Flags for 'bogus' message */
 #define H5O_BOGUS_MSG_FLAGS_SIZE        sizeof(uint8_t)
 #endif /* H5O_ENABLE_BOGUS */
+#ifdef H5O_ENABLE_BAD_MESG_COUNT
+#define H5O_BAD_MESG_COUNT_NAME         "bad message count"       /* Flag setting bad message count */
+#define H5O_BAD_MESG_COUNT_SIZE         sizeof(hbool_t)
+#endif /* H5O_ENABLE_BAD_MESG_COUNT */
 
 /* ========= Object Copy properties ============ */
 #define H5O_CPY_OPTION_NAME 		"copy object"           /* Copy options */

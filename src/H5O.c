@@ -1077,6 +1077,14 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
         oh->version = H5O_VERSION_1;
     oh->sizeof_size = H5F_SIZEOF_SIZE(f);
     oh->sizeof_addr = H5F_SIZEOF_ADDR(f);
+#ifdef H5O_ENABLE_BAD_MESG_COUNT
+    /* Check whether the "bad message count" property is set */
+    if(H5P_exist_plist(oc_plist, H5O_BAD_MESG_COUNT_NAME) > 0) {
+        /* Retrieve bad message count flag */
+        if(H5P_get(oc_plist, H5O_BAD_MESG_COUNT_NAME, &oh->store_bad_mesg_count) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get bad message count flag")
+    } /* end if */
+#endif /* H5O_ENABLE_BAD_MESG_COUNT */
 
     /* Set initial status flags */
     oh->flags = oh_flags;

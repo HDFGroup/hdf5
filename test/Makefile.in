@@ -81,8 +81,8 @@ am__EXEEXT_1 = testhdf5$(EXEEXT) lheap$(EXEEXT) ohdr$(EXEEXT) \
 	vfd$(EXEEXT) ntypes$(EXEEXT) dangle$(EXEEXT) \
 	dtransform$(EXEEXT) reserved$(EXEEXT) cross_read$(EXEEXT) \
 	btree2$(EXEEXT) fheap$(EXEEXT)
-am__EXEEXT_2 = gen_bogus$(EXEEXT) gen_cross$(EXEEXT) \
-	gen_deflate$(EXEEXT) gen_filters$(EXEEXT) \
+am__EXEEXT_2 = gen_bad_ohdr$(EXEEXT) gen_bogus$(EXEEXT) \
+	gen_cross$(EXEEXT) gen_deflate$(EXEEXT) gen_filters$(EXEEXT) \
 	gen_new_array$(EXEEXT) gen_new_fill$(EXEEXT) \
 	gen_new_group$(EXEEXT) gen_new_mtime$(EXEEXT) \
 	gen_new_super$(EXEEXT) gen_noencoder$(EXEEXT) \
@@ -173,6 +173,10 @@ flush2_SOURCES = flush2.c
 flush2_OBJECTS = flush2.$(OBJEXT)
 flush2_LDADD = $(LDADD)
 flush2_DEPENDENCIES = libh5test.la $(LIBHDF5)
+gen_bad_ohdr_SOURCES = gen_bad_ohdr.c
+gen_bad_ohdr_OBJECTS = gen_bad_ohdr.$(OBJEXT)
+gen_bad_ohdr_LDADD = $(LDADD)
+gen_bad_ohdr_DEPENDENCIES = libh5test.la $(LIBHDF5)
 gen_bogus_SOURCES = gen_bogus.c
 gen_bogus_OBJECTS = gen_bogus.$(OBJEXT)
 gen_bogus_LDADD = $(LDADD)
@@ -331,24 +335,26 @@ SOURCES = $(libh5test_la_SOURCES) big.c bittests.c btree2.c cache.c \
 	cache_api.c cmpd_dset.c cross_read.c dangle.c dsets.c \
 	dt_arith.c dtransform.c dtypes.c enum.c err_compat.c \
 	error_test.c extend.c external.c fheap.c fillval.c flush1.c \
-	flush2.c gen_bogus.c gen_cross.c gen_deflate.c gen_filters.c \
-	gen_new_array.c gen_new_fill.c gen_new_group.c gen_new_mtime.c \
-	gen_new_super.c gen_noencoder.c gen_nullspace.c gen_udlinks.c \
-	getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c \
-	mtime.c ntypes.c objcopy.c ohdr.c pool.c reserved.c \
-	set_extent.c space_overflow.c stab.c $(testhdf5_SOURCES) \
-	testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
+	flush2.c gen_bad_ohdr.c gen_bogus.c gen_cross.c gen_deflate.c \
+	gen_filters.c gen_new_array.c gen_new_fill.c gen_new_group.c \
+	gen_new_mtime.c gen_new_super.c gen_noencoder.c \
+	gen_nullspace.c gen_udlinks.c getname.c gheap.c hyperslab.c \
+	istore.c lheap.c links.c mount.c mtime.c ntypes.c objcopy.c \
+	ohdr.c pool.c reserved.c set_extent.c space_overflow.c stab.c \
+	$(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c \
+	vfd.c
 DIST_SOURCES = $(libh5test_la_SOURCES) big.c bittests.c btree2.c \
 	cache.c cache_api.c cmpd_dset.c cross_read.c dangle.c dsets.c \
 	dt_arith.c dtransform.c dtypes.c enum.c err_compat.c \
 	error_test.c extend.c external.c fheap.c fillval.c flush1.c \
-	flush2.c gen_bogus.c gen_cross.c gen_deflate.c gen_filters.c \
-	gen_new_array.c gen_new_fill.c gen_new_group.c gen_new_mtime.c \
-	gen_new_super.c gen_noencoder.c gen_nullspace.c gen_udlinks.c \
-	getname.c gheap.c hyperslab.c istore.c lheap.c links.c mount.c \
-	mtime.c ntypes.c objcopy.c ohdr.c pool.c reserved.c \
-	set_extent.c space_overflow.c stab.c $(testhdf5_SOURCES) \
-	testmeta.c $(ttsafe_SOURCES) unlink.c vfd.c
+	flush2.c gen_bad_ohdr.c gen_bogus.c gen_cross.c gen_deflate.c \
+	gen_filters.c gen_new_array.c gen_new_fill.c gen_new_group.c \
+	gen_new_mtime.c gen_new_super.c gen_noencoder.c \
+	gen_nullspace.c gen_udlinks.c getname.c gheap.c hyperslab.c \
+	istore.c lheap.c links.c mount.c mtime.c ntypes.c objcopy.c \
+	ohdr.c pool.c reserved.c set_extent.c space_overflow.c stab.c \
+	$(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c \
+	vfd.c
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -470,6 +476,7 @@ SET_MAKE = @SET_MAKE@
 SHELL = /bin/sh
 SIZE_T = @SIZE_T@
 STATIC_SHARED = @STATIC_SHARED@
+STRICT_FORMAT_CHECKS = @STRICT_FORMAT_CHECKS@
 STRIP = @STRIP@
 TESTPARALLEL = @TESTPARALLEL@
 TIME = @TIME@
@@ -631,7 +638,7 @@ TEST_PROG = testhdf5 lheap ohdr stab gheap cache cache_api \
 # --enable-build-all at configure time.
 # The gen_old_* files can only be compiled with older versions of the library
 # so do not appear in this list.
-BUILD_ALL_PROGS = gen_bogus gen_cross gen_deflate gen_filters gen_new_array \
+BUILD_ALL_PROGS = gen_bad_ohdr gen_bogus gen_cross gen_deflate gen_filters gen_new_array \
     gen_new_fill gen_new_group gen_new_mtime gen_new_super gen_noencoder \
     gen_nullspace gen_udlinks space_overflow
 
@@ -798,6 +805,9 @@ flush1$(EXEEXT): $(flush1_OBJECTS) $(flush1_DEPENDENCIES)
 flush2$(EXEEXT): $(flush2_OBJECTS) $(flush2_DEPENDENCIES) 
 	@rm -f flush2$(EXEEXT)
 	$(LINK) $(flush2_OBJECTS) $(flush2_LDADD) $(LIBS)
+gen_bad_ohdr$(EXEEXT): $(gen_bad_ohdr_OBJECTS) $(gen_bad_ohdr_DEPENDENCIES) 
+	@rm -f gen_bad_ohdr$(EXEEXT)
+	$(LINK) $(gen_bad_ohdr_OBJECTS) $(gen_bad_ohdr_LDADD) $(LIBS)
 gen_bogus$(EXEEXT): $(gen_bogus_OBJECTS) $(gen_bogus_DEPENDENCIES) 
 	@rm -f gen_bogus$(EXEEXT)
 	$(LINK) $(gen_bogus_OBJECTS) $(gen_bogus_LDADD) $(LIBS)
@@ -926,6 +936,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fillval.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flush1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flush2.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_bad_ohdr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_bogus.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_cross.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_deflate.Po@am__quote@
