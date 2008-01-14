@@ -234,7 +234,7 @@ main(int argc, const char *argv[])
     /* Check for creating groups with new format version */
     if(params.latest) {
         /* Set the "use the latest version of the format" bounds */
-        if(H5Pset_format_bounds(fapl_id, H5F_FORMAT_LATEST, H5F_FORMAT_LATEST) < 0) {
+        if(H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) {
             error_msg(progname, "Could not set property for using latest version of the format\n");
             leave(EXIT_FAILURE);
         } /* end if */

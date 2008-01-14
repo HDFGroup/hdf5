@@ -46,7 +46,7 @@ static void gen_file(void)
     char	attrname[30];
 
     fapl = H5Pcreate(H5P_FILE_ACCESS);
-    ret = H5Pset_format_bounds(fapl, H5F_FORMAT_LATEST, H5F_FORMAT_LATEST);
+    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
 
      /* Create dataset */
     file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);

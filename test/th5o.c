@@ -582,8 +582,8 @@ test_h5o_plist(void)
     CHECK(fapl, FAIL, "H5Pcreate");
 
     /* Set the "use the latest version of the format" bounds for creating objects in the file */
-    ret = H5Pset_format_bounds(fapl, H5F_FORMAT_LATEST, H5F_FORMAT_LATEST);
-    CHECK(ret, FAIL, "H5Pset_format_bounds");
+    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
 
     /* Create a new HDF5 file */
     fid = H5Fcreate(TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
@@ -801,8 +801,8 @@ test_h5o_link(void)
         CHECK(fapl_id, FAIL, "H5Pcreate");
 
         /* Set the "use the latest version of the format" bounds for creating objects in the file */
-        ret = H5Pset_format_bounds(fapl_id, (new_format ? H5F_FORMAT_LATEST : H5F_FORMAT_EARLIEST), H5F_FORMAT_LATEST);
-        CHECK(ret, FAIL, "H5Pset_format_bounds");
+        ret = H5Pset_libver_bounds(fapl_id, (new_format ? H5F_LIBVER_LATEST : H5F_LIBVER_EARLIEST), H5F_LIBVER_LATEST);
+        CHECK(ret, FAIL, "H5Pset_libver_bounds");
 
         /* Create a new HDF5 file */
         file_id = H5Fcreate(TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);

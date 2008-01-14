@@ -4413,7 +4413,7 @@ test_latest(void)
     /* Set the 'use the latest format' bounds in the FAPL */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         FAIL_STACK_ERROR
-    if(H5Pset_format_bounds(fapl, H5F_FORMAT_LATEST, H5F_FORMAT_LATEST) < 0)
+    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
         FAIL_STACK_ERROR
 
     /* Create file using default FAPL */

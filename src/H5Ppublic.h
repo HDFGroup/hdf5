@@ -265,10 +265,10 @@ H5_DLL herr_t H5Pset_sieve_buf_size(hid_t fapl_id, size_t size);
 H5_DLL herr_t H5Pget_sieve_buf_size(hid_t fapl_id, size_t *size/*out*/);
 H5_DLL herr_t H5Pset_small_data_block_size(hid_t fapl_id, hsize_t size);
 H5_DLL herr_t H5Pget_small_data_block_size(hid_t fapl_id, hsize_t *size/*out*/);
-H5_DLL herr_t H5Pset_format_bounds(hid_t plist_id, H5F_format_version_t low,
-    H5F_format_version_t high);
-H5_DLL herr_t H5Pget_format_bounds(hid_t plist_id, H5F_format_version_t *low,
-    H5F_format_version_t *high);
+H5_DLL herr_t H5Pset_libver_bounds(hid_t plist_id, H5F_libver_t low,
+    H5F_libver_t high);
+H5_DLL herr_t H5Pget_libver_bounds(hid_t plist_id, H5F_libver_t *low,
+    H5F_libver_t *high);
 
 /* Dataset creation property list (DCPL) routines */
 H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);

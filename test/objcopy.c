@@ -7176,7 +7176,7 @@ main(void)
         if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR
 
         /* Set the "use the latest version of the format" bounds for creating objects in the file */
-        if(H5Pset_format_bounds(fapl2, H5F_FORMAT_LATEST, H5F_FORMAT_LATEST) < 0) TEST_ERROR
+        if(H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) TEST_ERROR
 
         /* Create an FCPL with sharing enabled */
         if((fcpl_shared = H5Pcreate(H5P_FILE_CREATE)) < 0) TEST_ERROR

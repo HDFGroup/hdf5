@@ -654,14 +654,14 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                         else
                             fprintf(out, "NULL");
                     } else {
-                        H5F_format_version_t format_vers = va_arg(ap, H5F_format_version_t); /*lint !e64 Type mismatch not really occuring */
+                        H5F_libver_t libver_vers = va_arg(ap, H5F_libver_t); /*lint !e64 Type mismatch not really occuring */
 
-                        switch(format_vers) {
-                            case H5F_FORMAT_EARLIEST:
-                                fprintf(out, "H5F_FORMAT_EARLIEST");
+                        switch(libver_vers) {
+                            case H5F_LIBVER_EARLIEST:
+                                fprintf(out, "H5F_LIBVER_EARLIEST");
                                 break;
-                            case H5F_FORMAT_LATEST:
-                                fprintf(out, "H5F_FORMAT_LATEST");
+                            case H5F_LIBVER_LATEST:
+                                fprintf(out, "H5F_LIBVER_LATEST");
                                 break;
                         }
                     }

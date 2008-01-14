@@ -599,7 +599,7 @@ h5_fileaccess(void)
 #endif
     } else if(!HDstrcmp(name, "latest")) {
 	/* use the latest format */
-	if(H5Pset_format_bounds(fapl, H5F_FORMAT_LATEST, H5F_FORMAT_LATEST) < 0)
+	if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
             return -1;
     } else {
 	/* Unknown driver */

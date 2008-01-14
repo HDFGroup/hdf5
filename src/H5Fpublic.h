@@ -107,11 +107,11 @@ typedef struct H5F_info_t {
     } sohm;
 } H5F_info_t;
 
-/* File format versions */
-typedef enum H5F_format_version_t {
-    H5F_FORMAT_EARLIEST,        /* Use the earliest possible format for storing objects */
-    H5F_FORMAT_LATEST           /* Use the latest possible format available for storing objects*/
-} H5F_format_version_t;
+/* Library's file format versions */
+typedef enum H5F_libver_t {
+    H5F_LIBVER_EARLIEST,        /* Use the earliest possible format for storing objects */
+    H5F_LIBVER_LATEST           /* Use the latest possible format available for storing objects*/
+} H5F_libver_t;
 
 #ifdef __cplusplus
 extern "C" {

@@ -1876,7 +1876,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pset_format_bounds
+ * Function:	H5Pset_libver_bounds
  *
  * Purpose:	Indicates which versions of the file format the library should
  *      use when creating objects.  LOW is the earliest version of the HDF5
@@ -1915,7 +1915,7 @@ done:
  *      Setting the LOW and HIGH values will not affect reading/writing existing
  *      objects, only the creation of new objects.
  *
- * Note: Eventually we want to add more values to the H5F_format_version_t
+ * Note: Eventually we want to add more values to the H5F_libver_t
  *      enumerated type that indicate library release values where the file
  *      format was changed (like "H5F_FORMAT_1_2_0" for the file format changes
  *      in the 1.2.x release branch and possily even "H5F_FORMAT_1_4_2" for
@@ -1962,41 +1962,41 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_format_bounds(hid_t plist_id, H5F_format_version_t low,
-    H5F_format_version_t high)
+H5Pset_libver_bounds(hid_t plist_id, H5F_libver_t low,
+    H5F_libver_t high)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     hbool_t latest;             /* Whether to use the latest version or not */
     herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pset_format_bounds, FAIL)
+    FUNC_ENTER_API(H5Pset_libver_bounds, FAIL)
     H5TRACE3("e", "iFvFv", plist_id, low, high);
 
     /* Check args */
     /* (Note that this is _really_ restricted right now, we'll want to loosen
      *  this up more as we add features - QAK)
      */
-    if(high != H5F_FORMAT_LATEST)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid high format bound")
+    if(high != H5F_LIBVER_LATEST)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid high library version bound")
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set values */
-    latest = (low == H5F_FORMAT_LATEST) ? TRUE : FALSE;
+    latest = (low == H5F_LIBVER_LATEST) ? TRUE : FALSE;
     if(H5P_set(plist, H5F_ACS_LATEST_FORMAT_NAME, &latest) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set format bounds")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set library version bounds")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Pset_format_bounds() */
+} /* end H5Pset_libver_bounds() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_format_bounds
+ * Function:	H5Pget_libver_bounds
  *
- * Purpose:	Returns the current settings for the file format bounds
+ * Purpose:	Returns the current settings for the library version format bounds
  *      from a file access property list.
  *
  * Return:	Non-negative on success/Negative on failure
@@ -2007,14 +2007,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_format_bounds(hid_t plist_id, H5F_format_version_t *low/*out*/,
-    H5F_format_version_t *high/*out*/)
+H5Pget_libver_bounds(hid_t plist_id, H5F_libver_t *low/*out*/,
+    H5F_libver_t *high/*out*/)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     hbool_t latest;             /* Whether to use the latest version or not */
     herr_t ret_value = SUCCEED; /* return value */
 
-    FUNC_ENTER_API(H5Pget_format_bounds, FAIL)
+    FUNC_ENTER_API(H5Pget_libver_bounds, FAIL)
     H5TRACE3("e", "ixx", plist_id, low, high);
 
     /* Get the plist structure */
@@ -2023,16 +2023,16 @@ H5Pget_format_bounds(hid_t plist_id, H5F_format_version_t *low/*out*/,
 
     /* Get value */
     if(H5P_get(plist, H5F_ACS_LATEST_FORMAT_NAME, &latest) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get format bounds")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get library version bounds")
 
     /* Check for setting values to return */
     /* (Again, this is restricted now, we'll need to open it up later -QAK) */
     if(low)
-        *low = latest ?  H5F_FORMAT_LATEST : H5F_FORMAT_EARLIEST;
+        *low = latest ? H5F_LIBVER_LATEST : H5F_LIBVER_EARLIEST;
     if(high)
-               *high = H5F_FORMAT_LATEST;
+        *high = H5F_LIBVER_LATEST;
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Pget_format_bounds() */
+} /* end H5Pget_libver_bounds() */
 
