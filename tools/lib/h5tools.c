@@ -806,7 +806,11 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
     outer_count = 1;
     if (ctx.ndims > 2)
         for (i = 0; i < (size_t)ctx.ndims - 2; i++)
-            outer_count *= sset->count[ i ];
+        {
+            /* consider block size */
+            outer_count = outer_count * sset->count[ i ] * sset->block[ i ];
+
+        }
 
     if(ctx.ndims>0)
         init_acc_pos(&ctx,total_size);
@@ -848,24 +852,16 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
         /* number of read iterations in inner loop, read by rows, to match 2D display */
         if (ctx.ndims > 1)
         {
-
-#if 0
-            count = sset->count[ row_dim ];
-            temp_count[ row_dim ] = 1; 
-#else
-
           
             /* count is the number of iterations to display all the rows 
                consider how many blocks */
             count = sset->count[ row_dim ] * sset->block[ row_dim ];
 
             temp_count[ row_dim ] = 1; /* always 1 row at a time */ 
-            /* but consider the block size in temp_count */
+            /* but consider the block size in temp_count for columns */
             temp_count[ row_dim + 1 ] = sset->count[ row_dim + 1 ] 
                                         * sset->block[ row_dim + 1 ]; 
 
-
-#endif
         }
         /* for the 1D case */
         else
