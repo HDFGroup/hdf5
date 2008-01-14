@@ -153,7 +153,10 @@ int main( void )
  *-------------------------------------------------------------------------
  */
 
- /* Close the file. */
+  /* close type */
+ H5Tclose( string_type );
+ 
+ /* close the file */
  H5Fclose( file_id );
 
  return 0;
