@@ -862,6 +862,8 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
             temp_count[ row_dim + 1 ] = sset->count[ row_dim + 1 ] 
                                         * sset->block[ row_dim + 1 ]; 
 
+            
+
         }
         /* for the 1D case */
         else
@@ -879,7 +881,6 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
                 temp_start,
                 sset->stride,
                 temp_count,
-                /*sset->block);*/
                 temp_block);
             sm_nelmts = H5Sget_select_npoints(f_space);
              
@@ -967,8 +968,9 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
             /* set start to original from current_outer_dim up */
             for (i = current_outer_dim + 1; i < ctx.ndims; i++)
             {
-                temp_start[ i ] = sset->start[ i ]; 
+                temp_start[ i ] = sset->start[ i ];
             }
+
             
             /* increment start dimension */
             do
@@ -978,6 +980,11 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
                 if (temp_start[ current_outer_dim ] >= max_start[ current_outer_dim ])
                 {
                     temp_start[ current_outer_dim ] = sset->start[ current_outer_dim ];
+
+                    /* consider block */
+                    if ( sset->block[ current_outer_dim ] > 1 )
+                        temp_start[ current_outer_dim ]++;
+
                     current_outer_dim--;
                     reset_dim = 1;
                 }
