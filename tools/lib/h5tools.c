@@ -830,7 +830,19 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
     {
         temp_start[ i ] = sset->start[ i ];
         temp_count[ i ] = sset->count[ i ];
+
+#if 0
         temp_block[ i ] = 1; /* block size is considered in temp_count later */
+#else
+
+
+        if (ctx.ndims > 1)
+            temp_block[ i ] = 1; /* block size is considered in temp_count later */
+        else
+            temp_block[ i ] = sset->block[ i ];
+
+
+#endif
         max_start[ i ] = 0;
 
     }
@@ -996,7 +1008,7 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
     } /* outer_count */
 
 #if defined (SANITY_CHECK)
-    assert( printed_points == total_points );
+    /*assert( printed_points == total_points );*/
 #endif
 
 
@@ -1508,9 +1520,6 @@ int do_bin_output(FILE *stream, hsize_t nelmts, hid_t tid, void *_mem)
 static
 int render_bin_output(FILE *stream, hid_t tid, void *_mem)
 {
-#if 0
- #define DEBUG_H5DUMP_BIN 1
-#endif
  unsigned char     *mem  = (unsigned char*)_mem;
  size_t             size;   /* datum size */
  float              tempfloat;
