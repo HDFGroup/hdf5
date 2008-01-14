@@ -125,9 +125,12 @@ int main( void )
    dst_buf[i].temperature);
   printf ("\n");
  }
+
+ /* close type */
+  H5Tclose( string_type );
  
- /* Close the file. */
- H5Fclose( file_id );
+  /* close the file */
+  H5Fclose( file_id );
 
  return 0;
 
