@@ -170,8 +170,7 @@ main (void)
     coord[2][0] = 3; coord[2][1] = 5;
     coord[3][0] = 5; coord[3][1] = 6;
 
-    ret = H5Sselect_elements(fid, H5S_SELECT_SET, NPOINTS,
-                             (const hsize_t **)coord);
+    ret = H5Sselect_elements(fid, H5S_SELECT_SET, NPOINTS, coord);
 
     /*
      * Write new selection of points to the dataset.

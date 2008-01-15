@@ -112,8 +112,7 @@ H5_DLL herr_t H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op,
 				   const hsize_t count[],
 				   const hsize_t _block[]);
 H5_DLL herr_t H5Sselect_elements(hid_t space_id, H5S_seloper_t op,
-				  size_t num_elemn,
-				  const hsize_t **coord);
+    size_t num_elem, const hsize_t *coord);
 H5_DLL H5S_class_t H5Sget_simple_extent_type(hid_t space_id);
 H5_DLL herr_t H5Sset_extent_none(hid_t space_id);
 H5_DLL herr_t H5Sextent_copy(hid_t dst_id,hid_t src_id);

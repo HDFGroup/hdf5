@@ -378,10 +378,9 @@ H5S_point_iter_release (H5S_sel_iter_t UNUSED * iter)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S_point_add (H5S_t *space, H5S_seloper_t op, size_t num_elem, const hsize_t **_coord)
+H5S_point_add (H5S_t *space, H5S_seloper_t op, size_t num_elem, const hsize_t *coord)
 {
     H5S_pnt_node_t *top, *curr, *new_node; /* Point selection nodes */
-    const hsize_t *coord=(const hsize_t *)_coord;     /* Pointer to the actual coordinates */
     unsigned i;                 /* Counter */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
@@ -503,7 +502,7 @@ H5S_point_release (H5S_t *space)
         hid_t dsid;             IN: Dataspace ID of selection to modify
         H5S_seloper_t op;       IN: Operation to perform on current selection
         size_t num_elem;        IN: Number of elements in COORD array.
-        const hsize_t **coord; IN: The location of each element selected
+        const hsize_t *coord;   IN: The location of each element selected
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -525,7 +524,7 @@ H5S_point_release (H5S_t *space)
 --------------------------------------------------------------------------*/
 herr_t
 H5S_select_elements (H5S_t *space, H5S_seloper_t op, size_t num_elem,
-    const hsize_t **coord)
+    const hsize_t *coord)
 {
     herr_t ret_value=SUCCEED;  /* return value */
 
@@ -1204,7 +1203,7 @@ H5S_point_is_regular(const H5S_t *space)
         hid_t dsid;             IN: Dataspace ID of selection to modify
         H5S_seloper_t op;       IN: Operation to perform on current selection
         size_t num_elem;        IN: Number of elements in COORD array.
-        const hsize_t **coord; IN: The location of each element selected
+        const hsize_t *coord;   IN: The location of each element selected
  RETURNS
     Non-negative on success/Negative on failure
  DESCRIPTION
@@ -1226,13 +1225,13 @@ H5S_point_is_regular(const H5S_t *space)
 --------------------------------------------------------------------------*/
 herr_t
 H5Sselect_elements(hid_t spaceid, H5S_seloper_t op, size_t num_elem,
-    const hsize_t **coord)
+    const hsize_t *coord)
 {
     H5S_t	*space = NULL;  /* Dataspace to modify selection of */
     herr_t ret_value;  /* return value */
 
     FUNC_ENTER_API(H5Sselect_elements, FAIL);
-    H5TRACE4("e","iSsz**h",spaceid,op,num_elem,coord);
+    H5TRACE4("e","iSsz*h",spaceid,op,num_elem,coord);
 
     /* Check args */
     if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))

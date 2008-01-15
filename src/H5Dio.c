@@ -3060,7 +3060,7 @@ H5D_chunk_file_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, const
         coords_in_chunk[u]=coords[u]%fm->layout->u.chunk.dim[u];
 
     /* Add point to file selection for chunk */
-    if(H5S_select_elements(chunk_info->fspace,H5S_SELECT_APPEND,1,(const hsize_t **)coords_in_chunk)<0)
+    if(H5S_select_elements(chunk_info->fspace,H5S_SELECT_APPEND,1,coords_in_chunk)<0)
         HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSELECT, FAIL, "unable to select element")
 
     /* Increment the number of elemented selected in chunk */
@@ -3137,7 +3137,7 @@ H5D_chunk_mem_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, const 
 
     /* Add point to memory selection for chunk */
     if(fm->msel_type==H5S_SEL_POINTS) {
-        if(H5S_select_elements(chunk_info->mspace,H5S_SELECT_APPEND,1,(const hsize_t **)coords_in_mem)<0)
+        if(H5S_select_elements(chunk_info->mspace,H5S_SELECT_APPEND,1,coords_in_mem)<0)
             HGOTO_ERROR (H5E_DATASPACE, H5E_CANTSELECT, FAIL, "unable to select element")
     } /* end if */
     else {

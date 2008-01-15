@@ -3956,7 +3956,7 @@ test_random_chunks(void)
     if ((m = H5Screate_simple(1, msize, NULL))<0) TEST_ERROR;
 
     /* Select the random points for writing */
-    if (H5Sselect_elements (s, H5S_SELECT_SET, NPOINTS, (const hsize_t **)coord)<0) TEST_ERROR;
+    if (H5Sselect_elements (s, H5S_SELECT_SET, NPOINTS, coord)<0) TEST_ERROR;
 
     /* Write into dataset */
     if (H5Dwrite(d, H5T_NATIVE_INT, m, s, H5P_DEFAULT, wbuf)<0) TEST_ERROR;
@@ -3981,7 +3981,7 @@ test_random_chunks(void)
     if ((m = H5Screate_simple(1, msize, NULL))<0) TEST_ERROR;
 
     /* Select the random points for reading */
-    if (H5Sselect_elements (s, H5S_SELECT_SET, NPOINTS, (const hsize_t **)coord)<0) TEST_ERROR;
+    if (H5Sselect_elements (s, H5S_SELECT_SET, NPOINTS, coord)<0) TEST_ERROR;
 
     /* Read from dataset */
     if (H5Dread(d, H5T_NATIVE_INT, m, s, H5P_DEFAULT, rbuf)<0) TEST_ERROR;
@@ -4048,7 +4048,7 @@ test_random_chunks(void)
     if ((m = H5Screate_simple(1, msize, NULL))<0) TEST_ERROR;
 
     /* Select the random points for writing */
-    if (H5Sselect_elements (s, H5S_SELECT_SET, NPOINTS, (const hsize_t **)coord)<0) TEST_ERROR;
+    if (H5Sselect_elements (s, H5S_SELECT_SET, NPOINTS, coord)<0) TEST_ERROR;
 
     /* Write into dataset */
     if (H5Dwrite(d, H5T_NATIVE_INT, m, s, H5P_DEFAULT, wbuf)<0) TEST_ERROR;
@@ -4073,7 +4073,7 @@ test_random_chunks(void)
     if ((m = H5Screate_simple(1, msize, NULL))<0) TEST_ERROR;
 
     /* Select the random points for reading */
-    if (H5Sselect_elements (s, H5S_SELECT_SET, NPOINTS, (const hsize_t **)coord)<0) TEST_ERROR;
+    if (H5Sselect_elements (s, H5S_SELECT_SET, NPOINTS, coord)<0) TEST_ERROR;
 
     /* Read from dataset */
     if (H5Dread(d, H5T_NATIVE_INT, m, s, H5P_DEFAULT, rbuf)<0) TEST_ERROR;

@@ -113,7 +113,7 @@ static void test_single_end(hid_t file)
     CHECK(did, FAIL, "H5Dopen");
 
     /* Select the elements in the dataset */
-    ret = H5Sselect_elements(sid, H5S_SELECT_SET, (const size_t)12, (const hsize_t**)da_elmts1);
+    ret = H5Sselect_elements(sid, H5S_SELECT_SET, (const size_t)12, da_elmts1);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     msid = H5Screate_simple(4, mem1_dims, mem1_dims);
@@ -143,7 +143,7 @@ static void test_single_end(hid_t file)
     CHECK(did, FAIL, "H5Dopen");
 
     /* Select the elements in the dataset */
-    ret = H5Sselect_elements(sid, H5S_SELECT_SET, (const size_t)6, (const hsize_t**)da_elmts2);
+    ret = H5Sselect_elements(sid, H5S_SELECT_SET, (const size_t)6, da_elmts2);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     msid = H5Screate_simple(4, mem2_dims, mem2_dims);

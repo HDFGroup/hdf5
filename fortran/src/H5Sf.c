@@ -884,7 +884,7 @@ nh5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *nelements,  hsi
   }
 
   c_nelements = *nelements;
-  status = H5Sselect_elements(c_space_id, c_op, c_nelements, (const hsize_t **)c_coord);
+  status = H5Sselect_elements(c_space_id, c_op, c_nelements, c_coord);
   if ( status >= 0  ) ret_value = 0;
   HDfree(c_coord);
   return ret_value;

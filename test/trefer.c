@@ -423,7 +423,7 @@ test_reference_region(void)
     coord1[7][0]=9; coord1[7][1]=0;
     coord1[8][0]=7; coord1[8][1]=1;
     coord1[9][0]=3; coord1[9][1]=3;
-    ret = H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,(const hsize_t **)coord1);
+    ret = H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,coord1);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     ret = (int)H5Sget_select_npoints(sid2);
@@ -695,7 +695,7 @@ test_reference_region_1D(void)
     coord1[7][0]=89;
     coord1[8][0]=97;
     coord1[9][0]=03;
-    ret = H5Sselect_elements(sid3,H5S_SELECT_SET,POINT1_NPOINTS,(const hsize_t **)coord1);
+    ret = H5Sselect_elements(sid3,H5S_SELECT_SET,POINT1_NPOINTS,coord1);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     ret = (int)H5Sget_select_npoints(sid3);
