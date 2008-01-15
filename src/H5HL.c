@@ -284,9 +284,12 @@ H5HL_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
 	if (!heap->freelist) heap->freelist = fl;
 
 	p = heap->chunk + sizeof_hdr + free_block;
-	H5F_DECODE_LENGTH(f, p, free_block);
-	H5F_DECODE_LENGTH(f, p, fl->size);
 
+	H5F_DECODE_LENGTH(f, p, free_block);
+	if(free_block == 0)
+	    HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "free block size is zero?");
+
+	H5F_DECODE_LENGTH(f, p, fl->size);
 	if (fl->offset + fl->size > heap->disk_alloc)
 	    HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad heap free list");
     }
