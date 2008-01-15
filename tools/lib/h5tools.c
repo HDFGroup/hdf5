@@ -835,12 +835,7 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
     {
         temp_start[ i ] = sset->start[ i ];
         temp_count[ i ] = sset->count[ i ];
-
-        if (ctx.ndims > 1)
-            temp_block[ i ] = 1; /* block size is considered in temp_count later */
-        else
-            temp_block[ i ] = sset->block[ i ];
-
+        temp_block[ i ] = sset->block[ i ];
         max_start[ i ] = 0;
 
     }
@@ -863,16 +858,13 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
         if (ctx.ndims > 1)
         {
           
-            /* count is the number of iterations to display all the rows 
-               consider how many blocks */
+            /* count is the number of iterations to display all the rows,
+               the block size count times */
             count = sset->count[ row_dim ] * sset->block[ row_dim ];
 
-            temp_count[ row_dim ] = 1; /* always 1 row at a time */ 
-            /* but consider the block size in temp_count for columns */
-            temp_count[ row_dim + 1 ] = sset->count[ row_dim + 1 ] 
-                                        * sset->block[ row_dim + 1 ]; 
-
-            
+            /* always 1 row at a time, that is a block of size 1, 1 time */
+            temp_count[ row_dim ] = 1; 
+            temp_block[ row_dim ] = 1;            
 
         }
         /* for the 1D case */
