@@ -213,6 +213,21 @@ SOURCE=..\..\..\test\tconfig.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\test\tcoords.c
+
+!IF  "$(CFG)" == "testhdf5 - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "testhdf5 - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "testhdf5 - Win32 AlphaDbg"
+
+!ELSEIF  "$(CFG)" == "testhdf5 - Win32 AlphaRel"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\test\testframe.c
 
 !IF  "$(CFG)" == "testhdf5 - Win32 Release"

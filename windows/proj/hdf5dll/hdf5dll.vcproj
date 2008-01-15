@@ -2363,6 +2363,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5FDspace.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5FDstdio.c"
 				>
 				<FileConfiguration
@@ -9193,6 +9197,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\src\H5Epublic.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5FDpkg.h"
 				>
 			</File>
 			<File

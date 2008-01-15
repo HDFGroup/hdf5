@@ -557,6 +557,10 @@
 			</FileConfiguration>
 		</File>
 		<File
+			RelativePath="..\..\..\test\tcoords.c"
+			>
+		</File>
+		<File
 			RelativePath="..\..\..\test\testhdf5.c"
 			>
 			<FileConfiguration
