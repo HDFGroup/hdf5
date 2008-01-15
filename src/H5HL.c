@@ -213,87 +213,91 @@ H5HL_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
     size_t		free_block = H5HL_FREE_NULL;
     H5HL_t		*ret_value;
 
-    FUNC_ENTER_NOAPI(H5HL_load, NULL);
+    FUNC_ENTER_NOAPI(H5HL_load, NULL)
 
     /* check arguments */
-    assert(f);
-    assert(H5F_addr_defined(addr));
-    assert(!udata1);
-    assert(!udata2);
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(!udata1);
+    HDassert(!udata2);
 
     /* Cache this for later */
-    sizeof_hdr= H5HL_SIZEOF_HDR(f);
-    assert(sizeof_hdr <= sizeof(hdr));
+    sizeof_hdr = H5HL_SIZEOF_HDR(f);
+    HDassert(sizeof_hdr <= sizeof(hdr));
 
     /* Get the local heap's header */
-    if (H5F_block_read(f, H5FD_MEM_LHEAP, addr, sizeof_hdr, dxpl_id, hdr) < 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_READERROR, NULL, "unable to read heap header");
+    if(H5F_block_read(f, H5FD_MEM_LHEAP, addr, sizeof_hdr, dxpl_id, hdr) < 0)
+	HGOTO_ERROR(H5E_HEAP, H5E_READERROR, NULL, "unable to read heap header")
     p = hdr;
 
     /* Check magic number */
     if(HDmemcmp(hdr, H5HL_MAGIC, (size_t)H5HL_SIZEOF_MAGIC))
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad heap signature");
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad heap signature")
     p += H5HL_SIZEOF_MAGIC;
 
     /* Version */
-    if (H5HL_VERSION!=*p++)
-	HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, NULL, "wrong version number in global heap");
+    if(H5HL_VERSION != *p++)
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "wrong version number in global heap")
 
     /* Reserved */
     p += 3;
 
     /* Allocate space in memory for the heap */
-    if (NULL==(heap = H5FL_CALLOC(H5HL_t)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    if(NULL == (heap = H5FL_CALLOC(H5HL_t)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* heap data size */
     H5F_DECODE_LENGTH(f, p, heap->heap_alloc);
 
     /* free list head */
     H5F_DECODE_LENGTH(f, p, free_block);
-    if (free_block != H5HL_FREE_NULL && free_block >= heap->heap_alloc)
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad heap free list");
+    if(free_block != H5HL_FREE_NULL && free_block >= heap->heap_alloc)
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad heap free list")
 
     /* data */
     H5F_addr_decode(f, &p, &(heap->addr));
-    if (NULL==(heap->chunk = H5FL_BLK_CALLOC(heap_chunk,(sizeof_hdr + heap->heap_alloc))))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    if (heap->heap_alloc &&
+    if(NULL == (heap->chunk = H5FL_BLK_CALLOC(heap_chunk, (sizeof_hdr + heap->heap_alloc))))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    if(heap->heap_alloc &&
             H5F_block_read(f, H5FD_MEM_LHEAP, heap->addr, heap->heap_alloc, dxpl_id, heap->chunk + sizeof_hdr) < 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "unable to read heap data");
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "unable to read heap data")
 
     /* Build free list */
-    while (H5HL_FREE_NULL != free_block) {
-	if (free_block >= heap->heap_alloc)
-	    HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad heap free list");
-	if (NULL==(fl = H5FL_MALLOC(H5HL_free_t)))
-	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    while(H5HL_FREE_NULL != free_block) {
+	if(free_block >= heap->heap_alloc)
+	    HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad heap free list")
+	if(NULL == (fl = H5FL_MALLOC(H5HL_free_t)))
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 	fl->offset = free_block;
 	fl->prev = tail;
 	fl->next = NULL;
-	if (tail) tail->next = fl;
+	if(tail)
+            tail->next = fl;
 	tail = fl;
-	if (!heap->freelist) heap->freelist = fl;
+	if(!heap->freelist)
+            heap->freelist = fl;
 
 	p = heap->chunk + sizeof_hdr + free_block;
-	H5F_DECODE_LENGTH(f, p, free_block);
-	H5F_DECODE_LENGTH(f, p, fl->size);
 
+	H5F_DECODE_LENGTH(f, p, free_block);
+	if(free_block == 0)
+	    HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "free block size is zero?")
+
+	H5F_DECODE_LENGTH(f, p, fl->size);
 	if (fl->offset + fl->size > heap->heap_alloc)
-	    HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad heap free list");
-    }
+	    HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad heap free list")
+    } /* end while */
 
     /* Set return value */
     ret_value = heap;
 
 done:
-    if (!ret_value && heap) {
-        if(H5HL_dest(f,heap)<0)
-	    HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy local heap collection");
-    }
+    if(!ret_value && heap)
+        if(H5HL_dest(f,heap) < 0)
+	    HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy local heap collection")
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HL_load() */
 
 
 /*-------------------------------------------------------------------------
