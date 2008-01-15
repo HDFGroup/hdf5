@@ -2725,7 +2725,7 @@ test_reg_ref(hid_t fapl)
     /* Create a reference to elements selection */
     if((status = H5Sselect_none(space_id)) < 0)
 	TEST_ERROR
-    if((status = H5Sselect_elements(space_id, H5S_SELECT_SET, num_points,(const hsize_t **)coord)) < 0)
+    if((status = H5Sselect_elements(space_id, H5S_SELECT_SET, num_points, coord)) < 0)
 	TEST_ERROR
     if((status = H5Rcreate(&ref[1], file_id, REFREG_DSETNAMEV, H5R_DATASET_REGION, space_id)) < 0)
 	TEST_ERROR

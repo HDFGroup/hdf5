@@ -1598,7 +1598,7 @@ void io_mode_confusion(void)
                        mpi_rank, fcn_name);
 
         status = H5Sselect_elements(filespace, H5S_SELECT_SET, N,
-                                   (const hsize_t **)&coord);
+                                   &coord);
         VRFY((status >= 0 ), "H5Sselect_elements() failed");
     } else { /* select nothing */
         if(verbose )

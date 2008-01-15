@@ -86,7 +86,7 @@ class H5_DLLCPP DataSpace : public IdComponent {
 
 	// Selects array elements to be included in the selection for
 	// this dataspace.
-	void selectElements( H5S_seloper_t op, const size_t num_elements, const hsize_t *coord[ ] ) const;
+	void selectElements( H5S_seloper_t op, const size_t num_elements, const hsize_t *coord) const;
 
 	// Selects a hyperslab region to add to the current selected region.
 	void selectHyperslab( H5S_seloper_t op, const hsize_t *count, const hsize_t *start, const hsize_t *stride = NULL, const hsize_t *block = NULL ) const;

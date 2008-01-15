@@ -258,8 +258,8 @@ H5_DLL herr_t H5S_select_all(H5S_t *space, hbool_t rel_prev);
 H5_DLL herr_t H5S_select_none(H5S_t *space);
 
 /* Operations on point selections */
-H5_DLL herr_t H5S_select_elements (H5S_t *space, H5S_seloper_t op,
-    size_t num_elem, const hsize_t **coord);
+H5_DLL herr_t H5S_select_elements(H5S_t *space, H5S_seloper_t op,
+    size_t num_elem, const hsize_t *coord);
 
 /* Operations on hyperslab selections */
 H5_DLL herr_t H5S_select_hyperslab (H5S_t *space, H5S_seloper_t op, const hsize_t start[],

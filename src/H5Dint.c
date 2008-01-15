@@ -2177,7 +2177,7 @@ H5D_vlen_get_buf_size(void UNUSED *elem, hid_t type_id, unsigned UNUSED ndim, co
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't resize tbuf")
 
     /* Select point to read in */
-    if(H5Sselect_elements(vlen_bufsize->fspace_id, H5S_SELECT_SET, (size_t)1, (const hsize_t **)point) < 0)
+    if(H5Sselect_elements(vlen_bufsize->fspace_id, H5S_SELECT_SET, (size_t)1, point) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't select point")
 
     /* Read in the point (with the custom VL memory allocator) */

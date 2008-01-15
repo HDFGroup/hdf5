@@ -2455,7 +2455,7 @@ void gen_datareg(hid_t fid,
   coord[3][0]=2; coord[3][1]=5;
   coord[4][0]=1; coord[4][1]=7;
  }
- H5Sselect_elements(sid1,H5S_SELECT_SET,5,(const hsize_t **)coord);
+ H5Sselect_elements(sid1,H5S_SELECT_SET,5,coord);
  H5Sget_select_npoints(sid1);
 
  /* store second dataset region */

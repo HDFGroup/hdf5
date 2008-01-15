@@ -1812,7 +1812,7 @@ static void gent_datareg(void)
     coord1[7][0]=9; coord1[7][1]=0;
     coord1[8][0]=7; coord1[8][1]=1;
     coord1[9][0]=3; coord1[9][1]=3;
-    H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,(const hsize_t **)coord1);
+    H5Sselect_elements(sid2,H5S_SELECT_SET,POINT1_NPOINTS,coord1);
 
     H5Sget_select_npoints(sid2);
 
