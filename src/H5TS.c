@@ -191,7 +191,6 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex)
 herr_t
 H5TS_mutex_unlock(H5TS_mutex_t *mutex)
 {
-    unsigned lock_count;        /* Mutex's lock count */
     herr_t ret_value;           /* Return value */
 
     ret_value = pthread_mutex_lock(&mutex->atomic_lock);
@@ -199,11 +198,11 @@ H5TS_mutex_unlock(H5TS_mutex_t *mutex)
     if(ret_value)
         return ret_value;
 
-    lock_count = --mutex->lock_count;
+    mutex->lock_count--;
 
     ret_value = pthread_mutex_unlock(&mutex->atomic_lock);
 
-    if(lock_count == 0) {
+    if(mutex->lock_count == 0) {
         int err;
 
         err = pthread_cond_signal(&mutex->cond_var);
