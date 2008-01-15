@@ -491,8 +491,8 @@ done:
  USAGE
     herr_t H5S_get_select_bounds(space, start, end)
         hid_t dsid;             IN: Dataspace ID of selection to query
-        hsize_t *start;         OUT: Starting coordinate of bounding box
-        hsize_t *end;           OUT: Opposite coordinate of bounding box
+        hsize_t start[];        OUT: Starting coordinate of bounding box
+        hsize_t end[];          OUT: Opposite coordinate of bounding box
  RETURNS
     Non-negative on success, negative on failure
  DESCRIPTION
@@ -514,7 +514,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Sget_select_bounds(hid_t spaceid, hsize_t *start, hsize_t *end)
+H5Sget_select_bounds(hid_t spaceid, hsize_t start[], hsize_t end[])
 {
     H5S_t	*space = NULL;      /* Dataspace to modify selection of */
     herr_t ret_value;        /* return value */

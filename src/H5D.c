@@ -988,7 +988,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dset_extent(hid_t dset_id, const hsize_t *size)
+H5Dset_extent(hid_t dset_id, const hsize_t size[])
 {
     H5D_t *dset;                /* Dataset for this operation */
     herr_t ret_value = SUCCEED; /* Return value */

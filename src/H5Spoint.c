@@ -964,7 +964,7 @@ H5S_get_select_elem_pointlist(H5S_t *space, hsize_t startpoint, hsize_t numpoint
         hid_t dsid;             IN: Dataspace ID of selection to query
         hsize_t startpoint;     IN: Element point to start with
         hsize_t numpoints;      IN: Number of element points to get
-        hsize_t *buf;           OUT: List of element points selected
+        hsize_t buf[];          OUT: List of element points selected
  RETURNS
     Non-negative on success, negative on failure
  DESCRIPTION
@@ -984,7 +984,8 @@ H5S_get_select_elem_pointlist(H5S_t *space, hsize_t startpoint, hsize_t numpoint
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint, hsize_t numpoints, hsize_t *buf)
+H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint,
+    hsize_t numpoints, hsize_t buf[/*numpoints*/])
 {
     H5S_t	*space = NULL;      /* Dataspace to modify selection of */
     herr_t ret_value;        /* return value */

@@ -2558,7 +2558,7 @@ H5S_get_select_hyper_blocklist(H5S_t *space, hbool_t internal, hsize_t startbloc
         hid_t dsid;             IN: Dataspace ID of selection to query
         hsize_t startblock;     IN: Hyperslab block to start with
         hsize_t numblocks;      IN: Number of hyperslab blocks to get
-        hsize_t *buf;           OUT: List of hyperslab blocks selected
+        hsize_t buf[];          OUT: List of hyperslab blocks selected
  RETURNS
     Non-negative on success, negative on failure
  DESCRIPTION
@@ -2579,7 +2579,8 @@ H5S_get_select_hyper_blocklist(H5S_t *space, hbool_t internal, hsize_t startbloc
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock, hsize_t numblocks, hsize_t *buf)
+H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock,
+    hsize_t numblocks, hsize_t buf[/*numblocks*/])
 {
     H5S_t	*space = NULL;      /* Dataspace to modify selection of */
     herr_t ret_value;        /* return value */

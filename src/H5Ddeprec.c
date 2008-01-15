@@ -278,7 +278,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dextend(hid_t dset_id, const hsize_t *size)
+H5Dextend(hid_t dset_id, const hsize_t size[])
 {
     H5D_t	*dset;
     herr_t       ret_value = SUCCEED;  /* Return value */
