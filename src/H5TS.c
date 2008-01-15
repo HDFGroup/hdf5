@@ -96,10 +96,6 @@ H5TS_first_thread_init(void)
 {
     H5_g.H5_libinit_g = FALSE;
 
-    /* set the owner objects to initial values */
-    H5_g.init_lock.owner_thread = pthread_self();
-    H5_g.init_lock.owner_valid = FALSE;
-
     /* initialize global API mutex lock */
     pthread_mutex_init(&H5_g.init_lock.atomic_lock, NULL);
     pthread_cond_init(&H5_g.init_lock.cond_var, NULL);
@@ -150,26 +146,17 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex)
     if (ret_value)
         return ret_value;
 
-    if (mutex->owner_valid && pthread_equal(pthread_self(), mutex->owner_thread)) {
+    if(mutex->lock_count && pthread_equal(pthread_self(), mutex->owner_thread)) {
         /* already owned by self - increment count */
         mutex->lock_count++;
-    } else if (!mutex->owner_valid) {
-        /* no one else has locked it - set owner and grab lock */
-        mutex->owner_thread = pthread_self();
-        mutex->owner_valid = TRUE;
-        mutex->lock_count = 1;
     } else {
-        /* if already locked by someone else */
-        for (;;) {
-	    pthread_cond_wait(&mutex->cond_var, &mutex->atomic_lock);
+        /* if owned by other thread, wait for condition signal */
+        while(mutex->lock_count)
+            pthread_cond_wait(&mutex->cond_var, &mutex->atomic_lock);
 
-	    if (!mutex->owner_valid) {
-	        mutex->owner_thread = pthread_self();
-                mutex->owner_valid = TRUE;
-	        mutex->lock_count = 1;
-	        break;
-	    }
-        }
+        /* After we've received the signal, take ownership of the mutex */
+        mutex->owner_thread = pthread_self();
+        mutex->lock_count = 1;
     }
 
     return pthread_mutex_unlock(&mutex->atomic_lock);
@@ -204,26 +191,27 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex)
 herr_t
 H5TS_mutex_unlock(H5TS_mutex_t *mutex)
 {
-    herr_t ret_value;
+    unsigned lock_count;        /* Mutex's lock count */
+    herr_t ret_value;           /* Return value */
 
     ret_value = pthread_mutex_lock(&mutex->atomic_lock);
 
-    if (ret_value)
-	    return ret_value;
+    if(ret_value)
+        return ret_value;
 
-    mutex->lock_count--;
+    lock_count = --mutex->lock_count;
 
-    if (mutex->lock_count == 0) {
-	mutex->owner_valid = FALSE;
-        ret_value = pthread_cond_signal(&mutex->cond_var);
+    ret_value = pthread_mutex_unlock(&mutex->atomic_lock);
 
-	if (ret_value) {
-	    pthread_mutex_unlock(&mutex->atomic_lock);
-	    return ret_value;
-	}
-    }
+    if(lock_count == 0) {
+        int err;
 
-    return pthread_mutex_unlock(&mutex->atomic_lock);
+        err = pthread_cond_signal(&mutex->cond_var);
+        if(err != 0)
+            ret_value = err;
+    } /* end if */
+
+    return ret_value;
 }
 
 /*--------------------------------------------------------------------------
