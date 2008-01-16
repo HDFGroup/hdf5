@@ -25,7 +25,7 @@
 				AdditionalIncludeDirectories="..\..\..\..\src,..\..\..\..\tools\lib,..\..\..\..\hl\src"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_HDF5USEDLL_"
 				StringPooling="TRUE"
-				RuntimeLibrary="0"
+				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderFile=".\..\..\..\..\hl\tools\gifconvdll\h52gifdll\Release/h52gifdll.pch"
