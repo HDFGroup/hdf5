@@ -1,5 +1,5 @@
 #############################
-Expected output for 'h5dump -d 1d -s 1 -c 2 -k 3 -S 10 taindices.h5'
+Expected output for 'h5dump -d 1d -s 1 -S 10 -c 2 -k 3 taindices.h5'
 #############################
 HDF5 "taindices.h5" {
 DATASET "1d" {

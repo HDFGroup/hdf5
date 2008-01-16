@@ -613,7 +613,7 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
             }
 
             /*
-             * We need to break after each row of a dimension---> we should
+             * We need to break after each row_counter of a dimension---> we should
              * break at the end of the each last dimension well that is the
              * way the dumper did it before
              */
@@ -707,33 +707,40 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
  * Chapter:     H5Tools Library
  * Purpose:     Dump out a subset of a dataset.
  * Description:
- *      Select a hyperslab from the dataset DSET using the parameters
- *      specified in SSET. Dump this out to STREAM.
+ *
+ *  Select a hyperslab from the dataset DSET using the parameters
+ *   specified in SSET. Dump this out to STREAM.
  *      
- *       hyperslabs select "count" blocks of size "block",  
- *        spaced "stride" elements from each other, starting at coordinate  
- *       "start".
+ *  Hyperslabs select "count" blocks of size "block", spaced "stride" elements
+ *   from each other, starting at coordinate "start".
  *
  * Return:
  *      On success, return SUCCEED. Otherwise, the function returns FAIL.
- * Programmer:
- *      Bill Wendling, Wednesday, 07. March 2001
- * Modifications:
- *      Pedro Vicente, 12 December 2006
- *       Add information to print array indices from the element position
- *       The algorythm used is 
+ *
+ * Original programmer:
+ *      Bill Wendling, Wednesday, March 07, 2001
+ *
+ * Rewritten with modified algorithm by:
+ *      Pedro Vicente, Wednesday, January 16, 2008, contributions from Quincey Koziol
+ *
+ * Algorithm
+ *
+ * In a inner loop, the parameters from SSET are translated into temporary 
+ * variables so that 1 row is printed at a time (getting the coordinate indices 
+ * at each row).
+ * We define the stride, count and block to be 1 in the row dimension to achieve 
+ * this and advance until all points are printed. 
+ * An outer loop for cases where dimensionality is greater than 2D is made. 
+ * In each iteration, the 2D block is displayed in the inner loop. The remaining 
+ * slower dimensions above the first 2 are incremented one at a time in the outer loop
+ *
+ * The element position is obtained from the matrix according to:
  *       Given an index I(z,y,x) its position from the beginning of an array 
  *       of sizes A(size_z, size_y,size_x) is given by
  *       Position of I(z,y,x) = index_z * size_y * size_x 
  *                             + index_y * size_x
  *                             + index_x
- *
- *      Pedro Vicente, Quincey Koziol, 4 January 2007
- *       Introduced an outer loop for cases where dimensionality is greater 
- *       than 2D. In each iteration a 2D block is displayed by rows in a inner
- *       loop. The remainning slower dimensions above the first 2 are incremented 
- *       one at a time in the outer loop
- *      
+ * 
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -761,13 +768,15 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
     hid_t             sm_space;                /* stripmine data space */
     hsize_t           count;                   /* hyperslab count */
     hsize_t           outer_count;             /* offset count */
-    unsigned int      row_dim;                 /* index of row dimension */
+    unsigned int      row_dim;                 /* index of row_counter dimension */
     int               current_outer_dim;       /* dimension for start */
     hsize_t           temp_start[H5S_MAX_RANK];/* temporary start inside offset count loop */
     hsize_t           max_start[H5S_MAX_RANK]; /* maximum start inside offset count loop */
     hsize_t           temp_count[H5S_MAX_RANK];/* temporary count inside offset count loop  */
     hsize_t           temp_block[H5S_MAX_RANK];/* temporary block size used in loop  */
+    hsize_t           temp_stride[H5S_MAX_RANK];/* temporary stride size used in loop  */
     int               reset_dim;
+    hsize_t           size_row_block;           /* size for blocks along rows */
 
 #if defined (SANITY_CHECK)
     hsize_t total_points = 1; /* to print */
@@ -836,6 +845,7 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
         temp_start[ i ] = sset->start[ i ];
         temp_count[ i ] = sset->count[ i ];
         temp_block[ i ] = sset->block[ i ];
+        temp_stride[ i ] = sset->stride[ i ];
         max_start[ i ] = 0;
 
     }
@@ -854,34 +864,67 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
     for (n = 0; n < outer_count; n++)
     {
 
+        hsize_t row_counter = 0; 
+
         /* number of read iterations in inner loop, read by rows, to match 2D display */
         if (ctx.ndims > 1)
         {
-          
-            /* count is the number of iterations to display all the rows,
-               the block size count times */
+            
+        /* count is the number of iterations to display all the rows,
+            the block size count times */
             count = sset->count[ row_dim ] * sset->block[ row_dim ];
-
-            /* always 1 row at a time, that is a block of size 1, 1 time */
+            
+            /* always 1 row_counter at a time, that is a block of size 1, 1 time */
             temp_count[ row_dim ] = 1; 
-            temp_block[ row_dim ] = 1;            
-
+            temp_block[ row_dim ] = 1;  
+            
+            /* advance 1 row_counter at a time  */
+            if (sset->block[ row_dim ] > 1 )
+                temp_stride[ row_dim ] = 1;
+            
+            
         }
         /* for the 1D case */
         else
         {
             count = 1;
         }
-
         
+        
+        size_row_block = sset->block[ row_dim ];
+
+   
         /* display loop */
-        for (; count > 0; temp_start[ row_dim ] += sset->stride[ row_dim ],
-            count--) 
-        {
+        for (; count > 0; 
+               temp_start[ row_dim ] += temp_stride[ row_dim ],
+               count--)
+               {
+
+     
+                   /* jump rows if size of block exceeded
+                      cases where block > 1 only and stride > block */
+                   if ( size_row_block > 1 && 
+                        row_counter == size_row_block  &&
+                        sset->stride[ row_dim ] > sset->block[ row_dim ]
+                        )
+                   {
+
+                       hsize_t increase_rows = sset->stride[ row_dim ] -
+                           sset->block[ row_dim ];
+
+                       temp_start[ row_dim ] += increase_rows;
+
+                       row_counter = 0;
+                           
+                   }
+
+                   row_counter++;
+
+
             /* calculate the potential number of elements we're going to print */
             H5Sselect_hyperslab(f_space, H5S_SELECT_SET,
                 temp_start,
-                sset->stride,
+                temp_stride,
                 temp_count,
                 temp_block);
             sm_nelmts = H5Sget_select_npoints(f_space);
