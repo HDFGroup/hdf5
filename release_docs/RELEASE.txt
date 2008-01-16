@@ -1042,12 +1042,15 @@ Platforms marked with * were not tested for hdf5-1.8.0-rc* release
     (NCSA tg-login)               Intel(R) C++ Version 8.0
                                   Intel(R) Fortran Compiler Version 8.0
 				  mpich-gm-1.2.5..10-intel-r2
-    Windows XP                    Visual Studio 6.0
-                                  Visual Studio .NET w/ Intel Fortran 9.0
-                                  Visual Studio 2005 w/ Intel Fortran 9.0
-                                  cygwin
-    Windows 64                    Visual Studio .NET w/ Intel Fortran 9.0
-                                  Visual Studio 2005 w/ Intel Fortran 9.0
+    Windows XP                    
+							      Visual Studio .NET
+                                  Visual Studio 2005 w/ Intel Fortran 9.1
+                                  Cygwin
+								  MinGW
+    Windows XP x64                
+						          Visual Studio 2005 w/ Intel Fortran 9.1
+	Windows Vista			
+							      Visual Studio 2005
 
     MAC OS  10.4 (Intel)          gcc i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1 
                                   G95 (GCC 4.0.3 (g95 0.91!) Nov 21 2006)
@@ -1081,10 +1084,9 @@ Cray X1                  y        y      y        y     y     n
 Cray XT3           (16)  n        y      n        y     y     n
 AIX-5.2 & 5.3 32-bit     y        y      y        y     y     y
 AIX-5.2 & 5.3 64-bit     y        y      y        y     y     y
-WinXP .Net 2003          y        y(16)  n        y(8)  y     y               
-WinXP 64bit 
-    Visual Studio 2005   n        n      n        y     n     n
-Cygwin                   n        y      n        y     y     y
+Windows XP               y        y(15)  y(15)    y     y     y
+Windows XP x64           y        y(15)  y(15)    y     y     y
+Windows Vista            y        n      n        y     y     y
 Mac OS X 10.4 PowerPC    n               n
 FreeBSD 4.11             n        n      n        y     y     y
 RedHat EL3  W       (3)  y(1)     y(10)  n        y     y     y
@@ -1117,10 +1119,9 @@ Cray X1                  n                           y        n        y
 Cray XT3           (16)  n                           y        n        y
 AIX-5.2 & 5.3 32-bit     n       n         n         y        n        y
 AIX-5.2 & 5.3 64-bit     n       n         n         y        n        y
-WinXP .Net 2003          y       y         y         y        y        n
-WinXP 64bit 
-    Visual Studio 2005   y       y         y         y        n        n
-Cygwin                   n       dna       n         n        n        n
+Windows XP               y       y(15)     y         y        y        n
+Windows XP x64           y       y(15)     y         y        y        n
+Windows Vista            y       n         n         y        y        n
 Mac OS X 10.3            y                           y        n        y
 Mac OS X 10.4 PowerPC
 FreeBSD 4.11             y       n         y         y        y        y
@@ -1153,6 +1154,7 @@ Alpha OpenVMS 7.3.2      n       n         n         y        n        n
            (12) AMD Opteron x86_64
            (13) ifort
            (14) Yes with C and Fortran, but not with C++
+		   (15) Using Visual Studio 2005 or Cygwin
     Compiler versions for each platform are listed in the preceding
     "Platforms Tested" table.
 
@@ -1245,12 +1247,7 @@ Known Problems
   workaround until the problem is correctly handled is to use the 
   flag "--instantiate=local" prior to the configure and build steps, as:
         setenv CXX "pgCC --instantiate=local"  for pgCC 5.02 and higher
-        setenv CXX "pgCC -tlocal" for others
 
-* The h5dump tests may fail to match the expected output on some platforms
-  (e.g. parallel jobs, Windows) where the error messages directed to
-  "stderr" do not appear in the "right order" with output from stdout.
-  This is not an error.
 
 * The stream-vfd test uses ip port 10007 for testing. If another
   application is already using that port address, the test will hang
