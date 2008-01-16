@@ -175,7 +175,7 @@ int main (void)
 	coord[2][0] = 3; coord[2][1] = 5;
 	coord[3][0] = 5; coord[3][1] = 6;
 
-	fspace.selectElements( H5S_SELECT_SET, NPOINTS, coord);
+	fspace.selectElements( H5S_SELECT_SET, NPOINTS, (const hsize_t *)coord);
 
 	/*
 	 * Write new selection of points to the dataset.
