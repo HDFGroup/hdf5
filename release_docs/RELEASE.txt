@@ -942,19 +942,23 @@ Bug Fixes since HDF5-1.6.0 release
 
     Tools
     -----
+        - Fixed h5dump regarding the display of blocks in hyperslab
+           selections. PVN 2008/01/16
+        - Fixed h5diff regarding the display of NaN (Not a Number)
+           values. PVN 2008/01/16
         - Fixed h5dump & h5ls to display attributes in "name" order, rather
            than the order they are encountered in the object header.
            QAK - 2007/10/04
-        - Fixed a bug on h5dump regarding the display of named datatypes
+        - Fixed h5dump regarding the display of named datatypes
            attributes. PVN 2007/03/13
-        - Fixed a bug on h5dump regarding the display of group comments. PVN
+        - Fixed h5dump regarding the display of group comments. PVN
            2007/03/13
-        - Fixed a bug on h5dump regarding the display of hardlinks pointing 
+        - Fixed h5dump regarding the display of hardlinks pointing 
            to the root group. PVN 2007/03/13
-        - Fixed a bug in the h5diff percentage option -p. PVN 2007/03/05
-        - Fixed a bug in h5dump that caused array indices greater than 2 ^32-1
+        - Fixed h5diff percentage option -p. PVN 2007/03/05
+        - Fixed h5dump that caused array indices greater than 2 ^32-1
            not to be printed correctly - PVN 2007/2/19
-	- Fixed h5dump to print attributes data in ASCII if -r option is used.
+	  - Fixed h5dump to print attributes data in ASCII if -r option is used.
 	    AKC - 2004/11/18
         - Fixed space utilization reported in h5ls to correct error in formula
             used.  QAK - 2004/10/22
