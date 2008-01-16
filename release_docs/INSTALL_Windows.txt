@@ -16,7 +16,7 @@ Contents:
    Section I     :  What do we build and install
    Section II    :  How to build and test HDF5 libraries and tools
    Section III   :  How to build examples (optional)
-   Section IV    :  How to build an application using the HDF5 library  or DLL
+   Section IV    :  How to build an application using the HDF5 library or DLL
    Section V     :  How to disable Gzip(Zlib)/Szip compression
    Section VI    :  How to build HDF5 with Fortran Support
    Section VII   :  How to build Multi-threaded version of HDF5 library
@@ -151,9 +151,8 @@ Notes:
       directory, run copy_hdf.bat first and then open all.dsw under 
       hdf5/windows/proj/all to start building process.
 
-   2. Users who prefer to use Visual Studio 6.0 can follow instructions in 
-      INSTALL_Windows_Short_MSVS6.0.txt.  Note, however, that Visual Studio
-      6.0 will not be supported in future versions of HDF5.
+   2. Visual Studio 6.0 is no longer supported.  If you were previously using
+      Visual Studio 6.0, please upgrade to Visual Studio .NET or 2005.
 
    2. Users who prefer to use Visual Studio .NET can follow instructions in 
       INSTALL_Windows_Short_Net.txt.  Note, however, that Visual Studio
@@ -1372,7 +1371,7 @@ Notes: In Visual Studio 2005, the Single-threaded runtime libraries have been
        those two sections carefully before go to the following part.
 
        
-In Visual Studio 6.0 and .Net, users have the option of building multi-threaded
+In Visual Studio .NET, users have the option of building multi-threaded
 libraries by manipulating the project settings.  Otherwise, the build process
 is very much the same.  Therefore, follow the instructions below, and refer
 to the earlier sections of this document for details on building and testing.
