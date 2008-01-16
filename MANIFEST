@@ -2157,8 +2157,6 @@
 ./windows_vnet/test/overheaddll/overheaddll.vcproj
 ./windows_vnet/test/pool/pool.vcproj
 ./windows_vnet/test/pooldll/pooldll.vcproj
-./windows_vnet/test/ref/ref.vcproj
-./windows_vnet/test/refdll/refdll.vcproj
 ./windows_vnet/test/reserved/reserved.vcproj
 ./windows_vnet/test/reserveddll/reserveddll.vcproj
 ./windows_vnet/test/set_extent/set_extent.vcproj
