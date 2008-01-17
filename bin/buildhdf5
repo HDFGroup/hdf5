@@ -28,7 +28,7 @@ can continue from a previous build.
 
 Command Syntax
 ==============
-buildhdf5 [-config] [-srcdir dir] config-arguments ...
+buildhdf5 [-config] [-szlib] [-help] [-n] [-srcdir dir] [-fortran] [-cxx] [-pp] config-arguments ...
    -config:	run configure only. [default to do build too]
    -szlib:      configure in the szlib option
    -help:	show this help page
@@ -36,6 +36,9 @@ buildhdf5 [-config] [-srcdir dir] config-arguments ...
    -srcdir:	use dir as the source directory
              	   [Note: this is different from --srcdir
              	    which will be passed to configure]
+   -fortran:	add --enable-fortran
+   -cxx:	add --enable-cxx
+   -pp:		add --enable-parallel
    all other arguments are passed to configure
 
 
@@ -93,44 +96,111 @@ STEP()
 # This is a hack because there is no consistent szlib pathname.
 LOCATE_SZLIB()
 {
-    OS=`uname -s`
-    echo OS=$OS
-    case "$OS" in
-	HP-UX)
-	    szlibpaths="/afs/ncsa/projects/hdf/packages/szip_new/HPUX-11.00"
-	    ;;
-	IRIX)
-	    szlibpaths="/afs/ncsa/projects/hdf/packages/szip_new/IRIX64-6.5-32bit"
-	    ;;
-	IRIX64)
-	    case "$CC" in
-	    *-n32)
-		szlibpaths="/afs/ncsa/projects/hdf/packages/szip_new/IRIX64-6.5-32bit"
-		;;
-	    *)
-		szlibpaths="/afs/ncsa/projects/hdf/packages/szip_new/IRIX64-6.5"
-		;;
+    # Try to guess what domain I am in.
+    if [ -d /usr/hdf/bin ]; then
+	# I am in an THG host.
+	mydomain=thg
+    elif [ -d /afs/ncsa/projects/hdf/packages ]; then
+	# I am in an NCSA host that has AFS.
+	mydomain=ncsa
+    else
+	mydomain=unknown
+    fi
+    
+    case $mydomain in
+	thg)
+	    # THG hosts
+	    OS=`uname -s`
+	    echo OS=$OS
+	    case "$OS" in
+		Linux)
+		    case `uname -m` in
+		    i686)	# 32 bits
+			szlibpaths="/home/packages/szip/static/encoder/Linux2.6-gcc"
+			;;
+		    x86_64)	# 64 bits
+			szlibpaths="/home/packages/szip/static/encoder/Linux2.6-x86_64-gcc"
+			;;
+		    *)
+			# Don't know.  Give a shot at standard places.
+			szlibpaths="/usr/hdf /usr/local"
+			;;
+		    esac
+		    ;;
+		SunOS)
+		    szlibpaths="/home/packages/szip/static/encoder/SunOS-5.10"
+		    ;;
+		FreeBSD)
+		    case `uname -m` in
+		    i386)	# 32 bits
+			szlibpaths="/home/packages/szip/static/encoder/FreeBSD"
+			;;
+		    amd64)	# 64 bits
+			szlibpaths="/home/packages/szip/static/encoder/FreeBSD-64"
+			;;
+		    *)
+			# Don't know.  Give a shot at standard places.
+			szlibpaths="/usr/hdf /usr/local"
+			;;
+		    esac
+		    ;;
+		*)
+		    # Don't know.  Give a shot at standard places.
+		    szlibpaths="/usr/hdf /usr/local"
+		    ;;
 	    esac
-	    ;;
-	Linux)
-	    case `uname -m` in
-	    i686)
-		szlibpaths="/afs/ncsa/projects/hdf/packages/szip_new/Linux2.4"
-		;;
-	    *)
-		# Don't know.  Give a shot at standard places.
-		szlibpaths="/usr/ncsa /usr/sdt"
-		;;
+	    ;;	# end of case thg
+	ncsa)
+	    # ncsa hosts
+	    OS=`uname -s`
+	    echo OS=$OS
+	    case "$OS" in
+		HP-UX)
+		    szlibpaths="/afs/ncsa/projects/hdf/packages/szip_new/HPUX-11.00"
+		    ;;
+		IRIX)
+		    szlibpaths="/afs/ncsa/projects/hdf/packages/szip_new/IRIX64-6.5-32bit"
+		    ;;
+		IRIX64)
+		    case "$CC" in
+		    *-n32)
+			szlibpaths="/afs/ncsa/projects/hdf/packages/szip_new/IRIX64-6.5-32bit"
+			;;
+		    *)
+			szlibpaths="/afs/ncsa/projects/hdf/packages/szip_new/IRIX64-6.5"
+			;;
+		    esac
+		    ;;
+		Linux)
+		    case `uname -m` in
+		    i686)
+			szlibpaths="/afs/ncsa/projects/hdf/packages/szip_new/Linux2.4"
+			;;
+		    *)
+			# Don't know.  Give a shot at standard places.
+			szlibpaths="/usr/ncsa /usr/sdt"
+			;;
+		    esac
+		    ;;
+		SunOS)
+		    szlibpaths="/afs/ncsa/projects/hdf/packages/szip_new/SunOS_5.8"
+		    ;;
+		*)
+		    # Don't know.  Give a shot at standard places.
+		    szlibpaths="/usr/ncsa /usr/sdt"
+		    ;;
 	    esac
+	    ;;	# end of case ncsa
+	unknown)
+	    # Unknow domain. Give a shot at the some standard places.
+	    szlibpaths="/usr/local"
 	    ;;
-	SunOS)
-	    szlibpaths="/afs/ncsa/projects/hdf/packages/szip_new/SunOS_5.8"
-	    ;;
-	*)
-	    # Don't know.  Give a shot at standard places.
-	    szlibpaths="/usr/ncsa /usr/sdt"
-	    ;;
-    esac
+    esac	# end of case $mydomain
+
+
+
+
+
     echo szlibpaths=$szlibpaths
     for x in $szlibpaths dummy; do
 	if [ $x != dummy -a -f $x/include/szlib.h -a -f $x/lib/libsz.a ]; then
@@ -178,6 +248,9 @@ while [ $# -gt 0 ]; do
 	    # do configure only
 	    CONFIG_ONLY=yes
 	    ;;
+	-szlib)
+	    LOCATE_SZLIB
+	    ;;
 	-help)
 	    USAGE
 	    exit 0
@@ -189,8 +262,14 @@ while [ $# -gt 0 ]; do
 	    shift
 	    SRCDIRLIST="$1"
 	    ;;
-	-szlib)
-	    LOCATE_SZLIB
+	-cxx)
+	    CONFIG_CXX="--enable-cxx"
+	    ;;
+	-fortran)
+	    CONFIG_FORTRAN="--enable-fortran"
+	    ;;
+	-pp)
+	    CONFIG_PARALLEL="--enable-parallel"
 	    ;;
 	*)	# Quit parsing
 	    break
@@ -218,7 +297,7 @@ if [ x-$SRCDIR = x-dummy ]; then
 fi
 
 # Setup Configure options
-CONFIG_OP="$WITH_SZLIB"
+CONFIG_OP="$WITH_SZLIB $CONFIG_FORTRAN $CONFIG_CXX $CONFIG_PARALLEL"
 
 # Configure
 # no configure if already done.
