@@ -967,6 +967,9 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t buf_size, const void *
             need_more = need_size;
 
 	new_heap_alloc = heap->heap_alloc + need_more;
+#if 0 /* JRM */ /* delete this once we are convinced that the general 
+		 * fix will do the job.
+		 */
 /*
  * XXX: This is a _total_ hack, a real kludge. :-/  The metadata cache currently
  *      responds very poorly when an object is inserted into the cache (or
@@ -1002,6 +1005,7 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t buf_size, const void *
 	        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (size_t)-1, "H5AC_set_cache_auto_resize_config() failed.")
         } /* end if */
 }
+#endif /* JRM */
 	HDassert(heap->heap_alloc < new_heap_alloc);
 	H5_CHECK_OVERFLOW(heap->heap_alloc, size_t, hsize_t);
 	H5_CHECK_OVERFLOW(new_heap_alloc, size_t, hsize_t);
