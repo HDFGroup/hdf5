@@ -87,7 +87,7 @@ static void check_and_validate_cache_size(hid_t file_id,
                                           int32_t * cur_num_entries_ptr,
                                           hbool_t dump_data);
 
-static void mdc_api_call_smoke_check(void);
+static void mdc_api_call_smoke_check(int express_test);
 
 static void check_fapl_mdc_api_errs(void);
 
@@ -1376,7 +1376,7 @@ check_and_validate_cache_size(hid_t file_id,
 #define NUM_RANDOM_ACCESSES     200000
 
 static void
-mdc_api_call_smoke_check(void)
+mdc_api_call_smoke_check(int express_test)
 {
     const char * fcn_name = "mdc_api_call_smoke_check()";
     char filename[512];
@@ -1503,6 +1503,15 @@ mdc_api_call_smoke_check(void)
     };
 
     TESTING("MDC API smoke check");
+
+    if ( express_test > 0 ) {
+
+        SKIPPED();
+
+        HDfprintf(stdout, "     Long tests disabled.\n");
+
+        return;
+    }
 
     pass = TRUE;
 
@@ -4022,15 +4031,11 @@ check_file_mdc_api_errs(void)
 int
 main(void)
 {
+    int express_test;
+
     H5open();
 
-    skip_long_tests = FALSE;
-
-#ifdef NDEBUG
-    run_full_test = TRUE;
-#else /* NDEBUG */
-    run_full_test = FALSE;
-#endif /* NDEBUG */
+    express_test = GetTestExpress();
 
 #if 1
     check_fapl_mdc_api_calls();
@@ -4038,8 +4043,8 @@ main(void)
 #if 1
     check_file_mdc_api_calls();
 #endif
-#if 0
-    mdc_api_call_smoke_check();
+#if 1
+    mdc_api_call_smoke_check(express_test);
 #endif
 #if 1
     check_fapl_mdc_api_errs();

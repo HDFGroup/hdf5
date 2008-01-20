@@ -37,7 +37,7 @@
 #include "H5Fprivate.h"		/* File access				*/
 
 
-#define H5C_DO_SANITY_CHECKS		1
+#define H5C_DO_SANITY_CHECKS		0
 #define H5C_DO_EXTREME_SANITY_CHECKS	0
 
 /* This sanity checking constant was picked out of the air.  Increase
@@ -51,7 +51,7 @@
 /* H5C_COLLECT_CACHE_STATS controls overall collection of statistics
  * on cache activity.  In general, this #define should be set to 0.
  */
-#define H5C_COLLECT_CACHE_STATS	1
+#define H5C_COLLECT_CACHE_STATS	0
 
 /* H5C_COLLECT_CACHE_ENTRY_STATS controls collection of statistics
  * in individual cache entries.
@@ -202,6 +202,27 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t * cache_ptr,
  *
  *						JRM - 4/26/04
  *
+ * magic:       Unsigned 32 bit integer that must always be set to
+ *              H5C__H5C_CACHE_ENTRY_T_MAGIC when the entry is valid.
+ *              The field must be set to H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC
+ *              just before the entry is freed.
+ *
+ *              This is necessary, as the LRU list can be changed out
+ *              from under H5C_make_space_in_cache() by the flush
+ *              callback which may change the size of an existing entry,
+ *              and/or load a new entry while serializing the target entry.
+ *
+ *              This in turn can cause a recursive call to
+ *              H5C_make_space_in_cache() which may either flush or evict
+ *              the next entry that the first invocation of that function
+ *              was about to examine.
+ *
+ *              The magic field allows H5C_make_space_in_cache() to
+ *              detect this case, and re-start its scan from the bottom
+ *              of the LRU when this situation occurs.
+ *
+ *              This field is only compiled in debug mode.
+ * 
  * addr:	Base address of the cache entry on disk.
  *
  * size:	Length of the cache entry on disk.  Note that unlike normal
@@ -442,8 +463,16 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t * cache_ptr,
  *
  ****************************************************************************/
 
+#ifndef NDEBUG
+#define H5C__H5C_CACHE_ENTRY_T_MAGIC          0x005CAC0A
+#define H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC      0xDeadBeef
+#endif /* NDEBUG */
+
 typedef struct H5C_cache_entry_t
 {
+#ifndef NDEBUG
+    uint32_t		magic;
+#endif /* NDEBUG */
     haddr_t		addr;
     size_t		size;
     const H5C_class_t *	type;
