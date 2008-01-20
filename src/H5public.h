@@ -76,9 +76,9 @@ extern "C" {
 #define H5_VERS_MAJOR	1	/* For major interface/format changes  	     */
 #define H5_VERS_MINOR	6	/* For minor interface/format changes  	     */
 #define H5_VERS_RELEASE	6	/* For tweaks, bug-fixes, or development     */
-#define H5_VERS_SUBRELEASE "post5"	/* For pre-releases like snap0       */
+#define H5_VERS_SUBRELEASE "post6"	/* For pre-releases like snap0       */
 				/* Empty string for real releases.           */
-#define H5_VERS_INFO    "HDF5 library version: 1.6.6-post5"      /* Full version string */
+#define H5_VERS_INFO    "HDF5 library version: 1.6.6-post6"      /* Full version string */
 
 #define H5check()	H5check_version(H5_VERS_MAJOR,H5_VERS_MINOR,	      \
 				        H5_VERS_RELEASE)
