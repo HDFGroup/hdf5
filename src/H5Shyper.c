@@ -2586,7 +2586,7 @@ H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock,
     herr_t ret_value;        /* return value */
 
     FUNC_ENTER_API(H5Sget_select_hyper_blocklist, FAIL);
-    H5TRACE4("e", "ihh*h", spaceid, startblock, numblocks, buf);
+    H5TRACE4("e", "ihh*[a2]h", spaceid, startblock, numblocks, buf);
 
     /* Check args */
     if(buf==NULL)

@@ -991,7 +991,7 @@ H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint,
     herr_t ret_value;        /* return value */
 
     FUNC_ENTER_API(H5Sget_select_elem_pointlist, FAIL);
-    H5TRACE4("e", "ihh*h", spaceid, startpoint, numpoints, buf);
+    H5TRACE4("e", "ihh*[a2]h", spaceid, startpoint, numpoints, buf);
 
     /* Check args */
     if(buf==NULL)
