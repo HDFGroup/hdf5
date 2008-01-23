@@ -9234,10 +9234,6 @@ H5C__flash_increase_cache_size(H5C_t * cache_ptr,
     double			hit_rate;
 
     FUNC_ENTER_NOAPI_NOINIT(H5C__flash_increase_cache_size)
-#if 0
-    HDfprintf(stdout, "%s: old = %ld, new = %ld.\n", fcn_name,
-	      (long)old_entry_size, (long)new_entry_size);
-#endif
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
     HDassert( cache_ptr->flash_size_increase_possible );
@@ -10809,17 +10805,22 @@ H5C_make_space_in_cache(H5F_t *	f,
 
                 } else 
 #endif /* NDEBUG */
-		if ( ( prev_ptr->is_dirty != prev_is_dirty )
-                     ||
-                     ( prev_ptr->next != next_ptr )
-                     ||
-                     ( prev_ptr->is_protected )
-                     ||
-                     ( prev_ptr->is_pinned ) ) {
+		if ( (entry_ptr->type)->id == H5C__EPOCH_MARKER_TYPE ) {
+	
+		    entry_ptr = prev_ptr;
+
+		} else if ( ( prev_ptr->is_dirty != prev_is_dirty )
+                            ||
+                            ( prev_ptr->next != next_ptr )
+                            ||
+                            ( prev_ptr->is_protected )
+                            ||
+                            ( prev_ptr->is_pinned ) ) {
 
                     /* something has happened to the LRU -- start over
                      * from the tail.
                      */
+
                     entry_ptr = cache_ptr->LRU_tail_ptr;
 
                 } else {
