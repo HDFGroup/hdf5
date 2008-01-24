@@ -1,11 +1,11 @@
-HDF5 version 1.6.6-post5 released on Sun Jan 20 18:11:14 CST 2008
+HDF5 version 1.6.7-rc1 released on Wed Jan 23 22:25:36 CST 2008
 ================================================================================
 
 INTRODUCTION
 ============
 This document describes the differences between HDF5-1.6.6 and
-HDF5-1.6.6-*  It contains information on the platforms tested and
-known problems in HDF5-1.6.6-*. For more details, check the HISTORY.txt
+HDF5-1.6.7  It contains information on the platforms tested and
+known problems in HDF5-1.6.7. For more details, check the HISTORY.txt
 file in the HDF5 source.
 
 HDF5 documentation can be found in the distributed release source 
@@ -42,23 +42,29 @@ New Features
 ============
     Configuration:
     -------------------------
+    None
 
     Source code distribution
     ========================
     Library:
     --------
+    None
 
     Parallel Library:
     -----------------
-      
+    None      
+
     Tools:
     ------
+    None
 
     F90 API:
     --------
+    None
 
     C++ API:
     --------
+    None
 
 
 Support for New Platforms, Languages and Compilers
@@ -78,26 +84,32 @@ Bug Fixes since HDF5-1.6.6 Release
 
     Configuration
     -------------
+     None
 
 
     Performance
     -------------
+     None
    
 
     Tools
     -----
+     None
 
 
     Documentation 
     ------------- 
+     None
 
 
     F90 API
     -------
+     None
 
                                 
     C++ API
     -------
+     None
 
 
 Documentation
@@ -131,9 +143,6 @@ Platforms Tested
     FreeBSD 6.2 (32- and 64-bit)  gcc  and g++3.4.6
     (duty and liberty)            gcc and g++ 4.2.1
 
-    HP-UX B.11.23                 HP aC++/ANSI C B3910B A.06.02
-    (sirius)                      HP F90 v3.1 (32-bit only)
-                                  HP aC++/ANSI C B3910B A.06.02
 
     IRIX64 6.5                    MIPSpro cc 7.4.4m
     (ucar mop1 64 & n32)          F90 MIPSpro 7.4.4m (64 only)
@@ -170,10 +179,6 @@ Platforms Tested
     (cobalt)                      Intel(R) Fortran Itanium(R) Version 9.0
                                   SGI MPI
 
-    OSF1 V5.1 (QSC)               Compaq C V6.5-011 
-    (See "Known Problems.")       HP Fortran V5.5A-3548
-                                  Compaq C++ V6.5-036  
-                                  MPIX200_64_r13.4
 
     SunOS 5.8 32- and 64-bit      Sun WorkShop 6 update 2 C 5.3
     (sol)                         Sun WorkShop 6 update 2 Fortran 95 6.2
