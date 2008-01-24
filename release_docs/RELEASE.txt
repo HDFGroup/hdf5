@@ -484,7 +484,7 @@ New Features
 
     C++ Library:
     ----------------
-         - added support for shared C++ libraries.  -JML 2005/09/20
+        - added support for shared C++ libraries.  -JML 2005/09/20
         - Added missing member functions
                 H5::CompType::getMemberArrayType
                 H5::CompType::getMemberVarLenType
@@ -501,10 +501,10 @@ New Features
 
     Tools:
     ------
-	    - h5repack and h5diff changed command line parameter syntax to be
-		   similar to h5dump, adding also long switch names. PVN - 2008/1/16
+        - h5repack and h5diff changed command line parameter syntax to be
+           similar to h5dump, adding also long switch names. PVN - 2008/1/16
      	- h5repack now supports adding multiple filters to all objects. 
-		   PVN - 2008/1/16
+	   PVN - 2008/1/16
         - h5dump lists groups and attributes in requested orders (by name and 
            creation order, both ascending and descending). PVN - 2007/10/5
         - h5import imports string (text) data. PVN - 2007/10/5
@@ -957,10 +957,10 @@ Bug Fixes since HDF5-1.6.0 release
            selections. PVN 2008/01/16
         - Fixed h5diff regarding the display of NaN (Not a Number)
            values. PVN 2008/01/16
-		- Fixed h5dump regarding the parsing of binary output parameters. 
-		   PVN 2008/01/16
-		- Fixed memory problems in h52gif and gif2h5. PVN 2008/01/16
-		- Fixed h5repack dealing with NULL references. PVN 2008/01/16 
+	- Fixed h5dump regarding the parsing of binary output parameters. 
+           PVN 2008/01/16
+	- Fixed memory problems in h52gif and gif2h5. PVN 2008/01/16
+	- Fixed h5repack dealing with NULL references. PVN 2008/01/16 
         - Fixed h5dump & h5ls to display attributes in "name" order, rather
            than the order they are encountered in the object header.
            QAK - 2007/10/04
@@ -973,7 +973,7 @@ Bug Fixes since HDF5-1.6.0 release
         - Fixed h5diff percentage option -p. PVN 2007/03/05
         - Fixed h5dump that caused array indices greater than 2 ^32-1
            not to be printed correctly - PVN 2007/2/19
-	  - Fixed h5dump to print attributes data in ASCII if -r option is used.
+        - Fixed h5dump to print attributes data in ASCII if -r option is used.
 	    AKC - 2004/11/18
         - Fixed space utilization reported in h5ls to correct error in formula
             used.  QAK - 2004/10/22
