@@ -76,6 +76,13 @@ Bug Fixes since HDF5-1.6.6 Release
 
     Library
     -------
+        - Changed library's behavior for reading files that might have
+            corrupted object header information from a previous (buggy)
+            version of the library.  By default, the library now rebuilds the
+            correct object header information instead of issuing an error.
+            Previous "strict" file format interpretation can be enabled with
+            the "--enable-strict-format-checks" configure option.
+            QAK - 2008/01/13
         - Fixed bug in H5Epush() which was clearing the error stack before
             pushing new error value.  QAK - 2007/08/23
         - Fixed bug in H5Ewalk() which was not passing back the return value
