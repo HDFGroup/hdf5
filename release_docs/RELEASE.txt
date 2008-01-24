@@ -633,6 +633,13 @@ Bug Fixes since HDF5-1.6.0 release
 
     Library
     -------
+        - Changed library's behavior for reading files that might have
+            corrupted object header information from a previous (buggy)
+            version of the library.  By default, the library now rebuilds the
+            correct object header information instead of issuing an error.
+            Previous "strict" file format interpretation can be enabled with
+            the "--enable-strict-format-checks" configure option.
+            QAK - 2008/01/13
         - Fixed several bugs with writing fill values for datasets that have
             a variable-length datatype or component datatype.  QAK - 2007/06/19
         - STDIO driver didn't support files bigger than 2GB because the OFFSET
