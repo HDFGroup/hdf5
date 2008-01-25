@@ -10296,6 +10296,17 @@ H5C_flush_single_entry(H5F_t *		   f,
         /* Clear the dirty flag only, if requested */
         if ( clear_only ) {
 
+#ifndef NDEBUG
+	    if ( destroy ) {
+		/* we are about to call the clear callback with the 
+		 * destroy flag set -- this will result in *entry_ptr
+		 * being freed.  Set the magic field to bad magic
+		 * so we can detect a freed cache entry if we see
+		 * one.
+		 */
+		entry_ptr->magic = H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC;
+	    }
+#endif /* NDEBUG */
             /* Call the callback routine to clear all dirty flags for object */
             if ( (entry_ptr->type->clear)(f, entry_ptr, destroy) < 0 ) {
 
@@ -10313,21 +10324,23 @@ H5C_flush_single_entry(H5F_t *		   f,
             }
 #endif /* H5C_DO_SANITY_CHECKS */
 
+#ifndef NDEBUG
+	    if ( destroy ) {
+	        /* we are about to call the flush callback with the 
+	         * destroy flag set -- this will result in *entry_ptr
+	         * being freed.  Set the magic field to bad magic
+	         * so we can detect a freed cache entry if we see
+	         * one.
+	         */
+	        entry_ptr->magic = H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC;
+	    }
+#endif /* NDEBUG */
+
             /* Only block for all the processes on the first piece of metadata
              */
 
             if ( *first_flush_ptr && entry_ptr->is_dirty ) {
-#ifndef NDEBUG
-		if ( destroy ) {
-		    /* we are about to call the flush callback with the 
-		     * destroy flag set -- this will result in *entry_ptr
-		     * being freed.  Set the magic field to bad magic
-		     * so we can detect a freed cache entry if we see
-		     * one.
-		     */
-		    entry_ptr->magic = H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC;
-		}
-#endif /* NDEBUG */
+
                 status = (entry_ptr->type->flush)(f, primary_dxpl_id, destroy,
                                                  entry_ptr->addr, entry_ptr,
 						 &flush_flags);
@@ -10716,6 +10729,7 @@ H5C_make_space_in_cache(H5F_t *	f,
     size_t		empty_space;
 #endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
     hbool_t             prev_is_dirty = FALSE;
+    hbool_t             entry_is_epoch_maker = FALSE;
     H5C_cache_entry_t *	entry_ptr;
     H5C_cache_entry_t *	next_ptr;
     H5C_cache_entry_t *	prev_ptr;
@@ -10756,6 +10770,8 @@ H5C_make_space_in_cache(H5F_t *	f,
 
             if ( (entry_ptr->type)->id != H5C__EPOCH_MARKER_TYPE ) {
 
+                entry_is_epoch_maker = FALSE;
+
                 if ( entry_ptr->is_dirty ) {
 
                     result = H5C_flush_single_entry(f,
@@ -10784,6 +10800,7 @@ H5C_make_space_in_cache(H5F_t *	f,
                 /* Skip epoch markers.  Set result to SUCCEED to avoid
                  * triggering the error code below.
                  */
+                entry_is_epoch_maker = TRUE;
                 result = SUCCEED;
             }
 
@@ -10803,9 +10820,9 @@ H5C_make_space_in_cache(H5F_t *	f,
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                                 "*prev_ptr corrupt 1")
 
-                } else 
+                }
 #endif /* NDEBUG */
-		if ( (entry_ptr->type)->id == H5C__EPOCH_MARKER_TYPE ) {
+		if ( entry_is_epoch_maker ) {
 	
 		    entry_ptr = prev_ptr;
 
