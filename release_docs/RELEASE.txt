@@ -137,11 +137,9 @@ Documentation
 Platforms Tested
 ================
 
-    AIX 5.2 (32/64 bit)           xlc 6.0.0.8
-    (datastar)                    xlC 6.0.0.9
-                                  xlf 8.1.1.7
-                                  mpcc_r 6.0.0.8
-                                  mpxlf_r 8.1.1.7
+    AIX 5.2 (32/64 bit)           xlc 8.0.0.11
+    (datastar)                    xlC 8.0
+                                  xlf 10.01.0000.0002
 
     AIX 5.3 (32/64 bit)           xlc 7.0.0.0
     (copper)                      xlC 7.0.
