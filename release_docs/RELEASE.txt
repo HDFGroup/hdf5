@@ -214,10 +214,11 @@ Platforms Tested
                                   mpich-gm-1.2.5..10-intel-r2
 
     Windows XP                    Visual Studio 6.0
-                                  Visual Studio .NET (with Intel Fortran 9.0)
-                                  Visual Studio 2005 (with Intel Fortran 9.0)
+                                  Visual Studio .NET (with Intel Fortran 9.1)
+                                  Visual Studio 2005 (with Intel Fortran 9.1)
                                   cygwin (gcc 3.4.4)
 
+    Windows Vista                 Visual studio 2005
     MAC OS X Intel                Darwin 8.10.1
                                   i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1
                                   g95 0.91
@@ -244,6 +245,7 @@ WinXP Visual Studio 6.0               n        n    n        y    y     y
 WinXP CYGWIN                          n        n    n        y    y     y
 WinXP 2005                            n        y    n        y    y     y
 WinXP .Net                            n        y    n        y    y     y
+WinVista 2005                         n        n    n        y    y     y
 Mac OS X 10.4.10                      n        y    n        y    y     y
 AIX-5.2 & 5.3 32- and 64-bit          y        y    y        y    y     y
 FreeBSD 6.2 32- and 64-bit            n        n    n        y    y     y
@@ -274,6 +276,7 @@ WinXP Visual Studio 6.0               y             n        n        n
 WinXP CYGWIN                          y             n        n        n
 WinXP 2005                            y             n        n        n
 WinXP .Net                            y             n        n        n
+WinVista 2005                         y             n        n        n
 Mac OS X 10.4.10                      y             n        n        y
 AIX-5.2 & 5.3 32- and 64-bit          n             n        n        y
 FreeBSD 6.2 32- and 64-bit            y             n        n        y
