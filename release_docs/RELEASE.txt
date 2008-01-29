@@ -1027,10 +1027,10 @@ Platforms marked with * were not tested for hdf5-1.8.0-rc* release
 *   HP-UX B.11.23                 HP aC++/ANSI C B3910B A.06.00
                                   HP F90 v2.9.2
                                   HP aC++/ANSI C B3910B A.06.00
-*   IRIX64 6.5 (64 & n32)         MIPSpro cc 7.4.4m
+    IRIX64 6.5 (64 & n32)         MIPSpro cc 7.4.4m
                                   F90 MIPSpro 7.4.4m 
                                   C++ MIPSpro cc 7.4.4m
-				  mpt 1.6
+				 
 *   Linux 2.6.9 (RHEL4)           Intel 10.0 compilers
     (abe.ncsa.uiuc.edu)
     Linux 2.4.21-40               gcc 3.2.3
