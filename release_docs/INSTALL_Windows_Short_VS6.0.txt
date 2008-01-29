@@ -1,9 +1,9 @@
-HDF5 Build and Install Instructions for Windows 2000/XP (Short Version)
+HDF5 Build and Install Instructions for Windows XP (Short Version)
 ------------------------------------------------------------------------
 Note: This short instruction is written for users who want to quickly
       build HDF5 library and tools from the HDF5 source code package
       but do not want to know HDF5 building and installation details
-      on Windows 2000/XP.  This is written for the Microsoft Visual
+      on Windows XP.  This is written for the Microsoft Visual
       Studio 6.0 compiler.
          
       For detailed HDF5 build and install information, or if you have

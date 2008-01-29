@@ -1,5 +1,5 @@
       Instructions for Building and Testing HDF5 on Command Line
-                         for Windows XP/2000
+                         for Windows XP
 
 ************************************************************************
 Note: This instruction is written for users who would like to build HDF5

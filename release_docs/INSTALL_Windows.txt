@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------
-HDF5 Build and Install Instructions for Windows 2000/XP (Full Version)
+HDF5 Build and Install Instructions for Windows XP/VISTA 
 ----------------------------------------------------------------------
 
 The following instructions assume that the HDF5 source code package 
@@ -57,9 +57,9 @@ Preconditions
           to ftp://ftp.hdfgroup.org/lib-external/zlib/1.2/bin/windows 
           to download the Zlib library.
       
-      4.2 HDF5 uses Szip version 2.0 for compression and Szip
+      4.2 HDF5 uses Szip for compression and Szip
           compression software is provided with HDF5 products starting
-          from 1.6.0 release.  To use Szip 2.0 library, you can
+          from 1.6.0 release.  To use Szip 2.1 library, you can
           download Szip source codes and binaries from
           ftp://ftp.hdfgroup.org/lib-external/szip/2.1/bin/windows
 
@@ -90,7 +90,7 @@ Preconditions
       under "User Variables" box.
       
       In the New Variable window, set "Variable name" as HDF5_EXT_ZLIB
-      and "Variable value" as zdll.lib, then click OK.
+      and "Variable value" as zlib1.lib, then click OK.
       
       Similarly, you can set:
 
@@ -101,7 +101,7 @@ Preconditions
          a. You might have to close and reopen running programs for
             the new environment variable settings to take effect. 
 
-         b. c:\zlib122\zlib1.dll and c:\szip\dll\szlibdll.dll should
+         b. c:\zlib123\zlib1.dll and c:\szip\dll\szlibdll.dll should
             be copied into the location that the application can find,
             one suggestion is to use the c:\WINNT\system or
             c:\WINDOWS\system
@@ -120,16 +120,16 @@ Preconditions
       6.1 Find the box "Show directories for", choose 
           "Include files",
           If you cannot find your Zlib and Szip header path
-          (for example, c:\zlib122\include, c:\szip\include)
+          (for example, c:\zlib123\include, c:\szip\include)
           from the directory list, add the header path
-          (c:\zlib122\include, c:\szip\include) to the 
+          (c:\zlib123\include, c:\szip\include) to the 
           included directories.
       
       6.2 Find the box "Show directories for", choose "Library files",
           If you cannot find your Zlib and Szip library path
-          (for example, c:\zlib122\lib, c:\szip\dll)
+          (for example, c:\zlib123\lib, c:\szip\dll)
           from the directory list, add the library path
-          (c:\zlib122\lib, c:\szip\dll) to the library directories.
+          (c:\zlib123\lib, c:\szip\dll) to the library directories.
       
 Notes
 
@@ -176,7 +176,8 @@ The following sections discuss installation procedures in detail:
    Section VII : How to Build with Intel Fortran 9.1
    Section VIII: How to build and test HDF5 snapshot release
    Section IX  : How to build HDF5 Multithreaded Static Library
-   Section X   : Misc. 
+   Section X   : Build HDF5 on Windows Vista
+
 
 ---------------------------------------------------------------------
 
@@ -824,7 +825,7 @@ Section III: Building an application using the HDF5 library or DLL
        add HDF5, Zlib, and Szip header files directories.  For example:
        
           c:\MyHDFstuff\hdf5\hdf5lib\include
-          c:\zlib122\include
+          c:\zlib123\include
           c:\szip\include
 
        Then click OK.
@@ -870,8 +871,8 @@ Section III: Building an application using the HDF5 library or DLL
        
           c:\MyHDFstuff\hdf5\hdf5lib\include
           c:\MyHDFstuff\hdf5\hdf5lib\lib
-          c:\zlib122\include
-          c:\zlib122\lib
+          c:\zlib123\include
+          c:\zlib123\lib
           c:\szip\include
           c:\szip\dll
 
@@ -1135,9 +1136,9 @@ Section VII: Building with Intel Fortran 9.1
       menu, Go to Tools > Options > Intel(R) Fortran.
       In the right panel, make sure you "Selected Compiler" is Intel Fortran 9.1.
       Click rightmost box for "Libraries",
-      Add Zlib and Szip Library Path (c:\zlib122\lib, c:\szip\dll for example)
+      Add Zlib and Szip Library Path (c:\zlib123\lib, c:\szip\dll for example)
       Click rightmost box for "Includes",
-      Add Zlib and Szip header path (c:\zlib122\include c:\szip\include, for example).
+      Add Zlib and Szip header path (c:\zlib123\include c:\szip\include, for example).
       Then click "OK".
 
 
@@ -1472,30 +1473,33 @@ Section IX: How to build Multi-threaded version of HDF5 library
          
     5. Go back to Section II, Step 1 (4), continue to build and test HDF5 library.
 
+Section IX: How to build HDF5 on windows Vista
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Building on Windows Vista is very similar to building on Windows XP, with
+some minor changes.  Therefore, follow the build instructions above, with the
+following considerations:
 
-Section X: Misc.
-~~~~~~~~~~~~~~~~~~~
+    1. Only Visual Studio 2005 is currently supported on Windows Vista.  This
+       is because Microsoft has ended their support for 6.0 and .NET.
+       
+    2. Building Fortran libraries has not been tested, and is therefore also
+       unsupported.  You may attempt to build Fortran libraries following the
+       instructions above, but they should be considered experimental and used
+       for testing only.
+       
+    3. Elevated security permissions are required to test the HDF5 libraries.
+       This is because DLLs are installed in the system directory.  To enable
+       elevated security:
+       
+            1. In the Start menu, search for "Command Prompt".  Right click on
+               the "Command Prompt" program, and select "Run as administrator."
+               
+            2. A security dialog will pop up.  Make sure you select "Continue."
+            
+            3. Test HDF5 libraries and tools as usual using "hdf5check.bat"
+               script.
+			   
 
-    1) drivers we support
-
-    The default driver on windows we support is sec2 driver. However, 
-    stdio driver is also supported. If you want to use stdio driver 
-    in your application, you may set environment variable HDF5_DRIVER 
-    to "stdio".
-
-    On windows 2000/XP, the following steps should be followed to set
-    the environment variable,
-
-      a) Go to Control panel and find "system",
-      b) Click "system" and choose "advanced",
-      c) Choose Environment Variables
-      d) Add new variable "HDF5_DRIVER"
-      e) set the "HDF5_DRIVER" to "stdio"
-
-    Reminder: 
-    If you don't want to use stdio driver, please remember to 
-    delete the environment variable "HDF5_DRIVER" or change the 
-    variable value to "sec2".
 
 *******************************************************************
 Please send email to help@hdfgroup.org for further assistance.
