@@ -1,6 +1,6 @@
 
 ***********************************************************************
-*        HDF5 Build and Install Instructions for Windows XP           *
+*        HDF5 Build and Install Instructions for Windows XP/VISTA     *
 *                         (Full Version)                              *
 ***********************************************************************
 
@@ -16,13 +16,14 @@ Contents:
    Section I     :  What do we build and install
    Section II    :  How to build and test HDF5 libraries and tools
    Section III   :  How to build examples (optional)
-   Section IV    :  How to build an application using the HDF5 library or DLL
+   Section IV    :  How to build an application using the HDF5 library  or DLL
    Section V     :  How to disable Gzip(Zlib)/Szip compression
    Section VI    :  How to build HDF5 with Fortran Support
    Section VII   :  How to build Multi-threaded version of HDF5 library
    Section VIII  :  How to build HDF5 with Thread-Safe Feature
    Section IX    :  How to build HDF5 for 64-bit Windows
-   Section X     :  Misc.
+   Section X     :  How to build HDF5 on windows vista
+   Section XI    :  Misc.
 
 
 ========================================================================
@@ -108,7 +109,7 @@ Preconditions:
       Variables" box.
 
       In the New Variable window, set "Variable name" as HDF5_EXT_ZLIB and 
-      "Variable value" as zdll.lib, then click OK.
+      "Variable value" as zlib1.lib, then click OK.
 
       Similarly, you can set:
 
@@ -151,12 +152,11 @@ Notes:
       directory, run copy_hdf.bat first and then open all.dsw under 
       hdf5/windows/proj/all to start building process.
 
-   2. Visual Studio 6.0 is no longer supported.  If you were previously using
-      Visual Studio 6.0, please upgrade to Visual Studio .NET or 2005.
+   2. Visual Studio 6.0 will not be supported in HDF5 1.8 or later release.
 
    2. Users who prefer to use Visual Studio .NET can follow instructions in 
-      INSTALL_Windows_Short_Net.txt.  Note, however, that Visual Studio
-      .NET will not be supported in future versions of HDF5.
+      INSTALL_Windows_Short_Net.txt.  Note, however,  HDF5 fortran product
+	  will not be supported in HDF5 1.8 release.
 
    3. For users who want to quickly build HDF5 library or do not want to know 
       HDF5 building and installation details, please read the 
@@ -1371,7 +1371,7 @@ Notes: In Visual Studio 2005, the Single-threaded runtime libraries have been
        those two sections carefully before go to the following part.
 
        
-In Visual Studio .NET, users have the option of building multi-threaded
+In Visual Studio.Net, users have the option of building multi-threaded
 libraries by manipulating the project settings.  Otherwise, the build process
 is very much the same.  Therefore, follow the instructions below, and refer
 to the earlier sections of this document for details on building and testing.
@@ -1647,10 +1647,37 @@ Installing:
     into one folder, hdf5lib.  This script should work identically on 32- and 
     64-bit  builds.  Therefore, you may follow the instructions in Section II 
     about installing.  
- 
+	
+========================================================================
+ Section X: How to build HDF5 on windows Vista
+========================================================================
+Building on Windows Vista is very similar to building on Windows XP, with
+some minor changes.  Therefore, follow the build instructions above, with the
+following considerations:
+
+    1. Only Visual Studio 2005 is currently supported on Windows Vista.  This
+       is because Microsoft has ended their support for 6.0 and .NET.
+       
+    2. Building Fortran libraries has not been tested, and is therefore also
+       unsupported.  You may attempt to build Fortran libraries following the
+       instructions above, but they should be considered experimental and used
+       for testing only.
+       
+    3. Elevated security permissions are required to test the HDF5 libraries.
+       This is because DLLs are installed in the system directory.  To enable
+       elevated security:
+       
+            1. In the Start menu, search for "Command Prompt".  Right click on
+               the "Command Prompt" program, and select "Run as administrator."
+               
+            2. A security dialog will pop up.  Make sure you select "Continue."
+            
+            3. Test HDF5 libraries and tools as usual using "hdf5check.bat"
+               script.
+			   
  
 ========================================================================
-                            Section X: Misc.
+                            Section XI: Misc.
 ========================================================================
 
 1. Helpful Pointers
@@ -1679,6 +1706,7 @@ using the Visual C++ Development Environment.
 
     
 2. Backward compatibility with 1.6
+ THE FOLLOWING CONTENTS ARE OUT OF DATE. They are not correct. These should be updated.
     If you are going to use 1.6 APIs with 1.8 branch, you may do the 
     following two things:
         3.1 Uncomment out /*#define H5_WANT_H5_V1_6_COMPAT 1*/ inside 
