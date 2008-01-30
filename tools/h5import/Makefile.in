@@ -70,11 +70,11 @@ PROGRAMS = $(bin_PROGRAMS)
 h5import_SOURCES = h5import.c
 h5import_OBJECTS = h5import.$(OBJEXT)
 h5import_LDADD = $(LDADD)
-h5import_DEPENDENCIES = $(LIBHDF5) $(LIBH5TOOLS)
+h5import_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
 h5importtest_SOURCES = h5importtest.c
 h5importtest_OBJECTS = h5importtest.$(OBJEXT)
 h5importtest_LDADD = $(LDADD)
-h5importtest_DEPENDENCIES = $(LIBHDF5) $(LIBH5TOOLS)
+h5importtest_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)/src@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
 am__depfiles_maybe = depfiles
@@ -331,7 +331,7 @@ check_SCRIPT = h5importtestutil.sh
 SCRIPT_DEPEND = h5import$(EXEEXT)
 
 # All programs depend on the main hdf5 library and the tools library
-LDADD = $(LIBHDF5) $(LIBH5TOOLS)
+LDADD = $(LIBH5TOOLS) $(LIBHDF5)
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
