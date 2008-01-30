@@ -1440,7 +1440,7 @@ test_mount_after_unmount(hid_t fapl)
     *objname = '\0';
     if(H5Iget_name( gidAMXMY, objname, (size_t)NAME_BUF_SIZE ) < 0)
         TEST_ERROR
-    if(HDstrcmp(objname, ""))
+    if(HDstrcmp(objname, "/X/M/Y"))
         TEST_ERROR
 
     /* Rename object in file #3 that is "disconnected" from name hiearchy */
@@ -1460,7 +1460,7 @@ test_mount_after_unmount(hid_t fapl)
     *objname = '\0';
     if(H5Iget_name( gidAMXMY, objname, (size_t)NAME_BUF_SIZE ) < 0)
 	TEST_ERROR
-    if(HDstrcmp(objname, ""))
+    if(HDstrcmp(objname, "/X/M/Z"))
 	TEST_ERROR
 
     /* Mount fourth file */
@@ -3171,7 +3171,7 @@ test_close_parent(hid_t fapl)
     /* Check the name of "M" is not defined any longer */
     if((name_len = H5Iget_name(gidM, name, (size_t)NAME_BUF_SIZE )) < 0)
         TEST_ERROR
-    if(name_len != 0)
+    if(name_len == 0 || HDstrcmp(name, "/M"))
         TEST_ERROR
 
     /* Just file #2's underlying shared file should be open still */

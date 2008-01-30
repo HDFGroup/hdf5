@@ -177,6 +177,8 @@ H5_DLL herr_t H5G_name_free(H5G_entry_t *ent);
 H5_DLL  herr_t H5G_name_replace(int type, H5G_entry_t *loc,
         H5RS_str_t *dst_name, H5G_entry_t *dst_loc, H5G_names_op_t op);
 H5_DLL ssize_t H5G_get_name(hid_t id, char *name/*out*/, size_t size);
+H5_DLL ssize_t H5G_get_name_by_addr(hid_t file, hid_t dxpl_id, const H5G_entry_t *loc,
+        char *name, size_t size);
 
 #endif
 

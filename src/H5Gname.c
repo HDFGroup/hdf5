@@ -35,6 +35,7 @@
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MMprivate.h"        /* Memory wrappers                      */
 
 /* Private typedefs */
 
@@ -47,6 +48,19 @@ typedef struct H5G_names_t {
     H5RS_str_t  *dst_name;              /* Name of object relative to destination location */
 } H5G_names_t;
 
+/* Info to pass to the iteration function when building name */
+typedef struct H5G_gnba_iter_t {
+    /* In */
+    hid_t file;                 /* File ID */
+    const H5G_entry_t *loc;     /* The location of the object we're looking for */
+    hid_t dxpl_id;              /* DXPL for operations */
+
+    /* In/Out */
+    H5SL_t *grp_table;          /* Skip list for tracking visited nodes */
+
+    /* Out */
+    char *path;                 /* Name of the object */
+} H5G_gnba_iter_t;
 
 /* Private macros */
 
@@ -54,6 +68,9 @@ typedef struct H5G_names_t {
 
 /* Declare extern the PQ free list for the wrapped strings */
 H5FL_BLK_EXTERN(str_buf);
+
+/* Declare the free list to manage haddr_t's */
+H5FL_DEFINE_STATIC(haddr_t);
 
 /* PRIVATE PROTOTYPES */
 static htri_t H5G_common_path(const H5RS_str_t *fullpath_r, const H5RS_str_t *prefix_r);
@@ -63,6 +80,10 @@ static H5RS_str_t *H5G_build_fullpath_refstr_str(H5RS_str_t *path_r, const char 
 static herr_t H5G_name_move_path(H5RS_str_t **path_r_ptr,
     const char *full_suffix, const char *src_path, const char *dst_path);
 static int H5G_name_replace_cb(void *obj_ptr, hid_t obj_id, void *key);
+static herr_t H5G_free_grp_table_node(void *item, void *key, void *operator_data/*in,out*/);
+static char* H5G_string_append(char *dst, const char *src);
+static char* H5G_string_unappend(char *dst, const char *src);
+static herr_t H5G_get_name_by_addr_cb(hid_t gid, const char *path, void *_udata);
 
 
 /*-------------------------------------------------------------------------
@@ -351,33 +372,57 @@ done:
  * Programmer:	Quincey Koziol
  *              Tuesday, December 13, 2005
  *
+ * Modifications: Raymond Lu
+ * 		  15 Jan 2008
+ * 		  Added functionality to get the name for a reference data.
+ *                Borrowed most of the code from v1.8.
  *-------------------------------------------------------------------------
  */
 ssize_t
 H5G_get_name(hid_t id, char *name/*out*/, size_t size)
 {
     H5G_entry_t   *ent;       /*symbol table entry */
-    size_t        len = 0;
-    ssize_t       ret_value;
+    ssize_t       ret_value = FAIL;
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5G_get_name)
+    FUNC_ENTER_NOAPI(H5G_get_name, FAIL)
 
     /* get symbol table entry */
     if(NULL != (ent = H5G_loc(id))) {
+        ssize_t        len = 0;
+
+        /* If the user path is available and it's not "hidden", use it */
         if (ent->user_path_r != NULL && ent->obj_hidden == 0) {
             len = H5RS_len(ent->user_path_r);
 
             if(name) {
-                HDstrncpy(name, H5RS_get_str(ent->user_path_r), MIN(len + 1, size));
-                if(len >= size)
+                HDstrncpy(name, H5RS_get_str(ent->user_path_r), MIN((size_t)len + 1, size));
+                if((size_t)len >= size)
                     name[size-1] = '\0';
             } /* end if */
         } /* end if */
+	else if(!ent->obj_hidden) {
+	    hid_t	  file;
+
+            /* Retrieve file ID for name search */
+	    if((file = H5I_get_file_id(id)) < 0)
+		HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve file ID")
+
+            /* Search for name of object */
+	    if((len = H5G_get_name_by_addr(file, H5AC_ind_dxpl_id, ent, name, size)) < 0) {
+                H5I_dec_ref(file);
+		HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't determine name")
+            } /* end if */
+	
+            /* Close file ID used for search */
+	    if(H5I_dec_ref(file) < 0)
+		HGOTO_ERROR(H5E_SYM, H5E_CANTCLOSEFILE, FAIL, "can't determine name")
+	} /* end else */
+
+        /* Set return value */
+        ret_value = len;
     } /* end if */
 
-    /* Set return value */
-    ret_value=(ssize_t)len;
-
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_get_name() */
 
@@ -890,4 +935,329 @@ H5G_name_replace(int type, H5G_entry_t *loc,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_name_replace() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5G_free_grp_table_node
+ *
+ * Purpose:     Free the key for a group table node
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *
+ * Modifications:
+ *              Raymond Lu
+ *              22 January 2008
+ *              Borrowed this function from v1.8.
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5G_free_grp_table_node(void *item, void UNUSED *key, void UNUSED *operator_data/*in,out*/)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_free_grp_table_node)
+
+    H5FL_FREE(haddr_t, item);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5G_free_grp_table_node() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5G_string_append
+ *
+ * Purpose:     Private function to append a path name.
+ *
+ * Return:      Pointer to the string being appended.
+ *              NULL on failure.
+ *
+ * Programmer:  Raymond Lu
+ *              30 January 2008
+ *-------------------------------------------------------------------------
+ */
+static char*
+H5G_string_append(char *dst, const char *src)
+{
+    size_t src_len, dst_len;
+    size_t len_needed;              /* Length of path string needed */
+    char *ret_value = NULL;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5G_string_append)
+
+    if(!dst)
+        dst_len = 0;
+    else
+        dst_len = strlen(dst);
+
+    if(!src)
+        src_len = 0;
+    else
+        src_len = strlen(src);
+
+    if(src_len) {
+        if(dst_len) {
+            len_needed = dst_len + src_len + 2;
+            if((dst = H5MM_realloc(dst, len_needed)) == NULL)
+                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, NULL, "can't allocate space")
+        
+            dst = strcat(dst, "/");
+            dst = strcat(dst, src);
+        } else {
+            len_needed = src_len + 1;
+            if((dst = H5MM_malloc(len_needed)) == NULL)
+                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, NULL, "can't allocate space")
+         
+            dst = strncpy(dst, src, src_len);
+            dst[len_needed-1] = '\0';
+        }
+    }
+
+    ret_value = dst;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5G_string_append */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5G_string_unappend
+ *
+ * Purpose:     Private function to unappend a path name.
+ *
+ * Return:      Pointer to the string being unappended.
+ *              NULL on failure.
+ *
+ * Programmer:  Raymond Lu
+ *              30 January 2008
+ *-------------------------------------------------------------------------
+ */
+static char*
+H5G_string_unappend(char *dst, const char *src)
+{
+    size_t src_len, dst_len;
+    size_t len_needed;              /* Length of path string needed */
+    char *ret_value = NULL;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5G_string_unappend)
+
+    if(!dst)
+        dst_len = 0;
+    else
+        dst_len = strlen(dst);
+
+    if(!src)
+        src_len = 0;
+    else
+        src_len = strlen(src);
+
+    if(dst_len >= (src_len + 1))
+        len_needed = dst_len - (src_len + 1) + 1;
+    else
+        len_needed = 1;
+
+    if((dst = H5MM_realloc(dst, len_needed)) == NULL)
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, NULL, "can't reallocate space")
+
+    dst[len_needed - 1] = '\0';
+    ret_value = dst;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5G_string_unappend */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5G_get_name_by_addr_cb
+ *
+ * Purpose:     Callback for retrieving object's name by address
+ *
+ * Return:      Positive if path is for object desired
+ *              0 if not correct object
+ *              negative on failure.
+ *
+ * Programmer:  Quincey Koziol
+ *              November 4 2007
+ *
+ * Modifications: 
+ *              Raymond Lu
+ *              15 Jan 2008
+ *              This function was borrowed from v1.8 with some modifications.
+ *              It's written by Quincey.
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5G_get_name_by_addr_cb(hid_t gid, const char *path, void *_udata)
+{
+    H5G_gnba_iter_t *udata = (H5G_gnba_iter_t *)_udata; /* User data for iteration */
+    H5G_entry_t *group_ent, object_ent;
+    H5G_stat_t obj_stat;
+    int idx = 0;
+    haddr_t *new_node;                  /* New group node for table */
+    int status;                 /* Status from iteration */
+    herr_t ret_value = H5_ITER_CONT;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5G_get_name_by_addr_cb)
+
+    /* Sanity check */
+    HDassert(path);
+    HDassert(udata->loc);
+
+    if((group_ent = H5G_loc(gid)) == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5_ITER_ERROR, "bad group location")
+
+    /* To handle dangling symbolic link, return continue instead of failure */
+    if(H5G_find(group_ent, path, &object_ent, udata->dxpl_id) < 0)
+        HGOTO_DONE(H5_ITER_CONT)
+
+    /* Check for object in same file (handles mounted files) */
+    if(object_ent.header == udata->loc->header && object_ent.file == udata->loc->file) {
+        if((udata->path = H5G_string_append(udata->path, path)) == NULL)
+            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, H5_ITER_ERROR, "can't append path space")
+
+        /* Free the ID to name buffer */
+        H5G_name_free(&object_ent);
+
+        /* We found a match so we return immediately */
+        HGOTO_DONE(H5_ITER_STOP)
+    } /* end if */
+
+    /* Free the ID to name buffer */
+    H5G_name_free(&object_ent);
+
+    /* Check if we've seen this object before */
+    if(H5SL_search(udata->grp_table, &object_ent.header))
+        HGOTO_DONE(H5_ITER_CONT)
+
+    /* Allocate new path node */
+    if((new_node = H5FL_MALLOC(haddr_t)) == NULL)
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, H5_ITER_ERROR, "can't allocate group node")
+
+    /* Set node information */
+    *new_node = object_ent.header;
+
+    /* Insert this object into skip list */
+    if(H5SL_insert(udata->grp_table, new_node, new_node) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, H5_ITER_ERROR, "can't insert path node into table")
+
+    if(H5G_get_objinfo(group_ent, path, FALSE, &obj_stat, udata->dxpl_id) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5_ITER_ERROR, "can't get object's stat")
+
+    /* Recursively search the groups */
+    if(H5G_GROUP == obj_stat.type) {
+        /* Append the path name of the current group */
+        if((udata->path = H5G_string_append(udata->path, path)) == NULL)
+            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, H5_ITER_ERROR, "can't append path space")
+
+        /* Iterate all the links */
+        if((status = H5Giterate(gid, path, &idx, H5G_get_name_by_addr_cb, udata)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "group iteration failed while looking for object name")
+        else if(status > 0)
+            /* If the object is found */
+            HGOTO_DONE(H5_ITER_STOP)
+        else {
+            /* Chop off the path name of the current group if object isn't found */
+            if((udata->path = H5G_string_unappend(udata->path, path)) == NULL )
+                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, H5_ITER_ERROR, "can't unappend path name")
+        }
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_get_name_by_addr_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5G_get_name_by_addr
+ *
+ * Purpose:     Tries to figure out the path to an object from it's address
+ *
+ * Return:      returns size of path name, and copies it into buffer
+ * 		pointed to by name if that buffer is big enough.
+ * 		0 if it cannot find the path 
+ *              negative on failure.
+ *
+ * Programmer:	Quincey Koziol
+ *		November 4 2007
+ *
+ * Modifications: 
+ *              Raymond Lu
+ *              15 Jan 2008
+ *              This function was borrowed from v1.8 with some modifications,
+ *              primarily changing H5G_visit to H5Giterate.  It's written 
+ *              by Quincey.
+ *-------------------------------------------------------------------------
+ */
+ssize_t
+H5G_get_name_by_addr(hid_t file, hid_t dxpl_id, const H5G_entry_t *loc,
+    char *name, size_t size)
+{
+    H5G_gnba_iter_t udata;      /* User data for iteration */
+    H5G_entry_t *root_loc;      /* Root group's location */
+    hbool_t found_obj = FALSE;  /* If we found the object */
+    int idx = 0;
+    int status;                 /* Status from iteration */
+    ssize_t ret_value;          /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_get_name_by_addr, FAIL)
+
+    HDmemset(&udata, 0, sizeof(H5G_gnba_iter_t));
+
+    /* Construct the link info for the file's root group */
+    if((root_loc = H5G_loc(file)) == NULL)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get root group's location")
+
+    /* Check for root group being the object looked for */
+    if(root_loc->header == loc->header && root_loc->file == loc->file) {
+        udata.path = H5MM_strdup("");
+        found_obj = TRUE;
+    } /* end if */
+    else {
+        /* Set up user data for iterator */
+        udata.file = file;
+        udata.loc = loc;
+        udata.dxpl_id = dxpl_id;
+        udata.path = NULL;
+
+        /* Create skip list to keep track of visited group nodes */
+        if((udata.grp_table = H5SL_create(H5SL_TYPE_HADDR, 0.5, (size_t)16)) == NULL)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "can't create skip list for group nodes")
+        
+        /* Iterate all the links in the file */
+        if((status = H5Giterate(file, "/", &idx, H5G_get_name_by_addr_cb, &udata)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "group iteration failed while looking for object name")
+        else if(status > 0)
+            found_obj = TRUE;
+    } /* end else */
+
+    /* Check for finding the object */
+    if(found_obj) {
+        size_t full_path_len = HDstrlen(udata.path) + 1;        /* Length of path + 1 (for "/") */
+
+        /* Set the length of the full path */
+        ret_value = full_path_len;
+
+        /* If there's a buffer provided, copy into it, up to the limit of its size */
+        if(name) {
+            /* Copy the initial path separator */
+            HDstrcpy(name, "/");
+
+            /* Append the rest of the path */
+            /* (less one character, for the initial path separator) */
+            HDstrncat(name, udata.path, (size - 1));
+            if((size_t)ret_value >= size)
+                name[size - 1] = '\0';
+        } /* end if */
+    } /* end if */
+    else
+        ret_value = 0;
+
+done:    
+    /* Release resources */
+    H5MM_xfree(udata.path);
+
+    if(udata.grp_table)
+        H5SL_destroy(udata.grp_table, H5G_free_grp_table_node, NULL);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_get_name_by_addr() */
 

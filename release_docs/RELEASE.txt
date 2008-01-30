@@ -80,6 +80,9 @@ Bug Fixes since HDF5-1.6.6 Release
 
     Library
     -------
+        - H5Iget_name could not be used with an object identifier returned  
+            by H5Rdereference; the function would not be able to determine 
+            a valid object name.  It has been fixed.  SLU - 2008/1/30 
         - Changed library's behavior for reading files that might have
             corrupted object header information from a previous (buggy)
             version of the library.  By default, the library now rebuilds the
