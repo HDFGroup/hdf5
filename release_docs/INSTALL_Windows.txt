@@ -3,7 +3,7 @@ HDF5 Build and Install Instructions for Windows XP/VISTA
 ----------------------------------------------------------------------
 
 The following instructions assume that the HDF5 source code package 
-from HDF website (http://hdfgroup.org) is used.
+from the HDF website (http://hdfgroup.org) is used.
 
 
 ***************************WARNINGS***********************************
@@ -47,9 +47,9 @@ Preconditions
       directory called 'hdf5-1.6.x' under MyHDFstuff which contains 
       several files and directories.  Rename "hdf5-1.6.x" to "hdf5".  
 
-   4. HDF5 provide options to do in-memory compress within HDF5
-      library.  Currently, two external compression libraries Zlib and
-      Szip can be used with HDF5.
+   4. HDF5 provides options for in-memory compression within the HDF5
+      library.  Currently, two external compression libraries, Zlib and
+      Szip, can be used with HDF5.
 
       4.1 HDF5 uses Zlib version 1.2.3 for compression and Zlib is NOT
           distributed with HDF5 library in 1.6.x release. To use Zlib
@@ -68,16 +68,16 @@ Preconditions
           "Licensing terms" at
           http://hdfgroup.org/doc_resource/SZIP/index.html.
 
-      Compression feature inside HDF5 is optional. 
+      Compression in HDF5 is optional. 
       
    5. Define the following environment variables: 
 
         HDF5_EXT_ZLIB
         HDF5_EXT_SZIP
       
-      In this section, Zlib and Szip compression software are assumed
+      In this section, the Zlib and Szip compression software are assumed
       to be used.  Please read section V as well as this section if you
-      do not want to use compression feature inside HDF5.
+      do not want to use compression in HDF5.
       
       To define these environment variables:
       
@@ -140,13 +140,13 @@ Notes
       want to know HDF5 building and installation details, please 
       read INSATLL_Windows_Short.txt.
 
-   3. For users who would like to build and test HDF5 package from the 
+   3. For users who would like to build and test the HDF5 package from the 
       command line, please read INSATLL_Windows_From_Command_Line.txt.
    
-   4. HDF4-related tools are not built and released with HDF5 library
-      packages any more. To obtain HDF4-related tools, please check
-      http://hdfgroup.org/h4toh5/ and 
-      ftp://ftp.hdfgroup.org/HDF5/h4toh5
+   4. HDF4-related tools are not built and released with HDF5.  
+      To obtain HDF4-related tools, please check the following locations:
+          http://hdfgroup.org/h4toh5/ 
+          ftp://ftp.hdfgroup.org/HDF5/h4toh5
 
    5. For DLL users, please do read and follow "DLL hints"
       at Section IV.
@@ -155,11 +155,11 @@ Notes
  
    7. For fortran users, please read section VII.
 
-   8. We no longer support compaq viusal fortran compiler. Compaq visual
+   8. We no longer support the compaq visual fortran compiler. Compaq visual
       fortran projects are still included for forward compatibility with intel
       fortran 9.1.  
 
-   9. For users who would like to build, test and use HDF5 snapshot
+   9. For users who would like to build, test and use an HDF5 snapshot
       release, please read Section VIII.
 
 ------------------------------------------------------------------------
@@ -411,11 +411,11 @@ Section II: How to build and test HDF5 libraries and tools
       debug version
       debug dll version
 
-      We strongly suggest you to redirect your testing results into an
+      We strongly suggest that you redirect your testing results into an
       output file so that you can easily check the testing results. You
       may use either Notepad or WordPad or whatever other windows word
-      processor to check the results.  For the purpose of printing,  
-      please choose font less than 14 for better alignment of the text.
+      processor to check the results.  For printing purposes, please
+      choose a font less than 14 for better alignment of the text.
 
       DLLs listed below should be placed into the Windows system
       directory.  A batch file named install_dll.bat is included in 
@@ -511,7 +511,7 @@ Section II: How to build and test HDF5 libraries and tools
       Skip this step UNLESS you have built HDF5 C++ libraries
       and want to test them.
      
-      DLLs listed below should be placed into to the Windows system
+      DLLs listed below should be placed in the Windows system
       directory.  A batch file named install_cppdll.bat is included in 
       c:\MyHDFstuff\hdf5 directory.  Run this batch file and the 
       following HDF5 C++ DLLs will be copied to the system directory.
@@ -1122,7 +1122,7 @@ Section VII: Building with Intel Fortran 9.1
      Szip source codes or binaries for Intel compiler can be downloaded
      from the following address:
 
-     ftp://ftp.hdfgroup.org/lib-external/szip/2.1/bin/windows.
+         ftp://ftp.hdfgroup.org/lib-external/szip/2.1/bin/windows
 
      b. Set up path for external libraries and headers
 

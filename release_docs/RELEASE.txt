@@ -1,30 +1,31 @@
 HDF5 version 1.6.7 currently under development
 ================================================================================
+January 30, 2008
 
 INTRODUCTION
 ============
-This document describes the differences between HDF5-1.6.6 and
-HDF5-1.6.7  It contains information on the platforms tested and
-known problems in HDF5-1.6.7. For more details, check the HISTORY.txt
-file in the HDF5 source.
+This document describes the differences between HDF5-1.6.6 and HDF5-1.6.7  
+It contains information on the platforms tested and known problems in
+HDF5-1.6.7. For more details, check the HISTORY.txt file in the HDF5 source.
 
-HDF5 documentation can be found in the distributed release source 
-code in the subdirectory doc/html/ or on the THG (The HDF Group) 
-ftp server (ftp.hdfgroup.org) in the directory:
+HDF5 documentation can be found in the distributed release source code
+in the subdirectory doc/html/ or on the THG (The HDF Group) FTP server: 
 
-     /HDF5/docs/
+     ftp://ftp.hdfgroup.org/HDF5/docs/
 
-Documentation for the current release is also on the HDF web site:
+Documentation for the current release in the HDF5 Release 1.6.x series is 
+also on the HDF web site:
 
-     http://hdfgroup.org/HDF5/doc/
+     http://hdfgroup.org/HDF5/doc1.6/
 
-For more information, see the HDF5 home page at:
+For more information, see the HDF5 home page:
 
-    http://hdfgroup.org/HDF5/
+     http://hdfgroup.org/products/hdf5/
 
-If you have any questions or comments, please send them to:
+If you have any questions or comments, please see the HDF Support page
+for a list of available resources:
 
-    help@hdfgroup.org
+     http://hdfgroup.org/services/support.html
 
 
 CONTENTS
@@ -43,6 +44,7 @@ New Features
     Configuration:
     -------------------------
     None
+
 
     Source code distribution
     ========================
@@ -69,6 +71,8 @@ New Features
 
 Support for New Platforms, Languages and Compilers
 ==================================================
+
+No new platorms, languages, or compilers are supported in this release.
 
 
 Bug Fixes since HDF5-1.6.6 Release
@@ -124,14 +128,14 @@ Documentation
 
     HDF5 documentation can be found in the distributed release source 
     code in the subdirectory doc/html/ (start with index.html) or on the 
-    THG (The HDF Group) ftp server (ftp.hdfgroup.org) in the directory:
+    THG (The HDF Group) FTP server: 
 
-         /HDF5/docs/
+         ftp://ftp.hdfgroup.org/HDF5/docs/
 
-    Online documentation for the current release can be found on the THG 
-    web site:
+    Online documentation for the current release in the HDF5 Release 1.6.x 
+    series can be found on the THG web site:
 
-         http://hdfgroup.org/HDF5/doc/
+         http://hdfgroup.org/HDF5/doc1.6/
 
 
 Platforms Tested
@@ -147,7 +151,6 @@ Platforms Tested
 
     FreeBSD 6.2 (32- and 64-bit)  gcc  and g++3.4.6
     (duty and liberty)            gcc and g++ 4.2.1
-
 
     IRIX64 6.5                    MIPSpro cc 7.4.4m
     (ucar mop1 64 & n32)          F90 MIPSpro 7.4.4m (64 only)
@@ -169,9 +172,9 @@ Platforms Tested
                                   MPICH mpich2-1.0.4p1 compiled with  
                                   gcc 3.4.6 and G95 (GCC 4.0.3 (g95 0.91!) 
 
-    Linux 2.6.16.46-0.12-debug #1 
-        SMP ia64 GNU/Linux        Intel(R) C++ Version 10.0.025
-    (ucar hir1)                   Intel(R) Fortran Itanium(R) Version 10.0.025
+    Linux 2.6.16.46-0.12-debug #1 Intel(R) C++ Version 10.0.025
+        SMP ia64 GNU/Linux        Intel(R) Fortran Itanium(R) Version 10.0.025
+    (ucar hir1)                   
 
     Linux 2.6.16.46-0.14-smp #1   Intel(R) C++ for Intel(R) EM64T Ver. 9.1.037
         SMP x86_64 GNU/Linux      Intel(R) Fortran Intel(R) EM64T Ver. 9.1.031
@@ -179,11 +182,9 @@ Platforms Tested
                                          for 64-bit target on x86-64
                                   tested for both 32- and 64-bit binaries
 
-    Linux 2.6.5-7.283-rtgfx Altix 
-        SMP ia64                  Intel(R) C++ Version 9.0
-    (cobalt)                      Intel(R) Fortran Itanium(R) Version 9.0
-                                  SGI MPI
-
+    Linux 2.6.5-7.283-rtgfx Altix Intel(R) C++ Version 9.0
+        SMP ia64                  Intel(R) Fortran Itanium(R) Version 9.0
+    (cobalt)                      SGI MPI
 
     SunOS 5.8 32- and 64-bit      Sun WorkShop 6 update 2 C 5.3
     (sol)                         Sun WorkShop 6 update 2 Fortran 95 6.2
@@ -308,18 +309,18 @@ Footnotes:
 Known Problems
 ==============
 * We discovered two problems when running collective IO parallel HDF5 tests
-  with chunking storage on  ChaMPIon MPI compiler on tungsten, a linux
+  with chunking storage with the ChaMPIon MPI compiler on tungsten, a Linux
   cluster at NCSA.
   Under some complex selection cases, 
   1) MPI_Get_element returns the wrong value.
-  2) MPI_Type_struct also generates wrong derived data type and corrupt data
-     may be generated.
+  2) MPI_Type_struct also generates the wrong derived datatype and corrupt 
+     data may be generated.
   This only happens when turning on collective IO with chunking storage
-  with some complex selections. We haven't found these problems on other MPI-IO
-  compilers. If you encounter these problems, you may use Independent IO
-  instead.
+  with some complex selections. We haven't found these problems on other 
+  MPI-IO compilers. If you encounter these problems, you may use Independent 
+  IO instead.
 
-  Change the following line in your code:
+  To avoid this problem, change the following line in your code:
   H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
 
   to
@@ -327,29 +328,28 @@ Known Problems
  
   KY - 2007/08/24
 
-
-
 * QSC (an HP alpha-based OSF1 cluster) does not create h5pfc correctly. It
   does not include the -lmpi properly.  This will be fixed in the next
   release.  AKC - 2007/08/07.
 
 * On IRIX64 6.5 (UCAR SGI mop1), when testing HDF5 tools with an HDF5 shared
-  library, especially for h5repacktst and h52gifgentst, the following (or
+  library, especially for h5repacktst and h52gifgentst, the following (or a
   similar) error message may appear:
   "523648:lt-h5repacktst: rld: Fatal Error: Cannot Successfully map soname
   'libh5test.so.1' under any of the filenames .......(bunch of directories)
   "
   And the testing will fail. 
+
   We believe this is a libtool problem. One way to get rid of this is to
   add the paths of libh5test.so.1 and libh5.so.1 to the shared library path.
 
   For 32-bit:
   You may do this, under csh:
-  setenv LD_LIBRARYN32_PATH .......(existing pathes):[full path of HDF5
+  setenv LD_LIBRARYN32_PATH .......(existing paths):[full path of HDF5
   directory/test/.libs]:[full path of HDF5 directory/src/.libs]
 
   For 64-bit:
-  setenv LD_LIBRARY64_PATH ......(existing pathes):[full path of HDF5
+  setenv LD_LIBRARY64_PATH ......(existing paths):[full path of HDF5
   directory/test/.libs]:[full path of HDF5 directory/src/.libs]
 
   NOTE: This problem ONLY affects the testing of the HDF5 library when you 
@@ -364,7 +364,7 @@ Known Problems
   calloc".  AKC - 2007/7/12.
 
 * The Intel C Compiler for the Linux x86_64 platform (EM64T-based, v8.1) has
-  an optimization error in the datax types conversion code.  Before running
+  an optimization error in the datatypes conversion code.  Before running
   configure, edit the file config/intel-flags by changing the setting of
   PROD_CFLAGS from -O3 to -O0.  Then run configure.  AKC - 2005/11/10.
 
@@ -379,15 +379,15 @@ Known Problems
   Use the H5Pset_alloc_time function with H5D_ALLOC_TIME_EARLY to set up the 
   dataset creation property list to avoid the problem.  EIP - 2005/09/09
 
-* The dataset created or rewritten with the v1.6.3 library or after can't 
+* A dataset created or rewritten with the v1.6.3 library or after can't 
   be read with the v1.6.2 library or before when Fletcher32 EDC (a filter) is 
   enabled.  There was a bug in the calculating code of the Fletcher32 
   checksum in the library before v1.6.3.  The checksum value wasn't consistent 
   between big-endian and little-endian systems.  This bug was fixed in 
   Release 1.6.3.  However, after fixing the bug, the checksum value is no 
-  longer the same as before on little-endian system.  The library release 
-  after 1.6.4 can still read the dataset created or rewritten with the library
-  of v1.6.2 or before.  SLU - 2005/7/8
+  longer the same as before on little-endian system.  HDF5 library releases 
+  after 1.6.4 can still read datasets created or rewritten with an HDF5 
+  library of v1.6.2 or before.  SLU - 2005/7/8
 
 * For version 6 (6.02 and 6.04) of the Portland Group compiler on AMD Opteron
   processor, there's a bug in the compiler for optimization(-O2).  The library
@@ -445,7 +445,7 @@ Known Problems
 
 * The Stream VFD is not supported under Windows.
 
-* Use the --disable-shared configure flag if building with Absoft Fortran
+* Use the --disable-shared configure flag if building with an Absoft Fortran
   compiler.
 
 * Information about building with PGI and Intel compilers is available in

@@ -1,6 +1,7 @@
 
         Instructions for the Installation of HDF5 Software
         ==================================================
+                         January 30, 2008
 
         CONTENTS
         --------
@@ -63,7 +64,7 @@
 
 
 2. Quick installation
-        For those that don't like to read ;-) the following steps can be
+        For those who don't like to read ;-) the following steps can be
         used to configure, build, test, and install the HDF5 Library, header
         files, and support programs. The "#" symbol in "hdf5-1.6.#" below
         stands for the release number and/or the subrelease version.  (For  
@@ -71,8 +72,21 @@
 
             $ gunzip < hdf5-1.6.#.tar.gz | tar xf -
             $ cd hdf5-1.6.#
+            $ ./configure <configure_flags>
+            $ make
             $ make check
             $ make install
+
+        <configure_flags> above refers to the configure flags appropriate
+        to your installation.  For example, to install HDF5 with the 
+        Fortran and C++ interfaces and with SZIP compression, the 
+        configure line might read as follows:
+        
+            $ ./configure --enable-fortran --enable-cxx \
+                          --with-szlib=PATH_TO_SZIP
+
+        In this case, PATH_TO_SZIP would be replaced with the path to the 
+        installed location of the SZIP library.
 
 2.1. Windows
         Users of Microsoft Windows should see one of the INSTALL_Windows files
@@ -81,16 +95,16 @@
 
 3. HDF5 dependencies
 3.1. Zlib 
-        The HDF5 Library has a predefined compression filter that uses
-        the "deflate" method for chunked datatsets. If zlib-1.1.2 or
+        The HDF5 Library includes a predefined compression filter that 
+        uses the "deflate" method for chunked datasets. If zlib-1.1.2 or
         later is found, HDF5 will use it. Otherwise, HDF5's predefined
         compression method will degenerate to a no-op; the compression
         filter will succeed but the data will not be compressed.
 
 3.2. Szip (optional)
-        The HDF5 Library has a predefined compression filter that uses
-        the extended-Rice lossless compression algorithm for chunked 
-        datatsets. For more information about Szip compression and license 
+        The HDF5 Library includes a predefined compression filter that 
+        uses the extended-Rice lossless compression algorithm for chunked 
+        datasets. For more information about Szip compression and license 
         terms, see http://hdfgroup.org/doc_resource/SZIP/index.html.
 
         Precompiled szip binaries for each supported platform and a source tar 
@@ -111,8 +125,7 @@
 3.3. MPI and MPI-IO
         The parallel version of the library is built upon the foundation
         provided by MPI and MPI-IO. If these libraries are not available
-        when HDF5 is configured, only a serial version of HDF5 can be
-        built.
+        when HDF5 is configured, only a serial version of HDF5 can be built.
 
 
 4. Full installation instructions for source distributions
@@ -239,7 +252,7 @@
                 $ ./configure --enable-fortran --enable-parallel
 
 4.3.3. Additional compilation flags
-        If addtional flags must be passed to the compilation commands,
+        If additional flags must be passed to the compilation commands,
         specify those flags with the CFLAGS variable. For instance,
         to enable symbolic debugging of a production version of HDF5 one
         might say:
@@ -253,6 +266,7 @@
 
             $ ./configure --enable-fortran
             $ ./configure --enable-cxx
+            $ ./configure --enable-fortran --enable-cxx
         
         Configure uses the Fortran compiler specified in the host configuration
         file in the fortran/config directory and the C++ compiler specified in 
@@ -292,7 +306,7 @@
         during 'make install' (described below) with a BSD-compatible
         install program detected automatically by configure. If none is
         found, the shell script bin/install-sh is used. Configure
-        does NOT check that the install program actually works, but if a
+        does NOT check that the install program actually works; if a
         bad install is detected on your system, you have two choices: 
 
             1. Copy the bin/install-sh program to your $HOME/bin
@@ -343,7 +357,7 @@
 
             $ ./configure --disable-shared
 
-        To build only statically linked executables on platforms which
+        To build only statically linked executables on platforms that
         support shared libraries, use the '--enable-static-exec' flag.
 
             $ ./configure --enable-static-exec
@@ -370,7 +384,7 @@
         switch.  (See "Debugging HDF5 Applications" for a list of package 
         names.  In the documentation distributed with this release, that
         document is in doc/html/Debugging.html.  In the HDF5 documentation 
-        at http:hdfgroup.org/HDF5/doc/, select "HDF5 User's Guide from 
+        at http://hdfgroup.org/HDF5/doc1.6/, select "HDF5 User's Guide from 
         Release 1.4.5," then select "Debugging.")
 
         Debugging can be disabled by saying '--disable-debug'. The
@@ -409,7 +423,7 @@
         (For further details, see "Thread Safe HDF5 Library Implementation" 
         in the "HDF5 Technical Notes."  This document is included in the 
         HDF5 documentation set distributed with this release and posted at
-        http:hdfgroup.org/HDF5/doc/.)
+        http://hdfgroup.org/HDF5/doc1.6/.)
 
 4.3.12. Backward compatibility with HDF5 1.4* releases
         The 1.6 version of the HDF5 Library can be configured to operate
@@ -461,16 +475,16 @@
 4.6. Installing
         The HDF5 Library, include files, and support programs can be
         installed in a (semi-)public place by saying 'make install'. The
-        files are installed under the directory specified with
-        '--prefix=DIR' (or 'hdf5' in the build directory) in directories 
-        named 'lib', 'include', 'doc', and 'bin'. The prefix directory DIR 
-        must exist prior to 'make install', but its subdirectories are 
-        created automatically.  An 'hdf5' directory under the build directory
-        is created automatically.
+        files are installed under the directory specified with '--prefix=DIR' 
+        (or under 'hdf5/' in the build directory) in directories named 'lib', 
+        'include', 'doc', and 'bin'. The prefix directory DIR must exist 
+        prior to 'make install', but its subdirectories are created 
+        automatically.  If no prefix is defined, an 'hdf5' directory is 
+        automatically created under the build directory.
 
         If 'make install' fails because the install command at your site
         somehow fails, you may use the install-sh script that comes with the
-        source. You need to run ./configure again.
+        source. You need to run ./configure again:
 
             $ INSTALL="$PWD/bin/install-sh -c" ./configure ...
             $ make install
