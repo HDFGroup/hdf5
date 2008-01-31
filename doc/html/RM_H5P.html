@@ -140,14 +140,14 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-SetFaplSplit">H5Pset_fapl_split</a>
     <li><a href="#Property-SetFaplSec2">H5Pset_fapl_sec2</a>
     <li><a href="#Property-SetFaplStdio">H5Pset_fapl_stdio</a>
-    <li><a href="#Property-SetFaplStream">H5Pset_fapl_stream</a>
-    <li><a href="#Property-GetFaplStream">H5Pget_fapl_stream</a>
 <!-- FOR USE WITH PRINT VERSION ---------------------------------------->
-<!--<li><a href="#Property-SetDriver">H5Pset_driver</a>                              -->
+<!--<li><a href="#Property-SetFaplStream">H5Pset_fapl_stream</a>      -->
+<!--<li><a href="#Property-GetFaplStream">H5Pget_fapl_stream</a>      -->
+<!--<li><a href="#Property-SetDriver">H5Pset_driver</a>               -->
 <!-- FOR USE WITH PRINT VERSION ----------------------------------------
     <li><a href="#Property-GetDriver">H5Pget_driver</a>
 <!-- FOR USE WITH PRINT VERSION ---------------------------------------->
-<!--<li><a href="#Property-GetDriverInfo">H5Pget_driver_info</a>                     -->
+<!--<li><a href="#Property-GetDriverInfo">H5Pget_driver_info</a>      -->
 <!-- FOR USE WITH PRINT VERSION ----------------------------------------
     <li><a href="#Property-SetMetaBlockSize">H5Pset_meta_block_size</a>
     <li><a href="#Property-GetMetaBlockSize">H5Pget_meta_block_size</a>
@@ -370,14 +370,14 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-SetFaplSplit">H5Pset_fapl_split</a>
     <li><a href="#Property-SetFaplSec2">H5Pset_fapl_sec2</a>
     <li><a href="#Property-SetFaplStdio">H5Pset_fapl_stdio</a>
-    <li><a href="#Property-SetFaplStream">H5Pset_fapl_stream</a>
-    <li><a href="#Property-GetFaplStream">H5Pget_fapl_stream</a>
 <!-- FOR USE WITH ELECTRONIC VERSION ----------------------------------->
-<!--<li><a href="#Property-SetDriver">H5Pset_driver</a>                              -->
+<!--<li><a href="#Property-SetFaplStream">H5Pset_fapl_stream</a>      -->
+<!--<li><a href="#Property-GetFaplStream">H5Pget_fapl_stream</a>      -->
+<!--<li><a href="#Property-SetDriver">H5Pset_driver</a>               -->
 <!-- FOR USE WITH ELECTRONIC VERSION ----------------------------------->
     <li><a href="#Property-GetDriver">H5Pget_driver</a>
 <!-- FOR USE WITH ELECTRONIC VERSION ----------------------------------->
-<!--<li><a href="#Property-GetDriverInfo">H5Pget_driver_info</a>                     -->
+<!--<li><a href="#Property-GetDriverInfo">H5Pget_driver_info</a>      -->
 <!-- FOR USE WITH ELECTRONIC VERSION ----------------------------------->
     <li><a href="#Property-SetMetaBlockSize">H5Pset_meta_block_size</a>
     <li><a href="#Property-GetMetaBlockSize">H5Pget_meta_block_size</a>
@@ -513,7 +513,7 @@ See further notes in the description of each function.
       <li><a href="#Property-GetClassName">H5Pget_class_name</a>
       <li><a href="#Property-GetClassParent">H5Pget_class_parent</a>
       <li><a href="#Property-GetDriver">H5Pget_driver</a>
-  <!--<li><a href="#Property-GetDriverInfo">H5Pget_driver_info</a>                   -->
+  <!--<li><a href="#Property-GetDriverInfo">H5Pget_driver_info</a>       -->
       <li><a href="#Property-GetDxplMpio">H5Pget_dxpl_mpio</a>&nbsp;&nbsp;&nbsp;||
       <li><a href="#Property-GetDxplMulti">H5Pget_dxpl_multi</a>
       <li><a href="#Property-GetEdcCheck">H5Pget_edc_check</a>
@@ -527,7 +527,7 @@ See further notes in the description of each function.
       <li><a href="#Property-GetFaplMpiPosix">H5Pget_fapl_mpiposix</a>&nbsp;&nbsp;&nbsp;||
       <li><a href="#Property-GetFaplMulti">H5Pget_fapl_multi</a>
       <li><a href="#Property-GetFaplSrb">H5Pget_fapl_srb</a>
-      <li><a href="#Property-GetFaplStream">H5Pget_fapl_stream</a>
+<!--  <li><a href="#Property-GetFaplStream">H5Pget_fapl_stream</a>       -->
       <li><a href="#Property-GetFcloseDegree">H5Pget_fclose_degree</a>
       <li><a href="#Property-GetFillTime">H5Pget_fill_time</a>
 	</ul>
@@ -573,7 +573,7 @@ See further notes in the description of each function.
       <li><a href="#Property-SetCache">H5Pset_cache</a>
       <li><a href="#Property-SetChunk">H5Pset_chunk</a>
       <li><a href="#Property-SetDeflate">H5Pset_deflate</a>
-<!--  <li><a href="#Property-SetDriver">H5Pset_driver</a>                              -->
+<!--  <li><a href="#Property-SetDriver">H5Pset_driver</a>                 -->
       <li><a href="#Property-SetDxplMpio">H5Pset_dxpl_mpio</a>&nbsp;&nbsp;&nbsp;||
       <li><a href="#Property-SetDxplMulti">H5Pset_dxpl_multi</a>
       <li><a href="#Property-SetEdcCheck">H5Pset_edc_check</a>
@@ -597,7 +597,7 @@ See further notes in the description of each function.
       <li><a href="#Property-SetFaplSplit">H5Pset_fapl_split</a>
       <li><a href="#Property-SetFaplSrb">H5Pset_fapl_srb</a>
       <li><a href="#Property-SetFaplStdio">H5Pset_fapl_stdio</a>
-      <li><a href="#Property-SetFaplStream">H5Pset_fapl_stream</a>
+<!--  <li><a href="#Property-SetFaplStream">H5Pset_fapl_stream</a>       -->
       <li><a href="#Property-SetFcloseDegree">H5Pset_fclose_degree</a>
       <li><a href="#Property-SetFillTime">H5Pset_fill_time</a>
       <li><a href="#Property-SetFillValue">H5Pset_fill_value</a>
@@ -2381,8 +2381,8 @@ END SUBROUTINE h5pget_class_parent_f
            H5FD_MPIO
            H5FD_MULTI
            H5FD_SEC2
-           H5FD_STDIO
-           H5FD_STREAM </pre>
+           H5FD_STDIO  <!--
+           H5FD_STREAM --></pre>
         If a user defines and registers custom drivers or 
         if additional drivers are defined in an HDF5 distribution, 
         this list will be longer.
@@ -3374,8 +3374,8 @@ SUBROUTINE
         -->
 </dl>
 
-<!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Pget_fapl_stream" -->
+<!--
 <hr>
 <dl>
   <dt><strong>Name:</strong> <a name="Property-GetFaplStream">H5Pget_fapl_stream</a>
@@ -3406,6 +3406,7 @@ SUBROUTINE
         Otherwise returns a negative value.
   <dt><strong>Fortran90 Interface:</strong>
     <dd>None.
+-->
 <!--
 	<pre>
 SUBROUTINE
@@ -3417,6 +3418,7 @@ SUBROUTINE
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
+<!--
   <dt><strong>History:</strong>
 	<ul><table width="90%">
         <tr>
@@ -3428,8 +3430,13 @@ SUBROUTINE
 		  <td valign="top">1.4.0</td>
           <td valign="top">
 		    Function introduced in this release.</td></tr>
+        <tr>
+		  <td valign="top">1.6.7 and 1.8.0</td>
+          <td valign="top">
+		    Function removed in these releases.</td></tr>
     </table></ul>
 </dl>
+-->
 
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Pget_fclose_degree" -->
@@ -8336,8 +8343,8 @@ END SUBROUTINE h5pset_fapl_stdio_f
     </table></ul>
 </dl>
 
-<!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Pset_fapl_stream" -->
+<!--
 <hr>
 <dl>
   <dt><strong>Name:</strong> <a name="Property-SetFaplStream">H5Pset_fapl_stream</a>
@@ -8411,6 +8418,7 @@ END SUBROUTINE h5pset_fapl_stdio_f
         Otherwise returns a negative value.
   <dt><strong>Fortran90 Interface:</strong>
     <dd>None.
+-->
 <!--
 	<pre>
 SUBROUTINE
@@ -8423,6 +8431,7 @@ SUBROUTINE
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
+<!--
   <dt><strong>History:</strong>
 	<ul><table width="90%">
         <tr>
@@ -8434,8 +8443,13 @@ SUBROUTINE
 		  <td valign="top">1.4.0</td>
           <td valign="top">
 		    Function introduced in this release.</td></tr>
+        <tr>
+		  <td valign="top">1.6.7 and 1.8.0</td>
+          <td valign="top">
+		    Function removed in these releases.</td></tr>
     </table></ul>
 </dl>
+-->
 
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Pset_fclose_degree" -->
@@ -10801,7 +10815,7 @@ Describes HDF5 Release 1.6.7, January 2008
 
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 23 January 2008");
+document.writeln("Last modified: 30 January 2008");
 -->
 </SCRIPT>
  
