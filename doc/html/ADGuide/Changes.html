@@ -58,10 +58,41 @@ This document is intended to assist application developers who must keep
 an application synchronized with the HDF5 library or related software.
 
 
+<h2>Release 1.6.7 (current release) versus Release 1.6.6</h2> 
 
+<dir>
 
+This section lists the API-level changes that have been made in the 
+transition from the HDF5 Release 1.6.6 to Release 1.6.7.
+As this is primarily a bug-fix release, 
+the only interface changes are related to the removal of the 
+stream I/O driver, as outlined below.
 
-<h2>Release 1.6.6 (current release) versus Release 1.6.5</h2> 
+    <h3>Stream I/O Driver Removed</h3>
+    
+    The stream I/O driver, <code>H5FD_STREAM</code>, has been 
+    removd from and is no longer distributed with the HDF5 Library.
+    The following APIs have therefore been removed from this release.
+    <br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<code>H5Pset_fapl_stream</code>
+    <br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<code>H5Pget_fapl_stream</code>
+    <br>
+    The stream driver <small>ENUM</small> value <code>H5FD_STREAM</code>
+    has also been removed.
+
+    <p>
+    While the stream driver is no longer distributed by The HDF Group, 
+    it will be made available as a source code distribution from
+    <a href="http://hdf5-addons.origo.ethz.ch/">
+    <code>http://hdf5-addons.origo.ethz.ch/</code></a>.
+    An integration mechanism will be developed and 
+    instructions for using the driver with HDF5 
+    will be posted on that site.
+
+</dir>
+
+<h2>Release 1.6.7 versus Release 1.6.5</h2> 
 
 <dir>
 
@@ -2751,7 +2782,7 @@ Describes HDF5 Release 1.6.7, January 2008
 
 <!-- #EndLibraryItem --><!-- Created: Spring 1999 -->
 <!-- hhmts start -->
-Last modified: 13 August 2007
+Last modified: 31 January 2008
 <!-- hhmts end -->
 
 </body>
