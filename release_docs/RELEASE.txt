@@ -1,6 +1,5 @@
 HDF5 version 1.6.7 currently under development
 ================================================================================
-January 30, 2008
 
 INTRODUCTION
 ============
@@ -43,14 +42,18 @@ New Features
 ============
     Configuration:
     -------------------------
-    None
-
+    '--enable-stream-vfd' and '--disable-stream-vfd' are no longer valid 
+    configure options because the stream I/O driver has ben removed from
+    the distribution.
 
     Source code distribution
     ========================
     Library:
     --------
-    None
+    The stream I/O driver is not included with the HDF5 Library in this
+    release.  The source code files hdf5/src/H5FDstream.c and
+    hdf5/src/H5FDstream.h and the driver ENUM value H5FD_STREAM have been 
+    removed.
 
     Parallel Library:
     -----------------
@@ -128,7 +131,6 @@ Bug Fixes since HDF5-1.6.6 Release
 
 Documentation
 =============
-
     HDF5 documentation can be found in the distributed release source 
     code in the subdirectory doc/html/ (start with index.html) or on the 
     THG (The HDF Group) FTP server: 
@@ -139,6 +141,15 @@ Documentation
     series can be found on the THG web site:
 
          http://hdfgroup.org/HDF5/doc1.6/
+
+    A listing of interface changes from release to release can be found
+    in the document "HDF5 Software Changes from Release to Release":
+
+         http://hdfgroup.org/HDF5/doc1.6/ADGuide/Changes.html
+ 
+    Since the stream I/O driver is not included in this release, the 
+    functions H5Pset_fapl_stream and H5Pget_fapl_stream and the stream 
+    ENUM value H5FD_STREAM have been removed from the documentation.
 
 
 Platforms Tested
@@ -402,23 +413,17 @@ Known Problems
   and run the tests again.
 
   The tests may also fail with messages like "The socket name is already
-  in use".  HDF5 does not use sockets (except for stream-VFD).  This is
-  due to problems of the poe command trying to set up the debug socket.
-  Check whether there are many old /tmp/s.pedb.* files staying around.  These 
-  are sockets used by the poe command and left behind due to failed commands.
-  Ask your system administrator to clean them out.  Lastly, request IBM
-  to provide a means to run poe without the debug socket.
+  in use".  HDF5 does not use sockets.  This is due to problems of the 
+  poe command trying to set up the debug socket.  Check whether there are 
+  many old /tmp/s.pedb.* files staying around.  These are sockets used by 
+  the poe command and left behind due to failed commands.  Ask your system 
+  administrator to clean them out.  Lastly, request IBM to provide a means 
+  to run poe without the debug socket.
 
 * The h5dump tests may fail to match the expected output on some platforms
   (e.g. parallel jobs, Windows) where the error messages directed to
   "stderr" do not appear in the "right order" with output from stdout.
   This is not an error.
-
-* The stream-vfd test uses ip port 10007 for testing. If another
-  application is already using that port address, the test will hang
-  indefinitely and has to be terminated by the kill command. To try the
-  test again, change the port address in test/stream_test.c to one not
-  being used in the host.
 
 * The --enable-static-exec configure flag fails to compile for Solaris
   platforms. This is due to the fact that not all of the system
@@ -433,8 +438,6 @@ Known Problems
   
   It is suggested that you don't use this option on these platforms
   during configuration.
-
-* The Stream VFD is not supported under Windows.
 
 * Use the --disable-shared configure flag if building with an Absoft Fortran
   compiler.
