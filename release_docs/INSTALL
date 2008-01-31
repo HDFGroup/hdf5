@@ -1,7 +1,6 @@
 
         Instructions for the Installation of HDF5 Software
         ==================================================
-                         January 30, 2008
 
         CONTENTS
         --------
@@ -35,7 +34,6 @@
         4.3.10. Disabling high-level C APIs 
         4.3.11. Threadsafe capability
         4.3.12. Backward compatibility with HDF5 1.4* releases
-        4.3.13. Network stream capability
         4.4. Building
         4.5. Testing
         4.6. Installing
@@ -76,6 +74,9 @@
             $ make
             $ make check
             $ make install
+            $ make check-install
+
+        The last step above verifies your installation.
 
         <configure_flags> above refers to the configure flags appropriate
         to your installation.  For example, to install HDF5 with the 
@@ -432,12 +433,6 @@
         v1.6 library without requiring immediate changes to the
         application source code. This flag will only be supported in the
         v1.6 branch of the library; it will not be available in v1.8+.
-
-4.3.13. Network stream capability
-        By default, the HDF5 Library is configured with a network stream file
-        driver. See the documentation on the Virtual File Layer for more 
-        details about the use of this driver. Use the '--disable-stream-vfd' 
-        configuration flag to turn it OFF.
 
 4.4. Building
         The library, confidence tests, and programs can be built by
