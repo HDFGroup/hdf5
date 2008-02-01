@@ -3720,6 +3720,8 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/h5repack/h5repack.sh
                  tools/h5ls/Makefile
                  tools/h5copy/Makefile
+                 tools/h5recover/Makefile
+                 tools/h5recover/testh5recover.sh
                  tools/lib/Makefile
                  tools/misc/Makefile
                  tools/misc/h5cc
