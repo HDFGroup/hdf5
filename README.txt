@@ -1,4 +1,4 @@
-HDF5 version 1.6.7 released on Thu Jan 31 21:09:10 CST 2008
+HDF5 version 1.6.7-snap0 currently under development
 Please refer to the release_docs/INSTALL file for installation instructions.
 ------------------------------------------------------------------------------
 January 28, 2007
