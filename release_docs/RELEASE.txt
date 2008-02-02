@@ -1013,16 +1013,16 @@ Platforms marked with * were not tested for hdf5-1.8.0-rc* release
 *   Cray X1 water 3.0.35          Cray Standard C Version 5.4.0.7.4
                                   Cray Fortran 5.4.0.7.3
                                   Cray C++ 5.4.0.7.4
-    FreeBSD 6.2-STABLE            gcc 3.4.6 [FreeBSD] 20060305
-                                  g++ 3.4.6 [FreeBSD] 20060305
-                                  gcc 4.2.1 20070620
-                                  g++ 4.2.1 20070620
+    FreeBSD 6.2-STABLE i386       gcc 3.4.6 [FreeBSD] 20060305
+    (duty)                        g++ 3.4.6 [FreeBSD] 20060305
+                                  gcc 4.2.1 20080123
+                                  g++ 4.2.1 20080123
                                   gfortran 4.2.1 20070620
     FreeBSD 6.2-STABLE amd64      gcc 3.4.6 [FreeBSD] 20060305
-                                  g++ 3.4.6 [FreeBSD] 20060305
-                                  gcc 4.2.1 20070620
-                                  g++ 4.2.1 20070620
-                                  gfortran 4.2.1 20070620
+    (liberty)                     g++ 3.4.6 [FreeBSD] 20060305
+                                  gcc 4.2.1 20080123
+                                  g++ 4.2.1 20080123
+                                  gfortran 4.2.1 20080123
 
 *   HP-UX B.11.23                 HP aC++/ANSI C B3910B A.06.00
                                   HP F90 v2.9.2
@@ -1033,10 +1033,10 @@ Platforms marked with * were not tested for hdf5-1.8.0-rc* release
 				 
 *   Linux 2.6.9 (RHEL4)           Intel 10.0 compilers
     (abe.ncsa.uiuc.edu)
-    Linux 2.4.21-40               gcc 3.2.3
+    Linux 2.4.21-47               gcc 3.2.3 20030502
     (osage)
-    Linux 2.6.9                   gcc 3.4.6
-    (kagiso)                      PGI 6.2-5 (pgcc, pgf90, pgCC)
+    Linux 2.6.9-42.0.10           gcc 3.4.6 20060404
+    (kagiso)                      PGI 7.0-7 (pgcc, pgf90, pgCC)
                                   Intel 9.1 (icc, ifort, icpc)
     Linux 2.6.16.27 x86_64 AMD    gcc 4.1.0 (SuSE Linux), g++ 4.1.0, g95 (GCC 4.0.3)
     (smirom)                      PGI 6.2-5 (pgcc, pgf90, pgCC)
@@ -1046,7 +1046,7 @@ Platforms marked with * were not tested for hdf5-1.8.0-rc* release
     (cobalt)                      Intel(R) Fortran Itanium(R) Version 9.0 
                                   SGI MPI
     SunOS 5.8 32,46               Sun WorkShop 6 update 2 C 5.3
-     (Solaris 2.8)                Sun WorkShop 6 update 2 Fortran 90
+     (Solaris 2.8)                Sun WorkShop 6 update 2 Fortran 95 6.2
                                   Sun WorkShop 6 update 2 C++ 5.3
 *   SunOS 5.10 i86pc              Sun C 5.7
                                   Sun Fortran 95 8.1
@@ -1055,11 +1055,13 @@ Platforms marked with * were not tested for hdf5-1.8.0-rc* release
     (linew)                       f90: Sun Fortran 95 8.2 
                                   CC: Sun C++ 5.8 
     Xeon Linux 2.4.21-32.0.1.ELsmp-perfctr-lustre
-    (tungsten)	                  Intel(R) C++ Version 9.0
+    (tungsten)	                  gcc 3.2.2 20030222
+                                  Intel(R) C++ Version 9.0
                                   Intel(R) Fortran Compiler Version 9.0
     IA-64 Linux 2.4.21.SuSE_292.til1 ia64
-    (NCSA tg-login)               Intel(R) C++ Version 8.0
-                                  Intel(R) Fortran Compiler Version 8.0
+    (NCSA tg-login)               gcc 3.2.2
+                                  Intel(R) C++ Version 8.1
+                                  Intel(R) Fortran Compiler Version 8.1
 				  mpich-gm-1.2.5..10-intel-r2
     Windows XP                    
 				  Visual Studio .NET
@@ -1090,17 +1092,13 @@ Supported Configuration Features Summary
 
 Platform                 C        F90    F90      C++   zlib  SZIP
                          parallel        parallel
-Solaris2.8 64-bit        y        y      y(1)     y     y     y
-Solaris2.8 32-bit        y        y      y(1)     y     y     y
-Solaris2.10 64-bit       y(1)     y      n        y     y     y
-Solaris2.10 32-bit       y(1)     y      n        y     y     y
+SunOS5.8 64-bit          n        y      n        y     y     y
+SunOS5.8 32-bit          n        y      n        y     y     y
+SunOS5.10 64-bit         y(1)     y      n        y     y     y
+SunOS5.10 32-bit         y(1)     y      n        y     y     y
 IRIX64_6.5 64-bit        n        y      y        y     y     y
 IRIX64_6.5 32-bit        n        n      n        n     y     y
-HPUX11.00                y(1)     y      y        y     y     y
-HPUX11.23-32bit          n        y      n        y     y     y
-HPUX11.23-64bit          n        y      n        y     y     y
-Cray X1                  y        y      y        y     y     n
-Cray XT3           (16)  n        y      n        y     y     n
+Cray XT3           (16)  n        n      n        n     n     n
 AIX-5.2 & 5.3 32-bit     y        y      y        y     y     y
 AIX-5.2 & 5.3 64-bit     y        y      y        y     y     y
 Windows XP               n        y(15)  n(15)    y     y     y
@@ -1108,65 +1106,66 @@ Windows XP x64           n        y(15)  n(15)    y     y     y
 Windows Vista            n        n      n        y     y     y
 Mac OS X 10.4 PowerPC    n               n
 FreeBSD 4.11             n        n      n        y     y     y
-RedHat EL3  W       (3)  y(1)     y(10)  n        y     y     y
-RedHat EL3  W Intel (3)  n        y      n        y     y     y
-RedHat EL3  W PGI   (3)  n        y      n        y     y     y
-SuSe x86_64 gcc  (3,12)  n        y(11)  n        y     y     y
-SuSe x86_64 icc  (3,12)  n        y(13)  n        y     y     y
+RedHat EL3  W       (3)  y(1a)    y(10)  y(1a)    y     y     y
+RedHat EL3  W Intel (3)  n        y      n        y     y     n
+RedHat EL3  W PGI   (3)  n        y      n        y     y     n
+SuSe x86_64 gcc  (3,12)  y(1a)    y(11)  n        y     y     y
+SuSe x86_64 Int  (3,12)  n        y(13)  n        y     y     n
+SuSe x86_64 PGI  (3,12)  n        y(8)   n        y     y     y
 Linux 2.4 Xeon C 
-    Lustre Intel  (3,6)  n        y      n        y     y     y
+    Lustre Intel  (3,6)  n        y      n        y     y     n
 Linux 2.6 SuSE ia64 C 
-    Intel         (3,7)  y        y      y        y     y     y
+    Intel         (3,7)  y        y      y        y     y     n
 Linux 2.6 SGI Altix 
     ia64 Intel      (3)  y        y      y        y     y     y
 Alpha OpenVMS 7.3.2      n        y      n        y     n     n
 
 
 
-Platform                 Shared  Shared    Shared    static-  Thread-  STREAM-
-                         C libs  F90 libs  C++ libs  exec     safe     VFD
-Solaris2.8 64-bit        y       y         n         x        y        y
-Solaris2.8 32-bit        y       y         y         x        y        y
-Solaris2.10 64-bit       y                           x        y        y
-Solaris2.10 32-bit       y                           x        y        y
-IRIX64_6.5 64-bit        y       y         n         y        y        y
-IRIX64_6.5 32-bit        y       dna       y         y        y        y
-HPUX11.00                y       n         y         x        n        y
-HPUX11.23-32bit          y       n         n         y        n        y
-HPUX11.23-64bit          y       dna       n         y        n        y
-Cray X1                  n                           y        n        y
-Cray XT3           (16)  n                           y        n        y
-AIX-5.2 & 5.3 32-bit     n       n         n         y        n        y
-AIX-5.2 & 5.3 64-bit     n       n         n         y        n        y
-Windows XP               y       y(15)     y         y        y        n
-Windows XP x64           y       y(15)     y         y        y        n
-Windows Vista            y       n         n         y        y        n
-Mac OS X 10.3            y                           y        n        y
+Platform                 Shared  Shared    Shared    static-  Thread-  
+                         C libs  F90 libs  C++ libs  exec     safe     
+Solaris2.8 64-bit        y       y         y         x        y        
+Solaris2.8 32-bit        y       y         y         x        y        
+Solaris2.10 64-bit       y                           x        y        
+Solaris2.10 32-bit       y                           x        y        
+IRIX64_6.5 64-bit        y       y         n         y        y        
+IRIX64_6.5 32-bit        y       dna       y         y        y        
+HPUX11.00                y       n         y         x        n        
+HPUX11.23-32bit          y       n         n         y        n        
+HPUX11.23-64bit          y       dna       n         y        n        
+Cray XT3           (16)  n       n         n         n        n        
+AIX-5.2 & 5.3 32-bit     n       n         n         y        n        
+AIX-5.2 & 5.3 64-bit     n       n         n         y        n        
+Windows XP               y       y(15)     y         y        y        
+Windows XP x64           y       y(15)     y         y        y        
+Windows Vista            y       n         n         y        y        
+Mac OS X 10.3            y                           y        n        
 Mac OS X 10.4 PowerPC
-FreeBSD 4.11             y       n         y         y        y        y
-RedHat EL3  W       (3)  y       n(10)     y         y        y        y
-RedHat EL3  W Intel (3)  n       n         n         y        n        y
-RedHat EL3  W PGI   (3)  n       n         n         y        n        y
-SuSe x86_64 gcc  (3,12)  y       y         y         y        n        y
-SuSe x86_64 icc  (3,12)  y       y         y         y(14)    n        y
+FreeBSD 4.11             y       n         y         y        y        
+RedHat EL3  W       (3)  y       y(10)     y         y        y        
+RedHat EL3  W Intel (3)  y       y         y         y        n        
+RedHat EL3  W PGI   (3)  y       y         y         y        n        
+SuSe x86_64 W GNU (3,12) y       y         y         y        y        
+SuSe x86_64 W Int (3,12) y       y         y         y(14)    n        
+SuSe x86_64 W PGI (3,12) y       y         y         y(14)    n        
 Linux 2.4 Xeon C 
-    Lustre Intel  (3,6)  y       y         y         y        n        y
+    Lustre Intel    (6)  y       y         y         y        n        
 Linux 2.4 SuSE 
-    ia64 C Intel  (3,7)  y       y         y         y        n        n
+    ia64 C Intel    (7)  y       y         y         y        n        
 Linux 2.4 SGI Altix 
-    ia64 Intel      (3)  y                           y        n        y
-Alpha OpenVMS 7.3.2      n       n         n         y        n        n
+    ia64 Intel           y                           y        n        
+Alpha OpenVMS 7.3.2      n       n         n         y        n        
 
     Notes: (1)  Using mpich 1.2.6.
+           (1a) Using mpich2 1.0.6.
            (2)  Using mpt and mpich 1.2.6.
-           (3)  Linux 2.4 with GNU, Intel, and PGI compilers, as indicated.  
+           (3)  Linux 2.6 with GNU, Intel, and PGI compilers, as indicated.  
                   W or C indicates workstation or cluster, respectively.
-           (4)  IBM XLF and Absoft
-           (5)  Using mpt.
+
            (6)  Linux 2.4.21-32.0.1.  Xeon cluster with ELsmp_perfctr_lustre 
                   and Intel compilers
            (7)  Linux 2.4.21, SuSE_292.till.  Ia64 cluster with Intel compilers
-           (8)  Intel 8.1
+           (8)  pgf90
            (9)  With Compaq Visual Fortran 6.6c compiler.
            (10) With PGI and Absoft compilers.
            (11) PGI and Intel compilers for both C and Fortran
@@ -1174,6 +1173,7 @@ Alpha OpenVMS 7.3.2      n       n         n         y        n        n
            (13) ifort
            (14) Yes with C and Fortran, but not with C++
 	   (15) Using Visual Studio 2005 or Cygwin
+           (16) Not tested for this release.
     Compiler versions for each platform are listed in the preceding
     "Platforms Tested" table.
 
