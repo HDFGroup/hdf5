@@ -13,9 +13,15 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "hdf5.h"
+#include <signal.h>
+#include <sys/time.h>
+#include <math.h>
+#include <stdlib.h>
 
 /*
  * Header file for the trecover test program.
+ *
+ * Creator: Albert Cheng, Jan 28, 2008.
  */
 
 /* Macro definitions */
@@ -24,7 +30,20 @@
 #define AsyncCrash	1
 #define	CRASH	crasher(SyncCrash, 0)
 
+/* Data Structures */
+typedef union CrasherParam_t {
+    float tinterval;		/* time interval to schedule an Async Crash */
+} CrasherParam_t;
+
+
+/* Global variables */
+extern CrasherParam_t	AsyncCrashParam;
+extern int		CrashMode;
 
 /* protocol definitions */
-void crasher(int crash_mode, int crash_param);
+void crasher(int crash_mode, CrasherParam_t *crash_param);
 void writer(void);
+void wakeup(int signum);
+void parser(int ac, char **av);	/* command option parser */
+void init(void);		/* initialization */
+void help(void);		/* initialization */

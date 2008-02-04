@@ -14,6 +14,8 @@
 
 /*  
  * crasher HDF5 API module of the trecover test program.
+ *
+ * Creator: Albert Cheng, Jan 28, 2008.
  */
  
 #include "trecover.h"
@@ -26,17 +28,35 @@
  * Crash_param: used by AsyncCrash mode and ignored by SyncCrash mode.
  */
 void
-crasher(int crash_mode, int crash_param)
+crasher(int crash_mode, CrasherParam_t *crash_param)
 {
+    float fraction, integral;
+    struct itimerval old, new;
+
     switch (crash_mode) {
 	case SyncCrash:
 	    _exit(0);
 	    break;
 	case AsyncCrash:
-	    printf("AsyncCrash not implemented yet\n");
+	    /* Setup a wakeup call in the future */
+	    signal(SIGALRM, wakeup);
+	    fraction = modff(crash_param->tinterval, &integral);
+	    new.it_interval.tv_usec = 0;
+	    new.it_interval.tv_sec = 0;
+	    new.it_value.tv_usec = fraction * 1.0e6;
+	    new.it_value.tv_sec = integral;
+	    setitimer(ITIMER_REAL, &new, &old);
 	    break;
-	otherwise:
-	    print("Unknown Crash Mode (%d)\n", crash_mode);
+	default:
+	    fprintf(stderr, "Unknown Crash Mode (%d)\n", crash_mode);
 	    break;
     }
 }     
+
+
+void wakeup(int signum) 
+{
+    printf("wakeup, call sync crash\n");
+    /* call crasher with sync mode */
+    crasher(SyncCrash, 0);
+}

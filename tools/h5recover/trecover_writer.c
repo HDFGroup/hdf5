@@ -14,6 +14,8 @@
 
 /*  
  * writer HDF5 API module of the trecover test program.
+ *
+ * Creator: Albert Cheng, Jan 28, 2008.
  */
  
 #include "trecover.h"
