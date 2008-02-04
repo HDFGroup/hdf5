@@ -6165,10 +6165,12 @@ int
 main(void)
 {
     unsigned long	nerrors = 0;
+    unsigned long       rand_seed;
     hid_t		fapl=-1;
 
     /* Set the random # seed */
-    HDsrandom((unsigned long)HDtime(NULL));
+    rand_seed = (unsigned long)HDtime(NULL);
+    HDsrandom(rand_seed);
 
     reset_hdf5();
     fapl = h5_fileaccess();
@@ -6252,6 +6254,7 @@ main(void)
     if (nerrors) {
         printf("***** %lu FAILURE%s! *****\n",
                nerrors, 1==nerrors?"":"S");
+        printf("        seed for random is %29lu\n", rand_seed);
         HDexit(1);
     }
     printf("All data type tests passed.\n");
