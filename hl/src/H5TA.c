@@ -17,10 +17,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if 0
-#define SHRINK
-#endif
-
 
 /*-------------------------------------------------------------------------
  *
@@ -1400,9 +1396,7 @@ herr_t H5TBdelete_record( hid_t loc_id,
  size_t   *src_offset;
  size_t   *src_sizes;
  hsize_t  nrows;
-#if defined (SHRINK)
  hsize_t  dims[1];
-#endif
 
 
 /*-------------------------------------------------------------------------
@@ -1490,11 +1484,9 @@ herr_t H5TBdelete_record( hid_t loc_id,
  * Change the table dimension
  *-------------------------------------------------------------------------
  */
-#if defined (SHRINK)
  dims[0] = ntotal_records - nrecords;
  if ( H5Dset_extent( did, dims ) < 0 )
   goto out;
-#endif
 
  /* End access to the dataset */
  if ( H5Dclose( did ) < 0 )
