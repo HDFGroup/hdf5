@@ -16,14 +16,15 @@ Contents:
    Section I     :  What do we build and install
    Section II    :  How to build and test HDF5 libraries and tools
    Section III   :  How to build examples (optional)
-   Section IV    :  How to build an application using the HDF5 library  or DLL
+   Section IV    :  How to build an application using the HDF5 library or DLL
    Section V     :  How to disable Gzip(Zlib)/Szip compression
    Section VI    :  How to build HDF5 with Fortran Support
    Section VII   :  How to build Multi-threaded version of HDF5 library
    Section VIII  :  How to build HDF5 with Thread-Safe Feature
    Section IX    :  How to build HDF5 for 64-bit Windows
-   Section X     :  How to build HDF5 on windows vista
-   Section XI    :  Misc.
+   Section X     :  How to build HDF5 on Windows Vista
+   Section XI    :  Backwards Compatibility with HDF5 1.6
+   Section XII   :  Misc.
 
 
 ========================================================================
@@ -155,8 +156,8 @@ Notes:
    2. Visual Studio 6.0 will not be supported in HDF5 1.8 or later release.
 
    2. Users who prefer to use Visual Studio .NET can follow instructions in 
-      INSTALL_Windows_Short_Net.txt.  Note, however,  HDF5 fortran product
-	  will not be supported in HDF5 1.8 release.
+      INSTALL_Windows_Short_Net.txt.  Note, however,  HDF5 Fortran product
+      will not be supported in HDF5 1.8 release.
 
    3. For users who want to quickly build HDF5 library or do not want to know 
       HDF5 building and installation details, please read the 
@@ -175,9 +176,6 @@ Notes:
 
    7. For users who would like to build Muti-threaded version of HDF5 library, 
       please read Section VII.
-
-   8. For users who would like to build, test and use HDF5 snapshot
-      release, please read Section VIII.
       
 
 ========================================================================
@@ -1649,7 +1647,7 @@ Installing:
     about installing.  
 	
 ========================================================================
- Section X: How to build HDF5 on windows Vista
+            Section X: How to build HDF5 on Windows Vista
 ========================================================================
 Building on Windows Vista is very similar to building on Windows XP, with
 some minor changes.  Therefore, follow the build instructions above, with the
@@ -1674,10 +1672,40 @@ following considerations:
             
             3. Test HDF5 libraries and tools as usual using "hdf5check.bat"
                script.
-			   
- 
+
+
 ========================================================================
-                            Section XI: Misc.
+        Section XII: Backwards Compatibility with HDF5 1.6
+========================================================================
+
+Several basic HDF5 functions have changed over the years as requirements on 
+the library and data format have evolved. To enable existing applications to 
+run properly, all versions of these functions have been retained; for 
+flexibility and ease-of-use, macros have been created that can be mapped 
+either globally to broad sets of function versions or on a 
+function-by-function basis to specific versions. For example, an overall 
+approach can be determined by means global setting; function-level settings 
+can then be used to override the global setting then for specific functions.
+
+To enable 1.6 API symbols in your application:
+
+    1. Build and test HDF5 normally (see Section II).
+    
+    2. Open your application in Visual Studio.  Right click on the
+       project file, and select properties.
+       
+    3. Select the C/C++ > Preprocessor pane on the left.  In the list of
+       "Preprocessor Definitions", add "H5_USE_16_API". (Note: macros in
+       the list are separated by a semi-colon.)
+       
+    4. Repeat this for each project and project configuration that uses
+       HDF5 libraries.
+       
+    5. Continue to build and test your application normally.
+
+
+========================================================================
+                            Section XII: Misc.
 ========================================================================
 
 1. Helpful Pointers
@@ -1705,16 +1733,5 @@ using the Visual C++ Development Environment.
     Developer Studio project settings dialog.
 
     
-2. Backward compatibility with 1.6
- THE FOLLOWING CONTENTS ARE OUT OF DATE. They are not correct. These should be updated.
-    If you are going to use 1.6 APIs with 1.8 branch, you may do the 
-    following two things:
-        3.1 Uncomment out /*#define H5_WANT_H5_V1_6_COMPAT 1*/ inside 
-        h5pubconf.h under windows\src.
-        3.2 Set up an environment variable H5_WANT_H5_V1_6_COMPAT to 1, 
-        this will be used to test compatibility of error APIs.
-    Remember to undo 1 and 2 after you test if you are not going to use 1.6 
-    backward compatibility option.
-
 ************************************************************************
  Please send email to help@hdfgroup.org for further assistance.
