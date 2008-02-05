@@ -16,6 +16,7 @@
 # HDF Utilities Test script
 # Usage: h5importtestutil.sh [machine-type]
 
+
 # initialize errors variable
 errors=0
 
@@ -63,6 +64,7 @@ TESTING "ASCII I32 rank 3 - Output BE " ;
 TOOLTEST txtin32 -c $srcdir/testfiles/textin32 -o test1.h5
 
 TESTING "ASCII I16 rank 3 - Output LE - CHUNKED - extended" 
+#TOOLTEST txtin16.txt -c $srcdir/testfiles/txtin16.conf -o txtin16.h5
 TOOLTEST txtin16 -c $srcdir/testfiles/textin16 -o test2.h5
 
 TESTING "ASCII I8 - rank 3 - Output I16 LE-Chunked+Extended+Compressed " 
@@ -99,7 +101,7 @@ TESTING "BINARY UI32 - rank 3 - Output LE + CHUNKED "
 TOOLTEST buin32 -c $srcdir/testfiles/conbuin32 -o test13.h5
 
 TESTING "BINARY I8 CR LF EOF" 
-TOOLTEST $srcdir/testfiles/bin8w.bin -c $srcdir/testfiles/bin8w.conf -o bin8w.h5
+TOOLTEST bin8w.bin -c $srcdir/testfiles/bin8w.conf -o bin8w.h5
 
 rm -f  tx* b* *.dat
 rm -f  test*.h5 bin8w.h5
