@@ -1496,7 +1496,6 @@
 ./tools/h5import/testfiles/test11.h5
 ./tools/h5import/testfiles/test12.h5
 ./tools/h5import/testfiles/test13.h5
-./tools/h5import/testfiles/bin8w.bin
 ./tools/h5import/testfiles/bin8w.h5
 ./tools/h5import/testfiles/bin8w.conf
 
