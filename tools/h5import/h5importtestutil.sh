@@ -98,6 +98,9 @@ TOOLTEST buin16 -c $srcdir/testfiles/conbuin16 -o test12.h5
 TESTING "BINARY UI32 - rank 3 - Output LE + CHUNKED " 
 TOOLTEST buin32 -c $srcdir/testfiles/conbuin32 -o test13.h5
 
+TESTING "BINARY I8 CR LF EOF" 
+TOOLTEST $srcdir/testfiles/bin8w.bin -c $srcdir/testfiles/bin8w.conf -o bin8w.h5
+
 rm -f  tx* b* *.dat
 rm -f  test*.h5 
 rm -rf tmp_testfiles

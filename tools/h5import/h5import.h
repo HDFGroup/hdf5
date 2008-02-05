@@ -80,7 +80,7 @@ struct path_info
 struct Input
 {
   struct path_info path;
-  int inputClass;
+  int inputClass; /* 0 to 7, read string from configuration file, translated to int   */
   int inputSize;
   int rank;
   hsize_t* sizeOfDimension;

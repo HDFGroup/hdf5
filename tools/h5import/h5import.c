@@ -261,10 +261,49 @@ processDataFile(char *infile, struct Input *in, FILE **strm)
   const char *err7 = "Error in reading unsigned integer data.\n";
   const char *err10 = "Unrecognized input class type.\n";
 
-  if ((*strm = fopen(infile, "r")) == NULL)
+ /*-------------------------------------------------------------------------
+  * special case for opening binary classes in WIN32
+  * "FP" denotes a floating point binary file,
+  * "IN" denotes a signed integer binary file, 
+  * "UIN" denotes an unsigned integer binary file,
+  *-------------------------------------------------------------------------
+  */
+  if ( in->inputClass == 4 /* "IN" */ ||
+       in->inputClass == 3 /* "FP" */ ||
+       in->inputClass == 7 /* "UIN" */ 
+      
+      )
   {
-      (void) fprintf(stderr, err1, infile);
-      return(-1);
+
+#ifdef WIN32
+      
+      if ((*strm = fopen(infile, "rb")) == NULL)
+      {
+          (void) fprintf(stderr, err1, infile);
+          return(-1);
+      }
+#else
+
+      if ((*strm = fopen(infile, "r")) == NULL)
+      {
+          (void) fprintf(stderr, err1, infile);
+          return(-1);
+      }
+
+#endif
+
+  }
+ /*-------------------------------------------------------------------------
+  * if the input class is not binary, just use "r"
+  *-------------------------------------------------------------------------
+  */
+  else
+  {
+      if ((*strm = fopen(infile, "r")) == NULL)
+      {
+          (void) fprintf(stderr, err1, infile);
+          return(-1);
+      }
   }
 
   switch(in->inputClass)
