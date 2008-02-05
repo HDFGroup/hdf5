@@ -102,7 +102,7 @@ TESTING "BINARY I8 CR LF EOF"
 TOOLTEST $srcdir/testfiles/bin8w.bin -c $srcdir/testfiles/bin8w.conf -o bin8w.h5
 
 rm -f  tx* b* *.dat
-rm -f  test*.h5 
+rm -f  test*.h5 bin8w.h5
 rm -rf tmp_testfiles
 else
 	echo "** h5import or h5importtest not available ***"
