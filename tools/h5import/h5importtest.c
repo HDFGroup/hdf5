@@ -189,11 +189,11 @@ main(void)
 
 
  /*-------------------------------------------------------------------------
-  * 
+  * TOOLTEST txtin16.txt -c $srcdir/testfiles/txtin16.conf -o txtin16.h5
   *-------------------------------------------------------------------------
   */
 
-    sp = fopen("txtin16", "w");
+    sp = fopen("txtin16.txt", "w");
     for (k = 0; k < npln; k++)
     {
         for (i = 0; i < nrow; i++)
@@ -205,7 +205,12 @@ main(void)
     }
     (void) fclose(sp);
 
-    sp = fopen("txtin32", "w");
+ /*-------------------------------------------------------------------------
+  * TOOLTEST txtin32.txt -c $srcdir/testfiles/textin32.conf -o textin32.h5
+  *-------------------------------------------------------------------------
+  */
+
+    sp = fopen("txtin32.txt", "w");
     for (k = 0; k < npln; k++)
     {
         for (i = 0; i < nrow; i++)
@@ -217,7 +222,12 @@ main(void)
     }
     (void) fclose(sp);
 
-    sp = fopen("bin32", "w");
+/*-------------------------------------------------------------------------
+  * TOOLTEST binin32.bin -c $srcdir/testfiles/binin32.conf -o binin32.h5
+  *-------------------------------------------------------------------------
+  */
+
+    sp = fopen("binin32.bin", "w");
     for (k = 0; k < npln; k++)
     {
         for (i = 0; i < nrow; i++)
@@ -230,8 +240,12 @@ main(void)
     }
     (void) fclose(sp);
 
+/*-------------------------------------------------------------------------
+  * TOOLTEST binuin32.bin -c $srcdir/testfiles/binuin32.conf -o binuin32.h5
+  *-------------------------------------------------------------------------
+  */
 
-    sp = fopen("buin32", "w");
+    sp = fopen("binuin32.bin", "w");
     for (k = 0; k < npln; k++)
     {
         for (i = 0; i < nrow; i++)
@@ -270,8 +284,14 @@ main(void)
     }
     (void) fclose(sp);
 
+
+ /*-------------------------------------------------------------------------
+  * TOOLTEST binin16.bin -c $srcdir/testfiles/binin16.conf -o binin16.h5
+  *-------------------------------------------------------------------------
+  */
+
         
-    sp = fopen("bin16", "w");
+    sp = fopen("binin16.bin", "w");
     for (k = 0; k < npln; k++)
     {
         for (i = 0; i < nrow; i++)
@@ -284,7 +304,12 @@ main(void)
     }
     (void) fclose(sp);
 
-    sp = fopen("buin16", "w");
+ /*-------------------------------------------------------------------------
+  * TOOLTEST binuin16.bin -c $srcdir/testfiles/binuin16.conf -o binuin16.h5
+  *-------------------------------------------------------------------------
+  */
+
+    sp = fopen("binuin16.bin", "w");
     for (k = 0; k < npln; k++)
     {
         for (i = 0; i < nrow; i++)
@@ -313,7 +338,14 @@ main(void)
     (void) fclose(sp);
 #endif
 
-    sp = fopen("bin8", "w");
+
+ /*-------------------------------------------------------------------------
+  * TOOLTEST binin8.bin -c $srcdir/testfiles/binin8.conf  -o binin8.h5
+  *-------------------------------------------------------------------------
+  */
+
+
+    sp = fopen("binin8.bin", "w");
     for (k = 0; k < npln; k++)
     {
         for (i = 0; i < nrow; i++)
@@ -328,11 +360,19 @@ main(void)
 
 #endif
 
-    /*
-     * binary 64-bit file - rank 2 & 3
-     */
 
-    sp = fopen("bfp64", "w");
+
+
+ /*-------------------------------------------------------------------------
+  * TOOLTEST binfp64.bin -c $srcdir/testfiles/binfp64.conf -o binfp64.h5
+  *-------------------------------------------------------------------------
+  */
+
+ /*
+  * binary 64-bit file - rank 2 & 3
+  */
+
+    sp = fopen("binfp64.bin", "w");
     for (k = 0; k < npln; k++)
     {
         for (i = 0; i < nrow; i++)
@@ -347,16 +387,21 @@ main(void)
 
 
 
+/*-------------------------------------------------------------------------
+  * TOOLTEST binin8w.bin -c $srcdir/testfiles/binin8w.conf -o binin8w.h5
+  *-------------------------------------------------------------------------
+  */
+
     {
         /* test CR+LF (13,10) and EOF (26) in windows */
         char bin8w[4] = {13,10,26,0};
         
 #ifdef WIN32
 
-        sp = fopen("bin8w.bin", "wb");
+        sp = fopen("binin8w.bin", "wb");
 #else
 
-        sp = fopen("bin8w.bin", "w");
+        sp = fopen("binin8w.bin", "w");
 
 #endif
         for (i = 0; i < 4; i++)
