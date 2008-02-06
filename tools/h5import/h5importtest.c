@@ -13,7 +13,6 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
 #include <stdio.h>
 #include "H5private.h"
 
@@ -33,25 +32,25 @@
 int
 main(void)
 {
-    int         nrow = 3, ncol = 4, npln = 5;
-    int         i, j, k;
-    FILE       *sp;
+    int       nrow = 3, ncol = 4, npln = 5;
+    int       i, j, k;
+    FILE      *sp;
     
     float     b32r3[5][3][4];
     float     row4[3], col4[4], pln4[5];
     float     rowo4 = (float)11.0e0, colo4 = (float)21.0e0, plno4 = (float)51.0e0;
     float     rowi4 = (float)1.0e0, coli4 = (float)2.0e0, plni4 = (float)5.0e0;
     
-    int     b32i3[5][3][4];
-    int     row4i[3], col4i[4], pln4i[5];
-    int     rowo4i = (int)11 , colo4i = (int)21 , plno4i = (int)51 ;
-    int     rowi4i = (int)1 , coli4i = (int)2 , plni4i = (int)5 ;
+    int       b32i3[5][3][4];
+    int       row4i[3], col4i[4], pln4i[5];
+    int       rowo4i = (int)11 , colo4i = (int)21 , plno4i = (int)51 ;
+    int       rowi4i = (int)1 , coli4i = (int)2 , plni4i = (int)5 ;
     
 #ifndef WIN32
-    long_long     b64i2[3][4], b64i3[5][3][4];
-    long_long     row4i64[3], col4i64[4], pln4i64[5];
-    long_long     rowo4i64 = (long_long)11 , colo4i64 = (long_long)21 , plno4i64 = (long_long)51 ;
-    long_long     rowi4i64 = (long_long)1 , coli4i64 = (long_long)2 , plni4i64 = (long_long)5 ;
+    long_long b64i2[3][4], b64i3[5][3][4];
+    long_long row4i64[3], col4i64[4], pln4i64[5];
+    long_long rowo4i64 = (long_long)11 , colo4i64 = (long_long)21 , plno4i64 = (long_long)51 ;
+    long_long rowi4i64 = (long_long)1 , coli4i64 = (long_long)2 , plni4i64 = (long_long)5 ;
 #endif
     
     short     b16i3[5][3][4];
@@ -59,15 +58,15 @@ main(void)
     short     rowo4i16 = (short)11 , colo4i16 = (short)21 , plno4i16 = (short)51 ;
     short     rowi4i16 = (short)1 , coli4i16 = (short)2 , plni4i16 = (short)5 ;
     
-    char     b8i3[5][3][4];
-    char     row4i8[3], col4i8[4], pln4i8[5];
-    char     rowo4i8 = (char)11 , colo4i8 = (char)21 , plno4i8 = (char)51 ;
-    char     rowi4i8 = (char)1 , coli4i8 = (char)2 , plni4i8 = (char)5 ;
+    char      b8i3[5][3][4];
+    char      row4i8[3], col4i8[4], pln4i8[5];
+    char      rowo4i8 = (char)11 , colo4i8 = (char)21 , plno4i8 = (char)51 ;
+    char      rowi4i8 = (char)1 , coli4i8 = (char)2 , plni4i8 = (char)5 ;
     
-    double     b64r3[5][3][4];
-    double     row8[3], col8[4], pln8[5];
-    double     rowo8 = 11.0e0, colo8 = 21.0e0, plno8 = 51.0e0;
-    double     rowi8 = 1.0e0, coli8 = 2.0e0, plni8 = 5.0e0;
+    double    b64r3[5][3][4];
+    double    row8[3], col8[4], pln8[5];
+    double    rowo8 = 11.0e0, colo8 = 21.0e0, plno8 = 51.0e0;
+    double    rowi8 = 1.0e0, coli8 = 2.0e0, plni8 = 5.0e0;
     
     
     /*
@@ -180,9 +179,7 @@ main(void)
         }
     }
 
-    /*
-     * binary 32-bit file - rank 2 & 3
-     */
+    
 
 #ifndef UNICOS
 
@@ -192,6 +189,7 @@ main(void)
   * TOOLTEST txtin16.txt -c $srcdir/testfiles/txtin16.conf -o txtin16.h5
   *-------------------------------------------------------------------------
   */
+
 
     sp = fopen("txtin16.txt", "w");
     for (k = 0; k < npln; k++)
@@ -222,12 +220,16 @@ main(void)
     }
     (void) fclose(sp);
 
-/*-------------------------------------------------------------------------
+ /*-------------------------------------------------------------------------
   * TOOLTEST binin32.bin -c $srcdir/testfiles/binin32.conf -o binin32.h5
   *-------------------------------------------------------------------------
   */
 
+#ifdef WIN32        
+    sp = fopen("binin32.bin", "wb");
+#else
     sp = fopen("binin32.bin", "w");
+#endif
     for (k = 0; k < npln; k++)
     {
         for (i = 0; i < nrow; i++)
@@ -240,12 +242,16 @@ main(void)
     }
     (void) fclose(sp);
 
-/*-------------------------------------------------------------------------
+ /*-------------------------------------------------------------------------
   * TOOLTEST binuin32.bin -c $srcdir/testfiles/binuin32.conf -o binuin32.h5
   *-------------------------------------------------------------------------
   */
 
+#ifdef WIN32        
+    sp = fopen("binuin32.bin", "wb");
+#else
     sp = fopen("binuin32.bin", "w");
+#endif
     for (k = 0; k < npln; k++)
     {
         for (i = 0; i < nrow; i++)
@@ -257,6 +263,138 @@ main(void)
         }
     }
     (void) fclose(sp);
+
+
+
+
+ /*-------------------------------------------------------------------------
+  * TOOLTEST binin16.bin -c $srcdir/testfiles/binin16.conf -o binin16.h5
+  *-------------------------------------------------------------------------
+  */
+
+#ifdef WIN32        
+    sp = fopen("binin16.bin", "wb");
+#else
+    sp = fopen("binin16.bin", "w");
+#endif
+    for (k = 0; k < npln; k++)
+    {
+        for (i = 0; i < nrow; i++)
+        {
+            for (j = 0; j < ncol; j++)
+            {
+                (void) fwrite((char *) &b16i3[k][i][j], sizeof(short), 1, sp);
+            }
+        }
+    }
+    (void) fclose(sp);
+
+ /*-------------------------------------------------------------------------
+  * TOOLTEST binuin16.bin -c $srcdir/testfiles/binuin16.conf -o binuin16.h5
+  *-------------------------------------------------------------------------
+  */
+#ifdef WIN32
+    sp = fopen("binuin16.bin", "wb");
+#else
+    sp = fopen("binuin16.bin", "w");
+#endif
+    for (k = 0; k < npln; k++)
+    {
+        for (i = 0; i < nrow; i++)
+        {
+            for (j = 0; j < ncol; j++)
+            {
+                (void) fwrite((char *) &b16i3[k][i][j], sizeof(unsigned short), 1, sp);
+            }
+        }
+    }
+    (void) fclose(sp);
+
+
+
+ /*-------------------------------------------------------------------------
+  * TOOLTEST binin8.bin -c $srcdir/testfiles/binin8.conf  -o binin8.h5
+  *-------------------------------------------------------------------------
+  */
+
+#ifdef WIN32
+    sp = fopen("binin8.bin", "wb");
+#else
+    sp = fopen("binin8.bin", "w");
+#endif
+    for (k = 0; k < npln; k++)
+    {
+        for (i = 0; i < nrow; i++)
+        {
+            for (j = 0; j < ncol; j++)
+            {
+                (void) fwrite((char *) &b8i3[k][i][j], sizeof(char), 1, sp);
+            }
+        }
+    }
+    (void) fclose(sp);
+
+#endif /* UNICOS */
+
+
+
+
+ /*-------------------------------------------------------------------------
+  * TOOLTEST binfp64.bin -c $srcdir/testfiles/binfp64.conf -o binfp64.h5
+  *-------------------------------------------------------------------------
+  */
+
+ /*
+  * binary 64-bit file - rank 2 & 3
+  */
+
+#ifdef WIN32
+    sp = fopen("binfp64.bin", "w");
+#else
+    sp = fopen("binfp64.bin", "wb");
+#endif
+    for (k = 0; k < npln; k++)
+    {
+        for (i = 0; i < nrow; i++)
+        {
+            for (j = 0; j < ncol; j++)
+            {
+                (void) fwrite((char *) &b64r3[k][i][j], sizeof(double), 1, sp);
+            }
+        }
+    }
+    (void) fclose(sp);
+
+
+
+ /*-------------------------------------------------------------------------
+  * TOOLTEST binin8w.bin -c $srcdir/testfiles/binin8w.conf -o binin8w.h5
+  *-------------------------------------------------------------------------
+  */
+
+    {
+        /* test CR+LF (13,10) and EOF (26) in windows */
+        char bin8w[4] = {13,10,26,0};
+        
+#ifdef WIN32
+        sp = fopen("binin8w.bin", "wb");
+#else
+        sp = fopen("binin8w.bin", "w");
+#endif
+        for (i = 0; i < 4; i++)
+        {
+            char c = bin8w[i];
+            if ( fwrite( &c, sizeof(char), 1, sp) != 1 )
+                printf("error writing file\n");
+        }
+        fclose(sp);
+        
+        
+    }
+
+
+
+#if defined (NOT_USED)
 
 #ifndef WIN32
 
@@ -285,42 +423,6 @@ main(void)
     (void) fclose(sp);
 
 
- /*-------------------------------------------------------------------------
-  * TOOLTEST binin16.bin -c $srcdir/testfiles/binin16.conf -o binin16.h5
-  *-------------------------------------------------------------------------
-  */
-
-        
-    sp = fopen("binin16.bin", "w");
-    for (k = 0; k < npln; k++)
-    {
-        for (i = 0; i < nrow; i++)
-        {
-            for (j = 0; j < ncol; j++)
-            {
-                (void) fwrite((char *) &b16i3[k][i][j], sizeof(short), 1, sp);
-            }
-        }
-    }
-    (void) fclose(sp);
-
- /*-------------------------------------------------------------------------
-  * TOOLTEST binuin16.bin -c $srcdir/testfiles/binuin16.conf -o binuin16.h5
-  *-------------------------------------------------------------------------
-  */
-
-    sp = fopen("binuin16.bin", "w");
-    for (k = 0; k < npln; k++)
-    {
-        for (i = 0; i < nrow; i++)
-        {
-            for (j = 0; j < ncol; j++)
-            {
-                (void) fwrite((char *) &b16i3[k][i][j], sizeof(unsigned short), 1, sp);
-            }
-        }
-    }
-    (void) fclose(sp);
 
 #ifndef WIN32
 
@@ -338,82 +440,7 @@ main(void)
     (void) fclose(sp);
 #endif
 
-
- /*-------------------------------------------------------------------------
-  * TOOLTEST binin8.bin -c $srcdir/testfiles/binin8.conf  -o binin8.h5
-  *-------------------------------------------------------------------------
-  */
-
-
-    sp = fopen("binin8.bin", "w");
-    for (k = 0; k < npln; k++)
-    {
-        for (i = 0; i < nrow; i++)
-        {
-            for (j = 0; j < ncol; j++)
-            {
-                (void) fwrite((char *) &b8i3[k][i][j], sizeof(char), 1, sp);
-            }
-        }
-    }
-    (void) fclose(sp);
-
-#endif
-
-
-
-
- /*-------------------------------------------------------------------------
-  * TOOLTEST binfp64.bin -c $srcdir/testfiles/binfp64.conf -o binfp64.h5
-  *-------------------------------------------------------------------------
-  */
-
- /*
-  * binary 64-bit file - rank 2 & 3
-  */
-
-    sp = fopen("binfp64.bin", "w");
-    for (k = 0; k < npln; k++)
-    {
-        for (i = 0; i < nrow; i++)
-        {
-            for (j = 0; j < ncol; j++)
-            {
-                (void) fwrite((char *) &b64r3[k][i][j], sizeof(double), 1, sp);
-            }
-        }
-    }
-    (void) fclose(sp);
-
-
-
-/*-------------------------------------------------------------------------
-  * TOOLTEST binin8w.bin -c $srcdir/testfiles/binin8w.conf -o binin8w.h5
-  *-------------------------------------------------------------------------
-  */
-
-    {
-        /* test CR+LF (13,10) and EOF (26) in windows */
-        char bin8w[4] = {13,10,26,0};
-        
-#ifdef WIN32
-
-        sp = fopen("binin8w.bin", "wb");
-#else
-
-        sp = fopen("binin8w.bin", "w");
-
-#endif
-        for (i = 0; i < 4; i++)
-        {
-            char c = bin8w[i];
-            if ( fwrite( &c, sizeof(char), 1, sp) != 1 )
-                printf("error writing file\n");
-        }
-        fclose(sp);
-        
-        
-    }
+#endif /* NOT_USED */
 
 
 
