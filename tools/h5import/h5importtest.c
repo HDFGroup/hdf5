@@ -25,9 +25,6 @@
  *      used to test the h5import program.
  *
  */
-/*
- * Define names for test files
- */
 
 int
 main(void)
@@ -349,9 +346,9 @@ main(void)
   */
 
 #ifdef WIN32
-    sp = fopen("binfp64.bin", "w");
-#else
     sp = fopen("binfp64.bin", "wb");
+#else
+    sp = fopen("binfp64.bin", "w");
 #endif
     for (k = 0; k < npln; k++)
     {
