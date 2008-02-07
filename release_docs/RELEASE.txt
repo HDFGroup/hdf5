@@ -4,13 +4,12 @@ HDF5 version 1.8.0 currently under development
 
 INTRODUCTION
 
-This document describes the differences between HDF5-1.6.* and
-Hdf5 1.8.0 release candidate "HDF5-1.8.0-rc3", and contains information 
-on the platforms tested and known problems in HDF5-1.8.0-rc3. 
-For more details check the HISTORY.txt file in the HDF5 source.
+This document describes the differences between HDF5-1.6.0 and
+HDF5 1.8.0, and contains information on the platforms tested and known problems 
+in HDF5-1.8.0.  For more details check the HISTORY.txt file in the HDF5 source.
 
-
-Links to HDF5 1.8.0-rc3 source code, documentation, and additional materials
+=====================This part should be updated===========================
+Links to HDF5 1.8.0 source code, documentation, and additional materials
 can be found on THG's development server (www.hdfgroup.uiuc.edu) at the
 following location:
      http://www.hdfgroup.uiuc.edu/HDF5/release/beta/obtain518.html
@@ -26,6 +25,7 @@ New and modified APIs are described briefly in
 and will be listed in the "HDF5 Software Changes" document:
      http://www.hdfgroup.uiuc.edu/HDF5/doc_1.8pre/doc/ADGuide/Changes.html
 
+===========================================================================
 
 
 For more information, see the HDF5 home page:
@@ -35,6 +35,7 @@ For more information, see the HDF5 home page:
 If you have any questions or comments, please send them to the HDF Help Desk:
 
     help@hdfgroup.org
+
 
 
 CONTENTS
@@ -49,56 +50,85 @@ CONTENTS
 New Features
 ============
 
-    Configuration:
-    -------------
+   HDF5 Release 1.8.0 is a major release with many changes and new features.
 
-    Library:
-    --------
+New Features
+============
+   New format and interface features discussed in "What's New in HDF5 1.8.0" 
+   include:
+       Enhanced group object management
+       Enhanced attribute management and more efficient meta data handling
+       Expanded datatype features
+       Creation order tracking and indexing
+       Improved meta data caching and cache control
+       UTF-8 encoding
+       New I/O filters: n-bit and scale+offset compression
+       New link (H5L) and object (H5O) interfaces and features
+       External and user-defined links
+       New high-level APIs: 
+           HDF5 Packet Table (H5PT) and HDF5 Dimension Scale (H5DS)
+           C++ and Fortran interfaces for older high-level APIs:
+           H5Lite (H5LT), H5Image (H5IM), and H5Table (H5TB)
+    New and improved tools
+    And more...
+           http://hdfgroup.org/HDF5/doc/ADGuide/WhatsNew180.html
 
-    Parallel Library:
-    -----------------
-
-    Fortran Library:
-    ----------------
-
-    C++ Library:
-    ----------------
+    New APIs associated with these features, other interface changes 
+    (e.g., ENUM and struct definitions), and new library configuration flags
+    are listed in the "Release 1.8.0 (current release) versus Release 1.6.x" 
+    section of "HDF5 Software Changes from Release to Release."
+        http://hdfgroup.org/HDF5/doc/ADGuide/Changes.html
 
 
-    Tools:
-    ------
+Compatibility
+=============
+    Many HDF5 users and user communities have existing applications that 
+    they may wish to port to Release 1.8.0.  Alternatively, some users may 
+    wish to take advantage of Release 1.8.0's improved performance without
+    having to port such applications.  To facilitate managing application
+    compatibility and porting applications from release to release, the HDF 
+    Team has implemented the following features:
+        Individually-configurable macros that selectively map common 
+         interface names to the old and new interfaces
+        Library configuration options to configure the macro mappings
 
-    High-Level APIs:
-    ------
-    
-    Documentation 
-    ------------- 
+    Two related documents accompany this release:
+        "API Compatibility Macros in HDF5" discusses the specifics of the 
+        new individually-configurable macros and library configuration 
+        options.
+        http://hdfgroup.org/HDF5/doc/RM/APICompatMacros.html
+ 
+        "New Features in HDF5 Release 1.8.0 and Backward/Forward Format
+        Compatibility Issues" discusses each new feature with regard to 
+        its impact on format compatibility.
+        http://hdfgroup.org/HDF5/doc/ADGuide/CompatFormat180.html
+
+Referenced documents
+====================
+    http://hdfgroup.org/HDF5/doc/ADGuide/WhatsNew180.html
+        "What's New in HDF5 1.8.0"
+
+    http://hdfgroup.org/HDF5/doc/ADGuide/Changes.html
+        The "Release 1.8.0 (current release) versus Release 1.6.x "
+        section in "HDF5 Software Changes from Release to Release"
+
+    http://hdfgroup.org/HDF5/doc/RM/APICompatMacros.html
+        "API Compatibility Macros in HDF5"
+
+    http://hdfgroup.org/HDF5/doc/ADGuide/CompatFormat180.html
+        "New Features in HDF5 Release 1.8.0 and Backward/Forward Format
+        Compatibility Issues"
+
 
 Support for new platforms, languages and compilers.
 =======================================
+    - Support for Open VMS 7.3 was added
 
-Bug Fixes since HDF5-1.8.0 release
+Bug Fixes since HDF5-1.6.0 release
 ==================================
-
-    Library
-    -------
-
-    Configuration
-    -------------
-
-    Performance
-    -------------
-
-    Tools
-    -----
-
-    Documentation 
-    ------------- 
-
-
-    F90 APIs
-    --------
-
+     This release contains numerous bug fixes. For details see HISTORY.txt file
+     "Changes from 1.6.0 to 1.8.0-rc3" section.
+ 
 Platforms Tested
 ================
 Platforms marked with * were not tested for hdf5-1.8.0-rc* release
@@ -347,18 +377,6 @@ Known Problems
   Ask your system administrator to clean them out.  Lastly, request IBM
   to provide a mean to run poe without the debug socket.
 
-* The C++ library's tests fails when compiling with PGI C++ compiler.  The
-  workaround until the problem is correctly handled is to use the 
-  flag "--instantiate=local" prior to the configure and build steps, as:
-        setenv CXX "pgCC --instantiate=local"  for pgCC 5.02 and higher
-
-
-* The stream-vfd test uses ip port 10007 for testing. If another
-  application is already using that port address, the test will hang
-  indefinitely and has to be terminated by the kill command. To try the
-  test again, change the port address in test/stream_test.c to one not
-  being used in the host.
-
 * The --enable-static-exec configure flag fails to compile for Solaris
   platforms. This is due to the fact that not all of the system
   libraries on Solaris are available in a static format.
@@ -378,22 +396,11 @@ Known Problems
   
   This warning is innocuous and can be safely ignored.
 
-
-* The Stream VFD was not tested yet under Windows. It is not supported
-  in the TFLOPS machine.
-
-
 * The ./dsets tests failed in the TFLOPS machine if the test program,
   dsets.c, is compiled with the -O option.  The hdf5 library still works
   correctly with the -O option.  The test program works fine if it is
   compiled with -O1 or -O0.  Only -O (same as -O2) causes the test
   program to fail.
-
-* Certain platforms give false negatives when testing h5ls:
-    - Cray J90 and Cray T90IEEE give errors during testing when displaying
-      some floating-point values. These are benign differences due to
-      the different precision in the values displayed and h5ls appears to
-      be dumping floating-point numbers correctly.
 
 * Not all platforms behave correctly with szip's shared libraries. Szip is
   disabled in these cases, and a message is relayed at configure time. Static
