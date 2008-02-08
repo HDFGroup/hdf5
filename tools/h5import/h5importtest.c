@@ -391,54 +391,6 @@ main(void)
 
 
 
-#if defined (NOT_USED)
-
-#ifndef WIN32
-
-    sp = fopen("bin64-2", "w");
-    for (i = 0; i < nrow; i++)
-    {
-        for (j = 0; j < ncol; j++)
-        {
-            (void) fwrite((char *) &b64i2[i][j], sizeof(long_long), 1, sp);
-        }
-    }
-    (void) fclose(sp);
-#endif
-
-    sp = fopen("bfp32", "w");
-    for (k = 0; k < npln; k++)
-    {
-        for (i = 0; i < nrow; i++)
-        {
-            for (j = 0; j < ncol; j++)
-            {
-                (void) fwrite((char *) &b32r3[k][i][j],sizeof(float), 1, sp);
-            }
-        }
-    }
-    (void) fclose(sp);
-
-
-
-#ifndef WIN32
-
-    sp = fopen("bin64-3", "w");
-    for (k = 0; k < npln; k++)
-    {
-        for (i = 0; i < nrow; i++)
-        {
-            for (j = 0; j < ncol; j++)
-            {
-                (void) fwrite((char *) &b64i3[k][i][j], sizeof(long_long), 1, sp);
-            }
-        }
-    }
-    (void) fclose(sp);
-#endif
-
-#endif /* NOT_USED */
-
 
 
     return (0);
