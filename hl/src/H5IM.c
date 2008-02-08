@@ -45,13 +45,12 @@ herr_t H5IMmake_image_8bit( hid_t loc_id,
                             hsize_t height,
                             const unsigned char *buffer )
 {
- int      rank = 3;
- hsize_t  dims[3];
+ int      rank = 2;
+ hsize_t  dims[2];
 
   /* Initialize the image dimensions */
  dims[0] = height;
  dims[1] = width;
- dims[2] = 1;
 
  /* Make the dataset */
  if ( H5LTmake_dataset( loc_id, dset_name, rank, dims, H5T_NATIVE_UCHAR, buffer ) < 0 )
@@ -334,7 +333,7 @@ herr_t H5IMget_image_info( hid_t loc_id,
  {
   *height = dims[0];
   *width  = dims[1];
-  *planes = dims[2];
+  *planes = 1;
  }
 
  /* Close */
