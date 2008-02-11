@@ -1498,7 +1498,6 @@
 ./tools/h5import/testfiles/binuin16.h5
 ./tools/h5import/testfiles/txtuin32.h5
 ./tools/h5import/testfiles/txtuin16.h5
-./tools/h5import/testfiles/txtin32.txt
 ./tools/h5import/testfiles/txtin16.txt
 
 
