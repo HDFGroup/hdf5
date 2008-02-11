@@ -2,65 +2,62 @@
 	Instructions for the Installation of HDF5 Software
 	==================================================
 
-WARNING: This file was not updated for the 1.8.0-beta* releases. If you have any problems with the HDF5
-         installation please contact help@hdfgroup.org
-
 	CONTENTS
 	--------
 	1. Obtaining HDF5
 
-	2. Warnings about compilers
-	2.1. GNU (Intel platforms)
-	2.2. DEC
-	2.3. SGI (Irix64 6.2)
-	2.4. Windows/NT
+	2. Quick installation
+	2.1. Windows
+	2.2. RedStorm (Cray XT3)
 
-	3. Quick installation
-	3.1. Windows
-	3.2. RedStorm (Cray XT3)
+	3. HDF5 dependencies
+	3.1. Zlib
+        3.2  Szip (optional)
+	3.3. MPI and MPI-IO
 
-	4. HDF5 dependencies
-	4.1. Zlib
-	4.2  Szip
-	4.3. MPI and MPI-IO
+	4. Full installation instructions for source distributions
+	4.1. Unpacking the distribution
+	4.1.1. Non-compressed tar archive (*.tar)
+	4.1.2. Compressed tar archive (*.tar.Z)
+	4.1.3. Gzip'd tar archive (*.tar.gz)
+	4.1.4. Bzip'd tar archive (*.tar.bz2)
+        4.2. Source versus build directories
+	4.3. Configuring
+	4.3.1. Specifying the installation directories
+	4.3.2. Using an alternate C compiler
+        4.3.3. Configuring for 64-bit support
+	4.3.4. Additional compilation flags
+	4.3.5. Compiling HDF5 wrapper libraries
+	4.3.6. Specifying other programs
+	4.3.7. Specifying other libraries and headers
+	4.3.8. Static versus shared linking
+	4.3.9. Optimization versus symbolic debugging
+	4.3.10. Large (>2GB) vs. small (<2GB) file capability
+	4.3.11. Parallel vs. serial library
+        4.3.12. Threadsafe capability
+        4.3.13. Backward compatibility
+        4.3.14. Network stream capability
+	4.4. Building
+	4.5. Testing
+	4.6. Installing
+	4.7  Building and testing with Intel compilers
+	4.8  Building and testing with PGI compilers
 
-	5. Full installation instructions for source distributions
-	5.1. Unpacking the distribution
-	5.1.1. Non-compressed tar archive (*.tar)
-	5.1.2. Compressed tar archive (*.tar.Z)
-	5.1.3. Gzip'd tar archive (*.tar.gz)
-	5.1.4. Bzip'd tar archive (*.tar.bz2)
-	5.2. Source vs. Build Directories
-	5.3. Configuring
-	5.3.1. Specifying the installation directories
-	5.3.2. Using an alternate C compiler
-        5.3.3. Configuring for 64-bit support
-	5.3.4. Additional compilation flags
-	5.3.5. Compiling HDF5 wrapper libraries
-	5.3.6. Specifying other programs
-	5.3.7. Specifying other libraries and headers
-	5.3.8. Static versus shared linking
-	5.3.9. Optimization versus symbolic debugging
-	5.3.10. Large (>2GB) vs. small (<2GB) file capability
-	5.3.11. Parallel vs. serial library
-        5.3.12. Threadsafe capability
-        5.3.13. Backward compatibility
-        5.3.14. Network stream capability
-	5.4. Building
-	5.5. Testing
-	5.6. Installing
-	5.7  Building and testing with Intel compilers
-	5.8  Building and testing with PGI compilers
+	5. Using the Library
 
-	6. Using the Library
+	6. Support
 
-	7. Support
+        A. Warnings about compilers
+	A.1. GNU (Intel platforms)
+	A.2. DEC
+	A.3. SGI (Irix64 6.2)
+	A.4. Windows/NT
 
 *****************************************************************************
 
 1. Obtaining HDF5
 	The latest supported public release of HDF5 is available from
-	ftp://hdf.ncsa.uiuc.edu/HDF5/current/src.  For Unix platforms, it is
+	ftp://ftp.hdfgroup.org/HDF5/current/src.  For Unix platforms, it is
 	available in tar format compressed with gzip.  For Microsoft Windows,
         it is in ZIP format.
 
@@ -71,63 +68,44 @@ WARNING: This file was not updated for the 1.8.0-beta* releases. If you have any
 	Furthermore, the snapshots have only been tested on a few
 	machines and may not test correctly for parallel applications.
 	Snapshots can be found at
-	ftp://hdf.ncsa.uiuc.edu/pub/outgoing/hdf5/snapshots in a limited
-	number of formats.
+	    ftp://ftp.hdfgroup.uiuc.edu/pub/outgoing/hdf5/snapshots
+	in a limited number of formats.
 
 
-2. Warnings about compilers
-	OUTPUT FROM THE FOLLOWING COMPILERS SHOULD BE EXTREMELY SUSPECT
-	WHEN USED TO COMPILE THE HDF5 LIBRARY, ESPECIALLY IF
-	OPTIMIZATIONS ARE ENABLED. IN ALL CASES, HDF5 ATTEMPTS TO WORK
-	AROUND THE COMPILER BUGS BUT THE HDF5 DEVELOPMENT TEAM MAKES NO
-	GUARANTEES THAT THERE ARE OTHER CODE GENERATION PROBLEMS.
+2. Quick installation
+        For those who don't like to read ;-) the following steps can be used
+        to configure, build, test, and install the HDF5 Library, header files,
+        and support programs. For example, to install HDF5 version X.Y.Z at
+        location /usr/local/hdf5, use the following steps.
 
-2.1. GNU (Intel platforms)
-	Versions before 2.8.1 have serious problems allocating registers
-	when functions contain operations on `long long' data types.
-	Supplying the `--disable-hsizet' switch to configure (documented
-	below) will prevent hdf5 from using `long long' data types in
-	situations that are known not to work, but it limits the hdf5
-	address space to 2GB.
+            $ gunzip < hdf5-X.Y.Z.tar.gz | tar xf -
+            $ cd hdf5-X.Y.Z
+            $ ./configure --prefix=/usr/local/hdf5 <more configure_flags>
+            $ make
+            $ make check		# run test suite.
+            $ make install
+            $ make check-install	# verify installation.
 
-2.2. COMPAQ/DEC
-	The V5.2-038 compiler (and possibly others) occasionally
-	generates incorrect code for memcpy() calls when optimizations
-	are enabled, resulting in unaligned access faults. HDF5 works
-	around the problem by casting the second argument to `char *'.
-        The fortran module (5.4.1a) fails in compiling some fortran
-        programs.  Need to use 5.5.0 or more.
+        Some versions of the tar command supports the -z option. The first
+        step above can be simplied to
+	    $ tar zxf hdf5-X.Y.Z.tar.gz
 
-2.3. SGI (Irix64 6.2)
-	The Mongoose 7.00 compiler has serious optimization bugs and
-	should be upgraded to MIPSpro 7.2.1.2m. Patches are available
-	from SGI.
+        <configure_flags> above refers to the configure flags appropriate
+        to your installation.  For example, to install HDF5 with the 
+        Fortran and C++ interfaces and with SZIP compression, the 
+        configure line might read as follows:
+        
+            $ ./configure --prefix=/usr/local/hdf5 --enable-fortran \
+		    --enable-cxx --with-szlib=PATH_TO_SZIP
 
-2.4. Windows/NT
-	The MicroSoft Win32 5.0 compiler is unable to cast unsigned long
-	long values to doubles. HDF5 works around this bug by first
-	casting to signed long long and then to double.
+        In this case, PATH_TO_SZIP would be replaced with the path to the 
+        installed location of the SZIP library.
 
-	A link warning: defaultlib "LIBC" conflicts with use of other libs
-	appears for debug version of VC++ 6.0. This warning will not affect
-	building and testing hdf5 libraries. 
-
-
-3. Quick installation
-	For those that don't like to read ;-) the following steps can be
-	used to configure, build, test, and install the HDF5 library,
-	header files, and support programs.
-
-	    $ gunzip < hdf5-1.8.0.tar.gz | tar xf -
-	    $ cd hdf5-1.8.0
-	    $ make check
-	    $ make install
-
-3.1. Windows
-	Users of Microsoft Windows should see the INSTALL_Windows for
+2.1. Windows
+	Users of Microsoft Windows should see the INSTALL_Windows files for
 	detailed instructions.
 
-3.2. RedStorm (Cray Xt3)
+2.2. RedStorm (Cray Xt3)
 	Users of the Red Storm machine, after reading this file, should read
 	the Red Storm section in the INSTALL_parallel file for specific
 	instructions for the Red Storm machine.  The same instructions would
@@ -135,52 +113,70 @@ WARNING: This file was not updated for the 1.8.0-beta* releases. If you have any
 	verified.
 
 
-4. HDF5 dependencies
-4.1. Zlib
-	The HDF5 library has a predefined compression filter that uses
-	the "deflate" method for chunked datatsets. If zlib-1.1.2 or
-	later is found then HDF5 will use it, otherwise HDF5's predefined
-	compression method will degenerate to a no-op (the compression
-	filter will succeed but the data will not be compressed).
+3. HDF5 dependencies
+3.1. Zlib
+        The HDF5 Library includes a predefined compression filter that 
+        uses the "deflate" method for chunked datasets. If zlib-1.1.2 or
+        later is found, HDF5 will use it. Otherwise, HDF5's predefined
+        compression method will degenerate to a no-op; the compression
+        filter will succeed but the data will not be compressed.
 
-4.2. Szip
-	The HDF5 library has a predefined compression filter that uses
-	the extended-Rice lossless compression algorithm for chunked 
-        datatsets. For more information about Szip compression and license terms
-        see http://hdf.ncsa.uiuc.edu/HDF5/doc_resource/SZIP/index.html.
-        Precompiled szip binaries for each supported platform and source tar ball
-        file can be found at ftp://ftp.ncsa.uiuc.edu/HDF/HDF5/current/
+3.2. Szip (optional)
+        The HDF5 Library includes a predefined compression filter that 
+        uses the extended-Rice lossless compression algorithm for chunked 
+        datasets. For more information about Szip compression and license 
+        terms, see http://hdfgroup.org/doc_resource/SZIP/.
 
-4.3. MPI and MPI-IO
+        Precompiled szip binaries for each supported platform and a source tar 
+        ball file can be found at ftp://ftp.hdfgroup.org/lib-external/szip/.
+        
+        To configure the HDF5 Library with the Szip compression filter, use 
+        the '--enable-szlib=/PATH_TO_SZIP' flag. For more information, see 
+        section 4.3.7, "Specifying other libraries and headers."
+
+        Starting with release 1.6.3, Szip library binaries are distributed 
+        with the encoder enabled (a license may be required to use this binary) 
+        and with the encoder disabled (freely usable without a license). 
+        Depending on which Szip binary is used, Szip compression is available 
+        or is not available for an HDF5 application. Szip decoding is always 
+        available, i.e., an HDF5 application can always read Szip compressed 
+        data, if the Szip filter is present.
+
+3.3. MPI and MPI-IO
 	The parallel version of the library is built upon the foundation
 	provided by MPI and MPI-IO. If these libraries are not available
-	when HDF5 is configured then only a serial version of HDF5 can be
-	built.
+	when HDF5 is configured, only a serial version of HDF5 can be built.
 
 
-5. Full installation instructions for source distributions
-5.1. Unpacking the distribution
-	The HDF5 source code is distributed in a variety of formats which
-	can be unpacked with the following commands, each of which
-	creates an `hdf5-1.8.0' directory.
+4. Full installation instructions for source distributions
+4.1. Unpacking the distribution
+        The HDF5 source code is distributed in a variety of formats which
+        can be unpacked with the following commands, each of which creates an
+        'hdf5-X.Y.Z' directory, where X.Y.Z is the HDF5 version numbers.
 
-5.1.1. Non-compressed tar archive (*.tar)
+4.1.1. Non-compressed tar archive (*.tar)
 
-	    $ tar xf hdf5-1.8.0.tar
+	    $ tar xf hdf5-X.Y.Z.tar
 
-5.1.2. Compressed tar archive (*.tar.Z)
+4.1.2. Compressed tar archive (*.tar.Z)
 
-	    $ uncompress -c < hdf5-1.8.0.tar.Z | tar xf -
+	    $ uncompress -c < hdf5-X.Y.Z.tar.Z | tar xf -
+	    Or
+	    $ tar Zxf hdf5-X.Y.Z.tar.Z
 
-5.1.3. Gzip'd tar archive (*.tar.gz)
+4.1.3. Gzip'd tar archive (*.tar.gz)
 
-	    $ gunzip < hdf5-1.8.0.tar.gz | tar xf -
+	    $ gunzip < hdf5-X.Y.Z.tar.gz | tar xf -
+	    Or
+	    $ tar zxf hdf5-X.Y.Z.tar.gz
 
-5.1.4. Bzip'd tar archive (*.tar.bz2)
+4.1.4. Bzip'd tar archive (*.tar.bz2)
 
-	    $ bunzip2 < hdf5-1.8.0.tar.bz2 | tar xf -
+	    $ bunzip2 < hdf5-X.Y.Z.tar.bz2 | tar xf -
+	    Or
+	    $ tar jxf hdf5-X.Y.Z.tar.bz2
 
-5.2. Source vs. Build Directories
+4.2. Source versus build directories
 	On most systems the build can occur in a directory other than the
 	source directory, allowing multiple concurrent builds and/or
 	read-only source code. In order to accomplish this, one should
@@ -204,7 +200,7 @@ WARNING: This file was not updated for the 1.8.0-beta* releases. If you have any
 		version of make. The VPATH facility should not be used
 		with the new parallel make option.
 
-5.3. Configuring
+4.3. Configuring
 	HDF5 uses the GNU autoconf system for configuration, which
 	detects various features of the host system and creates the
 	Makefiles. On most systems it should be sufficient to say:
@@ -224,7 +220,7 @@ WARNING: This file was not updated for the 1.8.0-beta* releases. If you have any
 	`configure' output. The host config file influences the behavior
 	of configure by setting or augmenting shell variables.
 
-5.3.1. Specifying the installation directories
+4.3.1. Specifying the installation directories
 	Typing `make install' will install the HDF5 library, header
 	files, examples, and support programs in /usr/local/lib,
 	/usr/local/include, /usr/local/doc/hdf5/examples, and 
@@ -241,7 +237,7 @@ WARNING: This file was not updated for the 1.8.0-beta* releases. If you have any
 	specified at configure time; see the section on Installing HDF5
 	for more details.
 
-5.3.2. Using an alternate C compiler
+4.3.2. Using an alternate C compiler
 	By default, configure will look for the C compiler by trying
 	`gcc' and `cc'. However, if the environment variable "CC" is set
 	then its value is used as the C compiler (users of csh and
@@ -259,7 +255,7 @@ WARNING: This file was not updated for the 1.8.0-beta* releases. If you have any
 
 	    $ CC=/usr/local/mpi/bin/mpicc ./configure
 
-5.3.3. Configuring for 64-bit support
+4.3.3. Configuring for 64-bit support
 	Several machine architectures support 32-bit or 64-bit binaries.
 	The options below describe how to enable support for different options.
 
@@ -283,7 +279,7 @@ WARNING: This file was not updated for the 1.8.0-beta* releases. If you have any
 	    $ CFLAGS=-q64 FFLAGS=-q64 AR='ar -X 64'\
 	    $ ./configure --enable-fortran
 
-5.3.4. Additional compilation flags
+4.3.4. Additional compilation flags
 	If addtional flags must be passed to the compilation commands
 	then specify those flags with the CFLAGS variable. For instance,
 	to enable symbolic debugging of a production version of HDF5 one
@@ -291,7 +287,7 @@ WARNING: This file was not updated for the 1.8.0-beta* releases. If you have any
 
 	    $ CFLAGS=-g ./configure --enable-production
 
-5.3.5. Compiling HDF5 wrapper libraries
+4.3.5. Compiling HDF5 wrapper libraries
 	One can optionally build the Fortran and/or C++ interface to the
 	HDF5 C library. By default, both options are disabled. To build
 	them, specify `--enable-fortran' and `--enable-cxx' respectively.
@@ -320,10 +316,10 @@ WARNING: This file was not updated for the 1.8.0-beta* releases. If you have any
                specified lines or use a patch from HDF FTP server
                ftp://ftp.ncsa.uiuc.edu/HDF/HDF5/current/
 
-        Note: See sections 5.7 and 5.8 for how to build Fortran Library with
-              PGI or Intel compilers. 
+        Note: See sections 4.7 and 4.8 for how to build Fortran Library with
+              Intel or PGI compilers. 
 
-5.3.6. Specifying other programs
+4.3.6. Specifying other programs
 	The build system has been tuned for use with GNU make but works
 	also with other versions of make.  If the `make' command runs a
 	non-GNU version but a GNU version is available under a different
@@ -357,7 +353,7 @@ WARNING: This file was not updated for the 1.8.0-beta* releases. If you have any
 	       because the HDF5 makefiles also use the install program to
 	       also change file ownership and/or access permissions.
 
-5.3.7. Specifying other libraries and headers
+4.3.7. Specifying other libraries and headers
 	Configure searches the standard places (those places known by the
 	systems compiler) for include files and header files. However,
 	additional directories can be specified by using the CPPFLAGS
@@ -397,7 +393,7 @@ WARNING: This file was not updated for the 1.8.0-beta* releases. If you have any
 
         $ ./configure --with-szlib=/Szip_Install_Directory
 
-5.3.8. Static versus shared linking
+4.3.8. Static versus shared linking
 	The build process will create static libraries on all systems and
 	shared libraries on systems that support dynamic linking to a
 	sufficient degree. Either form of library may be suppressed by
@@ -413,7 +409,7 @@ WARNING: This file was not updated for the 1.8.0-beta* releases. If you have any
 
 	    $ ./configure --enable-static-exec
 
-5.3.9. Optimization versus symbolic debugging
+4.3.9. Optimization versus symbolic debugging
 	The library can be compiled to provide symbolic debugging support
 	so it can be debugged with gdb, dbx, ddd, etc or it can be
 	compiled with various optimizations. To compile for symbolic
@@ -450,7 +446,7 @@ WARNING: This file was not updated for the 1.8.0-beta* releases. If you have any
 	releases). The tracing must also be enabled at runtime to see any
 	output (see Debugging.html).
 
-5.3.10. Large (>2GB) vs. small (<2GB) file capability
+4.3.10. Large (>2GB) vs. small (<2GB) file capability
 	In order to read or write files that could potentially be larger
 	than 2GB it is necessary to use the non-ANSI `long long' data
 	type on some platforms. However, some compilers (e.g., GNU gcc
@@ -460,12 +456,12 @@ WARNING: This file was not updated for the 1.8.0-beta* releases. If you have any
 
 	    $ ./configure --disable-hsizet
 
-5.3.11. Parallel vs. serial library
+4.3.11. Parallel vs. serial library
 	The HDF5 library can be configured to use MPI and MPI-IO for
 	parallelizm on a distributed multi-processor system.  Read the
 	file INSTALL_parallel for detailed explanations.
 
-5.3.12. Threadsafe capability
+4.3.12. Threadsafe capability
 	The HDF5 library can be configured to be thread-safe (on a very
 	large scale) with the with the `--enable-threadsafe' flag to
 	the configure script.  Some platforms may also require the 
@@ -473,7 +469,7 @@ WARNING: This file was not updated for the 1.8.0-beta* releases. If you have any
 	script as well.  Read the file doc/TechNotes/ThreadSafeLibrary.html
 	for further details.
 
-5.3.13. Backward compatibility
+4.3.13. Backward compatibility
 	The 1.8 version of the HDF5 library can be configured to operate
 	identically to the v1.6 library with the `--enable-hdf5v1_6'
 	configure flag. This allows existing code to be compiled with the
@@ -481,7 +477,7 @@ WARNING: This file was not updated for the 1.8.0-beta* releases. If you have any
 	application source code. This flag will only be supported in the
 	v1.8 branch of the library, it will not be available in v1.9+.
 
-5.3.14. Network stream capability
+4.3.14. Network stream capability
 	The HDF5 library can be configured with a network stream file
 	driver with the `--enable-stream-vfd' configure flag. This option
 	compiles the "stream" Virtual File Driver into the main library.
@@ -491,7 +487,7 @@ WARNING: This file was not updated for the 1.8.0-beta* releases. If you have any
         compiler, where it is disabled. Explicitly enabling Stream-VFD
         will allow for its use in parallel.
 
-5.4. Building
+4.4. Building
 	The library, confidence tests, and programs can be build by
 	saying just:
 
@@ -508,7 +504,7 @@ WARNING: This file was not updated for the 1.8.0-beta* releases. If you have any
 
 	    $ make -j -l6
 
-5.5. Testing
+4.5. Testing
 	HDF5 comes with various test suites, all of which can be run by
 	saying
 
@@ -529,7 +525,7 @@ WARNING: This file was not updated for the 1.8.0-beta* releases. If you have any
         environment variable to 2 or 3 (with 3 being the shortest run).
         To perform a longer test, set HDF5TestExpress to 0.  1 is the default.
 
-5.6. Installing
+4.6. Installing
 	The HDF5 library, include files, and support programs can be
 	installed in a (semi-)public place by saying `make install'. The
 	files are installed under the directory specified with
@@ -590,7 +586,7 @@ WARNING: This file was not updated for the 1.8.0-beta* releases. If you have any
             ./tools/gifconv/h52gif	(HDF5 to GIF converter) 
             ./tools/gifconv/gif2h5      (GIF to HDF5 converter)
 
-5.7  Building and testing with Intel compilers
+4.7  Building and testing with Intel compilers
 
 
      When Intel compilers are used (icc or ecc), you will need to 
@@ -633,7 +629,7 @@ WARNING: This file was not updated for the 1.8.0-beta* releases. If you have any
       use a patch from HDF FTP server ftp://ftp.ncsa.uiuc.edu/HDF/HDF5/current/
 
 
-5.8  Building and testing with PGI compilers
+4.8  Building and testing with PGI compilers
      
      When PGI C and C++ compilers are used (pgcc or pgCC), you will need to 
      modify the generated "libtool" program after configuration is finished.
@@ -658,7 +654,7 @@ WARNING: This file was not updated for the 1.8.0-beta* releases. If you have any
       before running the configure script.
 
 
-6. Using the Library
+5. Using the Library
 	Please see the User Manual in the doc/html directory.
 
 	Most programs will include <hdf5.h> and link with -lhdf5.
@@ -670,5 +666,43 @@ WARNING: This file was not updated for the 1.8.0-beta* releases. If you have any
 	shared hdf5 libraries.
 
 
-7. Support
+6. Support
 	Support is described in the README file.
+
+
+Appendix A. Warnings about compilers
+	Output from the following compilers should be extremely suspected
+	when used to compile the HDF5 library, especially if optimizations are
+	enabled. in all cases, HDF5 attempts to work around the compiler bugs.
+
+A.1. GNU (Intel platforms)
+	Versions before 2.8.1 have serious problems allocating registers
+	when functions contain operations on `long long' data types.
+	Supplying the `--disable-hsizet' switch to configure (documented
+	below) will prevent hdf5 from using `long long' data types in
+	situations that are known not to work, but it limits the hdf5
+	address space to 2GB.
+
+A.2. COMPAQ/DEC
+	The V5.2-038 compiler (and possibly others) occasionally
+	generates incorrect code for memcpy() calls when optimizations
+	are enabled, resulting in unaligned access faults. HDF5 works
+	around the problem by casting the second argument to `char *'.
+        The fortran module (5.4.1a) fails in compiling some fortran
+        programs.  Need to use 5.5.0 or more.
+
+A.3. SGI (Irix64 6.2)
+	The Mongoose 7.00 compiler has serious optimization bugs and
+	should be upgraded to MIPSpro 7.2.1.2m. Patches are available
+	from SGI.
+
+A.4. Windows/NT
+	The MicroSoft Win32 5.0 compiler is unable to cast unsigned long
+	long values to doubles. HDF5 works around this bug by first
+	casting to signed long long and then to double.
+
+	A link warning: defaultlib "LIBC" conflicts with use of other libs
+	appears for debug version of VC++ 6.0. This warning will not affect
+	building and testing hdf5 libraries. 
+
+
