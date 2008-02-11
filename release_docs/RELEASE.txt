@@ -1,32 +1,20 @@
-HDF5 version 1.9.0-snap0 currently under development
+HDF5 version 1.9.0 currently under development
 ================================================================================
 
 
 INTRODUCTION
 
-This document describes the differences between HDF5-1.6.* and
-Hdf5 1.8.0 release candidate "HDF5-1.8.0-rc3", and contains information 
-on the platforms tested and known problems in HDF5-1.8.0-rc3. 
+This document describes the differences between HDF5-1.9.0 and
+HDF5 1.9.x snapshot, and contains information on the platforms 
+tested and known problems in HDF5-1.9.x. 
 For more details check the HISTORY.txt file in the HDF5 source.
 
 
-Links to HDF5 1.8.0-rc3 source code, documentation, and additional materials
-can be found on THG's development server (www.hdfgroup.uiuc.edu) at the
-following location:
-     http://www.hdfgroup.uiuc.edu/HDF5/release/beta/obtain518.html
-User documentation for the beta can be accessed directly at this location: 
-     http://www.hdfgroup.uiuc.edu/HDF5/doc_1.8pre/doc/
-
-New features of the upcoming 1.8.0 release are described in
-the "What's New in 1.8.0?" document:
-     http://www.hdfgroup.uiuc.edu/HDF5/doc_1.8pre/WhatsNew180.html
-
-New and modified APIs are described briefly in
-     http://www.hdfgroup.uiuc.edu/HDF5/doc_1.8pre/WhatsNew180.html
-and will be listed in the "HDF5 Software Changes" document:
-     http://www.hdfgroup.uiuc.edu/HDF5/doc_1.8pre/doc/ADGuide/Changes.html
-
-
+Links to HDF5 1.9.x source code can be found on THG's development 
+FTP server at the following location:
+     ftp://ftp.hdfgroup.uiuc.edu/pub/outgoing/hdf5/snapshots
+User documentation for the snapshot can be accessed directly at this location: 
+     http://www.hdfgroup.uiuc.edu/HDF5/doc_dev_snapshot/H5_dev/
 
 For more information, see the HDF5 home page:
    
@@ -101,9 +89,6 @@ Bug Fixes since HDF5-1.8.0 release
 
 Platforms Tested
 ================
-Platforms marked with * were not tested for hdf5-1.8.0-rc* release
-(This information is somewhat out of date and may be inaccurate.  It will be
-    updated for a later release)
 
     AIX 5.2 (32/64 bit)           xlc 8.0.0.11
                                   xlC 8.0
