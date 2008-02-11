@@ -61,13 +61,16 @@ cp $srcdir/testfiles/*.h5 tmp_testfiles/
 $RUNSERIAL ./h5importtest
 
 TESTING "ASCII I16 rank 3 - Output LE - CHUNKED - extended" 
-TOOLTEST txtin16.txt -c $srcdir/testfiles/txtin16.conf -o txtin16.h5
+#TOOLTEST txtin16.txt -c $srcdir/testfiles/txtin16.conf -o txtin16.h5
+TOOLTEST $srcdir/testfiles/txtin16.txt -c $srcdir/testfiles/txtin16.conf -o txtin16.h5
 
 TESTING "ASCII I32 rank 3 - Output BE " ;
-TOOLTEST txtin32.txt -c $srcdir/testfiles/txtin32.conf -o txtin32.h5
+#TOOLTEST txtin32.txt -c $srcdir/testfiles/txtin32.conf -o txtin32.h5
+TOOLTEST $srcdir/testfiles/txtin32.txt -c $srcdir/testfiles/txtin32.conf -o txtin32.h5
 
 TESTING "ASCII I8 - rank 3 - Output I16 LE-Chunked+Extended+Compressed " 
-TOOLTEST txtin16.txt -c $srcdir/testfiles/txtin8.conf  -o txtin8.h5
+#TOOLTEST txtin16.txt -c $srcdir/testfiles/txtin8.conf  -o txtin8.h5
+TOOLTEST $srcdir/testfiles/txtin16.txt -c $srcdir/testfiles/txtin8.conf  -o txtin8.h5
 
 TESTING "ASCII UI32 - rank 3 - Output BE" 
 TOOLTEST $srcdir/testfiles/txtuin32.txt -c $srcdir/testfiles/txtuin32.conf -o txtuin32.h5
