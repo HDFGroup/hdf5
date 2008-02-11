@@ -1,49 +1,51 @@
 HDF5 version 1.8.0 currently under development
 ================================================================================
 
-
 INTRODUCTION
+============
 
-This document describes the differences between HDF5-1.6.0 and
-HDF5 1.8.0, and contains information on the platforms tested and known problems 
-in HDF5-1.8.0.  For more details check the HISTORY.txt file in the HDF5 source.
+This document describes the differences between the HDF5-1.6.x release series
+and HDF5 1.8.0, and contains information on the platforms tested and known 
+problems in HDF5-1.8.0.  For more details, see the HISTORY.txt file in the 
+release_docs/ directory of the HDF5 source.
 
-=====================This part should be updated===========================
-Links to HDF5 1.8.0 source code, documentation, and additional materials
-can be found on THG's development server (www.hdfgroup.uiuc.edu) at the
-following location:
-     http://www.hdfgroup.uiuc.edu/HDF5/release/beta/obtain518.html
-User documentation for the beta can be accessed directly at this location: 
-     http://www.hdfgroup.uiuc.edu/HDF5/doc_1.8pre/doc/
+Links to the HDF5 1.8.0 source code, documentation, and additional materials
+can be found on the HDF5 web page at:
 
-New features of the upcoming 1.8.0 release are described in
-the "What's New in 1.8.0?" document:
-     http://www.hdfgroup.uiuc.edu/HDF5/doc_1.8pre/WhatsNew180.html
+     http://www.hdfgroup.org/products/hdf5/
 
-New and modified APIs are described briefly in
-     http://www.hdfgroup.uiuc.edu/HDF5/doc_1.8pre/WhatsNew180.html
-and will be listed in the "HDF5 Software Changes" document:
-     http://www.hdfgroup.uiuc.edu/HDF5/doc_1.8pre/doc/ADGuide/Changes.html
+The HDF5 1.8.0 release can be obtained from:
 
-===========================================================================
+     http://www.hdfgroup.org/HDF5/release/obtain5.html
 
+User documentation for 1.8.0 can be accessed directly at this location: 
 
-For more information, see the HDF5 home page:
-   
-    http://www.hdfgroup.org/HDF5/
+     http://www.hdfgroup.org/HDF5/doc/
+
+New features in 1.8.0, including brief general descriptions of some new 
+and modified APIs, are described in the "What's New in 1.8.0?" document:
+
+     http://www.hdfgroup.org/HDF5/doc/ADGuide/WhatsNew180.html
+
+All new and modified APIs are listed in detail in the "HDF5 Software Changes 
+from Release to Release" document, in the section "Release 1.8.0 (current 
+release) versus Release 1.6.x":
+
+     http://www.hdfgroup.org/HDF5/doc/ADGuide/Changes.html
 
 If you have any questions or comments, please send them to the HDF Help Desk:
 
-    help@hdfgroup.org
-
+     help@hdfgroup.org
 
 
 CONTENTS
+========
 
 - New Features
 - Support for new platforms and languages
-- Bug Fixes since HDF5-1.8.0
+- Bug Fixes since HDF5-1.6.0
 - Platforms Tested
+- Supported Configuration Features Summary
 - Known Problems
 
 
@@ -52,10 +54,9 @@ New Features
 
    HDF5 Release 1.8.0 is a major release with many changes and new features.
 
-New Features
-============
-   New format and interface features discussed in "What's New in HDF5 1.8.0" 
-   include:
+   New format and interface features discussed in the "What's New in 
+   HDF5 1.8.0" document include the following:
+
        Enhanced group object management
        Enhanced attribute management and more efficient meta data handling
        Expanded datatype features
@@ -67,21 +68,24 @@ New Features
        External and user-defined links
        New high-level APIs: 
            HDF5 Packet Table (H5PT) and HDF5 Dimension Scale (H5DS)
-           C++ and Fortran interfaces for older high-level APIs:
+       C++ and Fortran interfaces for older high-level APIs:
            H5Lite (H5LT), H5Image (H5IM), and H5Table (H5TB)
-    New and improved tools
-    And more...
-           http://hdfgroup.org/HDF5/doc/ADGuide/WhatsNew180.html
+       New and improved tools
+       And more...
+
+       http://hdfgroup.org/HDF5/doc/ADGuide/WhatsNew180.html
+
 
     New APIs associated with these features, other interface changes 
     (e.g., ENUM and struct definitions), and new library configuration flags
     are listed in the "Release 1.8.0 (current release) versus Release 1.6.x" 
     section of "HDF5 Software Changes from Release to Release."
+
         http://hdfgroup.org/HDF5/doc/ADGuide/Changes.html
 
 
 Compatibility
-=============
+-------------
     Many HDF5 users and user communities have existing applications that 
     they may wish to port to Release 1.8.0.  Alternatively, some users may 
     wish to take advantage of Release 1.8.0's improved performance without
@@ -89,7 +93,7 @@ Compatibility
     compatibility and porting applications from release to release, the HDF 
     Team has implemented the following features:
         Individually-configurable macros that selectively map common 
-         interface names to the old and new interfaces
+            interface names to the old and new interfaces
         Library configuration options to configure the macro mappings
 
     Two related documents accompany this release:
@@ -104,7 +108,7 @@ Compatibility
         http://hdfgroup.org/HDF5/doc/ADGuide/CompatFormat180.html
 
 Referenced documents
-====================
+--------------------
     http://hdfgroup.org/HDF5/doc/ADGuide/WhatsNew180.html
         "What's New in HDF5 1.8.0"
 
@@ -122,29 +126,32 @@ Referenced documents
 
 Support for new platforms, languages and compilers.
 =======================================
-    - Support for Open VMS 7.3 was added
+    - Support for Open VMS 7.3 was added.
 
-Bug Fixes since HDF5-1.6.0 release
-==================================
-     This release contains numerous bug fixes. For details see HISTORY.txt file
-     "Changes from 1.6.0 to 1.8.0-rc3" section.
- 
+
+Bug Fixes since HDF5-1.6.0 
+==========================
+    This release contains numerous bug fixes. For details, see the 
+    "Changes from 1.6.0 to 1.8.0-rc3" section of the HISTORY.txt file for
+    this release.
+
+
 Platforms Tested
 ================
-Platforms marked with * were not tested for hdf5-1.8.0-rc* release
-(This information is somewhat out of date and may be inaccurate.  It will be
-    updated for a later release)
+The following platforms and compilers have been tested for for this release.
 
     AIX 5.2 (32/64 bit)           xlc 8.0.0.11
                                   xlC 8.0
                                   xlf 10.01.0000.0 
                                   mpcc_r 6.0.0.8
                                   mpxlf_r 8.1.1.7
+
     FreeBSD 6.2-STABLE i386       gcc 3.4.6 [FreeBSD] 20060305
     (duty)                        g++ 3.4.6 [FreeBSD] 20060305
                                   gcc 4.2.1 20080123
                                   g++ 4.2.1 20080123
                                   gfortran 4.2.1 20070620
+
     FreeBSD 6.2-STABLE amd64      gcc 3.4.6 [FreeBSD] 20060305
     (liberty)                     g++ 3.4.6 [FreeBSD] 20060305
                                   gcc 4.2.1 20080123
@@ -154,48 +161,57 @@ Platforms marked with * were not tested for hdf5-1.8.0-rc* release
     IRIX64 6.5 (64 & n32)         MIPSpro cc 7.4.4m
                                   F90 MIPSpro 7.4.4m 
                                   C++ MIPSpro cc 7.4.4m
-				 
+
     Linux 2.6.9 (RHEL4)           Intel 10.0 compilers
     (abe.ncsa.uiuc.edu)
+
     Linux 2.4.21-47               gcc 3.2.3 20030502
     (osage)
+
     Linux 2.6.9-42.0.10           gcc 3.4.6 20060404
     (kagiso)                      PGI 7.0-7 (pgcc, pgf90, pgCC)
                                   Intel 9.1 (icc, ifort, icpc)
-    Linux 2.6.16.27 x86_64 AMD    gcc 4.1.0 (SuSE Linux), g++ 4.1.0, g95 (GCC 4.0.3)
-    (smirom)                      PGI 6.2-5 (pgcc, pgf90, pgCC)
-                         	  Intel 9.1 (icc, iort, icpc)
-    Linux 2.6.5-7.252.1-rtgfx #1 
-          SMP ia64                Intel(R) C++ Version 9.0
-    (cobalt)                      Intel(R) Fortran Itanium(R) Version 9.0 
-                                  SGI MPI
+
+    Linux 2.6.16.27 x86_64 AMD    gcc 4.1.0 (SuSE Linux), g++ 4.1.0, 
+    (smirom)                          g95 (GCC 4.0.3)
+                                  PGI 6.2-5 (pgcc, pgf90, pgCC)
+                                  Intel 9.1 (icc, iort, icpc)
+
+    Linux 2.6.5-7.252.1-rtgfx #1  Intel(R) C++ Version 9.0
+          SMP ia64                Intel(R) Fortran Itanium(R) Version 9.0 
+    (cobalt)                      SGI MPI
+
     SunOS 5.8 32,46               Sun WorkShop 6 update 2 C 5.3
      (Solaris 2.8)                Sun WorkShop 6 update 2 Fortran 95 6.2
                                   Sun WorkShop 6 update 2 C++ 5.3
+
     SunOS 5.10                    cc: Sun C 5.8 
     (linew)                       f90: Sun Fortran 95 8.2 
                                   CC: Sun C++ 5.8 
+
     Xeon Linux 2.4.21-32.0.1.ELsmp-perfctr-lustre
-    (tungsten)	                  gcc 3.2.2 20030222
+    (tungsten)                    gcc 3.2.2 20030222
                                   Intel(R) C++ Version 9.0
                                   Intel(R) Fortran Compiler Version 9.0
+
     IA-64 Linux 2.4.21.SuSE_292.til1 ia64
     (NCSA tg-login)               gcc 3.2.2
                                   Intel(R) C++ Version 8.1
                                   Intel(R) Fortran Compiler Version 8.1
-				  mpich-gm-1.2.5..10-intel-r2
-    Windows XP                    
-				  Visual Studio .NET
+                                  mpich-gm-1.2.5..10-intel-r2
+
+    Windows XP                    Visual Studio .NET
                                   Visual Studio 2005 w/ Intel Fortran 9.1
                                   Cygwin(native gcc compiler and g95)
-				  MinGW(native gcc compiler and g95)
-    Windows XP x64                
-			          Visual Studio 2005 w/ Intel Fortran 9.1
-    Windows Vista			
-			          Visual Studio 2005
+                                  MinGW(native gcc compiler and g95)
+
+    Windows XP x64                Visual Studio 2005 w/ Intel Fortran 9.1
+
+    Windows Vista                 Visual Studio 2005
 
     MAC OS  10.4 (Intel)          gcc i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1 
                                   G95 (GCC 4.0.3 (g95 0.91!) Nov 21 2006)
+
     Alpha Open VMS 7.3
 
 
@@ -296,99 +312,115 @@ Alpha OpenVMS 7.3.2      n       n         n         y        n
 
 Known Problems
 ==============
-* We discovered two problems when running collective IO parallel HDF5 tests 
-  with chunking storage on  ChaMPIon MPI compiler on tungsten, a linux 
-  cluster at NCSA.
-  Under some complex selection cases, 
-  1) MPI_Get_element returns the wrong value.
-  2) MPI_Type_struct also generates wrong derived data type and corrupt data
-     may be generated.
-  This only happens when turning on collective IO with chunking storage 
-  with some complex selections. We haven't found these problems on other
-  MPI-IO compilers. If you encounter these problems, you may use Independent IO
-  instead.
+* We have discovered two problems when running collective IO parallel HDF5 
+  tests with chunking storage on the ChaMPIon MPI compiler on tungsten, a 
+  Linux cluster at NCSA.
 
-  Change the following line in your code:
-  H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
+  Under some complex selection cases: 
+  1) MPI_Get_element returns the wrong value.
+  2) MPI_Type_struct also generates the wrong derived datatype and corrupt 
+     data may be generated.
+  These issues arise only when turning on collective IO with chunking storage 
+  with some complex selections. We have not found these problems on other 
+  MPI-IO compilers. If you encounter these problems, you may use independent 
+  IO instead.
+
+  To avoid this behavior, change the following line in your code
+      H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
 
   to
-  H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_INDEPENDENT);
+      H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_INDEPENDENT);
 
   KY - 2007/08/24
 
 * For SNL, spirit/liberty/thunderbird: The serial tests pass but parallel
-  tests failed with MPI-IO file locking message. AKC - 2007/6/25.
-* On Intel 64 Linux cluster (RH 4, Linux 2.6.9) with Intel 10.0 compilers use
-  -mp -O1 compilation flags to build the libraries. Higher level of optimization 
-  causes failures in several HDF5 library tests. 
-* For HPUX 11.23 many tools tests failed for 64-bit version when linked to the
-  shared libraries (tested for 1.8.0-beta2)
-* For SNL, Red Storm: only paralle HDF5 is supported.  The serial tests pass
-  and the parallel tests also pass with lots of non-fatal error messages.
-* For LLNL, uP: both serial and parallel pass.  Zeus: serial passes but
-  parallel fails with a known proglem in MPI.  ubgl: serial passes but
-  parallel fails. 
-* on SUN 5.10 C++ test fails in the "Testing Shared Datatypes with Attributes" test 
-* configuring with --enable-debug=all produces compiler errors on most
-  platforms.  Users who want to run HDF5 in debug mode should use
+  tests failed with MPI-IO file locking message. AKC - 2007/6/25
+
+* On Intel 64 Linux cluster (RH 4, Linux 2.6.9) with Intel 10.0 compilers, 
+  use -mp -O1 compilation flags to build the libraries. A higher level of 
+  optimization causes failures in several HDF5 library tests. 
+
+* For SNL, Red Storm: Only parallel HDF5 is supported.  The serial tests pass
+  when run against the parallel library; the parallel tests also pass, but
+  with lots of non-fatal error messages.
+
+* For LLNL, uP: both serial and parallel tests pass.  
+  Zeus: Serial tests pass but parallel tests fail with a known problem in MPI.
+  ubgl: Serial tests pass but parallel tests fail. 
+
+* On SUN 5.10 C++, testing fails in the "Testing Shared Datatypes with 
+  Attributes" test. 
+
+* Configuring with --enable-debug=all produces compiler errors on most
+  platforms:  Users who want to run HDF5 in debug mode should use
   --enable-debug rather than --enable-debug=all to enable debugging
   information on most modules.
+
 * On Mac OS 10.4, test/dt_arith.c has some errors in conversion from long
-  double to (unsigned) long long and from (unsigned)long long to long double. 
-* On Altix SGI with Intel 9.0 testmeta.c would not compile with -O3
+  double to (unsigned) long long and from (unsigned) long long to long double. 
+
+* On Altix SGI with Intel 9.0, testmeta.c would not compile with -O3
   optimization flag.
-* On VAX, Scaleoffset filter isn't supported. The filter cannot be applied to
-  HDF5 data generated on VAX. Scaleoffset filter only supports IEEE standard
-  for floating-point data.
+
+* On VAX, the Scaleoffset filter is not supported. The filter cannot be 
+  applied to HDF5 data generated on VAX. The Scaleoffset filter only supports 
+  the IEEE standard for floating-point data.
+
 * On Cray X1, a lone colon on the command line of h5dump --xml (as in
   the testh5dumpxml.sh script) is misinterpereted by the operating system
   and causes an error.
-* On mpich 1.2.5 and 1.2.6, we found that if more than two processes
-  contribute no IO and the application asks to do IO with collective, we found
-  that when using 4 processors, a simple collective write will be hung
-  sometimes. This can be verified with t_mpi test under testpar.
-* On IRIX6.5, when C compiler version >7.4, the complicate MPI derived data type
-  code will work. However, the user should be aware to enlarge MPI_TYPE_MAX environment 
-  variable to some certian value in order to use collective irregular selection code.
-  For example, the current parallel HDF5 test needs to enlarge MPI_TYPE_MAX to 
-  200,000 to make the test pass.
-* The dataset created or rewritten with the v1.6.3 library or after can't 
-  be read with the v1.6.2 library or before when Fletcher32 EDC(filter) is 
-  enabled.  There was a bug in the calculating code of the Fletcher32 
-  checksum in the library before v1.6.3.  The checksum value wasn't consistent 
-  between big-endian and little-endian systems.  This bug was fixed in 
-  Release 1.6.3.  However, after fixing the bug, the checksum value is no 
-  longer the same as before on little-endian system.  The library release 
-  after 1.6.4 can still read the dataset created or rewritten with the library
-  of v1.6.2 or before.  SLU - 2005/6/30
-* For the version 6(6.02 and 6.04) of Portland Group compiler on AMD Opteron
-  processor, there's a bug in the compiler for optimization(-O2).  The library
-  failed in several tests but all related to multi driver.  The problem has 
-  been reported to the vendor.  
+
+* On mpich 1.2.5 and 1.2.6, if more than two processes contribute no IO and 
+  the application asks to do collective IO, we have found that when using 4 
+  processors, a simple collective write will sometimes be hung. This can be 
+  verified with t_mpi test under testpar.
+
+* On IRIX6.5, when the C compiler version is greater than 7.4, complicated
+  MPI derived datatype code will work. However, the user should increase
+  the value of the MPI_TYPE_MAX environment variable to some appropriate value 
+  to use collective irregular selection code.  For example, the current 
+  parallel HDF5 test needs to raise MPI_TYPE_MAX to 200,000 to pass the test. 
+
+* A dataset created or rewritten with a v1.6.3 library or after cannot be read 
+  with the v1.6.2 library or before when the Fletcher32 EDC filter is enabled.
+  There was a bug in the calculating code of the Fletcher32 checksum in the 
+  library before v1.6.3; the checksum value was not consistent between big-
+  endian and little-endian systems.  This bug was fixed in Release 1.6.3.  
+  However, after fixing the bug, the checksum value was no longer the same as 
+  before on little-endian system.  Library releases after 1.6.4 can still read 
+  datasets created or rewritten with an HDF5 library of v1.6.2 or before.  
+  SLU - 2005/6/30
+
+* For version 6 (6.02 and 6.04) of the Portland Group compiler on the AMD 
+  Opteron processor, there is a bug in the compiler for optimization(-O2).  
+  The library failed in several tests, all related to the MULTI driver.  
+  The problem has been reported to the vendor.  
+
 * On IBM AIX systems, parallel HDF5 mode will fail some tests with error
-  messages like "INFO: 0031-XXX ...".  This is from the command poe.
+  messages like "INFO: 0031-XXX ...".  This is from the command `poe'.
   Set the environment variable MP_INFOLEVEL to 0 to minimize the messages
   and run the tests again.
-  The tests may fail with messages like "The socket name is already
-  in use".  HDF5 does not use sockets (except for stream-VFD).  This is
-  due to problems of the poe command trying to set up the debug socket.
-  Check if there are many old /tmp/s.pedb.* staying around.  These are
-  sockets used by the poe command and left behind due to failed commands.
-  Ask your system administrator to clean them out.  Lastly, request IBM
-  to provide a mean to run poe without the debug socket.
+
+  The tests may fail with messages like "The socket name is already in use",  
+  but HDF5 does not use sockets.  This failure is due to problems with the 
+  poe command trying to set up the debug socket.  To resolve this problem, 
+  check to see whether there are many old /tmp/s.pedb.* files staying around.  
+  These are sockets used by the poe command and left behind due to failed 
+  commands.  First, ask your system administrator to clean them out.  
+  Lastly, request IBM to provide a means to run poe without the debug socket.
 
 * The --enable-static-exec configure flag fails to compile for Solaris
-  platforms. This is due to the fact that not all of the system
-  libraries on Solaris are available in a static format.
+  platforms. This is due to the fact that not all of the system libraries on 
+  Solaris are available in a static format.
 
   The --enable-static-exec configure flag also fails to correctly compile
-  on IBM SP2 platform for the serial mode. The parallel mode works fine
-  with this option.
+  on IBM SP2 platform for the serial mode. The parallel mode works fine with 
+  this option.
   
-  It is suggested that you don't use this option on these platforms
+  It is suggested that you do not use this option on these platforms
   during configuration.
 
-* With the gcc 2.95.2 compiler, HDF 5 uses the `-ansi' flag during
+* With the gcc 2.95.2 compiler, HDF5 uses the `-ansi' flag during
   compilation. The ANSI version of the compiler complains about not being
   able to handle the `long long' datatype with the warning:
 
@@ -396,28 +428,29 @@ Known Problems
   
   This warning is innocuous and can be safely ignored.
 
-* The ./dsets tests failed in the TFLOPS machine if the test program,
-  dsets.c, is compiled with the -O option.  The hdf5 library still works
+* The ./dsets tests fail on the TFLOPS machine if the test program,
+  dsets.c, is compiled with the -O option.  The HDF5 library still works
   correctly with the -O option.  The test program works fine if it is
   compiled with -O1 or -O0.  Only -O (same as -O2) causes the test
   program to fail.
 
-* Not all platforms behave correctly with szip's shared libraries. Szip is
+* Not all platforms behave correctly with Szip's shared libraries. Szip is
   disabled in these cases, and a message is relayed at configure time. Static
-  libraries should be working on all systems that support szip, and should be
-  used when shared libraries are unavailable. There is also a configure error
-  on Altix machines that incorrectly reports when a version of szip without
-  an encoder is being used.
+  libraries should be working on all systems that support Szip and should be
+  used when shared libraries are unavailable. 
 
-* On some platforms that use Intel and Absoft compilers to build HDF5 fortran library,
-  compilation may fail for fortranlib_test.f90, fflush1.f90 and fflush2.f90
-  complaining about exit subroutine. Comment out the line 
-  IF (total_error .ne. 0) CALL exit (total_error)
+  There is also a configure error on Altix machines that incorrectly reports 
+  when a version of Szip without an encoder is being used.
+
+* On some platforms that use Intel and Absoft compilers to build the HDF5 
+  Fortran library, compilation may fail for fortranlib_test.f90, fflush1.f90 
+  and fflush2.f90 complaining about the exit subroutine. Comment out the line 
+  IF (total_error .ne. 0) CALL exit (total_error).
 
 * Information about building with PGI and Intel compilers is available in
-  INSTALL file sections 5.7 and 5.8
+  the INSTALL file sections 4.7 and 4.8.
 
-* On at least one system, (SDSC DataStar), the scheduler (in this case
+* On at least one system, SDSC DataStar, the scheduler (in this case
   LoadLeveler) sends job status updates to standard error when you run 
   any executable that was compiled with the parallel compilers.
 
@@ -452,15 +485,15 @@ Known Problems
 
         ($* > $STDOUT_FILE) >& $STDERR_FILE
 
-	set RETURN_VALUE=$status
+        set RETURN_VALUE=$status
 
         cat $STDOUT_FILE
 
         tail +3 $STDERR_FILE
 
-	exit $RETURN_VALUE
+        exit $RETURN_VALUE
 
-  You get the HDF make files and test scipts to execute your filter script
+  You get the HDF5 make files and test scipts to execute your filter script
   by setting the environment variable "RUNSERIAL" to the full path of the 
   script prior to running configure for parallel builds.  Remember to 
   "unsetenv RUNSERIAL" before running configure for a serial build.
@@ -476,5 +509,5 @@ Known Problems
 
 * H5Ocopy() does not copy reg_ref attributes correctly when shared-message
   is turn on. The value of the reference in the destination attriubte is
-  wrong. This H5Ocopy problem will affect h5copy tool
+  wrong. This H5Ocopy problem will affect the h5copy tool.
 
