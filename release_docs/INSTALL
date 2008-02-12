@@ -38,15 +38,12 @@ CONTENTS
         4.3.7. Specifying other libraries and headers
         4.3.8. Static versus shared linking
         4.3.9. Optimization versus symbolic debugging
-        4.3.10. Large (>2GB) vs. small (<2GB) file capability
-        4.3.11. Parallel vs. serial library
-        4.3.12. Threadsafe capability
-        4.3.13. Backward compatibility
+        4.3.10. Parallel versus serial library
+        4.3.11. Threadsafe capability
+        4.3.12. Backward compatibility
         4.4. Building
         4.5. Testing
         4.6. Installing HDF5
-        4.7  Building and testing with Intel compilers
-        4.8  Building and testing with PGI compilers
 
         5. Using the Library
 
@@ -57,6 +54,12 @@ CONTENTS
         A.2. DEC
         A.3. SGI (Irix64 6.2)
         A.4. Windows/NT
+
+        B. Large (>2GB) versus small (<2GB) file capability
+
+        C. Building and testing with other compilers
+        C.1.  Building and testing with Intel compilers
+        C.2.  Building and testing with PGI compilers
 
 *****************************************************************************
 
@@ -454,22 +457,12 @@ CONTENTS
         The tracing must also be enabled at runtime to see any output 
         (see "Debugging HDF5 Applications," reference above).
 
-4.3.10. Large (>2GB) vs. small (<2GB) file capability
-        In order to read or write files that could potentially be larger
-        than 2GB, it is necessary to use the non-ANSI `long long' data
-        type on some platforms. However, some compilers (e.g., GNU gcc
-        versions before 2.8.1 on Intel platforms) are unable to produce
-        correct machine code for this datatype. To disable use of the
-        `long long' type on these machines, say:
-
-            $ ./configure --disable-hsizet
-
-4.3.11. Parallel vs. serial library
+4.3.10. Parallel versus serial library
         The HDF5 Library can be configured to use MPI and MPI-IO for
         parallelism on a distributed multi-processor system.  Read the
         file INSTALL_parallel for detailed explanations.
 
-4.3.12. Threadsafe capability
+4.3.11. Threadsafe capability
         The HDF5 Library can be configured to be thread-safe (on a very
         large scale) with the `--enable-threadsafe' flag to the configure
         script.  Some platforms may also require the '-with-pthread=INC,LIB'
@@ -478,7 +471,7 @@ CONTENTS
 
             http://www.hdfgroup.org/HDF5/doc/TechNotes/ThreadSafeLibrary.html
 
-4.3.13. Backward compatibility
+4.3.12. Backward compatibility
         The 1.8 version of the HDF5 Library can be configured to operate
         identically to the v1.6 library with the 
             --with-default-api-version=v16
@@ -598,7 +591,78 @@ CONTENTS
             ./tools/gifconv/h52gif          (HDF5 to GIF converter) 
             ./tools/gifconv/gif2h5          (GIF to HDF5 converter)
 
-4.7  Building and testing with Intel compilers
+
+5. Using the Library
+        Please see the "HDF5 User's Guide" and the "HDF5 Reference Manual":
+
+            http://www.hdfgroup.org/HDF5/doc/
+
+        Most programs will include <hdf5.h> and link with -lhdf5.
+        Additional libraries may also be necessary depending on whether
+        support for compression, etc., was compiled into the HDF5 Library.
+
+        A summary of the HDF5 installation can be found in the
+        libhdf5.settings file in the same directory as the static and/or
+        shared HDF5 Libraries.
+
+
+6. Support
+        Support is described in the README file.
+
+
+*****************************************************************************
+			    APPENDIX
+*****************************************************************************
+
+A. Warnings about compilers
+        Output from the following compilers should be extremely suspected
+        when used to compile the HDF5 Library, especially if optimizations are
+        enabled. In all cases, HDF5 attempts to work around the compiler bugs.
+
+A.1. GNU (Intel platforms)
+        Versions before 2.8.1 have serious problems allocating registers
+        when functions contain operations on `long long' datatypes.
+        Supplying the `--disable-hsizet' switch to configure (documented
+        in Appendix B, "Large (>2GB) versus small (<2GB) file capability,")
+        will prevent HDF5 from using `long long' datatypes in
+        situations that are known not to work, but it limits the HDF5
+        address space to 2GB.
+
+A.2. COMPAQ/DEC
+        The V5.2-038 compiler (and possibly others) occasionally
+        generates incorrect code for memcpy() calls when optimizations
+        are enabled, resulting in unaligned access faults. HDF5 works
+        around the problem by casting the second argument to `char *'.
+        The Fortran module (5.4.1a) fails in compiling some Fortran
+        programs.  Use 5.5.0 or higher.
+
+A.3. SGI (Irix64 6.2)
+        The Mongoose 7.00 compiler has serious optimization bugs and
+        should be upgraded to MIPSpro 7.2.1.2m. Patches are available
+        from SGI.
+
+A.4. Windows/NT
+        The Microsoft Win32 5.0 compiler is unable to cast unsigned long
+        long values to doubles. HDF5 works around this bug by first
+        casting to signed long long and then to double.
+
+        A link warning: defaultlib "LIBC" conflicts with use of other libs
+        appears for debug version of VC++ 6.0. This warning will not affect
+        building and testing HDF5 Libraries. 
+
+
+B. Large (>2GB) versus small (<2GB) file capability
+        In order to read or write files that could potentially be larger
+        than 2GB, it is necessary to use the non-ANSI `long long' data
+        type on some platforms. However, some compilers (e.g., GNU gcc
+        versions before 2.8.1 on Intel platforms) are unable to produce
+        correct machine code for this datatype. To disable use of the
+        `long long' type on these machines, say:
+
+            $ ./configure --disable-hsizet
+
+C. Building and testing with other compilers
+C.1.  Building and testing with Intel compilers
         When Intel compilers are used (icc or ecc), you will need to modify
         the generated "libtool" program after configuration is finished.
         On or around line 104 of the libtool file, there are lines which 
@@ -644,7 +708,7 @@ CONTENTS
              ftp://ftp.hdfgroup.org/HDF5/current/
 
 
-4.8  Building and testing with PGI compilers
+C.2.  Building and testing with PGI compilers
         When PGI C and C++ compilers are used (pgcc or pgCC), you will need to 
         modify the generated "libtool" program after configuration is finished.
         On or around line 104 of the libtool file, there are lines which 
@@ -666,62 +730,4 @@ CONTENTS
         the environment variable CXX to "pgCC -tlocal"
             setenv CXX "pgCC -tlocal"
         before running the configure script.
-
-
-5. Using the Library
-        Please see the "HDF5 User's Guide" and the "HDF5 Reference Manual":
-
-            http://www.hdfgroup.org/HDF5/doc/
-
-        Most programs will include <hdf5.h> and link with -lhdf5.
-        Additional libraries may also be necessary depending on whether
-        support for compression, etc., was compiled into the HDF5 Library.
-
-        A summary of the HDF5 installation can be found in the
-        libhdf5.settings file in the same directory as the static and/or
-        shared HDF5 Libraries.
-
-
-6. Support
-        Support is described in the README file.
-
-
-*****************************************************************************
-
-Appendix A. Warnings about compilers
-        Output from the following compilers should be extremely suspected
-        when used to compile the HDF5 Library, especially if optimizations are
-        enabled. In all cases, HDF5 attempts to work around the compiler bugs.
-
-A.1. GNU (Intel platforms)
-        Versions before 2.8.1 have serious problems allocating registers
-        when functions contain operations on `long long' datatypes.
-        Supplying the `--disable-hsizet' switch to configure (documented
-        in section 4.3.10, "Large (>2GB) vs. small (<2GB) file capability,"
-        above) will prevent HDF5 from using `long long' datatypes in
-        situations that are known not to work, but it limits the HDF5
-        address space to 2GB.
-
-A.2. COMPAQ/DEC
-        The V5.2-038 compiler (and possibly others) occasionally
-        generates incorrect code for memcpy() calls when optimizations
-        are enabled, resulting in unaligned access faults. HDF5 works
-        around the problem by casting the second argument to `char *'.
-        The Fortran module (5.4.1a) fails in compiling some Fortran
-        programs.  Use 5.5.0 or higher.
-
-A.3. SGI (Irix64 6.2)
-        The Mongoose 7.00 compiler has serious optimization bugs and
-        should be upgraded to MIPSpro 7.2.1.2m. Patches are available
-        from SGI.
-
-A.4. Windows/NT
-        The Microsoft Win32 5.0 compiler is unable to cast unsigned long
-        long values to doubles. HDF5 works around this bug by first
-        casting to signed long long and then to double.
-
-        A link warning: defaultlib "LIBC" conflicts with use of other libs
-        appears for debug version of VC++ 6.0. This warning will not affect
-        building and testing HDF5 Libraries. 
-
 
