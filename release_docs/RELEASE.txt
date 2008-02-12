@@ -161,89 +161,81 @@ Supported Configuration Features Summary
           y   = tested and supported
           n   = not supported or not tested in this release
           x   = not working in this release
-          dna = does not apply
           ( ) = footnote appears below second table
-          <blank> = testing incomplete on this feature or platform 
+          <blank> = testing incomplete on this feature or platform
+          W or C indicates workstation or cluster, respectively.
 
-Platform                 C        F90    F90      C++   zlib  SZIP
-                         parallel        parallel
-SunOS5.8 64-bit          n        y      n        y     y     y
-SunOS5.8 32-bit          n        y      n        y     y     y
-SunOS5.10 64-bit         y(1)     y      n        y     y     y
-SunOS5.10 32-bit         y(1)     y      n        y     y     y
-IRIX64_6.5 64-bit        n        y      y        y     y     y
-IRIX64_6.5 32-bit        n        n      n        n     y     y
-AIX-5.2  32-bit          y        y      y        y     y     y
-AIX-5.2  64-bit          y        y      y        y     y     y
-Windows XP               n        y(15)  n(15)    y     y     y
-Windows XP x64           n        y(15)  n(15)    y     y     y
-Windows Vista            n        n      n        y     y     y
-Mac OS X 10.4 PowerPC    n               n
-Mac OS X 10.4 Intel      n        y      n        y     y     y
-FreeBSD 4.11             n        n      n        y     y     y
-RedHat EL3  W       (3)  y(1a)    y(10)  y(1a)    y     y     y
-RedHat EL3  W Intel (3)  n        y      n        y     y     n
-RedHat EL3  W PGI   (3)  n        y      n        y     y     n
-SuSe x86_64 gcc  (3,12)  y(1a)    y(11)  n        y     y     y
-SuSe x86_64 Int  (3,12)  n        y(13)  n        y     y     n
-SuSe x86_64 PGI  (3,12)  n        y(8)   n        y     y     y
-Linux 2.4 Xeon C 
-    Lustre Intel  (3,6)  n        y      n        y     y     n
-Linux 2.6 SuSE ia64 C 
-    Intel         (3,7)  y        y      y        y     y     n
-Linux 2.6 SGI Altix 
-    ia64 Intel      (3)  y        y      y        y     y     y
-Alpha OpenVMS 7.3.2      n        y      n        y     n     n
+Platform                          C        F90    F90      C++   zlib  SZIP
+                                  parallel        parallel
+SunOS5.8 64-bit                    n        y      n        y     y     y
+SunOS5.8 32-bit                    n        y      n        y     y     y
+SunOS5.10 64-bit                   n        y      n        y     y     y
+SunOS5.10 32-bit                   n        y      n        y     y     y
+IRIX64_6.5 64-bit                  n        y      y        y     y     y
+IRIX64_6.5 32-bit                  n        n      n        n     y     y
+AIX-5.2  32-bit                    y        y      y        y     y     y
+AIX-5.2  64-bit                    y        y      y        y     y     y
+Cray XT3 (not tested
+          for this release)        n        n      n        n     n     n
+Windows XP                         n        y(3)   n(3)     y     y     y
+Windows XP x64                     n        y(3)   n(3)     y     y     y
+Windows Vista                      n        n      n        y     y     y
+Mac OS X 10.4 PowerPC              n               n
+Mac OS X 10.4 Intel                n        y      n        y     y     y
+FreeBSD 6.2 32-bit                 n        n      n        y     y     y
+FreeBSD 6.2 64-bit
+RedHat EL4 2.6.9 i686 GNU        W y(2)     y(4)   y(2)     y     y     y
+RedHat EL4 2.6.9 i686 Intel      W n        y      n        y     y     n
+RedHat EL4 2.6.9 i686 PGI        W n        y      n        y     y     n
+SuSe Linux 2.6.16 x86_64 GNU (5) W y(2)     y      n        y     y     y
+SuSe Linux 2.6.16 x86_64 Int (5) W n        y      n        y     n     n
+SuSe Linux 2.6.16 x86_64 PGI (5) W n        y      n        y     n     n
+RHL9 Linux 2.4 Xeon Lustre Intel C n        y      n        y     y     n
+RHEL3 Linux 2.4 Xeon Intel       W n        y      n        n     y     n
+RHEL4 Linux 2.6 Xeon Lustre Int  C n        y      n        y     y     n
+SuSE Linux 2.4 ia64 Intel        C y(1)     y      y        y     y     y
+SuSe Linux 2.6.5
+       SGI Altix ia64 Intel      C n        y      n        y     n     y
+Alpha OpenVMS 7.3.2                n        y      n        y     n     n
 
 
 
-Platform                 Shared  Shared    Shared    static-  Thread-  
-                         C libs  F90 libs  C++ libs  exec     safe     
-Solaris2.8 64-bit        y       y         y         x        y        
-Solaris2.8 32-bit        y       y         y         x        y        
-Solaris2.10 64-bit       y                           x        y        
-Solaris2.10 32-bit       y                           x        y        
-IRIX64_6.5 64-bit        y       y         n         y        y        
-IRIX64_6.5 32-bit        y       dna       y         y        y        
-AIX-5.2 & 5.3 32-bit     n       n         n         y        n        
-AIX-5.2 & 5.3 64-bit     n       n         n         y        n        
-Windows XP               y       y(15)     y         y        y        
-Windows XP x64           y       y(15)     y         y        y        
-Windows Vista            y       n         n         y        y        
-Mac OS X 10.3            y                           y        n        
-FreeBSD 4.11             y       n         y         y        y        
-RedHat EL3  W       (3)  y       y(10)     y         y        y        
-RedHat EL3  W Intel (3)  y       y         y         y        n        
-RedHat EL3  W PGI   (3)  y       y         y         y        n        
-SuSe x86_64 W GNU (3,12) y       y         y         y        y        
-SuSe x86_64 W Int (3,12) y       y         y         y(14)    n        
-SuSe x86_64 W PGI (3,12) y       y         y         y(14)    n        
-Linux 2.4 Xeon C 
-    Lustre Intel    (6)  y       y         y         y        n        
-Linux 2.4 SuSE 
-    ia64 C Intel    (7)  y       y         y         y        n        
-Linux 2.4 SGI Altix 
-    ia64 Intel           y                           y        n        
-Alpha OpenVMS 7.3.2      n       n         n         y        n        
+Platform                          Shared   Shared    Shared    static-  Thread-
+                                  C libs   F90 libs  C++ libs  exec     safe
+SunOS 5.8 32-bit                    y        y         y         x        y
+SunOS 5.8 64-bit                    y        y         y         x        y
+SunOS 5.10 32-bit                   y        y         y         x        y
+SunOS 5.10 64-bit                   y        y         y         x        y
+IRIX64_6.5 32-bit                   y        n         y         x        y
+IRIX64_6.5 64-bit                   y        y         n         x        y
+AIX-5.2 32-bit                      n        n         n         x        n
+AIX-5.2 64-bit                      n        n         n         x        n
+Cray XT3 (not tested
+          for this release)         n        n         n         x        n
+Windows XP                          y        y(3)      y         y        y
+Windows XP x64                      y        y(3)      y         y        y
+Windows Vista                       y        n         n         y        y
+Mac OS X 10.4 Intel Duo             y        y         y         x        n
+FreeBSD 6.2 32-bit                  y        y         y         x        n
+FreeBSD 6.2 64-bit                  y        y         y         x        n
+RHEL4 2.6.9 i686 GNU              W y        y(4)      y         x        y
+RHEL4 2.6.9 i686 Intel            W y        y         y         x        n
+RHEL4 2.6.9 i686 PGI              W y        y         y         x        n
+SuSE Linux 2.6.16 x86_64 GNU (5)  W y        y         y         x        y
+SuSE Linux 2.6.16 x86_64 Intel(5) W y        y         y         x        n
+SuSE Linux 2.6.16 x86_64 PGI(5)   W y        y         y         x        n
+RHL9 Linux 2.4 Xeon Lustre Intel  C y        y         y         x        n
+RHEL3 Linux 2.4 Xeon Intel        W y        n         n         x        n
+RHEL4 Linux 2.6 Xeon Lustre Intel C y        y         y         x        n
+SuSE Linux 2.4 ia64 Intel         C y        y         y         x        n
+SuSe Linux 2.6.5
+           SGI Altix ia64 Intel   C n        n         n         x        n
 
     Notes: (1)  Using mpich 1.2.6.
-           (1a) Using mpich2 1.0.6.
-           (2)  Using mpt and mpich 1.2.6.
-           (3)  Linux 2.6 with GNU, Intel, and PGI compilers, as indicated.  
-                  W or C indicates workstation or cluster, respectively.
-
-           (6)  Linux 2.4.21-32.0.1.  Xeon cluster with ELsmp_perfctr_lustre 
-                  and Intel compilers
-           (7)  Linux 2.4.21, SuSE_292.till.  Ia64 cluster with Intel compilers
-           (8)  pgf90
-           (9)  With Compaq Visual Fortran 6.6c compiler.
-           (10) With PGI and Absoft compilers.
-           (11) PGI and Intel compilers for both C and Fortran
-           (12) AMD Opteron x86_64
-           (13) ifort
-           (14) Yes with C and Fortran, but not with C++
-	   (15) Using Visual Studio 2005 or Cygwin
-           (16) Not tested for this release.
+           (2) Using mpich2 1.0.6.
+           (3) Using Visual Studio 2005 or Cygwin
+           (4) With PGI and Absoft compilers.
+           (5) AMD Opteron x86_64
     Compiler versions for each platform are listed in the preceding
     "Platforms Tested" table.
 
