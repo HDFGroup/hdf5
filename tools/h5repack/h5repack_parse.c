@@ -47,6 +47,7 @@ extern char  *progname;
  *-------------------------------------------------------------------------
  */
 
+#if 0
 
 obj_list_t* parse_filter(const char *str,
                          int *n_objs,
@@ -329,6 +330,328 @@ obj_list_t* parse_filter(const char *str,
  return obj_list;
 }
 
+
+#else
+
+obj_list_t* parse_filter(const char *str,
+                         int *n_objs,
+                         filter_info_t *filt,
+                         pack_opt_t *options,
+                         int *is_glb)
+{
+    unsigned    i, u;
+    char        c;
+    size_t      len=strlen(str);
+    int         j, m, n, k, l, end_obj=-1, no_param=0;
+    char        sobj[MAX_NC_NAME];
+    char        scomp[10];
+    char        stype[5];
+    char        smask[3];
+    obj_list_t* obj_list=NULL;
+    unsigned    pixels_per_block;
+    
+    
+    /* initialize compression  info */
+    memset(filt,0,sizeof(filter_info_t));
+    *is_glb = 0;
+    
+    /* check for the end of object list and number of objects */
+    for ( i = 0, n = 0; i < len; i++)
+    {
+        c = str[i];
+        if ( c==':' )
+        {
+            end_obj=i;
+        }
+        if ( c==',' )
+        {
+            n++;
+        }
+    }
+    
+    if (end_obj==-1) /* missing : */
+    { 
+        /* apply to all objects */
+        options->all_filter=1;
+        *is_glb = 1;
+    }
+    
+    n++;
+    obj_list = malloc(n*sizeof(obj_list_t));
+    if (obj_list==NULL)
+    {
+        error_msg(progname, "could not allocate object list\n");
+        return NULL;
+    }
+    *n_objs=n;
+    
+    /* get object list */
+    for ( j = 0, k = 0, n = 0; j < end_obj; j++, k++)
+    {
+        c = str[j];
+        sobj[k] = c;
+        if ( c==',' || j==end_obj-1)
+        {
+            if ( c==',') sobj[k]='\0'; else sobj[k+1]='\0';
+            strcpy(obj_list[n].obj,sobj);
+            memset(sobj,0,sizeof(sobj));
+            n++;
+            k=-1;
+        }
+    }
+    /* nothing after : */
+    if (end_obj+1==(int)len)
+    {
+        if (obj_list) free(obj_list);
+        error_msg(progname, "input Error: Invalid compression type in <%s>\n",str);
+        exit(1);
+    }
+    
+    
+    /* get filter additional parameters */
+    m=0;
+    for ( i=end_obj+1, k=0, j=0; i<len; i++,k++)
+    {
+        c = str[i];
+        scomp[k]=c;
+        if ( c=='=' || i==len-1)
+        {
+            if ( c=='=') /*one more parameter */
+            {      
+                scomp[k]='\0';     /*cut space */
+                
+               /*-------------------------------------------------------------------------
+                * H5Z_FILTER_SZIP
+                * szip has the format SZIP=<pixels per block,coding>
+                * pixels per block is a even number in 2-32 and coding method is 'EC' or 'NN'
+                * example SZIP=8,NN
+                *-------------------------------------------------------------------------
+                */
+                if (strcmp(scomp,"SZIP")==0)
+                {
+                    l=-1; /* mask index check */
+                    for ( m=0,u=i+1; u<len; u++,m++)
+                    {
+                        if (str[u]==',')
+                        {
+                            stype[m]='\0'; /* end digit of szip */
+                            l=0;  /* start EC or NN search */
+                            u++;  /* skip ',' */
+                        }
+                        c = str[u];
+                        if (!isdigit(c) && l==-1){
+                            if (obj_list) free(obj_list);
+                            error_msg(progname, "compression parameter not digit in <%s>\n",str);
+                            exit(1);
+                        }
+                        if (l==-1)
+                            stype[m]=c;
+                        else
+                        {
+                            smask[l]=c;
+                            l++;
+                            if (l==2)
+                            {
+                                smask[l]='\0';
+                                i=len-1; /* end */
+                                (*n_objs)--; /* we counted an extra ',' */
+                                if (strcmp(smask,"NN")==0)
+                                    filt->cd_values[j++]=H5_SZIP_NN_OPTION_MASK;
+                                else if (strcmp(smask,"EC")==0)
+                                    filt->cd_values[j++]=H5_SZIP_EC_OPTION_MASK;
+                                else
+                                {
+                                    error_msg(progname, "szip mask must be 'NN' or 'EC' \n");
+                                    exit(1);
+                                }
+                                
+                                
+                            }
+                        }
+                        
+                    }  /* u */
+                } /*if */
+                
+                 
+                
+                
+               /*-------------------------------------------------------------------------
+                * all other filters
+                *-------------------------------------------------------------------------
+                */
+                
+                else
+                {
+                    /* here we could have 1 or 2 digits  */
+                    for ( m=0,u=i+1; u<len; u++,m++)
+                    {
+                        c = str[u];
+                        if (!isdigit(c)){
+                            if (obj_list) free(obj_list);
+                            error_msg(progname, "compression parameter is not a digit in <%s>\n",str);
+                            exit(1);
+                        }
+                        stype[m]=c;
+                    } /* u */
+                    
+                    stype[m]='\0';
+                } /*if */
+                
+                
+                
+                filt->cd_values[j++]=atoi(stype);
+                i+=m; /* jump */
+   }
+   else if (i==len-1) 
+   { /*no more parameters */
+       scomp[k+1]='\0';
+       no_param=1;
+   }
+
+  /*-------------------------------------------------------------------------
+   * translate from string to filter symbol
+   *-------------------------------------------------------------------------
+   */
+   
+  /*-------------------------------------------------------------------------
+   * H5Z_FILTER_NONE
+   *-------------------------------------------------------------------------
+   */
+   if (strcmp(scomp,"NONE")==0)
+   {
+       filt->filtn=H5Z_FILTER_NONE;
+       filt->cd_nelmts = 0;
+   }
+   
+  /*-------------------------------------------------------------------------
+   * H5Z_FILTER_DEFLATE
+   *-------------------------------------------------------------------------
+   */
+   else if (strcmp(scomp,"GZIP")==0)
+   {
+       filt->filtn=H5Z_FILTER_DEFLATE;
+       filt->cd_nelmts = 1;
+       if (no_param) 
+       { /*no more parameters, GZIP must have parameter */
+           if (obj_list) free(obj_list);
+           error_msg(progname, "missing compression parameter in <%s>\n",str);
+           exit(1);
+       }
+   }
+   
+  /*-------------------------------------------------------------------------
+   * H5Z_FILTER_SZIP
+   *-------------------------------------------------------------------------
+   */
+   else if (strcmp(scomp,"SZIP")==0)
+   {
+       filt->filtn=H5Z_FILTER_SZIP;
+       filt->cd_nelmts = 2;
+       if (no_param) 
+       { /*no more parameters, SZIP must have parameter */
+           if (obj_list) free(obj_list);
+           error_msg(progname, "missing compression parameter in <%s>\n",str);
+           exit(1);
+       }
+   }
+   
+   /*-------------------------------------------------------------------------
+   * H5Z_FILTER_SHUFFLE
+   *-------------------------------------------------------------------------
+   */
+   else if (strcmp(scomp,"SHUF")==0)
+   {
+       filt->filtn=H5Z_FILTER_SHUFFLE;
+       filt->cd_nelmts = 0;
+       if (m>0)
+       { /*shuffle does not have parameter */
+           if (obj_list) free(obj_list);
+           error_msg(progname, "extra parameter in SHUF <%s>\n",str);
+           exit(1);
+       }
+   }
+  /*-------------------------------------------------------------------------
+   * H5Z_FILTER_FLETCHER32
+   *-------------------------------------------------------------------------
+   */
+   else if (strcmp(scomp,"FLET")==0)
+   {
+       filt->filtn=H5Z_FILTER_FLETCHER32;
+       filt->cd_nelmts = 0;
+       if (m>0)
+       { /*shuffle does not have parameter */
+           if (obj_list) free(obj_list);
+           error_msg(progname, "extra parameter in FLET <%s>\n",str);
+           exit(1);
+       }
+   }
+  
+   else {
+       if (obj_list) free(obj_list);
+       error_msg(progname, "invalid filter type in <%s>\n",str);
+       exit(1);
+   }
+  }
+ } /*i*/
+ 
+  /*-------------------------------------------------------------------------
+   * check valid parameters
+   *-------------------------------------------------------------------------
+   */
+   
+   switch (filt->filtn)
+   {
+
+  /*-------------------------------------------------------------------------
+   * H5Z_FILTER_DEFLATE
+   *-------------------------------------------------------------------------
+   */
+       
+   case H5Z_FILTER_DEFLATE:
+       if (filt->cd_values[0]<0 || filt->cd_values[0]>9 )
+       {
+           if (obj_list) free(obj_list);
+           error_msg(progname, "invalid compression parameter in <%s>\n",str);
+           exit(1);
+       }
+       break;
+       
+  /*-------------------------------------------------------------------------
+   * H5Z_FILTER_SZIP
+   *-------------------------------------------------------------------------
+   */
+       
+   case H5Z_FILTER_SZIP:
+       pixels_per_block=filt->cd_values[0];
+       if ((pixels_per_block%2)==1) 
+       {
+           if (obj_list) free(obj_list);
+           error_msg(progname, "pixels_per_block is not even in <%s>\n",str);
+           exit(1);
+       }
+       if (pixels_per_block>H5_SZIP_MAX_PIXELS_PER_BLOCK) 
+       {
+           if (obj_list) free(obj_list);
+           error_msg(progname, "pixels_per_block is too large in <%s>\n",str);
+           exit(1);
+       }
+       if ( (strcmp(smask,"NN")!=0) && (strcmp(smask,"EC")!=0) ) 
+       {
+           if (obj_list) free(obj_list);
+           error_msg(progname, "szip mask must be 'NN' or 'EC' \n");
+           exit(1);
+       }
+       break;
+
+  
+   };
+   
+   return obj_list;
+}
+
+
+
+#endif
 
 /*-------------------------------------------------------------------------
  * Function: get_sfilter

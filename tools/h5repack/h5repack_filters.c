@@ -122,7 +122,7 @@ int aux_assign_obj(const char* name,            /* object name from traverse lis
         {
             /* assign the global filter */
             tmp.nfilters=1;
-            tmp.filter[0]=options->filter_g;
+            tmp.filter[0]=options->filter_g[0];
         } /* if all */
         else
         {
@@ -144,9 +144,12 @@ int aux_assign_obj(const char* name,            /* object name from traverse lis
         
         if (options->all_filter)
         {
-            /* assign the global filter */
-            tmp.nfilters=1;
-            tmp.filter[0]=options->filter_g;
+            int k;
+
+            /* assign the global filters */
+            tmp.nfilters=options->n_filter_g;
+            for ( k = 0; k < options->n_filter_g; k++)
+                tmp.filter[k]=options->filter_g[k];
         }
         if (options->all_layout)
         {
