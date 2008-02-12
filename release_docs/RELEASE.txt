@@ -1,4 +1,4 @@
-HDF5 version 1.8.0 currently under development
+HDF5 version 1.8.0 released on Tue Feb 12 18:09:07 CST 2008
 ================================================================================
 
 INTRODUCTION
