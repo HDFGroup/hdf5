@@ -51,18 +51,6 @@ typedef struct {
 
 */
 
-
-#if 0
-
-#define CDVALUES 2
-
-typedef struct {
- H5Z_filter_t filtn;               /* filter identification number */
- int          cd_values[CDVALUES]; /* filter client data values */
-} filter_info_t;
-
-#else
-
 #define CD_VALUES 20
 
 typedef struct {
@@ -72,7 +60,6 @@ typedef struct {
 } filter_info_t;
 
 
-#endif
 
 /* chunk lengths along each dimension and rank */
 typedef struct {
@@ -108,31 +95,6 @@ typedef struct {
  */
 
 /* all the above, ready to go to the hrepack call */
-
-
-#if 0
-
-typedef struct {
- pack_opttbl_t   *op_tbl;     /*table with all -c and -f options */
- int             all_layout;  /*apply the layout to all objects */
- int             all_filter;  /*apply the filter to all objects */
-
-#ifdef OLD
- filter_info_t   filter_g;    /*global filter INFO for the ALL case */
-#else
- filter_info_t   filter_g[H5_REPACK_MAX_NFILTERS];    /*global filter array for the ALL case */
-#endif
-
-
- chunk_info_t    chunk_g;     /*global chunk INFO for the ALL case */
- H5D_layout_t    layout_g;    /*global layout information for the ALL case */
- int             verbose;     /*verbose mode */
- hsize_t         threshold;   /*minimum size to compress, in bytes */
- int             use_native;  /*use a native type in write */  
-} pack_opt_t;
-
-#else
-
 typedef struct {
  pack_opttbl_t   *op_tbl;     /*table with all -c and -f options */
  int             all_layout;  /*apply the layout to all objects */
@@ -148,8 +110,6 @@ typedef struct {
 } pack_opt_t;
 
 
-
-#endif
 
 /*-------------------------------------------------------------------------
  * public functions
@@ -181,12 +141,6 @@ int h5repack_cmpdcpl   (const char *fname1,
  *-------------------------------------------------------------------------
  */
 
-#if 0
-int check_objects(const char* fname,
-                  pack_opt_t *options);
-
-#endif
-
 int copy_objects(const char* fnamein,
                  const char* fnameout,
                  pack_opt_t *options);
@@ -199,12 +153,6 @@ int do_copy_refobjs(hid_t fidin,
 
 void init_packobject(pack_info_t *obj);
 int print_filters(hid_t dcpl_id);
-
-#if 0
-int have_request(pack_opt_t *options);
-#endif
-
-
 
 
 /*-------------------------------------------------------------------------
@@ -232,11 +180,6 @@ int can_read(const char* name,    /* object name from traverse list */
  * layout functions
  *-------------------------------------------------------------------------
  */
-
-#if 0
-int has_layout(hid_t dcpl_id,
-               pack_info_t *obj);
-#endif
 
 int layout_this(hid_t dcpl_id,             /* DCPL from input object */
                 const char* name,          /* object name from traverse list */
@@ -270,31 +213,17 @@ pack_info_t* options_get_object( const char *path,
  */
 
 
-#if 0
-obj_list_t* parse_filter(const char *str,
-                         int *n_objs,
-                         filter_info_t *filt,
-                         pack_opt_t *options);
-
-#else
-
 obj_list_t* parse_filter(const char *str,
                          int *n_objs,
                          filter_info_t *filt,
                          pack_opt_t *options,
                          int *is_glb);
 
-#endif
 
 obj_list_t* parse_layout(const char *str,
                          int *n_objs,
                          pack_info_t *pack,    /* info about object */
                          pack_opt_t *options);
-
-#if 0
-const char* get_sfilter (H5Z_filter_t filtn);
-#endif
-
 
 int         parse_number(char *str);
 
