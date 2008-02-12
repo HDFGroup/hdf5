@@ -224,7 +224,9 @@ The following platforms and compilers have been tested for for this release.
     MAC OS  10.4 (Intel)          gcc i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1 
                                   G95 (GCC 4.0.3 (g95 0.91!) Nov 21 2006)
 
-    Alpha Open VMS 7.3
+    Alpha Open VMS 7.3            Compaq C V6.5-001-48BCD
+                                  HP Fortran V7.6-3276
+                                  Compaq C++ V6.5-004
 
 
 Supported Configuration Features Summary
