@@ -54,9 +54,9 @@ DISTCLEAN=h5repack.sh
 
 ## Source and object files for programs...
 ##
-PROG_SRC=h5repack.c h5repack_copy.c h5repack_refs.c h5repack_filters.c  h5repack_list.c h5repack_main.c h5repack_opttable.c h5repack_parse.c h5repack_verify.c h5repacktst.c
-OBJS=h5repack.lo h5repack_filters.lo h5repack_copy.lo h5repack_refs.lo h5repack_list.lo h5repack_main.lo h5repack_opttable.lo h5repack_parse.lo h5repack_verify.lo	
-TEST_OBJS=h5repack.lo h5repack_filters.lo  h5repack_copy.lo h5repack_refs.lo h5repack_list.lo h5repack_opttable.lo h5repack_parse.lo h5repack_verify.lo h5repacktst.lo
+PROG_SRC=h5repack.c h5repack_copy.c h5repack_refs.c h5repack_filters.c  h5repack_main.c h5repack_opttable.c h5repack_parse.c h5repack_verify.c h5repacktst.c
+OBJS=h5repack.lo h5repack_filters.lo h5repack_copy.lo h5repack_refs.lo h5repack_main.lo h5repack_opttable.lo h5repack_parse.lo h5repack_verify.lo	
+TEST_OBJS=h5repack.lo h5repack_filters.lo  h5repack_copy.lo h5repack_refs.lo h5repack_opttable.lo h5repack_parse.lo h5repack_verify.lo h5repacktst.lo
 DETECT_OBJS=testh5repack_detect_szip.lo
 PROG_OBJ=$(PROG_SRC:.c=.lo) $(DETECT_OBJS)
 

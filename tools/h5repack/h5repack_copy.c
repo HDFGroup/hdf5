@@ -29,10 +29,7 @@ extern char  *progname;
  */
 #define FORMAT_OBJ      " %-27s %s\n"   /* obj type, name */
 #define FORMAT_OBJ_ATTR "  %-27s %s\n"  /* obj type, name */
-#define PER(A,B) { per = 0;                                            \
-                   if (A!=0)                                           \
-                    per = (double) fabs( (double)(B-A) / (double)A  ); \
-                 }
+
 
 /*-------------------------------------------------------------------------
  * local functions
@@ -225,7 +222,6 @@ int do_copy_objects(hid_t fidin,
     hsize_t  dsize_out;         /* output dataset size after filter */
     int      apply_s;           /* flag for apply filter to small dataset sizes */
     int      apply_f;           /* flag for apply filter to return error on H5Dcreate */
-    double   per;               /* percent utilization of storage */
     void     *buf=NULL;         /* buffer for raw data */
     void     *sm_buf=NULL;      /* buffer for raw data */
     int      has_filter;        /* current object has a filter */
@@ -490,7 +486,7 @@ int do_copy_objects(hid_t fidin,
                         } /* hyperslab read */
                      }/*nelmts*/
                         
-                     /*-------------------------------------------------------------------------
+                      /*-------------------------------------------------------------------------
                       * amount of compression used
                       *-------------------------------------------------------------------------
                       */
@@ -498,26 +494,36 @@ int do_copy_objects(hid_t fidin,
                       {
                           if (apply_s && apply_f)
                           {
+                              double per=0;
+                              hssize_t a, b;
+                              
                               /* get the storage size of the input dataset */
                               dsize_out=H5Dget_storage_size(dset_out);
-                              PER((hssize_t)dsize_in,(hssize_t)dsize_out);
-                              print_dataset_info(dcpl_out,travt->objs[i].name,per*100.0);
+                              
+                              a = dsize_in; b = dsize_out;
+                              if (a!=0)
+                                  per = (double) (b-a)/a;
+                              
+                              per = -per;
+                              per *=100;
+                              
+                              print_dataset_info(dcpl_out,travt->objs[i].name,per);
                           }
                           else
                               print_dataset_info(dcpl_id,travt->objs[i].name,0.0);
-                                          
-                      /* print a message that the filter was not applied 
-                         (in case there was a filter)
-                      */
-                      if ( has_filter && apply_s == 0 )
-                          printf(" <warning: filter not applied to %s. dataset smaller than %d bytes>\n",
-                          travt->objs[i].name,
-                          (int)options->threshold);
-                      
-                      if ( has_filter && apply_f == 0 )
-                          printf(" <warning: could not apply the filter to %s>\n",
-                          travt->objs[i].name);
-                      
+                          
+                              /* print a message that the filter was not applied 
+                              (in case there was a filter)
+                          */
+                          if ( has_filter && apply_s == 0 )
+                              printf(" <warning: filter not applied to %s. dataset smaller than %d bytes>\n",
+                              travt->objs[i].name,
+                              (int)options->threshold);
+                          
+                          if ( has_filter && apply_f == 0 )
+                              printf(" <warning: could not apply the filter to %s>\n",
+                              travt->objs[i].name);
+                          
                       } /* verbose */
                       
                      /*-------------------------------------------------------------------------
