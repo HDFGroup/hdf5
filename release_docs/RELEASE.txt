@@ -42,6 +42,7 @@ CONTENTS
 ========
 
 - New Features
+- Removed Feature
 - Support for new platforms and languages
 - Bug Fixes since HDF5-1.6.0
 - Platforms Tested
@@ -83,7 +84,6 @@ New Features
 
         http://hdfgroup.org/HDF5/doc/ADGuide/Changes.html
 
-
 Compatibility
 -------------
     Many HDF5 users and user communities have existing applications that 
@@ -124,8 +124,20 @@ Referenced documents
         Compatibility Issues"
 
 
-Support for new platforms, languages and compilers.
-=======================================
+Removed Feature
+===============
+The stream virtual file driver (H5FD_STREAM) have been removed in this 
+release. This affects the functions H5Pset_fapl_stream and H5Pget_fapl_stream 
+and the constant H5FD_STREAM.
+
+This virtual file driver will be available at 
+http://hdf5-addons.origo.ethz.ch/. Note that at the time of this release, 
+the transition is still in progress; the necessary integration tools may 
+not be available when HDF5 Release 1.8.0 first comes out.
+
+
+Support for New Platforms, Languages, and Compilers
+===================================================
     - Support for Open VMS 7.3 was added.
 
 
@@ -307,7 +319,6 @@ Alpha OpenVMS 7.3.2      n       n         n         y        n
            (16) Not tested for this release.
     Compiler versions for each platform are listed in the preceding
     "Platforms Tested" table.
-
 
 
 Known Problems
