@@ -22,6 +22,7 @@
 
 extern char  *progname;
 
+
 /*-------------------------------------------------------------------------
  * Function: parse_filter
  *
@@ -585,40 +586,6 @@ obj_list_t* parse_layout(const char *str,
 
 
  return obj_list;
-}
-
-/*-------------------------------------------------------------------------
- * Function: parse_number
- *
- * Purpose: read a number from command line argument
- *
- * Return: number, -1 for FAIL
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: September, 23, 2003
- *
- *-------------------------------------------------------------------------
- */
-
-
-int parse_number(char *str)
-{
- unsigned    i;
- int         n;
- char        c;
- size_t      len=strlen(str);
-
- for ( i=0; i<len; i++)
- {
-  c = str[i];
-  if (!isdigit(c)){
-   return -1;
-  }
- }
- str[i]='\0';
- n=atoi(str);
- return n;
 }
 
 

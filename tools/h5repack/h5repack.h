@@ -13,7 +13,6 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
 #ifndef H5REPACK_H__
 #define H5REPACK_H__
 
@@ -225,7 +224,6 @@ obj_list_t* parse_layout(const char *str,
                          pack_info_t *pack,    /* info about object */
                          pack_opt_t *options);
 
-int         parse_number(char *str);
 
 
 
