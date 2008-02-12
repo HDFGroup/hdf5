@@ -1518,7 +1518,6 @@
 ./tools/h5repack/h5repack.h
 ./tools/h5repack/h5repack_copy.c
 ./tools/h5repack/h5repack_filters.c
-./tools/h5repack/h5repack_list.c
 ./tools/h5repack/h5repack_main.c
 ./tools/h5repack/h5repack_opttable.c
 ./tools/h5repack/h5repack_parse.c
