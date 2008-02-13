@@ -6,7 +6,7 @@ INTRODUCTION
 
 This document describes the differences between the HDF5-1.6.x release series
 and HDF5 1.8.0, and contains information on the platforms tested and known 
-problems in HDF5-1.8.0.  For more details, see the HISTORY.txt file in the 
+problems in HDF5-1.8.0.  For more details, see the HISTORY-1_0-1_8_0_rc3.txt file in the 
 release_docs/ directory of the HDF5 source.
 
 Links to the HDF5 1.8.0 source code, documentation, and additional materials
