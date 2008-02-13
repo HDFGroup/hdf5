@@ -1,6 +1,8 @@
 HDF5 HISTORY
 ============
-This file contains history of the HDF5 libraries releases
+This file contains history of the HDF5 libraries releases starting with
+HDF5-1.0.0 and ending with HDF5-1.8.0-rc3 (the state of the code before i
+the HDF5 1.8.0 release).
 
 CONTENTS
 

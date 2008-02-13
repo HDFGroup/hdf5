@@ -7,7 +7,7 @@ INTRODUCTION
 This document describes the differences between HDF5-1.9.0 and
 HDF5 1.9.x snapshot, and contains information on the platforms 
 tested and known problems in HDF5-1.9.x. 
-For more details check the HISTORY.txt file in the HDF5 source.
+For more details check the HISTORY*.txt files in the HDF5 source.
 
 
 Links to HDF5 1.9.x source code can be found on THG's development 

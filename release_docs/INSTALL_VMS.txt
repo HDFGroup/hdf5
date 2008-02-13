@@ -1,6 +1,6 @@
 		Building and installation instructions for Alpha Open VMS
                                   HDF5 1.8.0 release
-                                     January 2008
+                                     February 12, 2008
    
 
 
