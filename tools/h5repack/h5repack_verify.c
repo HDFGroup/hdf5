@@ -22,15 +22,6 @@ static int has_layout(hid_t pid, pack_info_t *obj);
 static int has_filters(hid_t pid, hid_t tid, unsigned nfilters, filter_info_t *filter);
 
 
-
-
-
-
-extern char  *progname;
-static int has_layout(hid_t pid, pack_info_t *obj);
-static int has_filters(hid_t pid, hid_t tid, unsigned nfilters, filter_info_t *filter);
-
-
 /*-------------------------------------------------------------------------
  * Function: h5repack_verify
  *
