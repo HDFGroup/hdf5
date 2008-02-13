@@ -21,7 +21,6 @@
 #include "h5tools_utils.h"
 #include "H5private.h"
 
-
 extern char  *progname;
 
 /*-------------------------------------------------------------------------
@@ -251,10 +250,6 @@ int h5repack_addlayout(const char* str,
  *
  * Date: September, 22, 2003
  * 
- * Modification:
- *   Peter Cao, July 9, 2007
- *   Add "-L, --latest" and other options to pack a file with the latest file format
- *
  *-------------------------------------------------------------------------
  */
 static int check_options(pack_opt_t *options)
