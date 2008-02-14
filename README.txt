@@ -1,4 +1,4 @@
-HDF5 version 1.8.0 released on Tue Feb 12 20:41:19 CST 2008
+HDF5 version 1.8.0-snap0 currently under development
 Please refer to the release_docs/INSTALL file for installation instructions.
 ------------------------------------------------------------------------------
 

@@ -1,0 +1,4 @@
+HDF5 History
+============
+
+This file contains development history of HDF5 1.8 branch

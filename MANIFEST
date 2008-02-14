@@ -385,6 +385,7 @@
 
 ./release_docs/COPYING
 ./release_docs/HISTORY-1_0-1_8_0_rc3.txt
+./release_docs/HISTORY-1_8.txt
 ./release_docs/INSTALL
 ./release_docs/INSTALL_Cygwin.txt
 ./release_docs/INSTALL_MinGW.txt

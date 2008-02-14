@@ -1,13 +1,13 @@
-HDF5 version 1.8.0 released on Tue Feb 12 20:41:19 CST 2008
+HDF5 version 1.8.0-snap0 currently under development
 ================================================================================
 
 INTRODUCTION
 ============
 
-This document describes the differences between the HDF5-1.6.x release series
+This document describes the differences between the HDF5-1.8.x release series
 and HDF5 1.8.0, and contains information on the platforms tested and known 
-problems in HDF5-1.8.0.  For more details, see the HISTORY-1_0-1_8_0_rc3.txt file in the 
-release_docs/ directory of the HDF5 source.
+problems in HDF5-1.8.0.  For more details, see the HISTORY-1_0-1_8_0_rc3.txt and HISTORY-1_8.txt 
+files in the release_docs/ directory of the HDF5 source.
 
 Links to the HDF5 1.8.0 source code, documentation, and additional materials
 can be found on the HDF5 web page at:
@@ -42,9 +42,8 @@ CONTENTS
 ========
 
 - New Features
-- Removed Feature
 - Support for new platforms and languages
-- Bug Fixes since HDF5-1.6.0
+- Bug Fixes since HDF5-1.8.0
 - Platforms Tested
 - Supported Configuration Features Summary
 - Known Problems
@@ -53,99 +52,36 @@ CONTENTS
 New Features
 ============
 
-   HDF5 Release 1.8.0 is a major release with many changes and new features.
+	Configuration
+	-------------
 
-   New format and interface features discussed in the "What's New in 
-   HDF5 1.8.0" document include the following:
+	Source code distribution
+	========================
 
-       Enhanced group object management
-       Enhanced attribute management and more efficient meta data handling
-       Expanded datatype features
-       Creation order tracking and indexing
-       Improved meta data caching and cache control
-       UTF-8 encoding
-       New I/O filters: n-bit and scale+offset compression
-       New link (H5L) and object (H5O) interfaces and features
-       External and user-defined links
-       New high-level APIs: 
-           HDF5 Packet Table (H5PT) and HDF5 Dimension Scale (H5DS)
-       C++ and Fortran interfaces for older high-level APIs:
-           H5Lite (H5LT), H5Image (H5IM), and H5Table (H5TB)
-       New and improved tools
-       And more...
+	Library
+	-------
 
-       http://hdfgroup.org/HDF5/doc/ADGuide/WhatsNew180.html
+	Parallel Library
+	----------------
+
+	Tools
+	-----
+
+	F90 API
+	------
+
+	C++ API
+	------
 
 
-    New APIs associated with these features, other interface changes 
-    (e.g., ENUM and struct definitions), and new library configuration flags
-    are listed in the "Release 1.8.0 (current release) versus Release 1.6.x" 
-    section of "HDF5 Software Changes from Release to Release."
-
-        http://hdfgroup.org/HDF5/doc/ADGuide/Changes.html
-
-Compatibility
--------------
-    Many HDF5 users and user communities have existing applications that 
-    they may wish to port to Release 1.8.0.  Alternatively, some users may 
-    wish to take advantage of Release 1.8.0's improved performance without
-    having to port such applications.  To facilitate managing application
-    compatibility and porting applications from release to release, the HDF 
-    Team has implemented the following features:
-        Individually-configurable macros that selectively map common 
-            interface names to the old and new interfaces
-        Library configuration options to configure the macro mappings
-
-    Two related documents accompany this release:
-        "API Compatibility Macros in HDF5" discusses the specifics of the 
-        new individually-configurable macros and library configuration 
-        options.
-        http://hdfgroup.org/HDF5/doc/RM/APICompatMacros.html
- 
-        "New Features in HDF5 Release 1.8.0 and Backward/Forward Format
-        Compatibility Issues" discusses each new feature with regard to 
-        its impact on format compatibility.
-        http://hdfgroup.org/HDF5/doc/ADGuide/CompatFormat180.html
-
-Referenced documents
---------------------
-    http://hdfgroup.org/HDF5/doc/ADGuide/WhatsNew180.html
-        "What's New in HDF5 1.8.0"
-
-    http://hdfgroup.org/HDF5/doc/ADGuide/Changes.html
-        The "Release 1.8.0 (current release) versus Release 1.6.x "
-        section in "HDF5 Software Changes from Release to Release"
-
-    http://hdfgroup.org/HDF5/doc/RM/APICompatMacros.html
-        "API Compatibility Macros in HDF5"
-
-    http://hdfgroup.org/HDF5/doc/ADGuide/CompatFormat180.html
-        "New Features in HDF5 Release 1.8.0 and Backward/Forward Format
-        Compatibility Issues"
-
-
-Removed Feature
-===============
-The stream virtual file driver (H5FD_STREAM) have been removed in this 
-release. This affects the functions H5Pset_fapl_stream and H5Pget_fapl_stream 
-and the constant H5FD_STREAM.
-
-This virtual file driver will be available at 
-http://hdf5-addons.origo.ethz.ch/. Note that at the time of this release, 
-the transition is still in progress; the necessary integration tools may 
-not be available when HDF5 Release 1.8.0 first comes out.
 
 
 Support for New Platforms, Languages, and Compilers
 ===================================================
-    - Support for Open VMS 7.3 was added.
 
 
-Bug Fixes since HDF5-1.6.0 
+Bug Fixes since HDF5-1.8.0 
 ==========================
-    This release contains numerous bug fixes. For details, see the 
-    "Changes from 1.6.0 to 1.8.0-rc3" section of the HISTORY.txt file for
-    this release.
 
 
 Platforms Tested
