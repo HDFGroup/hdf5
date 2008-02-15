@@ -18,4 +18,6 @@
 # latest revision of that branch.  If set to "hdf5", it uses the main
 # version.
 # H5VER tells runtest which version to run
-H5VERSION=hdf5
+H5VERSION=hdf5_1_8
+H5VER="-r1.8"
+
