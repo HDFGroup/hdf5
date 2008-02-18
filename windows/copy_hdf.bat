@@ -17,15 +17,15 @@ rem Purpose     : Copy all Files in the following formats from Windows to
 rem               approapriate directory: .bat .c .f90 .h .txt .js 
 rem             : 
 rem Written By  : Muqun Yang
-rem Last Update : November 17, 2007 by Scott Wegner
+rem Last Update : 2/18/08 by Scott Wegner
 
 pushd %~dp0
 
-copy src\H5Tinit.c ..\src
-copy src\H5pubconf.h ..\src
-copy fortran\src\H5f90i_gen.h ..\fortran\src
-copy fortran\src\H5fortran_types.f90 ..\fortran\src
-xcopy /e/i/Y *.bat ..\
-copy examples\testExamples_exp_output.txt ..\examples
+copy /y src\H5Tinit.c ..\src > nul
+copy /y src\H5pubconf.h ..\src > nul
+copy /y fortran\src\H5f90i_gen.h ..\fortran\src > nul
+copy /y fortran\src\H5fortran_types.f90 ..\fortran\src > nul
+xcopy /s /i /y *.bat ..\ > nul
+copy /y examples\testExamples_exp_output.txt ..\examples > nul
 
 popd
