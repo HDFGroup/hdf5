@@ -168,5 +168,5 @@ goto main
     )
     
     popd
-    endlocal & exit /b %nerrors%
+    endlocal & exit /b %errors%
     
