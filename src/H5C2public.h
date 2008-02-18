@@ -41,6 +41,13 @@ enum H5C2_cache_incr_mode
     H5C2_incr__threshold
 };
 
+enum H5C2_cache_flash_incr_mode
+{
+     H5C2_flash_incr__off,
+     H5C2_flash_incr__add_space
+};
+
+
 enum H5C2_cache_decr_mode
 {
     H5C2_decr__off,

@@ -52,6 +52,9 @@ const char *FILENAMES[] = {
   ( (a).increment              == (b).increment ) &&              \
   ( (a).apply_max_increment    == (b).apply_max_increment ) &&    \
   ( (a).max_increment          == (b).max_increment ) &&          \
+  ( (a).flash_incr_mode        == (b).flash_incr_mode ) &&        \
+  ( (a).flash_multiple         == (b).flash_multiple ) &&         \
+  ( (a).flash_threshold        == (b).flash_threshold ) &&        \
   ( (a).decr_mode              == (b).decr_mode ) &&              \
   ( (a).upper_hr_threshold     == (b).upper_hr_threshold ) &&     \
   ( (a).decrement              == (b).decrement ) &&              \
@@ -145,6 +148,9 @@ static void check_file_mdc_api_errs(void);
     ( (a).increment              == (b).increment ) &&               \
     ( (a).apply_max_increment    == (b).apply_max_increment ) &&     \
     ( (a).max_increment          == (b).max_increment ) &&           \
+    ( (a).flash_incr_mode        == (b).flash_incr_mode ) &&         \
+    ( (a).flash_multiple         == (b).flash_multiple ) &&          \
+    ( (a).flash_threshold        == (b).flash_threshold ) &&         \
     ( (a).decr_mode              == (b).decr_mode ) &&               \
     ( (a).upper_hr_threshold     == (b).upper_hr_threshold ) &&      \
     ( (a).decrement              == (b).decrement ) &&               \
@@ -172,6 +178,9 @@ static void check_file_mdc_api_errs(void);
     (i).increment              = (e).increment;                     \
     (i).apply_max_increment    = (e).apply_max_increment;           \
     (i).max_increment          = (e).max_increment;                 \
+    (i).flash_incr_mode        = (e).flash_incr_mode;               \
+    (i).flash_multiple         = (e).flash_multiple;                \
+    (i).flash_threshold        = (e).flash_threshold;               \
     (i).decr_mode              = (e).decr_mode;                     \
     (i).upper_hr_threshold     = (e).upper_hr_threshold;            \
     (i).decrement              = (e).decrement;                     \
@@ -198,31 +207,35 @@ check_fapl_mdc_api_calls(void)
     {
       /* int         version                = */
                                               H5AC2__CURR_CACHE_CONFIG_VERSION,
-      /* hbool_t     rpt_fcn_enabled        = */ FALSE,
-      /* hbool_t     open_trace_file        = */ FALSE,
-      /* hbool_t     close_trace_file       = */ FALSE,
-      /* char        trace_file_name[]      = */ "",
-      /* hbool_t     evictions_enabled      = */ TRUE,
-      /* hbool_t     set_initial_size       = */ TRUE,
-      /* size_t      initial_size           = */ (1 * 1024 * 1024 + 1),
-      /* double      min_clean_fraction     = */ 0.2,
-      /* size_t      max_size               = */ (16 * 1024 * 1024 + 1),
-      /* size_t      min_size               = */ ( 1 * 1024 * 1024 + 1),
-      /* long int    epoch_length           = */ 50001,
+      /* hbool_t     rpt_fcn_enabled         = */ FALSE,
+      /* hbool_t     open_trace_file         = */ FALSE,
+      /* hbool_t     close_trace_file        = */ FALSE,
+      /* char        trace_file_name[]       = */ "",
+      /* hbool_t     evictions_enabled       = */ TRUE,
+      /* hbool_t     set_initial_size        = */ TRUE,
+      /* size_t      initial_size            = */ (1 * 1024 * 1024 + 1),
+      /* double      min_clean_fraction      = */ 0.2,
+      /* size_t      max_size                = */ (16 * 1024 * 1024 + 1),
+      /* size_t      min_size                = */ ( 1 * 1024 * 1024 + 1),
+      /* long int    epoch_length            = */ 50001,
       /* enum H5C2_cache_incr_mode incr_mode = */ H5C2_incr__threshold,
-      /* double      lower_hr_threshold     = */ 0.91,
-      /* double      increment              = */ 2.1,
-      /* hbool_t     apply_max_increment    = */ TRUE,
-      /* size_t      max_increment          = */ (4 * 1024 * 1024 + 1),
+      /* double      lower_hr_threshold      = */ 0.91,
+      /* double      increment               = */ 2.1,
+      /* hbool_t     apply_max_increment     = */ TRUE,
+      /* size_t      max_increment           = */ (4 * 1024 * 1024 + 1),
+      /* enum H5C2_cache_flash_incr_mode       */
+      /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+      /* double      flash_multiple          = */ 2.0,
+      /* double      flash_threshold         = */ 0.5,
       /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out,
-      /* double      upper_hr_threshold     = */ 0.998,
-      /* double      decrement              = */ 0.91,
-      /* hbool_t     apply_max_decrement    = */ TRUE,
-      /* size_t      max_decrement          = */ (1 * 1024 * 1024 - 1),
-      /* int         epochs_before_eviction = */ 4,
-      /* hbool_t     apply_empty_reserve    = */ TRUE,
-      /* double      empty_reserve          = */ 0.05,
-      /* int         dirty_bytes_threshold  = */ (256 * 1024)
+      /* double      upper_hr_threshold      = */ 0.998,
+      /* double      decrement               = */ 0.91,
+      /* hbool_t     apply_max_decrement     = */ TRUE,
+      /* size_t      max_decrement           = */ (1 * 1024 * 1024 - 1),
+      /* int         epochs_before_eviction  = */ 4,
+      /* hbool_t     apply_empty_reserve     = */ TRUE,
+      /* double      empty_reserve           = */ 0.05,
+      /* int         dirty_bytes_threshold   = */ (256 * 1024)
     };
     H5AC2_cache_config_t scratch;
     H5C2_auto_size_ctl_t default_auto_size_ctl;
@@ -732,7 +745,7 @@ validate_mdc_config(hid_t file_id,
         /* Recall that in any configuration supplied by the cache
          * at run time, the set_initial_size field will always
          * be FALSE, regardless of the value pass2ed in.  Thus we
-         * always resume that this field need not match that of
+         * always presume that this field need not match that of
          * the supplied external configuration.
          *
          * The cache also sets the initial_size field to the current
@@ -794,120 +807,136 @@ check_file_mdc_api_calls(void)
     H5AC2_cache_config_t default_config = H5AC2__DEFAULT_CACHE_CONFIG;
     H5AC2_cache_config_t mod_config_1 =
     {
-      /* int         version                = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
-      /* hbool_t     rpt_fcn_enabled        = */ FALSE,
-      /* hbool_t     open_trace_file        = */ FALSE,
-      /* hbool_t     close_trace_file       = */ FALSE,
-      /* char        trace_file_name[]      = */ "",
-      /* hbool_t     evictions_enabled      = */ TRUE,
-      /* hbool_t     set_initial_size       = */ TRUE,
-      /* size_t      initial_size           = */ (1 * 1024 * 1024 + 1),
-      /* double      min_clean_fraction     = */ 0.2,
-      /* size_t      max_size               = */ (16 * 1024 * 1024 + 1),
-      /* size_t      min_size               = */ ( 1 * 1024 * 1024 + 1),
-      /* long int    epoch_length           = */ 50001,
+      /* int         version                 = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
+      /* hbool_t     rpt_fcn_enabled         = */ FALSE,
+      /* hbool_t     open_trace_file         = */ FALSE,
+      /* hbool_t     close_trace_file        = */ FALSE,
+      /* char        trace_file_name[]       = */ "",
+      /* hbool_t     evictions_enabled       = */ TRUE,
+      /* hbool_t     set_initial_size        = */ TRUE,
+      /* size_t      initial_size            = */ (1 * 1024 * 1024 + 1),
+      /* double      min_clean_fraction      = */ 0.2,
+      /* size_t      max_size                = */ (16 * 1024 * 1024 + 1),
+      /* size_t      min_size                = */ ( 1 * 1024 * 1024 + 1),
+      /* long int    epoch_length            = */ 50001,
       /* enum H5C2_cache_incr_mode incr_mode = */ H5C2_incr__threshold,
-      /* double      lower_hr_threshold     = */ 0.91,
-      /* double      increment              = */ 2.1,
-      /* hbool_t     apply_max_increment    = */ TRUE,
-      /* size_t      max_increment          = */ (4 * 1024 * 1024 + 1),
+      /* double      lower_hr_threshold      = */ 0.91,
+      /* double      increment               = */ 2.1,
+      /* hbool_t     apply_max_increment     = */ TRUE,
+      /* size_t      max_increment           = */ (4 * 1024 * 1024 + 1),
+      /* enum H5C2_cache_flash_incr_mode       */
+      /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+      /* double      flash_multiple          = */ 2.0,
+      /* double      flash_threshold         = */ 0.5,
       /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out,
-      /* double      upper_hr_threshold     = */ 0.998,
-      /* double      decrement              = */ 0.91,
-      /* hbool_t     apply_max_decrement    = */ TRUE,
-      /* size_t      max_decrement          = */ (1 * 1024 * 1024 - 1),
-      /* int         epochs_before_eviction = */ 4,
-      /* hbool_t     apply_empty_reserve    = */ TRUE,
-      /* double      empty_reserve          = */ 0.05,
-      /* int         dirty_bytes_threshold  = */ (256 * 1024)
+      /* double      upper_hr_threshold      = */ 0.998,
+      /* double      decrement               = */ 0.91,
+      /* hbool_t     apply_max_decrement     = */ TRUE,
+      /* size_t      max_decrement           = */ (1 * 1024 * 1024 - 1),
+      /* int         epochs_before_eviction  = */ 4,
+      /* hbool_t     apply_empty_reserve     = */ TRUE,
+      /* double      empty_reserve           = */ 0.05,
+      /* int         dirty_bytes_threshold   = */ (256 * 1024)
     };
     H5AC2_cache_config_t mod_config_2 =
     {
-      /* int         version                = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
-      /* hbool_t     rpt_fcn_enabled        = */ TRUE,
-      /* hbool_t     open_trace_file        = */ FALSE,
-      /* hbool_t     close_trace_file       = */ FALSE,
-      /* char        trace_file_name[]      = */ "",
-      /* hbool_t     evictions_enabled      = */ TRUE,
-      /* hbool_t     set_initial_size       = */ TRUE,
-      /* size_t      initial_size           = */ (512 * 1024),
-      /* double      min_clean_fraction     = */ 0.1,
-      /* size_t      max_size               = */ ( 8 * 1024 * 1024),
-      /* size_t      min_size               = */ (      512 * 1024),
-      /* long int    epoch_length           = */ 25000,
+      /* int         version                 = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
+      /* hbool_t     rpt_fcn_enabled         = */ TRUE,
+      /* hbool_t     open_trace_file         = */ FALSE,
+      /* hbool_t     close_trace_file        = */ FALSE,
+      /* char        trace_file_name[]       = */ "",
+      /* hbool_t     evictions_enabled       = */ TRUE,
+      /* hbool_t     set_initial_size        = */ TRUE,
+      /* size_t      initial_size            = */ (512 * 1024),
+      /* double      min_clean_fraction      = */ 0.1,
+      /* size_t      max_size                = */ ( 8 * 1024 * 1024),
+      /* size_t      min_size                = */ (      512 * 1024),
+      /* long int    epoch_length            = */ 25000,
       /* enum H5C2_cache_incr_mode incr_mode = */ H5C2_incr__threshold,
-      /* double      lower_hr_threshold     = */ 0.9,
-      /* double      increment              = */ 2.0,
-      /* hbool_t     apply_max_increment    = */ TRUE,
-      /* size_t      max_increment          = */ (2 * 1024 * 1024),
+      /* double      lower_hr_threshold      = */ 0.9,
+      /* double      increment               = */ 2.0,
+      /* hbool_t     apply_max_increment     = */ TRUE,
+      /* size_t      max_increment           = */ (2 * 1024 * 1024),
+      /* enum H5C2_cache_flash_incr_mode       */
+      /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+      /* double      flash_multiple          = */ 2.0,
+      /* double      flash_threshold         = */ 0.5,
       /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__threshold,
-      /* double      upper_hr_threshold     = */ 0.9995,
-      /* double      decrement              = */ 0.95,
-      /* hbool_t     apply_max_decrement    = */ TRUE,
-      /* size_t      max_decrement          = */ (512 * 1024),
-      /* int         epochs_before_eviction = */ 4,
-      /* hbool_t     apply_empty_reserve    = */ TRUE,
-      /* double      empty_reserve          = */ 0.05,
-      /* int         dirty_bytes_threshold  = */ (256 * 1024)
+      /* double      upper_hr_threshold      = */ 0.9995,
+      /* double      decrement               = */ 0.95,
+      /* hbool_t     apply_max_decrement     = */ TRUE,
+      /* size_t      max_decrement           = */ (512 * 1024),
+      /* int         epochs_before_eviction  = */ 4,
+      /* hbool_t     apply_empty_reserve     = */ TRUE,
+      /* double      empty_reserve           = */ 0.05,
+      /* int         dirty_bytes_threshold   = */ (256 * 1024)
     };
     H5AC2_cache_config_t mod_config_3 =
     {
-      /* int         version                = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
-      /* hbool_t     rpt_fcn_enabled        = */ FALSE,
-      /* hbool_t     open_trace_file        = */ FALSE,
-      /* hbool_t     close_trace_file       = */ FALSE,
-      /* char        trace_file_name[]      = */ "",
-      /* hbool_t     evictions_enabled      = */ TRUE,
-      /* hbool_t     set_initial_size       = */ TRUE,
-      /* size_t      initial_size           = */ (1 * 1024 * 1024),
-      /* double      min_clean_fraction     = */ 0.2,
-      /* size_t      max_size               = */ (16 * 1024 * 1024),
-      /* size_t      min_size               = */ ( 1 * 1024 * 1024),
-      /* long int    epoch_length           = */ 50000,
+      /* int         version                 = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
+      /* hbool_t     rpt_fcn_enabled         = */ FALSE,
+      /* hbool_t     open_trace_file         = */ FALSE,
+      /* hbool_t     close_trace_file        = */ FALSE,
+      /* char        trace_file_name[]       = */ "",
+      /* hbool_t     evictions_enabled       = */ TRUE,
+      /* hbool_t     set_initial_size        = */ TRUE,
+      /* size_t      initial_size            = */ (1 * 1024 * 1024),
+      /* double      min_clean_fraction      = */ 0.2,
+      /* size_t      max_size                = */ (16 * 1024 * 1024),
+      /* size_t      min_size                = */ ( 1 * 1024 * 1024),
+      /* long int    epoch_length            = */ 50000,
       /* enum H5C2_cache_incr_mode incr_mode = */ H5C2_incr__off,
-      /* double      lower_hr_threshold     = */ 0.90,
-      /* double      increment              = */ 2.0,
-      /* hbool_t     apply_max_increment    = */ TRUE,
-      /* size_t      max_increment          = */ (4 * 1024 * 1024),
+      /* double      lower_hr_threshold      = */ 0.90,
+      /* double      increment               = */ 2.0,
+      /* hbool_t     apply_max_increment     = */ TRUE,
+      /* size_t      max_increment           = */ (4 * 1024 * 1024),
+      /* enum H5C2_cache_flash_incr_mode       */
+      /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+      /* double      flash_multiple          = */ 2.0,
+      /* double      flash_threshold         = */ 0.5,
       /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__off,
-      /* double      upper_hr_threshold     = */ 0.999,
-      /* double      decrement              = */ 0.9,
-      /* hbool_t     apply_max_decrement    = */ FALSE,
-      /* size_t      max_decrement          = */ (1 * 1024 * 1024 - 1),
-      /* int         epochs_before_eviction = */ 3,
-      /* hbool_t     apply_empty_reserve    = */ FALSE,
-      /* double      empty_reserve          = */ 0.05,
-      /* int         dirty_bytes_threshold  = */ (256 * 1024)
+      /* double      upper_hr_threshold      = */ 0.999,
+      /* double      decrement               = */ 0.9,
+      /* hbool_t     apply_max_decrement     = */ FALSE,
+      /* size_t      max_decrement           = */ (1 * 1024 * 1024 - 1),
+      /* int         epochs_before_eviction  = */ 3,
+      /* hbool_t     apply_empty_reserve     = */ FALSE,
+      /* double      empty_reserve           = */ 0.05,
+      /* int         dirty_bytes_threshold   = */ (256 * 1024)
     };
     H5AC2_cache_config_t mod_config_4 =
     {
-      /* int         version                = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
-      /* hbool_t     rpt_fcn_enabled        = */ FALSE,
-      /* hbool_t     open_trace_file        = */ FALSE,
-      /* hbool_t     close_trace_file       = */ FALSE,
-      /* char        trace_file_name[]      = */ "",
-      /* hbool_t     evictions_enabled      = */ TRUE,
-      /* hbool_t     set_initial_size       = */ TRUE,
-      /* size_t      initial_size           = */ (1 * 1024 * 1024),
-      /* double      min_clean_fraction     = */ 0.15,
-      /* size_t      max_size               = */ (20 * 1024 * 1024),
-      /* size_t      min_size               = */ ( 1 * 1024 * 1024),
-      /* long int    epoch_length           = */ 75000,
+      /* int         version                 = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
+      /* hbool_t     rpt_fcn_enabled         = */ FALSE,
+      /* hbool_t     open_trace_file         = */ FALSE,
+      /* hbool_t     close_trace_file        = */ FALSE,
+      /* char        trace_file_name[]       = */ "",
+      /* hbool_t     evictions_enabled       = */ TRUE,
+      /* hbool_t     set_initial_size        = */ TRUE,
+      /* size_t      initial_size            = */ (1 * 1024 * 1024),
+      /* double      min_clean_fraction      = */ 0.15,
+      /* size_t      max_size                = */ (20 * 1024 * 1024),
+      /* size_t      min_size                = */ ( 1 * 1024 * 1024),
+      /* long int    epoch_length            = */ 75000,
       /* enum H5C2_cache_incr_mode incr_mode = */ H5C2_incr__threshold,
-      /* double      lower_hr_threshold     = */ 0.9,
-      /* double      increment              = */ 2.0,
-      /* hbool_t     apply_max_increment    = */ TRUE,
-      /* size_t      max_increment          = */ (2 * 1024 * 1024),
+      /* double      lower_hr_threshold      = */ 0.9,
+      /* double      increment               = */ 2.0,
+      /* hbool_t     apply_max_increment     = */ TRUE,
+      /* size_t      max_increment           = */ (2 * 1024 * 1024),
+      /* enum H5C2_cache_flash_incr_mode       */
+      /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+      /* double      flash_multiple          = */ 2.0,
+      /* double      flash_threshold         = */ 0.5,
       /* enum H5C2_cache_decr_mode decr_mode = */
                                                H5C2_decr__age_out_with_threshold,
-      /* double      upper_hr_threshold     = */ 0.999,
-      /* double      decrement              = */ 0.9,
-      /* hbool_t     apply_max_decrement    = */ TRUE,
-      /* size_t      max_decrement          = */ (1 * 1024 * 1024),
-      /* int         epochs_before_eviction = */ 3,
-      /* hbool_t     apply_empty_reserve    = */ TRUE,
-      /* double      empty_reserve          = */ 0.1,
-      /* int         dirty_bytes_threshold  = */ (256 * 1024)
+      /* double      upper_hr_threshold      = */ 0.999,
+      /* double      decrement               = */ 0.9,
+      /* hbool_t     apply_max_decrement     = */ TRUE,
+      /* size_t      max_decrement           = */ (1 * 1024 * 1024),
+      /* int         epochs_before_eviction  = */ 3,
+      /* hbool_t     apply_empty_reserve     = */ TRUE,
+      /* double      empty_reserve           = */ 0.1,
+      /* int         dirty_bytes_threshold   = */ (256 * 1024)
     };
 
     TESTING("MDC/FILE related API calls");
@@ -1420,93 +1449,114 @@ mdc_api_call_smoke_check(void)
     H5AC2_cache_config_t default_config = H5AC2__DEFAULT_CACHE_CONFIG;
     H5AC2_cache_config_t mod_config_1 =
     {
-      /* int         version                = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
-      /* hbool_t     rpt_fcn_enabled        = */ FALSE,
-      /* hbool_t     open_trace_file        = */ FALSE,
-      /* hbool_t     close_trace_file       = */ FALSE,
-      /* char        trace_file_name[]      = */ "",
-      /* hbool_t     evictions_enabled      = */ TRUE,
-      /* hbool_t     set_initial_size       = */ TRUE,
-      /* size_t      initial_size           = */ 500000,
-      /* double      min_clean_fraction     = */ 0.1,
-      /* size_t      max_size               = */ 16000000,
-      /* size_t      min_size               = */ 250000,
-      /* long int    epoch_length           = */ 50000,
+      /* int         version                 = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
+      /* hbool_t     rpt_fcn_enabled         = */ FALSE,
+      /* hbool_t     open_trace_file         = */ FALSE,
+      /* hbool_t     close_trace_file        = */ FALSE,
+      /* char        trace_file_name[]       = */ "",
+      /* hbool_t     evictions_enabled       = */ TRUE,
+      /* hbool_t     set_initial_size        = */ TRUE,
+      /* size_t      initial_size            = */ 500000,
+      /* double      min_clean_fraction      = */ 0.1,
+      /* size_t      max_size                = */ 16000000,
+      /* size_t      min_size                = */ 250000,
+      /* long int    epoch_length            = */ 50000,
       /* enum H5C2_cache_incr_mode incr_mode = */ H5C2_incr__off,
-      /* double      lower_hr_threshold     = */ 0.95,
-      /* double      increment              = */ 2.0,
-      /* hbool_t     apply_max_increment    = */ FALSE,
-      /* size_t      max_increment          = */ 4000000,
+      /* double      lower_hr_threshold      = */ 0.95,
+      /* double      increment               = */ 2.0,
+      /* hbool_t     apply_max_increment     = */ FALSE,
+      /* size_t      max_increment           = */ 4000000,
+      /* enum H5C2_cache_flash_incr_mode       */
+      /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+      /* double      flash_multiple          = */ 2.0,
+      /* double      flash_threshold         = */ 0.5,
       /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__off,
-      /* double      upper_hr_threshold     = */ 0.999,
-      /* double      decrement              = */ 0.9,
-      /* hbool_t     apply_max_decrement    = */ FALSE,
-      /* size_t      max_decrement          = */ 1000000,
-      /* int         epochs_before_eviction = */ 2,
-      /* hbool_t     apply_empty_reserve    = */ TRUE,
-      /* double      empty_reserve          = */ 0.05,
-      /* int         dirty_bytes_threshold  = */ (256 * 1024)
+      /* double      upper_hr_threshold      = */ 0.999,
+      /* double      decrement               = */ 0.9,
+      /* hbool_t     apply_max_decrement     = */ FALSE,
+      /* size_t      max_decrement           = */ 1000000,
+      /* int         epochs_before_eviction  = */ 2,
+      /* hbool_t     apply_empty_reserve     = */ TRUE,
+      /* double      empty_reserve           = */ 0.05,
+      /* int         dirty_bytes_threshold   = */ (256 * 1024)
     };
     H5AC2_cache_config_t mod_config_2 =
     {
-      /* int         version                = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
-      /* hbool_t     rpt_fcn_enabled        = */ FALSE,
-      /* hbool_t     open_trace_file        = */ FALSE,
-      /* hbool_t     close_trace_file       = */ FALSE,
-      /* char        trace_file_name[]      = */ "",
-      /* hbool_t     evictions_enabled      = */ TRUE,
-      /* hbool_t     set_initial_size       = */ TRUE,
-      /* size_t      initial_size           = */ 12000000,
-      /* double      min_clean_fraction     = */ 0.1,
-      /* size_t      max_size               = */ 16000000,
-      /* size_t      min_size               = */ 250000,
-      /* long int    epoch_length           = */ 50000,
+      /* int         version                 = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
+      /* hbool_t     rpt_fcn_enabled         = */ FALSE,
+      /* hbool_t     open_trace_file         = */ FALSE,
+      /* hbool_t     close_trace_file        = */ FALSE,
+      /* char        trace_file_name[]       = */ "",
+      /* hbool_t     evictions_enabled       = */ TRUE,
+      /* hbool_t     set_initial_size        = */ TRUE,
+      /* size_t      initial_size            = */ 12000000,
+      /* double      min_clean_fraction      = */ 0.1,
+      /* size_t      max_size                = */ 16000000,
+      /* size_t      min_size                = */ 250000,
+      /* long int    epoch_length            = */ 50000,
       /* enum H5C2_cache_incr_mode incr_mode = */ H5C2_incr__off,
-      /* double      lower_hr_threshold     = */ 0.95,
-      /* double      increment              = */ 2.0,
-      /* hbool_t     apply_max_increment    = */ FALSE,
-      /* size_t      max_increment          = */ 4000000,
+      /* double      lower_hr_threshold      = */ 0.95,
+      /* double      increment               = */ 2.0,
+      /* hbool_t     apply_max_increment     = */ FALSE,
+      /* size_t      max_increment           = */ 4000000,
+      /* enum H5C2_cache_flash_incr_mode       */
+      /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+      /* double      flash_multiple          = */ 2.0,
+      /* double      flash_threshold         = */ 0.5,
       /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__off,
-      /* double      upper_hr_threshold     = */ 0.999,
-      /* double      decrement              = */ 0.9,
-      /* hbool_t     apply_max_decrement    = */ FALSE,
-      /* size_t      max_decrement          = */ 1000000,
-      /* int         epochs_before_eviction = */ 2,
-      /* hbool_t     apply_empty_reserve    = */ TRUE,
-      /* double      empty_reserve          = */ 0.05,
-      /* int         dirty_bytes_threshold  = */ (256 * 1024)
+      /* double      upper_hr_threshold      = */ 0.999,
+      /* double      decrement               = */ 0.9,
+      /* hbool_t     apply_max_decrement     = */ FALSE,
+      /* size_t      max_decrement           = */ 1000000,
+      /* int         epochs_before_eviction  = */ 2,
+      /* hbool_t     apply_empty_reserve     = */ TRUE,
+      /* double      empty_reserve           = */ 0.05,
+      /* int         dirty_bytes_threshold   = */ (256 * 1024)
     };
     H5AC2_cache_config_t mod_config_3 =
     {
-      /* int         version                = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
-      /* hbool_t     rpt_fcn_enabled        = */ FALSE,
-      /* hbool_t     open_trace_file        = */ FALSE,
-      /* hbool_t     close_trace_file       = */ FALSE,
-      /* char        trace_file_name[]      = */ "",
-      /* hbool_t     evictions_enabled      = */ TRUE,
-      /* hbool_t     set_initial_size       = */ TRUE,
-      /* size_t      initial_size           = */ 2000000,
-      /* double      min_clean_fraction     = */ 0.1,
-      /* size_t      max_size               = */ 16000000,
-      /* size_t      min_size               = */ 250000,
-      /* long int    epoch_length           = */ 50000,
+      /* int         version                 = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
+      /* hbool_t     rpt_fcn_enabled         = */ FALSE,
+      /* hbool_t     open_trace_file         = */ FALSE,
+      /* hbool_t     close_trace_file        = */ FALSE,
+      /* char        trace_file_name[]       = */ "",
+      /* hbool_t     evictions_enabled       = */ TRUE,
+      /* hbool_t     set_initial_size        = */ TRUE,
+      /* size_t      initial_size            = */ 2000000,
+      /* double      min_clean_fraction      = */ 0.1,
+      /* size_t      max_size                = */ 16000000,
+      /* size_t      min_size                = */ 250000,
+      /* long int    epoch_length            = */ 50000,
       /* enum H5C2_cache_incr_mode incr_mode = */ H5C2_incr__off,
-      /* double      lower_hr_threshold     = */ 0.95,
-      /* double      increment              = */ 2.0,
-      /* hbool_t     apply_max_increment    = */ FALSE,
-      /* size_t      max_increment          = */ 4000000,
+      /* double      lower_hr_threshold      = */ 0.95,
+      /* double      increment               = */ 2.0,
+      /* hbool_t     apply_max_increment     = */ FALSE,
+      /* size_t      max_increment           = */ 4000000,
+      /* enum H5C2_cache_flash_incr_mode       */
+      /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+      /* double      flash_multiple          = */ 2.0,
+      /* double      flash_threshold         = */ 0.5,
       /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__off,
-      /* double      upper_hr_threshold     = */ 0.999,
-      /* double      decrement              = */ 0.9,
-      /* hbool_t     apply_max_decrement    = */ FALSE,
-      /* size_t      max_decrement          = */ 1000000,
-      /* int         epochs_before_eviction = */ 2,
-      /* hbool_t     apply_empty_reserve    = */ TRUE,
-      /* double      empty_reserve          = */ 0.05,
-      /* int         dirty_bytes_threshold  = */ (256 * 1024)
+      /* double      upper_hr_threshold      = */ 0.999,
+      /* double      decrement               = */ 0.9,
+      /* hbool_t     apply_max_decrement     = */ FALSE,
+      /* size_t      max_decrement           = */ 1000000,
+      /* int         epochs_before_eviction  = */ 2,
+      /* hbool_t     apply_empty_reserve     = */ TRUE,
+      /* double      empty_reserve           = */ 0.05,
+      /* int         dirty_bytes_threshold   = */ (256 * 1024)
     };
 
     TESTING("MDC API smoke check");
+
+    if ( express_test > 0 ) {
+
+        SKIPPED();
+
+        HDfprintf(stdout, "     Long tests disabled.\n");
+
+        return;
+    }
 
     pass2 = TRUE;
 
@@ -2145,7 +2195,7 @@ mdc_api_call_smoke_check(void)
  * used to test error rejection in the MDC related API calls.
  */
 
-#define NUM_INVALID_CONFIGS	36
+#define NUM_INVALID_CONFIGS	41
 
 H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
 {
@@ -2168,6 +2218,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
@@ -2197,6 +2251,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
@@ -2226,6 +2284,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
@@ -2255,6 +2317,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
@@ -2284,6 +2350,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
@@ -2313,6 +2383,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
@@ -2342,6 +2416,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
@@ -2371,6 +2449,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
@@ -2400,6 +2482,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
@@ -2429,6 +2515,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
@@ -2458,6 +2548,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
@@ -2487,6 +2581,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
@@ -2516,6 +2614,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
@@ -2545,6 +2647,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
@@ -2574,6 +2680,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
@@ -2603,6 +2713,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
@@ -2632,6 +2746,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
@@ -2661,6 +2779,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
@@ -2690,6 +2812,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 0.999999999999,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
@@ -2719,6 +2845,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ (hbool_t)-1,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
@@ -2730,7 +2860,172 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
-    /* 20 -- bad decr_mode */
+    /* 20 -- invalid flash_incr_mode */
+    /* int         version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
+    /* hbool_t     rpt_fcn_enabled        = */ FALSE,
+    /* hbool_t     open_trace_file        = */ FALSE,
+    /* hbool_t     close_trace_file       = */ FALSE,
+    /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
+    /* hbool_t     set_initial_size       = */ TRUE,
+    /* size_t      initial_size           = */ (1 * 1024 * 1024),
+    /* double      min_clean_fraction     = */ 0.25,
+    /* size_t      max_size               = */ (16 * 1024 * 1024),
+    /* size_t      min_size               = */ ( 1 * 1024 * 1024),
+    /* long int    epoch_length           = */ 50000,
+    /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,
+    /* double      lower_hr_threshold     = */ 0.9,
+    /* double      increment              = */ 2.0,
+    /* hbool_t     apply_max_increment    = */ TRUE,
+    /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C_cache_flash_incr_mode       */
+    /*                    flash_incr_mode = */ -1,
+    /* double      flash_multiple         = */ 2.0,
+    /* double      flash_threshold        = */ 0.5,
+    /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__age_out_with_threshold,
+    /* double      upper_hr_threshold     = */ 0.999,
+    /* double      decrement              = */ 0.9,
+    /* hbool_t     apply_max_decrement    = */ TRUE,
+    /* size_t      max_decrement          = */ (1 * 1024 * 1024),
+    /* int         epochs_before_eviction = */ 3,
+    /* hbool_t     apply_empty_reserve    = */ TRUE,
+    /* double      empty_reserve          = */ 0.1,
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
+  },
+  {
+    /* 21 -- flash_multiple too small */
+    /* int         version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
+    /* hbool_t     rpt_fcn_enabled        = */ FALSE,
+    /* hbool_t     open_trace_file        = */ FALSE,
+    /* hbool_t     close_trace_file       = */ FALSE,
+    /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
+    /* hbool_t     set_initial_size       = */ TRUE,
+    /* size_t      initial_size           = */ (1 * 1024 * 1024),
+    /* double      min_clean_fraction     = */ 0.25,
+    /* size_t      max_size               = */ (16 * 1024 * 1024),
+    /* size_t      min_size               = */ ( 1 * 1024 * 1024),
+    /* long int    epoch_length           = */ 50000,
+    /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,
+    /* double      lower_hr_threshold     = */ 0.9,
+    /* double      increment              = */ 2.0,
+    /* hbool_t     apply_max_increment    = */ TRUE,
+    /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C_cache_flash_incr_mode       */
+    /*                    flash_incr_mode = */ H5C_flash_incr__add_space,
+    /* double      flash_multiple         = */ 0.09,
+    /* double      flash_threshold        = */ 0.5,
+    /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__age_out_with_threshold,
+    /* double      upper_hr_threshold     = */ 0.999,
+    /* double      decrement              = */ 0.9,
+    /* hbool_t     apply_max_decrement    = */ TRUE,
+    /* size_t      max_decrement          = */ (1 * 1024 * 1024),
+    /* int         epochs_before_eviction = */ 3,
+    /* hbool_t     apply_empty_reserve    = */ TRUE,
+    /* double      empty_reserve          = */ 0.1,
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
+  },
+  {
+    /* 22 -- flash_multiple too big */
+    /* int         version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
+    /* hbool_t     rpt_fcn_enabled        = */ FALSE,
+    /* hbool_t     open_trace_file        = */ FALSE,
+    /* hbool_t     close_trace_file       = */ FALSE,
+    /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
+    /* hbool_t     set_initial_size       = */ TRUE,
+    /* size_t      initial_size           = */ (1 * 1024 * 1024),
+    /* double      min_clean_fraction     = */ 0.25,
+    /* size_t      max_size               = */ (16 * 1024 * 1024),
+    /* size_t      min_size               = */ ( 1 * 1024 * 1024),
+    /* long int    epoch_length           = */ 50000,
+    /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,
+    /* double      lower_hr_threshold     = */ 0.9,
+    /* double      increment              = */ 2.0,
+    /* hbool_t     apply_max_increment    = */ TRUE,
+    /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C_cache_flash_incr_mode       */
+    /*                    flash_incr_mode = */ H5C_flash_incr__add_space,
+    /* double      flash_multiple         = */ 10.001,
+    /* double      flash_threshold        = */ 0.5,
+    /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__age_out_with_threshold,
+    /* double      upper_hr_threshold     = */ 0.999,
+    /* double      decrement              = */ 0.9,
+    /* hbool_t     apply_max_decrement    = */ TRUE,
+    /* size_t      max_decrement          = */ (1 * 1024 * 1024),
+    /* int         epochs_before_eviction = */ 3,
+    /* hbool_t     apply_empty_reserve    = */ TRUE,
+    /* double      empty_reserve          = */ 0.1,
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
+  },
+  {
+    /* 23 -- flash_threshold too small */
+    /* int         version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
+    /* hbool_t     rpt_fcn_enabled        = */ FALSE,
+    /* hbool_t     open_trace_file        = */ FALSE,
+    /* hbool_t     close_trace_file       = */ FALSE,
+    /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
+    /* hbool_t     set_initial_size       = */ TRUE,
+    /* size_t      initial_size           = */ (1 * 1024 * 1024),
+    /* double      min_clean_fraction     = */ 0.25,
+    /* size_t      max_size               = */ (16 * 1024 * 1024),
+    /* size_t      min_size               = */ ( 1 * 1024 * 1024),
+    /* long int    epoch_length           = */ 50000,
+    /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,
+    /* double      lower_hr_threshold     = */ 0.9,
+    /* double      increment              = */ 2.0,
+    /* hbool_t     apply_max_increment    = */ TRUE,
+    /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C_cache_flash_incr_mode       */
+    /*                    flash_incr_mode = */ H5C_flash_incr__add_space,
+    /* double      flash_multiple         = */ 1.0,
+    /* double      flash_threshold        = */ 0.099,
+    /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__age_out_with_threshold,
+    /* double      upper_hr_threshold     = */ 0.999,
+    /* double      decrement              = */ 0.9,
+    /* hbool_t     apply_max_decrement    = */ TRUE,
+    /* size_t      max_decrement          = */ (1 * 1024 * 1024),
+    /* int         epochs_before_eviction = */ 3,
+    /* hbool_t     apply_empty_reserve    = */ TRUE,
+    /* double      empty_reserve          = */ 0.1,
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
+  },
+  {
+    /* 24 -- flash_threshold too big */
+    /* int         version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
+    /* hbool_t     rpt_fcn_enabled        = */ FALSE,
+    /* hbool_t     open_trace_file        = */ FALSE,
+    /* hbool_t     close_trace_file       = */ FALSE,
+    /* char        trace_file_name[]      = */ "",
+    /* hbool_t     evictions_enabled      = */ TRUE,
+    /* hbool_t     set_initial_size       = */ TRUE,
+    /* size_t      initial_size           = */ (1 * 1024 * 1024),
+    /* double      min_clean_fraction     = */ 0.25,
+    /* size_t      max_size               = */ (16 * 1024 * 1024),
+    /* size_t      min_size               = */ ( 1 * 1024 * 1024),
+    /* long int    epoch_length           = */ 50000,
+    /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,
+    /* double      lower_hr_threshold     = */ 0.9,
+    /* double      increment              = */ 2.0,
+    /* hbool_t     apply_max_increment    = */ TRUE,
+    /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C_cache_flash_incr_mode       */
+    /*                    flash_incr_mode = */ H5C_flash_incr__add_space,
+    /* double      flash_multiple         = */ 1.0,
+    /* double      flash_threshold        = */ 1.001,
+    /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__age_out_with_threshold,
+    /* double      upper_hr_threshold     = */ 0.999,
+    /* double      decrement              = */ 0.9,
+    /* hbool_t     apply_max_decrement    = */ TRUE,
+    /* size_t      max_decrement          = */ (1 * 1024 * 1024),
+    /* int         epochs_before_eviction = */ 3,
+    /* hbool_t     apply_empty_reserve    = */ TRUE,
+    /* double      empty_reserve          = */ 0.1,
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
+  },
+  {
+    /* 25 -- bad decr_mode */
     /* int         version                = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
     /* hbool_t     rpt_fcn_enabled        = */ FALSE,
     /* hbool_t     open_trace_file        = */ FALSE,
@@ -2748,6 +3043,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ -1,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
@@ -2759,7 +3058,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
-    /* 21 -- upper_hr_threshold too big */
+    /* 26 -- upper_hr_threshold too big */
     /* int         version                = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
     /* hbool_t     rpt_fcn_enabled        = */ FALSE,
     /* hbool_t     open_trace_file        = */ FALSE,
@@ -2777,6 +3076,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__threshold,
     /* double      upper_hr_threshold     = */ 1.00001,
     /* double      decrement              = */ 0.9,
@@ -2788,7 +3091,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
-    /* 22 -- decrement too small */
+    /* 27 -- decrement too small */
     /* int         version                = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
     /* hbool_t     rpt_fcn_enabled        = */ FALSE,
     /* hbool_t     open_trace_file        = */ FALSE,
@@ -2806,6 +3109,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ -0.0000000001,
@@ -2817,7 +3124,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
-    /* 23 -- decrement too big */
+    /* 28 -- decrement too big */
     /* int         version                = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
     /* hbool_t     rpt_fcn_enabled        = */ FALSE,
     /* hbool_t     open_trace_file        = */ FALSE,
@@ -2835,6 +3142,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 1.0000000001,
@@ -2846,7 +3157,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
-    /* 24 -- epochs_before_eviction too small */
+    /* 29 -- epochs_before_eviction too small */
     /* int         version                = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
     /* hbool_t     rpt_fcn_enabled        = */ FALSE,
     /* hbool_t     open_trace_file        = */ FALSE,
@@ -2864,6 +3175,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
@@ -2875,7 +3190,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
-    /* 24 -- epochs_before_eviction too big */
+    /* 30 -- epochs_before_eviction too big */
     /* int         version                = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
     /* hbool_t     rpt_fcn_enabled        = */ FALSE,
     /* hbool_t     open_trace_file        = */ FALSE,
@@ -2893,6 +3208,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
@@ -2904,7 +3223,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
-    /* 26 -- invalid apply_empty_reserve */
+    /* 31 -- invalid apply_empty_reserve */
     /* int         version                = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
     /* hbool_t     rpt_fcn_enabled        = */ FALSE,
     /* hbool_t     open_trace_file        = */ FALSE,
@@ -2922,6 +3241,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
@@ -2933,7 +3256,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
-    /* 27 -- empty_reserve too small */
+    /* 32 -- empty_reserve too small */
     /* int         version                = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
     /* hbool_t     rpt_fcn_enabled        = */ FALSE,
     /* hbool_t     open_trace_file        = */ FALSE,
@@ -2951,6 +3274,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
@@ -2962,7 +3289,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
-    /* 28 -- empty_reserve too big */
+    /* 33 -- empty_reserve too big */
     /* int         version                = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
     /* hbool_t     rpt_fcn_enabled        = */ FALSE,
     /* hbool_t     open_trace_file        = */ FALSE,
@@ -2980,6 +3307,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
@@ -2991,7 +3322,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
-    /* 29 -- upper_hr_threshold too small */
+    /* 34 -- upper_hr_threshold too small */
     /* int         version                = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
     /* hbool_t     rpt_fcn_enabled        = */ FALSE,
     /* hbool_t     open_trace_file        = */ FALSE,
@@ -3009,6 +3340,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ -0.000000001,
     /* double      decrement              = */ 0.9,
@@ -3020,7 +3355,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
-    /* 30 -- upper_hr_threshold too big */
+    /* 35 -- upper_hr_threshold too big */
     /* int         version                = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
     /* hbool_t     rpt_fcn_enabled        = */ FALSE,
     /* hbool_t     open_trace_file        = */ FALSE,
@@ -3038,6 +3373,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 1.00000001,
     /* double      decrement              = */ 0.9,
@@ -3049,7 +3388,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
-    /* 31 -- upper_hr_threshold <= lower_hr_threshold */
+    /* 36 -- upper_hr_threshold <= lower_hr_threshold */
     /* int         version                = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
     /* hbool_t     rpt_fcn_enabled        = */ FALSE,
     /* hbool_t     open_trace_file        = */ FALSE,
@@ -3067,6 +3406,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.9,
     /* double      decrement              = */ 0.9,
@@ -3078,7 +3421,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
-    /* 32 -- dirty_bytes_threshold too small */
+    /* 37 -- dirty_bytes_threshold too small */
     /* int         version                = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
     /* hbool_t     rpt_fcn_enabled        = */ FALSE,
     /* hbool_t     open_trace_file        = */ FALSE,
@@ -3096,6 +3439,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.999,
     /* double      decrement              = */ 0.9,
@@ -3107,7 +3454,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         dirty_bytes_threshold  = */ (H5C2__MIN_MAX_CACHE_SIZE / 2) - 1
   },
   {
-    /* 33 -- dirty_bytes_threshold too big */
+    /* 38 -- dirty_bytes_threshold too big */
     /* int         version                = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
     /* hbool_t     rpt_fcn_enabled        = */ FALSE,
     /* hbool_t     open_trace_file        = */ FALSE,
@@ -3125,6 +3472,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out_with_threshold,
     /* double      upper_hr_threshold     = */ 0.9,
     /* double      decrement              = */ 0.9,
@@ -3136,7 +3487,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         dirty_bytes_threshold  = */ (H5C2__MAX_MAX_CACHE_SIZE / 4) + 1
   },
   {
-    /* 34 -- attempt to disable evictions when auto incr enabled */
+    /* 39 -- attempt to disable evictions when auto incr enabled */
     /* int         version                = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
     /* hbool_t     rpt_fcn_enabled        = */ FALSE,
     /* hbool_t     open_trace_file        = */ FALSE,
@@ -3154,6 +3505,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__off,
     /* double      upper_hr_threshold     = */ 0.9,
     /* double      decrement              = */ 0.9,
@@ -3165,7 +3520,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
-    /* 35 -- attempt to disable evictions when auto decr enabled */
+    /* 40 -- attempt to disable evictions when auto decr enabled */
     /* int         version                = */ H5C2__CURR_AUTO_SIZE_CTL_VER,
     /* hbool_t     rpt_fcn_enabled        = */ FALSE,
     /* hbool_t     open_trace_file        = */ FALSE,
@@ -3183,6 +3538,10 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* double      increment              = */ 2.0,
     /* hbool_t     apply_max_increment    = */ TRUE,
     /* size_t      max_increment          = */ (4 * 1024 * 1024),
+    /* enum H5C2_cache_flash_incr_mode       */
+    /*                    flash_incr_mode  = */ H5C2_flash_incr__off,
+    /* double      flash_multiple          = */ 2.0,
+    /* double      flash_threshold         = */ 0.5,
     /* enum H5C2_cache_decr_mode decr_mode = */ H5C2_decr__age_out,
     /* double      upper_hr_threshold     = */ 0.9,
     /* double      decrement              = */ 0.9,
@@ -3759,15 +4118,13 @@ check_file_mdc_api_errs(void)
 int
 main(void)
 {
+    int express_test;
+
     H5open();
 
     skip_long_tests2 = FALSE;
 
-#ifdef NDEBUG
-    run_full_test2 = TRUE;
-#else /* NDEBUG */
-    run_full_test2 = FALSE;
-#endif /* NDEBUG */
+    express_test = GetTestExpress();
 
 #if 1
     check_fapl_mdc_api_calls();

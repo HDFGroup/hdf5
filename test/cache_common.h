@@ -655,6 +655,11 @@ void resize_entry(H5C_t * cache_ptr,
                    size_t new_size,
                    hbool_t resize_pin);
 
+void resize_pinned_entry(H5C_t * cache_ptr,
+                         int32_t type,
+                         int32_t idx,
+                         size_t new_size);
+
 H5C_t * setup_cache(size_t max_cache_size, size_t min_clean_size);
 
 void row_major_scan_forward(H5C_t * cache_ptr,

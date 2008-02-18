@@ -62,6 +62,8 @@ typedef struct H5O_t H5O_t;
 #define H5O_FHEAP_MAX_MAN_SIZE                  (4 * 1024)
 #define H5O_FHEAP_ID_LEN                        8
 
+/* #define H5O_ENABLE_BOGUS 1 */
+
 /* Object header macros */
 #define H5O_MESG_MAX_SIZE	65536	/*max obj header message size	     */
 #define H5O_ALL		(-1)		/* Operate on all messages of type   */
@@ -160,7 +162,8 @@ typedef struct H5O_copy_t {
 #define H5O_DRVINFO_ID  0x0014          /* Driver info message.  */
 #define H5O_AINFO_ID    0x0015          /* Attribute info message.  */
 #define H5O_REFCOUNT_ID 0x0016          /* Reference count message.  */
-#define H5O_UNKNOWN_ID  0x0017          /* Placeholder message ID for unknown message.  */
+#define H5O_MDJ_CONF_ID 0x0017		/* Metadata journaling config message */
+#define H5O_UNKNOWN_ID  0x0018          /* Placeholder message ID for unknown message.  */
                                         /* (this should never exist in a file) */
 
 
@@ -490,6 +493,60 @@ typedef struct H5O_ainfo_t {
  * (Data structure in memory)
  */
 typedef uint32_t H5O_refcount_t;        /* Contains # of links to object, if >1 */
+
+
+/*
+ * Metadata journaling configuration message
+ *
+ * Information on whether and how metadata changes are being journaled,
+ * so as to reconstruct consistent metadata in the file in the event of 
+ * a crash, stored in a superblock extension
+ * (Data structure in memory)
+ *
+ * The fields of the H5O_mdj_conf_t structure are discussed individually
+ * below:
+ *
+ * journaling_enabled: Boolean flag indicating whether metadata journaling
+ * 	is currently enabled.  
+ *
+ * journal_is_external: Boolean flag indicating whether the journal is 
+ * 	stored in an external file, or within the HDF5 file.  
+ *
+ * 	If the field is TRUE, external_journal_file_path points to a 
+ * 	buffer containing the path to the external journal file, and
+ * 	internal_journal_loc is undefined.
+ *
+ * 	If the field is FALSE, internal_journal_loc contains the base
+ * 	address of the journal within the hdf5 file, and 
+ * 	external_journal_file_path_ptr must be NULL.
+ *
+ * 	At least for the initial implementation, journal_is_external
+ * 	will always be TRUE.
+ *
+ * internal_journal_loc: haddr_t containing the base address of the 
+ * 	interal journal -- if there is one, or undefined if there
+ * 	isn't (see discussion of journal_is_external above).
+ *
+ * path_len: size_t containing the size of the buffer needed to 
+ * 	contain the path to the external journal file.  This field
+ * 	must contain 0 if the journal is internal.
+ *
+ * external_journal_file_path_ptr: Pointer to uint8_t.  If the 
+ * 	journal is stored in an external file, this field points to 
+ * 	a buffer containing the path to this file.
+ *
+ * 	If the journal is internal, this field must be NULL.
+ */
+typedef struct H5O_mdj_conf_t {
+
+    hbool_t	journaling_enabled;
+    hbool_t	journal_is_external;
+    haddr_t	internal_journal_loc;
+    size_t      path_len;
+    uint8_t *   external_journal_file_path_ptr;
+
+} H5O_mdj_conf_t;
+
 
 /*
  * "Unknown" Message.

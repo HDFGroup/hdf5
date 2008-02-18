@@ -5281,7 +5281,7 @@ trace_file_check(void)
     const char * expected_output[] =
     {
       "### HDF5 metadata cache trace file version 1 ###\n",
-      "H5AC_set_cache_auto_resize_config 1 0 1 0 \"t_cache_trace.txt\" 1 0 1048576 0.500000 16777216 1048576 50000 1 0.900000 2.000000 1 4194304 3 0.999000 0.900000 1 1048576 3 1 0.100000 262144 0\n",
+      "H5AC_set_cache_auto_resize_config 1 0 1 0 \"t_cache_trace.txt\" 1 0 1048576 0.500000 16777216 1048576 50000 1 0.900000 2.000000 1 1.000000 0.250000 1 4194304 3 0.999000 0.900000 1 1048576 3 1 0.100000 262144 0\n",
       "H5AC_set 0x0 15 0x0 2 0\n",
       "H5AC_set 0x2 15 0x0 2 0\n",
       "H5AC_set 0x4 15 0x0 4 0\n",

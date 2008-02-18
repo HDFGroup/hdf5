@@ -2587,6 +2587,10 @@ done:
  *              Modified code in support of revised cache API needed 
  *              to permit journaling.
  *
+ *              JRM - 1/2/08
+ *              Added support for the new flash cache increment related
+ *              fields.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -2665,6 +2669,9 @@ H5AC2_get_cache_auto_resize_config(H5AC2_t * cache_ptr,
     config_ptr->increment              = internal_config.increment;
     config_ptr->apply_max_increment    = internal_config.apply_max_increment;
     config_ptr->max_increment          = internal_config.max_increment;
+    config_ptr->flash_incr_mode        = internal_config.flash_incr_mode;
+    config_ptr->flash_multiple         = internal_config.flash_multiple;
+    config_ptr->flash_threshold        = internal_config.flash_threshold;
     config_ptr->decr_mode              = internal_config.decr_mode;
     config_ptr->upper_hr_threshold     = internal_config.upper_hr_threshold;
     config_ptr->decrement              = internal_config.decrement;
@@ -2868,6 +2875,10 @@ done:
  *              Modified code in support of revised cache API needed 
  *              to permit journaling.
  *
+ *              John Mainzer -- 1/3/07
+ *              Updated trace file code to record the new flash cache
+ *              size increase related fields.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -3021,7 +3032,7 @@ done:
          ( trace_file_ptr != NULL ) ) {
 
 	HDfprintf(trace_file_ptr, 
-                  "%s %d %d %d %d \"%s\" %d %d %d %f %d %d %ld %d %f %f %d %d %d %f %f %d %d %d %d %f %d %d\n", 
+                  "%s %d %d %d %d \"%s\" %d %d %d %f %d %d %ld %d %f %f %d %d %d %f %f %d %f %f %d %d %d %d %f %d %d\n",
 		  "H5AC2_set_cache_auto_resize_config",
 		  trace_config.version,
 		  (int)(trace_config.rpt_fcn_enabled),
@@ -3040,6 +3051,9 @@ done:
 		  trace_config.increment,
 		  (int)(trace_config.apply_max_increment),
 		  (int)(trace_config.max_increment),
+		  (int)(trace_config.flash_incr_mode),
+		  trace_config.flash_multiple,
+                  trace_config.flash_threshold,
 		  (int)(trace_config.decr_mode),
 		  trace_config.upper_hr_threshold,
 		  trace_config.decrement,
@@ -3379,7 +3393,7 @@ H5AC2_open_trace_file(H5AC2_t * cache_ptr,
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "trace file open failed.")
     }
 
-    HDfprintf(file_ptr, "### HDF5 metadata cache trace file version 1 ###\n");
+    HDfprintf(file_ptr, "### HDF5 metadata cache trace file version 2 ###\n");
 
     if ( H5C2_set_trace_file_ptr(cache_ptr, file_ptr) < 0 ) {
 
@@ -3678,7 +3692,10 @@ done:
  *
  * Modifications:
  *
- *              None.
+ *              Updated function for flash cache increment fields.
+ *
+ *                                              JRM -- 1/2/08
+ *
  *
  *-------------------------------------------------------------------------
  */
@@ -3721,6 +3738,10 @@ H5AC2_ext_config_2_int_config(H5AC2_cache_config_t * ext_conf_ptr,
     int_conf_ptr->increment              = ext_conf_ptr->increment;
     int_conf_ptr->apply_max_increment    = ext_conf_ptr->apply_max_increment;
     int_conf_ptr->max_increment          = ext_conf_ptr->max_increment;
+    int_conf_ptr->flash_incr_mode        = ext_conf_ptr->flash_incr_mode;
+    int_conf_ptr->flash_multiple         = ext_conf_ptr->flash_multiple;
+    int_conf_ptr->flash_threshold        = ext_conf_ptr->flash_threshold;
+
 
     int_conf_ptr->decr_mode              = ext_conf_ptr->decr_mode;
     int_conf_ptr->upper_hr_threshold     = ext_conf_ptr->upper_hr_threshold;

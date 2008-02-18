@@ -5556,8 +5556,12 @@ smoke_check_5(void)
  * Modifications:
  *
  *		JRM -- 7/11/06
- *		Updated fro H5AC2_expunge_entry() and 
+ *		Updated for H5AC2_expunge_entry() and 
  *		H5AC2_resize_pinned_entry().
+ *
+ *		JRM -- 2/14/08
+ *		Updated for changes in H5AC2_set_cache_auto_resize_config
+ *		to support the new flash cache size increment code.
  *	
  *****************************************************************************/
 
@@ -5571,8 +5575,8 @@ trace_file_check(void)
     const char * fcn_name = "trace_file_check()";
     const char * expected_output[] =
     {
-      "### HDF5 metadata cache trace file version 1 ###\n",
-      "H5AC2_set_cache_auto_resize_config 1 0 1 0 \"t_cache2_trace.txt\" 1 0 1048576 0.500000 16777216 1048576 50000 1 0.900000 2.000000 1 4194304 3 0.999000 0.900000 1 1048576 3 1 0.100000 262144 0\n",
+      "### HDF5 metadata cache trace file version 2 ###\n",
+      "H5AC2_set_cache_auto_resize_config 1 0 1 0 \"t_cache2_trace.txt\" 1 0 1048576 0.500000 16777216 1048576 50000 1 0.900000 2.000000 1 4194304 1 1.000000 0.250000 3 0.999000 0.900000 1 1048576 3 1 0.100000 262144 0\n",
       "H5AC2_set 0x400 2 15 0x0 2 0\n",
       "H5AC2_set 0x402 2 15 0x0 2 0\n",
       "H5AC2_set 0x404 4 15 0x0 4 0\n",

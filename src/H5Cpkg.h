@@ -465,6 +465,18 @@
  *		all the ways this can happen, we simply set this flag when
  *		we receive a new configuration.
  *
+ * flash_size_increase_possible: Depending on the configuration data given
+ * 		in the resize_ctl field, it may or may not be possible
+ * 		for a flash size increase to occur.  We set this flag
+ * 		whenever we receive a new configuration so as to avoid 
+ * 		repeated calculations.
+ *
+ * flash_size_increase_threshold: If a flash cache size increase is possible,
+ * 		this field is used to store the minimum size of a new entry
+ * 		or size increase needed to trigger a flash cache size 
+ * 		increase.  Note that this field must be updated whenever 
+ * 		the size of the cache is changed.
+ *
  * size_decrease_possible:  Depending on the configuration data given
  *              in the resize_ctl field, it may or may not be possible
  *              to decrease the size of the cache.  Rather than test for
@@ -580,10 +592,10 @@
  *		equal to the array index has not been in cache when
  *		requested in the current epoch.
  *
- * write_protects:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The cells
- * 		are used to record the number of times an entry with type id
- * 		equal to the array index has been write protected in the 
- * 		current epoch.
+ * write_protects:  Array of int64 of length H5C__MAX_NUM_TYPE_IDS + 1.  The 
+ *		cells are used to record the number of times an entry with 
+ *		type id equal to the array index has been write protected 
+ *		in the current epoch.
  *
  * 		Observe that (hits + misses) = (write_protects + read_protects).
  *
@@ -855,6 +867,8 @@ struct H5C_t
     H5C_cache_entry_t *	        dLRU_tail_ptr;
 
     hbool_t			size_increase_possible;
+    hbool_t			flash_size_increase_possible;
+    size_t			flash_size_increase_threshold; 
     hbool_t			size_decrease_possible;
     hbool_t			resize_enabled;
     hbool_t			cache_full;

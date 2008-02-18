@@ -33,6 +33,8 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5SMprivate.h"        /* Shared Object Header Messages        */
+#include "H5MMprivate.h"        /* Memory management                    */
+
 
 
 /****************/
@@ -226,6 +228,12 @@ done:
  *              wendling@ncsa.uiuc.edu
  *              Sept 12, 2003
  *
+ * Changes:	Johm Mainzer 
+ * 		12/14/07
+ * 		Added code to read in the metadata journaling config 
+ * 		if it is present, and to initialize 
+ * 		f->shared->journaling_enabled to FALSE if it isn't.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -250,6 +258,14 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
     /* Short cuts */
     shared = f->shared;
     lf = shared->lf;
+
+    /* initialize the metadata journaling configuration sections of the
+     * super block to indicate that journaling is not turned on at 
+     * present.  These initialization may be overridden shortly.
+     */
+    shared->journaling_enabled = FALSE;
+    shared->path_len = 0;
+    shared->external_journal_file_path_ptr = NULL; 
 
     /* Get the shared file creation property list */
     if(NULL == (c_plist = H5I_object(shared->fcpl_id)))
@@ -553,6 +569,9 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
         H5O_loc_t ext_loc;      /* "Object location" for superblock extension */
         H5O_btreek_t btreek;    /* v1 B-tree 'K' value message from superblock extension */
         H5O_drvinfo_t drvinfo;  /* Driver info message from superblock extension */
+	H5O_mdj_conf_t mdj_conf;/* metadata journaling config message 
+				 * from superblock extension 
+				 */
 
         /* Sanity check - superblock extension should only be defined for
          *      superblock version >= 2.
@@ -617,6 +636,48 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
             H5O_msg_reset(H5O_DRVINFO_ID, &drvinfo);
         } /* end else */
 
+	/* Read in the metadata journaling configuration message, 
+	 * if it exists.
+	 */
+        if(NULL == H5O_msg_read(&ext_loc, H5O_MDJ_CONF_ID, &mdj_conf, dxpl_id)) {
+            /* Reset error from "failed" message read */
+            H5E_clear_stack(NULL);
+        } /* end if */
+        else {
+
+	    shared->journaling_enabled = mdj_conf.journaling_enabled;
+
+	    if ( shared->journaling_enabled ) {
+
+                shared->journal_is_external = mdj_conf.journal_is_external;
+		shared->internal_journal_loc = mdj_conf.internal_journal_loc;
+		shared->path_len = mdj_conf.path_len;
+		shared->external_journal_file_path_ptr = 
+			mdj_conf.external_journal_file_path_ptr;
+
+		/* for now at least, the journal file must always be 
+		 * external -- hence the following asserts.  Remove them
+		 * if we ever support an internal journal.
+		 */
+		HDassert( shared->journal_is_external );
+		HDassert( shared->path_len > 0 );
+		HDassert( shared->external_journal_file_path_ptr != NULL );
+
+		/* if there is a an external journal file, 
+		 * H5O_mdj_conf_decode() will allocate a buffer to
+		 * store it in.  Rather than allocate our own buffer,
+		 * we will use the one created by H5O_mdj_conf_decode(),
+		 * and modify mdj_conf so that H5O_mdj_conf_reset() will
+		 * not discard it.
+		 */
+		mdj_conf.path_len = 0;
+		mdj_conf.external_journal_file_path_ptr = NULL;
+            }
+
+            /* Reset metadata journaling config message */
+            H5O_msg_reset(H5O_MDJ_CONF_ID, &mdj_conf);
+        }
+
         /* Close the extension.  Twiddle the number of open objects to avoid
          * closing the file (since this will be the only open object).
          */
@@ -644,6 +705,13 @@ done:
  * Programmer:  Quincey Koziol
  *              koziol@ncsa.uiuc.edu
  *              Sept 15, 2003
+ *
+ * Changes:	John Mainzer
+ * 		Dec. 14, 2007
+ * 		Added initialization for the metadata journaling 
+ * 		configuration fields.  By default, these fields are
+ * 		initialized to indicate that we are not journaling 
+ * 		metadata. 
  *
  *-------------------------------------------------------------------------
  */
@@ -801,6 +869,43 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
             if(H5O_msg_create(&ext_loc, H5O_DRVINFO_ID, H5O_MSG_FLAG_CONSTANT | H5O_MSG_FLAG_DONTSHARE, H5O_UPDATE_TIME, &drvinfo, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update driver info header message")
         } /* end if */
+
+	/* check for journaling config data to store */
+	if ( f->shared->journaling_enabled ) {
+
+	    struct H5O_mdj_conf_t mdj_conf;
+
+	    mdj_conf.journaling_enabled = f->shared->journaling_enabled;
+	    mdj_conf.journal_is_external = f->shared->journal_is_external;
+            mdj_conf.internal_journal_loc = f->shared->internal_journal_loc;
+	    mdj_conf.path_len = f->shared->path_len;
+
+	    if ( f->shared->external_journal_file_path_ptr == NULL ) {
+
+		mdj_conf.external_journal_file_path_ptr = NULL;
+
+	    } else { 
+
+		if ( ( NULL == (mdj_conf.external_journal_file_path_ptr =
+                                H5MM_malloc(mdj_conf.path_len + 1)) ) ) {
+
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+	                        "memory alloc failed for mdj path")
+
+		}
+	        HDmemcpy(mdj_conf.external_journal_file_path_ptr,
+	                 f->shared->external_journal_file_path_ptr,
+                         f->shared->path_len);
+            }
+
+            if ( H5O_msg_create(&ext_loc, H5O_MDJ_CONF_ID, 
+                                H5O_MSG_FLAG_CONSTANT | H5O_MSG_FLAG_DONTSHARE, 
+                                H5O_UPDATE_TIME, &mdj_conf, dxpl_id) < 0 ) {
+
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, \
+                       "unable to update metadata journal conf header message")
+            }
+	}
 
         /* Twiddle the number of open objects to avoid closing the file
          * (since this will be the only open object currently).

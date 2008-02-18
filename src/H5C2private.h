@@ -804,12 +804,16 @@ typedef herr_t (*H5C2_log_flush_func_t)(H5C2_t * cache_ptr,
  *
  ****************************************************************************/
 
+#ifndef NDEBUG
 #define H5C2__H5C2_CACHE_ENTRY_T_MAGIC		0x005CAC0A
 #define H5C2__H5C2_CACHE_ENTRY_T_BAD_MAGIC	0xDeadBeef
+#endif /* NDEBUG */
 
 typedef struct H5C2_cache_entry_t
 {
+#ifndef NDEBUG
     uint32_t			magic;
+#endif /* NDEBUG */
     haddr_t			addr;
     size_t			size;
     void *			image_ptr;
@@ -954,6 +958,57 @@ typedef struct H5C2_cache_entry_t
  *	above, this field contains the maximum number of bytes by which the
  *	cache size can be increased in a single re-size.
  *
+ * flash_incr_mode:  Instance of the H5C_cache_flash_incr_mode enumerated
+ *      type whose value indicates whether and by what algorithm we should
+ *      make flash increases in the size of the cache to accomodate insertion
+ *      of large entries and large increases in the size of a single entry.
+ *
+ *      The addition of the flash increment mode was occasioned by performance
+ *      problems that appear when a local heap is increased to a size in excess
+ *      of the current cache size.  While the existing re-size code dealt with
+ *      this eventually, performance was very bad for the remainder of the
+ *      epoch.
+ *
+ *      At present, there are two possible values for the flash_incr_mode:
+ *
+ *      H5C_flash_incr__off:  Don't perform flash increases in the size of
+ *              the cache.
+ *
+ *      H5C_flash_incr__add_space:  Let x be either the size of a newly
+ *              newly inserted entry, or the number of bytes by which the
+ *              size of an existing entry has been increased.
+ *
+ *              If
+ *                   x > flash_threshold * current max cache size,
+ *
+ *              increase the current maximum cache size by x * flash_multiple
+ *              less any free space in the cache, and start a new epoch.  For
+ *              now at least, pay no attention to the maximum increment.
+ *
+ *
+ *      With a little thought, it should be obvious that the above flash
+ *      cache size increase algorithm is not sufficient for all 
+ *      circumstances -- for example, suppose the user round robins through
+ *      (1/flash_threshold) +1 groups, adding one data set to each on each
+ *      pass.  Then all will increase in size at about the same time, requiring
+ *      the max cache size to at least double to maintain acceptable
+ *      performance, however the above flash increment algorithm will not be
+ *      triggered.
+ *
+ *      Hopefully, the add space algorithm detailed above will be sufficient
+ *      for the performance problems encountered to date.  However, we should
+ *      expect to revisit the issue.
+ *
+ * flash_multiple: Double containing the multiple described above in the
+ *      H5C_flash_incr__add_space section of the discussion of the
+ *      flash_incr_mode section.  This field is ignored unless flash_incr_mode
+ *      is H5C_flash_incr__add_space.
+ *
+ * flash_threshold: Double containing the factor by which current max cache 
+ * 	size is multiplied to obtain the size threshold for the add_space 
+ * 	flash increment algorithm.  The field is ignored unless 
+ * 	flash_incr_mode is H5C2_flash_incr__add_space.
+ * 
  *
  * Cache size decrease control fields:
  *
@@ -1068,6 +1123,8 @@ typedef struct H5C2_cache_entry_t
 #define H5C2__DEF_AR_MIN_CLEAN_FRAC		0.5
 #define H5C2__DEF_AR_INCREMENT			2.0
 #define H5C2__DEF_AR_MAX_INCREMENT		((size_t)( 2 * 1024 * 1024))
+#define H5C2__DEF_AR_FLASH_MULTIPLE             1.0
+#define H5C2__DEV_AR_FLASH_THRESHOLD            0.25
 #define H5C2__DEF_AR_DECREMENT			0.9
 #define H5C2__DEF_AR_MAX_DECREMENT		((size_t)( 1 * 1024 * 1024))
 #define H5C2__DEF_AR_EPCHS_B4_EVICT		3
@@ -1080,6 +1137,7 @@ enum H5C2_resize_status
 {
     in_spec2,
     increase2,
+    flash_increase2,
     decrease2,
     at_max_size2,
     at_min_size2,
@@ -1100,45 +1158,49 @@ typedef void (*H5C2_auto_resize_rpt_fcn)(H5C2_t * cache_ptr,
 typedef struct H5C2_auto_size_ctl_t
 {
     /* general configuration fields: */
-    int32_t			version;
-    H5C2_auto_resize_rpt_fcn	rpt_fcn;
+    int32_t				version;
+    H5C2_auto_resize_rpt_fcn		rpt_fcn;
 
-    hbool_t			set_initial_size;
-    size_t			initial_size;
+    hbool_t				set_initial_size;
+    size_t				initial_size;
 
-    double			min_clean_fraction;
+    double				min_clean_fraction;
 
-    size_t			max_size;
-    size_t			min_size;
+    size_t				max_size;
+    size_t				min_size;
 
-    int64_t			epoch_length;
+    int64_t				epoch_length;
 
 
     /* size increase control fields: */
-    enum H5C2_cache_incr_mode	incr_mode;
+    enum H5C2_cache_incr_mode		incr_mode;
 
-    double			lower_hr_threshold;
+    double				lower_hr_threshold;
 
-    double			increment;
+    double				increment;
 
-    hbool_t			apply_max_increment;
-    size_t			max_increment;
+    hbool_t				apply_max_increment;
+    size_t				max_increment;
+
+    enum H5C2_cache_flash_incr_mode     flash_incr_mode;
+    double                              flash_multiple;
+    double                              flash_threshold;
 
 
     /* size decrease control fields: */
-    enum H5C2_cache_decr_mode	decr_mode;
+    enum H5C2_cache_decr_mode		decr_mode;
 
-    double			upper_hr_threshold;
+    double				upper_hr_threshold;
 
-    double			decrement;
+    double				decrement;
 
-    hbool_t			apply_max_decrement;
-    size_t			max_decrement;
+    hbool_t				apply_max_decrement;
+    size_t				max_decrement;
 
-    int32_t			epochs_before_eviction;
+    int32_t				epochs_before_eviction;
 
-    hbool_t			apply_empty_reserve;
-    double			empty_reserve;
+    hbool_t				apply_empty_reserve;
+    double				empty_reserve;
 
 } H5C2_auto_size_ctl_t;
 

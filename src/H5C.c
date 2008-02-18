@@ -2596,6 +2596,10 @@ static herr_t H5C__autoadjust__ageout__remove_all_markers(H5C_t * cache_ptr);
 
 static herr_t H5C__autoadjust__ageout__remove_excess_markers(H5C_t * cache_ptr);
 
+static herr_t H5C__flash_increase_cache_size(H5C_t * cache_ptr,
+                                             size_t old_entry_size,
+                                             size_t new_entry_size);
+
 static herr_t H5C_flush_single_entry(H5F_t *             f,
                                      hid_t               primary_dxpl_id,
                                      hid_t               secondary_dxpl_id,
@@ -2836,8 +2840,12 @@ done:
  *		ro_ref_count fields.
  *
  *		JRM -- 7/27/07
-*		Added initialization for the new evictions_enabled 
-*		field of H5C_t.
+ *		Added initialization for the new evictions_enabled 
+ *		field of H5C_t.
+ *
+ *		JRM -- 12/31/07
+ *		Added initialization for the new flash cache size increase
+ *		related fields of H5C_t.
  *
  *-------------------------------------------------------------------------
  */
@@ -2954,6 +2962,8 @@ H5C_create(size_t		      max_cache_size,
     cache_ptr->dLRU_tail_ptr			= NULL;
 
     cache_ptr->size_increase_possible		= FALSE;
+    cache_ptr->flash_size_increase_possible     = FALSE;
+    cache_ptr->flash_size_increase_threshold    = 0;
     cache_ptr->size_decrease_possible		= FALSE;
     cache_ptr->resize_enabled			= FALSE;
     cache_ptr->cache_full			= FALSE;
@@ -2974,6 +2984,11 @@ H5C_create(size_t		      max_cache_size,
     (cache_ptr->resize_ctl).apply_max_increment	= TRUE;
     (cache_ptr->resize_ctl).max_increment	= H5C__DEF_AR_MAX_INCREMENT;
 
+    (cache_ptr->resize_ctl).flash_incr_mode	= H5C_flash_incr__off;
+    (cache_ptr->resize_ctl).flash_multiple	= 1.0;
+    (cache_ptr->resize_ctl).flash_threshold	= 0.25;
+
+
     (cache_ptr->resize_ctl).decr_mode		= H5C_decr__off;
     (cache_ptr->resize_ctl).upper_hr_threshold	= H5C__DEF_AR_UPPER_THRESHHOLD;
     (cache_ptr->resize_ctl).decrement	        = H5C__DEF_AR_DECREMENT;
@@ -2993,7 +3008,10 @@ H5C_create(size_t		      max_cache_size,
     for ( i = 0; i < H5C__MAX_EPOCH_MARKERS; i++ )
     {
         (cache_ptr->epoch_marker_active)[i]		 = FALSE;
-
+#ifndef NDEBUG
+	((cache_ptr->epoch_markers)[i]).magic            =
+		                                  H5C__H5C_CACHE_ENTRY_T_MAGIC;
+#endif /* NDEBUG */
         ((cache_ptr->epoch_markers)[i]).addr		 = (haddr_t)i;
         ((cache_ptr->epoch_markers)[i]).size		 = (size_t)0;
         ((cache_ptr->epoch_markers)[i]).type		 = &epoch_marker_class;
@@ -3079,6 +3097,9 @@ done:
  *		Updated function for display the new prefix field of
  *		H5C_t in output.
  *
+ *		JRM 12/31/07
+ *		Updated function to handle flash size increases.
+ *
  *-------------------------------------------------------------------------
  */
 void
@@ -3115,6 +3136,24 @@ H5C_def_auto_resize_rpt_fcn(H5C_t * cache_ptr,
                       "%sAuto cache resize -- hit rate (%lf) out of bounds low (%6.5lf).\n",
                       cache_ptr->prefix, hit_rate,
                       (cache_ptr->resize_ctl).lower_hr_threshold);
+
+            HDfprintf(stdout,
+                    "%s	cache size increased from (%Zu/%Zu) to (%Zu/%Zu).\n",
+                    cache_ptr->prefix,
+                    old_max_cache_size,
+                    old_min_clean_size,
+                    new_max_cache_size,
+                    new_min_clean_size);
+            break;
+
+        case flash_increase:
+            HDassert( old_max_cache_size < new_max_cache_size );
+
+            HDfprintf(stdout,
+                      "%sflash cache resize(%d) -- size threshold = %Zu.\n",
+                      cache_ptr->prefix, 
+                      (int)((cache_ptr->resize_ctl).flash_incr_mode),
+                      cache_ptr->flash_size_increase_threshold); 
 
             HDfprintf(stdout,
                     "%s	cache size increased from (%Zu/%Zu) to (%Zu/%Zu).\n",
@@ -3537,6 +3576,21 @@ done:
  *		callbacks.  As a result, we may have to make multiple 
  *		passes through the skip list before the cache is flushed.
  *
+ *              JRM -- 10/13/07
+ *              Added code to detect and manage the case in which a
+ *              flush callback changes the s-list out from under
+ *              the function.  The only way I can think of in which this
+ *              can happen is if a flush function loads an entry
+ *              into the cache that isn't there already.  Quincey tells
+ *              me that this will never happen, but I'm not sure I
+ *              believe him.
+ *
+ *              Note that this is a pretty bad scenario if it ever
+ *              happens.  The code I have added should allow us to
+ *              handle the situation under all but the worst conditions, 
+ *              but one can argue that I should just scream and die if I 
+ *              ever detect the condidtion.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3558,6 +3612,7 @@ H5C_flush_cache(H5F_t *  f,
     int32_t		protected_entries = 0;
     H5SL_node_t * 	node_ptr = NULL;
     H5C_cache_entry_t *	entry_ptr = NULL;
+    H5C_cache_entry_t *	next_entry_ptr = NULL;
 #if H5C_DO_SANITY_CHECKS
     int64_t		flushed_entries_count;
     size_t		flushed_entries_size;
@@ -3620,6 +3675,28 @@ H5C_flush_cache(H5F_t *  f,
 	{
 	    flushed_entries_last_pass = FALSE;
             node_ptr = H5SL_first(cache_ptr->slist_ptr);
+
+            if ( node_ptr != NULL ) {
+
+                next_entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
+
+                if ( next_entry_ptr == NULL ) {
+
+                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+		                "next_entry_ptr == NULL 1 ?!?!");
+                }
+#ifndef NDEBUG
+		HDassert( next_entry_ptr->magic ==
+                          H5C__H5C_CACHE_ENTRY_T_MAGIC );
+#endif /* NDEBUG */
+	        HDassert( next_entry_ptr->is_dirty );
+                HDassert( next_entry_ptr->in_slist );
+
+            } else {
+
+                next_entry_ptr = NULL;
+
+            }
        
 	    HDassert( node_ptr != NULL );
 
@@ -3667,12 +3744,75 @@ H5C_flush_cache(H5F_t *  f,
 
 	    while ( node_ptr != NULL )
 	    {
-                entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
+                entry_ptr = next_entry_ptr;
+
+                /* With the advent of the fractal heap, it is possible
+		 * that the flush callback will dirty and/or resize
+		 * other entries in the cache.  In particular, while
+		 * Quincey has promised me that this will never happen,
+		 * it is possible that the flush callback for an
+		 * entry may protect an entry that is not in the cache,
+		 * perhaps causing the cache to flush and possibly
+		 * evict the entry associated with node_ptr to make
+		 * space for the new entry.
+		 *
+		 * Thus we do a bit of extra sanity checking on entry_ptr,
+		 * and break out of this scan of the skip list if we
+		 * detect minor problems.  We have a bit of leaway on the
+		 * number of passes though the skip list, so this shouldn't
+		 * be an issue in the flush in and of itself, as it should
+		 * be all but impossible for this to happen more than once
+		 * in any flush.
+		 *
+		 * Observe that that breaking out of the scan early
+		 * shouldn't break the sanity checks just after the end
+		 * of this while loop.
+		 *
+		 * If an entry has merely been marked clean and removed from
+		 * the s-list, we simply break out of the scan.
+		 *
+		 * If the entry has been evicted, we flag an error and
+		 * exit.
+		 */
+#ifndef NDEBUG
+		if ( entry_ptr->magic != H5C__H5C_CACHE_ENTRY_T_MAGIC ) {
+
+                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                                "entry_ptr->magic invalid ?!?!");
+
+	        } else 
+#endif /* NDEBUG */
+		if ( ( ! entry_ptr->is_dirty ) ||
+                     ( ! entry_ptr->in_slist ) ) {
+
+                    /* the s-list has been modified out from under us.
+                     * set node_ptr to NULL and break out of the loop.
+                     */
+                    node_ptr = NULL;
+                    break;
+                }
 
                 /* increment node pointer now, before we delete its target
                  * from the slist.
                  */
                 node_ptr = H5SL_next(node_ptr);
+
+                if ( node_ptr != NULL ) {
+                    next_entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
+
+                    if ( next_entry_ptr == NULL ) {
+                        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                                    "next_entry_ptr == NULL 2 ?!?!");
+                    }
+#ifndef NDEBUG
+		    HDassert( next_entry_ptr->magic ==
+                              H5C__H5C_CACHE_ENTRY_T_MAGIC );
+#endif /* NDEBUG */
+                    HDassert( next_entry_ptr->is_dirty );
+                    HDassert( next_entry_ptr->in_slist );
+                } else {
+                    next_entry_ptr = NULL;
+                }
 
                 HDassert( entry_ptr != NULL );
                 HDassert( entry_ptr->in_slist );
@@ -3689,6 +3829,40 @@ H5C_flush_cache(H5F_t *  f,
                         tried_to_flush_protected_entry = TRUE;
 	                protected_entries++;
 
+                    } else if ( entry_ptr->is_pinned ) {
+			/* Test to see if we are can flush the entry now.
+			 * If we can, go ahead and flush.  Note that we
+			 * aren't trying to do a destroy here, so that
+			 * is not an issue.
+			 */
+                        if ( TRUE ) { /* When we get to multithreaded cache,
+                                       * we will need either locking code,
+                                       * and/or a test to see if the entry
+                                       * is in flushable condition here.
+                                       */
+#if H5C_DO_SANITY_CHECKS
+                            flushed_entries_count++;
+                            flushed_entries_size += entry_ptr->size;
+#endif /* H5C_DO_SANITY_CHECKS */
+                            status = H5C_flush_single_entry(f,
+                                                            primary_dxpl_id,
+                                                            secondary_dxpl_id,
+                                                            cache_ptr,
+                                                            NULL,
+                                                            entry_ptr->addr,
+                                                            flags,
+                                                            &first_flush,
+                                                            FALSE);
+                            if ( status < 0 ) {
+
+                                /* This shouldn't happen -- if it does, we are 
+			         * toast so just scream and die.
+                                 */
+                                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
+                                            "dirty pinned entry flush failed.")
+                            }
+			    flushed_entries_last_pass = TRUE;
+			}
                     } else {
 #if H5C_DO_SANITY_CHECKS
                         flushed_entries_count++;
@@ -4434,6 +4608,9 @@ done:
  *		Added code to disable evictions when the new 
  *		evictions_enabled field is FALSE.
  *
+ *		JRM -- 12/31/07
+ *		Added code supporting flash cache size increases.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -4447,6 +4624,7 @@ H5C_insert_entry(H5F_t * 	     f,
                  void *		     thing,
                  unsigned int        flags)
 {
+    /* const char *	fcn_name = "H5C_insert_entry()"; */
     herr_t		result;
     herr_t		ret_value = SUCCEED;    /* Return value */
     hbool_t		first_flush = TRUE;
@@ -4486,7 +4664,9 @@ H5C_insert_entry(H5F_t * 	     f,
     insert_pinned    = ( (flags & H5C__PIN_ENTRY_FLAG) != 0 );
 
     entry_ptr = (H5C_cache_entry_t *)thing;
-
+#ifndef NDEBUG
+    entry_ptr->magic = H5C__H5C_CACHE_ENTRY_T_MAGIC;
+#endif /* NDEBUG */
     entry_ptr->addr = addr;
     entry_ptr->type = type;
 
@@ -4523,6 +4703,18 @@ H5C_insert_entry(H5F_t * 	     f,
     entry_ptr->aux_prev = NULL;
 
     H5C__RESET_CACHE_ENTRY_STATS(entry_ptr)
+
+    if ( ( cache_ptr->flash_size_increase_possible ) &&
+         ( entry_ptr->size > cache_ptr->flash_size_increase_threshold ) ) {
+
+        result = H5C__flash_increase_cache_size(cache_ptr, 0, entry_ptr->size);
+
+        if ( result < 0 ) {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, \
+                        "H5C__flash_increase_cache_size failed.")
+        }
+    }
 
     if ( ( cache_ptr->evictions_enabled ) &&
          ( (cache_ptr->index_size + entry_ptr->size) > 
@@ -4999,7 +5191,9 @@ done:
  *
  * Modifications:
  *
- * 		None
+ * 		Added code to do a flash cache size increase if 
+ * 		appropriate.
+ * 						JRM -- 1/11/08
  *
  *-------------------------------------------------------------------------
  */
@@ -5010,6 +5204,8 @@ H5C_mark_pinned_entry_dirty(H5C_t * cache_ptr,
                             size_t  new_size)
 {
     herr_t              ret_value = SUCCEED;    /* Return value */
+    herr_t		result;
+    size_t		size_increase;
     H5C_cache_entry_t *	entry_ptr;
 
     FUNC_ENTER_NOAPI(H5C_mark_pinned_entry_dirty, FAIL)
@@ -5038,6 +5234,29 @@ H5C_mark_pinned_entry_dirty(H5C_t * cache_ptr,
 
     /* update for change in entry size if necessary */
     if ( ( size_changed ) && ( entry_ptr->size != new_size ) ) {
+
+        /* do a flash cache size increase if appropriate */
+        if ( cache_ptr->flash_size_increase_possible ) {
+
+            if ( new_size > entry_ptr->size ) {
+
+                size_increase = new_size - entry_ptr->size;
+
+                if ( size_increase >= 
+		     cache_ptr->flash_size_increase_threshold ) {
+
+                    result = H5C__flash_increase_cache_size(cache_ptr,
+                                                            entry_ptr->size,
+                                                            new_size);
+
+                    if ( result < 0 ) {
+
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
+                                    "H5C__flash_increase_cache_size failed.")
+                    }
+                }
+            }
+        }
 
         /* update the protected entry list */
         H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr->pel_len), \
@@ -5371,7 +5590,9 @@ done:
  *
  * Modifications:
  *
- * 		None
+ * 		Added code to apply a flash cache size increment if 
+ * 		appropriate.
+ * 						JRM -- 1/11/08
  *
  *-------------------------------------------------------------------------
  */
@@ -5380,8 +5601,11 @@ H5C_resize_pinned_entry(H5C_t * cache_ptr,
                         void *  thing,
                         size_t  new_size)
 {
+    /* const char *	fcn_name = "H5C_resize_pinned_entry()"; */
     herr_t              ret_value = SUCCEED;    /* Return value */
+    herr_t		result;
     H5C_cache_entry_t *	entry_ptr;
+    size_t 		size_increase;
 
     FUNC_ENTER_NOAPI(H5C_resize_pinned_entry, FAIL)
 
@@ -5416,6 +5640,29 @@ H5C_resize_pinned_entry(H5C_t * cache_ptr,
 
     /* update for change in entry size if necessary */
     if ( entry_ptr->size != new_size ) {
+
+        /* do a flash cache size increase if appropriate */
+        if ( cache_ptr->flash_size_increase_possible ) {
+
+            if ( new_size > entry_ptr->size ) {
+
+                size_increase = new_size - entry_ptr->size;
+
+                if ( size_increase >= 
+		     cache_ptr->flash_size_increase_threshold ) {
+
+                    result = H5C__flash_increase_cache_size(cache_ptr,
+                                                            entry_ptr->size,
+                                                            new_size);
+
+                    if ( result < 0 ) {
+
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
+                                    "H5C__flash_increase_cache_size failed.")
+                    }
+                }
+            }
+        }
 
         /* update the protected entry list */
         H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr->pel_len), \
@@ -5604,8 +5851,12 @@ done:
  * 		of cache entries.
  *
  * 		JRM -- 7/27/07
- * 		Added code supporting the new evictions_enabled fieled
+ * 		Added code supporting the new evictions_enabled field
  * 		in H5C_t.
+ *
+ * 		JRM -- 1/3/08
+ * 		Added to do a flash cache size increase if appropriate 
+ * 		when a large entry is loaded.
  *
  *-------------------------------------------------------------------------
  */
@@ -5621,6 +5872,7 @@ H5C_protect(H5F_t *	        f,
             void *	        udata2,
 	    unsigned		flags)
 {
+    /* const char *	fcn_name = "H5C_protect()"; */
     hbool_t		hit;
     hbool_t		first_flush;
     hbool_t		have_write_permitted = FALSE;
@@ -5678,7 +5930,25 @@ H5C_protect(H5F_t *	        f,
 
         entry_ptr = (H5C_cache_entry_t *)thing;
 
-        /* try to free up some space if necessary and if evictions are permitted */
+	/* If the entry is very large, and we are configured to allow it,
+	 * we may wish to perform a flash cache size increase.
+	 */
+        if ( ( cache_ptr->flash_size_increase_possible ) &&
+             ( entry_ptr->size > cache_ptr->flash_size_increase_threshold ) ) {
+
+            result = H5C__flash_increase_cache_size(cache_ptr, 0, 
+			                            entry_ptr->size);
+
+            if ( result < 0 ) {
+
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, \
+                            "H5C__flash_increase_cache_size failed.")
+            }
+        }
+
+        /* try to free up some space if necessary and if evictions are 
+	 * permitted 
+	 */
         if ( ( cache_ptr->evictions_enabled ) &&
 	     ( (cache_ptr->index_size + entry_ptr->size) > 
 	       cache_ptr->max_cache_size ) ) {
@@ -5978,6 +6248,10 @@ done:
  *		if the new configuration forces an immediate reduction
  *		in cache size.
  *
+ *		JRM -- 12/31/07
+ *		Added code supporting the new flash cache size increase
+ *		code.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -5985,6 +6259,7 @@ herr_t
 H5C_set_cache_auto_resize_config(H5C_t * cache_ptr,
                                  H5C_auto_size_ctl_t *config_ptr)
 {
+    /* const char *fcn_name = "H5C_set_cache_auto_resize_config()"; */
     herr_t	ret_value = SUCCEED;      /* Return value */
     herr_t	result;
     size_t      new_max_cache_size;
@@ -6039,8 +6314,10 @@ H5C_set_cache_auto_resize_config(H5C_t * cache_ptr,
                     "conflicting threshold fields in new config.")
     }
 
-    cache_ptr->size_increase_possible = TRUE; /* will set to FALSE if needed */
-    cache_ptr->size_decrease_possible = TRUE; /* will set to FALSE if needed */
+    /* will set the increase possible fields to FALSE later if needed */
+    cache_ptr->size_increase_possible       = TRUE;
+    cache_ptr->flash_size_increase_possible = TRUE; 
+    cache_ptr->size_decrease_possible       = TRUE; 
 
     switch ( config_ptr->incr_mode )
     {
@@ -6061,6 +6338,11 @@ H5C_set_cache_auto_resize_config(H5C_t * cache_ptr,
         default: /* should be unreachable */
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Unknown incr_mode?!?!?.")
     }
+
+    /* logically, this is were configuration for flash cache size increases
+     * should go.  However, this configuration depends on max_cache_size, so 
+     * we wait until the end of the function, when this field is set.
+     */
 
     switch ( config_ptr->decr_mode )
     {
@@ -6106,9 +6388,13 @@ H5C_set_cache_auto_resize_config(H5C_t * cache_ptr,
     if ( config_ptr->max_size == config_ptr->min_size ) {
 
         cache_ptr->size_increase_possible = FALSE;
+        cache_ptr->flash_size_increase_possible = FALSE; 
         cache_ptr->size_decrease_possible = FALSE;
     }
 
+    /* flash_size_increase_possible is intentionally omitted from the
+     * following:
+     */
     cache_ptr->resize_enabled = cache_ptr->size_increase_possible ||
                                 cache_ptr->size_decrease_possible;
 
@@ -6195,6 +6481,37 @@ H5C_set_cache_auto_resize_config(H5C_t * cache_ptr,
                         "error removing all epoch markers.")
         }
     }
+
+    /* configure flash size increase facility.  We wait until the
+     * end of the function, as we need the max_cache_size set before 
+     * we start to keep things simple.
+     *
+     * If we haven't already ruled out flash cache size increases above,
+     * go ahead and configure it.
+     */
+
+    if ( cache_ptr->flash_size_increase_possible ) {
+
+        switch ( config_ptr->flash_incr_mode )
+        {
+            case H5C_flash_incr__off:
+                cache_ptr->flash_size_increase_possible = FALSE; 
+	        break;
+
+            case H5C_flash_incr__add_space:
+                cache_ptr->flash_size_increase_possible = TRUE; 
+                cache_ptr->flash_size_increase_threshold = 
+                    (size_t)
+                    (((double)(cache_ptr->max_cache_size)) *
+                     ((cache_ptr->resize_ctl).flash_threshold));
+                break;
+
+            default: /* should be unreachable */
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                            "Unknown flash_incr_mode?!?!?.")
+                break;
+        }
+    }	
 
 done:
 
@@ -7095,6 +7412,9 @@ done:
  *		Also added sanity checks using the new is_read_only and
  *		ro_ref_count parameters.
  *
+ *		JRM -- 12/31/07
+ *		Modified funtion to support flash cache resizes.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7108,6 +7428,7 @@ H5C_unprotect(H5F_t *		  f,
               unsigned int        flags,
               size_t              new_size)
 {
+    /* const char *	fcn_name = "H5C_unprotect()"; */
     hbool_t		deleted;
     hbool_t		dirtied;
     hbool_t             set_flush_marker;
@@ -7118,6 +7439,8 @@ H5C_unprotect(H5F_t *		  f,
     hbool_t		clear_entry = FALSE;
 #endif /* H5_HAVE_PARALLEL */
     herr_t              ret_value = SUCCEED;    /* Return value */
+    herr_t              result;
+    size_t		size_increase = 0;
     H5C_cache_entry_t *	entry_ptr;
     H5C_cache_entry_t *	test_entry_ptr;
 
@@ -7264,6 +7587,29 @@ H5C_unprotect(H5F_t *		  f,
 
         /* update for change in entry size if necessary */
         if ( ( size_changed ) && ( entry_ptr->size != new_size ) ) {
+
+            /* do a flash cache size increase if appropriate */
+            if ( cache_ptr->flash_size_increase_possible ) {
+
+                if ( new_size > entry_ptr->size ) {
+
+                    size_increase = new_size - entry_ptr->size;
+
+                    if ( size_increase >= 
+                         cache_ptr->flash_size_increase_threshold ) {
+
+                        result = H5C__flash_increase_cache_size(cache_ptr, 
+                                                              entry_ptr->size,
+                                                              new_size);
+
+                        if ( result < 0 ) {
+
+                            HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
+                                        "H5C__flash_increase_cache_size failed.")
+                        }
+                    }
+                }
+            }
 
             /* update the protected list */
             H5C__DLL_UPDATE_FOR_SIZE_CHANGE((cache_ptr->pl_len), \
@@ -7458,7 +7804,9 @@ done:
  *
  * Modifications:
  *
- *		None.
+ *		Added validation for the flash increment fields.
+ *
+ *						JRM -- 12/31/07
  *
  *-------------------------------------------------------------------------
  */
@@ -7560,7 +7908,7 @@ H5C_validate_resize_config(H5C_auto_size_ctl_t * config_ptr,
                  ( config_ptr->apply_max_increment != FALSE ) ) {
 
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                            "apply_max_increment must be either TRUE or FALSE");
+                          "apply_max_increment must be either TRUE or FALSE");
             }
 
             /* no need to check max_increment, as it is a size_t,
@@ -7568,6 +7916,33 @@ H5C_validate_resize_config(H5C_auto_size_ctl_t * config_ptr,
              */
         } /* H5C_incr__threshold */
 
+        switch ( config_ptr->flash_incr_mode )
+        {
+	    case H5C_flash_incr__off:
+                /* nothing to do here */
+		break;
+
+	    case H5C_flash_incr__add_space:
+                if ( ( config_ptr->flash_multiple < 0.1 ) ||
+                     ( config_ptr->flash_multiple > 10.0 ) ) {
+
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                        "flash_multiple must be in the range [0.1, 10.0]");
+                }
+
+                if ( ( config_ptr->flash_threshold < 0.1 ) ||
+                     ( config_ptr->flash_threshold > 1.0 ) ) {
+
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                        "flash_threshold must be in the range [0.1, 1.0]");
+                }
+		break;
+
+	    default:
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+			    "Invalid flash_incr_mode");
+		break;
+	}
     } /* H5C_RESIZE_CFG__VALIDATE_INCREMENT */
 
 
@@ -7706,6 +8081,9 @@ done:
  *		Major re-write to support ageout method of cache size
  *		reduction, and to adjust to changes in the
  *		H5C_auto_size_ctl_t structure.
+ *
+ *		JRM -- 1/5/08
+ *		Added support for flash cache size increases.
  *
  *-------------------------------------------------------------------------
  */
@@ -7989,6 +8367,30 @@ H5C__auto_adjust_cache_size(H5C_t * cache_ptr,
         } else if ( status == decrease ) {
 
             cache_ptr->size_decreased = TRUE;
+        }
+
+        /* update flash cache size increase fields as appropriate */
+        if ( cache_ptr->flash_size_increase_possible ) {
+
+            switch ( (cache_ptr->resize_ctl).flash_incr_mode )
+            {
+                case H5C_flash_incr__off:
+                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                       "flash_size_increase_possible but H5C_flash_incr__off?!")
+                    break;
+
+                case H5C_flash_incr__add_space:
+                    cache_ptr->flash_size_increase_threshold =
+                        (size_t)
+                        (((double)(cache_ptr->max_cache_size)) *
+                         ((cache_ptr->resize_ctl).flash_threshold));
+                    break;
+
+                default: /* should be unreachable */
+                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                                "Unknown flash_incr_mode?!?!?.")
+                    break;
+            }
         }
     }
 
@@ -8308,7 +8710,20 @@ done:
  *
  * Modifications:
  *
- *              None.
+ *              JRM -- 10/13/07
+ *              Added code to detect and manage the case in which a
+ *              flush callback changes the LRU-list out from under
+ *              the function.  The only way I can think of in which this
+ *              can happen is if a flush function loads an entry
+ *              into the cache that isn't there already.  Quincey tells
+ *              me that this will never happen, but I'm not sure I
+ *              believe him.
+ *
+ *              Note that this is a pretty bad scenario if it ever
+ *              happens.  The code I have added should allow us to
+ *              handle the situation under all but the worst conditions, 
+ *              but one can argue that I should just scream and die if I 
+ *              ever detect the condidtion.
  *
  *-------------------------------------------------------------------------
  */
@@ -8325,7 +8740,9 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t * f,
     herr_t              result;
     size_t		eviction_size_limit;
     size_t		bytes_evicted = 0;
+    hbool_t             prev_is_dirty = FALSE;
     H5C_cache_entry_t * entry_ptr;
+    H5C_cache_entry_t * next_ptr;
     H5C_cache_entry_t * prev_ptr;
 
     FUNC_ENTER_NOAPI_NOINIT(H5C__autoadjust__ageout__evict_aged_out_entries)
@@ -8358,7 +8775,13 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t * f,
         {
             HDassert( ! (entry_ptr->is_protected) );
 
+	    next_ptr = entry_ptr->next;
             prev_ptr = entry_ptr->prev;
+
+	    if ( prev_ptr != NULL ) {
+
+                prev_is_dirty = prev_ptr->is_dirty;
+            }
 
             if ( entry_ptr->is_dirty ) {
 
@@ -8392,8 +8815,41 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t * f,
                             "unable to flush entry")
             }
 
-            entry_ptr = prev_ptr;
+            if ( prev_ptr != NULL ) {
+#ifndef NDEBUG
+                if ( prev_ptr->magic != H5C__H5C_CACHE_ENTRY_T_MAGIC ) {
 
+                   /* something horrible has happened to *prev_ptr --
+                    * scream and die.
+                    */
+                   HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                               "*prev_ptr corrupt")
+
+                } else 
+#endif /* NDEBUG */
+		if ( ( prev_ptr->is_dirty != prev_is_dirty )
+                            ||
+                            ( prev_ptr->next != next_ptr )
+                            ||
+                            ( prev_ptr->is_protected )
+                            ||
+                            ( prev_ptr->is_pinned ) ) {
+
+                    /* something has happened to the LRU -- start over
+                     * from the tail.
+                     */
+                    entry_ptr = cache_ptr->LRU_tail_ptr;
+
+                } else {
+
+                    entry_ptr = prev_ptr;
+
+                }
+            } else {
+
+                entry_ptr = NULL;
+
+            }
         } /* end while */
 
         /* for now at least, don't bother to maintain the minimum clean size,
@@ -8741,6 +9197,173 @@ done:
 
 } /* H5C__autoadjust__ageout__remove_excess_markers() */
 
+/*-------------------------------------------------------------------------
+ *
+ * Function:	H5C__flash_increase_cache_size
+ *
+ * Purpose:    	If there is not at least new_entry_size - old_entry_size
+ *		bytes of free space in the cache and the current 
+ *              max_cache_size is less than (cache_ptr->resize_ctl).max_size, 
+ *              perform a flash increase in the cache size and then reset 
+ *              the full cache hit rate statistics, and exit.
+ *
+ * Return:      Non-negative on success/Negative on failure.
+ *
+ * Programmer:  John Mainzer, 12/31/07
+ *
+ * Modifications:
+ *
+ *		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t
+H5C__flash_increase_cache_size(H5C_t * cache_ptr,
+                               size_t old_entry_size,
+                               size_t new_entry_size)
+{
+    /* const char *	fcn_name = "H5C__flash_increase_cache_size()";*/
+    herr_t			ret_value = SUCCEED;      /* Return value */
+    size_t			new_max_cache_size = 0;
+    size_t			old_max_cache_size = 0;
+    size_t			new_min_clean_size = 0;
+    size_t			old_min_clean_size = 0;
+    size_t                      space_needed;
+    enum H5C_resize_status	status = flash_increase; /* may change */
+    double			hit_rate;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5C__flash_increase_cache_size)
+    HDassert( cache_ptr );
+    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
+    HDassert( cache_ptr->flash_size_increase_possible );
+    HDassert( new_entry_size > cache_ptr->flash_size_increase_threshold );
+    HDassert( old_entry_size < new_entry_size );
+
+    if ( old_entry_size >= new_entry_size ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                    "old_entry_size >= new_entry_size")
+    }
+
+    space_needed = new_entry_size - old_entry_size;
+
+    if ( ( (cache_ptr->index_size + space_needed) > 
+                           cache_ptr->max_cache_size ) &&
+         ( cache_ptr->max_cache_size < (cache_ptr->resize_ctl).max_size ) ) {
+
+        /* we have work to do */
+
+        switch ( (cache_ptr->resize_ctl).flash_incr_mode ) 
+        {
+            case H5C_flash_incr__off:
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                   "flash_size_increase_possible but H5C_flash_incr__off?!")
+                break;
+
+            case H5C_flash_incr__add_space:
+		if ( cache_ptr->index_size < cache_ptr->max_cache_size ) {
+                
+		    HDassert( (cache_ptr->max_cache_size - cache_ptr->index_size)
+				    < space_needed );
+                    space_needed -= cache_ptr->max_cache_size - cache_ptr->index_size;
+		}
+		space_needed = 
+		    (size_t)(((double)space_needed) * 
+			     (cache_ptr->resize_ctl).flash_multiple);
+
+                new_max_cache_size = cache_ptr->max_cache_size + space_needed;
+
+                break;
+
+            default: /* should be unreachable */
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                            "Unknown flash_incr_mode?!?!?.")
+                break;
+        }
+
+        if ( new_max_cache_size > (cache_ptr->resize_ctl).max_size ) {
+
+	    new_max_cache_size = (cache_ptr->resize_ctl).max_size;
+        }
+
+        HDassert( new_max_cache_size > cache_ptr->max_cache_size );
+
+        new_min_clean_size = (size_t)
+                             ((double)new_max_cache_size *
+                              ((cache_ptr->resize_ctl).min_clean_fraction));
+
+        HDassert( new_min_clean_size <= new_max_cache_size );
+
+        old_max_cache_size = cache_ptr->max_cache_size;
+        old_min_clean_size = cache_ptr->min_clean_size;
+
+        cache_ptr->max_cache_size = new_max_cache_size;
+        cache_ptr->min_clean_size = new_min_clean_size;
+
+        /* update flash cache size increase fields as appropriate */
+        HDassert ( cache_ptr->flash_size_increase_possible );
+
+        switch ( (cache_ptr->resize_ctl).flash_incr_mode )
+        {
+            case H5C_flash_incr__off:
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                   "flash_size_increase_possible but H5C_flash_incr__off?!")
+                break;
+
+            case H5C_flash_incr__add_space:
+                cache_ptr->flash_size_increase_threshold =
+                    (size_t)
+                    (((double)(cache_ptr->max_cache_size)) *
+                     ((cache_ptr->resize_ctl).flash_threshold));
+                break;
+
+            default: /* should be unreachable */
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                            "Unknown flash_incr_mode?!?!?.")
+                break;
+        }
+
+        /* note that we don't cycle the epoch markers.  We can 
+         * argue either way as to whether we should, but for now
+         * we don't.
+         */
+
+        if ( (cache_ptr->resize_ctl).rpt_fcn != NULL ) {
+
+	    /* get the hit rate for the reporting function.  Should still
+	     * be good as we havent reset the hit rate statistics.
+	     */
+            if ( H5C_get_cache_hit_rate(cache_ptr, &hit_rate) != SUCCEED ) {
+
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't get hit rate.")
+            }
+
+            (*((cache_ptr->resize_ctl).rpt_fcn))
+                (cache_ptr,
+                 H5C__CURR_AUTO_RESIZE_RPT_FCN_VER,
+                 hit_rate,
+                 status,
+                 old_max_cache_size,
+                 new_max_cache_size,
+                 old_min_clean_size,
+                 new_min_clean_size);
+        }
+
+        if ( H5C_reset_cache_hit_rate_stats(cache_ptr) != SUCCEED ) {
+
+            /* this should be impossible... */
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                        "H5C_reset_cache_hit_rate_stats failed.")
+        }
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C__flash_increase_cache_size() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5C_flush_invalidate_cache
@@ -8779,11 +9402,27 @@ done:
  *
  * Modifications:
  *
- *		 To support the fractal heap, the cache must now deal with
- *		 entries being dirtied, resized, and/or renamed inside
- *		 flush callbacks.  Updated function to support this.
+ *		To support the fractal heap, the cache must now deal with
+ *		entries being dirtied, resized, and/or renamed inside
+ *		flush callbacks.  Updated function to support this.
  *
  *		                                     -- JRM 8/27/06
+ *
+ *              Added code to detect and manage the case in which a
+ *              flush callback changes the s-list out from under
+ *              the function.  The only way I can think of in which this
+ *              can happen is if a flush function loads an entry
+ *              into the cache that isn't there already.  Quincey tells
+ *              me that this will never happen, but I'm not sure I
+ *              believe him.
+ *
+ *              Note that this is a pretty bad scenario if it ever
+ *              happens.  The code I have added should allow us to
+ *              handle the situation under all but the worst conditions, 
+ *              but one can argue that I should just scream and die if I 
+ *              ever detect the condidtion.
+ *
+ * 							-- JRM 10/13/07
  *
  *-------------------------------------------------------------------------
  */
@@ -8895,6 +9534,23 @@ H5C_flush_invalidate_cache(H5F_t *  f,
 
             node_ptr = H5SL_first(cache_ptr->slist_ptr);
 
+            if ( node_ptr == NULL ) {
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                            "slist_len != 0 && node_ptr == NULL");
+            }
+
+            next_entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
+
+            if ( next_entry_ptr == NULL ) {
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                            "next_entry_ptr == NULL 1 ?!?!");
+            }
+#ifndef NDEBUG
+	    HDassert( next_entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC );
+#endif /* NDEBUG */
+            HDassert( next_entry_ptr->is_dirty );
+            HDassert( next_entry_ptr->in_slist );
+
         }
 #if H5C_DO_SANITY_CHECKS
         /* Depending on circumstances, H5C_flush_single_entry() will
@@ -8927,23 +9583,88 @@ H5C_flush_invalidate_cache(H5F_t *  f,
 
         while ( node_ptr != NULL )
         {
-	    /* Note that we now remove nodes from the slist as we flush
-             * the associated entries, instead of leaving them there
-             * until we are done, and then destroying all nodes in
-             * the slist.
-             *
-             * While this optimization used to be easy, with the possibility
-	     * of new entries being added to the slist in the midst of the 
-	     * flush, we must keep the slist in cannonical form at all 
-	     * times.
-             */
+            entry_ptr = next_entry_ptr;
 
-            entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
+            /* With the advent of the fractal heap, it is possible
+             * that the flush callback will dirty and/or resize
+             * other entries in the cache.  In particular, while
+             * Quincey has promised me that this will never happen,
+             * it is possible that the flush callback for an
+             * entry may protect an entry that is not in the cache,
+             * perhaps causing the cache to flush and possibly
+             * evict the entry associated with node_ptr to make
+             * space for the new entry.
+             *
+             * Thus we do a bit of extra sanity checking on entry_ptr,
+             * and break out of this scan of the skip list if we
+             * detect major problems.  We have a bit of leaway on the
+             * number of passes though the skip list, so this shouldn't
+             * be an issue in the flush in and of itself, as it should
+             * be all but impossible for this to happen more than once
+             * in any flush.
+             *
+             * Observe that that breaking out of the scan early
+             * shouldn't break the sanity checks just after the end
+	     * of this while loop.
+	     *
+	     * If an entry has merely been marked clean and removed from
+	     * the s-list, we simply break out of the scan.
+	     *
+	     * If the entry has been evicted, we flag an error and
+	     * exit.
+             */
+#ifndef NDEBUG
+	    if ( entry_ptr->magic != H5C__H5C_CACHE_ENTRY_T_MAGIC ) {
+
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                            "entry_ptr->magic is invalid ?!?!");
+
+	    } else 
+#endif /* NDEBUG */
+	    if ( ( ! entry_ptr->is_dirty ) ||
+                 ( ! entry_ptr->in_slist ) ) {
+
+                /* the s-list has been modified out from under us.
+	         * break out of the loop.
+                 */
+                break;
+            }
 
             /* increment node pointer now, before we delete its target
              * from the slist.
              */
+
             node_ptr = H5SL_next(node_ptr);
+            if ( node_ptr != NULL ) {
+
+                next_entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
+
+                if ( next_entry_ptr == NULL ) {
+                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                                "next_entry_ptr == NULL 2 ?!?!");
+                }
+#ifndef NDEBUG
+		HDassert( next_entry_ptr->magic ==
+                          H5C__H5C_CACHE_ENTRY_T_MAGIC );
+#endif /* NDEBUG */
+                HDassert( next_entry_ptr->is_dirty );
+                HDassert( next_entry_ptr->in_slist );
+
+            } else {
+
+                next_entry_ptr = NULL;
+	    }
+
+            /* Note that we now remove nodes from the slist as we flush
+	     * the associated entries, instead of leaving them there
+	     * until we are done, and then destroying all nodes in
+             * the slist.
+             *
+             * While this optimization used to be easy, with the possibility
+             * of new entries being added to the slist in the midst of the
+             * flush, we must keep the slist in cannonical form at all
+             * times.
+             */
 
             HDassert( entry_ptr != NULL );
             HDassert( entry_ptr->in_slist );
@@ -9030,12 +9751,19 @@ H5C_flush_invalidate_cache(H5F_t *  f,
 	/* It is possible that entries were added to the slist during
 	 * the scan, either before or after scan pointer.  The following
 	 * asserts take this into account.
-	 */
+         *
+         * Don't bother with the sanity checks if node_ptr != NULL, as
+         * in this case we broke out of the loop because it got changed
+         * out from under us.
+         */
 
-        HDassert( (actual_slist_len + cache_ptr->slist_len) == 
-		  (initial_slist_len + cache_ptr->slist_len_increase) );
-        HDassert( (actual_slist_size + cache_ptr->slist_size) == 
-		  (initial_slist_size + cache_ptr->slist_size_increase) );
+	if ( node_ptr == NULL ) {
+
+            HDassert( (actual_slist_len + cache_ptr->slist_len) == 
+		      (initial_slist_len + cache_ptr->slist_len_increase) );
+            HDassert( (actual_slist_size + cache_ptr->slist_size) == 
+		      (initial_slist_size + cache_ptr->slist_size_increase) );
+	}
 #endif /* H5C_DO_SANITY_CHECKS */
 
         /* Since we are doing a destroy, we must make a pass through
@@ -9056,8 +9784,13 @@ H5C_flush_invalidate_cache(H5F_t *  f,
             while ( next_entry_ptr != NULL )
             {
                 entry_ptr = next_entry_ptr;
-                next_entry_ptr = entry_ptr->ht_next;
 
+                next_entry_ptr = entry_ptr->ht_next;
+#ifndef NDEBUG
+		HDassert ( ( next_entry_ptr == NULL ) ||
+                           ( next_entry_ptr->magic ==
+                             H5C__H5C_CACHE_ENTRY_T_MAGIC ) );
+#endif /* NDEBUG */
                 if ( entry_ptr->is_protected ) {
 
                     /* we have major problems -- but lets flush and destroy
@@ -9099,6 +9832,28 @@ H5C_flush_invalidate_cache(H5F_t *  f,
 		 * of pinned entries from pass to pass.  If it stops
 		 * shrinking before it hits zero, we scream and die.
 		 */
+                /* if the flush function on the entry we last evicted
+                 * loaded an entry into cache (as Quincey has promised me
+                 * it never will), and if the cache was full, it is
+                 * possible that *next_entry_ptr was flushed or evicted.
+                 *
+                 * Test to see if this happened here.  Note that if this 
+		 * test is triggred, we are accessing a deallocated piece 
+		 * of dynamically allocated memory, so we just scream and 
+		 * die.
+                 */
+#ifndef NDEBUG
+                if ( ( next_entry_ptr != NULL ) &&
+                     ( next_entry_ptr->magic !=
+                       H5C__H5C_CACHE_ENTRY_T_MAGIC ) ) {
+
+                    /* Something horrible has happened to
+                     * *next_entry_ptr -- scream and die.
+                     */
+                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                                "next_entry_ptr->magic is invalid?!?!?.")
+                }
+#endif /* NDEBUG */
             } /* end while loop scanning hash table bin */
         } /* end for loop scanning hash table */
 
@@ -9541,6 +10296,17 @@ H5C_flush_single_entry(H5F_t *		   f,
         /* Clear the dirty flag only, if requested */
         if ( clear_only ) {
 
+#ifndef NDEBUG
+	    if ( destroy ) {
+		/* we are about to call the clear callback with the 
+		 * destroy flag set -- this will result in *entry_ptr
+		 * being freed.  Set the magic field to bad magic
+		 * so we can detect a freed cache entry if we see
+		 * one.
+		 */
+		entry_ptr->magic = H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC;
+	    }
+#endif /* NDEBUG */
             /* Call the callback routine to clear all dirty flags for object */
             if ( (entry_ptr->type->clear)(f, entry_ptr, destroy) < 0 ) {
 
@@ -9557,6 +10323,18 @@ H5C_flush_single_entry(H5F_t *		   f,
                             "Write when writes are always forbidden!?!?!")
             }
 #endif /* H5C_DO_SANITY_CHECKS */
+
+#ifndef NDEBUG
+	    if ( destroy ) {
+	        /* we are about to call the flush callback with the 
+	         * destroy flag set -- this will result in *entry_ptr
+	         * being freed.  Set the magic field to bad magic
+	         * so we can detect a freed cache entry if we see
+	         * one.
+	         */
+	        entry_ptr->magic = H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC;
+	    }
+#endif /* NDEBUG */
 
             /* Only block for all the processes on the first piece of metadata
              */
@@ -9816,7 +10594,9 @@ H5C_load_entry(H5F_t *             f,
      */
 
     HDassert( ( entry_ptr->is_dirty == FALSE ) || ( type->id == 4 ) );
-
+#ifndef NDEBUG
+    entry_ptr->magic = H5C__H5C_CACHE_ENTRY_T_MAGIC;
+#endif /* NDEBUG */
     entry_ptr->addr = addr;
     entry_ptr->type = type;
     entry_ptr->is_protected = FALSE;
@@ -9914,6 +10694,21 @@ done:
  *		Added sanity checks using the new is_read_only and 
  *		ro_ref_count fields.
  *
+ *              JRM -- 10/13/07
+ *              Added code to detect and manage the case in which a
+ *              flush callback changes the LRU-list out from under
+ *              the function.  The only way I can think of in which this
+ *              can happen is if a flush function loads an entry
+ *              into the cache that isn't there already.  Quincey tells
+ *              me that this will never happen, but I'm not sure I
+ *              believe him.
+ *
+ *              Note that this is a pretty bad scenario if it ever
+ *              happens.  The code I have added should allow us to
+ *              handle the situation under all but the worst conditions, 
+ *              but one can argue that I should just scream and die if I 
+ *              ever detect the condidtion.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -9933,7 +10728,10 @@ H5C_make_space_in_cache(H5F_t *	f,
 #if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
     size_t		empty_space;
 #endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
+    hbool_t             prev_is_dirty = FALSE;
+    hbool_t             entry_is_epoch_maker = FALSE;
     H5C_cache_entry_t *	entry_ptr;
+    H5C_cache_entry_t *	next_ptr;
     H5C_cache_entry_t *	prev_ptr;
 
     FUNC_ENTER_NOAPI_NOINIT(H5C_make_space_in_cache)
@@ -9962,9 +10760,17 @@ H5C_make_space_in_cache(H5F_t *	f,
             HDassert( ! (entry_ptr->is_read_only) );
             HDassert( (entry_ptr->ro_ref_count) == 0 );
 
-            prev_ptr = entry_ptr->prev;
+            next_ptr = entry_ptr->next;
+	    prev_ptr = entry_ptr->prev;
+
+	    if ( prev_ptr != NULL ) {
+
+                prev_is_dirty = prev_ptr->is_dirty;
+            }
 
             if ( (entry_ptr->type)->id != H5C__EPOCH_MARKER_TYPE ) {
+
+                entry_is_epoch_maker = FALSE;
 
                 if ( entry_ptr->is_dirty ) {
 
@@ -9994,6 +10800,7 @@ H5C_make_space_in_cache(H5F_t *	f,
                 /* Skip epoch markers.  Set result to SUCCEED to avoid
                  * triggering the error code below.
                  */
+                entry_is_epoch_maker = TRUE;
                 result = SUCCEED;
             }
 
@@ -10003,11 +10810,54 @@ H5C_make_space_in_cache(H5F_t *	f,
                             "unable to flush entry")
             }
 
-            entry_ptr = prev_ptr;
-        }
+            if ( prev_ptr != NULL ) {
+#ifndef NDEBUG
+                if ( prev_ptr->magic != H5C__H5C_CACHE_ENTRY_T_MAGIC ) {
+
+                    /* something horrible has happened to *prev_ptr --
+                     * scream and die.
+                     */
+                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                                "*prev_ptr corrupt 1")
+
+                }
+#endif /* NDEBUG */
+		if ( entry_is_epoch_maker ) {
+	
+		    entry_ptr = prev_ptr;
+
+		} else if ( ( prev_ptr->is_dirty != prev_is_dirty )
+                            ||
+                            ( prev_ptr->next != next_ptr )
+                            ||
+                            ( prev_ptr->is_protected )
+                            ||
+                            ( prev_ptr->is_pinned ) ) {
+
+                    /* something has happened to the LRU -- start over
+                     * from the tail.
+                     */
+
+                    entry_ptr = cache_ptr->LRU_tail_ptr;
+
+                } else {
+
+                    entry_ptr = prev_ptr;
+
+                }
+            } else {
+
+                entry_ptr = NULL;
+
+            }
+
+            entries_examined++;
+
+	}
 
 #if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
+	entries_examined = 0;
         initial_list_len = cache_ptr->dLRU_list_len;
         entry_ptr = cache_ptr->dLRU_tail_ptr;
 
@@ -10034,6 +10884,13 @@ H5C_make_space_in_cache(H5F_t *	f,
 
             prev_ptr = entry_ptr->aux_prev;
 
+	    next_ptr = entry_ptr->aux_next;
+
+            if ( prev_ptr != NULL ) {
+
+                HDassert( prev_ptr->is_dirty );
+            }
+
             result = H5C_flush_single_entry(f,
                                             primary_dxpl_id,
                                             secondary_dxpl_id,
@@ -10050,7 +10907,66 @@ H5C_make_space_in_cache(H5F_t *	f,
                             "unable to flush entry")
             }
 
-            entry_ptr = prev_ptr;
+            if ( prev_ptr != NULL ) {
+#ifndef NDEBUG
+                if (prev_ptr->magic != H5C__H5C_CACHE_ENTRY_T_MAGIC) {
+
+                    /* something horrible has happened to *prev_ptr --
+                     * scream and die.
+                     */
+
+                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                                "*prev_ptr corrupt 2")
+
+                } else 
+#endif /* #ifndef NDEBUG */
+		if ( ( ! ( prev_ptr->is_dirty ) )
+                     ||
+                     ( prev_ptr->aux_next != next_ptr )
+                     ||
+                     ( prev_ptr->is_protected )
+                     ||
+                     ( prev_ptr->is_pinned ) ) {
+
+                    /* something has happened to the dirty LRU -- start over
+                     * from the tail.
+                     */
+
+#if 0 /* This debuging code may be useful in the future -- keep it for now. */
+                    if ( ! ( prev_ptr->is_dirty ) ) {
+                        HDfprintf(stdout, "%s: ! prev_ptr->is_dirty\n",
+                                  fcn_name);
+                    }
+                    if ( prev_ptr->aux_next != next_ptr ) {
+                        HDfprintf(stdout, "%s: prev_ptr->next != next_ptr\n",
+                                  fcn_name);
+                    }
+                    if ( prev_ptr->is_protected ) {
+                        HDfprintf(stdout, "%s: prev_ptr->is_protected\n",
+                                  fcn_name);
+                    }
+                    if ( prev_ptr->is_pinned ) {
+                        HDfprintf(stdout, "%s:prev_ptr->is_pinned\n",
+                                  fcn_name);
+                    }
+
+                    HDfprintf(stdout, "%s: re-starting scan of dirty list\n",
+                              fcn_name);
+#endif /* JRM */
+                    entry_ptr = cache_ptr->dLRU_tail_ptr;
+
+                } else {
+
+                    entry_ptr = prev_ptr;
+
+                }
+            } else {
+
+                entry_ptr = NULL;
+
+            }
+
+            entries_examined++;
         }
 
 #endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
@@ -10096,6 +11012,7 @@ H5C_make_space_in_cache(H5F_t *	f,
             }
 
             entry_ptr = prev_ptr;
+	    entries_examined++;
         }
     }
 

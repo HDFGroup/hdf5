@@ -113,6 +113,11 @@ typedef struct H5F_file_t {
     struct H5G_t *root_grp;	/* Open root group			*/
     H5FO_t *open_objs;          /* Open objects in file                 */
     H5RC_t *grp_btree_shared;   /* Ref-counted group B-tree node info   */
+    hbool_t journaling_enabled;  /* metadata journaling configuration   */
+    hbool_t journal_is_external; /* fields.  All fields as per those    */
+    haddr_t internal_journal_loc;/* of the same name in M5O_mdj_conf_t. */
+    size_t path_len;                       
+    uint8_t * external_journal_file_path_ptr;
 } H5F_file_t;
 
 /* A record of the mount table */

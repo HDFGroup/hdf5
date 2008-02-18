@@ -77,6 +77,10 @@ static herr_t H5O_obj_type_real(H5O_t *oh, H5O_type_t *obj_type);
 /*********************/
 
 /* Header message ID to class mapping */
+
+/* Remember to increment H5O_MSG_TYPES in H5Opkg.h when adding a new 
+ * message.
+ */
 const H5O_msg_class_t *const H5O_msg_class_g[] = {
     H5O_MSG_NULL,		/*0x0000 Null				*/
     H5O_MSG_SDSPACE,		/*0x0001 Dataspace			*/
@@ -105,8 +109,11 @@ const H5O_msg_class_t *const H5O_msg_class_g[] = {
     H5O_MSG_DRVINFO,		/*0x0014 Driver info settings		*/
     H5O_MSG_AINFO,		/*0x0015 Attribute information		*/
     H5O_MSG_REFCOUNT,		/*0x0016 Object's ref. count		*/
-    H5O_MSG_UNKNOWN,		/*0x0017 Placeholder for unknown message */
+    H5O_MSG_MDJ_CONF,		/*0x0017 Metadata journaling config     */
+    H5O_MSG_UNKNOWN,		/*0x0018 Placeholder for unknown message */
 };
+
+/* HDassert(H5O_UNKNOWN_ID < H5O_MSG_TYPES); */
 
 /* Header object ID to class mapping */
 /*
@@ -157,6 +164,10 @@ H5FL_EXTERN(time_t);
  * Programmer:	Quincey Koziol
  *              Thursday, January 18, 2007
  *
+ * Changes:     JRM -- 12/12/07
+ *              Added santity check verifying that H5O_msg_class_g
+ *              is big enough.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -167,6 +178,8 @@ H5O_init_interface(void)
     /* H5O interface sanity checks */
     HDassert(H5O_MSG_TYPES == NELMTS(H5O_msg_class_g));
     HDassert(sizeof(H5O_fheap_id_t) == H5O_FHEAP_ID_LEN);
+
+    HDassert(H5O_UNKNOWN_ID < H5O_MSG_TYPES);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_init_interface() */

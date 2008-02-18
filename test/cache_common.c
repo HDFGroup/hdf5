@@ -1722,6 +1722,91 @@ resize_entry(H5C_t * cache_ptr,
 
 
 /*-------------------------------------------------------------------------
+ * Function:	resize_pinned_entry
+ *
+ * Purpose:	Given a pointer to a cache, an entry type, an index, and
+ *              a new size, change the size of the target pinned entry
+ *              to match the supplied new size.
+ *
+ *		Do nothing if pass is false on entry.
+ *
+ * Return:	void
+ *
+ * Programmer:	John Mainzer
+ *              1/11/08
+ *
+ * Modifications:
+ *
+ *		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+void
+resize_pinned_entry(H5C_t * cache_ptr,
+                    int32_t type,
+                    int32_t idx,
+	            size_t new_size)
+{
+    herr_t result;
+    test_entry_t * base_addr;
+    test_entry_t * entry_ptr;
+
+    HDassert( cache_ptr );
+    HDassert( ( 0 <= type ) && ( type < NUMBER_OF_ENTRY_TYPES ) );
+    HDassert( ( 0 <= idx ) && ( idx <= max_indices[type] ) );
+    HDassert( type = VARIABLE_ENTRY_TYPE ) ;
+    HDassert( ( 0 < new_size ) && ( new_size <= entry_sizes[type] ) );
+
+    if ( pass ) {
+
+        if ( ! entry_in_cache(cache_ptr, type, idx) ) {
+
+	    pass = FALSE;
+            failure_mssg = "entry not in cache.";
+
+        } else {
+
+            base_addr = entries[type];
+            entry_ptr = &(base_addr[idx]);
+
+            HDassert( entry_ptr->index == idx );
+            HDassert( entry_ptr->type == type );
+            HDassert( entry_ptr == entry_ptr->self );
+
+            if ( ! ( (entry_ptr->header).is_pinned ) ) {
+
+                pass = FALSE;
+                failure_mssg = "entry to be resized is not pinned.";
+		    
+            } else {
+
+		entry_ptr->size = new_size;
+
+	        result = H5C_resize_pinned_entry(cache_ptr, 
+				                 (void *)entry_ptr, 
+						 new_size);
+
+		if ( result != SUCCEED ) {
+
+		    pass = FALSE;
+		    failure_mssg = "error(s) in H5C_resize_pinned_entry().";
+
+		} else {
+
+		    HDassert( entry_ptr->size = (entry_ptr->header).size );
+
+                }
+	    }
+	}
+    }
+
+    return;
+
+} /* resize_pinned_entry() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	verify_clean
  *
  * Purpose:	Verify that all cache entries are marked as clean.  If any
@@ -2460,6 +2545,12 @@ mark_pinned_entry_dirty(H5C_t * cache_ptr,
 
 	entry_ptr->is_dirty = TRUE;
 
+	if ( size_changed ) {
+	
+	    /* update entry size now to keep the sanity checks happy */
+	    entry_ptr->size = new_size;
+	}
+
         result = H5C_mark_pinned_entry_dirty(cache_ptr,
 			                     (void *)entry_ptr,
 					     size_changed,
@@ -2472,6 +2563,22 @@ mark_pinned_entry_dirty(H5C_t * cache_ptr,
              ( entry_ptr->size != entry_ptr->header.size ) ||
              ( entry_ptr->addr != entry_ptr->header.addr ) ) {
 
+#if 0 /* This is useful debugging code -- keep it around  */
+	    HDfprintf(stdout, "result = %ld.\n", (long)result);
+	    HDfprintf(stdout, "entry_ptr->header.is_dirty = %d.\n",
+		      (int)(entry_ptr->header.is_dirty));
+	    HDfprintf(stdout, "entry_ptr->header.is_pinned = %d.\n",
+		      (int)(entry_ptr->header.is_pinned));
+	    HDfprintf(stdout, 
+		      "(entry_ptr->header.type != &(types[type])) = %d.\n",
+		      (int)(entry_ptr->header.type != &(types[type])));
+	    HDfprintf(stdout, 
+		      "entry_ptr->size = %ld, entry_ptr->header.size = %ld.\n",
+		      (long)(entry_ptr->size), (long)(entry_ptr->header.size));
+	    HDfprintf(stdout, 
+		      "entry_ptr->addr = %ld, entry_ptr->header.addr = %ld.\n",
+		      (long)(entry_ptr->addr), (long)(entry_ptr->header.addr));
+#endif 
             pass = FALSE;
             failure_mssg = "error in H5C_mark_pinned_entry_dirty().";
 

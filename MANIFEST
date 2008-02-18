@@ -452,6 +452,7 @@
 ./src/H5Cprivate.h
 ./src/H5Cpublic.h
 ./src/H5C2.c
+./src/H5C2journal.c
 ./src/H5C2pkg.h
 ./src/H5C2private.h
 ./src/H5C2public.h
