@@ -19,6 +19,9 @@ rem This batch file takes the following options:
 rem .  /fort             Build and test HDF5 with Fortran libraries
 rem .  /useenv           Build HDF5 using compiler settings defined
 rem .                    in the environment, rather than the IDE.
+rem .  /log               Log the build and test results in files defined by
+rem .                      environment variables HDF5BUILD_LOG and
+rem .                      HDF5CHECK_LOG
 rem .  /?                Help information
 rem By Xuan Bai
 rem Created: Aug. 16, 2004
@@ -33,6 +36,8 @@ rem    - szip and zlib DLLs are already placed in an accessible directory
 rem    - hdf5_ext_szip or hdf5_ext_zlib have been set accordingly
 rem    - if building with the /useenv option, szip and zlib paths have been added
 rem      to %include% and %libpath% as necessary.
+rem    - if using the /log option, hdf5build_log and hdf5_check log should be defined
+rem    - in the environment.
 
 rem By default, only C and C++ libraries are built and tested.
 
@@ -69,6 +74,10 @@ rem Parse through the parameters sent to file, and set appropriate variables
             rem Pass /useenv flag to devenv
             set hdf5_useenv=true
             
+        ) else if "%%a"=="/log" (
+            rem Log our results to files defined in environment
+            set hdf5_logresults=true
+                        
         ) else if "%%a"=="/?" (
             rem Set errorlevel 1 and send to help
             call :help
@@ -102,21 +111,49 @@ rem Setup our environment
         set hdf5build_params=%hdf5build_params% /useenv
     )
     
+    rem Clear out our log files if they will be used
+    if defined hdf5_logresults (
+        if not defined hdf5build_log (
+            echo.Error: HDF5BUILD_LOG not defined in environment!
+            exit /b 1
+        ) else (
+            type nul > !hdf5build_log!
+        )
+        
+        if not defined hdf5check_log (
+            echo.Error: HDF5CHECK_LOG not defined in environment!
+            exit /b 1
+        ) else (
+            type nul > !hdf5check_log!
+        )
+    )
+    
     exit /b 0
 
 
 rem Build HDF5 libraries and tools
 :build
 
-    call hdf5build.bat %hdf5build_params%
+    if defined hdf5_logresults (
+        echo.Calling hdf5bbuild.bat %hdf5build_params%
+        echo.Results logged in %hdf5build_log%
+        call hdf5build.bat %hdf5build_params% > !hdf5build_log! 2>&1
+    ) else (
+        call hdf5build.bat %hdf5build_params%
+    )
 
     exit /b
 
 
 rem Test our libraries and tools
 :test
-
-    call hdf5check %hdf5check_params%
+    if defined hdf5_logresults (
+        echo.Calling hdf5check.bat %hdf5check_params%
+        echo.Results logged in %hdf5check_log%
+        call hdf5check %hdf5check_params% > !hdf5check_log! 2>&1
+    ) else (
+        call hdf5check %hdf5check_params%
+    )
 
     exit /b
 
@@ -151,6 +188,10 @@ rem This is where the magic happens
     )
 
     call :setup
+    if %errorlevel% neq 0 (
+        echo.Error setting up hdf5bt environment!
+        goto error
+    )
 
     echo.*****************************************************************************
     echo.                        Build and Test HDF5 Library and Tools
