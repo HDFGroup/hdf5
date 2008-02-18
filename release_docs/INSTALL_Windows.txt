@@ -833,16 +833,16 @@ To build and test HDF5 High Level C examples:
       subdirectories in c:\MyHDFstuff\hdf5\examples\
 
           allhlcexamples
-          ex_images
-          ex_imagesdll
-          ex_lite
-          ex_litedll
-          ex_table
-          ex_tabledll
-          ex_ds
-          ex_dsdll
-          ex_packet
-          ex_packetdll
+          ex_image1
+          ex_image1dll
+          ex_lite1
+          ex_lite1dll
+          ex_table01
+          ex_table01dll
+          ex_ds1
+          ex_ds1dll
+          ptExampleFL
+          ptExampleFLdll
 
    3. Invoke a command prompt and run the batch file Install_hlcexamples.bat 
       which resides in the top level directory (c:\MyHDFstuff\hdf5).  This file 

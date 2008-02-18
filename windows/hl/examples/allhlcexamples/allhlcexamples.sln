@@ -14,25 +14,25 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "allhlcexamples", "allhlcexa
 		{4B6CC6F6-C64D-4A1A-BF78-1304AA91D618} = {4B6CC6F6-C64D-4A1A-BF78-1304AA91D618}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ex_ds", "..\ex_ds\ex_ds.vcproj", "{70E7B820-4AEB-49EF-93C5-A6BBDF69B76F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ex_ds1", "..\ex_ds1\ex_ds1.vcproj", "{70E7B820-4AEB-49EF-93C5-A6BBDF69B76F}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ex_dsdll", "..\ex_dsdll\ex_dsdll.vcproj", "{C17AAC18-2DFC-46DE-AF5F-749F6F043DE0}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ex_ds1dll", "..\ex_ds1dll\ex_ds1dll.vcproj", "{C17AAC18-2DFC-46DE-AF5F-749F6F043DE0}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ex_images", "..\ex_images\ex_images.vcproj", "{B4DE42B5-0032-4175-BEEE-F65875360A45}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ex_image1", "..\ex_image1\ex_image1.vcproj", "{B4DE42B5-0032-4175-BEEE-F65875360A45}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ex_imagesdll", "..\ex_imagesdll\ex_imagesdll.vcproj", "{E424C58A-BEA8-4801-8A9C-5E976A3FAA5D}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ex_image1dll", "..\ex_image1dll\ex_image1dll.vcproj", "{E424C58A-BEA8-4801-8A9C-5E976A3FAA5D}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ex_lite", "..\ex_lite\ex_lite.vcproj", "{4B6CC6F6-C64D-4A1A-BF78-1304AA91D618}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ex_lite1", "..\ex_lite1\ex_lite1.vcproj", "{4B6CC6F6-C64D-4A1A-BF78-1304AA91D618}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ex_litedll", "..\ex_litedll\ex_litedll.vcproj", "{DB7330C6-D009-4BF7-B85D-656185825950}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ex_lite1dll", "..\ex_lite1dll\ex_lite1dll.vcproj", "{DB7330C6-D009-4BF7-B85D-656185825950}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ex_packet", "..\ex_packet\ex_packet.vcproj", "{47753B08-F9F5-409B-9EC2-9135B4508BAF}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ptExampleFL", "..\ptExampleFL\ptExampleFL.vcproj", "{47753B08-F9F5-409B-9EC2-9135B4508BAF}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ex_packetdll", "..\ex_packetdll\ex_packetdll.vcproj", "{25DC2207-299D-4272-9530-B126539BE0E9}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ptExampleFLdll", "..\ptExampleFLdll\ptExampleFLdll.vcproj", "{25DC2207-299D-4272-9530-B126539BE0E9}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ex_table", "..\ex_table\ex_table.vcproj", "{334E19CF-8B74-4067-8303-A398E3F22593}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ex_table01", "..\ex_table01\ex_table01.vcproj", "{334E19CF-8B74-4067-8303-A398E3F22593}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ex_tabledll", "..\ex_tabledll\ex_tabledll.vcproj", "{4116EF37-EBA5-424F-A01B-2D80DB5807E3}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ex_table01dll", "..\ex_table01dll\ex_table01dll.vcproj", "{4116EF37-EBA5-424F-A01B-2D80DB5807E3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

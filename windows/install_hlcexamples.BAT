@@ -1,34 +1,36 @@
-@REM Copyright by The HDF Group.
-@REM Copyright by the Board of Trustees of the University of Illinois.
-@REM All rights reserved.
-@REM
-@REM This file is part of HDF5.  The full HDF5 copyright notice, including
-@REM terms governing use, modification, and redistribution, is contained in
-@REM the files COPYING and Copyright.html.  COPYING can be found at the root
-@REM of the source code distribution tree; Copyright.html can be found at the
-@REM root level of an installed copy of the electronic HDF5 document set and
-@REM is linked from the top-level documents page.  It can also be found at
-@REM http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
-@REM access to either file, you may request a copy from help@hdfgroup.org.
+@echo OFF
+rem Copyright by The HDF Group.
+rem Copyright by the Board of Trustees of the University of Illinois.
+rem All rights reserved.
+rem
+rem This file is part of HDF5.  The full HDF5 copyright notice, including
+rem terms governing use, modification, and redistribution, is contained in
+rem the files COPYING and Copyright.html.  COPYING can be found at the root
+rem of the source code distribution tree; Copyright.html can be found at the
+rem root level of an installed copy of the electronic HDF5 document set and
+rem is linked from the top-level documents page.  It can also be found at
+rem http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+rem access to either file, you may request a copy from help@hdfgroup.org.
 
 
-@ECHO OFF
-@:: This batch file is used to install HDF5 High Level C 
-@:: Examples' executable files.
-@:: Written by   : Fang GUO
-@:: Created on   : 07/25/2005
-@:: Last Modified: 03/08/2006
+rem This batch file is used to install HDF5 High Level C 
+rem Examples' executable files.
+rem Written by   : Fang GUO
+rem Created on   : 07/25/2005
+rem Last Modified: 2/18/2008
 
-cd hl/examples
+pushd hl\examples
 
 mkdir HLCexamplesRELEASE
 mkdir HLCexamplesRELEASEDLL
 mkdir HLCexamplesDEBUG
 mkdir HLCexamplesDEBUGDLL
 
-for %%i in (images lite table ds packet) do (
-copy ex_%%i\debug\ex_%%i.exe HLCexamplesDEBUG\
-copy ex_%%i\release\ex_%%i.exe HLCexamplesRELEASE\
-copy ex_%%idll\debug\ex_%%idll.exe HLCexamplesDEBUGDLL\
-copy ex_%%idll\release\ex_%%idll.exe HLCexamplesRELEASEDLL\
+for %%i in (ex_image1 ex_lite1 ex_table01 ex_ds1 ptExampleFL) do (
+    copy %%i\debug\%%i.exe HLCexamplesDEBUG\
+    copy %%i\release\%%i.exe HLCexamplesRELEASE\
+    copy %%idll\debug\%%idll.exe HLCexamplesDEBUGDLL\
+    copy %%idll\release\%%idll.exe HLCexamplesRELEASEDLL\
 )
+
+popd
