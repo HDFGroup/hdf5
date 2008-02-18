@@ -1728,13 +1728,21 @@ AC_MSG_RESULT([no]))
 
 dnl Check whether the global variable `timezone' is defined.
 AC_MSG_CHECKING([for global timezone variable])
-AC_TRY_LINK([
-#include <sys/time.h>
-#include <time.h>], [timezone=0;],
-AC_DEFINE([HAVE_TIMEZONE], [1],
-          [Define if `timezone' is a global variable])
-AC_MSG_RESULT([yes]),
-AC_MSG_RESULT([no]))
+
+case "`uname`" in
+  CYGWIN*)
+    AC_MSG_RESULT([disabled in CYGWIN])
+    ;;
+  *)
+    AC_TRY_LINK([
+    #include <sys/time.h>
+    #include <time.h>], [timezone=0;],
+    AC_DEFINE([HAVE_TIMEZONE], [1],
+              [Define if `timezone' is a global variable])
+    AC_MSG_RESULT([yes]),
+    AC_MSG_RESULT([no]))
+    ;;
+esac
 
 dnl Check whether `struct timezone' is defined.
 AC_STRUCT_TIMEZONE
