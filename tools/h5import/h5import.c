@@ -12,6 +12,7 @@
  * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #include "hdf5.h"
 #include "H5private.h"
 #include <stdio.h>
@@ -19,6 +20,8 @@
 #include <string.h>
 #include <ctype.h>
 #include "h5import.h"
+#include "h5tools_utils.h"
+
 
 int main(int argc, char *argv[])
 {
@@ -41,6 +44,13 @@ int main(int argc, char *argv[])
 
   (void) HDsetvbuf(stderr, (char *) NULL, _IOLBF, 0);
   (void) HDsetvbuf(stdout, (char *) NULL, _IOLBF, 0);
+
+  if ( argv[1] && (strcmp("-V",argv[1])==0) )
+  {
+      print_version("h5import");
+      exit(EXIT_SUCCESS);
+      
+  }
 
  /*
   * validate the number of command line arguments
@@ -249,8 +259,23 @@ gtoken(char *s)
   return (token);
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    processDataFile
+ *
+ * Purpose:     allocate memory and read data file
+ *
+ * Return:      0, success, -1, error
+ *
+ * Programmer:  pkmat
+ *
+ * Modifications: pvn
+ *  2/19/2008. Added support for STR type, extra parameter FILE_ID
+ *
+ *-------------------------------------------------------------------------
+ */
+
 static int
-processDataFile(char *infile, struct Input *in, FILE **strm)
+processDataFile(char *infile, struct Input *in, FILE **strm, hid_t file_id)
 {
   const char *err1 = "Unable to open the input file  %s for reading.\n";
   const char *err2 = "Error in allocating integer data storage.\n";
@@ -260,6 +285,7 @@ processDataFile(char *infile, struct Input *in, FILE **strm)
   const char *err6 = "Error in allocating unsigned integer data storage.\n";
   const char *err7 = "Error in reading unsigned integer data.\n";
   const char *err10 = "Unrecognized input class type.\n";
+  const char *err11 = "Error in reading string data.\n";
 
  /*-------------------------------------------------------------------------
   * special case for opening binary classes in WIN32
@@ -341,7 +367,16 @@ processDataFile(char *infile, struct Input *in, FILE **strm)
     break;
 
     case 5: /*  STR  */
-    break;
+        
+        if (processStrData(strm, in, file_id) == -1)
+        {
+            (void) fprintf(stderr, err11, infile);
+            return(-1);
+        }
+        
+        
+        
+        break;
 
     case 6: /* TEXTUIN */
     case 7: /* UIN */
@@ -379,7 +414,7 @@ readIntegerData(FILE **strm, struct Input *in)
   int j;
 
   const char *err1 = "Unable to get integer value from file.\n";
-  const char *err2 = "Unrecongnized input class type.\n";
+  const char *err2 = "Unrecognized input class type.\n";
   const char *err3 = "Invalid input size.\n";
 
   for (j=0; j<in->rank;j++)
@@ -542,7 +577,7 @@ readUIntegerData(FILE **strm, struct Input *in)
   hsize_t i;
   int j;
   const char *err1 = "Unable to get unsigned integer value from file.\n";
-  const char *err2 = "Unrecongnized input class type.\n";
+  const char *err2 = "Unrecognized input class type.\n";
   const char *err3 = "Invalid input size.\n";
 
   for (j=0; j<in->rank;j++)
@@ -700,7 +735,7 @@ readFloatData(FILE **strm, struct Input *in)
   hsize_t i;
   int j;
   const char *err1 = "Unable to get integer value from file.\n";
-  const char *err2 = "Unrecongnized input class type.\n";
+  const char *err2 = "Unrecognized input class type.\n";
   const char *err3 = "Invalid input size type.\n";
 
   for (j=0; j<in->rank;j++)
@@ -788,6 +823,157 @@ readFloatData(FILE **strm, struct Input *in)
   }
   return(0);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function: processStrData
+ *
+ * Purpose: read an ASCII file with string data and generate an HDF5 dataset
+ *  with a variable length type
+ *
+ * Return: 0, ok, -1 no
+ *
+ * Programmer: Pedro Vicente, pvn@hdfgroup.org
+ *
+ * Date: July, 26, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+processStrData(FILE **strm, struct Input *in, hid_t file_id)
+{
+    hid_t   group_id, dset_id, space_id, mspace_id, type_id, handle;
+    hsize_t dims[1];
+    char    str[1024];
+    char    c;
+    int     i = 0, j, nlines = 0, line;
+    
+/*-------------------------------------------------------------------------
+ * get number of lines in the input file
+ *-------------------------------------------------------------------------
+ */
+
+    while ( !feof( *strm ) ) 
+    {
+        c = fgetc( *strm );
+                   
+        if ( c == 10 ) /* eol */
+        {
+            nlines++;
+            
+        }
+    }
+
+    if ( !nlines )
+        return 0;
+
+    /* number of records */
+    dims[0] = nlines;
+
+    /* rewind */
+    fseek(*strm,0L,0);
+
+/*-------------------------------------------------------------------------
+ * read file again and generate an HDF5 dataset
+ *-------------------------------------------------------------------------
+ */
+
+    if (( type_id = H5Tcopy(H5T_C_S1)) < 0 )
+        goto out;
+
+    if ( H5Tset_size (type_id,H5T_VARIABLE) < 0 )
+        goto out;
+
+    /* disable error reporting */
+    H5E_BEGIN_TRY 
+    {
+        
+        /* create parent groups */
+        if(in->path.count > 1) {
+            j = 0;
+            handle = file_id;
+            while(j < in->path.count - 1) {
+                if((group_id = H5Gopen(handle, in->path.group[j])) < 0) {
+                    group_id = H5Gcreate(handle, in->path.group[j++], 0);
+                    for(; j < in->path.count - 1; j++)
+                        group_id = H5Gcreate(group_id, in->path.group[j], 0);
+                    handle = group_id;
+                    break;
+                }
+                handle = group_id;
+                j++;
+            }
+        }
+        else {
+            handle = file_id;
+            j = 0;
+        }
+        
+        /*enable error reporting */
+    } H5E_END_TRY;
+
+    if((space_id = H5Screate_simple(1, dims, NULL)) < 0)
+        goto out;
+
+    if((mspace_id = H5Screate(H5S_SCALAR)) < 0)
+        goto out;
+
+    if((dset_id = H5Dcreate(handle, in->path.group[j], type_id, space_id, H5P_DEFAULT)) < 0)
+        goto out;
+
+    line = 0;
+
+    while(!feof(*strm)) {
+        c = fgetc(*strm);
+        
+        str[i] = c;
+        
+        i++;
+        
+        if(c == 10) /* eol */
+        {
+            char    *str2 = str;
+            hid_t   fspace_id;
+            hsize_t start[1];
+            hsize_t count[1] = { 1 };
+
+            str[ i-1 ] = '\0'; /* terminate string */
+
+            if (( fspace_id = H5Dget_space (dset_id)) < 0 )
+                goto out;
+
+            start[0] = line ++ ;
+
+            if ( H5Sselect_hyperslab(fspace_id,H5S_SELECT_SET,start,NULL,count,NULL) < 0 )
+                goto out;
+
+            if ( H5Dwrite(dset_id,type_id,mspace_id,fspace_id,H5P_DEFAULT, &str2 ) < 0 )
+                goto out;
+
+            if ( H5Sclose(fspace_id) < 0 )
+                goto out;
+
+            i = 0;
+            str[ 0 ] = '\0';
+            
+        }
+    }
+
+    
+    /* close */
+    H5Dclose(dset_id);
+    H5Sclose(space_id);
+    H5Sclose(mspace_id);
+    H5Tclose(type_id);
+
+    return(0);
+
+out:
+
+    return (-1);
+}
+
+
 
 static int
 allocateIntegerStorage(struct Input *in)
@@ -1291,6 +1477,10 @@ validateConfigurationParameters(struct Input * in)
 #ifdef WIN32
   const char *err6 = "No support for reading 64-bit integer (INPUT-CLASS: IN, TEXTIN, UIN, TEXTUIN files\n";
 #endif
+
+    /* for class STR other parameters are ignored */
+  if (in->inputClass == 5) /* STR */
+      return (0);
 
   if (
       (in->configOptionVector[DIM] != 1) ||
@@ -2276,11 +2466,14 @@ process(struct Options *opt)
         }
     }
 
-    if (processDataFile(opt->infiles[k].datafile, in, &strm) == -1)
+    if (processDataFile(opt->infiles[k].datafile, in, &strm, file_id ) == -1)
     {
       (void) fprintf(stderr, err3, opt->infiles[k].datafile);
       return (-1);
     }
+
+    if (in->inputClass != 5) /* STR */
+    {
 
     for (j=0; j<in->rank;j++)
       numOfElements *= in->sizeOfDimension[j];
@@ -2389,6 +2582,10 @@ process(struct Options *opt)
     H5Pclose(proplist);
     H5Sclose(dataspace);
   }
+
+  } /* STR */
+
+
   H5Fclose(file_id);
   return (0);
 }

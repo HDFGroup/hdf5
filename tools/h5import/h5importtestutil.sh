@@ -99,6 +99,9 @@ TOOLTEST binuin16.bin -c $srcdir/testfiles/binuin16.conf -o binuin16.h5
 TESTING "BINARY UI32 - rank 3 - Output LE + CHUNKED " 
 TOOLTEST binuin32.bin -c $srcdir/testfiles/binuin32.conf -o binuin32.h5
 
+TESTING "STR" 
+TOOLTEST $srcdir/testfiles/txtstr.txt -c $srcdir/testfiles/txtstr.conf -o txtstr.h5
+
 TESTING "BINARY I8 CR LF EOF" 
 TOOLTEST binin8w.bin -c $srcdir/testfiles/binin8w.conf -o binin8w.h5
 

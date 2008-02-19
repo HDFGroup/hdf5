@@ -13,6 +13,7 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+
 /*
  *
  * Data and structure definitions for h5import
@@ -214,7 +215,7 @@ static int  CompressionTypeStrToInt(char *temp);
 static int  getCompressionParameter(struct Input *in, FILE** strm);
 static int  getExternalFilename(struct Input *in, FILE** strm);
 static int  getMaximumDimensionSizes(struct Input *in, FILE **strm);
-static int  processDataFile(char *infile, struct Input *in, FILE **strm);
+static int  processDataFile(char *infile, struct Input *in, FILE **strm, hid_t file_id);
 static int  readIntegerData(FILE **strm, struct Input *in);
 static int  readFloatData(FILE **strm, struct Input *in);
 static int  allocateIntegerStorage(struct Input *in);
@@ -224,6 +225,7 @@ hid_t       createInputDataType(struct Input *in);
 static int  readUIntegerData(FILE **strm, struct Input *in);
 static int  allocateUIntegerStorage(struct Input *in);
 static int  validateConfigurationParameters(struct Input * in);
+static int  processStrData(FILE **strm, struct Input *in, hid_t file_id);
 
 #endif  /* H5IMPORT_H__ */
 
