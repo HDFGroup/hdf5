@@ -1499,6 +1499,9 @@
 ./tools/h5import/testfiles/txtuin32.h5
 ./tools/h5import/testfiles/txtuin16.h5
 ./tools/h5import/testfiles/txtin16.txt
+./tools/h5import/testfiles/txtstr.txt
+./tools/h5import/testfiles/txtstr.conf
+./tools/h5import/testfiles/txtstr.h5
 
 
 # h5diff sources
