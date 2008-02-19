@@ -19,18 +19,77 @@ rem Written by   : Fang GUO
 rem Created on   : 07/25/2005
 rem Last Modified: 2/18/2008
 
-pushd hl\examples
+setlocal enabledelayedexpansion
+pushd %~dp0
 
-mkdir HLCexamplesRELEASE
-mkdir HLCexamplesRELEASEDLL
-mkdir HLCexamplesDEBUG
-mkdir HLCexamplesDEBUGDLL
+set exdir=hl\examples
+set nerrors=0
+goto main
 
-for %%i in (ex_image1 ex_lite1 ex_table01 ex_ds1 ptExampleFL) do (
-    copy %%i\debug\%%i.exe HLCexamplesDEBUG\
-    copy %%i\release\%%i.exe HLCexamplesRELEASE\
-    copy %%idll\debug\%%idll.exe HLCexamplesDEBUGDLL\
-    copy %%idll\release\%%idll.exe HLCexamplesRELEASEDLL\
-)
+rem Simply create the needed directories
+:makedirs
+    mkdir %exdir%\HLCexamplesRELEASE
+    mkdir %exdir%\HLCexamplesRELEASEDLL
+    mkdir %exdir%\HLCexamplesDEBUG
+    mkdir %exdir%\HLCexamplesDEBUGDLL
+    exit /b
 
+rem This function actally copies the file over, first making sure it exists.  If not, we increment nerrors
+rem and print an error message
+rem Expected parameters:
+rem     %1 - name of file to copy
+rem     %2 - destination to copy to
+:safe_copy
+    
+    if exist %exdir%\%1 (
+        copy /y %exdir%\%1 %exdir%\%2 > nul
+    ) else (
+        echo.Warning: Cannot find example file: %exdir%\%1
+        set /a nerrors=%nerrors%+1
+    )
+    
+    exit /b %nerrors%
+    
+    
+:main
+    if not exist %exdir% (
+        echo.Error: Examples directory doesn't exist: %CD%\%exdir%
+        set /a nerrors=!nerrors!+1
+        goto :end
+    )
+    
+    call :makedirs
+    
+    rem copy the files
+    for %%a in (DEBUG RELEASE) do (
+        for %%b in (DLL static) do (
+            set ver=%%b
+            set ver=!ver:static=!
+            
+            call :safe_copy ex_ds1!ver!\%%a\ex_ds1!ver!.exe HLCexamples%%a!ver!
+            
+            for /l %%c in (1,1,2) do (
+                call :safe_copy ex_image%%c!ver!\%%a\ex_image%%c!ver!.exe HLCexamples%%a!ver!
+            )
+            
+            for /l %%c in (1,1,3) do (
+                call :safe_copy ex_lite%%c!ver!\%%a\ex_lite%%c!ver!.exe HLCexamples%%a!ver!
+            )
+    
+            for /l %%c in (1,1,9) do (
+                call :safe_copy ex_table0%%c!ver!\%%a\ex_table0%%c!ver!.exe HLCexamples%%a!ver!
+            )
+            
+            for /l %%c in (10,1,12) do (
+                call :safe_copy ex_table%%c!ver!\%%a\ex_table%%c!ver!.exe HLCexamples%%a!ver!
+            )
+            
+            for %%c in (FL VL) do (
+                call :safe_copy ptExample%%c!ver!\%%a\ptExample%%c!ver!.exe HLCexamples%%a!ver!
+            )
+        )
+    )
+    
+:end
 popd
+endlocal & exit /b %nerrors%

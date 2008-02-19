@@ -31,49 +31,70 @@ if "%1"=="debug" GOTO CONFIG
 GOTO WRONG
 
 :CONFIG
-if "%2"=="dll" GOTO TEST
-if %2.==. GOTO TEST
-GOTO WRONG
+    if "%2"=="dll" GOTO TEST
+    if %2.==. GOTO TEST
+    GOTO WRONG
 
 :TEST
-echo Testing %1 %2 version of High Level examples 
-echo.
-
-for %%i in (ex_ds1 ex_lite1 ex_table01 ex_image1 ptExampleFL) do (
-    HLCexamples%1%2\%%i%2
-    if not !errorlevel!==0 set /A total_error=!total_error!+1
-)
-
-
-if %total_error%==0 (
+    echo Testing %1 %2 version of High Level examples 
     echo.
-    echo. All of the HL C Examples Passed!
-) else (
-    echo.
-    echo. %total_error% HL C Examples Failed!
-)
 
-GOTO END
+    HLCexamples%1%2\ex_ds1%2.exe HLCexamples%1%2
+    
+    for /l %%a in (1,1,2) do (
+        HLCexamples%1%2\ex_image%%a%2.exe HLCexamples%1%2
+        if not !errorlevel!==0 set /A total_error=!total_error!+1
+    )
+    
+    for /l %%a in (1,1,3) do (
+        HLCexamples%1%2\ex_lite%%a%2.exe HLCexamples%1%2
+        if not !errorlevel!==0 set /A total_error=!total_error!+1
+    )
+
+    for /l %%a in (1,1,9) do (
+        HLCexamples%1%2\ex_table0%%a%2.exe HLCexamples%1%2
+        if not !errorlevel!==0 set /A total_error=!total_error!+1
+    )
+    
+    for /l %%a in (10,1,12) do (
+        HLCexamples%1%2\ex_table%%a%2.exe HLCexamples%1%2
+        if not !errorlevel!==0 set /A total_error=!total_error!+1
+    )
+    
+    for %%a in (FL VL) do (
+        HLCexamples%1%2\ptExample%%a%2.exe HLCexamples%1%2
+        if not !errorlevel!==0 set /A total_error=!total_error!+1
+    )
+
+    if %total_error%==0 (
+        echo.
+        echo. All of the HL C Examples Passed!
+    ) else (
+        echo.
+        echo. %total_error% HL C Examples Failed!
+    )
+
+    GOTO END
 
 :WRONG
-echo The syntax of the command is incorrect.
-echo Use test_hl_cexamples /? for usage information
-echo.
-GOTO END
+    echo The syntax of the command is incorrect.
+    echo Use test_hl_cexamples /? for usage information
+    echo.
+    GOTO END
 
 :HELP
-echo Tests HDF5 High Level C examples.
-echo.
-echo test_hl_cexamples [OPTION]
-echo.
-echo Please use one of the following options!
-echo.
-echo test_hl_cexamples release     test HDF5 HL C examples -- release version
-echo test_hl_cexamples release dll test HDF5 HL C examples -- release dll version
-echo test_hl_cexamples debug       test HDF5 HL C examples -- debug version
-echo test_hl_cexamples debug dll   test HDF5 HL C examples -- debug dll version
-echo test_hl_cexamples /?          Help information
-echo.
-GOTO END
+    echo Tests HDF5 High Level C examples.
+    echo.
+    echo test_hl_cexamples [OPTION]
+    echo.
+    echo Please use one of the following options!
+    echo.
+    echo test_hl_cexamples release     test HDF5 HL C examples -- release version
+    echo test_hl_cexamples release dll test HDF5 HL C examples -- release dll version
+    echo test_hl_cexamples debug       test HDF5 HL C examples -- debug version
+    echo test_hl_cexamples debug dll   test HDF5 HL C examples -- debug dll version
+    echo test_hl_cexamples /?          Help information
+    echo.
+    GOTO END
 
 :END

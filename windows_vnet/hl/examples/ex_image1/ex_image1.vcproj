@@ -3,6 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="ex_image1"
+	RootNamespace="ex_image1"
 	SccProjectName=""
 	SccLocalPath="">
 	<Platforms>
@@ -12,8 +13,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\..\..\..\..\hl\examples\ex_image1\Debug"
-			IntermediateDirectory=".\..\..\..\..\hl\examples\ex_image1\Debug"
+			OutputDirectory=".\..\..\..\..\hl\examples\$(ProjectName)\$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -74,8 +75,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\..\..\..\..\hl\examples\ex_image1\Release"
-			IntermediateDirectory=".\..\..\..\..\hl\examples\ex_image1\Release"
+			OutputDirectory=".\..\..\..\..\hl\examples\$(ProjectName)\$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"

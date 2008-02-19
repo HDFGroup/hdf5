@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\..\..\..\..\hl\examples\ptExampleFL\Debug"
-			IntermediateDirectory=".\..\..\..\..\hl\examples\ptExampleFL\Debug"
+			OutputDirectory=".\..\..\..\..\hl\examples\$(ProjectName)\$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -74,8 +74,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\..\..\..\..\hl\examples\ptExampleFL\Release"
-			IntermediateDirectory=".\..\..\..\..\hl\examples\ptExampleFL\Release"
+			OutputDirectory=".\..\..\..\..\hl\examples\$(ProjectName)\$(ConfigurationName)"
+			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
