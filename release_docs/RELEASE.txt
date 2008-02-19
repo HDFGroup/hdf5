@@ -61,6 +61,8 @@ New Features
            similar to h5dump, adding also long switch names. PVN - 2008/2/13
      - h5repack now supports adding multiple filters to all objects. 
 	     PVN - 2008/2/13
+     - h5import imports string (text) data. PVN - 2008/2/19
+
 
 
     F90 API:
