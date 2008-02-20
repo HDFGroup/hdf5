@@ -1,5 +1,5 @@
 #############################
-Expected output for 'h5diff h5diff_dtypes.h5 h5diff_dtypes.h5 -v dset0a dset0b'
+Expected output for 'h5diff -v h5diff_dtypes.h5 h5diff_dtypes.h5 dset0a dset0b'
 #############################
 dataset: </dset0a> and </dset0b>
 Warning: different storage datatype
