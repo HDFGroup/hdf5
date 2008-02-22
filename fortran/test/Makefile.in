@@ -47,6 +47,10 @@ FORTLIBTEST_OBJ=$(FORTLIBTEST_FSRC:.f90=.lo) $(FORTLIBTEST_CSRC:.c=.lo)
 
 TEST_OBJ=$(FORTLIBTEST_OBJ) $(TEST_PROGS_SRC:.f90=.lo)
 PUB_LIB=
+
+# The fflush1 test must run before the fflush2 test
+fflush2.chkexe_: fflush1.chkexe_
+
 ## Temporary files
 MOSTLYCLEAN=*.h5 *.tmp
 
