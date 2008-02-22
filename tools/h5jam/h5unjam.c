@@ -45,7 +45,7 @@ char *ub_file = NULL;
  * parameters. The long-named ones can be partially spelled. When
  * adding more, make sure that they don't clash with each other.
  */
-static const char *s_opts = "hu:i:o:d";
+static const char *s_opts = "hu:i:o:d:V";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
@@ -83,6 +83,8 @@ usage(const char *prog)
 
     fprintf(stdout, "       %s -h\n",prog);
     fprintf(stdout, "           Print a usage message and exit\n");
+    fprintf(stdout, "       %s -V \n", prog);
+    fprintf(stdout, "           Print HDF5 library version and exit\n");
 }
 
 /*-------------------------------------------------------------------------
@@ -121,13 +123,16 @@ parse_command_line(int argc, const char *argv[])
 	case 'd':
 	  do_delete = TRUE;
 	  break;
-        case 'h':
-            usage(progname);
-            exit(EXIT_SUCCESS);
-        case '?':
-        default:
-            usage(progname);
-            exit(EXIT_FAILURE);
+    case 'h':
+        usage(progname);
+        exit(EXIT_SUCCESS);
+    case 'V':
+        print_version (progname);
+        exit (EXIT_SUCCESS);
+    case '?':
+    default:
+        usage(progname);
+        exit(EXIT_FAILURE);
         }
     }
 
@@ -175,6 +180,7 @@ main(int argc, const char *argv[])
     /* Disable error reporting */
     H5Eget_auto(&func, &edata);
     H5Eset_auto(NULL, NULL);
+
 
     parse_command_line(argc, argv);
 
@@ -252,7 +258,7 @@ main(int argc, const char *argv[])
             exit(EXIT_FAILURE);
         }
     } else {
-        h5fid = open(output_file,O_WRONLY|O_CREAT|O_TRUNC, 0644 );
+        h5fid = HDopen(output_file,O_WRONLY|O_CREAT|O_TRUNC, 0644 );
 
         if (h5fid < 0) {
             error_msg(progname, "unable to open output HDF5 file \"%s\"\n", output_file);
@@ -286,33 +292,33 @@ main(int argc, const char *argv[])
  *  Returns the size of the output file.
  */
 hsize_t
-copy_to_file( int infid, int ofid, ssize_t where, ssize_t how_much ) {
-	char buf[1024];
-	off_t to;
-	off_t from;
-	ssize_t nchars = -1;
+copy_to_file( int infid, int ofid, ssize_t where, ssize_t how_much )
+{
+    char buf[1024];
+    off_t to;
+    off_t from;
+    ssize_t nchars = -1;
 
+    /* nothing to copy */
+    if(how_much <= 0)
+        return(where);
 
-	if (how_much <= 0) {
-		/* nothing to copy */
-		return(where);
-	}
-	from = where;
-	to = 0;
+    from = where;
+    to = 0;
 
-	while( how_much > 0) {
-		HDlseek(infid,from,SEEK_SET);
-		if (how_much > 512) {
-			nchars = HDread(infid,buf,(unsigned)512);
-		} else {
-			nchars = HDread(infid,buf,(unsigned)how_much);
-		}
-		HDlseek(ofid,to,SEEK_SET);
-		HDwrite(ofid,buf,(unsigned)nchars);
-		how_much -= nchars;
-		from += nchars;
-		to += nchars;
-	}
+    while( how_much > 0) {
+        HDlseek(infid,from,SEEK_SET);
+        if (how_much > 512)
+            nchars = HDread(infid,buf,(unsigned)512);
+        else
+            nchars = HDread(infid,buf,(unsigned)how_much);
+        HDlseek(ofid,to,SEEK_SET);
+        HDwrite(ofid,buf,(unsigned)nchars);
+        how_much -= nchars;
+        from += nchars;
+        to += nchars;
+    }
 
-	return (where+how_much);
+    return (where + how_much);
 }
+
