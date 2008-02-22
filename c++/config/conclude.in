@@ -56,41 +56,126 @@ check-p: tests
 	$(MAKE) _check-p
 	@echo "===Parallel C++ tests in `echo ${PWD} | sed -e s:.*/::` ended `date`==="
 
-## Actual execution of sequtial tests.
-_check-s: tests
-	@for test in $(TEST_PROGS) dummy; do                                  \
-	   if test $$test != dummy; then				      \
-	      echo "";							      \
-	      echo "=====================================";		      \
-	      echo "C++ API: Testing $$test $(TEST_FLAGS)";		      \
-	      echo "=====================================";		      \
-	      echo "";							      \
-	      srcdir="$(srcdir)"					      \
-		 $(TIME) ./$$test $(TEST_FLAGS) ||                            \
-		 (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||     \
-		 break;							      \
-	   fi;								      \
-	done;								      \
-	test $$test = dummy || false
-	@for test in $(TEST_SCRIPTS) dummy; do                                \
-	   if test $$test != dummy; then				      \
-	      echo "";							      \
-	      echo "=====================================";		      \
-	      echo "C++ API: Testing $$test $(TEST_FLAGS)";		      \
-	      echo "=====================================";		      \
-	      echo "";							      \
-	      srcdir="$(srcdir)"					      \
-		 $(TIME) /bin/sh $$test $(TEST_FLAGS) ||	              \
-		 (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||     \
-		 break;							      \
-	   fi;								      \
-	done;								      \
-	test $$test = dummy || false
+## setup for non-repeating tests.
+TEST_PROG_CHKEXE=$(TEST_PROGS:=.chkexe_)
+TEST_PROG_PARA_CHKEXE=$(TEST_PROGS_PARA:=.chkexe_)
+TEST_SCRIPT_CHKSH=$(TEST_SCRIPTS:=.chkexe_)
+TEST_SCRIPT_PARA_CHKSH=$(TEST_SCRIPTS_PARA:=.chkexe_)
+# .chkexe files are used to mark tests that have run successfully.
+# .chklog files are output from those tests.
+# *.clog are from the MPE option.
+CHECK_CLEANFILES=*.chkexe *.chklog *.clog
 
-## Actual execution of parallel tests.
-## No parallel C++ tests yet.  Just a dummy target.
-_check-p: tests
+_check-s: $(TEST_PROG_CHKEXE) $(TEST_SCRIPT_CHKSH)
 
+# The dummy.chkexe here prevents the target from being
+# empty if there are no tests in the current directory.
+# $${log} is the log file.
+# $${tname} is the name of test.
+$(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
+	@if test "X$@" != "X.chkexe_" && test "X$@" != "Xdummy.chkexe_"; then \
+	   tname=$(@:.chkexe_=)$(EXEEXT);\
+	   log=$(@:.chkexe_=.chklog); \
+	   echo "============================"; \
+	   if $(top_srcdir)/bin/newer $(@:.chkexe_=.chkexe) $${tname}; then \
+	      echo "No need to test $${tname} again."; \
+	   else \
+	      echo "============================" > $${log}; \
+	      if test "X$(HDF_FORTRAN)" = "Xyes"; then \
+	         echo "Fortran API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+	         echo "Fortran API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+	      elif test "X$(HDF_CXX)" = "Xyes"; then \
+	         echo "C++ API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+	         echo "C++ API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log};\
+	      else \
+	         echo "Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
+	         echo "$(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+	      fi; \
+	      echo "============================" >> $${log}; \
+	      srcdir="$(srcdir)" \
+	         $(TIME) $(RUNTESTS) ./$${tname} $(TEST_FLAGS) >> $${log} 2>&1 \
+	         && touch $(@:.chkexe_=.chkexe) || \
+	         (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
+	         (cat $${log} && false) || exit 1; \
+	      echo "" >> $${log}; \
+	      echo "Finished testing $${tname} $(TEST_FLAGS)" >> $${log}; \
+	      echo "============================" >> $${log}; \
+	      echo "Finished testing $${tname} $(TEST_FLAGS)"; \
+	      cat $${log}; \
+	   fi; \
+	fi
+ 
+# The dummysh.chkexe here prevents the target from being
+# empty if there are no tests in the current directory.
+# $${log} is the log file.
+# $${tname} is the name of test.
+$(TEST_SCRIPT_CHKSH) $(TEST_SCRIPT_PARA_CHKSH) dummysh.chkexe_:
+	@if test "X$@" != "X.chkexe_" && test "X$@" != "Xdummysh.chkexe_"; then \
+	   cmd=$(@:.chkexe_=);\
+	   tname=`basename $$cmd`;\
+	   chkname=`basename $(@:.chkexe_=.chkexe)`;\
+	   log=`basename $(@:.chkexe_=.chklog)`; \
+	   echo "============================"; \
+	   if $(top_srcdir)/bin/newer $${chkname} $$cmd $(SCRIPT_DEPEND); then \
+	      echo "No need to test $${tname} again."; \
+	   else \
+	      echo "============================" > $${log}; \
+	      if test "X$(HDF_FORTRAN)" = "Xyes"; then \
+	         echo "Fortran API: Testing $${tname} $(TEST_FLAGS)"; \
+	         echo "Fortran API: $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+	      elif test "X$(HDF_CXX)" = "Xyes"; then \
+	         echo "C++ API: Testing $${tname} $(TEST_FLAGS)"; \
+	         echo "C++ API: $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+	      else \
+	         echo "Testing $${tname} $(TEST_FLAGS)"; \
+	         echo "$${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
+	      fi; \
+	      echo "============================" >> $${log}; \
+	      RUNSERIAL="$(RUNSERIAL)" RUNPARALLEL="$(RUNPARALLEL)"           \
+	      srcdir="$(srcdir)" \
+	         $(TIME) $(SHELL) $$cmd $(TEST_FLAGS) >> $${log} 2>&1 \
+	         && touch $${chkname} || \
+	         (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
+	         (cat $${log} && false) || exit 1; \
+	      echo "" >> $${log}; \
+	      echo "Finished testing $${tname} $(TEST_FLAGS)" >> $${log}; \
+	      echo "============================" >> $${log}; \
+	      echo "Finished testing $${tname} $(TEST_FLAGS)"; \
+	      cat $${log}; \
+	   fi; \
+	   echo "============================"; \
+	fi
+
+# Actual execution of check-p.
+# (no parallel tests for C++ API yet.)
+_check-p: $(LIB) $(PROGS) $(TESTS)
+	@if test -n "$(TEST_PROGS_PARA)$(TEST_SCRIPTS_PARA)"; then      \
+	   echo "===Parallel tests in `echo ${PWD} | sed -e s:.*/::` begin `date`==="; \
+	fi
+	@if test -n "$(TEST_PROGS_PARA)"; then                                \
+	    echo "**** Hint ****";                                            \
+	    echo "Parallel test files reside in the current directory"        \
+	         "by default.";                                               \
+	    echo "Set HDF5_PARAPREFIX to use another directory. E.g.,";       \
+	    echo "    HDF5_PARAPREFIX=/PFS/user/me";                          \
+	    echo "    export HDF5_PARAPREFIX";                                \
+	    echo "    make check";                                            \
+	    echo "**** end of Hint ****";                                     \
+	fi
+	@for test in $(TEST_PROGS_PARA) dummy; do                             \
+	   if test $$test != dummy; then                                      \
+	      $(MAKE) $(AM_MAKEFLAGS) $$test.chkexe_ \
+	      RUNTESTS="$(RUNPARALLEL)" || exit 1; \
+	   fi;                                                                \
+	done
+	@for test in $(TEST_SCRIPTS_PARA) dummy; do                           \
+	  if test $$test != dummy; then                                      \
+	    $(MAKE) $(AM_MAKEFLAGS) $$test.chkexe_ || exit 1; \
+	  fi;                                                                 \
+	done
+	@if test -n "$(TEST_PROGS_PARA)$(TEST_SCRIPTS_PARA)"; then      \
+	    echo "===Parallel tests in `echo ${PWD} | sed -e s:.*/::` ended `date`===";\
+	fi
 
 ## Make installation directories directories if they don't exist.
 $(libdir):
@@ -157,10 +242,24 @@ uninstall:
 	    fi;								      \
 	done
 
+# General rule for recursive cleaning targets.  Like the rule above,
+# but doesn't require building BUILT_SOURCES.
+check-clean:
+	@$(MAKE) $(AM_MAKEFLAGS) build-$@ || exit 1;
+	@for d in X $(SUBDIRS); do                                             \
+	    if test $$d != X && test $$d != .; then                           \
+	        (set -x; cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;     \
+	    fi;                                                               \
+	done
+
+# clean up files generated by tests so they can be re-run.
+build-check-clean:
+	$(RM) -rf $(CHECK_CLEANFILES)
+
 ## Removes temporary files without removing the final target files.  That is,
 ## remove things like object files but not libraries or executables.
 ##
-mostlyclean:
+mostlyclean: build-check-clean
 	@if test -n "$(LIB_OBJ)"; then                                        \
 	    $(RM) $(LIB_OBJ) $(LIB_OBJ:.lo=.o);                               \
 	fi

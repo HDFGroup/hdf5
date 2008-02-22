@@ -69,7 +69,7 @@ dep depend:
 	  fi;                                                                 \
 	done
 
-check check-s check-p tests test _test: $(PROGS)
+check check-s check-p check-clean tests test _test: $(PROGS)
 	@@SETX@; for d in X $(SUBDIRS); do                                    \
 	  if test $$d != X; then                                              \
 	    (cd $$d && $(MAKE) $@) || exit 1;                                 \
