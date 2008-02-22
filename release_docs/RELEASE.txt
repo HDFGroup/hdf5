@@ -43,7 +43,11 @@ New Features
 ============
     Configuration:
     -------------------------
-    None
+	- Added no-repeat test feature from v1.8 to this branch.  What it does
+	  is that if a test has passed in previous "make check", it will not
+	  run again unless its executable has changed. This can be overridden
+	  by "make check-clean" which removes all check-success markers and
+	  let all tests run again. AKC - 2008/2/22.
 
     Source code distribution
     ========================
