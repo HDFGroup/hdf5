@@ -44,6 +44,10 @@ EXAMPLE_PROGS=$(TEST_SRC)
 TEST_PROGS=$(TEST_SRC:.cpp=)
 TEST_SCRIPTS=testh5c++.sh
 
+# Some of the examples depend on files created by running other examples
+readdata.chkexe_: create.chkexe_
+chunks.chkexe_: extend_ds.chkexe_
+
 ## These are the files that `make clean' (and derivatives) will remove from
 ## this directory.
 CLEAN=*.h5

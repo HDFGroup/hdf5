@@ -33,6 +33,14 @@ TEST_PROGS=dsetexample fileexample rwdsetexample attrexample groupexample	\
 	   refregexample mountexample compound
 TEST_SCRIPTS=testh5fc.sh
 
+# Some examples depend on files created by other examples.
+grpdsetexample.chkexe_: grpsexample.chkexe_
+refregexample.chkexe_: refobjexample.chkexe_
+# rwdsetexample and attrexample both modify the same file created by
+# dsetexample. Serialize them.
+rwdsetexample.chkexe_: dsetexample.chkexe_
+attrexample.chkexe_: rwdsetexample.chkexe_
+
 ## These are the files that `make clean' (and derivatives) will remove from
 ## this directory.
 CLEAN=*.h5

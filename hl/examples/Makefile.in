@@ -47,6 +47,9 @@ EXAMPLE_PROGS=$(TEST_SRC)
 ## `make check' will run. List them in the order they should be run.
 TEST_PROGS=$(TEST_SRC:.c=)
 
+# ex_lite2 uses a file created by ex_lite1
+ex_lite2.chkexe_: ex_lite1.chkexe_
+
 ## These are the files that `make clean' (and derivatives) will remove from
 ## this directory.
 CLEAN=*.h5
