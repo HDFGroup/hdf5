@@ -1408,5 +1408,56 @@ H5_DLL herr_t H5C2_unprotect(H5C2_t *            cache_ptr,
 H5_DLL herr_t H5C2_validate_resize_config(H5C2_auto_size_ctl_t * config_ptr,
                                          unsigned int tests);
 
+
+/*****************************************************************************/
+/****************** journal buffer function definitions: *********************/
+/*****************************************************************************/
+
+typedef struct H5C2_jbrb_t H5C2_jbrb_t;
+
+H5_DLL herr_t H5C2_jb__flush_full_buffers(H5C2_jbrb_t * struct_ptr);
+
+H5_DLL herr_t H5C2_jb__flush(H5C2_jbrb_t * struct_ptr);
+
+H5_DLL herr_t H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr, 
+		                       size_t size,
+                                       const char * data);
+
+H5_DLL herr_t H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
+                            char * HDF5_file_name,
+                            char * journal_file_name,
+                            size_t buf_size,
+                            int num_bufs,
+                            hbool_t use_aio,
+                            hbool_t human_readable);
+
+H5_DLL herr_t H5C2_jb__start_transaction(H5C2_jbrb_t * struct_ptr,
+                                         unsigned long trans_num);
+
+H5_DLL herr_t H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
+                                     unsigned long trans_num,
+                                     haddr_t base_addr,
+                                     size_t length,
+                                     char * body);
+
+H5_DLL herr_t H5C2_jb__end_transaction(H5C2_jbrb_t * struct_ptr,
+                                       unsigned long trans_num);
+
+H5_DLL herr_t H5C2_jb__comment(H5C2_jbrb_t * struct_ptr,
+                               char * comment_ptr);
+
+H5_DLL herr_t H5C2_jb__get_last_transaction_on_disk(H5C2_jbrb_t * struct_ptr,
+                                                 unsigned long * trans_num_ptr);
+
+H5_DLL herr_t H5C2_jb__trunc(H5C2_jbrb_t * struct_ptr);
+
+H5_DLL herr_t H5C2_jb__takedown(H5C2_jbrb_t * struct_ptr);
+
+H5_DLL herr_t H5C2_jb__reconfigure(H5C2_jbrb_t * struct_ptr,
+                                   size_t new_buf_size,
+                                   int new_num_bufs,
+                                   hbool_t new_use_aio);
+
+
 #endif /* !_H5C2private_H */
 

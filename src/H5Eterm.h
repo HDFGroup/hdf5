@@ -62,7 +62,10 @@ H5E_READERROR_g=
 H5E_WRITEERROR_g=    
 H5E_CLOSEERROR_g=    
 H5E_OVERFLOW_g=    
-H5E_FCNTL_g=
+H5E_FCNTL_g=    
+H5E_SYNCFAIL_g=    
+H5E_TRUNCFAIL_g=    
+H5E_REMOVEFAIL_g=
 
 /* Resource errors */    
 H5E_NOSPACE_g=    
@@ -164,7 +167,8 @@ H5E_CANTUNPIN_g=
 H5E_CANTMARKDIRTY_g=    
 H5E_CANTDIRTY_g=    
 H5E_CANTEXPUNGE_g=    
-H5E_CANTRESIZE_g=
+H5E_CANTRESIZE_g=    
+H5E_CANTJOURNAL_g=
 
 /* Link related errors */    
 H5E_TRAVERSE_g=    

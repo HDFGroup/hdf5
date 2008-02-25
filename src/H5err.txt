@@ -137,6 +137,9 @@ MINOR, FILE, H5E_WRITEERROR, Write failed
 MINOR, FILE, H5E_CLOSEERROR, Close failed
 MINOR, FILE, H5E_OVERFLOW, Address overflowed
 MINOR, FILE, H5E_FCNTL, File control (fcntl) failed
+MINOR, FILE, H5E_SYNCFAIL, File sync failed
+MINOR, FILE, H5E_TRUNCFAIL, File truncate failed
+MINOR, FILE, H5E_REMOVEFAIL, File remove failed
 
 # Function entry/exit interface errors
 MINOR, FUNC, H5E_CANTINIT, Unable to initialize object
@@ -168,6 +171,8 @@ MINOR, CACHE, H5E_CANTMARKDIRTY, Unable to mark a pinned entry as dirty
 MINOR, CACHE, H5E_CANTDIRTY, Unable to mark metadata as dirty
 MINOR, CACHE, H5E_CANTEXPUNGE, Unable to expunge a metadata cache entry
 MINOR, CACHE, H5E_CANTRESIZE, Unable to resize a metadata cache entry
+MINOR, CACHE, H5E_CANTJOURNAL, Unable to write to journal file
+
 
 # B-tree related errors
 MINOR, BTREE, H5E_NOTFOUND, Object not found

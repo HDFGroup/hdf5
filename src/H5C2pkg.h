@@ -43,6 +43,140 @@
 /* Get needed headers */
 #include "H5SLprivate.h"        /* Skip lists */
 
+
+ /******************************************************************************
+ *
+ * Structure: 		H5C2_jbrb_t
+ *
+ * Programmer: 		Mike McGreevy <mcgreevy@hdfgroup.org>
+ * 			Tuesday, February 5, 2008
+ *
+ * Purpose:		Instances of the H5C2_jbrb_t structure are used to
+ * 			implement a ring buffer of journal buffers. This
+ * 			structure is used in association with HDF5 File
+ * 			Recovery. It is used to journal metadata cache
+ * 			changes in an effort to be able to reproduce
+ * 			actions in the event of a crash during data writing.
+ *
+ *			The fields of this structure are discussed below:
+ *
+ *
+ * magic:		Unsigned 32-bit integer always set to 
+ * 			H5C2__H5C2_JBRB_T_MAGIC.  This field is used to validate 
+ * 			pointers to instances of H5C_jbrb_t.
+ *			
+ * journal_file_fd:	File Descriptor of the journal file that is being 
+ * 			written to from this ring buffer.
+ *
+ * num_bufs:		The number of journal buffers in the ring buffer. This
+ * 			must be at least 2 in the asynchronous case (one for
+ * 			storing journal entries as they are accumulated, and
+ * 			one for holding the last set of journal entries while
+ *			they are being written to disk).
+ *
+ * buf_size:		The size of each journal buffer in the ring buffer. This
+ * 			value is user specified, and will determine how much
+ * 			data each journal buffer can hold before a move to
+ * 			another journal buffer in the ring buffer is necessary.
+ *			Typically, this will be a multiple of the block size of
+ *			the underlying file system.
+ *
+ * bufs_in_use:		This is the current number of dirty journal buffers
+ * 			in the ring buffer.
+ *
+ * jvers:		The journal version number. This is used to keep track
+ * 			of the formatting changes of the journal file.
+ *
+ * get:			Number of the journal buffer that is next in line to
+ * 			be written to disk. (i.e. the least recently dirtied 
+ * 			journal buffer).
+ *
+ * put:			Number of the journal buffer that is currently being
+ *		 	written to.
+ *
+ * jentry_written:	Boolean flag that indiciates if a journal entry has
+ *			been written under the current transaction.
+ *
+ * use_aio:		Boolean flag that indicates whether synchronous or
+ *			asynchronous writes will be used.
+ *
+ * human_readable:	Boolean flag that indicates whether the journal file
+ *			is to be human readable or machine readable.
+ *	
+ * journal_is_empty:	Boolean flag that indicates if the journal file
+ *			associated with the ring buffer is currently
+ * 			empty.
+ *
+ * cur_trans:		Current transaction number, used to differentiate
+ *			between differing journal entries in the journal file.
+ *
+ * last_trans_on_disk:	Number of the last transaction that has successfully
+ * 			made it to disk.
+ *
+ * trans_in_prog:	Boolean flag that indicates if a transaction is in
+ *			progress or not.
+ *
+ * jname: 		Character array containing the name of the journal file.
+ *
+ * hdf5_file_name: 	Character array containing the name of the HDF5 file
+ *			associated with this journal file.
+ *	
+ * header_present:	Boolean flag that indicates if the header message has
+ *			been written into the current journal file or journal
+ *			buffer.
+ *
+ * cur_buf_free_space: 	The amount of space remaining in the currently active
+ *			journal buffer. This is used to determine when the
+ * 			ring buffer needs to switch to writing to the next
+ *			journal buffer.
+ *
+ * rb_free_space:	The amount of space remaining in the entire ring
+ * 			buffer. This is needed to determine if writes to
+ *			the ring buffer need to loop around to the top of
+ *			the chunk of allocated memory.
+ * 
+ * head: 		A pointer to the location in the active journal buffer
+ *			that is to be written to.
+ *
+ * buf:			Array of char pointers to each journal buffer in the
+ *			ring buffer. This is allocated as a single chunk of 
+ * 			memory, and thus data can be written past a buffer
+ * 			boundary provided it will not extend past the end
+ * 			of the total area allocated for the ring buffer.
+ *
+ ******************************************************************************/
+
+#define H5C2__H5C2_JBRB_T_MAGIC   	(unsigned)0x00D0A03
+#define H5C2__JOURNAL_VERSION		1
+
+struct H5C2_jbrb_t 
+{
+	uint32_t	magic;
+	int 		journal_file_fd;
+	int 		num_bufs;
+	size_t		buf_size;
+	int		bufs_in_use;
+	unsigned long 	jvers;
+	int 		get;
+	int 		put;
+	hbool_t 	jentry_written;
+	hbool_t		use_aio;
+	hbool_t		human_readable;
+	hbool_t		journal_is_empty;
+	unsigned long	cur_trans;
+	unsigned long	last_trans_on_disk;
+	hbool_t		trans_in_prog;
+	char *		jname;
+	char *		hdf5_file_name;
+	hbool_t 	header_present;
+	size_t 		cur_buf_free_space;
+	size_t		rb_free_space;
+	char * 		head;
+	unsigned long	(*trans_on_disk_record)[];
+	char 		*((*buf)[]);
+};
+
+
 /* With the introduction of the fractal heap, it is now possible for 
  * entries to be dirtied, resized, and/or renamed in the flush callbacks.
  * As a result, on flushes, it may be necessary to make multiple passes

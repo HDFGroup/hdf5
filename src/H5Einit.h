@@ -211,6 +211,21 @@ if((msg = H5E_create_msg(cls, H5E_MINOR, "File control (fcntl) failed"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_FCNTL_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_SYNCFAIL_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "File sync failed"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_SYNCFAIL_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_TRUNCFAIL_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "File truncate failed"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_TRUNCFAIL_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_REMOVEFAIL_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "File remove failed"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_REMOVEFAIL_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 
 /* Resource errors */
 assert(H5E_NOSPACE_g==(-1));
@@ -616,6 +631,11 @@ assert(H5E_CANTRESIZE_g==(-1));
 if((msg = H5E_create_msg(cls, H5E_MINOR, "Unable to resize a metadata cache entry"))==NULL)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
 if((H5E_CANTRESIZE_g = H5I_register(H5I_ERROR_MSG, msg))<0)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
+assert(H5E_CANTJOURNAL_g==(-1));
+if((msg = H5E_create_msg(cls, H5E_MINOR, "Unable to write to journal file"))==NULL)
+    HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "error message initialization failed")
+if((H5E_CANTJOURNAL_g = H5I_register(H5I_ERROR_MSG, msg))<0)
     HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 
 /* Link related errors */

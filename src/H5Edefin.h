@@ -61,6 +61,9 @@ hid_t H5E_WRITEERROR_g     = FAIL;      /* Write failed */
 hid_t H5E_CLOSEERROR_g     = FAIL;      /* Close failed */
 hid_t H5E_OVERFLOW_g       = FAIL;      /* Address overflowed */
 hid_t H5E_FCNTL_g          = FAIL;      /* File control (fcntl) failed */
+hid_t H5E_SYNCFAIL_g       = FAIL;      /* File sync failed */
+hid_t H5E_TRUNCFAIL_g      = FAIL;      /* File truncate failed */
+hid_t H5E_REMOVEFAIL_g     = FAIL;      /* File remove failed */
 
 /* Resource errors */
 hid_t H5E_NOSPACE_g        = FAIL;      /* No space available for allocation */
@@ -163,6 +166,7 @@ hid_t H5E_CANTMARKDIRTY_g  = FAIL;      /* Unable to mark a pinned entry as dirt
 hid_t H5E_CANTDIRTY_g      = FAIL;      /* Unable to mark metadata as dirty */
 hid_t H5E_CANTEXPUNGE_g    = FAIL;      /* Unable to expunge a metadata cache entry */
 hid_t H5E_CANTRESIZE_g     = FAIL;      /* Unable to resize a metadata cache entry */
+hid_t H5E_CANTJOURNAL_g    = FAIL;      /* Unable to write to journal file */
 
 /* Link related errors */
 hid_t H5E_TRAVERSE_g       = FAIL;      /* Link traversal failure */

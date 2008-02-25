@@ -96,12 +96,18 @@ H5_DLLVAR hid_t H5E_CACHE_g;         /* Object cache */
 #define H5E_CLOSEERROR       (H5OPEN H5E_CLOSEERROR_g)
 #define H5E_OVERFLOW         (H5OPEN H5E_OVERFLOW_g)
 #define H5E_FCNTL            (H5OPEN H5E_FCNTL_g)
+#define H5E_SYNCFAIL         (H5OPEN H5E_SYNCFAIL_g)
+#define H5E_TRUNCFAIL        (H5OPEN H5E_TRUNCFAIL_g)
+#define H5E_REMOVEFAIL       (H5OPEN H5E_REMOVEFAIL_g)
 H5_DLLVAR hid_t H5E_SEEKERROR_g;     /* Seek failed */
 H5_DLLVAR hid_t H5E_READERROR_g;     /* Read failed */
 H5_DLLVAR hid_t H5E_WRITEERROR_g;    /* Write failed */
 H5_DLLVAR hid_t H5E_CLOSEERROR_g;    /* Close failed */
 H5_DLLVAR hid_t H5E_OVERFLOW_g;      /* Address overflowed */
 H5_DLLVAR hid_t H5E_FCNTL_g;         /* File control (fcntl) failed */
+H5_DLLVAR hid_t H5E_SYNCFAIL_g;      /* File sync failed */
+H5_DLLVAR hid_t H5E_TRUNCFAIL_g;     /* File truncate failed */
+H5_DLLVAR hid_t H5E_REMOVEFAIL_g;    /* File remove failed */
 
 /* Resource errors */
 #define H5E_NOSPACE          (H5OPEN H5E_NOSPACE_g)
@@ -264,6 +270,7 @@ H5_DLLVAR hid_t H5E_NOIDS_g;         /* Out of IDs for group */
 #define H5E_CANTDIRTY        (H5OPEN H5E_CANTDIRTY_g)
 #define H5E_CANTEXPUNGE      (H5OPEN H5E_CANTEXPUNGE_g)
 #define H5E_CANTRESIZE       (H5OPEN H5E_CANTRESIZE_g)
+#define H5E_CANTJOURNAL      (H5OPEN H5E_CANTJOURNAL_g)
 H5_DLLVAR hid_t H5E_CANTFLUSH_g;     /* Unable to flush data from cache */
 H5_DLLVAR hid_t H5E_CANTSERIALIZE_g; /* Unable to serialize data from cache */
 H5_DLLVAR hid_t H5E_CANTLOAD_g;      /* Unable to load metadata into cache */
@@ -280,6 +287,7 @@ H5_DLLVAR hid_t H5E_CANTMARKDIRTY_g; /* Unable to mark a pinned entry as dirty *
 H5_DLLVAR hid_t H5E_CANTDIRTY_g;     /* Unable to mark metadata as dirty */
 H5_DLLVAR hid_t H5E_CANTEXPUNGE_g;   /* Unable to expunge a metadata cache entry */
 H5_DLLVAR hid_t H5E_CANTRESIZE_g;    /* Unable to resize a metadata cache entry */
+H5_DLLVAR hid_t H5E_CANTJOURNAL_g;   /* Unable to write to journal file */
 
 /* Link related errors */
 #define H5E_TRAVERSE         (H5OPEN H5E_TRAVERSE_g)
