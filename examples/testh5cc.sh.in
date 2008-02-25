@@ -63,9 +63,13 @@ prog2_o=${H5TOOL}_prog2.o
 applib=libapp${H5TOOL}.a
 
 # short hands
+# Caution: if some *.h5 files must be cleaned here, list them by names.
+# Don't use the wildcard form of *.h5 as it will wipe out even *.h5 generated
+# by otehr test programs. This will cause a racing condition error when
+# parallel make (e.g., gmake -j 4) is used.
 temp_SRC="$hdf5main $appmain $prog1 $prog2"
 temp_OBJ=`echo $temp_SRC | sed -e "s/\.${suffix}/.o/g"`
-temp_FILES="a.out *.h5 $applib"
+temp_FILES="a.out $applib"
 
 # Generate appmain:
 # An application Main that calls hdf5 and application's own functions.
