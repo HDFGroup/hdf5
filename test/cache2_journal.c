@@ -58,7 +58,19 @@ static void write_noflush_verify(H5C2_jbrb_t * struct_ptr,
 /**************************************************************************/
 /**************************************************************************/
 
-/* JRM -- header comment?? */
+/***************************************************************************
+ * Function: 	check_buffer_writes
+ *
+ * Purpose:  	Verify the function H5C_jb__write_to_buffer properly writes
+ *		messages of varying sizes into the journal buffers, and 
+ *		that the journal buffers properly flush out when filled.
+ *
+ * Return:	void
+ *
+ * Programmer: 	Mike McGreevy <mcgreevy@hdfgroup.org>
+ *		Thursday, February 21, 2008
+ * 
+ **************************************************************************/
 
 static void 
 check_buffer_writes(void)
@@ -293,7 +305,20 @@ check_buffer_writes(void)
 } /* check_buffer_writes */
 
 
-/* JRM: header comment? */
+/***************************************************************************
+ * Function: 	write_flush_verify
+ *
+ * Purpose:  	Helper function for check_buffer_writes test. Writes a 
+ *		piece of data of specified size into the journal buffer, then
+ *		flushes the journal buffers. The data is read back and
+ *		verified for correctness.
+ *
+ * Return:	void
+ *
+ * Programmer: 	Mike McGreevy <mcgreevy@hdfgroup.org>
+ *		Thursday, February 21, 2008
+ * 
+ **************************************************************************/
 
 
 static void 
@@ -340,7 +365,22 @@ write_flush_verify(H5C2_jbrb_t * struct_ptr,
 } /* write_flush_verify */
 
 
-/* JRM: header comment? */
+/***************************************************************************
+ * Function: 	write_noflush_verify
+ *
+ * Purpose:  	Helper function for check_buffer_writes test. Writes a 
+ * 		piece of data of specified size into the journal buffer
+ *		multiple times, without calling H5C_jb__flush in between
+ *		writes. After all writes are completed, H5C_jb__flush is 
+ *		called, and the data is read back from the journal file and
+ *		verified for correctness.
+ *
+ * Return:	void
+ *
+ * Programmer: 	Mike McGreevy <mcgreevy@hdfgroup.org>
+ *		Thursday, February 21, 2008
+ * 
+ **************************************************************************/
 
 
 static void 
