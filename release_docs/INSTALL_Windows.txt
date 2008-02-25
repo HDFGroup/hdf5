@@ -829,20 +829,14 @@ To build and test HDF5 High Level C examples:
           Select "Build" -> "Build Solution" or "Rebuild Solution" to build 
           release version of project "allhlcexamples".
 
-      When the debug and release build is done, there should be the following 
-      subdirectories in c:\MyHDFstuff\hdf5\examples\
+      When the debug and release build is done, binaries will be built in the
+      following subdirectories of c:\MyHDFstuff\hdf5\examples\
 
-          allhlcexamples
-          ex_images
-          ex_imagesdll
-          ex_lite
-          ex_litedll
-          ex_table
-          ex_tabledll
-          ex_ds
-          ex_dsdll
-          ex_packet
-          ex_packetdll
+          ex_image[1-2](dll)
+          ex_lite1(dll)
+          ex_table[01-12](dll)
+          ex_ds1(dll)
+          ptExample[FL+VL](dll)
 
    3. Invoke a command prompt and run the batch file Install_hlcexamples.bat 
       which resides in the top level directory (c:\MyHDFstuff\hdf5).  This file 
