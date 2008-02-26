@@ -7,8 +7,7 @@ usage: h5dump [OPTIONS] file
      -n, --contents       Print a list of the file contents and exit
      -B, --superblock     Print the content of the super block
      -H, --header         Print the header only; no data is displayed
-     -A, --onlyattr       Print the header and value of attributes; data 
-                          of datasets is not displayed
+     -A, --onlyattr       Print the header and value of attributes
      -i, --object-ids     Print the object ids
      -r, --string         Print 1-byte integer datasets as ASCII
      -e, --escape         Escape non printing characters
@@ -21,10 +20,7 @@ usage: h5dump [OPTIONS] file
      -g P, --group=P      Print the specified group and all members
      -l P, --soft-link=P  Print the value(s) of the specified soft link
      -o F, --output=F     Output raw data into file F
-     -b B, --binary=B     Binary file output, of form B. Recommended usage is
-                          with -o (output file) and -d (dataset). B can be:
-                          MEMORY for a memory type, FILE for the file type,
-                          LE or BE for pre-existing little or big endian types
+     -b B, --binary=B     Binary file output, of form B
      -t P, --datatype=P   Print the specified named data type
      -w N, --width=N      Set the number of columns of output
      -x, --xml            Output in XML using Schema
@@ -58,6 +54,10 @@ usage: h5dump [OPTIONS] file
         number of dimensions in the dataspace being queried
   U - is a URI reference (as defined in [IETF RFC 2396],
         updated by [IETF RFC 2732])
+  B - is the form of binary output: MEMORY for a memory type, FILE for the
+        file type, LE or BE for pre-existing little or big endian types.
+        Must be used with -o (output file) and it is recommended that
+        -d (dataset) is used
 
   Examples:
 

@@ -593,8 +593,7 @@ usage(const char *prog)
     fprintf(stdout, "     -n, --contents       Print a list of the file contents and exit\n");
     fprintf(stdout, "     -B, --superblock     Print the content of the super block\n");
     fprintf(stdout, "     -H, --header         Print the header only; no data is displayed\n");
-    fprintf(stdout, "     -A, --onlyattr       Print the header and value of attributes; data \n");
-    fprintf(stdout, "                          of datasets is not displayed\n");
+    fprintf(stdout, "     -A, --onlyattr       Print the header and value of attributes\n");
     fprintf(stdout, "     -i, --object-ids     Print the object ids\n");
     fprintf(stdout, "     -r, --string         Print 1-byte integer datasets as ASCII\n");
     fprintf(stdout, "     -e, --escape         Escape non printing characters\n");
@@ -607,10 +606,7 @@ usage(const char *prog)
     fprintf(stdout, "     -g P, --group=P      Print the specified group and all members\n");
     fprintf(stdout, "     -l P, --soft-link=P  Print the value(s) of the specified soft link\n");
     fprintf(stdout, "     -o F, --output=F     Output raw data into file F\n");
-    fprintf(stdout, "     -b B, --binary=B     Binary file output, of form B. Recommended usage is\n");
-    fprintf(stdout, "                          with -o (output file) and -d (dataset). B can be:\n");
-    fprintf(stdout, "                          MEMORY for a memory type, FILE for the file type,\n");
-    fprintf(stdout, "                          LE or BE for pre-existing little or big endian types\n");
+    fprintf(stdout, "     -b B, --binary=B     Binary file output, of form B\n");
     fprintf(stdout, "     -t P, --datatype=P   Print the specified named data type\n");
     fprintf(stdout, "     -w N, --width=N      Set the number of columns of output\n");
     fprintf(stdout, "     -x, --xml            Output in XML using Schema\n");
@@ -644,6 +640,10 @@ usage(const char *prog)
     fprintf(stdout, "        number of dimensions in the dataspace being queried\n");
     fprintf(stdout, "  U - is a URI reference (as defined in [IETF RFC 2396],\n");
     fprintf(stdout, "        updated by [IETF RFC 2732])\n");
+    fprintf(stdout, "  B - is the form of binary output: MEMORY for a memory type, FILE for the\n");
+    fprintf(stdout, "        file type, LE or BE for pre-existing little or big endian types.\n");
+    fprintf(stdout, "        Must be used with -o (output file) and it is recommended that\n");
+    fprintf(stdout, "        -d (dataset) is used\n");
     fprintf(stdout, "\n");
     fprintf(stdout, "  Examples:\n");
     fprintf(stdout, "\n");
