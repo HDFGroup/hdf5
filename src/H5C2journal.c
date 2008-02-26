@@ -139,7 +139,7 @@ H5O_mdj_conf_decode(H5F_t *f,
     H5O_mdj_conf_t      *mesg;          /* Native message        */
     void                *ret_value;     /* Return value          */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_btreek_decode)
+    FUNC_ENTER_NOAPI_NOINIT(H5O_mdj_conf_decode)
 
     HDfprintf(stdout, "%s: entering.\n", fcn_name);
 
@@ -484,7 +484,7 @@ H5O_mdj_conf_debug(H5F_t UNUSED *f,
     const char * fcn_name = "H5O_mdj_conf_debug()";
     const H5O_mdj_conf_t *mesg = (const H5O_mdj_conf_t *)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_btreek_debug)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_mdj_conf_debug)
 
     HDfprintf(stdout, "%s: entering.\n", fcn_name);
 
