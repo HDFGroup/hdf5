@@ -1006,7 +1006,6 @@
 ./c++/examples/Makefile.in
 ./c++/examples/readdata.cpp
 ./c++/examples/strtype.cpp
-./c++/examples/testexamples.sh
 ./c++/examples/testh5c++.sh.in
 ./c++/examples/writedata.cpp
 
