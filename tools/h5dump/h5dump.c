@@ -591,7 +591,7 @@ usage(const char *prog)
     fprintf(stdout, "  OPTIONS\n");
     fprintf(stdout, "     -h, --help           Print a usage message and exit\n");
     fprintf(stdout, "     -n, --contents       Print a list of the file contents and exit\n");
-    fprintf(stdout, "     -B, --bootblock      Print the content of the boot block\n");
+    fprintf(stdout, "     -B, --superblock     Print the content of the super block\n");
     fprintf(stdout, "     -H, --header         Print the header only; no data is displayed\n");
     fprintf(stdout, "     -A, --onlyattr       Print the header and value of attributes; data \n");
     fprintf(stdout, "                          of datasets is not displayed\n");

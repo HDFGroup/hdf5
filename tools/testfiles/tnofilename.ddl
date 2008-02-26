@@ -5,7 +5,7 @@ usage: h5dump [OPTIONS] file
   OPTIONS
      -h, --help           Print a usage message and exit
      -n, --contents       Print a list of the file contents and exit
-     -B, --bootblock      Print the content of the boot block
+     -B, --superblock     Print the content of the super block
      -H, --header         Print the header only; no data is displayed
      -A, --onlyattr       Print the header and value of attributes; data 
                           of datasets is not displayed
