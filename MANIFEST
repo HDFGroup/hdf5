@@ -267,7 +267,6 @@
 ./c++/examples/extend_ds.cpp
 ./c++/examples/h5group.cpp
 ./c++/examples/readdata.cpp
-./c++/examples/testexamples.sh
 ./c++/examples/testh5c++.sh.in
 ./c++/examples/writedata.cpp
 ./c++/examples/Makefile.am
