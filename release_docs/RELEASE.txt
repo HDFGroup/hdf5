@@ -79,11 +79,16 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
-     - h5import bug on Windows w/binary datasets. fread in windows needs a binary file 
-        to be open with 'rb' instead of 'r' otherwise it terminates execution if an end 
-        of file character is found on the input file. Besides that the binary file 
-        generated needs to be open with 'wb' , otherwise an end of line character is 
-        read twice. PVN - 2008/2/19
+        - Fixed bug in h5diff that prevented datasets & attributes with
+            variable-length string elements from comparing correctly.
+            (QAK - 2008/02/28)
+
+        - h5import bug on Windows w/binary datasets. fread in windows needs a
+            binary file to be open with 'rb' instead of 'r' otherwise it
+            terminates execution if an end of file character is found on the
+            input file. Besides that the binary file generated needs to be open
+            with 'wb' , otherwise an end of line character is read twice.
+            (PVN - 2008/02/19)
 
 
     Documentation 
