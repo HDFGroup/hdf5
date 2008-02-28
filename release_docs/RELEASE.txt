@@ -83,6 +83,30 @@ Support for New Platforms, Languages, and Compilers
 Bug Fixes since HDF5-1.8.0 
 ==========================
 
+	Configuration
+	-------------
+
+	Source code distribution
+	========================
+
+	Library
+	-------
+
+	Parallel Library
+	----------------
+
+	Tools
+	-----
+            - Fixed bug in h5diff that prevented datasets & attributes with
+                variable-length string elements from comparing correctly.
+                (QAK - 2008/02/28)
+
+	F90 API
+	------
+
+	C++ API
+	------
+
 
 Platforms Tested
 ================
