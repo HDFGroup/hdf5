@@ -687,7 +687,8 @@ void write_attr_in(hid_t loc_id,
 
  /* create 1D attributes with dimension [2], 2 elements */
  hsize_t    dims[1]={2};
- char       buf1[2][2]= {"ab","de"};        /* string */
+ char       buf1[2][STR_SIZE]= {"ab","de"};        /* string */
+ char       *buf1a[2];                             /* VL string */
  char       buf2[2]= {1,2};                 /* bitfield, opaque */
  s_t        buf3[2]= {{1,2},{3,4}};         /* compound */
  hobj_ref_t buf4[2];                        /* reference */
@@ -700,7 +701,8 @@ void write_attr_in(hid_t loc_id,
 
  /* create 2D attributes with dimension [3][2], 6 elements */
  hsize_t    dims2[2]={3,2};
- char       buf12[6][2]= {"ab","cd","ef","gh","ij","kl"};         /* string */
+ char       buf12[3][2][STR_SIZE]= {{"ab","cd"},{"ef","gh"},{"ij","kl"}};     /* string */
+ char       *buf12a[3][2];                                               /* VL string */
  char       buf22[3][2]= {{1,2},{3,4},{5,6}};                     /* bitfield, opaque */
  s_t        buf32[6]= {{1,2},{3,4},{5,6},{7,8},{9,10},{11,12}};   /* compound */
  hobj_ref_t buf42[3][2];                                          /* reference */
@@ -712,9 +714,11 @@ void write_attr_in(hid_t loc_id,
 
  /* create 3D attributes with dimension [4][3][2], 24 elements */
  hsize_t    dims3[3]={4,3,2};
- char       buf13[24][2]= {"ab","cd","ef","gh","ij","kl","mn","pq",
- "rs","tu","vw","xz","AB","CD","EF","GH",
- "IJ","KL","MN","PQ","RS","TU","VW","XZ"};  /* string */
+ char       buf13[4][3][2][STR_SIZE]= {{{"ab","cd"},{"ef","gh"},{"ij","kl"}},
+                {{"mn","pq"},{"rs","tu"},{"vw","xz"}},
+                {{"AB","CD"},{"EF","GH"},{"IJ","KL"}},
+                {{"MN","PQ"},{"RS","TU"},{"VW","XZ"}}};  /* string */
+ char       *buf13a[4][3][2];   /* VL string */
  char       buf23[4][3][2];    /* bitfield, opaque */
  s_t        buf33[4][3][2];    /* compound */
  hobj_ref_t buf43[4][3][2];    /* reference */
@@ -758,6 +762,13 @@ void write_attr_in(hid_t loc_id,
  tid = H5Tcopy(H5T_C_S1);
  status  = H5Tset_size(tid, 2);
  write_attr(loc_id,1,dims,"string",tid,buf1);
+ status = H5Tclose(tid);
+
+ for (i=0; i<2; i++)
+  buf1a[i]=buf1[i];
+ tid = H5Tcopy(H5T_C_S1);
+ status  = H5Tset_size(tid, H5T_VARIABLE);
+ write_attr(loc_id,1,dims,"VLstring",tid,buf1a);
  status = H5Tclose(tid);
 
 /*-------------------------------------------------------------------------
@@ -1020,6 +1031,14 @@ position        array of </g1>  array of </g1>  difference
  tid = H5Tcopy(H5T_C_S1);
  status  = H5Tset_size(tid, 2);
  write_attr(loc_id,2,dims2,"string2D",tid,buf12);
+ status = H5Tclose(tid);
+
+ for (i=0; i<3; i++)
+  for (j=0; j<2; j++)
+   buf12a[i][j]=buf12[i][j];
+ tid = H5Tcopy(H5T_C_S1);
+ status  = H5Tset_size(tid, H5T_VARIABLE);
+ write_attr(loc_id,2,dims2,"VLstring2D",tid,buf12a);
  status = H5Tclose(tid);
 
 /*-------------------------------------------------------------------------
@@ -1342,6 +1361,15 @@ position        string3D of </g1> string3D of </g1> difference
  tid = H5Tcopy(H5T_C_S1);
  status  = H5Tset_size(tid, 2);
  write_attr(loc_id,3,dims3,"string3D",tid,buf13);
+ status = H5Tclose(tid);
+
+ for (i=0; i<4; i++)
+  for (j=0; j<3; j++)
+   for (k=0; k<2; k++)
+    buf13a[i][j][k]=buf13[i][j][k];
+ tid = H5Tcopy(H5T_C_S1);
+ status  = H5Tset_size(tid, H5T_VARIABLE);
+ write_attr(loc_id,3,dims3,"VLstring3D",tid,buf13a);
  status = H5Tclose(tid);
 
 /*-------------------------------------------------------------------------
@@ -1696,6 +1724,7 @@ void write_dset_in(hid_t loc_id,
  /* create 1D attributes with dimension [2], 2 elements */
  hsize_t    dims[1]={2};
  char       buf1[2][STR_SIZE]= {"ab","de"}; /* string */
+ char       *buf1a[2];                      /* VL string */
  char       buf2[2]= {1,2};                 /* bitfield, opaque */
  s_t        buf3[2]= {{1,2},{3,4}};         /* compound */
  hobj_ref_t buf4[2];                        /* reference */
@@ -1708,7 +1737,8 @@ void write_dset_in(hid_t loc_id,
 
  /* create 2D attributes with dimension [3][2], 6 elements */
  hsize_t    dims2[2]={3,2};
- char       buf12[6][STR_SIZE]= {"ab","cd","ef","gh","ij","kl"};  /* string */
+ char       buf12[3][2][STR_SIZE]= {{"ab","cd"},{"ef","gh"},{"ij","kl"}};     /* string */
+ char       *buf12a[3][2];                                        /* VL string */
  char       buf22[3][2]= {{1,2},{3,4},{5,6}};                     /* bitfield, opaque */
  s_t        buf32[6]= {{1,2},{3,4},{5,6},{7,8},{9,10},{11,12}};   /* compound */
  hobj_ref_t buf42[3][2];                                          /* reference */
@@ -1719,9 +1749,11 @@ void write_dset_in(hid_t loc_id,
 
  /* create 3D attributes with dimension [4][3][2], 24 elements */
  hsize_t    dims3[3]={4,3,2};
- char       buf13[24][STR_SIZE]= {"ab","cd","ef","gh","ij","kl","mn","pq",
- "rs","tu","vw","xz","AB","CD","EF","GH",
- "IJ","KL","MN","PQ","RS","TU","VW","XZ"};  /* string */
+ char       buf13[4][3][2][STR_SIZE]= {{{"ab","cd"},{"ef","gh"},{"ij","kl"}},
+                {{"mn","pq"},{"rs","tu"},{"vw","xz"}},
+                {{"AB","CD"},{"EF","GH"},{"IJ","KL"}},
+                {{"MN","PQ"},{"RS","TU"},{"VW","XZ"}}};  /* string */
+ char       *buf13a[4][3][2];  /* VL string */
  char       buf23[4][3][2];    /* bitfield, opaque */
  s_t        buf33[4][3][2];    /* compound */
  hobj_ref_t buf43[4][3][2];    /* reference */
@@ -1756,6 +1788,14 @@ void write_dset_in(hid_t loc_id,
  status  = H5Tset_size(tid,STR_SIZE);
  write_dset(loc_id,1,dims,"string",tid,buf1);
  status = H5Tclose(tid);
+
+ for (i=0; i<2; i++)
+  buf1a[i]=buf1[i];
+ tid = H5Tcopy(H5T_C_S1);
+ status  = H5Tset_size(tid, H5T_VARIABLE);
+ write_dset(loc_id,1,dims,"VLstring",tid,buf1a);
+ status = H5Tclose(tid);
+
 
 /*-------------------------------------------------------------------------
  * H5T_BITFIELD
@@ -1929,6 +1969,14 @@ void write_dset_in(hid_t loc_id,
  write_dset(loc_id,2,dims2,"string2D",tid,buf12);
  status = H5Tclose(tid);
 
+ for (i=0; i<3; i++)
+  for (j=0; j<2; j++)
+   buf12a[i][j]=buf12[i][j];
+ tid = H5Tcopy(H5T_C_S1);
+ status  = H5Tset_size(tid, H5T_VARIABLE);
+ write_dset(loc_id,2,dims2,"VLstring2D",tid,buf12a);
+ status = H5Tclose(tid);
+
 /*-------------------------------------------------------------------------
  * H5T_BITFIELD
  *-------------------------------------------------------------------------
@@ -2088,6 +2136,16 @@ void write_dset_in(hid_t loc_id,
  status  = H5Tset_size(tid,STR_SIZE);
  write_dset(loc_id,3,dims3,"string3D",tid,buf13);
  status = H5Tclose(tid);
+
+ for (i=0; i<4; i++)
+  for (j=0; j<3; j++)
+   for (k=0; k<2; k++)
+    buf13a[i][j][k]=buf13[i][j][k];
+ tid = H5Tcopy(H5T_C_S1);
+ status  = H5Tset_size(tid, H5T_VARIABLE);
+ write_dset(loc_id,3,dims3,"VLstring3D",tid,buf13a);
+ status = H5Tclose(tid);
+
 
 /*-------------------------------------------------------------------------
  * H5T_BITFIELD
