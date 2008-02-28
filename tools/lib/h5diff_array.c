@@ -266,8 +266,6 @@ hsize_t diff_array( void *_mem1,
     size_t        size;              /* size of datum */
     unsigned char *mem1 = (unsigned char*)_mem1;
     unsigned char *mem2 = (unsigned char*)_mem2;
-    unsigned char *tmp1;
-    unsigned char *tmp2;
     hsize_t       acc[32];    /* accumulator position */
     hsize_t       pos[32];    /* matrix position */
     int           ph=1;       /* print header  */
@@ -288,23 +286,26 @@ hsize_t diff_array( void *_mem1,
     
     if(H5Tis_variable_str(m_type))
     {
-        tmp1 = ((unsigned char**)mem1)[0];
-        tmp2 = ((unsigned char**)mem2)[0];
-        nfound+=diff_datum(
-            tmp1,
-            tmp2,
-            m_type,
-            (hsize_t)0,
-            rank,
-            dims,
-            acc,
-            pos,
-            options,
-            name1,
-            name2,
-            container1_id,
-            container2_id,
-            &ph);
+        for ( i = 0; i < nelmts; i++)
+        {
+            nfound+=diff_datum(
+                ((unsigned char**)mem1)[(size_t)i],
+                ((unsigned char**)mem2)[(size_t)i],
+                m_type,
+                i,
+                rank,
+                dims,
+                acc,
+                pos,
+                options,
+                name1,
+                name2,
+                container1_id,
+                container2_id,
+                &ph);
+            if (options->n && nfound>=options->count)
+                return nfound;
+        } /* i */
     }
     
     else
@@ -515,42 +516,35 @@ hsize_t diff_datum(void       *_mem1,
     case H5T_STRING:
 
         {
-            
             H5T_str_t pad;
             char      *s;
             
-            if(H5Tis_variable_str(m_type))
-            {
-               /* mem1 is the pointer into the struct where a `char*' is stored. So we have
-                * to dereference the pointer to get the `char*' to pass to HDstrlen(). */
-                s = *(char**)mem1;
-                if(s!=NULL)
-                    size = HDstrlen(s);
-            }
-            else
-            {
-                s = (char *)mem1;
-                size = H5Tget_size(m_type);
-            }
-            
-            pad = H5Tget_strpad(m_type);
-            
+            /* Get pointer to first string to compare */
+            s = (char *)mem1;
+
             /* check for NULL pointer for string */
             if(s!=NULL)
             {
+                if(H5Tis_variable_str(m_type))
+                    size = HDstrlen(s);
+                else
+                    size = H5Tget_size(m_type);
+                
+                pad = H5Tget_strpad(m_type);
+            
                 for (u=0; u<size && (s[u] || pad!=H5T_STR_NULLTERM); u++)
                     nfound+=character_compare(
-                    mem1 + u,
-                    mem2 + u, /* offset */
-                    i,        /* index position */
-                    rank,
-                    dims,
-                    acc,
-                    pos,
-                    options,
-                    obj1,
-                    obj2,
-                    ph);
+                        mem1 + u,
+                        mem2 + u, /* offset */
+                        i,        /* index position */
+                        rank,
+                        dims,
+                        acc,
+                        pos,
+                        options,
+                        obj1,
+                        obj2,
+                        ph);
             }
                 
         }
