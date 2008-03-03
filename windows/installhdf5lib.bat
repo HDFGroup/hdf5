@@ -14,7 +14,7 @@ rem access to either file, you may request a copy from help@hdfgroup.org.
 
 
 rem This batch file is used to install HDF5 libraries and tools
-rem Last Updated: 2/18/2007
+rem Last Updated: 3/3/08
 
 setlocal enabledelayedexpansion
 pushd %~dp0
@@ -173,7 +173,7 @@ rem Install C++ Libraries and Tools
 
     rem ===RELEASE===
     rem include
-    call :safe_copy cpp\src\*.h hdf5lib\release\include
+    call :safe_copy "c++\src\*.h" hdf5lib\release\include
     rem lib
     call :safe_copy proj\hdf5_cpp\release\hdf5_cpp.lib hdf5lib\release\lib
     rem dll
