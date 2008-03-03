@@ -173,7 +173,7 @@ rem Install C++ Libraries and Tools
 
     rem ===RELEASE===
     rem include
-    call :safe_copy cpp\src\*.h hdf5lib\release\include
+    call :safe_copy "c++\src\*.h" hdf5lib\release\include
     rem lib
     call :safe_copy proj\hdf5_cpp\release\hdf5_cpp.lib hdf5lib\release\lib
     rem dll
