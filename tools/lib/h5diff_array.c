@@ -2866,8 +2866,6 @@ hsize_t diff_float(unsigned char *mem1,
     return nfound;
 }
 
-
-
 /*-------------------------------------------------------------------------
  * Function: diff_double
  *
@@ -2897,80 +2895,111 @@ hsize_t diff_double(unsigned char *mem1,
     hsize_t     i;
     double      per;
     int         both_zero;
+    int         isnan1;
+    int         isnan2;
     
-    
-    /* -d and !-p */
+
+ /*-------------------------------------------------------------------------
+  * -d and !-p 
+  *-------------------------------------------------------------------------
+  */
+ 
     if (options->d && !options->p)
     {
-        
         for ( i = 0; i < nelmts; i++)
         {
             memcpy(&temp1_double, mem1, sizeof(double));
             memcpy(&temp2_double, mem2, sizeof(double));
-            
-            if (ABS(temp1_double-temp2_double) > options->delta)
-            {
-                if ( print_data(options) )
+
+           /*-------------------------------------------------------------------------
+            * detect NaNs
+            *-------------------------------------------------------------------------
+            */
+            isnan1 = my_isnan(FLT_DOUBLE,&temp1_double);
+            isnan2 = my_isnan(FLT_DOUBLE,&temp2_double);
+
+            if ( !isnan1 && !isnan2)
+            {             
+                if (ABS(temp1_double-temp2_double) > options->delta)
                 {
-                    print_pos(ph,0,hyper_start+i,acc,pos,rank,dims,obj1,obj2);
-                    printf(SPACES);
-                    printf(F_FORMAT,temp1_double,temp2_double,ABS(temp1_double-temp2_double));
+                    if ( print_data(options) )
+                    {
+                        print_pos(ph,0,hyper_start+i,acc,pos,rank,dims,obj1,obj2);
+                        printf(SPACES);
+                        printf(F_FORMAT,temp1_double,temp2_double,ABS(temp1_double-temp2_double));
+                    }
+                    nfound++;
                 }
-                nfound++;
-            }
+            } /* NaN */
             mem1+=sizeof(double);
             mem2+=sizeof(double);
             if (options->n && nfound>=options->count)
                 return nfound;
-        }
+        } /* i */
     }
-    
-    /* !-d and -p */
+
+ /*-------------------------------------------------------------------------
+  * !-d and -p 
+  *-------------------------------------------------------------------------
+  */
     else if (!options->d && options->p)
     {
-        
         for ( i = 0; i < nelmts; i++)
         {
             memcpy(&temp1_double, mem1, sizeof(double));
             memcpy(&temp2_double, mem2, sizeof(double));
             
-            PER(temp1_double,temp2_double);
+           /*-------------------------------------------------------------------------
+            * detect NaNs
+            *-------------------------------------------------------------------------
+            */
+            isnan1 = my_isnan(FLT_DOUBLE,&temp1_double);
+            isnan2 = my_isnan(FLT_DOUBLE,&temp2_double);
             
-            if (not_comparable && !both_zero) /* not comparable */
-            {
-                if ( print_data(options) )
-                {
-                    print_pos(ph,1,hyper_start+i,acc,pos,rank,dims,obj1,obj2);
-                    printf(SPACES);
-                    printf(F_FORMAT_P_NOTCOMP,temp1_double,temp2_double,
-                        ABS(temp1_double-temp2_double));
-                }
-                options->not_cmp=1;
-                nfound++;
-            }
-            
-            else
+            if ( !isnan1 && !isnan2)
+            {        
                 
-                if ( per > options->percent )
+                PER(temp1_double,temp2_double);
+                
+                if (not_comparable && !both_zero) /* not comparable */
                 {
                     if ( print_data(options) )
                     {
                         print_pos(ph,1,hyper_start+i,acc,pos,rank,dims,obj1,obj2);
                         printf(SPACES);
-                        printf(F_FORMAT_P,temp1_double,temp2_double,
-                            ABS(temp1_double-temp2_double),
-                            ABS(1-temp2_double/temp1_double));
+                        printf(F_FORMAT_P_NOTCOMP,temp1_double,temp2_double,
+                            ABS(temp1_double-temp2_double));
                     }
+                    options->not_cmp=1;
                     nfound++;
                 }
-                mem1+=sizeof(double);
-                mem2+=sizeof(double);
-                if (options->n && nfound>=options->count)
-                    return nfound;
-        }
+                
+                else
+                    
+                    if ( per > options->percent )
+                    {
+                        if ( print_data(options) )
+                        {
+                            print_pos(ph,1,hyper_start+i,acc,pos,rank,dims,obj1,obj2);
+                            printf(SPACES);
+                            printf(F_FORMAT_P,temp1_double,temp2_double,
+                                ABS(temp1_double-temp2_double),
+                                ABS(1-temp2_double/temp1_double));
+                        }
+                        nfound++;
+                    }
+            } /* NaN */
+            mem1+=sizeof(double);
+            mem2+=sizeof(double);
+            if (options->n && nfound>=options->count)
+                return nfound;
+        } /* i */
     }
     
-    /* -d and -p */
+ /*-------------------------------------------------------------------------
+  * -d and -p 
+  *-------------------------------------------------------------------------
+  */
     else if ( options->d && options->p)
     {
         
@@ -2979,41 +3008,58 @@ hsize_t diff_double(unsigned char *mem1,
             memcpy(&temp1_double, mem1, sizeof(double));
             memcpy(&temp2_double, mem2, sizeof(double));
             
-            PER(temp1_double,temp2_double);
+            /*-------------------------------------------------------------------------
+            * detect NaNs
+            *-------------------------------------------------------------------------
+            */
+            isnan1 = my_isnan(FLT_DOUBLE,&temp1_double);
+            isnan2 = my_isnan(FLT_DOUBLE,&temp2_double);
             
-            if (not_comparable && !both_zero) /* not comparable */
-            {
-                if ( print_data(options) )
-                {
-                    print_pos(ph,1,hyper_start+i,acc,pos,rank,dims,obj1,obj2);
-                    printf(SPACES);
-                    printf(F_FORMAT_P_NOTCOMP,temp1_double,temp2_double,
-                        ABS(temp1_double-temp2_double));
-                }
-                options->not_cmp=1;
-                nfound++;
-            }
-            
-            else
+            if ( !isnan1 && !isnan2)
+            {        
                 
-                if ( per > options->percent && ABS(temp1_double-temp2_double) > options->delta )
+                PER(temp1_double,temp2_double);
+                
+                if (not_comparable && !both_zero) /* not comparable */
                 {
                     if ( print_data(options) )
                     {
                         print_pos(ph,1,hyper_start+i,acc,pos,rank,dims,obj1,obj2);
                         printf(SPACES);
-                        printf(F_FORMAT_P,temp1_double,temp2_double,
-                            ABS(temp1_double-temp2_double),
-                            ABS(1-temp2_double/temp1_double));
+                        printf(F_FORMAT_P_NOTCOMP,temp1_double,temp2_double,
+                            ABS(temp1_double-temp2_double));
                     }
+                    options->not_cmp=1;
                     nfound++;
                 }
-                mem1+=sizeof(double);
-                mem2+=sizeof(double);
-                if (options->n && nfound>=options->count)
-                    return nfound;
-        }
+                
+                else
+                    
+                    if ( per > options->percent && ABS(temp1_double-temp2_double) > options->delta )
+                    {
+                        if ( print_data(options) )
+                        {
+                            print_pos(ph,1,hyper_start+i,acc,pos,rank,dims,obj1,obj2);
+                            printf(SPACES);
+                            printf(F_FORMAT_P,temp1_double,temp2_double,
+                                ABS(temp1_double-temp2_double),
+                                ABS(1-temp2_double/temp1_double));
+                        }
+                        nfound++;
+                    }
+                    
+            } /* NaN */
+            mem1+=sizeof(double);
+            mem2+=sizeof(double);
+            if (options->n && nfound>=options->count)
+                return nfound;
+        } /* i */
     }
+
+ /*-------------------------------------------------------------------------
+  * no -d and -p 
+  *-------------------------------------------------------------------------
+  */
     else
     {
         
@@ -3043,6 +3089,9 @@ hsize_t diff_double(unsigned char *mem1,
     
     return nfound;
 }
+
+
+
 
 /*-------------------------------------------------------------------------
  * Function: diff_schar
