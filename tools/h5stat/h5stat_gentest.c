@@ -29,7 +29,7 @@
 #define DATASET_NAME	"DATASET_NAME"
 #define GROUP_NAME	"GROUP"
 #define ATTR_NAME	"ATTR"
-#define NUM_GRPS 	350
+#define NUM_GRPS       	35000
 #define NUM_ATTRS	100
 
 /* 

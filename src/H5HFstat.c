@@ -128,6 +128,7 @@ H5HF_size(const H5HF_t *fh, hid_t dxpl_id, hsize_t *heap_size)
 {
     H5HF_hdr_t *hdr;                            /* Fractal heap header */
     herr_t      ret_value = SUCCEED;            /* Return value */
+    hsize_t     meta_size = 0;                  /* free space storage size */
 
     FUNC_ENTER_NOAPI(H5HF_size, FAIL)
 
@@ -172,9 +173,11 @@ H5HF_size(const H5HF_t *fh, hid_t dxpl_id, hsize_t *heap_size)
     } /* end if */
 
     /* Get storage for free-space tracking info */
-    if(H5F_addr_defined(hdr->fs_addr))
-        if(H5HF_space_size(hdr, dxpl_id, heap_size) < 0)
+    if(H5F_addr_defined(hdr->fs_addr)) {
+        if(H5HF_space_size(hdr, dxpl_id, &meta_size) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "can't retrieve FS meta storage info")
+	*heap_size += meta_size;
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

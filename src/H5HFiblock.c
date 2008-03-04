@@ -1624,7 +1624,8 @@ H5HF_man_iblock_size(H5F_t *f, hid_t dxpl_id, H5HF_hdr_t *hdr, haddr_t iblock_ad
         entry = hdr->man_dtable.max_direct_rows * hdr->man_dtable.cparam.width;
 	first_row_bits = H5V_log2_of2((uint32_t)hdr->man_dtable.cparam.start_block_size) +
 			    H5V_log2_of2(hdr->man_dtable.cparam.width);
-        num_indirect_rows = (H5V_log2_gen(hdr->man_dtable.row_block_size[u]) - first_row_bits) + 1;
+	num_indirect_rows =
+            (H5V_log2_gen(hdr->man_dtable.row_block_size[hdr->man_dtable.max_direct_rows]) - first_row_bits) + 1;
         for(u = hdr->man_dtable.max_direct_rows; u < iblock->nrows; u++, num_indirect_rows++) {
             size_t      v;                      /* Local index variable */
 
