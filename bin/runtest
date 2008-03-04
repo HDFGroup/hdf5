@@ -419,6 +419,34 @@ RUNSNAPTEST()
     fi
 }
 
+TIMELIMIT_PARSE()
+{
+    # Function returns timeparam for timekeeper via standard out - 
+    # any debug statements should be 'echo "Debug string" >&2' or timekeeper 
+    # will declare timeparam to be non-numeric and ignore it.
+    while read x y ; do
+        # Scan for entry for this weekday.
+        xd=`echo $x | cut -f1 -d/`
+        if [ "$xd" = ${WEEKDAY} ]; then
+            # strip away the weekday/ part.
+            timeparam=`echo $x | cut -f2 -d/`
+            break
+        fi
+        case "$x" in
+           '' | '#'*)
+                # blank or comment lines.  Continue.
+                ;;
+            ???/*)
+                # Ignore any entry not of this weekday.
+                ;;
+            *)
+                timeparam="$x"
+                ;;
+        esac
+    done
+    echo $timeparam
+    return
+}
 
 # configuration parsing.
 # Taking configuration from input.
@@ -561,7 +589,7 @@ errcode=0			# error code of the whole test
 skiptest=no			# if test is skipped
 CC_SAVED="$CC"			# CC & PATH maybe changed within a test.
 PATH_SAVED=$PATH		# These save the original values.
-timelimit=300			# time limit (minutes) for the timekeeper
+timelimit=300			# default time limit (minutes) for the timekeeper
 
 #################################
 # Parse options
@@ -847,7 +875,7 @@ if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
     cd ${SNAPYARD}/log
     # Fork off timekeeper if concurrent tests will be used.
     if [ -n "$SRCDIR" ]; then
-	timelimit=`grep -v '^#' $TIMELIMIT`
+        timelimit=$(TIMELIMIT_PARSE < $TIMELIMIT)
 	($SNAPYARD/current/bin/timekeeper $timelimit > $TIMEKEEPERLOG 2>&1 &)
 	PRINT "    Fork off timekeeper $timelimit"
     fi
