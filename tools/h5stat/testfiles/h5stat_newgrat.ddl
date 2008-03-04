@@ -3,20 +3,20 @@ Expected output for 'h5stat h5stat_newgrat.h5'
 #############################
 Filename: h5stat_newgrat.h5
 File information
-	# of unique groups: 351
+	# of unique groups: 35001
 	# of unique datasets: 1
 	# of unique named dataypes: 0
 	# of unique links: 0
 	# of unique other: 0
 	Max. # of links to object: 1
-	Max. # of objects in group: 351
+	Max. # of objects in group: 35001
 Object header size: (total/unused)
-	Groups: 51597/32292
+	Groups: 5145147/3220092
 	Datasets: 414/312
 Storage information:
 	Groups:
-		B-tree/List: 5158
-		Heap: 7643
+		B-tree/List: 470054
+		Heap: 739128
 	Attributes:
 		B-tree/List: 2598
 		Heap: 4442
@@ -28,12 +28,12 @@ Storage information:
 		Heap: 0
 	Superblock extension: 0
 Small groups:
-	# of groups of size 0: 350
-	Total # of small groups: 350
+	# of groups of size 0: 35000
+	Total # of small groups: 35000
 Group bins:
-	# of groups of size 0: 350
-	# of groups of size 100 - 999: 1
-	Total # of groups: 351
+	# of groups of size 0: 35000
+	# of groups of size 10000 - 99999: 1
+	Total # of groups: 35001
 Dataset dimension information:
 	Max. rank of datasets: 0
 	Dataset ranks:
