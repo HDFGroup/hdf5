@@ -20,24 +20,34 @@
  
 #include "trecover.h"
 
-#define H5FILE_NAME        "SDS.h5"
 #define DATASETNAME "IntArray" 
+#define CHUNKDATASETNAME "IntArrayChunked" 
 #define ZDATASETNAME "IntArrayZCompressed" 
 #define SZDATASETNAME "IntArraySZCompressed" 
-/* Dataset dimensions. Intentional small for easier dumping of data. */
-#define RANK   2
-#define NX     8000                    /* dataset dimensions */
-#define NY     16
-#define ChunkX 8		    /* Dataset chunk sizes */
-#define ChunkY 8
+
+int
+create_files(char *filename, char *ctl_filename)
+{
+    /*
+     * Create a new file and the control file using H5F_ACC_TRUNC access,
+     * default file creation properties, and default file
+     * access properties.
+     */
+    file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    ctl_file = H5Fcreate(ctl_filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+}
+
+int
+close_file(hid_t fid)
+{
+    H5Fclose(fid);
+}
 
 void
-writer(void)
+writer(hid_t file, int dstype, int rank, hsize_t *dims, hsize_t *dimschunk)
 {
-    hid_t       file, dataset;         /* file and dataset handles */
+    hid_t       dataset;         /* dataset handle */
     hid_t       datatype, dataspace, plist;      /* handles */
-    hsize_t     dims[RANK]={NX,NY};              /* dataset dimensions */
-    hsize_t     dimschunk[RANK]={ChunkX,ChunkY}; /* dataset chunk dimensions */
     herr_t      status;                             
     int         data[NX][NY];          /* data to write */
     int         i, j;
@@ -49,13 +59,6 @@ writer(void)
 	for (j = 0; j < NY; j++)
 	    data[i][j] = i*100 + j;
     }     
-
-    /*
-     * Create a new file using H5F_ACC_TRUNC access,
-     * default file creation properties, and default file
-     * access properties.
-     */
-    file = H5Fcreate(H5FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
      * Describe the size of the array and create the data space for fixed
@@ -70,6 +73,7 @@ writer(void)
     datatype = H5Tcopy(H5T_NATIVE_INT);
     status = H5Tset_order(datatype, H5T_ORDER_LE);
 
+    if (dstype & DSContig) {
     /* =============================================================
      * Create a new dataset within the file using defined dataspace and
      * datatype and default dataset creation properties.
@@ -83,13 +87,37 @@ writer(void)
      */
     status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
 		      H5P_DEFAULT, data);
-    CRASH;
     /*
      * Close/release resources.
      */
     H5Dclose(dataset);
     printf("%s created.\n", DATASETNAME);
+    }
 
+    if (dstype & DSChunked) {
+    /* =============================================================
+     * Create a new dataset within the file using defined dataspace and
+     * datatype and default dataset creation properties.
+     * =============================================================
+     */
+    plist     = H5Pcreate(H5P_DATASET_CREATE);
+                H5Pset_chunk(plist, RANK, dimschunk);
+    dataset = H5Dcreate(file, CHUNKDATASETNAME, H5T_NATIVE_INT,
+                        dataspace, H5P_DEFAULT, plist, H5P_DEFAULT);
+    /*
+     * Write the data to the dataset using default transfer properties.
+     */
+    status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
+		      H5P_DEFAULT, data);
+    /*
+     * Close/release resources.
+     */
+    H5Pclose(plist);
+    H5Dclose(dataset);
+    printf("%s created.\n", CHUNKDATASETNAME);
+    }
+
+    if (dstype & DSZip){
 #ifdef H5_HAVE_FILTER_DEFLATE
     /* =============================================================
      * Create similar dataset but using Zlib compression.
@@ -102,7 +130,7 @@ writer(void)
                 H5Pset_chunk(plist, RANK, dimschunk);
                 H5Pset_deflate( plist, 6);
     dataset = H5Dcreate(file, ZDATASETNAME, H5T_NATIVE_INT,
-                        dataspace, plist, H5P_DEFAULT, H5P_DEFAULT);
+                        dataspace, H5P_DEFAULT, plist, H5P_DEFAULT);
     status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
 		      H5P_DEFAULT, data);
 
@@ -116,7 +144,9 @@ writer(void)
     printf("%s is not created because of no GZIP (deflate) support.\n",
 	ZDATASETNAME);
 #endif
+    }
 
+    if (dstype & DSSZip){
 #ifdef H5_HAVE_FILTER_SZIP
     /* =============================================================
      * Create similar dataset but using SZLIB compression.
@@ -129,7 +159,7 @@ writer(void)
                 H5Pset_chunk(plist, RANK, dimschunk);
 		H5Pset_szip (plist, H5_SZIP_NN_OPTION_MASK, 8);
     dataset = H5Dcreate(file, SZDATASETNAME, H5T_NATIVE_INT,
-                        dataspace, plist, H5P_DEFAULT, H5P_DEFAULT);
+                        dataspace, H5P_DEFAULT, plist, H5P_DEFAULT);
     status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
 		      H5P_DEFAULT, data);
 
@@ -143,17 +173,15 @@ writer(void)
     printf("%s is not created because of no SZIP encode support.\n",
 	SZDATASETNAME);
 #endif
+    }
 
-    /*
-     * Close/release resources.
+
+
+    /* 
+     * All done, close/release resources.
      */
     H5Sclose(dataspace);
     H5Tclose(datatype);
 
-    /* Close the file */
-    H5Fclose(file);
-
-    printf("HDF5 C Sample program ran successfully. File %s generated.\n", H5FILE_NAME);
- 
     return;
 }     
