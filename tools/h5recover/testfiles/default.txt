@@ -1,0 +1,4 @@
+#############################
+Expected output for 'trecover '
+#############################
+h5diff: <trecover.h5>: unable to open file
