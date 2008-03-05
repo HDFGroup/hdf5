@@ -22,8 +22,16 @@ USE_FILTER_FLETCHER32="@USE_FILTER_FLETCHER32@"
 USE_FILTER_NBIT="@USE_FILTER_NBIT@"
 USE_FILTER_SCALEOFFSET="@USE_FILTER_SCALEOFFSET@"
 
-TOOL=h5recover                     # The tool name
-TOOL_BIN=`pwd`/$TOOL          # The path of the tool binary
+TOOL=trecover                  # The tool name
+TOOL_BIN=`pwd`/$TOOL           # The path of the tool binary
+TOOLDataFile=trecover.h5
+TOOLCTLDataFile=CTL$TOOLDataFile
+# Since h5recover does not exist yet, use touch for now.
+#RECOVERTOOL=h5recover                      # The tool name
+#RECOVERTOOL_BIN=`pwd`/$RECOVERTOOL         # The path of the tool binary
+RECOVERTOOL=touch                      # The tool name
+RECOVERTOOL_BIN=touch         # The path of the tool binary
+H5DIFF=h5diff
 TESTDIR=`pwd`/../testfiles
 
 
@@ -55,43 +63,52 @@ TESTING() {
 # the actual output file is calculated by replacing the `.ddl' with
 # `.out'.  The actual output is not removed if $HDF5_NOCLEANUP has a
 # non-zero value.
+
+# $1: Expected output file
+# $2-: arguments for the trecover program
 #
 TOOLTEST() {
-
-    expect="$srcdir/../testfiles/$1"
-    actual="../testfiles/`basename $1 .ddl`.out"
-    actual_err="../testfiles/`basename $1 .ddl`.err"
+    expect="$srcdir/testfiles/$1"
+    actual=`basename $1 .txt`.out
+    actual_err=`basename $1 .txt`.err
     shift
 
     # Run test.
     TESTING $TOOL $@
+    $RUNSERIAL $TOOL_BIN $@
+    # expect first diff to fail
+    $RUNSERIAL $H5DIFF $TOOLDataFile $TOOLCTLDataFile > /dev/null 2>&1
+    if [ $? = 0 ]; then
+	echo first diff did not fail as expected
+    fi
+    # Recover the file
+    $RUNSERIAL $RECOVERTOOL_BIN $TOOLDataFile
+    # second diff should produce expected output
+    $RUNSERIAL $H5DIFF $TOOLDataFile $TOOLCTLDataFile > $actual
     (
-      echo "#############################"
-      echo "Expected output for '$TOOL $@'" 
-      echo "#############################"
-	  cd $srcdir/../testfiles
-  	  $RUNSERIAL $TOOL_BIN $@
+	echo "#############################"
+	echo "Expected output for '$TOOL $@'" 
+	echo "#############################"
+	$RUNSERIAL $H5DIFF $TOOLDataFile $TOOLCTLDataFile
     ) >$actual 2>$actual_err
     cat $actual_err >> $actual
 
-	if [ ! -f $expect ]; then
-    # Create the expect file if it doesn't yet exist.
-     echo " CREATED"
-     cp $actual $expect
+    if [ ! -f $expect ]; then
+	echo "missing expected output file($expect)"
+	nerrors="`expr $nerrors + 1`"
     elif $CMP $expect $actual; then
-     echo " PASSED"
+	echo " PASSED"
     else
-     echo "*FAILED*"
-     echo "    Expected result (*.ddl) differs from actual result (*.out)"
-	 nerrors="`expr $nerrors + 1`"
-	 test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+	echo "*FAILED*"
+	echo "    Expected result (*.ddl) differs from actual result (*.out)"
+	nerrors="`expr $nerrors + 1`"
+	test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
     fi
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
 	 rm -f $actual $actual_err
     fi
-
 }
 
 
@@ -110,10 +127,11 @@ SKIP() {
 ##############################################################################
 ##############################################################################
 
-SKIP dummy testh5recover
+# default test setting
+TOOLTEST default.txt
 
-# test for displaying groups
-#TOOLTEST tgroup-1.ddl tgroup.h5
+# async crash
+TOOLTEST async_crash.txt -a 0.005
 
 
 if test $nerrors -eq 0 ; then
