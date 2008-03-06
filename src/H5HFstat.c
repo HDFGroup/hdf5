@@ -148,7 +148,7 @@ H5HF_size(const H5HF_t *fh, hid_t dxpl_id, hsize_t *heap_size)
 
     /* Check for indirect blocks for managed objects */
     if(H5F_addr_defined(hdr->man_dtable.table_addr) && hdr->man_dtable.curr_root_rows != 0)
-        if(H5HF_man_iblock_size(hdr->f, dxpl_id, hdr, hdr->man_dtable.table_addr, hdr->man_dtable.curr_root_rows, heap_size) < 0)
+        if(H5HF_man_iblock_size(hdr->f, dxpl_id, hdr, hdr->man_dtable.table_addr, hdr->man_dtable.curr_root_rows, NULL, 0, heap_size) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to get fractal heap storage info for indirect block")
 
     /* Get B-tree storage for huge objects in fractal heap */
