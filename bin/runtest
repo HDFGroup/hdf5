@@ -875,7 +875,7 @@ if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
     cd ${SNAPYARD}/log
     # Fork off timekeeper if concurrent tests will be used.
     if [ -n "$SRCDIR" ]; then
-        timelimit=$(TIMELIMIT_PARSE < $TIMELIMIT)
+        timelimit=`TIMELIMIT_PARSE < $TIMELIMIT`
 	($SNAPYARD/current/bin/timekeeper $timelimit > $TIMEKEEPERLOG 2>&1 &)
 	PRINT "    Fork off timekeeper $timelimit"
     fi
@@ -900,10 +900,10 @@ if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
 
 		# launch concurrent tests only if srcdir is used
 		if [ -n "$SRCDIR" ]; then
-		    $CMD &
+		    $CMD || REPORT_ERR "****FAILED ${h}: Abnormal exit from runtest****" && PRINT_BLANK &
 		    echo $! > PID.${h}_${CONFIGNAME}
 		else
-		    $CMD
+		    $CMD || REPORT_ERR "****FAILED ${h}: Abnormal exit from runtest****" && PRINT_BLANK
 		fi
 		;;
 	    NoRemoteCommand)
