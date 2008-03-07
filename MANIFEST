@@ -618,6 +618,7 @@
 ./src/H5Olayout.c
 ./src/H5Olinfo.c
 ./src/H5Olink.c
+./src/H5Omdj_msg.c
 ./src/H5Omessage.c
 ./src/H5Omtime.c
 ./src/H5Oname.c

@@ -716,6 +716,55 @@ struct H5C2_jbrb_t
  *	this field will be reset every automatic resize epoch.
  *
  *
+ * Metadata journaling fields:
+ *
+ * The following fields are used to support metadata journaling.  The 
+ * objective here is to journal all changes in metadata, so that we will
+ * be able to re-construct a HDF5 file with a consistent set of metadata
+ * in the event of a crash.
+ *
+ * mdj_enabled:  Boolean flag used to indicate whether journaling is 
+ * 		currently enabled.  In general, the values of the 
+ * 		remaining fields in this section are undefined if 
+ * 		mdj_enabled is FALSE.
+ *
+ * mdj_file_name_ptr:  Pointer to a string containing the path of the 
+ * 		journal file, or NULL if this path is undefined.
+ * 		At present, the journal will always be stored in an 
+ * 		external file, so this field must be defined if 
+ * 		journaling is enabled.
+ *
+ * mdj_conf_block_len: Length (in bytes) of the metadata journaling 
+ * 		configuration block, or 0 if that block is undefined.
+ *
+ * mdj_conf_block_ptr: Pointer to a dynamically allocated chunk of 
+ * 		memory of size mdj_conf_block_len used to construct 
+ * 		an image of the on disk metadata journaling configuration
+ * 		block.  This block is used to record the path of the 
+ * 		journal file in the HDF5 file, so that it can be 
+ * 		found in the event of a crash.
+ *
+ * 		The metadata journaling configuration block has the 
+ * 		following format:
+ *
+ * 		4 bytes		signature
+ *
+ * 		1 byte		version
+ *
+ * 		4 bytes		path length
+ *
+ * 		variable	string containing path of journal file
+ *
+ * 		4 bytes		checksum
+ *
+ * 		The base address and lenth of the metadata journaling 
+ * 		configuration block is stored in the mdj_msg superblock
+ * 		extension message.
+ *
+ * mdj_jbrb:    Instance of H5C2_jbrb_t used to manage logging of journal
+ * 		entries to the journal file.
+ *
+ *
  * Statistics collection fields:
  *
  * When enabled, these fields are used to collect statistics as described
@@ -1027,6 +1076,12 @@ struct H5C2_t
 
     int64_t			cache_hits;
     int64_t			cache_accesses;
+ 
+    hbool_t			mdj_enabled;
+    char *			mdj_file_name_ptr;
+    size_t			mdj_conf_block_len;
+    void *			mdj_conf_block_ptr;
+    struct H5C2_jbrb_t		mdj_jbrb;
 
 #if H5C2_COLLECT_CACHE_STATS
 

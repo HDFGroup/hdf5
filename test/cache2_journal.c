@@ -20,10 +20,14 @@
  *		features implemented in H5C2.c and friends.
  */
 
+#define H5F_PACKAGE             /*suppress error about including H5Fpkg   */
+
 #include "h5test.h"
 #include "H5Iprivate.h"
+#include "H5MMprivate.h"        /* Memory management                    */
 #include "H5AC2private.h"
 #include "cache2_common.h"
+#include "H5Fpkg.h"
 
 #define HDF5_FILE_NAME "HDF5.file"
 
@@ -32,6 +36,7 @@
 const char *FILENAMES[] = {
         "cache_test",
         "cache_journal_test",
+	"cache_sb_test",
         NULL
 };
 
@@ -50,6 +55,8 @@ static void write_noflush_verify(H5C2_jbrb_t * struct_ptr,
                                  char * data, 
                                  FILE * readback, 
                                  int repeats);
+
+static void check_superblock_extensions(void);
 
 
 /**************************************************************************/
@@ -296,9 +303,12 @@ check_buffer_writes(void)
     /* report pass / failure information */
     if ( pass2 ) { PASSED(); } else { H5_FAILED(); }
 
-    if ( ! pass2 )
+    if ( ! pass2 ) {
+
+	failures2++;
         HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
                   fcn_name, failure_mssg2);
+    }
 
     return;
 
@@ -432,6 +442,639 @@ write_noflush_verify(H5C2_jbrb_t * struct_ptr,
 
 } /* write_noflush_verify */
 
+/*** super block extension related test code ***/
+
+/*-------------------------------------------------------------------------
+ * Function:    check_superblock_extensions()
+ *
+ * Purpose:     Verify that the super block extensions for tracking 
+ * 		operate as they should.
+ *
+ *              Note that this test code will have to be re-worked
+ *              once journaling is fully implemented.
+ *
+ * Return:      void
+ *
+ * Programmer:  John Mainzer
+ *              2/26/08
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static void
+check_superblock_extensions(void)
+{
+    const char * fcn_name = "check_superblock_extensions()";
+    const char * journal_file_name = "journal_file.txt";
+    const int journal_file_name_len = strlen(journal_file_name);
+    char filename[512];
+    hbool_t show_progress = FALSE;
+    haddr_t mdc_jrnl_block_loc = 0x1000;
+    hsize_t mdc_jrnl_block_len = 0x100;
+    int i;
+    int cp = 0; 
+    hid_t fapl_id = -1;
+    hid_t file_id = -1;
+    hid_t dataset_id = -1;
+    hid_t dataspace_id = -1;
+    H5F_t * file_ptr = NULL;
+    hsize_t             dims[2];
+
+
+    TESTING("superblock extensions");
+
+    pass2 = TRUE;
+
+    if ( pass2 ) { PASSED(); } else { H5_FAILED(); }
+
+    /* Verify that the journaling superblock extension performs as 
+     * expected.  Note that this test will have to be re-written
+     * (or possibly subsumed in another test) once the full journaling
+     * code is up and running.
+     *
+     * For now at least, the test proceeds as follows:
+     *
+     *  1) create a HDF5 file, and verify that journaling is
+     *     listed as being off.
+     *
+     *  2) create a dataset in the file, and then close the file
+     * 
+     *  3) Open the file again, and verifiy that journaling is still
+     *     listed as being off.
+     *
+     *  4) Write data to the superblock marking the file as currently
+     *     being journaled, and close the file again.
+     *
+     *  5) Open the file a third time, and verify that the superblock
+     *     extension indicates that the file is being journaled.  
+     *
+     *  6) Reset the journaling information to indicate that the file
+     *     is not being journaled, and close the file again.
+     *
+     *  7) Open the file a fourth time, and verify that the superblock
+     *     extension indicates that the file is not being journaled.
+     *
+     *  8) Write data to the superblock, marking the file as being
+     *     journaled.  Now write different data to the superbloc, that 
+     *     still marks the file as being journaled.  Close the file. 
+     *
+     *  9) Re-open the file, and verify that the second write in 8 
+     *     above took.
+     *
+     * 10) Write data to the superblock indicating that journaling is
+     *     not in progress.  Close the file.
+     *
+     * 11) Reopen the file, and verify that journaling is not in 
+     *     progress.
+     *
+     * 12) Close the file and delete it.
+     */
+
+    /********************************************************/
+    /* 1) create a HDF5 file, and verify that journaling is */
+    /*    listed as being off.                              */
+    /********************************************************/
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    /* setup the file name */
+    if ( pass2 ) {
+
+        if ( h5_fixname(FILENAMES[2], H5P_DEFAULT, filename, sizeof(filename))
+				            == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "h5_fixname() failed.\n";
+        }
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    /* create a file access propertly list */
+    if ( pass2 ) {
+
+        fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+
+        if ( fapl_id < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Pcreate() failed.\n";
+        }
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    /* call H5Pset_latest_format() on the fapl_id */
+    if ( pass2 ) {
+
+	if ( H5Pset_latest_format(fapl_id, TRUE) < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Pset_latest_format() failed.\n";
+        }
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    /* create the file using fapl_id */
+    if ( pass2 ) {
+
+        file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+
+        if ( file_id < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fcreate() failed.\n";
+        }
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    /* get a pointer to the files internal data structure and then 
+     * verify that journaling is disabled.
+     */
+    if ( pass2 ) {
+
+        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+
+        if ( file_ptr == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "Can't get file_ptr (1).\n";
+
+        } else if ( file_ptr->shared->mdc_jrnl_enabled ) {
+	
+	    pass2 = FALSE;
+	    failure_mssg2 = "Journaling enabled on file creation.\n";
+	}
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    /************************************************************/
+    /* 2) create a dataset in the file, and then close the file */
+    /************************************************************/
+
+    if ( pass2 ) {
+
+        dims[0] = 4;
+        dims[1] = 6;
+        dataspace_id = H5Screate_simple(2, dims, NULL);
+
+	if ( dataspace_id < 0 ) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5Screate_simple() failed.";
+        }
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    if ( pass2 ) {
+
+        /* Create the dataset. */
+        dataset_id = H5Dcreate(file_id, "/dset", H5T_STD_I32BE, dataspace_id,
+                               H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+	if ( dataspace_id < 0 ) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5Dcreate() failed.";
+        }
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    if ( pass2 ) {
+
+        /* close the data set, the data space, and the file */
+	if ( ( H5Dclose(dataset_id) < 0 ) ||
+	     ( H5Sclose(dataspace_id) < 0 ) ||
+	     ( H5Fclose(file_id) ) ) {
+
+            pass2 = FALSE;
+	    failure_mssg2 = "data set, data space, or file close failed.";
+	}
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    /****************************************************************/
+    /* 3) Open the file again, and verifiy that journaling is still */
+    /*    listed as being off.                                      */
+    /****************************************************************/
+
+    /* open the file r/w using the default FAPL */
+    if ( pass2 ) {
+
+        file_id = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
+
+        if ( file_id < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fopen() failed (1).\n";
+        }
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    /* get a pointer to the files internal data structure and then 
+     * verify that journaling is disabled.
+     */
+    if ( pass2 ) {
+
+        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+
+        if ( file_ptr == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "Can't get file_ptr (2).\n";
+
+        } else if ( file_ptr->shared->mdc_jrnl_enabled ) {
+	
+	    pass2 = FALSE;
+	    failure_mssg2 = "Journaling enabled on file open (1).\n";
+	}
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    /*****************************************************************/
+    /* 4) Write data to the superblock marking the file as currently */
+    /*    being journaled, and close the file again.                 */
+    /*****************************************************************/
+
+    /* At present, we just write the super block regardless if the 
+     * file is opened read/write.  This is ugly, but that is how it
+     * is for now.  Thus just go in and modify the journaling fields
+     * of the super block to taste.
+     */
+
+    if ( pass2 ) {
+
+        file_ptr->shared->mdc_jrnl_enabled = TRUE;
+        file_ptr->shared->mdc_jrnl_block_loc = mdc_jrnl_block_loc;
+        file_ptr->shared->mdc_jrnl_block_len = mdc_jrnl_block_len;
+
+	if ( H5F_super_write_mdj_msg(file_ptr, -1) < 0 ) {
+
+            pass2 = FALSE;
+	    failure_mssg2 = "H5F_super_write_mdj_msg failed (1).";
+	}
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    /* close the file again. */
+    if ( pass2 ) {
+
+	if ( H5Fclose(file_id) ) {
+
+            pass2 = FALSE;
+	    failure_mssg2 = "file close failed (1).";
+	}
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+
+    /*****************************************************************/
+    /* 5) Open the file a third time, and verify that the superblock */
+    /*    extension indicates that the file is being journaled.      */
+    /*****************************************************************/
+
+    /* open the file r/w using the default FAPL */
+    if ( pass2 ) {
+
+        file_id = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
+
+        if ( file_id < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fopen() failed (2).\n";
+        }
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    /* get a pointer to the files internal data structure and then 
+     * verify that journaling is enabled.
+     */
+    if ( pass2 ) {
+
+        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+
+        if ( file_ptr == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "Can't get file_ptr (3).\n";
+
+        } else if ( ! file_ptr->shared->mdc_jrnl_enabled ) {
+	
+	    pass2 = FALSE;
+	    failure_mssg2 = "Journaling disabled on file open (1).\n";
+
+	} else if ( file_ptr->shared->mdc_jrnl_block_loc != 
+			mdc_jrnl_block_loc ) {
+	
+	    pass2 = FALSE;
+	    HDfprintf(stdout, "%s: block_loc = %ld (%ld).\n",
+		      fcn_name, (long)(file_ptr->shared->mdc_jrnl_block_loc),
+		      (long)(mdc_jrnl_block_loc));
+	    failure_mssg2 = "unexpected mdc_jrnl_block_loc(1).\n";
+
+	} else if ( file_ptr->shared->mdc_jrnl_block_len != 
+		    (hsize_t)mdc_jrnl_block_len ) {
+	
+	    pass2 = FALSE;
+	    failure_mssg2 = "unexpected mdc_jrnl_block_len (1).\n";
+
+        }
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    /*****************************************************************/
+    /* 6) Reset the journaling information to indicate that the file */
+    /*    is not being journaled, and close the file again.          */
+    /*****************************************************************/
+
+    if ( pass2 ) {
+
+	file_ptr->shared->mdc_jrnl_enabled = FALSE;
+
+	if ( H5F_super_write_mdj_msg(file_ptr, -1) < 0 ) {
+
+            pass2 = FALSE;
+	    failure_mssg2 = "H5F_super_write_mdj_msg failed (2).";
+	}
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    /* close the file again. */
+    if ( pass2 ) {
+
+	if ( H5Fclose(file_id) ) {
+
+            pass2 = FALSE;
+	    failure_mssg2 = "file close failed (2).";
+	}
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+    
+
+    /******************************************************************/
+    /* 7) Open the file a fourth time, and verify that the superblock */
+    /*    extension indicates that the file is not being journaled.   */
+    /*******************************************************************/
+
+    /* open the file r/w using the default FAPL */
+    if ( pass2 ) {
+
+        file_id = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
+
+        if ( file_id < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fopen() failed (3).\n";
+        }
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    /* get a pointer to the files internal data structure and then 
+     * verify that journaling is disabled.
+     */
+    if ( pass2 ) {
+
+        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+
+        if ( file_ptr == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "Can't get file_ptr (4).\n";
+
+        } else if ( file_ptr->shared->mdc_jrnl_enabled ) {
+	
+	    pass2 = FALSE;
+	    failure_mssg2 = "Journaling enabled on file open (2).\n";
+	}
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+
+    /*******************************************************************/
+    /*  8) Write data to the superblock, marking the file as being     */
+    /*     journaled.  Now write different data to the superbloc, that */
+    /*     still marks the file as being journaled.  Close the file.   */
+    /*******************************************************************/
+
+    if ( pass2 ) {
+
+        file_ptr->shared->mdc_jrnl_enabled = TRUE;
+        file_ptr->shared->mdc_jrnl_block_loc = mdc_jrnl_block_loc * 2;
+        file_ptr->shared->mdc_jrnl_block_len = mdc_jrnl_block_len * 2;
+
+	if ( H5F_super_write_mdj_msg(file_ptr, -1) < 0 ) {
+
+            pass2 = FALSE;
+	    failure_mssg2 = "H5F_super_write_mdj_msg failed (3).";
+	}
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    if ( pass2 ) {
+
+        file_ptr->shared->mdc_jrnl_enabled = TRUE;
+        file_ptr->shared->mdc_jrnl_block_loc = mdc_jrnl_block_loc / 2;
+        file_ptr->shared->mdc_jrnl_block_len = mdc_jrnl_block_len / 2;
+
+	if ( H5F_super_write_mdj_msg(file_ptr, -1) < 0 ) {
+
+            pass2 = FALSE;
+	    failure_mssg2 = "H5F_super_write_mdj_msg failed (4).";
+	}
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    /* close the file again. */
+    if ( pass2 ) {
+
+	if ( H5Fclose(file_id) ) {
+
+            pass2 = FALSE;
+	    failure_mssg2 = "file close failed (3).";
+	}
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    
+    /***************************************************************/
+    /*  9) Re-open the file, and verify that the second write in 8 */
+    /*     above took.                                             */
+    /***************************************************************/
+
+    /* open the file r/w using the default FAPL */
+    if ( pass2 ) {
+
+        file_id = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
+
+        if ( file_id < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fopen() failed (4).\n";
+        }
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    /* get a pointer to the files internal data structure and then 
+     * verify that journaling is enabled.
+     */
+    if ( pass2 ) {
+
+        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+
+        if ( file_ptr == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "Can't get file_ptr (5).\n";
+
+        } else if ( ! file_ptr->shared->mdc_jrnl_enabled ) {
+	
+	    pass2 = FALSE;
+	    failure_mssg2 = "Journaling disabled on file open (2).\n";
+
+	} else if ( file_ptr->shared->mdc_jrnl_block_loc != 
+			mdc_jrnl_block_loc / 2 ) {
+	
+	    pass2 = FALSE;
+	    HDfprintf(stdout, "%s: block_loc = %ld (%ld).\n",
+		      fcn_name, (long)(file_ptr->shared->mdc_jrnl_block_loc),
+		      (long)(mdc_jrnl_block_loc));
+	    failure_mssg2 = "unexpected mdc_jrnl_block_loc(2).\n";
+
+	} else if ( file_ptr->shared->mdc_jrnl_block_len != 
+		    (hsize_t)mdc_jrnl_block_len / 2 ) {
+	
+	    pass2 = FALSE;
+	    failure_mssg2 = "unexpected mdc_jrnl_block_len (2).\n";
+
+        }
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+
+    /******************************************************************/
+    /* 10) Write data to the superblock indicating that journaling is */
+    /*     not in progress.  Close the file.                          */
+    /******************************************************************/
+
+    if ( pass2 ) {
+
+	file_ptr->shared->mdc_jrnl_enabled = FALSE;
+
+	if ( H5F_super_write_mdj_msg(file_ptr, -1) < 0 ) {
+
+            pass2 = FALSE;
+	    failure_mssg2 = "H5F_super_write_mdj_msg failed (5).";
+	}
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    /* close the file again. */
+    if ( pass2 ) {
+
+	if ( H5Fclose(file_id) ) {
+
+            pass2 = FALSE;
+	    failure_mssg2 = "file close failed (4).";
+	}
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+
+    /*************************************************************/
+    /* 11) Reopen the file, and verify that journaling is not in */
+    /*     progress.                                             */
+    /*************************************************************/
+
+    /* open the file r/w using the default FAPL */
+    if ( pass2 ) {
+
+        file_id = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
+
+        if ( file_id < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fopen() failed (5).\n";
+        }
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    /* get a pointer to the files internal data structure and then 
+     * verify that journaling is disabled.
+     */
+    if ( pass2 ) {
+
+        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+
+        if ( file_ptr == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "Can't get file_ptr (6).\n";
+
+        } else if ( file_ptr->shared->mdc_jrnl_enabled ) {
+	
+	    pass2 = FALSE;
+	    failure_mssg2 = "Journaling enabled on file open (3).\n";
+	}
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+
+    /*************************************/
+    /* 12) Close the file and delete it. */
+    /*************************************/
+    
+    if ( pass2 ) {
+
+	if ( H5Fclose(file_id) ) {
+
+            pass2 = FALSE;
+	    failure_mssg2 = "file close failed (5).";
+
+        } else if ( HDremove(filename) < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "HDremove() failed.\n";
+        }
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    if ( ! pass2 ) {
+
+	failures2++;
+        HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
+                  fcn_name, failure_mssg2);
+    }
+
+} /* check_superblock_extensions() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -455,12 +1098,16 @@ main(void)
 {
     int express_test;
 
+    failures2 = 0;
+
     H5open();
 
     express_test = GetTestExpress();
 
     check_buffer_writes();
 
-    return(0);
+    check_superblock_extensions();
+
+    return(failures2);
 
 } /* main() */

@@ -111,6 +111,10 @@
 /* Local Prototypes */
 /********************/
 
+herr_t H5F_super_create_extension(H5F_t *f, 
+		                  hid_t dxpl_id,
+		                  H5O_loc_t * ext_loc_ptr);
+
 
 /*********************/
 /* Package Variables */
@@ -214,6 +218,95 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5F_super_create_extension()
+ *
+ * Purpose:     Create a superblock extension for the superblock.
+ *
+ * 		This method will be called either on superblock 
+ * 		initialization, or if journaling is enabled, and there
+ * 		is no superblock extension to put the journaling 
+ * 		configuration data into.
+ *
+ * 		The code in this function was hacked from existing
+ * 		code in H5F_super_init().
+ *
+ * 		The method should fail if a superblock extension 
+ * 		exists on entry.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  John Mainzer
+ *              2/29/08
+ *
+ * Changes:	None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5F_super_create_extension(H5F_t *f, 
+		           hid_t dxpl_id,
+			   H5O_loc_t * ext_loc_ptr)
+{
+    H5O_loc_t       ext_loc;        /* Superblock extension object location */
+    H5O_loc_t       *elp;
+    herr_t          ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5F_super_create_extension, FAIL)
+
+    HDassert( f != NULL );
+    HDassert( f->shared != NULL );
+
+    if ( ext_loc_ptr != NULL ) {
+
+	elp = ext_loc_ptr;
+
+    } else {
+
+	elp = &ext_loc;
+    }
+
+
+    if ( ! f->shared->extension_ok ) {
+
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, 
+		    "superblock extension not permitted?!?!")
+
+    } else if ( f->shared->extension_addr != HADDR_UNDEF ) {
+
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, 
+		    "superblock extension already exists?!?!")
+
+    } else {
+
+        /* The superblock extension isn't actually a group, but the
+         * default group creation list should work fine.
+         * If we don't supply a size for the object header, HDF5 will
+         * allocate H5O_MIN_SIZE by default.  This is currently
+         * big enough to hold the biggest possible extension, but should
+         * be tuned if more information is added to the superblock
+         * extension.
+         */
+        H5O_loc_reset(elp);
+        if( H5O_create(f, dxpl_id, 0, H5P_GROUP_CREATE_DEFAULT, elp) < 0 )
+        {
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, \
+			"unable to create superblock extension")
+        }
+
+        /* Record the address of the superblock extension */
+        f->shared->extension_addr = elp->addr;
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5F_super_create_extension() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5F_super_read
  *
  * Purpose:     Reads the superblock from the file or from the BUF. If
@@ -263,9 +356,9 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
      * super block to indicate that journaling is not turned on at 
      * present.  These initialization may be overridden shortly.
      */
-    shared->journaling_enabled = FALSE;
-    shared->path_len = 0;
-    shared->external_journal_file_path_ptr = NULL; 
+    shared->mdc_jrnl_enabled = FALSE;
+    shared->mdc_jrnl_block_loc = HADDR_UNDEF;
+    shared->mdc_jrnl_block_len = 0;
 
     /* Get the shared file creation property list */
     if(NULL == (c_plist = H5I_object(shared->fcpl_id)))
@@ -480,6 +573,8 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
         uint32_t computed_chksum;       /* Computed checksum  */
         uint32_t read_chksum;           /* Checksum read from file  */
 
+	shared->extension_ok = TRUE;
+
         /* Size of file addresses */
         sizeof_addr = *p++;
         if(sizeof_addr != 2 && sizeof_addr != 4 &&
@@ -566,11 +661,12 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
 
     /* Read the file's superblock extension, if there is one. */
     if(H5F_addr_defined(shared->extension_addr)) {
+
         H5O_loc_t ext_loc;      /* "Object location" for superblock extension */
         H5O_btreek_t btreek;    /* v1 B-tree 'K' value message from superblock extension */
         H5O_drvinfo_t drvinfo;  /* Driver info message from superblock extension */
-	H5O_mdj_conf_t mdj_conf;/* metadata journaling config message 
-				 * from superblock extension 
+	H5O_mdj_msg_t mdj_msg;  /* metadata journaling message 
+			         * from superblock extension 
 				 */
 
         /* Sanity check - superblock extension should only be defined for
@@ -639,43 +735,30 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
 	/* Read in the metadata journaling configuration message, 
 	 * if it exists.
 	 */
-        if(NULL == H5O_msg_read(&ext_loc, H5O_MDJ_CONF_ID, &mdj_conf, dxpl_id)) {
+
+        if(NULL == H5O_msg_read(&ext_loc, H5O_MDJ_MSG_ID, &mdj_msg, dxpl_id)) {
+
             /* Reset error from "failed" message read */
+	    /* H5Eprint1(stdout); */
             H5E_clear_stack(NULL);
         } /* end if */
         else {
 
-	    shared->journaling_enabled = mdj_conf.journaling_enabled;
+	    shared->mdc_jrnl_enabled = mdj_msg.mdc_jrnl_enabled;
 
-	    if ( shared->journaling_enabled ) {
+	    if ( shared->mdc_jrnl_enabled ) {
 
-                shared->journal_is_external = mdj_conf.journal_is_external;
-		shared->internal_journal_loc = mdj_conf.internal_journal_loc;
-		shared->path_len = mdj_conf.path_len;
-		shared->external_journal_file_path_ptr = 
-			mdj_conf.external_journal_file_path_ptr;
-
-		/* for now at least, the journal file must always be 
-		 * external -- hence the following asserts.  Remove them
-		 * if we ever support an internal journal.
-		 */
-		HDassert( shared->journal_is_external );
-		HDassert( shared->path_len > 0 );
-		HDassert( shared->external_journal_file_path_ptr != NULL );
-
-		/* if there is a an external journal file, 
-		 * H5O_mdj_conf_decode() will allocate a buffer to
-		 * store it in.  Rather than allocate our own buffer,
-		 * we will use the one created by H5O_mdj_conf_decode(),
-		 * and modify mdj_conf so that H5O_mdj_conf_reset() will
-		 * not discard it.
-		 */
-		mdj_conf.path_len = 0;
-		mdj_conf.external_journal_file_path_ptr = NULL;
+		shared->mdc_jrnl_block_loc = mdj_msg.mdc_jrnl_block_loc;
+		shared->mdc_jrnl_block_len = mdj_msg.mdc_jrnl_block_len;
+            }
+	    else
+            {
+		shared->mdc_jrnl_block_loc = HADDR_UNDEF;
+		shared->mdc_jrnl_block_len = 0;
             }
 
             /* Reset metadata journaling config message */
-            H5O_msg_reset(H5O_MDJ_CONF_ID, &mdj_conf);
+            H5O_msg_reset(H5O_MDJ_MSG_ID, &mdj_msg);
         }
 
         /* Close the extension.  Twiddle the number of open objects to avoid
@@ -688,7 +771,9 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
     } /* end if */
 
 done:
+
     FUNC_LEAVE_NOAPI(ret_value)
+
 } /* end H5F_super_read() */
 
 
@@ -711,7 +796,7 @@ done:
  * 		Added initialization for the metadata journaling 
  * 		configuration fields.  By default, these fields are
  * 		initialized to indicate that we are not journaling 
- * 		metadata. 
+ * 		metadata.  
  *
  *-------------------------------------------------------------------------
  */
@@ -788,6 +873,7 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
     /* Files with SOHM indices always need the superblock extension */
     if(f->shared->sohm_nindexes > 0) {
         HDassert(super_vers >= HDF5_SUPERBLOCK_VERSION_2);
+	f->shared->extension_ok = TRUE;
         need_ext = TRUE;
     } /* end if */
     /* If we're going to use a version of the superblock format which allows 
@@ -795,6 +881,12 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
      *  in it.
      */
     else if(super_vers >= HDF5_SUPERBLOCK_VERSION_2) {
+
+	/* make note of the fact that we can construct a superblock 
+	 * extension later if we wish.
+	 */
+	f->shared->extension_ok = TRUE;
+
         /* Check for non-default v1 B-tree 'K' values to store */
         if(f->shared->btree_k[H5B_SNODE_ID] != HDF5_BTREE_SNODE_IK_DEF ||
                 f->shared->btree_k[H5B_ISTORE_ID] != HDF5_BTREE_ISTORE_IK_DEF || 
@@ -811,7 +903,8 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
 
     /* Create the superblock extension for "extra" superblock data, if necessary. */
     if(need_ext) {
-        H5O_loc_t       ext_loc;            /* Superblock extension object location */
+
+        H5O_loc_t       ext_loc;    /* Superblock extension object location */
 
         /* The superblock extension isn't actually a group, but the
          * default group creation list should work fine.
@@ -821,12 +914,11 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
          * be tuned if more information is added to the superblock
          * extension.
          */
-        H5O_loc_reset(&ext_loc);
-        if(H5O_create(f, dxpl_id, 0, H5P_GROUP_CREATE_DEFAULT, &ext_loc) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "unable to create superblock extension")
+        if ( H5F_super_create_extension(f, dxpl_id, &ext_loc) != SUCCEED ) {
 
-        /* Record the address of the superblock extension */
-        f->shared->extension_addr = ext_loc.addr;
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, \
+			"unable to create superblock extension");
+	}
 
         /* Create the Shared Object Header Message table and register it with
          *      the metadata cache, if this file supports shared messages.
@@ -871,40 +963,13 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
         } /* end if */
 
 	/* check for journaling config data to store */
-	if ( f->shared->journaling_enabled ) {
+	if ( f->shared->mdc_jrnl_enabled ) {
 
-	    struct H5O_mdj_conf_t mdj_conf;
+	    struct H5O_mdj_msg_t mdj_conf;
 
-	    mdj_conf.journaling_enabled = f->shared->journaling_enabled;
-	    mdj_conf.journal_is_external = f->shared->journal_is_external;
-            mdj_conf.internal_journal_loc = f->shared->internal_journal_loc;
-	    mdj_conf.path_len = f->shared->path_len;
-
-	    if ( f->shared->external_journal_file_path_ptr == NULL ) {
-
-		mdj_conf.external_journal_file_path_ptr = NULL;
-
-	    } else { 
-
-		if ( ( NULL == (mdj_conf.external_journal_file_path_ptr =
-                                H5MM_malloc(mdj_conf.path_len + 1)) ) ) {
-
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
-	                        "memory alloc failed for mdj path")
-
-		}
-	        HDmemcpy(mdj_conf.external_journal_file_path_ptr,
-	                 f->shared->external_journal_file_path_ptr,
-                         f->shared->path_len);
-            }
-
-            if ( H5O_msg_create(&ext_loc, H5O_MDJ_CONF_ID, 
-                                H5O_MSG_FLAG_CONSTANT | H5O_MSG_FLAG_DONTSHARE, 
-                                H5O_UPDATE_TIME, &mdj_conf, dxpl_id) < 0 ) {
-
-                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, \
-                       "unable to update metadata journal conf header message")
-            }
+	    mdj_conf.mdc_jrnl_enabled = f->shared->mdc_jrnl_enabled;
+	    mdj_conf.mdc_jrnl_block_loc = f->shared->mdc_jrnl_block_loc;
+            mdj_conf.mdc_jrnl_block_len = f->shared->mdc_jrnl_block_len;
 	}
 
         /* Twiddle the number of open objects to avoid closing the file
@@ -917,7 +982,9 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
     } /* end if */
 
 done:
+
     FUNC_LEAVE_NOAPI(ret_value)
+
 } /* end H5F_super_init() */
 
 
@@ -1067,8 +1134,188 @@ H5F_super_write(H5F_t *f, hid_t dxpl_id)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write superblock")
 
 done:
+
     FUNC_LEAVE_NOAPI(ret_value)
+
 } /* end H5F_super_write() */
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_super_write_mdj_msg
+ *
+ *              If journaling is enabled, create a superblock extension
+ *              if necessary and then write the current contents of 
+ *              the mdc_jrnl_enabled, mdc_jrnl_block_loc, and 
+ *              mdc_jrnl_block_len fields of the shared structure to the 
+ *              mdj_msg in the superblock extention, overwriting the old 
+ *              message if it exists.
+ *
+ *              If journaling is not enabled, remove the old mdj message
+ *              from the superblock extension (if it exists).
+ *
+ *              Recall that the absence of a mdj message indicates that
+ *              metadata journaling is not enabled.
+ *
+ * Return:      Success:        non-negative on success
+ *              Failure:        Negative
+ *
+ * Programmer:  John Mainzer
+ *              3/3/08
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_super_write_mdj_msg(H5F_t *f, 
+		        hid_t dxpl_id)
+{
+    H5O_loc_t 			ext_loc;
+    herr_t			result;
+    htri_t    			tri_result;
+    struct H5O_mdj_msg_t	mdj_msg;
+    herr_t    			ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5F_super_write_mdj_msg, FAIL)
+
+    HDassert( f != NULL );
+    HDassert( f->shared != NULL );
+    HDassert( f->shared->extension_ok );
+
+    if ( f->shared->extension_addr == HADDR_UNDEF ) {
+
+        result = H5F_super_create_extension(f, dxpl_id, &ext_loc);
+
+	if ( result < 0 ) {
+
+            HGOTO_ERROR(H5E_SYSTEM, H5E_SYSERRSTR, FAIL, \
+                        "unable to create superblock extension?!?!");
+	}
+    } else {
+
+        /* Set up "fake" object location for superblock extension */
+        H5O_loc_reset(&ext_loc);
+        ext_loc.file = f;
+        ext_loc.addr = f->shared->extension_addr;
+
+        /* Open the superblock extension */
+        if(H5O_open(&ext_loc) < 0) {
+
+            HGOTO_ERROR(H5E_SYSTEM, H5E_SYSERRSTR, FAIL, \
+                        "unable to open superblock extension?!?!");
+        }
+    }
+
+    tri_result = H5O_msg_exists(&ext_loc, H5O_MDJ_MSG_ID, dxpl_id);
+
+    if ( tri_result < 0 ) { /* failure */
+
+        HGOTO_ERROR(H5E_SYSTEM, H5E_SYSERRSTR, FAIL, \
+                    "unable to open superblock extension?!?!");
+
+    } else if ( tri_result == 0 ) { 
+        /* metadata journaling message doesn't exist */
+
+	if ( f->shared->mdc_jrnl_enabled ) {
+
+	    /* create a metadata journaling message and insert it in 
+	     * the superblock extension.
+	     */
+            mdj_msg.mdc_jrnl_enabled = f->shared->mdc_jrnl_enabled;
+            mdj_msg.mdc_jrnl_block_loc = f->shared->mdc_jrnl_block_loc;
+            mdj_msg.mdc_jrnl_block_len = f->shared->mdc_jrnl_block_len;
+
+	    result = H5O_msg_create(&ext_loc, 
+		           H5O_MDJ_MSG_ID, 
+			   H5O_MSG_FLAG_DONTSHARE, 
+			   H5O_UPDATE_TIME, 
+			   &mdj_msg, 
+			   dxpl_id);
+
+	    if ( result < 0 ) {
+
+                HGOTO_ERROR(H5E_SYSTEM, H5E_SYSERRSTR, FAIL, \
+                         "unable to add mdj_msg to superblock extension?!?!");
+	    }
+
+	} else {
+
+	    /* do nothing */
+	}
+
+    } else { 
+        /* metadata journaling message exists */
+
+	if ( f->shared->mdc_jrnl_enabled ) {
+
+	    /* overwrite the old metadata journaling message with a 
+	     * new one in the superblock extension.
+	     */
+            mdj_msg.mdc_jrnl_enabled = f->shared->mdc_jrnl_enabled;
+            mdj_msg.mdc_jrnl_block_loc = f->shared->mdc_jrnl_block_loc;
+            mdj_msg.mdc_jrnl_block_len = f->shared->mdc_jrnl_block_len;
+
+	    result = H5O_msg_write(&ext_loc, 
+		           H5O_MDJ_MSG_ID, 
+			   H5O_MSG_FLAG_DONTSHARE, 
+			   H5O_UPDATE_TIME, 
+			   &mdj_msg, 
+			   dxpl_id);
+
+	    if ( result < 0 ) {
+
+                HGOTO_ERROR(H5E_SYSTEM, H5E_SYSERRSTR, FAIL, \
+                     "unable to overwrite mdj_msg in superblock extension?!?!");
+	    }
+
+
+	} else {
+
+	    /* delete the old metadata journaling message from the
+	     * superblock extension.
+	     */
+
+	    result = H5O_msg_remove(&ext_loc,
+                                    H5O_MDJ_MSG_ID,
+				    H5O_ALL,
+	    /* the next parameter is the "adj_link" parameter, which is 
+	     * boolean.  Unfortunately, its meaning is not documented
+	     * in the code.  The value gets stuffed into an instance of 
+	     * H5O_iter_rm_t, and then passed along somehow to a funcition
+	     * whose address appears to be picked out of a table somewhere.
+	     * 
+	     * The documentation on the adj_link field of H5O_iter_rm_t
+	     * simply says that the value specifies "Whether to adjust 
+	     * links when removing messages" -- but unfortunately, I 
+	     * don't know what a "link" is in this context.
+	     *
+	     * Bottom line is that after spending over an hour dredging 
+	     * through the code, I haven't a clue as to what the value 
+	     * of this parameter should be.  We will set it to FALSE and
+	     * see if anything blows up.
+	     *
+	     * 					JRM -- 3/5/08
+	     */
+				    FALSE,
+				    dxpl_id);
+	}
+
+    }
+
+    /* Close the extension.  Twiddle the number of open objects to avoid
+     * closing the file (since this may be the only open object).
+     */
+    f->nopen_objs++;
+    if(H5O_close(&ext_loc) < 0) {
+
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENFILE, FAIL, 
+		     "unable to close superblock extension")
+    }
+    f->nopen_objs--;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5F_super_write_mdj_msg() */
 
 
 /*-------------------------------------------------------------------------

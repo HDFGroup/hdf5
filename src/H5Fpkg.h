@@ -83,7 +83,8 @@ typedef struct H5F_file_t {
     size_t	sizeof_size;	/* Size of offsets in file              */
     haddr_t	super_addr;	/* Absolute address of super block	*/
     haddr_t	base_addr;	/* Absolute base address for rel.addrs. */
-    haddr_t	extension_addr;	/* Relative address of superblock extension	*/
+    hbool_t	extension_ok;   /* TRUE iff version permits SB extensions */
+    haddr_t	extension_addr;	/* Relative address of superblock extension */
     haddr_t	sohm_addr;	/* Relative address of shared object header message table */
     unsigned	sohm_vers;	/* Version of shared message table on disk */
     unsigned	sohm_nindexes;	/* Number of shared messages indexes in the table */
@@ -113,11 +114,9 @@ typedef struct H5F_file_t {
     struct H5G_t *root_grp;	/* Open root group			*/
     H5FO_t *open_objs;          /* Open objects in file                 */
     H5RC_t *grp_btree_shared;   /* Ref-counted group B-tree node info   */
-    hbool_t journaling_enabled;  /* metadata journaling configuration   */
-    hbool_t journal_is_external; /* fields.  All fields as per those    */
-    haddr_t internal_journal_loc;/* of the same name in M5O_mdj_conf_t. */
-    size_t path_len;                       
-    uint8_t * external_journal_file_path_ptr;
+    hbool_t mdc_jrnl_enabled;   /* TRUE iff journaling is in progress	*/
+    haddr_t mdc_jrnl_block_loc; /* Rel addr of mdc journal block	*/
+    hsize_t mdc_jrnl_block_len; /* Length of mdc journal block		*/
 } H5F_file_t;
 
 /* A record of the mount table */
@@ -183,6 +182,7 @@ H5_DLL herr_t H5F_mount_count_ids(H5F_t *f, unsigned *nopen_files, unsigned *nop
 /* Superblock related routines */
 H5_DLL herr_t H5F_super_init(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5F_super_write(H5F_t *f, hid_t dxpl_id);
+H5_DLL herr_t H5F_super_write_mdj_msg(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc);
 H5_DLL herr_t H5F_super_ext_size(H5F_t *f, hid_t dxpl_id, hsize_t *super_ext_info);
 

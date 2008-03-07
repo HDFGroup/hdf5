@@ -46,6 +46,7 @@ hbool_t pass2 = TRUE; /* set to false on error */
 hbool_t skip_long_tests2 = TRUE;
 hbool_t run_full_test2 = TRUE;
 const char *failure_mssg2 = NULL;
+int failures2 = 0;
 
 test_entry_t pico_entries2[NUM_PICO_ENTRIES];
 test_entry_t nano_entries2[NUM_NANO_ENTRIES];

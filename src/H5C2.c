@@ -2858,6 +2858,9 @@ done:
  *              Added initialization for the new flash cache size increase
  *              related fields of H5C2_t.
  *
+ * 		JRM -- 3/6/08
+ * 		Added initialization for metadata journaling related 
+ * 		fields in H5C2_t.
  *
  *-------------------------------------------------------------------------
  */
@@ -3050,6 +3053,14 @@ H5C2_create(const H5F_t *               f,
         ((cache_ptr->epoch_markers)[i]).pins		 = 0;
 #endif /* H5C2_COLLECT_CACHE_ENTRY_STATS */
     }
+
+    /* metadata journaling related fields */
+    cache_ptr->mdj_enabled				 = FALSE;
+    cache_ptr->mdj_file_name_ptr                         = NULL;
+    cache_ptr->mdj_conf_block_len                        = 0;
+    cache_ptr->mdj_conf_block_ptr                        = NULL;
+    (cache_ptr->mdj_jbrb).magic                          = 
+	    					H5C2__H5C2_JBRB_T_MAGIC;
 
     if ( H5C2_reset_cache_hit_rate_stats(cache_ptr) != SUCCEED ) {
 

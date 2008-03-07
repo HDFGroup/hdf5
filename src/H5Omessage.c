@@ -496,8 +496,10 @@ H5O_msg_read_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
     for(idx = 0; idx < oh->nmesgs; idx++)
 	if(type == oh->mesg[idx].type)
             break;
-    if(idx == oh->nmesgs)
+    if(idx == oh->nmesgs) {
+
         HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, NULL, "message type not found")
+    }
 
     /*
      * Decode the message if necessary.  If the message is shared then retrieve
@@ -514,6 +516,7 @@ H5O_msg_read_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to copy message to user space")
 
 done:
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_msg_read_real() */
 

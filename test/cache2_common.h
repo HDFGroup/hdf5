@@ -489,6 +489,7 @@ extern hbool_t pass2; /* set to false on error */
 extern hbool_t skip_long_tests2;
 extern hbool_t run_full_test2;
 extern const char *failure_mssg2;
+extern int failures2;
 
 extern test_entry_t pico_entries2[NUM_PICO_ENTRIES];
 extern test_entry_t nano_entries2[NUM_NANO_ENTRIES];
