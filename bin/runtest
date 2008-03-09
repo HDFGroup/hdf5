@@ -927,7 +927,7 @@ if [ -n "$TESTHOST" -a $HOSTNAME != "$TESTHOST" ]; then
 	TMP_OUTPUT="#${h}_${CONFIGNAME}.out"
 	cat $TMP_OUTPUT
 	# Verify test script did complete by checking the last lines
-	(tail -2 $TMP_OUTPUT | grep -s 'Grand total' > /dev/null 2>&1) ||
+	(tail -5 $TMP_OUTPUT | grep -s 'Grand total' > /dev/null 2>&1) ||
 	    (REPORT_ERR "****FAILED ${h}: snaptest did not complete****" &&
 		PRINT_BLANK)
 	rm -f $TMP_OUTPUT PID.${h}_${CONFIGNAME}
