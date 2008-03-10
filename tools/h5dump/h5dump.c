@@ -2911,6 +2911,8 @@ parse_subset_params(char *dset)
  *              Tuesday, 9. January 2001
  *
  * Modifications:
+ *  Pedro Vicente, Friday, March 7, 2008
+ *  check for block overlap
  *
  *-------------------------------------------------------------------------
  */
@@ -2981,6 +2983,37 @@ handle_datasets(hid_t fid, char *dset, void *data)
 
             H5Sclose(sid);
         }
+    }
+
+   /*-------------------------------------------------------------------------
+    * check for block overlap
+    *-------------------------------------------------------------------------
+    */
+
+    if(sset) 
+    {
+        hid_t sid = H5Dget_space(dsetid);
+        unsigned int ndims = H5Sget_simple_extent_ndims(sid);
+        unsigned int i;
+        
+        for ( i = 0; i < ndims; i++)
+        {
+            if ( sset->count[i] > 1 )
+            {
+                
+                if ( sset->stride[i] < sset->block[i] )
+                {
+                    error_msg(progname, "wrong subset selection; blocks overlap\n");
+                    d_status = EXIT_FAILURE;
+                    return;
+                    
+                }                                
+                
+            }
+            
+        } 
+        H5Sclose(sid);
+        
     }
 
     H5Gget_objinfo(dsetid, ".", TRUE, &statbuf);
