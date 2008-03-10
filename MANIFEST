@@ -1606,7 +1606,6 @@
 ./tools/testfiles/tdset-2.ddl
 ./tools/testfiles/tdset-3s.ddl
 ./tools/testfiles/tdset.h5
-./tools/testfiles/tdset2-1s.ddl
 ./tools/testfiles/tdset2.h5
 ./tools/testfiles/tempty.ddl
 ./tools/testfiles/tempty.h5
@@ -1730,6 +1729,13 @@
 ./tools/testfiles/tbin1.ddl
 # h5dump binary test, h5import configuration
 ./tools/testfiles/out3.h5import
+./tools/testfiles/tindicessub2.ddl
+./tools/testfiles/tindicessub3.ddl
+./tools/testfiles/tindicessub4.ddl
+./tools/testfiles/tindicessub1.ddl
+
+
+
 
 # Expected output from h5ls tests
 ./tools/testfiles/nosuchfile.ls
