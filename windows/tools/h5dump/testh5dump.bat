@@ -16,7 +16,7 @@ rem
 rem Tests for the h5dump tool
 rem
 rem    Created:  Scott Wegner, 8/23/07
-rem    Modified: Scott Wegner, 8/27/07
+rem    Modified: Scott Wegner, 3/10/08
 rem
 
 setlocal enabledelayedexpansion
@@ -405,8 +405,7 @@ rem ############################################################################
     call :tooltest tall-4s.ddl --dataset=/g1/g1.1/dset1.1.1 --start=1,1 --stride=2,3 --count=3,2 --block=1,1 tall.h5
     call :tooltest tall-5s.ddl -d "/g1/g1.1/dset1.1.2[0;2;10;]" tall.h5
     call :tooltest tdset-3s.ddl -d "/dset1[1,1;;;]" tdset.h5
-    rem block
-    rem call :tooltest tdset2-1s.ddl -d "/dset1[;3,2;4,4;1,4]" tdset2.h5
+
 
     rem test printing characters in ASCII instead of decimal
     call :tooltest tchar1.ddl -r tchar.h5
