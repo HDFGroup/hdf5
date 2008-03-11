@@ -312,6 +312,8 @@ H5Aget_num_attrs(hid_t loc_id)
     H5TRACE1("Is", "i", loc_id);
 
     /* check arguments */
+    if(H5I_BADID == H5I_get_type(loc_id))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad location ID")
     if(H5I_FILE == H5I_get_type(loc_id) || H5I_ATTR == H5I_get_type(loc_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
     if(NULL == (obj = H5I_object(loc_id)))
