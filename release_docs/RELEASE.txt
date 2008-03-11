@@ -91,6 +91,9 @@ Bug Fixes since HDF5-1.8.0
 
 	Library
 	-------
+            - Fixed bug in H5Aget_num_attrs() routine to handle invalid location
+                ID correctly.  (QAK - 2008/03/11)
+
 
 	Parallel Library
 	----------------
