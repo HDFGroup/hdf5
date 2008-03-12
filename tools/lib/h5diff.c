@@ -21,14 +21,15 @@
 /*-------------------------------------------------------------------------
  * Function: print_objname
  *
- * Purpose: print object name only when:
+ * Purpose: check if object name is to be printed, only when:
  *  1) verbose mode
  *  2) when diff was found (normal mode)
  *-------------------------------------------------------------------------
  */
-int print_objname(diff_opt_t *options, hsize_t nfound)
+int
+print_objname (diff_opt_t * options, hsize_t nfound)
 {
-    return ( (options->m_verbose || nfound) && !options->m_quiet) ?1:0;
+    return ((options->m_verbose || nfound) && !options->m_quiet) ? 1 : 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -64,42 +65,44 @@ hsize_t h5diff(const char *fname1,
                const char *objname1,
                const char *objname2,
                diff_opt_t *options)
-{
-    int          nobjects1, nobjects2;
+{    
     trav_info_t  *info1=NULL;
     trav_info_t  *info2=NULL;
-    hid_t        file1_id=(-1), file2_id=(-1);
-    hsize_t      nfound=0;
+    hid_t        file1_id = (-1);
+    hid_t        file2_id = (-1);
+    int          nobjects1;
+    int          nobjects2;
+    hsize_t      nfound = 0;
     
-    if (options->m_quiet && (options->m_verbose || options->m_report))
+    if(options->m_quiet && (options->m_verbose || options->m_report)) 
     {
         printf("Error: -q (quiet mode) cannot be added to verbose or report modes\n");
         options->err_stat=1;
         return 0;
-    }
+    } /* end if */
     
    /*-------------------------------------------------------------------------
     * open the files first; if they are not valid, no point in continuing
     *-------------------------------------------------------------------------
     */
     
-    /* disable error reporting */
+     /* disable error reporting */
     H5E_BEGIN_TRY 
     {
-        /* Open the files */
-        if ((file1_id=H5Fopen(fname1,H5F_ACC_RDONLY,H5P_DEFAULT))<0 )
+        /* open the files */
+        if((file1_id = H5Fopen(fname1, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) 
         {
             printf("h5diff: <%s>: unable to open file\n", fname1 );
-            options->err_stat=1;
+            options->err_stat = 1;
             goto out;
-        }
-        if ((file2_id=H5Fopen(fname2,H5F_ACC_RDONLY,H5P_DEFAULT))<0 )
+        } /* end if */
+        if((file2_id = H5Fopen(fname2, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) 
         {
             printf("h5diff: <%s>: unable to open file\n", fname2 );
-            options->err_stat=1;
+            options->err_stat = 1;
             goto out;
-        }
-        /* enable error reporting */
+        } /* end if */
+    /* enable error reporting */
     } H5E_END_TRY;
     
     
@@ -140,12 +143,11 @@ hsize_t h5diff(const char *fname1,
     * object name was supplied
     *-------------------------------------------------------------------------
     */
-    
-    if ( objname1 )
+    if( objname1 ) 
     {
         assert(objname2);
-        options->cmn_objs=1; /* eliminate warning */
-        nfound=diff_compare(file1_id,
+        options->cmn_objs = 1; /* eliminate warning */
+        nfound = diff_compare(file1_id, 
             fname1,
             objname1,
             nobjects1,
@@ -156,23 +158,23 @@ hsize_t h5diff(const char *fname1,
             nobjects2,
             info2,
             options);
-    }
-    
+     } /* end if */
+
    /*-------------------------------------------------------------------------
     * compare all
     *-------------------------------------------------------------------------
     */
-    
-    else
+
+    else 
     {
-        nfound=diff_match(file1_id,
-            nobjects1,
-            info1,
-            file2_id,
-            nobjects2,
-            info2,
-            options);
-    }
+        nfound = diff_match(file1_id, 
+                            nobjects1,
+                            info1,
+                            file2_id,
+                            nobjects2,
+                            info2,
+                            options);
+    } /* end else */
     
     
     h5trav_freeinfo(info1,nobjects1);
@@ -207,23 +209,22 @@ out:
  *
  *-------------------------------------------------------------------------
  */
-hsize_t diff_match( hid_t file1_id,
-                    int nobjects1,
-                    trav_info_t *info1,
-                    hid_t file2_id,
-                    int nobjects2,
-                    trav_info_t *info2,
-                    diff_opt_t *options )
+hsize_t diff_match(hid_t file1_id,
+                   int nobjects1,
+                   trav_info_t *info1,
+                   hid_t file2_id,
+                   int nobjects2,
+                   trav_info_t *info2,
+                   diff_opt_t *options)
 {
     int           more_names_exist = (nobjects1>0 && nobjects2>0) ? 1 : 0;
-    trav_table_t  *table=NULL;
+    trav_table_t  *table = NULL;
     int           cmp;
     int           curr1=0;
     int           curr2=0;
     unsigned      infile[2];
-    char          c1, c2;
-    hsize_t       nfound=0;
-    unsigned int  i;
+    hsize_t       nfound = 0;
+    unsigned      i;
     
    /*-------------------------------------------------------------------------
     * build the list
@@ -287,20 +288,20 @@ hsize_t diff_match( hid_t file1_id,
     * print the list
     *-------------------------------------------------------------------------
     */
-    
-    if (options->m_verbose)
+    if(options->m_verbose) 
     {
         printf("\n");
         printf("file1     file2\n");
         printf("---------------------------------------\n");
-        for (i = 0; i < table->nobjs; i++)
-        {
+        for(i = 0; i < table->nobjs; i++) {
+            char c1, c2;
+
             c1 = (table->objs[i].flags[0]) ? 'x' : ' ';
             c2 = (table->objs[i].flags[1]) ? 'x' : ' ';
             printf("%5c %6c    %-15s\n", c1, c2, table->objs[i].name);
-        }
-        printf("\n");
-    }
+        } /* end for */
+        printf ("\n");
+    } /* end if */
     
     
    /*-------------------------------------------------------------------------
@@ -357,21 +358,21 @@ hsize_t diff_match( hid_t file1_id,
  *-------------------------------------------------------------------------
  */
 
-hsize_t diff_compare( hid_t file1_id,
-                      const char *file1_name,
-                      const char *obj1_name,
-                      int nobjects1,
-                      trav_info_t *info1,
-                      hid_t file2_id,
-                      const char *file2_name,
-                      const char *obj2_name,
-                      int nobjects2,
-                      trav_info_t *info2,
-                      diff_opt_t *options )
+hsize_t diff_compare(hid_t file1_id,
+                     const char *file1_name,
+                     const char *obj1_name,
+                     int nobjects1,
+                     trav_info_t *info1,
+                     hid_t file2_id,
+                     const char *file2_name,
+                     const char *obj2_name,
+                     int nobjects2,
+                     trav_info_t *info2,
+                     diff_opt_t *options)
 {
-    
-    int     f1=0, f2=0;
-    hsize_t nfound=0;
+    int     f1 = 0;
+    int     f2 = 0;
+    hsize_t nfound = 0;
     
     int i = h5trav_getindex( obj1_name, nobjects1, info1 );
     int j = h5trav_getindex( obj2_name, nobjects2, info2 );
@@ -386,9 +387,9 @@ hsize_t diff_compare( hid_t file1_id,
         printf( "Object <%s> could not be found in <%s>\n", obj2_name, file2_name );
         f2=1;
     }
-    if ( f1 || f2 ) 
+    if (f1 || f2)
     {
-        options->err_stat=1;
+        options->err_stat = 1;
         return 0;
     }
     
@@ -407,12 +408,12 @@ hsize_t diff_compare( hid_t file1_id,
         return 0;
     }
     
-    nfound=diff( file1_id, 
-                 obj1_name, 
-                 file2_id, 
-                 obj2_name, 
-                 options, 
-                 info1[i].type );
+    nfound = diff(file1_id, 
+                  obj1_name, 
+                  file2_id, 
+                  obj2_name, 
+                  options, 
+                  info1[i].type );
     
     return nfound;
 }
@@ -444,14 +445,14 @@ hsize_t diff (hid_t file1_id,
               diff_opt_t * options, 
               H5G_obj_t1 type)
 {
-    hid_t       type1_id=(-1);
-    hid_t       type2_id=(-1);
-    hid_t       grp1_id=(-1);
-    hid_t       grp2_id=(-1);
-    int ret;
+    hid_t      type1_id = (-1);
+    hid_t      type2_id = (-1);
+    hid_t      grp1_id = (-1);
+    hid_t      grp2_id = (-1);
+    int        ret;
     H5G_stat_t sb1;
     H5G_stat_t sb2;
-    hsize_t nfound = 0;
+    hsize_t    nfound = 0;
     
     switch (type)
     {
@@ -636,21 +637,19 @@ hsize_t diff (hid_t file1_id,
  return nfound;
  
 out:
+    options->err_stat = 1;
 
- options->err_stat=1;
- 
- /* close */
- /* disable error reporting */
- H5E_BEGIN_TRY
- {
-     H5Tclose (type1_id);
-     H5Tclose (type2_id);
-     H5Gclose (grp1_id);
-     H5Tclose (grp2_id);
-     /* enable error reporting */
- }
- H5E_END_TRY;
- 
- return nfound;
+    /* close */
+    /* disable error reporting */
+    H5E_BEGIN_TRY {
+        H5Tclose(type1_id);
+        H5Tclose(type2_id);
+        H5Gclose(grp1_id);
+        H5Tclose(grp2_id);
+        /* enable error reporting */
+    } H5E_END_TRY;
+
+    return nfound;
 }
+
 
