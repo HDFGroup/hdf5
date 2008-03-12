@@ -1729,7 +1729,7 @@ AC_MSG_RESULT([no]))
 dnl Check whether the global variable `timezone' is defined.
 AC_MSG_CHECKING([for global timezone variable])
 
-case "'uname'" in
+case "`uname`" in
   CYGWIN*)
     AC_MSG_RESULT([disabled in CYGWIN])
     ;;
