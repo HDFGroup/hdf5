@@ -254,7 +254,6 @@ int test_basic(const char *fname1,
     */
     {
 
-#if 1
         float data15[6];
         float data16[6];
 
@@ -274,48 +273,9 @@ int test_basic(const char *fname1,
 
         write_dset(gid1,1,dims1,"fp15",H5T_NATIVE_FLOAT,data15);
         write_dset(gid1,1,dims1,"fp16",H5T_NATIVE_FLOAT,data16);
-#else
-
-#define NU_ELMTS 1000000
-
-        hsize_t i;
-
-        hsize_t dims2[1] = { NU_ELMTS };
-
-        float *data15 = malloc (NU_ELMTS * sizeof(float) );
-        float *data16 = malloc (NU_ELMTS * sizeof(float) );
-
-        data15[0] = (float) sqrt( (double)-1 );
-        data15[1] = 1;
-        data15[2] = (float) sqrt( (double)-1 );
-        data15[3] = 1;
-        data15[4] = 1;
-        data15[5] = 1;
-
-        data16[0] = (float) sqrt( (double)-1 );
-        data16[1] = (float) sqrt( (double)-1 );
-        data16[2] = 1;
-        data16[3] = 1;
-        data16[4] = 1;
-        data16[5] = 1;
-
-        for ( i = 6; i < NU_ELMTS; i++ )
-        {
-            data15[i] = /*data15[0];*/ 2;
-            data16[i] = 1;
-        }
-
-        write_dset(gid1,1,dims2,"fp15",H5T_NATIVE_FLOAT,data15);
-        write_dset(gid1,1,dims2,"fp16",H5T_NATIVE_FLOAT,data16);
-
-        free( data15 );
-        free( data16 );
-#endif
 
     }
-
        
-        
    /*-------------------------------------------------------------------------
     * NaNs in H5T_NATIVE_DOUBLE
     *-------------------------------------------------------------------------
@@ -343,9 +303,7 @@ int test_basic(const char *fname1,
         write_dset(gid1,1,dims1,"fp18",H5T_NATIVE_DOUBLE,data18);
 
     }
-        
-
-  
+ 
     
    /*-------------------------------------------------------------------------
     * close
