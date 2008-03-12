@@ -730,13 +730,13 @@ int test_datasets(const char *file,
 
     write_dset_in(gid,"/dset",fid,make_diffs);
 
-    /* Close */
+    /* close */
     status = H5Dclose(did);
     assert(status >= 0);
     status = H5Gclose(gid);
     assert(status >= 0);
 
-    /* Close file */
+    /* close file */
     status = H5Fclose(fid);
     assert(status >= 0);
     return status;
@@ -2613,31 +2613,35 @@ int write_attr(hid_t loc_id,
                hid_t tid,
                void *buf)
 {
- hid_t   aid;
- hid_t   sid;
-
- /* create a space  */
- if((sid = H5Screate_simple(rank, dims, NULL)) < 0)
-     goto out;
-
- /* create the attribute */
- if((aid = H5Acreate2(loc_id, name, tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-     goto out;
-
- /* write */
- if(buf)
-   if(H5Awrite(aid, tid, buf) < 0)
-      goto out;
-
- /* close */
- H5Aclose(aid);
- H5Sclose(sid);
-
- return SUCCEED;
-
+    hid_t   aid=-1;
+    hid_t   sid=-1;
+    
+    /* create a space  */
+    if((sid = H5Screate_simple(rank, dims, NULL)) < 0)
+        goto out;
+    
+    /* create the attribute */
+    if((aid = H5Acreate2(loc_id, name, tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    
+    /* write */
+    if(buf)
+    {
+        if(H5Awrite(aid, tid, buf) < 0)
+            goto out;
+    }
+        
+    /* close */
+    H5Aclose(aid);
+    H5Sclose(sid);
+        
+    return SUCCEED;
+        
 out:
- 
- return FAIL;
+    
+    H5Aclose(aid);
+    H5Sclose(sid);
+    return FAIL;
 }
 
 /*-------------------------------------------------------------------------
@@ -2655,8 +2659,8 @@ int write_dset( hid_t loc_id,
                 hid_t tid,
                 void *buf )
 {
-    hid_t   did;
-    hid_t   sid;
+    hid_t   did=-1;
+    hid_t   sid=-1;
 
     /* create a space  */
     if((sid = H5Screate_simple(rank, dims, NULL)) < 0)
@@ -2668,8 +2672,10 @@ int write_dset( hid_t loc_id,
 
     /* write */
     if(buf)
+    {
         if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
             goto out;
+    }
 
     /* close */
     H5Dclose(did);
@@ -2678,6 +2684,9 @@ int write_dset( hid_t loc_id,
     return SUCCEED;
 
 out:
+
+    H5Dclose(did);
+    H5Sclose(sid);
     return FAIL;
 }
 
