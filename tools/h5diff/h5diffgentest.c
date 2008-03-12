@@ -317,77 +317,77 @@ out:
 static
 int test_types(const char *fname)
 {
-
- hid_t   fid1;
- hid_t   gid1;
- hid_t   gid2;
- hid_t   tid1;
- hid_t   tid2;
- herr_t  status;
- hsize_t dims[1]={1};
- typedef struct s1_t
- {
-  int    a;
-  float  b;
- } s1_t;
- typedef struct s2_t
- {
-  int    a;
- } s2_t;
-
-/*-------------------------------------------------------------------------
- * Create one file
- *-------------------------------------------------------------------------
- */
- fid1 = H5Fcreate (fname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-
-/*-------------------------------------------------------------------------
- * H5G_DATASET
- *-------------------------------------------------------------------------
- */
- write_dset(fid1,1,dims,"dset",H5T_NATIVE_INT,0);
-
-/*-------------------------------------------------------------------------
- * H5G_GROUP
- *-------------------------------------------------------------------------
- */
- gid1 = H5Gcreate(fid1, "g1", 0);
- status = H5Gclose(gid1);
- gid2 = H5Gcreate(fid1, "g2", 0);
- status = H5Gclose(gid2);
-
-/*-------------------------------------------------------------------------
- * H5G_TYPE
- *-------------------------------------------------------------------------
- */
-
- /* create and commit datatype 1 */
- tid1 = H5Tcreate (H5T_COMPOUND, sizeof(s1_t));
- H5Tinsert(tid1, "a", HOFFSET(s1_t, a), H5T_NATIVE_INT);
- H5Tinsert(tid1, "b", HOFFSET(s1_t, b), H5T_NATIVE_FLOAT);
- H5Tcommit(fid1, "t1", tid1);
- H5Tclose(tid1);
- /* create and commit datatype 2 */
- tid2 = H5Tcreate (H5T_COMPOUND, sizeof(s2_t));
- H5Tinsert(tid2, "a", HOFFSET(s2_t, a), H5T_NATIVE_INT);
- H5Tcommit(fid1, "t2", tid2);
- H5Tclose(tid2);
-
-/*-------------------------------------------------------------------------
- * H5G_LINK
- *-------------------------------------------------------------------------
- */
-
- status = H5Glink(fid1, H5G_LINK_SOFT, "g1", "l1");
- status = H5Glink(fid1, H5G_LINK_SOFT, "g2", "l2");
-
-
-/*-------------------------------------------------------------------------
- * Close
- *-------------------------------------------------------------------------
- */
- status = H5Fclose(fid1);
- return status;
+    
+    hid_t   fid1;
+    hid_t   gid1;
+    hid_t   gid2;
+    hid_t   tid1;
+    hid_t   tid2;
+    herr_t  status;
+    hsize_t dims[1]={1};
+    typedef struct s1_t
+    {
+        int    a;
+        float  b;
+    } s1_t;
+    typedef struct s2_t
+    {
+        int    a;
+    } s2_t;
+    
+    /*-------------------------------------------------------------------------
+    * Create one file
+    *-------------------------------------------------------------------------
+    */
+    fid1 = H5Fcreate (fname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    
+    /*-------------------------------------------------------------------------
+    * H5G_DATASET
+    *-------------------------------------------------------------------------
+    */
+    write_dset(fid1,1,dims,"dset",H5T_NATIVE_INT,0);
+    
+    /*-------------------------------------------------------------------------
+    * H5G_GROUP
+    *-------------------------------------------------------------------------
+    */
+    gid1 = H5Gcreate(fid1, "g1", 0);
+    status = H5Gclose(gid1);
+    gid2 = H5Gcreate(fid1, "g2", 0);
+    status = H5Gclose(gid2);
+    
+    /*-------------------------------------------------------------------------
+    * H5G_TYPE
+    *-------------------------------------------------------------------------
+    */
+    
+    /* create and commit datatype 1 */
+    tid1 = H5Tcreate (H5T_COMPOUND, sizeof(s1_t));
+    H5Tinsert(tid1, "a", HOFFSET(s1_t, a), H5T_NATIVE_INT);
+    H5Tinsert(tid1, "b", HOFFSET(s1_t, b), H5T_NATIVE_FLOAT);
+    H5Tcommit(fid1, "t1", tid1);
+    H5Tclose(tid1);
+    /* create and commit datatype 2 */
+    tid2 = H5Tcreate (H5T_COMPOUND, sizeof(s2_t));
+    H5Tinsert(tid2, "a", HOFFSET(s2_t, a), H5T_NATIVE_INT);
+    H5Tcommit(fid1, "t2", tid2);
+    H5Tclose(tid2);
+    
+    /*-------------------------------------------------------------------------
+    * H5G_LINK
+    *-------------------------------------------------------------------------
+    */
+    
+    status = H5Glink(fid1, H5G_LINK_SOFT, "g1", "l1");
+    status = H5Glink(fid1, H5G_LINK_SOFT, "g2", "l2");
+    
+    
+    /*-------------------------------------------------------------------------
+    * Close
+    *-------------------------------------------------------------------------
+    */
+    status = H5Fclose(fid1);
+    return status;
 }
 
 
@@ -615,50 +615,50 @@ static
 int test_attributes(const char *file,
                     int make_diffs /* flag to modify data buffers */)
 {
- hid_t   fid;
- hid_t   did;
- hid_t   gid;
- hid_t   root_id;
- hid_t   sid;
- hsize_t dims[1]={2};
- herr_t  status;
+    hid_t   fid;
+    hid_t   did;
+    hid_t   gid;
+    hid_t   root_id;
+    hid_t   sid;
+    hsize_t dims[1]={2};
+    herr_t  status;
+    
+    /* Create a file  */
+    if((fid  = H5Fcreate(file, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        return -1;
 
- /* Create a file  */
- if ((fid  = H5Fcreate(file, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0)
-  return -1;
+    /* Create a 1D dataset */
+    sid = H5Screate_simple(1, dims, NULL);
+    did  = H5Dcreate(fid,"dset",H5T_NATIVE_INT,sid,H5P_DEFAULT);
+    status   = H5Sclose(sid);
+    assert(status>=0);
+    
+    /* Create groups */
+    gid  = H5Gcreate(fid,"g1",0);
+    root_id   = H5Gopen(fid, "/");
+    
+    /*-------------------------------------------------------------------------
+    * write a series of attributes on the dataset, group, and root group
+    *-------------------------------------------------------------------------
+    */
+    
+    write_attr_in(did,"dset",fid,make_diffs);
+    write_attr_in(gid,NULL,0,make_diffs);
+    write_attr_in(root_id,NULL,0,make_diffs);
+    
+    
+    /* Close */
+    status = H5Dclose(did);
+    assert(status >= 0);
+    status = H5Gclose(gid);
+    assert(status >= 0);
+    status = H5Gclose(root_id);
+    assert(status >= 0);
 
- /* Create a 1D dataset */
- sid = H5Screate_simple(1,dims,NULL);
- did  = H5Dcreate(fid,"dset",H5T_NATIVE_INT,sid,H5P_DEFAULT);
- status   = H5Sclose(sid);
- assert(status>=0);
-
- /* Create groups */
- gid  = H5Gcreate(fid,"g1",0);
- root_id   = H5Gopen(fid, "/");
-
-/*-------------------------------------------------------------------------
- * write a series of attributes on the dataset, group, and root group
- *-------------------------------------------------------------------------
- */
-
- write_attr_in(did,"dset",fid,make_diffs);
- write_attr_in(gid,NULL,0,make_diffs);
- write_attr_in(root_id,NULL,0,make_diffs);
-
-
- /* Close */
- status = H5Dclose(did);
- assert(status>=0);
- status = H5Gclose(gid);
- assert(status>=0);
- status = H5Gclose(root_id);
- assert(status>=0);
-
- /* Close file */
- status = H5Fclose(fid);
- assert(status>=0);
- return status;
+    /* Close file */
+    status = H5Fclose(fid);
+    assert(status >= 0);
+    return status;
 }
 
 
@@ -676,50 +676,49 @@ static
 int test_datasets(const char *file,
                   int make_diffs /* flag to modify data buffers */)
 {
- hid_t   fid;
- hid_t   did;
- hid_t   gid;
- hid_t   sid;
- hsize_t dims[1]={2};
- herr_t  status;
- int     buf[2]={1,2};
+    hid_t   fid;
+    hid_t   did;
+    hid_t   gid;
+    hid_t   sid;
+    hsize_t dims[1]={2};
+    herr_t  status;
+    int     buf[2]={1,2};
+    
+    if(make_diffs)
+        memset(buf, 0, sizeof buf);
 
- if (make_diffs)
- {
-  memset(buf,0,sizeof buf);
- }
+    /* Create a file  */
+    if((fid = H5Fcreate(file, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        return -1;
 
- /* Create a file  */
- if ((fid  = H5Fcreate(file, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0)
-  return -1;
+    /* Create a 1D dataset */
+    sid = H5Screate_simple(1, dims, NULL);
+    did  = H5Dcreate(fid, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT);
+    status = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
 
- /* Create a 1D dataset */
- sid = H5Screate_simple(1,dims,NULL);
- did  = H5Dcreate(fid,"dset",H5T_NATIVE_INT,sid,H5P_DEFAULT);
- status   = H5Dwrite(did,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf);
- status   = H5Sclose(sid);
- assert(status>=0);
+    status   = H5Sclose(sid);
+    assert(status>=0);
+    
+    /* Create a group */
+    gid  = H5Gcreate(fid,"g1",0);
+    
+    /*-------------------------------------------------------------------------
+    * write a series of datasets on the group
+    *-------------------------------------------------------------------------
+    */
+    
+    write_dset_in(gid,"/dset",fid,make_diffs);
+    
+    /* close */
+    status = H5Dclose(did);
+    assert(status >= 0);
+    status = H5Gclose(gid);
+    assert(status >= 0);
 
- /* Create a group */
- gid  = H5Gcreate(fid,"g1",0);
-
-/*-------------------------------------------------------------------------
- * write a series of datasets on the group
- *-------------------------------------------------------------------------
- */
-
- write_dset_in(gid,"/dset",fid,make_diffs);
-
- /* Close */
- status = H5Dclose(did);
- assert(status>=0);
- status = H5Gclose(gid);
- assert(status>=0);
-
- /* Close file */
- status = H5Fclose(fid);
- assert(status>=0);
- return status;
+    /* close file */
+    status = H5Fclose(fid);
+    assert(status >= 0);
+    return status;
 }
 
 /*-------------------------------------------------------------------------
@@ -2597,24 +2596,35 @@ int write_attr(hid_t loc_id,
                hid_t tid,
                void *buf)
 {
- hid_t   aid;
- hid_t   sid;
- herr_t  status;
-
- /* Create a buf space  */
- sid = H5Screate_simple(rank,dims,NULL);
-
- /* Create the attribute */
- aid = H5Acreate(loc_id,name,tid,sid,H5P_DEFAULT);
-
- /* Write the buf */
- if ( buf )
-  status = H5Awrite(aid,tid,buf);
-
- /* Close */
- status = H5Aclose(aid);
- status = H5Sclose(sid);
- return status;
+    hid_t   aid=-1;
+    hid_t   sid=-1;
+    
+    /* create a space  */
+    if((sid = H5Screate_simple(rank, dims, NULL)) < 0)
+        goto out;
+    
+    /* create the attribute */
+    if((aid = H5Acreate(loc_id, name, tid, sid, H5P_DEFAULT)) < 0)
+        goto out;
+    
+    /* write */
+    if(buf)
+    {
+        if(H5Awrite(aid, tid, buf) < 0)
+            goto out;
+    }
+        
+    /* close */
+    H5Aclose(aid);
+    H5Sclose(sid);
+        
+    return SUCCEED;
+        
+out:
+    
+    H5Aclose(aid);
+    H5Sclose(sid);
+    return FAIL;
 }
 
 /*-------------------------------------------------------------------------
@@ -2632,24 +2642,33 @@ int write_dset( hid_t loc_id,
                 hid_t tid,
                 void *buf )
 {
- hid_t   did;
- hid_t   sid;
- herr_t  status;
+    hid_t   did=-1;
+    hid_t   sid=-1;
 
- /* Create a buf space  */
- sid = H5Screate_simple(rank,dims,NULL);
+    /* create a space  */
+    if((sid = H5Screate_simple(rank, dims, NULL)) < 0)
+        goto out;
 
- /* Create a dataset */
- did = H5Dcreate(loc_id,name,tid,sid,H5P_DEFAULT);
+    /* create the dataset */
+    if((did = H5Dcreate(loc_id, name, tid, sid, H5P_DEFAULT)) < 0)
+        goto out;
 
- /* Write the buf */
- if ( buf )
-  status = H5Dwrite(did,tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf);
+    /* write */
+    if(buf)
+    {
+        if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+            goto out;
+    }
 
- /* Close */
- status = H5Dclose(did);
- status = H5Sclose(sid);
+    /* close */
+    H5Dclose(did);
+    H5Sclose(sid);
 
- return status;
+    return SUCCEED;
+
+out:
+
+    H5Dclose(did);
+    H5Sclose(sid);
+    return FAIL;
 }
-
