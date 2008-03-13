@@ -232,10 +232,11 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
         case H5T_COMPOUND:
             {
                 unsigned offset_nbytes;         /* Size needed to encode member offsets */
+                size_t max_memb_pos = 0;        /* Maximum member covered, so far */
                 unsigned j;
 
                 /* Compute the # of bytes required to store a member offset */
-                offset_nbytes = (H5V_log2_gen((uint64_t)dt->shared->size) + 7) / 8;
+                offset_nbytes = H5V_limit_enc_size((uint64_t)dt->shared->size);
 
                 /*
                  * Compound datatypes...
@@ -335,6 +336,18 @@ H5O_dtype_decode_helper(H5F_t *f, const uint8_t **pp, H5T_t *dt)
 
                     /* Set the field datatype (finally :-) */
                     dt->shared->u.compnd.memb[i].type = temp_type;
+
+                    /* Check if this field overlaps with a prior field */
+                    /* (probably indicates that the file is corrupt) */
+                    if(i > 0 && dt->shared->u.compnd.memb[i].offset < max_memb_pos) {
+                        for(j = 0; j < i; j++)
+                            if(dt->shared->u.compnd.memb[i].offset >= dt->shared->u.compnd.memb[j].offset
+                                    && dt->shared->u.compnd.memb[i].offset < (dt->shared->u.compnd.memb[j].offset + dt->shared->u.compnd.memb[j].size))
+                                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "member overlaps with previous member")
+                    } /* end if */
+
+                    /* Update the maximum member position covered */
+                    max_memb_pos = MAX(max_memb_pos, (dt->shared->u.compnd.memb[i].offset + dt->shared->u.compnd.memb[i].size));
 
                     /* Check if the datatype stayed packed */
                     if(dt->shared->u.compnd.packed) {
@@ -734,7 +747,7 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
                 unsigned offset_nbytes;         /* Size needed to encode member offsets */
 
                 /* Compute the # of bytes required to store a member offset */
-                offset_nbytes = (H5V_log2_gen((uint64_t)dt->shared->size) + 7) / 8;
+                offset_nbytes = H5V_limit_enc_size((uint64_t)dt->shared->size);
 
                 /*
                  * Compound datatypes...
@@ -1097,7 +1110,7 @@ H5O_dtype_size(const H5F_t *f, const void *_mesg)
                 unsigned offset_nbytes;         /* Size needed to encode member offsets */
 
                 /* Compute the # of bytes required to store a member offset */
-                offset_nbytes = (H5V_log2_gen((uint64_t)dt->shared->size) + 7) / 8;
+                offset_nbytes = H5V_limit_enc_size((uint64_t)dt->shared->size);
 
                 /* Compute the total size needed to encode compound datatype */
                 for(u = 0; u < dt->shared->u.compnd.nmembs; u++) {
