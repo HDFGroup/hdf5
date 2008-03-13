@@ -57,89 +57,91 @@ print_dimensions (int rank, hsize_t *dims)
  */
 void print_type(hid_t type)
 {
- switch (H5Tget_class(type))
- {
- default:
-  return;
- case H5T_INTEGER:
-  if (H5Tequal(type, H5T_STD_I8BE)) {
-   printf("H5T_STD_I8BE");
-  } else if (H5Tequal(type, H5T_STD_I8LE)) {
-   printf("H5T_STD_I8LE");
-  } else if (H5Tequal(type, H5T_STD_I16BE)) {
-   printf("H5T_STD_I16BE");
-  } else if (H5Tequal(type, H5T_STD_I16LE)) {
-   printf("H5T_STD_I16LE");
-  } else if (H5Tequal(type, H5T_STD_I32BE)) {
-   printf("H5T_STD_I32BE");
-  } else if (H5Tequal(type, H5T_STD_I32LE)) {
-   printf("H5T_STD_I32LE");
-  } else if (H5Tequal(type, H5T_STD_I64BE)) {
-   printf("H5T_STD_I64BE");
-  } else if (H5Tequal(type, H5T_STD_I64LE)) {
-   printf("H5T_STD_I64LE");
-  } else if (H5Tequal(type, H5T_STD_U8BE)) {
-   printf("H5T_STD_U8BE");
-  } else if (H5Tequal(type, H5T_STD_U8LE)) {
-   printf("H5T_STD_U8LE");
-  } else if (H5Tequal(type, H5T_STD_U16BE)) {
-   printf("H5T_STD_U16BE");
-  } else if (H5Tequal(type, H5T_STD_U16LE)) {
-   printf("H5T_STD_U16LE");
-  } else if (H5Tequal(type, H5T_STD_U32BE)) {
-   printf("H5T_STD_U32BE");
-  } else if (H5Tequal(type, H5T_STD_U32LE)) {
-   printf("H5T_STD_U32LE");
-  } else if (H5Tequal(type, H5T_STD_U64BE)) {
-   printf("H5T_STD_U64BE");
-  } else if (H5Tequal(type, H5T_STD_U64LE)) {
-   printf("H5T_STD_U64LE");
-  } else if (H5Tequal(type, H5T_NATIVE_SCHAR)) {
-   printf("H5T_NATIVE_SCHAR");
-  } else if (H5Tequal(type, H5T_NATIVE_UCHAR)) {
-   printf("H5T_NATIVE_UCHAR");
-  } else if (H5Tequal(type, H5T_NATIVE_SHORT)) {
-   printf("H5T_NATIVE_SHORT");
-  } else if (H5Tequal(type, H5T_NATIVE_USHORT)) {
-   printf("H5T_NATIVE_USHORT");
-  } else if (H5Tequal(type, H5T_NATIVE_INT)) {
-   printf("H5T_NATIVE_INT");
-  } else if (H5Tequal(type, H5T_NATIVE_UINT)) {
-   printf("H5T_NATIVE_UINT");
-  } else if (H5Tequal(type, H5T_NATIVE_LONG)) {
-   printf("H5T_NATIVE_LONG");
-  } else if (H5Tequal(type, H5T_NATIVE_ULONG)) {
-   printf("H5T_NATIVE_ULONG");
-  } else if (H5Tequal(type, H5T_NATIVE_LLONG)) {
-   printf("H5T_NATIVE_LLONG");
-  } else if (H5Tequal(type, H5T_NATIVE_ULLONG)) {
-   printf("H5T_NATIVE_ULLONG");
-  } else {
-   printf("undefined integer");
-  }
-  break;
-
- case H5T_FLOAT:
-  if (H5Tequal(type, H5T_IEEE_F32BE)) {
-   printf("H5T_IEEE_F32BE");
-  } else if (H5Tequal(type, H5T_IEEE_F32LE)) {
-   printf("H5T_IEEE_F32LE");
-  } else if (H5Tequal(type, H5T_IEEE_F64BE)) {
-   printf("H5T_IEEE_F64BE");
-  } else if (H5Tequal(type, H5T_IEEE_F64LE)) {
-   printf("H5T_IEEE_F64LE");
-  } else if (H5Tequal(type, H5T_NATIVE_FLOAT)) {
-   printf("H5T_NATIVE_FLOAT");
-  } else if (H5Tequal(type, H5T_NATIVE_DOUBLE)) {
-   printf("H5T_NATIVE_DOUBLE");
-  } else if (H5Tequal(type, H5T_NATIVE_LDOUBLE)) {
-   printf("H5T_NATIVE_LDOUBLE");
-  } else {
-   printf("undefined float");
-  }
-  break;
-
- }/*switch*/
+    switch (H5Tget_class(type))
+    {
+    default:
+        return;
+    case H5T_INTEGER:
+        if (H5Tequal(type, H5T_STD_I8BE)) {
+            printf("H5T_STD_I8BE");
+        } else if (H5Tequal(type, H5T_STD_I8LE)) {
+            printf("H5T_STD_I8LE");
+        } else if (H5Tequal(type, H5T_STD_I16BE)) {
+            printf("H5T_STD_I16BE");
+        } else if (H5Tequal(type, H5T_STD_I16LE)) {
+            printf("H5T_STD_I16LE");
+        } else if (H5Tequal(type, H5T_STD_I32BE)) {
+            printf("H5T_STD_I32BE");
+        } else if (H5Tequal(type, H5T_STD_I32LE)) {
+            printf("H5T_STD_I32LE");
+        } else if (H5Tequal(type, H5T_STD_I64BE)) {
+            printf("H5T_STD_I64BE");
+        } else if (H5Tequal(type, H5T_STD_I64LE)) {
+            printf("H5T_STD_I64LE");
+        } else if (H5Tequal(type, H5T_STD_U8BE)) {
+            printf("H5T_STD_U8BE");
+        } else if (H5Tequal(type, H5T_STD_U8LE)) {
+            printf("H5T_STD_U8LE");
+        } else if (H5Tequal(type, H5T_STD_U16BE)) {
+            printf("H5T_STD_U16BE");
+        } else if (H5Tequal(type, H5T_STD_U16LE)) {
+            printf("H5T_STD_U16LE");
+        } else if (H5Tequal(type, H5T_STD_U32BE)) {
+            printf("H5T_STD_U32BE");
+        } else if (H5Tequal(type, H5T_STD_U32LE)) {
+            printf("H5T_STD_U32LE");
+        } else if (H5Tequal(type, H5T_STD_U64BE)) {
+            printf("H5T_STD_U64BE");
+        } else if (H5Tequal(type, H5T_STD_U64LE)) {
+            printf("H5T_STD_U64LE");
+        } else if (H5Tequal(type, H5T_NATIVE_SCHAR)) {
+            printf("H5T_NATIVE_SCHAR");
+        } else if (H5Tequal(type, H5T_NATIVE_UCHAR)) {
+            printf("H5T_NATIVE_UCHAR");
+        } else if (H5Tequal(type, H5T_NATIVE_SHORT)) {
+            printf("H5T_NATIVE_SHORT");
+        } else if (H5Tequal(type, H5T_NATIVE_USHORT)) {
+            printf("H5T_NATIVE_USHORT");
+        } else if (H5Tequal(type, H5T_NATIVE_INT)) {
+            printf("H5T_NATIVE_INT");
+        } else if (H5Tequal(type, H5T_NATIVE_UINT)) {
+            printf("H5T_NATIVE_UINT");
+        } else if (H5Tequal(type, H5T_NATIVE_LONG)) {
+            printf("H5T_NATIVE_LONG");
+        } else if (H5Tequal(type, H5T_NATIVE_ULONG)) {
+            printf("H5T_NATIVE_ULONG");
+        } else if (H5Tequal(type, H5T_NATIVE_LLONG)) {
+            printf("H5T_NATIVE_LLONG");
+        } else if (H5Tequal(type, H5T_NATIVE_ULLONG)) {
+            printf("H5T_NATIVE_ULLONG");
+        } else {
+            printf("undefined integer");
+        }
+        break;
+        
+    case H5T_FLOAT:
+        if (H5Tequal(type, H5T_IEEE_F32BE)) {
+            printf("H5T_IEEE_F32BE");
+        } else if (H5Tequal(type, H5T_IEEE_F32LE)) {
+            printf("H5T_IEEE_F32LE");
+        } else if (H5Tequal(type, H5T_IEEE_F64BE)) {
+            printf("H5T_IEEE_F64BE");
+        } else if (H5Tequal(type, H5T_IEEE_F64LE)) {
+            printf("H5T_IEEE_F64LE");
+        } else if (H5Tequal(type, H5T_NATIVE_FLOAT)) {
+            printf("H5T_NATIVE_FLOAT");
+        } else if (H5Tequal(type, H5T_NATIVE_DOUBLE)) {
+            printf("H5T_NATIVE_DOUBLE");
+#if H5_SIZEOF_LONG_DOUBLE !=0
+        } else if (H5Tequal(type, H5T_NATIVE_LDOUBLE)) {
+            printf("H5T_NATIVE_LDOUBLE");
+#endif
+        } else {
+            printf("undefined float");
+        }
+        break;
+        
+    }/*switch*/
 }
 
 
@@ -158,21 +160,21 @@ void print_type(hid_t type)
 const char*
 diff_basename(const char *name)
 {
- size_t i;
-
- if (name==NULL)
-  return(NULL);
-
- /* Find the end of the base name */
- i = strlen(name);
- while (i>0 && '/'==name[i-1])
-  --i;
-
- /* Skip backward over base name */
- while (i>0 && '/'!=name[i-1])
-  --i;
-
- return(name+i);
+    size_t i;
+    
+    if (name==NULL)
+        return NULL;
+    
+    /* Find the end of the base name */
+    i = strlen(name);
+    while (i>0 && '/'==name[i-1])
+        --i;
+    
+    /* Skip backward over base name */
+    while (i>0 && '/'!=name[i-1])
+        --i;
+    
+    return(name+i);
 }
 
 /*-------------------------------------------------------------------------
@@ -189,19 +191,19 @@ diff_basename(const char *name)
 const char*
 get_type(int type)
 {
- switch (type)
- {
- case H5G_DATASET:
-  return("H5G_DATASET");
- case H5G_GROUP:
-  return("H5G_GROUP");
- case H5G_TYPE:
-  return("H5G_TYPE");
- case H5G_LINK:
-  return("H5G_LINK");
- default:
-  return("user defined type");
- }
+    switch (type)
+    {
+    case H5G_DATASET:
+        return("H5G_DATASET");
+    case H5G_GROUP:
+        return("H5G_GROUP");
+    case H5G_TYPE:
+        return("H5G_TYPE");
+    case H5G_LINK:
+        return("H5G_LINK");
+    default:
+        return("user defined type");
+    }
 }
 
 /*-------------------------------------------------------------------------
@@ -220,15 +222,15 @@ get_type(int type)
 const char*
 get_sign(H5T_sign_t sign)
 {
- switch (sign)
- {
- default:
-  return("H5T_SGN_ERROR");
- case H5T_SGN_NONE:
-  return("H5T_SGN_NONE");
- case H5T_SGN_2:
-  return("H5T_SGN_2");
- }
+    switch (sign)
+    {
+    default:
+        return("H5T_SGN_ERROR");
+    case H5T_SGN_NONE:
+        return("H5T_SGN_NONE");
+    case H5T_SGN_2:
+        return("H5T_SGN_2");
+    }
 }
 
 
@@ -246,33 +248,33 @@ get_sign(H5T_sign_t sign)
 const char*
 get_class(H5T_class_t tclass)
 {
- switch (tclass)
- {
- default:
-  return("Invalid class");
- case H5T_TIME:
-  return("H5T_TIME");
- case H5T_INTEGER:
-  return("H5T_INTEGER");
- case H5T_FLOAT:
-  return("H5T_FLOAT");
- case H5T_STRING:
-  return("H5T_STRING");
- case H5T_BITFIELD:
-  return("H5T_BITFIELD");
- case H5T_OPAQUE:
-  return("H5T_OPAQUE");
- case H5T_COMPOUND:
-  return("H5T_COMPOUND");
- case H5T_REFERENCE:
-  return("H5T_REFERENCE");
- case H5T_ENUM:
-  return("H5T_ENUM");
- case H5T_VLEN:
-  return("H5T_VLEN");
- case H5T_ARRAY:
-  return("H5T_ARRAY");
- }
+    switch (tclass)
+    {
+    default:
+        return("Invalid class");
+    case H5T_TIME:
+        return("H5T_TIME");
+    case H5T_INTEGER:
+        return("H5T_INTEGER");
+    case H5T_FLOAT:
+        return("H5T_FLOAT");
+    case H5T_STRING:
+        return("H5T_STRING");
+    case H5T_BITFIELD:
+        return("H5T_BITFIELD");
+    case H5T_OPAQUE:
+        return("H5T_OPAQUE");
+    case H5T_COMPOUND:
+        return("H5T_COMPOUND");
+    case H5T_REFERENCE:
+        return("H5T_REFERENCE");
+    case H5T_ENUM:
+        return("H5T_ENUM");
+    case H5T_VLEN:
+        return("H5T_VLEN");
+    case H5T_ARRAY:
+        return("H5T_ARRAY");
+    }
 }
 
 /*-------------------------------------------------------------------------
@@ -286,57 +288,5 @@ void print_found(hsize_t nfound)
 {
  HDfprintf(stdout,"%Hu differences found\n",nfound);
 }
-
-
-/*-------------------------------------------------------------------------
- * Function: print_sizes
- *
- * Purpose: Print datatype sizes
- *
- *-------------------------------------------------------------------------
- */
-#if defined (H5DIFF_DEBUG)
-void print_sizes( const char *obj1, const char *obj2,
-                  hid_t f_type1, hid_t f_type2,
-                  hid_t m_type1, hid_t m_type2 )
-{
- size_t  f_size1, f_size2;       /* size of type in file */
- size_t  m_size1, m_size2;       /* size of type in memory */
-
- f_size1 = H5Tget_size( f_type1 );
- f_size2 = H5Tget_size( f_type2 );
- m_size1 = H5Tget_size( m_type1 );
- m_size2 = H5Tget_size( m_type2 );
-
- printf("\n");
- printf("------------------\n");
- printf("sizeof(char)   %u\n", sizeof(char) );
- printf("sizeof(short)  %u\n", sizeof(short) );
- printf("sizeof(int)    %u\n", sizeof(int) );
- printf("sizeof(long)   %u\n", sizeof(long) );
- printf("<%s> ------------------\n", obj1);
- printf("type on file   ");
- print_type(f_type1);
- printf("\n");
- printf("size on file   %u\n", f_size1 );
-
- printf("type on memory ");
- print_type(m_type1);
- printf("\n");
- printf("size on memory %u\n", m_size1 );
-
- printf("<%s> ------------------\n", obj2);
- printf("type on file   ");
- print_type(f_type2);
- printf("\n");
- printf("size on file   %u\n", f_size2 );
-
- printf("type on memory ");
- print_type(m_type2);
- printf("\n");
- printf("size on memory %u\n", m_size2 );
- printf("\n");
-}
-#endif /* H5DIFF_DEBUG */
 
 
