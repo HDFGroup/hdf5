@@ -55,8 +55,10 @@
  * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
  *			Wednesday, February 6, 2008
  *
- * Purpose:		Flush the specified number of buffers to disk, starting
- *			from the buffer indexed by struct_ptr->get.
+ * Purpose:		Flush all the dirtied buffers in the ring buffer 
+ *                      starting with the buffer referenced by struct_ptr->get 
+ *                      and ending with the buffer right before the one
+ *                      referenced by struct_ptr->put. 
  *
  * Returns:		SUCCEED on success.
  *
@@ -73,7 +75,8 @@ H5C2_jb__flush_full_buffers(H5C2_jbrb_t * struct_ptr)
     /* this asserts that at least one buffer is in use */
     HDassert(struct_ptr->bufs_in_use > 0);
     /* write an assert to verify that at least one buffer is full */
-    /* code */
+    HDassert( (struct_ptr->put != struct_ptr->get) ||
+              (struct_ptr->rb_free_space == 0)      );
 
     /* flush all full, dirtied journal buffers to disk */
     if (struct_ptr->get < struct_ptr->put) {
@@ -86,11 +89,13 @@ H5C2_jb__flush_full_buffers(H5C2_jbrb_t * struct_ptr)
 	        (struct_ptr->put - struct_ptr->get) * struct_ptr->buf_size);
 
 	struct_ptr->bufs_in_use -= (struct_ptr->put - struct_ptr->get);
+        struct_ptr->rb_free_space += (struct_ptr->put - struct_ptr->get) * struct_ptr->buf_size;
 
-    } else {
+    } /* end if */
+
+    else {
 
 	/* write from get through end of buffer */
-/* JRM: need to check return on this call, and flag an error if it fails */
 	result = HDwrite(struct_ptr->journal_file_fd, 
 	      (*struct_ptr->buf)[struct_ptr->get], 
 	      (struct_ptr->num_bufs - struct_ptr->get) * struct_ptr->buf_size);
@@ -102,46 +107,47 @@ H5C2_jb__flush_full_buffers(H5C2_jbrb_t * struct_ptr)
         }
 
 	struct_ptr->bufs_in_use -= (struct_ptr->num_bufs - struct_ptr->get);
+        struct_ptr->rb_free_space += (struct_ptr->num_bufs - struct_ptr->get) * struct_ptr->buf_size;
 
-	/* write from start of buffer up to, but not including, put */
-	/* note that when get = put = 0, the full ring buffer has 
-	 * already written at this point, and this write does nothing 
-	 */
-	result = HDwrite(struct_ptr->journal_file_fd, 
-	      (*struct_ptr->buf)[0], 
-	      (struct_ptr->put) * struct_ptr->buf_size);
+        /* if put = 0, then everything that needs to be flushed will have been
+           flushed, so we can stop here. Otherwise, need to flush all buffers
+           from the start of the ring buffer's allocated space up to, but not
+           including, the buffer indexed by put. */
+        if (struct_ptr->put != 0) {
 
-	if ( result == -1 ) {
+            result = HDwrite(struct_ptr->journal_file_fd, 
+                             (*struct_ptr->buf)[0], 
+                             (struct_ptr->put) * struct_ptr->buf_size);
 
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, \
-		        "Journal file write failed.")
-        }
+	    if ( result == -1 ) {
+
+                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, \
+		            "Journal file write failed.")
+            } /* end if */
+
+        struct_ptr->rb_free_space += (struct_ptr->put * struct_ptr->buf_size);
+
+        } /* end if */
 
 	struct_ptr->bufs_in_use -= struct_ptr->put;
-    }
+
+    } /* end else */
 	
     HDassert(struct_ptr->bufs_in_use <= 1);
 
-    /* perform a sync to ensure everything gets to disk before continuing */
-    if ( fsync(struct_ptr->journal_file_fd) < 0 ) {
-
-        HGOTO_ERROR(H5E_IO, H5E_SYNCFAIL, FAIL, "Jounal file sync failed.")
-
-    } /* end if */
-	
-    /* update get pointer */
+    /* update get index */
     struct_ptr->get = struct_ptr->put;
 	
     /* record last transaction number that made it to disk */
     if (struct_ptr->put == 0) {
 
 	struct_ptr->last_trans_on_disk = 
-		(*struct_ptr->trans_on_disk_record)[struct_ptr->num_bufs - 1];
+		(*struct_ptr->trans_tracking)[struct_ptr->num_bufs - 1];
 
     } else {
 
 	struct_ptr->last_trans_on_disk = 
-		(*struct_ptr->trans_on_disk_record)[struct_ptr->put - 1];
+		(*struct_ptr->trans_tracking)[struct_ptr->put - 1];
     }
 
 done:
@@ -171,6 +177,7 @@ herr_t
 H5C2_jb__flush(H5C2_jbrb_t * struct_ptr)
 {
     int result;
+    int i;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5C2_jb__flush, FAIL)
@@ -187,10 +194,28 @@ H5C2_jb__flush(H5C2_jbrb_t * struct_ptr)
                     "Attempt to flush buffers with transaction in progress.")
     } /* end if */
 
-    /* flush all full, dirtied journal buffers to disk */
+    if (struct_ptr->get > struct_ptr->put) {
+
+	/* write from get through end of buffer */
+	result = HDwrite(struct_ptr->journal_file_fd, 
+	      (*struct_ptr->buf)[struct_ptr->get], 
+	      (struct_ptr->num_bufs - struct_ptr->get) * struct_ptr->buf_size);
+
+	if ( result == -1 ) {
+
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, \
+		        "Journal file write failed.")
+        }
+        
+	struct_ptr->bufs_in_use -= (struct_ptr->num_bufs - struct_ptr->get);
+        struct_ptr->rb_free_space += (struct_ptr->num_bufs - struct_ptr->get) * struct_ptr->buf_size;
+        struct_ptr->get = 0;
+        
+    } /* end if */
+
     if (struct_ptr->get < struct_ptr->put) {
 
-	/* can write solid chunk from get up to, but not including, put */
+	/* write from get up to, but not including, put */
 	result = HDwrite(struct_ptr->journal_file_fd, 
 	            (*struct_ptr->buf)[struct_ptr->get], 
 	            (struct_ptr->put - struct_ptr->get) * struct_ptr->buf_size);
@@ -202,47 +227,14 @@ H5C2_jb__flush(H5C2_jbrb_t * struct_ptr)
         }
 
 	struct_ptr->bufs_in_use -= (struct_ptr->put - struct_ptr->get);
+        struct_ptr->rb_free_space += (struct_ptr->put - struct_ptr->get) * struct_ptr->buf_size;
+        struct_ptr->get = struct_ptr->put;
 
-    } else if ( ( struct_ptr->get == struct_ptr->put ) &&
-		( struct_ptr->cur_buf_free_space != 0 ) ) {
+    } /* end if */
 
-	/* do nothing for now ... this is the case when no buffer is full. */
+    if ( struct_ptr->cur_buf_free_space != struct_ptr->buf_size ) {
 
-    } else {
-	/* write from get through end of buffer */
-	result = HDwrite(struct_ptr->journal_file_fd, 
-	      (*struct_ptr->buf)[struct_ptr->get], 
-	      (struct_ptr->num_bufs - struct_ptr->get) * struct_ptr->buf_size);
-
-	if ( result == -1 ) {
-
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, \
-		        "Journal file write failed.")
-        }
-
-	struct_ptr->bufs_in_use -= (struct_ptr->num_bufs - struct_ptr->get);
-
-	/* write from start of buffer up to, but not including, put */
-	/* note that when get = put = 0, the full ring buffer has already 
-	 * written at this point, and this write does nothing 
-	 */
-	result = HDwrite(struct_ptr->journal_file_fd, 
-	               (*struct_ptr->buf)[0], 
-	               (struct_ptr->put) * struct_ptr->buf_size);
-
-	if ( result == -1 ) {
-
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, \
-		        "Journal file write failed.")
-        }
-
-	struct_ptr->bufs_in_use -= struct_ptr->put;
-    }
-
-    /* flush partially filled portion of current journal buffer to disk */
-    if ( ( struct_ptr->cur_buf_free_space != 0 ) &&
-         ( struct_ptr->cur_buf_free_space != struct_ptr->buf_size ) ) {
-
+        /* flush partially filled portion of current journal buffer to disk */
 	result = HDwrite(struct_ptr->journal_file_fd, 
 	               (*struct_ptr->buf)[struct_ptr->put], 
 	               struct_ptr->buf_size - struct_ptr->cur_buf_free_space);
@@ -254,39 +246,43 @@ H5C2_jb__flush(H5C2_jbrb_t * struct_ptr)
         }
 
 	struct_ptr->bufs_in_use--;
-    }
+        struct_ptr->rb_free_space += (struct_ptr->buf_size - struct_ptr->cur_buf_free_space);
+
+    } /* end if */
 
     HDassert(struct_ptr->bufs_in_use == 0);
+    HDassert(struct_ptr->rb_free_space == struct_ptr->num_bufs * struct_ptr->buf_size);
 
     /* perform sync to ensure everything gets to disk before returning */
+    /* Note: there is no HDfsync function, so for now, the standard
+       fsync is being used. */
     if ( fsync(struct_ptr->journal_file_fd) < 0 ) {
 
-        HGOTO_ERROR(H5E_IO, H5E_SYNCFAIL, FAIL, "Jounal file sync failed.")
+        HGOTO_ERROR(H5E_IO, H5E_SYNCFAIL, FAIL, "Journal file sync failed.")
     } /* end if */
+
+    /* record last transaction number that made it to disk */
+	struct_ptr->last_trans_on_disk = 
+		(*struct_ptr->trans_tracking)[struct_ptr->put];
 
     /* MIKE: optimization note: don't reset to top of ring buffer. 
      * instead, keep filling out current buffer so we can keep writes 
      * on block boundaries. 
      */
     struct_ptr->cur_buf_free_space = struct_ptr->buf_size;
-    struct_ptr->rb_free_space = struct_ptr->num_bufs * struct_ptr->buf_size;
+    struct_ptr->rb_space_to_rollover = struct_ptr->num_bufs * struct_ptr->buf_size;
     struct_ptr->head = (*struct_ptr->buf)[0];
     struct_ptr->put = 0;
 
-    /* update get pointer */
-    struct_ptr->get = struct_ptr->put;
-
-    /* record last transaction number that made it to disk */
-    if (struct_ptr->put == 0) {
-
-	struct_ptr->last_trans_on_disk = 
-		(*struct_ptr->trans_on_disk_record)[struct_ptr->num_bufs - 1];
-
-    } else {
-
-	struct_ptr->last_trans_on_disk = 
-		(*struct_ptr->trans_on_disk_record)[struct_ptr->put - 1];
+    /* Propogate the last transaction on in the buffers throughout the 
+     * transaction tracking array. */
+    for (i=0; i<struct_ptr->num_bufs; i++)
+    {
+	(*struct_ptr->trans_tracking)[i] = struct_ptr->last_trans_on_disk;
     }
+
+    /* update get index */
+    struct_ptr->get = struct_ptr->put;
 
 done:
 
@@ -312,9 +308,10 @@ done:
  *
  *			At this point, the rest of the data can just be written
  *			without having to break it up further. In the event
- *			the data covers more than one journal buffer, the get and
- *			put indices are updated to state this fact. Any journal
- *			buffers that were filled during the write are flushed.
+ *			the data covers more than one journal buffer, the get 
+ *			and put indices are updated to state this fact. Any 
+ *			journal buffers that were filled during the write are 
+ *			flushed.
  *
  * Returns:		SUCCEED on success.
  *
@@ -323,9 +320,14 @@ done:
 herr_t 
 H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr,	
 			size_t size,			
-			const char * data)
+			const char * data,
+                        hbool_t is_end_trans,
+                        unsigned long trans_num)
 {
     herr_t ret_value = SUCCEED;
+    unsigned long track_last_trans = 0;
+    int oldput = 0;
+    int i;
 	
     FUNC_ENTER_NOAPI(H5C2_jb__write_to_buffer, FAIL)
 
@@ -333,33 +335,57 @@ H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr,
     HDassert(struct_ptr);
     HDassert(data);
     HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
-    HDassert(strlen(data) == size);
-    HDassert(struct_ptr->rb_free_space <= 
+    HDassert(HDstrlen(data) == size);
+    HDassert(struct_ptr->rb_space_to_rollover <= 
 		    struct_ptr->num_bufs * struct_ptr->buf_size);
-    HDassert(struct_ptr->rb_free_space > 0); /* JOHN: will remain true in interesting ways */
+    HDassert(struct_ptr->rb_space_to_rollover > 0); 
 
     /* If the data size exceeds the bounds of the ring buffer's allocated 
      * memory, loop around to top 
      */
-    if (size >= struct_ptr->rb_free_space) {
+    if (size >= struct_ptr->rb_space_to_rollover) {
 
-	while (size >= struct_ptr->rb_free_space) {
+	while (size >= struct_ptr->rb_space_to_rollover) {
 			
 	    /* Assertions */
 	    HDassert(size != 0);
-	    HDassert(strlen(data) >= struct_ptr->rb_free_space);
+	    HDassert(HDstrlen(data) >= struct_ptr->rb_space_to_rollover);
 
 	    /* fill up remaining space in the ring buffer */
-	    memcpy(struct_ptr->head, data, struct_ptr->rb_free_space);
+	    HDmemcpy(struct_ptr->head, data, struct_ptr->rb_space_to_rollover);
 			
 	    /* move head to point to start of ring buffer */
 	    struct_ptr->head = (*struct_ptr->buf)[0];
+
+            /* make note of last transaction on disk */
+            track_last_trans = (*struct_ptr->trans_tracking)[struct_ptr->put];
+            
+            /* update rb_free_space */
+            struct_ptr->rb_free_space -= struct_ptr->rb_space_to_rollover;
+
+            /* Fill out the remainder of the trans_tracking array with
+               the most recent transaction in the array.*/
+	    (*struct_ptr->trans_tracking)[0] = track_last_trans;
+            for (i=struct_ptr->put; i<struct_ptr->num_bufs; i++)
+            {
+	        (*struct_ptr->trans_tracking)[i] = track_last_trans;
+            }
 
 	    /* reset put index */
 	    struct_ptr->put = 0;
 
 	    /* update bufs_in_use as necessary */
 	    struct_ptr->bufs_in_use = struct_ptr->num_bufs - struct_ptr->get;
+
+            /* check to see if trans_tracking needs to be updated. If so,
+               then update it */
+            if ((size == struct_ptr->rb_space_to_rollover) &&
+                (is_end_trans == TRUE)) {
+                
+                (*struct_ptr->trans_tracking)[struct_ptr->num_bufs - 1] 
+                                                    = trans_num;
+                (*struct_ptr->trans_tracking)[0] = trans_num;
+            }
 
 	    /* flush buffers */
 	    if ( H5C2_jb__flush_full_buffers(struct_ptr) < 0 ) {
@@ -369,15 +395,15 @@ H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr,
             }
 
 	    /* update remaining size of data to be written */
-	    size = size - struct_ptr->rb_free_space;
+	    size = size - struct_ptr->rb_space_to_rollover;
 
 	    /* update the data pointer to point to the remaining data to be 
 	     * written 
 	     */
-	    data = &data[struct_ptr->rb_free_space];
+	    data = &data[struct_ptr->rb_space_to_rollover];
 
-	    /* update the amount of space that is available to write to */
-	    struct_ptr->rb_free_space = 
+	    /* update the amount of space left at end of ring buffer */
+	    struct_ptr->rb_space_to_rollover = 
 		    struct_ptr->buf_size * struct_ptr->num_bufs;
 
 	    /* update the amount of space in the current buffer */
@@ -394,20 +420,35 @@ H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr,
 	HDassert(struct_ptr->cur_buf_free_space != 0);
 
 	/* write data into journal buffers */
-	memcpy(struct_ptr->head, data, size);
+	HDmemcpy(struct_ptr->head, data, size);
 
 	/* update head pointer */
 	struct_ptr->head = &struct_ptr->head[size];
 
+        /* make note of last transaction on disk */
+        track_last_trans = (*struct_ptr->trans_tracking)[struct_ptr->put];
+        oldput = struct_ptr->put;
+
+        /* update rb_free_space */
+        struct_ptr->rb_free_space -= size;
+
 	/* update put index */
 	struct_ptr->put += 
-		(size-struct_ptr->cur_buf_free_space)/(struct_ptr->buf_size) + 1; 
+            (size-struct_ptr->cur_buf_free_space)/(struct_ptr->buf_size) + 1; 
+
+        /* Drag the last transaction in a filled buffer value residing in the 
+           old put location through the trans_tracking array to the new 
+           corresponding put position. */
+        for (i=oldput; i<struct_ptr->put+1; i++)
+        {
+            (*struct_ptr->trans_tracking)[i] = track_last_trans;
+        }
 
 	/* update current buffer usage */
 	struct_ptr->cur_buf_free_space = 
-		struct_ptr->rb_free_space - size - 
-		(struct_ptr->num_bufs - (struct_ptr->put + 1)) * 
-			(struct_ptr->buf_size );
+            struct_ptr->rb_space_to_rollover - size - 
+            (struct_ptr->num_bufs - (struct_ptr->put + 1)) * 
+            (struct_ptr->buf_size );
 
 	/* update bufs_in_use as necessary */
 	struct_ptr->bufs_in_use = struct_ptr->put - struct_ptr->get;
@@ -416,6 +457,19 @@ H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr,
 	    struct_ptr->bufs_in_use++;
         }
 
+        /* check to see if trans_tracking needs to be updated. If so,
+           then update it */
+        if (is_end_trans == TRUE) {
+                
+            if (struct_ptr->cur_buf_free_space == struct_ptr->buf_size) {
+                (*struct_ptr->trans_tracking)[struct_ptr->put - 1] = trans_num;
+            }
+            else {
+                (*struct_ptr->trans_tracking)[struct_ptr->put] = trans_num;
+            }
+
+        } /* end if */
+
 	/* flush buffers */
 	if ( H5C2_jb__flush_full_buffers(struct_ptr) < 0 ) {
 
@@ -423,8 +477,8 @@ H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr,
                         "H5C2_jb__flush_full_buffers() failed.\n")
         }
 
-	/* update ring buffer usage */
-	struct_ptr->rb_free_space -= size;
+	/* update space left at end of ring buffer */
+	struct_ptr->rb_space_to_rollover -= size;
 
     } /* end if */
 
@@ -436,7 +490,7 @@ H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr,
 	HDassert(size <= struct_ptr->cur_buf_free_space);
 		
 	/* write data into journal buffer */
-	memcpy(struct_ptr->head, data, size);
+	HDmemcpy(struct_ptr->head, data, size);
 
 	/* increment bufs_in_use as necessary */
 	if ( ( struct_ptr->bufs_in_use == 0 ) ) {
@@ -447,36 +501,61 @@ H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr,
 	/* update head pointer */
 	struct_ptr->head = &struct_ptr->head[size];
 
+        /* update rb_free_space */
+        struct_ptr->rb_free_space -= size;
+
 	/* update current buffer usage */
 	struct_ptr->cur_buf_free_space -= size;
 
-	/* update ring buffer usage */
-	struct_ptr->rb_free_space -= size;
+	/* update end of buffer space */
+	struct_ptr->rb_space_to_rollover -= size;
 		
+        /* check to see if trans_tracking needs to be updated. If so,
+           then update it */
+        if (is_end_trans == TRUE) {
+                
+            (*struct_ptr->trans_tracking)[struct_ptr->put] 
+                                            = trans_num;
+        } /* end if */
+
 	/* if buffer is full, flush it, and loop to the top of the 
 	 * ring buffer if at the end. 
 	 */
 	if (struct_ptr->cur_buf_free_space == 0) {
 
 	    if ( struct_ptr->put != (struct_ptr->num_bufs - 1) ) {
-
 		struct_ptr->put += 1;
 
-	    } else {
+                /* Drag trans_tracking value into next buffer */
+                (*struct_ptr->trans_tracking)[struct_ptr->put] 
+                 = (*struct_ptr->trans_tracking)[struct_ptr->put - 1];
+
+	    } /* end if */
+                
+            else {
+
 		struct_ptr->put = 0;
+
+                /* Drag trans_tracking value into next buffer */
+                (*struct_ptr->trans_tracking)[0] 
+                 = (*struct_ptr->trans_tracking)[struct_ptr->num_bufs - 1];
+
+                /* reset head pointer and free space values */
 		struct_ptr->head = (*struct_ptr->buf)[0];
-		struct_ptr->rb_free_space = 
+		struct_ptr->rb_space_to_rollover = 
 			struct_ptr->buf_size * struct_ptr->num_bufs;
-	    }
+
+	    } /* end else */
 
 	    if ( H5C2_jb__flush_full_buffers(struct_ptr) < 0 ) {
 
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                             "H5C2_jb__flush_full_buffers() failed.\n")
-            }
+            } /* end if */
 
 	    struct_ptr->cur_buf_free_space = struct_ptr->buf_size;
-	}
+
+	} /* end if */
 
     } /* end else */
 	
@@ -535,11 +614,6 @@ H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
 
     if ( struct_ptr->journal_file_fd  == -1) {
 
-	/* JRM -- why are we trying to close a file we have just failed to
-	 *        create?  Commenting this out for now -- put it back in 
-	 *        if there is a good reason to.
-	 */
-	/* HDclose(struct_ptr->journal_file_fd); */
         HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, \
                     "Can't create journal file.  Does it already exist?")
     } /* end if */
@@ -560,6 +634,7 @@ H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
     struct_ptr->last_trans_on_disk = 0;
     struct_ptr->cur_buf_free_space = struct_ptr->buf_size;
     struct_ptr->rb_free_space = struct_ptr->num_bufs * struct_ptr->buf_size;
+    struct_ptr->rb_space_to_rollover = struct_ptr->num_bufs * struct_ptr->buf_size;
     struct_ptr->jentry_written = FALSE;
     struct_ptr->journal_is_empty = TRUE;
 	
@@ -585,19 +660,19 @@ H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
     /* Allocate space for the purposes of tracking the last 
      * transaction on disk 
      */
-    struct_ptr->trans_on_disk_record = 
+    struct_ptr->trans_tracking = 
     	H5MM_malloc(struct_ptr->num_bufs * sizeof(unsigned long));
 
-    if ( struct_ptr->trans_on_disk_record == NULL ) {
+    if ( struct_ptr->trans_tracking == NULL ) {
 
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
-                    "allocation of trans_on_disk_record failed.");
+                    "allocation of trans_tracking failed.");
     } /* end if */
 	
-    /* Initialize last transaction on disk record array */
+    /* Initialize the transaction tracking array */
     for (i=0; i<struct_ptr->num_bufs; i++)
     {
-	(*struct_ptr->trans_on_disk_record)[i] = 0;
+	(*struct_ptr->trans_tracking)[i] = 0;
     }
 	
     /* Make journal buffer pointers point to the right location in 
@@ -622,7 +697,8 @@ H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
 	struct_ptr->human_readable);
 
     /* Write the header message into the ring buffer */
-    if ( H5C2_jb__write_to_buffer(struct_ptr, strlen(temp), temp ) < 0) {
+    if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, FALSE, 0) 
+		    < 0) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                     "H5C2_jb__write_to_buffer() failed.\n")
@@ -678,6 +754,12 @@ H5C2_jb__start_transaction(H5C2_jbrb_t * struct_ptr,
                     "Transaction already in progress.")
     } /* end if */
 
+    /* JRM: Heads up:  we may relax this constraint to rquire that the 
+     *      new transaction number is greater than the old, but possibly
+     *      not the next integer in sequence.  Will this cause problems
+     *      with testing?
+     */
+
     /* Verify that the supplied transaction number is next in sequence */
     if ( (struct_ptr->cur_trans + 1) != trans_num ) {
 
@@ -698,7 +780,8 @@ H5C2_jb__start_transaction(H5C2_jbrb_t * struct_ptr,
 	    __DATE__, 
 	    struct_ptr->human_readable);
 
-        if ( H5C2_jb__write_to_buffer(struct_ptr, strlen(temp), temp) < 0 ) {
+        if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, 
+				      FALSE, trans_num) < 0 ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                         "H5C2_jb__write_to_buffer() failed.\n")
@@ -710,7 +793,8 @@ H5C2_jb__start_transaction(H5C2_jbrb_t * struct_ptr,
 
     /* Write start transaction message */
     HDsnprintf(temp, (size_t)150, "1 bgn_trans %ld\n", trans_num);
-    if ( H5C2_jb__write_to_buffer(struct_ptr, strlen(temp), temp) < 0 ) {
+    if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, 
+			          FALSE, trans_num) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                     "H5C2_jb__write_to_buffer() failed.\n")
@@ -748,9 +832,12 @@ H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
 			unsigned long trans_num,
 			haddr_t base_addr,
 			size_t length,
-			char * body)
+			const char * body)
 {
+
     char * temp = NULL;
+    char * hexdata = NULL;
+    size_t hexlength;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5C2_jb__journal_entry, FAIL)
@@ -774,38 +861,35 @@ H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
                    "allocation of assembly buffer failed.");
     }
 
+    if ( (hexdata = H5MM_malloc(length * 40)) == NULL ) {
+
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                   "allocation of assembly buffer failed.");
+    }
+
     /* Write journal entry */
-    /* JRM -- Modified to printf base addr in HEX 
-     *     -- Must check with Quincey about using the %a option in 
-     *        format string for haddr_t.  Casting to unsigned long 
-     *        for now.
-     */
     HDsnprintf(temp, 
                (size_t)(length + 100),
-               "2 trans_num %ld length %d base_addr Ox%lx body ", 
+               "2 trans_num %ld length %d base_addr 0x%lx body ", 
  	       trans_num, 
 	       length, 
 	       (unsigned long)base_addr); /* <== fix this */
 
-    if ( H5C2_jb__write_to_buffer(struct_ptr, strlen(temp), temp) < 0 ) {
+    if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, FALSE, trans_num) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                     "H5C2_jb__write_to_buffer() failed.\n")
     } /* end if */
 
-    /* JRM -- the buffer will contain binary -- need to conver to hex */
-    if ( H5C2_jb__write_to_buffer(struct_ptr, length, body) < 0 ) {
+    /* Convert data from binary to hex */
+    H5C2_jb__bin2hex(body, hexdata, &hexlength, 0, length);
+
+    if ( H5C2_jb__write_to_buffer(struct_ptr, hexlength, hexdata, FALSE, trans_num) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                     "H5C2_jb__write_to_buffer() failed.\n")
     } /* end if */
 
-    if (H5C2_jb__write_to_buffer(struct_ptr, 1, "\n") < 0) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_jb__write_to_buffer() failed.\n")
-    } /* end if */
-	
     /* Indicate that at least one journal entry has been written under 
      * this transaction 
      */
@@ -826,12 +910,22 @@ done:
         }
     }
 
+    if ( hexdata != NULL )
+    {
+        hexdata = H5MM_xfree(hexdata);
+        if ( hexdata != NULL ) {
+
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
+                        "free of assembly buffer failed.");
+        }
+    }
+
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5C2_jb__journal_entry */
 
 
-/******************************************************************************
+/*****************************************************************************
  *
  * Function:		H5C2_jb__end_transaction
  *
@@ -847,9 +941,8 @@ done:
  *
  * Returns:		SUCCEED on success.
  *
- ******************************************************************************/
-
-herr_t 
+ *****************************************************************************/
+herr_t
 H5C2_jb__end_transaction(H5C2_jbrb_t * struct_ptr,
 			 unsigned long trans_num)
 {
@@ -879,30 +972,17 @@ H5C2_jb__end_transaction(H5C2_jbrb_t * struct_ptr,
                     "Empty transaction -- at least one journal entry required.")
     } /* end if */
 
-    /* Write end transaction message */
+
+    /* Prepare end transaction message */
     HDsnprintf(temp, (size_t)25, "3 end_trans %ld\n", trans_num);
 
-    if ( H5C2_jb__write_to_buffer(struct_ptr, strlen(temp), temp) < 0 ) {
+    /* Write end transaction message */
+    if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, 
+			          TRUE, trans_num ) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                     "H5C2_jb__write_to_buffer() failed.\n")
     } /* end if */
-
-    /* record the transaction number in the appropriate buffer index */
-    if ( ( struct_ptr->cur_buf_free_space == struct_ptr->buf_size ) &&
-         ( struct_ptr->put != 0 ) ) {
-
-	(*struct_ptr->trans_on_disk_record)[struct_ptr->put - 1] = trans_num;
-
-    } else if ( (struct_ptr->cur_buf_free_space == struct_ptr->buf_size ) &&
-                (struct_ptr->put == 0 ) ) {
-
-	(*struct_ptr->trans_on_disk_record)[struct_ptr->num_bufs-1] = trans_num;
-
-    } else {
-
-	(*struct_ptr->trans_on_disk_record)[struct_ptr->put] = trans_num;
-    }
 
     /* reset boolean flag indicating if at least one journal entry has 
      * been written under transaction 
@@ -949,17 +1029,23 @@ H5C2_jb__comment(H5C2_jbrb_t * struct_ptr,
     HDassert(comment_ptr);
     HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
 
-    temp_len = strlen(comment_ptr) + 11;
-    if ( ( temp = H5MM_malloc(strlen(comment_ptr) + 11) ) == NULL ) {
+    temp_len = HDstrlen(comment_ptr) + 11;
+    if ( ( temp = H5MM_malloc(HDstrlen(comment_ptr) + 11) ) == NULL ) {
 
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
                    "allocation of temp buffer failed.");
     } /* end if */
 
     /* Write comment message */
-    HDsnprintf(temp, temp_len, "C comment %s\n", comment_ptr);
+    HDsnprintf(temp, temp_len, "C comment %s", comment_ptr);
 
-    if ( H5C2_jb__write_to_buffer(struct_ptr, strlen(temp), temp) < 0 ) {
+    if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, FALSE, struct_ptr->cur_trans ) < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_jb__write_to_buffer() failed.\n")
+    } /* end if */
+
+    if ( H5C2_jb__write_to_buffer(struct_ptr, 1, "\n", FALSE, struct_ptr->cur_trans ) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                     "H5C2_jb__write_to_buffer() failed.\n")
@@ -1019,6 +1105,18 @@ H5C2_jb__get_last_transaction_on_disk(H5C2_jbrb_t * struct_ptr,
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "bad struct_ptr.")
     }
 
+    /* JRM: In machine readable version, lets check to see if a sync is 
+     *      necessary, and call it only if it is.
+     */
+    /* perform a sync to ensure everything gets to disk before continuing */
+    /* Note: there is no HDfsync function, so for now, the standard
+       fsync is being used. */
+    if ( fsync(struct_ptr->journal_file_fd) < 0 ) {
+
+        HGOTO_ERROR(H5E_IO, H5E_SYNCFAIL, FAIL, "Jounal file sync failed.")
+
+    } /* end if */
+
     * trans_num_ptr = struct_ptr->last_trans_on_disk;
 
 done:
@@ -1037,8 +1135,7 @@ done:
  *
  * Purpose:		Verify that there is no transaction in progress, and 
  *			that the journal entry buffers are empty. Truncate
- *			the journal file, and reset the last transaction
- *			number to zero. Does not return until the file
+ *			the journal file. Does not return until the file
  *			is truncated on disk.
  *
  * Returns:		SUCCEED on success.
@@ -1169,7 +1266,15 @@ H5C2_jb__takedown(H5C2_jbrb_t * struct_ptr)
         }
     }
 
-    /* JRM: Shouldn't you free struct_ptr->trans_on_disk_record?? */
+    if ( struct_ptr->trans_tracking != NULL ) {
+
+        struct_ptr->trans_tracking = H5MM_xfree(struct_ptr->trans_tracking);
+        if ( struct_ptr->trans_tracking != NULL ) {
+
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
+                        "free of transaction tracking array failed.");
+        }
+    }
 
 done:
 
@@ -1214,4 +1319,61 @@ done:
     return FAIL;
 #endif
 } /* end H5C2_jb__reconfigure */
+
+
+/******************************************************************************
+ *
+ * Function:		H5C2_jb__bin2hex
+ *
+ * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
+ *			Tuesday, March 4, 2008
+ *
+ * Purpose:		Convert binary data into hexadecimal.
+ *
+ * Returns:		SUCCEED on success.
+ *
+ ******************************************************************************/
+
+herr_t 
+H5C2_jb__bin2hex(uint8_t * buf, 
+                 uint8_t * hexdata,
+                 size_t * hexlength,
+                 size_t buf_offset, 
+                 size_t buf_size)
+
+{
+
+    herr_t ret_value = SUCCEED;
+    size_t      u, v;                   /* Local index variable */
+    uint8_t        c;
+	
+    FUNC_ENTER_NOAPI(H5C2_jb__bin2hex, FAIL)
+
+    HDsnprintf(hexdata, (size_t)2, " ");
+
+    for(u = 0; u < buf_size; u += 16) {
+
+        /* Print the hex values */
+        for(v = 0; v < 16; v++) {
+
+            if(u + v < buf_size) {
+
+                c = buf[buf_offset + u + v];
+                sprintf(hexdata, "%s%02x ", hexdata, c);
+
+            } /* end if */
+
+        } /* end for */
+
+    } /* end for */
+    
+    sprintf(hexdata, "%s\n", hexdata);
+
+    * hexlength = HDstrlen(hexdata);
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5C2_jb__bin2hex*/
 

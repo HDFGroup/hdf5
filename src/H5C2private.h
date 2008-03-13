@@ -1421,7 +1421,9 @@ H5_DLL herr_t H5C2_jb__flush(H5C2_jbrb_t * struct_ptr);
 
 H5_DLL herr_t H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr, 
 		                       size_t size,
-                                       const char * data);
+                                       const char * data,
+                                       hbool_t is_end_trans,
+                                       unsigned long trans_num);
 
 H5_DLL herr_t H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
                             char * HDF5_file_name,
@@ -1438,7 +1440,7 @@ H5_DLL herr_t H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
                                      unsigned long trans_num,
                                      haddr_t base_addr,
                                      size_t length,
-                                     char * body);
+                                     const char * body);
 
 H5_DLL herr_t H5C2_jb__end_transaction(H5C2_jbrb_t * struct_ptr,
                                        unsigned long trans_num);
@@ -1458,6 +1460,11 @@ H5_DLL herr_t H5C2_jb__reconfigure(H5C2_jbrb_t * struct_ptr,
                                    int new_num_bufs,
                                    hbool_t new_use_aio);
 
+H5_DLL herr_t H5C2_jb__bin2hex(uint8_t * buf,
+                               uint8_t * hexdata,
+                               size_t * hexlength,
+                               size_t buf_offset,
+                               size_t buf_size);
 
 #endif /* !_H5C2private_H */
 

@@ -58,389 +58,23 @@ static void write_noflush_verify(H5C2_jbrb_t * struct_ptr,
 
 static void check_superblock_extensions(void);
 
+static void check_message_format(void);
+
+static void check_legal_calls(void);
+
+static void check_transaction_tracking(void);
+
+static void write_verify_trans_num(H5C2_jbrb_t * struct_ptr, 
+                                   unsigned long trans_num, 
+                                   unsigned long verify_val);
+
+
 
 /**************************************************************************/
 /**************************************************************************/
 /********************************* tests: *********************************/
 /**************************************************************************/
 /**************************************************************************/
-
-/***************************************************************************
- * Function: 	check_buffer_writes
- *
- * Purpose:  	Verify the function H5C_jb__write_to_buffer properly writes
- *		messages of varying sizes into the journal buffers, and 
- *		that the journal buffers properly flush out when filled.
- *
- * Return:	void
- *
- * Programmer: 	Mike McGreevy <mcgreevy@hdfgroup.org>
- *		Thursday, February 21, 2008
- * 
- **************************************************************************/
-
-static void 
-check_buffer_writes(void)
-{
-    const char * fcn_name = "check_buffer_writes(): ";
-    char filename[512];
-    int i;
-    herr_t result;
-    H5C2_jbrb_t * struct_ptr;
-    FILE * readback;
-    hbool_t show_progress = FALSE;
-    int32_t checkpoint = 1;
-    char filldata[13][100];
-
-    TESTING("metadata buffer & file writes");
-
-    pass2 = TRUE;
-
-    /* Initialize data to get written as tests */
-    memcpy(filldata[0], "3456789\n", 9);
-    memcpy(filldata[1], "abcdefghijklmn\n", 16);
-    memcpy(filldata[2], "ABCDEFGHIJKLMNO\n", 17);
-    memcpy(filldata[3], "AaBbCcDdEeFfGgHh\n", 18);
-    memcpy(filldata[4], "ZAB-ZAB-ZAB-ZAB-ZAB-ZAB-ZAB-ZA\n", 32);
-    memcpy(filldata[5], "ABC-ABC-ABC-ABC-ABC-ABC-ABC-ABC\n", 33);
-    memcpy(filldata[6], "BCD-BCD-BCD-BCD-BCD-BCD-BCD-BCD-\n", 34);
-    memcpy(filldata[7], "12345-12345-12345-12345-12345-12345-12345-1234\n", 48);
-    memcpy(filldata[8], "01234-01234-01234-01234-01234-01234-01234-01234\n", 49);
-    memcpy(filldata[9], "23456-23456-23456-23456-23456-23456-23456-23456-\n", 50);
-    memcpy(filldata[10], "aaaa-bbbb-cccc-dddd-eeee-ffff-gggg-hhhh-iiii-jjjj-kkkk-llll-mmmm-nnnn-oooo-pppp-qqqq-rrrr-ssss\n", 96);
-    memcpy(filldata[11], "bbbb-cccc-dddd-eeee-ffff-gggg-hhhh-iiii-jjjj-kkkk-llll-mmmm-nnnn-oooo-pppp-qqqq-rrrr-ssss-tttt-\n", 97);
-    memcpy(filldata[12], "cccc-dddd-eeee-ffff-gggg-hhhh-iiii-jjjj-kkkk-llll-mmmm-nnnn-oooo-pppp-qqqq-rrrr-ssss-tttt-uuuu-v\n", 98);
-
-    /* Assert that size of data is as expected */
-    HDassert(strlen(filldata[0]) == 8);
-    HDassert(strlen(filldata[1]) == 15);
-    HDassert(strlen(filldata[2]) == 16);
-    HDassert(strlen(filldata[3]) == 17);
-    HDassert(strlen(filldata[4]) == 31);
-    HDassert(strlen(filldata[5]) == 32);
-    HDassert(strlen(filldata[6]) == 33);
-    HDassert(strlen(filldata[7]) == 47);
-    HDassert(strlen(filldata[8]) == 48);
-    HDassert(strlen(filldata[9]) == 49);
-    HDassert(strlen(filldata[10]) == 95);
-    HDassert(strlen(filldata[11]) == 96);
-    HDassert(strlen(filldata[12]) == 97);
-
-    /* Allocate memory for H5C2_jbrb_t structure */
-    /* JRM: why allocate this?  Why not just declare it as a local 
-     *      variable?
-     */
-    if ( pass2 ) {
-
-	if (NULL == (struct_ptr = malloc(sizeof(H5C2_jbrb_t)))) {
-
-	    pass2 = FALSE;
-	    failure_mssg2 = 
-		    "Can't allocate memory for H5C2_jbrb_t structure.\n";
-	}
-	struct_ptr->magic = H5C2__H5C2_JBRB_T_MAGIC;
-    }
-	
-    if ( show_progress ) /* 1 */ 
-	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
-
-    /* setup the file name */
-    if ( pass2 ) {
-
-        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, sizeof(filename))
-             == NULL ) {
-
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed.\n";
-        }
-    }
-	
-    if ( show_progress ) /* 2 */ 
-	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
-
-    /* Initialize H5C2_jbrb_t structure. */
-    if ( pass2 ) {
-
-       	result = H5C2_jb__init(/* H5C2_jbrb_t */            struct_ptr, 
-			       /* HDF5 file name */         HDF5_FILE_NAME,
-			       /* journal file name */      filename, 
-			       /* Buffer size */            16, 
-			       /* Number of Buffers */      3, 
-			       /* Use Synchronois I/O */    FALSE, 
-			       /* human readable journal */ TRUE);
-
-        if ( result != 0) {
-
-	    pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb_init failed.\n";
-       	}
-    }
-	
-    if ( show_progress ) /* 3 */ 
-	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
-
-    /* Flush out buffers to disk */
-    if ( pass2 ) {
-	
-	if ( H5C2_jb__flush(struct_ptr) != SUCCEED ) {
-
-            pass2 = FALSE;
-	    failure_mssg2 = "H5C2_jb_flush failed.\n";
-	}	
-    }
-	
-    /* Truncate journal file */
-    if ( pass2 ) {
-
-	if ( H5C2_jb__trunc(struct_ptr) != SUCCEED ) {
-
-		pass2 = FALSE;
-		failure_mssg2 = "H5C2_jb_trunc failed.\n";
-	}
-    }
-
-    if ( show_progress ) /* 4 */ 
-	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
-
-    /* open journal file for reading */
-    readback = fopen(filename, "r");
-
-
-    /* run a collection of calls to write_flush_verify(). These calls 
-     * write specific lengths of data into the journal buffers and 
-     * then flushes them to disk, and ensures that what makes it to 
-     * disk is as expected 
-     */
-
-    for (i=1; i<13; i++) {
-
-	write_flush_verify(struct_ptr, 
-			   (int)strlen(filldata[i]), 
-			   filldata[i], 
-			   readback);
-
-	if ( show_progress )
-	    HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		      checkpoint++, (int)pass2);
-
-    }
-
-    /* run a collection of calls to write_noflush_verify(). These 
-     * calls write specific lengths of data into the journal buffers 
-     * multiple times, but only flushes at the end of the set of writes. 
-     * This tests to ensure that the automatic flush calls in 
-     * H5C2_jb__write_to_buffer are working properly. The routine then 
-     * ensures that what makes it it disk is as expected 
-     */
-
-    write_noflush_verify(struct_ptr, 15, filldata[1], readback, 16);
-	
-    if ( show_progress ) /* 17 */ 
-	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
-
-    write_noflush_verify(struct_ptr, 16, filldata[2], readback, 6);
-	
-    if ( show_progress ) /* 18 */ 
-	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
-
-    write_noflush_verify(struct_ptr, 17, filldata[3], readback, 16);
-	
-    if ( show_progress ) /* 19 */ 
-	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
-
-    write_noflush_verify(struct_ptr, 47, filldata[7], readback, 16);
-	
-    if ( show_progress ) /* 20 */ 
-	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
-
-    write_noflush_verify(struct_ptr, 48, filldata[8], readback, 6);
-	
-    if ( show_progress ) /* 21 */ 
-	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
-
-    write_noflush_verify(struct_ptr, 49, filldata[9], readback, 16);
-	
-    if ( show_progress ) /* 22 */ 
-	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
-		  checkpoint++, (int)pass2);
-
-    /* close the journal file's file pointer, and truncate the journal file */
-    /* JRM -- Don't you want to close the readback file 
-     *        if it is open, not just if there is a pass?
-     */
-    if ( pass2 ) {
-
-	fclose(readback);
-
-	if ( H5C2_jb__trunc(struct_ptr) != SUCCEED ) {
-
-		pass2 = FALSE;
-		failure_mssg2 = "H5C2_jb__trunc failed.\n";
-	}
-    }
-
-    /* take down the journal file */
-    if ( pass2 ) {
-
-	if (H5C2_jb__takedown(struct_ptr) != SUCCEED) {
-
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_jb__takedown failed.\n";
-	}
-
-	free(struct_ptr);
-    }
-
-    /* report pass / failure information */
-    if ( pass2 ) { PASSED(); } else { H5_FAILED(); }
-
-    if ( ! pass2 ) {
-
-	failures2++;
-        HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
-                  fcn_name, failure_mssg2);
-    }
-
-    return;
-
-} /* check_buffer_writes */
-
-
-/***************************************************************************
- * Function: 	write_flush_verify
- *
- * Purpose:  	Helper function for check_buffer_writes test. Writes a 
- *		piece of data of specified size into the journal buffer, then
- *		flushes the journal buffers. The data is read back and
- *		verified for correctness.
- *
- * Return:	void
- *
- * Programmer: 	Mike McGreevy <mcgreevy@hdfgroup.org>
- *		Thursday, February 21, 2008
- * 
- **************************************************************************/
-
-
-static void 
-write_flush_verify(H5C2_jbrb_t * struct_ptr, 
-		   int size, 
-		   char * data, 
-		   FILE * readback)
-{
-    char verify[150];
-
-    if ( pass2 ) {
-
-	if ( H5C2_jb__write_to_buffer(struct_ptr, size, data) != SUCCEED ) {
-
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_jb__write_to_buffer failed.\n";
-	}
-    }
-
-    if ( pass2 ) {
-
-	if ( H5C2_jb__flush(struct_ptr) != SUCCEED ) {
-
-	    pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb_flush failed.\n";
-	}	
-    }
-
-    if ( pass2 ) {
-
-	fgets(verify, size+10, readback);
-		
-	if (strcmp(verify, data) != 0) {
-
-	    pass2 = FALSE;
-	    failure_mssg2 = "Journal entry not written correctly.\n";
-	    printf("message read from file : %s\n", verify);
-	    printf("message supplied       : %s\n", data);
-	}
-    }
-
-    return;
-
-} /* write_flush_verify */
-
-
-/***************************************************************************
- * Function: 	write_noflush_verify
- *
- * Purpose:  	Helper function for check_buffer_writes test. Writes a 
- * 		piece of data of specified size into the journal buffer
- *		multiple times, without calling H5C_jb__flush in between
- *		writes. After all writes are completed, H5C_jb__flush is 
- *		called, and the data is read back from the journal file and
- *		verified for correctness.
- *
- * Return:	void
- *
- * Programmer: 	Mike McGreevy <mcgreevy@hdfgroup.org>
- *		Thursday, February 21, 2008
- * 
- **************************************************************************/
-
-
-static void 
-write_noflush_verify(H5C2_jbrb_t * struct_ptr, 
-		     int size, 
-		     char * data, 
-		     FILE * readback, 
-		     int repeats)
-{
-    int i;
-    char verify[150];	
-
-    for (i=0; i<repeats; i++) {
-
-	if ( pass2 ) {
-
-	    if ( H5C2_jb__write_to_buffer(struct_ptr, size, data) != SUCCEED ) {
-
-		pass2 = FALSE;
-		failure_mssg2 = "H5C2_jb__write_to_buffer failed.\n";
-	    } /* end if */
-	} /* end if */
-    } /* end for */
-
-    if ( pass2 ) {
-
-	if ( H5C2_jb__flush(struct_ptr) != SUCCEED ) {
-
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_jb_flush failed.\n";
-	}	
-    }
-
-    for (i=0; i<repeats; i++) {
-
-	if ( pass2 ) {
-	    fgets(verify, size+10, readback);
-	    if (strcmp(verify, data) != 0) {
-
-		pass2 = FALSE;
-		failure_mssg2 = "Journal entry not written correctly.\n";
-		printf("message read from file : %s\n", verify);
-		printf("message supplied       : %s\n", data);
-	    } /* end if */
-	} /* end if */
-    } /* end for */
-
-    return;
-
-} /* write_noflush_verify */
 
 /*** super block extension related test code ***/
 
@@ -1075,6 +709,1997 @@ check_superblock_extensions(void)
 
 } /* check_superblock_extensions() */
 
+
+
+/***************************************************************************
+ * Function: 	check_buffer_writes
+ *
+ * Purpose:  	Verify the function H5C_jb__write_to_buffer properly writes
+ *              messages of varying sizes into the journal buffers, and 
+ *              that the journal buffers properly flush out when filled.
+ *
+ * Return:      void
+ *
+ * Programmer: 	Mike McGreevy <mcgreevy@hdfgroup.org>
+ *              Thursday, February 21, 2008
+ * 
+ **************************************************************************/
+static void 
+check_buffer_writes(void)
+{
+    const char * fcn_name = "check_buffer_writes(): ";
+    char filename[512];
+    int i;
+    herr_t result;
+    H5C2_jbrb_t jbrb_struct;
+    FILE * readback;
+    hbool_t show_progress = FALSE;
+    int32_t checkpoint = 1;
+    char filldata[12][100];
+    int repeatnum[12];
+
+    TESTING("metadata buffer & file writes");
+
+    pass2 = TRUE;
+
+    /* Initialize data to get written as tests */
+    HDmemcpy(filldata[0], "abcdefghijklmn\n", 16);
+    HDmemcpy(filldata[1], "ABCDEFGHIJKLMNO\n", 17);
+    HDmemcpy(filldata[2], "AaBbCcDdEeFfGgHh\n", 18);
+    HDmemcpy(filldata[3], "ZAB-ZAB-ZAB-ZAB-ZAB-ZAB-ZAB-ZA\n", 32);
+    HDmemcpy(filldata[4], "ABC-ABC-ABC-ABC-ABC-ABC-ABC-ABC\n", 33);
+    HDmemcpy(filldata[5], "BCD-BCD-BCD-BCD-BCD-BCD-BCD-BCD-\n", 34);
+    HDmemcpy(filldata[6], "12345-12345-12345-12345-12345-12345-12345-1234\n", 
+	     48);
+    HDmemcpy(filldata[7], "01234-01234-01234-01234-01234-01234-01234-01234\n", 
+	     49);
+    HDmemcpy(filldata[8], "23456-23456-23456-23456-23456-23456-23456-23456-\n",
+	     50);
+    HDmemcpy(filldata[9], "aaaa-bbbb-cccc-dddd-eeee-ffff-gggg-hhhh-iiii-jjjj-kkkk-llll-mmmm-nnnn-oooo-pppp-qqqq-rrrr-ssss\n", 96);
+    HDmemcpy(filldata[10], "bbbb-cccc-dddd-eeee-ffff-gggg-hhhh-iiii-jjjj-kkkk-llll-mmmm-nnnn-oooo-pppp-qqqq-rrrr-ssss-tttt-\n", 97);
+    HDmemcpy(filldata[11], "cccc-dddd-eeee-ffff-gggg-hhhh-iiii-jjjj-kkkk-llll-mmmm-nnnn-oooo-pppp-qqqq-rrrr-ssss-tttt-uuuu-v\n", 98);
+    
+    /* Assert that size of data is as expected */
+    HDassert(HDstrlen(filldata[0]) == 15);
+    HDassert(HDstrlen(filldata[1]) == 16);
+    HDassert(HDstrlen(filldata[2]) == 17);
+    HDassert(HDstrlen(filldata[3]) == 31);
+    HDassert(HDstrlen(filldata[4]) == 32);
+    HDassert(HDstrlen(filldata[5]) == 33);
+    HDassert(HDstrlen(filldata[6]) == 47);
+    HDassert(HDstrlen(filldata[7]) == 48);
+    HDassert(HDstrlen(filldata[8]) == 49);
+    HDassert(HDstrlen(filldata[9]) == 95);
+    HDassert(HDstrlen(filldata[10]) == 96);
+    HDassert(HDstrlen(filldata[11]) == 97);
+
+    /* Give structure its magic number */
+    jbrb_struct.magic = H5C2__H5C2_JBRB_T_MAGIC;
+	
+    if ( show_progress ) /* 1 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* setup the file name */
+    if ( pass2 ) {
+
+        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, sizeof(filename))
+             == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "h5_fixname() failed";
+
+        } /* end if */
+
+    } /* end if */
+	
+    if ( show_progress ) /* 2 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    /* Initialize H5C2_jbrb_t structure. */
+    if ( pass2 ) {
+
+       	result = H5C2_jb__init(/* H5C2_jbrb_t */            &jbrb_struct, 
+                               /* HDF5 file name */         HDF5_FILE_NAME,
+                               /* journal file name */      filename, 
+                               /* Buffer size */            16, 
+                               /* Number of Buffers */      3, 
+                               /* Use Synchronois I/O */    FALSE, 
+                               /* human readable journal */ TRUE);
+
+        if ( result != 0) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb_init failed";
+
+       	} /* end if */
+
+    } /* end if */
+	
+    if ( show_progress ) /* 3 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Flush and truncate journal file to get rid of the header
+     * message for subsequent tests. */
+    if ( pass2 ) {
+	
+	if ( H5C2_jb__flush(&jbrb_struct) != SUCCEED ) {
+
+            pass2 = FALSE;
+	    failure_mssg2 = "H5C2_jb_flush failed";
+
+	} /* end if */	
+
+    } /* end if */
+	
+    /* Truncate journal file */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__trunc(&jbrb_struct) != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb_trunc failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 4 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    /* open journal file for reading */
+    readback = fopen(filename, "r");
+
+    /* run a collection of calls to write_flush_verify(). These calls 
+     * write specific lengths of data into the journal buffers and 
+     * then flushes them to disk, and ensures that what makes it to 
+     * disk is as expected 
+     */
+
+    for (i=0; i<12; i++) {
+
+	write_flush_verify(&jbrb_struct, 
+			   (int)HDstrlen(filldata[i]), 
+			   filldata[i], 
+			   readback);
+
+	if ( show_progress )
+	    HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		      checkpoint++, (int)pass2);
+
+    } /* end for */
+
+    /* run a collection of calls to write_noflush_verify(). These 
+     * calls write specific lengths of data into the journal buffers 
+     * multiple times, but only flushes at the end of the set of writes. 
+     * This tests to ensure that the automatic flush calls in 
+     * H5C2_jb__write_to_buffer are working properly. The routine then 
+     * ensures that what makes it it disk is as expected 
+     */
+
+    /* Initialize repeat array to specify how many times to repeat each write
+       within the write_noflush_verify calls. */
+    repeatnum[0] = 16;
+    repeatnum[1] = 6;
+    repeatnum[2] = 16;
+    repeatnum[3] = 16;
+    repeatnum[4] = 6;
+    repeatnum[5] = 16;
+    repeatnum[6] = 16;
+    repeatnum[7] = 6;
+    repeatnum[8] = 16;
+    repeatnum[9] = 16;
+    repeatnum[10] = 6;
+    repeatnum[11] = 16;
+
+    for (i=0; i<12; i++) {
+
+        write_noflush_verify(&jbrb_struct,
+                             (int)HDstrlen(filldata[i]),
+                             filldata[i],
+                             readback,
+                             repeatnum[i]);
+        
+	if ( show_progress )
+	    HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		      checkpoint++, (int)pass2);
+
+    } /* end for */
+    
+    /* close journal file pointer */
+    fclose(readback);
+
+    /* Truncate the journal file */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__trunc(&jbrb_struct) != SUCCEED ) {
+
+		pass2 = FALSE;
+		failure_mssg2 = "H5C2_jb__trunc failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    /* take down the journal file */
+    if ( pass2 ) {
+
+	if (H5C2_jb__takedown(&jbrb_struct) != SUCCEED) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5C2_jb__takedown failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    /* report pass / failure information */
+    if ( pass2 ) { PASSED(); } else { H5_FAILED(); }
+
+    if ( ! pass2 ) {
+
+	failures2++;
+        HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
+                  fcn_name, failure_mssg2);
+
+    }
+
+    return;
+
+} /* check_buffer_writes */
+
+
+
+/***************************************************************************
+ * Function: 	write_flush_verify
+ *
+ * Purpose:  	Helper function for check_buffer_writes test. Writes a 
+ *              piece of data of specified size into the journal buffer, then
+ *              flushes the journal buffers. The data is read back and
+ *              verified for correctness.
+ *
+ * Return:      void
+ *
+ * Programmer: 	Mike McGreevy <mcgreevy@hdfgroup.org>
+ *              Thursday, February 21, 2008
+ * 
+ **************************************************************************/
+static void 
+write_flush_verify(H5C2_jbrb_t * struct_ptr, 
+		   int size, 
+		   char * data, 
+		   FILE * readback)
+{
+    char verify[150];
+
+    if ( pass2 ) {
+
+	if ( H5C2_jb__write_to_buffer(struct_ptr, (size_t)size, data, 0, 0) 
+           != SUCCEED ) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5C2_jb__write_to_buffer failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( pass2 ) {
+
+	if ( H5C2_jb__flush(struct_ptr) != SUCCEED ) {
+
+	    pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb_flush failed";
+
+        } /* end if */
+
+    } /* end if */
+
+    if ( pass2 ) {
+
+	fgets(verify, size+10, readback);
+		
+	if (HDstrcmp(verify, data) != 0) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "Journal entry not written correctly";
+
+	} /* end if */
+
+    } /* end if */
+
+    return;
+
+} /* write_flush_verify */
+
+
+
+/***************************************************************************
+ * Function: 	write_noflush_verify
+ *
+ * Purpose:  	Helper function for check_buffer_writes test. Writes a 
+ *              piece of data of specified size into the journal buffer
+ *              multiple times, without calling H5C_jb__flush in between
+ *              writes. After all writes are completed, H5C_jb__flush is 
+ *              called, and the data is read back from the journal file and
+ *              verified for correctness.
+ *
+ * Return:      void
+ *
+ * Programmer: 	Mike McGreevy <mcgreevy@hdfgroup.org>
+ *              Thursday, February 21, 2008
+ * 
+ **************************************************************************/
+static void 
+write_noflush_verify(H5C2_jbrb_t * struct_ptr, 
+		     int size, 
+		     char * data, 
+		     FILE * readback, 
+		     int repeats)
+{
+    int i;
+    char verify[150];	
+
+    for (i=0; i<repeats; i++) {
+
+        if ( pass2 ) {
+	
+            if ( H5C2_jb__write_to_buffer(struct_ptr, (size_t)size, data, 0, 0) 
+               != SUCCEED ) {
+
+                pass2 = FALSE;
+                failure_mssg2 = "H5C2_jb__write_to_buffer failed";
+
+            } /* end if */
+
+        } /* end if */
+
+    } /* end for */
+
+    if ( pass2 ) {
+
+        if ( H5C2_jb__flush(struct_ptr) != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb_flush failed";
+
+	} /* end if */	
+
+    } /* end if */
+
+    for (i=0; i<repeats; i++) {
+
+        if ( pass2 ) {
+            fgets(verify, size+10, readback);
+            if (HDstrcmp(verify, data) != 0) {
+
+                pass2 = FALSE;
+                failure_mssg2 = "Journal entry not written correctly";
+
+            } /* end if */
+
+	} /* end if */
+
+    } /* end for */
+
+    return;
+
+} /* write_noflush_verify */
+
+
+
+/***************************************************************************
+ * Function: 	check_message_format
+ *
+ * Purpose:  	Verify that the functions that write messages into the journal
+ *              buffers actually write the correct messages.
+ *
+ * Return:      void
+ *
+ * Programmer: 	Mike McGreevy <mcgreevy@hdfgroup.org>
+ *              Tuesday, February 26, 2008
+ * 
+ **************************************************************************/
+static void 
+check_message_format(void)
+{
+    const char * fcn_name = "check_message_format(): ";
+    char filename[512];
+    int i;
+    herr_t result;
+    H5C2_jbrb_t jbrb_struct;
+    FILE * readback;
+    hbool_t show_progress = FALSE;
+    int32_t checkpoint = 1;
+    char verify[9][500];
+    char from_journal[9][500];
+
+    TESTING("journal file message format");
+
+    pass2 = TRUE;
+
+    /* setup the file name */
+    if ( pass2 ) {
+
+        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, sizeof(filename))
+             == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "h5_fixname() failed";
+
+        } /* end if */
+
+    } /* end if */
+
+    /* Give structure its magic number */
+    jbrb_struct.magic = H5C2__H5C2_JBRB_T_MAGIC;
+
+    /* Initialize H5C2_jbrb_t structure. */
+    if ( pass2 ) {
+
+       	result = H5C2_jb__init(/* H5C2_jbrb_t */            &jbrb_struct, 
+                               /* HDF5 file name */         HDF5_FILE_NAME,
+                               /* journal file name */      filename, 
+                               /* Buffer size */            16, 
+                               /* Number of Buffers */      3, 
+                               /* Use Synchronois I/O */    FALSE, 
+                               /* human readable journal */ TRUE);
+
+        if ( result != 0) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb_init failed";
+
+       	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 1 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+ 
+    /* Start a transaction */
+    if ( pass2 ) {
+
+        if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t  */  &jbrb_struct, 
+                                        /* trans number */  1) 
+           != SUCCEED ) {
+    
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__start_transaction failed";
+
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 2 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+ 
+    /* Write a journal entry */
+    if ( pass2 ) {
+
+        if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t  */  &jbrb_struct, 
+                                    /* trans number */  1, 
+                                    /* base address */  (haddr_t)0, 
+                                    /* data length  */  1, 
+                                    /* data         */  "A") 
+           != SUCCEED ) {
+            
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__journal_entry failed";
+
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 3 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+ 
+    /* Write a journal entry */
+    if ( pass2 ) {
+
+        if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t  */  &jbrb_struct, 
+                                    /* trans number */  1, 
+                                    /* base address */  (haddr_t)1, 
+                                    /* data length  */  2, 
+                                    /* data         */  "AB") 
+           != SUCCEED ) {
+            
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__journal_entry failed";
+
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 4 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+ 
+    /* Write a journal entry */
+    if ( pass2 ) {
+
+        if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t  */  &jbrb_struct, 
+                                    /* trans number */  1, 
+                                    /* base address */  (haddr_t)3, 
+                                    /* data length  */  4, 
+                                    /* data         */  "CDEF") 
+           != SUCCEED ) {
+            
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__journal_entry failed";
+
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 5 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+ 
+    /* End transaction */
+    if ( pass2 ) {
+        if ( H5C2_jb__end_transaction(/* H5C2_jbrb_t  */  &jbrb_struct, 
+                                      /* trans number */  1) 
+           != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__end_transaction failed";
+            
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 6 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    /* Start a transaction */
+    if ( pass2 ) {
+
+        if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t  */  &jbrb_struct, 
+                                        /* trans number */  2) 
+           != SUCCEED ) {
+    
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__start_transaction failed";
+
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 7 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    /* Write a journal entry */
+    if ( pass2 ) {
+
+        if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t  */  &jbrb_struct, 
+                                    /* trans number */  2, 
+                                    /* base address */  (haddr_t)285, 
+                                    /* data length  */  11, 
+                                    /* data         */  "Test Data?!") 
+           != SUCCEED ) {
+            
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__journal_entry failed";
+
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 8 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    /* End transaction */
+    if ( pass2 ) {
+        if ( H5C2_jb__end_transaction(/* H5C2_jbrb_t  */  &jbrb_struct, 
+                                      /* trans number */  2) 
+           != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__end_transaction failed";
+            
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 9 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    /* Flush the journal buffers. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__flush(/* H5C2_jbrb_t */  &jbrb_struct) 
+           != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__flush failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 10 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    /* Fill out verify array with expected messages */
+    sprintf(verify[0], "0 ver_num 1 target_file_name HDF5.file creation_date %s human_readable 1\n", __DATE__);
+    sprintf(verify[1], "1 bgn_trans 1\n");
+    sprintf(verify[2], "2 trans_num 1 length 1 base_addr 0x0 body  41 \n");
+    sprintf(verify[3], "2 trans_num 1 length 2 base_addr 0x1 body  41 42 \n");
+    sprintf(verify[4], "2 trans_num 1 length 4 base_addr 0x3 body  43 44 45 46 \n");
+    sprintf(verify[5], "3 end_trans 1\n");
+    sprintf(verify[6], "1 bgn_trans 2\n");
+    sprintf(verify[7], "2 trans_num 2 length 11 base_addr 0x11d body  54 65 73 74 20 44 61 74 61 3f 21 \n");
+    sprintf(verify[8], "3 end_trans 2\n");
+
+    /* verify that messages in journal are same as expected */
+    readback = fopen(filename, "r");
+    for (i = 0; i < 9; i++) {
+
+        if ( pass2) {
+
+            fgets(from_journal[i], 300, readback);
+
+            if ( HDstrcmp(verify[i], from_journal[i]) != 0) {
+    
+                pass2 = FALSE;
+                failure_mssg2 = "journal file not written correctly";
+
+            } /* end if */
+
+        } /* end if */
+
+    } /* end for */
+    fclose(readback);
+
+    /* Truncate the journal file */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__trunc(&jbrb_struct) != SUCCEED ) {
+
+		pass2 = FALSE;
+		failure_mssg2 = "H5C2_jb__trunc failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 11 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    /* Start a transaction */
+    if ( pass2 ) {
+
+        if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t  */  &jbrb_struct, 
+                                        /* trans number */  3) 
+           != SUCCEED ) {
+    
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__start_transaction failed";
+
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 12 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    /* Write a journal entry */
+    if ( pass2 ) {
+
+        if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t  */  &jbrb_struct, 
+                                    /* trans number */  3, 
+                                    /* base address */  (haddr_t)28591, 
+                                    /* data length  */  6, 
+                                    /* data         */  "#1nN`}") 
+           != SUCCEED ) {
+            
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__journal_entry failed";
+
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 13 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    /* End transaction */
+    if ( pass2 ) {
+        if ( H5C2_jb__end_transaction(/* H5C2_jbrb_t  */  &jbrb_struct, 
+                                      /* trans number */  3) 
+           != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__end_transaction failed";
+            
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 14 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    /* Add a comment */
+    if ( pass2 ) {
+        if ( H5C2_jb__comment(/* H5C2_jbrb_t     */  &jbrb_struct, 
+                              /* comment message */  "This is a comment!") 
+           != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__comment failed";
+            
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 14 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    /* Add a comment */
+    if ( pass2 ) {
+        if ( H5C2_jb__comment(/* H5C2_jbrb_t     */  &jbrb_struct, 
+                              /* comment message */  "This is another comment!") 
+           != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__comment failed";
+            
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 14 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    /* Flush the journal buffers. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__flush(/* H5C2_jbrb_t */  &jbrb_struct) 
+           != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__flush failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 15 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    /* Fill out verify array with expected messages */
+    sprintf(verify[0], "0 ver_num 1 target_file_name HDF5.file creation_date %s human_readable 1\n", __DATE__);
+    sprintf(verify[1], "1 bgn_trans 3\n");
+    sprintf(verify[2], "2 trans_num 3 length 6 base_addr 0x6faf body  23 31 6e 4e 60 7d \n");
+    sprintf(verify[3], "3 end_trans 3\n");
+    sprintf(verify[4], "C comment This is a comment!\n");
+    sprintf(verify[5], "C comment This is another comment!\n");
+
+    /* verify that messages in journal are same as expected */
+    readback = fopen(filename, "r");
+    for (i = 0; i < 6; i++) {
+
+        if ( pass2) {
+
+            fgets(from_journal[i], 300, readback);
+
+            if ( HDstrcmp(verify[i], from_journal[i]) != 0) {
+    
+                pass2 = FALSE;
+                failure_mssg2 = "journal file not written correctly";
+
+            } /* end if */
+
+        } /* end if */
+
+    } /* end for */
+    fclose(readback);
+
+    /* Truncate the journal file */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__trunc(&jbrb_struct) != SUCCEED ) {
+
+		pass2 = FALSE;
+		failure_mssg2 = "H5C2_jb__trunc failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    /* take down the journal file */
+    if ( pass2 ) {
+
+	if (H5C2_jb__takedown(&jbrb_struct) != SUCCEED) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5C2_jb__takedown failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 16 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    /* report pass / failure information */
+    if ( pass2 ) { PASSED(); } else { H5_FAILED(); }
+
+    if ( ! pass2 ) {
+
+	failures2++;
+        HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
+                  fcn_name, failure_mssg2);
+
+    }
+
+    return;
+
+} /* end check_message_format */
+
+
+
+/***************************************************************************
+ * Function: 	check_legal_calls
+ *
+ * Purpose:  	Verify that all H5C_jb functions prevent use when appropriate.
+ *
+ * Return:      void
+ *
+ * Programmer:  Mike McGreevy <mcgreevy@hdfgroup.org>
+ *              Tuesday, February 26, 2008
+ * 
+ **************************************************************************/
+static void 
+check_legal_calls(void)
+{
+    const char * fcn_name = "check_legal_calls(): ";
+    char filename[512];
+    herr_t result;
+    H5C2_jbrb_t jbrb_struct;
+    hbool_t show_progress = FALSE;
+    int32_t checkpoint = 1;
+
+    TESTING("journaling routine compatibility");
+
+    pass2 = TRUE;
+
+    /* Give structure its magic number */
+    jbrb_struct.magic = H5C2__H5C2_JBRB_T_MAGIC;
+
+    /* setup the file name */
+    if ( pass2 ) {
+
+        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, sizeof(filename))
+             == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "h5_fixname() failed";
+
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 1 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Initialize H5C2_jbrb_t structure. This call should SUCCEED. */
+    if ( pass2 ) {
+
+       	result = H5C2_jb__init(/* H5C2_jbrb_t */            &jbrb_struct, 
+                               /* HDF5 file name */         HDF5_FILE_NAME,
+                               /* journal file name */      filename, 
+                               /* Buffer size */            4000, 
+                               /* Number of Buffers */      3, 
+                               /* Use Synchronois I/O */    FALSE, 
+                               /* human readable journal */ TRUE);
+
+        if ( result != SUCCEED) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb_init failed";
+
+       	} /* end if */
+
+    } /* end if */
+	
+    if ( show_progress ) /* 2 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Start transaction 2. This should FAIL because transaction 1 has
+       not occurred yet. Ensure that it fails, and flag an error if it 
+       does not. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t   */  &jbrb_struct, 
+                                        /* Transaction # */  2)
+           == SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__start_transaction should have failed";
+
+	} /* end if */
+
+    } /* end if */ 
+
+    if ( show_progress ) /* 3 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* End transaction 1. This should FAIL because transaction 1 has
+       not started yet. Ensure that it fails, and flag an error if it 
+       does not. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__end_transaction(/* H5C2_jbrb_t   */  &jbrb_struct, 
+                                      /* Transaction # */  1)
+           == SUCCEED ) {
+        
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__end_transaction should have failed";
+ 
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 4 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Attempt to write a journal entry before transaction has started..
+       This should FAIL because transaction 1 has not started yet. Ensure 
+       that it fails, and flag an error if it does not. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t   */  &jbrb_struct, 
+                                    /* Transaction # */  1,
+                                    /* Base Address  */  (haddr_t)123456789, 
+                                    /* Length        */  16, 
+                                    /* Body          */  "This should fail")
+           == SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__journal_entry should have failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 5 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Start transaction 1. This should SUCCEED. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t   */  &jbrb_struct, 
+                                        /* Transaction # */  1)
+           != SUCCEED ) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5C2_jb__start_transaction failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 6 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Attempt to start transaction 1 again. This should FAIL because 
+       transaction 1 is already open. Ensure that it fails, and flag an
+       error if it does not. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t   */  &jbrb_struct, 
+                                        /* Transaction # */  1)
+           == SUCCEED ) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5C2_jb__start_transaction should have failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 7 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Attempt to end transaction 1. This should FAIL because no 
+       journal entry has been written under this transaction. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__end_transaction(/* H5C2_jbrb_t   */  &jbrb_struct, 
+                                      /* Transaction # */  1)
+           == SUCCEED ) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5C2_jb__end_transaction should have failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 8 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Attempt to write a journal entry into the wrong transaction number.
+       This should FAIL because specified transaction number isn't in 
+       progress. Ensure that it fails, and flag an error if it does not. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t   */  &jbrb_struct, 
+                                    /* Transaction # */  2,
+                                    /* Base Address  */  (haddr_t)123456789, 
+                                    /* Length        */  16, 
+                                    /* Body          */  "This should fail")
+           == SUCCEED ) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5C2_jb__journal_entry should have failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 9 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Write a journal entry during transaction 1. This should SUCCEED. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t   */  &jbrb_struct, 
+                                    /* Transaction # */  1,
+                                    /* Base Address  */  (haddr_t)123456789, 
+                                    /* Length        */  51, 
+                                    /* Body          */  "This is the first transaction during transaction 1.")
+           != SUCCEED ) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5C2_jb__journal_entry failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 10 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Attempt to flush buffers. This should FAIL because a transaction
+       is still in progress. Ensure that it fails, and flag an error
+       if it does not. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__flush(/* H5C2_jbrb_t */  &jbrb_struct) 
+             == SUCCEED ) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5C2_jb__flush should have failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 11 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* End transaction 1. This should SUCCEED. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__end_transaction(/* H5C2_jbrb_t   */  &jbrb_struct, 
+                                      /* Transaction # */  1)
+           != SUCCEED ) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5C2_jb__end_transaction failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 12 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Attempt to start transaction 1 again. This should FAIL because
+       transaction 1 has already occurred. Ensure that it fails, and flag
+       an error if it does not. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t   */  &jbrb_struct, 
+                                        /* Transaction # */  1)
+           == SUCCEED ) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5C2_jb__start_transaction should have failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 13 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Start transaction 2. This should SUCCEED.*/
+    if ( pass2 ) {
+
+	if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t   */  &jbrb_struct, 
+                                        /* Transaction # */  2)
+           != SUCCEED ) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5C2_jb__start_transaction failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 14 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Write a journal entry during transaction 2. This should SUCCEED. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t   */  &jbrb_struct, 
+                                    /* Transaction # */  2,
+                                    /* Base Address  */  (haddr_t)7465, 
+                                    /* Length        */  51, 
+                                    /* Body          */  "This is the first transaction during transaction 2!")
+           != SUCCEED ) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5C2_jb__journal_entry failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 15 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Write a journal entry during transaction 2. This should SUCCEED. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t   */  &jbrb_struct, 
+                                    /* Transaction # */  2,
+                                    /* Base Address  */  (haddr_t)123456789, 
+                                    /* Length        */  60, 
+                                    /* Body          */  "... And here's your second transaction during transaction 2.")
+           != SUCCEED ) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5C2_jb__journal_entry failed";
+ 
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 16 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* End transaction 2. This should SUCCEED. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__end_transaction(/* H5C2_jbrb_t   */  &jbrb_struct, 
+                                      /* Transaction # */  2)
+           != SUCCEED ) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5C2_jb__end_transaction failed";
+  
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 17 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Attempt to truncate the journal file. This should FAIL because the
+       journal buffers have not been flushed yet. Ensure that it fails, and
+       flag and error if it does not. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__trunc(/* H5C2_jbrb_t */  &jbrb_struct) 
+           == SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__trunc should have failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 18 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Attempt to take down the ring buffer. This should FAIL because the 
+       journal buffers have not been flushed yet. Ensure that it fails, and
+       flag and error if it does not. */
+    if ( pass2 ) {
+
+	if (H5C2_jb__takedown(/* H5C2_jbrb_t */  &jbrb_struct) 
+           == SUCCEED) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5C2_jb__takedown should have failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 19 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Flush the journal buffers. This should SUCCEED. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__flush(/* H5C2_jbrb_t */  &jbrb_struct) 
+           != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__flush failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 20 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Attempt to take down the ring buffer. This should FAIL because the 
+       journal file has not been truncated. Ensure that it fails, and
+       flag and error if it does not. */
+    if ( pass2 ) {
+
+	if (H5C2_jb__takedown(/* H5C2_jbrb_t */  &jbrb_struct) 
+           == SUCCEED) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5C2_jb__takedown should have failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 21 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Truncate the journal file. This should SUCCEED. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__trunc(/* H5C2_jbrb_t */  &jbrb_struct) 
+           != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__trunc failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 22 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Take down the journal file. This should SUCCEED. */
+    if ( pass2 ) {
+
+	if (H5C2_jb__takedown(/* H5C2_jbrb_t */  &jbrb_struct) 
+           != SUCCEED) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5C2_jb__takedown failed";
+ 
+	} /* end if */
+
+   } /* end if */
+
+    if ( show_progress ) /* 23 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* report pass / failure information */
+    if ( pass2 ) { PASSED(); } else { H5_FAILED(); }
+
+    if ( ! pass2 ) {
+
+	failures2++;
+        HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
+                  fcn_name, failure_mssg2);
+
+    }
+
+    return;
+
+} /* end check_legal_calls */
+
+
+
+/***************************************************************************
+ * Function: 	check_transaction_tracking
+ *
+ * Purpose:  	Verify that the ring buffer successfully tracks when
+ *              transactions make it to disk. 
+ *
+ * Return:      void
+ *
+ * Programmer: 	Mike McGreevy <mcgreevy@hdfgroup.org>
+ *              Tuesday, February 26, 2008
+ * 
+ **************************************************************************/
+static void 
+check_transaction_tracking(void)
+{
+    const char * fcn_name = "check_transaction_tracking(): ";
+    char filename[512];
+    int i;
+    herr_t result;
+    H5C2_jbrb_t jbrb_struct;
+    hbool_t show_progress = FALSE;
+    int32_t checkpoint = 1;
+    int expected_tval[12];
+
+    TESTING("journal file transaction tracking");
+
+    pass2 = TRUE;
+
+    /* setup the file name */
+    if ( pass2 ) {
+
+        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, sizeof(filename))
+             == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "h5_fixname() failed";
+
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 1 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Give structure its magic number */
+    jbrb_struct.magic = H5C2__H5C2_JBRB_T_MAGIC;
+
+    /* ===================================================
+     * First ring buffer configuration.
+     * 4 Buffers, each size 250.
+     * Writing transactions of size 100.
+     * Test cases: 
+     *     - writing multiple transactions in each buffer
+     *     - writing end transaction message to exact end
+     *       of a journal buffer, as well as the exact end
+     *       of the ring buffer.
+     * =================================================== */
+
+    /* Initialize H5C2_jbrb_t structure. */
+    if ( pass2 ) {
+
+       	result = H5C2_jb__init(/* H5C2_jbrb_t */            &jbrb_struct, 
+                               /* HDF5 file name */         HDF5_FILE_NAME,
+                               /* journal file name */      filename, 
+                               /* Buffer size */            250, 
+                               /* Number of Buffers */      4, 
+                               /* Use Synchronois I/O */    FALSE, 
+                               /* human readable journal */ TRUE);
+
+        if ( result != SUCCEED) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb_init failed";
+
+       	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 2 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Flush the journal buffers. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__flush(/* H5C2_jbrb_t */  &jbrb_struct) 
+           != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__flush failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 3 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Write journal entries and verify that the transactions that get to
+       disk are accurately reported after each write. The following test the
+       case where multiple journal entries reside in each buffer before a flush
+       occurs. Also, the case when a transaction ends on a buffer boundary
+       is also tested. */
+
+    /* set up array of expected transaction values on disk */
+    expected_tval[1] = 0;
+    expected_tval[2] = 0;
+    expected_tval[3] = 2;
+    expected_tval[4] = 2;
+    expected_tval[5] = 5;
+    expected_tval[6] = 5;
+    expected_tval[7] = 5;
+    expected_tval[8] = 7;
+    expected_tval[9] = 7;
+    expected_tval[10] = 10;
+
+    /* write 20 messages and verify that expected values are as indicated in
+       the expected_tval array */
+    for (i = 1; i < 11; i++) {
+
+        write_verify_trans_num(/* H5C2_jbrb_t   */ &jbrb_struct, 
+                           /* transaction num */ (unsigned long)i, 
+                           /* expected trans */(unsigned long)expected_tval[i]);
+
+    } /* end for */
+
+    if ( show_progress ) /* 4 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Flush the journal buffers. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__flush(/* H5C2_jbrb_t */  &jbrb_struct) 
+           != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__flush failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    /* Truncate the journal file. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__trunc(/* H5C2_jbrb_t */  &jbrb_struct) 
+           != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__trunc failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    /* Take down the journal file. */
+    if ( pass2 ) {
+
+	if (H5C2_jb__takedown(/* H5C2_jbrb_t */  &jbrb_struct) 
+           != SUCCEED) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5C2_jb__takedown failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 5 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* ===================================================
+     * Second ring buffer configuration
+     * 4 Buffers, each size 100.
+     * Writing transactions of size 100.
+     * Test cases: 
+     *     - end transaction messages appear on buffer
+     *       boundaries.
+     * =================================================== */
+
+    /* Initialize H5C2_jbrb_t structure. */
+    if ( pass2 ) {
+
+       	result = H5C2_jb__init(/* H5C2_jbrb_t */            &jbrb_struct, 
+                               /* HDF5 file name */         HDF5_FILE_NAME,
+                               /* journal file name */      filename, 
+                               /* Buffer size */            100, 
+                               /* Number of Buffers */      4, 
+                               /* Use Synchronois I/O */    FALSE, 
+                               /* human readable journal */ TRUE);
+
+        if ( result != SUCCEED) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb_init failed";
+
+       	} /* end if */
+
+    } /* end if */
+
+    /* Flush the journal buffers. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__flush(/* H5C2_jbrb_t */  &jbrb_struct) 
+           != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__flush failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 6 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Write journal entries and verify that the transactions that get to
+       disk are accurately reported after each write. The following tests the
+       case where end transaction messages hit exactly at the end of the 
+       ring buffer. */
+    for (i=1; i<20; i++) {
+
+        write_verify_trans_num(/* H5C2_ujbrb_t */&jbrb_struct, 
+                               /* transaction num */(unsigned long)i, 
+                               /* expected trans on disk */(unsigned long)i);
+
+    } /* end for */
+
+    if ( show_progress ) /* 7 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Flush the journal buffers. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__flush(/* H5C2_jbrb_t */  &jbrb_struct) 
+           != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__flush failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    /* Truncate the journal file. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__trunc(/* H5C2_jbrb_t */  &jbrb_struct) 
+           != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__trunc failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    /* Take down the journal file. */
+    if ( pass2 ) {
+
+	if (H5C2_jb__takedown(/* H5C2_jbrb_t */  &jbrb_struct) 
+           != SUCCEED) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5C2_jb__takedown failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    /* ===================================================
+     * Third ring buffer configuration
+     * 10 Buffers, each size 30.
+     * Writing transactions of size 100.
+     * Test cases: 
+     *     - end transaction messages start in one buffer
+     *       and end in the following buffer.
+     *     - end transaction messages start in the last 
+     *       buffer and loop around to the first buffer.
+     *     - multiple buffers are filled between end 
+     *       transaction messages.
+     * =================================================== */
+
+    /* Initialize H5C2_jbrb_t structure. */
+    if ( pass2 ) {
+
+       	result = H5C2_jb__init(/* H5C2_jbrb_t */            &jbrb_struct, 
+                               /* HDF5 file name */         HDF5_FILE_NAME,
+                               /* journal file name */      filename, 
+                               /* Buffer size */            30, 
+                               /* Number of Buffers */      10, 
+                               /* Use Synchronois I/O */    FALSE, 
+                               /* human readable journal */ TRUE);
+
+        if ( result != SUCCEED) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb_init failed";
+
+       	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 8 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Flush the journal buffers. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__flush(/* H5C2_jbrb_t */  &jbrb_struct) 
+           != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__flush failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 9 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Write journal entries and verify that the transactions that get to
+       disk are accurately reported after each write. The following tests the
+       case where end transaction messages start in one buffer and end in
+       another buffer. Also tests the case where one transaction ends several
+       buffers ahead of the next transaction end. */
+    write_verify_trans_num(&jbrb_struct, 1, 0); /* 1 in bufs, 0 on disk */
+    write_verify_trans_num(&jbrb_struct, 2, 1); /* 2 in bufs, 1 on disk */
+    write_verify_trans_num(&jbrb_struct, 3, 3); /* nothing in bufs, 3 on disk */
+    H5C2_jb__write_to_buffer(&jbrb_struct, 10, "XXXXXXXXX\n", 0, 0);   
+    write_verify_trans_num(&jbrb_struct, 4, 3); /* 1 in bufs, 0 on disk */
+    write_verify_trans_num(&jbrb_struct, 5, 5); /* 2 in bufs, 1 on disk */
+    write_verify_trans_num(&jbrb_struct, 6, 5); /* nothing in bufs, 3 on disk */
+    H5C2_jb__write_to_buffer(&jbrb_struct, 10, "XXXXXXXXX\n", 0, 0);   
+    write_verify_trans_num(&jbrb_struct, 7, 7); /* 1 in bufs, 0 on disk */
+    write_verify_trans_num(&jbrb_struct, 8, 7); /* 2 in bufs, 1 on disk */
+    write_verify_trans_num(&jbrb_struct, 9, 8); /* nothing in bufs, 3 on disk */
+    H5C2_jb__write_to_buffer(&jbrb_struct, 10, "XXXXXXXXX\n", 0, 0);   
+    write_verify_trans_num(&jbrb_struct, 10, 9); /* 1 in bufs, 0 on disk */
+    write_verify_trans_num(&jbrb_struct, 11, 10); /* 2 in bufs, 1 on disk */
+    write_verify_trans_num(&jbrb_struct, 12, 12); /* nothing in buf, 3 on disk */
+
+    if ( show_progress ) /* 10 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Flush the journal buffers. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__flush(/* H5C2_jbrb_t */  &jbrb_struct) 
+           != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__flush failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    /* Truncate the journal file. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__trunc(/* H5C2_jbrb_t */  &jbrb_struct) 
+           != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__trunc failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    /* Take down the journal file. */
+    if ( pass2 ) {
+
+	if (H5C2_jb__takedown(/* H5C2_jbrb_t */  &jbrb_struct) 
+           != SUCCEED) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5C2_jb__takedown failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    /* ===================================================
+     * Fourth ring buffer configuration
+     * 35 Buffers, each size 1.
+     * Writing transactions of size 100.
+     * Test cases: 
+     *     - end transaction messages are longer than the 
+     *       entire ring buffer structure. note this is an
+     *       extreme corner case situation as buffer sizes
+     *       should generally be much larger than an end
+     *       transaction message.
+     * =================================================== */
+
+    /* Initialize H5C2_jbrb_t structure. */
+    if ( pass2 ) {
+
+       	result = H5C2_jb__init(/* H5C2_jbrb_t */            &jbrb_struct, 
+                               /* HDF5 file name */         HDF5_FILE_NAME,
+                               /* journal file name */      filename, 
+                               /* Buffer size */            1, 
+                               /* Number of Buffers */      35, 
+                               /* Use Synchronois I/O */    FALSE, 
+                               /* human readable journal */ TRUE);
+
+        if ( result != SUCCEED) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb_init failed";
+
+       	} /* end if */
+
+    } /* end if */
+
+    /* Flush the journal buffers. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__flush(/* H5C2_jbrb_t */  &jbrb_struct) 
+           != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__flush failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 11 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Write journal entries and verify that the transactions that get to
+       disk are accurately reported after each write. The following tests the
+       case where end transaction messages take up several journal buffers, and
+       ensures that the trans_tracking array is properly propogated */
+    for (i=1; i<5; i++) {
+
+        write_verify_trans_num(/* H5C2_jbrb_t */  &jbrb_struct, 
+                               /* transaction num */  (unsigned long)i, 
+                               /* expected returned trans */  (unsigned long)i);
+
+    } /* end for */
+
+    if ( show_progress ) /* 12 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* Flush the journal buffers. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__flush(/* H5C2_jbrb_t */  &jbrb_struct) 
+           != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__flush failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    /* Truncate the journal file. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__trunc(/* H5C2_jbrb_t */  &jbrb_struct) 
+           != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__trunc failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    /* Take down the journal file. */
+    if ( pass2 ) {
+
+	if (H5C2_jb__takedown(/* H5C2_jbrb_t */  &jbrb_struct) 
+           != SUCCEED) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5C2_jb__takedown failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 13 */ 
+        HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+                  checkpoint++, (int)pass2);
+
+    /* report pass / failure information */
+    if ( pass2 ) { PASSED(); } else { H5_FAILED(); }
+
+    if ( ! pass2 ) {
+
+	failures2++;
+        HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
+                  fcn_name, failure_mssg2);
+
+    }
+
+    return;
+
+} /* end check_transaction_tracking */
+
+
+
+/***************************************************************************
+ * Function: 	write_verify_trans_num
+ *
+ * Purpose:  	Helper function for check_transaction_tracking test. Writes a 
+ *              journal entry of length 100 into the ring buffer, provided that
+ *              the transaction number of the journal entry is less than 1000, 
+ *              and then verifies that the recorded last transaction on disk is 
+ *              as specified in verify_val. 
+ *
+ * Return:      void
+ *
+ * Programmer: 	Mike McGreevy <mcgreevy@hdfgroup.org>
+ *              Thursday, February 28, 2008
+ * 
+ **************************************************************************/
+static void
+write_verify_trans_num(H5C2_jbrb_t * struct_ptr, 
+                       unsigned long trans_num, 
+                       unsigned long verify_val)
+{
+    unsigned long trans_verify;
+    
+    /* Write an entire transaction. (start, journal entry, end).
+     * As long as the supplied transaction number is less than 1000,
+     * the total length of the transaction will be 100. For cases where
+     * the transaction number increases in number of digits, the amount
+     * of data in the body is reduced to account for the extra trans digits,
+     * so transactions remain at size 100. Note that data is converted
+     * into hex, so reducing input by one character reduces journal entry 
+     * by three (two hex characters and a space).
+     */  
+    if ( pass2 ) {
+        
+       	if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t  */  struct_ptr, 
+                                        /* trans number */  trans_num)
+           != SUCCEED) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__start_transaction failed";
+
+       	} /* end if */
+
+
+        if (trans_num < 10) {
+
+	        if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t   */  struct_ptr, 
+                                            /* Transaction # */  trans_num,
+                                            /* Base Address  */  (haddr_t)16, 
+                                            /* Length        */  9, 
+                                            /* Body          */  "XXXXXXXXX")
+                   != SUCCEED ) {
+
+	            pass2 = FALSE;
+	            failure_mssg2 = "H5C2_jb__journal_entry failed";
+
+	        } /* end if */
+
+        } /* end if */
+
+        else if (trans_num < 100) {
+
+	        if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t   */  struct_ptr, 
+                                            /* Transaction # */  trans_num,
+                                            /* Base Address  */  (haddr_t)16, 
+                                            /* Length        */  8, 
+                                            /* Body          */  "XXXXXXXX")
+                   != SUCCEED ) {
+
+	            pass2 = FALSE;
+	            failure_mssg2 = "H5C2_jb__journal_entry failed";
+
+	        } /* end if */
+
+        } /* end else if */
+
+        else {
+
+	        if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t   */  struct_ptr, 
+                                            /* Transaction # */  trans_num,
+                                            /* Base Address  */  (haddr_t)16, 
+                                            /* Length        */  7, 
+                                            /* Body          */  "XXXXXXX")
+                   != SUCCEED ) {
+
+	            pass2 = FALSE;
+	            failure_mssg2 = "H5C2_jb__journal_entry failed";
+
+	        } /* end if */
+
+        } /* end else */
+
+	if ( H5C2_jb__end_transaction(/* H5C2_jbrb_t   */  struct_ptr, 
+                                      /* Transaction # */  trans_num)
+           != SUCCEED ) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5C2_jb__end_transaction failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    /* Make sure the last transaction that's on disk is as expected. */
+    if ( pass2 ) {
+
+        if ( H5C2_jb__get_last_transaction_on_disk(
+                                              /* H5C2_jbrb_t  */  struct_ptr,
+                                              /* trans number */  &trans_verify)
+           != SUCCEED ) {
+            
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__get_last_transaction_on_disk failed";
+
+        } /* end if */
+
+        if ( trans_verify != verify_val) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__get_last_transaction_on_disk returned the wrong transaction number!";
+
+        } /* end if */
+
+    } /* end if */
+
+    return;
+
+} /* end write_verify_trans_num */
+
+
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -1105,9 +2730,12 @@ main(void)
     express_test = GetTestExpress();
 
     check_buffer_writes();
-
+    check_legal_calls();
+    check_message_format();
+    check_transaction_tracking();
     check_superblock_extensions();
 
     return(failures2);
 
 } /* main() */
+

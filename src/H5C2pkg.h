@@ -130,13 +130,21 @@
  * 			ring buffer needs to switch to writing to the next
  *			journal buffer.
  *
- * rb_free_space:	The amount of space remaining in the entire ring
- * 			buffer. This is needed to determine if writes to
- *			the ring buffer need to loop around to the top of
- *			the chunk of allocated memory.
+ * rb_space_to_rollover: The amount of space left at the end of the ring 
+ *                      buffer, starting at the head pointer, and ending at
+ *                      the end of the ring buffer's allocate space. This
+ *                      is used to keep track of when a rollover to the start
+ *                      of the ring buffer must occur.
+ *
+ * rb_free_space:       The amount of unused space in the ring buffer.
  * 
  * head: 		A pointer to the location in the active journal buffer
  *			that is to be written to.
+ *
+ * trans_tracking:      An array of size num_bufs that reports the last
+ *                      transaction successfully written into each buffer. This
+ *                      is used when the buffers are flushed to determine which
+ *                      is the last transaction successfully on disk.
  *
  * buf:			Array of char pointers to each journal buffer in the
  *			ring buffer. This is allocated as a single chunk of 
@@ -170,9 +178,10 @@ struct H5C2_jbrb_t
 	char *		hdf5_file_name;
 	hbool_t 	header_present;
 	size_t 		cur_buf_free_space;
+	size_t		rb_space_to_rollover;
 	size_t		rb_free_space;
 	char * 		head;
-	unsigned long	(*trans_on_disk_record)[];
+	unsigned long	(*trans_tracking)[];
 	char 		*((*buf)[]);
 };
 
