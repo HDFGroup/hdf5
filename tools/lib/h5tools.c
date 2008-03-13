@@ -538,29 +538,32 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
                          hsize_t nelmts, hid_t type, void *_mem)
 {
     unsigned char *mem = (unsigned char*)_mem;
-    hsize_t  i;  /*element counter  */
-    char  *s, *section; /*a section of output  */
-    int   secnum;  /*section sequence number */
-    size_t  size;  /*size of each datum  */
-    size_t  ncols = 80; /*available output width */
-    h5tools_str_t buffer;  /*string into which to render */
-    int   multiline; /*datum was multiline  */
-    hsize_t  curr_pos;  /* total data element position   */
-    int                 elmt_counter = 0;/*counts the # elements printed.
-                                          *I (ptl?) needed something that
-                                          *isn't going to get reset when a new
-                                          *line is formed. I'm going to use
-                                          *this var to count elements and
-                                          *break after we see a number equal
-                                          *to the ctx->size_last_dim.   */
+    hsize_t       i;          /*element counter  */
+    char          *s;
+    char          *section;   /*a section of output  */
+    int           secnum;     /*section sequence number */
+    size_t        size;       /*size of each datum  */
+    size_t        ncols = 80; /*available output width */
+    h5tools_str_t buffer;     /*string into which to render */
+    int           multiline;  /*datum was multiline  */
+    hsize_t       curr_pos;   /* total data element position   */
+    int           elmt_counter = 0;/*counts the # elements printed.
+                                    *I (ptl?) needed something that
+                                    *isn't going to get reset when a new
+                                    *line is formed. I'm going to use
+                                    *this var to count elements and
+                                    *break after we see a number equal
+                                    *to the ctx->size_last_dim.   */
 
      /* binary dump */
-    if(bin_output) {
+    if(bin_output) 
+    {
         do_bin_output(stream, nelmts, type, _mem);
         bin_output = 0;
     } /* end if */
-    else {
-        /* Setup */
+    else 
+    {
+        /* setup */
         HDmemset(&buffer, 0, sizeof(h5tools_str_t));
         size = H5Tget_size(type);
 
@@ -613,7 +616,7 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
             }
 
             /*
-             * We need to break after each row_counter of a dimension---> we should
+             * We need to break after each row of a dimension---> we should
              * break at the end of the each last dimension well that is the
              * way the dumper did it before
              */
