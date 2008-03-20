@@ -76,6 +76,7 @@ Attribute::Attribute(const hid_t existing_id) : AbstractDs(existing_id) {}
 //--------------------------------------------------------------------------
 void Attribute::write( const DataType& mem_type, const void *buf ) const
 {
+   // Call C function H5Awrite to write data in 'buf' to the attribute
    herr_t ret_value = H5Awrite( id, mem_type.getId(), buf );
    if( ret_value < 0 )
    {
@@ -98,6 +99,7 @@ void Attribute::write( const DataType& mem_type, const H5std_string& strg ) cons
    const char* strg_C;
    strg_C = strg.c_str();  // strg_C refers to the contents of strg as a C-str
 
+   // Call C function H5Awrite to write the character string to the attribute
    herr_t ret_value = H5Awrite( id, mem_type.getId(), &strg_C );
    if( ret_value < 0 )
    {
@@ -115,10 +117,11 @@ void Attribute::write( const DataType& mem_type, const H5std_string& strg ) cons
 //--------------------------------------------------------------------------
 void Attribute::read( const DataType& mem_type, void *buf ) const
 {
+   // Call C function H5Aread to read attribute data into 'buf'
    herr_t ret_value = H5Aread( id, mem_type.getId(), buf );
    if( ret_value < 0 )
    {
-      throw AttributeIException("Attribute::read", "H5Aread  failed");
+      throw AttributeIException("Attribute::read", "H5Aread failed");
    }
 }
 
@@ -130,20 +133,37 @@ void Attribute::read( const DataType& mem_type, void *buf ) const
 ///\param	strg      - IN: Buffer for read string
 ///\exception	H5::AttributeIException
 // Programmer	Binh-Minh Ribler - Apr, 2003
+// Modification
+//	Mar 2008
+//		Corrected a misunderstanding that H5Aread would allocate 
+//		space for the buffer.  Obtained the attribute size and 
+//		allocated memory properly. - BMR
 //--------------------------------------------------------------------------
 void Attribute::read( const DataType& mem_type, H5std_string& strg ) const
 {
-   char* strg_C;  // temporary C-string for C API
+   // Get the attribute size and allocate temporary C-string for C API
+   hsize_t attr_size = H5Aget_storage_size(id);
+   if (attr_size <= 0)
+   {
+      throw AttributeIException("Attribute::read", "Unable to get attribute size before reading");
+   }
+   char* strg_C = new char [attr_size+1];
+   if (strg_C == NULL)
+   {
+      throw AttributeIException("Attribute::read", "Unable to allocate buffer to read the attribute");
+   }
 
-   // call C API to get the attribute string of chars
-   herr_t ret_value = H5Aread( id, mem_type.getId(), &strg_C);
-
+   // Call C API to get the attribute data, a string of chars
+   herr_t ret_value = H5Aread(id, mem_type.getId(), &strg_C);
    if( ret_value < 0 )
    {
       throw AttributeIException("Attribute::read", "H5Aread failed");
    }
-   strg = strg_C;       // get 'string' from the C char*
-   HDfree(strg_C);
+
+   // Get 'string' from the C char* and release resource
+   strg_C[attr_size] = '\0';
+   strg = strg_C;
+   delete []strg_C;
 }
 
 //--------------------------------------------------------------------------
@@ -232,7 +252,6 @@ H5std_string Attribute::getName( size_t buf_size ) const
    H5std_string attr_name;
    ssize_t name_size = getName( buf_size, attr_name );
    return( attr_name );
-   // let caller catch exception if any
 }
 
 //--------------------------------------------------------------------------
@@ -246,22 +265,32 @@ H5std_string Attribute::getName( size_t buf_size ) const
 //--------------------------------------------------------------------------
 H5std_string Attribute::getName() const
 {
-   // Try with 256 characters for the name first, if the name's length
-   // returned is more than that then, read the name again with the
-   // appropriate space allocation
-   char* name_C = new char[256];  // temporary C-string for C API
-   ssize_t name_size = H5Aget_name(id, 255, name_C);
 
-   H5std_string attr_name;
-   if (name_size >= 256)
-      name_size = getName(name_size, attr_name);
+   // Try with 0 and NULL to get the name size
+   ssize_t name_size = H5Aget_name(id, 0, NULL);
+
+   // If H5Aget_name returns a negative value, raise an exception,
+   if (name_size < 0)
+   {
+      throw AttributeIException("Attribute::getName", "H5Aget_name failed with 0 and NULL");
+   }
+
+   // Allocate temporary C-string for C API
+   char* name_C = new char[name_size+1];  // temporary C-string for C API
+
+   // Calls C routine H5Aget_name again to get the name of the attribute
+   name_size = H5Aget_name(id, name_size+1, name_C);
+
+   // If H5Aget_name returns a negative value, raise an exception,
+   if (name_size < 0)
+   {
+      throw AttributeIException("Attribute::getName", "H5Aget_name failed");
+   }
 
    // otherwise, convert the C attribute name and return
-   else
-      attr_name = name_C;
-
+   H5std_string attr_name = name_C;
    delete []name_C;
-   return( attr_name );
+   return(attr_name);
 }
 
 //--------------------------------------------------------------------------
