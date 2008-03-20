@@ -407,7 +407,7 @@ END SUBROUTINE h5iget_file_id_f
 <dt><strong>Fortran90 Interface:</strong> h5iget_name_f
     <dd>
 	<pre>
-SUBROUTINE h5iget_name_f(obj_id, buf, buf_size, hdferr) 
+SUBROUTINE h5iget_name_f(obj_id, buf, buf_size, name_size, hdferr) 
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN)    :: obj_id     ! Object identifier 
   CHARACTER(LEN=*), INTENT(OUT) :: buf        ! Buffer to hold object name 
@@ -731,7 +731,7 @@ Describes HDF5 Release 1.6.7, January 2008
 
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 12 October 2006");
+document.writeln("Last modified: 20 March 2008");
 -->
 </SCRIPT>
 
