@@ -89,6 +89,20 @@ typedef enum H5FD_mem_t {
 #define H5FD_MEM_SOHM_TABLE     H5FD_MEM_OHDR
 #define H5FD_MEM_SOHM_INDEX     H5FD_MEM_BTREE
 
+/* Map metadata journaling configuration block to raw for now, as it is of
+ * arbitrary size, and the metadata cache will be managing it directly, 
+ * without passing it through the metadata cache proper.  
+ *
+ * 						JRM -- 3/11/08
+ *
+ * Quincey:  I suspect this is bogus.  However, I gather that adding a 
+ *           new memory type is a bit of a bother, so I'm trying to avoid
+ *           it until I talk to you.  Please let me know  what you think
+ *           I should do here.
+ *                                                 -- JRM
+ */
+#define H5FD_MEM_MDJCONFIG 	H5FD_MEM_DRAW
+
 /*
  * A free-list map which maps all types of allocation requests to a single
  * free list.  This is useful for drivers that don't really care about

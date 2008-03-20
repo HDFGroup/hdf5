@@ -36,12 +36,743 @@
  *-------------------------------------------------------------------------
  */
 
-#define H5C2_PACKAGE            /*suppress error about including H5C2pkg  */
+#define H5F_PACKAGE             /* suppress error about including H5Fpkg  */
+#define H5C2_PACKAGE            /* suppress error about including H5C2pkg */
 
 #include "H5private.h"          /* Generic Functions                    */
 #include "H5Eprivate.h"         /* Error handling                       */
 #include "H5MMprivate.h"        /* Memory management                    */
+#include "H5MFprivate.h"        /* File memory management               */
+#include "H5Fpkg.h"		/* File access                          */
 #include "H5C2pkg.h"            /* Cache                                */
+
+
+/**************************************************************************/
+/************************* journaling code proper *************************/
+/**************************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C2__begin_transaction
+ *
+ * Purpose:     Handle book keeping for the beginning of a transaction, and
+ *              return the transaction ID assigned to the transaction in 
+ *              *trans_num_ptr.  
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  John Mainzer
+ *              March 18, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/* This function is just a shell for now. -- JRM */
+
+herr_t
+H5C2__begin_transaction(H5C2_t * cache_ptr,
+		        uint64_t * trans_num_ptr)
+{
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5C2__begin_transaction, FAIL)
+    
+    HDassert( cache_ptr != NULL );
+    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+
+    /* we need at least one error to keep the macros happy */
+    if ( trans_num_ptr == NULL ) {
+
+	HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "trans_num_ptr NULL on entry.")
+    }
+
+    *trans_num_ptr = 1024;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C2__begin_transaction() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C2__end_transaction
+ *
+ * Purpose:     Handle book keeping for the end of a transaction.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  John Mainzer
+ *              March 18, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/* This function is just a shell for now. -- JRM */
+
+herr_t
+H5C2__end_transaction(H5C2_t * cache_ptr,
+                      uint64_t trans_num)
+{
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5C2__end_transaction, FAIL)
+    
+    HDassert( cache_ptr != NULL );
+    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+
+    /* we need at least one error to keep the macros happy */
+    if ( trans_num != 1024 ) {
+
+	HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "unexpected transaction number.")
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C2__end_transaction() */
+
+
+
+/**************************************************************************/
+/***************** journal config block management code *******************/
+/**************************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C2__create_journal_config_block()
+ *
+ * Purpose:     Given a string containing a journal file name and a pointer
+ * 		to the associated instance of H5C2_t, allocate a journal
+ * 		configuration block, write it to file, and update the 
+ * 		instance of H5C2_t.
+ *
+ * 		Note that the method assumes that mdj_conf_block_addr is 
+ * 		NULL on entry.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  John Mainzer
+ *              March 7, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5C2_create_journal_config_block(H5C2_t * cache_ptr,
+                                 hid_t dxpl_id,
+                                 const char * journal_file_name_ptr)
+{
+    size_t path_len = 0;
+    hsize_t block_len = 0;
+    haddr_t block_addr = HADDR_UNDEF;
+    void * block_ptr = NULL;
+    uint8_t version = H5C2__JOURNAL_CONF_VERSION;
+    uint8_t * p = NULL;
+    char * jfn_ptr = NULL;
+    uint32_t chksum;
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5C2_create_journal_config_block, FAIL)
+
+    HDassert( cache_ptr );
+    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->f != NULL );
+
+    if ( cache_ptr->mdj_conf_block_ptr != NULL ) {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+		        "cache_ptr->mdj_conf_block_ptr != NULL on entry?!?")
+    } 
+
+    HDassert( journal_file_name_ptr != NULL );
+
+    path_len = strlen(journal_file_name_ptr) + 1;
+
+    HDassert( path_len > 0 );
+
+    block_len = H5C2__JOURNAL_BLOCK_LEN(path_len, cache_ptr->f);
+
+    block_ptr = (void *)H5MM_malloc((size_t)block_len);
+
+    if ( block_ptr == NULL ) {
+
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                    "allocation of in core journal config block failed.");
+    }
+
+    p = (uint8_t *)block_ptr;
+
+    /* copy the signature into the config block */
+    HDmemcpy(p, H5C2__JOURNAL_CONF_MAGIC, H5C2__JOURNAL_MAGIC_LEN);
+    p += H5C2__JOURNAL_MAGIC_LEN;
+
+    /* copy the version into the config block */
+    HDmemcpy(p, &version, 1);
+    p++;
+
+    /* copy the length of the journal file path into the config block */
+    H5F_ENCODE_LENGTH(cache_ptr->f, p, path_len);
+
+    /* copy the path to the journal file into the config block, including 
+     * the terminalting null.  Before we do so, make note of p, as its 
+     * value will be the address of our copy of the journal file path.
+     */
+    jfn_ptr = (char *)p;
+    HDmemcpy(p, journal_file_name_ptr, path_len + 1);
+    p += path_len + 1;
+
+    HDassert( strcmp(jfn_ptr, journal_file_name_ptr) == 0 );
+
+    /* compute and save checksum */
+    chksum = H5_checksum_metadata(block_ptr, (size_t)(block_len - 4), 0);
+    UINT32ENCODE(p, chksum);
+
+    HDassert( (unsigned)(p - (uint8_t *)block_ptr) == block_len );
+
+
+    /* having created an in core image of the journaling configuration block,
+     * we must now allocate space for it in file, and write it to disk.
+     */
+
+    block_addr = H5MF_alloc(cache_ptr->f,
+		            H5FD_MEM_MDJCONFIG,
+			    dxpl_id,
+			    block_len);
+
+    if ( block_addr == HADDR_UNDEF ) {
+
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                    "allocation of file journal config block failed.");
+    }
+
+    /* now write the block to disk -- note that we don't sync.  We will
+     * have to do that later.
+     */
+     if ( H5F_block_write(cache_ptr->f, H5FD_MEM_MDJCONFIG, block_addr,
+                          (size_t)block_len, dxpl_id, block_ptr) < 0 )
+     {
+         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                     "Can't write metadata journaling config block to file.")
+     }
+
+     /* finally, if we we get this far, update the cache data structure to
+      * record the metadata journaling configuration block.
+      */
+     cache_ptr->mdj_file_name_ptr = jfn_ptr;
+     cache_ptr->mdj_conf_block_addr = block_addr;
+     cache_ptr->mdj_conf_block_len = block_len;
+     cache_ptr->mdj_conf_block_ptr = block_ptr;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC2__create_journal_config_block() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C2__discard_journal_config_block()
+ *
+ * Purpose:     Free the file and core space allocated to the metadata 
+ *              journaling configuration block, and re-set all the associated
+ *              fields in the cache's instance of H5C2_t.
+ *
+ * 		Note that the method assumes that 
+ *
+ * 			struct_ptr->mdj_file_name_ptr,
+ * 			struct_ptr->mdj_conf_block_addr,
+ * 			struct_ptr->mdj_conf_block_len, and
+ * 			struct_ptr->mdj_conf_block_ptr
+ * 		
+ * 		are all set up for the current metadata journaling 
+ * 		configuration block on entry.  On successful exit, these
+ * 		fields will all be reset to their initial values.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  John Mainzer
+ *              March 7, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5C2_discard_journal_config_block(H5C2_t * cache_ptr,
+                                  hid_t dxpl_id)
+{
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5C2_discard_journal_config_block, FAIL)
+
+    HDassert( cache_ptr );
+    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->f != NULL );
+
+    if ( ( cache_ptr->mdj_conf_block_addr == HADDR_UNDEF ) ||
+         ( cache_ptr->mdj_conf_block_len == 0 ) ||
+	 ( cache_ptr->mdj_conf_block_ptr == NULL ) ||
+	 ( cache_ptr->mdj_file_name_ptr == NULL ) ) {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+		        "metadata journaling config block undefined on entry?!?")
+    } 
+
+    if ( H5MF_xfree(cache_ptr->f, H5FD_MEM_MDJCONFIG, dxpl_id, 
+		    cache_ptr->mdj_conf_block_addr,
+		    cache_ptr->mdj_conf_block_len) < 0 ) {
+
+	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
+                    "deallocation of file journal config block failed.");
+    }
+
+    H5MM_xfree(cache_ptr->mdj_conf_block_ptr);
+
+    /* if we get this far, go ahead and null out the fields in *cache_ptr */
+    cache_ptr->mdj_conf_block_addr = HADDR_UNDEF;
+    cache_ptr->mdj_conf_block_len = 0;
+    cache_ptr->mdj_conf_block_ptr = NULL;
+    cache_ptr->mdj_file_name_ptr = NULL;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC2__discard_journal_config_block() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C2_get_journaling_in_progress()
+ *
+ * Purpose:     Query the HDF5 file to see if it is marked as having
+ * 		journaling in progress.  Update the journaling 
+ * 		configuration fields in the cache structure accordingly.
+ *
+ * 		At least initially, the purpose of this function is
+ * 		to examine a newly opened HDF5 file, and determine
+ * 		whether journaling was enabled.  If so, we can presume
+ * 		that the application crashed while journaling, and that
+ * 		we must refuse to open the file until the user runs the
+ * 		recovery utility on it.
+ *
+ * 		Hwever, this logic will be handled at a higher level.
+ * 		In this function, we just get the journaling configuration
+ * 		(if any) that has been saved in the file, and load it
+ * 		into *cache_ptr.
+ *
+ * 		Note that this function assumes that *cache_ptr has
+ * 		no journaling configuration set before the function
+ * 		is called.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  John Mainzer
+ *              March 11, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5C2_get_journaling_in_progress(H5C2_t * cache_ptr,
+                                hid_t dxpl_id)
+{
+    herr_t result;
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5C2_mark_journaling_in_progress, FAIL)
+
+    HDassert( cache_ptr );
+    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->f != NULL );
+    HDassert( cache_ptr->f->shared != NULL );
+    HDassert( ! cache_ptr->f->shared->mdc_jrnl_enabled );
+    HDassert( cache_ptr->mdj_conf_block_addr == HADDR_UNDEF );
+    HDassert( cache_ptr->mdj_conf_block_len == 0 );
+    HDassert( cache_ptr->mdj_conf_block_ptr == NULL );
+    HDassert( cache_ptr->mdj_file_name_ptr == NULL );
+
+    if ( cache_ptr->f->shared->mdc_jrnl_enabled == TRUE ) {
+	    
+        result = H5C2_load_journal_config_block(cache_ptr,
+                                                dxpl_id,
+                                                cache_ptr->mdj_conf_block_addr,
+                                                cache_ptr->mdj_conf_block_len);
+        if ( result != SUCCEED ) {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                        "H5C2_load_journal_config_block() failed.")
+	}
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC2__get_journal_config_block() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C2_load_journal_config_block()
+ *
+ * Purpose:     Given the base address and lenght of a journal configuration
+ * 		block, attempt to load it, and store it in the cache structure.
+ *
+ * 		Note that the method assumes that mdj_conf_block_addr is 
+ * 		NULL on entry.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  John Mainzer
+ *              March 11, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5C2_load_journal_config_block(H5C2_t * cache_ptr,
+                               hid_t dxpl_id,
+                               haddr_t block_addr,
+                               hsize_t block_len)
+{
+    size_t path_len = 0;
+    void * block_ptr = NULL;
+    uint8_t version;
+    uint8_t * p = NULL;
+    char * jfn_ptr = NULL;
+    uint32_t computed_chksum;
+    uint32_t read_chksum;
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5C2_load_journal_config_block, FAIL)
+
+    HDassert( cache_ptr );
+    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->f != NULL );
+
+    if ( cache_ptr->mdj_conf_block_ptr != NULL ) {
+
+       HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                   "cache_ptr->mdj_conf_block_ptr != NULL on entry?!?")
+    } 
+
+    block_ptr = (void *)H5MM_malloc((size_t)block_len);
+
+    if ( block_ptr == NULL ) {
+
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                    "allocation of in core journal config block failed.");
+    }
+
+    p = (uint8_t *)block_ptr;
+
+    /* read the metadata journaling block from file */
+    if ( H5F_block_read(cache_ptr->f, H5FD_MEM_MDJCONFIG, block_addr, 
+			(size_t)block_len, dxpl_id, block_ptr) < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "Can't read metadata journaling configuration block.")
+    }
+
+    /* verify the signature */
+    if ( HDmemcmp(p, H5C2__JOURNAL_CONF_MAGIC, H5C2__JOURNAL_MAGIC_LEN) != 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "Bad signature on metadata journaling configuration block.")
+    }
+    p += H5C2__JOURNAL_MAGIC_LEN;
+
+    /* get the version of the config block */
+    HDmemcpy(&version, p, 1);
+    p++;
+
+    if ( version != H5C2__JOURNAL_CONF_VERSION ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "Bad version on metadata journaling configuration block.")
+    }
+
+    /* get the length of the journal file path into the config block */
+    H5F_DECODE_LENGTH(cache_ptr->f, p, path_len);
+
+    /* Verify that the length matches the actual path length.  Also,
+     * make note of p, as its value will be the address of our copy of 
+     * the journal file path.
+     */
+    jfn_ptr = (char *)p;
+    if ( strlen(jfn_ptr) != path_len - 1 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "Bad path_len in metadata journaling configuration block.")
+    }
+
+    p += path_len + 1;
+
+    /* get the checksum from the block */
+    UINT32DECODE(p, read_chksum);
+
+    /* compute the actual checksum */
+    computed_chksum = 
+	    H5_checksum_metadata(block_ptr, (size_t)(block_len - 4), 0);
+
+    /* verify that the computed and read checksums match */
+    if ( computed_chksum != read_chksum ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "Bad checksum in metadata journaling configuration block.")
+    }
+
+    HDassert( (unsigned)(p - (uint8_t *)block_ptr) == block_len );
+
+     /* finally, if we we get this far, we have read the metadata journaling
+      * configuration block successfully.  Record the data in the cache 
+      * structure.
+      */
+    cache_ptr->mdj_file_name_ptr = jfn_ptr;
+    cache_ptr->mdj_conf_block_addr = block_addr;
+    cache_ptr->mdj_conf_block_len = block_len;
+    cache_ptr->mdj_conf_block_ptr = block_ptr;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC2__load_journal_config_block() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C2_mark_journaling_in_progress()
+ *
+ * Purpose:     Modify the HDF5 file to indicate that journaling is 
+ * 		in progress, and flush the file to disk.  
+ *
+ * 		The objective here is to allow us to detect the fact 
+ * 		the file was being journaled if we crash before we 
+ * 		close the file properly.
+ *
+ * 		Note that the function assumes that the file is not 
+ * 		currently marked as having journaling in progress.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  John Mainzer
+ *              March 11, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5C2_mark_journaling_in_progress(H5C2_t * cache_ptr,
+                                 hid_t dxpl_id,
+                                 const char * journal_file_name_ptr)
+{
+    herr_t result;
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5C2_mark_journaling_in_progress, FAIL)
+
+    HDassert( cache_ptr );
+    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->f != NULL );
+    HDassert( cache_ptr->f->shared != NULL );
+    HDassert( ! cache_ptr->f->shared->mdc_jrnl_enabled );
+    HDassert( cache_ptr->mdj_conf_block_addr == HADDR_UNDEF );
+    HDassert( cache_ptr->mdj_conf_block_len == 0 );
+    HDassert( cache_ptr->mdj_conf_block_ptr == NULL );
+    HDassert( cache_ptr->mdj_file_name_ptr == NULL );
+    HDassert( journal_file_name_ptr != NULL );
+
+    /* Can't journal a read only file, so verify that we are
+     * opened read/write and fail if we are not.
+     */
+    if ( (cache_ptr->f->shared->flags & H5F_ACC_RDWR) == 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "File is opened read only.")
+    }
+
+    /* first, create a metadata journaling configuration block */
+    result = H5C2_create_journal_config_block(cache_ptr,
+                                              dxpl_id,
+                                              journal_file_name_ptr);
+
+    if ( result != SUCCEED ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_create_journal_config_block() failed.")
+    }
+
+    HDassert( cache_ptr->mdj_conf_block_addr != HADDR_UNDEF );
+    HDassert( cache_ptr->mdj_conf_block_len != 0 );
+    HDassert( cache_ptr->mdj_conf_block_ptr != NULL );
+    HDassert( cache_ptr->mdj_file_name_ptr != NULL );
+
+    /* now, load the base addr and length of the configuration block
+     * into shared, and then call H5F_super_write_mdj_msg() to write
+     * the metadata journaling superblock extension message to file.
+     */
+    cache_ptr->f->shared->mdc_jrnl_enabled = TRUE;
+    cache_ptr->f->shared->mdc_jrnl_block_loc = cache_ptr->mdj_conf_block_addr;
+    cache_ptr->f->shared->mdc_jrnl_block_len = cache_ptr->mdj_conf_block_len;
+
+    if ( H5F_super_write_mdj_msg(cache_ptr->f, dxpl_id) < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5F_super_write_mdj_msg() failed.")
+    }
+
+    /* Finally, flush the file to ensure that changes made it to disk. */
+
+    /* Quincey: Two issues here:
+     *
+     * 		First, there is the simple matter of using H5Fflush().
+     * 		Given the curent plans for implementing beging/end 
+     * 		transaction, we have the problem of a flush triggering
+     * 		a transaction here -- not what we want.  We could get
+     * 		around this by calling H5F_flush(), but presently that
+     * 		function is local to H5F.c
+     *
+     * 		Second, there is the matter of the scope parameter:
+     * 		At present, I am passing H5F_SCOPE_GLOBAL here -- is 
+     * 		this appropriate?  I guess this comes down to how we 
+     * 		are going to handle journaling in the case of multiple 
+     * 		files -- a point we haven't discussed.  We should do so.
+     */
+
+    if ( H5Fflush(cache_ptr->f->file_id, H5F_SCOPE_GLOBAL) < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, "H5Fflush() failed.")
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C2_mark_journaling_in_progress() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C2_unmark_journaling_in_progress()
+ *
+ * Purpose:     Modify the HDF5 file to indicate that journaling is 
+ * 		not in progress, and flush the file to disk.  
+ *
+ * 		The objective here is to remove the messages indicating
+ * 		that the file is being journaled.  We will typically do 
+ * 		this either on file close, or if directed to cease 
+ * 		journaling.  Once these messages are removed, we will
+ * 		be able to open the file without triggering a "journaling
+ * 		in progress" failure.
+ *
+ * 		Note that the function assumes that the file is
+ * 		currently marked as having journaling in progress.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  John Mainzer
+ *              March 11, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5C2_unmark_journaling_in_progress(H5C2_t * cache_ptr,
+                                   hid_t dxpl_id)
+{
+    herr_t result;
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5C2_unmark_journaling_in_progress, FAIL)
+
+    HDassert( cache_ptr );
+    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->f != NULL );
+    HDassert( cache_ptr->f->shared != NULL );
+    HDassert( cache_ptr->f->shared->mdc_jrnl_enabled );
+    HDassert( cache_ptr->mdj_conf_block_addr != HADDR_UNDEF );
+    HDassert( cache_ptr->mdj_conf_block_len > 0 );
+    HDassert( cache_ptr->mdj_conf_block_ptr != NULL );
+    HDassert( cache_ptr->mdj_file_name_ptr != NULL );
+    HDassert( cache_ptr->f->shared->mdc_jrnl_block_loc == 
+              cache_ptr->mdj_conf_block_addr );
+    HDassert( cache_ptr->f->shared->mdc_jrnl_block_len == 
+              cache_ptr->mdj_conf_block_len );
+
+
+    /* Can't journal a read only file, so verify that we are
+     * opened read/write and fail if we are not.
+     */
+    if ( (cache_ptr->f->shared->flags & H5F_ACC_RDWR) == 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "File is opened read only.")
+    }
+
+    /* next, discard the metadata journaling configuration block */
+    result = H5C2_discard_journal_config_block(cache_ptr, dxpl_id);
+
+    if ( result != SUCCEED ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_discard_journal_config_block() failed.")
+    }
+
+    HDassert( cache_ptr->mdj_conf_block_addr == HADDR_UNDEF );
+    HDassert( cache_ptr->mdj_conf_block_len == 0 );
+    HDassert( cache_ptr->mdj_conf_block_ptr == NULL );
+    HDassert( cache_ptr->mdj_file_name_ptr == NULL );
+
+    /* now, mark f->shared to indicate that journaling is not in 
+     * progress, and then call H5F_super_write_mdj_msg() to write
+     * the changes to disk.
+     */
+    cache_ptr->f->shared->mdc_jrnl_enabled = FALSE;
+    cache_ptr->f->shared->mdc_jrnl_block_loc = HADDR_UNDEF;
+    cache_ptr->f->shared->mdc_jrnl_block_len = 0;
+
+    if ( H5F_super_write_mdj_msg(cache_ptr->f, dxpl_id) < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5F_super_write_mdj_msg() failed.")
+    }
+
+    /* Finally, flush the file to ensure that changes made it to disk. */
+
+    /* Quincey: Two issues here:
+     *
+     * 		First, there is the simple matter of using H5Fflush().
+     * 		Given the curent plans for implementing beging/end 
+     * 		transaction, we have the problem of a flush triggering
+     * 		a transaction here -- not what we want.  We could get
+     * 		around this by calling H5F_flush(), but presently that
+     * 		function is local to H5F.c
+     *
+     * 		Second, there is the matter of the scope parameter:
+     * 		At present, I am passing H5F_SCOPE_GLOBAL here -- is 
+     * 		this appropriate?  I guess this comes down to how we 
+     * 		are going to handle journaling in the case of multiple 
+     * 		files -- a point we haven't discussed.  We should do so.
+     */
+
+    if ( H5Fflush(cache_ptr->f->file_id, H5F_SCOPE_GLOBAL) < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, "H5Fflush() failed.")
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C2_unmark_journaling_in_progress() */
+
 
 
 /**************************************************************************/

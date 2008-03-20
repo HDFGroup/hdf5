@@ -489,6 +489,7 @@ extern hbool_t pass2; /* set to false on error */
 extern hbool_t skip_long_tests2;
 extern hbool_t run_full_test2;
 extern const char *failure_mssg2;
+extern int express_test2;
 extern int failures2;
 
 extern test_entry_t pico_entries2[NUM_PICO_ENTRIES];
@@ -706,6 +707,7 @@ void resize_pinned_entry2(H5C2_t * cache_ptr,
 H5C2_t * setup_cache2(size_t max_cache_size, size_t min_clean_size);
 
 void row_major_scan_forward2(H5C2_t * cache_ptr,
+                             int32_t max_index,
                              int32_t lag,
                              hbool_t verbose,
                              hbool_t reset_stats,
@@ -730,6 +732,7 @@ void hl_row_major_scan_forward2(H5C2_t * cache_ptr,
                                 hbool_t dirty_inserts);
 
 void row_major_scan_backward2(H5C2_t * cache_ptr,
+                              int32_t max_index,
                               int32_t lag,
                               hbool_t verbose,
                               hbool_t reset_stats,
@@ -754,6 +757,7 @@ void hl_row_major_scan_backward2(H5C2_t * cache_ptr,
                                  hbool_t dirty_inserts);
 
 void col_major_scan_forward2(H5C2_t * cache_ptr,
+                             int32_t max_index,
                              int32_t lag,
                              hbool_t verbose,
                              hbool_t reset_stats,
@@ -774,6 +778,7 @@ void hl_col_major_scan_forward2(H5C2_t * cache_ptr,
                                 int dirty_unprotects);
 
 void col_major_scan_backward2(H5C2_t * cache_ptr,
+                              int32_t max_index,
                               int32_t lag,
                               hbool_t verbose,
                               hbool_t reset_stats,

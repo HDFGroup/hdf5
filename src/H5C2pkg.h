@@ -743,6 +743,13 @@ struct H5C2_jbrb_t
  * 		external file, so this field must be defined if 
  * 		journaling is enabled.
  *
+ * 		To avoid allocating extra memory, mdj_file_name_ptr
+ * 		points into the approprite location in the in core
+ * 		image of the metadata journaling configuration block.
+ *
+ * mdj_conf_block_addr:  Address of the metadata journaling configuration
+ * 		block on disk, or HADDR_UNDEF if that block is undefined.
+ *
  * mdj_conf_block_len: Length (in bytes) of the metadata journaling 
  * 		configuration block, or 0 if that block is undefined.
  *
@@ -999,9 +1006,19 @@ struct H5C2_jbrb_t
  *
  ****************************************************************************/
 
-#define H5C2__H5C2_T_MAGIC	0x005CAC0F
-#define H5C2__MAX_NUM_TYPE_IDS	16
+#define H5C2__H5C2_T_MAGIC		0x005CAC0F
+#define H5C2__MAX_NUM_TYPE_IDS		16
 #define H5C2__PREFIX_LEN		32
+
+#define H5C2__JOURNAL_MAGIC_LEN		(size_t)4
+#define H5C2__JOURNAL_CONF_MAGIC	"MDJC"
+#define H5C2__JOURNAL_CONF_VERSION	((uint8_t)1)
+#define H5C2__JOURNAL_BLOCK_LEN(pathLen, f)	\
+	( H5C2__JOURNAL_MAGIC_LEN +		\
+	  1 + /* version */			\
+          H5F_SIZEOF_SIZE(f) +			\
+	  ((pathLen) + 1) +             	\
+	  4 /* checksum */ )
 
 struct H5C2_t
 {
@@ -1088,7 +1105,8 @@ struct H5C2_t
  
     hbool_t			mdj_enabled;
     char *			mdj_file_name_ptr;
-    size_t			mdj_conf_block_len;
+    haddr_t			mdj_conf_block_addr;
+    hsize_t			mdj_conf_block_len;
     void *			mdj_conf_block_ptr;
     struct H5C2_jbrb_t		mdj_jbrb;
 

@@ -160,18 +160,31 @@ smoke_check_1(void)
     int dirty_destroys = FALSE;
     hbool_t display_stats = FALSE;
     int32_t lag = 10;
+    int32_t max_index = (10 * 1024) - 1;
     int mile_stone = 1;
     H5C2_t * cache_ptr = NULL;
 
     TESTING("smoke check #1 -- all clean, ins, dest, ren, 4/2 MB cache");
 
-    if ( skip_long_tests2 ) {
+    switch ( express_test2 )
+    {
+	case 0:
+	    max_index = (10 * 1024) - 1;
+	    break;
 
-        SKIPPED();
+	case 1:
+	    max_index = (1 * 1024) - 1;
+	    break;
 
-        HDfprintf(stdout, "	Long tests disabled.\n");
+	case 2:
+	    max_index = (512) - 1;
+	    break;
 
-        return;
+	default:
+            SKIPPED();
+            HDfprintf(stdout, "	Long tests disabled.\n");
+	    return;  /* <========== note return */
+	    break;
     }
 
     pass2 = TRUE;
@@ -194,6 +207,7 @@ smoke_check_1(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     row_major_scan_forward2(/* cache_ptr              */ cache_ptr,
+		            /* max_index              */ max_index,
                             /* lag                    */ lag,
                             /* verbose                */ FALSE,
                             /* reset_stats            */ TRUE,
@@ -213,6 +227,7 @@ smoke_check_1(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     row_major_scan_backward2(/* cache_ptr              */ cache_ptr,
+                             /* max_index              */ max_index,
                              /* lag                    */ lag,
                              /* verbose                */ FALSE,
                              /* reset_stats            */ TRUE,
@@ -232,6 +247,7 @@ smoke_check_1(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     row_major_scan_forward2(/* cache_ptr              */ cache_ptr,
+		            /* max_index              */ max_index,
                             /* lag                    */ lag,
                             /* verbose                */ FALSE,
                             /* reset_stats            */ TRUE,
@@ -262,6 +278,7 @@ smoke_check_1(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     col_major_scan_forward2(/* cache_ptr              */ cache_ptr,
+		            /* max_index              */ max_index,
                             /* lag                    */ lag,
                             /* verbose                */ FALSE,
                             /* reset_stats            */ TRUE,
@@ -287,6 +304,7 @@ smoke_check_1(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     col_major_scan_backward2(/* cache_ptr              */ cache_ptr,
+		             /* max_index              */ max_index,
                              /* lag                    */ lag,
                              /* verbose                */ FALSE,
                              /* reset_stats            */ TRUE,
@@ -353,19 +371,32 @@ smoke_check_2(void)
     int dirty_unprotects = TRUE;
     int dirty_destroys = TRUE;
     hbool_t display_stats = FALSE;
+    int32_t max_index = (10 * 1024) - 1;
     int32_t lag = 10;
     int mile_stone = 1;
     H5C2_t * cache_ptr = NULL;
 
     TESTING("smoke check #2 -- ~1/2 dirty, ins, dest, ren, 4/2 MB cache");
 
-    if ( skip_long_tests2 ) {
+    switch ( express_test2 )
+    {
+	case 0:
+	    max_index = (10 * 1024) - 1;
+	    break;
 
-        SKIPPED();
+	case 1:
+	    max_index = (1 * 1024) - 1;
+	    break;
 
-        HDfprintf(stdout, "	Long tests disabled.\n");
+	case 2:
+	    max_index = (512) - 1;
+	    break;
 
-        return;
+	default:
+            SKIPPED();
+            HDfprintf(stdout, "	Long tests disabled.\n");
+	    return;  /* <========== note return */
+	    break;
     }
 
     pass2 = TRUE;
@@ -388,6 +419,7 @@ smoke_check_2(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     row_major_scan_forward2(/* cache_ptr              */ cache_ptr,
+		            /* max_index              */ max_index,
                             /* lag                    */ lag,
                             /* verbose                */ FALSE,
                             /* reset_stats            */ TRUE,
@@ -407,6 +439,7 @@ smoke_check_2(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     row_major_scan_backward2(/* cache_ptr              */ cache_ptr,
+                             /* max_index              */ max_index,
                              /* lag                    */ lag,
                              /* verbose                */ FALSE,
                              /* reset_stats            */ TRUE,
@@ -426,6 +459,7 @@ smoke_check_2(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     row_major_scan_forward2(/* cache_ptr              */ cache_ptr,
+		            /* max_index              */ max_index,
                             /* lag                    */ lag,
                             /* verbose                */ FALSE,
                             /* reset_stats            */ TRUE,
@@ -456,6 +490,7 @@ smoke_check_2(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     col_major_scan_forward2(/* cache_ptr              */ cache_ptr,
+		            /* max_index              */ max_index,
                             /* lag                    */ lag,
                             /* verbose                */ FALSE,
                             /* reset_stats            */ TRUE,
@@ -481,6 +516,7 @@ smoke_check_2(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     col_major_scan_backward2(/* cache_ptr              */ cache_ptr,
+		             /* max_index              */ max_index,
                              /* lag                    */ lag,
                              /* verbose                */ FALSE,
                              /* reset_stats            */ TRUE,
@@ -546,19 +582,32 @@ smoke_check_3(void)
     int dirty_unprotects = FALSE;
     int dirty_destroys = FALSE;
     hbool_t display_stats = FALSE;
+    int32_t max_index = (10 * 1024) - 1;
     int32_t lag = 10;
     int mile_stone = 1;
     H5C2_t * cache_ptr = NULL;
 
     TESTING("smoke check #3 -- all clean, ins, dest, ren, 2/1 KB cache");
 
-    if ( skip_long_tests2 ) {
+    switch ( express_test2 )
+    {
+	case 0:
+	    max_index = (10 * 1024) - 1;
+	    break;
 
-        SKIPPED();
+	case 1:
+	    max_index = (1 * 1024) - 1;
+	    break;
 
-        HDfprintf(stdout, "	Long tests disabled.\n");
+	case 2:
+	    max_index = (512) - 1;
+	    break;
 
-        return;
+	default:
+            SKIPPED();
+            HDfprintf(stdout, "	Long tests disabled.\n");
+	    return;  /* <========== note return */
+	    break;
     }
 
     pass2 = TRUE;
@@ -581,6 +630,7 @@ smoke_check_3(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     row_major_scan_forward2(/* cache_ptr              */ cache_ptr,
+		            /* max_index              */ max_index,
                            /* lag                    */ lag,
                            /* verbose                */ FALSE,
                            /* reset_stats            */ TRUE,
@@ -600,6 +650,7 @@ smoke_check_3(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     row_major_scan_backward2(/* cache_ptr              */ cache_ptr,
+                             /* max_index              */ max_index,
                             /* lag                    */ lag,
                             /* verbose                */ FALSE,
                             /* reset_stats            */ TRUE,
@@ -619,6 +670,7 @@ smoke_check_3(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     row_major_scan_forward2(/* cache_ptr              */ cache_ptr,
+		            /* max_index              */ max_index,
                            /* lag                    */ lag,
                            /* verbose                */ FALSE,
                            /* reset_stats            */ TRUE,
@@ -649,6 +701,7 @@ smoke_check_3(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     col_major_scan_forward2(/* cache_ptr              */ cache_ptr,
+		            /* max_index              */ max_index,
                            /* lag                    */ lag,
                            /* verbose                */ FALSE,
                            /* reset_stats            */ TRUE,
@@ -674,6 +727,7 @@ smoke_check_3(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     col_major_scan_backward2(/* cache_ptr              */ cache_ptr,
+		             /* max_index              */ max_index,
                             /* lag                    */ lag,
                             /* verbose                */ FALSE,
                             /* reset_stats            */ TRUE,
@@ -740,19 +794,32 @@ smoke_check_4(void)
     int dirty_unprotects = TRUE;
     int dirty_destroys = TRUE;
     hbool_t display_stats = FALSE;
+    int32_t max_index = (10 * 1024) - 1;
     int32_t lag = 10;
     int mile_stone = 1;
     H5C2_t * cache_ptr = NULL;
 
     TESTING("smoke check #4 -- ~1/2 dirty, ins, dest, ren, 2/1 KB cache");
 
-    if ( skip_long_tests2 ) {
+    switch ( express_test2 )
+    {
+	case 0:
+	    max_index = (10 * 1024) - 1;
+	    break;
 
-        SKIPPED();
+	case 1:
+	    max_index = (1 * 1024) - 1;
+	    break;
 
-        HDfprintf(stdout, "	Long tests disabled.\n");
+	case 2:
+	    max_index = (512) - 1;
+	    break;
 
-        return;
+	default:
+            SKIPPED();
+            HDfprintf(stdout, "	Long tests disabled.\n");
+	    return;  /* <========== note return */
+	    break;
     }
 
     pass2 = TRUE;
@@ -775,6 +842,7 @@ smoke_check_4(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     row_major_scan_forward2(/* cache_ptr              */ cache_ptr,
+		            /* max_index              */ max_index,
                            /* lag                    */ lag,
                            /* verbose                */ FALSE,
                            /* reset_stats            */ TRUE,
@@ -794,6 +862,7 @@ smoke_check_4(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     row_major_scan_backward2(/* cache_ptr              */ cache_ptr,
+                             /* max_index              */ max_index,
                             /* lag                    */ lag,
                             /* verbose                */ FALSE,
                             /* reset_stats            */ TRUE,
@@ -813,6 +882,7 @@ smoke_check_4(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     row_major_scan_forward2(/* cache_ptr              */ cache_ptr,
+		            /* max_index              */ max_index,
                            /* lag                    */ lag,
                            /* verbose                */ FALSE,
                            /* reset_stats            */ TRUE,
@@ -843,6 +913,7 @@ smoke_check_4(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     col_major_scan_forward2(/* cache_ptr              */ cache_ptr,
+		            /* max_index              */ max_index,
                            /* lag                    */ lag,
                            /* verbose                */ FALSE,
                            /* reset_stats            */ TRUE,
@@ -868,6 +939,7 @@ smoke_check_4(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     col_major_scan_backward2(/* cache_ptr              */ cache_ptr,
+		             /* max_index              */ max_index,
                             /* lag                    */ lag,
                             /* verbose                */ FALSE,
                             /* reset_stats            */ TRUE,
@@ -988,18 +1060,25 @@ smoke_check_5(void)
 
     TESTING("smoke check #5 -- all clean, ins, prot, unprot, AR cache 1");
 
-    if ( skip_long_tests2 ) {
+    switch ( express_test2 )
+    {
+	case 0:
+	    max_index = (10 * 1024) - 1;
+	    break;
 
-        SKIPPED();
+	case 1:
+	    max_index = (1 * 1024) - 1;
+	    break;
 
-        HDfprintf(stdout, "	Long tests disabled.\n");
+	case 2:
+	    max_index = (512) - 1;
+	    break;
 
-        return;
-    }
-
-    if ( run_full_test2 ) {
-
-        max_index = (10 * 1024) - 1;
+	default:
+            SKIPPED();
+            HDfprintf(stdout, "	Long tests disabled.\n");
+	    return;  /* <========== note return */
+	    break;
     }
 
     pass2 = TRUE;
@@ -1230,18 +1309,25 @@ smoke_check_6(void)
 
     pass2 = TRUE;
 
-    if ( skip_long_tests2 ) {
+    switch ( express_test2 )
+    {
+	case 0:
+	    max_index = (10 * 1024) - 1;
+	    break;
 
-        SKIPPED();
+	case 1:
+	    max_index = (1 * 1024) - 1;
+	    break;
 
-        HDfprintf(stdout, "	Long tests disabled.\n");
+	case 2:
+	    max_index = (512) - 1;
+	    break;
 
-        return;
-    }
-
-    if ( run_full_test2 ) {
-
-        max_index = (10 * 1024) - 1;
+	default:
+            SKIPPED();
+            HDfprintf(stdout, "	Long tests disabled.\n");
+	    return;  /* <========== note return */
+	    break;
     }
 
     if ( show_progress ) /* 1 */
@@ -1469,18 +1555,25 @@ smoke_check_7(void)
 
     TESTING("smoke check #7 -- all clean, ins, prot, unprot, AR cache 2");
 
-    if ( skip_long_tests2 ) {
+    switch ( express_test2 )
+    {
+	case 0:
+	    max_index = (10 * 1024) - 1;
+	    break;
 
-        SKIPPED();
+	case 1:
+	    max_index = (1 * 1024) - 1;
+	    break;
 
-        HDfprintf(stdout, "	Long tests disabled.\n");
+	case 2:
+	    max_index = (512) - 1;
+	    break;
 
-        return;
-    }
-
-    if ( run_full_test2 ) {
-
-        max_index = (10 * 1024) - 1;
+	default:
+            SKIPPED();
+            HDfprintf(stdout, "	Long tests disabled.\n");
+	    return;  /* <========== note return */
+	    break;
     }
 
     pass2 = TRUE;
@@ -1710,18 +1803,25 @@ smoke_check_8(void)
 
     TESTING("smoke check #8 -- ~1/2 dirty, ins, prot, unprot, AR cache 2");
 
-    if ( skip_long_tests2 ) {
+    switch ( express_test2 )
+    {
+	case 0:
+	    max_index = (10 * 1024) - 1;
+	    break;
 
-        SKIPPED();
+	case 1:
+	    max_index = (1 * 1024) - 1;
+	    break;
 
-        HDfprintf(stdout, "	Long tests disabled.\n");
+	case 2:
+	    max_index = (512) - 1;
+	    break;
 
-        return;
-    }
-
-    if ( run_full_test2 ) {
-
-        max_index = (10 * 1024) - 1;
+	default:
+            SKIPPED();
+            HDfprintf(stdout, "	Long tests disabled.\n");
+	    return;  /* <========== note return */
+	    break;
     }
 
     pass2 = TRUE;
@@ -1899,19 +1999,32 @@ smoke_check_9(void)
     int dirty_destroys = FALSE;
     hbool_t display_stats = FALSE;
     hbool_t display_detailed_stats = FALSE;
+    int32_t max_index = (10 * 1024) - 1;
     int32_t lag = 10;
     int mile_stone = 1;
     H5C2_t * cache_ptr = NULL;
 
     TESTING("smoke check #9 -- all clean, ins, dest, ren, 4/2 MB, corked");
 
-    if ( skip_long_tests2 ) {
+    switch ( express_test2 )
+    {
+	case 0:
+	    max_index = (10 * 1024) - 1;
+	    break;
 
-        SKIPPED();
+	case 1:
+	    max_index = (1 * 1024) - 1;
+	    break;
 
-        HDfprintf(stdout, "	Long tests disabled.\n");
+	case 2:
+	    max_index = (512) - 1;
+	    break;
 
-        return;
+	default:
+            SKIPPED();
+            HDfprintf(stdout, "	Long tests disabled.\n");
+	    return;  /* <========== note return */
+	    break;
     }
 
     pass2 = TRUE;
@@ -1951,6 +2064,7 @@ smoke_check_9(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     row_major_scan_forward2(/* cache_ptr              */ cache_ptr,
+		            /* max_index              */ max_index,
                            /* lag                    */ lag,
                            /* verbose                */ FALSE,
                            /* reset_stats            */ TRUE,
@@ -1987,6 +2101,7 @@ smoke_check_9(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     row_major_scan_backward2(/* cache_ptr              */ cache_ptr,
+                             /* max_index              */ max_index,
                             /* lag                    */ lag,
                             /* verbose                */ FALSE,
                             /* reset_stats            */ TRUE,
@@ -2021,6 +2136,7 @@ smoke_check_9(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     row_major_scan_forward2(/* cache_ptr              */ cache_ptr,
+		            /* max_index              */ max_index,
                            /* lag                    */ lag,
                            /* verbose                */ FALSE,
                            /* reset_stats            */ TRUE,
@@ -2081,6 +2197,7 @@ smoke_check_9(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     col_major_scan_forward2(/* cache_ptr              */ cache_ptr,
+		            /* max_index              */ max_index,
                            /* lag                    */ lag,
                            /* verbose                */ FALSE,
                            /* reset_stats            */ TRUE,
@@ -2121,6 +2238,7 @@ smoke_check_9(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     col_major_scan_backward2(/* cache_ptr              */ cache_ptr,
+		             /* max_index              */ max_index,
                             /* lag                    */ lag,
                             /* verbose                */ FALSE,
                             /* reset_stats            */ TRUE,
@@ -2206,19 +2324,32 @@ smoke_check_10(void)
     int dirty_destroys = TRUE;
     hbool_t display_stats = FALSE;
     hbool_t display_detailed_stats = FALSE;
+    int32_t max_index = (10 * 1024) - 1;
     int32_t lag = 10;
     int mile_stone = 1;
     H5C2_t * cache_ptr = NULL;
 
     TESTING("smoke check #10 -- ~1/2 dirty, ins, dest, ren, 4/2 MB, corked");
 
-    if ( skip_long_tests2 ) {
+    switch ( express_test2 )
+    {
+	case 0:
+	    max_index = (10 * 1024) - 1;
+	    break;
 
-        SKIPPED();
+	case 1:
+	    max_index = (1 * 1024) - 1;
+	    break;
 
-        HDfprintf(stdout, "	Long tests disabled.\n");
+	case 2:
+	    max_index = (512) - 1;
+	    break;
 
-        return;
+	default:
+            SKIPPED();
+            HDfprintf(stdout, "	Long tests disabled.\n");
+	    return;  /* <========== note return */
+	    break;
     }
 
     pass2 = TRUE;
@@ -2241,6 +2372,7 @@ smoke_check_10(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     row_major_scan_forward2(/* cache_ptr              */ cache_ptr,
+		            /* max_index              */ max_index,
                            /* lag                    */ lag,
                            /* verbose                */ FALSE,
                            /* reset_stats            */ TRUE,
@@ -2275,6 +2407,7 @@ smoke_check_10(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     row_major_scan_backward2(/* cache_ptr              */ cache_ptr,
+                             /* max_index              */ max_index,
                             /* lag                    */ lag,
                             /* verbose                */ FALSE,
                             /* reset_stats            */ TRUE,
@@ -2309,6 +2442,7 @@ smoke_check_10(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     row_major_scan_forward2(/* cache_ptr              */ cache_ptr,
+		            /* max_index              */ max_index,
                            /* lag                    */ lag,
                            /* verbose                */ FALSE,
                            /* reset_stats            */ TRUE,
@@ -2369,6 +2503,7 @@ smoke_check_10(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     col_major_scan_forward2(/* cache_ptr              */ cache_ptr,
+		            /* max_index              */ max_index,
                            /* lag                    */ lag,
                            /* verbose                */ FALSE,
                            /* reset_stats            */ TRUE,
@@ -2424,6 +2559,7 @@ smoke_check_10(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     col_major_scan_backward2(/* cache_ptr              */ cache_ptr,
+		             /* max_index              */ max_index,
                             /* lag                    */ lag,
                             /* verbose                */ FALSE,
                             /* reset_stats            */ TRUE,
@@ -2502,6 +2638,7 @@ write_permitted_check(void)
     const char * fcn_name = "write_permitted_check";
     hbool_t show_progress = FALSE;
     hbool_t display_stats = FALSE;
+    int32_t max_index = (10 * 1024) - 1;
     int32_t lag = 10;
     int mile_stone = 1;
     H5C2_t * cache_ptr = NULL;
@@ -2511,6 +2648,27 @@ write_permitted_check(void)
     TESTING("write permitted check -- 1/0 MB cache");
 
 #if H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
+
+    switch ( express_test2 )
+    {
+	case 0:
+	    max_index = (10 * 1024) - 1;
+	    break;
+
+	case 1:
+	    max_index = (1 * 1024) - 1;
+	    break;
+
+	case 2:
+	    max_index = (512) - 1;
+	    break;
+
+	default:
+            SKIPPED();
+            HDfprintf(stdout, "	Long tests disabled.\n");
+	    return;  /* <========== note return */
+	    break;
+    }
 
     pass2 = TRUE;
 
@@ -2532,6 +2690,7 @@ write_permitted_check(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     row_major_scan_forward2(/* cache_ptr              */ cache_ptr,
+		            /* max_index              */ max_index,
                            /* lag                    */ lag,
                            /* verbose                */ FALSE,
                            /* reset_stats            */ TRUE,
@@ -2553,6 +2712,7 @@ write_permitted_check(void)
     write_permitted2 = FALSE;
 
     row_major_scan_backward2(/* cache_ptr              */ cache_ptr,
+                             /* max_index              */ max_index,
                             /* lag                    */ lag,
                             /* verbose                */ FALSE,
                             /* reset_stats            */ TRUE,
@@ -2574,6 +2734,7 @@ write_permitted_check(void)
     write_permitted2 = TRUE;
 
     row_major_scan_forward2(/* cache_ptr              */ cache_ptr,
+		            /* max_index              */ max_index,
                            /* lag                    */ lag,
                            /* verbose                */ FALSE,
                            /* reset_stats            */ TRUE,
@@ -2604,6 +2765,7 @@ write_permitted_check(void)
                   fcn_name, mile_stone++, (int)pass2);
 
     col_major_scan_forward2(/* cache_ptr              */ cache_ptr,
+		            /* max_index              */ max_index,
                            /* lag                    */ lag,
                            /* verbose                */ FALSE,
                            /* reset_stats            */ TRUE,
@@ -2620,6 +2782,7 @@ write_permitted_check(void)
     write_permitted2 = FALSE;
 
     col_major_scan_backward2(/* cache_ptr              */ cache_ptr,
+		             /* max_index              */ max_index,
                             /* lag                    */ lag,
                             /* verbose                */ FALSE,
                             /* reset_stats            */ TRUE,
@@ -28616,17 +28779,22 @@ main(void)
 {
     H5open();
 
-    skip_long_tests2 = FALSE;
+    express_test2 = GetTestExpress();
 
-#ifdef NDEBUG
-    run_full_test2 = TRUE;
-#else /* NDEBUG */
-    run_full_test2 = FALSE;
-#endif /* NDEBUG */
+    if ( express_test2 >= 3 ) {
 
-#if 1
-    run_full_test2 = TRUE;
-#endif
+	skip_long_tests2 = TRUE;
+
+    } else {
+
+	skip_long_tests2 = FALSE;
+    }
+
+    printf("===================================\n");
+    printf("Internal cache tests\n");
+    printf("        express_test = %d\n", express_test2);
+    printf("        skip_long_tests = %d\n", (int)skip_long_tests2);
+    printf("===================================\n");
 
 #if 1
     smoke_check_1();

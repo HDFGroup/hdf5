@@ -83,7 +83,7 @@
  * want them on for testing on occasion, but in general they should be
  * off.
  */
-#define H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS  0
+#define H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS  0 /* JRM */
 
 #endif /* H5_HAVE_PARALLEL */
 
@@ -1409,6 +1409,17 @@ H5_DLL herr_t H5C2_validate_resize_config(H5C2_auto_size_ctl_t * config_ptr,
                                          unsigned int tests);
 
 
+/**************************************************************************/
+/***************** journaling function definitions proper: ****************/
+/**************************************************************************/
+
+H5_DLL herr_t H5C2__begin_transaction(H5C2_t * cache_ptr,
+		                      uint64_t * trans_num_ptr);
+
+H5_DLL herr_t H5C2__end_transaction(H5C2_t * cache_ptr,
+                                    uint64_t trans_num);
+
+
 /*****************************************************************************/
 /****************** journal buffer function definitions: *********************/
 /*****************************************************************************/
@@ -1465,6 +1476,34 @@ H5_DLL herr_t H5C2_jb__bin2hex(uint8_t * buf,
                                size_t * hexlength,
                                size_t buf_offset,
                                size_t buf_size);
+
+/*****************************************************************************/
+/********** journal config block management function definitions: ************/
+/*****************************************************************************/
+
+H5_DLL herr_t H5C2_create_journal_config_block(H5C2_t * cache_ptr,
+                                           hid_t dxpl_id,
+                                           const char * journal_file_name_ptr);
+
+H5_DLL herr_t H5C2_discard_journal_config_block(H5C2_t * cache_ptr,
+                                                hid_t dxpl_id);
+
+H5_DLL herr_t H5C2_get_journaling_in_progress(H5C2_t * cache_ptr,
+                                              hid_t dxpl_id);
+
+H5_DLL herr_t H5C2_load_journal_config_block(H5C2_t * cache_ptr,
+                                             hid_t dxpl_id,
+                                             haddr_t block_addr,
+                                             hsize_t block_len);
+
+H5_DLL herr_t H5C2_mark_journaling_in_progress(H5C2_t * cache_ptr,
+                                            hid_t dxpl_id,
+                                            const char * journal_file_name_ptr);
+
+H5_DLL herr_t H5C2_unmark_journaling_in_progress(H5C2_t * cache_ptr,
+                                                 hid_t dxpl_id);
+
+
 
 #endif /* !_H5C2private_H */
 

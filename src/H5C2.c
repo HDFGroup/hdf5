@@ -3057,6 +3057,7 @@ H5C2_create(const H5F_t *               f,
     /* metadata journaling related fields */
     cache_ptr->mdj_enabled				 = FALSE;
     cache_ptr->mdj_file_name_ptr                         = NULL;
+    cache_ptr->mdj_conf_block_addr                       = HADDR_UNDEF;
     cache_ptr->mdj_conf_block_len                        = 0;
     cache_ptr->mdj_conf_block_ptr                        = NULL;
     (cache_ptr->mdj_jbrb).magic                          = 
