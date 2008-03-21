@@ -1,11 +1,12 @@
-HDF5 version 1.6.7 released on Thu Jan 31 21:09:10 CST 2008
+HDF5 version 1.6.7-snap0 released on Thu Mar 20 19:14:11 CDT 2008
 ================================================================================
 
 INTRODUCTION
 ============
-This document describes the differences between HDF5-1.6.6 and HDF5-1.6.7  
+This document describes the differences between HDF5-1.6.7 and
+HDF5-1.6.7-snap*.  
 It contains information on the platforms tested and known problems in
-HDF5-1.6.7. For more details, check the HISTORY.txt file in the HDF5 source.
+HDF5-1.6.7-snap*. For more details, check the HISTORY.txt file in the HDF5 source.
 
 HDF5 documentation can be found in the distributed release source code
 in the subdirectory doc/html/ or on the THG (The HDF Group) FTP server: 
@@ -31,7 +32,7 @@ CONTENTS
 ========
 - New Features
 - Support for New Platforms, Languages and Compilers
-- Bug Fixes since HDF5-1.6.6
+- Bug Fixes since HDF5-1.6.7
 - Documentation
 - Platforms Tested
 - Supported Configuration Features Summary
@@ -42,18 +43,17 @@ New Features
 ============
     Configuration:
     -------------------------
-    '--enable-stream-vfd' and '--disable-stream-vfd' are no longer valid 
-    configure options because the stream I/O driver has ben removed from
-    the distribution.
+	- Added no-repeat test feature from v1.8 to this branch.  What it does
+	  is that if a test has passed in previous "make check", it will not
+	  run again unless its executable has changed. This can be overridden
+	  by "make check-clean" which removes all check-success markers and
+	  let all tests run again. AKC - 2008/2/22.
 
     Source code distribution
     ========================
     Library:
     --------
-    The stream I/O driver is not included with the HDF5 Library in this
-    release.  The source code files hdf5/src/H5FDstream.c and
-    hdf5/src/H5FDstream.h and the driver ENUM value H5FD_STREAM have been 
-    removed.
+    None
 
     Parallel Library:
     -----------------
@@ -61,7 +61,13 @@ New Features
 
     Tools:
     ------
-    None
+     - h5repack and h5diff changed command line parameter syntax to be
+           similar to h5dump, adding also long switch names. PVN - 2008/2/13
+     - h5repack now supports adding multiple filters to all objects. 
+	     PVN - 2008/2/13
+     - h5import imports string (text) data. PVN - 2008/2/19
+
+
 
     F90 API:
     --------
@@ -75,29 +81,13 @@ New Features
 Support for New Platforms, Languages and Compilers
 ==================================================
 
-No new platorms, languages, or compilers are supported in this release.
 
-
-Bug Fixes since HDF5-1.6.6 Release
+Bug Fixes since HDF5-1.6.7 Release
 ==================================
 
     Library
     -------
-        - H5Iget_name could not be used with an object identifier returned  
-            by H5Rdereference; the function would not be able to determine 
-            a valid object name.  It has been fixed.  SLU - 2008/1/30 
-        - Changed library's behavior for reading files that might have
-            corrupted object header information from a previous (buggy)
-            version of the library.  By default, the library now rebuilds the
-            correct object header information instead of issuing an error.
-            Previous "strict" file format interpretation can be enabled with
-            the "--enable-strict-format-checks" configure option.
-            QAK - 2008/01/13
-        - Fixed bug in H5Epush() which was clearing the error stack before
-            pushing new error value.  QAK - 2007/08/23
-        - Fixed bug in H5Ewalk() which was not passing back the return value
-            from error stack walking callback.  QAK - 2007/08/23
-
+     None
 
     Configuration
     -------------
@@ -111,7 +101,16 @@ Bug Fixes since HDF5-1.6.6 Release
 
     Tools
     -----
-     None
+     - h5import bug on Windows w/binary datasets. fread in windows needs a binary file 
+        to be open with 'rb' instead of 'r' otherwise it terminates execution if an end 
+        of file character is found on the input file. Besides that the binary file 
+        generated needs to be open with 'wb', otherwise an end of line character is 
+        read twice. PVN - 2008/2/19
+     - Fixed h5diff regarding the display of NaN (Not a Number) values. PVN 2008/03/04
+     - Fixed h5dump regarding the display of array indices and block selections in 
+        subsetting. PVN 2008/03/10 
+ 
+
 
 
     Documentation 
