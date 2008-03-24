@@ -263,7 +263,7 @@
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="D:\szip\all\lib\Debug"
+				AdditionalLibraryDirectories=""
 				IgnoreDefaultLibraryNames="libc.lib"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\../../../tools/h5repack/Debug/h5repack.pdb"
