@@ -940,8 +940,6 @@
 ./tools/h5import/testfiles/txtstr
 ./tools/h5import/testfiles/textstr
 
-
-
 # h5diff sources
 ./tools/h5diff/Makefile.am
 ./tools/h5diff/Makefile.in
@@ -952,6 +950,15 @@
 ./tools/h5diff/h5diffgentest.c
 ./tools/h5diff/testh5diff.sh
 ./tools/h5diff/testph5diff.sh
+
+# h5recover sources
+./tools/h5recover/Makefile.am
+./tools/h5recover/Makefile.in
+./tools/h5recover/testh5recover.sh.in
+./tools/h5recover/trecover_crasher.c
+./tools/h5recover/trecover.h
+./tools/h5recover/trecover_main.c
+./tools/h5recover/trecover_writer.c
 
 # h5repack sources
 ./tools/h5repack/Makefile.am
