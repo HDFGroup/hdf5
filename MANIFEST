@@ -750,6 +750,7 @@
 ./test/cache2_common.c
 ./test/cache_common.h
 ./test/cache2_common.h
+./test/cache2_journal.c
 ./test/cmpd_dset.c
 ./test/cross_read.c
 ./test/dangle.c
@@ -959,6 +960,8 @@
 ./tools/h5recover/trecover.h
 ./tools/h5recover/trecover_main.c
 ./tools/h5recover/trecover_writer.c
+./tools/h5recover/testfiles/default.txt
+./tools/h5recover/testfiles/async_crash.txt
 
 # h5repack sources
 ./tools/h5repack/Makefile.am
