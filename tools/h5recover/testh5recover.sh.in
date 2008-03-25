@@ -31,7 +31,7 @@ TOOLCTLDataFile=CTL$TOOLDataFile
 #RECOVERTOOL_BIN=`pwd`/$RECOVERTOOL         # The path of the tool binary
 RECOVERTOOL=touch                      # The tool name
 RECOVERTOOL_BIN=touch         # The path of the tool binary
-H5DIFF=h5diff
+H5DIFF=../h5diff/h5diff
 TESTDIR=`pwd`/../testfiles
 
 
