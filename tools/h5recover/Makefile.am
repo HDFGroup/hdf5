@@ -35,8 +35,9 @@ SCRIPT_DEPEND=trecover$(EXEEXT)
 trecover_SOURCES=trecover_main.c trecover_writer.c trecover_crasher.c
 
 # Our main target, the h5recover tool.
-# h5recover source is not ready yet.
-bin_PROGRAMS=#h5recover
+# For now, it is a dummy program in order to provide a real executable
+# for the Red Storm platform.
+bin_PROGRAMS=h5recover
 
 # All the programs depend on the hdf5 and h5tools libraries
 LDADD=$(LIBH5TOOLS) $(LIBHDF5)

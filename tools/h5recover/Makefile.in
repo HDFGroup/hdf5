@@ -53,7 +53,7 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/testh5recover.sh.in $(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am
 check_PROGRAMS = $(am__EXEEXT_1)
-bin_PROGRAMS =
+bin_PROGRAMS = h5recover$(EXEEXT)
 TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
 subdir = tools/h5recover
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -67,6 +67,10 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 am__EXEEXT_1 = trecover$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
+h5recover_SOURCES = h5recover.c
+h5recover_OBJECTS = h5recover.$(OBJEXT)
+h5recover_LDADD = $(LDADD)
+h5recover_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
 am_trecover_OBJECTS = trecover_main.$(OBJEXT) \
 	trecover_writer.$(OBJEXT) trecover_crasher.$(OBJEXT)
 trecover_OBJECTS = $(am_trecover_OBJECTS)
@@ -84,8 +88,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(trecover_SOURCES)
-DIST_SOURCES = $(trecover_SOURCES)
+SOURCES = h5recover.c $(trecover_SOURCES)
+DIST_SOURCES = h5recover.c $(trecover_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -421,6 +425,9 @@ clean-checkPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
+h5recover$(EXEEXT): $(h5recover_OBJECTS) $(h5recover_DEPENDENCIES) 
+	@rm -f h5recover$(EXEEXT)
+	$(LINK) $(h5recover_OBJECTS) $(h5recover_LDADD) $(LIBS)
 trecover$(EXEEXT): $(trecover_OBJECTS) $(trecover_DEPENDENCIES) 
 	@rm -f trecover$(EXEEXT)
 	$(LINK) $(trecover_OBJECTS) $(trecover_LDADD) $(LIBS)
@@ -431,6 +438,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5recover.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trecover_crasher.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trecover_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trecover_writer.Po@am__quote@

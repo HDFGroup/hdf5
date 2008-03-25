@@ -26,11 +26,8 @@ TOOL=trecover                  # The tool name
 TOOL_BIN=`pwd`/$TOOL           # The path of the tool binary
 TOOLDataFile=trecover.h5
 TOOLCTLDataFile=CTL$TOOLDataFile
-# Since h5recover does not exist yet, use touch for now.
-#RECOVERTOOL=h5recover                      # The tool name
-#RECOVERTOOL_BIN=`pwd`/$RECOVERTOOL         # The path of the tool binary
-RECOVERTOOL=touch                      # The tool name
-RECOVERTOOL_BIN=touch         # The path of the tool binary
+RECOVERTOOL=h5recover                      # The tool name
+RECOVERTOOL_BIN=`pwd`/$RECOVERTOOL         # The path of the tool binary
 H5DIFF=../h5diff/h5diff
 TESTDIR=`pwd`/../testfiles
 
@@ -81,8 +78,9 @@ TOOLTEST() {
     if [ $? = 0 ]; then
 	echo first diff did not fail as expected
     fi
-    # Recover the file
-    $RUNSERIAL $RECOVERTOOL_BIN $TOOLDataFile
+    # Recover the file.
+    # h5recover is not ready yet. Redirect its output to /dev/null.
+    $RUNSERIAL $RECOVERTOOL_BIN $TOOLDataFile > /dev/null
     # second diff should produce expected output
     $RUNSERIAL $H5DIFF $TOOLDataFile $TOOLCTLDataFile > $actual
     (
