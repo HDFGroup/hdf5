@@ -53,7 +53,7 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/testh5recover.sh.in $(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am
 check_PROGRAMS = $(am__EXEEXT_1)
-bin_PROGRAMS = h5recover$(EXEEXT)
+bin_PROGRAMS = h5recover$(EXEEXT) trecover$(EXEEXT)
 TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
 subdir = tools/h5recover
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -65,7 +65,7 @@ CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES = testh5recover.sh
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
-am__EXEEXT_1 = trecover$(EXEEXT)
+am__EXEEXT_1 =
 PROGRAMS = $(bin_PROGRAMS)
 h5recover_SOURCES = h5recover.c
 h5recover_OBJECTS = h5recover.$(OBJEXT)
@@ -328,7 +328,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5 *.out *.err
 INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 # Test programs and scripts
-TEST_PROG = trecover
+TEST_PROG = 
 TEST_SCRIPT = testh5recover.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = trecover$(EXEEXT)

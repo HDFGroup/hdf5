@@ -24,7 +24,7 @@ include $(top_srcdir)/config/commence.am
 INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 # Test programs and scripts
-TEST_PROG=trecover
+TEST_PROG=
 TEST_SCRIPT=testh5recover.sh
 
 check_PROGRAMS=$(TEST_PROG)
@@ -37,7 +37,8 @@ trecover_SOURCES=trecover_main.c trecover_writer.c trecover_crasher.c
 # Our main target, the h5recover tool.
 # For now, it is a dummy program in order to provide a real executable
 # for the Red Storm platform.
-bin_PROGRAMS=h5recover
+# Added trecover here since we don't want it in TEST_PROG as it gets SIGTERM by default.
+bin_PROGRAMS=h5recover trecover
 
 # All the programs depend on the hdf5 and h5tools libraries
 LDADD=$(LIBH5TOOLS) $(LIBHDF5)

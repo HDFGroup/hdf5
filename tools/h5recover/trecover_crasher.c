@@ -30,12 +30,15 @@
 void
 crasher(int crash_mode, CrasherParam_t *crash_param)
 {
-    float fraction, integral;
-    struct itimerval old, new;
+    float	fraction, integral;
+    struct	itimerval old, new;
+    pid_t	mypid;
 
     switch (crash_mode) {
 	case SyncCrash:
-	    _exit(0);
+	    /* need to use SIGTERM since _exit(0) may hang in Red Storm. */
+	    mypid = getpid();
+	    kill(mypid, SIGTERM);	/* Terminate myself */
 	    break;
 	case AsyncCrash:
 	    /* Setup a wakeup call in the future */
@@ -54,9 +57,11 @@ crasher(int crash_mode, CrasherParam_t *crash_param)
 }     
 
 
+/* Red Storm may hang if the signal handlin routine does I/O, even just printf() calls.
+ * Be aware if you want to add printf calls.
+ */
 void wakeup(int signum) 
 {
-    printf("wakeup, call sync crash\n");
     /* call crasher with sync mode */
     crasher(SyncCrash, 0);
 }
