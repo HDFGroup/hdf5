@@ -2814,6 +2814,24 @@ else
   AC_MSG_RESULT([false])
 fi
 
+dnl ----------------------------------------------------------------------
+dnl Set the flag to indicate that the machine has window style pathname,
+dnl that is, "drive-letter:\" (e.g. "C:") or "drive-letter:/" (e.g. "C:/").
+dnl (This flag should be _unset_ for all machines, except for Windows, where
+dnl it's set in the custom Windows H5pubconf.h file)
+dnl
+AC_MSG_CHECKING([if the machine has window style path name])
+AC_CACHE_VAL([hdf5_have_window_path], [hdf5_have_window_path=no])
+
+if test ${hdf5_have_window_path} = "yes"; then
+  AC_DEFINE([HAVE_WINDOW_PATH], [1],
+            [Define if your system has window style path name.])
+  AC_MSG_RESULT([true])
+else
+  AC_MSG_RESULT([false])
+fi
+
+
 dnl -----------------------------------------------------------------------
 dnl Set flag to indicate that the machine can handle conversion from 
 dnl long double to integers accurately.  This flag should be set "yes" for 
