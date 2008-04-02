@@ -35,6 +35,8 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Eprivate.h"
+
 
 
 /****************/
@@ -578,4 +580,98 @@ HDremove_all(const char *fname)
 }
 #endif
 
+
+/*
+ *
+ * Function: H5_build_extpath
+ *
+ * Purpose:  To build the path for later searching of target file for external link.
+ *   	     This path can be either:
+ *                      1. The absolute path of NAME
+ *                      or
+ *                      2. The current working directory + relative path of NAME
+ *
+ * Return:	Success:        0
+ *		Failure:	-1
+ *
+ * Programmer:	Vailin Choi
+ *		April 2, 2008
+ */
+#define MAX_PATH_LEN     1024
 
+herr_t
+H5_build_extpath(const char *name, char **extpath/*out*/)
+{
+    char        *full_path=NULL, *ptr=NULL;
+    char        *retcwd=NULL, *cwdpath=NULL, *new_name=NULL;
+    int         drive;
+    size_t      cwdlen, path_len;
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5_build_extpath)
+
+    *extpath = NULL;
+
+    /* 
+     * Unix: name[0] is a "/"
+     * Windows: name[0-2] is "<drive letter>:\" or "<drive-letter>:/"
+     */
+    if (CHECK_ABSOLUTE(name)) {
+        if ((full_path=H5MM_strdup(name)) == NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+    } else { /* relative pathname */
+        if ((cwdpath=H5MM_malloc(MAX_PATH_LEN)) == NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        if ((new_name=H5MM_strdup(name)) == NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+	/* 
+	 * Windows: name[0-1] is "<drive-letter>:"
+	 * 	Get current working directory on the drive specified in NAME 
+	 * Unix: does not apply
+	 */
+        if (CHECK_ABS_DRIVE(name)) {
+            drive = name[0] - 'A' + 1;
+            retcwd = HDgetdcwd(drive, cwdpath, MAX_PATH_LEN);
+            HDstrcpy(new_name, &name[2]);
+	/* 
+	 * Windows: name[0] is a '/' or '\' 
+	 *	Get current drive
+	 * Unix: does not apply
+	 */
+        } else if (CHECK_ABS_PATH(name) && (drive=HDgetdrive())) {
+            sprintf(cwdpath, "%c:%c", (drive+'A'-1), name[0]);
+            retcwd = cwdpath;
+            HDstrcpy(new_name, &name[1]);
+        } else /* totally relative for both Unix and Windows: get current working directory  */
+            retcwd = HDgetcwd(cwdpath, MAX_PATH_LEN);
+
+        if (retcwd != NULL) {
+            cwdlen = HDstrlen(cwdpath);
+            HDassert(cwdlen);
+            path_len = cwdlen + HDstrlen(new_name) + 2;
+            if ((full_path=H5MM_malloc(path_len)) == NULL)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+            HDstrcpy(full_path, cwdpath);
+            if (!CHECK_DELIMITER(cwdpath[cwdlen-1]))
+                HDstrcat(full_path, DIR_SEPS);
+            HDstrcat(full_path, new_name);
+        }
+    }
+
+    /* strip out the last component (the file name itself) from the path */
+    if (full_path) {
+        GET_LAST_DELIMITER(full_path, ptr)
+        HDassert(ptr);
+        *++ptr = '\0';
+        *extpath = full_path;
+    }
+
+done:
+    if (cwdpath)
+	H5MM_xfree(cwdpath);
+    if (new_name)
+	H5MM_xfree(new_name);
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5_build_extpath() */
