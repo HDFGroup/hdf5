@@ -533,7 +533,6 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
     if(bin_output) 
     {
         do_bin_output(stream, nelmts, type, _mem);
-        bin_output = 0;
     } /* end if */
     else 
     {
