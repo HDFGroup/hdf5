@@ -649,8 +649,7 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #endif
 #define HDgetegid()		getegid()
 #define HDgetenv(S)		getenv(S)
-#define HDsetenv(S,V,O)		setenv(S,V,O)
-#define HDunsetenv(S)		unsetenv(S)
+#define HDputenv(S)		putenv(S)
 #define HDgeteuid()		geteuid()
 #define HDgetgid()		getgid()
 #define HDgetgrgid(G)		getgrgid(G)
