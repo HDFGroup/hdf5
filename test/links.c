@@ -2604,6 +2604,10 @@ external_link_env(hid_t fapl, hbool_t new_format)
     hid_t	fid = (-1);     		/* File ID */
     hid_t	gid = (-1);	                /* Group IDs */
     char	*envval=NULL;
+    static      char *new_env = "HDF5_EXT_PREFIX=.:tmp";
+    static      char *env_var = "HDF5_EXT_PREFIX";
+    static	envstring[NAME_BUF_SIZE];
+
     char	filename1[NAME_BUF_SIZE],
     		filename2[NAME_BUF_SIZE],
     		filename3[NAME_BUF_SIZE];
@@ -2641,8 +2645,10 @@ external_link_env(hid_t fapl, hbool_t new_format)
     if(H5Lcreate_external(filename2, "/A", fid, "ext_link", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* get original value for the HDF library environment variable for external link if set */
-    envval = HDgetenv("HDF5_EXT_PREFIX");
-    setenv("HDF5_EXT_PREFIX", ".:tmp", 1);
+    envval = HDgetenv(env_var);
+    if (HDputenv(new_env) < 0)
+	TEST_ERROR
+
 
     /* Open object through external link */
     H5E_BEGIN_TRY {
@@ -2650,10 +2656,11 @@ external_link_env(hid_t fapl, hbool_t new_format)
     } H5E_END_TRY;
 
     /* restore value for the environment variable as needed */
-    if (envval)
-	HDsetenv("HDF5_EXT_PREFIX", envval, 1);
-    else
-	HDunsetenv("HDF5_EXT_PREFIX");
+    if ((envval != NULL) && (*envval)) {
+	sprintf(envstring, "%s=%s", env_var, envval);
+	if (HDputenv(envstring) < 0)
+	    TEST_ERROR
+    }
 	
     /* should be able to find the target file from pathnames set via environment variable */
     if (gid < 0) {

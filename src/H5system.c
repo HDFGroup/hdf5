@@ -582,6 +582,7 @@ HDremove_all(const char *fname)
 
 
 /*
+ *-------------------------------------------------------------------------
  *
  * Function: H5_build_extpath
  *
@@ -596,6 +597,7 @@ HDremove_all(const char *fname)
  *
  * Programmer:	Vailin Choi
  *		April 2, 2008
+ *-------------------------------------------------------------------------
  */
 #define MAX_PATH_LEN     1024
 
