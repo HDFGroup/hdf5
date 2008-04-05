@@ -1338,7 +1338,7 @@ H5_DLL herr_t H5C2_insert_entry(H5F_t *              f,
                                 void *               thing,
                                 unsigned int         flags);
 
-H5_DLL herr_t H5C2_mark_entries_as_clean(H5C2_t *  cache_ptr,
+H5_DLL herr_t H5C2_mark_entries_as_clean(H5F_t *  f,
                                          hid_t     dxpl_id,
                                          int32_t   ce_array_len,
                                          haddr_t * ce_array_ptr);

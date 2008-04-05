@@ -413,7 +413,6 @@ check_mdj_config_block_IO(void)
 
 	    pass2 = FALSE;
 	    failure_mssg2 = "H5C2_load_journal_config_block() failed.";
-	    H5Eprint1(stdout);
 	
 	} else {
 
@@ -612,7 +611,6 @@ test_mdj_conf_blk_read_write_discard(H5F_t * file_ptr,
 
 	    pass2 = FALSE;
 	    failure_mssg2 = "H5C2_load_journal_config_block() failed.";
-	    H5Eprint1(stdout);
 	
 	} else {
 
@@ -885,13 +883,13 @@ check_superblock_extensions(void)
     if ( pass2 ) {
 
         /* Create the dataset. */
-        dataset_id = H5Dcreate(file_id, "/dset", H5T_STD_I32BE, dataspace_id,
+        dataset_id = H5Dcreate2(file_id, "/dset", H5T_STD_I32BE, dataspace_id,
                                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
 	if ( dataspace_id < 0 ) {
 
 	    pass2 = FALSE;
-	    failure_mssg2 = "H5Dcreate() failed.";
+	    failure_mssg2 = "H5Dcreate2() failed.";
         }
     }
 

@@ -35,12 +35,16 @@ create_files(char *filename, char *ctl_filename)
      */
     file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     ctl_file = H5Fcreate(ctl_filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    return(0);
 }
 
 int
 close_file(hid_t fid)
 {
     H5Fclose(fid);
+
+    return(0);
 }
 
 void
@@ -79,7 +83,7 @@ writer(hid_t file, int dstype, int rank, hsize_t *dims, hsize_t *dimschunk)
      * datatype and default dataset creation properties.
      * =============================================================
      */
-    dataset = H5Dcreate(file, DATASETNAME, datatype, dataspace,
+    dataset = H5Dcreate2(file, DATASETNAME, datatype, dataspace,
 			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
@@ -102,7 +106,7 @@ writer(hid_t file, int dstype, int rank, hsize_t *dims, hsize_t *dimschunk)
      */
     plist     = H5Pcreate(H5P_DATASET_CREATE);
                 H5Pset_chunk(plist, RANK, dimschunk);
-    dataset = H5Dcreate(file, CHUNKDATASETNAME, H5T_NATIVE_INT,
+    dataset = H5Dcreate2(file, CHUNKDATASETNAME, H5T_NATIVE_INT,
                         dataspace, H5P_DEFAULT, plist, H5P_DEFAULT);
     /*
      * Write the data to the dataset using default transfer properties.
@@ -129,7 +133,7 @@ writer(hid_t file, int dstype, int rank, hsize_t *dims, hsize_t *dimschunk)
     plist     = H5Pcreate(H5P_DATASET_CREATE);
                 H5Pset_chunk(plist, RANK, dimschunk);
                 H5Pset_deflate( plist, 6);
-    dataset = H5Dcreate(file, ZDATASETNAME, H5T_NATIVE_INT,
+    dataset = H5Dcreate2(file, ZDATASETNAME, H5T_NATIVE_INT,
                         dataspace, H5P_DEFAULT, plist, H5P_DEFAULT);
     status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
 		      H5P_DEFAULT, data);
@@ -158,7 +162,7 @@ writer(hid_t file, int dstype, int rank, hsize_t *dims, hsize_t *dimschunk)
     plist     = H5Pcreate(H5P_DATASET_CREATE);
                 H5Pset_chunk(plist, RANK, dimschunk);
 		H5Pset_szip (plist, H5_SZIP_NN_OPTION_MASK, 8);
-    dataset = H5Dcreate(file, SZDATASETNAME, H5T_NATIVE_INT,
+    dataset = H5Dcreate2(file, SZDATASETNAME, H5T_NATIVE_INT,
                         dataspace, H5P_DEFAULT, plist, H5P_DEFAULT);
     status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
 		      H5P_DEFAULT, data);

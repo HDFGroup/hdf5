@@ -4778,7 +4778,7 @@ H5AC2_receive_and_apply_clean_list(H5F_t *   f,
 
 
         /* mark the indicated entries as clean */
-        if ( H5C2_mark_entries_as_clean(cache_ptr, dxpl_id, 
+        if ( H5C2_mark_entries_as_clean(f, dxpl_id, 
                                         (int32_t)num_entries,
                                         &(haddr_buf_ptr[0])) < 0 ) {
 

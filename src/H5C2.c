@@ -4988,11 +4988,12 @@ done:
 
 #ifdef H5_HAVE_PARALLEL
 herr_t
-H5C2_mark_entries_as_clean(H5C2_t *  cache_ptr,
+H5C2_mark_entries_as_clean(H5F_t *  f,
                            hid_t     dxpl_id,
                            int32_t   ce_array_len,
                            haddr_t * ce_array_ptr)
 {
+    H5C2_t *            cache_ptr;
     herr_t		ret_value = SUCCEED;      /* Return value */
     int			entries_cleared;
     int			entries_examined;
@@ -5010,6 +5011,8 @@ H5C2_mark_entries_as_clean(H5C2_t *  cache_ptr,
 
     FUNC_ENTER_NOAPI(H5C2_mark_entries_as_clean, FAIL)
 
+    HDassert( f );
+    cache_ptr = f->shared->cache2;
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
 
@@ -7055,11 +7058,11 @@ H5C2_stats(H5C2_t * cache_ptr,
               hit_rate);
 
     HDfprintf(stdout,
-              "%s  Total write / read (max) protects  = %ld / %ld (%d)\n",
+              "%s  Total write / read (max) protects  = %ld / %ld (%ld)\n",
               cache_ptr->prefix,
               (long)total_write_protects,
               (long)total_read_protects,
-              max_read_protects);
+              (long)max_read_protects);
 
     HDfprintf(stdout,
               "%s  Total clears / flushes / evictions = %ld / %ld / %ld\n",
