@@ -228,7 +228,7 @@ H5B_create(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, void *udata,
      */
     if (NULL==(bt = H5FL_MALLOC(H5B_t)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree root node")
-    HDmemset(&bt->cache_info,0,sizeof(H5AC2_info_t));
+    HDmemset(&bt->cache_info, 0, sizeof(H5AC2_info_t));
     bt->level = 0;
     bt->left = HADDR_UNDEF;
     bt->right = HADDR_UNDEF;
@@ -1865,7 +1865,10 @@ H5B_copy(const H5B_t *old_bt)
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for B-tree root node")
 
     /* Copy the main structure */
-    HDmemcpy(new_node,old_bt,sizeof(H5B_t));
+    HDmemcpy(new_node, old_bt, sizeof(H5B_t));
+
+    /* Reset cache info */
+    HDmemset(&new_node->cache_info, 0, sizeof(H5AC2_info_t));
 
     if ( NULL==(new_node->native=H5FL_BLK_MALLOC(native_block,shared->sizeof_keys)) ||
             NULL==(new_node->child=H5FL_SEQ_MALLOC(haddr_t,(size_t)shared->two_k)))

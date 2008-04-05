@@ -118,7 +118,7 @@ H5B_deserialize(haddr_t UNUSED addr, size_t UNUSED len, const void *image, const
     /* Allocate the B-tree node in memory */
     if(NULL == (bt = H5FL_MALLOC(H5B_t)))
 	HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, NULL, "can't allocate B-tree struct")
-    HDmemset(&bt->cache_info, 0, sizeof(bt->cache_info));
+    HDmemset(&bt->cache_info, 0, sizeof(H5AC2_info_t));
 
     /* Set & increment the ref-counted "shared" B-tree information for the node */
     bt->rc_shared = udata->rc_shared;
@@ -173,6 +173,9 @@ H5B_deserialize(haddr_t UNUSED addr, size_t UNUSED len, const void *image, const
         if((udata->type->decode)(shared, p, native) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, NULL, "unable to decode key")
     } /* end if */
+
+    /* Sanity check */
+    HDassert((size_t)((const uint8_t *)p - (const uint8_t *)image) <= len);
 
     /* Set return value */
     ret_value = bt;
@@ -260,6 +263,9 @@ H5B_serialize(haddr_t UNUSED addr, size_t UNUSED len, void *image, void *_thing,
 
     /* Reset the cache flags for this operation (metadata not resized or renamed) */
     *flags = 0;
+
+    /* Sanity check */
+    HDassert((size_t)((const uint8_t *)p - (const uint8_t *)image) <= len);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

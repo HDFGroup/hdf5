@@ -4128,7 +4128,7 @@ row_major_scan_forward2(H5F_t * file_ptr,
 
         local_max_index = MIN(max_index, max_indices2[type]);
 
-        //while ( ( pass2 ) && ( idx <= (max_indices2[type] + lag) ) )
+        /*while ( ( pass2 ) && ( idx <= (max_indices2[type] + lag) ) ) */
         while ( ( pass2 ) && ( idx <= (local_max_index + lag) ) )
         {
 	    if ( verbose ) {
@@ -4137,7 +4137,7 @@ row_major_scan_forward2(H5F_t * file_ptr,
 	    }
 
             if ( ( pass2 ) && ( do_inserts ) && ( (idx + lag) >= 0 ) &&
-                 //( (idx + lag) <= max_indices2[type] ) &&
+                 /*( (idx + lag) <= max_indices2[type] ) && */
                  ( (idx + lag) <= local_max_index ) &&
                  ( ((idx + lag) % 2) == 0 ) &&
                  ( ! entry_in_cache2(cache_ptr, type, (idx + lag)) ) ) {
@@ -4151,7 +4151,7 @@ row_major_scan_forward2(H5F_t * file_ptr,
 
 
             if ( ( pass2 ) && ( (idx + lag - 1) >= 0 ) &&
-                 //( (idx + lag - 1) <= max_indices2[type] ) &&
+                 /*( (idx + lag - 1) <= max_indices2[type] ) && */
                  ( (idx + lag - 1) <= local_max_index ) &&
                  ( ( (idx + lag - 1) % 3 ) == 0 ) ) {
 
@@ -4162,7 +4162,7 @@ row_major_scan_forward2(H5F_t * file_ptr,
             }
 
             if ( ( pass2 ) && ( (idx + lag - 2) >= 0 ) &&
-                 //( (idx + lag - 2) <= max_indices2[type] ) &&
+                 /*( (idx + lag - 2) <= max_indices2[type] ) && */
                  ( (idx + lag - 2) <= local_max_index ) &&
                  ( ( (idx + lag - 2) % 3 ) == 0 ) ) {
 
@@ -4175,7 +4175,7 @@ row_major_scan_forward2(H5F_t * file_ptr,
 
 
             if ( ( pass2 ) && ( do_renames ) && ( (idx + lag - 2) >= 0 ) &&
-                 //( (idx + lag - 2) <= max_indices2[type] ) &&
+                 /*( (idx + lag - 2) <= max_indices2[type] ) && */
                  ( (idx + lag - 2) <= local_max_index ) &&
                  ( ( (idx + lag - 2) % 3 ) == 0 ) ) {
 
@@ -4189,7 +4189,7 @@ row_major_scan_forward2(H5F_t * file_ptr,
 
 
             if ( ( pass2 ) && ( (idx + lag - 3) >= 0 ) &&
-                 //( (idx + lag - 3) <= max_indices2[type] ) &&
+                 /*( (idx + lag - 3) <= max_indices2[type] ) && */
                  ( (idx + lag - 3) <= local_max_index ) &&
                  ( ( (idx + lag - 3) % 5 ) == 0 ) ) {
 
@@ -4200,7 +4200,7 @@ row_major_scan_forward2(H5F_t * file_ptr,
             }
 
             if ( ( pass2 ) && ( (idx + lag - 5) >= 0 ) &&
-                 //( (idx + lag - 5) <= max_indices2[type] ) &&
+                 /*( (idx + lag - 5) <= max_indices2[type] ) && */
                  ( (idx + lag - 5) <= local_max_index ) &&
                  ( ( (idx + lag - 5) % 5 ) == 0 ) ) {
 
@@ -4214,7 +4214,7 @@ row_major_scan_forward2(H5F_t * file_ptr,
 	    if ( do_mult_ro_protects )
 	    {
 		if ( ( pass2 ) && ( (idx + lag - 5) >= 0 ) &&
-		     //( (idx + lag - 5) < max_indices2[type] ) &&
+		     /*( (idx + lag - 5) < max_indices2[type] ) && */
 		     ( (idx + lag - 5) < local_max_index ) &&
 		     ( (idx + lag - 5) % 9 == 0 ) ) {
 
@@ -4226,7 +4226,7 @@ row_major_scan_forward2(H5F_t * file_ptr,
 		}
 
 		if ( ( pass2 ) && ( (idx + lag - 6) >= 0 ) &&
-		     //( (idx + lag - 6) < max_indices2[type] ) &&
+		     /*( (idx + lag - 6) < max_indices2[type] ) && */
 		     ( (idx + lag - 6) < local_max_index ) &&
 		     ( (idx + lag - 6) % 11 == 0 ) ) {
 
@@ -4238,7 +4238,7 @@ row_major_scan_forward2(H5F_t * file_ptr,
 		}
 
 		if ( ( pass2 ) && ( (idx + lag - 7) >= 0 ) &&
-		     // ( (idx + lag - 7) < max_indices2[type] ) &&
+		     /* ( (idx + lag - 7) < max_indices2[type] ) && */
 		     ( (idx + lag - 7) < local_max_index ) &&
 		     ( (idx + lag - 7) % 13 == 0 ) ) {
 
@@ -4250,7 +4250,7 @@ row_major_scan_forward2(H5F_t * file_ptr,
 		}
 
 		if ( ( pass2 ) && ( (idx + lag - 7) >= 0 ) &&
-		     // ( (idx + lag - 7) < max_indices2[type] ) &&
+		     /* ( (idx + lag - 7) < max_indices2[type] ) && */
 		     ( (idx + lag - 7) < local_max_index ) &&
 		     ( (idx + lag - 7) % 9 == 0 ) ) {
 
@@ -4263,7 +4263,7 @@ row_major_scan_forward2(H5F_t * file_ptr,
 		}
 
 		if ( ( pass2 ) && ( (idx + lag - 8) >= 0 ) &&
-		     // ( (idx + lag - 8) < max_indices2[type] ) &&
+		     /* ( (idx + lag - 8) < max_indices2[type] ) && */
 		     ( (idx + lag - 8) < local_max_index ) &&
 		     ( (idx + lag - 8) % 11 == 0 ) ) {
 
@@ -4276,7 +4276,7 @@ row_major_scan_forward2(H5F_t * file_ptr,
 		}
 
 		if ( ( pass2 ) && ( (idx + lag - 9) >= 0 ) &&
-		     //( (idx + lag - 9) < max_indices2[type] ) &&
+		     /*( (idx + lag - 9) < max_indices2[type] ) && */
 		     ( (idx + lag - 9) < local_max_index ) &&
 		     ( (idx + lag - 9) % 13 == 0 ) ) {
 
@@ -4289,7 +4289,7 @@ row_major_scan_forward2(H5F_t * file_ptr,
 		}
 	    } /* if ( do_mult_ro_protects ) */
 
-            //if ( ( pass2 ) && ( idx >= 0 ) && ( idx <= max_indices2[type] ) ) {
+            /*if ( ( pass2 ) && ( idx >= 0 ) && ( idx <= max_indices2[type] ) ) { */
             if ( ( pass2 ) && ( idx >= 0 ) && ( idx <= local_max_index ) ) {
 
                 if ( verbose )
@@ -4299,7 +4299,7 @@ row_major_scan_forward2(H5F_t * file_ptr,
             }
 
             if ( ( pass2 ) && ( (idx - lag + 2) >= 0 ) &&
-                 //( (idx - lag + 2) <= max_indices2[type] ) &&
+                 /*( (idx - lag + 2) <= max_indices2[type] ) && */
                  ( (idx - lag + 2) <= local_max_index ) &&
                  ( ( (idx - lag + 2) % 7 ) == 0 ) ) {
 
@@ -4311,7 +4311,7 @@ row_major_scan_forward2(H5F_t * file_ptr,
             }
 
             if ( ( pass2 ) && ( (idx - lag + 1) >= 0 ) &&
-                 //( (idx - lag + 1) <= max_indices2[type] ) &&
+                 /*( (idx - lag + 1) <= max_indices2[type] ) && */
                  ( (idx - lag + 1) <= local_max_index ) &&
                  ( ( (idx - lag + 1) % 7 ) == 0 ) ) {
 
@@ -4325,7 +4325,7 @@ row_major_scan_forward2(H5F_t * file_ptr,
             if ( do_destroys ) {
 
                 if ( ( pass2 ) && ( (idx - lag) >= 0 ) &&
-                     // ( ( idx - lag) <= max_indices2[type] ) ) {
+                     /* ( ( idx - lag) <= max_indices2[type] ) ) { */
                      ( ( idx - lag) <= local_max_index ) ) {
 
                     switch ( (idx - lag) %4 ) {
@@ -4403,7 +4403,7 @@ row_major_scan_forward2(H5F_t * file_ptr,
             } else {
 
                 if ( ( pass2 ) && ( (idx - lag) >= 0 ) &&
-                     // ( ( idx - lag) <= max_indices2[type] ) ) {
+                     /* ( ( idx - lag) <= max_indices2[type] ) ) { */
                      ( ( idx - lag) <= local_max_index ) ) {
 
                     if ( verbose )
@@ -4608,13 +4608,13 @@ row_major_scan_backward2(H5F_t * file_ptr,
     {
         local_max_index = MIN(max_index, max_indices2[type]);
 
-        //idx = max_indices2[type] + lag;
+        /*idx = max_indices2[type] + lag; */
         idx = local_max_index + lag;
 
         while ( ( pass2 ) && ( idx >= -lag ) )
         {
             if ( ( pass2 ) && ( do_inserts ) && ( (idx - lag) >= 0 ) &&
-                 //( (idx - lag) <= max_indices2[type] ) &&
+                 /*( (idx - lag) <= max_indices2[type] ) && */
                  ( (idx - lag) <= local_max_index ) &&
                  ( ((idx - lag) % 2) == 1 ) &&
                  ( ! entry_in_cache2(cache_ptr, type, (idx - lag)) ) ) {
@@ -4628,7 +4628,7 @@ row_major_scan_backward2(H5F_t * file_ptr,
 
 
             if ( ( pass2 ) && ( (idx - lag + 1) >= 0 ) &&
-                 //( (idx - lag + 1) <= max_indices2[type] ) &&
+                 /*( (idx - lag + 1) <= max_indices2[type] ) && */
                  ( (idx - lag + 1) <= local_max_index ) &&
                  ( ( (idx - lag + 1) % 3 ) == 0 ) ) {
 
@@ -4639,7 +4639,7 @@ row_major_scan_backward2(H5F_t * file_ptr,
             }
 
             if ( ( pass2 ) && ( (idx - lag + 2) >= 0 ) &&
-                 //( (idx - lag + 2) <= max_indices2[type] ) &&
+                 /*( (idx - lag + 2) <= max_indices2[type] ) && */
                  ( (idx - lag + 2) <= local_max_index ) &&
                  ( ( (idx - lag + 2) % 3 ) == 0 ) ) {
 
@@ -4652,7 +4652,7 @@ row_major_scan_backward2(H5F_t * file_ptr,
 
 
             if ( ( pass2 ) && ( do_renames ) && ( (idx - lag + 2) >= 0 ) &&
-                 //( (idx - lag + 2) <= max_indices2[type] ) &&
+                 /*( (idx - lag + 2) <= max_indices2[type] ) && */
                  ( (idx - lag + 2) <= local_max_index ) &&
                  ( ( (idx - lag + 2) % 3 ) == 0 ) ) {
 
@@ -4666,7 +4666,7 @@ row_major_scan_backward2(H5F_t * file_ptr,
 
 
             if ( ( pass2 ) && ( (idx - lag + 3) >= 0 ) &&
-                 //( (idx - lag + 3) <= max_indices2[type] ) &&
+                 /*( (idx - lag + 3) <= max_indices2[type] ) && */
                  ( (idx - lag + 3) <= local_max_index ) &&
                  ( ( (idx - lag + 3) % 5 ) == 0 ) ) {
 
@@ -4677,7 +4677,7 @@ row_major_scan_backward2(H5F_t * file_ptr,
             }
 
             if ( ( pass2 ) && ( (idx - lag + 5) >= 0 ) &&
-                 //( (idx - lag + 5) <= max_indices2[type] ) &&
+                 /*( (idx - lag + 5) <= max_indices2[type] ) && */
                  ( (idx - lag + 5) <= local_max_index ) &&
                  ( ( (idx - lag + 5) % 5 ) == 0 ) ) {
 
@@ -4691,7 +4691,7 @@ row_major_scan_backward2(H5F_t * file_ptr,
 	    if ( do_mult_ro_protects )
 	    {
 		if ( ( pass2 ) && ( (idx - lag + 5) >= 0 ) &&
-		     //( (idx - lag + 5) < max_indices2[type] ) &&
+		     /*( (idx - lag + 5) < max_indices2[type] ) && */
 		     ( (idx - lag + 5) < local_max_index ) &&
 		     ( (idx - lag + 5) % 9 == 0 ) ) {
 
@@ -4703,7 +4703,7 @@ row_major_scan_backward2(H5F_t * file_ptr,
 		}
 
 		if ( ( pass2 ) && ( (idx - lag + 6) >= 0 ) &&
-		     //( (idx - lag + 6) < max_indices2[type] ) &&
+		     /*( (idx - lag + 6) < max_indices2[type] ) && */
 		     ( (idx - lag + 6) < local_max_index ) &&
 		     ( (idx - lag + 6) % 11 == 0 ) ) {
 
@@ -4715,7 +4715,7 @@ row_major_scan_backward2(H5F_t * file_ptr,
 		}
 
 		if ( ( pass2 ) && ( (idx - lag + 7) >= 0 ) &&
-		     // ( (idx - lag + 7) < max_indices2[type] ) &&
+		     /* ( (idx - lag + 7) < max_indices2[type] ) && */
 		     ( (idx - lag + 7) < local_max_index ) &&
 		     ( (idx - lag + 7) % 13 == 0 ) ) {
 
@@ -4727,7 +4727,7 @@ row_major_scan_backward2(H5F_t * file_ptr,
 		}
 
 		if ( ( pass2 ) && ( (idx - lag + 7) >= 0 ) &&
-		     //( (idx - lag + 7) < max_indices2[type] ) &&
+		     /*( (idx - lag + 7) < max_indices2[type] ) && */
 		     ( (idx - lag + 7) < local_max_index ) &&
 		     ( (idx - lag + 7) % 9 == 0 ) ) {
 
@@ -4740,7 +4740,7 @@ row_major_scan_backward2(H5F_t * file_ptr,
 		}
 
 		if ( ( pass2 ) && ( (idx - lag + 8) >= 0 ) &&
-		     //( (idx - lag + 8) < max_indices2[type] ) &&
+		     /*( (idx - lag + 8) < max_indices2[type] ) && */
 		     ( (idx - lag + 8) < local_max_index ) &&
 		     ( (idx - lag + 8) % 11 == 0 ) ) {
 
@@ -4753,7 +4753,7 @@ row_major_scan_backward2(H5F_t * file_ptr,
 		}
 
 		if ( ( pass2 ) && ( (idx - lag + 9) >= 0 ) &&
-		     //( (idx - lag + 9) < max_indices2[type] ) &&
+		     /*( (idx - lag + 9) < max_indices2[type] ) && */
 		     ( (idx - lag + 9) < local_max_index ) &&
 		     ( (idx - lag + 9) % 13 == 0 ) ) {
 
@@ -4766,7 +4766,7 @@ row_major_scan_backward2(H5F_t * file_ptr,
 		}
 	    } /* if ( do_mult_ro_protects ) */
 
-            //if ( ( pass2 ) && ( idx >= 0 ) && ( idx <= max_indices2[type] ) ) {
+            /*if ( ( pass2 ) && ( idx >= 0 ) && ( idx <= max_indices2[type] ) ) { */
             if ( ( pass2 ) && ( idx >= 0 ) && ( idx <= local_max_index ) ) {
 
                 if ( verbose )
@@ -4777,7 +4777,7 @@ row_major_scan_backward2(H5F_t * file_ptr,
 
 
             if ( ( pass2 ) && ( (idx + lag - 2) >= 0 ) &&
-                 //( (idx + lag - 2) <= max_indices2[type] ) &&
+                 /*( (idx + lag - 2) <= max_indices2[type] ) && */
                  ( (idx + lag - 2) <= local_max_index ) &&
                  ( ( (idx + lag - 2) % 7 ) == 0 ) ) {
 
@@ -4789,7 +4789,7 @@ row_major_scan_backward2(H5F_t * file_ptr,
             }
 
             if ( ( pass2 ) && ( (idx + lag - 1) >= 0 ) &&
-                 //( (idx + lag - 1) <= max_indices2[type] ) &&
+                 /*( (idx + lag - 1) <= max_indices2[type] ) && */
                  ( (idx + lag - 1) <= local_max_index ) &&
                  ( ( (idx + lag - 1) % 7 ) == 0 ) ) {
 
@@ -4803,7 +4803,7 @@ row_major_scan_backward2(H5F_t * file_ptr,
             if ( do_destroys ) {
 
                 if ( ( pass2 ) && ( (idx + lag) >= 0 ) &&
-                     //( ( idx + lag) <= max_indices2[type] ) ) {
+                     /*( ( idx + lag) <= max_indices2[type] ) ) { */
                      ( ( idx + lag) <= local_max_index ) ) {
 
                     switch ( (idx + lag) %4 ) {
@@ -4852,7 +4852,7 @@ row_major_scan_backward2(H5F_t * file_ptr,
             } else {
 
                 if ( ( pass2 ) && ( (idx + lag) >= 0 ) &&
-                     //( ( idx + lag) <= max_indices2[type] ) ) {
+                     /*( ( idx + lag) <= max_indices2[type] ) ) { */
                      ( ( idx + lag) <= local_max_index ) ) {
 
                     if ( verbose )
@@ -5059,7 +5059,7 @@ col_major_scan_forward2(H5F_t * file_ptr,
         while ( ( pass2 ) && ( type < NUMBER_OF_ENTRY_TYPES ) )
         {
             if ( ( pass2 ) && ( do_inserts ) && ( (idx + lag) >= 0 ) &&
-                 //( (idx + lag) <= max_indices2[type] ) &&
+                 /*( (idx + lag) <= max_indices2[type] ) && */
                  ( (idx + lag) <= local_max_index[type] ) &&
                  ( ((idx + lag) % 3) == 0 ) &&
                  ( ! entry_in_cache2(cache_ptr, type, (idx + lag)) ) ) {
@@ -5071,7 +5071,7 @@ col_major_scan_forward2(H5F_t * file_ptr,
                               H5C2__NO_FLAGS_SET);
             }
 
-            //if ( ( pass2 ) && ( idx >= 0 ) && ( idx <= max_indices2[type] ) ) {
+            /*if ( ( pass2 ) && ( idx >= 0 ) && ( idx <= max_indices2[type] ) ) { */
             if ( ( pass2 ) && 
                  ( idx >= 0 ) && 
                  ( idx <= local_max_index[type] ) ) {
@@ -5083,7 +5083,7 @@ col_major_scan_forward2(H5F_t * file_ptr,
             }
 
             if ( ( pass2 ) && ( (idx - lag) >= 0 ) &&
-                 //( (idx - lag) <= max_indices2[type] ) ) {
+                 /*( (idx - lag) <= max_indices2[type] ) ) { */
                  ( (idx - lag) <= local_max_index[type] ) ) {
 
                 if ( verbose )
@@ -5203,7 +5203,7 @@ hl_col_major_scan_forward2(H5F_t * file_ptr,
                 }
 
                 if ( ( pass2 ) && ( i >= 0 ) &&
-                     //( i <= max_indices2[type] ) ) {
+                     /*( i <= max_indices2[type] ) ) { */
                      ( i <= local_max_index ) ) {
 
                     if ( verbose )
@@ -5291,7 +5291,7 @@ col_major_scan_backward2(H5F_t * file_ptr,
         H5C2_stats__reset(cache_ptr);
     }
 
-    // idx = MAX_ENTRIES + lag;
+    /* idx = MAX_ENTRIES + lag; */
     idx = local_max_index[NUMBER_OF_ENTRY_TYPES - 1] + lag;
 
     if ( verbose ) /* 1 */
@@ -5305,7 +5305,7 @@ col_major_scan_backward2(H5F_t * file_ptr,
         while ( ( pass2 ) && ( type >= 0 ) )
         {
             if ( ( pass2 ) && ( do_inserts) && ( (idx - lag) >= 0 ) &&
-                 //( (idx - lag) <= max_indices2[type] ) &&
+                 /*( (idx - lag) <= max_indices2[type] ) && */
                  ( (idx - lag) <= local_max_index[type] ) &&
                  ( ((idx - lag) % 3) == 0 ) &&
                  ( ! entry_in_cache2(cache_ptr, type, (idx - lag)) ) ) {
@@ -5317,7 +5317,7 @@ col_major_scan_backward2(H5F_t * file_ptr,
                               H5C2__NO_FLAGS_SET);
             }
 
-            //if ( ( pass2 ) && ( idx >= 0 ) && ( idx <= max_indices2[type] ) ) {
+            /*if ( ( pass2 ) && ( idx >= 0 ) && ( idx <= max_indices2[type] ) ) { */
             if ( ( pass2 ) &&
 		 ( idx >= 0 ) && 
 		 ( idx <= local_max_index[type] ) ) {
@@ -5329,7 +5329,7 @@ col_major_scan_backward2(H5F_t * file_ptr,
             }
 
             if ( ( pass2 ) && ( (idx + lag) >= 0 ) &&
-                 //( (idx + lag) <= max_indices2[type] ) ) {
+                 /*( (idx + lag) <= max_indices2[type] ) ) { */
                  ( (idx + lag) <= local_max_index[type] ) ) {
 
                 if ( verbose )
