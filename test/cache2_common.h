@@ -195,6 +195,10 @@ typedef struct test_entry_t
     struct test_entry_t * self; 	/* pointer to this entry -- used for
 					 * sanity checking.
                                          */
+    H5F_t               * file_ptr;     /* pointer to the file in which the
+                                         * entry resides, or NULL if the entry
+                                         * is not in a file.
+                                         */
     H5C2_t              * cache_ptr;	/* pointer to the cache in which
 					 * the entry resides, or NULL if the
 					 * entry is not in cache.
@@ -638,28 +642,28 @@ haddr_t type_and_index_to_addr2(int32_t type,
                                 int32_t idx);
 #endif
 
-void dirty_entry2(H5C2_t * cache_ptr,
+void dirty_entry2(H5F_t * file_ptr,
                   int32_t type,
                   int32_t idx,
                   hbool_t dirty_pin);
 
-void expunge_entry2(H5C2_t * cache_ptr,
+void expunge_entry2(H5F_t * file_ptr,
                     int32_t type,
                     int32_t idx);
 
-void insert_entry2(H5C2_t * cache_ptr,
+void insert_entry2(H5F_t * file_ptr,
                    int32_t type,
                    int32_t idx,
                    hbool_t dirty,
                    unsigned int flags);
 
-void mark_pinned_entry_dirty2(H5C2_t * cache_ptr,
+void mark_pinned_entry_dirty2(H5F_t * file_ptr,
 	                      int32_t type,
 		              int32_t idx,
 		              hbool_t size_changed,
 		              size_t  new_size);
 
-void mark_pinned_or_protected_entry_dirty2(H5C2_t * cache_ptr,
+void mark_pinned_or_protected_entry_dirty2(H5F_t * file_ptr,
                                            int32_t type,
                                            int32_t idx);
 
@@ -668,11 +672,11 @@ void rename_entry2(H5C2_t * cache_ptr,
                    int32_t idx,
                    hbool_t main_addr);
 
-void protect_entry2(H5C2_t * cache_ptr,
+void protect_entry2(H5F_t * file_ptr,
                     int32_t type,
                     int32_t idx);
 
-void protect_entry_ro2(H5C2_t * cache_ptr,
+void protect_entry_ro2(H5F_t * file_ptr,
                        int32_t type,
                        int32_t idx);
 
@@ -680,33 +684,33 @@ hbool_t entry_in_cache2(H5C2_t * cache_ptr,
                         int32_t type,
                         int32_t idx);
 
-void create_pinned_entry_dependency2(H5C2_t * cache_ptr,
+void create_pinned_entry_dependency2(H5F_t * file_ptr,
 		                     int pinning_type,
 		                     int pinning_idx,
 		                     int pinned_type,
 		                     int pinned_idx);
 
-void execute_flush_op2(H5C2_t * cache_ptr,
+void execute_flush_op2(H5F_t * file_ptr,
 		      struct test_entry_t * entry_ptr,
                       struct flush_op * op_ptr,
 		      unsigned * flags_ptr);
 
 void reset_entries2(void);
 
-void resize_entry2(H5C2_t * cache_ptr,
+void resize_entry2(H5F_t * file_ptr,
                    int32_t type,
                    int32_t idx,
                    size_t new_size,
                    hbool_t resize_pin);
 
-void resize_pinned_entry2(H5C2_t * cache_ptr,
+void resize_pinned_entry2(H5F_t * file_ptr,
                           int32_t type,
                           int32_t idx,
                           size_t new_size);
 
-H5C2_t * setup_cache2(size_t max_cache_size, size_t min_clean_size);
+H5F_t * setup_cache2(size_t max_cache_size, size_t min_clean_size);
 
-void row_major_scan_forward2(H5C2_t * cache_ptr,
+void row_major_scan_forward2(H5F_t * file_ptr,
                              int32_t max_index,
                              int32_t lag,
                              hbool_t verbose,
@@ -722,7 +726,7 @@ void row_major_scan_forward2(H5C2_t * cache_ptr,
                              int dirty_destroys,
                              int dirty_unprotects);
 
-void hl_row_major_scan_forward2(H5C2_t * cache_ptr,
+void hl_row_major_scan_forward2(H5F_t * file_ptr,
                                 int32_t max_index,
                                 hbool_t verbose,
                                 hbool_t reset_stats,
@@ -731,7 +735,7 @@ void hl_row_major_scan_forward2(H5C2_t * cache_ptr,
                                 hbool_t do_inserts,
                                 hbool_t dirty_inserts);
 
-void row_major_scan_backward2(H5C2_t * cache_ptr,
+void row_major_scan_backward2(H5F_t * file_ptr,
                               int32_t max_index,
                               int32_t lag,
                               hbool_t verbose,
@@ -747,7 +751,7 @@ void row_major_scan_backward2(H5C2_t * cache_ptr,
                               int dirty_destroys,
                               int dirty_unprotects);
 
-void hl_row_major_scan_backward2(H5C2_t * cache_ptr,
+void hl_row_major_scan_backward2(H5F_t * file_ptr,
                                  int32_t max_index,
                                  hbool_t verbose,
                                  hbool_t reset_stats,
@@ -756,7 +760,7 @@ void hl_row_major_scan_backward2(H5C2_t * cache_ptr,
                                  hbool_t do_inserts,
                                  hbool_t dirty_inserts);
 
-void col_major_scan_forward2(H5C2_t * cache_ptr,
+void col_major_scan_forward2(H5F_t * file_ptr,
                              int32_t max_index,
                              int32_t lag,
                              hbool_t verbose,
@@ -767,7 +771,7 @@ void col_major_scan_forward2(H5C2_t * cache_ptr,
                              hbool_t dirty_inserts,
                              int dirty_unprotects);
 
-void hl_col_major_scan_forward2(H5C2_t * cache_ptr,
+void hl_col_major_scan_forward2(H5F_t * file_ptr,
                                 int32_t max_index,
                                 hbool_t verbose,
                                 hbool_t reset_stats,
@@ -777,7 +781,7 @@ void hl_col_major_scan_forward2(H5C2_t * cache_ptr,
                                 hbool_t dirty_inserts,
                                 int dirty_unprotects);
 
-void col_major_scan_backward2(H5C2_t * cache_ptr,
+void col_major_scan_backward2(H5F_t * file_ptr,
                               int32_t max_index,
                               int32_t lag,
                               hbool_t verbose,
@@ -788,7 +792,7 @@ void col_major_scan_backward2(H5C2_t * cache_ptr,
                               hbool_t dirty_inserts,
                               int dirty_unprotects);
 
-void hl_col_major_scan_backward2(H5C2_t * cache_ptr,
+void hl_col_major_scan_backward2(H5F_t * file_ptr,
                                  int32_t max_index,
                                  hbool_t verbose,
                                  hbool_t reset_stats,
@@ -798,26 +802,26 @@ void hl_col_major_scan_backward2(H5C2_t * cache_ptr,
                                  hbool_t dirty_inserts,
                                  int dirty_unprotects);
 
-void takedown_cache2(H5C2_t * cache_ptr,
+void takedown_cache2(H5F_t * file_ptr,
                      hbool_t dump_stats,
                      hbool_t dump_detailed_stats);
 
-void flush_cache2(H5C2_t * cache_ptr,
+void flush_cache2(H5F_t * file_ptr,
                   hbool_t destroy_entries,
                   hbool_t dump_stats,
                   hbool_t dump_detailed_stats);
 
-void unpin_entry2(H5C2_t * cache_ptr,
+void unpin_entry2(H5F_t * file_ptr,
                   int32_t type,
                   int32_t idx);
 
-void unprotect_entry2(H5C2_t * cache_ptr,
+void unprotect_entry2(H5F_t * file_ptr,
                       int32_t type,
                       int32_t idx,
                       int dirty,
                       unsigned int flags);
 
-void unprotect_entry_with_size_change2(H5C2_t * cache_ptr,
+void unprotect_entry_with_size_change2(H5F_t * file_ptr,
                                        int32_t type,
                                        int32_t idx,
                                        unsigned int flags,

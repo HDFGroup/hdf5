@@ -174,8 +174,8 @@ struct H5C2_jbrb_t
 	unsigned long	cur_trans;
 	unsigned long	last_trans_on_disk;
 	hbool_t		trans_in_prog;
-	char *		jname;
-	char *		hdf5_file_name;
+	const char *	jname;
+	const char *	hdf5_file_name;
 	hbool_t 	header_present;
 	size_t 		cur_buf_free_space;
 	size_t		rb_space_to_rollover;
@@ -242,11 +242,6 @@ struct H5C2_jbrb_t
  * magic:	Unsigned 32 bit integer always set to H5C2__H5C2_T_MAGIC.  
  * 		This field is used to validate pointers to instances of 
  * 		H5C2_t.
- *
- * f:           Pointer to the instance of H5F_t associated with this
- *              instance of the metadata cache.  This field is set at
- *              create, and then used until the file is closed (at which
- *              point, the cache will be shut down as well).
  *
  * flush_in_progress: Boolean flag indicating whether a flush is in 
  * 		progress.
@@ -1023,8 +1018,6 @@ struct H5C2_jbrb_t
 struct H5C2_t
 {
     uint32_t			magic;
-
-    H5F_t *			f;
 
     hbool_t			flush_in_progress;
 

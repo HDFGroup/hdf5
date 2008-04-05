@@ -1034,7 +1034,9 @@ serialize(haddr_t addr,
 
         for ( i = 0; i < entry_ptr->num_flush_ops; i++ )
         {
-            execute_flush_op2(entry_ptr->cache_ptr,
+            HDassert( entry_ptr->file_ptr );
+
+            execute_flush_op2(entry_ptr->file_ptr,
                               entry_ptr,
                               &((entry_ptr->flush_ops)[i]),
                               flags_ptr);
@@ -1364,7 +1366,9 @@ free_icr(haddr_t addr,
 
 	    if ( pinned_entry_ptr->pinning_ref_count <= 0 ) {
 
-		unpin_entry2(pinned_entry_ptr->cache_ptr,
+                HDassert( pinned_entry_ptr->file_ptr );
+
+		unpin_entry2(pinned_entry_ptr->file_ptr,
 			     pinned_entry_ptr->type,
 			     pinned_entry_ptr->index);
 	    }
@@ -1570,7 +1574,7 @@ add_flush_op2(int target_type,
  */
 
 void
-create_pinned_entry_dependency2(H5C2_t * cache_ptr,
+create_pinned_entry_dependency2(H5F_t * file_ptr,
 		                int pinning_type,
                                 int pinning_idx,
 	                        int pinned_type,
@@ -1614,8 +1618,8 @@ create_pinned_entry_dependency2(H5C2_t * cache_ptr,
 
         if ( pinned_entry_ptr->pinning_ref_count == 0 ) {
 
-	    protect_entry2(cache_ptr, pinned_type, pinned_idx);
-	    unprotect_entry2(cache_ptr, pinned_type, pinned_idx, FALSE,
+	    protect_entry2(file_ptr, pinned_type, pinned_idx);
+	    unprotect_entry2(file_ptr, pinned_type, pinned_idx, FALSE,
 		             H5C2__PIN_ENTRY_FLAG);
 	}
 
@@ -1653,11 +1657,12 @@ create_pinned_entry_dependency2(H5C2_t * cache_ptr,
  */
 
 void
-dirty_entry2(H5C2_t * cache_ptr,
+dirty_entry2(H5F_t * file_ptr,
              int32_t type,
              int32_t idx,
 	     hbool_t dirty_pin)
 {
+    H5C2_t * cache_ptr = file_ptr->shared->cache2;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
 
@@ -1690,15 +1695,15 @@ dirty_entry2(H5C2_t * cache_ptr,
 		    
                 } else {
 
-		    mark_pinned_entry_dirty2(cache_ptr, type, idx, 
+		    mark_pinned_entry_dirty2(file_ptr, type, idx, 
 				             FALSE, (size_t)0);
 
 		}
 	    }
         } else {
         
-	    protect_entry2(cache_ptr, type, idx);
-            unprotect_entry2(cache_ptr, type, idx, TRUE, H5C2__NO_FLAGS_SET);
+	    protect_entry2(file_ptr, type, idx);
+            unprotect_entry2(file_ptr, type, idx, TRUE, H5C2__NO_FLAGS_SET);
 	}
     }
 
@@ -1728,12 +1733,13 @@ dirty_entry2(H5C2_t * cache_ptr,
  */
 
 void
-execute_flush_op2(H5C2_t * cache_ptr,
+execute_flush_op2(H5F_t * file_ptr,
 		  struct test_entry_t * entry_ptr,
 		  struct flush_op * op_ptr,
 		  unsigned * flags_ptr)
 {
-    const char * fcn_name = "execute_flush_op2()";
+    /* const char * fcn_name = "execute_flush_op2()"; */
+    H5C2_t * cache_ptr = file_ptr->shared->cache2;
 
     HDassert( cache_ptr != NULL );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
@@ -1765,7 +1771,7 @@ execute_flush_op2(H5C2_t * cache_ptr,
 		HDassert( ( entry_ptr->type != op_ptr->type ) || 
 			  ( entry_ptr->index != op_ptr->idx ) );
 
-		dirty_entry2(cache_ptr, op_ptr->type, op_ptr->idx, 
+		dirty_entry2(file_ptr, op_ptr->type, op_ptr->idx, 
 			     op_ptr->flag);
 		break;
 
@@ -1790,7 +1796,7 @@ execute_flush_op2(H5C2_t * cache_ptr,
 
 		    /* change the size of some other entry */
 
-		    resize_entry2(cache_ptr, op_ptr->type, op_ptr->idx, 
+		    resize_entry2(file_ptr, op_ptr->type, op_ptr->idx, 
                                   op_ptr->size, op_ptr->flag);
 		}
 		break;
@@ -2045,12 +2051,13 @@ reset_entries2(void)
  */
 
 void
-resize_entry2(H5C2_t * cache_ptr,
+resize_entry2(H5F_t * file_ptr,
              int32_t type,
              int32_t idx,
 	     size_t new_size,
 	     hbool_t resize_pin)
 {
+    H5C2_t * cache_ptr = file_ptr->shared->cache2;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
 
@@ -2085,14 +2092,14 @@ resize_entry2(H5C2_t * cache_ptr,
 		    
                 } else {
 
-		    mark_pinned_entry_dirty2(cache_ptr, type, idx, 
+		    mark_pinned_entry_dirty2(file_ptr, type, idx, 
 				             TRUE, new_size);
 		}
 	    }
         } else {
         
-	    protect_entry2(cache_ptr, type, idx);
-	    unprotect_entry_with_size_change2(cache_ptr, type, idx,
+	    protect_entry2(file_ptr, type, idx);
+	    unprotect_entry_with_size_change2(file_ptr, type, idx,
                                               H5C2__SIZE_CHANGED_FLAG, 
 					      new_size);
 	}
@@ -2125,11 +2132,12 @@ resize_entry2(H5C2_t * cache_ptr,
    */
 
 void
-resize_pinned_entry2(H5C2_t * cache_ptr,
+resize_pinned_entry2(H5F_t * file_ptr,
                      int32_t type,
                      int32_t idx,
                      size_t new_size)
 {
+    H5C2_t * cache_ptr = file_ptr->shared->cache2;
     herr_t result;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
@@ -2165,7 +2173,7 @@ resize_pinned_entry2(H5C2_t * cache_ptr,
 
                 entry_ptr->size = new_size;
 
-                result = H5C2_resize_pinned_entry(cache_ptr,
+                result = H5C2_resize_pinned_entry(file_ptr,
                                                   (void *)entry_ptr,
                                                    new_size);
 
@@ -2272,7 +2280,7 @@ verify_entry_status2(H5C2_t * cache_ptr,
 		     int num_entries,
 		     struct expected_entry_status expected[])
 {
-    const char *   fcn_name = "verify_entry_status2()";
+    /* const char *   fcn_name = "verify_entry_status2()"; */
     static char    msg[128];
     hbool_t        in_cache = FALSE; /* will set to TRUE if necessary */
     int            i;
@@ -2588,7 +2596,7 @@ verify_unprotected2(void)
  *
  *****************************************************************************/
 
-H5C2_t *
+H5F_t *
 setup_cache2(size_t max_cache_size,
              size_t min_clean_size)
 {
@@ -2600,7 +2608,7 @@ setup_cache2(size_t max_cache_size,
     hid_t fid = -1;
     H5F_t * file_ptr = NULL;
     H5C2_t * cache_ptr = NULL;
-    H5C2_t * ret_val = NULL;
+    H5F_t * ret_val = NULL;
     haddr_t actual_base_addr;
     hid_t fapl_id = H5P_DEFAULT;
 
@@ -2717,6 +2725,10 @@ setup_cache2(size_t max_cache_size,
 
     if ( pass2 ) {
 
+/* FIXME: I'm in a hurry here, I'll need to talk to John about the best way
+ *              to do this right... -QAK
+ */
+#ifdef OLD_WAY
         cache_ptr = H5C2_create(file_ptr,
 			        max_cache_size,
                                 min_clean_size,
@@ -2726,6 +2738,20 @@ setup_cache2(size_t max_cache_size,
                                 TRUE,
                                 NULL,
                                 NULL);
+#else /* OLD_WAY */
+        H5C2_dest(file_ptr, H5P_DATASET_XFER_DEFAULT);
+
+        cache_ptr = H5C2_create(max_cache_size,
+                                min_clean_size,
+                                (NUMBER_OF_ENTRY_TYPES - 1),
+				(const char **)entry_type_names2,
+                                check_write_permitted2,
+                                TRUE,
+                                NULL,
+                                NULL);
+
+        file_ptr->shared->cache2 = cache_ptr;
+#endif /* OLD_WAY */
     }
 
     if ( show_progress ) /* 5 */
@@ -2795,7 +2821,7 @@ setup_cache2(size_t max_cache_size,
     if ( pass2 ) {
 
         H5C2_stats__reset(cache_ptr);
-        ret_val = cache_ptr;
+        ret_val = file_ptr;
     }
 
     if ( show_progress ) /* 8 */
@@ -2827,22 +2853,28 @@ setup_cache2(size_t max_cache_size,
  */
 
 void
-takedown_cache2(H5C2_t * cache_ptr,
+takedown_cache2(H5F_t * file_ptr,
                 hbool_t dump_stats,
                 hbool_t dump_detailed_stats)
 {
     char filename[512];
 
-    if ( cache_ptr != NULL ) {
+    if ( file_ptr != NULL ) {
+        H5C2_t * cache_ptr = file_ptr->shared->cache2;
 
         if ( dump_stats ) {
 
             H5C2_stats(cache_ptr, "test cache", dump_detailed_stats);
         }
 	
-        flush_cache2(cache_ptr, TRUE, FALSE, FALSE);
+        flush_cache2(file_ptr, TRUE, FALSE, FALSE);
 
-        H5C2_dest(cache_ptr, H5P_DATASET_XFER_DEFAULT);
+/* FIXME:  Related to earlier hack with same tag, have John check for
+ *              correctness... -QAK
+ */
+#ifdef OLD_WAY
+        H5C2_dest(file_ptr, H5P_DATASET_XFER_DEFAULT);
+#endif /* OLD_WAY */
 
     }
 
@@ -2900,11 +2932,14 @@ takedown_cache2(H5C2_t * cache_ptr,
  */
 
 void
-expunge_entry2(H5C2_t * cache_ptr,
+expunge_entry2(H5F_t * file_ptr,
               int32_t type,
               int32_t idx)
 {
     /* const char * fcn_name = "expunge_entry2()"; */
+#ifndef NDEBUG
+    H5C2_t * cache_ptr = file_ptr->shared->cache2;
+#endif /* NDEBUG */
     herr_t result;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
@@ -2927,7 +2962,7 @@ expunge_entry2(H5C2_t * cache_ptr,
         HDassert( ! ( entry_ptr->header.is_pinned ) );
 	HDassert( ! ( entry_ptr->is_pinned ) );
 
-        result = H5C2_expunge_entry(cache_ptr, H5P_DATASET_XFER_DEFAULT, 
+        result = H5C2_expunge_entry(file_ptr, H5P_DATASET_XFER_DEFAULT, 
 			            &(types2[type]),
                                     entry_ptr->addr);
 
@@ -2961,17 +2996,18 @@ expunge_entry2(H5C2_t * cache_ptr,
  */
 
 void
-flush_cache2(H5C2_t * cache_ptr,
+flush_cache2(H5F_t * file_ptr,
              hbool_t destroy_entries,
              hbool_t dump_stats,
              hbool_t dump_detailed_stats)
 {
     const char * fcn_name = "flush_cache2()";
+    H5C2_t * cache_ptr = file_ptr->shared->cache2;
     hbool_t show_progress = FALSE;
     herr_t result = 0;
     int mile_post = 0;
 
-    HDassert(cache_ptr);
+    HDassert(file_ptr);
 
     if ( show_progress ) {
 	HDfprintf(stdout, "%s: mile_post = %d.\n", 
@@ -2989,12 +3025,12 @@ flush_cache2(H5C2_t * cache_ptr,
 
         if ( destroy_entries ) {
 
-            result = H5C2_flush_cache(cache_ptr, H5P_DATASET_XFER_DEFAULT,
+            result = H5C2_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
                                      H5C2__FLUSH_INVALIDATE_FLAG);
 
         } else {
 
-            result = H5C2_flush_cache(cache_ptr, H5P_DATASET_XFER_DEFAULT,
+            result = H5C2_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
                                       H5C2__NO_FLAGS_SET);
         }
     }
@@ -3069,12 +3105,13 @@ flush_cache2(H5C2_t * cache_ptr,
  */
 
 void
-insert_entry2(H5C2_t * cache_ptr,
+insert_entry2(H5F_t * file_ptr,
              int32_t type,
              int32_t idx,
              hbool_t UNUSED dirty,
              unsigned int flags)
 {
+    H5C2_t * cache_ptr = file_ptr->shared->cache2;
     herr_t result;
     hbool_t insert_pinned;
     test_entry_t * base_addr;
@@ -3098,7 +3135,7 @@ insert_entry2(H5C2_t * cache_ptr,
 
 	entry_ptr->is_dirty = TRUE;
 
-        result = H5C2_insert_entry(cache_ptr, H5P_DATASET_XFER_DEFAULT, 
+        result = H5C2_insert_entry(file_ptr, H5P_DATASET_XFER_DEFAULT, 
 			           &(types2[type]), entry_ptr->addr, 
 				   entry_ptr->size, (void *)entry_ptr, flags);
 
@@ -3129,6 +3166,7 @@ insert_entry2(H5C2_t * cache_ptr,
         }
 	HDassert( entry_ptr->cache_ptr == NULL );
 
+        entry_ptr->file_ptr = file_ptr;
         entry_ptr->cache_ptr = cache_ptr;
 
 	if ( insert_pinned ) {
@@ -3171,13 +3209,16 @@ insert_entry2(H5C2_t * cache_ptr,
  */
 
 void
-mark_pinned_entry_dirty2(H5C2_t * cache_ptr,
+mark_pinned_entry_dirty2(H5F_t * file_ptr,
                          int32_t type,
                          int32_t idx,
 		 	 hbool_t size_changed,
 			 size_t  new_size)
 {
     /* const char * fcn_name = "mark_pinned_entry_dirty2()"; */
+#ifndef NDEBUG
+    H5C2_t * cache_ptr = file_ptr->shared->cache2;
+#endif /* NDEBUG */
     herr_t result;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
@@ -3207,7 +3248,7 @@ mark_pinned_entry_dirty2(H5C2_t * cache_ptr,
             entry_ptr->size = new_size;
         }
 
-        result = H5C2_mark_pinned_entry_dirty(cache_ptr,
+        result = H5C2_mark_pinned_entry_dirty(file_ptr,
 		 	                      (void *)entry_ptr,
 				 	      size_changed,
 					      new_size);
@@ -3269,11 +3310,14 @@ mark_pinned_entry_dirty2(H5C2_t * cache_ptr,
  */
 
 void
-mark_pinned_or_protected_entry_dirty2(H5C2_t * cache_ptr,
+mark_pinned_or_protected_entry_dirty2(H5F_t * file_ptr,
                                      int32_t type,
                                      int32_t idx)
 {
     /* const char * fcn_name = "mark_pinned_or_protected_entry_dirty2()"; */
+#ifndef NDEBUG
+    H5C2_t * cache_ptr = file_ptr->shared->cache2;
+#endif /* NDEBUG */
     herr_t result;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
@@ -3296,7 +3340,7 @@ mark_pinned_or_protected_entry_dirty2(H5C2_t * cache_ptr,
 
 	entry_ptr->is_dirty = TRUE;
 
-        result = H5C2_mark_pinned_or_protected_entry_dirty(cache_ptr,
+        result = H5C2_mark_pinned_or_protected_entry_dirty(file_ptr,
 		 	                                   (void *)entry_ptr);
 
         if ( ( result < 0 )
@@ -3463,11 +3507,12 @@ rename_entry2(H5C2_t * cache_ptr,
  */
 
 void
-protect_entry2(H5C2_t * cache_ptr,
+protect_entry2(H5F_t * file_ptr,
                int32_t type,
                int32_t idx)
 {
     const char * fcn_name = "protect_entry2()";
+    H5C2_t * cache_ptr = file_ptr->shared->cache2;
     hbool_t verbose = FALSE;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
@@ -3499,7 +3544,7 @@ protect_entry2(H5C2_t * cache_ptr,
 		      (long)(entry_ptr->size));
 	}
 
-        cache_entry_ptr = H5C2_protect(cache_ptr, H5P_DATASET_XFER_DEFAULT, 
+        cache_entry_ptr = H5C2_protect(file_ptr, H5P_DATASET_XFER_DEFAULT, 
 			               &(types2[type]), entry_ptr->addr, 
 				       entry_ptr->size, NULL, 
 				       H5C2__NO_FLAGS_SET);
@@ -3548,6 +3593,7 @@ protect_entry2(H5C2_t * cache_ptr,
 		      ( entry_ptr->cache_ptr == cache_ptr ) );
 
 	    entry_ptr->cache_ptr = cache_ptr;
+	    entry_ptr->file_ptr = file_ptr;
             entry_ptr->is_protected = TRUE;
 
         }
@@ -3585,11 +3631,12 @@ protect_entry2(H5C2_t * cache_ptr,
  */
 
 void
-protect_entry_ro2(H5C2_t * cache_ptr,
+protect_entry_ro2(H5F_t * file_ptr,
                   int32_t type,
                   int32_t idx)
 {
     /* const char * fcn_name = "protect_entry_ro2()"; */
+    H5C2_t * cache_ptr = file_ptr->shared->cache2;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
     H5C2_cache_entry_t * cache_entry_ptr;
@@ -3610,7 +3657,7 @@ protect_entry_ro2(H5C2_t * cache_ptr,
 		  ( ( entry_ptr->is_read_only ) && 
 		    ( entry_ptr->ro_ref_count > 0 ) ) );
 
-        cache_entry_ptr = H5C2_protect(cache_ptr, H5P_DATASET_XFER_DEFAULT, 
+        cache_entry_ptr = H5C2_protect(file_ptr, H5P_DATASET_XFER_DEFAULT, 
 			               &(types2[type]), entry_ptr->addr, 
 				       entry_ptr->size, NULL,
 				       H5C2__READ_ONLY_FLAG);
@@ -3632,6 +3679,7 @@ protect_entry_ro2(H5C2_t * cache_ptr,
 		      ( entry_ptr->cache_ptr == cache_ptr ) );
 
 	    entry_ptr->cache_ptr = cache_ptr;
+	    entry_ptr->file_ptr = file_ptr;
             entry_ptr->is_protected = TRUE;
 	    entry_ptr->is_read_only = TRUE;
 	    entry_ptr->ro_ref_count++;
@@ -3665,11 +3713,14 @@ protect_entry_ro2(H5C2_t * cache_ptr,
  */
 
 void
-unpin_entry2(H5C2_t * cache_ptr,
+unpin_entry2(H5F_t * file_ptr,
              int32_t type,
              int32_t idx)
 {
     /* const char * fcn_name = "unpin_entry2()"; */
+#ifndef NDEBUG
+    H5C2_t * cache_ptr = file_ptr->shared->cache2;
+#endif /* NDEBUG */
     herr_t result;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
@@ -3691,7 +3742,7 @@ unpin_entry2(H5C2_t * cache_ptr,
         HDassert( entry_ptr->header.is_pinned );
 	HDassert( entry_ptr->is_pinned );
 
-        result = H5C2_unpin_entry(cache_ptr, (void *)entry_ptr);
+        result = H5C2_unpin_entry(file_ptr, (void *)entry_ptr);
 
         if ( ( result < 0 ) ||
              ( entry_ptr->header.is_pinned ) ||
@@ -3751,13 +3802,16 @@ unpin_entry2(H5C2_t * cache_ptr,
  */
 
 void
-unprotect_entry2(H5C2_t * cache_ptr,
+unprotect_entry2(H5F_t * file_ptr,
                 int32_t type,
                 int32_t idx,
                 int dirty,
                 unsigned int flags)
 {
     const char * fcn_name = "unprotect_entry2()";
+#ifndef NDEBUG
+    H5C2_t * cache_ptr = file_ptr->shared->cache2;
+#endif /* NDEBUG */
     herr_t result;
     hbool_t verbose = FALSE;
     hbool_t pin_flag_set;
@@ -3805,7 +3859,7 @@ unprotect_entry2(H5C2_t * cache_ptr,
 	              fcn_name, (long)(entry_ptr->addr));
         }
 
-        result = H5C2_unprotect(cache_ptr, H5P_DATASET_XFER_DEFAULT, 
+        result = H5C2_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT, 
 			        &(types2[type]), entry_ptr->addr, 
 				(void *)entry_ptr, flags, (size_t)0);
 
@@ -3907,13 +3961,16 @@ unprotect_entry2(H5C2_t * cache_ptr,
  */
 
 void
-unprotect_entry_with_size_change2(H5C2_t * cache_ptr,
+unprotect_entry_with_size_change2(H5F_t * file_ptr,
                                   int32_t type,
                                   int32_t idx,
                                   unsigned int flags,
 		                  size_t new_size)
 {
     /* const char * fcn_name = "unprotect_entry_with_size_change2()"; */
+#ifndef NDEBUG
+    H5C2_t * cache_ptr = file_ptr->shared->cache2;
+#endif /* NDEBUG */
     herr_t result;
     hbool_t dirty_flag_set;
     hbool_t pin_flag_set;
@@ -3959,7 +4016,7 @@ unprotect_entry_with_size_change2(H5C2_t * cache_ptr,
 	    entry_ptr->size = new_size;
         }
 
-        result = H5C2_unprotect(cache_ptr, H5P_DATASET_XFER_DEFAULT, 
+        result = H5C2_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT, 
 			        &(types2[type]), entry_ptr->addr, 
 				(void *)entry_ptr, flags, new_size);
 
@@ -4031,7 +4088,7 @@ unprotect_entry_with_size_change2(H5C2_t * cache_ptr,
  */
 
 void
-row_major_scan_forward2(H5C2_t * cache_ptr,
+row_major_scan_forward2(H5F_t * file_ptr,
                         int32_t max_index,
                         int32_t lag,
                         hbool_t verbose,
@@ -4048,6 +4105,7 @@ row_major_scan_forward2(H5C2_t * cache_ptr,
                         int dirty_unprotects)
 {
     const char * fcn_name = "row_major_scan_forward2";
+    H5C2_t * cache_ptr = file_ptr->shared->cache2;
     int32_t type;
     int32_t idx;
     int32_t local_max_index;
@@ -4087,7 +4145,7 @@ row_major_scan_forward2(H5C2_t * cache_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "1(i, %d, %d) ", type, (idx + lag));
 
-                insert_entry2(cache_ptr, type, (idx + lag), dirty_inserts,
+                insert_entry2(file_ptr, type, (idx + lag), dirty_inserts,
                               H5C2__NO_FLAGS_SET);
             }
 
@@ -4100,7 +4158,7 @@ row_major_scan_forward2(H5C2_t * cache_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "2(p, %d, %d) ", type, (idx + lag - 1));
 
-                protect_entry2(cache_ptr, type, (idx + lag - 1));
+                protect_entry2(file_ptr, type, (idx + lag - 1));
             }
 
             if ( ( pass2 ) && ( (idx + lag - 2) >= 0 ) &&
@@ -4111,7 +4169,7 @@ row_major_scan_forward2(H5C2_t * cache_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "3(u, %d, %d) ", type, (idx + lag - 2));
 
-                unprotect_entry2(cache_ptr, type, idx+lag-2, NO_CHANGE,
+                unprotect_entry2(file_ptr, type, idx+lag-2, NO_CHANGE,
                                  H5C2__NO_FLAGS_SET);
             }
 
@@ -4138,7 +4196,7 @@ row_major_scan_forward2(H5C2_t * cache_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "5(p, %d, %d) ", type, (idx + lag - 3));
 
-                protect_entry2(cache_ptr, type, (idx + lag - 3));
+                protect_entry2(file_ptr, type, (idx + lag - 3));
             }
 
             if ( ( pass2 ) && ( (idx + lag - 5) >= 0 ) &&
@@ -4149,7 +4207,7 @@ row_major_scan_forward2(H5C2_t * cache_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "6(u, %d, %d) ", type, (idx + lag - 5));
 
-                unprotect_entry2(cache_ptr, type, idx+lag-5, NO_CHANGE,
+                unprotect_entry2(file_ptr, type, idx+lag-5, NO_CHANGE,
                                  H5C2__NO_FLAGS_SET);
             }
 
@@ -4164,7 +4222,7 @@ row_major_scan_forward2(H5C2_t * cache_ptr,
                         HDfprintf(stdout, "7(p-ro, %d, %d) ", type, 
 				  (idx + lag - 5));
 
-		    protect_entry_ro2(cache_ptr, type, (idx + lag - 5));
+		    protect_entry_ro2(file_ptr, type, (idx + lag - 5));
 		}
 
 		if ( ( pass2 ) && ( (idx + lag - 6) >= 0 ) &&
@@ -4176,7 +4234,7 @@ row_major_scan_forward2(H5C2_t * cache_ptr,
                         HDfprintf(stdout, "8(p-ro, %d, %d) ", type, 
 				  (idx + lag - 6));
 
-		    protect_entry_ro2(cache_ptr, type, (idx + lag - 6));
+		    protect_entry_ro2(file_ptr, type, (idx + lag - 6));
 		}
 
 		if ( ( pass2 ) && ( (idx + lag - 7) >= 0 ) &&
@@ -4188,7 +4246,7 @@ row_major_scan_forward2(H5C2_t * cache_ptr,
                         HDfprintf(stdout, "9(p-ro, %d, %d) ", type, 
 				  (idx + lag - 7));
 
-		    protect_entry_ro2(cache_ptr, type, (idx + lag - 7));
+		    protect_entry_ro2(file_ptr, type, (idx + lag - 7));
 		}
 
 		if ( ( pass2 ) && ( (idx + lag - 7) >= 0 ) &&
@@ -4200,7 +4258,7 @@ row_major_scan_forward2(H5C2_t * cache_ptr,
                         HDfprintf(stdout, "10(u-ro, %d, %d) ", type, 
 				  (idx + lag - 7));
 
-		    unprotect_entry2(cache_ptr, type, (idx + lag - 7),
+		    unprotect_entry2(file_ptr, type, (idx + lag - 7),
 				     FALSE, H5C2__NO_FLAGS_SET);
 		}
 
@@ -4213,7 +4271,7 @@ row_major_scan_forward2(H5C2_t * cache_ptr,
                         HDfprintf(stdout, "11(u-ro, %d, %d) ", type, 
 				  (idx + lag - 8));
 
-		    unprotect_entry2(cache_ptr, type, (idx + lag - 8),
+		    unprotect_entry2(file_ptr, type, (idx + lag - 8),
 				    FALSE, H5C2__NO_FLAGS_SET);
 		}
 
@@ -4226,7 +4284,7 @@ row_major_scan_forward2(H5C2_t * cache_ptr,
                         HDfprintf(stdout, "12(u-ro, %d, %d) ", type, 
 				  (idx + lag - 9));
 
-		    unprotect_entry2(cache_ptr, type, (idx + lag - 9),
+		    unprotect_entry2(file_ptr, type, (idx + lag - 9),
 				     FALSE, H5C2__NO_FLAGS_SET);
 		}
 	    } /* if ( do_mult_ro_protects ) */
@@ -4237,7 +4295,7 @@ row_major_scan_forward2(H5C2_t * cache_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "13(p, %d, %d) ", type, idx);
 
-                protect_entry2(cache_ptr, type, idx);
+                protect_entry2(file_ptr, type, idx);
             }
 
             if ( ( pass2 ) && ( (idx - lag + 2) >= 0 ) &&
@@ -4248,7 +4306,7 @@ row_major_scan_forward2(H5C2_t * cache_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "14(u, %d, %d) ", type, (idx - lag + 2));
 
-                unprotect_entry2(cache_ptr, type, idx-lag+2, NO_CHANGE,
+                unprotect_entry2(file_ptr, type, idx-lag+2, NO_CHANGE,
                                 H5C2__NO_FLAGS_SET);
             }
 
@@ -4260,7 +4318,7 @@ row_major_scan_forward2(H5C2_t * cache_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "15(p, %d, %d) ", type, (idx - lag + 1));
 
-                protect_entry2(cache_ptr, type, (idx - lag + 1));
+                protect_entry2(file_ptr, type, (idx - lag + 1));
             }
 
 
@@ -4278,7 +4336,7 @@ row_major_scan_forward2(H5C2_t * cache_ptr,
                                 HDfprintf(stdout, 
 					 "16(u, %d, %d) ", type, (idx - lag));
 
-                            unprotect_entry2(cache_ptr, type, idx - lag,
+                            unprotect_entry2(file_ptr, type, idx - lag,
                                             NO_CHANGE, H5C2__NO_FLAGS_SET);
                             break;
 
@@ -4289,7 +4347,7 @@ row_major_scan_forward2(H5C2_t * cache_ptr,
                                 HDfprintf(stdout, 
 					 "17(u, %d, %d) ", type, (idx - lag));
 
-                                unprotect_entry2(cache_ptr, type, idx - lag,
+                                unprotect_entry2(file_ptr, type, idx - lag,
                                                 NO_CHANGE, H5C2__NO_FLAGS_SET);
                             } else {
 
@@ -4297,7 +4355,7 @@ row_major_scan_forward2(H5C2_t * cache_ptr,
                                 HDfprintf(stdout, 
 					 "18(u, %d, %d) ", type, (idx - lag));
 
-                                unprotect_entry2(cache_ptr, type, idx - lag,
+                                unprotect_entry2(file_ptr, type, idx - lag,
                                                 dirty_unprotects,
                                                 H5C2__NO_FLAGS_SET);
                             }
@@ -4309,7 +4367,7 @@ row_major_scan_forward2(H5C2_t * cache_ptr,
                                 HDfprintf(stdout, 
 					 "19(u-del, %d, %d) ", type, (idx - lag));
 
-                            unprotect_entry2(cache_ptr, type, idx - lag,
+                            unprotect_entry2(file_ptr, type, idx - lag,
                                             NO_CHANGE, H5C2__DELETED_FLAG);
                             break;
 
@@ -4321,7 +4379,7 @@ row_major_scan_forward2(H5C2_t * cache_ptr,
 					      "20(u-del, %d, %d) ", 
 					      type, (idx - lag));
 
-                                unprotect_entry2(cache_ptr, type, idx - lag,
+                                unprotect_entry2(file_ptr, type, idx - lag,
                                                 NO_CHANGE, H5C2__DELETED_FLAG);
                             } else {
 
@@ -4330,7 +4388,7 @@ row_major_scan_forward2(H5C2_t * cache_ptr,
 					      "21(u-del, %d, %d) ", 
 					      type, (idx - lag));
 
-                                unprotect_entry2(cache_ptr, type, idx - lag,
+                                unprotect_entry2(file_ptr, type, idx - lag,
                                                 dirty_destroys,
                                                 H5C2__DELETED_FLAG);
                             }
@@ -4351,7 +4409,7 @@ row_major_scan_forward2(H5C2_t * cache_ptr,
                     if ( verbose )
                         HDfprintf(stdout, "22(u, %d, %d) ", type, (idx - lag));
 
-                    unprotect_entry2(cache_ptr, type, idx - lag,
+                    unprotect_entry2(file_ptr, type, idx - lag,
                                     dirty_unprotects, H5C2__NO_FLAGS_SET);
                 }
             }
@@ -4397,7 +4455,7 @@ row_major_scan_forward2(H5C2_t * cache_ptr,
  */
 
 void
-hl_row_major_scan_forward2(H5C2_t * cache_ptr,
+hl_row_major_scan_forward2(H5F_t * file_ptr,
                            int32_t max_index,
                            hbool_t verbose,
                            hbool_t reset_stats,
@@ -4407,6 +4465,7 @@ hl_row_major_scan_forward2(H5C2_t * cache_ptr,
                            hbool_t dirty_inserts)
 {
     const char * fcn_name = "hl_row_major_scan_forward2";
+    H5C2_t * cache_ptr = file_ptr->shared->cache2;
     int32_t type;
     int32_t idx;
     int32_t i;
@@ -4443,7 +4502,7 @@ hl_row_major_scan_forward2(H5C2_t * cache_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "(i, %d, %d) ", type, (idx + lag));
 
-                insert_entry2(cache_ptr, type, (idx + lag), dirty_inserts,
+                insert_entry2(file_ptr, type, (idx + lag), dirty_inserts,
                               H5C2__NO_FLAGS_SET);
             }
 
@@ -4456,12 +4515,12 @@ hl_row_major_scan_forward2(H5C2_t * cache_ptr,
                     if ( verbose )
                         HDfprintf(stdout, "(p, %d, %d) ", type, i);
 
-                    protect_entry2(cache_ptr, type, i);
+                    protect_entry2(file_ptr, type, i);
 
                     if ( verbose )
                         HDfprintf(stdout, "(u, %d, %d) ", type, i);
 
-                    unprotect_entry2(cache_ptr, type, i, NO_CHANGE,
+                    unprotect_entry2(file_ptr, type, i, NO_CHANGE,
                                     H5C2__NO_FLAGS_SET);
                 }
                 i--;
@@ -4511,7 +4570,7 @@ hl_row_major_scan_forward2(H5C2_t * cache_ptr,
  */
 
 void
-row_major_scan_backward2(H5C2_t * cache_ptr,
+row_major_scan_backward2(H5F_t * file_ptr,
                          int32_t max_index,
                          int32_t lag,
                          hbool_t verbose,
@@ -4528,6 +4587,7 @@ row_major_scan_backward2(H5C2_t * cache_ptr,
                          int dirty_unprotects)
 {
     const char * fcn_name = "row_major_scan_backward2";
+    H5C2_t * cache_ptr = file_ptr->shared->cache2;
     int32_t type;
     int32_t idx;
     int32_t local_max_index;
@@ -4562,7 +4622,7 @@ row_major_scan_backward2(H5C2_t * cache_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "(i, %d, %d) ", type, (idx - lag));
 
-                insert_entry2(cache_ptr, type, (idx - lag), dirty_inserts,
+                insert_entry2(file_ptr, type, (idx - lag), dirty_inserts,
                               H5C2__NO_FLAGS_SET);
             }
 
@@ -4575,7 +4635,7 @@ row_major_scan_backward2(H5C2_t * cache_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "(p, %d, %d) ", type, (idx - lag + 1));
 
-                protect_entry2(cache_ptr, type, (idx - lag + 1));
+                protect_entry2(file_ptr, type, (idx - lag + 1));
             }
 
             if ( ( pass2 ) && ( (idx - lag + 2) >= 0 ) &&
@@ -4586,7 +4646,7 @@ row_major_scan_backward2(H5C2_t * cache_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "(u, %d, %d) ", type, (idx - lag + 2));
 
-                unprotect_entry2(cache_ptr, type, idx-lag+2, NO_CHANGE,
+                unprotect_entry2(file_ptr, type, idx-lag+2, NO_CHANGE,
                                 H5C2__NO_FLAGS_SET);
             }
 
@@ -4613,7 +4673,7 @@ row_major_scan_backward2(H5C2_t * cache_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "(p, %d, %d) ", type, (idx - lag + 3));
 
-                protect_entry2(cache_ptr, type, (idx - lag + 3));
+                protect_entry2(file_ptr, type, (idx - lag + 3));
             }
 
             if ( ( pass2 ) && ( (idx - lag + 5) >= 0 ) &&
@@ -4624,7 +4684,7 @@ row_major_scan_backward2(H5C2_t * cache_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "(u, %d, %d) ", type, (idx - lag + 5));
 
-                unprotect_entry2(cache_ptr, type, idx-lag+5, NO_CHANGE,
+                unprotect_entry2(file_ptr, type, idx-lag+5, NO_CHANGE,
                                 H5C2__NO_FLAGS_SET);
             }
 
@@ -4639,7 +4699,7 @@ row_major_scan_backward2(H5C2_t * cache_ptr,
                         HDfprintf(stdout, "(p-ro, %d, %d) ", type, 
 				  (idx - lag + 5));
 
-		    protect_entry_ro2(cache_ptr, type, (idx - lag + 5));
+		    protect_entry_ro2(file_ptr, type, (idx - lag + 5));
 		}
 
 		if ( ( pass2 ) && ( (idx - lag + 6) >= 0 ) &&
@@ -4651,7 +4711,7 @@ row_major_scan_backward2(H5C2_t * cache_ptr,
                         HDfprintf(stdout, "(p-ro, %d, %d) ", type, 
 				  (idx - lag + 6));
 
-		    protect_entry_ro2(cache_ptr, type, (idx - lag + 6));
+		    protect_entry_ro2(file_ptr, type, (idx - lag + 6));
 		}
 
 		if ( ( pass2 ) && ( (idx - lag + 7) >= 0 ) &&
@@ -4663,7 +4723,7 @@ row_major_scan_backward2(H5C2_t * cache_ptr,
                         HDfprintf(stdout, "(p-ro, %d, %d) ", type, 
 				  (idx - lag + 7));
 
-		    protect_entry_ro2(cache_ptr, type, (idx - lag + 7));
+		    protect_entry_ro2(file_ptr, type, (idx - lag + 7));
 		}
 
 		if ( ( pass2 ) && ( (idx - lag + 7) >= 0 ) &&
@@ -4675,7 +4735,7 @@ row_major_scan_backward2(H5C2_t * cache_ptr,
                         HDfprintf(stdout, "(u-ro, %d, %d) ", type, 
 				  (idx - lag + 7));
 
-		    unprotect_entry2(cache_ptr, type, (idx - lag + 7),
+		    unprotect_entry2(file_ptr, type, (idx - lag + 7),
 				    FALSE, H5C2__NO_FLAGS_SET);
 		}
 
@@ -4688,7 +4748,7 @@ row_major_scan_backward2(H5C2_t * cache_ptr,
                         HDfprintf(stdout, "(u-ro, %d, %d) ", type, 
 				  (idx - lag + 8));
 
-		    unprotect_entry2(cache_ptr, type, (idx - lag + 8),
+		    unprotect_entry2(file_ptr, type, (idx - lag + 8),
 				    FALSE, H5C2__NO_FLAGS_SET);
 		}
 
@@ -4701,7 +4761,7 @@ row_major_scan_backward2(H5C2_t * cache_ptr,
                         HDfprintf(stdout, "(u-ro, %d, %d) ", type, 
 				  (idx - lag + 9));
 
-		    unprotect_entry2(cache_ptr, type, (idx - lag + 9),
+		    unprotect_entry2(file_ptr, type, (idx - lag + 9),
 				    FALSE, H5C2__NO_FLAGS_SET);
 		}
 	    } /* if ( do_mult_ro_protects ) */
@@ -4712,7 +4772,7 @@ row_major_scan_backward2(H5C2_t * cache_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "(p, %d, %d) ", type, idx);
 
-                protect_entry2(cache_ptr, type, idx);
+                protect_entry2(file_ptr, type, idx);
             }
 
 
@@ -4724,7 +4784,7 @@ row_major_scan_backward2(H5C2_t * cache_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "(u, %d, %d) ", type, (idx + lag - 2));
 
-                unprotect_entry2(cache_ptr, type, idx+lag-2, NO_CHANGE,
+                unprotect_entry2(file_ptr, type, idx+lag-2, NO_CHANGE,
                                 H5C2__NO_FLAGS_SET);
             }
 
@@ -4736,7 +4796,7 @@ row_major_scan_backward2(H5C2_t * cache_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "(p, %d, %d) ", type, (idx + lag - 1));
 
-                protect_entry2(cache_ptr, type, (idx + lag - 1));
+                protect_entry2(file_ptr, type, (idx + lag - 1));
             }
 
 
@@ -4751,36 +4811,36 @@ row_major_scan_backward2(H5C2_t * cache_ptr,
                         case 0:
                             if ( (entries2[type])[idx+lag].is_dirty ) {
 
-                                unprotect_entry2(cache_ptr, type, idx + lag,
+                                unprotect_entry2(file_ptr, type, idx + lag,
                                                  NO_CHANGE, H5C2__NO_FLAGS_SET);
                             } else {
 
-                                unprotect_entry2(cache_ptr, type, idx + lag,
+                                unprotect_entry2(file_ptr, type, idx + lag,
                                                 dirty_unprotects,
                                                 H5C2__NO_FLAGS_SET);
                             }
                             break;
 
                         case 1: /* we just did an insert */
-                            unprotect_entry2(cache_ptr, type, idx + lag,
+                            unprotect_entry2(file_ptr, type, idx + lag,
                                             NO_CHANGE, H5C2__NO_FLAGS_SET);
                             break;
 
                         case 2:
                             if ( (entries2[type])[idx + lag].is_dirty ) {
 
-                                unprotect_entry2(cache_ptr, type, idx + lag,
+                                unprotect_entry2(file_ptr, type, idx + lag,
                                                 NO_CHANGE, H5C2__DELETED_FLAG);
                             } else {
 
-                                unprotect_entry2(cache_ptr, type, idx + lag,
+                                unprotect_entry2(file_ptr, type, idx + lag,
                                                 dirty_destroys,
                                                 H5C2__DELETED_FLAG);
                             }
                             break;
 
                         case 3: /* we just did an insrt */
-                            unprotect_entry2(cache_ptr, type, idx + lag,
+                            unprotect_entry2(file_ptr, type, idx + lag,
                                             NO_CHANGE, H5C2__DELETED_FLAG);
                             break;
 
@@ -4798,7 +4858,7 @@ row_major_scan_backward2(H5C2_t * cache_ptr,
                     if ( verbose )
                         HDfprintf(stdout, "(u, %d, %d) ", type, (idx + lag));
 
-                    unprotect_entry2(cache_ptr, type, idx + lag,
+                    unprotect_entry2(file_ptr, type, idx + lag,
                                     dirty_unprotects, H5C2__NO_FLAGS_SET);
                 }
             }
@@ -4844,7 +4904,7 @@ row_major_scan_backward2(H5C2_t * cache_ptr,
  */
 
 void
-hl_row_major_scan_backward2(H5C2_t * cache_ptr,
+hl_row_major_scan_backward2(H5F_t * file_ptr,
                             int32_t max_index,
                             hbool_t verbose,
                             hbool_t reset_stats,
@@ -4854,6 +4914,7 @@ hl_row_major_scan_backward2(H5C2_t * cache_ptr,
                             hbool_t dirty_inserts)
 {
     const char * fcn_name = "hl_row_major_scan_backward2";
+    H5C2_t * cache_ptr = file_ptr->shared->cache2;
     int32_t type;
     int32_t idx;
     int32_t i;
@@ -4890,7 +4951,7 @@ hl_row_major_scan_backward2(H5C2_t * cache_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "(i, %d, %d) ", type, (idx + lag));
 
-                insert_entry2(cache_ptr, type, (idx + lag), dirty_inserts,
+                insert_entry2(file_ptr, type, (idx + lag), dirty_inserts,
                               H5C2__NO_FLAGS_SET);
             }
 
@@ -4903,12 +4964,12 @@ hl_row_major_scan_backward2(H5C2_t * cache_ptr,
                     if ( verbose )
                         HDfprintf(stdout, "(p, %d, %d) ", type, i);
 
-                    protect_entry2(cache_ptr, type, i);
+                    protect_entry2(file_ptr, type, i);
 
                     if ( verbose )
                         HDfprintf(stdout, "(u, %d, %d) ", type, i);
 
-                    unprotect_entry2(cache_ptr, type, i, NO_CHANGE,
+                    unprotect_entry2(file_ptr, type, i, NO_CHANGE,
                                     H5C2__NO_FLAGS_SET);
                 }
                 i--;
@@ -4954,7 +5015,7 @@ hl_row_major_scan_backward2(H5C2_t * cache_ptr,
  */
 
 void
-col_major_scan_forward2(H5C2_t * cache_ptr,
+col_major_scan_forward2(H5F_t * file_ptr,
 		        int32_t max_index,
                         int32_t lag,
                         hbool_t verbose,
@@ -4966,6 +5027,7 @@ col_major_scan_forward2(H5C2_t * cache_ptr,
                         int dirty_unprotects)
 {
     const char * fcn_name = "col_major_scan_forward2()";
+    H5C2_t * cache_ptr = file_ptr->shared->cache2;
     int i;
     int32_t type;
     int32_t idx;
@@ -4976,7 +5038,7 @@ col_major_scan_forward2(H5C2_t * cache_ptr,
 
     for ( i = 0; i < NUMBER_OF_ENTRY_TYPES; i++ )
     {
-        local_max_index[i] = MIN(max_index, max_indices2[type]);
+        local_max_index[i] = MIN(max_index, max_indices2[i]);
     }
 
     HDassert( lag > 5 );
@@ -5005,7 +5067,7 @@ col_major_scan_forward2(H5C2_t * cache_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "(i, %d, %d) ", type, (idx + lag));
 
-                insert_entry2(cache_ptr, type, (idx + lag), dirty_inserts,
+                insert_entry2(file_ptr, type, (idx + lag), dirty_inserts,
                               H5C2__NO_FLAGS_SET);
             }
 
@@ -5017,7 +5079,7 @@ col_major_scan_forward2(H5C2_t * cache_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "(p, %d, %d) ", type, idx);
 
-                protect_entry2(cache_ptr, type, idx);
+                protect_entry2(file_ptr, type, idx);
             }
 
             if ( ( pass2 ) && ( (idx - lag) >= 0 ) &&
@@ -5027,7 +5089,7 @@ col_major_scan_forward2(H5C2_t * cache_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "(u, %d, %d) ", type, (idx - lag));
 
-                unprotect_entry2(cache_ptr, type, idx - lag,
+                unprotect_entry2(file_ptr, type, idx - lag,
                                 dirty_unprotects, H5C2__NO_FLAGS_SET);
             }
 
@@ -5073,7 +5135,7 @@ col_major_scan_forward2(H5C2_t * cache_ptr,
  */
 
 void
-hl_col_major_scan_forward2(H5C2_t * cache_ptr,
+hl_col_major_scan_forward2(H5F_t * file_ptr,
                           int32_t max_index,
                           hbool_t verbose,
                           hbool_t reset_stats,
@@ -5084,6 +5146,7 @@ hl_col_major_scan_forward2(H5C2_t * cache_ptr,
                           int dirty_unprotects)
 {
     const char * fcn_name = "hl_col_major_scan_forward2()";
+    H5C2_t * cache_ptr = file_ptr->shared->cache2;
     int32_t type;
     int32_t idx;
     int32_t lag = 200;
@@ -5127,7 +5190,7 @@ hl_col_major_scan_forward2(H5C2_t * cache_ptr,
                     if ( verbose )
                         HDfprintf(stdout, "(i, %d, %d) ", type, i);
 
-                    insert_entry2(cache_ptr, type, i, dirty_inserts,
+                    insert_entry2(file_ptr, type, i, dirty_inserts,
                                   H5C2__NO_FLAGS_SET);
                 }
 
@@ -5136,7 +5199,7 @@ hl_col_major_scan_forward2(H5C2_t * cache_ptr,
                     if ( verbose )
                         HDfprintf(stdout, "(p, %d, %d) ", type, i);
 
-                    protect_entry2(cache_ptr, type, i);
+                    protect_entry2(file_ptr, type, i);
                 }
 
                 if ( ( pass2 ) && ( i >= 0 ) &&
@@ -5146,7 +5209,7 @@ hl_col_major_scan_forward2(H5C2_t * cache_ptr,
                     if ( verbose )
                         HDfprintf(stdout, "(u, %d, %d) ", type, i);
 
-                    unprotect_entry2(cache_ptr, type, i,
+                    unprotect_entry2(file_ptr, type, i,
                                     dirty_unprotects, H5C2__NO_FLAGS_SET);
                 }
 
@@ -5194,7 +5257,7 @@ hl_col_major_scan_forward2(H5C2_t * cache_ptr,
  */
 
 void
-col_major_scan_backward2(H5C2_t * cache_ptr,
+col_major_scan_backward2(H5F_t * file_ptr,
 		         int32_t max_index,
                          int32_t lag,
                          hbool_t verbose,
@@ -5206,6 +5269,7 @@ col_major_scan_backward2(H5C2_t * cache_ptr,
                          int dirty_unprotects)
 {
     const char * fcn_name = "col_major_scan_backward2()";
+    H5C2_t * cache_ptr = file_ptr->shared->cache2;
     int i;
     int mile_stone = 1;
     int32_t type;
@@ -5217,7 +5281,7 @@ col_major_scan_backward2(H5C2_t * cache_ptr,
 
     for ( i = 0; i < NUMBER_OF_ENTRY_TYPES; i++ )
     {
-        local_max_index[i] = MIN(max_index, max_indices2[type]);
+        local_max_index[i] = MIN(max_index, max_indices2[i]);
     }
 
     HDassert( lag > 5 );
@@ -5249,7 +5313,7 @@ col_major_scan_backward2(H5C2_t * cache_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "(i, %d, %d) ", type, (idx - lag));
 
-                insert_entry2(cache_ptr, type, (idx - lag), dirty_inserts,
+                insert_entry2(file_ptr, type, (idx - lag), dirty_inserts,
                               H5C2__NO_FLAGS_SET);
             }
 
@@ -5261,7 +5325,7 @@ col_major_scan_backward2(H5C2_t * cache_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "(p, %d, %d) ", type, idx);
 
-                protect_entry2(cache_ptr, type, idx);
+                protect_entry2(file_ptr, type, idx);
             }
 
             if ( ( pass2 ) && ( (idx + lag) >= 0 ) &&
@@ -5271,7 +5335,7 @@ col_major_scan_backward2(H5C2_t * cache_ptr,
                 if ( verbose )
                     HDfprintf(stdout, "(u, %d, %d) ", type, (idx + lag));
 
-                unprotect_entry2(cache_ptr, type, idx + lag,
+                unprotect_entry2(file_ptr, type, idx + lag,
                                 dirty_unprotects, H5C2__NO_FLAGS_SET);
             }
 
@@ -5323,7 +5387,7 @@ col_major_scan_backward2(H5C2_t * cache_ptr,
  */
 
 void
-hl_col_major_scan_backward2(H5C2_t * cache_ptr,
+hl_col_major_scan_backward2(H5F_t * file_ptr,
                             int32_t max_index,
                             hbool_t verbose,
                             hbool_t reset_stats,
@@ -5334,6 +5398,7 @@ hl_col_major_scan_backward2(H5C2_t * cache_ptr,
                             int dirty_unprotects)
 {
     const char * fcn_name = "hl_col_major_scan_backward2()";
+    H5C2_t * cache_ptr = file_ptr->shared->cache2;
     int32_t type;
     int32_t idx;
     int32_t lag = 50;
@@ -5376,7 +5441,7 @@ hl_col_major_scan_backward2(H5C2_t * cache_ptr,
                     if ( verbose )
                         HDfprintf(stdout, "(i, %d, %d) ", type, i);
 
-                    insert_entry2(cache_ptr, type, i, dirty_inserts,
+                    insert_entry2(file_ptr, type, i, dirty_inserts,
                                   H5C2__NO_FLAGS_SET);
                 }
 
@@ -5385,7 +5450,7 @@ hl_col_major_scan_backward2(H5C2_t * cache_ptr,
                     if ( verbose )
                         HDfprintf(stdout, "(p, %d, %d) ", type, i);
 
-                    protect_entry2(cache_ptr, type, i);
+                    protect_entry2(file_ptr, type, i);
                 }
 
                 if ( ( pass2 ) && ( i >= 0 ) &&
@@ -5394,7 +5459,7 @@ hl_col_major_scan_backward2(H5C2_t * cache_ptr,
                     if ( verbose )
                         HDfprintf(stdout, "(u, %d, %d) ", type, i);
 
-                    unprotect_entry2(cache_ptr, type, i,
+                    unprotect_entry2(file_ptr, type, i,
                                     dirty_unprotects, H5C2__NO_FLAGS_SET);
                 }
 
@@ -5418,3 +5483,4 @@ hl_col_major_scan_backward2(H5C2_t * cache_ptr,
     return;
 
 } /* hl_col_major_scan_backward2() */
+

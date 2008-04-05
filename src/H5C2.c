@@ -2565,20 +2565,23 @@ H5FL_DEFINE_STATIC(H5C2_t);
  * Private file-scope function declarations:
  */
 
-static herr_t H5C2__auto_adjust_cache_size(H5C2_t * cache_ptr,
+static herr_t H5C2__auto_adjust_cache_size(H5F_t * f,
                                            hid_t dxpl_id,
+                                           H5C2_t * cache_ptr,
                                            hbool_t write_permitted);
 
-static herr_t H5C2__autoadjust__ageout(H5C2_t * cache_ptr,
+static herr_t H5C2__autoadjust__ageout(H5F_t * f,
+                                       hid_t dxpl_id,
+                                       H5C2_t * cache_ptr,
                                        double hit_rate,
                                        enum H5C2_resize_status * status_ptr,
                                        size_t * new_max_cache_size_ptr,
-                                       hid_t dxpl_id,
                                        hbool_t write_permitted);
 
 static herr_t H5C2__autoadjust__ageout__cycle_epoch_marker(H5C2_t * cache_ptr);
 
-static herr_t H5C2__autoadjust__ageout__evict_aged_out_entries(hid_t dxpl_id,
+static herr_t H5C2__autoadjust__ageout__evict_aged_out_entries(H5F_t * f,
+                                                       hid_t dxpl_id,
                                                        H5C2_t * cache_ptr,
                                                        hbool_t write_permitted);
 
@@ -2600,7 +2603,8 @@ static herr_t H5C2_flush_single_entry(H5F_t *		   f,
                                       unsigned	           flags,
                                       hbool_t del_entry_from_slist_on_destroy);
 
-static herr_t H5C2_flush_invalidate_cache(hid_t    dxpl_id,
+static herr_t H5C2_flush_invalidate_cache(H5F_t *  f,
+                                          hid_t    dxpl_id,
                                           H5C2_t * cache_ptr,
 			                  unsigned flags);
 
@@ -2612,7 +2616,8 @@ static void * H5C2_load_entry(H5F_t *              f,
 		              hbool_t		   chk_len,
                               const void *         udata_ptr);
 
-static herr_t H5C2_make_space_in_cache(hid_t	dxpl_id,
+static herr_t H5C2_make_space_in_cache(H5F_t *  f,
+                                       hid_t	dxpl_id,
                                        H5C2_t * cache_ptr,
 		                       size_t	space_needed,
                                        hbool_t	write_permitted);
@@ -2866,8 +2871,7 @@ done:
  */
 
 H5C2_t *
-H5C2_create(const H5F_t *               f,
-	    size_t		        max_cache_size,
+H5C2_create(size_t		        max_cache_size,
             size_t		        min_clean_size,
             int			        max_type_id,
 	    const char *                (* type_name_table_ptr),
@@ -2881,8 +2885,6 @@ H5C2_create(const H5F_t *               f,
     H5C2_t * ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5C2_create, NULL)
-
-    HDassert( f );
 
     HDassert( max_cache_size >= H5C2__MIN_MAX_CACHE_SIZE );
     HDassert( max_cache_size <= H5C2__MAX_MAX_CACHE_SIZE );
@@ -2916,8 +2918,6 @@ H5C2_create(const H5F_t *               f,
      */
 
     cache_ptr->magic 				= H5C2__H5C2_T_MAGIC;
-
-    cache_ptr->f                                = (H5F_t *)f;
 
     cache_ptr->flush_in_progress		= FALSE;
 
@@ -3328,9 +3328,10 @@ H5C2_def_auto_resize_rpt_fcn(H5C2_t * cache_ptr,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C2_dest(H5C2_t * cache_ptr,
+H5C2_dest(H5F_t * f,
           hid_t	 dxpl_id)
 {
+    H5C2_t * cache_ptr = f->shared->cache2;
     herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5C2_dest, FAIL)
@@ -3338,7 +3339,7 @@ H5C2_dest(H5C2_t * cache_ptr,
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
 
-    if ( H5C2_flush_cache(cache_ptr, dxpl_id,
+    if ( H5C2_flush_cache(f, dxpl_id,
                           H5C2__FLUSH_INVALIDATE_FLAG) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
@@ -3439,12 +3440,13 @@ done:
  */
 
 herr_t
-H5C2_expunge_entry(H5C2_t *             cache_ptr,
+H5C2_expunge_entry(H5F_t *              f,
 		   hid_t                dxpl_id,
                    const H5C2_class_t * type,
                    haddr_t 	        addr)
 {
     /* const char *	fcn_name = "H5C2_expunge_entry()"; */
+    H5C2_t *            cache_ptr = f->shared->cache2;
     herr_t		result;
     herr_t		ret_value = SUCCEED;      /* Return value */
     H5C2_cache_entry_t *	entry_ptr = NULL;
@@ -3492,7 +3494,7 @@ H5C2_expunge_entry(H5C2_t *             cache_ptr,
      * This will clear the entry, and then delete it from the cache.
      */
 
-    result = H5C2_flush_single_entry(cache_ptr->f,
+    result = H5C2_flush_single_entry(f,
                                      dxpl_id,
                                      cache_ptr,
                                      entry_ptr->type,
@@ -3639,11 +3641,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C2_flush_cache(H5C2_t * cache_ptr,
+H5C2_flush_cache(H5F_t *f,
 		 hid_t    dxpl_id,
                  unsigned flags)
 {
-    /* const char *        fcn_name = "H5C2_flush_cache()"; */
+    H5C2_t *            cache_ptr = f->shared->cache2;
     herr_t              status;
     herr_t		ret_value = SUCCEED;
     hbool_t             destroy;
@@ -3667,7 +3669,7 @@ H5C2_flush_cache(H5C2_t * cache_ptr,
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
-    HDassert( cache_ptr->skip_file_checks || cache_ptr->f );
+    HDassert( cache_ptr->skip_file_checks || f);
     HDassert( cache_ptr->slist_ptr );
 
     ignore_protected = ( (flags & H5C2__FLUSH_IGNORE_PROTECTED_FLAG) != 0 );
@@ -3688,7 +3690,8 @@ H5C2_flush_cache(H5C2_t * cache_ptr,
 
     if ( destroy ) {
 
-        status = H5C2_flush_invalidate_cache(dxpl_id,
+        status = H5C2_flush_invalidate_cache(f,
+                                             dxpl_id,
 					     cache_ptr,
 					     flags);
 
@@ -3888,7 +3891,7 @@ H5C2_flush_cache(H5C2_t * cache_ptr,
                             flushed_entries_count++;
 			    flushed_entries_size += entry_ptr->size;
 #endif /* H5C2_DO_SANITY_CHECKS */
-                            status = H5C2_flush_single_entry(cache_ptr->f,
+                            status = H5C2_flush_single_entry(f,
                                                              dxpl_id,
                                                              cache_ptr,
                                                              entry_ptr->type,
@@ -3910,7 +3913,7 @@ H5C2_flush_cache(H5C2_t * cache_ptr,
                         flushed_entries_count++;
 			flushed_entries_size += entry_ptr->size;
 #endif /* H5C2_DO_SANITY_CHECKS */
-                        status = H5C2_flush_single_entry(cache_ptr->f,
+                        status = H5C2_flush_single_entry(f,
                                                          dxpl_id,
                                                          cache_ptr,
                                                          entry_ptr->type,
@@ -4038,9 +4041,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C2_flush_to_min_clean(H5C2_t * cache_ptr,
+H5C2_flush_to_min_clean(H5F_t * f,
 		        hid_t    dxpl_id)
 {
+    H5C2_t *            cache_ptr = f->shared->cache2;
     herr_t      	result;
     herr_t		ret_value = SUCCEED;
     hbool_t		write_permitted;
@@ -4057,11 +4061,11 @@ H5C2_flush_to_min_clean(H5C2_t * cache_ptr,
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
-    HDassert( cache_ptr->skip_file_checks || cache_ptr->f );
+    HDassert( cache_ptr->skip_file_checks || f );
 
     if ( cache_ptr->check_write_permitted != NULL ) {
 
-        result = (cache_ptr->check_write_permitted)(cache_ptr->f,
+        result = (cache_ptr->check_write_permitted)(f,
                                                     dxpl_id,
                                                     &write_permitted);
 
@@ -4081,7 +4085,8 @@ H5C2_flush_to_min_clean(H5C2_t * cache_ptr,
                     "cache write is not permitted!?!\n");
     }
 #if 1 /* original code */
-    result = H5C2_make_space_in_cache(dxpl_id,
+    result = H5C2_make_space_in_cache(f,
+                                      dxpl_id,
                                       cache_ptr,
                                       (size_t)0,
                                       write_permitted);
@@ -4412,7 +4417,7 @@ done:
  */
 
 herr_t
-H5C2_get_entry_status(H5C2_t *  cache_ptr,
+H5C2_get_entry_status(H5F_t *  f,
                       haddr_t   addr,
                       size_t *  size_ptr,
                       hbool_t * in_cache_ptr,
@@ -4421,6 +4426,7 @@ H5C2_get_entry_status(H5C2_t *  cache_ptr,
 		      hbool_t * is_pinned_ptr)
 {
     /* const char *  		fcn_name = "H5C2_get_entry_status()"; */
+    H5C2_t *                    cache_ptr = f->shared->cache2;
     herr_t			ret_value = SUCCEED;      /* Return value */
     H5C2_cache_entry_t *	entry_ptr = NULL;
 
@@ -4668,7 +4674,7 @@ done:
  */
 
 herr_t
-H5C2_insert_entry(H5C2_t *             cache_ptr,
+H5C2_insert_entry(H5F_t *              f,
                   hid_t		       dxpl_id,
                   const H5C2_class_t * type,
                   haddr_t 	       addr,
@@ -4677,6 +4683,7 @@ H5C2_insert_entry(H5C2_t *             cache_ptr,
                   unsigned int         flags)
 {
     /* const char *     fcn_name = "H5C2_insert_entry()"; */
+    H5C2_t *                    cache_ptr = f->shared->cache2;
     herr_t			result;
     herr_t			ret_value = SUCCEED;    /* Return value */
     hbool_t			insert_pinned;
@@ -4689,7 +4696,7 @@ H5C2_insert_entry(H5C2_t *             cache_ptr,
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
-    HDassert( cache_ptr->skip_file_checks || cache_ptr->f );
+    HDassert( cache_ptr->skip_file_checks || f );
     HDassert( type );
     HDassert( H5F_addr_defined(addr) );
     HDassert( thing );
@@ -4772,7 +4779,7 @@ H5C2_insert_entry(H5C2_t *             cache_ptr,
 
         if ( cache_ptr->check_write_permitted != NULL ) {
 
-            result = (cache_ptr->check_write_permitted)(cache_ptr->f,
+            result = (cache_ptr->check_write_permitted)(f,
                                                         dxpl_id,
                                                         &write_permitted);
 
@@ -4820,7 +4827,8 @@ H5C2_insert_entry(H5C2_t *             cache_ptr,
          * no point in worrying about the third.
          */
 
-        result = H5C2_make_space_in_cache(dxpl_id,
+        result = H5C2_make_space_in_cache(f,
+                                          dxpl_id,
                                           cache_ptr,
                                           space_needed,
                                           write_permitted);
@@ -5080,7 +5088,7 @@ H5C2_mark_entries_as_clean(H5C2_t *  cache_ptr,
 
         } else {
 
-            if ( H5C2_flush_single_entry(cache_ptr->f,
+            if ( H5C2_flush_single_entry(f,
                                          dxpl_id,
                                          cache_ptr,
                                          entry_ptr->type,
@@ -5138,7 +5146,7 @@ H5C2_mark_entries_as_clean(H5C2_t *  cache_ptr,
             entry_ptr = entry_ptr->prev;
             entries_cleared++;
 
-            if ( H5C2_flush_single_entry(cache_ptr->f,
+            if ( H5C2_flush_single_entry(f,
                                          dxpl_id,
                                          cache_ptr,
                                          clear_ptr->type,
@@ -5174,7 +5182,7 @@ H5C2_mark_entries_as_clean(H5C2_t *  cache_ptr,
             entry_ptr = entry_ptr->next;
             entries_cleared++;
 
-            if ( H5C2_flush_single_entry(cache_ptr->f,
+            if ( H5C2_flush_single_entry(f,
                                          dxpl_id,
                                          cache_ptr,
                                          clear_ptr->type,
@@ -5257,11 +5265,12 @@ done:
  */
 
 herr_t
-H5C2_mark_pinned_entry_dirty(H5C2_t * cache_ptr,
+H5C2_mark_pinned_entry_dirty(H5F_t * f,
                              void *  thing,
 			     hbool_t size_changed,
                              size_t  new_size)
 {
+    H5C2_t *            cache_ptr = f->shared->cache2;
     herr_t              ret_value = SUCCEED;    /* Return value */
     herr_t              result;
     size_t              size_increase;
@@ -5389,9 +5398,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C2_mark_pinned_or_protected_entry_dirty(H5C2_t * cache_ptr,
+H5C2_mark_pinned_or_protected_entry_dirty(H5F_t * f,
                                           void *   thing)
 {
+    H5C2_t *            cache_ptr = f->shared->cache2;
     herr_t              ret_value = SUCCEED;    /* Return value */
     H5C2_cache_entry_t *	entry_ptr;
 
@@ -5661,11 +5671,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C2_resize_pinned_entry(H5C2_t * cache_ptr,
+H5C2_resize_pinned_entry(H5F_t * f,
                          void *  thing,
                          size_t  new_size)
 {
     /* const char *     fcn_name = "H5C2_resize_pinned_entry()"; */
+    H5C2_t *            cache_ptr = f->shared->cache2;
     herr_t              ret_value = SUCCEED;    /* Return value */
     herr_t              result;
     H5C2_cache_entry_t *	entry_ptr;
@@ -5796,14 +5807,15 @@ done:
  */
 #ifndef NDEBUG
 herr_t
-H5C2_pin_protected_entry(H5C2_t * cache_ptr,
+H5C2_pin_protected_entry(H5F_t * f,
                          void *	  thing)
 #else
 herr_t
-H5C2_pin_protected_entry(H5C2_t UNUSED * cache_ptr,
+H5C2_pin_protected_entry(H5F_t UNUSED * f,
                         void *           thing)
 #endif
 {
+    H5C2_t      *cache_ptr = f->shared->cache2;
     herr_t              ret_value = SUCCEED;    /* Return value */
     H5C2_cache_entry_t *	entry_ptr;
 
@@ -5933,7 +5945,7 @@ done:
  */
 
 void *
-H5C2_protect(H5C2_t *		  cache_ptr,
+H5C2_protect(H5F_t *		  f,
              hid_t	          dxpl_id,
              const H5C2_class_t * type,
              haddr_t 	          addr,
@@ -5942,6 +5954,7 @@ H5C2_protect(H5C2_t *		  cache_ptr,
 	     unsigned		  flags)
 {
     /* const char *	fcn_name = "H5C2_protect()"; */
+    H5C2_t *		cache_ptr = f->shared->cache2;
     hbool_t		hit;
     hbool_t		first_flush;
     hbool_t		have_write_permitted = FALSE;
@@ -5958,7 +5971,7 @@ H5C2_protect(H5C2_t *		  cache_ptr,
     /* check args */
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
-    HDassert( cache_ptr->skip_file_checks || cache_ptr->f );
+    HDassert( cache_ptr->skip_file_checks || f );
     HDassert( type );
     HDassert( H5F_addr_defined(addr) );
     HDassert( len > 0 );
@@ -5996,7 +6009,7 @@ H5C2_protect(H5C2_t *		  cache_ptr,
 
         hit = FALSE;
 
-        thing = H5C2_load_entry(cache_ptr->f, dxpl_id, type, 
+        thing = H5C2_load_entry(f, dxpl_id, type, 
 			        addr, len, chk_len, udata);
 
         if ( thing == NULL ) {
@@ -6035,7 +6048,7 @@ H5C2_protect(H5C2_t *		  cache_ptr,
 
             if ( cache_ptr->check_write_permitted != NULL ) {
 
-                result = (cache_ptr->check_write_permitted)(cache_ptr->f,
+                result = (cache_ptr->check_write_permitted)(f,
                                                             dxpl_id,
                                                             &write_permitted);
 
@@ -6097,7 +6110,7 @@ H5C2_protect(H5C2_t *		  cache_ptr,
              * see no point in worrying about the fourth.
              */
 
-            result = H5C2_make_space_in_cache(dxpl_id, cache_ptr,
+            result = H5C2_make_space_in_cache(f, dxpl_id, cache_ptr,
                                               space_needed, write_permitted);
 
             if ( result < 0 ) {
@@ -6175,7 +6188,7 @@ H5C2_protect(H5C2_t *		  cache_ptr,
 
             if ( cache_ptr->check_write_permitted != NULL ) {
 
-                result = (cache_ptr->check_write_permitted)(cache_ptr->f,
+                result = (cache_ptr->check_write_permitted)(f,
                                                             dxpl_id,
                                                             &write_permitted);
 
@@ -6204,8 +6217,9 @@ H5C2_protect(H5C2_t *		  cache_ptr,
              ( cache_ptr->cache_accesses >=
                (cache_ptr->resize_ctl).epoch_length ) ) {
 
-            result = H5C2__auto_adjust_cache_size(cache_ptr,
+            result = H5C2__auto_adjust_cache_size(f,
                                                   dxpl_id,
+                                                  cache_ptr,
                                                   write_permitted);
             if ( result != SUCCEED ) {
 
@@ -6226,7 +6240,8 @@ H5C2_protect(H5C2_t *		  cache_ptr,
 
                 cache_ptr->cache_full = TRUE;
 
-                result = H5C2_make_space_in_cache(dxpl_id,
+                result = H5C2_make_space_in_cache(f,
+                                                  dxpl_id,
                                                   cache_ptr,
                                                   (size_t)0, 
                                                   write_permitted);
@@ -6331,10 +6346,11 @@ done:
  */
 
 herr_t
-H5C2_set_cache_auto_resize_config(H5C2_t * cache_ptr,
+H5C2_set_cache_auto_resize_config(const H5F_t * f,
                                  H5C2_auto_size_ctl_t *config_ptr)
 {
     /* const char *fcn_name = "H5C2_set_cache_auto_resize_config()"; */
+    H5C2_t *    cache_ptr = f->shared->cache2;
     herr_t	ret_value = SUCCEED;      /* Return value */
     herr_t	result;
     size_t      new_max_cache_size;
@@ -6615,9 +6631,10 @@ done:
  */
 
 herr_t
-H5C2_set_evictions_enabled(H5C2_t * cache_ptr,
+H5C2_set_evictions_enabled(const H5F_t * f,
                            hbool_t evictions_enabled)
 {
+    H5C2_t * cache_ptr = f->shared->cache2;
     herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5C2_set_evictions_enabled, FAIL)
@@ -7361,9 +7378,10 @@ H5C2_stats__reset(H5C2_t UNUSED * cache_ptr)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C2_unpin_entry(H5C2_t *		  cache_ptr,
+H5C2_unpin_entry(H5F_t *		  f,
                 void *		  thing)
 {
+    H5C2_t      *cache_ptr = f->shared->cache2;
     herr_t              ret_value = SUCCEED;    /* Return value */
     H5C2_cache_entry_t *	entry_ptr;
 
@@ -7500,7 +7518,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C2_unprotect(H5C2_t *		    cache_ptr,
+H5C2_unprotect(H5F_t *		    f,
                hid_t		    dxpl_id,
                const H5C2_class_t * type,
                haddr_t		    addr,
@@ -7509,6 +7527,7 @@ H5C2_unprotect(H5C2_t *		    cache_ptr,
                size_t               new_size)
 {
     /* const char *	fcn_name = "H5C2_unprotect()"; */
+    H5C2_t *            cache_ptr = f->shared->cache2;
     hbool_t		deleted;
     hbool_t		dirtied;
     hbool_t             set_flush_marker;
@@ -7541,7 +7560,7 @@ H5C2_unprotect(H5C2_t *		    cache_ptr,
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
-    HDassert( cache_ptr->skip_file_checks || cache_ptr->f );
+    HDassert( cache_ptr->skip_file_checks || f );
     HDassert( type );
     HDassert( H5F_addr_defined(addr) );
     HDassert( thing );
@@ -7787,7 +7806,7 @@ H5C2_unprotect(H5C2_t *		    cache_ptr,
                             "hash table contains multiple entries for addr?!?.")
             }
 
-            if ( H5C2_flush_single_entry(cache_ptr->f,
+            if ( H5C2_flush_single_entry(f,
                                          dxpl_id,
                                          cache_ptr,
                                          type,
@@ -7817,7 +7836,7 @@ H5C2_unprotect(H5C2_t *		    cache_ptr,
                             "hash table contains multiple entries for addr?!?.")
             }
 
-            if ( H5C2_flush_single_entry(cache_ptr->f,
+            if ( H5C2_flush_single_entry(f,
                                          dxpl_id,
                                          cache_ptr,
                                          type,
@@ -8156,8 +8175,9 @@ done:
  */
 
 static herr_t
-H5C2__auto_adjust_cache_size(H5C2_t * cache_ptr,
+H5C2__auto_adjust_cache_size(H5F_t * f,
                              hid_t dxpl_id,
+                             H5C2_t * cache_ptr,
                              hbool_t write_permitted)
 {
     herr_t			ret_value = SUCCEED;      /* Return value */
@@ -8172,6 +8192,7 @@ H5C2__auto_adjust_cache_size(H5C2_t * cache_ptr,
 
     FUNC_ENTER_NOAPI_NOINIT(H5C2__auto_adjust_cache_size)
 
+    HDassert( f );
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
     HDassert( cache_ptr->cache_accesses >=
@@ -8356,11 +8377,12 @@ H5C2__auto_adjust_cache_size(H5C2_t * cache_ptr,
 
                     } else {
 
-                        result = H5C2__autoadjust__ageout(cache_ptr,
+                        result = H5C2__autoadjust__ageout(f,
+                                                          dxpl_id,
+                                                          cache_ptr,
                                                           hit_rate,
                                                           &status,
                                                           &new_max_cache_size,
-                                                          dxpl_id,
                                                           write_permitted);
 
                         if ( result != SUCCEED ) {
@@ -8512,11 +8534,12 @@ done:
  */
 
 static herr_t
-H5C2__autoadjust__ageout(H5C2_t * cache_ptr,
+H5C2__autoadjust__ageout(H5F_t * f,
+                        hid_t dxpl_id,
+                        H5C2_t * cache_ptr,
                         double hit_rate,
                         enum H5C2_resize_status * status_ptr,
                         size_t * new_max_cache_size_ptr,
-                        hid_t dxpl_id,
                         hbool_t write_permitted)
 {
     herr_t	ret_value = SUCCEED;      /* Return value */
@@ -8525,6 +8548,7 @@ H5C2__autoadjust__ageout(H5C2_t * cache_ptr,
 
     FUNC_ENTER_NOAPI_NOINIT(H5C2__autoadjust__ageout)
 
+    HDassert( f );
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
     HDassert( ( status_ptr ) && ( *status_ptr == in_spec2 ) );
@@ -8558,6 +8582,7 @@ H5C2__autoadjust__ageout(H5C2_t * cache_ptr,
             /* evict aged out cache entries if appropriate... */
             result = H5C2__autoadjust__ageout__evict_aged_out_entries
                      (
+                       f,
                        dxpl_id,
                        cache_ptr,
                        write_permitted
@@ -8793,7 +8818,8 @@ done:
  */
 
 static herr_t
-H5C2__autoadjust__ageout__evict_aged_out_entries(hid_t    dxpl_id,
+H5C2__autoadjust__ageout__evict_aged_out_entries(H5F_t * f,
+                                                 hid_t    dxpl_id,
                                                  H5C2_t * cache_ptr,
                                                  hbool_t write_permitted)
 {
@@ -8810,6 +8836,7 @@ H5C2__autoadjust__ageout__evict_aged_out_entries(hid_t    dxpl_id,
 
     FUNC_ENTER_NOAPI_NOINIT(H5C2__autoadjust__ageout__evict_aged_out_entries)
 
+    HDassert( f );
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
 
@@ -8848,7 +8875,7 @@ H5C2__autoadjust__ageout__evict_aged_out_entries(hid_t    dxpl_id,
 
             if ( entry_ptr->is_dirty ) {
 
-                result = H5C2_flush_single_entry(cache_ptr->f,
+                result = H5C2_flush_single_entry(f,
                                                  dxpl_id,
                                                  cache_ptr,
                                                  entry_ptr->type,
@@ -8859,7 +8886,7 @@ H5C2__autoadjust__ageout__evict_aged_out_entries(hid_t    dxpl_id,
 
                 bytes_evicted += entry_ptr->size;
 
-                result = H5C2_flush_single_entry(cache_ptr->f,
+                result = H5C2_flush_single_entry(f,
                                                  dxpl_id,
                                                  cache_ptr,
                                                  entry_ptr->type,
@@ -8956,7 +8983,7 @@ H5C2__autoadjust__ageout__evict_aged_out_entries(hid_t    dxpl_id,
 
             if ( ! (entry_ptr->is_dirty) ) {
 
-                result = H5C2_flush_single_entry(cache_ptr->f,
+                result = H5C2_flush_single_entry(f,
                                                  dxpl_id,
                                                  cache_ptr,
                                                  entry_ptr->type,
@@ -9495,8 +9522,9 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5C2_flush_invalidate_cache(hid_t    dxpl_id,
+static herr_t
+H5C2_flush_invalidate_cache(H5F_t * f,
+                            hid_t    dxpl_id,
                             H5C2_t * cache_ptr,
 			    unsigned flags)
 {
@@ -9522,9 +9550,10 @@ H5C2_flush_invalidate_cache(hid_t    dxpl_id,
 
     FUNC_ENTER_NOAPI(H5C2_flush_invalidate_cache, FAIL)
 
+    HDassert( f );
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
-    HDassert( cache_ptr->skip_file_checks || cache_ptr->f );
+    HDassert( cache_ptr->skip_file_checks || f );
     HDassert( cache_ptr->slist_ptr );
 
     /* Filter out the flags that are not relevant to the flush/invalidate.
@@ -9768,7 +9797,7 @@ H5C2_flush_invalidate_cache(hid_t    dxpl_id,
 			       * condition here.
 			       */
 
-                    status = H5C2_flush_single_entry(cache_ptr->f,
+                    status = H5C2_flush_single_entry(f,
                                                      dxpl_id,
                                                      cache_ptr,
                                                      entry_ptr->type,
@@ -9787,7 +9816,7 @@ H5C2_flush_invalidate_cache(hid_t    dxpl_id,
                 }
             } else {
 
-                status = H5C2_flush_single_entry(cache_ptr->f,
+                status = H5C2_flush_single_entry(f,
                                                  dxpl_id,
                                                  cache_ptr,
                                                  entry_ptr->type,
@@ -9868,7 +9897,7 @@ H5C2_flush_invalidate_cache(hid_t    dxpl_id,
                 } else if ( ! ( entry_ptr->is_pinned ) ) {
 
                     status = 
-		        H5C2_flush_single_entry(cache_ptr->f,
+		        H5C2_flush_single_entry(f,
                                                 dxpl_id,
                                                 cache_ptr,
                                                 entry_ptr->type,
@@ -10432,7 +10461,7 @@ H5C2_flush_single_entry(H5F_t *		     f,
 		/* only call the clear_dirty_bits callback if debugging
 		 * is enabled.
 		 */
-	        if ( entry_ptr->type->clear_dirty_bits(addr, 
+	        if ( entry_ptr->type->clear_dirty_bits && entry_ptr->type->clear_dirty_bits(addr, 
 					               entry_ptr->size, 
 						       (void *)entry_ptr)
                      != SUCCEED )
@@ -10798,8 +10827,6 @@ H5C2_load_entry(H5F_t *              f,
 {
     /* const char *		fcn_name = "H5C2_load_entry()"; */
     hbool_t			dirty = FALSE;
-    haddr_t     		abs_eoa;     /* Absolute end of file address */
-    haddr_t     		rel_eoa;     /* Relative end of file address */
     void *			image_ptr = NULL;
     void *			thing = NULL;
     void *			ret_value = NULL;
@@ -10814,44 +10841,6 @@ H5C2_load_entry(H5F_t *              f,
     HDassert( len > 0 );
     HDassert( type->deserialize );
     HDassert( ( ! chk_len ) || ( type->image_len ) );
-
-    /* Make certain we don't speculatively read off the end of the file */
-    if ( HADDR_UNDEF == (abs_eoa = H5F_get_eoa(f)) )
-    {
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, \
-		    "unable to determine file size")
-    }
-
-    /* Adjust absolute EOA address to relative EOA address */
-    rel_eoa = abs_eoa - H5F_get_base_addr(f);
-
-    HDassert( rel_eoa > addr );
-
-    if ( (rel_eoa - addr) < (haddr_t)len )
-    {
-        /* either the client is speculatively reading beyond the end of
-	 * file, or there is a major screw up.  Adjust the len in the 
-	 * former case, and scream and die in the latter
-	 */
-	if ( chk_len ) /* i.e. possible speculative read beyond eof */
-	{
-	    /* Quincey:  Did I use this correctly?  In the example I
-	     * stole it from, the from type was hsize_t even though
-	     * the source was a haddr_t.  I changed the from to match
-	     * the source.  Is this as it should be?
-	     */
-	    /* JRM */
-            H5_ASSIGN_OVERFLOW(len, (rel_eoa - addr), \
-			       /* from: */ haddr_t, /* to: */ size_t);
-	    HDassert( len > 0 );
-	}
-	else
-	{
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, \
-                        "tried to read beyond eof")
-
-	}
-    }
 
     image_ptr = H5MM_malloc(len);
 
@@ -11037,7 +11026,8 @@ done:
  */
 
 static herr_t
-H5C2_make_space_in_cache(hid_t	 dxpl_id,
+H5C2_make_space_in_cache(H5F_t * f,
+                        hid_t	 dxpl_id,
                         H5C2_t * cache_ptr,
 		        size_t	 space_needed,
                         hbool_t	 write_permitted)
@@ -11058,6 +11048,7 @@ H5C2_make_space_in_cache(hid_t	 dxpl_id,
 
     FUNC_ENTER_NOAPI_NOINIT(H5C2_make_space_in_cache)
 
+    HDassert( f );
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
 
@@ -11094,7 +11085,7 @@ H5C2_make_space_in_cache(hid_t	 dxpl_id,
 
                 if ( entry_ptr->is_dirty ) {
 
-                    result = H5C2_flush_single_entry(cache_ptr->f,
+                    result = H5C2_flush_single_entry(f,
                                                      dxpl_id,
                                                      cache_ptr,
                                                      entry_ptr->type,
@@ -11104,7 +11095,7 @@ H5C2_make_space_in_cache(hid_t	 dxpl_id,
                 } else {
 
                     result = 
-		        H5C2_flush_single_entry(cache_ptr->f,
+		        H5C2_flush_single_entry(f,
                                                 dxpl_id,
                                                 cache_ptr,
                                                 entry_ptr->type,
@@ -11211,7 +11202,7 @@ H5C2_make_space_in_cache(hid_t	 dxpl_id,
 		HDassert( prev_ptr->is_dirty );
 	    }
 
-            result = H5C2_flush_single_entry(cache_ptr->f,
+            result = H5C2_flush_single_entry(f,
                                              dxpl_id,
                                              cache_ptr,
                                              entry_ptr->type,
@@ -11313,7 +11304,7 @@ H5C2_make_space_in_cache(hid_t	 dxpl_id,
 
             prev_ptr = entry_ptr->aux_prev;
 
-            result = H5C2_flush_single_entry(cache_ptr->f,
+            result = H5C2_flush_single_entry(f,
                                              dxpl_id,
                                              cache_ptr,
                                              entry_ptr->type,

@@ -128,7 +128,7 @@ typedef enum {
 typedef H5C2_deserialize_func_t		H5AC2_deserialize_func_t;
 typedef H5C2_image_len_func_t		H5AC2_image_len_func_t;
 typedef H5C2_serialize_func_t		H5AC2_serialize_func_t;
-typedef H5C2_free_icr_func_t		H5CA2_free_icr_func_t;
+typedef H5C2_free_icr_func_t		H5AC2_free_icr_func_t;
 typedef H5C2_clear_dirty_bits_func_t	H5AC2_clear_dirty_bits_func_t;
 
 typedef H5C2_class_t			H5AC2_class_t;
@@ -305,7 +305,7 @@ H5_DLL herr_t H5AC2_get_cache_hit_rate(H5AC2_t * cache_ptr,
 
 H5_DLL herr_t H5AC2_reset_cache_hit_rate_stats(H5AC2_t * cache_ptr);
 
-H5_DLL herr_t H5AC2_set_cache_auto_resize_config(H5AC2_t * cache_ptr,
+H5_DLL herr_t H5AC2_set_cache_auto_resize_config(const H5F_t * f,
                                               H5AC2_cache_config_t *config_ptr);
 
 H5_DLL herr_t H5AC2_validate_config(H5AC2_cache_config_t * config_ptr);

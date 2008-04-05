@@ -301,17 +301,21 @@ typedef struct H5F_t H5F_t;
     case 2: UINT16DECODE(p, o); break;					      \
 }
 
-#define H5F_ENCODE_LENGTH(f,p,l) switch(H5F_SIZEOF_SIZE(f)) {		      \
+#define H5F_ENCODE_LENGTH_LEN(p,l,s) switch(s) {		      	      \
     case 4: UINT32ENCODE(p,l); break;					      \
     case 8: UINT64ENCODE(p,l); break;					      \
     case 2: UINT16ENCODE(p,l); break;					      \
 }
 
-#define H5F_DECODE_LENGTH(f,p,l) switch(H5F_SIZEOF_SIZE(f)) {		      \
+#define H5F_ENCODE_LENGTH(f,p,l) H5F_ENCODE_LENGTH_LEN(p,l,H5F_SIZEOF_SIZE(f))
+
+#define H5F_DECODE_LENGTH_LEN(p,l,s) switch(s) {		              \
     case 4: UINT32DECODE(p,l); break;					      \
     case 8: UINT64DECODE(p,l); break;					      \
     case 2: UINT16DECODE(p,l); break;					      \
 }
+
+#define H5F_DECODE_LENGTH(f,p,l) H5F_DECODE_LENGTH_LEN(p,l,H5F_SIZEOF_SIZE(f))
 
 /*
  * Macros that check for overflows.  These are somewhat dangerous to fiddle
@@ -457,9 +461,12 @@ H5_DLL herr_t H5F_block_write(const H5F_t *f, H5FD_mem_t type, haddr_t addr,
                 size_t size, hid_t dxpl_id, const void *buf);
 
 /* Address-related functions */
-H5_DLL void H5F_addr_encode(const H5F_t *, uint8_t** /*in,out*/, haddr_t);
-H5_DLL void H5F_addr_decode(const H5F_t *, const uint8_t** /*in,out*/,
-			     haddr_t* /*out*/);
+H5_DLL void H5F_addr_encode_len(uint8_t **pp/*in,out*/, haddr_t addr,
+    unsigned addr_len);
+H5_DLL void H5F_addr_encode(const H5F_t *f, uint8_t **pp/*in,out*/,
+    haddr_t addr);
+H5_DLL void H5F_addr_decode(const H5F_t *f, const uint8_t **pp/*in,out*/,
+    haddr_t *addr_p/*out*/);
 
 /* File access property list callbacks */
 H5_DLL herr_t H5P_facc_close(hid_t dxpl_id, void *close_data);

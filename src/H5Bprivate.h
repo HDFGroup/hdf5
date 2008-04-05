@@ -33,7 +33,6 @@
 
 /* Private headers needed by this file */
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5RCprivate.h"	/* Reference counted object functions	*/
@@ -73,9 +72,6 @@ typedef enum H5B_ins_t {
 typedef int (*H5B_operator_t)(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
                                         const void *_rt_key, void *_udata);
 
-/* Typedef for B-tree in memory (defined in H5Bpkg.h) */
-typedef struct H5B_t H5B_t;
-
 /* Each B-tree has certain information that can be shared across all
  * the instances of nodes in that B-tree.
  */
@@ -85,6 +81,8 @@ typedef struct H5B_shared_t {
     size_t		sizeof_rkey;	/* Size of raw (disk) key	     */
     size_t		sizeof_rnode;	/* Size of raw (disk) node	     */
     size_t		sizeof_keys;	/* Size of native (memory) key node  */
+    size_t              sizeof_addr;    /* Size of file address (in bytes)   */
+    size_t              sizeof_len;     /* Size of file lengths (in bytes)   */
     uint8_t	        *page;	        /* Disk page */
     size_t              *nkey;          /* Offsets of each native key in native key buffer */
 } H5B_shared_t;
@@ -119,8 +117,8 @@ typedef struct H5B_class_t {
 			  hbool_t*);
 
     /* encode, decode, debug key values */
-    herr_t	(*decode)(const H5F_t*, const struct H5B_t*, const uint8_t*, void*);
-    herr_t	(*encode)(const H5F_t*, const struct H5B_t*, uint8_t*, void*);
+    herr_t	(*decode)(const H5B_shared_t*, const uint8_t*, void*);
+    herr_t	(*encode)(const H5B_shared_t*, uint8_t*, const void*);
     herr_t	(*debug_key)(FILE*, H5F_t*, hid_t, int, int, const void*, const void*);
 } H5B_class_t;
 

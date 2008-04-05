@@ -38,44 +38,151 @@
 #include "H5Bpkg.h"		/* B-link trees				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 
+
 /****************/
 /* Local Macros */
 /****************/
+
 
 /******************/
 /* Local Typedefs */
 /******************/
 
+
 /********************/
 /* Local Prototypes */
 /********************/
 
-/* General routines */
-static herr_t H5B_serialize(const H5F_t *f, const H5B_t *bt);
-
 /* Metadata cache callbacks */
-static H5B_t *H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata);
-static herr_t H5B_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *b, unsigned UNUSED * flags_ptr);
-static herr_t H5B_clear(H5F_t *f, H5B_t *b, hbool_t destroy);
-static herr_t H5B_compute_size(const H5F_t *f, const H5B_t *bt, size_t *size_ptr);
+static void *H5B_deserialize(haddr_t addr, size_t len, const void *image,
+    const void *udata, hbool_t *dirty);
+static herr_t H5B_serialize(haddr_t addr, size_t len, void *image,
+    void *thing, unsigned *flags, haddr_t *new_addr,
+    size_t *new_len, void **new_image);
+static herr_t H5B_free_icr(haddr_t addr, size_t len, void *thing);
+
 
 /*********************/
 /* Package Variables */
 /*********************/
 
 /* H5B inherits cache-like properties from H5AC */
-const H5AC_class_t H5AC_BT[1] = {{
-    H5AC_BT_ID,
-    (H5AC_load_func_t)H5B_load,
-    (H5AC_flush_func_t)H5B_flush,
-    (H5AC_dest_func_t)H5B_dest,
-    (H5AC_clear_func_t)H5B_clear,
-    (H5AC_size_func_t)H5B_compute_size,
+const H5AC2_class_t H5AC2_BT[1] = {{
+    H5AC2_BT_ID,
+    "v1 B-tree",
+    H5FD_MEM_BTREE,
+    H5B_deserialize,
+    NULL,
+    H5B_serialize,
+    H5B_free_icr,
+    NULL
 }};
 
 /*******************/
 /* Local Variables */
 /*******************/
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5B_deserialize
+ *
+ * Purpose:     Deserialize the data structure from disk.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              Mar 24, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5B_deserialize(haddr_t UNUSED addr, size_t UNUSED len, const void *image, const void *_udata,
+    hbool_t UNUSED *dirty)
+{
+    H5B_t *bt = NULL;           /* Pointer to the deserialized B-tree node */
+    const H5B_cache_ud_t *udata = (const H5B_cache_ud_t *)_udata;       /* User data for callback */
+    H5B_shared_t *shared;       /* Pointer to shared B-tree info */
+    const uint8_t *p;           /* Pointer into image buffer */
+    uint8_t *native;            /* Pointer to native keys */
+    unsigned u;                 /* Local index variable */
+    H5B_t *ret_value;           /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5B_deserialize)
+
+    /* check arguments */
+    HDassert(image);
+
+    /* Allocate the B-tree node in memory */
+    if(NULL == (bt = H5FL_MALLOC(H5B_t)))
+	HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, NULL, "can't allocate B-tree struct")
+    HDmemset(&bt->cache_info, 0, sizeof(bt->cache_info));
+
+    /* Set & increment the ref-counted "shared" B-tree information for the node */
+    bt->rc_shared = udata->rc_shared;
+    H5RC_INC(bt->rc_shared);
+
+    /* Get a pointer to the shared info, for convenience */
+    shared = (H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
+    HDassert(shared);
+
+    /* Allocate space for the native keys and child addresses */
+    if(NULL == (bt->native = H5FL_BLK_MALLOC(native_block, shared->sizeof_keys)))
+	HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, NULL, "can't allocate buffer for native keys")
+    if(NULL == (bt->child = H5FL_SEQ_MALLOC(haddr_t, (size_t)shared->two_k)))
+	HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, NULL, "can't allocate buffer for child addresses")
+
+    /* Set the pointer into the image */
+    p = image;
+
+    /* magic number */
+    if(HDmemcmp(p, H5B_MAGIC, (size_t)H5B_SIZEOF_MAGIC))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree signature")
+    p += 4;
+
+    /* node type and level */
+    if(*p++ != (uint8_t)udata->type->id)
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "incorrect B-tree node type")
+    bt->level = *p++;
+
+    /* entries used */
+    UINT16DECODE(p, bt->nchildren);
+
+    /* sibling pointers */
+    H5F_addr_decode(udata->f, (const uint8_t **)&p, &(bt->left));
+    H5F_addr_decode(udata->f, (const uint8_t **)&p, &(bt->right));
+
+    /* the child/key pairs */
+    native = bt->native;
+    for(u = 0; u < bt->nchildren; u++) {
+        /* Decode native key value */
+        if((udata->type->decode)(shared, p, native) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, NULL, "unable to decode key")
+        p += shared->sizeof_rkey;
+        native += udata->type->sizeof_nkey;
+
+        /* Decode address value */
+        H5F_addr_decode(udata->f, (const uint8_t **)&p, bt->child + u);
+    } /* end for */
+
+    /* Decode final key */
+    if(bt->nchildren > 0) {
+        /* Decode native key value */
+        if((udata->type->decode)(shared, p, native) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, NULL, "unable to decode key")
+    } /* end if */
+
+    /* Set return value */
+    ret_value = bt;
+
+done:
+    if(!ret_value && bt)
+        (void)H5B_dest(bt);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5B_deserialize() */
 
 
 /*-------------------------------------------------------------------------
@@ -86,31 +193,36 @@ const H5AC_class_t H5AC_BT[1] = {{
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
- * Programmer:  Bill Wendling
- *              wendling@ncsa.uiuc.edu
- *              Sept. 15, 2003
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              Mar 24, 2008
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B_serialize(const H5F_t *f, const H5B_t *bt)
+H5B_serialize(haddr_t UNUSED addr, size_t UNUSED len, void *image, void *_thing,
+    unsigned *flags, haddr_t UNUSED *new_addr, size_t UNUSED *new_len,
+    void UNUSED **new_image)
 {
-    H5B_shared_t *shared=NULL;  /* Pointer to shared B-tree info */
-    unsigned    u;
-    uint8_t    *p;              /* Pointer into raw data buffer */
+    H5B_t *bt = (H5B_t *)_thing;        /* Pointer to the B-tree node */
+    H5B_shared_t *shared;       /* Pointer to shared B-tree info */
+    uint8_t    *p;              /* Pointer into image buffer */
     uint8_t    *native;         /* Pointer to native keys */
+    unsigned    u;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B_serialize, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5B_serialize)
 
     /* check arguments */
-    HDassert(f);
+    HDassert(image);
     HDassert(bt);
     HDassert(bt->rc_shared);
-    shared=(H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
+    HDassert(flags);
+    shared = (H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
     HDassert(shared);
 
-    p = shared->page;
+    /* Set the local pointer into the serialized image */
+    p = image;
 
     /* magic number */
     HDmemcpy(p, H5B_MAGIC, (size_t)H5B_SIZEOF_MAGIC);
@@ -125,26 +237,29 @@ H5B_serialize(const H5F_t *f, const H5B_t *bt)
     UINT16ENCODE(p, bt->nchildren);
 
     /* sibling pointers */
-    H5F_addr_encode(f, &p, bt->left);
-    H5F_addr_encode(f, &p, bt->right);
+    H5F_addr_encode_len(&p, bt->left, shared->sizeof_addr);
+    H5F_addr_encode_len(&p, bt->right, shared->sizeof_addr);
 
     /* child keys and pointers */
-    native=bt->native;
-    for (u = 0; u < bt->nchildren; ++u) {
+    native = bt->native;
+    for(u = 0; u < bt->nchildren; ++u) {
         /* encode the key */
-        if (shared->type->encode(f, bt, p, native) < 0)
+        if(shared->type->encode(shared, p, native) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode B-tree key")
         p += shared->sizeof_rkey;
         native += shared->type->sizeof_nkey;
 
         /* encode the child address */
-        H5F_addr_encode(f, &p, bt->child[u]);
+        H5F_addr_encode_len(&p, bt->child[u], shared->sizeof_addr);
     } /* end for */
-    if(bt->nchildren>0) {
+    if(bt->nchildren > 0) {
         /* Encode the final key */
-        if (shared->type->encode(f, bt, p, native) < 0)
+        if(shared->type->encode(shared, p, native) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode B-tree key")
     } /* end if */
+
+    /* Reset the cache flags for this operation (metadata not resized or renamed) */
+    *flags = 0;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -152,272 +267,30 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B_load
+ * Function:    H5B_free_icr
  *
- * Purpose:	Loads a B-tree node from the disk.
+ * Purpose:     Destroy/release an "in core representation" of a data structure
  *
- * Return:	Success:	Pointer to a new B-tree node.
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
  *
- *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jun 23 1997
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              Mar 26, 2008
  *
  *-------------------------------------------------------------------------
  */
-static H5B_t *
-H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata)
+static herr_t
+H5B_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
 {
-    const H5B_class_t	*type = (const H5B_class_t *) _type;
-    H5B_t		*bt = NULL;
-    H5B_shared_t        *shared;        /* Pointer to shared B-tree info */
-    uint8_t		*p;             /* Pointer into raw data buffer */
-    uint8_t		*native;        /* Pointer to native keys */
-    unsigned		u;              /* Local index variable */
-    H5B_t		*ret_value;
-
-    FUNC_ENTER_NOAPI(H5B_load, NULL)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B_free_icr)
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(type);
-    HDassert(type->get_shared);
+    HDassert(thing);
 
-    if (NULL==(bt = H5FL_MALLOC(H5B_t)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    HDmemset(&bt->cache_info,0,sizeof(H5AC_info_t));
-    if((bt->rc_shared=(type->get_shared)(f, udata))==NULL)
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "can't retrieve B-tree node buffer")
-    shared=(H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
-    HDassert(shared);
-    if (NULL==(bt->native=H5FL_BLK_MALLOC(native_block,shared->sizeof_keys)) ||
-            NULL==(bt->child=H5FL_SEQ_MALLOC(haddr_t,(size_t)shared->two_k)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-
-    if (H5F_block_read(f, H5FD_MEM_BTREE, addr, shared->sizeof_rnode, dxpl_id, shared->page)<0)
-	HGOTO_ERROR(H5E_BTREE, H5E_READERROR, NULL, "can't read B-tree node")
-
-    p = shared->page;
-
-    /* magic number */
-    if (HDmemcmp(p, H5B_MAGIC, (size_t)H5B_SIZEOF_MAGIC))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree signature")
-    p += 4;
-
-    /* node type and level */
-    if (*p++ != (uint8_t)type->id)
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "incorrect B-tree node type")
-    bt->level = *p++;
-
-    /* entries used */
-    UINT16DECODE(p, bt->nchildren);
-
-    /* sibling pointers */
-    H5F_addr_decode(f, (const uint8_t **) &p, &(bt->left));
-    H5F_addr_decode(f, (const uint8_t **) &p, &(bt->right));
-
-    /* the child/key pairs */
-    native=bt->native;
-    for (u = 0; u < bt->nchildren; u++) {
-        /* Decode native key value */
-        if ((type->decode) (f, bt, p, native) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, NULL, "unable to decode key")
-        p += shared->sizeof_rkey;
-        native += type->sizeof_nkey;
-
-        /* Decode address value */
-        H5F_addr_decode(f, (const uint8_t **) &p, bt->child + u);
-    }
-
-    /* Decode final key */
-    if(bt->nchildren>0) {
-        /* Decode native key value */
-        if ((type->decode) (f, bt, p, native) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTDECODE, NULL, "unable to decode key")
-    } /* end if */
-
-    /* Set return value */
-    ret_value = bt;
-
-done:
-    if (!ret_value && bt)
-        (void)H5B_dest(f,bt);
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5B_load() */  /*lint !e818 Can't make udata a pointer to const */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5B_flush
- *
- * Purpose:	Flushes a dirty B-tree node to disk.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jun 23 1997
- *
- * Changes:     JRM -- 8/21/06
- *              Added the flags_ptr parameter.  This parameter exists to
- *              allow the flush routine to report to the cache if the
- *              entry is resized or renamed as a result of the flush.
- *              *flags_ptr is set to H5C_CALLBACK__NO_FLAGS_SET on entry.
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5B_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B_t *bt, unsigned UNUSED * flags_ptr)
-{
-    H5B_shared_t        *shared;        /* Pointer to shared B-tree info */
-    herr_t      ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI(H5B_flush, FAIL)
-
-    /* check arguments */
-    HDassert(f);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(bt);
-    shared=(H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
-    HDassert(shared);
-    HDassert(shared->type);
-    HDassert(shared->type->encode);
-
-    if (bt->cache_info.is_dirty) {
-        if (H5B_serialize(f, bt) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTSERIALIZE, FAIL, "unable to serialize B-tree")
-
-	/*
-         * Write the disk page.	We always write the header, but we don't
-         * bother writing data for the child entries that don't exist or
-         * for the final unchanged children.
-	 */
-	if (H5F_block_write(f, H5FD_MEM_BTREE, addr, shared->sizeof_rnode, dxpl_id, shared->page) < 0)
-	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL, "unable to save B-tree node to disk")
-
-	bt->cache_info.is_dirty = FALSE;
-    } /* end if */
-
-    if (destroy)
-        if (H5B_dest(f,bt) < 0)
-	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree node")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5B_flush() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5B_dest
- *
- * Purpose:	Destroys a B-tree node in memory.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Jan 15 2003
- *
- *-------------------------------------------------------------------------
- */
-/* ARGSUSED */
-herr_t
-H5B_dest(H5F_t UNUSED *f, H5B_t *bt)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B_dest)
-
-    /*
-     * Check arguments.
-     */
-    HDassert(bt);
-    HDassert(bt->rc_shared);
-
-    H5FL_SEQ_FREE(haddr_t,bt->child);
-    H5FL_BLK_FREE(native_block,bt->native);
-    H5RC_DEC(bt->rc_shared);
-    H5FL_FREE(H5B_t,bt);
+    /* Destroy B-tree node */
+    H5B_dest(thing);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5B_dest() */
+} /* end H5B_free_icr() */
 
-
-/*-------------------------------------------------------------------------
- * Function:	H5B_clear
- *
- * Purpose:	Mark a B-tree node in memory as non-dirty.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Mar 20 2003
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5B_clear(H5F_t *f, H5B_t *bt, hbool_t destroy)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT(H5B_clear)
-
-    /*
-     * Check arguments.
-     */
-    HDassert(bt);
-
-    /* Reset the dirty flag.  */
-    bt->cache_info.is_dirty = FALSE;
-
-    if (destroy)
-        if (H5B_dest(f, bt) < 0)
-	    HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree node")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5B_clear() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5B_compute_size
- *
- * Purpose:	Compute the size in bytes of the specified instance of
- *		H5B_t on disk, and return it in *len_ptr.  On failure,
- *		the value of *len_ptr is undefined.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	John Mainzer
- *		5/13/04
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5B_compute_size(const H5F_t *f, const H5B_t *bt, size_t *size_ptr)
-{
-    H5B_shared_t        *shared;        /* Pointer to shared B-tree info */
-    size_t	size;
-    herr_t      ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5B_compute_size)
-
-    /* check arguments */
-    HDassert(f);
-    HDassert(bt);
-    HDassert(bt->rc_shared);
-    shared=(H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
-    HDassert(shared);
-    HDassert(shared->type);
-    HDassert(size_ptr);
-
-    /* Check node's size */
-    if ((size = H5B_nodesize(f, shared, NULL)) == 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGETSIZE, FAIL, "H5B_nodesize() failed")
-
-    /* Set size value */
-    *size_ptr = size;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5B_compute_size() */

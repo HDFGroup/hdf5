@@ -124,7 +124,6 @@ H5O_mdj_msg_decode(H5F_t *f,
 		    unsigned UNUSED mesg_flags,
 		    const uint8_t *p)
 {
-    const char * fcn_name = "H5O_mdj_msg_decode()";
     uint16_t            flags = 0;      /* packed boolean fields */
     H5O_mdj_msg_t      *mesg;          /* Native message        */
     void                *ret_value;     /* Return value          */
@@ -260,7 +259,6 @@ done:
 static void *
 H5O_mdj_msg_copy(const void *_mesg, void *_dest)
 {
-    const char * fcn_name = "H5O_mdj_msg_copy()";
     const H5O_mdj_msg_t  *mesg = (const H5O_mdj_msg_t *)_mesg;
     H5O_mdj_msg_t        *dest = (H5O_mdj_msg_t *)_dest;
     void                  *ret_value;
@@ -312,9 +310,7 @@ H5O_mdj_msg_size(const H5F_t *f,
 		  hbool_t UNUSED disable_shared, 
 		  const void *_mesg)
 {
-    const char * fcn_name = "H5O_mdj_msg_size()";
     const H5O_mdj_msg_t * mesg = (const H5O_mdj_msg_t *)_mesg;
-    size_t                 ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_mdj_msg_size)
 
@@ -322,12 +318,7 @@ H5O_mdj_msg_size(const H5F_t *f,
     HDassert(f);
     HDassert(mesg);
 
-    ret_value = MDJ_MSG_LEN(f);
-
-done:
-
-   FUNC_LEAVE_NOAPI(ret_value)
-
+    FUNC_LEAVE_NOAPI(MDJ_MSG_LEN(f))
 } /* end H5O_mdj_msg_size() */
 
 
@@ -350,23 +341,19 @@ done:
 static herr_t
 H5O_mdj_msg_reset(void *_mesg)
 {
-    const char * fcn_name = "H5O_mdj_msg_reset()";
     H5O_mdj_msg_t *mesg = (H5O_mdj_msg_t *) _mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_mdj_msg_reset);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_mdj_msg_reset)
 
     /* check args */
-    assert(mesg);
+    HDassert(mesg);
 
     /* reset */
     mesg->mdc_jrnl_enabled = FALSE;
     mesg->mdc_jrnl_block_loc = HADDR_UNDEF;
     mesg->mdc_jrnl_block_len = 0;
 
-done:
-
-    FUNC_LEAVE_NOAPI(SUCCEED);
-
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5O_mdj_msg_reset() */
 
 
@@ -391,7 +378,6 @@ H5O_mdj_msg_debug(H5F_t UNUSED *f,
 		   int indent, 
 		   int fwidth)
 {
-    const char * fcn_name = "H5O_mdj_msg_debug()";
     const H5O_mdj_msg_t *mesg = (const H5O_mdj_msg_t *)_mesg;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_mdj_msg_debug)
@@ -415,9 +401,6 @@ H5O_mdj_msg_debug(H5F_t UNUSED *f,
               "mdc_jrnl_block_len:", 
 	      (int)(mesg->mdc_jrnl_block_len));
 
-done:
-
     FUNC_LEAVE_NOAPI(SUCCEED)
-
 } /* end H5O_mdj_msg_debug() */
 

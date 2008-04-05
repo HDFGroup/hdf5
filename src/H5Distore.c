@@ -45,7 +45,6 @@
 /* Module Setup */
 /****************/
 
-#define H5B_PACKAGE		/*suppress error about including H5Bpkg	  */
 #define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
 
 
@@ -53,7 +52,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5Bpkg.h"		/* B-link trees				*/
+#include "H5Bprivate.h"		/* B-link trees				*/
 #include "H5Dpkg.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* Files				*/
@@ -249,10 +248,8 @@ static H5B_ins_t H5D_istore_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *
 static H5B_ins_t H5D_istore_remove( H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key,
                   hbool_t *lt_key_changed, void *_udata, void *_rt_key,
                   hbool_t *rt_key_changed);
-static herr_t H5D_istore_decode_key(const H5F_t *f, const H5B_t *bt, const uint8_t *raw,
-				    void *_key);
-static herr_t H5D_istore_encode_key(const H5F_t *f, const H5B_t *bt, uint8_t *raw,
-				    void *_key);
+static herr_t H5D_istore_decode_key(const H5B_shared_t *shared, const uint8_t *raw, void *_key);
+static herr_t H5D_istore_encode_key(const H5B_shared_t *shared, uint8_t *raw, const void *_key);
 static herr_t H5D_istore_debug_key(FILE *stream, H5F_t *f, hid_t dxpl_id,
                                 int indent, int fwidth, const void *key,
                                     const void *udata);
@@ -332,9 +329,6 @@ H5D_istore_get_shared(const H5F_t UNUSED *f, const void *_udata)
     HDassert(udata->mesg);
     HDassert(udata->mesg->u.chunk.btree_shared);
 
-    /* Increment reference count on B-tree info */
-    H5RC_INC(udata->mesg->u.chunk.btree_shared);
-
     /* Return the pointer to the ref-count object */
     FUNC_LEAVE_NOAPI(udata->mesg->u.chunk.btree_shared)
 } /* end H5D_istore_get_shared() */
@@ -353,29 +347,25 @@ H5D_istore_get_shared(const H5F_t UNUSED *f, const void *_udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_istore_decode_key(const H5F_t UNUSED *f, const H5B_t *bt, const uint8_t *raw, void *_key)
+H5D_istore_decode_key(const H5B_shared_t *shared, const uint8_t *raw, void *_key)
 {
     H5D_istore_key_t	*key = (H5D_istore_key_t *) _key;
-    H5B_shared_t        *shared;        /* Pointer to shared B-tree info */
     size_t		ndims;
     unsigned		u;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_decode_key)
 
     /* check args */
-    assert(f);
-    assert(bt);
-    shared=H5RC_GET_OBJ(bt->rc_shared);
     HDassert(shared);
-    assert(raw);
-    assert(key);
+    HDassert(raw);
+    HDassert(key);
     ndims = H5D_ISTORE_NDIMS(shared);
-    assert(ndims<=H5O_LAYOUT_NDIMS);
+    HDassert(ndims <= H5O_LAYOUT_NDIMS);
 
     /* decode */
     UINT32DECODE(raw, key->nbytes);
     UINT32DECODE(raw, key->filter_mask);
-    for (u=0; u<ndims; u++)
+    for(u = 0; u < ndims; u++)
 	UINT64DECODE(raw, key->offset[u]);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -395,29 +385,25 @@ H5D_istore_decode_key(const H5F_t UNUSED *f, const H5B_t *bt, const uint8_t *raw
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_istore_encode_key(const H5F_t UNUSED *f, const H5B_t *bt, uint8_t *raw, void *_key)
+H5D_istore_encode_key(const H5B_shared_t *shared, uint8_t *raw, const void *_key)
 {
-    H5D_istore_key_t	*key = (H5D_istore_key_t *) _key;
-    H5B_shared_t        *shared;        /* Pointer to shared B-tree info */
+    const H5D_istore_key_t	*key = (const H5D_istore_key_t *) _key;
     size_t		ndims;
     unsigned		u;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_encode_key)
 
     /* check args */
-    assert(f);
-    assert(bt);
-    shared=H5RC_GET_OBJ(bt->rc_shared);
     HDassert(shared);
-    assert(raw);
-    assert(key);
+    HDassert(raw);
+    HDassert(key);
     ndims = H5D_ISTORE_NDIMS(shared);
-    assert(ndims<=H5O_LAYOUT_NDIMS);
+    HDassert(ndims <= H5O_LAYOUT_NDIMS);
 
     /* encode */
     UINT32ENCODE(raw, key->nbytes);
     UINT32ENCODE(raw, key->filter_mask);
-    for (u=0; u<ndims; u++)
+    for(u = 0; u < ndims; u++)
 	UINT64ENCODE(raw, key->offset[u]);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -1488,6 +1474,10 @@ H5D_istore_shared_create (const H5F_t *f, H5O_layout_t *layout)
     assert(shared->sizeof_rkey);
     shared->sizeof_rnode = H5B_nodesize(f, shared, &shared->sizeof_keys);
     assert(shared->sizeof_rnode);
+    shared->sizeof_addr = H5F_SIZEOF_ADDR(f);
+    assert(shared->sizeof_addr);
+    shared->sizeof_len = H5F_SIZEOF_SIZE(f);
+    assert(shared->sizeof_len);
     if(NULL==(shared->page=H5FL_BLK_MALLOC(chunk_page,shared->sizeof_rnode)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")
 #ifdef H5_CLEAR_MEMORY

@@ -104,10 +104,8 @@ static H5B_ins_t H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_l
 static H5B_ins_t H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *lt_key,
 				 hbool_t *lt_key_changed, void *udata,
 				 void *rt_key, hbool_t *rt_key_changed);
-static herr_t H5G_node_decode_key(const H5F_t *f, const H5B_t *bt, const uint8_t *raw,
-				  void *_key);
-static herr_t H5G_node_encode_key(const H5F_t *f, const H5B_t *bt, uint8_t *raw,
-				  void *_key);
+static herr_t H5G_node_decode_key(const H5B_shared_t *shared, const uint8_t *raw, void *_key);
+static herr_t H5G_node_encode_key(const H5B_shared_t *shared, uint8_t *raw, const void *_key);
 static herr_t H5G_node_debug_key(FILE *stream, H5F_t *f, hid_t dxpl_id,
                                     int indent, int fwidth, const void *key,
                                     const void *udata);
@@ -173,18 +171,12 @@ H5FL_BLK_DEFINE_STATIC(grp_page);
 static H5RC_t *
 H5G_node_get_shared(const H5F_t *f, const void UNUSED *_udata)
 {
-    H5RC_t *rc;
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_get_shared)
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_get_shared);
-
-    assert(f);
-
-    /* Increment reference count on shared B-tree node */
-    rc=H5F_GRP_BTREE_SHARED(f);
-    H5RC_INC(rc);
+    HDassert(f);
 
     /* Return the pointer to the ref-count object */
-    FUNC_LEAVE_NOAPI(rc);
+    FUNC_LEAVE_NOAPI(H5F_GRP_BTREE_SHARED(f))
 } /* end H5G_node_get_shared() */
 
 
@@ -199,25 +191,23 @@ H5G_node_get_shared(const H5F_t *f, const void UNUSED *_udata)
  *		matzke@llnl.gov
  *		Jul  8 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_decode_key(const H5F_t *f, const H5B_t UNUSED *bt, const uint8_t *raw, void *_key)
+H5G_node_decode_key(const H5B_shared_t *shared, const uint8_t *raw, void *_key)
 {
     H5G_node_key_t	   *key = (H5G_node_key_t *) _key;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_decode_key);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_decode_key)
 
-    assert(f);
-    assert(raw);
-    assert(key);
+    HDassert(shared);
+    HDassert(raw);
+    HDassert(key);
 
-    H5F_DECODE_LENGTH(f, raw, key->offset);
+    H5F_DECODE_LENGTH_LEN(raw, key->offset, shared->sizeof_len);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5G_node_decode_key() */
 
 
 /*-------------------------------------------------------------------------
@@ -231,25 +221,23 @@ H5G_node_decode_key(const H5F_t *f, const H5B_t UNUSED *bt, const uint8_t *raw, 
  *		matzke@llnl.gov
  *		Jul  8 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_encode_key(const H5F_t *f, const H5B_t UNUSED *bt, uint8_t *raw, void *_key)
+H5G_node_encode_key(const H5B_shared_t *shared, uint8_t *raw, const void *_key)
 {
-    H5G_node_key_t	   *key = (H5G_node_key_t *) _key;
+    const H5G_node_key_t *key = (const H5G_node_key_t *) _key;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_encode_key);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_encode_key)
 
-    assert(f);
-    assert(raw);
-    assert(key);
+    HDassert(shared);
+    HDassert(raw);
+    HDassert(key);
 
-    H5F_ENCODE_LENGTH(f, raw, key->offset);
+    H5F_ENCODE_LENGTH_LEN(raw, key->offset, shared->sizeof_len);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5G_node_encode_key() */
 
 
 /*-------------------------------------------------------------------------
@@ -1637,6 +1625,10 @@ H5G_node_init(H5F_t *f)
     assert(shared->sizeof_rkey);
     shared->sizeof_rnode = H5B_nodesize(f, shared, &shared->sizeof_keys);
     assert(shared->sizeof_rnode);
+    shared->sizeof_addr = H5F_SIZEOF_ADDR(f);
+    assert(shared->sizeof_addr);
+    shared->sizeof_len = H5F_SIZEOF_SIZE(f);
+    assert(shared->sizeof_len);
     if(NULL==(shared->page=H5FL_BLK_MALLOC(grp_page,shared->sizeof_rnode)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")
 #ifdef H5_CLEAR_MEMORY

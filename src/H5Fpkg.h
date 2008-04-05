@@ -36,12 +36,13 @@
 
 /* Other private headers needed by this file */
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5AC2private.h"	/* cache                                */
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5FOprivate.h"        /* File objects                         */
 #include "H5Gprivate.h"		/* Groups 			  	*/
 #include "H5Oprivate.h"         /* Object header messages               */
 #include "H5RCprivate.h"	/* Reference counted object functions	*/
-#include "H5AC2private.h"	/* cache                                */
 
 /*
  * Feature: Define this constant on the compiler command-line if you want to

@@ -43,38 +43,38 @@ const char *FILENAMES[] = {
     ( (a).set_initial_size     == (b).set_initial_size ) ) &&     \
   ( ( ! compare_init ) ||                                         \
     ( (a).initial_size         == (b).initial_size ) ) &&         \
-  ( (a).min_clean_fraction     == (b).min_clean_fraction ) &&     \
+  ( DBL_REL_EQUAL((a).min_clean_fraction, (b).min_clean_fraction, 0.00001 ) ) &&     \
   ( (a).max_size               == (b).max_size ) &&               \
   ( (a).min_size               == (b).min_size ) &&               \
   ( (a).epoch_length           == (b).epoch_length ) &&           \
   ( (a).incr_mode              == (b).incr_mode ) &&              \
-  ( (a).lower_hr_threshold     == (b).lower_hr_threshold ) &&     \
-  ( (a).increment              == (b).increment ) &&              \
+  ( DBL_REL_EQUAL((a).lower_hr_threshold, (b).lower_hr_threshold, 0.00001 ) ) &&     \
+  ( DBL_REL_EQUAL((a).increment, (b).increment, 0.00001 ) ) &&     \
   ( (a).apply_max_increment    == (b).apply_max_increment ) &&    \
   ( (a).max_increment          == (b).max_increment ) &&          \
   ( (a).flash_incr_mode        == (b).flash_incr_mode ) &&        \
-  ( (a).flash_multiple         == (b).flash_multiple ) &&         \
-  ( (a).flash_threshold        == (b).flash_threshold ) &&        \
+  ( DBL_REL_EQUAL((a).flash_multiple, (b).flash_multiple, 0.00001 ) ) &&     \
+  ( DBL_REL_EQUAL((a).flash_threshold, (b).flash_threshold, 0.00001 ) ) &&     \
   ( (a).decr_mode              == (b).decr_mode ) &&              \
-  ( (a).upper_hr_threshold     == (b).upper_hr_threshold ) &&     \
-  ( (a).decrement              == (b).decrement ) &&              \
+  ( DBL_REL_EQUAL((a).upper_hr_threshold, (b).upper_hr_threshold, 0.00001 ) ) &&     \
+  ( DBL_REL_EQUAL((a).decrement, (b).decrement, 0.00001 ) ) &&     \
   ( (a).apply_max_decrement    == (b).apply_max_decrement ) &&    \
   ( (a).max_decrement          == (b).max_decrement ) &&          \
   ( (a).epochs_before_eviction == (b).epochs_before_eviction ) && \
   ( (a).apply_empty_reserve    == (b).apply_empty_reserve ) &&    \
-  ( (a).empty_reserve          == (b).empty_reserve ) )
+  ( DBL_REL_EQUAL((a).empty_reserve, (b).empty_reserve, 0.00001 ) ) )
 
 
 /* private function declarations: */
 
-static void check_fapl_mdc_api_calls(void);
+static unsigned check_fapl_mdc_api_calls(void);
 
 static void validate_mdc_config(hid_t file_id,
                                 H5AC2_cache_config_t * ext_config_ptr,
                                 hbool_t compare_init,
                                 int test_num);
 
-static void check_file_mdc_api_calls(void);
+static unsigned check_file_mdc_api_calls(void);
 
 static void check_and_validate_cache_hit_rate(hid_t file_id,
                                               double * hit_rate_ptr,
@@ -92,12 +92,12 @@ static void check_and_validate_cache_size(hid_t file_id,
 /* This test can't be run until we start using H5C2, so comment
  * out declaration for now.
  */
-static void mdc_api_call_smoke_check(void);
+static unsigned mdc_api_call_smoke_check(void);
 #endif
 
-static void check_fapl_mdc_api_errs(void);
+static unsigned check_fapl_mdc_api_errs(void);
 
-static void check_file_mdc_api_errs(void);
+static unsigned check_file_mdc_api_errs(void);
 
 
 /**************************************************************************/
@@ -139,26 +139,26 @@ static void check_file_mdc_api_errs(void);
       ( (a).set_initial_size     == (b).set_initial_size ) ) &&      \
     ( ( ! cmp_init_size ) ||                                         \
       ( (a).initial_size         == (b).initial_size ) ) &&          \
-    ( (a).min_clean_fraction     == (b).min_clean_fraction ) &&      \
+    ( DBL_REL_EQUAL((a).min_clean_fraction, (b).min_clean_fraction, 0.00001 ) ) &&     \
     ( (a).max_size               == (b).max_size ) &&                \
     ( (a).min_size               == (b).min_size ) &&                \
     ( (a).epoch_length           == (b).epoch_length ) &&            \
     ( (a).incr_mode              == (b).incr_mode ) &&               \
-    ( (a).lower_hr_threshold     == (b).lower_hr_threshold ) &&      \
-    ( (a).increment              == (b).increment ) &&               \
+    ( DBL_REL_EQUAL((a).lower_hr_threshold, (b).lower_hr_threshold, 0.00001 ) ) &&     \
+    ( DBL_REL_EQUAL((a).increment, (b).increment, 0.00001 ) ) &&     \
     ( (a).apply_max_increment    == (b).apply_max_increment ) &&     \
     ( (a).max_increment          == (b).max_increment ) &&           \
     ( (a).flash_incr_mode        == (b).flash_incr_mode ) &&         \
-    ( (a).flash_multiple         == (b).flash_multiple ) &&          \
-    ( (a).flash_threshold        == (b).flash_threshold ) &&         \
+    ( DBL_REL_EQUAL((a).flash_multiple, (b).flash_multiple, 0.00001 ) ) &&     \
+    ( DBL_REL_EQUAL((a).flash_threshold, (b).flash_threshold, 0.00001 ) ) &&     \
     ( (a).decr_mode              == (b).decr_mode ) &&               \
-    ( (a).upper_hr_threshold     == (b).upper_hr_threshold ) &&      \
-    ( (a).decrement              == (b).decrement ) &&               \
+    ( DBL_REL_EQUAL((a).upper_hr_threshold, (b).upper_hr_threshold, 0.00001 ) ) &&     \
+    ( DBL_REL_EQUAL((a).decrement, (b).decrement, 0.00001 ) ) &&     \
     ( (a).apply_max_decrement    == (b).apply_max_decrement ) &&     \
     ( (a).max_decrement          == (b).max_decrement ) &&           \
     ( (a).epochs_before_eviction == (b).epochs_before_eviction ) &&  \
     ( (a).apply_empty_reserve    == (b).apply_empty_reserve ) &&     \
-    ( (a).empty_reserve          == (b).empty_reserve ) )
+    ( DBL_REL_EQUAL((a).empty_reserve, (b).empty_reserve, 0.00001 ) ) )
 
 #define XLATE_EXT_TO_INT_MDC_CONFIG(i, e)                           \
 {                                                                   \
@@ -191,7 +191,7 @@ static void check_file_mdc_api_errs(void);
     (i).empty_reserve          = (e).empty_reserve;                 \
 }
 
-static void
+static unsigned
 check_fapl_mdc_api_calls(void)
 {
     const char * fcn_name = "check_fapl_mdc_api_calls()";
@@ -643,6 +643,8 @@ check_fapl_mdc_api_calls(void)
         HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
                   fcn_name, failure_mssg2);
 
+    return !pass2;
+
 } /* check_fapl_mdc_api_calls() */
 
 
@@ -792,7 +794,7 @@ validate_mdc_config(hid_t file_id,
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_file_mdc_api_calls(void)
 {
     const char * fcn_name = "check_file_mdc_api_calls()";
@@ -803,7 +805,6 @@ check_file_mdc_api_calls(void)
     size_t cur_size;
     int cur_num_entries;
     double hit_rate;
-    H5F_t * file_ptr = NULL;
     H5AC2_cache_config_t default_config = H5AC2__DEFAULT_CACHE_CONFIG;
     H5AC2_cache_config_t mod_config_1 =
     {
@@ -1111,6 +1112,8 @@ check_file_mdc_api_calls(void)
     if ( ! pass2 )
         HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
                   fcn_name, failure_mssg2);
+
+    return !pass2;
 
 } /* check_file_mdc_api_calls() */
 
@@ -1420,7 +1423,7 @@ check_and_validate_cache_size(hid_t file_id,
  */
 #if 0 
 
-static void
+static unsigned
 mdc_api_call_smoke_check(void)
 {
     const char * fcn_name = "mdc_api_call_smoke_check()";
@@ -2185,6 +2188,8 @@ mdc_api_call_smoke_check(void)
     if ( ! pass2 )
         HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
                   fcn_name, failure_mssg2);
+
+    return !pass2;
 
 } /* mdc_api_call_smoke_check() */
 
@@ -3571,7 +3576,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_fapl_mdc_api_errs(void)
 {
     const char * fcn_name = "check_fapl_mdc_api_errs()";
@@ -3728,6 +3733,8 @@ check_fapl_mdc_api_errs(void)
         HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
                   fcn_name, failure_mssg2);
 
+    return !pass2;
+
 } /* check_fapl_mdc_api_errs() */
 
 
@@ -3747,7 +3754,7 @@ check_fapl_mdc_api_errs(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_file_mdc_api_errs(void)
 {
     const char * fcn_name = "check_file_mdc_api_errs()";
@@ -3762,7 +3769,9 @@ check_file_mdc_api_errs(void)
     size_t cur_size;
     int cur_num_entries;
     double hit_rate;
+#if 0 /* JRM */
     H5F_t * file_ptr = NULL;
+#endif /* JRM */
     H5AC2_cache_config_t default_config = H5AC2__DEFAULT_CACHE_CONFIG;
     H5AC2_cache_config_t scratch;
 
@@ -4095,6 +4104,8 @@ check_file_mdc_api_errs(void)
         HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
                   fcn_name, failure_mssg2);
 
+    return !pass2;
+
 } /* check_file_mdc_api_errs() */
 
 
@@ -4119,6 +4130,7 @@ int
 main(void)
 {
     int express_test;
+    unsigned nerrs = 0;
 
     H5open();
 
@@ -4127,22 +4139,22 @@ main(void)
     express_test = GetTestExpress();
 
 #if 1
-    check_fapl_mdc_api_calls();
+    nerrs += check_fapl_mdc_api_calls();
 #endif
 #if 1
-    check_file_mdc_api_calls();
+    nerrs += check_file_mdc_api_calls();
 #endif
 #if 0
     /* this test can't be run until we start using H5C2 */
-    mdc_api_call_smoke_check();
+    nerrs += mdc_api_call_smoke_check();
 #endif
 #if 1
-    check_fapl_mdc_api_errs();
+    nerrs += check_fapl_mdc_api_errs();
 #endif
 #if 1
-    check_file_mdc_api_errs();
+    nerrs += check_file_mdc_api_errs();
 #endif
 
-    return(0);
+    return( nerrs > 0 );
 
 } /* main() */

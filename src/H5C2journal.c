@@ -163,10 +163,11 @@ done:
  */
 
 herr_t
-H5C2_create_journal_config_block(H5C2_t * cache_ptr,
+H5C2_create_journal_config_block(H5F_t * f,
                                  hid_t dxpl_id,
                                  const char * journal_file_name_ptr)
 {
+    H5C2_t * cache_ptr = f->shared->cache2;
     size_t path_len = 0;
     hsize_t block_len = 0;
     haddr_t block_addr = HADDR_UNDEF;
@@ -179,9 +180,9 @@ H5C2_create_journal_config_block(H5C2_t * cache_ptr,
 
     FUNC_ENTER_NOAPI(H5C2_create_journal_config_block, FAIL)
 
+    HDassert( f );
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
-    HDassert( cache_ptr->f != NULL );
 
     if ( cache_ptr->mdj_conf_block_ptr != NULL ) {
 
@@ -195,7 +196,7 @@ H5C2_create_journal_config_block(H5C2_t * cache_ptr,
 
     HDassert( path_len > 0 );
 
-    block_len = H5C2__JOURNAL_BLOCK_LEN(path_len, cache_ptr->f);
+    block_len = H5C2__JOURNAL_BLOCK_LEN(path_len, f);
 
     block_ptr = (void *)H5MM_malloc((size_t)block_len);
 
@@ -216,7 +217,7 @@ H5C2_create_journal_config_block(H5C2_t * cache_ptr,
     p++;
 
     /* copy the length of the journal file path into the config block */
-    H5F_ENCODE_LENGTH(cache_ptr->f, p, path_len);
+    H5F_ENCODE_LENGTH(f, p, path_len);
 
     /* copy the path to the journal file into the config block, including 
      * the terminalting null.  Before we do so, make note of p, as its 
@@ -239,7 +240,7 @@ H5C2_create_journal_config_block(H5C2_t * cache_ptr,
      * we must now allocate space for it in file, and write it to disk.
      */
 
-    block_addr = H5MF_alloc(cache_ptr->f,
+    block_addr = H5MF_alloc(f,
 		            H5FD_MEM_MDJCONFIG,
 			    dxpl_id,
 			    block_len);
@@ -253,7 +254,7 @@ H5C2_create_journal_config_block(H5C2_t * cache_ptr,
     /* now write the block to disk -- note that we don't sync.  We will
      * have to do that later.
      */
-     if ( H5F_block_write(cache_ptr->f, H5FD_MEM_MDJCONFIG, block_addr,
+     if ( H5F_block_write(f, H5FD_MEM_MDJCONFIG, block_addr,
                           (size_t)block_len, dxpl_id, block_ptr) < 0 )
      {
          HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
@@ -303,16 +304,17 @@ done:
  */
 
 herr_t
-H5C2_discard_journal_config_block(H5C2_t * cache_ptr,
+H5C2_discard_journal_config_block(H5F_t * f,
                                   hid_t dxpl_id)
 {
+    H5C2_t * cache_ptr = f->shared->cache2;
     herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5C2_discard_journal_config_block, FAIL)
 
+    HDassert( f );
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
-    HDassert( cache_ptr->f != NULL );
 
     if ( ( cache_ptr->mdj_conf_block_addr == HADDR_UNDEF ) ||
          ( cache_ptr->mdj_conf_block_len == 0 ) ||
@@ -323,7 +325,7 @@ H5C2_discard_journal_config_block(H5C2_t * cache_ptr,
 		        "metadata journaling config block undefined on entry?!?")
     } 
 
-    if ( H5MF_xfree(cache_ptr->f, H5FD_MEM_MDJCONFIG, dxpl_id, 
+    if ( H5MF_xfree(f, H5FD_MEM_MDJCONFIG, dxpl_id, 
 		    cache_ptr->mdj_conf_block_addr,
 		    cache_ptr->mdj_conf_block_len) < 0 ) {
 
@@ -379,27 +381,28 @@ done:
  */
 
 herr_t
-H5C2_get_journaling_in_progress(H5C2_t * cache_ptr,
+H5C2_get_journaling_in_progress(H5F_t * f,
                                 hid_t dxpl_id)
 {
+    H5C2_t * cache_ptr = f->shared->cache2;
     herr_t result;
     herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5C2_mark_journaling_in_progress, FAIL)
 
+    HDassert( f );
+    HDassert( f->shared != NULL );
+    HDassert( ! f->shared->mdc_jrnl_enabled );
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
-    HDassert( cache_ptr->f != NULL );
-    HDassert( cache_ptr->f->shared != NULL );
-    HDassert( ! cache_ptr->f->shared->mdc_jrnl_enabled );
     HDassert( cache_ptr->mdj_conf_block_addr == HADDR_UNDEF );
     HDassert( cache_ptr->mdj_conf_block_len == 0 );
     HDassert( cache_ptr->mdj_conf_block_ptr == NULL );
     HDassert( cache_ptr->mdj_file_name_ptr == NULL );
 
-    if ( cache_ptr->f->shared->mdc_jrnl_enabled == TRUE ) {
+    if ( f->shared->mdc_jrnl_enabled == TRUE ) {
 	    
-        result = H5C2_load_journal_config_block(cache_ptr,
+        result = H5C2_load_journal_config_block(f,
                                                 dxpl_id,
                                                 cache_ptr->mdj_conf_block_addr,
                                                 cache_ptr->mdj_conf_block_len);
@@ -436,11 +439,12 @@ done:
  */
 
 herr_t
-H5C2_load_journal_config_block(H5C2_t * cache_ptr,
+H5C2_load_journal_config_block(H5F_t * f,
                                hid_t dxpl_id,
                                haddr_t block_addr,
                                hsize_t block_len)
 {
+    H5C2_t * cache_ptr = f->shared->cache2;
     size_t path_len = 0;
     void * block_ptr = NULL;
     uint8_t version;
@@ -452,9 +456,9 @@ H5C2_load_journal_config_block(H5C2_t * cache_ptr,
 
     FUNC_ENTER_NOAPI(H5C2_load_journal_config_block, FAIL)
 
+    HDassert( f );
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
-    HDassert( cache_ptr->f != NULL );
 
     if ( cache_ptr->mdj_conf_block_ptr != NULL ) {
 
@@ -473,7 +477,7 @@ H5C2_load_journal_config_block(H5C2_t * cache_ptr,
     p = (uint8_t *)block_ptr;
 
     /* read the metadata journaling block from file */
-    if ( H5F_block_read(cache_ptr->f, H5FD_MEM_MDJCONFIG, block_addr, 
+    if ( H5F_block_read(f, H5FD_MEM_MDJCONFIG, block_addr, 
 			(size_t)block_len, dxpl_id, block_ptr) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
@@ -499,7 +503,7 @@ H5C2_load_journal_config_block(H5C2_t * cache_ptr,
     }
 
     /* get the length of the journal file path into the config block */
-    H5F_DECODE_LENGTH(cache_ptr->f, p, path_len);
+    H5F_DECODE_LENGTH(f, p, path_len);
 
     /* Verify that the length matches the actual path length.  Also,
      * make note of p, as its value will be the address of our copy of 
@@ -569,20 +573,21 @@ done:
  */
 
 herr_t
-H5C2_mark_journaling_in_progress(H5C2_t * cache_ptr,
+H5C2_mark_journaling_in_progress(H5F_t * f,
                                  hid_t dxpl_id,
                                  const char * journal_file_name_ptr)
 {
+    H5C2_t * cache_ptr = f->shared->cache2;
     herr_t result;
     herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5C2_mark_journaling_in_progress, FAIL)
 
+    HDassert( f != NULL );
+    HDassert( f->shared != NULL );
+    HDassert( ! f->shared->mdc_jrnl_enabled );
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
-    HDassert( cache_ptr->f != NULL );
-    HDassert( cache_ptr->f->shared != NULL );
-    HDassert( ! cache_ptr->f->shared->mdc_jrnl_enabled );
     HDassert( cache_ptr->mdj_conf_block_addr == HADDR_UNDEF );
     HDassert( cache_ptr->mdj_conf_block_len == 0 );
     HDassert( cache_ptr->mdj_conf_block_ptr == NULL );
@@ -592,14 +597,14 @@ H5C2_mark_journaling_in_progress(H5C2_t * cache_ptr,
     /* Can't journal a read only file, so verify that we are
      * opened read/write and fail if we are not.
      */
-    if ( (cache_ptr->f->shared->flags & H5F_ACC_RDWR) == 0 ) {
+    if ( (f->shared->flags & H5F_ACC_RDWR) == 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                     "File is opened read only.")
     }
 
     /* first, create a metadata journaling configuration block */
-    result = H5C2_create_journal_config_block(cache_ptr,
+    result = H5C2_create_journal_config_block(f,
                                               dxpl_id,
                                               journal_file_name_ptr);
 
@@ -618,11 +623,11 @@ H5C2_mark_journaling_in_progress(H5C2_t * cache_ptr,
      * into shared, and then call H5F_super_write_mdj_msg() to write
      * the metadata journaling superblock extension message to file.
      */
-    cache_ptr->f->shared->mdc_jrnl_enabled = TRUE;
-    cache_ptr->f->shared->mdc_jrnl_block_loc = cache_ptr->mdj_conf_block_addr;
-    cache_ptr->f->shared->mdc_jrnl_block_len = cache_ptr->mdj_conf_block_len;
+    f->shared->mdc_jrnl_enabled = TRUE;
+    f->shared->mdc_jrnl_block_loc = cache_ptr->mdj_conf_block_addr;
+    f->shared->mdc_jrnl_block_len = cache_ptr->mdj_conf_block_len;
 
-    if ( H5F_super_write_mdj_msg(cache_ptr->f, dxpl_id) < 0 ) {
+    if ( H5F_super_write_mdj_msg(f, dxpl_id) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                     "H5F_super_write_mdj_msg() failed.")
@@ -646,7 +651,7 @@ H5C2_mark_journaling_in_progress(H5C2_t * cache_ptr,
      * 		files -- a point we haven't discussed.  We should do so.
      */
 
-    if ( H5Fflush(cache_ptr->f->file_id, H5F_SCOPE_GLOBAL) < 0 ) {
+    if ( H5Fflush(f->file_id, H5F_SCOPE_GLOBAL) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, "H5Fflush() failed.")
     }
@@ -684,40 +689,43 @@ done:
  */
 
 herr_t
-H5C2_unmark_journaling_in_progress(H5C2_t * cache_ptr,
+H5C2_unmark_journaling_in_progress(H5F_t * f,
                                    hid_t dxpl_id)
 {
+#ifndef NDEBUG
+    H5C2_t * cache_ptr = f->shared->cache2;
+#endif /* NDEBUG */
     herr_t result;
     herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5C2_unmark_journaling_in_progress, FAIL)
 
+    HDassert( f != NULL );
+    HDassert( f->shared != NULL );
+    HDassert( f->shared->mdc_jrnl_enabled );
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
-    HDassert( cache_ptr->f != NULL );
-    HDassert( cache_ptr->f->shared != NULL );
-    HDassert( cache_ptr->f->shared->mdc_jrnl_enabled );
     HDassert( cache_ptr->mdj_conf_block_addr != HADDR_UNDEF );
     HDassert( cache_ptr->mdj_conf_block_len > 0 );
     HDassert( cache_ptr->mdj_conf_block_ptr != NULL );
     HDassert( cache_ptr->mdj_file_name_ptr != NULL );
-    HDassert( cache_ptr->f->shared->mdc_jrnl_block_loc == 
+    HDassert( f->shared->mdc_jrnl_block_loc == 
               cache_ptr->mdj_conf_block_addr );
-    HDassert( cache_ptr->f->shared->mdc_jrnl_block_len == 
+    HDassert( f->shared->mdc_jrnl_block_len == 
               cache_ptr->mdj_conf_block_len );
 
 
     /* Can't journal a read only file, so verify that we are
      * opened read/write and fail if we are not.
      */
-    if ( (cache_ptr->f->shared->flags & H5F_ACC_RDWR) == 0 ) {
+    if ( (f->shared->flags & H5F_ACC_RDWR) == 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                     "File is opened read only.")
     }
 
     /* next, discard the metadata journaling configuration block */
-    result = H5C2_discard_journal_config_block(cache_ptr, dxpl_id);
+    result = H5C2_discard_journal_config_block(f, dxpl_id);
 
     if ( result != SUCCEED ) {
 
@@ -734,11 +742,11 @@ H5C2_unmark_journaling_in_progress(H5C2_t * cache_ptr,
      * progress, and then call H5F_super_write_mdj_msg() to write
      * the changes to disk.
      */
-    cache_ptr->f->shared->mdc_jrnl_enabled = FALSE;
-    cache_ptr->f->shared->mdc_jrnl_block_loc = HADDR_UNDEF;
-    cache_ptr->f->shared->mdc_jrnl_block_len = 0;
+    f->shared->mdc_jrnl_enabled = FALSE;
+    f->shared->mdc_jrnl_block_loc = HADDR_UNDEF;
+    f->shared->mdc_jrnl_block_len = 0;
 
-    if ( H5F_super_write_mdj_msg(cache_ptr->f, dxpl_id) < 0 ) {
+    if ( H5F_super_write_mdj_msg(f, dxpl_id) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                     "H5F_super_write_mdj_msg() failed.")
@@ -762,7 +770,7 @@ H5C2_unmark_journaling_in_progress(H5C2_t * cache_ptr,
      * 		files -- a point we haven't discussed.  We should do so.
      */
 
-    if ( H5Fflush(cache_ptr->f->file_id, H5F_SCOPE_GLOBAL) < 0 ) {
+    if ( H5Fflush(f->file_id, H5F_SCOPE_GLOBAL) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, "H5Fflush() failed.")
     }
@@ -1318,8 +1326,8 @@ done:
 
 herr_t 
 H5C2_jb__init(H5C2_jbrb_t * struct_ptr,  	
-	      char * HDF5_file_name,	 	
-	      char * journal_file_name, 	
+	      const char * HDF5_file_name,	 	
+	      const char * journal_file_name, 	
 	      size_t buf_size,		
 	      int num_bufs,		 	
 	      hbool_t use_aio,		
@@ -1341,7 +1349,7 @@ H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
 	
     /* Open journal file */
     struct_ptr->journal_file_fd = 
-	    open(journal_file_name, O_WRONLY|O_CREAT|O_EXCL, 0777);
+	    HDopen(journal_file_name, O_WRONLY|O_CREAT|O_EXCL, 0777);
 
     if ( struct_ptr->journal_file_fd  == -1) {
 
@@ -1563,7 +1571,7 @@ H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
 			unsigned long trans_num,
 			haddr_t base_addr,
 			size_t length,
-			const char * body)
+			const uint8_t * body)
 {
 
     char * temp = NULL;
@@ -1601,7 +1609,7 @@ H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
     /* Write journal entry */
     HDsnprintf(temp, 
                (size_t)(length + 100),
-               "2 trans_num %ld length %d base_addr 0x%lx body ", 
+               "2 trans_num %ld length %zu base_addr 0x%lx body ", 
  	       trans_num, 
 	       length, 
 	       (unsigned long)base_addr); /* <== fix this */
@@ -1747,7 +1755,7 @@ done:
 
 herr_t 
 H5C2_jb__comment(H5C2_jbrb_t * struct_ptr,
-		 char * comment_ptr)
+		 const char * comment_ptr)
 {
     char * temp = NULL;
     size_t temp_len;
@@ -2066,19 +2074,17 @@ done:
  ******************************************************************************/
 
 herr_t 
-H5C2_jb__bin2hex(uint8_t * buf, 
-                 uint8_t * hexdata,
+H5C2_jb__bin2hex(const uint8_t * buf, 
+                 char * hexdata,
                  size_t * hexlength,
                  size_t buf_offset, 
                  size_t buf_size)
 
 {
-
-    herr_t ret_value = SUCCEED;
     size_t      u, v;                   /* Local index variable */
     uint8_t        c;
 	
-    FUNC_ENTER_NOAPI(H5C2_jb__bin2hex, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5C2_jb__bin2hex)
 
     HDsnprintf(hexdata, (size_t)2, " ");
 
@@ -2102,9 +2108,6 @@ H5C2_jb__bin2hex(uint8_t * buf,
 
     * hexlength = HDstrlen(hexdata);
 
-done:
-
-    FUNC_LEAVE_NOAPI(ret_value)
-
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5C2_jb__bin2hex*/
 

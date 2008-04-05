@@ -59,7 +59,7 @@ static void write_noflush_verify(H5C2_jbrb_t * struct_ptr,
 
 static void check_mdj_config_block_IO(void);
 
-static void test_mdj_conf_blk_read_write_discard(H5C2_t * cache_ptr,
+static void test_mdj_conf_blk_read_write_discard(H5F_t * file_ptr,
 		                                 const char * jrnl_file_path);
 
 static void check_superblock_extensions(void);
@@ -238,27 +238,27 @@ check_mdj_config_block_IO(void)
     /*    with length some multiple of 4.                                    */
     /*************************************************************************/
 
-    test_mdj_conf_blk_read_write_discard(cache_ptr, "a");
+    test_mdj_conf_blk_read_write_discard(file_ptr, "a");
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    test_mdj_conf_blk_read_write_discard(cache_ptr, "ab");
+    test_mdj_conf_blk_read_write_discard(file_ptr, "ab");
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    test_mdj_conf_blk_read_write_discard(cache_ptr, "abc");
+    test_mdj_conf_blk_read_write_discard(file_ptr, "abc");
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    test_mdj_conf_blk_read_write_discard(cache_ptr, "abcd");
+    test_mdj_conf_blk_read_write_discard(file_ptr, "abcd");
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    test_mdj_conf_blk_read_write_discard(cache_ptr, "abcde");
+    test_mdj_conf_blk_read_write_discard(file_ptr, "abcde");
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    test_mdj_conf_blk_read_write_discard(cache_ptr, 
+    test_mdj_conf_blk_read_write_discard(file_ptr, 
 		                         "abcdefghijklmnopqrstuvwxyz");
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
@@ -284,7 +284,7 @@ check_mdj_config_block_IO(void)
 
     if ( pass2 ) {
     
-        result = H5C2_create_journal_config_block(cache_ptr,
+        result = H5C2_create_journal_config_block(file_ptr,
 			                          H5P_DATASET_XFER_DEFAULT,
 						  test_path);
 	
@@ -404,7 +404,7 @@ check_mdj_config_block_IO(void)
         cache_ptr->mdj_conf_block_ptr = NULL;
         cache_ptr->mdj_file_name_ptr = NULL;
 
-	result = H5C2_load_journal_config_block(cache_ptr,
+	result = H5C2_load_journal_config_block(file_ptr,
 			                        H5P_DATASET_XFER_DEFAULT,
 						block_addr,
 						block_len);
@@ -506,10 +506,11 @@ check_mdj_config_block_IO(void)
  */
 
 static void
-test_mdj_conf_blk_read_write_discard(H5C2_t * cache_ptr,
+test_mdj_conf_blk_read_write_discard(H5F_t * file_ptr,
 		                     const char * jrnl_file_path)
 {
     const char * fcn_name = "test_mdj_conf_blk_read_write_discard()";
+    H5C2_t * cache_ptr = file_ptr->shared->cache2;
     hbool_t show_progress = FALSE;
     int cp = 0;
     herr_t result;
@@ -542,7 +543,7 @@ test_mdj_conf_blk_read_write_discard(H5C2_t * cache_ptr,
 
     if ( pass2 ) {
     
-        result = H5C2_create_journal_config_block(cache_ptr,
+        result = H5C2_create_journal_config_block(file_ptr,
 			                          H5P_DATASET_XFER_DEFAULT,
 						  jrnl_file_path);
 	
@@ -602,7 +603,7 @@ test_mdj_conf_blk_read_write_discard(H5C2_t * cache_ptr,
         cache_ptr->mdj_conf_block_ptr = NULL;
         cache_ptr->mdj_file_name_ptr = NULL;
 
-	result = H5C2_load_journal_config_block(cache_ptr,
+	result = H5C2_load_journal_config_block(file_ptr,
 			                        H5P_DATASET_XFER_DEFAULT,
 						block_addr,
 						block_len);
@@ -653,7 +654,7 @@ test_mdj_conf_blk_read_write_discard(H5C2_t * cache_ptr,
 
     if ( pass2 ) {
 
-        result = H5C2_discard_journal_config_block(cache_ptr, 
+        result = H5C2_discard_journal_config_block(file_ptr, 
 			                           H5P_DATASET_XFER_DEFAULT);
 	
 	if ( result != SUCCEED ) {
@@ -721,7 +722,6 @@ static void
 check_superblock_extensions(void)
 {
     const char * fcn_name = "check_superblock_extensions()";
-    const char * journal_file_name = "journal_file.txt";
     char filename[512];
     hbool_t show_progress = FALSE;
     haddr_t mdc_jrnl_block_loc = 0x1000;
@@ -1429,7 +1429,7 @@ check_buffer_writes(void)
         if ( result != 0) {
 
             pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb_init failed";
+            failure_mssg2 = "H5C2_jb_init failed, check 1";
 
        	} /* end if */
 
@@ -1769,7 +1769,7 @@ check_message_format(void)
         if ( result != 0) {
 
             pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb_init failed";
+            failure_mssg2 = "H5C2_jb_init failed, check 2";
 
        	} /* end if */
 
@@ -1804,7 +1804,7 @@ check_message_format(void)
                                     /* trans number */  1, 
                                     /* base address */  (haddr_t)0, 
                                     /* data length  */  1, 
-                                    /* data         */  "A") 
+                                    /* data         */  (const uint8_t *)"A") 
            != SUCCEED ) {
             
             pass2 = FALSE;
@@ -1825,7 +1825,7 @@ check_message_format(void)
                                     /* trans number */  1, 
                                     /* base address */  (haddr_t)1, 
                                     /* data length  */  2, 
-                                    /* data         */  "AB") 
+                                    /* data         */  (const uint8_t *)"AB") 
            != SUCCEED ) {
             
             pass2 = FALSE;
@@ -1846,7 +1846,7 @@ check_message_format(void)
                                     /* trans number */  1, 
                                     /* base address */  (haddr_t)3, 
                                     /* data length  */  4, 
-                                    /* data         */  "CDEF") 
+                                    /* data         */  (const uint8_t *)"CDEF") 
            != SUCCEED ) {
             
             pass2 = FALSE;
@@ -1902,7 +1902,7 @@ check_message_format(void)
                                     /* trans number */  2, 
                                     /* base address */  (haddr_t)285, 
                                     /* data length  */  11, 
-                                    /* data         */  "Test Data?!") 
+                                    /* data         */  (const uint8_t *)"Test Data?!") 
            != SUCCEED ) {
             
             pass2 = FALSE;
@@ -2022,7 +2022,7 @@ check_message_format(void)
                                     /* trans number */  3, 
                                     /* base address */  (haddr_t)28591, 
                                     /* data length  */  6, 
-                                    /* data         */  "#1nN`}") 
+                                    /* data         */  (const uint8_t *)"#1nN`}") 
            != SUCCEED ) {
             
             pass2 = FALSE;
@@ -2236,7 +2236,7 @@ check_legal_calls(void)
         if ( result != SUCCEED) {
 
             pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb_init failed";
+            failure_mssg2 = "H5C2_jb_init failed, check 3";
 
        	} /* end if */
 
@@ -2295,7 +2295,7 @@ check_legal_calls(void)
                                     /* Transaction # */  1,
                                     /* Base Address  */  (haddr_t)123456789, 
                                     /* Length        */  16, 
-                                    /* Body          */  "This should fail")
+                                    /* Body          */  (const uint8_t *)"This should fail")
            == SUCCEED ) {
 
             pass2 = FALSE;
@@ -2375,7 +2375,7 @@ check_legal_calls(void)
                                     /* Transaction # */  2,
                                     /* Base Address  */  (haddr_t)123456789, 
                                     /* Length        */  16, 
-                                    /* Body          */  "This should fail")
+                                    /* Body          */  (const uint8_t *)"This should fail")
            == SUCCEED ) {
 
 	    pass2 = FALSE;
@@ -2396,7 +2396,7 @@ check_legal_calls(void)
                                     /* Transaction # */  1,
                                     /* Base Address  */  (haddr_t)123456789, 
                                     /* Length        */  51, 
-                                    /* Body          */  "This is the first transaction during transaction 1.")
+                                    /* Body          */  (const uint8_t *)"This is the first transaction during transaction 1.")
            != SUCCEED ) {
 
 	    pass2 = FALSE;
@@ -2492,7 +2492,7 @@ check_legal_calls(void)
                                     /* Transaction # */  2,
                                     /* Base Address  */  (haddr_t)7465, 
                                     /* Length        */  51, 
-                                    /* Body          */  "This is the first transaction during transaction 2!")
+                                    /* Body          */  (const uint8_t *)"This is the first transaction during transaction 2!")
            != SUCCEED ) {
 
 	    pass2 = FALSE;
@@ -2513,7 +2513,7 @@ check_legal_calls(void)
                                     /* Transaction # */  2,
                                     /* Base Address  */  (haddr_t)123456789, 
                                     /* Length        */  60, 
-                                    /* Body          */  "... And here's your second transaction during transaction 2.")
+                                    /* Body          */  (const uint8_t *)"... And here's your second transaction during transaction 2.")
            != SUCCEED ) {
 
 	    pass2 = FALSE;
@@ -2743,7 +2743,7 @@ check_transaction_tracking(void)
         if ( result != SUCCEED) {
 
             pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb_init failed";
+            failure_mssg2 = "H5C2_jb_init failed, check 4";
 
        	} /* end if */
 
@@ -2868,7 +2868,7 @@ check_transaction_tracking(void)
         if ( result != SUCCEED) {
 
             pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb_init failed";
+            failure_mssg2 = "H5C2_jb_init failed, check 5";
 
        	} /* end if */
 
@@ -2973,7 +2973,7 @@ check_transaction_tracking(void)
         if ( result != SUCCEED) {
 
             pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb_init failed";
+            failure_mssg2 = "H5C2_jb_init failed, check 6";
 
        	} /* end if */
 
@@ -3090,7 +3090,7 @@ check_transaction_tracking(void)
         if ( result != SUCCEED) {
 
             pass2 = FALSE;
-            failure_mssg2 = "H5C2_jb_init failed";
+            failure_mssg2 = "H5C2_jb_init failed, check 7";
 
        	} /* end if */
 
@@ -3238,7 +3238,7 @@ write_verify_trans_num(H5C2_jbrb_t * struct_ptr,
                                             /* Transaction # */  trans_num,
                                             /* Base Address  */  (haddr_t)16, 
                                             /* Length        */  9, 
-                                            /* Body          */  "XXXXXXXXX")
+                                            /* Body          */  (const uint8_t *)"XXXXXXXXX")
                    != SUCCEED ) {
 
 	            pass2 = FALSE;
@@ -3254,7 +3254,7 @@ write_verify_trans_num(H5C2_jbrb_t * struct_ptr,
                                             /* Transaction # */  trans_num,
                                             /* Base Address  */  (haddr_t)16, 
                                             /* Length        */  8, 
-                                            /* Body          */  "XXXXXXXX")
+                                            /* Body          */  (const uint8_t *)"XXXXXXXX")
                    != SUCCEED ) {
 
 	            pass2 = FALSE;
@@ -3270,7 +3270,7 @@ write_verify_trans_num(H5C2_jbrb_t * struct_ptr,
                                             /* Transaction # */  trans_num,
                                             /* Base Address  */  (haddr_t)16, 
                                             /* Length        */  7, 
-                                            /* Body          */  "XXXXXXX")
+                                            /* Body          */  (const uint8_t *)"XXXXXXX")
                    != SUCCEED ) {
 
 	            pass2 = FALSE;

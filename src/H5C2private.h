@@ -156,7 +156,7 @@ typedef struct H5C2_t H5C2_t;
  *
  *      If the image contains valid data, and is of the correct length,
  *      the deserialize function must allocate space for an in core 
- *      represntation of that data, load the contents of the image into 
+ *      representation of that data, load the contents of the image into 
  *      the space allocated for the in core representation, and return 
  *      a pointer to the in core representation.  Observe that an 
  *      instance of H5C2_cache_entry_t must be the first item in this 
@@ -1268,8 +1268,7 @@ typedef struct H5C2_auto_size_ctl_t
 #define H5C2__READ_ONLY_FLAG			0x0400
 #define H5C2__CHECK_SIZE_FLAG			0x0800
 
-H5_DLL H5C2_t * H5C2_create(const H5F_t *               f,
-		            size_t                      max_cache_size,
+H5_DLL H5C2_t * H5C2_create(size_t                      max_cache_size,
                             size_t                      min_clean_size,
                             int                         max_type_id,
 			    const char *                (* type_name_table_ptr),
@@ -1287,22 +1286,22 @@ H5_DLL void H5C2_def_auto_resize_rpt_fcn(H5C2_t * cache_ptr,
                                          size_t old_min_clean_size,
                                          size_t new_min_clean_size);
 
-H5_DLL herr_t H5C2_dest(H5C2_t * cache_ptr,
+H5_DLL herr_t H5C2_dest(H5F_t * f,
 		        hid_t  dxpl_id);
 
 H5_DLL herr_t H5C2_dest_empty(H5C2_t * cache_ptr);
 
-H5_DLL herr_t H5C2_expunge_entry(H5C2_t *             cache_ptr,
+H5_DLL herr_t H5C2_expunge_entry(H5F_t *              f,
 		                 hid_t                dxpl_id,
                                  const H5C2_class_t * type,
                                  haddr_t              addr);
 
-H5_DLL herr_t H5C2_flush_cache(H5C2_t * cache_ptr,
-		               hid_t    dxpl_id,
-                               unsigned flags);
+H5_DLL herr_t H5C2_flush_cache(H5F_t *f,
+		 hid_t    dxpl_id,
+                 unsigned flags);
 
 
-H5_DLL herr_t H5C2_flush_to_min_clean(H5C2_t * cache_ptr,
+H5_DLL herr_t H5C2_flush_to_min_clean(H5F_t * f,
 		                      hid_t    dxpl_id);
 
 H5_DLL herr_t H5C2_get_cache_auto_resize_config(H5C2_t * cache_ptr,
@@ -1317,7 +1316,7 @@ H5_DLL herr_t H5C2_get_cache_size(H5C2_t * cache_ptr,
 H5_DLL herr_t H5C2_get_cache_hit_rate(H5C2_t * cache_ptr,
                                      double * hit_rate_ptr);
 
-H5_DLL herr_t H5C2_get_entry_status(H5C2_t *   cache_ptr,
+H5_DLL herr_t H5C2_get_entry_status(H5F_t *   f,
                                     haddr_t   addr,
                                     size_t *  size_ptr,
                                     hbool_t * in_cache_ptr,
@@ -1331,7 +1330,7 @@ H5_DLL herr_t H5C2_get_evictions_enabled(H5C2_t * cache_ptr,
 H5_DLL herr_t H5C2_get_trace_file_ptr(H5C2_t * cache_ptr,
 		                     FILE ** trace_file_ptr_ptr);
 
-H5_DLL herr_t H5C2_insert_entry(H5C2_t *             cache_ptr,
+H5_DLL herr_t H5C2_insert_entry(H5F_t *              f,
                                 hid_t                dxpl_id,
                                 const H5C2_class_t * type,
                                 haddr_t              addr,
@@ -1344,12 +1343,12 @@ H5_DLL herr_t H5C2_mark_entries_as_clean(H5C2_t *  cache_ptr,
                                          int32_t   ce_array_len,
                                          haddr_t * ce_array_ptr);
 
-H5_DLL herr_t H5C2_mark_pinned_entry_dirty(H5C2_t * cache_ptr,
+H5_DLL herr_t H5C2_mark_pinned_entry_dirty(H5F_t * f,
 	                                  void *  thing,
 					  hbool_t size_changed,
 					  size_t  new_size);
 
-H5_DLL herr_t H5C2_mark_pinned_or_protected_entry_dirty(H5C2_t * cache_ptr,
+H5_DLL herr_t H5C2_mark_pinned_or_protected_entry_dirty(H5F_t * f,
                                                        void *  thing);
 
 H5_DLL herr_t H5C2_rename_entry(H5C2_t *             cache_ptr,
@@ -1357,10 +1356,10 @@ H5_DLL herr_t H5C2_rename_entry(H5C2_t *             cache_ptr,
                                haddr_t             old_addr,
                                haddr_t             new_addr);
 
-H5_DLL herr_t H5C2_pin_protected_entry(H5C2_t * cache_ptr,
+H5_DLL herr_t H5C2_pin_protected_entry(H5F_t * f,
                                       void *  thing);
 
-H5_DLL void * H5C2_protect(H5C2_t *             cache_ptr,
+H5_DLL void * H5C2_protect(H5F_t *              f,
 		           hid_t                dxpl_id,
 			   const H5C2_class_t * type,
                            haddr_t              addr,
@@ -1370,14 +1369,14 @@ H5_DLL void * H5C2_protect(H5C2_t *             cache_ptr,
 
 H5_DLL herr_t H5C2_reset_cache_hit_rate_stats(H5C2_t * cache_ptr);
 
-H5_DLL herr_t H5C2_resize_pinned_entry(H5C2_t * cache_ptr,
+H5_DLL herr_t H5C2_resize_pinned_entry(H5F_t * f,
                                       void *  thing,
                                       size_t  new_size);
 
-H5_DLL herr_t H5C2_set_cache_auto_resize_config(H5C2_t * cache_ptr,
+H5_DLL herr_t H5C2_set_cache_auto_resize_config(const H5F_t * f,
                                              H5C2_auto_size_ctl_t *config_ptr);
 
-H5_DLL herr_t H5C2_set_evictions_enabled(H5C2_t * cache_ptr,
+H5_DLL herr_t H5C2_set_evictions_enabled(const H5F_t * f,
                                          hbool_t evictions_enabled);
 
 H5_DLL herr_t H5C2_set_prefix(H5C2_t * cache_ptr, char * prefix);
@@ -1395,9 +1394,9 @@ H5_DLL herr_t H5C2_stats(H5C2_t * cache_ptr,
 
 H5_DLL void H5C2_stats__reset(H5C2_t * cache_ptr);
 
-H5_DLL herr_t H5C2_unpin_entry(H5C2_t * cache_ptr, void * thing);
+H5_DLL herr_t H5C2_unpin_entry(H5F_t * file_ptr, void * thing);
 
-H5_DLL herr_t H5C2_unprotect(H5C2_t *            cache_ptr,
+H5_DLL herr_t H5C2_unprotect(H5F_t *             f,
 		            hid_t                dxpl_id,
                             const H5C2_class_t * type,
                             haddr_t              addr,
@@ -1437,8 +1436,8 @@ H5_DLL herr_t H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr,
                                        unsigned long trans_num);
 
 H5_DLL herr_t H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
-                            char * HDF5_file_name,
-                            char * journal_file_name,
+                            const char * HDF5_file_name,
+                            const char * journal_file_name,
                             size_t buf_size,
                             int num_bufs,
                             hbool_t use_aio,
@@ -1451,13 +1450,13 @@ H5_DLL herr_t H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
                                      unsigned long trans_num,
                                      haddr_t base_addr,
                                      size_t length,
-                                     const char * body);
+                                     const uint8_t * body);
 
 H5_DLL herr_t H5C2_jb__end_transaction(H5C2_jbrb_t * struct_ptr,
                                        unsigned long trans_num);
 
 H5_DLL herr_t H5C2_jb__comment(H5C2_jbrb_t * struct_ptr,
-                               char * comment_ptr);
+                               const char * comment_ptr);
 
 H5_DLL herr_t H5C2_jb__get_last_transaction_on_disk(H5C2_jbrb_t * struct_ptr,
                                                  unsigned long * trans_num_ptr);
@@ -1471,8 +1470,8 @@ H5_DLL herr_t H5C2_jb__reconfigure(H5C2_jbrb_t * struct_ptr,
                                    int new_num_bufs,
                                    hbool_t new_use_aio);
 
-H5_DLL herr_t H5C2_jb__bin2hex(uint8_t * buf,
-                               uint8_t * hexdata,
+H5_DLL herr_t H5C2_jb__bin2hex(const uint8_t * buf,
+                               char * hexdata,
                                size_t * hexlength,
                                size_t buf_offset,
                                size_t buf_size);
@@ -1481,26 +1480,26 @@ H5_DLL herr_t H5C2_jb__bin2hex(uint8_t * buf,
 /********** journal config block management function definitions: ************/
 /*****************************************************************************/
 
-H5_DLL herr_t H5C2_create_journal_config_block(H5C2_t * cache_ptr,
+H5_DLL herr_t H5C2_create_journal_config_block(H5F_t *f,
                                            hid_t dxpl_id,
                                            const char * journal_file_name_ptr);
 
-H5_DLL herr_t H5C2_discard_journal_config_block(H5C2_t * cache_ptr,
+H5_DLL herr_t H5C2_discard_journal_config_block(H5F_t * f,
                                                 hid_t dxpl_id);
 
-H5_DLL herr_t H5C2_get_journaling_in_progress(H5C2_t * cache_ptr,
+H5_DLL herr_t H5C2_get_journaling_in_progress(H5F_t * f,
                                               hid_t dxpl_id);
 
-H5_DLL herr_t H5C2_load_journal_config_block(H5C2_t * cache_ptr,
+H5_DLL herr_t H5C2_load_journal_config_block(H5F_t * f,
                                              hid_t dxpl_id,
                                              haddr_t block_addr,
                                              hsize_t block_len);
 
-H5_DLL herr_t H5C2_mark_journaling_in_progress(H5C2_t * cache_ptr,
+H5_DLL herr_t H5C2_mark_journaling_in_progress(H5F_t * f,
                                             hid_t dxpl_id,
                                             const char * journal_file_name_ptr);
 
-H5_DLL herr_t H5C2_unmark_journaling_in_progress(H5C2_t * cache_ptr,
+H5_DLL herr_t H5C2_unmark_journaling_in_progress(H5F_t * f,
                                                  hid_t dxpl_id);
 
 

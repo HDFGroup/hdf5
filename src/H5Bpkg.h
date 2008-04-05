@@ -32,20 +32,22 @@
 #include "H5Bprivate.h"
 
 /* Other private headers needed by this file */
-#include "H5RCprivate.h"	/* Reference counted objects            */
+#include "H5AC2private.h"	/* Metadata cache #2			*/
+
 
 /**************************/
 /* Package Private Macros */
 /**************************/
+
 
 /****************************/
 /* Package Private Typedefs */
 /****************************/
 
 /* The B-tree node as stored in memory...  */
-struct H5B_t {
-    H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
-                            /* first field in structure */
+typedef struct H5B_t {
+    H5AC2_info_t        cache_info;     /* Information for H5AC2 cache functions */
+                                        /* _must_ be first field in structure */
     H5RC_t		*rc_shared;	/*ref-counted shared info	     */
     unsigned		level;		/*node level			     */
     unsigned		nchildren;	/*number of child pointers	     */
@@ -53,14 +55,21 @@ struct H5B_t {
     haddr_t		right;		/*address of right sibling	     */
     uint8_t		*native;	/*array of keys in native format     */
     haddr_t		*child;		/*2k child pointers		     */
-};
+} H5B_t;
+
+/* Callback info for loading a B-tree node into the cache */
+typedef struct H5B_cache_ud_t {
+    H5F_t *f;                           /* File that B-tree node is within   */
+    const struct H5B_class_t *type;     /* Type of tree			     */
+    H5RC_t *rc_shared;                  /* Ref-counted shared info	     */
+} H5B_cache_ud_t;
 
 /*****************************/
 /* Package Private Variables */
 /*****************************/
 
-/* H5B header inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_BT[1];
+/* H5B header inherits cache-like properties from H5AC2 */
+H5_DLLVAR const H5AC2_class_t H5AC2_BT[1];
 
 /* Declare a free list to manage the haddr_t sequence information */
 H5FL_SEQ_EXTERN(haddr_t);
@@ -71,9 +80,11 @@ H5FL_BLK_EXTERN(native_block);
 /* Declare a free list to manage the H5B_t struct */
 H5FL_EXTERN(H5B_t);
 
+
 /******************************/
 /* Package Private Prototypes */
 /******************************/
-herr_t H5B_dest(H5F_t *f, H5B_t *b);
+herr_t H5B_dest(H5B_t *bt);
 
 #endif /*_H5Bpkg_H*/
+
