@@ -5542,8 +5542,7 @@ error:
  *              Contains:
  *              1) an integer dataset
  *              2) a float dataset
- *              3) an array dataset
- *              4) a large double dataset
+ *              4) a double dataset
  *
  *-------------------------------------------------------------------------
  */
@@ -5551,64 +5550,43 @@ static void
 gent_binary(void)
 {
  hid_t    fid, sid, did, tid;
- hsize_t  dims[1] = {6};
- hsize_t  dimarray[1] = {2};
- hsize_t  dimsl[1] = {100000};
+ hsize_t  dims[1]  = {6};
  int      ibuf[6]  = {1,2,3,4,5,6};
  float    fbuf[6]  = {1,2,3,4,5,6};
- int      abuf[2][6] = {{1,2,3,4,5,6},{7,8,9,10,11,12}};  /* array */
- double   *dbuf=NULL;
+ double   dbuf[6]  = {1,2,3,4,5,6};
 
  fid = H5Fcreate(FILE55, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+ sid = H5Screate_simple(1, dims, NULL);
 
 
 /*-------------------------------------------------------------------------
  * integer
  *-------------------------------------------------------------------------
  */
- sid = H5Screate_simple(1, dims, NULL);
+ 
  did = H5Dcreate2(fid, "integer", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
  H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, ibuf);
  H5Dclose(did);
- H5Sclose(sid);
 
 /*-------------------------------------------------------------------------
  * float
  *-------------------------------------------------------------------------
  */
- sid = H5Screate_simple(1, dims, NULL);
  did = H5Dcreate2(fid, "float", H5T_NATIVE_FLOAT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
  H5Dwrite(did, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, fbuf);
  H5Dclose(did);
- H5Sclose(sid);
-
-/*-------------------------------------------------------------------------
- * array
- *-------------------------------------------------------------------------
- */
- tid = H5Tarray_create2(H5T_NATIVE_INT, 1, dims);
- sid = H5Screate_simple(1, dimarray, NULL);
- did = H5Dcreate2(fid, "array", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
- H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, abuf);
- H5Dclose(did);
- H5Tclose(tid);
- H5Sclose(sid);
 
 /*-------------------------------------------------------------------------
  * double
  *-------------------------------------------------------------------------
  */
- sid = H5Screate_simple(1, dimsl, NULL);
  did = H5Dcreate2(fid, "double", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
- dbuf = calloc(100000, sizeof(double));
- if(dbuf != NULL) {
-  H5Dwrite(did, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dbuf);
-  free(dbuf);
- }
+ H5Dwrite(did, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dbuf);
  H5Dclose(did);
- H5Sclose(sid);
+ 
 
  /* close */
+ H5Sclose(sid);
  H5Fclose(fid);
 }
 
