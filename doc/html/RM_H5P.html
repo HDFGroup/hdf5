@@ -3158,7 +3158,8 @@ END SUBROUTINE h5pget_fapl_mpio_f
   <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Pget_fapl_mpiposix</code>(
                      <em>hid_t</em> <code>fapl_id</code>,
-                     <em>MPI_Comm *</em><code>comm</code>
+                     <em>MPI_Comm *</em><code>comm</code>,
+                     <em>hbool_t *</em><code>use_gpfs_hints</code>
     )
   <dt><strong>Purpose:</strong>
     <dd> Returns MPI communicator information.
@@ -3170,14 +3171,24 @@ END SUBROUTINE h5pget_fapl_mpio_f
         <p>
         <code>comm</code> is not copied, so it is valid only 
         until the file access property list is either modified or closed.
+        <p>
+        <code>use_gpfs_hints</code> specifies whether to attempt to use
+        GPFS hints when accessing this file.
+        A value of <code>TRUE</code> (or <code>1</code>) indicates that
+        the hints are being used, where possible.
+        A value of <code>FALSE</code> (or <code>0</code>) indicates that
+        the hints are not being used.
   <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
             <td valign="top">IN: File access property list identifier.</td></tr>
         <tr>
-		    <td valign="top"><em>MPI_Comm&nbsp;*</em><code>comm&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top"><em>MPI_Comm&nbsp;*</em><code>comm</code></td>
             <td valign="top">OUT: MPI-2 communicator.</td></tr>
+        <tr>
+            <td valign="top"><em>hbool_t *</em><code>use_gpfs_hints&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Use of GPFS hints.</td></tr>
     </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
@@ -3203,31 +3214,29 @@ END SUBROUTINE h5pget_fapl_mpiposix_f
   <dt><strong>History:</strong>
 	<ul><table width="90%">
         <tr>
-		  <td valign="top" align="left" width="10%">
-		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left" width="10%">
+            <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
           <td valign="top" align="left">
-		    <strong>C</strong></td>
-		  <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;</td>
-		  <td valign="top" align="left">
-		    <strong>Fortran90</strong></td>
-			</tr>
+            <strong>C</strong></td>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+            <strong>Fortran90</strong></td></tr>
         <tr>
-		  <td valign="top">1.6.1</td>
+          <td valign="top">1.6.1</td>
           <td valign="top">&nbsp;</td>
           <td valign="top">&nbsp;</td>
-		  <td valign="top">
-			Fortran subroutine introduced in this release.</td></tr>
-		<tr>
-		  <td valign="top">1.6.0</td>
-		  <td valign="top">Function introduced in this release.<br></td>
-		  <td valign="top">&nbsp;</td>
-		  <td valign="top">&nbsp;</td></tr>
-		<tr>
-		  <td valign="top">1.6.0</td>
-		  <td valign="top">A <code>use_gpfs</code> 
-		    parameter of type <em>hbool_t</em> has been added.</td>
-		  <td valign="top">&nbsp;</td>
-		  <td valign="top">&nbsp;</td></tr>
+          <td valign="top">
+        	Fortran subroutine introduced in this release.</td></tr>
+        <tr>
+          <td valign="top">1.6.0</td>
+          <td valign="top"><code>use_gpfs_hints</code> parameter added.</td>
+          <td valign="top">&nbsp;</td>
+          <td valign="top">&nbsp;</td></tr>
+        <tr>
+          <td valign="top">1.6.0</td>
+          <td valign="top">Function introduced in this release.<br></td>
+          <td valign="top">&nbsp;</td>
+          <td valign="top">&nbsp;</td></tr>
     </table></ul>
 </dl>
 
@@ -7768,7 +7777,8 @@ END SUBROUTINE h5pset_fapl_mpio_f
   <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Pset_fapl_mpiposix</code>(
                      <em>hid_t</em> <code>fapl_id</code>,
-                     <em>MPI_Comm</em> <code>comm</code>
+                     <em>MPI_Comm</em> <code>comm</code>,
+                     <em>hbool_t</em> <code>use_gpfs_hints</code>
     )
   <dt><strong>Purpose:</strong>
     <dd>Stores MPI IO communicator information to a file access property list.
@@ -7788,14 +7798,31 @@ END SUBROUTINE h5pset_fapl_mpio_f
         returns may have an undetermined effect on the access property list. 
         Users should not modify the communicator while it is defined 
         in a property list.
+        <p>
+        <code>use_gpfs_hints</code> specifies whether to attempt to use
+        GPFS hints when accessing this file.
+        A value of <code>TRUE</code> (or <code>1</code>) indicates that
+        the hints should be used, if possible.
+        A value of <code>FALSE</code> (or <code>0</code>) indicates that
+        the hints should not be used.
+        <p>
+        Available GPFS hints are known to the HFD5 Library 
+        and are not user configurable.
+        They may be used <i>only</i> with GPFS file systems
+        and may improve file access for some applications; 
+        the user of a GPFS system is encouraged to experiment 
+        by running an application with and without this parameter set.
   <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
             <td valign="top">IN: File access property list identifier.</td></tr>
         <tr>
-		    <td valign="top"><em>MPI_Comm</em>&nbsp;<code>comm&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top"><em>MPI_Comm</em>&nbsp;<code>comm</code></td>
             <td valign="top">IN: MPI-2 communicator.</td></tr>
+        <tr>
+            <td valign="top"><em>hbool_t</em> <code>use_gpfs_hints&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Use of GPFS hints.</td></tr>
     </table></ul>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
@@ -7823,36 +7850,35 @@ END SUBROUTINE h5pset_fapl_mpiposix_f
   <dt><strong>History:</strong>
     <ul><table width="90%">
         <tr>
-		  <td valign="top" align="left" width="10%">
-		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left" width="10%">
+            <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
           <td valign="top" align="left">
-		    <strong>C</strong></td>
-		  <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;</td>
-		  <td valign="top" align="left">
-		    <strong>Fortran90</strong></td></tr>
+            <strong>C</strong></td>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+            <strong>Fortran90</strong></td></tr>
         <tr>
-		  <td valign="top">1.6.1</td>
+          <td valign="top">1.6.1</td>
           <td valign="top">&nbsp;</td>
-		  <td valign="top">&nbsp;</td>
-		  <td valign="top">
-		    Fortran subroutine introduced in this release.
-		  </td></tr>
-		<tr>
-		  <td valign="top">1.6.0</td>
-		  <td valign="top">
-		    A <code>use_gpfs</code> parameter of type 
-			<em>hbool_t</em> has been added.</td>
-		  <td valign="top">&nbsp;</td>
-		  <td valign="top">&nbsp;</td>
-		</tr>
-		<tr>
-		  <td valign="top">1.6.0</td>
-		  <td valign="top">
-		    Function introduced in this release.
-			</td>
-		  <td valign="top">&nbsp;</td>
-		  <td valign="top">&nbsp;</td>
-		</tr>
+          <td valign="top">&nbsp;</td>
+          <td valign="top">
+            Fortran subroutine introduced in this release.
+          </td></tr>
+        <tr>
+          <td valign="top">1.6.0</td>
+          <td valign="top">
+            <code>use_gpfs_hints</code> parameter added.</td>
+          <td valign="top">&nbsp;</td>
+          <td valign="top">&nbsp;</td>
+        </tr>
+        <tr>
+          <td valign="top">1.6.0</td>
+          <td valign="top">
+            Function introduced in this release.
+        	</td>
+          <td valign="top">&nbsp;</td>
+          <td valign="top">&nbsp;</td>
+        </tr>
     </table></ul>
 </dl>
 
@@ -10815,7 +10841,7 @@ Describes HDF5 Release 1.6.7, January 2008
 
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 30 January 2008");
+document.writeln("Last modified: 7 March 2008");
 -->
 </SCRIPT>
  
