@@ -108,6 +108,9 @@ Bug Fixes since HDF5-1.8.0
             - Fixed bug in h5diff that prevented datasets & attributes with
                 variable-length string elements from comparing correctly.
                 (QAK - 2008/02/28)
+            - Fixed bug in h5dump that caused binary output to be made
+                only for the first dataset, when several datasets were requested
+                (PVN - 2008/04/07)
 
 	F90 API
 	------
