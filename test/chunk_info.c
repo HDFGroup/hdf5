@@ -18,7 +18,7 @@
  *              April 7, 2008
  *
  * Purpose:     Tests the H5Dget_chunk_info API function
- *              This program writes a 4x4 did by iterating on 2x2 chunks
+ *              This program writes a 4x4 dataset did by iterating on 2x2 chunks
  *               at a time
  */
 
