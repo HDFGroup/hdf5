@@ -18,7 +18,7 @@
  *              April 7, 2008
  *
  * Purpose:     Tests the H5Dget_chunk_info API function
- *              This program writes a 4x4 dataset did by iterating on 2x2 chunks
+ *              This program writes a 4x4 dataset by iterating on 2x2 chunks
  *               at a time
  */
 
@@ -36,7 +36,7 @@ int main( void )
 {
     
     hid_t   fid;      /* file ID */
-    hid_t   did;      /* did ID */
+    hid_t   did;      /* dataset ID */
     hid_t   f_sid;    /* file space ID */
     hid_t   m_sid;    /* memory space ID */
     hid_t   pid;      /* property list ID */
@@ -65,12 +65,12 @@ int main( void )
     *-------------------------------------------------------------------------
     */
 
-    /* modify did creation properties, i.e. enable chunking. */
+    /* modify dataset creation properties, i.e. enable chunking. */
     if ((pid = H5Pcreate (H5P_DATASET_CREATE)) < 0) TEST_ERROR;
     if (H5Pset_chunk(pid, RANK, chunk_dims) < 0) TEST_ERROR;
     if (H5Pset_fill_value(pid, H5T_NATIVE_INT, &fillvalue) < 0) TEST_ERROR;
 
-    /* create a new did */
+    /* create a new dataset */
     if((did = H5Dcreate2(fid , DATASETNAME, H5T_NATIVE_INT, f_sid, H5P_DEFAULT, pid, H5P_DEFAULT)) < 0) TEST_ERROR;
 
 
