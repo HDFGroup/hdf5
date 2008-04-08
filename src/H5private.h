@@ -955,7 +955,7 @@ extern char *strdup(const char *s);
 #endif
 
 #define 	COLON_SEPC	':'
-H5_DLL herr_t 	H5_build_extpath(const char *, char **/*out*/);
+H5_DLL herr_t   H5_build_extpath(const char *, char ** /*out*/ );
 
 
 /*
