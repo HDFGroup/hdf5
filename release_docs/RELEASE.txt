@@ -70,6 +70,10 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+	- Fixed the problem with the searching of target file for H5Lcreate_external().
+	  The searching pattern will depend on whether the target file's
+	  pathname is an absolute or a relative path. Please see the description
+	  in the RM for H5Lcreate_external().  (VC - 4/8/08)
         - Fixed possible file corruption bug when encoding datatype
             descriptions for compound datatypes whose size was between
             256 & 511 bytes and the file was opened with the "use the
