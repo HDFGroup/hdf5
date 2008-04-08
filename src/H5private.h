@@ -1232,6 +1232,16 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
     H5E_clear_stack(NULL);				                      \
     {
 
+/* Use this macro for API functions that [could] modify metadata */
+#define FUNC_ENTER_API_META(func_name,err) {{                                      \
+    FUNC_ENTER_API_VARS(func_name)                                            \
+    FUNC_ENTER_COMMON(func_name,H5_IS_API(#func_name));                       \
+    FUNC_ENTER_API_THREADSAFE;                                                \
+    FUNC_ENTER_API_COMMON(func_name,err);		                      \
+    /* Clear thread error stack entering public functions */		      \
+    H5E_clear_stack(NULL);				                      \
+    {
+
 /*
  * Use this macro for API functions that shouldn't clear the error stack
  *      like H5Eprint and H5Ewalk.
@@ -1357,14 +1367,6 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
  *
  * Programmer:	Quincey Koziol
  *
- * Modifications:
- *
- *	Robb Matzke, 4 Aug 1997
- *	The pablo mask comes from the constant PABLO_MASK defined on a
- *	per-file basis.	 The pablo_func_id comes from an auto variable
- *	defined by FUNC_ENTER.
- *      PABLO was deleted on January 21, 2005 EIP
- *
  *-------------------------------------------------------------------------
  */
 #define FUNC_LEAVE_API(ret_value)                                             \
@@ -1376,9 +1378,20 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
     } /*end scope from end of FUNC_ENTER*/                                    \
 }} /*end scope from beginning of FUNC_ENTER*/
 
+/* Use this macro to match the FUNC_ENTER_API_NOFS macro */
 #define FUNC_LEAVE_API_NOFS(ret_value)                                        \
         FINISH_MPE_LOG;                                                       \
         H5TRACE_RETURN(ret_value);					      \
+        FUNC_LEAVE_API_THREADSAFE                                             \
+        return (ret_value);						      \
+    } /*end scope from end of FUNC_ENTER*/                                    \
+}} /*end scope from beginning of FUNC_ENTER*/
+
+/* Use this macro to match the FUNC_ENTER_API_META macro */
+#define FUNC_LEAVE_API_META(ret_value)                                        \
+        FINISH_MPE_LOG;                                                       \
+        H5TRACE_RETURN(ret_value);					      \
+        H5_POP_FUNC;                                                          \
         FUNC_LEAVE_API_THREADSAFE                                             \
         return (ret_value);						      \
     } /*end scope from end of FUNC_ENTER*/                                    \

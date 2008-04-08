@@ -222,7 +222,7 @@ H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
     H5S_t		*space;                 /* Dataspace to use for attribute */
     hid_t		ret_value;              /* Return value */
 
-    FUNC_ENTER_API(H5Acreate2, FAIL)
+    FUNC_ENTER_API_META(H5Acreate2, FAIL)
     H5TRACE6("i", "i*siiii", loc_id, attr_name, type_id, space_id, acpl_id, aapl_id);
 
     /* check arguments */
@@ -244,7 +244,7 @@ H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to create attribute")
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* H5Acreate2() */
 
 
@@ -293,7 +293,7 @@ H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     H5S_t		*space;                 /* Dataspace to use for attribute */
     hid_t		ret_value;              /* Return value */
 
-    FUNC_ENTER_API(H5Acreate_by_name, FAIL)
+    FUNC_ENTER_API_META(H5Acreate_by_name, FAIL)
     H5TRACE8("i", "i*s*siiiii", loc_id, obj_name, attr_name, type_id, space_id,
              acpl_id, aapl_id, lapl_id);
 
@@ -332,7 +332,7 @@ done:
     if(loc_found && H5G_loc_free(&obj_loc) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location")
 
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* H5Acreate_by_name() */
 
 
@@ -904,7 +904,7 @@ H5Awrite(hid_t attr_id, hid_t dtype_id, const void *buf)
     const H5T_t    *mem_type = NULL;
     herr_t	    ret_value;
 
-    FUNC_ENTER_API(H5Awrite, FAIL)
+    FUNC_ENTER_API_META(H5Awrite, FAIL)
     H5TRACE3("e", "ii*x", attr_id, dtype_id, buf);
 
     /* check arguments */
@@ -920,7 +920,7 @@ H5Awrite(hid_t attr_id, hid_t dtype_id, const void *buf)
         HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "unable to write attribute")
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* H5Awrite() */
 
 
@@ -1724,7 +1724,7 @@ H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
     H5G_loc_t	loc;	                /* Object location */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Arename, FAIL)
+    FUNC_ENTER_API_META(H5Arename, FAIL)
     H5TRACE3("e", "i*s*s", loc_id, old_name, new_name);
 
     /* check arguments */
@@ -1742,7 +1742,7 @@ H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute")
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* H5Arename() */
 
 
@@ -1770,7 +1770,7 @@ H5Arename_by_name(hid_t loc_id, const char *obj_name, const char *old_attr_name,
     hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Arename_by_name, FAIL)
+    FUNC_ENTER_API_META(H5Arename_by_name, FAIL)
     H5TRACE5("e", "i*s*s*si", loc_id, obj_name, old_attr_name, new_attr_name,
              lapl_id);
 
@@ -1813,7 +1813,7 @@ done:
     if(loc_found && H5G_loc_free(&obj_loc) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location")
 
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* H5Arename_by_name() */
 
 
@@ -2036,7 +2036,7 @@ H5Adelete(hid_t loc_id, const char *name)
     H5G_loc_t	loc;		        /* Object location */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Adelete, FAIL)
+    FUNC_ENTER_API_META(H5Adelete, FAIL)
     H5TRACE2("e", "i*s", loc_id, name);
 
     /* check arguments */
@@ -2052,7 +2052,7 @@ H5Adelete(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* H5Adelete() */
 
 
@@ -2083,7 +2083,7 @@ H5Adelete_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Adelete_by_name, FAIL)
+    FUNC_ENTER_API_META(H5Adelete_by_name, FAIL)
     H5TRACE4("e", "i*s*si", loc_id, obj_name, attr_name, lapl_id);
 
     /* check arguments */
@@ -2120,7 +2120,7 @@ done:
     if(loc_found && H5G_loc_free(&obj_loc) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location")
 
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* H5Adelete_by_name() */
 
 
@@ -2159,7 +2159,7 @@ H5Adelete_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Adelete_by_idx, FAIL)
+    FUNC_ENTER_API_META(H5Adelete_by_idx, FAIL)
     H5TRACE6("e", "i*sIiIohi", loc_id, obj_name, idx_type, order, n, lapl_id);
 
     /* check arguments */
@@ -2198,7 +2198,7 @@ done:
     if(loc_found && H5G_loc_free(&obj_loc) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't free location")
 
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* H5Adelete_by_idx() */
 
 
@@ -2222,7 +2222,7 @@ H5Aclose(hid_t attr_id)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_API(H5Aclose, FAIL)
+    FUNC_ENTER_API_META(H5Aclose, FAIL)
     H5TRACE1("e", "i", attr_id);
 
     /* check arguments */
@@ -2234,7 +2234,7 @@ H5Aclose(hid_t attr_id)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "can't close attribute")
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* H5Aclose() */
 
 

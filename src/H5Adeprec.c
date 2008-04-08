@@ -143,7 +143,7 @@ H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     H5S_t		*space;                 /* Dataspace to use for attribute */
     hid_t		ret_value;              /* Return value */
 
-    FUNC_ENTER_API(H5Acreate1, FAIL)
+    FUNC_ENTER_API_META(H5Acreate1, FAIL)
     H5TRACE5("i", "i*siii", loc_id, name, type_id, space_id, plist_id);
 
     /* check arguments */
@@ -165,7 +165,7 @@ H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to create attribute")
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* H5Acreate1() */
 
 

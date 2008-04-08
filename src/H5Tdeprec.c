@@ -128,7 +128,7 @@ H5Tcommit1(hid_t loc_id, const char *name, hid_t type_id)
     H5T_t	*type;                  /* Datatype for ID */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Tcommit1, FAIL)
+    FUNC_ENTER_API_META(H5Tcommit1, FAIL)
     H5TRACE3("e", "i*si", loc_id, name, type_id);
 
     /* Check arguments */
@@ -145,7 +145,7 @@ H5Tcommit1(hid_t loc_id, const char *name, hid_t type_id)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* end H5Tcommit1() */
 
 

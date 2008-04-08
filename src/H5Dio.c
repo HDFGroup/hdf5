@@ -388,7 +388,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     char                    fake_char;
     herr_t                  ret_value=SUCCEED;  /* Return value */
 
-    FUNC_ENTER_API(H5Dwrite, FAIL)
+    FUNC_ENTER_API_META(H5Dwrite, FAIL)
     H5TRACE6("e", "iiiii*x", dset_id, mem_type_id, mem_space_id, file_space_id,
              plist_id, buf);
 
@@ -435,7 +435,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 }
 
 

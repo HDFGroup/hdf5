@@ -133,7 +133,7 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     const H5S_t    *space;              /* Dataspace for dataset */
     hid_t           ret_value;          /* Return value */
 
-    FUNC_ENTER_API(H5Dcreate2, FAIL)
+    FUNC_ENTER_API_META(H5Dcreate2, FAIL)
     H5TRACE7("i", "i*siiiii", loc_id, name, type_id, space_id, lcpl_id, dcpl_id,
              dapl_id);
 
@@ -178,7 +178,7 @@ done:
         if(dset && H5D_close(dset) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
 
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* end H5Dcreate2() */
 
 
@@ -226,7 +226,7 @@ H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id,
     const H5S_t    *space;              /* Dataspace for dataset */
     hid_t           ret_value;          /* Return value */
 
-    FUNC_ENTER_API(H5Dcreate_anon, FAIL)
+    FUNC_ENTER_API_META(H5Dcreate_anon, FAIL)
     H5TRACE5("i", "iiiii", loc_id, type_id, space_id, dcpl_id, dapl_id);
 
     /* Check arguments */
@@ -262,7 +262,7 @@ done:
         if(dset && H5D_close(dset) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
 
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* end H5Dcreate_anon() */
 
 
@@ -372,7 +372,7 @@ H5Dclose(hid_t dset_id)
     H5D_t	*dset;	                /* Dataset object to release */
     herr_t       ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_API(H5Dclose, FAIL)
+    FUNC_ENTER_API_META(H5Dclose, FAIL)
     H5TRACE1("e", "i", dset_id);
 
     /* Check args */
@@ -387,7 +387,7 @@ H5Dclose(hid_t dset_id)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't free")
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* end H5Dclose() */
 
 
@@ -994,7 +994,7 @@ H5Dset_extent(hid_t dset_id, const hsize_t *size)
     H5D_t *dset;                /* Dataset for this operation */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(H5Dset_extent, FAIL)
+    FUNC_ENTER_API_META(H5Dset_extent, FAIL)
     H5TRACE2("e", "i*h", dset_id, size);
 
     /* Check args */
@@ -1008,6 +1008,6 @@ H5Dset_extent(hid_t dset_id, const hsize_t *size)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set extend dataset")
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* end H5Dset_extent() */
 

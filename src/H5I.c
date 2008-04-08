@@ -1261,7 +1261,7 @@ H5Idec_ref(hid_t id)
 {
     int ret_value;                      /* Return value */
 
-    FUNC_ENTER_API(H5Idec_ref, FAIL);
+    FUNC_ENTER_API_META(H5Idec_ref, FAIL);
     H5TRACE1("Is", "i", id);
 
     /* Check arguments */
@@ -1273,7 +1273,7 @@ H5Idec_ref(hid_t id)
         HGOTO_ERROR (H5E_ATOM, H5E_CANTDEC, FAIL, "can't decrement ID ref count");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API_META(ret_value);
 } /* end H5Idec_ref() */
 
 
@@ -1386,7 +1386,7 @@ H5Iinc_ref(hid_t id)
 {
     int ret_value;                      /* Return value */
 
-    FUNC_ENTER_API(H5Iinc_ref, FAIL);
+    FUNC_ENTER_API_META(H5Iinc_ref, FAIL);
     H5TRACE1("Is", "i", id);
 
     /* Check arguments */
@@ -1398,7 +1398,7 @@ H5Iinc_ref(hid_t id)
         HGOTO_ERROR (H5E_ATOM, H5E_CANTINC, FAIL, "can't increment ID ref count");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API_META(ret_value);
 } /* end H5Iinc_ref() */
 
 

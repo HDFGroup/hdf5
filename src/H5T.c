@@ -1700,7 +1700,7 @@ H5Tclose(hid_t type_id)
     H5T_t	*dt = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Tclose, FAIL);
+    FUNC_ENTER_API_META(H5Tclose, FAIL)
     H5TRACE1("e", "i", type_id);
 
     /* Check args */
@@ -1714,7 +1714,7 @@ H5Tclose(hid_t type_id)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id");
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API_META(ret_value)
 }
 
 

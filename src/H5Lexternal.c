@@ -311,7 +311,7 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
     uint8_t    *p;                      /* Pointer into external link buffer */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Lcreate_external, FAIL)
+    FUNC_ENTER_API_META(H5Lcreate_external, FAIL)
     H5TRACE6("e", "*s*si*sii", file_name, obj_name, link_loc_id, link_name,
              lcpl_id, lapl_id);
 
@@ -345,7 +345,7 @@ done:
     if(ext_link_buf != NULL)
         H5MM_free(ext_link_buf);
 
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* end H5Lcreate_external() */
 
 

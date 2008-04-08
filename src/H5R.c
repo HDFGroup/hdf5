@@ -311,7 +311,7 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
     H5S_t	*space = NULL;          /* Pointer to dataspace containing region */
     herr_t      ret_value;      /* Return value */
 
-    FUNC_ENTER_API(H5Rcreate, FAIL)
+    FUNC_ENTER_API_META(H5Rcreate, FAIL)
     H5TRACE5("e", "*xi*sRti", ref, loc_id, name, ref_type, space_id);
 
     /* Check args */
@@ -333,7 +333,7 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to create reference")
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 }   /* end H5Rcreate() */
 
 

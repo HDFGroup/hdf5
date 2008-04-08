@@ -203,7 +203,7 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
     hid_t           tmp_gcpl = (-1);    /* Temporary group creation property list */
     hid_t	    ret_value;          /* Return value */
 
-    FUNC_ENTER_API(H5Gcreate1, FAIL)
+    FUNC_ENTER_API_META(H5Gcreate1, FAIL)
     H5TRACE3("i", "i*sz", loc_id, name, size_hint);
 
     /* Check arguments */
@@ -257,7 +257,7 @@ done:
         if(grp && H5G_close(grp) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
 
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* end H5Gcreate1() */
 
 
@@ -325,7 +325,7 @@ H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API(H5Glink, FAIL)
+    FUNC_ENTER_API_META(H5Glink, FAIL)
     H5TRACE4("e", "iLl*s*s", cur_loc_id, type, cur_name, new_name);
 
     /* Check arguments */
@@ -353,7 +353,7 @@ H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Not a valid link type")
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* end H5Glink() */
 
 
@@ -371,7 +371,7 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API(H5Glink2, FAIL)
+    FUNC_ENTER_API_META(H5Glink2, FAIL)
     H5TRACE5("e", "i*sLli*s", cur_loc_id, cur_name, type, new_loc_id, new_name);
 
     /* Check arguments */
@@ -404,7 +404,7 @@ H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a valid link type")
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* end H5Glink2() */
 
 
@@ -474,7 +474,7 @@ H5Gmove(hid_t src_loc_id, const char *src_name, const char *dst_name)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Gmove, FAIL)
+    FUNC_ENTER_API_META(H5Gmove, FAIL)
     H5TRACE3("e", "i*s*s", src_loc_id, src_name, dst_name);
 
     /* Call common routine to move the link */
@@ -482,7 +482,7 @@ H5Gmove(hid_t src_loc_id, const char *src_name, const char *dst_name)
       HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "couldn't move link")
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* end H5Gmove() */
 
 
@@ -499,7 +499,7 @@ H5Gmove2(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Gmove2, FAIL)
+    FUNC_ENTER_API_META(H5Gmove2, FAIL)
     H5TRACE4("e", "i*si*s", src_loc_id, src_name, dst_loc_id, dst_name);
 
     /* Call common routine to move the link */
@@ -507,7 +507,7 @@ H5Gmove2(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
       HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "couldn't move link")
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* end H5Gmove2() */
 
 
@@ -581,7 +581,7 @@ H5Gunlink(hid_t loc_id, const char *name)
     H5G_loc_t	loc;                    /* Group's location */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API(H5Gunlink, FAIL)
+    FUNC_ENTER_API_META(H5Gunlink, FAIL)
     H5TRACE2("e", "i*s", loc_id, name);
 
     /* Check arguments */
@@ -595,7 +595,7 @@ H5Gunlink(hid_t loc_id, const char *name)
       HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "couldn't delete link")
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* end H5Gunlink() */
 
 
@@ -654,7 +654,7 @@ H5Gset_comment(hid_t loc_id, const char *name, const char *comment)
     H5G_loc_t	loc;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Gset_comment, FAIL)
+    FUNC_ENTER_API_META(H5Gset_comment, FAIL)
     H5TRACE3("e", "i*s*s", loc_id, name, comment);
 
     if(H5G_loc(loc_id, &loc) < 0)
@@ -666,7 +666,7 @@ H5Gset_comment(hid_t loc_id, const char *name, const char *comment)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to set comment value")
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* end H5Gset_comment() */
 
 

@@ -146,7 +146,7 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id,
     H5G_t	   *grp = NULL;         /* New group created */
     hid_t	    ret_value;          /* Return value */
 
-    FUNC_ENTER_API(H5Gcreate2, FAIL)
+    FUNC_ENTER_API_META(H5Gcreate2, FAIL)
     H5TRACE5("i", "i*siii", loc_id, name, lcpl_id, gcpl_id, gapl_id);
 
     /* Check arguments */
@@ -187,7 +187,7 @@ done:
         if(grp && H5G_close(grp) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
 
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* end H5Gcreate2() */
 
 
@@ -286,7 +286,7 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
     H5G_t	   *grp = NULL;
     hid_t	    ret_value;
 
-    FUNC_ENTER_API(H5Gcreate_anon, FAIL)
+    FUNC_ENTER_API_META(H5Gcreate_anon, FAIL)
     H5TRACE3("i", "iii", loc_id, gcpl_id, gapl_id);
 
     /* Check arguments */
@@ -318,7 +318,7 @@ done:
         if(grp && H5G_close(grp) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
 
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* end H5Gcreate_anon() */
 
 
@@ -661,7 +661,7 @@ H5Gclose(hid_t group_id)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API(H5Gclose, FAIL)
+    FUNC_ENTER_API_META(H5Gclose, FAIL)
     H5TRACE1("e", "i", group_id);
 
     /* Check args */
@@ -676,7 +676,7 @@ H5Gclose(hid_t group_id)
     	HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close group")
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* end H5Gclose() */
 
 /*

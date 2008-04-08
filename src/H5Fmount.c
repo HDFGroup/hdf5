@@ -482,7 +482,7 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
     H5F_t	*child = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Fmount, FAIL)
+    FUNC_ENTER_API_META(H5Fmount, FAIL)
     H5TRACE4("e", "i*sii", loc_id, name, child_id, plist_id);
 
     /* Check arguments */
@@ -503,7 +503,7 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to mount file")
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* end H5Fmount() */
 
 
@@ -532,7 +532,7 @@ H5Funmount(hid_t loc_id, const char *name)
     H5G_loc_t	loc;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Funmount, FAIL)
+    FUNC_ENTER_API_META(H5Funmount, FAIL)
     H5TRACE2("e", "i*s", loc_id, name);
 
     /* Check args */
@@ -546,7 +546,7 @@ H5Funmount(hid_t loc_id, const char *name)
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to unmount file")
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* end H5Funmount() */
 
 

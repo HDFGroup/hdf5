@@ -411,7 +411,7 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
     H5G_loc_t	obj_loc;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API(H5Olink, FAIL)
+    FUNC_ENTER_API_META(H5Olink, FAIL)
     H5TRACE5("e", "ii*sii", obj_id, new_loc_id, new_name, lcpl_id, lapl_id);
 
     /* Check arguments */
@@ -433,7 +433,7 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* end H5Olink() */
 
 
@@ -463,7 +463,7 @@ H5Oincr_refcount(hid_t object_id)
     H5O_loc_t  *oloc;
     herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_API(H5Oincr_refcount, FAIL)
+    FUNC_ENTER_API_META(H5Oincr_refcount, FAIL)
     H5TRACE1("e", "i", object_id);
 
     /* Get the object's oloc so we can adjust its link count */
@@ -474,7 +474,7 @@ H5Oincr_refcount(hid_t object_id)
         HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* end H5O_incr_refcount() */
 
 
@@ -504,7 +504,7 @@ H5Odecr_refcount(hid_t object_id)
     H5O_loc_t  *oloc;
     herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_API(H5Odecr_refcount, FAIL)
+    FUNC_ENTER_API_META(H5Odecr_refcount, FAIL)
     H5TRACE1("e", "i", object_id);
 
     /* Get the object's oloc so we can adjust its link count */
@@ -515,7 +515,7 @@ H5Odecr_refcount(hid_t object_id)
         HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* end H5Odecr_refcount() */
 
 
@@ -692,7 +692,7 @@ H5Oset_comment(hid_t obj_id, const char *comment)
     H5G_loc_t	loc;                    /* Location of group */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Oset_comment, FAIL)
+    FUNC_ENTER_API_META(H5Oset_comment, FAIL)
     H5TRACE2("e", "i*s", obj_id, comment);
 
     /* Check args */
@@ -704,7 +704,7 @@ H5Oset_comment(hid_t obj_id, const char *comment)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* end H5Oset_comment() */
 
 
@@ -732,7 +732,7 @@ H5Oset_comment_by_name(hid_t loc_id, const char *name, const char *comment,
     H5G_loc_t	loc;                    /* Location of group */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API(H5Oset_comment_by_name, FAIL)
+    FUNC_ENTER_API_META(H5Oset_comment_by_name, FAIL)
     H5TRACE4("e", "i*s*si", loc_id, name, comment, lapl_id);
 
     /* Check args */
@@ -751,7 +751,7 @@ H5Oset_comment_by_name(hid_t loc_id, const char *name, const char *comment,
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* end H5Oset_comment_by_name() */
 
 
@@ -862,7 +862,7 @@ H5Oclose(hid_t object_id)
 {
     herr_t       ret_value = SUCCEED;
 
-    FUNC_ENTER_API(H5Oclose, FAIL)
+    FUNC_ENTER_API_META(H5Oclose, FAIL)
     H5TRACE1("e", "i", object_id);
 
     /* Get the type of the object and close it in the correct way */
@@ -883,7 +883,7 @@ H5Oclose(hid_t object_id)
     } /* end switch */
 
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* end H5Oclose() */
 
 

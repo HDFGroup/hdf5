@@ -185,7 +185,7 @@ H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
 
     herr_t      ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_API(H5Ocopy, FAIL)
+    FUNC_ENTER_API_META(H5Ocopy, FAIL)
     H5TRACE6("e", "i*si*sii", src_loc_id, src_name, dst_loc_id, dst_name,
              ocpypl_id, lcpl_id);
 
@@ -258,7 +258,7 @@ done:
     if(obj_open)
         H5O_close(&src_oloc);
 
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_META(ret_value)
 } /* end H5Ocopy() */
 
 
