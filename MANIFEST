@@ -1931,6 +1931,8 @@
 ./windows/test/cache_apidll/cache_apidll.vcproj
 ./windows/test/cachedll/cachedll.vcproj
 ./windows/test/chunk/chunk.vcproj
+./windows/test/chunk_info/chunk_info.vcproj
+./windows/test/chunk_infodll/chunk_infodll.vcproj
 ./windows/test/chunkdll/chunkdll.vcproj
 ./windows/test/cmpd_dset/cmpd_dset.vcproj
 ./windows/test/cmpd_dsetdll/cmpd_dsetdll.vcproj
@@ -2182,6 +2184,8 @@
 ./windows_vnet/test/cache_apidll/cache_apidll.vcproj
 ./windows_vnet/test/cachedll/cachedll.vcproj
 ./windows_vnet/test/chunk/chunk.vcproj
+./windows_vnet/test/chunk_info/chunk_info.vcproj
+./windows_vnet/test/chunk_infodll/chunk_infodll.vcproj
 ./windows_vnet/test/chunkdll/chunkdll.vcproj
 ./windows_vnet/test/cmpd_dset/cmpd_dset.vcproj
 ./windows_vnet/test/cmpd_dsetdll/cmpd_dsetdll.vcproj
