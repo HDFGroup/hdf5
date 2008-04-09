@@ -927,7 +927,7 @@ extern char *strdup(const char *s);
 #define	DIR_SEPC 		'\\'
 #define	DIR_SEPS 		"\\"
 #define CHECK_DELIMITER(SS)     ((SS == DIR_SEPC)||(SS == DIR_SLASH_SEPC))
-#define CHECK_ABSOLUTE(NAME)    (((isalpha(NAME[0])) && (NAME[1] == ':') && CHECK_DELIMITER(NAME[2]))
+#define CHECK_ABSOLUTE(NAME)    ((isalpha(NAME[0])) && (NAME[1] == ':') && (CHECK_DELIMITER(NAME[2])))
 #define CHECK_ABS_DRIVE(NAME)   ((isalpha(NAME[0])) && (NAME[1] == ':'))
 #define CHECK_ABS_PATH(NAME)    (CHECK_DELIMITER(NAME[0]))
 
@@ -955,7 +955,7 @@ extern char *strdup(const char *s);
 #endif
 
 #define 	COLON_SEPC	':'
-H5_DLL herr_t 	H5_build_extpath(const char *, char **/*out*/);
+H5_DLL herr_t 	H5_build_extpath(const char *, char ** /*out*/ );
 
 
 /*
