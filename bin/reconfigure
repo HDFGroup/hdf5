@@ -32,7 +32,7 @@ AUTOCONF_VERSION="autoconf (GNU Autoconf) 2.61"
 AUTOMAKE_VERSION="automake (GNU automake) 1.10.1"
 AUTOHEADER_VERSION="autoheader (GNU Autoconf) 2.61"
 ACLOCAL_VERSION="aclocal (GNU automake) 1.10.1"
-LIBTOOL_VERSION="(GNU libtool) 2.2"
+LIBTOOL_VERSION="(GNU libtool) 2.2.2"
 #
 # When upgrading automake's version, don't forget to also update its
 # helper utilities, especially depcomp.
@@ -53,7 +53,7 @@ if test -z ${ACLOCAL}; then
   ACLOCAL=/home1/packages/automake/automake-1.10.1/bin/aclocal-1.10
 fi
 if test -z ${LIBTOOL}; then
-  LIBTOOL=/home1/packages/libtool/libtool-2.2/bin/libtool
+  LIBTOOL=/home1/packages/libtool/libtool-2.2.2/bin/libtool
 fi
 
 # Check version numbers of all autotools against the "correct" versions

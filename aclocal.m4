@@ -946,7 +946,7 @@ m4_define([_LT_COPYING], [dnl
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 ])
 
-# serial 54 LT_INIT
+# serial 55 LT_INIT
 
 
 # LT_PREREQ(VERSION)
@@ -966,7 +966,7 @@ m4_defun([LT_PREREQ],
 m4_defun([_LT_CHECK_BUILDDIR],
 [case `pwd` in
   *\ * | *\	*)
-    AC_MSG_WARN([Libtool does not cope well with whitespace in \`pwd\`]) ;;
+    AC_MSG_WARN([Libtool does not cope well with whitespace in `pwd`]) ;;
 esac
 ])
 
@@ -1064,9 +1064,7 @@ test -z "$LN_S" && LN_S="ln -s"
 _LT_DECL([], [LN_S], [1], [Whether we need soft or hard links])dnl
 dnl
 AC_REQUIRE([LT_CMD_MAX_LEN])dnl
-AC_REQUIRE([AC_OBJEXT])dnl
 _LT_DECL([objext], [ac_objext], [0], [Object file suffix (normally "o")])dnl
-AC_REQUIRE([AC_EXEEXT])dnl
 _LT_DECL([], [exeext], [0], [Executable file suffix (normally "")])dnl
 dnl
 m4_require([_LT_FILEUTILS_DEFAULTS])dnl
@@ -1588,7 +1586,7 @@ _LT_CONFIG_SAVE_COMMANDS([
 #! $SHELL
 
 # `$ECHO "$ofile" | sed 's%^.*/%%'` - Provide generalized library-building support services.
-# Generated automatically by $as_me (GNU $PACKAGE$TIMESTAMP) $VERSION
+# Generated automatically by $as_me ($PACKAGE$TIMESTAMP) $VERSION
 # Libtool was configured on host `(hostname || uname -n) 2>/dev/null | sed 1q`:
 # NOTE: Changes made to this file will be lost: look at ltmain.sh.
 #
@@ -1810,14 +1808,20 @@ m4_defun_once([_LT_REQUIRED_DARWIN_CHECKS],[
 	# by either setting the environment variable LT_MULTI_MODULE
 	# non-empty at configure time, or by adding -multi_module to the
 	# link flags.
+	rm -rf libconftest.dylib*
 	echo "int foo(void){return 1;}" > conftest.c
+	echo "$LTCC $LTCFLAGS $LDFLAGS -o libconftest.dylib \
+-dynamiclib -Wl,-single_module conftest.c" >&AS_MESSAGE_LOG_FD
 	$LTCC $LTCFLAGS $LDFLAGS -o libconftest.dylib \
-	  -dynamiclib ${wl}-single_module conftest.c
-	if test -f libconftest.dylib; then
+	  -dynamiclib -Wl,-single_module conftest.c 2>conftest.err
+        _lt_result=$?
+	if test -f libconftest.dylib && test ! -s conftest.err && test $_lt_result = 0; then
 	  lt_cv_apple_cc_single_mod=yes
-	  rm -rf libconftest.dylib*
+	else
+	  cat conftest.err >&AS_MESSAGE_LOG_FD
 	fi
-	rm conftest.c
+	rm -rf libconftest.dylib*
+	rm -f conftest.*
       fi])
     AC_CACHE_CHECK([for -exported_symbols_list linker flag],
       [lt_cv_ld_exported_symbols_list],
@@ -2097,8 +2101,7 @@ _LT_DECL([], [ECHO], [1],
 # _LT_ENABLE_LOCK
 # ---------------
 m4_defun([_LT_ENABLE_LOCK],
-[AC_REQUIRE([AC_OBJEXT])dnl
-AC_ARG_ENABLE([libtool-lock],
+[AC_ARG_ENABLE([libtool-lock],
   [AS_HELP_STRING([--disable-libtool-lock],
     [avoid locking (might break parallel builds)])])
 test "x$enable_libtool_lock" != xno && enable_libtool_lock=yes
@@ -2287,8 +2290,7 @@ _LT_TAGDECL([], [old_archive_cmds], [2],
 # ----------------------------------------------------------------
 # Check whether the given compiler option works
 AC_DEFUN([_LT_COMPILER_OPTION],
-[AC_REQUIRE([AC_OBJEXT])dnl
-m4_require([_LT_FILEUTILS_DEFAULTS])dnl
+[m4_require([_LT_FILEUTILS_DEFAULTS])dnl
 m4_require([_LT_DECL_SED])dnl
 AC_CACHE_CHECK([$1], [$2],
   [$2=no
@@ -2740,8 +2742,7 @@ dnl AC_DEFUN([AC_LIBTOOL_DLOPEN_SELF], [])
 # Check to see if options -c and -o are simultaneously supported by compiler.
 # This macro does not hard code the compiler like AC_PROG_CC_C_O.
 m4_defun([_LT_COMPILER_C_O],
-[AC_REQUIRE([AC_OBJEXT])dnl
-m4_require([_LT_DECL_SED])dnl
+[m4_require([_LT_DECL_SED])dnl
 m4_require([_LT_FILEUTILS_DEFAULTS])dnl
 m4_require([_LT_TAG_COMPILER])dnl
 AC_CACHE_CHECK([if $compiler supports -c -o file.$ac_objext],
@@ -3058,13 +3059,18 @@ aix[[4-9]]*)
   ;;
 
 amigaos*)
-  if test "$host_cpu" = m68k; then
+  case $host_cpu in
+  powerpc)
+    # Since July 2007 AmigaOS4 officially supports .so libraries.
+    # When compiling the executable, add -use-dynld -Lsobjs: to the compileline.
+    library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}$major $libname${shared_ext}'
+    ;;
+  m68k)
     library_names_spec='$libname.ixlibrary $libname.a'
     # Create ${libname}_ixlibrary.a entries in /sys/libs.
     finish_eval='for lib in `ls $libdir/*.ixlibrary 2>/dev/null`; do libname=`$ECHO "X$lib" | $Xsed -e '\''s%^.*/\([[^/]]*\)\.ixlibrary$%\1%'\''`; test $RM /sys/libs/${libname}_ixlibrary.a; $show "cd /sys/libs && $LN_S $lib ${libname}_ixlibrary.a"; cd /sys/libs && $LN_S $lib ${libname}_ixlibrary.a || exit 1; done'
-  else
-    dynamic_linker=no
-  fi
+    ;;
+  esac
   ;;
 
 beos*)
@@ -4046,7 +4052,6 @@ _LT_DECL([], [file_magic_cmd], [1],
 # find the pathname to a BSD- or MS-compatible name lister
 AC_DEFUN([LT_PATH_NM],
 [AC_REQUIRE([AC_PROG_CC])dnl
-AC_REQUIRE([AC_OBJEXT])dnl
 AC_CACHE_CHECK([for BSD- or MS-compatible name lister (nm)], lt_cv_path_NM,
 [if test -n "$NM"; then
   # Let the user override the test.
@@ -4182,7 +4187,6 @@ _LT_TAGDECL([no_builtin_flag], [lt_prog_compiler_no_builtin_flag], [1],
 m4_defun([_LT_CMD_GLOBAL_SYMBOLS],
 [AC_REQUIRE([AC_CANONICAL_HOST])dnl
 AC_REQUIRE([AC_PROG_CC])dnl
-AC_REQUIRE([AC_OBJEXT])dnl
 AC_REQUIRE([LT_PATH_NM])dnl
 AC_REQUIRE([LT_PATH_LD])dnl
 m4_require([_LT_DECL_SED])dnl
@@ -4434,14 +4438,22 @@ m4_if([$1], [CXX], [
 	_LT_TAGVAR(lt_prog_compiler_static, $1)='-Bstatic'
       fi
       ;;
+
     amigaos*)
-      if test "$host_cpu" = m68k; then
-        # FIXME: we need at least 68020 code to build shared libraries, but
-        # adding the `-m68020' flag to GCC prevents building anything better,
-        # like `-m68040'.
-        _LT_TAGVAR(lt_prog_compiler_pic, $1)='-m68020 -resident32 -malways-restore-a4'
-      fi
+      case $host_cpu in
+      powerpc)
+            # see comment about AmigaOS4 .so support
+            _LT_TAGVAR(lt_prog_compiler_pic, $1)='-fPIC'
+        ;;
+      m68k)
+            # FIXME: we need at least 68020 code to build shared libraries, but
+            # adding the `-m68020' flag to GCC prevents building anything better,
+            # like `-m68040'.
+            _LT_TAGVAR(lt_prog_compiler_pic, $1)='-m68020 -resident32 -malways-restore-a4'
+        ;;
+      esac
       ;;
+
     beos* | irix5* | irix6* | nonstopux* | osf3* | osf4* | osf5*)
       # PIC is the default for these OSes.
       ;;
@@ -4726,12 +4738,18 @@ m4_if([$1], [CXX], [
       ;;
 
     amigaos*)
-      if test "$host_cpu" = m68k; then
-        # FIXME: we need at least 68020 code to build shared libraries, but
-        # adding the `-m68020' flag to GCC prevents building anything better,
-        # like `-m68040'.
-        _LT_TAGVAR(lt_prog_compiler_pic, $1)='-m68020 -resident32 -malways-restore-a4'
-      fi
+      case $host_cpu in
+      powerpc)
+            # see comment about AmigaOS4 .so support
+            _LT_TAGVAR(lt_prog_compiler_pic, $1)='-fPIC'
+        ;;
+      m68k)
+            # FIXME: we need at least 68020 code to build shared libraries, but
+            # adding the `-m68020' flag to GCC prevents building anything better,
+            # like `-m68040'.
+            _LT_TAGVAR(lt_prog_compiler_pic, $1)='-m68020 -resident32 -malways-restore-a4'
+        ;;
+      esac
       ;;
 
     beos* | irix5* | irix6* | nonstopux* | osf3* | osf4* | osf5*)
@@ -5138,19 +5156,18 @@ _LT_EOF
       ;;
 
     amigaos*)
-      if test "$host_cpu" = m68k; then
-        _LT_TAGVAR(archive_cmds, $1)='$RM $output_objdir/a2ixlibrary.data~$ECHO "#define NAME $libname" > $output_objdir/a2ixlibrary.data~$ECHO "#define LIBRARY_ID 1" >> $output_objdir/a2ixlibrary.data~$ECHO "#define VERSION $major" >> $output_objdir/a2ixlibrary.data~$ECHO "#define REVISION $revision" >> $output_objdir/a2ixlibrary.data~$AR $AR_FLAGS $lib $libobjs~$RANLIB $lib~(cd $output_objdir && a2ixlibrary -32)'
-        _LT_TAGVAR(hardcode_libdir_flag_spec, $1)='-L$libdir'
-        _LT_TAGVAR(hardcode_minus_L, $1)=yes
-      fi
-
-      # Samuel A. Falvo II <kc5tja@dolphin.openprojects.net> reports
-      # that the semantics of dynamic libraries on AmigaOS, at least up
-      # to version 4, is to share data among multiple programs linked
-      # with the same dynamic library.  Since this doesn't match the
-      # behavior of shared libraries on other platforms, we can't use
-      # them.
-      _LT_TAGVAR(ld_shlibs, $1)=no
+      case $host_cpu in
+      powerpc)
+            # see comment about AmigaOS4 .so support
+            _LT_TAGVAR(archive_cmds, $1)='$CC -shared $libobjs $deplibs $compiler_flags ${wl}-soname $wl$soname -o $lib'
+            _LT_TAGVAR(archive_expsym_cmds, $1)=''
+        ;;
+      m68k)
+            _LT_TAGVAR(archive_cmds, $1)='$RM $output_objdir/a2ixlibrary.data~$ECHO "#define NAME $libname" > $output_objdir/a2ixlibrary.data~$ECHO "#define LIBRARY_ID 1" >> $output_objdir/a2ixlibrary.data~$ECHO "#define VERSION $major" >> $output_objdir/a2ixlibrary.data~$ECHO "#define REVISION $revision" >> $output_objdir/a2ixlibrary.data~$AR $AR_FLAGS $lib $libobjs~$RANLIB $lib~(cd $output_objdir && a2ixlibrary -32)'
+            _LT_TAGVAR(hardcode_libdir_flag_spec, $1)='-L$libdir'
+            _LT_TAGVAR(hardcode_minus_L, $1)=yes
+        ;;
+      esac
       ;;
 
     beos*)
@@ -5497,13 +5514,18 @@ _LT_EOF
       ;;
 
     amigaos*)
-      if test "$host_cpu" = m68k; then
-        _LT_TAGVAR(archive_cmds, $1)='$RM $output_objdir/a2ixlibrary.data~$ECHO "#define NAME $libname" > $output_objdir/a2ixlibrary.data~$ECHO "#define LIBRARY_ID 1" >> $output_objdir/a2ixlibrary.data~$ECHO "#define VERSION $major" >> $output_objdir/a2ixlibrary.data~$ECHO "#define REVISION $revision" >> $output_objdir/a2ixlibrary.data~$AR $AR_FLAGS $lib $libobjs~$RANLIB $lib~(cd $output_objdir && a2ixlibrary -32)'
-        _LT_TAGVAR(hardcode_libdir_flag_spec, $1)='-L$libdir'
-        _LT_TAGVAR(hardcode_minus_L, $1)=yes
-      fi
-      # see comment about different semantics on the GNU ld section
-      _LT_TAGVAR(ld_shlibs, $1)=no
+      case $host_cpu in
+      powerpc)
+            # see comment about AmigaOS4 .so support
+            _LT_TAGVAR(archive_cmds, $1)='$CC -shared $libobjs $deplibs $compiler_flags ${wl}-soname $wl$soname -o $lib'
+            _LT_TAGVAR(archive_expsym_cmds, $1)=''
+        ;;
+      m68k)
+            _LT_TAGVAR(archive_cmds, $1)='$RM $output_objdir/a2ixlibrary.data~$ECHO "#define NAME $libname" > $output_objdir/a2ixlibrary.data~$ECHO "#define LIBRARY_ID 1" >> $output_objdir/a2ixlibrary.data~$ECHO "#define VERSION $major" >> $output_objdir/a2ixlibrary.data~$ECHO "#define REVISION $revision" >> $output_objdir/a2ixlibrary.data~$AR $AR_FLAGS $lib $libobjs~$RANLIB $lib~(cd $output_objdir && a2ixlibrary -32)'
+            _LT_TAGVAR(hardcode_libdir_flag_spec, $1)='-L$libdir'
+            _LT_TAGVAR(hardcode_minus_L, $1)=yes
+        ;;
+      esac
       ;;
 
     bsdi[[45]]*)
@@ -7714,6 +7736,7 @@ GCC=yes
 CC=${GCJ-"gcj"}
 compiler=$CC
 _LT_TAGVAR(compiler, $1)=$CC
+_LT_TAGVAR(LD, $1)="$LD"
 _LT_CC_BASENAME([$compiler])
 
 # GCJ did not exist at the time GCC didn't implicitly link libc in.
@@ -8153,7 +8176,7 @@ _LT_EOF
 # unlimited permission to copy and/or distribute it, with or without
 # modifications, as long as this notice is preserved.
 
-# serial 4 ltoptions.m4
+# serial 5 ltoptions.m4
 
 # This is to help aclocal find these macros, as it can't see m4_define.
 AC_DEFUN([LTOPTIONS_VERSION], [m4_if([1])])
@@ -8286,7 +8309,8 @@ _LT_DECL([], [OBJDUMP], [0], [Object dumper program])dnl
 ])# win32-dll
 
 AU_DEFUN([AC_LIBTOOL_WIN32_DLL],
-[_LT_SET_OPTION([LT_INIT], [win32-dll])
+[AC_REQUIRE([AC_CANONICAL_HOST])dnl
+_LT_SET_OPTION([LT_INIT], [win32-dll])
 AC_DIAGNOSE([obsolete],
 [$0: Remove this warning and the call to _LT_SET_OPTION when you
 put the `win32-dll' option into LT_INIT's first parameter.])
@@ -8641,15 +8665,15 @@ m4_define([lt_dict_filter],
 
 # Generated from ltversion.in.
 
-# serial 2599 ltversion.m4
+# serial 2627 ltversion.m4
 # This file is part of GNU Libtool
 
-m4_define([LT_PACKAGE_VERSION], [2.2])
-m4_define([LT_PACKAGE_REVISION], [1.2599])
+m4_define([LT_PACKAGE_VERSION], [2.2.2])
+m4_define([LT_PACKAGE_REVISION], [1.2627])
 
 AC_DEFUN([LTVERSION_VERSION],
-[macro_version='2.2'
-macro_revision='1.2599'
+[macro_version='2.2.2'
+macro_revision='1.2627'
 _LT_DECL(, macro_version, 0, [Which release of libtool.m4 was used?])
 _LT_DECL(, macro_revision, 0)
 ])
