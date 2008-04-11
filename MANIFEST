@@ -380,6 +380,13 @@
 ./perform/pio_standalone.h
 ./perform/pio_timer.c
 ./perform/pio_timer.h
+./perform/sio_engine.c
+./perform/sio_perf.c
+./perform/sio_perf.h
+./perform/sio_standalone.c
+./perform/sio_standalone.h
+./perform/sio_timer.c
+./perform/sio_timer.h
 ./perform/zip_perf.c
 
 ./release_docs/COPYING
