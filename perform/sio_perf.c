@@ -861,9 +861,6 @@ report_parameters(struct options *opts)
     HDfprintf(output, "Number of iterations=%Hd\n",
               (long_long)opts->num_iters);
 
-    //HDfprintf(output, "Size of dataset(s)=");
-    //recover_size_and_print((long_long)(opts->num_bpp), "\n");
-
     HDfprintf(output, "Dataset size=");
 
     for (i=0; i<rank; i++)
@@ -1217,7 +1214,6 @@ parse_command_line(int argc, char *argv[])
                         if (isalnum(*end) && i < 10)
                             buf[i++] = *end;
 
-                    //cl_opts->order[j] = atoi(buf);
                     cl_opts->order[j] = parse_size_directive(buf);
 
                     j++;

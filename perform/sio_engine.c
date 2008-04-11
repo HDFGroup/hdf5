@@ -728,6 +728,9 @@ static herr_t posix_buffer_write(int local_dim, file_descr *fd, parameters *parm
     int dtype_size = 1;
     int         ret_code = SUCCESS;
     long i;
+    size_t d_offset;
+    size_t linear_dset_offset = 0;
+    int j, rc;
 
     /* if dimension is not contiguous, call recursively */
     if (local_dim < parms->rank-1 && local_dim != cont_dim) {
@@ -746,8 +749,6 @@ static herr_t posix_buffer_write(int local_dim, file_descr *fd, parameters *parm
     } else {
 
         buf_offset[local_dim] = 0;
-        size_t linear_dset_offset = 0, d_offset;
-        int j, rc;
 
         /* determine offset in the buffer */
         for (i=0; i < parms->rank; i++){
@@ -1011,6 +1012,9 @@ static herr_t posix_buffer_read(int local_dim, file_descr *fd, parameters *parms
     int dtype_size = 1;
     int         ret_code = SUCCESS;
     long i;
+    size_t d_offset;
+    size_t linear_dset_offset = 0;
+    int j, rc;
 
     /* if local dimension is not contiguous, recurse */
     if (local_dim < parms->rank-1 && local_dim != cont_dim) {
@@ -1025,8 +1029,6 @@ static herr_t posix_buffer_read(int local_dim, file_descr *fd, parameters *parms
     } else {
 
         buf_offset[local_dim] = 0;
-        size_t linear_dset_offset = 0, d_offset;
-        int j, rc;
         /* determine offset in buffer */
         for (i=0; i<parms->rank; i++){
             d_offset=1;
