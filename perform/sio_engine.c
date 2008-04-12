@@ -456,8 +456,8 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
     hsize_t     h5maxdims[MAX_DIMS];
     int         rank;                   /*rank of dataset */
         /* Prepare buffer for verifying data */
-//    if (parms->verify)
-         //   memset(buffer,1,linear_buf_size);
+/*    if (parms->verify)
+            memset(buffer,1,linear_buf_size); */
 
     buf_p=(unsigned char *)buffer;
 
@@ -555,8 +555,8 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
         } /* end if */
 
         sprintf(dname, "Dataset_%ld", (unsigned long)parms->num_bytes);
-        h5ds_id = H5Dcreate1(fd->h5fd, dname, ELMT_H5_TYPE,
-            h5dset_space_id, h5dcpl);
+        h5ds_id = H5Dcreate2(fd->h5fd, dname, ELMT_H5_TYPE,
+            h5dset_space_id, H5P_DEFAULT, h5dcpl, H5P_DEFAULT);
 
         if (h5ds_id < 0) {
             fprintf(stderr, "HDF5 Dataset Create failed\n");
@@ -692,7 +692,7 @@ static herr_t dset_write(int local_dim, file_descr *fd, parameters *parms, void 
                             dims[k] = dims[k]+h5count[k];
                             hrc=H5Sset_extent_simple(h5dset_space_id,parms->rank,dims,maxdims);
                             VRFY((hrc >= 0), "H5Sset_extent_simple");
-                            hrc=H5Dextend(h5ds_id,dims);
+                            hrc=H5Dset_extent(h5ds_id,dims);
                             VRFY((hrc >= 0), "H5Dextend");
                         }
                     }
@@ -799,9 +799,6 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
     int         rank;
 
         /* Prepare buffer for verifying data */
-       // if (parms->verify)
-         //   memset(buffer,1,linear_buf_size);
-//    if (parms->verify)
         for (i=0; i < linear_buf_size; i++)
             buffer2[i]=i%128;
 
@@ -866,7 +863,7 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
 
         case HDF5:
         sprintf(dname, "Dataset_%ld", parms->num_bytes);
-        h5ds_id = H5Dopen1(fd->h5fd, dname);
+        h5ds_id = H5Dopen2(fd->h5fd, dname, H5P_DEFAULT);
         if (h5ds_id < 0) {
             fprintf(stderr, "HDF5 Dataset open failed\n");
             GOTOERROR(FAIL);
