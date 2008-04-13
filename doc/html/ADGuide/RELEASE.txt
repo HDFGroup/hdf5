@@ -1,4 +1,4 @@
-HDF5 version 1.6.7-snap1 released on Sun Apr  6 18:08:36 CDT 2008
+HDF5 version 1.6.7-snap2 released on Sun Apr 13 18:05:47 CDT 2008
 ================================================================================
 
 INTRODUCTION
@@ -109,6 +109,9 @@ Bug Fixes since HDF5-1.6.7 Release
      - Fixed h5diff regarding the display of NaN (Not a Number) values. PVN 2008/03/04
      - Fixed h5dump regarding the display of array indices and block selections in 
         subsetting. PVN 2008/03/10 
+     - Fixed bug in h5dump that caused binary output to be made only for the first 
+        dataset, when several datasets were requested. PVN - 2008/04/07
+
  
 
 
