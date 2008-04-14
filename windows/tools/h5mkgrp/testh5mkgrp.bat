@@ -148,7 +148,7 @@ rem
     rem     copy %actual% %expect%
     rem )
     
-    fc /w %expect_parsed% %expect_parsed% | find "FC: no diff" > nul
+    fc /w %expect_parsed% %expect_parsed% > nul
     if %errorlevel% equ 0 (
         call :verify_h5ls PASSED %*
     ) else ( 

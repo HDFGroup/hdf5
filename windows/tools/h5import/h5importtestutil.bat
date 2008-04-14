@@ -67,7 +67,7 @@ goto main
     %h5dump_bin% %5 > log1
     popd
     
-    fc /w tmp_testfiles\log1 log2 | find "FC: no diff" > nul
+    fc /w tmp_testfiles\log1 log2 > nul
     if %errorlevel% neq 0 set err=1
     del /f log2 tmp_testfiles\log1
     if "%err%"=="1" (

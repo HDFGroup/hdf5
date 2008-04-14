@@ -211,7 +211,7 @@ rem        rem Create the expect file if it doesn't yet exist
 rem        call :verify_h5ls CREATED %*
 rem        copy %actual% %expect%
 rem    ) else (
-    fc %expect_parsed% %actual_parsed% | find "FC: no diff" > nul
+    fc %expect_parsed% %actual_parsed% > nul
     if %errorlevel% equ 0 (
         call :verify_h5ls PASSED %*
     ) else (

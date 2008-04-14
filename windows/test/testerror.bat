@@ -141,11 +141,11 @@ rem
         )
     )
         
-    fc /w %expect1_parsed% %actual% | find "FC: no diff" > nul
+    fc /w %expect1_parsed% %actual% > nul
     if %errorlevel% equ 0 (
             call :testing PASSED %test_err%
     ) else (
-        fc /w %expect2_parsed% %actual% | find "FC: no diff" > nul
+        fc /w %expect2_parsed% %actual% > nul
         if !errorlevel! equ 0 (
             call :testing PASSED %test_err%
         ) else (
