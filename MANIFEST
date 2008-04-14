@@ -2000,7 +2000,6 @@
 ./windows/test/objcopydll/objcopydll.vcproj
 ./windows/test/ohdr/ohdr.vcproj
 ./windows/test/ohdrdll/ohdrdll.vcproj
-./windows/test/ohdr_gentst/ohdr_gentst.vcproj
 ./windows/test/overhead/overhead.vcproj
 ./windows/test/overheaddll/overheaddll.vcproj
 ./windows/test/pool/pool.vcproj
@@ -2253,7 +2252,6 @@
 ./windows_vnet/test/objcopydll/objcopydll.vcproj
 ./windows_vnet/test/ohdr/ohdr.vcproj
 ./windows_vnet/test/ohdrdll/ohdrdll.vcproj
-./windows_vnet/test/ohdr_gentst/ohdr_gentst.vcproj
 ./windows_vnet/test/overhead/overhead.vcproj
 ./windows_vnet/test/overheaddll/overheaddll.vcproj
 ./windows_vnet/test/pool/pool.vcproj
