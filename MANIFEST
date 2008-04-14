@@ -1695,6 +1695,7 @@
 ./windows/COPYING
 ./windows/hdf5bt.BAT
 ./windows/hdf5build.BAT
+./windows/hdf5build_examples.BAT
 ./windows/hdf5check.BAT
 ./windows/InstallcppExamples.BAT
 ./windows/install_dll.BAT
