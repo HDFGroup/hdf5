@@ -3849,7 +3849,7 @@ external_link_win5(hid_t fapl, hbool_t new_format)
     HDstrcpy(tmpname, &cwdpath[2]); /* stripped the drive letter to make it rel drive but absolute path */
     HDstrcat(tmpname, "/");
     HDstrcat(tmpname, FILENAME[12]);
-    h5_fixname(tmpname, fapl, filename2, sizeof filename2);
+    h5_fixname(tmpname, fapl, filename1, sizeof filename1);
 
     /* set up name for target link: "<drive-letter>:tmp/extlinks14" */
     sprintf(tmpname, "%c:%s", (drive+'A'-1), FILENAME[36]);
