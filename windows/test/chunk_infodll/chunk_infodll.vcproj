@@ -23,6 +23,7 @@
 			OutputDirectory="..\..\..\test\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
+			InheritedPropertySheets="..\..\proj\property_sheets\remove-posix-warnings.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -65,7 +66,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="$(HDF5_EXT_ZLIB) $(HDF5_EXT_SZIP)"
-				LinkIncremental="2"
+				LinkIncremental="0"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -100,6 +101,7 @@
 			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
+			InheritedPropertySheets="..\..\proj\property_sheets\remove-posix-warnings.vsprops"
 			CharacterSet="1"
 			>
 			<Tool
@@ -143,7 +145,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="$(HDF5_EXT_ZLIB) $(HDF5_EXT_SZIP)"
-				LinkIncremental="2"
+				LinkIncremental="0"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="17"
@@ -178,6 +180,7 @@
 			OutputDirectory="..\..\..\test\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
+			InheritedPropertySheets="..\..\proj\property_sheets\remove-posix-warnings.vsprops"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -218,7 +221,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="$(HDF5_EXT_ZLIB) $(HDF5_EXT_SZIP)"
-				LinkIncremental="1"
+				LinkIncremental="0"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -255,6 +258,7 @@
 			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="1"
+			InheritedPropertySheets="..\..\proj\property_sheets\remove-posix-warnings.vsprops"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -296,7 +300,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="$(HDF5_EXT_ZLIB) $(HDF5_EXT_SZIP)"
-				LinkIncremental="1"
+				LinkIncremental="0"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
