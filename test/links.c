@@ -11723,8 +11723,8 @@ main(void)
             nerrors += external_link_win1(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += external_link_win2(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += external_link_win3(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_win4(my_fapl, new_format) < 0 ? 1 : 0;
-            nerrors += external_link_win5(my_fapl, new_format) < 0 ? 1 : 0;
+           // nerrors += external_link_win4(my_fapl, new_format) < 0 ? 1 : 0;
+           // nerrors += external_link_win5(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += external_link_win6(my_fapl, new_format) < 0 ? 1 : 0;
 #endif
 
