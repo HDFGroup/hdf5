@@ -112,6 +112,14 @@ Bug Fixes since HDF5-1.8.0 release
     F90 APIs
     --------
 
+
+    C++ APIs
+    --------
+        - Fixed bug that caused segfaults in Attribute::read. (BMR - 2008/04/20)
+        - Fixed bug in PropList::getClassName to use portable HDfree instead
+            of free. (BMR - 2008/04/20)
+
+
 Platforms Tested
 ================
 
