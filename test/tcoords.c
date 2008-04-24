@@ -148,7 +148,7 @@ static void test_singleEnd_selElements(hid_t file, hbool_t is_chunked)
     /* Select the elements in the dataset */
     elmts_numb = 12;
 
-    ret = H5Sselect_elements(sid, H5S_SELECT_SET, elmts_numb, da_elmts1);
+    ret = H5Sselect_elements(sid, H5S_SELECT_SET, elmts_numb, (const hsize_t *)da_elmts1);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     /* Dataspace for memory buffer */
@@ -170,7 +170,7 @@ static void test_singleEnd_selElements(hid_t file, hbool_t is_chunked)
     for(i=0; i<6; i++)
         for(j=0; j<2; j++)
             if(da_buffer[0][0][i][j] != mem1_buffer[0][0][i][j]) {
-                TestErrPrintf("Read different values than written at index 0,0,%d,%d\n", i, j);
+                TestErrPrintf("%u: Read different values than written at index 0,0,%d,%d\n", __LINE__, i, j);
             }
 
     /* ****** Case 2: ******
@@ -181,7 +181,7 @@ static void test_singleEnd_selElements(hid_t file, hbool_t is_chunked)
     /* Select the elements in the dataset */
     elmts_numb = 6;
 
-    ret = H5Sselect_elements(sid, H5S_SELECT_SET, elmts_numb, da_elmts2);
+    ret = H5Sselect_elements(sid, H5S_SELECT_SET, elmts_numb, (const hsize_t *)da_elmts2);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     /* Dataspace for memory buffer */
@@ -203,7 +203,7 @@ static void test_singleEnd_selElements(hid_t file, hbool_t is_chunked)
     for(i=0; i<2; i++)
         for(j=0; j<3; j++)
             if(da_buffer[i][j][0][0] != mem2_buffer[i][j][0][0]) {
-                TestErrPrintf("Read different values than written at index %d,%d,0,0\n", i, j);
+                TestErrPrintf("%u: Read different values than written at index %d,%d,0,0, da_buffer = %d, mem2_buffer = %d\n", __LINE__, i, j, da_buffer[i][j][0][0], mem2_buffer[i][j][0][0]);
             }
 
     /* ****** Case 3: ******
@@ -214,7 +214,7 @@ static void test_singleEnd_selElements(hid_t file, hbool_t is_chunked)
     /* Select the elements in the dataset */
     elmts_numb = 18;
 
-    ret = H5Sselect_elements(sid, H5S_SELECT_SET, elmts_numb, da_elmts3);
+    ret = H5Sselect_elements(sid, H5S_SELECT_SET, elmts_numb, (const hsize_t *)da_elmts3);
     CHECK(ret, FAIL, "H5Sselect_elements");
 
     /* Dataspace for memory buffer */
@@ -236,7 +236,7 @@ static void test_singleEnd_selElements(hid_t file, hbool_t is_chunked)
     for(i=0; i<3; i++)
         for(j=0; j<6; j++)
             if(da_buffer[0][i][j][0] != mem3_buffer[0][i][j][0]) {
-                TestErrPrintf("Read different values than written at index 0,%d,%d,0\n", i, j);
+                TestErrPrintf("%u: Read different values than written at index 0,%d,%d,0\n", __LINE__, i, j);
             }
 
 
@@ -323,7 +323,7 @@ static void test_singleEnd_selHyperslab(hid_t file, hbool_t is_chunked)
     for(i=0; i<6; i++)
         for(j=0; j<2; j++)
             if(da_buffer[0][0][i][j] != mem1_buffer[0][0][i][j]) {
-                TestErrPrintf("Read different values than written at index 0,0,%d,%d\n", i, j);
+                TestErrPrintf("%u: Read different values than written at index 0,0,%d,%d\n", __LINE__, i, j);
             }
 
     /* ****** Case 2: ******
@@ -354,7 +354,7 @@ static void test_singleEnd_selHyperslab(hid_t file, hbool_t is_chunked)
     for(i=0; i<2; i++)
         for(j=0; j<3; j++)
             if(da_buffer[i][j][0][0] != mem2_buffer[i][j][0][0]) {
-                TestErrPrintf("Read different values than written at index %d,%d,0,0\n", i, j);
+                TestErrPrintf("%u: Read different values than written at index %d,%d,0,0\n", __LINE__, i, j);
             }
 
     /* ****** Case 3: ******
@@ -385,7 +385,7 @@ static void test_singleEnd_selHyperslab(hid_t file, hbool_t is_chunked)
     for(i=0; i<3; i++)
         for(j=0; j<6; j++)
             if(da_buffer[0][i][j][0] != mem3_buffer[0][i][j][0]) {
-                TestErrPrintf("Read different values than written at index 0,%d,%d,0\n", i, j);
+                TestErrPrintf("%u: Read different values than written at index 0,%d,%d,0\n", __LINE__, i, j);
             }
 
 
@@ -519,7 +519,7 @@ static void test_multiple_ends(hid_t file, hbool_t is_chunked)
             for(k=0; k<6; k++)
                 for(l=0; l<2; l++)
                     if(data_buf[0][0][0][i][j][0][k][l] != mem1_buffer[0][0][0][i][j][0][k][l]) {
-                        TestErrPrintf("Read different values than written at index 0,0,0,%d,%d,0,%d,%d\n", i, j, k, l);
+                        TestErrPrintf("%u: Read different values than written at index 0,0,0,%d,%d,0,%d,%d\n", __LINE__, i, j, k, l);
                     }
 
     /* ****** Case 2: ******
@@ -551,7 +551,7 @@ static void test_multiple_ends(hid_t file, hbool_t is_chunked)
             for(k=0; k<4; k++)
                 for(l=0; l<2; l++)
                     if(data_buf[i][j][0][k][l][0][0][0] != mem2_buffer[i][j][0][k][l][0][0][0]) {
-                        TestErrPrintf("Read different values than written at index %d,%d,0,%d,%d,0,0,0\n", i, j, k, l);
+                        TestErrPrintf("%u: Read different values than written at index %d,%d,0,%d,%d,0,0,0\n", __LINE__, i, j, k, l);
                     }
 
     /* ****** Case 3: ******
@@ -583,7 +583,7 @@ static void test_multiple_ends(hid_t file, hbool_t is_chunked)
             for(k=0; k<3; k++)
                 for(l=0; l<6; l++)
                     if(data_buf[0][i][j][0][0][k][l][0] != mem3_buffer[0][i][j][0][0][k][l][0]) {
-                        TestErrPrintf("Read different values than written at index 0,%d,%d,0,0,%d,%d,0\n", i, j, k, l);
+                        TestErrPrintf("%u: Read different values than written at index 0,%d,%d,0,0,%d,%d,0\n", __LINE__, i, j, k, l);
                     }
 
     /* ****** Case 4: ******
@@ -615,7 +615,7 @@ static void test_multiple_ends(hid_t file, hbool_t is_chunked)
             for(k=0; k<6; k++)
                 for(l=0; l<2; l++)
                     if(data_buf[i][j][0][0][0][0][k][l] != mem4_buffer[i][j][0][0][0][0][k][l]) {
-                        TestErrPrintf("Read different values than written at index %d,%d,0,0,0,0,%d,%d\n", i, j, k, l);
+                        TestErrPrintf("%u: Read different values than written at index %d,%d,0,0,0,0,%d,%d\n", __LINE__, i, j, k, l);
                     }
 
 
@@ -651,7 +651,7 @@ static void test_multiple_ends(hid_t file, hbool_t is_chunked)
                     for(m=0; m<6; m++)
                         for(n=0; n<2; n++)
                             if(data_buf[i][j][0][k][l][0][m][n] != mem5_buffer[i][j][0][k][l][0][m][n]) {
-                                TestErrPrintf("Read different values than written at index %d,%d,0,%d,%d,0,%d,%d\n", i, j, k, l, m, n);
+                                TestErrPrintf("%u: Read different values than written at index %d,%d,0,%d,%d,0,%d,%d\n", __LINE__, i, j, k, l, m, n);
                             }
 
 

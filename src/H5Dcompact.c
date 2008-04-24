@@ -41,21 +41,51 @@
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Vprivate.h"		/* Vector and array functions		*/
 
+
 /****************/
 /* Local Macros */
 /****************/
+
 
 /******************/
 /* Local Typedefs */
 /******************/
 
+
 /********************/
 /* Local Prototypes */
 /********************/
 
+/* Layout operation callbacks */
+static herr_t H5D_compact_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
+    hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
+    H5D_chunk_map_t *cm);
+static ssize_t H5D_compact_readvv(const H5D_io_info_t *io_info,
+    size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[],
+    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[]);
+static ssize_t H5D_compact_writevv(const H5D_io_info_t *io_info,
+    size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[],
+    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[]);
+
+
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Compact storage layout I/O ops */
+const H5D_layout_ops_t H5D_LOPS_COMPACT[1] = {{
+    H5D_compact_io_init,
+    H5D_contig_read,
+    H5D_contig_write,
+#ifdef H5_HAVE_PARALLEL
+    NULL,
+    NULL,
+#endif /* H5_HAVE_PARALLEL */
+    H5D_compact_readvv,
+    H5D_compact_writevv,
+    NULL
+}};
+
 
 /*******************/
 /* Local Variables */
@@ -63,6 +93,7 @@
 
 /* Declare extern the free list to manage blocks of type conversion data */
 H5FL_BLK_EXTERN(type_conv);
+
 
 
 /*-------------------------------------------------------------------------
@@ -118,6 +149,32 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5D_compact_io_init
+ *
+ * Purpose:	Performs initialization before any sort of I/O on the raw data
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, March 20, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_compact_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t UNUSED *type_info,
+    hsize_t UNUSED nelmts, const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space,
+    H5D_chunk_map_t UNUSED *cm)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_compact_io_init)
+
+    io_info->store->compact.buf = io_info->dset->shared->layout.u.compact.buf;
+    io_info->store->compact.dirty = &io_info->dset->shared->layout.u.compact.dirty;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5D_compact_io_init() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5D_compact_readvv
  *
  * Purpose:     Reads some data vectors from a dataset into a buffer.
@@ -135,20 +192,19 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-ssize_t
+static ssize_t
 H5D_compact_readvv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[],
-    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[],
-    haddr_t UNUSED addr, void UNUSED *pointer/*in*/, void *buf)
+    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[])
 {
-    ssize_t ret_value;          /* Return value */
+    ssize_t ret_value;                  /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_compact_readvv, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5D_compact_readvv)
 
-    assert(io_info->dset);
+    HDassert(io_info);
 
     /* Use the vectorized memory copy routine to do actual work */
-    if((ret_value=H5V_memcpyvv(buf,mem_max_nseq,mem_curr_seq,mem_size_arr,mem_offset_arr,io_info->dset->shared->layout.u.compact.buf,dset_max_nseq,dset_curr_seq,dset_size_arr,dset_offset_arr))<0)
+    if((ret_value = H5V_memcpyvv(io_info->u.rbuf, mem_max_nseq, mem_curr_seq, mem_size_arr, mem_offset_arr, io_info->store->compact.buf, dset_max_nseq, dset_curr_seq, dset_size_arr, dset_offset_arr)) < 0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed")
 
 done:
@@ -177,24 +233,23 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-ssize_t
+static ssize_t
 H5D_compact_writevv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[],
-    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[],
-    haddr_t UNUSED addr, void UNUSED *pointer/*in*/, const void *buf)
+    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[])
 {
-    ssize_t ret_value;          /* Return value */
+    ssize_t ret_value;                  /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_compact_writevv, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5D_compact_writevv)
 
-    assert(io_info->dset);
+    HDassert(io_info);
 
     /* Use the vectorized memory copy routine to do actual work */
-    if((ret_value=H5V_memcpyvv(io_info->dset->shared->layout.u.compact.buf,dset_max_nseq,dset_curr_seq,dset_size_arr,dset_offset_arr,buf,mem_max_nseq,mem_curr_seq,mem_size_arr,mem_offset_arr))<0)
+    if((ret_value = H5V_memcpyvv(io_info->store->compact.buf, dset_max_nseq, dset_curr_seq, dset_size_arr, dset_offset_arr, io_info->u.wbuf, mem_max_nseq, mem_curr_seq, mem_size_arr, mem_offset_arr)) < 0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed")
 
     /* Mark the compact dataset's buffer as dirty */
-    io_info->dset->shared->layout.u.compact.dirty = TRUE;
+    *io_info->store->compact.dirty = TRUE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -371,11 +426,11 @@ done:
         if(H5I_dec_ref(tid_mem) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
     if(buf)
-        H5FL_BLK_FREE(type_conv, buf);
+        (void)H5FL_BLK_FREE(type_conv, buf);
     if(reclaim_buf)
-        H5FL_BLK_FREE(type_conv, reclaim_buf);
+        (void)H5FL_BLK_FREE(type_conv, reclaim_buf);
     if(bkg)
-        H5FL_BLK_FREE(type_conv, bkg);
+        (void)H5FL_BLK_FREE(type_conv, bkg);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_compact_copy() */

@@ -456,6 +456,7 @@
 ./src/H5CS.c
 ./src/H5CSprivate.h
 ./src/H5D.c
+./src/H5Dchunk.c
 ./src/H5Dcompact.c
 ./src/H5Dcontig.c
 ./src/H5Ddbg.c
@@ -470,6 +471,7 @@
 ./src/H5Dpkg.h
 ./src/H5Dprivate.h
 ./src/H5Dpublic.h
+./src/H5Dscatgath.c
 ./src/H5Dselect.c
 ./src/H5Dtest.c
 ./src/H5E.c

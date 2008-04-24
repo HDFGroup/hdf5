@@ -45,18 +45,6 @@ static herr_t H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc);
 static H5S_t *H5S_decode(const unsigned char *buf);
 static htri_t H5S_extent_equal(const H5S_t *ds1, const H5S_t *ds2);
 
-#ifdef H5S_DEBUG
-/* Names of the selection names, for debugging */
-static const char *H5S_sel_names[]={
-    "none", "point", "hyperslab", "all"
-};
-
-/* The path table, variable length */
-static H5S_iostats_t		**H5S_iostats_g = NULL;
-static size_t			H5S_aiostats_g = 0;	/*entries allocated*/
-static size_t			H5S_niostats_g = 0;	/*entries used*/
-#endif /* H5S_DEBUG */
-
 #ifdef H5_HAVE_PARALLEL
 /* Global vars whose value can be set from environment variable also */
 hbool_t H5S_mpi_opt_types_g = TRUE;
@@ -87,9 +75,9 @@ DESCRIPTION
 static herr_t
 H5S_init_interface(void)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5S_init_interface);
+    FUNC_ENTER_NOAPI_NOINIT(H5S_init_interface)
 
     /* Initialize the atom group for the file IDs */
     if(H5I_register_type(H5I_DATASPACE, (size_t)H5I_DATASPACEID_HASHSIZE, H5S_RESERVED_ATOMS, (H5I_free_t)H5S_close) < 0)
@@ -105,8 +93,8 @@ H5S_init_interface(void)
 #endif /* H5_HAVE_PARALLEL */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S_init_interface() */
 
 
 /*--------------------------------------------------------------------------
@@ -129,156 +117,26 @@ done:
 int
 H5S_term_interface(void)
 {
-    int	n=0;
-#ifdef H5S_DEBUG
-    size_t	i;
-    int		j, nprints=0;
-    H5S_iostats_t	*path=NULL;
-    char	buf[256];
-#endif /* H5S_DEBUG */
+    int	n = 0;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_term_interface);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_term_interface)
 
-    if (H5_interface_initialize_g) {
-	if ((n=H5I_nmembers(H5I_DATASPACE))) {
+    if(H5_interface_initialize_g) {
+	if((n = H5I_nmembers(H5I_DATASPACE))) {
 	    H5I_clear_type(H5I_DATASPACE, FALSE);
-	} else {
-#ifdef H5S_DEBUG
-	    /*
-	     * Print statistics about each conversion path.
-	     */
-	    if (H5DEBUG(S)) {
-		for (i=0; i<H5S_niostats_g; i++) {
-		    path = H5S_iostats_g[i];
-		    for (j=0; j<2; j++) {
-			if (0==path->stats[j].gath_ncalls &&
-			    0==path->stats[j].scat_ncalls &&
-			    0==path->stats[j].bkg_ncalls &&
-			    0==path->stats[j].read_ncalls &&
-			    0==path->stats[j].write_ncalls) {
-			    continue;
-			}
-			if (0==nprints++) {
-			    fprintf(H5DEBUG(S), "H5S: data space conversion "
-				    "statistics:\n");
-			    fprintf(H5DEBUG(S),
-				    "   %-16s %10s %10s %8s %8s %8s %10s\n",
-				    "Memory <> File", "Bytes", "Calls",
-				    "User", "System", "Elapsed", "Bandwidth");
-			    fprintf(H5DEBUG(S),
-				    "   %-16s %10s %10s %8s %8s %8s %10s\n",
-				    "--------------", "-----", "-----",
-				    "----", "------", "-------", "---------");
-			}
-
-			/* Summary */
-			sprintf(buf, "%s %c %s",
-				H5S_sel_names[path->mtype], 0==j?'>':'<', H5S_sel_names[path->ftype]);
-			fprintf(H5DEBUG(S), "   %-16s\n", buf);
-
-			/* Gather */
-			if (path->stats[j].gath_ncalls) {
-			    H5_bandwidth(buf,
-					 (double)(path->stats[j].gath_nbytes),
-					 path->stats[j].gath_timer.etime);
-			    HDfprintf(H5DEBUG(S),
-				      "   %16s %10Hu %10Hu %8.2f %8.2f %8.2f "
-				      "%10s\n", "gather",
-				      path->stats[j].gath_nbytes,
-				      path->stats[j].gath_ncalls,
-				      path->stats[j].gath_timer.utime,
-				      path->stats[j].gath_timer.stime,
-				      path->stats[j].gath_timer.etime,
-				      buf);
-			}
-
-			/* Scatter */
-			if (path->stats[j].scat_ncalls) {
-			    H5_bandwidth(buf,
-					 (double)(path->stats[j].scat_nbytes),
-					 path->stats[j].scat_timer.etime);
-			    HDfprintf(H5DEBUG(S),
-				      "   %16s %10Hu %10Hu %8.2f %8.2f %8.2f "
-				      "%10s\n", "scatter",
-				      path->stats[j].scat_nbytes,
-				      path->stats[j].scat_ncalls,
-				      path->stats[j].scat_timer.utime,
-				      path->stats[j].scat_timer.stime,
-				      path->stats[j].scat_timer.etime,
-				      buf);
-			}
-
-			/* Background */
-			if (path->stats[j].bkg_ncalls) {
-			    H5_bandwidth(buf,
-					 (double)(path->stats[j].bkg_nbytes),
-					 path->stats[j].bkg_timer.etime);
-			    HDfprintf(H5DEBUG(S),
-				      "   %16s %10Hu %10Hu %8.2f %8.2f %8.2f "
-				      "%10s\n", "background",
-				      path->stats[j].bkg_nbytes,
-				      path->stats[j].bkg_ncalls,
-				      path->stats[j].bkg_timer.utime,
-				      path->stats[j].bkg_timer.stime,
-				      path->stats[j].bkg_timer.etime,
-				      buf);
-			}
-
-			/* Read */
-			if (path->stats[j].read_ncalls) {
-			    H5_bandwidth(buf,
-					 (double)(path->stats[j].read_nbytes),
-					 path->stats[j].read_timer.etime);
-			    HDfprintf(H5DEBUG(S),
-				      "   %16s %10Hu %10Hu %8.2f %8.2f %8.2f "
-				      "%10s\n", "read",
-				      path->stats[j].read_nbytes,
-				      path->stats[j].read_ncalls,
-				      path->stats[j].read_timer.utime,
-				      path->stats[j].read_timer.stime,
-				      path->stats[j].read_timer.etime,
-				      buf);
-			}
-
-			/* Write */
-			if (path->stats[j].write_ncalls) {
-			    H5_bandwidth(buf,
-					 (double)(path->stats[j].write_nbytes),
-					 path->stats[j].write_timer.etime);
-			    HDfprintf(H5DEBUG(S),
-				      "   %16s %10Hu %10Hu %8.2f %8.2f %8.2f "
-				      "%10s\n", "write",
-				      path->stats[j].write_nbytes,
-				      path->stats[j].write_ncalls,
-				      path->stats[j].write_timer.utime,
-				      path->stats[j].write_timer.stime,
-				      path->stats[j].write_timer.etime,
-				      buf);
-			}
-		    }
-		}
-	    }
-#endif /* H5S_DEBUG */
-
+	} /* end if */
+        else {
 	    /* Free data types */
 	    H5I_dec_type_ref(H5I_DATASPACE);
-
-#ifdef H5S_DEBUG
-	    /* Clear/free conversion table */
-	    for (i=0; i<H5S_niostats_g; i++)
-                H5MM_xfree(H5S_iostats_g[i]);
-	    H5S_iostats_g = H5MM_xfree(H5S_iostats_g);
-	    H5S_niostats_g = H5S_aiostats_g = 0;
-#endif /* H5S_DEBUG */
 
 	    /* Shut down interface */
 	    H5_interface_initialize_g = 0;
 	    n = 1; /*H5I*/
-	}
-    }
+	} /* end else */
+    } /* end if */
 
-    FUNC_LEAVE_NOAPI(n);
-}
+    FUNC_LEAVE_NOAPI(n)
+} /* end H5S_term_interface() */
 
 
 /*--------------------------------------------------------------------------
@@ -1383,105 +1241,6 @@ H5S_set_extent_simple(H5S_t *space, unsigned rank, const hsize_t *dims,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5S_set_extent_simple() */
-
-#ifdef H5S_DEBUG
-
-/*-------------------------------------------------------------------------
- * Function:	H5S_find
- *
- * Purpose:	Given two data spaces (MEM_SPACE and FILE_SPACE) this
- *		function returns a pointer to the conversion path information,
- *		creating a new conversion path entry if necessary.
- *
- * Return:	Success:	Ptr to a conversion path entry
- *
- *		Failure:	NULL
- *
- * Programmer:	Robb Matzke
- *		Wednesday, January 21, 1998
- *
- * Modifications:
- *
- * 	Quincey Koziol
- *	Instead of returning a point into the data space conversion table we
- *	copy all the information into a user-supplied CONV buffer and return
- *	non-negative on success or negative on failure.
- *
- * 	Robb Matzke, 11 Aug 1998
- *	Returns a pointer into the conversion path table.  A path entry
- *	contains pointers to the memory and file half of the conversion (the
- *	pointers registered in the H5S_fconv_g[] and H5S_mconv_g[] tables)
- *	along with other data whose scope is the conversion path (like path
- *	statistics).
- *
- *	John Mainzer, 8/30/04
- *	Modified code to check with all other processes that have the
- *	file open before OKing collective I/O.
- *
- *-------------------------------------------------------------------------
- */
-H5S_iostats_t *
-H5S_find (const H5S_t *mem_space, const H5S_t *file_space)
-{
-    H5S_iostats_t	*path=NULL;  /* Space conversion path */
-    size_t	u;      /* Index variable */
-    H5S_iostats_t *ret_value;   /* Return value */
-
-    FUNC_ENTER_NOAPI(H5S_find, NULL);
-
-    /* Check args */
-    assert (mem_space && (H5S_SIMPLE==H5S_GET_EXTENT_TYPE(mem_space) ||
-                          H5S_NULL==H5S_GET_EXTENT_TYPE(mem_space) ||
-			  H5S_SCALAR==H5S_GET_EXTENT_TYPE(mem_space)));
-    assert (file_space && (H5S_SIMPLE==H5S_GET_EXTENT_TYPE(file_space) ||
-                           H5S_NULL==H5S_GET_EXTENT_TYPE(file_space) ||
-			   H5S_SCALAR==H5S_GET_EXTENT_TYPE(file_space)));
-
-    /*
-     * Is this path already present in the data space conversion path table?
-     * If so then return a pointer to that entry.
-     */
-    for (u=0; u<H5S_niostats_g; u++)
-        if (H5S_iostats_g[u]->ftype==H5S_GET_SELECT_TYPE(file_space) &&
-                H5S_iostats_g[u]->mtype==H5S_GET_SELECT_TYPE(mem_space))
-            HGOTO_DONE(H5S_iostats_g[u]);
-
-    /*
-     * The path wasn't found.  Create a new path.
-     */
-    if (NULL==(path = H5MM_calloc(sizeof(*path))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for data space conversion path")
-
-    /* Initialize file & memory conversion functions */
-    path->ftype = H5S_GET_SELECT_TYPE(file_space);
-    path->mtype = H5S_GET_SELECT_TYPE(mem_space);
-
-    /*
-     * Add the new path to the table.
-     */
-    if (H5S_niostats_g>=H5S_aiostats_g) {
-        size_t n = MAX(10, 2*H5S_aiostats_g);
-        H5S_iostats_t **p = H5MM_realloc(H5S_iostats_g, n*sizeof(H5S_iostats_g[0]));
-
-        if (NULL==p)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for data space conversion path table")
-        H5S_aiostats_g = n;
-        H5S_iostats_g = p;
-    } /* end if */
-    H5S_iostats_g[H5S_niostats_g++] = path;
-
-    /* Set the return value */
-    ret_value=path;
-
-done:
-    if(ret_value==NULL) {
-        if(path!=NULL)
-            H5MM_xfree(path);
-    } /* end if */
-
-    FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5S_find() */
-#endif /* H5S_DEBUG */
 
 
 /*-------------------------------------------------------------------------
