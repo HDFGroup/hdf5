@@ -42,14 +42,14 @@ typedef enum H5FD_mpio_xfer_t {
     H5FD_MPIO_COLLECTIVE
 } H5FD_mpio_xfer_t;
 
-/* Type of I/O for data transfer properties */
+/* Type of chunked dataset I/O */
 typedef enum H5FD_mpio_chunk_opt_t {
     H5FD_MPIO_CHUNK_DEFAULT = 0,
     H5FD_MPIO_CHUNK_ONE_IO,  		/*zero is the default*/
     H5FD_MPIO_CHUNK_MULTI_IO
 } H5FD_mpio_chunk_opt_t;
 
-/* Type of I/O for data transfer properties */
+/* Type of collective I/O */
 typedef enum H5FD_mpio_collective_opt_t {
     H5FD_MPIO_COLLECTIVE_IO = 0,
     H5FD_MPIO_INDIVIDUAL_IO  		/*zero is the default*/

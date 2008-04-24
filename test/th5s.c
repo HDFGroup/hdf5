@@ -378,7 +378,7 @@ test_h5s_null(void)
         hsize_t	coord[1][1]; /* Coordinates for point selection */
 
         coord[0][0]=0;
-	ret = H5Sselect_elements(sid, H5S_SELECT_SET, (size_t)1, coord);
+	ret = H5Sselect_elements(sid, H5S_SELECT_SET, (size_t)1, (const hsize_t *)coord);
     } H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Sselect_elements");
 
@@ -1055,8 +1055,8 @@ test_h5s_chunk(void)
     for(i=0; i<50000; i++) {
         for(j=0; j<3; j++) {
             /* Check if the two values are within 0.001% range. */
-            if(!DBL_REL_EQUAL(chunk_data_dbl[i][j],chunk_data_flt[i][j], 0.00001))
-                TestErrPrintf("chunk_data_dbl[%d][%d]=%f, chunk_data_flt[%d][%d]=%f\n",i,j,chunk_data_dbl[i][j],i,j,chunk_data_flt[i][j]);
+            if(!DBL_REL_EQUAL(chunk_data_dbl[i][j], chunk_data_flt[i][j], 0.00001))
+                TestErrPrintf("%u: chunk_data_dbl[%d][%d]=%e, chunk_data_flt[%d][%d]=%e\n", (unsigned)__LINE__, i, j, chunk_data_dbl[i][j], i, j, chunk_data_flt[i][j]);
         } /* end for */
     } /* end for */
 } /* test_h5s_chunk() */

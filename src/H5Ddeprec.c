@@ -156,7 +156,7 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
     if(H5I_DATATYPE != H5I_get_type(type_id))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype ID")
-    if(NULL == (space = H5I_object_verify(space_id,H5I_DATASPACE)))
+    if(NULL == (space = (const H5S_t *)H5I_object_verify(space_id,H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace ID")
     if(H5P_DEFAULT == dcpl_id)
         dcpl_id = H5P_DATASET_CREATE_DEFAULT;

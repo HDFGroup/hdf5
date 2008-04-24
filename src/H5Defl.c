@@ -33,29 +33,87 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* Files				*/
 
+
 /****************/
 /* Local Macros */
 /****************/
+
 
 /******************/
 /* Local Typedefs */
 /******************/
 
+
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5D_efl_read (const H5O_efl_t *efl, haddr_t addr, size_t size,
+
+/* Layout operation callbacks */
+static herr_t H5D_efl_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
+    hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
+    H5D_chunk_map_t *cm);
+static ssize_t H5D_efl_readvv(const H5D_io_info_t *io_info,
+    size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
+    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[]);
+static ssize_t H5D_efl_writevv(const H5D_io_info_t *io_info,
+    size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
+    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[]);
+
+/* Helper routines */
+static herr_t H5D_efl_read(const H5O_efl_t *efl, haddr_t addr, size_t size,
     uint8_t *buf);
 static herr_t H5D_efl_write(const H5O_efl_t *efl, haddr_t addr, size_t size,
     const uint8_t *buf);
+
 
 /*********************/
 /* Package Variables */
 /*********************/
 
+/* External File List (EFL) storage layout I/O ops */
+const H5D_layout_ops_t H5D_LOPS_EFL[1] = {{
+    H5D_efl_io_init,
+    H5D_contig_read,
+    H5D_contig_write,
+#ifdef H5_HAVE_PARALLEL
+    NULL,
+    NULL,
+#endif /* H5_HAVE_PARALLEL */
+    H5D_efl_readvv,
+    H5D_efl_writevv,
+    NULL
+}};
+
+
 /*******************/
 /* Local Variables */
 /*******************/
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_efl_io_init
+ *
+ * Purpose:	Performs initialization before any sort of I/O on the raw data
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, March 20, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_efl_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t UNUSED *type_info,
+    hsize_t UNUSED nelmts, const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space,
+    H5D_chunk_map_t UNUSED *cm)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_efl_io_init)
+
+    HDmemcpy(&io_info->store->efl, &(io_info->dset->shared->dcpl_cache.efl), sizeof(H5O_efl_t));
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5D_efl_io_init() */
 
 
 /*-------------------------------------------------------------------------
@@ -77,26 +135,26 @@ static herr_t H5D_efl_write(const H5O_efl_t *efl, haddr_t addr, size_t size,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_efl_read (const H5O_efl_t *efl, haddr_t addr, size_t size, uint8_t *buf)
+H5D_efl_read(const H5O_efl_t *efl, haddr_t addr, size_t size, uint8_t *buf)
 {
-    int		fd=-1;
+    int		fd = -1;
     size_t	to_read;
 #ifndef NDEBUG
     hsize_t     tempto_read;
 #endif /* NDEBUG */
-    hsize_t     skip=0;
+    hsize_t     skip = 0;
     haddr_t     cur;
     ssize_t	n;
     size_t      u;                      /* Local index variable */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_efl_read)
 
     /* Check args */
-    assert (efl && efl->nused>0);
-    assert (H5F_addr_defined (addr));
-    assert (size < SIZET_MAX);
-    assert (buf || 0==size);
+    HDassert(efl && efl->nused>0);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(size < SIZET_MAX);
+    HDassert(buf || 0 == size);
 
     /* Find the first efl member from which to read */
     for (u=0, cur=0; u<efl->nused; u++) {
@@ -109,7 +167,7 @@ H5D_efl_read (const H5O_efl_t *efl, haddr_t addr, size_t size, uint8_t *buf)
 
     /* Read the data */
     while (size) {
-        assert(buf);
+        HDassert(buf);
 	if (u>=efl->nused)
 	    HGOTO_ERROR (H5E_EFL, H5E_OVERFLOW, FAIL, "read past logical end of file")
 	if (H5F_OVERFLOW_HSIZET2OFFT (efl->slot[u].offset+skip))
@@ -165,25 +223,25 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_efl_write (const H5O_efl_t *efl, haddr_t addr, size_t size, const uint8_t *buf)
+H5D_efl_write(const H5O_efl_t *efl, haddr_t addr, size_t size, const uint8_t *buf)
 {
-    int		fd=-1;
+    int		fd = -1;
     size_t	to_write;
 #ifndef NDEBUG
     hsize_t	tempto_write;
 #endif /* NDEBUG */
     haddr_t     cur;
-    hsize_t     skip=0;
+    hsize_t     skip = 0;
     size_t	u;                      /* Local index variable */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_efl_write)
 
     /* Check args */
-    assert (efl && efl->nused>0);
-    assert (H5F_addr_defined (addr));
-    assert (size < SIZET_MAX);
-    assert (buf || 0==size);
+    HDassert(efl && efl->nused>0);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(size < SIZET_MAX);
+    HDassert(buf || 0 == size);
 
     /* Find the first efl member in which to write */
     for (u=0, cur=0; u<efl->nused; u++) {
@@ -248,71 +306,68 @@ done:
  * Programmer:	Quincey Koziol
  *              Wednesday, May  7, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-ssize_t
+static ssize_t
 H5D_efl_readvv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
-    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
-    haddr_t UNUSED address, void UNUSED *pointer/*in*/, void *_buf)
+    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[])
 {
-    const H5O_efl_t *efl=&(io_info->store->efl); /* Pointer to efl info */
+    const H5O_efl_t *efl = &(io_info->store->efl); /* Pointer to efl info */
     unsigned char *buf;         /* Pointer to buffer to write */
     haddr_t addr;               /* Actual address to read */
-    size_t total_size=0;        /* Total size of sequence in bytes */
+    size_t total_size = 0;      /* Total size of sequence in bytes */
     size_t size;                /* Size of sequence in bytes */
     size_t u;                   /* Counting variable */
     size_t v;                   /* Counting variable */
     ssize_t ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_efl_readvv, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5D_efl_readvv)
 
     /* Check args */
-    assert (efl && efl->nused>0);
-    assert (_buf);
+    HDassert(efl && efl->nused > 0);
+    HDassert(io_info->u.rbuf);
 
     /* Work through all the sequences */
-    for(u=*dset_curr_seq, v=*mem_curr_seq; u<dset_max_nseq && v<mem_max_nseq; ) {
+    for(u = *dset_curr_seq, v = *mem_curr_seq; u < dset_max_nseq && v < mem_max_nseq; ) {
         /* Choose smallest buffer to write */
-        if(mem_len_arr[v]<dset_len_arr[u])
-            size=mem_len_arr[v];
+        if(mem_len_arr[v] < dset_len_arr[u])
+            size = mem_len_arr[v];
         else
-            size=dset_len_arr[u];
+            size = dset_len_arr[u];
 
         /* Compute offset on disk */
-        addr=dset_offset_arr[u];
+        addr = dset_offset_arr[u];
 
         /* Compute offset in memory */
-        buf = (unsigned char *)_buf + mem_offset_arr[v];
+        buf = (unsigned char *)io_info->u.rbuf + mem_offset_arr[v];
 
         /* Read data */
-        if (H5D_efl_read(efl, addr, size, buf)<0)
+        if(H5D_efl_read(efl, addr, size, buf) < 0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed")
 
         /* Update memory information */
-        mem_len_arr[v]-=size;
-        mem_offset_arr[v]+=size;
-        if(mem_len_arr[v]==0)
+        mem_len_arr[v] -= size;
+        mem_offset_arr[v] += size;
+        if(mem_len_arr[v] == 0)
             v++;
 
         /* Update file information */
-        dset_len_arr[u]-=size;
-        dset_offset_arr[u]+=size;
-        if(dset_len_arr[u]==0)
+        dset_len_arr[u] -= size;
+        dset_offset_arr[u] += size;
+        if(dset_len_arr[u] == 0)
             u++;
 
         /* Increment number of bytes copied */
-        total_size+=size;
+        total_size += size;
     } /* end for */
 
     /* Update current sequence vectors */
-    *dset_curr_seq=u;
-    *mem_curr_seq=v;
+    *dset_curr_seq = u;
+    *mem_curr_seq = v;
 
     /* Set return value */
-    H5_ASSIGN_OVERFLOW(ret_value,total_size,size_t,ssize_t);
+    H5_ASSIGN_OVERFLOW(ret_value, total_size, size_t, ssize_t);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -332,71 +387,68 @@ done:
  * Programmer:	Quincey Koziol
  *              Friday, May  2, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-ssize_t
+static ssize_t
 H5D_efl_writevv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_offset_arr[],
-    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[],
-    haddr_t UNUSED address, void UNUSED *pointer/*in*/, const void *_buf)
+    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[])
 {
-    const H5O_efl_t *efl=&(io_info->store->efl); /* Pointer to efl info */
+    const H5O_efl_t *efl = &(io_info->store->efl); /* Pointer to efl info */
     const unsigned char *buf;   /* Pointer to buffer to write */
     haddr_t addr;               /* Actual address to read */
-    size_t total_size=0;        /* Total size of sequence in bytes */
+    size_t total_size = 0;      /* Total size of sequence in bytes */
     size_t size;                /* Size of sequence in bytes */
     size_t u;                   /* Counting variable */
     size_t v;                   /* Counting variable */
     ssize_t ret_value;          /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_efl_writevv, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5D_efl_writevv)
 
     /* Check args */
-    assert (efl && efl->nused>0);
-    assert (_buf);
+    HDassert(efl && efl->nused > 0);
+    HDassert(io_info->u.wbuf);
 
     /* Work through all the sequences */
-    for(u=*dset_curr_seq, v=*mem_curr_seq; u<dset_max_nseq && v<mem_max_nseq; ) {
+    for(u = *dset_curr_seq, v = *mem_curr_seq; u < dset_max_nseq && v < mem_max_nseq; ) {
         /* Choose smallest buffer to write */
-        if(mem_len_arr[v]<dset_len_arr[u])
-            size=mem_len_arr[v];
+        if(mem_len_arr[v] < dset_len_arr[u])
+            size = mem_len_arr[v];
         else
-            size=dset_len_arr[u];
+            size = dset_len_arr[u];
 
         /* Compute offset on disk */
-        addr=dset_offset_arr[u];
+        addr = dset_offset_arr[u];
 
         /* Compute offset in memory */
-        buf = (const unsigned char *)_buf + mem_offset_arr[v];
+        buf = (const unsigned char *)io_info->u.wbuf + mem_offset_arr[v];
 
         /* Write data */
-        if (H5D_efl_write(efl, addr, size, buf)<0)
+        if(H5D_efl_write(efl, addr, size, buf) < 0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed")
 
         /* Update memory information */
-        mem_len_arr[v]-=size;
-        mem_offset_arr[v]+=size;
-        if(mem_len_arr[v]==0)
+        mem_len_arr[v] -= size;
+        mem_offset_arr[v] += size;
+        if(mem_len_arr[v] == 0)
             v++;
 
         /* Update file information */
-        dset_len_arr[u]-=size;
-        dset_offset_arr[u]+=size;
-        if(dset_len_arr[u]==0)
+        dset_len_arr[u] -= size;
+        dset_offset_arr[u] += size;
+        if(dset_len_arr[u] == 0)
             u++;
 
         /* Increment number of bytes copied */
-        total_size+=size;
+        total_size += size;
     } /* end for */
 
     /* Update current sequence vectors */
-    *dset_curr_seq=u;
-    *mem_curr_seq=v;
+    *dset_curr_seq = u;
+    *mem_curr_seq = v;
 
     /* Set return value */
-    H5_ASSIGN_OVERFLOW(ret_value,total_size,size_t,ssize_t);
+    H5_ASSIGN_OVERFLOW(ret_value, total_size, size_t, ssize_t);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
