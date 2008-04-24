@@ -1681,6 +1681,17 @@ AC_ARG_ENABLE([threadsafe],
                               [Enable thread safe capability])],
               THREADSAFE=$enableval)
 
+dnl The --enable-threadsafe flag is not compatible with --enable-cxx.
+dnl If the user tried to specify both flags, throw an error.
+if test "X${HDF_CXX}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
+  AC_MSG_ERROR([--enable-cxx and --enable-threadsafe flags are incompatible])
+fi
+
+dnl --enable-threadsafe is also incompatible with --enable-fortran.
+if test "X${HDF_FORTRAN}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
+  AC_MSG_ERROR([--enable-fortran and --enable-threadsafe flags are incompatible])
+fi
+
 case "X-$THREADSAFE" in
   X-|X-no)
     AC_MSG_RESULT([no])
