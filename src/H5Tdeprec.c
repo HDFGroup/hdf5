@@ -46,6 +46,7 @@
 #include "H5FOprivate.h"	/* File objects				*/
 #include "H5Iprivate.h"		/* IDs					*/
 #include "H5Tpkg.h"		/* Datatypes				*/
+#include "H5AC2private.h"       /* Metadata cache                       */
 
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
@@ -128,7 +129,7 @@ H5Tcommit1(hid_t loc_id, const char *name, hid_t type_id)
     H5T_t	*type;                  /* Datatype for ID */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API_META(H5Tcommit1, FAIL)
+    FUNC_ENTER_API_META(H5Tcommit1, loc_id, FAIL)
     H5TRACE3("e", "i*si", loc_id, name, type_id);
 
     /* Check arguments */

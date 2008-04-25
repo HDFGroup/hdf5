@@ -36,7 +36,8 @@
 extern "C" {
 #endif
 
-#define H5AC2__MAX_TRACE_FILE_NAME_LEN	1024
+#define H5AC2__MAX_TRACE_FILE_NAME_LEN		1024
+#define H5AC2__MAX_JOURNAL_FILE_NAME_LEN	1024
 
 /****************************************************************************
  *
@@ -380,6 +381,58 @@ extern "C" {
  *	file.  This field is ignored unless HDF5 has been compiled for
  *	parallel.
  *
+ *
+ * Journal Configuration Fields:
+ *
+ * The journaling fields allow enabling of metadata journaling, specification
+ * of the journal file, and marking a file as recovered.  
+ *
+ * Note that the fields with the "jbrb_" prefix are used to configure the
+ * journal buffer ring buffer -- a ring buffer of buffers used to buffer
+ * output of journal messages.
+ *
+ * At least to begin with, these fields may only be used at file open/create
+ * time -- i.e. in the FAPL.
+ *
+ * enable_journaling:  Boolean flag that is set to TRUE if journaling is 
+ * 	to be enabled, and to FALSE otherwise.  
+ *
+ * 	When the cache configuration is reported, this field is TRUE iff
+ * 	journaling is enabled.
+ *
+ * journal_file_path:  Full path of the file to be used to store the 
+ * 	metadata journal.  This field is only defined if enable_journaling
+ * 	is TRUE.
+ *
+ * 	At present, the length of the journal file path is restricted to 
+ * 	no more than H5AC2__MAX_JOURNAL_FILE_NAME_LEN.
+ *
+ * journal_recovered:  Boolean flag use to indicate that we are opening
+ * 	a journaled file that was not closed correctly, and on which the
+ * 	journal recovery tool has been run.
+ *
+ * 	Unless you are the writer of a new journal recovery tool, you
+ * 	should always set this field to FALSE.
+ *
+ * jbrb_buf_size: size_t containing the size of each individual buffer 
+ * 	in the journal buffer ring buffer.  This size should be chosen
+ * 	to be some multiple of the block size used by the file system 
+ * 	on which the journal file will be written.
+ *
+ * jbrb_num_bufs: Integer containing the number of buffers in the journal
+ * 	buffer ring buffer.  If synchronous I/O is used, one or two buffers
+ * 	is sufficient.  If asynchronous I/O is used, the number of buffers
+ * 	should be sufficiently large that a write on buffer is likely to 
+ * 	complete before that buffer is needed again.
+ *
+ * jbrb_use_aio:  Boolean flag indicating whether we should use 
+ * 	asynchronous I/O for journal entry writes.
+ *
+ * jbrb_human_readable: Boolean flag which determines whether the journal
+ * 	file will be written in human readable form.  In general, this 
+ * 	field should be set to false, as the human readable journal
+ * 	file is at least twice a large as the machine readable version.
+ *
  ****************************************************************************/
 
 #define H5AC2__CURR_CACHE_CONFIG_VERSION 1
@@ -441,6 +494,17 @@ typedef struct H5AC2_cache_config_t
 
     /* parallel configuration fields: */
     int                       dirty_bytes_threshold;
+
+
+    /* metadata journaling configuration fields: */
+    hbool_t                   enable_journaling;
+    char                      journal_file_path[
+	    				H5AC2__MAX_JOURNAL_FILE_NAME_LEN];
+    hbool_t                   journal_recovered;
+    size_t                    jbrb_buf_size;
+    int                       jbrb_num_bufs;
+    hbool_t                   jbrb_use_aio;
+    hbool_t                   jbrb_human_readable;
 
 } H5AC2_cache_config_t;
 

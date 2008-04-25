@@ -32,6 +32,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5AC2private.h"       /* Metadata cache                       */
 
 
 /****************/
@@ -133,7 +134,7 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     const H5S_t    *space;              /* Dataspace for dataset */
     hid_t           ret_value;          /* Return value */
 
-    FUNC_ENTER_API_META(H5Dcreate2, FAIL)
+    FUNC_ENTER_API_META(H5Dcreate2, loc_id, FAIL)
     H5TRACE7("i", "i*siiiii", loc_id, name, type_id, space_id, lcpl_id, dcpl_id,
              dapl_id);
 
@@ -226,7 +227,7 @@ H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id,
     const H5S_t    *space;              /* Dataspace for dataset */
     hid_t           ret_value;          /* Return value */
 
-    FUNC_ENTER_API_META(H5Dcreate_anon, FAIL)
+    FUNC_ENTER_API_META(H5Dcreate_anon, loc_id, FAIL)
     H5TRACE5("i", "iiiii", loc_id, type_id, space_id, dcpl_id, dapl_id);
 
     /* Check arguments */
@@ -372,7 +373,7 @@ H5Dclose(hid_t dset_id)
     H5D_t	*dset;	                /* Dataset object to release */
     herr_t       ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_API_META(H5Dclose, FAIL)
+    FUNC_ENTER_API_META(H5Dclose, dset_id, FAIL)
     H5TRACE1("e", "i", dset_id);
 
     /* Check args */
@@ -994,7 +995,7 @@ H5Dset_extent(hid_t dset_id, const hsize_t *size)
     H5D_t *dset;                /* Dataset for this operation */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API_META(H5Dset_extent, FAIL)
+    FUNC_ENTER_API_META(H5Dset_extent, dset_id, FAIL)
     H5TRACE2("e", "i*h", dset_id, size);
 
     /* Check args */

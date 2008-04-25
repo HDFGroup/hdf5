@@ -319,8 +319,8 @@ typedef struct test_entry_t
                                          */
 } test_entry_t;
 
-/* The following is a cut down copy of the hash table manipulation
- * macros from H5C.c, which have been further modified to avoid references
+/* The following are cut down test versions of the hash table manipulation
+ * macros from H5C2pkg.c, which have been further modified to avoid references
  * to the error reporting macros.  Needless to say, these macros must be
  * updated as necessary.
  */
@@ -328,7 +328,7 @@ typedef struct test_entry_t
 #define H5C2__HASH_MASK          ((size_t)(H5C2__HASH_TABLE_LEN - 1) << 3)
 #define H5C2__HASH_FCN(x)        (int)(((x) & H5C2__HASH_MASK) >> 3)
 
-#define H5C2__PRE_HT_SEARCH_SC(cache_ptr, Addr)           \
+#define H5C2_TEST__PRE_HT_SEARCH_SC(cache_ptr, Addr)      \
 if ( ( (cache_ptr) == NULL ) ||                           \
      ( (cache_ptr)->magic != H5C2__H5C2_T_MAGIC ) ||      \
      ( ! H5F_addr_defined(Addr) ) ||                      \
@@ -337,33 +337,33 @@ if ( ( (cache_ptr) == NULL ) ||                           \
     HDfprintf(stdout, "Pre HT search SC failed.\n");      \
 }
 
-#define H5C2__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, Addr, k) \
-if ( ( (cache_ptr) == NULL ) ||                                    \
-     ( (cache_ptr)->magic != H5C2__H5C2_T_MAGIC ) ||               \
-     ( (cache_ptr)->index_len < 1 ) ||                             \
-     ( (entry_ptr) == NULL ) ||                                    \
-     ( (cache_ptr)->index_size < (entry_ptr)->size ) ||            \
-     ( H5F_addr_ne((entry_ptr)->addr, (Addr)) ) ||                 \
-     ( (entry_ptr)->size <= 0 ) ||                                 \
-     ( ((cache_ptr)->index)[k] == NULL ) ||                        \
-     ( ( ((cache_ptr)->index)[k] != (entry_ptr) ) &&               \
-       ( (entry_ptr)->ht_prev == NULL ) ) ||                       \
-     ( ( ((cache_ptr)->index)[k] == (entry_ptr) ) &&               \
-       ( (entry_ptr)->ht_prev != NULL ) ) ||                       \
-     ( ( (entry_ptr)->ht_prev != NULL ) &&                         \
-       ( (entry_ptr)->ht_prev->ht_next != (entry_ptr) ) ) ||       \
-     ( ( (entry_ptr)->ht_next != NULL ) &&                         \
-       ( (entry_ptr)->ht_next->ht_prev != (entry_ptr) ) ) ) {      \
-    HDfprintf(stdout, "Post successful HT search SC failed.\n");   \
+#define H5C2_TEST__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, Addr, k) \
+if ( ( (cache_ptr) == NULL ) ||                                         \
+     ( (cache_ptr)->magic != H5C2__H5C2_T_MAGIC ) ||                    \
+     ( (cache_ptr)->index_len < 1 ) ||                                  \
+     ( (entry_ptr) == NULL ) ||                                         \
+     ( (cache_ptr)->index_size < (entry_ptr)->size ) ||                 \
+     ( H5F_addr_ne((entry_ptr)->addr, (Addr)) ) ||                      \
+     ( (entry_ptr)->size <= 0 ) ||                                      \
+     ( ((cache_ptr)->index)[k] == NULL ) ||                             \
+     ( ( ((cache_ptr)->index)[k] != (entry_ptr) ) &&                    \
+       ( (entry_ptr)->ht_prev == NULL ) ) ||                            \
+     ( ( ((cache_ptr)->index)[k] == (entry_ptr) ) &&                    \
+       ( (entry_ptr)->ht_prev != NULL ) ) ||                            \
+     ( ( (entry_ptr)->ht_prev != NULL ) &&                              \
+       ( (entry_ptr)->ht_prev->ht_next != (entry_ptr) ) ) ||            \
+     ( ( (entry_ptr)->ht_next != NULL ) &&                              \
+       ( (entry_ptr)->ht_next->ht_prev != (entry_ptr) ) ) ) {           \
+    HDfprintf(stdout, "Post successful HT search SC failed.\n");        \
 }
 
 
-#define H5C2__SEARCH_INDEX(cache_ptr, Addr, entry_ptr)                  \
+#define H5C2_TEST__SEARCH_INDEX(cache_ptr, Addr, entry_ptr)             \
 {                                                                       \
     int k;                                                              \
     int depth = 0;                                                      \
-    H5C2__PRE_HT_SEARCH_SC(cache_ptr, Addr)                             \
-    k = H5C2__HASH_FCN(Addr);                                            \
+    H5C2_TEST__PRE_HT_SEARCH_SC(cache_ptr, Addr)                        \
+    k = H5C2__HASH_FCN(Addr);                                           \
     entry_ptr = ((cache_ptr)->index)[k];                                \
     while ( ( entry_ptr ) && ( H5F_addr_ne(Addr, (entry_ptr)->addr) ) ) \
     {                                                                   \
@@ -372,7 +372,7 @@ if ( ( (cache_ptr) == NULL ) ||                                    \
     }                                                                   \
     if ( entry_ptr )                                                    \
     {                                                                   \
-        H5C2__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, Addr, k)      \
+        H5C2_TEST__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, Addr, k) \
         if ( entry_ptr != ((cache_ptr)->index)[k] )                     \
         {                                                               \
             if ( (entry_ptr)->ht_next )                                 \

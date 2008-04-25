@@ -89,19 +89,12 @@ typedef enum H5FD_mem_t {
 #define H5FD_MEM_SOHM_TABLE     H5FD_MEM_OHDR
 #define H5FD_MEM_SOHM_INDEX     H5FD_MEM_BTREE
 
-/* Map metadata journaling configuration block to raw for now, as it is of
- * arbitrary size, and the metadata cache will be managing it directly, 
- * without passing it through the metadata cache proper.  
+/* Per discussion with Quincey, I'm mapping the metadata journaling 
+ * configuration block to super.
  *
- * 						JRM -- 3/11/08
- *
- * Quincey:  I suspect this is bogus.  However, I gather that adding a 
- *           new memory type is a bit of a bother, so I'm trying to avoid
- *           it until I talk to you.  Please let me know  what you think
- *           I should do here.
- *                                                 -- JRM
+ * 						JRM -- 3/20/08
  */
-#define H5FD_MEM_MDJCONFIG 	H5FD_MEM_DRAW
+#define H5FD_MEM_MDJCONFIG 	H5FD_MEM_SUPER
 
 /*
  * A free-list map which maps all types of allocation requests to a single

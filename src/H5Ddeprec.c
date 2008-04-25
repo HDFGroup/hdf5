@@ -45,6 +45,7 @@
 #include "H5Dpkg.h"		/* Datasets 				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5AC2private.h"       /* Metadata cache                       */
 
 
 /****************/
@@ -147,7 +148,7 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     const H5S_t    *space;              /* Dataspace for dataset */
     hid_t           ret_value;          /* Return value */
 
-    FUNC_ENTER_API_META(H5Dcreate1, FAIL)
+    FUNC_ENTER_API_META(H5Dcreate1, loc_id, FAIL)
     H5TRACE5("i", "i*siii", loc_id, name, type_id, space_id, dcpl_id);
 
     /* Check arguments */
@@ -284,7 +285,7 @@ H5Dextend(hid_t dset_id, const hsize_t *size)
     H5D_t	*dset;
     herr_t       ret_value = SUCCEED;  /* Return value */
 
-    FUNC_ENTER_API_META(H5Dextend, FAIL)
+    FUNC_ENTER_API_META(H5Dextend, dset_id, FAIL)
     H5TRACE2("e", "i*h", dset_id, size);
 
     /* Check args */

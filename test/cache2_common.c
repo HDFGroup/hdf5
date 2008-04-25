@@ -40,6 +40,11 @@ const char *FILENAME[] = {
 hid_t saved_fid = -1; /* store the file id here between cache setup 
 		       * and takedown.
 		       */
+H5C2_t * saved_cache2 = NULL; /* store the pointer to the instance of 
+ 			       * of H5C2_t created by H5Fcreate() 
+			       * here between test cache setup and 
+			       * shutdown.
+			       */
 
 hbool_t write_permitted2 = TRUE;
 hbool_t pass2 = TRUE; /* set to false on error */
@@ -1888,7 +1893,7 @@ entry_in_cache2(H5C2_t * cache_ptr,
     HDassert( entry_ptr->type == type );
     HDassert( entry_ptr == entry_ptr->self );
 
-    H5C2__SEARCH_INDEX(cache_ptr, entry_ptr->addr, test_ptr)
+    H5C2_TEST__SEARCH_INDEX(cache_ptr, entry_ptr->addr, test_ptr)
 
     if ( test_ptr != NULL ) {
 
@@ -2592,7 +2597,11 @@ verify_unprotected2(void)
  *
  * Modifications:
  *
- *              None.
+ *              Updated for changes in the parameter list of H5C2_create().
+ *              These changes are needed for journaling.  We do nothing
+ *              with these parameters here -- will write another version 
+ *              of this routine for journaling tests.
+ *              					JRM -- 3/27/08
  *
  *****************************************************************************/
 
@@ -2725,11 +2734,42 @@ setup_cache2(size_t max_cache_size,
 
     if ( pass2 ) {
 
-/* FIXME: I'm in a hurry here, I'll need to talk to John about the best way
- *              to do this right... -QAK
- */
-#ifdef OLD_WAY
+        /* A bit of fancy footwork here:
+	 *
+	 * The call to H5Fcreate() allocates an instance of H5C2_t,
+	 * initializes it, and stores its address in f->shared->cache2.
+	 *
+	 * We don't want to use this cache, as it has a bunch of extra
+	 * initialization that may change over time, and in any case
+	 * it will not in general be configured the way we want it.
+	 *
+	 * We used to deal with this problem by storing the file pointer
+	 * in another instance of H5C2_t, and then ignoring the original
+	 * version.  However, this strategy doesn't work any more, as
+	 * we can't store the file pointer in the instance of H5C2_t,
+	 * and we have modified many cache2 routines to use a file
+	 * pointer to look up the target cache.
+	 *
+	 * Thus we now make note of the address of the instance of 
+	 * H5C2_t created by the call to H5Fcreate(), set 
+	 * file_ptr->shared->cache2 to NULL, call H5C2_create()
+	 * to allocate a new instance of H5C2_t for test purposes,
+	 * and store than new instance's address in 
+	 * file_ptr->shared->cache2.
+	 *
+	 * On shut down, we call H5C2_dest on our instance of H5C2_t,
+	 * set file_ptr->shared->cache2 to point to the original 
+	 * instance, and then close the file normally.
+	 */
+
+        HDassert( saved_cache2 == NULL );
+
+	saved_cache2 = file_ptr->shared->cache2;
+
+	file_ptr->shared->cache2 = NULL;
+
         cache_ptr = H5C2_create(file_ptr,
+			        H5P_DATASET_XFER_DEFAULT,
 			        max_cache_size,
                                 min_clean_size,
                                 (NUMBER_OF_ENTRY_TYPES - 1),
@@ -2737,21 +2777,10 @@ setup_cache2(size_t max_cache_size,
                                 check_write_permitted2,
                                 TRUE,
                                 NULL,
-                                NULL);
-#else /* OLD_WAY */
-        H5C2_dest(file_ptr, H5P_DATASET_XFER_DEFAULT);
-
-        cache_ptr = H5C2_create(max_cache_size,
-                                min_clean_size,
-                                (NUMBER_OF_ENTRY_TYPES - 1),
-				(const char **)entry_type_names2,
-                                check_write_permitted2,
-                                TRUE,
                                 NULL,
-                                NULL);
+				FALSE);
 
         file_ptr->shared->cache2 = cache_ptr;
-#endif /* OLD_WAY */
     }
 
     if ( show_progress ) /* 5 */
@@ -2869,13 +2898,13 @@ takedown_cache2(H5F_t * file_ptr,
 	
         flush_cache2(file_ptr, TRUE, FALSE, FALSE);
 
-/* FIXME:  Related to earlier hack with same tag, have John check for
- *              correctness... -QAK
- */
-#ifdef OLD_WAY
         H5C2_dest(file_ptr, H5P_DATASET_XFER_DEFAULT);
-#endif /* OLD_WAY */
 
+	if ( saved_cache2 != NULL ) {
+
+	    file_ptr->shared->cache2 = saved_cache2;
+	    saved_cache2 = NULL;
+	}
     }
 
     if ( saved_fid != -1 ) {
@@ -2917,7 +2946,6 @@ takedown_cache2(H5F_t * file_ptr,
  *
  * Purpose:	Expunge the entry indicated by the type and index.
  *
- *		Do nothing if pass2 is FALSE on entry.
  *
  * Return:	void
  *

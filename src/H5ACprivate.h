@@ -225,7 +225,17 @@ extern hid_t H5AC_ind_dxpl_id;
   /* int         epochs_before_eviction = */ 3,                               \
   /* hbool_t     apply_empty_reserve    = */ TRUE,                            \
   /* double      empty_reserve          = */ 0.1,                             \
-  /* int	 dirty_bytes_threshold  = */ (256 * 1024)                     \
+  /* int	 dirty_bytes_threshold  = */ (256 * 1024),                    \
+  /* The following fields are not used by H5AC or H5C -- they exist here */   \
+  /* because they are used by H5AC2 and H5C2, and including them here    */   \
+  /* us to avoid duplicating the user level cache configuration code.    */   \
+  /* hbool_t     enable_journaling       = */ FALSE,                          \
+  /* char        journal_file_path[]     = */ "",                             \
+  /* hbool_t     journal_recovered       = */ FALSE,                          \
+  /* size_t      jbrb_buf_size           = */ (8 * 1024),                     \
+  /* int         jbrb_num_bufs           = */ 2,                              \
+  /* hbool_t     jbrb_use_aio            = */ FALSE,                          \
+  /* hbool_t     jbrb_human_readable     = */ TRUE                            \
 }
 
 

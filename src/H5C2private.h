@@ -784,6 +784,37 @@ typedef herr_t (*H5C2_log_flush_func_t)(H5C2_t * cache_ptr,
  *		there is no previous item, it should be NULL.
  *
  *
+ * Fields supporting metadata journaling:
+ *
+ * last_trans:	unit64_t containing the ID of the last transaction in
+ * 		which this entry was dirtied.  If journaling is disabled,
+ * 		or if the entry has never been dirtied in a transaction,
+ * 		this field should be set to zero.  Once we notice that
+ * 		the specified transaction has made it to disk, we will
+ * 		reset this field to zero as well.
+ *
+ * 		We must maintain this field, as to avoid messages from 
+ * 		the future, we must not flush a dirty entry to disk 
+ * 		until the last transaction in which it was dirtied 
+ * 		has made it to disk in the journal file.
+ *
+ * trans_next:  Next pointer in the entries modified in the current 
+ * 		transaction list.  This field should always be null
+ * 		unless journaling is enabled, the entry is dirty, 
+ * 		and last_trans field contains the current transaction
+ * 		number.  Even if all these conditions are fulfilled, 
+ * 		the field will still be NULL if this is the last 
+ * 		entry on the list.
+ *
+ * trans_prev:  Previous pointer in the entries modified in the current 
+ * 		transaction list.  This field should always be null
+ * 		unless journaling is enabled, the entry is dirty, 
+ * 		and last_trans field contains the current transaction
+ * 		number.  Even if all these conditions are fulfilled, 
+ * 		the field will still be NULL if this is the first
+ * 		entry on the list.
+ *
+ *
  * Cache entry stats collection fields:
  *
  * These fields should only be compiled in when both H5C2_COLLECT_CACHE_STATS
@@ -843,6 +874,13 @@ typedef struct H5C2_cache_entry_t
     struct H5C2_cache_entry_t *	prev;
     struct H5C2_cache_entry_t *	aux_next;
     struct H5C2_cache_entry_t *	aux_prev;
+
+
+    /* fields supporting journaling */
+
+    uint64_t			last_trans;
+    struct H5C2_cache_entry_t * trans_next;
+    struct H5C2_cache_entry_t * trans_prev;
 
 #if H5C2_COLLECT_CACHE_ENTRY_STATS
 
@@ -1268,14 +1306,17 @@ typedef struct H5C2_auto_size_ctl_t
 #define H5C2__READ_ONLY_FLAG			0x0400
 #define H5C2__CHECK_SIZE_FLAG			0x0800
 
-H5_DLL H5C2_t * H5C2_create(size_t                      max_cache_size,
+H5_DLL H5C2_t * H5C2_create(H5F_t *                     f,
+                            hid_t                       dxpl_id,
+		            size_t                      max_cache_size,
                             size_t                      min_clean_size,
                             int                         max_type_id,
 			    const char *                (* type_name_table_ptr),
                             H5C2_write_permitted_func_t check_write_permitted,
                             hbool_t                     write_permitted,
                             H5C2_log_flush_func_t       log_flush,
-                            void *                      aux_ptr);
+                            void *                      aux_ptr,
+			    hbool_t                     journal_recovered);
 
 H5_DLL void H5C2_def_auto_resize_rpt_fcn(H5C2_t * cache_ptr,
                                          int32_t version,
@@ -1297,8 +1338,8 @@ H5_DLL herr_t H5C2_expunge_entry(H5F_t *              f,
                                  haddr_t              addr);
 
 H5_DLL herr_t H5C2_flush_cache(H5F_t *f,
-		 hid_t    dxpl_id,
-                 unsigned flags);
+		               hid_t dxpl_id,
+                               unsigned flags);
 
 
 H5_DLL herr_t H5C2_flush_to_min_clean(H5F_t * f,
@@ -1412,11 +1453,46 @@ H5_DLL herr_t H5C2_validate_resize_config(H5C2_auto_size_ctl_t * config_ptr,
 /***************** journaling function definitions proper: ****************/
 /**************************************************************************/
 
-H5_DLL herr_t H5C2__begin_transaction(H5C2_t * cache_ptr,
-		                      uint64_t * trans_num_ptr);
+H5_DLL herr_t H5C2_begin_journaling(H5F_t * f,
+                                    hid_t dxpl_id,
+				    H5C2_t * cache_ptr,
+                                    char * journal_file_name_ptr,
+                                    size_t buf_size,
+                                    int num_bufs,
+                                    hbool_t use_aio,
+                                    hbool_t human_readable);
 
-H5_DLL herr_t H5C2__end_transaction(H5C2_t * cache_ptr,
-                                    uint64_t trans_num);
+H5_DLL herr_t H5C2_begin_transaction(H5C2_t * cache_ptr,
+		                     uint64_t * trans_num_ptr,
+                                     const char * api_call_name);
+
+H5_DLL herr_t H5C2_end_journaling(H5F_t * f,
+                                  hid_t dxpl_id,
+				  H5C2_t * cache_ptr);
+
+H5_DLL herr_t H5C2_end_transaction(H5F_t * f,
+                                   H5C2_t * cache_ptr,
+                                   uint64_t trans_num,
+                                   const char * api_call_name);
+
+H5_DLL herr_t H5C2_get_journal_config(H5C2_t * cache_ptr,
+                                      hbool_t * journaling_enabled_ptr,
+                                      char * journal_file_path_ptr,
+                                      size_t * jbrb_buf_size_ptr,
+                                      int * jbrb_num_bufs_ptr,
+                                      hbool_t * jbrb_use_aio_ptr,
+                                      hbool_t * jbrb_human_readable_ptr);
+
+H5_DLL herr_t H5C2_journal_post_flush(H5C2_t * cache_ptr,
+                                      hbool_t cache_is_clean);
+
+H5_DLL herr_t H5C2_journal_pre_flush(H5C2_t * cache_ptr);
+
+H5_DLL herr_t H5C2_journal_transaction(H5F_t * f,
+                                       H5C2_t * cache_ptr);
+
+H5_DLL herr_t H5C2_update_for_new_last_trans_on_disk(H5C2_t * cache_ptr,
+                                             uint64_t new_last_trans_on_disk);
 
 
 /*****************************************************************************/
@@ -1433,7 +1509,7 @@ H5_DLL herr_t H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr,
 		                       size_t size,
                                        const char * data,
                                        hbool_t is_end_trans,
-                                       unsigned long trans_num);
+                                       uint64_t trans_num);
 
 H5_DLL herr_t H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
                             const char * HDF5_file_name,
@@ -1444,22 +1520,22 @@ H5_DLL herr_t H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
                             hbool_t human_readable);
 
 H5_DLL herr_t H5C2_jb__start_transaction(H5C2_jbrb_t * struct_ptr,
-                                         unsigned long trans_num);
+                                         uint64_t trans_num);
 
 H5_DLL herr_t H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
-                                     unsigned long trans_num,
+                                     uint64_t trans_num,
                                      haddr_t base_addr,
                                      size_t length,
                                      const uint8_t * body);
 
 H5_DLL herr_t H5C2_jb__end_transaction(H5C2_jbrb_t * struct_ptr,
-                                       unsigned long trans_num);
+                                       uint64_t trans_num);
 
 H5_DLL herr_t H5C2_jb__comment(H5C2_jbrb_t * struct_ptr,
                                const char * comment_ptr);
 
 H5_DLL herr_t H5C2_jb__get_last_transaction_on_disk(H5C2_jbrb_t * struct_ptr,
-                                                 unsigned long * trans_num_ptr);
+                                                    uint64_t * trans_num_ptr);
 
 H5_DLL herr_t H5C2_jb__trunc(H5C2_jbrb_t * struct_ptr);
 
@@ -1480,6 +1556,11 @@ H5_DLL herr_t H5C2_jb__bin2hex(const uint8_t * buf,
 /********** journal config block management function definitions: ************/
 /*****************************************************************************/
 
+H5_DLL herr_t H5C2_check_for_journaling(H5F_t * f,
+                                        hid_t dxpl_id,
+		                        H5C2_t * cache_ptr,
+                                        hbool_t journal_recovered);
+
 H5_DLL herr_t H5C2_create_journal_config_block(H5F_t *f,
                                            hid_t dxpl_id,
                                            const char * journal_file_name_ptr);
@@ -1487,11 +1568,13 @@ H5_DLL herr_t H5C2_create_journal_config_block(H5F_t *f,
 H5_DLL herr_t H5C2_discard_journal_config_block(H5F_t * f,
                                                 hid_t dxpl_id);
 
-H5_DLL herr_t H5C2_get_journaling_in_progress(H5F_t * f,
-                                              hid_t dxpl_id);
+H5_DLL herr_t H5C2_get_journaling_in_progress(const H5F_t * f,
+                                              hid_t dxpl_id,
+					      H5C2_t * cache_ptr);
 
-H5_DLL herr_t H5C2_load_journal_config_block(H5F_t * f,
+H5_DLL herr_t H5C2_load_journal_config_block(const H5F_t * f,
                                              hid_t dxpl_id,
+					     H5C2_t * cache_ptr,
                                              haddr_t block_addr,
                                              hsize_t block_len);
 
@@ -1500,7 +1583,8 @@ H5_DLL herr_t H5C2_mark_journaling_in_progress(H5F_t * f,
                                             const char * journal_file_name_ptr);
 
 H5_DLL herr_t H5C2_unmark_journaling_in_progress(H5F_t * f,
-                                                 hid_t dxpl_id);
+                                                 hid_t dxpl_id,
+						 H5C2_t * cache_ptr);
 
 
 

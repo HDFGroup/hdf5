@@ -15,7 +15,10 @@ Error Test-DIAG: Error detected in Error Program (1.0) thread (IDs):
         major: Error in API
         minor: Error in H5Eget_num
 HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
-  #000: (file name) line (number) in H5Dwrite(): not a dataset
+  #000: (file name) line (number) in H5Dwrite(): H5AC2_begin_transaction() failed.
+    major: Object cache
+    minor: Unable to write to journal file
+  #001: (file name) line (number) in H5AC2_begin_transaction(): H5I_get_type() reports bad id
     major: Invalid arguments to routine
     minor: Inappropriate type
 Error Test-DIAG: Error detected in Error Program (1.0) thread (IDs):
@@ -26,6 +29,9 @@ Error Test-DIAG: Error detected in Error Program (1.0) thread (IDs):
     major: Error in IO
     minor: Error in H5Dwrite
 HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
-  #002: (file name) line (number) in H5Dwrite(): not a dataset
+  #002: (file name) line (number) in H5Dwrite(): H5AC2_begin_transaction() failed.
+    major: Object cache
+    minor: Unable to write to journal file
+  #003: (file name) line (number) in H5AC2_begin_transaction(): H5I_get_type() reports bad id
     major: Invalid arguments to routine
     minor: Inappropriate type

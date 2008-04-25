@@ -29,6 +29,7 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Rpkg.h"		/* References				*/
 #include "H5Sprivate.h"		/* Dataspaces 				*/
+#include "H5AC2private.h"       /* Metadata cache                       */
 
 /* Local macro definitions */
 
@@ -311,7 +312,7 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
     H5S_t	*space = NULL;          /* Pointer to dataspace containing region */
     herr_t      ret_value;      /* Return value */
 
-    FUNC_ENTER_API_META(H5Rcreate, FAIL)
+    FUNC_ENTER_API_META(H5Rcreate, loc_id, FAIL)
     H5TRACE5("e", "*xi*sRti", ref, loc_id, name, ref_type, space_id);
 
     /* Check args */

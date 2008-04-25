@@ -89,6 +89,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Lprivate.h"         /* Links                                */
 #include "H5Pprivate.h"         /* Property lists                       */
+#include "H5AC2private.h"       /* Metadata cache                       */
 
 /* Local macros */
 #define H5G_RESERVED_ATOMS	0
@@ -146,7 +147,7 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id,
     H5G_t	   *grp = NULL;         /* New group created */
     hid_t	    ret_value;          /* Return value */
 
-    FUNC_ENTER_API_META(H5Gcreate2, FAIL)
+    FUNC_ENTER_API_META(H5Gcreate2, loc_id, FAIL)
     H5TRACE5("i", "i*siii", loc_id, name, lcpl_id, gcpl_id, gapl_id);
 
     /* Check arguments */
@@ -286,7 +287,7 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
     H5G_t	   *grp = NULL;
     hid_t	    ret_value;
 
-    FUNC_ENTER_API_META(H5Gcreate_anon, FAIL)
+    FUNC_ENTER_API_META(H5Gcreate_anon, loc_id, FAIL)
     H5TRACE3("i", "iii", loc_id, gcpl_id, gapl_id);
 
     /* Check arguments */
@@ -661,7 +662,8 @@ H5Gclose(hid_t group_id)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API_META(H5Gclose, FAIL)
+    /* Can this change metadata?  If not, no need for a transaction. */
+    FUNC_ENTER_API_META(H5Gclose, group_id,  FAIL)
     H5TRACE1("e", "i", group_id);
 
     /* Check args */

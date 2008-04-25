@@ -48,6 +48,7 @@
 #include "H5Ipkg.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Oprivate.h"		/* Object headers		  	*/
+#include "H5AC2private.h"       /* Metadata cache                       */
 
 /* Define this to compile in support for dumping ID information */
 /* #define H5I_DEBUG_OUTPUT */
@@ -1261,7 +1262,7 @@ H5Idec_ref(hid_t id)
 {
     int ret_value;                      /* Return value */
 
-    FUNC_ENTER_API_META(H5Idec_ref, FAIL);
+    FUNC_ENTER_API_META(H5Idec_ref, id, FAIL);
     H5TRACE1("Is", "i", id);
 
     /* Check arguments */
@@ -1386,7 +1387,7 @@ H5Iinc_ref(hid_t id)
 {
     int ret_value;                      /* Return value */
 
-    FUNC_ENTER_API_META(H5Iinc_ref, FAIL);
+    FUNC_ENTER_API_META(H5Iinc_ref, id, FAIL);
     H5TRACE1("Is", "i", id);
 
     /* Check arguments */

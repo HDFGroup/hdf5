@@ -27,6 +27,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5MMprivate.h"	/* Memory management			*/
+#include "H5AC2private.h"       /* Metadata cache                       */
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child,
@@ -482,7 +483,12 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
     H5F_t	*child = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API_META(H5Fmount, FAIL)
+    /* Not sure this will generate any dirty metadata...
+     *
+     * Also we must work out how we are going to deal with journaling
+     * in such cases.
+     */
+    FUNC_ENTER_API_META(H5Fmount, loc_id, FAIL)
     H5TRACE4("e", "i*sii", loc_id, name, child_id, plist_id);
 
     /* Check arguments */
@@ -532,7 +538,12 @@ H5Funmount(hid_t loc_id, const char *name)
     H5G_loc_t	loc;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API_META(H5Funmount, FAIL)
+    /* Not sure that this will generate any dirty metadata.
+     *
+     * Also, must decide how we are going to deal with journaling 
+     * in such cases.
+     */
+    FUNC_ENTER_API_META(H5Funmount, loc_id, FAIL)
     H5TRACE2("e", "i*s", loc_id, name);
 
     /* Check args */

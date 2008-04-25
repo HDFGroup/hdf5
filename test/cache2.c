@@ -16431,6 +16431,8 @@ check_flush_protected_err(void)
  *-------------------------------------------------------------------------
  */
 
+extern H5C2_t * saved_cache2;
+
 static unsigned
 check_destroy_pinned_err(void)
 {
@@ -16465,17 +16467,21 @@ check_destroy_pinned_err(void)
 
 	    unpin_entry2(file_ptr, 0, 0);
 
-/* FIXME:  Related to earlier hack with same tag, have John check for
- *              correctness... -QAK
- */
-#ifdef OLD_WAY
             if ( H5C2_dest(file_ptr, H5P_DATASET_XFER_DEFAULT) < 0 ) {
 
                 pass2 = FALSE;
                 failure_mssg2 = "destroy failed after unpin.\n";
 
-            }
-#endif /* OLD_WAY */
+            } else {
+                file_ptr->shared->cache2 = NULL;
+	    }
+        }
+            
+        if ( saved_cache2 != NULL ) {
+
+            file_ptr->shared->cache2 = saved_cache2;
+            saved_cache2 = NULL;
+
         }
 
 	/* call takedown_cache2() with a NULL file_ptr parameter.
@@ -16549,17 +16555,21 @@ check_destroy_protected_err(void)
 
             unprotect_entry2(file_ptr, 0, 0, TRUE, H5C2__NO_FLAGS_SET);
 
-/* FIXME:  Related to earlier hack with same tag, have John check for
- *              correctness... -QAK
- */
-#ifdef OLD_WAY
             if ( H5C2_dest(file_ptr, H5P_DATASET_XFER_DEFAULT) < 0 ) {
 
                 pass2 = FALSE;
                 failure_mssg2 = "destroy failed after unprotect.\n";
 
-            }
-#endif /* OLD_WAY */
+            } else {
+                file_ptr->shared->cache2 = NULL;
+	    }
+        }
+            
+        if ( saved_cache2 != NULL ) {
+
+            file_ptr->shared->cache2 = saved_cache2;
+            saved_cache2 = NULL;
+
         }
 
 	/* call takedown_cache2() with a NULL file_ptr parameter.

@@ -1233,14 +1233,26 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
     {
 
 /* Use this macro for API functions that [could] modify metadata */
-#define FUNC_ENTER_API_META(func_name,err) {{                                      \
+
+#define FUNC_ENTER_API_META(func_name, id, err) {{                            \
     FUNC_ENTER_API_VARS(func_name)                                            \
     FUNC_ENTER_COMMON(func_name,H5_IS_API(#func_name));                       \
     FUNC_ENTER_API_THREADSAFE;                                                \
     FUNC_ENTER_API_COMMON(func_name,err);		                      \
     /* Clear thread error stack entering public functions */		      \
-    H5E_clear_stack(NULL);				                      \
-    {
+    H5E_clear_stack(NULL);                                                    \
+    {                                                                         \
+        uint64_t trans_num = 0;                                               \
+	H5O_loc_t id_oloc;                                                    \
+	hbool_t do_transaction = FALSE;				              \
+	hbool_t id_oloc_open = FALSE;                                         \
+	hbool_t transaction_begun = FALSE;                                    \
+	if (H5AC2_begin_transaction(id, &do_transaction, &id_oloc,            \
+				    &id_oloc_open, &transaction_begun,        \
+				    &trans_num, FUNC) < 0) {                  \
+		    HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, err,              \
+				"H5AC2_begin_transaction() failed.");         \
+	}
 
 /*
  * Use this macro for API functions that shouldn't clear the error stack
@@ -1388,7 +1400,14 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
 }} /*end scope from beginning of FUNC_ENTER*/
 
 /* Use this macro to match the FUNC_ENTER_API_META macro */
+
 #define FUNC_LEAVE_API_META(ret_value)                                        \
+       if ( H5AC2_end_transaction(do_transaction, &id_oloc,                   \
+			          id_oloc_open, transaction_begun,            \
+			          trans_num, FUNC) < 0 ) {                    \
+	    HDONE_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL,                     \
+			"H5AC2_end_transaction() failed.");                   \
+        }                                                                     \
         FINISH_MPE_LOG;                                                       \
         H5TRACE_RETURN(ret_value);					      \
         H5_POP_FUNC;                                                          \

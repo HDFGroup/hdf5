@@ -46,13 +46,100 @@
 #include "H5Fpkg.h"		/* File access                          */
 #include "H5C2pkg.h"            /* Cache                                */
 
-
+
 /**************************************************************************/
 /************************* journaling code proper *************************/
 /**************************************************************************/
 
 /*-------------------------------------------------------------------------
- * Function:    H5C2__begin_transaction
+ * Function:    H5C2_begin_journaling
+ *
+ * Purpose:     Setup the metadata cache to begin journaling.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  John Mainzer
+ *              March 26, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5C2_begin_journaling(H5F_t * f,
+		      hid_t dxpl_id,
+		      H5C2_t * cache_ptr,
+		      char * journal_file_name_ptr,
+                      size_t buf_size,
+                      int num_bufs,
+                      hbool_t use_aio,
+                      hbool_t human_readable)
+{
+    herr_t result;
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5C2_begin_journaling, FAIL)
+    
+    HDassert( f != NULL );
+    HDassert( f->name != NULL );
+    HDassert( cache_ptr != NULL );
+    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->mdj_enabled == FALSE );
+    HDassert( cache_ptr->trans_in_progress == FALSE );
+    HDassert( cache_ptr->trans_num == 0 );
+    HDassert( cache_ptr->last_trans_on_disk == 0 );
+    HDassert( cache_ptr->tl_len == 0 );
+    HDassert( cache_ptr->tl_size == 0 );
+    HDassert( cache_ptr->tl_head_ptr == NULL );
+    HDassert( cache_ptr->tl_tail_ptr == NULL );
+    HDassert( cache_ptr->jwipl_len == 0 );
+    HDassert( cache_ptr->jwipl_size == 0 );
+    HDassert( cache_ptr->jwipl_head_ptr == NULL );
+    HDassert( cache_ptr->jwipl_tail_ptr == NULL );
+    HDassert( buf_size > 0 );
+    HDassert( num_bufs > 0 );
+    HDassert( journal_file_name_ptr != NULL );
+
+    if ( cache_ptr->mdj_enabled ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "metadata journaling already enabled on entry.")
+    }
+
+    result = H5C2_jb__init(&(cache_ptr->mdj_jbrb),
+		           f->name,
+			   journal_file_name_ptr,
+                           buf_size,
+                           num_bufs,
+                           use_aio,
+                           human_readable);
+
+    if ( result != SUCCEED ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, "H5C2_jb__init() failed.")
+    }
+
+    result = H5C2_mark_journaling_in_progress(f,
+                                              dxpl_id,
+                                              journal_file_name_ptr);
+
+    if ( result != SUCCEED ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_mark_journaling_in_progress() failed.")
+    }
+
+    cache_ptr->mdj_enabled = TRUE;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C2_begin_journaling() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C2_begin_transaction
  *
  * Purpose:     Handle book keeping for the beginning of a transaction, and
  *              return the transaction ID assigned to the transaction in 
@@ -67,37 +154,136 @@
  *-------------------------------------------------------------------------
  */
 
-/* This function is just a shell for now. -- JRM */
-
 herr_t
-H5C2__begin_transaction(H5C2_t * cache_ptr,
-		        uint64_t * trans_num_ptr)
+H5C2_begin_transaction(H5C2_t * cache_ptr,
+                       uint64_t * trans_num_ptr,
+                       const char * api_call_name)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C2__begin_transaction, FAIL)
+    FUNC_ENTER_NOAPI(H5C2_begin_transaction, FAIL)
     
     HDassert( cache_ptr != NULL );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->tl_len == 0 );
+    HDassert( cache_ptr->tl_size == 0 );
+    HDassert( cache_ptr->tl_head_ptr == NULL );
+    HDassert( cache_ptr->tl_tail_ptr == NULL );
+    HDassert( trans_num_ptr != NULL );
+    HDassert( api_call_name != NULL );
+    HDassert( HDstrlen(api_call_name) <= H5C2__MAX_API_NAME_LEN );
 
-    /* we need at least one error to keep the macros happy */
-    if ( trans_num_ptr == NULL ) {
+    if ( cache_ptr->mdj_enabled ) {
 
-	HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "trans_num_ptr NULL on entry.")
+        if ( cache_ptr->trans_in_progress ) {
+
+	    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                        "transaction already in progress?.")
+        }
+
+        HDstrncpy(cache_ptr->trans_api_name, api_call_name, 
+                  (size_t)H5C2__MAX_API_NAME_LEN);
+        cache_ptr->trans_num++;
+
+        *trans_num_ptr = cache_ptr->trans_num;
+
+        cache_ptr->trans_in_progress = TRUE;
     }
-
-    *trans_num_ptr = 1024;
 
 done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2__begin_transaction() */
+} /* H5C2_begin_transaction() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C2__end_transaction
+ * Function:    H5C2_end_journaling
+ *
+ * Purpose:     Shutdown metadata journaling.
+ *
+ *              To do this we must:
+ *
+ *              1) Flush the cache.  This will also flush and truncate the
+ *                 journal file.
+ *
+ *              2) Mark the superblock to indicate that we are no longer
+ *                 journaling.
+ *
+ *              3) Tell the journal file write code to shutdown.  This will
+ *                 also cause the journal file to be deleted.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  John Mainzer
+ *              April 12, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5C2_end_journaling(H5F_t * f,
+                    hid_t dxpl_id,
+		    H5C2_t * cache_ptr)
+{
+    herr_t result;
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5C2_end_journaling, FAIL)
+    
+    HDassert( f != NULL );
+    HDassert( cache_ptr != NULL );
+    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->mdj_enabled == TRUE );
+    HDassert( cache_ptr->trans_in_progress == FALSE );
+    HDassert( cache_ptr->tl_len == 0 );
+    HDassert( cache_ptr->tl_size == 0 );
+    HDassert( cache_ptr->tl_head_ptr == NULL );
+    HDassert( cache_ptr->tl_tail_ptr == NULL );
+
+    if ( ! cache_ptr->mdj_enabled ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "metadata journaling not enabled on entry.")
+    }
+
+    result = H5C2_flush_cache(f, dxpl_id, H5C2__NO_FLAGS_SET);
+
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_flush_cache() failed.")
+    }
+
+    result = H5C2_unmark_journaling_in_progress(f, dxpl_id, cache_ptr);
+
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_unmark_journaling_in_progress() failed.")
+    }
+
+    result = H5C2_jb__takedown(&(cache_ptr->mdj_jbrb));
+
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_jb__takedown() failed.")
+    }
+
+    cache_ptr->mdj_enabled = FALSE;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C2_end_journaling() */
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C2_end_transaction
  *
  * Purpose:     Handle book keeping for the end of a transaction.
  *
@@ -110,32 +296,638 @@ done:
  *-------------------------------------------------------------------------
  */
 
-/* This function is just a shell for now. -- JRM */
-
 herr_t
-H5C2__end_transaction(H5C2_t * cache_ptr,
-                      uint64_t trans_num)
+H5C2_end_transaction(H5F_t * f,
+                     H5C2_t * cache_ptr,
+                     uint64_t trans_num,
+                     const char * api_call_name)
 {
+    uint64_t new_last_trans_on_disk = 0;
+    herr_t result;
     herr_t ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C2__end_transaction, FAIL)
+    FUNC_ENTER_NOAPI(H5C2_end_transaction, FAIL)
     
     HDassert( cache_ptr != NULL );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( api_call_name != NULL );
+    HDassert( HDstrlen(api_call_name) <= H5C2__MAX_API_NAME_LEN );
+    HDassert( ( ! ( cache_ptr->mdj_enabled ) ) ||
+              ( HDstrcmp(api_call_name, cache_ptr->trans_api_name) == 0 ) );
 
-    /* we need at least one error to keep the macros happy */
-    if ( trans_num != 1024 ) {
+    if ( cache_ptr->mdj_enabled ) {
 
-	HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "unexpected transaction number.")
+        if ( ! ( cache_ptr->trans_in_progress ) ) {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                        "transaction not in progress?!?!")
+        }
+
+        if ( cache_ptr->trans_num != trans_num ) {
+
+	    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "trans_num mis-match?!?!")
+        }
+
+        /* if the transaction list is not empty, generate journal messages,
+         * and remove all entries from the transaction list.
+         */
+        if ( cache_ptr->tl_len > 0 ) {
+
+            result = H5C2_journal_transaction(f, cache_ptr);
+
+            if ( result != SUCCEED ) {
+
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                            "H5C2_journal_transaction() failed.")
+            }
+        }
+
+        cache_ptr->trans_in_progress = FALSE;
+
+        /* Get the last transaction on disk.  If it has changed, remove
+         * all entries with completed journal writes from the journal write
+         * in progress list.
+         */
+
+        result = H5C2_jb__get_last_transaction_on_disk(&(cache_ptr->mdj_jbrb),
+                                                       &new_last_trans_on_disk);
+        if ( result != SUCCEED ) {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                        "H5C2_jb__get_last_transaction_on_disk() failed.")
+        }
+
+        if ( cache_ptr->last_trans_on_disk < new_last_trans_on_disk ) {
+
+            result = H5C2_update_for_new_last_trans_on_disk(cache_ptr,
+		                                        new_last_trans_on_disk);
+
+	    if ( result != SUCCEED ) {
+
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                            "H5C2_update_for_new_last_trans_on_disk() failed.")
+            }
+        }
     }
 
 done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C2__end_transaction() */
+} /* H5C2_end_transaction() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C2_get_journal_config
+ *
+ * Purpose:     Return the current metadata journaling status.
+ *
+ *              If journaling is enabled, *journaling_enabled_ptr is 
+ *              set to TRUE, and the targets of the remaining pointer
+ *              parameters will be set to reflect current journaling 
+ *              status if they are not NULL.
+ *
+ *              If journaling is disabled, *journaling_enabled_ptr is set
+ *              to FALSE, and the the targets of the remaining pointer 
+ *              parameters are not altered.
+ *
+ *              The remaining parameters are discussed in detail below:
+ *
+ *              journal_file_path_ptr is presumed to point to a buffer 
+ *              of length H5AC2__MAX_JOURNAL_FILE_NAME_LEN.  If journaling
+ *              is enabled, and the field is not null, the path to the 
+ *              journal file will be copied into this buffer to the 
+ *              extent that it fits.
+ *
+ * 		jbrb_buf_size_ptr is presumed to point to a size_t.  If 
+ * 		journaling is enabled and the field is not NULL, the size
+ * 		of the buffers used in the journal buffer ring buffer
+ * 		will be reported in *jbrb_buf_size_ptr.
+ *
+ * 		jbrb_num_bufs_ptr is presumed to point to an int.  If
+ * 		journaling is enabled and the field is not NULL, the 
+ * 		number of buffers in the ournal buffer ring buffer
+ *              will be reported in *jbrb_num_bufs_ptr.
+ *
+ *              jbrb_use_aio_ptr is presumed to point to a hbool_t.  If
+ *              journaling is enabled and the field is not NULL, 
+ *              *jbrb_use_aio_ptr will be set to true or false depending
+ *              on whether the journal entry logging code has been 
+ *              instructed to use AIO.
+ *
+ *		jbrb_human_readable_ptr is presumed to point to a hbool_t.  If
+ *		journaling is enabled and the field is not NULL,
+ *		*jbrb_human_readable_ptr will be set to true or false depending
+ *		on whether the journal entry logging code has been 
+ *		instructed to record the journal in human readable form.
+ * 		
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  John Mainzer
+ *              April 13, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5C2_get_journal_config(H5C2_t * cache_ptr,
+		        hbool_t * journaling_enabled_ptr,
+			char * journal_file_path_ptr,
+			size_t * jbrb_buf_size_ptr,
+			int * jbrb_num_bufs_ptr,
+			hbool_t * jbrb_use_aio_ptr,
+			hbool_t * jbrb_human_readable_ptr)
+{
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5C2_get_journal_config, FAIL)
+
+    HDassert( cache_ptr != NULL );
+    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+
+    if ( journaling_enabled_ptr == NULL ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "journaling_enabled_ptr NULL on entry!?!.")
+    }
+
+
+    if ( cache_ptr->mdj_enabled ) {
+
+        *journaling_enabled_ptr = TRUE;
+
+	if ( journal_file_path_ptr != NULL ) {
+
+	    HDsnprintf(journal_file_path_ptr, 
+                       H5AC2__MAX_JOURNAL_FILE_NAME_LEN,
+		       "%s",
+		       cache_ptr->mdj_file_name_ptr);
+	}
+
+	if ( jbrb_buf_size_ptr != NULL ) {
+
+	    *jbrb_buf_size_ptr = (cache_ptr->mdj_jbrb).buf_size;
+	}
+
+	if ( jbrb_num_bufs_ptr != NULL ) {
+
+	    *jbrb_num_bufs_ptr = (cache_ptr->mdj_jbrb).num_bufs;
+	}
+
+	if ( jbrb_use_aio_ptr != NULL ) {
+
+	    *jbrb_use_aio_ptr = (cache_ptr->mdj_jbrb).use_aio;
+	}
+
+	if ( jbrb_human_readable_ptr ) {
+
+	    *jbrb_human_readable_ptr = (cache_ptr->mdj_jbrb).human_readable;
+	}
+
+    } else {
+
+        *journaling_enabled_ptr = FALSE;
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C2_get_journal_config() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C2_journal_post_flush()
+ *
+ * Purpose:     Handle any journaling activities that are necessary
+ * 		after we flush the metadata cache.
+ *
+ * 		At present this means:
+ *
+ * 		1) Verify that a transaction is still not in progress.
+ *
+ * 		2) Verify that the journal write in progress list
+ * 		   is still empty.
+ *
+ * 		3) If the cache_is_clean parameter is true:
+ *
+ * 		   a) Truncate the journal file
+ *
+ * 		   b) Reset cache_ptr->trans_num and 
+ * 		      cache_ptr->last_trans_on_disk to zero.
+ * 		
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  John Mainzer
+ *              April 10, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5C2_journal_post_flush(H5C2_t * cache_ptr,
+		        hbool_t cache_is_clean)
+{
+    herr_t result;
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5C2_journal_post_flush, FAIL)
+
+    HDassert( cache_ptr != NULL );
+    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->mdj_enabled );
+
+    if ( cache_ptr->trans_in_progress ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                    "Transaction in progress during flush?!?!?.")
+    }
+
+    if ( cache_ptr->jwipl_len != 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "journal write in progress list isn't empty?!?!.")
+    }
+
+    if ( cache_is_clean ) {
+
+        result = H5C2_jb__trunc(&(cache_ptr->mdj_jbrb));
+
+        if ( result != SUCCEED ) {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                        "H5C2_jb__trunc() failed.")
+        }
+        
+	cache_ptr->trans_num = (uint64_t)0;
+	cache_ptr->last_trans_on_disk = (uint64_t)0;
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C2_journal_post_flush() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C2_journal_pre_flush()
+ *
+ * Purpose:     Handle any journaling activities that are necessary
+ * 		before we flush the metadata cache.
+ *
+ * 		At present this means:
+ *
+ * 		1) Verify that a transaction is not in progress.
+ *
+ * 		2) Flush the journal to disk.
+ *
+ * 		3) Get the ID of the last transaction on disk.
+ *
+ * 		4) If the value obtained in 2) above has changed,
+ * 		   remove all entries whose last transaction has 
+ * 		   made it to disk from the journal write in progress
+ * 		   list.
+ *
+ * 		5) Verify that the journal write in progress list is
+ * 		   empty.
+ * 		
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  John Mainzer
+ *              April 10, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5C2_journal_pre_flush(H5C2_t * cache_ptr)
+{
+    herr_t result;
+    uint64_t new_last_trans_on_disk;
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5C2_journal_pre_flush, FAIL)
+
+    HDassert( cache_ptr != NULL );
+    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->mdj_enabled );
+
+    if ( cache_ptr->trans_in_progress ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                    "Transaction in progress during flush?!?!?.")
+    }
+
+    result = H5C2_jb__flush(&(cache_ptr->mdj_jbrb));
+
+    if ( result != SUCCEED ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_jb__flush() failed.")
+    }
+
+    result = H5C2_jb__get_last_transaction_on_disk(&(cache_ptr->mdj_jbrb),
+		                                   &new_last_trans_on_disk);
+    if ( result != SUCCEED ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_jb__get_last_transaction_on_disk() failed.")
+    }
+
+    if ( cache_ptr->last_trans_on_disk < new_last_trans_on_disk ) {
+
+        result = H5C2_update_for_new_last_trans_on_disk(cache_ptr,
+		                                        new_last_trans_on_disk);
+
+	if ( result != SUCCEED ) {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                        "H5C2_update_for_new_last_trans_on_disk() failed.")
+        }
+    }    
+
+    if ( cache_ptr->jwipl_len != 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "journal write in progress list isn't empty?!?!.")
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C2_journal_pre_flush() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C2_journal_transaction()
+ *
+ * Purpose:     Generate journal messages for the current transaction.
+ * 		In passing, remove all entries from the transaction list.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  John Mainzer
+ *              April 3, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5C2_journal_transaction(H5F_t * f,
+		         H5C2_t * cache_ptr)
+
+{
+    char buf[H5C2__MAX_API_NAME_LEN + 128];
+    H5C2_cache_entry_t * entry_ptr = NULL;
+    unsigned serialize_flags = 0;
+    haddr_t new_addr;
+    size_t new_len;
+    void * new_image_ptr;
+    void * thing;
+    herr_t result;
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5C2_journal_transaction, FAIL)
+    
+    HDassert( f != NULL );
+    HDassert( cache_ptr != NULL );
+    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->trans_in_progress );
+    HDassert( cache_ptr->tl_len > 0 );
+
+    HDsnprintf(buf, H5C2__MAX_API_NAME_LEN + 128, "Begin transaction on %s.",
+               cache_ptr->trans_api_name);
+
+    result = H5C2_jb__comment(&(cache_ptr->mdj_jbrb), buf);
+
+    if ( result != SUCCEED ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_jb__comment() failed.")
+    }
+
+    result = H5C2_jb__start_transaction(&(cache_ptr->mdj_jbrb), 
+		                        cache_ptr->trans_num);
+
+    if ( result != SUCCEED ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_jb__start_transaction() failed.")
+    }
+
+    entry_ptr = cache_ptr->tl_tail_ptr;
+    while ( entry_ptr != NULL )
+    {
+        HDassert( entry_ptr->is_dirty );
+	HDassert( entry_ptr->last_trans == cache_ptr->trans_num );
+
+	if ( entry_ptr->is_protected ) 
+        {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                        "Protected entry in TL at transaction close.")
+	}
+
+        if ( entry_ptr->image_ptr == NULL )
+        {
+            entry_ptr->image_ptr = H5MM_malloc(entry_ptr->size);
+
+            if ( entry_ptr->image_ptr == NULL )
+            {
+
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                           "memory allocation failed for on disk image buffer.")
+            }
+        }
+
+        result = entry_ptr->type->serialize(entry_ptr->addr,
+                                            entry_ptr->size,
+                                            entry_ptr->image_ptr,
+                                            (void *)entry_ptr,
+                                            &serialize_flags,
+                                            &new_addr,
+                                            &new_len,
+                                            &new_image_ptr);
+        if ( result != SUCCEED )
+        {
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                        "unable to serialize entry")
+        }
+
+        if ( serialize_flags != 0 )
+        {
+	    /* if the serialize_flags are not zero, the entry has been 
+	     * modified as a result of the serialize.  Pass these changes
+	     * on to the cache, and don't bother to write a journal entry 
+	     * at this time -- the protect/unprotect/rename will move the 
+	     * entry to the head of the transaction list, where we will 
+	     * handle it later.
+	     */
+	    hbool_t resized;
+	    hbool_t renamed;
+
+	    resized = (serialize_flags & H5C2__SERIALIZE_RESIZED_FLAG) != 0;
+	    renamed = (serialize_flags & H5C2__SERIALIZE_RENAMED_FLAG) != 0;
+
+	    if ( ( renamed ) && ( ! resized ) )
+            {
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                            "entry renamed but not resized?!?!")
+            }
+
+	    if ( resized ) 
+            {
+                /* in the following protect/unprotect, use default 
+	         * dxpl_id as we know that the entry is in cache,
+	         * and thus no I/O will take place.
+	         */
+	        thing = H5C2_protect(f, H5P_DATASET_XFER_DEFAULT,
+	                             entry_ptr->type, entry_ptr->addr,
+				     entry_ptr->size, NULL, 
+				     H5C2__NO_FLAGS_SET);
+
+                if ( thing == NULL ) 
+                {
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                                "H5C2_protect() failed.")
+                }
+
+                result = H5C2_unprotect(f, H5P_DATASET_XFER_DEFAULT,
+                                        entry_ptr->type, entry_ptr->addr,
+                                        thing, H5C2__SIZE_CHANGED_FLAG, 
+					new_len);
+
+                if ( result < 0 )
+                {
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                                "H5C2_unprotect() failed.")
+                }
+
+		entry_ptr->image_ptr = new_image_ptr;
+            }
+
+	    if ( renamed )
+            {
+                result = H5C2_rename_entry(cache_ptr, entry_ptr->type,
+				           entry_ptr->addr, new_addr);
+
+                if ( result < 0 )
+                {
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                                "H5C2_rename_entr() failed.")
+                }
+            }
+        }
+	else /* generate the journal entry & remove from transaction list */
+        {
+            result = H5C2_jb__journal_entry(&(cache_ptr->mdj_jbrb),
+                                            cache_ptr->trans_num,
+					    entry_ptr->addr,
+					    entry_ptr->size,
+					    entry_ptr->image_ptr);
+
+            if ( result != SUCCEED ) {
+
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                            "H5C2_jb__journal_entry() failed.")
+            }
+
+	    H5C2__TRANS_DLL_REMOVE(entry_ptr, cache_ptr->tl_head_ptr, \
+                                   cache_ptr->tl_tail_ptr, cache_ptr->tl_len, \
+				   cache_ptr->tl_size, FAIL);
+        }
+        entry_ptr = cache_ptr->tl_tail_ptr;
+    }
+
+    result = H5C2_jb__end_transaction(&(cache_ptr->mdj_jbrb),
+		                      cache_ptr->trans_num);
+
+    if ( result != SUCCEED ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_jb__end_transaction() failed.")
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C2_journal_transaction() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C2_update_for_new_last_trans_on_disk()
+ *
+ * Purpose:     Update the journal write in progress list for a change in
+ * 		the last transaction on disk.
+ *
+ * 		Specifically, update the last_trans_on_disk field of 
+ * 		*cache_ptr, and then scan the journal write in progress
+ * 		list for entries whose last_trans field is now less than
+ * 		or equal to cache_ptr->last_trans_on_disk.  Remove all
+ * 		these entries from the journal write in progress list,
+ * 		set their last_trans fields to zero, and insert then into
+ * 		the eviction policy data structures.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  John Mainzer
+ *              April 3, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5C2_update_for_new_last_trans_on_disk(H5C2_t * cache_ptr,
+		                       uint64_t new_last_trans_on_disk)
+{
+    H5C2_cache_entry_t * entry_ptr = NULL;
+    H5C2_cache_entry_t * prev_entry_ptr = NULL;
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5C2_update_for_new_last_trans_on_disk, FAIL)
+
+    HDassert( cache_ptr != NULL );
+    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->mdj_enabled );
+    HDassert( cache_ptr->last_trans_on_disk <= new_last_trans_on_disk );
+
+    if ( cache_ptr->last_trans_on_disk < new_last_trans_on_disk ) {
+
+        cache_ptr->last_trans_on_disk = new_last_trans_on_disk;
+
+	entry_ptr = cache_ptr->jwipl_tail_ptr;
+
+	while ( entry_ptr != NULL )
+        {
+            prev_entry_ptr = entry_ptr->next;
+
+	    HDassert( entry_ptr->last_trans > 0 );
+
+	    if ( entry_ptr->last_trans <= cache_ptr->last_trans_on_disk ) {
+
+                entry_ptr->last_trans = 0;
+                H5C2__UPDATE_RP_FOR_JOURNAL_WRITE_COMPLETE(cache_ptr, \
+				                           entry_ptr, \
+		                                           FAIL)
+            }
+
+	    entry_ptr = prev_entry_ptr;
+        }
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C2_update_for_new_last_trans_on_disk() */
 
 
 /**************************************************************************/
@@ -143,7 +935,104 @@ done:
 /**************************************************************************/
 
 /*-------------------------------------------------------------------------
- * Function:    H5C2__create_journal_config_block()
+ * Function:	H5C2_check_for_journaling()
+ *
+ * Purpose:	If the superblock extension of a newly opened HDF5 file
+ * 		indicates that journaling is in progress, the process
+ * 		that created the file failed to close it properly, and 
+ * 		thus the file is almost certainly corrupted.
+ *
+ * 		The purpose of this function is to detect this condition,
+ * 		and either throw an error telling the user to run the 
+ * 		recovery tool, or if so directed (presumably by the 
+ * 		recovery tool) simply delete the metadata journaling 
+ * 		configuration block and any reference to journaling in the 
+ * 		superblock extension.
+ *
+ * 							JRM -- 3/26/08
+ *
+ * Return:	Success:	SUCCEED
+ * 		Failure:	FAIL
+ *
+ * Programmer:	John Mainzer
+ * 		March 26, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5C2_check_for_journaling(H5F_t * f,
+                          hid_t dxpl_id,
+			  H5C2_t * cache_ptr,
+		          hbool_t journal_recovered)
+{
+    const char * l0 =
+        "This file was last written with metadata journaling enabled and was \n";
+    const char * l1 =
+        "not closed cleanly.  To allow HDF5 to read this file, please run the \n";
+    const char * l2 = 
+	"journal recovery tool on this file.  The journal was written \n";
+    const char * l3 = "to \"";
+    const char * l4 = "\".\n";
+    herr_t result;
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5C2_check_for_journaling, FAIL)
+
+    HDassert( f );
+    HDassert( cache_ptr );
+    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->mdj_conf_block_addr == HADDR_UNDEF );
+    HDassert( cache_ptr->mdj_conf_block_len == 0 );
+    HDassert( cache_ptr->mdj_conf_block_ptr == NULL );
+    HDassert( cache_ptr->mdj_file_name_ptr == NULL );
+
+    result = H5C2_get_journaling_in_progress(f, dxpl_id, cache_ptr);
+
+    if ( result != SUCCEED ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_get_journaling_in_progress() failed.")
+    }
+
+    if ( cache_ptr->mdj_file_name_ptr != NULL ) /* journaling was in progress */
+    {
+        if ( journal_recovered ) {
+
+	    /* delete the metadata journaling config block and the 
+	     * superblock extenstion refering to it.
+	     */
+
+            result = H5C2_unmark_journaling_in_progress(f, dxpl_id, cache_ptr);
+
+	    if ( result != SUCCEED ) {
+
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                            "H5C2_unmark_journaling_in_progress() failed.")
+            }
+	} else {
+
+            /* we have to play some games here to set up an error message that
+	     * contains the journal file path.  In essence, what follows is a 
+	     * somewhat modified version of the HGOTO_ERROR() macro.
+	     */
+            (void)H5Epush2(H5E_DEFAULT, __FILE__, FUNC, __LINE__, H5E_ERR_CLS_g,
+	                   H5E_CACHE, H5E_CANTJOURNAL, "%s%s%s%s%s%s", 
+			   l0, l1, l2, l3, cache_ptr->mdj_file_name_ptr, l4);
+	    (void)H5E_dump_api_stack((int)H5_IS_API(FUNC));
+	    HGOTO_DONE(FAIL)
+
+	}
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C2_check_for_journaling() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C2_create_journal_config_block()
  *
  * Purpose:     Given a string containing a journal file name and a pointer
  * 		to the associated instance of H5C2_t, allocate a journal
@@ -167,7 +1056,7 @@ H5C2_create_journal_config_block(H5F_t * f,
                                  hid_t dxpl_id,
                                  const char * journal_file_name_ptr)
 {
-    H5C2_t * cache_ptr = f->shared->cache2;
+    H5C2_t * cache_ptr;
     size_t path_len = 0;
     hsize_t block_len = 0;
     haddr_t block_addr = HADDR_UNDEF;
@@ -181,6 +1070,8 @@ H5C2_create_journal_config_block(H5F_t * f,
     FUNC_ENTER_NOAPI(H5C2_create_journal_config_block, FAIL)
 
     HDassert( f );
+    HDassert( f->shared );
+    cache_ptr = f->shared->cache2;
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
 
@@ -192,7 +1083,7 @@ H5C2_create_journal_config_block(H5F_t * f,
 
     HDassert( journal_file_name_ptr != NULL );
 
-    path_len = strlen(journal_file_name_ptr) + 1;
+    path_len = HDstrlen(journal_file_name_ptr) + 1;
 
     HDassert( path_len > 0 );
 
@@ -277,7 +1168,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C2__discard_journal_config_block()
+ * Function:    H5C2_discard_journal_config_block()
  *
  * Purpose:     Free the file and core space allocated to the metadata 
  *              journaling configuration block, and re-set all the associated
@@ -307,12 +1198,14 @@ herr_t
 H5C2_discard_journal_config_block(H5F_t * f,
                                   hid_t dxpl_id)
 {
-    H5C2_t * cache_ptr = f->shared->cache2;
+    H5C2_t * cache_ptr;
     herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5C2_discard_journal_config_block, FAIL)
 
     HDassert( f );
+    HDassert( f->shared );
+    cache_ptr = f->shared->cache2;
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
 
@@ -345,7 +1238,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5AC2__discard_journal_config_block() */
+} /* H5AC2_discard_journal_config_block() */
 
 
 /*-------------------------------------------------------------------------
@@ -381,18 +1274,17 @@ done:
  */
 
 herr_t
-H5C2_get_journaling_in_progress(H5F_t * f,
-                                hid_t dxpl_id)
+H5C2_get_journaling_in_progress(const H5F_t * f,
+                                hid_t dxpl_id,
+				H5C2_t * cache_ptr)
 {
-    H5C2_t * cache_ptr = f->shared->cache2;
     herr_t result;
     herr_t ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C2_mark_journaling_in_progress, FAIL)
+    FUNC_ENTER_NOAPI(H5C2_get_journaling_in_progress, FAIL)
 
     HDassert( f );
     HDassert( f->shared != NULL );
-    HDassert( ! f->shared->mdc_jrnl_enabled );
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
     HDassert( cache_ptr->mdj_conf_block_addr == HADDR_UNDEF );
@@ -401,9 +1293,13 @@ H5C2_get_journaling_in_progress(H5F_t * f,
     HDassert( cache_ptr->mdj_file_name_ptr == NULL );
 
     if ( f->shared->mdc_jrnl_enabled == TRUE ) {
+
+	cache_ptr->mdj_conf_block_addr = f->shared->mdc_jrnl_block_loc;
+	cache_ptr->mdj_conf_block_len = f->shared->mdc_jrnl_block_len;
 	    
         result = H5C2_load_journal_config_block(f,
                                                 dxpl_id,
+						cache_ptr,
                                                 cache_ptr->mdj_conf_block_addr,
                                                 cache_ptr->mdj_conf_block_len);
         if ( result != SUCCEED ) {
@@ -417,7 +1313,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5AC2__get_journal_config_block() */
+} /* H5C2_get_journaling_in_progress() */
 
 
 /*-------------------------------------------------------------------------
@@ -439,12 +1335,12 @@ done:
  */
 
 herr_t
-H5C2_load_journal_config_block(H5F_t * f,
+H5C2_load_journal_config_block(const H5F_t * f,
                                hid_t dxpl_id,
+			       H5C2_t * cache_ptr,
                                haddr_t block_addr,
                                hsize_t block_len)
 {
-    H5C2_t * cache_ptr = f->shared->cache2;
     size_t path_len = 0;
     void * block_ptr = NULL;
     uint8_t version;
@@ -457,6 +1353,7 @@ H5C2_load_journal_config_block(H5F_t * f,
     FUNC_ENTER_NOAPI(H5C2_load_journal_config_block, FAIL)
 
     HDassert( f );
+    HDassert( f->shared );
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
 
@@ -510,7 +1407,7 @@ H5C2_load_journal_config_block(H5F_t * f,
      * the journal file path.
      */
     jfn_ptr = (char *)p;
-    if ( strlen(jfn_ptr) != path_len - 1 ) {
+    if ( HDstrlen(jfn_ptr) != path_len - 1 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                     "Bad path_len in metadata journaling configuration block.")
@@ -547,7 +1444,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5AC2__load_journal_config_block() */
+} /* H5C2_load_journal_config_block() */
 
 
 /*-------------------------------------------------------------------------
@@ -577,7 +1474,7 @@ H5C2_mark_journaling_in_progress(H5F_t * f,
                                  hid_t dxpl_id,
                                  const char * journal_file_name_ptr)
 {
-    H5C2_t * cache_ptr = f->shared->cache2;
+    H5C2_t * cache_ptr;
     herr_t result;
     herr_t ret_value = SUCCEED;      /* Return value */
 
@@ -586,6 +1483,9 @@ H5C2_mark_journaling_in_progress(H5F_t * f,
     HDassert( f != NULL );
     HDassert( f->shared != NULL );
     HDassert( ! f->shared->mdc_jrnl_enabled );
+
+    cache_ptr = f->shared->cache2;
+
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
     HDassert( cache_ptr->mdj_conf_block_addr == HADDR_UNDEF );
@@ -690,11 +1590,13 @@ done:
 
 herr_t
 H5C2_unmark_journaling_in_progress(H5F_t * f,
-                                   hid_t dxpl_id)
-{
+                                   hid_t dxpl_id,
 #ifndef NDEBUG
-    H5C2_t * cache_ptr = f->shared->cache2;
+				   H5C2_t * cache_ptr)
+#else /* NDEBUG */
+				   H5C2_t UNUSED * cache_ptr)
 #endif /* NDEBUG */
+{
     herr_t result;
     herr_t ret_value = SUCCEED;      /* Return value */
 
@@ -1061,7 +1963,7 @@ H5C2_jb__write_to_buffer(H5C2_jbrb_t * struct_ptr,
 			size_t size,			
 			const char * data,
                         hbool_t is_end_trans,
-                        unsigned long trans_num)
+                        uint64_t trans_num)
 {
     herr_t ret_value = SUCCEED;
     unsigned long track_last_trans = 0;
@@ -1436,8 +2338,8 @@ H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
 	struct_ptr->human_readable);
 
     /* Write the header message into the ring buffer */
-    if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, FALSE, 0) 
-		    < 0) {
+    if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, FALSE, 
+			          (uint64_t)0) < 0) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                     "H5C2_jb__write_to_buffer() failed.\n")
@@ -1462,8 +2364,8 @@ done:
  *			Wednesday, February 6, 2008
  *
  * Purpose:		Verify that there is no transaction in progress, and
- *			that the supplied transaction number is next in
- *			sequence. Then construct a start transaction message, 
+ *			that the supplied transaction number greater than 
+ *			the last.  Then construct a start transaction message, 
  *			and write it to the current journal buffer. Make note
  *			of the fact that the supplied transaction is in
  *			progress.
@@ -1474,7 +2376,7 @@ done:
 
 herr_t 
 H5C2_jb__start_transaction(H5C2_jbrb_t * struct_ptr,
-			   unsigned long trans_num)
+			   uint64_t trans_num)
 
 {
     char temp[150];
@@ -1499,8 +2401,8 @@ H5C2_jb__start_transaction(H5C2_jbrb_t * struct_ptr,
      *      with testing?
      */
 
-    /* Verify that the supplied transaction number is next in sequence */
-    if ( (struct_ptr->cur_trans + 1) != trans_num ) {
+    /* Verify that the supplied transaction number greater than the last */
+    if ( (struct_ptr->cur_trans) >= trans_num ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                     "New transaction out of sequence.")
@@ -1531,7 +2433,7 @@ H5C2_jb__start_transaction(H5C2_jbrb_t * struct_ptr,
     } /* end if */
 
     /* Write start transaction message */
-    HDsnprintf(temp, (size_t)150, "1 bgn_trans %ld\n", trans_num);
+    HDsnprintf(temp, (size_t)150, "1 bgn_trans %llu\n", trans_num);
     if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, 
 			          FALSE, trans_num) < 0 ) {
 
@@ -1568,7 +2470,7 @@ done:
 
 herr_t 
 H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
-			unsigned long trans_num,
+			uint64_t trans_num,
 			haddr_t base_addr,
 			size_t length,
 			const uint8_t * body)
@@ -1609,7 +2511,7 @@ H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
     /* Write journal entry */
     HDsnprintf(temp, 
                (size_t)(length + 100),
-               "2 trans_num %ld length %zu base_addr 0x%lx body ", 
+               "2 trans_num %llu length %zu base_addr 0x%lx body ", 
  	       trans_num, 
 	       length, 
 	       (unsigned long)base_addr); /* <== fix this */
@@ -1683,7 +2585,7 @@ done:
  *****************************************************************************/
 herr_t
 H5C2_jb__end_transaction(H5C2_jbrb_t * struct_ptr,
-			 unsigned long trans_num)
+			 uint64_t trans_num)
 {
     char temp[25];
     herr_t ret_value = SUCCEED;
@@ -1713,7 +2615,7 @@ H5C2_jb__end_transaction(H5C2_jbrb_t * struct_ptr,
 
 
     /* Prepare end transaction message */
-    HDsnprintf(temp, (size_t)25, "3 end_trans %ld\n", trans_num);
+    HDsnprintf(temp, (size_t)25, "3 end_trans %llu\n", trans_num);
 
     /* Write end transaction message */
     if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, 
@@ -1825,7 +2727,7 @@ done:
 
 herr_t 
 H5C2_jb__get_last_transaction_on_disk(H5C2_jbrb_t * struct_ptr,
-				      unsigned long * trans_num_ptr)
+				      uint64_t * trans_num_ptr)
 {
     herr_t ret_value = SUCCEED;
 
@@ -1885,6 +2787,7 @@ herr_t
 H5C2_jb__trunc(H5C2_jbrb_t * struct_ptr)
 
 {
+    int i;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5C2_jb__trunc, FAIL)
@@ -1916,6 +2819,16 @@ H5C2_jb__trunc(H5C2_jbrb_t * struct_ptr)
     /* Start back to top of journal buffer and journal file */
     struct_ptr->header_present = FALSE;
     struct_ptr->journal_is_empty = TRUE;
+
+    /* reset the transaction number fields */
+    struct_ptr->cur_trans = 0;
+    struct_ptr->last_trans_on_disk = 0;
+	
+    /* reset the transaction tracking array */
+    for (i=0; i<struct_ptr->num_bufs; i++)
+    {
+	(*struct_ptr->trans_tracking)[i] = 0;
+    }
 
     if ( HDlseek(struct_ptr->journal_file_fd, (off_t)0, SEEK_SET) == (off_t)-1 )
     {

@@ -2255,7 +2255,7 @@ expunge_entry(H5C2_t * cache_ptr,
         HDassert( ((entry_ptr->header).type)->id == DATUM_ENTRY_TYPE );
 	HDassert( ! ((entry_ptr->header).is_dirty) );
 
-	result = H5C2_get_entry_status(cache_ptr, entry_ptr->base_addr,
+	result = H5C2_get_entry_status(file_ptr, entry_ptr->base_addr,
 				      NULL, &in_cache, NULL, NULL, NULL);
 
 	if ( result < 0 ) {
@@ -3329,7 +3329,7 @@ setup_cache_for_test(hid_t * fid_ptr,
     }
 
     if ( file_ptr == NULL ) {
-        nerrors++;
+        
         if ( verbose ) {
 	    HDfprintf(stdout, "%d:%s: Can't get file_ptr.\n",
                       world_mpi_rank, fcn_name);
@@ -3376,8 +3376,8 @@ setup_cache_for_test(hid_t * fid_ptr,
 
             config.rpt_fcn_enabled = TRUE;
 
-            if ( H5AC2_set_cache_auto_resize_config(cache_ptr, &config)
-                 != SUCCEED ) {
+            if ( H5AC2_set_cache_auto_resize_config(file_ptr, 
+                                 H5P_DATASET_XFER_DEFAULT, &config) != SUCCEED ) {
 
 	        HDfprintf(stdout,
                          "%d:%s: H5AC2_set_cache_auto_resize_config() failed.\n",
@@ -5576,7 +5576,7 @@ trace_file_check(void)
     const char * expected_output[] =
     {
       "### HDF5 metadata cache trace file version 2 ###\n",
-      "H5AC2_set_cache_auto_resize_config 1 0 1 0 \"t_cache2_trace.txt\" 1 0 1048576 0.500000 16777216 1048576 50000 1 0.900000 2.000000 1 4194304 1 1.000000 0.250000 3 0.999000 0.900000 1 1048576 3 1 0.100000 262144 0\n",
+      "H5AC2_set_cache_auto_resize_config 1 0 1 0 \"t_cache2_trace.txt\" 1 0 1048576 0.500000 16777216 1048576 50000 1 0.900000 2.000000 1 4194304 1 1.000000 0.250000 3 0.999000 0.900000 1 1048576 3 1 0.100000 262144 0 \"\" 0 4096 1 0 0 0\n",
       "H5AC2_set 0x400 2 15 0x0 2 0\n",
       "H5AC2_set 0x402 2 15 0x0 2 0\n",
       "H5AC2_set 0x404 4 15 0x0 4 0\n",
@@ -5671,8 +5671,8 @@ trace_file_check(void)
                 config.open_trace_file = TRUE;
 		strcpy(config.trace_file_name, "t_cache2_trace.txt");
 
-                if ( H5AC2_set_cache_auto_resize_config(cache_ptr, &config) 
-                     != SUCCEED ) {
+                if ( H5AC2_set_cache_auto_resize_config(file_ptr, 
+			H5P_DATASET_XFER_DEFAULT, &config) != SUCCEED ) {
 
 		    nerrors++;
 	            HDfprintf(stdout, 
@@ -5735,8 +5735,8 @@ trace_file_check(void)
                 config.close_trace_file = TRUE;
 		config.trace_file_name[0] = '\0';
 
-                if ( H5AC2_set_cache_auto_resize_config(cache_ptr, &config) 
-                     != SUCCEED ) {
+                if ( H5AC2_set_cache_auto_resize_config(file_ptr, 
+			H5P_DATASET_XFER_DEFAULT, &config) != SUCCEED ) {
 
 		    nerrors++;
 	            HDfprintf(stdout, 

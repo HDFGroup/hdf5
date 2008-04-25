@@ -935,8 +935,13 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 	/* Create a metadata cache with modified API along side the regular
 	 * version.  For now, this is just for testing.  Once we get it 
 	 * fully in use, we will delete the old version.
+	 *
+	 * Note the use of H5P_DATASET_XFER_DEFAULT for the dxpl_id parameter
+	 * of H5AC2_create().  We may want to change this.
 	 */
-	if(H5AC2_create(f, (H5AC2_cache_config_t *)&(f->shared->mdc_initCacheCfg)) < 0)
+	if(H5AC2_create(f, H5P_DATASET_XFER_DEFAULT,
+		(H5AC2_cache_config_t *)&(f->shared->mdc_initCacheCfg)) < 0)
+
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create meta data cache2")
 
         /* Create the file's "open object" information */
@@ -1432,7 +1437,8 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     H5F_t	*new_file = NULL;	/*file struct for new file	*/
     hid_t	ret_value;	        /*return value			*/
 
-    FUNC_ENTER_API_META(H5Fcreate, FAIL)
+    /* can't journal at this point, as the file doesn't exist yet. */
+    FUNC_ENTER_API(H5Fcreate, FAIL)
     H5TRACE4("i", "*sIuii", filename, flags, fcpl_id, fapl_id);
 
     /* Check/fix arguments */
@@ -1484,7 +1490,7 @@ done:
         if(H5F_close(new_file) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
 
-    FUNC_LEAVE_API_META(ret_value)
+    FUNC_LEAVE_API(ret_value)
 } /* end H5Fcreate() */
 
 
@@ -1534,7 +1540,13 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     H5F_t	*new_file = NULL;	/*file struct for new file	*/
     hid_t	ret_value;	        /*return value			*/
 
-    FUNC_ENTER_API_META(H5Fopen, FAIL)
+    /* can't journal at this point as the file is not open */
+    /* In theory, opening the file shouldn't generate any dirty metadata,
+     * but we do have one case where we fix some object automatically 
+     * when we first touch it.  Can this happen here?  If so, we will
+     * have to do somethings to start a transaction before this happens.
+     */
+    FUNC_ENTER_API(H5Fopen, FAIL)
     H5TRACE3("i", "*sIui", filename, flags, fapl_id);
 
     /* Check/fix arguments. */
@@ -1564,7 +1576,7 @@ done:
     if(ret_value < 0 && new_file && H5F_try_close(new_file) < 0)
         HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
 
-    FUNC_LEAVE_API_META(ret_value)
+    FUNC_LEAVE_API(ret_value)
 } /* end H5Fopen() */
 
 
@@ -1601,7 +1613,8 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
     H5O_loc_t	*oloc = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API_META(H5Fflush, FAIL)
+    /* don't start a transaction here, as a flush must not modify metadata. */
+    FUNC_ENTER_API(H5Fflush, FAIL)
     H5TRACE2("e", "iFs", object_id, scope);
 
     switch(H5I_get_type(object_id)) {
@@ -1651,7 +1664,7 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "flush failed")
 
 done:
-    FUNC_LEAVE_API_META(ret_value)
+    FUNC_LEAVE_API(ret_value)
 } /* end H5Fflush() */
 
 
@@ -2011,7 +2024,8 @@ H5Fclose(hid_t file_id)
 {
     herr_t	ret_value = SUCCEED;
 
-    FUNC_ENTER_API_META(H5Fclose, FAIL)
+    /* This function shouldn't change metadata, so don't start a transaction */
+    FUNC_ENTER_API(H5Fclose, FAIL)
     H5TRACE1("e", "i", file_id);
 
     /* Check/fix arguments. */
@@ -2026,7 +2040,7 @@ H5Fclose(hid_t file_id)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEFILE, FAIL, "decrementing file ID failed")
 
 done:
-    FUNC_LEAVE_API_META(ret_value)
+    FUNC_LEAVE_API(ret_value)
 } /* end H5Fclose() */
 
 
@@ -2059,7 +2073,8 @@ H5Freopen(hid_t file_id)
     H5F_t	*new_file = NULL;
     hid_t	ret_value;
 
-    FUNC_ENTER_API_META(H5Freopen, FAIL)
+    /* should be no metadata changes, so done start a transaction */
+    FUNC_ENTER_API(H5Freopen, FAIL)
     H5TRACE1("i", "i", file_id);
 
     /* Check arguments */
@@ -2087,7 +2102,7 @@ done:
 	if(H5F_dest(new_file, H5AC_dxpl_id) < 0)
 	    HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
 
-    FUNC_LEAVE_API_META(ret_value)
+    FUNC_LEAVE_API(ret_value)
 } /* end H5Freopen() */
 
 
@@ -3369,6 +3384,7 @@ H5Fset_mdc_config(hid_t file_id,
 
     /* pass the resize configuration to the modified cache as well. */
     result = H5AC2_set_cache_auto_resize_config(file, 
+                                            H5P_DATASET_XFER_DEFAULT,
 		                            (H5AC2_cache_config_t *)config_ptr);
 
     if ( result != SUCCEED ) {

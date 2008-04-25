@@ -214,6 +214,11 @@ out:
  *
  * Modifications:
  *
+ * 		John Mainzer -- 4/23/08
+ * 		Added error check on malloc of table, initialized fields 
+ * 		in table to keep lower level code from choking on bogus 
+ * 		data in error cases.
+ *
  *-------------------------------------------------------------------------
  */
 hid_t H5PTopen( hid_t loc_id,
@@ -231,6 +236,12 @@ hid_t H5PTopen( hid_t loc_id,
       goto out;
 
   table = (htbl_t *)malloc(sizeof(htbl_t));
+
+  if ( table == NULL ) {
+    goto out;
+  }
+  table->dset_id = H5I_BADID;
+  table->type_id = H5I_BADID;
 
   /* Open the dataset */
   if((table->dset_id = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)

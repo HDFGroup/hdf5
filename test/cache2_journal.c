@@ -71,8 +71,8 @@ static void check_legal_calls(void);
 static void check_transaction_tracking(void);
 
 static void write_verify_trans_num(H5C2_jbrb_t * struct_ptr, 
-                                   unsigned long trans_num, 
-                                   unsigned long verify_val);
+                                   uint64_t trans_num, 
+                                   uint64_t verify_val);
 
 
 
@@ -406,6 +406,7 @@ check_mdj_config_block_IO(void)
 
 	result = H5C2_load_journal_config_block(file_ptr,
 			                        H5P_DATASET_XFER_DEFAULT,
+						cache_ptr,
 						block_addr,
 						block_len);
 	
@@ -604,6 +605,7 @@ test_mdj_conf_blk_read_write_discard(H5F_t * file_ptr,
 
 	result = H5C2_load_journal_config_block(file_ptr,
 			                        H5P_DATASET_XFER_DEFAULT,
+						cache_ptr,
 						block_addr,
 						block_len);
 	
@@ -1593,8 +1595,8 @@ write_flush_verify(H5C2_jbrb_t * struct_ptr,
 
     if ( pass2 ) {
 
-	if ( H5C2_jb__write_to_buffer(struct_ptr, (size_t)size, data, 0, 0) 
-           != SUCCEED ) {
+	if ( H5C2_jb__write_to_buffer(struct_ptr, (size_t)size, 
+				      data, 0, (uint64_t)0) != SUCCEED ) {
 
 	    pass2 = FALSE;
 	    failure_mssg2 = "H5C2_jb__write_to_buffer failed";
@@ -1663,8 +1665,8 @@ write_noflush_verify(H5C2_jbrb_t * struct_ptr,
 
         if ( pass2 ) {
 	
-            if ( H5C2_jb__write_to_buffer(struct_ptr, (size_t)size, data, 0, 0) 
-               != SUCCEED ) {
+            if ( H5C2_jb__write_to_buffer(struct_ptr, (size_t)size, 
+				          data, 0, (uint64_t)0) != SUCCEED ) {
 
                 pass2 = FALSE;
                 failure_mssg2 = "H5C2_jb__write_to_buffer failed";
@@ -1781,7 +1783,7 @@ check_message_format(void)
     if ( pass2 ) {
 
         if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t  */  &jbrb_struct, 
-                                        /* trans number */  1) 
+                                        /* trans number */  (uint64_t)1) 
            != SUCCEED ) {
     
             pass2 = FALSE;
@@ -1799,7 +1801,7 @@ check_message_format(void)
     if ( pass2 ) {
 
         if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t  */  &jbrb_struct, 
-                                    /* trans number */  1, 
+                                    /* trans number */  (uint64_t)1, 
                                     /* base address */  (haddr_t)0, 
                                     /* data length  */  1, 
                                     /* data         */  (const uint8_t *)"A") 
@@ -1820,7 +1822,7 @@ check_message_format(void)
     if ( pass2 ) {
 
         if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t  */  &jbrb_struct, 
-                                    /* trans number */  1, 
+                                    /* trans number */  (uint64_t)1, 
                                     /* base address */  (haddr_t)1, 
                                     /* data length  */  2, 
                                     /* data         */  (const uint8_t *)"AB") 
@@ -1841,7 +1843,7 @@ check_message_format(void)
     if ( pass2 ) {
 
         if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t  */  &jbrb_struct, 
-                                    /* trans number */  1, 
+                                    /* trans number */  (uint64_t)1, 
                                     /* base address */  (haddr_t)3, 
                                     /* data length  */  4, 
                                     /* data         */  (const uint8_t *)"CDEF") 
@@ -1861,7 +1863,7 @@ check_message_format(void)
     /* End transaction */
     if ( pass2 ) {
         if ( H5C2_jb__end_transaction(/* H5C2_jbrb_t  */  &jbrb_struct, 
-                                      /* trans number */  1) 
+                                      /* trans number */  (uint64_t)1) 
            != SUCCEED ) {
 
             pass2 = FALSE;
@@ -1879,7 +1881,7 @@ check_message_format(void)
     if ( pass2 ) {
 
         if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t  */  &jbrb_struct, 
-                                        /* trans number */  2) 
+                                        /* trans number */  (uint64_t)2) 
            != SUCCEED ) {
     
             pass2 = FALSE;
@@ -1897,7 +1899,7 @@ check_message_format(void)
     if ( pass2 ) {
 
         if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t  */  &jbrb_struct, 
-                                    /* trans number */  2, 
+                                    /* trans number */  (uint64_t)2, 
                                     /* base address */  (haddr_t)285, 
                                     /* data length  */  11, 
                                     /* data         */  (const uint8_t *)"Test Data?!") 
@@ -1917,7 +1919,7 @@ check_message_format(void)
     /* End transaction */
     if ( pass2 ) {
         if ( H5C2_jb__end_transaction(/* H5C2_jbrb_t  */  &jbrb_struct, 
-                                      /* trans number */  2) 
+                                      /* trans number */  (uint64_t)2) 
            != SUCCEED ) {
 
             pass2 = FALSE;
@@ -1999,7 +2001,7 @@ check_message_format(void)
     if ( pass2 ) {
 
         if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t  */  &jbrb_struct, 
-                                        /* trans number */  3) 
+                                        /* trans number */  (uint64_t)3) 
            != SUCCEED ) {
     
             pass2 = FALSE;
@@ -2017,7 +2019,7 @@ check_message_format(void)
     if ( pass2 ) {
 
         if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t  */  &jbrb_struct, 
-                                    /* trans number */  3, 
+                                    /* trans number */  (uint64_t)3, 
                                     /* base address */  (haddr_t)28591, 
                                     /* data length  */  6, 
                                     /* data         */  (const uint8_t *)"#1nN`}") 
@@ -2037,7 +2039,7 @@ check_message_format(void)
     /* End transaction */
     if ( pass2 ) {
         if ( H5C2_jb__end_transaction(/* H5C2_jbrb_t  */  &jbrb_struct, 
-                                      /* trans number */  3) 
+                                      /* trans number */  (uint64_t)3) 
            != SUCCEED ) {
 
             pass2 = FALSE;
@@ -2243,14 +2245,18 @@ check_legal_calls(void)
     if ( show_progress ) /* 2 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
                   checkpoint++, (int)pass2);
-
+#if 0
     /* Start transaction 2. This should FAIL because transaction 1 has
        not occurred yet. Ensure that it fails, and flag an error if it 
        does not. */
+    /* transaction numbers need not be sequential, only monitonically 
+     * increasing -- thus this is not an error any more.
+     *                                                    -- JRM
+     */
     if ( pass2 ) {
 
 	if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t   */  &jbrb_struct, 
-                                        /* Transaction # */  2)
+                                        /* Transaction # */  (uint64_t)2)
            == SUCCEED ) {
 
             pass2 = FALSE;
@@ -2259,7 +2265,7 @@ check_legal_calls(void)
 	} /* end if */
 
     } /* end if */ 
-
+#endif
     if ( show_progress ) /* 3 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
                   checkpoint++, (int)pass2);
@@ -2270,7 +2276,7 @@ check_legal_calls(void)
     if ( pass2 ) {
 
 	if ( H5C2_jb__end_transaction(/* H5C2_jbrb_t   */  &jbrb_struct, 
-                                      /* Transaction # */  1)
+                                      /* Transaction # */  (uint64_t)1)
            == SUCCEED ) {
         
             pass2 = FALSE;
@@ -2290,7 +2296,7 @@ check_legal_calls(void)
     if ( pass2 ) {
 
 	if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t   */  &jbrb_struct, 
-                                    /* Transaction # */  1,
+                                    /* Transaction # */  (uint64_t)1,
                                     /* Base Address  */  (haddr_t)123456789, 
                                     /* Length        */  16, 
                                     /* Body          */  (const uint8_t *)"This should fail")
@@ -2311,7 +2317,7 @@ check_legal_calls(void)
     if ( pass2 ) {
 
 	if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t   */  &jbrb_struct, 
-                                        /* Transaction # */  1)
+                                        /* Transaction # */  (uint64_t)1)
            != SUCCEED ) {
 
 	    pass2 = FALSE;
@@ -2331,7 +2337,7 @@ check_legal_calls(void)
     if ( pass2 ) {
 
 	if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t   */  &jbrb_struct, 
-                                        /* Transaction # */  1)
+                                        /* Transaction # */  (uint64_t)1)
            == SUCCEED ) {
 
 	    pass2 = FALSE;
@@ -2350,7 +2356,7 @@ check_legal_calls(void)
     if ( pass2 ) {
 
 	if ( H5C2_jb__end_transaction(/* H5C2_jbrb_t   */  &jbrb_struct, 
-                                      /* Transaction # */  1)
+                                      /* Transaction # */  (uint64_t)1)
            == SUCCEED ) {
 
 	    pass2 = FALSE;
@@ -2370,7 +2376,7 @@ check_legal_calls(void)
     if ( pass2 ) {
 
 	if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t   */  &jbrb_struct, 
-                                    /* Transaction # */  2,
+                                    /* Transaction # */  (uint64_t)2,
                                     /* Base Address  */  (haddr_t)123456789, 
                                     /* Length        */  16, 
                                     /* Body          */  (const uint8_t *)"This should fail")
@@ -2391,7 +2397,7 @@ check_legal_calls(void)
     if ( pass2 ) {
 
 	if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t   */  &jbrb_struct, 
-                                    /* Transaction # */  1,
+                                    /* Transaction # */  (uint64_t)1,
                                     /* Base Address  */  (haddr_t)123456789, 
                                     /* Length        */  51, 
                                     /* Body          */  (const uint8_t *)"This is the first transaction during transaction 1.")
@@ -2431,7 +2437,7 @@ check_legal_calls(void)
     if ( pass2 ) {
 
 	if ( H5C2_jb__end_transaction(/* H5C2_jbrb_t   */  &jbrb_struct, 
-                                      /* Transaction # */  1)
+                                      /* Transaction # */  (uint64_t)1)
            != SUCCEED ) {
 
 	    pass2 = FALSE;
@@ -2451,7 +2457,7 @@ check_legal_calls(void)
     if ( pass2 ) {
 
 	if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t   */  &jbrb_struct, 
-                                        /* Transaction # */  1)
+                                        /* Transaction # */  (uint64_t)1)
            == SUCCEED ) {
 
 	    pass2 = FALSE;
@@ -2469,7 +2475,7 @@ check_legal_calls(void)
     if ( pass2 ) {
 
 	if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t   */  &jbrb_struct, 
-                                        /* Transaction # */  2)
+                                        /* Transaction # */  (uint64_t)2)
            != SUCCEED ) {
 
 	    pass2 = FALSE;
@@ -2487,7 +2493,7 @@ check_legal_calls(void)
     if ( pass2 ) {
 
 	if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t   */  &jbrb_struct, 
-                                    /* Transaction # */  2,
+                                    /* Transaction # */  (uint64_t)2,
                                     /* Base Address  */  (haddr_t)7465, 
                                     /* Length        */  51, 
                                     /* Body          */  (const uint8_t *)"This is the first transaction during transaction 2!")
@@ -2508,7 +2514,7 @@ check_legal_calls(void)
     if ( pass2 ) {
 
 	if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t   */  &jbrb_struct, 
-                                    /* Transaction # */  2,
+                                    /* Transaction # */  (uint64_t)2,
                                     /* Base Address  */  (haddr_t)123456789, 
                                     /* Length        */  60, 
                                     /* Body          */  (const uint8_t *)"... And here's your second transaction during transaction 2.")
@@ -2529,7 +2535,7 @@ check_legal_calls(void)
     if ( pass2 ) {
 
 	if ( H5C2_jb__end_transaction(/* H5C2_jbrb_t   */  &jbrb_struct, 
-                                      /* Transaction # */  2)
+                                      /* Transaction # */  (uint64_t)2)
            != SUCCEED ) {
 
 	    pass2 = FALSE;
@@ -2791,8 +2797,8 @@ check_transaction_tracking(void)
     for (i = 1; i < 11; i++) {
 
         write_verify_trans_num(/* H5C2_jbrb_t   */ &jbrb_struct, 
-                           /* transaction num */ (unsigned long)i, 
-                           /* expected trans */(unsigned long)expected_tval[i]);
+                           /* transaction num */ (uint64_t)i, 
+                           /* expected trans */(uint64_t)expected_tval[i]);
 
     } /* end for */
 
@@ -2896,8 +2902,8 @@ check_transaction_tracking(void)
     for (i=1; i<20; i++) {
 
         write_verify_trans_num(/* H5C2_ujbrb_t */&jbrb_struct, 
-                               /* transaction num */(unsigned long)i, 
-                               /* expected trans on disk */(unsigned long)i);
+                               /* transaction num */(uint64_t)i, 
+                               /* expected trans on disk */(uint64_t)i);
 
     } /* end for */
 
@@ -3003,21 +3009,45 @@ check_transaction_tracking(void)
        case where end transaction messages start in one buffer and end in
        another buffer. Also tests the case where one transaction ends several
        buffers ahead of the next transaction end. */
-    write_verify_trans_num(&jbrb_struct, 1, 0); /* 1 in bufs, 0 on disk */
-    write_verify_trans_num(&jbrb_struct, 2, 1); /* 2 in bufs, 1 on disk */
-    write_verify_trans_num(&jbrb_struct, 3, 3); /* nothing in bufs, 3 on disk */
-    H5C2_jb__write_to_buffer(&jbrb_struct, 10, "XXXXXXXXX\n", 0, 0);   
-    write_verify_trans_num(&jbrb_struct, 4, 3); /* 1 in bufs, 0 on disk */
-    write_verify_trans_num(&jbrb_struct, 5, 5); /* 2 in bufs, 1 on disk */
-    write_verify_trans_num(&jbrb_struct, 6, 5); /* nothing in bufs, 3 on disk */
-    H5C2_jb__write_to_buffer(&jbrb_struct, 10, "XXXXXXXXX\n", 0, 0);   
-    write_verify_trans_num(&jbrb_struct, 7, 7); /* 1 in bufs, 0 on disk */
-    write_verify_trans_num(&jbrb_struct, 8, 7); /* 2 in bufs, 1 on disk */
-    write_verify_trans_num(&jbrb_struct, 9, 8); /* nothing in bufs, 3 on disk */
-    H5C2_jb__write_to_buffer(&jbrb_struct, 10, "XXXXXXXXX\n", 0, 0);   
-    write_verify_trans_num(&jbrb_struct, 10, 9); /* 1 in bufs, 0 on disk */
-    write_verify_trans_num(&jbrb_struct, 11, 10); /* 2 in bufs, 1 on disk */
-    write_verify_trans_num(&jbrb_struct, 12, 12); /* nothing in buf, 3 on disk */
+    write_verify_trans_num(&jbrb_struct, 
+		           (uint64_t)1, 
+			   (uint64_t)0); /* 1 in bufs, 0 on disk */
+    write_verify_trans_num(&jbrb_struct, 
+		           (uint64_t)2, 
+			   (uint64_t)1); /* 2 in bufs, 1 on disk */
+    write_verify_trans_num(&jbrb_struct, 
+		           (uint64_t)3, 
+			   (uint64_t)3); /* nothing in bufs, 3 on disk */
+    H5C2_jb__write_to_buffer(&jbrb_struct, 10, "XXXXXXXXX\n", 0, (uint64_t)0);   
+    write_verify_trans_num(&jbrb_struct, 
+		           (uint64_t)4, 
+			   (uint64_t)3); /* 1 in bufs, 0 on disk */
+    write_verify_trans_num(&jbrb_struct, 
+		           (uint64_t)5, 
+			   (uint64_t)5); /* 2 in bufs, 1 on disk */
+    write_verify_trans_num(&jbrb_struct, 
+		           (uint64_t)6, 
+			   (uint64_t)5); /* nothing in bufs, 3 on disk */
+    H5C2_jb__write_to_buffer(&jbrb_struct, 10, "XXXXXXXXX\n", 0, (uint64_t)0);   
+    write_verify_trans_num(&jbrb_struct, 
+		           (uint64_t)7, 
+			   (uint64_t)7); /* 1 in bufs, 0 on disk */
+    write_verify_trans_num(&jbrb_struct, 
+		           (uint64_t)8, 
+			   (uint64_t)7); /* 2 in bufs, 1 on disk */
+    write_verify_trans_num(&jbrb_struct, 
+		           (uint64_t)9, 
+			   (uint64_t)8); /* nothing in bufs, 3 on disk */
+    H5C2_jb__write_to_buffer(&jbrb_struct, 10, "XXXXXXXXX\n", 0, (uint64_t)0);   
+    write_verify_trans_num(&jbrb_struct, 
+		           (uint64_t)10, 
+			   (uint64_t)9); /* 1 in bufs, 0 on disk */
+    write_verify_trans_num(&jbrb_struct, 
+		           (uint64_t)11, 
+			   (uint64_t)10); /* 2 in bufs, 1 on disk */
+    write_verify_trans_num(&jbrb_struct, 
+		           (uint64_t)12, 
+			   (uint64_t)12); /* nothing in buf, 3 on disk */
 
     if ( show_progress ) /* 10 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
@@ -3118,8 +3148,8 @@ check_transaction_tracking(void)
     for (i=1; i<5; i++) {
 
         write_verify_trans_num(/* H5C2_jbrb_t */  &jbrb_struct, 
-                               /* transaction num */  (unsigned long)i, 
-                               /* expected returned trans */  (unsigned long)i);
+                               /* transaction num */  (uint64_t)i, 
+                               /* expected returned trans */  (uint64_t)i);
 
     } /* end for */
 
@@ -3204,10 +3234,10 @@ check_transaction_tracking(void)
  **************************************************************************/
 static void
 write_verify_trans_num(H5C2_jbrb_t * struct_ptr, 
-                       unsigned long trans_num, 
-                       unsigned long verify_val)
+                       uint64_t trans_num, 
+                       uint64_t verify_val)
 {
-    unsigned long trans_verify;
+    uint64_t trans_verify;
     
     /* Write an entire transaction. (start, journal entry, end).
      * As long as the supplied transaction number is less than 1000,

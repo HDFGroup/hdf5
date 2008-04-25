@@ -32,6 +32,7 @@
 #include "H5Sprivate.h"		/* Dataspace functions			*/
 #include "H5SLprivate.h"	/* Skip lists				*/
 #include "H5Vprivate.h"		/* Vector and array functions		*/
+#include "H5AC2private.h"       /* Metadata cache                       */
 
 #ifdef H5_HAVE_PARALLEL
 /* Remove this if H5R_DATASET_REGION is no longer used in this file */
@@ -388,7 +389,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     char                    fake_char;
     herr_t                  ret_value=SUCCEED;  /* Return value */
 
-    FUNC_ENTER_API_META(H5Dwrite, FAIL)
+    FUNC_ENTER_API_META(H5Dwrite, dset_id, FAIL)
     H5TRACE6("e", "iiiii*x", dset_id, mem_type_id, mem_space_id, file_space_id,
              plist_id, buf);
 

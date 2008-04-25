@@ -38,6 +38,7 @@
 #include "H5MMprivate.h"	/*memory management			  */
 #include "H5Pprivate.h"		/* Property Lists			  */
 #include "H5Tpkg.h"		/*data-type functions			  */
+#include "H5AC2private.h"       /* Metadata cache                       */
 
 /* Check for header needed for SGI floating-point code */
 #ifdef H5_HAVE_SYS_FPU_H
@@ -1700,7 +1701,7 @@ H5Tclose(hid_t type_id)
     H5T_t	*dt = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API_META(H5Tclose, FAIL)
+    FUNC_ENTER_API_META(H5Tclose, type_id, FAIL)
     H5TRACE1("e", "i", type_id);
 
     /* Check args */

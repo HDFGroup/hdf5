@@ -41,6 +41,7 @@
 
 /* Pivate headers needed by this header */
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5Oprivate.h"         /* Object headers                       */
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5C2private.h"	/* cache				*/
 
@@ -215,7 +216,14 @@ extern hid_t H5AC2_ind_dxpl_id;
   /* int         epochs_before_eviction  = */ 3,                              \
   /* hbool_t     apply_empty_reserve     = */ TRUE,                           \
   /* double      empty_reserve           = */ 0.1,                            \
-  /* int	 dirty_bytes_threshold   = */ (256 * 1024)                    \
+  /* int	 dirty_bytes_threshold   = */ (256 * 1024),                   \
+  /* hbool_t     enable_journaling       = */ FALSE,                          \
+  /* char        journal_file_path[]     = */ "",                             \
+  /* hbool_t     journal_recovered       = */ FALSE,                          \
+  /* size_t      jbrb_buf_size           = */ (8 * 1024),                     \
+  /* int         jbrb_num_bufs           = */ 2,                              \
+  /* hbool_t     jbrb_use_aio            = */ FALSE,                          \
+  /* hbool_t     jbrb_human_readable     = */ TRUE                            \
 }
 
 
@@ -254,7 +262,32 @@ extern hid_t H5AC2_ind_dxpl_id;
 /* external function declarations: */
 
 H5_DLL herr_t H5AC2_init(void);
-H5_DLL herr_t H5AC2_create(const H5F_t *f, H5AC2_cache_config_t *config_ptr);
+H5_DLL herr_t H5AC2_create(H5F_t *f, 
+		           hid_t dxpl_id, 
+			   H5AC2_cache_config_t *config_ptr);
+#if 1 /* new version */
+H5_DLL herr_t H5AC2_begin_transaction(hid_t id,
+                                      hbool_t * do_transaction_ptr,
+                                      H5O_loc_t * id_oloc_ptr,
+                                      hbool_t * id_oloc_open_ptr,
+                                      hbool_t * transaction_begun_ptr,
+                                      uint64_t * trans_num_ptr,
+                                      const char * api_call_name);
+
+H5_DLL herr_t H5AC2_end_transaction(hbool_t do_transaction,
+                                    H5O_loc_t * id_oloc_ptr,
+                                    hbool_t id_oloc_open,
+                                    hbool_t transaction_begun,
+                                    uint64_t trans_num,
+                                    const char * api_call_name);
+#else /* old version */
+H5_DLL herr_t H5AC2_begin_transaction(H5F_t *    f,
+                                      uint64_t * trans_num_ptr,
+                                      const char * api_call_name);
+H5_DLL herr_t H5AC2_end_transaction(H5F_t *    f,
+                                    uint64_t trans_num,
+                                    const char * api_call_name);
+#endif /* old version */
 H5_DLL herr_t H5AC2_get_entry_status(H5F_t * f, haddr_t addr,
 				    unsigned * status_ptr);
 H5_DLL herr_t H5AC2_set(H5F_t *f, hid_t dxpl_id, const H5AC2_class_t *type,
@@ -306,7 +339,8 @@ H5_DLL herr_t H5AC2_get_cache_hit_rate(H5AC2_t * cache_ptr,
 H5_DLL herr_t H5AC2_reset_cache_hit_rate_stats(H5AC2_t * cache_ptr);
 
 H5_DLL herr_t H5AC2_set_cache_auto_resize_config(const H5F_t * f,
-                                              H5AC2_cache_config_t *config_ptr);
+                                                 hid_t dxpl_id,
+                                                 H5AC2_cache_config_t *config_ptr);
 
 H5_DLL herr_t H5AC2_validate_config(H5AC2_cache_config_t * config_ptr);
 

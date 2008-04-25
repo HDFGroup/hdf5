@@ -25,8 +25,9 @@
 #include "H5Iprivate.h"		/* IDs					*/
 #include "H5Lpkg.h"             /* Links                                */
 #include "H5MMprivate.h"        /* Memory management                    */
-#include "H5Opublic.h"         /* File objects                         */
+#include "H5Opublic.h"          /* File objects                         */
 #include "H5Pprivate.h"         /* Property lists                       */
+#include "H5AC2private.h"       /* Metadata cache                       */
 
 static hid_t H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
     const void *udata, size_t UNUSED udata_size, hid_t lapl_id);
@@ -311,7 +312,7 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
     uint8_t    *p;                      /* Pointer into external link buffer */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API_META(H5Lcreate_external, FAIL)
+    FUNC_ENTER_API_META(H5Lcreate_external, link_loc_id, FAIL)
     H5TRACE6("e", "*s*si*sii", file_name, obj_name, link_loc_id, link_name,
              lcpl_id, lapl_id);
 
