@@ -1173,6 +1173,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5Dchunk.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5Dcompact.c"
 				>
 				<FileConfiguration
@@ -1543,6 +1547,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5Dscatgath.c"
+				>
 			</File>
 			<File
 				RelativePath="..\..\..\src\H5Dselect.c"
