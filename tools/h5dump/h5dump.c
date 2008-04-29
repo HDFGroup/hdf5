@@ -2440,6 +2440,9 @@ static void dump_fill_value(hid_t dcpl,hid_t type_id, hid_t obj_id)
  *
  * Programmer:  pvn
  *
+ * Modifications: pvn, March 28, 2008
+ *   Add a COMPRESSION ratio information for cases when filters are present
+ *
  *-------------------------------------------------------------------------
  */
 static void
@@ -2467,6 +2470,7 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
     unsigned         j;
 
     storage_size=H5Dget_storage_size(obj_id);
+    nfilters = H5Pget_nfilters(dcpl_id);
     ioffset=H5Dget_offset(obj_id);
     next=H5Pget_external_count(dcpl_id);
     strcpy(f_name,"\0");
@@ -2490,7 +2494,72 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
             HDfprintf(stdout, ", %Hu", chsize[i]);
         printf(" %s\n", dump_header_format->dataspacedimend);
         indentation(indent + COL);
-        HDfprintf(stdout, "SIZE %Hu\n ", storage_size);
+
+
+       /* if there are filters, print a compression ratio */
+        if ( nfilters )
+        {
+
+            hid_t sid = H5Dget_space( obj_id );
+            hid_t tid = H5Dget_type( obj_id );
+            size_t datum_size = H5Tget_size( tid );
+            hsize_t dims[H5S_MAX_RANK];
+            int ndims = H5Sget_simple_extent_dims( sid, dims, NULL);  
+            hsize_t nelmts = 1;
+            hsize_t size;
+            double per = 0;
+            hssize_t a, b;
+            int ok = 0;
+
+            /* only print the compression ratio for these filters */
+            for ( i = 0; i < nfilters; i++) 
+            {
+                cd_nelmts = NELMTS(cd_values);
+                filtn = H5Pget_filter2(dcpl_id, (unsigned)i, &filt_flags, &cd_nelmts,
+                    cd_values, sizeof(f_name), f_name, NULL);
+                
+                switch (filtn) 
+                {
+                case H5Z_FILTER_DEFLATE:
+                case H5Z_FILTER_SZIP:
+                case H5Z_FILTER_NBIT:
+                case H5Z_FILTER_SCALEOFFSET:
+                    ok = 1;
+                    break;
+                }
+            }
+            
+            if (ndims && ok )
+            {
+                
+                for (i = 0; i < ndims; i++)
+                {
+                    nelmts *= dims[i];
+                }
+                size = nelmts * datum_size;
+
+                a = size; b = storage_size;
+                if (a!=0)
+                    per = (double) (b-a)/a;
+                
+                per = -per;
+                per *=100;
+
+                HDfprintf(stdout, "SIZE %Hu (%.1f%%COMPRESSION)\n ", storage_size, per);
+                
+            }
+            else
+                HDfprintf(stdout, "SIZE %Hu\n ", storage_size);
+
+
+            H5Sclose(sid);
+            H5Tclose(tid);
+            
+        }
+        else
+        {
+            HDfprintf(stdout, "SIZE %Hu\n ", storage_size);
+        }
 
         /*end indent */
         indent -= COL;
@@ -2559,11 +2628,11 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
             printf("%s\n",END);
         }
     }
-    /*-------------------------------------------------------------------------
+   /*-------------------------------------------------------------------------
     * FILTERS
     *-------------------------------------------------------------------------
     */
-    nfilters = H5Pget_nfilters(dcpl_id);
+    
 
     indentation(indent + COL);
     printf("%s %s\n", FILTERS, BEGIN);
