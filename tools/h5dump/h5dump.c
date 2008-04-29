@@ -2441,7 +2441,7 @@ static void dump_fill_value(hid_t dcpl,hid_t type_id, hid_t obj_id)
  * Programmer:  pvn
  *
  * Modifications: pvn, March 28, 2008
- *   Add a COMPRESSION ration information for cases when filters are present
+ *   Add a COMPRESSION ratio information for cases when filters are present
  *
  *-------------------------------------------------------------------------
  */
