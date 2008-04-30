@@ -54,7 +54,11 @@ nh5iget_type_c (hid_t_f *obj_id, int_f *type)
  * Returns:     length of the name on success, -1 on failure
  * Programmer:  Elena Pourmal
  *              Wednesday, March 12, 2003
- * Modifications:
+ * Modifications: 
+ *               Changed the size of c_buf_size to c_buf_size + 1, which
+ *               fixes the problem of truncating the string by 1 if the 
+ *               exact size of the string (buf_size) is passed in.
+ *               M.S. Breitenfeld, April 21, 2008
  *---------------------------------------------------------------------------*/
 int_f
 nh5iget_name_c(hid_t_f *obj_id, _fcd buf, size_t_f *buf_size, size_t_f *name_size)
@@ -68,8 +72,8 @@ nh5iget_name_c(hid_t_f *obj_id, _fcd buf, size_t_f *buf_size, size_t_f *name_siz
      /*
       * Allocate buffer to hold name of an attribute
       */
-     c_buf_size = (size_t)*buf_size;
-     c_buf = (char *)HDmalloc(c_buf_size +1);
+     c_buf_size = (size_t)*buf_size +1;
+     c_buf = (char *)HDmalloc(c_buf_size);
      if (c_buf == NULL) return ret_value;
 
      /*
@@ -82,7 +86,7 @@ nh5iget_name_c(hid_t_f *obj_id, _fcd buf, size_t_f *buf_size, size_t_f *name_siz
      /*
       * Convert C name to FORTRAN and place it in the given buffer
       */
-      HD5packFstring(c_buf, _fcdtocp(buf), c_buf_size);
+      HD5packFstring(c_buf, _fcdtocp(buf), c_buf_size-1);
       *name_size = (size_t_f)c_size;
       ret_value = 0;
 

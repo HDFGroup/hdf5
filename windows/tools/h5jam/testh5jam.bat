@@ -249,7 +249,7 @@ rem
     rem Compare to 'cmpfile', result is set in result1
     set tfile=tt1
     %getub_bin% -c %size% %hfile% > %tfile%
-    fc /w %cmpfile% %tfile% > nul
+    fc /w %cmpfile% %tfile% | find "FC: no diff" > nul
     if %errorlevel% neq 0 (
         fc /w %cmpfile% %file%
         set result1=1

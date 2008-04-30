@@ -123,7 +123,7 @@ H5S_mpio_all_type( const H5S_t *space, size_t elmt_size,
     *new_type = MPI_BYTE;
     H5_ASSIGN_OVERFLOW(*count, total_bytes, hsize_t, size_t);
     *extra_offset = 0;
-    *is_derived_type = FALSE;
+    *is_derived_type = 0;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -163,7 +163,7 @@ H5S_mpio_none_type( const H5S_t UNUSED *space, size_t UNUSED elmt_size,
     *new_type = MPI_BYTE;
     *count = 0;
     *extra_offset = 0;
-    *is_derived_type = FALSE;
+    *is_derived_type = 0;
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 } /* H5S_mpio_none_type() */
@@ -456,7 +456,7 @@ H5S_mpio_hyper_type( const H5S_t *space, size_t elmt_size,
     /* fill in the remaining return values */
     *count = 1;			/* only have to move one of these suckers! */
     *extra_offset = 0;
-    *is_derived_type = TRUE;
+    *is_derived_type = 1;
     HGOTO_DONE(SUCCEED);
 
 empty:
@@ -464,7 +464,7 @@ empty:
     *new_type = MPI_BYTE;
     *count = 0;
     *extra_offset = 0;
-    *is_derived_type = FALSE;
+    *is_derived_type = 0;
 
 done:
     /* Release selection iterator */
@@ -475,7 +475,7 @@ done:
 
 #ifdef H5S_DEBUG
   if(H5DEBUG(S)){
-    HDfprintf(H5DEBUG(S), "Leave %s, count=%ld  is_derived_type=%t\n",
+    HDfprintf(H5DEBUG(S), "Leave %s, count=%ld  is_derived_type=%d\n",
 		FUNC, *count, *is_derived_type );
   }
 #endif
@@ -556,7 +556,7 @@ H5S_mpio_span_hyper_type( const           H5S_t *space,
     /* fill in the remaining return values */
     *count = 1;
     *extra_offset = 0;
-    *is_derived_type = TRUE;
+    *is_derived_type = 1;
 
     HGOTO_DONE(SUCCEED);
 
@@ -565,7 +565,7 @@ empty:
     *new_type        = MPI_BYTE;
     *count           = 0;
     *extra_offset    = 0;
-    *is_derived_type = FALSE;
+    *is_derived_type = 0;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);

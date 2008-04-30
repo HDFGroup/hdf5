@@ -254,6 +254,7 @@ int test_basic(const char *fname1,
     */
     {
 
+#if 1
         float data15[6];
         float data16[6];
 
@@ -273,9 +274,48 @@ int test_basic(const char *fname1,
 
         write_dset(gid1,1,dims1,"fp15",H5T_NATIVE_FLOAT,data15);
         write_dset(gid1,1,dims1,"fp16",H5T_NATIVE_FLOAT,data16);
+#else
+
+#define NU_ELMTS 1000000
+
+        hsize_t i;
+
+        hsize_t dims2[1] = { NU_ELMTS };
+
+        float *data15 = malloc (NU_ELMTS * sizeof(float) );
+        float *data16 = malloc (NU_ELMTS * sizeof(float) );
+
+        data15[0] = (float) sqrt( (double)-1 );
+        data15[1] = 1;
+        data15[2] = (float) sqrt( (double)-1 );
+        data15[3] = 1;
+        data15[4] = 1;
+        data15[5] = 1;
+
+        data16[0] = (float) sqrt( (double)-1 );
+        data16[1] = (float) sqrt( (double)-1 );
+        data16[2] = 1;
+        data16[3] = 1;
+        data16[4] = 1;
+        data16[5] = 1;
+
+        for ( i = 6; i < NU_ELMTS; i++ )
+        {
+            data15[i] = /*data15[0];*/ 2;
+            data16[i] = 1;
+        }
+
+        write_dset(gid1,1,dims2,"fp15",H5T_NATIVE_FLOAT,data15);
+        write_dset(gid1,1,dims2,"fp16",H5T_NATIVE_FLOAT,data16);
+
+        free( data15 );
+        free( data16 );
+#endif
 
     }
+
        
+        
    /*-------------------------------------------------------------------------
     * NaNs in H5T_NATIVE_DOUBLE
     *-------------------------------------------------------------------------
@@ -303,7 +343,9 @@ int test_basic(const char *fname1,
         write_dset(gid1,1,dims1,"fp18",H5T_NATIVE_DOUBLE,data18);
 
     }
- 
+        
+
+  
     
    /*-------------------------------------------------------------------------
     * close
@@ -402,7 +444,7 @@ int test_types(const char *fname)
     */
     H5Lcreate_external("filename", "objname", fid1, "ext_link", H5P_DEFAULT, H5P_DEFAULT);
     H5Lregister(UD_link_class);
-    H5Lcreate_ud(fid1, "ud_link", MY_LINKCLASS, NULL, (size_t)0, H5P_DEFAULT, H5P_DEFAULT);
+    H5Lcreate_ud(fid1, "ud_link", MY_LINKCLASS, NULL, 0, H5P_DEFAULT, H5P_DEFAULT);
 
     /*-------------------------------------------------------------------------
     * Close
@@ -730,13 +772,13 @@ int test_datasets(const char *file,
 
     write_dset_in(gid,"/dset",fid,make_diffs);
 
-    /* close */
+    /* Close */
     status = H5Dclose(did);
     assert(status >= 0);
     status = H5Gclose(gid);
     assert(status >= 0);
 
-    /* close file */
+    /* Close file */
     status = H5Fclose(fid);
     assert(status >= 0);
     return status;
@@ -772,13 +814,12 @@ void write_attr_in(hid_t loc_id,
  hid_t   sid;
  hid_t   tid;
  herr_t  status;
- int     val, i, j, k, l, n;
+ int     val, i, j, k, n;
  float   f;
 
  /* create 1D attributes with dimension [2], 2 elements */
  hsize_t    dims[1]={2};
- char       buf1[2][STR_SIZE]= {"ab","de"};        /* string */
- char       *buf1a[2];                             /* VL string */
+ char       buf1[2][2]= {"ab","de"};        /* string */
  char       buf2[2]= {1,2};                 /* bitfield, opaque */
  s_t        buf3[2]= {{1,2},{3,4}};         /* compound */
  hobj_ref_t buf4[2];                        /* reference */
@@ -791,8 +832,7 @@ void write_attr_in(hid_t loc_id,
 
  /* create 2D attributes with dimension [3][2], 6 elements */
  hsize_t    dims2[2]={3,2};
- char       buf12[3][2][STR_SIZE]= {{"ab","cd"},{"ef","gh"},{"ij","kl"}};     /* string */
- char       *buf12a[3][2];                                               /* VL string */
+ char       buf12[6][2]= {"ab","cd","ef","gh","ij","kl"};         /* string */
  char       buf22[3][2]= {{1,2},{3,4},{5,6}};                     /* bitfield, opaque */
  s_t        buf32[6]= {{1,2},{3,4},{5,6},{7,8},{9,10},{11,12}};   /* compound */
  hobj_ref_t buf42[3][2];                                          /* reference */
@@ -804,11 +844,9 @@ void write_attr_in(hid_t loc_id,
 
  /* create 3D attributes with dimension [4][3][2], 24 elements */
  hsize_t    dims3[3]={4,3,2};
- char       buf13[4][3][2][STR_SIZE]= {{{"ab","cd"},{"ef","gh"},{"ij","kl"}},
-                {{"mn","pq"},{"rs","tu"},{"vw","xz"}},
-                {{"AB","CD"},{"EF","GH"},{"IJ","KL"}},
-                {{"MN","PQ"},{"RS","TU"},{"VW","XZ"}}};  /* string */
- char       *buf13a[4][3][2];   /* VL string */
+ char       buf13[24][2]= {"ab","cd","ef","gh","ij","kl","mn","pq",
+ "rs","tu","vw","xz","AB","CD","EF","GH",
+ "IJ","KL","MN","PQ","RS","TU","VW","XZ"};  /* string */
  char       buf23[4][3][2];    /* bitfield, opaque */
  s_t        buf33[4][3][2];    /* compound */
  hobj_ref_t buf43[4][3][2];    /* reference */
@@ -833,7 +871,9 @@ void write_attr_in(hid_t loc_id,
  {
   for (i=0; i<2; i++)
    for (j=0; j<2; j++)
+   {
     buf1[i][j]='z';
+   }
  }
  /*
  buf1[2][2]= {"ab","de"};
@@ -848,15 +888,8 @@ void write_attr_in(hid_t loc_id,
 [ 1 ]          e                z
  */
  tid = H5Tcopy(H5T_C_S1);
- status  = H5Tset_size(tid, (size_t)STR_SIZE);
+ status  = H5Tset_size(tid, 2);
  write_attr(loc_id,1,dims,"string",tid,buf1);
- status = H5Tclose(tid);
-
- for (i=0; i<2; i++)
-  buf1a[i]=buf1[i];
- tid = H5Tcopy(H5T_C_S1);
- status  = H5Tset_size(tid, H5T_VARIABLE);
- write_attr(loc_id,1,dims,"VLstring",tid,buf1a);
  status = H5Tclose(tid);
 
 /*-------------------------------------------------------------------------
@@ -902,7 +935,7 @@ void write_attr_in(hid_t loc_id,
 [ 1 ]          2               0               2
 */
 
- tid = H5Tcreate(H5T_OPAQUE, (size_t)1);
+ tid = H5Tcreate(H5T_OPAQUE, 1);
  status = H5Tset_tag(tid, "1-byte opaque type"); /* must set this */
  write_attr(loc_id,1,dims,"opaque",tid,buf2);
  status = H5Tclose(tid);
@@ -1093,10 +1126,7 @@ position        array of </g1>  array of </g1>  difference
  */
  if (make_diffs)
  {
-  for (i=0; i<3; i++)
-   for (j=0; j<2; j++)
-    for (k=0; k<2; k++)
-     buf12[i][j][k]='z';
+  memset(buf12, 'z', sizeof buf12);
  }
 
  /*
@@ -1120,16 +1150,8 @@ position        array of </g1>  array of </g1>  difference
  */
 
  tid = H5Tcopy(H5T_C_S1);
- status  = H5Tset_size(tid, (size_t)STR_SIZE);
+ status  = H5Tset_size(tid, 2);
  write_attr(loc_id,2,dims2,"string2D",tid,buf12);
- status = H5Tclose(tid);
-
- for (i=0; i<3; i++)
-  for (j=0; j<2; j++)
-   buf12a[i][j]=buf12[i][j];
- tid = H5Tcopy(H5T_C_S1);
- status  = H5Tset_size(tid, H5T_VARIABLE);
- write_attr(loc_id,2,dims2,"VLstring2D",tid,buf12a);
  status = H5Tclose(tid);
 
 /*-------------------------------------------------------------------------
@@ -1179,7 +1201,7 @@ position        array of </g1>  array of </g1>  difference
 [ 2 0 ]          5               0               5
 [ 2 1 ]          6               0               6
  */
- tid = H5Tcreate(H5T_OPAQUE, (size_t)1);
+ tid = H5Tcreate(H5T_OPAQUE, 1);
  status = H5Tset_tag(tid, "1-byte opaque type"); /* must set this */
  write_attr(loc_id,2,dims2,"opaque2D",tid,buf22);
  status = H5Tclose(tid);
@@ -1266,6 +1288,7 @@ position        enum2D of </g1> enum2D of </g1> difference
  n=0;
  for (i = 0; i < 3; i++) {
   for (j = 0; j < 2; j++) {
+    int l;
     buf52[i][j].p = malloc((i + 1) * sizeof(int));
     buf52[i][j].len = i + 1;
     for (l = 0; l < i + 1; l++)
@@ -1388,11 +1411,7 @@ position        float2D of </g1> float2D of </g1> difference
 
  if (make_diffs)
  {
-  for (i=0; i<4; i++)
-   for (j=0; j<3; j++)
-    for (k=0; k<2; k++)
-     for (l=0; l<2; l++)
-      buf13[i][j][k][l]='z';
+  memset(buf13,'z',sizeof buf13);
  }
 
  /*
@@ -1453,17 +1472,8 @@ position        string3D of </g1> string3D of </g1> difference
  */
 
  tid = H5Tcopy(H5T_C_S1);
- status  = H5Tset_size(tid, (size_t)STR_SIZE);
+ status  = H5Tset_size(tid, 2);
  write_attr(loc_id,3,dims3,"string3D",tid,buf13);
- status = H5Tclose(tid);
-
- for (i=0; i<4; i++)
-  for (j=0; j<3; j++)
-   for (k=0; k<2; k++)
-    buf13a[i][j][k]=buf13[i][j][k];
- tid = H5Tcopy(H5T_C_S1);
- status  = H5Tset_size(tid, H5T_VARIABLE);
- write_attr(loc_id,3,dims3,"VLstring3D",tid,buf13a);
  status = H5Tclose(tid);
 
 /*-------------------------------------------------------------------------
@@ -1518,7 +1528,7 @@ position        bitfield3D of </g1> bitfield3D of </g1> difference
  * H5T_OPAQUE
  *-------------------------------------------------------------------------
  */
- tid = H5Tcreate(H5T_OPAQUE, (size_t)1);
+ tid = H5Tcreate(H5T_OPAQUE, 1);
  status = H5Tset_tag(tid, "1-byte opaque type"); /* must set this */
  write_attr(loc_id,3,dims3,"opaque3D",tid,buf23);
  status = H5Tclose(tid);
@@ -1676,6 +1686,7 @@ position        enum3D of </g1> enum3D of </g1> difference
  for (i = 0; i < 4; i++) {
   for (j = 0; j < 3; j++) {
    for (k = 0; k < 2; k++) {
+    int l;
     buf53[i][j][k].p = malloc((i + 1) * sizeof(int));
     buf53[i][j][k].len = i + 1;
     for (l = 0; l < i + 1; l++)
@@ -1810,14 +1821,13 @@ void write_dset_in(hid_t loc_id,
  hid_t   tid;
  hid_t   dcpl;
  herr_t  status;
- int     val, i, j, k, l, n;
+ int     val, i, j, k, n;
  float   f;
  int     fillvalue=2;
 
  /* create 1D attributes with dimension [2], 2 elements */
  hsize_t    dims[1]={2};
  char       buf1[2][STR_SIZE]= {"ab","de"}; /* string */
- char       *buf1a[2];                      /* VL string */
  char       buf2[2]= {1,2};                 /* bitfield, opaque */
  s_t        buf3[2]= {{1,2},{3,4}};         /* compound */
  hobj_ref_t buf4[2];                        /* reference */
@@ -1830,8 +1840,7 @@ void write_dset_in(hid_t loc_id,
 
  /* create 2D attributes with dimension [3][2], 6 elements */
  hsize_t    dims2[2]={3,2};
- char       buf12[3][2][STR_SIZE]= {{"ab","cd"},{"ef","gh"},{"ij","kl"}};     /* string */
- char       *buf12a[3][2];                                        /* VL string */
+ char       buf12[6][STR_SIZE]= {"ab","cd","ef","gh","ij","kl"};  /* string */
  char       buf22[3][2]= {{1,2},{3,4},{5,6}};                     /* bitfield, opaque */
  s_t        buf32[6]= {{1,2},{3,4},{5,6},{7,8},{9,10},{11,12}};   /* compound */
  hobj_ref_t buf42[3][2];                                          /* reference */
@@ -1842,11 +1851,9 @@ void write_dset_in(hid_t loc_id,
 
  /* create 3D attributes with dimension [4][3][2], 24 elements */
  hsize_t    dims3[3]={4,3,2};
- char       buf13[4][3][2][STR_SIZE]= {{{"ab","cd"},{"ef","gh"},{"ij","kl"}},
-                {{"mn","pq"},{"rs","tu"},{"vw","xz"}},
-                {{"AB","CD"},{"EF","GH"},{"IJ","KL"}},
-                {{"MN","PQ"},{"RS","TU"},{"VW","XZ"}}};  /* string */
- char       *buf13a[4][3][2];  /* VL string */
+ char       buf13[24][STR_SIZE]= {"ab","cd","ef","gh","ij","kl","mn","pq",
+ "rs","tu","vw","xz","AB","CD","EF","GH",
+ "IJ","KL","MN","PQ","RS","TU","VW","XZ"};  /* string */
  char       buf23[4][3][2];    /* bitfield, opaque */
  s_t        buf33[4][3][2];    /* compound */
  hobj_ref_t buf43[4][3][2];    /* reference */
@@ -1871,20 +1878,15 @@ void write_dset_in(hid_t loc_id,
  {
   for (i=0; i<2; i++)
    for (j=0; j<2; j++)
+   {
     buf1[i][j]='z';
+   }
  }
 
 
  tid = H5Tcopy(H5T_C_S1);
- status  = H5Tset_size(tid,(size_t)STR_SIZE);
+ status  = H5Tset_size(tid,STR_SIZE);
  write_dset(loc_id,1,dims,"string",tid,buf1);
- status = H5Tclose(tid);
-
- for (i=0; i<2; i++)
-  buf1a[i]=buf1[i];
- tid = H5Tcopy(H5T_C_S1);
- status  = H5Tset_size(tid, H5T_VARIABLE);
- write_dset(loc_id,1,dims,"VLstring",tid,buf1a);
  status = H5Tclose(tid);
 
 /*-------------------------------------------------------------------------
@@ -1915,7 +1917,7 @@ void write_dset_in(hid_t loc_id,
   }
  }
 
- tid = H5Tcreate(H5T_OPAQUE, (size_t)1);
+ tid = H5Tcreate(H5T_OPAQUE, 1);
  status = H5Tset_tag(tid, "1-byte opaque type"); /* must set this */
  write_dset(loc_id,1,dims,"opaque",tid,buf2);
  status = H5Tclose(tid);
@@ -2049,24 +2051,13 @@ void write_dset_in(hid_t loc_id,
 
  if (make_diffs)
  {
-  for (i=0; i<3; i++)
-   for (j=0; j<2; j++)
-    for (k=0; k<2; k++)
-     buf12[i][j][k]='z';
+  memset(buf12, 'z', sizeof buf12);
  }
 
 
  tid = H5Tcopy(H5T_C_S1);
- status  = H5Tset_size(tid,(size_t)STR_SIZE);
+ status  = H5Tset_size(tid,STR_SIZE);
  write_dset(loc_id,2,dims2,"string2D",tid,buf12);
- status = H5Tclose(tid);
-
- for (i=0; i<3; i++)
-  for (j=0; j<2; j++)
-   buf12a[i][j]=buf12[i][j];
- tid = H5Tcopy(H5T_C_S1);
- status  = H5Tset_size(tid, H5T_VARIABLE);
- write_dset(loc_id,2,dims2,"VLstring2D",tid,buf12a);
  status = H5Tclose(tid);
 
 /*-------------------------------------------------------------------------
@@ -2088,7 +2079,7 @@ void write_dset_in(hid_t loc_id,
  * H5T_OPAQUE
  *-------------------------------------------------------------------------
  */
- tid = H5Tcreate(H5T_OPAQUE, (size_t)1);
+ tid = H5Tcreate(H5T_OPAQUE, 1);
  status = H5Tset_tag(tid, "1-byte opaque type"); /* must set this */
  write_dset(loc_id,2,dims2,"opaque2D",tid,buf22);
  status = H5Tclose(tid);
@@ -2144,6 +2135,8 @@ void write_dset_in(hid_t loc_id,
  n = 0;
  for(i = 0; i < 3; i++)
   for(j = 0; j < 2; j++) {
+    int l;
+
     buf52[i][j].p = malloc((i + 1) * sizeof(int));
     buf52[i][j].len = i + 1;
     for(l = 0; l < i + 1; l++)
@@ -2220,25 +2213,12 @@ void write_dset_in(hid_t loc_id,
 
  if (make_diffs)
  {
-  for (i=0; i<4; i++)
-   for (j=0; j<3; j++)
-    for (k=0; k<2; k++)
-     for (l=0; l<2; l++)
-      buf13[i][j][k][l]='z';
+  memset(buf13,'z',sizeof buf13);
  }
 
  tid = H5Tcopy(H5T_C_S1);
- status  = H5Tset_size(tid,(size_t)STR_SIZE);
+ status  = H5Tset_size(tid,STR_SIZE);
  write_dset(loc_id,3,dims3,"string3D",tid,buf13);
- status = H5Tclose(tid);
-
- for (i=0; i<4; i++)
-  for (j=0; j<3; j++)
-   for (k=0; k<2; k++)
-    buf13a[i][j][k]=buf13[i][j][k];
- tid = H5Tcopy(H5T_C_S1);
- status  = H5Tset_size(tid, H5T_VARIABLE);
- write_dset(loc_id,3,dims3,"VLstring3D",tid,buf13a);
  status = H5Tclose(tid);
 
 /*-------------------------------------------------------------------------
@@ -2266,7 +2246,7 @@ void write_dset_in(hid_t loc_id,
  * H5T_OPAQUE
  *-------------------------------------------------------------------------
  */
- tid = H5Tcreate(H5T_OPAQUE, (size_t)1);
+ tid = H5Tcreate(H5T_OPAQUE, 1);
  status = H5Tset_tag(tid, "1-byte opaque type"); /* must set this */
  write_dset(loc_id,3,dims3,"opaque3D",tid,buf23);
  status = H5Tclose(tid);
@@ -2336,6 +2316,8 @@ void write_dset_in(hid_t loc_id,
  for(i = 0; i < 4; i++)
   for(j = 0; j < 3; j++)
    for(k = 0; k < 2; k++) {
+    int l;
+
     buf53[i][j][k].p = malloc((i + 1) * sizeof(int));
     buf53[i][j][k].len = i + 1;
     for(l = 0; l < i + 1; l++)
@@ -2428,7 +2410,7 @@ void gen_datareg(hid_t fid,
  int             i;
 
  /* allocate the buffer for write the references */
- rbuf = calloc((size_t)2, sizeof(hdset_reg_ref_t));
+ rbuf = calloc(2, sizeof(hdset_reg_ref_t));
 
  /* allocate the buffer for write the data dataset */
  buf = malloc(10 * 10 * sizeof(int));
@@ -2473,7 +2455,7 @@ void gen_datareg(hid_t fid,
   coord[3][0]=2; coord[3][1]=5;
   coord[4][0]=1; coord[4][1]=7;
  }
- H5Sselect_elements(sid1,H5S_SELECT_SET,(size_t)5,(const hsize_t *)coord);
+ H5Sselect_elements(sid1,H5S_SELECT_SET,5,coord);
  H5Sget_select_npoints(sid1);
 
  /* store second dataset region */
@@ -2542,7 +2524,7 @@ int test_hyperslab(const char *fname,
   goto out;
  
  /* create a evenly divided buffer from 0 to 127  */
- buf = (char *)HDmalloc((size_t)(nelmts * size));
+ buf = (char *)HDmalloc((unsigned)(nelmts * size));
  s = 1024 * 1024 / 127;
  for(i = 0, j = 0, c = 0; i < 1024 * 1024; j++, i++) {
   if(j == s) {
@@ -2613,35 +2595,31 @@ int write_attr(hid_t loc_id,
                hid_t tid,
                void *buf)
 {
-    hid_t   aid=-1;
-    hid_t   sid=-1;
-    
-    /* create a space  */
-    if((sid = H5Screate_simple(rank, dims, NULL)) < 0)
-        goto out;
-    
-    /* create the attribute */
-    if((aid = H5Acreate2(loc_id, name, tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        goto out;
-    
-    /* write */
-    if(buf)
-    {
-        if(H5Awrite(aid, tid, buf) < 0)
-            goto out;
-    }
-        
-    /* close */
-    H5Aclose(aid);
-    H5Sclose(sid);
-        
-    return SUCCEED;
-        
+ hid_t   aid;
+ hid_t   sid;
+
+ /* create a space  */
+ if((sid = H5Screate_simple(rank, dims, NULL)) < 0)
+     goto out;
+
+ /* create the attribute */
+ if((aid = H5Acreate2(loc_id, name, tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+     goto out;
+
+ /* write */
+ if(buf)
+   if(H5Awrite(aid, tid, buf) < 0)
+      goto out;
+
+ /* close */
+ H5Aclose(aid);
+ H5Sclose(sid);
+
+ return SUCCEED;
+
 out:
-    
-    H5Aclose(aid);
-    H5Sclose(sid);
-    return FAIL;
+ 
+ return FAIL;
 }
 
 /*-------------------------------------------------------------------------
@@ -2659,8 +2637,8 @@ int write_dset( hid_t loc_id,
                 hid_t tid,
                 void *buf )
 {
-    hid_t   did=-1;
-    hid_t   sid=-1;
+    hid_t   did;
+    hid_t   sid;
 
     /* create a space  */
     if((sid = H5Screate_simple(rank, dims, NULL)) < 0)
@@ -2672,10 +2650,8 @@ int write_dset( hid_t loc_id,
 
     /* write */
     if(buf)
-    {
         if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
             goto out;
-    }
 
     /* close */
     H5Dclose(did);
@@ -2684,9 +2660,6 @@ int write_dset( hid_t loc_id,
     return SUCCEED;
 
 out:
-
-    H5Dclose(did);
-    H5Sclose(sid);
     return FAIL;
 }
 

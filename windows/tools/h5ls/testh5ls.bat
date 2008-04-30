@@ -124,7 +124,7 @@ rem %2 and on -- argument for the h5ls tool
     rem     call :testing CREATED %params%
     rem     copy %actual% %expect% > nul
     ) else (
-        fc /w %expect% %actual% > nul
+        fc /w %expect% %actual% | find "FC: no diff" > nul
         if !errorlevel! equ 0 (
             call :testing PASSED %params%
         ) else (

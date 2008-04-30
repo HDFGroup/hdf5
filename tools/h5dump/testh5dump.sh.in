@@ -325,7 +325,8 @@ TOOLTEST tall-2B.ddl -A -r tall.h5
 TOOLTEST tall-4s.ddl --dataset=/g1/g1.1/dset1.1.1 --start=1,1 --stride=2,3 --count=3,2 --block=1,1 tall.h5
 TOOLTEST tall-5s.ddl -d "/g1/g1.1/dset1.1.2[0;2;10;]" tall.h5
 TOOLTEST tdset-3s.ddl -d "/dset1[1,1;;;]" tdset.h5
-
+# block
+# TOOLTEST tdset2-1s.ddl -d "/dset1[;3,2;4,4;1,4]" tdset2.h5
 
 # test printing characters in ASCII instead of decimal
 TOOLTEST tchar1.ddl -r tchar.h5

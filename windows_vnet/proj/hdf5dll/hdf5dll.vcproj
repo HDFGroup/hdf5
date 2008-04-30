@@ -973,9 +973,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\src\H5Dchunk.c">
-			</File>
-			<File
 				RelativePath="..\..\..\src\H5Dcompact.c">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -1372,9 +1369,6 @@
 						Optimization="2"
 						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\..\..\src\H5Dscatgath.c">
 			</File>
 			<File
 				RelativePath="..\..\..\src\H5Dselect.c">

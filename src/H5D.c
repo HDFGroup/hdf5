@@ -625,7 +625,7 @@ H5Dget_create_plist(hid_t dset_id)
                 H5I_dec_ref(src_id);
                 H5I_dec_ref(dst_id);
                 if(bkg_buf)
-                    (void)H5FL_BLK_FREE(type_conv, bkg_buf);
+                    H5FL_BLK_FREE(type_conv, bkg_buf);
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
             } /* end if */
 
@@ -633,7 +633,7 @@ H5Dget_create_plist(hid_t dset_id)
             H5I_dec_ref(src_id);
             H5I_dec_ref(dst_id);
             if(bkg_buf)
-                (void)H5FL_BLK_FREE(type_conv, bkg_buf);
+                H5FL_BLK_FREE(type_conv, bkg_buf);
         } /* end if */
     } /* end if */
 

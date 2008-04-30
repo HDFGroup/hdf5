@@ -115,6 +115,31 @@ typedef struct H5S_sel_iter_t {
     } u;
 } H5S_sel_iter_t;
 
+#ifdef H5S_DEBUG
+typedef struct H5S_iostats_t {
+    H5S_sel_type	ftype;
+    H5S_sel_type	mtype;
+
+    struct {
+	H5_timer_t	scat_timer;		/*time spent scattering	*/
+	hsize_t		scat_nbytes;		/*scatter throughput	*/
+	hsize_t		scat_ncalls;		/*number of calls	*/
+	H5_timer_t	gath_timer;		/*time spent gathering	*/
+	hsize_t		gath_nbytes;		/*gather throughput	*/
+	hsize_t		gath_ncalls;		/*number of calls	*/
+	H5_timer_t	bkg_timer;		/*time for background	*/
+	hsize_t		bkg_nbytes;		/*background throughput	*/
+	hsize_t		bkg_ncalls;		/*number of calls	*/
+	H5_timer_t	read_timer;		/*time for read calls	*/
+	hsize_t		read_nbytes;		/*total bytes read	*/
+	hsize_t		read_ncalls;		/*number of calls	*/
+	H5_timer_t	write_timer;		/*time for write calls	*/
+	hsize_t		write_nbytes;		/*total bytes written	*/
+	hsize_t		write_ncalls;		/*number of calls	*/
+    } stats[2];		/* 0=output, 1=input */
+} H5S_iostats_t;
+#endif
+
 /* If the module using this macro is allowed access to the private variables, access them directly */
 #ifdef H5S_PACKAGE
 #define H5S_GET_EXTENT_TYPE(S)          ((S)->extent.type)
@@ -173,6 +198,9 @@ typedef struct H5S_sel_iter_t {
 /* Operations on dataspaces */
 H5_DLL H5S_t *H5S_copy(const H5S_t *src, hbool_t share_selection, hbool_t copy_max);
 H5_DLL herr_t H5S_close(H5S_t *ds);
+#ifdef H5S_DEBUG
+H5_DLL H5S_iostats_t *H5S_find(const H5S_t *mem_space, const H5S_t *file_space);
+#endif /* H5S_DEBUG */
 H5_DLL H5S_class_t H5S_get_simple_extent_type(const H5S_t *ds);
 H5_DLL hssize_t H5S_get_simple_extent_npoints(const H5S_t *ds);
 H5_DLL hsize_t H5S_get_npoints_max(const H5S_t *ds);

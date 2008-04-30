@@ -61,7 +61,7 @@ The "--enable-parallel" is optional in this case.
 Make sure your environment variables are set correctly to compile and execute
 a single process mpi applications for the SP machine. Unfortunately, the
 setting varies from machine to machine.  E.g., the following works for the
-IBM SP machine at LLNL.
+Blue machine of LLNL.
 
     setenv MP_PROCS     1
     setenv MP_NODES     1
@@ -102,7 +102,7 @@ This allows for >2GB sized files on Linux systems and is only available with
 Linux kernels 2.4 and greater.
 
 
-2.4. Red Storm (Cray XT3) (for v1.8 and later)
+2.4. Red Storm (Cray XT3) (for v1.8 only)
 -------------------------
 The following steps are for building the Parallel HDF5 for the Red Storm
 compute nodes.  They would probably work for other Cray XT3 systems but have
@@ -180,28 +180,15 @@ environment variable at the time `make check' is run (or the value 3).
 
 4. Parallel test suite
 ----------------------
-The testpar/ directory contains tests for Parallel HDF5 and MPI-IO.  Here are
-some notes about some of the tests.
-
-The t_mpi tests the basic functionalities of some MPI-IO features used by
-Parallel HDF5.  It usually exits with non-zero code if a required MPI-IO
-feature does not succeed as expected.  One exception is the testing of
-accessing files larger than 2GB.  If the underlying filesystem or if the
-MPI-IO library fails to handle file sizes larger than 2GB, the test will
-print informational messages stating the failure but will not exit with
-non-zero code.  Failure to support file size greater than 2GB is not a fatal
-error for HDF5 because HDF5 can use other file-drivers such as families of
-files to bypass the file size limit.
-
-The t_posix_compliant tests if the file system is POSIX compliant when POSIX
-and MPI IO APIs are used.  This is for information only and it always exits
-with 0 even when non-compliance errors have occurred.  This is to prevent
-the test from aborting the remaining parallel HDF5 tests unnecessarily.
-
-The t_cache does many small sized I/O requests and may not run well in a
-slow file system such as NFS disk. If it takes a long time to run it, try
-set the environment variable $HDF5_PARAPREFIX to a file system more suitable
-for MPI-IO requests before running t_cache.
+The testpar/ directory contains tests for Parallel HDF5 and MPI-IO.  The t_mpi
+tests the basic functionalities of some MPI-IO features used by Parallel HDF5.
+It usually exits with non-zero code if a required MPI-IO feature does not
+succeed as expected.  One exception is the testing of accessing files larger
+than 2GB.  If the underlying filesystem or if the MPI-IO library fails to
+handle file sizes larger than 2GB, the test will print informational messages
+stating the failure but will not exit with non-zero code.  Failure to support
+file size greater than 2GB is not a fatal error for HDF5 because HDF5 can
+use other file-drivers such as families of files to bypass the file size limit.
 
 By default, the parallel tests use the current directory as the test directory.
 This can be changed by the environment variable $HDF5_PARAPREFIX.  For example,

@@ -22,7 +22,7 @@
 			OutputDirectory="..\..\..\proj\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\property_sheets\remove-posix-warnings.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -80,7 +80,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)\hdf5_cppdll.dll"
-				LinkIncremental="0"
+				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				ManifestFile="$(TargetPath).intermediate.manifest"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
@@ -117,7 +117,7 @@
 			OutputDirectory="..\..\..\proj\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\property_sheets\remove-posix-warnings.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -175,7 +175,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)\hdf5_cppdll.dll"
-				LinkIncremental="0"
+				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				ManifestFile="$(TargetPath).intermediate.manifest"
 				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
@@ -212,7 +212,7 @@
 			OutputDirectory="..\..\..\proj\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\property_sheets\remove-posix-warnings.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -269,7 +269,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)\hdf5_cppddll.dll"
-				LinkIncremental="0"
+				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				ManifestFile="$(TargetPath).intermediate.manifest"
 				GenerateDebugInformation="true"
@@ -307,7 +307,7 @@
 			OutputDirectory="..\..\..\proj\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\property_sheets\remove-posix-warnings.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -364,7 +364,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)\hdf5_cppddll.dll"
-				LinkIncremental="0"
+				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				ManifestFile="$(TargetPath).intermediate.manifest"
 				GenerateDebugInformation="true"
@@ -415,7 +415,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -425,7 +425,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -435,7 +435,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -446,7 +446,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -461,7 +461,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -471,7 +471,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -481,7 +481,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -492,7 +492,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -507,7 +507,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -517,7 +517,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -527,7 +527,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -538,7 +538,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -553,7 +553,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -563,7 +563,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -573,7 +573,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -584,7 +584,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -599,7 +599,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -609,7 +609,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -619,7 +619,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -630,7 +630,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -645,7 +645,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -655,7 +655,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -665,7 +665,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -676,7 +676,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -691,7 +691,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -701,7 +701,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -711,7 +711,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -722,7 +722,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -737,7 +737,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -747,7 +747,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -757,7 +757,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -768,7 +768,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -783,7 +783,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -793,7 +793,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -803,7 +803,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -814,7 +814,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -829,7 +829,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -839,7 +839,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -849,7 +849,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -860,7 +860,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -875,7 +875,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -885,7 +885,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -895,7 +895,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -906,7 +906,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -921,7 +921,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -931,7 +931,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -941,7 +941,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -952,7 +952,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -967,7 +967,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -977,7 +977,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -987,7 +987,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -998,7 +998,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -1013,7 +1013,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1023,7 +1023,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1033,7 +1033,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -1044,7 +1044,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -1059,7 +1059,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1069,7 +1069,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1079,7 +1079,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -1090,7 +1090,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -1105,7 +1105,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1115,7 +1115,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1125,7 +1125,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -1136,7 +1136,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -1151,7 +1151,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1161,7 +1161,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1171,7 +1171,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -1182,7 +1182,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -1197,7 +1197,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1207,7 +1207,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1217,7 +1217,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -1228,7 +1228,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -1243,7 +1243,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1253,7 +1253,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1263,7 +1263,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -1274,7 +1274,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -1289,7 +1289,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1299,7 +1299,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1309,7 +1309,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -1320,7 +1320,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -1335,7 +1335,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1345,7 +1345,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1355,7 +1355,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -1366,7 +1366,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -1381,7 +1381,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1391,7 +1391,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1401,7 +1401,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -1412,7 +1412,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -1427,7 +1427,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1437,7 +1437,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1447,7 +1447,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -1458,7 +1458,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -1473,7 +1473,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1483,7 +1483,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1493,7 +1493,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -1504,7 +1504,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -1519,7 +1519,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1529,7 +1529,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1539,7 +1539,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -1550,7 +1550,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -1565,7 +1565,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1575,7 +1575,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1585,7 +1585,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
@@ -1596,7 +1596,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL"
+						PreprocessorDefinitions="HDF5_CPPDLL_EXPORTS;_HDF5USEDLL_;WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;$(NoInherit)"
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>

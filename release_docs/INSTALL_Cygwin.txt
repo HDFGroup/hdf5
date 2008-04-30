@@ -98,7 +98,29 @@ Install HDF5 on Cygwin
 
             $ bunzip2 < hdf5-1.8.0.tar.bz2 | tar xf - 
             
-3. Configuring 
+3. Setup environment
+
+   In the latest version of the Cygwin DLL, a bug was introduced
+   relating to the 'timezone' global variable and C99 support. As
+   work-around, we must use a special compiler flag.
+
+      3.1. In the command prompt you plan to build from, run the 
+           command:
+
+               export CFLAGS="-ansi ${CFLAGS}"
+
+      3.2 (Optional) If you plan to build C++ libraries, also
+          run the command:
+
+               export CXXFLAGS="-ansi ${CXXFLAGS}"
+
+      3.3 (Optional) If you plan to build Fortran libraries, also
+          run the command:
+
+               export FCFLAGS="-ansi ${FCFLAGS}"
+
+
+4. Configuring 
      
    Notes: See detailed information in hdf5/release_docs/INSTALL, 
           part 5. Full installation instructions for source 
@@ -112,19 +134,19 @@ Install HDF5 on Cygwin
      
    In short,
      
-   3.1 To configure HDF5 C Library, using 
+   4.1 To configure HDF5 C Library, using 
             
             $ ./configure
                    
-   3.2 To configure HDF5 C/C++ Library, using
+   4.2 To configure HDF5 C/C++ Library, using
 
             $ ./configure --enable-cxx
                    
-   3.3 To configure HDF5 C/Fortran Library, using
+   4.3 To configure HDF5 C/Fortran Library, using
 
             $ ./configure --enable-fortran
                    
-   3.4 To configure HDF5 C with Szip library, using
+   4.4 To configure HDF5 C with Szip library, using
 
             $ ./configure  --with-szlib="path to szlib"
            
@@ -135,15 +157,15 @@ Install HDF5 on Cygwin
            
             $ ./configure --with-szlib=/cygdrive/c/szip
                    
-   3.5 To configure HDF5 C without Zlib,
+   4.5 To configure HDF5 C without Zlib,
      
        To disable zlib, using
 
            $ ./configure --without-zlib
            
-   3.6 Two ways to configure HDF5 C with specified Zlib
+   4.6 Two ways to configure HDF5 C with specified Zlib
      
-     3.6.1 Using
+     4.6.1 Using
 
            $ ./configure --with-zlib=INCDIR,LIBDIR
 
@@ -153,7 +175,7 @@ Install HDF5 on Cygwin
 
  $ ./configure --with-zlib=/cygdrive/c/usr/include,/cygdrive/c/usr/lib
 
-     3.6.2 Through the CPPFLAGS and LDFLAGS Variables
+     4.6.2 Through the CPPFLAGS and LDFLAGS Variables
            
        For example, if zlib was installed in the directory 
        /cygdrive/c/usr then using the following command to configure 
@@ -163,7 +185,7 @@ Install HDF5 on Cygwin
            $ LDFLAGS=-L/cygdrive/c/usr/lib \
            $ ./configure
 
-   3.7 To specify the installation directories, using 
+   4.7 To specify the installation directories, using 
 
             $ ./configure --prefix="path for installation"
                  
@@ -174,7 +196,7 @@ Install HDF5 on Cygwin
        the path with the `--prefix=PATH' switch as in the above
        command.
 
-   3.8 Combination of Switches 
+   4.8 Combination of Switches 
 
        All of the above switches can be combined together. For 
        example, if users want to configure HDF5 C/C++/Fortran 
@@ -209,7 +231,7 @@ Install HDF5 on Cygwin
              --enable-fortran 
              <"If no more switches, then hit Enter">
                           
-4. Make and Make Check
+5. Make and Make Check
 
    After configuration is done successfully, run the following series of
    commands to build, test and install HDF5
@@ -220,19 +242,22 @@ Install HDF5 on Cygwin
    Before run "make install", check output file for "make check", there
    should be no failures at all.
 
-5. Make Install
+6. Make Install
 
             $ make install  > "output file name"
    
      
-6. Check installed HDF5 library
+7. Check installed HDF5 library
 
    After step 4, go to your installation directory, there should be 
    three subdirectories: "bin" "include" and "lib".
 
-7. Known Problems 
+8. Known Problems 
    
    Shared libraries can not be built on Cygwin In release 1.8.0.
+
+   There are issues linking with the latest Cygwin DLL.  As a work-around,
+   make sure to follow the steps described in step 3 above.
 
 -----------------------------------------------------------------------
 

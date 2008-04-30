@@ -3303,10 +3303,6 @@ test_attr_deprec(hid_t fcpl, hid_t fapl)
     CHECK(dataset, FAIL, "H5Dopen2");
 
 
-    /* Get number of attributes with bad ID */
-    ret = H5Aget_num_attrs(-1);
-    VERIFY(ret, FAIL, "H5Aget_num_attrs");
-
     /* Get number of attributes */
     ret = H5Aget_num_attrs(dataset);
     VERIFY(ret, 1, "H5Aget_num_attrs");

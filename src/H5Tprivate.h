@@ -69,7 +69,7 @@ typedef struct H5T_conv_cb_t {
 
 /* Values for the optimization of compound data reading and writing.  They indicate
  * whether the fields of the source and destination are subset of each other and
- * there is no conversion needed.
+ * there is no conversion needed.  It's for the Chicago company.
  */
 typedef enum {
     H5T_SUBSET_BADVALUE = -1,   /* Invalid value */

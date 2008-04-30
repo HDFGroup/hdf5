@@ -1421,32 +1421,32 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
 
     /* Create xfer properties to preserve initialized data */
     if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
-       FAIL_STACK_ERROR
+       goto error;
 
     if(H5Pset_preserve(dxpl, TRUE) < 0)
-       FAIL_STACK_ERROR
+       goto error;
 
     /* Rewrite contiguous data set */
     if((dataset = H5Dopen2(file, DSET_NAME[0], H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+        goto error;
 
     /* Write the data to the dataset */
     if(H5Dwrite(dataset, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf) < 0)
-	FAIL_STACK_ERROR
+	goto error;
 
     if(H5Dclose(dataset) < 0)
-        FAIL_STACK_ERROR
+        goto error;
 
     /* Rewrite chunked data set */
     if((dataset = H5Dopen2(file, DSET_NAME[1], H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+        goto error;
 
     /* Write the data to the dataset */
     if(H5Dwrite(dataset, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf) < 0)
-	FAIL_STACK_ERROR
+	goto error;
 
     if(H5Dclose(dataset) < 0)
-        FAIL_STACK_ERROR
+        goto error;
 
     PASSED();
 
@@ -1458,48 +1458,48 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
 
     /* Check contiguous data set */
     if((dataset = H5Dopen2(file, DSET_NAME[0], H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+        goto error;
 
     if(H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
-        FAIL_STACK_ERROR
+        goto error;
 
     if(compare_data(orig, rbuf, TRUE) < 0) 
-        TEST_ERROR
+        goto error;
 
     if(H5Dclose(dataset) < 0)
-        FAIL_STACK_ERROR
+        goto error;
 
     /* Check chunked data set */
     if((dataset = H5Dopen2(file, DSET_NAME[1], H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+        goto error;
 
     if(H5Dread(dataset, dst_tid, H5S_ALL, H5S_ALL, dxpl, rbuf) < 0)
-        FAIL_STACK_ERROR
+        goto error;
 
     if(compare_data(orig, rbuf, TRUE) < 0) 
-        TEST_ERROR
+        goto error;
 
     if(H5Dclose(dataset) < 0)
-        FAIL_STACK_ERROR
+        goto error;
 
     /* Finishing test and release resources */
     if(H5Sclose(space) < 0)
-        FAIL_STACK_ERROR
+        goto error;
 
     if(H5Pclose(dcpl) < 0)
-        FAIL_STACK_ERROR
+        goto error;
 
     if(H5Pclose(dxpl) < 0)
-        FAIL_STACK_ERROR
+        goto error;
 
     if(H5Tclose(src_tid) < 0)
-        FAIL_STACK_ERROR
+        goto error;
     if(H5Tclose(dst_tid) < 0)
-        FAIL_STACK_ERROR
+        goto error;
     if(H5Tclose(rew_tid) < 0)
-        FAIL_STACK_ERROR
+        goto error;
     if(H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
+        goto error;
 
     free(orig);
     free(rbuf);

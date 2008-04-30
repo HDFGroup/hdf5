@@ -273,7 +273,7 @@ error:
         H5Sclose(sid_ref);
         H5Dclose(did1);
         H5Dclose(did2);
-        H5Aclose(aid);
+        H5Pclose(aid);
     } H5E_END_TRY;
 
     return(-1);

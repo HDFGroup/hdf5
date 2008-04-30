@@ -527,6 +527,7 @@ static void test_compact_vlstring()
  *-------------------------------------------------------------------------
  */
 // String for testing attributes
+static const char *string_att = "This is the string for the attribute";
 static char *string_att_write=NULL;
 
 // Info for a string attribute

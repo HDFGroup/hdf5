@@ -1,20 +1,32 @@
-HDF5 version 1.9.5 currently under development
+HDF5 version 1.8.0 currently under development
 ================================================================================
 
 
 INTRODUCTION
 
-This document describes the differences between HDF5-1.9.0 and
-HDF5 1.9.x snapshot, and contains information on the platforms 
-tested and known problems in HDF5-1.9.x. 
-For more details check the HISTORY*.txt files in the HDF5 source.
+This document describes the differences between HDF5-1.6.* and
+Hdf5 1.8.0 release candidate "HDF5-1.8.0-rc*", and contains information 
+on the platforms tested and known problems in HDF5-1.8.0-rc*. 
+For more details check the HISTORY.txt file in the HDF5 source.
 
 
-Links to HDF5 1.9.x source code can be found on THG's development 
-FTP server at the following location:
-     ftp://ftp.hdfgroup.uiuc.edu/pub/outgoing/hdf5/snapshots
-User documentation for the snapshot can be accessed directly at this location: 
-     http://www.hdfgroup.uiuc.edu/HDF5/doc_dev_snapshot/H5_dev/
+Links to HDF5 1.8.0-rc* source code, documentation, and additional materials
+can be found on THG's development server (www.hdfgroup.uiuc.edu) at the
+following location:
+     http://www.hdfgroup.uiuc.edu/HDF5/release/beta/obtain518.html
+User documentation for the beta can be accessed directly at this location: 
+     http://www.hdfgroup.uiuc.edu/HDF5/doc_1.8pre/doc/
+
+New features of the upcoming 1.8.0 release are described in
+the "What's New in 1.8.0?" document:
+     http://www.hdfgroup.uiuc.edu/HDF5/doc_1.8pre/WhatsNew180.html
+
+New and modified APIs are described briefly in
+     http://www.hdfgroup.uiuc.edu/HDF5/doc_1.8pre/WhatsNew180.html
+and will be listed in the "HDF5 Software Changes" document:
+     http://www.hdfgroup.uiuc.edu/HDF5/doc_1.8pre/doc/ADGuide/Changes.html
+
+
 
 For more information, see the HDF5 home page:
    
@@ -29,7 +41,7 @@ CONTENTS
 
 - New Features
 - Support for new platforms and languages
-- Bug Fixes since HDF5-1.8.0
+- Bug Fixes since HDF5-1.6.0
 - Platforms Tested
 - Known Problems
 
@@ -38,71 +50,940 @@ New Features
 ============
 
     Configuration:
-    -------------
+    --------------
+        - Removed stream-vfd from the HDF5 library. - AKC 2007/11/19.
+        - Updated versions of autotools. HDF5 now uses automake 1.10.0, 
+          autoconf 2.61, and libtool 1.5.22. MAM - 2007/7/25.
+        - Changed default fortran compiler to g95 when gcc is used. - AKC
+          2007/2/17.
+        - 'make check-vfd' can now be run from the top level directory. Not all
+          tests that 'make check' invokes work with certain Virtual File Drivers,
+          so those tests have been skipped. - MAM 2006/7/17  
+        - Added the variable HDF5TestExpress to control how long tests run.
+          Setting it to a value between 0 and 3 controls how thoroughly the
+          library is tested, with 0 being an "exhaustive run" and 3 being a
+          very quick "smoke test."  1 (a "full run") is the default.
+          -JML 2006/6/21
+        - If both shared and static libraries are installed, now both will be
+          tested during 'make install'. -MAM 2006/06/21
+        - Added support to explicity enable stream_vfd or shared libraries
+          when using parallel via the '--enable-stream_vfd' and
+          '--enable-shared' options, respectively. If not explicity defined, 
+          These settings default to enabled when parallel is not used, 
+          and disabled when parallel is used. -MAM 2006/06/17
+        - Remove the flexible parallel code and the --enable-fphdf5
+          configure option, it was never up to production standards
+          anyway.  -QAK 2006/4/20
+        - Added a macro hdf5_mpi_special_collective_io_works to filter out
+          some mpi-io packages that don't support collective IO for no IO
+          contributions in some processes. -KY 2006/2/16
+	- Added -shlib option to link against installed shared libraries to
+	  h5c++ and h5fc.  -JML 2005/11/1
+	- Added --enable-build-all option to configure, which only developers
+	  should need to use.  -JML 2005/10/24
+	- Configure uses the 'TR' variable to let the user override the path
+          to the 'tr' utility. -JML 2005/10/17
+	- Configure can recognize -lmpich as a form of MPI library. -AKC-
+	  2005/9/28.
+        - MD5 checksumming has been added to snapshot releases.  Release
+          tarballs will be accompanied by .md5 checksum files, which can
+          be verified using the md5sum utility.  -JML 2005/9/6
+        - Some configure flags are incompatible (e.g., the C++ APIs cannot
+          be built using the parallel version of HDF5).  configure will now
+          output errors when some common incompatible features are used
+          together.  -JML 2005/9/6
+        - A new API function, H5Tis_hard(), was added to the library.  It
+          checks if a conversion function is a compiler (hard) conversion.
+          SLU - 2005/9/6
+	- t_mpi will run the test_mpio_derived_dtype by default unless it is
+	  known not working (indicated by macro H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS
+	  not defined.)  -AKC- 2005/8/23.
+	- Test execution has changed in a number of ways:
+	  When make is invoked in parallel (using -j), sequential tests
+	  are now executed as parallel make targets.  This should make them
+	  finish more quickly on machines with multiple processors.
+	  Since test output is garbled when they are executed by parallel make,
+	  tests now dump their output to foo.log files and foo.logsh files
+	  (for test scripts).  These logs are printed to the screen only
+	  when a test fails or when all tests in the current directory have
+	  completed successfully.
+	  When tests pass, they will create a foo.chkexe file.
+	  This prevents the test from executing again until the test or
+	  main library changes.
+	  All files generated by tests (*.chkexe, *.log, and any *.h5 files
+	  created) can be removed by invoking 'make check-clean'.
+	  Sequential and parallel library tests can now be invoked separately.
+	  'make check-s' will execute only sequential tests, and 'make check-p'
+	  will execute only parallel tests.  'make check' will still execute
+	  all tests.
+	    -JML 2005/08/03
+        - On windows, all.zip is deprecated. users should
+             read INSTALL_Windows.txt to know the details.
+             Reasons to deprecate all.zip:
+		1. Avoid confliction for windows programmers
+                2. Decrease size of CVS tree by adding all.zip
+	        3. Avoid using winzip as the intermediate step
+             --KY 2005/04/22
+	- When HDF5 is created as a shared library, it now uses libtool's
+	  shared library versioning scheme. -JML 2005/04/18
+	- HDF5 now uses automake 1.9.5 to generate Makefiles.in.
+	  This has a number of effects on users:
+          The Fortran compiler should be set using the environment
+          variable $FC, not $F9X.  F9X still works, but is depreciated.
+	  The output of make may be different.  This should be only a
+          cosmetic effect.
+	  make depened (or make dep) is no longer recognized, since automake
+	  handles dependency tracking.
+	  Some new configure options exist.  --enable-dependency-tracking
+          and --disable-dependency-tracking are used to control automake's
+	  dependency tracking.  Dependencies are on by default *on most
+	  platforms and compilers*.  If --enable-dependency-tracking is
+	  used, they will be enabled on any platform.  However, this can
+	  slow down builds or even cause build errors in some cases.
+	  Likewise, --disable-dependency-tracking can speed up builds and
+	  avoid some build errors.
+	  Some make targets have alternate names.  make check-install and
+	  make installcheck do the same thing, for instance.
+	  pmake on IRIX can be invoked from the root directory, but the
+	  -V flag must be used to invoke it in any subdirectory or it
+	  will give an error about undefined variables.
+	  JML 2005/01 - 2005/03
+        - Hardware conversion between long double and integers is also added.
+          SLU 2005/02/10
+        - Started to support software conversion between long double and 
+          integers.  Hardware conversion will come very soon.  SLU - 2005/1/6
+	- Intel v8.0 compiler would infinite loop when compiling some test
+	  code with -O3 option.  Changed enable-production default compiler
+	  option to -O2. AKC - 2004/12/06
+	- Long double is assumed to be a supported C data type.  It is a
+	  stanadard C89 type. AKC - 2004/10/22
+	- The IA64 will use ecc as the C++ compiler by default.
+        - Added some initial support for making valgrind/Purify (or similar
+            memory checking products) happier by initializing buffers to zero
+            and disabling the internal free list code.  To take advantage of
+            this, use the "--enable-using-memchecker" configure option when
+            building the library.  QAK - 2004/07/23
+        - Fixed the long compile time of H5detect.c when v7.x Intel Compiler
+	    is used with optimization NOT off.  AKC - 2004/05/20
+	- Fixed configure setting of C++ for OSF1 platform. AKC - 2004/01/06
+        - Prefix default is changed from /usr/local to `pwd`/hdf5.
+            AKC - 2003/07/09
 
     Library:
     --------
+       - Removed size restrictions on attributes, when using the "latest"
+            version of the file format. - QAK - 2007/02/21
+       - Relaxed restrictions on attribute operations to allow a file ID to
+            be used as the "location ID".  If a file ID is used, the attribute
+            operation will occur on the root group of the file.
+            - QAK - 2007/02/09
+       - Enabled the CORE driver to read an existing file depending on 
+            the setting of the backing_store for H5Pset_fapl_core and file 
+            open flags. - SLU - 2006/11/30
+       - Added new H5Gget_info_by_idx() routine to query the information about
+            a group according to the order within an index.
+            - QAK - 2006/11/27
+       - Added new H5Gget_info() routine to query the information about a
+            group by name.
+            - QAK - 2006/11/27
+       - Added new H5Oget_info_by_idx() routine to query the information about
+            an object in a group according to the order within an index.
+            - QAK - 2006/11/26
+       - Added new H5Oget_info() routine to query the information about an
+            object in a group by name.
+            - QAK - 2006/11/26
+       - Added new H5Oopen_by_idx() routine to open an object in a group
+            according to the order within an index.
+            - QAK - 2006/11/20
+       - Added new H5Literate() routine to iterate over links in a group
+            according to the order within an index.
+            - QAK - 2006/11/20
+       - Added new H5Ldelete_by_idx() routine to delete a link according to
+            the order within an index.
+            - QAK - 2006/11/13
+       - Added new H5Lget_val_by_idx() routine to query the value of a soft link
+            according to the order within an index.
+            - QAK - 2006/11/13
+       - Added new H5Lget_name_by_idx() routine to query the name of a link
+            according to the order within an index.
+            - QAK - 2006/11/12
+       - Added new H5Rget_name() routine to determine the name of the object
+            that a reference points to, as long as the object is still
+            reachable in the group hierarchy.
+            - QAK - 2006/11/10
+       - Added new H5Lget_info_by_idx() routine to query the link information
+            according to the order within an index.
+            - QAK - 2006/11/10
+       - Added feature to H5Iget_name to allow retrieving the name of any
+            object's ID, as long as the object is still reachable in the
+            group hierarchy.
+            - LA - 2006/11/01
+       - Added External and User-defined links.
+            External links are links from one HDF5 file to another; they
+            require both the name of the file and a path within that file.
+            User-defined links allow users to supply callback functions
+            for link traversals, allowing links to exhibit essentially
+            any behavior.
+            External links are a kind of user-defined link, so their default
+            behavior can be overridden by the user.
+            -JML 2006/8/23
+       - Added H5Oopen and H5Oclose for opening objects of unknown type
+            (as link callback functions do).
+            -JML 2006/8/23
+       - Added H5Oopen_by_addr, H5Oincr_refcount, and H5Odecr_refcount for
+            opening objects by address.  Be very careful with these!
+            -JML 2006/8/23
+       - Added H5Fget_intent to get the "intent" of a file (whether it
+            was opened with read-write access or read-only.
+            -JML 2006/8/23
+       - Added Link Access Property Lists. They currently contain two
+            properties, nlinks (H5Pget/set_nlinks) and elink_prefix
+            (H5Pget/set_elink_prefix). nlinks controls how many soft and
+            user-defined traversals are allowed before HDF5 assumes it has
+            found a cycle (previously this defaulted to 16).
+            The elink_prefix is a filesystem path that is prefixed to the
+            names of any external link files opened using this LAPL.
+            -JML 2006/8/23
+       - Add H5L link APIs.  Old APIs (H5Glink, H5Gmove, etc.) are still
+         supported but deprecated.
+         New APIs are:
+            H5Llink - create a link to an object given its ID
+            H5Lmove - just like H5Gmove2
+            H5Lcopy - copy a link without copying the underlying object
+            H5Lcreate_hard - like H5Glink2 for hard links
+            H5Lcreate_soft - like H5Glink2 for soft links
+            H5Ldelete - just like H5Gunlink
+            H5Lget_val - just like H5Gget_linkval
+            H5Lget_info - gets link-specific info (like H5Gget_objinfo)
+
+         In addition, H5Gcreate_anon, H5Tcommit_anon, and H5Dcreate_anon
+         no longer create links to objects; objects must be manually linked
+         using H5Llink or they will be deleted when the ID is closed.
+
+         Link Creation Property Lists can be used to pass character
+         encoding (ASCII or UTF-8) for link names and to set the Intermediate
+         Group Creation Flag:
+            H5Pset_char_encoding, H5Pget_char_encoding
+            H5Pset_copy_object, H5Pget_copy_object
+         -JML 2006/7/5
+       - Added managements of collective IO supports for chunking storage
+         inside parallel HDF5
+         1) Implemented One IO with collective mode for all chunks in the
+            application by building one MPI derived datatype accross all
+            chunks.
+         2) Implemented the decision-making support to do collective IO inside
+            MPI-IO per chunk. 
+         3) Added the decision-making support to do one IO accross all chunks
+            or to do multiple IOs with each IO per chunk.
+         4) Added the support to handle the case some processes won't do any IOs in 
+            collectively.
+         5) Some MPI-IO package(mpich 1.2.6 or lower, e.g.) cannot handle
+            collective IO correctly for the case when some processes have no
+            contributions to IOs, a special macro is added to change
+            collective IO mode to independent IO mode inside HDF5 library.
+
+            Currently we find that MPICH at Linux and vender MPI-IO package at NCSA
+            Altix cannot handle this case. 
+            
+             "hdf5_mpi_special_collective_io_works=${hdf5_mpi_special_collective_io_works='no'}"
+              has been added at the end of file <ia64-linux-gnui> and
+                                                 <linux-gnulibc1>.
+
+             If MPI-IO packages at your Linux and Altix support this case,
+             please comment out the last line and report to us at
+             help@hdfgroup.org. We can tune in our configuration to
+             support this.                                                     
+ 
+             KY - 2006/02/16
+       - Added character encoding to attribute creation property lists.
+            JML - 2006/01/02
+       - Added H5Gcopy() routine to copy objects between while keeping
+         data in compressed form.  QAK - 2005/11/06
+       - Added H5Sextent_equal() routine.  QAK - 2005/11/06
+       - Added HSYS_ERROR which retrieves the system error message and pushes
+         it to the error stack.  This gives more information of the failed
+	 system call. AKC - 2005/08/04
+       - Added H5F_OBJ_LOCAL flag to H5Fget_obj_count() & H5Fget_obj_ids(), to
+         allow querying for objects in file that were opened with a particular
+         file ID, instead of all objects opened in file with any file ID.
+         QAK - 2005/06/01
+       - Added H5T_CSET_UTF8 character set to mark datatypes that use the
+         UTF-8 Unicode character encoding.  Added tests to ensure that
+         library handles UTF-8 object names, attributes, etc. -JL 2005/05/13
+       - HDF5 supports collective MPI-IO for irregular selection with HDF5
+         dataset. Irregular selection is when users use H5Sselect_hyperslab
+         more than once for the same dataset.
+         Currently, not all MPI-IO packages support complicated MPI derived
+                     datatype used in the implementation of irregular
+                     selection INSIDE HDF5. 
+                     1) DEC 5.x is not supporting complicated derived datatype.
+                     2) For AIX 5.1,
+                     if your poe version number is 3.2.0.19 or lower,
+                     please edit powerpc-ibm-aix5.x under hdf5/config,
+                     Find the line with
+                            << hdf5_mpi_complex_derived_datatype_works>>
+                     and UNCOMMENT this line before the configure.
+                     check poe version with the following command:
+                     lpp -l all | grep ppe.poe
+                     3) For Linux cluster, 
+                        if mpich version is 1.2.5 or lower, collective irregular selection
+                        IO is not supported, internally independent IO is used.
+                     4) For IRIX 6.5,
+                        if C compiler version is 7.3 or lower, collective irregular selection
+                        IO is not supported, internally independent IO is used.
+                     5) For platforms which internally used mpich, if the
+                        mpich version is 1.2.5 or lower, please find the 
+                        corresponding config file and add
+                        hdf5_mpi_complex_derived_datatype_works='no' at the
+                        end of the configuration file. For example, at NCSA
+                        SGI Altix, the internal mpich library is 1.2.5. So 
+                        hdf5_mpi_complex_derived_datatype_works='no' should be
+                        added at the end of the config file ia64-linux-gnu.
+                     KY - 2005/09/12
+        We also found not all MPI-IO packages support collective IO with one
+                    or more processes to have no contributions to IO.
+                     For mpich version 1.2.6 or lower and all IRIX machine, 
+                     if the library  checks that there are no IO contributions for some
+                     processes, collective IO request is replaced with
+                     independent inside HDF5.
+                     KY - 2006/05/04
+                    
+        - HDF5 N-bit filter 
+          HDF5 support N-bit filter from this version,  
+          The N-Bit filter is used effectively for compressing data of N-Bit
+          datatype as well as compound and array datatype with N-Bit fields. 
+          KY - 2005/04/15
+        - HDF5 scaleoffset filter
+          HDF5 supports scaleoffset filter for users to do data
+          compression through HDF5 library. 
+          Scale-Offset compression performs a scale and/or offset operation
+          on each data value and truncates the resulting value to a minimum 
+          number of bits and then stores the data.
+          Scaleoffset filter supports floating-point and integer datatype.
+          Please check the HDF5 reference manual for this.
+          KY - 2005/06/06
+        - Retired SRB vfd (--with-srb). Functions H5Pset_fapl_srb and
+          H5Pget_fapl_srb were removed.  EIP - 2005/04/07
+	- Retired GASS vfd (--with-gass).  Functions H5Pset_fapl_gass and
+	  H5Pget_fapl_gass are removed too.  AKC - 2005/3/3
+        - Pablo was removed from the source code EIP - 2005/01/21
+        - Modified registration of SZIP to dynamically detect the presence
+            or absence of the encoder.  Changed configure and Makefiles,
+            and tests to dynamically detect encoder. BEM - 2004/11/02
+	- Added function H5Pget_data_transform, together with the previously
+	    added H5Pset_data_transform, to support the data transform
+	    feature. AKC - 2004/10/26
+        - Compound datatype has been enhanced with a new feature of size 
+            adjustment.  The size can be increased and decreased(without
+            cutting the last member) as long as it doesn't go down to zero.  
+            No API change is involved.  SLU - 2004/10/1
+        - Put back 6 old error API functions to be backward compatible with
+            version 1.6.  They are H5Epush, H5Eprint, H5Ewalk, H5Eclear,
+            H5Eset_auto, H5Eget_auto.  Their new equivalent functions are
+            called H5Epush_stack, H5Eprint_stack, H5Ewalk_stack,
+            H5Eclear_stack, H5Eset_auto_stack, H5Eget_auto_stack.  SLU -
+            2004/9/2
+        - 4 new API functions, H5Tencode, H5Tdecode, H5Sencode, H5Sdecode were
+            added to the library.  Given object ID, these functions encode and 
+            decode HDF5 objects(data type and space) information into and from 
+            binary buffer.        SLU - 2004/07/21
+        - Modified the way how HDF5 calculates 'pixels_per_scanline' parameter for 
+            SZIP compression. Now there is no restriction on the size and shape of the
+            chunk except that the total number of elements in the chunk cannot be 
+            bigger than 'pixels_per_block' parameter provided by the user.  
+                                                                     EIP - 2004/07/21  
+        - Added support for SZIP without encoder.  Added H5Zget_filter_info
+            and changed H5Pget_filter and H5Pget_filter_by_id to support this
+            change.  JL/NF - 2004/06/30
+        - SZIP always uses K13 compression.  This flag no longer needs to
+            be set when calling H5Pset_szip.  If the flag for CHIP
+            compression is set, it will be ignored (since the two are mutually
+            exclusive).  JL/NF - 2004/6/30
+        - A new API function H5Fget_name was added.  It returns the name
+            of the file by object(file, group, data set, named data type,
+            attribute) ID.  SLU - 2004/06/29
+        - Added support for user defined identifier types.  NF/JL - 2004/06/29
+        - A new API function H5Fget_filesize was added.  It returns the
+            actual file size of the opened file.  SLU - 2004/06/24
+	- New Feature of Data transformation is added.  AKC - 2004/05/03.
+        - New exception handler for datatype conversion is put in to 
+            replace the old overflow callback function.  This exception
+            handler is set through H5Pset_type_conv_cb function.
+            SLU - 2004/4/27
+        - Added option that if $HDF5_DISABLE_VERSION_CHECK is set to 2,
+	    will suppress all library version mismatch warning messages.
+	    AKC - 2004/4/14
+	- A new type of dataspace, null dataspace(dataspace without any 
+            element) was added.  SLU - 2004/3/24
+        - Data type conversion(software) from integer to float was added.
+            SLU - 2004/3/13 
+        - Data type conversion(software) from float to integer was added.
+            Conversion from integer to float will be added later.  
+            SLU -2004/2/4
+        - Added new H5Premove_filter routine to remove I/O pipeline filters
+            from dataset creation property lists.  PVN - 2004/01/26
+        - Added new 'compare' callback parameter to H5Pregister & H5Pinsert
+            routines.  QAK - 2004/01/07
+        - Data type conversion(hardware) between integers and floats was added.
+            SLU 2003/11/21
+        - New function H5Iget_file_id() was added.  It returns file ID given
+            an object(dataset, group, or attribute) ID.  SLU 2003/10/29
+        - Added new fields to the H5G_stat_t for more information about an
+            object's object header.  QAK 2003/10/06
+        - Added new H5Fget_freespace() routine to query the free space in a
+            given file.  QAK 2003/10/06
+        - Added backward compatability with v1.6 for new Error API. SLU - 
+            2003/09/24
+        - Changed 'objno' field in H5G_stat_t structure from 'unsigned long[2]'
+            to 'haddr_t'.  QAK - 2003/08/08
+        - Changed 'fileno' field in H5G_stat_t structure from 'unsigned long[2]'
+            to 'unsigned long'.  QAK - 2003/08/08
+        - Changed 'hobj_ref_t' type from structure with array field to 'haddr_t'.
+            QAK - 2003/08/08
+        - Object references (hobj_ref_t) can now be compared with the 'objno'
+            field in the H5G_stat_t struct for testing if two objects are the
+            same within a file.  QAK - 2003/08/08
+        - Switched over to new error API. SLU - 2003/07/25
 
     Parallel Library:
     -----------------
+	- Added mpich2 as a testing "platform" informally. AKC - 2005/9/28.
+	- A dataset created in serial mode with H5D_ALLOC_TIME_INCR allocation
+	  setting was not extendible, either explicitly by H5Dextend or
+	  implicitly by writing to unallocated chunks.	Library now allocates
+	  more space when needed or directed if the file is opened by parallel
+	  mode, independent of what the dataset allocation mode is.
+	  CC/AKC - 2005/08/29.
+        - Allow compressed, chunked datasets to be read in parallel.
+            QAK - 2004/10/04
+        - Add options of using atomicity and file-sync to test_mpio_1wMr.
+            AKC - 2003/11/13
+        - Added parallel test, test_mpio_1wMr, which tests if the
+            underlaying parallel I/O system is conforming to the POSIX
+            write/read requirement.  AKC - 2003/11/12
 
     Fortran Library:
     ----------------
+         - added support for shared Fortran libraries.  -JML 2005/09/20
+         - added missing h5tget_member_class_f function
+                                                 EIP 2005/04/06         
+         - added new functions h5fget_name_f and h5fget_filesize_f 
+                                                 EIP 2004/07/08
+         - h5dwrite/read_f and h5awrite/read_f functions only accept dims parameter
+            of the type INTEGER(HSIZE_T).
+         - added support for native integers of 8 bytes (i.e. when special
+           compiler flag is specified to set native fortran integers to 8 bytes,
+           for example, -i8 flag for PGI and Absoft Fortran compilers, 
+           -qintsize=8 flag for IBM xlf compiler).
+                                                 EIP 2005/06/20
+         - added support for "big" REAL and DOUBLE PRECISION types
+           (usually the size is specified by compilers flags like 
+            -r8, -r16, etc.)
+           Known problem: multi file test fails when REAL is 16 bytes.
+                                                EIP 2005/09/8
 
     C++ Library:
     ----------------
+        - added support for shared C++ libraries.  -JML 2005/09/20
+        - Added missing member functions
+                H5::CompType::getMemberArrayType
+                H5::CompType::getMemberVarLenType
+                H5::AbstractDs::getArrayType
+                H5::AbstractDs::getVarLenType
+                H5::CommonFG::openArrayType
+                H5::CommonFG::openVarLenType
+                H5::PropList::copyProp -- this will replace the current
+                        H5::PropList::copyProp in later releases due
+                        to incorrect prototype.
+                H5::IdComponent::getHDFObjType
+                BMR - 2005/08/08
 
 
     Tools:
     ------
+        - h5repack and h5diff changed command line parameter syntax to be
+           similar to h5dump, adding also long switch names. PVN - 2008/1/16
+     	- h5repack now supports adding multiple filters to all objects. 
+	   PVN - 2008/1/16
+        - h5dump lists groups and attributes in requested orders (by name and 
+           creation order, both ascending and descending). PVN - 2007/10/5
+        - h5import imports string (text) data. PVN - 2007/10/5
+        - h52gif and gif2h5: Both these tools were revised to include the High
+          Level Image API support, and tests were added to /hl/tools/gif2h5.
+           PVN - 2007/04/13
+        - h5dump: added support for double long type H5T_NATIVE_LDOUBLE. PVN
+           2007/03/13
+        - h5dump: added support for binary output, see usage. PVN 2007/03/13
+        - h5repack: added support for the new nbit and scaleoffset filters.
+           PVN - 2007/05/07
+        - h5repack: now uses the API function H5Ocopy (of the tool h5copy) to
+           recreate objects if there is not a user input for changes. PVN -
+           2007/05/07
+        - h5repack: added support for reading and repacking  by hyperslabs for
+           large files. PVN - 2007/03/01
+        - h5repack: a new option allows the copy using the file type (default)
+           instead of the previous conversion to native type. PVN - 2007/03/01
+        - h5repack: output the percentage of compression used. PVN - 2007/03/01
+        - h5diff: added support for -p option for unsigned long_long data. PVN
+          - 2007/02/26
+        - h5diff: added support for comparing dataset regions. PVN - 2007/02/20
+        - h5diff: added support for reading and comparing by hyperslabs for large files.
+           PVN - 2007/02/20
+        - h5diff: printing of dataset dimensions along with dataset name. PVN -2007/02/19
+        - h5dump now uses the new API function H5Rget_name to display the name
+          of the dataset referenced instead of its ID. PVN - 2007/02/19
+        - Added new tool, h5mkgrp. QAK - 2007/02/14
+        - Added new tool, h5copy. PVN - 2006/7/15
+	- Removed obsolete pdb2hdf5 tool from tools/misc  -JML 2005/10/24
+	- Added build_h5perf_alone.sh that builds h5perf by standalone mode.
+	  AKC - 2005/09/18.
+        - Sped up h5dump on files with large numbers of objects.
+            QAK - 2005/08/25
+        - Added a standalone mode for building h5perf.  AKC - 2005/08/12
+        - new tool, h5jam. See reference manual.  2004/10/08
+        - h5repack.sh did not report errors encountered during tests.  It does
+            now.  AKC - 2004/04/02
+        - Added the MPI-I/O and MPI-POSIX drivers to the list of VFL drivers
+            available for h5dump and h5ls.  RPM & QAK - 2004/02/01
+        - Added option --vfd= to h5ls to allow a VFL driver to be selected
+            by a user.  RPM & QAK - 2004/02/01
+	- Added option -showconfig to compiler tools (h5cc,h5fc,h5c++).
+	    AKC - 2004/01/08
+        - Install the "h5cc" and "h5fc" tools as "h5pcc" and "h5pfc"
+            respectively if library is built in parallel mode.
+            WCW - 2003/11/04
+        - Added metadata benchmark (perform/perf_meta).  SLU - 2003/10/03
+        - Changed output of "OID"s from h5dump from "<number>-<number>" to
+            "<number".  This affects both the "regular" and XML output.
+            QAK - 2003/08/08
+        - Changed output of file IDs and "OID"s from h5ls from
+            "<number>:<number>:<number>:<number>" to "<number>:<number>"
+            QAK - 2003/08/08
 
     High-Level APIs:
     ------
+        - Fortran interfaces for the Image, Table and Lite APIs. PVN - 2007/5/1
+        - New HDF5 Dimension Scale API (H5DS) allows dimension scales to be
+          created in an HDF5 file and associated with specific datasets. PVN - 2007/5/1
+        - There are two new functions in the Lite library, H5LTtext_to_dtype
+            and H5LTdtype_to_text.  H5LTtext_to_dtype creates a HDF5 data type
+            given a text description; H5LTdtype_to_text converts a data type
+            to text description.  Only DDL definition is supported as text 
+            desciption now. SLU - 2006/05/17
+        - Added Packet Table API for creating tables with less overhead than
+            H5TB API.  Added C++ wrapper for Packet Tables.  See documentation.
+            JML - 2004/03/28
     
     Documentation 
     ------------- 
+        - The documentation for this release is largely complete, but 
+            trails the source code.  A few of the newer functions are 
+            not yet documented.                       FMB - 2007/04/18
+        - The user documents for this release can be accessed directly at
+            this location:
+               http://www.hdfgroup.uiuc.edu/HDF5/doc_1.8pre/doc/
+            The most recent document versions (updated daily) in the 
+            1.8 development branch can be accessed at this location:
+               http://www.hdfgroup.uiuc.edu/HDF5/doc_dev_snapshot/H5_dev/
+                                                      FMB - 2007/04/18
+
 
 Support for new platforms, languages and compilers.
 =======================================
+        - Added support for Free-BSD on amd64 with GNU C and Fortran compilers
+          4.2.1
+                                                     EIP - 2007/06/25
+        - Added support for sequential and parallel libraries for Intel 64 Linux
+          cluster (abe.ncsa.uiuc.edu).  Among three MPICH packages available on
+          this machine, only Open MPI works.  The VMI has seg fault in hyperslab.c
+          and bittests.c tests.  The MVAPICH2 complained about mpd not running 
+          the parallel test.  (see Known Problems section for more info)
+                                                     EIP - 2007/06/25
+        - Added support for HPUX11.23 for both 32 and 64-bit; HDF5 C++
+        - Added support for 64-bit Windows with Visual Studio .NET and 2005.
+            SJW - 2007/06/25
+        - Added suport for HPUX11.23 for both 32 and 64-bit; HDF5 C++
+          shared library is not supported with +DD64 flag.
+                                                     EIP - 2006/06/22
+        - Added support for VAX floating numbers for Alpha Open VMS 7.3.2
+                                                     EIP - 2006/05/05
+        - Fixed broken make.com files in tools directories
+                                                     EIP - 2006/05/05
+        - Added support for Alpha Open VMS 7.3.2 EIP - 2006/04/15
+        - Added support for Cray X1.  JML - 2005/10/03
+        - PGI Fortran compiler is supported on Linux64 systems (x86_64)
+                            EIP - 2004/08/19
+        - Absoft compiler f95 v9.0 supported on Linux 2.4
+                            EIP - 2004/07/29
+        - HDF5 Fortran APIs are supported on Mac OSX with IBM XL Fortran
+            compiler version 8.1. This is a default compiler.
+        - HDF5 Fortran APIs are supported on MAC OSX with Absoft F95 compiler
+            version 8.2; set F9X environment varibale to f95, for example
+            setenv F9X f95
+            Use --disable-shared --enable-static configure flags when Absoft
+            compiler is used.
+                             EIP - 2004/07/27
+        - HDF5 Fortran APIs are supported on MAC OSX with IBM XL Fortran
+            Compiler version 8.1 Use "--disable-shared --enable-static"
+            configure flags along with the "--enable-fortran" flag to build
+            Fortran library.  EIP - 2004/01/07
 
-Bug Fixes since HDF5-1.8.0 release
+Bug Fixes since HDF5-1.6.0 release
 ==================================
 
     Library
     -------
-	- Fixed the problem with the searching of target file for H5Lcreate_external().
-	  The searching pattern will depend on whether the target file's
-	  pathname is an absolute or a relative path. Please see the description
-	  in the RM for H5Lcreate_external().  (VC - 4/8/08)
-        - Fixed possible file corruption bug when encoding datatype
-            descriptions for compound datatypes whose size was between
-            256 & 511 bytes and the file was opened with the "use the
-            latest format" property enabled (with H5Pset_libver_bounds).
-            (QAK - 2008/03/13)
-        - Fixed bug in H5Aget_num_attrs() routine to handle invalid location
-            ID correctly.  (QAK - 2008/03/11)
+        - Changed library's behavior for reading files that might have
+            corrupted object header information from a previous (buggy)
+            version of the library.  By default, the library now rebuilds the
+            correct object header information instead of issuing an error.
+            Previous "strict" file format interpretation can be enabled with
+            the "--enable-strict-format-checks" configure option.
+            QAK - 2008/01/13
+        - Fixed several bugs with writing fill values for datasets that have
+            a variable-length datatype or component datatype.  QAK - 2007/06/19
+        - STDIO driver didn't support files bigger than 2GB because the OFFSET
+            parameter of fseek is of type LONG INT, not big enough for big files.
+            Use fseeko instead for big files if it's available on the system.
+            SLU - 2007/4/5
+        - Fixed a bug in H5Sselect_valid() that caused an incorrect value to
+            be returned (0) instead of FAIL on error conditions such as the
+            selection or extent not being defined. CMC - 2007/01/17
+        - Fixed the MULTI driver problem (Bug #731) that corruptted the data.
+            SLU - 2007/1/12
+        - Fixed file corruption bug which could write an incorrect number of
+            messages to an object's header under certain circumstances.
+            Generally, the sequence of actions to generate this bug looks
+            like this:
+                - Create an object
+                - Close the file
+                - Re-open the file
+                - Add 2 (or more) attributes to the object
+                - Close the file
+                - Re-open the file
+                - Delete one of the attributes on the object
+                - Add a smaller attribute to the object
+                - Delete the smaller atttribute on the object
+                - Add a larger attribute on the object
 
+            After this, the number of header messages stored for the object
+            will be off by one.  Other sequences of modifying attributes on an
+            object could also trigger this bug.  If you are opening an
+            object and the bottom few messages of the HDF5 error stack
+            resembles this, the object has been affected by this bug:
+
+              #007: ../../hdf5_v1.6/src/H5C.c line 3887 in H5C_load_entry(): unable to load entry
+                major(08): Meta data cache layer
+                minor(40): Unable to load metadata into cache
+              #008: ../../hdf5_v1.6/src/H5Ocache.c line 332 in H5O_load(): corrupt object header - too few messages
+                major(12): Object header layer
+                minor(40): Unable to load metadata into cache
+
+            Specifically, "corrupt object header" is the best string to search
+            for in the HDF5 error stack output.
+
+            If your files have been affected by this bug, or you are concerned
+            that your files might have been, please contact the HDF Helpdesk
+            at help@hdfgroup.org for a tool to detect and repair files
+            affected by this problem.  QAK - 2006/6/16
+        - Fixed various problems with retrieving names of objects, especially
+            with mounted files.  QAK - 2005/12/25
+        - Fixed core dump when closing root groups opened through two different
+            file handles that operate on the same actual file.  QAK - 2005/10/02
+        - Corrected errors when performing various operations on a group opened
+            by dereferencing an object reference.  QAK - 2005/07/30
+        - Fixed a bug with named datatypes where a copy of a named datatype
+            used to create a dataset would accidentally use the original
+            named datatype for the dataset's datatype.  QAK - 2005/07/23
+        - Made H5Fget_name() be consistent and always return name of actual
+            file the ID is in.  (Instead of the name of the top file in a
+            file mounting hierarchy).  QAK - 2005/07/19
+        - Reworked internal file mounting semantics to hopefully eliminate
+            mounting problems.  We now require that files that are mounting
+            together all have the same "file close degree".  QAK - 2005/07/19
+        - More bug fixes on holding open files that are mounted and have
+            IDs open.  QAK - 2005/07/14
+        - Don't unmount child files until the parent file actually closes.
+            (Previously, if an object is holding open a file, the child files
+            would get unmounted too early).  QAK - 2005/07/05
+        - Fixed bug where unmounted files could cause the library to go into
+            an infinite loop when shutting down.  QAK - 2005/06/30
+        - The library didn't save the information of family driver in file.
+          The original file member size was lost after file was closed (see
+          bug #213).  This has been fixed by saving driver name and member
+          file size in the superblock.  SLU - 2005/6/24
+        - Fixed bug with hyperslab selections that use selection offsets and
+            operate on chunked datasets going into infinite loop or dumping
+            core.  QAK - 2005/06/17
+        - Corrected memory leak and possible corruption when opening a group.
+            QAK - 2005/06/17
+        - Added check for opaque datatype tags being too long (check against
+            H5T_OPAQUE_TAG_MAX, currently set to 256).  QAK - 2005/06/14
+        - Fixed various errors in maintaining names for open objects in the
+            face of unusual mount & unmount operations.  QAK - 2005/06/08
+        - "SEMI" and "STRONG" file close degree settings now apply only to the
+            particular file ID being closed, instead of operating on all open
+            file IDs for a given file.  QAK - 2005/06/01
+        - For family driver, the library didn't save member size in file.
+          When file is reopened, the size of 1st member file determine the 
+          member size.  Now member size is saved in file and is used to 
+          define member file size.  Wrong file access property of member size
+          will result in a failure.  Using any other driver except family 
+          will cause library to return error.  So is multi driver. SLU - 
+          2005/05/24  
+        - Fixed error in opening object in group that was opened in mounted
+          file which has been unmounted.  QAK - 2005/03/17
+        - Fixed a racing condition in MPIPOSIX virtual file drive close
+	  function.  Now all processes must completed the close before any
+	  of them is returned.  This prevents some "faster" processes start
+	  accessing the file for another purpose (e.g., open with truncate)
+	  while other "slower" processes have not closed the same file with
+	  the previous purpose.  AKC - 2005/03/01
+        - H5Tget_member_value calls for enum datatype didn't return correct 
+            value if H5Tenum_valueof was called first.  It's fixed.  SLU - 
+            2005/02/08
+        - For variable-length string, H5Tget_class returned H5T_STRING as its
+            class.  But H5Tdetect_class and H5Tget_member_class considered it
+            as H5T_VLEN.  This is fixed to let all these 3 functions treat it
+            as H5T_STRING.  SLU - 2005/02/08
+        - The byte order of 1-byte integer types was fixed as little endian
+            even on a big-endian machine.  This has been corrected.  SLU -
+            2005/02/07 
+        - Fix segmentation fault when calling H5Fflush with an attribute that
+            hasn't had a value written to it open.  QAK - 2004/10/18
+        - Back up supporting bitfield and time types in H5Tget_native_type.  
+            Leave it to future support.  The function simply returns error 
+            message of "not support" for bitfield and time types.  
+            SLU - 2004/10/5
+        - Fixed address check in Core VFL driver to avoid spurious address/size
+            overflows for odd valued addresses and/or sizes.  QAK - 2004/09/27
+	- Fixed parallel bug in which some processes attempted collective
+	    I/O while others did independent I/O.  Bug appeared when some
+	    processes used point selections, and others didn't.  JRM - 2004/9/15
+        - Corrected error where dataset region references were written in an
+            incorrect way on Cray machines.  PVN & QAK - 2004/09/13
+        - The H5Tget_native_type now determines the native type for integers 
+	    based on the precision. This is to avoid cases of wrongly converting 
+            an int to a short in machines that have a short of 8 bytes but with 
+	    32bit precision (e.g Cray SV1). PVN - 2004/09/07  
+        - Changed H5Dread() to not overwrite data in an application's buffer
+            with garbage when accessing a chunked dataset with an undefined
+            fill value and an unwritten chunk is uncountered.  QAK - 2004/08/25
+        - Fixed error which could cause a core dump when a type conversion
+            routine was registered after a compound datatype had been
+            converted and then an equivalment compound datatype was converted
+            again.  QAK - 2004/08/07
+        - Fixed memory overwrite when encoding "multi" file driver information
+            for file's superblock.  QAK - 2004/08/05
+        - Fixed obscure bug where a filter which failed during chunk allocation
+            could allow library to write uncompressed data to disk but think
+            the data was compressed.  QAK - 2004/07/29
+        - Fixed bug where I/O to an extendible chunked dataset with zero-sized
+            dimensions would cause library to fail an assertion.
+            QAK - 2004/07/27
+        - Fixed bug where chunked datasets which have filters defined,
+            allocation time set to "late" and whose chunks don't align with
+            the dataspace bounds could have incorrect data stored when
+            overwriting the entire dataset on the first write.  QAK - 2004/07/27
+        - Added check to ensure that dataspaces have extents set. JML-2004/07/26
+        - Fixed bug on some Solaris systems where HDF5 would try to use
+            gettimeofday() when that function didn't work properly.
+            JML - 2004/07/23
+        - Fixed bug in H5Sset_extent_simple where setting maximum size to
+            non-zero, then to zero would cause an error.  JML - 2004/07/20
+        - Allow NULL pointer for buffer parameter to H5Dread & H5Dwrite
+            when not writing data ("none" selection or hyperslab or point
+            selection with no elements defined).  QAK - 2004/07/20
+        - Calling H5Gcreate() on "/" or "." throws an error instead of
+            failing quietly. JML - 2004/07/19
+        - Fixed bug where setting file address size to be very small could
+            trigger an assert if the file grew to more than 64 KB.  Now throws
+            an error and data can be recovered. JL/NF - 2004/07/14
+        - Fixed bug where "resurrecting" a dataset was failing.
+            QAK - 2004/07/14
+        - Fixed bug where incorrect data could be read from a chunked dataset
+            after it was extended.  QAK - 2004/07/12
+        - Fixed failure to read data back from file of compound type with
+            variable-length string as field.  SLU - 2004/06/10
+        - Fixed potential file corruption bug when a block of metadata could
+            overlap the end of the internal metadata accumulator buffer and
+            the buffer would be extended correctly, but would incorrectly 
+            change it's starting address.  QAK - 2004/06/09
+        - Opaque datatype with no tag failed for some operations.  Fixed.
+            SLU - 2004/6/3 
+        - Fixed potential file corruption bug where dimensions that were
+            too large (a value greater than could be represented in 32-bits)
+            could cause the incorrect amount of space to be allocated in a
+            file for the raw data for the dataset.  QAK - 2004/06/01
+	- Fixed dtypes "sw long double -> double" failure in QSC class
+            machines.  AKC - 2004/4/16
+        - Fixed problem with fletcher32 filter when converting data of different
+	    endianess. PVN - 2004/03/10
+        - Fixed problem with H5Tget_native_type() not handling opaque fields
+            correctly.  QAK - 2004/01/31
+        - Fixed several errors in B-tree deletion code which could cause a
+            B-tree (used with groups and chunked datasets) to become corrupt
+            with the right sequence of deleted objects.  QAK - 2004/01/19
+        - Fixed small internal memory leaks of fill-value information.
+            QAK - 2004/01/13
+        - Fixed bug that caused variable-length datatypes (strings or sequences)
+            used for datasets in files with objects that were unlinked to
+            fail to be read/written to a file.  QAK - 2004/01/13
+        - Detect situation where szip 'pixels per block' is larger than the
+            fastest changing dimension of a dataset's chunk size and disallow
+            this (due to limits in szip library).  QAK - 2003/12/31
+        - Fixed bug with flattened hyperslab selections that would generate
+            incorrect hyperslab information with certain high-dimensionality
+            combinations of start/stride/count/block information.
+            QAK - 2003/12/31
+        - Fixed bug with variable-length datatypes used in compound datatypes.
+            SLU - 2003/12/29
+        - Fixed bug in parallel I/O routines that would cause reads from
+            "short datasets" (datasets which were only partially written out)
+            to return invalid data.  QAK & AKC - 2003/12/19
+        - Fixed bug where scalar dataspaces for attributes were reporting as
+            simple dataspaces.  QAK - 2003/12/13
+        - Fixed problem with selection offsets of hyperslab selections in
+            chunked datasets causing the library to go into an infinite loop.
+            QAK - 2003/12/13
+        - Fixed H5Giterate to avoid re-using index parameter after iteration
+            callback has been called (allows iteration callback to modify the
+            index parameter itself).  QAK - 2003/12/06
+        - Fixed various floating-point conversion problems, including a
+            change which could corrupt data when converting from double->float.
+            QAK - 2003/11/24
+        - Changed "single process" metadata writing in library to collective
+            I/O by all processes, in order to guarantee correct data being
+            written with MPI-I/O.  QAK - 2003/11/20
+        - Fixed problems with fill values and variable-length types and also
+            I/O on VL values that were set to NULL.  QAK - 2003/11/08
+        - Fixed problems with MPI datatypes that caused ASCI Q machine to
+            hang.  QAK - 2003/10/28
+        - Removed HDF5_MPI_PREFER_DERIVED_TYPES environment variable support,
+            since it had no benefit.  QAK - 2003/10/28
+        - Single hyperslab selections (which were set with only one call to
+            H5Sselect_hyperslab) that had dimensions that could be "flattened"
+            but were interspersed with dimensions that could not be flattened
+            were not correctly handled, causing core dumps.  QAK - 2003/10/25
+        - Fixed incorrect datatype of the third parameter to the Fortran90
+            h5pset(get)_cache_f subroutine (INTEGER to INTEGER(SIZE_T)) 
+            EIP - 2003/10/13
+        - Fixed problems with accessing variable-length data datatypes on
+            Crays.  QAK - 2003/10/10
+        - Fixed potential file corruption bug when too many object header
+            messages (probably attributes, from a user perspective) were
+            inserted into an object header and certain other conditions were
+            met.  QAK - 2003/10/08
+        - Changed implementation of internal ID searching algorithm to avoid
+            O(n) behavior for many common cases.  QAK - 2003/10/06
+        - Allow partial parallel writing to compact datasets.  QAK - 2003/10/06
+        - Correctly create reference to shared datatype in attribute, instead
+            of making a copy of the shared datatype in the attribute.
+            QAK - 2003/10/01
+        - Revert changes which caused files >2GB to fail when created with
+            MPI-I/O file driver on certain platforms.  QAK - 2003/09/16
+        - Allow compound datatypes to grow in size.  SLU - 2003/09/10
+        - Detect if a type is already packed before attempting to pack it
+            again or check if it is locked.  SLU - 2003/09/10
+        - Corrected bug when opening a file twice with read-only permission
+            for one open and then closing the read-only access file ID would
+            generate an error.  QAK - 2003/09/10
+        - Corrected bug in repeated calls to H5Pget_access_plist() which would
+            incorrectly manage reference counts of internal information and
+            eventually blow up.  QAK - 2003/09/02
+        - Return rank of the array datatype on successful call to
+            H5Tget_array_dims().  QAK - 2003/08/30
+        - Corrected bug in H5Tdetect_class which was not correctly detecting
+            datatype classes of fields in nested compound datatypes in some
+            circumstances.  QAK - 2003/08/30
+        - Corrected bug in sieve buffer code which could cause loss of data
+            when a small dataset was created and deleted in quick succession.
+            QAK - 2003/08/27
+        - Corrected bug in H5Gget_objname_by_idx which was not allowing NULL
+            for the name when just querying for the object name's length.
+            QAK - 2003/08/25
+        - Corrected bug in variable-length string handling which could
+            generate a core dump on writing variable-length strings as part
+            of a compound datatype on certain architectures.  QAK - 2003/08/25
+        - Corrected bug in H5Tget_native_type which would incorrectly compute
+            the size of certain compound datatypes and also incorrectly
+            compute the offset of the last field for those compound datatypes.
+            QAK - 2003/08/25
+        - Corrected bug in H5Tget_native_type which would drop string datatype
+            metadata (padding, etc.)  QAK - 2003/08/25
+        - Corrected bugs in H5Gget_num_objs, H5Gget_objname_by_idx and
+            H5Gget_objtype_by_idx to allow them to accept location IDs, not just
+            group IDs.  QAK - 2003/08/21
+        - Corrected bug when using scalar dataspace for memory selection and
+            operating on chunked dataset.  QAK - 2003/08/18
+        - Corrected bugs with multiple '/' characters in names for H5Glink
+            and H5Gunlink.  QAK - 2003/08/16
+        - Corrected bug with user blocks that didn't allow a user block to
+            be inserted in front of a file after the file was created.
+            QAK - 2003/08/13
+        - Corrected errors with using point selections to access data in
+            chunked datasets.  QAK - 2003/07/23
+        - Corrected error with variable-length datatypes and chunked datasets
+            caused H5Dwrite to fail sometimes.  QAK - 2003/07/19
+        - Modified library and file format to support storing indexed storage
+            (chunked dataset) B-tree's with non-default internal 'K' values.
+            QAK - 2003/07/15
+        - Returned H5T_BKG_TEMP support to library after it was accidentally
+            removed.  QAK - 2003/07/14
 
     Configuration
     -------------
+	- Configure can now use any tr command.  No more need for
+	  defining variable TR nor is it supported. -AKC 2006/05/19
+        - Parallel I/O with the MPI-I/O driver will no longer work if the
+            filesystem is not POSIX compliant.  The "HDF5_MPI_1_METAWRITE"
+            environment variable has been removed.  QAK - 2004/01/30
+        - Fixed the error that cause "make install" to fail because of the
+            macro definition syntax of "prefix?=..."  AKC - 2003/07/22
 
     Performance
     -------------
+        - Optimized I/O for enumerated datatypes that are a superset of source
+            enumerated datatype.  QAK - 2005/03/19
+        - More optimizations to inner loops of datatype conversions for
+            integers and floats which give a 10-50% speedup.  QAK - 2003/11/07
+        - Hoisted invariant 'if/else's out of inner datatype conversion loop for
+            integer and floating-point values, giving about a 20% speedup.
+            QAK - 2003/10/20
 
     Tools
     -----
-        - Fixed bug in h5diff that prevented datasets & attributes with
-            variable-length string elements from comparing correctly.
-            (QAK - 2008/02/28)
-        - h5import bug on Windows w/binary datasets. fread in windows needs a
-            binary file to be open with 'rb' instead of 'r' otherwise it
-            terminates execution if an end of file character is found on the
-            input file. Besides that the binary file generated needs to be open
-            with 'wb' , otherwise an end of line character is read twice.
-            (PVN - 2008/02/19)
-        - Fixed bug in h5dump that caused binary output to be made only for the first 
-           dataset, when several datasets were requested. (PVN - 2008/04/07)
-
+        - Fixed h5dump regarding the display of blocks in hyperslab
+           selections. PVN 2008/01/16
+        - Fixed h5diff regarding the display of NaN (Not a Number)
+           values. PVN 2008/01/16
+	- Fixed h5dump regarding the parsing of binary output parameters. 
+           PVN 2008/01/16
+	- Fixed memory problems in h52gif and gif2h5. PVN 2008/01/16
+	- Fixed h5repack dealing with NULL references. PVN 2008/01/16 
+        - Fixed h5dump & h5ls to display attributes in "name" order, rather
+           than the order they are encountered in the object header.
+           QAK - 2007/10/04
+        - Fixed h5dump regarding the display of named datatypes
+           attributes. PVN 2007/03/13
+        - Fixed h5dump regarding the display of group comments. PVN
+           2007/03/13
+        - Fixed h5dump regarding the display of hardlinks pointing 
+           to the root group. PVN 2007/03/13
+        - Fixed h5diff percentage option -p. PVN 2007/03/05
+        - Fixed h5dump that caused array indices greater than 2 ^32-1
+           not to be printed correctly - PVN 2007/2/19
+        - Fixed h5dump to print attributes data in ASCII if -r option is used.
+	    AKC - 2004/11/18
+        - Fixed space utilization reported in h5ls to correct error in formula
+            used.  QAK - 2004/10/22
+        - Fixed h5redeploy which sometimes complain too many argument for the
+            test command. (The complain did not hinder the h5redploy to
+            proceed correctly.) AKC - 2003/11/03
+        - Fixed a segmentation fault of h5diff when percentage option is used.
+            AKC - 2003/08/27
+        - Switched away from tools using internal "fixtype" function(s) to use
+            H5Tget_native_type() internally.  QAK - 2003/08/25
 
 
     Documentation 
@@ -111,23 +992,27 @@ Bug Fixes since HDF5-1.8.0 release
 
     F90 APIs
     --------
-
-
-    C++ APIs
-    --------
-        - Fixed bug that caused segfaults in Attribute::read. (BMR - 2008/04/20)
-        - Fixed bug in PropList::getClassName to use portable HDfree instead
-            of free. (BMR - 2008/04/20)
+        - h5pget_driver_f was returning information that could not be
+          interpreted by fortran application program; fixed. EIP - 2005/04/10 
 
 
 Platforms Tested
 ================
+Platforms marked with * were not tested for hdf5-1.8.0-rc* release
+(This information is somewhat out of date and may be inaccurate.  It will be
+    updated for a later release)
 
-    AIX 5.2 (32/64 bit)           xlc 8.0.0.11
+*   AIX 5.2 (32/64 bit)           xlc 8.0.0.11
                                   xlC 8.0
                                   xlf 10.01.0000.0 
                                   mpcc_r 6.0.0.8
                                   mpxlf_r 8.1.1.7
+*    AIX 5.3 (32/64 bit)           xlc 7.0.0.8
+                                  xlC 7.0.0.8
+                                  xlf  09.01.0000.0007
+*   Cray X1 water 3.0.35          Cray Standard C Version 5.4.0.7.4
+                                  Cray Fortran 5.4.0.7.3
+                                  Cray C++ 5.4.0.7.4
     FreeBSD 6.2-STABLE i386       gcc 3.4.6 [FreeBSD] 20060305
     (duty)                        g++ 3.4.6 [FreeBSD] 20060305
                                   gcc 4.2.1 20080123
@@ -139,11 +1024,14 @@ Platforms Tested
                                   g++ 4.2.1 20080123
                                   gfortran 4.2.1 20080123
 
+*   HP-UX B.11.23                 HP aC++/ANSI C B3910B A.06.00
+                                  HP F90 v2.9.2
+                                  HP aC++/ANSI C B3910B A.06.00
     IRIX64 6.5 (64 & n32)         MIPSpro cc 7.4.4m
                                   F90 MIPSpro 7.4.4m 
                                   C++ MIPSpro cc 7.4.4m
 				 
-    Linux 2.6.9 (RHEL4)           Intel 10.0 compilers
+*   Linux 2.6.9 (RHEL4)           Intel 10.0 compilers
     (abe.ncsa.uiuc.edu)
     Linux 2.4.21-47               gcc 3.2.3 20030502
     (osage)
@@ -160,6 +1048,9 @@ Platforms Tested
     SunOS 5.8 32,46               Sun WorkShop 6 update 2 C 5.3
      (Solaris 2.8)                Sun WorkShop 6 update 2 Fortran 95 6.2
                                   Sun WorkShop 6 update 2 C++ 5.3
+*   SunOS 5.10 i86pc              Sun C 5.7
+                                  Sun Fortran 95 8.1
+                                  Sun C++ 5.7
     SunOS 5.10                    cc: Sun C 5.8 
     (linew)                       f90: Sun Fortran 95 8.2 
                                   CC: Sun C++ 5.8 
@@ -184,91 +1075,105 @@ Platforms Tested
 
     MAC OS  10.4 (Intel)          gcc i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1 
                                   G95 (GCC 4.0.3 (g95 0.91!) Nov 21 2006)
-    Alpha Open VMS 7.3
+*    Alpha Open VMS 7.3
 
 
 Supported Configuration Features Summary
+(This table was not modified for 1.8.0-rc* release; for information contact help@hdfgroup.org)
 ========================================
 
     In the tables below
           y   = tested and supported
           n   = not supported or not tested in this release
           x   = not working in this release
+          dna = does not apply
           ( ) = footnote appears below second table
-          <blank> = testing incomplete on this feature or platform
-          W or C indicates workstation or cluster, respectively.
+          <blank> = testing incomplete on this feature or platform 
 
-Platform                          C        F90    F90      C++   zlib  SZIP
-                                  parallel        parallel
-SunOS5.8 64-bit                    n        y      n        y     y     y
-SunOS5.8 32-bit                    n        y      n        y     y     y
-SunOS5.10 64-bit                   n        y      n        y     y     y
-SunOS5.10 32-bit                   n        y      n        y     y     y
-IRIX64_6.5 64-bit                  n        y      y        y     y     y
-IRIX64_6.5 32-bit                  n        n      n        n     y     y
-AIX-5.2  32-bit                    y        y      y        y     y     y
-AIX-5.2  64-bit                    y        y      y        y     y     y
-Cray XT3 (not tested
-          for this release)        n        n      n        n     n     n
-Windows XP                         n        y(3)   n(3)     y     y     y
-Windows XP x64                     n        y(3)   n(3)     y     y     y
-Windows Vista                      n        n      n        y     y     y
-Mac OS X 10.4 PowerPC              n               n
-Mac OS X 10.4 Intel                n        y      n        y     y     y
-FreeBSD 6.2 32-bit                 n        n      n        y     y     y
-FreeBSD 6.2 64-bit
-RedHat EL4 2.6.9 i686 GNU        W y(2)     y(4)   y(2)     y     y     y
-RedHat EL4 2.6.9 i686 Intel      W n        y      n        y     y     n
-RedHat EL4 2.6.9 i686 PGI        W n        y      n        y     y     n
-SuSe Linux 2.6.16 x86_64 GNU (5) W y(2)     y      n        y     y     y
-SuSe Linux 2.6.16 x86_64 Int (5) W n        y      n        y     n     n
-SuSe Linux 2.6.16 x86_64 PGI (5) W n        y      n        y     n     n
-RHL9 Linux 2.4 Xeon Lustre Intel C n        y      n        y     y     n
-RHEL3 Linux 2.4 Xeon Intel       W n        y      n        n     y     n
-RHEL4 Linux 2.6 Xeon Lustre Int  C n        y      n        y     y     n
-SuSE Linux 2.4 ia64 Intel        C y(1)     y      y        y     y     y
-SuSe Linux 2.6.5
-       SGI Altix ia64 Intel      C n        y      n        y     n     y
-Alpha OpenVMS 7.3.2                n        y      n        y     n     n
+Platform                 C        F90    F90      C++   zlib  SZIP
+                         parallel        parallel
+SunOS5.8 64-bit          n        y      n        y     y     y
+SunOS5.8 32-bit          n        y      n        y     y     y
+SunOS5.10 64-bit         y(1)     y      n        y     y     y
+SunOS5.10 32-bit         y(1)     y      n        y     y     y
+IRIX64_6.5 64-bit        n        y      y        y     y     y
+IRIX64_6.5 32-bit        n        n      n        n     y     y
+Cray XT3           (16)  n        n      n        n     n     n
+AIX-5.2 & 5.3 32-bit     y        y      y        y     y     y
+AIX-5.2 & 5.3 64-bit     y        y      y        y     y     y
+Windows XP               n        y(15)  n(15)    y     y     y
+Windows XP x64           n        y(15)  n(15)    y     y     y
+Windows Vista            n        n      n        y     y     y
+Mac OS X 10.4 PowerPC    n               n
+FreeBSD 4.11             n        n      n        y     y     y
+RedHat EL3  W       (3)  y(1a)    y(10)  y(1a)    y     y     y
+RedHat EL3  W Intel (3)  n        y      n        y     y     n
+RedHat EL3  W PGI   (3)  n        y      n        y     y     n
+SuSe x86_64 gcc  (3,12)  y(1a)    y(11)  n        y     y     y
+SuSe x86_64 Int  (3,12)  n        y(13)  n        y     y     n
+SuSe x86_64 PGI  (3,12)  n        y(8)   n        y     y     y
+Linux 2.4 Xeon C 
+    Lustre Intel  (3,6)  n        y      n        y     y     n
+Linux 2.6 SuSE ia64 C 
+    Intel         (3,7)  y        y      y        y     y     n
+Linux 2.6 SGI Altix 
+    ia64 Intel      (3)  y        y      y        y     y     y
+Alpha OpenVMS 7.3.2      n        y      n        y     n     n
 
 
 
-Platform                          Shared   Shared    Shared    static-  Thread-
-                                  C libs   F90 libs  C++ libs  exec     safe
-SunOS 5.8 32-bit                    y        y         y         x        y
-SunOS 5.8 64-bit                    y        y         y         x        y
-SunOS 5.10 32-bit                   y        y         y         x        y
-SunOS 5.10 64-bit                   y        y         y         x        y
-IRIX64_6.5 32-bit                   y        n         y         x        y
-IRIX64_6.5 64-bit                   y        y         n         x        y
-AIX-5.2 32-bit                      n        n         n         x        n
-AIX-5.2 64-bit                      n        n         n         x        n
-Cray XT3 (not tested
-          for this release)         n        n         n         x        n
-Windows XP                          y        y(3)      y         y        y
-Windows XP x64                      y        y(3)      y         y        y
-Windows Vista                       y        n         n         y        y
-Mac OS X 10.4 Intel Duo             y        y         y         x        n
-FreeBSD 6.2 32-bit                  y        y         y         x        n
-FreeBSD 6.2 64-bit                  y        y         y         x        n
-RHEL4 2.6.9 i686 GNU              W y        y(4)      y         x        y
-RHEL4 2.6.9 i686 Intel            W y        y         y         x        n
-RHEL4 2.6.9 i686 PGI              W y        y         y         x        n
-SuSE Linux 2.6.16 x86_64 GNU (5)  W y        y         y         x        y
-SuSE Linux 2.6.16 x86_64 Intel(5) W y        y         y         x        n
-SuSE Linux 2.6.16 x86_64 PGI(5)   W y        y         y         x        n
-RHL9 Linux 2.4 Xeon Lustre Intel  C y        y         y         x        n
-RHEL3 Linux 2.4 Xeon Intel        W y        n         n         x        n
-RHEL4 Linux 2.6 Xeon Lustre Intel C y        y         y         x        n
-SuSE Linux 2.4 ia64 Intel         C y        y         y         x        n
-SuSe Linux 2.6.5
-           SGI Altix ia64 Intel   C n        n         n         x        n
+Platform                 Shared  Shared    Shared    static-  Thread-  
+                         C libs  F90 libs  C++ libs  exec     safe     
+Solaris2.8 64-bit        y       y         y         x        y        
+Solaris2.8 32-bit        y       y         y         x        y        
+Solaris2.10 64-bit       y                           x        y        
+Solaris2.10 32-bit       y                           x        y        
+IRIX64_6.5 64-bit        y       y         n         y        y        
+IRIX64_6.5 32-bit        y       dna       y         y        y        
+HPUX11.00                y       n         y         x        n        
+HPUX11.23-32bit          y       n         n         y        n        
+HPUX11.23-64bit          y       dna       n         y        n        
+Cray XT3           (16)  n       n         n         n        n        
+AIX-5.2 & 5.3 32-bit     n       n         n         y        n        
+AIX-5.2 & 5.3 64-bit     n       n         n         y        n        
+Windows XP               y       y(15)     y         y        y        
+Windows XP x64           y       y(15)     y         y        y        
+Windows Vista            y       n         n         y        y        
+Mac OS X 10.3            y                           y        n        
+Mac OS X 10.4 PowerPC
+FreeBSD 4.11             y       n         y         y        y        
+RedHat EL3  W       (3)  y       y(10)     y         y        y        
+RedHat EL3  W Intel (3)  y       y         y         y        n        
+RedHat EL3  W PGI   (3)  y       y         y         y        n        
+SuSe x86_64 W GNU (3,12) y       y         y         y        y        
+SuSe x86_64 W Int (3,12) y       y         y         y(14)    n        
+SuSe x86_64 W PGI (3,12) y       y         y         y(14)    n        
+Linux 2.4 Xeon C 
+    Lustre Intel    (6)  y       y         y         y        n        
+Linux 2.4 SuSE 
+    ia64 C Intel    (7)  y       y         y         y        n        
+Linux 2.4 SGI Altix 
+    ia64 Intel           y                           y        n        
+Alpha OpenVMS 7.3.2      n       n         n         y        n        
 
     Notes: (1)  Using mpich 1.2.6.
-           (2) Using mpich2 1.0.6.
-           (3) Using Visual Studio 2005 or Cygwin
-           (4) With PGI and Absoft compilers.
-           (5) AMD Opteron x86_64
+           (1a) Using mpich2 1.0.6.
+           (2)  Using mpt and mpich 1.2.6.
+           (3)  Linux 2.6 with GNU, Intel, and PGI compilers, as indicated.  
+                  W or C indicates workstation or cluster, respectively.
+
+           (6)  Linux 2.4.21-32.0.1.  Xeon cluster with ELsmp_perfctr_lustre 
+                  and Intel compilers
+           (7)  Linux 2.4.21, SuSE_292.till.  Ia64 cluster with Intel compilers
+           (8)  pgf90
+           (9)  With Compaq Visual Fortran 6.6c compiler.
+           (10) With PGI and Absoft compilers.
+           (11) PGI and Intel compilers for both C and Fortran
+           (12) AMD Opteron x86_64
+           (13) ifort
+           (14) Yes with C and Fortran, but not with C++
+	   (15) Using Visual Studio 2005 or Cygwin
+           (16) Not tested for this release.
     Compiler versions for each platform are listed in the preceding
     "Platforms Tested" table.
 
@@ -405,6 +1310,12 @@ Known Problems
       the different precision in the values displayed and h5ls appears to
       be dumping floating-point numbers correctly.
 
+* Before building HDF5 F90 Library from source on Crays 
+  replace H5Aff.f90, H5Dff.f90 and H5Pff.f90 files in the fortran/src
+  subdirectory in the top level directory with the Cray-specific files
+  from this site:
+       ftp://www.hdfgroup.uiuc.edu/pub/outgoing/hdf5/hdf5-1.8.0-pre/PATCH/
+
 * Not all platforms behave correctly with szip's shared libraries. Szip is
   disabled in these cases, and a message is relayed at configure time. Static
   libraries should be working on all systems that support szip, and should be
@@ -416,6 +1327,23 @@ Known Problems
   compilation may fail for fortranlib_test.f90, fflush1.f90 and fflush2.f90
   complaining about exit subroutine. Comment out the line 
   IF (total_error .ne. 0) CALL exit (total_error)
+
+* On IA32 and IA64 systems, if you use a compiler other than GCC (such as
+  Intel's ecc or icc compilers), you will need to modify the generated
+  "libtool" program after configuration is finished. On or around line 104 of
+  the libtool file, there are lines which look like:
+
+      # How to pass a linker flag through the compiler.
+      wl=""
+
+  change these lines to this:
+
+      # How to pass a linker flag through the compiler.
+      wl="-Wl,"
+
+  UPDATE: This is now done automatically by the configure script. However, if
+  you still experience a problem, you may want to check this line in the
+  libtool file and make sure that it has the correct value.
 
 * Information about building with PGI and Intel compilers is available in
   INSTALL file sections 5.7 and 5.8

@@ -141,7 +141,7 @@ rem
         call :testing CREATED %h5diff% %params%
         copy /y %actual% %expect% > nul
     ) else (
-        fc /w %expect% %actual% > nul
+        fc /w %expect% %actual% | find "FC: no diff" > nul
         if !errorlevel! equ 0 (
             call :testing PASSED %h5diff% %params%
         ) else (

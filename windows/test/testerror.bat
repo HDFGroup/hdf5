@@ -88,40 +88,25 @@ rem
         if not "!line_tmp:~0,9!"=="*********" (
             set line=
             set last_token=
-            set skip=
             for %%b in (%%a) do (
-                if not defined skip (
-                    if "!last_token!"=="thread" (
-                        set line=!line! ^(IDs^):
-                        
-                    ) else if "!last_token!"=="some" (
-                        if "%%b"=="thread:" (
-                            set line=!line! thread ^(IDs^):
-                            set skip=yes
-                        ) else (
-                            set line=!line! some %%b
-                        )
-                        
-                    ) else if "!last_token:~0,2!"=="#0" (
-                        set line=!line! ^(file name^)
-                        
-                    ) else if "!last_token!"=="HDF5" (
-                        rem Check if we wrap parenthesis around "version (number)"
-                        set version_token=%%b
-                        if "!version_token:~0,1!"=="(" (
-                            set line=!line! ^(version ^(number^)^)
-                        ) else (
-                            set line=!line! version ^(number^).
-                        )
-                        
-                    ) else if "!last_token!"=="line" (
-                        set line=!line! ^(number^)
-                        
-                    ) else if not "%%b"=="some" (
-                        set line=!line! %%b
+                if "!last_token!"=="thread" (
+                    set line=!line! ^(IDs^):
+                ) else if "!last_token:~0,2!"=="#0" (
+                    set line=!line! ^(file name^)
+                ) else if "!last_token!"=="HDF5" (
+                    rem Check if we wrap parenthesis around "version (number)"
+                    set version_token=%%b
+                    if "!version_token:~0,1!"=="(" (
+                        set line=!line! ^(version ^(number^)^)
+                    ) else (
+                        set line=!line! version ^(number^).
                     )
-                    set last_token=%%b
+                ) else if "!last_token!"=="line" (
+                    set line=!line! ^(number^)
+                ) else (
+                    set line=!line! %%b
                 )
+                set last_token=%%b
             )
             echo.!line!>>%actual_ext%
         )
@@ -144,12 +129,23 @@ rem
             )
         )
     )
+    type nul > %expect2_parsed%
+    for /f "delims=" %%a in (%expect2%) do (
+        set line_tmp=%%a
+        if not "!line_tmp:~0,9!"=="*********" (
+            set line=
+            for %%b in (%%a) do (
+                set line=!line! %%b
+            )
+            echo.!line!>>%expect2_parsed%
+        )
+    )
         
-    fc /w %expect1_parsed% %actual% > nul
+    fc /w %expect1_parsed% %actual% | find "FC: no diff" > nul
     if %errorlevel% equ 0 (
             call :testing PASSED %test_err%
     ) else (
-        fc /w %expect2_parsed% %actual% > nul
+        fc /w %expect2_parsed% %actual% | find "FC: no diff" > nul
         if !errorlevel! equ 0 (
             call :testing PASSED %test_err%
         ) else (

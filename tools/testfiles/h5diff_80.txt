@@ -8,9 +8,6 @@ file1     file2
     x      x    /dset          
     x      x    /dsetref       
     x      x    /g1            
-    x      x    /g1/VLstring   
-    x      x    /g1/VLstring2D 
-    x      x    /g1/VLstring3D 
     x      x    /g1/array      
     x      x    /g1/array2D    
     x      x    /g1/array3D    
@@ -56,84 +53,6 @@ dataset: </dsetref> and </dsetref>
 0 differences found
 group  : </g1> and </g1>
 0 differences found
-dataset: </g1/VLstring> and </g1/VLstring>
-size:           [2]           [2]
-position        VLstring        VLstring        difference          
-------------------------------------------------------------
-[ 0 ]          a                z                
-[ 0 ]          b                z                
-[ 1 ]          d                z                
-[ 1 ]          e                z                
-4 differences found
-dataset: </g1/VLstring2D> and </g1/VLstring2D>
-size:           [3x2]           [3x2]
-position        VLstring2D      VLstring2D      difference          
-------------------------------------------------------------
-[ 0 0 ]          a                z                
-[ 0 0 ]          b                z                
-[ 0 1 ]          c                z                
-[ 0 1 ]          d                z                
-[ 1 0 ]          e                z                
-[ 1 0 ]          f                z                
-[ 1 1 ]          g                z                
-[ 1 1 ]          h                z                
-[ 2 0 ]          i                z                
-[ 2 0 ]          j                z                
-[ 2 1 ]          k                z                
-[ 2 1 ]          l                z                
-12 differences found
-dataset: </g1/VLstring3D> and </g1/VLstring3D>
-size:           [4x3x2]           [4x3x2]
-position        VLstring3D      VLstring3D      difference          
-------------------------------------------------------------
-[ 0 0 0 ]          a                z                
-[ 0 0 0 ]          b                z                
-[ 0 0 1 ]          c                z                
-[ 0 0 1 ]          d                z                
-[ 0 1 0 ]          e                z                
-[ 0 1 0 ]          f                z                
-[ 0 1 1 ]          g                z                
-[ 0 1 1 ]          h                z                
-[ 0 2 0 ]          i                z                
-[ 0 2 0 ]          j                z                
-[ 0 2 1 ]          k                z                
-[ 0 2 1 ]          l                z                
-[ 1 0 0 ]          m                z                
-[ 1 0 0 ]          n                z                
-[ 1 0 1 ]          p                z                
-[ 1 0 1 ]          q                z                
-[ 1 1 0 ]          r                z                
-[ 1 1 0 ]          s                z                
-[ 1 1 1 ]          t                z                
-[ 1 1 1 ]          u                z                
-[ 1 2 0 ]          v                z                
-[ 1 2 0 ]          w                z                
-[ 1 2 1 ]          x                z                
-[ 2 0 0 ]          A                z                
-[ 2 0 0 ]          B                z                
-[ 2 0 1 ]          C                z                
-[ 2 0 1 ]          D                z                
-[ 2 1 0 ]          E                z                
-[ 2 1 0 ]          F                z                
-[ 2 1 1 ]          G                z                
-[ 2 1 1 ]          H                z                
-[ 2 2 0 ]          I                z                
-[ 2 2 0 ]          J                z                
-[ 2 2 1 ]          K                z                
-[ 2 2 1 ]          L                z                
-[ 3 0 0 ]          M                z                
-[ 3 0 0 ]          N                z                
-[ 3 0 1 ]          P                z                
-[ 3 0 1 ]          Q                z                
-[ 3 1 0 ]          R                z                
-[ 3 1 0 ]          S                z                
-[ 3 1 1 ]          T                z                
-[ 3 1 1 ]          U                z                
-[ 3 2 0 ]          V                z                
-[ 3 2 0 ]          W                z                
-[ 3 2 1 ]          X                z                
-[ 3 2 1 ]          Z                z                
-47 differences found
 dataset: </g1/array> and </g1/array>
 size:           [2]           [2]
 position        array           array           difference          
@@ -857,7 +776,7 @@ position        vlen3D          vlen3D          difference
 [ 3 2 1 ]          59              0               59             
 59 differences found
 dataset: </refreg> and </refreg>
-Referenced dataset      10272            10272
+Referenced dataset      5904            5904
 ------------------------------------------------------------
 Region blocks
 block #0           (2,2)-(7,7)           (0,0)-(2,2)

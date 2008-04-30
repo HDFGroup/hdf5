@@ -21,11 +21,11 @@ rem Last Update : November 17, 2007 by Scott Wegner
 
 pushd %~dp0
 
-copy /y src\H5Tinit.c ..\src > nul
-copy /y src\H5pubconf.h ..\src > nul
-copy /y fortran\src\H5f90i_gen.h ..\fortran\src > nul
-copy /y fortran\src\H5fortran_types.f90 ..\fortran\src > nul
-xcopy /s /i /y *.bat ..\ > nul
-copy /y examples\testExamples_exp_output.txt ..\examples > nul
+copy src\H5Tinit.c ..\src
+copy src\H5pubconf.h ..\src
+copy fortran\src\H5f90i_gen.h ..\fortran\src
+copy fortran\src\H5fortran_types.f90 ..\fortran\src
+xcopy /e/i/Y *.bat ..\
+copy examples\testExamples_exp_output.txt ..\examples
 
 popd

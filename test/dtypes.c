@@ -90,10 +90,6 @@ typedef enum dtype_t {
 /* Constant for size of conversion buffer for int <-> float exception test */
 #define CONVERT_SIZE    4
 
-/* Constants for compound_13 test */
-#define COMPOUND13_ARRAY_SIZE   256
-#define COMPOUND13_ATTR_NAME    "attr"
-
 /* Count opaque conversions */
 static int num_opaque_conversions_g = 0;
 
@@ -2175,107 +2171,6 @@ test_compound_12(void)
   error:
     return 1;
 }
-
-
-/*-------------------------------------------------------------------------
- * Function:    test_compound_12
- *
- * Purpose:     Tests compound datatypes whose size is at the boundary for
- *              needing 2 bytes for the datatype size and "use the latest
- *              format" flag is enabled so that the size of the offsets uses
- *              the smallest # of bytes possible.
- *
- * Return:      Success:        0
- *              Failure:        number of errors
- *
- * Programmer:  Quincey Koziol
- *              Thursday, March 13, 2008
- *
- *-------------------------------------------------------------------------
- */
-static int
-test_compound_13(void)
-{
-    struct s1 {
-        unsigned char x[COMPOUND13_ARRAY_SIZE + 1];
-        float y;
-    };
-    struct s1   data_out, data_in;
-    hid_t       fileid, grpid, typeid, array1_tid, spaceid, attid;
-    hid_t       fapl_id;
-    hsize_t     dims[1] = {COMPOUND13_ARRAY_SIZE + 1};
-    char        filename[1024];
-    unsigned    u;
-
-    TESTING("compound datatypes of boundary size with latest format");
-
-    /* Create some phony data. */   
-    for(u = 0; u < COMPOUND13_ARRAY_SIZE + 1; u++)
-        data_out.x[u] = u;
-    data_out.y = 99.99;
-
-    /* Set latest_format in access propertly list to enable the latest
-     * compound datatype format.
-     */
-    if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0) FAIL_STACK_ERROR
-    if(H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) FAIL_STACK_ERROR
-
-    /* Open file and get root group. */
-    h5_fixname(FILENAME[4], H5P_DEFAULT, filename, sizeof filename);
-    if((fileid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0) FAIL_STACK_ERROR
-    if((grpid = H5Gopen2(fileid, "/", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-
-    /* Create a compound type. */
-    if((typeid = H5Tcreate(H5T_COMPOUND, sizeof(struct s1))) < 0) FAIL_STACK_ERROR
-    if((array1_tid = H5Tarray_create2(H5T_NATIVE_UCHAR, 1, dims)) < 0) FAIL_STACK_ERROR
-    if(H5Tinsert(typeid, "x", HOFFSET(struct s1, x), array1_tid) < 0) FAIL_STACK_ERROR
-    if(H5Tinsert(typeid, "y", HOFFSET(struct s1, y), H5T_NATIVE_FLOAT) < 0) FAIL_STACK_ERROR
-
-    /* Create a space. */
-    if((spaceid = H5Screate(H5S_SCALAR)) < 0) FAIL_STACK_ERROR
-
-    /* Create an attribute of this compound type. */
-    if((attid = H5Acreate2(grpid, COMPOUND13_ATTR_NAME, typeid, spaceid, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-
-    /* Write some data. */
-    if(H5Awrite(attid, typeid, &data_out) < 0) FAIL_STACK_ERROR
-    
-    /* Release all resources. */
-    if(H5Aclose(attid) < 0) FAIL_STACK_ERROR
-    if(H5Tclose(array1_tid) < 0) FAIL_STACK_ERROR
-    if(H5Tclose(typeid) < 0) FAIL_STACK_ERROR
-    if(H5Sclose(spaceid) < 0) FAIL_STACK_ERROR
-    if(H5Gclose(grpid) < 0) FAIL_STACK_ERROR
-    if(H5Fclose(fileid) < 0) FAIL_STACK_ERROR
-    if(H5Pclose(fapl_id) < 0) FAIL_STACK_ERROR
-
-    /* Now open the file and read it. */
-    if((fileid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-    if((grpid = H5Gopen2(fileid, "/", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-    if((attid = H5Aopen(grpid, COMPOUND13_ATTR_NAME, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-    if((typeid = H5Aget_type(attid)) < 0) FAIL_STACK_ERROR
-    if(H5Tget_class(typeid) != H5T_COMPOUND) FAIL_STACK_ERROR
-    if(HOFFSET(struct s1, x) != H5Tget_member_offset(typeid, 0)) TEST_ERROR
-    if(HOFFSET(struct s1, y) != H5Tget_member_offset(typeid, 1)) TEST_ERROR
-    if(H5Aread(attid, typeid, &data_in) < 0) FAIL_STACK_ERROR
-
-    /* Check the data. */
-    for (u = 0; u < COMPOUND13_ARRAY_SIZE + 1; u++)
-        if(data_out.x[u] != data_in.x[u]) TEST_ERROR
-    if(data_out.y != data_in.y) TEST_ERROR
-
-    /* Release all resources. */
-    if(H5Aclose(attid) < 0) FAIL_STACK_ERROR
-    if(H5Tclose(typeid) < 0) FAIL_STACK_ERROR
-    if(H5Gclose(grpid) < 0) FAIL_STACK_ERROR
-    if(H5Fclose(fileid) < 0) FAIL_STACK_ERROR
-
-    PASSED();
-    return 0;
-
-error:
-    return 1;
-} /* end test_compound_13() */
 
 
 /*-------------------------------------------------------------------------
@@ -4808,7 +4703,7 @@ test_deprec(hid_t fapl)
 
     /* Create an array datatype with an atomic base type */
     /* (dimension permutations allowed, but not stored) */
-    if((type = H5Tarray_create1(H5T_NATIVE_INT, (int)rank, dims, perm)) < 0)
+    if((type = H5Tarray_create1(H5T_NATIVE_INT, rank, dims, perm)) < 0)
         FAIL_STACK_ERROR
 
     /* Make certain that the correct classes can be detected */
@@ -4967,7 +4862,6 @@ main(void)
     nerrors += test_compound_10();
     nerrors += test_compound_11();
     nerrors += test_compound_12();
-    nerrors += test_compound_13();
     nerrors += test_conv_enum_1();
     nerrors += test_conv_enum_2();
     nerrors += test_conv_bitfield();

@@ -1027,3 +1027,127 @@ nh5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *nelements,  hsi
   return ret_value;
 }
 
+/*----------------------------------------------------------------------------
+ * Name:        h5sdecode_c
+ * Purpose:     Call H5Sdecode
+ * Inputs:       
+ *		buf     - Buffer for the data space object to be decoded.
+ * Outputs:
+ *              obj_id  - Object_id (non-negative)
+ *
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  M.S. Breitenfeld
+ *              March 26, 2008
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f
+nh5sdecode_c ( _fcd buf, int_f *obj_id )
+{
+  int ret_value = -1;
+  unsigned char *c_buf = NULL;  /* Buffer to hold C string */
+  hid_t c_obj_id;
+
+  /*
+   * Call H5Sdecode function.
+   */
+
+  c_buf = (unsigned char*)buf; 
+
+  c_obj_id = H5Sdecode(c_buf);
+  if(c_obj_id < 0)
+    return ret_value;
+
+  *obj_id = (int_f)c_obj_id;
+  ret_value = 0;
+
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5sencode_c
+ * Purpose:     Call H5Sencode
+ * Inputs:       
+ *            obj_id - Identifier of the object to be encoded.
+ *		 buf - Buffer for the object to be encoded into.
+ *            nalloc - The size of the allocated buffer.
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  M.S. Breitenfeld
+ *              March 26, 2008
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f
+nh5sencode_c (_fcd buf, hid_t_f *obj_id, size_t_f *nalloc )
+{
+  int ret_value = -1;
+  unsigned char *c_buf = NULL;          /* Buffer to hold C string */
+  size_t c_size;
+
+  /* return just the size of the allocated buffer;
+   * equivalent to C routine for which 'name' is set equal to NULL
+   */
+
+  if (*nalloc == 0) {
+
+    if(H5Sencode((hid_t)*obj_id, c_buf, &c_size) < 0)
+      return ret_value;
+
+    *nalloc = (size_t_f)c_size;
+
+    ret_value = 0;
+    return ret_value;
+  }
+
+  c_size = (size_t)*nalloc;
+  /*
+   * Allocate buffer
+   */
+  if ((c_buf = HDmalloc(c_size)) == NULL)
+    return ret_value;
+  /*
+   * Call H5Sencode function.
+   */
+  if(H5Sencode((hid_t)*obj_id, c_buf, &c_size) < 0){
+    return ret_value;
+  }
+
+  /* copy the C buffer to the FORTRAN buffer. 
+   * Can not use HD5packFstring because we don't want to
+   * eliminate the NUL terminator or pad remaining space 
+   * with blanks.
+   */
+
+  HDmemcpy(_fcdtocp(buf),(char *)c_buf,c_size);
+
+  ret_value = 0;
+  if(c_buf) HDfree(c_buf);
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5sextent_equal_c
+ * Purpose:     Call H5Sextent_equal
+ * Inputs:        
+ *		space1_id - First dataspace identifier.
+ *              space2_id - Second dataspace identifier.
+ * Outputs:
+ *              equal - TRUE if equal, FALSE if unequal.
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  M.S. Breitenfeld
+ *              April 4, 2008
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f
+nh5sextent_equal_c ( hid_t_f * space1_id, hid_t_f *space2_id, hid_t_f *c_equal)
+{
+  int ret_value = -1;
+
+  if( (*c_equal = (hid_t_f)H5Sextent_equal((hid_t)*space1_id, (hid_t)*space2_id)) < 0)
+    return ret_value;
+
+  ret_value = 0;
+  return ret_value;
+}
+

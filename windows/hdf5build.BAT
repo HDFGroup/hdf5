@@ -158,7 +158,7 @@ rem Build the HDF5 libraries.  By default, C and C++ libraries are built.
     rem Build both debug and release versions
     for %%a in (debug release) DO (
         echo.Building %%a libraries...
-        devenv %hdf5_sln% %ccflags% /rebuild %%a
+        devenv .\windows\proj\all\all.sln %ccflags% /rebuild %%a
         if !errorlevel! neq 0 exit /b
     )
 

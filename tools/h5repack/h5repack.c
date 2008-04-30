@@ -45,7 +45,7 @@ static int have_request(pack_opt_t *options);
  * Purpose: locate all high-level HDF5 objects in the file
  *  and compress/chunk them using options
  *
- * Algorithm: 2 traversals are made to the file; the 1st builds a list of
+ * Algorythm: 2 traversals are made to the file; the 1st builds a list of
  *  the objects, the 2nd makes a copy of them, using the options;
  *  the reason for the 1st traversal is to check for invalid
  *  object name requests

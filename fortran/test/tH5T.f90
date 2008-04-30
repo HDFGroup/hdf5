@@ -27,7 +27,7 @@
 ! The following H5T interface functions are tested:
 ! h5tcopy_f, h5tset(get)_size_f, h5tcreate_f, h5tinsert_f,  h5tclose_f,
 ! h5tget_class_f, h5tget_member_name_f, h5tget_member_offset_f, h5tget_member_type_f,
-! h5tequal_f, h5tinsert_array_f, h5tcommit_f
+! h5tequal_f, h5tinsert_array_f, h5tcommit_f, h5tencode_f, h5tdecode_f
 
 
      USE HDF5 ! This module contains all necessary modules 
@@ -88,6 +88,12 @@
      INTEGER(SIZE_T) :: sizechar
      INTEGER(HSIZE_T), DIMENSION(1) :: data_dims
      LOGICAL :: flag = .TRUE.
+     
+     CHARACTER(LEN=1024) :: cmpd_buf
+     INTEGER(size_t) :: cmpd_buf_size=0
+     INTEGER(hid_t) :: decoded_sid1
+     INTEGER :: decoded_tid1
+
      data_dims(1) = dimsize
      !
      ! Initialize data buffer.
@@ -176,7 +182,36 @@
      !
      offset = offset + type_sized  ! Offset of the last member is 14
      CALL h5tinsert_f(dtype_id, "real_field", offset, H5T_NATIVE_REAL, error)
-         CALL check("h5tinsert_f", error, total_error)
+     CALL check("h5tinsert_f", error, total_error)
+
+!!$     !/*-----------------------------------------------------------------------
+!!$     ! * Test encoding and decoding compound  datatypes
+!!$     ! *-----------------------------------------------------------------------
+!!$     !*/
+!!$     !    /* Encode compound type in a buffer */
+!!$
+!!$     !         First find the buffer size
+!!$
+!!$     CALL H5Tencode_f(dtype_id, cmpd_buf, cmpd_buf_size, error)
+!!$     CALL check("H5Tencode_f", error, total_error)
+!!$
+!!$     ! /* Try decoding bogus buffer */
+!!$
+!!$     CALL H5Tdecode_f(cmpd_buf, decoded_tid1, error)
+!!$     CALL VERIFY("H5Tdecode_f", error, -1, total_error)  
+!!$     
+!!$     CALL H5Tencode_f(dtype_id, cmpd_buf, cmpd_buf_size, error)
+!!$     CALL check("H5Tencode_f", error, total_error)
+!!$
+!!$     ! /* Decode from the compound buffer and return an object handle */
+!!$     CALL H5Tdecode_f(cmpd_buf, decoded_tid1, error)
+!!$     CALL check("H5Tdecode_f", error, total_error)  
+!!$
+!!$     ! /* Verify that the datatype was copied exactly */
+!!$     
+!!$     CALL H5Tequal_f(decoded_tid1, dtype_id, flag, error)
+!!$     CALL check("H5Tequal_f", error, total_error) 
+!!$     CALL VerifyLogical("H5Tequal_f", flag, .TRUE., total_error)
 
      !
      ! Create the dataset with compound datatype.
@@ -485,7 +520,33 @@
             endif
          enddo
      !
+     ! *-----------------------------------------------------------------------
+     ! * Test encoding and decoding compound datatypes
+     ! *-----------------------------------------------------------------------
+     !
+     !    /* Encode compound type in a buffer */
+     !         -- First find the buffer size
 
+     CALL H5Tencode_f(dtype_id, cmpd_buf, cmpd_buf_size, error)
+     CALL check("H5Tencode_f", error, total_error)
+
+     ! /* Try decoding bogus buffer */
+
+     CALL H5Tdecode_f(cmpd_buf, decoded_tid1, error)
+     CALL VERIFY("H5Tdecode_f", error, -1, total_error)  
+     
+     CALL H5Tencode_f(dtype_id, cmpd_buf, cmpd_buf_size, error)
+     CALL check("H5Tencode_f", error, total_error)
+
+     ! /* Decode from the compound buffer and return an object handle */
+     CALL H5Tdecode_f(cmpd_buf, decoded_tid1, error)
+     CALL check("H5Tdecode_f", error, total_error)  
+
+     ! /* Verify that the datatype was copied exactly */
+     
+     CALL H5Tequal_f(decoded_tid1, dtype_id, flag, error)
+     CALL check("H5Tequal_f", error, total_error) 
+     CALL VerifyLogical("H5Tequal_f", flag, .TRUE., total_error)
      !
      ! Close all open objects.
      !
