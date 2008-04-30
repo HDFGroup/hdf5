@@ -806,8 +806,6 @@ installed with HDF5.
 <dt><strong>Tool Name:</strong>  <a name="Tools-Repack">h5repack</a>  &nbsp;&nbsp;&nbsp;
 <dt><strong>Syntax:</strong>
     <dd><code>h5repack </code> 
-        <code>-i</code> <em>file1</em>
-        <code>-o</code> <em>file2</em> 
         <code>[-h]</code> 
         <code>[-v]</code> 
         <code>[-m</code> <em>number</em><code>]</code> 
@@ -815,20 +813,18 @@ installed with HDF5.
         <code>[-f '</code><em>filter</em><code>']</code> 
         <code>[-l '</code><em>layout</em><code>']</code> 
         <code>[-e</code> <em>file</em><code>]</code> 
+        <em>in_file</em>
+        <em>out_file</em> 
 <dt><strong>Purpose:</strong>
     <dd>Copies an HDF5 file to a new file with or without compression/chunking.
 <dt><strong>Description:</strong>
     <dd><code>h5repack</code> is a command line tool that 
-      applies HDF5 filters to an input file <em>file1</em>, 
-      saving the output in a new output file, <em>file2</em>.
+      applies HDF5 filters to an input file <em>in_file</em>, 
+      saving the output in a new output file, <em>out_file</em>.
 
       <p></p>
 <dt><strong>Options and Parameters:</strong>
     <dl>
-        <dt><code>-i</code> <em>file1</em>
-            <dd>Input HDF5 file
-        <dt><code>-o</code> <em>file2</em>
-            <dd>Output HDF5 file
         <dt><code>-h</code>
             <dd>Help message
         <dt><code>-v</code>
@@ -920,21 +916,26 @@ installed with HDF5.
         <dt><code>-e</code> <em>file</em>
             <dd>File containing the -f and -l options 
                 (only filter and layout flags)
+        <dt><em>in_file</em>
+            <dd>Input HDF5 file
+        <dt><em>out_file</em>
+            <dd>Output HDF5 file
     </dl>
     <p></p>
 <dt><strong>Examples:</strong>
     <dd>
     <ol>
-        <li><code>h5repack -i file1 -o file2 -f GZIP=1 -v</code>
+        <li><code>h5repack -f GZIP=1 -v file1 file2 </code>
             <br>
             Applies GZIP compression to all objects in <code>file1</code> 
             and saves the output in <code>file2</code>.
+            Prints verbose output.
             <br>&nbsp;
-        <li><code>h5repack -i file1 -o file2 -f dset1:SZIP=8,NN -v</code>
+        <li><code>h5repack -f dset1:SZIP=8,NN file1 file2 </code>
             <br>
             Applies SZIP compression only to object <code>dset1</code>.
             <br>&nbsp;
-        <li><code>h5repack -i file1 -o file2 -l dset1,dset2:CHUNK=20x10 -v</code>
+        <li><code>h5repack -l dset1,dset2:CHUNK=20x10 file1 file2</code>
             <br>
             Applies chunked layout to objects <code>dset1</code> 
             and <code>dset2</code>.
@@ -2815,7 +2816,7 @@ Describes HDF5 Release 1.6.7, January 2008
 <!-- #EndLibraryItem -->&nbsp;<br>
 <SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 3 May 2007");
+document.writeln("Last modified: 30 April 2008");
 -->
 </SCRIPT>
 
