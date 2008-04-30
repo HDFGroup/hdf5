@@ -19,17 +19,12 @@
 
 #include "hdf5.h"
 #include "h5trav.h"
-#include "H5Zprivate.h"	/* H5Z_COMMON_CD_VALUES */	
-
-
 
 #define H5FOPENERROR "unable to open file"
-
-#define PFORMAT  "%-7s %-7s %-7s\n" /*chunk info, compression info, name*/
-#define PFORMAT1 "%-7s %-7s %-7s"     /*chunk info, compression info, name*/
-
-#define MAX_NC_NAME 256 /* max length of a name */
-#define MAX_VAR_DIMS 32 /* max per variable dimensions */
+#define PFORMAT  "%-7s %-7s %-7s\n"   /* chunk info, compression info, name*/
+#define PFORMAT1 "%-7s %-7s %-7s"     /* chunk info, compression info, name*/
+#define MAX_NC_NAME 256               /* max length of a name */
+#define MAX_VAR_DIMS 32               /* max per variable dimensions */
 
 /*-------------------------------------------------------------------------
  * data structures for command line options
@@ -53,7 +48,6 @@ typedef struct {
  H5Z_FILTER_SCALEOFFSET 6 , scaleoffset compression
 */
 
-/* #define CD_VALUES H5Z_COMMON_CD_VALUES */
 #define CD_VALUES 20
 
 typedef struct {

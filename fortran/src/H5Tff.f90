@@ -16,11 +16,11 @@
 !
 ! This file contains FORTRAN90 interfaces for H5T functions
 !
-MODULE H5T
+      MODULE H5T
 
-  USE H5GLOBAL
+        USE H5GLOBAL
       
-CONTAINS
+      CONTAINS
 
 !----------------------------------------------------------------------
 ! Name:		h5topen_f 
@@ -36,62 +36,53 @@ CONTAINS
 !				 	Success:  0
 !				 	Failure: -1   
 ! Optional parameters:
-!              tapl_id          - datatype access property list identifier.
+!				NONE
 !
 ! Programmer:	Elena Pourmal
 !		August 12, 1999	
 !
-! Modifications: Explicit Fortran interfaces were added for 
-!		 called C functions (it is needed for Windows
-!		 port).  March 7, 2001 
-!
-!                Added optional parameter 'tapl_id' for compatability
-!                with H5Topen2. April 9, 2009.              
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  March 7, 2001 
 !
 ! Comment:		
 !----------------------------------------------------------------------
 
-  SUBROUTINE h5topen_f(loc_id, name, type_id, hdferr, tapl_id)
+          SUBROUTINE h5topen_f(loc_id, name, type_id, hdferr) 
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
 !DEC$attributes dllexport :: h5topen_f
 !DEC$endif
 !
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id  ! File or group identifier 
-    CHARACTER(LEN=*), INTENT(IN) :: name ! Datatype name within file or group
-    INTEGER(HID_T), INTENT(OUT) :: type_id  ! Datatype identifier
-    INTEGER, INTENT(OUT) :: hdferr ! Error code
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: tapl_id ! datatype access property list identifier
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: loc_id  ! File or group identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name  
+                                  ! Datatype name within file or group
+            INTEGER(HID_T), INTENT(OUT) :: type_id  ! Datatype identifier 
+            INTEGER, INTENT(OUT) :: hdferr          ! Error code
+            INTEGER :: namelen          ! Name length 
 
-    INTEGER :: namelen                  ! Name length
-    INTEGER(HID_T) :: tapl_id_default
-!
+!            INTEGER, EXTERNAL :: h5topen_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
-    INTERFACE
-       INTEGER FUNCTION h5topen_c(loc_id, name, namelen, type_id, tapl_id_default)
-         USE H5GLOBAL
-         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TOPEN_C'::h5topen_c
-         !DEC$ ENDIF
-         !DEC$ATTRIBUTES reference ::name 
-         INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: name
-         INTEGER :: namelen
-         INTEGER(HID_T), INTENT(OUT) :: type_id
-         INTEGER(HID_T) :: tapl_id_default
-       END FUNCTION h5topen_c
-    END INTERFACE
-    
-    namelen = LEN(name)
+            INTERFACE
+              INTEGER FUNCTION h5topen_c(loc_id, name, namelen, type_id)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TOPEN_C'::h5topen_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference ::name 
+              INTEGER(HID_T), INTENT(IN) :: loc_id
+              CHARACTER(LEN=*), INTENT(IN) :: name
+              INTEGER :: namelen
+              INTEGER(HID_T), INTENT(OUT) :: type_id
+              END FUNCTION h5topen_c
+            END INTERFACE
 
-    tapl_id_default = H5P_DEFAULT_F
-    IF(PRESENT(tapl_id)) tapl_id_default = tapl_id
-
-    hdferr = h5topen_c(loc_id, name, namelen, type_id, tapl_id_default)
-  END SUBROUTINE h5topen_f
+            namelen = LEN(name)
+            hdferr = h5topen_c(loc_id, name, namelen, type_id)
+          END SUBROUTINE h5topen_f
 
 !----------------------------------------------------------------------
 ! Name:		h5tcommit_f 
@@ -109,84 +100,53 @@ CONTAINS
 !				 	Success:  0
 !				 	Failure: -1   
 ! Optional parameters:
-!	       lcpl_id          - Link creation property list
-!              tcpl_id          - Datatype creation property list
-!              tapl_id          - Datatype access property list
+!				NONE
 !
 ! Programmer:	Elena Pourmal
 !		August 12, 1999	
 !
-! Modifications: - Explicit Fortran interfaces were added for 
-!		   called C functions (it is needed for Windows
-!	           port).  March 7, 2001
-!
-!                - Added optional parameters introduced in version 1.8 
-!                  M.S. Breitenfeld
-!
-!
+! Modifications: 	Explicit Fortran interfaces were added for 
+!			called C functions (it is needed for Windows
+!			port).  March 7, 2001 
 !
 ! Comment:		
 !----------------------------------------------------------------------
 
-  SUBROUTINE h5tcommit_f(loc_id, name, type_id, hdferr, &
-       lcpl_id, tcpl_id, tapl_id  ) 
+          SUBROUTINE h5tcommit_f(loc_id, name, type_id, hdferr) 
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
 !DEC$attributes dllexport :: h5tcommit_f
 !DEC$endif
 !
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id  ! File or group identifier 
-    CHARACTER(LEN=*), INTENT(IN) :: name  
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN) :: loc_id  ! File or group identifier 
+            CHARACTER(LEN=*), INTENT(IN) :: name  
                                   ! Datatype name within file or group
-    INTEGER(HID_T), INTENT(IN) :: type_id  ! Datatype identifier 
-    INTEGER, INTENT(OUT) :: hdferr          ! Error code
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lcpl_id ! Link creation property list
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: tcpl_id ! Datatype creation property list
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: tapl_id ! Datatype access property list
+            INTEGER(HID_T), INTENT(IN) :: type_id  ! Datatype identifier 
+            INTEGER, INTENT(OUT) :: hdferr          ! Error code
+            INTEGER :: namelen          ! Name length 
 
-
-    INTEGER :: namelen          ! Name length
-
-    INTEGER(HID_T) :: lcpl_id_default
-    INTEGER(HID_T) :: tcpl_id_default
-    INTEGER(HID_T) :: tapl_id_default
-
+!            INTEGER, EXTERNAL :: h5tcommit_c
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
-    INTERFACE
-       INTEGER FUNCTION h5tcommit_c(loc_id, name, namelen, type_id, &
-            lcpl_id_default, tcpl_id_default, tapl_id_default )
-         USE H5GLOBAL
-         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TCOMMIT_C'::h5tcommit_c
-         !DEC$ ENDIF
-         !DEC$ATTRIBUTES reference ::name 
-         INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(LEN=*), INTENT(IN) :: name
-         INTEGER :: namelen
-         INTEGER(HID_T), INTENT(IN) :: type_id
-         INTEGER(HID_T) :: lcpl_id_default
-         INTEGER(HID_T) :: tcpl_id_default
-         INTEGER(HID_T) :: tapl_id_default
-       END FUNCTION h5tcommit_c
-    END INTERFACE
+            INTERFACE
+              INTEGER FUNCTION h5tcommit_c(loc_id, name, namelen, type_id)
+              USE H5GLOBAL
+              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TCOMMIT_C'::h5tcommit_c
+              !DEC$ ENDIF
+              !DEC$ATTRIBUTES reference ::name 
+              INTEGER(HID_T), INTENT(IN) :: loc_id
+              CHARACTER(LEN=*), INTENT(IN) :: name
+              INTEGER :: namelen
+              INTEGER(HID_T), INTENT(IN) :: type_id
+              END FUNCTION h5tcommit_c
+            END INTERFACE
 
-    lcpl_id_default = H5P_DEFAULT_F
-    tcpl_id_default = H5P_DEFAULT_F
-    tapl_id_default = H5P_DEFAULT_F
-
-    IF (PRESENT(lcpl_id)) lcpl_id_default = lcpl_id
-    IF (PRESENT(tcpl_id)) tcpl_id_default = tcpl_id
-    IF (PRESENT(tapl_id)) tapl_id_default = tapl_id
-    
-    namelen = LEN(name)
-
-    hdferr = h5tcommit_c(loc_id, name, namelen, type_id, &
-         lcpl_id_default, tcpl_id_default, tapl_id_default )
-
-  END SUBROUTINE h5tcommit_f
+            namelen = LEN(name)
+            hdferr = h5tcommit_c(loc_id, name, namelen, type_id)
+          END SUBROUTINE h5tcommit_f
 
 !----------------------------------------------------------------------
 ! Name:		h5tcopy_f 
@@ -3289,357 +3249,4 @@ CONTAINS
           END SUBROUTINE h5tget_member_class_f
 
 !----------------------------------------------------------------------
-! Name:		h5tcommit_anon_f 
-!
-! Purpose: 	Commits a transient datatype to a file, 
-!               creating a new named datatype, 
-!               but does not link it into the file structure.	
-!
-! Inputs:
-!        loc_id - A file or group identifier specifying the file 
-!                 in which the new named datatype is to be created.
-!      dtype_id - A datatype identifier.
-!
-! Outputs:
-!	hdferr: - error code		
-!			Success:  0
-!          		Failure: -1   
-! Optional parameters:
-!       tcpl_id - A datatype creation property list identifier.
-!                 (H5P_DEFAULT_F for the default property list.)
-!       tapl_id - A datatype access property list identifier.
-!                 should always be passed as the value H5P_DEFAULT_F.
-!
-! Programmer:	M.S. Breitenfeld
-!		February 25, 2008
-!
-! Modifications:
-!
-! Comment:		
-!----------------------------------------------------------------------
-
-  SUBROUTINE h5tcommit_anon_f(loc_id, dtype_id, hdferr, tcpl_id, tapl_id) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tcommit_anon_f
-!DEC$endif
-!
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id  ! A file or group identifier specifying 
-                                          ! the file in which the new named datatype 
-                                          ! is to be created.
-    INTEGER(HID_T), INTENT(IN) :: dtype_id  ! Datatype identifier 
-    INTEGER, INTENT(OUT) :: hdferr          ! Error code
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: tcpl_id ! A datatype creation property 
-                                                    ! list identifier.
-                                                    ! (H5P_DEFAULT_F for the default property list.)
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: tapl_id ! A datatype access property list identifier.
-                                                    ! should always be passed as the value H5P_DEFAULT_F.
-    INTEGER(HID_T) :: tcpl_id_default
-    INTEGER(HID_T) :: tapl_id_default
-
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-    INTERFACE
-       INTEGER FUNCTION h5tcommit_anon_c(loc_id, dtype_id, &
-            tcpl_id_default, tapl_id_default)
-         USE H5GLOBAL
-         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TCOMMIT_ANON_C'::h5tcommit_anon_c
-         !DEC$ ENDIF
-         !DEC$ATTRIBUTES reference ::name 
-         INTEGER(HID_T), INTENT(IN) :: loc_id
-         INTEGER(HID_T), INTENT(IN) :: dtype_id
-         INTEGER(HID_T) :: tcpl_id_default
-         INTEGER(HID_T) :: tapl_id_default
-       END FUNCTION h5tcommit_anon_c
-    END INTERFACE
-
-    tcpl_id_default = H5P_DEFAULT_F
-    tapl_id_default = H5P_DEFAULT_F
-
-    IF(PRESENT(tcpl_id)) tcpl_id_default = tcpl_id
-    IF(PRESENT(tapl_id)) tapl_id_default = tapl_id
-    
-    hdferr = h5tcommit_anon_c(loc_id, dtype_id, & 
-         tcpl_id_default, tapl_id_default )
-
-  END SUBROUTINE h5tcommit_anon_f
-
-!----------------------------------------------------------------------
-! Name:      h5tcommitted_f 
-!
-! Purpose:   Determines whether a datatype is a named type or a transient type.
-!
-! Inputs:
-!      dtype_id - A datatype identifier.
-!
-! Outputs:
-!     committed - .TRUE., if the datatype has been committed
-!                .FALSE., if the datatype has not been committed.
-!	hdferr: - error code		
-!			Success:  0
-!          		Failure: -1   
-! Optional parameters: None
-!
-! Programmer:	M.S. Breitenfeld
-!		February 25, 2008
-!
-! Modifications:
-!
-! Comment:		
-!----------------------------------------------------------------------
-
-  SUBROUTINE h5tcommitted_f(dtype_id, committed, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport ::  h5tcommitted_f
-!DEC$endif
-!
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: dtype_id  ! A datatype identifier
-    LOGICAL, INTENT(OUT) :: committed ! .TRUE., if the datatype has been committed
-                                      !.FALSE., if the datatype has not been committed.
-    INTEGER, INTENT(OUT) :: hdferr     ! Error code:		
-!			                   Success:  0
-!          		                   Failure: -1  
-
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-    INTERFACE
-       INTEGER FUNCTION h5tcommitted_c(dtype_id)
-         USE H5GLOBAL
-         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TCOMMITTED_C'::h5tcommitted_c
-         !DEC$ ENDIF
-         !DEC$ATTRIBUTES reference ::name
-         INTEGER(HID_T), INTENT(IN) :: dtype_id
-       END FUNCTION h5tcommitted_c
-    END INTERFACE
-
-    hdferr = h5tcommitted_c(dtype_id)
-
-    IF(hdferr.GT.0)THEN
-       committed = .TRUE.
-       hdferr = 0
-    ELSE IF(hdferr.EQ.0)THEN
-       committed = .FALSE.
-       hdferr = 0
-    ELSE
-       hdferr = -1
-    ENDIF
-       
-
-  END SUBROUTINE h5tcommitted_f
-
-!----------------------------------------------------------------------
-! Name:		H5Tdecode_f
-!
-! Purpose:	Decode a binary object description of data type and return a new object handle.
-! Inputs:  
-!		buf -  Buffer for the data space object to be decoded.
-!            obj_id - Object ID
-! Outputs:
-!           hdferr: - error code		
-!			Success:  0
-!			Failure: -1
-!
-! Optional parameters:		- NONE
-!
-! Programmer:	M.S. Breitenfeld
-!		April 9, 2008
-!
-! Modifications: 	
-!
-! Comment:		
-!----------------------------------------------------------------------
-
-  SUBROUTINE h5tdecode_f(buf, obj_id, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tdecode_f
-!DEC$endif
-!
-    IMPLICIT NONE
-    CHARACTER(LEN=*), INTENT(IN) :: buf ! Buffer for the data space object to be decoded.
-    INTEGER, INTENT(OUT) :: obj_id  ! Object ID
-    INTEGER, INTENT(OUT) :: hdferr     ! Error code
-
-    INTERFACE
-       INTEGER FUNCTION h5tdecode_c(buf, obj_id)
-         USE H5GLOBAL
-         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TDECODE_C'::h5tdecode_c
-         !DEC$ ENDIF
-         CHARACTER(LEN=*), INTENT(IN) :: buf
-         INTEGER, INTENT(OUT) :: obj_id  ! Object ID
-       END FUNCTION h5tdecode_c
-    END INTERFACE
-
-    hdferr = h5tdecode_c(buf, obj_id)
-    
-  END SUBROUTINE h5tdecode_f
-
-!----------------------------------------------------------------------
-! Name:		H5Tencode_f
-!
-! Purpose:	Encode a data type object description into a binary buffer.
-!
-! Inputs:
-!            obj_id - Identifier of the object to be encoded.
-!		buf - Buffer for the object to be encoded into.
-!            nalloc - The size of the allocated buffer.
-! Outputs:
-!            nalloc - The size of the buffer needed.
-!           hdferr: - error code		
-!	                Success:  0
-!		        Failure: -1
-!
-! Optional parameters:		- NONE
-!
-! Programmer:	M.S. Breitenfeld
-!		April 9, 2008
-!
-! Modifications: 	
-!
-! Comment:		
-!----------------------------------------------------------------------
-
-  SUBROUTINE h5tencode_f(obj_id, buf, nalloc, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tencode_f
-!DEC$endif
-!
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: obj_id ! Identifier of the object to be encoded.
-    CHARACTER(LEN=*), INTENT(OUT) :: buf ! Buffer for the object to be encoded into.
-    INTEGER(SIZE_T), INTENT(INOUT) :: nalloc ! The size of the allocated buffer.
-    INTEGER, INTENT(OUT) :: hdferr     ! Error code
-
-
-    INTERFACE
-       INTEGER FUNCTION h5tencode_c(buf, obj_id, nalloc)
-         USE H5GLOBAL
-         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TENCODE_C'::h5tencode_c
-         !DEC$ ENDIF
-         INTEGER(HID_T), INTENT(IN) :: obj_id
-         CHARACTER(LEN=*), INTENT(OUT) :: buf
-         INTEGER(SIZE_T), INTENT(INOUT) :: nalloc
-       END FUNCTION h5tencode_c
-    END INTERFACE
-    
-    hdferr = h5tencode_c(buf, obj_id, nalloc)
-
-  END SUBROUTINE h5tencode_f
-
-!----------------------------------------------------------------------
-! Name:		h5tget_create_plist_f 
-!
-! Purpose:  	Returns a copy of a datatype creation property list.
-!		
-! Inputs:  
-!		dtype_id   - Datatype identifier
-! Outputs:  
-!               dtpl_id    - Datatype property list identifier
-!		hdferr:    - Error code		
-!				 Success:  0
-!				 Failure: -1   
-! Optional parameters:
-!				NONE			
-!
-! Programmer:	M.S. Breitenfeld
-!		April 9, 2008	
-!
-! Modifications:  N/A
-!
-!----------------------------------------------------------------------
-
-  SUBROUTINE h5tget_create_plist_f(dtype_id, dtpl_id, hdferr) 
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tget_create_plist_f
-!DEC$endif
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: dtype_id  ! Datatype identifier
-    INTEGER(HID_T), INTENT(OUT) :: dtpl_id  ! Datatype property list identifier.
-    INTEGER, INTENT(OUT) :: hdferr       ! Error code:
-                                         ! 0 on success and -1 on failure
-
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-    INTERFACE
-       INTEGER FUNCTION h5tget_create_plist_c(dtype_id, dtpl_id)
-         USE H5GLOBAL
-         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TGET_CREATE_PLIST_C'::h5tget_create_plist_c
-         !DEC$ ENDIF
-         INTEGER(HID_T), INTENT(IN) :: dtype_id
-         INTEGER(HID_T), INTENT(OUT) :: dtpl_id
-       END FUNCTION h5tget_create_plist_c
-    END INTERFACE
-    
-    hdferr = h5tget_create_plist_c(dtype_id, dtpl_id)
-  END SUBROUTINE h5tget_create_plist_f
-
-!----------------------------------------------------------------------
-! Name:		h5tcompiler_conv_f 
-!
-! Purpose:  	Check whether the library’s default conversion is hard conversion.R
-!		
-! Inputs:  
-!           src_id - Identifier for the source datatype.
-!           dst_id - Identifier for the destination datatype.
-! Outputs:  
-!           flag - TRUE for compiler conversion, FALSE for library conversion
-!          hdferr: - Error code		
-!			Success:  0
-!			Failure: -1   
-! Optional parameters:
-!				NONE			
-!
-! Programmer:	M.S. Breitenfeld
-!		April 9, 2008	
-!
-! Modifications:  N/A
-!
-!----------------------------------------------------------------------
-
-  SUBROUTINE h5tcompiler_conv_f( src_id, dst_id, flag, hdferr) 
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5tcompiler_conv_f
-!DEC$endif
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: src_id ! Identifier for the source datatype.
-    INTEGER(HID_T), INTENT(IN) :: dst_id ! Identifier for the destination datatype.
-    LOGICAL, INTENT(OUT) :: flag  ! .TRUE. for compiler conversion, .FALSE. for library conversion
-    INTEGER, INTENT(OUT) :: hdferr  ! Error code:
-                                    ! 0 on success and -1 on failure
-    INTEGER :: c_flag
-
-    INTERFACE
-       INTEGER FUNCTION h5tcompiler_conv_c(src_id, dst_id, c_flag)
-         USE H5GLOBAL
-         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TCOMPILER_CONV_C'::h5tcompiler_conv_c
-         !DEC$ ENDIF
-         INTEGER(HID_T), INTENT(IN) :: src_id
-         INTEGER(HID_T), INTENT(IN) :: dst_id
-         INTEGER :: c_flag
-       END FUNCTION h5tcompiler_conv_c
-    END INTERFACE
-    
-    hdferr = h5tcompiler_conv_c(src_id, dst_id, c_flag)
-
-    flag = .FALSE.
-    IF(c_flag .GT. 0) flag = .TRUE.
-
-  END SUBROUTINE h5tcompiler_conv_f
-
-END MODULE H5T
+      END MODULE H5T

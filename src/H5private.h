@@ -638,7 +638,15 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDfwrite(M,Z,N,F)	fwrite(M,Z,N,F)
 #define HDgetc(F)		getc(F)
 #define HDgetchar()		getchar()
+#ifdef _WIN32
+#define HDgetcwd(S,Z)		_getcwd(S,Z)
+#define HDgetdcwd(D,S,Z)	_getdcwd(D,S,Z)
+#define HDgetdrive()		_getdrive()
+#else
 #define HDgetcwd(S,Z)		getcwd(S,Z)
+#define HDgetdcwd(D,S,Z)	getcwd(S,Z)
+#define HDgetdrive()		0
+#endif
 #define HDgetegid()		getegid()
 #define HDgetenv(S)		getenv(S)
 #define HDgeteuid()		geteuid()
@@ -910,6 +918,42 @@ extern char *strdup(const char *s);
 #define HDstrdup(S)     strdup(S)
 
 #endif /* _WIN32 */
+
+#ifdef H5_HAVE_WINDOW_PATH
+
+/* directory delimiter for Windows: slash and backslash are acceptable on Windows */
+#define	DIR_SLASH_SEPC 		'/'
+#define	DIR_SEPC 		'\\'
+#define	DIR_SEPS 		"\\"
+#define CHECK_DELIMITER(SS)     ((SS == DIR_SEPC)||(SS == DIR_SLASH_SEPC))
+#define CHECK_ABSOLUTE(NAME)    ((isalpha(NAME[0])) && (NAME[1] == ':') && (CHECK_DELIMITER(NAME[2])))
+#define CHECK_ABS_DRIVE(NAME)   ((isalpha(NAME[0])) && (NAME[1] == ':'))
+#define CHECK_ABS_PATH(NAME)    (CHECK_DELIMITER(NAME[0]))
+
+#define GET_LAST_DELIMITER(NAME, ptr) {                 \
+    char        *slash, *backslash;                     \
+    slash = strrchr(NAME, DIR_SLASH_SEPC);              \
+    backslash = strrchr(NAME, DIR_SEPC);                \
+    if (backslash > slash)                              \
+        (ptr = backslash);                              \
+    else                                                \
+        (ptr = slash);                                  \
+}
+
+#else
+
+#define		DIR_SEPC	'/'
+#define		DIR_SEPS	"/"
+#define         CHECK_DELIMITER(SS)             (SS == DIR_SEPC)
+#define         CHECK_ABSOLUTE(NAME)            (CHECK_DELIMITER(*NAME))
+#define 	CHECK_ABS_DRIVE(NAME)   	(0)
+#define 	CHECK_ABS_PATH(NAME)    	(0)
+#define         GET_LAST_DELIMITER(NAME, ptr)   ptr = strrchr(NAME, DIR_SEPC);
+
+#endif
+
+#define 	COLON_SEPC	':'
+H5_DLL herr_t   H5_build_extpath(const char *, char ** /*out*/ );
 
 
 /*

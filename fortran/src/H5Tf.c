@@ -24,7 +24,6 @@
  * Inputs:      loc_id - file or group identifier
  *              name - name of the datatype within file or  group
  *              namelen - name length
- *              tapl_id - datatype access property list identifier
  * Outputs:     type_id - dataset identifier
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
@@ -32,7 +31,7 @@
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5topen_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id, hid_t_f *tapl_id)
+nh5topen_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id)
 {
     char *c_name = NULL;
     hid_t c_type_id;
@@ -47,7 +46,7 @@ nh5topen_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id, hid_t_
     /*
      * Call H5Topen2 function.
      */
-    if((c_type_id = H5Topen2((hid_t)*loc_id, c_name, (hid_t)*tapl_id)) < 0)
+    if((c_type_id = H5Topen2((hid_t)*loc_id, c_name, H5P_DEFAULT)) < 0)
         goto done;
     *type_id = (hid_t_f)c_type_id;
 
@@ -68,19 +67,13 @@ done:
  *              name - name of the datatype within file or  group
  *              namelen - name length
  *              type_id - dataset identifier
- *              lcpl_id - Link creation property list
- *              tcpl_id - Datatype creation property list
- *              tapl_id - Datatype access property list
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
  *              Saturday, August 14, 1999
  * Modifications:
- *              - Added passing optional parameters for version 1.8
- *                M.S. Breitenfeld
  *---------------------------------------------------------------------------*/
 int_f
-nh5tcommit_c(hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id, 
-	     hid_t_f *lcpl_id, hid_t_f *tcpl_id, hid_t_f *tapl_id)
+nh5tcommit_c(hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id)
 {
     char *c_name = NULL;
     int ret_value = -1;
@@ -90,7 +83,7 @@ nh5tcommit_c(hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id,
         goto done;
 
     /* Call H5Tcommit2 function */
-    if(H5Tcommit2((hid_t)*loc_id, c_name, (hid_t)*type_id, (hid_t)*lcpl_id, (hid_t)*tcpl_id, (hid_t)*tapl_id) < 0)
+    if(H5Tcommit2((hid_t)*loc_id, c_name, (hid_t)*type_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
         goto done;
 
     ret_value = 0;
@@ -1639,204 +1632,5 @@ nh5tget_member_class_c ( hid_t_f *type_id ,  int_f *member_no, int_f *class )
 
   if ( c_class == H5T_NO_CLASS  ) ret_value = -1;
   *class = (int_f)c_class;
-  return ret_value;
-}
-
-/*----------------------------------------------------------------------------
- * Name:        h5tcommit_anon_c
- * Purpose:     Call H5Tcommit_anon
- * Inputs:      loc_id - file or group identifier
- *              dtype_id - dataset identifier
- *              tcpl_id - Datatype creation property list
- *              tapl_id - Datatype access property list
- * Returns:     0 on success, -1 on failure
- * Programmer:  M.S. Breitenfeld
- *              February 25, 2008
- * Modifications:
- *---------------------------------------------------------------------------*/
-int_f
-nh5tcommit_anon_c(hid_t_f *loc_id, hid_t_f *dtype_id, 
-		  hid_t_f *tcpl_id, hid_t_f *tapl_id)
-{
-  int ret_value = -1;
-  
-  /* Call H5Tcommit_anon function */
-  if(H5Tcommit_anon((hid_t)*loc_id, (hid_t)*dtype_id, (hid_t)*tcpl_id, (hid_t)*tapl_id) < 0)
-    goto done;
-  
-  ret_value = 0;
-  
- done:
-  return ret_value;
-}
-
-/*----------------------------------------------------------------------------
- * Name:        h5tcommitted_c
- * Purpose:     Call H5Tcommitted
- *              dtype_id - dataset identifier
- * Returns:     a positive value, for TRUE, if the datatype has been committed, 
- *              or 0 (zero), for FALSE, if the datatype has not been committed. 
- *		Otherwise returns a negative value.
- * Programmer:  M.S. Breitenfeld
- *              February 25, 2008
- * Modifications:
- *---------------------------------------------------------------------------*/
-int_f
-nh5tcommitted_c(hid_t_f *dtype_id)
-{
-  int_f ret_value;
-  
-  /* Call H5Tcommitted function */
-  
-  ret_value=(int_f)H5Tcommitted((hid_t)*dtype_id);
-
-  return ret_value;
-
-}
-
-/*----------------------------------------------------------------------------
- * Name:        h5tdecode_c
- * Purpose:     Call H5Tdecode
- * Inputs:       
- *		buf     - Buffer for the data space object to be decoded.
- * Outputs:
- *              obj_id  - Object_id (non-negative)
- *
- * Returns:     0 on success, -1 on failure
- * Programmer:  M.S. Breitenfeld
- *              April 9, 2008
- * Modifications:
- *---------------------------------------------------------------------------*/
-
-int_f
-nh5tdecode_c ( _fcd buf, int_f *obj_id )
-{
-  int ret_value = -1;
-  unsigned char *c_buf = NULL;  /* Buffer to hold C string */
-  hid_t c_obj_id;
-
-  /*
-   * Call H5Tdecode function.
-   */
-
-  c_buf = (unsigned char*)buf; 
-
-  c_obj_id = H5Tdecode(c_buf);
-  if(c_obj_id < 0)
-    return ret_value;
-
-  *obj_id = (int_f)c_obj_id;
-  ret_value = 0;
-
-  return ret_value;
-}
-
-/*----------------------------------------------------------------------------
- * Name:        h5tencode_c
- * Purpose:     Call H5Tencode
- * Inputs:       
- *            obj_id - Identifier of the object to be encoded.
- *		 buf - Buffer for the object to be encoded into.
- *            nalloc - The size of the allocated buffer.
- * Returns:     0 on success, -1 on failure
- * Programmer:  M.S. Breitenfeld
- *              April 9, 2008
- * Modifications:
- *---------------------------------------------------------------------------*/
-
-int_f
-nh5tencode_c (_fcd buf, hid_t_f *obj_id, size_t_f *nalloc )
-{
-  int ret_value = -1;
-  unsigned char *c_buf = NULL;          /* Buffer to hold C string */
-  size_t c_size;
-
-  /* return just the size of the allocated buffer;
-   * equivalent to C routine for which 'name' is set equal to NULL
-   */
-
-  if (*nalloc == 0) {
-
-    if(H5Tencode((hid_t)*obj_id, c_buf, &c_size) < 0)
-      return ret_value;
-
-    *nalloc = (size_t_f)c_size;
-
-    ret_value = 0;
-    return ret_value;
-  }
-
-  c_size = (size_t)*nalloc;
-  /*
-   * Allocate buffer
-   */
-  if ((c_buf = HDmalloc(c_size)) == NULL)
-    return ret_value;
-  /*
-   * Call H5Tencode function.
-   */
-  if(H5Tencode((hid_t)*obj_id, c_buf, &c_size) < 0){
-    return ret_value;
-  }
-
-  /* copy the C buffer to the FORTRAN buffer. 
-   * Can not use HD5packFstring because we don't want to
-   * eliminate the NUL terminator or pad remaining space 
-   * with blanks.
-   */
-
-  HDmemcpy(_fcdtocp(buf),(char *)c_buf,c_size);
-
-  ret_value = 0;
-  if(c_buf) HDfree(c_buf);
-  return ret_value;
-}
-
-/*----------------------------------------------------------------------------
- * Name:        h5tget_create_plist_c
- * Purpose:     Call H5Tget_create_plist 
- * Inputs:      dtype_id          - Datatype identifier
- * Outputs:     dtpl_id           - Datatype property list identifier
- * Returns:     0 on success, -1 on failure
- * Programmer:  M.S. Breitenfeld
- *              April 9, 2008
- * Modifications: N/A
- *---------------------------------------------------------------------------*/
-
-int_f
-nh5tget_create_plist_c ( hid_t_f *dtype_id,  hid_t_f *dtpl_id)
-{
-    int_f ret_value=-1;          /* Return value */
-
-    if ((*dtpl_id = (hid_t_f)H5Tget_create_plist((hid_t)*dtype_id)) < 0)
-        return ret_value;
-    
-    ret_value = 0;
-    return ret_value;
-}
-
-/*----------------------------------------------------------------------------
- * Name:        h5tcompiler_conv_c
- * Purpose:     Call H5Tcompiler_conv
- * Inputs:    
- *              src_id - Identifier for the source datatype.
- *              dst_id - Identifier for the destination datatype. 
- * Outputs:     c_flag - flag; TRUE for compiler conversion, FALSE for library conversion
- * Returns:     0 on success, -1 on failure
- * Programmer:  M.S. Breitenfeld
- *              April 9, 2008
- * Modifications:
- *---------------------------------------------------------------------------*/
-
-int_f
-nh5tcompiler_conv_c ( hid_t_f *src_id, hid_t_f *dst_id, int_f *c_flag)
-{
-  int ret_value = -1;
-  htri_t status;
-
-  status = H5Tcompiler_conv( (hid_t)*src_id , (hid_t)*dst_id);
-  if ( status < 0  ) return ret_value;
-  *c_flag = (int_f)status;
-  ret_value = 0;
   return ret_value;
 }

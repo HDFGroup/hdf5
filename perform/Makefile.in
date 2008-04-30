@@ -67,7 +67,8 @@ CONFIG_CLEAN_FILES =
 @BUILD_PARALLEL_CONDITIONAL_TRUE@	mpi-perf$(EXEEXT)
 @BUILD_ALL_CONDITIONAL_TRUE@am__EXEEXT_3 = $(am__EXEEXT_2)
 am__EXEEXT_4 = iopipe$(EXEEXT) chunk$(EXEEXT) overhead$(EXEEXT) \
-	zip_perf$(EXEEXT) perf_meta$(EXEEXT) $(am__EXEEXT_3)
+	zip_perf$(EXEEXT) perf_meta$(EXEEXT) h5perf_serial$(EXEEXT) \
+	$(am__EXEEXT_3)
 benchpar_SOURCES = benchpar.c
 benchpar_OBJECTS = benchpar.$(OBJEXT)
 benchpar_LDADD = $(LDADD)
@@ -80,6 +81,10 @@ am_h5perf_OBJECTS = pio_perf.$(OBJEXT) pio_engine.$(OBJEXT) \
 	pio_timer.$(OBJEXT)
 h5perf_OBJECTS = $(am_h5perf_OBJECTS)
 h5perf_DEPENDENCIES = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
+am_h5perf_serial_OBJECTS = sio_perf.$(OBJEXT) sio_engine.$(OBJEXT) \
+	sio_timer.$(OBJEXT)
+h5perf_serial_OBJECTS = $(am_h5perf_serial_OBJECTS)
+h5perf_serial_DEPENDENCIES = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
 iopipe_SOURCES = iopipe.c
 iopipe_OBJECTS = iopipe.$(OBJEXT)
 iopipe_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
@@ -112,10 +117,12 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = benchpar.c chunk.c $(h5perf_SOURCES) iopipe.c mpi-perf.c \
-	overhead.c perf.c perf_meta.c zip_perf.c
-DIST_SOURCES = benchpar.c chunk.c $(h5perf_SOURCES) iopipe.c \
-	mpi-perf.c overhead.c perf.c perf_meta.c zip_perf.c
+SOURCES = benchpar.c chunk.c $(h5perf_SOURCES) \
+	$(h5perf_serial_SOURCES) iopipe.c mpi-perf.c overhead.c perf.c \
+	perf_meta.c zip_perf.c
+DIST_SOURCES = benchpar.c chunk.c $(h5perf_SOURCES) \
+	$(h5perf_serial_SOURCES) iopipe.c mpi-perf.c overhead.c perf.c \
+	perf_meta.c zip_perf.c
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -358,8 +365,9 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/tools/lib
 
 # These are the programs that `make all' or `make tests' will build and which
 # `make check' will run. List them in the order they should be run.
-TEST_PROG = iopipe chunk overhead zip_perf perf_meta $(BUILD_ALL_PROGS)
+TEST_PROG = iopipe chunk overhead zip_perf perf_meta h5perf_serial $(BUILD_ALL_PROGS)
 h5perf_SOURCES = pio_perf.c pio_engine.c pio_timer.c
+h5perf_serial_SOURCES = sio_perf.c sio_engine.c sio_timer.c
 
 # These are the files that `make clean' (and derivatives) will remove from
 # this directory.
@@ -369,6 +377,7 @@ CLEANFILES = *.h5 *.raw *.dat x-gnuplot
 # depend on test or tools library.
 LDADD = $(LIBHDF5)
 h5perf_LDADD = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
+h5perf_serial_LDADD = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
 perf_LDADD = $(LIBH5TEST) $(LIBHDF5)
 iopipe_LDADD = $(LIBH5TEST) $(LIBHDF5)
 zip_perf_LDADD = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
@@ -438,6 +447,9 @@ chunk$(EXEEXT): $(chunk_OBJECTS) $(chunk_DEPENDENCIES)
 h5perf$(EXEEXT): $(h5perf_OBJECTS) $(h5perf_DEPENDENCIES) 
 	@rm -f h5perf$(EXEEXT)
 	$(LINK) $(h5perf_OBJECTS) $(h5perf_LDADD) $(LIBS)
+h5perf_serial$(EXEEXT): $(h5perf_serial_OBJECTS) $(h5perf_serial_DEPENDENCIES) 
+	@rm -f h5perf_serial$(EXEEXT)
+	$(LINK) $(h5perf_serial_OBJECTS) $(h5perf_serial_LDADD) $(LIBS)
 iopipe$(EXEEXT): $(iopipe_OBJECTS) $(iopipe_DEPENDENCIES) 
 	@rm -f iopipe$(EXEEXT)
 	$(LINK) $(iopipe_OBJECTS) $(iopipe_LDADD) $(LIBS)
@@ -473,6 +485,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_engine.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_perf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_timer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sio_engine.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sio_perf.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sio_timer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zip_perf.Po@am__quote@
 
 .c.o:

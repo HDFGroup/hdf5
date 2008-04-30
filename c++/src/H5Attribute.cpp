@@ -131,22 +131,36 @@ void Attribute::read( const DataType& mem_type, void *buf ) const
 ///\exception	H5::AttributeIException
 // Programmer	Binh-Minh Ribler - Apr, 2003
 // Modification
-//		2006/12/9 - H5Aread allocates memory for character string
-//			    buffer with malloc, therefore, no allocation here,
-//			    but HDfree is needed. - BMR
+//	Mar 2008
+//		Corrected a misunderstanding that H5Aread would allocate
+//		space for the buffer.  Obtained the attribute size and
+//		allocated memory properly. - BMR
 //--------------------------------------------------------------------------
 void Attribute::read( const DataType& mem_type, H5std_string& strg ) const
 {
-   char* strg_C;  // temporary C-string for C API
+   // Get the attribute size and allocate temporary C-string for C API
+   hsize_t attr_size = H5Aget_storage_size(id);
+   if (attr_size <= 0)
+   {
+      throw AttributeIException("Attribute::read", "Unable to get attribute size before reading");
+   }
+   char* strg_C = new char [attr_size+1];
+   if (strg_C == NULL)
+   {
+      throw AttributeIException("Attribute::read", "Unable to allocate buffer to read the attribute");
+   }
 
-   // call C API to get the attribute string of chars
-   herr_t ret_value = H5Aread( id, mem_type.getId(), &strg_C);
+   // Call C API to get the attribute data, a string of chars
+   herr_t ret_value = H5Aread(id, mem_type.getId(), &strg_C);
    if( ret_value < 0 )
    {
       throw AttributeIException("Attribute::read", "H5Aread failed");
    }
-   strg = strg_C;	// get 'string' from the C char*
-   HDfree(strg_C);
+
+   // Get 'string' from the C char* and release resource
+   strg_C[attr_size] = '\0';
+   strg = strg_C;
+   delete []strg_C;
 }
 
 //--------------------------------------------------------------------------

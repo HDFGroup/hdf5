@@ -13,15 +13,15 @@
 				<Tool Name="VFLibrarianTool" SwitchesHaveChanged="true" MustRebuild="true" OutputFile="$(OutDir)\$(ProjectName).lib" SuppressStartupBanner="true" LinkLibraryDependencies="true"/>
 				<Tool Name="VFPreLinkEventTool"/>
 				<Tool Name="VFResourceCompilerTool" SwitchesHaveChanged="true" PreprocessorDefinitions="NDEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/></Configuration>
-		<Configuration Name="Debug|Win32" OutputDirectory="..\..\..\proj\$(ProjectName)\$(ConfigurationName)" IntermediateDirectory="$(OutDir)" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)" ConfigurationType="typeStaticLibrary" MustRebuild="true" Command="$(TargetPath)">
-				<Tool Name="VFMidlTool" SwitchesHaveChanged="true" SuppressStartupBanner="true" TypeLibraryName="$(IntDir)/$(InputName).tlb"/>
+		<Configuration Name="Debug|Win32" OutputDirectory="..\..\..\proj\$(ProjectName)\$(ConfigurationName)" IntermediateDirectory="$(OutDir)" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)" ConfigurationType="typeStaticLibrary" Command="$(TargetPath)">
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TypeLibraryName="$(IntDir)/$(InputName).tlb"/>
 				<Tool Name="VFPreBuildEventTool"/>
 				<Tool Name="VFPostBuildEventTool"/>
-				<Tool Name="VFFortranCompilerTool" SwitchesHaveChanged="true" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="Debug/" PreprocessorDefinitions="HDF5F90_WINDOWS" WarnArgMismatch="true" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug" CompileOnly="true"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="Debug/" PreprocessorDefinitions="HDF5F90_WINDOWS" WarnArgMismatch="true" ModulePath="$(INTDIR)/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug" CompileOnly="true"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFResourceCompilerTool" SwitchesHaveChanged="true" PreprocessorDefinitions="_DEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/>
-				<Tool Name="VFLibrarianTool" SwitchesHaveChanged="true" MustRebuild="true" OutputFile="$(OutDir)\$(ProjectName)d.lib" SuppressStartupBanner="true" LinkLibraryDependencies="true"/></Configuration>
+				<Tool Name="VFResourceCompilerTool" PreprocessorDefinitions="_DEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/>
+				<Tool Name="VFLibrarianTool" OutputFile="$(OutDir)\$(ProjectName)d.lib" SuppressStartupBanner="true" LinkLibraryDependencies="true"/></Configuration>
 		<Configuration Name="Release|x64" OutputDirectory="..\..\..\proj\$(ProjectName)\$(ConfigurationName)" IntermediateDirectory="$(OutDir)" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)" ConfigurationType="typeStaticLibrary" MustRebuild="true" Command="$(TargetPath)">
 				<Tool Name="VFMidlTool" SwitchesHaveChanged="true" SuppressStartupBanner="true" TypeLibraryName="$(IntDir)/$(InputName).tlb"/>
 				<Tool Name="VFPreBuildEventTool"/>
@@ -52,7 +52,6 @@
 		<File RelativePath="..\..\..\fortran\src\H5fortran_types.f90"/>
 		<File RelativePath="..\..\..\fortran\src\H5Gff.f90"/>
 		<File RelativePath="..\..\..\fortran\src\H5Iff.f90"/>
-		<File RelativePath="..\..\..\fortran\src\H5Lff.f90"/>
 		<File RelativePath="..\..\..\fortran\src\H5Pff.f90"/>
 		<File RelativePath="..\..\..\fortran\src\H5Rff.f90"/>
 		<File RelativePath="..\..\..\fortran\src\H5Sff.f90"/>

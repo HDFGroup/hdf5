@@ -144,8 +144,6 @@ static void test_classes()
  */
 static void test_copy()
 {
-    hid_t               a_copy;
-    herr_t		status;
 
     SUBTEST("DataType::copy() and DataType::operator=");
     try {
@@ -213,7 +211,6 @@ static void test_query()
 	long   c;
 	double d;
     } s_type_t;
-    char	filename[1024];
     short	enum_val;
 
     // Output message about test being performed
@@ -388,11 +385,9 @@ static void test_transient ()
 const H5std_string filename2("dtypes2.h5");
 static void test_named ()
 {
-    herr_t		status;
     static hsize_t	ds_size[2] = {10, 20};
     hsize_t		i;
     unsigned 		attr_data[10][20];
-    char		filename[1024];
     
     SUBTEST("Named datatypes");
     try {

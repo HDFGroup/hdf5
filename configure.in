@@ -26,7 +26,7 @@ dnl
 dnl NOTE: Don't forget to change the version number here when we do a
 dnl release!!!
 dnl
-AC_INIT([HDF5], [1.8.0], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.5], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AM_CONFIG_HEADER([src/H5config.h])
 
@@ -1011,7 +1011,7 @@ AC_ARG_ENABLE(production,
                               [Determines how to run the compiler.])])
 
 case "X-$enable_production" in
-  X-|X-yes)
+  X-yes)
     enable_production="yes"
     AC_MSG_RESULT([production])
 
@@ -1053,7 +1053,7 @@ case "X-$enable_production" in
     H5_CXXFLAGS="$H5_CXXFLAGS $PROD_CXXFLAGS"
     H5_FCFLAGS="$H5_FCFLAGS $PROD_FCFLAGS"
     ;;
-  X-no)
+  X-|X-no)
     enable_production="no"
     AC_MSG_RESULT([development])
     CONFIG_MODE=development
@@ -1728,13 +1728,21 @@ AC_MSG_RESULT([no]))
 
 dnl Check whether the global variable `timezone' is defined.
 AC_MSG_CHECKING([for global timezone variable])
-AC_TRY_LINK([
-#include <sys/time.h>
-#include <time.h>], [timezone=0;],
-AC_DEFINE([HAVE_TIMEZONE], [1],
-          [Define if `timezone' is a global variable])
-AC_MSG_RESULT([yes]),
-AC_MSG_RESULT([no]))
+
+case "`uname`" in
+  CYGWIN*)
+    AC_MSG_RESULT([disabled in CYGWIN])
+    ;;
+  *)
+    AC_TRY_LINK([
+    #include <sys/time.h>
+    #include <time.h>], [timezone=0;],
+    AC_DEFINE([HAVE_TIMEZONE], [1],
+              [Define if `timezone' is a global variable])
+    AC_MSG_RESULT([yes]),
+    AC_MSG_RESULT([no]))
+    ;;
+esac
 
 dnl Check whether `struct timezone' is defined.
 AC_STRUCT_TIMEZONE
@@ -2805,6 +2813,24 @@ if test ${hdf5_cv_convert_float_llong_not_works} = "yes"; then
 else
   AC_MSG_RESULT([false])
 fi
+
+dnl ----------------------------------------------------------------------
+dnl Set the flag to indicate that the machine has window style pathname,
+dnl that is, "drive-letter:\" (e.g. "C:") or "drive-letter:/" (e.g. "C:/").
+dnl (This flag should be _unset_ for all machines, except for Windows, where
+dnl it's set in the custom Windows H5pubconf.h file)
+dnl
+AC_MSG_CHECKING([if the machine has window style path name])
+AC_CACHE_VAL([hdf5_have_window_path], [hdf5_have_window_path=no])
+
+if test ${hdf5_have_window_path} = "yes"; then
+  AC_DEFINE([HAVE_WINDOW_PATH], [1],
+            [Define if your system has window style path name.])
+  AC_MSG_RESULT([true])
+else
+  AC_MSG_RESULT([false])
+fi
+
 
 dnl -----------------------------------------------------------------------
 dnl Set flag to indicate that the machine can handle conversion from 

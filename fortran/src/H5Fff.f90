@@ -58,14 +58,14 @@
 !DEC$endif
 !
            
-            IMPLICIT NONE 
+            IMPLICIT NONE
             CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the file
             INTEGER, INTENT(IN) :: access_flags    ! File access flags
             INTEGER(HID_T), INTENT(OUT) :: file_id ! File identifier 
             INTEGER, INTENT(OUT) :: hdferr         ! Error code 
             INTEGER(HID_T), OPTIONAL, INTENT(IN) :: creation_prp 
                                                    ! File creation propertly
-                                                   ! list identifier 
+                                                   ! list identifier
             INTEGER(HID_T), OPTIONAL, INTENT(IN) :: access_prp
                                                    ! File access property list
                                                    ! identifier

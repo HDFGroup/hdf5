@@ -265,6 +265,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_GC_REF(F)           ((F)->shared->gc_ref)
 #define H5F_USE_LATEST_FORMAT(F) ((F)->shared->latest_format)
 #define H5F_INTENT(F)           ((F)->intent)
+#define H5F_EXTPATH(F)          ((F)->extpath)
 #define H5F_GET_FC_DEGREE(F)    ((F)->shared->fc_degree)
 #define H5F_STORE_MSG_CRT_IDX(F)    ((F)->shared->store_msg_crt_idx)
 #define H5F_GET_FILENO(F,FILENUM) ((FILENUM) = (F)->shared->lf->fileno)
@@ -284,6 +285,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_GC_REF(F)           (H5F_gc_ref(F))
 #define H5F_USE_LATEST_FORMAT(F) (H5F_use_latest_format(F))
 #define H5F_INTENT(F)           (H5F_get_intent(F))
+#define H5F_EXTPATH(F)          (H5F_get_extpath(F))
 #define H5F_GET_FC_DEGREE(F)    (H5F_get_fc_degree(F))
 #define H5F_STORE_MSG_CRT_IDX(F)    (H5F_store_msg_crt_idx(F))
 #define H5F_GET_FILENO(F,FILENUM) (H5F_get_filenum((F), &(FILENUM)))
@@ -417,6 +419,7 @@ H5_DLL herr_t H5F_try_close(H5F_t *f);
 H5_DLL hid_t H5F_get_driver_id(const H5F_t *f);
 H5_DLL hid_t H5F_get_access_plist(H5F_t *f);
 H5_DLL unsigned H5F_get_intent(const H5F_t *f);
+H5_DLL char *H5F_get_extpath(const H5F_t *f);
 H5_DLL herr_t H5F_get_fileno(const H5F_t *f, unsigned long *filenum);
 H5_DLL hid_t H5F_get_id(H5F_t *file);
 H5_DLL unsigned H5F_get_obj_count(const H5F_t *f, unsigned types);

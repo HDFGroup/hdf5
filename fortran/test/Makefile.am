@@ -36,10 +36,12 @@ else
 endif
 
 # Our main targets, the tests themselves
-TEST_PROG=fortranlib_test fflush1 fflush2 fortranlib_test_1_8
+TEST_PROG=fortranlib_test fflush1 fflush2
 check_PROGRAMS=$(TEST_PROG)
 
-libh5test_fortran_la_SOURCES= tf.f90 t.c
+libh5test_fortran_la_SOURCES=fortranlib_test.f90 tH5F.f90 tH5D.f90 \
+        tH5R.f90 tH5S.f90 tH5T.f90 tH5VL.f90 tH5Z.f90 tH5Sselect.f90 \
+        tH5P.f90 tH5A.f90 tH5I.f90 tH5G.f90 tH5E.f90 tf.f90 t.c
 
 # Source files are used for both the library and fortranlib_test.
 # Automake will complain about this without the following workaround.
@@ -48,12 +50,8 @@ fortranlib_test_CFLAGS=$(AM_CFLAGS)
 
 fortranlib_test_SOURCES = fortranlib_test.f90 \
         tH5F.f90 tH5D.f90 tH5R.f90 tH5S.f90 tH5T.f90 tH5VL.f90 tH5Z.f90 \
-        tH5Sselect.f90 tH5P.f90 tH5A.f90 tH5I.f90 tH5G.f90 tH5E.f90
-
-fortranlib_test_1_8_SOURCES = fortranlib_test_1_8.f90 \
-        tH5F.f90 tH5D.f90 tH5R.f90 tH5S.f90 tH5T.f90 tH5VL.f90 tH5Z.f90 \
-        tH5Sselect.f90 tH5O.f90 tH5P.f90 tH5A_1_8.f90 tH5I.f90 tH5G_1_8.f90 tH5E.f90
- 
+        tH5Sselect.f90 tH5P.f90 tH5A.f90 tH5I.f90 tH5G.f90 tH5E.f90 tf.f90 \
+        t.c
 fflush1_SOURCES=fflush1.f90
 fflush2_SOURCES=fflush2.f90
 

@@ -7,39 +7,39 @@
 		<Configuration Name="Release|Win32" OutputDirectory="..\..\..\..\fortran\test\$(ProjectName)\$(ConfigurationName)" IntermediateDirectory="$(OutDir)" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)" MustRebuild="true">
 				<Tool Name="VFMidlTool" SwitchesHaveChanged="true" SuppressStartupBanner="true" TypeLibraryName="$(OUTDIR)/testhdf5_fortrandll.tlb"/>
 				<Tool Name="VFPreBuildEventTool"/>
-				<Tool Name="VFPostBuildEventTool"/>
-				<Tool Name="VFFortranCompilerTool" SwitchesHaveChanged="true" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="Release/;..\..\..\proj\hdf5_fortrandll\Release/" ModulePath="..\..\..\..\proj\hdf5_fortrandll\Release/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/" RuntimeLibrary="rtMultiThreadedDLL" CompileOnly="true"/>
-				<Tool Name="VFCustomBuildTool"/>
-				<Tool Name="VFLinkerTool" SwitchesHaveChanged="true" MustRebuild="true" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" ProgramDatabaseFile="$(OUTDIR)/testhdf5_fortrandll.pdb" SubSystem="subSystemConsole" AdditionalDependencies="kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib WS2_32.lib $(HDF5_EXT_ZLIB) $(HDF5_EXT_SZIP)"/>
-				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFResourceCompilerTool" SwitchesHaveChanged="true" PreprocessorDefinitions="NDEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/></Configuration>
-		<Configuration Name="Debug|Win32" OutputDirectory="..\..\..\..\fortran\test\$(ProjectName)\$(ConfigurationName)" IntermediateDirectory="$(OutDir)" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)" MustRebuild="true">
-				<Tool Name="VFMidlTool" SwitchesHaveChanged="true" SuppressStartupBanner="true" TypeLibraryName="$(OUTDIR)/testhdf5_fortrandll.tlb"/>
-				<Tool Name="VFPreBuildEventTool"/>
-				<Tool Name="VFPostBuildEventTool"/>
-				<Tool Name="VFFortranCompilerTool" SwitchesHaveChanged="true" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="Debug/;..\..\..\proj\hdf5_fortrandll\Debug/" WarnArgMismatch="true" ModulePath="..\..\..\..\proj\hdf5_fortrandll\Debug/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL" CompileOnly="true"/>
-				<Tool Name="VFCustomBuildTool"/>
-				<Tool Name="VFLinkerTool" SwitchesHaveChanged="true" MustRebuild="true" LinkIncremental="linkIncrementalYes" SuppressStartupBanner="true" IgnoreDefaultLibraryNames="libcd.lib" GenerateDebugInformation="true" ProgramDatabaseFile="$(OUTDIR)/testhdf5_fortrandll.pdb" SubSystem="subSystemConsole" AdditionalDependencies="kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib WS2_32.lib $(HDF5_EXT_ZLIB) $(HDF5_EXT_SZIP)"/>
-				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFResourceCompilerTool" SwitchesHaveChanged="true" PreprocessorDefinitions="_DEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/></Configuration>
-		<Configuration Name="Release|x64" OutputDirectory="..\..\..\..\fortran\test\$(ProjectName)\$(ConfigurationName)" IntermediateDirectory="$(OutDir)" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)" MustRebuild="true">
-				<Tool Name="VFMidlTool" SwitchesHaveChanged="true" SuppressStartupBanner="true" TypeLibraryName="$(OUTDIR)/testhdf5_fortrandll.tlb"/>
-				<Tool Name="VFPreBuildEventTool"/>
 				<Tool Name="VFFortranCompilerTool" SwitchesHaveChanged="true" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="Release/;..\..\..\proj\hdf5_fortrandll\Release/" ModulePath="..\..\..\..\proj\hdf5_fortrandll\Release/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/" RuntimeLibrary="rtMultiThreadedDLL" CompileOnly="true"/>
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFLinkerTool" SwitchesHaveChanged="true" MustRebuild="true" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" ProgramDatabaseFile="$(OUTDIR)/testhdf5_fortrandll.pdb" SubSystem="subSystemConsole" AdditionalDependencies="kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib WS2_32.lib $(HDF5_EXT_ZLIB) $(HDF5_EXT_SZIP)"/>
 				<Tool Name="VFResourceCompilerTool" SwitchesHaveChanged="true" PreprocessorDefinitions="NDEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/>
 				<Tool Name="VFPreLinkEventTool"/></Configuration>
+		<Configuration Name="Debug|Win32" OutputDirectory="..\..\..\..\fortran\test\$(ProjectName)\$(ConfigurationName)" IntermediateDirectory="$(OutDir)" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)">
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TypeLibraryName="$(OUTDIR)/testhdf5_fortrandll.tlb"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="Debug/;..\..\..\proj\hdf5_fortrandll\Debug/" WarnArgMismatch="true" ModulePath="..\..\..\..\proj\hdf5_fortrandll\Debug/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL" CompileOnly="true"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalYes" SuppressStartupBanner="true" IgnoreDefaultLibraryNames="libcd.lib" GenerateDebugInformation="true" ProgramDatabaseFile="$(OUTDIR)/testhdf5_fortrandll.pdb" SubSystem="subSystemConsole" AdditionalDependencies="kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib WS2_32.lib $(HDF5_EXT_ZLIB) $(HDF5_EXT_SZIP)"/>
+				<Tool Name="VFResourceCompilerTool" PreprocessorDefinitions="_DEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/>
+				<Tool Name="VFPreLinkEventTool"/></Configuration>
+		<Configuration Name="Release|x64" OutputDirectory="..\..\..\..\fortran\test\$(ProjectName)\$(ConfigurationName)" IntermediateDirectory="$(OutDir)" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)" MustRebuild="true">
+				<Tool Name="VFMidlTool" SwitchesHaveChanged="true" SuppressStartupBanner="true" TypeLibraryName="$(OUTDIR)/testhdf5_fortrandll.tlb"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFFortranCompilerTool" SwitchesHaveChanged="true" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="Release/;..\..\..\proj\hdf5_fortrandll\Release/" ModulePath="..\..\..\..\proj\hdf5_fortrandll\Release/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/" RuntimeLibrary="rtMultiThreadedDLL" CompileOnly="true"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFLinkerTool" SwitchesHaveChanged="true" MustRebuild="true" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" ProgramDatabaseFile="$(OUTDIR)/testhdf5_fortrandll.pdb" SubSystem="subSystemConsole" AdditionalDependencies="kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib WS2_32.lib $(HDF5_EXT_ZLIB) $(HDF5_EXT_SZIP)"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFResourceCompilerTool" SwitchesHaveChanged="true" PreprocessorDefinitions="NDEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/></Configuration>
 		<Configuration Name="Debug|x64" OutputDirectory="..\..\..\..\fortran\test\$(ProjectName)\$(ConfigurationName)" IntermediateDirectory="$(OutDir)" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)" MustRebuild="true">
 				<Tool Name="VFMidlTool" SwitchesHaveChanged="true" SuppressStartupBanner="true" TypeLibraryName="$(OUTDIR)/testhdf5_fortrandll.tlb"/>
 				<Tool Name="VFPreBuildEventTool"/>
-				<Tool Name="VFFortranCompilerTool" SwitchesHaveChanged="true" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="Debug/;..\..\..\proj\hdf5_fortrandll\Debug/" WarnArgMismatch="true" ModulePath="..\..\..\..\proj\hdf5_fortrandll\Debug/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL" CompileOnly="true"/>
 				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFFortranCompilerTool" SwitchesHaveChanged="true" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="Debug/;..\..\..\proj\hdf5_fortrandll\Debug/" WarnArgMismatch="true" ModulePath="..\..\..\..\proj\hdf5_fortrandll\Debug/" ObjectFile="$(INTDIR)/" AssemblerListingLocation="$(INTDIR)/" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL" CompileOnly="true"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFLinkerTool" SwitchesHaveChanged="true" MustRebuild="true" LinkIncremental="linkIncrementalYes" SuppressStartupBanner="true" IgnoreDefaultLibraryNames="libcd.lib" GenerateDebugInformation="true" ProgramDatabaseFile="$(OUTDIR)/testhdf5_fortrandll.pdb" SubSystem="subSystemConsole" AdditionalDependencies="kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib WS2_32.lib $(HDF5_EXT_ZLIB) $(HDF5_EXT_SZIP)"/>
-				<Tool Name="VFResourceCompilerTool" SwitchesHaveChanged="true" PreprocessorDefinitions="_DEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/>
-				<Tool Name="VFPreLinkEventTool"/></Configuration></Configurations>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFResourceCompilerTool" SwitchesHaveChanged="true" PreprocessorDefinitions="_DEBUG" Culture="rcEnglishUS" ResourceOutputFileName="$(INTDIR)/$(InputName).res"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Source Files" Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat;f90;for;f;fpp">
 		<File RelativePath="..\..\..\..\fortran\test\fortranlib_test.f90"/>
@@ -57,7 +57,7 @@
 		<File RelativePath="..\..\..\..\fortran\test\tH5VL.f90"/>
 		<File RelativePath="..\..\..\..\fortran\test\tH5Z.f90">
 			<FileConfiguration Name="Debug|Win32">
-				<Tool Name="VFFortranCompilerTool" SwitchesHaveChanged="true" AdditionalIncludeDirectories="..\..\..\..\proj\hdf5_fortrandll\Debug/" ModulePath="..\..\..\..\proj\hdf5_fortrandll\Debug/"/></FileConfiguration>
+				<Tool Name="VFFortranCompilerTool" SwitchesHaveChanged="false" AdditionalIncludeDirectories="..\..\..\..\proj\hdf5_fortrandll\Debug/" ModulePath="..\..\..\..\proj\hdf5_fortrandll\Debug/"/></FileConfiguration>
 			<FileConfiguration Name="Debug|x64">
 				<Tool Name="VFFortranCompilerTool" SwitchesHaveChanged="true" AdditionalIncludeDirectories="..\..\..\..\proj\hdf5_fortrandll\Debug/" ModulePath="..\..\..\..\proj\hdf5_fortrandll\Debug/"/></FileConfiguration></File></Filter>
 		<Filter Name="Header Files" Filter="h;hpp;hxx;hm;inl;fi;fd"/>

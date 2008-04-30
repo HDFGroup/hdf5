@@ -45,10 +45,6 @@ int main(int argc, char *argv[])
    (void)HDsetvbuf(stderr, (char *) NULL, _IOLBF, 0);
    (void)HDsetvbuf(stdout, (char *) NULL, _IOLBF, 0);
 
-#if defined __MWERKS__
-    argc = ccommand(&argv);
-#endif
-
     if ( argv[1] && (strcmp("-V",argv[1])==0) )
     {
         print_version("h5import");
@@ -275,7 +271,7 @@ gtoken(char *s)
  * Programmer:  pkmat
  *
  * Modifications: pvn
- *  7/23/2007. Added support for STR type
+ *  7/23/2007. Added support for STR type, extra parameter FILE_ID
  *
  *-------------------------------------------------------------------------
  */
@@ -293,11 +289,52 @@ processDataFile(char *infile, struct Input *in, FILE **strm, hid_t file_id)
   const char *err10 = "Unrecognized input class type.\n";
   const char *err11 = "Error in reading string data.\n";
 
-  if ((*strm = fopen(infile, "r")) == NULL)
+ /*-------------------------------------------------------------------------
+  * special case for opening binary classes in WIN32
+  * "FP" denotes a floating point binary file,
+  * "IN" denotes a signed integer binary file, 
+  * "UIN" denotes an unsigned integer binary file,
+  *-------------------------------------------------------------------------
+  */
+  if ( in->inputClass == 4 /* "IN" */ ||
+       in->inputClass == 3 /* "FP" */ ||
+       in->inputClass == 7 /* "UIN" */ 
+      
+      )
   {
-      (void) fprintf(stderr, err1, infile);
-      return(-1);
+
+#ifdef WIN32
+      
+      if ((*strm = fopen(infile, "rb")) == NULL)
+      {
+          (void) fprintf(stderr, err1, infile);
+          return(-1);
+      }
+#else
+
+      if ((*strm = fopen(infile, "r")) == NULL)
+      {
+          (void) fprintf(stderr, err1, infile);
+          return(-1);
+      }
+
+#endif
+
   }
+ /*-------------------------------------------------------------------------
+  * if the input class is not binary, just use "r"
+  *-------------------------------------------------------------------------
+  */
+  else
+  {
+      if ((*strm = fopen(infile, "r")) == NULL)
+      {
+          (void) fprintf(stderr, err1, infile);
+          return(-1);
+      }
+  }
+
+
 
   switch(in->inputClass)
   {
@@ -372,7 +409,7 @@ readIntegerData(FILE **strm, struct Input *in)
   H5DT_INT8 *in08;
   H5DT_INT16 *in16, temp;
   H5DT_INT32 *in32;
-#ifndef _WIN32
+#ifndef WIN32
   H5DT_INT64 *in64;
   char buffer[256];
 #endif

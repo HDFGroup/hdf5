@@ -82,19 +82,20 @@ am_libhdf5_la_OBJECTS = H5.lo H5checksum.lo H5dbg.lo H5system.lo \
 	H5timer.lo H5trace.lo H5A.lo H5Abtree2.lo H5Adense.lo \
 	H5Adeprec.lo H5Aint.lo H5Atest.lo H5AC.lo H5B.lo H5Bcache.lo \
 	H5B2.lo H5B2cache.lo H5B2dbg.lo H5B2int.lo H5B2stat.lo \
-	H5B2test.lo H5C.lo H5CS.lo H5D.lo H5Dcompact.lo H5Dcontig.lo \
-	H5Ddbg.lo H5Ddeprec.lo H5Defl.lo H5Dfill.lo H5Dint.lo H5Dio.lo \
-	H5Distore.lo H5Dmpio.lo H5Doh.lo H5Dselect.lo H5Dtest.lo \
-	H5E.lo H5Edeprec.lo H5Eint.lo H5F.lo H5Fdbg.lo H5Ffake.lo \
-	H5Fmount.lo H5Fsfile.lo H5Fsuper.lo H5Ftest.lo H5FD.lo \
-	H5FDcore.lo H5FDdirect.lo H5FDfamily.lo H5FDlog.lo H5FDmpi.lo \
-	H5FDmpio.lo H5FDmpiposix.lo H5FDmulti.lo H5FDsec2.lo \
-	H5FDspace.lo H5FDstdio.lo H5FL.lo H5FO.lo H5FS.lo H5FScache.lo \
-	H5FSdbg.lo H5FSsection.lo H5G.lo H5Gbtree2.lo H5Gcompact.lo \
-	H5Gdense.lo H5Gdeprec.lo H5Gent.lo H5Gint.lo H5Glink.lo \
-	H5Gloc.lo H5Gname.lo H5Gnode.lo H5Gobj.lo H5Goh.lo H5Gstab.lo \
-	H5Gtest.lo H5Gtraverse.lo H5HF.lo H5HFbtree2.lo H5HFcache.lo \
-	H5HFdbg.lo H5HFdblock.lo H5HFdtable.lo H5HFhdr.lo H5HFhuge.lo \
+	H5B2test.lo H5C.lo H5CS.lo H5D.lo H5Dchunk.lo H5Dcompact.lo \
+	H5Dcontig.lo H5Ddbg.lo H5Ddeprec.lo H5Defl.lo H5Dfill.lo \
+	H5Dint.lo H5Dio.lo H5Distore.lo H5Dmpio.lo H5Doh.lo \
+	H5Dscatgath.lo H5Dselect.lo H5Dtest.lo H5E.lo H5Edeprec.lo \
+	H5Eint.lo H5F.lo H5Fdbg.lo H5Ffake.lo H5Fmount.lo H5Fsfile.lo \
+	H5Fsuper.lo H5Ftest.lo H5FD.lo H5FDcore.lo H5FDdirect.lo \
+	H5FDfamily.lo H5FDlog.lo H5FDmpi.lo H5FDmpio.lo \
+	H5FDmpiposix.lo H5FDmulti.lo H5FDsec2.lo H5FDspace.lo \
+	H5FDstdio.lo H5FL.lo H5FO.lo H5FS.lo H5FScache.lo H5FSdbg.lo \
+	H5FSsection.lo H5G.lo H5Gbtree2.lo H5Gcompact.lo H5Gdense.lo \
+	H5Gdeprec.lo H5Gent.lo H5Gint.lo H5Glink.lo H5Gloc.lo \
+	H5Gname.lo H5Gnode.lo H5Gobj.lo H5Goh.lo H5Gstab.lo H5Gtest.lo \
+	H5Gtraverse.lo H5HF.lo H5HFbtree2.lo H5HFcache.lo H5HFdbg.lo \
+	H5HFdblock.lo H5HFdtable.lo H5HFhdr.lo H5HFhuge.lo \
 	H5HFiblock.lo H5HFiter.lo H5HFman.lo H5HFsection.lo \
 	H5HFspace.lo H5HFstat.lo H5HFtest.lo H5HFtiny.lo H5HG.lo \
 	H5HGdbg.lo H5HL.lo H5HLdbg.lo H5HP.lo H5I.lo H5L.lo \
@@ -383,7 +384,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog
 # Add libtool shared library version numbers to the HDF5 library
 # See libtool versioning documentation online.
 LT_VERS_INTERFACE = 5
-LT_VERS_REVISION = 0
+LT_VERS_REVISION = 6
 LT_VERS_AGE = 0
 H5detect_CFLAGS = -g
 
@@ -404,10 +405,10 @@ libhdf5_la_SOURCES = H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5AC.c H5B.c H5Bcache.c \
         H5B2.c H5B2cache.c H5B2dbg.c H5B2int.c H5B2stat.c H5B2test.c \
         H5C.c H5CS.c \
-        H5D.c H5Dcompact.c H5Dcontig.c H5Ddbg.c \
+        H5D.c H5Dchunk.c H5Dcompact.c H5Dcontig.c H5Ddbg.c \
         H5Ddeprec.c H5Defl.c H5Dfill.c H5Dint.c \
         H5Dio.c \
-        H5Distore.c H5Dmpio.c H5Doh.c H5Dselect.c H5Dtest.c \
+        H5Distore.c H5Dmpio.c H5Doh.c H5Dscatgath.c H5Dselect.c H5Dtest.c \
         H5E.c H5Edeprec.c H5Eint.c \
         H5F.c H5Fdbg.c H5Ffake.c H5Fmount.c H5Fsfile.c H5Fsuper.c H5Ftest.c \
         H5FD.c H5FDcore.c  \
@@ -602,6 +603,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5C.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5CS.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5D.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Dchunk.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Dcompact.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Dcontig.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Ddbg.Plo@am__quote@
@@ -613,6 +615,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Distore.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Dmpio.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Doh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Dscatgath.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Dselect.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Dtest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5E.Plo@am__quote@

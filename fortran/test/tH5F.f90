@@ -697,6 +697,8 @@
           LOGICAL, INTENT(IN) :: cleanup
           INTEGER, INTENT(OUT) :: total_error 
           INTEGER              :: error
+          INTEGER flag 
+          INTEGER :: free_space_out
      
           !
           CHARACTER(LEN=10), PARAMETER :: filename = "file_space"
