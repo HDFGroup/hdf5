@@ -323,6 +323,8 @@ out:
  *   H5Ocopy or not is if a change of filters or layout is requested by the user 
  *   then use read/write else use H5Ocopy. 
  *
+ * May, 1, 2008: Add a printing of the compression ratio of old size / new size
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -364,7 +366,7 @@ int do_copy_objects(hid_t fidin,
 
     if (options->verbose) {
         printf("-----------------------------------------\n");
-        printf(" Type     Filter (%%Savings)     Name\n");
+        printf(" Type     Filter (Compression)     Name\n");
         printf("-----------------------------------------\n");
     }
 
@@ -661,25 +663,25 @@ int do_copy_objects(hid_t fidin,
                              */
                             if (options->verbose) 
                             {
+                                double ratio=0;
+
                                 if (apply_s && apply_f)
                                 {
-                                    double per=0;
                                     hssize_t a, b;
 
-                                    /* get the storage size of the input dataset */
+                                    /* get the storage size of the output dataset */
                                     dsize_out=H5Dget_storage_size(dset_out);
 
-                                    a = dsize_in; b = dsize_out;
-                                    if (a!=0)
-                                        per = (double) (b-a)/a;
-                                   
-                                    per = -per;
-                                    per *=100;
+                                    /* compression ratio = uncompressed size /  compressed size */
 
-                                    print_dataset_info(dcpl_out,travt->objs[i].name,per);
+                                    a = dsize_in; b = dsize_out;
+                                    if (b!=0)
+                                        ratio = (double) a / (double) b;
+                                  
+                                    print_dataset_info(dcpl_out,travt->objs[i].name,ratio);
                                 }
                                 else
-                                    print_dataset_info(dcpl_id,travt->objs[i].name,0.0);
+                                    print_dataset_info(dcpl_id,travt->objs[i].name,ratio);
 
                                 /* print a message that the filter was not applied 
                                 (in case there was a filter)
@@ -1058,7 +1060,7 @@ error:
  */
 static void print_dataset_info(hid_t dcpl_id,
                                char *objname,
-                               double per)
+                               double ratio)
 {
     char         strfilter[255];
 #if defined (PRINT_DEBUG )
@@ -1146,7 +1148,7 @@ static void print_dataset_info(hid_t dcpl_id,
         char str[255], temp[20];
         strcpy(str,"dset     ");
         strcat(str,strfilter);
-        sprintf(temp,"  (%.1f%%)",per);
+        sprintf(temp,"  (%.3f:1)",ratio);
         strcat(str,temp);
         printf(FORMAT_OBJ,str,objname);
     }
