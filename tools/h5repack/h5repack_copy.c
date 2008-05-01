@@ -195,6 +195,8 @@ out:
  *  in (2) is that, when using the strip mine size, it assures that the "remaining" part 
  *  of the dataset that does not fill an entire strip mine is processed.
  *
+ *  May, 1, 2008: Add a printing of the compression ratio of old size / new size
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -236,7 +238,7 @@ int do_copy_objects(hid_t fidin,
     if (options->verbose) 
     {
         printf("-----------------------------------------\n");
-        printf(" Type     Filter (Ratio)     Name\n");
+        printf(" Type     Filter (Compression)     Name\n");
         printf("-----------------------------------------\n");
     }
     
@@ -492,25 +494,25 @@ int do_copy_objects(hid_t fidin,
                       */
                       if (options->verbose) 
                       {
+                          double ratio=0;
+
                           if (apply_s && apply_f)
                           {
-                              double per=0;
                               hssize_t a, b;
                               
                               /* get the storage size of the input dataset */
                               dsize_out=H5Dget_storage_size(dset_out);
                               
+                              /* compression ratio = uncompressed size /  compressed size */
+                              
                               a = dsize_in; b = dsize_out;
-                              if (a!=0)
-                                  per = (double) (b-a)/a;
+                              if (b!=0)
+                                  ratio = (double) a / (double) b;
                               
-                              per = -per;
-                              per *=100;
-                              
-                              print_dataset_info(dcpl_out,travt->objs[i].name,per);
+                              print_dataset_info(dcpl_out,travt->objs[i].name,ratio);
                           }
                           else
-                              print_dataset_info(dcpl_id,travt->objs[i].name,0.0);
+                              print_dataset_info(dcpl_id,travt->objs[i].name,ratio);
                           
                               /* print a message that the filter was not applied 
                               (in case there was a filter)
@@ -850,7 +852,7 @@ error:
  */
 static void print_dataset_info(hid_t dcpl_id,
                                char *objname,
-                               double per)
+                               double ratio)
 {
     char         strfilter[255];
 #if defined (PRINT_DEBUG )
@@ -935,7 +937,7 @@ static void print_dataset_info(hid_t dcpl_id,
         char str[255], temp[20];
         strcpy(str,"dset     ");
         strcat(str,strfilter);
-        sprintf(temp,"  (%.1f%%)",per);
+        sprintf(temp,"  (%.3f:1)",ratio);
         strcat(str,temp);
         printf(FORMAT_OBJ,str,objname);
     }
