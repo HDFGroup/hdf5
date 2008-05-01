@@ -41,8 +41,10 @@ const char *FILENAME[] = {
     "max_compact_dataset",
     "simple",
     "set_local",
+    "random_chunks",
     NULL
 };
+#define FILENAME_BUF_SIZE       1024
 
 #define FILE_DEFLATE_NAME       "deflate.h5"
 
@@ -142,7 +144,6 @@ const char *FILENAME[] = {
 
 /* Names for random chunks test */
 #define NPOINTS         50
-#define RC_FILENAME "random_chunks.h5"
 
 /* Shared global arrays */
 #define DSET_DIM1       100
@@ -339,7 +340,7 @@ test_create(hid_t file)
 static herr_t
 test_simple_io(hid_t fapl)
 {
-    char                filename[32];
+    char                filename[FILENAME_BUF_SIZE];
     hid_t		file, dataset, space, xfer;
     int			i, j, n;
     hsize_t		dims[2];
@@ -453,7 +454,7 @@ error:
 static herr_t
 test_userblock_offset(hid_t fapl)
 {
-    char                filename[32];
+    char                filename[FILENAME_BUF_SIZE];
     hid_t		file, fcpl, dataset, space;
     int			i, j;
     hsize_t		dims[2];
@@ -543,7 +544,7 @@ test_compact_io(hid_t fapl)
     hid_t       file, dataset, space, plist;
     hsize_t     dims[2];
     int         wbuf[16][8], rbuf[16][8];
-    char	filename[1024];
+    char	filename[FILENAME_BUF_SIZE];
     int         i, j, n;
 
     TESTING("compact dataset I/O");
@@ -645,7 +646,7 @@ test_max_compact(hid_t fapl)
     hsize_t     compact_size;
     herr_t      status;
     int         *wbuf, *rbuf;
-    char	filename[1024];
+    char	filename[FILENAME_BUF_SIZE];
     int         i,  n;
 
     TESTING("compact dataset of maximal size");
@@ -5139,7 +5140,7 @@ const H5Z_class_t H5Z_SET_LOCAL_TEST[1] = {{
 static herr_t
 test_set_local(hid_t fapl)
 {
-    char        filename[32];
+    char        filename[FILENAME_BUF_SIZE];
     hid_t       file;           /* File ID */
     hid_t       dsid;           /* Dataset ID */
     hid_t       sid;            /* Dataspace ID */
@@ -5968,8 +5969,9 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_random_chunks(void)
+test_random_chunks(hid_t fapl)
 {
+    char        filename[FILENAME_BUF_SIZE];
     hid_t       s=-1, m=-1, d=-1, dcpl=-1, file=-1;
     int         wbuf[NPOINTS],
                 rbuf[NPOINTS],
@@ -5986,8 +5988,10 @@ test_random_chunks(void)
 
     assert(NPOINTS < 100);
 
+    h5_fixname(FILENAME[6], fapl, filename, sizeof filename);
+
     /* Create file for first test */
-    if((file = H5Fcreate(RC_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Create dataspace */
     if((s = H5Screate_simple(2, dsize, NULL)) < 0) TEST_ERROR;
@@ -6038,7 +6042,7 @@ test_random_chunks(void)
     if(H5Fclose(file) < 0) TEST_ERROR;
 
     /* Open file again */
-    if((file = H5Fopen(RC_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) TEST_ERROR;
+    if((file = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Open dataset */
     if((d = H5Dopen2(file, dname, H5P_DEFAULT)) < 0) TEST_ERROR;
@@ -6069,12 +6073,9 @@ test_random_chunks(void)
     if(H5Dclose(d) < 0) TEST_ERROR;
     if(H5Fclose(file) < 0) TEST_ERROR;
 
-    /* Remove file */
-    HDremove(RC_FILENAME);
-
 
     /* Create file for second test */
-    if((file = H5Fcreate(RC_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Create dataspace with unlimited maximum dimensions */
     if((s = H5Screate_simple(2, dsize, dmax)) < 0) TEST_ERROR;
@@ -6131,7 +6132,7 @@ test_random_chunks(void)
     if(H5Fclose(file) < 0) TEST_ERROR;
 
     /* Open file again */
-    if((file = H5Fopen(RC_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) TEST_ERROR;
+    if((file = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Open dataset */
     if((d = H5Dopen2(file, dname, H5P_DEFAULT)) < 0) TEST_ERROR;
@@ -6160,9 +6161,6 @@ test_random_chunks(void)
     if(H5Sclose(m) < 0) TEST_ERROR;
     if(H5Dclose(d) < 0) TEST_ERROR;
     if(H5Fclose(file) < 0) TEST_ERROR;
-
-    /* Remove file */
-    HDremove(RC_FILENAME);
 
     PASSED();
     return 0;
@@ -6387,7 +6385,7 @@ main(void)
     if(envval == NULL)
         envval = "nomatch";
     if(HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
-        char		filename[1024];
+        char		filename[FILENAME_BUF_SIZE];
         hid_t		file, grp, fapl, fapl2;
         hbool_t new_format;
         int mdc_nelmts;
@@ -6476,7 +6474,7 @@ main(void)
             nerrors += (test_filters_endianess(my_fapl) < 0	? 1 : 0);
             nerrors += (test_zero_dims(file) < 0		? 1 : 0);
             nerrors += (test_missing_chunk(file) < 0		? 1 : 0);
-            nerrors += (test_random_chunks() < 0		? 1 : 0);
+            nerrors += (test_random_chunks(my_fapl) < 0		? 1 : 0);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
             nerrors += (test_deprec(file) < 0			? 1 : 0);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
