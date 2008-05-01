@@ -56,6 +56,10 @@ New Features
     Tools:
     ------
 
+     - h5dump: add a printing of the compression ratio of uncompressed and compressed 
+         sizes for cases where compression  filters are present. (PVN - 2008/05/01)
+
+
     High-Level APIs:
     ------
     
@@ -74,12 +78,12 @@ Bug Fixes since HDF5-1.8.0 release
 	  The searching pattern will depend on whether the target file's
 	  pathname is an absolute or a relative path. Please see the description
 	  in the RM for H5Lcreate_external().  (VC - 4/8/08)
-        - Fixed possible file corruption bug when encoding datatype
+      - Fixed possible file corruption bug when encoding datatype
             descriptions for compound datatypes whose size was between
             256 & 511 bytes and the file was opened with the "use the
             latest format" property enabled (with H5Pset_libver_bounds).
             (QAK - 2008/03/13)
-        - Fixed bug in H5Aget_num_attrs() routine to handle invalid location
+      - Fixed bug in H5Aget_num_attrs() routine to handle invalid location
             ID correctly.  (QAK - 2008/03/11)
 
 
