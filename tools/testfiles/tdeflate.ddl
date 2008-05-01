@@ -7,7 +7,7 @@ DATASET "deflate" {
    DATASPACE  SIMPLE { ( 20, 10 ) / ( 20, 10 ) }
    STORAGE_LAYOUT {
       CHUNKED ( 10, 5 )
-      SIZE 385 (51.9%COMPRESSION)
+      SIZE 385 (2.078:1 COMPRESSION)
     }
    FILTERS {
       COMPRESSION DEFLATE { LEVEL 9 }

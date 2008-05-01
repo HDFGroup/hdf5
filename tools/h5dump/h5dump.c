@@ -2507,7 +2507,7 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
             int ndims = H5Sget_simple_extent_dims( sid, dims, NULL);  
             hsize_t nelmts = 1;
             hsize_t size;
-            double per = 0;
+            double ratio = 0;
             hssize_t a, b;
             int ok = 0;
 
@@ -2538,14 +2538,14 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
                 }
                 size = nelmts * datum_size;
 
-                a = size; b = storage_size;
-                if (a!=0)
-                    per = (double) (b-a)/a;
-                
-                per = -per;
-                per *=100;
+                 a = size; b = storage_size;
 
-                HDfprintf(stdout, "SIZE %Hu (%.1f%%COMPRESSION)\n ", storage_size, per);
+                /* compression ratio = uncompressed size /  compressed size */
+
+                if (b!=0)
+                    ratio = (double) a / (double) b;
+              
+                HDfprintf(stdout, "SIZE %Hu (%.3f:1 COMPRESSION)\n ", storage_size, ratio);
                 
             }
             else

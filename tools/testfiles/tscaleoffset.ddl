@@ -7,7 +7,7 @@ DATASET "scaleoffset" {
    DATASPACE  SIMPLE { ( 20, 10 ) / ( 20, 10 ) }
    STORAGE_LAYOUT {
       CHUNKED ( 10, 5 )
-      SIZE 152 (81.0%COMPRESSION)
+      SIZE 152 (5.263:1 COMPRESSION)
     }
    FILTERS {
       COMPRESSION SCALEOFFSET { MIN BITS 4 }
