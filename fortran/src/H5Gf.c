@@ -16,6 +16,7 @@
 /* This files contains C stubs for H5G Fortran APIs */
 
 #include "H5f90.h"
+#include "H5Eprivate.h"
 
 /*----------------------------------------------------------------------------
  * Name:        h5gcreate_c
@@ -35,9 +36,9 @@
  *---------------------------------------------------------------------------*/
 int_f
 nh5gcreate_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size_hint,
-    hid_t_f *grp_id)
+	     hid_t_f *grp_id, hid_t_f *lcpl_id, hid_t_f *gcpl_id, hid_t_f *gapl_id )
 {
-    hid_t gcpl_id = -1;          /* Group creation property list */
+    hid_t c_gcpl_id = -1;          /* Group creation property list */
     char *c_name = NULL;
     hid_t c_grp_id;
     int_f ret_value = -1;
@@ -51,19 +52,19 @@ nh5gcreate_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size_hint,
     /*
      * Call H5Gcreate function.
      */
-    if(*size_hint == OBJECT_NAMELEN_DEFAULT_F )
-        c_grp_id = H5Gcreate2((hid_t)*loc_id, c_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if(*size_hint == OBJECT_NAMELEN_DEFAULT_F ){
+      c_grp_id = H5Gcreate2((hid_t)*loc_id, c_name,(hid_t)*lcpl_id,(hid_t)*gcpl_id,(hid_t)*gapl_id);}
     else {
-        /* Create the group creation property list */
-        if((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0)
-            goto DONE;
+      /* Create the group creation property list */
+      if((c_gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0)
+	goto DONE;
 
-        /* Set the local heap size hint */
-        if(H5Pset_local_heap_size_hint(gcpl_id, (size_t)*size_hint) < 0)
-            goto DONE;
+      /* Set the local heap size hint */
+      if(H5Pset_local_heap_size_hint(c_gcpl_id, (size_t)*size_hint) < 0)
+	goto DONE;
 
-        /* Create the group */
-        c_grp_id = H5Gcreate2((hid_t)*loc_id, c_name, H5P_DEFAULT, gcpl_id, H5P_DEFAULT);
+      /* Create the group */
+      c_grp_id = H5Gcreate2((hid_t)*loc_id, c_name, H5P_DEFAULT, c_gcpl_id, H5P_DEFAULT);
     }
     if(c_grp_id < 0)
         goto DONE;
@@ -73,8 +74,8 @@ nh5gcreate_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *size_hint,
     ret_value = 0;
 
 DONE:
-    if(gcpl_id > 0)
-        H5Pclose(gcpl_id);
+    if(c_gcpl_id > 0)
+        H5Pclose(c_gcpl_id);
     if(c_name)
         HDfree(c_name);
     return ret_value;
@@ -86,6 +87,7 @@ DONE:
  * Inputs:      loc_id - file or group identifier
  *              name - name of the group
  *              namelen - name length
+ *              gapl_id - Group access property list identifier 
  * Outputs:     grp_id - group identifier
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
@@ -93,7 +95,7 @@ DONE:
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5gopen_c(hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *grp_id)
+nh5gopen_c(hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *gapl_id, hid_t_f *grp_id)
 {
      char *c_name = NULL;
      hid_t c_grp_id;
@@ -108,7 +110,7 @@ nh5gopen_c(hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *grp_id)
      /*
       * Call H5Gopen function.
       */
-    if((c_grp_id = H5Gopen2((hid_t)*loc_id, c_name, H5P_DEFAULT)) < 0)
+    if((c_grp_id = H5Gopen2((hid_t)*loc_id, c_name, (hid_t)*gapl_id)) < 0)
         goto DONE;
 
     /* Everything OK, set values to return */
@@ -657,5 +659,212 @@ DONE:
     if(c_comment)
         HDfree(c_comment);
     return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5gcreate_anon_c
+ * Purpose:     Call H5Gcreate_anon
+ * Inputs:      
+ *              loc_id  - Location identifier 
+ *              gcpl_id - Group creation property list identifier
+ *              gapl_id - Group access property list identifier
+ *
+ * Outputs:     grp_id - group identifier
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  M.S. Breitenfeld
+ *              February 15, 2008
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+int_f
+nh5gcreate_anon_c(hid_t_f *loc_id, hid_t_f *gcpl_id, hid_t_f *gapl_id, hid_t_f *grp_id)
+{
+
+  int_f ret_value=0;          /* Return value */
+  
+  if ((*grp_id = (hid_t_f)H5Gcreate_anon((hid_t)*loc_id,(hid_t)*gcpl_id,(hid_t)*gapl_id)) < 0)
+    HGOTO_DONE(FAIL);
+
+done:
+    return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5gget_create_plist_c 
+ * Purpose:     Call H5Gget_create_plist
+ * Inputs:      
+ *              grp_id - group identifier
+ *
+ * Outputs:     gcpl_id - Group creation property list identifier
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  M.S. Breitenfeld
+ *              February 15, 2008
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+int_f
+nh5gget_create_plist_c(hid_t_f *grp_id, hid_t_f *gcpl_id )
+{
+  int_f ret_value=0; /* Return value */
+
+  if ((*gcpl_id = (hid_t_f)H5Gget_create_plist((hid_t)*grp_id)) < 0)
+    HGOTO_DONE(FAIL);
+
+done:
+    return ret_value;
+}
+
+
+/*----------------------------------------------------------------------------
+ * Name:      h5gget_info_c
+ * Purpose:   Call H5Gget_info
+ * Inputs:    group_id - Group identifier
+ * Outputs: 
+ *            storage_type - Type of storage for links in group:
+ *                             H5G_STORAGE_TYPE_COMPACT: Compact storage
+ *                             H5G_STORAGE_TYPE_DENSE: Indexed storage
+ *                             H5G_STORAGE_TYPE_SYMBOL_TABLE: Symbol tables, the original HDF5 structure
+ *
+ *                  nlinks - Number of links in group
+ *              max_corder - Current maximum creation order value for group
+ *
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  M.S. Breitenfeld
+ *              February 15, 2008
+ * Modifications: N/A
+ *---------------------------------------------------------------------------*/
+int_f
+nh5gget_info_c (hid_t_f *group_id, int_f *storage_type, int_f *nlinks, int_f *max_corder)
+{
+
+    int_f ret_value = 0;          /* Return value */
+    H5G_info_t ginfo;
+
+     /*
+      * Call H5Gget_info function.
+      */
+    if(H5Gget_info((hid_t)*group_id,&ginfo) < 0)
+      HGOTO_DONE(FAIL);
+
+    /* Unpack the structure */
+
+    *storage_type = (int_f)ginfo.storage_type;
+    *nlinks = (int_f)ginfo.nlinks;
+    *max_corder = (int_f)ginfo.max_corder;
+
+done:
+    return ret_value;
+}
+
+
+/*----------------------------------------------------------------------------
+ * Name:      h5gget_info_by_idx_c
+ * Purpose:   Call H5Gget_info_by_idx
+ * Inputs:    
+ *          loc_id - File or group identifier
+ *      group_name - Name of group containing group for which information is to be retrieved
+ *   group_namelen - name length
+ *      index_type - Index type
+ *           order - Order of the count in the index
+ *               n - Position in the index of the group for which information is retrieved
+ *         lapl_id - Link access property list
+ * Outputs: 
+ *            storage_type - Type of storage for links in group:
+ *                             H5G_STORAGE_TYPE_COMPACT: Compact storage
+ *                             H5G_STORAGE_TYPE_DENSE: Indexed storage
+ *                             H5G_STORAGE_TYPE_SYMBOL_TABLE: Symbol tables, the original HDF5 structure
+ *
+ *                  nlinks - Number of links in group
+ *              max_corder - Current maximum creation order value for group
+ *
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  M.S. Breitenfeld
+ *              February 18, 2008
+ * Modifications: N/A
+ *---------------------------------------------------------------------------*/
+int_f
+nh5gget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen, 
+		      hid_t_f *index_type, hid_t_f *order, hsize_t_f *n, hid_t_f *lapl_id, 
+		      int_f *storage_type, int_f *nlinks, int_f *max_corder)
+
+{
+  char *c_group_name = NULL;          /* Buffer to hold group name C string */
+  int_f ret_value = 0;          /* Return value */
+  H5G_info_t ginfo;
+  /*
+   * Convert FORTRAN name to C name
+   */
+  if((c_group_name = HD5f2cstring(group_name, (size_t)*group_namelen)) == NULL)
+    HGOTO_DONE(FAIL);
+
+  /*
+   * Call H5Gget_info_by_idx function.
+   */
+  if(H5Gget_info_by_idx((hid_t)*loc_id,c_group_name, (H5_index_t)*index_type,(H5_iter_order_t)*order,(hsize_t)*n,
+			&ginfo, (hid_t)*lapl_id) < 0)
+    HGOTO_DONE(FAIL);
+
+  /* Unpack the structure */
+
+  *storage_type = (int_f)ginfo.storage_type;
+  *nlinks = (int_f)ginfo.nlinks;
+  *max_corder = (int_f)ginfo.max_corder;
+
+ done:
+  if(c_group_name)
+    HDfree(c_group_name);
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:      h5gget_info_by_name_c
+ * Purpose:   Call H5Gget_info_by_name
+ * Inputs:    
+ *          loc_id - File or group identifier
+ *      group_name - Name of group containing group for which information is to be retrieved
+ *   group_namelen - name length
+ *         lapl_id - Link access property list
+ * Outputs: 
+ *            storage_type - Type of storage for links in group:
+ *                             H5G_STORAGE_TYPE_COMPACT: Compact storage
+ *                             H5G_STORAGE_TYPE_DENSE: Indexed storage
+ *                             H5G_STORAGE_TYPE_SYMBOL_TABLE: Symbol tables, the original HDF5 structure
+ *
+ *                  nlinks - Number of links in group
+ *              max_corder - Current maximum creation order value for group
+ *
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  M.S. Breitenfeld
+ *              February 18, 2008
+ * Modifications: N/A
+ *---------------------------------------------------------------------------*/
+int_f
+nh5gget_info_by_name_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen, hid_t_f *lapl_id, 
+		       int_f *storage_type, int_f *nlinks, int_f *max_corder)
+
+{
+  char *c_group_name = NULL;          /* Buffer to hold group name C string */
+  int_f ret_value = 0;          /* Return value */
+  H5G_info_t ginfo;
+  /*
+   * Convert FORTRAN name to C name
+   */
+  if((c_group_name = HD5f2cstring(group_name, (size_t)*group_namelen)) == NULL)
+    HGOTO_DONE(FAIL);
+
+  /*
+   * Call H5Gget_info_by_name function.
+   */
+  if(H5Gget_info_by_name((hid_t)*loc_id, c_group_name, &ginfo, (hid_t)*lapl_id) < 0)
+    HGOTO_DONE(FAIL);
+
+  /* Unpack the structure */
+
+  *storage_type = (int_f)ginfo.storage_type;
+  *nlinks = (int_f)ginfo.nlinks;
+  *max_corder = (int_f)ginfo.max_corder;
+
+ done:
+  if(c_group_name)
+    HDfree(c_group_name);
+  return ret_value;
 }
 

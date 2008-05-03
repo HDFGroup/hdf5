@@ -52,10 +52,6 @@
     !
     INTEGER(HSIZE_T), DIMENSION(3) :: dimsm = (/7,7,3/)
 
-    !
-    !to get Dataset dimensions 
-    !
-    INTEGER(HSIZE_T), DIMENSION(2) :: dims_out
 
     !
     !Dataset dimensions 
@@ -103,21 +99,18 @@
     !
     INTEGER :: memrank = 3
 
-    !
-    !integer to get the dataspace rank from dataset
-    !
-    INTEGER :: rank 
+
 
 
     !
     !general purpose integer 
     !
-    INTEGER :: i, j, k 
+    INTEGER :: i, j 
 
     !
     !flag to check operation success 
     !
-    INTEGER :: error, error_n 
+    INTEGER :: error 
     INTEGER(HSIZE_T), DIMENSION(3) :: data_dims
 
 
@@ -397,8 +390,7 @@
     !
     !flag to check operation success 
     !
-    INTEGER :: error 
-    LOGICAL :: status
+    INTEGER :: error
     INTEGER(HSIZE_T), DIMENSION(3) :: data_dims
 
 
@@ -720,8 +712,7 @@
 
      INTEGER(HID_T) :: file_id       ! File identifier 
      INTEGER(HID_T) :: dset_id       ! Dataset identifier 
-     INTEGER(HID_T) :: dataspace     ! Dataspace identifier 
-     INTEGER(HID_T) :: memspace      ! memspace identifier 
+     INTEGER(HID_T) :: dataspace     ! Dataspace identifier
 
      !
      !Dataset dimensions 
@@ -763,10 +754,6 @@
      !
      INTEGER(HSIZE_T), DIMENSION(RANK, NUMPS) :: coord
 
-     !
-     !Size of the hyperslab in memory 
-     !
-     INTEGER(HSIZE_T), DIMENSION(3) :: count_out = (/3,4,1/)
 
      !
      !Number of hyperslabs selected in the current dataspace 
@@ -802,19 +789,9 @@
      INTEGER, DIMENSION(5,6) :: data
 
      !
-     !output buffer 
-     !
-     INTEGER, DIMENSION(7,7,3) :: data_out
-
-     !
-     !general purpose integer 
-     !
-     INTEGER :: i, j, k 
-
-     !
      !flag to check operation success 
      !
-     INTEGER :: error, error_n 
+     INTEGER :: error
      INTEGER(HSIZE_T), DIMENSION(3) :: data_dims
 
      !

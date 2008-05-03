@@ -190,6 +190,10 @@
 ./fortran/src/H5Gff.f90
 ./fortran/src/H5If.c
 ./fortran/src/H5Iff.f90
+./fortran/src/H5Lf.c
+./fortran/src/H5Lff.f90
+./fortran/src/H5Of.c
+./fortran/src/H5Off.f90
 ./fortran/src/H5Pf.c
 ./fortran/src/H5Pff.f90
 ./fortran/src/H5Rf.c
@@ -213,6 +217,7 @@
 ./fortran/src/Makefile.am
 ./fortran/src/Makefile.in
 ./fortran/src/README
+./fortran/src/README_DEVELOPEMENT 	_DO_NOT_DISTRIBUTE_
 ./fortran/src/h5fc.in
 ./fortran/src/libhdf5_fortran.settings.in
 
@@ -221,15 +226,19 @@
 ./fortran/test/fflush1.f90
 ./fortran/test/fflush2.f90
 ./fortran/test/fortranlib_test.f90
+./fortran/test/fortranlib_test_1_8.f90
 ./fortran/test/t.c
 ./fortran/test/t.h
 ./fortran/test/tf.f90
 ./fortran/test/tH5A.f90
+./fortran/test/tH5A_1_8.f90
 ./fortran/test/tH5D.f90
 ./fortran/test/tH5E.f90
 ./fortran/test/tH5F.f90
 ./fortran/test/tH5G.f90
+./fortran/test/tH5G_1_8.f90
 ./fortran/test/tH5I.f90
+./fortran/test/tH5O.f90
 ./fortran/test/tH5P.f90
 ./fortran/test/tH5R.f90
 ./fortran/test/tH5S.f90
