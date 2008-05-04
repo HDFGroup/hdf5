@@ -71,8 +71,8 @@ PROGRAM fortranlibtest
   error_string = failure
   CALL file_space(cleanup, fspace_total_error)
   IF (fspace_total_error == 0) error_string = success
-  WRITE(*, fmt = '(21a)', advance = 'no') ' File free space test'     
-  WRITE(*, fmt = '(49x,a)', advance = 'no') ' ' 
+  WRITE(*, fmt = '(21a)', advance = 'no') ' Testing file free space'     
+  WRITE(*, fmt = '(52x,a)', advance = 'no') ' ' 
   WRITE(*, fmt = e_format) error_string
   total_error = total_error + fspace_total_error 
 
@@ -96,19 +96,19 @@ PROGRAM fortranlibtest
 !  WRITE(*, fmt = e_format) error_string
 !  total_error = total_error + group_total_error
 
-!  CALL test_h5o(cleanup, group_total_error )
-!  WRITE(*, fmt = '(15a)', advance = 'no') ' H5O TEST'     
-!  WRITE(*, fmt = '(55x,a)', advance = 'no')  ' '
-!  IF (group_total_error == 0) error_string = success
-!  WRITE(*, fmt = e_format) error_string
-!  total_error = total_error + group_total_error
+  CALL test_h5o(cleanup, group_total_error )
+  WRITE(*, fmt = '(15a)', advance = 'no') ' Testing object interface'     
+  WRITE(*, fmt = '(51x,a)', advance = 'no')  ' '
+  IF (group_total_error == 0) error_string = success
+  WRITE(*, fmt = e_format) error_string
+  total_error = total_error + group_total_error
 
-!  CALL dtransform(cleanup, group_total_error)
-!  WRITE(*, fmt = '(15a)', advance = 'no') ' Dtransform TEST'     
-!  WRITE(*, fmt = '(55x,a)', advance = 'no')  ' '
-!  IF (group_total_error == 0) error_string = success
-!  WRITE(*, fmt = e_format) error_string
-!  total_error = total_error + group_total_error
+  CALL dtransform(cleanup, group_total_error)
+  WRITE(*, fmt = '(15a)', advance = 'no') ' Testing data transform'     
+  WRITE(*, fmt = '(53x,a)', advance = 'no')  ' '
+  IF (group_total_error == 0) error_string = success
+  WRITE(*, fmt = e_format) error_string
+  total_error = total_error + group_total_error
 
 !  CALL test_genprop_basic_class(cleanup, group_total_error)
 !  WRITE(*, fmt = '(30a)', advance = 'no') ' test_genprop_basic_class TEST'     
@@ -116,12 +116,12 @@ PROGRAM fortranlibtest
 !  IF (group_total_error == 0) error_string = success
 !  WRITE(*, fmt = e_format) error_string
 !  total_error = total_error + group_total_error
-!  CALL test_h5s_encode(cleanup, group_total_error)
-!  WRITE(*, fmt = '(15a)', advance = 'no') ' test_h5s_encode TEST'     
-!  WRITE(*, fmt = '(55x,a)', advance = 'no')  ' '
-!  IF (group_total_error == 0) error_string = success
-!  WRITE(*, fmt = e_format) error_string
-!  total_error = total_error + group_total_error
+  CALL test_h5s_encode(cleanup, group_total_error)
+  WRITE(*, fmt = '(15a)', advance = 'no') ' Testing dataspace encoding and decoding'     
+  WRITE(*, fmt = '(36x,a)', advance = 'no')  ' '
+  IF (group_total_error == 0) error_string = success
+  WRITE(*, fmt = e_format) error_string
+  total_error = total_error + group_total_error
 
 !  CALL test_hard_query(group_total_error)
 
@@ -337,7 +337,7 @@ SUBROUTINE test_h5s_encode(cleanup, total_error)
   INTEGER :: error
 
   !/* Output message about test being performed */
-  WRITE(*,*) "Testing Dataspace Encoding and Decoding"
+  !WRITE(*,*) "Testing Dataspace Encoding and Decoding"
 
   !/*-------------------------------------------------------------------------
   ! * Test encoding and decoding of simple dataspace and hyperslab selection.

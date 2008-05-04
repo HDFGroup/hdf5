@@ -21,7 +21,7 @@ SUBROUTINE test_h5o(cleanup, total_error)
   INTEGER, INTENT(OUT) :: total_error
 
   ! /* Output message about test being performed */
-  WRITE(*,*) "Testing Objects"
+  ! WRITE(*,*) "Testing Objects"
 
 !!$  test_h5o_open();		/* Test generic OPEN FUNCTION */
 !!$  test_h5o_open_by_addr();	/* Test opening objects by address */
