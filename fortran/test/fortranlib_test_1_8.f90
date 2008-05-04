@@ -81,47 +81,47 @@ PROGRAM fortranlibtest
   !     write(*,*) 'Testing ATTRIBUTE interface              ' 
   !     write(*,*) '========================================='
 
-  error_string = failure
-  CALL attribute_test_1_8(cleanup, attribute_total_error)
-  WRITE(*, fmt = '(15a)', advance = 'no') ' ATTRIBUTE TEST'     
-  WRITE(*, fmt = '(55x,a)', advance = 'no')  ' '
-  IF (attribute_total_error == 0) error_string = success
-  WRITE(*, fmt = e_format) error_string
-  total_error = total_error + attribute_total_error
+!  error_string = failure
+!  CALL attribute_test_1_8(cleanup, attribute_total_error)
+!  WRITE(*, fmt = '(15a)', advance = 'no') ' ATTRIBUTE TEST'     
+!  WRITE(*, fmt = '(55x,a)', advance = 'no')  ' '
+!  IF (attribute_total_error == 0) error_string = success
+!  WRITE(*, fmt = e_format) error_string
+!  total_error = total_error + attribute_total_error
 
-  CALL group_test(cleanup, group_total_error)
-  WRITE(*, fmt = '(15a)', advance = 'no') ' GROUP TEST'     
-  WRITE(*, fmt = '(55x,a)', advance = 'no')  ' '
-  IF (group_total_error == 0) error_string = success
-  WRITE(*, fmt = e_format) error_string
-  total_error = total_error + group_total_error
+!  CALL group_test(cleanup, group_total_error)
+!  WRITE(*, fmt = '(15a)', advance = 'no') ' GROUP TEST'     
+!  WRITE(*, fmt = '(55x,a)', advance = 'no')  ' '
+!  IF (group_total_error == 0) error_string = success
+!  WRITE(*, fmt = e_format) error_string
+!  total_error = total_error + group_total_error
 
-  CALL test_h5o(cleanup, group_total_error )
-  WRITE(*, fmt = '(15a)', advance = 'no') ' H5O TEST'     
-  WRITE(*, fmt = '(55x,a)', advance = 'no')  ' '
-  IF (group_total_error == 0) error_string = success
-  WRITE(*, fmt = e_format) error_string
-  total_error = total_error + group_total_error
+!  CALL test_h5o(cleanup, group_total_error )
+!  WRITE(*, fmt = '(15a)', advance = 'no') ' H5O TEST'     
+!  WRITE(*, fmt = '(55x,a)', advance = 'no')  ' '
+!  IF (group_total_error == 0) error_string = success
+!  WRITE(*, fmt = e_format) error_string
+!  total_error = total_error + group_total_error
 
-  CALL dtransform(cleanup, group_total_error)
-  WRITE(*, fmt = '(15a)', advance = 'no') ' Dtransform TEST'     
-  WRITE(*, fmt = '(55x,a)', advance = 'no')  ' '
-  IF (group_total_error == 0) error_string = success
-  WRITE(*, fmt = e_format) error_string
-  total_error = total_error + group_total_error
+!  CALL dtransform(cleanup, group_total_error)
+!  WRITE(*, fmt = '(15a)', advance = 'no') ' Dtransform TEST'     
+!  WRITE(*, fmt = '(55x,a)', advance = 'no')  ' '
+!  IF (group_total_error == 0) error_string = success
+!  WRITE(*, fmt = e_format) error_string
+!  total_error = total_error + group_total_error
 
-  CALL test_genprop_basic_class(cleanup, group_total_error)
-  WRITE(*, fmt = '(30a)', advance = 'no') ' test_genprop_basic_class TEST'     
-  WRITE(*, fmt = '(55x,a)', advance = 'no')  ' '
-  IF (group_total_error == 0) error_string = success
-  WRITE(*, fmt = e_format) error_string
-  total_error = total_error + group_total_error
-  CALL test_h5s_encode(cleanup, group_total_error)
-  WRITE(*, fmt = '(15a)', advance = 'no') ' test_h5s_encode TEST'     
-  WRITE(*, fmt = '(55x,a)', advance = 'no')  ' '
-  IF (group_total_error == 0) error_string = success
-  WRITE(*, fmt = e_format) error_string
-  total_error = total_error + group_total_error
+!  CALL test_genprop_basic_class(cleanup, group_total_error)
+!  WRITE(*, fmt = '(30a)', advance = 'no') ' test_genprop_basic_class TEST'     
+!  WRITE(*, fmt = '(55x,a)', advance = 'no')  ' '
+!  IF (group_total_error == 0) error_string = success
+!  WRITE(*, fmt = e_format) error_string
+!  total_error = total_error + group_total_error
+!  CALL test_h5s_encode(cleanup, group_total_error)
+!  WRITE(*, fmt = '(15a)', advance = 'no') ' test_h5s_encode TEST'     
+!  WRITE(*, fmt = '(55x,a)', advance = 'no')  ' '
+!  IF (group_total_error == 0) error_string = success
+!  WRITE(*, fmt = e_format) error_string
+!  total_error = total_error + group_total_error
 
 !  CALL test_hard_query(group_total_error)
 
