@@ -24,6 +24,7 @@ SUBROUTINE group_test(cleanup, total_error)
   
   INTEGER :: error
 
+  WRITE(*,*) "TESTING GROUPS"
   CALL H5Pcreate_f(H5P_FILE_ACCESS_F, fapl, error)
   CALL check("H5Pcreate_f",error, total_error)
 
@@ -46,7 +47,7 @@ SUBROUTINE group_test(cleanup, total_error)
 ! CALL ud_hard_links(fapl2,total_error)
   CALL timestamps(cleanup, fapl2, total_error)
   CALL test_move_preserves(fapl2, total_error)
-  CALL delete_by_idx(cleanup,fapl2, total_error)
+!EP  CALL delete_by_idx(cleanup,fapl2, total_error)
   CALL test_lcpl(cleanup, fapl, total_error)
 
   CALL objcopy(fapl, total_error)

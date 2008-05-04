@@ -81,20 +81,20 @@ PROGRAM fortranlibtest
   !     write(*,*) 'Testing ATTRIBUTE interface              ' 
   !     write(*,*) '========================================='
 
-!  error_string = failure
-!  CALL attribute_test_1_8(cleanup, attribute_total_error)
-!  WRITE(*, fmt = '(15a)', advance = 'no') ' ATTRIBUTE TEST'     
-!  WRITE(*, fmt = '(55x,a)', advance = 'no')  ' '
-!  IF (attribute_total_error == 0) error_string = success
-!  WRITE(*, fmt = e_format) error_string
-!  total_error = total_error + attribute_total_error
+  error_string = failure
+  CALL attribute_test_1_8(cleanup, attribute_total_error)
+  WRITE(*, fmt = '(15a)', advance = 'no') ' Testing attributes'     
+  WRITE(*, fmt = '(57x,a)', advance = 'no')  ' '
+  IF (attribute_total_error == 0) error_string = success
+  WRITE(*, fmt = e_format) error_string
+  total_error = total_error + attribute_total_error
 
-!  CALL group_test(cleanup, group_total_error)
-!  WRITE(*, fmt = '(15a)', advance = 'no') ' GROUP TEST'     
-!  WRITE(*, fmt = '(55x,a)', advance = 'no')  ' '
-!  IF (group_total_error == 0) error_string = success
-!  WRITE(*, fmt = e_format) error_string
-!  total_error = total_error + group_total_error
+  CALL group_test(cleanup, group_total_error)
+  WRITE(*, fmt = '(15a)', advance = 'no') ' Testing groups'     
+  WRITE(*, fmt = '(61x,a)', advance = 'no')  ' '
+  IF (group_total_error == 0) error_string = success
+  WRITE(*, fmt = e_format) error_string
+  total_error = total_error + group_total_error
 
   CALL test_h5o(cleanup, group_total_error )
   WRITE(*, fmt = '(15a)', advance = 'no') ' Testing object interface'     
