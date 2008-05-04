@@ -1,4 +1,4 @@
-HDF5 version 1.6.7-snap3 released on Sun Apr 27 18:06:34 CDT 2008
+HDF5 version 1.6.7-snap4 released on Sun May  4 17:55:34 CDT 2008
 ================================================================================
 
 INTRODUCTION
@@ -66,6 +66,9 @@ New Features
      - h5repack now supports adding multiple filters to all objects. 
 	     PVN - 2008/2/13
      - h5import imports string (text) data. PVN - 2008/2/19
+     - h5dump: add a printing of the compression ratio of uncompressed and compressed 
+           sizes for cases where compression  filters are present. (PVN - 2008/05/01)
+
 
 
 
