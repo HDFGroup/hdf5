@@ -110,12 +110,13 @@ PROGRAM fortranlibtest
   WRITE(*, fmt = e_format) error_string
   total_error = total_error + group_total_error
 
-!  CALL test_genprop_basic_class(cleanup, group_total_error)
-!  WRITE(*, fmt = '(30a)', advance = 'no') ' test_genprop_basic_class TEST'     
-!  WRITE(*, fmt = '(55x,a)', advance = 'no')  ' '
-!  IF (group_total_error == 0) error_string = success
-!  WRITE(*, fmt = e_format) error_string
-!  total_error = total_error + group_total_error
+  CALL test_genprop_basic_class(cleanup, group_total_error)
+  WRITE(*, fmt = '(30a)', advance = 'no') ' Testing basic generic properties'     
+  WRITE(*, fmt = '(43x,a)', advance = 'no')  ' '
+  IF (group_total_error == 0) error_string = success
+  WRITE(*, fmt = e_format) error_string
+  total_error = total_error + group_total_error
+
   CALL test_h5s_encode(cleanup, group_total_error)
   WRITE(*, fmt = '(15a)', advance = 'no') ' Testing dataspace encoding and decoding'     
   WRITE(*, fmt = '(36x,a)', advance = 'no')  ' '
@@ -228,7 +229,7 @@ SUBROUTINE test_genprop_basic_class(cleanup, total_error)
 
   !/* Output message about test being performed */
 
-  WRITE(*,*) "Testing Basic Generic Property List Class Creation Functionality"
+  !WRITE(*,*) "Testing Basic Generic Property List Class Creation Functionality"
 
   ! /* Create a new generic class, derived from the root of the class hierarchy */
   CALL H5Pcreate_class_f(H5P_ROOT_F, CLASS1_NAME, cid1, error)
