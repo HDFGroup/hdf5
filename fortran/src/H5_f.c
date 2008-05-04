@@ -203,6 +203,7 @@ nh5close_types_c( hid_t_f * types, int_f *lentypes,
  *                    h5g_flags    - H5G interface flags
  *                    h5i_flags    - H5I interface flags
  *                    h5p_flags    - H5P interface flags
+ *                    h5p_flags_int    - H5P intger interface flags
  *                    h5r_flags    - H5R interface flags
  *                    h5s_flags    - H5S interface flags
  *                    h5t_flags    - H5T interface flags
@@ -223,7 +224,7 @@ int_f
 nh5init_flags_c( int_f *h5d_flags, int_f *h5f_flags,
                  int_f *h5fd_flags, hid_t_f *h5fd_hid_flags,
                  int_f *h5g_flags, int_f *h5i_flags, int_f *h5l_flags, int_f *h5o_flags,
-                 hid_t_f *h5p_flags, int_f *h5r_flags, int_f *h5s_flags,
+                 hid_t_f *h5p_flags, int_f *h5p_flags_int, int_f *h5r_flags, int_f *h5s_flags,
                  int_f *h5t_flags, int_f *h5z_flags, int_f *h5_generic_flags)
 {
     int ret_value = -1;
@@ -392,19 +393,25 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5f_flags,
       h5p_flags[4] = (hid_t_f)H5P_FILE_MOUNT;
       h5p_flags[5] = (hid_t_f)H5P_DEFAULT;
       h5p_flags[6] = (hid_t_f)H5P_ROOT;
-      h5p_flags[7] = (hid_t_f)H5P_CRT_ORDER_INDEXED;
-      h5p_flags[8] = (hid_t_f)H5P_CRT_ORDER_TRACKED;
-      h5p_flags[9] = (hid_t_f)H5P_OBJECT_CREATE;
-      h5p_flags[10] = (hid_t_f)H5P_DATASET_ACCESS;
-      h5p_flags[11] = (hid_t_f)H5P_GROUP_CREATE;
-      h5p_flags[12] = (hid_t_f)H5P_GROUP_ACCESS;
-      h5p_flags[13] = (hid_t_f)H5P_DATATYPE_CREATE;
-      h5p_flags[14] = (hid_t_f)H5P_DATATYPE_ACCESS;
-      h5p_flags[15] = (hid_t_f)H5P_STRING_CREATE;
-      h5p_flags[16] = (hid_t_f)H5P_ATTRIBUTE_CREATE;
-      h5p_flags[17] = (hid_t_f)H5P_OBJECT_COPY;
-      h5p_flags[18] = (hid_t_f)H5P_LINK_CREATE;
-      h5p_flags[19] = (hid_t_f)H5P_LINK_ACCESS;
+      h5p_flags[7] = (hid_t_f)H5P_OBJECT_CREATE;
+      h5p_flags[8] = (hid_t_f)H5P_DATASET_ACCESS;
+      h5p_flags[9] = (hid_t_f)H5P_GROUP_CREATE;
+      h5p_flags[10] = (hid_t_f)H5P_GROUP_ACCESS;
+      h5p_flags[11] = (hid_t_f)H5P_DATATYPE_CREATE;
+      h5p_flags[12] = (hid_t_f)H5P_DATATYPE_ACCESS;
+      h5p_flags[13] = (hid_t_f)H5P_STRING_CREATE;
+      h5p_flags[14] = (hid_t_f)H5P_ATTRIBUTE_CREATE;
+      h5p_flags[15] = (hid_t_f)H5P_OBJECT_COPY;
+      h5p_flags[16] = (hid_t_f)H5P_LINK_CREATE;
+      h5p_flags[17] = (hid_t_f)H5P_LINK_ACCESS;
+
+
+/*
+ *  H5P integer flags
+ */
+      h5p_flags_int[0] = (int_f)H5P_CRT_ORDER_INDEXED;
+      h5p_flags_int[1] = (int_f)H5P_CRT_ORDER_TRACKED;
+
 /*
  *  H5R flags
  */

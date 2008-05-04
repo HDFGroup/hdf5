@@ -6712,11 +6712,11 @@
 !
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: fapl_id ! File access property list identifier
-    INTEGER(HID_T), INTENT(IN) :: low ! The earliest version of the library that will be used for writing objects.
+    INTEGER, INTENT(IN) :: low ! The earliest version of the library that will be used for writing objects.
                                         ! Currently, low must be one of two pre-defined values:
                                         !            HDF_LIBVER_EARLIEST_F
                                         !            HDF_LIBVER_LATEST_F
-    INTEGER(HID_T), INTENT(IN) :: high ! The latest version of the library that will be used for writing objects.
+    INTEGER, INTENT(IN) :: high ! The latest version of the library that will be used for writing objects.
                                          ! Currently, low must set to the pre-defined value:
                                          !            HDF_LIBVER_LATEST_F
     INTEGER, INTENT(OUT) :: hdferr   ! Error code
@@ -6731,8 +6731,8 @@
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PSET_LIBVER_BOUNDS_C'::h5pset_libver_bounds_c
          !DEC$ ENDIF
          INTEGER(HID_T), INTENT(IN) :: fapl_id
-         INTEGER(HID_T), INTENT(IN) :: low
-         INTEGER(HID_T), INTENT(IN) :: high
+         INTEGER, INTENT(IN) :: low
+         INTEGER, INTENT(IN) :: high
          
        END FUNCTION H5pset_libver_bounds_c
     END INTERFACE
@@ -6774,7 +6774,7 @@
 !
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: gcpl_id ! File access property list identifier
-    INTEGER(HID_T), INTENT(IN) :: crt_order_flags ! Creation order flag(s)
+    INTEGER, INTENT(IN) :: crt_order_flags ! Creation order flag(s)
     INTEGER, INTENT(OUT) :: hdferr   ! Error code
 !
 !  MS FORTRAN needs explicit interface for C functions called here.
@@ -6787,7 +6787,7 @@
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PSET_LINK_CREATION_ORDER_C'::h5pset_link_creation_order_c
          !DEC$ ENDIF
          INTEGER(HID_T), INTENT(IN) :: gcpl_id
-         INTEGER(HID_T), INTENT(IN) :: crt_order_flags
+         INTEGER, INTENT(IN) :: crt_order_flags
          
        END FUNCTION H5pset_link_creation_order_c
     END INTERFACE
@@ -7027,7 +7027,7 @@
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PSET_CREATE_INTER_GROUP_C'::h5pset_create_inter_group_c
          !DEC$ ENDIF
          INTEGER(HID_T), INTENT(IN) :: lcpl_id
-         INTEGER(HID_T), INTENT(IN) :: crt_intermed_group
+         INTEGER, INTENT(IN) :: crt_intermed_group
        END FUNCTION h5pset_create_inter_group_c
     END INTERFACE
 
@@ -8143,7 +8143,7 @@
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PGET_CREATE_INTER_GROUP_C'::h5pget_create_inter_group_c
          !DEC$ ENDIF
          INTEGER(HID_T), INTENT(IN) :: lcpl_id
-         INTEGER(HID_T), INTENT(IN) :: crt_intermed_group
+         INTEGER, INTENT(IN) :: crt_intermed_group
        END FUNCTION h5pget_create_inter_group_c
     END INTERFACE
 

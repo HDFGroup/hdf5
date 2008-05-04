@@ -577,7 +577,7 @@ CONTAINS
          INTEGER(HID_T), INTENT(IN) :: loc_id
          CHARACTER(LEN=*), INTENT(IN) :: name
          INTEGER(SIZE_T), INTENT(IN) :: namelen
-         INTEGER(HID_T), INTENT(OUT) :: link_exists_c
+         INTEGER, INTENT(OUT) :: link_exists_c
          INTEGER(HID_T) :: lapl_id_default
          
        END FUNCTION h5lexists_c
@@ -886,7 +886,7 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: src_name  ! Original link name.
     INTEGER(HID_T), INTENT(IN) :: dest_loc_id ! Destination file or group identifier.
     CHARACTER(LEN=*), INTENT(IN) :: dest_name ! NEW link name.
-    INTEGER(HID_T), INTENT(OUT) :: hdferr     ! Error code:
+    INTEGER, INTENT(OUT) :: hdferr     ! Error code:
                                               ! 0 on success and -1 on failure
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lcpl_id ! Link creation property list identifier 
                                                     ! to be associated WITH the NEW link.

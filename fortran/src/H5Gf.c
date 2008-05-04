@@ -782,7 +782,7 @@ done:
  *---------------------------------------------------------------------------*/
 int_f
 nh5gget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen, 
-		      hid_t_f *index_type, hid_t_f *order, hsize_t_f *n, hid_t_f *lapl_id, 
+		      int_f *index_type, int_f *order, hsize_t_f *n, hid_t_f *lapl_id, 
 		      int_f *storage_type, int_f *nlinks, int_f *max_corder)
 
 {

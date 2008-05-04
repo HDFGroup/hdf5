@@ -1042,7 +1042,7 @@ nh5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *nelements,  hsi
  *---------------------------------------------------------------------------*/
 
 int_f
-nh5sdecode_c ( _fcd buf, int_f *obj_id )
+nh5sdecode_c ( _fcd buf, hid_t_f *obj_id )
 {
   int ret_value = -1;
   unsigned char *c_buf = NULL;  /* Buffer to hold C string */
@@ -1058,7 +1058,7 @@ nh5sdecode_c ( _fcd buf, int_f *obj_id )
   if(c_obj_id < 0)
     return ret_value;
 
-  *obj_id = (int_f)c_obj_id;
+  *obj_id = (hid_t_f)c_obj_id;
   ret_value = 0;
 
   return ret_value;

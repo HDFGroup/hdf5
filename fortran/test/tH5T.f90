@@ -90,9 +90,9 @@
      LOGICAL :: flag = .TRUE.
      
      CHARACTER(LEN=1024) :: cmpd_buf
-     INTEGER(size_t) :: cmpd_buf_size=0
-     INTEGER(hid_t) :: decoded_sid1
-     INTEGER :: decoded_tid1
+     INTEGER(SIZE_T) :: cmpd_buf_size=0
+     INTEGER(HID_T) :: decoded_sid1
+     INTEGER(HID_T) :: decoded_tid1
 
      data_dims(1) = dimsize
      !

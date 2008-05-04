@@ -86,6 +86,7 @@ CONTAINS
             i_H5L_flags, &
             i_H5O_flags, &
             i_H5P_flags, &
+            i_H5P_flags_int, &
             i_H5R_flags, &
             i_H5S_flags, &
             i_H5T_flags, &               
@@ -101,6 +102,7 @@ CONTAINS
          INTEGER i_H5L_flags(H5L_FLAGS_LEN)
          INTEGER i_H5O_flags(H5O_FLAGS_LEN)
          INTEGER(HID_T) i_H5P_flags(H5P_FLAGS_LEN)
+         INTEGER i_H5P_flags_int(H5P_FLAGS_INT_LEN)
          INTEGER i_H5R_flags(H5R_FLAGS_LEN)
          INTEGER i_H5S_flags(H5S_FLAGS_LEN)
          INTEGER i_H5T_flags(H5T_FLAGS_LEN)
@@ -131,6 +133,7 @@ CONTAINS
          H5L_flags, &
          H5O_flags, &
          H5P_flags, &
+         H5P_flags_int, &
          H5R_flags, &
          H5S_flags, &
          H5T_flags, &

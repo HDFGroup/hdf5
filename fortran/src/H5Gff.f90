@@ -1284,8 +1284,8 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id     ! File or group identifier
     CHARACTER(LEN=*), INTENT(IN) :: group_name ! Name of group containing group for which information is to be retrieved
-    INTEGER(HID_T), INTENT(IN) :: index_type ! Index type
-    INTEGER(HID_T), INTENT(IN) :: order      ! Order of the count in the index
+    INTEGER, INTENT(IN) :: index_type ! Index type
+    INTEGER, INTENT(IN) :: order      ! Order of the count in the index
     INTEGER(HSIZE_T), INTENT(IN) :: n          ! Position in the index of the group for which information is retrieved
 
     INTEGER, INTENT(OUT) :: storage_type ! Type of storage for links in group:
@@ -1312,8 +1312,8 @@ CONTAINS
          !DEC$ ENDIF
          INTEGER(HID_T), INTENT(IN) :: loc_id
          CHARACTER(LEN=*), INTENT(IN) :: group_name
-         INTEGER(HID_T), INTENT(IN) :: index_type
-         INTEGER(HID_T), INTENT(IN) :: order
+         INTEGER, INTENT(IN) :: index_type
+         INTEGER, INTENT(IN) :: order
          INTEGER(HSIZE_T), INTENT(IN) :: n
          INTEGER(HID_T) :: lapl_id_default
          INTEGER, INTENT(OUT) :: storage_type

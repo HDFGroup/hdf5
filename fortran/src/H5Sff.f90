@@ -1974,7 +1974,7 @@
 !
     IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: buf ! Buffer for the data space object to be decoded.
-    INTEGER, INTENT(OUT) :: obj_id  ! Object ID
+    INTEGER(HID_T), INTENT(OUT) :: obj_id  ! Object ID
     INTEGER, INTENT(OUT) :: hdferr     ! Error code
 
     INTERFACE
@@ -1984,7 +1984,7 @@
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5SDECODE_C'::h5sdecode_c
          !DEC$ ENDIF
          CHARACTER(LEN=*), INTENT(IN) :: buf
-         INTEGER, INTENT(OUT) :: obj_id  ! Object ID
+         INTEGER(HID_T), INTENT(OUT) :: obj_id  ! Object ID
        END FUNCTION h5sdecode_c
     END INTERFACE
 

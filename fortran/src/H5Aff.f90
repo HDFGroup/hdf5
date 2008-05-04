@@ -4025,7 +4025,7 @@ CONTAINS
          CHARACTER(LEN=*), INTENT(IN) :: attr_name
          INTEGER(SIZE_T), INTENT(IN) :: attr_namelen
          INTEGER(HID_T), INTENT(IN) :: lapl_id_default
-         INTEGER(HID_T), INTENT(OUT) :: attr_exists_c
+         INTEGER, INTENT(OUT) :: attr_exists_c
        END FUNCTION h5aexists_by_name_c
     END INTERFACE
 

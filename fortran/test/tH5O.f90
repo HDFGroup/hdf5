@@ -52,10 +52,13 @@ SUBROUTINE test_h5o_link(total_error)
   INTEGER(HID_T) :: type_id
   INTEGER(HID_T) :: fapl_id
   INTEGER(HID_T) :: lcpl_id
+  INTEGER(HID_T) :: mem_space_id, file_space_id, xfer_prp
   CHARACTER(LEN=8), PARAMETER :: TEST_FILENAME = 'TestFile'
   INTEGER, PARAMETER :: TEST6_DIM1 = 2, TEST6_DIM2 = 5
-  INTEGER(HSIZE_T), DIMENSION(1:2), PARAMETER :: dims = (/TEST6_DIM1,TEST6_DIM2/)
-  INTEGER, DIMENSION(1:TEST6_DIM1,1:TEST6_DIM2) :: wdata, rdata
+!EP  INTEGER(HSIZE_T), DIMENSION(1:2), PARAMETER :: dims = (/TEST6_DIM1,TEST6_DIM2/)
+  INTEGER(HSIZE_T), DIMENSION(1:2)  :: dims = (/TEST6_DIM1,TEST6_DIM2/)
+!EP  INTEGER, DIMENSION(1:TEST6_DIM1,1:TEST6_DIM2) :: wdata, rdata
+  INTEGER, DIMENSION(TEST6_DIM1,TEST6_DIM2) :: wdata, rdata
 
   INTEGER, PARAMETER :: TRUE = 1, FALSE = 0
 
@@ -124,13 +127,15 @@ SUBROUTINE test_h5o_link(total_error)
   
   ! /* Write the data to the dataset */
 
-  CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, wdata, dims, error, &
-         mem_space_id=H5S_ALL_F, file_space_id=H5S_ALL_F, xfer_prp = H5P_DEFAULT_F)
+!EP  CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, wdata, dims, error, &
+!EP         mem_space_id=H5S_ALL_F, file_space_id=H5S_ALL_F, xfer_prp = H5P_DEFAULT_F)
+  CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, wdata, dims, error)
   CALL check("h5dwrite_f", error, total_error)
 
   ! /* Read the data back */
-  CALL h5dread_f(dset_id, H5T_NATIVE_INTEGER, rdata, dims, error, &
-       mem_space_id=H5S_ALL_F, file_space_id=H5S_ALL_F, xfer_prp = H5P_DEFAULT_F)
+!EP  CALL h5dread_f(dset_id, H5T_NATIVE_INTEGER, rdata, dims, error, &
+!EP       mem_space_id=H5S_ALL_F, file_space_id=H5S_ALL_F, xfer_prp = H5P_DEFAULT_F)
+  CALL h5dread_f(dset_id, H5T_NATIVE_INTEGER, rdata, dims, error)
   CALL check("h5dread_f", error, total_error)
         
   ! /* Verify the data */
@@ -179,8 +184,9 @@ SUBROUTINE test_h5o_link(total_error)
   CALL check("test_lcpl.h5dopen_f", error, total_error)
 
   ! /* Read data from dataset */
-  CALL h5dread_f(dset_id, H5T_NATIVE_INTEGER, rdata, dims, error, &
-       H5S_ALL_F, H5S_ALL_F, xfer_prp = H5P_DEFAULT_F)
+!EP  CALL h5dread_f(dset_id, H5T_NATIVE_INTEGER, rdata, dims, error, &
+!EP       H5S_ALL_F, H5S_ALL_F, xfer_prp = H5P_DEFAULT_F)
+  CALL h5dread_f(dset_id, H5T_NATIVE_INTEGER, rdata, dims, error)
   CALL check("h5dread_f", error, total_error)
 
   ! /* Verify the data */
