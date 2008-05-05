@@ -87,6 +87,8 @@
 #define FILE57  "thyperslab.h5"
 #define FILE58  "tordergr.h5"
 #define FILE59  "torderattr.h5"
+#define FILE60  "tfpformat.h5"
+
 
 
 /*-------------------------------------------------------------------------
@@ -5542,14 +5544,14 @@ error:
  *              Contains:
  *              1) an integer dataset
  *              2) a float dataset
- *              4) a double dataset
+ *              3) a double dataset
  *
  *-------------------------------------------------------------------------
  */
 static void
 gent_binary(void)
 {
- hid_t    fid, sid, did, tid;
+ hid_t    fid, sid, did;
  hsize_t  dims[1]  = {6};
  int      ibuf[6]  = {1,2,3,4,5,6};
  float    fbuf[6]  = {1,2,3,4,5,6};
@@ -6128,6 +6130,50 @@ out:
     
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    gent_fpformat
+ *
+ * Purpose:     Generate a file to be used in the floating point format test 
+ *              Contains:
+ *              2) a float dataset
+ *              4) a double dataset
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+gent_fpformat(void)
+{
+ hid_t    fid, sid, did;
+ hsize_t  dims[1]  = {6};
+ double   dbuf[6]  = {-0.1234567, 0.1234567, 0, 0, 0, 0};
+ float    fbuf[6]  = {-0.1234567f, 0.1234567f, 0, 0, 0, 0};
+
+ fid = H5Fcreate(FILE60, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+ sid = H5Screate_simple(1, dims, NULL);
+
+/*-------------------------------------------------------------------------
+ * double
+ *-------------------------------------------------------------------------
+ */
+ did = H5Dcreate2(fid, "double", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ H5Dwrite(did, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dbuf);
+ H5Dclose(did);
+
+
+/*-------------------------------------------------------------------------
+ * float
+ *-------------------------------------------------------------------------
+ */
+ did = H5Dcreate2(fid, "float", H5T_NATIVE_FLOAT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ H5Dwrite(did, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, fbuf);
+ H5Dclose(did);
+
+
+ /* close */
+ H5Sclose(sid);
+ H5Fclose(fid);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function: main
@@ -6196,6 +6242,7 @@ int main(void)
     gent_hyperslab();
     gent_group_creation_order();
     gent_attr_creation_order();
+    gent_fpformat();
 
 
     return 0;

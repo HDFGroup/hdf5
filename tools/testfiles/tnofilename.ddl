@@ -23,6 +23,7 @@ usage: h5dump [OPTIONS] file
      -b B, --binary=B     Binary file output, of form B
      -t P, --datatype=P   Print the specified named datatype
      -w N, --width=N      Set the number of columns of output
+     -m T, --format=T     Set the floating point output format
      -q Q, --sort_by=Q    Sort groups and attributes by index Q
      -z Z, --sort_order=Z Sort groups and attributes by order Z
      -x, --xml            Output in XML using Schema
@@ -52,6 +53,7 @@ usage: h5dump [OPTIONS] file
   F - is a filename.
   P - is the full path from the root group to the object.
   N - is an integer greater than 1.
+  T - is a string containing the floating point format, e.g '0.000'
   L - is a list of integers the number of which are equal to the
         number of dimensions in the dataspace being queried
   U - is a URI reference (as defined in [IETF RFC 2396],
