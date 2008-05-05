@@ -660,7 +660,7 @@ usage(const char *prog)
     fprintf(stdout, "  F - is a filename.\n");
     fprintf(stdout, "  P - is the full path from the root group to the object.\n");
     fprintf(stdout, "  N - is an integer greater than 1.\n");
-    fprintf(stdout, "  T - is a string containing the floating point format, e.g '%.3f'\n");
+    fprintf(stdout, "  T - is a string containing the floating point format, e.g '%%.3f'\n");
     fprintf(stdout, "  L - is a list of integers the number of which are equal to the\n");
     fprintf(stdout, "        number of dimensions in the dataspace being queried\n");
     fprintf(stdout, "  U - is a URI reference (as defined in [IETF RFC 2396],\n");

@@ -53,7 +53,7 @@ usage: h5dump [OPTIONS] file
   F - is a filename.
   P - is the full path from the root group to the object.
   N - is an integer greater than 1.
-  T - is a string containing the floating point format, e.g '0.000'
+  T - is a string containing the floating point format, e.g '%.3f'
   L - is a list of integers the number of which are equal to the
         number of dimensions in the dataspace being queried
   U - is a URI reference (as defined in [IETF RFC 2396],
