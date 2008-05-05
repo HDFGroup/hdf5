@@ -1193,7 +1193,7 @@ done:
  *---------------------------------------------------------------------------*/
 int_f
 nh5adelete_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, 
-		     int_f *idx_type, int_f *order, size_t_f *n, hid_t_f *lapl_id)
+		     int_f *idx_type, int_f *order, hsize_t_f *n, hid_t_f *lapl_id)
 {
     char *c_obj_name = NULL;          /* Buffer to hold C string */
     H5_index_t c_idx_type;
@@ -1260,7 +1260,7 @@ done:
  *---------------------------------------------------------------------------*/
 int_f
 nh5aget_name_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, 
-		       int_f *idx_type, int_f *order, size_t_f *n, _fcd name, 
+		       int_f *idx_type, int_f *order, hsize_t_f *n, _fcd name, 
 		       size_t_f *size, hid_t_f *lapl_id)
 {
     char *c_obj_name = NULL;          /* Buffer to hold C string */
@@ -1444,7 +1444,7 @@ done:
  *---------------------------------------------------------------------------*/
 int_f
 nh5aget_info_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, 
-		int_f *idx_type, int_f *order, size_t_f *n, hid_t_f *lapl_id,
+		int_f *idx_type, int_f *order, hsize_t_f *n, hid_t_f *lapl_id,
 		int_f *corder_valid, int_f *corder, 
 		int_f *cset, hsize_t_f *data_size )
 {

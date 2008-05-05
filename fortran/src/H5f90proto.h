@@ -572,9 +572,9 @@ H5_FCDLL int_f nh5aopen_c ( hid_t_f *obj_id, _fcd attr_name, size_t_f *attr_name
 H5_FCDLL int_f nh5adelete_by_name_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, 
 				     _fcd attr_name, size_t_f *attr_namelen, hid_t_f *lapl_id); /* MSB */
 H5_FCDLL int_f nh5adelete_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, 
-				    int_f *idx_type, int_f *order, size_t_f *n, hid_t_f *lapl_id); /* MSB */
+				    int_f *idx_type, int_f *order, hsize_t_f *n, hid_t_f *lapl_id); /* MSB */
 H5_FCDLL int_f nh5aget_name_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, 
-				      int_f *idx_type, int_f *order, size_t_f *n, _fcd name, 
+				      int_f *idx_type, int_f *order, hsize_t_f *n, _fcd name, 
 				      size_t_f *size, hid_t_f *lapl_id); /* MSB */
 H5_FCDLL int_f nh5aget_create_plist_c ( hid_t_f *attr_id, hid_t_f *creation_prop_id ); /* MSB */
 H5_FCDLL int_f nh5aopen_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, 
@@ -582,7 +582,7 @@ H5_FCDLL int_f nh5aopen_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_
 H5_FCDLL int_f nh5aget_info_c (hid_t_f *loc_id, int_f *corder_valid, int_f *corder, 
 			       int_f *cset, hsize_t_f *data_size ); /* MSB */
 H5_FCDLL int_f nh5aget_info_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, 
-				      int_f *idx_type, int_f *order, size_t_f *n, hid_t_f *lapl_id,
+				      int_f *idx_type, int_f *order, hsize_t_f *n, hid_t_f *lapl_id,
 				      int_f *corder_valid, int_f *corder, 
 				      int_f *cset, hsize_t_f *data_size ); /* MSB */
 H5_FCDLL int_f nh5aget_info_by_name_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
@@ -1186,7 +1186,7 @@ H5_FCDLL int_f nh5lcreate_soft_c(_fcd target_path, size_t_f *target_path_len,
 				 hid_t_f *lcpl_id, hid_t_f *lapl_id ); /*MSB*/
 H5_FCDLL int_f nh5ldelete_c( hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id ); /*MSB*/
 H5_FCDLL int_f nh5ldelete_by_idx_c (hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen, 
-				    int_f *index_field, int_f *order, size_t_f *n, hid_t_f *lapl_id); /*MSB*/
+				    int_f *index_field, int_f *order, hsize_t_f *n, hid_t_f *lapl_id); /*MSB*/
 H5_FCDLL int_f nh5lexists_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id, hid_t_f *link_exists); /*MSB*/
 H5_FCDLL int_f nh5lget_info_c (hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen,
 			       int_f *cset, int_f *corder, int_f *corder_valid, int_f *link_type, 

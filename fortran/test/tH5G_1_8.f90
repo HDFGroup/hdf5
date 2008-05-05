@@ -47,7 +47,7 @@ SUBROUTINE group_test(cleanup, total_error)
 ! CALL ud_hard_links(fapl2,total_error)
   CALL timestamps(cleanup, fapl2, total_error)
   CALL test_move_preserves(fapl2, total_error)
-!EP  CALL delete_by_idx(cleanup,fapl2, total_error)
+  CALL delete_by_idx(cleanup,fapl2, total_error)
   CALL test_lcpl(cleanup, fapl, total_error)
 
   CALL objcopy(fapl, total_error)
@@ -1631,6 +1631,7 @@ SUBROUTINE delete_by_idx(cleanup, fapl, total_error)
   CHARACTER(LEN=80) :: fix_filename1
   CHARACTER(LEN=80) :: fix_filename2
   INTEGER(SIZE_T) :: size_tmp
+  INTEGER(HSIZE_T) :: htmp
 
   LOGICAL :: cleanup
 
@@ -1731,8 +1732,9 @@ SUBROUTINE delete_by_idx(cleanup, fapl, total_error)
            ! IF(H5G_has_links_test(group_id, NULL) != TRUE) TEST_ERROR
 
            ! /* Check for out of bound deletion */
-
-           CALL H5Ldelete_by_idx_f(group_id, ".", idx_type, iorder, INT(u,HSIZE_T), error)
+           htmp =9 
+!EP           CALL H5Ldelete_by_idx_f(group_id, ".", idx_type, iorder, INT(u,HSIZE_T), error)
+           CALL H5Ldelete_by_idx_f(group_id, ".", idx_type, iorder, htmp, error)
            CALL VERIFY("delete_by_idx.H5Ldelete_by_idx_f", error, -1, total_error) ! test should fail (error = -1)
 
 
@@ -2235,6 +2237,7 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
   INTEGER(HSIZE_T), DIMENSION(1:2) :: dimsout, maxdimsout ! dimensions
 
   INTEGER :: i
+  INTEGER :: tmp1, tmp2
 
   WRITE(*,*) "link creation property lists (w/new group format)"
 
@@ -2317,8 +2320,14 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
   CALL check("test_lcpl.h5sget_simple_extent_dims_f",error, total_error)
   
   DO i = 1, 2
-     CALL VERIFY("H5Sget_simple_extent_dims", dimsout(i), extend_dim(i), total_error)
-     CALL VERIFY("H5Sget_simple_extent_dims", maxdimsout(i), dims(i), total_error)
+     tmp1 = dimsout(i)
+     tmp2 = extend_dim(i)
+!EP     CALL VERIFY("H5Sget_simple_extent_dims", dimsout(i), extend_dim(i), total_error)
+     CALL VERIFY("H5Sget_simple_extent_dims", tmp1, tmp2, total_error)
+!EP     CALL VERIFY("H5Sget_simple_extent_dims", maxdimsout(i), dims(i), total_error)
+     tmp1 = maxdimsout(i)
+     tmp2 = dims(i)
+     CALL VERIFY("H5Sget_simple_extent_dims", tmp1, tmp2, total_error)
   ENDDO
 
   ! /* close data set */

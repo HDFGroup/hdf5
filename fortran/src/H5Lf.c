@@ -301,7 +301,7 @@ nh5lcreate_hard_c(hid_t_f *obj_loc_id, _fcd obj_name, size_t_f *obj_namelen,
  *---------------------------------------------------------------------------*/
 int_f
 nh5ldelete_by_idx_c (hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen, 
-		     int_f *index_field, int_f *order, size_t_f *n, hid_t_f *lapl_id)
+		     int_f *index_field, int_f *order, hsize_t_f *n, hid_t_f *lapl_id)
 {
     char *c_group_name = NULL;          /* Buffer to hold C string */
     H5_index_t c_index_field;
