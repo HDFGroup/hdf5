@@ -3462,36 +3462,6 @@ else
   BYTESEX="little-endian"
 fi
 
-dnl Are we compiling static libraries, shared libraries, or both?  This
-dnl is only used for the libhdf5.settings file. We can't just look at
-dnl $enable_static and $enable_shared because if they're yes the ltconfig
-dnl might have decided that one or the other is simply not possible.
-dnl Therefore we have to ask the generated `libtool' shell script
-dnl which 'features' it has enabled.
-AC_SUBST([STATIC_SHARED])
-if (./libtool --features | grep '^enable shared libraries' > /dev/null); then
-  enable_shared=yes
-else
-  enable_shared=no
-fi
-
-if (./libtool --features | grep '^enable static libraries' > /dev/null); then
-  enable_static=yes
-else
-  enable_static=no
-fi
-
-if test "X$enable_static" = "Xyes" && test "X$enable_shared" = "Xyes"; then
-  STATIC_SHARED="static, shared"
-elif test "X$enable_static" = "Xyes"; then
-  STATIC_SHARED="static"
-elif test "X$enable_shared" = "Xyes"; then
-  STATIC_SHARED="shared"
-else
-  STATIC_SHARED="none"
-fi
-
-
 dnl Parallel support? (set above except empty if none)
 PARALLEL=${PARALLEL:-no}
 
@@ -3826,6 +3796,35 @@ touch ./config/stamp2
 
 # Finally the makefiles
 test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
+
+dnl Are we compiling static libraries, shared libraries, or both?  This
+dnl is only used for the libhdf5.settings file. We can't just look at
+dnl $enable_static and $enable_shared because if they're yes the ltconfig
+dnl might have decided that one or the other is simply not possible.
+dnl Therefore we have to ask the generated `libtool' shell script
+dnl which 'features' it has enabled.
+AC_SUBST([STATIC_SHARED])
+if (./libtool --features | grep '^enable shared libraries' > /dev/null); then
+  enable_shared=yes
+else
+  enable_shared=no
+fi
+
+if (./libtool --features | grep '^enable static libraries' > /dev/null); then
+  enable_static=yes
+else
+  enable_static=no
+fi
+
+if test "X$enable_static" = "Xyes" && test "X$enable_shared" = "Xyes"; then
+  STATIC_SHARED="static, shared"
+elif test "X$enable_static" = "Xyes"; then
+  STATIC_SHARED="static"
+elif test "X$enable_shared" = "Xyes"; then
+  STATIC_SHARED="shared"
+else
+  STATIC_SHARED="none"
+fi
 
 chmod 755 tools/misc/h5cc
 

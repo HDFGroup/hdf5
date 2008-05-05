@@ -29,10 +29,10 @@
 
 # HDF5 currently uses the following versions of the autotools:
 AUTOCONF_VERSION="autoconf (GNU Autoconf) 2.61"
-AUTOMAKE_VERSION="automake (GNU automake) 1.10"
+AUTOMAKE_VERSION="automake (GNU automake) 1.10.1"
 AUTOHEADER_VERSION="autoheader (GNU Autoconf) 2.61"
-ACLOCAL_VERSION="aclocal (GNU automake) 1.10"
-LIBTOOL_VERSION="(GNU libtool) 1.5.22"
+ACLOCAL_VERSION="aclocal (GNU automake) 1.10.1"
+LIBTOOL_VERSION="(GNU libtool) 2.2.2"
 #
 # When upgrading automake's version, don't forget to also update its
 # helper utilities, especially depcomp.
@@ -44,16 +44,16 @@ if test -z ${AUTOCONF}; then
   AUTOCONF=/home1/packages/autoconf/autoconf-2.61/bin/autoconf
 fi
 if test -z ${AUTOMAKE}; then
-  AUTOMAKE=/home1/packages/automake/automake-1.10.0/bin/automake-1.10
+  AUTOMAKE=/home1/packages/automake/automake-1.10.1/bin/automake-1.10
 fi
 if test -z ${AUTOHEADER}; then
   AUTOHEADER=/home1/packages/autoconf/autoconf-2.61/bin/autoheader
 fi
 if test -z ${ACLOCAL}; then
-  ACLOCAL=/home1/packages/automake/automake-1.10.0/bin/aclocal-1.10
+  ACLOCAL=/home1/packages/automake/automake-1.10.1/bin/aclocal-1.10
 fi
 if test -z ${LIBTOOL}; then
-  LIBTOOL=/home1/packages/libtool/libtool-1.5.22/bin/libtool
+  LIBTOOL=/home1/packages/libtool/libtool-2.2.2/bin/libtool
 fi
 
 # Check version numbers of all autotools against the "correct" versions

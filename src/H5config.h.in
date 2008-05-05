@@ -418,6 +418,10 @@
    values correctly. */
 #undef LLONG_TO_LDOUBLE_CORRECT
 
+/* Define to the sub-directory in which libtool stores uninstalled libraries.
+   */
+#undef LT_OBJDIR
+
 /* Define if the metadata trace file code is to be compiled in */
 #undef METADATA_TRACE_FILE
 
