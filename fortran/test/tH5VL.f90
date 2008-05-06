@@ -364,7 +364,6 @@
           INTEGER(HID_T) :: file_id       ! File identifier 
           INTEGER(HID_T) :: dset_id       ! Dataset identifier 
           INTEGER(HID_T) :: dspace_id     ! Dataspace identifier
-          INTEGER(HID_T) :: vltype_id     ! Datatype identifier
 
 
           INTEGER(HSIZE_T), DIMENSION(1) :: dims = (/4/) ! Dataset dimensions
@@ -374,10 +373,9 @@
 
           CHARACTER(LEN=10), DIMENSION(4) :: string_data ! Array of strings
           CHARACTER(LEN=10), DIMENSION(4) :: string_data_out     ! Data buffers
-          CHARACTER(LEN=10) :: tmp_str
           INTEGER     ::   error ! Error flag
 
-          INTEGER     :: i, j    !general purpose integers
+          INTEGER     :: i    !general purpose integers
           INTEGER(HSIZE_T), DIMENSION(2) :: data_dims = (/10,4/)
           INTEGER(HID_T) :: vl_type_id
           LOGICAL        :: vl_flag

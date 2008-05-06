@@ -64,12 +64,10 @@ CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libh5test_fortran_la_LIBADD =
-am_libh5test_fortran_la_OBJECTS = fortranlib_test.lo tH5F.lo tH5D.lo \
-	tH5R.lo tH5S.lo tH5T.lo tH5VL.lo tH5Z.lo tH5Sselect.lo tH5P.lo \
-	tH5A.lo tH5I.lo tH5G.lo tH5E.lo tf.lo t.lo
+am_libh5test_fortran_la_OBJECTS = tf.lo t.lo
 libh5test_fortran_la_OBJECTS = $(am_libh5test_fortran_la_OBJECTS)
 am__EXEEXT_1 = fortranlib_test$(EXEEXT) fflush1$(EXEEXT) \
-	fflush2$(EXEEXT)
+	fflush2$(EXEEXT) fortranlib_test_1_8$(EXEEXT)
 am_fflush1_OBJECTS = fflush1.$(OBJEXT)
 fflush1_OBJECTS = $(am_fflush1_OBJECTS)
 fflush1_LDADD = $(LDADD)
@@ -89,8 +87,7 @@ am_fortranlib_test_OBJECTS =  \
 	fortranlib_test-tH5Sselect.$(OBJEXT) \
 	fortranlib_test-tH5P.$(OBJEXT) fortranlib_test-tH5A.$(OBJEXT) \
 	fortranlib_test-tH5I.$(OBJEXT) fortranlib_test-tH5G.$(OBJEXT) \
-	fortranlib_test-tH5E.$(OBJEXT) fortranlib_test-tf.$(OBJEXT) \
-	fortranlib_test-t.$(OBJEXT)
+	fortranlib_test-tH5E.$(OBJEXT)
 fortranlib_test_OBJECTS = $(am_fortranlib_test_OBJECTS)
 fortranlib_test_LDADD = $(LDADD)
 fortranlib_test_DEPENDENCIES = libh5test_fortran.la $(LIBH5TEST) \
@@ -98,6 +95,16 @@ fortranlib_test_DEPENDENCIES = libh5test_fortran.la $(LIBH5TEST) \
 fortranlib_test_LINK = $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(FCLD) $(fortranlib_test_FCFLAGS) $(FCFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+am_fortranlib_test_1_8_OBJECTS = fortranlib_test_1_8.$(OBJEXT) \
+	tH5F.$(OBJEXT) tH5D.$(OBJEXT) tH5R.$(OBJEXT) tH5S.$(OBJEXT) \
+	tH5T.$(OBJEXT) tH5VL.$(OBJEXT) tH5Z.$(OBJEXT) \
+	tH5Sselect.$(OBJEXT) tH5O.$(OBJEXT) tH5P.$(OBJEXT) \
+	tH5A_1_8.$(OBJEXT) tH5I.$(OBJEXT) tH5G_1_8.$(OBJEXT) \
+	tH5E.$(OBJEXT)
+fortranlib_test_1_8_OBJECTS = $(am_fortranlib_test_1_8_OBJECTS)
+fortranlib_test_1_8_LDADD = $(LDADD)
+fortranlib_test_1_8_DEPENDENCIES = libh5test_fortran.la $(LIBH5TEST) \
+	$(LIBH5F) $(LIBHDF5)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
 am__depfiles_maybe = depfiles
@@ -118,9 +125,11 @@ FCLINK = $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link \
 	$(FCLD) $(AM_FCFLAGS) $(FCFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o \
 	$@
 SOURCES = $(libh5test_fortran_la_SOURCES) $(fflush1_SOURCES) \
-	$(fflush2_SOURCES) $(fortranlib_test_SOURCES)
+	$(fflush2_SOURCES) $(fortranlib_test_SOURCES) \
+	$(fortranlib_test_1_8_SOURCES)
 DIST_SOURCES = $(libh5test_fortran_la_SOURCES) $(fflush1_SOURCES) \
-	$(fflush2_SOURCES) $(fortranlib_test_SOURCES)
+	$(fflush2_SOURCES) $(fortranlib_test_SOURCES) \
+	$(fortranlib_test_1_8_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -373,11 +382,8 @@ noinst_LTLIBRARIES = libh5test_fortran.la
 @FORTRAN_SHARED_CONDITIONAL_FALSE@AM_LDFLAGS = -static
 
 # Our main targets, the tests themselves
-TEST_PROG = fortranlib_test fflush1 fflush2
-libh5test_fortran_la_SOURCES = fortranlib_test.f90 tH5F.f90 tH5D.f90 \
-        tH5R.f90 tH5S.f90 tH5T.f90 tH5VL.f90 tH5Z.f90 tH5Sselect.f90 \
-        tH5P.f90 tH5A.f90 tH5I.f90 tH5G.f90 tH5E.f90 tf.f90 t.c
-
+TEST_PROG = fortranlib_test fflush1 fflush2 fortranlib_test_1_8
+libh5test_fortran_la_SOURCES = tf.f90 t.c
 
 # Source files are used for both the library and fortranlib_test.
 # Automake will complain about this without the following workaround.
@@ -385,8 +391,11 @@ fortranlib_test_FCFLAGS = $(AM_FCFLAGS)
 fortranlib_test_CFLAGS = $(AM_CFLAGS)
 fortranlib_test_SOURCES = fortranlib_test.f90 \
         tH5F.f90 tH5D.f90 tH5R.f90 tH5S.f90 tH5T.f90 tH5VL.f90 tH5Z.f90 \
-        tH5Sselect.f90 tH5P.f90 tH5A.f90 tH5I.f90 tH5G.f90 tH5E.f90 tf.f90 \
-        t.c
+        tH5Sselect.f90 tH5P.f90 tH5A.f90 tH5I.f90 tH5G.f90 tH5E.f90
+
+fortranlib_test_1_8_SOURCES = fortranlib_test_1_8.f90 \
+        tH5F.f90 tH5D.f90 tH5R.f90 tH5S.f90 tH5T.f90 tH5VL.f90 tH5Z.f90 \
+        tH5Sselect.f90 tH5O.f90 tH5P.f90 tH5A_1_8.f90 tH5I.f90 tH5G_1_8.f90 tH5E.f90
 
 fflush1_SOURCES = fflush1.f90
 fflush2_SOURCES = fflush2.f90
@@ -474,6 +483,9 @@ fflush2$(EXEEXT): $(fflush2_OBJECTS) $(fflush2_DEPENDENCIES)
 fortranlib_test$(EXEEXT): $(fortranlib_test_OBJECTS) $(fortranlib_test_DEPENDENCIES) 
 	@rm -f fortranlib_test$(EXEEXT)
 	$(fortranlib_test_LINK) $(fortranlib_test_OBJECTS) $(fortranlib_test_LDADD) $(LIBS)
+fortranlib_test_1_8$(EXEEXT): $(fortranlib_test_1_8_OBJECTS) $(fortranlib_test_1_8_DEPENDENCIES) 
+	@rm -f fortranlib_test_1_8$(EXEEXT)
+	$(FCLINK) $(fortranlib_test_1_8_OBJECTS) $(fortranlib_test_1_8_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -481,7 +493,6 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fortranlib_test-t.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/t.Plo@am__quote@
 
 .c.o:
@@ -504,20 +515,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
-
-fortranlib_test-t.o: t.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_CFLAGS) $(CFLAGS) -MT fortranlib_test-t.o -MD -MP -MF $(DEPDIR)/fortranlib_test-t.Tpo -c -o fortranlib_test-t.o `test -f 't.c' || echo '$(srcdir)/'`t.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/fortranlib_test-t.Tpo $(DEPDIR)/fortranlib_test-t.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='t.c' object='fortranlib_test-t.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_CFLAGS) $(CFLAGS) -c -o fortranlib_test-t.o `test -f 't.c' || echo '$(srcdir)/'`t.c
-
-fortranlib_test-t.obj: t.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_CFLAGS) $(CFLAGS) -MT fortranlib_test-t.obj -MD -MP -MF $(DEPDIR)/fortranlib_test-t.Tpo -c -o fortranlib_test-t.obj `if test -f 't.c'; then $(CYGPATH_W) 't.c'; else $(CYGPATH_W) '$(srcdir)/t.c'; fi`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/fortranlib_test-t.Tpo $(DEPDIR)/fortranlib_test-t.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='t.c' object='fortranlib_test-t.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fortranlib_test_CFLAGS) $(CFLAGS) -c -o fortranlib_test-t.obj `if test -f 't.c'; then $(CYGPATH_W) 't.c'; else $(CYGPATH_W) '$(srcdir)/t.c'; fi`
 
 .f90.o:
 	$(FCCOMPILE) -c -o $@ $<
@@ -611,12 +608,6 @@ fortranlib_test-tH5E.o: tH5E.f90
 
 fortranlib_test-tH5E.obj: tH5E.f90
 	$(FC) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tH5E.obj `if test -f 'tH5E.f90'; then $(CYGPATH_W) 'tH5E.f90'; else $(CYGPATH_W) '$(srcdir)/tH5E.f90'; fi`
-
-fortranlib_test-tf.o: tf.f90
-	$(FC) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tf.o `test -f 'tf.f90' || echo '$(srcdir)/'`tf.f90
-
-fortranlib_test-tf.obj: tf.f90
-	$(FC) $(fortranlib_test_FCFLAGS) $(FCFLAGS) -c -o fortranlib_test-tf.obj `if test -f 'tf.f90'; then $(CYGPATH_W) 'tf.f90'; else $(CYGPATH_W) '$(srcdir)/tf.f90'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
