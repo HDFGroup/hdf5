@@ -84,6 +84,9 @@
 #define FILE55  "tbinary.h5"
 #define FILE56  "tbigdims.h5"
 #define FILE57  "thyperslab.h5"
+/* FILE58 and 59  not defined in this version  */
+#define FILE60  "tfpformat.h5"
+
 
 /*-------------------------------------------------------------------------
  * prototypes
@@ -5356,7 +5359,7 @@ error:
 static void
 gent_binary(void)
 {
- hid_t    fid, sid, did, tid;
+ hid_t    fid, sid, did;
  hsize_t  dims[1]  = {6};
  int      ibuf[6]  = {1,2,3,4,5,6};
  float    fbuf[6]  = {1,2,3,4,5,6};
@@ -5500,9 +5503,6 @@ out:
     
 }
 
-
-
-
 /*-------------------------------------------------------------------------
  * Function: gent_hyperslab
  *
@@ -5532,6 +5532,51 @@ static void gent_hyperslab(void)
 
  free(buf);
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    gent_fpformat
+ *
+ * Purpose:     Generate a file to be used in the floating point format test 
+ *              Contains:
+ *              1) a float dataset
+ *              2) a double dataset
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+gent_fpformat(void)
+{
+ hid_t    fid, sid, did;
+ hsize_t  dims[1]  = {6};
+ double   dbuf[6]  = {-0.1234567, 0.1234567, 0, 0, 0, 0};
+ float    fbuf[6]  = {-0.1234567f, 0.1234567f, 0, 0, 0, 0};
+
+ fid = H5Fcreate(FILE60, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+ sid = H5Screate_simple(1, dims, NULL);
+
+/*-------------------------------------------------------------------------
+ * double
+ *-------------------------------------------------------------------------
+ */
+ did = H5Dcreate(fid, "double", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT);
+ H5Dwrite(did, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dbuf);
+ H5Dclose(did);
+
+
+/*-------------------------------------------------------------------------
+ * float
+ *-------------------------------------------------------------------------
+ */
+ did = H5Dcreate(fid, "float", H5T_NATIVE_FLOAT, sid, H5P_DEFAULT);
+ H5Dwrite(did, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, fbuf);
+ H5Dclose(did);
+
+
+ /* close */
+ H5Sclose(sid);
+ H5Fclose(fid);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function: main
@@ -5596,6 +5641,7 @@ int main(void)
     gent_binary();
     gent_bigdims();
     gent_hyperslab();
+    gent_fpformat();
 
     return 0;
 }

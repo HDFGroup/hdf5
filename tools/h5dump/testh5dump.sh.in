@@ -446,6 +446,10 @@ IMPORTTEST $TESTDIR/out3.bin -c out3.h5import -o $TESTDIR/out3.h5
 DIFFTEST   tbinary.h5 $TESTDIR/out3.h5 /integer /integer
 
 TOOLTEST1   tbin4.ddl -d double  -o $TESTDIR/out4.bin -b FILE   tbinary.h5
+
+# tests for floating point user defined printf format
+TOOLTEST tfpformat.ddl -m %.7f tfpformat.h5
+
    
 # Clean up binary output files
 if test -z "$HDF5_NOCLEANUP"; then

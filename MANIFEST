@@ -1733,6 +1733,8 @@
 ./tools/testfiles/tindicessub3.ddl
 ./tools/testfiles/tindicessub4.ddl
 ./tools/testfiles/tindicessub1.ddl
+./tools/testfiles/tfpformat.ddl
+./tools/testfiles/tfpformat.h5
 
 
 
