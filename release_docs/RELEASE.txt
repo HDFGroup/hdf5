@@ -71,6 +71,9 @@ New Features
 	-----
         - h5dump: add a printing of the compression ratio of uncompressed and compressed 
            sizes for cases where compression  filters are present. (PVN - 2008/05/01)
+        - h5dump: added an option to allow a user defined formatting string for printf 
+           regarding floating point numbers. (PVN - 2008/05/06)
+
 
 
 	F90 API

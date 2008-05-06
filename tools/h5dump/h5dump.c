@@ -62,6 +62,8 @@ static size_t       prefix_len = 1024;
 static char         *prefix;
 static const char   *driver = NULL;      /* The driver to open the file with. */
 static const h5dump_header_t *dump_header_format;
+static const char   *fp_format = NULL;
+
 
 /* things to display or which are set via command line parameters */
 static int          display_all       = TRUE;
@@ -367,7 +369,7 @@ struct handler_t {
  * parameters. The long-named ones can be partially spelled. When
  * adding more, make sure that they don't clash with each other.
  */
-static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b:F:s:S:Aq:z:";
+static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b:F:s:S:Aq:z:m:";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
@@ -478,6 +480,7 @@ static struct long_options l_opts[] = {
     { "form", require_arg, 'F' },
     { "sort_by", require_arg, 'q' },
     { "sort_order", require_arg, 'z' },
+    { "format", require_arg, 'm' },
     { NULL, 0, '\0' }
 };
 
@@ -628,6 +631,7 @@ usage(const char *prog)
     fprintf(stdout, "     -b B, --binary=B     Binary file output, of form B\n");
     fprintf(stdout, "     -t P, --datatype=P   Print the specified named datatype\n");
     fprintf(stdout, "     -w N, --width=N      Set the number of columns of output\n");
+    fprintf(stdout, "     -m T, --format=T     Set the floating point output format\n");
     fprintf(stdout, "     -q Q, --sort_by=Q    Sort groups and attributes by index Q\n");
     fprintf(stdout, "     -z Z, --sort_order=Z Sort groups and attributes by order Z\n");
     fprintf(stdout, "     -x, --xml            Output in XML using Schema\n");
@@ -657,6 +661,7 @@ usage(const char *prog)
     fprintf(stdout, "  F - is a filename.\n");
     fprintf(stdout, "  P - is the full path from the root group to the object.\n");
     fprintf(stdout, "  N - is an integer greater than 1.\n");
+    fprintf(stdout, "  T - is a string containing the floating point format, e.g '%%.3f'\n");
     fprintf(stdout, "  L - is a list of integers the number of which are equal to the\n");
     fprintf(stdout, "        number of dimensions in the dataspace being queried\n");
     fprintf(stdout, "  U - is a URI reference (as defined in [IETF RFC 2396],\n");
@@ -2188,6 +2193,12 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
     hsize_t     size[64], nelmts = 1, alloc_size;
     int         depth;
     int         stdindent = COL;    /* should be 3 */
+
+    if (fp_format)
+    {
+        outputformat->fmt_double = fp_format;
+        outputformat->fmt_float = fp_format;
+    }
 
     outputformat->line_ncols = nCols;
     outputformat->do_escape=display_escape;
@@ -3819,6 +3830,15 @@ parse_start:
             /* To Do: check format of this value?  */
             xml_dtd_uri = opt_arg;
             break;
+
+        case 'm':
+            /* specify alternative floating point printing format */
+            fp_format = opt_arg;
+            break;
+
+
+
+
         case 'X':
             /* specify XML namespace (default="hdf5:"), or none */
             /* To Do: check format of this value?  */

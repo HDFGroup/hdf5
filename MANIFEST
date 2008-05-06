@@ -1239,6 +1239,8 @@
 ./tools/testfiles/torderattr3.ddl
 ./tools/testfiles/torderattr4.ddl
 ./tools/testfiles/torderattr.h5
+./tools/testfiles/tfpformat.ddl
+./tools/testfiles/tfpformat.h5
 
 
 
