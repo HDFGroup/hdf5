@@ -190,6 +190,11 @@
 ./fortran/src/H5Gff.f90
 ./fortran/src/H5If.c
 ./fortran/src/H5Iff.f90
+./fortran/test/tH5O.f90
+./fortran/src/H5Lf.c
+./fortran/src/H5Lff.f90
+./fortran/src/H5Off.f90
+./fortran/src/H5Of.c
 ./fortran/src/H5Pf.c
 ./fortran/src/H5Pff.f90
 ./fortran/src/H5Rf.c
@@ -213,7 +218,7 @@
 ./fortran/src/Makefile.am
 ./fortran/src/Makefile.in
 ./fortran/src/README
-/fortran/src/README_DEVELOPEMENT       _DO_NOT_DISTRIBUTE_
+./fortran/src/README_DEVELOPEMENT       _DO_NOT_DISTRIBUTE_
 ./fortran/src/h5fc.in
 ./fortran/src/libhdf5_fortran.settings.in
 
