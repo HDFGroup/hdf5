@@ -595,7 +595,7 @@ H5_FCDLL int_f nh5acreate_by_name_c(hid_t_f *loc_id, _fcd obj_name, size_t_f *ob
 				    hid_t_f *lapl_id, hid_t_f *attr_id ); /* MSB */
 H5_FCDLL int_f nh5aexists_c (hid_t_f *obj_id, _fcd name, size_t_f *namelen, hid_t_f *attr_exists); /* MSB */
 H5_FCDLL int_f nh5aexists_by_name_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, _fcd attr_name, size_t_f *attr_namelen, 
-		      hid_t_f *lapl_id, hid_t_f *attr_exists); /* MSB */
+		      hid_t_f *lapl_id, int_f *attr_exists); /* MSB */
 H5_FCDLL int_f nh5aopen_by_name_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, _fcd attr_name, size_t_f *attr_namelen, 
 				   hid_t_f *aapl_id, hid_t_f *lapl_id, hid_t_f *attr_id); /* MSB */
 H5_FCDLL int_f nh5arename_c( hid_t_f *loc_id,

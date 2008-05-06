@@ -1652,7 +1652,7 @@ done:
  *---------------------------------------------------------------------------*/
 int_f
 nh5aexists_by_name_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, _fcd attr_name, size_t_f *attr_namelen, 
-		      hid_t_f *lapl_id, hid_t_f *attr_exists)
+		      hid_t_f *lapl_id, int_f *attr_exists)
 {
   char *c_obj_name = NULL;          /* Buffer to hold object name C string */
   char *c_attr_name = NULL;          /* Buffer to hold attribute name C string */
@@ -1669,7 +1669,7 @@ nh5aexists_by_name_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, _fc
   /*
    * Call H5Aexists_by_name function.
    */
-  if((*attr_exists = (hid_t_f)H5Aexists_by_name((hid_t)*loc_id, c_obj_name, c_attr_name, (hid_t)*lapl_id)) < 0)
+  if((*attr_exists = (int_f)H5Aexists_by_name((hid_t)*loc_id, c_obj_name, c_attr_name, (hid_t)*lapl_id)) < 0)
          HGOTO_DONE(FAIL);
 
 done:

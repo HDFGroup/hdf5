@@ -3284,37 +3284,29 @@ SUBROUTINE test_attr_basic_write(fapl, total_error)
   CHARACTER(LEN=25) :: check_name
   CHARACTER(LEN=18) :: chr_exact_size
 
-  INTEGER, PARAMETER :: SPACE1_RANK = 3
-  INTEGER, PARAMETER :: NX = 20
-  INTEGER, PARAMETER :: NY = 5
-  INTEGER, PARAMETER :: NZ = 10
-!  INTEGER(HSIZE_T), DIMENSION(3) :: dims1 = (/NX,NY,NZ/)
+  INTEGER, PARAMETER :: SPACE1_RANK = 2 
 
   CHARACTER(LEN=5), PARAMETER ::  ATTR1_NAME="Attr1"
-  INTEGER, PARAMETER :: ATTR1_RANK = 1
-  INTEGER, PARAMETER ::  ATTR1_DIM1 = 3
+  INTEGER, PARAMETER :: ATTR1_RANK = 1 
+  INTEGER, PARAMETER ::  ATTR1_DIM1 = 3 
   CHARACTER(LEN=7), PARAMETER :: ATTR1A_NAME ="Attr1_a"
   CHARACTER(LEN=18), PARAMETER :: ATTR_TMP_NAME = "Attr1_a-1234567890"
-! int attr_data1a[ATTR1_DIM1]={256,11945,-22107};
-  INTEGER, DIMENSION(ATTR1_DIM1), PARAMETER :: attr_data1 =(/258,9987,-99890/)
+  INTEGER, DIMENSION(ATTR1_DIM1) :: attr_data1
   INTEGER, DIMENSION(ATTR1_DIM1) :: attr_data1a
   INTEGER, DIMENSION(ATTR1_DIM1) :: read_data1
   INTEGER(HSIZE_T) :: attr_size   ! attributes storage requirements .MSB.
-!  INTEGER :: attr_data1
-  INTEGER(HSIZE_T), DIMENSION(2) :: dims2 = (/4,6/) ! Dataset dimensions
+  INTEGER(HSIZE_T), DIMENSION(1) :: dimsa = (/3/) ! Dataset dimensions
 
-!!!! start
   INTEGER     ::   rank1 = 2               ! Dataspace1 rank
   INTEGER(HSIZE_T), DIMENSION(2) :: dims1 = (/4,6/) ! Dataset dimensions
   INTEGER(HSIZE_T), DIMENSION(2) :: maxdims1 = (/4,6/) ! maximum dimensions
 
   INTEGER(SIZE_T) :: size
 
-! Not setting it as a parameter but intialize caused error
-! Look into. -Scot-
-!  attr_data1(1) = 258
-!  attr_data1(2) = 9987
-!  attr_data1(3) = -99890
+!! Initialize attribute data
+  attr_data1(1) = 258
+  attr_data1(2) = 9987
+  attr_data1(3) = -99890
 
   attr_data1a(1) = 258
   attr_data1a(2) = 1087
@@ -3329,16 +3321,14 @@ SUBROUTINE test_attr_basic_write(fapl, total_error)
 
   ! /* Create dataspace for dataset */
   CALL h5screate_simple_f(rank1, dims1, sid1, error, maxdims1)
-!  CALL h5screate_simple_f(SPACE1_RANK, dims1, sid1, error)
   CALL check("h5screate_simple_f",error,total_error)
 
   ! /* Create a dataset */
-!  sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
   CALL h5dcreate_f(fid1, DSET1_NAME, H5T_NATIVE_CHARACTER, sid1, dataset, error, H5P_DEFAULT_F, H5P_DEFAULT_F, H5P_DEFAULT_F )
   CALL check("h5dcreate_f",error,total_error)
 
   ! /* Create dataspace for attribute */
-  CALL h5screate_simple_f(ATTR1_RANK, dims2, sid2, error)
+  CALL h5screate_simple_f(ATTR1_RANK, dimsa, sid2, error)
   CALL check("h5screate_simple_f",error,total_error)
 
   ! /* Try to create an attribute on the file (should create an attribute on root group) */
@@ -3370,9 +3360,8 @@ SUBROUTINE test_attr_basic_write(fapl, total_error)
   CALL check("h5acreate_f",error,total_error)
 
   ! /* Write attribute information */
-  data_dims(1) = 3
   
-  CALL h5awrite_f(attr, H5T_NATIVE_INTEGER, attr_data1, data_dims, error)
+  CALL h5awrite_f(attr, H5T_NATIVE_INTEGER, attr_data1, dimsa, error)
   CALL check("h5awrite_f",error,total_error)
 
   ! /* Create an another attribute for the dataset */
@@ -3380,7 +3369,7 @@ SUBROUTINE test_attr_basic_write(fapl, total_error)
   CALL check("h5acreate_f",error,total_error)
 
   ! /* Write attribute information */
-  CALL h5awrite_f(attr2, H5T_NATIVE_INTEGER, attr_data1a, data_dims, error)
+  CALL h5awrite_f(attr2, H5T_NATIVE_INTEGER, attr_data1a, dimsa, error)
   CALL check("h5awrite_f",error,total_error)
 
   ! /* Check storage size for attribute */
@@ -3393,7 +3382,7 @@ SUBROUTINE test_attr_basic_write(fapl, total_error)
 !  VERIFY(attr_size, (ATTR1_DIM1 * sizeof(int)), "H5A_get_storage_size");
 
   ! /* Read attribute information immediately, without closing attribute */
-  CALL h5aread_f(attr, H5T_NATIVE_INTEGER, read_data1, data_dims, error)
+  CALL h5aread_f(attr, H5T_NATIVE_INTEGER, read_data1, dimsa, error)
   CALL check("h5aread_f",error,total_error)
 
   ! /* Verify values read in */
@@ -3452,87 +3441,14 @@ SUBROUTINE test_attr_basic_write(fapl, total_error)
   ! /* Close attribute */
   CALL h5aclose_f(attr, error)
   CALL check("h5aclose_f",error,total_error)
-!!$
-!!$    /* Open the second attribute again */
-!!$    attr2=H5Aopen(dataset, ATTR1A_NAME, H5P_DEFAULT);
-!!$    CHECK(attr, FAIL, "H5Aopen");
-!!$
-!!$    /* Verify new attribute name */
-!!$    attr_name_size = H5Aget_name(attr2, (size_t)0, NULL);
-!!$    CHECK(attr_name_size, FAIL, "H5Aget_name");
-!!$
-!!$    if(attr_name_size>0)
-!!$        attr_name = (char*)HDcalloc((size_t)(attr_name_size+1), sizeof(char));
-!!$
-!!$    ret=(herr_t)H5Aget_name(attr2, (size_t)(attr_name_size+1), attr_name);
-!!$    CHECK(ret, FAIL, "H5Aget_name");
-!!$    ret=HDstrcmp(attr_name, ATTR1A_NAME);
-!!$    VERIFY(ret, 0, "HDstrcmp");
-!!$
-!!$    if(attr_name)
-!!$        HDfree(attr_name);
-!!$
-!!$    /* Read attribute information immediately, without closing attribute */
-!!$    ret=H5Aread(attr2,H5T_NATIVE_INT,read_data1);
-!!$    CHECK(ret, FAIL, "H5Aread");
-!!$
-!!$    /* Verify values read in */
-!!$    for(i=0; i<ATTR1_DIM1; i++)
-!!$        if(attr_data1a[i]!=read_data1[i])
-!!$            TestErrPrintf("%d: attribute data different: attr_data1a[%d]=%d, read_data1[%d]=%d\n",__LINE__,i,attr_data1a[i],i,read_data1[i]);
-!!$
-!!$    /* Close attribute */
-!!$    ret=H5Aclose(attr2);
-!!$    CHECK(ret, FAIL, "H5Aclose");
 
   CALL h5sclose_f(sid1, error)
   CALL check("h5sclose_f",error,total_error)
   CALL h5sclose_f(sid2, error)
   CALL check("h5sclose_f",error,total_error)
-
   !/* Close Dataset */
   CALL h5dclose_f(dataset, error)
   CALL check("h5dclose_f",error,total_error)
-
-!!$    /* Create group */
-!!$    group = H5Gcreate2(fid1, GROUP1_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-!!$    CHECK(group, FAIL, "H5Gcreate2");
-!!$
-!!$    /* Create dataspace for attribute */
-!!$    sid2 = H5Screate_simple(ATTR2_RANK, dims3, NULL);
-!!$    CHECK(sid2, FAIL, "H5Screate_simple");
-!!$
-!!$    /* Create an attribute for the group */
-!!$    attr = H5Acreate2(group, ATTR2_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
-!!$    CHECK(attr, FAIL, "H5Acreate2");
-!!$
-!!$    /* Check storage size for attribute */
-!!$    attr_size = H5Aget_storage_size(attr);
-!!$    VERIFY(attr_size, (ATTR2_DIM1 * ATTR2_DIM2 * sizeof(int)), "H5Aget_storage_size");
-!!$
-!!$    /* Try to create the same attribute again (should fail) */
-!!$    ret = H5Acreate2(group, ATTR2_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
-!!$    VERIFY(ret, FAIL, "H5Acreate2");
-!!$
-!!$    /* Write attribute information */
-!!$    ret = H5Awrite(attr, H5T_NATIVE_INT, attr_data2);
-!!$    CHECK(ret, FAIL, "H5Awrite");
-!!$
-!!$    /* Check storage size for attribute */
-!!$    attr_size = H5Aget_storage_size(attr);
-!!$    VERIFY(attr_size, (ATTR2_DIM1 * ATTR2_DIM2 * sizeof(int)), "H5A_get_storage_size");
-!!$
-!!$    /* Close attribute */
-!!$    ret = H5Aclose(attr);
-!!$    CHECK(ret, FAIL, "H5Aclose");
-!!$
-!!$    /* Close Attribute dataspace */
-!!$    ret = H5Sclose(sid2);
-!!$    CHECK(ret, FAIL, "H5Sclose");
-
-!!$    !/* Close Group */
-!!$    ret = H5Gclose(group);
-!!$    CHECK(ret, FAIL, "H5Gclose");
 
   ! /* Close file */
   CALL h5fclose_f(fid1, error)
