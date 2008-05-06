@@ -6135,8 +6135,8 @@ out:
  *
  * Purpose:     Generate a file to be used in the floating point format test 
  *              Contains:
- *              2) a float dataset
- *              4) a double dataset
+ *              1) a float dataset
+ *              2) a double dataset
  *
  *-------------------------------------------------------------------------
  */
