@@ -3197,7 +3197,7 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5ARENAME_BY_NAME_C'::h5arename_by_name_c
          !DEC$ ENDIF
-         !DEC$ATTRIBUTES reference :: name
+         !DEC$ATTRIBUTES reference :: obj_name
          INTEGER(HID_T), INTENT(IN) :: loc_id
          CHARACTER(LEN=*), INTENT(IN) :: obj_name
          INTEGER(SIZE_T) :: obj_namelen
@@ -3272,7 +3272,7 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5AOPEN_C'::h5aopen_c
          !DEC$ ENDIF
-         !DEC$ATTRIBUTES reference :: name
+         !DEC$ATTRIBUTES reference :: attr_name
          INTEGER(HID_T), INTENT(IN) :: obj_id
          CHARACTER(LEN=*), INTENT(IN) :: attr_name
          INTEGER(HID_T) :: aapl_id_default
@@ -3365,7 +3365,7 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5ADELETE_BY_IDX_C'::h5adelete_by_idx_c
          !DEC$ ENDIF
-         !DEC$ATTRIBUTES reference :: name
+         !DEC$ATTRIBUTES reference :: obj_name
          INTEGER(HID_T), INTENT(IN) :: loc_id
          CHARACTER(LEN=*), INTENT(IN) :: obj_name
          INTEGER, INTENT(IN) :: idx_type
@@ -3433,7 +3433,7 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5ADELETE_BY_NAME_C'::h5adelete_by_name_c
          !DEC$ ENDIF
-         !DEC$ATTRIBUTES reference :: name
+         !DEC$ATTRIBUTES reference :: obj_name
          INTEGER(HID_T), INTENT(IN) :: loc_id
          CHARACTER(LEN=*), INTENT(IN) :: obj_name
          CHARACTER(LEN=*), INTENT(IN) :: attr_name
