@@ -111,7 +111,7 @@ SUBROUTINE attribute_test_1_8(cleanup, total_error)
               my_fcpl = fcpl
            END IF
 !!$              CALL test_attr_dense_create(my_fcpl, my_fapl)
-!!EP           CALL test_attr_dense_open(my_fcpl, my_fapl, total_error)
+           CALL test_attr_dense_open(my_fcpl, my_fapl, total_error)
 !!$              CALL test_attr_dense_delete(my_fcpl, my_fapl)
 !!$              CALL test_attr_dense_rename(my_fcpl, my_fapl)
 !!$              CALL test_attr_dense_unlink(my_fcpl, my_fapl)
@@ -2965,7 +2965,8 @@ SUBROUTINE test_attr_dense_open( fcpl, fapl, total_error)
      CALL check("h5aclose_f",error,total_error)
 
      ! /* Verify attributes written so far */
-!EP It looks like a bug we have with a dense storage     CALL test_attr_dense_verify(dataset, u, total_error)
+!EP It looks like a bug we have with a dense storage     
+     CALL test_attr_dense_verify(dataset, u, total_error)
 !!$        CHECK(ret, FAIL, "test_attr_dense_verify");
   ENDDO
 
