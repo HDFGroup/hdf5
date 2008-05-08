@@ -3348,7 +3348,6 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TCOMMIT_ANON_C'::h5tcommit_anon_c
          !DEC$ ENDIF
-         !DEC$ATTRIBUTES reference ::name 
          INTEGER(HID_T), INTENT(IN) :: loc_id
          INTEGER(HID_T), INTENT(IN) :: dtype_id
          INTEGER(HID_T) :: tcpl_id_default
@@ -3414,7 +3413,6 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TCOMMITTED_C'::h5tcommitted_c
          !DEC$ ENDIF
-         !DEC$ATTRIBUTES reference ::name
          INTEGER(HID_T), INTENT(IN) :: dtype_id
        END FUNCTION h5tcommitted_c
     END INTERFACE
