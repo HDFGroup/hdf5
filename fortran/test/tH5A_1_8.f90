@@ -111,7 +111,7 @@ SUBROUTINE attribute_test_1_8(cleanup, total_error)
               my_fcpl = fcpl
            END IF
 !!$              CALL test_attr_dense_create(my_fcpl, my_fapl)
-!!EP           CALL test_attr_dense_open(my_fcpl, my_fapl, total_error)
+           CALL test_attr_dense_open(my_fcpl, my_fapl, total_error)
 !!$              CALL test_attr_dense_delete(my_fcpl, my_fapl)
 !!$              CALL test_attr_dense_rename(my_fcpl, my_fapl)
 !!$              CALL test_attr_dense_unlink(my_fcpl, my_fapl)
@@ -996,14 +996,12 @@ SUBROUTINE test_attr_info_by_idx(new_format, fcpl, fapl, total_error)
         CALL h5aget_info_by_idx_f(my_dataset, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, hzero, &
              f_corder_valid, corder, cset, data_size, error, lapl_id=H5P_DEFAULT_F)
         CALL VERIFY("h5aget_info_by_idx_f",error,minusone,total_error)
-!EP        pause 1
         
         size = 0
         CALL h5aget_name_by_idx_f(my_dataset, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, &
 !EP             0_HSIZE_T, tmpname, size,  error, lapl_id=H5P_DEFAULT_F)
              hzero, tmpname, size,  error, lapl_id=H5P_DEFAULT_F)
         CALL VERIFY("h5aget_name_by_idx_f",error,minusone,total_error)
-!EP        pause 2
 
 
         ! /* Create attributes, up to limit of compact form */
@@ -2965,8 +2963,8 @@ SUBROUTINE test_attr_dense_open( fcpl, fapl, total_error)
      CALL check("h5aclose_f",error,total_error)
 
      ! /* Verify attributes written so far */
-!EP It looks like a bug we have with a dense storage     CALL test_attr_dense_verify(dataset, u, total_error)
-!!$        CHECK(ret, FAIL, "test_attr_dense_verify");
+     CALL test_attr_dense_verify(dataset, u, total_error)
+     ! CHECK(ret, FAIL, "test_attr_dense_verify");
   ENDDO
 
   ! /* Check on dataset's attribute storage status */
@@ -3053,7 +3051,7 @@ SUBROUTINE test_attr_dense_verify(loc_id, max_attr, total_error)
   INTEGER :: value
 
   data_dims = 0
-  
+
 
     ! /* Retrieve the current # of reported errors */
     ! old_nerrs = GetTestNumErrs();
