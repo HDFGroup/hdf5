@@ -992,7 +992,24 @@ SUBROUTINE test_attr_info_by_idx(new_format, fcpl, fapl, total_error)
         ! /* Check for query on non-existant attribute */
 
         n = 0
-!EP        CALL h5aget_info_by_idx_f(my_dataset, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, 0_HSIZE_T, &
+
+        ! -- CHECK PASSING AN INTEGER CONSTANT IN DIFFERENT FORMS --
+
+        ! 1) call by passing an integer with the _hsize_t declaration 
+
+        CALL h5aget_info_by_idx_f(my_dataset, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, 0_hsize_t, &
+             f_corder_valid, corder, cset, data_size, error, lapl_id=H5P_DEFAULT_F)
+        CALL VERIFY("h5aget_info_by_idx_f",error,minusone,total_error)
+
+        ! 2) call by passing an integer with the INT(,hsize_t) declaration
+
+        CALL h5aget_info_by_idx_f(my_dataset, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, INT(0,hsize_t), &
+             f_corder_valid, corder, cset, data_size, error, lapl_id=H5P_DEFAULT_F)
+        CALL VERIFY("h5aget_info_by_idx_f",error,minusone,total_error)
+
+        
+        ! 3) call by passing a variable with the attribute hsize_t
+
         CALL h5aget_info_by_idx_f(my_dataset, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, hzero, &
              f_corder_valid, corder, cset, data_size, error, lapl_id=H5P_DEFAULT_F)
         CALL VERIFY("h5aget_info_by_idx_f",error,minusone,total_error)
@@ -1030,11 +1047,9 @@ SUBROUTINE test_attr_info_by_idx(new_format, fcpl, fapl, total_error)
 
            ! /* Verify information for new attribute */
               
-!EP           CALL attr_info_by_idx_check(my_dataset, attrname, INT(j,HSIZE_T), use_index(i), total_error )
+!EP        CALL attr_info_by_idx_check(my_dataset, attrname, INT(j,HSIZE_T), use_index(i), total_error )
            htmp = j
            CALL attr_info_by_idx_check(my_dataset, attrname, htmp, use_index(i), total_error )
-!EP         pause 3 
-!EP           CALL check("attr_info_by_idx_check",error,total_error)
 
            !CHECK(ret, FAIL, "attr_info_by_idx_check");
         ENDDO
@@ -1241,10 +1256,30 @@ SUBROUTINE attr_info_by_idx_check(obj_id, attrname, n, use_index, total_error )
   
   ! CALL HDmemset(ainfo, 0, SIZEOF(ainfo)
 !EP  CALL h5aget_info_by_idx_f(obj_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_DEC_F, 0_HSIZE_T, &
+
+  ! -- CHECK PASSING AN INTEGER CONSTANT IN DIFFERENT FORMS --
+
+  ! 1) call by passing an integer with the _hsize_t declaration 
+
+  CALL h5aget_info_by_idx_f(obj_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_DEC_F, 0_HSIZE_T, &
+       f_corder_valid, corder, cset, data_size, error)
+  CALL check("h5aget_info_by_idx_f",error,total_error)
+  CALL VERIFY("h5aget_info_by_idx_f",corder,INT(n),total_error)
+  
+  ! 2) call by passing an integer with the INT(,hsize_t) declaration
+
+  CALL h5aget_info_by_idx_f(obj_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_DEC_F, INT(0,HSIZE_T), &
+       f_corder_valid, corder, cset, data_size, error)
+  CALL check("h5aget_info_by_idx_f",error,total_error)
+  CALL VERIFY("h5aget_info_by_idx_f",corder,INT(n),total_error)  
+  
+  ! 3) call by passing a variable with the attribute hsize_t
+
   CALL h5aget_info_by_idx_f(obj_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_DEC_F, hzero, &
        f_corder_valid, corder, cset, data_size, error)
   CALL check("h5aget_info_by_idx_f",error,total_error)
   CALL VERIFY("h5aget_info_by_idx_f",corder,INT(n),total_error)
+
 !!$    CALL HDmemset(tmpname, 0, (size_t))
 !!$    ret = H5Aget_name_by_idx(obj_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT)
 !!$    CALL CHECK(ret, FAIL, "H5Aget_name_by_idx")
