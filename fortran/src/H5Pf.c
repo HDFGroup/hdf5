@@ -4422,13 +4422,16 @@ nh5pget_create_inter_group_c(hid_t_f *lcpl_id, int_f *crt_intermed_group)
 {
   int ret_value = -1;
   herr_t ret;
+  unsigned c_crt_intermed_group;
 
   /*
    * Call H5Pget_create_intermediate_group function.
    */
-  ret = H5Pget_create_intermediate_group((hid_t)*lcpl_id, (unsigned)*crt_intermed_group);
+  ret = H5Pget_create_intermediate_group((hid_t)*lcpl_id, &c_crt_intermed_group);
 
   if (ret < 0) return ret_value; /* error occurred */
+
+  *crt_intermed_group = (int_f)c_crt_intermed_group;
   ret_value = 0;
   return ret_value;
 }
