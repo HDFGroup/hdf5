@@ -96,11 +96,8 @@ fortranlib_test_LINK = $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(FCLD) $(fortranlib_test_FCFLAGS) $(FCFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 am_fortranlib_test_1_8_OBJECTS = fortranlib_test_1_8.$(OBJEXT) \
-	tH5F.$(OBJEXT) tH5D.$(OBJEXT) tH5R.$(OBJEXT) tH5S.$(OBJEXT) \
-	tH5T.$(OBJEXT) tH5VL.$(OBJEXT) tH5Z.$(OBJEXT) \
-	tH5Sselect.$(OBJEXT) tH5O.$(OBJEXT) tH5P.$(OBJEXT) \
-	tH5A_1_8.$(OBJEXT) tH5I.$(OBJEXT) tH5G_1_8.$(OBJEXT) \
-	tH5E.$(OBJEXT)
+	tH5F.$(OBJEXT) tH5O.$(OBJEXT) tH5A_1_8.$(OBJEXT) \
+	tH5G_1_8.$(OBJEXT)
 fortranlib_test_1_8_OBJECTS = $(am_fortranlib_test_1_8_OBJECTS)
 fortranlib_test_1_8_LDADD = $(LDADD)
 fortranlib_test_1_8_DEPENDENCIES = libh5test_fortran.la $(LIBH5TEST) \
@@ -394,8 +391,7 @@ fortranlib_test_SOURCES = fortranlib_test.f90 \
         tH5Sselect.f90 tH5P.f90 tH5A.f90 tH5I.f90 tH5G.f90 tH5E.f90
 
 fortranlib_test_1_8_SOURCES = fortranlib_test_1_8.f90 \
-        tH5F.f90 tH5D.f90 tH5R.f90 tH5S.f90 tH5T.f90 tH5VL.f90 tH5Z.f90 \
-        tH5Sselect.f90 tH5O.f90 tH5P.f90 tH5A_1_8.f90 tH5I.f90 tH5G_1_8.f90 tH5E.f90
+        tH5F.f90 tH5O.f90 tH5A_1_8.f90  tH5G_1_8.f90
 
 fflush1_SOURCES = fflush1.f90
 fflush2_SOURCES = fflush2.f90
