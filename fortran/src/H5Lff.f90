@@ -988,6 +988,7 @@ CONTAINS
                                              ! returns correct size
     CHARACTER(LEN=*), INTENT(OUT) :: name ! Buffer in which link value is returned
     INTEGER, INTENT(OUT) :: hdferr        ! Error code:
+                                          ! 0 on success and -1 on failure
                      
     INTEGER(SIZE_T)  :: group_namelen
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id  ! Link access property list
