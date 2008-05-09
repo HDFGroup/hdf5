@@ -6769,7 +6769,7 @@
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_libver_bounds_f
+!DEC$attributes dllexport :: h5pset_link_creation_order_f
 !DEC$endif
 !
     IMPLICIT NONE
