@@ -1340,7 +1340,7 @@ done:
  *---------------------------------------------------------------------------*/
 int_f
 nh5aopen_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, 
-		   int_f *idx_type, int_f *order, size_t_f *n, hid_t_f *aapl_id, hid_t_f *lapl_id, hid_t_f *attr_id )
+		   int_f *idx_type, int_f *order, hsize_t_f *n, hid_t_f *aapl_id, hid_t_f *lapl_id, hid_t_f *attr_id )
 {
     char *c_obj_name = NULL;          /* Buffer to hold C string */
     H5_index_t c_idx_type;
