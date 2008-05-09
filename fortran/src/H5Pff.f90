@@ -6647,7 +6647,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-  SUBROUTINE  h5pget_attr_creation_order_f(ocpl_id, crt_order_flags, hdferr)
+  SUBROUTINE h5pget_attr_creation_order_f(ocpl_id, crt_order_flags, hdferr)
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -7059,7 +7059,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-  SUBROUTINE  h5pget_link_creation_order_f(gcpl_id, crt_order_flags, hdferr)
+  SUBROUTINE h5pget_link_creation_order_f(gcpl_id, crt_order_flags, hdferr)
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -7116,7 +7116,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-  SUBROUTINE  h5pset_char_encoding_f(plist_id, encoding, hdferr)
+  SUBROUTINE h5pset_char_encoding_f(plist_id, encoding, hdferr)
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -7249,6 +7249,7 @@
                                         !   H5O_COPY_EXPAND_REFERENCE_F
                                         !   H5O_COPY_WITHOUT_ATTR_FLAG_F
     INTEGER, INTENT(OUT) :: hdferr      ! Error code
+                                        ! 0 on success and -1 on failure
 
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
@@ -7467,7 +7468,7 @@
 ! Comment: 
 !----------------------------------------------------------------------
 
-  SUBROUTINE H5Pget_local_heap_size_hint_f(gcpl_id, size_hint, hdferr) 
+  SUBROUTINE h5pget_local_heap_size_hint_f(gcpl_id, size_hint, hdferr) 
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -7482,7 +7483,7 @@
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
     INTERFACE
-       INTEGER FUNCTION H5Pget_local_heap_size_hint_c(gcpl_id, size_hint)
+       INTEGER FUNCTION h5pget_local_heap_size_hint_c(gcpl_id, size_hint)
          USE H5GLOBAL
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PGET_LOCAL_HEAP_SIZE_HINT_C'::h5pget_local_heap_size_hint_c
@@ -7494,7 +7495,7 @@
 
     hdferr = H5Pget_local_heap_size_hint_c(gcpl_id, size_hint)
 
-  END SUBROUTINE H5Pget_local_heap_size_hint_f
+  END SUBROUTINE h5pget_local_heap_size_hint_f
 
 !----------------------------------------------------------------------
 ! Name:		H5Pget_est_link_info_f 
@@ -7520,7 +7521,7 @@
 ! Comment: 
 !----------------------------------------------------------------------
 
-  SUBROUTINE H5Pget_est_link_info_f(gcpl_id, est_num_entries, est_name_len, hdferr) 
+  SUBROUTINE h5pget_est_link_info_f(gcpl_id, est_num_entries, est_name_len, hdferr) 
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -7536,7 +7537,7 @@
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
     INTERFACE
-       INTEGER FUNCTION H5Pget_est_link_info_c(gcpl_id, est_num_entries, est_name_len)
+       INTEGER FUNCTION h5pget_est_link_info_c(gcpl_id, est_num_entries, est_name_len)
          USE H5GLOBAL
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PGET_EST_LINK_INFO_C'::h5pget_est_link_info_c
@@ -7544,12 +7545,12 @@
          INTEGER(HID_T), INTENT(IN) :: gcpl_id  
          INTEGER, INTENT(OUT) :: est_num_entries
          INTEGER, INTENT(OUT) :: est_name_len
-       END FUNCTION H5Pget_est_link_info_c
+       END FUNCTION h5pget_est_link_info_c
     END INTERFACE
 
-    hdferr = H5Pget_est_link_info_c(gcpl_id, est_num_entries, est_name_len)
+    hdferr = h5pget_est_link_info_c(gcpl_id, est_num_entries, est_name_len)
 
-  END SUBROUTINE H5Pget_est_link_info_f
+  END SUBROUTINE h5pget_est_link_info_f
 
 !----------------------------------------------------------------------
 ! Name:		H5Pset_local_heap_size_hint_f 
@@ -7574,7 +7575,7 @@
 ! Comment: 
 !----------------------------------------------------------------------
 
-  SUBROUTINE H5Pset_local_heap_size_hint_f(gcpl_id, size_hint, hdferr) 
+  SUBROUTINE h5pset_local_heap_size_hint_f(gcpl_id, size_hint, hdferr) 
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -7589,19 +7590,19 @@
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
     INTERFACE
-       INTEGER FUNCTION H5Pset_local_heap_size_hint_c(gcpl_id, size_hint)
+       INTEGER FUNCTION h5pset_local_heap_size_hint_c(gcpl_id, size_hint)
          USE H5GLOBAL
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PSET_LOCAL_HEAP_SIZE_HINT_C'::h5pset_local_heap_size_hint_c
          !DEC$ ENDIF
          INTEGER(HID_T), INTENT(IN) :: gcpl_id
          INTEGER(SIZE_T), INTENT(IN) :: size_hint
-       END FUNCTION H5Pset_local_heap_size_hint_c
+       END FUNCTION h5pset_local_heap_size_hint_c
     END INTERFACE
 
     hdferr = H5Pset_local_heap_size_hint_c(gcpl_id, size_hint)
 
-  END SUBROUTINE H5Pset_local_heap_size_hint_f
+  END SUBROUTINE h5pset_local_heap_size_hint_f
 
 !----------------------------------------------------------------------
 ! Name:		H5Pset_est_link_info_f 
@@ -7910,7 +7911,7 @@
 ! Comment: 
 !----------------------------------------------------------------------
 
-  SUBROUTINE H5Pset_nbit_f(plist_id, hdferr) 
+  SUBROUTINE h5pset_nbit_f(plist_id, hdferr) 
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -7935,7 +7936,7 @@
 
     hdferr = H5Pset_nbit_c(plist_id)
 
-  END SUBROUTINE H5Pset_nbit_f
+  END SUBROUTINE h5pset_nbit_f
 
 !----------------------------------------------------------------------
 ! Name:		H5Pset_scaleoffset_f 
