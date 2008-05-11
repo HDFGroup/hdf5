@@ -1,4 +1,4 @@
-HDF5 version 1.6.7-snap4 released on Sun May  4 17:55:34 CDT 2008
+HDF5 version 1.6.7-snap5 released on Sun May 11 18:05:59 CDT 2008
 ================================================================================
 
 INTRODUCTION
@@ -68,6 +68,9 @@ New Features
      - h5import imports string (text) data. PVN - 2008/2/19
      - h5dump: add a printing of the compression ratio of uncompressed and compressed 
            sizes for cases where compression  filters are present. (PVN - 2008/05/01)
+     - h5dump: added an option to allow a user defined formatting string for printf 
+         regarding floating point numbers. (PVN - 2008/05/06)
+
 
 
 
