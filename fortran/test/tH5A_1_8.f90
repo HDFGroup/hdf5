@@ -424,7 +424,7 @@ SUBROUTINE test_attr_null_space(fcpl, fapl, total_error)
   INTEGER(HID_T) :: attr_sid
   INTEGER(HSIZE_T), DIMENSION(7) :: data_dims
 
-  INTEGER(HSIZE_T) :: storage_size   ! attributes storage requirements .MSB.
+  INTEGER(HSIZE_T) :: storage_size   ! attributes storage requirements 
 
   LOGICAL :: f_corder_valid ! Indicates whether the the creation order data is valid for this attribute 
   INTEGER :: corder ! Is a positive integer containing the creation order of the attribute
@@ -442,7 +442,7 @@ SUBROUTINE test_attr_null_space(fcpl, fapl, total_error)
 
 ! /* Output message about test being performed */
   WRITE(*,*) "     - Testing Storing Attributes with 'null' dataspace"
-  ! /* Create file */
+! /* Create file */
   CALL h5fcreate_f(FileName, H5F_ACC_TRUNC_F, fid, error, fcpl, fapl)
   CALL check("h5fcreate_f",error,total_error)
 ! /* Close file */
@@ -463,8 +463,6 @@ SUBROUTINE test_attr_null_space(fcpl, fapl, total_error)
   ! /* Create a dataset */
   CALL h5dcreate_f(fid, DSET1_NAME, H5T_NATIVE_CHARACTER, sid, dataset, error)
   CALL check("h5dcreate_f",error,total_error)
-!!$  dataset = H5Dcreate2(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)
-!!$  CALL CHECK(dataset, FAIL, "H5Dcreate2")
   ! /* Add attribute with 'null' dataspace */
 
   ! /* Create attribute */
@@ -496,7 +494,6 @@ SUBROUTINE test_attr_null_space(fcpl, fapl, total_error)
   CALL check("H5Sextent_equal_f",error,total_error)
   CALL Verifylogical("H5Sextent_equal_f",equal,.TRUE.,total_error)
   
-
 !!$  ret = H5Sclose(attr_sid)
 !!$  CALL CHECK(ret, FAIL, "H5Sclose")
 
@@ -505,9 +502,18 @@ SUBROUTINE test_attr_null_space(fcpl, fapl, total_error)
   CALL VERIFY("h5aget_storage_size_f",INT(storage_size),0,total_error)
 
   CALL h5aget_info_f(attr, f_corder_valid, corder, cset, data_size,  error)
-  CALL VERIFY("h5aget_info_f",INT(data_size),INT(storage_size),total_error)
+  CALL check("h5aget_info_f", error, total_error)
 
+  ! /* Check the attribute's information */
+  CALL VERIFY("h5aget_info_f.corder",corder,0,total_error)
 
+!  PRINT*,'f_corder_valid',f_corder_valid
+!  CALL Verifylogical("h5aget_info_f.corder_valid",f_corder_valid,.TRUE.,total_error)
+
+  CALL VERIFY("h5aget_info_f.cset", cset, H5T_CSET_ASCII_F, total_error)
+  CALL h5aget_storage_size_f(attr, storage_size, error)
+  CALL check("h5aget_storage_size_f",error,total_error)
+  CALL VERIFY("h5aget_info_f.data_size", data_size, INT(storage_size), total_error)
   CALL h5aclose_f(attr,error)
   CALL check("h5aclose_f",error,total_error)
   
@@ -3685,6 +3691,7 @@ SUBROUTINE attr_open_check(fid, dsetname, obj_id, max_attrs, total_error )
   INTEGER :: cset ! Indicates the character set used for the attribute’s name
   INTEGER(HSIZE_T) :: data_size   ! indicates the size, in the number of characters
 
+  INTEGER(HSIZE_T) :: storage_size   ! attributes storage requirements
   CHARACTER(LEN=2) :: chr2
   INTEGER(HID_T) attr_id
   ! /* Open each attribute on object by index and check that it's the correct one */
@@ -3704,8 +3711,14 @@ SUBROUTINE attr_open_check(fid, dsetname, obj_id, max_attrs, total_error )
      
      CALL h5aget_info_f(attr_id, f_corder_valid, corder, cset, data_size,  error)
      CALL check("h5aget_info_f",error,total_error)
-     ! /* Check that the object is the correct one */
+
+     ! /* Check that the object's attributes are correct */
      CALL VERIFY("h5aget_info_f",corder,u,total_error)
+     CALL Verifylogical("h5aget_info_f",f_corder_valid,.TRUE.,total_error)
+     CALL VERIFY("h5aget_info_f", cset, H5T_CSET_ASCII_F, total_error)
+     CALL h5aget_storage_size_f(attr_id, storage_size, error)
+     CALL check("h5aget_storage_size_f",error,total_error)
+     CALL VERIFY("h5aget_info_f", data_size, INT(storage_size), total_error)
 
      ! /* Close attribute */
      CALL h5aclose_f(attr_id, error)
@@ -3718,8 +3731,13 @@ SUBROUTINE attr_open_check(fid, dsetname, obj_id, max_attrs, total_error )
 
      CALL h5aget_info_f(attr_id, f_corder_valid, corder, cset, data_size,  error)
      CALL check("h5aget_info_f",error,total_error)
-     ! /* Get the attribute's information */
+     ! /* Check the attribute's information */
      CALL VERIFY("h5aget_info_f",corder,u,total_error)
+     CALL Verifylogical("h5aget_info_f",f_corder_valid,.TRUE.,total_error)
+     CALL VERIFY("h5aget_info_f", cset, H5T_CSET_ASCII_F, total_error)
+     CALL h5aget_storage_size_f(attr_id, storage_size, error)
+     CALL check("h5aget_storage_size_f",error,total_error)
+     CALL VERIFY("h5aget_info_f", data_size, INT(storage_size), total_error)
 
 
      ! /* Close attribute */
@@ -3736,8 +3754,13 @@ SUBROUTINE attr_open_check(fid, dsetname, obj_id, max_attrs, total_error )
      CALL h5aget_info_f(attr_id, f_corder_valid, corder, cset, data_size,  error)
      CALL check("h5aget_info_f",error,total_error)
 
-     ! /* Check that the object is the correct one */
+     ! /* Check the attribute's information */
      CALL VERIFY("h5aget_info_f",corder,u,total_error)
+     CALL Verifylogical("h5aget_info_f",f_corder_valid,.TRUE.,total_error)
+     CALL VERIFY("h5aget_info_f", cset, H5T_CSET_ASCII_F, total_error)
+     CALL h5aget_storage_size_f(attr_id, storage_size, error)
+     CALL check("h5aget_storage_size_f",error,total_error)
+     CALL VERIFY("h5aget_info_f", data_size, INT(storage_size), total_error)
 
      ! /* Close attribute */
      CALL h5aclose_f(attr_id, error)
