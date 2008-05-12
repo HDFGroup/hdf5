@@ -16,7 +16,7 @@ rem
 rem Tests for the h5dump tool
 rem
 rem    Created:  Scott Wegner, 8/23/07
-rem    Modified: Scott Wegner, 3/10/08
+rem    Modified: Scott Wegner, 5/12/08
 rem
 
 setlocal enabledelayedexpansion
@@ -70,9 +70,9 @@ rem
             set test_msg=!test_msg! %%~nxa
         ) )
     )
-    rem We need to replace PERCENT-ZERO here with "%0" for the tfamily test.
-    rem --SJW 8/24/07
-    set test_msg=!test_msg:PERCENT-ZERO=%%0!                                                                
+    rem We need to replace PERCENT here with "%" for tests that use a percent
+    rem sign.  --SJW 5/12/08
+    set test_msg=!test_msg:PERCENT=%%!                                                                
     echo.%test_msg:~0,69% %1
     
     exit /b
@@ -106,15 +106,15 @@ rem
     rem Run test.
     
     (
-        rem We need to replace PERCENT-ZERO here with "%0" for the tfamily test.
+        rem We need to replace PERCENT here with "%" for tests that use percents
         rem Also remove quotes here, because Linux 'echo' command strips them.
         rem --SJW 8/24/07
-        set params_echo=!params:PERCENT-ZERO=%%0!
+        set params_echo=!params:PERCENT=%%!
         echo.#############################
         echo.Expected output for 'h5dump !params_echo:"=!'
         echo.#############################
         pushd %CD%\..\testfiles
-        %dumper_bin% !params:PERCENT-ZERO=%%0!
+        %dumper_bin% !params:PERCENT=%%!
         popd
     ) > %actual% 2> %actual_err%
     type %actual_err% >> %actual%
@@ -166,7 +166,7 @@ rem use for the binary tests that expect a full path in -o
     rem Run test.
     (
         pushd %CD%\..\testfiles
-        %dumper_bin% !params:PERCENT-ZERO=%%0!
+        %dumper_bin% !params:PERCENT=%%!
         popd
     ) > %actual% 2> %actual_err%
     type %actual_err% >> %actual%
@@ -386,10 +386,10 @@ rem ############################################################################
 
     rem test the --filedriver flag
     call :tooltest tsplit_file.ddl --filedriver=split tsplit_file
-    rem On Windows, we pass "PERCENT-ZERO", and let other calls replace it with
-    rem the "%0".  We cannot pass "%0" directly because Windows interprets it as
+    rem On Windows, we pass "PERCENT", and let other calls replace it with
+    rem the "%".  We cannot pass "%" directly because Windows interprets it as
     rem the name of the script.  --SJW 8/24/07
-    call :tooltest tfamily.ddl --filedriver=family tfamilyPERCENT-ZERO5d.h5
+    call :tooltest tfamily.ddl --filedriver=family tfamilyPERCENT05d.h5
     call :tooltest tmulti.ddl --filedriver=multi tmulti
 
     rem test for files with group names which reach > 1024 bytes in size
@@ -589,6 +589,11 @@ rem ############################################################################
     call :tooltest torderattr2.ddl -H --sort_by=name --sort_order=descending torderattr.h5
     call :tooltest torderattr3.ddl -H --sort_by=creation_order --sort_order=ascending torderattr.h5
     call :tooltest torderattr4.ddl -H --sort_by=creation_order --sort_order=descending torderattr.h5
+
+    rem tests for floating point user defined printf format
+    rem Note: Make sure to use PERCENT rather than "%", because Windows needs
+    rem to handle it specially.  --SJW 5/12/08
+    call :tooltest tfpformat.ddl -m PERCENT.7f tfpformat.h5
 
     
     
