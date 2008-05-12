@@ -23,26 +23,8 @@ PROGRAM fortranlibtest
 
   IMPLICIT NONE
   INTEGER :: total_error = 0
-  INTEGER :: error 
-  INTEGER :: mounting_total_error = 0
-  INTEGER :: reopen_total_error = 0
-  INTEGER :: fclose_total_error = 0
-  INTEGER :: fspace_total_error = 0
-  INTEGER :: dataset_total_error = 0
-  INTEGER :: extend_dataset_total_error = 0
-  INTEGER :: refobj_total_error = 0
-  INTEGER :: refreg_total_error = 0
-  INTEGER :: dataspace_total_error = 0
-  INTEGER :: hyperslab_total_error = 0
-  INTEGER :: element_total_error = 0
-  INTEGER :: basic_select_total_error = 0
-  INTEGER :: total_error_compoundtest = 0
-  INTEGER :: basic_datatype_total_error = 0
-  INTEGER :: enum_total_error = 0
-  INTEGER :: external_total_error = 0
-  INTEGER :: multi_file_total_error = 0
-  INTEGER :: attribute_total_error = 0
-  INTEGER :: group_total_error = 0
+  INTEGER :: error
+  INTEGER :: ret_total_error
   INTEGER :: majnum, minnum, relnum
   CHARACTER(LEN=8) error_string
   CHARACTER(LEN=8) :: success = ' PASSED '
@@ -68,65 +50,72 @@ PROGRAM fortranlibtest
   ENDIF
   WRITE(*,*)
 
+  ret_total_error = 0
   error_string = failure
-  CALL file_space(cleanup, fspace_total_error)
-  IF (fspace_total_error == 0) error_string = success
+  CALL file_space(cleanup, ret_total_error)
+  IF (ret_total_error == 0) error_string = success
   WRITE(*, fmt = '(21a)', advance = 'no') ' Testing file free space'     
   WRITE(*, fmt = '(52x,a)', advance = 'no') ' ' 
   WRITE(*, fmt = e_format) error_string
-  total_error = total_error + fspace_total_error 
-
+  total_error = total_error + ret_total_error
   !     write(*,*)
   !     write(*,*) '========================================='
   !     write(*,*) 'Testing ATTRIBUTE interface              ' 
   !     write(*,*) '========================================='
 
+  ret_total_error = 0
   error_string = failure
-  CALL attribute_test_1_8(cleanup, attribute_total_error)
+  CALL attribute_test_1_8(cleanup, ret_total_error)
   WRITE(*, fmt = '(15a)', advance = 'no') ' Testing attributes'     
   WRITE(*, fmt = '(57x,a)', advance = 'no')  ' '
-  IF (attribute_total_error == 0) error_string = success
+  IF (ret_total_error == 0) error_string = success
   WRITE(*, fmt = e_format) error_string
-  total_error = total_error + attribute_total_error
+  total_error = total_error + ret_total_error
 
-  CALL group_test(cleanup, group_total_error)
+  ret_total_error = 0
+  error_string = failure
+  CALL group_test(cleanup, ret_total_error)
   WRITE(*, fmt = '(15a)', advance = 'no') ' Testing groups'     
   WRITE(*, fmt = '(61x,a)', advance = 'no')  ' '
-  IF (group_total_error == 0) error_string = success
+  IF (ret_total_error == 0) error_string = success
   WRITE(*, fmt = e_format) error_string
-  total_error = total_error + group_total_error
+  total_error = total_error + ret_total_error
 
-  CALL test_h5o(cleanup, group_total_error )
+  ret_total_error = 0
+  error_string = failure
+  CALL test_h5o(cleanup, ret_total_error)
   WRITE(*, fmt = '(15a)', advance = 'no') ' Testing object interface'     
   WRITE(*, fmt = '(51x,a)', advance = 'no')  ' '
-  IF (group_total_error == 0) error_string = success
+  IF (ret_total_error == 0) error_string = success
   WRITE(*, fmt = e_format) error_string
-  total_error = total_error + group_total_error
+  total_error = total_error + ret_total_error
 
-  CALL dtransform(cleanup, group_total_error)
+  ret_total_error = 0
+  error_string = failure
+  CALL dtransform(cleanup, ret_total_error)
   WRITE(*, fmt = '(15a)', advance = 'no') ' Testing data transform'     
   WRITE(*, fmt = '(53x,a)', advance = 'no')  ' '
-  IF (group_total_error == 0) error_string = success
+  IF (ret_total_error == 0) error_string = success
   WRITE(*, fmt = e_format) error_string
-  total_error = total_error + group_total_error
+  total_error = total_error + ret_total_error
 
-  CALL test_genprop_basic_class(cleanup, group_total_error)
+  ret_total_error = 0
+  error_string = failure
+  CALL test_genprop_basic_class(cleanup, ret_total_error)
   WRITE(*, fmt = '(30a)', advance = 'no') ' Testing basic generic properties'     
   WRITE(*, fmt = '(43x,a)', advance = 'no')  ' '
-  IF (group_total_error == 0) error_string = success
+  IF (ret_total_error == 0) error_string = success
   WRITE(*, fmt = e_format) error_string
-  total_error = total_error + group_total_error
+  total_error = total_error + ret_total_error
 
-  CALL test_h5s_encode(cleanup, group_total_error)
+  CALL test_h5s_encode(cleanup, ret_total_error)
   WRITE(*, fmt = '(15a)', advance = 'no') ' Testing dataspace encoding and decoding'     
   WRITE(*, fmt = '(36x,a)', advance = 'no')  ' '
-  IF (group_total_error == 0) error_string = success
+  IF (ret_total_error == 0) error_string = success
   WRITE(*, fmt = e_format) error_string
-  total_error = total_error + group_total_error
+  total_error = total_error + ret_total_error
 
 !  CALL test_hard_query(group_total_error)
-
-  total_error = total_error + group_total_error
 
   WRITE(*,*)
 
