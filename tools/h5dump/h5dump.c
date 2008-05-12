@@ -106,6 +106,7 @@ static void     init_prefix(char **prfx, size_t prfx_len);
 static void     add_prefix(char **prfx, size_t *prfx_len, const char *name);
 /* callback function used by H5Literate() */
 static herr_t   dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void *op_data);
+static int      dump_extlink(const char *filename, const char *targname);
 
 
 static h5tool_format_t         dataformat = {
@@ -358,7 +359,7 @@ static char            *xml_escape_the_name(const char *);
 
 /* a structure for handling the order command-line parameters come in */
 struct handler_t {
-    void (*func)(hid_t, char *, void *);
+    void (*func)(hid_t, const char *, void *, int);
     char *obj;
     struct subset_t *subset_info;
 };
@@ -1378,6 +1379,9 @@ dump_selected_attr(hid_t loc_id, const char *name)
  *  RMcG, November 2000
  *   Added XML support. Also, optionally checks the op_data argument
  *
+ *  PVN, May 2008
+ *   Dump external links
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1662,11 +1666,15 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED 
                     else {
                         if(!doxml) {
                             indentation(indent + COL);
-                            printf("LINKCLASS %d\n", linfo->type);
-                            indentation(indent + COL);
                             printf("TARGETFILE \"%s\"\n", filename);
                             indentation(indent + COL);
                             printf("TARGETPATH \"%s\"\n", targname);
+
+
+                            /* dump the external link */
+                            dump_extlink(filename,targname);
+
+
                         } /* end if */
                         /* XML */
                         else {
@@ -3121,7 +3129,7 @@ set_sort_order(const char *form)
  *-------------------------------------------------------------------------
  */
 static void
-handle_attributes(hid_t fid, char *attr, void UNUSED * data)
+handle_attributes(hid_t fid, const char *attr, void UNUSED * data, int pe)
 {
     dump_selected_attr(fid, attr);
 }
@@ -3262,26 +3270,36 @@ parse_subset_params(char *dset)
  *              Tuesday, 9. January 2001
  *
  * Modifications:
- *  Pedro Vicente, Tuesday, January 15, 2008
+ *  Pedro Vicente, January 15, 2008
  *  check for block overlap
+ *
+ *  Pedro Vicente, May 8, 2008
+ *   added a flag PE that prints/not prints error messages
+ *   added for cases of external links not found, to avoid printing of 
+ *    objects not found, since external links are dumped on a trial error basis
  *
  *-------------------------------------------------------------------------
  */
 static void
-handle_datasets(hid_t fid, char *dset, void *data)
+handle_datasets(hid_t fid, const char *dset, void *data, int pe)
 {
     H5O_info_t       oinfo;
     hid_t            dsetid;
     struct subset_t *sset = (struct subset_t *)data;
 
-    if((dsetid = H5Dopen2(fid, dset, H5P_DEFAULT)) < 0) {
-        begin_obj(dump_header_format->datasetbegin, dset,
-                  dump_header_format->datasetblockbegin);
-        indentation(COL);
-        error_msg(progname, "unable to open dataset \"%s\"\n", dset);
-        end_obj(dump_header_format->datasetend,
+    if((dsetid = H5Dopen2(fid, dset, H5P_DEFAULT)) < 0) 
+    {
+        if (pe)
+        {
+            begin_obj(dump_header_format->datasetbegin, dset,
+                dump_header_format->datasetblockbegin);
+            indentation(COL);
+            error_msg(progname, "unable to open dataset \"%s\"\n", dset);
+            end_obj(dump_header_format->datasetend,
                 dump_header_format->datasetblockend);
-        d_status = EXIT_FAILURE;
+            d_status = EXIT_FAILURE;
+        }
+        
         return;
     } /* end if */
 
@@ -3408,24 +3426,35 @@ handle_datasets(hid_t fid, char *dset, void *data)
  * Programmer:  Bill Wendling
  *              Tuesday, 9. January 2001
  *
- * Modifications: Pedro Vicente, September 26, 2007
+ * Modifications: 
+ *
+ * Pedro Vicente, September 26, 2007
  *  handle creation order
+ *
+ * Pedro Vicente, May 8, 2008
+ *   added a flag PE that prints/not prints error messages
+ *   added for cases of external links not found, to avoid printing of 
+ *    objects not found, since external links are dumped on a trial error basis
  *
  *-------------------------------------------------------------------------
  */
 static void
-handle_groups(hid_t fid, char *group, void UNUSED * data)
+handle_groups(hid_t fid, const char *group, void UNUSED * data, int pe)
 {
     hid_t      gid;
    
     
     if((gid = H5Gopen2(fid, group, H5P_DEFAULT)) < 0) 
     {
-        begin_obj(dump_header_format->groupbegin, group, dump_header_format->groupblockbegin);
-        indentation(COL);
-        error_msg(progname, "unable to open group \"%s\"\n", group);
-        end_obj(dump_header_format->groupend, dump_header_format->groupblockend);
-        d_status = EXIT_FAILURE;
+        if ( pe )
+        {
+            begin_obj(dump_header_format->groupbegin, group, dump_header_format->groupblockbegin);
+            indentation(COL);
+            error_msg(progname, "unable to open group \"%s\"\n", group);
+            end_obj(dump_header_format->groupend, dump_header_format->groupblockend);
+            d_status = EXIT_FAILURE;
+        }
+        
     } 
     else 
     {
@@ -3461,7 +3490,7 @@ handle_groups(hid_t fid, char *group, void UNUSED * data)
  *-------------------------------------------------------------------------
  */
 static void
-handle_links(hid_t fid, char *links, void UNUSED * data)
+handle_links(hid_t fid, const char *links, void UNUSED * data, int pe)
 {
     H5L_info_t linfo;
 
@@ -3547,10 +3576,15 @@ handle_links(hid_t fid, char *links, void UNUSED * data)
  *
  * Modifications:
  *
+ *  Pedro Vicente, May 8, 2008
+ *   added a flag PE that prints/not prints error messages
+ *   added for cases of external links not found, to avoid printing of 
+ *    objects not found, since external links are dumped on a trial error basis
+ *
  *-------------------------------------------------------------------------
  */
 static void
-handle_datatypes(hid_t fid, char *type, void UNUSED * data)
+handle_datatypes(hid_t fid, const char *type, void UNUSED * data, int pe)
 {
     hid_t       type_id;
 
@@ -3572,16 +3606,23 @@ handle_datatypes(hid_t fid, char *type, void UNUSED * data)
             idx++;
         } /* end while */
 
-        if(idx == type_table->nobjs) {
-            /* unknown type */
-            begin_obj(dump_header_format->datatypebegin, type,
-                      dump_header_format->datatypeblockbegin);
-            indentation(COL);
-            error_msg(progname, "unable to open datatype \"%s\"\n", type);
-            end_obj(dump_header_format->datatypeend,
+        if(idx == type_table->nobjs) 
+        {
+            if ( pe )
+            {
+                /* unknown type */
+                begin_obj(dump_header_format->datatypebegin, type,
+                    dump_header_format->datatypeblockbegin);
+                indentation(COL);
+                error_msg(progname, "unable to open datatype \"%s\"\n", type);
+                end_obj(dump_header_format->datatypeend,
                     dump_header_format->datatypeblockend);
-            d_status = EXIT_FAILURE;
-        } else {
+                d_status = EXIT_FAILURE;
+            }
+            
+        } 
+        else 
+        {
             hid_t dsetid = H5Dopen2(fid, type_table->objs[idx].objname, H5P_DEFAULT);
             type_id = H5Dget_type(dsetid);
             dump_named_datatype(type_id, type);
@@ -4194,7 +4235,7 @@ main(int argc, const char *argv[])
 
         for(i = 0; i < argc; i++)
             if(hand[i].func)
-                hand[i].func(fid, hand[i].obj, hand[i].subset_info);
+                hand[i].func(fid, hand[i].obj, hand[i].subset_info, 1);
     }
 
     if (!doxml) {
@@ -6630,3 +6671,50 @@ add_prefix(char **prfx, size_t *prfx_len, const char *name)
     HDstrcat(HDstrcat(*prfx, "/"), name);
 } /* end add_prefix */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    dump_extlink
+ *
+ * made by: PVN
+ *
+ * Purpose:     Dump an external link
+ *  Since external links are soft links, they are dumped on a trial error 
+ *   basis, attempting to dump as a dataset, as a group and as a named datatype
+ *   Error messages are supressed
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static int dump_extlink(const char *filename, const char *targname)
+{
+    hid_t fid;
+    
+    
+    fid = h5tools_fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT, driver, NULL, 0);
+   
+    if (fid < 0) 
+    {
+        goto fail;
+    }
+    
+    /* add some indentation to distinguish that these objects are external */
+    indent += 2*COL;
+    
+    handle_datasets(fid, targname, NULL, 0);
+    handle_groups(fid, targname, NULL, 0);
+    handle_datatypes(fid, targname, NULL, 0);
+    
+    indent -= 2*COL;
+    
+    
+    if (H5Fclose(fid) < 0)
+        d_status = EXIT_FAILURE;
+    
+    
+    return SUCCEED;
+    
+fail:
+
+    return FAIL;
+    
+}
