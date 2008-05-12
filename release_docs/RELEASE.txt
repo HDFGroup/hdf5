@@ -67,6 +67,9 @@ New Features
          sizes for cases where compression  filters are present. (PVN - 2008/05/01)
      - h5dump: added an option to allow a user defined formatting string for printf 
          regarding floating point numbers. (PVN - 2008/05/06)
+     - h5dump: support for external links, display the object that the external link 
+         points to. (PVN - 2008/05/12)
+
 
 
     High-Level APIs:
