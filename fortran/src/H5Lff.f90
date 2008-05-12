@@ -55,7 +55,7 @@ CONTAINS
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5lcopy
+!DEC$attributes dllexport :: h5lcopy_f
 !DEC$endif
 !
     IMPLICIT NONE

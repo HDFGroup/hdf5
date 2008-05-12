@@ -693,6 +693,14 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\fortran\src\H5Lf.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\fortran\src\H5Of.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\fortran\src\H5Pf.c"
 				>
 				<FileConfiguration

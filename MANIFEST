@@ -1783,6 +1783,8 @@
 ./windows/fortran/test/libtest_fortran/libtest_fortran.vfproj
 ./windows/fortran/test/libtest_fortrandll/libtest_fortrandll.vfproj
 ./windows/fortran/test/testhdf5_fortran/testhdf5_fortran.vfproj
+./windows/fortran/test/testhdf5_fortran_1_8/testhdf5_fortran_1_8.vfproj
+./windows/fortran/test/testhdf5_fortran_1_8dll/testhdf5_fortran_1_8dll.vfproj
 ./windows/fortran/test/testhdf5_fortrandll/testhdf5_fortrandll.vfproj
 
 # High-Leve C++ Tests
