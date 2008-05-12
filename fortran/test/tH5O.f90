@@ -27,7 +27,7 @@ SUBROUTINE test_h5o(cleanup, total_error)
 !!$  test_h5o_open_by_addr();	/* Test opening objects by address */
 !!$  test_h5o_close();		/* Test generic CLOSE FUNCTION */
 !!$  test_h5o_refcount();        /* Test incrementing and decrementing reference count */
-!!$  test_h5o_plist();           /* Test object creation properties */
+  CALL test_h5o_plist(total_error)           ! /* Test object creation properties */
   CALL test_h5o_link(total_error) ! /* Test object link routine */
 
 END SUBROUTINE test_h5o
@@ -109,10 +109,10 @@ SUBROUTINE test_h5o_link(total_error)
   
   ! /* Create and commit a datatype with no name */
   CALL H5Tcopy_f( H5T_NATIVE_INTEGER, type_id, error)
-  CALL check("H5Tcopy",error,total_error)
+  CALL check("H5Tcopy_F",error,total_error)
   
   CALL H5Tcommit_anon_f(file_id, type_id, error) ! using no optional parameters
-  CALL check("H5Tcommit_anon",error,total_error)
+  CALL check("H5Tcommit_anon_F",error,total_error)
 
   CALL H5Tcommitted_f(type_id, committed, error)
   CALL check("H5Tcommitted_f",error,total_error)
@@ -212,3 +212,235 @@ SUBROUTINE test_h5o_link(total_error)
   CALL check("h5pclose_f", error, total_error)
 
 END SUBROUTINE test_h5o_link
+
+!/****************************************************************
+!**
+!**  test_h5o_plist(): Test object creation properties
+!**
+!****************************************************************/
+
+SUBROUTINE test_h5o_plist(total_error)
+
+  USE HDF5 ! This module contains all necessary modules 
+  
+  IMPLICIT NONE
+  INTEGER, INTENT(OUT) :: total_error
+
+  INTEGER(hid_t) :: fid                        !/* HDF5 File ID      */
+  INTEGER(hid_t) :: grp, dset, dtype, dspace   !/* Object identifiers */
+  INTEGER(hid_t) :: fapl                       !/* File access property list */
+  INTEGER(hid_t) :: gcpl, dcpl, tcpl           !/* Object creation properties */
+  INTEGER :: def_max_compact, def_min_dense    !/* Default phase change parameters */
+  INTEGER :: max_compact, min_dense            !/* Actual phase change parameters */
+  INTEGER :: error                             !/* Value returned from API calls */
+  CHARACTER(LEN=7), PARAMETER :: TEST_FILENAME = 'test.h5'
+  
+
+  PRINT*,'Testing object creation properties'
+
+  !/* Make a FAPL that uses the "use the latest version of the format" flag */
+  CALL H5Pcreate_f(H5P_FILE_ACCESS_F, fapl, error)
+  CALL check("H5Pcreate_f", error, total_error)
+
+  ! /* Set the "use the latest version of the format" bounds for creating objects in the file */
+  CALL H5Pset_libver_bounds_f(fapl, H5F_LIBVER_LATEST_F, H5F_LIBVER_LATEST_F, error)
+  CALL check("H5Pcreate_f", error, total_error)
+
+  ! /* Create a new HDF5 file */
+  CALL H5Fcreate_f(TEST_FILENAME, H5F_ACC_TRUNC_F, fid, error, access_prp=fapl)
+  CALL check("H5Fcreate_f", error, total_error)
+
+  ! /* Create group, dataset & named datatype creation property lists */
+  CALL H5Pcreate_f(H5P_GROUP_CREATE_F, gcpl, error)
+  CALL check("H5Pcreate_f", error, total_error)
+  CALL H5Pcreate_f(H5P_DATASET_CREATE_F, dcpl, error)
+  CALL check("H5Pcreate_f", error, total_error)
+  CALL H5Pcreate_f(H5P_DATATYPE_CREATE_F, tcpl, error)
+  CALL check("H5Pcreate_f", error, total_error)
+
+  ! /* Retrieve default attribute phase change values */
+  CALL H5Pget_attr_phase_change_f(gcpl, def_max_compact, def_min_dense, error)
+  CALL check("H5Pget_attr_phase_change_f", error, total_error)
+
+  ! /* Set non-default attribute phase change values on each creation property list */
+  CALL H5Pset_attr_phase_change_f(gcpl, def_max_compact+1, def_min_dense-1, error)
+  CALL check("H5Pget_attr_phase_change_f", error, total_error)
+  CALL H5Pset_attr_phase_change_f(dcpl, def_max_compact+1, def_min_dense-1, error)
+  CALL check("H5Pget_attr_phase_change_f", error, total_error)
+  CALL H5Pset_attr_phase_change_f(tcpl, def_max_compact+1, def_min_dense-1, error)
+  CALL check("H5Pget_attr_phase_change_f", error, total_error)
+  
+  ! /* Retrieve attribute phase change values on each creation property list and verify */
+  CALL H5Pget_attr_phase_change_f(gcpl, max_compact, min_dense, error)
+  CALL check("H5Pget_attr_phase_change_f", error, total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", max_compact, (def_max_compact + 1), total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", min_dense, (def_min_dense - 1), total_error)
+
+  CALL H5Pget_attr_phase_change_f(dcpl, max_compact, min_dense, error)
+  CALL check("H5Pget_attr_phase_change_f", error, total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", max_compact, (def_max_compact + 1), total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", min_dense, (def_min_dense - 1), total_error)
+
+  CALL H5Pget_attr_phase_change_f(tcpl, max_compact, min_dense, error)
+  CALL check("H5Pget_attr_phase_change_f", error, total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", max_compact, (def_max_compact + 1), total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", min_dense, (def_min_dense - 1), total_error)
+
+
+  !/* Create a group, dataset, and committed datatype within the file,
+  ! *  using the respective type of creation property lists.
+  ! */
+
+  !/* Create the group anonymously and link it in */
+  CALL H5Gcreate_anon_f(fid, grp, error, gcpl_id=gcpl)
+  CALL check("H5Gcreate_anon_f", error, total_error)
+
+  CALL H5Olink_f(grp, fid, "group", error)
+  CALL check("H5Olink_f", error, total_error)
+
+  ! /* Commit the type inside the group anonymously and link it in */
+  CALL h5tcopy_f(H5T_NATIVE_INTEGER, dtype, error)
+  CALL check("h5tcopy_f", error, total_error)
+  
+  CALL H5Tcommit_anon_f(fid, dtype, error, tcpl_id=tcpl)
+  CALL check("H5Tcommit_anon_f",error,total_error)
+
+  CALL H5Olink_f(dtype, fid, "datatype", error)
+  CALL check("H5Olink_f", error, total_error)
+
+  ! /* Create the dataspace for the dataset. */
+  CALL h5screate_f(H5S_SCALAR_F, dspace, error)
+  CALL check("h5screate_f",error,total_error)
+
+  ! /* Create the dataset anonymously and link it in */
+  CALL H5Dcreate_anon_f(fid, H5T_NATIVE_INTEGER, dspace, dset, error, dcpl )
+  CALL check("H5Dcreate_anon_f",error,total_error)
+  
+  CALL H5Olink_f(dset, fid, "dataset", error)
+  CALL check("H5Olink_f", error, total_error)
+
+  CALL h5sclose_f(dspace, error)
+  CALL check("h5sclose_f",error,total_error)
+
+
+  ! /* Close current creation property lists */
+  CALL h5pclose_f(gcpl,error)
+  CALL check("h5pclose_f", error, total_error)
+  CALL h5pclose_f(dcpl,error)
+  CALL check("h5pclose_f", error, total_error)
+  CALL h5pclose_f(tcpl,error)
+  CALL check("h5pclose_f", error, total_error)
+
+  ! /* Retrieve each object's creation property list */
+  
+  CALL H5Gget_create_plist_f(grp, gcpl, error)
+  CALL check("H5Gget_create_plist", error, total_error)
+
+  CALL H5Tget_create_plist_f(dtype, tcpl, error)
+  CALL check("H5Tget_create_plist_f", error, total_error)
+
+  CALL H5Dget_create_plist_f(dset, dcpl, error)
+  CALL check("H5Dget_create_plist_f", error, total_error)
+
+
+  ! /* Retrieve attribute phase change values on each creation property list and verify */
+  CALL H5Pget_attr_phase_change_f(gcpl, max_compact, min_dense, error)
+  CALL check("H5Pget_attr_phase_change_f", error, total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", max_compact, (def_max_compact + 1), total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", min_dense, (def_min_dense - 1), total_error)
+
+  CALL H5Pget_attr_phase_change_f(dcpl, max_compact, min_dense, error)
+  CALL check("H5Pget_attr_phase_change_f", error, total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", max_compact, (def_max_compact + 1), total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", min_dense, (def_min_dense - 1), total_error)
+
+  CALL H5Pget_attr_phase_change_f(tcpl, max_compact, min_dense, error)
+  CALL check("H5Pget_attr_phase_change_f", error, total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", max_compact, (def_max_compact + 1), total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", min_dense, (def_min_dense - 1), total_error)
+
+
+  !/* Close current objects */
+  
+  CALL h5pclose_f(gcpl,error)
+  CALL check("h5pclose_f", error, total_error)
+  CALL h5pclose_f(dcpl,error)
+  CALL check("h5pclose_f", error, total_error)
+  CALL h5pclose_f(tcpl,error)
+  CALL check("h5pclose_f", error, total_error)
+
+  CALL h5gclose_f(grp, error)
+  CALL check("h5gclose_f",error,total_error)
+
+  CALL h5tclose_f(dtype, error)
+  CALL check("h5tclose_f",error,total_error)
+  CALL h5dclose_f(dset, error)
+  CALL check("h5dclose_f",error,total_error)
+  CALL h5fclose_f(fid, error)
+  CALL check("h5fclose_f",error,total_error)
+  ! /* Re-open the file and check that the object creation properties persist */
+  CALL h5fopen_f(TEST_FILENAME, H5F_ACC_RDONLY_F, fid, error, access_prp=fapl)
+  CALL check("H5fopen_f",error,total_error)
+
+  ! /* Re-open objects */
+  CALL H5Gopen_f(fid, "group", grp, error)
+  CALL check("h5gopen_f", error, total_error)
+
+  CALL H5Topen_f(fid, "datatype", dtype,error)
+  CALL check("h5topen_f", error, total_error)
+
+  CALL H5Dopen_f(fid, "dataset", dset, error)
+  CALL check("h5dopen_f", error, total_error)
+
+  ! /* Retrieve each object's creation property list */
+  CALL H5Gget_create_plist_f(grp, gcpl, error)
+  CALL check("H5Gget_create_plist", error, total_error)
+
+  CALL H5Tget_create_plist_f(dtype, tcpl, error)
+  CALL check("H5Tget_create_plist_f", error, total_error)
+
+  CALL H5Dget_create_plist_f(dset, dcpl, error)
+  CALL check("H5Dget_create_plist_f", error, total_error)
+
+
+  ! /* Retrieve attribute phase change values on each creation property list and verify */
+  CALL H5Pget_attr_phase_change_f(gcpl, max_compact, min_dense, error)
+  CALL check("H5Pget_attr_phase_change_f", error, total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", max_compact, (def_max_compact + 1), total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", min_dense, (def_min_dense - 1), total_error)
+
+  CALL H5Pget_attr_phase_change_f(dcpl, max_compact, min_dense, error)
+  CALL check("H5Pget_attr_phase_change_f", error, total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", max_compact, (def_max_compact + 1), total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", min_dense, (def_min_dense - 1), total_error)
+
+  CALL H5Pget_attr_phase_change_f(tcpl, max_compact, min_dense, error)
+  CALL check("H5Pget_attr_phase_change_f", error, total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", max_compact, (def_max_compact + 1), total_error)
+  CALL VERIFY("H5Pget_attr_phase_change_f", min_dense, (def_min_dense - 1), total_error)
+
+
+  ! /* Close current objects */
+  
+  CALL h5pclose_f(gcpl,error)
+  CALL check("h5pclose_f", error, total_error)
+  CALL h5pclose_f(dcpl,error)
+  CALL check("h5pclose_f", error, total_error)
+  CALL h5pclose_f(tcpl,error)
+  CALL check("h5pclose_f", error, total_error)
+
+  CALL h5gclose_f(grp, error)
+  CALL check("h5gclose_f",error,total_error)
+
+  CALL h5tclose_f(dtype, error)
+  CALL check("h5tclose_f",error,total_error)
+  CALL h5dclose_f(dset, error)
+  CALL check("h5dclose_f",error,total_error)
+  CALL h5fclose_f(fid, error)
+  CALL check("h5fclose_f",error,total_error)
+
+  ! /* Close the FAPL */
+  CALL H5Pclose_f(fapl, error)
+  CALL check("H5Pclose_f", error, total_error)
+
+END SUBROUTINE test_h5o_plist
