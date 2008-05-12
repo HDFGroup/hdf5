@@ -64,7 +64,7 @@ END SUBROUTINE verifyLogical
 
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: verifyLogical
+!DEC$attributes dllexport :: verifyString
 !DEC$endif
 SUBROUTINE verifyString(string, value,correct_value,total_error)
   CHARACTER(LEN=*) :: string

@@ -52,6 +52,8 @@
 		<File RelativePath="..\..\..\fortran\src\H5fortran_types.f90"/>
 		<File RelativePath="..\..\..\fortran\src\H5Gff.f90"/>
 		<File RelativePath="..\..\..\fortran\src\H5Iff.f90"/>
+		<File RelativePath="..\..\..\fortran\src\H5Lff.f90"/>
+		<File RelativePath="..\..\..\fortran\src\H5Off.f90"/>
 		<File RelativePath="..\..\..\fortran\src\H5Pff.f90"/>
 		<File RelativePath="..\..\..\fortran\src\H5Rff.f90"/>
 		<File RelativePath="..\..\..\fortran\src\H5Sff.f90"/>

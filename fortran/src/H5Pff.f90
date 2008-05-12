@@ -7120,7 +7120,7 @@
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_attr_creation_order_f
+!DEC$attributes dllexport :: h5pset_char_encoding_f
 !DEC$endif
 !
     IMPLICIT NONE
