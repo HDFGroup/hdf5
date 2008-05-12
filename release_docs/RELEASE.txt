@@ -40,6 +40,9 @@ New Features
     Configuration:
     -------------
 
+    - Configuration suite now uses Autoconf 2.61, Automake 1.10.1, and 
+      Libtool 2.2.2 (MAM - 2008/05/05)
+
     - There is a new build command, 'make check-perform', which will
     run the tests in the perform directory. This is an optional step
     afer 'make check' in the build process. (MAM - 2008/05/12)
