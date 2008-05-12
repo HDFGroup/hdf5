@@ -3125,6 +3125,8 @@ set_sort_order(const char *form)
  *              Tuesday, 9. January 2001
  *
  * Modifications:
+ *  PVN, May 2008
+ *   add an extra parameter PE, to allow printing/not printing of error messages
  *
  *-------------------------------------------------------------------------
  */
@@ -3531,8 +3533,6 @@ handle_links(hid_t fid, const char *links, void UNUSED * data, int pe)
 
                     if(H5Lunpack_elink_val(buf, linfo.u.val_size, NULL, &elink_file, &elink_path)>=0) {
                         indentation(COL);
-                        printf("LINKCLASS %d\n", linfo.type);
-                        indentation(COL);
                         printf("TARGETFILE \"%s\"\n", elink_file);
                         indentation(COL);
                         printf("TARGETPATH \"%s\"\n", elink_path);
@@ -3588,11 +3588,13 @@ handle_datatypes(hid_t fid, const char *type, void UNUSED * data, int pe)
 {
     hid_t       type_id;
 
-    if((type_id = H5Topen2(fid, type, H5P_DEFAULT)) < 0) {
+    if((type_id = H5Topen2(fid, type, H5P_DEFAULT)) < 0) 
+    {
         /* check if type is unamed datatype */
         unsigned idx = 0;
 
-        while(idx < type_table->nobjs ) {
+        while(idx < type_table->nobjs ) 
+        {
             char name[128];
 
             if(!type_table->objs[idx].recorded) {
@@ -3629,7 +3631,9 @@ handle_datatypes(hid_t fid, const char *type, void UNUSED * data, int pe)
             H5Tclose(type_id);
             H5Dclose(dsetid);
         }
-    } else {
+    } 
+    else 
+    {
         dump_named_datatype(type_id, type);
 
         if(H5Tclose(type_id) < 0)
