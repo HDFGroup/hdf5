@@ -101,6 +101,13 @@ tests:
 	  fi;                                                           \
 	done
 
+check-perform:
+	@@SETX@; for d in perform; do                        \
+	  if test $$d != .; then                                        \
+	   (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;            \
+	  fi;                                                           \
+	done
+
 install-exec-local:
 	@cd perform && $(MAKE) $(AM_MAKEFLAGS) install
 uninstall-local:
