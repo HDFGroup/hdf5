@@ -31,7 +31,7 @@ PROGRAM fortranlibtest
   CHARACTER(LEN=8) :: failure = '*FAILED*'
   CHARACTER(LEN=4) :: e_format ='(8a)'
   LOGICAL :: cleanup = .TRUE.
-  !     LOGICAL :: cleanup = .FALSE.
+!       LOGICAL :: cleanup = .FALSE.
 
   CALL h5open_f(error) 
   WRITE(*,*) '                       ==========================                            '

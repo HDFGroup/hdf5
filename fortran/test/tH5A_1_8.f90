@@ -2984,7 +2984,6 @@ SUBROUTINE test_attr_dense_open( fcpl, fapl, total_error)
 
   ! /* Add attributes, until just before converting to dense storage */
 
-  write(*,*) max_compact
   DO u = 0, max_compact - 1
      ! /* Create attribute */
      WRITE(chr2,'(I2.2)') u
@@ -3718,6 +3717,7 @@ SUBROUTINE attr_open_check(fid, dsetname, obj_id, max_attrs, total_error )
      CALL VERIFY("h5aget_info_f.cset", cset, H5T_CSET_ASCII_F, total_error)
      CALL h5aget_storage_size_f(attr_id, storage_size, error)
      CALL check("h5aget_storage_size_f",error,total_error)
+     
      CALL VERIFY("h5aget_info_f.data_size", INT(data_size), INT(storage_size), total_error)
 
 

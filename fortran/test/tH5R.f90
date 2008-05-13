@@ -147,21 +147,23 @@ SUBROUTINE refobjtest(cleanup, total_error)
   
   CALL H5Rget_name_f(dsetr_id, ref(1), buf, error, buf_size )
   CALL check("H5Rget_name_f", error, total_error)
-  CALL VERIFY("H5Rget_name_f", buf_size,INT(7,SIZE_T), total_error)
+ 
+
+  CALL VERIFY("H5Rget_name_f", INT(buf_size),7, total_error)
   CALL VerifyString("H5Rget_name_f", buf, "/GROUP1", total_error)
   
   ! with buffer bigger then needed
   
   CALL H5Rget_name_f(dsetr_id, ref(1), buf_big, error, buf_size )
   CALL check("H5Rget_name_f", error, total_error)
-  CALL VERIFY("H5Rget_name_f", buf_size,INT(7,SIZE_T),total_error)
+  CALL VERIFY("H5Rget_name_f", INT(buf_size),7,total_error)
   CALL VerifyString("H5Rget_name_f", TRIM(buf_big), "/GROUP1", total_error)
   
   ! getting path to dataset in /Group1
   
   CALL H5Rget_name_f(dsetr_id, ref(2), buf_big, error, buf_size )
   CALL check("H5Rget_name_f", error, total_error)
-  CALL VERIFY("H5Rget_name_f", buf_size,INT(14,SIZE_T),total_error)
+  CALL VERIFY("H5Rget_name_f", INT(buf_size),14,total_error)
   CALL VerifyString("H5Rget_name_f", TRIM(buf_big), "/GROUP1/GROUP2", total_error)
   
   !
@@ -371,14 +373,14 @@ SUBROUTINE refregtest(cleanup, total_error)
   ! Get name of the dataset the first region reference points to using H5Rget_name_f
   CALL H5Rget_name_f(dsetr_id, ref_out(1), buf, error, buf_size )
   CALL check("H5Rget_name_f", error, total_error)
-  CALL VERIFY("H5Rget_name_f", buf_size,INT(7,SIZE_T),total_error)
+  CALL VERIFY("H5Rget_name_f", INT(buf_size),7,total_error)
   CALL VerifyString("H5Rget_name_f", buf, "/MATRIX", total_error)
 
   ! Get name of the dataset the first region reference points to using H5Rget_name_f
   ! buffer bigger then needed
   CALL H5Rget_name_f(dsetr_id, ref_out(1), buf_big, error, buf_size )
   CALL check("H5Rget_name_f", error, total_error)
-  CALL VERIFY("H5Rget_name_f", buf_size,INT(7,SIZE_T),total_error)
+  CALL VERIFY("H5Rget_name_f", INT(buf_size),7,total_error)
   CALL VerifyString("H5Rget_name_f", TRIM(buf_big), "/MATRIX", total_error)
 
 
@@ -386,7 +388,7 @@ SUBROUTINE refregtest(cleanup, total_error)
   ! buffer smaller then needed
   CALL H5Rget_name_f(dsetr_id, ref_out(1), buf_small, error, buf_size )
   CALL check("H5Rget_name_f", error, total_error)
-  CALL VERIFY("H5Rget_name_f", buf_size,INT(7,SIZE_T),total_error)
+  CALL VERIFY("H5Rget_name_f", INT(buf_size),7,total_error)
   CALL VerifyString("H5Rget_name_f", TRIM(buf_small), "/MAT", total_error)
 
   ! 
