@@ -50312,7 +50312,7 @@ if `echo $CC_NOFLAGS | grep ^/ >/dev/null 2>&1`; then
 else
   CC_VERSION="$CC";
   for x in `echo $PATH | sed -e 's/:/ /g'`; do
-    if test -x $x/$CC_NOFLAG; then
+    if test -x $x/$CC_NOFLAGS; then
       CC_VERSION="$x/$CC"
       break
     fi
