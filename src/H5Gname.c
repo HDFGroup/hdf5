@@ -1245,9 +1245,9 @@ H5G_get_name_by_addr(hid_t file, hid_t dxpl_id, const H5G_entry_t *loc,
             /* (less two characters, for the initial path separator, */
 	    /*  and because strncat appends a null byte) */
             HDstrncat(name, udata.path, (size - 2));
-	    // Unnecessary, because strncat will always set the last byte null.
-            // if((size_t)ret_value >= size)
-            //     name[size - 1] = '\0';
+	    /* Unnecessary, because strncat will always set the last byte null. */
+            /* if((size_t)ret_value >= size) */
+            /*     name[size - 1] = '\0'; */
         } /* end if */
     } /* end if */
     else
