@@ -513,7 +513,7 @@ SUBROUTINE test_attr_null_space(fcpl, fapl, total_error)
   CALL VERIFY("h5aget_info_f.cset", cset, H5T_CSET_ASCII_F, total_error)
   CALL h5aget_storage_size_f(attr, storage_size, error)
   CALL check("h5aget_storage_size_f",error,total_error)
-  CALL VERIFY("h5aget_info_f.data_size", data_size, INT(storage_size), total_error)
+  CALL VERIFY("h5aget_info_f.data_size", INT(data_size), INT(storage_size), total_error)
   CALL h5aclose_f(attr,error)
   CALL check("h5aclose_f",error,total_error)
   
@@ -3713,12 +3713,13 @@ SUBROUTINE attr_open_check(fid, dsetname, obj_id, max_attrs, total_error )
      CALL check("h5aget_info_f",error,total_error)
 
      ! /* Check that the object's attributes are correct */
-     CALL VERIFY("h5aget_info_f",corder,u,total_error)
-     CALL Verifylogical("h5aget_info_f",f_corder_valid,.TRUE.,total_error)
-     CALL VERIFY("h5aget_info_f", cset, H5T_CSET_ASCII_F, total_error)
+     CALL VERIFY("h5aget_info_f.corder",corder,u,total_error)
+     CALL Verifylogical("h5aget_info_f.corder_valid",f_corder_valid,.TRUE.,total_error)
+     CALL VERIFY("h5aget_info_f.cset", cset, H5T_CSET_ASCII_F, total_error)
      CALL h5aget_storage_size_f(attr_id, storage_size, error)
      CALL check("h5aget_storage_size_f",error,total_error)
-     CALL VERIFY("h5aget_info_f", data_size, INT(storage_size), total_error)
+     CALL VERIFY("h5aget_info_f.data_size", INT(data_size), INT(storage_size), total_error)
+
 
      ! /* Close attribute */
      CALL h5aclose_f(attr_id, error)
@@ -3737,8 +3738,7 @@ SUBROUTINE attr_open_check(fid, dsetname, obj_id, max_attrs, total_error )
      CALL VERIFY("h5aget_info_f", cset, H5T_CSET_ASCII_F, total_error)
      CALL h5aget_storage_size_f(attr_id, storage_size, error)
      CALL check("h5aget_storage_size_f",error,total_error)
-     CALL VERIFY("h5aget_info_f", data_size, INT(storage_size), total_error)
-
+     CALL VERIFY("h5aget_info_f", INT(data_size), INT(storage_size), total_error)
 
      ! /* Close attribute */
      CALL h5aclose_f(attr_id, error)
@@ -3760,7 +3760,7 @@ SUBROUTINE attr_open_check(fid, dsetname, obj_id, max_attrs, total_error )
      CALL VERIFY("h5aget_info_f", cset, H5T_CSET_ASCII_F, total_error)
      CALL h5aget_storage_size_f(attr_id, storage_size, error)
      CALL check("h5aget_storage_size_f",error,total_error)
-     CALL VERIFY("h5aget_info_f", data_size, INT(storage_size), total_error)
+     CALL VERIFY("h5aget_info_f", INT(data_size), INT(storage_size), total_error)
 
      ! /* Close attribute */
      CALL h5aclose_f(attr_id, error)
