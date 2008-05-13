@@ -344,7 +344,7 @@ done:
  * Modifications:
  *---------------------------------------------------------------------------*/
 int_f
-nh5lexists_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id, hid_t_f *link_exists)
+nh5lexists_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id, int_f *link_exists)
 {
   char *c_name = NULL;          /* Buffer to hold C string */
   int_f ret_value = 0;          /* Return value */
@@ -358,7 +358,7 @@ nh5lexists_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id, h
   /*
    * Call H5Lexists function.
    */
-  if((*link_exists = (hid_t_f)H5Lexists((hid_t)*loc_id, c_name, (hid_t)*lapl_id)) < 0)
+  if((*link_exists = (int_f)H5Lexists((hid_t)*loc_id, c_name, (hid_t)*lapl_id)) < 0)
          HGOTO_DONE(FAIL);
 
 done:

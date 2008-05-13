@@ -1238,7 +1238,7 @@ SUBROUTINE lifecycle(cleanup, fapl2, total_error)
   ! /* Query default group creation property settings */
   CALL H5Pget_local_heap_size_hint_f(gcpl, lheap_size_hint, error)
   CALL check("H5Pget_local_heap_size_hint_f",error,total_error)
-  CALL verify("H5Pget_local_heap_size_hint_f", lheap_size_hint,0,total_error)
+  CALL verify("H5Pget_local_heap_size_hint_f", INT(lheap_size_hint),0,total_error)
 
   CALL H5Pget_link_phase_change_f(gcpl, max_compact, min_dense, error)
   CALL check("H5Pget_link_phase_change_f", error, total_error)
@@ -1270,7 +1270,7 @@ SUBROUTINE lifecycle(cleanup, fapl2, total_error)
 
   CALL H5Pget_local_heap_size_hint_f(gcpl, lheap_size_hint, error)
   CALL check("H5Pget_local_heap_size_hint_f",error,total_error)
-  CALL verify("H5Pget_local_heap_size_hint_f", lheap_size_hint,LIFECYCLE_LOCAL_HEAP_SIZE_HINT,total_error)
+  CALL verify("H5Pget_local_heap_size_hint_f", INT(lheap_size_hint),INT(LIFECYCLE_LOCAL_HEAP_SIZE_HINT),total_error)
 
   CALL H5Pget_link_phase_change_f(gcpl, max_compact, min_dense, error)
   CALL check("H5Pget_link_phase_change_f", error, total_error)

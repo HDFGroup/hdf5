@@ -1187,7 +1187,7 @@ H5_FCDLL int_f nh5lcreate_soft_c(_fcd target_path, size_t_f *target_path_len,
 H5_FCDLL int_f nh5ldelete_c( hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id ); /*MSB*/
 H5_FCDLL int_f nh5ldelete_by_idx_c (hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen, 
 				    int_f *index_field, int_f *order, hsize_t_f *n, hid_t_f *lapl_id); /*MSB*/
-H5_FCDLL int_f nh5lexists_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id, hid_t_f *link_exists); /*MSB*/
+H5_FCDLL int_f nh5lexists_c (hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id, int_f *link_exists); /*MSB*/
 H5_FCDLL int_f nh5lget_info_c (hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen,
 			       int_f *cset, int_f *corder, int_f *corder_valid, int_f *link_type, 
 			       int_f *address, hsize_t_f *link_len,
