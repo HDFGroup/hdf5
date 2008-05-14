@@ -950,13 +950,13 @@ CONTAINS
 !
 ! Outputs:  
 !   name        - Buffer in which link value is returned
-!    size       - Maximum number of characters of link value to be returned.
 !   hdferr      - error code		
 !		      Success:  0
 !		      Failure: -1
 !
 ! Optional parameters:
 !    lapl_id    - List access property list identifier.
+!    size       - Maximum number of characters of link value to be returned.
 !
 ! Programmer:	M. S. Breitenfeld
 !		March 10, 2008	
@@ -965,7 +965,7 @@ CONTAINS
 !
 !----------------------------------------------------------------------
   SUBROUTINE h5lget_name_by_idx_f(loc_id, group_name, index_field, order, n, &
-       size, name, hdferr, lapl_id) 
+        name, hdferr, size, lapl_id) 
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
 !DEC$attributes dllexport :: h5lget_name_by_idx_f
@@ -984,8 +984,6 @@ CONTAINS
                                         !    H5_ITER_DEC_F      - Decreasing order
                                         !    H5_ITER_NATIVE_F   - No particular order, whatever is fastest
     INTEGER(HSIZE_T), INTENT(IN) :: n   ! Attribute’s position in index
-    INTEGER(SIZE_T), INTENT(INOUT) :: size   ! Indicates the size, in the number of characters, of the attribute
-                                             ! returns correct size
     CHARACTER(LEN=*), INTENT(OUT) :: name ! Buffer in which link value is returned
     INTEGER, INTENT(OUT) :: hdferr        ! Error code:
                                           ! 0 on success and -1 on failure
@@ -993,12 +991,15 @@ CONTAINS
     INTEGER(SIZE_T)  :: group_namelen
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id  ! Link access property list
     INTEGER(HID_T) :: lapl_id_default
+    INTEGER(SIZE_T), OPTIONAL, INTENT(OUT) :: size   ! Indicates the size, in the number of characters, of the link
+    INTEGER(SIZE_T) :: size_default 
+
 
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
     INTERFACE
        INTEGER FUNCTION h5lget_name_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, &
-             size, name, lapl_id_default)
+             size_default, name, lapl_id_default)
          USE H5GLOBAL
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LGET_NAME_BY_IDX_C'::h5lget_name_by_idx_c
@@ -1009,7 +1010,7 @@ CONTAINS
          INTEGER, INTENT(IN) :: index_field
          INTEGER, INTENT(IN) :: order
          INTEGER(HSIZE_T), INTENT(IN) :: n
-         INTEGER(SIZE_T), INTENT(INOUT) :: size
+         INTEGER(SIZE_T) :: size_default
          CHARACTER(LEN=*), INTENT(OUT) :: name
          INTEGER(HID_T) :: lapl_id_default
        END FUNCTION h5lget_name_by_idx_c
@@ -1020,8 +1021,13 @@ CONTAINS
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
+    size_default = LEN(name)
+
     hdferr = h5lget_name_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, &
-             size, name, lapl_id_default)
+             size_default, name, lapl_id_default)
+
+    IF(PRESENT(size)) size = size_default
+
 
   END SUBROUTINE h5lget_name_by_idx_f
 
