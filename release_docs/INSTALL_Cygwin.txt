@@ -23,16 +23,16 @@ Preconditions:
 
 2. Compilers Installed
 
-   2.1 C/C++ Compilers HDF5-1.8.0 Supported
+   2.1 C/C++ Compilers HDF5-1.8 Supported
 
        gcc-3.4.4 is included in Cygwin, which includes: 
        gcc    : GNU C compiler
        gcc-g++: GNU C++ compiler
        gcc-g77: GNU Fortran 77 compiler
 
-   2.2 Fortran Compiler HDF5-1.8.0 Supported
+   2.2 Fortran Compiler HDF5-1.8 Supported
        
-       HDF5-1.8.0 supports g95(GCC 4.0.1 (g95!) Jul 22 2005) and higher.
+       HDF5-1.8 supports g95(GCC 4.0.1 (g95!) Jul 22 2005) and higher.
        
        g95 is a free, open source Fortran 95 compiler. Users can 
        download the g95 binaries for Cygwin in the following website: 
@@ -84,19 +84,19 @@ Install HDF5 on Cygwin
 
    The HDF5 source code is distributed in a variety of formats which
    can be unpacked with the following commands, each of which creates 
-   an `hdf5-1.8.0' directory.
+   an `hdf5-1.8.1' directory.
 
    2.1 Non-compressed tar archive (*.tar)
 
-            $ tar xf hdf5-1.8.0.tar
+            $ tar xf hdf5-1.8.1.tar
 
    2.2 Gzip'd tar archive (*.tar.gz)
 
-            $ gunzip < hdf5-1.8.0.tar.gz | tar xf -
+            $ gunzip < hdf5-1.8.1.tar.gz | tar xf -
 
    2.3 Bzip'd tar archive (*.tar.bz2)
 
-            $ bunzip2 < hdf5-1.8.0.tar.bz2 | tar xf - 
+            $ bunzip2 < hdf5-1.8.1.tar.bz2 | tar xf - 
             
 3. Configuring 
      
@@ -232,7 +232,7 @@ Install HDF5 on Cygwin
 
 7. Known Problems 
    
-   Shared libraries can not be built on Cygwin In release 1.8.0.
+   Shared libraries can not be built on Cygwin In release 1.8.
 
 -----------------------------------------------------------------------
 

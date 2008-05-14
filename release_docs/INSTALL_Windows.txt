@@ -80,7 +80,7 @@ Preconditions:
 
 
       6.2 HDF5 uses Szip version 2.0 for compression and Szip compression 
-          software is provided with HDF5 products in 1.8.0 release.  To use 
+          software is provided with HDF5 products in 1.8.1 release.  To use 
           Szip 2.0 library, you can download Szip source codes and binaries from
           ftp://ftp.hdfgroup.org/lib-external/szip/2.1/bin/windows
 
@@ -149,7 +149,7 @@ Preconditions:
 
 Notes:
 
-   1. In release 1.8.0, all.zip is deprecated. Users should go to hdf5/windows 
+   1. As of 1.8.0, all.zip is deprecated. Users should go to hdf5/windows 
       directory, run copy_hdf.bat first and then open all.dsw under 
       hdf5/windows/proj/all to start building process.
 
@@ -409,6 +409,16 @@ STEP 2: Testing HDF5 Libraries and Tools
 
 HDF5 libraries and tools should be tested to make sure that they were built 
 correctly.
+
+Note:   The complete testing suite can take a long time to run on even fast
+        machines.  Some of the longer tests can be automatically shortened by
+        defining an environment variable HDF5TestExpress.  Set HDF5TestExpress
+        to 3 for fastest, or 0 for slowest.  For example:
+        
+            set HDF5TestExpress=3
+            
+        If the variable is unset, it takes on the value 1.
+        
 
 We provide 2 options for users to test HDF5 libraries and tools.
 
@@ -1416,9 +1426,9 @@ to the earlier sections of this document for details on building and testing.
    Posix Threads for Windows is a open source free software. Users can download 
    it from http://sources.redhat.com/pthreads-win32/.
 
-   HDF5 release 1.8.0 supports Pthread-Win32 2.7.0 (2005-06-04) or later. Since 
-   pthreadVC2.dll used by HDF5 1.8.0 is the release version dll of 
-   pthread-win32, ONLY HDF5 1.8.0 release dll are supported and tested on 
+   HDF5 release 1.8 supports Pthread-Win32 2.7.0 (2005-06-04) or later. Since 
+   pthreadVC2.dll used by HDF5 1.8 is the release version dll of 
+   pthread-win32, ONLY HDF5 1.8 release dll are supported and tested on 
    Windows XP.
 
    Pre2. Set Path for Pthread-Win32 header and library
