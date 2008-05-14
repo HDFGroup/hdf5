@@ -4771,34 +4771,34 @@ CONTAINS
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE H5Dset_extent_f(dataset_id, size, hdferr) 
+  SUBROUTINE h5dset_extent_f(dataset_id, size, hdferr) 
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: H5Dset_extent_f
+!DEC$attributes dllexport :: h5dset_extent_f
 !DEC$endif
-            IMPLICIT NONE 
-            INTEGER(HID_T), INTENT(IN) :: dataset_id      ! Dataset identifier
-            INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN)  :: size
-                                                          ! Array containing 
-                                                          ! dimensions' sizes 
-            INTEGER, INTENT(OUT) :: hdferr                ! Error code 
-
-!            INTEGER, EXTERNAL ::  H5Dset_extent_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION H5Dset_extent_c(dataset_id, size)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5DSET_EXTENT_C'::H5Dset_extent_c
-              !DEC$ ENDIF
-              INTEGER(HID_T), INTENT(IN) :: dataset_id
-              INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN)  :: size
-              END FUNCTION H5Dset_extent_c
-            END INTERFACE
-
-            hdferr = H5Dset_extent_c(dataset_id, size)
-          END SUBROUTINE H5Dset_extent_f  
+    IMPLICIT NONE 
+    INTEGER(HID_T), INTENT(IN) :: dataset_id      ! Dataset identifier
+    INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN)  :: size
+    ! Array containing 
+    ! dimensions' sizes 
+    INTEGER, INTENT(OUT) :: hdferr                ! Error code 
+    
+    !
+    !  MS FORTRAN needs explicit interface for C functions called here.
+    !
+    INTERFACE
+       INTEGER FUNCTION h5dset_extent_c(dataset_id, size)
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5DSET_EXTENT_C'::h5dset_extent_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: dataset_id
+         INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN)  :: size
+       END FUNCTION h5dset_extent_c
+    END INTERFACE
+    
+    hdferr = H5Dset_extent_c(dataset_id, size)
+  END SUBROUTINE h5dset_extent_f
 
 
 !----------------------------------------------------------------------

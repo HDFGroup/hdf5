@@ -795,7 +795,7 @@ CONTAINS
   END SUBROUTINE h5lget_info_by_idx_f
 
 !----------------------------------------------------------------------
-! Name:	   H5Lis_registered_f 
+! Name:	   h5lis_registered_f 
 !
 ! Purpose:  Determines whether a class of user-defined links is registered.
 !		
@@ -817,10 +817,10 @@ CONTAINS
 ! Modifications:  N/A
 !
 !----------------------------------------------------------------------
-  SUBROUTINE H5Lis_registered_f(link_cls_id, registered, hdferr) 
+  SUBROUTINE h5lis_registered_f(link_cls_id, registered, hdferr) 
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: H5Lis_registered_f
+!DEC$attributes dllexport :: h5lis_registered_f
 !DEC$endif
     IMPLICIT NONE
     INTEGER, INTENT(IN) :: link_cls_id  ! User-defined link class identifier
@@ -832,16 +832,16 @@ CONTAINS
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
     INTERFACE
-       INTEGER FUNCTION H5Lis_registered_c(link_cls_id)
+       INTEGER FUNCTION h5lis_registered_c(link_cls_id)
          USE H5GLOBAL
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LIS_REGISTERED_C'::h5lis_registered_c
          !DEC$ ENDIF
          INTEGER, INTENT(IN) :: link_cls_id  ! User-defined link class identifier
-       END FUNCTION H5Lis_registered_c
+       END FUNCTION h5lis_registered_c
     END INTERFACE
 
-    hdferr = H5Lis_registered_c(link_cls_id)
+    hdferr = h5lis_registered_c(link_cls_id)
 
     IF(hdferr.GT.0)THEN
        registered = .TRUE.
@@ -849,10 +849,10 @@ CONTAINS
        registered = .FALSE.
     ENDIF
        
-  END SUBROUTINE H5Lis_registered_f
+  END SUBROUTINE h5lis_registered_f
 
 !----------------------------------------------------------------------
-! Name:	   H5Lmove_f
+! Name:	   h5lmove_f
 !
 ! Purpose:  Renames a link within an HDF5 file.
 !		
@@ -879,7 +879,7 @@ CONTAINS
   SUBROUTINE h5lmove_f(src_loc_id, src_name, dest_loc_id, dest_name, hdferr, lcpl_id, lapl_id) 
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: H5Lmove_f
+!DEC$attributes dllexport :: h5lmove_f
 !DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: src_loc_id  ! Original file or group identifier.
@@ -903,7 +903,7 @@ CONTAINS
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
     INTERFACE
-       INTEGER FUNCTION H5Lmove_c(src_loc_id, src_name, src_namelen, dest_loc_id, &
+       INTEGER FUNCTION h5lmove_c(src_loc_id, src_name, src_namelen, dest_loc_id, &
             dest_name, dest_namelen, lcpl_id_default, lapl_id_default) 
          USE H5GLOBAL
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
@@ -920,7 +920,7 @@ CONTAINS
          INTEGER(HID_T) :: lcpl_id_default 
          INTEGER(HID_T) :: lapl_id_default 
 
-       END FUNCTION H5Lmove_c
+       END FUNCTION h5lmove_c
     END INTERFACE
 
     lcpl_id_default = H5P_DEFAULT_F
@@ -934,7 +934,7 @@ CONTAINS
     hdferr = H5Lmove_c(src_loc_id, src_name, src_namelen, dest_loc_id, &
          dest_name, dest_namelen, lcpl_id_default, lapl_id_default)
 
-  END SUBROUTINE H5Lmove_f
+  END SUBROUTINE h5lmove_f
 
 !----------------------------------------------------------------------
 ! Name:		h5lget_name_by_idx_f

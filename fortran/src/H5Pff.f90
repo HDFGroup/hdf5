@@ -7605,7 +7605,7 @@
   END SUBROUTINE h5pset_local_heap_size_hint_f
 
 !----------------------------------------------------------------------
-! Name:		H5Pset_est_link_info_f 
+! Name:		h5pset_est_link_info_f 
 !
 ! Purpose: 	Sets estimated number of links and length of link names in a group.
 !
@@ -7628,7 +7628,7 @@
 ! Comment: 
 !----------------------------------------------------------------------
 
-  SUBROUTINE H5Pset_est_link_info_f(gcpl_id, est_num_entries, est_name_len, hdferr) 
+  SUBROUTINE h5pset_est_link_info_f(gcpl_id, est_num_entries, est_name_len, hdferr) 
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -7644,7 +7644,7 @@
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
     INTERFACE
-       INTEGER FUNCTION H5Pset_est_link_info_c(gcpl_id, est_num_entries, est_name_len)
+       INTEGER FUNCTION h5pset_est_link_info_c(gcpl_id, est_num_entries, est_name_len)
          USE H5GLOBAL
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PSET_EST_LINK_INFO_C'::h5pset_est_link_info_c
@@ -7652,15 +7652,15 @@
          INTEGER(HID_T), INTENT(IN) :: gcpl_id  
          INTEGER, INTENT(IN) :: est_num_entries
          INTEGER, INTENT(IN) :: est_name_len
-       END FUNCTION H5Pset_est_link_info_c
+       END FUNCTION h5pset_est_link_info_c
     END INTERFACE
 
     hdferr = H5Pset_est_link_info_c(gcpl_id, est_num_entries, est_name_len)
 
-  END SUBROUTINE H5Pset_est_link_info_f
+  END SUBROUTINE h5pset_est_link_info_f
 
 !----------------------------------------------------------------------
-! Name:		H5Pset_link_phase_change_f
+! Name:		h5pset_link_phase_change_f
 !
 ! Purpose: 	Sets the parameters for conversion between compact and dense groups.
 !
@@ -7715,7 +7715,7 @@
   END SUBROUTINE h5pset_link_phase_change_f
 
 !----------------------------------------------------------------------
-! Name:		H5Pset_fapl_direct_f
+! Name:		h5pset_fapl_direct_f
 !
 ! Purpose: 	Sets up use of the direct I/O driver.
 !
@@ -7739,7 +7739,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-  SUBROUTINE H5Pset_fapl_direct_f(fapl_id, alignment, block_size, cbuf_size, hdferr)
+  SUBROUTINE h5pset_fapl_direct_f(fapl_id, alignment, block_size, cbuf_size, hdferr)
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -7756,7 +7756,7 @@
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
     INTERFACE
-       INTEGER FUNCTION H5Pset_fapl_direct_c(fapl_id, alignment, block_size, cbuf_size)
+       INTEGER FUNCTION h5pset_fapl_direct_c(fapl_id, alignment, block_size, cbuf_size)
          USE H5GLOBAL
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PSET_FAPL_DIRECT_C'::h5pset_fapl_direct_c
@@ -7765,14 +7765,14 @@
          INTEGER(SIZE_T), INTENT(IN) :: alignment
          INTEGER(SIZE_T), INTENT(IN) :: block_size
          INTEGER(SIZE_T), INTENT(IN) :: cbuf_size
-       END FUNCTION H5Pset_fapl_direct_c
+       END FUNCTION h5pset_fapl_direct_c
     END INTERFACE
 
     hdferr = H5Pset_fapl_direct_c(fapl_id, alignment, block_size, cbuf_size)
-  END SUBROUTINE H5Pset_fapl_direct_f
+  END SUBROUTINE h5pset_fapl_direct_f
 
 !----------------------------------------------------------------------
-! Name:		H5Pget_fapl_direct_f
+! Name:		h5pget_fapl_direct_f
 !
 ! Purpose: 	Gets up use of the direct I/O driver.
 !
@@ -7796,7 +7796,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-  SUBROUTINE H5Pget_fapl_direct_f(fapl_id, alignment, block_size, cbuf_size, hdferr)
+  SUBROUTINE h5pget_fapl_direct_f(fapl_id, alignment, block_size, cbuf_size, hdferr)
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -7813,7 +7813,7 @@
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
     INTERFACE
-       INTEGER FUNCTION H5Pget_fapl_direct_c(fapl_id, alignment, block_size, cbuf_size)
+       INTEGER FUNCTION h5pget_fapl_direct_c(fapl_id, alignment, block_size, cbuf_size)
          USE H5GLOBAL
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PGET_FAPL_DIRECT_C'::h5pget_fapl_direct_c
@@ -7822,11 +7822,11 @@
          INTEGER(SIZE_T), INTENT(OUT) :: alignment
          INTEGER(SIZE_T), INTENT(OUT) :: block_size
          INTEGER(SIZE_T), INTENT(OUT) :: cbuf_size
-       END FUNCTION H5Pget_fapl_direct_c
+       END FUNCTION h5pget_fapl_direct_c
     END INTERFACE
 
     hdferr = H5Pget_fapl_direct_c(fapl_id, alignment, block_size, cbuf_size)
-  END SUBROUTINE H5Pget_fapl_direct_f
+  END SUBROUTINE h5pget_fapl_direct_f
 
 !----------------------------------------------------------------------
 ! Name:		H5Pset_attr_phase_change_f 
@@ -7939,7 +7939,7 @@
   END SUBROUTINE h5pset_nbit_f
 
 !----------------------------------------------------------------------
-! Name:		H5Pset_scaleoffset_f 
+! Name:		h5pset_scaleoffset_f 
 !
 ! Purpose: 	Sets up the use of the Scale-Offset filter.
 !
@@ -7962,7 +7962,7 @@
 ! Comment: 
 !----------------------------------------------------------------------
 
-  SUBROUTINE H5Pset_scaleoffset_f(plist_id, scale_type, scale_factor, hdferr) 
+  SUBROUTINE h5pset_scaleoffset_f(plist_id, scale_type, scale_factor, hdferr) 
 !
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -7978,7 +7978,7 @@
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
     INTERFACE
-       INTEGER FUNCTION H5Pset_scaleoffset_c(plist_id, scale_type, scale_factor)
+       INTEGER FUNCTION h5pset_scaleoffset_c(plist_id, scale_type, scale_factor)
          USE H5GLOBAL
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PSET_SCALEOFFSET_C'::h5pset_scaleoffset_c
@@ -7986,12 +7986,12 @@
          INTEGER(HID_T), INTENT(IN) :: plist_id
          INTEGER, INTENT(IN) :: scale_type
          INTEGER, INTENT(IN) :: scale_factor
-       END FUNCTION H5Pset_scaleoffset_c
+       END FUNCTION h5pset_scaleoffset_c
     END INTERFACE
 
     hdferr = H5Pset_scaleoffset_c(plist_id, scale_type, scale_factor)
 
-  END SUBROUTINE H5Pset_scaleoffset_f
+  END SUBROUTINE h5pset_scaleoffset_f
 
 !----------------------------------------------------------------------
 ! Name:		h5pset_nlinks_f 
