@@ -1213,44 +1213,12 @@ SUBROUTINE attr_info_by_idx_check(obj_id, attrname, n, use_index, total_error )
   CALL h5aget_name_by_idx_f(obj_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, &
        n, tmpname, error, NAME_BUF_SIZE)
   CALL check("h5aget_name_by_idx_f",error,total_error)
-  CALL VERIFY("h5aget_name_by_idx_f", NAME_BUF_SIZE, 7, error)
+  CALL VERIFY("h5aget_name_by_idx_f", INT(NAME_BUF_SIZE), 7, error)
 
   IF(attrname.NE.tmpname)THEN
      error = -1
   ENDIF
   CALL VERIFY("h5aget_name_by_idx_f",error,0,total_error)
-
-  ! Try with a larger buffer size then needed
-  NAME_BUF_SIZE = 17
-  CALL h5aget_name_by_idx_f(obj_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, &
-       n, tmpname, error, NAME_BUF_SIZE )
-  CALL check("h5aget_name_by_idx_f",error,total_error)
-  CALL VERIFY("h5aget_name_by_idx_f", NAME_BUF_SIZE, 7, error)
-
-  IF(attrname(1:NAME_BUF_SIZE).NE.tmpname(1:NAME_BUF_SIZE))THEN
-     error = -1
-  ENDIF
-  CALL VERIFY("h5aget_name_by_idx_f",error,0,total_error)
-
-  ! Try with a smaller buffer size then needed
-  NAME_BUF_SIZE = 5
-  CALL h5aget_name_by_idx_f(obj_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, &
-       n, tmpname, error, NAME_BUF_SIZE)
-  CALL check("h5aget_name_by_idx_f",error,total_error)
-  CALL VERIFY("h5aget_name_by_idx_f", NAME_BUF_SIZE, 7, error)
-
-  IF(attrname(1:5).NE.tmpname(1:5))THEN
-     error = -1
-  ENDIF
-  CALL VERIFY("h5aget_name_by_idx_f",error,0,total_error)
-
-  ! Try with a zero buffer size
-  NAME_BUF_SIZE = 0
-  CALL h5aget_name_by_idx_f(obj_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, &
-       n, tmpname, error, NAME_BUF_SIZE)
-  CALL check("h5aget_name_by_idx_f",error,total_error)
-  CALL VERIFY("h5aget_name_by_idx_f", NAME_BUF_SIZE, 7, error)
-
 
   !  /* Don't test "native" order if there is no creation order index, since
   !   *  there's not a good way to easily predict the attribute's order in the name
