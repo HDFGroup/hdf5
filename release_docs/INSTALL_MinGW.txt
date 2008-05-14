@@ -5,7 +5,7 @@
 Preconditions:
 --------------
 
-1. Installed MinGW (5.1.2 or higher) and MSYS (1.0.10 or higher)
+1. Installed MinGW (5.1.4 or higher) and MSYS (1.0.10 or higher)
 
    To install the MinGW net release, go to http://www.mingw.org and 
    click on "Install or update now!" icon. This will download a GUI 
@@ -15,7 +15,7 @@ Preconditions:
 
 2. Compilers Installed
 
-   2.1 C/C++ Compilers HDF5-1.8.0 Supported
+   2.1 C/C++ Compilers HDF5-1.8.1 Supported
 
        gcc-3.4.2 is included in MinGW, which includes: 
        gcc    : GNU C compiler
@@ -31,7 +31,9 @@ Preconditions:
        try to set the following variables to override the default 
        choices.
        
+       CC  : C compiler command
        CXX : C++ compiler command
+       FC  : Fortran compiler command
        
 3. HDF5 Dependencies
 
@@ -61,28 +63,51 @@ Build HDF5 on MinGW
 
    The HDF5 source code is distributed in a variety of formats which
    can be unpacked with the following commands, each of which creates 
-   an `hdf5-1.8.0' directory.
+   an `hdf5-1.8.1' directory.
 
    2.1 Non-compressed tar archive (*.tar)
 
-            $ tar xf hdf5-1.8.0.tar
+            $ tar xf hdf5-1.8.1.tar
 
    2.2 Gzip'd tar archive (*.tar.gz)
 
-            $ gunzip < hdf5-1.8.0.tar.gz | tar xf -
+            $ gunzip < hdf5-1.8.1.tar.gz | tar xf -
 
    2.3 Bzip'd tar archive (*.tar.bz2)
 
-            $ bunzip2 < hdf5-1.8.0.tar.bz2 | tar xf - 
+            $ bunzip2 < hdf5-1.8.1.tar.bz2 | tar xf - 
             
 3. Setup Environment
 
-   Building HDF5 1.8.0 requires an explicit link to libws2_32.a
+   Building HDF5 1.8.1 requires an explicit link to libws2_32.a
    to handle Windows Sockets.  To do this, issue the command:
    
             $ export LIBS=-lws2_32
+            
+   Also, the default search path can cause trouble using ./configure in HDF5
+   1.8.1.  Check that non-MinGW or non-msys directories are not added to the
+   PATH.  You can do this by:
+   
+            $ echo $PATH
+            
+   If there are spurious entries, specifically those related to other Windows
+   compilers or tools, remove them by setting a new PATH without them.  For
+   example,
+   
+            $ export PATH=.:/usr/local/bin:/mingw/bin:/bin
 
-4. Remove Tests
+            
+4. Remove Unsupported Source
+
+   There are some projects which are built by default to test performance on
+   POSIX systems.  They are irrelevent on MinGW, and can cause compiler errors.
+   
+   To remove these projects from the build script, open ./perform/Makefile.in
+   Find all instances of "h5perf_serial", and remove them (along with their
+   respective extension or targets, if they exist).  Then save the file.
+   
+   
+5. Remove Tests
    
    When building with MinGW, many tests must be removed from the
    test suite run with "make check".  This is because of the way
@@ -111,33 +136,26 @@ Build HDF5 on MinGW
         
         - ./tools/misc/Makefile.in: "testh5mkgrp.sh"
         
-        - ./tools/h5jam/Makefile.in: "testh5jam.sh"
-        
         - ./tools/h5copy/Makefile.in: "testh5copy.sh"
         
         - ./tools/h5ls/Makefile.in: "testh5ls.sh"
         
         - ./tools/h5stat/Makefile.in: "testh5stat.sh"
-   
         
-5. Configuring 
+        
+6. Configuring 
      
    Notes: 
-       1) The stream vfd in HDF5 is not supported on MinGW.
-          Therefore, each configuration must incude the parameter
-          "--disable-stream-vfd".
-          
-       2) Building Fortran libraries is also currently unsupported.  This is
+       1) Building Fortran libraries is also currently unsupported.  This is
           because the current release of gcc for mingw (3.4.5) is not compatible
           with the current g95 for mingw (g95 0.91!, gcc version 4.0.3).
           
-          However, if you would like to build gcc 4.x on your own, there are
-          instructions for doing so here: 
-          http://www.mingw.org/MinGWiki/index.php/How%20to%20Compile%20GCC%204.1
-          Remember that this is UNSUPPORTED, and any Fortran binaries build
-          should be considered experimental.
+          However, MinGW offers versions of gcc 4.x as a "Technology Preview"
+          or "Testing" release.  These should be compatible with the latest
+          MinGW g95, but is untested.  Keep in mind that this is UNSUPPORTED, 
+          and any Fortran binaries build should be considered experimental.
        
-       4) Shared libraries can not be built on MinGW in release 1.8.0.
+       2) Shared libraries can not be built on MinGW in release 1.8.1.
           
        3) See detailed information in hdf5/release_docs/INSTALL, 
           part 5. Full installation instructions for source 
@@ -145,40 +163,40 @@ Build HDF5 on MinGW
      
    In short,
      
-   5.1 To configure HDF5 with C Library, use 
+   To configure HDF5 with C Library, use 
             
-            $ ./configure --disable-stream-vfd
+            $ ./configure
                    
-   5.2 If you would like to build the C++ library, add the parameter:
+   If you would like to build the C++ library, add the parameter:
 
             --enable-cxx
                                                          
-   5.3 If you would like to build without the Zlib library, add the parameter:
+   If you would like to build without the Zlib library, add the parameter:
      
            --without-zlib
            
-   5.4 If you would like to specify the the Zlib library, there are two ways:
+   If you would like to specify the the Zlib library, there are two ways:
      
-     5.4.1 Using
+     Using
 
            --with-zlib=INCDIR,LIBDIR
 
        For example, if the zlib library is installed in
-       /c/usr, which is the parent directory of directories
+       /usr, which is the parent directory of directories
        "include" and "lib", 
 
-           --with-zlib=/c/usr/include,/c/usr/lib
+           --with-zlib=/usr/include,/usr/lib
 
-     5.4.2 Through the CPPFLAGS and LDFLAGS Variables
+     Through the CPPFLAGS and LDFLAGS Variables
            
        For example, if zlib was installed in the directory 
        /c/usr then using the following command to configure 
        HDF5 with zib
 
-           $ export CPPFLAGS=-I/c/usr/include
-           $ export LDFLAGS=-L/c/usr/lib
+           $ export CPPFLAGS=-I/usr/include
+           $ export LDFLAGS=-L/usr/lib
 
-   5.6 If you would like to specify the install directory, add the parameter:
+   If you would like to specify the install directory, add the parameter:
 
             --prefix="path for installation"
                  
@@ -189,7 +207,7 @@ Build HDF5 on MinGW
        the path with the `--prefix=PATH' switch as in the above
        command.
 
-   5.7 Combination of Switches 
+   Combination of Switches 
 
        All of the above switches can be combined together. For 
        example, if users want to configure HDF5 C/C++
@@ -198,10 +216,9 @@ Build HDF5 on MinGW
        gcc/g++ as C/C++ compiler:
      
            $ ./configure
-             --with-zlib=/c/usr/include,/c/usr/lib
+             --with-zlib=/usr/include,/usr/lib
              --prefix=/c/hdf5
              --enable-cxx
-             --disable-stream-vfd
              <"If no more switches, then hit Enter">
 
        Notes: The command format above is for readilibity. In practice,
@@ -212,16 +229,15 @@ Build HDF5 on MinGW
  
      or do it through CPPFLAGS and LDFLAGS variables:
      
-           $ CPPFLAGS=-I/c/usr/include \
-           $ LDFLAGS=-L/c/usr/lib \
+           $ CPPFLAGS=-I/usr/include \
+           $ LDFLAGS=-L/usr/lib \
 
            $ ./configure
              --prefix=/c/hdf5
              --enable-cxx
-             --disable-stream-vfd
              <"If no more switches, then hit Enter">
                           
-6. Make and Make Check
+7. Make and Make Check
 
    After configuration is done successfully, run the following series of
    commands to build, test and install HDF5
@@ -232,12 +248,12 @@ Build HDF5 on MinGW
    Before run "make install", check output file for "make check", there
    should be no failures at all.
 
-7. Make Install
+8. Make Install
 
             $ make install  > "output file name"
    
      
-8. Check installed HDF5 library
+9. Check installed HDF5 library
 
    After step 4, go to your installation directory, there should be 
    three subdirectories: "bin" "include" and "lib".
