@@ -2036,23 +2036,19 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
 
   ! The actual size of tmpname should be 7
 
-  size_tmp = INT(3,SIZE_T)
-  CALL H5Lget_name_by_idx_f(group_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, INT(n,HSIZE_T), size_tmp, tmpname_small, error)
+  CALL H5Lget_name_by_idx_f(group_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, INT(n,HSIZE_T), tmpname_small, error, size_tmp)
   CALL check("link_info_by_idx_check.H5Lget_name_by_idx_f", error, total_error)
   CALL verifyString("link_info_by_idx_check.H5Lget_name_by_idx_f", &
        linkname(1:LEN(tmpname_small)), tmpname_small(1:LEN(tmpname_small)),  total_error)
   CALL VERIFY("link_info_by_idx_check.H5Lget_name_by_idx_f", INT(size_tmp), 7, total_error)
-
   ! try it with the correct size
-  size_tmp = INT(LEN(tmpname),SIZE_T)
-  CALL H5Lget_name_by_idx_f(group_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, INT(n,HSIZE_T), size_tmp, tmpname, error)
+  CALL H5Lget_name_by_idx_f(group_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, INT(n,HSIZE_T), tmpname, error, size=size_tmp)
   CALL check("link_info_by_idx_check.H5Lget_name_by_idx_f", error, total_error)
   CALL verifyString("link_info_by_idx_check.H5Lget_name_by_idx_f", &
        linkname(1:LEN(tmpname)), tmpname(1:LEN(tmpname)),  total_error)
   CALL VERIFY("link_info_by_idx_check.H5Lget_name_by_idx_f", INT(size_tmp), 7, total_error)
 
-  size_tmp = INT(LEN(tmpname_big),SIZE_T)
-  CALL H5Lget_name_by_idx_f(group_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, INT(n,HSIZE_T), size_tmp, tmpname_big, error)
+  CALL H5Lget_name_by_idx_f(group_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, INT(n,HSIZE_T), tmpname_big, error, size_tmp)
   CALL check("link_info_by_idx_check.H5Lget_name_by_idx_f", error, total_error)
   CALL verifyString("link_info_by_idx_check.H5Lget_name_by_idx_f", &
        linkname(1:7), tmpname_big(1:7),  total_error)
