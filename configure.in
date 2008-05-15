@@ -949,6 +949,31 @@ case "$INSTALL" in
     ;;
 esac
 
+dnl ----------------------------------------------------------------------
+dnl Some users have reported problems with libtool's use of '-Wl,-rpath' to
+dnl link shared libraries in nondefulat directories. Allow users to
+dnl disable embedding the rpath information in the executables and to
+dnl instead solely rely on the information in LD_LIBRARY_PATH.
+AC_MSG_CHECKING([if -Wl,-rpath should be used to link shared libs in nondefault directories])
+AC_ARG_ENABLE([sharedlib-rpath],
+              [AC_HELP_STRING([--disable-sharedlib-rpath],
+               [Disable use of the '=Wl,-rpath' linker option])],
+              [RPATH=$enableval])
+
+case "X-$RPATH" in
+  X-no)
+    AC_MSG_RESULT([no])
+    hardcode_libdir_flag_spec=''
+    ;;
+  X-|X-yes)
+    AC_MSG_RESULT([yes])
+    ;;
+  *)
+    AC_MSG_RESULT([error])
+    AC_MSG_ERROR([\'$enableval\' is not a valid rpath type])
+    ;;
+esac
+
 AC_MSG_CHECKING([make])
 
 dnl ----------------------------------------------------------------------
