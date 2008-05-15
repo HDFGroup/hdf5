@@ -389,7 +389,7 @@ finish:
  * Return:      Nothing
  * Programmer:  Bill Wendling, 30. October 2001
  * Modifications:
- *    Added 2D testing (Christian Chilan, 10. August 2005)
+ *    Added multidimensional testing (Christian Chilan, April, 2008) 
  */
 static void
 run_test_loop(struct options *opts)
@@ -930,7 +930,7 @@ report_parameters(struct options *opts)
  * Return:      Pointer to an OPTIONS structure
  * Programmer:  Bill Wendling, 31. October 2001
  * Modifications:
- *    Added 2D testing (Christian Chilan, 10. August 2005)
+ *    Added multidimensional testing (Christian Chilan, April, 2008)
  */
 static struct options *
 parse_command_line(int argc, char *argv[])
@@ -1266,6 +1266,11 @@ parse_command_line(int argc, char *argv[])
     cl_opts->order_rank = actual_rank;
     cl_opts->chk_rank = actual_rank;
 
+    for (i=0; i<actual_rank; i++) {
+        if (cl_opts->order[i] > actual_rank) {
+            exit(EXIT_FAILURE);
+        }
+    }
 
     /* set default if none specified yet */
     if (!cl_opts->io_types)
@@ -1335,55 +1340,37 @@ parse_size_directive(const char *size)
  * Return:      Nothing
  * Programmer:  Bill Wendling, 31. October 2001
  * Modifications:
- * 	Added 2D testing (Christian Chilan, 10. August 2005)
  */
 static void
 usage(const char *prog)
 {
-
-
 	print_version(prog);
         printf("usage: %s [OPTIONS]\n", prog);
         printf("  OPTIONS\n");
-        printf("     -h, --help                  Print a usage message and exit\n");
-        printf("     -a S, --align=S             Alignment of objects in HDF5 file [default: 1]\n");
-        printf("     -A AL, --api=AL             Which APIs to test [default: all of them]\n");
-#if 0
-        printf("     -b, --binary                The elusive binary option\n");
-#endif  /* 0 */
-        printf("     -B S, --block-size=S        Block size within transfer buffer\n");
-        printf("                                 (see below for description)\n");
-        printf("                                 [default: half the number of bytes per processor per dataset]\n");
-        printf("     -c, --chunk                 Create HDF5 datasets chunked [default: off]\n");
-        printf("     -C, --collective            Use collective I/O for MPI and HDF5 APIs\n");
-        printf("                                 [default: off (i.e. independent I/O)]\n");
-        printf("     -d N, --num-dsets=N         Number of datasets per file [default:1]\n");
-        printf("     -D DL, --debug=DL           Indicate the debugging level\n");
-        printf("                                 [default: no debugging]\n");
-        printf("     -e S, --num-bytes=S         Number of bytes per process per dataset\n");
-        printf("                                 [default: 256K for 1D, 8K for 2D]\n");
-        printf("     -F N, --num-files=N         Number of files [default: 1]\n");
-        printf("     -g, --geometry              Use 2D geometry [default: 1D]\n");
-        printf("     -i N, --num-iterations=N    Number of iterations to perform [default: 1]\n");
-        printf("     -I, --interleaved           Interleaved block I/O (see below for example)\n");
-        printf("                                 [default: Contiguous block I/O]\n");
-        printf("     -m, --mpi-posix             Use MPI-posix driver for HDF5 I/O\n");
-        printf("                                 [default: use MPI-I/O driver]\n");
-        printf("     -o F, --output=F            Output raw data into file F [default: none]\n");
-        printf("     -p N, --min-num-processes=N Minimum number of processes to use [default: 1]\n");
-        printf("     -P N, --max-num-processes=N Maximum number of processes to use\n");
-        printf("                                 [default: all MPI_COMM_WORLD processes ]\n");
-        printf("     -T S, --threshold=S         Threshold for alignment of objects in HDF5 file\n");
-        printf("                                 [default: 1]\n");
-        printf("     -w, --write-only            Perform write tests not the read tests\n");
-        printf("     -x S, --min-xfer-size=S     Minimum transfer buffer size\n");
-        printf("                                 [default: half the number of bytes per processor per dataset]\n");
-        printf("     -X S, --max-xfer-size=S     Maximum transfer buffer size\n");
-        printf("                                 [default: the number of bytes per processor per dataset]\n");
+        printf("     -h                Print an usage message and exit\n");
+        printf("     -A AL             Which APIs to test\n");
+        printf("                       [default: all of them]\n");
+        printf("     -c SL             Selects chunked storage and defines chunks dimensions\n");
+        printf("                       and sizes\n");
+        printf("                       [default: Off]\n");
+        printf("     -e SL             Dimensions and sizes of dataset\n");
+        printf("                       [default: 16M]\n");
+        printf("     -i N              Number of iterations to perform\n");
+        printf("                       [default: 1]\n");
+        printf("     -r NL             Dimension access order (see below for description)\n");
+        printf("                       [default: 1]\n");
+        printf("     -t                Selects extendable dimensions for HDF5 dataset\n");
+        printf("                       [default: Off]\n");
+        printf("     -v VFD            Selects file driver for HDF5 access\n");
+        printf("                       [default: sec2]\n");
+        printf("     -w                Perform write tests, not the read tests\n");
+        printf("                       [default: Off]\n");
+        printf("     -x SL             Dimensions and sizes of the transfer buffer\n");
+        printf("                       [default: 256K]\n");
         printf("\n");
-        printf("  F  - is a filename.\n");
-        printf("  N  - is an integer >=0.\n");
-        printf("  S  - is a size specifier, an integer >=0 followed by a size indicator:\n");
+        printf("  N  - is an integer > 0.\n");
+        printf("\n");
+        printf("  S  - is a size specifier, an integer > 0 followed by a size indicator:\n");
         printf("          K - Kilobyte (%d)\n", ONE_KB);
         printf("          M - Megabyte (%d)\n", ONE_MB);
         printf("          G - Gigabyte (%d)\n", ONE_GB);
@@ -1391,56 +1378,37 @@ usage(const char *prog)
         printf("      Example: '37M' is 37 megabytes or %d bytes\n", 37*ONE_MB);
         printf("\n");
         printf("  AL - is an API list. Valid values are:\n");
-        printf("          phdf5 - Parallel HDF5\n");
-        printf("          mpiio - MPI-I/O\n");
+        printf("          hdf5 - HDF5\n");
         printf("          posix - POSIX\n");
         printf("\n");
-        printf("      Example: --api=mpiio,phdf5\n");
+        printf("      Example: -A posix,hdf5\n");
         printf("\n");
-        printf("  Block size vs. Transfer buffer size:\n");
-        printf("      The transfer buffer size is the size of a buffer in memory, which is\n");
-        printf("      broken into 'block size' pieces and written to the file.  The pattern\n");
-        printf("      of the blocks in the file is described below in the 'Interleaved vs.\n");
-        printf("      Contiguous blocks' example.\n");
+        printf("  NL - is list of integers (N) separated by commas.\n");
         printf("\n");
-        printf("      If the collective I/O option is given, the blocks in each transfer buffer\n");
-        printf("      are written at once with an MPI derived type, for the MPI-I/O and PHDF5\n");
-        printf("      APIs.\n");
+        printf("      Example: 1,2,3\n");
         printf("\n");
-        printf("  Interleaved vs. Contiguous blocks:\n");
-        printf("      When contiguous blocks are written to a dataset, the dataset is divided\n");
-        printf("      into '# processes' regions and each process writes data to its own region.\n");
-        printf("      When interleaved blocks are written to a dataset, space for the first\n");
-        printf("      block of the first process is allocated in the dataset, then space is\n");
-        printf("      allocated for the first block of the second process, etc. until space is\n");
-        printf("      allocated for the first block of each process, then space is allocated for\n");
-        printf("      the second block of the first process, the second block of the second\n");
-        printf("      process, etc.\n");
+        printf("  SL - is list of size specifiers (S) separated by commas.\n");
         printf("\n");
-        printf("      For example, with a 4 process run, 1MB bytes-per-process, 256KB transfer\n");
-        printf("        buffer size, and 64KB block size,\n");
-        printf("          16 contiguous blocks per process are written to the file like so:\n");
-        printf("              1111111111111111222222222222222233333333333333334444444444444444\n");
-        printf("          16 interleaved blocks per process are written to the file like so:\n");
-        printf("              1234123412341234123412341234123412341234123412341234123412341234\n");
-        printf("        If collective I/O is turned on, all of the four blocks per transfer\n");
-        printf("        buffer will be written in one collective I/O call.\n");
+        printf("      Example: 2K,2K,3K\n");
         printf("\n");
-        printf("  DL - is a list of debugging flags. Valid values are:\n");
-        printf("          1 - Minimal\n");
-        printf("          2 - Not quite everything\n");
-        printf("          3 - Everything\n");
-        printf("          4 - The kitchen sink\n");
-        printf("          r - Raw data I/O throughput information\n");
-        printf("          t - Times as well as throughputs\n");
-        printf("          v - Verify data correctness\n");
+        printf("      The example defines an object (dataset, tranfer buffer) with three\n");
+        printf("      dimensions. Be aware that as the number of dimensions increases, the\n");
+        printf("      the total size of the object increases exponentially.\n");
         printf("\n");
-        printf("      Example: --debug=2,r,t\n");
+        printf("  VFD  - is an HDF5 file driver specifier. Valid values are:\n");
+        printf("          sec2, stdio, core, split, multi, family, direct\n");
+        printf("\n");
+        printf("  Dimension access order:\n");
+        printf("      Data access starts at the cardinal origin of the dataset using the\n");
+        printf("      transfer buffer. The next access occurs on a dataset region next to\n");
+        printf("      the previous one. For a multidimensional dataset, there are several\n");
+        printf("      directions as to where to proceed. This can be specified in the dimension\n");
+        printf("      access order. For example, -r 1,2 states that the tool should traverse\n");
+        printf("      dimension 1 first, and then dimension 2.\n");
         printf("\n");
         printf("  Environment variables:\n");
-        printf("  HDF5_NOCLEANUP   Do not remove data files if set [default remove]\n");
-        printf("  HDF5_MPI_INFO    MPI INFO object key=value separated by ;\n");
-        printf("  HDF5_PARAPREFIX  Paralllel data files prefix\n");
+        printf("      HDF5_NOCLEANUP   Do not remove data files if set [default remove]\n");
+        printf("\n");
         fflush(stdout);
 }
 
