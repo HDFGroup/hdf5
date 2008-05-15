@@ -20,7 +20,6 @@ General Information:
 			 Ranlib: @RANLIB@
 	      Debugged Packages: @DEBUG_PKG@
 		    API Tracing: @TRACE_API@
-		 File addresses: @HSIZET@
 
 Compiling Options:
 ------------------
@@ -54,7 +53,6 @@ Features:
                            GPFS: @GPFS@
       Strict File Format Checks: @STRICT_FORMAT_CHECKS@
             Default API Mapping: @DEFAULT_API_VERSION@
-                        hsize_t: @HSIZET@
          I/O filters (external): @EXTERNAL_FILTERS@
          I/O filters (internal): @FILTERS@
  Linux Large File Support (LFS): @LINUX_LFS@

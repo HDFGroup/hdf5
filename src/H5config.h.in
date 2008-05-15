@@ -162,9 +162,6 @@
 /* Define to 1 if you have the <io.h> header file. */
 #undef HAVE_IO_H
 
-/* Define if it's safe to use `long long' for hsize_t and hssize_t */
-#undef HAVE_LARGE_HSIZET
-
 /* Define to 1 if you have the `dmalloc' library (-ldmalloc). */
 #undef HAVE_LIBDMALLOC
 
