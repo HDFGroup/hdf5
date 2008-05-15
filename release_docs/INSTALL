@@ -622,11 +622,6 @@ A. Warnings about compilers
 A.1. GNU (Intel platforms)
         Versions before 2.8.1 have serious problems allocating registers
         when functions contain operations on `long long' datatypes.
-        Supplying the `--disable-hsizet' switch to configure (documented
-        in Appendix B, "Large (>2GB) versus small (<2GB) file capability,")
-        will prevent HDF5 from using `long long' datatypes in
-        situations that are known not to work, but it limits the HDF5
-        address space to 2GB.
 
 A.2. COMPAQ/DEC
         The V5.2-038 compiler (and possibly others) occasionally
@@ -656,10 +651,8 @@ B. Large (>2GB) versus small (<2GB) file capability
         than 2GB, it is necessary to use the non-ANSI `long long' data
         type on some platforms. However, some compilers (e.g., GNU gcc
         versions before 2.8.1 on Intel platforms) are unable to produce
-        correct machine code for this datatype. To disable use of the
-        `long long' type on these machines, say:
+        correct machine code for this datatype. 
 
-            $ ./configure --disable-hsizet
 
 C. Building and testing with other compilers
 C.1.  Building and testing with Intel compilers

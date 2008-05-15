@@ -589,12 +589,6 @@ main (int ac, char **av)
 	    usage();
 	    goto quit;
 	}
-	if (sizeof(hsize_t)<=4) {
-	    puts("Test skipped because the hdf5 library was configured with the");
-	    puts("--disable-hsizet flag in order to work around a compiler bug.");
-	    usage();
-	    goto quit;
-	}
     }
 
     /* Do the test with the Family Driver */
