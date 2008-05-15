@@ -167,13 +167,6 @@ case $host_os in
     ;;
 esac
 
-AC_MSG_CHECKING([for sizeof hsize_t and hssize_t])
-AC_SUBST(HSIZET)
-AC_MSG_RESULT([large])
-HSIZET=large
-AC_DEFINE([HAVE_LARGE_HSIZET], [1],
-          [Define if it's safe to use `long long' for hsize_t and hssize_t])
-
 host_config="none"
 for f in $host_cpu-$host_vendor-$host_os \
          $host_cpu-$host_vendor-$host_os_novers \
@@ -2712,12 +2705,6 @@ IF_ENABLED_DISABLED "$STRICT_FORMAT_CHECKS"
 
 PRINT_N "        HDF5 v1.4 Compatibility"
 IF_YES_NO "$HDF5_V1_4_COMPAT"
-
-PRINT_N "                        hsize_t"
-case "$HSIZET" in
-  no|small)  PRINT "Small" ;;
-  *)         PRINT "Large" ;;
-esac
 
 PRINT_N "         I/O filters (external)"
 PRINT "$EXTERNAL_FILTERS"

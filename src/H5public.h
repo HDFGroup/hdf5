@@ -141,7 +141,6 @@ typedef __int64 ssize_t;
  * sizes are enabled then use a 64-bit data type, otherwise use the size of
  * memory objects.
  */
-#ifdef H5_HAVE_LARGE_HSIZET
 #   if H5_SIZEOF_LONG_LONG>=8
 typedef unsigned long long 	hsize_t;
 typedef signed long long	hssize_t;
@@ -151,11 +150,6 @@ typedef unsigned __int64	hsize_t;
 typedef signed __int64		hssize_t;
 #       define H5_SIZEOF_HSIZE_T H5_SIZEOF___INT64
 #   endif
-#else /* H5_HAVE_LARGE_HSIZET */
-typedef size_t			hsize_t;
-typedef ssize_t			hssize_t;
-#       define H5_SIZEOF_HSIZE_T H5_SIZEOF_SIZE_T
-#endif /* H5_HAVE_LARGE_HSIZET */
 
 /*
  * File addresses have there own types.
