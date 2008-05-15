@@ -9,7 +9,7 @@ Note: This instruction is written for users who would like to build HDF5
       Currently, we support 
       
       1. Building and testing HDF5 C/C++/Fortran libraries on command line with 
-         Microsoft Visual Studio 2005
+         Microsoft Visual Studio 2005 for 32- or 64-bit Windows.
       
       For all other Windows development tools, HDF5 should be built in
       the development environment.  Please refer to INSTALL_Windows.txt
@@ -61,8 +61,8 @@ notes in INSTALL_Windows.txt before starting below procedures.
     Similarly, set HDF5_EXT_SZIP to the name of the szip library on your system.
     
     (Optional) If you will be building using the /useenv switch, you must also
-    define variables INCLUDE and LIBPATH with a semi-colon deliminated list of
-    paths for szip and zlib include files, and libraries, respectively.  Set
+    define variables INCLUDE and LIB with a semi-colon deliminated list of
+    paths for szip and zlib include files and libraries, respectively.  Set
     these variables in the same way you set HDF5_EXT_ZLIB and HDF5_EXT_SZIP.
 
       
