@@ -59,8 +59,13 @@ New Features
           Libtool 2.2.2 (MAM - 2008/05/01)
 
         - There is a new build command, 'make check-perform', which will
-        run the tests in the perform directory.  This is an optional step
-        after 'make check' in the build process. (MAM - 2008/05/12)
+          run the tests in the perform directory.  This is an optional step
+          after 'make check' in the build process. (MAM - 2008/05/12)
+
+        - The new configure option "--disable-sharedlib-rpath" disables 
+          embedding the '-Wl,-rpath' information into executables when 
+          shared libraries are produced, and instead solely relies on the 
+          information in LD_LIBRARY_PATH.
 
 	Source code distribution
 	========================
