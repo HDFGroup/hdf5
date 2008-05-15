@@ -1285,21 +1285,17 @@ nh5aget_name_by_idx_c (hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen,
     c_buf_size = (size_t)*size + 1; 
     c_buf = (char *)HDmalloc(c_buf_size);
     if (c_buf == NULL) return ret_value;
-
      /*
       * Call H5Aget_name_by_idx function.
       */
      c_size = H5Aget_name_by_idx((hid_t)*loc_id, c_obj_name, c_idx_type, c_order, (hsize_t)*n, c_buf, c_buf_size,(hid_t)*lapl_id);
-   
-/*      printf( "In C routine, The attr name is %s %i \n ", c_buf, c_buf_size ); */
-/*      printf( "In C routine, The c_size is %i \n ", c_size );  */
 
      if (c_size < 0) goto done;
 
      /*
       * Convert C name to FORTRAN and place it in the given buffer
       */
-     HD5packFstring(c_buf, _fcdtocp(name), c_buf_size);
+     HD5packFstring(c_buf, _fcdtocp(name), c_buf_size-1);
      *size = (size_t_f)c_size;
      ret_value = 0;
 
