@@ -14,6 +14,17 @@ Notes: This short instruction is written for users who want to quickly build
       
        For users who would like to build and test HDF5 package from the
        command line, please refer to INSATLL_Windows_From_Command_Line.txt.
+       
+       Notes:
+       
+         1. HDF5 1.8 can also be built using Visual Studio 2005 on Windows
+            Vista.  For details, please see Section X of INSTALL_Windows.txt.
+            
+         2. 64-bit builds are also supported in Visual STudio 2005.  For details
+            please see Section IX of INSTALL_Windows.txt.
+            
+         3. Fortran libraries can be built with Visual Studio 2005 and Intel
+            Fortran 9.1.  For details, see Section VI of INSTALL_Windows.txt.
 
 WARNINGS:
 
