@@ -1,20 +1,65 @@
-SUMMARY OF THE HDF5 CONFIGURATION
-=================================
+	    SUMMARY OF THE HDF5 CONFIGURATION
+	    =================================
 
-HDF5 Version:		@H5_VERSION@
-Configured on:		@CONFIG_DATE@
-Configured by:		@CONFIG_USER@
-Configure mode:		@CONFIG_MODE@
-Host system:		@host_cpu@-@host_vendor@-@host_os@
-Byte sex:		@BYTESEX@
-Libraries:		@STATIC_SHARED@
-Parallel support:	@PARALLEL@
-Installation point:	@prefix@
-Compiler:		@CC_VERSION@
-Compiler switches:	@CFLAGS@ @CPPFLAGS@
-Extra libraries:	@LDFLAGS@ @LIBS@
-Archiver:		@AR@
-Ranlib:			@RANLIB@
-Debugged Packages:	@DEBUG_PKG@
-API Tracing:		@TRACE_API@
-File addresses:		@HSIZET@
+General Information:
+-------------------
+		   HDF5 Version: @H5_VERSION@
+		  Configured on: @CONFIG_DATE@
+		  Configured by: @CONFIG_USER@
+		 Configure mode: @CONFIG_MODE@
+		    Host system: @host_cpu@-@host_vendor@-@host_os@
+	      Uname information: @UNAME_INFO@
+		       Byte sex: @BYTESEX@
+		      Libraries: @STATIC_SHARED@
+	       Parallel support: @PARALLEL@
+	     Installation point: @prefix@
+		       Compiler: @CC_VERSION@
+	      Compiler switches: @CFLAGS@ @CPPFLAGS@
+		Extra libraries: @LDFLAGS@ @LIBS@
+		       Archiver: @AR@
+			 Ranlib: @RANLIB@
+	      Debugged Packages: @DEBUG_PKG@
+		    API Tracing: @TRACE_API@
+		 File addresses: @HSIZET@
+
+Compiling Options:
+------------------
+               Compilation Mode: @CONFIG_MODE@
+                     C Compiler: @CC_VERSION@
+	       CFLAGS/H5_CFLAGS: @CFLAGS@/@H5_CFLAGS@
+           CPPFLAGS/H5_CPPFLAGS: @CPPFLAGS@/@H5_CPPFLAGS@
+                        LDFLAGS: @LDFLAGS@
+                     Debug Mode: @DEBUG_PKG@
+               Shared Libraries: @enable_shared@
+               Static Libraries: @enable_static@
+  Statically Linked Executables: @STATIC_EXEC@
+ Default Public Symbols Version: @DEFAULT_API_VERSION@
+ With Deprecated Public Symbols: @DEPRECATED_SYMBOLS@
+                        Tracing: @TRACE_API@
+Clear file buffers before write: @CLEARFILEBUF@
+           Using memory checker: @USINGMEMCHECKER@
+   Optimization Instrumentation: @INSTRUMENT@
+
+Languages:
+----------
+                        Fortran: @HDF_FORTRAN@
+@BUILD_FORTRAN_CONDITIONAL_TRUE@              Fortran Compiler:  @FC@@FCFLAGS@
+                            C++: @HDF_CXX@
+@BUILD_CXX_CONDITIONAL_TRUE@                  C++ Compiler:  @CXX@@CXXFLAGS@
+
+Features:
+---------
+                        dmalloc: @HAVE_DMALLOC@
+         Function Stack Tracing: @CODESTACK@
+                           GPFS: @GPFS@
+      Strict File Format Checks: @STRICT_FORMAT_CHECKS@
+            Default API Mapping: @DEFAULT_API_VERSION@
+                        hsize_t: @HSIZET@
+         I/O filters (external): @EXTERNAL_FILTERS@
+         I/O filters (internal): @FILTERS@
+ Linux Large File Support (LFS): @LINUX_LFS@
+                            MPE: @MPE@
+                  Parallel HDF5: @PARALLEL@
+                     Direct VFD: @DIRECT_VFD@
+                   Threadsafety: @THREADSAFE@
+             High Level library: @HDF5_HL@
