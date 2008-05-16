@@ -55,7 +55,7 @@
 #define H5D_CRT_CHUNK_DIM_SIZE     sizeof(unsigned)
 #define H5D_CRT_CHUNK_DIM_DEF      1
 /* Definitions for chunk size */
-#define H5D_CRT_CHUNK_SIZE_SIZE    sizeof(size_t[H5O_LAYOUT_NDIMS])
+#define H5D_CRT_CHUNK_SIZE_SIZE    sizeof(uint32_t[H5O_LAYOUT_NDIMS])
 #define H5D_CRT_CHUNK_SIZE_DEF     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,\
                                    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
 /* Definitions for fill value.  size=0 means fill value will be 0 as
@@ -148,7 +148,7 @@ H5P_dcrt_reg_prop(H5P_genclass_t *pclass)
 {
     H5D_layout_t layout = H5D_CRT_LAYOUT_DEF;           /* Default storage layout */
     unsigned chunk_ndims = H5D_CRT_CHUNK_DIM_DEF;       /* Default rank for chunks */
-    size_t chunk_size[H5O_LAYOUT_NDIMS] = H5D_CRT_CHUNK_SIZE_DEF;       /* Default chunk size */
+    uint32_t chunk_size[H5O_LAYOUT_NDIMS] = H5D_CRT_CHUNK_SIZE_DEF;       /* Default chunk size */
     H5O_fill_t fill = H5D_CRT_FILL_VALUE_DEF;           /* Default fill value */
     unsigned alloc_time_state = H5D_CRT_ALLOC_TIME_STATE_DEF;   /* Default allocation time state */
     H5O_efl_t efl = H5D_CRT_EXT_FILE_LIST_DEF;          /* Default external file list */
@@ -737,37 +737,43 @@ done:
 herr_t
 H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
 {
-    int			    i;
-    size_t real_dims[H5O_LAYOUT_NDIMS]; /* Full-sized array to hold chunk dims */
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=SUCCEED;   /* return value */
+    uint32_t real_dims[H5O_LAYOUT_NDIMS]; /* Full-sized array to hold chunk dims */
+    uint64_t chunk_nelmts;      /* Number of elements in chunk */
+    unsigned u;                 /* Local index variable */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(H5Pset_chunk, FAIL)
     H5TRACE3("e", "iIs*[a1]h", plist_id, ndims, dim);
 
     /* Check arguments */
-    if (ndims <= 0)
+    if(ndims <= 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "chunk dimensionality must be positive")
-    if (ndims > H5S_MAX_RANK)
+    if(ndims > H5S_MAX_RANK)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "chunk dimensionality is too large")
-    if (!dim)
+    if(!dim)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no chunk dimensions specified")
 
-    /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-
-    /* Initialize chunk dims to 0s */
-    HDmemset(real_dims,0,sizeof(real_dims));
-    for (i=0; i<ndims; i++) {
-        if (dim[i] == 0)
+    /* Verify & initialize internal chunk dims */
+    HDmemset(real_dims, 0, sizeof(real_dims));
+    chunk_nelmts = 1;
+    for(u = 0; u < (unsigned)ndims; u++) {
+        if(dim[u] == 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "all chunk dimensions must be positive")
-        if (dim[i] != (dim[i]&0xffffffff))
+        if(dim[u] != (dim[u] & 0xffffffff))
             HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "all chunk dimensions must be less than 2^32")
-        real_dims[i]=(size_t)dim[i]; /* Store user's chunk dimensions */
+        chunk_nelmts *= dim[u];
+        if(chunk_nelmts > (uint64_t)0xffffffff)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "number of elements in chunk must be < 4GB")
+        real_dims[u] = (uint32_t)dim[u]; /* Store user's chunk dimensions */
     } /* end for */
 
-    if(H5P_set_layout (plist, H5D_CHUNKED) < 0)
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Set chunk information in property list */
+    if(H5P_set_layout(plist, H5D_CHUNKED) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set layout")
     if(H5P_set(plist, H5D_CRT_CHUNK_DIM_NAME, &ndims) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set chunk dimensionanlity")
@@ -776,7 +782,7 @@ H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Pset_chunk() */
 
 
 /*-------------------------------------------------------------------------
@@ -828,22 +834,22 @@ H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[]/*out*/)
 
     if(dim) {
         int		i;
-        size_t          chunk_size[H5O_LAYOUT_NDIMS];
+        uint32_t        chunk_size[H5O_LAYOUT_NDIMS];
 
         if(H5P_get(plist, H5D_CRT_CHUNK_SIZE_NAME, chunk_size) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get chunk size")
 
         /* Get the dimension sizes */
-        for (i=0; i<ndims && i<max_ndims; i++)
+        for(i = 0; i < ndims && i < max_ndims; i++)
             dim[i] = chunk_size[i];
     } /* end if */
 
     /* Set the return value */
-    ret_value=ndims;
+    ret_value = ndims;
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Pget_chunk() */
 
 
 /*-------------------------------------------------------------------------

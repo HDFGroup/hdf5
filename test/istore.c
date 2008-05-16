@@ -171,19 +171,20 @@ test_create(hid_t f, const char *prefix)
 {
     hid_t       dataset;        /* Dataset ID */
     hsize_t     dims[H5O_LAYOUT_NDIMS+1]; /* Dimensions of dataset */
+    hsize_t     my_chunk_dims[H5O_LAYOUT_NDIMS+1]; /* Dimensions of chunks */
     char        name[256];      /* Dataset name */
     unsigned    u;              /* Local index variable */
 
     TESTING("istore create");
 
-    dims[0]=TEST_CHUNK_SIZE;
+    dims[0] = my_chunk_dims[0] = 1;
     for (u = 1; u <= H5S_MAX_RANK; u++) {
         /* Initialize the dimension size in this new dimension */
-        dims[u]=TEST_CHUNK_SIZE;
+        dims[u] = my_chunk_dims[u] = 2;
 
         /* Create chunked dataset of this dimensionality */
 	HDsnprintf(name, sizeof name, "%s_%02u", prefix, u);
-	if ((dataset=new_object(f, name, (int)u, dims, chunk_dims)) < 0)
+	if ((dataset=new_object(f, name, (int)u, dims, my_chunk_dims)) < 0)
 	    return FAIL;
 
         /* Close dataset created */

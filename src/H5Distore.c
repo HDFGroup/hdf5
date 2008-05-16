@@ -160,7 +160,7 @@ typedef struct H5D_istore_it_ud4_t {
     H5T_path_t          *tpath_mem_dst;         /* Datatype conversion path from memory to dest. file */
     void                *reclaim_buf;           /* Buffer for reclaiming data */
     size_t              reclaim_buf_size;       /* Reclaim buffer size */
-    size_t              nelmts;                 /* Number of elements in buffer */
+    uint32_t            nelmts;                 /* Number of elements in buffer */
     H5S_t               *buf_space;             /* Dataspace describing buffer */
 
     /* needed for compressed variable-length data */
@@ -431,7 +431,7 @@ H5D_istore_debug_key(FILE *stream, H5F_t UNUSED *f, hid_t UNUSED dxpl_id, int in
 
     HDassert(key);
 
-    HDfprintf(stream, "%*s%-*s %Zd bytes\n", indent, "", fwidth, "Chunk size:", key->nbytes);
+    HDfprintf(stream, "%*s%-*s %u bytes\n", indent, "", fwidth, "Chunk size:", (unsigned)key->nbytes);
     HDfprintf(stream, "%*s%-*s 0x%08x\n", indent, "", fwidth, "Filter mask:", key->filter_mask);
     HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Logical offset:");
     for(u = 0; u < udata->mesg->u.chunk.ndims; u++)
@@ -596,7 +596,7 @@ H5D_istore_new_node(H5F_t *f, hid_t dxpl_id, H5B_ins_t op,
 
     /* Allocate new storage */
     HDassert(udata->nbytes > 0);
-    H5_CHECK_OVERFLOW(udata->nbytes, size_t, hsize_t);
+    H5_CHECK_OVERFLOW(udata->nbytes, uint32_t, hsize_t);
     if(HADDR_UNDEF == (*addr_p = H5MF_alloc(f, H5FD_MEM_DRAW, dxpl_id, (hsize_t)udata->nbytes)))
         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "couldn't allocate new file storage")
     udata->addr = *addr_p;
@@ -772,10 +772,10 @@ H5D_istore_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key,
                       (hsize_t)lt_key->nbytes, (hsize_t)udata->nbytes)))
                 HGOTO_ERROR(H5E_STORAGE, H5E_NOSPACE, H5B_INS_ERROR, "unable to reallocate chunk storage")
 #else /* OLD_WAY */
-            H5_CHECK_OVERFLOW( lt_key->nbytes ,size_t, hsize_t);
-            if(H5MF_xfree(f, H5FD_MEM_DRAW, dxpl_id, addr, (hsize_t)lt_key->nbytes)<0)
+            H5_CHECK_OVERFLOW(lt_key->nbytes, uint32_t, hsize_t);
+            if(H5MF_xfree(f, H5FD_MEM_DRAW, dxpl_id, addr, (hsize_t)lt_key->nbytes) < 0)
                 HGOTO_ERROR(H5E_STORAGE, H5E_CANTFREE, H5B_INS_ERROR, "unable to free chunk")
-            H5_CHECK_OVERFLOW(udata->nbytes ,size_t, hsize_t);
+            H5_CHECK_OVERFLOW(udata->nbytes, uint32_t, hsize_t);
             if(HADDR_UNDEF == (*new_node_p = H5MF_alloc(f, H5FD_MEM_DRAW, dxpl_id, (hsize_t)udata->nbytes)))
                 HGOTO_ERROR(H5E_STORAGE, H5E_NOSPACE, H5B_INS_ERROR, "unable to reallocate chunk")
 #endif /* OLD_WAY */
@@ -809,7 +809,7 @@ H5D_istore_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key,
         /*
          * Allocate storage for the new chunk
          */
-        H5_CHECK_OVERFLOW(udata->nbytes, size_t, hsize_t);
+        H5_CHECK_OVERFLOW(udata->nbytes, uint32_t, hsize_t);
         if(HADDR_UNDEF == (*new_node_p = H5MF_alloc(f, H5FD_MEM_DRAW, dxpl_id, (hsize_t)udata->nbytes)))
             HGOTO_ERROR(H5E_STORAGE, H5E_NOSPACE, H5B_INS_ERROR, "file allocation failed")
         udata->addr = *new_node_p;
@@ -874,13 +874,11 @@ H5D_istore_iter_chunkmap (H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_lt
 {
     H5D_istore_it_ud5_t	*udata = (H5D_istore_it_ud5_t *)_udata;
     const H5D_istore_key_t	*lt_key = (const H5D_istore_key_t *)_lt_key;
-    unsigned       rank;
+    unsigned       rank = udata->common.mesg->u.chunk.ndims - 1;
     hsize_t        chunk_index;
     int            ret_value = H5_ITER_CONT;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_istore_iter_chunkmap)
-
-    rank = udata->common.mesg->u.chunk.ndims - 1;
 
     if(H5V_chunk_index(rank, lt_key->offset, udata->common.mesg->u.chunk.dim, udata->down_chunks, &chunk_index) < 0)
        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
@@ -968,12 +966,15 @@ H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
     /* needed for commpressed variable length data */
     hbool_t                 is_compressed = FALSE;
     H5Z_EDC_t               edc_read = H5Z_NO_EDC;
-    size_t                  nbytes = lt_key->nbytes;
+    size_t                  nbytes;             /* Size of chunk (in bytes) */
     H5Z_cb_t                cb_struct;
 
     int                     ret_value = H5_ITER_CONT; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_istore_iter_copy)
+
+    /* Get 'size_t' local value for number of bytes in chunk */
+    H5_ASSIGN_OVERFLOW(nbytes, lt_key->nbytes, uint32_t, size_t);
 
     /* Check parameter for type conversion */
     if(udata->do_convert) {
@@ -1033,12 +1034,12 @@ H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
         hid_t                   tid_src = udata->tid_src;
         hid_t                   tid_dst = udata->tid_dst;
         hid_t                   tid_mem = udata->tid_mem;
-        size_t                  nelmts = udata->nelmts;
         void                    *reclaim_buf = udata->reclaim_buf;
         size_t                  reclaim_buf_size = udata->reclaim_buf_size;
 
         /* Convert from source file to memory */
-        if(H5T_convert(tpath_src_mem, tid_src, tid_mem, nelmts, (size_t)0, (size_t)0, buf, NULL, dxpl_id) < 0)
+        H5_CHECK_OVERFLOW(udata->nelmts, uint32_t, size_t);
+        if(H5T_convert(tpath_src_mem, tid_src, tid_mem, (size_t)udata->nelmts, (size_t)0, (size_t)0, buf, NULL, dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5_ITER_ERROR, "datatype conversion failed")
 
         /* Copy into another buffer, to reclaim memory later */
@@ -1048,7 +1049,7 @@ H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
         HDmemset(bkg, 0, buf_size);
 
         /* Convert from memory to destination file */
-        if(H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, bkg, dxpl_id) < 0)
+        if(H5T_convert(tpath_mem_dst, tid_mem, tid_dst, udata->nelmts, (size_t)0, (size_t)0, buf, bkg, dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5_ITER_ERROR, "datatype conversion failed")
 
         /* Reclaim space from variable length data */
@@ -1085,7 +1086,7 @@ H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
         if(H5Z_pipeline(pline, 0, &(udata_dst.filter_mask), edc_read,
                 cb_struct, &nbytes, &buf_size, &buf) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, H5_ITER_ERROR, "output pipeline failed")
-        udata_dst.nbytes = nbytes;
+        H5_ASSIGN_OVERFLOW(udata_dst.nbytes, nbytes, size_t, uint32_t);
 	udata->buf = buf;
 	udata->buf_size = buf_size;
     } /* end if */
@@ -1277,7 +1278,6 @@ static herr_t
 H5D_istore_flush_entry(const H5D_io_info_t *io_info, H5D_rdcc_ent_t *ent, hbool_t reset)
 {
     void		*buf = NULL;	/*temporary buffer		*/
-    size_t		alloc;		/*bytes allocated for BUF	*/
     hbool_t		point_of_no_return = FALSE;
     herr_t		ret_value = SUCCEED;	/*return value			*/
 
@@ -1292,9 +1292,6 @@ H5D_istore_flush_entry(const H5D_io_info_t *io_info, H5D_rdcc_ent_t *ent, hbool_
     if(ent->dirty) {
         H5D_istore_ud1_t 	udata;		/*pass through B-tree		*/
 
-        /* Initial buffer size */
-        alloc = ent->alloc_size;
-
         /* Set up user data for B-tree callbacks */
         udata.common.mesg = &io_info->dset->shared->layout;
         udata.common.offset = ent->offset;
@@ -1304,16 +1301,19 @@ H5D_istore_flush_entry(const H5D_io_info_t *io_info, H5D_rdcc_ent_t *ent, hbool_
 
         /* Should the chunk be filtered before writing it to disk? */
         if(io_info->dset->shared->dcpl_cache.pline.nused) {
+            size_t alloc = ent->alloc_size;	/* Bytes allocated for BUF */
+            size_t nbytes;                      /* Chunk size (in bytes) */
+
             if(!reset) {
                 /*
                  * Copy the chunk to a new buffer before running it through
                  * the pipeline because we'll want to save the original buffer
                  * for later.
                  */
-                alloc = ent->chunk_size;
+                H5_ASSIGN_OVERFLOW(alloc, ent->chunk_size, uint32_t, size_t);
                 if(NULL == (buf = H5MM_malloc(alloc)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for pipeline")
-                HDmemcpy(buf, ent->chunk, ent->chunk_size);
+                HDmemcpy(buf, ent->chunk, alloc);
             } /* end if */
             else {
                 /*
@@ -1326,9 +1326,11 @@ H5D_istore_flush_entry(const H5D_io_info_t *io_info, H5D_rdcc_ent_t *ent, hbool_
                 point_of_no_return = TRUE;
                 ent->chunk = NULL;
             } /* end else */
+            H5_ASSIGN_OVERFLOW(nbytes, udata.nbytes, uint32_t, size_t);
             if(H5Z_pipeline(&(io_info->dset->shared->dcpl_cache.pline), 0, &(udata.filter_mask), io_info->dxpl_cache->err_detect,
-                     io_info->dxpl_cache->filter_cb, &(udata.nbytes), &alloc, &buf) < 0)
+                     io_info->dxpl_cache->filter_cb, &nbytes, &alloc, &buf) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "output pipeline failed")
+            H5_ASSIGN_OVERFLOW(udata.nbytes, nbytes, size_t, uint32_t);
         } /* end if */
 
         /*
@@ -1337,7 +1339,8 @@ H5D_istore_flush_entry(const H5D_io_info_t *io_info, H5D_rdcc_ent_t *ent, hbool_
          */
         if(H5B_insert(io_info->dset->oloc.file, io_info->dxpl_id, H5B_ISTORE, io_info->dset->shared->layout.u.chunk.addr, &udata)<0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to allocate chunk")
-        if(H5F_block_write(io_info->dset->oloc.file, H5FD_MEM_DRAW, udata.addr, udata.nbytes, io_info->dxpl_id, buf) < 0)
+        H5_CHECK_OVERFLOW(udata.nbytes, uint32_t, size_t);
+        if(H5F_block_write(io_info->dset->oloc.file, H5FD_MEM_DRAW, udata.addr, (size_t)udata.nbytes, io_info->dxpl_id, buf) < 0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file")
 
         /* Cache the chunk's info, in case it's accessed again shortly */
@@ -1688,20 +1691,20 @@ H5D_istore_prune (const H5D_io_info_t *io_info, size_t size)
     while ((p[0] || p[1]) && rdcc->nbytes+size>total) {
 
 	/* Introduce new pointers */
-	for (i=0; i<nmeth-1; i++)
-            if (0==w[i])
-                p[i+1] = rdcc->head;
+	for(i = 0; i < (nmeth - 1); i++)
+            if(0 == w[i])
+                p[i + 1] = rdcc->head;
 
 	/* Compute next value for each pointer */
-	for (i=0; i<nmeth; i++)
+	for(i = 0; i < nmeth; i++)
             n[i] = p[i] ? p[i]->next : NULL;
 
 	/* Give each method a chance */
-	for (i=0; i<nmeth && rdcc->nbytes+size>total; i++) {
-	    if (0==i && p[0] && !p[0]->locked &&
-                    ((0==p[0]->rd_count && 0==p[0]->wr_count) ||
-                     (0==p[0]->rd_count && p[0]->chunk_size==p[0]->wr_count) ||
-                     (p[0]->chunk_size==p[0]->rd_count && 0==p[0]->wr_count))) {
+	for(i = 0; i < nmeth && (rdcc->nbytes + size) > total; i++) {
+	    if(0 == i && p[0] && !p[0]->locked &&
+                    ((0 == p[0]->rd_count && 0 == p[0]->wr_count) ||
+                     (0 == p[0]->rd_count && p[0]->chunk_size == p[0]->wr_count) ||
+                     (p[0]->chunk_size == p[0]->rd_count && 0 == p[0]->wr_count))) {
 		/*
 		 * Method 0: Preempt entries that have been completely written
 		 * and/or completely read but not entries that are partially
@@ -1813,7 +1816,7 @@ H5D_istore_lock(const H5D_io_info_t *io_info, H5D_istore_ud1_t *udata,
 
     /* Get the chunk's size */
     HDassert(layout->u.chunk.size > 0);
-    H5_ASSIGN_OVERFLOW(chunk_size, layout->u.chunk.size, hsize_t, size_t);
+    H5_ASSIGN_OVERFLOW(chunk_size, layout->u.chunk.size, uint32_t, size_t);
 
     /* Search for the chunk in the cache */
     if(rdcc->nslots > 0) {
@@ -1854,7 +1857,6 @@ H5D_istore_lock(const H5D_io_info_t *io_info, H5D_istore_ud1_t *udata,
         /* In the case that some dataset functions look through this data,
          * clear it to all 0s. */
         HDmemset(chunk, 0, chunk_size);
-
     } /* end if */
     else {
         H5D_istore_ud1_t tmp_udata;		/*B-tree pass-through	*/
@@ -1873,24 +1875,24 @@ H5D_istore_lock(const H5D_io_info_t *io_info, H5D_istore_ud1_t *udata,
             chunk_addr = H5D_istore_get_addr(io_info, udata);
         } /* end else */
 
-        if (H5F_addr_defined(chunk_addr)) {
-            size_t		chunk_alloc = 0;		/*allocated chunk size	*/
+        /* Check if the chunk exists on disk */
+        if(H5F_addr_defined(chunk_addr)) {
+            size_t	chunk_alloc;		/* Allocated chunk size	*/
 
-            /*
-             * The chunk exists on disk.
-             */
             /* Chunk size on disk isn't [likely] the same size as the final chunk
              * size in memory, so allocate memory big enough. */
-            chunk_alloc = udata->nbytes;
-            if(NULL == (chunk = H5D_istore_chunk_alloc (chunk_alloc, pline)))
+            H5_ASSIGN_OVERFLOW(chunk_alloc, udata->nbytes, uint32_t, size_t);
+            if(NULL == (chunk = H5D_istore_chunk_alloc(chunk_alloc, pline)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk")
-            if(H5F_block_read(dset->oloc.file, H5FD_MEM_DRAW, chunk_addr, udata->nbytes, io_info->dxpl_id, chunk) < 0)
+            if(H5F_block_read(dset->oloc.file, H5FD_MEM_DRAW, chunk_addr, chunk_alloc, io_info->dxpl_id, chunk) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, NULL, "unable to read raw data chunk")
 
-            if(pline->nused)
+            if(pline->nused) {
                 if(H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &(udata->filter_mask), io_info->dxpl_cache->err_detect,
-                        io_info->dxpl_cache->filter_cb, &(udata->nbytes), &chunk_alloc, &chunk) < 0)
+                        io_info->dxpl_cache->filter_cb, &chunk_alloc, &chunk_alloc, &chunk) < 0)
                     HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, NULL, "data pipeline read failed")
+                H5_ASSIGN_OVERFLOW(udata->nbytes, chunk_alloc, size_t, uint32_t);
+            } /* end if */
 #ifdef H5D_ISTORE_DEBUG
             rdcc->nmisses++;
 #endif /* H5D_ISTORE_DEBUG */
@@ -1904,7 +1906,7 @@ H5D_istore_lock(const H5D_io_info_t *io_info, H5D_istore_ud1_t *udata,
 
             /* Chunk size on disk isn't [likely] the same size as the final chunk
              * size in memory, so allocate memory big enough. */
-            if(NULL == (chunk = H5D_istore_chunk_alloc (chunk_size, pline)))
+            if(NULL == (chunk = H5D_istore_chunk_alloc(chunk_size, pline)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk")
 
             if(H5P_is_fill_value_defined(fill, &fill_status) < 0)
@@ -1947,31 +1949,31 @@ H5D_istore_lock(const H5D_io_info_t *io_info, H5D_istore_ud1_t *udata,
          * Add the chunk to the cache only if the slot is not already locked.
          * Preempt enough things from the cache to make room.
          */
-        if (ent) {
+        if(ent) {
 #ifdef H5D_ISTORE_DEBUG
             HDputc('#', stderr);
             HDfflush(stderr);
 #endif
-            if (H5D_istore_preempt(io_info, ent, TRUE)<0)
+            if(H5D_istore_preempt(io_info, ent, TRUE) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL, "unable to preempt chunk from cache")
-        }
-        if (H5D_istore_prune(io_info, chunk_size)<0)
+        } /* end if */
+        if(H5D_istore_prune(io_info, chunk_size) < 0)
             HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL, "unable to preempt chunk(s) from cache")
 
         /* Create a new entry */
         ent = H5FL_MALLOC(H5D_rdcc_ent_t);
         ent->locked = 0;
         ent->dirty = FALSE;
-        ent->chunk_size = chunk_size;
+        H5_ASSIGN_OVERFLOW(ent->chunk_size, chunk_size, size_t, uint32_t);
         ent->alloc_size = chunk_size;
-        for (u=0; u<layout->u.chunk.ndims; u++)
+        for(u = 0; u < layout->u.chunk.ndims; u++)
             ent->offset[u] = io_info->store->chunk.offset[u];
-        ent->rd_count = chunk_size;
-        ent->wr_count = chunk_size;
-        ent->chunk = (uint8_t*)chunk;
+        H5_ASSIGN_OVERFLOW(ent->rd_count, chunk_size, size_t, uint32_t);
+        H5_ASSIGN_OVERFLOW(ent->wr_count, chunk_size, size_t, uint32_t);
+        ent->chunk = (uint8_t *)chunk;
 
         /* Add it to the cache */
-        assert(NULL==rdcc->slot[idx]);
+        HDassert(NULL == rdcc->slot[idx]);
         rdcc->slot[idx] = ent;
         ent->idx = idx;
         rdcc->nbytes += chunk_size;
@@ -1979,16 +1981,17 @@ H5D_istore_lock(const H5D_io_info_t *io_info, H5D_istore_ud1_t *udata,
 
         /* Add it to the linked list */
         ent->next = NULL;
-        if (rdcc->tail) {
+        if(rdcc->tail) {
             rdcc->tail->next = ent;
             ent->prev = rdcc->tail;
             rdcc->tail = ent;
-        } else {
+        } /* end if */
+        else {
             rdcc->head = rdcc->tail = ent;
             ent->prev = NULL;
-        }
+        } /* end else */
         found = TRUE;
-    } else if (!found) {
+    } else if(!found) {
         /*
          * The chunk is larger than the entire cache so we don't cache it.
          * This is the reason all those arguments have to be repeated for the
@@ -1996,38 +1999,37 @@ H5D_istore_lock(const H5D_io_info_t *io_info, H5D_istore_ud1_t *udata,
          */
         ent = NULL;
         idx = UINT_MAX;
-
     } else {
         /*
          * The chunk is not at the beginning of the cache; move it backward
          * by one slot.  This is how we implement the LRU preemption
          * algorithm.
          */
-        assert(ent);
-        if (ent->next) {
-            if (ent->next->next)
+        HDassert(ent);
+        if(ent->next) {
+            if(ent->next->next)
                 ent->next->next->prev = ent;
             else
                 rdcc->tail = ent;
             ent->next->prev = ent->prev;
-            if (ent->prev)
+            if(ent->prev)
                 ent->prev->next = ent->next;
             else
                 rdcc->head = ent->next;
             ent->prev = ent->next;
             ent->next = ent->next->next;
             ent->prev->next = ent;
-        }
-    }
+        } /* end if */
+    } /* end else */
 
     /* Lock the chunk into the cache */
-    if (ent) {
-        assert (!ent->locked);
+    if(ent) {
+        HDassert(!ent->locked);
         ent->locked = TRUE;
         chunk = ent->chunk;
-    }
+    } /* end if */
 
-    if (idx_hint)
+    if(idx_hint)
         *idx_hint = idx;
 
     /* Set return value */
@@ -2071,19 +2073,18 @@ done:
  */
 herr_t
 H5D_istore_unlock(const H5D_io_info_t *io_info,
-    hbool_t dirty, unsigned idx_hint, void *chunk, size_t naccessed)
+    hbool_t dirty, unsigned idx_hint, void *chunk, uint32_t naccessed)
 {
     const H5O_layout_t *layout=&(io_info->dset->shared->layout); /* Dataset layout */
     const H5D_rdcc_t	*rdcc = &(io_info->dset->shared->cache.chunk);
     H5D_rdcc_ent_t	*ent = NULL;
-    unsigned		u;
-    herr_t              ret_value=SUCCEED;      /* Return value */
+    herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_istore_unlock)
 
     assert(io_info);
 
-    if (UINT_MAX==idx_hint) {
+    if(UINT_MAX == idx_hint) {
         /*
          * It's not in the cache, probably because it's too big.  If it's
          * dirty then flush it to disk.  In any case, free the chunk.
@@ -2093,40 +2094,42 @@ H5D_istore_unlock(const H5D_io_info_t *io_info,
         if (dirty) {
             H5D_rdcc_ent_t x;
 
-            HDmemset (&x, 0, sizeof x);
+            HDmemset(&x, 0, sizeof(x));
             x.dirty = TRUE;
-            for (u=0; u<layout->u.chunk.ndims; u++)
-                x.offset[u] = io_info->store->chunk.offset[u];
-            assert(layout->u.chunk.size>0);
-            H5_ASSIGN_OVERFLOW(x.chunk_size,layout->u.chunk.size,hsize_t,size_t);
-            x.alloc_size = x.chunk_size;
-            x.chunk = (uint8_t*)chunk;
+            HDassert(sizeof(x.offset[0]) == sizeof(io_info->store->chunk.offset[0]));
+            HDmemcpy(x.offset, io_info->store->chunk.offset, layout->u.chunk.ndims * sizeof(x.offset[0]));
+            HDassert(layout->u.chunk.size > 0);
+            x.chunk_size = layout->u.chunk.size;
+            H5_ASSIGN_OVERFLOW(x.alloc_size, x.chunk_size, uint32_t, size_t);
+            x.chunk = (uint8_t *)chunk;
 
-            if (H5D_istore_flush_entry(io_info, &x, TRUE)<0)
+            if(H5D_istore_flush_entry(io_info, &x, TRUE) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot flush indexed storage buffer")
-        } else {
+        } /* end if */
+        else {
             if(chunk)
-                chunk=H5D_istore_chunk_xfree (chunk,&(io_info->dset->shared->dcpl_cache.pline));
-        }
-    } else {
+                chunk = H5D_istore_chunk_xfree(chunk, &(io_info->dset->shared->dcpl_cache.pline));
+        } /* end else */
+    } /* end if */
+    else {
         /* Sanity check */
-	assert(idx_hint<rdcc->nslots);
-	assert(rdcc->slot[idx_hint]);
-	assert(rdcc->slot[idx_hint]->chunk==chunk);
+	HDassert(idx_hint < rdcc->nslots);
+	HDassert(rdcc->slot[idx_hint]);
+	HDassert(rdcc->slot[idx_hint]->chunk == chunk);
 
         /*
          * It's in the cache so unlock it.
          */
         ent = rdcc->slot[idx_hint];
-        assert (ent->locked);
-        if (dirty) {
+        HDassert(ent->locked);
+        if(dirty) {
             ent->dirty = TRUE;
-            ent->wr_count -= MIN (ent->wr_count, naccessed);
-        } else {
-            ent->rd_count -= MIN (ent->rd_count, naccessed);
-        }
+            ent->wr_count -= MIN(ent->wr_count, naccessed);
+        } /* end if */
+        else
+            ent->rd_count -= MIN(ent->rd_count, naccessed);
         ent->locked = FALSE;
-    }
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2510,8 +2513,7 @@ H5D_istore_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
 
     /* Get original chunk size */
-    H5_CHECK_OVERFLOW(layout->u.chunk.size, hsize_t, size_t);
-    orig_chunk_size = (size_t)layout->u.chunk.size;
+    H5_ASSIGN_OVERFLOW(orig_chunk_size, layout->u.chunk.size, uint32_t, size_t);
 
     /* Check the dataset's fill-value status */
     if(H5P_is_fill_value_defined(fill, &fill_status) < 0)
@@ -2613,7 +2615,7 @@ H5D_istore_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
                         chunk_size = nbytes;
                     } /* end if */
                     else
-                        chunk_size = (size_t)layout->u.chunk.size;
+                        H5_ASSIGN_OVERFLOW(chunk_size, layout->u.chunk.size, uint32_t, size_t);
                 } /* end if */
                 else
                     chunk_size = orig_chunk_size;
@@ -2621,7 +2623,7 @@ H5D_istore_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
                 /* Initialize the chunk information */
                 udata.common.mesg = layout;
                 udata.common.offset = chunk_offset;
-                udata.nbytes = chunk_size;
+                H5_ASSIGN_OVERFLOW(udata.nbytes, chunk_size, size_t, uint32_t);
                 udata.filter_mask = filter_mask;
                 udata.addr = HADDR_UNDEF;
 
@@ -2639,16 +2641,19 @@ H5D_istore_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
                     if(using_mpi) {
                         /* Write the chunks out from only one process */
                         /* !! Use the internal "independent" DXPL!! -QAK */
-                        if(H5_PAR_META_WRITE == mpi_rank)
-                            if(H5F_block_write(dset->oloc.file, H5FD_MEM_DRAW, udata.addr, udata.nbytes, data_dxpl_id, fb_info.fill_buf) < 0)
+                        if(H5_PAR_META_WRITE == mpi_rank) {
+                            HDassert(udata.nbytes == chunk_size);
+                            if(H5F_block_write(dset->oloc.file, H5FD_MEM_DRAW, udata.addr, chunk_size, data_dxpl_id, fb_info.fill_buf) < 0)
                                 HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file")
+                        } /* end if */
 
                         /* Indicate that blocks are being written */
                         blocks_written = TRUE;
                     } /* end if */
                     else {
 #endif /* H5_HAVE_PARALLEL */
-                        if(H5F_block_write(dset->oloc.file, H5FD_MEM_DRAW, udata.addr, udata.nbytes, data_dxpl_id, fb_info.fill_buf) < 0)
+                        HDassert(udata.nbytes == chunk_size);
+                        if(H5F_block_write(dset->oloc.file, H5FD_MEM_DRAW, udata.addr, chunk_size, data_dxpl_id, fb_info.fill_buf) < 0)
                             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file")
 #ifdef H5_HAVE_PARALLEL
                     } /* end else */
@@ -3029,12 +3034,13 @@ H5D_istore_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key /*in,out 
 	hbool_t *rt_key_changed /*out */ )
 {
     H5D_istore_key_t    *lt_key = (H5D_istore_key_t *)_lt_key;
-    H5B_ins_t ret_value=H5B_INS_REMOVE; /* Return value */
+    H5B_ins_t ret_value = H5B_INS_REMOVE;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_istore_remove)
 
     /* Remove raw data chunk from file */
-    if(H5MF_xfree(f, H5FD_MEM_DRAW, dxpl_id, addr, (hsize_t)lt_key->nbytes)<0)
+    H5_CHECK_OVERFLOW(lt_key->nbytes, uint32_t, hsize_t);
+    if(H5MF_xfree(f, H5FD_MEM_DRAW, dxpl_id, addr, (hsize_t)lt_key->nbytes) < 0)
         HGOTO_ERROR(H5E_STORAGE, H5E_CANTFREE, H5B_INS_ERROR, "unable to free chunk")
 
     /* Mark keys as unchanged */
@@ -3082,7 +3088,7 @@ H5D_istore_initialize_by_extent(H5D_io_info_t *io_info)
     hsize_t          hyper_start[H5O_LAYOUT_NDIMS];	/* Starting location of hyperslab */
     hsize_t          nchunks[H5O_LAYOUT_NDIMS]; /* Current number of chunks in each dimension */
     hsize_t          down_chunks[H5O_LAYOUT_NDIMS]; /* "down" size of number of elements in each dimension */
-    hsize_t          bytes_per_chunk;	/* Bytes in chunk */
+    uint32_t         elmts_per_chunk;	/* Elements in a chunk */
     int              srank;	        /* # of chunk dimensions (signed) */
     unsigned         rank;	        /* # of chunk dimensions */
     hbool_t	     carry;             /* Flag to indicate that chunk increment carrys to higher dimension (sorta) */
@@ -3105,11 +3111,11 @@ H5D_istore_initialize_by_extent(H5D_io_info_t *io_info)
     /* Set size of lowest chunk dimension (the dataset element size) */
     dset_dims[rank] = layout->u.chunk.dim[rank];
 
-    /* Compute the number of chunks in dataset & the # of bytes in a chunk */
+    /* Compute the number of chunks in dataset & the # of elements in a chunk */
     /* (round up to the next integer # of chunks, to accomodate partial chunks) */
-    for(u = 0, bytes_per_chunk = layout->u.chunk.dim[rank]; u < rank; u++) {
+    for(u = 0, elmts_per_chunk = 1; u < rank; u++) {
         nchunks[u] = ((dset_dims[u] - 1) / layout->u.chunk.dim[u]) + 1;
-        bytes_per_chunk *= layout->u.chunk.dim[u];
+        elmts_per_chunk *= layout->u.chunk.dim[u];
     } /* end for */
 
     /* Get the "down" sizes for each dimension */
@@ -3159,9 +3165,10 @@ H5D_istore_initialize_by_extent(H5D_io_info_t *io_info)
 
             /* Initialize the fill value buffer, if necessary */
             if(!fb_info_init) {
+                H5_CHECK_OVERFLOW(elmts_per_chunk, uint32_t, size_t);
                 if(H5D_fill_init(&fb_info, NULL, FALSE, NULL, NULL, NULL, NULL,
                         &dset->shared->dcpl_cache.fill,
-                        dset->shared->type, dset->shared->type_id, (size_t)(bytes_per_chunk / layout->u.chunk.dim[rank]),
+                        dset->shared->type, dset->shared->type_id, (size_t)elmts_per_chunk,
                         io_info->dxpl_cache->max_temp_buf, io_info->dxpl_id) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill buffer info")
                 fb_info_init = TRUE;
@@ -3217,7 +3224,8 @@ H5D_istore_initialize_by_extent(H5D_io_info_t *io_info)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "can't refill fill value buffer")
 
             /* Create a selection iterator for scattering the elements to memory buffer */
-            if(H5S_select_iter_init(&chunk_iter, space_chunk, layout->u.chunk.dim[rank]) < 0)
+            H5_CHECK_OVERFLOW(layout->u.chunk.dim[rank], uint32_t, size_t);
+            if(H5S_select_iter_init(&chunk_iter, space_chunk, (size_t)layout->u.chunk.dim[rank]) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize chunk selection information")
 
             /* Scatter the data into memory */
@@ -3236,8 +3244,8 @@ H5D_istore_initialize_by_extent(H5D_io_info_t *io_info)
             bytes_accessed = nelmts * layout->u.chunk.dim[rank];
 
             /* Release lock on chunk */
-            H5_CHECK_OVERFLOW(bytes_accessed, hsize_t, size_t);
-	    if(H5D_istore_unlock(io_info, TRUE, idx_hint, chunk, (size_t)bytes_accessed) < 0)
+            H5_CHECK_OVERFLOW(bytes_accessed, hsize_t, uint32_t);
+	    if(H5D_istore_unlock(io_info, TRUE, idx_hint, chunk, (uint32_t)bytes_accessed) < 0)
 		HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to unlock raw data chunk")
 	} /* end if */
 
@@ -3386,12 +3394,12 @@ H5D_istore_update_cache(H5D_t *dset, hid_t dxpl_id)
         next = ent->next;
 
         /* Calculate the index of this chunk */
-        if(H5V_chunk_index(rank,ent->offset,dset->shared->layout.u.chunk.dim,down_chunks,&idx)<0)
+        if(H5V_chunk_index(rank, ent->offset, dset->shared->layout.u.chunk.dim, down_chunks, &idx) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
 
         /* Compute the index for the chunk entry */
-        old_idx=ent->idx;   /* Save for later */
-        ent->idx=H5D_CHUNK_HASH(dset->shared, idx);
+        old_idx = ent->idx;   /* Save for later */
+        ent->idx = H5D_CHUNK_HASH(dset->shared, idx);
 
         if(old_idx != ent->idx) {
             /* Check if there is already a chunk at this chunk's new location */
@@ -3450,7 +3458,7 @@ H5D_istore_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
     void       *reclaim_buf = NULL;     /* Buffer for reclaiming data */
     H5S_t      *buf_space = NULL;       /* Dataspace describing buffer */
     hid_t       sid_buf = -1;           /* ID for buffer dataspace */
-    size_t      nelmts = 0;             /* Number of elements in buffer */
+    uint32_t    nelmts = 0;             /* Number of elements in buffer */
     hbool_t     do_convert = FALSE;     /* Indicate that type conversions should be performed */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -3553,7 +3561,7 @@ H5D_istore_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
             do_convert = TRUE;
         } /* end if */
 
-        buf_size = layout_src->u.chunk.size;
+        H5_ASSIGN_OVERFLOW(buf_size, layout_src->u.chunk.size, uint32_t, size_t);
         reclaim_buf_size = 0;
     } /* end else */
 
