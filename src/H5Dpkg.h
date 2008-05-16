@@ -204,7 +204,7 @@ typedef struct H5D_io_info_t {
 /* Structure holding information about a chunk's selection for mapping */
 typedef struct H5D_chunk_info_t {
     hsize_t index;              /* "Index" of chunk in dataset */
-    size_t chunk_points;        /* Number of elements selected in chunk */
+    uint32_t chunk_points;      /* Number of elements selected in chunk */
     hsize_t coords[H5O_LAYOUT_NDIMS];   /* Coordinates of chunk in file dataset's dataspace */
     H5S_t *fspace;              /* Dataspace describing chunk & selection in it */
     unsigned fspace_shared;     /* Indicate that the file space for a chunk is shared and shouldn't be freed */
@@ -213,10 +213,10 @@ typedef struct H5D_chunk_info_t {
 } H5D_chunk_info_t;
 
 /* Cached information about a particular chunk */
-typedef struct {
+typedef struct H5D_chunk_cached_t{
     hbool_t     valid;                          /*whether cache info is valid*/
     hsize_t	offset[H5O_LAYOUT_NDIMS];	/*logical offset to start*/
-    size_t	nbytes;				/*size of stored data	*/
+    uint32_t	nbytes;				/*size of stored data	*/
     unsigned	filter_mask;			/*excluded filters	*/
     haddr_t	addr;				/*file address of chunk */
 } H5D_chunk_cached_t;
@@ -379,7 +379,7 @@ typedef struct {
  * The chunk's file address is part of the B-tree and not part of the key.
  */
 typedef struct H5D_istore_key_t {
-    size_t	nbytes;				/*size of stored data	*/
+    uint32_t	nbytes;				/*size of stored data	*/
     hsize_t	offset[H5O_LAYOUT_NDIMS];	/*logical offset to start*/
     unsigned	filter_mask;			/*excluded filters	*/
 } H5D_istore_key_t;
@@ -401,7 +401,7 @@ typedef struct H5D_istore_ud1_t {
     H5D_istore_bt_ud_common_t common;           /* Common info for B-tree user data (must be first) */
 
     /* Upward */
-    size_t	nbytes;				/*size of stored data	*/
+    uint32_t	nbytes;				/*size of stored data	*/
     unsigned	filter_mask;			/*excluded filters	*/
     haddr_t	addr;				/*file address of chunk */
 } H5D_istore_ud1_t; 
@@ -422,9 +422,9 @@ typedef struct H5D_rdcc_ent_t {
     hbool_t	locked;		/*entry is locked in cache		*/
     hbool_t	dirty;		/*needs to be written to disk?		*/
     hsize_t	offset[H5O_LAYOUT_NDIMS]; /*chunk name			*/
-    size_t	rd_count;	/*bytes remaining to be read		*/
-    size_t	wr_count;	/*bytes remaining to be written		*/
-    size_t	chunk_size;	/*size of a chunk			*/
+    uint32_t	rd_count;	/*bytes remaining to be read		*/
+    uint32_t	wr_count;	/*bytes remaining to be written		*/
+    uint32_t	chunk_size;	/*size of a chunk			*/
     size_t	alloc_size;	/*amount allocated for the chunk	*/
     uint8_t	*chunk;		/*the unfiltered chunk data		*/
     unsigned	idx;		/*index in hash table			*/
@@ -547,7 +547,7 @@ H5_DLL herr_t H5D_istore_copy(H5F_t *f_src, H5O_layout_t *layout_src,
 H5_DLL void * H5D_istore_lock(const H5D_io_info_t *io_info, H5D_istore_ud1_t *udata,
     hbool_t relax, unsigned *idx_hint/*in,out*/);
 H5_DLL herr_t H5D_istore_unlock(const H5D_io_info_t *io_info,
-    hbool_t dirty, unsigned idx_hint, void *chunk, size_t naccessed);
+    hbool_t dirty, unsigned idx_hint, void *chunk, uint32_t naccessed);
 
 /* Functions that perform fill value operations on datasets */
 H5_DLL herr_t H5D_fill(const void *fill, const H5T_t *fill_type, void *buf,
