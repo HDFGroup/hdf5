@@ -1354,11 +1354,11 @@ usage(const char *prog)
         printf("                       and sizes\n");
         printf("                       [default: Off]\n");
         printf("     -e SL             Dimensions and sizes of dataset\n");
-        printf("                       [default: 16M]\n");
+        printf("                       [default: 100,200]\n");
         printf("     -i N              Number of iterations to perform\n");
         printf("                       [default: 1]\n");
         printf("     -r NL             Dimension access order (see below for description)\n");
-        printf("                       [default: 1]\n");
+        printf("                       [default: 1,2]\n");
         printf("     -t                Selects extendable dimensions for HDF5 dataset\n");
         printf("                       [default: Off]\n");
         printf("     -v VFD            Selects file driver for HDF5 access\n");
@@ -1366,7 +1366,7 @@ usage(const char *prog)
         printf("     -w                Perform write tests, not the read tests\n");
         printf("                       [default: Off]\n");
         printf("     -x SL             Dimensions and sizes of the transfer buffer\n");
-        printf("                       [default: 256K]\n");
+        printf("                       [default: 10,20]\n");
         printf("\n");
         printf("  N  - is an integer > 0.\n");
         printf("\n");
