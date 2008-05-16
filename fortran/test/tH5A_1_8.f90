@@ -1014,10 +1014,8 @@ SUBROUTINE test_attr_info_by_idx(new_format, fcpl, fapl, total_error)
              f_corder_valid, corder, cset, data_size, error, lapl_id=H5P_DEFAULT_F)
         CALL VERIFY("h5aget_info_by_idx_f",error,minusone,total_error)
         
-        size = 0
         CALL h5aget_name_by_idx_f(my_dataset, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, &
-!EP             0_HSIZE_T, tmpname, size,  error, lapl_id=H5P_DEFAULT_F)
-             hzero, tmpname, size,  error, lapl_id=H5P_DEFAULT_F)
+             hzero, tmpname,  error, size, lapl_id=H5P_DEFAULT_F)
         CALL VERIFY("h5aget_name_by_idx_f",error,minusone,total_error)
 
 
@@ -1204,17 +1202,18 @@ SUBROUTINE attr_info_by_idx_check(obj_id, attrname, n, use_index, total_error )
 
   ! /* Verify the name for new link, in increasing creation order */
 
-!!$    CALL HDmemset(tmpname, 0, (size_t))
+  ! Try with the correct buffer size
 
   CALL h5aget_name_by_idx_f(obj_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, &
-       n, tmpname, NAME_BUF_SIZE, error)
+       n, tmpname, error, NAME_BUF_SIZE)
   CALL check("h5aget_name_by_idx_f",error,total_error)
+  CALL VERIFY("h5aget_name_by_idx_f", INT(NAME_BUF_SIZE), 7, error)
 
-  IF(TRIM(attrname).NE.TRIM(tmpname))THEN
+  IF(attrname.NE.tmpname)THEN
      error = -1
   ENDIF
   CALL VERIFY("h5aget_name_by_idx_f",error,0,total_error)
-  
+
   !  /* Don't test "native" order if there is no creation order index, since
   !   *  there's not a good way to easily predict the attribute's order in the name
   !   *  index.
@@ -1238,7 +1237,7 @@ SUBROUTINE attr_info_by_idx_check(obj_id, attrname, n, use_index, total_error )
    ! /* Verify the name for new link, in increasing native order */
    ! CALL HDmemset(tmpname, 0, (size_t))
      CALL h5aget_name_by_idx_f(obj_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_NATIVE_F, &
-          n, tmpname, NAME_BUF_SIZE, error)
+          n, tmpname, error) ! check with no optional parameters
      CALL check("h5aget_name_by_idx_f",error,total_error)
      IF(TRIM(attrname).NE.TRIM(tmpname))THEN
         WRITE(*,*) "ERROR: attribute name size wrong!"
@@ -2105,7 +2104,7 @@ SUBROUTINE test_attr_delete_by_idx(new_format, fcpl, fapl, total_error)
 
                  size = 7 ! *CHECK* IF NOT THE SAME SIZE
                  CALL h5aget_name_by_idx_f(my_dataset, ".", idx_type, order,INT(0,hsize_t), &
-                      tmpname, size, error, lapl_id=H5P_DEFAULT_F)
+                      tmpname, error, lapl_id=H5P_DEFAULT_F, size=size)
                  CALL check('h5aget_name_by_idx_f',error,total_error)
                  IF(order .EQ. H5_ITER_INC_F)THEN
                     WRITE(chr2,'(I2.2)') u + 1
@@ -2245,7 +2244,7 @@ SUBROUTINE test_attr_delete_by_idx(new_format, fcpl, fapl, total_error)
 
                  size = 7 ! *CHECK* if not the correct size 
                  CALL h5aget_name_by_idx_f(my_dataset, ".", idx_type, order,INT(0,hsize_t), &
-                      tmpname, size, error)
+                      tmpname, error, size)
 
                  IF(order .EQ. H5_ITER_INC_F)THEN
                     WRITE(chr2,'(I2.2)') u + 1
@@ -2978,7 +2977,6 @@ SUBROUTINE test_attr_dense_open( fcpl, fapl, total_error)
 
   ! /* Add attributes, until just before converting to dense storage */
 
-  write(*,*) max_compact
   DO u = 0, max_compact - 1
      ! /* Create attribute */
      WRITE(chr2,'(I2.2)') u

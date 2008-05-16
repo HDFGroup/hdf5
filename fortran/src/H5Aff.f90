@@ -2785,7 +2785,7 @@ CONTAINS
 !                  H5_INDEX_UNKNOWN_F = -1  - Unknown index type
 !                  H5_INDEX_NAME_F          - Index on names
 !                  H5_INDEX_CRT_ORDER_F     - Index on creation order
-!                  H5_INDEX_N	 _F         - Number of indices defined
+!                  H5_INDEX_N_F             - Number of indices defined
 !
 !          order    - Order in which to iterate over index; Possible values are:
 !
@@ -2797,16 +2797,15 @@ CONTAINS
 !
 !          order    - Index traversal order
 !              n    - Attribute’s position in index
-!           size    - Size, in bytes, of attribute name
 !
 ! Outputs:  
 !		name            - Attribute name
-!               name_size_out   - Size of Attribute name returned from function
 !		hdferr:		- error code		
 !				 	Success:  0
 !				 	Failure: -1   
 ! Optional parameters:
 !        lapl_id    - Link access property list	
+!           size    - Size, in bytes, of attribute name
 !
 ! Programmer:   M.S. Breitenfeld
 !		January, 2008
@@ -2815,7 +2814,7 @@ CONTAINS
 !----------------------------------------------------------------------
 
   SUBROUTINE h5aget_name_by_idx_f(loc_id, obj_name, idx_type, order, &
-       n, name, size, hdferr, lapl_id) 
+       n, name, hdferr, size, lapl_id) 
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
 !DEC$attributes dllexport :: h5aget_name_by_idx_f
@@ -2839,9 +2838,8 @@ CONTAINS
 
     INTEGER(HSIZE_T), INTENT(IN) :: n !  Attribute’s position in index
      
-    CHARACTER(LEN=*), INTENT(OUT) :: name    ! Attribute name
+    CHARACTER(LEN=*), INTENT(OUT) :: name ! Attribute name
 
-    INTEGER(SIZE_T), INTENT(INOUT) :: size  ! Buffer size ! *TEST* check for 0 value *CHECK* should this return the correct value
     
     INTEGER, INTENT(OUT) :: hdferr    ! Error code:
                                          ! Returns attribute name size,
@@ -2849,12 +2847,14 @@ CONTAINS
     INTEGER(SIZE_T) :: obj_namelen
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id   ! Link access property list
     INTEGER(HID_T) :: lapl_id_default
+    INTEGER(SIZE_T), OPTIONAL, INTENT(OUT) :: size   ! Indicates the size, in the number of characters, of the attribute
+    INTEGER(SIZE_T) :: size_default
 !
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
     INTERFACE
        INTEGER FUNCTION h5aget_name_by_idx_c(loc_id, obj_name, obj_namelen, idx_type, order, &
-            n, name, size, lapl_id_default)
+            n, name, size_default, lapl_id_default)
          USE H5GLOBAL
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5AGET_NAME_BY_IDX_C'::h5aget_name_by_idx_c
@@ -2867,7 +2867,7 @@ CONTAINS
          INTEGER(HSIZE_T), INTENT(IN) :: n
      
          CHARACTER(LEN=*), INTENT(OUT) :: name
-         INTEGER(SIZE_T), INTENT(INOUT) :: size
+         INTEGER(SIZE_T) :: size_default
          INTEGER(HID_T) :: lapl_id_default
          INTEGER(SIZE_T) :: obj_namelen
        END FUNCTION h5aget_name_by_idx_c
@@ -2877,8 +2877,13 @@ CONTAINS
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
+    size_default = LEN(name)
+
     hdferr = h5aget_name_by_idx_c(loc_id, obj_name, obj_namelen, idx_type, order, &
-         n, name, size, lapl_id_default)
+         n, name, size_default, lapl_id_default)
+    
+    IF(PRESENT(size)) size = size_default
+
 
   END SUBROUTINE h5aget_name_by_idx_f
 
