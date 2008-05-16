@@ -33,7 +33,11 @@ Contents:
 
 Preconditions:
 
-   1. Installed Microsoft Visual Studio 2005.
+   1. Installed Microsoft Visual Studio.  This document is written for Visual
+      Studio 2005, although we also support Visual Studio .NET 2003.  Most of 
+      the instructions are the same, although some features are unsupported in
+      Visual Studio .NET.  For simple Visual Studio .NET instructions, see the
+      document INSTALL_Windows_NET.TXT.
    
    2. (Optional) Installed Intel Compiler 9.1 if you want to build HDF5 Fortran 
       libraries.
@@ -428,7 +432,9 @@ Note:   The complete testing suite can take a long time to run on even fast
         
             set HDF5TestExpress=3
             
-        If the variable is unset, it takes on the value 1.
+        If the variable is unset, it takes on the value 1.  Note that when
+        HDF5TestExpress is set to 2 or 3, some features may not be thoroughly
+        tested.  For most users, we recommend not setting this variable.
         
 
 We provide 2 options for users to test HDF5 libraries and tools.
