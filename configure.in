@@ -69,12 +69,9 @@ AC_OUTPUT_COMMANDS([
     /bin/mv -f pubconf src/H5pubconf.h
   fi
   echo "Post process src/libhdf5.settings"
-cat src/libhdf5.settings
   sed '/^#/d' < src/libhdf5.settings > libhdf5.settings.TMP
   cp libhdf5.settings.TMP src/libhdf5.settings
   rm -f libhdf5.settings.TMP
-echo result
-cat src/libhdf5.settings
 ])
 
 dnl It's possible to configure for a host other than the one on which
@@ -138,7 +135,7 @@ dnl CXX: C++ compiler.
 dnl HDF5_HL: whether high-level library is enabled. Default is yes.
 dnl GPFS: whether gpfs is enabled. Default no.
 dnl LINUX_LFS: whether LINUX_LFS is enabled. Default no.
-dnl INSTRUMENT: whether INSTRUMENT is enabled. Default no.
+dnl INSTRUMENT: whether INSTRUMENT is enabled. No default set here.
 dnl CODESTACK: whether CODESTACK is enabled. Default no.
 dnl HAVE_DMALLOC: whether system has dmalloc support. Default no.
 dnl DIRECT_VFD: whether DIRECT_VFD is enabled. Default no.
@@ -158,7 +155,7 @@ AC_SUBST(CXX) HDF_CXX=no
 AC_SUBST(HDF5_HL) HDF5_HL=yes
 AC_SUBST(GPFS) GPFS=no
 AC_SUBST(LINUX_LFS) LINUX_LFS=no
-AC_SUBST(INSTRUMENT) INSTRUMENT=no
+AC_SUBST(INSTRUMENT)
 AC_SUBST(CODESTACK) CODESTACK=no
 AC_SUBST(HAVE_DMALLOC) HAVE_DMALLOC=no
 AC_SUBST(DIRECT_VFD) DIRECT_VFD=no
