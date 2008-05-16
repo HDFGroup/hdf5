@@ -236,7 +236,7 @@ SUBROUTINE test_h5o_plist(total_error)
   CHARACTER(LEN=7), PARAMETER :: TEST_FILENAME = 'test.h5'
   
 
-  PRINT*,'Testing object creation properties'
+!  PRINT*,'Testing object creation properties'
 
   !/* Make a FAPL that uses the "use the latest version of the format" flag */
   CALL H5Pcreate_f(H5P_FILE_ACCESS_F, fapl, error)
