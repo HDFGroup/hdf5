@@ -519,8 +519,7 @@ rem
     call :tooltest %arg%
 
 
-    rem long swtiches. use FILE4=h5repack_layout.h5 (no filters)
-
+    rem latest file format with long switches. use FILE4=h5repack_layout.h5 (no filters)
     set arg=%file4% --layout CHUNK=20x10 --filter GZIP=1 --threshold=10 --native --latest --compact=8 --indexed=6 --ssize=8[:dtype]
     if not "%use_filter_deflate%"=="yes" (
        call :skip %arg%
@@ -528,6 +527,14 @@ rem
        call :tooltest %arg%
     )
 
+    rem latest file format with short switches. use FILE4=h5repack_layout.h5 (no filters)
+    set arg=%file4% -l CHUNK=20x10 -f GZIP=1 -m 10 -n -L -c 8 -d 6 -s 8[:dtype]
+    if not "%use_filter_deflate%"=="yes" (
+     call :skip %arg%
+    ) else (
+     call :tooltest %arg%
+    )
+    
     rem several global filters
 
     set arg=%file4% --filter GZIP=1 --filter SHUF
