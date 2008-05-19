@@ -766,8 +766,6 @@ uninstall-am: uninstall-binPROGRAMS
 help:
 	@$(top_srcdir)/bin/makehelp
 
-check-perform: check
-
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
 build-lib: $(LIB)

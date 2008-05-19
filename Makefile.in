@@ -370,7 +370,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog
 @BUILD_HDF5_HL_CONDITIONAL_FALSE@HDF5_HL_DIR = 
 @BUILD_HDF5_HL_CONDITIONAL_TRUE@HDF5_HL_DIR = hl
 SUBDIRS = src test $(TESTPARALLEL_DIR) tools . $(CXX_DIR) $(FORTRAN_DIR) \
-          $(HDF5_HL_DIR)
+          $(HDF5_HL_DIR) perform
 
 DIST_SUBDIRS = src test testpar tools . c++ fortran hl perform examples
 
@@ -835,13 +835,6 @@ all-local:
 
 tests:
 	@@SETX@; for d in $(SUBDIRS) perform; do                        \
-	  if test $$d != .; then                                        \
-	   (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;            \
-	  fi;                                                           \
-	done
-
-check-perform:
-	@@SETX@; for d in perform; do                        \
 	  if test $$d != .; then                                        \
 	   (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;            \
 	  fi;                                                           \

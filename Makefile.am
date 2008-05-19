@@ -73,7 +73,7 @@ else
 endif
 
 SUBDIRS = src test $(TESTPARALLEL_DIR) tools . $(CXX_DIR) $(FORTRAN_DIR) \
-          $(HDF5_HL_DIR)
+          $(HDF5_HL_DIR) perform
 DIST_SUBDIRS = src test testpar tools . c++ fortran hl perform examples
 
 # Some files generated during configure that should be cleaned
@@ -96,13 +96,6 @@ all-local:
 
 tests:
 	@@SETX@; for d in $(SUBDIRS) perform; do                        \
-	  if test $$d != .; then                                        \
-	   (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;            \
-	  fi;                                                           \
-	done
-
-check-perform:
-	@@SETX@; for d in perform; do                        \
 	  if test $$d != .; then                                        \
 	   (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;            \
 	  fi;                                                           \
