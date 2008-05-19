@@ -62,6 +62,4 @@ iopipe_LDADD=$(LIBH5TEST) $(LIBHDF5)
 zip_perf_LDADD=$(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
 perf_meta_LDADD=$(LIBH5TEST) $(LIBHDF5)
 
-check-perform: check
-
 include $(top_srcdir)/config/conclude.am
