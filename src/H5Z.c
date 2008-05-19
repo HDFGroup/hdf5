@@ -499,7 +499,7 @@ H5Z_prelude_callback(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type_t prelude_ty
             /* Check if the chunks have filters */
             if(dcpl_pline.nused > 0) {
                 unsigned chunk_ndims;   /* # of chunk dimensions */
-                size_t chunk_size[H5O_LAYOUT_NDIMS];       /* Size of chunk dimensions */
+                uint32_t chunk_size[H5O_LAYOUT_NDIMS];       /* Size of chunk dimensions */
                 hsize_t chunk_dims[H5O_LAYOUT_NDIMS];      /* Size of chunk dimensions */
                 H5S_t *space;           /* Dataspace describing chunk */
                 hid_t space_id;         /* ID for dataspace describing chunk */
@@ -512,8 +512,8 @@ H5Z_prelude_callback(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type_t prelude_ty
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve chunk size")
 
                 /* Create a data space for a chunk & set the extent */
-                for(u=0; u<chunk_ndims; u++)
-                    chunk_dims[u]=chunk_size[u];
+                for(u = 0; u < chunk_ndims; u++)
+                    chunk_dims[u] = chunk_size[u];
                 if(NULL == (space = H5S_create_simple(chunk_ndims,chunk_dims,NULL)))
                     HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace")
 

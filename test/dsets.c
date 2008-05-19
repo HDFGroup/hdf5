@@ -2541,8 +2541,8 @@ test_nbit_int(hid_t file)
 {
 #ifdef H5_HAVE_FILTER_NBIT
     hid_t               dataset, datatype, mem_datatype, space, dc;
-    const hsize_t       size[2] = {2, 5};
-    const hsize_t       chunk_size[2] = {2,5};
+    hsize_t             size[2] = {2, 5};
+    hsize_t             chunk_size[2] = {2,5};
     int                 orig_data[2][5];
     int                 new_data[2][5];
     unsigned int        mask;
