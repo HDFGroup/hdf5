@@ -43,7 +43,7 @@ INSTALL_FILES=dsetexample.f90 fileexample.f90 rwdsetexample.f90             \
        refregexample.f90 mountexample.f90 compound.f90 ph5example.f90
 
 # Mark this directory as part of the Fortran API
-HDF_FORTRAN=yes
+FORTRAN_API=yes
 
 # Some examples depend on files created by other examples.
 grpdsetexample.chkexe_: grpsexample.chkexe_

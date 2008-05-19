@@ -140,9 +140,7 @@ HAVE_DMALLOC = @HAVE_DMALLOC@
 HDF5_HL = @HDF5_HL@
 HDF5_INTERFACES = @HDF5_INTERFACES@
 HDF_CXX = @HDF_CXX@
-
-# Mark this directory as part of the Fortran API
-HDF_FORTRAN = yes
+HDF_FORTRAN = @HDF_FORTRAN@
 HID_T = @HID_T@
 HL = @HL@
 HL_FOR = @HL_FOR@
@@ -330,6 +328,10 @@ TEST_PROG = exlite
 
 # List files to be installed here
 INSTALL_FILES = 
+
+# Mark this directory as part of the Fortran API (this affects output
+# from tests in conclude.am)
+FORTRAN_API = yes
 
 # Tell automake how to install examples
 EXAMPLEDIR = $(docdir)/hdf5/examples/hl/fortran
@@ -670,10 +672,10 @@ $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
 	      echo "No need to test $${tname} again."; \
 	   else \
 	      echo "============================" > $${log}; \
-	      if test "X$(HDF_FORTRAN)" = "Xyes"; then \
+	      if test "X$(FORTRAN_API)" = "Xyes"; then \
 	         echo "Fortran API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
 	         echo "Fortran API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
-	      elif test "X$(HDF_CXX)" = "Xyes"; then \
+	      elif test "X$(CXX_API)" = "Xyes"; then \
 	         echo "C++ API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
 	         echo "C++ API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log};\
 	      else \
@@ -709,10 +711,10 @@ $(TEST_SCRIPT_CHKSH) $(TEST_SCRIPT_PARA_CHKSH) dummysh.chkexe_:
 	      echo "No need to test $${tname} again."; \
 	   else \
 	      echo "============================" > $${log}; \
-	      if test "X$(HDF_FORTRAN)" = "Xyes"; then \
+	      if test "X$(FORTRAN_API)" = "Xyes"; then \
 	         echo "Fortran API: Testing $${tname} $(TEST_FLAGS)"; \
 	         echo "Fortran API: $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
-	      elif test "X$(HDF_CXX)" = "Xyes"; then \
+	      elif test "X$(CXX_API)" = "Xyes"; then \
 	         echo "C++ API: Testing $${tname} $(TEST_FLAGS)"; \
 	         echo "C++ API: $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
 	      else \

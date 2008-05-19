@@ -175,9 +175,7 @@ HADDR_T = @HADDR_T@
 HAVE_DMALLOC = @HAVE_DMALLOC@
 HDF5_HL = @HDF5_HL@
 HDF5_INTERFACES = @HDF5_INTERFACES@
-
-# Mark this directory as part of the C++ API
-HDF_CXX = yes
+HDF_CXX = @HDF_CXX@
 HDF_FORTRAN = @HDF_FORTRAN@
 HID_T = @HID_T@
 HL = @HL@
@@ -386,6 +384,9 @@ include_HEADERS = H5Cpp.h H5AbstractDs.h H5AtomType.h H5Attribute.h H5Classes.h 
 # h5c++ and libhdf5.settings are generated during configure.  Remove only when
 # distclean.
 DISTCLEANFILES = h5c++ libhdf5.settings
+
+# Mark this directory as part of the C++ API
+CXX_API = yes
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
@@ -856,10 +857,10 @@ $(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
 	      echo "No need to test $${tname} again."; \
 	   else \
 	      echo "============================" > $${log}; \
-	      if test "X$(HDF_FORTRAN)" = "Xyes"; then \
+	      if test "X$(FORTRAN_API)" = "Xyes"; then \
 	         echo "Fortran API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
 	         echo "Fortran API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
-	      elif test "X$(HDF_CXX)" = "Xyes"; then \
+	      elif test "X$(CXX_API)" = "Xyes"; then \
 	         echo "C++ API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
 	         echo "C++ API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log};\
 	      else \
@@ -895,10 +896,10 @@ $(TEST_SCRIPT_CHKSH) $(TEST_SCRIPT_PARA_CHKSH) dummysh.chkexe_:
 	      echo "No need to test $${tname} again."; \
 	   else \
 	      echo "============================" > $${log}; \
-	      if test "X$(HDF_FORTRAN)" = "Xyes"; then \
+	      if test "X$(FORTRAN_API)" = "Xyes"; then \
 	         echo "Fortran API: Testing $${tname} $(TEST_FLAGS)"; \
 	         echo "Fortran API: $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
-	      elif test "X$(HDF_CXX)" = "Xyes"; then \
+	      elif test "X$(CXX_API)" = "Xyes"; then \
 	         echo "C++ API: Testing $${tname} $(TEST_FLAGS)"; \
 	         echo "C++ API: $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
 	      else \
