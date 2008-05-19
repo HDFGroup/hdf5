@@ -841,6 +841,25 @@ H5_CFLAGS
 H5_CPPFLAGS
 H5_FCFLAGS
 H5_CXXFLAGS
+EXTERNAL_FILTERS
+MPE
+STATIC_EXEC
+HDF_FORTRAN
+FC
+HDF_CXX
+CXX
+HDF5_HL
+GPFS
+LINUX_LFS
+INSTRUMENT
+CODESTACK
+HAVE_DMALLOC
+DIRECT_VFD
+THREADSAFE
+STATIC_SHARED
+enable_shared
+enable_static
+UNAME_INFO
 CC
 CFLAGS
 LDFLAGS
@@ -865,7 +884,6 @@ HSSIZE_T
 HID_T
 SIZE_T
 OBJECT_NAMELEN_DEFAULT_F
-FC
 FCFLAGS
 ac_ct_FC
 FCFLAGS_f90
@@ -874,7 +892,6 @@ FSEARCH_DIRS
 F9XMODFLAG
 F9XMODEXT
 FCLIBS
-CXX
 CXXFLAGS
 ac_ct_CXX
 CXXDEPMODE
@@ -920,7 +937,6 @@ INSTRUMENT_LIBRARY
 CLEARFILEBUF
 USINGMEMCHECKER
 ADD_PARALLEL_FILES
-MPE
 MPI_GET_SIZE
 FILTERS
 USE_FILTER_SHUFFLE
@@ -955,8 +971,7 @@ BUILD_HDF5_HL_CONDITIONAL_FALSE
 SEARCH
 SETX
 LIBOBJS
-LTLIBOBJS
-STATIC_SHARED'
+LTLIBOBJS'
 ac_subst_files=''
       ac_precious_vars='build_alias
 host_alias
@@ -2723,6 +2738,27 @@ echo $ECHO_N "checking shell variables initial values... $ECHO_C" >&6; }
 set >&5
 { echo "$as_me:$LINENO: result: done" >&5
 echo "${ECHO_T}done" >&6; }
+
+
+
+ MPE=no
+ STATIC_EXEC=no
+ HDF_FORTRAN=no
+ HDF_FORTRAN=no
+ HDF_CXX=no
+ HDF_CXX=no
+ HDF5_HL=yes
+ GPFS=no
+ LINUX_LFS=no
+
+ CODESTACK=no
+ HAVE_DMALLOC=no
+ DIRECT_VFD=no
+ THREADSAFE=no
+
+
+
+ UNAME_INFO=`uname -a`
 
 
 
@@ -7876,13 +7912,13 @@ if test "${lt_cv_nm_interface+set}" = set; then
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:7879: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:7915: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:7882: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:7918: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:7885: output\"" >&5)
+  (eval echo "\"\$as_me:7921: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -8990,7 +9026,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 8993 "configure"' > conftest.$ac_ext
+  echo '#line 9029 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -11559,11 +11595,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:11562: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:11598: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:11566: \$? = $ac_status" >&5
+   echo "$as_me:11602: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -11883,11 +11919,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:11886: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:11922: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:11890: \$? = $ac_status" >&5
+   echo "$as_me:11926: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -11988,11 +12024,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:11991: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12027: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:11995: \$? = $ac_status" >&5
+   echo "$as_me:12031: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12043,11 +12079,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12046: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12082: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:12050: \$? = $ac_status" >&5
+   echo "$as_me:12086: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14871,7 +14907,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 14874 "configure"
+#line 14910 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14971,7 +15007,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 14974 "configure"
+#line 15010 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -16990,11 +17026,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16993: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17029: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16997: \$? = $ac_status" >&5
+   echo "$as_me:17033: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -17089,11 +17125,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17092: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17128: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:17096: \$? = $ac_status" >&5
+   echo "$as_me:17132: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -17141,11 +17177,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17144: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17180: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:17148: \$? = $ac_status" >&5
+   echo "$as_me:17184: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -18671,11 +18707,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18674: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18710: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:18678: \$? = $ac_status" >&5
+   echo "$as_me:18714: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -18770,11 +18806,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18773: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18809: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:18777: \$? = $ac_status" >&5
+   echo "$as_me:18813: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -18822,11 +18858,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18825: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18861: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:18829: \$? = $ac_status" >&5
+   echo "$as_me:18865: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -47753,7 +47789,7 @@ rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
       conftest$ac_exeext conftest.$ac_ext
   fi
 
-               MPE=yes
+              MPE=yes
 
 # Check whether --with-mpe was given.
 if test "${with_mpe+set}" = set; then
@@ -51880,28 +51916,28 @@ H5_CFLAGS!$H5_CFLAGS$ac_delim
 H5_CPPFLAGS!$H5_CPPFLAGS$ac_delim
 H5_FCFLAGS!$H5_FCFLAGS$ac_delim
 H5_CXXFLAGS!$H5_CXXFLAGS$ac_delim
+EXTERNAL_FILTERS!$EXTERNAL_FILTERS$ac_delim
+MPE!$MPE$ac_delim
+STATIC_EXEC!$STATIC_EXEC$ac_delim
+HDF_FORTRAN!$HDF_FORTRAN$ac_delim
+FC!$FC$ac_delim
+HDF_CXX!$HDF_CXX$ac_delim
+CXX!$CXX$ac_delim
+HDF5_HL!$HDF5_HL$ac_delim
+GPFS!$GPFS$ac_delim
+LINUX_LFS!$LINUX_LFS$ac_delim
+INSTRUMENT!$INSTRUMENT$ac_delim
+CODESTACK!$CODESTACK$ac_delim
+HAVE_DMALLOC!$HAVE_DMALLOC$ac_delim
+DIRECT_VFD!$DIRECT_VFD$ac_delim
+THREADSAFE!$THREADSAFE$ac_delim
+STATIC_SHARED!$STATIC_SHARED$ac_delim
+enable_shared!$enable_shared$ac_delim
+enable_static!$enable_static$ac_delim
+UNAME_INFO!$UNAME_INFO$ac_delim
 CC!$CC$ac_delim
 CFLAGS!$CFLAGS$ac_delim
 LDFLAGS!$LDFLAGS$ac_delim
-ac_ct_CC!$ac_ct_CC$ac_delim
-EXEEXT!$EXEEXT$ac_delim
-OBJEXT!$OBJEXT$ac_delim
-DEPDIR!$DEPDIR$ac_delim
-am__include!$am__include$ac_delim
-am__quote!$am__quote$ac_delim
-AMDEP_TRUE!$AMDEP_TRUE$ac_delim
-AMDEP_FALSE!$AMDEP_FALSE$ac_delim
-AMDEPBACKSLASH!$AMDEPBACKSLASH$ac_delim
-CCDEPMODE!$CCDEPMODE$ac_delim
-am__fastdepCC_TRUE!$am__fastdepCC_TRUE$ac_delim
-am__fastdepCC_FALSE!$am__fastdepCC_FALSE$ac_delim
-HDF5_INTERFACES!$HDF5_INTERFACES$ac_delim
-R_LARGE!$R_LARGE$ac_delim
-R_INTEGER!$R_INTEGER$ac_delim
-HADDR_T!$HADDR_T$ac_delim
-HSIZE_T!$HSIZE_T$ac_delim
-HSSIZE_T!$HSSIZE_T$ac_delim
-HID_T!$HID_T$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -51943,9 +51979,27 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
+ac_ct_CC!$ac_ct_CC$ac_delim
+EXEEXT!$EXEEXT$ac_delim
+OBJEXT!$OBJEXT$ac_delim
+DEPDIR!$DEPDIR$ac_delim
+am__include!$am__include$ac_delim
+am__quote!$am__quote$ac_delim
+AMDEP_TRUE!$AMDEP_TRUE$ac_delim
+AMDEP_FALSE!$AMDEP_FALSE$ac_delim
+AMDEPBACKSLASH!$AMDEPBACKSLASH$ac_delim
+CCDEPMODE!$CCDEPMODE$ac_delim
+am__fastdepCC_TRUE!$am__fastdepCC_TRUE$ac_delim
+am__fastdepCC_FALSE!$am__fastdepCC_FALSE$ac_delim
+HDF5_INTERFACES!$HDF5_INTERFACES$ac_delim
+R_LARGE!$R_LARGE$ac_delim
+R_INTEGER!$R_INTEGER$ac_delim
+HADDR_T!$HADDR_T$ac_delim
+HSIZE_T!$HSIZE_T$ac_delim
+HSSIZE_T!$HSSIZE_T$ac_delim
+HID_T!$HID_T$ac_delim
 SIZE_T!$SIZE_T$ac_delim
 OBJECT_NAMELEN_DEFAULT_F!$OBJECT_NAMELEN_DEFAULT_F$ac_delim
-FC!$FC$ac_delim
 FCFLAGS!$FCFLAGS$ac_delim
 ac_ct_FC!$ac_ct_FC$ac_delim
 FCFLAGS_f90!$FCFLAGS_f90$ac_delim
@@ -51954,7 +52008,6 @@ FSEARCH_DIRS!$FSEARCH_DIRS$ac_delim
 F9XMODFLAG!$F9XMODFLAG$ac_delim
 F9XMODEXT!$F9XMODEXT$ac_delim
 FCLIBS!$FCLIBS$ac_delim
-CXX!$CXX$ac_delim
 CXXFLAGS!$CXXFLAGS$ac_delim
 ac_ct_CXX!$ac_ct_CXX$ac_delim
 CXXDEPMODE!$CXXDEPMODE$ac_delim
@@ -52000,7 +52053,6 @@ INSTRUMENT_LIBRARY!$INSTRUMENT_LIBRARY$ac_delim
 CLEARFILEBUF!$CLEARFILEBUF$ac_delim
 USINGMEMCHECKER!$USINGMEMCHECKER$ac_delim
 ADD_PARALLEL_FILES!$ADD_PARALLEL_FILES$ac_delim
-MPE!$MPE$ac_delim
 MPI_GET_SIZE!$MPI_GET_SIZE$ac_delim
 FILTERS!$FILTERS$ac_delim
 USE_FILTER_SHUFFLE!$USE_FILTER_SHUFFLE$ac_delim
@@ -52024,21 +52076,9 @@ BUILD_ALL_CONDITIONAL_FALSE!$BUILD_ALL_CONDITIONAL_FALSE$ac_delim
 DEPRECATED_SYMBOLS!$DEPRECATED_SYMBOLS$ac_delim
 DEFAULT_API_VERSION!$DEFAULT_API_VERSION$ac_delim
 STRICT_FORMAT_CHECKS!$STRICT_FORMAT_CHECKS$ac_delim
-BUILD_CXX_CONDITIONAL_TRUE!$BUILD_CXX_CONDITIONAL_TRUE$ac_delim
-BUILD_CXX_CONDITIONAL_FALSE!$BUILD_CXX_CONDITIONAL_FALSE$ac_delim
-BUILD_PARALLEL_CONDITIONAL_TRUE!$BUILD_PARALLEL_CONDITIONAL_TRUE$ac_delim
-BUILD_PARALLEL_CONDITIONAL_FALSE!$BUILD_PARALLEL_CONDITIONAL_FALSE$ac_delim
-BUILD_FORTRAN_CONDITIONAL_TRUE!$BUILD_FORTRAN_CONDITIONAL_TRUE$ac_delim
-BUILD_FORTRAN_CONDITIONAL_FALSE!$BUILD_FORTRAN_CONDITIONAL_FALSE$ac_delim
-BUILD_HDF5_HL_CONDITIONAL_TRUE!$BUILD_HDF5_HL_CONDITIONAL_TRUE$ac_delim
-BUILD_HDF5_HL_CONDITIONAL_FALSE!$BUILD_HDF5_HL_CONDITIONAL_FALSE$ac_delim
-SEARCH!$SEARCH$ac_delim
-SETX!$SETX$ac_delim
-LIBOBJS!$LIBOBJS$ac_delim
-LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 93; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5
@@ -52057,6 +52097,59 @@ fi
 
 cat >>$CONFIG_STATUS <<_ACEOF
 cat >"\$tmp/subs-2.sed" <<\CEOF$ac_eof
+/@[a-zA-Z_][a-zA-Z_0-9]*@/!b
+_ACEOF
+sed '
+s/[,\\&]/\\&/g; s/@/@|#_!!_#|/g
+s/^/s,@/; s/!/@,|#_!!_#|/
+:n
+t n
+s/'"$ac_delim"'$/,g/; t
+s/$/\\/; p
+N; s/^.*\n//; s/[,\\&]/\\&/g; s/@/@|#_!!_#|/g; b n
+' >>$CONFIG_STATUS <conf$$subs.sed
+rm -f conf$$subs.sed
+cat >>$CONFIG_STATUS <<_ACEOF
+CEOF$ac_eof
+_ACEOF
+
+
+ac_delim='%!_!# '
+for ac_last_try in false false false false false :; do
+  cat >conf$$subs.sed <<_ACEOF
+BUILD_CXX_CONDITIONAL_TRUE!$BUILD_CXX_CONDITIONAL_TRUE$ac_delim
+BUILD_CXX_CONDITIONAL_FALSE!$BUILD_CXX_CONDITIONAL_FALSE$ac_delim
+BUILD_PARALLEL_CONDITIONAL_TRUE!$BUILD_PARALLEL_CONDITIONAL_TRUE$ac_delim
+BUILD_PARALLEL_CONDITIONAL_FALSE!$BUILD_PARALLEL_CONDITIONAL_FALSE$ac_delim
+BUILD_FORTRAN_CONDITIONAL_TRUE!$BUILD_FORTRAN_CONDITIONAL_TRUE$ac_delim
+BUILD_FORTRAN_CONDITIONAL_FALSE!$BUILD_FORTRAN_CONDITIONAL_FALSE$ac_delim
+BUILD_HDF5_HL_CONDITIONAL_TRUE!$BUILD_HDF5_HL_CONDITIONAL_TRUE$ac_delim
+BUILD_HDF5_HL_CONDITIONAL_FALSE!$BUILD_HDF5_HL_CONDITIONAL_FALSE$ac_delim
+SEARCH!$SEARCH$ac_delim
+SETX!$SETX$ac_delim
+LIBOBJS!$LIBOBJS$ac_delim
+LTLIBOBJS!$LTLIBOBJS$ac_delim
+_ACEOF
+
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 12; then
+    break
+  elif $ac_last_try; then
+    { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5
+echo "$as_me: error: could not make $CONFIG_STATUS" >&2;}
+   { (exit 1); exit 1; }; }
+  else
+    ac_delim="$ac_delim!$ac_delim _$ac_delim!! "
+  fi
+done
+
+ac_eof=`sed -n '/^CEOF[0-9]*$/s/CEOF/0/p' conf$$subs.sed`
+if test -n "$ac_eof"; then
+  ac_eof=`echo "$ac_eof" | sort -nru | sed 1q`
+  ac_eof=`expr $ac_eof + 1`
+fi
+
+cat >>$CONFIG_STATUS <<_ACEOF
+cat >"\$tmp/subs-3.sed" <<\CEOF$ac_eof
 /@[a-zA-Z_][a-zA-Z_0-9]*@/!b end
 _ACEOF
 sed '
@@ -52325,7 +52418,7 @@ s&@abs_top_builddir@&$ac_abs_top_builddir&;t t
 s&@INSTALL@&$ac_INSTALL&;t t
 s&@MKDIR_P@&$ac_MKDIR_P&;t t
 $ac_datarootdir_hack
-" $ac_file_inputs | sed -f "$tmp/subs-1.sed" | sed -f "$tmp/subs-2.sed" >$tmp/out
+" $ac_file_inputs | sed -f "$tmp/subs-1.sed" | sed -f "$tmp/subs-2.sed" | sed -f "$tmp/subs-3.sed" >$tmp/out
 
 test -z "$ac_datarootdir_hack$ac_datarootdir_seen" &&
   { ac_out=`sed -n '/\${datarootdir}/p' "$tmp/out"`; test -n "$ac_out"; } &&
@@ -52493,6 +52586,10 @@ echo "$as_me: executing $ac_file commands" >&6;}
   else
     /bin/mv -f pubconf src/H5pubconf.h
   fi
+  echo "Post process src/libhdf5.settings"
+  sed '/^#/d' < src/libhdf5.settings > libhdf5.settings.TMP
+  cp libhdf5.settings.TMP src/libhdf5.settings
+  rm -f libhdf5.settings.TMP
  ;;
     "depfiles":C) test x"$AMDEP_TRUE" != x"" || for mf in $CONFIG_FILES; do
   # Strip MF so we end up with the name of the file.
@@ -53581,7 +53678,6 @@ touch ./config/stamp2
 # Finally the makefiles
 test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
 
-
 if (./libtool --features | grep '^enable shared libraries' > /dev/null); then
   enable_shared=yes
 else
@@ -53621,6 +53717,9 @@ cat >> src/H5config.h <<EOF
 #endif
 EOF
 
+cat src/libhdf5.settings
+
+if false; then
 if test -z "$ECHO_N" -o -z "$ECHO_C"; then
   if (echo "testing\c"; echo 1,2,3) | grep c >/dev/null; then
     if (echo -n testing; echo 1,2,3) | sed s/-n/xn/ | grep xn >/dev/null; then
@@ -53816,4 +53915,4 @@ IF_ENABLED_DISABLED "$THREADSAFE"
 
 PRINT_N "             High Level library"
 IF_ENABLED_DISABLED "$HDF5_HL"
-
+fi
