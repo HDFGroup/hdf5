@@ -49,7 +49,7 @@ static struct long_options l_opts[] = {
     { "native", no_arg, 'n' },
     { "latest", no_arg, 'L' },
     { "compact", require_arg, 'c' },
-    { "indexed", require_arg, 'i' },
+    { "indexed", require_arg, 'd' },
     { "ssize", require_arg, 's' },
     { NULL, 0, '\0' }
 };
