@@ -27,8 +27,6 @@
 #include "H5MMprivate.h"
 #include "cache2_common.h"
 
-#define USE_CORE_DRIVER	FALSE
-
 /* global variable declarations: */
 
 const char *FILENAME[] = {
@@ -989,6 +987,7 @@ serialize(haddr_t addr,
           void ** new_image_ptr_ptr)
 {
     const char * fcn_name = "serialize()";
+    char * char_ptr;
     hbool_t verbose = FALSE;
     herr_t ret_val = SUCCEED;
     int32_t i;
@@ -1049,6 +1048,12 @@ serialize(haddr_t addr,
         entry_ptr->num_flush_ops = 0;
         entry_ptr->flush_op_self_resize_in_progress = FALSE;
 
+	/* This looks wrong, but it isn't -- *flags_ptr will be modified
+	 * by execute_flush_op2() only if the target is this entry --
+	 * and the flags set will accumulate over the set of calls in 
+	 * the for loop.
+	 */
+
 	if ( ( pass2 ) && 
              ( ((*flags_ptr) & H5C2__SERIALIZE_RESIZED_FLAG) != 0 ) ) {
 
@@ -1082,6 +1087,7 @@ serialize(haddr_t addr,
 
                     *new_image_ptr_ptr = image_ptr;
                     *new_len_ptr = entry_ptr->size;
+		    len = entry_ptr->size;
 
                 }
             }
@@ -1095,6 +1101,14 @@ serialize(haddr_t addr,
 
             *new_addr_ptr = entry_ptr->addr;
 	}
+    }
+
+    /* null out the image to avoid spurious failures */
+    char_ptr = (char *)image_ptr;
+    for ( i = 0; (size_t)i < len; i++ )
+    {
+        *char_ptr = '\0';
+	char_ptr++;
     }
 
     if ( ( type == PICO_ENTRY_TYPE ) || ( type == VARIABLE_ENTRY_TYPE ) ) {
@@ -1344,7 +1358,6 @@ free_icr(haddr_t addr,
     HDassert( entry_ptr->header.size == entry_ptr->size );
     HDassert( ( entry_ptr->type == VARIABLE_ENTRY_TYPE ) ||
 	      ( entry_ptr->size == entry_sizes2[entry_ptr->type] ) );
-
     HDassert( !(entry_ptr->is_dirty) );
     HDassert( !(entry_ptr->header.is_dirty) );
 
@@ -2181,6 +2194,7 @@ resize_pinned_entry2(H5F_t * file_ptr,
                 result = H5C2_resize_pinned_entry(file_ptr,
                                                   (void *)entry_ptr,
                                                    new_size);
+		entry_ptr->is_dirty = TRUE;
 
                 if ( result != SUCCEED ) {
 
@@ -2625,6 +2639,8 @@ setup_cache2(size_t max_cache_size,
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
                   fcn_name, mile_stone++, (int)pass2);
 
+    saved_fid = -1;
+
 #if 0 /* This debugging code is useful from time to time -- keep it for now */
     HDfprintf(stdout, "PICO_BASE_ADDR = 0x%lx, PICO_ALT_BASE_ADDR = 0x%lx.\n",
               (long)PICO_BASE_ADDR, (long)PICO_ALT_BASE_ADDR);
@@ -2693,6 +2709,8 @@ setup_cache2(size_t max_cache_size,
 
         fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
 
+	saved_fid = fid;
+
         if ( fid < 0 ) {
 
             pass2 = FALSE;
@@ -2713,7 +2731,6 @@ setup_cache2(size_t max_cache_size,
 
         } else {
 
-	    saved_fid = fid;
             file_ptr = H5I_object_verify(fid, H5I_FILE);
 
 	    if ( file_ptr == NULL ) {
@@ -2919,7 +2936,7 @@ takedown_cache2(H5F_t * file_ptr,
 	    saved_fid = -1;
 
         }
-#if ! USE_CORE_DRIVER
+#if ( USE_CORE_DRIVER == FALSE )
         if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
 
@@ -3176,7 +3193,7 @@ insert_entry2(H5F_t * file_ptr,
             pass2 = FALSE;
             failure_mssg2 = "error in H5C2_insert().";
 
-#if 0 /* This is useful debugging code.  Lets keep it around. */
+#if 1 /* This is useful debugging code.  Lets keep it around. */
 
             HDfprintf(stdout, "result = %d\n", (int)result);
             HDfprintf(stdout, "entry_ptr->header.is_protected = %d\n",
@@ -3427,6 +3444,9 @@ mark_pinned_or_protected_entry_dirty2(H5F_t * file_ptr,
  *		Updated code to reflect the fact that renames automatically
  *		dirty entries.
  *
+ *		JRM -- 5/16/08
+ *		Updated code to do nothing if pass2 is FALSE on entry.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -3436,6 +3456,7 @@ rename_entry2(H5C2_t * cache_ptr,
               int32_t idx,
               hbool_t main_addr)
 {
+    const char *   fcn_name = "rename_entry2()";
     herr_t         result;
     hbool_t	   done = TRUE; /* will set to FALSE if we have work to do */
     haddr_t        old_addr = HADDR_UNDEF;
@@ -3443,74 +3464,168 @@ rename_entry2(H5C2_t * cache_ptr,
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
 
-    HDassert( cache_ptr );
-    HDassert( ( 0 <= type ) && ( type < NUMBER_OF_ENTRY_TYPES ) );
-    HDassert( ( 0 <= idx ) && ( idx <= max_indices2[type] ) );
+    if ( pass2 ) {
 
-    base_addr = entries2[type];
-    entry_ptr = &(base_addr[idx]);
+        HDassert( cache_ptr );
+        HDassert( ( 0 <= type ) && ( type < NUMBER_OF_ENTRY_TYPES ) );
+        HDassert( ( 0 <= idx ) && ( idx <= max_indices2[type] ) );
 
-    HDassert( entry_ptr->index == idx );
-    HDassert( entry_ptr->type == type );
-    HDassert( entry_ptr == entry_ptr->self );
-    HDassert( entry_ptr->cache_ptr == cache_ptr );
-    HDassert( !(entry_ptr->is_protected) );
-    HDassert( !(entry_ptr->header.is_protected) );
+        base_addr = entries2[type];
+        entry_ptr = &(base_addr[idx]);
+
+        HDassert( entry_ptr->index == idx );
+        HDassert( entry_ptr->type == type );
+        HDassert( entry_ptr == entry_ptr->self );
+        HDassert( entry_ptr->cache_ptr == cache_ptr );
+        HDassert( !(entry_ptr->is_protected) );
+        HDassert( !(entry_ptr->header.is_protected) );
 
 
-    if ( entry_ptr->at_main_addr && !main_addr ) {
+        if ( entry_ptr->at_main_addr && !main_addr ) {
 
-        /* rename to alt addr */
+            /* rename to alt addr */
 
-        HDassert( entry_ptr->addr == entry_ptr->main_addr );
+            HDassert( entry_ptr->addr == entry_ptr->main_addr );
 
-        done = FALSE;
-        old_addr = entry_ptr->addr;
-        new_addr = entry_ptr->alt_addr;
+            done = FALSE;
+            old_addr = entry_ptr->addr;
+            new_addr = entry_ptr->alt_addr;
 
-    } else if ( !(entry_ptr->at_main_addr) && main_addr ) {
+        } else if ( !(entry_ptr->at_main_addr) && main_addr ) {
 
-        /* rename to main addr */
+            /* rename to main addr */
 
-        HDassert( entry_ptr->addr == entry_ptr->alt_addr );
+            HDassert( entry_ptr->addr == entry_ptr->alt_addr );
 
-        done = FALSE;
-        old_addr = entry_ptr->addr;
-        new_addr = entry_ptr->main_addr;
-    }
-
-    if ( ! done ) {
-
-        entry_ptr->is_dirty = TRUE;
-
-        result = H5C2_rename_entry(cache_ptr, &(types2[type]),
-                                   old_addr, new_addr);
-    }
-
-    if ( ! done ) {
-
-        if ( ( result < 0 ) || 
-	     ( ( ! ( entry_ptr->header.destroy_in_progress ) ) &&
-	       ( entry_ptr->header.addr != new_addr ) ) ) {
-
-            pass2 = FALSE;
-            failure_mssg2 = "error in H5C2_rename_entry().";
-
-        } else {
-
-            entry_ptr->addr = new_addr;
-            entry_ptr->at_main_addr = main_addr;
+            done = FALSE;
+            old_addr = entry_ptr->addr;
+            new_addr = entry_ptr->main_addr;
         }
+
+        if ( ! done ) {
+
+            entry_ptr->is_dirty = TRUE;
+
+            result = H5C2_rename_entry(cache_ptr, &(types2[type]),
+                                       old_addr, new_addr);
+        }
+
+        if ( ! done ) {
+
+            if ( ( result < 0 ) || 
+	         ( ( ! ( entry_ptr->header.destroy_in_progress ) ) &&
+	           ( entry_ptr->header.addr != new_addr ) ) ) {
+
+#if 1 /* JRM */
+	        if ( result < 0 ) {
+	            HDfprintf(stdout, "%s: H5C2_rename_entry() failed.\n", 
+                              fcn_name);
+	        }
+		if ( ( ! ( entry_ptr->header.destroy_in_progress ) ) &&
+                     ( entry_ptr->header.addr != new_addr ) ) {
+	            HDfprintf(stdout, "%s: ( ( ! ( entry_ptr->header.destroy_in_progress ) ) && ( entry_ptr->header.addr != new_addr ) ).\n", 
+                              fcn_name);
+		}
+	        HDassert(FALSE);
+#endif /* JRM */
+                pass2 = FALSE;
+                failure_mssg2 = "error in H5C2_rename_entry().";
+
+            } else {
+
+                entry_ptr->addr = new_addr;
+                entry_ptr->at_main_addr = main_addr;
+            }
+        }
+
+        HDassert( ((entry_ptr->header).type)->id == type );
+
+        HDassert( entry_ptr->header.is_dirty );
+        HDassert( entry_ptr->is_dirty );
     }
-
-    HDassert( ((entry_ptr->header).type)->id == type );
-
-    HDassert( entry_ptr->header.is_dirty );
-    HDassert( entry_ptr->is_dirty );
 
     return;
 
 } /* rename_entry2() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	pin_protected_entry2()
+ *
+ * Purpose:	Pin the specified protected entry.
+ *
+ *		Do nothing if pass2 is FALSE on entry.
+ *
+ * Return:	void
+ *
+ * Programmer:	John Mainzer
+ *              5/17/06
+ *
+ * Modifications:
+ *
+ *		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+void
+pin_protected_entry2(H5F_t * file_ptr,
+                     int32_t type,
+                     int32_t idx)
+{
+    /* const char * fcn_name = "pin_protected_entry2()"; */
+#ifndef NDEBUG
+    H5C2_t * cache_ptr = file_ptr->shared->cache2;
+#endif /* NDEBUG */
+    herr_t result;
+    test_entry_t * base_addr;
+    test_entry_t * entry_ptr;
+
+    if ( pass2 ) {
+
+        HDassert( cache_ptr );
+        HDassert( ( 0 <= type ) && ( type < NUMBER_OF_ENTRY_TYPES ) );
+        HDassert( ( 0 <= idx ) && ( idx <= max_indices2[type] ) );
+
+        base_addr = entries2[type];
+        entry_ptr = &(base_addr[idx]);
+
+        HDassert( entry_ptr->index == idx );
+        HDassert( entry_ptr->type == type );
+        HDassert( entry_ptr == entry_ptr->self );
+	HDassert( entry_ptr->cache_ptr == cache_ptr );
+        HDassert( entry_ptr->header.is_protected );
+	HDassert( ! entry_ptr->header.is_pinned );
+
+        result = H5C2_pin_protected_entry(file_ptr, (void *)entry_ptr);
+
+        if ( ( result < 0 )
+	     ||
+	     ( ! (entry_ptr->header.is_protected) )
+	     ||
+	     ( ! (entry_ptr->header.is_pinned) )
+	     ||
+             ( entry_ptr->header.type != &(types2[type]) )
+	     ||
+             ( entry_ptr->size != entry_ptr->header.size )
+	     ||
+             ( entry_ptr->addr != entry_ptr->header.addr ) ) {
+
+            pass2 = FALSE;
+            failure_mssg2 =
+                "error in H5C2_pin_protected_entry().";
+
+        }
+
+	entry_ptr->is_pinned = TRUE;
+
+        HDassert( ((entry_ptr->header).type)->id == type );
+
+    }
+
+    return;
+
+} /* pinned_protected_entry2() */
 
 
 /*-------------------------------------------------------------------------
@@ -3590,7 +3705,7 @@ protect_entry2(H5F_t * file_ptr,
              ( entry_ptr->size != entry_ptr->header.size ) ||
              ( entry_ptr->addr != entry_ptr->header.addr ) ) {
 
-#if 0
+#if 1
             /* I've written the following debugging code several times
              * now.  Lets keep it around so I don't have to write it
              * again.

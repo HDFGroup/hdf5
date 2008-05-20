@@ -3003,6 +3003,7 @@ H5AC2_get_cache_auto_resize_config(H5AC2_t * cache_ptr,
     config_ptr->jbrb_human_readable  = FALSE;
 
     result = H5C2_get_journal_config(cache_ptr,
+		                     NULL,
 		                     &(config_ptr->enable_journaling),
                                      &(config_ptr->journal_file_path[0]),
 				     &(config_ptr->jbrb_buf_size),
@@ -3345,7 +3346,7 @@ H5AC2_set_cache_auto_resize_config(const H5F_t * f,
     }
 
     result = H5C2_get_journal_config((H5C2_t *)cache_ptr, &mdj_enabled,
-		                     NULL, NULL, NULL, NULL, NULL);
+		                     NULL, NULL, NULL, NULL, NULL, NULL);
 
     if ( result < 0 ) {
 

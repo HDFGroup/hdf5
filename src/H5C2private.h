@@ -572,6 +572,9 @@ typedef herr_t (*H5C2_log_flush_func_t)(H5C2_t * cache_ptr,
  * 		If the entry is dirty, the serialize callback must be used
  * 		to update this image before it is written to disk
  *
+ * image_up_to_date:  Boolean flag that is set to TRUE when *image_ptr
+ * 		is up to date, and set to false when the entry is dirtied.
+ *
  * type:	Pointer to the instance of H5C2_class_t containing pointers
  *		to the methods for cache entries of the current type.  This
  *		field should be NULL when the instance of H5C2_cache_entry_t
@@ -848,6 +851,7 @@ typedef struct H5C2_cache_entry_t
     haddr_t			addr;
     size_t			size;
     void *			image_ptr;
+    hbool_t			image_up_to_date;
     const H5C2_class_t *	type;
     hbool_t			is_dirty;
     hbool_t			dirtied;
@@ -1477,6 +1481,7 @@ H5_DLL herr_t H5C2_end_transaction(H5F_t * f,
 
 H5_DLL herr_t H5C2_get_journal_config(H5C2_t * cache_ptr,
                                       hbool_t * journaling_enabled_ptr,
+                                      hbool_t * startup_pending_ptr,
                                       char * journal_file_path_ptr,
                                       size_t * jbrb_buf_size_ptr,
                                       int * jbrb_num_bufs_ptr,
@@ -1490,6 +1495,15 @@ H5_DLL herr_t H5C2_journal_pre_flush(H5C2_t * cache_ptr);
 
 H5_DLL herr_t H5C2_journal_transaction(H5F_t * f,
                                        H5C2_t * cache_ptr);
+
+H5_DLL herr_t H5C2_queue_begin_journaling(H5F_t * f,
+                                          hid_t dxpl_id,
+                                          H5C2_t * cache_ptr,
+                                          char * journal_file_name_ptr,
+                                          size_t buf_size,
+                                          int num_bufs,
+                                          hbool_t use_aio,
+                                          hbool_t human_readable);
 
 H5_DLL herr_t H5C2_update_for_new_last_trans_on_disk(H5C2_t * cache_ptr,
                                              uint64_t new_last_trans_on_disk);

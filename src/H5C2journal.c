@@ -79,9 +79,10 @@ H5C2_begin_journaling(H5F_t * f,
     herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5C2_begin_journaling, FAIL)
-    
+#if 0 /* JRM */
+    HDfprintf(stdout, "%s entering.\n", FUNC);
+#endif /* JRM */ 
     HDassert( f != NULL );
-    HDassert( f->name != NULL );
     HDassert( cache_ptr != NULL );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
     HDassert( cache_ptr->mdj_enabled == FALSE );
@@ -102,34 +103,91 @@ H5C2_begin_journaling(H5F_t * f,
 
     if ( cache_ptr->mdj_enabled ) {
 
+	HDfprintf(stdout, "%s: metadata journaling already enabled on entry.\n",
+		  FUNC);
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                     "metadata journaling already enabled on entry.")
     }
 
-    result = H5C2_jb__init(&(cache_ptr->mdj_jbrb),
-		           f->name,
-			   journal_file_name_ptr,
-                           buf_size,
-                           num_bufs,
-                           use_aio,
-                           human_readable);
+#if 0 /* JRM */
+    HDfprintf(stdout, "%s Finished initial sanity checks.\n", FUNC);
+#endif /* JRM */ 
 
-    if ( result != SUCCEED ) {
+    if ( f->name == NULL ) {
 
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, "H5C2_jb__init() failed.")
+#if 0 /* JRM */
+        HDfprintf(stdout, "%s Queueing startup.\n", FUNC);
+#endif /* JRM */ 
+
+        if ( cache_ptr->mdj_startup_pending ) {
+
+	    HDfprintf(stdout, 
+                      "%s: metadata journaling startup already pending.\n",
+		      FUNC);
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                        "metadata journaling startup already pending.")
+        }
+
+        result = H5C2_queue_begin_journaling(f, dxpl_id, cache_ptr,
+                                             journal_file_name_ptr, buf_size, 
+					     num_bufs, use_aio, human_readable);
+
+	if ( result < 0 ) {
+	
+	    HDfprintf(stdout, "%s: H5C2_queue_begin_journaling() failed.\n",
+		      FUNC);
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                        "H5C2_queue_begin_journaling() failed.")
+        }
+
+#if 0 /* JRM */
+        HDfprintf(stdout, "%s Queueing startup -- done.\n", FUNC);
+#endif /* JRM */ 
+    } else {
+
+#if 0 /* JRM */
+        HDfprintf(stdout, "%s calling H5C2_jb__init().\n", FUNC);
+#endif /* JRM */ 
+
+        result = H5C2_jb__init(&(cache_ptr->mdj_jbrb),
+		               f->name,
+		               journal_file_name_ptr,
+                               buf_size,
+                               num_bufs,
+                               use_aio,
+                               human_readable);
+
+        if ( result != SUCCEED ) {
+
+	    HDfprintf(stdout, "%s: H5C2_jb__init() failed.\n", FUNC);
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+	                "H5C2_jb__init() failed.")
+        }
+
+#if 0 /* JRM */
+        HDfprintf(stdout, "%s calling H5C2_mark_journaling_in_progress().\n", 
+		  FUNC);
+#endif /* JRM */ 
+
+        result = H5C2_mark_journaling_in_progress(f,
+                                                  dxpl_id,
+                                                  journal_file_name_ptr);
+
+        if ( result != SUCCEED ) {
+
+	    HDfprintf(stdout, 
+		      "%s: H5C2_mark_journaling_in_progress() failed.\n", FUNC);
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                        "H5C2_mark_journaling_in_progress() failed.")
+        }
+
+        cache_ptr->mdj_enabled = TRUE;
+        cache_ptr->mdj_startup_pending = FALSE;
     }
 
-    result = H5C2_mark_journaling_in_progress(f,
-                                              dxpl_id,
-                                              journal_file_name_ptr);
-
-    if ( result != SUCCEED ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_mark_journaling_in_progress() failed.")
-    }
-
-    cache_ptr->mdj_enabled = TRUE;
+#if 0 /* JRM */
+        HDfprintf(stdout, "%s exiting.\n", FUNC);
+#endif /* JRM */ 
 
 done:
 
@@ -160,9 +218,15 @@ H5C2_begin_transaction(H5C2_t * cache_ptr,
                        const char * api_call_name)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
+    herr_t result;
 
     FUNC_ENTER_NOAPI(H5C2_begin_transaction, FAIL)
-    
+#if 0 /* JRM */
+    HDfprintf(stdout, "%s entering -- call name = \"%s\".\n", 
+              FUNC, api_call_name);
+    HDfprintf(stdout, "%s cache_ptr->mdj_enabled = %d.\n", 
+              FUNC, (int)(cache_ptr->mdj_enabled));
+#endif /* JRM */ 
     HDassert( cache_ptr != NULL );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
     HDassert( cache_ptr->tl_len == 0 );
@@ -173,17 +237,51 @@ H5C2_begin_transaction(H5C2_t * cache_ptr,
     HDassert( api_call_name != NULL );
     HDassert( HDstrlen(api_call_name) <= H5C2__MAX_API_NAME_LEN );
 
+    if ( cache_ptr->mdj_startup_pending ) {
+#if 0 /* JRM */
+        HDfprintf(stdout, "%s calling H5C2_begin_journaling()...", FUNC);
+	fflush(stdout);
+#endif /* JRM */
+        result = H5C2_begin_journaling(cache_ptr->mdj_startup_f,
+                                       cache_ptr->mdj_startup_dxpl_id,
+                                       cache_ptr,
+                                       cache_ptr->mdj_startup_jrnl_file_name,
+                                       cache_ptr->mdj_startup_buf_size,
+                                       cache_ptr->mdj_startup_num_bufs,
+                                       cache_ptr->mdj_startup_use_aio,
+                                       cache_ptr->mdj_startup_human_readable);
+
+	if ( result < 0 ) {
+
+	    HDfprintf(stdout, "%s H5C2_begin_journaling() failed.\n", FUNC);
+	    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                        "H5C2_begin_journaling() failed.")
+        } 
+
+	if ( cache_ptr->mdj_startup_jrnl_file_name != NULL ) {
+
+            cache_ptr->mdj_startup_jrnl_file_name = (char *)
+		    H5MM_xfree((void *)(cache_ptr->mdj_startup_jrnl_file_name));
+        }
+#if 0 /* JRM */
+        HDfprintf(stdout, "done.\n");
+	fflush(stdout);
+#endif /* JRM */
+    }
+
     if ( cache_ptr->mdj_enabled ) {
 
         if ( cache_ptr->trans_in_progress ) {
 
+	    HDfprintf(stdout, "%s transaction already in progress.\n", FUNC);
 	    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                         "transaction already in progress?.")
         }
 
-        HDstrncpy(cache_ptr->trans_api_name, api_call_name, 
+	HDstrncpy(cache_ptr->trans_api_name, api_call_name,
                   (size_t)H5C2__MAX_API_NAME_LEN);
-        cache_ptr->trans_num++;
+
+        (cache_ptr->trans_num)++;
 
         *trans_num_ptr = cache_ptr->trans_num;
 
@@ -191,7 +289,10 @@ H5C2_begin_transaction(H5C2_t * cache_ptr,
     }
 
 done:
-
+#if 0 /* JRM */
+    HDfprintf(stdout, "%s exiting -- cache_ptr->trans_num = %lld.\n", 
+              FUNC, cache_ptr->trans_num);
+#endif /* JRM */
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5C2_begin_transaction() */
@@ -235,7 +336,7 @@ H5C2_end_journaling(H5F_t * f,
     HDassert( f != NULL );
     HDassert( cache_ptr != NULL );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
-    HDassert( cache_ptr->mdj_enabled == TRUE );
+    /* HDassert( cache_ptr->mdj_enabled == TRUE ); */
     HDassert( cache_ptr->trans_in_progress == FALSE );
     HDassert( cache_ptr->tl_len == 0 );
     HDassert( cache_ptr->tl_size == 0 );
@@ -253,7 +354,7 @@ H5C2_end_journaling(H5F_t * f,
     if ( result < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_flush_cache() failed.")
+                         "H5C2_flush_cache() failed.")
     }
 
     result = H5C2_unmark_journaling_in_progress(f, dxpl_id, cache_ptr);
@@ -307,7 +408,10 @@ H5C2_end_transaction(H5F_t * f,
     herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5C2_end_transaction, FAIL)
-    
+#if 0 /* JRM */
+    HDfprintf(stdout, "%s call = \"%s\", trans_num = %lld, tl_len = %d.\n", 
+              FUNC, api_call_name, trans_num, (int)(cache_ptr->tl_len));
+#endif /* JRM */ 
     HDassert( cache_ptr != NULL );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
     HDassert( api_call_name != NULL );
@@ -318,13 +422,20 @@ H5C2_end_transaction(H5F_t * f,
     if ( cache_ptr->mdj_enabled ) {
 
         if ( ! ( cache_ptr->trans_in_progress ) ) {
-
+#if 0 /* JRM */
+            HDfprintf(stdout, "%s: transaction not in progress?!?!\n", FUNC);
+#endif /* JRM */
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                         "transaction not in progress?!?!")
         }
 
         if ( cache_ptr->trans_num != trans_num ) {
 
+#if 0 /* JRM */
+            HDfprintf(stdout, "%s: trans_num mis-match (%lld/%lld)\n", 
+                      FUNC, (long long)(trans_num), 
+		      (long long)(cache_ptr->trans_num));
+#endif /* JRM */
 	    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "trans_num mis-match?!?!")
         }
 
@@ -337,11 +448,18 @@ H5C2_end_transaction(H5F_t * f,
 
             if ( result != SUCCEED ) {
 
+#if 0 /* JRM */
+                HDfprintf(stdout, "%s: H5C2_journal_transaction() failed.\n", 
+                          FUNC);
+#endif /* JRM */
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                             "H5C2_journal_transaction() failed.")
             }
         }
-
+#if 0 /* JRM */
+	HDfprintf(stdout, "%s: setting cache_ptr->trans_in_progress = FALSE.\n",
+		  FUNC);
+#endif /* JRM */
         cache_ptr->trans_in_progress = FALSE;
 
         /* Get the last transaction on disk.  If it has changed, remove
@@ -353,6 +471,11 @@ H5C2_end_transaction(H5F_t * f,
                                                        &new_last_trans_on_disk);
         if ( result != SUCCEED ) {
 
+#if 0 /* JRM */
+            HDfprintf(stdout, 
+                      "%s: H5C2_jb__get_last_transaction_on_disk() failed.\n", 
+                      FUNC);
+#endif /* JRM */
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                         "H5C2_jb__get_last_transaction_on_disk() failed.")
         }
@@ -364,6 +487,11 @@ H5C2_end_transaction(H5F_t * f,
 
 	    if ( result != SUCCEED ) {
 
+#if 0 /* JRM */
+                HDfprintf(stdout, 
+                      "%s: H5C2_update_for_new_last_trans_on_disk() failed.\n", 
+                      FUNC);
+#endif /* JRM */
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                             "H5C2_update_for_new_last_trans_on_disk() failed.")
             }
@@ -427,12 +555,20 @@ done:
  * Programmer:  John Mainzer
  *              April 13, 2008
  *
+ * Changes:
+ *
+ * 		John Mainzer -- 4/2/08
+ *              Modified function to report the pending journaling
+ *              status if journaling has been enabled, but not yet
+ *              configured.
+ *
  *-------------------------------------------------------------------------
  */
 
 herr_t
 H5C2_get_journal_config(H5C2_t * cache_ptr,
 		        hbool_t * journaling_enabled_ptr,
+			hbool_t * startup_pending_ptr,
 			char * journal_file_path_ptr,
 			size_t * jbrb_buf_size_ptr,
 			int * jbrb_num_bufs_ptr,
@@ -456,6 +592,11 @@ H5C2_get_journal_config(H5C2_t * cache_ptr,
     if ( cache_ptr->mdj_enabled ) {
 
         *journaling_enabled_ptr = TRUE;
+
+	if ( startup_pending_ptr != NULL ) {
+
+	    *startup_pending_ptr = FALSE;
+	}
 
 	if ( journal_file_path_ptr != NULL ) {
 
@@ -483,6 +624,43 @@ H5C2_get_journal_config(H5C2_t * cache_ptr,
 	if ( jbrb_human_readable_ptr ) {
 
 	    *jbrb_human_readable_ptr = (cache_ptr->mdj_jbrb).human_readable;
+	}
+
+    } else if ( cache_ptr->mdj_startup_pending ) {
+
+        *journaling_enabled_ptr = TRUE;
+
+	if ( startup_pending_ptr != NULL ) {
+
+	    *startup_pending_ptr = TRUE;
+	}
+
+	if ( journal_file_path_ptr != NULL ) {
+
+	    HDsnprintf(journal_file_path_ptr, 
+                       H5AC2__MAX_JOURNAL_FILE_NAME_LEN,
+		       "%s",
+		       cache_ptr->mdj_startup_jrnl_file_name);
+	}
+
+	if ( jbrb_buf_size_ptr != NULL ) {
+
+	    *jbrb_buf_size_ptr = cache_ptr->mdj_startup_buf_size;
+	}
+
+	if ( jbrb_num_bufs_ptr != NULL ) {
+
+	    *jbrb_num_bufs_ptr = cache_ptr->mdj_startup_num_bufs;
+	}
+
+	if ( jbrb_use_aio_ptr != NULL ) {
+
+	    *jbrb_use_aio_ptr = cache_ptr->mdj_startup_use_aio;
+	}
+
+	if ( jbrb_human_readable_ptr ) {
+
+	    *jbrb_human_readable_ptr = cache_ptr->mdj_startup_human_readable;
 	}
 
     } else {
@@ -617,7 +795,7 @@ H5C2_journal_pre_flush(H5C2_t * cache_ptr)
     HDassert( cache_ptr->mdj_enabled );
 
     if ( cache_ptr->trans_in_progress ) {
-
+        HDassert(0);
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                     "Transaction in progress during flush?!?!?.")
     }
@@ -684,6 +862,8 @@ H5C2_journal_transaction(H5F_t * f,
 
 {
     char buf[H5C2__MAX_API_NAME_LEN + 128];
+    hbool_t resized;
+    hbool_t renamed;
     H5C2_cache_entry_t * entry_ptr = NULL;
     unsigned serialize_flags = 0;
     haddr_t new_addr;
@@ -708,6 +888,9 @@ H5C2_journal_transaction(H5F_t * f,
 
     if ( result != SUCCEED ) {
 
+#if 0 /* JRM */
+        HDfprintf(stdout, "%s: H5C2_jb__comment() failed.\n", FUNC);
+#endif /* JRM */
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                     "H5C2_jb__comment() failed.")
     }
@@ -717,6 +900,9 @@ H5C2_journal_transaction(H5F_t * f,
 
     if ( result != SUCCEED ) {
 
+#if 0 /* JRM */
+        HDfprintf(stdout, "%s: H5C2_jb__start_transaction() failed.\n", FUNC);
+#endif /* JRM */
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                     "H5C2_jb__start_transaction() failed.")
     }
@@ -727,9 +913,16 @@ H5C2_journal_transaction(H5F_t * f,
         HDassert( entry_ptr->is_dirty );
 	HDassert( entry_ptr->last_trans == cache_ptr->trans_num );
 
+	resized = FALSE;
+	renamed = FALSE;
+
 	if ( entry_ptr->is_protected ) 
         {
 
+#if 0 /* JRM */
+            HDfprintf(stdout, 
+		"%s: Protected entry in TL at transaction close.\n", FUNC);
+#endif /* JRM */
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                         "Protected entry in TL at transaction close.")
 	}
@@ -741,91 +934,126 @@ H5C2_journal_transaction(H5F_t * f,
             if ( entry_ptr->image_ptr == NULL )
             {
 
+#if 0 /* JRM */
+               HDfprintf(stdout, 
+		    "%s: memory allocation failed for on disk image buffer.\n", 
+		    FUNC);
+#endif /* JRM */
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
                            "memory allocation failed for on disk image buffer.")
             }
         }
 
-        result = entry_ptr->type->serialize(entry_ptr->addr,
-                                            entry_ptr->size,
-                                            entry_ptr->image_ptr,
-                                            (void *)entry_ptr,
-                                            &serialize_flags,
-                                            &new_addr,
-                                            &new_len,
-                                            &new_image_ptr);
-        if ( result != SUCCEED )
-        {
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "unable to serialize entry")
-        }
+	/* This should always be true, unless the entry has already been 
+	 * serialized in this function, and that serialization caused the
+	 * entry to be resized (and possibly renamed as well).
+	 */
+	if ( ! ( entry_ptr->image_up_to_date ) ) {
 
-        if ( serialize_flags != 0 )
-        {
-	    /* if the serialize_flags are not zero, the entry has been 
-	     * modified as a result of the serialize.  Pass these changes
-	     * on to the cache, and don't bother to write a journal entry 
-	     * at this time -- the protect/unprotect/rename will move the 
-	     * entry to the head of the transaction list, where we will 
-	     * handle it later.
-	     */
-	    hbool_t resized;
-	    hbool_t renamed;
-
-	    resized = (serialize_flags & H5C2__SERIALIZE_RESIZED_FLAG) != 0;
-	    renamed = (serialize_flags & H5C2__SERIALIZE_RENAMED_FLAG) != 0;
-
-	    if ( ( renamed ) && ( ! resized ) )
+            result = entry_ptr->type->serialize(entry_ptr->addr,
+                                                entry_ptr->size,
+                                                entry_ptr->image_ptr,
+                                                (void *)entry_ptr,
+                                                &serialize_flags,
+                                                &new_addr,
+                                                &new_len,
+                                                &new_image_ptr);
+            if ( result != SUCCEED )
             {
+#if 0 /* JRM */
+                HDfprintf(stdout, "%s: unable to serialize entry.\n", FUNC);
+#endif /* JRM */
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                            "entry renamed but not resized?!?!")
+                            "unable to serialize entry")
             }
 
-	    if ( resized ) 
+            if ( serialize_flags != 0 )
             {
-                /* in the following protect/unprotect, use default 
-	         * dxpl_id as we know that the entry is in cache,
-	         * and thus no I/O will take place.
+	        /* if the serialize_flags are not zero, the entry has been 
+	         * modified as a result of the serialize.  Pass these changes
+	         * on to the cache, and don't bother to write a journal entry 
+	         * at this time -- the protect/unprotect/rename will move the 
+	         * entry to the head of the transaction list, where we will 
+	         * handle it later.
 	         */
-	        thing = H5C2_protect(f, H5P_DATASET_XFER_DEFAULT,
-	                             entry_ptr->type, entry_ptr->addr,
-				     entry_ptr->size, NULL, 
-				     H5C2__NO_FLAGS_SET);
 
-                if ( thing == NULL ) 
+	        resized = (serialize_flags & H5C2__SERIALIZE_RESIZED_FLAG) != 0;
+	        renamed = (serialize_flags & H5C2__SERIALIZE_RENAMED_FLAG) != 0;
+
+	        if ( ( renamed ) && ( ! resized ) )
                 {
+#if 0 /* JRM */
+                    HDfprintf(stdout, "%s: entry renamed but not resized.\n", 
+			      FUNC);
+#endif /* JRM */
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                                "H5C2_protect() failed.")
+                                "entry renamed but not resized?!?!")
                 }
 
-                result = H5C2_unprotect(f, H5P_DATASET_XFER_DEFAULT,
-                                        entry_ptr->type, entry_ptr->addr,
-                                        thing, H5C2__SIZE_CHANGED_FLAG, 
-					new_len);
-
-                if ( result < 0 )
+	        if ( resized ) 
                 {
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                                "H5C2_unprotect() failed.")
+                    /* in the following protect/unprotect, use default 
+	             * dxpl_id as we know that the entry is in cache,
+	             * and thus no I/O will take place.
+	             */
+	            thing = H5C2_protect(f, H5P_DATASET_XFER_DEFAULT,
+	                                 entry_ptr->type, entry_ptr->addr,
+				         entry_ptr->size, NULL, 
+				         H5C2__NO_FLAGS_SET);
+
+                    if ( thing == NULL ) 
+                    {
+#if 0 /* JRM */
+                        HDfprintf(stdout, "%s: H5C2_protect() failed.\n", 
+                                  FUNC);
+#endif /* JRM */
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                                    "H5C2_protect() failed.")
+                    }
+
+                    result = H5C2_unprotect(f, H5P_DATASET_XFER_DEFAULT,
+                                            entry_ptr->type, entry_ptr->addr,
+                                            thing, H5C2__SIZE_CHANGED_FLAG, 
+					    new_len);
+
+                    if ( result < 0 )
+                    {
+#if 0 /* JRM */
+                        HDfprintf(stdout, "%s: H5C2_unprotect() failed.\n", 
+                                  FUNC);
+#endif /* JRM */
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                                    "H5C2_unprotect() failed.")
+                    }
+
+		    entry_ptr->image_ptr = new_image_ptr;
                 }
 
-		entry_ptr->image_ptr = new_image_ptr;
+	        if ( renamed )
+                {
+                    result = H5C2_rename_entry(cache_ptr, entry_ptr->type,
+				               entry_ptr->addr, new_addr);
+
+                    if ( result < 0 )
+                    {
+#if 0 /* JRM */
+                        HDfprintf(stdout, "%s: H5C2_rename_entr() failed.\n", 
+                                  FUNC);
+#endif /* JRM */
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                                    "H5C2_rename_entr() failed.")
+                    }
+                }
             }
 
-	    if ( renamed )
-            {
-                result = H5C2_rename_entry(cache_ptr, entry_ptr->type,
-				           entry_ptr->addr, new_addr);
-
-                if ( result < 0 )
-                {
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                                "H5C2_rename_entr() failed.")
-                }
-            }
+	    entry_ptr->image_up_to_date = TRUE;
         }
-	else /* generate the journal entry & remove from transaction list */
-        {
+
+	/* if the entry hasn't been either resized or renamed, generate
+	 * the journal entry, & remove from the transaction list.
+	 */
+	if ( ( ! resized ) && ( ! renamed ) ) {
+        
             result = H5C2_jb__journal_entry(&(cache_ptr->mdj_jbrb),
                                             cache_ptr->trans_num,
 					    entry_ptr->addr,
@@ -834,6 +1062,10 @@ H5C2_journal_transaction(H5F_t * f,
 
             if ( result != SUCCEED ) {
 
+#if 0 /* JRM */
+                HDfprintf(stdout, "%s: H5C2_jb__journal_entry() failed.\n", 
+                          FUNC);
+#endif /* JRM */
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                             "H5C2_jb__journal_entry() failed.")
             }
@@ -850,6 +1082,9 @@ H5C2_journal_transaction(H5F_t * f,
 
     if ( result != SUCCEED ) {
 
+#if 0 /* JRM */
+        HDfprintf(stdout, "%s: H5C2_jb__end_transaction() failed.\n", FUNC);
+#endif /* JRM */
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                     "H5C2_jb__end_transaction() failed.")
     }
@@ -859,6 +1094,93 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5C2_journal_transaction() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5C2_queue_begin_journaling()
+ *
+ * Purpose:	Verify that the HDF5 file name is not available.
+ *
+ * 		Then make note of the information needed to begin 
+ * 		journaling once the file is fully open.
+ *
+ * Return:	Success:	SUCCEED
+ * 		Failure:	FAIL
+ *
+ * Programmer:	John Mainzer
+ * 		5/1/08
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5C2_queue_begin_journaling(H5F_t * f,
+		            hid_t dxpl_id,
+		            H5C2_t * cache_ptr,
+		            char * journal_file_name_ptr,
+                            size_t buf_size,
+                            int num_bufs, 
+			    hbool_t use_aio,
+                            hbool_t human_readable)
+{
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5C2_queue_begin_journaling, FAIL)
+    
+    HDassert( f != NULL );
+    HDassert( cache_ptr != NULL );
+    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->mdj_enabled == FALSE );
+    HDassert( cache_ptr->mdj_startup_pending == FALSE );
+    HDassert( cache_ptr->trans_in_progress == FALSE );
+    HDassert( cache_ptr->trans_num == 0 );
+    HDassert( cache_ptr->last_trans_on_disk == 0 );
+    HDassert( cache_ptr->tl_len == 0 );
+    HDassert( cache_ptr->tl_size == 0 );
+    HDassert( cache_ptr->tl_head_ptr == NULL );
+    HDassert( cache_ptr->tl_tail_ptr == NULL );
+    HDassert( cache_ptr->jwipl_len == 0 );
+    HDassert( cache_ptr->jwipl_size == 0 );
+    HDassert( cache_ptr->jwipl_head_ptr == NULL );
+    HDassert( cache_ptr->jwipl_tail_ptr == NULL );
+    HDassert( buf_size > 0 );
+    HDassert( num_bufs > 0 );
+    HDassert( journal_file_name_ptr != NULL );
+
+    if ( cache_ptr->mdj_enabled ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "metadata journaling already enabled on entry.")
+    }
+
+    cache_ptr->mdj_startup_jrnl_file_name = 
+	    (char *)H5MM_malloc(strlen(journal_file_name_ptr) + 1);
+
+    if ( cache_ptr->mdj_startup_jrnl_file_name == NULL ) {
+
+        if ( cache_ptr->mdj_startup_jrnl_file_name == NULL ) {
+
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                        "memory allocation failed for jrnl file name buffer.")
+        }
+    }
+    
+    HDstrcpy(cache_ptr->mdj_startup_jrnl_file_name, journal_file_name_ptr);
+
+    cache_ptr->mdj_startup_f = f;
+    cache_ptr->mdj_startup_dxpl_id = dxpl_id;
+    cache_ptr->mdj_startup_buf_size = buf_size;
+    cache_ptr->mdj_startup_num_bufs = num_bufs;
+    cache_ptr->mdj_startup_use_aio = use_aio;
+    cache_ptr->mdj_startup_human_readable = human_readable;
+
+    cache_ptr->mdj_startup_pending = TRUE;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C2_queue_begin_journaling() */
 
 
 /*-------------------------------------------------------------------------
@@ -874,6 +1196,13 @@ done:
  * 		these entries from the journal write in progress list,
  * 		set their last_trans fields to zero, and insert then into
  * 		the eviction policy data structures.
+ *
+ * 		Similarly, scan the pinned entry list for entries whose
+ * 		last_trans field is now less than or equal to 
+ * 		cache_ptr->last_trans_on_disk.  In this case, just set
+ * 		the last trans field to 0.  Note that here we assume that
+ * 		the pinned entry list will always be small -- if this
+ * 		ceases to be the case, we will have re-visit this case.
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
@@ -907,9 +1236,10 @@ H5C2_update_for_new_last_trans_on_disk(H5C2_t * cache_ptr,
 
 	while ( entry_ptr != NULL )
         {
-            prev_entry_ptr = entry_ptr->next;
+            prev_entry_ptr = entry_ptr->prev;
 
 	    HDassert( entry_ptr->last_trans > 0 );
+	    HDassert( entry_ptr->is_dirty );
 
 	    if ( entry_ptr->last_trans <= cache_ptr->last_trans_on_disk ) {
 
@@ -921,6 +1251,24 @@ H5C2_update_for_new_last_trans_on_disk(H5C2_t * cache_ptr,
 
 	    entry_ptr = prev_entry_ptr;
         }
+
+	/* now scan the pinned entry list */
+
+	entry_ptr = cache_ptr->pel_head_ptr;
+
+	while ( entry_ptr != NULL ) {
+
+	    if ( entry_ptr->last_trans > 0 ) {
+
+	        HDassert( entry_ptr->is_dirty );
+
+		if ( entry_ptr->last_trans <= cache_ptr->last_trans_on_disk ) {
+
+		    entry_ptr->last_trans = 0;
+		}
+	    }
+	    entry_ptr = entry_ptr->next;
+	}
     }
 
 done:
@@ -1493,7 +1841,10 @@ H5C2_mark_journaling_in_progress(H5F_t * f,
     HDassert( cache_ptr->mdj_conf_block_ptr == NULL );
     HDassert( cache_ptr->mdj_file_name_ptr == NULL );
     HDassert( journal_file_name_ptr != NULL );
-
+#if 0
+    /* Unfortunately, the flags may not be set yet -- thus we can't 
+     * check for this error.
+     */
     /* Can't journal a read only file, so verify that we are
      * opened read/write and fail if we are not.
      */
@@ -1502,7 +1853,7 @@ H5C2_mark_journaling_in_progress(H5F_t * f,
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                     "File is opened read only.")
     }
-
+#endif
     /* first, create a metadata journaling configuration block */
     result = H5C2_create_journal_config_block(f,
                                               dxpl_id,
@@ -1897,7 +2248,7 @@ H5C2_jb__flush(H5C2_jbrb_t * struct_ptr)
     /* perform sync to ensure everything gets to disk before returning */
     /* Note: there is no HDfsync function, so for now, the standard
        fsync is being used. */
-    if ( fsync(struct_ptr->journal_file_fd) < 0 ) {
+    if ( fsync(struct_ptr->journal_file_fd) != 0 ) {
 
         HGOTO_ERROR(H5E_IO, H5E_SYNCFAIL, FAIL, "Journal file sync failed.")
     } /* end if */
@@ -2252,9 +2603,11 @@ H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
     /* Open journal file */
     struct_ptr->journal_file_fd = 
 	    HDopen(journal_file_name, O_WRONLY|O_CREAT|O_EXCL, 0777);
-
     if ( struct_ptr->journal_file_fd  == -1) {
 
+	HDfprintf(stdout, 
+	      "%s: Can't create journal file \"%s\".  Does it already exist?\n", 
+	      FUNC, journal_file_name);
         HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, \
                     "Can't create journal file.  Does it already exist?")
     } /* end if */
@@ -2284,6 +2637,9 @@ H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
 
     if ( struct_ptr->buf == NULL ) {
 
+	HDfprintf(stdout, 
+	          "%s: allocation of buf pointer array failed.\n", 
+		  FUNC);
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
                     "allocation of buf pointer array failed.");
     } /* end if */
@@ -2294,6 +2650,9 @@ H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
 
     if ( (*struct_ptr->buf)[0] == NULL ) {
 
+	HDfprintf(stdout, 
+	          "%s: allocation of buffers failed.\n", 
+		  FUNC);
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
                     "allocation of buffers failed.");
     } /* end if */
@@ -2306,6 +2665,9 @@ H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
 
     if ( struct_ptr->trans_tracking == NULL ) {
 
+	HDfprintf(stdout, 
+	          "%s: allocation of trans_tracking failed.\n", 
+		  FUNC);
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
                     "allocation of trans_tracking failed.");
     } /* end if */
@@ -2341,6 +2703,9 @@ H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
     if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, FALSE, 
 			          (uint64_t)0) < 0) {
 
+	HDfprintf(stdout, 
+	          "%s: H5C2_jb__write_to_buffer() failed.\n", 
+		  FUNC);
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                     "H5C2_jb__write_to_buffer() failed.\n")
     } /* end if */
@@ -2383,7 +2748,9 @@ H5C2_jb__start_transaction(H5C2_jbrb_t * struct_ptr,
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5C2_jb__start_transaction, FAIL)
-	
+#if 0 /* JRM */
+    HDfprintf(stdout, "%s trans_num = %lld.\n", FUNC, trans_num);
+#endif /* JRM */	
     /* Check Arguments */
     HDassert(struct_ptr);
     HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
@@ -2482,7 +2849,10 @@ H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5C2_jb__journal_entry, FAIL)
-	
+#if 0 /* JRM */
+    HDfprintf(stdout, "%s trans_num = %lld, base_addr = %d, length = %ld.\n",
+              FUNC, trans_num, (int)base_addr, (int)length);
+#endif /* JRM */	
     /* Check Arguments */
     HDassert(struct_ptr);
     HDassert(body);
@@ -2591,7 +2961,9 @@ H5C2_jb__end_transaction(H5C2_jbrb_t * struct_ptr,
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5C2_jb__end_transaction, FAIL)
-	
+#if 0 /* JRM */
+    HDfprintf(stdout, "%s trans_num = %lld.\n", FUNC, trans_num);
+#endif /* JRM */	
     /* Check Arguments */
     HDassert(struct_ptr);
     HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);

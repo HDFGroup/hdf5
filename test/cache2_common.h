@@ -33,6 +33,8 @@
 
 #define NO_CHANGE       -1
 
+#define USE_CORE_DRIVER 0
+
 /* with apologies for the abuse of terminology... */
 
 #define PICO_ENTRY_TYPE		0
@@ -671,6 +673,10 @@ void rename_entry2(H5C2_t * cache_ptr,
                    int32_t type,
                    int32_t idx,
                    hbool_t main_addr);
+
+void pin_protected_entry2(H5F_t * file_ptr,
+                          int32_t type,
+                          int32_t idx);
 
 void protect_entry2(H5F_t * file_ptr,
                     int32_t type,

@@ -601,6 +601,8 @@ H5C2_create(H5F_t *                     f,
 #endif /* NDEBUG */
         ((cache_ptr->epoch_markers)[i]).addr		 = (haddr_t)i;
         ((cache_ptr->epoch_markers)[i]).size		 = (size_t)0;
+        ((cache_ptr->epoch_markers)[i]).image_ptr	 = NULL;
+        ((cache_ptr->epoch_markers)[i]).image_up_to_date = FALSE;
         ((cache_ptr->epoch_markers)[i]).type		 = &epoch_marker_class_2;
         ((cache_ptr->epoch_markers)[i]).is_dirty	 = FALSE;
         ((cache_ptr->epoch_markers)[i]).dirtied		 = FALSE;
@@ -643,6 +645,15 @@ H5C2_create(H5F_t *                     f,
     cache_ptr->jwipl_size                                = 0;
     cache_ptr->jwipl_head_ptr                            = NULL;
     cache_ptr->jwipl_tail_ptr                            = NULL;
+
+    cache_ptr->mdj_startup_pending			 = FALSE;
+    cache_ptr->mdj_startup_f				 = NULL;
+    cache_ptr->mdj_startup_dxpl_id			 = -1;
+    cache_ptr->mdj_startup_jrnl_file_name		 = NULL;
+    cache_ptr->mdj_startup_buf_size			 = 0;
+    cache_ptr->mdj_startup_num_bufs			 = 0;
+    cache_ptr->mdj_startup_use_aio			 = FALSE;
+    cache_ptr->mdj_startup_human_readable		 = FALSE;
 
 
     if ( H5C2_reset_cache_hit_rate_stats(cache_ptr) != SUCCEED ) {
@@ -1032,9 +1043,12 @@ done:
  *		*cache_ptr), and one of the dxpl ids.
  *
  *		JRM -- 4/3/08
- *		I don't think we need to do anything on an expunge
- *		vis-a-vis journaling.  Comment is here just to make
- *		note of the fact that I have reviewed this function.
+ *		Added code to test to see if journaling is enabled, and 
+ *		if it is, test to see if entry_ptr->last_trans > zero.
+ *		If so, must remove the entry from the transaction list
+ *		(if it is present), remove the entry from the journal
+ *		write in progress list, and set entry_ptr->last_trans to
+ *		zero before calling H5C2_flush_single_entry().
  *
  *-------------------------------------------------------------------------
  */
@@ -1083,15 +1097,41 @@ H5C2_expunge_entry(H5F_t *              f,
     HDassert( entry_ptr->type == type );
 
     if ( entry_ptr->is_protected ) {
-
+#if 0 /* JRM */
+        HDfprintf(stdout, "%s: Target entry is protected.\n", FUNC);
+#endif /* JRM */
         HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, \
 		    "Target entry is protected.")
     }
 
     if ( entry_ptr->is_pinned ) {
-
+#if 0 /* JRM */
+        HDfprintf(stdout, "%s: Target entry is pinned.\n", FUNC);
+#endif /* JRM */
         HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, \
 		    "Target entry is pinned.")
+    }
+
+    /* H5C2_flush_single_entry() will choke if the last_trans field
+     * of the entry isn't zero, or if the entry is on the transaction
+     * list, or on the transaction write in progress list.  Must tend
+     * to this before we we make the call.
+     */
+    if ( cache_ptr->mdj_enabled ) {
+
+	if ( cache_ptr->trans_num > 0 ) {
+
+	    /* remove the entry from the transaction list if it is there */
+            H5C2__TRANS_DLL_REMOVE(entry_ptr, cache_ptr->tl_head_ptr, \
+                                   cache_ptr->tl_tail_ptr, cache_ptr->tl_len, \
+                                   cache_ptr->tl_size, FAIL);
+
+            entry_ptr->last_trans = (uint64_t)0;
+
+            H5C2__UPDATE_RP_FOR_JOURNAL_WRITE_COMPLETE(cache_ptr, \
+                                                       entry_ptr, \
+                                                       FAIL)
+        }
     }
 
     /* If we get this far, call H5C2_flush_single_entry() with the 
@@ -1109,7 +1149,9 @@ H5C2_expunge_entry(H5F_t *              f,
                                      TRUE);
 
     if ( result < 0 ) {
-
+#if 0 /* JRM */
+        HDfprintf(stdout, "%s: H5C2_flush_single_entry() failed.\n", FUNC);
+#endif /* JRM */
         HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, \
                     "H5C2_flush_single_entry() failed.")
     }
@@ -2385,6 +2427,9 @@ H5C2_insert_entry(H5F_t *              f,
     entry_ptr->addr  = addr;
     entry_ptr->type  = type;
 
+    entry_ptr->image_ptr = NULL;
+    entry_ptr->image_up_to_date = FALSE;
+
     /* newly inserted entries are assumed to be dirty */
     entry_ptr->is_dirty = TRUE;
 
@@ -2427,6 +2472,10 @@ H5C2_insert_entry(H5F_t *              f,
 
         if ( result < 0 ) {
 
+#if 0 /* JRM */
+            HDfprintf(stdout, "%s: H5C2__flash_increase_cache_size failed.\n",
+		      FUNC);
+#endif /* JRM */
             HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, \
                         "H5C2__flash_increase_cache_size failed.")
         }
@@ -2448,6 +2497,9 @@ H5C2_insert_entry(H5F_t *              f,
 
             if ( result < 0 ) {
 
+#if 0 /* JRM */
+            HDfprintf(stdout, "%s: Can't get write_permitted.\n", FUNC);
+#endif /* JRM */
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, \
                             "Can't get write_permitted")
             }
@@ -2498,6 +2550,9 @@ H5C2_insert_entry(H5F_t *              f,
 
         if ( result < 0 ) {
 
+#if 0 /* JRM */
+            HDfprintf(stdout, "%s: H5C2_make_space_in_cache() failed.\n", FUNC);
+#endif /* JRM */
             HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, \
                         "H5C2_make_space_in_cache failed.")
         }
@@ -2513,6 +2568,9 @@ H5C2_insert_entry(H5F_t *              f,
 
         if ( test_entry_ptr == entry_ptr ) {
 
+#if 0 /* JRM */
+            HDfprintf(stdout, "%s: entry already in cache.\n", FUNC);
+#endif /* JRM */
             HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, \
                         "entry already in cache.")
 
@@ -2985,6 +3043,7 @@ H5C2_mark_pinned_entry_dirty(H5F_t * f,
 
     /* mark the entry as dirty if it isn't already */
     entry_ptr->is_dirty = TRUE;
+    entry_ptr->image_up_to_date = FALSE;
 
     /* update for change in entry size if necessary */
     if ( ( size_changed ) && ( entry_ptr->size != new_size ) ) {
@@ -3136,6 +3195,7 @@ H5C2_mark_pinned_or_protected_entry_dirty(H5F_t * f,
 
         /* mark the entry as dirty if it isn't already */
         entry_ptr->is_dirty = TRUE;
+	entry_ptr->image_up_to_date = FALSE;
 
 	/* If journaling is enabled, must add the entry to the transaction
 	 * list, if it is not there already.
@@ -3342,6 +3402,8 @@ H5C2_rename_entry(H5C2_t *	     cache_ptr,
 	if ( ! ( entry_ptr->flush_in_progress ) ) {
 
             entry_ptr->is_dirty = TRUE;
+	    /* This shouldn't be needed, but it keeps the test code happy */
+	    entry_ptr->image_up_to_date = FALSE;
 	}
 
         H5C2__INSERT_IN_INDEX(cache_ptr, entry_ptr, FAIL)
@@ -3471,6 +3533,7 @@ H5C2_resize_pinned_entry(H5F_t * f,
      * isn't already 
      */
     entry_ptr->is_dirty = TRUE;
+    entry_ptr->image_up_to_date = FALSE;
 
     /* update for change in entry size if necessary */
     if ( entry_ptr->size != new_size ) {
@@ -3514,6 +3577,13 @@ H5C2_resize_pinned_entry(H5F_t * f,
                                               (new_size));
         }
 
+	/* if journaling is enabled, and the entry is already in the 
+	 * transaction list, update that list for the size change as well.
+	 */
+	H5C2__UPDATE_TL_FOR_ENTRY_SIZE_CHANGE((cache_ptr), (entry_ptr), \
+                                              (entry_ptr->size), (new_size));
+
+
         /* update statistics just before changing the entry size */
 	H5C2__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE((cache_ptr), (entry_ptr), \
                                                 (new_size));
@@ -3526,6 +3596,12 @@ H5C2_resize_pinned_entry(H5F_t * f,
 
 	H5C2__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
     }
+
+    /* if journaling is enabled, check to see if the entry is in the 
+     * transaction list.  If it isn't, insert it.  If it is, move it to 
+     * the head of the list.
+     */
+    H5C2__UPDATE_TL_FOR_ENTRY_DIRTY(cache_ptr, entry_ptr, FAIL)
 
     H5C2__UPDATE_STATS_FOR_DIRTY_PIN(cache_ptr, entry_ptr)
 
@@ -3562,17 +3638,16 @@ done:
  *		H5C2__UPDATE_STATS_FOR_UNPIN to call to 
  *		H5C2__UPDATE_STATS_FOR_PIN.
  *
+ *		JRM -- 5/16/08
+ *		Undid change of 2/16/08, as we can use the f parameter
+ *		in production mode.  
+ *
  *-------------------------------------------------------------------------
  */
-#ifndef NDEBUG
+
 herr_t
 H5C2_pin_protected_entry(H5F_t * f,
                          void *	  thing)
-#else
-herr_t
-H5C2_pin_protected_entry(H5F_t UNUSED * f,
-                        void *           thing)
-#endif
 {
     H5C2_t *             cache_ptr;
     herr_t               ret_value = SUCCEED;    /* Return value */
@@ -3788,6 +3863,9 @@ H5C2_protect(H5F_t *		  f,
 
         if ( thing == NULL ) {
 
+#if 0 /* JRM */
+	    HDfprintf(stdout, "%s can't load entry.\n", FUNC);
+#endif /* JRM */
             HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "can't load entry")
         }
 
@@ -3804,6 +3882,10 @@ H5C2_protect(H5F_t *		  f,
 
             if ( result < 0 ) {
 
+#if 0 /* JRM */
+	        HDfprintf(stdout, 
+			"%s H5C2__flash_increase_cache_size failed.\n", FUNC);
+#endif /* JRM */
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, \
                             "H5C2__flash_increase_cache_size failed.")
              }
@@ -3828,6 +3910,10 @@ H5C2_protect(H5F_t *		  f,
 
                 if ( result < 0 ) {
 
+#if 0 /* JRM */
+	            HDfprintf(stdout, 
+			      "%s Can't get write_permitted 1.\n", FUNC);
+#endif /* JRM */
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, \
                                "Can't get write_permitted 1")
 
@@ -3889,6 +3975,10 @@ H5C2_protect(H5F_t *		  f,
 
             if ( result < 0 ) {
 
+#if 0 /* JRM */
+                HDfprintf(stdout, 
+                         "%s H5C2_make_space_in_cache failed 1.\n", FUNC);
+#endif /* JRM */
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, \
                             "H5C2_make_space_in_cache failed 1.")
             }
@@ -3917,12 +4007,18 @@ H5C2_protect(H5F_t *		  f,
 	    H5C2__INSERT_ENTRY_IN_TL(cache_ptr, entry_ptr, NULL);
 	}
 
-        /* insert the entry in the data structures used by the replacement
-         * policy.  We are just going to take it out again when we update
-         * the replacement policy for a protect, but this simplifies the
-         * code.  If we do this often enough, we may want to optimize this.
-         */
-        H5C2__UPDATE_RP_FOR_INSERTION(cache_ptr, entry_ptr, NULL)
+	/* load the entry into the data structures used by the replacement
+	 * policy.  We are just going to take it out again when we update
+	 * the replacement policy for a protect, but this simplifies the
+	 * code.  If we do this often enough, we may want to optimize this.
+	 *
+	 * Note that we used to do an update for insertion here, but
+	 * that confused the journaling code -- the update for load is 
+	 * just a simplified version of update for insertion that 
+	 * avoids the problem.
+	 */
+
+        H5C2__UPDATE_RP_FOR_LOAD(cache_ptr, entry_ptr, NULL)
     }
 
     HDassert( entry_ptr->addr == addr );
@@ -3938,6 +4034,10 @@ H5C2_protect(H5F_t *		  f,
 
 	} else {
 
+#if 0 /* JRM */
+            HDfprintf(stdout, 
+                      "%s Target already protected & not read only?!?\n", FUNC);
+#endif /* JRM */
             HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, \
                         "Target already protected & not read only?!?.")
 	}
@@ -4007,6 +4107,10 @@ H5C2_protect(H5F_t *		  f,
                                                   write_permitted);
             if ( result != SUCCEED ) {
 
+#if 0 /* JRM */
+                HDfprintf(stdout, 
+                      "%s Cache auto-resize failed.?!?\n", FUNC);
+#endif /* JRM */
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, \
                             "Cache auto-resize failed.")
             }
@@ -4032,6 +4136,10 @@ H5C2_protect(H5F_t *		  f,
 
                 if ( result < 0 ) {
 
+#if 0 /* JRM */
+                    HDfprintf(stdout, 
+                          "%s H5C2_make_space_in_cache failed 2.\n", FUNC);
+#endif /* JRM */
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, \
                                 "H5C2_make_space_in_cache failed 2.")
                 }
@@ -4044,7 +4152,6 @@ done:
 #if H5C2_DO_EXTREME_SANITY_CHECKS
         if ( H5C2_validate_lru_list(cache_ptr) < 0 ) {
 
-                HDassert(0);
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, NULL, \
                             "LRU sanity check failed.\n");
         }
@@ -5484,7 +5591,13 @@ H5C2_unprotect(H5F_t *		    f,
         }
 
         /* mark the entry as dirty if appropriate */
-        entry_ptr->is_dirty = ( (entry_ptr->is_dirty) || dirtied );
+	if ( dirtied ) {
+
+            entry_ptr->is_dirty = ( (entry_ptr->is_dirty) || dirtied );
+	    entry_ptr->image_up_to_date = FALSE;
+
+	    H5C2__UPDATE_TL_FOR_ENTRY_DIRTY(cache_ptr, entry_ptr, FAIL)
+	}
 
         /* update for change in entry size if necessary */
         if ( ( size_changed ) && ( entry_ptr->size != new_size ) ) {
@@ -5528,6 +5641,13 @@ H5C2_unprotect(H5F_t *		    f,
 				                  (entry_ptr->size),\
                                                   (new_size));
             }
+
+	    /* if journaling is enabled, and the entry is on the transaction
+	     * list, update that list for the size changed.
+	     */
+	    H5C2__UPDATE_TL_FOR_ENTRY_SIZE_CHANGE((cache_ptr), (entry_ptr), \
+			                          (entry_ptr->size), \
+						  (new_size));
 
             /* update statistics just before changing the entry size */
 	    H5C2__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE((cache_ptr), (entry_ptr), \
@@ -5621,6 +5741,9 @@ H5C2_unprotect(H5F_t *		    f,
 
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "Can't flush.")
             }
+
+	    /* delete the entry from the transaction list if appropriate */
+	    H5C2__UPDATE_TL_FOR_ENTRY_CLEAR((cache_ptr), (entry_ptr), FAIL)
         }
 #ifdef H5_HAVE_PARALLEL
         else if ( clear_entry ) {
@@ -5650,6 +5773,9 @@ H5C2_unprotect(H5F_t *		    f,
 
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "Can't clear.")
             }
+
+	    /* delete the entry from the transaction list if appropriate */
+	    H5C2__UPDATE_TL_FOR_ENTRY_CLEAR((cache_ptr), (entry_ptr), FAIL)
         }
 #endif /* H5_HAVE_PARALLEL */
     }
@@ -8001,7 +8127,7 @@ H5C2_flush_single_entry(H5F_t *		     f,
             }
         }
     }
-#if 1
+#if 0 
     /* this should be useful for debugging from time to time.
      * lets leave it in for now.       -- JRM 12/15/04
      */
@@ -8016,6 +8142,7 @@ H5C2_flush_single_entry(H5F_t *		     f,
 
     if ( ( entry_ptr != NULL ) && ( entry_ptr->is_protected ) )
     {
+
         /* Attempt to flush a protected entry -- scream and die. */
         HGOTO_ERROR(H5E_CACHE, H5E_PROTECT, FAIL, \
                     "Attempt to flush a protected entry.")
@@ -8245,6 +8372,7 @@ H5C2_flush_single_entry(H5F_t *		     f,
             H5C2__UPDATE_RP_FOR_EVICTION(cache_ptr, entry_ptr, FAIL)
 
         } else {
+
 	    /* If journaling is enabled, the target entry is being cleared,
 	     * and it is on the transaction list, remove it from the transaction
 	     * list and set its last_trans field to zero.
@@ -8272,6 +8400,7 @@ H5C2_flush_single_entry(H5F_t *		     f,
                 H5C2__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr)
             }
         }
+
 
         /* Clear the dirty flag only, if requested */
         if ( clear_only ) 
@@ -8329,172 +8458,184 @@ H5C2_flush_single_entry(H5F_t *		     f,
 		}
 	    }
 
-	    if ( entry_ptr->type->serialize(entry_ptr->addr, 
-				            entry_ptr->size,
-					    entry_ptr->image_ptr,
-					    (void *)entry_ptr,
-					    &serialize_flags,
-					    &new_addr,
-					    &new_len,
-					    &new_image_ptr) != SUCCEED )
-            {
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-                            "unable to serialize entry")
-	    }
+	    if ( ! ( entry_ptr->image_up_to_date ) ) {
 
-	    if ( serialize_flags != 0 )
-            {
-                if ( destroy )
-		{
-		    if ( cache_ptr->mdj_enabled ) {
+	        if ( entry_ptr->type->serialize(entry_ptr->addr, 
+				                entry_ptr->size,
+					        entry_ptr->image_ptr,
+					        (void *)entry_ptr,
+					        &serialize_flags,
+					        &new_addr,
+					        &new_len,
+					        &new_image_ptr) != SUCCEED )
+                {
 
-                        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                            "rename/resize on destroy when journaling enabled.");
-                    }
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
+                                "unable to serialize entry")
+	        }
 
-                    /* We have already removed the entry from the 
-		     * cache's data structures, so no need to update
-		     * them for the re-size and/or rename.  All we need
-		     * to do is update the cache entry so we will have
-		     * the correct values when we actually write the
-		     * image of the entry to disk.
-		     *
-		     * Note that if the serialize function changes the 
-		     * size of the disk image of the entry, it must
-		     * deallocate the old image, and allocate a new.
-		     */
+	        if ( serialize_flags != 0 )
+                {
+                    if ( destroy )
+		    {
+		        if ( cache_ptr->mdj_enabled ) {
 
-                    switch ( serialize_flags ) 
-		    { 
-			case H5C2__SERIALIZE_RESIZED_FLAG: 
-			    H5C2__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(cache_ptr,
-					                             entry_ptr,
-								     new_len)
-			    entry_ptr->size = new_len;
-			    entry_ptr->image_ptr = new_image_ptr;
-			    break; 
+                            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                           "rename/resize on destroy when journaling enabled.");
+                        }
+
+                        /* We have already removed the entry from the 
+		         * cache's data structures, so no need to update
+		         * them for the re-size and/or rename.  All we need
+		         * to do is update the cache entry so we will have
+		         * the correct values when we actually write the
+		         * image of the entry to disk.
+		         *
+		         * Note that if the serialize function changes the 
+		         * size of the disk image of the entry, it must
+		         * deallocate the old image, and allocate a new.
+		         */
+
+                        switch ( serialize_flags ) 
+		        { 
+		  	    case H5C2__SERIALIZE_RESIZED_FLAG: 
+			        H5C2__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(    \
+						                  cache_ptr, \
+					                          entry_ptr, \
+								  new_len)
+			        entry_ptr->size = new_len;
+			        entry_ptr->image_ptr = new_image_ptr;
+			        break; 
 			
-			case (H5C2__SERIALIZE_RESIZED_FLAG | 
-                              H5C2__SERIALIZE_RENAMED_FLAG): 
-			    H5C2__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(cache_ptr,
-					                             entry_ptr,
-								     new_len)
-			    entry_ptr->addr = new_addr;
-			    entry_ptr->size = new_len;
-			    entry_ptr->image_ptr = new_image_ptr;
-			    break; 
+			    case (H5C2__SERIALIZE_RESIZED_FLAG | 
+                                  H5C2__SERIALIZE_RENAMED_FLAG): 
+			        H5C2__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(     \
+						                   cache_ptr, \
+					                           entry_ptr, \
+								   new_len)
+			        entry_ptr->addr = new_addr;
+			        entry_ptr->size = new_len;
+			        entry_ptr->image_ptr = new_image_ptr;
+			        break; 
 			
-			default: 
-			    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-					"unexpected serialize flag(s)")
-			    break;
+			    default: 
+			        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
+					    "unexpected serialize flag(s)")
+			        break;
+		        }
 		    }
-		}
-		else
-		{
-		    if ( cache_ptr->mdj_enabled ) {
+		    else
+		    {
+		        if ( cache_ptr->mdj_enabled ) {
 
-                        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                             "rename/resize on flush when journaling enabled.");
-                    }
+                        }
 
-		    /* The entry is not being destroyed, and thus has not
-		     * been removed from the cache's data structures.  
-		     *
-		     * Thus, in addition to updating the entry for the 
-		     * re-size and/or rename, we must also update the
-		     * cache data structures.
-		     */
+		        /* The entry is not being destroyed, and thus has not
+		         * been removed from the cache's data structures.  
+		         *
+		         * Thus, in addition to updating the entry for the 
+		         * re-size and/or rename, we must also update the
+		         * cache data structures.
+		         */
 
-                    switch ( serialize_flags ) 
-		    { 
-			case H5C2__SERIALIZE_RESIZED_FLAG: 
-			    H5C2__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(cache_ptr,
-					                             entry_ptr,
-								     new_len)
-			    /* The replacement policy code thinks the 
-			     * entry is already clean, so modify is_dirty
-			     * to meet this expectation.
-			     */
-			    entry_ptr->is_dirty = FALSE;
+                        switch ( serialize_flags ) 
+		        { 
+			    case H5C2__SERIALIZE_RESIZED_FLAG: 
+			        H5C2__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(     \
+						                   cache_ptr, \
+					                           entry_ptr, \
+								   new_len)
+			        /* The replacement policy code thinks the 
+			         * entry is already clean, so modify is_dirty
+			         * to meet this expectation.
+			         */
+			        entry_ptr->is_dirty = FALSE;
 
-                            /* update the hash table for the size change*/
-                            H5C2__UPDATE_INDEX_FOR_SIZE_CHANGE((cache_ptr), \
+                                /* update the hash table for the size change*/
+                                H5C2__UPDATE_INDEX_FOR_SIZE_CHANGE(           \
+						            (cache_ptr),      \
                                                             (entry_ptr->size),\
 							    (new_len));
 
-                            /* The entry can't be protected since we  are in
-			     * the process of flushing it.  Thus we must 
-			     * update the replacement policy data structures 
-			     * for the size change.  The macro deals with 
-			     * the pinned case.  
-			     */
-			    H5C2__UPDATE_RP_FOR_SIZE_CHANGE(cache_ptr, \
-					                    entry_ptr, \
-							    new_len);
+                                /* The entry can't be protected since we  are
+			         * in the process of flushing it.  Thus we must 
+			         * update the replacement policy data 
+				 * structures for the size change.  The macro 
+				 * deals with the pinned case.  
+			         */
+			        H5C2__UPDATE_RP_FOR_SIZE_CHANGE(cache_ptr, \
+					                        entry_ptr, \
+						 	        new_len);
 
-                            /* The entry can't be in the slist, so no need 
-			     * to update the slist for the size change.  
-			     */
+                                /* The entry can't be in the slist, so no need 
+			         * to update the slist for the size change.  
+			         */
 
-			    /* finally, set is_dirty to TRUE again, and 
-			     * update the size and image_ptr.
-			     */
-			    entry_ptr->is_dirty = TRUE;
-			    entry_ptr->size = new_len;
-			    entry_ptr->image_ptr = new_image_ptr;
-			    break; 
+			        /* finally, set is_dirty to TRUE again, and 
+			         * update the size and image_ptr.
+			         */
+			        entry_ptr->is_dirty = TRUE;
+			        entry_ptr->size = new_len;
+			        entry_ptr->image_ptr = new_image_ptr;
+			        break; 
 			
-			case (H5C2__SERIALIZE_RESIZED_FLAG | 
-                              H5C2__SERIALIZE_RENAMED_FLAG): 
-			    H5C2__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(cache_ptr,
-					                             entry_ptr,
-								     new_len)
-			    /* The replacement policy code thinks the 
-			     * entry is already clean, so modify is_dirty
-			     * to meet this expectation.
-			     */
-			    entry_ptr->is_dirty = FALSE;
+			    case (H5C2__SERIALIZE_RESIZED_FLAG | 
+                                  H5C2__SERIALIZE_RENAMED_FLAG): 
+			        H5C2__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(     \
+						                   cache_ptr, \
+					                           entry_ptr, \
+								   new_len)
+			        /* The replacement policy code thinks the 
+			         * entry is already clean, so modify is_dirty
+			         * to meet this expectation.
+			         */
+			        entry_ptr->is_dirty = FALSE;
 
-			    /* first update the hash table for the rename */
-			    H5C2__DELETE_FROM_INDEX(cache_ptr, entry_ptr)
-		            entry_ptr->addr = new_addr;
-			    H5C2__INSERT_IN_INDEX(cache_ptr, entry_ptr, FAIL)
+			        /* first update the hash table for the rename */
+			        H5C2__DELETE_FROM_INDEX(cache_ptr, entry_ptr)
+		                entry_ptr->addr = new_addr;
+			        H5C2__INSERT_IN_INDEX(cache_ptr, entry_ptr, \
+						      FAIL)
 
-                            /* update the hash table for the size change */
-                            H5C2__UPDATE_INDEX_FOR_SIZE_CHANGE((cache_ptr), \
+                                /* update the hash table for the size change */
+                                H5C2__UPDATE_INDEX_FOR_SIZE_CHANGE(           \
+						            (cache_ptr),      \
                                                             (entry_ptr->size),\
 							    (new_len));
 
-                            /* The entry can't be protected since we  are in
-			     * the process of flushing it.  Thus we must 
-			     * update the replacement policy data structures 
-			     * for the size change.  The macro deals with 
-			     * the pinned case.  
-			     */
-			    H5C2__UPDATE_RP_FOR_SIZE_CHANGE(cache_ptr, \
-					                    entry_ptr, \
-							    new_len);
+                                /* The entry can't be protected since we  are 
+			         * in the process of flushing it.  Thus we must 
+			         * update the replacement policy data 
+				 * structures for the size change.  The macro 
+				 * deals with the pinned case.  
+			         */
+			        H5C2__UPDATE_RP_FOR_SIZE_CHANGE(cache_ptr, \
+					                        entry_ptr, \
+						   	        new_len);
 
-                            /* The entry can't be in the slist, so no need 
-			     * to update the slist for the size change.  
-			     */
+                                /* The entry can't be in the slist, so no need 
+			         * to update the slist for the size change.  
+			         */
 
-			    /* finally, set is_dirty to TRUE again, and 
-			     * update the size and image_ptr.
-			     */
-			    entry_ptr->is_dirty = TRUE;
+			        /* finally, set is_dirty to TRUE again, and 
+			         * update the size and image_ptr.
+			         */
+			        entry_ptr->is_dirty = TRUE;
 
-			    entry_ptr->size = new_len;
-			    entry_ptr->image_ptr = new_image_ptr;
-			    break; 
+			        entry_ptr->size = new_len;
+			        entry_ptr->image_ptr = new_image_ptr;
+			        break; 
 			
-			default: 
-			    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-					"unexpected serialize flag(s)")
-			    break;
+			    default: 
+			        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
+			 		    "unexpected serialize flag(s)")
+			        break;
+		        }
 		    }
-		}
+                }
+		entry_ptr->image_up_to_date = TRUE;
             }
 
 	    /* now write the image to disk */
@@ -8507,6 +8648,10 @@ H5C2_flush_single_entry(H5F_t *		     f,
             }
 
 #ifdef H5_HAVE_PARALLEL
+	    /* note that we initialized the serialize_flags to 0, so if
+	     * the image was up to date on entry, serialize_flags should
+	     * still be 0 at this point.
+	     */
             if ( serialize_flags != 0 ) {
 
                 /* In the parallel case, resizes and renames in
@@ -8571,6 +8716,7 @@ H5C2_flush_single_entry(H5F_t *		     f,
             if ( type_ptr->free_icr(entry_ptr->addr, entry_ptr->size,
 		                    (void *)entry_ptr) != SUCCEED )
             {
+
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
                             "free_icr callback failed.")
             }
@@ -8681,12 +8827,19 @@ H5C2_load_entry(H5F_t *              f,
 
     if ( image_ptr == NULL )
     {
+#if 0 /* JRM */
+        HDfprintf(stdout, 
+		  "memory allocation failed for on disk image buffer.\n");
+#endif /* JRM */
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, \
                     "memory allocation failed for on disk image buffer.")
     }
 
     if ( H5F_block_read(f, type->mem_type, addr, len, dxpl_id, image_ptr) < 0 )
     {
+#if 0 /* JRM */
+        HDfprintf(stdout, "can't read image.\n.");
+#endif /* JRM */
         HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "Can't read image")
     }
 
@@ -8694,6 +8847,9 @@ H5C2_load_entry(H5F_t *              f,
 
     if ( thing == NULL )
     {
+#if 0 /* JRM */
+        HDfprintf(stdout, "can't deserialize image.\n.");
+#endif /* JRM */
         HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "Can't deserialize image")
     }
 
@@ -8701,15 +8857,24 @@ H5C2_load_entry(H5F_t *              f,
     {
         if ( type->image_len(thing, &new_len) != SUCCEED )
         {
-	    HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "image_len() failed")
+#if 0 /* JRM */
+            HDfprintf(stdout, "image_len() failed.\n.");
+#endif /* JRM */
+	    HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "image_len() failed.\n");
 	}
 	else if ( new_len > len )
 	{
-	    HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "new_len > len")
+#if 0 /* JRM */
+            HDfprintf(stdout, "new_len > len.\n.");
+#endif /* JRM */
+	    HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "new_len > len.\n");
 	}
 	else if ( new_len <= 0 )
 	{
-	    HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "new_len <= 0")
+#if 0 /* JRM */
+            HDfprintf(stdout, "new_len <= 0.\n.");
+#endif /* JRM */
+	    HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "new_len <= 0.\n")
 	}
 	else if ( new_len < len )
 	{
@@ -8717,6 +8882,9 @@ H5C2_load_entry(H5F_t *              f,
 
 	    if ( thing == NULL )
 	    {
+#if 0 /* JRM */
+                HDfprintf(stdout, "thing null after H5MM_realloc().\n");
+#endif /* JRM */
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, \
                             "thing null after H5MM_realloc().")
 	    }
@@ -8756,6 +8924,7 @@ H5C2_load_entry(H5F_t *              f,
     entry_ptr->addr                 = addr;
     entry_ptr->size                 = len;
     entry_ptr->image_ptr            = image_ptr;
+    entry_ptr->image_up_to_date     = TRUE;
     entry_ptr->type                 = type;
     entry_ptr->is_dirty	            = dirty;
     entry_ptr->dirtied              = FALSE;
