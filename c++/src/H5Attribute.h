@@ -21,10 +21,13 @@
 namespace H5 {
 #endif
 
-class H5_DLLCPP Attribute : public AbstractDs {
+class H5_DLLCPP Attribute : public AbstractDs, public IdComponent {
    public:
 	// Closes this attribute.
 	virtual void close();
+
+	// Gets the name of the file, in which this attribute belongs.
+	H5std_string getFileName() const;
 
 	// Gets the name of this attribute.
 	ssize_t getName( size_t buf_size, H5std_string& attr_name ) const;
@@ -45,11 +48,15 @@ class H5_DLLCPP Attribute : public AbstractDs {
 	void write(const DataType& mem_type, const void *buf ) const;
 	void write(const DataType& mem_type, const H5std_string& strg ) const;
 
+	// Creates an attribute by way of dereference.
+	Attribute(H5Object& obj, void* ref);
+	Attribute(H5File& file, void* ref);
+
 	// Returns this class name
 	virtual H5std_string fromClass () const { return("Attribute"); }
 
-        // Creates a copy of an existing attribute using the attribute id
-        Attribute( const hid_t attr_id );
+	// Creates a copy of an existing attribute using the attribute id
+	Attribute( const hid_t attr_id );
 
 	// Copy constructor: makes a copy of an existing Attribute object.
 	Attribute( const Attribute& original );
@@ -57,10 +64,16 @@ class H5_DLLCPP Attribute : public AbstractDs {
 	// Default constructor
 	Attribute();
 
+	// Gets/Sets the attribute id.
+	virtual hid_t getId() const;
+	virtual void setId(const hid_t new_id);
+
 	// Destructor: properly terminates access to this attribute.
 	virtual ~Attribute();
 
    private:
+	hid_t id;	// HDF5 attribute id
+
 	// This function contains the common code that is used by
 	// getTypeClass and various API functions getXxxType
 	// defined in AbstractDs for generic datatype and specific
