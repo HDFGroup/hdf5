@@ -47,6 +47,6 @@ parallel_test_SOURCES=ptest.f90 hyper.f90 mdset.f90
 LDADD=$(LIBH5FTEST) $(LIBH5TEST) $(LIBH5F) $(LIBHDF5)
 
 # Mark this directory as part of the Fortran API
-HDF_FORTRAN=yes
+FORTRAN_API=yes
 
 include $(top_srcdir)/config/conclude.am

@@ -149,7 +149,7 @@ H5fortran_detect.f90: H5test_kind$(EXEEXT)
 H5test_kind_SOURCES = $(srcdir)/H5test_kind.f90
 
 # Mark this directory as part of the Fortran API
-HDF_FORTRAN=yes
+FORTRAN_API=yes
 
 # Hardcode the dependencies of these files. There isn't a known way of
 # determining this automagically (like we do with the C files). So, when

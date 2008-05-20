@@ -42,7 +42,7 @@ testhdf5_SOURCES=testhdf5.cpp tattr.cpp tcompound.cpp tfile.cpp tfilter.cpp \
 	th5s.cpp trefer.cpp ttypes.cpp tvlstr.cpp h5cpputil.cpp
 
 # Tell conclude.am that these are C++ tests.
-HDF_CXX=yes
+CXX_API=yes
 
 # Some C++ compilers/linkers (PGI?) create a directory named "ii_files" that
 # holds *.ii files, which are template entity instantiations.

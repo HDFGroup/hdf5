@@ -37,7 +37,7 @@ TEST_PROG=exlite
 INSTALL_FILES=
 
 # Mark this directory as part of the Fortran API
-HDF_FORTRAN=yes
+FORTRAN_API=yes
 
 # Tell automake how to build examples using h5fc
 if BUILD_PARALLEL_CONDITIONAL
