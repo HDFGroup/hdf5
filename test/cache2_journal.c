@@ -5156,6 +5156,7 @@ check_message_format(void)
     int32_t checkpoint = 1;
     char verify[9][500];
     char from_journal[9][500];
+    time_t current_date;
 
     TESTING("journal file message format");
 
@@ -5368,12 +5369,14 @@ check_message_format(void)
 
     } /* end if */
 
+    current_date = time(NULL);
+
     if ( show_progress ) /* 10 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
 		  checkpoint++, (int)pass2);
 
     /* Fill out verify array with expected messages */
-    sprintf(verify[0], "0 ver_num 1 target_file_name HDF5.file creation_date %s human_readable 1\n", __DATE__);
+    sprintf(verify[0], "0 ver_num 1 target_file_name HDF5.file creation_date %010.10s human_readable 1\n", ctime(&current_date));
     sprintf(verify[1], "1 bgn_trans 1\n");
     sprintf(verify[2], "2 trans_num 1 length 1 base_addr 0x0 body  41 \n");
     sprintf(verify[3], "2 trans_num 1 length 2 base_addr 0x1 body  41 42 \n");
@@ -5522,12 +5525,14 @@ check_message_format(void)
 
     } /* end if */
 
+    current_date = time(NULL);
+
     if ( show_progress ) /* 15 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
 		  checkpoint++, (int)pass2);
 
     /* Fill out verify array with expected messages */
-    sprintf(verify[0], "0 ver_num 1 target_file_name HDF5.file creation_date %s human_readable 1\n", __DATE__);
+    sprintf(verify[0], "0 ver_num 1 target_file_name HDF5.file creation_date %010.10s human_readable 1\n", ctime(&current_date));
     sprintf(verify[1], "1 bgn_trans 3\n");
     sprintf(verify[2], "2 trans_num 3 length 6 base_addr 0x6faf body  23 31 6e 4e 60 7d \n");
     sprintf(verify[3], "3 end_trans 3\n");

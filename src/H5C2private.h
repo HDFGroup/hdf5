@@ -1563,7 +1563,6 @@ H5_DLL herr_t H5C2_jb__reconfigure(H5C2_jbrb_t * struct_ptr,
 H5_DLL herr_t H5C2_jb__bin2hex(const uint8_t * buf,
                                char * hexdata,
                                size_t * hexlength,
-                               size_t buf_offset,
                                size_t buf_size);
 
 /*****************************************************************************/

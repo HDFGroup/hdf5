@@ -2589,6 +2589,7 @@ H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
     char 	temp[150];
     int 	i;
     herr_t 	ret_value = SUCCEED;
+    time_t      current_date;
 
     FUNC_ENTER_NOAPI(H5C2_jb__init, FAIL)
 
@@ -2690,13 +2691,16 @@ H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
     /* Define head pointer to point at where we are writing to in the buffer */
     struct_ptr->head = (*struct_ptr->buf)[struct_ptr->put];
 	
+    /* Get the current date */
+    current_date = time(NULL);
+
     /* Format the header message into a temporary buffer */
     HDsnprintf(temp, 
         (size_t)150,
-	"0 ver_num %ld target_file_name %s creation_date %s human_readable %d\n",
+	"0 ver_num %ld target_file_name %s creation_date %010.10s human_readable %d\n",
 	struct_ptr->jvers, 
 	struct_ptr->hdf5_file_name, 
-	__DATE__, 
+	ctime(&current_date), 
 	struct_ptr->human_readable);
 
     /* Write the header message into the ring buffer */
@@ -2746,6 +2750,7 @@ H5C2_jb__start_transaction(H5C2_jbrb_t * struct_ptr,
 {
     char temp[150];
     herr_t ret_value = SUCCEED;
+    time_t current_date;
 
     FUNC_ENTER_NOAPI(H5C2_jb__start_transaction, FAIL)
 #if 0 /* JRM */
@@ -2780,12 +2785,15 @@ H5C2_jb__start_transaction(H5C2_jbrb_t * struct_ptr,
      */
     if ( struct_ptr->header_present == FALSE ) {
 
+        /* Get the current date */
+        current_date = time(NULL);
+
 	HDsnprintf(temp, 
 	(size_t)150,
-	"0 ver_num %ld target_file_name %s creation_date %s human_readable %d\n",
+	"0 ver_num %ld target_file_name %s creation_date %010.10s human_readable %d\n",
 	    struct_ptr->jvers, 
 	    struct_ptr->hdf5_file_name, 
-	    __DATE__, 
+	    ctime(&current_date), 
 	    struct_ptr->human_readable);
 
         if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, 
@@ -2893,7 +2901,7 @@ H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
     } /* end if */
 
     /* Convert data from binary to hex */
-    H5C2_jb__bin2hex(body, hexdata, &hexlength, 0, length);
+    H5C2_jb__bin2hex(body, hexdata, &hexlength, length);
 
     if ( H5C2_jb__write_to_buffer(struct_ptr, hexlength, hexdata, FALSE, trans_num) < 0 ) {
 
@@ -3362,36 +3370,29 @@ herr_t
 H5C2_jb__bin2hex(const uint8_t * buf, 
                  char * hexdata,
                  size_t * hexlength,
-                 size_t buf_offset, 
                  size_t buf_size)
 
 {
-    size_t      u, v;                   /* Local index variable */
+    size_t         v;                   /* Local index variable */
     uint8_t        c;
+    char *         t;
 	
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5C2_jb__bin2hex)
 
-    HDsnprintf(hexdata, (size_t)2, " ");
+    t = hexdata;
+    t[0] = ' ';
+    for (v = 0; v < buf_size; v++) {
 
-    for(u = 0; u < buf_size; u += 16) {
-
-        /* Print the hex values */
-        for(v = 0; v < 16; v++) {
-
-            if(u + v < buf_size) {
-
-                c = buf[buf_offset + u + v];
-                sprintf(hexdata, "%s%02x ", hexdata, c);
-
-            } /* end if */
-
-        } /* end for */
+        t = &hexdata[v * 3 + 1];
+        c = buf[v];
+        HDsnprintf(t, (size_t)3, "%02x ", c);
+        t[2] = ' ';
 
     } /* end for */
-    
-    sprintf(hexdata, "%s\n", hexdata);
+    t[3] = '\n';
+    t[4] = 0;
 
-    * hexlength = HDstrlen(hexdata);
+    * hexlength = v * 3 + 2;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5C2_jb__bin2hex*/
