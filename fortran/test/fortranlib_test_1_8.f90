@@ -49,31 +49,45 @@ PROGRAM fortranlibtest
 
   ret_total_error = 0
   CALL file_space(cleanup, ret_total_error)
-  CALL write_test_status(ret_total_error, ' Testing file free space', total_error)
+  CALL write_test_status(ret_total_error, &
+       ' Testing file free space', &
+       total_error)
 
   ret_total_error = 0
   CALL attribute_test_1_8(cleanup, ret_total_error)
-  CALL write_test_status(ret_total_error, ' Testing attributes', total_error)
+  CALL write_test_status(ret_total_error, &
+       ' Testing attributes', &
+       total_error)
 
   ret_total_error = 0
   CALL group_test(cleanup, ret_total_error)
-  CALL write_test_status(ret_total_error, ' Testing groups', total_error)
+  CALL write_test_status(ret_total_error, &
+       ' Testing groups', &
+       total_error)
 
   ret_total_error = 0
   CALL test_h5o(cleanup, ret_total_error)
-  CALL write_test_status(ret_total_error, ' Testing object interface', total_error)
+  CALL write_test_status(ret_total_error, &
+       ' Testing object interface', &
+       total_error)
 
   ret_total_error = 0
   CALL dtransform(cleanup, ret_total_error)
-  CALL write_test_status(ret_total_error, ' Testing data transform', total_error)
+  CALL write_test_status(ret_total_error, &
+       ' Testing data transform', &
+       total_error)
 
   ret_total_error = 0
   CALL test_genprop_basic_class(cleanup, ret_total_error)
-  CALL write_test_status(ret_total_error, ' Testing basic generic properties', total_error)
+  CALL write_test_status(ret_total_error, &
+       ' Testing basic generic properties', &
+       total_error)
 
   ret_total_error = 0
   CALL test_h5s_encode(cleanup, ret_total_error)
-  CALL write_test_status(ret_total_error, ' Testing dataspace encoding and decoding', total_error)
+  CALL write_test_status(ret_total_error, &
+       ' Testing dataspace encoding and decoding', &
+       total_error)
 
 !  CALL test_hard_query(group_total_error)
 
@@ -99,8 +113,8 @@ SUBROUTINE dtransform(cleanup, total_error)
   LOGICAL, INTENT(IN)  :: cleanup
   INTEGER, INTENT(INOUT) :: total_error
 
-  INTEGER(HID_T) :: dxpl_id_c_to_f, dxpl_id_c_to_f_copy
-  INTEGER(HID_T) :: dxpl_id_simple, dxpl_id_polynomial, dxpl_id_polynomial_copy, dxpl_id_utrans_inv, file_id
+  INTEGER(HID_T) :: dxpl_id_c_to_f
+  INTEGER(HID_T) :: file_id
   
   CHARACTER(LEN=15), PARAMETER :: c_to_f = "(9/5.0)*x + 123"
   INTEGER :: error
@@ -166,7 +180,6 @@ SUBROUTINE test_genprop_basic_class(cleanup, total_error)
 
   INTEGER(HID_T) :: cid1		!/* Generic Property class ID */
   INTEGER(HID_T) :: cid2		!/* Generic Property class ID */
-  INTEGER(HID_T) :: cid3		!/* Generic Property class ID */
 
   CHARACTER(LEN=7) :: CLASS1_NAME = "Class 1"
   CHARACTER(LEN=7)  :: name              ! /* Name of class */
@@ -254,10 +267,10 @@ SUBROUTINE test_h5s_encode(cleanup, total_error)
   LOGICAL, INTENT(IN)  :: cleanup
   INTEGER, INTENT(INOUT) :: total_error
 
-  INTEGER(hid_t) :: sid1, sid2, sid3!	/* Dataspace ID		*/
-  INTEGER(hid_t) :: decoded_sid1, decoded_sid2, decoded_sid3
+  INTEGER(hid_t) :: sid1, sid3!	/* Dataspace ID		*/
+  INTEGER(hid_t) :: decoded_sid1, decoded_sid3
   INTEGER :: rank	!/* LOGICAL rank of dataspace	*/
-  INTEGER(size_t) :: sbuf_size=0, null_size=0, scalar_size=0
+  INTEGER(size_t) :: sbuf_size=0, scalar_size=0
 
 ! Make sure the size is large, need variable length in fortran 2003
   CHARACTER(LEN=288) :: sbuf
