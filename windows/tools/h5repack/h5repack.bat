@@ -162,6 +162,40 @@ rem
     exit /b
     
     
+rem Call h5repack with old syntax
+rem
+:tooltest0
+
+    rem Run test.
+    set infile=%CD%\..\testfiles\%1
+    rem Linux uses a $path variable here, but it is unneccessary, and will
+    rem corrupt our Windows PATH if we use it.  --SJW 8/28/07
+    rem set path=%CD%
+    rem set outfile=%path%\out.%1
+    set outfile=%CD%\out.%1
+    
+    rem We define %params% here because Windows `shift` command doesn't affect
+    rem the %* variable.  --SJW 8/28/07
+    if "%2"=="" (
+        set params=
+    ) else (
+        set params=%*
+        set params=!params:* =!
+    )
+    %h5repack_bin% -i %infile% -o %outfile% %params%
+    
+    if %errorlevel% neq 0 (
+        call :testing *FAILED* %*
+        set /a nerrors=!nerrors!+1
+    ) else (
+        call :testing PASSED %*
+        call :difftest %infile% %outfile%
+    )
+    del /f %outfile%
+    
+    exit /b
+    
+    
 rem This is a Windows-specific function that detects if the filter passed
 rem should be enabled for this test script.  It searches H5pubconf.h for the
 rem string "#define H5_HAVE_FILTER_%1" and sets the variable "use_filter_%1"
@@ -546,6 +580,15 @@ rem
         call :tooltest %arg%
     )
 
+    rem syntax of -i infile -o outfile
+    rem latest file format with short switches. use FILE4=h5repack_layout.h5 (no filters)
+    set arg=%file4% -l CHUNK=20x10 -f GZIP=1 -m 10 -n -L -c 8 -d 6 -s 8[:dtype]
+    if not "%use_filter_deflate%"=="yes" (
+        call :skip %arg%
+    ) else (
+        call :tooltest0 %arg%
+    )
+    
     
     if %nerrors% equ 0 (
         echo.All %h5repack% tests passed.
