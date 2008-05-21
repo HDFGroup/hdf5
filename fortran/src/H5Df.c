@@ -1298,6 +1298,7 @@ nh5dextend_c ( hid_t_f *dset_id , hsize_t_f *dims)
   if (c_space_id < 0) return ret_value;
 
   rank = H5Sget_simple_extent_ndims(c_space_id);
+  H5Sclose(c_space_id);
   if (rank < 0) return ret_value;
 
   c_dims = malloc(sizeof(hsize_t)*rank);
