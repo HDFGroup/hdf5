@@ -94,11 +94,6 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 	void reference(void* ref, const char* name) const;
 	void reference(void* ref, const H5std_string& name) const;
 
-	//change prototype: void dereference(IdComponent& obj, void* ref);
-        // may need individual - remove when done
-	// Open a referenced HDF5 object.
-	void dereference(H5Object& obj, void* ref);
-
 	// Returns this class name
 	virtual H5std_string fromClass () const { return("H5File"); }
 
