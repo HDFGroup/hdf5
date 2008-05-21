@@ -41,11 +41,11 @@ PROGRAM parallel_test
   ENDIF
   CALL mpi_comm_rank( MPI_COMM_WORLD, mpi_rank, mpierror )
   IF (mpierror .NE. MPI_SUCCESS) THEN
-     WRITE(*,*) "MPI_COMM_RANK   *FAILED*"
+     WRITE(*,*) "MPI_COMM_RANK  *FAILED* Process = ", mpi_rank
   ENDIF
   CALL mpi_comm_size( MPI_COMM_WORLD, mpi_size, mpierror )
   IF (mpierror .NE. MPI_SUCCESS) THEN
-     WRITE(*,*) "MPI_COMM_SIZE  *FAILED*"
+     WRITE(*,*) "MPI_COMM_SIZE  *FAILED* Process = ", mpi_rank
   ENDIF
   !//////////////////////////////////////////////////////////
   ! initialize the HDF5 fortran interface
@@ -117,13 +117,13 @@ PROGRAM parallel_test
   IF (nerrors == 0) THEN
      CALL mpi_finalize(mpierror)  
      IF (mpierror .NE. MPI_SUCCESS) THEN
-        WRITE(*,*) "MPI_FINALIZE  *FAILED*"
+        WRITE(*,*) "MPI_FINALIZE  *FAILED* Process = ", mpi_rank
      ENDIF
   ELSE
      WRITE(*,*) 'Errors detected in process ', mpi_rank
      CALL mpi_abort(MPI_COMM_WORLD, 1, mpierror)  
      IF (mpierror .NE. MPI_SUCCESS) THEN
-        WRITE(*,*) "MPI_ABORT  *FAILED*"
+        WRITE(*,*) "MPI_ABORT  *FAILED* Process = ", mpi_rank
      ENDIF
   ENDIF
 
