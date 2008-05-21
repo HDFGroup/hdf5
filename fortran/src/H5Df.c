@@ -1287,7 +1287,10 @@ nh5dset_extent_c ( hid_t_f *dset_id , hsize_t_f *dims)
 
   if((c_space_id = H5Dget_space((hid_t)*dset_id)) < 0) return ret_value;
 
-  if((rank = H5Sget_simple_extent_ndims(c_space_id)) < 0) return ret_value;
+  rank = H5Sget_simple_extent_ndims(c_space_id);
+  H5Sclose(c_space_id);
+  if(rank < 0 ) return ret_value;
+
 
   /*
    * Reverse dimensions due to C-FORTRAN storage order.
