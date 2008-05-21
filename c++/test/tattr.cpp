@@ -379,7 +379,7 @@ static void test_attr_compound_write()
 
     try {
 	// Create file
-	H5File fid1(FILENAME.c_str(), H5F_ACC_TRUNC);
+	H5File fid1(FILENAME, H5F_ACC_TRUNC);
 
 	// Create dataspace for dataset
 	hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
