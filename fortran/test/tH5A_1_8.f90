@@ -22,7 +22,8 @@ SUBROUTINE attribute_test_1_8(cleanup, total_error)
 ! 
 
   USE HDF5 ! This module contains all necessary modules 
-        
+  USE error_handler
+
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
   INTEGER, INTENT(OUT) :: total_error 
@@ -56,6 +57,7 @@ SUBROUTINE attribute_test_1_8(cleanup, total_error)
   LOGICAL, DIMENSION(1:2) :: new_format = (/.TRUE.,.FALSE./)
   LOGICAL, DIMENSION(1:2) :: use_shared = (/.TRUE.,.FALSE./)
 
+  INTEGER :: ret_total_error
 
 ! ********************
 ! test_attr equivelent
@@ -81,14 +83,18 @@ SUBROUTINE attribute_test_1_8(cleanup, total_error)
   CALL check(" H5Pset_shared_mesg_index_f",error, total_error)
 
   DO i = 1, 2
+
      IF (new_format(i)) THEN
-!        WRITE(*,*) "     - Testing with new file format"
+        WRITE(*,'(1X,A)') "Testing with new file format:"
         my_fapl = fapl2
      ELSE
-!        WRITE(*,*) "     - Testing with old file format"
+        WRITE(*,'(1X,A)') "Testing with old file format:"
         my_fapl = fapl
      END IF
-     CALL test_attr_basic_write(my_fapl, total_error)
+     ret_total_error = 0
+     CALL test_attr_basic_write(my_fapl, ret_total_error)
+     CALL write_test_status(ret_total_error, '  - Tests INT attributes on both datasets and groups', total_error)
+
 !!$        CALL test_attr_basic_read(my_fapl)
 !!$        CALL test_attr_flush(my_fapl)
 !!$        CALL test_attr_plist(my_fapl) ! this is next
@@ -104,39 +110,76 @@ SUBROUTINE attribute_test_1_8(cleanup, total_error)
      IF(new_format(i)) THEN
         DO j = 1, 2
            IF (use_shared(j)) THEN
-!              WRITE(*,*) "     - Testing with shared attributes"
+              WRITE(*,*) " - Testing with shared attributes:"
               my_fcpl = fcpl2
            ELSE
-!              WRITE(*,*) "     - Testing without shared attributes"
+              WRITE(*,*) " - Testing without shared attributes:"
               my_fcpl = fcpl
            END IF
 !!$              CALL test_attr_dense_create(my_fcpl, my_fapl)
-           CALL test_attr_dense_open(my_fcpl, my_fapl, total_error)
+           
+           ret_total_error = 0
+           CALL test_attr_dense_open(my_fcpl, my_fapl, ret_total_error)
+           CALL write_test_status(ret_total_error, &
+                '   - Testing INT attributes on both datasets and groups', total_error)
+           
 !!$              CALL test_attr_dense_delete(my_fcpl, my_fapl)
 !!$              CALL test_attr_dense_rename(my_fcpl, my_fapl)
 !!$              CALL test_attr_dense_unlink(my_fcpl, my_fapl)
 !!$              CALL test_attr_dense_limits(my_fcpl, my_fapl)
 !!$              CALL test_attr_big(my_fcpl, my_fapl)
-           CALL test_attr_null_space(my_fcpl, my_fapl, total_error)
+           ret_total_error = 0
+           CALL test_attr_null_space(my_fcpl, my_fapl, ret_total_error)
+           CALL write_test_status(ret_total_error, &
+                '   - Testing storing attribute with "null" dataspace', total_error)
 !!$              CALL test_attr_deprec(fcpl, my_fapl)
-           CALL test_attr_many(new_format(i), my_fcpl, my_fapl, total_error)
-           CALL test_attr_corder_create_basic(my_fcpl, my_fapl, total_error)
-           CALL test_attr_corder_create_compact(my_fcpl, my_fapl, total_error)
+           ret_total_error = 0
+           CALL test_attr_many(new_format(i), my_fcpl, my_fapl, ret_total_error)
+           CALL write_test_status(ret_total_error, '   - Testing storing lots of attributes', total_error)
+
+           ret_total_error = 0
+           CALL test_attr_corder_create_basic(my_fcpl, my_fapl, ret_total_error)
+           CALL write_test_status(ret_total_error, &
+                '   - Testing creating objects with attribute creation order', total_error)
+           
+           ret_total_error = 0
+           CALL test_attr_corder_create_compact(my_fcpl, my_fapl, ret_total_error)
+           CALL write_test_status(ret_total_error, &
+                '   - Testing compact storage on objects with attribute creation order', total_error)
 !!$              CALL test_attr_corder_create_dense(my_fcpl, my_fapl)
 !!$              CALL test_attr_corder_create_reopen(my_fcpl, my_fapl)
 !!$              CALL test_attr_corder_transition(my_fcpl, my_fapl)
 !!$              CALL test_attr_corder_delete(my_fcpl, my_fapl)
-           CALL test_attr_info_by_idx(new_format, my_fcpl, my_fapl, total_error)
-           CALL test_attr_delete_by_idx(new_format, my_fcpl, my_fapl, total_error)
+           ret_total_error = 0
+           CALL test_attr_info_by_idx(new_format, my_fcpl, my_fapl, ret_total_error)
+           CALL write_test_status(ret_total_error, &
+                '   - Testing querying attribute info by index', total_error)
+           
+           ret_total_error = 0
+           CALL test_attr_delete_by_idx(new_format, my_fcpl, my_fapl, ret_total_error)
+           CALL write_test_status(ret_total_error, '   - Testing deleting attribute by index', total_error)
+           
 !!$              CALL test_attr_iterate2(new_format, my_fcpl, my_fapl)
 !!$              CALL test_attr_open_by_idx(new_format, my_fcpl, my_fapl)
 !!$              CALL test_attr_open_by_name(new_format, my_fcpl, my_fapl)
-           CALL test_attr_create_by_name(new_format(i), my_fcpl, my_fapl, total_error)
+           ret_total_error = 0
+           CALL test_attr_create_by_name(new_format(i), my_fcpl, my_fapl, ret_total_error)
+           CALL write_test_status(ret_total_error, '   - Testing creating attributes by name', total_error)
+
              ! /* More complex tests with both "new format" and "shared" attributes */
            IF( use_shared(j) ) THEN
 !!$                 CALL test_attr_shared_write(my_fcpl, my_fapl)
-              CALL test_attr_shared_rename(my_fcpl, my_fapl, total_error)
-              CALL test_attr_shared_delete(my_fcpl, my_fapl, total_error)
+              ret_total_error = 0
+              CALL test_attr_shared_rename(my_fcpl, my_fapl, ret_total_error)
+              CALL write_test_status(ret_total_error,&
+                   '   - Testing renaming shared attributes in "compact" & "dense" storage', total_error)
+
+              ret_total_error = 0
+              CALL test_attr_shared_delete(my_fcpl, my_fapl, ret_total_error)
+              CALL write_test_status(ret_total_error,&
+                   '   - Testing deleting shared attributes in "compact" & "dense" storage', total_error)
+              
+
 !!$                 CALL test_attr_shared_unlink(my_fcpl, my_fapl)
            END IF
 !!$              CALL test_attr_bug1(my_fcpl, my_fapl)
@@ -155,7 +198,7 @@ SUBROUTINE attribute_test_1_8(cleanup, total_error)
 !!$           CALL test_attr_bug1(fcpl, my_fapl)
 
      END IF
-  END DO
+  ENDDO
 
   CALL H5Pclose_f(fcpl, error)
   CALL CHECK("H5Pclose", error,total_error)
@@ -170,6 +213,13 @@ SUBROUTINE attribute_test_1_8(cleanup, total_error)
 END SUBROUTINE attribute_test_1_8
 
 SUBROUTINE test_attr_corder_create_compact(fcpl,fapl, total_error)
+
+!/****************************************************************
+!**
+!**  test_attr_corder_create_compact(): Test basic H5A (attribute) code.
+!**      Tests compact attribute storage on objects with attribute creation order info
+!**
+!****************************************************************/
 
 ! Needed for get_info_by_name
 
@@ -510,6 +560,13 @@ END SUBROUTINE test_attr_null_space
 
 SUBROUTINE test_attr_create_by_name(new_format,fcpl,fapl, total_error)
 
+!/****************************************************************
+!**
+!**  test_attr_create_by_name(): Test basic H5A (attribute) code.
+!**      Tests creating attributes by name
+!**
+!****************************************************************/
+
   USE HDF5
 
   IMPLICIT NONE
@@ -761,6 +818,13 @@ END SUBROUTINE test_attr_create_by_name
 
 
 SUBROUTINE test_attr_info_by_idx(new_format, fcpl, fapl, total_error)
+
+!/****************************************************************
+!**
+!**  test_attr_info_by_idx(): Test basic H5A (attribute) code.
+!**      Tests querying attribute info by index
+!**
+!****************************************************************/
 
   USE HDF5
 
@@ -1609,6 +1673,13 @@ END SUBROUTINE test_attr_shared_rename
 
 
 SUBROUTINE test_attr_delete_by_idx(new_format, fcpl, fapl, total_error)
+
+!/****************************************************************
+!**
+!**  test_attr_delete_by_idx(): Test basic H5A (attribute) code.
+!**      Tests deleting attribute by index
+!**
+!****************************************************************/
 
   USE HDF5
   

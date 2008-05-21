@@ -20,16 +20,13 @@
 PROGRAM fortranlibtest
 
   USE HDF5
+  USE error_handler
 
   IMPLICIT NONE
   INTEGER :: total_error = 0
   INTEGER :: error
   INTEGER :: ret_total_error
   INTEGER :: majnum, minnum, relnum
-  CHARACTER(LEN=8) error_string
-  CHARACTER(LEN=8) :: success = ' PASSED '
-  CHARACTER(LEN=8) :: failure = '*FAILED*'
-  CHARACTER(LEN=4) :: e_format ='(8a)'
   LOGICAL :: cleanup = .TRUE.
 !       LOGICAL :: cleanup = .FALSE.
 
@@ -51,69 +48,32 @@ PROGRAM fortranlibtest
   WRITE(*,*)
 
   ret_total_error = 0
-  error_string = failure
   CALL file_space(cleanup, ret_total_error)
-  IF (ret_total_error == 0) error_string = success
-  WRITE(*, fmt = '(21a)', advance = 'no') ' Testing file free space'     
-  WRITE(*, fmt = '(52x,a)', advance = 'no') ' ' 
-  WRITE(*, fmt = e_format) error_string
-  total_error = total_error + ret_total_error
-  !     write(*,*)
-  !     write(*,*) '========================================='
-  !     write(*,*) 'Testing ATTRIBUTE interface              ' 
-  !     write(*,*) '========================================='
+  CALL write_test_status(ret_total_error, ' Testing file free space', total_error)
 
   ret_total_error = 0
-  error_string = failure
   CALL attribute_test_1_8(cleanup, ret_total_error)
-  WRITE(*, fmt = '(15a)', advance = 'no') ' Testing attributes'     
-  WRITE(*, fmt = '(57x,a)', advance = 'no')  ' '
-  IF (ret_total_error == 0) error_string = success
-  WRITE(*, fmt = e_format) error_string
-  total_error = total_error + ret_total_error
+  CALL write_test_status(ret_total_error, ' Testing attributes', total_error)
 
   ret_total_error = 0
-  error_string = failure
   CALL group_test(cleanup, ret_total_error)
-  WRITE(*, fmt = '(15a)', advance = 'no') ' Testing groups'     
-  WRITE(*, fmt = '(61x,a)', advance = 'no')  ' '
-  IF (ret_total_error == 0) error_string = success
-  WRITE(*, fmt = e_format) error_string
-  total_error = total_error + ret_total_error
+  CALL write_test_status(ret_total_error, ' Testing groups', total_error)
 
   ret_total_error = 0
-  error_string = failure
   CALL test_h5o(cleanup, ret_total_error)
-  WRITE(*, fmt = '(15a)', advance = 'no') ' Testing object interface'     
-  WRITE(*, fmt = '(51x,a)', advance = 'no')  ' '
-  IF (ret_total_error == 0) error_string = success
-  WRITE(*, fmt = e_format) error_string
-  total_error = total_error + ret_total_error
+  CALL write_test_status(ret_total_error, ' Testing object interface', total_error)
 
   ret_total_error = 0
-  error_string = failure
   CALL dtransform(cleanup, ret_total_error)
-  WRITE(*, fmt = '(15a)', advance = 'no') ' Testing data transform'     
-  WRITE(*, fmt = '(53x,a)', advance = 'no')  ' '
-  IF (ret_total_error == 0) error_string = success
-  WRITE(*, fmt = e_format) error_string
-  total_error = total_error + ret_total_error
+  CALL write_test_status(ret_total_error, ' Testing data transform', total_error)
 
   ret_total_error = 0
-  error_string = failure
   CALL test_genprop_basic_class(cleanup, ret_total_error)
-  WRITE(*, fmt = '(30a)', advance = 'no') ' Testing basic generic properties'     
-  WRITE(*, fmt = '(43x,a)', advance = 'no')  ' '
-  IF (ret_total_error == 0) error_string = success
-  WRITE(*, fmt = e_format) error_string
-  total_error = total_error + ret_total_error
+  CALL write_test_status(ret_total_error, ' Testing basic generic properties', total_error)
 
+  ret_total_error = 0
   CALL test_h5s_encode(cleanup, ret_total_error)
-  WRITE(*, fmt = '(15a)', advance = 'no') ' Testing dataspace encoding and decoding'     
-  WRITE(*, fmt = '(36x,a)', advance = 'no')  ' '
-  IF (ret_total_error == 0) error_string = success
-  WRITE(*, fmt = e_format) error_string
-  total_error = total_error + ret_total_error
+  CALL write_test_status(ret_total_error, ' Testing dataspace encoding and decoding', total_error)
 
 !  CALL test_hard_query(group_total_error)
 

@@ -15,6 +15,7 @@
 !
 SUBROUTINE group_test(cleanup, total_error)
   USE HDF5 ! This module contains all necessary modules 
+  USE error_handler
   
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
@@ -22,7 +23,7 @@ SUBROUTINE group_test(cleanup, total_error)
 
   INTEGER(HID_T) :: fapl, fapl2, my_fapl ! /* File access property lists */
   
-  INTEGER :: error
+  INTEGER :: error, ret_total_error
 
 !  WRITE(*,*) "TESTING GROUPS"
   CALL H5Pcreate_f(H5P_FILE_ACCESS_F, fapl, error)
@@ -40,19 +41,42 @@ SUBROUTINE group_test(cleanup, total_error)
   my_fapl = fapl2
 
   
-  CALL mklinks(fapl2, total_error)
-  CALL cklinks(fapl2, total_error)
+  ret_total_error = 0
+  CALL mklinks(fapl2, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing building a file with assorted links', total_error)
 
-  CALL group_info(cleanup, fapl2,total_error)
+  ret_total_error = 0
+  CALL cklinks(fapl2, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing links are correct and building assorted links', total_error)
+
+  ret_total_error = 0
+  CALL group_info(cleanup, fapl2, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing create group with creation order indices, test querying group info', total_error)
+
 ! CALL ud_hard_links(fapl2,total_error)
-  CALL timestamps(cleanup, fapl2, total_error)
-  CALL test_move_preserves(fapl2, total_error)
-  CALL delete_by_idx(cleanup,fapl2, total_error)
-  CALL test_lcpl(cleanup, fapl, total_error)
+  ret_total_error = 0
+  CALL timestamps(cleanup, fapl2, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing disabling tracking timestamps for an object', total_error)
 
-  CALL objcopy(fapl, total_error)
+  ret_total_error = 0
+  CALL test_move_preserves(fapl2, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing moving and renaming links preserves their properties', total_error)
 
-  CALL lifecycle(cleanup, fapl2, total_error)
+  ret_total_error = 0
+  CALL delete_by_idx(cleanup,fapl2,ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing deleting links by index', total_error)
+  
+  ret_total_error = 0
+  CALL test_lcpl(cleanup, fapl, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing link creation property lists', total_error)
+
+  ret_total_error = 0
+  CALL objcopy(fapl, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing object copy', total_error)
+
+  ret_total_error = 0
+  CALL lifecycle(cleanup, fapl2, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing adding links to a group follow proper "lifecycle"', total_error)
 
   IF(cleanup) CALL h5_cleanup_f("TestLinks", H5P_DEFAULT_F, error)
   CALL check("h5_cleanup_f", error, total_error)

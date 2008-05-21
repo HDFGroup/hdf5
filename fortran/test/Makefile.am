@@ -70,4 +70,13 @@ FORTRAN_API=yes
 # fflush2 depends on files created by fflush1
 fflush2.chkexe_: fflush1.chkexe_
 
+# Hardcode the dependencies of these files. There isn't a known way of
+# determining this automagically (like we do with the C files). So, when
+# doing a parallel make, some modules could be made way before the
+# modules they depend upon are actually made. *sigh*
+fortranlib_test.lo:             fortranlib_test.f90 tf.lo
+fortranlib_test_1_8.lo:         fortranlib_test_1_8.f90 tf.lo
+tH5A_1_8.lo:                    tH5A_1_8.f90 tf.lo
+tH5G_1_8.lo:                    tH5G_1_8.f90 tf.lo
+
 include $(top_srcdir)/config/conclude.am
