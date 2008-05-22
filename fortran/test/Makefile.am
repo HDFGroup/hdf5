@@ -74,9 +74,9 @@ fflush2.chkexe_: fflush1.chkexe_
 # determining this automagically (like we do with the C files). So, when
 # doing a parallel make, some modules could be made way before the
 # modules they depend upon are actually made. *sigh*
-fortranlib_test.lo:             fortranlib_test.f90 tf.lo
-fortranlib_test_1_8.lo:         fortranlib_test_1_8.f90 tf.lo
-tH5A_1_8.lo:                    tH5A_1_8.f90 tf.lo
-tH5G_1_8.lo:                    tH5G_1_8.f90 tf.lo
+fortranlib_test.lo:             $(srcdir)/fortranlib_test.f90 tf.lo
+fortranlib_test_1_8.lo:         $(srcdir)/fortranlib_test_1_8.f90 tf.lo
+tH5A_1_8.lo:                    $(srcdir)/tH5A_1_8.f90 tf.lo
+tH5G_1_8.lo:                    $(srcdir)/tH5G_1_8.f90 tf.lo
 
 include $(top_srcdir)/config/conclude.am
