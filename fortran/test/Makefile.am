@@ -81,7 +81,7 @@ install-data-local:
 
 uninstall-local:
 	@if test -n "$(F9XMODEXT)" -a "X$(F9XMODEXT)" != "Xo"; then      \
-	  if test -f "$(includedir)/tf.$(F9XMODEXT)" -o -f "$(includedir)/TF.$(F9XMODEXT)"; then \
+	  if test -f "$(includedir)/error_handler.$(F9XMODEXT)" -o -f "$(includedir)/ERROR_HANDLER.$(F9XMODEXT)"; then \
 	    set -x; $(RM) $(includedir)/*.$(F9XMODEXT);                 \
 	  fi;                                                           \
 	fi;								\
@@ -102,6 +102,6 @@ fortranlib_test.lo:             $(srcdir)/fortranlib_test.f90 tf.lo
 fortranlib_test_1_8.lo:         $(srcdir)/fortranlib_test_1_8.f90 tf.lo
 tH5A_1_8.lo:                    $(srcdir)/tH5A_1_8.f90 tf.lo
 tH5G_1_8.lo:                    $(srcdir)/tH5G_1_8.f90 tf.lo
-tf.lo:                          $(srcdir)/t.f90
+tf.lo:                          $(srcdir)/tf.f90
 
 include $(top_srcdir)/config/conclude.am
