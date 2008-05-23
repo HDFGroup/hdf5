@@ -68,9 +68,13 @@ New Features
 
 	Library
 	-------
+        
+        - None
 
 	Parallel Library
 	----------------
+        
+        - None
 
 	Tools
 	-----
@@ -80,6 +84,8 @@ New Features
            regarding floating point numbers. (PVN - 2008/05/06)
         - h5dump: support for external links, display the object that the external link 
            points to. (PVN - 2008/05/12)
+        - h5repack: added back -o and -i command line flags to specify input and
+          output files. (PVN - 2008/05/23)
 
 
 
@@ -87,8 +93,14 @@ New Features
 	F90 API
 	------
 
+        New H5A, H5G, H5L, H5O, and H5P APIs to enable 1.8 features were
+	added. See Changes.html (http://www.hdfgroup.org/HDF5/doc/ADGuide/Changes.html) 
+	file for the complete list of the new APIs.
+
 	C++ API
 	------
+        
+        - None
 
 
 
@@ -96,18 +108,23 @@ New Features
 Support for New Platforms, Languages, and Compilers
 ===================================================
 
+	- Fortran library will work correctly if compiled with -i8 flag; 
+	  tested with g95, PGI and Intel Fortran compilers.
 
 Bug Fixes since HDF5-1.8.0 
 ==========================
 
 	Configuration
 	-------------
+        
+        - None
 
 	Source code distribution
 	========================
 
 	Library
 	-------
+            - Chunked > 4GB are disallowed. (QAK - 2008/05/16)
 	    - Fixed the problem with the searching of target file for H5Lcreate_external().
 	      The searching pattern will depend on whether the target file's
 	      pathname is an absolute or a relative path. Please see the
@@ -123,6 +140,8 @@ Bug Fixes since HDF5-1.8.0
 
 	Parallel Library
 	----------------
+        
+        - None
 
 	Tools
 	-----
@@ -136,8 +155,26 @@ Bug Fixes since HDF5-1.8.0
 	F90 API
 	------
 
+	- h5tset(get)_fields subroutines were missing parameter to specify
+	  a sign position; fixed (EIP - 2008/05/23)
+	- Many APIs were fixed to work with the 8 byte integer in Fortran vs.
+	  4 byte integer in C; this change is trasparent to user's
+	  application.
+
 	C++ API
 	------
+
+	- The class hierarchy was revised to address the problem reported
+	  in bugzilla #1068.  Classes AbstractDS and Attribute are moved out of
+   	  H5Object.  Class Attribute now multiply inherits from IdComponent and
+   	  AbstractDs and class DataSet from H5Object and AbstractDs.
+
+   	  In addition, data member IdComponent::id was moved into subclasses:
+   	  Attribute, DataSet, DataSpace, DataType, H5File, Group, and PropList.
+
+   	- Revised Attribute::write and Attribute::read
+   	  wrappers to handle memory allocation/deallocation properly. (bugzilla 1045)
+          (BMR - 2008/05/20)
 
 
 Platforms Tested
@@ -213,12 +250,10 @@ The following platforms and compilers have been tested for for this release.
 
     Windows Vista                 Visual Studio 2005
 
-    MAC OS  10.4 (Intel)          gcc i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1 
-                                  G95 (GCC 4.0.3 (g95 0.91!) Nov 21 2006)
+    MAC OS  10.5.2 (Intel)        i686-apple-darwin9-gcc-4.0.1 (GCC) 4.0.1
+                                  GNU Fortran (GCC) 4.3.0 20070810
+                                  G95 (GCC 4.0.3 (g95 0.91!) Apr 24 2008)
 
-    Alpha Open VMS 7.3            Compaq C V6.5-001-48BCD
-                                  HP Fortran V7.6-3276
-                                  Compaq C++ V6.5-004
 
 
 Supported Configuration Features Summary
@@ -260,7 +295,6 @@ Linux 2.6 SuSE ia64 C
     Intel         (3,7)  y        y      y        y     y     n
 Linux 2.6 SGI Altix 
     ia64 Intel      (3)  y        y      y        y     y     y
-Alpha OpenVMS 7.3.2      n        y      n        y     n     n
 
 
 
@@ -291,7 +325,6 @@ Linux 2.4 SuSE
     ia64 C Intel    (7)  y       y         y         y        n        
 Linux 2.4 SGI Altix 
     ia64 Intel           y                           y        n        
-Alpha OpenVMS 7.3.2      n       n         n         y        n        
 
     Notes: (1)  Using mpich 1.2.6.
            (1a) Using mpich2 1.0.6.
@@ -352,9 +385,6 @@ Known Problems
 * For LLNL, uP: both serial and parallel tests pass.  
   Zeus: Serial tests pass but parallel tests fail with a known problem in MPI.
   ubgl: Serial tests pass but parallel tests fail. 
-
-* On SUN 5.10 C++, testing fails in the "Testing Shared Datatypes with 
-  Attributes" test. 
 
 * Configuring with --enable-debug=all produces compiler errors on most
   platforms:  Users who want to run HDF5 in debug mode should use
