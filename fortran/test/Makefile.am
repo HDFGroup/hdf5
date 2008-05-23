@@ -63,6 +63,30 @@ LDADD=libh5test_fortran.la $(LIBH5TEST) $(LIBH5F) $(LIBHDF5)
 CHECK_CLEANFILES+=*.h5
 MOSTLYCLEANFILES=*.tmp
 
+# Fortran module files can have different extensions and different names
+# (e.g., different capitalizations) on different platforms.  Write rules
+# for them explicitly rather than trying to teach automake about them.
+# They should be installed as headers and removed during clean.
+maintainer-clean-local: clean-local
+distclean-local: clean-local
+clean-local:
+	@if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
+	  $(RM) *.$(F9XMODEXT);                                         \
+	fi
+
+install-data-local:
+	@if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
+	  $(CP) $(top_builddir)/$(subdir)/*.$(F9XMODEXT) $(includedir)/. ; \
+	fi
+
+uninstall-local:
+	@if test -n "$(F9XMODEXT)" -a "X$(F9XMODEXT)" != "Xo"; then      \
+	  if test -f "$(includedir)/tf.$(F9XMODEXT)" -o -f "$(includedir)/TF.$(F9XMODEXT)"; then \
+	    set -x; $(RM) $(includedir)/*.$(F9XMODEXT);                 \
+	  fi;                                                           \
+	fi;								\
+	$(RM) $(bindir)/$(H5FC_NAME)
+
 # Mark this directory as part of the Fortran API (this affects output
 # from tests in conclude.am)
 FORTRAN_API=yes
@@ -78,5 +102,6 @@ fortranlib_test.lo:             $(srcdir)/fortranlib_test.f90 tf.lo
 fortranlib_test_1_8.lo:         $(srcdir)/fortranlib_test_1_8.f90 tf.lo
 tH5A_1_8.lo:                    $(srcdir)/tH5A_1_8.f90 tf.lo
 tH5G_1_8.lo:                    $(srcdir)/tH5G_1_8.f90 tf.lo
+tf.lo:                          $(srcdir)/t.f90
 
 include $(top_srcdir)/config/conclude.am
