@@ -955,6 +955,7 @@
 # h5recover sources
 ./tools/h5recover/Makefile.am
 ./tools/h5recover/Makefile.in
+./tools/h5recover/h5recover.c
 ./tools/h5recover/testh5recover.sh.in
 ./tools/h5recover/trecover_crasher.c
 ./tools/h5recover/trecover.h
