@@ -216,7 +216,7 @@ The following platforms and compilers have been tested for for this release.
     Linux 2.6.16.27 x86_64 AMD    gcc 4.1.0 (SuSE Linux), g++ 4.1.0, 
     (smirom)                          g95 (GCC 4.0.3)
                                   PGI 6.2-5 (pgcc, pgf90, pgCC)
-                                  Intel 9.1 (icc, iort, icpc)
+                                  Intel 9.1 (icc, ifort, icpc)
 
     Linux 2.6.5-7.252.1-rtgfx #1  Intel(R) C++ Version 9.0
           SMP ia64                Intel(R) Fortran Itanium(R) Version 9.0 
@@ -235,11 +235,17 @@ The following platforms and compilers have been tested for for this release.
                                   Intel(R) C++ Version 9.0
                                   Intel(R) Fortran Compiler Version 9.0
 
-    IA-64 Linux 2.4.21.SuSE_292.til1 ia64
+    IA-64 Linux 2.4.21.SuSE_309.tg1 ia64
     (NCSA tg-login)               gcc 3.2.2
                                   Intel(R) C++ Version 8.1
                                   Intel(R) Fortran Compiler Version 8.1
-                                  mpich-gm-1.2.5..10-intel-r2
+                                  mpich-gm-1.2.6..14b-intel-r2
+
+    Intel 64 Linux 2.6.9-42.0.10.EL_lustre-1.4.10.1smp
+    (abe)                         gcc 3.4.6 20060404
+                                  Intel(R) C++ Version 10.0
+                                  Intel (R) Fortran Compiler Version 10.0
+                                  mvapich2-0.9.8p2patched-intel-ofed-1.2
 
     Windows XP                    Visual Studio .NET
                                   Visual Studio 2005 w/ Intel Fortran 9.1
@@ -271,8 +277,8 @@ Platform                 C        F90    F90      C++   zlib  SZIP
                          parallel        parallel
 SunOS5.8 64-bit          n        y      n        y     y     y
 SunOS5.8 32-bit          n        y      n        y     y     y
-SunOS5.10 64-bit         y(1)     y      n        y     y     y
-SunOS5.10 32-bit         y(1)     y      n        y     y     y
+SunOS5.10 64-bit         n        y      n        y     y     y
+SunOS5.10 32-bit         n        y      n        y     y     y
 IRIX64_6.5 64-bit        n        y      y        y     y     y
 IRIX64_6.5 32-bit        n        n      n        n     y     y
 AIX-5.2  32-bit          y        y      y        y     y     y
@@ -283,10 +289,10 @@ Windows Vista            n        n      n        y     y     y
 Mac OS X 10.4 PowerPC    n               n
 Mac OS X 10.4 Intel      n        y      n        y     y     y
 FreeBSD 4.11             n        n      n        y     y     y
-RedHat EL3  W       (3)  y(1a)    y(10)  y(1a)    y     y     y
+RedHat EL3  W       (3)  y(1)     y(10)  y(1)     y     y     y
 RedHat EL3  W Intel (3)  n        y      n        y     y     n
 RedHat EL3  W PGI   (3)  n        y      n        y     y     n
-SuSe x86_64 gcc  (3,12)  y(1a)    y(11)  n        y     y     y
+SuSe x86_64 gcc  (3,12)  y(2)     y(11)  y(2)     y     y     y
 SuSe x86_64 Int  (3,12)  n        y(13)  n        y     y     n
 SuSe x86_64 PGI  (3,12)  n        y(8)   n        y     y     y
 Linux 2.4 Xeon C 
@@ -295,43 +301,47 @@ Linux 2.6 SuSE ia64 C
     Intel         (3,7)  y        y      y        y     y     n
 Linux 2.6 SGI Altix 
     ia64 Intel      (3)  y        y      y        y     y     y
+Linux 2.6 RHEL C
+    Lustre Intel    (5)  y(4)     y      y(4)     y     y     n
 
 
-
-Platform                 Shared  Shared    Shared    static-  Thread-  
-                         C libs  F90 libs  C++ libs  exec     safe     
-Solaris2.8 64-bit        y       y         y         x        y        
-Solaris2.8 32-bit        y       y         y         x        y        
-Solaris2.10 64-bit       y                           x        y        
-Solaris2.10 32-bit       y                           x        y        
-IRIX64_6.5 64-bit        y       y         n         y        y        
-IRIX64_6.5 32-bit        y       dna       y         y        y        
-AIX-5.2 & 5.3 32-bit     n       n         n         y        n        
-AIX-5.2 & 5.3 64-bit     n       n         n         y        n        
-Windows XP               y       y(15)     y         y        y        
-Windows XP x64           y       y(15)     y         y        y        
-Windows Vista            y       n         n         y        y        
-Mac OS X 10.3            y                           y        n        
-FreeBSD 4.11             y       n         y         y        y        
-RedHat EL3  W       (3)  y       y(10)     y         y        y        
-RedHat EL3  W Intel (3)  y       y         y         y        n        
-RedHat EL3  W PGI   (3)  y       y         y         y        n        
-SuSe x86_64 W GNU (3,12) y       y         y         y        y        
-SuSe x86_64 W Int (3,12) y       y         y         y(14)    n        
-SuSe x86_64 W PGI (3,12) y       y         y         y(14)    n        
+Platform                 Shared  Shared    Shared    Thread-  
+                         C libs  F90 libs  C++ libs  safe     
+Solaris2.8 64-bit        y       y         y         y        
+Solaris2.8 32-bit        y       y         y         y        
+Solaris2.10 64-bit       y       y         y         y        
+Solaris2.10 32-bit       y       y         y         y        
+IRIX64_6.5 64-bit        y       y         n         y        
+IRIX64_6.5 32-bit        y       dna       y         y        
+AIX-5.2 & 5.3 32-bit     n       n         n         n        
+AIX-5.2 & 5.3 64-bit     n       n         n         n        
+Windows XP               y       y(15)     y         y        
+Windows XP x64           y       y(15)     y         y        
+Windows Vista            y       n         n         y        
+Mac OS X 10.3            y                           n        
+FreeBSD 4.11             y       n         y         y        
+RedHat EL3  W       (3)  y       y(10)     y         y        
+RedHat EL3  W Intel (3)  y       y         y         n        
+RedHat EL3  W PGI   (3)  y       y         y         n        
+SuSe x86_64 W GNU (3,12) y       y         y         y        
+SuSe x86_64 W Int (3,12) y       y         y         n        
+SuSe x86_64 W PGI (3,12) y       y         y         n        
 Linux 2.4 Xeon C 
-    Lustre Intel    (6)  y       y         y         y        n        
+    Lustre Intel    (6)  y       y         y         n        
 Linux 2.4 SuSE 
-    ia64 C Intel    (7)  y       y         y         y        n        
+    ia64 C Intel    (7)  y       y         y         n        
 Linux 2.4 SGI Altix 
-    ia64 Intel           y                           y        n        
+    ia64 Intel           y                           n        
+Linux 2.6 RHEL C
+    Lustre Intel    (5)  y        y        y         n
 
-    Notes: (1)  Using mpich 1.2.6.
-           (1a) Using mpich2 1.0.6.
-           (2)  Using mpt and mpich 1.2.6.
+    Notes: (1)  Using mpich2 1.0.6.
+           (2)  Using mpich2 1.0.7.
            (3)  Linux 2.6 with GNU, Intel, and PGI compilers, as indicated.  
                   W or C indicates workstation or cluster, respectively.
-
+           (4)  Using mvapich2 0.9.8.
+           (5)  Linux 2.6.9-42.0.10.  Xeon cluster with ELsmp_perfctr_lustre 
+                  and Intel compilers
            (6)  Linux 2.4.21-32.0.1.  Xeon cluster with ELsmp_perfctr_lustre 
                   and Intel compilers
            (7)  Linux 2.4.21, SuSE_292.till.  Ia64 cluster with Intel compilers
