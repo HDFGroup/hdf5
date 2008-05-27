@@ -6,30 +6,32 @@ INTRODUCTION
 
 This document describes the differences between the HDF5-1.8.x release series
 and HDF5 1.8.0, and contains information on the platforms tested and known 
-problems in HDF5-1.8.0.  For more details, see the HISTORY-1_0-1_8_0_rc3.txt and HISTORY-1_8.txt 
-files in the release_docs/ directory of the HDF5 source.
+problems in HDF5-1.8.1.  For more details, see the files
+HISTORY-1_0-1_8_0_rc3.txt and HISTORY-1_8.txt in the release_docs/ directory 
+of the HDF5 source.
 
-Links to the HDF5 1.8.0 source code, documentation, and additional materials
+Links to the HDF5 1.8.1 source code, documentation, and additional materials
 can be found on the HDF5 web page at:
 
      http://www.hdfgroup.org/products/hdf5/
 
-The HDF5 1.8.0 release can be obtained from:
+The HDF5 1.8.1 release can be obtained from:
 
      http://www.hdfgroup.org/HDF5/release/obtain5.html
 
-User documentation for 1.8.0 can be accessed directly at this location: 
+User documentation for 1.8.1 can be accessed directly at this location: 
 
      http://www.hdfgroup.org/HDF5/doc/
 
-New features in 1.8.0, including brief general descriptions of some new 
-and modified APIs, are described in the "What's New in 1.8.0?" document:
+New features in the HDF5-1.8.x release series, including brief general 
+descriptions of some new and modified APIs, are described in the "What's New 
+in 1.8.0?" document:
 
      http://www.hdfgroup.org/HDF5/doc/ADGuide/WhatsNew180.html
 
 All new and modified APIs are listed in detail in the "HDF5 Software Changes 
-from Release to Release" document, in the section "Release 1.8.0 (current 
-release) versus Release 1.6.x":
+from Release to Release" document, in the section "Release 1.8.1 (current 
+release) versus Release 1.8.0":
 
      http://www.hdfgroup.org/HDF5/doc/ADGuide/Changes.html
 
@@ -52,9 +54,8 @@ CONTENTS
 New Features
 ============
 
-	Configuration
-	-------------
-
+        Configuration
+        -------------
         - Configuration suite now uses Autoconf 2.61, Automake 1.10.1, and 
           Libtool 2.2.2 (MAM - 2008/05/01)
 
@@ -63,125 +64,121 @@ New Features
           shared libraries are produced, and instead solely relies on the 
           information in LD_LIBRARY_PATH. (MAM - 2008/05/15)
 
-	Source code distribution
-	========================
+        Source code distribution
+        ========================
 
-	Library
-	-------
-        
+        Library
+        -------
         - None
 
-	Parallel Library
-	----------------
-        
+        Parallel Library
+        ----------------
         - None
 
-	Tools
-	-----
-        - h5dump: add a printing of the compression ratio of uncompressed and compressed 
-           sizes for cases where compression  filters are present. (PVN - 2008/05/01)
-        - h5dump: added an option to allow a user defined formatting string for printf 
-           regarding floating point numbers. (PVN - 2008/05/06)
-        - h5dump: support for external links, display the object that the external link 
-           points to. (PVN - 2008/05/12)
-        - h5repack: added back -o and -i command line flags to specify input and
-          output files. (PVN - 2008/05/23)
+        Tools
+        -----
+        - h5dump, in output of the -p option: Added effective data compression 
+          ratio to the dataset storage layout output when a compression filter 
+          has been applied to a dataset.  (PVN - 2008/05/01)
+        - h5dump: Added an option, -m, to allow user-defined formatting in the 
+          output of floating point numbers. (PVN - 2008/05/06)
+        - h5dump: Added support for external links, displaying the object that 
+          an external link points to. (PVN - 2008/05/12)
+        - h5repack: Reinstated the -i and -o command line flags to specify 
+          input and output files.  h5repack now understands both the old
+          syntax (with -i and -o) and the new syntax introduced in Release
+          1.8.0.  (PVN - 2008/05/23)
 
-
-
-
-	F90 API
-	------
-
+        F90 API
+        ------
         New H5A, H5G, H5L, H5O, and H5P APIs to enable 1.8 features were
-	added. See Changes.html (http://www.hdfgroup.org/HDF5/doc/ADGuide/Changes.html) 
-	file for the complete list of the new APIs.
+        added. See "Release 1.8.1 (current release) versus Release 1.8.0" in 
+        the document "HDF5 Software Changes from Release to Release"
+        (http://hdfgroup.org/HDF5/doc/ADGuide/Changes.html) for the 
+        complete list of the new APIs.
 
-	C++ API
-	------
-        
+        C++ API
+        ------
         - None
-
-
 
 
 Support for New Platforms, Languages, and Compilers
 ===================================================
 
-	- Fortran library will work correctly if compiled with -i8 flag; 
-	  tested with g95, PGI and Intel Fortran compilers.
+        - The Fortran library will work correctly if compiled with the -i8 
+          flag.  This has been tested with the g95, PGI and Intel Fortran 
+          compilers.
+
 
 Bug Fixes since HDF5-1.8.0 
 ==========================
 
-	Configuration
-	-------------
-        
+        Configuration
+        -------------
         - None
 
-	Source code distribution
-	========================
+        Source code distribution
+        ========================
 
-	Library
-	-------
-            - Chunked > 4GB are disallowed. (QAK - 2008/05/16)
-	    - Fixed the problem with the searching of target file for H5Lcreate_external().
-	      The searching pattern will depend on whether the target file's
-	      pathname is an absolute or a relative path. Please see the
-	      description in the RM for H5Lcreate_external().  (VC - 4/8/08)
-            - Fixed possible file corruption bug when encoding datatype
-                descriptions for compound datatypes whose size was between
-                256 & 511 bytes and the file was opened with the "use the
-                latest format" property enabled (with H5Pset_libver_bounds).
-                (QAK - 2008/03/13)
-            - Fixed bug in H5Aget_num_attrs() routine to handle invalid location
-                ID correctly.  (QAK - 2008/03/11)
+        Library
+        -------
+        - Chunking:  Chunks greater than 4GB are disallowed. 
+          (QAK - 2008/05/16)
+        - Fixed the problem with searching for a target file when following 
+          an external link.  The search pattern will depend on whether the 
+          target file's pathname is an absolute or a relative path. 
+          Please see the H5Lcreate_external description in the "HDF5 
+          Reference Manual" (http://hdfgroup.org/HDF5/doc/RM/RM_H5L.html).
+          (VC - 4/8/08)
+        - Fixed possible file corruption bug when encoding datatype
+          descriptions for compound datatypes whose size was between
+          256 and 511 bytes and the file was opened with the "use the
+          latest format" property enabled (with H5Pset_libver_bounds).
+          (QAK - 2008/03/13)
+        - Fixed bug in H5Aget_num_attrs() routine to correctly handle an 
+          invalid location identifier.  (QAK - 2008/03/11)
 
-
-	Parallel Library
-	----------------
-        
+        Parallel Library
+        ----------------
         - None
 
-	Tools
-	-----
-            - Fixed bug in h5diff that prevented datasets & attributes with
-                variable-length string elements from comparing correctly.
-                (QAK - 2008/02/28)
-            - Fixed bug in h5dump that caused binary output to be made
-                only for the first dataset, when several datasets were requested
-                (PVN - 2008/04/07)
+        Tools
+        -----
+        - Fixed bug in h5diff that prevented datasets and attributes with
+          variable-length string elements from comparing correctly.
+          (QAK - 2008/02/28)
+        - Fixed bug in h5dump that caused binary output to be made only for 
+          the first dataset, when several datasets were requested.
+          (PVN - 2008/04/07)
 
-	F90 API
-	------
+        F90 API
+        ------
+        - The h5tset(get)_fields subroutines were missing the parameter to 
+          specify a sign position; fixed.  (EIP - 2008/05/23)
+        - Many APIs were fixed to work with the 8-byte integers in Fortran vs.
+          4-byte integers in C. This change is trasparent to user applications.
 
-	- h5tset(get)_fields subroutines were missing parameter to specify
-	  a sign position; fixed (EIP - 2008/05/23)
-	- Many APIs were fixed to work with the 8 byte integer in Fortran vs.
-	  4 byte integer in C; this change is trasparent to user's
-	  application.
+        C++ API
+        ------
+        - The class hierarchy was revised to address the problem reported in
+          Bugzilla #1068.  Classes AbstractDS and Attribute are moved out of
+          H5Object.  Class Attribute now multiply inherits from IdComponent 
+          and AbstractDs and class DataSet from H5Object and AbstractDs.
 
-	C++ API
-	------
+          In addition, data member IdComponent::id was moved into subclasses:
+          Attribute, DataSet, DataSpace, DataType, H5File, Group, and PropList.
 
-	- The class hierarchy was revised to address the problem reported
-	  in bugzilla #1068.  Classes AbstractDS and Attribute are moved out of
-   	  H5Object.  Class Attribute now multiply inherits from IdComponent and
-   	  AbstractDs and class DataSet from H5Object and AbstractDs.
-
-   	  In addition, data member IdComponent::id was moved into subclasses:
-   	  Attribute, DataSet, DataSpace, DataType, H5File, Group, and PropList.
-
-   	- Revised Attribute::write and Attribute::read
-   	  wrappers to handle memory allocation/deallocation properly. (bugzilla 1045)
+        - Revised the Attribute::write and Attribute::read wrappers to handle 
+          memory allocation/deallocation properly. (Bugzilla 1045)
           (BMR - 2008/05/20)
 
 
 Platforms Tested
 ================
+
 The following platforms and compilers have been tested for for this release.
 
-    AIX 5.2 (32/64 bit)           xlc 8.0.0.11
+    AIX 5.2 (32/64-bit)           xlc 8.0.0.11
                                   xlC 8.0
                                   xlf 10.01.0000.0 
                                   mpcc_r 6.0.0.8
@@ -259,7 +256,6 @@ The following platforms and compilers have been tested for for this release.
     MAC OS  10.5.2 (Intel)        i686-apple-darwin9-gcc-4.0.1 (GCC) 4.0.1
                                   GNU Fortran (GCC) 4.3.0 20070810
                                   G95 (GCC 4.0.3 (g95 0.91!) Apr 24 2008)
-
 
 
 Supported Configuration Features Summary
@@ -352,7 +348,7 @@ Linux 2.6 RHEL C
            (12) AMD Opteron x86_64
            (13) ifort
            (14) Yes with C and Fortran, but not with C++
-	   (15) Using Visual Studio 2005 or Cygwin
+           (15) Using Visual Studio 2005 or Cygwin
            (16) Not tested for this release.
     Compiler versions for each platform are listed in the preceding
     "Platforms Tested" table.
@@ -360,6 +356,7 @@ Linux 2.6 RHEL C
 
 Known Problems
 ==============
+
 * We have discovered two problems when running collective IO parallel HDF5 
   tests with chunking storage on the ChaMPIon MPI compiler on tungsten, a 
   Linux cluster at NCSA.
@@ -375,7 +372,6 @@ Known Problems
 
   To avoid this behavior, change the following line in your code
       H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
-
   to
       H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_INDEPENDENT);
 
@@ -407,9 +403,9 @@ Known Problems
 * On Altix SGI with Intel 9.0, testmeta.c would not compile with -O3
   optimization flag.
 
-* On VAX, the Scaleoffset filter is not supported. The filter cannot be 
-  applied to HDF5 data generated on VAX. The Scaleoffset filter only supports 
-  the IEEE standard for floating-point data.
+* On VAX, the Scaleoffset filter is not supported.  The Scaleoffset filter 
+  supports only the IEEE standard for floating-point data; it cannot be applied 
+  to HDF5 data generated on VAX. 
 
 * On Cray X1, a lone colon on the command line of h5dump --xml (as in
   the testh5dumpxml.sh script) is misinterpereted by the operating system
@@ -428,7 +424,7 @@ Known Problems
 
 * A dataset created or rewritten with a v1.6.3 library or after cannot be read 
   with the v1.6.2 library or before when the Fletcher32 EDC filter is enabled.
-  There was a bug in the calculating code of the Fletcher32 checksum in the 
+  There was a bug in the calculation of the Fletcher32 checksum in the 
   library before v1.6.3; the checksum value was not consistent between big-
   endian and little-endian systems.  This bug was fixed in Release 1.6.3.  
   However, after fixing the bug, the checksum value was no longer the same as 
@@ -459,7 +455,7 @@ Known Problems
   Solaris are available in a static format.
 
   The --enable-static-exec configure flag also fails to correctly compile
-  on IBM SP2 platform for the serial mode. The parallel mode works fine with 
+  on IBM SP2 platforms for serial mode. The parallel mode works fine with 
   this option.
   
   It is suggested that you do not use this option on these platforms
@@ -544,7 +540,7 @@ Known Problems
   "unsetenv RUNSERIAL" before running configure for a serial build.
 
   Note that the RUNSERIAL environment variable exists so that we can 
-  can prefix serial runs as necessary on the target system.  On DataStar,
+  prefix serial runs as necessary on the target system.  On DataStar,
   no prefix is necessary.  However on an MPICH system, the prefix might
   have to be set to something like "/usr/local/mpi/bin/mpirun -np 1" to
   get the serial tests to run at all.
