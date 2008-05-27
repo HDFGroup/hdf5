@@ -15,7 +15,6 @@
 !
 SUBROUTINE group_test(cleanup, total_error)
   USE HDF5 ! This module contains all necessary modules 
-  USE error_handler
   
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup

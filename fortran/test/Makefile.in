@@ -731,14 +731,14 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-checkPROGRAMS clean-generic clean-libtool clean-local \
+clean-am: clean-checkPROGRAMS clean-generic clean-libtool \
 	clean-noinstLTLIBRARIES mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
-	distclean-local distclean-tags
+	distclean-tags
 
 dvi: dvi-am
 
@@ -750,7 +750,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-data-local
+install-data-am:
 
 install-dvi: install-dvi-am
 
@@ -771,8 +771,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
-maintainer-clean-am: distclean-am maintainer-clean-generic \
-	maintainer-clean-local
+maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-am
 
@@ -787,25 +786,23 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-local
+uninstall-am:
 
 .MAKE: install-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am all-local check check-TESTS check-am \
 	clean clean-checkPROGRAMS clean-generic clean-libtool \
-	clean-local clean-noinstLTLIBRARIES ctags distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-local distclean-tags distdir dvi dvi-am html html-am \
-	info info-am install install-am install-data install-data-am \
-	install-data-local install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic maintainer-clean-local mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	mostlyclean-local pdf pdf-am ps ps-am tags uninstall \
-	uninstall-am uninstall-local
+	clean-noinstLTLIBRARIES ctags distclean distclean-compile \
+	distclean-generic distclean-libtool distclean-tags distdir dvi \
+	dvi-am html html-am info info-am install install-am \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool mostlyclean-local pdf \
+	pdf-am ps ps-am tags uninstall uninstall-am
 
 
 # List all build rules defined by HDF5 Makefiles as "PHONY" targets here.
@@ -819,42 +816,8 @@ uninstall-am: uninstall-local
 help:
 	@$(top_srcdir)/bin/makehelp
 
-# Fortran module files can have different extensions and different names
-# (e.g., different capitalizations) on different platforms.  Write rules
-# for them explicitly rather than trying to teach automake about them.
-# They should be installed as headers and removed during clean.
-maintainer-clean-local: clean-local
-distclean-local: clean-local
-clean-local:
-	@if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
-	  $(RM) *.$(F9XMODEXT);                                         \
-	fi
-
-install-data-local:
-	@if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
-	  $(CP) $(top_builddir)/$(subdir)/*.$(F9XMODEXT) $(includedir)/. ; \
-	fi
-
-uninstall-local:
-	@if test -n "$(F9XMODEXT)" -a "X$(F9XMODEXT)" != "Xo"; then      \
-	  if test -f "$(includedir)/error_handler.$(F9XMODEXT)" -o -f "$(includedir)/ERROR_HANDLER.$(F9XMODEXT)"; then \
-	    set -x; $(RM) $(includedir)/*.$(F9XMODEXT);                 \
-	  fi;                                                           \
-	fi;								\
-	$(RM) $(bindir)/$(H5FC_NAME)
-
 # fflush2 depends on files created by fflush1
 fflush2.chkexe_: fflush1.chkexe_
-
-# Hardcode the dependencies of these files. There isn't a known way of
-# determining this automagically (like we do with the C files). So, when
-# doing a parallel make, some modules could be made way before the
-# modules they depend upon are actually made. *sigh*
-fortranlib_test.lo:             $(srcdir)/fortranlib_test.f90 tf.lo
-fortranlib_test_1_8.lo:         $(srcdir)/fortranlib_test_1_8.f90 tf.lo
-tH5A_1_8.lo:                    $(srcdir)/tH5A_1_8.f90 tf.lo
-tH5G_1_8.lo:                    $(srcdir)/tH5G_1_8.f90 tf.lo
-tf.lo:                          $(srcdir)/tf.f90
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.

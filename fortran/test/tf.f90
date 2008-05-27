@@ -18,17 +18,7 @@
 !    This file contains subroutines which are used in
 !    all the hdf5 fortran tests
 !
-MODULE error_handler
 
-! Controls the output style for reporting test results
-
-  CHARACTER(LEN=8) :: error_string
-  CHARACTER(LEN=8), PARAMETER :: success = ' PASSED '
-  CHARACTER(LEN=8), PARAMETER :: failure = '*FAILED*'
-  CHARACTER(LEN=8), PARAMETER :: skip    = '--SKIP--'
-  CHARACTER(LEN=4), PARAMETER :: e_format ='(8a)'
-
-CONTAINS
 
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
@@ -47,6 +37,15 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: test_title ! Short description of test
     INTEGER, INTENT(INOUT) :: total_error ! Accumulated error
 
+! Controls the output style for reporting test results
+
+  CHARACTER(LEN=8) :: error_string
+  CHARACTER(LEN=8), PARAMETER :: success = ' PASSED '
+  CHARACTER(LEN=8), PARAMETER :: failure = '*FAILED*'
+  CHARACTER(LEN=8), PARAMETER :: skip    = '--SKIP--'
+  CHARACTER(LEN=4), PARAMETER :: e_format ='(8a)'
+
+
     error_string = failure
     IF (test_result ==  0) THEN
        error_string = success
@@ -60,8 +59,6 @@ CONTAINS
     IF(test_result.GT.0) total_error = total_error + test_result
 
   END SUBROUTINE write_test_status
-
-END MODULE error_handler
 
 
 !This definition is needed for Windows DLLs

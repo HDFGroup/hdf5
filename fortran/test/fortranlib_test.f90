@@ -20,7 +20,6 @@
 PROGRAM fortranlibtest
   
   USE HDF5
-  USE error_handler
   
   IMPLICIT NONE
   INTEGER :: total_error = 0
