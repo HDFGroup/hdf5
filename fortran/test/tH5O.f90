@@ -19,6 +19,7 @@ SUBROUTINE test_h5o(cleanup, total_error)
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
   INTEGER, INTENT(OUT) :: total_error
+  INTEGER :: error
 
   ! /* Output message about test being performed */
   ! WRITE(*,*) "Testing Objects"
@@ -30,6 +31,11 @@ SUBROUTINE test_h5o(cleanup, total_error)
   CALL test_h5o_plist(total_error)           ! /* Test object creation properties */
   CALL test_h5o_link(total_error) ! /* Test object link routine */
 
+  IF(cleanup) CALL h5_cleanup_f("TestFile", H5P_DEFAULT_F, error)
+  CALL check("h5_cleanup_f", error, total_error)
+  IF(cleanup) CALL h5_cleanup_f("test", H5P_DEFAULT_F, error)
+  CALL check("h5_cleanup_f", error, total_error)
+  
 END SUBROUTINE test_h5o
 
 !/****************************************************************
@@ -53,7 +59,7 @@ SUBROUTINE test_h5o_link(total_error)
   INTEGER(HID_T) :: fapl_id
   INTEGER(HID_T) :: lcpl_id
   INTEGER(HID_T) :: mem_space_id, file_space_id, xfer_prp
-  CHARACTER(LEN=8), PARAMETER :: TEST_FILENAME = 'TestFile'
+  CHARACTER(LEN=11), PARAMETER :: TEST_FILENAME = 'TestFile.h5'
   INTEGER, PARAMETER :: TEST6_DIM1 = 2, TEST6_DIM2 = 5
 !EP  INTEGER(HSIZE_T), DIMENSION(1:2), PARAMETER :: dims = (/TEST6_DIM1,TEST6_DIM2/)
   INTEGER(HSIZE_T), DIMENSION(1:2)  :: dims = (/TEST6_DIM1,TEST6_DIM2/)
