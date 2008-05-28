@@ -223,12 +223,12 @@ The following platforms and compilers have been tested for this release.
     (osage)
 
     Linux 2.6.9-42.0.10           gcc 3.4.6 20060404
-    (kagiso)                      PGI 7.0-7 (pgcc, pgf90, pgCC)
+    (kagiso)                      PGI 7.1-6 (pgcc, pgf90, pgCC)
                                   Intel 9.1 (icc, ifort, icpc)
 
     Linux 2.6.16.27 x86_64 AMD    gcc 4.1.0 (SuSE Linux), g++ 4.1.0, 
     (smirom)                          g95 (GCC 4.0.3)
-                                  PGI 6.2-5 (pgcc, pgf90, pgCC)
+                                  PGI 7.1-6 (pgcc, pgf90, pgCC)
                                   Intel 9.1 (icc, ifort, icpc)
 
     Linux 2.6.5-7.252.1-rtgfx #1  Intel(R) C++ Version 9.0
