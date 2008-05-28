@@ -170,11 +170,15 @@ Bug Fixes since HDF5-1.8.0
           class H5Object.  Classes AbstractDS was moved out of H5Object.
           Class Attribute now multiply inherits from IdComponent and
           AbstractDs and class DataSet from H5Object and AbstractDs.
-
           In addition, data member IdComponent::id was moved into subclasses:
           Attribute, DataSet, DataSpace, DataType, H5File, Group, and PropList.
           (BMR - 2008/05/20)
-
+	- IdComponent::dereference was incorrect; it was changed from:
+		void IdComponent::dereference(IdComponent& obj, void* ref)
+	  to:
+		void H5Object::dereference(H5File& h5file, void* ref)
+		void H5Object::dereference(H5Object& obj, void* ref)
+	  (BMR - 2008/05/20)
         - Revised Attribute::write and Attribute::read wrappers to handle
           memory allocation/deallocation properly. (bugzilla 1045)
           (BMR - 2008/05/20)
