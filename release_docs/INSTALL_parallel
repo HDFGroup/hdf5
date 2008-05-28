@@ -104,6 +104,30 @@ Linux kernels 2.4 and greater.
 
 2.4. Red Storm (Cray XT3) (for v1.8 and later)
 -------------------------
+Both serial and parallel HDF5 are supported in Red Storm.
+
+2.4.1 Building serial HDF5 for Red Storm
+------------------------------------------
+The following steps are for building the serial HDF5 for the Red Storm
+compute nodes.  They would probably work for other Cray XT3 systems but have
+not been verified.
+
+# Assume you already have a copy of HDF5 source code in directory `hdf5' and
+# want to install the binary in directory `/project/hdf5/hdf5'.
+
+$ cd hdf5
+$ bin/yodconfigure configure
+$ env RUNSERIAL="yod -sz 1" \
+    CC=cc F9X=ftn CXX=CC \
+    ./configure --prefix=/project/hdf5/hdf5
+$ make
+$ make check
+
+# if all is well, install the binary.
+$ make install
+
+2.4.2 Building parallel HDF5 for Red Storm
+------------------------------------------
 The following steps are for building the Parallel HDF5 for the Red Storm
 compute nodes.  They would probably work for other Cray XT3 systems but have
 not been verified.
@@ -115,14 +139,46 @@ not been verified.
 $ cd hdf5
 $ bin/yodconfigure configure
 $ env RUNSERIAL="yod -sz 1" RUNPARALLEL="yod -sz 3" \
-    CC="mpicc -DRED_STORM" F9X=mpif90 \
-    ./configure --disable-hl --without-zlib --disable-stream-vfd \
-    --enable-parallel --prefix=/project/hdf5/phdf5
+    CC=mpicc F9X=mpif90 \
+    ./configure --enable-parallel --prefix=/project/hdf5/phdf5
 $ make
 $ make check
 
 # if all is well, install the binary.
 $ make install
+
+2.4.3 Red Storm known problems
+------------------------------
+For Red Storm, a Cray XT3 system, the yod command sometimes gives the
+message,  "yod allocation delayed for node recovery".  This interferes with
+test suites that do not expect seeing this message.  To bypass this problem,
+I launch the executables with a command shell script called "myyod" which
+consists of the following lines.  (You should set $RUNSERIAL and $RUNPARALLEL
+to use myyod instead of yod.)
+==== myyod =======
+#!/bin/sh
+# sleep 2 seconds to allow time for the node recovery else it pops the
+# message,
+#   yod allocation delayed for node recovery
+sleep 2
+yod $*
+==== end of myyod =======
+
+For Red Storm, a Cray XT3 system, the tools/h5ls/testh5ls.sh will fail on
+the test "Testing h5ls -w80 -r -g tgroup.h5" fails.  This test is
+expected to fail and exit with a non-zero code but the yod command does
+not propagate the exit code of the executables. Yod always returns 0 if it
+can launch the executable.  The test suite shell expects a non-zero for
+this particular test, therefore it concludes the test has failed when it
+receives 0 from yod.  To bypass this problem for now, change the following
+lines in the tools/h5ls/testh5ls.sh.
+======== Original =========
+# The following combination of arguments is expected to return an error message
+# and return value 1
+TOOLTEST tgroup-1.ls 1 -w80 -r -g tgroup.h5
+======== Skip the test =========
+echo SKIP TOOLTEST tgroup-1.ls 1 -w80 -r -g tgroup.h5
+======== end of bypass ========
 
 
 3. Detail explanation

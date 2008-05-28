@@ -4,7 +4,7 @@ HDF5 version 1.8.1-rc1 currently under development
 INTRODUCTION
 ============
 
-This document describes the differences between the HDF5-1.8.x release series
+This document describes the differences between the HDF5-1.8.1 release series
 and HDF5 1.8.0, and contains information on the platforms tested and known 
 problems in HDF5-1.8.1.  For more details, see the files
 HISTORY-1_0-1_8_0_rc3.txt and HISTORY-1_8.txt in the release_docs/ directory 
@@ -56,13 +56,16 @@ New Features
 
         Configuration
         -------------
-        - Configuration suite now uses Autoconf 2.61, Automake 1.10.1, and 
-          Libtool 2.2.2 (MAM - 2008/05/01)
+        - The lib/libhdf5.settings file contains much more configure
+          information. (AKC - 2008/05/18)
 
         - The new configure option "--disable-sharedlib-rpath" disables 
           embedding the '-Wl,-rpath' information into executables when 
           shared libraries are produced, and instead solely relies on the 
           information in LD_LIBRARY_PATH. (MAM - 2008/05/15)
+
+        - Configuration suite now uses Autoconf 2.61, Automake 1.10.1, and 
+          Libtool 2.2.2 (MAM - 2008/05/01)
 
         Source code distribution
         ========================
@@ -77,17 +80,17 @@ New Features
 
         Tools
         -----
-        - h5dump, in output of the -p option: Added effective data compression 
-          ratio to the dataset storage layout output when a compression filter 
-          has been applied to a dataset.  (PVN - 2008/05/01)
-        - h5dump: Added an option, -m, to allow user-defined formatting in the 
-          output of floating point numbers. (PVN - 2008/05/06)
-        - h5dump: Added support for external links, displaying the object that 
-          an external link points to. (PVN - 2008/05/12)
         - h5repack: Reinstated the -i and -o command line flags to specify 
           input and output files.  h5repack now understands both the old
           syntax (with -i and -o) and the new syntax introduced in Release
           1.8.0.  (PVN - 2008/05/23)
+        - h5dump: Added support for external links, displaying the object that 
+          an external link points to. (PVN - 2008/05/12)
+        - h5dump: Added an option, -m, to allow user-defined formatting in the 
+          output of floating point numbers. (PVN - 2008/05/06)
+        - h5dump, in output of the -p option: Added effective data compression 
+          ratio to the dataset storage layout output when a compression filter 
+          has been applied to a dataset.  (PVN - 2008/05/01)
 
         F90 API
         ------
@@ -104,6 +107,8 @@ New Features
 
 Support for New Platforms, Languages, and Compilers
 ===================================================
+Both serial and parallel HDF5 are supported for the Red Storm machine which is
+a Cray XT3 system.
 
         - The Fortran library will work correctly if compiled with the -i8 
           flag.  This has been tested with the g95, PGI and Intel Fortran 
@@ -129,7 +134,7 @@ Bug Fixes since HDF5-1.8.0
           target file's pathname is an absolute or a relative path. 
           Please see the H5Lcreate_external description in the "HDF5 
           Reference Manual" (http://hdfgroup.org/HDF5/doc/RM/RM_H5L.html).
-          (VC - 4/8/08)
+          (VC - 2008/04/08)
         - Fixed possible file corruption bug when encoding datatype
           descriptions for compound datatypes whose size was between
           256 and 511 bytes and the file was opened with the "use the
@@ -177,14 +182,19 @@ Bug Fixes since HDF5-1.8.0
 
 Platforms Tested
 ================
-
-The following platforms and compilers have been tested for for this release.
+The following platforms and compilers have been tested for this release.
 
     AIX 5.2 (32/64-bit)           xlc 8.0.0.11
                                   xlC 8.0
                                   xlf 10.01.0000.0 
                                   mpcc_r 6.0.0.8
                                   mpxlf_r 8.1.1.7
+
+    Cray XT3 (2.0.41)             cc (pgcc) 7.1-4
+    (red storm)                   ftn (pgf90) 7.1-4
+				  CC (pgCC) 7.1-4
+                                  mpicc 1.0.2
+                                  mpif90 1.0.2
 
     FreeBSD 6.2-STABLE i386       gcc 3.4.6 [FreeBSD] 20060305
     (duty)                        g++ 3.4.6 [FreeBSD] 20060305
@@ -301,6 +311,7 @@ Linux 2.6 SGI Altix
     ia64 Intel      (3)  y        y      y        y     y     y
 Linux 2.6 RHEL C
     Lustre Intel    (5)  y(4)     y      y(4)     y     y     n
+Cray XT3 2.0.41          y        y      y        y     y     n
 
 
 Platform                 Shared  Shared    Shared    Thread-  
@@ -332,6 +343,7 @@ Linux 2.4 SGI Altix
     ia64 Intel           y                           n        
 Linux 2.6 RHEL C
     Lustre Intel    (5)  y        y        y         n
+Cray XT3 2.0.41          n       n         n         n        n
 
     Notes: (1)  Using mpich2 1.0.6.
            (2)  Using mpich2 1.0.7.
@@ -358,6 +370,28 @@ Linux 2.6 RHEL C
 
 Known Problems
 ==============
+* For Red Storm, a Cray XT3 system, the yod command sometimes gives the
+  message,  "yod allocation delayed for node recovery".  This interferes with
+  test suites that do not expect seeing this message.  See the section of "Red
+  Storm" in file INSTALL_parallel for a way to deal with this problem.
+  AKC - 2008/05/28
+
+* For Red Storm, a Cray XT3 system, the tools/h5ls/testh5ls.sh will fail on
+  the test "Testing h5ls -w80 -r -g tgroup.h5" fails.  This test is
+  expected to fail and exit with a non-zero code but the yod command does
+  not propagate the exit code of the executables. Yod always returns 0 if it
+  can launch the executable.  The test suite shell expects a non-zero for
+  this particular test, therefore it concludes the test has failed when it
+  receives 0 from yod.  To bypass this problem for now, change the following
+  lines in the tools/h5ls/testh5ls.sh.
+  ======== Original =========
+  # The following combination of arguments is expected to return an error message
+  # and return value 1
+  TOOLTEST tgroup-1.ls 1 -w80 -r -g tgroup.h5
+  ======== Skip the test =========
+  echo SKIP TOOLTEST tgroup-1.ls 1 -w80 -r -g tgroup.h5
+  ======== end of bypass ========
+  AKC - 2008/05/28
 
 * We have discovered two problems when running collective IO parallel HDF5 
   tests with chunking storage on the ChaMPIon MPI compiler on tungsten, a 
@@ -385,10 +419,6 @@ Known Problems
 * On Intel 64 Linux cluster (RH 4, Linux 2.6.9) with Intel 10.0 compilers, 
   use -mp -O1 compilation flags to build the libraries. A higher level of 
   optimization causes failures in several HDF5 library tests. 
-
-* For SNL, Red Storm: Only parallel HDF5 is supported.  The serial tests pass
-  when run against the parallel library; the parallel tests also pass, but
-  with lots of non-fatal error messages.
 
 * For LLNL, uP: both serial and parallel tests pass.  
   Zeus: Serial tests pass but parallel tests fail with a known problem in MPI.
