@@ -160,16 +160,18 @@ Bug Fixes since HDF5-1.8.0
 
         C++ API
         ------
-        - The class hierarchy was revised to address the problem reported in
-          Bugzilla #1068.  Classes AbstractDS and Attribute are moved out of
-          H5Object.  Class Attribute now multiply inherits from IdComponent 
-          and AbstractDs and class DataSet from H5Object and AbstractDs.
+        - The class hierarchy was revised to address the problem reported
+          in bugzilla #1068, Attribute should not be derived from base
+          class H5Object.  Classes AbstractDS was moved out of H5Object.
+          Class Attribute now multiply inherits from IdComponent and
+          AbstractDs and class DataSet from H5Object and AbstractDs.
 
           In addition, data member IdComponent::id was moved into subclasses:
           Attribute, DataSet, DataSpace, DataType, H5File, Group, and PropList.
+          (BMR - 2008/05/20)
 
-        - Revised the Attribute::write and Attribute::read wrappers to handle 
-          memory allocation/deallocation properly. (Bugzilla 1045)
+        - Revised Attribute::write and Attribute::read wrappers to handle
+          memory allocation/deallocation properly. (bugzilla 1045)
           (BMR - 2008/05/20)
 
 
@@ -551,4 +553,9 @@ Known Problems
 * H5Ocopy() does not copy reg_ref attributes correctly when shared-message
   is turn on. The value of the reference in the destination attriubte is
   wrong. This H5Ocopy problem will affect the h5copy tool.
+
+* In the C++ API, it appears that there are bugs in Attribute::write/read
+  and DataSet::write/read for fixed- and variable-len strings.  The problems
+  are being worked on and a patch will be provided when the fixes are
+  available.
 
