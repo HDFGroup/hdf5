@@ -241,7 +241,7 @@
 				ProgramDataBaseFileName=".\../../../test/fheapdll/Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
-				DebugInformationFormat="4"
+				DebugInformationFormat="3"
 				CompileAs="0"
 			/>
 			<Tool
