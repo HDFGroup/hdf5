@@ -1,10 +1,10 @@
-HDF5 version 1.8.1 currently under development
+HDF5 version 1.8.1 released on Thu May 29 11:52:26 CDT 2008
 ================================================================================
 
 INTRODUCTION
 ============
 
-This document describes the differences between the HDF5-1.8.1 release series
+This document describes the differences between the HDF5-1.8.1 release 
 and HDF5 1.8.0, and contains information on the platforms tested and known 
 problems in HDF5-1.8.1.  For more details, see the files
 HISTORY-1_0-1_8_0_rc3.txt and HISTORY-1_8.txt in the release_docs/ directory 
@@ -107,8 +107,8 @@ New Features
 
 Support for New Platforms, Languages, and Compilers
 ===================================================
-Both serial and parallel HDF5 are supported for the Red Storm machine which is
-a Cray XT3 system.
+        - Both serial and parallel HDF5 are supported for the Red Storm machine 
+          which is a Cray XT3 system.
 
         - The Fortran library will work correctly if compiled with the -i8 
           flag.  This has been tested with the g95, PGI and Intel Fortran 
@@ -187,12 +187,6 @@ Bug Fixes since HDF5-1.8.0
 Platforms Tested
 ================
 The following platforms and compilers have been tested for this release.
-
-    AIX 5.2 (32/64-bit)           xlc 8.0.0.11
-                                  xlC 8.0
-                                  xlf 10.01.0000.0 
-                                  mpcc_r 6.0.0.8
-                                  mpxlf_r 8.1.1.7
 
     Cray XT3 (2.0.41)             cc (pgcc) 7.1-4
     (red storm)                   ftn (pgf90) 7.1-4
@@ -287,19 +281,14 @@ Supported Configuration Features Summary
 
 Platform                 C        F90    F90      C++   zlib  SZIP
                          parallel        parallel
-SunOS5.8 64-bit          n        y      n        y     y     y
-SunOS5.8 32-bit          n        y      n        y     y     y
 SunOS5.10 64-bit         n        y      n        y     y     y
 SunOS5.10 32-bit         n        y      n        y     y     y
 IRIX64_6.5 64-bit        n        y      y        y     y     y
 IRIX64_6.5 32-bit        n        n      n        n     y     y
-AIX-5.2  32-bit          y        y      y        y     y     y
-AIX-5.2  64-bit          y        y      y        y     y     y
 Windows XP               n        y(15)  n(15)    y     y     y
 Windows XP x64           n        y(15)  n(15)    y     y     y
 Windows Vista            n        n      n        y     y     y
-Mac OS X 10.4 PowerPC    n               n
-Mac OS X 10.4 Intel      n        y      n        y     y     y
+Mac OS X 10.5 Intel      n        y      n        y     y     y
 FreeBSD 4.11             n        n      n        y     y     y
 RedHat EL3  W       (3)  y(1)     y(10)  y(1)     y     y     y
 RedHat EL3  W Intel (3)  n        y      n        y     y     n
@@ -320,14 +309,10 @@ Cray XT3 2.0.41          y        y      y        y     y     n
 
 Platform                 Shared  Shared    Shared    Thread-  
                          C libs  F90 libs  C++ libs  safe     
-Solaris2.8 64-bit        y       y         y         y        
-Solaris2.8 32-bit        y       y         y         y        
 Solaris2.10 64-bit       y       y         y         y        
 Solaris2.10 32-bit       y       y         y         y        
 IRIX64_6.5 64-bit        y       y         n         y        
 IRIX64_6.5 32-bit        y       dna       y         y        
-AIX-5.2 & 5.3 32-bit     n       n         n         n        
-AIX-5.2 & 5.3 64-bit     n       n         n         n        
 Windows XP               y       y(15)     y         y        
 Windows XP x64           y       y(15)     y         y        
 Windows Vista            y       n         n         y        
