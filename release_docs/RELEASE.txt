@@ -1,4 +1,4 @@
-HDF5 version 1.8.1 released on Thu May 29 11:52:26 CDT 2008
+HDF5 version 1.8.1 released on Thu May 29 15:28:55 CDT 2008
 ================================================================================
 
 INTRODUCTION
@@ -216,7 +216,7 @@ The following platforms and compilers have been tested for this release.
     Linux 2.4.21-47               gcc 3.2.3 20030502
     (osage)
 
-    Linux 2.6.9-42.0.10           gcc 3.4.6 20060404
+    Linux 2.6.9-42.0.10           gcc,g++ 3.4.6 20060404, G95 (GCC 4.0.3) 
     (kagiso)                      PGI 7.1-6 (pgcc, pgf90, pgCC)
                                   Intel 9.1 (icc, ifort, icpc)
 
