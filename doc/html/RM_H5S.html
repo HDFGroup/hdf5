@@ -1304,7 +1304,7 @@ END SUBROUTINE h5sselect_all_f
 <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Sselect_elements</code>(<em>hid_t </em><code>space_id</code>,
         <em>H5S_seloper_t</em> <code>op</code>,
-        <em>const size_t</em> <code>num_elements</code>,
+        <em>size_t</em> <code>num_elements</code>,
         <em>const hsize_t *</em><code>coord</code>[ ]
     )
 <dt><strong>Purpose:</strong>
@@ -1361,19 +1361,19 @@ END SUBROUTINE h5sselect_all_f
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		  <td valign="top"><em>hid_t</em> <code>space_id</code></td>
+          <td valign="top"><em>hid_t</em> <code>space_id</code></td>
           <td valign="top">Identifier of the dataspace.</td></tr>
         <tr>
-		  <td valign="top"><em>H5S_seloper_t</em> <code>op</code></td>
+          <td valign="top"><em>H5S_seloper_t</em> <code>op</code></td>
           <td valign="top">Operator specifying how the new selection is to be 
-                combined with the existing selection for the dataspace.</td></tr>
+              combined with the existing selection for the dataspace.</td></tr>
         <tr>
-		  <td valign="top"><em>const&nbsp;size_t</em>&nbsp;<code>num_elements&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top"><em>size_t</em>&nbsp;<code>num_elements&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
           <td valign="top">Number of elements to be selected.</td></tr>
         <tr>
-		  <td valign="top"><em>const hsize_t *</em><code>coord</code>[ ]</td>
-          <td valign="top">A 2-dimensional array of 0-based values specifying the 
-                coordinates of the elements being selected.</td></tr>
+          <td valign="top"><em>const hsize_t *</em><code>coord</code>[ ]</td>
+          <td valign="top">A 2-dimensional array of 0-based values specifying 
+              the coordinates of the elements being selected.</td></tr>
     </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful; 
@@ -1955,7 +1955,7 @@ Describes HDF5 Release 1.6.7, January 2008
 
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 11 October 2006");
+document.writeln("Last modified: 29 May 2008");
 -->
 </SCRIPT> 
 
