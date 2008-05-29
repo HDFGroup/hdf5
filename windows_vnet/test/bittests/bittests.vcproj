@@ -158,7 +158,7 @@
 				OutputFile=".\../../../test/bittests/Debug/bittests.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../test/bittests/Debug/bittests.pdb"
 				SubSystem="1"
@@ -221,7 +221,7 @@
 				OutputFile=".\../../../test/bittests/Release/bittests.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libcd.lib"
+				IgnoreDefaultLibraryNames=""
 				ProgramDatabaseFile=".\../../../test/bittests/Release/bittests.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>

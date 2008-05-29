@@ -103,7 +103,7 @@
 				OutputFile=".\../../../../hl/test/hl_test_lite/Debug/hl_test_lite.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../../hl/test/hl_test_lite/Debug/hl_test_lite.pdb"
 				SubSystem="1"

@@ -41,7 +41,7 @@
 				OutputFile=".\../../../tools/h5debug/Debug/h5debug.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../tools/h5debug/Debug/h5debug.pdb"
 				SubSystem="1"
@@ -221,7 +221,7 @@
 				OutputFile=".\../../../tools/h5debug/Release/h5debug.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libcd.lib"
+				IgnoreDefaultLibraryNames=""
 				ProgramDatabaseFile=".\../../../tools/h5debug/Release/h5debug.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>

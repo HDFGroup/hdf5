@@ -160,7 +160,7 @@
 				OutputFile=".\../../../test/overhead/Release/overhead.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libcd.lib"
+				IgnoreDefaultLibraryNames=""
 				ProgramDatabaseFile=".\../../../test/overhead/Release/overhead.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
@@ -220,7 +220,7 @@
 				OutputFile=".\../../../test/overhead/Debug/overhead.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../test/overhead/Debug/overhead.pdb"
 				SubSystem="1"

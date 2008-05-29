@@ -101,7 +101,7 @@
 				OutputFile=".\../../../test/chunk/Debug/chunk.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../test/chunk/Debug/chunk.pdb"
 				SubSystem="1"
@@ -164,7 +164,7 @@
 				OutputFile=".\../../../test/chunk/Release/chunk.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libcd.lib"
+				IgnoreDefaultLibraryNames=""
 				ProgramDatabaseFile=".\../../../test/chunk/Release/chunk.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>

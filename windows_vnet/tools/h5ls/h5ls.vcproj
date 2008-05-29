@@ -43,7 +43,7 @@
 				OutputFile=".\../../../tools/h5ls/Release/h5ls.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libcd.lib"
+				IgnoreDefaultLibraryNames=""
 				ProgramDatabaseFile=".\../../../tools/h5ls/Release/h5ls.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
@@ -103,7 +103,7 @@
 				OutputFile=".\../../../tools/h5ls/Debug/h5ls.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../tools/h5ls/Debug/h5ls.pdb"
 				SubSystem="1"

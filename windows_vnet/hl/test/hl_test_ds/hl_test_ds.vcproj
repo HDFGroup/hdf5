@@ -42,7 +42,7 @@
 				OutputFile=".\../../../../hl/test/hl_test_ds/Debug/hl_test_ds.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../../hl/test/hl_test_ds/Debug/hl_test_ds.pdb"
 				SubSystem="1"

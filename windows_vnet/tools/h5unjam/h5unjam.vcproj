@@ -103,7 +103,7 @@
 				OutputFile=".\../../../tools/h5unjam/Debug/h5unjam.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../tools/h5unjam/Debug/h5unjam.pdb"
 				SubSystem="1"

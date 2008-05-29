@@ -103,7 +103,7 @@
 				OutputFile=".\../../../test/tellub/Debug/tellub.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../test/tellub/Debug/tellub.pdb"
 				SubSystem="1"

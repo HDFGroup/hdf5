@@ -42,7 +42,7 @@
 				OutputFile=".\../../../tools/talign/Debug/talign.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../tools/talign/Debug/talign.pdb"
 				SubSystem="1"
@@ -105,7 +105,7 @@
 				OutputFile=".\../../../tools/talign/Release/talign.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libcd.lib"
+				IgnoreDefaultLibraryNames=""
 				ProgramDatabaseFile=".\../../../tools/talign/Release/talign.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>

@@ -43,7 +43,7 @@
 				OutputFile=".\../../../tools/h5repart/Release/h5repart.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libcd.lib"
+				IgnoreDefaultLibraryNames=""
 				ProgramDatabaseFile=".\../../../tools/h5repart/Release/h5repart.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
@@ -103,7 +103,7 @@
 				OutputFile=".\../../../tools/h5repart/Debug/h5repart.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../tools/h5repart/Debug/h5repart.pdb"
 				SubSystem="1"

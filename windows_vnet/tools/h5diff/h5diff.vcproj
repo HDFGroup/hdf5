@@ -43,7 +43,7 @@
 				OutputFile=".\../../../tools/h5diff/Debug/h5diff.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../tools/h5diff/Debug/h5diff.pdb"
 				SubSystem="1"
@@ -106,7 +106,7 @@
 				OutputFile=".\../../../tools/h5diff/Release/h5diff.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libcd.lib"
+				IgnoreDefaultLibraryNames=""
 				ProgramDatabaseFile=".\../../../tools/h5diff/Release/h5diff.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
