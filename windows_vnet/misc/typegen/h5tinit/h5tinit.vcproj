@@ -37,6 +37,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="WS2_32.lib"
 				OutputFile=".\..\..\..\..\src/h5tinit.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
@@ -96,7 +97,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib WS2_32.lib"
+				AdditionalDependencies="WS2_32.lib"
 				OutputFile=".\..\..\..\..\src/h5tinit.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
