@@ -43,7 +43,6 @@
   CHARACTER(LEN=8), PARAMETER :: success = ' PASSED '
   CHARACTER(LEN=8), PARAMETER :: failure = '*FAILED*'
   CHARACTER(LEN=8), PARAMETER :: skip    = '--SKIP--'
-  CHARACTER(LEN=4), PARAMETER :: e_format ='(8a)'
 
 
     error_string = failure
@@ -53,8 +52,7 @@
        error_string = skip
     ENDIF
        
-    WRITE(*, fmt = '(A,T72)', advance = 'no')  test_title
-    WRITE(*, fmt = e_format) error_string
+    WRITE(*, fmt = '(A, T72, A)') test_title, error_string
     
     IF(test_result.GT.0) total_error = total_error + test_result
 
