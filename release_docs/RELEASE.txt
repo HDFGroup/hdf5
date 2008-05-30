@@ -1,12 +1,12 @@
-HDF5 version 1.8.1 released on Thu May 29 15:28:55 CDT 2008
+HDF5 version 1.8.1-snap0 currently under development
 ================================================================================
 
 INTRODUCTION
 ============
 
-This document describes the differences between the HDF5-1.8.1 release 
-and HDF5 1.8.0, and contains information on the platforms tested and known 
-problems in HDF5-1.8.1.  For more details, see the files
+This document describes the differences between the HDF5-1.8.1-snap* releases 
+and HDF5 1.8.1, and contains information on the platforms tested and known 
+problems in HDF5-1.8.1-snap*.  For more details, see the files
 HISTORY-1_0-1_8_0_rc3.txt and HISTORY-1_8.txt in the release_docs/ directory 
 of the HDF5 source.
 
@@ -45,7 +45,7 @@ CONTENTS
 
 - New Features
 - Support for new platforms and languages
-- Bug Fixes since HDF5-1.8.0
+- Bug Fixes since HDF5-1.8.1
 - Platforms Tested
 - Supported Configuration Features Summary
 - Known Problems
@@ -56,16 +56,7 @@ New Features
 
         Configuration
         -------------
-        - The lib/libhdf5.settings file contains much more configure
-          information. (AKC - 2008/05/18)
-
-        - The new configure option "--disable-sharedlib-rpath" disables 
-          embedding the '-Wl,-rpath' information into executables when 
-          shared libraries are produced, and instead solely relies on the 
-          information in LD_LIBRARY_PATH. (MAM - 2008/05/15)
-
-        - Configuration suite now uses Autoconf 2.61, Automake 1.10.1, and 
-          Libtool 2.2.2 (MAM - 2008/05/01)
+        - None
 
         Source code distribution
         ========================
@@ -80,25 +71,11 @@ New Features
 
         Tools
         -----
-        - h5repack: Reinstated the -i and -o command line flags to specify 
-          input and output files.  h5repack now understands both the old
-          syntax (with -i and -o) and the new syntax introduced in Release
-          1.8.0.  (PVN - 2008/05/23)
-        - h5dump: Added support for external links, displaying the object that 
-          an external link points to. (PVN - 2008/05/12)
-        - h5dump: Added an option, -m, to allow user-defined formatting in the 
-          output of floating point numbers. (PVN - 2008/05/06)
-        - h5dump, in output of the -p option: Added effective data compression 
-          ratio to the dataset storage layout output when a compression filter 
-          has been applied to a dataset.  (PVN - 2008/05/01)
+        - None
 
         F90 API
         ------
-        New H5A, H5G, H5L, H5O, and H5P APIs to enable 1.8 features were
-        added. See "Release 1.8.1 (current release) versus Release 1.8.0" in 
-        the document "HDF5 Software Changes from Release to Release"
-        (http://hdfgroup.org/HDF5/doc/ADGuide/Changes.html) for the 
-        complete list of the new APIs.
+        - None
 
         C++ API
         ------
@@ -107,15 +84,10 @@ New Features
 
 Support for New Platforms, Languages, and Compilers
 ===================================================
-        - Both serial and parallel HDF5 are supported for the Red Storm machine 
-          which is a Cray XT3 system.
-
-        - The Fortran library will work correctly if compiled with the -i8 
-          flag.  This has been tested with the g95, PGI and Intel Fortran 
-          compilers.
+        - None
 
 
-Bug Fixes since HDF5-1.8.0 
+Bug Fixes since HDF5-1.8.1 
 ==========================
 
         Configuration
@@ -127,21 +99,7 @@ Bug Fixes since HDF5-1.8.0
 
         Library
         -------
-        - Chunking:  Chunks greater than 4GB are disallowed. 
-          (QAK - 2008/05/16)
-        - Fixed the problem with searching for a target file when following 
-          an external link.  The search pattern will depend on whether the 
-          target file's pathname is an absolute or a relative path. 
-          Please see the H5Lcreate_external description in the "HDF5 
-          Reference Manual" (http://hdfgroup.org/HDF5/doc/RM/RM_H5L.html).
-          (VC - 2008/04/08)
-        - Fixed possible file corruption bug when encoding datatype
-          descriptions for compound datatypes whose size was between
-          256 and 511 bytes and the file was opened with the "use the
-          latest format" property enabled (with H5Pset_libver_bounds).
-          (QAK - 2008/03/13)
-        - Fixed bug in H5Aget_num_attrs() routine to correctly handle an 
-          invalid location identifier.  (QAK - 2008/03/11)
+        - None
 
         Parallel Library
         ----------------
@@ -149,39 +107,15 @@ Bug Fixes since HDF5-1.8.0
 
         Tools
         -----
-        - Fixed bug in h5diff that prevented datasets and attributes with
-          variable-length string elements from comparing correctly.
-          (QAK - 2008/02/28)
-        - Fixed bug in h5dump that caused binary output to be made only for 
-          the first dataset, when several datasets were requested.
-          (PVN - 2008/04/07)
+        - None
 
         F90 API
         ------
-        - The h5tset(get)_fields subroutines were missing the parameter to 
-          specify a sign position; fixed.  (EIP - 2008/05/23)
-        - Many APIs were fixed to work with the 8-byte integers in Fortran vs.
-          4-byte integers in C. This change is trasparent to user applications.
+        - None
 
         C++ API
         ------
-        - The class hierarchy was revised to address the problem reported
-          in bugzilla #1068, Attribute should not be derived from base
-          class H5Object.  Classes AbstractDS was moved out of H5Object.
-          Class Attribute now multiply inherits from IdComponent and
-          AbstractDs and class DataSet from H5Object and AbstractDs.
-          In addition, data member IdComponent::id was moved into subclasses:
-          Attribute, DataSet, DataSpace, DataType, H5File, Group, and PropList.
-          (BMR - 2008/05/20)
-	- IdComponent::dereference was incorrect; it was changed from:
-		void IdComponent::dereference(IdComponent& obj, void* ref)
-	  to:
-		void H5Object::dereference(H5File& h5file, void* ref)
-		void H5Object::dereference(H5Object& obj, void* ref)
-	  (BMR - 2008/05/20)
-        - Revised Attribute::write and Attribute::read wrappers to handle
-          memory allocation/deallocation properly. (bugzilla 1045)
-          (BMR - 2008/05/20)
+        - None
 
 
 Platforms Tested
