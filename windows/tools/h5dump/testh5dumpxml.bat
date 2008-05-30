@@ -63,6 +63,7 @@ rem non-zero value.
 rem
 :tooltest
     set expect=%CD%\..\testfiles\%1
+    set expect_eol=%CD%\..\testfiles\%~n1.eol
     set actual=%CD%\..\testfiles\%~n1.out
     set actual_err=%CD%\..\testfiles\%~n1.err
     
@@ -93,15 +94,23 @@ rem
         if !errorlevel! equ 0 (
             call :testing PASSED %params%
         ) else (
-            call :testing *FAILED* %params%
-            echo.    Expected results ^(*.ddl^) differs from actual results ^(*.out^)
-            set /a nerrors=!nerrors!+1
-            if "yes"=="%verbose%" fc /w %expect% %actual%
+            rem First, check if the error is caused by Unix-style EOL, because
+            rem FC can fail incorrectly when comparing them. --SJW 5/30/08
+            more < %expect% > %expect_eol%
+            fc /w %expect_eol% %actual% > nul
+            if !errorlevel! equ 0 (
+                call :testing PASSED %params%
+            ) else (
+                call :testing *FAILED* %params%
+                echo.    Expected results ^(*.ddl^) differs from actual results ^(*.out^)
+                set /a nerrors=!nerrors!+1
+                if "yes"=="%verbose%" fc /w %expect% %actual%
+            )
         )
     )
     
     rem Clean up output file
-    if not defined HDF5_NOCLEANUP del /f %actual% %actual_err%
+    if not defined HDF5_NOCLEANUP del /f %expect_eol% %actual% %actual_err% 
     
     exit /b
     
@@ -166,10 +175,7 @@ rem ############################################################################
     call :tooltest tvldtypes4.h5.xml --xml tvldtypes4.h5
     call :tooltest tvldtypes5.h5.xml --xml tvldtypes5.h5
     call :tooltest tvlstr.h5.xml --xml tvlstr.h5
-    rem Skip this test because it seems to fail when tsaf.h5.xml has unix-style
-    rem EOL-characters. --SJW 5/27/08
-    rem call :tooltest tsaf.h5.xml --xml tsaf.h5
-    call :skip tsaf.h5.xml --xml tsaf.h5
+    call :tooltest tsaf.h5.xml --xml tsaf.h5
     call :tooltest tempty.h5.xml --xml tempty.h5
     call :tooltest tnamed_dtype_attr.h5.xml --xml tnamed_dtype_attr.h5
     rem Test dataset and attribute of null space.  Commented out:
