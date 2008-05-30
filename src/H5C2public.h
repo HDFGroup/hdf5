@@ -30,6 +30,7 @@
 
 /* Public headers needed by this file */
 #include "H5public.h"
+#include "H5Fpublic.h"		/*for H5Pset_fapl_journal */
 
 #ifdef __cplusplus
 extern "C" {
@@ -55,6 +56,8 @@ enum H5C2_cache_decr_mode
     H5C2_decr__age_out,
     H5C2_decr__age_out_with_threshold
 };
+
+H5_DLL herr_t H5Pset_fapl_journal(hid_t fapl_id, const char *journal_file);
 
 #ifdef __cplusplus
 }

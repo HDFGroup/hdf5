@@ -45,6 +45,7 @@
 #include "H5MFprivate.h"        /* File memory management               */
 #include "H5Fpkg.h"		/* File access                          */
 #include "H5C2pkg.h"            /* Cache                                */
+#include "H5Pprivate.h"		/* Property lists			*/
 
 
 /**************************************************************************/
@@ -3396,4 +3397,62 @@ H5C2_jb__bin2hex(const uint8_t * buf,
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5C2_jb__bin2hex*/
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_fapl_journal
+ *
+ * Purpose:	Modify the file access property list to enable journaling.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Albert Cheng & Mike McGreevy
+ *		May 27, 2008
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_fapl_journal(hid_t fapl_id, const char *journal_file)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED; /* set to SUCCEED for now. */
+    H5AC2_cache_config_t mdj_config;
+
+    FUNC_ENTER_API(H5Pset_fapl_journal, FAIL)
+
+    /* Check/fix arguments */
+    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+    if (!journal_file || !*journal_file)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file name")
+    if (strlen(journal_file) >= H5AC2__MAX_JOURNAL_FILE_NAME_LEN)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file name too long")
+
+    /* setup cache config struct to enable journaling */
+    mdj_config.version = H5C2__CURR_AUTO_SIZE_CTL_VER;
+
+    /* get cache config struct information */
+    H5Pget_mdc_config(fapl_id, (H5AC_cache_config_t *)&mdj_config);
+
+    /* set enable journaling field to true */
+    mdj_config.enable_journaling = TRUE;    /* turn on journaling */
+    mdj_config.jbrb_buf_size = 8*1024;	    /* multiples of system buffer size*/
+    mdj_config.jbrb_num_bufs = 2;	
+    mdj_config.jbrb_use_aio = FALSE;	    /* only sync IO is supported */
+    mdj_config.jbrb_human_readable = TRUE;  /* only readable form is supported */
+    /* specify name of journal file */
+    HDstrcpy(mdj_config.journal_file_path, journal_file);
+
+    /* set latest format */
+    if (H5Pset_latest_format(fapl_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'latest format'")
+
+    /* set cache config struct information */
+    ret_value = H5Pset_mdc_config(fapl_id, (H5AC_cache_config_t *)&mdj_config);
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}
 
