@@ -983,8 +983,6 @@ H5AC2_begin_transaction(hid_t id,
 
 done:
 
-    *trans_num_ptr = 1;
-
 #if H5AC2__TRACE_FILE_ENABLED
     if ( trace_file_ptr != NULL ) {
 
