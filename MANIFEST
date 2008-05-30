@@ -1514,7 +1514,8 @@
 ./tools/testfiles/h5mkgrp_single_latest.ls
 ./tools/testfiles/h5mkgrp_version.ls
 
-
+#h52jpeg
+./tools/h52jpeg/h52jpeg.c
 
 # high level libraries
 ./hl/COPYING
