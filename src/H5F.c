@@ -71,7 +71,6 @@ static herr_t H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void** file_hand
 static H5F_t *H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id,
                       H5FD_t *lf);
 static herr_t H5F_dest(H5F_t *f, hid_t dxpl_id);
-static herr_t H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags);
 static herr_t H5F_close(H5F_t *f);
 
 /* Declare a free list to manage the H5F_t struct */
@@ -1012,6 +1011,13 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
             H5AC_stats(f);
 #endif /* H5AC_DUMP_STATS_ON_CLOSE */
 
+	    /* shut down metadata journaling if it is enabled. */
+	    if ( H5C2_end_journaling(f, dxpl_id, f->shared->cache2) != SUCCEED ) {
+                /* Push error, but keep going*/
+                HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
+                            "unable to shutdown metadata journaling")
+	    }
+
             /* Flush and invalidate all caches */
             if(H5F_flush(f, dxpl_id, H5F_SCOPE_LOCAL, H5F_FLUSH_INVALIDATE | H5F_FLUSH_CLOSING) < 0)
                 /* Push error, but keep going*/
@@ -1683,7 +1689,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
 {
     unsigned		nerrors = 0;    /* Errors from nested flushes */

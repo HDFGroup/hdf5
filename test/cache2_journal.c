@@ -123,18 +123,29 @@ static void jrnl_row_major_scan_forward2(H5F_t * file_ptr,
                                          int dirty_unprotects,
 			                 uint64_t trans_num);
 #endif /* JRM */
+static void open_exiting_file_for_journaling(const char * hdf_file_name,
+                                             const char * journal_file_name,
+                                             hid_t * file_id_ptr,
+                                             H5F_t ** file_ptr_ptr,
+                                             H5C2_t ** cache_ptr_ptr, 
+				             hbool_t use_core_driver_if_avail);
+
 static void setup_cache_for_journaling(const char * hdf_file_name,
                                        const char * journal_file_name,
                                        hid_t * file_id_ptr,
                                        H5F_t ** file_ptr_ptr,
-                                       H5C2_t ** cache_ptr_ptr);
+                                       H5C2_t ** cache_ptr_ptr,
+				       hbool_t use_core_driver_if_avail);
 
 static void takedown_cache_after_journaling(hid_t file_id,
                                             const char * filename,
-                                            const char * journal_filename);
+                                            const char * journal_filename,
+			                    hbool_t use_core_driver_if_avail);
 
 static void verify_journal_contents(const char * journal_file_path_ptr,
                                     const char * expected_file_path_ptr);
+
+static void verify_journal_deleted(const char * journal_file_path_ptr);
 
 static void verify_journal_empty(const char * journal_file_path_ptr);
 
@@ -279,7 +290,7 @@ copy_file(const char * input_file,
     ssize_t result;
     int input_file_fd = -1;
     int output_file_fd = -1;
-    struct stat buf;
+    h5_stat_t buf;
 
     if ( pass2 ) {
 
@@ -1547,6 +1558,233 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
 
 
 /*-------------------------------------------------------------------------
+ * Function:    open_existing_file_for_journaling()
+ *
+ * Purpose:     If pass2 is true on entry, open the specified a HDF5 file 
+ * 		with journaling enabled and journal file with the specified 
+ * 		name.  Return pointers to the cache data structure and file 
+ * 		data structures, and verify that it contains the expected data.
+ *
+ *              On failure, set pass2 to FALSE, and set failure_mssg2 
+ *              to point to an appropriate failure message.
+ *
+ *              Do nothing if pass2 is FALSE on entry.
+ *
+ * Return:      void
+ *
+ * Programmer:  John Mainzer
+ *              5/13/08
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static void
+open_exiting_file_for_journaling(const char * hdf_file_name,
+                                 const char * journal_file_name,
+                                 hid_t * file_id_ptr,
+                                 H5F_t ** file_ptr_ptr,
+                                 H5C2_t ** cache_ptr_ptr, 
+				 hbool_t use_core_driver_if_avail)
+{
+    const char * fcn_name = "open_exiting_file_for_journaling()";
+    hbool_t show_progress = FALSE;
+    hbool_t verbose = FALSE;
+    int cp = 0;
+    herr_t result;
+    H5AC2_cache_config_t mdj_config;
+    hid_t fapl_id = -1;
+    hid_t file_id;
+    H5F_t * file_ptr;
+    H5C2_t * cache_ptr;
+
+    if ( pass2 )
+    {
+        if ( ( hdf_file_name == NULL ) ||
+             ( journal_file_name == NULL ) ||
+	     ( file_id_ptr == NULL ) ||
+	     ( file_ptr_ptr == NULL ) ||
+	     ( cache_ptr_ptr == NULL ) ) {
+
+            failure_mssg2 = 
+                "Bad param(s) on entry to open_exiting_file_for_journaling().\n";
+	    pass2 = FALSE;
+        }
+	else if ( strlen(journal_file_name) > H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+
+            failure_mssg2 = "journal file name too long.\n";
+	    pass2 = FALSE;
+
+        } else {
+
+	    strcpy(mdj_config.journal_file_path, journal_file_name);
+
+            if ( verbose ) {
+
+                HDfprintf(stdout, "%s: HDF file name = \"%s\".\n", 
+			  fcn_name, hdf_file_name);
+                HDfprintf(stdout, "%s: journal file name = \"%s\".\n", 
+			  fcn_name, journal_file_name);
+	    }
+	}
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    /* create a file access propertly list. */
+    if ( pass2 ) {
+
+        fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+
+        if ( fapl_id < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Pcreate() failed.\n";
+        }
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    /* call H5Pset_latest_format() on the fapl_id */
+    if ( pass2 ) {
+
+	if ( H5Pset_latest_format(fapl_id, TRUE) < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Pset_latest_format() failed.\n";
+        }
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    if ( pass2 ) {
+
+        mdj_config.version = H5C2__CURR_AUTO_SIZE_CTL_VER;
+
+        result = H5Pget_mdc_config(fapl_id, (H5AC_cache_config_t *)&mdj_config);
+
+        if ( result < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Pset_mdc_config() failed.\n";
+        }
+
+	/* set journaling config fields to taste */
+        mdj_config.enable_journaling       = TRUE;
+
+        strcpy(mdj_config.journal_file_path, journal_file_name);
+
+        mdj_config.journal_recovered       = FALSE;
+        mdj_config.jbrb_buf_size           = (8 * 1024);
+        mdj_config.jbrb_num_bufs           = 2;
+        mdj_config.jbrb_use_aio            = FALSE;
+        mdj_config.jbrb_human_readable     = TRUE;
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    if ( pass2 ) {
+
+        result = H5Pset_mdc_config(fapl_id, (H5AC_cache_config_t *)&mdj_config);
+
+        if ( result < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Pset_mdc_config() failed.\n";
+        }
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+#if USE_CORE_DRIVER
+    if ( ( pass2 ) && ( use_core_driver_if_avail ) ) {
+
+        if ( H5Pset_fapl_core(fapl_id, 64 * 1024 * 1024, FALSE) < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5P_set_fapl_core() failed.\n";
+        }
+    }
+#endif /* USE_CORE_DRIVER */
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+ 
+    /**************************************/
+    /* open the file with the fapl above. */
+    /**************************************/
+
+    /* open the file using fapl_id */
+    if ( pass2 ) {
+
+        file_id = H5Fopen(hdf_file_name, H5F_ACC_RDWR, fapl_id);
+
+        if ( file_id < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fopen() failed.\n";
+
+        } else {
+
+            file_ptr = H5I_object_verify(file_id, H5I_FILE);
+
+            if ( file_ptr == NULL ) {
+
+                pass2 = FALSE;
+                failure_mssg2 = "Can't get file_ptr.";
+
+                if ( verbose ) {
+                    HDfprintf(stdout, "%s: Can't get file_ptr.\n", fcn_name);
+                }
+            }
+        }
+    }
+
+    /* At least within the context of the cache2 test code, there should be
+     * no need to allocate space for test entries since we are re-opening
+     * the file, and any needed space allocation should have been done at 
+     * file creation.
+     */
+
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    /* get a pointer to the files internal data structure and then 
+     * to the cache structure
+     */
+    if ( pass2 ) {
+
+        if ( file_ptr->shared->cache2 == NULL ) {
+	
+	    pass2 = FALSE;
+	    failure_mssg2 = "can't get cache2 pointer(1).\n";
+
+	} else {
+
+	    cache_ptr = file_ptr->shared->cache2;
+	}
+    }
+
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    if ( pass2 ) {
+
+        *file_id_ptr = file_id;
+	*file_ptr_ptr = file_ptr;
+	*cache_ptr_ptr = cache_ptr;
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d -- exiting.\n", fcn_name, cp++);
+
+    return;
+
+} /* open_existing_file_for_journaling() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    setup_cache_for_journaling()
  *
  * Purpose:     If pass2 is true on entry, create a HDF5 file with 
@@ -1574,7 +1812,8 @@ setup_cache_for_journaling(const char * hdf_file_name,
                            const char * journal_file_name,
                            hid_t * file_id_ptr,
                            H5F_t ** file_ptr_ptr,
-                           H5C2_t ** cache_ptr_ptr)
+                           H5C2_t ** cache_ptr_ptr,
+			   hbool_t use_core_driver_if_avail)
 {
     const char * fcn_name = "setup_cache_for_journaling()";
     hbool_t show_progress = FALSE;
@@ -1700,7 +1939,7 @@ setup_cache_for_journaling(const char * hdf_file_name,
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
 #if USE_CORE_DRIVER
-    if ( pass2 ) {
+    if ( ( pass2 ) && ( use_core_driver_if_avail ) ) {
 
         if ( H5Pset_fapl_core(fapl_id, 64 * 1024 * 1024, FALSE) < 0 ) {
 
@@ -1817,7 +2056,7 @@ setup_cache_for_journaling(const char * hdf_file_name,
  * Function:    takedown_cache_after_journaling()
  *
  * Purpose:     If file_id >= 0, close the associated file, and then delete
- * 		it and the associated journal file (if it exists).
+ * 		it.  Verify that they journal file has been deleted.
  *
  * Return:      void
  *
@@ -1832,7 +2071,9 @@ setup_cache_for_journaling(const char * hdf_file_name,
 static void
 takedown_cache_after_journaling(hid_t file_id,
                                 const char * filename,
-                                const char * journal_filename)
+                                const char * journal_filename,
+				hbool_t 
+				use_core_driver_if_avail)
 {
     hbool_t verbose = TRUE;
     int error;
@@ -1846,8 +2087,8 @@ takedown_cache_after_journaling(hid_t file_id,
                 pass2 = FALSE;
 	        failure_mssg2 = "file close failed.";
 	    }
-#if ! USE_CORE_DRIVER
-        } else if ( (error = HDremove(filename)) != 0 ) {
+	} else if ( ( ( ! USE_CORE_DRIVER ) || ( ! use_core_driver_if_avail ) ) &&
+                    ( ( error = HDremove(filename) ) != 0 ) ) {
 
 	    if ( verbose ) {
 	        HDfprintf(stdout, 
@@ -1860,16 +2101,10 @@ takedown_cache_after_journaling(hid_t file_id,
                 pass2 = FALSE;
                 failure_mssg2 = "HDremove() failed (1).\n";
             }
-#endif
-        } else if ( HDremove(journal_filename) != 0 ) {
-
-	    if ( pass2 ) {
-
-                pass2 = FALSE;
-                failure_mssg2 = "HDremove() failed (2).\n";
-            }
         }
     }
+
+    verify_journal_deleted(journal_filename);
 
     return;
 
@@ -1916,7 +2151,7 @@ verify_journal_contents(const char * journal_file_path_ptr,
     ssize_t read_result;
     int journal_file_fd = -1;
     int expected_file_fd = -1;
-    struct stat buf;
+    h5_stat_t buf;
 
     if ( pass2 ) {
 
@@ -2211,6 +2446,76 @@ verify_journal_contents(const char * journal_file_path_ptr,
 
 
 /*-------------------------------------------------------------------------
+ * Function:    verify_journal_deleted()
+ *
+ * Purpose:     If pass2 is true on entry, stat the target journal file,
+ * 		and verify that it does not exist.  If it does, set
+ * 		pass2 to FALSE, and set failure_mssg2 to point to an 
+ * 		appropriate failure message.  Similarly, if any errors 
+ * 		are detected in this process, set pass2 to FALSE and set
+ * 		failure_mssg2 to point to an appropriate error message.
+ *
+ *              Do nothing if pass2 is FALSE on entry.
+ *
+ * Return:      void
+ *
+ * Programmer:  John Mainzer
+ *              5//08
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static void
+verify_journal_deleted(const char * journal_file_path_ptr)
+{
+    const char * fcn_name = "verify_journal_deleted()";
+    hbool_t verbose = FALSE;
+    h5_stat_t buf;
+
+    if ( pass2 ) {
+
+	if ( journal_file_path_ptr == NULL ) {
+
+            failure_mssg2 = "journal_file_path_ptr NULL on entry?!?",
+            pass2 = FALSE;
+	}
+    }
+
+    if ( pass2 ) {
+
+	if ( HDstat(journal_file_path_ptr, &buf) == 0 ) {
+
+	    if ( verbose ) {
+
+	        HDfprintf(stdout, "%s: HDstat(%s) succeeded.\n", fcn_name,
+			  journal_file_path_ptr);
+	    }
+
+	    failure_mssg2 = "journal file not deleted(1).";
+	    pass2 = FALSE;
+
+        } else if ( errno != ENOENT ) {
+
+	    if ( verbose ) {
+
+	        HDfprintf(stdout, 
+			  "%s: HDstat() failed with unexpected errno = %d.\n",
+                          fcn_name, errno);
+	    }
+	    failure_mssg2 = "journal file not deleted(2).";
+	    pass2 = FALSE;
+
+	} 
+    }
+
+    return;
+
+} /* verify_journal_deleted() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    verify_journal_empty()
  *
  * Purpose:     If pass2 is true on entry, stat the target journal file,
@@ -2237,7 +2542,7 @@ verify_journal_empty(const char * journal_file_path_ptr)
 {
     const char * fcn_name = "verify_journal_empty()";
     hbool_t verbose = FALSE;
-    struct stat buf;
+    h5_stat_t buf;
 
     if ( pass2 ) {
 
@@ -2292,7 +2597,13 @@ verify_journal_empty(const char * journal_file_path_ptr)
  *                 Verify that these transactions are reflected correctly 
  *                 in the journal.
  *
- *              3) Close and delete the file.
+ *              3) Close the hdf5 file, and verify that the journal file
+ *                 is deleted.  Re-open the file with journaling, and 
+ *                 do a transaction or two just to verify that the 
+ *                 journaling is working.
+ *
+ *              4) Close the file, and verify that the journal is deleted.
+ *                 Then delete the file.
  *
  * Return:      void
  *
@@ -2327,6 +2638,7 @@ mdj_smoke_check_00(void)
         "testfiles/cache2_journal_sc00_014.jnl",
         "testfiles/cache2_journal_sc00_015.jnl",
         "testfiles/cache2_journal_sc00_016.jnl",
+        "testfiles/cache2_journal_sc00_017.jnl",
 	NULL
     };
     char filename[512];
@@ -2391,7 +2703,7 @@ mdj_smoke_check_00(void)
     }
 
     setup_cache_for_journaling(filename, journal_filename, &file_id,
-                               &file_ptr, &cache_ptr);
+                               &file_ptr, &cache_ptr, FALSE);
 
     if ( show_progress )
         HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
@@ -3168,12 +3480,81 @@ mdj_smoke_check_00(void)
 
     verify_journal_contents(journal_filename, testfiles[16]);
 
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+
+    /************************************************************/
+    /* 3) Close the hdf5 file, and verify that the journal file */
+    /*    is deleted.  Re-open the file with journaling, and    */
+    /*    do a transaction or two just to verify that the       */
+    /*    journaling is working.                                */
+    /************************************************************/
+
+    /* a) Close the hdf5 file. */
+    if ( pass2 ) {
+
+	if ( H5Fclose(file_id) < 0 ) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "temporary H5Fclose() failed.\n";
+
+	} else {
+	    file_id = -1;
+	    file_ptr = NULL;
+	    cache_ptr = NULL;
+	}
+    }
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+
+    /* b) Verify that the journal file has been deleted. */
+    verify_journal_deleted(journal_filename);
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+
+    /* c) Re-open the hdf5 file. */
+    open_exiting_file_for_journaling(filename, journal_filename, &file_id,
+                                     &file_ptr, &cache_ptr, FALSE);
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+
+    /* d) do a transaction or to to verify that journaling is working. */
+
+    begin_trans(cache_ptr, verbose, (uint64_t)1, "transaction 1.5");
+
+    insert_entry2(file_ptr, 0, 1, FALSE, H5C2__NO_FLAGS_SET); 
+    protect_entry2(file_ptr, 0, 0);
+    unprotect_entry2(file_ptr, 0, 0, TRUE, H5C2__NO_FLAGS_SET);
+
+    end_trans(file_ptr, cache_ptr, verbose, (uint64_t)1, "transaction 1.5");
+
+    flush_journal(cache_ptr);
+
+    if ( update_architypes ) {
+
+        copy_file(journal_filename, testfiles[17]);
+    }
+
+    verify_journal_contents(journal_filename, testfiles[17]);
+
+    flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
 
     /*******************************************************/
-    /* 3) Close and discard the file and the journal file. */
+    /* 4) Close and discard the file and the journal file. */
     /*******************************************************/
 
-    takedown_cache_after_journaling(file_id, filename, journal_filename);
+    takedown_cache_after_journaling(file_id, filename, journal_filename, FALSE);
 
     if ( show_progress )
         HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
@@ -3290,7 +3671,7 @@ mdj_smoke_check_01(void)
     }
 
     setup_cache_for_journaling(filename, journal_filename, &file_id,
-                               &file_ptr, &cache_ptr);
+                               &file_ptr, &cache_ptr, TRUE);
 
     if ( show_progress )
         HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
@@ -3480,7 +3861,7 @@ mdj_smoke_check_01(void)
     /* Close and discard the file and the journal file. */
     /****************************************************/
 
-    takedown_cache_after_journaling(file_id, filename, journal_filename);
+    takedown_cache_after_journaling(file_id, filename, journal_filename, TRUE);
 
     if ( show_progress )
         HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);

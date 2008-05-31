@@ -500,7 +500,7 @@ H5Gmove2(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API_META(H5Gmove2, src_loc_id, FAIL)
+    FUNC_ENTER_API_META(H5Gmove2, dst_loc_id, FAIL)
     H5TRACE4("e", "i*si*s", src_loc_id, src_name, dst_loc_id, dst_name);
 
     /* Call common routine to move the link */
