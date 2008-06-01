@@ -3493,7 +3493,7 @@ H5C2_jb__bin2hex(const uint8_t * buf,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pset_fapl_journal
+ * Function:	H5Pset_journal
  *
  * Purpose:	Modify the file access property list to enable journaling.
  *
@@ -3507,13 +3507,13 @@ H5C2_jb__bin2hex(const uint8_t * buf,
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_fapl_journal(hid_t fapl_id, const char *journal_file)
+H5Pset_journal(hid_t fapl_id, const char *journal_file)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED; /* set to SUCCEED for now. */
     H5AC2_cache_config_t mdj_config;
 
-    FUNC_ENTER_API(H5Pset_fapl_journal, FAIL)
+    FUNC_ENTER_API(H5Pset_journal, FAIL)
 
     /* Check/fix arguments */
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
@@ -3524,7 +3524,7 @@ H5Pset_fapl_journal(hid_t fapl_id, const char *journal_file)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file name too long")
 
     /* setup cache config struct to enable journaling */
-    mdj_config.version = H5C2__CURR_AUTO_SIZE_CTL_VER;
+    mdj_config.version = H5AC2__CURR_CACHE_CONFIG_VERSION;
 
     /* get cache config struct information */
     H5Pget_mdc_config(fapl_id, (H5AC_cache_config_t *)&mdj_config);
