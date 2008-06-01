@@ -136,5 +136,10 @@ if test $nerrors -eq 0 ; then
    echo "All $TOOL tests passed."
 fi
 
-exit $nerrors
-
+if test $nerrors -eq 0 ; then
+    echo "All $TOOL tests passed."
+    exit 0
+else
+    echo $nerrors errors encountered.
+    exit 1
+fi

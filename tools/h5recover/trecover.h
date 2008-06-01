@@ -46,6 +46,7 @@
 #define ChunkY 8
 #define H5FILE_NAME        "trecover.h5"
 #define CTL_H5FILE_NAME    "CTL"H5FILE_NAME	/* control file name */
+#define JNL_H5FILE_NAME    H5FILE_NAME".jnl"	/* journal file name */
 
 /* Data Structures */
 typedef union CrasherParam_t {
@@ -65,5 +66,5 @@ void wakeup(int signum);
 void parser(int ac, char **av);	/* command option parser */
 void init(void);		/* initialization */
 void help(void);		/* initialization */
-int create_files(char *filename, char *ctl_filename);
+int create_files(char *filename, char *ctl_filename, char *jnl_filename);
 int close_file(hid_t fid);

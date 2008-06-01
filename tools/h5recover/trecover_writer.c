@@ -26,7 +26,7 @@
 #define SZDATASETNAME "IntArraySZCompressed" 
 
 int
-create_files(char *filename, char *ctl_filename)
+create_files(char *filename, char *ctl_filename, char *jnl_filename)
 {
     /*
      * Create a new file and the control file using H5F_ACC_TRUNC access,
@@ -36,11 +36,15 @@ create_files(char *filename, char *ctl_filename)
     hid_t       fapl_id;         /* file access property list handle */
 
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-    if (H5Pset_fapl_journal(fapl_id, "journal_file") < 0){
+    if (H5Pset_journal(fapl_id, jnl_filename) < 0){
 	fprintf(stderr, "H5Pset_journal on data file failed\n");
 	H5Pclose(fapl_id);
 	return(-1);
     }
+    /* remove any existing test files. */
+    remove(filename);
+    remove(ctl_filename);
+    remove(jnl_filename);
     file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     ctl_file = H5Fcreate(ctl_filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 

@@ -144,7 +144,7 @@ main (int ac, char **av)
     parser(ac, av);
 
     /* create/open both files. */
-    create_files(H5FILE_NAME, CTL_H5FILE_NAME);
+    create_files(H5FILE_NAME, CTL_H5FILE_NAME, JNL_H5FILE_NAME);
 
     /* create datasets in Control file first. */
     writer(ctl_file, DSTypes, RANK, dims, dimschunk);
