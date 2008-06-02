@@ -1768,10 +1768,6 @@
 ./windows/fortran/examples/selecteletest/selecteletest.vfproj
 ./windows/fortran/examples/selecteletestdll/selecteletestdll.vfproj
 
-# Windows-maintained Fortran Source
-./windows/fortran/src/H5f90i_gen.h
-./windows/fortran/src/H5fortran_types.f90
-
 # Fortran Tests
 ./windows/fortran/test/checkfortrantests.bat
 ./windows/fortran/test/flush1_fortran/flush1_fortran.vfproj
@@ -1909,7 +1905,6 @@
 
 # Windows-maintainted Source
 ./windows/src/H5pubconf.h
-./windows/src/H5Tinit.c
 
 # Library Test Projects
 ./windows/test/checktests.bat

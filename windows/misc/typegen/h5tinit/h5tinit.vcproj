@@ -19,7 +19,7 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\..\..\..\src"
+			OutputDirectory="..\..\..\..\src\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\..\proj\property_sheets\remove-posix-warnings.vsprops"
@@ -105,12 +105,12 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Generating H5tinit.c"
-				CommandLine="$(TargetPath) &gt;$(TargetDir)H5tinit.c"
+				CommandLine="$(TargetPath) &gt;$(TargetDir)..\..\H5tinit.c"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="..\..\..\..\src"
+			OutputDirectory="..\..\..\..\src\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\..\proj\property_sheets\remove-posix-warnings.vsprops"
@@ -197,12 +197,12 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Generating H5tinit.c"
-				CommandLine="$(TargetPath) &gt;$(TargetDir)H5tinit.c"
+				CommandLine="$(TargetPath) &gt;$(TargetDir)..\..\H5tinit.c"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\..\..\..\src"
+			OutputDirectory="..\..\..\..\src\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\..\proj\property_sheets\remove-posix-warnings.vsprops"
@@ -288,12 +288,12 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Generating H5tinit.c"
-				CommandLine="$(TargetPath) &gt;$(TargetDir)H5tinit.c"
+				CommandLine="$(TargetPath) &gt;$(TargetDir)..\..\H5tinit.c"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="..\..\..\..\src"
+			OutputDirectory="..\..\..\..\src\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\..\proj\property_sheets\remove-posix-warnings.vsprops"
@@ -380,7 +380,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Generating H5tinit.c"
-				CommandLine="$(TargetPath) &gt;$(TargetDir)H5tinit.c"
+				CommandLine="$(TargetPath) &gt;$(TargetDir)..\..\H5tinit.c"
 			/>
 		</Configuration>
 	</Configurations>
