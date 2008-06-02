@@ -32,7 +32,7 @@
 				ProgramDataBaseFileName=".\../../../../hl/test/hl_test_image/Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
-				DebugInformationFormat="4"
+				DebugInformationFormat="3"
 				CompileAs="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -42,7 +42,7 @@
 				OutputFile=".\../../../../hl/test/hl_test_image/Debug/hl_test_image.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../../hl/test/hl_test_image/Debug/hl_test_image.pdb"
 				SubSystem="1"

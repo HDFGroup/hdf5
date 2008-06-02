@@ -32,7 +32,7 @@
 				ProgramDataBaseFileName=".\../../../test/vfd/Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
-				DebugInformationFormat="4"
+				DebugInformationFormat="3"
 				CompileAs="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -42,7 +42,7 @@
 				OutputFile=".\../../../test/vfd/Debug/vfd.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				ForceSymbolReferences="_gethostname@8"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../test/vfd/Debug/vfd.pdb"
@@ -106,7 +106,7 @@
 				OutputFile=".\../../../test/vfd/release/vfd.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libcd.lib"
+				IgnoreDefaultLibraryNames=""
 				ForceSymbolReferences="_gethostname@8"
 				ProgramDatabaseFile=".\../../../test/vfd/release/vfd.pdb"
 				SubSystem="1"

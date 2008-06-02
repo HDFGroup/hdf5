@@ -32,7 +32,7 @@
 				ProgramDataBaseFileName=".\..\..\..\..\hl\examples\ex_ds1dll\Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
-				DebugInformationFormat="4"
+				DebugInformationFormat="3"
 				CompileAs="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>

@@ -233,7 +233,7 @@
 				ProgramDataBaseFileName=".\../../../../tools/testfiles/binread/Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
-				DebugInformationFormat="4"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"

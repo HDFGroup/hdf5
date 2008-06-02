@@ -53,7 +53,7 @@
 				ProgramDataBaseFileName=".\..\..\..\tools\toolslib\Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
-				DebugInformationFormat="1"
+				DebugInformationFormat="3"
 				CompileAs="0"
 			/>
 			<Tool
@@ -125,7 +125,7 @@
 				ProgramDataBaseFileName=".\..\..\..\tools\toolslib\Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
-				DebugInformationFormat="1"
+				DebugInformationFormat="3"
 				CompileAs="0"
 			/>
 			<Tool

@@ -31,7 +31,7 @@
 				ProgramDataBaseFileName=".\../../../test/dtypes/Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
-				DebugInformationFormat="4"
+				DebugInformationFormat="3"
 				CompileAs="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -41,7 +41,7 @@
 				OutputFile=".\../../../test/dtypes/Debug/dtypes.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				ForceSymbolReferences="_gethostname@8"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../test/dtypes/Debug/dtypes.pdb"
@@ -222,7 +222,7 @@
 				OutputFile=".\../../../test/dtypes/Release/dtypes.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libcd.lib"
+				IgnoreDefaultLibraryNames=""
 				ForceSymbolReferences="_gethostname@8"
 				ProgramDatabaseFile=".\../../../test/dtypes/Release/dtypes.pdb"
 				SubSystem="1"

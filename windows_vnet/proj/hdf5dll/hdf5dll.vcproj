@@ -29,7 +29,7 @@
 				ProgramDataBaseFileName=".\../../../proj/hdf5dll/Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
-				DebugInformationFormat="4"/>
+				DebugInformationFormat="3"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool

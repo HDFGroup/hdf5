@@ -32,7 +32,7 @@
 				ProgramDataBaseFileName=".\../../../test/reserved/Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
-				DebugInformationFormat="4"
+				DebugInformationFormat="3"
 				CompileAs="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -42,7 +42,7 @@
 				OutputFile=".\../../../test/reserved/Debug/reserved.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../test/reserved/Debug/reserved.pdb"
 				SubSystem="1"
@@ -105,7 +105,7 @@
 				OutputFile=".\../../../test/reserved/Release/reserved.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libcd.lib"
+				IgnoreDefaultLibraryNames=""
 				ProgramDatabaseFile=".\../../../test/reserved/Release/reserved.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>

@@ -32,7 +32,7 @@
 				ProgramDataBaseFileName=".\../../../test/dtransform/Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
-				DebugInformationFormat="4"
+				DebugInformationFormat="3"
 				CompileAs="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -42,7 +42,7 @@
 				OutputFile=".\../../../test/dtransform/Debug/dtransform.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../test/dtransform/Debug/dtransform.pdb"
 				SubSystem="1"
@@ -105,7 +105,7 @@
 				OutputFile=".\../../../test/dtransform/Release/dtransform.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libcd.lib"
+				IgnoreDefaultLibraryNames=""
 				ProgramDatabaseFile=".\../../../test/dtransform/Release/dtransform.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>

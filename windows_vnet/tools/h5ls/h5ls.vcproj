@@ -43,7 +43,7 @@
 				OutputFile=".\../../../tools/h5ls/Release/h5ls.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libcd.lib"
+				IgnoreDefaultLibraryNames=""
 				ProgramDatabaseFile=".\../../../tools/h5ls/Release/h5ls.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
@@ -93,7 +93,7 @@
 				ProgramDataBaseFileName=".\../../../tools/h5ls/Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
-				DebugInformationFormat="4"
+				DebugInformationFormat="3"
 				CompileAs="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -103,7 +103,7 @@
 				OutputFile=".\../../../tools/h5ls/Debug/h5ls.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../tools/h5ls/Debug/h5ls.pdb"
 				SubSystem="1"

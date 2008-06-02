@@ -44,7 +44,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\..\..\proj\hdf5_cpp\release,..\..\..\..\hdf5lib\release\lib"
-				IgnoreDefaultLibraryNames="libcpp.lib"
+				IgnoreDefaultLibraryNames=""
 				ProgramDatabaseFile=".\../../../../c++/examples/chunkstest/Release/chunkstest.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
@@ -95,7 +95,7 @@
 				ProgramDataBaseFileName=".\../../../../c++/examples/chunkstest/Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
-				DebugInformationFormat="4"
+				DebugInformationFormat="3"
 				CompileAs="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -106,7 +106,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\..\..\proj\hdf5_cpp\debug,..\..\..\..\hdf5lib\debug\lib"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../../c++/examples/chunkstest/Debug/chunkstest.pdb"
 				SubSystem="1"
