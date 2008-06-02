@@ -10051,8 +10051,10 @@ END SUBROUTINE h5pset_sym_k_f
     <dd><em>herr_t</em> <code>H5Pset_szip</code>(<em>hid_t</em> <code>plist</code>,
                 <em>unsigned int</em> <code>options_mask</code>,
                 <em>unsigned int</em> <code>pixels_per_block</code>)
+        <p>
   <dt><strong>Purpose:</strong>
     <dd>Sets up use of the SZIP compression filter.
+        <p>
   <dt><strong>Description:</strong>
     <dd><code>H5Pset_szip</code> sets an SZIP compression filter, 
         <code>H5Z_FILTER_SZIP</code>, for a dataset. 
@@ -10094,11 +10096,11 @@ END SUBROUTINE h5pset_sym_k_f
             variable-length datatypes, 
 	    enumerations, or 
             any other user-defined datatypes.
-        If an SZIP filter is set up for a dataset containing a non-allowed 
-        datatype, <code>H5Pset_szip</code> will succeed but the subsequent call
+        If an SZIP filter is set in a dataset creation property list used 
+        to create a dataset containing a non-allowed datatype, the call
         to <a href="RM_H5D.html#Dataset-Create"><code>H5Dcreate</code></a>
         will fail; 
-        the conflict is detected only when the property list is used.
+        the conflict can be detected only when the property list is used.
         
 
 	<p>
@@ -10163,7 +10165,7 @@ END SUBROUTINE h5pset_sym_k_f
         number of elements in a dataset chunk, 
         <code>H5Pset_szip</code> will succeed but the subsequent call to 
         <a href="RM_H5D.html#Dataset-Create"><code>H5Dcreate</code></a>
-        will fail; the conflict is detected only when the property list 
+        will fail; the conflict can be detected only when the property list 
         is used.
 	<p>
         To achieve optimal performance for SZIP compression, 
@@ -10173,11 +10175,11 @@ END SUBROUTINE h5pset_sym_k_f
         allowed by the SZIP library.
         In the current version of SZIP, <em>N</em> is set to 128.
         <p>
-		<code>H5Pset_szip</code> will fail if SZIP encoding is 
-		disabled in the available copy of the SZIP library.
-		<a href="RM_H5Z.html#Compression-GetFilterInfo">
-		<code>H5Zget_filter_info</code></a> can be employed 
-		to avoid such a failure.
+        SZIP compression is an optional HDF5 filter.
+        See the note below for information regarding its designed behavior, 
+        particularly under circumstances where SZIP is not available 
+        to an application.
+        <p>
   <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
@@ -10193,10 +10195,69 @@ END SUBROUTINE h5pset_sym_k_f
 		    <td valign="top"><em>unsigned&nbsp;int</em>&nbsp;<code>pixels_per_block&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: The number of pixels or data elements in each data block.</td></tr>
     </table></ul>
+        <p>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
-  <dt><strong>Notes:</strong>
+        <p>
+  <dt><strong>Notes on Filter Behavior in HDF5:</strong>
+    <dd>SZIP is an optional filter in HDF5 and can therefore be set for 
+        HDF5 datasets even though it is not available at the moment.  
+        SZIP compression can then be applied to those datasets when the file 
+        containing the dataset is moved to a system on which is available.
+        <p>
+        Consider a situation where one is creating files that will normally 
+        be used only on systems where SZIP compression (encoding and decoding) 
+        is routinely available.
+        One can create those files on system A, which lacks SZIP, 
+        create chunked datasets in the files with SZIP defined in the 
+        dataset creation property list, and even write data to those datasets.
+        The dataset object header will indicate that the SZIP filter has
+        been associated with this dataset.
+        But since system A does not have SZIP, dataset chunks will
+        be written without SZIP compression.
+        <p>
+        HDF5 has a mechanism for determining whether chunks are actually 
+        written with filters specified in the object header, so until the file 
+        is moved from system A, system A will be able to read the data.
+        Once the file is moved to system B, where SZIP encoding is available,
+        HDF5 will use SZIP to compress any data written in these datasets. 
+        Dataset chunks that have been written on system B will then be 
+        unreadable on system A; chunks that have not been re-written since 
+        being written on system A will remain readable on system A.
+        <p>
+        The following table summarizes this behavior.
+        <div align=center>
+        <table border=0 width=80%>
+          <tr align=left valign=top> 
+            <td width=20%>&nbsp;</td>
+            <td width=25%><b>SZIP<br>not available</b>
+            <td width=25%><b>SZIP available<br>with encode</b>
+            <td width=25%><b>SZIP available<br>decode only</b>
+          </tr><tr align=left valign=top>
+            <td><b><code>H5Pset_szip</code>&nbsp;&nbsp;&nbsp;</b></td>
+            <td>Will succeed.<br>&nbsp;</td>
+            <td>Will succeed.</td>
+            <td>Will succeed.</td>
+          </tr><tr align=left valign=top>
+            <td><b><code>H5Dwrite</code><br>with SZIP set</b></td>
+            <td>Will succeed;<br>data will not be compressed.</td>
+            <td>Will succeed;<br>data will be compressed.</td>
+            <td>Will succeed;<br>data will not be compressed.</td>
+          </tr><tr align=left valign=top>
+            <td><b><code>H5Dread</code><br>with SZIP set</b></td>
+            <td>Will succeed if data has not actually been compressed.</td>
+            <td>Will succeed.</td>
+            <td>Will succeed.</td>
+          </tr>
+        </table>
+        </div>
+        <p>
+        The above principles apply generally in the use of 
+        HDF5 optional filters insofar as HDF5 does as much as possible
+        to complete an operation when a optional filter is unavailable.
+        <p>
+  <dt><strong>Notes for Users Familiar with SZIP in Other Contexts:</strong>
     <dd>The following notes are of interest primarily to those who have 
         used SZIP compression outside of the HDF5 context.
 	<p>
@@ -10271,7 +10332,7 @@ END SUBROUTINE h5pset_sym_k_f
         <code>ALLOW_K13_OPTION_MASK</code>, and one of
         <code>LSB_OPTION_MASK</code> or <code>MSB_OPTION_MASK</code>, 
         depending on endianness of the datatype.
- 
+        <p>
   <dt><strong>Fortran90 Interface:</strong> h5pset_szip_f
     <dd>
 	<pre>
@@ -10293,13 +10354,14 @@ SUBROUTINE h5pset_szip_f(prp_id, hdferr)
 END SUBROUTINE h5pset_szip_f
 	</pre>		
 		
-		<!--<dt><strong>Non-C API(s):</strong>
+        <!--<dt><strong>Non-C API(s):</strong>
     	<dd>
         
         <img src="Graphics/Java.gif"> 
         <img src="Graphics/C++.gif">
         -->
 		
+        <p>
   <dt><strong>History:</strong>
     <ul><table width="90%">
         <tr>
@@ -10841,7 +10903,7 @@ Describes HDF5 Release 1.6.7, January 2008
 
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 7 March 2008");
+document.writeln("Last modified: 2 June 2008");
 -->
 </SCRIPT>
  
