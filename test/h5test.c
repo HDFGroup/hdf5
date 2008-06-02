@@ -668,7 +668,9 @@ h5_show_hostname(void)
     }
 #elif defined(H5_HAVE_THREADSAFE)
 #ifdef _WIN32
-    printf("some thread: no way to know the thread number from pthread on windows.");
+		/* use GetCurrentThreadId because pthread_self return cannot be cast */
+		/* as an int on Windows                                              */
+        fprintf("thread %d.", (int)GetCurrentThreadId());
 #else
     printf("thread %d.", (int)pthread_self());
 #endif
