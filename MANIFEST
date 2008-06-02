@@ -1904,6 +1904,9 @@
 ./windows/proj/hdf5_hl_fortran/hdf5_hl_fortran.vfproj
 ./windows/proj/hdf5_hl_fortrandll/hdf5_hl_fortrandll.vfproj
 
+# Visual Studio Property Sheets
+./windows/proj/property_sheets/remove-posix-warnings.vsprops
+
 # Windows-maintainted Source
 ./windows/src/H5pubconf.h
 ./windows/src/H5Tinit.c
