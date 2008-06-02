@@ -16,6 +16,8 @@ rem access to either file, you may request a copy from help@hdfgroup.org.
 rem File Name: hdf5bt.bat
 rem This batch file is used to build and test HDF5 Libraries and Tools.
 rem This batch file takes the following options:
+rem .  /vs7              Build HDF5 using Visual Studio .NET 2003 
+rem .                    Note: Default is Visual Studio 2005
 rem .  /fort             Build and test HDF5 with Fortran libraries
 rem .  /useenv           Build HDF5 using compiler settings defined
 rem .                    in the environment, rather than the IDE.
@@ -25,7 +27,7 @@ rem .                      HDF5CHECK_LOG
 rem .  /?                Help information
 rem By Xuan Bai
 rem Created: Aug. 16, 2004
-rem Last Updated: Scott Wegner, 2/18/08
+rem Last Updated: Scott Wegner, 5/27/08
 
 rem This batch file makes the following assumptions:
 rem    - The appropriate version of Visual Studio is installed and setup
@@ -57,6 +59,8 @@ rem Print a help message
     echo.
     echo Usage: %~nx0 [OPTION]
     echo.
+    echo.   /vs7              Build HDF5 using Visual Studio .NET 2003 
+    echo.                     Note: Default is Visual Studio 2005
     echo.   /fort             Build and test HDF5 with Fortran libraries
     echo.   /useenv           Build HDF5 using compiler settings defined
     echo.                     in the environment, rather than the IDE.
@@ -69,7 +73,11 @@ rem Parse through the parameters sent to file, and set appropriate variables
 :parse_params
 
     for %%a in (%*) do (
-        if "%%a"=="/fort" (
+        if "%%a"=="/vs7" (
+            rem Use Visual Studio .NET to build
+            set hdf5_vnet=true
+    
+        ) else if "%%a"=="/fort" (
             rem Enable Fortran
             set hdf5_enablefortran=true
             
@@ -104,6 +112,10 @@ rem Setup our environment
     rem hdf5build and hdf5check.
     set hdf5build_params=
     set hdf5check_params=enablecpp
+    
+    if defined hdf5_vnet (
+        set hdf5build_params=%hdf5build_params% /vs7
+    )
     
     if defined hdf5_enablefortran (
         set hdf5build_params=%hdf5build_params% /fort
