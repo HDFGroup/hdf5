@@ -1452,6 +1452,7 @@
 ./tools/testfiles/h5diff_dtypes.h5
 ./tools/testfiles/h5diff_dset1.h5
 ./tools/testfiles/h5diff_dset2.h5
+./tools/testfiles/h5diff_empty.h5
 ./tools/testfiles/h5diff_hyper1.h5
 ./tools/testfiles/h5diff_attr1.h5
 ./tools/testfiles/h5diff_hyper2.h5
