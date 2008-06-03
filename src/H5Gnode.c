@@ -74,7 +74,6 @@ typedef struct H5G_node_t {
 /* PRIVATE PROTOTYPES */
 static herr_t H5G_node_serialize(H5F_t *f, H5G_node_t *sym, size_t size, uint8_t *buf);
 static size_t H5G_node_size_real(const H5F_t *f);
-static herr_t H5G_node_shared_free(void *shared);
 
 /* Metadata cache callbacks */
 static H5G_node_t *H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata1,
@@ -145,12 +144,6 @@ H5FL_DEFINE_STATIC(H5G_node_t);
 
 /* Declare a free list to manage sequences of H5G_entry_t's */
 H5FL_SEQ_DEFINE_STATIC(H5G_entry_t);
-
-/* Declare a free list to manage the native key offset sequence information */
-H5FL_SEQ_DEFINE_STATIC(size_t);
-
-/* Declare a free list to manage the raw page information */
-H5FL_BLK_DEFINE_STATIC(grp_page);
 
 
 /*-------------------------------------------------------------------------
@@ -1590,39 +1583,26 @@ herr_t
 H5G_node_init(H5F_t *f)
 {
     H5B_shared_t *shared;               /* Shared B-tree node info */
-    size_t	u;                      /* Local index variable */
+    size_t	sizeof_rkey;	        /* Size of raw (disk) key	     */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_node_init, FAIL);
 
     /* Check arguments. */
-    assert(f);
+    HDassert(f);
 
-    /* Allocate space for the shared structure */
-    if(NULL==(shared=H5FL_MALLOC(H5B_shared_t)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for shared B-tree info")
+    /* Set the raw key size */
+    sizeof_rkey = H5F_SIZEOF_SIZE(f);	/*name offset */
 
-    /* Set up the "global" information for this file's groups */
-    shared->type= H5B_SNODE;
-    shared->two_k=2*H5F_KVALUE(f,H5B_SNODE);
-    shared->sizeof_rkey = H5F_SIZEOF_SIZE(f);	/*the name offset */
-    assert(shared->sizeof_rkey);
-    shared->sizeof_rnode = H5B_nodesize(f, shared, &shared->sizeof_keys);
-    assert(shared->sizeof_rnode);
-    if(NULL==(shared->page=H5FL_BLK_MALLOC(grp_page,shared->sizeof_rnode)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")
-#ifdef H5_CLEAR_MEMORY
-HDmemset(shared->page, 0, shared->sizeof_rnode);
-#endif /* H5_CLEAR_MEMORY */
-    if(NULL==(shared->nkey=H5FL_SEQ_MALLOC(size_t,(size_t)(2*H5F_KVALUE(f,H5B_SNODE)+1))))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree page")
+    /* Allocate & initialize global info for the shared structure */
+    if(NULL == (shared = H5B_shared_new(f, H5B_SNODE, sizeof_rkey)))
+	HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, FAIL, "memory allocation failed for shared B-tree info")
 
-    /* Initialize the offsets into the native key buffer */
-    for(u=0; u<(2*H5F_KVALUE(f,H5B_SNODE)+1); u++)
-        shared->nkey[u]=u*H5B_SNODE->sizeof_nkey;
+    /* Set up the "local" information for this file's groups */
+        /* <none> */
 
     /* Make shared B-tree info reference counted */
-    if(NULL==(f->shared->grp_btree_shared=H5RC_create(shared,H5G_node_shared_free)))
+    if(NULL == (f->shared->grp_btree_shared = H5RC_create(shared, H5B_shared_free)))
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create ref-count wrapper for shared B-tree info")
 
 done:
@@ -1659,40 +1639,6 @@ H5G_node_close(const H5F_t *f)
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 } /* end H5G_node_close */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_node_shared_free
- *
- * Purpose:	Free B-tree shared info
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *              Thursday, July  8, 2004
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5G_node_shared_free (void *_shared)
-{
-    H5B_shared_t *shared = (H5B_shared_t *)_shared;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_shared_free)
-
-    /* Free the raw B-tree node buffer */
-    H5FL_BLK_FREE(grp_page,shared->page);
-
-    /* Free the B-tree native key offsets buffer */
-    H5FL_SEQ_FREE(size_t,shared->nkey);
-
-    /* Free the shared B-tree info */
-    H5FL_FREE(H5B_shared_t,shared);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5G_node_shared_free() */
 
 
 /*-------------------------------------------------------------------------

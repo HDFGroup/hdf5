@@ -326,6 +326,10 @@ typedef struct H5O_efl_t {
  */
 #define H5O_LAYOUT_NDIMS	(H5S_MAX_RANK+1)
 
+/* Forward declaration of structs used below */
+struct H5D_layout_ops_t;                /* Defined in H5Dpkg.h               */
+struct H5D_chunk_ops_t;                 /* Defined in H5Dpkg.h               */
+
 typedef struct H5O_layout_contig_t {
     haddr_t	addr;			/* File address of data              */
     hsize_t     size;                   /* Size of data in bytes             */
@@ -337,6 +341,7 @@ typedef struct H5O_layout_chunk_t {
     uint32_t	dim[H5O_LAYOUT_NDIMS];	/* Size of chunk in elements         */
     uint32_t    size;                   /* Size of chunk in bytes            */
     H5RC_t     *btree_shared;           /* Ref-counted info for B-tree nodes */
+    const struct H5D_chunk_ops_t *ops;  /* Pointer to chunked layout operations */
 } H5O_layout_chunk_t;
 
 typedef struct H5O_layout_compact_t {
@@ -348,6 +353,7 @@ typedef struct H5O_layout_compact_t {
 typedef struct H5O_layout_t {
     H5D_layout_t type;			/* Type of layout                    */
     unsigned version;                   /* Version of message                */
+    const struct H5D_layout_ops_t *ops; /* Pointer to data layout I/O operations */
     union {
         H5O_layout_contig_t contig;     /* Information for contiguous layout */
         H5O_layout_chunk_t chunk;       /* Information for chunked layout    */

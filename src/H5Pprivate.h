@@ -59,7 +59,7 @@ H5_DLL herr_t H5P_init(void);
 H5_DLL herr_t H5P_close(void *_plist);
 H5_DLL hid_t H5P_create_id(H5P_genclass_t *pclass);
 H5_DLL hid_t H5P_copy_plist(H5P_genplist_t *old_plist);
-H5_DLL herr_t H5P_get(H5P_genplist_t *plist, const char *name, void *value);
+H5_DLL herr_t H5P_get(const H5P_genplist_t *plist, const char *name, void *value);
 H5_DLL herr_t H5P_set(H5P_genplist_t *plist, const char *name, const void *value);
 H5_DLL herr_t H5P_insert(H5P_genplist_t *plist, const char *name, size_t size,
     void *value, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,

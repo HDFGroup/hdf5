@@ -710,17 +710,21 @@ H5D_set_io_ops(H5D_t *dataset)
     switch(dataset->shared->layout.type) {
         case H5D_CONTIGUOUS:
             if(dataset->shared->dcpl_cache.efl.nused > 0)
-                dataset->shared->layout_ops = H5D_LOPS_EFL;
+                dataset->shared->layout.ops = H5D_LOPS_EFL;
             else
-                dataset->shared->layout_ops = H5D_LOPS_CONTIG;
+                dataset->shared->layout.ops = H5D_LOPS_CONTIG;
             break;
 
         case H5D_CHUNKED:
-            dataset->shared->layout_ops = H5D_LOPS_CHUNK;
+            dataset->shared->layout.ops = H5D_LOPS_CHUNK;
+
+            /* Set the chunk operations */
+            /* (Only "istore" indexing type currently supported */
+            dataset->shared->layout.u.chunk.ops = H5D_COPS_ISTORE;
             break;
 
         case H5D_COMPACT:
-            dataset->shared->layout_ops = H5D_LOPS_COMPACT;
+            dataset->shared->layout.ops = H5D_LOPS_COMPACT;
             break;
 
         default:
@@ -831,6 +835,7 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
     /* Create an object header for the dataset */
     if(H5O_create(file, dxpl_id, ohdr_size, dset->shared->dcpl_id, oloc/*out*/) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset object header")
+    HDassert(file == dset->oloc.file);
 
     /* Get a pointer to the object header itself */
     if((oh = H5O_protect(oloc, dxpl_id)) == NULL)
@@ -877,7 +882,7 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
      * allocation until later.
      */
     if(fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY)
-        if(H5D_alloc_storage(file, dxpl_id, dset, H5D_ALLOC_CREATE, FALSE) < 0)
+        if(H5D_alloc_storage(dset, dxpl_id, H5D_ALLOC_CREATE, FALSE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage")
 
     /* Update external storage message, if it's used */
@@ -1000,13 +1005,10 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
 {
     const H5T_t         *type;                  /* Datatype for dataset */
     H5D_t		*new_dset = NULL;
-    int		        i, ndims;
-    unsigned            chunk_ndims = 0;        /* Dimensionality of chunk */
     H5P_genplist_t 	*dc_plist = NULL;       /* New Property list */
     hbool_t             has_vl_type = FALSE;    /* Flag to indicate a VL-type for dataset */
-    hbool_t             chunk_init = FALSE;     /* Flag to indicate that chunk information was initialized */
+    hbool_t             layout_init = FALSE;    /* Flag to indicate that chunk information was initialized */
     H5G_loc_t           dset_loc;               /* Dataset location */
-    unsigned		u;                      /* Local index variable */
     H5D_t		*ret_value;             /* Return value */
 
     FUNC_ENTER_NOAPI(H5D_create, NULL)
@@ -1101,10 +1103,6 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
         if(IS_H5FD_MPI(file) && pline->nused > 0)
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, NULL, "Parallel I/O does not support filters yet")
 
-        /* Chunked datasets are non-default, so retrieve their info here */
-        if(H5P_get(dc_plist, H5D_CRT_CHUNK_DIM_NAME, &chunk_ndims) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve chunk dimensions")
-
         /* Get the dataset's external file list information */
         if(H5P_get(dc_plist, H5D_CRT_EXT_FILE_LIST_NAME, &new_dset->shared->dcpl_cache.efl) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve external file list")
@@ -1125,139 +1123,16 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     if(IS_H5FD_MPI(file))
         new_dset->shared->dcpl_cache.fill.alloc_time = H5D_ALLOC_TIME_EARLY;
 
-    switch(new_dset->shared->layout.type) {
-        case H5D_CONTIGUOUS:
-            {
-                hssize_t tmp_size;                      /* Temporary holder for raw data size */
-                hsize_t	dim[H5O_LAYOUT_NDIMS];	        /* Current size of data in elements */
-                hsize_t	max_dim[H5O_LAYOUT_NDIMS];      /* Maximum size of data in elements */
-
-                /*
-                 * The maximum size of the dataset cannot exceed the storage size.
-                 * Also, only the slowest varying dimension of a simple data space
-                 * can be extendible (currently only for external data storage).
-                 */
-                new_dset->shared->layout.u.contig.addr = HADDR_UNDEF;        /* Initialize to no address */
-
-                if((ndims = H5S_get_simple_extent_dims(new_dset->shared->space, dim, max_dim)) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize contiguous storage")
-                for(i = 1; i < ndims; i++)
-                    if(max_dim[i] > dim[i])
-                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "only the first dimension can be extendible")
-                if(new_dset->shared->dcpl_cache.efl.nused > 0) {
-                    hsize_t max_points = H5S_get_npoints_max(new_dset->shared->space);
-                    hsize_t max_storage = H5O_efl_total_size(&new_dset->shared->dcpl_cache.efl);
-
-                    if(H5S_UNLIMITED == max_points) {
-                        if(H5O_EFL_UNLIMITED != max_storage)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unlimited data space but finite storage")
-                    } else if(max_points * H5T_get_size(type) < max_points) {
-                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "data space * type size overflowed")
-                    } else if(max_points * H5T_get_size(type) > max_storage) {
-                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "data space size exceeds external storage size")
-                    }
-                } /* end if */
-                else {
-                    if(ndims > 0 && max_dim[0] > dim[0])
-                        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, NULL, "extendible contiguous non-external dataset")
-                } /* end else */
-
-                /* Compute the total size of a chunk */
-                tmp_size = H5S_GET_EXTENT_NPOINTS(new_dset->shared->space) * H5T_get_size(new_dset->shared->type);
-                H5_ASSIGN_OVERFLOW(new_dset->shared->layout.u.contig.size, tmp_size, hssize_t, hsize_t);
-
-                /* Get the sieve buffer size for this dataset */
-                new_dset->shared->cache.contig.sieve_buf_size = H5F_SIEVE_BUF_SIZE(file);
-            } /* end case */
-            break;
-
-        case H5D_CHUNKED:
-            {
-                hsize_t	max_dim[H5O_LAYOUT_NDIMS];      /* Maximum size of data in elements */
-                uint64_t chunk_size;                    /* Size of chunk in bytes */
-
-                /* Set up layout information */
-                if((ndims = H5S_GET_EXTENT_NDIMS(new_dset->shared->space)) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "unable to get rank")
-                new_dset->shared->layout.u.chunk.ndims = (unsigned)ndims + 1;
-                HDassert((unsigned)(new_dset->shared->layout.u.chunk.ndims) <= NELMTS(new_dset->shared->layout.u.chunk.dim));
-
-                /* Initialize to no address */
-                new_dset->shared->layout.u.chunk.addr = HADDR_UNDEF;
-
-                /*
-                 * Chunked storage allows any type of data space extension, so we
-                 * don't even bother checking.
-                 */
-                if(chunk_ndims != (unsigned)ndims)
-                    HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "dimensionality of chunks doesn't match the data space")
-                if(new_dset->shared->dcpl_cache.efl.nused > 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "external storage not supported with chunked layout")
-
-                /*
-                 * The chunk size of a dimension with a fixed size cannot exceed
-                 * the maximum dimension size
-                 */
-                if(H5P_get(dc_plist, H5D_CRT_CHUNK_SIZE_NAME, new_dset->shared->layout.u.chunk.dim) < 0)
-                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve chunk size")
-                new_dset->shared->layout.u.chunk.dim[new_dset->shared->layout.u.chunk.ndims-1] = H5T_get_size(new_dset->shared->type);
-
-                if(H5S_get_simple_extent_dims(new_dset->shared->space, NULL, max_dim) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to query maximum dimensions")
-                for(u = 0; u < new_dset->shared->layout.u.chunk.ndims - 1; u++)
-                    if(max_dim[u] != H5S_UNLIMITED && max_dim[u] < new_dset->shared->layout.u.chunk.dim[u])
-                        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "chunk size must be <= maximum dimension size for fixed-sized dimensions")
-
-                /* Compute the total size of a chunk */
-                /* (Use 64-bit value to ensure that we can detect >4GB chunks) */
-                for(u = 1, chunk_size = (uint64_t)new_dset->shared->layout.u.chunk.dim[0]; u < new_dset->shared->layout.u.chunk.ndims; u++)
-                    chunk_size *= (uint64_t)new_dset->shared->layout.u.chunk.dim[u];
-
-                /* Check for chunk larger than can be represented in 32-bits */
-                /* (Chunk size is encoded in 32-bit value in v1 B-tree records) */
-                if(chunk_size > (uint64_t)0xffffffff)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "chunk size must be < 4GB")
-
-                /* Retain computed chunk size */
-                H5_ASSIGN_OVERFLOW(new_dset->shared->layout.u.chunk.size, chunk_size, uint64_t, uint32_t);
-
-                /* Initialize the chunk cache for the dataset */
-                if(H5D_istore_init(file, new_dset) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't initialize chunk cache")
-
-                /* Indicate that the chunk information was initialized */
-                chunk_init = TRUE;
-            } /* end case */
-            break;
-
-        case H5D_COMPACT:
-            {
-                hssize_t tmp_size;      /* Temporary holder for raw data size */
-                hsize_t	comp_data_size;
-
-                /*
-                 * Compact dataset is stored in dataset object header message of
-                 * layout.
-                 */
-                tmp_size = H5S_GET_EXTENT_NPOINTS(space) * H5T_get_size(new_dset->shared->type);
-                H5_ASSIGN_OVERFLOW(new_dset->shared->layout.u.compact.size, tmp_size, hssize_t, size_t);
-
-                /* Verify data size is smaller than maximum header message size
-                 * (64KB) minus other layout message fields.
-                 */
-                comp_data_size = H5O_MESG_MAX_SIZE - H5O_layout_meta_size(file, &(new_dset->shared->layout));
-                if(new_dset->shared->layout.u.compact.size > comp_data_size)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "compact dataset size is bigger than header message maximum size")
-            } /* end case */
-            break;
-
-        default:
-            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, NULL, "not implemented yet")
-    } /* end switch */ /*lint !e788 All appropriate cases are covered */
-
     /* Set the dataset's I/O operations */
     if(H5D_set_io_ops(new_dset) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize I/O operations")
+
+    /* Create the layout information for the new dataset */
+    if((new_dset->shared->layout.ops->new)(file, dxpl_id, new_dset, dc_plist) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize layout information")
+
+    /* Indicate that the layout information was initialized */
+    layout_init = TRUE;
 
     /* Update the dataset's object header info. */
     if(H5D_update_oh_info(file, dxpl_id, new_dset) != SUCCEED)
@@ -1277,8 +1152,8 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
 done:
     if(!ret_value && new_dset && new_dset->shared) {
         if(new_dset->shared) {
-            if(new_dset->shared->layout.type == H5D_CHUNKED && chunk_init) {
-                if(H5D_istore_dest(new_dset,H5AC_dxpl_id) < 0)
+            if(new_dset->shared->layout.type == H5D_CHUNKED && layout_init) {
+                if(H5D_chunk_dest(file, dxpl_id, new_dset) < 0)
                     HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, NULL, "unable to destroy chunk cache")
             } /* end if */
             if(new_dset->shared->space) {
@@ -1482,6 +1357,30 @@ H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read data layout message")
     if(H5P_set(plist, H5D_CRT_LAYOUT_NAME, &dataset->shared->layout.type) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set layout")
+
+    /* Get the external file list message, which might not exist.  Space is
+     * also undefined when space allocate time is H5D_ALLOC_TIME_LATE. */
+    if((dataset->shared->layout.type == H5D_CONTIGUOUS && !H5F_addr_defined(dataset->shared->layout.u.contig.addr))
+            || (dataset->shared->layout.type == H5D_CHUNKED && !H5F_addr_defined(dataset->shared->layout.u.chunk.addr))) {
+        if((msg_exists = H5O_msg_exists(&(dataset->oloc), H5O_EFL_ID, dxpl_id)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if message exists")
+        if(msg_exists) {
+            /* Retrieve the EFL  message */
+            if(NULL == H5O_msg_read(&(dataset->oloc), H5O_EFL_ID, &dataset->shared->dcpl_cache.efl, dxpl_id))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve message")
+
+            /* Set the EFL info in the property list */
+            if(H5P_set(plist, H5D_CRT_EXT_FILE_LIST_NAME, &dataset->shared->dcpl_cache.efl) < 0)
+            	HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set external file list")
+
+            /* Set the dataset's I/O operations */
+            dataset->shared->layout.ops = H5D_LOPS_EFL;
+        } /* end if */
+    } /* end if */
+
+    /* Sanity check that the layout operations are set up */
+    HDassert(dataset->shared->layout.ops);
+
     switch(dataset->shared->layout.type) {
         case H5D_CONTIGUOUS:
             /* Compute the size of the contiguous storage for versions of the
@@ -1516,7 +1415,7 @@ H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
                      HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set chunk size")
 
                 /* Initialize the chunk cache for the dataset */
-                if(H5D_istore_init(dataset->oloc.file, dataset) < 0)
+                if(H5D_chunk_init(dataset->oloc.file, dxpl_id, dataset) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize chunk cache")
             }
             break;
@@ -1584,27 +1483,6 @@ H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set allocation time state")
     } /* end if */
 
-    /* Get the external file list message, which might not exist.  Space is
-     * also undefined when space allocate time is H5D_ALLOC_TIME_LATE. */
-    if((dataset->shared->layout.type == H5D_CONTIGUOUS && !H5F_addr_defined(dataset->shared->layout.u.contig.addr))
-            || (dataset->shared->layout.type == H5D_CHUNKED && !H5F_addr_defined(dataset->shared->layout.u.chunk.addr))) {
-        if((msg_exists = H5O_msg_exists(&(dataset->oloc), H5O_EFL_ID, dxpl_id)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if message exists")
-        if(msg_exists) {
-            /* Retrieve the EFL  message */
-            if(NULL == H5O_msg_read(&(dataset->oloc), H5O_EFL_ID, &dataset->shared->dcpl_cache.efl, dxpl_id))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve message")
-
-            /* Set the EFL info in the property list */
-            if(H5P_set(plist, H5D_CRT_EXT_FILE_LIST_NAME, &dataset->shared->dcpl_cache.efl) < 0)
-            	HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set external file list")
-        } /* end if */
-    } /* end if */
-
-    /* Set the dataset's I/O operations */
-    if(H5D_set_io_ops(dataset) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize I/O operations")
-
     /*
      * Make sure all storage is properly initialized.
      * This is important only for parallel I/O where the space must
@@ -1614,7 +1492,7 @@ H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
             && ((dataset->shared->layout.type == H5D_CONTIGUOUS && !H5F_addr_defined(dataset->shared->layout.u.contig.addr))
                 || (dataset->shared->layout.type == H5D_CHUNKED && !H5F_addr_defined(dataset->shared->layout.u.chunk.addr)))
             && IS_H5FD_MPI(dataset->oloc.file)) {
-        if(H5D_alloc_storage(dataset->oloc.file, dxpl_id, dataset, H5D_ALLOC_OPEN, FALSE) < 0)
+        if(H5D_alloc_storage(dataset, dxpl_id, H5D_ALLOC_OPEN, FALSE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file storage")
     } /* end if */
 
@@ -1671,9 +1549,9 @@ H5D_close(H5D_t *dataset)
     HDassert(dataset->shared->fo_count >0);
 
     /* Dump debugging info */
-#ifdef H5D_ISTORE_DEBUG
-    H5D_istore_stats(dataset, FALSE);
-#endif /* H5F_ISTORE_DEBUG */
+#ifdef H5D_CHUNK_DEBUG
+    H5D_chunk_stats(dataset, FALSE);
+#endif /* H5D_CHUNK_DEBUG */
 
     dataset->shared->fo_count--;
     if(dataset->shared->fo_count == 0) {
@@ -1714,7 +1592,7 @@ H5D_close(H5D_t *dataset)
                 } /* end if */
 
                 /* Flush and destroy chunks in the cache */
-                if(H5D_istore_dest(dataset, H5AC_dxpl_id) < 0)
+                if(H5D_chunk_dest(dataset->oloc.file, H5AC_dxpl_id, dataset) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy chunk cache")
                 break;
 
@@ -1899,10 +1777,11 @@ H5D_get_file(const H5D_t *dset)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_alloc_storage(H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_alloc_t time_alloc,
+H5D_alloc_storage(H5D_t *dset/*in,out*/, hid_t dxpl_id, H5D_time_alloc_t time_alloc,
     hbool_t full_overwrite)
 {
-    struct H5O_layout_t *layout;        /* The dataset's layout information */
+    H5F_t *f = dset->oloc.file;         /* The dataset's file pointer */
+    H5O_layout_t *layout;               /* The dataset's layout information */
     hbool_t must_init_space = FALSE;    /* Flag to indicate that space should be initialized */
     hbool_t addr_set = FALSE;           /* Flag to indicate that the dataset's storage address was set */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -1910,8 +1789,8 @@ H5D_alloc_storage(H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_alloc
     FUNC_ENTER_NOAPI_NOINIT(H5D_alloc_storage)
 
     /* check args */
-    HDassert(f);
     HDassert(dset);
+    HDassert(f);
 
     /* If the data is stored in external files, don't set an address for the layout
      * We assume that external storage is already
@@ -1925,7 +1804,7 @@ H5D_alloc_storage(H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_alloc
             case H5D_CONTIGUOUS:
                 if(!H5F_addr_defined(layout->u.contig.addr)) {
                     /* Reserve space in the file for the entire array */
-                    if(H5D_contig_create(f, dxpl_id, layout/*out*/) < 0)
+                    if(H5D_contig_alloc(f, dxpl_id, layout/*out*/) < 0)
                         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to initialize contiguous storage")
 
                     /* Indicate that we set the storage addr */
@@ -1939,7 +1818,7 @@ H5D_alloc_storage(H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_alloc
             case H5D_CHUNKED:
                 if(!H5F_addr_defined(layout->u.chunk.addr)) {
                     /* Create the root of the B-tree that describes chunked storage */
-                    if(H5D_istore_create(f, dxpl_id, layout/*out*/) < 0)
+                    if(H5D_chunk_create(dset /*in,out*/, dxpl_id) < 0)
                         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to initialize chunked storage")
 
                     /* Indicate that we set the storage addr */
@@ -2079,7 +1958,7 @@ H5D_init_storage(H5D_t *dset, hbool_t full_overwrite, hid_t dxpl_id)
              * Allocate file space
              * for all chunks now and initialize each chunk with the fill value.
              */
-            if(H5D_istore_allocate(dset, dxpl_id, full_overwrite) < 0)
+            if(H5D_chunk_allocate(dset, dxpl_id, full_overwrite) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to allocate all chunks of dataset")
             break;
 
@@ -2122,7 +2001,8 @@ H5D_get_storage_size(H5D_t *dset, hid_t dxpl_id)
             if(dset->shared->layout.u.chunk.addr == HADDR_UNDEF)
                 ret_value = 0;
             else
-                ret_value = H5D_istore_allocated(dset, dxpl_id);
+                if(H5D_chunk_allocated(dset, dxpl_id, &ret_value) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't retrieve chunked dataset allocated size")
             break;
 
         case H5D_CONTIGUOUS:
@@ -2428,7 +2308,7 @@ done:
  * Function:	H5D_set_extent
  *
  * Purpose:	Based on H5D_extend, allows change to a lower dimension,
- *		calls H5S_set_extent and H5D_istore_prune_by_extent instead
+ *		calls H5S_set_extent and H5D_chunk_prune_by_extent instead
  *
  * Return:	Non-negative on success, negative on failure
  *
@@ -2491,12 +2371,12 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
          */
         /* Update the index values for the cached chunks for this dataset */
         if(H5D_CHUNKED == dset->shared->layout.type)
-            if(H5D_istore_update_cache(dset, dxpl_id) < 0)
+            if(H5D_chunk_update_cache(dset, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update cached chunk indices")
 
 	/* Allocate space for the new parts of the dataset, if appropriate */
         if(expand && dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_EARLY)
-            if(H5D_alloc_storage(dset->oloc.file, dxpl_id, dset, H5D_ALLOC_EXTEND, FALSE) < 0)
+            if(H5D_alloc_storage(dset, dxpl_id, H5D_ALLOC_EXTEND, FALSE) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset storage")
 
 
@@ -2506,24 +2386,9 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
          *-------------------------------------------------------------------------
          */
         if(shrink && H5D_CHUNKED == dset->shared->layout.type) {
-            H5D_io_info_t io_info;              /* Dataset I/O info */
-            H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
-            H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
-
-            /* Fill the DXPL cache values for later use */
-            if(H5D_get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
-
-            /* Construct dataset I/O info */
-            H5D_BUILD_IO_INFO_RD(&io_info, dset, dxpl_cache, dxpl_id, NULL, NULL);
-
             /* Remove excess chunks */
-            if(H5D_istore_prune_by_extent(&io_info, curr_dims) < 0)
+            if(H5D_chunk_prune_by_extent(dset, dxpl_id, curr_dims) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to remove chunks ")
-
-            /* Reset the elements outsize the new dimensions, but in existing chunks */
-            if(H5D_istore_initialize_by_extent(&io_info) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to initialize chunks ")
         } /* end if */
 
         /* Mark the dataspace as dirty, for later writing to the file */
@@ -2611,7 +2476,7 @@ H5D_flush_real(H5D_t *dataset, hid_t dxpl_id, unsigned flags)
 
         case H5D_CHUNKED:
             /* Flush the raw data cache */
-            if(H5D_istore_flush(dataset, dxpl_id, flags & H5F_FLUSH_INVALIDATE) < 0)
+            if(H5D_chunk_flush(dataset, dxpl_id, flags & H5F_FLUSH_INVALIDATE) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush raw data cache")
             break;
 

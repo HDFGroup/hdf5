@@ -200,7 +200,7 @@ main(int argc, char *argv[])
                 } /* end if */
 
                 ndims = (unsigned)extra;
-                status = H5D_istore_debug (f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, ndims);
+                status = H5D_istore_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, ndims);
                 break;
 
             default:

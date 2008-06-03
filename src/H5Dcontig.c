@@ -61,6 +61,8 @@
 /********************/
 
 /* Layout operation callbacks */
+static herr_t H5D_contig_new(H5F_t *f, hid_t dxpl_id, H5D_t *dset,
+    const H5P_genplist_t *dc_plist);
 static herr_t H5D_contig_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
     H5D_chunk_map_t *cm);
@@ -76,6 +78,7 @@ static herr_t H5D_contig_write_one(H5D_io_info_t *io_info, hsize_t offset,
 
 /* Contiguous storage layout I/O ops */
 const H5D_layout_ops_t H5D_LOPS_CONTIG[1] = {{
+    H5D_contig_new,
     H5D_contig_io_init,
     H5D_contig_read,
     H5D_contig_write,
@@ -102,7 +105,7 @@ H5FL_BLK_EXTERN(type_conv);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_contig_create
+ * Function:	H5D_contig_alloc
  *
  * Purpose:	Allocate file space for a contiguously stored dataset
  *
@@ -114,11 +117,11 @@ H5FL_BLK_EXTERN(type_conv);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_contig_create(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout /*out */ )
+H5D_contig_alloc(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout /*out */ )
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_contig_create, FAIL)
+    FUNC_ENTER_NOAPI(H5D_contig_alloc, FAIL)
 
     /* check args */
     HDassert(f);
@@ -130,7 +133,7 @@ H5D_contig_create(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout /*out */ )
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_contig_create */
+} /* end H5D_contig_alloc */
 
 
 /*-------------------------------------------------------------------------
@@ -352,6 +355,63 @@ H5D_contig_get_addr(const H5D_t *dset)
 
     FUNC_LEAVE_NOAPI(dset->shared->layout.u.contig.addr)
 } /* end H5D_contig_get_addr */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_contig_new
+ *
+ * Purpose:	Constructs new contiguous layout information for dataset
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, May 22, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+static herr_t
+H5D_contig_new(H5F_t *f, hid_t UNUSED dxpl_id, H5D_t *dset,
+    const H5P_genplist_t UNUSED *dc_plist)
+{
+    const H5T_t *type = dset->shared->type;     /* Convenience pointer to dataset's datatype */
+    hssize_t tmp_size;                  /* Temporary holder for raw data size */
+    hsize_t dim[H5O_LAYOUT_NDIMS];	/* Current size of data in elements */
+    hsize_t max_dim[H5O_LAYOUT_NDIMS];  /* Maximum size of data in elements */
+    int ndims;                          /* Rank of dataspace */
+    int i;                              /* Local index variable */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_contig_new)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(dset);
+
+    /*
+     * The maximum size of the dataset cannot exceed the storage size.
+     * Also, only the slowest varying dimension of a simple data space
+     * can be extendible (currently only for external data storage).
+     */
+    dset->shared->layout.u.contig.addr = HADDR_UNDEF;        /* Initialize to no address */
+
+    /* Check for invalid dataset dimensions */
+    if((ndims = H5S_get_simple_extent_dims(dset->shared->space, dim, max_dim)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize contiguous storage")
+    for(i = 0; i < ndims; i++)
+        if(max_dim[i] > dim[i])
+            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "extendible contiguous non-external dataset")
+
+    /* Compute the total size of dataset */
+    tmp_size = H5S_GET_EXTENT_NPOINTS(dset->shared->space) * H5T_get_size(type);
+    H5_ASSIGN_OVERFLOW(dset->shared->layout.u.contig.size, tmp_size, hssize_t, hsize_t);
+
+    /* Get the sieve buffer size for this dataset */
+    dset->shared->cache.contig.sieve_buf_size = H5F_SIEVE_BUF_SIZE(f);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_contig_new() */
 
 
 /*-------------------------------------------------------------------------
@@ -1137,7 +1197,7 @@ H5D_contig_copy(H5F_t *f_src, const H5O_layout_t *layout_src, H5F_t *f_dst,
     HDassert(dt_src);
 
     /* Allocate space for destination raw data */
-    if(H5D_contig_create(f_dst, dxpl_id, layout_dst) < 0)
+    if(H5D_contig_alloc(f_dst, dxpl_id, layout_dst) < 0)
         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to allocate contiguous storage")
 
     /* Set up number of bytes to copy, and initial buffer size */

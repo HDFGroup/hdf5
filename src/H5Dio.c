@@ -392,7 +392,7 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
                 || dataset->shared->layout.type == H5D_COMPACT);
 
     /* Call storage method's I/O initialization routine */
-    if(io_info.layout_ops.init && (*io_info.layout_ops.init)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
+    if(io_info.layout_ops.io_init && (*io_info.layout_ops.io_init)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
     io_op_init = TRUE;
 
@@ -408,7 +408,7 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 
 done:
     /* Shut down the I/O op information */
-    if(io_op_init && io_info.layout_ops.term && (*io_info.layout_ops.term)(&fm) < 0)
+    if(io_op_init && io_info.layout_ops.io_term && (*io_info.layout_ops.io_term)(&fm) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
 #ifdef H5_HAVE_PARALLEL
     /* Shut down io_info struct */
@@ -553,7 +553,7 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
             full_overwrite = (hsize_t)file_nelmts == nelmts ? TRUE : FALSE;
 
  	/* Allocate storage */
-        if(H5D_alloc_storage(dataset->oloc.file, dxpl_id, dataset, H5D_ALLOC_WRITE, full_overwrite) < 0)
+        if(H5D_alloc_storage(dataset, dxpl_id, H5D_ALLOC_WRITE, full_overwrite) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage")
     } /* end if */
 
@@ -567,7 +567,7 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 #endif /*H5_HAVE_PARALLEL*/
 
     /* Call storage method's I/O initialization routine */
-    if(io_info.layout_ops.init && (*io_info.layout_ops.init)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
+    if(io_info.layout_ops.io_init && (*io_info.layout_ops.io_init)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
     io_op_init = TRUE;
 
@@ -598,7 +598,7 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 
 done:
     /* Shut down the I/O op information */
-    if(io_op_init && io_info.layout_ops.term && (*io_info.layout_ops.term)(&fm) < 0)
+    if(io_op_init && io_info.layout_ops.io_term && (*io_info.layout_ops.io_term)(&fm) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
 #ifdef H5_HAVE_PARALLEL
     /* Shut down io_info struct */
@@ -646,11 +646,11 @@ H5D_ioinfo_init(H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     io_info->store = store;
 
     /* Set I/O operations to initial values */
-    io_info->layout_ops = *dset->shared->layout_ops;
+    io_info->layout_ops = *dset->shared->layout.ops;
 
     /* Set the "high-level" I/O operations for the dataset */
-    io_info->io_ops.multi_read = dset->shared->layout_ops->ser_read;
-    io_info->io_ops.multi_write = dset->shared->layout_ops->ser_write;
+    io_info->io_ops.multi_read = dset->shared->layout.ops->ser_read;
+    io_info->io_ops.multi_write = dset->shared->layout.ops->ser_write;
 
     /* Set the I/O operations for reading/writing single blocks on disk */
     if(type_info->is_xform_noop && type_info->is_conv_noop) {
@@ -887,8 +887,8 @@ H5D_ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset,
         /* Check if we can use the optimized parallel I/O routines */
         if(opt == TRUE) {
             /* Override the I/O op pointers to the MPI-specific routines */
-            io_info->io_ops.multi_read = dset->shared->layout_ops->par_read;
-            io_info->io_ops.multi_write = dset->shared->layout_ops->par_write;
+            io_info->io_ops.multi_read = dset->shared->layout.ops->par_read;
+            io_info->io_ops.multi_write = dset->shared->layout.ops->par_write;
             io_info->io_ops.single_read = H5D_mpio_select_read;
             io_info->io_ops.single_write = H5D_mpio_select_write;
         } /* end if */
