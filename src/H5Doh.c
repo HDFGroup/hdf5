@@ -361,7 +361,7 @@ H5O_dset_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
 
     /* Check for chunked dataset storage */
     if((layout.type == H5D_CHUNKED) && H5F_addr_defined(layout.u.chunk.addr))
-        if(H5D_istore_bh_info(f, dxpl_id, &layout, &(bh_info->index_size)) < 0)
+        if(H5D_chunk_bh_info(f, dxpl_id, &layout, &(bh_info->index_size)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't determine chunked dataset btree info")
 
 done:

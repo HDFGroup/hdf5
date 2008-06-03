@@ -67,9 +67,6 @@ typedef struct H5G_gnba_iter_t {
 /* Declare extern the PQ free list for the wrapped strings */
 H5FL_BLK_EXTERN(str_buf);
 
-/* Declare the free list to manage haddr_t's */
-H5FL_DEFINE_STATIC(haddr_t);
-
 /* PRIVATE PROTOTYPES */
 static htri_t H5G_common_path(const H5RS_str_t *fullpath_r, const H5RS_str_t *prefix_r);
 static H5RS_str_t *H5G_build_fullpath(const char *prefix, const char *name);

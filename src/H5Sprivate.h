@@ -196,7 +196,9 @@ H5_DLL herr_t H5S_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream
 H5_DLL int H5S_extend(H5S_t *space, const hsize_t *size);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
+/* Operations on dataspace extents */
 H5_DLL hsize_t H5S_extent_nelem(const H5S_extent_t *ext);
+H5_DLL htri_t H5S_extent_equal(const H5S_t *ds1, const H5S_t *ds2);
 
 /* Operations on selections */
 H5_DLL herr_t H5S_select_deserialize(H5S_t *space, const uint8_t *buf);

@@ -43,7 +43,6 @@ static herr_t H5S_set_extent_simple (H5S_t *space, unsigned rank,
 static htri_t H5S_is_simple(const H5S_t *sdim);
 static herr_t H5S_encode(H5S_t *obj, unsigned char *buf, size_t *nalloc);
 static H5S_t *H5S_decode(const unsigned char *buf);
-static htri_t H5S_extent_equal(const H5S_t *ds1, const H5S_t *ds2);
 
 #ifdef H5_HAVE_PARALLEL
 /* Global vars whose value can be set from environment variable also */
@@ -1933,7 +1932,7 @@ done:
  DESCRIPTION
 	Compare two dataspaces if their extents are identical.
 --------------------------------------------------------------------------*/
-static htri_t
+htri_t
 H5S_extent_equal(const H5S_t *ds1, const H5S_t *ds2)
 {
     unsigned u;                 /* Local index variable */

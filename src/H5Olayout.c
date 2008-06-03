@@ -136,10 +136,29 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
         p += 5;
 
         /* Address */
-        if(mesg->type == H5D_CONTIGUOUS)
+        if(mesg->type == H5D_CONTIGUOUS) {
             H5F_addr_decode(f, &p, &(mesg->u.contig.addr));
-        else if(mesg->type == H5D_CHUNKED)
+
+            /* Set the layout operations */
+            mesg->ops = H5D_LOPS_CONTIG;
+        } /* end if */
+        else if(mesg->type == H5D_CHUNKED) {
             H5F_addr_decode(f, &p, &(mesg->u.chunk.addr));
+
+            /* Set the layout operations */
+            mesg->ops = H5D_LOPS_CHUNK;
+
+            /* Set the chunk operations */
+            /* (Only "istore" indexing type currently supported */
+            mesg->u.chunk.ops = H5D_COPS_ISTORE;
+        } /* end if */
+        else {
+            /* Sanity check */
+            HDassert(mesg->type == H5D_COMPACT);
+
+            /* Set the layout operations */
+            mesg->ops = H5D_LOPS_COMPACT;
+        } /* end else */
 
         /* Read the size */
         if(mesg->type != H5D_CHUNKED) {
@@ -185,11 +204,17 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
                     HDmemcpy(mesg->u.compact.buf, p, mesg->u.compact.size);
                     p += mesg->u.compact.size;
                 } /* end if */
+
+                /* Set the layout operations */
+                mesg->ops = H5D_LOPS_COMPACT;
                 break;
 
             case H5D_CONTIGUOUS:
                 H5F_addr_decode(f, &p, &(mesg->u.contig.addr));
                 H5F_DECODE_LENGTH(f, p, mesg->u.contig.size);
+
+                /* Set the layout operations */
+                mesg->ops = H5D_LOPS_CONTIG;
                 break;
 
             case H5D_CHUNKED:
@@ -208,6 +233,13 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
                 /* Compute chunk size */
                 for(u = 1, mesg->u.chunk.size = mesg->u.chunk.dim[0]; u < mesg->u.chunk.ndims; u++)
                     mesg->u.chunk.size *= mesg->u.chunk.dim[u];
+
+                /* Set the layout operations */
+                mesg->ops = H5D_LOPS_CHUNK;
+
+                /* Set the chunk operations */
+                /* (Only "istore" indexing type currently supported */
+                mesg->u.chunk.ops = H5D_COPS_ISTORE;
                 break;
 
             default:
@@ -576,8 +608,8 @@ H5O_layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh, void *_mesg)
             break;
 
         case H5D_CHUNKED:       /* Chunked blocks on disk */
-            /* Free the file space for the raw data */
-            if(H5D_istore_delete(f, dxpl_id, mesg) < 0)
+            /* Free the file space for the index & chunk raw data */
+            if(H5D_chunk_delete(f, dxpl_id, mesg) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free raw data")
             break;
 
@@ -670,7 +702,7 @@ H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
                 layout_dst->u.chunk.addr = HADDR_UNDEF;
 
                 /* create chunked layout */
-                if(H5D_istore_copy(file_src, layout_src, file_dst, layout_dst, udata->src_dtype, cpy_info, udata->src_pline, dxpl_id) < 0)
+                if(H5D_chunk_copy(file_src, layout_src, file_dst, layout_dst, udata->src_dtype, cpy_info, udata->src_pline, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL, "unable to copy chunked storage")
 
                 /* Freed by copy routine */
