@@ -1262,6 +1262,7 @@
 ./tools/testfiles/tdset-1.ls
 ./tools/testfiles/tgroup-1.ls
 ./tools/testfiles/tgroup-2.ls
+./tools/testfiles/tgroup-3.ls
 ./tools/testfiles/tgroup.ls
 ./tools/testfiles/thlink-1.ls
 ./tools/testfiles/tloop-1.ls

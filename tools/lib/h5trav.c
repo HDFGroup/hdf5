@@ -39,6 +39,7 @@ typedef struct {
 typedef struct {
     trav_addr_t *seen;              /* List of addresses seen already */
     const trav_visitor_t *visitor;  /* Information for visiting each link/object */
+    hbool_t is_absolute;            /* Whether the traversal has absolute paths */
 } trav_ud_traverse_t;
 
 typedef struct {
@@ -139,13 +140,19 @@ traverse_cb(hid_t loc_id, const char *path, const H5L_info_t *linfo,
     void *_udata)
 {
     trav_ud_traverse_t *udata = (trav_ud_traverse_t *)_udata;     /* User data */
-    char *full_name;
+    char *new_name = NULL;
+    const char *full_name;
     const char *already_visited = NULL; /* Whether the link/object was already visited */
 
     /* Create the full path name for the link */
-    full_name = HDmalloc(HDstrlen(path) + 2);
-    *full_name = '/';
-    HDstrcpy(full_name + 1, path);
+    if(udata->is_absolute) {
+        new_name = HDmalloc(HDstrlen(path) + 2);
+        *new_name = '/';
+        HDstrcpy(new_name + 1, path);
+        full_name = new_name;
+    } /* end if */
+    else
+        full_name = path;
 
     /* Perform the correct action for different types of links */
     if(linfo->type == H5L_TYPE_HARD) {
@@ -172,7 +179,8 @@ traverse_cb(hid_t loc_id, const char *path, const H5L_info_t *linfo,
             (*udata->visitor->visit_lnk)(full_name, linfo, udata->visitor->udata);
     } /* end else */
 
-    HDfree(full_name);
+    if(new_name)
+        HDfree(new_name);
 
     return(H5_ITER_CONT);
 } /* end traverse_cb() */
@@ -222,6 +230,7 @@ traverse(hid_t file_id, const char *grp_name, hbool_t visit_start,
         /* Set up user data structure */
         udata.seen = &seen;
         udata.visitor = visitor;
+        udata.is_absolute = (*grp_name == '/');
 
         /* Check for iteration of links vs. visiting all links recursively */
         if(recurse) {
@@ -580,32 +589,6 @@ h5trav_getindext(const char *name, const trav_table_t *table)
 
     return -1;
 }
-
-/*-------------------------------------------------------------------------
- * Function: trav_table_search
- *
- * Purpose: Search in the table for OBJNO
- *
- * Return: index of object in table
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: November 4, 2002
- *
- *-------------------------------------------------------------------------
- */
-
-static size_t
-trav_table_search(const trav_table_t *table, haddr_t objno)
-{
-    size_t i;
-
-    for(i = 0; i < table->nobjs; i++)
-        if(table->objs[i].objno == objno)
-            return(i);
-    return(i);
-}
-
 
 /*-------------------------------------------------------------------------
  * Function: trav_table_add

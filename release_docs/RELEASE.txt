@@ -107,7 +107,8 @@ Bug Fixes since HDF5-1.8.1
 
         Tools
         -----
-        - None
+        - Fixed bug in h5ls that prevented relative group listings (like
+            "h5ls foo.h5/bar") from working correctly (QAK - 2008/06/03)
 
         F90 API
         ------

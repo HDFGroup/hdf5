@@ -33,8 +33,8 @@
 
 /* Struct to pass through to visitors */
 typedef struct {
-    hid_t fid;                          /* File ID */
     const char *fname;                  /* Filename */
+    hid_t gid;                          /* Group ID */
 }iter_t;
 
 /* Command-line switches */
@@ -1687,7 +1687,7 @@ list_obj(const char *name, const H5O_info_t *oinfo, const char *first_seen, void
         /* Open the object.  Not all objects can be opened.  If this is the case
          * then return right away.
          */
-        if(obj_type >= 0 && (obj = H5Oopen(iter->fid, name, H5P_DEFAULT)) < 0) {
+        if(obj_type >= 0 && (obj = H5Oopen(iter->gid, name, H5P_DEFAULT)) < 0) {
             printf(" *ERROR*\n");
             goto done;
         } /* end if */
@@ -1779,7 +1779,7 @@ list_lnk(const char *name, const H5L_info_t *linfo, void *_iter)
             if((buf = HDmalloc(linfo->u.val_size)) == NULL)
                 goto done;
 
-            if(H5Lget_val(iter->fid, name, buf, linfo->u.val_size, H5P_DEFAULT) < 0) {
+            if(H5Lget_val(iter->gid, name, buf, linfo->u.val_size, H5P_DEFAULT) < 0) {
                 HDfree(buf);
                 goto done;
             } /* end if */
@@ -1796,7 +1796,7 @@ list_lnk(const char *name, const H5L_info_t *linfo, void *_iter)
             if((buf = HDmalloc(linfo->u.val_size)) == NULL)
                 goto done;
 
-            if(H5Lget_val(iter->fid, name, buf, linfo->u.val_size, H5P_DEFAULT) < 0) {
+            if(H5Lget_val(iter->gid, name, buf, linfo->u.val_size, H5P_DEFAULT) < 0) {
                 HDfree(buf);
                 goto done;
             } /* end if */
@@ -2164,7 +2164,7 @@ main(int argc, const char *argv[])
 
             /* Shorten the file name; lengthen the object name */
             x = oname;
-            oname = strrchr(fname, '/');
+            oname = HDstrrchr(fname, '/');
             if(x)
                 *x = '/';
             if(!oname)
@@ -2185,7 +2185,7 @@ main(int argc, const char *argv[])
 
         /* Remember the file information for later */
         iter.fname = fname;
-        iter.fid = file;
+        iter.gid = -1;
 
         /* Check for root group as object name */
         if(HDstrcmp(oname, root_name)) {
@@ -2209,13 +2209,28 @@ main(int argc, const char *argv[])
             } /* end if */
 
             /* Check for group iteration */
-            if(H5O_TYPE_GROUP == oi.type && !grp_literal_g)
+            if(H5O_TYPE_GROUP == oi.type && !grp_literal_g) {
+                /* Get ID for group */
+                if((iter.gid = H5Gopen2(file, oname, H5P_DEFAULT)) < 0) {
+                    fprintf(stderr, "%s: unable to open '%s' as group\n", fname, oname);
+                    continue;
+                } /* end if */
+
                 /* Specified name is a group. List the complete contents of the group. */
                 h5trav_visit(file, oname, display_root_g, recursive_g, list_obj, list_lnk, &iter);
-            else
+
+                /* Close group */
+                H5Gclose(iter.gid);
+            } /* end if */
+            else {
+                /* Use file ID for root group ID */
+                iter.gid = file;
+
                 /* Specified name is a non-group object -- list that object */
                 list_obj(oname, &oi, NULL, &iter);
-        } else
+            } /* end else */
+        } /* end if */
+        else
             /* Specified name is not for object -- list that link */
             list_lnk(oname, &li, &iter);
         H5Fclose(file);
@@ -2223,5 +2238,5 @@ main(int argc, const char *argv[])
     } /* end while */
 
     leave(0);
-}
+} /* end main() */
 
