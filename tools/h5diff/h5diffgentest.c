@@ -40,6 +40,7 @@
 #define FILE8    "h5diff_dset2.h5"
 #define FILE9    "h5diff_hyper1.h5"
 #define FILE10   "h5diff_hyper2.h5"
+#define FILE11   "h5diff_empty.h5"
 #define UIMAX    4294967295u /*Maximum value for a variable of type unsigned int */
 #define STR_SIZE 3
 #define GBLL    ((unsigned long_long) 1024 * 1024 *1024 )
@@ -71,7 +72,7 @@ const H5L_class_t UD_link_class[1] = {{
  */
 
 /* tests called in main() */
-static int test_basic(const char *fname1,const char *fname2);
+static int test_basic(const char *fname1, const char *fname2, const char *fname3);
 static int test_types(const char *fname);
 static int test_datatypes(const char *fname);
 static int test_attributes(const char *fname,int make_diffs);
@@ -96,7 +97,7 @@ static int write_dset(hid_t loc_id,int rank,hsize_t *dims,const char *name,hid_t
 
 int main(void) 
 {
-    if ( test_basic (FILE1,FILE2) < 0 )
+    if (test_basic(FILE1, FILE2, FILE11) < 0 )
         goto out;
 
     test_types (FILE3);
@@ -122,19 +123,29 @@ out:
 /*-------------------------------------------------------------------------
  * Function: test_basic
  *
- * Purpose: basic tests
+ * Purpose: Create basic test files, first two contains different data, the
+ * third one is just an empty file.
  *
  *-------------------------------------------------------------------------
  */
 
 static
-int test_basic(const char *fname1,
-               const char *fname2)
+int test_basic(const char *fname1, const char *fname2, const char *fname3)
 {
     hid_t   fid1, fid2;
     hid_t   gid1, gid2, gid3;
     hsize_t dims1[1] = { 6 };
     hsize_t dims2[2] = { 3,2 };
+
+    /* create the empty file */
+    if ((fid1=H5Fcreate(fname3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0){
+	fprintf(stderr, "empty file (%s) creation failed.\n", fname3);
+        goto out;
+    }
+    if (H5Fclose(fid1) < 0){
+	fprintf(stderr, "empty file (%s) close failed.\n", fname3);
+        goto out;
+    }
 
    /*-------------------------------------------------------------------------
     * create two files
