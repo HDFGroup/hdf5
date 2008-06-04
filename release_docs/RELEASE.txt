@@ -108,6 +108,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - Fixed bug in h5ls that prevented relative group listings (like
+            "h5ls foo.h5/bar") from working correctly (QAK - 2008/06/03)
         - Fixed bug in h5diff that prevented datasets & attributes with
             variable-length string elements from comparing correctly.
             (QAK - 2008/02/28)
