@@ -1858,9 +1858,14 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
                 break;
     }
 
-    indent += COL;
-    H5Aiterate(did, NULL, dump_attr, NULL);
-    indent -= COL;
+    if ( !bin_output )
+    {
+        
+        indent += COL;
+        H5Aiterate(did, NULL, dump_attr, NULL);
+        indent -= COL;
+        
+    }
     H5Tclose(type);
     H5Sclose(space);
     H5Pclose(dcpl_id);
