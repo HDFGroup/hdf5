@@ -497,7 +497,7 @@ typedef struct {
  */
  
  /* Use platform-specific versions if necessary */
-#include "win32defs.h"
+#include "H5win32defs.h"
 
 #ifndef HDabort
     #define HDabort()		abort()
