@@ -27,7 +27,7 @@ if BUILD_PARALLEL_CONDITIONAL
   bin_PROGRAMS=h5perf
   TEST_PROG_PARA=h5perf perf
 else
-  bin_PROGRAMS=h5perf h5perf_serial
+  bin_PROGRAMS=h5perf_serial
 endif
 
 # Some programs are not built or run by default, but can be built by hand or by
