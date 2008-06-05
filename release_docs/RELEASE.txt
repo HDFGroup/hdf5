@@ -109,6 +109,10 @@ Bug Fixes since HDF5-1.8.1
         -----
         - Fixed bug in h5ls that prevented relative group listings (like
             "h5ls foo.h5/bar") from working correctly (QAK - 2008/06/03)
+        - h5dump: when doing binary output (-b), the stdout printing of attributes 
+           was done incorrectly. Removed printing of attributes when doing binary 
+           output. PVN - 2008/06/05
+
 
         F90 API
         ------
