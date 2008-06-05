@@ -5554,7 +5554,7 @@ error:
 static void
 gent_binary(void)
 {
- hid_t    fid, sid, did;
+ hid_t    fid, sid, did, aid;
  hsize_t  dims[1]  = {6};
  int      ibuf[6]  = {1,2,3,4,5,6};
  float    fbuf[6]  = {1,2,3,4,5,6};
@@ -5587,6 +5587,9 @@ gent_binary(void)
  */
  did = H5Dcreate2(fid, "double", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
  H5Dwrite(did, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dbuf);
+ /* create an attribute */
+ aid = H5Acreate2(did, "attr", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, H5P_DEFAULT);
+ H5Aclose(aid);
  H5Dclose(did);
  
 
