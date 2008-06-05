@@ -2067,13 +2067,18 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
 
     indent += COL;
 
-    /* attribute iteration: if there is a request to do H5_INDEX_CRT_ORDER and tracking order is set
-    in the group for attributes, then, sort by creation order, otherwise by name */
-    
-    if( (sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED))
-        H5Aiterate2(did, sort_by, sort_order, NULL, dump_attr_cb, NULL);
-    else
-        H5Aiterate2(did, H5_INDEX_NAME, sort_order, NULL, dump_attr_cb, NULL);
+    if ( !bin_output )
+    {
+        
+       /* attribute iteration: if there is a request to do H5_INDEX_CRT_ORDER and tracking order is set
+        in the group for attributes, then, sort by creation order, otherwise by name */
+        
+        if( (sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED))
+            H5Aiterate2(did, sort_by, sort_order, NULL, dump_attr_cb, NULL);
+        else
+            H5Aiterate2(did, H5_INDEX_NAME, sort_order, NULL, dump_attr_cb, NULL);
+        
+    }
 
     indent -= COL;
 
