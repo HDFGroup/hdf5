@@ -258,7 +258,7 @@ test_fill(size_t nx, size_t ny, size_t nz,
 
 				if (acc != ref_value) {
 				    puts("*FAILED*");
-				    if (!isatty(1)) {
+				    if (!HDisatty(1)) {
 					/*
 					 * Print debugging info unless output
 					 * is going directly to a terminal.
@@ -504,7 +504,7 @@ test_copy(int mode,
 			    }
 			    if (acc != ref_value) {
 				puts("*FAILED*");
-				if (!isatty(1)) {
+				if (!HDisatty(1)) {
 				    /*
 				     * Print debugging info unless output is
 				     * going directly to a terminal.
@@ -547,7 +547,7 @@ test_copy(int mode,
 			    if (acc+(unsigned)dx*(unsigned)dy*(unsigned)dz !=
 				ref_value + nx*ny*nz) {
 				puts("*FAILED*");
-				if (!isatty(1)) {
+				if (!HDisatty(1)) {
 				    /*
 				     * Print debugging info unless output is
 				     * going directly to a terminal.
@@ -675,7 +675,7 @@ test_multifill(size_t nx)
 	}
 	if (s[0]) {
 	    puts("*FAILED*");
-	    if (!isatty(1)) {
+	    if (!HDisatty(1)) {
 		AT();
 		printf("   fill={%d,%g,%d}\n   ",
 		       fill.left, fill.mid, fill.right);
@@ -757,7 +757,7 @@ test_endian(size_t nx)
 	for (j = 0; j < 4; j++) {
 	    if (src[i * 4 + j] != dst[i * 4 + 3 - j]) {
 		puts("*FAILED*");
-		if (!isatty(1)) {
+		if (!HDisatty(1)) {
 		    /*
 		     * Print debugging info unless output is going directly
 		     * to a terminal.
@@ -851,7 +851,7 @@ test_transpose(size_t nx, size_t ny)
 	for (j = 0; j < ny; j++) {
 	    if (src[i * ny + j] != dst[j * nx + i]) {
 		puts("*FAILED*");
-		if (!isatty(1)) {
+		if (!HDisatty(1)) {
 		    AT();
 		    printf("   diff at i=%lu, j=%lu\n",
 			   (unsigned long)i, (unsigned long)j);
@@ -948,7 +948,7 @@ test_sub_super(size_t nx, size_t ny)
 	for (j = 0; j < ny; j++) {
 	    if (full[4 * i * ny + 2 * j] != half[i * ny + j]) {
 		puts("*FAILED*");
-		if (!isatty(1)) {
+		if (!HDisatty(1)) {
 		    AT();
 		    printf("   full[%lu][%lu] != half[%lu][%lu]\n",
 			   (unsigned long)i*2,
@@ -1025,7 +1025,7 @@ test_sub_super(size_t nx, size_t ny)
 	    }
 	    if (s[0]) {
 		puts("*FAILED*");
-		if (!isatty(1)) {
+		if (!HDisatty(1)) {
 		    AT();
 		    printf("   %s\n   Half is:\n", s);
 		    print_array(half, nx, ny, (size_t)1);
@@ -1409,7 +1409,7 @@ main(int argc, char *argv[])
     if (nerrors) {
 	printf("***** %d HYPERSLAB TEST%s FAILED! *****\n",
 	       nerrors, 1 == nerrors ? "" : "S");
-	if (isatty(1)) {
+	if (HDisatty(1)) {
 	    printf("(Redirect output to a pager or a file to see "
 		   "debug output)\n");
 	}

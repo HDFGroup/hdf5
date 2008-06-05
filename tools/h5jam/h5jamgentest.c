@@ -321,7 +321,7 @@ gent_ub(const char * filename, size_t ub_size, size_t ub_fill)
 
 	HDwrite(fd, buf, ub_size);
 
-	close(fd);
+	HDclose(fd);
   }
 }
 
@@ -349,7 +349,7 @@ create_textfile(const char *name, size_t size)
 
     HDwrite(fd, buf, size);
 
-    close(fd);
+    HDclose(fd);
 }
 
 #ifdef notdef
@@ -375,7 +375,7 @@ create_binfile(char *name, off_t size)
 
     HDwrite(fd,buf,size);
 
-    close(fd);
+    HDclose(fd);
 }
 #endif
 

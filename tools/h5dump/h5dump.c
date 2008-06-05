@@ -4185,7 +4185,7 @@ main(int argc, const char *argv[])
                 char * ns;
                 char *indx;
 
-                ns = strdup(xmlnsprefix);
+                ns = HDstrdup(xmlnsprefix);
                 indx = strrchr(ns,(int)':');
                 if (indx) *indx = '\0';
 
