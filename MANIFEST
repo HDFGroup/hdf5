@@ -741,6 +741,7 @@
 ./src/Makefile.in
 ./src/hdf5.h
 ./src/libhdf5.settings.in
+./src/win32defs.h
 
 ./test/COPYING
 ./test/Makefile.am

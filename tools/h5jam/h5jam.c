@@ -119,13 +119,13 @@ parse_command_line (int argc, const char *argv[])
       switch ((char) opt)
 	{
 	case 'o':
-	  output_file = strdup (opt_arg);
+	  output_file = HDstrdup (opt_arg);
 	  break;
 	case 'i':
-	  input_file = strdup (opt_arg);
+	  input_file = HDstrdup (opt_arg);
 	  break;
 	case 'u':
-	  ub_file = strdup (opt_arg);
+	  ub_file = HDstrdup (opt_arg);
 	  break;
 	case 'c':
 	  do_clobber = TRUE;
@@ -342,9 +342,9 @@ main (int argc, const char *argv[])
   where = write_pad (ofid, where);
 
 
-  close (ufid);
-  close (h5fid);
-  close (ofid);
+  HDclose (ufid);
+  HDclose (h5fid);
+  HDclose (ofid);
 
   return d_status;
 }

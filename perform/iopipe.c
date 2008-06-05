@@ -326,9 +326,9 @@ printf("Before getrusage() call\n");
     for (i=0; i<nwrite; i++) {
 	putc (PROGRESS, stderr);
 	fflush (stderr);
-	offset = lseek (fd, (off_t)0, SEEK_SET);
+	offset = HDlseek (fd, (off_t)0, SEEK_SET);
 	assert (0==offset);
-	n = write (fd, the_data, (size_t)(size[0]*size[1]));
+	n = HDwrite (fd, the_data, (size_t)(size[0]*size[1]));
 	assert (n>=0 && (size_t)n==size[0]*size[1]);
     }
 #ifdef H5_HAVE_GETRUSAGE
@@ -405,9 +405,9 @@ printf("Before getrusage() call\n");
     for (i=0; i<nread; i++) {
 	putc (PROGRESS, stderr);
 	fflush (stderr);
-	offset = lseek (fd, (off_t)0, SEEK_SET);
+	offset = HDlseek (fd, (off_t)0, SEEK_SET);
 	assert (0==offset);
-	n = read (fd, the_data, (size_t)(size[0]*size[1]));
+	n = HDread (fd, the_data, (size_t)(size[0]*size[1]));
 	assert (n>=0 && (size_t)n==size[0]*size[1]);
     }
 #ifdef H5_HAVE_GETRUSAGE

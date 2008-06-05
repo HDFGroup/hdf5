@@ -1731,11 +1731,11 @@ test_compound_10(void)
 
     for(i=0; i<ARRAY_DIM; i++) {
         wdata[i].i1 = i*10+i;
-        wdata[i].str = strdup("C string A");
+        wdata[i].str = HDstrdup("C string A");
         wdata[i].str[9] += i;
         wdata[i].i2 = i*1000+i*10;
 
-        wdata[i].text.p   = (void*)strdup("variable-length text A\0");
+        wdata[i].text.p   = (void*)HDstrdup("variable-length text A\0");
         len = wdata[i].text.len = strlen((char*)wdata[i].text.p)+1;
         ((char*)(wdata[i].text.p))[len-2] += i;
         ((char*)(wdata[i].text.p))[len-1] = '\0';

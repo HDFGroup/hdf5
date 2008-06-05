@@ -56,26 +56,26 @@ same_contents (const char *name1, const char *name2)
     ssize_t	n1, n2;
     char	buf1[1024], buf2[1024];
 
-    fd1 = open (name1, O_RDONLY);
-    fd2 = open (name2, O_RDONLY);
+    fd1 = HDopen(name1, O_RDONLY, 0666);
+    fd2 = HDopen(name2, O_RDONLY, 0666);
     assert (fd1>=0 && fd2>=0);
 
     while (1) {
-	n1 = read (fd1, buf1, sizeof(buf1));
-	n2 = read (fd2, buf2, sizeof(buf2));
+	n1 = HDread(fd1, buf1, sizeof(buf1));
+	n2 = HDread(fd2, buf2, sizeof(buf2));
 	assert (n1>=0 && (size_t)n1<=sizeof(buf1));
 	assert (n2>=0 && (size_t)n2<=sizeof(buf2));
 	assert (n1==n2);
 
 	if (n1<=0 && n2<=0) break;
 	if (memcmp (buf1, buf2, (size_t)n1)) {
-	    close (fd1);
-	    close (fd2);
+	    HDclose(fd1);
+	    HDclose(fd2);
 	    return 0;
 	}
     }
-    close (fd1);
-    close (fd2);
+    HDclose(fd1);
+    HDclose(fd2);
     return 1;
 }
 
@@ -619,15 +619,15 @@ test_2 (hid_t fapl)
 	    part[j] = (int)(i*25+j);
 	}
 	sprintf (filename, "extern_%lua.raw", (unsigned long)i+1);
-	fd = HDopen (filename, O_RDWR|O_CREAT|O_TRUNC, 0666);
+	fd = HDopen(filename, O_RDWR|O_CREAT|O_TRUNC, 0666);
 	assert (fd>=0);
 /*	n = lseek (fd, (off_t)(i*10), SEEK_SET);
 */
-	n = write(fd,temparray,(size_t)i*10);
+	n = HDwrite(fd,temparray,(size_t)i*10);
 	assert (n>=0 && (size_t)n==i*10);
-	n = write (fd, part, sizeof(part));
+	n = HDwrite(fd, part, sizeof(part));
 	assert (n==sizeof(part));
-	close (fd);
+	HDclose(fd);
     }
 
     /*
@@ -752,14 +752,14 @@ test_3 (hid_t fapl)
     /* Make sure the output files are fresh*/
     for (i=1; i<=4; i++) {
 	sprintf(filename, "extern_%db.raw", i);
-	if ((fd= open(filename, O_RDWR|O_CREAT|O_TRUNC, 0666)) < 0) {
+	if ((fd= HDopen(filename, O_RDWR|O_CREAT|O_TRUNC, 0666)) < 0) {
 	    H5_FAILED();
 	    printf("    cannot open %s: %s\n", filename, strerror(errno));
 	    goto error;
 	}
 
-	write(fd, temparray, (i-1)*10);
-	close (fd);
+	HDwrite(fd, temparray, (i-1)*10);
+	HDclose(fd);
     }
 
     /* Create the dataset */

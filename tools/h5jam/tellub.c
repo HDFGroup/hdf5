@@ -148,7 +148,7 @@ main (int argc, const char *argv[])
       return (EXIT_FAILURE);
     }
 
-  ifname = strdup (argv[opt_ind]);
+  ifname = HDstrdup (argv[opt_ind]);
 
   testval = H5Fis_hdf5 (ifname);
 
