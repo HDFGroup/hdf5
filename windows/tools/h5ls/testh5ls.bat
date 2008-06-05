@@ -160,6 +160,7 @@ rem ############################################################################
     call :tooltest tall-1.ls 0 -w80 tall.h5
     call :tooltest tall-2.ls 0 -w80 -r -d tall.h5
     call :tooltest tgroup.ls 0 -w80 tgroup.h5
+    call :tooltest tgroup-3.ls 0 -w80 tgroup.h5/g1
 
     rem test for displaying groups
     call :tooltest tgroup-1.ls 1 -w80 -r -g tgroup.h5
