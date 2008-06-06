@@ -118,7 +118,7 @@ typedef struct H5C2_t H5C2_t;
  *
  *	The typedef for the deserialize callback is as follows:
  *
- * 	   typedef void *(*H5C_deserialize_func_t)(haddr_t addr,
+ * 	   typedef void *(*H5C2_deserialize_func_t)(haddr_t addr,
  * 	                                           size_t len,
  *                                                 const void * image_ptr,
  *                                                 void * udata_ptr,
@@ -450,7 +450,8 @@ typedef herr_t (*H5C2_image_len_func_t)(void *thing,
 #define H5C2__SERIALIZE_RESIZED_FLAG	0x1
 #define H5C2__SERIALIZE_RENAMED_FLAG	0x2
 
-typedef herr_t (*H5C2_serialize_func_t)(haddr_t addr,
+typedef herr_t (*H5C2_serialize_func_t)(const H5F_t *f,
+                                        haddr_t addr,
                                         size_t len,
                                         void * image_ptr,
                                         void * thing,
@@ -1341,7 +1342,7 @@ H5_DLL herr_t H5C2_expunge_entry(H5F_t *              f,
                                  const H5C2_class_t * type,
                                  haddr_t              addr);
 
-H5_DLL herr_t H5C2_flush_cache(H5F_t *f,
+H5_DLL herr_t H5C2_flush_cache(const H5F_t *f,
 		               hid_t dxpl_id,
                                unsigned flags);
 
@@ -1555,11 +1556,6 @@ H5_DLL herr_t H5C2_jb__trunc(H5C2_jbrb_t * struct_ptr);
 
 H5_DLL herr_t H5C2_jb__takedown(H5C2_jbrb_t * struct_ptr);
 
-H5_DLL herr_t H5C2_jb__reconfigure(H5C2_jbrb_t * struct_ptr,
-                                   size_t new_buf_size,
-                                   int new_num_bufs,
-                                   hbool_t new_use_aio);
-
 H5_DLL herr_t H5C2_jb__bin2hex(const uint8_t * buf,
                                char * hexdata,
                                size_t * hexlength,
@@ -1574,11 +1570,11 @@ H5_DLL herr_t H5C2_check_for_journaling(H5F_t * f,
 		                        H5C2_t * cache_ptr,
                                         hbool_t journal_recovered);
 
-H5_DLL herr_t H5C2_create_journal_config_block(H5F_t *f,
+H5_DLL herr_t H5C2_create_journal_config_block(const H5F_t *f,
                                            hid_t dxpl_id,
                                            const char * journal_file_name_ptr);
 
-H5_DLL herr_t H5C2_discard_journal_config_block(H5F_t * f,
+H5_DLL herr_t H5C2_discard_journal_config_block(const H5F_t * f,
                                                 hid_t dxpl_id);
 
 H5_DLL herr_t H5C2_get_journaling_in_progress(const H5F_t * f,

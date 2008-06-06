@@ -1240,7 +1240,7 @@ struct H5C2_t
     H5C2_cache_entry_t *	jwipl_tail_ptr;
     
     hbool_t			mdj_startup_pending;
-    H5F_t * 			mdj_startup_f;
+    H5F_t * 		        mdj_startup_f;
     hid_t                       mdj_startup_dxpl_id;
     char *			mdj_startup_jrnl_file_name;
     size_t			mdj_startup_buf_size;

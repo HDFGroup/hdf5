@@ -1151,7 +1151,8 @@ serialize(haddr_t addr,
 } /* serialize() */
 
 herr_t 
-pico_serialize(haddr_t addr,
+pico_serialize(const H5F_t UNUSED *f,
+               haddr_t addr,
                size_t len,
                void * image_ptr,
                void * thing,
@@ -1166,7 +1167,8 @@ pico_serialize(haddr_t addr,
 }
 
 herr_t 
-nano_serialize(haddr_t addr,
+nano_serialize(const H5F_t UNUSED *f,
+               haddr_t addr,
                size_t len,
                void * image_ptr,
                void * thing,
@@ -1181,7 +1183,8 @@ nano_serialize(haddr_t addr,
 }
 
 herr_t 
-micro_serialize(haddr_t addr,
+micro_serialize(const H5F_t UNUSED *f,
+               haddr_t addr,
                 size_t len,
                 void * image_ptr,
                 void * thing,
@@ -1196,7 +1199,8 @@ micro_serialize(haddr_t addr,
 }
 
 herr_t 
-tiny_serialize(haddr_t addr,
+tiny_serialize(const H5F_t UNUSED *f,
+               haddr_t addr,
                size_t len,
                void * image_ptr,
                void * thing,
@@ -1211,7 +1215,8 @@ tiny_serialize(haddr_t addr,
 }
 
 herr_t 
-small_serialize(haddr_t addr,
+small_serialize(const H5F_t UNUSED *f,
+               haddr_t addr,
                 size_t len,
                 void * image_ptr,
                 void * thing,
@@ -1226,7 +1231,8 @@ small_serialize(haddr_t addr,
 }
 
 herr_t 
-medium_serialize(haddr_t addr,
+medium_serialize(const H5F_t UNUSED *f,
+               haddr_t addr,
                  size_t len,
                  void * image_ptr,
                  void * thing,
@@ -1241,7 +1247,8 @@ medium_serialize(haddr_t addr,
 }
 
 herr_t 
-large_serialize(haddr_t addr,
+large_serialize(const H5F_t UNUSED *f,
+               haddr_t addr,
                 size_t len,
                 void * image_ptr,
                 void * thing,
@@ -1256,7 +1263,8 @@ large_serialize(haddr_t addr,
 }
 
 herr_t 
-huge_serialize(haddr_t addr,
+huge_serialize(const H5F_t UNUSED *f,
+               haddr_t addr,
                size_t len,
                void * image_ptr,
                void * thing,
@@ -1271,7 +1279,8 @@ huge_serialize(haddr_t addr,
 }
 
 herr_t 
-monster_serialize(haddr_t addr,
+monster_serialize(const H5F_t UNUSED *f,
+               haddr_t addr,
                   size_t len,
                   void * image_ptr,
                   void * thing,
@@ -1286,7 +1295,8 @@ monster_serialize(haddr_t addr,
 }
 
 herr_t 
-variable_serialize(haddr_t addr,
+variable_serialize(const H5F_t UNUSED *f,
+               haddr_t addr,
                    size_t len,
                    void * image_ptr,
                    void * thing,

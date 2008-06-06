@@ -3088,41 +3088,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_addr_encode_len
- *
- * Purpose:	Encodes an address into the buffer pointed to by *PP and
- *		then increments the pointer to the first byte after the
- *		address.  An undefined value is stored as all 1's.
- *
- * Return:	void
- *
- * Programmer:	Robb Matzke
- *		Friday, November  7, 1997
- *
- *-------------------------------------------------------------------------
- */
-void
-H5F_addr_encode_len(uint8_t **pp/*in,out*/, haddr_t addr, unsigned addr_len)
-{
-    unsigned u;         /* Local index variable */
-
-    HDassert(pp && *pp);
-
-    if(H5F_addr_defined(addr)) {
-	for(u = 0; u < addr_len; u++) {
-	    *(*pp)++ = (uint8_t)(addr & 0xff);
-	    addr >>= 8;
-	} /* end for */
-	assert("overflow" && 0 == addr);
-    } /* end if */
-    else {
-	for(u = 0; u < addr_len; u++)
-	    *(*pp)++ = 0xff;
-    } /* end else */
-} /* end H5F_addr_encode_len() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5F_addr_encode
  *
  * Purpose:	Encodes an address into the buffer pointed to by *PP and
@@ -3142,10 +3107,22 @@ H5F_addr_encode_len(uint8_t **pp/*in,out*/, haddr_t addr, unsigned addr_len)
 void
 H5F_addr_encode(const H5F_t *f, uint8_t **pp/*in,out*/, haddr_t addr)
 {
+    unsigned u;         /* Local index variable */
+
     HDassert(f);
     HDassert(pp && *pp);
 
-    H5F_addr_encode_len(pp, addr, H5F_SIZEOF_ADDR(f));
+    if(H5F_addr_defined(addr)) {
+	for(u = 0; u < H5F_SIZEOF_ADDR(f); u++) {
+	    *(*pp)++ = (uint8_t)(addr & 0xff);
+	    addr >>= 8;
+	} /* end for */
+	assert("overflow" && 0 == addr);
+    } /* end if */
+    else {
+	for(u = 0; u < H5F_SIZEOF_ADDR(f); u++)
+	    *(*pp)++ = 0xff;
+    } /* end else */
 } /* end H5F_addr_encode() */
 
 

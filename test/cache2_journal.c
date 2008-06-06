@@ -286,7 +286,7 @@ copy_file(const char * input_file,
     size_t cur_buf_len;
     const size_t max_buf_len = (8 * 1024);
     size_t input_len;
-    size_t input_remainder;
+    size_t input_remainder = 0;
     ssize_t result;
     int input_file_fd = -1;
     int output_file_fd = -1;
@@ -1595,9 +1595,9 @@ open_exiting_file_for_journaling(const char * hdf_file_name,
     herr_t result;
     H5AC2_cache_config_t mdj_config;
     hid_t fapl_id = -1;
-    hid_t file_id;
-    H5F_t * file_ptr;
-    H5C2_t * cache_ptr;
+    hid_t file_id = -1;
+    H5F_t * file_ptr = NULL;
+    H5C2_t * cache_ptr = NULL;
 
     if ( pass2 )
     {
@@ -1861,10 +1861,10 @@ setup_cache_for_journaling(const char * hdf_file_name,
       /* hbool_t     jbrb_human_readable     = */ TRUE
     };
     hid_t fapl_id = -1;
-    hid_t file_id;
+    hid_t file_id = -1;
     haddr_t actual_base_addr;
-    H5F_t * file_ptr;
-    H5C2_t * cache_ptr;
+    H5F_t * file_ptr = NULL;
+    H5C2_t * cache_ptr = NULL;
 
     if ( pass2 )
     {
@@ -2143,11 +2143,11 @@ verify_journal_contents(const char * journal_file_path_ptr,
     hbool_t verbose = FALSE;
     size_t cur_buf_len;
     const size_t max_buf_len = (8 * 1024);
-    size_t journal_len;
-    size_t expected_len;
+    size_t journal_len = 0;
+    size_t expected_len = 0;
     size_t first_line_len;
-    size_t journal_remainder_len;
-    size_t expected_remainder_len;
+    size_t journal_remainder_len = 0;
+    size_t expected_remainder_len = 0;
     ssize_t read_result;
     int journal_file_fd = -1;
     int expected_file_fd = -1;
@@ -5757,7 +5757,7 @@ check_message_format(void)
 		  checkpoint++, (int)pass2);
 
     /* Fill out verify array with expected messages */
-    sprintf(verify[0], "0 ver_num 1 target_file_name HDF5.file creation_date %010.10s human_readable 1\n", ctime(&current_date));
+    sprintf(verify[0], "0 ver_num 1 target_file_name HDF5.file creation_date %10.10s human_readable 1\n", ctime(&current_date));
     sprintf(verify[1], "1 bgn_trans 1\n");
     sprintf(verify[2], "2 trans_num 1 length 1 base_addr 0x0 body  41 \n");
     sprintf(verify[3], "2 trans_num 1 length 2 base_addr 0x1 body  41 42 \n");
@@ -5913,7 +5913,7 @@ check_message_format(void)
 		  checkpoint++, (int)pass2);
 
     /* Fill out verify array with expected messages */
-    sprintf(verify[0], "0 ver_num 1 target_file_name HDF5.file creation_date %010.10s human_readable 1\n", ctime(&current_date));
+    sprintf(verify[0], "0 ver_num 1 target_file_name HDF5.file creation_date %10.10s human_readable 1\n", ctime(&current_date));
     sprintf(verify[1], "1 bgn_trans 3\n");
     sprintf(verify[2], "2 trans_num 3 length 6 base_addr 0x6faf body  23 31 6e 4e 60 7d \n");
     sprintf(verify[3], "3 end_trans 3\n");

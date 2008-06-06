@@ -32,7 +32,6 @@
 #include "H5Gprivate.h"
 
 /* Other private headers needed by this file */
-#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5B2private.h"	/* v2 B-trees				*/
 #include "H5HFprivate.h"	/* Fractal heaps			*/
 #include "H5HLprivate.h"	/* Local Heaps				*/
@@ -106,7 +105,6 @@ typedef struct H5G_entry_t {
     H5G_cache_t cache;                  /*cached data from object header     */
     size_t      name_off;               /*offset of name within name heap    */
     haddr_t     header;                 /*file address of object header      */
-    H5F_t       *file;                  /*file to which this obj hdr belongs */
 } H5G_entry_t;
 
 /*
@@ -321,9 +319,6 @@ typedef struct {
  */
 H5_DLLVAR H5B_class_t H5B_SNODE[1];
 
-/* The cache subclass */
-H5_DLLVAR const H5AC_class_t H5AC_SNODE[1];
-
 /* The v2 B-tree class for indexing 'name' field on links */
 H5_DLLVAR const H5B2_class_t H5G_BT2_NAME[1];
 
@@ -402,9 +397,9 @@ H5_DLL H5G_obj_t H5G_stab_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx,
 H5_DLL herr_t H5G_ent_copy(H5G_entry_t *dst, const H5G_entry_t *src,
             H5_copy_depth_t depth);
 H5_DLL herr_t H5G_ent_reset(H5G_entry_t *ent);
-H5_DLL herr_t H5G_ent_decode_vec(H5F_t *f, const uint8_t **pp,
+H5_DLL herr_t H5G_ent_decode_vec(const H5F_t *f, const uint8_t **pp,
 				  H5G_entry_t *ent, unsigned n);
-H5_DLL herr_t H5G_ent_encode_vec(H5F_t *f, uint8_t **pp,
+H5_DLL herr_t H5G_ent_encode_vec(const H5F_t *f, uint8_t **pp,
 				  const H5G_entry_t *ent, unsigned n);
 H5_DLL herr_t H5G_ent_convert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap,
     const char *name, const H5O_link_t *lnk, H5G_entry_t *ent);

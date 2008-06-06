@@ -64,7 +64,7 @@
  *-------------------------------------------------------------------------
  */
 haddr_t
-H5MF_alloc(H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
+H5MF_alloc(const H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
 {
     haddr_t	ret_value;
 
@@ -118,7 +118,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MF_xfree(H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size)
+H5MF_xfree(const H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size)
 {
     herr_t      ret_value=SUCCEED;       /* Return value */
 
@@ -234,7 +234,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hbool_t
-H5MF_alloc_overflow(H5F_t *f, hsize_t size)
+H5MF_alloc_overflow(const H5F_t *f, hsize_t size)
 {
     hsize_t space_needed = 0;    /* Accumulator variable */
     size_t c;                    /* Local index variable */

@@ -56,9 +56,8 @@
 /* Metadata cache callbacks */
 static void *H5B_deserialize(haddr_t addr, size_t len, const void *image,
     const void *udata, hbool_t *dirty);
-static herr_t H5B_serialize(haddr_t addr, size_t len, void *image,
-    void *thing, unsigned *flags, haddr_t *new_addr,
-    size_t *new_len, void **new_image);
+static herr_t H5B_serialize(const H5F_t *f, haddr_t addr, size_t len, void *image,
+    void *thing, unsigned *flags, haddr_t *new_addr, size_t *new_len, void **new_image);
 static herr_t H5B_free_icr(haddr_t addr, size_t len, void *thing);
 
 
@@ -66,7 +65,7 @@ static herr_t H5B_free_icr(haddr_t addr, size_t len, void *thing);
 /* Package Variables */
 /*********************/
 
-/* H5B inherits cache-like properties from H5AC */
+/* H5B inherits cache-like properties from H5AC2 */
 const H5AC2_class_t H5AC2_BT[1] = {{
     H5AC2_BT_ID,
     "v1 B-tree",
@@ -203,8 +202,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B_serialize(haddr_t UNUSED addr, size_t UNUSED len, void *image, void *_thing,
-    unsigned *flags, haddr_t UNUSED *new_addr, size_t UNUSED *new_len,
+H5B_serialize(const H5F_t *f, haddr_t UNUSED addr, size_t UNUSED len, void *image,
+    void *_thing, unsigned *flags, haddr_t UNUSED *new_addr, size_t UNUSED *new_len,
     void UNUSED **new_image)
 {
     H5B_t *bt = (H5B_t *)_thing;        /* Pointer to the B-tree node */
@@ -240,8 +239,8 @@ H5B_serialize(haddr_t UNUSED addr, size_t UNUSED len, void *image, void *_thing,
     UINT16ENCODE(p, bt->nchildren);
 
     /* sibling pointers */
-    H5F_addr_encode_len(&p, bt->left, shared->sizeof_addr);
-    H5F_addr_encode_len(&p, bt->right, shared->sizeof_addr);
+    H5F_addr_encode(f, &p, bt->left);
+    H5F_addr_encode(f, &p, bt->right);
 
     /* child keys and pointers */
     native = bt->native;
@@ -253,7 +252,7 @@ H5B_serialize(haddr_t UNUSED addr, size_t UNUSED len, void *image, void *_thing,
         native += shared->type->sizeof_nkey;
 
         /* encode the child address */
-        H5F_addr_encode_len(&p, bt->child[u], shared->sizeof_addr);
+        H5F_addr_encode(f, &p, bt->child[u]);
     } /* end for */
     if(bt->nchildren > 0) {
         /* Encode the final key */

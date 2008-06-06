@@ -1235,18 +1235,22 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
 /* Use this macro for API functions that [could] modify metadata */
 
 #define FUNC_ENTER_API_META(func_name, id, err) {{                            \
-    FUNC_ENTER_API_VARS(func_name)                                            \
-    FUNC_ENTER_COMMON(func_name,H5_IS_API(#func_name));                       \
-    FUNC_ENTER_API_THREADSAFE;                                                \
-    FUNC_ENTER_API_COMMON(func_name,err);		                      \
-    /* Clear thread error stack entering public functions */		      \
-    H5E_clear_stack(NULL);                                                    \
     {                                                                         \
+        /* Metadata journaling variables */                     	      \
         uint64_t trans_num = 0;                                               \
 	H5O_loc_t id_oloc;                                                    \
 	hbool_t do_transaction = FALSE;				              \
 	hbool_t id_oloc_open = FALSE;                                         \
 	hbool_t transaction_begun = FALSE;                                    \
+        /* end - Metadata journaling variables */                     	      \
+                                                                              \
+        FUNC_ENTER_API_VARS(func_name)                                        \
+        FUNC_ENTER_COMMON(func_name,H5_IS_API(#func_name));                   \
+        FUNC_ENTER_API_THREADSAFE;                                            \
+        FUNC_ENTER_API_COMMON(func_name,err);		                      \
+        /* Clear thread error stack entering public functions */	      \
+        H5E_clear_stack(NULL);                                                \
+                                                                              \
 	if (H5AC2_begin_transaction(id, &do_transaction, &id_oloc,            \
 				    &id_oloc_open, &transaction_begun,        \
 				    &trans_num, FUNC) < 0) {                  \

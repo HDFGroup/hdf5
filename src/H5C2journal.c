@@ -951,7 +951,8 @@ H5C2_journal_transaction(H5F_t * f,
 	 */
 	if ( ! ( entry_ptr->image_up_to_date ) ) {
 
-            result = entry_ptr->type->serialize(entry_ptr->addr,
+            result = entry_ptr->type->serialize(f,
+                                                entry_ptr->addr,
                                                 entry_ptr->size,
                                                 entry_ptr->image_ptr,
                                                 (void *)entry_ptr,
@@ -1401,7 +1402,7 @@ done:
  */
 
 herr_t
-H5C2_create_journal_config_block(H5F_t * f,
+H5C2_create_journal_config_block(const H5F_t * f,
                                  hid_t dxpl_id,
                                  const char * journal_file_name_ptr)
 {
@@ -1544,7 +1545,7 @@ done:
  */
 
 herr_t
-H5C2_discard_journal_config_block(H5F_t * f,
+H5C2_discard_journal_config_block(const H5F_t * f,
                                   hid_t dxpl_id)
 {
     H5C2_t * cache_ptr;
@@ -2645,15 +2646,10 @@ H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
     } /* end if */
 
     /* Initialize Fields of H5C2_jbrb_t structure */
-#if 0 /* JRM */ /* initial version */
-    struct_ptr->jname = journal_file_name;
-#else /* JRM */ /* revised version */
     /* this should be modified to check error returns, etc.   Also, should
      * probably do the same with the HDF5 file name.
      */
-    struct_ptr->jname = (char *)H5MM_malloc(strlen(journal_file_name) + 1);
-    HDstrcpy(struct_ptr->jname, journal_file_name);
-#endif /* JRM */
+    struct_ptr->jname = HDstrdup(journal_file_name);
     struct_ptr->hdf5_file_name = HDF5_file_name;
     struct_ptr->buf_size = buf_size;
     struct_ptr->num_bufs = num_bufs;
@@ -2736,7 +2732,7 @@ H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
     /* Format the header message into a temporary buffer */
     HDsnprintf(temp, 
         (size_t)150,
-	"0 ver_num %ld target_file_name %s creation_date %010.10s human_readable %d\n",
+	"0 ver_num %ld target_file_name %s creation_date %10.10s human_readable %d\n",
 	struct_ptr->jvers, 
 	struct_ptr->hdf5_file_name, 
 	ctime(&current_date), 
@@ -2829,7 +2825,7 @@ H5C2_jb__start_transaction(H5C2_jbrb_t * struct_ptr,
 
 	HDsnprintf(temp, 
 	(size_t)150,
-	"0 ver_num %ld target_file_name %s creation_date %010.10s human_readable %d\n",
+	"0 ver_num %ld target_file_name %s creation_date %10.10s human_readable %d\n",
 	    struct_ptr->jvers, 
 	    struct_ptr->hdf5_file_name, 
 	    ctime(&current_date), 
@@ -3407,44 +3403,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5C2_jb__takedown */
-
-
-/******************************************************************************
- *
- * Function:		H5C2_jb__reconfigure
- *
- * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
- *			Wednesday, February 6, 2008
- *
- * Purpose:		Re-configure the specified journal buffer ring buffer
- *			to use the supplied parameters.
- *
- * Returns:		SUCCEED on success.
- *
- ******************************************************************************/
-
-herr_t 
-H5C2_jb__reconfigure(H5C2_jbrb_t * struct_ptr,
-	             size_t new_buf_size,
-                     int new_num_bufs,
-                     hbool_t new_use_aio)
-{
-#if 0 /* body commented out pending implementation */
-    herr_t ret_value = SUCCEED;
-	
-    FUNC_ENTER_NOAPI(H5C2_jb__reconfigure, FAIL)
-
-		/* code */
-		/* code */
-		/* code */
-
-done:
-
-    FUNC_LEAVE_NOAPI(ret_value)
-#else
-    return FAIL;
-#endif
-} /* end H5C2_jb__reconfigure */
 
 
 /******************************************************************************

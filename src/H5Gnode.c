@@ -32,6 +32,7 @@
 
 /* Packages needed by this file... */
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5AC2private.h"	/* Metadata cache #2			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"		/* File access				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
@@ -58,10 +59,10 @@ typedef struct H5G_node_key_t {
  * table or group.
  */
 typedef struct H5G_node_t {
-    H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
-                            /* first field in structure */
-    unsigned nsyms;                     /*number of symbols                  */
-    H5G_entry_t *entry;                 /*array of symbol table entries      */
+    H5AC2_info_t cache_info;    /* Information for H5AC cache functions, _must_ be */
+                                /* first field in structure */
+    unsigned nsyms;             /*number of symbols                  */
+    H5G_entry_t *entry;         /*array of symbol table entries      */
 } H5G_node_t;
 
 /* Private macros */
@@ -72,18 +73,17 @@ typedef struct H5G_node_t {
 #define H5G_NODE_BUF_SIZE       512
 
 /* PRIVATE PROTOTYPES */
-static herr_t H5G_node_serialize(H5F_t *f, H5G_node_t *sym, size_t size, uint8_t *buf);
 static size_t H5G_node_size_real(const H5F_t *f);
 static herr_t H5G_node_shared_free(void *shared);
 
 /* Metadata cache callbacks */
-static H5G_node_t *H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_udata1,
-				 void *_udata2);
-static herr_t H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
-			     H5G_node_t *sym, unsigned UNUSED * flags_ptr);
-static herr_t H5G_node_dest(H5F_t *f, H5G_node_t *sym);
-static herr_t H5G_node_clear(H5F_t *f, H5G_node_t *sym, hbool_t destroy);
-static herr_t H5G_node_size(const H5F_t *f, const H5G_node_t *sym, size_t *size_ptr);
+static void *H5G_node_deserialize(haddr_t addr, size_t len, const void *image,
+    const void *udata, hbool_t *dirty);
+static herr_t H5G_node_serialize(const H5F_t *f, haddr_t addr, size_t len,
+    void *image, void *thing, unsigned *flags, haddr_t *new_addr,
+    size_t *new_len, void **new_image);
+static herr_t H5G_node_free_icr(haddr_t addr, size_t len, void *thing);
+static herr_t H5G_node_clear(haddr_t addr, size_t len, void *sym);
 
 /* B-tree callbacks */
 static H5RC_t *H5G_node_get_shared(const H5F_t *f, const void *_udata);
@@ -110,14 +110,16 @@ static herr_t H5G_node_debug_key(FILE *stream, H5F_t *f, hid_t dxpl_id,
                                     int indent, int fwidth, const void *key,
                                     const void *udata);
 
-/* H5G inherits cache-like properties from H5AC */
-const H5AC_class_t H5AC_SNODE[1] = {{
-    H5AC_SNODE_ID,
-    (H5AC_load_func_t)H5G_node_load,
-    (H5AC_flush_func_t)H5G_node_flush,
-    (H5AC_dest_func_t)H5G_node_dest,
-    (H5AC_clear_func_t)H5G_node_clear,
-    (H5AC_size_func_t)H5G_node_size,
+/* H5G symbol table node inherits cache-like properties from H5AC2 */
+const H5AC2_class_t H5AC2_SNODE[1] = {{
+    H5AC2_SNODE_ID,
+    "symbol table node",
+    H5FD_MEM_BTREE,
+    H5G_node_deserialize,
+    NULL,
+    H5G_node_serialize,
+    H5G_node_free_icr,
+    H5G_node_clear,
 }};
 
 /* H5G inherits B-tree like properties from H5B */
@@ -309,70 +311,70 @@ H5G_node_size_real(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_node_load
+ * Function:	H5G_node_dest
  *
- * Purpose:	Loads a symbol table node from the file.
+ * Purpose:	Destroy a symbol table node in memory.
  *
- * Return:	Success:	Ptr to the new table.
+ * Return:	Non-negative on success/Negative on failure
  *
- *		Failure:	NULL
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Jan 15 2003
  *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jun 23 1997
- *
- * Modifications:
- *		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- *
- *	Quincey Koziol, 2002-7-180
- *	Added dxpl parameter to allow more control over I/O from metadata
- *      cache.
  *-------------------------------------------------------------------------
  */
-static H5G_node_t *
-H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED  *_udata1,
-	      void UNUSED * _udata2)
+static herr_t
+H5G_node_dest(H5G_node_t *sym)
 {
-    H5G_node_t		   *sym = NULL;
-    size_t		    size;
-    H5WB_t                 *wb = NULL;     /* Wrapped buffer for node data */
-    uint8_t                 node_buf[H5G_NODE_BUF_SIZE]; /* Buffer for node */
-    uint8_t		   *node;           /* Pointer to node buffer */
-    const uint8_t	   *p;
-    H5G_node_t		   *ret_value;	/*for error handling */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5G_node_load)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_dest);
 
     /*
      * Check arguments.
      */
+    HDassert(sym);
+
+    /* Verify that node is clean */
+    HDassert(sym->cache_info.is_dirty == FALSE);
+
+    if(sym->entry)
+        sym->entry = H5FL_SEQ_FREE(H5G_entry_t, sym->entry);
+    H5FL_FREE(H5G_node_t,sym);
+
+    FUNC_LEAVE_NOAPI(SUCCEED);
+} /* end H5G_node_dest() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5G_node_deserialize
+ *
+ * Purpose:     Deserialize the data structure from disk.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              Apr 14, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5G_node_deserialize(haddr_t UNUSED addr, size_t UNUSED len, const void *image,
+    const void *udata, hbool_t UNUSED *dirty)
+{
+    H5G_node_t *sym = NULL;     /* Pointer to the deserialized symbol table node */
+    const H5F_t *f = (const H5F_t *)udata;     /* Get file pointer from user data */
+    const uint8_t *p;           /* Pointer into image buffer */
+    H5G_node_t *ret_value;      /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5G_node_deserialize)
+
+    /* check arguments */
+    HDassert(image);
     HDassert(f);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(!_udata1);
-    HDassert(NULL == _udata2);
 
-    /*
-     * Initialize variables.
-     */
-
-    /* Wrap the local buffer for serialized node info */
-    if(NULL == (wb = H5WB_wrap(node_buf, sizeof(node_buf))))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't wrap buffer")
-
-    /* Compute the size of the serialized symbol table node on disk */
-    size = H5G_node_size_real(f);
-
-    /* Get a pointer to a buffer that's large enough for node */
-    if(NULL == (node = H5WB_actual(wb, size)))
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, NULL, "can't get actual buffer")
-
-    /* Read the serialized symbol table node. */
-    if(H5F_block_read(f, H5FD_MEM_BTREE, addr, size, dxpl_id, node) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_READERROR, NULL, "unable to read symbol table node")
-
-    /* Get temporary pointer to serialized node */
-    p = node;
+    /* Get temporary pointer to serialized symbol table node */
+    p = image;
 
     /* magic */
     if(HDmemcmp(p, H5G_NODE_MAGIC, (size_t)H5G_NODE_SIZEOF_MAGIC))
@@ -399,159 +401,54 @@ H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED  *_udata1
     if(H5G_ent_decode_vec(f, &p, sym->entry, sym->nsyms) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, NULL, "unable to decode symbol table entries")
 
+    /* Sanity check */
+    HDassert((size_t)((const uint8_t *)p - (const uint8_t *)image) <= len);
+
     /* Set return value */
     ret_value = sym;
 
 done:
-    /* Release resources */
-    if(wb && H5WB_unwrap(wb) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, NULL, "can't close wrapped buffer")
     if(!ret_value)
-        if(sym && H5G_node_dest(f, sym) < 0)
+        if(sym && H5G_node_dest(sym) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTFREE, NULL, "unable to destroy symbol table node")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_node_load() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_node_flush
- *
- * Purpose:	Flush a symbol table node to disk.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jun 23 1997
- *
- * Modifications:
- *              rky, 1998-08-28
- *		Only p0 writes metadata to disk.
- *
- * 		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- *
- *	Quincey Koziol, 2002-7-180
- *	Added dxpl parameter to allow more control over I/O from metadata
- *      cache.
- *
- *      Pedro Vicente, <pvn@ncsa.uiuc.edu> 18 Sep 2002
- *      Added `id to name' support.
- *
- *      JRM -- 8/21/06
- *      Added the flags_ptr parameter.  This parameter exists to
- *      allow the flush routine to report to the cache if the
- *      entry is resized or renamed as a result of the flush.
- *      *flags_ptr is set to H5C_CALLBACK__NO_FLAGS_SET on entry.
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5G_node_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5G_node_t *sym, unsigned UNUSED * flags_ptr)
-{
-    H5WB_t     *wb = NULL;     /* Wrapped buffer for node data */
-    uint8_t     node_buf[H5G_NODE_BUF_SIZE]; /* Buffer for node */
-    unsigned	u;
-    herr_t      ret_value = SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT(H5G_node_flush)
-
-    /*
-     * Check arguments.
-     */
-    HDassert(f);
-    HDassert(H5F_addr_defined(addr));
-    HDassert(sym);
-
-    /*
-     * Look for dirty entries and set the node dirty flag.
-     */
-    for(u = 0; u < sym->nsyms; u++)
-	if(sym->entry[u].dirty) {
-            /* Set the node's dirty flag */
-            sym->cache_info.is_dirty = TRUE;
-
-            /* Reset the entry's dirty flag */
-            sym->entry[u].dirty = FALSE;
-        } /* end if */
-
-    /*
-     * Write the symbol node to disk.
-     */
-    if(sym->cache_info.is_dirty) {
-        uint8_t	   *node;           /* Pointer to node buffer */
-        size_t	size;
-
-        /* Wrap the local buffer for serialized node info */
-        if(NULL == (wb = H5WB_wrap(node_buf, sizeof(node_buf))))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't wrap buffer")
-
-        /* Compute the size of the serialized symbol table node on disk */
-        size = H5G_node_size_real(f);
-
-        /* Get a pointer to a buffer that's large enough for node */
-        if(NULL == (node = H5WB_actual(wb, size)))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't get actual buffer")
-
-        /* Serialize symbol table node into buffer */
-        if(H5G_node_serialize(f, sym, size, node) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTSERIALIZE, FAIL, "node serialization failed")
-
-	/* Write the serialized symbol table node. */
-        if(H5F_block_write(f, H5FD_MEM_BTREE, addr, size, dxpl_id, node) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_WRITEERROR, FAIL, "unable to write symbol table node to the file")
-
-        /* Reset the node's dirty flag */
-        sym->cache_info.is_dirty = FALSE;
-    } /* end if */
-
-    /*
-     * Destroy the symbol node?	 This might happen if the node is being
-     * preempted from the cache.
-     */
-    if(destroy)
-        if(H5G_node_dest(f, sym) < 0)
-	    HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to destroy symbol table node")
-
-done:
-    /* Release resources */
-    if(wb && H5WB_unwrap(wb) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close wrapped buffer")
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_node_flush() */
+} /* end H5G_node_deserialize() */
 
 
 /*-------------------------------------------------------------------------
  * Function:    H5G_node_serialize
  *
- * Purpose:     Serialize the symbol table node
+ * Purpose:     Serialize the data structure for writing to disk.
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
  *
- * Programmer:  Bill Wendling
- *              wendling@ncsa.uiuc.edu
- *              Sept. 16, 2003
- *
- * Modifications:
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              Mar 24, 2008
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_serialize(H5F_t *f, H5G_node_t *sym, size_t size, uint8_t *buf)
+H5G_node_serialize(const H5F_t *f, haddr_t UNUSED addr, size_t UNUSED len,
+    void *image, void *_thing, unsigned *flags, haddr_t UNUSED *new_addr,
+    size_t UNUSED *new_len, void UNUSED **new_image)
 {
-    uint8_t    *p;
-    herr_t      ret_value = SUCCEED;
+    H5G_node_t *sym = (H5G_node_t *)_thing;        /* Pointer to the Symbol Table node */
+    size_t	size;           /* Size of symbol table node in file */
+    uint8_t    *p;              /* Pointer into image buffer */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_node_serialize);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_node_serialize)
 
-    /* check args */
-    assert(f);
-    assert(sym);
-    assert(buf);
+    /* check arguments */
+    HDassert(image);
+    HDassert(sym);
+    HDassert(flags);
 
-    p = buf;
+    /* Set the local pointer into the serialized image */
+    p = image;
 
     /* magic number */
     HDmemcpy(p, H5G_NODE_MAGIC, (size_t)H5G_NODE_SIZEOF_MAGIC);
@@ -566,50 +463,53 @@ H5G_node_serialize(H5F_t *f, H5G_node_t *sym, size_t size, uint8_t *buf)
     /* number of symbols */
     UINT16ENCODE(p, sym->nsyms);
 
+    /* Compute the size of the serialized symbol table node on disk */
+    size = H5G_node_size_real(f);
+    HDassert(size);
+
     /* entries */
-    if (H5G_ent_encode_vec(f, &p, sym->entry, sym->nsyms) < 0)
+    if(H5G_ent_encode_vec(f, &p, sym->entry, sym->nsyms) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "can't serialize")
-    HDmemset(p, 0, size - (p - buf));
+    HDmemset(p, 0, size - (size_t)((const uint8_t *)p - (const uint8_t *)image));
+
+    /* Reset the cache flags for this operation (metadata not resized or renamed) */
+    *flags = 0;
+
+    /* Sanity check */
+    HDassert((size_t)((const uint8_t *)p - (const uint8_t *)image) <= len);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_node_serialize() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_node_dest
+ * Function:    H5G_node_free_icr
  *
- * Purpose:	Destroy a symbol table node in memory.
+ * Purpose:     Destroy/release an "in core representation" of a data structure
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Jan 15 2003
- *
- * Modifications:
+ * Programmer:  Quincey Koziol
+ *              koziol@hdfgroup.org
+ *              May 30, 2008
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_dest(H5F_t UNUSED *f, H5G_node_t *sym)
+H5G_node_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_dest);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_free_icr)
 
-    /*
-     * Check arguments.
-     */
-    assert(sym);
+    /* Check arguments */
+    HDassert(thing);
 
-    /* Verify that node is clean */
-    assert (sym->cache_info.is_dirty==FALSE);
+    /* Destroy B-tree node */
+    H5G_node_dest(thing);
 
-    if(sym->entry)
-        sym->entry = H5FL_SEQ_FREE(H5G_entry_t,sym->entry);
-    H5FL_FREE(H5G_node_t,sym);
-
-    FUNC_LEAVE_NOAPI(SUCCEED);
-} /* end H5G_node_dest() */
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5G_node_free_icr() */
 
 
 /*-------------------------------------------------------------------------
@@ -623,72 +523,27 @@ H5G_node_dest(H5F_t UNUSED *f, H5G_node_t *sym)
  *		koziol@ncsa.uiuc.edu
  *		Mar 20 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_clear(H5F_t *f, H5G_node_t *sym, hbool_t destroy)
+H5G_node_clear(haddr_t UNUSED addr, size_t UNUSED len, void *_sym)
 {
+    H5G_node_t *sym = (H5G_node_t *)_sym;
     unsigned u;              /* Local index variable */
-    herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_node_clear);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_clear)
 
     /*
      * Check arguments.
      */
-    assert(sym);
+    HDassert(sym);
 
     /* Look for dirty entries and reset their dirty flag.  */
     for(u = 0; u < sym->nsyms; u++)
-        sym->entry[u].dirty=FALSE;
-    sym->cache_info.is_dirty = FALSE;
+        sym->entry[u].dirty = FALSE;
 
-    /*
-     * Destroy the symbol node?	 This might happen if the node is being
-     * preempted from the cache.
-     */
-    if (destroy)
-        if (H5G_node_dest(f, sym) < 0)
-	    HGOTO_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to destroy symbol table node");
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G_node_clear() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_node_size
- *
- * Purpose:	Compute the size in bytes of the specified instance of
- *		H5G_node_t on disk, and return it in *size_ptr.  On failure
- *		the value of size_ptr is undefined.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	John Mainzer
- *		5/13/04
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5G_node_size(const H5F_t *f, const H5G_node_t UNUSED *sym, size_t *size_ptr)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_size);
-
-    /*
-     * Check arguments.
-     */
-    HDassert(f);
-    HDassert(size_ptr);
-
-    *size_ptr = H5G_node_size_real(f);
-
-    FUNC_LEAVE_NOAPI(SUCCEED);
-} /* H5G_node_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -729,16 +584,17 @@ H5G_node_create(H5F_t *f, hid_t dxpl_id, H5B_ins_t UNUSED op, void *_lt_key,
     assert(H5B_INS_FIRST == op);
 
     if(NULL == (sym = H5FL_CALLOC(H5G_node_t)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     size = H5G_node_size_real(f);
+    HDassert(size);
     if(HADDR_UNDEF == (*addr_p = H5MF_alloc(f, H5FD_MEM_BTREE, dxpl_id, size)))
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to allocate file space");
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to allocate file space")
 
-    sym->entry = H5FL_SEQ_CALLOC(H5G_entry_t, (size_t)(2 * H5F_SYM_LEAF_K(f)));
-    if(NULL==sym->entry)
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
-    if(H5AC_set(f, dxpl_id, H5AC_SNODE, *addr_p, sym, H5AC__NO_FLAGS_SET) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to cache symbol table leaf node");
+    if(NULL == ( sym->entry = H5FL_SEQ_CALLOC(H5G_entry_t, (size_t)(2 * H5F_SYM_LEAF_K(f)))))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+    H5_CHECK_OVERFLOW(size, /* vartype */hsize_t, /* casttype */size_t);
+    if(H5AC2_set(f, dxpl_id, H5AC2_SNODE, *addr_p, (size_t)size, sym, H5AC2__NO_FLAGS_SET) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to cache symbol table leaf node")
     /*
      * The left and right symbols in an empty tree are both the
      * empty string stored at offset zero by the H5G functions. This
@@ -933,7 +789,7 @@ H5G_node_found(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *_lt_key
     /*
      * Load the symbol table node for exclusive access.
      */
-    if(NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (sn = H5AC2_protect(f, dxpl_id, H5AC2_SNODE, addr, H5G_node_size_real(f), (void *)f, H5AC2_READ)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL, "unable to protect symbol table node")
 
     /* Get base address of heap */
@@ -963,7 +819,7 @@ H5G_node_found(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *_lt_key
         HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "iterator callback failed")
 
 done:
-    if(sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) < 0)
+    if(sn && H5AC2_unprotect(f, dxpl_id, H5AC2_SNODE, addr, (size_t)0, sn, H5AC2__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to release symbol table node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1015,7 +871,7 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     H5G_node_key_t	*rt_key = (H5G_node_key_t *) _rt_key;
     H5G_bt_ins_t	*udata = (H5G_bt_ins_t *) _udata;
     H5G_node_t		*sn = NULL, *snrt = NULL;
-    unsigned		sn_flags = H5AC__NO_FLAGS_SET, snrt_flags = H5AC__NO_FLAGS_SET;
+    unsigned		sn_flags = H5AC2__NO_FLAGS_SET, snrt_flags = H5AC2__NO_FLAGS_SET;
     const char		*s;
     const char          *base;                  /* Base of heap */
     unsigned		lt = 0, rt;		/* Binary search cntrs	*/
@@ -1039,7 +895,7 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     /*
      * Load the symbol node.
      */
-    if(NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_WRITE)))
+    if(NULL == (sn = H5AC2_protect(f, dxpl_id, H5AC2_SNODE, addr, H5G_node_size_real(f), (void *)f, H5AC2_WRITE)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_INS_ERROR, "unable to protect symbol table node")
 
     /* Get base address of heap */
@@ -1082,19 +938,19 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr,
 	if(H5G_node_create(f, dxpl_id, H5B_INS_FIRST, NULL, NULL, NULL, new_node_p/*out*/) < 0)
 	    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5B_INS_ERROR, "unable to split symbol table node")
 
-	if(NULL == (snrt = H5AC_protect(f, dxpl_id, H5AC_SNODE, *new_node_p, NULL, NULL, H5AC_WRITE)))
+	if(NULL == (snrt = H5AC2_protect(f, dxpl_id, H5AC2_SNODE, *new_node_p, H5G_node_size_real(f), (void *)f, H5AC2_WRITE)))
 	    HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_INS_ERROR, "unable to split symbol table node")
 
 	HDmemcpy(snrt->entry, sn->entry + H5F_SYM_LEAF_K(f),
 		 H5F_SYM_LEAF_K(f) * sizeof(H5G_entry_t));
 	snrt->nsyms = H5F_SYM_LEAF_K(f);
-        snrt_flags |= H5AC__DIRTIED_FLAG;
+        snrt_flags |= H5AC2__DIRTIED_FLAG;
 
 	/* The left node */
 	HDmemset(sn->entry + H5F_SYM_LEAF_K(f), 0,
 		 H5F_SYM_LEAF_K(f) * sizeof(H5G_entry_t));
 	sn->nsyms = H5F_SYM_LEAF_K(f);
-        sn_flags |= H5AC__DIRTIED_FLAG;
+        sn_flags |= H5AC2__DIRTIED_FLAG;
 
 	/* The middle key */
 	md_key->offset = sn->entry[sn->nsyms - 1].name_off;
@@ -1115,7 +971,7 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     } else {
 	/* Where to insert the new entry? */
 	ret_value = H5B_INS_NOOP;
-        sn_flags |= H5AC__DIRTIED_FLAG;
+        sn_flags |= H5AC2__DIRTIED_FLAG;
 	insert_into = sn;
 	if(idx == (int)sn->nsyms) {
 	    rt_key->offset = ent.name_off;
@@ -1137,9 +993,9 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     insert_into->nsyms += 1;
 
 done:
-    if(snrt && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, *new_node_p, snrt, snrt_flags) < 0)
+    if(snrt && H5AC2_unprotect(f, dxpl_id, H5AC2_SNODE, *new_node_p, (size_t)0, snrt, snrt_flags) < 0)
 	HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to release symbol table node")
-    if(sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, sn_flags) < 0)
+    if(sn && H5AC2_unprotect(f, dxpl_id, H5AC2_SNODE, addr, (size_t)0, sn, sn_flags) < 0)
 	HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to release symbol table node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1184,7 +1040,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
     H5G_node_key_t	*rt_key = (H5G_node_key_t *)_rt_key;
     H5G_bt_rm_t	*udata = (H5G_bt_rm_t *)_udata;
     H5G_node_t		*sn = NULL;
-    unsigned		sn_flags = H5AC__NO_FLAGS_SET;
+    unsigned		sn_flags = H5AC2__NO_FLAGS_SET;
     unsigned		lt = 0, rt, idx = 0;
     int		        cmp = 1;
     H5B_ins_t		ret_value = H5B_INS_ERROR;
@@ -1199,7 +1055,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
     HDassert(udata && udata->common.heap);
 
     /* Load the symbol table */
-    if(NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_WRITE)))
+    if(NULL == (sn = H5AC2_protect(f, dxpl_id, H5AC2_SNODE, addr, H5G_node_size_real(f), (void *)f, H5AC2_WRITE)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5B_INS_ERROR, "unable to protect symbol table node")
 
     /* "Normal" removal of a single entry from the symbol table node */
@@ -1288,7 +1144,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
             *rt_key_changed = TRUE;
             sn->nsyms = 0;
             if(H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, (hsize_t)H5G_node_size_real(f)) < 0
-                    || H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__DIRTIED_FLAG | H5C__DELETED_FLAG) < 0) {
+                    || H5AC2_unprotect(f, dxpl_id, H5AC2_SNODE, addr, (size_t)0, sn, H5AC2__DIRTIED_FLAG | H5AC2__DELETED_FLAG) < 0) {
                 sn = NULL;
                 HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to free symbol table node")
             } /* end if */
@@ -1302,7 +1158,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
              * change.
              */
             sn->nsyms -= 1;
-            sn_flags |= H5AC__DIRTIED_FLAG;
+            sn_flags |= H5AC2__DIRTIED_FLAG;
             HDmemmove(sn->entry + idx, sn->entry + idx + 1,
                       (sn->nsyms-idx) * sizeof(H5G_entry_t));
             ret_value = H5B_INS_NOOP;
@@ -1314,7 +1170,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
              * should be changed to reflect the new right-most entry.
              */
             sn->nsyms -= 1;
-            sn_flags |= H5AC__DIRTIED_FLAG;
+            sn_flags |= H5AC2__DIRTIED_FLAG;
             rt_key->offset = sn->entry[sn->nsyms - 1].name_off;
             *rt_key_changed = TRUE;
             ret_value = H5B_INS_NOOP;
@@ -1325,7 +1181,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
              * node.
              */
             sn->nsyms -= 1;
-            sn_flags |= H5AC__DIRTIED_FLAG;
+            sn_flags |= H5AC2__DIRTIED_FLAG;
             HDmemmove(sn->entry + idx, sn->entry + idx + 1,
                       (sn->nsyms - idx) * sizeof(H5G_entry_t));
             ret_value = H5B_INS_NOOP;
@@ -1360,7 +1216,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
         *rt_key_changed = TRUE;
         sn->nsyms = 0;
         if(H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, (hsize_t)H5G_node_size_real(f)) < 0
-                || H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__DIRTIED_FLAG | H5C__DELETED_FLAG) < 0) {
+                || H5AC2_unprotect(f, dxpl_id, H5AC2_SNODE, addr, (size_t)0, sn, H5AC2__DIRTIED_FLAG | H5AC2__DELETED_FLAG) < 0) {
             sn = NULL;
             HGOTO_ERROR(H5E_SYM, H5E_PROTECT, H5B_INS_ERROR, "unable to free symbol table node")
         } /* end if */
@@ -1369,7 +1225,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
     } /* end else */
 
 done:
-    if(sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, sn_flags) < 0)
+    if(sn && H5AC2_unprotect(f, dxpl_id, H5AC2_SNODE, addr, (size_t)0, sn, sn_flags) < 0)
 	HDONE_ERROR(H5E_SYM, H5E_CANTUNPROTECT, H5B_INS_ERROR, "unable to release symbol table node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1409,7 +1265,7 @@ H5G_node_iterate(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t ad
     HDassert(udata && udata->heap);
 
     /* Protect the symbol table node & local heap while we iterate over entries */
-    if(NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (sn = H5AC2_protect(f, dxpl_id, H5AC2_SNODE, addr, H5G_node_size_real(f), (void *)f, H5AC2_READ)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5_ITER_ERROR, "unable to load symbol table node")
 
     /*
@@ -1476,7 +1332,7 @@ H5G_node_iterate(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t ad
 
 done:
     /* Release resources */
-    if(sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) != SUCCEED)
+    if(sn && H5AC2_unprotect(f, dxpl_id, H5AC2_SNODE, addr, (size_t)0, sn, H5AC2__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5_ITER_ERROR, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1514,13 +1370,13 @@ H5G_node_sumup(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr
     HDassert(num_objs);
 
     /* Find the object node and add the number of symbol entries. */
-    if(NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (sn = H5AC2_protect(f, dxpl_id, H5AC2_SNODE, addr, H5G_node_size_real(f), (void *)f, H5AC2_READ)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5_ITER_ERROR, "unable to load symbol table node")
 
     *num_objs += sn->nsyms;
 
 done:
-    if(sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) != SUCCEED)
+    if(sn && H5AC2_unprotect(f, dxpl_id, H5AC2_SNODE, addr, (size_t)0, sn, H5AC2__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5_ITER_ERROR, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1559,7 +1415,7 @@ H5G_node_by_idx(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t add
     HDassert(udata);
 
     /* Get a pointer to the symbol table node */
-    if(NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (sn = H5AC2_protect(f, dxpl_id, H5AC2_SNODE, addr, H5G_node_size_real(f), (void *)f, H5AC2_READ)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5_ITER_ERROR, "unable to load symbol table node");
 
     /* Find the node, locate the object symbol table entry and retrieve the name */
@@ -1581,7 +1437,7 @@ H5G_node_by_idx(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t add
         udata->num_objs += sn->nsyms;
 
 done:
-    if(sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) != SUCCEED)
+    if(sn && H5AC2_unprotect(f, dxpl_id, H5AC2_SNODE, addr, (size_t)0, sn, H5AC2__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5_ITER_ERROR, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1748,7 +1604,7 @@ H5G_node_copy(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t addr,
     HDassert(udata);
 
     /* load the symbol table into memory from the source file */
-    if(NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (sn = H5AC2_protect(f, dxpl_id, H5AC2_SNODE, addr, H5G_node_size_real(f), (void *)f, H5AC2_READ)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5_ITER_ERROR, "unable to load symbol table node")
 
     /* get the base address of the heap */
@@ -1841,7 +1697,7 @@ done:
     if (heap && H5HL_unprotect(f, dxpl_id, heap, udata->src_heap_addr) < 0)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5_ITER_ERROR, "unable to unprotect symbol name")
 
-    if (sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) != SUCCEED)
+    if (sn && H5AC2_unprotect(f, dxpl_id, H5AC2_SNODE, addr, (size_t)0, sn, H5AC2__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5_ITER_ERROR, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1883,7 +1739,7 @@ H5G_node_build_table(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_
      * Save information about the symbol table node since we can't lock it
      * because we're about to call an application function.
      */
-    if(NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (sn = H5AC2_protect(f, dxpl_id, H5AC2_SNODE, addr, H5G_node_size_real(f), (void *)f, H5AC2_READ)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, H5_ITER_ERROR, "unable to load symbol table node")
 
     /* Check if the link table needs to be extended */
@@ -1916,7 +1772,7 @@ H5G_node_build_table(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_
 
 done:
     /* Release the locked items */
-    if(sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) != SUCCEED)
+    if(sn && H5AC2_unprotect(f, dxpl_id, H5AC2_SNODE, addr, (size_t)0, sn, H5AC2__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5_ITER_ERROR, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1997,7 +1853,7 @@ H5G_node_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
      * If we couldn't load the symbol table node, then try loading the
      * B-tree node.
      */
-    if (NULL == (sn = H5AC_protect(f, dxpl_id, H5AC_SNODE, addr, NULL, NULL, H5AC_READ))) {
+    if (NULL == (sn = H5AC2_protect(f, dxpl_id, H5AC2_SNODE, addr, H5G_node_size_real(f), (void *)f, H5AC2_READ))) {
         H5G_bt_common_t	udata;		/*data to pass through B-tree	*/
 
         H5E_clear_stack(NULL); /* discard that error */
@@ -2035,7 +1891,7 @@ H5G_node_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int indent,
     } /* end if */
 
 done:
-    if(sn && H5AC_unprotect(f, dxpl_id, H5AC_SNODE, addr, sn, H5AC__NO_FLAGS_SET) < 0)
+    if(sn && H5AC2_unprotect(f, dxpl_id, H5AC2_SNODE, addr, (size_t)0, sn, H5AC2__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to release symbol table node")
     if(heap && H5HL_unprotect(f, dxpl_id, heap, heap_addr) < 0)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol table heap")

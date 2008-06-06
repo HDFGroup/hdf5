@@ -34,8 +34,8 @@
 /* Private macros */
 
 /* Private prototypes */
-static herr_t H5G_ent_encode(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent);
-static herr_t H5G_ent_decode(H5F_t *f, const uint8_t **pp,
+static herr_t H5G_ent_encode(const H5F_t *f, uint8_t **pp, const H5G_entry_t *ent);
+static herr_t H5G_ent_decode(const H5F_t *f, const uint8_t **pp,
 			      H5G_entry_t *ent/*out*/);
 
 /* Declare extern the PQ free list for the wrapped strings */
@@ -65,7 +65,7 @@ H5FL_BLK_EXTERN(str_buf);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_decode_vec(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent, unsigned n)
+H5G_ent_decode_vec(const H5F_t *f, const uint8_t **pp, H5G_entry_t *ent, unsigned n)
 {
     unsigned    u;
     herr_t      ret_value=SUCCEED;       /* Return value */
@@ -110,7 +110,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_ent_decode(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent)
+H5G_ent_decode(const H5F_t *f, const uint8_t **pp, H5G_entry_t *ent)
 {
     const uint8_t	*p_ret = *pp;
     uint32_t		tmp;
@@ -121,8 +121,6 @@ H5G_ent_decode(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent)
     HDassert(f);
     HDassert(pp);
     HDassert(ent);
-
-    ent->file = f;
 
     /* decode header */
     H5F_DECODE_LENGTH(f, *pp, ent->name_off);
@@ -180,7 +178,7 @@ H5G_ent_decode(H5F_t *f, const uint8_t **pp, H5G_entry_t *ent)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_encode_vec(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent, unsigned n)
+H5G_ent_encode_vec(const H5F_t *f, uint8_t **pp, const H5G_entry_t *ent, unsigned n)
 {
     unsigned    u;
     herr_t      ret_value=SUCCEED;       /* Return value */
@@ -228,7 +226,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_ent_encode(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
+H5G_ent_encode(const H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
 {
     uint8_t		*p_ret = *pp + H5G_SIZEOF_ENTRY(f);
 
@@ -272,7 +270,8 @@ H5G_ent_encode(H5F_t *f, uint8_t **pp, const H5G_entry_t *ent)
     }
 
     /* fill with zero */
-    while (*pp < p_ret) *(*pp)++ = 0;
+    while(*pp < p_ret)
+        *(*pp)++ = 0;
     *pp = p_ret;
 
     FUNC_LEAVE_NOAPI(SUCCEED);
@@ -423,9 +422,6 @@ H5G_ent_convert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, const char *name,
           HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unrecognized link type")
     } /* end switch */
 
-    /* Set the file for the entry */
-    ent->file = f;
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_ent_convert() */
@@ -445,7 +441,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_debug(H5F_t UNUSED *f, const H5G_entry_t *ent, FILE *stream,
+H5G_ent_debug(H5F_t *f, const H5G_entry_t *ent, FILE *stream,
     int indent, int fwidth, H5HL_t *heap)
 {
     const char		*lval = NULL;
@@ -494,7 +490,7 @@ H5G_ent_debug(H5F_t UNUSED *f, const H5G_entry_t *ent, FILE *stream,
                        "Link value offset:",
                        (unsigned long)(ent->cache.slink.lval_offset));
             if(heap) {
-                lval = H5HL_offset_into(ent->file, heap, ent->cache.slink.lval_offset);
+                lval = H5HL_offset_into(f, heap, ent->cache.slink.lval_offset);
                 HDfprintf(stream, "%*s%-*s %s\n", nested_indent, "", nested_fwidth,
                            "Link value:",
                            lval);

@@ -154,7 +154,7 @@ static herr_t H5C2__flash_increase_cache_size(H5C2_t * cache_ptr,
                                               size_t old_entry_size,
                                               size_t new_entry_size);
 
-static herr_t H5C2_flush_single_entry(H5F_t *		   f,
+static herr_t H5C2_flush_single_entry(const H5F_t *	   f,
                                       hid_t 		   dxpl_id,
                                       H5C2_t *	           cache_ptr,
                                       const H5C2_class_t * type_ptr,
@@ -162,7 +162,7 @@ static herr_t H5C2_flush_single_entry(H5F_t *		   f,
                                       unsigned	           flags,
                                       hbool_t del_entry_from_slist_on_destroy);
 
-static herr_t H5C2_flush_invalidate_cache(H5F_t *  f,
+static herr_t H5C2_flush_invalidate_cache(const H5F_t *  f,
                                           hid_t    dxpl_id,
                                           H5C2_t * cache_ptr,
 			                  unsigned flags);
@@ -212,7 +212,8 @@ static void * H5C2_epoch_marker_deserialize(haddr_t addr,
 			                    hbool_t * dirty_ptr);
 static herr_t H5C2_epoch_marker_image_len(void * thing,
 		                          size_t *image_len_ptr);
-static herr_t H5C2_epoch_marker_serialize(haddr_t addr,
+static herr_t H5C2_epoch_marker_serialize(const H5F_t *f,
+                                          haddr_t addr,
 		                          size_t len,
 		                          void * image_ptr,
                                           void * thing,
@@ -258,7 +259,7 @@ H5C2_epoch_marker_deserialize(haddr_t UNUSED addr,
 {
     void * ret_value = NULL;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5C2_epoch_marker_serialize, NULL)
+    FUNC_ENTER_NOAPI(H5C2_epoch_marker_deserialize, NULL)
 
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, NULL, "called unreachable fcn.")
 
@@ -283,7 +284,8 @@ done:
 }
 
 static herr_t 
-H5C2_epoch_marker_serialize(haddr_t UNUSED addr,
+H5C2_epoch_marker_serialize(const H5F_t UNUSED *f,
+                            haddr_t UNUSED addr,
 		            size_t UNUSED len,
 		            void UNUSED * image_ptr,
                             void UNUSED * thing,
@@ -1291,7 +1293,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C2_flush_cache(H5F_t *f,
+H5C2_flush_cache(const H5F_t *f,
 		 hid_t    dxpl_id,
                  unsigned flags)
 {
@@ -7453,7 +7455,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C2_flush_invalidate_cache(H5F_t * f,
+H5C2_flush_invalidate_cache(const H5F_t * f,
                             hid_t    dxpl_id,
                             H5C2_t * cache_ptr,
 			    unsigned flags)
@@ -8067,7 +8069,7 @@ done:
  */
 
 static herr_t
-H5C2_flush_single_entry(H5F_t *		     f,
+H5C2_flush_single_entry(const H5F_t *		     f,
                         hid_t 		     dxpl_id,
                         H5C2_t *	     cache_ptr,
                         const H5C2_class_t * type_ptr,
@@ -8460,7 +8462,8 @@ H5C2_flush_single_entry(H5F_t *		     f,
 
 	    if ( ! ( entry_ptr->image_up_to_date ) ) {
 
-	        if ( entry_ptr->type->serialize(entry_ptr->addr, 
+	        if ( entry_ptr->type->serialize(f,
+                                                entry_ptr->addr, 
 				                entry_ptr->size,
 					        entry_ptr->image_ptr,
 					        (void *)entry_ptr,

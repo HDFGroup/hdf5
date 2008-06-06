@@ -136,7 +136,6 @@ H5F_debug(H5F_t *f, FILE *stream, int indent, int fwidth)
         HDassert(root_oloc);
         root_ent.type = H5G_NOTHING_CACHED;
         root_ent.header = root_oloc->addr;
-        root_ent.file = f;
 
         /* Display root group symbol table entry info */
 	H5G_ent_debug(f, &root_ent, stream, indent + 3, MAX(0, fwidth - 3), NULL);

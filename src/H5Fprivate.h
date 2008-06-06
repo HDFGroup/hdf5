@@ -463,8 +463,6 @@ H5_DLL herr_t H5F_block_write(const H5F_t *f, H5FD_mem_t type, haddr_t addr,
                 size_t size, hid_t dxpl_id, const void *buf);
 
 /* Address-related functions */
-H5_DLL void H5F_addr_encode_len(uint8_t **pp/*in,out*/, haddr_t addr,
-    unsigned addr_len);
 H5_DLL void H5F_addr_encode(const H5F_t *f, uint8_t **pp/*in,out*/,
     haddr_t addr);
 H5_DLL void H5F_addr_decode(const H5F_t *f, const uint8_t **pp/*in,out*/,

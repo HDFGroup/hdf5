@@ -3205,7 +3205,7 @@ done:
  */
 
 herr_t
-H5AC2_set_cache_auto_resize_config(const H5F_t * f,
+H5AC2_set_cache_auto_resize_config(H5F_t * f,
 		                   hid_t dxpl_id,
                                    H5AC2_cache_config_t *config_ptr)
 {

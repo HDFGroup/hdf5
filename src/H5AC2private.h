@@ -338,7 +338,7 @@ H5_DLL herr_t H5AC2_get_cache_hit_rate(H5AC2_t * cache_ptr,
 
 H5_DLL herr_t H5AC2_reset_cache_hit_rate_stats(H5AC2_t * cache_ptr);
 
-H5_DLL herr_t H5AC2_set_cache_auto_resize_config(const H5F_t * f,
+H5_DLL herr_t H5AC2_set_cache_auto_resize_config(H5F_t * f,
                                                  hid_t dxpl_id,
                                                  H5AC2_cache_config_t *config_ptr);
 
