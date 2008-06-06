@@ -146,7 +146,7 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex)
     if (ret_value)
         return ret_value;
 
-    if(mutex->lock_count && pthread_equal(pthread_self(), mutex->owner_thread)) {
+    if(mutex->lock_count && pthread_equal(HDpthread_self(), mutex->owner_thread)) {
         /* already owned by self - increment count */
         mutex->lock_count++;
     } else {
@@ -155,7 +155,7 @@ H5TS_mutex_lock(H5TS_mutex_t *mutex)
             pthread_cond_wait(&mutex->cond_var, &mutex->atomic_lock);
 
         /* After we've received the signal, take ownership of the mutex */
-        mutex->owner_thread = pthread_self();
+        mutex->owner_thread = HDpthread_self();
         mutex->lock_count = 1;
     }
 

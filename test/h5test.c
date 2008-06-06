@@ -667,14 +667,7 @@ h5_show_hostname(void)
 	    printf("thread 0.");
     }
 #elif defined(H5_HAVE_THREADSAFE)
-#ifdef _WIN32
-		/* use GetCurrentThreadId because pthread_self return cannot be cast */
-		/* as an int on Windows                                              */
-        fprintf("thread %d.", (int)GetCurrentThreadId());
-#else
-    printf("thread %d.", (int)pthread_self());
-#endif
-
+    printf("thread %lu.", HDpthread_self_ulong());
 #else
     printf("thread 0.");
 #endif
