@@ -52,5 +52,11 @@ typedef __int64             h5_stat_size_t;
 #define HDvsnprintf(S,N,FMT,A) _vsnprintf(S,N,FMT,A)
 #define HDwrite(F,M,Z)      _write(F,M,Z)
 
+/* Non-POSIX functions */
+
+/* Don't use actual pthread_self on Windows because the return
+ * type cannot be cast as a ulong like other systems. */
+#define HDpthread_self_ulong() ((unsigned long)GetCurrentThreadId())
+
 
 #endif /* _WIN32 */
