@@ -1,4 +1,4 @@
-HDF5 version 1.6.7-snap8 released on Sun Jun  1 18:52:44 CDT 2008
+HDF5 version 1.6.7-snap9 released on Sun Jun  8 18:15:04 CDT 2008
 ================================================================================
 
 INTRODUCTION
@@ -117,6 +117,9 @@ Bug Fixes since HDF5-1.6.7 Release
         subsetting. PVN 2008/03/10 
      - Fixed bug in h5dump that caused binary output to be made only for the first 
         dataset, when several datasets were requested. PVN - 2008/04/07
+     - h5dump: when doing binary output (-b), the stdout printing of attributes 
+       was done incorrectly. Removed printing of attributes when doing binary 
+       output. PVN - 2008/06/05
 
  
 
