@@ -2890,6 +2890,7 @@ H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
     char * hexdata = NULL;
     size_t hexlength;
     herr_t ret_value = SUCCEED;
+    uint8_t * bodydata = strdup(body);
 
     FUNC_ENTER_NOAPI(H5C2_jb__journal_entry, FAIL)
 #if 0 /* JRM */
@@ -2898,7 +2899,7 @@ H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
 #endif /* JRM */	
     /* Check Arguments */
     HDassert(struct_ptr);
-    HDassert(body);
+    HDassert(bodydata);
     HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
 	
     /* Verify that the supplied transaction is in progress */
@@ -2936,7 +2937,7 @@ H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
     } /* end if */
 
     /* Convert data from binary to hex */
-    H5C2_jb__bin2hex(body, hexdata, &hexlength, length);
+    H5C2_jb__bin2hex(bodydata, hexdata, &hexlength, length);
 
     if ( H5C2_jb__write_to_buffer(struct_ptr, hexlength, hexdata, FALSE, trans_num) < 0 ) {
 
@@ -2953,6 +2954,16 @@ H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
     }
 
 done:
+
+    if ( bodydata != NULL )
+    {
+        bodydata = H5MM_xfree(bodydata);
+        if ( bodydata != NULL ) {
+
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
+                        "free of assembly buffer failed.");
+        }
+    }
 
     if ( temp != NULL )
     {

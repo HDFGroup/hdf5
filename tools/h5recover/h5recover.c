@@ -682,7 +682,7 @@ main (int argc, const char *argv[])
     } /* end if */
 
     /* open HDF5 file with provided fapl */
-    fid = H5Fopen(file_name, H5F_ACC_RDWR, H5P_DEFAULT /*fapl */);    
+    fid = H5Fopen(file_name, H5F_ACC_RDWR, fapl);    
        
     if ( fid == -1 ) {
     
