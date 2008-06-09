@@ -37,6 +37,7 @@
 
 /*#define H5_HAVE_TM_ZONE 1 windows do not use this constant.*/  
 #define H5_MALLOC_WORKS 1
+#define H5_HAVE_TIMEZONE 1
 
 /* code warrior returns 0 in malloc(0) */
 #if defined(__MWERKS__)
