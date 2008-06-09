@@ -14,14 +14,32 @@
 ##
 ## Makefile.am
 ## Run automake to generate a Makefile.in from this file.
-##
 #
-# Tools HDF5 Makefile(.in)
+# HDF5 Library Makefile(.in)
 #
 
 include $(top_srcdir)/config/commence.am
 
-# All subdirectories
-SUBDIRS=lib h5dump h5diff h5ls misc h5import h5repack h5jam h5copy h5stat h52jpeg
+# Include src and tools/lib directories
+INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib -I$(top_srcdir)/hl/src
+
+# These are our main targets, the tools
+
+#TEST_SCRIPT=$(srcdir)/h52jpeg.sh
+check_SCRIPTS=$(TEST_SCRIPT)
+
+bin_PROGRAMS=h52jpeg
+noinst_PROGRAMS=h52jpegtst
+
+h52jpeg_SOURCES=h52jpeg.c 
+
+h52jpegtst_SOURCES=h52jpegtst.c 
+
+# Programs all depend on the hdf5 library, the tools library, and the HL
+# library.
+LDADD=$(LIBH5_HL) $(LIBH5TOOLS) $(LIBHDF5)
+
+CHECK_CLEANFILES+=*.h5
+CHECK_CLEANFILES+=*.jpg
 
 include $(top_srcdir)/config/conclude.am
