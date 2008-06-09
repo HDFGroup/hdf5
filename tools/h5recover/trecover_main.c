@@ -35,7 +35,11 @@ int		CrashMode = SyncCrash;	/* default to synchronous crash */
 hid_t		file, ctl_file;         /* file id and control file id*/
 
 /* local variables */
+#if 0
 static int	DSTypes=DSNone;		/* set to none first. */
+#else
+static int	DSTypes=DSChunked;	/* set to Chunked temp. first. */
+#endif
 
 /* Command arguments parser.
  * 	-a <seconds>	Do Async crash with a floating value of seconds
@@ -130,6 +134,7 @@ help(void)
 		"\t\t  K\tChunked datasets\n"
 		"\t\t  S\tSzip compressed datasets\n"
 		"\t\tDefault is all datasets\n"
+		"\t\tTemp Default is Chunked datasets\n"
 	    );
 }
 
