@@ -3472,6 +3472,7 @@ H5Pset_journal(hid_t fapl_id, const char *journal_file)
     H5AC2_cache_config_t mdj_config;
 
     FUNC_ENTER_API(H5Pset_journal, FAIL)
+    H5TRACE2("e", "i*s", fapl_id, journal_file);
 
     /* Check/fix arguments */
     if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
