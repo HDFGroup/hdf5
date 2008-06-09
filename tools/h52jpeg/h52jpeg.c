@@ -14,15 +14,24 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <stdlib.h>
+#include <memory.h>
+
+#if 0
+#include "jpeglib.h"
+#include "jerror.h"
+#endif
+
+#include "h5tools.h"
 #include "h5tools_utils.h"
+#include "h5trav.h"
+#include "H5IMpublic.h"
+
 
 
 const char *progname = "h52jpeg";
-static void usage(const char *prog);
+int d_status = EXIT_SUCCESS;
 
-/*
- * command-line options: The user can specify short or long-named parameters
- */
+/* command-line options: The user can specify short or long-named parameters */
 static const char *s_opts = "hVvi:t:";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
@@ -34,6 +43,22 @@ static struct long_options l_opts[] = {
 };
 
 
+/* a structure that contains h52jpeg options */
+typedef struct 
+{
+ const char  *file_name;
+ const char  *template_name;
+ const char  *image_name;
+ int         image_type;
+ int         verbose;
+
+
+} h52jpeg_opt_t;
+
+
+/* prototypes */
+static void usage(const char *prog);
+static int h52jpeg(h52jpeg_opt_t options);
 
 
 /*-------------------------------------------------------------------------
@@ -49,12 +74,12 @@ static struct long_options l_opts[] = {
  */
 int main(int argc, char **argv)
 {
-    int   opt;
-    char  *image_name = NULL;
-    char  *image_type = NULL;
-    char  *file_name = NULL;
-    char  *template_name = NULL;
-    int   verbose = 0;
+    h52jpeg_opt_t options;
+    const char    *image_type = NULL;
+    int           opt;
+
+    /* initialze options to 0 */
+    memset(&options,0,sizeof(h52jpeg_opt_t));
     
     /* parse command line options */
     while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) 
@@ -68,13 +93,13 @@ int main(int argc, char **argv)
             print_version(progname);
             exit(EXIT_SUCCESS);
         case 'v':
-            verbose = 1;
+            options.verbose = 1;
             break;        
         case 'i':
-            image_name = argv[ opt_ind ];
+            options.image_name = opt_arg;
             break;
         case 't':
-            image_type = argv[ opt_ind ];
+            image_type = opt_arg;
             break;
             
         } /* switch */
@@ -85,8 +110,8 @@ int main(int argc, char **argv)
     /* check for file names to be processed */
     if ( argv[ opt_ind ] != NULL && argv[ opt_ind + 1 ] != NULL ) 
     {
-        file_name = argv[ opt_ind ];
-        template_name = argv[ opt_ind + 1 ];    
+        options.file_name = argv[ opt_ind ];
+        options.template_name = argv[ opt_ind + 1 ];    
     }
     
     else
@@ -94,6 +119,9 @@ int main(int argc, char **argv)
         usage(progname);
         exit(EXIT_FAILURE);
     }
+
+    if ( h52jpeg(options) < 0 )
+        return 1;
     
     
     return 0;
@@ -126,7 +154,132 @@ static void usage(const char *prog)
     
     printf("  T - is a string, either <8bit> or <24bit>\n");
     
-    
 }
+
+/*-------------------------------------------------------------------------
+ * Function: h52jpeg
+ *
+ * Parameters: options at command line
+ *
+ * Purpose: traverse the HDF5 file, save HDF5 images to jpeg files, translate
+ *  2D datasets of classes H5T_INTEGER and H5T_FLOAT to image data and save them
+ *  to jpeg files
+ *
+ * Return: 0, all is fine, -1 not all is fine
+ *
+ *-------------------------------------------------------------------------
+ */
+static int h52jpeg(h52jpeg_opt_t opt)
+{
+    hid_t         fid;
+    trav_table_t  *travt = NULL;
+    size_t        i;
+    
+    /* open the HDF5 file */
+    if (( fid = h5tools_fopen(opt.file_name, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0) 
+    {
+        error_msg(progname, "cannot open file <%s>\n", opt.file_name );
+        return -1;
+    }
+    
+    /* initialize traversal table */
+    trav_table_init(&travt);
+    
+    /* get the list of objects in the file */
+    if ( h5trav_gettable(fid, travt) < 0 )
+        goto out;
+
+    /* search for images/datasets in file */
+    for ( i = 0; i < travt->nobjs; i++) 
+    {
+        
+        switch ( travt->objs[i].type ) 
+        {
+        default:
+            goto out;
+            
+        case H5TRAV_TYPE_GROUP:
+        case H5TRAV_TYPE_NAMED_DATATYPE:
+        case H5TRAV_TYPE_LINK:
+        case H5TRAV_TYPE_UDLINK:
+            
+            break;
+            
+        case H5TRAV_TYPE_DATASET:
+
+            printf("%s\n", travt->objs[i].name );
+
+            if ( H5IMis_image( fid, travt->objs[i].name ) )
+            {
+                hsize_t  width;
+                hsize_t  height;
+                hsize_t  planes;
+                char     interlace[20];
+                hssize_t npals;
+                char*    buf = NULL;
+                
+                if ( H5IMget_image_info( fid, travt->objs[i].name, &width, &height, &planes, interlace, &npals ) < 0 )
+                    goto out;
+                
+                buf = (char*) malloc( (size_t) width * (size_t) height );
+                
+                if ( H5IMread_image( fid, travt->objs[i].name, buf ) < 0 )
+                    goto out;
+
+                if ( planes == 1 )
+                {
+
+
+
+                }
+
+
+
+
+
+                free( buf );
+
+
+                
+                
+                
+            }
+                
+            
+            
+            break;
+            
+            
+            
+        } /* switch */
+        
+        
+        
+    } /* i */
+
+    
+    
+    /* free table */
+    trav_table_free(travt);
+    
+    
+    /* close */
+    if ( H5Fclose(fid) < 0 )
+        return -1;
+    
+    return 0;
+    
+out:
+    H5E_BEGIN_TRY 
+    {
+        
+        H5Fclose(fid);
+        
+    } H5E_END_TRY;
+    
+    
+    return -1;
+}
+
 
 
