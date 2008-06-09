@@ -27,11 +27,6 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 
-#if defined (_WIN32) && !defined (__MWERKS__)
-#include <sys/types.h>
-#include <sys/timeb.h>
-#endif
-
 
 static void *H5O_mtime_new_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
 static herr_t H5O_mtime_new_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
@@ -247,24 +242,7 @@ H5O_mtime_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_fla
 
 	the_time -= tz.tz_minuteswest * 60 - (tm.tm_isdst ? 3600 : 0);
     }
-#elif defined (_WIN32)
-  #if !defined (__MWERKS__) /* MSVC */
-    {
-     struct timeb timebuffer;
-     long  tz;
-
-     ftime(&timebuffer);
-     tz = timebuffer.timezone;
-     /* daylight is not handled properly. Currently we just hard-code
-     the problem. */
-     the_time -= tz * 60 - 3600;
-    }
-  #else  /*__MWERKS__*/
-
-    ;
-
-  #endif /*__MWERKS__*/
-#else /* _WIN32 */
+#else 
     /*
      * The catch-all.  If we can't convert a character string universal
      * coordinated time to a time_t value reliably then we can't decode the

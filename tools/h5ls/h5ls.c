@@ -1526,11 +1526,7 @@ dataset_list2(hid_t dset, const char UNUSED *name)
                (unsigned long)total, 1==total?"":"s",
                (unsigned long)used, 1==used?"":"s");
         if (used>0) {
-#ifdef _WIN32
-            utilization = (hssize_t)total * 100.0 / (hssize_t)used;
-#else
             utilization = (total*100.0)/used;
-#endif
             printf(", %1.2f%% utilization", utilization);
         }
         putchar('\n');

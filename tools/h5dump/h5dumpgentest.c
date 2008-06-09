@@ -1199,11 +1199,7 @@ static void gent_many(void)
                     for(i0 = 0; i0 < 2; i0++) {
                         dset1[j].a[i3][i2][i1][i0] = i0+j;
                         dset1[j].b[i3][i2][i1][i0] = (double)(i0+j);
-#ifdef _WIN32
-                        dset1[j].c[i3][i2][i1][i0] = (double)(i0+j+(signed __int64)sdim);
-#else
                         dset1[j].c[i3][i2][i1][i0] = (double)(i0+j+sdim);
-#endif
                     }
                 }
             }

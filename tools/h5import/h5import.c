@@ -372,10 +372,8 @@ readIntegerData(FILE **strm, struct Input *in)
   H5DT_INT8 *in08;
   H5DT_INT16 *in16, temp;
   H5DT_INT32 *in32;
-#ifndef _WIN32
   H5DT_INT64 *in64;
   char buffer[256];
-#endif
   hsize_t len=1;
   hsize_t i;
   int j;
@@ -488,7 +486,6 @@ readIntegerData(FILE **strm, struct Input *in)
       }
     break;
 
-#ifndef _WIN32
     case 64:
       in64 = (H5DT_INT64 *) in->data;
       switch(in->inputClass)
@@ -521,7 +518,6 @@ readIntegerData(FILE **strm, struct Input *in)
           return (-1);
       }
   	  break;
-#endif /* ifndef _WIN32 */
 
     default:
       (void) fprintf(stderr, err3);
@@ -536,10 +532,8 @@ readUIntegerData(FILE **strm, struct Input *in)
   H5DT_UINT8 *in08;
   H5DT_UINT16 *in16, temp;
   H5DT_UINT32 *in32;
-#ifndef _WIN32
   H5DT_UINT64 *in64;
   char buffer[256];
-#endif
   hsize_t len=1;
   hsize_t i;
   int j;
@@ -650,7 +644,6 @@ readUIntegerData(FILE **strm, struct Input *in)
       }
     break;
 
-#ifndef _WIN32
     case 64:
       in64 = (H5DT_UINT64 *) in->data;
       switch(in->inputClass)
@@ -683,7 +676,6 @@ readUIntegerData(FILE **strm, struct Input *in)
           return (-1);
       }
     break;
-#endif /* ifndef _WIN32 */
 
     default:
       (void) fprintf(stderr, err3);
@@ -1441,9 +1433,6 @@ validateConfigurationParameters(struct Input * in)
   const char *err4a = "OUTPUT-ARCHITECTURE cannot be STD if OUTPUT-CLASS is floating point (FP).\n";
   const char *err4b = "OUTPUT-ARCHITECTURE cannot be IEEE if OUTPUT-CLASS is integer (IN).\n";
   const char *err5 = "For OUTPUT-CLASS FP, valid values for OUTPUT-SIZE are (32, 64) .\n";
-#ifdef _WIN32
-  const char *err6 = "No support for reading 64-bit integer (INPUT-CLASS: IN, TEXTIN, UIN, TEXTUIN files\n";
-#endif
 
    /* for class STR other parameters are ignored */
   if (in->inputClass == 5) /* STR */
@@ -1502,13 +1491,6 @@ validateConfigurationParameters(struct Input * in)
       return (-1);
     }
 
-#ifdef _WIN32
-  if (in->inputSize == 64 && (in->inputClass == 0 || in->inputClass == 4 || in->inputClass == 6 || in->inputClass == 7) )
-	{
-	  (void) fprintf(stderr, err6);
-	  return -1;
-	}
-#endif
   return (0);
 }
 

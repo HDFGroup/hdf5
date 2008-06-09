@@ -333,11 +333,7 @@ create_textfile(const char *name, size_t size)
     size_t i;
     char *bp;
 
-#ifdef _WIN32
-    fd = _creat(name, _S_IREAD | _S_IWRITE);
-#else /* _WIN32 */
-    fd = creat(name,(mode_t)0777);
-#endif /* _WIN32 */
+    fd = HDcreat(name,0777);
     assert(fd >= 0);
     buf = calloc(size, (size_t)1);
     assert(buf);

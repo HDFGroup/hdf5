@@ -99,13 +99,8 @@ warn_msg(const char *progname, const char *fmt, ...)
 
     va_start(ap, fmt);
     HDfflush(stdout);
-#ifdef _WIN32
-    HDfprintf(stdout, "%s warning: ", progname);
-    HDvfprintf(stdout, fmt, ap);
-#else /* _WIN32 */
     HDfprintf(stderr, "%s warning: ", progname);
     HDvfprintf(stderr, fmt, ap);
-#endif /* _WIN32 */
     va_end(ap);
 }
 

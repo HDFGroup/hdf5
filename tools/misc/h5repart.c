@@ -45,11 +45,6 @@
 #   include <sys/stat.h>
 #endif
 
-#ifdef _WIN32
-#   include <io.h>
-#	include <fcntl.h>
-#endif
-
 #ifndef FALSE
 #   define FALSE	0
 #endif
@@ -216,21 +211,12 @@ main (int argc, char *argv[])
     int		dst_is_family;		/*is dst name a family name?	*/
     int		dst_membno=0;		/*destination member number	*/
 
-#if defined(_WIN32) && ! defined (__MWERKS__)
-    __int64	left_overs=0;		/*amount of zeros left over	*/
-    __int64	src_offset=0;		/*offset in source member	*/
-    __int64	dst_offset=0;		/*offset in destination member	*/
-    __int64	src_size;		/*source logical member size	*/
-    __int64	src_act_size;		/*source actual member size	*/
-    __int64	dst_size=1 GB;		/*destination logical memb size	*/
-#else
     off_t	left_overs=0;		/*amount of zeros left over	*/
     off_t	src_offset=0;		/*offset in source member	*/
     off_t	dst_offset=0;		/*offset in destination member	*/
     off_t	src_size;		/*source logical member size	*/
     off_t	src_act_size;		/*source actual member size	*/
     off_t	dst_size=1 GB;		/*destination logical memb size	*/
-#endif
     hid_t       fapl;                   /*file access property list     */
     hid_t       file;
     hsize_t     hdsize;                 /*destination logical memb size */

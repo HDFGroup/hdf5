@@ -3202,12 +3202,8 @@ HD5packFstring(tmp, _fcdtocp(memb_name), (size_t)(c_lenmax*H5FD_MEM_NTYPES));
   for (i=0; i < H5FD_MEM_NTYPES; i++) {
        memb_map[i] = (int_f)c_memb_map[i];
        memb_fapl[i] = (hid_t_f)c_memb_fapl[i];
-#if defined(_WIN32)
-       memb_addr[i] = -1;
-#else
        if(c_memb_addr[i] == HADDR_UNDEF) memb_addr[i] = -1;
        else memb_addr[i] = (real_f) ((long)c_memb_addr[i]/HADDR_MAX);
-#endif /*_WIN32*/
   }
   *flag = (int_f)relax;
   *maxlen_out = (int_f)length;

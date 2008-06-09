@@ -21,10 +21,6 @@
 *
 *************************************************************/
 
-#ifdef _WIN32
-#include <stdio.h>
-#endif
-
 #include "testhdf5.h"
 
 #include "hdf5.h"
