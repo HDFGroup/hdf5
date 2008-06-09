@@ -2243,33 +2243,60 @@ done:
  */
 
 herr_t
-H5C2_get_trace_file_ptr(H5C2_t * cache_ptr,
+H5C2_get_trace_file_ptr(const H5C2_t * cache_ptr,
                         FILE ** trace_file_ptr_ptr)
 {
-    herr_t		ret_value = SUCCEED;   /* Return value */
+    FUNC_ENTER_NOAPI_NOFUNC(H5C2_get_trace_file_ptr)
 
-    FUNC_ENTER_NOAPI(H5C2_get_trace_file_ptr, FAIL)
-
-    /* This would normally be an assert, but we need to use an HGOTO_ERROR
-     * call to shut up the compiler.
-     */
-    if ( ( ! cache_ptr ) || ( cache_ptr->magic != H5C2__H5C2_T_MAGIC ) ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr")
-    }
-
-    if ( trace_file_ptr_ptr == NULL ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "NULL trace_file_ptr_ptr")
-    }
+    HDassert( cache_ptr );
+    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( trace_file_ptr_ptr );
 
     *trace_file_ptr_ptr = cache_ptr->trace_file_ptr;
 
-done:
-
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 
 } /* H5C2_get_trace_file_ptr() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C2_get_trace_file_ptr_from_entry
+ *
+ * Purpose:     Get the trace_file_ptr field from the cache, via an entry.
+ *
+ *              This field will either be NULL (which indicates that trace
+ *              file logging is turned off), or contain a pointer to the 
+ *              open file to which trace file data is to be written.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              6/9/08
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5C2_get_trace_file_ptr_from_entry(const H5C2_cache_entry_t *entry_ptr,
+                        FILE ** trace_file_ptr_ptr)
+{
+    const H5C2_t        *cache_ptr;             /* Cache pointer, from entry */
+
+    FUNC_ENTER_NOAPI_NOFUNC(H5C2_get_trace_file_ptr)
+
+    /* Sanity checks */
+    HDassert( entry_ptr );
+    HDassert( entry_ptr->cache_ptr );
+
+    cache_ptr = entry_ptr->cache_ptr;
+
+    H5C2_get_trace_file_ptr(cache_ptr, trace_file_ptr_ptr);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+
+} /* H5C2_get_trace_file_ptr_from_entry() */
 
 
 /*-------------------------------------------------------------------------
@@ -2426,6 +2453,7 @@ H5C2_insert_entry(H5F_t *              f,
 #ifndef NDEBUG
     entry_ptr->magic = H5C2__H5C2_CACHE_ENTRY_T_MAGIC;
 #endif /* NDEBUG */
+    entry_ptr->cache_ptr = cache_ptr;
     entry_ptr->addr  = addr;
     entry_ptr->type  = type;
 
@@ -5278,28 +5306,27 @@ H5C2_stats__reset(H5C2_t UNUSED * cache_ptr)
  *		Modified routine to allow it to operate on protected
  *		entries.
  *
+ * 		QAK -- 6/9/08
+ *		Dropped file pointer parameter and retrieve cache pointer from
+ *		entry.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C2_unpin_entry(H5F_t *		  f,
-                void *		  thing)
+H5C2_unpin_entry(void *_entry_ptr)
 {
     H5C2_t      *cache_ptr;
+    H5C2_cache_entry_t *entry_ptr = (H5C2_cache_entry_t *)_entry_ptr;
     herr_t              ret_value = SUCCEED;    /* Return value */
-    H5C2_cache_entry_t *	entry_ptr;
 
     FUNC_ENTER_NOAPI(H5C2_unpin_entry, FAIL)
 
-    HDassert( f );
-    HDassert( f->shared );
+    HDassert( entry_ptr );
 
-    cache_ptr = f->shared->cache2;
+    cache_ptr = entry_ptr->cache_ptr;
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
-    HDassert( thing );
-
-    entry_ptr = (H5C2_cache_entry_t *)thing;
 
     if ( ! ( entry_ptr->is_pinned ) ) {
 
@@ -8712,10 +8739,13 @@ H5C2_flush_single_entry(const H5F_t *		     f,
 	    /* we are about to discard the in core representation --
 	     * set the magic field to bad magic so we can detect a 
 	     * freed entry if we see one.
+	     *
+	     * Also reset the pointer to the cache the entry is within. -QAK
 	     */
 #ifndef NDEBUG
 	    entry_ptr->magic = H5C2__H5C2_CACHE_ENTRY_T_BAD_MAGIC;
 #endif /* NDEBUG */
+            entry_ptr->cache_ptr = NULL;
             if ( type_ptr->free_icr(entry_ptr->addr, entry_ptr->size,
 		                    (void *)entry_ptr) != SUCCEED )
             {
@@ -8820,6 +8850,8 @@ H5C2_load_entry(H5F_t *              f,
     FUNC_ENTER_NOAPI_NOINIT(H5C2_load_entry)
 
     HDassert( f );
+    HDassert( f->shared );
+    HDassert( f->shared->cache2 );
     HDassert( type );
     HDassert( H5F_addr_defined(addr) );
     HDassert( len > 0 );
@@ -8924,6 +8956,7 @@ H5C2_load_entry(H5F_t *              f,
 #ifndef NDEBUG
     entry_ptr->magic                = H5C2__H5C2_CACHE_ENTRY_T_MAGIC;
 #endif /* NDEBUG */
+    entry_ptr->cache_ptr            = f->shared->cache2;
     entry_ptr->addr                 = addr;
     entry_ptr->size                 = len;
     entry_ptr->image_ptr            = image_ptr;

@@ -3895,7 +3895,7 @@ unpin_entry2(H5F_t * file_ptr,
         HDassert( entry_ptr->header.is_pinned );
 	HDassert( entry_ptr->is_pinned );
 
-        result = H5C2_unpin_entry(file_ptr, (void *)entry_ptr);
+        result = H5C2_unpin_entry(entry_ptr);
 
         if ( ( result < 0 ) ||
              ( entry_ptr->header.is_pinned ) ||

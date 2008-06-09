@@ -265,7 +265,6 @@ H5_DLL herr_t H5AC2_init(void);
 H5_DLL herr_t H5AC2_create(H5F_t *f, 
 		           hid_t dxpl_id, 
 			   H5AC2_cache_config_t *config_ptr);
-#if 1 /* new version */
 H5_DLL herr_t H5AC2_begin_transaction(hid_t id,
                                       hbool_t * do_transaction_ptr,
                                       H5O_loc_t * id_oloc_ptr,
@@ -273,21 +272,12 @@ H5_DLL herr_t H5AC2_begin_transaction(hid_t id,
                                       hbool_t * transaction_begun_ptr,
                                       uint64_t * trans_num_ptr,
                                       const char * api_call_name);
-
 H5_DLL herr_t H5AC2_end_transaction(hbool_t do_transaction,
                                     H5O_loc_t * id_oloc_ptr,
                                     hbool_t id_oloc_open,
                                     hbool_t transaction_begun,
                                     uint64_t trans_num,
                                     const char * api_call_name);
-#else /* old version */
-H5_DLL herr_t H5AC2_begin_transaction(H5F_t *    f,
-                                      uint64_t * trans_num_ptr,
-                                      const char * api_call_name);
-H5_DLL herr_t H5AC2_end_transaction(H5F_t *    f,
-                                    uint64_t trans_num,
-                                    const char * api_call_name);
-#endif /* old version */
 H5_DLL herr_t H5AC2_get_entry_status(H5F_t * f, haddr_t addr,
 				    unsigned * status_ptr);
 H5_DLL herr_t H5AC2_set(H5F_t *f, hid_t dxpl_id, const H5AC2_class_t *type,
@@ -300,8 +290,7 @@ H5_DLL void * H5AC2_protect(H5F_t *f, hid_t dxpl_id, const H5AC2_class_t *type,
 H5_DLL herr_t H5AC2_resize_pinned_entry(H5F_t * f,
                                        void *  thing,
                                        size_t  new_size);
-H5_DLL herr_t H5AC2_unpin_entry(H5F_t * f,
-		               void *  thing);
+H5_DLL herr_t H5AC2_unpin_entry(void * thing);
 H5_DLL herr_t H5AC2_unprotect(H5F_t *f, hid_t dxpl_id,
                              const H5AC2_class_t *type, haddr_t addr,
 			     size_t new_size, void *thing, unsigned flags);

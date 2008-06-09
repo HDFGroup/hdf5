@@ -2454,29 +2454,29 @@ done:
  *              Modified code in support of revised cache API needed 
  *              to permit journaling.			JRM - 10/18/07
  *
+ *              Removed file pointer parameter.         QAK - 6/9/08
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC2_unpin_entry(H5F_t * f,
-                  void *  thing)
+H5AC2_unpin_entry(void *  thing)
 {
-    herr_t	result;
-    herr_t      ret_value = SUCCEED;    /* Return value */
 #if H5AC2__TRACE_FILE_ENABLED
     char                trace[128] = "";
     FILE *              trace_file_ptr = NULL;
 #endif /* H5AC2__TRACE_FILE_ENABLED */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5AC2_unpin_entry, FAIL)
+
+    /* Sanity check */
+    HDassert(thing);
 
 #if H5AC2__TRACE_FILE_ENABLED
     /* For the unpin entry call, only the addr is really necessary 
      * in the trace file.  Also write the result to catch occult errors.
      */
-    if ( ( f != NULL ) &&
-         ( f->shared != NULL ) &&
-         ( f->shared->cache2 != NULL ) &&
-         ( H5C2_get_trace_file_ptr(f->shared->cache2, &trace_file_ptr) >= 0) &&
+    if ( ( H5C2_get_trace_file_ptr_from_entry(thing, &trace_file_ptr) >= 0) &&
          ( trace_file_ptr != NULL ) ) {
 
         sprintf(trace, "H5AC2_unpin_entry 0x%lx",
@@ -2484,9 +2484,7 @@ H5AC2_unpin_entry(H5F_t * f,
     }
 #endif /* H5AC2__TRACE_FILE_ENABLED */
 
-    result = H5C2_unpin_entry(f, thing);
-
-    if ( result < 0 ) {
+    if ( H5C2_unpin_entry(thing) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "H5C2_unpin_entry() failed.")
     }

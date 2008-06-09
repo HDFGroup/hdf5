@@ -550,6 +550,8 @@ typedef herr_t (*H5C2_log_flush_func_t)(H5C2_t * cache_ptr,
  *              detect this case, and re-start its scan from the bottom 
  *              of the LRU when this situation occurs.
  *
+ * cache_ptr:	Pointer to the cache that this entry is contained within.
+ *
  * addr:	Base address of the cache entry on disk.
  *
  * size:	Length of the cache entry on disk.  Note that unlike normal
@@ -849,6 +851,7 @@ typedef struct H5C2_cache_entry_t
 #ifndef NDEBUG
     uint32_t			magic;
 #endif /* NDEBUG */
+    H5C2_t *                    cache_ptr;
     haddr_t			addr;
     size_t			size;
     void *			image_ptr;
@@ -1373,8 +1376,10 @@ H5_DLL herr_t H5C2_get_entry_status(H5F_t *   f,
 H5_DLL herr_t H5C2_get_evictions_enabled(H5C2_t * cache_ptr,
                                          hbool_t * evictions_enabled_ptr);
 
-H5_DLL herr_t H5C2_get_trace_file_ptr(H5C2_t * cache_ptr,
+H5_DLL herr_t H5C2_get_trace_file_ptr(const H5C2_t * cache_ptr,
 		                     FILE ** trace_file_ptr_ptr);
+H5_DLL herr_t H5C2_get_trace_file_ptr_from_entry(const H5C2_cache_entry_t *entry_ptr,
+                        FILE ** trace_file_ptr_ptr);
 
 H5_DLL herr_t H5C2_insert_entry(H5F_t *              f,
                                 hid_t                dxpl_id,
@@ -1440,7 +1445,7 @@ H5_DLL herr_t H5C2_stats(H5C2_t * cache_ptr,
 
 H5_DLL void H5C2_stats__reset(H5C2_t * cache_ptr);
 
-H5_DLL herr_t H5C2_unpin_entry(H5F_t * file_ptr, void * thing);
+H5_DLL herr_t H5C2_unpin_entry(void * thing);
 
 H5_DLL herr_t H5C2_unprotect(H5F_t *             f,
 		            hid_t                dxpl_id,

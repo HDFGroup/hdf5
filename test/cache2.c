@@ -16927,7 +16927,7 @@ check_double_unpin_err(void)
 
     if ( pass2 ) {
 
-	result =  H5C2_unpin_entry(file_ptr, (void *)entry_ptr);
+	result =  H5C2_unpin_entry((void *)entry_ptr);
 
         if ( result > 0 ) {
 
