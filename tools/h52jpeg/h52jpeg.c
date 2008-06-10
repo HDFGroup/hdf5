@@ -16,11 +16,14 @@
 #include <stdlib.h>
 #include <memory.h>
 
+
+
 #if 0
 #include "jpeglib.h"
 #include "jerror.h"
 #endif
 
+#include "H5private.h"
 #include "h5tools.h"
 #include "h5tools_utils.h"
 #include "h5trav.h"
@@ -171,10 +174,29 @@ static void usage(const char *prog)
  */
 static int h52jpeg(h52jpeg_opt_t opt)
 {
-    hid_t         fid;
-    trav_table_t  *travt = NULL;
-    size_t        i;
-    
+    hid_t          fid;
+    trav_table_t   *travt = NULL;
+    hsize_t        width;
+    hsize_t        height;
+    hsize_t        planes;
+    char           interlace[20];
+    hssize_t       npals;
+    void           *buf=NULL;
+    H5T_class_t    tclass;
+    hid_t          sid;
+    hid_t          did;
+    hid_t          tid;
+    int            rank;
+    hsize_t        dims[H5S_MAX_RANK];
+    hsize_t        maxdim[H5S_MAX_RANK];
+    size_t         size;
+    hsize_t        nelmts;
+    char*          name;
+    size_t         i;
+    int            j;
+    int            done;
+    char           jpeg_name[1024];
+
     /* open the HDF5 file */
     if (( fid = h5tools_fopen(opt.file_name, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0) 
     {
@@ -207,47 +229,112 @@ static int h52jpeg(h52jpeg_opt_t opt)
             
         case H5TRAV_TYPE_DATASET:
 
-            printf("%s\n", travt->objs[i].name );
+            name = travt->objs[i].name;
+            strcpy( jpeg_name, opt.template_name );
+            strcat( jpeg_name, name );
 
-            if ( H5IMis_image( fid, travt->objs[i].name ) )
+            done = 0;
+
+            if ( opt.verbose)
+                printf("%s ...", name );
+            
+            /*-------------------------------------------------------------------------
+            * HDF5 Image
+            *-------------------------------------------------------------------------
+            */
+
+            if ( H5IMis_image( fid, name ) )
             {
-                hsize_t  width;
-                hsize_t  height;
-                hsize_t  planes;
-                char     interlace[20];
-                hssize_t npals;
-                char*    buf = NULL;
                 
-                if ( H5IMget_image_info( fid, travt->objs[i].name, &width, &height, &planes, interlace, &npals ) < 0 )
+                if ( H5IMget_image_info( fid, name, &width, &height, &planes, interlace, &npals ) < 0 )
                     goto out;
                 
-                buf = (char*) malloc( (size_t) width * (size_t) height );
-                
-                if ( H5IMread_image( fid, travt->objs[i].name, buf ) < 0 )
+                if (NULL == (buf = HDmalloc( (size_t)width * (size_t)height * (size_t)planes ))) 
                     goto out;
-
-                if ( planes == 1 )
-                {
-
-
-
-                }
-
-
-
-
-
+                
+                if ( H5IMread_image( fid, name, buf ) < 0 )
+                    goto out;
+                
                 free( buf );
-
-
+                buf = NULL;
                 
                 
                 
             }
+
+            /*-------------------------------------------------------------------------
+            * regular dataset
+            *-------------------------------------------------------------------------
+            */
+
+            else
+            {
+
+                if (( did = H5Dopen2( fid, name, H5P_DEFAULT )) < 0) 
+                    goto out;
+                if (( sid = H5Dget_space( did )) < 0 )
+                    goto out;
+                if (( rank = H5Sget_simple_extent_ndims(sid)) < 0 )
+                    goto out;
+                if (( tid = H5Dget_type( did )) < 0 )
+                    goto out;
+                if (( tclass = H5Tget_class(tid)) < 0)
+                    goto out;
+
+                if ( ( H5T_FLOAT == tclass || H5T_INTEGER == tclass) &&
+                    ( rank == 2 ) )
+                {
+                    
+                    if ( H5Sget_simple_extent_dims( sid, dims, maxdim ) < 0 )
+                        goto out;
+                    
+                    size =  H5Tget_size( tid );
+                    
+                    nelmts = 1;
+                    for ( j = 0; j < rank; j++)
+                    {
+                        nelmts *= dims[j];
+                    }
+                    
+                    if ( NULL == (buf = HDmalloc( (size_t)nelmts * size ))) 
+                        goto out;                  
+                    if ( H5Dread(did,tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0 )
+                        goto out;
+                    
+                    
+                    free( buf );
+                    buf = NULL;
+                    
+                }
                 
+                
+                
+                H5Sclose(sid);
+                H5Tclose(tid);
+                H5Dclose(did);
+
+              
+                
+                
+            } /* else */
             
             
-            break;
+            if ( opt.verbose)
+            {                
+                if ( done )
+                {
+                    printf("saved to %s\n", jpeg_name );
+                }
+                else
+                {
+                    printf("\n");
+                }
+                
+            }
+            
+            
+            
+            break; /* H5TRAV_TYPE_DATASET */
             
             
             
@@ -272,14 +359,19 @@ static int h52jpeg(h52jpeg_opt_t opt)
 out:
     H5E_BEGIN_TRY 
     {
-        
+
+        H5Sclose(sid);
+        H5Tclose(tid);
+        H5Dclose(did);
         H5Fclose(fid);
         
     } H5E_END_TRY;
+
+    if ( buf != NULL )
+        free( buf );
     
     
     return -1;
 }
-
 
 
