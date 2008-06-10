@@ -3080,7 +3080,7 @@ H5T_t *
 H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
 {
     H5T_t	*new_dt = NULL, *tmp = NULL;
-    H5T_shared_t    *reopened_fo;
+    H5T_shared_t    *reopened_fo = NULL;
     unsigned	i;
     char	*s;
     H5T_t	*ret_value;
@@ -3098,10 +3098,6 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
 
     /* Copy shared information (entry information is copied last) */
     *(new_dt->shared) = *(old_dt->shared);
-
-    /* Copy parent information */
-    if(new_dt->shared->parent)
-        new_dt->shared->parent = H5T_copy(new_dt->shared->parent, method);
 
     /* Check what sort of copy we are making */
     switch (method) {
@@ -3130,7 +3126,7 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
              */
             if(old_dt->sh_loc.type == H5O_SHARE_TYPE_COMMITTED) {
                 /* Check if the object is already open */
-                if((reopened_fo = H5FO_opened(old_dt->sh_loc.file, old_dt->sh_loc.u.loc.oh_addr)) == NULL) {
+                if(NULL == (reopened_fo = H5FO_opened(old_dt->sh_loc.file, old_dt->sh_loc.u.loc.oh_addr))) {
                     /* Clear any errors from H5FO_opened() */
                     H5E_clear_stack(NULL);
 
@@ -3173,6 +3169,10 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
             }
             break;
     } /* end switch */
+
+    /* Copy parent information, if we aren't sharing an already opened committed datatype */
+    if(NULL == reopened_fo && old_dt->shared->parent)
+        new_dt->shared->parent = H5T_copy(old_dt->shared->parent, method);
 
     switch(new_dt->shared->type) {
         case H5T_COMPOUND:
@@ -3537,7 +3537,8 @@ H5T_close(H5T_t *dt)
 
     HDassert(dt && dt->shared);
 
-    dt->shared->fo_count--;
+    if(dt->shared->state == H5T_STATE_OPEN)
+        dt->shared->fo_count--;
 
     if(dt->shared->state != H5T_STATE_OPEN || dt->shared->fo_count == 0) {
         if(H5T_free(dt) < 0)
