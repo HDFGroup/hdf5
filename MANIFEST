@@ -1518,6 +1518,8 @@
 ./tools/testfiles/h5mkgrp_version.ls
 
 #h52jpeg
+./tools/h52jpeg/Makefile.in
+./tools/h52jpeg/Makefile.am
 ./tools/h52jpeg/h52jpeg.c
 ./tools/h52jpeg/h52jpegtst.c
 
