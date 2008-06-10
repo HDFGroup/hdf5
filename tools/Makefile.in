@@ -324,7 +324,7 @@ TRACE = perl $(top_srcdir)/bin/trace
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog
 
 # All subdirectories
-SUBDIRS = lib h5dump h5diff h5ls misc h5import h5repack h5jam h5copy h5stat h52jpeg
+SUBDIRS = lib h5dump h5diff h5ls misc h5import h5repack h5jam h5copy h5stat
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
