@@ -331,7 +331,8 @@ static void * datum_deserialize(haddr_t addr,
 static herr_t datum_image_len(void *thing,
                               size_t *image_len_ptr);
 
-static herr_t datum_serialize(haddr_t addr,
+static herr_t datum_serialize(const H5F_t *f,
+                              haddr_t addr,
                               size_t len,
                               void * image_ptr,
                               void * thing,
@@ -1994,7 +1995,8 @@ datum_image_len(void *thing,
  */
 
 herr_t 
-datum_serialize(UNUSED haddr_t addr,
+datum_serialize(const H5F_t UNUSED *f,
+                UNUSED haddr_t addr,
                 UNUSED size_t len,
                 void * image_ptr,
                 void * thing,
@@ -3854,7 +3856,7 @@ unpin_entry(H5C2_t * cache_ptr,
 
 	    }
 
-	    result = H5AC2_unpin_entry(file_ptr, (void *)entry_ptr);
+	    result = H5AC2_unpin_entry(entry_ptr);
 
 	    if ( result < 0 ) {
 
