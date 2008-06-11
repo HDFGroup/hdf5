@@ -33,7 +33,7 @@ RECOVERTOOL_BIN=`pwd`/$RECOVERTOOL         # The path of the tool binary
 # Use my own h5diff since h5diff has errors such as returning 0 when comparing
 # an empty file with a non-empty one.
 #H5DIFF=../h5diff/h5diff
-H5DIFF=H5DIFF
+H5DIFF=MYH5DIFF
 H5DUMP=../h5dump/h5dump
 TESTDIR=`pwd`/../testfiles
 
@@ -130,7 +130,7 @@ SKIP() {
 # an empty file with a non-empty one.
 # Compare the h5dump output of two files, return 0 if the same, else 1.
 # The cp to x.data is needed to make h5dump output showing the same filename.
-H5DIFF(){
+MYH5DIFF(){
     xout1=x1.out
     xerr1=x1.err
     xout2=x2.out
