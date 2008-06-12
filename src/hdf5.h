@@ -24,6 +24,7 @@
 #include "H5public.h"
 #include "H5Apublic.h"		/* Attributes				*/
 #include "H5ACpublic.h"		/* Metadata cache			*/
+#include "H5AC2public.h"	/* New Metadata cache			*/
 #include "H5Dpublic.h"		/* Datasets				*/
 #include "H5Epublic.h"		/* Errors				*/
 #include "H5Fpublic.h"		/* Files				*/
