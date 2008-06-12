@@ -1036,12 +1036,12 @@ H5D_istore_idx_iterate_cb(H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
     FUNC_ENTER_NOAPI_NOINIT(H5D_istore_idx_iterate_cb)
 
     /* Sanity check for memcpy() */
-    HDassert(offsetof(H5D_chunk_rec_t, nbytes) == offsetof(H5D_istore_key_t, nbytes));
-    HDassert(sizeof(chunk_rec.nbytes) == sizeof(lt_key->nbytes));
-    HDassert(offsetof(H5D_chunk_rec_t, offset) == offsetof(H5D_istore_key_t, offset));
-    HDassert(sizeof(chunk_rec.offset) == sizeof(lt_key->offset));
-    HDassert(offsetof(H5D_chunk_rec_t, filter_mask) == offsetof(H5D_istore_key_t, filter_mask));
-    HDassert(sizeof(chunk_rec.filter_mask) == sizeof(lt_key->filter_mask));
+    HDcompile_assert(offsetof(H5D_chunk_rec_t, nbytes) == offsetof(H5D_istore_key_t, nbytes));
+    HDcompile_assert(sizeof(chunk_rec.nbytes) == sizeof(lt_key->nbytes));
+    HDcompile_assert(offsetof(H5D_chunk_rec_t, offset) == offsetof(H5D_istore_key_t, offset));
+    HDcompile_assert(sizeof(chunk_rec.offset) == sizeof(lt_key->offset));
+    HDcompile_assert(offsetof(H5D_chunk_rec_t, filter_mask) == offsetof(H5D_istore_key_t, filter_mask));
+    HDcompile_assert(sizeof(chunk_rec.filter_mask) == sizeof(lt_key->filter_mask));
 
     /* Compose generic chunk record for callback */
     HDmemcpy(&chunk_rec, lt_key, sizeof(*lt_key));
