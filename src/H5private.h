@@ -1881,6 +1881,9 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
 #define H5_GLUE(x,y)       x##y
 #define H5_GLUE3(x,y,z)    x##y##z
 
+/* Compile-time "assert" macro */
+#define HDcompile_assert(e)     do { enum { compile_assert__ = 1 / (e) }; } while(0)
+
 /* Private functions, not part of the publicly documented API */
 H5_DLL herr_t H5_init_library(void);
 H5_DLL void H5_term_library(void);
