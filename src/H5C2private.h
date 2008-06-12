@@ -1544,6 +1544,7 @@ H5_DLL herr_t H5C2_jb__start_transaction(H5C2_jbrb_t * struct_ptr,
 
 H5_DLL herr_t H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
                                      uint64_t trans_num,
+                                     haddr_t eoa,
                                      haddr_t base_addr,
                                      size_t length,
                                      const uint8_t * body);

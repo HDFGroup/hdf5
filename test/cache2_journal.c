@@ -5606,6 +5606,7 @@ check_message_format(void)
 
         if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t  */  &jbrb_struct, 
                                     /* trans number */  (uint64_t)1, 
+                                    /* eoa */           (haddr_t)1,
                                     /* base address */  (haddr_t)0, 
                                     /* data length  */  1, 
                                     /* data         */  (const uint8_t *)"A") 
@@ -5627,6 +5628,7 @@ check_message_format(void)
 
         if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t  */  &jbrb_struct, 
                                     /* trans number */  (uint64_t)1, 
+                                    /* eoa */           (haddr_t)1,
                                     /* base address */  (haddr_t)1, 
                                     /* data length  */  2, 
                                     /* data         */  (const uint8_t *)"AB") 
@@ -5648,6 +5650,7 @@ check_message_format(void)
 
         if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t  */  &jbrb_struct, 
                                     /* trans number */  (uint64_t)1, 
+                                    /* eoa */           (haddr_t)1,
                                     /* base address */  (haddr_t)3, 
                                     /* data length  */  4, 
                                     /* data         */  (const uint8_t *)"CDEF") 
@@ -5704,6 +5707,7 @@ check_message_format(void)
 
         if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t  */  &jbrb_struct, 
                                     /* trans number */  (uint64_t)2, 
+                                    /* eoa */           (haddr_t)1,
                                     /* base address */  (haddr_t)285, 
                                     /* data length  */  11, 
                                     /* data         */  (const uint8_t *)"Test Data?!") 
@@ -5759,12 +5763,12 @@ check_message_format(void)
     /* Fill out verify array with expected messages */
     sprintf(verify[0], "0 ver_num 1 target_file_name HDF5.file creation_date %10.10s human_readable 1\n", ctime(&current_date));
     sprintf(verify[1], "1 bgn_trans 1\n");
-    sprintf(verify[2], "2 trans_num 1 length 1 base_addr 0x0 body  41 \n");
-    sprintf(verify[3], "2 trans_num 1 length 2 base_addr 0x1 body  41 42 \n");
-    sprintf(verify[4], "2 trans_num 1 length 4 base_addr 0x3 body  43 44 45 46 \n");
+    sprintf(verify[2], "2 trans_num 1 eoa 0x1 length 1 base_addr 0x0 body  41 \n");
+    sprintf(verify[3], "2 trans_num 1 eoa 0x1 length 2 base_addr 0x1 body  41 42 \n");
+    sprintf(verify[4], "2 trans_num 1 eoa 0x1 length 4 base_addr 0x3 body  43 44 45 46 \n");
     sprintf(verify[5], "3 end_trans 1\n");
     sprintf(verify[6], "1 bgn_trans 2\n");
-    sprintf(verify[7], "2 trans_num 2 length 11 base_addr 0x11d body  54 65 73 74 20 44 61 74 61 3f 21 \n");
+    sprintf(verify[7], "2 trans_num 2 eoa 0x1 length 11 base_addr 0x11d body  54 65 73 74 20 44 61 74 61 3f 21 \n");
     sprintf(verify[8], "3 end_trans 2\n");
 
     /* verify that messages in journal are same as expected */
@@ -5826,6 +5830,7 @@ check_message_format(void)
 
         if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t  */  &jbrb_struct, 
                                     /* trans number */  (uint64_t)3, 
+                                    /* eoa */           (haddr_t)1,
                                     /* base address */  (haddr_t)28591, 
                                     /* data length  */  6, 
                                     /* data         */  (const uint8_t *)"#1nN`}") 
@@ -5915,7 +5920,7 @@ check_message_format(void)
     /* Fill out verify array with expected messages */
     sprintf(verify[0], "0 ver_num 1 target_file_name HDF5.file creation_date %10.10s human_readable 1\n", ctime(&current_date));
     sprintf(verify[1], "1 bgn_trans 3\n");
-    sprintf(verify[2], "2 trans_num 3 length 6 base_addr 0x6faf body  23 31 6e 4e 60 7d \n");
+    sprintf(verify[2], "2 trans_num 3 eoa 0x1 length 6 base_addr 0x6faf body  23 31 6e 4e 60 7d \n");
     sprintf(verify[3], "3 end_trans 3\n");
     sprintf(verify[4], "C comment This is a comment!\n");
     sprintf(verify[5], "C comment This is another comment!\n");
@@ -6105,6 +6110,7 @@ check_legal_calls(void)
 
 	if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t   */  &jbrb_struct, 
                                     /* Transaction # */  (uint64_t)1,
+                                    /* eoa */            (haddr_t)1,
                                     /* Base Address  */  (haddr_t)123456789, 
                                     /* Length        */  16, 
                                     /* Body          */  (const uint8_t *)"This should fail")
@@ -6185,6 +6191,7 @@ check_legal_calls(void)
 
 	if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t   */  &jbrb_struct, 
                                     /* Transaction # */  (uint64_t)2,
+                                    /* eoa */            (haddr_t)1,
                                     /* Base Address  */  (haddr_t)123456789, 
                                     /* Length        */  16, 
                                     /* Body          */  (const uint8_t *)"This should fail")
@@ -6206,6 +6213,7 @@ check_legal_calls(void)
 
 	if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t   */  &jbrb_struct, 
                                     /* Transaction # */  (uint64_t)1,
+                                    /* eoa */            (haddr_t)1,
                                     /* Base Address  */  (haddr_t)123456789, 
                                     /* Length        */  51, 
                                     /* Body          */  (const uint8_t *)"This is the first transaction during transaction 1.")
@@ -6302,6 +6310,7 @@ check_legal_calls(void)
 
 	if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t   */  &jbrb_struct, 
                                     /* Transaction # */  (uint64_t)2,
+                                    /* eoa */            (haddr_t)1,
                                     /* Base Address  */  (haddr_t)7465, 
                                     /* Length        */  51, 
                                     /* Body          */  (const uint8_t *)"This is the first transaction during transaction 2!")
@@ -6323,6 +6332,7 @@ check_legal_calls(void)
 
 	if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t   */  &jbrb_struct, 
                                     /* Transaction # */  (uint64_t)2,
+                                    /* eoa */            (haddr_t)1,
                                     /* Base Address  */  (haddr_t)123456789, 
                                     /* Length        */  60, 
                                     /* Body          */  (const uint8_t *)"... And here's your second transaction during transaction 2.")
@@ -7072,9 +7082,10 @@ write_verify_trans_num(H5C2_jbrb_t * struct_ptr,
 
 	        if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t   */  struct_ptr, 
                                             /* Transaction # */  trans_num,
+                                            /* eoa */            (haddr_t)16,
                                             /* Base Address  */  (haddr_t)16, 
-                                            /* Length        */  9, 
-                                            /* Body          */  (const uint8_t *)"XXXXXXXXX")
+                                            /* Length        */  6, 
+                                            /* Body          */  (const uint8_t *)"XXXXXX")
                    != SUCCEED ) {
 
 	            pass2 = FALSE;
@@ -7088,9 +7099,10 @@ write_verify_trans_num(H5C2_jbrb_t * struct_ptr,
 
 	        if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t   */  struct_ptr, 
                                             /* Transaction # */  trans_num,
+                                            /* eoa */            (haddr_t)16,
                                             /* Base Address  */  (haddr_t)16, 
-                                            /* Length        */  8, 
-                                            /* Body          */  (const uint8_t *)"XXXXXXXX")
+                                            /* Length        */  5, 
+                                            /* Body          */  (const uint8_t *)"XXXXX")
                    != SUCCEED ) {
 
 	            pass2 = FALSE;
@@ -7104,9 +7116,10 @@ write_verify_trans_num(H5C2_jbrb_t * struct_ptr,
 
 	        if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t   */  struct_ptr, 
                                             /* Transaction # */  trans_num,
+                                            /* eoa */            (haddr_t)16,
                                             /* Base Address  */  (haddr_t)16, 
-                                            /* Length        */  7, 
-                                            /* Body          */  (const uint8_t *)"XXXXXXX")
+                                            /* Length        */  4, 
+                                            /* Body          */  (const uint8_t *)"XXXX")
                    != SUCCEED ) {
 
 	            pass2 = FALSE;

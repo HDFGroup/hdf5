@@ -871,7 +871,8 @@ H5C2_journal_transaction(H5F_t * f,
     size_t new_len;
     void * new_image_ptr;
     void * thing;
-    herr_t result;
+    herr_t result;    
+    haddr_t eoa;
     herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5C2_journal_transaction, FAIL)
@@ -1055,9 +1056,14 @@ H5C2_journal_transaction(H5F_t * f,
 	 * the journal entry, & remove from the transaction list.
 	 */
 	if ( ( ! resized ) && ( ! renamed ) ) {
-        
+                
+            if(HADDR_UNDEF==(eoa = H5FDget_eoa(f->shared->lf, H5FD_MEM_DEFAULT)))
+                HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, \
+                                   "file get eoa request failed")
+
             result = H5C2_jb__journal_entry(&(cache_ptr->mdj_jbrb),
                                             cache_ptr->trans_num,
+                                            eoa,
 					    entry_ptr->addr,
 					    entry_ptr->size,
 					    entry_ptr->image_ptr);
@@ -2881,6 +2887,7 @@ done:
 herr_t 
 H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
 			uint64_t trans_num,
+                        haddr_t eoa,
 			haddr_t base_addr,
 			size_t length,
 			const uint8_t * body)
@@ -2925,10 +2932,11 @@ H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
     /* Write journal entry */
     HDsnprintf(temp, 
                (size_t)(length + 100),
-               "2 trans_num %llu length %zu base_addr 0x%lx body ", 
+               "2 trans_num %llu eoa 0x%lx length %zu base_addr 0x%lx body ", 
  	       trans_num, 
+               (unsigned long)eoa,
 	       length, 
-	       (unsigned long)base_addr); /* <== fix this */
+	       (unsigned long)base_addr);
 
     if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, FALSE, trans_num) < 0 ) {
 

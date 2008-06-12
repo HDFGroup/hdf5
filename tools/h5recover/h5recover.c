@@ -13,6 +13,8 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#define H5F_PACKAGE
+
 #include "hdf5.h"
 #include "h5tools.h"
 #include "h5tools_utils.h"
@@ -21,6 +23,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <stdlib.h>
+#include "H5Fpkg.h"
 
 const char *    progname="h5recover";
 int             d_status;
@@ -186,9 +189,10 @@ main (int argc, const char *argv[])
     char *           readback;   /* array to read into from journal */
     char *           last_trans_msg; /* array to keep last end_trans msg */
     int              last_trans_found = 0; /* bool */
-    char *           tok[9];     /* string tokens */
+    char *           tok[11];     /* string tokens */
     int              i; /* iterator */
     haddr_t          address; /* address to write to */
+    haddr_t          eoa; /* end of address of file */
     uint8_t *        body; /* body of journal entry */
     size_t           size; /* size of journal entry body */
     size_t           max_size; /* maximum size of journal entry body */
@@ -203,6 +207,7 @@ main (int argc, const char *argv[])
     long             pos; /* file descriptor position indicator */
     long             pos_end; /* file descriptor position indicator */
     char             temp[100]; /* temporary buffer */
+    H5F_t *          f; /* File pointer */
 
     /**********************
     * Command line parsing 
@@ -497,7 +502,7 @@ main (int argc, const char *argv[])
 
             /* if ( verbose ) printf("  token[0] : <%s>\n", tok[0]); */
 
-            for (i=1; i<8; i++) {
+            for (i=1; i<10; i++) {
 
                 tok[i] = HDstrtok(NULL, " ");
                 if (tok[i] == NULL) {
@@ -513,8 +518,8 @@ main (int argc, const char *argv[])
 
             /* put all remaining data into last token. */ 
             /* This contains all of the journal entry body */
-            tok[8] = HDstrtok(NULL, "\n");
-            if (tok[8] == NULL) {
+            tok[10] = HDstrtok(NULL, "\n");
+            if (tok[10] == NULL) {
 
                 error_msg(progname, "Could not tokenize journal entry\n");
                 leave( EXIT_FAILURE);
@@ -530,7 +535,7 @@ main (int argc, const char *argv[])
             if ( verbose ) printf("Converting data from character strings.\n");
 
             /* convert address from character character string */
-            address = HDstrtod(tok[6], NULL);
+            address = HDstrtod(tok[8], NULL);
             if (address == 0) {
     
                 error_msg(progname, "Could not convert address to integer\n");
@@ -541,10 +546,19 @@ main (int argc, const char *argv[])
             /* if ( verbose ) printf("  address: %llx\n", address); */
 
             /* convert size from character string*/
-            size = HDstrtod(tok[4], NULL);
+            size = HDstrtod(tok[6], NULL);
             if (size == 0) {
 
                 error_msg(progname, "Could not convert size to double\n");
+                leave( EXIT_FAILURE);
+
+            } /* end if */
+
+            /* convert eoa from character character string */
+            eoa = HDstrtod(tok[4], NULL);
+            if (eoa == 0) {
+    
+                error_msg(progname, "Could not convert eoa to integer\n");
                 leave( EXIT_FAILURE);
 
             } /* end if */
@@ -560,7 +574,7 @@ main (int argc, const char *argv[])
 
             } /* end if */
             
-            p = &(tok[8])[0];
+            p = &(tok[10])[0];
             
             for (i = 0; i < size; i++) {
             
@@ -690,7 +704,23 @@ main (int argc, const char *argv[])
         leave( EXIT_FAILURE );
     
     } /* end if */
-    
+
+    /* obtain H5F_t pointer */
+    if ((f = H5I_object(fid)) == -1) {
+
+        error_msg(progname, "Could not obtain H5F_t pointer from file id");
+        leave( EXIT_FAILURE );
+
+    } /* end if */
+   
+    /* set the correct value of the eoa */
+    if (H5FDset_eoa(f->shared->lf, H5FD_MEM_DEFAULT, eoa) == -1) {
+
+        error_msg(progname, "Driver set eoa request failed");
+        leave( EXIT_FAILURE );
+
+    } /* end if */
+
     /* close HDF5 file */
     if ( H5Fclose(fid) == -1 ) {
     
