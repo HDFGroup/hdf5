@@ -187,7 +187,7 @@ case "$cc_vendor-$cc_version" in
 # Closer to the gcc 4.4 release, we should check for additional flags to
 # include and break it out into it's own section, like the other versions
 # below. -QAK
-  gcc-4.[3]*)
+  gcc-4.3*)
     # Replace -ansi flag with -std=c99 flag
     H5_CFLAGS="`echo $H5_CFLAGS | sed -e 's/-ansi/-std=c99/g'`"
 
@@ -224,7 +224,10 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wvariadic-macros -Wnonnull -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
 
     # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat -Wstrict-overflow -Wvolatile-register-var"
+    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat -Wvolatile-register-var"
+
+    # Append more extra warning flags that only gcc 4.2+ know about
+    H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow"
 
     # Append more extra warning flags that only gcc 4.3+ know about
     #
@@ -238,7 +241,7 @@ case "$cc_vendor-$cc_version" in
     #DEBUG_CFLAGS="$DEBUG_CFLAGS -Wstack-protector -fstack-protector-all"
     ;;
 
-  gcc-4.[12]*)
+  gcc-4.2*)
     # Replace -ansi flag with -std=c99 flag
     H5_CFLAGS="`echo $H5_CFLAGS | sed -e 's/-ansi/-std=c99/g'`"
 
@@ -275,7 +278,55 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wvariadic-macros -Wnonnull -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
 
     # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat -Wstrict-overflow -Wvolatile-register-var"
+    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat -Wvolatile-register-var"
+
+    # Append more extra warning flags that only gcc 4.2+ know about
+    H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow"
+
+    # Try out the new "stack protector" feature in gcc 4.1
+    # (Strictly speaking this isn't really a "warning" flag, so it's added to
+    #   the debugging flags)
+    #DEBUG_CFLAGS="$DEBUG_CFLAGS -Wstack-protector -fstack-protector-all"
+    ;;
+
+  gcc-4.1*)
+    # Replace -ansi flag with -std=c99 flag
+    H5_CFLAGS="`echo $H5_CFLAGS | sed -e 's/-ansi/-std=c99/g'`"
+
+    # Disable warnings about using 'long long' type
+    H5_CFLAGS="$H5_CFLAGS -Wno-long-long"
+
+    # Append warning flags from gcc-3* case
+    # (don't use -Wpadded flag for normal builds, many of the warnings its
+    #   issuing can't be fixed and they are making it hard to detect other,
+    #   more important warnings)
+    #H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
+    H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute"
+
+    # Append warning flags from gcc-3.2* case
+    H5_CFLAGS="$H5_CFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization"
+
+    # Enable more format checking flags, beyond the basic -Wformat included
+    # in -Wall
+    H5_CFLAGS="$H5_CFLAGS -Wformat=2"
+
+    # The "unreachable code" warning does not appear to be reliable yet...
+    H5_CFLAGS="$H5_CFLAGS -Wunreachable-code"
+
+    # Append warning flags from gcc-3.3* case
+    H5_CFLAGS="$H5_CFLAGS -Wendif-labels"
+
+    # Append warning flags from gcc-3.4* case
+    H5_CFLAGS="$H5_CFLAGS -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch"
+
+    # Replace old -W flag with new -Wextra flag
+    H5_CFLAGS="`echo $H5_CFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
+
+    # Append more extra warning flags that only gcc 4.0+ know about
+    H5_CFLAGS="$H5_CFLAGS -Wvariadic-macros -Wnonnull -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
+
+    # Append more extra warning flags that only gcc 4.1+ know about
+    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat -Wvolatile-register-var"
 
     # Try out the new "stack protector" feature in gcc 4.1
     # (Strictly speaking this isn't really a "warning" flag, so it's added to
