@@ -360,9 +360,11 @@ hid_t
 H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     const H5S_t *space, hid_t acpl_id, hid_t dxpl_id)
 {
-    H5A_t	    *attr = NULL;
-    htri_t           tri_ret;           /* htri_t return value */
-    hid_t	     ret_value;         /* Return value */
+    H5A_t	*attr = NULL;
+    hssize_t	snelmts;	/* elements in attribute */
+    size_t	nelmts;		/* elements in attribute */
+    htri_t      tri_ret;        /* htri_t return value */
+    hid_t	ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5A_create)
 
@@ -463,9 +465,14 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     attr->dt_size = H5O_msg_raw_size(attr->oloc.file, H5O_DTYPE_ID, FALSE, attr->dt);
     attr->ds_size = H5O_msg_raw_size(attr->oloc.file, H5O_SDSPACE_ID, FALSE, attr->ds);
 
+    /* Get # of elements for attribute's dataspace */
+    if((snelmts = H5S_GET_EXTENT_NPOINTS(attr->ds)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
+    H5_ASSIGN_OVERFLOW(nelmts, snelmts, hssize_t, size_t);
+
     HDassert(attr->dt_size > 0);
     HDassert(attr->ds_size > 0);
-    H5_ASSIGN_OVERFLOW(attr->data_size, H5S_GET_EXTENT_NPOINTS(attr->ds) * H5T_get_size(attr->dt), hssize_t, size_t);
+    attr->data_size = nelmts * H5T_get_size(attr->dt);
 
     /* Hold the symbol table entry (and file) open */
     if(H5O_open(&(attr->oloc)) < 0)

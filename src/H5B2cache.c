@@ -177,7 +177,7 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, vo
     size = H5B2_HEADER_SIZE(f);
 
     /* Get a pointer to a buffer that's large enough for header */
-    if(NULL == (hdr = H5WB_actual(wb, size)))
+    if(NULL == (hdr = (uint8_t *)H5WB_actual(wb, size)))
         HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, NULL, "can't get actual buffer")
 
     /* Read header from disk */
@@ -300,7 +300,7 @@ H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B
         size = H5B2_HEADER_SIZE(f);
 
         /* Get a pointer to a buffer that's large enough for header */
-        if(NULL == (hdr = H5WB_actual(wb, size)))
+        if(NULL == (hdr = (uint8_t *)H5WB_actual(wb, size)))
             HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, FAIL, "can't get actual buffer")
 
         /* Get temporary pointer to serialized header */
@@ -326,8 +326,10 @@ H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B
         UINT16ENCODE(p, shared->depth);
 
         /* Split & merge %s */
-        *p++ = shared->split_percent;
-        *p++ = shared->merge_percent;
+        H5_CHECK_OVERFLOW(shared->split_percent, /* From: */ unsigned, /* To: */ uint8_t);
+        *p++ = (uint8_t)shared->split_percent;
+        H5_CHECK_OVERFLOW(shared->merge_percent, /* From: */ unsigned, /* To: */ uint8_t);
+        *p++ = (uint8_t)shared->merge_percent;
 
         /* Root node pointer */
         H5F_addr_encode(f, &p, bt2->root.addr);

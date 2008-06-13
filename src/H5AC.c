@@ -43,8 +43,8 @@
  *-------------------------------------------------------------------------
  */
 
-#define H5C_PACKAGE             /*suppress error about including H5Cpkg   */
 #define H5AC_PACKAGE            /*suppress error about including H5ACpkg  */
+#define H5C_PACKAGE             /*suppress error about including H5Cpkg   */
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 /* Interface initialization */
@@ -2319,7 +2319,7 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
     }
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
-    dirtied = ( ( (flags & H5AC__DIRTIED_FLAG) == H5AC__DIRTIED_FLAG ) ||
+    dirtied = (hbool_t)( ( (flags & H5AC__DIRTIED_FLAG) == H5AC__DIRTIED_FLAG ) ||
 		( ((H5AC_info_t *)thing)->dirtied ) );
 
     if ( dirtied ) {
@@ -3064,7 +3064,7 @@ H5AC_validate_config(H5AC_cache_config_t * config_ptr)
 {
     herr_t              result;
     herr_t              ret_value = SUCCEED;    /* Return value */
-    int		        name_len;
+    size_t	        name_len;
     H5C_auto_size_ctl_t internal_config;
 
     FUNC_ENTER_NOAPI(H5AC_validate_config, FAIL)
@@ -3109,7 +3109,7 @@ H5AC_validate_config(H5AC_cache_config_t * config_ptr)
 	 */
 	name_len = HDstrlen(config_ptr->trace_file_name);
 
-	if ( name_len <= 0 ) {
+	if ( name_len == 0 ) {
 
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
                         "config_ptr->trace_file_name is empty.")

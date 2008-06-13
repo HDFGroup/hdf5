@@ -34,14 +34,12 @@
 #ifndef _H5ACpkg_H
 #define _H5ACpkg_H
 
-#define H5C_PACKAGE             /*suppress error about including H5Cpkg   */
-
 /* Get package's private header */
-#include "H5Cprivate.h"
+#include "H5ACprivate.h"
 
 
 /* Get needed headers */
-#include "H5Cpkg.h"             /* Cache                                */
+#include "H5Cprivate.h"         /* Cache                                */
 #include "H5SLprivate.h"        /* Skip lists */
 
 
@@ -323,4 +321,5 @@ typedef struct H5AC_aux_t
 
 #endif /* H5_HAVE_PARALLEL */
 
-#endif /* _H5Cpkg_H */
+#endif /* _H5ACpkg_H */
+

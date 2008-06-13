@@ -497,7 +497,7 @@ HDstrtoll(const char *s, const char **rest, int base)
 	if (sign>0) {
 	    acc = ((uint64_t)1<<(8*sizeof(int64_t)-1))-1;
 	} else {
-	    acc = (uint64_t)1<<(8*sizeof(int64_t)-1);
+	    acc = (int64_t)((uint64_t)1<<(8*sizeof(int64_t)-1));
 	}
 	errno = ERANGE;
     }
@@ -622,9 +622,9 @@ H5_build_extpath(const char *name, char **extpath/*out*/)
         if ((full_path=H5MM_strdup(name)) == NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     } else { /* relative pathname */
-        if ((cwdpath=H5MM_malloc(MAX_PATH_LEN)) == NULL)
+        if (NULL == (cwdpath = (char *)H5MM_malloc(MAX_PATH_LEN)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-        if ((new_name=H5MM_strdup(name)) == NULL)
+        if (NULL == (new_name = (char *)H5MM_strdup(name)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
 	/* 
@@ -652,7 +652,7 @@ H5_build_extpath(const char *name, char **extpath/*out*/)
             cwdlen = HDstrlen(cwdpath);
             HDassert(cwdlen);
             path_len = cwdlen + HDstrlen(new_name) + 2;
-            if ((full_path=H5MM_malloc(path_len)) == NULL)
+            if (NULL == (full_path = (char *)H5MM_malloc(path_len)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
             HDstrcpy(full_path, cwdpath);

@@ -206,7 +206,7 @@ void
 H5_term_library(void)
 {
     int	pending, ntries = 0, n;
-    unsigned	at = 0;
+    size_t	at = 0;
     char	loop[1024];
     H5E_auto2_t func;
 
@@ -476,7 +476,7 @@ H5_debug_mask(const char *s)
     FILE	*stream = stderr;
     char	pkg_name[32], *rest;
     size_t	i;
-    int		clear;
+    hbool_t	clear;
 
     while (s && *s) {
 	if (HDisalpha(*s) || '-'==*s || '+'==*s) {
@@ -499,20 +499,20 @@ H5_debug_mask(const char *s)
 
 	    /* Trace, all, or one? */
 	    if (!HDstrcmp(pkg_name, "trace")) {
-		H5_debug_g.trace = clear?NULL:stream;
+		H5_debug_g.trace = clear ? NULL : stream;
             } else if (!HDstrcmp(pkg_name, "ttop")) {
                 H5_debug_g.trace = stream;
-                H5_debug_g.ttop = !clear;
+                H5_debug_g.ttop = (hbool_t)!clear;
             } else if (!HDstrcmp(pkg_name, "ttimes")) {
                 H5_debug_g.trace = stream;
-                H5_debug_g.ttimes = !clear;
+                H5_debug_g.ttimes = (hbool_t)!clear;
 	    } else if (!HDstrcmp(pkg_name, "all")) {
 		for (i=0; i<(size_t)H5_NPKGS; i++)
-		    H5_debug_g.pkg[i].stream = clear?NULL:stream;
+		    H5_debug_g.pkg[i].stream = clear ? NULL : stream;
 	    } else {
 		for (i=0; i<(size_t)H5_NPKGS; i++) {
 		    if (!HDstrcmp(H5_debug_g.pkg[i].name, pkg_name)) {
-			H5_debug_g.pkg[i].stream = clear?NULL:stream;
+			H5_debug_g.pkg[i].stream = clear ? NULL : stream;
 			break;
 		    }
 		}
