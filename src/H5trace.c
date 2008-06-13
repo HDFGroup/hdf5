@@ -319,6 +319,9 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 		    case H5D_ALLOC_TIME_INCR:
 			fprintf (out, "H5D_ALLOC_TIME_INCR");
 			break;
+                    default:
+                        fprintf (out, "%ld", (long)alloc_time);
+			break;
 		    }
 		}
 		break;
@@ -368,6 +371,9 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 		    case H5D_FILL_TIME_IFSET:
 			fprintf (out, "H5D_FILL_TIME_IFSET");
 			break;
+                    default:
+                        fprintf (out, "%ld", (long)fill_time);
+			break;
 		    }
 		}
 		break;
@@ -393,6 +399,9 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 			break;
 		    case H5D_FILL_VALUE_USER_DEFINED:
 			fprintf (out, "H5D_FILL_VALUE_USER_DEFINED");
+			break;
+                    default:
+                        fprintf (out, "%ld", (long)fill_value);
 			break;
 		    }
 		}
@@ -619,6 +628,9 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                             case H5F_CLOSE_STRONG:
                                 fprintf(out, "H5F_CLOSE_STRONG");
                                 break;
+                            default:
+                                fprintf(out, "%ld", (long)degree);
+                                break;
                         }
                     }
                     break;
@@ -643,6 +655,9 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                                 fprintf(out, "H5F_SCOPE_DOWN "
                                         "/*FOR INTERNAL USE ONLY!*/");
                                 break;
+                            default:
+                                fprintf(out, "%ld", (long)scope);
+                                break;
                         }
                     }
                     break;
@@ -662,6 +677,9 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                                 break;
                             case H5F_LIBVER_LATEST:
                                 fprintf(out, "H5F_LIBVER_LATEST");
+                                break;
+                            default:
+                                fprintf(out, "%ld", (long)libver_vers);
                                 break;
                         }
                     }
@@ -928,7 +946,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                             /* Save the rank of simple data spaces for arrays */
                             /* This may generate recursive call to the library... -QAK */
                             {
-                                H5S_t *space = H5I_object(obj);
+                                H5S_t *space = (H5S_t *)H5I_object(obj);
                                 if (H5S_SIMPLE==H5S_GET_EXTENT_TYPE(space)) {
                                     asize[argno] = H5S_GET_EXTENT_NDIMS(space);
                                 }
@@ -997,6 +1015,9 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                             case H5_INDEX_N:
                                 fprintf(out, "H5_INDEX_N");
                                 break;
+                            default:
+                                fprintf(out, "%ld", (long)idx_type);
+                                break;
                         } /* end switch */
                     } /* end else */
                     break;
@@ -1025,6 +1046,9 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                                 break;
                             case H5_ITER_N:
                                 fprintf(out, "H5_ITER_N");
+                                break;
+                            default:
+                                fprintf(out, "%ld", (long)order);
                                 break;
                         } /* end switch */
                     } /* end else */
@@ -1169,6 +1193,12 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                             case H5L_TYPE_SOFT:
                                 fprintf(out, "H5L_TYPE_SOFT");
                                 break;
+                            case H5L_TYPE_EXTERNAL:
+                                fprintf(out, "H5L_TYPE_EXTERNAL");
+                                break;
+                            case H5L_TYPE_MAX:
+                                fprintf(out, "H5L_TYPE_MAX");
+                                break;
                             default:
                                 fprintf(out, "%ld", (long)link_type);
                                 break;
@@ -1286,6 +1316,9 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                     else {
                         H5O_type_t objtype = va_arg(ap, H5O_type_t); /*lint !e64 Type mismatch not really occuring */
                         switch(objtype) {
+                            case H5O_TYPE_UNKNOWN:
+                                fprintf(out, "H5O_TYPE_UNKNOWN");
+                                break;
                             case H5O_TYPE_GROUP:
                                 fprintf(out, "H5O_TYPE_GROUP");
                                 break;
@@ -1294,6 +1327,9 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                                 break;
                             case H5O_TYPE_NAMED_DATATYPE:
                                 fprintf(out, "H5O_TYPE_NAMED_DATATYPE");
+                                break;
+                            case H5O_TYPE_NTYPES:
+                                fprintf(out, "H5O_TYPE_TYPES");
                                 break;
                             default:
                                 fprintf(out, "BADTYPE(%ld)", (long)objtype);
@@ -1317,13 +1353,13 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
 		}
 	    } else {
 		hid_t pclass_id = va_arg (ap, hid_t);
-                char *class_name=NULL;
+                char *class_name = NULL;
                 H5P_genclass_t *pclass;
 
                 /* Get the class name and print it */
                 /* This may generate recursive call to the library... -QAK */
-                if(NULL != (pclass = H5I_object(pclass_id)) &&
-                        (class_name=H5P_get_class_name(pclass))!=NULL) {
+                if(NULL != (pclass = (H5P_genclass_t *)H5I_object(pclass_id)) &&
+                        (class_name = H5P_get_class_name(pclass))!=NULL) {
 		    fprintf (out, class_name);
                     H5MM_xfree(class_name);
                 } /* end if */

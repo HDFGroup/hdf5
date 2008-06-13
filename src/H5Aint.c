@@ -197,8 +197,8 @@ H5A_compact_build_table(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_index_t idx_type,
     udata.dxpl_id = dxpl_id;
     udata.atable = atable;
     udata.curr_attr = 0;
-    udata.bogus_crt_idx = (oh->version == H5O_VERSION_1 ||
-            !(oh->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED)) ? TRUE : FALSE;
+    udata.bogus_crt_idx = (hbool_t)((oh->version == H5O_VERSION_1 ||
+            !(oh->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED)) ? TRUE : FALSE);
 
     /* Iterate over existing attributes, checking for attribute with same name */
     op.op_type = H5O_MESG_OP_LIB;
@@ -564,6 +564,13 @@ H5A_attr_iterate_table(const H5A_attr_table_t *atable, hsize_t skip,
             case H5A_ATTR_OP_LIB:
                 /* Call the library's callback */
                 ret_value = (attr_op->u.lib_op)(&(atable->attrs[u]), op_data);
+                break;
+
+            default:
+                HDassert("unknown attribute op type" && 0);
+#ifdef NDEBUG
+                HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "unsupported attribute op type")
+#endif /* NDEBUG */
         } /* end switch */
 
         /* Increment the number of entries passed through */
@@ -649,7 +656,7 @@ H5A_get_ainfo(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_ainfo_t *ainfo)
     HDassert(oh);
 
     /* Retrieve the "attribute info" structure */
-    if((ret_value = H5O_msg_read_real(f, dxpl_id, oh, H5O_AINFO_ID, ainfo))) {
+    if((ret_value = (H5O_ainfo_t *)H5O_msg_read_real(f, dxpl_id, oh, H5O_AINFO_ID, ainfo))) {
         /* Check if we don't know how many attributes there are */
         if(ret_value->nattrs == HSIZET_MAX) {
             /* Check if we are using "dense" attribute storage */

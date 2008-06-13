@@ -302,7 +302,7 @@ H5V_vector_inc(int n, hsize_t *v1, const hsize_t *v2)
 }
 
 /* Lookup table for general log2(n) routine */
-static const char LogTable256[] =
+static const unsigned char LogTable256[] =
 {
     0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3,
     4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
@@ -356,15 +356,15 @@ H5V_log2_gen(uint64_t n)
 #endif /* H5_BAD_LOG2_CODE_GENERATED */
         if((ttt = (unsigned)(n >> 32)))
             if((tt = (unsigned)(n >> 48)))
-                r = (t = (unsigned)(n >> 56)) ? 56 + LogTable256[t] : 48 + LogTable256[tt & 0xFF];
+                r = (t = (unsigned)(n >> 56)) ? 56 + (unsigned)LogTable256[t] : 48 + (unsigned)LogTable256[tt & 0xFF];
             else
-                r = (t = (unsigned)(n >> 40)) ? 40 + LogTable256[t] : 32 + LogTable256[ttt & 0xFF];
+                r = (t = (unsigned)(n >> 40)) ? 40 + (unsigned)LogTable256[t] : 32 + (unsigned)LogTable256[ttt & 0xFF];
         else
             if((tt = (unsigned)(n >> 16)))
-                r = (t = (unsigned)(n >> 24)) ? 24 + LogTable256[t] : 16 + LogTable256[tt & 0xFF];
+                r = (t = (unsigned)(n >> 24)) ? 24 + (unsigned)LogTable256[t] : 16 + (unsigned)LogTable256[tt & 0xFF];
             else
                 /* Added 'uint8_t' cast to pacify PGCC compiler */
-                r = (t = (unsigned)(n >> 8)) ? 8 + LogTable256[t] : LogTable256[(uint8_t)n];
+                r = (t = (unsigned)(n >> 8)) ? 8 + (unsigned)LogTable256[t] : (unsigned)LogTable256[(uint8_t)n];
 #ifdef H5_BAD_LOG2_CODE_GENERATED
     } /* end else */
 #endif /* H5_BAD_LOG2_CODE_GENERATED  */

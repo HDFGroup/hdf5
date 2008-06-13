@@ -126,10 +126,10 @@ H5_checksum_fletcher32(const void *_data, size_t _len)
      *  performed without numeric overflow)
      */
     while (len) {
-        unsigned tlen = len > 360 ? 360 : len;
+        size_t tlen = len > 360 ? 360 : len;
         len -= tlen;
         do {
-            sum1 += (((uint16_t)data[0]) << 8) | ((uint16_t)data[1]);
+            sum1 += (uint32_t)(((uint16_t)data[0]) << 8) | ((uint16_t)data[1]);
             data += 2;
             sum2 += sum1;
         } while (--tlen);
@@ -139,7 +139,7 @@ H5_checksum_fletcher32(const void *_data, size_t _len)
 
     /* Check for odd # of bytes */
     if(_len % 2) {
-        sum1 += ((uint16_t)*data) << 8;
+        sum1 += (uint32_t)(((uint16_t)*data) << 8);
         sum2 += sum1;
         sum1 = (sum1 & 0xffff) + (sum1 >> 16);
         sum2 = (sum2 & 0xffff) + (sum2 >> 16);
@@ -486,8 +486,8 @@ H5_hash_string(const char *str)
     /* Sanity check */
     HDassert(str);
 
-    while(c = *str++)
-        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+    while((c = *str++))
+        hash = ((hash << 5) + hash) + (uint32_t)c; /* hash * 33 + c */
 
     FUNC_LEAVE_NOAPI(hash)
 } /* end H5_hash_string() */
